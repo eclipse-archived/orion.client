@@ -352,7 +352,7 @@ orion.TextSearcher = (function() {
 		_doReplace: function(start, end, searchStr, newStr) {
 			var editor = this._editor;
 			if (this._useRegExp) {
-				var newStrWithSubstitutions = editor.getText().substring(start, end).replace(new RegExp(searchStr), newStr);
+				var newStrWithSubstitutions = editor.getText().substring(start, end).replace(new RegExp(searchStr, this._ignoreCase ? "i" : ""), newStr); //$NON-NLS-0$
 				if (newStrWithSubstitutions) {
 					editor.setText(newStrWithSubstitutions, start, end);
 					editor.setSelection(start, start + newStrWithSubstitutions.length, true);
