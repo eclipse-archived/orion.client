@@ -27,7 +27,7 @@ var IS_WINDOWS = process.platform === 'win32';
 
 var pathToNode = process.execPath;
 var pathToRjs = require.resolve('requirejs');
-var pathToBuildFile = path.resolve(__dirname, process.argv[2] || './orion.build.js');
+var pathToBuildFile = path.resolve(__dirname, process.argv[2] || './orion.build.json');
 var pathToOrionClientBundlesFolder = path.resolve(path.dirname(pathToBuildFile), '../../../bundles/');
 var pathToOrionodeClient = path.resolve(path.dirname(pathToBuildFile), '../lib/orionode.client/');
 var pathToTempDir = path.resolve(__dirname, '.temp');
@@ -213,7 +213,7 @@ function build(optimizeElements) {
 		// TODO This is probably a dumb way to do it, but i don't understand how CSS optimization works in the real Orion build.
 		section('Optimizing page CSS files');
 		return async.sequence(cssFiles.map(function(cssFile) {
-			 return function() {
+			return function() {
 				return dfs.exists(path.join(pathToTempDir, cssFile.path)).then(function(exists) {
 					if (exists) {
 						return spawn(pathToNode, [

@@ -150,7 +150,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.commandService.addCommand(erasePrivateKeyCommand);
 			this.commandService.registerCommandContribution("repositoryItemCommands", "eclipse.orion.git.eraseGitCredentials", 1);
 			
-			var that = this;
 			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
 			gitPreferenceStorage.getRepositories().then(
 				function(repositories){
