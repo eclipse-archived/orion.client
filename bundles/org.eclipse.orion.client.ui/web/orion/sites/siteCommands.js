@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global console define document window*/
-/*jslint laxbreak:true*/
+/*jslint sub:true*/
 define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
 			'orion/Deferred', 'orion/i18nUtil'],
 		function(messages, require, mCommands, mSiteUtils, mSiteClient, Deferred, i18nUtil) {
@@ -33,7 +33,7 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 			name : messages["Create"],
 			tooltip: messages["Create a new site configuration"],
 			id: "orion.site.create", //$NON-NLS-0$
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'string', 'Name:')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'string', messages["Name"])]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			visibleWhen: function(bah) {
 				return true;
 			},

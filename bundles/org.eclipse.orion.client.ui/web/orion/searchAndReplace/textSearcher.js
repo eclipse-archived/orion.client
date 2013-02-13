@@ -107,6 +107,7 @@ orion.TextSearcher = (function() {
 					function(event) {
 						that.setOptions({ignoreCase: !event.target.checked});
 						optionMenu.dropdown.close(true);
+						that.findNext(true, null, true);
 					});
 				
 				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Wrap search"], that._wrapSearch,
@@ -125,12 +126,14 @@ orion.TextSearcher = (function() {
 					function(event) {
 						that.setOptions({wholeWord: event.target.checked});
 						optionMenu.dropdown.close(true);
+						that.findNext(true, null, true);
 					});
 					
 				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Regular expression"], that._useRegExp,
 					function(event) {
 						that.setOptions({useRegExp: event.target.checked});
 						optionMenu.dropdown.close(true);
+						that.findNext(true, null, true);
 					});
 				
 				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Find after replace"], that._findAfterReplace,
@@ -352,7 +355,7 @@ orion.TextSearcher = (function() {
 		_doReplace: function(start, end, searchStr, newStr) {
 			var editor = this._editor;
 			if (this._useRegExp) {
-				var newStrWithSubstitutions = editor.getText().substring(start, end).replace(new RegExp(searchStr), newStr);
+				var newStrWithSubstitutions = editor.getText().substring(start, end).replace(new RegExp(searchStr, this._ignoreCase ? "i" : ""), newStr); //$NON-NLS-0$
 				if (newStrWithSubstitutions) {
 					editor.setText(newStrWithSubstitutions, start, end);
 					editor.setSelection(start, start + newStrWithSubstitutions.length, true);
