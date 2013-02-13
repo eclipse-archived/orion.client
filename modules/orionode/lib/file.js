@@ -42,7 +42,9 @@ function writeEmptyFilePathError(res, rest) {
 	if (rest === '') {
 		// I think this is an implementation detail, not API, but emulate the Java Orion server's behavior here anyway.
 		writeError(403, res);
+		return true;
 	}
+	return false;
 }
 
 /*
