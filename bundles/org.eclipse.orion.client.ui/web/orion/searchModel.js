@@ -26,7 +26,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
             return modelItem;
         }
         return modelItem.parent;
-    };
+    }
 
     /*
      *	The model to support the search result.
@@ -66,7 +66,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
             if (this._searchHelper.params.keyword === "") {
                 return;
             }
-            this.registry.getService("orion.page.progress").progress(this.fileClient.read(parentItem.location), "Getting file contents " + parentItem.name).then(
+            this.registry.getService("orion.page.progress").progress(this.fileClient.read(parentItem.location), "Getting file contents " + parentItem.name).then( //$NON-NLS-1$ //$NON-NLS-0$
 
             function(jsonData) {
                 mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchHelper.params.caseSensitive);
@@ -123,7 +123,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
         for (var i = 0; i < this._resultLocation.length; i++) {
             var childNode = {
                 parent: this.getListRoot(),
-                type: "file",
+                type: "file", //$NON-NLS-0$
                 name: this._resultLocation[i].name,
                 lastModified: this._resultLocation[i].lastModified, //$NON-NLS-0$
                 linkLocation: this._resultLocation[i].linkLocation,
@@ -197,28 +197,28 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
      * matchNumber: Number. The zero-based match number in matches.
      */
     SearchResultModel.prototype.getDetailInfo = function(modelItem) {
-    	return {lineString: modelItem.name, lineNumber: modelItem.lineNumber -1, matches:modelItem.matches, matchNumber: (modelItem.matchNumber ? modelItem.matchNumber - 1 : 0)};
+		return {lineString: modelItem.name, lineNumber: modelItem.lineNumber -1, matches:modelItem.matches, matchNumber: (modelItem.matchNumber ? modelItem.matchNumber - 1 : 0)};
     };
 
     /**
      * Get the file name by a given model item. Required function.
      */
     SearchResultModel.prototype.getFileName = function(modelItem) {
-    	return modelItem.name;
+		return modelItem.name;
     };
 
     /**
      * Get the file contents by a given file model. Async call. Required function.
      */
     SearchResultModel.prototype.provideFileContent = function(fileItem, onComplete) {
-    	this._provideFileContent(fileItem).then(function() { onComplete(fileItem);});
+		this._provideFileContent(fileItem).then(function() { onComplete(fileItem);});
     };
 
     SearchResultModel.prototype._provideFileContent = function(fileItem) {
         if (fileItem.contents) {
             return new Deferred().resolve(fileItem);
         } else {
-            return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then(
+            return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then( //$NON-NLS-1$ //$NON-NLS-0$
 
             function(jsonData) {
                 mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchHelper.params.caseSensitive);
@@ -237,22 +237,22 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
      */
     SearchResultModel.prototype.getFileContents = function(fileItem) {
         return fileItem.contents.join(this._lineDelimiter);
-    }
+    };
 
     /**
      * Get the replaced file contents by a given file model. Sync call. Required function.
      * @param {Object} newContentHolder The returned replaced file content holder. The content holder has to have a property called "contents". It can be either type of the below:
-     * 		   String type: the pure contents of the file
-     * 		   Array type: the lines of the file exclude the line delimeter. If an array type of contents is provided, the lineDelim property has to be defined. Otherwise "\n" is used.
+     *		   String type: the pure contents of the file
+     *		   Array type: the lines of the file exclude the line delimeter. If an array type of contents is provided, the lineDelim property has to be defined. Otherwise "\n" is used.
      * @param {Boolean} updating The flag indicating if getting replaced file contets based on existing newContentHolder.contents. It can be ignored if over riding this function does not care the case below.
      *         The explorer basically caches the current file's replaced contents. If only check box is changed on the same file, the falg is set to true when call this fucntion.
      *         Lets say a file with 5000 lines has been changed only because one line is changed, then we do not have to replace the whole 5000 lines but only one line.
      * @param {Object} fileItem The file item that generates the replaced contents.
      */
     SearchResultModel.prototype.getReplacedFileContent = function(newContentHolder, updating, fileItem) {
-    	mSearchUtils.generateNewContents(updating, fileItem.contents, newContentHolder, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength);
+		mSearchUtils.generateNewContents(updating, fileItem.contents, newContentHolder, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength);
 		newContentHolder.lineDelim = this._lineDelimiter;
-    }
+    };
 
     /**
      * Write the replace file contents. Required function.
@@ -267,7 +267,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
 	 */
     SearchResultModel.prototype.writeReplacedContents = function(reportList){
         var promises = [];
-   		var validFileList = this.getValidFileList();
+		var validFileList = this.getValidFileList();
 		validFileList.forEach(function(fileItem) {
 			promises.push(this._writeOneFile(fileItem, reportList));
 		}.bind(this));
@@ -288,12 +288,12 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
                 headerStr = "";
                 if (!this.replaceMode()) {
                     headerStr = i18nUtil.formatMessage(messages["Files ${0} of ${1} matching ${2}"],
-                    startNumber + "-" + endNumber, pagingParams.totalNumber, this._searchHelper.displayedSearchTerm);
+                    startNumber + "-" + endNumber, pagingParams.totalNumber, this._searchHelper.displayedSearchTerm); //$NON-NLS-0$
                 } else {
                     headerStr = i18nUtil.formatMessage(messages["Replace ${0} with ${1} for files ${2} of ${3}"],
                     this._searchHelper.displayedSearchTerm,
                     this._searchHelper.params.replace,
-                    startNumber + "-" + endNumber, //$NON-NLS-2$
+                    startNumber + "-" + endNumber, //$NON-NLS-0$
                     pagingParams.totalNumber);
                 }
             }
@@ -325,7 +325,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
         if (currentModel) {
             var fileItem = _getFileModel(currentModel);
             if(!fileItem){
-            	return;
+				return;
             }
             window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentFileLocation"] = fileItem.location; //$NON-NLS-0$
             if (currentModel.type === "file") { //$NON-NLS-0$
@@ -421,22 +421,22 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
        var matchesReplaced = this._matchesReplaced(fileItem);
        if (matchesReplaced > 0) {
            return this._provideFileContent(fileItem).then(function() {
-       		   matchesReplaced = this._matchesReplaced(fileItem);
+			   matchesReplaced = this._matchesReplaced(fileItem);
                var newContents = {};
                mSearchUtils.generateNewContents(false, fileItem.contents, newContents, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength);
                var contents = newContents.contents.join(this._lineDelimiter);
                var etag = fileItem.ETag;
                var args = etag ? {
-                   "ETag": etag
-               } : null; //$NON-NLS-0$
-               return this.registry.getService("orion.page.progress").progress(this.fileClient.write(fileItem.location, contents, args), "Saving changes to " + fileItem.location).then(
+                   "ETag": etag //$NON-NLS-0$
+               } : null;
+               return this.registry.getService("orion.page.progress").progress(this.fileClient.write(fileItem.location, contents, args), "Saving changes to " + fileItem.location).then( //$NON-NLS-1$ //$NON-NLS-0$
 
                function(result) {
                    reportList.push({
                        model: fileItem,
                        matchesReplaced: matchesReplaced,
-                       status: "pass"
-                   }); //$NON-NLS-0$
+                       status: "pass" //$NON-NLS-0$
+                   });
                }.bind(this),
 
                function(error) {
@@ -447,8 +447,8 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
                            model: fileItem,
                            message: messages["Resource has been changed by others."],
                            matchesReplaced: matchesReplaced,
-                           status: "failed"
-                       }); //$NON-NLS-1$
+                           status: "failed" //$NON-NLS-0$
+                       });
                    }
                    // unknown error
                    else {
@@ -457,8 +457,8 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
                            model: fileItem,
                            message: messages["Failed to write file."],
                            matchesReplaced: matchesReplaced,
-                           status: "failed"
-                       }); //$NON-NLS-1$
+                           status: "failed" //$NON-NLS-0$
+                       });
                    }
                }.bind(this));
            }.bind(this));
@@ -474,7 +474,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
         }
         if (model.children) {
             for (var j = 0; j < model.children.length; j++) {
-                if (!(model.children[j].checked === false)) {
+                if (model.children[j].checked !== false) {
                     matchesReplaced += 1;
                 }
             }
