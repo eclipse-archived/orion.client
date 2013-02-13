@@ -91,6 +91,7 @@ describe('Workspace API', function() {
 					assert.equal(res.body.Name, DEFAULT_WORKSPACE_NAME);
 					// Orionode doesn't have "projects" so don't check res.body.Projects
 					assert.ok(Array.isArray(res.body.Children));
+					res.body.Children.sort(byName);
 					assert.equal(res.body.Children.length, 1);
 					assert.equal(res.body.Children[0].Name, "project");
 					assert.equal(res.body.Children[0].Directory, true);
@@ -101,6 +102,8 @@ describe('Workspace API', function() {
 					.expect(200)
 					.end(function(err, res) {
 						assert.ifError(err);
+						assert.ok(Array.isArray(res.body.Children));
+						res.body.Children.sort(byName);
 						assert.equal(res.body.Children.length, 2);
 						assert.equal(res.body.Children[0].Name, 'fizz.txt');
 						assert.equal(res.body.Children[1].Name, 'my folder');
