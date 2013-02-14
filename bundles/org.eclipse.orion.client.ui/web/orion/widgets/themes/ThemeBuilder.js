@@ -42,7 +42,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 			SELECTED_ZONE = null;
 			INITIALIZE = true;
 			ARCS = true;
-		
 			zones = [];
 			canvas = null; 
 			position = null;
@@ -58,10 +57,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		var familyname;
 		var familyvalue;
 
-		
 		Family.prototype.name = familyname;
-		Family.prototype.value = familyvalue;
-		
+		Family.prototype.value = familyvalue;		
 
 		function ThemeBuilder(args){
 	
@@ -72,6 +69,18 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 			this.processSettings = this.themeData.processSettings;
 		
 			init();	
+			
+			var commandTemplate = 	'<div id="commandButtons">' +
+						'<div id="revertCommands" class="layoutRight sectionActions"></div>' +
+						'<div id="userCommands" class="layoutRight sectionActions"></div>' +
+					'</div>';
+
+			var commandArea = document.getElementById( 'pageActions' );
+			commandArea.innerHTML = commandTemplate;
+			
+			var pageToolBar = document.getElementById( 'pageToolbar' );
+			
+			pageToolBar.style.paddingBottom = '5px';
 			
 			this.commandService = args.commandService;
 			this.preferences = args.preferences;
@@ -99,7 +108,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 			});
 			
 			var guideCommand = new mCommands.Command({
-				name: 'Guide',
+				name: 'Show Guide',
 				tooltip: 'Check Guide',
 				id: "orion.checkGuide", //$NON-NLS-0$
 				callback: function(data){
@@ -120,7 +129,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 
 		function applyColor(){
 		
-			var newcolor = document.getElementById( this.themebuilder.colorFieldId ).value;
+			var newcolor = document.getElementById( this.themebuilder.colorFieldId ).firstChild.value;
 			
 			if( this.themebuilder.validateHex( newcolor ) ){
 			
@@ -134,8 +143,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 				lib.node( 'pickercontainer' ).style.display = 'none';
 				lib.node( 'savecontainer' ).style.display = '';
 				lib.node( 'stringcontainer' ).style.display = '';
-			
-				console.log( 'apply color' );
 			}
 		}
 		
@@ -153,24 +160,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 
 		
 		ThemeBuilder.prototype.template =	'<div id="themeContainer">' +
-												'<div class="sectionWrapper toolComposite">' +
-													'<div id="General" class="sectionAnchor sectionTitle layoutLeft">Theme Builder</div>' +
-													'<div id="commandButtons">' +
-														'<div id="revertCommands" class="layoutRight sectionActions"></div>' +
-														'<div id="userCommands" class="layoutRight sectionActions"></div>' +
-													'</div>' +
-												'</div>' +
-												'<canvas id="orionui" width="800" height="380"></canvas>' +
+												'<canvas id="orionui" width="800" height="380" style="padding-top:20px;"></canvas>' +
 												'<div id="sizecontainer" style="display:none;">' +
 													'<span class="settingsLabel">Font Size:</span>' + 
 													'<div id="fontsizepicker" class="fontsizepicker"></div>' +
 												'</div>' +
-												/* FOR FONT FAMILY - ROUGHING THIS IN '<div id="familycontainer" style="display:block;">' +
-													'<span class="settingsLabel">Font Family:</span>' + 
-													'<div id="familypicker"></div>' +
-												'</div>' + */
 												'<div id="pickercontainer" style="display:block;">' +
-													'<span class="settingsLabel">Chosen Theme:</span>' + 
+													'<span class="settingsLabel">Theme:</span>' + 
 													'<div id="themepicker" class="themepicker"></div>' +
 												'</div>' +
 												'<br>' +
@@ -178,7 +174,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 													'<span class="settingsLabel">New theme name:</span>' + 
 													'<div id="themesaver" class="themesaver"></div>' +
 												'</div>' +
-												'<div id="stringcontainer" style="position:absolute;left:425px;top:360px;display:none;">' +
+												'<div id="stringcontainer" style="position:absolute;left:425px;top:330px;display:none;">' +
 														'<span>OR HEX: </span>' + 
 														'<div id="colorstring" class="colorfield"></div>' +
 														'<button class = "commandButton" style="padding:5px;font-size:9pt;"type="button" id="colorButton"}">ok</button>' + 
@@ -303,7 +299,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		    y -= canvas.offsetTop -15;
 		    
 		    x = x - position.x;
-		    y = y - position.y;
+		    y = y - position.y - 42;
 			
 		    return { x: x, y: y };
 		}
@@ -356,21 +352,21 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 
 			var x = UI_SIZE + 40;
 			
-		    Component.drawText( ctx, component.description.toUpperCase(), LEFT + x, TOP + 10, 'bold 9pt sans-serif', '#333' );
-		    Component.drawLine( ctx, LEFT + x, TOP + 20, LEFT + x+190, TOP + 20, 10, '#333' );   
-		    Component.drawText( ctx, 'COLOR:', LEFT + x, TOP + 45, '8pt sans-serif', '#333' ); 
-		    Component.drawRectangle( ctx, LEFT + x + 80, TOP + 36, 30, 10, component.fill, null );	    
-		    Component.drawText( ctx, 'COLOR STRING:  ', LEFT + x, TOP + 65, '8pt sans-serif', '#333' );    
-		    Component.drawText( ctx, '  ' + component.fill, LEFT + x + 80, TOP + 65, '8pt sans-serif', '#333' );     
-		    Component.drawLine( ctx, LEFT + x, TOP + 20, LEFT + x + 190, TOP + 20, 10, '#333' );       
-		    Component.drawLine( ctx, LEFT + x, TOP + 80, LEFT + x + 190, TOP + 80, 5, '#333' );    
-		    Component.drawText( ctx, 'NEW COLOR:', LEFT + x, TOP + 105, 'bold 8pt sans-serif', '#333' ); 
+		    Component.drawText( ctx, component.description.toUpperCase(), LEFT + x, TOP + 10, 'bold 9pt sans-serif', '#555' );
+
+		    Component.drawText( ctx, 'COLOR:', LEFT + x, TOP + 50, '8pt sans-serif', '#555' ); 
+		    Component.drawRectangle( ctx, LEFT + x + 100, TOP + 40, 50, 10, component.fill, null );	    
+		    Component.drawText( ctx, 'COLOR STRING:', LEFT + x, TOP + 70, '8pt sans-serif', '#555' );    
+		    Component.drawText( ctx, component.fill, LEFT + x + 100, TOP + 70, '8pt sans-serif', '#555' );     
+		    Component.drawLine( ctx, LEFT + x, TOP + 25, LEFT + x + 190, TOP + 25, 10, '#555' );       
+		    Component.drawLine( ctx, LEFT + x, TOP + 85, LEFT + x + 190, TOP + 85, 5, '#555' );    
+		    Component.drawText( ctx, 'NEW COLOR:', LEFT + x, TOP + 115, 'bold 8pt sans-serif', '#555' ); 
 		    
 		    if( ARCS === true){
 			    for( var row = 0; row < 7; row ++ ){
 					for( var column = 1; column < 11; column++ ){
 						var item = column-1;
-						var arc = Component.drawArc( ctx, LEFT + UI_SIZE + ( column * 20 ) + 25, TOP + 80 + ( row * 20 ) + 50, 7, 0, 2 * Math.PI, false, null, colornames[row][item] );
+						var arc = Component.drawArc( ctx, LEFT + UI_SIZE + ( column * 20 ) + 25, TOP + 90 + ( row * 20 ) + 50, 7, 0, 2 * Math.PI, false, null, colornames[row][item] );
 						arc.paintchip = true;
 						zones.push( arc );
 					}
@@ -525,11 +521,11 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 							ctx.beginPath();
 							ctx.moveTo( originx + 70 , labely -4 );
 							ctx.lineTo( UI_SIZE + 50, labely -4 );
-							ctx.strokeStyle = '#cc0000';
-							ctx.lineWidth = 1;
+							ctx.strokeStyle = 'rgba(187,0,0,0.7)';
+							ctx.lineWidth = 0.5;
 							ctx.stroke();
 							
-							Component.drawArc( ctx, originx + 70 , labely -4, 3, 0, 2 * Math.PI, false, null, '#cc0000' );
+							Component.drawArc( ctx, originx + 70 , labely -4, 3, 0, 2 * Math.PI, false, null, 'rgba(187,0,0,0.7)' );
 
 							break;
 							
@@ -539,11 +535,11 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 							ctx.beginPath();
 							ctx.moveTo( originx + 30 , labely -4 );
 							ctx.lineTo( UI_SIZE + 50, labely -4 );
-							ctx.strokeStyle = '#cc0000';
-							ctx.lineWidth = 1;
+							ctx.strokeStyle = 'rgba(187,0,0,0.7)';
+							ctx.lineWidth = 0.5;
 							ctx.stroke();
 							
-							Component.drawArc( ctx, originx + 30 , labely -4, 3, 0, 2 * Math.PI, false, null, '#cc0000' );
+							Component.drawArc( ctx, originx + 30 , labely -4, 3, 0, 2 * Math.PI, false, null, 'rgba(187,0,0,0.7)' );
 
 							break;
 							
@@ -552,11 +548,11 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 							ctx.moveTo( originx, originy );
 							ctx.lineTo( originx, labely -4 );
 							ctx.lineTo( UI_SIZE + 50, labely -4 );
-							ctx.strokeStyle = '#cc0000';
-							ctx.lineWidth = 1;
+							ctx.strokeStyle = 'rgba(187,0,0,0.7)';
+							ctx.lineWidth = 0.5;
 							ctx.stroke();
 							
-							Component.drawArc( ctx, originx, originy, 3, 0, 2 * Math.PI, false, null, '#cc0000' );
+							Component.drawArc( ctx, originx, originy, 3, 0, 2 * Math.PI, false, null, 'rgba(187,0,0,0.7)' );
 							
 							break;
 					}
@@ -721,11 +717,11 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 			
 			/* New Theme defined */
 			
-			if( lib.node( 'themesaver' ).value.length > 0 ){
+			if( lib.node( 'themesaver' ).firstChild.value.length > 0 ){
 			
 				var newtheme = {};
 				
-				newtheme.name = lib.node( 'themesaver' ).value;
+				newtheme.name = lib.node( 'themesaver' ).firstChild.value;
 				
 				for( var setting in this.settings ){
 					
@@ -791,7 +787,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		function guide(data){	
 			this.refresh();
 			OVERVIEW = true;
-			var data = this.themeData.getViewData();
+			data = this.themeData.getViewData();
 			this.drawOutlineData(data);
 			lib.node( 'stringcontainer' ).style.display = 'none';
 		}
@@ -827,15 +823,10 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		
 		ThemeBuilder.prototype.select = select;
 		
-		function selectFontSize( size ){
-		
-			this.settings['fontSize'] = { value:size };
-			
-			this.themeData.selectFontSize( size );
-			
+		function selectFontSize( size ){		
+			this.settings['fontSize'] = { value:size };	
+			this.themeData.selectFontSize( size );		
 			this.fontSize = size;
-		
-			console.log( 'font size: ' + size );
 		}
 		
 		ThemeBuilder.prototype.selectFontSize = selectFontSize;
@@ -977,7 +968,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		
 		ThemeBuilder.prototype.addThemePicker = addThemePicker;
 		
-		
 		function updateThemePicker(selection){
 			
 			var options = [];
@@ -1000,7 +990,16 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 				this.themeSelect.destroy();
 				var newdiv = document.createElement('div');
 				newdiv.id = 'themepicker';
-				document.getElementById( 'pickercontainer').appendChild(newdiv);
+				var picker = document.getElementById( 'themepicker');
+				
+				var fc = picker.firstChild;
+
+				while( fc ) {
+				    picker.removeChild( fc );
+				    fc = picker.firstChild;
+				}
+				
+				picker.appendChild(newdiv);
 				this.themeSelect = new Select( {options:options}, newdiv );
 				this.themeSelect.setStorageItem = this.select.bind(this);
 				this.themeSelect.show();
@@ -1026,7 +1025,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 			element.id = this.colorFieldId;
 			
 			if( this.themeData.fontSettable ){
-				lib.node( 'sizecontainer' ).style.display = '';
+			
+				/* Can enable font selection on the editor page by
+				   uncommenting this line ... choosing not to for 
+				   now because we can do it in page, and I feel this
+				   complicates the user interface 
+				   
+				lib.node( 'sizecontainer' ).style.display = ''; */
 			}
 	
 			this.drawOutlineData(data);	
