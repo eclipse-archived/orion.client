@@ -235,7 +235,6 @@ Component.prototype.render = render;
 		function drawArc( context, x, y, radius, startAngle, endAngle, direction, width, color ){
 			var arc = new Component();
 		    arc.type= 'ELLIPSE';
-		//    arc.stroke = color;
 		    arc.fill = color;
 		    arc.width = width;
 		    arc.x = x;

@@ -95,6 +95,23 @@ define(["orion/assert", "orion/URL-shim", "domReady!"], function(assert) {
 		url.query.clear();
 		assert.equal(url.search, "");
 	};
+	
+	tests.testInvalidURL = function() {
+		var url = new URL("http:::::::://///////invalid?a=1#bad");
+		assert.equal(url.href, "http:::::::://///////invalid?a=1#bad");
+		assert.equal(url.origin, "");
+		assert.equal(url.protocol, ":");
+		assert.equal(url.username, "");
+		assert.equal(url.password, "");
+		assert.equal(url.host, "");
+		assert.equal(url.hostname, "");
+		assert.equal(url.port, "");
+		assert.equal(url.pathname, "");
+		assert.equal(url.search, "");
+		assert.equal(url.query, null);
+		assert.equal(url.hash, "");
+	};
+	
 
 	return tests;
 });
