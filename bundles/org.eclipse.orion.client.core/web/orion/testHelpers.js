@@ -29,12 +29,18 @@ define(['orion/Deferred'], function(Deferred) {
 					if (result && result.then) {
 						return result.then(
 							function(r) {
-								tearDown();
-								d.resolve(r);
+								Deferred.when(tearDown(), function() {
+									d.resolve(r);
+								}, function(e) {
+									d.reject(e);
+								});
 							},
 							function(e) {
-								tearDown();
-								d.reject(e);
+								Deferred.when(tearDown(), function() {
+									d.reject(e);
+								}, function(e) {
+									d.reject(e);
+								});
 							});
 					} else {
 						tearDown();
