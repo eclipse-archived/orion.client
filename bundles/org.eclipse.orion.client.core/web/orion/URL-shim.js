@@ -10,15 +10,14 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global document window StopIteration*/
-// URL Shim -- see http://http://url.spec.whatwg.org/ and http://dvcs.w3.org/hg/url/raw-file/tip/Overview.html
+// URL Shim -- see http://url.spec.whatwg.org/ and http://dvcs.w3.org/hg/url/raw-file/tip/Overview.html
 
 (function() {
 	try {
 		if (typeof window.URL === "function" && window.URL.length !== 0 && new window.URL("http://www.w3.org").protocol === "http:") {
 			return;
 		}
-	} catch (e) {
-	}
+	} catch (e) {}
 
 	var _USERNAME_PASSWORD_RE = /([^:]*):?(.*)/;
 	var STOP_ITERATION = typeof StopIteration !== "undefined" ? StopIteration : new Error("Stop Iteration");
@@ -81,6 +80,14 @@
 		if (typeof txt !== "string") {
 			throw new TypeError();
 		}
+	}
+
+	function _isValidURL(anchor) {
+		var protocol = anchor.protocol;
+		if (!protocol || protocol === ":" || (protocol === "http:" && !anchor.hostname)) {
+			return false;
+		}
+		return true;
 	}
 
 	// See http://url.spec.whatwg.org/#interface-urlquery
@@ -232,9 +239,9 @@
 	});
 
 	// See http://url.spec.whatwg.org/#api
-	function URL(url, base) {
-		url = url || "";
-		if (typeof url !== "string") {
+	function URL(input, base) {
+		input = input || "";
+		if (typeof input !== "string") {
 			throw new TypeError("url");
 		}
 
@@ -242,6 +249,11 @@
 		if (typeof base !== "string") {
 			throw new TypeError("base");
 		}
+
+		Object.defineProperty(this, "_input", {
+			value: input,
+			writable: true
+		});
 
 		var doc = document.implementation.createHTMLDocument("");
 		if (base) {
@@ -256,13 +268,16 @@
 		}
 
 		var urlAnchor = doc.createElement("a");
-		urlAnchor.href = url;
+		urlAnchor.href = input;
 		doc.body.appendChild(urlAnchor);
 		Object.defineProperty(this, "_urlAnchor", {
 			value: urlAnchor
 		});
+		var query = new URLQuery(urlAnchor);
 		Object.defineProperty(this, "query", {
-			value: new URLQuery(urlAnchor),
+			get: function() {
+				return _isValidURL(urlAnchor) ? query : null;
+			},
 			enumerable: true
 		});
 	}
@@ -270,26 +285,24 @@
 	Object.defineProperties(URL.prototype, {
 		href: {
 			get: function() {
-				return this._urlAnchor.href;
+				return _isValidURL(this._urlAnchor) ? this._urlAnchor.href : this._input;
 			},
 			set: function(value) {
 				_checkString(value);
+				this._input = value;
 				this._urlAnchor.href = value;
 			},
 			enumerable: true
 		},
 		origin: {
 			get: function() {
-				if (this._urlAnchor.protocol.length > 1 && this._urlAnchor.host) {
-					return this._urlAnchor.protocol + "//" + this._urlAnchor.host;
-				}
-				return "";
+				return _isValidURL(this._urlAnchor) ? this._urlAnchor.protocol + "//" + this._urlAnchor.host : "";
 			},
 			enumerable: true
 		},
 		protocol: {
 			get: function() {
-				return this._urlAnchor.protocol;
+				return _isValidURL(this._urlAnchor) ? this._urlAnchor.protocol : ":";
 			},
 			set: function(value) {
 				_checkString(value);
@@ -299,6 +312,9 @@
 		},
 		_userinfo: { // note: not part of spec so not enumerable
 			get: function() {
+				if (!_isValidURL(this._urlAnchor)) {
+					return "";
+				}
 				var re = new RegExp("^" + this._urlAnchor.protocol + "(\\/\\/)(?:([^@]*)?@)?" + this._urlAnchor.host);
 				var result = re.exec(this._urlAnchor.href);
 				var userinfo = result[2];
@@ -313,6 +329,9 @@
 		},
 		username: {
 			get: function() {
+				if (!_isValidURL(this._urlAnchor)) {
+					return "";
+				}
 				var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
 				var username = decodeURIComponent(parsed[1] || "");
 				return username;
@@ -330,6 +349,9 @@
 		},
 		password: {
 			get: function() {
+				if (!_isValidURL(this._urlAnchor)) {
+					return "";
+				}
 				var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
 				var password = decodeURIComponent(parsed[2] || "");
 				return password;
@@ -347,7 +369,7 @@
 		},
 		host: {
 			get: function() {
-				return this._urlAnchor.host;
+				return _isValidURL(this._urlAnchor) ? this._urlAnchor.host : "";
 			},
 			set: function(value) {
 				_checkString(value);
@@ -357,7 +379,7 @@
 		},
 		hostname: {
 			get: function() {
-				return this._urlAnchor.hostname;
+				return _isValidURL(this._urlAnchor) ? this._urlAnchor.hostname : "";
 			},
 			set: function(value) {
 				_checkString(value);
@@ -367,7 +389,7 @@
 		},
 		port: {
 			get: function() {
-				return this._urlAnchor.port;
+				return _isValidURL(this._urlAnchor) ? this._urlAnchor.port : "";
 			},
 			set: function(value) {
 				_checkString(value);
@@ -377,7 +399,7 @@
 		},
 		pathname: {
 			get: function() {
-				return this._urlAnchor.pathname;
+				return _isValidURL(this._urlAnchor) ? this._urlAnchor.pathname : "";
 			},
 			set: function(value) {
 				_checkString(value);
@@ -387,7 +409,7 @@
 		},
 		search: {
 			get: function() {
-				return this._urlAnchor.search;
+				return _isValidURL(this._urlAnchor) ? this._urlAnchor.search : "";
 			},
 			set: function(value) {
 				_checkString(value);
@@ -397,7 +419,7 @@
 		},
 		hash: {
 			get: function() {
-				return this._urlAnchor.hash;
+				return _isValidURL(this._urlAnchor) ? this._urlAnchor.hash : "";
 			},
 			set: function(value) {
 				_checkString(value);

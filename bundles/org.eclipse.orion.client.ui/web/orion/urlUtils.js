@@ -27,7 +27,8 @@ define(['orion/PageUtil', "orion/URL-shim"], function(PageUtil) {
 			// match[1]: the string inside the pair of "[" and "]"
 			// match[2]: the string inside the pair of "(" and ")"
 			if (match.length === 3 && match[2].length > 0){
-				if (new URL(match[2]).href && PageUtil.validateURLScheme(match[2])) { //Check if it is a valid URL
+				var url = new URL(match[2]);
+				if (url.protocol !== ":" && PageUtil.validateURLScheme(url.href)) { //Check if it is a valid URL
 					if (match.index > lastNonMatchIndex) { //We have to push a plain text segment first
 						matches.push({segmentStr: text.substring(lastNonMatchIndex, match.index)});
 					}
