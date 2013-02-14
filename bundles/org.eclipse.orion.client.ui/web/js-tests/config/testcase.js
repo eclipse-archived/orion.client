@@ -12,7 +12,6 @@
 define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', 'orion/serviceregistry', 'orion/pluginregistry'],
 		function(assert, Deferred, testHelpers, config, mServiceRegistry, mPluginRegistry) {
 	var ConfigAdminFactory = config.ConfigurationAdminFactory;
-	var Plugin = mPluginRegistry.Plugin;
 	var MANAGED_SERVICE = 'orion.cm.managedservice';
 
 	function MockPrefsService() {
