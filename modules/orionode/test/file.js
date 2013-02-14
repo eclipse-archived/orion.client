@@ -39,6 +39,17 @@ describe('File API', function() {
 		testData.setUp(WORKSPACE, done);
 	});
 
+	describe('get /file', function(done) {
+		app.request()
+			.get(PREFIX)
+			.expect(403, function(err, res) {
+				assert.ifError(err);
+				app.request()
+					.get(PREFIX)
+					.expect(403, done);
+			});
+	});
+
 	/**
 	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Actions_on_files
 	 */

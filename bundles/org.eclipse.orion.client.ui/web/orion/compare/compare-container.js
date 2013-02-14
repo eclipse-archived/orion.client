@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-//*jslint browser:true devel:true */
+/*global define document console prompt window*/
 define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/commands',
         'orion/editor/textModel','orion/editor/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher', 'orion/fileClient'], 
@@ -36,8 +36,8 @@ exports.DefaultDiffProvider = (function() {
 				var baseFileContentType = results[0];//.extension[0];
 				var newFileContentType = results[1];//.extension[0];
 				that.callBack({ baseFile:{URL: baseFileURL, Name: that._resolveFileName(baseFileURL), Type: baseFileContentType},
-				 			newFile:{URL: newFileURL, Name: that._resolveFileName(newFileURL), Type: newFileContentType},
-				 			diff: that._diffContent
+							newFile:{URL: newFileURL, Name: that._resolveFileName(newFileURL), Type: newFileContentType},
+							diff: that._diffContent
 						 });
 			};
 			Deferred.all([ that._getContentType(baseFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
@@ -60,7 +60,7 @@ exports.DefaultDiffProvider = (function() {
 					}
 					if (onlyDiff){
 						that.callBack({ 
-				 			diff: that._diffContent
+							diff: that._diffContent
 						 });
 					} else {
 						that._resolveComplexFileURL(resource);
@@ -107,14 +107,14 @@ exports.CompareStyler = (function() {
 										 null, //passing an AnnotationModel allows the styler to use it to annotate tasks/comment folding/etc, but we do not really need this in compare editor
 										 fileName,
 										 false /*bug 378193*/).then(function(){
-										 	if(compareWidget && loadingNumber){
+											if(compareWidget && loadingNumber){
 												editorWidget.setAnnotationRulerVisible(false);
-										 		compareWidget._highlighterLoaded++;
-										 		if(compareWidget._highlighterLoaded === loadingNumber){
-										 			compareWidget._diffNavigator.renderAnnotations();
-										 			compareWidget._diffNavigator.gotoBlock(compareWidget.options.blockNumber-1, compareWidget.options.changeNumber-1);
-										 		}
-										 	}
+												compareWidget._highlighterLoaded++;
+												if(compareWidget._highlighterLoaded === loadingNumber){
+													compareWidget._diffNavigator.renderAnnotations();
+													compareWidget._diffNavigator.gotoBlock(compareWidget.options.blockNumber-1, compareWidget.options.changeNumber-1);
+												}
+											}
 										 });
 		}
 	};
@@ -184,7 +184,6 @@ exports.CompareContainer = (function() {
 			if(!commandSpanId){
 				return;
 			}
-			var that = this;
 			var copyToLeftCommand = new mCommands.Command({
 				name : messages["Copy current change from right to left"],
 				tooltip : messages["Copy current change from right to left"],
@@ -290,7 +289,7 @@ exports.CompareContainer = (function() {
 				
 			// Register command contributions
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.openComparePage", 107); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 108, null, false, new mCommands.CommandKeyBinding('l', true, true)); //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 108, null, false, new mCommands.CommandKeyBinding('l', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
 			if (!this.options.readonly) {
 				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 109, null, false, new mCommands.CommandKeyBinding(37/*left arrow key*/, true, false, true)); //$NON-NLS-0$
 			}
@@ -421,7 +420,7 @@ exports.CompareContainer = (function() {
 					if(that.options.callback){
 						that.options.callback(that.options.baseFile.Name, that.options.newFile.Name);
 					}
-					var filesToLoad = ( that.options.diffContent ? 	[that.options.baseFile/*, that.options.newFile*/] : [that.options.baseFile, that.options.newFile]); 
+					var filesToLoad = ( that.options.diffContent ? [that.options.baseFile/*, that.options.newFile*/] : [that.options.baseFile, that.options.newFile]); 
 					that.getFilesContents(filesToLoad).then( function(){
 						var viewHeight = this.setEditor();
 						if(this._onLoadContents){
@@ -456,9 +455,9 @@ exports.CompareContainer = (function() {
 	    },
 	    
 	    _loadSingleFile: function(file) {
-	        return this._registry.getService("orion.page.progress").progress(this._fileClient.read(file.URL), "Getting contents of " + file.URL).then(
+	        return this._registry.getService("orion.page.progress").progress(this._fileClient.read(file.URL), "Getting contents of " + file.URL).then( //$NON-NLS-1$ //$NON-NLS-0$
 		        function(contents) {
-		        	file.Content = contents;
+					file.Content = contents;
 					return file;
 		        }.bind(this),
 		        function(error, ioArgs) {
@@ -560,8 +559,8 @@ exports.TwoWayCompareContainer = (function() {
 					var message = typeof (errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; //$NON-NLS-0$
 					newFileTitleNode.appendChild(document.createTextNode(message));
 					baseFileTitleNode.appendChild(document.createTextNode(message));
-					newFileTitleNode.style.color = "red"; //$NON-NLS-1$
-					baseFileTitleNode.style.color = "red"; //$NON-NLS-1$
+					newFileTitleNode.style.color = "red"; //$NON-NLS-0$
+					baseFileTitleNode.style.color = "red"; //$NON-NLS-0$
 				}
 			};
 		}
@@ -570,7 +569,6 @@ exports.TwoWayCompareContainer = (function() {
 		this._rightEditorDiv = this._uiFactory.getEditorParentDiv(false);
 		
 		this.initCommands();
-		var that = this;
 		this._inputManager = {
 			filePath: "",
 			getInput: function() {
@@ -597,7 +595,7 @@ exports.TwoWayCompareContainer = (function() {
 							}.bind(this)
 					);
 				} else {
-					that._progress.progress(that._fileClient.read(fileURI, true), "Getting file metadata " + fileURI).then(
+					that._progress.progress(that._fileClient.read(fileURI, true), "Getting file metadata " + fileURI).then( //$NON-NLS-0$
 						function(metadata) {
 							this._fileMetadata = metadata;
 							this.setTitle(metadata.Location, metadata);
@@ -764,7 +762,7 @@ exports.TwoWayCompareContainer = (function() {
 				return;
 			}
 			var localSearcher = new mSearcher.TextSearcher(editor, that._commandService, undoStack);
-			var commandGenerator = new mEditorCommands.EditorCommandFactory(that._registry, that._commandService,that._fileClient , that._inputManager, "pageActions", readOnly, "pageNavigationActions", localSearcher); //$NON-NLS-0$
+			var commandGenerator = new mEditorCommands.EditorCommandFactory(that._registry, that._commandService,that._fileClient , that._inputManager, "pageActions", readOnly, "pageNavigationActions", localSearcher); //$NON-NLS-1$ //$NON-NLS-0$
 			commandGenerator.generateEditorCommands(editor);
 			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
 			keyModeStack.push(genericBindings);
@@ -777,8 +775,9 @@ exports.TwoWayCompareContainer = (function() {
 		var dirtyIndicator = "";
 		var status = "";
 		var statusReporter = function(message, isError) {
-			if(!statusDiv)
+			if(!statusDiv) {
 				return;
+			}
 			if (isError) {
 				status =  messages["ERROR: "] + message;
 			} else {
@@ -861,7 +860,6 @@ exports.TwoWayCompareContainer = (function() {
 
 	TwoWayCompareContainer.prototype.addRulers = function(){
 		if(this._rightTextView && this._leftTextView && !this._hasRuler){
-			var that = this;
 			this._leftTextViewRuler= new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this._rightTextViewRuler = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this._leftTextView.addRuler(this._leftTextViewRuler);
@@ -884,7 +882,6 @@ exports.TwoWayCompareContainer = (function() {
 			output = result.output;
 		}
 		this._highlighterLoaded = 0;
-		var that = this;
 		if(!this._leftEditor){
 			this.initEditorContainers(result.delim , output , input ,  result.mapper , true);
 		} else if (onsave) {
@@ -905,8 +902,9 @@ exports.TwoWayCompareContainer = (function() {
 			this._highlighter[1].highlight(this.options.baseFile.Name, this.options.baseFile.Type, this._rightEditor, this, 2);
 			this.renderCommands();
 			this.addRulers();
-			if(!this.options.readonly)
+			if(!this.options.readonly){
 				this._inputManager.setInput(this.options.newFile.URL , this._leftEditor);
+			}
 		}
 		if(this._viewLoadedCounter > 1){
 			this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
@@ -932,11 +930,11 @@ exports.InlineCompareContainer = (function() {
 		var that = this;
 		if(!this.options.callback){
 			this.options.callback = function(baseFileName, newFileName) {
-				var diffTitleNode = lib.node("fileNameInViewer"); //$NON-NLS-2$
-				if(difTitleNode){
+				var diffTitleNode = lib.node("fileNameInViewer"); //$NON-NLS-0$
+				if(diffTitleNode){
 					lib.empty(diffTitleNode);
 					diffTitleNode.appendChild(document.createTextNode(that._diffTitle));
-					diffTitleNode.style.color = "#6d6d6d"; //$NON-NLS-2$
+					diffTitleNode.style.color = "#6d6d6d"; //$NON-NLS-0$
 				}
 				that._statusService.setProgressMessage("");
 			};
@@ -1038,14 +1036,14 @@ exports.InlineCompareContainer = (function() {
 		editor.installTextView();
 		editor.setOverviewRulerVisible(false);
 		editor.setAnnotationRulerVisible(false);
-		if(createLineStyler && fileObj)
+		if(createLineStyler && fileObj){
 			editor.setInput(fileObj.Name);
+		}
 			
 		var textView = editor.getTextView();
 			
 		this._rulerOrigin = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 1,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this._rulerNew = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var that = this;
 		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
                 function(lineIndex, ruler){that._diffNavigator.matchPositionFromOverview(lineIndex);});
 		
@@ -1098,7 +1096,6 @@ exports.InlineCompareContainer = (function() {
 		if(!output){
 			output = result.output;
 		}
-		var that = this;
 		this._highlighterLoaded = 0;
 		if(!this._textView){
 			this.initEditorContainers(result.delim , input ,  result.mapper , result.diffArray , true);

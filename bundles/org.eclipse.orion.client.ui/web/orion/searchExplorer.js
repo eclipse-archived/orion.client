@@ -10,7 +10,6 @@
  ******************************************************************************/
 
 /*global define console window*/
-/*jslint regexp:false browser:true forin:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/explorers/navigationUtils', 'orion/webui/tooltip'],
 
@@ -33,7 +32,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     function _place(ndoeToPlace, parent, position) {
         var parentNode = lib.node(parent);
         if (parentNode) {
-            if (position === "only") {
+            if (position === "only") { //$NON-NLS-0$
                 lib.empty(parentNode);
             }
             parentNode.appendChild(ndoeToPlace);
@@ -47,7 +46,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 for (var i = 0; i < classNames.length; i++) {
                     element.classList.add(classNames[i]);
                 }
-            } else if (typeof classNames === "string") {
+            } else if (typeof classNames === "string") { //$NON-NLS-0$
                 element.className = classNames;
             }
         }
@@ -62,7 +61,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     }
 
     function _createLink(classNames, id, href, parent, linkName) {
-        var link = _createElement('a', classNames, id, parent); //$NON-NLS-2$
+        var link = _createElement('a', classNames, id, parent); //$NON-NLS-0$
         link.href = href;
         if (linkName) {
             link.appendChild(document.createTextNode(linkName));
@@ -71,7 +70,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     }
 
     function _createSpan(classNames, id, parent, spanName) {
-        var span = _createElement('span', classNames, id, parent); //$NON-NLS-2$
+        var span = _createElement('span', classNames, id, parent); //$NON-NLS-0$
         if (spanName) {
             span.appendChild(document.createTextNode(spanName));
         }
@@ -88,25 +87,25 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             return modelItem;
         }
         return modelItem.parent;
-    };
+    }
 
     function _onSameFile(modelItem1, modelItem2) {
         return _getFileModel(modelItem1) === _getFileModel(modelItem2);
-    };
+    }
 
     function _validFiles(searchModel) {
         if (typeof searchModel.getValidFileList === "function") { //$NON-NLS-0$
             return searchModel.getValidFileList();
         }
         return searchModel.getListRoot().children;
-    };
+    }
 
     function _headerString(searchModel) {
         if (typeof searchModel.getHeaderString === "function") { //$NON-NLS-0$
             return searchModel.getHeaderString();
         }
         return messages["Results"]; //$NON-NLS-0$;
-    };
+    }
     
     //Renderer to render the model
     function SearchResultRenderer(options, explorer) {
@@ -141,13 +140,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
         var title, header;
         if (col_no !== 0) {
-            title = _createElement("th"); //$NON-NLS-2
-            header = _createElement("h2", "search_header", null, title); //$NON-NLS-2
+            title = _createElement("th"); //$NON-NLS-0$
+            header = _createElement("h2", "search_header", null, title); //$NON-NLS-1$  //$NON-NLS-0$
             if (col_no === 1) {
                 header.textContent = _headerString(this.explorer.model);
                 return title;
             } else if (col_no === 2) {
-                header.textContent = messages["Location"];
+                header.textContent = messages["Location"]; //$NON-NLS-0$
             }
             return title;
         } else {
@@ -214,16 +213,17 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultRenderer.prototype.generateContextTip = function(detailModel) {
-        var tableNode = _createElement('table', "search_context_tip");
+        var tableNode = _createElement('table', "search_context_tip"); //$NON-NLS-1$ //$NON-NLS-0$
         for (var i = 0; i < detailModel.context.length; i++) {
             var lineDiv = _createElement('tr', null, null, tableNode); //$NON-NLS-0$
+            var lineTd;
             if (detailModel.context[i].current) {
-                var lineTd = _createElement('td', null, null, lineDiv);
+                lineTd = _createElement('td', null, null, lineDiv); //$NON-NLS-0$
                 lineTd.noWrap = true;
-                var span = _createElement('span', "primaryColumn", null, lineTd);
+                var span = _createElement('span', "primaryColumn", null, lineTd); //$NON-NLS-1$ //$NON-NLS-0$
                 this.generateDetailHighlight(detailModel, span); //$NON-NLS-1$ //$NON-NLS-0$
             } else {
-                var lineTd = _createElement('td', null, null, lineDiv);
+                lineTd = _createElement('td', null, null, lineDiv); //$NON-NLS-0$
                 lineTd.noWrap = true;
                 lineTd.textContent = detailModel.context[i].context + "\u00a0"; //$NON-NLS-0$
             }
@@ -235,7 +235,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         var startIndex = 0;
         var detailInfo = this.explorer.model.getDetailInfo(detailModel);
         for (var i = 0; i < detailInfo.matches.length; i++) {
-            if (startIndex >= detailInfo.lineString.length) break;
+            if (startIndex >= detailInfo.lineString.length) {
+				break;
+            }
             if (this.explorer.model.replaceMode()) {
                 if (i !== detailInfo.matchNumber) {
                     continue;
@@ -244,7 +246,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             if (startIndex !== detailInfo.matches[i].startIndex) {
                 _place(document.createTextNode(detailInfo.lineString.substring(startIndex, detailInfo.matches[i].startIndex)), parentSpan, "last"); //$NON-NLS-0$
             }
-            var matchSegBold = _createElement('b', null, null, parentSpan);
+            var matchSegBold = _createElement('b', null, null, parentSpan); //$NON-NLS-0$
             var  gap = detailInfo.matches[i].length;
             _place(document.createTextNode(detailInfo.lineString.substring(detailInfo.matches[i].startIndex, detailInfo.matches[i].startIndex + gap)), matchSegBold, "only"); //$NON-NLS-0$
             startIndex = detailInfo.matches[i].startIndex + gap;
@@ -266,12 +268,12 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultRenderer.prototype.renderDetailLineNumber = function(item, spanHolder) {
-    	var detailInfo = this.explorer.model.getDetailInfo(item);
-    	var lineNumber = detailInfo.lineNumber + 1;
+		var detailInfo = this.explorer.model.getDetailInfo(item);
+		var lineNumber = detailInfo.lineNumber + 1;
         if (!this.explorer.model.replaceMode() || detailInfo.matches.length <= 1) {
             _place(document.createTextNode(lineNumber + ":"), spanHolder, "last"); //$NON-NLS-1$ //$NON-NLS-0$
         } else {
-        	var matchNumber = detailInfo.matchNumber + 1;
+			var matchNumber = detailInfo.matchNumber + 1;
             _place(document.createTextNode(lineNumber + "(" + matchNumber + "):"), spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         }
     };
@@ -343,9 +345,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultRenderer.prototype.getCellElement = function(col_no, item, tableRow) {
+        var col, span;
         switch (col_no) {
             case 0:
-                var col, span, link;
                 col = _createElement('td'); //$NON-NLS-0$
                 if (item.type === "file") { //$NON-NLS-0$
                     col.noWrap = true;
@@ -365,10 +367,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 }
                 return col;
             case 1:
-                var col, span, link;
-                col = _createElement('td'); //$NON-NLS-0$
+                 col = _createElement('td'); //$NON-NLS-0$
                 span = _createSpan(null, this.getFileSpanId(item), col, null);
-                var that = this;
                 if (item.type === "file") { //$NON-NLS-0$
                     var renderName = item.totalMatches ? this.explorer.model.getFileName(item) + " (" + item.totalMatches + " matches)" : this.explorer.model.getFileName(item); //$NON-NLS-1$ //$NON-NLS-0$
                     this.renderFileElement(item, span, renderName);
@@ -399,7 +399,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._init(options);
         this.options = options;
         this.explorer = explorer;
-    };
+    }
 
     SearchReportRenderer.prototype = new mExplorer.SelectionRenderer();
 
@@ -408,12 +408,12 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         switch (col_no) {
             case 0:
                 th = _createElement('th', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
-                h2 = _createElement('h2', null, null, th); //$NON-NLS-1$
+                h2 = _createElement('h2', null, null, th); //$NON-NLS-0$
                 h2.textContent = messages["Files replaced"];
                 break;
             case 1:
                 th = _createElement('th', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
-                h2 = _createElement('h2', null, null, th); //$NON-NLS-1$
+                h2 = _createElement('h2', null, null, th); //$NON-NLS-0$
                 h2.textContent = messages["Status"];
                 break;
         }
@@ -423,7 +423,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         switch (col_no) {
             case 0:
                 var col = _createElement('td', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
-                var div = _createElement('div', null, null, col); //$NON-NLS-1$
+                var div = _createElement('div', null, null, col); //$NON-NLS-0$
                 var span = _createElement('span', "primaryColumn", null, div); //$NON-NLS-1$ //$NON-NLS-0$
 
                 _place(document.createTextNode(item.model.fullPathName + "/" + this.explorer.resultModel.getFileName(item.model)), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -441,16 +441,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 operationIcon.classList.add('imageSprite'); //$NON-NLS-0$
                 if (item.status) {
                     switch (item.status) {
-                        case "warning":
-                            //$NON-NLS-0$
+                        case "warning": //$NON-NLS-0$
                             operationIcon.classList.add('core-sprite-warning'); //$NON-NLS-0$
                             return col;
-                        case "failed":
-                            //$NON-NLS-0$
+                        case "failed": //$NON-NLS-0$
                             operationIcon.classList.add('core-sprite-error'); //$NON-NLS-0$
                             return col;
-                        case "pass":
-                            //$NON-NLS-0$
+                        case "pass": //$NON-NLS-0$
                             operationIcon.classList.add('core-sprite-ok'); //$NON-NLS-0$
                             return col;
                     }
@@ -460,16 +457,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 var statusMessage;
                 if (item.status) {
                     switch (item.status) {
-                        case "warning":
-                            //$NON-NLS-0$
+                        case "warning": //$NON-NLS-0$
                             statusMessage = item.message;
                             break;
-                        case "failed":
-                            //$NON-NLS-0$
+                        case "failed": //$NON-NLS-0$
                             statusMessage = item.message;
                             break;
-                        case "pass":
-                            //$NON-NLS-0$
+                        case "pass": //$NON-NLS-0$
                             statusMessage = item.model.totalMatches ? i18nUtil.formatMessage(messages["${0} out of ${1}  matches replaced."], item.matchesReplaced, item.model.totalMatches) : item.message;
                             break;
                     }
@@ -712,11 +706,11 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._commandService.addCommand(nextResultCommand);
         this._commandService.addCommand(prevResultCommand);
         mExplorer.createExplorerCommands(this._commandService, function(item) {
-        	var emptyKeyword = false;
-        	if(that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword === ""){
-        		emptyKeyword = true;
-        	}
-            return !item._reporting && !emptyKeyword;
+			var emptyKeyword = false;
+			if(that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword === ""){
+				emptyKeyword = true;
+			}
+			return !item._reporting && !emptyKeyword;
         });
         // Register command contributions
         this._commandService.registerCommandContribution("pageNavigationActions", "orion.explorer.expandAll", 1); //$NON-NLS-1$ //$NON-NLS-0$
@@ -728,8 +722,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultExplorer.prototype._checkStale = function(model) {
-        return this.registry.getService("orion.page.progress")
-            .progress(this.fileClient.read(model.location), "Checing file " + model.location + " for stale")
+        return this.registry.getService("orion.page.progress") //$NON-NLS-0$
+            .progress(this.fileClient.read(model.location), "Checing file " + model.location + " for stale") //$NON-NLS-1$ //$NON-NLS-0$
             .then(function(contents) {
             if (this.model.staleCheck(contents)) {
                 model.stale = false;
@@ -749,7 +743,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
     
     SearchResultExplorer.prototype._loadFileMetaData = function(fileItem) {
-        return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location, true), "Getting file metadata " + fileItem.location).then(
+        return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location, true), "Getting file metadata " + fileItem.location).then( //$NON-NLS-1$ //$NON-NLS-0$
 	        function(meta) {
 	            fileItem.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 	            fileItem.parentLocation = meta.Parents[0].Location;
@@ -780,7 +774,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         var that = this;
         this._commandService.openParameterCollector("pageActions", function(parentDiv) { //$NON-NLS-0$
             // create replace text
-            var replaceStringDiv = _createElement('input', null, "globalSearchReplaceWith", parentDiv); //$NON-NLS-0$
+            var replaceStringDiv = _createElement('input', null, "globalSearchReplaceWith", parentDiv); //$NON-NLS-1$  //$NON-NLS-0$
             replaceStringDiv.type = "text"; //$NON-NLS-0$
             replaceStringDiv.name = "ReplaceWith:"; //$NON-NLS-0$
             replaceStringDiv.placeholder = "Replace With"; //$NON-NLS-0$
@@ -797,7 +791,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             };
 
             // create the command span for Replace
-            var span = _createElement('span', 'parameters', "globalSearchReplaceCommands", parentDiv); //$NON-NLS-0$
+            _createElement('span', 'parameters', "globalSearchReplaceCommands", parentDiv); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
             return replaceStringDiv;
         });
 
@@ -928,7 +922,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
         var that = this;
         this.createTree(this._uiFactory ? this._uiFactory.getMatchDivID() : this.getParentDivId(), this.model, {
-            selectionPolicy: "cursorOnly",
+            selectionPolicy: "cursorOnly", //$NON-NLS-0$
             indent: 0,
             onCollapse: function(model) {
                 that.onCollapse(model);
@@ -1033,11 +1027,11 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             if (that.model.onMatchNumberChanged) {
                 that.model.onMatchNumberChanged(fileItem);
             }
-    		that.model.getReplacedFileContent(that._currentReplacedContents, updating, fileItem);
-    		var replacedContents = that._currentReplacedContents.contents;
-    		if(Array.isArray(replacedContents)){
-    			replacedContents = that._currentReplacedContents.contents.join(that._currentReplacedContents.lineDelim);
-    		}
+			that.model.getReplacedFileContent(that._currentReplacedContents, updating, fileItem);
+			var replacedContents = that._currentReplacedContents.contents;
+			if(Array.isArray(replacedContents)){
+				replacedContents = that._currentReplacedContents.contents.join(that._currentReplacedContents.lineDelim);
+			}
             // Diff operations
             var contentTypeService = new mContentTypes.ContentTypeService(that.registry);
             var fileName = that.model.getFileName(fileItem);
@@ -1071,9 +1065,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 });
             } else {
                 _empty(that.uiFactoryCompare.getTitleDiv());
-                _place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
+                _place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$ //$NON-NLS-0$
                 _empty(that.uiFactoryCompare.getTitleDiv(true));
-                _place(document.createTextNode(i18nUtil.formatMessage(messages['Original File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$
+                _place(document.createTextNode(i18nUtil.formatMessage(messages['Original File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$ //$NON-NLS-0$
                 that.twoWayCompareContainer.setOptions(options);
                 that.twoWayCompareContainer.setEditor();
             }
@@ -1092,13 +1086,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         if (!this.model._provideSearchHelper) {
             return;
         }
-        var query = mSearchUtils.generateSearchHref(searchParams).split("#")[1];
+        var query = mSearchUtils.generateSearchHref(searchParams).split("#")[1]; //$NON-NLS-0$
         var qName = query;
 
         if (typeof(this.model._provideSearchHelper().displayedSearchTerm) === "string" && typeof(searchParams.resource) === "string") { //$NON-NLS-1$ //$NON-NLS-0$
             qName = "\'" + this.model._provideSearchHelper().displayedSearchTerm + "\' in "; // +queryObj.location; //$NON-NLS-1$ //$NON-NLS-0$
             if (searchParams.resource.length > 0) {
-                this.registry.getService("orion.page.progress").progress(this.fileClient.read(searchParams.resource, true), "Getting file metadata " + searchParams.resource).then(
+                this.registry.getService("orion.page.progress").progress(this.fileClient.read(searchParams.resource, true), "Getting file metadata " + searchParams.resource).then( //$NON-NLS-1$ //$NON-NLS-0$
 
                 function(meta) {
                     var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
@@ -1149,7 +1143,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
         this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         if (this.model._provideSearchHelper && this.model._provideSearchHelper().params.keyword !== "") {
-            var newMenu = this._commandService._createDropdownMenu("pageNavigationActions", messages['Options'], false, function() { //$NON-NLS-0$
+            var newMenu = this._commandService._createDropdownMenu("pageNavigationActions", messages['Options'], false, function() { //$NON-NLS-1$ //$NON-NLS-0$
                 if (!that.model.replaceMode()) {
                     that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Sort by Name"], that.model.sortByName,
 
@@ -1186,11 +1180,10 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             this.contextTip.destroy();
             this.contextTip = null;
         }
-        var that = this;
         var modelLinkId = this.renderer.getDetailIconId(model);
         var tableNode = this.renderer.generateContextTip(model);
         var aroundNode = lib.node(modelLinkId);
-        var orient = ["below", "right"]; //$NON-NLS-3$ //$NON-NLS-2$
+        var orient = ["below", "right"]; //$NON-NLS-1$ //$NON-NLS-0$
         if (aroundNode) {
             var parentNode = this.myTree._parent;
             var parentRect = parentNode.getClientRects()[0];
@@ -1198,7 +1191,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             for (var i = 0, l = rects.length; i < l; i++) {
                 var r = rects[i];
                 if ((r.bottom + 100) > parentRect.bottom) {
-                    orient = ["above", "right"]; //$NON-NLS-3$ //$NON-NLS-2$
+                    orient = ["above", "right"]; //$NON-NLS-1$ //$NON-NLS-0$
                     break;
                 }
             }
@@ -1302,17 +1295,16 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultExplorer.prototype.onReplaceCursorChanged = function(prevModel, currentModel) {
-        var that = this;
         if (!_onSameFile(this._currentPreviewModel, currentModel)) {
             this.buildPreview();
         }
         if (currentModel.type === "detail") { //$NON-NLS-0$
-        	//TODO:This has to be removed but not quite sure why it was there
-        	/*
-            if (!currentModel.newMatches) {
-                that.renderer.focus();
-                return;
-            }*/
+			//TODO:This has to be removed but not quite sure why it was there
+			/*
+			if (!currentModel.newMatches) {
+			    that.renderer.focus();
+			    return;
+			}*/
             var detailInfo = this.model.getDetailInfo(currentModel);
             this.twoWayCompareContainer.gotoDiff(detailInfo.lineNumber, detailInfo.matches[detailInfo.matchNumber].startIndex, false);
         }
@@ -1357,24 +1349,24 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultExplorer.prototype.startUp = function() {
-    	var pagingParams = this.model.getPagingParams();
-        if (pagingParams.numberOnPage === 0) {
+		var pagingParams = this.model.getPagingParams();
+		if (pagingParams.numberOnPage === 0) {
 			var message = messages["No matches"];
 			if(this.model._provideSearchHelper){
-            	message = i18nUtil.formatMessage(messages["No matches found for ${0}"], this.model._provideSearchHelper().displayedSearchTerm);
+				message = i18nUtil.formatMessage(messages["No matches found for ${0}"], this.model._provideSearchHelper().displayedSearchTerm);
 			}
-            this.parentNode.textContent = "";
-            var textBold = _createElement('b', null, null, this.parentNode); //$NON-NLS-1$ //$NON-NLS-0$
-            _place(document.createTextNode(message), textBold, "only"); //$NON-NLS-0$
-            return;
-        } 
+		    this.parentNode.textContent = "";
+		    var textBold = _createElement('b', null, null, this.parentNode); //$NON-NLS-1$ //$NON-NLS-0$
+		    _place(document.createTextNode(message), textBold, "only"); //$NON-NLS-0$
+		    return;
+		} 
         var that = this;
         this.model.buildResultModel();
         if (!this.model.replaceMode()) {
             this.initCommands();
             _empty(this.getParentDivId());
             this.createTree(this.getParentDivId(), this.model, {
-                selectionPolicy: "cursorOnly",
+                selectionPolicy: "cursorOnly", //$NON-NLS-0$
                 indent: 0,
                 onCollapse: function(model) {
                     that.onCollapse(model);
@@ -1416,7 +1408,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             }
         }
         if(this.model.setValidFileList){
-        	this.model.setValidFileList(newIndex);
+			this.model.setValidFileList(newIndex);
         }
         if (_validFiles(this.model).length === 0) {
             this.getNavHandler().refreshModel(this.getNavDict(), this.model, _validFiles(this.model));
@@ -1464,7 +1456,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             modelToExpand = this.getNavHandler().currentModel();
         }
         if(!modelToExpand){
-        	modelToExpand = _validFiles(this.model).length > 0 ? _validFiles(this.model)[0] : null;
+			modelToExpand = _validFiles(this.model).length > 0 ? _validFiles(this.model)[0] : null;
         }
         this.getNavHandler().cursorOn(modelToExpand, true);
         if (modelToExpand && detailIndex && detailIndex !== "none") { //$NON-NLS-0$

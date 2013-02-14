@@ -82,7 +82,7 @@ function _checkNpmPath(config, callback){
 	if(result && result.npm_path){
 		var npmPath = result.npm_path;
 		if(npmPath.indexOf("./") === 0 || npmPath.indexOf("../") === 0){
-		    npmPath = path.dirname(PATH_TO_NODE) + "/" + npmPath;
+			npmPath = path.dirname(PATH_TO_NODE) + "/" + npmPath;
 		}
 		npm_path_guess_list.push(npmPath);
 	}

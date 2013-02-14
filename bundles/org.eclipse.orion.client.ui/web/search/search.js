@@ -18,7 +18,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/s
 		function(messages, require, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mSearchOutliner, 
 				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil) {
 	function makeHref(fileClient, seg, location, searchParams, searcher){
-		var searchLocation = (!location || location === "" || location === "root") ? searcher.getSearchRootLocation() : location;
+		var searchLocation = (!location || location === "" || location === "root") ? searcher.getSearchRootLocation() : location; //$NON-NLS-0$
 		var newParams = mSearchUtils.copySearchParams(searchParams);
 		newParams.resource = searchLocation;
 		seg.href = mSearchUtils.generateSearchHref(newParams);
@@ -31,16 +31,16 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/s
 			if(searchLoc === fileClient.fileServiceRootURL(searchLoc)){
 				searcher.setRootLocationbyURL(searchLoc);
 				searcher.setLocationbyURL(searchLoc);
-				mGlobalCommands.setPageTarget({task: "Search", title: title, serviceRegistry: serviceRegistry, 
+				mGlobalCommands.setPageTarget({task: "Search", title: title, serviceRegistry: serviceRegistry, //$NON-NLS-0$
 					commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: fileClient.fileServiceName(searchLoc),
 					makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
 					searcher.setChildrenLocationbyURL(searchLoc);
 					searchResultsGenerator.loadResults(searchParams);
 			} else {
-				progress.progress(fileClient.read(searchLoc, true), "Loading file metadata " + searchLoc).then(
+				progress.progress(fileClient.read(searchLoc, true), "Loading file metadata " + searchLoc).then( //$NON-NLS-0$
 					function(metadata) {
-						mGlobalCommands.setPageTarget({task: "Search", title: title, target: metadata, serviceRegistry: serviceRegistry, 
-							fileService: fileClient, commandService: commandService, searchService: searcher, breadcrumbRootName: "Search",
+						mGlobalCommands.setPageTarget({task: "Search", title: title, target: metadata, serviceRegistry: serviceRegistry,  //$NON-NLS-0$
+							fileService: fileClient, commandService: commandService, searchService: searcher, breadcrumbRootName: "Search", //$NON-NLS-0$
 							makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
 							searchResultsGenerator.loadResults(searchParams);
 					}.bind(this),
@@ -50,8 +50,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/s
 				);
 			}
 		} else {
-			mGlobalCommands.setPageTarget({task: "Search", title: title, serviceRegistry: serviceRegistry, 
-				commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: "Search",
+			mGlobalCommands.setPageTarget({task: "Search", title: title, serviceRegistry: serviceRegistry,  //$NON-NLS-0$
+				commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: "Search", //$NON-NLS-0$
 				makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
 		}
 	}
