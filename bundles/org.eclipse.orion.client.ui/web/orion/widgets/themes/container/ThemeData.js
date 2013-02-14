@@ -199,7 +199,7 @@ define(['orion/widgets/themes/container/ThemeSheetWriter'],
 			dataset.width = UI_SIZE;
 			dataset.height = UI_SIZE;
 			
-			dataset.shapes = [ 	{ type:'IMAGE', 		name:'logo', x: LEFT + 5, y:TOP + 8, source: 'orion-transparent.png', family:'logo' },
+			dataset.shapes = [ 
 								{ type:'RECTANGLE', 	name:'Navigation Bar',		x:LEFT,		y:TOP,					width:UI_SIZE,	height: BANNER_HEIGHT, family:'navbar', fill: '#333', order:1 },
 								{ type:'TEXT',		name:'Navigation Text',	 label:'UserName',	x:LEFT + UI_SIZE - 70, y:TOP + 20, family:'navtext', fill: '#bfbfbf', font: '8pt sans-serif'},
 								{ type:'ROUNDRECTANGLE', name:'Search Box',	x:LEFT + UI_SIZE - 145,	y:TOP + 10, width: 70,	height: 12, family:'search', fill: '#444', order:3 },
@@ -224,7 +224,12 @@ define(['orion/widgets/themes/container/ThemeSheetWriter'],
 								{ type:'LINE', 		name:'Line Color', x1:LEFT + UI_SIZE * 0.4, y1:CONTENT_TOP + 30, x2:LEFT + UI_SIZE, y2:CONTENT_TOP + 30, linewidth:2, fill:'#DEDEDE' },
 								{ type:'LINE', 		name:'Line Color', x1:LEFT + UI_SIZE * 0.4, y1:CONTENT_TOP, x2:LEFT + UI_SIZE * 0.4, y2:TOP + UI_SIZE, linewidth:2, fill:'#DEDEDE'},
 								{ type:'LINE', 		name:'Line Color', x1:LEFT + 10, y1:CONTENT_TOP + 29, x2:LEFT + UI_SIZE * 0.4 - 10, y2:CONTENT_TOP + 29, linewidth:2, fill:'#DEDEDE' },
-								{ type:'RECTANGLE', 	name:'Side Panel',	x:LEFT,		y:CONTENT_TOP, 			width: UI_SIZE * 0.4,	height: UI_SIZE - CONTENT_TOP + TOP, family:'sidepanel', fill: '#FBFBFB', order:12 }
+								{ type:'RECTANGLE', 	name:'Side Panel',	x:LEFT,		y:CONTENT_TOP, 			width: UI_SIZE * 0.4,	height: UI_SIZE - CONTENT_TOP + TOP, family:'sidepanel', fill: '#FBFBFB', order:12 },
+								{ type:'TRIANGLE',	name:'userMenu', x1:LEFT + UI_SIZE - 7, y1:TOP + 14, x2:LEFT + UI_SIZE - 13, y2:TOP + 14, x3:LEFT + UI_SIZE - 10, y3:TOP + 19, family:'userMenu', fill: '#BFBFBF' },
+								{ type:'TRIANGLE',	name:'userMenu', x1:LEFT + 10, y1:CONTENT_TOP + 17, x2:LEFT + 16, y2:CONTENT_TOP + 17, x3:LEFT + 13, y3:CONTENT_TOP + 22, family:'userMenu', fill: '#BFBFBF' },
+								{ type:'TEXT',		name:'Navigation Text',	 label:'Navigator',	x:LEFT + 50, y: TOP + 20, family:'navtext', fill: '#bfbfbf', font: '8pt sans-serif', order:2 },
+								{ type:'TRIANGLE',	name:'userMenu', x1:LEFT + UI_SIZE - 7, y1:TOP + 14, x2:LEFT + UI_SIZE - 13, y2:TOP + 14, x3:LEFT + UI_SIZE - 10, y3:TOP + 19, family:'userMenu', fill: '#BFBFBF' },
+								{ type:'TRIANGLE',	name:'userMenu', x1:LEFT + 10, y1:CONTENT_TOP + 17, x2:LEFT + 16, y2:CONTENT_TOP + 17, x3:LEFT + 13, y3:CONTENT_TOP + 22, family:'userMenu', fill: '#BFBFBF' }
 			];
 			
 			
@@ -250,6 +255,8 @@ define(['orion/widgets/themes/container/ThemeSheetWriter'],
 				x3:LEFT + UI_SIZE * 0.4 + 10, y3: CONTENT_TOP + 56 + (twisty*20), 
 				family:'navbar', fill: '#333' } );
 			}
+			
+			dataset.shapes.push( { type:'IMAGE', 		name:'logo', x: LEFT + 5, y:TOP + 8, source: '../../images/orion-transparent.png', family:'logo' } );
 			
 			return dataset;
 		}
