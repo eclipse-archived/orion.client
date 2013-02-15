@@ -6,12 +6,11 @@
  *
  *************************************************************************************************/
 .textview {
-	background-color: white;
 	padding: 1px 2px;
 }
 
 .textviewContainer {
-	background-color: #eaeaea;
+	background-color: white;
 	font-family: "Menlo", "Consolas", "Vera Mono", "monospace";
 	font-size: 10pt;
 	min-width: 50px;

@@ -1,7 +1,10 @@
 .tooltip .textview {
-	color: InfoText !important;
-	background-color: InfoBackground !important;
 	padding: 0px;
+}
+
+.tooltip.textviewContainer {
+	background-color: InfoBackground !important;
+	color: InfoText !important;
 }
 
 /* Styles for the view tooltips */
