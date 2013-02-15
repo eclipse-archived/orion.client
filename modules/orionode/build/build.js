@@ -176,19 +176,23 @@ function build(optimizeElements) {
 			 * will resolve in later optimization steps.
 			 */
 			return async.sequence(bundles.map(function(bundle) {
-				var bundleWebFolder = path.resolve(pathToOrionClientBundlesFolder, bundle, BUNDLE_WEB_FOLDER);
-				return dfs.exists(bundleWebFolder).then(function(exists) {
-					if (exists) {
-						return execCommand(getCopyDirCmd(bundleWebFolder, pathToTempDir));
-					} else {
-						console.log('Bundle has no web/ folder, skip: ' + bundle);
-						return;
+					return function() {
+						var bundleWebFolder = path.resolve(pathToOrionClientBundlesFolder, bundle, BUNDLE_WEB_FOLDER);
+						return dfs.exists(bundleWebFolder).then(function(exists) {
+							if (exists) {
+								return execCommand(getCopyDirCmd(bundleWebFolder, pathToTempDir));
+							} else {
+								console.log('Bundle has no web/ folder, skip: ' + bundle);
+								return;
+							}
+						});
+					};
+				}).concat([
+					function() {
+						console.log('Copying orionode.client');
+						return execCommand(getCopyDirCmd(pathToOrionodeClient, pathToTempDir));
 					}
-				});
-			}));
-		}).then(function() {
-			console.log('Copying orionode.client');
-			return execCommand(getCopyDirCmd(pathToOrionodeClient, pathToTempDir));
+				]));
 		});
 	}).then(function() {
 		if (steps.optimize === false) { return new Deferred().resolve(); }
