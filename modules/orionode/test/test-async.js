@@ -66,5 +66,26 @@ describe('async', function() {
 				}
 			]);
 		});
+		it('runs all chained promises before the 2nd function is invoked', function(done) {
+			var deepestRan = false;
+			async.sequence([
+				function() {
+					return new Deferred().resolve()
+						.then(function() {
+							var d = new Deferred();
+							setTimeout(function() {
+								deepestRan = true;
+								d.resolve('foo');
+							}, 60);
+							return d;
+						});
+				},
+				function(val) {
+					assert.equal(deepestRan, true);
+					assert.equal(val, 'foo');
+					done();
+				}
+			]);
+		});
 	});
 });
