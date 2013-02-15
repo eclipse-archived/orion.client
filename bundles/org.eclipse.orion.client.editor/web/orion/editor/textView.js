@@ -4365,7 +4365,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			viewDiv.style.background = "transparent"; //$NON-NLS-0$
 			if (util.isMac && util.isWebkit) {
 				viewDiv.style.pointerEvents = "none"; //$NON-NLS-0$
-				viewDiv.style.zIndex = "4"; //$NON-NLS-0$
+				viewDiv.style.zIndex = "2"; //$NON-NLS-0$
 			}
 			rootDiv.appendChild(viewDiv);
 			
