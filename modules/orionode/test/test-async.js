@@ -16,6 +16,11 @@ var Deferred = require('deferred-fs').Deferred;
 
 describe('async', function() {
 	describe('#sequence', function() {
+		it('works for the trivial case', function(done) {
+			async.sequence([]).then(function() {
+				done();
+			});
+		});
 		it('calls functions in the right order', function(done) {
 			var events = [0, 0, 0];
 			async.sequence([
