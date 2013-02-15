@@ -4374,7 +4374,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			rootDiv.appendChild(leftDiv);
 
 			var viewDiv = util.createElement(document, "div"); //$NON-NLS-0$
-			viewDiv.className = "textview"; //$NON-NLS-0$
+			viewDiv.className = "textviewScroll"; //$NON-NLS-0$
 			this._viewDiv = viewDiv;
 			viewDiv.tabIndex = -1;
 			viewDiv.style.overflow = "auto"; //$NON-NLS-0$
@@ -4529,10 +4529,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			if (!document.getElementById("_textviewStyle")) { //$NON-NLS-0$
 				var styleText = "";
 				if (util.isWebkit && this._metrics.scrollWidth > 0) {
-					styleText += "\n.textviewContainer ::-webkit-scrollbar-corner {background: #eeeeee;}"; //$NON-NLS-0$
+					styleText += "\n.textview ::-webkit-scrollbar-corner {background: #eeeeee;}"; //$NON-NLS-0$
 				}
 				if (util.isFirefox && util.isMac && this._highlightRGB && this._highlightRGB !== "Highlight") { //$NON-NLS-0$
-					styleText += "\n.textviewContainer ::-moz-selection {background: " + this._highlightRGB + ";}"; //$NON-NLS-1$ //$NON-NLS-0$
+					styleText += "\n.textview ::-moz-selection {background: " + this._highlightRGB + ";}"; //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				if (styleText) {
 					var stylesheet = util.createElement(document, "style"); //$NON-NLS-0$
@@ -5781,7 +5781,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 		},
 		_setThemeClass: function (themeClass, init) {
 			this._themeClass = themeClass;
-			var viewContainerClass = "textviewContainer"; //$NON-NLS-0$
+			var viewContainerClass = "textview"; //$NON-NLS-0$
 			if (this._themeClass) { viewContainerClass += " " + this._themeClass; } //$NON-NLS-0$
 			this._rootDiv.className = viewContainerClass;
 			this._updateStyle(init);

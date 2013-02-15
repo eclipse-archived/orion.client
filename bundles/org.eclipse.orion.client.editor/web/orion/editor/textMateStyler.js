@@ -76,7 +76,7 @@ function _styleSheet( settings, theme ){
 		family = 'monospace';
 	}	
 	
-	result.push( theme + " .textviewContainer {" );
+	result.push( theme + ".textview {" );
 	result.push( "\background-color:" + elements['background'] + ";" );
 	result.push( "\tfont-family: " + family + ";" );
 	result.push( "\tfont-size: " + elements['fontSize'] + ";" );
@@ -90,10 +90,6 @@ function _styleSheet( settings, theme ){
 	result.push("\tfont-size: " + elements['fontSize'] + ";");
 	
 	result.push("\tcolor: " + elements['text'] + ";");
-	result.push("}");
-	
-	result.push(  theme + " .textview {");
-	result.push("\tbackground-color: " + elements['background'] + ";");
 	result.push("}");
 	
 	result.push(  theme + ".ruler.annotations{");
