@@ -1,13 +1,13 @@
 .textview {
-	padding: 1px 2px;
-}
-
-.textviewContainer {
 	background-color: white;
 	font-family: 'Lucida Sans Unicode', 'Lucida Grande', Verdana, Arial, Helvetica, Myriad, Tahoma, clean, sans-serif;
 	font-size: 10pt;
 	min-width: 50px;
 	min-height: 50px;
+}
+
+.textviewScroll {
+	padding: 1px 2px;
 }
 
 .textviewContent {

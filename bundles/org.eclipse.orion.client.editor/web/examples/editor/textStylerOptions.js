@@ -91,12 +91,8 @@ define("examples/editor/textStylerOptions", ['orion/bootstrap', 'orion/editor/ut
 			result.push("\tcolor: " + elements['text'] + ";");
 			result.push("}");
 			
-			result.push("." + theme + " .textview {");
+			result.push("." + theme + ".textview {");
 			result.push("\tbackground-color: " + elements['background'] + ";");
-			result.push("}");
-			
-			result.push("." + theme + ".ruler.annotations{");
-			result.push("\tbackground-color: " + 'red' + ";");
 			result.push("}");
 			
 			result.push("." + theme + " .ruler {");

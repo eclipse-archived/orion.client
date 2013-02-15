@@ -1,10 +1,10 @@
-.tooltip .textview {
-	padding: 0px;
-}
-
-.tooltip.textviewContainer {
+.tooltip.textview {
 	background-color: InfoBackground !important;
 	color: InfoText !important;
+}
+
+.tooltip .textviewScroll {
+	padding: 0px;
 }
 
 /* Styles for the view tooltips */
