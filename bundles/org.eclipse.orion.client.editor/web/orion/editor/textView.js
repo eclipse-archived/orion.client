@@ -4350,6 +4350,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			leftDiv.style.MozUserSelect = "none"; //$NON-NLS-0$
 			leftDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
 			leftDiv.style.position = "absolute"; //$NON-NLS-0$
+			leftDiv.style.top = "0px"; //$NON-NLS-0$
+			leftDiv.style.bottom = "0px"; //$NON-NLS-0$
 			leftDiv.style.cursor = "default"; //$NON-NLS-0$
 			leftDiv.style.display = "none"; //$NON-NLS-0$
 			leftDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -4382,6 +4384,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			viewDiv.style.borderWidth = "0px"; //$NON-NLS-0$
 			viewDiv.style.margin = "0px"; //$NON-NLS-0$
 			viewDiv.style.outline = "none"; //$NON-NLS-0$
+			viewDiv.style.background = "transparent"; //$NON-NLS-0$
 			rootDiv.appendChild(viewDiv);
 			
 			var rightDiv = util.createElement(document, "div"); //$NON-NLS-0$
@@ -4393,6 +4396,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			rightDiv.style.MozUserSelect = "none"; //$NON-NLS-0$
 			rightDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
 			rightDiv.style.position = "absolute"; //$NON-NLS-0$
+			rightDiv.style.top = "0px"; //$NON-NLS-0$
+			rightDiv.style.bottom = "0px"; //$NON-NLS-0$
 			rightDiv.style.cursor = "default"; //$NON-NLS-0$
 			rightDiv.style.right = "0px"; //$NON-NLS-0$
 			rightDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -4438,6 +4443,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				clipDiv.style.margin = "0px"; //$NON-NLS-0$
 				clipDiv.style.borderWidth = "0px"; //$NON-NLS-0$
 				clipDiv.style.padding = "0px"; //$NON-NLS-0$
+				clipDiv.style.background = "transparent"; //$NON-NLS-0$
 				rootDiv.appendChild(clipDiv);
 				
 				var clipScrollDiv = util.createElement(document, "div"); //$NON-NLS-0$
@@ -4445,6 +4451,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				clipScrollDiv.style.position = "absolute"; //$NON-NLS-0$
 				clipScrollDiv.style.height = "1px"; //$NON-NLS-0$
 				clipScrollDiv.style.top = "-1000px"; //$NON-NLS-0$
+				clipScrollDiv.style.background = "transparent"; //$NON-NLS-0$
 				clipDiv.appendChild(clipScrollDiv);
 			}
 			
@@ -6123,8 +6130,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				scrollHeight = totalHeight;
 	
 				// Update rulers
-				this._updateRuler(this._leftDiv, topIndex, bottomIndex);
-				this._updateRuler(this._rightDiv, topIndex, bottomIndex);
+				this._updateRuler(this._leftDiv, topIndex, lineEnd, parentHeight);
+				this._updateRuler(this._rightDiv, topIndex, lineEnd, parentHeight);
 				
 				leftWidth = 0;
 				if (this._leftDiv) {
@@ -6164,9 +6171,6 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				}
 				/* Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset. */
 				scroll = this._getScroll();
-				var rulerHeight = clientHeight + viewPad.top + viewPad.bottom;
-				this._updateRulerSize(this._leftDiv, rulerHeight);
-				this._updateRulerSize(this._rightDiv, rulerHeight);
 			}
 			if (this._vScrollDiv) {
 				var trackHeight = clientHeight - 8;
@@ -6268,22 +6272,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				}
 			}
 		},
-		_updateRulerSize: function (divRuler, rulerHeight) {
-			if (!divRuler) { return; }
-			var topIndexY = this._topIndexY;
-			var lineHeight = this._getLineHeight();
-			var cells = divRuler.firstChild.rows[0].cells;
-			for (var i = 0; i < cells.length; i++) {
-				var div = cells[i].firstChild;
-				var offset = lineHeight;
-				if (div._ruler.getOverview() === "page") { offset += topIndexY; } //$NON-NLS-0$
-				div.style.top = -offset + "px"; //$NON-NLS-0$
-				div.style.height = (rulerHeight + offset) + "px"; //$NON-NLS-0$
-				div = div.nextSibling;
-			}
-			divRuler.style.height = rulerHeight + "px"; //$NON-NLS-0$
-		},
-		_updateRuler: function (divRuler, topIndex, bottomIndex) {
+		_updateRuler: function (divRuler, topIndex, bottomIndex, parentHeight) {
 			if (!divRuler) { return; }
 			var cells = divRuler.firstChild.rows[0].cells;
 			var document = this._parent.ownerDocument;
@@ -6292,6 +6281,12 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			for (var i = 0; i < cells.length; i++) {
 				var div = cells[i].firstChild;
 				var ruler = div._ruler;
+				var offset = lineHeight;
+				var overview = ruler.getOverview();
+				if (overview === "page") { offset += this._topIndexY; } //$NON-NLS-0$
+				div.style.top = -offset + "px"; //$NON-NLS-0$
+				div.style.height = (parentHeight + offset) + "px"; //$NON-NLS-0$
+				
 				if (div.rulerChanged) {
 					applyStyle(ruler.getRulerStyle(), div);
 				}
@@ -6322,7 +6317,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 					}
 				}
 
-				var overview = ruler.getOverview(), lineDiv, frag, annotations;
+				var lineDiv, frag, annotations;
 				if (overview === "page") { //$NON-NLS-0$
 					annotations = ruler.getAnnotations(topIndex, bottomIndex + 1);
 					while (child) {

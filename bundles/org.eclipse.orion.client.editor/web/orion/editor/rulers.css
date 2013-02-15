@@ -5,11 +5,9 @@
 	width: 16px;
 }
 .ruler.folding {
-	background-color: white;
 	width: 14px;
 }
 .ruler.lines {
-	background-color: white;
 	text-align: right;
 }
 .ruler.overview {

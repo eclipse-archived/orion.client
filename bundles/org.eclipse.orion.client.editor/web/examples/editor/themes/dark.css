@@ -3,7 +3,7 @@
 	font-size: 12pt;
 }
 
-.dark .textview {
+.dark.textviewContainer {
 	background-color: #202020;
 }
 
