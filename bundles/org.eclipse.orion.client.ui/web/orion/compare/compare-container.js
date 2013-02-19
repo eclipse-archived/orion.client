@@ -27,18 +27,27 @@ exports.DefaultDiffProvider = (function() {
 		_resolveTwoFiles: function(baseFileURL, newFileURL, errorCallback){
 			var that = this;
 			var compareTwo = function(results) {
-				if(results[0]._error && errorCallback){
-					errorCallback(results[0]._error);
+				if(Array.isArray(results) && results.length === 2 && results[0] && results[1]){
+					if(results[0]._error && errorCallback){
+						errorCallback(results[0]._error);
+					}
+					if(results[1]._error && errorCallback){
+						errorCallback(results[1]._error);
+					}
+					var baseFileContentType = results[0];
+					var newFileContentType = results[1];
+					that.callBack({ baseFile:{URL: baseFileURL, Name: that._resolveFileName(baseFileURL), Type: baseFileContentType},
+								newFile:{URL: newFileURL, Name: that._resolveFileName(newFileURL), Type: newFileContentType},
+								diff: that._diffContent
+							 });
+				} else {
+					var baseFileName = baseFileURL ? that._resolveFileName(baseFileURL) : ""; //$NON-NLS-0$
+					var newFileName = newFileURL ? that._resolveFileName(newFileURL) : ""; //$NON-NLS-0$
+					that.callBack({ baseFile:{URL: baseFileURL, Name: baseFileName, Type: null},
+								newFile:{URL: newFileURL, Name: newFileName, Type: null},
+								diff: that._diffContent
+							 });
 				}
-				if(results[1]._error && errorCallback){
-					errorCallback(results[1]._error);
-				}
-				var baseFileContentType = results[0];//.extension[0];
-				var newFileContentType = results[1];//.extension[0];
-				that.callBack({ baseFile:{URL: baseFileURL, Name: that._resolveFileName(baseFileURL), Type: baseFileContentType},
-							newFile:{URL: newFileURL, Name: that._resolveFileName(newFileURL), Type: newFileContentType},
-							diff: that._diffContent
-						 });
 			};
 			Deferred.all([ that._getContentType(baseFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
 		},
