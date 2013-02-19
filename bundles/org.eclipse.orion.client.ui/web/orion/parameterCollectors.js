@@ -195,8 +195,9 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 					}
 				};
 				commandInvocation.parameters.forEach(function(parm) {
+					var label = null;
 					if (parm.label) {
-						var label = document.createElement("label"); //$NON-NLS-0$
+						label = document.createElement("label"); //$NON-NLS-0$
 						label.classList.add("parameterInput"); //$NON-NLS-0$
 						label.setAttribute("for", parm.name + "parameterCollector"); //$NON-NLS-1$ //$NON-NLS-0$
 						label.textContent = parm.label;
@@ -205,12 +206,13 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 					var type = parm.type;
 					var id = parm.name + "parameterCollector"; //$NON-NLS-0$
 					var field;
+					var parent = label || parameterArea;
 					if (type === "text" && typeof(parm.lines) === "number" && parm.lines > 1) { //$NON-NLS-1$ //$NON-NLS-0$
 						field = document.createElement("textarea"); //$NON-NLS-0$
 						field.rows = parm.lines;
 						field.type = "textarea"; //$NON-NLS-0$
 						field.id = id;
-						parameterArea.appendChild(field);
+						parent.appendChild(field);
 						// esc only
 						keyHandler = function(event) {
 							if (event.keyCode === lib.KEY.ESCAPE) {
@@ -222,7 +224,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 						field = document.createElement("input"); //$NON-NLS-0$
 						field.type = "checkbox"; //$NON-NLS-0$
 						field.id = id;
-						parameterArea.appendChild(field);
+						parent.appendChild(field);
 						if (parm.value) {
 							field.checked = true;
 						}
@@ -230,7 +232,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 						field = document.createElement("input"); //$NON-NLS-0$
 						field.type = parm.type;
 						field.id = id;
-						parameterArea.appendChild(field);
+						parent.appendChild(field);
 						if (parm.value) {
 							field.value = parm.value;
 						}
@@ -247,7 +249,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 					}
 					field.addEventListener("keydown", keyHandler, false); //$NON-NLS-0$
 				});
-				var parentDismiss = dismissArea || parameterArea;
+				var parentDismiss = dismissArea;
+				if (!parentDismiss) {
+					parentDismiss = document.createElement("span"); //$NON-NLS-0$
+					parentDismiss.className = "layoutRight parametersDismiss"; //$NON-NLS-0$
+					parameterArea.appendChild(parentDismiss);
+				}
 				var finish = function (collector) {
 					collector._collectAndCall(commandInvocation, parameterArea);
 					localClose();

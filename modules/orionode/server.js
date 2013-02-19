@@ -17,16 +17,26 @@ var startServer = require('./index.js');
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
 var port = args.port || args.p || 8081;
-var workspaceArg = args.workspace || args.w;
-var workspaceDir = workspaceArg ? path.resolve(process.cwd(), workspaceArg) : path.join(__dirname, '.workspace');
-var config_params = {};
-argslib.createDirs([workspaceDir], function(dirs) {
-	var passwordFile = args.password || args.pwd;
-	argslib.readPasswordFile(passwordFile, function(password) {
-		argslib.readConfigFile(path.join(__dirname, 'orion.conf'), function(configParams) {
-			if(configParams){
-				config_params = configParams;
-			}
+
+argslib.readConfigFile(path.join(__dirname, 'orion.conf'), function(configParams) {
+	configParams = configParams || {};
+
+	var workspaceArg = args.workspace || args.w;
+	var workspaceConfigParam = configParams.workspace;
+	var workspaceDir;
+	if (workspaceArg) {
+		// -workspace passed in command line is relative to cwd
+		workspaceDir = path.resolve(process.cwd(), workspaceArg);
+	} else if (workspaceConfigParam) {
+		 // workspace param in orion.conf is relative to the server install dir.
+		workspaceDir = path.resolve(__dirname, workspaceConfigParam);
+	} else {
+		workspaceDir = path.join(__dirname, '.workspace');
+	}
+
+	argslib.createDirs([workspaceDir], function(dirs) {
+		var passwordFile = args.password || args.pwd;
+		argslib.readPasswordFile(passwordFile, function(password) {
 			var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
 			var log = Object.prototype.hasOwnProperty.call(args, 'log');
 			if (dev) {
@@ -42,7 +52,7 @@ argslib.createDirs([workspaceDir], function(dirs) {
 				workspaceDir: dirs[0],
 				passwordFile: passwordFile,
 				password: password,
-				configParams: config_params,
+				configParams: configParams,
 				dev: dev,
 				log: log
 			});
