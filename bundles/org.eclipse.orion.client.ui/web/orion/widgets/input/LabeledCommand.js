@@ -14,7 +14,7 @@
 define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 
 	function LabeledCommand(options, node) {
-		objects.mixin(options, this);
+		objects.mixin(this, options);
 		this.node = node || document.createElement('div'); //$NON-NLS-0$
 	}
 	objects.mixin(LabeledCommand.prototype, {
@@ -36,7 +36,6 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		},
                 
         postCreate: function(){
-            this.inherited( arguments );
             this.mylabel.textContent = this.fieldlabel;
             
             // add erase command
