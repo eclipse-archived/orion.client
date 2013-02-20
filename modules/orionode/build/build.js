@@ -212,7 +212,7 @@ function build(optimizeElements) {
 			};
 		}));
 	}).then(function() {
-		if (steps.css === false) { return new Deferred.resolve(); }
+		if (steps.css === false) { return new Deferred().resolve(); }
 		// Optimize each page's corresponding ${page}.css file.
 		// TODO This is probably a dumb way to do it, but i don't understand how CSS optimization works in the real Orion build.
 		section('Optimizing page CSS files');
