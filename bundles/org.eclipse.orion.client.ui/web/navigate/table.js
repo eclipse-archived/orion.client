@@ -164,9 +164,10 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion
 		commandService.registerCommandContribution("selectionTools", "orion.importSFTP", 4, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.exportSFTPCommand", 5, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
-		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		// Must happen after the above call, so that all the open with commands are registered when we create our navigation links.
-		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favorites", commandService: commandService, serviceRegistry: serviceRegistry}); //$NON-NLS-0$
+		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "orion.selectionGroup").then(function() {   //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			// Must happen after the above call, so that all the open with commands are registered when we create our navigation links.
+			new mNavOutliner.NavigationOutliner({parent: "favorites", commandService: commandService, serviceRegistry: serviceRegistry}); //$NON-NLS-0$
+		});
 
 		window.addEventListener("hashchange", function() {refresh();}, false); //$NON-NLS-0$
 	});
