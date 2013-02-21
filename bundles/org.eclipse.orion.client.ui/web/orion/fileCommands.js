@@ -977,6 +977,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	};
 
 	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, commandGroup) {
+	
+		var done = new Deferred();
 		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
 		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 		
@@ -1066,9 +1068,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			Deferred.all(commandDeferreds, function(error) {return {_error: error};}).then(function(errorOrResultArray){
 				fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
 				explorer.updateCommands();
+				done.resolve({});
 			});
 
 		});
+		return done;
 	};
 	
 	return fileCommandUtils;
