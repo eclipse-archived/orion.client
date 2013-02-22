@@ -240,13 +240,13 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 				if (selection.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
 					that.func(selection, selection.parent);
 				} else {
-					var id = selection.CloneLocation.split("/")[4]; //$NON-NLS-0$
+					var fileLocation = selection.CloneLocation.substring(selection.CloneLocation.indexOf(selection.CloneLocation.split("/")[3]));
 					var newBranchObject = { };
 					newBranchObject.parent = selection;
 					newBranchObject.FullName = "refs/remotes/" + selection.Name + "/" + that.$newBranch.value; //$NON-NLS-1$ //$NON-NLS-0$
 					newBranchObject.Name = selection.Name + "/" + that.$newBranch.value; //$NON-NLS-0$
 					newBranchObject.Type = "RemoteTrackingBranch"; //$NON-NLS-0$
-					newBranchObject.Location = "/gitapi/remote/" + selection.Name + "/" + encodeURIComponent(that.$newBranch.value) + "/file/" + id; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					newBranchObject.Location = "/gitapi/remote/" + selection.Name + "/" + encodeURIComponent(that.$newBranch.value) + "/" + fileLocation; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					that.func(null, selection, newBranchObject);
 				}
 			}		
