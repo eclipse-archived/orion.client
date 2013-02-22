@@ -40,8 +40,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		this.favorites = [];
 		var self = this;
 		var service = this.registry.getService("orion.core.favorite"); //$NON-NLS-0$
-		if(!progressService)
+		if(!progressService) {
 			progressService = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
+		}
 		progressService.progress(service.getFavorites(), "Getting favorites").then(function(favs) {
 			self.cacheFavorites(favs.navigator);
 		});
@@ -538,7 +539,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			callback: function(data) {
 				var items = Array.isArray(data.items) ? data.items : [data.items];
 				var confirmMessage = items.length === 1 ? i18nUtil.formatMessage(messages["Are you sure you want to delete '${0}'?"], items[0].Name) : i18nUtil.formatMessage(messages["Are you sure you want to delete these ${0} items?"], items.length);
-				var ex = explorer;
 				serviceRegistry.getService("orion.page.dialog").confirm(confirmMessage,  //$NON-NLS-0$
 					function(doit) {
 						if (!doit) {
@@ -742,9 +742,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					if (name && url) {
 						var deferred = fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, true);
 						var ex = explorer;
-						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Linking to ${0}"], url)).then(
-							function() {ex.loadResourceList.bind(ex)(this.treeRoot.Path, true); }, // refresh the root
-							errorHandler);
+						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Linking to ${0}"], url)).then(function() {
+						    ex.loadResourceList(ex.treeRoot.Path, true); // refresh the root
+						}, errorHandler);
 					}
 				};
 				if (data.parameters && data.parameters.valueFor('name') && data.parameters.valueFor('url')) { //$NON-NLS-1$ //$NON-NLS-0$
@@ -977,6 +977,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	};
 
 	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, commandGroup) {
+	
+		var done = new Deferred();
 		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
 		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 		
@@ -1066,9 +1068,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			Deferred.all(commandDeferreds, function(error) {return {_error: error};}).then(function(errorOrResultArray){
 				fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
 				explorer.updateCommands();
+				done.resolve({});
 			});
 
 		});
+		return done;
 	};
 	
 	return fileCommandUtils;

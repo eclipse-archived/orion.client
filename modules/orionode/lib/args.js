@@ -133,15 +133,19 @@ exports.readConfigFile = function(configFile, callback) {
 	if (configFile) {
 		fs.readFile(configFile, function(err, content) {
 			if (err) { throw err; }
-			var params = content.toString().split("\n");
+			var params = content.toString().split(/\r?\n/);
 			var result = {};
-			for (var i = 0; i < params.length; i++) {
-				var pair = params[i];
+			params.forEach(function(pair) {
+				if (pair.trim().charAt(0) === '#') {
+					return;
+				}
 				var parsed = /([^=]*)(=?)(.*)/.exec(pair);
-				var name = parsed[1] || ""; 
-				var value = parsed[3] || ""; 
-				result[name] = value;
-			}
+				var name = (parsed[1] || "").trim();
+				var value = (parsed[3] || "").trim();
+				if (name !== "") {
+					result[name] = value;
+				}
+			});
 			_checkNpmPath(result, callback);
 		});
 	} else {

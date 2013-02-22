@@ -136,7 +136,8 @@ h2 {
 }
 
 label.parameterInput{
-	color:silver;
+	color: silver;
+	white-space: nowrap;
 }
 
 .parameterInput {

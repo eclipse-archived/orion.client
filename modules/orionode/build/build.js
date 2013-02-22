@@ -176,19 +176,23 @@ function build(optimizeElements) {
 			 * will resolve in later optimization steps.
 			 */
 			return async.sequence(bundles.map(function(bundle) {
-				var bundleWebFolder = path.resolve(pathToOrionClientBundlesFolder, bundle, BUNDLE_WEB_FOLDER);
-				return dfs.exists(bundleWebFolder).then(function(exists) {
-					if (exists) {
-						return execCommand(getCopyDirCmd(bundleWebFolder, pathToTempDir));
-					} else {
-						console.log('Bundle has no web/ folder, skip: ' + bundle);
-						return;
+					return function() {
+						var bundleWebFolder = path.resolve(pathToOrionClientBundlesFolder, bundle, BUNDLE_WEB_FOLDER);
+						return dfs.exists(bundleWebFolder).then(function(exists) {
+							if (exists) {
+								return execCommand(getCopyDirCmd(bundleWebFolder, pathToTempDir));
+							} else {
+								console.log('Bundle has no web/ folder, skip: ' + bundle);
+								return;
+							}
+						});
+					};
+				}).concat([
+					function() {
+						console.log('Copying orionode.client');
+						return execCommand(getCopyDirCmd(pathToOrionodeClient, pathToTempDir));
 					}
-				});
-			}));
-		}).then(function() {
-			console.log('Copying orionode.client');
-			return execCommand(getCopyDirCmd(pathToOrionodeClient, pathToTempDir));
+				]));
 		});
 	}).then(function() {
 		if (steps.optimize === false) { return new Deferred().resolve(); }
@@ -208,7 +212,7 @@ function build(optimizeElements) {
 			};
 		}));
 	}).then(function() {
-		if (steps.css === false) { return new Deferred.resolve(); }
+		if (steps.css === false) { return new Deferred().resolve(); }
 		// Optimize each page's corresponding ${page}.css file.
 		// TODO This is probably a dumb way to do it, but i don't understand how CSS optimization works in the real Orion build.
 		section('Optimizing page CSS files');
