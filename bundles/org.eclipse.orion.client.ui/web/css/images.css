@@ -35,7 +35,7 @@
 /* Individual sprites */
 .core-sprite-check{ background-position: 0 0; width: 16px; height: 16px; } 
 .core-sprite-check_on{ background-position: 0 -18px; width: 16px; height: 16px; } 
-.core-sprite-close{ background-position: 0 -36px; width: 16px; height: 16px; } 
+.core-sprite-close{ background-position: 0 -36px; width: 12px; height: 12px; } 
 .core-sprite-closedarrow{ background-position: 0 -54px; width: 16px; height: 16px; } 
 /* .core-sprite-collapseAll{ background-position: 0 -72px; width: 16px; height: 16px; } */
 .core-sprite-collapseAll{ background: url(../images/collapse.png) no-repeat top left; width: 16px; height: 16px; } 

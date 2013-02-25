@@ -17,9 +17,19 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 	 * have the same parent.  Trigger should have "dropdownTrigger" class, and the dropdown node should 
 	 * have "dropdownMenu" class.  Dropdown items should be <li> elements, so typically the dropdown node
 	 * supplied is a <ul>.
+	 *
+	 * "dropdowntriggerbutton.html" contains an appropriate HTML fragment for a triggering button and associated
+	 * dropdown.  Clients can add this fragment to the DOM and then attach Dropdown behavior to it.
 	 * 
 	 * Nested ("sub") menu behavior is accomplished by adding the class "dropdownSubMenu" to one of the <li> items.
 	 * This item can then parent another trigger and <ul>.
+	 *
+	 * "submenutriggerbutton.html" contains an appropriate HTML fragment for a menu item that triggers a sub menu.
+	 * Clients can add this fragment to a dropdown menu and then attach Dropdown behavior to the sub menu item.
+	 *
+	 * The items inside each <li> item in a dropdown can be almost any type of node.  The class "dropdownMenuItem" is
+	 * used on the node inside the li to find items and style them appropriately.  There are HTML fragments for some
+	 * common menu types.  For example, "checkedmenuitem.html" is a fragment appropriate for checked menu items.
 	 *
 	 * @param {Object} options The options object, which must minimally specify the dropdown dom node
 	 * @param options.dropdown The node for the dropdown presentation.  Required.

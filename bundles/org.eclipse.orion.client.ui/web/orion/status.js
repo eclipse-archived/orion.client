@@ -40,12 +40,6 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 			if (closeButton && !this._hookedClose) {
 				closeButton.addEventListener("click", function() { //$NON-NLS-0$
 					self.setProgressMessage("");
-				}, false);	
-				// onClick events do not register for spans when using the keyboard
-				closeButton.addEventListener("keydown", function(e) { //$NON-NLS-0$
-					if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
-						self.setProgressMessage("");
-					}				
 				}, false);
 			}
 		},

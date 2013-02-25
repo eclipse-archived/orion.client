@@ -11,9 +11,53 @@
 /*jslint sub:true*/
  /*global define document window Image */
  
-define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/explorers/navigationUtils'], function(messages, require, UIUtil, PageUtil, lib, mDropdown, mTooltip, mNavUtils) {
+define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/webui/dropdown', 
+	'text!orion/webui/dropdowntriggerbutton.html', 'text!orion/webui/submenutriggerbutton.html', 'text!orion/webui/checkedmenuitem.html', 'orion/webui/tooltip', 'orion/explorers/navigationUtils'], 
+	function(messages, require, UIUtil, PageUtil, lib, mDropdown, DropdownButtonFragment, SubMenuButtonFragment, CheckedMenuItemFragment, mTooltip, mNavUtils) {
 
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
+	
+		
+	function createDropdownMenu(parent, name, populateFunction, buttonCss) {
+		parent = lib.node(parent);
+		if (!parent) {
+			throw "no parent node was specified"; //$NON-NLS-0$
+		}
+		var range = document.createRange();
+		range.selectNode(parent);
+		var buttonFragment = range.createContextualFragment(DropdownButtonFragment);
+		// bind name to fragment variable
+		lib.processTextNodes(buttonFragment, {ButtonText: name});
+		parent.appendChild(buttonFragment);
+		var newMenu = parent.lastChild;
+		var menuButton = newMenu.previousSibling;
+		if (buttonCss) {
+			menuButton.classList.add(buttonCss);
+		} else {
+			menuButton.classList.add("orionButton"); //$NON-NLS-0$
+			menuButton.classList.add("commandButton"); //$NON-NLS-0$
+		}
+		menuButton.dropdown = new mDropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
+		newMenu.dropdown = menuButton.dropdown;
+		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown};
+	}
+	
+	function createCheckedMenuItem(parent, name, checked, onChange) {
+		parent = lib.node(parent);
+		if (!parent) {
+			throw "no parent node was specified"; //$NON-NLS-0$
+		}
+		var range = document.createRange();
+		range.selectNode(parent);
+		var buttonFragment = range.createContextualFragment(CheckedMenuItemFragment);
+		// bind name to fragment variable
+		lib.processTextNodes(buttonFragment, {ItemText: name});
+		parent.appendChild(buttonFragment);
+		var itemParent = parent.lastChild;
+		var checkbox = lib.$(".checkedMenuItem", itemParent); //$NON-NLS-0$
+		checkbox.checked = checked;
+		checkbox.addEventListener("change", onChange, false); //$NON-NLS-0$
+	}
 
 	/**
 	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
@@ -452,15 +496,14 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 					var heading = document.createElement("h2"); //$NON-NLS-0$
 					targetNode.appendChild(heading);
 					heading.appendChild(document.createTextNode(scopedBinding));
-					for (var i=0; i<scopes[scopedBinding].length; i++) {
-						binding = scopes[scopedBinding][i];
+					scopes[scopedBinding].forEach(function(binding) {
 						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
 						span = document.createElement("span"); //$NON-NLS-0$
 						span.role = "listitem"; //$NON-NLS-0$
 						span.appendChild(document.createTextNode(bindingString+ " = " + binding.command.name)); //$NON-NLS-0$
 						span.appendChild(document.createElement("br")); //$NON-NLS-0$
 						targetNode.appendChild(span);
-					}
+					});
 				}	
 			}
 		},
@@ -517,15 +560,15 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		_createEntryForPath: function(parentTable, parentPath) {
 			if (parentPath) {
 				var segments = parentPath.split("/"); //$NON-NLS-0$
-				for (var i = 0; i < segments.length; i++) {
-					if (segments[i].length > 1) {
-						if (!parentTable[segments[i]]) {
+				segments.forEach(function(segment) {
+					if (segment.length > 1) {
+						if (!parentTable[segment]) {
 							// empty slot with children
-							parentTable[segments[i]] = {position: 0, children: {}};
+							parentTable[segment] = {position: 0, children: {}};
 						} 
-						parentTable = parentTable[segments[i]].children;
+						parentTable = parentTable[segment].children;
 					}
-				}
+				});
 			}
 			return parentTable;	
 		},
@@ -713,15 +756,15 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 				}
 			}
 			// now traverse the sorted contributions and render as we go
-			for (var i = 0; i < sortedByPosition.length; i++) {
+			var index = 0;
+			var commandService = this;
+			sortedByPosition.forEach(function(contribution) {
 				var id, invocation;
-				if (sortedByPosition[i].children && Object.getOwnPropertyNames(sortedByPosition[i].children).length > 0) {
-					var group = sortedByPosition[i];
-					var childContributions = sortedByPosition[i].children;
-					var commandService = this;
+				if (contribution.children && Object.getOwnPropertyNames(contribution.children).length > 0) {
+					var childContributions = contribution.children;
 					var created;
 					if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
-						if (group.title) {
+						if (contribution.title) {
 							// We need a named menu button.  We used to first render into the menu and only 
 							// add a menu button in the dom when we knew items were actually rendered.
 							// For performance, though, we need to be asynchronous in traversing children, so we will 
@@ -729,25 +772,24 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 							// If we wait until the end of asynch processing to add the menu button, the layout will have 
 							// to be redone. The down side to always adding the menu button is that we may find out we didn't
 							// need it after all, which could cause layout to change.
-							created = this._createDropdownMenu(parent, group.title); 
+							created = commandService._createDropdownMenu(parent, contribution.title); 
 							if(domNodeWrapperList){
 								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
 
 							// render the children asynchronously
-							var context = {contributions: childContributions, group: group, parent: parent};
 							window.setTimeout(function() {
-								commandService._render(context.contributions, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
+								commandService._render(contribution.children, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
 								// of a trailing separator in the menu first, and then decide if our menu is necessary
 								commandService._checkForTrailingSeparator(created.menu, "menu", true);  //$NON-NLS-0$
 								// now determine if we actually needed the menu or not
 								if (created.menu.childNodes.length === 0) {
-									if (context.group.emptyGroupMessage) {
+									if (contribution.emptyGroupMessage) {
 										if (!created.menuButton.emptyGroupTooltip) {
 											created.menuButton.emptyGroupTooltip = new mTooltip.Tooltip({
 												node: created.menuButton,
-												text: context.group.emptyGroupMessage,
+												text: contribution.emptyGroupMessage,
 												trigger: "click", //$NON-NLS-0$
 												position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 											});
@@ -772,8 +814,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 							// non grouped items.
 							var sep;
 							// Only draw a separator if there is a non-separator preceding it.
-							if (parent.childNodes.length > 0 && !this._checkForTrailingSeparator(parent, renderType)) {
-								sep = this.generateSeparatorImage(parent);
+							if (parent.childNodes.length > 0 && !commandService._checkForTrailingSeparator(parent, renderType)) {
+								sep = commandService.generateSeparatorImage(parent);
 							}
 							commandService._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
 	
@@ -781,45 +823,48 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 							if (parent.childNodes.length > 0) {
 								var lastRendered = parent.childNodes[parent.childNodes.length - 1];
 								if (lastRendered !== sep) {
-									sep = this.generateSeparatorImage(parent);
+									sep = commandService.generateSeparatorImage(parent);
 								}
 							}
 						}
 					} else {
 						// group within a menu
-						if (group.title) {
+						if (contribution.title) {
 							var trigger = document.createElement("li"); //$NON-NLS-0$
 							parent.appendChild(trigger);
-							var subMenu = this._createDropdownMenu(trigger, group.title, true);
-							commandService._render(childContributions, subMenu.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
-							if (subMenu.menu.childNodes.length === 0) {
-								parent.removeChild(trigger);
+							var subMenu = commandService._createDropdownMenu(trigger, contribution.title, true);
+							// Check for a submenu for a menu that has already been removed from the dom.
+							if (subMenu) {
+								commandService._render(childContributions, subMenu.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
+								if (subMenu.menu.childNodes.length === 0) {
+									parent.removeChild(trigger);
+								}
 							}
 						} else {  
 							// menu items with leading and trailing separators
 							// don't render a separator if there is nothing preceding
 							if (parent.childNodes.length > 0) {
-								this._generateMenuSeparator(parent);
+								commandService._generateMenuSeparator(parent);
 							}
 							// synchronously render the children since order matters
 							commandService._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
 							// Add a trailing separator if children rendered.
-							this._generateMenuSeparator(parent);
+							commandService._generateMenuSeparator(parent);
 						}
 					}
 				} else {
 					// processing atomic commands
-					var command = this._commandList[sortedByPosition[i].id];
+					var command = commandService._commandList[contribution.id];
 					var render = command ? true : false;
 					var keyBinding = null;
 					var urlBinding = null;
 					if (command) {
-						invocation = new CommandInvocation(this, handler, items, userData, command);
+						invocation = new CommandInvocation(commandService, handler, items, userData, command);
 						invocation.domParent = parent;
 						var enabled = render && (command.visibleWhen ? command.visibleWhen(items) : true);
 						// ensure that keybindings are bound to the current handler, items, and user data
-						if (this._activeBindings[command.id] && this._activeBindings[command.id].keyBinding) {
-							keyBinding = this._activeBindings[command.id];
+						if (commandService._activeBindings[command.id] && commandService._activeBindings[command.id].keyBinding) {
+							keyBinding = commandService._activeBindings[command.id];
 							if (enabled) {
 								keyBinding.invocation = invocation;
 							} else {
@@ -832,8 +877,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 						}
 						
 						// same for url bindings
-						if (this._urlBindings[command.id] && this._urlBindings[command.id].urlBinding) {
-							urlBinding = this._urlBindings[command.id];
+						if (commandService._urlBindings[command.id] && commandService._urlBindings[command.id].urlBinding) {
+							urlBinding = commandService._urlBindings[command.id];
 							if (enabled) {
 								urlBinding.invocation = invocation;
 							} else {
@@ -865,85 +910,63 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 								nested = true;
 							}
 							// dropdown button
-							var self = this;
 							var populateFunction = function(menu) {
-								this.populateChoicesMenu(menu, items, handler, userData, self);
+								command.populateChoicesMenu(menu, items, handler, userData, commandService);
 							};
-							this._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command));
+							commandService._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command));
 						} else {
 							if (renderType === "tool") { //$NON-NLS-0$
-								id = "tool" + command.id + i;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
+								id = "tool" + command.id + index;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
 								command._addTool(parent, id, invocation, domNodeWrapperList);	
 							} else if (renderType === "button") { //$NON-NLS-0$
-								id = "button" + command.id + i;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item 
+								id = "button" + command.id + index;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item 
 								command._addButton(parent, id, invocation, domNodeWrapperList);	
 							} else if (renderType === "menu") { //$NON-NLS-0$
 								command._addMenuItem(parent, invocation, domNodeWrapperList);
 							}
+							index++;
 						}
 					} 
 				}
-			}
+			});
 		},
 		
+		/*
+		 * private.  Parent must exist in the DOM.
+		 */
 		_createDropdownMenu: function(parent, name, nested, populateFunction) {
 			parent = lib.node(parent);
-			var destroyButton, arrowClass, extraClass;
-			var menuButton = document.createElement("span"); //$NON-NLS-0$
-			menuButton.classList.add("dropdownTrigger"); //$NON-NLS-0$
+			// We create dropdowns asynchronously so it's possible that the parent has been removed from the document 
+			// by the time we are called.  If so, don't bother building a submenu for an orphaned menu.
+			if (!parent || !lib.contains(document.body, parent)) {
+				return null;
+			}
+			var menuButton, newMenu;
+			var destroyButton, menuParent = parent;
 			if (nested) {
-				menuButton.classList.add("dropdownMenuItem"); //$NON-NLS-0$
-				extraClass = "dropdownSubMenu"; //$NON-NLS-0$
-				arrowClass = "dropdownArrowRight"; //$NON-NLS-0$
-				menuButton.tabIndex = 0;
-				menuButton.role = "menuitem"; //$NON-NLS-0$
-			} else {
-				menuButton.classList.add("commandButton"); //$NON-NLS-0$
-				arrowClass = "dropdownArrowDown"; //$NON-NLS-0$
-				menuButton.tabIndex = 0; 
-				menuButton.role = "button"; //$NON-NLS-0$
-			}
-			var title = document.createTextNode(name);
-			menuButton.appendChild(title);
-			var arrow = document.createElement("span"); //$NON-NLS-0$
-			arrow.classList.add(arrowClass); //$NON-NLS-0$
-			menuButton.appendChild(arrow);
-			var menuParent = parent;
-			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
-				menuParent = document.createElement("li"); //$NON-NLS-0$
-				parent.appendChild(menuParent);
-				destroyButton = menuParent;
-			} else {
-				menuButton.classList.add("commandMargins"); //$NON-NLS-0$
+				var range = document.createRange();
+				range.selectNode(parent);
+				var buttonFragment = range.createContextualFragment(SubMenuButtonFragment);
+				// bind name to fragment variable
+				lib.processTextNodes(buttonFragment, {ButtonText: name});
+				parent.appendChild(buttonFragment);
+				newMenu = parent.lastChild.lastChild;
+				menuButton = newMenu.previousSibling;
 				destroyButton = menuButton;
+				menuButton.dropdown = new mDropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
+				newMenu.dropdown = menuButton.dropdown;
+			} else {
+				if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
+					menuParent = document.createElement("li"); //$NON-NLS-0$
+					parent.appendChild(menuParent);
+					destroyButton = menuParent;
+				}
+				var created = createDropdownMenu(menuParent, name, populateFunction);
+				menuButton = created.menuButton;
+				newMenu = created.menu;
 			}
-			menuParent.appendChild(menuButton);
-			if (extraClass) {
-				menuParent.classList.add(extraClass);
-			}
-			var newMenu = document.createElement("ul"); //$NON-NLS-0$
-			menuParent.appendChild(newMenu);
-			newMenu.classList.add("dropdownMenu"); //$NON-NLS-0$
-			menuButton.dropdown = new mDropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
-			newMenu.dropdown = menuButton.dropdown;
+			
 			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton};
-		},
-		
-		_generateCheckedMenuItem: function(dropdown, name, checked, onChange) {
-			var itemNode = document.createElement("li"); //$NON-NLS-0$
-			dropdown.appendChild(itemNode);
-			var label = document.createElement("label"); //$NON-NLS-0$
-			label.classList.add("dropdownMenuItem"); //$NON-NLS-0$
-			var node = document.createElement("input"); //$NON-NLS-0$
-			node.type = "checkbox";//$NON-NLS-0$
-			node.role = "menuitem"; //$NON-NLS-0$
-			node.checked = checked;
-			node.classList.add("checkedMenuItem"); //$NON-NLS-0$
-			label.appendChild(node);
-			var text = document.createTextNode(name); //$NON-NLS-0$
-			label.appendChild(text);
-			itemNode.appendChild(label);
-			node.addEventListener("change", onChange, false); //$NON-NLS-0$
 		},
 		
 		_generateMenuSeparator: function(dropdown) {
@@ -1060,13 +1083,9 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 			var element, image;
 			if (this.hrefCallback) {
 				element = this._makeLink(parent, context, "commandLink"); //$NON-NLS-0$
-				if (!element) {
-					return;
-				}
+				this._adornElement(element, context, ["above", "below", "right", "left"]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
-				element = document.createElement("span"); //$NON-NLS-0$
-				element.tabIndex = domNodeWrapperList ? -1 : 0;
-				element.role = "button";  //$NON-NLS-0$ 
+				element = document.createElement("button"); //$NON-NLS-0$
 				if (!this.hasImage()) {
 					var text = window.document.createTextNode(this.name);
 					element.appendChild(text);
@@ -1079,17 +1098,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 						element.setAttribute("aria-label", this.name); //$NON-NLS-0$
 					}
 				}
-				this._hookCallback(element, context);
+				this._adornElement(element, context, ["above", "below", "right", "left"], this.callback); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			context.domNode = element;
 			context.domParent = parent;
-			if (this.tooltip) {
-				element.commandTooltip = new mTooltip.Tooltip({
-					node: element,
-					text: this.tooltip,
-					position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				});
-			}
+			
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 				var li = document.createElement("li"); //$NON-NLS-0$
 				parent.appendChild(li);
@@ -1111,27 +1124,21 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 			var element;
 			if (this.hrefCallback) {
 				element = this._makeLink(parent, context, "commandLink"); //$NON-NLS-0$
+				this._adornElement(element, context, ["above", "below", "right", "left"]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			} else if (!this.name && this.hasImage()) {
 				// rare case but can happen for some icons we force with text
-				element = document.createElement("span"); //$NON-NLS-0$
-				element.tabIndex = 0;
-				element.role = "button"; //$NON-NLS-0$ 
+				element = document.createElement("button"); //$NON-NLS-0$
+				element.className = "orionButton commandButton"; //$NON-NLS-0$
 				addImageToElement(this, element, name);
 				// ensure there is accessible text describing this image if we have any
 				if (this.tooltip) {
 					element.setAttribute("aria-label", this.tooltip); //$NON-NLS-0$
 				}
-				this._hookCallback(element, context);
-				if (this.tooltip) {
-					element.commandTooltip = new mTooltip.Tooltip({
-						node: element,
-						text: this.tooltip,
-						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-				}
+				this._adornElement(element, context, ["above", "below", "right", "left"], this.callback); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
 			} else {
-				element = this._makeButton(parent, context, "commandButton"); //$NON-NLS-0$
-				this._hookCallback(element, context);
+				element = this._makeButton(parent, "commandButton"); //$NON-NLS-0$
+				this._adornElement(element, context, ["above", "below", "right", "left"], this.callback); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			context.domParent = parent;
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
@@ -1150,12 +1157,14 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 			var element;
 			var dropdown = parent.dropdown;
 			if (this.hrefCallback) {
-				element = this._makeLink(parent, context, "dropdownMenuItem", ["right", "left", "above", "below"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				element = this._makeLink(parent, context, "dropdownMenuItem"); //$NON-NLS-0$
+				element.role = "menuitem"; //$NON-NLS-0$
+				this._adornElement(element, context, ["right", "left", "above", "below"]);  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
-				element = this._makeButton(parent, context, "dropdownMenuItem", ["right", "left", "above", "below"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				if (this.callback) {
-					this._hookCallback(element, context, function() {dropdown.close(true);});
-				}
+				element = this._makeMenuItem(parent, "dropdownMenuItem"); //$NON-NLS-0$
+				this._adornElement(element, context, ["right", "left", "above", "below"], this.callback, function() {  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					dropdown.close(true);
+				}); 
 			}
 			element.role = "menuitem";  //$NON-NLS-0$
 			
@@ -1174,31 +1183,21 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		/*
 		 * stateless helper
 		 */
-		_makeButton: function(parent, context, aClass, position) {
-			var element = document.createElement("span"); //$NON-NLS-0$
-			element.role = "button"; //$NON-NLS-0$
-			element.tabIndex = 0; 
-			element.id = this.name;
+		_makeButton: function(parent, extraClass) {
+			var element = document.createElement("button"); //$NON-NLS-0$
+			element.className = "orionButton"; //$NON-NLS-0$
 			var text = document.createTextNode(this.name);
 			element.appendChild(text);
-			if (aClass) {
-				element.classList.add(aClass); //$NON-NLS-0$
+			if (extraClass) {
+				element.classList.add(extraClass); //$NON-NLS-0$
 			}
-			if (this.tooltip) {
-				element.commandTooltip = new mTooltip.Tooltip({
-					node: element,
-					text: this.tooltip,
-					position: position || ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				});
-			}
-			context.domNode = element;
 			return element;
 		 },
 		
 		/*
 		 * stateless helper
 		 */
-		 _makeLink: function(parent, context, aClass, position) {
+		 _makeLink: function(parent, context, aClass) {
 			var element = document.createElement("a"); //$NON-NLS-0$
 			element.id = this.name;
 			if (aClass) {
@@ -1217,6 +1216,28 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 					element.href = "#"; //$NON-NLS-0$
 				}
 			}
+			return element;
+		},
+		
+				/*
+		 * stateless helper
+		 */
+		 _makeMenuItem: function(parent, aClass) {
+			var element = document.createElement("span"); //$NON-NLS-0$
+			element.role = "menuitem"; //$NON-NLS-0$
+			element.tabIndex = 0;
+			element.id = this.name;
+			if (aClass) {
+				element.classList.add(aClass); //$NON-NLS-0$
+			}
+			element.appendChild(document.createTextNode(this.name));
+			return element;
+		},
+		
+		/*
+		 * stateless helper
+		 */
+		 _adornElement: function(element, context, position, callback, before, after ) {
 			if (this.tooltip) {
 				element.commandTooltip = new mTooltip.Tooltip({
 					node: element,
@@ -1225,6 +1246,23 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 				});
 			}
 			context.domNode = element;
+			if (callback) {
+				element.addEventListener("click", function(e) { //$NON-NLS-0$
+					if (before) { before(); }
+					context.commandService._invoke(context);
+					if (after) { after(); }
+					lib.stop(e);
+				}, false);
+				if (element.nodeName !== "BUTTON" && element.nodeName !== "A") {
+					element.addEventListener("keydown", function(e) { //$NON-NLS-0$
+						if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
+							if (before) { before(); }
+							context.commandService._invoke(context);					
+							if (after) { after(); }
+							lib.stop(e);
+						}				
+					}, false);				}
+			}
 			return element;
 		 },
 		
@@ -1232,20 +1270,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		 * stateless helper
 		 */
 		_hookCallback: function(domNode, context, before, after) {
-			domNode.addEventListener("click", function(e) { //$NON-NLS-0$
-				if (before) { before(); }
-				context.commandService._invoke(context);
-				if (after) { after(); }
-				lib.stop(e);
-			}, false);
-			domNode.addEventListener("keydown", function(e) { //$NON-NLS-0$
-				if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
-					if (before) { before(); }
-					context.commandService._invoke(context);					
-					if (after) { after(); }
-					lib.stop(e);
-				}				
-			}, false);
+			
 		},
 		
 		/**
@@ -1255,8 +1280,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		 */
 		 populateChoicesMenu: function(parent, items, handler, userData, commandService) {
 			var choices = this.getChoices(items, handler, userData);
-			for (var j=0; j<choices.length; j++) {
-				var choice = choices[j];
+			choices.forEach(function(choice) {
 				if (choice.name) {
 					var itemNode = document.createElement("li"); //$NON-NLS-0$
 					parent.appendChild(itemNode);
@@ -1283,7 +1307,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 				} else {  // anything not named is a separator
 					commandService._generateMenuSeparator(parent);
 				}
-			}
+			});
 		},
 		
 		/**
@@ -1501,10 +1525,10 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		_storeParameters: function(parameterArray) {
 			this.parameterTable = null;
 			if (parameterArray) {
-				this.parameterTable = {};
-				for (var i=0; i<parameterArray.length; i++) {
-					this.parameterTable[parameterArray[i].name] = parameterArray[i];
-				}
+				var table = this.parameterTable = {};
+				parameterArray.forEach(function(parameter) {
+					table[parameter.name] = parameter;
+				});
 			}
 		},
 		
@@ -1624,6 +1648,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		CommandInvocation: CommandInvocation,
 		URLBinding: URLBinding,
 		ParametersDescription: ParametersDescription,
-		CommandParameter: CommandParameter
+		CommandParameter: CommandParameter,
+		createDropdownMenu: createDropdownMenu,
+		createCheckedMenuItem: createCheckedMenuItem
 	};
 });
