@@ -96,24 +96,14 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 				if (close.length === 0) {
 					// add the close button if the fill function did not.
 					var dismiss = this._activeElements.dismissArea || this._activeElements.parameterArea;
-					close = document.createElement("span"); //$NON-NLS-0$
+					close = document.createElement("button"); //$NON-NLS-0$
 					close.id = "closebox"; //$NON-NLS-0$
-					close.role = "button"; //$NON-NLS-0$
-					close.tabIndex = 0; //$NON-NLS-0$
-					close.classList.add("imageSprite"); //$NON-NLS-0$
-					close.classList.add("core-sprite-close"); //$NON-NLS-0$
-					close.classList.add("dismiss"); //$NON-NLS-0$
+					close.className ="imageSprite core-sprite-close dismissButton"; //$NON-NLS-0$
 					close.title = messages['Close'];
 					dismiss.appendChild(close);
 					var self = this;
 					close.addEventListener("click", function(event) { //$NON-NLS-0$
 						self.close();
-					}, false);
-					// onClick events do not register for spans when using the keyboard without a screen reader
-					close.addEventListener("keydown", function (e) { //$NON-NLS-0$
-						if(e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
-							self.close();
-						}
 					}, false);
 				}
 				// all parameters have been generated.  Activate the area.
@@ -238,8 +228,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 						}
 					}
 					field.classList.add("parameterInput"); //$NON-NLS-0$
-					// we define special classes for some parameter types
-					field.classList.add("parameterInput"+field.type); //$NON-NLS-0$
 					// for fun
 					field.setAttribute("speech", "speech"); //$NON-NLS-1$ //$NON-NLS-0$
 					field.setAttribute("x-webkit-speech", "x-webkit-speech"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -261,14 +249,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 				};
 
 				var makeButton = function(text, parent) {
-					var button = document.createElement("span"); //$NON-NLS-0$
-					button.role = "button"; //$NON-NLS-0$
-					button.tabIndex = 0;
+					var button = document.createElement("button"); //$NON-NLS-0$
 					parent.appendChild(button);
 					if (text) {
 						button.appendChild(document.createTextNode(text)); //$NON-NLS-0$
 					}
-					button.classList.add("dismiss"); //$NON-NLS-0$
+					button.classList.add("dismissButton"); //$NON-NLS-0$
 					return button;
 				};
 				
@@ -280,24 +266,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 						commandInvocation.parameters.optionsRequested = true;
 						finish(self);
 					}, false);
-					// onClick events do not register for spans when using the keyboard without a screen reader
-					options.addEventListener("keydown", function (e) { //$NON-NLS-0$
-						if(e.keyCode === lib.KEY.ENTER  || e.keyCode === lib.KEY.SPACE) {			
-							commandInvocation.parameters.optionsRequested = true;
-							finish(self);
-						}
-					}, false);
 				}
 				// OK and cancel buttons
 				var ok = makeButton(messages["Submit"], parentDismiss);
 					ok.addEventListener("click", function() { //$NON-NLS-0$
 					finish(self);
-				}, false);
-				// onClick events do not register for spans when using the keyboard without a screen reader
-					ok.addEventListener("keydown", function (e) { //$NON-NLS-0$
-					if(e.keyCode === lib.KEY.ENTER  || e.keyCode === lib.KEY.SPACE) {
-						finish(self);
-					}
 				}, false);
 				
 				var close = makeButton(null, parentDismiss);
@@ -307,12 +280,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 				close.title = messages['Close'];
 				close.addEventListener("click", function(event) { //$NON-NLS-0$
 					localClose();
-				}, false);
-				// onClick events do not register for spans when using the keyboard without a screen reader
-				close.addEventListener("keydown", function (e) { //$NON-NLS-0$
-					if(e.keyCode === lib.KEY.ENTER  || e.keyCode === lib.KEY.SPACE) {
-						localClose();
-					}
 				}, false);
 				return first;
 			};

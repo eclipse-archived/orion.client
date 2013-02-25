@@ -170,25 +170,25 @@ a.currentLocation:hover {
 	outline:none;
 }
 
+/* Orion button provides standard padding, margin, alignment for any button, regardless of whether it is a command or not.  Using
+   this helps non-gray buttons remain uniform looking with respect to size. */
+   
+.orionButton {
+	border: 1px solid transparent;
+	text-align: center;
+	vertical-align: baseline;
+    display: inline-block;
+    padding: 2px 6px 3px;
+    border-radius:1px;
+    line-height: 12px;
+	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
+	margin: 0;  /* to override user agent stylesheet */
+}
+
 .commandButton {
 	color: #222;
 	border: 1px solid #dedede;
 	background-color: #efefef;
-	text-align: center;
-	vertical-align: baseline;
-    cursor: pointer;
-    display: inline-block;
-    padding:6px;
-    padding-top: 4px; /* To align with Command Menu */
-    border-radius:1px;
-    line-height: 12px;
-    font-size:8pt;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
 }
 
 .commandButton:hover, .commandButton:focus {
