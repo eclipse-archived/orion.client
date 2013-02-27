@@ -106,77 +106,36 @@ define("orion/editor/textTheme", ['orion/editor/eventTarget', 'orion/editor/util
 			result.push("\tbackground-color: " + settings.background + ";");
 			result.push("}");
 			
+			function defineRule(className, value, isBackground) {
+				result.push("." + theme + " ." + className + " {");
+				result.push("\t" + (isBackground ? "background-color" : "color") + ": " + value + ";");
+				result.push("}");
+			}
+			
 			//From rulers.css
-			result.push("." + theme + " .ruler.annotations {");
-			result.push("\tbackground-color: " + settings.annotationRuler + ";");
-			result.push("}");
-			
-			result.push("." + theme + " .ruler.lines {");
-			result.push("\tbackground-color: " + settings.annotationRuler + ";");
-			result.push("}");
-			
-			result.push("." + theme + " .ruler.folding {");
-			result.push("\tbackground-color: " + settings.annotationRuler + ";");
-			result.push("}");
-			
-			result.push("." + theme + " .ruler.overview {");
-			result.push("\tbackground-color: " + settings.overviewRuler + ";");
-			result.push("}");
-			
-			result.push("." + theme + " .rulerLines {");
-			result.push("\tcolor: " + settings.lineNumber  + ";");
-			result.push("}");
-			
-			result.push("." + theme + " .rulerLines.even {");
-			result.push("\tcolor: " + settings.lineNumberEven + ";");
-			result.push("}");
-
-			result.push("." + theme + " .rulerLines.odd {");
-			result.push("\tcolor: " + settings.lineNumberOdd + ";");
-			result.push("}");
+			defineRule("ruler.annotations", settings.annotationRuler, true);
+			defineRule("ruler.lines", settings.annotationRuler, true);
+			defineRule("ruler.folding", settings.annotationRuler, true);
+			defineRule("ruler.overview", settings.overviewRuler, true);
+			defineRule("rulerLines", settings.lineNumber, false);
+			defineRule("rulerLines.even", settings.lineNumberEven, false);
+			defineRule("rulerLines.odd", settings.lineNumberOdd, false);
 			
 			//From annotations.css
-			result.push("." + theme + " .annotationLine.currentLine {");
-			result.push("\tbackground-color: " + settings.currentLine  + ";");
-			result.push("}");
+			defineRule("annotationLine.currentLine", settings.currentLine, true);
 			
 			//From default-theme.css
-			result.push("." + theme + " .entity-name-tag {");
-			result.push("\tcolor: " + settings.keyword + ";");
-			result.push("}");	
-			
-			result.push("." + theme + " .entity-other-attribute-name {");
-			result.push("\tcolor: " + settings.attribute + ";");
-			result.push("}");	
-			
-			result.push("." + theme + " .string-quoted {");
-			result.push("\tcolor: " + settings.string + ";");
-			result.push("}");
+			defineRule("entity-name-tag", settings.keyword, false);
+			defineRule("entity-other-attribute-name", settings.attribute, false);
+			defineRule("string-quoted", settings.string, false);
 			
 			//From textstyler.css
-			result.push("." + theme + " .token_keyword {");
-			result.push("\tcolor: " + settings.keyword + ";");
-			result.push("}");	
-			
-			result.push("." + theme + " .token_string {");
-			result.push("\tcolor: " + settings.string + ";");
-			result.push("}");
-			
-			result.push("." + theme + " .token_singleline_comment {");
-			result.push("\tcolor: " + settings.comment + ";");
-			result.push("}");
-						
-			result.push("." + theme + " .token_multiline_comment {");
-			result.push("\tcolor: " + settings.comment + ";");
-			result.push("}");
-			
-			result.push("." + theme + " .token_doc_comment {");
-			result.push("\tcolor: " + settings.comment + ";");
-			result.push("}");
-			
-			result.push("." + theme + " .token_doc_html_markup {");
-			result.push("\tcolor: " + settings.comment + ";");
-			result.push("}");
+			defineRule("token_keyword", settings.keyword, false);
+			defineRule("token_string", settings.string, false);
+			defineRule("token_singleline_comment", settings.comment, false);
+			defineRule("token_multiline_comment", settings.comment, false);
+			defineRule("token_doc_comment", settings.comment, false);
+			defineRule("token_doc_html_markup", settings.comment, false);
 			
 			return result.join("\n");
 		}
