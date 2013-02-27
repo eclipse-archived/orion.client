@@ -10,9 +10,8 @@
  ******************************************************************************/
 
 /*global define*/
-define(['examples/editor/textStyler', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler',
-			'examples/editor/textStylerOptions', 'orion/bootstrap', 'orion/editor/util', 'orion/Deferred'], 
-		function(mTextStyler, mTextMateStyler, AsyncStyler, mTextStylerOptions, mBootstrap, util, Deferred) {
+define(['examples/editor/textStyler', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler', 'orion/Deferred'], 
+		function(mTextStyler, mTextMateStyler, AsyncStyler, Deferred) {
 	/**
 	 * Returns a promise that will provide a styler for the given content type.
 	 * @static
@@ -59,10 +58,6 @@ define(['examples/editor/textStyler', 'orion/editor/textMateStyler', 'orion/edit
 					styler = new mTextStyler.TextStyler(textView, "css", annotationModel); //$NON-NLS-0$
 					break;
 			}
-			if (styler) {
-				// Temporary. Add support for the preference page.
-				new mTextStylerOptions.TextStylerOptions(styler);
-			}
 			return styler;
 		}
 		// Check default styler
@@ -105,7 +100,7 @@ define(['examples/editor/textStyler', 'orion/editor/textMateStyler', 'orion/edit
 					styler.setContentType(contentType);
 				} else if (type === "grammar" || typeof type === "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
 					var grammar = provider.getProperty("grammar"); //$NON-NLS-0$
-					styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars, mBootstrap, util);
+					styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
 				}
 			}
 			return styler;

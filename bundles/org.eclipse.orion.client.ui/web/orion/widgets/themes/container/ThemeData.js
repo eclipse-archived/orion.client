@@ -177,8 +177,8 @@ define(['orion/widgets/themes/container/ThemeSheetWriter'],
 		ThemeData.prototype.getStyles = getStyles;
 		
 		
-				function getThemeStorageInfo(){
-			var themeInfo = { storage:'/themes', styleset:'styles', defaultTheme:'orion' }; 
+		function getThemeStorageInfo(){
+			var themeInfo = { storage:'/themes', styleset:'styles', defaultTheme:'orion', selectedKey: 'selected'  }; 
 			return themeInfo;
 		}
 

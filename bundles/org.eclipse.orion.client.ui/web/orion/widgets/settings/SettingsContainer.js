@@ -22,10 +22,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		'orion/widgets/themes/container/ThemeData', 
 		'orion/widgets/settings/SplitSelectionLayout',
 		'orion/widgets/plugin/PluginList',
-		'orion/widgets/settings/UserSettings',
-		'orion/widgets/settings/InputBuilder'
+		'orion/widgets/settings/UserSettings'
 		], function(messages, require, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
-			ThemeBuilder, SettingsList, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings, InputBuilder) {
+			ThemeBuilder, SettingsList, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings) {
 
 	/**
 	 * @param {Object} options
@@ -81,7 +80,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			// to build the UI until there are settings to be found there.
 			window.setTimeout(function() {
 				this.drawUserInterface();
-				this.inputBuilder = new InputBuilder( this.preferences );
 			}.bind(this), 100);
 			window.addEventListener("hashchange", this.processHash.bind(this)); //$NON-NLS-0$
 			
@@ -163,10 +161,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		
 		showUserSettings: function(id){
 		
-//			var td = this.preferences.getPreferences('/settings', 2).then( function(prefs){		 //$NON-NLS-0$
-//				var navigate = prefs.get(messages["JavaScript Editor"]);
-//			} );
-
 			this.selectCategory(id);
 
 			lib.empty(this.table);

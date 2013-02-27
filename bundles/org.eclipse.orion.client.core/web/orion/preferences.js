@@ -390,7 +390,7 @@ define(['require', 'orion/Deferred', 'orion/xhr'], function(require, Deferred, x
 	
 		listenForChangedSettings: function( callback ){
 			window.addEventListener("storage", callback, false); //$NON-NLS-0$
-			return "/orion/preferences/local/settings"; //$NON-NLS-0$
+			return "/orion/preferences/local/themes"; //$NON-NLS-0$
 		},
 		
 		/**

@@ -11,14 +11,20 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/editor/ThemeData','orion/widgets/input/Select'], 
-	function(messages, require, ThemeData, Select ) {
+define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/editor/ThemeData', 'orion/editor/textTheme', 'orion/widgets/input/Select'], 
+	function(messages, require, ThemeData, mTextTheme, Select ) {
 
-		function MiniThemeChooser(preferences, textview){			
+		function MiniThemeChooser(preferences){			
 			this.preferences = preferences;
-			this.textview = textview;
 			this.themeData = new ThemeData.ThemeData();
 			this.initializeStorage();
+			var miniChooser = this;
+			//TODO: Need an abstract class that both setup.js and MiniThemeChooser.js can use to change the settings
+			var storageKey = preferences.listenForChangedSettings(function(e) {
+				if (e.key === storageKey) {
+					miniChooser.selectTheme();
+				}
+			});
 		}
 		
 		MiniThemeChooser.prototype.template =	'<div id="themeContainer">' +
@@ -82,13 +88,11 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 			
 			var themeInfo = this.themeData.getThemeStorageInfo();
 			var themeData = this.themeData;
-			var selectedTheme;
 			var settings;
 			
 			var miniChooser = this;
 		
 			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){ //$NON-NLS-0$
-			
 				var currentTheme = prefs.get( 'selected' );
 				
 				if( !currentTheme && !name ){	
@@ -97,11 +101,22 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 					prefs.put( themeInfo.styleset, JSON.stringify(styleset) );
 				}
 				
+				if( currentTheme ){
+					currentTheme = JSON.parse ( currentTheme );
+				} else {
+					currentTheme = {};
+					currentTheme[themeInfo.selectedKey] = name;
+				}
+				
+				if( currentTheme && !name ) {
+					name = currentTheme[themeInfo.selectedKey];
+				}
+				
 				if( name ){
 				
-					selectedTheme = { 'selected': name };
+					currentTheme[themeInfo.selectedKey] = name;
 				
-					var styles = prefs.get( 'editorstyles' );
+					var styles = prefs.get(	themeInfo.styleset );
 					
 					if( styles ){	
 						styles = JSON.parse( styles ); 
@@ -115,8 +130,7 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 							}			
 						}
 					}
-		
-					prefs.put( 'selected', JSON.stringify(selectedTheme) );
+					prefs.put( 'selected', JSON.stringify(currentTheme) );
 					
 					miniChooser.setThemeData( settings );
 				}		
@@ -126,51 +140,13 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 		MiniThemeChooser.prototype.selectTheme = selectTheme;
 		
 		function setThemeData( settings ){
-		
-			var subcategories;			
-			var tv = this.textview;
-
-			this.preferences.getPreferences('/settings', 2).then(function(prefs){
-			
-				if( settings ){	
-					var font = {};		
-					font.label = 'Font';
-					font.data = [	{ label:'Family', value: 'Sans Serif', ui:'Font' }, 
-									{ label:'Size', value: settings.fontSize.value, ui:'Font' }, 
-									{ label:'Color', value: settings.text.value }, 
-									{ label:'Background', value: settings.background.value } ];
-						
-					subcategories = [ { element: 'fontFamily', value: 'sans serif' },
-									  { element: 'fontSize', value:  settings.fontSize },
-							          { element: 'fontWeight', value: 'normal' },
-									  { element: 'text', value: settings.text }, 
-									  { element: 'background', value: settings.background },
-									  { element: 'string', value: settings.string },
-									  { element: 'annotationRuler', value: settings.annotationRuler },
-									  { element: 'comment', value: settings.comment },
-									  { element: 'keyword', value: settings.keyword },
-									  { element: 'overviewRuler', value: settings.overviewRuler },
-									  { element: 'annotationRuler', value: settings.annotationRuler },
-									  { element: 'lineNumber', value: settings.lineNumber },
-									  { element: 'currentLine', value: settings.currentLine },
-									  { element: 'attribute', value: settings.attribute }
-									];
-	
-					prefs.put( 'JavaScript Editor', JSON.stringify(subcategories) );
-					
-					if( tv.stylerOptions ){
-						tv.stylerOptions._update( subcategories, tv.stylerOptions );
-					}	
-				}
-			} );
+			var theme = mTextTheme.TextTheme.getTheme();
+			theme.setThemeClass("userTheme", theme.buildStyleSheet(settings, "userTheme"));
 		}
 		
 		MiniThemeChooser.prototype.setThemeData = setThemeData;
 		
 		function initializeStorage(){
-			var builder = this;
-			var themeInfo = this.themeData.getThemeStorageInfo();
-			var themeData = this.themeData; 
 			this.selectTheme();
 		}
 		
@@ -180,41 +156,31 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 		
 			var themeInfo = this.themeData.getThemeStorageInfo();
 			
-			var tv = this.textview;
+			var miniChooser = this;
 		
-			this.preferences.getPreferences('/settings', 2).then(function(prefs){
+			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){
+				var styles = prefs.get( themeInfo.styleset );
+				var selection = prefs.get( 'selected' );
+				if(selection){ selection = JSON.parse( selection ); }
+				var settings;
 				
-				var styles = prefs.get( 'JavaScript Editor' );
-				
-				if(styles){ 
-					styles = JSON.parse( styles ); 
+				if( styles ){	
+					styles = JSON.parse( styles );
 					
-					for( var s in styles ){
-						if( styles[s].element === 'fontSize' ){
-							styles[s].value = size;
-							break;
+					for( var s = 0; s < styles.length; s++ ){
+						styles[s].fontSize = size;
+						if( styles[s].name ===  selection[themeInfo.selectedKey] ){
+							settings = styles[s];
 						}
+						
 					}
 				}
-			
-				prefs.put( 'JavaScript Editor', JSON.stringify(styles) );
+
+				prefs.put( themeInfo.styleset , JSON.stringify(styles) );
 				
-				var nodes = document.querySelectorAll( '.userTheme' ); 
-				for( var item in nodes ){
-					if( nodes[item].style ){
-						nodes[item].style.fontSize = size;
-					}
+				if( settings ){ 
+					miniChooser.setThemeData( settings );
 				}
-				
-				nodes = document.querySelectorAll( '.textview' ); 
-				
-				for( var item in nodes ){
-					if( nodes[item].style ){
-						nodes[item].style.fontSize = size;
-					}
-				}
-				
-				tv.update( true );
 			});
 		}
 		
@@ -222,22 +188,21 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 		
 		function addFontSizePicker(){
 		
-			var chooser = this;
+			var miniChooser = this;
 			
 			var currentSize = '10pt';
 			
 			var themeInfo = this.themeData.getThemeStorageInfo();
 			
-			this.preferences.getPreferences('/settings', 2).then(function(prefs){
-			
-				var styles = prefs.get( 'JavaScript Editor' );
-				
-				if(styles){ 
-					styles = JSON.parse( styles ); 
-					
-					for( var s in styles ){
-						if( styles[s].element === 'fontSize' ){
-							currentSize = styles[s].value;
+			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){
+				var styles = prefs.get( themeInfo.styleset );
+				var selection = prefs.get( 'selected' );
+				if(selection){ selection = JSON.parse( selection ); }
+				if( styles ){	
+					styles = JSON.parse( styles );
+					for( var s = 0; s < styles.length; s++ ){
+						if( styles[s].name ===  selection[themeInfo.selectedKey] ){
+							currentSize = styles[s].fontSize;
 							break;
 						}
 					}
@@ -262,7 +227,7 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 				}	
 				
 				this.sizeSelect = new Select( { options: options }, picker );
-				this.sizeSelect.setStorageItem = chooser.selectFontSize.bind(chooser);
+				this.sizeSelect.setStorageItem = miniChooser.selectFontSize.bind(miniChooser);
 				this.sizeSelect.show();
 			});
 		}
@@ -277,7 +242,7 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 			var options = [];
 			
 			var chooser = this;
-   		   
+
 				var selection = prefs.get( 'selected' );
 				
 				if(selection){ selection = JSON.parse( selection ); }
@@ -295,12 +260,13 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 				}
 				
 				if(!selection) {
-					selection = { 'selected':'Prospecto' };	
+					selection = {};	
+					selection[themeInfo.selectedKey] = themeInfo.defaultTheme;
 				}
 			
 				if( styles ){
 				
-					for( var theme in styles ){
+					for( var theme= 0; theme < styles.length; theme++ ){
 					
 						var set = {
 							value: styles[theme].name,
@@ -308,7 +274,7 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 						};	
 						
 						if( selection ){	
-							if( styles[theme].name === selection.selected ){
+							if( styles[theme].name === selection[themeInfo.selectedKey] ){
 								set.selected = true;
 							}
 						}
