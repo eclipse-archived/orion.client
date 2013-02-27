@@ -233,7 +233,7 @@ define([],
 		ThemeData.prototype.fontSettable = fontSettable;
 		
 		function getThemeStorageInfo(){
-			var themeInfo = { storage:'/themes', styleset:'editorstyles', defaultTheme:'Prospecto' }; 
+			var themeInfo = { storage:'/themes', styleset:'editorstyles', defaultTheme:'Prospecto', selectedKey: 'editorSelected' }; 
 			return themeInfo;
 		}
 
@@ -682,7 +682,7 @@ define([],
 			
 			var newStyle = new StyleSet();
 			
-			newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;;
+			newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;
 			newStyle.annotationRuler = xml.getElementsByTagName("background")[0].attributes[0].value; 
 			newStyle.background = xml.getElementsByTagName("background")[0].attributes[0].value;
 			newStyle.comment = xml.getElementsByTagName("singleLineComment")[0].attributes[0].value;
@@ -703,39 +703,7 @@ define([],
 		ThemeData.prototype.importTheme = importTheme;
 		
 		function processSettings( settings, preferences ){
-			
-			if( !settings['fontSize'] ){
-				settings['fontSize'] = { value:'10pt' };
-			}
-		
-			preferences.getPreferences('/settings', 2).then(function(prefs){ //$NON-NLS-0$
-				
-				var font = {};		
-				font.label = 'Font';
-				font.data = [ 	{ label:'Family', value: 'Sans Serif', ui:'Font' }, 
-								{ label:'Size', value: settings['fontSize'].value, ui:'Font' }, 
-								{ label:'Color', value: settings['text'].value }, 
-								{ label:'Background', value: settings['background'].value } ];
-					
-				var subcategories = [ { element: 'fontFamily', value: 'sans serif' },
-							          { element: 'fontSize', value:  settings['fontSize'].value },
-							          { element: 'fontWeight', value: 'normal' },
-									  { element: 'text', value: settings['text'].value }, 
-									  { element: 'background', value: settings['background'].value },
-									  { element: 'string', value: settings['string'].value },
-									  { element: 'annotationRuler', value: settings['annotationRuler'].value },
-									  { element: 'comment', value: settings['comment'].value },
-									  { element: 'keyword', value: settings['keyword'].value },
-									  { element: 'overviewRuler', value: settings['overviewRuler'].value },
-									  { element: 'annotationRuler', value: settings['annotationRuler'].value },
-									  { element: 'lineNumber', value: settings['lineNumber'].value },
-									  { element: 'currentLine', value: settings['currentLine'].value },
-									  { element: 'attribute', value: settings['attribute'].value }
-									  ];
 
-				prefs.put( 'JavaScript Editor', JSON.stringify(subcategories) );
-				
-			});
 		}
 
 		ThemeData.prototype.processSettings = processSettings;

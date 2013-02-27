@@ -52,10 +52,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 					prefs.put("selected", null); //$NON-NLS-0$
 					preferencesStatusService.setMessage("Theme settings have been cleared.");
 				});
-				preferences.getPreferences('/settings', 2).then(function(prefs) { //$NON-NLS-0$
-					prefs.put("JavaScript Editor", null); //$NON-NLS-0$ // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386765
-					preferencesStatusService.setMessage("Theme settings have been cleared.");
-				});
 			}});
 		commandService.addCommand(clearPrefsCommand);
 		// add as a binding only command

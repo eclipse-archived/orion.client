@@ -14,7 +14,7 @@
 
 /*global define*/
 
-define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBinding', 'orion/editor/eventTarget', 'orion/editor/util'], function(mTextModel, mKeyBinding, mEventTarget, util) { //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBinding', 'orion/editor/eventTarget', 'orion/editor/textTheme', 'orion/editor/util'], function(mTextModel, mKeyBinding, mEventTarget, mTextTheme, util) { //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	/** @private */
 	function getWindow(document) {
@@ -4949,6 +4949,14 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			};
 			this._model.addEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
 			this._model.addEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
+			
+			var theme = mTextTheme.TextTheme.getTheme();
+			this._themeListener = {
+				onChanged: function(themeChangedEvent) {
+					self._setThemeClass(theme.getThemeClass());
+				}
+			};
+			theme.addEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-0$
 			
 			var handlers = this._handlers = [];
 			var clientDiv = this._clientDiv, viewDiv = this._viewDiv, rootDiv = this._rootDiv;

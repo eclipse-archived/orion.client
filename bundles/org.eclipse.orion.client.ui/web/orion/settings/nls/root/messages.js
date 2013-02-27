@@ -18,7 +18,6 @@ define({
 	"Title": "Title",
 	"Plugins": "Plugins",
 	"User Profile": "User Profile",
-	"JavaScript Editor": "JavaScript Editor",
 	"General": "General",
 	"Navigation": "Navigation",
 	"Open in same tab": "Open in same tab",
