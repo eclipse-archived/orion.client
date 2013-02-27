@@ -117,8 +117,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 			return ret;
 		},
 		createUser : function(userName, password, email, onLoad, onError) {
-			var ret = new Deferred();
-			xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Content-Type": "application/x-www-form-urlencoded", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
@@ -128,15 +127,16 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 					login : userName,
 					password : password,
 					email: email
-				}),
-				load : function(jsonData, xhrArgs) {
-					ret.resolve(jsonData);
-				},
-				error : function(error, ioArgs) {
-					ret.reject(error.response || error);
-				}
+				})
+			}).then(function(result) {
+				return getJSON(result.response);
+			}, function(result) {
+				var error = result;
+				try {
+					error = getJSON(result.response || result.error);
+				} catch (e) {}
+				return error;
 			});
-			return ret;
 		},
 		getUserInfo: function(userURI, onLoad){
 			var ret = new Deferred();
