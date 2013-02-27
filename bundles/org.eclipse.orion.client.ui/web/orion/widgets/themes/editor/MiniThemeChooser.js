@@ -206,7 +206,7 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 					}
 				}
 				
-				nodes = document.querySelectorAll( '.textviewContainer' ); 
+				nodes = document.querySelectorAll( '.textview' ); 
 				
 				for( var item in nodes ){
 					if( nodes[item].style ){

@@ -1013,9 +1013,6 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 		}
 	};
 	
-	/* There is no way of getting the overlay scroll bar width */
-	var overlayScrollWidth = 15;
-
 	/**
 	 * @class This object describes the options for the text view.
 	 * <p>
@@ -3226,7 +3223,6 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			var oldX = this._hScroll;
 			var oldY = this._vScroll;
 			if (oldX !== scroll.x || oldY !== scroll.y) {
-				this._checkOverlayScroll();
 				this._hScroll = scroll.x;
 				this._vScroll = scroll.y;
 				this._commitIME();
@@ -4052,24 +4048,6 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			};
 			return {lineHeight: lineHeight, largestFontStyle: style, lineTrim: trim, viewPadding: pad, scrollWidth: scrollWidth, invalid: invalid};
 		},
-		_checkOverlayScroll: function() {
-			if (!util.isMac) { return; }
-			var that = this;
-			var window = this._getWindow();
-			if (this._overlayScrollTimer) {
-				window.clearTimeout(this._overlayScrollTimer);
-			}
-			var check = function() {
-				var over = that._isOverOverlayScroll();
-				if (over.vertical || over.horizontal) {
-					that._overlayScrollTimer = window.setTimeout(check, 200);
-				} else {
-					that._overlayScrollTimer = undefined;
-					that._update();
-				}
-			};
-			this._overlayScrollTimer = window.setTimeout(check, 200);
-		},
 		_clearSelection: function (direction) {
 			var selection = this._getSelection();
 			if (selection.isEmpty()) { return false; }
@@ -4350,6 +4328,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			leftDiv.style.MozUserSelect = "none"; //$NON-NLS-0$
 			leftDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
 			leftDiv.style.position = "absolute"; //$NON-NLS-0$
+			leftDiv.style.top = "0px"; //$NON-NLS-0$
+			leftDiv.style.bottom = "0px"; //$NON-NLS-0$
 			leftDiv.style.cursor = "default"; //$NON-NLS-0$
 			leftDiv.style.display = "none"; //$NON-NLS-0$
 			leftDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -4372,7 +4352,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			rootDiv.appendChild(leftDiv);
 
 			var viewDiv = util.createElement(document, "div"); //$NON-NLS-0$
-			viewDiv.className = "textview"; //$NON-NLS-0$
+			viewDiv.className = "textviewScroll"; //$NON-NLS-0$
 			this._viewDiv = viewDiv;
 			viewDiv.tabIndex = -1;
 			viewDiv.style.overflow = "auto"; //$NON-NLS-0$
@@ -4382,6 +4362,11 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			viewDiv.style.borderWidth = "0px"; //$NON-NLS-0$
 			viewDiv.style.margin = "0px"; //$NON-NLS-0$
 			viewDiv.style.outline = "none"; //$NON-NLS-0$
+			viewDiv.style.background = "transparent"; //$NON-NLS-0$
+			if (util.isMac && util.isWebkit) {
+				viewDiv.style.pointerEvents = "none"; //$NON-NLS-0$
+				viewDiv.style.zIndex = "2"; //$NON-NLS-0$
+			}
 			rootDiv.appendChild(viewDiv);
 			
 			var rightDiv = util.createElement(document, "div"); //$NON-NLS-0$
@@ -4393,6 +4378,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			rightDiv.style.MozUserSelect = "none"; //$NON-NLS-0$
 			rightDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
 			rightDiv.style.position = "absolute"; //$NON-NLS-0$
+			rightDiv.style.top = "0px"; //$NON-NLS-0$
+			rightDiv.style.bottom = "0px"; //$NON-NLS-0$
 			rightDiv.style.cursor = "default"; //$NON-NLS-0$
 			rightDiv.style.right = "0px"; //$NON-NLS-0$
 			rightDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -4438,6 +4425,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				clipDiv.style.margin = "0px"; //$NON-NLS-0$
 				clipDiv.style.borderWidth = "0px"; //$NON-NLS-0$
 				clipDiv.style.padding = "0px"; //$NON-NLS-0$
+				clipDiv.style.background = "transparent"; //$NON-NLS-0$
 				rootDiv.appendChild(clipDiv);
 				
 				var clipScrollDiv = util.createElement(document, "div"); //$NON-NLS-0$
@@ -4445,6 +4433,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				clipScrollDiv.style.position = "absolute"; //$NON-NLS-0$
 				clipScrollDiv.style.height = "1px"; //$NON-NLS-0$
 				clipScrollDiv.style.top = "-1000px"; //$NON-NLS-0$
+				clipScrollDiv.style.background = "transparent"; //$NON-NLS-0$
 				clipDiv.appendChild(clipScrollDiv);
 			}
 			
@@ -4522,10 +4511,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			if (!document.getElementById("_textviewStyle")) { //$NON-NLS-0$
 				var styleText = "";
 				if (util.isWebkit && this._metrics.scrollWidth > 0) {
-					styleText += "\n.textviewContainer ::-webkit-scrollbar-corner {background: #eeeeee;}"; //$NON-NLS-0$
+					styleText += "\n.textview ::-webkit-scrollbar-corner {background: #eeeeee;}"; //$NON-NLS-0$
 				}
 				if (util.isFirefox && util.isMac && this._highlightRGB && this._highlightRGB !== "Highlight") { //$NON-NLS-0$
-					styleText += "\n.textviewContainer ::-moz-selection {background: " + this._highlightRGB + ";}"; //$NON-NLS-1$ //$NON-NLS-0$
+					styleText += "\n.textview ::-moz-selection {background: " + this._highlightRGB + ";}"; //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				if (styleText) {
 					var stylesheet = util.createElement(document, "style"); //$NON-NLS-0$
@@ -5113,18 +5102,6 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			/* Create elements */
 			this._createActions();
 			this._createView();
-		},
-		_isOverOverlayScroll: function() {
-			if (!util.isMac) {
-				return {};
-			}
-			var rect = this._viewDiv.getBoundingClientRect();
-			var x = this._lastMouseMoveX;
-			var y = this._lastMouseMoveY;
-			return {
-				vertical: rect.top <= y && y < rect.bottom && rect.right - overlayScrollWidth <= x && x < rect.right,
-				horizontal: rect.bottom - overlayScrollWidth <= y && y < rect.bottom && rect.left <= x && x < rect.right
-			};
 		},
 		_modifyContent: function(e, updateCaret) {
 			if (this._readonly && !e._code) {
@@ -5774,7 +5751,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 		},
 		_setThemeClass: function (themeClass, init) {
 			this._themeClass = themeClass;
-			var viewContainerClass = "textviewContainer"; //$NON-NLS-0$
+			var viewContainerClass = "textview"; //$NON-NLS-0$
 			if (this._themeClass) { viewContainerClass += " " + this._themeClass; } //$NON-NLS-0$
 			this._rootDiv.className = viewContainerClass;
 			this._updateStyle(init);
@@ -6123,8 +6100,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				scrollHeight = totalHeight;
 	
 				// Update rulers
-				this._updateRuler(this._leftDiv, topIndex, bottomIndex);
-				this._updateRuler(this._rightDiv, topIndex, bottomIndex);
+				this._updateRuler(this._leftDiv, topIndex, lineEnd, parentHeight);
+				this._updateRuler(this._rightDiv, topIndex, lineEnd, parentHeight);
 				
 				leftWidth = 0;
 				if (this._leftDiv) {
@@ -6164,9 +6141,6 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				}
 				/* Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset. */
 				scroll = this._getScroll();
-				var rulerHeight = clientHeight + viewPad.top + viewPad.bottom;
-				this._updateRulerSize(this._leftDiv, rulerHeight);
-				this._updateRulerSize(this._rightDiv, rulerHeight);
 			}
 			if (this._vScrollDiv) {
 				var trackHeight = clientHeight - 8;
@@ -6211,9 +6185,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				}
 				clipDiv.style.left = clipLeft + "px"; //$NON-NLS-0$
 				clipDiv.style.top = clipTop + "px"; //$NON-NLS-0$
-				var over = this._isOverOverlayScroll();
-				clipDiv.style.right = (parentWidth - clipWidth - clipLeft + (this._overlayScrollTimer && over.vertical ? overlayScrollWidth : 0)) + "px"; //$NON-NLS-0$
-				clipDiv.style.bottom = (parentHeight - clipHeight - clipTop + (this._overlayScrollTimer && over.horizontal ? overlayScrollWidth : 0)) + "px"; //$NON-NLS-0$
+				clipDiv.style.right = (parentWidth - clipWidth - clipLeft) + "px"; //$NON-NLS-0$
+				clipDiv.style.bottom = (parentHeight - clipHeight - clipTop) + "px"; //$NON-NLS-0$
 				clientDiv.style.left = clientLeft + "px"; //$NON-NLS-0$
 				clientDiv.style.top = clientTop + "px"; //$NON-NLS-0$
 				clientDiv.style.width = scrollWidth + "px"; //$NON-NLS-0$
@@ -6268,22 +6241,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 				}
 			}
 		},
-		_updateRulerSize: function (divRuler, rulerHeight) {
-			if (!divRuler) { return; }
-			var topIndexY = this._topIndexY;
-			var lineHeight = this._getLineHeight();
-			var cells = divRuler.firstChild.rows[0].cells;
-			for (var i = 0; i < cells.length; i++) {
-				var div = cells[i].firstChild;
-				var offset = lineHeight;
-				if (div._ruler.getOverview() === "page") { offset += topIndexY; } //$NON-NLS-0$
-				div.style.top = -offset + "px"; //$NON-NLS-0$
-				div.style.height = (rulerHeight + offset) + "px"; //$NON-NLS-0$
-				div = div.nextSibling;
-			}
-			divRuler.style.height = rulerHeight + "px"; //$NON-NLS-0$
-		},
-		_updateRuler: function (divRuler, topIndex, bottomIndex) {
+		_updateRuler: function (divRuler, topIndex, bottomIndex, parentHeight) {
 			if (!divRuler) { return; }
 			var cells = divRuler.firstChild.rows[0].cells;
 			var document = this._parent.ownerDocument;
@@ -6292,6 +6250,12 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			for (var i = 0; i < cells.length; i++) {
 				var div = cells[i].firstChild;
 				var ruler = div._ruler;
+				var offset = lineHeight;
+				var overview = ruler.getOverview();
+				if (overview === "page") { offset += this._topIndexY; } //$NON-NLS-0$
+				div.style.top = -offset + "px"; //$NON-NLS-0$
+				div.style.height = (parentHeight + offset) + "px"; //$NON-NLS-0$
+				
 				if (div.rulerChanged) {
 					applyStyle(ruler.getRulerStyle(), div);
 				}
@@ -6322,7 +6286,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 					}
 				}
 
-				var overview = ruler.getOverview(), lineDiv, frag, annotations;
+				var lineDiv, frag, annotations;
 				if (overview === "page") { //$NON-NLS-0$
 					annotations = ruler.getAnnotations(topIndex, bottomIndex + 1);
 					while (child) {

@@ -1,14 +1,13 @@
 .textview {
 	background-color: white;
-	padding: 1px 2px;
-}
-
-.textviewContainer {
-	background-color: #eaeaea;
 	font-family: 'Lucida Sans Unicode', 'Lucida Grande', Verdana, Arial, Helvetica, Myriad, Tahoma, clean, sans-serif;
 	font-size: 10pt;
 	min-width: 50px;
 	min-height: 50px;
+}
+
+.textviewScroll {
+	padding: 1px 2px;
 }
 
 .textviewContent {
@@ -16,9 +15,9 @@
 }
 
 .textviewLeftRuler {
-  border-right: 1px solid #eaeaea;
+	border-right: 1px solid #eaeaea;
 }
 
 .textviewRightRuler {
-  border-left: 1px solid #eaeaea;
+	border-left: 1px solid #eaeaea;
 }

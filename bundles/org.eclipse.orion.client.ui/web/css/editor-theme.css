@@ -7,16 +7,15 @@
  *************************************************************************************************/
 .textview {
 	background-color: white;
-	padding: 1px 2px;
-}
-
-.textviewContainer {
-	background-color: #eaeaea;
 	font-family: "Menlo", "Consolas", "Vera Mono", "monospace";
 	font-size: 10pt;
 	min-width: 50px;
 	min-height: 50px;
 	color: #333;
+}
+
+.textviewScroll {
+	padding: 1px 2px;
 }
 
 .textviewContent {

@@ -42,6 +42,10 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 
 	/**	@private */
 	function getTextFromElement(element) {
+		var firstChild = element.firstChild;
+		if (firstChild && firstChild.tagName === "TEXTAREA") { //$NON-NLS-0$
+			return firstChild.value;
+		}
 		var document = element.ownerDocument;
 		var window = document.defaultView || document.parentWindow;
 		if (!window.getSelection) {
