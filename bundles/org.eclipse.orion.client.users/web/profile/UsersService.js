@@ -129,13 +129,13 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 					email: email
 				})
 			}).then(function(result) {
-				return getJSON(result.response);
+				return new Deferred().resolve(getJSON(result.response));
 			}, function(result) {
 				var error = result;
 				try {
 					error = getJSON(result.response || result.error);
 				} catch (e) {}
-				return error;
+				return new Deferred().reject(error);
 			});
 		},
 		getUserInfo: function(userURI, onLoad){
