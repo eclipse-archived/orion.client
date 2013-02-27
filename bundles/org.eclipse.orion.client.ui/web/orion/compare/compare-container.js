@@ -185,6 +185,7 @@ exports.CompareContainer = (function() {
 				this._errorCallback = options.errorCallback ? options.errorCallback : this._errorCallback;
 				this.options.onSetTitle = options.onSetTitle ? options.onSetTitle : this.options.onSetTitle;
 				this.options.toggler = options.toggler ? options.toggler : this.options.toggler;
+				this.options.highlighter = options.highlighter ? options.highlighter : this.options.highlighter;
 			}
 		},
 		
@@ -649,8 +650,13 @@ exports.TwoWayCompareContainer = (function() {
 		
 		this._curveRuler = new mCompareRulers.CompareCurveRuler(this._uiFactory.getDiffCanvasDiv());
 		this._highlighter = [];
-		this._highlighter.push( new exports.CompareStyler(this._registry));//left side styler
-		this._highlighter.push( new exports.CompareStyler(this._registry));//right side styler
+		if(this.options.highlighter && typeof this.options.highlighter === "function") { //$NON-NLS-0$
+			this._highlighter.push(new this.options.highlighter());
+			this._highlighter.push(new this.options.highlighter());
+		} else {
+			this._highlighter.push( new exports.CompareStyler(this._registry));//left side styler
+			this._highlighter.push( new exports.CompareStyler(this._registry));//right side styler
+		}
 		this.initEditorContainers("\n" , messages['fetching...'] , messages["fetching..."] , []); //$NON-NLS-0$
 	}
 	TwoWayCompareContainer.prototype = new exports.CompareContainer();
@@ -968,7 +974,11 @@ exports.InlineCompareContainer = (function() {
 		
 		this.initCommands();
 		this._highlighter = [];
-		this._highlighter.push( new exports.CompareStyler(this._registry));
+		if(this.options.highlighter && typeof this.options.highlighter === "function") { //$NON-NLS-0$
+			this._highlighter.push(new this.options.highlighter());
+		} else {
+			this._highlighter.push( new exports.CompareStyler(this._registry));
+		}
 		this._editorDivId = editorDivId;
 		this.initEditorContainers("" , "\n" , [],[]); //$NON-NLS-0$
 		this.hasContent = false;
