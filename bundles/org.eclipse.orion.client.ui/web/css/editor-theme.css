@@ -63,7 +63,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 	color: #7F9FBF;
 }
 
-.token-string {
+.token_string {
 	color: #446fbd; /* was blue; */
 }
 
