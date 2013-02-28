@@ -106,61 +106,72 @@ h2 {
 	min-height: 30px;
 }
 
+/* slideout styles */
+
+/* the left hand side of slideout containing parameter fields */
 .parameters {
-	color: #404040;
+	color: silver;
 	vertical-align: middle;
 }
 
+/* the right hand side of slideout containing dismiss buttons */
 .parametersDismiss {
-	color: #404040;
+	color: silver;
 	vertical-align: middle;
 	font-weight: normal;
-	color: silver;
 	padding: 3px;
 	padding-bottom: 0;
 }
 
-.dismiss {
+/* buttons used to dismiss or complete a slideout */
+.dismissButton {
 	border: 1px solid transparent;
-    border-radius: 2px;
-	cursor: pointer;
-	padding: 1px;
-	font-size: 8pt;
-	margin: 0;
-	margin-left: 8px;
+	background: transparent;
+	color: silver;
+    border-radius: 1px;
+	padding: 2px;
+	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
+	margin: 0 4px 0;
 	vertical-align: middle;
-}
-.dismiss:hover {
-	background-color: #e6e6e6;
-	border: 1px solid #808080;
+	min-height: 16px;
+	min-width: 16px;
 }
 
+.dismissButton:hover {
+	color: #fdfdfd;
+}
+
+/* button contained in a slideout next to parameter fields */
+.parameterInlineButton {
+	vertical-align: baseline;
+}
+
+/* parameter labels */
 label.parameterInput{
 	color: silver;
 	white-space: nowrap;
 }
 
+/* parameter fields */
 .parameterInput {
-	margin-right: 16px;
-	margin-bottom: 8px;
+	margin: 4px;
 	font-weight: normal;
 	vertical-align: baseline;
 	color:#333;
 }
 
-.parameterInputurl {
+/* Adjust default sizes and layout for certain types */
+input.parameterInput[type=url] {
 	width: 30em;
-	color:#333;
 }
 
-.parameterInputcheckbox {
+input.parameterInput[type=checkbox] {
 	width: auto;
 }
 
-.parameterInputtextarea {
+textarea.parameterInput {
 	vertical-align: top;
 	width: 50em;
-	color:#333;
 }
 
 .parameterPopup {

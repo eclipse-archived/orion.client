@@ -141,7 +141,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							name = self.getTitle();
 						}
 		
-						var chooser = new mThemeChooser.MiniThemeChooser( preferences, editor.getTextView() );
+						var chooser = new mThemeChooser.MiniThemeChooser( preferences );
 						mGlobalCommands.addSettings( chooser );
 						
 						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$

@@ -121,14 +121,6 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 	var tabStyle = {styleClass: "token_tab"};
 	var caretLineStyle = {styleClass: "line_caret"};
 	
-	var rulerStyle = {styleClass:"ruler"};
-	var rulerAnnotationsStyle = {styleCLass:"ruler.annotations"};
-	var rulerFoldingStyle = {styleClass:"ruler.lines"};
-	var rulerOverviewStyle = {styleClass:"ruler.overview"};
-	var rulerLinesStyle = {styleCLass:"rulerLines"};
-	var rulerLinesEvenStyle = {styleClass:"rulerLines.even"};
-	var rulerLinesOddStyle = {styleClass:"rulerLines.odd"};
-	
 	function Scanner (keywords, whitespacesVisible) {
 		this.keywords = keywords;
 		this.whitespacesVisible = whitespacesVisible;
@@ -503,32 +495,6 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 	}
 	
 	TextStyler.prototype = {
-		getClassNameForToken: function(token) {
-			switch (token) {
-			
-				case "singleLineComment": return singleCommentStyle.styleClass;
-				case "multiLineComment": return multiCommentStyle.styleClass;
-				case "docComment": return docCommentStyle.styleClass;
-				case "docHtmlComment": return htmlMarkupStyle.styleClass;
-				case "tasktag": return tasktagStyle.styleClass;
-				case "doctag": return doctagStyle.styleClass;
-				case "string": return stringStyle.styleClass;
-				case "number": return numberStyle.styleClass;
-				case "keyword": return keywordStyle.styleClass;
-				case "space": return spaceStyle.styleClass;
-				case "tab": return tabStyle.styleClass;
-				case "caretLine": return caretLineStyle.styleClass;
-				
-				case "rulerStyle": return rulerStyle.styleClass;
-				case "annotationsStyle": return rulerAnnotationsStyle.styleClass;
-				case "rulerFolding": return rulerLinesStyle.styleClass;
-				case "rulerOverview": return rulerOverviewStyle.styleClass;
-				case "rulerLines": return rulerLinesStyle.styleClass;
-				case "rulerLinesEven": return rulerLinesEvenStyle.styleClass;
-				case "rulerLinesOdd": return rulerLinesOddStyle.styleClass;
-			}
-			return null;
-		},
 		destroy: function() {
 			var view = this.view;
 			if (view) {

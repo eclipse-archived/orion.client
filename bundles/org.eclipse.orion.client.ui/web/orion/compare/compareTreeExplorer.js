@@ -410,8 +410,8 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 	CompareTreeExplorer.prototype._addOptions = function() {
 		var that = this;
 		_empty("pageNavigationActions");
-		var optionMenu = that._commandService._createDropdownMenu("pageNavigationActions", messages['Options']);
-		that._commandService._generateCheckedMenuItem(optionMenu.menu, messages["Sort by folders"], false,
+		var optionMenu = mCommands.createDropdownMenu("pageNavigationActions", messages['Options']);
+		mCommands.createCheckedMenuItem(optionMenu.menu, messages["Sort by folders"], false,
 			function(event) {
 				that._sortByFolder = event.target.checked;
 				that._renderUI();

@@ -52,33 +52,34 @@ orion.TextSearcher = (function() {
 			this._commandService.openParameterCollector("pageNavigationActions", function(parentDiv) { //$NON-NLS-0$
 	
 				// create the input box for searchTerm
-				var searchStringDiv = document.createElement('input'); //$NON-NLS-0$
-				searchStringDiv.type = "text"; //$NON-NLS-0$
-				searchStringDiv.name = messages["Find:"];
-				searchStringDiv.id = "localSearchFindWith"; //$NON-NLS-0$
-				searchStringDiv.placeholder=messages["Find With"];
-				searchStringDiv.onkeyup = function(evt){
+				var searchStringInput = document.createElement('input'); //$NON-NLS-0$
+				searchStringInput.type = "text"; //$NON-NLS-0$
+				searchStringInput.name = messages["Find:"];
+				searchStringInput.className = "parameterInput"; //$NON-NLS-0$
+				searchStringInput.id = "localSearchFindWith"; //$NON-NLS-0$
+				searchStringInput.placeholder=messages["Find With"];
+				searchStringInput.onkeyup = function(evt){
 					return that._handleKeyUp(evt);
 				};
-				searchStringDiv.onkeydown = function(evt){
+				searchStringInput.onkeydown = function(evt){
 					return that._handleKeyDown(evt,true);
 				};
-				parentDiv.appendChild(searchStringDiv);
+				parentDiv.appendChild(searchStringInput);
 				
 				that.createButton("Next", parentDiv, function() {that.findNext(true);}); //$NON-NLS-0$			
 				that.createButton("Previous", parentDiv, function() {that.findNext(false);}); //$NON-NLS-0$
 				
 				// create replace text
-				var replaceStringDiv = document.createElement('input'); //$NON-NLS-0$
-				replaceStringDiv.type = "text"; //$NON-NLS-0$
-				replaceStringDiv.name = messages["ReplaceWith:"];
-				replaceStringDiv.id = "localSearchReplaceWith"; //$NON-NLS-0$
-				replaceStringDiv.placeholder=messages["Replace With"];
-				replaceStringDiv.classList.add('searchCmdGroupMargin'); //$NON-NLS-0$
-				replaceStringDiv.onkeydown = function(evt){
+				var replaceStringInput = document.createElement('input'); //$NON-NLS-0$
+				replaceStringInput.type = "text"; //$NON-NLS-0$
+				replaceStringInput.name = messages["ReplaceWith:"];
+				replaceStringInput.className = "parameterInput"; //$NON-NLS-0$
+				replaceStringInput.id = "localSearchReplaceWith"; //$NON-NLS-0$
+				replaceStringInput.placeholder=messages["Replace With"];
+				replaceStringInput.onkeydown = function(evt){
 					return that._handleKeyDown(evt, false);
 				};
-				parentDiv.appendChild(replaceStringDiv);
+				parentDiv.appendChild(replaceStringInput);
 				
 				that.createButton(messages["Replace"], parentDiv, function() {that.replace();}); //$NON-NLS-0$		
 				that.createButton(messages["Replace All"], parentDiv, function() {that.replaceAll();});	//$NON-NLS-0$
@@ -86,9 +87,9 @@ orion.TextSearcher = (function() {
 				var optionsDiv = document.createElement("div"); //$NON-NLS-0$
 				parentDiv.appendChild(optionsDiv);
 				optionsDiv.classList.add("findOptionsDiv"); //$NON-NLS-0$
-				var optionMenu = that._commandService._createDropdownMenu(optionsDiv, messages['Options']);
-				optionMenu.menuButton.classList.add("findSlideoutMenu"); //$NON-NLS-0$
-				that._commandService._generateCheckedMenuItem(optionMenu.menu, messages["Show all"], that._showAllOccurrence,
+				var optionMenu = mCommands.createDropdownMenu(optionsDiv, messages['Options'], null, "dismissButton"); //$NON-NLS-0$
+				optionMenu.menuButton.classList.add("parameterInlineButton"); //$NON-NLS-0$
+				mCommands.createCheckedMenuItem(optionMenu.menu, messages["Show all"], that._showAllOccurrence,
 					function(event) {
 						var checked = event.target.checked;
 						that.setOptions({showAllOccurrence: checked});
@@ -103,46 +104,46 @@ orion.TextSearcher = (function() {
 						optionMenu.dropdown.close(true);
 					});
 				
-				that._commandService._generateCheckedMenuItem(optionMenu.menu, messages["Case sensitive"], !that._ignoreCase,
+				mCommands.createCheckedMenuItem(optionMenu.menu, messages["Case sensitive"], !that._ignoreCase,
 					function(event) {
 						that.setOptions({ignoreCase: !event.target.checked});
 						optionMenu.dropdown.close(true);
 						that.findNext(true, null, true);
 					});
 				
-				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Wrap search"], that._wrapSearch,
+				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Wrap search"], that._wrapSearch,
 					function(event) {
 						that.setOptions({wrapSearch: event.target.checked});
 						optionMenu.dropdown.close(true);
 					});
 					
-				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Incremental search"], that._incremental,
+				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Incremental search"], that._incremental,
 					function(event) {
 						that.setOptions({incremental: event.target.checked});
 						optionMenu.dropdown.close(true);
 					});
 					
-				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Whole Word"], that._wholeWord,
+				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Whole Word"], that._wholeWord,
 					function(event) {
 						that.setOptions({wholeWord: event.target.checked});
 						optionMenu.dropdown.close(true);
 						that.findNext(true, null, true);
 					});
 					
-				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Regular expression"], that._useRegExp,
+				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Regular expression"], that._useRegExp,
 					function(event) {
 						that.setOptions({useRegExp: event.target.checked});
 						optionMenu.dropdown.close(true);
 						that.findNext(true, null, true);
 					});
 				
-				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Find after replace"], that._findAfterReplace,
+				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Find after replace"], that._findAfterReplace,
 					function(event) {
 						that.setOptions({findAfterReplace: event.target.checked});
 						optionMenu.dropdown.close(true);
 					});
 					
-				return searchStringDiv;
+				return searchStringInput;
 			},
 			function(){that.closeUI();});
 		},
@@ -223,20 +224,16 @@ orion.TextSearcher = (function() {
 		},
 		
 		createButton: function(text, parent, callback) {
-			var button  = document.createElement("span"); //$NON-NLS-0$
-			button.tabIndex = 0;
-			button.role = "button"; //$NON-NLS-0$
+			var button  = document.createElement("button"); //$NON-NLS-0$
 			button.addEventListener("click", callback.bind(this), false); //$NON-NLS-0$
 			var self = this;
 			button.addEventListener("keydown", function(e) { //$NON-NLS-0$
-				if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
-					callback.bind(self)();			
-				} else if (e.keyCode === lib.KEY.ESCAPE) {
+				if (e.keyCode === lib.KEY.ESCAPE) {
 					self.closeUI();
 				}
 			});
 			button.appendChild(document.createTextNode(text)); //$NON-NLS-0$
-			button.classList.add("findSlideoutButton"); //$NON-NLS-0$
+			button.className = "dismissButton parameterInlineButton"; //$NON-NLS-0$
 			
 			parent.appendChild(button);
 		},

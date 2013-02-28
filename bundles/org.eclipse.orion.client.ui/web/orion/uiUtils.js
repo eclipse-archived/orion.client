@@ -199,25 +199,21 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 	}
 	
 	function createButton(text, callback) {
-		var button = document.createElement("span"); //$NON-NLS-0$
-		button.role = "button"; //$NON-NLS-0$
-		button.tabIndex = 0; 
-		button.appendChild(document.createTextNode(text));
-		button.className = "commandButton commandMargins"; //$NON-NLS-0$
+		var button = document.createElement("button"); //$NON-NLS-0$
+		button.className = "orionButton commandButton commandMargins"; //$NON-NLS-0$
 		button.addEventListener("click", function(e) { //$NON-NLS-0$
 			callback();
 			lib.stop(e);
 		}, false);
-		button.addEventListener("keydown", function(e) { //$NON-NLS-0$
-			if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
-				callback();
-				lib.stop(e);
-			}				
-		}, false);
+		if (text) {
+			button.appendChild(document.createTextNode(text));
+		}
 		return button;	
 	}
+	
+	function createDropdownButton(parent, name, populateFunction) {
+	}
 
-		
 
 	//return module exports
 	return {
@@ -225,6 +221,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		getUserText: getUserText,
 		openInNewWindow: openInNewWindow,
 		followLink: followLink,
-		createButton: createButton
+		createButton: createButton,
+		createDropdownButton: createDropdownButton
 	};
 });

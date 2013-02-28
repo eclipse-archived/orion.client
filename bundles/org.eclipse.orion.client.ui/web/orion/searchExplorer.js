@@ -1143,9 +1143,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
         this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         if (this.model._provideSearchHelper && this.model._provideSearchHelper().params.keyword !== "") {
-            var newMenu = this._commandService._createDropdownMenu("pageNavigationActions", messages['Options'], false, function() { //$NON-NLS-1$ //$NON-NLS-0$
+            var newMenu = mCommands.createDropdownMenu("pageNavigationActions", messages['Options'], function() { //$NON-NLS-0$
                 if (!that.model.replaceMode()) {
-                    that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Sort by Name"], that.model.sortByName,
+                    mCommands.createCheckedMenuItem(newMenu.menu, messages["Sort by Name"], that.model.sortByName,
 
                     function(event) {
                         that.sortWithName(event.target.checked);
@@ -1154,7 +1154,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                         }, 100); // so user can see the check take effect briefly before it closes
                     });
                 } else {
-                    that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Compare changes"], true,
+                    mCommands.createCheckedMenuItem(newMenu.menu, messages["Compare changes"], true,
 
                     function(event) {
                         that.toggleCompare(event.target.checked);

@@ -41,7 +41,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		'<input id="sftpPath" /></div>' + //$NON-NLS-0$
 		'<div><label for="sftpUser">${User name:}</label>' + //$NON-NLS-0$
 		'<input id="sftpUser" /></div>' + //$NON-NLS-0$
-		'<div class="layoutBlock layoutRight"><span id="addSftpConnection" role="button" class="dropdownTrigger commandButton" tabindex="0">${Add}</span></div>';  //$NON-NLS-0$
+		'<div class="layoutBlock layoutRight"><button id="addSftpConnection" class="dropdownTrigger orionButton commandButton">${Add}</button></div>';  //$NON-NLS-0$
 	
 	SFTPNewConnectionPopup.prototype._bindToDom = function(parent) {
 		var self = this;
@@ -51,12 +51,6 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 			this.hide();
 		};
 		this.$addSftpConnection.addEventListener("click", addConnection.bind(self), false); //$NON-NLS-0$
-		this.$addSftpConnection.addEventListener("keydown", function(e) { //$NON-NLS-0$
-			if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
-				addConnection.bind(self)();
-				lib.stop(e);
-			}				
-		}, false);
 	};
 	
 	SFTPNewConnectionPopup.prototype.constructor = SFTPNewConnectionPopup;
@@ -80,7 +74,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		'<div>' + //$NON-NLS-0$
 			'<div><label for="sftpPath">${Location:}</label></div>' +  //$NON-NLS-0$
 			'<div><select id="sftpConnectionList" name="sftpConnectionList"></select>' + //$NON-NLS-0$
-			'<span id="newSftpConnection" role="button" style="margin-left: 16px;" class="dropdownTrigger commandButton" tabindex="0">${New}<span class="dropdownArrowDown"></span></span></div>' + //$NON-NLS-0$
+			'<button id="newSftpConnection" style="margin-left: 16px;" class="dropdownTrigger orionButton commandButton">${New}<span class="dropdownArrowDown"></span></button></div>' + //$NON-NLS-0$
 			'<div><label for="sftpPassword">${Password:}</label></div>' + //$NON-NLS-0$
 			'<div><input id="sftpPassword" type="password" /></div>' + //$NON-NLS-0$
 			'<p>${If the same file exists in both the source and destination:}</p>' + //$NON-NLS-0$
@@ -108,12 +102,6 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		var self = this;
 		this.$sftpConnectionList.style.minWidth = "220px"; //$NON-NLS-0$
 		this._popupDialog = new SFTPNewConnectionPopup(this.$newSftpConnection, this.onAddConnection.bind(this));
-		this.$newSftpConnection.addEventListener("keydown", function(e) { //$NON-NLS-0$
-			if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
-				self._popupDialog.show();
-				lib.stop(e);
-			}				
-		}, false);
 		this._addChildDialog(this._popupDialog);
 		this._populateSelect();
 	};
