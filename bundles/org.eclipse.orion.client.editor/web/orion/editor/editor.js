@@ -1003,9 +1003,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 	}
 
 	return {
-		Editor: Editor,
-		util: {
-			bind: bind
-		}
+		Editor: Editor
 	};
 });
