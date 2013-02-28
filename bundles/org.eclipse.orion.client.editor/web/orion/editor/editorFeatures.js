@@ -12,8 +12,8 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/editorFeatures", ['i18n!orion/editor/nls/messages', 'orion/editor/undoStack', 'orion/editor/keyBinding', //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	'orion/editor/rulers', 'orion/editor/annotations', 'orion/editor/tooltip', 'orion/editor/textDND', 'orion/editor/regex', 'orion/editor/util'], //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/editorFeatures", ['i18n!orion/editor/nls/messages', 'orion/editor/undoStack', 'orion/keyBinding', //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	'orion/editor/rulers', 'orion/editor/annotations', 'orion/editor/tooltip', 'orion/editor/textDND', 'orion/editor/regex', 'orion/util'], //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTextDND, mRegex, util) {
 
 	function UndoFactory() {
