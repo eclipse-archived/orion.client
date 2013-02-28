@@ -10,6 +10,7 @@
  ******************************************************************************/
 
 /*globals window document define confirm URL*/
+/*jslint nomen:false sub:true forin:false laxbreak:true eqeqeq:false*/
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
