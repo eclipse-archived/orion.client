@@ -494,6 +494,11 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 				onMouseMove: function(e) {
 					var tooltip = mTooltip.Tooltip.getTooltip(textView);
 					if (!tooltip) { return; }
+					if (self._listener.lastMouseX === e.event.clientX && self._listener.lastMouseY === e.event.clientY) {
+						return;
+					}
+					self._listener.lastMouseX = e.event.clientX;
+					self._listener.lastMouseY = e.event.clientY;
 					tooltip.setTarget({
 						x: e.x,
 						y: e.y,
@@ -502,7 +507,17 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 						}
 					});
 				},
-				onMouseOut: function(lineIndex, e) {
+				onMouseOut: function(e) {
+					var tooltip = mTooltip.Tooltip.getTooltip(textView);
+					if (!tooltip) { return; }
+					if (self._listener.lastMouseX === e.event.clientX && self._listener.lastMouseY === e.event.clientY) {
+						return;
+					}
+					self._listener.lastMouseX = e.event.clientX;
+					self._listener.lastMouseY = e.event.clientY;
+					tooltip.setTarget(null);
+				},
+				onScroll: function(e) {
 					var tooltip = mTooltip.Tooltip.getTooltip(textView);
 					if (!tooltip) { return; }
 					tooltip.setTarget(null);
@@ -517,6 +532,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 			textView.addEventListener("MouseOver", this._listener.onMouseOver); //$NON-NLS-0$
 			textView.addEventListener("MouseOut", this._listener.onMouseOut); //$NON-NLS-0$
 			textView.addEventListener("MouseMove", this._listener.onMouseMove); //$NON-NLS-0$
+			textView.addEventListener("Scroll", this._listener.onScroll); //$NON-NLS-0$
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
