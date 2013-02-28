@@ -114,7 +114,7 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 	var htmlMarkupStyle = {styleClass: "token_doc_html_markup"};
 	var tasktagStyle = {styleClass: "token_task_tag"};
 	var doctagStyle = {styleClass: "token_doc_tag"};
-	var stringStyle = {styleClass: "token-string"};
+	var stringStyle = {styleClass: "token_string"};
 	var numberStyle = {styleClass: "token_number"};
 	var keywordStyle = {styleClass: "token_keyword"};
 	var spaceStyle = {styleClass: "token_space"};
