@@ -12,7 +12,7 @@
  
 /*globals define document*/
 
-define("orion/editor/textTheme", ['orion/editor/eventTarget', 'orion/editor/util'], function(mEventTarget, util) { 
+define("orion/editor/textTheme", ['orion/editor/eventTarget', 'orion/util'], function(mEventTarget, util) { 
 	var THEME_PREFIX = "orion-theme-";
 	
 	var DefaultTheme;

@@ -17,7 +17,7 @@
 define([
 	"require", 
 	"orion/editor/textView",
-	"orion/editor/keyBinding",
+	"orion/keyBinding",
 	"examples/editor/textStyler",
 	"orion/editor/textMateStyler",
 	"orion/editor/htmlGrammar",

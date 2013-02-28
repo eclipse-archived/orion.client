@@ -18,7 +18,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	"orion/editor/textModel", //$NON-NLS-0$
 	"orion/editor/projectionTextModel", //$NON-NLS-0$
 	"orion/editor/eventTarget", //$NON-NLS-0$
-	"orion/editor/keyBinding", //$NON-NLS-0$
+	"orion/keyBinding", //$NON-NLS-0$
 	"orion/editor/rulers", //$NON-NLS-0$
 	"orion/editor/annotations", //$NON-NLS-0$
 	"orion/editor/tooltip", //$NON-NLS-0$
