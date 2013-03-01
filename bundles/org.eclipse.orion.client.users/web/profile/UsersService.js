@@ -53,11 +53,6 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 				}
 				ret.resolve(jsonData);
 			}, function(error) {
-				if(!service.info) {
-					handleAuthenticationError(getError(error), function(){
-						service.getUsersListSubset(start, rows); // retry GET
-					});
-				}
 				ret.reject(error.response || error);
 			});
 			return ret;
@@ -80,11 +75,6 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 				}
 				ret.resolve(jsonData.users);
 			}, function(error) {
-				if(!service.info) {
-					handleAuthenticationError(getError(error), function(){
-						service.getUsersList(onLoad); // retry GET
-					});
-				}
 				ret.reject(error.response || error);
 			});
 			return ret;
@@ -107,11 +97,6 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 				}
 				ret.resolve(jsonData);
 			}, function(error) {
-				if(!service.info) {
-					handleAuthenticationError(getError(error), function(){
-						service.deleteUser(userURI, onLoad); // retry DELETE
-					});
-				}
 				ret.reject(error.response || error);
 			});
 			return ret;
@@ -156,11 +141,6 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 				}
 				ret.resolve(jsonData);
 			}, function(error) {
-				if(!service.info) {
-					handleAuthenticationError(getError(error), function(){
-						service.getUserInfo(userURI, onLoad); // retry GET
-					});
-				}
 				ret.reject(error.response || error);
 			});
 			return ret;
@@ -172,7 +152,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 			
 
 			if(data.password!==data.passwordRetype){
-				ret.reject({message: messages["Passwords do not match!"]});
+				ret.reject({message: "Passwords do not match!"});
 				return ret;
 			}
 
@@ -193,11 +173,6 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 				}
 				ret.resolve(jsonData);
 			}, function(error) {
-				if(!service.info) {
-					handleAuthenticationError(getError(error), function(){
-						service.updateUserInfo(userUri, data, onLoad); // retry GET
-					});
-				}
 				ret.reject(error.response || error);
 			});
 			
@@ -226,7 +201,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
 				ret.resolve(jsonData);
-			}, function(result) {
+			}, function(error) {
 				ret.reject(error.response || error);
 			});
 			return ret;
