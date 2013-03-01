@@ -239,7 +239,6 @@ define(
 															});
 										}
 									}, function(error) {
-										loadingDeferred.callback();
 										that.handleError(error);
 									});
 				};
