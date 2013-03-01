@@ -11,7 +11,7 @@
  *******************************************************************************/
  
 /*global define window document */
-/*jslint devel:true*/
+/*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/searchUtils', 'orion/crawler/searchCrawler'], 
 function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
@@ -56,7 +56,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				this._crawler.searchName(searchParams, function(jsonData){renderer(transform(jsonData), null);});
 			} else {
 				try {
-					this.registry.getService("orion.page.progress").progress(this._fileService.search(searchParams), "Searching " + searchParams.keyword).then(function(jsonData) {
+					this.registry.getService("orion.page.progress").progress(this._fileService.search(searchParams), "Searching " + searchParams.keyword).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
 						/**
 						 * transforms the jsonData so that the result conforms to the same
 						 * format as the favourites list. This way renderer implementation can
@@ -73,9 +73,9 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 					});
 				}
 				catch(error){
-					if(typeof(error) === "string" && error.indexOf("search") > -1 && this._crawler){ //$NON-NLS-0$
+					if(typeof(error) === "string" && error.indexOf("search") > -1 && this._crawler){ //$NON-NLS-1$ //$NON-NLS-0$
 						this._crawler.searchName(searchParams, function(jsonData){renderer(transform(jsonData), null);});
-					} else if(typeof(error) === "string" && error.indexOf("search") > -1 && !searchParams.nameSearch){ //$NON-NLS-0${
+					} else if(typeof(error) === "string" && error.indexOf("search") > -1 && !searchParams.nameSearch){ //$NON-NLS-1$ //$NON-NLS-0$
 						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this._fileService, searchParams, {childrenLocation: this.getChildrenLocation()});
 						crawler.search(function(jsonData){renderer(transform(jsonData), null);});
 					} else {
@@ -127,7 +127,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				var placeHolder = i18nUtil.formatMessage(messages["Search ${0}"], locationName);
 				
 				if(placeHolder.length > 30){
-					searchInputDom.placeholder = placeHolder.substring(0, 27) + "..."; //$NON-NLS-1$
+					searchInputDom.placeholder = placeHolder.substring(0, 27) + "..."; //$NON-NLS-0$
 				} else {
 					searchInputDom.placeholder = i18nUtil.formatMessage(messages["Search ${0}"], locationName);
 				}
@@ -179,7 +179,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				//var wildcard= (/\*$/.test(keyword) ? "" : "*"); //$NON-NLS-0$
 				return {
 					resource: searchOn,
-					sort: "NameLower asc",
+					sort: "NameLower asc", //$NON-NLS-0$
 					rows: 100,
 					start: 0,
 					nameSearch: true,
@@ -188,7 +188,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 			}
 			return {
 				resource: searchOn,
-				sort: "Path asc",
+				sort: "Path asc", //$NON-NLS-0$
 				rows: 40,
 				start: 0,
 				caseSensitive: advancedOptions ? advancedOptions.caseSensitive : undefined,
@@ -218,7 +218,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 						return true;
 					}
 					var contentType = contentTypeService.getFilenameContentType(fileName);
-					if(contentType && (contentType['extends'] === "text/plain" || contentType.id === "text/plain")){
+					if(contentType && (contentType['extends'] === "text/plain" || contentType.id === "text/plain")){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						return true;
 					}
 					return false;

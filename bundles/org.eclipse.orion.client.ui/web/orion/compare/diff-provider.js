@@ -47,10 +47,10 @@ define(['i18n!orion/compare/nls/messages', 'orion/Deferred'], function(messages,
 	 */
 	function DiffProvider(serviceRegistry, filter) {
 		var allReferences = serviceRegistry.getServiceReferences("orion.core.diff"); //$NON-NLS-0$
-		var _references = allReferences;
+		var i, _references = allReferences;
 		if (filter) {
 			_references = [];
-			for(var i = 0; i < allReferences.length; ++i) {
+			for(i = 0; i < allReferences.length; ++i) {
 				if (filter(allReferences[i])) {
 					_references.push(allReferences[i]);
 				}
@@ -59,8 +59,8 @@ define(['i18n!orion/compare/nls/messages', 'orion/Deferred'], function(messages,
 		var _patterns = [];
 		var _services = [];
 		
-		for(var i = 0; i < _references.length; ++i) {
-			_patterns[i] = new RegExp(_references[i].getProperty("pattern") || ".*");			 //$NON-NLS-1$ //$NON-NLS-0$
+		for(i = 0; i < _references.length; ++i) {
+			_patterns[i] = new RegExp(_references[i].getProperty("pattern") || ".*");//$NON-NLS-1$ //$NON-NLS-0$
 			_services[i] = serviceRegistry.getService(_references[i]);
 		}
 
