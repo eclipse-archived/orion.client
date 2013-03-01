@@ -17,8 +17,9 @@ define(["orion/assert", "orion/editor/editor"],
 	var tests = {};
 
 	// ************************************************************************************************
-	// Test supporting util methods
-	var bind = mEditor.util.bind;
+	// Test Function.prototype.bind function
+	// The implementation of this function may be provided by editor.js
+	var bind = Function.prototype.bind;
 
 	// Test our implementation of "bind"
 	tests["test bind - 'this'"] = function() {

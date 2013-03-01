@@ -13,7 +13,7 @@
 
 /*global define */
 
-define("orion/editor/keyBinding", ['orion/editor/util'], function(util) { //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON-NLS-0$
 
 	/**
 	 * Constructs a new key binding with the given key code and modifiers.

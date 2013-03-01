@@ -16,7 +16,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	'orion/editor/textView', //$NON-NLS-0$
 	'orion/editor/textModel', //$NON-NLS-0$
 	'orion/editor/projectionTextModel', //$NON-NLS-0$
-	'orion/editor/util' //$NON-NLS-0$
+	'orion/util' //$NON-NLS-0$
 ], function(messages, mTextView, mTextModel, mProjectionTextModel, util) {
 
 	/** @private */

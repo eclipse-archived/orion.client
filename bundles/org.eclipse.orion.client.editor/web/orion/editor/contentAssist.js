@@ -12,7 +12,7 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/editor/keyBinding', 'orion/editor/eventTarget', 'orion/Deferred', 'orion/editor/util'], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
+define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/keyBinding', 'orion/editor/eventTarget', 'orion/Deferred', 'orion/util'], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.

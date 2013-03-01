@@ -16,7 +16,7 @@ define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/webu
         'orion/commands', 'orion/favorites', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textView', 'orion/editor/textModel', 
-        'orion/editor/projectionTextModel', 'orion/editor/keyBinding','orion/searchAndReplace/textSearcher',
+        'orion/editor/projectionTextModel', 'orion/keyBinding','orion/searchAndReplace/textSearcher',
         'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel', 'orion/widgets/themes/editor/MiniThemeChooser'],
 		function(messages, require, Deferred, lib, mSelection, mStatus, mProgress, mDialogs, mCommands, mFavorites,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,

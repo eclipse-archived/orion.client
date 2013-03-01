@@ -13,7 +13,7 @@
  
 /*globals define window */
 
-define(['examples/editor/demoSetup', 'tests/editor/test-performance', 'orion/editor/util'],   
+define(['examples/editor/demoSetup', 'tests/editor/test-performance', 'orion/util'],   
  
 function(mSetup, mTestPerformance, util) {
 	

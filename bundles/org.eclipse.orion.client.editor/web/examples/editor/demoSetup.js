@@ -13,7 +13,7 @@
 /*globals define XMLHttpRequest log */
  
 define(["require", 
-		"orion/editor/keyBinding",
+		"orion/keyBinding",
 		"orion/editor/textModel",
 		"orion/editor/annotations", 
 		"orion/editor/projectionTextModel", 
@@ -25,7 +25,7 @@ define(["require",
 		"orion/editor/textMateStyler",
 		"orion/editor/htmlGrammar",
 		"examples/editor/textStyler",
-		"orion/editor/util"
+		"orion/util"
 ], function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler, util) {
 
 	var exports = {};

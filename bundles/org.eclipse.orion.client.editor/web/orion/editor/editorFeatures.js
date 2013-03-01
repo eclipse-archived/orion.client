@@ -12,8 +12,8 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/editorFeatures", ['i18n!orion/editor/nls/messages', 'orion/editor/undoStack', 'orion/editor/keyBinding', //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	'orion/editor/rulers', 'orion/editor/annotations', 'orion/editor/tooltip', 'orion/editor/textDND', 'orion/editor/regex', 'orion/editor/util'], //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/editorFeatures", ['i18n!orion/editor/nls/messages', 'orion/editor/undoStack', 'orion/keyBinding', //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	'orion/editor/rulers', 'orion/editor/annotations', 'orion/editor/tooltip', 'orion/editor/textDND', 'orion/editor/regex', 'orion/util'], //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTextDND, mRegex, util) {
 
 	function UndoFactory() {
@@ -444,93 +444,69 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.gotoLine});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(190, true), "nextAnnotation"); //$NON-NLS-0$
-			this.textView.setAction("nextAnnotation", function() { //$NON-NLS-0$
-				var editor = this.editor;
+			function nextAnnotation(forward) {
+				var editor = self.editor;
 				var annotationModel = editor.getAnnotationModel();
 				if(!annotationModel) { return true; }
 				var model = editor.getModel();
 				var currentOffset = editor.getCaretOffset();
-				var annotations = annotationModel.getAnnotations(currentOffset, model.getCharCount());
-				while(annotations.hasNext()) {
+				var annotations = annotationModel.getAnnotations(forward ? currentOffset : 0, forward ? model.getCharCount() : currentOffset);
+				var foundAnnotation = null;
+				while (annotations.hasNext()) {
 					var annotation = annotations.next();
-					if(annotation.start <= currentOffset) { continue; }
-					if(annotation.type !== mAnnotations.AnnotationType.ANNOTATION_ERROR && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_WARNING && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_TASK && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_BOOKMARK) { continue; }
-					var tooltip = mTooltip.Tooltip.getTooltip(this.textView);
-					if (!tooltip) { 
-						editor.moveSelection(annotation.start);
+					if (forward) {
+						if (annotation.start <= currentOffset) { continue; }
+					} else {
+						if (annotation.start >= currentOffset) { continue; }
+					}
+					switch (annotation.type) {
+						case mAnnotations.AnnotationType.ANNOTATION_ERROR:
+						case mAnnotations.AnnotationType.ANNOTATION_WARNING:
+						case mAnnotations.AnnotationType.ANNOTATION_TASK:
+						case mAnnotations.AnnotationType.ANNOTATION_BOOKMARK:
+							break;
+						default:
+							continue;
+					}
+					foundAnnotation = annotation;
+					if (forward) {
+						break;
+					}
+				}
+				if (foundAnnotation) {
+					var view = self.textView;
+					var nextLine = model.getLineAtOffset(foundAnnotation.start);
+					var tooltip = mTooltip.Tooltip.getTooltip(view);
+					if (!tooltip) {
+						editor.moveSelection(foundAnnotation.start);
 						return true;
 					}
-					var nextLine = model.getLineAtOffset(annotation.start);
-					var view = this.textView;
-					var callback = function() {
-						setTimeout( function() {
-							tooltip.setTarget({
-								getTooltipInfo: function() {
-									var tooltipCoords = view.convert({x: view.getLocationAtOffset(annotation.start).x, 
-																	  y: view.getLocationAtOffset(model.getLineStart(nextLine)).y},
-																	  "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
-									return { contents: [annotation],
-											 x: tooltipCoords.x,
-											 y: tooltipCoords.y + Math.floor(view.getLineHeight(nextLine) * 1.33)
-										   };
-								}
-							}, 0);
+					editor.moveSelection(foundAnnotation.start, foundAnnotation.start, function() {
+						tooltip.setTarget({
+							getTooltipInfo: function() {
+								var tooltipCoords = view.convert({
+									x: view.getLocationAtOffset(foundAnnotation.start).x, 
+									y: view.getLocationAtOffset(model.getLineStart(nextLine)).y
+								}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
+								return {
+									contents: [foundAnnotation],
+									x: tooltipCoords.x,
+									y: tooltipCoords.y + Math.floor(view.getLineHeight(nextLine) * 1.33)
+								};
+							}
 						}, 0);
-					};
-					editor.moveSelection(annotation.start, annotation.start, callback);
-					break;
+					});
 				}
 				return true;
+			}
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(190, true), "nextAnnotation"); //$NON-NLS-0$
+			this.textView.setAction("nextAnnotation", function() { //$NON-NLS-0$
+				return nextAnnotation(true);
 			}.bind(this), {name: messages.nextAnnotation});
 			
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(188, true), "previousAnnotation"); //$NON-NLS-0$
 			this.textView.setAction("previousAnnotation", function() { //$NON-NLS-0$
-				var editor = this.editor;
-				var annotationModel = editor.getAnnotationModel();
-				if(!annotationModel) { return true; }
-				var model = editor.getModel();
-				var currentOffset = editor.getCaretOffset();
-				var annotations = annotationModel.getAnnotations(0, currentOffset);
-				var previousAnnotation = null;
-				while(annotations.hasNext()) {
-					var annotation = annotations.next();
-					if(annotation.start >= currentOffset) { continue; }
-					if(annotation.type !== mAnnotations.AnnotationType.ANNOTATION_ERROR && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_WARNING && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_TASK && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_BOOKMARK) { continue; }
-					previousAnnotation = annotation;
-				}
-				if(previousAnnotation) {
-					var nextLine = model.getLineAtOffset(previousAnnotation.start);
-					var tooltip = mTooltip.Tooltip.getTooltip(this.textView);
-					if (!tooltip) {
-						editor.moveSelection(previousAnnotation.start);
-						return true;
-					}
-					var view = this.textView;
-					var callback = function() {
-						setTimeout( function() {
-							tooltip.setTarget({
-								getTooltipInfo: function() {
-									var tooltipCoords = view.convert({x: view.getLocationAtOffset(previousAnnotation.start).x, 
-																	  y: view.getLocationAtOffset(model.getLineStart(nextLine)).y},
-																	  "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
-									return { contents: [previousAnnotation],
-											 x: tooltipCoords.x,
-											 y: tooltipCoords.y + Math.floor(view.getLineHeight(nextLine) * 1.33)
-										   };
-								}
-							}, 0);
-						}, 0);
-					};
-					editor.moveSelection(previousAnnotation.start, previousAnnotation.start, callback);
-				}
-				return true;
+				return nextAnnotation(false);
 			}.bind(this), {name: messages.prevAnnotation});
 			
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, false, true, false), "expand"); //$NON-NLS-1$ //$NON-NLS-0$

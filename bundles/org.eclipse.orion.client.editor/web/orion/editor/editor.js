@@ -12,7 +12,7 @@
  /*global define*/
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/editor/keyBinding', 'orion/editor/eventTarget', 'orion/editor/tooltip', 'orion/editor/annotations', 'orion/editor/util'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, util) { //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBinding', 'orion/editor/eventTarget', 'orion/editor/tooltip', 'orion/editor/annotations', 'orion/util'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, util) { //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var Animation;
 	
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
@@ -494,6 +494,11 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/editor/k
 				onMouseMove: function(e) {
 					var tooltip = mTooltip.Tooltip.getTooltip(textView);
 					if (!tooltip) { return; }
+					if (self._listener.lastMouseX === e.event.clientX && self._listener.lastMouseY === e.event.clientY) {
+						return;
+					}
+					self._listener.lastMouseX = e.event.clientX;
+					self._listener.lastMouseY = e.event.clientY;
 					tooltip.setTarget({
 						x: e.x,
 						y: e.y,
@@ -502,7 +507,17 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/editor/k
 						}
 					});
 				},
-				onMouseOut: function(lineIndex, e) {
+				onMouseOut: function(e) {
+					var tooltip = mTooltip.Tooltip.getTooltip(textView);
+					if (!tooltip) { return; }
+					if (self._listener.lastMouseX === e.event.clientX && self._listener.lastMouseY === e.event.clientY) {
+						return;
+					}
+					self._listener.lastMouseX = e.event.clientX;
+					self._listener.lastMouseY = e.event.clientY;
+					tooltip.setTarget(null);
+				},
+				onScroll: function(e) {
 					var tooltip = mTooltip.Tooltip.getTooltip(textView);
 					if (!tooltip) { return; }
 					tooltip.setTarget(null);
@@ -517,6 +532,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/editor/k
 			textView.addEventListener("MouseOver", this._listener.onMouseOver); //$NON-NLS-0$
 			textView.addEventListener("MouseOut", this._listener.onMouseOut); //$NON-NLS-0$
 			textView.addEventListener("MouseMove", this._listener.onMouseMove); //$NON-NLS-0$
+			textView.addEventListener("Scroll", this._listener.onScroll); //$NON-NLS-0$
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
@@ -987,9 +1003,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/editor/k
 	}
 
 	return {
-		Editor: Editor,
-		util: {
-			bind: bind
-		}
+		Editor: Editor
 	};
 });

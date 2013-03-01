@@ -8,6 +8,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+ /*global define document console window*/
+/*jslint forin:true regexp:false sub:true*/
+
 define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 
 		'orion/explorers/navigationUtils', 'orion/crawler/searchCrawler', 'orion/compare/compareUtils', 'orion/searchUtils', 'orion/selection'], 
 		function(messages, require, lib, mExplorer, mNavHandler, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection) {
@@ -29,7 +32,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 	function _place(ndoeToPlace, parent, position){
 		var parentNode = lib.node(parent);
 		if(parentNode){
-			if(position === "only"){
+			if(position === "only"){ //$NON-NLS-0$
 				lib.empty(parentNode);
 			}
 			parentNode.appendChild(ndoeToPlace);
@@ -50,7 +53,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 				for(var i = 0; i < classNames.length; i++){
 					element.classList.add(classNames[i]);
 				}
-			} else if(typeof classNames === "string"){
+			} else if(typeof classNames === "string"){ //$NON-NLS-0$
 				element.className = classNames;
 			}
 		}
@@ -86,7 +89,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 		this._init(options);
 		this.options = options;
 		this.explorer = explorer;
-	};
+	}
 	
 	CompareTreeExplorerRenderer.prototype = new mExplorer.SelectionRenderer();
 	
@@ -94,37 +97,38 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 		var col, h2;
 		switch(col_no){
 			case 0:
-				col = _createElement('th'); //$NON-NLS-1$
-				h2 = _createElement('h2', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-1$
+				col = _createElement('th'); //$NON-NLS-0$
+				h2 = _createElement('h2', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-0$
 				h2.textContent = this.explorer._compareResults.length + " of " + this.explorer._totalFiles + messages["files changed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				return col;
 			case 1: 
-				col = _createElement('th'); //$NON-NLS-1$
-				h2 = _createElement('h2', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-1$
-				h2.textContent = messages["Location"]; //$NON-NLS-1$
+				col = _createElement('th'); //$NON-NLS-0$
+				h2 = _createElement('h2', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-0$
+				h2.textContent = messages["Location"]; //$NON-NLS-0$
 			return col;
 		}
 	};
 	
 	CompareTreeExplorerRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		var col, div, span, linkRef;
 		switch(col_no){
 		case 0:
-			var col = _createElement('td'); //$NON-NLS-1$ //$NON-NLS-1$
-			var div = _createElement('div', "compare_tree_grid", null, col); //$NON-NLS-1$
+			col = _createElement('td'); //$NON-NLS-0$
+			div = _createElement('div', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			var diffStatusIcon = _createElement("span", null, null, div); //$NON-NLS-1$
-			var linkRef, displayName;
+			var diffStatusIcon = _createElement("span", null, null, div); //$NON-NLS-0$
+			var displayName;
 			if(item.type){
 				switch (item.type) {
 					case "added": //$NON-NLS-0$
 						_addClass(diffStatusIcon, "compareAdditionSprite"); //$NON-NLS-0$
 						displayName = item.name;
-						linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL;
+						linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL; //$NON-NLS-1$ //$NON-NLS-0$
 						break;
 					case "removed": //$NON-NLS-0$
 						_addClass(diffStatusIcon, "compareRemovalSprite"); //$NON-NLS-0$
 						displayName = item.name;
-						linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL;
+						linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL; //$NON-NLS-1$ //$NON-NLS-0$
 						break;
 					case "modified": //$NON-NLS-0$
 						_addClass(diffStatusIcon, "imageSprite"); //$NON-NLS-0$
@@ -135,8 +139,8 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 				}
 			}
 			
-			var span = _createElement('span', "primaryColumn", null, div); //$NON-NLS-2$ //$NON-NLS-1$
-			_place(document.createTextNode(displayName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			span = _createElement('span', "primaryColumn", null, div); //$NON-NLS-1$ //$NON-NLS-0$
+			_place(document.createTextNode(displayName), span, "only");//$NON-NLS-0$
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
 			_connect(span, "click", function() { //$NON-NLS-0$
 				window.open(linkRef);
@@ -152,11 +156,11 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			if(!item.fullPathName){
 				return;
 			}
-			var col = _createElement('td'); //$NON-NLS-1$ //$NON-NLS-1$
-			var div = _createElement('div', "compare_tree_grid", null, col); //$NON-NLS-1$
+			col = _createElement('td'); //$NON-NLS-0$
+			div = _createElement('div', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			var span = _createElement('span', "primaryColumn", null, div); //$NON-NLS-2$ //$NON-NLS-1$
-			var linkRef = require.toUrl("navigate/table.html") + "#" + item.parentLocation;
+			span = _createElement('span', "primaryColumn", null, div); //$NON-NLS-1$ //$NON-NLS-0$
+			linkRef = require.toUrl("navigate/table.html") + "#" + item.parentLocation; //$NON-NLS-1$ //$NON-NLS-0$
 			var fileService = this.explorer.getFileServiceName(item);
 			_place(document.createTextNode(fileService + "/" + item.fullPathName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
@@ -176,11 +180,11 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 	CompareTreeExplorerRenderer.prototype.constructor = CompareTreeExplorerRenderer;
 	
 	function CompareTreeExplorer(registry, parentId, commandService){
-		this.selection = new mSelection.Selection(registry, "orion.compare.selection"); 
+		this.selection = new mSelection.Selection(registry, "orion.compare.selection"); //$NON-NLS-0$
 		this.registry = registry;
 		this._commandService = commandService;
 		this._fileClient = new mFileClient.FileClient(this.registry);
-		this._progress = registry.getService("orion.page.progress");
+		this._progress = registry.getService("orion.page.progress"); //$NON-NLS-0$
 		this.parentId = parentId;
 		this.renderer = new CompareTreeExplorerRenderer({checkbox: false}, this);
 		//this.declareCommands();
@@ -194,26 +198,25 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 	CompareTreeExplorer.prototype._tailRelativePath = function(parentFullPath, childFullPath) {
 		var containsParentPath = childFullPath.indexOf(parentFullPath);
 		if(containsParentPath !== 0){
-			throw "File path does not contain the folder path";
-			return childFullPath;
+			throw "File path does not contain the folder path"; //$NON-NLS-0$
 		}
 		var relativePath = childFullPath.substring(parentFullPath.length);
-		if(relativePath.length > 0 && relativePath.indexOf("/") === 0){
+		if(relativePath.length > 0 && relativePath.indexOf("/") === 0){ //$NON-NLS-0$
 			relativePath = relativePath.substring(1);
 		}
 		return relativePath;
 	};
 	
 	CompareTreeExplorer.prototype._compareHitTest = function(files, OveralIndex) {
-		console.log("compare hit testing on: " + OveralIndex );
+		console.log("compare hit testing on: " + OveralIndex ); //$NON-NLS-0$
 		console.log(files[0].URL );
 		console.log(files[1].URL);
 		if(files[1].Content !== files[0].Content){
-			this._compareResults.push({type: "modified", fileURL: files[0].URL, fileURLBase: files[1].URL, name: files[0].name});
+			this._compareResults.push({type: "modified", fileURL: files[0].URL, fileURLBase: files[1].URL, name: files[0].name}); //$NON-NLS-0$
 			this._renderUI();		
-			console.log("Different files..." );
+			console.log("Different files..." ); //$NON-NLS-0$
 		} else {
-			console.log("Same files..." );
+			console.log("Same files..." ); //$NON-NLS-0$
 		}
 		files[1].Content = null;
 		files[0].Content = null;
@@ -223,12 +226,12 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 		if(currentIndex === this._sameFiles.length){
 			var that = this;
 			if(this._compareResults.length > 0){
-				this._loadOneFileMetaData(0,function(){that._renderUI(); that._addOptions()});
+				this._loadOneFileMetaData(0,function(){that._renderUI(); that._addOptions();});
 			}
-			console.log("completed compare");
+			console.log("completed compare"); //$NON-NLS-0$
 			this.reportStatus("");	
 		} else {
-			this.reportStatus("Comparing " + this._sameFiles[currentIndex].fileNew.Location);	
+			this.reportStatus("Comparing " + this._sameFiles[currentIndex].fileNew.Location); //$NON-NLS-0$
 			this._getFileContent([{URL: this._sameFiles[currentIndex].fileNew.Location, name: this._sameFiles[currentIndex].fileNew.Name}, 
 					{URL: this._sameFiles[currentIndex].fileBase.Location, name: this._sameFiles[currentIndex].fileBase.Name}], 0, currentIndex);
 		}
@@ -236,29 +239,29 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 	
 	CompareTreeExplorer.prototype._loadOneFileMetaData =  function(index, onComplete){
 		var item = this._compareResults[index];
-		this._progress.progress(this._fileClient.read(item.fileURL, true), "Reading file metadata " + item.fileURL).then(
+		this._progress.progress(this._fileClient.read(item.fileURL, true), "Reading file metadata " + item.fileURL).then( //$NON-NLS-0$
 			function(meta) {
 				item.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 				item.parentLocation = meta.Parents[0].ChildrenLocation;
 				item.name = meta.Name;
-			    if(index === (this._compareResults.length-1)){	
-			    	if(onComplete){
-			    		onComplete();
-			    	} else {
-			    		return; 
-			    	}
-			    } else {
+				if(index === (this._compareResults.length-1)){	
+					if(onComplete){
+						onComplete();
+					} else {
+						return; 
+					}
+				} else {
 					this._loadOneFileMetaData(index+1, onComplete);
-			    }
+				}
 			}.bind(this),
 			function(error) {
 				console.error("Error loading file metadata: status " + error.status); //$NON-NLS-0$
 				if(index === (this._compareResults.length-1)){
-			    	if(onComplete){
-			    		onComplete();
-			    	} else {
-			    		return; 
-			    	}
+					if(onComplete){
+						onComplete();
+					} else {
+						return; 
+					}
 				} else {
 					this._loadOneFileMetaData( index+1, onComplete);
 				}
@@ -272,7 +275,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			return;
 		}
 		var that = this;
-		that._progress.progress(that._fileClient.read(locations[index].URL, true), "Reading file metadata " + locations[index].URL).then(function(meta) {
+		that._progress.progress(that._fileClient.read(locations[index].URL, true), "Reading file metadata " + locations[index].URL).then(function(meta) { //$NON-NLS-0$
 			locations[index].childrenLocation = meta.ChildrenLocation;
 			if(index < (locations.length - 1)){
 				that._getChildrenLocation(locations, index+1, onComplete);
@@ -295,7 +298,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			return;
 		}
 		var that = this;
-		that._progress.progress(that._fileClient.read(files[currentIndex].URL), "Reading file " + files[currentIndex].URL).then(function(contents) {
+		that._progress.progress(that._fileClient.read(files[currentIndex].URL), "Reading file " + files[currentIndex].URL).then(function(contents) { //$NON-NLS-0$
 			files[currentIndex].Content = contents;
 			if(currentIndex < (files.length - 1)){
 				that._getFileContent(files, currentIndex+1, OveralIndex);
@@ -319,7 +322,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 	};
 	
 	CompareTreeExplorer.prototype.getFileServiceName = function(item) {
-		if(item.type === "removed"){
+		if(item.type === "removed"){ //$NON-NLS-0$
 			return this._fileServiceNameBase;
 		}
 		return this._fileServiceNameNew;
@@ -330,13 +333,13 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 		this._sameFiles = [];//To buffer a list of file pairs that have the same relative location
 		var skeletonNew = this._fileSkeletonNew;
 		var skeletonBase = this._fileSkeletonBase;
+		var curResItemBase;
 		for(var i = 0; i < skeletonNew.length; i++){//Loop on file skeleton to be compared
 			var hasSameFile = false;
-			var sameFileBase = null;
 			var curResItemNew = skeletonNew[i];
 			var relativePathNew = this._tailRelativePath(this._folderNew, curResItemNew.Location);
 			for( var j = 0; j < skeletonBase.length; j++){//Loop on file skeleton to compare with
-				var curResItemBase = skeletonBase[j];
+				curResItemBase = skeletonBase[j];
 				var relativePathBase = this._tailRelativePath(this._folderBase, curResItemBase.Location);
 				if(relativePathBase === relativePathNew){//If the relative path is the same, we treat them as same file
 					curResItemNew._hasSameFile = true;
@@ -347,13 +350,13 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 				}
 			}
 			if(!hasSameFile){//If a file in the new file skeleton has no partner in the base file skeleton, it is treatede as added file.
-				this._compareResults.push({type: "added", fileURL: curResItemNew.Location, name: curResItemNew.Name});
+				this._compareResults.push({type: "added", fileURL: curResItemNew.Location, name: curResItemNew.Name}); //$NON-NLS-0$
 			}
 		}
-		for( var j = 0; j < skeletonBase.length; j++){//Loop on the base file skeleton(the opne to compare with) to filter out those that do not have "_hasSameFile" property.
-			var curResItemBase = skeletonBase[j];
+		for( var k = 0; k < skeletonBase.length; k++){//Loop on the base file skeleton(the opne to compare with) to filter out those that do not have "_hasSameFile" property.
+			curResItemBase = skeletonBase[k];
 			if(!curResItemBase._hasSameFile){
-				this._compareResults.push({type: "removed", fileURL: curResItemBase.Location, name: curResItemBase.Name});
+				this._compareResults.push({type: "removed", fileURL: curResItemBase.Location, name: curResItemBase.Name}); //$NON-NLS-0$
 			}
 		}
 		this._totalFiles = this._compareResults.length + this._sameFiles.length;
@@ -375,10 +378,10 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			var locations = [{URL:this._folderNew},{URL:this._folderBase}];
 			this._getChildrenLocation(locations, 0, function(){
 				var crawlerNew = new mSearchCrawler.SearchCrawler(that.registry, that._fileClient, "", {buildSkeletonOnly: true, location: that._folderNew, childrenLocation: locations[0].childrenLocation,
-									fetchChildrenCallBack: function(folderURL){that.reportStatus("Fetching folder: " + folderURL + "...");}
+									fetchChildrenCallBack: function(folderURL){that.reportStatus("Fetching folder: " + folderURL + "...");} //$NON-NLS-1$ //$NON-NLS-0$
 									}); 
 				var crawlerBase = new mSearchCrawler.SearchCrawler(that.registry, that._fileClient, "", {buildSkeletonOnly: true, location: that._folderBase, childrenLocation: locations[1].childrenLocation,
-									fetchChildrenCallBack: function(folderURL){that.reportStatus("Fetching folder: " + folderURL + "...");}
+									fetchChildrenCallBack: function(folderURL){that.reportStatus("Fetching folder: " + folderURL + "...");} //$NON-NLS-1$ //$NON-NLS-0$
 									}); 
 				crawlerNew.buildSkeleton(
 					function(){
@@ -399,18 +402,18 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 
 	CompareTreeExplorer.prototype.startup = function(compareParams) {
 		_empty(this.parentId);
-		this.reportStatus("Generating compare tree result...");	
+		this.reportStatus("Generating compare tree result..."); //$NON-NLS-0$
 		this.prepareResults(compareParams);
 	};
 
 	CompareTreeExplorer.prototype.readonly = function() {
-		return (this._compareParams.readonly === "true" ? true : false);
+		return (this._compareParams.readonly === "true" ? true : false); //$NON-NLS-0$
 	};
 
 	CompareTreeExplorer.prototype._addOptions = function() {
 		var that = this;
-		_empty("pageNavigationActions");
-		var optionMenu = mCommands.createDropdownMenu("pageNavigationActions", messages['Options']);
+		_empty("pageNavigationActions"); //$NON-NLS-0$
+		var optionMenu = mCommands.createDropdownMenu("pageNavigationActions", messages['Options']); //$NON-NLS-1$ //$NON-NLS-0$
 		mCommands.createCheckedMenuItem(optionMenu.menu, messages["Sort by folders"], false,
 			function(event) {
 				that._sortByFolder = event.target.checked;
@@ -432,7 +435,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 					return 0;
 				}
 			});
-		this.createTree(this.parentId, new CompareTreeModel(null, null, this._compareResults), {selectionPolicy: "cursorOnly", setFocus: true});
+		this.createTree(this.parentId, new CompareTreeModel(null, null, this._compareResults), {selectionPolicy: "cursorOnly", setFocus: true}); //$NON-NLS-0$
 	};
 	
 	CompareTreeExplorer.prototype.constructor = CompareTreeExplorer;
