@@ -62,6 +62,10 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 						operations[this].operation.type = "loadend";
 						that.changedItem(this);
 					};
+					var progress = function(operation){
+						operations[this].operation = operation;
+						that.changedItem(this);
+					};
 					var failure = function(error) {
 						if(error.canceled){
 							operation.deferred = that.operationsClient.getOperation(this);
@@ -83,10 +87,6 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 						operations[this].operation.error = error;
 						that.changedItem(this);
 					}; 
-					var progress = function(operation){
-						operations[this].operation = operation;
-						that.changedItem(this);
-					};
 					operation.deferred = that.operationsClient.getOperation(operationLocation);
 					operation.deferred.then(success.bind(operationLocation), failure.bind(operationLocation), progress.bind(operationLocation));
 				}
