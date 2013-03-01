@@ -8,14 +8,14 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
+/*global define JsDiff*/
+/*jslint forin:true regexp:false sub:true*/
 
 define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapter", "mapper-test-data.js", 'jsdiff/diff'], function(assert, mDiffParser, mJSDiffAdapter, mMapperTestData) {
 	var tests = {};
 	var mapperTestCases = mMapperTestData.mapperTestCases;
 
 	var _inTestArray = function(testDataIndexs, index){
-		var ret = false;
 		for(var k = 0; k < testDataIndexs.length; k++){
 			if(testDataIndexs[k] === index){
 				return true;
@@ -44,9 +44,9 @@ define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapte
 			var j = i + 1;
 			
 			// Note: This is not a great way to do tests. Each test should be separate
-			tests["test " + j + ": " + description] = function(input, diff, expectedOutput, expectedMapping) {
+			tests["test " + j + ": " + description] = function(input, diff, expectedOutput, expectedMapping) { //$NON-NLS-1$ //$NON-NLS-0$
 				return function() {
-					var diffParser = new mDiffParser.DiffParser("\n");
+					var diffParser = new mDiffParser.DiffParser("\n"); //$NON-NLS-0$
 					var result = diffParser.parse(input, diff);
 					assert.deepEqual(result.mapper, expectedMapping);
 					assert.equal(result.outPutFile, expectedOutput);
@@ -58,22 +58,20 @@ define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapte
 	var _mapperPartialEqual = function(mapper, expectedMapper){
 		if(mapper.length !== expectedMapper.length){
 			throw new assert.AssertionError({
-				message :  "mapper failed at total length",
+				message :  "mapper failed at total length", //$NON-NLS-0$
 				expected : expectedMapper,
 				actual : mapper
 			});
-			return;
 		}
 		for(var i = 0; i < mapper.length; i++ ){
 			for(var j= 0; j < 3; j++){
 				if(j < 2 || ( j === 2 && expectedMapper[i][j] < 1) ){
 					if(mapper[i][j] !== expectedMapper[i][j]){
 						throw new assert.AssertionError({
-							message :  "mapper failed at index " + i,
+							message :  "mapper failed at index " + i, //$NON-NLS-0$
 							expected : expectedMapper,
 							actual : mapper
 						});
-						return;
 					}
 				}
 			}
@@ -96,23 +94,23 @@ define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapte
 			var expectedOutput = testCase[2];
 			
 			var output;
-			if(expectedOutput.indexOf("\r\n") >= 0){
-				output = expectedOutput.split("\r\n").join("\n");
+			if(expectedOutput.indexOf("\r\n") >= 0){ //$NON-NLS-0$
+				output = expectedOutput.split("\r\n").join("\n"); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
 				output = expectedOutput;
 			}
-			if(input.indexOf("\r\n") >= 0){
-				input = input.split("\r\n").join("\n");
+			if(input.indexOf("\r\n") >= 0){ //$NON-NLS-0$
+				input = input.split("\r\n").join("\n"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			var diff = JsDiff.createPatch("foo", input, output, "", "") ;			
+			var diff = JsDiff.createPatch("foo", input, output, "", "") ; //$NON-NLS-1$ //$NON-NLS-0$		
 			var expectedMapping = testCase[3];
 			var description = testCase[4];
 			var j = i + 1;
 			
 			// Note: This is not a great way to do tests. Each test should be separate
-			tests["test jsDiff " + j + ": " + description] = function(input, diff, output, expectedMapping) {
+			tests["test jsDiff " + j + ": " + description] = function(input, diff, output, expectedMapping) { //$NON-NLS-1$ //$NON-NLS-0$
 				return function() {
-					var diffParser = new mDiffParser.DiffParser("\n");
+					var diffParser = new mDiffParser.DiffParser("\n"); //$NON-NLS-0$
 					//console.log("\n\nDiff:\n");
 					//console.log(diff);
 					var result = diffParser.parse(input, diff, false,true);
@@ -139,13 +137,13 @@ define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapte
 			var input = testCase[0];
 			var expectedOutput = testCase[2];
 			var output;
-			if(expectedOutput.indexOf("\r\n") >= 0){
-				output = expectedOutput.split("\r\n").join("\n");
+			if(expectedOutput.indexOf("\r\n") >= 0){ //$NON-NLS-0$
+				output = expectedOutput.split("\r\n").join("\n"); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
 				output = expectedOutput;
 			}
-			if(input.indexOf("\r\n") >= 0){
-				input = input.split("\r\n").join("\n");
+			if(input.indexOf("\r\n") >= 0){ //$NON-NLS-0$
+				input = input.split("\r\n").join("\n"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			
 			var expectedMapping = testCase[3];
@@ -153,9 +151,9 @@ define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapte
 			var j = i + 1;
 			
 			// Note: This is not a great way to do tests. Each test should be separate
-			tests["test jsDiff adapter " + j + ": " + description] = function(input, output, expectedMapping) {
+			tests["test jsDiff adapter " + j + ": " + description] = function(input, output, expectedMapping) { //$NON-NLS-1$ //$NON-NLS-0$
 				return function() {
-					var result = adapter.adapt(input, output, "\n");
+					var result = adapter.adapt(input, output, "\n"); //$NON-NLS-0$
 					_mapperPartialEqual(result.mapper, expectedMapping);
 				};				
 			}(input,  output, expectedMapping);
@@ -167,7 +165,7 @@ define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapte
 	testJSDiffPatch(mapperTestCases, null, [23,29,31,39,40]);
 	testJSDiffAdapter(mapperTestCases);
 	
-	tests["test empty case"] = function() {
+	tests["test empty case"] = function() { //$NON-NLS-0$
 		var input = "";
 		var diff = "";
 		var expectedOutput = "";
@@ -180,12 +178,12 @@ define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapte
 	};
 	
 
-	tests["test add 1 empty line to empty file"] = function() {
+	tests["test add 1 empty line to empty file"] = function() { //$NON-NLS-0$
 		var input = "";
-		var diff = "@@ -0,0 +1 @@\r\n" + 
-		  "+\r\n" + 
+		var diff = "@@ -0,0 +1 @@\r\n" +  //$NON-NLS-0$
+		  "+\r\n" +  //$NON-NLS-0$
 		  "";
-		var expectedOutput = "\r\n" +
+		var expectedOutput = "\r\n" + //$NON-NLS-0$
 		  "";
 		var expectedMapping = [[1, 0, 2]];
 
@@ -196,16 +194,16 @@ define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapte
 	};
 	
 
-	tests["test add 2 empty lines to empty file"] = function() {
+	tests["test add 2 empty lines to empty file"] = function() { //$NON-NLS-0$
 		var input = "";
 		
-		var diff = "@@ -0,0 +1,2 @@\r\n" + 
-		  "+\r\n" + 
-		  "+\r\n" + 
+		var diff = "@@ -0,0 +1,2 @@\r\n" +  //$NON-NLS-0$
+		  "+\r\n" +  //$NON-NLS-0$
+		  "+\r\n" +  //$NON-NLS-0$
 		  "";
 		
-		var expectedOutput = "\r\n" + 
-		  "\r\n" + 
+		var expectedOutput = "\r\n" +  //$NON-NLS-0$
+		  "\r\n" +  //$NON-NLS-0$
 		  "";
 		
 		var expectedMapping = [[2, 0, 2]];

@@ -25,17 +25,17 @@ exports.searchUtils = exports.searchUtils || {};
 exports.searchUtils.ALL_FILE_TYPE = "*.*"; //$NON-NLS-0$
 
 function _generateSearchHelperRegEx(inFileQuery, searchParams, fromStart){
-	var prefix = ""; //$NON-NLS-1$
+	var prefix = "";
 	if(fromStart){
-		prefix = "^"; //$NON-NLS-1$
+		prefix = "^"; //$NON-NLS-0$
 	}
 	var regexp = mRegex.parse("/" + prefix + inFileQuery.searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
 	if (regexp) {
 		var pattern = regexp.pattern;
 		var flags = regexp.flags;
-		if(flags.indexOf("i") === -1 && !searchParams.caseSensitive){ //$NON-NLS-1$ 
+		if(flags.indexOf("i") === -1 && !searchParams.caseSensitive){ //$NON-NLS-0$ 
 			//If the regEx flag does not include 'i' then we have to add it by searchParams.caseSensitive
-			flags = flags + "i";//$NON-NLS-1$
+			flags = flags + "i";//$NON-NLS-0$
 		}
 		inFileQuery.regExp = {pattern: pattern, flags: flags};
 		inFileQuery.wildCard = true;
@@ -45,7 +45,7 @@ function _generateSearchHelperRegEx(inFileQuery, searchParams, fromStart){
 exports.searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions){
 	if (searcher) {
 		var newSearchStr = searchStr, commitSearch = true;
-		if(newSearchStr === "*"){
+		if(newSearchStr === "*"){ //$NON-NLS-0$
 			newSearchStr = "";
 		}
 		if(newSearchStr === ""){
@@ -86,7 +86,7 @@ exports.searchUtils.generateSearchHelper = function(searchParams, fromStart) {
 	var displayedSearchTerm = searchStr;
 	var inFileQuery = {};
 	if(searchParams.fileType && searchParams.fileType !== exports.searchUtils.ALL_FILE_TYPE && searchStr === ""){
-		displayedSearchTerm = "*." + searchParams.fileType;
+		displayedSearchTerm = "*." + searchParams.fileType; //$NON-NLS-0$
 	}
 	if(!searchParams.regEx){
 		var hasStar = (searchStr.indexOf("*") > -1); //$NON-NLS-0$
@@ -98,7 +98,7 @@ exports.searchUtils.generateSearchHelper = function(searchParams, fromStart) {
 			searchStr = searchStr.split("?").join("."); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		if(!hasStar && !hasQMark && !searchParams.nameSearch){
-			inFileQuery.searchStr = searchParams.caseSensitive ? searchStr.split("\\").join("") : searchStr.split("\\").join("").toLowerCase(); //$NON-NLS-0$
+			inFileQuery.searchStr = searchParams.caseSensitive ? searchStr.split("\\").join("") : searchStr.split("\\").join("").toLowerCase(); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			inFileQuery.wildCard = false;
 		} else {
 			inFileQuery.searchStr = searchParams.caseSensitive ? searchStr : searchStr.toLowerCase();
@@ -115,19 +115,19 @@ exports.searchUtils.generateSearchHelper = function(searchParams, fromStart) {
 
 exports.searchUtils.convertSearchParams = function(searchParams) {
 	if(searchParams.rows !== undefined){
-		searchParams.rows = parseInt(searchParams.rows);
+		searchParams.rows = parseInt(searchParams.rows, 10);
 	}
 	if(searchParams.start !== undefined){
-		searchParams.start = parseInt(searchParams.start);
+		searchParams.start = parseInt(searchParams.start, 10);
 	}
-	if(typeof searchParams.regEx === "string"){
-		searchParams.regEx = (searchParams.regEx.toLowerCase() === "true");
+	if(typeof searchParams.regEx === "string"){ //$NON-NLS-0$
+		searchParams.regEx = (searchParams.regEx.toLowerCase() === "true"); //$NON-NLS-0$
 	}
-	if(typeof searchParams.caseSensitive === "string"){
-		searchParams.caseSensitive = (searchParams.caseSensitive.toLowerCase() === "true");
+	if(typeof searchParams.caseSensitive === "string"){ //$NON-NLS-0$
+		searchParams.caseSensitive = (searchParams.caseSensitive.toLowerCase() === "true"); //$NON-NLS-0$
 	}
-	if(typeof searchParams.nameSearch === "string"){
-		searchParams.nameSearch = (searchParams.nameSearch.toLowerCase() === "true");
+	if(typeof searchParams.nameSearch === "string"){ //$NON-NLS-0$
+		searchParams.nameSearch = (searchParams.nameSearch.toLowerCase() === "true"); //$NON-NLS-0$
 	}
 };
 
@@ -135,7 +135,7 @@ exports.searchUtils.copySearchParams = function(searchParams, copyReplace) {
 	var result = {};
 	for (var prop in searchParams) {
 		if(searchParams[prop] !== undefined && searchParams[prop] !== null){
-			if(!copyReplace && prop === "replace") { //$NON-NLS-2$
+			if(!copyReplace && prop === "replace") { //$NON-NLS-0$
 				continue;
 			}
 			result[prop] = searchParams[prop];
@@ -161,26 +161,26 @@ exports.searchUtils.generateFindURLBinding = function(searchParams, inFileQuery,
 		find: inFileQuery.searchStr,
 		regEx: inFileQuery.wildCard ? true : undefined,
 		caseSensitive: searchParams.caseSensitive ? true : undefined,
-		replaceWith: typeof(replaceStr) === "string" ? replaceStr : undefined,
-		atLine: typeof(lineNumber) === "number" ? lineNumber : undefined
-	}
+		replaceWith: typeof(replaceStr) === "string" ? replaceStr : undefined, //$NON-NLS-0$
+		atLine: typeof(lineNumber) === "number" ? lineNumber : undefined //$NON-NLS-0$
+	};
 	var binding = new URITemplate("{,params*}").expand({ //$NON-NLS-0$
 		params: params
 	});
-	return "," + binding;
+	return "," + binding; //$NON-NLS-0$
 };
 
 exports.searchUtils.convertFindURLBinding = function(findParams) {
-	if(typeof findParams.regEx === "string"){
-		findParams.regEx = (findParams.regEx.toLowerCase() === "true");
+	if(typeof findParams.regEx === "string"){ //$NON-NLS-0$
+		findParams.regEx = (findParams.regEx.toLowerCase() === "true"); //$NON-NLS-0$
 	}
-	if(typeof findParams.caseSensitive === "string"){
-		findParams.caseSensitive = (findParams.caseSensitive.toLowerCase() === "true");
+	if(typeof findParams.caseSensitive === "string"){ //$NON-NLS-0$
+		findParams.caseSensitive = (findParams.caseSensitive.toLowerCase() === "true"); //$NON-NLS-0$
 	}
-	if(typeof findParams.atLine === "string"){
-		findParams.atLine = parseInt(findParams.atLine);
+	if(typeof findParams.atLine === "string"){ //$NON-NLS-0$
+		findParams.atLine = parseInt(findParams.atLine, 10);
 	}
-}
+};
 
 exports.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
 	var regexp = new RegExp(regEx.pattern, regEx.flags);
@@ -239,10 +239,10 @@ exports.searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
 	flags = flags || "";
 	// 'g' makes exec() iterate all matches, 'm' makes ^$
 	// work linewise
-	flags += (flags.indexOf("g") === -1 ? "g" : "") //$NON-NLS-1$ //$NON-NLS-0$
-			+ (flags.indexOf("m") === -1 ? "m" : ""); //$NON-NLS-1$ //$NON-NLS-0$
+	flags += (flags.indexOf("g") === -1 ? "g" : "") + //$NON-NLS-1$ //$NON-NLS-0$
+			(flags.indexOf("m") === -1 ? "m" : ""); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var regexp = new RegExp(pattern, flags);
-	var result = null, match = null;
+	var result = null;
 	result = regexp.exec(text.substring(startIndex));
 	return result && {
 		startIndex: result.index + startIndex,
@@ -251,7 +251,7 @@ exports.searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
 };
 
 exports.searchUtils.searchOnelineRegEx =  function(inFileQuery, lineString, onlyOnce){
-	var i,startIndex = 0;
+	var startIndex = 0;
 	var found = false;
 	var result = [];
 	while(true){
@@ -285,12 +285,12 @@ exports.searchUtils.generateNewContents = function( updating, oldContents, newCo
 			var fullChecked = false;
 			var checkedMatches = [];
 			var originalMatches;
-			var startNumber = 0;
+			var k, startNumber = 0;
 			for(var j = 0; j < fileModelNode.children.length; j++){
 				var lnumber = fileModelNode.children[j].lineNumber - 1;
 				if(lnumber === i){
 					startNumber = j;
-					for(var k = 0; k < fileModelNode.children[j].matches.length; k++ ){
+					for(k = 0; k < fileModelNode.children[j].matches.length; k++ ){
 						if(fileModelNode.children[j+k].checked !== false){
 							checkedMatches.push(k);
 						}
@@ -306,13 +306,13 @@ exports.searchUtils.generateNewContents = function( updating, oldContents, newCo
 				var newStr;
 				if(!checked){
 					newStr = lineStringOrigin;
-					for(var k = 0; k < fileModelNode.children[startNumber].matches.length; k++ ){
+					for(k = 0; k < fileModelNode.children[startNumber].matches.length; k++ ){
 						fileModelNode.children[startNumber+k].newMatches = fileModelNode.children[startNumber+k].matches;
 					}
 				} else{
 					var result =  exports.searchUtils.replaceCheckedMatches(lineStringOrigin, replaceStr, originalMatches, checkedMatches, searchStrLength);
 					newStr = result.replacedStr;
-					for(var k = 0; k < fileModelNode.children[startNumber].matches.length; k++ ){
+					for(k = 0; k < fileModelNode.children[startNumber].matches.length; k++ ){
 						fileModelNode.children[startNumber+k].newMatches = result.newMatches;
 					}
 				}
@@ -415,16 +415,16 @@ exports.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fil
 					result = exports.searchUtils.searchOnelineLiteral(inFileQuery, lineString);
 				}
 				if(result){
-					var lineNumber = i+1;
+					var detailNode, lineNumber = i+1;
 					if(!replacing){
-						var detailNode = {parent: fileModelNode, context: exports.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, 
-										  type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, 
+						detailNode = {parent: fileModelNode, context: exports.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, 
+										  type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, //$NON-NLS-0$ 
 										  location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						fileModelNode.children.push(detailNode);
 					} else {
 						for(var j = 0; j < result.length; j++){
 							var matchNumber = j+1;
-							var detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, matchNumber: matchNumber, name: lineStringOrigin, location: fileModelNode.location + "-" + lineNumber + "-" + matchNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, matchNumber: matchNumber, name: lineStringOrigin, location: fileModelNode.location + "-" + lineNumber + "-" + matchNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							fileModelNode.children.push(detailNode);
 						}
 					}
@@ -497,7 +497,7 @@ exports.searchUtils._storeRecentSearch = function(serviceRegistry, searches){
 };
 
 exports.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useRegEx){
-	if(typeof searchName !== "string" || !searchName ){
+	if(typeof searchName !== "string" || !searchName ){ //$NON-NLS-0$
 		return;
 	}
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
@@ -507,7 +507,6 @@ exports.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useR
 			searches = JSON.parse(searches);
 		}
 		if (searches) {
-			var i;
 			for (i in searches) {
 				if (searches[i].name === searchName) {
 					return;
@@ -520,7 +519,7 @@ exports.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useR
 		} else {
 			searches = [];
 		}
-		searches.splice(0,0,{ "name": searchName, "regEx": useRegEx});//$NON-NLS-1$
+		searches.splice(0,0,{ "name": searchName, "regEx": useRegEx});//$NON-NLS-1$ //$NON-NLS-0$
 		exports.searchUtils._storeRecentSearch(serviceRegistry, searches);
 		//prefs.put("recentSearch", searches); //$NON-NLS-0$
 	});
@@ -528,7 +527,6 @@ exports.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useR
 
 exports.searchUtils.getSearches = function(serviceRegistry, type, callback){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		var i;
 		var searches = prefs.get(type); //$NON-NLS-0$
 		if (typeof searches === "string") { //$NON-NLS-0$
 			searches = JSON.parse(searches);
@@ -541,7 +539,6 @@ exports.searchUtils.getSearches = function(serviceRegistry, type, callback){
 
 exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, checkDuplication, callback){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		var i;
 		var searches = prefs.get("recentSearch"); //$NON-NLS-0$
 		if (typeof searches === "string") { //$NON-NLS-0$
 			searches = JSON.parse(searches);
@@ -551,18 +548,20 @@ exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, checkDup
 			if (typeof savedSearches === "string") { //$NON-NLS-0$
 				savedSearches = JSON.parse(savedSearches);
 			}
-			for (var i in savedSearches) {
-				if(checkDuplication){
-					var qObj = exports.searchUtils.parseQueryStr(savedSearches[i].query);
-					var duplicated = searches.some(function(search) {
-							return qObj.searchStrTitle === search.name;
-					});
-					if(!duplicated){
-						searches.push({"name": qObj.searchStrTitle, "label": savedSearches[i].name});
+			if(savedSearches){
+				savedSearches.forEach(function(savedSearch) {
+					if(checkDuplication){
+						var qObj = exports.searchUtils.parseQueryStr(savedSearch.query);
+						var duplicated = searches.some(function(search) {
+								return qObj.searchStrTitle === search.name;
+						});
+						if(!duplicated){
+							searches.push({"name": qObj.searchStrTitle, "label": savedSearch.name}); //$NON-NLS-1$ //$NON-NLS-0$
+						}
+					} else {
+						searches.push({"name": null, "label": savedSearch.name, value: savedSearch.query}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
-				} else {
-					searches.push({"name": null, "label": savedSearches[i].name, value: savedSearches[i].query});
-				}
+				});
 			}
 		}
 		if (searches && callback) {
@@ -573,11 +572,10 @@ exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, checkDup
 
 exports.searchUtils.getOpenSearchPref = function(serviceRegistry, callback){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/cm/configurations").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		var i;
 		var properties = prefs.get("nav.config"); //$NON-NLS-0$
 		var openInNewTab;
 		if (properties && properties["links.newtab"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
-			openInNewTab = properties["links.newtab"] ? true : false; //$NON-NLS-2$ 
+			openInNewTab = properties["links.newtab"] ? true : false; //$NON-NLS-0$ 
 		} else {
 			openInNewTab = false;
 		}
@@ -587,7 +585,7 @@ exports.searchUtils.getOpenSearchPref = function(serviceRegistry, callback){
 
 exports.searchUtils.setOpenSearchPref = function(serviceRegistry, openInNewTab){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-		prefs.put("openSearchPref", {"openInNewTab": openInNewTab}); //$NON-NLS-0$
+		prefs.put("openSearchPref", {"openInNewTab": openInNewTab}); //$NON-NLS-1$ //$NON-NLS-0$
 	});
 };
 
