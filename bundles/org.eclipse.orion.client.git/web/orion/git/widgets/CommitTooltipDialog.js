@@ -8,6 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+ 
+ /*globals define window document Image*/
 
 define([ 'i18n!git/nls/gitmessages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/webui/popupdialog'], 
 	function(messages, require, lib, i18nUtil, popupdialog) {
@@ -147,7 +149,7 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/webui/littlelib', 'orion/
 				tagsList.appendChild(tagNameSpan);
 			}
 		}
-	}
+	};
 	
 	CommitTooltipDialog.prototype.constructor = CommitTooltipDialog;
 	

@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*globals define document clearTimeout setTimeout window*/
+/*globals define document clearTimeout setTimeout window Image*/
 
 define(['i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/webui/dialog', 'orion/webui/littlelib'], function(
 messages, i18nUtil, Deferred, dialog, lib) {

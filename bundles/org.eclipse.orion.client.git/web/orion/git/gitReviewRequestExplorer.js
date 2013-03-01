@@ -9,8 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/*global define document window*/
+
 define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/globalCommands',
-        'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog',], 
+        'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
 		function(messages, require, mSection, i18nUtil, PageUtil, lib, mGlobalCommands, mGitCommands, Deferred, mCommitTooltip) {
 	var exports = {};
 

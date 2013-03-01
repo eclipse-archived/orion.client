@@ -8,8 +8,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+ 
+ /*globals define window setTimeout document*/
 
-define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialog' ], function(messages, DirPrompter, dialog) {
+define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialog', 'require' ], function(messages, DirPrompter, dialog, require) {
 
 	function CloneGitRepositoryDialog(options) {
 		this._init(options);

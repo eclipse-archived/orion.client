@@ -8,6 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+ 
+  /*globals define window setTimeout, FileReader*/
 
 define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/webui/dialog' ], function(messages, GitPreferenceStorage, dialog) {
 

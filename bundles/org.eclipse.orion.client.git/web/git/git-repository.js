@@ -8,6 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*globals define window*/
 
 var eclipse;
 
