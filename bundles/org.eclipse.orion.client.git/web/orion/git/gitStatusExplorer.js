@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document*/
+/*global define document window Image*/
 define(
 		[ 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orion/selection', 'orion/section', 'orion/PageUtil', 'orion/webui/littlelib',
 				'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/git/util',
@@ -215,7 +215,7 @@ define(
 
 																					for ( var i = 0; i < config.length; i++) {
 																						if (config[i].Key === "user.name" || config[i].Key === "user.email") //$NON-NLS-1$ //$NON-NLS-0$
-																							status.Clone.Config.push(config[i])
+																							status.Clone.Config.push(config[i]);
 																					}
 
 																					var tableNode = lib.node('table'); //$NON-NLS-0$
@@ -354,7 +354,7 @@ define(
 
 					this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.stageCommand", 100);
 
-					UnstagedModel = (function() {
+					var UnstagedModel = (function() {
 						function UnstagedModel() {
 						}
 
@@ -395,7 +395,7 @@ define(
 						return UnstagedModel;
 					}());
 
-					UnstagedRenderer = (function() {
+					var UnstagedRenderer = (function() {
 						function UnstagedRenderer(options, explorer) {
 							this._init(options);
 							this.options = options;
@@ -496,7 +496,7 @@ define(
 						return UnstagedRenderer;
 					}());
 
-					UnstagedNavigator = (function() {
+					var UnstagedNavigator = (function() {
 						function UnstagedNavigator(registry, selection, parentId, actionScopeId) {
 							this.registry = registry;
 							this.checkbox = false;
@@ -582,7 +582,7 @@ define(
 
 					this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
 
-					StagedModel = (function() {
+					var StagedModel = (function() {
 						function StagedModel() {
 						}
 
@@ -623,7 +623,7 @@ define(
 						return StagedModel;
 					}());
 
-					StagedRenderer = (function() {
+					var StagedRenderer = (function() {
 						function StagedRenderer(options, explorer) {
 							this._init(options);
 							this.options = options;
@@ -724,7 +724,7 @@ define(
 						return StagedRenderer;
 					}());
 
-					StagedNavigator = (function() {
+					var StagedNavigator = (function() {
 						function StagedNavigator(registry, selection, parentId, actionScopeId) {
 							this.registry = registry;
 							this.checkbox = false;

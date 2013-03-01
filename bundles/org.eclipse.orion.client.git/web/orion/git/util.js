@@ -34,10 +34,6 @@ define(['i18n!git/nls/gitmessages'], function(messages) {
 	
 	var statusUILocation = "git/git-status2.html"; //$NON-NLS-0$
 	
-	function isChange(change){
-		return isStaged(change) || isUnstaged(change);
-	}
-	
 	function isStaged(change){
 		for(var i = 0; i < interestedStagedGroup.length ; i++){
 			if(change.type === interestedStagedGroup[i]){
@@ -54,6 +50,10 @@ define(['i18n!git/nls/gitmessages'], function(messages) {
 			}
 		}
 		return false;
+	}
+	
+	function isChange(change){
+		return isStaged(change) || isUnstaged(change);
 	}
 	
 	function hasStagedChanges(status){
