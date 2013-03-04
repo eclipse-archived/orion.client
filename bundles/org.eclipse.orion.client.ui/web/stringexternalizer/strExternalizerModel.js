@@ -20,7 +20,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils, mNonnls
         reportList.push({
             model: fileItem,
             message: message ? message : (passed ? messages["Passed"] : messages["Failed"]),
-            status: passed ? "pass" : "failed", //$NON-NLS-0$ //$NON-NLS-0$
+            status: passed ? "pass" : "failed" //$NON-NLS-0$ //$NON-NLS-0$
         });
     };
     
@@ -224,7 +224,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils, mNonnls
      */
     StrExternalizerModel.prototype.getFileContents = function(fileItem) {
         return fileItem.contents;
-    }
+    };
 
     /**
      * Get the replaced file contents by a given file model. Sync call. Required function.
@@ -245,8 +245,8 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils, mNonnls
     			return detailItem.checked || detailItem.checked === undefined;
     		});
     	}
-		newContentHolder.contents = checked ? mNonnlsSearchUtil.replaceNls(fileItem.contents, fileItem.nonnls, this.config) : fileItem.contents
-    }
+		newContentHolder.contents = checked ? mNonnlsSearchUtil.replaceNls(fileItem.contents, fileItem.nonnls, this.config) : fileItem.contents;
+    };
 
     /**
      * Write the replace file contents. Required function.

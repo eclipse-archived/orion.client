@@ -1348,7 +1348,7 @@ var exports = {};
 						var locationToChange = clone.Children[0].ConfigLocation;
 						
 						var handleError = function(error){
-							handleProgressServiceResponse(error, {}, serviceRegistry);
+							exports.handleProgressServiceResponse(error, {}, serviceRegistry);
 						};
 						
 						exports.gatherSshCredentials(serviceRegistry, commandInvocation).then(
@@ -1412,7 +1412,7 @@ var exports = {};
 																
 															}, handleError);
 														} else {
-															handleError(erry);
+															handleError(err);
 														}
 													}
 												);

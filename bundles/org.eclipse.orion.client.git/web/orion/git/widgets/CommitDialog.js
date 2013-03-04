@@ -8,6 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+ 
+  /*globals define window*/
 
 define(
 		[ 'i18n!git/nls/gitmessages', 'orion/webui/dialog' ],

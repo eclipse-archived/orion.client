@@ -10,6 +10,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define document console prompt window*/
+/*jslint forin:true regexp:false sub:true*/
+
 define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/commands',
         'orion/editor/textModel','orion/editor/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher', 'orion/fileClient'], 

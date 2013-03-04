@@ -8,7 +8,7 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-
+/*globals define*/
 
 define(['i18n!orion/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/webui/dialogs/OperationsDialog'], 
 function(messages, require, Deferred, lib, mOperationsDialog) {
@@ -214,7 +214,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 						delete this._operationDeferrds[i];
 					}
 				}
-				this._progressMonitorTool.generateOperationsInfo(operations, this._operationDeferrds);
+				this._progressMonitorTool.generateOperationsInfo(this._operations, this._operationDeferrds);
 			},
 			setProgressResult: function(result){
 				this._serviceRegistry.getService("orion.page.message").setProgressResult(result); //$NON-NLS-0$
@@ -244,7 +244,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 				this._operations[operationIndex] = operation;
 				this._operationDeferrds[operationIndex] = deferred;
 				if(operation.Location){
-					serviceRegistry.getService("orion.core.preference").getPreferences("/operations").then(function(globalOperations){
+					this._serviceRegistry.getService("orion.core.preference").getPreferences("/operations").then(function(globalOperations){
 						globalOperations.put(operation.Location, {Name: operation.Name, expires: operation.expires});
 					});
 				}

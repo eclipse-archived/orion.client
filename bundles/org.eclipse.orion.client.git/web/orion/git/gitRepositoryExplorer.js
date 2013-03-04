@@ -132,7 +132,7 @@ exports.GitRepositoryExplorer = (function() {
 				if (resp.Children.length === 0) {
 					that.initTitleBar({});
 					that.displayRepositories([], "full"); //$NON-NLS-0$
-				} else if (resp.Children.length == 1 && resp.Children[0].Type === "Clone") { //$NON-NLS-0$
+				} else if (resp.Children.length && resp.Children.length === 1 && resp.Children[0].Type === "Clone") { //$NON-NLS-0$
 					var repositories = resp.Children;
 					
 					that.initTitleBar(repositories[0]);
@@ -160,7 +160,7 @@ exports.GitRepositoryExplorer = (function() {
 							that.displayRepositories(repositories, "mini", true); //$NON-NLS-0$
 							that.displayBranches(repositories[0], "full"); //$NON-NLS-0$
 							that.displayRemoteBranches(repositories[0], "full"); //$NON-NLS-0$
-						}, function () {
+						}, function (error) {
 							that.handleError(error);
 						}
 					);
@@ -175,7 +175,7 @@ exports.GitRepositoryExplorer = (function() {
 							
 							that.displayRepositories(repositories, "mini", true); //$NON-NLS-0$
 							that.displayTags(repositories[0], "full"); //$NON-NLS-0$
-						}, function () {
+						}, function (error) {
 							that.handleError(error);
 						}
 					);
@@ -188,7 +188,7 @@ exports.GitRepositoryExplorer = (function() {
 							
 							that.displayRepositories(repositories, "mini", true); //$NON-NLS-0$
 							that.displayConfig(repositories[0], "full"); //$NON-NLS-0$
-						}, function () {
+						}, function (error) {
 							that.handleError(error);
 						}
 					);
@@ -676,7 +676,7 @@ exports.GitRepositoryExplorer = (function() {
 
 		var commit = branch.Commit.Children[0];
 		
-		var tracksMessage = ((branch.RemoteLocation.length == 1 && branch.RemoteLocation[0].Children.length == 1) ? 
+		var tracksMessage = ((branch.RemoteLocation.length && branch.RemoteLocation.length === 1 && branch.RemoteLocation[0].Children.length && branch.RemoteLocation[0].Children.length === 1) ? 
 				i18nUtil.formatMessage(messages["tracks ${0}, "], branch.RemoteLocation[0].Children[0].Name) : messages["tracks no branch, "]);
 				
 		var description = document.createElement("div");

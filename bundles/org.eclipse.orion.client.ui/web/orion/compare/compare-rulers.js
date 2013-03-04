@@ -64,8 +64,9 @@ orion.CompareRuler = (function() {
 			var result = [];
 			for (var i=startLine; i<endLine; i++) {
 				var style = this.getStyle(i);
-				if(style)
+				if(style){
 					result[i] = {html: this.getHTML(i), style: style};
+				}
 			}
 			return result;
 		},
@@ -160,8 +161,6 @@ orion.CompareOverviewRuler = (function() {
 			style.width = "8px"; //$NON-NLS-0$
 			//style.height = "3px";
 			style.left = "2px"; //$NON-NLS-0$
-			
-			var model = this._editor.getModel();
 			if(lineIndex >= 0 ){
 				var diffBlocks;
 				if(this._diffNavigator && this._diffNavigator.getFeeder()){
@@ -171,7 +170,9 @@ orion.CompareOverviewRuler = (function() {
 				}
 				
 				var annotationIndex = mCompareUtils.getAnnotationIndex(diffBlocks, lineIndex);
-				if (annotationIndex === -1) return null;
+				if (annotationIndex === -1){
+					return null;
+				}
 				var mapperIndex = mCompareUtils.getAnnotationMapperIndex(diffBlocks, annotationIndex);
 				var mapper;
 				mapper = this._diffNavigator.getMapper();
@@ -189,11 +190,12 @@ orion.CompareOverviewRuler = (function() {
 				}
 				var clientArea = this._editor.getClientArea();
 				var height =  Math.floor(clientArea.height*anH/lC);
-				if (height < 2)
+				if (height < 2){
 					height = 2;
+				}
 				style.height = height +"px"; //$NON-NLS-0$
 			} else {
-				return style.height = "3px"; //$NON-NLS-0$
+				return null;
 			}
 		}
 		return result;
@@ -211,8 +213,9 @@ orion.CompareOverviewRuler = (function() {
 	CompareOverviewRuler.prototype._onModelChanged = function(e) {
 		var model = this._editor.getModel();
 		var lineCount = model.getLineCount();
-		if(lineCount > 0)
+		if(lineCount > 0){
 			this._editor.redrawLines(0, 1, this);
+		}
 	};
 	return CompareOverviewRuler;
 }());
@@ -260,8 +263,9 @@ orion.CompareCurveRuler =  (function() {
 		},
 	
 		render: function(){
-			if(!this._mapper )
+			if(!this._mapper){
 				return;
+			}
 			var context=this._canvasDiv.getContext("2d"); //$NON-NLS-0$
 			context.clearRect(0,0,this._canvasDiv.width,this._canvasDiv.height);
 			context.strokeStyle = '#AAAAAA';  //$NON-NLS-0$
@@ -320,14 +324,16 @@ orion.CompareCurveRuler =  (function() {
 		},
 		
 		onChanged: function(e) {
-			if(e.removedLineCount === e.addedLineCount)
+			if(e.removedLineCount === e.addedLineCount){
 				return;
+			}
 			if(!this._initing){
 				mCompareUtils.updateMapper(this._mapper , 0 , this._leftTextView.getModel().getLineAtOffset(e.start) , e.removedLineCount, e.addedLineCount);
 			}
 			this._initing = false;
-			if(e.removedLineCount > 0 || e.addedLineCount > 0)
+			if(e.removedLineCount > 0 || e.addedLineCount > 0){
 				this.render();
+			}
 		}
 	};
 	return CompareCurveRuler;

@@ -79,17 +79,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
 			this.crawling = searchParams.regEx || searchParams.caseSensitive;
 			var parent = lib.node(this.resultsId);
+			var that = this, crawler;
 			if(this.crawling){
 				lib.empty(parent);
 				parent.appendChild(document.createTextNode(""));
-				var self = this;
-				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, searchParams, {childrenLocation: this.searcher.getChildrenLocation()});
-				crawler.search(function(jsonData, incremental){self._renderSearchResult(true, resultsNode, searchParams, jsonData, incremental);});
+				crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, searchParams, {childrenLocation: this.searcher.getChildrenLocation()});
+				crawler.search(function(jsonData, incremental){that._renderSearchResult(true, resultsNode, searchParams, jsonData, incremental);});
 			} else {
 				lib.empty(parent);
 				parent.appendChild(document.createTextNode(messages["Searching..."]));
 				try{
-					this.registry.getService("orion.page.progress").progress(this.fileService.search(searchParams), "Searching " + searchParams.keyword).then(
+					this.registry.getService("orion.page.progress").progress(this.fileService.search(searchParams), "Searching " + searchParams.keyword).then( //$NON-NLS-1$ //$NON-NLS-0$
 						function(jsonData) {
 							this._renderSearchResult(false, resultsNode, searchParams, jsonData);
 						}.bind(this));
@@ -97,10 +97,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				catch(error){
 					lib.empty(parent);
 					parent.appendChild(document.createTextNode(""));
-					if(typeof(error) === "string" && error.indexOf("search") > -1){ //$NON-NLS-0$
-						var self = this;
-						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, searchParams, {childrenLocation: this.searcher.getChildrenLocation()});
-						crawler.search(function(jsonData, incremental){self._renderSearchResult(true, resultsNode, searchParams, jsonData, incremental);});
+					if(typeof(error) === "string" && error.indexOf("search") > -1){ //$NON-NLS-1$ //$NON-NLS-0$
+						crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, searchParams, {childrenLocation: this.searcher.getChildrenLocation()});
+						crawler.search(function(jsonData, incremental){that._renderSearchResult(true, resultsNode, searchParams, jsonData, incremental);});
 					} else {
 						this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
 					}

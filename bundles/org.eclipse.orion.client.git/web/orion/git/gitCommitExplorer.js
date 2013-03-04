@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console document Image */
+/*global define window console document Image */
 
 define(
 		[ 'i18n!git/nls/gitmessages', 'orion/section', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/i18nUtil', 'orion/webui/littlelib',
@@ -321,7 +321,7 @@ define(
 
 					var sectionItemActionScopeId = "diffSectionItemActionArea"; //$NON-NLS-0$
 
-					DiffModel = (function() {
+					var DiffModel = (function() {
 						function DiffModel() {
 						}
 
@@ -366,7 +366,7 @@ define(
 						return DiffModel;
 					}());
 
-					DiffRenderer = (function() {
+					var DiffRenderer = (function() {
 						function DiffRenderer(options, explorer) {
 							this._init(options);
 							this.options = options;
@@ -475,7 +475,7 @@ define(
 						return DiffRenderer;
 					}());
 
-					DiffNavigator = (function() {
+					var DiffNavigator = (function() {
 						function DiffNavigator(registry, selection, parentId, actionScopeId) {
 							this.registry = registry;
 							this.checkbox = false;

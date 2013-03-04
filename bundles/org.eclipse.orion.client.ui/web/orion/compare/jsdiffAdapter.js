@@ -9,6 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*global define document console prompt window*/
 
 define(['jsdiff/diff'], function(JsDiff) {
 
@@ -24,10 +25,11 @@ orion.JSDiffAdapter = (function() {
 	 */
 	function JSDiffAdapter() {
 	}
+	
 	JSDiffAdapter.prototype = {
 		adapt: function(oldStr, newStr, lineDelim){
 			if(!lineDelim){
-				lineDelim = "\n";
+				lineDelim = "\n"; //$NON-NLS-0$
 			}
 			var splitOld = oldStr.split(lineDelim); //$NON-NLS-0$
 			var splitNew = newStr.split(lineDelim); //$NON-NLS-0$
@@ -42,71 +44,71 @@ orion.JSDiffAdapter = (function() {
 			var changeIndex = -1;
 			var oFileLineCounter = 0;
 			var previousDelim = true;
-		    for (var i = 0; i < diff.length; i++) {
-		    	var current = diff[i];
+		    for (var i = 0; i < diff.length; i++){ 
+				var current = diff[i];
 		        //var lines = current.lines || current.value.replace(/\n$/, "").split("\n");
 		        var lines = current.lines || current.value.split(lineDelim); //$NON-NLS-0$
 		        var currentLineNumber = lines.length;
 		        var startNumber = 0;
 		        if(lines.length > 1 && lines[lines.length-1] === ""){
-		        	currentLineNumber--;
+					currentLineNumber--;
 		        }
-		        if(currentLineNumber > 1 && !previousDelim){
-		        	if(lines[0] === ""){
-		        		currentLineNumber--;
-		        		startNumber++;
-		        	}
-		        }
+		        if (currentLineNumber > 1 && !previousDelim) {
+		            if (lines[0] === "") {
+		                currentLineNumber--;
+		                startNumber++;
+		            }
+		        }		        
 		        current.lines = lines;
-		        if(!current.added && !current.removed){
-		        	if(linesAdded || linesRemoved){
-			        	map.push([linesAdded, linesRemoved, changeIndex]);
-						linesAdded = 0;
-						linesRemoved = 0;
-						changeIndex = -1;
-						oFileLineCounter += linesRemoved;
-		        	}
-		        	map.push([currentLineNumber, currentLineNumber, 0]);
-					oFileLineCounter += currentLineNumber;
-		        } else if (current.added){
-		        	if(changeIndex === -1){
-		        		changeIndex = changContents.length +1;
-		        	}
-		        	linesAdded += currentLineNumber;
-		        	for(var j = startNumber; j < (currentLineNumber + startNumber) ; j++){
-		        		changContents.push(current.lines[j]);
-		        	}
+		        if (!current.added && !current.removed) {
+		            if (linesAdded || linesRemoved) {
+		                map.push([linesAdded, linesRemoved, changeIndex]);
+		                linesAdded = 0;
+		                linesRemoved = 0;
+		                changeIndex = -1;
+		                oFileLineCounter += linesRemoved;
+		            }
+		            map.push([currentLineNumber, currentLineNumber, 0]);
+		            oFileLineCounter += currentLineNumber;
+		        } else if (current.added) {
+		            if (changeIndex === -1) {
+		                changeIndex = changContents.length + 1;
+		            }
+		            linesAdded += currentLineNumber;
+		            for (var j = startNumber; j < (currentLineNumber + startNumber); j++) {
+		                changContents.push(current.lines[j]);
+		            }
 		        } else {
-		        	linesRemoved += currentLineNumber;
-		        }
+		            linesRemoved += currentLineNumber;
+		        }		        
 		        previousDelim = false;
 		        if(lines.length > 1 && lines[lines.length-1] === ""){
 			        previousDelim = true;
 		        }
 		    }
-        	if(linesAdded || linesRemoved){
-	        	map.push([linesAdded, linesRemoved, changeIndex]);
-				oFileLineCounter += linesRemoved;
-        	}
-        	
-        	if(oFileLineCounter < splitOld.length && splitOld.length > 1){
-				var lastMapItem = map[map.length-1];
-				if(lastMapItem[2] === 0){
-					lastMapItem[0] += 1;
-					lastMapItem[1] += 1;
-				} else if (lastMapItem[2] === -1){
-					map.push([1 , 1 , 0]);
-				} else if(newLineAtEndOld === newLineAtEndNew){
-					map.push([1 , 1 , 0]);
-				} else {
-					if(newLineAtEndNew)
-						lastMapItem[0] += 1;
-					if(newLineAtEndOld )
-						lastMapItem[1] += 1;
-				}
-        	}
-       	
-         	return {mapper:map, changContents: {array:changContents , index:0}};
+		    
+		    
+		    
+			if (linesAdded || linesRemoved) {
+			    map.push([linesAdded, linesRemoved, changeIndex]);
+			    oFileLineCounter += linesRemoved;
+			}
+			
+			if (oFileLineCounter < splitOld.length && splitOld.length > 1) {
+			    var lastMapItem = map[map.length - 1];
+			    if (lastMapItem[2] === 0) {
+			        lastMapItem[0] += 1;
+			        lastMapItem[1] += 1;
+			    } else if (lastMapItem[2] === -1) {
+			        map.push([1, 1, 0]);
+			    } else if (newLineAtEndOld === newLineAtEndNew) {
+			        map.push([1, 1, 0]);
+			    } else {
+			        if (newLineAtEndNew) {lastMapItem[0] += 1;}
+			        if (newLineAtEndOld) {lastMapItem[1] += 1;}
+			    }
+			}
+			return {mapper:map, changContents: {array:changContents , index:0}};
 		},
 		
 		adaptCharDiff : function(oldStr, newStr, word) {

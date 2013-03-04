@@ -8,6 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+ 
+/*globals define window*/
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands',
         'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',

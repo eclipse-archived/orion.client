@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document */
+/*global define document window*/
 
 define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/contentTypes', 'orion/PageUtil', 'orion/compare/compareTreeExplorer'],

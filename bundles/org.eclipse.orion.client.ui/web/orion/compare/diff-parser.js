@@ -9,13 +9,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*global define document console prompt window*/
+/*jslint forin:true regexp:false sub:true*/
 
 define([], function() {
 
 var orion = orion || {};
 
 orion.DiffParser = (function() {
-	var isWindows = navigator.platform.indexOf("Win") !== -1; //$NON-NLS-0$
+	var isWindows = window.navigator.platform.indexOf("Win") !== -1; //$NON-NLS-0$
 	var NO_NEW_LINE = "\\ No newline at end of file"; //$NON-NLS-0$
 	/** @private */
 	function DiffParser(lineDelimiter, diffLineDilemeter) {
@@ -56,26 +58,28 @@ orion.DiffParser = (function() {
 		
 		parse: function(oFileString , diffString , detectConflicts ,doNotBuildNewFile){
 			this._init();
-			if(diffString === "")
-				return {outPutFile:oFileString ,mapper:[]};
+			if(diffString === ""){
+				return {outPutFile: oFileString, mapper: []};
+			}
 			this._oFileContents = oFileString === "" ? []:oFileString.split(this._lineDelimiter);
 			this._diffContents = diffString.split(this._diffLineDelimiter);
-			var lineNumber = this._diffContents.length;
+			var totalLines = this._diffContents.length;
 			this._hunkRanges = [];
-			for(var i = 0; i <lineNumber ; i++){
-				  var hunkRange = this._parseHunkRange(i);
-				  if(hunkRange)
-					  this._hunkRanges.push(hunkRange); 
-			}
+			for(var i = 0; i <totalLines ; i++){
+				var hunkRange = this._parseHunkRange(i);
+				if (hunkRange) {
+				    this._hunkRanges.push(hunkRange);
+				}			
+		    }
 			if(0 === this._hunkRanges.length){
 				return {outPutFile:oFileString,mapper:[]};
 			}
 
 			if(this._DEBUG){
 				console.log("***Diff contents: \n"); //$NON-NLS-0$
-				for(var j = 0;j < this._diffContents.length ; j++){
-					console.log(this._diffContents[j]);
-				}
+				this._diffContents.forEach(function(singleLine) {
+					console.log(singleLine);
+				});
 				console.log("***Hunk ranges: \n"); //$NON-NLS-0$
 				console.log(JSON.stringify(this._hunkRanges));
 			}
@@ -98,8 +102,9 @@ orion.DiffParser = (function() {
 				this._logMap();
 				console.log("***Total line number in original file: " + this._oFileContents.length); //$NON-NLS-0$
 			}
-			if(doNotBuildNewFile === undefined || !doNotBuildNewFile)
+			if(!doNotBuildNewFile){
 				this._buildNewFile();
+			}
 			if(this._DEBUG){
 				//console.log("***New File: \n");
 				//this._logNewFile();
@@ -127,8 +132,9 @@ orion.DiffParser = (function() {
 		},
 		
 		_createBlock: function(token , blocks , startAtLine , endAtLine){
-			if(endAtLine === startAtLine && token === " ") //$NON-NLS-0$
+			if(endAtLine === startAtLine && token === " "){ //$NON-NLS-0$
 				return;
+			}
 			var block = [startAtLine , endAtLine - startAtLine ,"s" ]; //$NON-NLS-0$
 			if(token === "-"){ //$NON-NLS-0$
 				block[2] = "r"; //$NON-NLS-0$
@@ -173,8 +179,9 @@ orion.DiffParser = (function() {
 			var nBlkStart = this._hunkRanges[hunkRangeNo][3];
 			var lastPlusPos = startNo;
 			for (var i = startNo ; i< endNo ; i++){
-				if( 0 === this._diffContents[i].length)
+				if( 0 === this._diffContents[i].length){
 					continue;
+				}
 				var curToken = this._diffContents[i][0];
 				if(curToken === "\\"){ //$NON-NLS-0$
 					if( NO_NEW_LINE === this._diffContents[i].substring(0 , this._diffContents[i].length-1) ||
@@ -203,8 +210,9 @@ orion.DiffParser = (function() {
 				}
 				
 				if(lastToken !== curToken){
-					if(curToken === "+") //$NON-NLS-0$
+					if(curToken === "+"){ //$NON-NLS-0$
 						lastPlusPos = i;
+					}
 					switch(lastToken){
 					case " ": //$NON-NLS-0$
 						oBlkStart = this._hunkRanges[hunkRangeNo][1] + oCursor;
@@ -245,8 +253,9 @@ orion.DiffParser = (function() {
 		},
 		
 		_detectConflictes: function(startIndexInDiff , lines){
-			if(startIndexInDiff < 0)
+			if(startIndexInDiff < 0){
 				return false;
+			}
 			var endIndex = startIndexInDiff + lines;
 			for(var i = startIndexInDiff ; i < endIndex ; i++){
 				var line = this._diffContents[i];
@@ -261,18 +270,19 @@ orion.DiffParser = (function() {
 			var  blockLen = this._oBlocks.length;
 			var oFileLen = this._oFileContents.length;
 			var oFileLineCounter = 0;
-			var lastSamePos = 1;
+			var delta, lastSamePos = 1;
 			for(var i = 0 ; i < blockLen ; i++){
-				var delta =  this._oBlocks[i][0] - lastSamePos;
+				delta =  this._oBlocks[i][0] - lastSamePos;
 				//Create the "same on both" delta 
 				if(delta > 0){
 					this._deltaMap.push([delta , delta , 0]);
 					oFileLineCounter += delta;
 				}
-				if(detectConflicts && this._detectConflictes(this._nBlocks[i][2] , this._nBlocks[i][1]))
+				if(detectConflicts && this._detectConflictes(this._nBlocks[i][2] , this._nBlocks[i][1])){
 					this._deltaMap.push([this._nBlocks[i][1] , this._oBlocks[i][1] , this._nBlocks[i][2]+1 , 1]);
-				else	
+				} else {
 					this._deltaMap.push([this._nBlocks[i][1] , this._oBlocks[i][1] , this._nBlocks[i][2]+1]);
+				}
 				oFileLineCounter += this._oBlocks[i][1];
 				lastSamePos = this._oBlocks[i][0] + this._oBlocks[i][1];
 			}
@@ -281,7 +291,7 @@ orion.DiffParser = (function() {
 				oFileLineCounter += (oFileLen - lastSamePos+1);
 			}
 			if(oFileLineCounter < oFileLen){
-				var delta = oFileLen - oFileLineCounter;
+				delta = oFileLen - oFileLineCounter;
 				var lastMapItem = this._deltaMap[this._deltaMap.length-1];
 				if(lastMapItem[2] === 0){
 					lastMapItem[0] += delta;
@@ -291,10 +301,12 @@ orion.DiffParser = (function() {
 				} else if(this._nNewLineAtEnd === this._oNewLineAtEnd){
 					this._deltaMap.push([delta , delta , 0]);
 				} else {
-					if(this._nNewLineAtEnd)
+					if(this._nNewLineAtEnd){
 						lastMapItem[0] += delta;
-					if(this._oNewLineAtEnd)
+					}
+					if(this._oNewLineAtEnd){
 						lastMapItem[1] += delta;
+					}
 				}
 			}
 		},
@@ -303,15 +315,16 @@ orion.DiffParser = (function() {
 			var oFileCursor = 1;
 			var lastUpdateBySameBlk = false;
 			var len = this._deltaMap.length;
-			for(var i = 0;i < len ; i++){
+			var i, j;
+			for(i = 0;i < len ; i++){
 				lastUpdateBySameBlk = false;
 				if(this._deltaMap[i][2] === 0){
-					for(var j = 0;j < this._deltaMap[i][0] ; j++){
+					for(j = 0;j < this._deltaMap[i][0] ; j++){
 						this._nFileContents.push(this._oFileContents[oFileCursor+j-1]);
 					}
 					lastUpdateBySameBlk = true;
 				} else if(this._deltaMap[i][2] > 0){
-					for(var j = 0;j < this._deltaMap[i][0] ; j++){
+					for(j = 0;j < this._deltaMap[i][0] ; j++){
 						this._nFileContents.push(this._diffContents[this._deltaMap[i][2]+j-1].substring(1));
 					}
 				}
@@ -327,12 +340,12 @@ orion.DiffParser = (function() {
 		_parseHRangeBody: function(body , retVal){
 			if(0 < body.indexOf(",")){ //$NON-NLS-0$
 				var splitted = body.split(","); //$NON-NLS-0$
-				var split0 = parseInt(splitted[0]);
-				var split1 = parseInt(splitted[1]);
+				var split0 = parseInt(splitted[0], 10);
+				var split1 = parseInt(splitted[1], 10);
 				retVal.push(split0 >= 0 ? split0 : 1);
 				retVal.push(split1 >= 0 ? split1 : 1);
 			} else {
-				var bodyInt = parseInt(body);
+				var bodyInt = parseInt(body, 10);
 				retVal.push(bodyInt >= 0 ? bodyInt : 1);
 				retVal.push(1);
 			}
@@ -349,24 +362,28 @@ orion.DiffParser = (function() {
 		 */
 		_parseHunkRange: function(lineNumber){
 			var oneLine = this._diffContents[lineNumber];
-			if(8 > oneLine.length )
-				return undefined;//to be qualified as a hunkSign line , the line has to match the @@-l,s+l,s@@ pattern
+			if(8 > oneLine.length){
+				return null;//to be qualified as a hunkSign line , the line has to match the @@-l,s+l,s@@ pattern
+			}
 			var subStr = oneLine.substring(0,2);
-			if("@@" !== subStr) //$NON-NLS-0$
-				return undefined;//to be qualified as a hunkSign line , the line has to start with "@@"
+			if("@@" !== subStr){ //$NON-NLS-0$
+				return null;//to be qualified as a hunkSign line , the line has to start with "@@"
+			}
 			var subLine = oneLine.substring(2);
 			var secondIndex = subLine.indexOf("@@"); //$NON-NLS-0$
-			if(secondIndex < 0)
-				return undefined;//to be qualified as a hunkSign line , the line has to have the second "@@"
+			if(secondIndex < 0){
+				return null;//to be qualified as a hunkSign line , the line has to have the second "@@"
+			}
 			var hunkSignBody = subLine.substring(0 , secondIndex);
 			
 			var minusIndex = hunkSignBody.indexOf("-"); //$NON-NLS-0$
 			var plusIndex = hunkSignBody.indexOf("+"); //$NON-NLS-0$
-			if( minusIndex < 0 || plusIndex < 0)
-					return undefined;
-			var retVal = [lineNumber];
+			if( minusIndex < 0 || plusIndex < 0){
+				return null;
+			}
+			var splitted, retVal = [lineNumber];
 			if(minusIndex < plusIndex){
-				var splitted = hunkSignBody.substring(minusIndex+1).split("+"); //$NON-NLS-0$
+				splitted = hunkSignBody.substring(minusIndex+1).split("+"); //$NON-NLS-0$
 				this._parseHRangeBody(splitted[0] , retVal);
 				this._parseHRangeBody(splitted[1] , retVal);
 			} else {
