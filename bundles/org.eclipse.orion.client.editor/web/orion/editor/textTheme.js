@@ -10,13 +10,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*globals define document*/
+/*globals define*/
 
-define("orion/editor/textTheme", ['orion/editor/eventTarget', 'orion/util'], function(mEventTarget, util) { 
-	var THEME_PREFIX = "orion-theme-";
-	
-	var DefaultTheme;
-	
+define("orion/editor/textTheme", //$NON-NLS-0$
+[
+	'require', //$NON-NLS-0$
+	'orion/editor/eventTarget', //$NON-NLS-0$
+	'orion/util' //$NON-NLS-0$
+], function(require, mEventTarget, util) {
+	var THEME_PREFIX = "orion-theme-"; //$NON-NLS-0$
+
 	/**
 	 * Constructs a new text theme.
 	 * 
@@ -26,10 +29,12 @@ define("orion/editor/textTheme", ['orion/editor/eventTarget', 'orion/util'], fun
 	 * @borrows orion.editor.EventTarget#removeEventListener as #removeEventListener
 	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
 	 */
-	function TextTheme() {
-		
+	function TextTheme(options) {
+		options = options || {};
+		this._document = options.document || document;
 	}
 	
+	var DefaultTheme;
 	TextTheme.getTheme = function() {
 		if (!DefaultTheme) {
 			//TODO: Load a default sheet somehow
@@ -39,29 +44,136 @@ define("orion/editor/textTheme", ['orion/editor/eventTarget', 'orion/util'], fun
 	};
 
 	TextTheme.prototype = /** @lends orion.editor.TextTheme.prototype */ {
-		load: function (className, styleSheet) {
-			//check to see if ID exists already
-			var node = document.getElementById(THEME_PREFIX + className);
+		/**
+		 *
+		 */
+		buildStyleSheet: function(themeCLass, settings) {
+			
+			var result = [];
+			result.push("");
+			
+			//view container
+			var family = settings.fontFamily;
+			if (family === "sans serif") { //$NON-NLS-0$
+				family = '"Menlo", "Consolas", "Vera Mono", "monospace"'; //$NON-NLS-0$
+			} else {
+				family = 'monospace'; //$NON-NLS-0$
+			}	
+			
+			result.push("." + themeCLass + " {"); //$NON-NLS-1$ //$NON-NLS-0$
+			result.push("\tfont-family: " + family + ";"); //$NON-NLS-1$ //$NON-NLS-0$
+			result.push("\tfont-size: " + settings.fontSize + ";"); //$NON-NLS-1$ //$NON-NLS-0$
+			result.push("\tcolor: " + settings.text + ";"); //$NON-NLS-1$ //$NON-NLS-0$
+			result.push("}"); //$NON-NLS-0$
+			
+			//From textview.css
+			result.push("." + themeCLass + ".textview {"); //$NON-NLS-1$ //$NON-NLS-0$
+			result.push("\tbackground-color: " + settings.background + ";"); //$NON-NLS-1$ //$NON-NLS-0$
+			result.push("}"); //$NON-NLS-0$
+			
+			function defineRule(className, value, isBackground) {
+				result.push("." + themeCLass + " ." + className + " {"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				result.push("\t" + (isBackground ? "background-color" : "color") + ": " + value + ";"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				result.push("}"); //$NON-NLS-0$
+			}
+			
+			//From rulers.css
+			defineRule("ruler.annotations", settings.annotationRuler, true); //$NON-NLS-0$
+			defineRule("ruler.lines", settings.annotationRuler, true); //$NON-NLS-0$
+			defineRule("ruler.folding", settings.annotationRuler, true); //$NON-NLS-0$
+			defineRule("ruler.overview", settings.overviewRuler, true); //$NON-NLS-0$
+			defineRule("rulerLines", settings.lineNumber, false); //$NON-NLS-0$
+			defineRule("rulerLines.even", settings.lineNumberEven, false); //$NON-NLS-0$
+			defineRule("rulerLines.odd", settings.lineNumberOdd, false); //$NON-NLS-0$
+			
+			//From annotations.css
+			defineRule("annotationLine.currentLine", settings.currentLine, true); //$NON-NLS-0$
+			
+			//From default-theme.css
+			defineRule("entity-name-tag", settings.keyword, false); //$NON-NLS-0$
+			defineRule("entity-other-attribute-name", settings.attribute, false); //$NON-NLS-0$
+			defineRule("string-quoted", settings.string, false); //$NON-NLS-0$
+			
+			//From textstyler.css
+			defineRule("token_keyword", settings.keyword, false); //$NON-NLS-0$
+			defineRule("token_string", settings.string, false); //$NON-NLS-0$
+			defineRule("token_singleline_comment", settings.comment, false); //$NON-NLS-0$
+			defineRule("token_multiline_comment", settings.comment, false); //$NON-NLS-0$
+			defineRule("token_doc_comment", settings.comment, false); //$NON-NLS-0$
+			defineRule("token_doc_html_markup", settings.comment, false); //$NON-NLS-0$
+			
+			return result.join("\n"); //$NON-NLS-0$
+		},
+		_createStyle: function(className, styleSheet, callback, link) {
+			var document = this._document;
+			var id = THEME_PREFIX + className;
+			var node = document.getElementById(id);
 			if (node) {
-				//TODO: Check if contents are the same, if so return
+				if (link || node.firstChild.data === styleSheet) {
+					return;
+				}
 				node.removeChild(node.firstChild);
 				node.appendChild(document.createTextNode(styleSheet));
 			} else {
-				node = util.createElement(document, "style");
-				node.appendChild(document.createTextNode(styleSheet));
-				var head = document.getElementsByTagName("head")[0] || document.documentElement;	
+				if (link) {
+					node = util.createElement(document, "link"); //$NON-NLS-0$
+					node.rel = "stylesheet"; //$NON-NLS-0$
+					node.type = "text/css"; //$NON-NLS-0$
+					node.href = styleSheet;
+					node.addEventListener("load", function() { //$NON-NLS-0$
+						callback();
+					});
+				} else {
+					node = util.createElement(document, "style"); //$NON-NLS-0$
+					node.appendChild(document.createTextNode(styleSheet));
+				}
+				node.id = id;
+				var head = document.getElementsByTagName("head")[0] || document.documentElement; //$NON-NLS-0$
 				head.appendChild(node);
-			}	
+			}
+			if (!link) {
+				callback();
+			}
 		},
-		setThemeClass: function(className, styleSheet) {
-			//TODO: Also need to check the styleSheet contents before determining if it is the same
-			//if (className === this._themeClass) { return; }
-			this._themeClass = className;
-			this.load(className, styleSheet);
-			this.onThemeChanged({type: "ThemeChanged"});
-		},
+		/**
+		 *
+		 */
 		getThemeClass: function() {
 			return this._themeClass;
+		},
+		_load: function (className, styleSheet, callback) {
+			if (typeof styleSheet === "string") { //$NON-NLS-0$
+				this._createStyle(className, styleSheet, callback);
+				return;
+			}
+			var href = styleSheet.href;
+			var extension = ".css"; //$NON-NLS-0$
+			if (href.substring(href.length - extension.length) !== extension) {
+				href += extension;
+			}
+			if (/^https?:\/\//i.test(href)) {
+				this._createStyle(className, require.toUrl(href), callback, true);
+			} else {
+				var self = this;
+				require(["text!" + href], function(cssText) { //$NON-NLS-0$
+					self._createStyle(className, cssText, callback, false);
+				});
+			}
+		},
+		/**
+		 *
+		 */
+		setThemeClass: function(className, styleSheet) {
+			var self = this;
+			this._load(className, styleSheet, function() {
+				var themeClass = self._themeClass;
+				self._themeClass = className;
+				self.onThemeChanged({
+					type: "ThemeChanged", //$NON-NLS-0$
+					oldValue: themeClass,
+					newValue: self.getThemeClass()
+				});
+			});
 		},
 		/**
 		 * @class This is the event sent when the current theme has changed.
@@ -71,6 +183,9 @@ define("orion/editor/textTheme", ['orion/editor/eventTarget', 'orion/util'], fun
 		 * {@link orion.editor.TextTheme#event:onThemeChanged}
 		 * </p>
 		 * @name orion.editor.ThemeChangedEvent
+		 * 
+		 * @property {String} oldValue The old selection.
+		 * @property {String} newValue The new selection.
 		 */
 		/**
 		 * This event is sent when the current theme has changed.
@@ -80,64 +195,6 @@ define("orion/editor/textTheme", ['orion/editor/eventTarget', 'orion/util'], fun
 		 */
 		onThemeChanged: function(themeChangedEvent) {
 			return this.dispatchEvent(themeChangedEvent);
-		},
-		buildStyleSheet: function(settings, theme ){
-			
-			var result = [];
-			result.push("");
-			
-			//view container
-			var family = settings.fontFamily;
-			if(family === "sans serif"){
-				family = '"Menlo", "Consolas", "Vera Mono", "monospace"';
-			}else{
-				family = 'monospace';
-			}	
-			
-			result.push("." + theme + " {");
-			result.push("\tfont-family: " + family + ";");
-			result.push("\tfont-size: " + settings.fontSize + ";");
-			
-			result.push("\tcolor: " + settings.text + ";");
-			result.push("}");
-			
-			//From textview.css
-			result.push("." + theme + ".textview {");
-			result.push("\tbackground-color: " + settings.background + ";");
-			result.push("}");
-			
-			function defineRule(className, value, isBackground) {
-				result.push("." + theme + " ." + className + " {");
-				result.push("\t" + (isBackground ? "background-color" : "color") + ": " + value + ";");
-				result.push("}");
-			}
-			
-			//From rulers.css
-			defineRule("ruler.annotations", settings.annotationRuler, true);
-			defineRule("ruler.lines", settings.annotationRuler, true);
-			defineRule("ruler.folding", settings.annotationRuler, true);
-			defineRule("ruler.overview", settings.overviewRuler, true);
-			defineRule("rulerLines", settings.lineNumber, false);
-			defineRule("rulerLines.even", settings.lineNumberEven, false);
-			defineRule("rulerLines.odd", settings.lineNumberOdd, false);
-			
-			//From annotations.css
-			defineRule("annotationLine.currentLine", settings.currentLine, true);
-			
-			//From default-theme.css
-			defineRule("entity-name-tag", settings.keyword, false);
-			defineRule("entity-other-attribute-name", settings.attribute, false);
-			defineRule("string-quoted", settings.string, false);
-			
-			//From textstyler.css
-			defineRule("token_keyword", settings.keyword, false);
-			defineRule("token_string", settings.string, false);
-			defineRule("token_singleline_comment", settings.comment, false);
-			defineRule("token_multiline_comment", settings.comment, false);
-			defineRule("token_doc_comment", settings.comment, false);
-			defineRule("token_doc_html_markup", settings.comment, false);
-			
-			return result.join("\n");
 		}
 	};
 	mEventTarget.EventTarget.addMixin(TextTheme.prototype);
@@ -145,5 +202,4 @@ define("orion/editor/textTheme", ['orion/editor/eventTarget', 'orion/util'], fun
 	return {
 		TextTheme: TextTheme
 	};
-	
 });
