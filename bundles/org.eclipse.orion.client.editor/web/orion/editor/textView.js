@@ -1029,6 +1029,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 	 * @property {Boolean} [fullSelection=true] whether or not the view is in full selection mode.
 	 * @property {Boolean} [tabMode=true] whether or not the tab keypress is consumed by the view or is used for focus traversal.
 	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces.
+	 * @property {orion.editor.TextTheme} [theme=orion.editor.TextTheme.getTheme()] the TextTheme manager. TODO more info on this
 	 * @property {String} [themeClass] the CSS class for the view theming.
 	 * @property {Number} [tabSize=8] The number of spaces in a tab.
 	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
@@ -1045,7 +1046,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function TextView (options) {
-		this._init(options);
+		this._init(options || {});
 	}
 	
 	TextView.prototype = /** @lends orion.editor.editor.prototype */ {
@@ -1179,6 +1180,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 
 			this._parent = null;
 			this._model = null;
+			this._theme = null;
 			this._selection = null;
 			this._doubleClickSelection = null;
 			this._keyBindings = null;
@@ -4541,6 +4543,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				tabSize: {value: 8, update: this._setTabSize},
 				expandTab: {value: false, update: null},
 				wrapMode: {value: false, update: this._setWrapMode},
+				theme: {value: mTextTheme.TextTheme.getTheme(), update: this._setTheme},
 				themeClass: {value: undefined, update: this._setThemeClass}
 			};
 		},
@@ -4950,13 +4953,12 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			this._model.addEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
 			this._model.addEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
 			
-			var theme = mTextTheme.TextTheme.getTheme();
 			this._themeListener = {
 				onChanged: function(themeChangedEvent) {
-					self._setThemeClass(theme.getThemeClass());
+					self._setThemeClass(self._themeClass);
 				}
 			};
-			theme.addEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-0$
+			this._theme.addEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-0$
 			
 			var handlers = this._handlers = [];
 			var clientDiv = this._clientDiv, viewDiv = this._viewDiv, rootDiv = this._rootDiv;
@@ -5757,10 +5759,22 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				this._resetLineWidth();
 			}
 		},
+		_setTheme: function(theme) {
+			if (this._theme) {
+				this._theme.removeEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-0$
+			}
+			this._theme = theme;
+			if (this._theme) {
+				this._theme.addEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-0$
+			}
+			this._setThemeClass(this._themeClass);
+		},
 		_setThemeClass: function (themeClass, init) {
 			this._themeClass = themeClass;
 			var viewContainerClass = "textview"; //$NON-NLS-0$
-			if (this._themeClass) { viewContainerClass += " " + this._themeClass; } //$NON-NLS-0$
+			var globalThemeClass = this._theme.getThemeClass();
+			if (globalThemeClass) { viewContainerClass += " " + globalThemeClass; } //$NON-NLS-0$
+			if (this._themeClass && globalThemeClass !== this._themeClass) { viewContainerClass += " " + this._themeClass; } //$NON-NLS-0$
 			this._rootDiv.className = viewContainerClass;
 			this._updateStyle(init);
 		},
@@ -5870,6 +5884,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		_unhookEvents: function() {
 			this._model.removeEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
 			this._model.removeEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
+			this._theme.removeEventListener("ThemeChanged", this._themeListener.onChanged); //$NON-NLS-0$
 			this._modelListener = null;
 			for (var i=0; i<this._handlers.length; i++) {
 				var h = this._handlers[i];

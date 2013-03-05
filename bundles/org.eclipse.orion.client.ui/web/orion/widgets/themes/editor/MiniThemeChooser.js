@@ -140,8 +140,9 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 		MiniThemeChooser.prototype.selectTheme = selectTheme;
 		
 		function setThemeData( settings ){
+			var themeClass = "editorTheme";
 			var theme = mTextTheme.TextTheme.getTheme();
-			theme.setThemeClass("userTheme", theme.buildStyleSheet(settings, "userTheme"));
+			theme.setThemeClass(themeClass, theme.buildStyleSheet(themeClass, settings));
 		}
 		
 		MiniThemeChooser.prototype.setThemeData = setThemeData;

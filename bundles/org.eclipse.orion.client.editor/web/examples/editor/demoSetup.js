@@ -18,6 +18,7 @@ define(["require",
 		"orion/editor/annotations", 
 		"orion/editor/projectionTextModel", 
 		"orion/editor/textView", 
+		"orion/editor/textTheme", 
 		"orion/editor/textDND", 
 		"orion/editor/rulers",
 		"orion/editor/undoStack",
@@ -26,13 +27,12 @@ define(["require",
 		"orion/editor/htmlGrammar",
 		"examples/editor/textStyler",
 		"orion/util"
-], function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler, util) {
+], function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextTheme, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler, util) {
 
 	var exports = {};
 	var view = null;
 	var styler = null;
 	var annotationStyler = null;
-	var loadedThemes = [];
 	
 	var AnnotationType = mAnnotations.AnnotationType;
 		
@@ -48,28 +48,10 @@ define(["require",
 	}
 	exports.getFile = getFile;
 	
-	function loadTheme(theme) {
-		if (theme) {
-			for (var i=0; i<loadedThemes.length; i++) {
-				if (theme === loadedThemes[i]) {
-					return;
-				}
-			}
-			loadedThemes.push(theme);
-			require(["text!examples/editor/themes/" + theme + ".css"], function(cssText) { //$NON-NLS-1$ //$NON-NLS-0$
-				var stylesheet;
-				var document = view.getOptions("parent").ownerDocument; //$NON-NLS-0$
-				if (document.createStyleSheet) {
-					stylesheet = document.createStyleSheet();
-					stylesheet.cssText = cssText;
-				} else {
-					stylesheet = util.createElement(document, "style"); //$NON-NLS-0$
-					var head = document.getElementsByTagName("head")[0] || document.documentElement; //$NON-NLS-0$
-					stylesheet.appendChild(document.createTextNode(cssText));
-					head.appendChild(stylesheet);
-				}
-				view.update(true);
-			});
+	function loadTheme(themeClass) {
+		if (themeClass) {
+			var theme = mTextTheme.TextTheme.getTheme();
+			theme.setThemeClass(themeClass, {href: "examples/editor/themes/" + themeClass}); //$NON-NLS-0$
 		}
 	}
 	
