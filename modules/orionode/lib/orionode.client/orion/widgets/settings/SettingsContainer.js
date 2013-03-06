@@ -146,6 +146,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			}
 			
 			var editorTheme = new editorThemeData.ThemeData();
+			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
 		
 			this.editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: editorTheme });
 			
