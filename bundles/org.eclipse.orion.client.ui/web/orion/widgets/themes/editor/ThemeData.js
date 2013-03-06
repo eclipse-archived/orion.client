@@ -11,8 +11,8 @@
 /*global widgets orion window console define localStorage ActiveXObject DOMParser*/
 /*jslint browser:true*/
 
-define([], 
-	function() {
+define(['orion/editor/textTheme'], 
+	function(mTextTheme) {
 	
 		/* Synchronizing colors and styles for HTML, CSS and JS files like this ...
 	
@@ -54,7 +54,7 @@ define([],
 		StyleSet.prototype.attribute = 'cadetBlue';
 		StyleSet.prototypefontSize = '10pt';
 
-			function ThemeData() {
+		function ThemeData() {
 
 		this.styles = [];
 
@@ -703,7 +703,9 @@ define([],
 		ThemeData.prototype.importTheme = importTheme;
 		
 		function processSettings( settings, preferences ){
-
+			var themeClass = "editorTheme";
+			var theme = mTextTheme.TextTheme.getTheme();
+			theme.setThemeClass(themeClass, theme.buildStyleSheet(themeClass, settings));
 		}
 
 		ThemeData.prototype.processSettings = processSettings;

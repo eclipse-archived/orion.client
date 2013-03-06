@@ -17,11 +17,12 @@ define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/webu
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textView', 'orion/editor/textModel', 
         'orion/editor/projectionTextModel', 'orion/keyBinding','orion/searchAndReplace/textSearcher',
-        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel', 'orion/widgets/themes/editor/MiniThemeChooser'],
+        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel',
+        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser'],
 		function(messages, require, Deferred, lib, mSelection, mStatus, mProgress, mDialogs, mCommands, mFavorites, mExtensionCommands,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, mThemeChooser) {
+				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, mThemePreferences, mThemeData, mThemeChooser) {
 	
 var exports = exports || {};
 	
@@ -144,7 +145,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							name = self.getTitle();
 						}
 		
-						var chooser = new mThemeChooser.MiniThemeChooser( preferences );
+						var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
+						themePreferences.apply();
+						var chooser = new mThemeChooser.MiniThemeChooser( themePreferences );
 						mGlobalCommands.addSettings( chooser );
 						
 						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$

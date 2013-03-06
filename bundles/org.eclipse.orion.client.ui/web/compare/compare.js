@@ -12,8 +12,9 @@
 /*global define document */
 
 define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
-		'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/compare/compareUtils', 'orion/contentTypes', 'orion/PageUtil'],
-		function(mBootstrap, mStatus, mProgress, mOperationsClient, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mCompareContainer, mCompareUtils, mContentTypes, PageUtil) {
+		'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData',
+        'orion/compare/compareUtils', 'orion/contentTypes', 'orion/PageUtil'],
+		function(mBootstrap, mStatus, mProgress, mOperationsClient, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mCompareContainer, mThemePreferences, mThemeData, mCompareUtils, mContentTypes, PageUtil) {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
@@ -30,6 +31,9 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsCl
 		var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 
+//		var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
+//		themePreferences.apply();
+		
 		mGlobalCommands.generateBanner("orion-compare", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 		var uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
 			parentDivID: "compareContainer", //$NON-NLS-0$
@@ -38,7 +42,7 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsCl
 		});
 		uiFactory.buildUI();
 		var diffProvider = new mCompareContainer.DefaultDiffProvider(serviceRegistry);
-		
+
 		var startWidget = function(){
 			var compareParams = PageUtil.matchResourceParameters();
 			var options = {

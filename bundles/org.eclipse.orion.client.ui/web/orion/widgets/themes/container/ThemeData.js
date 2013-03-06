@@ -11,8 +11,8 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['orion/widgets/themes/container/ThemeSheetWriter'], 
-	function(ThemeSheetWriter) {
+define(['orion/editor/textTheme', 'orion/widgets/themes/container/ThemeSheetWriter'], 
+	function(mTextTheme, ThemeSheetWriter) {
 
 		function StyleSet(){
 		
@@ -42,7 +42,7 @@ define(['orion/widgets/themes/container/ThemeSheetWriter'],
 		function ThemeData(){
 		
 			this.styles = [];
-
+			
 			var orion = new StyleSet();
 			orion.name = 'Orion';
 			orion.navbar = '#333';
@@ -178,7 +178,7 @@ define(['orion/widgets/themes/container/ThemeSheetWriter'],
 		
 		
 		function getThemeStorageInfo(){
-			var themeInfo = { storage:'/themes', styleset:'styles', defaultTheme:'orion', selectedKey: 'selected'  }; 
+			var themeInfo = { storage:'/themes', styleset:'styles', defaultTheme:'Orion', selectedKey: 'selected'  }; 
 			return themeInfo;
 		}
 
@@ -265,13 +265,9 @@ define(['orion/widgets/themes/container/ThemeSheetWriter'],
 		
 		function processSettings( settings ){
 			var sheetMaker = new ThemeSheetWriter.ThemeSheetWriter();
-			var cssdata = sheetMaker.getSheet( settings );
-			
-			var stylesheet = document.createElement("STYLE");
-			stylesheet.appendChild(document.createTextNode(cssdata));
-			
-			var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
-			head.appendChild(stylesheet);
+			var themeClass = "orionTheme";
+			var theme = new mTextTheme.TextTheme.getTheme(themeClass);
+			theme.setThemeClass(themeClass, sheetMaker.getSheet( settings ));
 		}
 		
 		ThemeData.prototype.processSettings = processSettings;
