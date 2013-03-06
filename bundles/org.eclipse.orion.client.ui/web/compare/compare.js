@@ -31,8 +31,8 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsCl
 		var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 
-//		var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
-//		themePreferences.apply();
+		var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
+		themePreferences.apply();
 		
 		mGlobalCommands.generateBanner("orion-compare", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 		var uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
