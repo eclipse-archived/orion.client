@@ -121,8 +121,8 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 			var valid = false;
 			var value;
 			// item has the specified property
-			if (item[key]) {
-				if (!match) {  // value doesn't matter, just the presence of the property is enough
+			if (typeof(item[key]) !== "undefined") { //$NON-NLS-0$
+				if (typeof(match) === "undefined") {  //$NON-NLS-0$ // value doesn't matter, just the presence of the property is enough
 					value = item[key];
 					valid = true;
 				} else if (typeof(match) === 'string') {  // the value is a regular expression that should match some string //$NON-NLS-0$
@@ -214,7 +214,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 			if (validator.info.validationProperties) {
 				for (var i=0; i<validator.info.validationProperties.length; i++) {
 					var validationProperty = validator.info.validationProperties[i];
-					if (validationProperty.source) {
+					if (typeof(validationProperty.source) !== "undefined") { //$NON-NLS-0$
 						var matchFound = matchSinglePattern(item, validationProperty.source, validationProperty, validator);
 						if (!matchFound){
 							return false;
@@ -371,7 +371,8 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 						image: info.image,
 						id: info.id || info.name,
 						tooltip: info.tooltipKey ? commandMessages[info.tooltipKey] : info.tooltip,
-						isEditor: info.isEditor
+						isEditor: info.isEditor,
+						showGlobally: info.showGlobally
 				};
 				enhanceCommandOptions(commandOptions, deferred);
 			});
@@ -381,7 +382,8 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 					image: info.image,
 					id: info.id || info.name,
 					tooltip: info.tooltip,
-					isEditor: info.isEditor
+					isEditor: info.isEditor,
+					showGlobally: info.showGlobally
 			};
 			enhanceCommandOptions(commandOptions, deferred);
 		}
@@ -398,6 +400,113 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 			}
 		}
 		return openWithCommands;
+	};
+	
+	var contentTypesCache;
+
+	extensionCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, toolbarId, position, commandGroup, isNavigator) {
+	
+		var done = new Deferred();
+		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
+		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
+		
+		// The shape of the contributed commands is (for now):
+		// info - information about the command (object).
+		//		required attribute: name - the name of the command
+		//		required attribute: id - the id of the command
+		//		optional attribute: tooltip - the tooltip to use for the command
+		//      optional attribute: image - a URL to an image for the command
+		//      optional attribute: uriTemplate - a URI template that can be expanded to generate a URI appropriate for the item.
+		//      optional attribute: forceSingleItem - if true, then the service is only invoked when a single item is selected
+		//			and the item parameter to the run method is guaranteed to be a single item vs. an array.  When this is not true, 
+		//			the item parameter to the run method may be an array of items.
+		//      optional attribute: contentType - an array of content types for which this command is valid
+		//      optional attribute: validationProperties - an array of validation properties used to read the resource
+		//          metadata to determine whether the command is valid for the given resource.  Regular expression patterns are
+		//          supported as values in addition to specific values.
+		//          For example the validation property
+		//				[{source: "Git"}, {source: "Directory", match:"true"}]
+		//              specifies that the property "Git" must be present, and that the property "Directory" must be true.
+		// run - the implementation of the command (function).
+		//        arguments passed to run: (itemOrItems)
+		//          itemOrItems (object or array) - an array of items to which the item applies, or a single item if the info.forceSingleItem is true
+		//        the run function is assumed to perform all necessary action and the return is not used.
+		var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
+		
+		var fileCommands = [];
+		var i;
+		for (i=0; i<commandsReferences.length; i++) {
+			// Exclude any navigation commands themselves, since we are the navigator.
+			var id = commandsReferences[i].getProperty("id"); //$NON-NLS-0$
+			if (id !== "orion.navigateFromMetadata") { //$NON-NLS-0$
+				var impl = serviceRegistry.getService(commandsReferences[i]);
+				var info = {};
+				var propertyNames = commandsReferences[i].getPropertyKeys();
+				for (var j = 0; j < propertyNames.length; j++) {
+					info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
+				}
+				// If we are processing commands for the navigator, include all command declarations.
+				// If we are not the navigator, include only those marked "showGlobally"
+				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=402447
+				if (isNavigator || (info.forceSingleItem && info.showGlobally)) {
+					fileCommands.push({properties: info, service: impl});
+				}
+			}
+		}
+		
+		function getContentTypes() {
+			return contentTypesCache || serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(ct) { //$NON-NLS-0$
+				contentTypesCache = ct;
+				return contentTypesCache;
+			});
+		}
+		var self = this;
+		Deferred.when(getContentTypes(), function() {
+			// If we are processing commands for the navigator, also include the open with command.  If we are not in the navigator, we only want the
+			// commands we processed before.
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=402447
+			fileCommands = isNavigator ? fileCommands.concat(extensionCommandUtils._createOpenWithCommands(serviceRegistry, contentTypesCache)) : fileCommands;
+			var extensionGroupCreated = false;
+			var openWithGroupCreated = false;
+			var commandDeferreds = [];
+		
+			for (i=0; i < fileCommands.length; i++) {
+				var commandInfo = fileCommands[i].properties;
+				var service = fileCommands[i].service;
+				var commandDeferred = extensionCommandUtils._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true);
+				commandDeferreds.push(commandDeferred);
+				var index = i;
+				var context = {isEditor: commandInfo.isEditor, index: i};
+				var processOptions = function(commandOptions) {
+					var command = new mCommands.Command(commandOptions);
+					if (this.isEditor) {
+						command.isEditor = this.isEditor;
+					}
+					
+					commandService.addCommand(command);
+					if (commandGroup && !extensionGroupCreated) {
+						extensionGroupCreated = true;
+						commandService.addCommandGroup(toolbarId, "eclipse.fileCommandExtensions", 1000, null, commandGroup); //$NON-NLS-0$
+					}
+					if (commandGroup && !openWithGroupCreated) {
+						openWithGroupCreated = true;
+						commandService.addCommandGroup(toolbarId, "eclipse.openWith", 1000, "Open With", commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					if (this.isEditor) {
+						commandService.registerCommandContribution(toolbarId, command.id, position + this.index, commandGroup ? commandGroup + "/eclipse.fileCommandExtensions/eclipse.openWith" : null); //$NON-NLS-0$
+					} else {
+						commandService.registerCommandContribution(toolbarId, command.id, position + this.index, commandGroup ? commandGroup + "/eclipse.fileCommandExtensions" : null); //$NON-NLS-0$
+					}
+				};
+
+				commandDeferred.then(processOptions.bind(context));
+			}
+			Deferred.all(commandDeferreds, function(error) {return {_error: error};}).then(function(errorOrResultArray){
+				done.resolve({});
+			});
+
+		});
+		return done;
 	};
 	
 	return extensionCommandUtils;
