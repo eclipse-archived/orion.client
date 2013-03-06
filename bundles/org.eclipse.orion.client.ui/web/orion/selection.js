@@ -48,7 +48,7 @@ define(["orion/EventTarget"], function(EventTarget){
 		 * @param onDone The function to invoke with the selections
 		 */
 		getSelections: function(onDone) {
-			onDone(this._selections || []);
+			onDone(Array.isArray(this._selections) ? this._selections.slice() : []);
 		},
 		
 		_getSingleSelection: function() {
@@ -65,7 +65,7 @@ define(["orion/EventTarget"], function(EventTarget){
 		setSelections: function(itemOrArray) {
 			var oldSelection = this._selections;
 			if (Array.isArray(itemOrArray)) {	
-				this._selections = itemOrArray.length > 0 ? itemOrArray : null;
+				this._selections = itemOrArray.length > 0 ? itemOrArray.slice() : null;
 			} else if (itemOrArray) {
 				this._selections = [itemOrArray];
 			} else {
