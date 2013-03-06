@@ -34,13 +34,15 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 		this._document = options.document || document;
 	}
 	
-	var DefaultTheme;
-	TextTheme.getTheme = function() {
-		if (!DefaultTheme) {
+	var Themes = {};
+	TextTheme.getTheme = function(name) {
+		name = name || "default";
+		var theme = Themes[name];
+		if (!theme) {
 			//TODO: Load a default sheet somehow
-			DefaultTheme = new TextTheme();
+			theme = Themes[name] = new TextTheme();
 		}
-		return DefaultTheme;
+		return theme;
 	};
 
 	TextTheme.prototype = /** @lends orion.editor.TextTheme.prototype */ {
