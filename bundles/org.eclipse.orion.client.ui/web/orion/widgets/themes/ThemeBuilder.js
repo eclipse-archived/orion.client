@@ -710,12 +710,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 					themesaver.firstChild.value = '';
 				}
 			
-				if (this.fontSize) {
-					for( var i=0; i<styles.length; i++ ){
-						styles[i].fontSize = this.fontSize;
-					}
-				}
-				
 				this.preferences.setTheme(themename, styles);
 				lib.node( 'savecontainer' ).style.display = 'none';
 				lib.node( 'pickercontainer' ).style.display = '';
@@ -776,15 +770,12 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		
 		function selectFontSize( size ){
 			this.settings.fontSize = { value:size };	
-			this.themeData.selectFontSize( size );		
-			this.fontSize = size;
+			this.preferences.setFontSize( size );
 		}
 		
 		ThemeBuilder.prototype.selectFontSize = selectFontSize;
 		
 		function updateFontSizePicker( selected ){
-		
-			var themebuilder = this;
 		
 			var options = [];
 			
@@ -805,7 +796,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 			newdiv.id = 'fontsizepicker';
 			document.getElementById( 'sizecontainer' ).appendChild(newdiv);
 			this.sizeSelect = new Select( {options:options}, newdiv );
-			this.sizeSelect.setStorageItem = themebuilder.selectFontSize.bind(themebuilder);
+			this.sizeSelect.setStorageItem = this.selectFontSize.bind(this);
 			this.sizeSelect.show();
 		}
 		
