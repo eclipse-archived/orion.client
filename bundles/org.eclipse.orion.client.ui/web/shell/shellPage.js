@@ -193,7 +193,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 		}
 		var errNode = document.createElement("span"); //$NON-NLS-0$
 		errNode.textContent = error;
-		promise.resolve(errNode);
+		promise.reject(errNode);
 	};
 
 	function computeEditURL(node) {
@@ -304,7 +304,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 								links[i].setAttribute("target", "_self"); //$NON-NLS-1$ //$NON-NLS-0$
 								links[i].className = "";
 							}
-						}, 1);
+						});
 					},
 					function(error) {
 						resolveError(result, error);
@@ -723,21 +723,67 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 					}
 					return result;
 				}
-				progress.progress(service.callback(pluginArgs, {cwd:getCWD()}), "Executing command " + getCommandString(name, args)).then( //$NON-NLS-0$
-					function(result) {
-						var commandResult = new CommandResult(result, returnType);
-						processResult(promise, commandResult, output);
-					},
-					function(error) {
-						resolveError(promise, error);
-					},
-					function(data) {
+				var resolvedFn = function(result) {
+					var commandResult = new CommandResult(result, returnType);
+					processResult(promise, commandResult, output);
+				};
+				var errorFn = function(error) {
+					resolveError(promise, error);
+				};
+				var progressFn = function(data) {
+					if (data && data.uriTemplate) {
+						/* delegated UI request */
+						var uriTemplate = new URITemplate(data.uriTemplate);
+						var cwd = shellPageFileService.getCurrentDirectory();
+						var href = uriTemplate.expand({}); // TODO
+						var iframe = document.createElement("iframe"); //$NON-NLS-0$
+						iframe.id = name;
+						iframe.name = name;
+						iframe.type = "text/html"; //$NON-NLS-0$
+						iframe.sandbox = "allow-scripts allow-same-origin"; //$NON-NLS-0$
+						iframe.frameborder = 1;
+						iframe.src = href;
+						iframe.style.border = "1px inset"; //$NON-NLS-0$
+						// iframe.className = "delegatedUI"; //$NON-NLS-0$
+						if (data.width) {
+							iframe.style.width = data.width;
+						}
+						if (data.height) {
+							iframe.style.height = data.height;
+						}
+						var outputElements = document.getElementsByClassName("gcli-row-out"); //$NON-NLS-0$
+						var parentElement = outputElements[outputElements.length - 1];
+						parentElement.appendChild(iframe);
+						/* listen for notification from the iframe, expecting either a "result", "error" or "progress" property */
+						window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
+							if (event.source !== iframe.contentWindow) {
+								return;
+							}
+							if (typeof event.data === "string") { //$NON-NLS-0$
+								var data = JSON.parse(event.data);
+								if (data.pageService === "orion.page.delegatedUI" && data.source === name) { //$NON-NLS-0$
+									window.removeEventListener("message", _messageHandler, false); //$NON-NLS-0$
+									if (data.error) {
+										errorFn(data.error);
+									} else {
+										parentElement.removeChild(iframe);
+										if (data.result) {
+											resolvedFn(data.result);
+										} else if (data.progress) {
+											progressFn(data.progress);
+										}
+									}
+								}
+							}
+						}, false);
+					} else {
 						if (typeof promise.progress === "function") { //$NON-NLS-0$
 							var commandResult = new CommandResult(data, returnType);
 							processResult(promise, commandResult, output, true);
 						}
 					}
-				);
+				};
+				progress.progress(service.callback(pluginArgs, {cwd: getCWD()}), "Executing command " + getCommandString(name, args)).then(resolvedFn, errorFn, progressFn); //$NON-NLS-0$
 			});
 			return promise;
 		};
