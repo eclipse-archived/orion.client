@@ -144,6 +144,10 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			return this._themeClass;
 		},
 		_load: function (className, styleSheet, callback) {
+			if (!className) {
+				callback();
+				return;
+			}
 			if (typeof styleSheet === "string") { //$NON-NLS-0$
 				this._createStyle(className, styleSheet, callback);
 				return;
@@ -167,12 +171,12 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 		 */
 		setThemeClass: function(className, styleSheet) {
 			var self = this;
+			var oldThemeClass = self._themeClass;	
+			self._themeClass = className;
 			this._load(className, styleSheet, function() {
-				var themeClass = self._themeClass;
-				self._themeClass = className;
 				self.onThemeChanged({
 					type: "ThemeChanged", //$NON-NLS-0$
-					oldValue: themeClass,
+					oldValue: oldThemeClass,
 					newValue: self.getThemeClass()
 				});
 			});
