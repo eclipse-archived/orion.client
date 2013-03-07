@@ -1126,7 +1126,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 			} else if (!this.name && this.hasImage()) {
 				// rare case but can happen for some icons we force with text
 				element = document.createElement("button"); //$NON-NLS-0$
-				element.className = "orionButton commandButton"; //$NON-NLS-0$
+				element.className = "orionButton"; //$NON-NLS-0$
 				addImageToElement(this, element, name);
 				// ensure there is accessible text describing this image if we have any
 				if (this.tooltip) {
