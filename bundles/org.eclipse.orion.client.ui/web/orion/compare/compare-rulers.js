@@ -11,7 +11,7 @@
 
 /*global define */
 
-define(['orion/compare/compareUtils', 'orion/compare/diffTreeNavigator'], function(mCompareUtils, mDiffTreeNavigator) {
+define(['orion/compare/compareUtils'], function(mCompareUtils) {
 var orion = orion || {};
 
 orion.CompareRuler = (function() {

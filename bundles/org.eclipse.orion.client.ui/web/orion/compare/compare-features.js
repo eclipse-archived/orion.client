@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*global define */
 
-define(['i18n!orion/compare/nls/messages', 'orion/compare/compareUtils', 'orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/compare/compare-features.html'], 
-function(messages, mCompareUtils, lib, mSplitter, FeatureTemplate) {
+define(['orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/compare/compare-features.html'], 
+function(lib, mSplitter, FeatureTemplate) {
 
 var orion = orion || {};
 orion.TwoWayCompareUIFactory = (function() {
