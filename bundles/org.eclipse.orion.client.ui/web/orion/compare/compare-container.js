@@ -675,14 +675,13 @@ exports.TwoWayCompareContainer = (function() {
 		this._leftTextView = this._leftEditor.getTextView();
 		this._rightEditor = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDiv , this._uiFactory.getStatusDiv(false) ,true, createLineStyler , this.options.baseFile);
 		this._rightTextView = this._rightEditor.getTextView();
-		var that = this;
 		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
-                function(lineIndex, ruler){that._diffNavigator.matchPositionFromOverview(lineIndex);});
+                function(lineIndex, ruler){this._diffNavigator.matchPositionFromOverview(lineIndex);}.bind(this));
 		window.onbeforeunload = function() {
-			if (that._leftEditor.isDirty()) {
+			if (this._leftEditor.isDirty()) {
 				return messages["There are unsaved changes."];
 			}
-		};
+		}.bind(this);
 		
 	};
 	
@@ -696,19 +695,6 @@ exports.TwoWayCompareContainer = (function() {
 		this._diffNavigator.gotoDiff(offset, textView);
 	};
 
-	TwoWayCompareContainer.prototype.gotoMatch = function(lineNumber, match, newMatch, defaultGap, onScroll, onLoad){	
-		if(!this.onScroll){
-			this.onScroll = onScroll;
-		}
-		if(!this.onLoad){
-			this.onLoad = onLoad;
-		}
-		//var offsetRight = this._rightTextView.getModel().getLineStart(lineNumber) + match.startIndex;
-		//this._rightEditor.moveSelection(offsetRight, offsetRight + (match.length ? match.length : defaultGap));
-		var offsetLeft = this._leftTextView.getModel().getLineStart(lineNumber) + newMatch.startIndex;
-		this._leftEditor.moveSelection(offsetLeft, offsetLeft/* + (newMatch.length ? newMatch.length : defaultGap)*/);
-	};
-	
 	TwoWayCompareContainer.prototype.copyToLeft = function(){	
 		this._curveRuler.copyToLeft();
 	};
@@ -802,7 +788,7 @@ exports.TwoWayCompareContainer = (function() {
 			}
 			statusDiv.textContent = dirtyIndicator +  status;
 		};
-		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(that._registry, that._commandService, "pageActions"); //$NON-NLS-0$
+		var undoStackFactory =  new mEditorFeatures.UndoFactory();
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();
 		var editor = new mEditor.Editor({
 			textViewFactory: textViewFactory,
@@ -825,10 +811,6 @@ exports.TwoWayCompareContainer = (function() {
 		}
 			
 		var textView = editor.getTextView();
-		if(createLineStyler && fileObj && typeof(fileObj.Name) === "string"  && typeof(fileObj.Type) === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
-			editor.setInput(fileObj.Name);
-			this._highlighter[columnIndex].highlight(fileObj.Name , fileObj.Type, editor);
-		}
 
 		textView.addEventListener("Selection", function(evt) { //$NON-NLS-0$
 			if(evt.newValue){
@@ -901,20 +883,16 @@ exports.TwoWayCompareContainer = (function() {
 		this._highlighterLoaded = 0;
 		if(!this._leftEditor){
 			this.initEditorContainers(result.delim , output , input ,  result.mapper , true);
-		} else if (onsave) {
-			this._diffNavigator.initMapper(result.mapper);
-			this._curveRuler.init(result.mapper ,this._leftEditor , this._rightEditor, this._diffNavigator);
-			this.renderCommands();
-			this._leftTextView.redrawRange();
-			this._rightTextView.redrawRange();
-		}else {
+		} else {
 			var rFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._rightTextView.getModel(), result.mapper, 1);
 			var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._leftTextView.getModel(), result.mapper, 0);
 			this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._rightEditor, this._leftEditor, rFeeder, lFeeder, this._overviewRuler, this._curveRuler); //$NON-NLS-1$ //$NON-NLS-0$
 			this._curveRuler.init(result.mapper ,this._leftEditor , this._rightEditor, this._diffNavigator);
 			this._inputManager.filePath = this.options.newFile.URL;
 			this._rightEditor.setInput(this.options.baseFile.Name, null, input);
-			this._leftEditor.setInput(this.options.newFile.Name, null, output);
+			if(!onsave){
+				this._leftEditor.setInput(this.options.newFile.Name, null, output);
+			}
 			this._highlighter[0].highlight(this.options.newFile.Name, this.options.newFile.Type, this._leftEditor, this, 2);
 			this._highlighter[1].highlight(this.options.baseFile.Name, this.options.baseFile.Type, this._rightEditor, this, 2);
 			this.renderCommands();

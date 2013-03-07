@@ -7,12 +7,13 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  ******************************************************************************/
+ /*global define*/
 define(['orion/i18n!orion/globalSearch/nls/messages','orion/globalSearch/nls/root/messages'], function(bundle, root) {
 	var result = {
 			root:root
 	};
 	Object.keys(bundle).forEach(function(key) {
-		if (typeof result[key] === 'undefined') {
+		if (typeof result[key] === 'undefined') { //$NON-NLS-0$
 			result[key] = bundle[key];
 		}
 	});
