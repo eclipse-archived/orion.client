@@ -50,7 +50,7 @@ define(["require",
 	
 	function loadTheme(themeClass) {
 		var theme = mTextTheme.TextTheme.getTheme();
-		theme.setThemeClass(themeClass, {href: "examples/editor/themes/" + themeClass}); //$NON-NLS-0$
+		theme.setThemeClass(themeClass, {href: "orion/editor/themes/" + themeClass}); //$NON-NLS-0$
 	}
 	
 	function checkView(options) {
