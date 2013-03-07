@@ -62,8 +62,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 			
 			this.themeData = args.themeData;
 			
-			this.processSettings = this.themeData.processSettings;
-		
 			init();	
 			
 			var commandTemplate = '<div id="commandButtons">' +
@@ -81,8 +79,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 			this.commandService = args.commandService;
 			this.preferences = args.preferences;
 					
-			this.initializeStorage();
-			
 			var revertCommand = new mCommands.Command({
 				name: 'Cancel',
 				tooltip: 'Revert Theme',
@@ -184,38 +180,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 						 ["black", "darkred", "maroon", "brown", "darkolivegreen", "darkgreen", "midnightblue", "navy", "indigo","purple"]];
 
 		ThemeBuilder.prototype.colornames = colornames;
-		
-		
-		function initializeStorage(){
-		
-			var themeInfo = this.themeData.getThemeStorageInfo();
-			var themeData = this.themeData; 
-		
-			this.preferences.getPreferences( themeInfo.storage, 2).then(function(prefs){ 
-
-				/* Check to see if the Orion theme is in the themes preferences ... if it is, 
-				   then we don't need to populate again, otherwise we do need to populate. */
-
-				var styles = prefs.get( themeInfo.styleset ); 
-				if (!styles){
-					styles = themeData.getStyles();
-					prefs.put( themeInfo.styleset, JSON.stringify(styles) ); 
-				} else {
-					styles = JSON.parse ( styles );				
-				}
-				
-				var selectedTheme = prefs.get( 'selected' );
-				if ( selectedTheme ) { selectedTheme = JSON.parse(selectedTheme); }
-				if (!selectedTheme || selectedTheme[themeInfo.selectedKey] === undefined) {
-					selectedTheme = selectedTheme || {}; 
-					selectedTheme[themeInfo.selectedKey] = themeInfo.defaultTheme;
-					prefs.put( 'selected', JSON.stringify(selectedTheme) );
-				}
-				
-			} );
-		}
-		
-		ThemeBuilder.prototype.initializeStorage = initializeStorage;
 		
 		function addAdditionalCommand( commandData ){
 		
@@ -698,50 +662,27 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		
 		ThemeBuilder.prototype.drawOutlineData = drawOutlineData;
 		
-		function processSettings( settings, preferences ){ /* to be provided by ThemeData */ }
-		
-		ThemeBuilder.prototype.processSettings = processSettings;
-		
 		function apply(data){
 		
-			this.processSettings( this.settings, this.preferences );
-			
-			var themename = this.settings.name;
-			
-			var themeInfo = data.themeData.getThemeStorageInfo();
-			
-			var themeBuilder = this;
-			
 			/* New Theme defined */
-			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){ //$NON-NLS-0$
+			this.preferences.getTheme(function( themeStyles ) { 
+				var themename = this.settings.name;
 				
-				var styles = prefs.get(	themeInfo.styleset );
-				if( styles ){	
-					styles = JSON.parse( styles ); 
-				}
+				var styles = themeStyles.styles;
+
+				var themesaver = lib.node( 'themesaver' );
+				var name = themesaver.firstChild.value;
 					
-				if( lib.node( 'themesaver' ).firstChild.value.length > 0 ){
+				if( name.length > 0 ){
 				
-					var newtheme = {};
-					
-					newtheme.name = lib.node( 'themesaver' ).firstChild.value;
-					
-					for( var setting in themeBuilder.settings ){
-						
-						var element = themeBuilder.settings[setting].name;
-						
-						if( element !== 'name' ){
-							newtheme[element] = themeBuilder.settings[setting].value;
-						}
-					}
 					
 					var existingTheme = false;
 					
 					if( styles ){	
 						
-						for( var s in styles ){
+						for( var s=0; s<styles.length; s++ ){
 						
-							if( styles[s].name === newtheme.name ){
+							if( styles[s].name === name ){
 								existingTheme = true;
 								break;
 							}			
@@ -749,38 +690,37 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 					}
 					
 					if( !existingTheme ){
+						var newtheme = {};
+						
+						newtheme.name = name;
+						
+						for( var setting in this.settings ){
+							
+							var element = this.settings[setting].name;
+							
+							if( element !== 'name' ){
+								newtheme[element] = this.settings[setting].value;
+							}
+						}
 						styles.push( newtheme );
 					}
 					
-					themename = newtheme.name;
+					themename = name;
 					
-					if( lib.node( 'themesaver' ).value ){
-						lib.node( 'themesaver' ).value = '';
-					}
+					themesaver.firstChild.value = '';
 				}
 			
-				if (themeBuilder.fontSize) {
-					for( var i=0; i<styles.length; i++ ){
-						styles[i].fontSize = themeBuilder.fontSize;
-					}
-				}
-				
-				var selectedTheme = prefs.get( 'selected' );
-				selectedTheme = selectedTheme ? JSON.parse( selectedTheme ) : {};
-				selectedTheme[themeInfo.selectedKey] = themename;
-				prefs.put( themeInfo.styleset, JSON.stringify(styles) );
-				prefs.put( 'selected', JSON.stringify(selectedTheme) );
+				this.preferences.setTheme(themename, styles);
 				lib.node( 'savecontainer' ).style.display = 'none';
 				lib.node( 'pickercontainer' ).style.display = '';
-				themeBuilder.updateThemePicker(themename, styles);
-				themeBuilder.AUTONAME = false;
-			} );
+				this.updateThemePicker(themename, styles);
+				this.AUTONAME = false;
+			}.bind(this) );
 		}
 		
 		ThemeBuilder.prototype.apply = apply;
 
 		function revert(data){	
-			this.initializeStorage();
 			this.guide();
 			lib.node( 'pickercontainer' ).style.display = '';
 			lib.node( 'savecontainer' ).style.display = 'none';
@@ -800,17 +740,19 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		ThemeBuilder.prototype.guide = guide;
 		
 		function select( name, styles ){
-		
-			for( var s in styles ){
+		    
+		    for ( var theme = 0; theme<styles.length; theme++) {
 				
-				if( styles[s].name === name ){
-				    
-				    this.settings.name = name;
+				var style = styles[theme];
+				
+				if( style.name === name) {
+					
+		    		this.settings.name = name;
 					
 					for( var setting in this.settings ){
 						if( setting !== 'name' ){
 							var item = this.settings[setting].name;
-							this.settings[setting].value = styles[s][item];
+							this.settings[setting].value = style[item];
 						}
 					}
 					break;
@@ -828,15 +770,12 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		
 		function selectFontSize( size ){
 			this.settings.fontSize = { value:size };	
-			this.themeData.selectFontSize( size );		
-			this.fontSize = size;
+			this.preferences.setFontSize( size );
 		}
 		
 		ThemeBuilder.prototype.selectFontSize = selectFontSize;
 		
 		function updateFontSizePicker( selected ){
-		
-			var themebuilder = this;
 		
 			var options = [];
 			
@@ -857,139 +796,75 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 			newdiv.id = 'fontsizepicker';
 			document.getElementById( 'sizecontainer' ).appendChild(newdiv);
 			this.sizeSelect = new Select( {options:options}, newdiv );
-			this.sizeSelect.setStorageItem = themebuilder.selectFontSize.bind(themebuilder);
+			this.sizeSelect.setStorageItem = this.selectFontSize.bind(this);
 			this.sizeSelect.show();
 		}
 		
 		ThemeBuilder.prototype.updateFontSizePicker = updateFontSizePicker;
 		
-		function addFontSizePicker(){
+		function addFontSizePicker(themeStyles){
 		
-			var themebuilder = this;
+			var currentFont = themeStyles.style.fontSize;
 			
-			var themeInfo = this.themeData.getThemeStorageInfo();
+			var picker = document.getElementById( 'fontsizepicker' );
+	
+			var options = [];
 			
-			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){
-				var styles = prefs.get( themeInfo.styleset );
-				var selection = prefs.get( 'selected' );
-				if(selection){ selection = JSON.parse( selection ); }
-				var currentFont;
-				
-				if( styles ){	
-					styles = JSON.parse( styles );
+			for( var size = 8; size < 19; size++ ){
 					
-					for( var s = 0; s < styles.length; s++ ){
-						if( styles[s].name ===  selection[themeInfo.selectedKey] ){
-							currentFont = styles[s].fontSize;
-							break;
-						}
-					}
-				}
+				var set = {
+					value: size + 'pt',
+					label: size + 'pt'
+				};	
 				
-				var picker = document.getElementById( 'fontsizepicker' );
-		
-				var options = [];
+				if( set.value === currentFont ){ set.selected = 'true'; }
 				
-				for( var size = 8; size < 19; size++ ){
-						
-					var set = {
-						value: size + 'pt',
-						label: size + 'pt'
-					};	
-					
-					if( set.value === currentFont ){ set.selected = 'true'; }
-					
-					options.push(set);
-				}	
-				
-				if(!this.sizeSelect){
-					this.sizeSelect = new Select( {options:options}, picker );
-					this.sizeSelect.setStorageItem = themebuilder.selectFontSize.bind(themebuilder);	
-					this.sizeSelect.show();
-				}
-			});
+				options.push(set);
+			}	
 			
+			if(!this.sizeSelect){
+				this.sizeSelect = new Select( {options:options}, picker );
+				this.sizeSelect.setStorageItem = this.selectFontSize.bind(this);	
+				this.sizeSelect.show();
+			}
 		}
 		
 		ThemeBuilder.prototype.addFontSizePicker = addFontSizePicker;
 		
 		
-		function addThemePicker(){
+		function addThemePicker(themeStyles){
 		
 			var options = [];
 			
-			var themebuilder = this;
+			var name = themeStyles.style.name;
+			var styles = themeStyles.styles;
+			for( var theme= 0; theme < styles.length; theme++ ){
 			
-			var selection;
-			
-			var themeData = this.themeData;
-
-			var themeInfo = themeData.getThemeStorageInfo();
-			
-			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){ //$NON-NLS-0$
-
-				/* Check to see if the Orion theme is in the themes preferences ... if it is, 
-				   then we don't need to populate again, otherwise we do need to populate. */
-
-				selection = prefs.get( 'selected' );
+				var set = {
+					value: styles[theme].name,
+					label: styles[theme].name
+				};	
 				
-				if(selection){ selection = JSON.parse( selection ); }
-				
-				var styles = prefs.get( themeInfo.styleset );
-				
-				if(styles){ styles = JSON.parse( styles ); }
-
-				if(!styles){
-				
-					/* If we're in this condition, then the themes are not in local storage yet.
-					   Going to make sure */
-					styles = themeData.getStyles();
-					prefs.put( themeInfo.styleset, JSON.stringify(styles) ); 
+				if( styles[theme].name === name ){
+					set.selected = true;
 				}
 				
-				if(!selection) {
-					selection = {}; 
-					selection[themeInfo.selectedKey] = themeInfo.defaultTheme;
-					prefs.put( 'selected', JSON.stringify(selection) );
-				}
+				options.push(set);
+			}	
+				
+			this.select( name, styles );
 			
-				if( styles ){
-				
-					for( var theme in styles ){
-					
-						var set = {
-							value: styles[theme].name,
-							label: styles[theme].name
-						};	
-						
-						if( selection ){	
-							if( styles[theme].name === selection[themeInfo.selectedKey] ){
-								set.selected = true;
-							}
-						}
-						
-						options.push(set);
-						
-						themebuilder.styles = styles;
-					}	
-				}
-				
-				if( selection ){	
-					this.select( selection[themeInfo.selectedKey], styles );
-				}
+			var picker = document.getElementById( 'themepicker' );
 			
-				var picker = document.getElementById( 'themepicker' );
+			if(!this.themeSelect){
+				this.themeSelect = new Select( {options:options}, picker );
+				this.themeSelect.setStorageItem = this.selectTheme.bind( this );
+				this.themeSelect.show();
 				
-				if(!this.themeSelect){
-					this.themeSelect = new Select( {options:options}, picker );
-					this.themeSelect.setStorageItem = themebuilder.selectTheme.bind( themebuilder );
-					this.themeSelect.show();
-					
-					var saver = document.getElementById( 'themesaver' );
-					this.themeSaver = new TextField({}, saver );
-					this.themeSaver.show();
-				}
-			}.bind(this));	
+				var saver = document.getElementById( 'themesaver' );
+				this.themeSaver = new TextField({}, saver );
+				this.themeSaver.show();
+			}
 		}
 		
 		ThemeBuilder.prototype.addThemePicker = addThemePicker;
@@ -1059,9 +934,11 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 				lib.node( 'sizecontainer' ).style.display = '';   */
 			}
 	
-			this.drawOutlineData(data);	
-			this.addFontSizePicker();
-			this.addThemePicker();
+			this.drawOutlineData(data);
+			this.preferences.getTheme(function(themeStyles) {
+				this.addFontSizePicker(themeStyles);
+				this.addThemePicker(themeStyles);		
+			}.bind(this));
 			
 			this.commandService.renderCommands('themeCommands', document.getElementById( 'revertCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
 		}
@@ -1069,17 +946,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		ThemeBuilder.prototype.renderData = renderData;
 		
 		function selectTheme ( name ) {
-			var builder = this;
-			var themeInfo = this.themeData.getThemeStorageInfo();
-			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){ //$NON-NLS-0$
-
-				var styles = prefs.get( themeInfo.styleset );
-				
-				if(styles){ 
-					styles = JSON.parse( styles ); 
-					builder.select( name, styles );
-				}
-			});
+			this.preferences.getTheme(function(themeStyles) {
+				this.select( name, themeStyles.styles );
+			}.bind(this));
 		}
 		
 		ThemeBuilder.prototype.selectTheme = selectTheme;

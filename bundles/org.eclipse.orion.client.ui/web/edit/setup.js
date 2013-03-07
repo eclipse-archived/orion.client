@@ -13,15 +13,16 @@
 /*global define eclipse:true orion:true window*/
 
 define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
-        'orion/commands', 'orion/favorites', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
+        'orion/commands', 'orion/favorites', 'orion/extensionCommands', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textView', 'orion/editor/textModel', 
         'orion/editor/projectionTextModel', 'orion/keyBinding','orion/searchAndReplace/textSearcher',
-        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel', 'orion/widgets/themes/editor/MiniThemeChooser'],
-		function(messages, require, Deferred, lib, mSelection, mStatus, mProgress, mDialogs, mCommands, mFavorites,
+        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel',
+        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser'],
+		function(messages, require, Deferred, lib, mSelection, mStatus, mProgress, mDialogs, mCommands, mFavorites, mExtensionCommands,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, mThemeChooser) {
+				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, mThemePreferences, mThemeData, mThemeChooser) {
 	
 var exports = exports || {};
 	
@@ -117,12 +118,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 							if (toolbar) {	
 								commandService.destroy(toolbar);
-								commandService.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
+								// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
+								mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, "pageActions", 500).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
+									commandService.renderCommands("pageActions", toolbar, metadata, editor, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+								});
 							}
-							toolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
-							if (toolbar) {	
-								commandService.destroy(toolbar);
-								commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
+							var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
+							if (rightToolbar) {	
+								commandService.destroy(rightToolbar);
+								commandService.renderCommands(rightToolbar.id, rightToolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
 							}
 							self.setTitle(metadata.Location);
 							self._contentType = contentTypeService.getFileContentType(metadata);
@@ -141,7 +145,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							name = self.getTitle();
 						}
 		
-						var chooser = new mThemeChooser.MiniThemeChooser( preferences );
+						var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
+						themePreferences.apply();
+						var chooser = new mThemeChooser.MiniThemeChooser( themePreferences );
 						mGlobalCommands.addSettings( chooser );
 						
 						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$

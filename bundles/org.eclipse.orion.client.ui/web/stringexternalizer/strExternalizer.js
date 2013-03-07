@@ -15,10 +15,11 @@
 define(['require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/dialogs',
 	'orion/commands', 'orion/favorites', 'stringexternalizer/stringexternalizerconfig', 'orion/searchClient',
 	'orion/fileClient', 'orion/operationsClient', 'stringexternalizer/strExternalizerResults', 'orion/globalCommands',
+	'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData',
 	'orion/contentTypes'],
 
 function(require, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mStringExternalizerConfig,
-mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes) {
+mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mThemePreferences, mThemeData, mContentTypes) {
 
 
 	function locationHash() {
@@ -60,6 +61,9 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 		new mFavorites.FavoritesService({
 			serviceRegistry: serviceRegistry
 		});
+		
+		var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
+		themePreferences.apply();
 
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		new mContentTypes.ContentTypeService(serviceRegistry); //yes we're bad

@@ -45,11 +45,27 @@
 				id: "sample.commands.sample3",
 				tooltip: "Bulk command operates on selections"
 			});
+			
+			provider.registerService("orion.navigate.command", {
+				run : function(item) {
+					window.alert("Running command for " + item.Location + ".  I can even run on a non-navigator page like editor.");
+				}
+			}, {
+				image: "../images/gear.gif",
+				name: "Generic File Command",
+				forceSingleItem: true,
+				validationProperties: [
+					{source: "Directory", match: false}
+				],
+				id: "sample.commands.sample4",
+				tooltip: "Navigator command that can appear on other pages",
+				showGlobally: true
+			});
 
 			provider.registerService("orion.navigate.command", {}, {
 				image: "http://www.google.com/favicon.ico",
 				name: "Google Search",
-				id: "sample.commands.sample4",
+				id: "sample.commands.sample5",
 				forceSingleItem: true,
 				uriTemplate: "http://www.google.com/#q={Name}",
 				tooltip: "Link to google search for this file name"
