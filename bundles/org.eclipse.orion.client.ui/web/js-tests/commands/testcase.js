@@ -17,7 +17,9 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 * dom elements we need
 	 */
 	var parentDiv = document.createElement("div");
+	document.body.appendChild(parentDiv);
 	var parentUl = document.createElement("ul");
+	document.body.appendChild(parentUl);
 	var menuDiv = document.createElement("div");
 	document.body.appendChild(menuDiv);
 	var dropdownTrigger = document.createElement("span");
