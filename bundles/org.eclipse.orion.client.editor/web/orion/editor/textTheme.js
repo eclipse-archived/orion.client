@@ -19,9 +19,11 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
 ], function(require, mEventTarget, util) {
 	var THEME_PREFIX = "orion-theme-"; //$NON-NLS-0$
+	
+	var Themes = {};
 
 	/**
-	 * Constructs a new text theme.
+	 * Constructs a new text theme. 
 	 * 
 	 * @class A TextTheme is a class used to specify an editor theme.
 	 * @name orion.editor.TextTheme
@@ -33,8 +35,13 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 		options = options || {};
 		this._document = options.document || document;
 	}
-	
-	var Themes = {};
+
+	/**
+	 * Gets an instance of <code>orion.editor.TextTheme</code> by name. If the name
+	 * paramenter is not speficed the default text theme instance is returned.
+	 * Subsequent calls of <code>getTheme</code> with the same name will return
+	 * the same instance.
+	 */
 	TextTheme.getTheme = function(name) {
 		name = name || "default"; //$NON-NLS-0$
 		var theme = Themes[name];
@@ -46,7 +53,78 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 
 	TextTheme.prototype = /** @lends orion.editor.TextTheme.prototype */ {
 		/**
+		 * Returns the theme className.
 		 *
+		 * @see #setThemeClass
+		 */
+		getThemeClass: function() {
+			return this._themeClass;
+		},
+		/**
+		 * @class This object represents a style sheet for a theme manager.
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.editor.TextTheme#setThemeClass}
+		 * </p>
+		 * @name orion.editor.ThemeStyleSheet
+		 * 
+		 * @property {String} href The href of the stylesheet
+		 */
+		/**
+		 * Sets the theme className and style sheet.
+		 * <p>
+		 * If the <code>stylesheet</code> parameter is a string, it represents an inline
+		 * CSS and it will be added to the document as a <i>STYLE</i> tag element.  If the
+		 * <code>stylesheet</code> parameter is a <code>orion.editor.ThemeStyleSheet</code>,
+		 * its href property is loaded as either a <i>STYLE</i> tag element or as a <i>LINK</i>
+		 * tag element.
+		 * </p>
+		 * <p>
+		 * Listeners of the ThemeChanged event are notify once the styled sheet is loaded
+		 * into the document.
+		 * </p>
+		 *
+		 * @param {String} className the new theme className.
+		 * @param {String|orion.editor.ThemeStyleSheet} styleSheet the CSS stylesheet for the new theme className.
+		 *
+		 * @see #getThemeClass
+		 * @see #onThemeChanged
+		 */
+		 setThemeClass: function(className, styleSheet) {
+			var self = this;
+			var oldThemeClass = self._themeClass;	
+			self._themeClass = className;
+			this._load(className, styleSheet, function() {
+				self.onThemeChanged({
+					type: "ThemeChanged", //$NON-NLS-0$
+					oldValue: oldThemeClass,
+					newValue: self.getThemeClass()
+				});
+			});
+		},
+		/**
+		 * @class This is the event sent when the theme className or style sheet has changed.
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.editor.TextTheme}<br/>
+		 * {@link orion.editor.TextTheme#event:onThemeChanged}
+		 * </p>
+		 * @name orion.editor.ThemeChangedEvent
+		 * 
+		 * @property {String} oldValue The old theme clasName.
+		 * @property {String} newValue The new theme className.
+		 */
+		/**
+		 * This event is sent when the theme clasName has changed and its style sheet has been loaded in the document.
+		 *
+		 * @event
+		 * @param {orion.editor.ThemeChangedEvent} themeChangedEvent the event
+		 */
+		onThemeChanged: function(themeChangedEvent) {
+			return this.dispatchEvent(themeChangedEvent);
+		},
+		/**
+		 * @private
 		 */
 		buildStyleSheet: function(themeClass, settings) {
 			
@@ -105,6 +183,9 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			
 			return result.join("\n"); //$NON-NLS-0$
 		},
+		/**
+		 * @private
+		 */
 		_createStyle: function(className, styleSheet, callback, link) {
 			var document = this._document;
 			var id = THEME_PREFIX + className;
@@ -137,11 +218,8 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			}
 		},
 		/**
-		 *
+		 * @private
 		 */
-		getThemeClass: function() {
-			return this._themeClass;
-		},
 		_load: function (className, styleSheet, callback) {
 			if (!className) {
 				callback();
@@ -164,42 +242,6 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 					self._createStyle(className, cssText, callback, false);
 				});
 			}
-		},
-		/**
-		 *
-		 */
-		setThemeClass: function(className, styleSheet) {
-			var self = this;
-			var oldThemeClass = self._themeClass;	
-			self._themeClass = className;
-			this._load(className, styleSheet, function() {
-				self.onThemeChanged({
-					type: "ThemeChanged", //$NON-NLS-0$
-					oldValue: oldThemeClass,
-					newValue: self.getThemeClass()
-				});
-			});
-		},
-		/**
-		 * @class This is the event sent when the current theme has changed.
-		 * <p>
-		 * <b>See:</b><br/>
-		 * {@link orion.editor.TextTheme}<br/>
-		 * {@link orion.editor.TextTheme#event:onThemeChanged}
-		 * </p>
-		 * @name orion.editor.ThemeChangedEvent
-		 * 
-		 * @property {String} oldValue The old selection.
-		 * @property {String} newValue The new selection.
-		 */
-		/**
-		 * This event is sent when the current theme has changed.
-		 *
-		 * @event
-		 * @param {orion.editor.ThemeChangedEvent} themeChangedEvent the event
-		 */
-		onThemeChanged: function(themeChangedEvent) {
-			return this.dispatchEvent(themeChangedEvent);
 		}
 	};
 	mEventTarget.EventTarget.addMixin(TextTheme.prototype);
