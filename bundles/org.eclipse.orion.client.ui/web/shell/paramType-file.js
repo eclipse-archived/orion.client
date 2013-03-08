@@ -36,7 +36,6 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				var index = this.typedPath.lastIndexOf(this.shellPageFileService.SEPARATOR, this.typedPath.length - 2);
 				var path = index !== -1 ? this.typedPath.substring(0, index) : "."; //$NON-NLS-0$
 
-				var self = this;
 				var waitCount = 0;
 				var nodesQueue = this.value.slice(0);
 				var result = [];
@@ -45,13 +44,13 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 						result.push(file);
 					}
 					if (waitCount === 0 && nodesQueue.length === 0) {
-						if (self.typeSpec.multiple) {
+						if (this.typeSpec.multiple) {
 							promise.resolve(result);
 						} else {
 							promise.resolve(result[0]);
 						}
 					}
-				};
+				}.bind(this);
 
 				var processNodesQueue = function() {
 					while (nodesQueue.length > 0) {
@@ -62,14 +61,14 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 						};
 						if (node.recursePath) {
 							node.recursePath.forEach(function(current) {
-								file.path += self.shellPageFileService.SEPARATOR + current;
-							});
+								file.path += this.shellPageFileService.SEPARATOR + current;
+							}.bind(this));
 						}
-						file.path += self.shellPageFileService.SEPARATOR + node.Name;
-						if (node.Directory && self.typeSpec.multiple && self.typeSpec.recurse) {
+						file.path += this.shellPageFileService.SEPARATOR + node.Name;
+						if (node.Directory && this.typeSpec.multiple && this.typeSpec.recurse) {
 							(function(node) {
 								waitCount++;
-								self.shellPageFileService.withChildren(
+								this.shellPageFileService.withChildren(
 									node,
 									function(children) {
 										waitCount--;
@@ -94,14 +93,14 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 										resultFn();	/* waitCount may now be 0 */
 									}
 								);
-							})(node);
+							}.bind(this))(node);
 						}
 
 						nodesQueue.splice(0,1);
-						if (self.typeSpec.content && !file.isDirectory) {
+						if (this.typeSpec.content && !file.isDirectory) {
 							(function(file) {
 								waitCount++;
-								self.shellPageFileService.readBlob(node).then(
+								this.shellPageFileService.readBlob(node).then(
 									function(content) {
 										waitCount--;
 										file.blob = content;
@@ -112,12 +111,12 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 										resultFn(file);
 									}
 								);
-							}(file));
+							}.bind(this)(file));
 						} else {
 							resultFn(file);
 						}
 					}
-				};
+				}.bind(this);
 				processNodesQueue();
 			}
 			return promise;
@@ -159,13 +158,12 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 			processResult: function(promise, result, output, isProgress) {
 				var element = document.createElement("div"); //$NON-NLS-0$
 
-				var self = this;
 				var waitCount = 0;
 				var successFn = function(file) {
 					this.callback = function() {
 						var string = i18nUtil.formatMessage(
 							messages["Wrote ${0}"],
-							typeof(file) === "string" ? file : self.shellPageFileService.computePathString(file)); //$NON-NLS-0$
+							typeof(file) === "string" ? file : this.shellPageFileService.computePathString(file)); //$NON-NLS-0$
 						var writer = new mResultWriters.ShellStringWriter(element);
 						writer.appendText(string);
 						writer.appendNewline();
@@ -175,14 +173,14 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 						} else {
 							promise.resolve(element);
 						}
-					};
+					}.bind(this);
 					return this;
-				};
+				}.bind(this);
 				var errorFn = function(file) {
 					this.callback = function(error) {
 						var string = i18nUtil.formatMessage(
 							messages["Failed to write ${0}"],
-							typeof(file) === "string" ? file : self.shellPageFileService.computePathString(file)); //$NON-NLS-0$
+							typeof(file) === "string" ? file : this.shellPageFileService.computePathString(file)); //$NON-NLS-0$
 						string += " [" + error + "]"; //$NON-NLS-1$ //$NON-NLS-0$
 						var writer = new mResultWriters.ShellStringWriter(element);
 						writer.appendText(string);
@@ -193,9 +191,9 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 						} else {
 							promise.resolve(element);
 						}
-					};
+					}.bind(this);
 					return this;
-				};
+				}.bind(this);
 
 				var destination = output || this.shellPageFileService.getCurrentDirectory();
 				waitCount++;
@@ -209,7 +207,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 						}
 						files.forEach(function(file) {
 							waitCount++;
-							var pathSegments = file.path.split(self.shellPageFileService.SEPARATOR);
+							var pathSegments = file.path.split(this.shellPageFileService.SEPARATOR);
 
 							/* normalize instances of '.' and '..' in the path */
 							var index = 0;
@@ -232,34 +230,34 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 							var writeFile = function(parentNode, fileToWrite, pathSegments) {
 								var segment = pathSegments[0];
 								pathSegments.splice(0,1);
-								var nodeString = self.shellPageFileService.computePathString(parentNode) + self.shellPageFileService.SEPARATOR + segment;
+								var nodeString = this.shellPageFileService.computePathString(parentNode) + this.shellPageFileService.SEPARATOR + segment;
 								if (pathSegments.length === 0) {
 									/* attempt to write the new resource */
 									if (fileToWrite.isDirectory) {
-										self.shellPageFileService.ensureDirectory(parentNode, segment).then(successFn(nodeString).callback, errorFn(nodeString).callback);
+										this.shellPageFileService.ensureDirectory(parentNode, segment).then(successFn(nodeString).callback, errorFn(nodeString).callback);
 									} else {
-										self.shellPageFileService.ensureFile(parentNode, segment).then(
+										this.shellPageFileService.ensureFile(parentNode, segment).then(
 											function(file) {
-												var writer = new mResultWriters.FileBlobWriter(file, self.shellPageFileService);
+												var writer = new mResultWriters.FileBlobWriter(file, this.shellPageFileService);
 												writer.addBlob(fileToWrite.blob);
 												writer.write().then(successFn(file).callback, errorFn(file).callback);
-											},
+											}.bind(this),
 											errorFn(nodeString).callback
 										);
 									}
 									return;
 								}
 								/* more lead-up path segments to go */
-								self.shellPageFileService.ensureDirectory(parentNode, segment).then(
+								this.shellPageFileService.ensureDirectory(parentNode, segment).then(
 									function(newNode) {
 										writeFile(newNode, fileToWrite, pathSegments);
 									},
-									errorFn(self.shellPageFileService.computePathString(parentNode) + self.shellPageFileService.SEPARATOR + segment).callback
+									errorFn(this.shellPageFileService.computePathString(parentNode) + this.shellPageFileService.SEPARATOR + segment).callback
 								);
-							};
+							}.bind(this);
 							writeFile(directory, file, pathSegments);
-						});
-					},
+						}.bind(this));
+					}.bind(this),
 					errorFn(destination).callback
 				);
 			},

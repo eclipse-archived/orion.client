@@ -31,10 +31,9 @@ define(['orion/Deferred', 'orion/urlUtils'], function(Deferred, mUrlUtils) {
 			write: function() {
 				// TODO handle cases of multiple blobs better?
 				var promise = new Deferred();
-				var self = this;
 				this.shellPageFileService.ensureFile(null, this.destination).then(
 					function(file) {
-						self.shellPageFileService.writeBlob(file, self.blobs[0]).then(
+						this.shellPageFileService.writeBlob(file, this.blobs[0]).then(
 							function() {
 								promise.resolve();
 							},
@@ -42,7 +41,7 @@ define(['orion/Deferred', 'orion/urlUtils'], function(Deferred, mUrlUtils) {
 								promise.reject(error);
 							}
 						);
-					},
+					}.bind(this),
 					function(error) {
 						promise.reject(error);
 					}
@@ -68,10 +67,9 @@ define(['orion/Deferred', 'orion/urlUtils'], function(Deferred, mUrlUtils) {
 			},
 			write: function() {
 				var promise = new Deferred();
-				var self = this;
 				this.shellPageFileService.ensureFile(null, this.destination).then(
 					function(file) {
-						self.shellPageFileService.write(file, self.value).then(
+						this.shellPageFileService.write(file, this.value).then(
 							function() {
 								promise.resolve();
 							},
@@ -79,7 +77,7 @@ define(['orion/Deferred', 'orion/urlUtils'], function(Deferred, mUrlUtils) {
 								promise.reject(error);
 							}
 						);
-					},
+					}.bind(this),
 					function(error) {
 						promise.reject(error);
 					}

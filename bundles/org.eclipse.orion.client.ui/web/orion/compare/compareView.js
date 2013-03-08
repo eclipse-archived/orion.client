@@ -25,61 +25,11 @@ define(['i18n!orion/compare/nls/messages',
         'orion/compare/compare-features',
         'orion/compare/compareUtils',
         'orion/compare/jsdiffAdapter',
-        'orion/compare/diffTreeNavigator', 
-		"orion/editor/textMateStyler",
-		"orion/editor/htmlGrammar",
-		"examples/editor/textStyler"],
+        'orion/compare/diffTreeNavigator'],
 function(messages, require, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mCommands, mTextView,
 		 mCompareFeatures, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
-
 var exports = {};
-
-/*
- * Default syntax highlighter for js, java, and css. Grammar-based highlighter for html.
-*/
-function DefaultHighlighter() {
-	this.styler = null;
-}
-DefaultHighlighter.prototype = {
-	highlight: function(fileName, contentType, editor) {
-		if (this.styler) {
-			this.styler.destroy();
-			this.styler = null;
-		}
-		var splitName = fileName.split("."); //$NON-NLS-0$
-		var lang = "js"; //$NON-NLS-0$
-		if(splitName.length > 1){
-			lang = splitName[splitName.length - 1];
-		}
-		if (lang){
-			var textView = editor.getTextView();
-			var annotationModel = editor.getAnnotationModel();
-			switch(lang) {
-				case "js": //$NON-NLS-0$
-				case "java": //$NON-NLS-0$
-				case "css": //$NON-NLS-0$
-					this.styler = new mTextStyler.TextStyler(textView, lang, annotationModel);
-					break;
-				case "html": //$NON-NLS-0$
-					this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
-					break;
-			}
-			return new Deferred().resolve(editor);
-			/*
-			if(compareWidget && loadingNumber){
-				editor.setAnnotationRulerVisible(false);
-				compareWidget._highlighterLoaded++;
-				if(compareWidget._highlighterLoaded === loadingNumber){
-					compareWidget._diffNavigator.renderAnnotations();
-					compareWidget._diffNavigator.gotoBlock(compareWidget.options.blockNumber-1, compareWidget.options.changeNumber-1);
-				}
-			}
-			*/
-		}
-		return null;
-	}
-};
-
+//var messages = {};
 /*
  * Abstract diff view class
 */
@@ -144,7 +94,10 @@ exports.CompareView = (function() {
 			}
 		},
 		
-		initCommands: function(){	
+		initCommands: function(/*mCommands*/){	
+			if(!this._commandService){
+				return;
+			}
 			var commandSpanId = this.getCommandSpanId();
 			if(!commandSpanId){
 				return;
@@ -252,6 +205,9 @@ exports.CompareView = (function() {
 		},
 		
 		renderCommands: function(){
+			if(!this._commandService){
+				return;
+			}
 			var commandSpanId = this.getCommandSpanId();
 			if(!commandSpanId){
 				return;
@@ -343,33 +299,32 @@ exports.CompareView = (function() {
 		},
 		
 		_initSyntaxHighlighter: function(targetArray){
-			this._syntaxHighlighters = [];
-			if(targetArray.length < 1 || targetArray.length > 2){
-				return;
-			}
+			this._syntaxHighlighters = null;
 			if(this.options.highlighters && this.options.highlighters.length > 0){
-				this._syntaxHighlighters.push({highlighter: this.options.highlighters[0], target: targetArray[0]});
-			} else {
-				this._syntaxHighlighters.push({highlighter: new DefaultHighlighter(), target: targetArray[0]});
-			}
-			if(targetArray.length === 2){
-				if(this.options.highlighters && this.options.highlighters.length > 1){
+				if(targetArray.length < 1 || targetArray.length > 2){
+					return;
+				}
+				this._syntaxHighlighters = [{highlighter: this.options.highlighters[0], target: targetArray[0]}];
+				if(targetArray.length === 2 && this.options.highlighters.length === 2){
 					this._syntaxHighlighters.push({highlighter: this.options.highlighters[1], target: targetArray[1]});
-				} else {
-					this._syntaxHighlighters.push({highlighter: new DefaultHighlighter(), target: targetArray[1]});
 				}
 			}
 		},
 
 		_highlightSyntax: function(){
-	        var promises = [];
-			this._syntaxHighlighters.forEach(function(wrapper) {
-				promises.push(wrapper.highlighter.highlight(wrapper.target.fileName, wrapper.target.contentType, wrapper.target.editor));
-			}.bind(this));
-			Deferred.all(promises, function(error) { return {_error: error}; }).then(function(promises){
+			if(this._syntaxHighlighters){//If syntax highlighter is used, we need to render all the diff annotations after syntax highlighting is done
+		        var promises = [];
+				this._syntaxHighlighters.forEach(function(wrapper) {
+					promises.push(wrapper.highlighter.highlight(wrapper.target.fileName, wrapper.target.contentType, wrapper.target.editor));
+				}.bind(this));
+				Deferred.all(promises, function(error) { return {_error: error}; }).then(function(promises){
+					this._diffNavigator.renderAnnotations();
+					this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
+				}.bind(this));
+			} else {//render all the diff annotations directly
 				this._diffNavigator.renderAnnotations();
 				this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
-			}.bind(this));
+			}
 		},
 
 		startup: function(onsave, onLoadContents){
@@ -384,15 +339,12 @@ exports.CompareView = (function() {
  * Side by side diff view
 */
 exports.TwoWayCompareView = (function() {
-	/**
-	 * Constructs a new side by side compare container. 
-	 */
 	function TwoWayCompareView(commandService, parentDivId, uiFactory, options) {
 		//Init the diff navigator that controls the navigation on both block and word level.
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this._commandService = commandService;
 		
-		//Build the compare view UI container
+		//Build the compare view UI by the UI factory
 		this._uiFactory = uiFactory;
 		if(!this._uiFactory){
 			this._uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
@@ -408,9 +360,7 @@ exports.TwoWayCompareView = (function() {
 		
 		this._leftEditorDiv = this._uiFactory.getEditorParentDiv(true);
 		this._rightEditorDiv = this._uiFactory.getEditorParentDiv(false);
-		
 		this.initCommands();
-		
 		this._curveRuler = new mCompareRulers.CompareCurveRuler(this._uiFactory.getDiffCanvasDiv());
 		this._highlighter = [];
 		if(this.options.highlighter && typeof this.options.highlighter === "function") { //$NON-NLS-0$
@@ -418,6 +368,7 @@ exports.TwoWayCompareView = (function() {
 			this._highlighter.push(new this.options.highlighter());
 		}
 		this.initEditorContainers("\n" , messages['fetching...'] , messages["fetching..."] , []); //$NON-NLS-0$
+		
 	}
 	TwoWayCompareView.prototype = new exports.CompareView();
 	
@@ -425,16 +376,8 @@ exports.TwoWayCompareView = (function() {
 		//Create editor on the left side
 		this._leftEditor = this.createEditorContainer(leftContent, mapper, 0, this._uiFactory.getEditorParentDiv(true), this._uiFactory.getStatusDiv(true), this.options.readonly, this.options.newFile);
 		this._leftTextView = this._leftEditor.getTextView();
-		//TODO: move this to the comapre glue code
-		/*
-		if( this.options.onPage){
-			var toolbar = lib.node("pageActions"); //$NON-NLS-0$
-			if (toolbar) {	
-				this._commandService.destroy(toolbar);
-				this._commandService.renderCommands(toolbar.id, toolbar, this._leftEditor, this._leftEditor, "button"); //$NON-NLS-0$
-			}
-		}
-		*/
+		//TODO: move this.options.onPage to the comapre glue code
+		
 		//Create editor on the right side
 		this._rightEditor = this.createEditorContainer(rightContent, mapper, 1, this._uiFactory.getEditorParentDiv(false), this._uiFactory.getStatusDiv(false), true, this.options.baseFile);
 		this._rightTextView = this._rightEditor.getTextView();
@@ -639,8 +582,9 @@ exports.TwoWayCompareView = (function() {
 			this._leftEditor.setInput(this.options.newFile.Name, null, output);
 		}
 		this._rightEditor.setInput(this.options.baseFile.Name, null, input);
-		this._highlighter[0].highlight(this.options.newFile.Name, this.options.newFile.Type, this._leftEditor, this, 2);
-		this._highlighter[1].highlight(this.options.baseFile.Name, this.options.baseFile.Type, this._rightEditor, this, 2);
+		this._initSyntaxHighlighter([{fileName: this.options.newFile.Name, contentType: this.options.newFile.Type, editor: this._leftEditor},
+									 {fileName: this.options.baseFile.Name, contentType: this.options.baseFile.Type, editor: this._rightEditor}]);
+		this._highlightSyntax();
 		this.renderCommands();
 		this.addRulers();
 		
@@ -788,7 +732,9 @@ exports.InlineCompareView = (function() {
 		rFeeder.setModel(this._textView.getModel());
 		lFeeder.setModel(this._textView.getModel());
 		this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editor, this._editor, rFeeder, lFeeder, this._overviewRuler); //$NON-NLS-1$ //$NON-NLS-0$
-		this._highlighter[0].highlight(this.options.baseFile.Name, this.options.baseFile.Type, this._editor, this, 1);
+		
+		this._initSyntaxHighlighter([{fileName: this.options.baseFile.Name, contentType: this.options.baseFile.Type, editor: this._editor}]);
+		this._highlightSyntax();
 		this.renderCommands();
 		this.addRulers();
 		var drawLine = this._textView.getTopIndex() ;

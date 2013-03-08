@@ -830,14 +830,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 					} else {
 						// group within a menu
 						if (contribution.title) {
-							var trigger = document.createElement("li"); //$NON-NLS-0$
-							parent.appendChild(trigger);
-							var subMenu = commandService._createDropdownMenu(trigger, contribution.title, true);
-							// Check for a submenu for a menu that has already been removed from the dom.
+							var subMenu = commandService._createDropdownMenu(parent, contribution.title, true);
 							if (subMenu) {
 								commandService._render(childContributions, subMenu.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
-								if (subMenu.menu.childNodes.length === 0) {
-									parent.removeChild(trigger);
+								// If no items rendered in the submenu, we don't need it.
+								if (subMenu.menu.childNodes.length === 0 && subMenu.destroyButton) {
+									parent.removeChild(subMenu.destroyButton);
 								}
 							}
 						} else {  
@@ -952,7 +950,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 				parent.appendChild(buttonFragment);
 				newMenu = parent.lastChild.lastChild;
 				menuButton = newMenu.previousSibling;
-				destroyButton = menuButton;
+				destroyButton = parent.lastChild;
 				menuButton.dropdown = new mDropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
 				newMenu.dropdown = menuButton.dropdown;
 			} else {
@@ -1128,7 +1126,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 			} else if (!this.name && this.hasImage()) {
 				// rare case but can happen for some icons we force with text
 				element = document.createElement("button"); //$NON-NLS-0$
-				element.className = "orionButton commandButton"; //$NON-NLS-0$
+				element.className = "orionButton"; //$NON-NLS-0$
 				addImageToElement(this, element, name);
 				// ensure there is accessible text describing this image if we have any
 				if (this.tooltip) {
