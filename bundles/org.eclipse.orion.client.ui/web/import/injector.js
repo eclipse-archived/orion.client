@@ -6,33 +6,67 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define console window*/
-define(['orion/Deferred', 'orion/xhr', 'orion/URL-shim'], function(Deferred, xhr, _) {
+define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'], function(require, Deferred, xhr, form, _) {
+	function debug(msg) { console.log('orion injector: ' + msg); }
 
 	function Injector(fileClient, usersClient) {
 		this.fileClient = fileClient;
 		this.usersClient = usersClient;
 	}
-	Injector.prototype.inject = function(user, projectZipData) {
+	/**
+	 * @param {Boolean} createUser True to create a new user should be created, false to use an existing user.
+	 * @param {Object} userInfo User data for creating new user, or logging in.
+	 * @param {String} [userInfo.email] Required when createUser == true, otherwise ignored.
+	 * @param {String} [userInfo.Name] Required when createUser == true, otherwise ignored.
+	 * @param {String} [userInfo.login] Required when !createUser, otherwise optional.
+	 * @param {String} userInfo.password
+	 * @param {Blob} projectZipData
+	 * @param {String} projectName
+	 */
+	Injector.prototype.inject = function(createUser, userInfo, projectZipData, projectName) {
+		projectName = projectName || 'Project';
 		var fileClient = this.fileClient;
-//		var usersClient = this.usersClient;
-		// FIXME: this needs to create a user and login
-		// right now it assumes you're already logged in
-		var createUserAndLogin = function() {
-			return new Deferred().resolve();
+		var usersClient = this.usersClient;
+
+		// Log in -- TODO no service API for this, so it's hardcoded
+		var doLogin = function(login, password) {
+			debug('logging in...');
+			return xhr('POST', require.toUrl('login/form'), {
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'Orion-Version': '1'
+				},
+				data: form.encodeFormData({
+					login: login,
+					password: password
+				})
+			}).then(function(xhrResult) {
+				return JSON.parse(xhrResult.response);
+			});
 		};
-//		var createUserAndLogin = function() {
-//			var d = new Deferred();
-//			usersClient.createUser(user.Name, user.Password, user.Email).then(function(r) {
-//				d.resolve(r);
-//			}, function(e) {
-//				if (e && e.Message && e.Message.indexOf('already exists') !== -1) {
-//					// TODO need to get the user here
-//					return d.resolve();
-//				}
-//				return d.reject(e);
-//			});
-//			return d;
-//		};
+		var ensureUserLoggedIn = function() {
+			if (createUser) {
+				var randomSuffix = String(Math.random()).substring(2, 12);
+				var login = 'user' + randomSuffix;
+				var displayName = userInfo.Name;
+				var password = userInfo.Password;
+				var email = 'user@' + randomSuffix;
+				return usersClient.createUser(login, password, email).then(function(user) {
+					debug('user created');
+					return user;
+				}).then(function() {
+					return doLogin(login, password);
+				}).then(function(user) {
+					debug('set display name of ' + user.login + ' to ' + displayName);
+					user.Name = displayName;
+					return usersClient.updateUserInfo(user.Location, user).then(function(/*xhrResult*/) {
+						return user;
+					});
+				});
+			} else {
+				return doLogin(userInfo.login, userInfo.password);
+			}
+		};
 		// Creates project if necessary, and returns its metadata
 		var ensureProjectExists = function(location, name) {
 			return fileClient.createProject(location, name).then(function(p) {
@@ -67,17 +101,14 @@ define(['orion/Deferred', 'orion/xhr', 'orion/URL-shim'], function(Deferred, xhr
 			});
 		};
 
-		return createUserAndLogin().then(function() {
-			return fileClient.loadWorkspaces().then(function(workspaces) {
-				// TODO which workspace?
-				return fileClient.loadWorkspace(workspaces[0].Location).then(function(workspace) {
-					console.log('loaded workspace ' + workspace.Location);
-					return ensureProjectExists(workspace.ChildrenLocation, 'Code Samples').then(function(project) {
-						return fileClient.read(project.ChildrenLocation, true).then(function(projectMetadata) {
-							console.log('Unzipping (importing) to ' + projectMetadata.ImportLocation);
-							return uploadZip(projectMetadata.ImportLocation, projectZipData).then(function() {
-								return projectMetadata;
-							});
+		return ensureUserLoggedIn().then(function() {
+			return fileClient.loadWorkspace().then(function(workspace) {
+				console.log('loaded workspace ' + workspace.Location);
+				return ensureProjectExists(workspace.ChildrenLocation, projectName).then(function(project) {
+					return fileClient.read(project.ChildrenLocation, true).then(function(projectMetadata) {
+						console.log('Unzipping (importing) to ' + projectMetadata.ImportLocation);
+						return uploadZip(projectMetadata.ImportLocation, projectZipData).then(function() {
+							return projectMetadata;
 						});
 					});
 				});
