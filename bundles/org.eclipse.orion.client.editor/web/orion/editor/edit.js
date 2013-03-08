@@ -179,6 +179,10 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 			if (index !== -1) {
 				themeClass = themeClass.substring(index + 1);
 			}
+			var extension = ".css"; //$NON-NLS-0$
+			if (themeClass.substring(themeClass.length - extension.length) === extension) {
+				themeClass = themeClass.substring(0, themeClass.length - extension.length);
+			}
 			theme.setThemeClass(themeClass, {href: options.theme});
 			options.theme = theme;
 		}
