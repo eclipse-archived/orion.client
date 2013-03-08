@@ -10,18 +10,15 @@
  ******************************************************************************/
 /*global define module document console URL window*/
 
-/* 0. external page require()'s [someOrionServer]/import/trampoline.js
- * 1. trampoline.js injects an iframe for communicating with Orion:
+/* -- external page require()'s [someOrionServer]/import/trampoline.js
+ * -- trampoline.js injects an iframe for communicating with Orion:
  *    -- iframe src is [orion_site]/import.html 
- *    -- iframe contains a page (outside of Orion auth filter??) that bootstraps itself in the normal page way
- * 2. How do we install the plugin provided by the external site?
- * --trampoline registers itself as an 'orion.core.autoimport' service provider
+ *    -- iframe contains a page that bootstraps itself with a limited set of plugins that don't require authentication
  * --Wait for import frame to tell us it's loaded
- * --When it's loaded, post a message giving our location (that is, the URL of external page, who included this script)
- * --Frame installs external page as a plugin
+ * --Send it a message with our user+import data
  *
  * TODO build an optimized version of this file that can be dropped into <script> tag, like plugin.js
- * - figure out how our dependencies can be handled
+ * TODO leverage pluginregistry for crosspage communication
  */
 define(['../orion/URL-shim.js', '../orion/plugin.js', '../orion/EventTarget.js', 'domReady!'], function(_, PluginProvider, EventTarget) {
 	var trampoline = {};

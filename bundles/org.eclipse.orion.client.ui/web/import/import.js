@@ -10,20 +10,16 @@
  ******************************************************************************/
 /*global define exports module document console URL window*/
 
-define(['require', 'orion/bootstrap', 'orion/fileClient', 'orion/profile/usersClient', 'orion/URL-shim', 'orion/EventTarget',
+define(['require', 'import/bootstrap-import', 'import/import-fileClient', 'orion/profile/usersClient', 'orion/URL-shim', 'orion/EventTarget',
 		'import/Injector', 'import/ImportHandler'],
-		function(require, mBootstrap, mFileClient, mUsersClient, _, EventTarget, Injector, ImportHandler) {
+		function(require, bootstrapImport, mFileClient, mUsersClient, _, EventTarget, Injector, ImportHandler) {
 	function debug(msg) { console.log('Orion: ' + msg); }
 
 	function ServiceProxy() {
 		EventTarget.attach(this);
 	}
 
-	// TODO: bootstrap loads a lot of unnecessary dependencies. we only need:
-	// authenticationPlugin
-	// fileClientPlugin
-	// userservicePlugin
-	mBootstrap.startup().then(function(core) {
+	bootstrapImport().then(function(core) {
 		debug('bootstrap done');
 		var serviceRegistry = core.serviceRegistry;
 		var pluginRegistry = core.pluginRegistry;
