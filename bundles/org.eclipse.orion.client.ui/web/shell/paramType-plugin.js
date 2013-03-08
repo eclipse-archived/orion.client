@@ -26,13 +26,12 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			name: NAME_ALL,
 			getPluginLocations: function() {
 				var result = [];
-				var self = this;
 				this.plugins.forEach(function(current) {
 					var location = current.getLocation();
-					if (!self.urlsToExclude || !self.urlsToExclude[location]) {
+					if (!this.urlsToExclude || !this.urlsToExclude[location]) {
 						result.push(location);
 					}
-				});
+				}.bind(this));
 				return result;
 			},
 			isAllPlugin: function() {
@@ -56,12 +55,11 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			_invokeOnAllPlugins: function(funcName, arg) {
 				var targetList = this.urlsToExclude ? [] : this.plugins;
 				if (this.urlsToExclude) {
-					var self = this;
 					this.plugins.forEach(function(current) {
-						if (!self.urlsToExclude[current.getLocation()]) {
+						if (!this.urlsToExclude[current.getLocation()]) {
 							targetList.push(current);
 						}
-					});
+					}.bind(this));
 				}
 
 				var result = new Deferred();
@@ -89,25 +87,24 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 		function ParamTypePlugin(pluginRegistry) {
 			this.pluginRegistry = pluginRegistry;
 
-			var self = this;
 			pluginRegistry.addEventListener("installed", function() { //$NON-NLS-0$
-				self._initPluginsList();
-			});
+				this._initPluginsList();
+			}.bind(this));
 			pluginRegistry.addEventListener("uninstalled", function() { //$NON-NLS-0$
-				self._initPluginsList();
-			});
+				this._initPluginsList();
+			}.bind(this));
 			pluginRegistry.addEventListener("stopping", function() { //$NON-NLS-0$
-				self._sort(self.plugins);
-			});
+				this._sort(this.plugins);
+			}.bind(this));
 			pluginRegistry.addEventListener("lazy activation", function() { //$NON-NLS-0$
-				self._sort(self.plugins);
-			});
+				this._sort(this.plugins);
+			}.bind(this));
 
 			/* don't let initialization delay rendering of the page */
 			window.setTimeout(function() {
-				self._computeDefaultPlugins();
-				self._initPluginsList();
-			}, 1);
+				this._computeDefaultPlugins();
+				this._initPluginsList();
+			}.bind(this), 1);
 		}
 
 		ParamTypePlugin.prototype = {
@@ -152,10 +149,9 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 				var defaultPluginsStorage = localStorage.getItem("/orion/preferences/default/plugins"); //$NON-NLS-0$
 				if (defaultPluginsStorage) {
 					var pluginsPreference = JSON.parse(defaultPluginsStorage);
-					var self = this;
 					Object.keys(pluginsPreference).forEach(function(pluginUrl) {
-						self._defaultPluginUrls[normalizeUrl(require.toUrl(pluginUrl))] = true;
-					});
+						this._defaultPluginUrls[normalizeUrl(require.toUrl(pluginUrl))] = true;
+					}.bind(this));
 				}
 			},
 
@@ -207,14 +203,13 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			_getPredictions: function(text, multiple, excludeDefaultPlugins) {
 				var predictions = [];
 				if (this.plugins) {
-					var self = this;
 					this.plugins.forEach(function(current) {
-						if (!excludeDefaultPlugins || !self._defaultPluginUrls[current.getLocation()]) {
+						if (!excludeDefaultPlugins || !this._defaultPluginUrls[current.getLocation()]) {
 							if (current.name.indexOf(text) === 0) {
 								predictions.push({name: current.name, value: current});
 							}
 						}
-					});
+					}.bind(this));
 					if (multiple && NAME_ALL.indexOf(text) === 0) {
 						predictions.push({
 							name: NAME_ALL,
@@ -227,13 +222,12 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			_initPluginsList: function() {
 				this.plugins = [];
 				var list = this.pluginRegistry.getPlugins();
-				var self = this;
 				list.forEach(function(current) {
 					var location = current.getLocation();
 					var headers = current.getHeaders();
-					current.name = headers.name || self._formatLocationAsPluginName(location);
-					self.plugins.push(current);
-				});
+					current.name = headers.name || this._formatLocationAsPluginName(location);
+					this.plugins.push(current);
+				}.bind(this));
 				this._sort(this.plugins);
 			},
 			_sort: function(children) {

@@ -19,24 +19,23 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 		function ParamTypeService(pluginRegistry) {
 			this.pluginRegistry = pluginRegistry;
 
-			var self = this;
 			pluginRegistry.addEventListener(
 				"installed", //$NON-NLS-0$
 				function() {
-					self._initServicesList();
-				}
+					this._initServicesList();
+				}.bind(this)
 			);
 			pluginRegistry.addEventListener(
 				"uninstalled", //$NON-NLS-0$
 				function() {
-					self._initServicesList();
-				}
+					this._initServicesList();
+				}.bind(this)
 			);
 
 			/* don't let initialization delay page rendering */
 			window.setTimeout(function() {
-				self._initServicesList();
-			}, 1);
+				this._initServicesList();
+			}.bind(this), 1);
 		}
 
 		ParamTypeService.prototype = {

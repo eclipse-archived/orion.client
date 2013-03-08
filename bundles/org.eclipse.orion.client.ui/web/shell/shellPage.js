@@ -115,10 +115,9 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 					twistieElement.id = this.getTwistieElementId(tr.id);
 					span.appendChild(twistieElement);
 					twistieElement.className = "modelDecorationSprite core-sprite-closedarrow"; //$NON-NLS-0$
-					var self = this;
 					twistieElement.onclick = function(event) {
-						self.tableTree.toggle(tr.id);
-					};
+						this.tableTree.toggle(tr.id);
+					}.bind(this);
 
 					td = document.createElement("td"); //$NON-NLS-0$
 					tr.appendChild(td);
@@ -304,7 +303,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 								links[i].setAttribute("target", "_self"); //$NON-NLS-1$ //$NON-NLS-0$
 								links[i].className = "";
 							}
-						});
+						}, 1);
 					},
 					function(error) {
 						resolveError(result, error);
