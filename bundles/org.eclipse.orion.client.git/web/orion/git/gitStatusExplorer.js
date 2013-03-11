@@ -229,7 +229,7 @@ define(
 
 																					// render
 																					// commands
-																					mGitCommands.updateNavTools(that.registry, that,
+																					mGitCommands.updateNavTools(that.registry, that.commandService, that,
 																							"pageActions", "selectionTools", status); //$NON-NLS-1$ //$NON-NLS-0$
 																				}, function(error) {
 																					that.handleError(error);
@@ -474,7 +474,7 @@ define(
 										}
 										};
 
-										var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry,
+										var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, that.commandService,
 												"diffArea_" + item.diffUri, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
 										inlineCompareContainer.startup(function(maxHeight) {
 											var vH = 420;
@@ -702,7 +702,7 @@ define(
 										}
 										};
 
-										var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry,
+										var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, that.commandService,
 												"diffArea_" + item.diffUri, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
 										inlineCompareContainer.startup(function(maxHeight) {
 											var vH = 420;

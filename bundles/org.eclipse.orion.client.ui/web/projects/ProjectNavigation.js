@@ -11,9 +11,9 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 'orion/commands', 'orion/selection', 'orion/section', 'projects/DriveTreeRenderer', 'orion/Deferred', 'orion/fileCommands', 'projects/ProjectExplorer' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 'orion/commands', 'orion/keyBinding', 'orion/selection', 'orion/section', 'projects/DriveTreeRenderer', 'orion/Deferred', 'orion/fileCommands', 'projects/ProjectExplorer' ], 
 	
-	function(messages, require, lib, mCommands, mSelection, mSection, DriveTreeRenderer, Deferred, mFileCommands, ProjectExplorer ) {
+	function(messages, require, lib, mCommands, mKeyBinding, mSelection, mSection, DriveTreeRenderer, Deferred, mFileCommands, ProjectExplorer ) {
 
 		function ProjectNavigation( project, workspace, anchor, serviceRegistry, commandService, progressService, fileClient, contentTypeService, projectDataManager ){
 		
@@ -247,10 +247,16 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 			mFileCommands.createAndPlaceFileCommandsExtension(this.serviceRegistry, this.commandService, this.drivesExplorer, this.drivesSection.actionsNode.id, this.drivesSection.selectionNode.id, "orion.driveSelectionGroup");  //$NON-NLS-0$
 			var menuid = this.drivesSection.selectionNode.id;
 			this.commandService.registerCommandContribution(menuid, "orion.makeFavorite", 1, "orion.driveSelectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.registerCommandContribution(menuid, "eclipse.renameResource", 2, "orion.driveSelectionGroup", false, new mCommands.CommandKeyBinding(113, false, false, false, false, "DriveContent", "Drives")); //$NON-NLS-4$  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var binding = new mKeyBinding.KeyBinding(113);
+			binding.domScope = "DriveContent"; //$NON-NLS-0$
+			binding.scopeName = "Drives"; //TODO should be externalized
+			this.commandService.registerCommandContribution(menuid, "eclipse.renameResource", 2, "orion.driveSelectionGroup", false, binding); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.registerCommandContribution(menuid, "eclipse.copyFile", 3, "orion.driveSelectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.registerCommandContribution(menuid, "eclipse.moveFile", 4, "orion.driveSelectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.registerCommandContribution(menuid, "eclipse.deleteFile", 5, "orion.driveSelectionGroup", false, new mCommands.CommandKeyBinding(46, false, false, false, false, "DriveContent", "Drives")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var binding = new mKeyBinding.KeyBinding(46);
+			binding.domScope = "DriveContent"; //$NON-NLS-0$
+			binding.scopeName = "Drives"; //TODO should be externalized
+			this.commandService.registerCommandContribution(menuid, "eclipse.deleteFile", 5, "orion.driveSelectionGroup", false, binding); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.registerCommandContribution(menuid, "eclipse.compareWithEachOther", 6, "orion.driveSelectionGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.registerCommandContribution(menuid, "eclipse.compareWith", 7, "orion.driveSelectionGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.registerCommandContribution(menuid, "eclipse.downloadFile", 3, "orion.driveSelectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

@@ -9,13 +9,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*globals define window*/
+/*global define window */
 
-define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands',
+define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',
         'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/ssh/sshTools', 'orion/git/gitLogExplorer', 'orion/git/gitCommands',
 	    'orion/links', 'orion/PageUtil'], 
-		function(messages, require, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection, mFileClient, mOperationsClient,
+		function(messages, require, mBootstrap, mStatus, mProgress, mCommandRegistry, mDialogs, mSelection, mFileClient, mOperationsClient,
 					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitLogExplorer, mGitCommands, mLinks, PageUtil) {
 
 		mBootstrap.startup().then(function(core) {
@@ -24,11 +24,11 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status'
 			
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			new mProgress.ProgressService(serviceRegistry, operationsClient);
 			new mDialogs.DialogService(serviceRegistry);
 			var selection = new mSelection.Selection(serviceRegistry);
 			new mSshTools.SshService(serviceRegistry);
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+			var commandService = new mCommandRegistry.CommandRegistry({selection: selection});
+			new mProgress.ProgressService(serviceRegistry, operationsClient, commandService);
 			var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 		
 			// Git operations

@@ -12,10 +12,10 @@
 /*globals window document define confirm URL*/
 /*jslint nomen:false sub:true forin:false laxbreak:true eqeqeq:false*/
 
-define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
+define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim'], 
-        function(messages, require, Deferred, i18nUtil, lib, mCommands, mGitUtil, mCompareUtils, GitPreferenceStorage, mConfirmPush, mRemotePrompter,
+        function(messages, require, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, mConfirmPush, mRemotePrompter,
         mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch) {
 
 /**
@@ -26,29 +26,28 @@ var exports = {};
 (function() {
 	var doOnce = false;
 
-	exports.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item, pageNavId) {
+	exports.updateNavTools = function(registry, commandRegistry, explorer, toolbarId, selectionToolbarId, item, pageNavId) {
 		var toolbar = lib.node(toolbarId);
-		var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
 		if (toolbar) {
-			commandService.destroy(toolbar);
+			commandRegistry.destroy(toolbar);
 		} else {
 			throw "could not find toolbar " + toolbarId; //$NON-NLS-0$
 		}
-		commandService.renderCommands(toolbarId, toolbar, item, explorer, "button");  //$NON-NLS-0$
+		commandRegistry.renderCommands(toolbarId, toolbar, item, explorer, "button");  //$NON-NLS-0$
 		
 		if (pageNavId) {
 			var pageNav = lib.node(pageNavId);
 			if (pageNav) {
-				commandService.destroy(pageNav);
-				commandService.renderCommands(pageNavId, pageNav, item, explorer, "button");   //$NON-NLS-0$
+				commandRegistry.destroy(pageNav);
+				commandRegistry.renderCommands(pageNavId, pageNav, item, explorer, "button");   //$NON-NLS-0$
 			}
 		}
 		
 		if (selectionToolbarId) {
 			var selectionTools = lib.node(selectionToolbarId);
 			if (selectionTools) {
-				commandService.destroy(selectionToolbarId);
-				commandService.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button");  //$NON-NLS-0$
+				commandRegistry.destroy(selectionToolbarId);
+				commandRegistry.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button");  //$NON-NLS-0$
 			}
 		}
 
@@ -58,8 +57,8 @@ var exports = {};
 			registry.getService("orion.page.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 				var selectionTools = lib.node(selectionToolbarId);
 				if (selectionTools) {
-					commandService.destroy(selectionTools);
-					commandService.renderCommands(selectionToolbarId, selectionTools, event.selections, explorer, "button"); //$NON-NLS-0$
+					commandRegistry.destroy(selectionTools);
+					commandRegistry.renderCommands(selectionToolbarId, selectionTools, event.selections, explorer, "button"); //$NON-NLS-0$
 				}
 			});
 		}
@@ -370,7 +369,7 @@ var exports = {};
 			serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 		}
 
-		var checkoutTagNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', messages["Local Branch Name:"])]); //$NON-NLS-1$ //$NON-NLS-0$
+		var checkoutTagNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages["Local Branch Name:"])]); //$NON-NLS-1$ //$NON-NLS-0$
 		var checkoutTagCommand = new mCommands.Command({
 			name: messages['Checkout'],
 			tooltip: messages["Checkout the current tag, creating a local branch based on its contents."],
@@ -458,7 +457,7 @@ var exports = {};
 		});
 		commandService.addCommand(checkoutBranchCommand);
 
-		var branchNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:')]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var branchNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:')]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		var addBranchCommand = new mCommands.Command({
 			name: messages["New Branch"],
@@ -549,8 +548,8 @@ var exports = {};
 		});
 		commandService.addCommand(removeRemoteBranchCommand);
 
-		var addRemoteParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		                                                               new mCommands.CommandParameter('url', 'url', 'Url:')]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var addRemoteParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		                                                               		new mCommandRegistry.CommandParameter('url', 'url', 'Url:')]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var addRemoteCommand = new mCommands.Command({
 			name: messages["New Remote"],
@@ -791,14 +790,14 @@ var exports = {};
 							function(isEnabled){
 								if(isEnabled){
 									if (jsonData.JsonData.User)
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommandRegistry.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 									else
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommandRegistry.CommandParameterarameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								} else {
 									if (jsonData.JsonData.User)
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 									else
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								}
 								
 								commandInvocation.errorData = jsonData.JsonData;
@@ -918,14 +917,14 @@ var exports = {};
 							function(isEnabled){
 								if(isEnabled){
 									if (jsonData.JsonData.User)
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommandRegistry.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 									else
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommandRegistry.CommandParameterarameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								} else {
 									if (jsonData.JsonData.User)
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 									else
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								}
 								
 								commandInvocation.errorData = jsonData.JsonData;
@@ -1280,14 +1279,14 @@ var exports = {};
 							function(isEnabled){
 								if(isEnabled){
 									if (jsonData.JsonData.User)
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommandRegistry.CommandParameterarameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 									else
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameterarameter("sshpassword", "password", messages['SSH Password:']), new mCommandRegistry.CommandParameterarameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								} else {
 									if (jsonData.JsonData.User)
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameterarameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 									else
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameterarameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameterarameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								}
 								
 								commandInvocation.errorData = jsonData.JsonData;
@@ -1498,14 +1497,14 @@ var exports = {};
 							function(isEnabled){
 								if(isEnabled){
 									if (jsonData.JsonData.User)
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameterarameter("sshpassword", "password", messages["SSH Password:"]), new mCommandRegistry.CommandParameterarameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 									else
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameterarameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameterarameter("sshpassword", "password", messages['SSH Password:']), new mCommandRegistry.CommandParameterarameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								} else {
 									if (jsonData.JsonData.User)
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameterarameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 									else
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameterarameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameterarameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								}
 								
 								commandInvocation.errorData = jsonData.JsonData;
@@ -1750,7 +1749,7 @@ var exports = {};
 		});
 		commandService.addCommand(resetIndexCommand);
 
-		var tagNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', messages['Name:'])]); //$NON-NLS-1$ //$NON-NLS-0$
+		var tagNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'])]); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var addTagCommand = new mCommands.Command({
 			name : messages["Tag"],
@@ -1801,7 +1800,7 @@ var exports = {};
 		});
 		commandService.addCommand(removeTagCommand);
 		
-		var notificationParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('reviewer', 'text', messages["Reviewer name"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+		var notificationParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('reviewer', 'text', messages["Reviewer name"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 		
 
 		var askForReviewCommand = new mCommands.Command({
@@ -1973,8 +1972,8 @@ var exports = {};
 		
 		// Git repository configuration
 		
-		var addConfigParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('key', 'text', messages['Key:']),  //$NON-NLS-1$ //$NON-NLS-0$
-		                                                               new mCommands.CommandParameter('value', 'text', messages['Value:'])]); //$NON-NLS-1$ //$NON-NLS-0$
+		var addConfigParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('key', 'text', messages['Key:']),  //$NON-NLS-1$ //$NON-NLS-0$
+		                                                               		new mCommandRegistry.CommandParameter('value', 'text', messages['Value:'])]); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var addConfigEntryCommand = new mCommands.Command({
 			name: messages["New Configuration Entry"],
@@ -1997,7 +1996,7 @@ var exports = {};
 		});
 		commandService.addCommand(addConfigEntryCommand);
 		
-		var editConfigParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('value', 'text', messages['Value:'])]); //$NON-NLS-1$ //$NON-NLS-0$
+		var editConfigParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('value', 'text', messages['Value:'])]); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var editConfigEntryCommand = new mCommands.Command({
 			name: messages["Edit"],
@@ -2046,7 +2045,7 @@ var exports = {};
 		});
 		commandService.addCommand(deleteConfigEntryCommand);
 		
-		var cloneParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("url", "url", messages['Repository URL:'])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+		var cloneParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("url", "url", messages['Repository URL:'])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 
 		function forceSingleItem(item) {
 			if (Array.isArray(item)) {
@@ -2171,14 +2170,14 @@ var exports = {};
 							function(isEnabled){
 								if(isEnabled){
 									if (jsonData.JsonData.User)
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommandRegistry.CommandParameterarameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 									else
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameterarameter("sshpassword", "password", messages['SSH Password:']), new mCommandRegistry.CommandParameterarameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								} else {
 									if (jsonData.JsonData.User)
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 									else
-										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameterarameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 								}
 								
 								commandInvocation.errorData = jsonData.JsonData;
@@ -2254,8 +2253,8 @@ var exports = {};
 										commandInvocation.remoteName,
 										commandInvocation.items);
 				} else {
-					commandInvocation.parameters = new mCommands.ParametersDescription([
-						new mCommands.CommandParameter("remoteName", "text", messages["Remote Name:"])
+					commandInvocation.parameters = new mCommandRegistry.ParametersDescription([
+						new mCommandRegistry.CommandParameter("remoteName", "text", messages["Remote Name:"])
 					], {hasOptionalParameters : false});
 					
 					commandService.collectParameters(commandInvocation);
@@ -2268,7 +2267,7 @@ var exports = {};
 		});
 		commandService.addCommand(addRemoteReviewRequestCommand);
 
-		var initRepositoryParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("folderName", "text", messages['New folder:'])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+		var initRepositoryParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("folderName", "text", messages['New folder:'])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var initGitRepositoryCommand = new mCommands.Command({
 			name : messages["Init Repository"],
@@ -2375,7 +2374,7 @@ var exports = {};
 		});
 		commandService.addCommand(applyPatchCommand);
 		
-		var openCommitParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("commitName", "text", messages["Commit name:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+		var openCommitParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("commitName", "text", messages["Commit name:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var openCommitCommand = new mCommands.Command({
 			name : messages["Open Commit"],
@@ -2586,8 +2585,8 @@ var exports = {};
 		
 		commandService.addCommand(unstageCommand);
 		
-		var commitMessageParameters = new mCommands.ParametersDescription(
-			[new mCommands.CommandParameter('name', 'text', messages['Commit message:'], "", 4), new mCommands.CommandParameter('amend', 'boolean', messages['Amend:'], false)], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+		var commitMessageParameters = new mCommandRegistry.ParametersDescription(
+			[new mCommandRegistry.CommandParameter('name', 'text', messages['Commit message:'], "", 4), new mCommandRegistry.CommandParameter('amend', 'boolean', messages['Amend:'], false)], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 			 {hasOptionalParameters: true});
 		
 		var commitCommand = new mCommands.Command({

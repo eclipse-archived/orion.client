@@ -10,9 +10,9 @@
  ******************************************************************************/
 /*global define document*/
 /*jslint sub:true*/
-define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/Deferred', 'orion/commands', 'orion/section', 'orion/globalCommands',
+define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/Deferred', 'orion/commands', 'orion/keyBinding', 'orion/section', 'orion/globalCommands',
 		'orion/selection', 'orion/sites/siteUtils', 'orion/explorers/navigationUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/webui/treetable', 'orion/webui/littlelib'],
-		function(messages, i18nUtil, mExplorer, Deferred, mCommands, mSection, mGlobalCommands, mSelection, mSiteUtils, mNavUtils, mSiteClient, mSiteCommands, treetable, lib) {
+		function(messages, i18nUtil, mExplorer, Deferred, mCommands, mKeyBinding, mSection, mGlobalCommands, mSelection, mSiteUtils, mNavUtils, mSiteClient, mSiteCommands, treetable, lib) {
 	var SiteServicesExplorer, SitesRenderer, SiteTreeModel;
 
 	/** 
@@ -21,16 +21,18 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/expl
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry
 	 * @param registry [required] service registry
 	 * @param selection [required] selection service
+	 * @param commandRegistry [required] command registry
 	 * @param parentId [required] parent node id
 	 * @returns SiteServicesExplorer object
 	 */
 	SiteServicesExplorer = (function() {
 		
-		function SiteServicesExplorer(registry, selection, parentId) {
+		function SiteServicesExplorer(registry, selection, commandRegistry, parentId) {
 			this.registry = registry;
 			this.checkbox = false;
 			this.parentId = parentId;
 			this.selection = selection;
+			this.commandService = commandRegistry;
 			
 			this.pageActionsWrapperId = "pageActions";
 			this.selectionActionsWrapperId = "selectionTools";
@@ -41,13 +43,12 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/expl
 		
 		SiteServicesExplorer.prototype._updatePageActions = function(registry, item){
 			var toolbar = document.getElementById(this.pageActionsWrapperId);
-			var commandService = registry.getService("orion.page.command");  //$NON-NLS-0$
 			if (toolbar) {
-				commandService.destroy(toolbar);
+				this.commandService.destroy(toolbar);
 			} else {
 				throw "could not find toolbar " + this.pageActionsWrapperId; //$NON-NLS-0$
 			}
-			commandService.renderCommands(this.pageActionsWrapperId, toolbar, item, this, "button", this.getRefreshHandler());  //$NON-NLS-0$
+			this.commandService.renderCommands(this.pageActionsWrapperId, toolbar, item, this, "button", this.getRefreshHandler());  //$NON-NLS-0$
 		};
 		
 		SiteServicesExplorer.prototype._getSiteConfigurations = function(siteServices, result, deferred){
@@ -93,17 +94,16 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/expl
 				this.siteClients.push(new mSiteClient.SiteClient(this.registry, siteService, siteServiceRef));
 			}
 
+			var commandService = this.commandService;
 			this._getSiteConfigurations(this.siteClients).then(
 				function(siteConfigurations){
-					that.renderer = new SitesRenderer({registry: that.registry, actionScopeId: "sdsd", cachePrefix: "SitesExplorer", checkbox: false}, that); //$NON-NLS-0$
+					that.renderer = new SitesRenderer({registry: that.registry, commandService: that.commandService, actionScopeId: "sdsd", cachePrefix: "SitesExplorer", checkbox: false}, that); //$NON-NLS-0$
 
-					var commandService = that.registry.getService('orion.page.command'); //$NON-NLS-0$
-					
 					commandService.registerCommandContribution(that.pageActionsWrapperId, 'orion.site.create', 100); //$NON-NLS-0$
 					
 					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.start', 20); //$NON-NLS-0$
 					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.stop', 30); //$NON-NLS-0$
-					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.delete', 40, null, false, new mCommands.CommandKeyBinding(lib.KEY.DEL, false, false, false, false, null, messages['SitesCommandScope'])); //$NON-NLS-0$
+					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.delete', 40, null, false, new mKeyBinding.KeyBinding(lib.KEY.DEL)); //$NON-NLS-0$
 					
 					commandService.registerCommandContribution(that.defaultActionWrapperId, 'orion.site.start', 20); //$NON-NLS-0$
 					commandService.registerCommandContribution(that.defaultActionWrapperId, 'orion.site.stop', 30); //$NON-NLS-0$
@@ -193,6 +193,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/expl
 			this.options = options;
 			this.explorer = explorer;
 			this.registry = options.registry;
+			this.commandService = options.commandService;
 		}
 		
 		SitesRenderer.prototype.getCellElement = function(col_no, item, tableRow){					
@@ -234,7 +235,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/expl
 							var inlineAction = document.createElement("span"); //$NON-NLS-0$
 							inlineAction.classList.add("inlineAction"); //$NON-NLS-0$
 							statusField.appendChild(inlineAction);
-							this.registry.getService('orion.page.command').renderCommands("DefaultActionWrapper", inlineAction, item, this.explorer, "button", this.explorer.getRefreshHandler(), navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
+							this.commandService.renderCommands("DefaultActionWrapper", inlineAction, item, this.explorer, "button", this.explorer.getRefreshHandler(), navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
 							
 							var statusString = "this site.";
 							statusField.appendChild(document.createTextNode(statusString));
@@ -247,7 +248,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/expl
 							var inlineAction = document.createElement("span"); //$NON-NLS-0$
 							inlineAction.classList.add("inlineAction"); //$NON-NLS-0$
 							statusField.appendChild(inlineAction);
-							this.registry.getService('orion.page.command').renderCommands("DefaultActionWrapper", inlineAction, item, this.explorer, "button", this.explorer.getRefreshHandler(), navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
+							this.commandService.renderCommands("DefaultActionWrapper", inlineAction, item, this.explorer, "button", this.explorer.getRefreshHandler(), navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
 							
 							statusField.appendChild(document.createTextNode("this site"));
 						}

@@ -325,6 +325,7 @@ objects.mixin(SiteEditor.prototype, {
 
 		// Ask the service for the proposals to put in the dropdown menu
 		if (!this._mappingProposals) {
+			var commandService = this._commandService;
 			this._mappingProposals = this._siteClient.getMappingProposals(siteConfiguration).then(function(proposals) {
 				// Register command used for adding mapping
 				var addMappingCommand = new mCommands.Command({
@@ -336,11 +337,11 @@ objects.mixin(SiteEditor.prototype, {
 						return true;
 					},
 					choiceCallback: this._makeAddMenuChoices.bind(this, proposals)});
-				this._commandService.addCommand(addMappingCommand);
+				commandService.addCommand(addMappingCommand);
 				var toolbar = this.titleWrapper.actionsNode;
-				this._commandService.registerCommandContribution(toolbar.id, "orion.site.mappings.add", 1); //$NON-NLS-0$
+				commandService.registerCommandContribution(toolbar.id, "orion.site.mappings.add", 1); //$NON-NLS-0$
 				// do we really have to render here
-				this._commandService.renderCommands(toolbar.id, toolbar, this.mappings, this, "button"); //$NON-NLS-0$
+				commandService.renderCommands(toolbar.id, toolbar, this.mappings, this, "button"); //$NON-NLS-0$
 			}.bind(this));
 		}
 
@@ -397,7 +398,7 @@ objects.mixin(SiteEditor.prototype, {
 			});
 			
 			this.mappings = new mSiteMappingsTable.MappingsTable({serviceRegistry: this.serviceRegistry,
-					siteClient: this._siteClient, fileClient: this._fileClient, selection: null, 
+					siteClient: this._siteClient, fileClient: this._fileClient, commandRegistry: this._commandService, selection: null, 
 					parentId: "mappingsNode", siteConfiguration: this._siteConfiguration
 				});
 		} else {

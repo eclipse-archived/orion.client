@@ -10,9 +10,9 @@
 /*global window console define localStorage*/
 /*jslint browser:true forin:true*/
 
-define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/webui/littlelib',
+define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegistry', 'orion/globalCommands', 'orion/PageUtil', 'orion/webui/littlelib',
 		'orion/widgets/themes/ThemeComponent', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/input/Select', 'orion/widgets/input/TextField'], 
-	function(messages, mCommands, mGlobalCommands, PageUtil, lib, Component, ThemeData, Select, TextField) {
+	function(messages, mCommands, mCommandRegistry, mGlobalCommands, PageUtil, lib, Component, ThemeData, Select, TextField) {
 
 		var TOP = 10;
 		var LEFT = 10; 
@@ -183,8 +183,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		
 		function addAdditionalCommand( commandData ){
 		
-			var commitMessageParameters = new mCommands.ParametersDescription(
-			[new mCommands.CommandParameter('name', 'text', messages['Commit message:'], "", 4)], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+			var commitMessageParameters = new mCommandRegistry.ParametersDescription(
+			[new mCommandRegistry.CommandParameter('name', 'text', messages['Commit message:'], "", 4)], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 			 {hasOptionalParameters: false});
 		
 			var command = new mCommands.Command({

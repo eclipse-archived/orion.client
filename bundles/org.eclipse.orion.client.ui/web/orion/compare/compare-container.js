@@ -13,10 +13,10 @@
 /*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
-        'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/commands',
+        'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/commands', 'orion/keyBinding',
         'orion/editor/textModel','orion/editor/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher', 'orion/fileClient'], 
 		function(messages, require, Deferred, lib, mDiffParser, mCompareRulers, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands,
-				mCommands, mTextModel, mTextView, mCompareFeatures, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator, mSearcher, mFileClient) {
+				mCommands, mKeyBinding, mTextModel, mTextView, mCompareFeatures, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator, mSearcher, mFileClient) {
 
 var exports = {};
 
@@ -301,20 +301,20 @@ exports.CompareContainer = (function() {
 				
 			// Register command contributions
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.openComparePage", 107); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 108, null, false, new mCommands.CommandKeyBinding('l', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 108, null, false, new mKeyBinding.KeyBinding('l', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
 			if (!this.options.readonly) {
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 109, null, false, new mCommands.CommandKeyBinding(37/*left arrow key*/, true, false, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 109, null, false, new mKeyBinding.KeyBinding(37/*left arrow key*/, true, false, true)); //$NON-NLS-0$
 			}
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2Inline", 110); //$NON-NLS-0$
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2TwoWay", 111); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 112, null, false, new mCommands.CommandKeyBinding(40/*down arrow key*/, true)); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 113, null, false, new mCommands.CommandKeyBinding(38/*up arrow key*/, true)); //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 112, null, false, new mKeyBinding.KeyBinding(40/*down arrow key*/, true)); //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 113, null, false, new mKeyBinding.KeyBinding(38/*up arrow key*/, true)); //$NON-NLS-0$
 			if(this.options.wordLevelNav){
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, false, new mCommands.CommandKeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, false, new mCommands.CommandKeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, false, new mKeyBinding.KeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, false, new mKeyBinding.KeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
 			} else {
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, true, new mCommands.CommandKeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, true, new mCommands.CommandKeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, true, new mKeyBinding.KeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, true, new mKeyBinding.KeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
 			}
 		},
 		
@@ -526,12 +526,12 @@ exports.TwoWayCompareContainer = (function() {
 	/**
 	 * Constructs a new side by side compare container. 
 	 */
-	function TwoWayCompareContainer(serviceRegistry, parentDivId, uiFactory, options) {
+	function TwoWayCompareContainer(serviceRegistry, commandRegistry, parentDivId, uiFactory, options) {
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this._registry = serviceRegistry;
+		this._commandService = commandRegistry;
 		// TODO this is probably not a good idea, 
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337740
-		this._commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
 		this._fileClient = new mFileClient.FileClient(serviceRegistry);
 		this._searchService = this._registry.getService("orion.core.search"); //$NON-NLS-0$
 		this._progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
@@ -912,10 +912,10 @@ exports.TwoWayCompareContainer = (function() {
 }());
 
 exports.InlineCompareContainer = (function() {
-	function InlineCompareContainer(serviceRegistry, editorDivId, options ) {
+	function InlineCompareContainer(serviceRegistry, commandRegistry, editorDivId, options ) {
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this._registry = serviceRegistry;
-		this._commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
+		this._commandService = commandRegistry;
 		this._fileClient = new mFileClient.FileClient(serviceRegistry);
 		this._statusService = this._registry.getService("orion.page.message"); //$NON-NLS-0$
 		this._progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
@@ -1127,19 +1127,20 @@ exports.InlineCompareContainer = (function() {
 }());
 
 exports.toggleableCompareContainer = (function() {
-	function toggleableCompareContainer(serviceRegistry, parentDivId, startWith, options ) {
+	function toggleableCompareContainer(serviceRegistry, commandService, parentDivId, startWith, options ) {
 		if(options){
 			options.toggler = this;
 		}
 		if(startWith === "inline"){ //$NON-NLS-0$
 			this.widgetType = "inline"; //$NON-NLS-0$
-			this._widget = new exports.InlineCompareContainer(serviceRegistry, parentDivId, options);
+			this._widget = new exports.InlineCompareContainer(serviceRegistry, commandService, parentDivId, options);
 		} else {
 			this.widgetType = "twoWay"; //$NON-NLS-0$
-			this._widget = new exports.TwoWayCompareContainer(serviceRegistry, parentDivId, null, options);
+			this._widget = new exports.TwoWayCompareContainer(serviceRegistry, commandService, parentDivId, null, options);
 		}
 		this._parentDivId = parentDivId;
 		this._serviceRegistry = serviceRegistry;
+		this._commandService = commandService;
 	}
 	toggleableCompareContainer.prototype = {
 		startup: function(onLoadContents){
@@ -1155,10 +1156,10 @@ exports.toggleableCompareContainer = (function() {
 			lib.empty(lib.node(this._parentDivId));
 			if(this.widgetType === "inline"){ //$NON-NLS-0$
 				this.widgetType = "twoWay"; //$NON-NLS-0$
-				this._widget = new exports.TwoWayCompareContainer(this._serviceRegistry, this._parentDivId, null, options);
+				this._widget = new exports.TwoWayCompareContainer(this._serviceRegistry, this._commandService, this._parentDivId, null, options);
 			} else {
 				this.widgetType = "inline"; //$NON-NLS-0$
-				this._widget = new exports.InlineCompareContainer(this._serviceRegistry, this._parentDivId, options);
+				this._widget = new exports.InlineCompareContainer(this._serviceRegistry, this._commandService, this._parentDivId, options);
 			}
 			this._widget.setEditor();
 		}

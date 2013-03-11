@@ -16,9 +16,9 @@
  * Glue code for content.html
  */
 
-define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/webui/littlelib', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
+define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/webui/littlelib', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/fileClient', 'orion/operationsClient',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/PageUtil'], 
-			function(messages, require, mBootstrap, lib, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, 
+			function(messages, require, mBootstrap, lib, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, 
 				mGlobalCommands, PageUtil) {
 
 		mBootstrap.startup().then(function(core) {
@@ -29,10 +29,10 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/
 			// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=337740
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+			var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 			
 			function fillMyPage () {
 				// Many pages use the hash to determine the content.
@@ -57,7 +57,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/
 			
 			// first parameter is page id from html.  These id's should ideally be unique across pages because the id may be used in
 			// preferences, localStorage, etc. to save page-related UI state.
-			mGlobalCommands.generateBanner("orion-singlepanepageid", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-singlepanepageid", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 			window.addEventListener("hashchange", function() { fillMyPage(); }, false); //$NON-NLS-0$
 			fillMyPage();
 		});

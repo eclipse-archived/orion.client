@@ -16,21 +16,22 @@
  * Glue code for content.html
  */
 
-define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
+define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/fileClient', 'orion/operationsClient',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/URITemplate', 'orion/PageUtil', 'orion/URL-shim'], 
-			function(messages, require, lib, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, 
+			function(messages, require, lib, mBootstrap, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, 
 			mGlobalCommands, URITemplate, PageUtil) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
+		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+		
 		// Register services
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+		var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		
 		var fileMetadata;
 		var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
@@ -135,7 +136,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 										fileMetadata = metadata;
 										mGlobalCommands.setPageTarget(
 											{task: info.name, location: metadata.Location, target: metadata, serviceRegistry: serviceRegistry, 
-												commandService: commandService, searchService: searcher, fileService: fileClient});
+												commandService: commandRegistry, searchService: searcher, fileService: fileClient});
 										makeIFrame();
 									}
 					
@@ -186,7 +187,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 			}
 		}, false);
 		
-		mGlobalCommands.generateBanner("orion-delegatedContent", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-delegatedContent", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 		window.addEventListener("hashchange", function() { loadContent(); }, false); //$NON-NLS-0$
 		loadContent();
 	});

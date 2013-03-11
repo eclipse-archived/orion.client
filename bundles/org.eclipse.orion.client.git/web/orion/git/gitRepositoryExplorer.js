@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document Image window*/
-define(['i18n!git/nls/gitmessages', 'require', 'orion/commands', 'orion/section', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/PageUtil', 'orion/dynamicContent', 'orion/fileUtils', 
+define(['i18n!git/nls/gitmessages', 'require', 'orion/commandRegistry', 'orion/section', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/PageUtil', 'orion/dynamicContent', 'orion/fileUtils', 
         'orion/globalCommands', 'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
 		function(messages, require, mCommands, mSection, i18nUtil, lib, PageUtil, mDynamicContent, mFileUtils, mGlobalCommands, mGitCommands, Deferred,
 				mCommitTooltip) {
@@ -199,9 +199,8 @@ exports.GitRepositoryExplorer = (function() {
 		);
 	};
 	
-	var updatePageActions = function(registry, toolbarId, scopeId, item){
+	var updatePageActions = function(registry, commandService, toolbarId, scopeId, item){
 		var toolbar = lib.node(toolbarId);
-		var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
 		if (toolbar) {
 			commandService.destroy(toolbar);
 		} else {
@@ -239,7 +238,7 @@ exports.GitRepositoryExplorer = (function() {
 			scopeId = "reposPageActions";
 		}
 		
-		updatePageActions(that.registry, "pageActions", scopeId, repository || {}); //$NON-NLS-1$ //$NON-NLS-0$
+		updatePageActions(that.registry, that.commandService, "pageActions", scopeId, repository || {}); //$NON-NLS-1$ //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({task: "Repositories", target: repository, breadcrumbTarget: item,
 			makeBreadcrumbLink: function(seg, location) {
 				seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$

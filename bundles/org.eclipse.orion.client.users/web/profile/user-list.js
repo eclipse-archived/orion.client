@@ -12,27 +12,28 @@
  /*jslint browser:true devel:true sub:true */
  /*global define window orion */
 
-define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commands', 'orion/selection',
+define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 
+			'orion/commandRegistry', 'orion/commands', 'orion/selection',
 	        'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/profile/UsersList', 'orion/profile/usersUtil',
 	        'orion/profile/dialogs/NewUserDialog', 'orion/profile/dialogs/ResetPasswordDialog'], 
-			function(messages, require, lib, i18nUtil, mBootstrap, mStatus, mProgress, mOperationsClient, mCommands, mSelection, mSearchClient, mFileClient, mGlobalCommands, mUsersList, mUsersUtil, NewUserDialog, ResetPasswordDialog) {
+			function(messages, require, lib, i18nUtil, mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mCommands, mSelection, mSearchClient, mFileClient, mGlobalCommands, mUsersList, mUsersUtil, NewUserDialog, ResetPasswordDialog) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
 	
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 		var selection = new mSelection.Selection(serviceRegistry);
+		var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection });
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mProgress.ProgressService(serviceRegistry, operationsClient);
+		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
-		var usersList = new mUsersList.UsersList(serviceRegistry, selection, searcher, "usersList", "pageActions", "selectionTools", "userCommands"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var usersList = new mUsersList.UsersList(serviceRegistry, commandRegistry, selection, searcher, "usersList", "pageActions", "selectionTools", "userCommands"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-		mGlobalCommands.generateBanner("orion-userList", serviceRegistry, commandService, preferences, searcher, usersList); //$NON-NLS-0$	
+		mGlobalCommands.generateBanner("orion-userList", serviceRegistry, commandRegistry, preferences, searcher, usersList); //$NON-NLS-0$	
 		
 		var previousPage = new mCommands.Command({
 			name : messages["< Previous Page"],
@@ -49,7 +50,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 				return usersList.queryObject.start > 0;
 			}
 		});
-		commandService.addCommand(previousPage);
+		commandRegistry.addCommand(previousPage);
 
 		var nextPage = new mCommands.Command({
 			name : messages["Next Page >"],
@@ -62,7 +63,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 				return usersList.queryObject.length === 0 ? true : (usersList.queryObject.start + usersList.queryObject.rows) < usersList.queryObject.length;
 			}
 		});
-		commandService.addCommand(nextPage);
+		commandRegistry.addCommand(nextPage);
 
 
 		var createUserCommand = new mCommands.Command({
@@ -82,7 +83,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 			}
 		});
 		
-		commandService.addCommand(createUserCommand);
+		commandRegistry.addCommand(createUserCommand);
 			
 		var deleteCommand = new mCommands.Command({
 			name: messages["Delete User"],
@@ -126,7 +127,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 				}
 			}
 		});
-		commandService.addCommand(deleteCommand);
+		commandRegistry.addCommand(deleteCommand);
 		
 		var changePasswordCommand = new mCommands.Command({
 			name: messages["Change Password"],
@@ -144,20 +145,20 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 				return true;
 			}
 		});
-		commandService.addCommand(changePasswordCommand);
+		commandRegistry.addCommand(changePasswordCommand);
 		
 		// define the command contributions - where things appear, first the groups
-		commandService.addCommandGroup("pageActions", "eclipse.usersGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, messages["More"]); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup("pageActions", "eclipse.usersGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, messages["More"]); //$NON-NLS-1$ //$NON-NLS-0$
 		
-		commandService.registerCommandContribution("pageActions", "orion.userlist.prevPage", 2, "eclipse.usersGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("pageActions", "orion.userlist.nextPage", 3, "eclipse.usersGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("pageActions", "orion.userlist.prevPage", 2, "eclipse.usersGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("pageActions", "orion.userlist.nextPage", 3, "eclipse.usersGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-		commandService.registerCommandContribution("pageActions", "eclipse.createUser", 1, "eclipse.usersGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("pageActions", "eclipse.createUser", 1, "eclipse.usersGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
-		commandService.registerCommandContribution("userCommands", "eclipse.deleteUser", 1); //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("userCommands", "eclipse.changePassword", 2); //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("selectionTools", "eclipse.deleteUser", 1, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("userCommands", "eclipse.deleteUser", 1); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("userCommands", "eclipse.changePassword", 2); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("selectionTools", "eclipse.deleteUser", 1, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		//every time the user manually changes the hash, we need to load the user list again
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$

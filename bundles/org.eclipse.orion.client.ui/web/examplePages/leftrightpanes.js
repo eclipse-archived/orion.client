@@ -16,9 +16,9 @@
  * Glue code for content.html
  */
 
-define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/webui/littlelib', 'orion/section', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
-	        'orion/searchClient', 'orion/globalCommands', 'orion/PageUtil'], 
-			function(messages, require, mBootstrap, lib, mSection, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, 
+define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/webui/littlelib', 'orion/section', 'orion/status', 'orion/progress', 'orion/commandRegistry', 
+			'orion/commands', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/PageUtil'], 
+			function(messages, require, mBootstrap, lib, mSection, mStatus, mProgress, mCommandRegistry, mCommands, mFileClient, mOperationsClient, mSearchClient, 
 				mGlobalCommands, PageUtil) {
 
 		mBootstrap.startup().then(function(core) {
@@ -29,10 +29,11 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/
 			// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=337740
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+			// if the page manages a set of selections, we would create a selection service and give it to the command registry.
+			var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 			
 			function fillMyPage() {
 				// Get our DOM id's so we can pass them to javascript components.
@@ -70,15 +71,15 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/
 					}
 				});
 				// Step 2.  Add to command service.  This is what makes it available to any DOM node on the page.
-				commandService.addCommand(exampleCommand);
+				commandRegistry.addCommand(exampleCommand);
 				
 				// Step 3.  Add it to the DOM of the main toolbar.  "myPageCommands" is an id chosen by this page to represent
 				// commands that belong on the page.
-				commandService.registerCommandContribution("myPageCommands", "orion.pushme", 1);  //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution("myPageCommands", "orion.pushme", 1);  //$NON-NLS-1$ //$NON-NLS-0$
 				
 				// Step 4.  Render.  Here is where we actually decide that our page commands should go in the main toolbar.  We
 				// could have decided to put them somewhere else in the DOM.  "pageActions" is the main toolbar id.
-				commandService.renderCommands("myPageCommands", "pageActions", {}); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.renderCommands("myPageCommands", "pageActions", {}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			
 			// Here we track hash changes.  Another pattern is that the component on the right side would track the hash change
@@ -100,7 +101,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/
 			
 			// first parameter is page id from html.  These id's should ideally be unique across pages because the id may be used in
 			// preferences, localStorage, etc. to save page-related UI state.
-			mGlobalCommands.generateBanner("orion-leftrightpage", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-leftrightpage", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 			window.addEventListener("hashchange", function() { updateRightSide(); }, false); //$NON-NLS-0$
 			fillMyPage();
 		});
