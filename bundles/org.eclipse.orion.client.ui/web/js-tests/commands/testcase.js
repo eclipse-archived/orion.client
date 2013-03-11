@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global define orion window document */
 
-define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'orion/selection', 'orion/Deferred', 'orion/webui/littlelib', 'orion/webui/dropdown'], 
-			function(require, assert, mServiceregistry, mCommands, mSelection, Deferred, lib, mDropdown) {
+define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/selection', 'orion/Deferred', 'orion/webui/littlelib', 'orion/webui/dropdown'], 
+			function(require, assert, mServiceregistry, mCommandRegistry, mCommands, mKeyBinding, mSelection, Deferred, lib, mDropdown) {
 			
 	/**
 	 * dom elements we need
@@ -34,7 +34,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	var selectionService = new mSelection.Selection(serviceRegistry);
-	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selectionService});
+	var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selectionService});
 	
 	/**
 	 * mock items
@@ -120,7 +120,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 		}
 		event.shiftKey = !!mod2;
 		event.altKey = !!mod3;
-		commandService._processKey(event);
+		mCommands._testMethodProcessKey(event, commandRegistry._activeBindings);  // a total reach into the implementation
 	}
 	
 	
@@ -139,7 +139,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 			hitCommand("test.delete");		
 		}
 	});
-	commandService.addCommand(deleteCommand);
+	commandRegistry.addCommand(deleteCommand);
 	
 	var newCommand = new mCommands.Command({
 		name: "New",
@@ -151,7 +151,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 			hitCommand("test.new");		
 		}
 	});
-	commandService.addCommand(newCommand);
+	commandRegistry.addCommand(newCommand);
 	
 	var noIconCommand = new mCommands.Command({
 		name: "No Icon",
@@ -162,7 +162,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 			hitCommand("test.noIcon");		
 		}
 	});
-	commandService.addCommand(noIconCommand);
+	commandRegistry.addCommand(noIconCommand);
 	
 	var linkCommand = new mCommands.Command({
 		name: "Link",
@@ -174,7 +174,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 			return "/foo.html";
 		}
 	});
-	commandService.addCommand(linkCommand);
+	commandRegistry.addCommand(linkCommand);
 	
 	var parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Thing')]);
 	parameters.cumulativeCount = 0;
@@ -194,7 +194,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 			parameters.lastValueForName = data.parameters.valueFor("name");
 		}
 	});
-	commandService.addCommand(commandWithParameters);
+	commandRegistry.addCommand(commandWithParameters);
 
 	var tests = {};
 
@@ -204,8 +204,8 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 		window.console.log("Initializing data for test " + testId);
 		contributionId = testId;
 		parentMenu.empty();
-		commandService.destroy(parentDiv);
-		commandService.destroy(parentUl);
+		commandRegistry.destroy(parentDiv);
+		commandRegistry.destroy(parentUl);
 		initializeItems();
 	}
 	
@@ -214,9 +214,9 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderAtomicButtons = function() {
 		init("testRenderAtomicButtons");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1);
-		commandService.registerCommandContribution(contributionId, "test.new", 2);
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1);
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2);
+		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 2);
 	};
 	
@@ -225,9 +225,9 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderAtomicTools = function() {
 		init("testRenderAtomicTools");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1);
-		commandService.registerCommandContribution(contributionId, "test.new", 2);
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "tool");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1);
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2);
+		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "tool");
 		assert.equal(parentDiv.childNodes.length, 2);
 	};
 	
@@ -236,10 +236,10 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderMixedLinksAndButtons = function() {
 		init("testRenderMixedLinksAndButtons");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1);
-		commandService.registerCommandContribution(contributionId, "test.new", 2);
-		commandService.registerCommandContribution(contributionId, "test.link", 3);
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1);
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2);
+		commandRegistry.registerCommandContribution(contributionId, "test.link", 3);
+		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 3);
 		assert.equal(lib.$$("a", parentDiv).length, 1);
 	};
@@ -249,10 +249,10 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderMixedLinksAndTools = function() {
 		init("testRenderMixedLinksAndTools");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1);
-		commandService.registerCommandContribution(contributionId, "test.new", 2);
-		commandService.registerCommandContribution(contributionId, "test.link", 3);
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "tool");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1);
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2);
+		commandRegistry.registerCommandContribution(contributionId, "test.link", 3);
+		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "tool");
 		assert.equal(parentDiv.childNodes.length, 3);
 		assert.equal(lib.$$("a", parentDiv).length, 1);
 	};
@@ -262,9 +262,9 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderMissingImageTools = function() {
 		init("testRenderMissingImageTools");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1);
-		commandService.registerCommandContribution(contributionId, "test.noIcon", 3);
-		commandService.renderCommands(contributionId, parentDiv, allItems, window, "tool");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1);
+		commandRegistry.registerCommandContribution(contributionId, "test.noIcon", 3);
+		commandRegistry.renderCommands(contributionId, parentDiv, allItems, window, "tool");
 		assert.equal(parentDiv.childNodes.length, 2);
 		assert.equal(lib.$$(".commandSprite", parentDiv).length, 1);
 		assert.equal(lib.$$(".commandMissingImageButton", parentDiv).length, 1);
@@ -275,10 +275,10 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderAtomicMenu = function() {
 		init("testRenderAtomicMenu");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1);
-		commandService.registerCommandContribution(contributionId, "test.new", 2);
-		commandService.registerCommandContribution(contributionId, "test.noIcon", 3);
-		commandService.renderCommands(contributionId, dropdownMenu, item1, window, "menu");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1);
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2);
+		commandRegistry.registerCommandContribution(contributionId, "test.noIcon", 3);
+		commandRegistry.renderCommands(contributionId, dropdownMenu, item1, window, "menu");
 		assert.equal(parentMenu.getItems().length, 3);
 	};
 	
@@ -287,12 +287,12 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderUnnamedGroups = function() {
 		init("testRenderUnnamedGroups");
-		commandService.addCommandGroup(contributionId, "testGroup", 1);
-		commandService.addCommandGroup(contributionId, "testGroup2", 2);
-		commandService.registerCommandContribution(contributionId, "test.delete", 1, "testGroup");
-		commandService.registerCommandContribution(contributionId, "test.new", 2, "testGroup");
-		commandService.registerCommandContribution(contributionId, "test.noIcon", 1, "testGroup2");
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
+		commandRegistry.addCommandGroup(contributionId, "testGroup", 1);
+		commandRegistry.addCommandGroup(contributionId, "testGroup2", 2);
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1, "testGroup");
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2, "testGroup");
+		commandRegistry.registerCommandContribution(contributionId, "test.noIcon", 1, "testGroup2");
+		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(lib.$$(".commandSeparator", parentDiv).length, 1);
 	};
 	
@@ -301,11 +301,11 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderNamedGroupDropDown = function() {
 		init("testRenderUnnamedGroups");
-		commandService.addCommandGroup(contributionId, "testGroup", 1, "Menu");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1, "testGroup");
-		commandService.registerCommandContribution(contributionId, "test.new", 2, "testGroup");
-		commandService.registerCommandContribution(contributionId, "test.noIcon", 3, "testGroup");
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
+		commandRegistry.addCommandGroup(contributionId, "testGroup", 1, "Menu");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1, "testGroup");
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2, "testGroup");
+		commandRegistry.registerCommandContribution(contributionId, "test.noIcon", 3, "testGroup");
+		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(lib.$$(".commandButton.dropdownTrigger", parentDiv).length, 1);
 	};
 	
@@ -314,11 +314,11 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderNamedGroupMenu = function() {
 		init("testRenderNamedGroupMenu");
-		commandService.addCommandGroup(contributionId, "testGroup", 1, "SubMenu");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1, "testGroup");
-		commandService.registerCommandContribution(contributionId, "test.new", 2, "testGroup");
-		commandService.registerCommandContribution(contributionId, "test.noIcon", 3, "testGroup");
-		commandService.renderCommands(contributionId, dropdownMenu, item1, window, "menu");
+		commandRegistry.addCommandGroup(contributionId, "testGroup", 1, "SubMenu");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1, "testGroup");
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2, "testGroup");
+		commandRegistry.registerCommandContribution(contributionId, "test.noIcon", 3, "testGroup");
+		commandRegistry.renderCommands(contributionId, dropdownMenu, item1, window, "menu");
 		assert.equal(parentMenu.getItems().length, 1);  // everything is in a submenu
 	};
 	
@@ -327,13 +327,13 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderNestedGroups = function() {
 		init("testRenderNestedGroupsMenu");
-		commandService.addCommandGroup(contributionId, "testGroup", 1, "Menu");
-		commandService.addCommandGroup(contributionId, "testGroup2", 1, "SubMenu", "testGroup");
-		commandService.addCommandGroup(contributionId, "testGroup3", 1, "SubSubMenu", "testGroup/testGroup2");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1, "testGroup");
-		commandService.registerCommandContribution(contributionId, "test.new", 2, "testGroup/testGroup2");
-		commandService.registerCommandContribution(contributionId, "test.noIcon", 3, "testGroup/testGroup2/testGroup3");
-		commandService.renderCommands(contributionId, menuDiv, item1, window, "menu");
+		commandRegistry.addCommandGroup(contributionId, "testGroup", 1, "Menu");
+		commandRegistry.addCommandGroup(contributionId, "testGroup2", 1, "SubMenu", "testGroup");
+		commandRegistry.addCommandGroup(contributionId, "testGroup3", 1, "SubSubMenu", "testGroup/testGroup2");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1, "testGroup");
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2, "testGroup/testGroup2");
+		commandRegistry.registerCommandContribution(contributionId, "test.noIcon", 3, "testGroup/testGroup2/testGroup3");
+		commandRegistry.renderCommands(contributionId, menuDiv, item1, window, "menu");
 		assert.equal(lib.$$(".dropdownTrigger", menuDiv).length, 4);  // four menus
 		assert.equal(lib.$$(".dropdownTrigger.dropdownMenuItem", menuDiv).length, 3);  // three sub menus
 		assert.equal(lib.$$(".dropdownTrigger.commandButton", menuDiv).length, 1);  // one top menu
@@ -347,10 +347,10 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 		item1.IsValid = false;
 		item2.IsValid = false;
 		item3.IsValid = false;
-		commandService.registerCommandContribution(contributionId, "test.delete", 1);
-		commandService.registerCommandContribution(contributionId, "test.new", 2);
-		commandService.registerCommandContribution(contributionId, "test.link", 3);
-		commandService.renderCommands(contributionId, parentDiv, allItems, window, "button");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1);
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2);
+		commandRegistry.registerCommandContribution(contributionId, "test.link", 3);
+		commandRegistry.renderCommands(contributionId, parentDiv, allItems, window, "button");
 		assert.equal(parentDiv.childNodes.length, 0);
 	};	 
 	
@@ -359,10 +359,10 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testNoItemsSpecified = function() {
 		init("testNoItemsSpecified");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1);
-		commandService.registerCommandContribution(contributionId, "test.noIcon", 2);
-		commandService.registerCommandContribution(contributionId, "test.link", 3);
-		commandService.renderCommands(contributionId, parentDiv, null, window, "button");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1);
+		commandRegistry.registerCommandContribution(contributionId, "test.noIcon", 2);
+		commandRegistry.registerCommandContribution(contributionId, "test.link", 3);
+		commandRegistry.renderCommands(contributionId, parentDiv, null, window, "button");
 		assert.equal(parentDiv.childNodes.length, 2);  // selection service had two items in it so only two commands (delete and noIcon) validated against it
 	};	
 	
@@ -371,10 +371,10 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testRenderInUl = function() {
 		init("testRenderInUl");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1);
-		commandService.registerCommandContribution(contributionId, "test.new", 2);
-		commandService.registerCommandContribution(contributionId, "test.link", 3);
-		commandService.renderCommands(contributionId, parentUl, item1, window, "button");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1);
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 2);
+		commandRegistry.registerCommandContribution(contributionId, "test.link", 3);
+		commandRegistry.renderCommands(contributionId, parentUl, item1, window, "button");
 		assert.equal(lib.$$("a", parentUl).length, 1);
 		assert.equal(lib.$$("li > a", parentUl).length, 1);
 		assert.equal(parentUl.childNodes.length, 3);
@@ -387,11 +387,11 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	tests.testCommandParametersLifeCycle = function() {
 		init("testCommandParametersLifeCycle");
 		// URL binding is so we know we have a saved invocation for the test.
-		commandService.registerCommandContribution(contributionId, "test.parameters", 1, null, false, null,  new mCommands.URLBinding("foo", "name"));
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
+		commandRegistry.registerCommandContribution(contributionId, "test.parameters", 1, null, false, null,  new mCommands.URLBinding("foo", "name"));
+		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		hitCounters = {};
-		commandService.runCommand("test.parameters");
-		commandService.runCommand("test.parameters");
+		commandRegistry.runCommand("test.parameters");
+		commandRegistry.runCommand("test.parameters");
 		var d = new Deferred();
 		window.setTimeout(function(){
 			try {
@@ -412,8 +412,8 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testKeyBindingRendered = function() {
 		init("testKeyBindingRendered");
-		commandService.registerCommandContribution(contributionId, "test.delete", 1, null, false, new mCommands.CommandKeyBinding('z'));
-		commandService.renderCommands(contributionId, parentDiv, allItems, window, "button");
+		commandRegistry.registerCommandContribution(contributionId, "test.delete", 1, null, false, new mKeyBinding.KeyBinding('z'));
+		commandRegistry.renderCommands(contributionId, parentDiv, allItems, window, "button");
 		assert.equal(parentDiv.childNodes.length, 1);
 		hitCounters["test.delete"] = 0;
 		fakeKeystroke('z');
@@ -434,8 +434,8 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testKeyBindingNotRendered = function() {
 		init("testKeyBindingNotRendered");
-		commandService.registerCommandContribution(contributionId, "test.noIcon", 1, null, true, new mCommands.CommandKeyBinding('z', true, true));
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
+		commandRegistry.registerCommandContribution(contributionId, "test.noIcon", 1, null, true, new mKeyBinding.KeyBinding('z', true, true));
+		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 0);
 		hitCounters["test.noIcon"] = 0;
 		fakeKeystroke('z', true, true);
@@ -456,10 +456,10 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testUrlBindingRendered = function() {
 		init("testUrlBindingRendered");
-		commandService.registerCommandContribution(contributionId, "test.new", 1, null, false, null, new mCommands.URLBinding("foo", "name"));
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 1, null, false, null, new mCommands.URLBinding("foo", "name"));
+		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 1);
-		commandService.processURL("#,foo=fred");
+		commandRegistry.processURL("#,foo=fred");
 		var d = new Deferred();
 		window.setTimeout(function(){
 			try {
@@ -483,10 +483,10 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 	 */
 	tests.testUrlBindingNotRendered = function() {
 		init("testUrlBindingNotRendered");
-		commandService.registerCommandContribution(contributionId, "test.new", 1, null, true, null, new mCommands.URLBinding("foo", "name"));
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 1, null, true, null, new mCommands.URLBinding("foo", "name"));
+		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 0);
-		commandService.processURL("#,foo=wilma");
+		commandRegistry.processURL("#,foo=wilma");
 		var d = new Deferred();
 		window.setTimeout(function(){
 			try {

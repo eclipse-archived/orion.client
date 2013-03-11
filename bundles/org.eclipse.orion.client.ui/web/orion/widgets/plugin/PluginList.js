@@ -15,9 +15,9 @@
    provides JavaScript functions for user management of Orion plugins. It is designed
    to contain PluginEntry widgets */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/commands', 'orion/commonHTMLFragments', 'orion/objects', 'orion/webui/littlelib',
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/commonHTMLFragments', 'orion/objects', 'orion/webui/littlelib',
 		'orion/widgets/plugin/PluginEntry'
-		], function(messages, require, Deferred, mCommands, mHTMLFragments, objects, lib, PluginEntry) {
+		], function(messages, require, Deferred, mCommands, mCommandRegistry, mHTMLFragments, objects, lib, PluginEntry) {
 	
 	var defaultPluginURLs = {};
 	
@@ -122,7 +122,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				name: messages["Install"],
 				tooltip: messages["Install a plugin by specifying its URL"],
 				id: "orion.installPlugin", //$NON-NLS-0$
-				parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', messages['Plugin URL:'], '')]), //$NON-NLS-1$ //$NON-NLS-0$
+				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('url', 'url', messages['Plugin URL:'], '')]), //$NON-NLS-1$ //$NON-NLS-0$
 				callback: function(data) {
 					if (data.parameters) {
 						var location = data.parameters.valueFor('url'); //$NON-NLS-0$
@@ -133,7 +133,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				}.bind(this)
 			});
 			this.commandService.addCommand(installPluginCommand);
-			this.commandService.registerCommandContribution("pluginCommands", "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution("pluginCommands", "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommandRegistry.URLBinding("installPlugin", "url")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var reloadAllPluginsCommand = new mCommands.Command({
 				name: messages["Reload all"],
 				tooltip: messages["Reload all installed plugins"],

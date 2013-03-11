@@ -12,9 +12,10 @@
 /*global window define orion XMLHttpRequest*/
 /*browser:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
+define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 
+	'orion/commandRegistry', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog', 'orion/webui/dialogs/ImportDialog'],
-	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, ImportDialog){
+	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mCommandRegistry, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, ImportDialog){
 
 	/**
 	 * Utility methods
@@ -99,30 +100,28 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 * @name orion.fileCommands#updateNavTools
 	 * @function
 	 */
-	fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
-		var service = registry.getService("orion.page.command"); //$NON-NLS-0$
+	fileCommandUtils.updateNavTools = function(registry, commandService, explorer, toolbarId, selectionToolbarId, item) {
 		var toolbar = lib.node(toolbarId);
 		if (toolbar) {
-			service.destroy(toolbar);
+			commandService.destroy(toolbar);
 		} else {
 			throw "could not find toolbar " + toolbarId; //$NON-NLS-0$
 		}
 		// close any open slideouts because if we are retargeting the command
 		if (item.Location !== lastItemLoaded.Location) {
-			service.closeParameterCollector();
+			commandService.closeParameterCollector();
 			lastItemLoaded.Location = item.Location;
 		}
 
-		service.renderCommands(toolbar.id, toolbar, item, explorer, "button").then(function() { //$NON-NLS-0$
-			if (lastItemLoaded.Location) {
-				service.processURL(window.location.href);
-			}
-		}); 
+		commandService.renderCommands(toolbar.id, toolbar, item, explorer, "button"); //$NON-NLS-0$
+		if (lastItemLoaded.Location) {
+			commandService.processURL(window.location.href);
+		} 
 		if (selectionToolbarId) {
 			var selectionTools = lib.node(selectionToolbarId);
 			if (selectionTools) {
-				service.destroy(selectionTools);
-				service.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button");  //$NON-NLS-0$
+				commandService.destroy(selectionTools);
+				commandService.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button");  //$NON-NLS-0$
 			}
 		}
 		
@@ -133,8 +132,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			selectionService.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 				var selectionTools = lib.node(selectionToolbarId);
 				if (selectionTools) {
-					service.destroy(selectionTools);
-					service.renderCommands(selectionTools.id, selectionTools, event.selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+					commandService.destroy(selectionTools);
+					commandService.renderCommands(selectionTools.id, selectionTools, event.selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			});
 		}
@@ -596,7 +595,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			}});
 		commandService.addCommand(downloadCommand);
 		
-		var newFileNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', messages['Name:'], messages['New File'])]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var newFileNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'], messages['New File'])]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var newFileCommand =  new mCommands.Command({
 			name: messages["New File"],
@@ -634,7 +633,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
 		commandService.addCommand(newFileCommand);
 		
-		var newFolderNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', messages['Folder name:'], messages['New Folder'])]); //$NON-NLS-1$ //$NON-NLS-0$
+		var newFolderNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Folder name:'], messages['New Folder'])]); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var newFolderCommand = new mCommands.Command({
 			name: messages['New Folder'],
@@ -673,7 +672,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	
 		commandService.addCommand(newFolderCommand);
 
-		var zipURLParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', messages['File URL:'], 'URL'), new mCommands.CommandParameter('unzip', 'boolean', messages["Unzip *.zip files:"], true)]);//$NON-NLS-4$  //$NON-NLS-3$  //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
+		var zipURLParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('url', 'url', messages['File URL:'], 'URL'), new mCommandRegistry.CommandParameter('unzip', 'boolean', messages["Unzip *.zip files:"], true)]);//$NON-NLS-4$  //$NON-NLS-3$  //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
 
 		var importZipURLCommand = new mCommands.Command({
 			name: messages["Import from HTTP..."],
@@ -736,7 +735,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			description: messages["Create a folder that links to an existing folder on the server."],
 			imageClass: "core-sprite-link", //$NON-NLS-0$
 			id: "orion.new.linkProject", //$NON-NLS-0$
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Folder'), new mCommands.CommandParameter('url', 'url', messages['Server path:'], '')]), //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:', 'New Folder'), new mCommandRegistry.CommandParameter('url', 'url', messages['Server path:'], '')]), //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			callback: function(data) {
 				var createFunction = function(name, url) {
 					if (name && url) {
@@ -937,13 +936,13 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	
 	fileCommandUtils.createNewContentCommand = function(id, name, href, hrefContent, explorer, fileClient, progress, progressMessage) {
 		var parametersArray = href ? [] : [
-			new mCommands.CommandParameter("folderName", "text", messages['Folder name:'], name), //$NON-NLS-1$ //$NON-NLS-0$
-			new mCommands.CommandParameter("url", "url", messages['Extracted from:'], hrefContent), //$NON-NLS-1$ //$NON-NLS-0$
-			new mCommands.CommandParameter("unzip", "boolean", messages['Unzip *.zip files:'], true) //$NON-NLS-1$ //$NON-NLS-0$
+			new mCommandRegistry.CommandParameter("folderName", "text", messages['Folder name:'], name), //$NON-NLS-1$ //$NON-NLS-0$
+			new mCommandRegistry.CommandParameter("url", "url", messages['Extracted from:'], hrefContent), //$NON-NLS-1$ //$NON-NLS-0$
+			new mCommandRegistry.CommandParameter("unzip", "boolean", messages['Unzip *.zip files:'], true) //$NON-NLS-1$ //$NON-NLS-0$
 		];
 		var parameterDescription = null;
 		if (parametersArray.length > 0) {
-			parameterDescription = new mCommands.ParametersDescription(parametersArray);
+			parameterDescription = new mCommandRegistry.ParametersDescription(parametersArray);
 		}
 
 		var newContentCommand = new mCommands.Command({
@@ -1066,7 +1065,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				commandDeferred.then(processOptions.bind(context));
 			}
 			Deferred.all(commandDeferreds, function(error) {return {_error: error};}).then(function(errorOrResultArray){
-				fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
+				fileCommandUtils.updateNavTools(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
 				explorer.updateCommands();
 				done.resolve({});
 			});

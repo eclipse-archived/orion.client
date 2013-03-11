@@ -100,7 +100,7 @@ define(
 														commits[0].CloneLocation = repositories[0].Location;
 
 														// render commands
-														mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", commits[0]); //$NON-NLS-1$ //$NON-NLS-0$
+														mGitCommands.updateNavTools(that.registry, that.commandService, that, "pageActions", "selectionTools", commits[0]); //$NON-NLS-1$ //$NON-NLS-0$
 													}, function(error) {
 														that.handleError(error);
 													});
@@ -452,7 +452,7 @@ define(
 											}
 										};
 
-										var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry,
+										var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, that.commandService, 
 												"diffArea_" + item.parent.DiffLocation, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
 										inlineCompareContainer.startup(function(maxHeight) {
 											var vH = 420;

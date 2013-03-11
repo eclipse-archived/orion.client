@@ -1060,7 +1060,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                     showLineStatus: false
                 });
                 that.uiFactoryCompare.buildUI();
-                that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
+                that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, that._commandService, uiFactory.getCompareDivID(), that.uiFactoryCompare, options, this._commandService);
                 that.twoWayCompareContainer.startup(false, function() {
                     that._uiFactory.setCompareWidget(that.twoWayCompareContainer);
                 });

@@ -14,15 +14,16 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 	var exports = {};
 
 	exports.OperationsExplorer = (function() {
-		function OperationsExplorer(registry, selection, operationsClient, parentId, toolbarId, selectionToolsId, actionScopeId) {
+		function OperationsExplorer(registry, commandRegistry, selection, operationsClient, parentId, toolbarId, selectionToolsId, actionScopeId) {
 			this.parentId = parentId;
 			this.registry = registry;
+			this.commandRegistry = commandRegistry;
 			this.selection = selection;
 			this.toolbarId = toolbarId;
 			this.selectionToolsId = selectionToolsId;
 			this.operationsClient = operationsClient;
 			this.actionScopeId = actionScopeId;
-			this.renderer = new exports.OperationsRenderer({actionScopeId: this.actionScopeId}, this);
+			this.renderer = new exports.OperationsRenderer({commandService: commandRegistry, actionScopeId: this.actionScopeId}, this);
 		};
 
 		OperationsExplorer.prototype = new mExplorer.Explorer();
@@ -97,7 +98,7 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 		
 		OperationsExplorer.prototype._loadOperationsList = function(operationsList){
 			this.operations = operationsList;
-			mOperationsCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.operations);
+			mOperationsCommands.updateNavTools(this.registry, this.commandRegistry, this, this.toolbarId, this.selectionToolsId, this.operations);
 			this.model = new exports.OperationsModel(operationsList);
 			this.createTree(this.parentId, this.model);
 			this.getNavHandler().refreshModel(this.getNavDict(), this.model, operationsList);

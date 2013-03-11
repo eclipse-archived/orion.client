@@ -363,7 +363,7 @@ a.currentLocation:hover {
 .dropdownMenuItem, .dropdownMenuItem a {
 	display: inline-block;
 	vertical-align: baseline;
-	color: #222;
+	color: #222 !important;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;

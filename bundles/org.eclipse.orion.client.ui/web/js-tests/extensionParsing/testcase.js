@@ -10,14 +10,14 @@
  ******************************************************************************/
 /*global define orion window document */
 
-define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'orion/extensionCommands'], 
-			function(require, assert, mServiceregistry, mCommands, mExtensionCommands) {
+define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegistry', 'orion/extensionCommands'], 
+			function(require, assert, mServiceregistry, mCommandRegistry, mExtensionCommands) {
 			
 	/**
 	 * mock services
 	 */
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
-	new mCommands.CommandService({serviceRegistry: serviceRegistry});
+	new mCommandRegistry.CommandRegistry({ });
 	
 	/**
 	 * mock content types cache

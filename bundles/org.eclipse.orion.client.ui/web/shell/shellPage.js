@@ -13,11 +13,11 @@
 /*global define window*/
 /*jslint browser:true sub:true*/
 
-define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
+define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/widgets/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
 		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
 		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters"],
-	function(messages, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
+	function(messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
 		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate, Deferred, mStatus, mProgress,
 		mOperationsClient, mResultWriters) {
 
@@ -748,13 +748,13 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 		serviceRegistry = core.serviceRegistry;
 		preferences = core.preferences;
 
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
 		fileClient = new mFileClient.FileClient(serviceRegistry);
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mProgress.ProgressService(serviceRegistry, operationsClient);
-		mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
+		mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({task: messages.Shell});
 
 		output = document.getElementById("shell-output"); //$NON-NLS-0$
