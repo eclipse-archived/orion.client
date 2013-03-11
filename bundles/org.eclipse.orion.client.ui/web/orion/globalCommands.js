@@ -14,11 +14,11 @@
 
 define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/commandRegistry', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
-	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 
+	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 
 	'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/globalSearch/advSearchOptContainer', 'orion/Deferred',
 	'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html', 'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html'], 
         function(messages, require, commonHTML, KeyBinding, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
-        mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, 
+        mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, mThemePreferences, mThemeData, mSearchUtils, mInputCompletion, 
         mAdvSearchOptContainer, Deferred, mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate){
 
 	/**
@@ -439,43 +439,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		});
 	}
 	
-	
-	function applyTheme(preferences){
-	
-		preferences.getPreferences('/themes', 2).then(function(prefs){ //$NON-NLS-0$
-			
-			var selected = prefs.get( 'selected' ); //$NON-NLS-0$
-			
-			if( selected ){
-				var ob = JSON.parse( selected );
-				
-				var stylesStr =  prefs.get( 'styles' ); //$NON-NLS-0$
-				if(!stylesStr){
-					return;
-				}
-				var styles = JSON.parse(stylesStr);
-				
-				for( var theme in styles ){
-					
-					var cssdata;
-					
-					if( styles[theme].name === ob.selected ){
-						cssdata = styles[theme];
-						var sheetMaker = new ThemeSheetWriter.ThemeSheetWriter();
-						var css = sheetMaker.getSheet( cssdata );
-				
-						var stylesheet = document.createElement("STYLE"); //$NON-NLS-0$
-						stylesheet.appendChild(document.createTextNode(css));
-							
-						var head = document.getElementsByTagName("HEAD")[0] || document.documentElement; //$NON-NLS-0$
-						head.appendChild(stylesheet);	
-						break;
-					}	
-				}
-			}		
-		});
-	}
-	
 	function getToolbarElements(toolNode) {
 		var elements = {};
 		var toolbarNode = null;
@@ -615,7 +578,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	 * @function
 	 */
 	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
-		applyTheme( prefsService );
+		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
 		
 		var parent = lib.node(parentId);
 		

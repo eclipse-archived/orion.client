@@ -11,20 +11,11 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/editor/ThemeData', 'orion/editor/textTheme', 'orion/widgets/input/Select'], 
-	function(messages, require, ThemeData, mTextTheme, Select ) {
+define(['i18n!orion/settings/nls/messages', 'orion/widgets/input/Select'], 
+	function(messages, Select ) {
 
 		function MiniThemeChooser(preferences){			
 			this.preferences = preferences;
-			this.themeData = new ThemeData.ThemeData();
-			this.initializeStorage();
-			var miniChooser = this;
-			//TODO: Need an abstract class that both setup.js and MiniThemeChooser.js can use to change the settings
-			var storageKey = preferences.listenForChangedSettings(function(e) {
-				if (e.key === storageKey) {
-					miniChooser.selectTheme();
-				}
-			});
 		}
 		
 		MiniThemeChooser.prototype.template =	'<div id="themeContainer">' +
@@ -77,233 +68,74 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 		function appendTo( node ){
 		
 			this.container = node;
-			node.innerHTML = this.template;		
-			this.addFontSizePicker();
-			this.addThemePicker();		
+			node.innerHTML = this.template;
+			this.preferences.getTheme(function(themeStyles) {
+				this.addFontSizePicker(themeStyles);
+				this.addThemePicker(themeStyles);		
+			}.bind(this));
 		}
 		
 		MiniThemeChooser.prototype.appendTo = appendTo;	
 		
-		function selectTheme( name ){
-			
-			var themeInfo = this.themeData.getThemeStorageInfo();
-			var themeData = this.themeData;
-			var settings;
-			
-			var miniChooser = this;
-		
-			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){ //$NON-NLS-0$
-				var currentTheme = prefs.get( 'selected' );
-				
-				if( !currentTheme && !name ){	
-					name = themeInfo.defaultTheme;
-					var styleset = themeData.getStyles();
-					prefs.put( themeInfo.styleset, JSON.stringify(styleset) );
-				}
-				
-				if( currentTheme ){
-					currentTheme = JSON.parse ( currentTheme );
-				} else {
-					currentTheme = {};
-					currentTheme[themeInfo.selectedKey] = name;
-				}
-				
-				if( currentTheme && !name ) {
-					name = currentTheme[themeInfo.selectedKey];
-				}
-				
-				if( name ){
-				
-					currentTheme[themeInfo.selectedKey] = name;
-				
-					var styles = prefs.get(	themeInfo.styleset );
-					
-					if( styles ){	
-						styles = JSON.parse( styles ); 
-						
-						for( var s in styles ){
-						
-							if( styles[s].name === name ){
-								
-								settings = styles[s];
-								break;
-							}			
-						}
-					}
-					prefs.put( 'selected', JSON.stringify(currentTheme) );
-					
-					miniChooser.setThemeData( settings );
-				}		
-			} );
+		function selectTheme( name ) {
+			this.preferences.setTheme(name);
 		}
 		
 		MiniThemeChooser.prototype.selectTheme = selectTheme;
-		
-		function setThemeData( settings ){
-			var theme = mTextTheme.TextTheme.getTheme();
-			theme.setThemeClass("userTheme", theme.buildStyleSheet(settings, "userTheme"));
-		}
-		
-		MiniThemeChooser.prototype.setThemeData = setThemeData;
-		
-		function initializeStorage(){
-			this.selectTheme();
-		}
-		
-		MiniThemeChooser.prototype.initializeStorage = initializeStorage;
-		
-		function selectFontSize( size ){
-		
-			var themeInfo = this.themeData.getThemeStorageInfo();
-			
-			var miniChooser = this;
-		
-			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){
-				var styles = prefs.get( themeInfo.styleset );
-				var selection = prefs.get( 'selected' );
-				if(selection){ selection = JSON.parse( selection ); }
-				var settings;
-				
-				if( styles ){	
-					styles = JSON.parse( styles );
-					
-					for( var s = 0; s < styles.length; s++ ){
-						styles[s].fontSize = size;
-						if( styles[s].name ===  selection[themeInfo.selectedKey] ){
-							settings = styles[s];
-						}
-						
-					}
-				}
 
-				prefs.put( themeInfo.styleset , JSON.stringify(styles) );
-				
-				if( settings ){ 
-					miniChooser.setThemeData( settings );
-				}
-			});
+		function selectFontSize( size ){
+			this.preferences.setFontSize(size);
 		}
 		
 		MiniThemeChooser.prototype.selectFontSize = selectFontSize;
 		
-		function addFontSizePicker(){
-		
-			var miniChooser = this;
+		function addFontSizePicker( themeStyles ){
+			this.fontSize = themeStyles.style.fontSize;
 			
-			var currentSize = '10pt';
+			var options = [];
+			for( var size = 8; size < 19; size++ ){
 			
-			var themeInfo = this.themeData.getThemeStorageInfo();
-			
-			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){
-				var styles = prefs.get( themeInfo.styleset );
-				var selection = prefs.get( 'selected' );
-				if(selection){ selection = JSON.parse( selection ); }
-				if( styles ){	
-					styles = JSON.parse( styles );
-					for( var s = 0; s < styles.length; s++ ){
-						if( styles[s].name ===  selection[themeInfo.selectedKey] ){
-							currentSize = styles[s].fontSize;
-							break;
-						}
-					}
+				var set = {
+					value: size + 'pt',
+					label: size + 'pt'
+				};
+				
+				if( set.label === this.fontSize ){
+					set.selected = true;
 				}
 				
-				var picker = document.getElementById( 'fontsizepicker' );
+				options.push(set);
+			}	
 			
-				var options = [];
-				
-				for( var size = 8; size < 19; size++ ){
-						
-					var set = {
-						value: size + 'pt',
-						label: size + 'pt'
-					};	
-					
-					if( set.label === currentSize ){ set.selected = true; }
-					
-					this.fontSize = currentSize;
-					
-					options.push(set);
-				}	
-				
-				this.sizeSelect = new Select( { options: options }, picker );
-				this.sizeSelect.setStorageItem = miniChooser.selectFontSize.bind(miniChooser);
-				this.sizeSelect.show();
-			});
+			var picker = document.getElementById( 'fontsizepicker' );
+			this.sizeSelect = new Select( { options: options }, picker );
+			this.sizeSelect.setStorageItem = this.selectFontSize.bind(this);
+			this.sizeSelect.show();
 		}
 		
 		MiniThemeChooser.prototype.addFontSizePicker = addFontSizePicker;
 		
-		
-		function setUpPicker(prefs){ //$NON-NLS-0$
-		
-			var themeInfo = this.themeData.getThemeStorageInfo();
-				
+		function addThemePicker( themeStyles ){
+			var styles = themeStyles.styles;
 			var options = [];
+			for( var theme= 0; theme < styles.length; theme++ ){
 			
-			var chooser = this;
-
-				var selection = prefs.get( 'selected' );
+				var set = {
+					value: styles[theme].name,
+					label: styles[theme].name
+				};	
 				
-				if(selection){ selection = JSON.parse( selection ); }
-				
-				var styles = prefs.get( themeInfo.styleset );
-				
-				if(styles){ styles = JSON.parse( styles ); }
-
-				if(!styles){
-				
-					/* If we're in this condition, then the themes are not in local storage yet.
-					   Going to make sure */
-				
-					styles = chooser.styleset; 
+				if( styles[theme].name === themeStyles.style.name ){
+					set.selected = true;
 				}
 				
-				if(!selection) {
-					selection = {};	
-					selection[themeInfo.selectedKey] = themeInfo.defaultTheme;
-				}
-			
-				if( styles ){
-				
-					for( var theme= 0; theme < styles.length; theme++ ){
-					
-						var set = {
-							value: styles[theme].name,
-							label: styles[theme].name
-						};	
-						
-						if( selection ){	
-							if( styles[theme].name === selection[themeInfo.selectedKey] ){
-								set.selected = true;
-							}
-						}
-						
-						options.push(set);
-						
-						chooser.styles = styles;
-					}	
-				}
-			
-				var picker = document.getElementById( 'themepicker' );
-				
-				this.themeSelect = new Select( { options: options }, picker );
-				this.themeSelect.setStorageItem = chooser.selectTheme.bind(chooser); 
-				this.themeSelect.show();
-			}
+				options.push(set);
+			}	
 		
-		MiniThemeChooser.prototype.setUpPicker = setUpPicker;
-				
-		function addThemePicker(){
-			
-			var themeInfo = this.themeData.getThemeStorageInfo();
-			
-			/* Check to see if the Orion theme is in the themes preferences ... if it is, 
-				   then we don't need to populate again, otherwise we do need to populate. */
-				   
-			var chooser = this;
-			
-			this.preferences.getPreferences(themeInfo.storage, 2).then( chooser.setUpPicker.bind(chooser) );	
+			var picker = document.getElementById( 'themepicker' );
+			this.themeSelect = new Select( { options: options }, picker );
+			this.themeSelect.setStorageItem = this.selectTheme.bind(this);
+			this.themeSelect.show();
 		}
 		
 		MiniThemeChooser.prototype.addThemePicker = addThemePicker;

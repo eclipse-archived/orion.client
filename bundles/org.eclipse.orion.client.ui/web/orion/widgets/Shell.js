@@ -228,11 +228,10 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 				 * Create the shell asynchronously to ensure that the client finishes its
 				 * layout before GCLI computes the locations for its created widgets.
 				 */
-				var self = this;
 				setTimeout(function() {
 					mGCLI.createDisplay();
-					self.output(i18nUtil.formatMessage(messages["For a list of available commands type '${0}'."], "<b>help</b>")); //$NON-NLS-0$
-				});
+					this.output(i18nUtil.formatMessage(messages["For a list of available commands type '${0}'."], "<b>help</b>")); //$NON-NLS-0$
+				}.bind(this), 1);
 				mHelp.startup();
 				mHelp.helpListHtml = mHelp.helpListHtml.replace("\"${includeIntro}\"","${false}"); //$NON-NLS-1$ //$NON-NLS-0$
 
@@ -277,12 +276,11 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 						 * We only got a 'provisional' conversion. When caches are filled
 						 * we'll get a callback and should try again.
 						 */
-						var self = this;
-						conversion.then(function () {
-							if (self.element) { /* if there's no UI yet then ignore */
-								self.setConversion(self.getConversion());
+						conversion.then(function() {
+							if (this.element) { /* if there's no UI yet then ignore */
+								this.setConversion(this.getConversion());
 							}
-						});
+						}.bind(this));
 					}
 				};
 				CustomField.prototype.onItemClick = function(ev) {

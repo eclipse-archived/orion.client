@@ -9,9 +9,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*global define */
 
-define(['i18n!orion/compare/nls/messages', 'orion/compare/compareUtils', 'orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/compare/compare-features.html'], 
-function(messages, mCompareUtils, lib, mSplitter, FeatureTemplate) {
+define(['orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/compare/compare-features.html'], 
+function(lib, mSplitter, FeatureTemplate) {
 
 var orion = orion || {};
 orion.TwoWayCompareUIFactory = (function() {
@@ -26,44 +27,44 @@ orion.TwoWayCompareUIFactory = (function() {
 	TwoWayCompareUIFactory.prototype = {
 		_init: function(){
 			//Have to add prefix to the local dome node ids inside the widget, to support multiple widgets by the same template. 
-			var prefix = this._parentDivID + "_";
+			var prefix = this._parentDivID + "_"; //$NON-NLS-0$
 			
-			this._topWidgetDiv = lib.node("topWidget_id");
-			this._topWidgetDiv.id = prefix + "topWidget_id";
+			this._topWidgetDiv = lib.node("topWidget_id"); //$NON-NLS-0$
+			this._topWidgetDiv.id = prefix + "topWidget_id"; //$NON-NLS-0$
 			
-			this._leftEditorParentDiv = lib.node("left_editor_id");
-			this._leftEditorParentDiv.id = prefix + "left_editor_id";
-			this._rightEditorParentDiv = lib.node("right_editor_id");
-			this._rightEditorParentDiv.id = prefix + "right_editor_id";
-			this._rightEditorWrapperDiv = lib.node("right_editor_wrapper_id");
-			this._rightEditorWrapperDiv.id = prefix + "right_editor_wrapper_id";
+			this._leftEditorParentDiv = lib.node("left_editor_id"); //$NON-NLS-0$
+			this._leftEditorParentDiv.id = prefix + "left_editor_id"; //$NON-NLS-0$
+			this._rightEditorParentDiv = lib.node("right_editor_id"); //$NON-NLS-0$
+			this._rightEditorParentDiv.id = prefix + "right_editor_id"; //$NON-NLS-0$
+			this._rightEditorWrapperDiv = lib.node("right_editor_wrapper_id"); //$NON-NLS-0$
+			this._rightEditorWrapperDiv.id = prefix + "right_editor_wrapper_id"; //$NON-NLS-0$
 			
-			this._leftTitleDiv = lib.node("left_title_id");
-			this._leftTitleDiv.id = prefix + "left_title_id";
-			this._rightTitleDiv = lib.node("right_title_id");
-			this._rightTitleDiv.id = prefix + "right_title_id";
+			this._leftTitleDiv = lib.node("left_title_id"); //$NON-NLS-0$
+			this._leftTitleDiv.id = prefix + "left_title_id"; //$NON-NLS-0$
+			this._rightTitleDiv = lib.node("right_title_id"); //$NON-NLS-0$
+			this._rightTitleDiv.id = prefix + "right_title_id"; //$NON-NLS-0$
 			
-			this._leftStatusDiv = lib.node("left_status_id");
-			this._leftStatusDiv.id = prefix + "left_status_id";
-			this._rightStatusDiv = lib.node("right_status_id");
-			this._rightStatusDiv.id = prefix + "right_status_id";
+			this._leftStatusDiv = lib.node("left_status_id"); //$NON-NLS-0$
+			this._leftStatusDiv.id = prefix + "left_status_id"; //$NON-NLS-0$
+			this._rightStatusDiv = lib.node("right_status_id"); //$NON-NLS-0$
+			this._rightStatusDiv.id = prefix + "right_status_id"; //$NON-NLS-0$
 
-			this._diffCanvasDiv = lib.node("diff_canvas_id");
-			this._diffCanvasDiv.id = prefix + "diff_canvas_id";
+			this._diffCanvasDiv = lib.node("diff_canvas_id"); //$NON-NLS-0$
+			this._diffCanvasDiv.id = prefix + "diff_canvas_id"; //$NON-NLS-0$
 			
-			this._splitterId = prefix+"orion_splitter";
+			this._splitterId = prefix+"orion_splitter"; //$NON-NLS-0$
 			
 			if(!this._showTitle){
-				this._leftEditorParentDiv.style.top = "0px";
-				this._rightEditorWrapperDiv.style.top = "0px";
-				this._leftTitleDiv.style.height = "0px";
-				this._rightTitleDiv.style.height = "0px";
+				this._leftEditorParentDiv.style.top = "0px"; //$NON-NLS-0$
+				this._rightEditorWrapperDiv.style.top = "0px"; //$NON-NLS-0$
+				this._leftTitleDiv.style.height = "0px"; //$NON-NLS-0$
+				this._rightTitleDiv.style.height = "0px"; //$NON-NLS-0$
 			}
 			if(!this._showLineStatus){
-				this._leftEditorParentDiv.style.marginBottom = "0px";
-				this._rightEditorWrapperDiv.style.marginBottom = "0px";
-				this._leftStatusDiv.style.height = "0px";
-				this._rightStatusDiv.style.height = "0px";
+				this._leftEditorParentDiv.style.marginBottom = "0px"; //$NON-NLS-0$
+				this._rightEditorWrapperDiv.style.marginBottom = "0px"; //$NON-NLS-0$
+				this._leftStatusDiv.style.height = "0px"; //$NON-NLS-0$
+				this._rightStatusDiv.style.height = "0px"; //$NON-NLS-0$
 			}
 		},
 		

@@ -931,9 +931,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			});
 		commandService.addCommand(pasteFromBufferCommand);		
 	};
-	
-	var contentTypesCache;
-	
+		
 	fileCommandUtils.createNewContentCommand = function(id, name, href, hrefContent, explorer, fileClient, progress, progressMessage) {
 		var parametersArray = href ? [] : [
 			new mCommandRegistry.CommandParameter("folderName", "text", messages['Folder name:'], name), //$NON-NLS-1$ //$NON-NLS-0$
@@ -973,105 +971,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			visibleWhen: canCreateProject
 		});
 		return newContentCommand;
-	};
-
-	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, commandGroup) {
-	
-		var done = new Deferred();
-		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
-		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
-		
-		// The shape of the contributed commands is (for now):
-		// info - information about the command (object).
-		//		required attribute: name - the name of the command
-		//		required attribute: id - the id of the command
-		//		optional attribute: tooltip - the tooltip to use for the command
-		//      optional attribute: image - a URL to an image for the command
-		//      optional attribute: uriTemplate - a URI template that can be expanded to generate a URI appropriate for the item.
-		//      optional attribute: forceSingleItem - if true, then the service is only invoked when a single item is selected
-		//			and the item parameter to the run method is guaranteed to be a single item vs. an array.  When this is not true, 
-		//			the item parameter to the run method may be an array of items.
-		//      optional attribute: contentType - an array of content types for which this command is valid
-		//      optional attribute: validationProperties - an array of validation properties used to read the resource
-		//          metadata to determine whether the command is valid for the given resource.  Regular expression patterns are
-		//          supported as values in addition to specific values.
-		//          For example the validation property
-		//				[{source: "Git"}, {source: "Directory", match:"true"}]
-		//              specifies that the property "Git" must be present, and that the property "Directory" must be true.
-		// run - the implementation of the command (function).
-		//        arguments passed to run: (itemOrItems)
-		//          itemOrItems (object or array) - an array of items to which the item applies, or a single item if the info.forceSingleItem is true
-		//        the run function is assumed to perform all necessary action and the return is not used.
-		var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
-		
-		var fileCommands = [];
-		var i;
-		for (i=0; i<commandsReferences.length; i++) {
-			// Exclude any navigation commands themselves, since we are the navigator.
-			var id = commandsReferences[i].getProperty("id"); //$NON-NLS-0$
-			if (id !== "orion.navigateFromMetadata") { //$NON-NLS-0$
-				var impl = serviceRegistry.getService(commandsReferences[i]);
-				var info = {};
-				var propertyNames = commandsReferences[i].getPropertyKeys();
-				for (var j = 0; j < propertyNames.length; j++) {
-					info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
-				}
-				fileCommands.push({properties: info, service: impl});
-			}
-		}
-		
-		function getContentTypes() {
-			return contentTypesCache || serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(ct) { //$NON-NLS-0$
-				contentTypesCache = ct;
-				return contentTypesCache;
-			});
-		}
-		var self = this;
-		Deferred.when(getContentTypes(), function() {
-			fileCommands = fileCommands.concat(mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypesCache));
-			var extensionGroupCreated = false;
-			var openWithGroupCreated = false;
-			var commandDeferreds = [];
-		
-			for (i=0; i < fileCommands.length; i++) {
-				var commandInfo = fileCommands[i].properties;
-				var service = fileCommands[i].service;
-				var commandDeferred = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true);
-				commandDeferreds.push(commandDeferred);
-				var index = i;
-				var context = {isEditor: commandInfo.isEditor, index: i};
-				var processOptions = function(commandOptions) {
-					var command = new mCommands.Command(commandOptions);
-					if (this.isEditor) {
-						command.isEditor = this.isEditor;
-					}
-					
-					commandService.addCommand(command);
-					if (!extensionGroupCreated) {
-						extensionGroupCreated = true;
-						commandService.addCommandGroup(selectionToolbarId, "eclipse.fileCommandExtensions", 1000, null, commandGroup); //$NON-NLS-0$
-					}
-					if (!openWithGroupCreated) {
-						openWithGroupCreated = true;
-						commandService.addCommandGroup(selectionToolbarId, "eclipse.openWith", 1000, messages["Open With"], commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					}
-					if (this.isEditor) {
-						commandService.registerCommandContribution(selectionToolbarId, command.id, this.index, commandGroup + "/eclipse.fileCommandExtensions/eclipse.openWith"); //$NON-NLS-0$
-					} else {
-						commandService.registerCommandContribution(selectionToolbarId, command.id, this.index, commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-0$
-					}
-				};
-
-				commandDeferred.then(processOptions.bind(context));
-			}
-			Deferred.all(commandDeferreds, function(error) {return {_error: error};}).then(function(errorOrResultArray){
-				fileCommandUtils.updateNavTools(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
-				explorer.updateCommands();
-				done.resolve({});
-			});
-
-		});
-		return done;
 	};
 	
 	return fileCommandUtils;

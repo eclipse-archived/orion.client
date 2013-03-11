@@ -105,7 +105,6 @@ define(
 														that.handleError(error);
 													});
 										}
-										progressService.setProgressMessage("");
 									}, function(error) {
 										that.handleError(error);
 									});

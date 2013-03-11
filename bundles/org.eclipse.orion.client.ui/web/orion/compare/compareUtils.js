@@ -34,21 +34,24 @@ orion.compareUtils.lookUpMapper = function(mapper , mapperColumnIndex , lineInde
 	var curLineindex = 0;//zero based
 	for (var i = 0 ; i < mapper.length ; i++){
 		var size = mapper[i][mapperColumnIndex];
-		if(size === 0)
+		if(size === 0){
 			size = 1;
+		}
 		if(lineIndex >= curLineindex && lineIndex < (curLineindex + size)){
 			return {mapperIndex:i , startFrom:curLineindex};
 		}
-		if(i === (mapper.length - 1 ))
+		if(i === (mapper.length - 1 )){
 			break;
+		}
 		curLineindex += mapper[i][mapperColumnIndex];
 	}
 	return  {mapperIndex:mapper.length-1 , startFrom:curLineindex};
 };
 
 orion.compareUtils.lookUpLineIndex = function(mapper , mapperColumnIndex , mapperIndex){
-	if(mapperIndex === 0)
+	if(mapperIndex === 0){
 		return 0;
+	}
 	var curLineindex = 0;//zero based
 	for (var i = 0 ; i < mapperIndex ; i++){
 		curLineindex += mapper[i][mapperColumnIndex];
@@ -57,12 +60,14 @@ orion.compareUtils.lookUpLineIndex = function(mapper , mapperColumnIndex , mappe
 };
 
 orion.compareUtils.updateMapper = function(mapper , mapperColumnIndex , startLineIndex, removedLineCount, addedLineCount){
-	if(removedLineCount === addedLineCount)
+	if(removedLineCount === addedLineCount){
 		return;
+	}
 	if(removedLineCount > 0 || addedLineCount > 0){
 		var mapperItem = orion.compareUtils.lookUpMapper(mapper , mapperColumnIndex ,startLineIndex);
-		if(mapperItem.mapperIndex < 0)
+		if(mapperItem.mapperIndex < 0){
 			return;
+		}
 		if(removedLineCount > 0){
 			var linesLeft = removedLineCount;
 			var startInMapper = startLineIndex - mapperItem.startFrom;
@@ -86,10 +91,12 @@ orion.compareUtils.updateMapper = function(mapper , mapperColumnIndex , startLin
 orion.compareUtils.overlapMapper = function(mapperItem , mapperColumnIndex , startLineIndex, lineFrom , lineTo){
 	var endLineIndex = startLineIndex + mapperItem[mapperColumnIndex] - 1;
 	
-	if(endLineIndex < startLineIndex)
+	if(endLineIndex < startLineIndex){
 		endLineIndex = startLineIndex;
-	if(lineTo < lineFrom)
+	}
+	if(lineTo < lineFrom){
 		lineTo = lineFrom;
+	}
 	if (endLineIndex < lineFrom || lineTo < startLineIndex){
 		return false;
 	}
@@ -98,14 +105,16 @@ orion.compareUtils.overlapMapper = function(mapperItem , mapperColumnIndex , sta
 
 orion.compareUtils.findFirstDiff = function(mapper , mapperColumnIndex , lineFrom , lineTo){
 	var curLineIndex = 0;
-	var retValue = undefined;
+	var retValue = null;
 	for (var i = 0 ; i < mapper.length ; i++){
-		if(curLineIndex > lineTo)
+		if(curLineIndex > lineTo){
 			break;
+		}
 		if(orion.compareUtils.overlapMapper( mapper[i] , mapperColumnIndex , curLineIndex , lineFrom , lineTo)){
 			retValue = {mapperIndex:i , startFrom:curLineIndex };
-			if( mapper[i][2] !== 0 )
+			if( mapper[i][2] !== 0 ){
 				break;
+			}
 		}
 		curLineIndex  +=  mapper[i][mapperColumnIndex];
 	}
@@ -115,8 +124,9 @@ orion.compareUtils.findFirstDiff = function(mapper , mapperColumnIndex , lineFro
 
 //returns the line index at the top of the other editor , when scroll happens on the eidotr
 orion.compareUtils.matchMapper = function(mapper , mapperColumnIndex , lineFrom , lineTo){
-	if(mapper.length === 0)
+	if(mapper.length === 0){
 		return lineFrom;
+	}
 	var baseLine = lineFrom + Math.round((lineTo -lineFrom)/3);
 	var first = orion.compareUtils.findFirstDiff(mapper , mapperColumnIndex , lineFrom , lineTo);
 	var mapperEndAt = mapper[first.mapperIndex][mapperColumnIndex] === 0 ? first.startFrom : first.startFrom + mapper[first.mapperIndex][mapperColumnIndex] -1;
@@ -170,10 +180,12 @@ orion.compareUtils.getAnnotationIndexByMapper = function(annotations, mapperInde
 };
 
 orion.compareUtils.isMapperConflict = function(mapper, mapperIndex){
-	if(mapperIndex < 0)
+	if(mapperIndex < 0){
 		return false;
-	if(!mapper[mapperIndex][3])
+	}
+	if(!mapper[mapperIndex][3]){
 		return false;
+	}
 	return mapper[mapperIndex][3] === 1;
 };
 
