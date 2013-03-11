@@ -178,7 +178,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 	});
 	commandRegistry.addCommand(linkCommand);
 	
-	var parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Thing')]);
+	var parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:', 'New Thing')]);
 	parameters.cumulativeCount = 0;
 	var lastCommandInvocation;
 	var commandWithParameters = new mCommands.Command({
@@ -389,7 +389,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 	tests.testCommandParametersLifeCycle = function() {
 		init("testCommandParametersLifeCycle");
 		// URL binding is so we know we have a saved invocation for the test.
-		commandRegistry.registerCommandContribution(contributionId, "test.parameters", 1, null, false, null,  new mCommands.URLBinding("foo", "name"));
+		commandRegistry.registerCommandContribution(contributionId, "test.parameters", 1, null, false, null,  new mCommandRegistry.URLBinding("foo", "name"));
 		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		hitCounters = {};
 		commandRegistry.runCommand("test.parameters");
@@ -458,7 +458,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 	 */
 	tests.testUrlBindingRendered = function() {
 		init("testUrlBindingRendered");
-		commandRegistry.registerCommandContribution(contributionId, "test.new", 1, null, false, null, new mCommands.URLBinding("foo", "name"));
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 1, null, false, null, new mCommandRegistry.URLBinding("foo", "name"));
 		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 1);
 		commandRegistry.processURL("#,foo=fred");
@@ -485,7 +485,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 	 */
 	tests.testUrlBindingNotRendered = function() {
 		init("testUrlBindingNotRendered");
-		commandRegistry.registerCommandContribution(contributionId, "test.new", 1, null, true, null, new mCommands.URLBinding("foo", "name"));
+		commandRegistry.registerCommandContribution(contributionId, "test.new", 1, null, true, null, new mCommandRegistry.URLBinding("foo", "name"));
 		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 0);
 		commandRegistry.processURL("#,foo=wilma");
