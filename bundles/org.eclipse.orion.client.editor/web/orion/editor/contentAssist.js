@@ -129,15 +129,25 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 			if (!proposal) {
 				return false;
 			}
-			var offset = this.textView.getCaretOffset();
+	
+			// now handle prefixes
+			// if there is a non-empty selection, then replace it,
+			// if overwrite is truthy, then also replace the prefix
+			var sel = this.textView.getSelection();
+			var start = Math.min(sel.start, sel.end);
+			var end = Math.max(sel.start, sel.end);
+			if (proposal.overwrite) {
+				start = this.getPrefixStart(start);
+			}
+
 			var data = {
 				proposal: proposal,
-				start: offset,
-				end: offset
+				start: start,
+				end: end
 			};
 			this.setState(State.INACTIVE);
 			var proposalText = proposal.proposal || proposal;
-			this.textView.setText(proposalText, offset, offset);
+			this.textView.setText(proposalText, start, end);
 			this.dispatchEvent({type: "ProposalApplied", data: data});
 			return true;
 		},
