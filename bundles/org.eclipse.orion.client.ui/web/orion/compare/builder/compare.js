@@ -10,18 +10,15 @@
  ******************************************************************************/
 /*global define document console prompt window*/
 
-define(['orion/serviceregistry',
+define(['orion/commandRegistry',
 		'orion/commands',
 		'orion/Deferred',
 		'orion/compare/compareView',
 		"orion/editor/textMateStyler",
 		"orion/editor/htmlGrammar",
 		"examples/editor/textStyler"],
-function(mServiceregistry, mCommands, Deferred, mCompareView, mTextMateStyler, mHtmlGrammar, mTextStyler) {
-
-	var serviceRegistry = window.serviceRegistry = new mServiceregistry.ServiceRegistry();
-	var commandService = new mCommands.CommandService({
-		serviceRegistry: serviceRegistry
+function(mCommandRegistry, mCommands, Deferred, mCompareView, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+	var commandService = new mCommandRegistry.CommandRegistry({
 	});
 
 	function _fileExt(fName){
@@ -92,22 +89,24 @@ function(mServiceregistry, mCommands, Deferred, mCompareView, mTextMateStyler, m
 			contentOnRight = "Sample Orion compare contents on right side\nvar right = 2\n"; //$NON-NLS-0$
 		}
         var options = {
-            readonly: true,
-            hasConflicts: false,
+            hasConflicts: true,
             commandSpanId: commandDivId,
             highlighters: (viewOptions && viewOptions.highlighters) ? viewOptions.highlighters : [new DefaultHighlighter(), new DefaultHighlighter()],
             newFile: {
                 Name: nameOnLeft,
+                readonly: false,
                 Type: _contentType(nameOnLeft),
                 Content: contentOnLeft
             },
             baseFile: {
-                Name: nameOnRight, //$NON-NLS-0$
+                Name: nameOnRight,
+                readonly: false,
                 Type: _contentType(nameOnRight),
                 Content: contentOnRight
             }
         };
 		var compareView = new mCompareView.toggleableCompareView(commandService, parentDivId, "twoWay", options); //$NON-NLS-0$
+		compareView.getWidget().setOptions({readonly: false, hasConflicts: false});
 		compareView.startup();
     }
     return compare;
