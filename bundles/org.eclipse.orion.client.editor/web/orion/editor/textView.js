@@ -3462,6 +3462,9 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 									} else {
 										return false;
 									}
+								} else {
+									// Firefox feature. without this else branch execution goes into the else branch above 
+									// and defaults are *not* prevented
 								}
 							} else if (action.defaultHandler) {
 								return typeof(action.defaultHandler()) === "boolean"; //$NON-NLS-0$
