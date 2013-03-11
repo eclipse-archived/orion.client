@@ -12,7 +12,7 @@
 /*global window document define setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib', 'orion/section', 'orion/commands'], function(messages, require, lib, mSection, mCommands){
+define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib', 'orion/section', 'orion/commandRegistry'], function(messages, require, lib, mSection, mCommands){
 
 	/**
 	 * Creates a new user interface element showing a list of tasks

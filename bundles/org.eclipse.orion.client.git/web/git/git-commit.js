@@ -8,15 +8,15 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- 
-/*globals define window*/
+
+ /*global define document window */
 
 var eclipse;
 
-define([ 'i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/dialogs', 'orion/selection',
+define([ 'i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 		'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitCommitExplorer', 'orion/git/gitCommands',
-		'orion/git/gitClient', 'orion/links', 'orion/contentTypes', 'orion/PageUtil' ], function(messages, require, mBootstrap, mStatus, mProgress, mCommands,
-		mDialogs, mSelection, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mGitCommitExplorer, mGitCommands, mGitClient, mLinks,
+		'orion/git/gitClient', 'orion/links', 'orion/contentTypes', 'orion/PageUtil' ], function(messages, require, mBootstrap, mStatus, mProgress, CommandRegistry,
+		Commands, KeyBinding, mDialogs, mSelection, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mGitCommitExplorer, mGitCommands, mGitClient, mLinks,
 		mContentTypes, PageUtil) {
 
 	mBootstrap.startup().then(
@@ -26,11 +26,10 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status
 
 				new mDialogs.DialogService(serviceRegistry);
 				var selection = new mSelection.Selection(serviceRegistry);
-				var commandService = new mCommands.CommandService({ serviceRegistry : serviceRegistry
-				});
+				var commandRegistry = new CommandRegistry.CommandRegistry({selection: selection});
 				var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 				new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				new mProgress.ProgressService(serviceRegistry, operationsClient);
+				new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 				// ...
 				var linkService = new mLinks.TextLinkService({ serviceRegistry : serviceRegistry
@@ -39,30 +38,30 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
 				var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 				var searcher = new mSearchClient.Searcher({ serviceRegistry : serviceRegistry,
-				commandService : commandService,
+				commandService : commandRegistry,
 				fileService : fileClient
 				});
 
-				var explorer = new mGitCommitExplorer.GitCommitExplorer(serviceRegistry, commandService, linkService, /* selection */null,
+				var explorer = new mGitCommitExplorer.GitCommitExplorer(serviceRegistry, commandRegistry, linkService, /* selection */null,
 						"artifacts", "pageActions", null, "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				mGlobalCommands.generateBanner("orion-git-commit", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
+				mGlobalCommands.generateBanner("orion-git-commit", serviceRegistry, commandRegistry, preferences, searcher, explorer); //$NON-NLS-0$
 
 				// define commands
-				mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
-				mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
+				mGitCommands.createFileCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
+				mGitCommands.createGitClonesCommands(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
 
 				// define the command contributions - where things appear, first
 				// the groups
-				commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
-				commandService.registerCommandContribution("pageActions", "eclipse.orion.git.cherryPick", 100, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				commandService.registerCommandContribution("pageActions", "eclipse.orion.git.askForReviewCommand", 101, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				commandService.registerCommandContribution(
-						"pageActions", "eclipse.orion.git.openCommitCommand", 102, "eclipse.gitGroup", true, new mCommands.CommandKeyBinding('h', true, true)); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.addCommandGroup("pageActions", "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution("pageActions", "eclipse.orion.git.cherryPick", 100, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution("pageActions", "eclipse.orion.git.askForReviewCommand", 101, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(
+						"pageActions", "eclipse.orion.git.openCommitCommand", 102, "eclipse.gitGroup", true, new KeyBinding.KeyBinding('h', true, true)); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				// object contributions
-				commandService.registerCommandContribution("itemLevelCommands", "eclipse.removeTag", 1000); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeTag", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 
-				var showDiffCommand = new mCommands.Command({ name : messages["Working Directory Version"],
+				var showDiffCommand = new Commands.Command({ name : messages["Working Directory Version"],
 				tooltip : messages["View the working directory version of the file"],
 				imageClass : "git-sprite-open_compare", //$NON-NLS-0$
 				spriteClass : "gitCommandSprite", //$NON-NLS-0$
@@ -75,13 +74,13 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status
 				}
 				});
 
-				commandService.addCommand(showDiffCommand);
-				commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showCurrent", 2000); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.addCommand(showDiffCommand);
+				commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showCurrent", 2000); //$NON-NLS-1$ //$NON-NLS-0$
 
 				var pageParams = PageUtil.matchResourceParameters();
 				explorer.display(pageParams.resource);
 
-				window.addEventListener("hashchange", function() {
+				window.addEventListener("hashchange", function() { //$NON-NLS-0$
 					var pageParams = PageUtil.matchResourceParameters();
 					explorer.display(pageParams.resource);
 				}, false);

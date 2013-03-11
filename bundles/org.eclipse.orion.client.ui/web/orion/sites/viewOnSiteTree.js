@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global define document*/
 /*jslint sub:true*/
-define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'orion/commands', 'orion/globalCommands',
+define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'orion/commandRegistry', 'orion/globalCommands',
 		'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/webui/treetable',
 		'orion/webui/littlelib'],
 		function(messages, i18nUtil, Deferred, mCommands, mGlobalCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable, lib) {
@@ -63,7 +63,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'or
 		 * @private
 		 */
 		function SitesRenderer(options) {
-			this._commandService = options.serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
+			this._commandService = options.commandRegistry;
 			this._options = options;
 		}
 		SitesRenderer.prototype = /** @lends orion.sites.SitesRenderer.prototype */{
@@ -209,6 +209,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'or
 		function ViewOnSiteRenderer(options) {
 			SitesRenderer.apply(this, Array.prototype.slice.call(arguments));
 			this.serviceRegistry = options.serviceRegistry;
+			this._commandService = options.commandRegistry;
 			this.file = options.file;
 			this.addToCallback = options.addToCallback;
 			this.errorCallback = options.errorCallback;
@@ -281,7 +282,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'or
 	ViewOnSiteTree = /** @ignore */ (function() {
 		function ViewOnSiteTree(options) {
 			var serviceRegistry = options.serviceRegistry;
-			var commandService = serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
+			var commandService = options.commandRegistry;
 			var progress =  serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			var siteService = this.siteService = mSiteClient.forFileLocation(serviceRegistry, options.fileLocation);
 			var fileClient = options.fileClient;

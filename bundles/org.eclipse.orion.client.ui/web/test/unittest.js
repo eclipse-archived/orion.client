@@ -12,10 +12,10 @@
  /*global document console define window */
 
 
-define(['require', 'orion/webui/littlelib', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 
+define(['require', 'orion/webui/littlelib', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commandRegistry', 
 		'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/webui/treetable', "orion/URITemplate", 
 		'orion/PageUtil'],
-        function(require, lib, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, 
+        function(require, lib, mServiceRegistry, mPluginRegistry, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, 
             mTreetable, URITemplate, mPageUtil) {
 	
 
@@ -147,12 +147,12 @@ UnitTestRenderer.prototype = {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		
 		// global banner
-		mGlobalCommands.generateBanner("orion-unittest", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-unittest", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 		
 		function runTests(testSelectionURI) {
 			// testSelectionURI specifies a test file and optionally a specific test

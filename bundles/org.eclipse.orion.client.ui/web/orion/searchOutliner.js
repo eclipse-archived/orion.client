@@ -9,10 +9,12 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global window define setTimeout */
+/*global window define setTimeout document*/
 /*jslint forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/section', 'orion/commands', 'orion/selection', 'orion/explorers/explorer', 'orion/EventTarget'], function(messages, require, lib, i18nUtil, mSection, mCommands, mSelection, mExplorer, EventTarget){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/section', 'orion/commands', 'orion/commandRegistry', 
+	'orion/keyBinding', 'orion/selection', 'orion/explorers/explorer', 'orion/EventTarget'], 
+	function(messages, require, lib, i18nUtil, mSection, mCommands, mCommandRegistry, mKeyBinding, mSelection, mExplorer, EventTarget){
 
 	/**
 	 * Instantiates the saved search service. This service is used internally by the
@@ -180,12 +182,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
 		var reg = options.serviceRegistry;
+		this.commandService = options.commandService;
 		
 		var renameSearchCommand = new mCommands.Command({
 			name: messages["Rename"],
 			imageClass: "core-sprite-rename", //$NON-NLS-0$
 			id: "eclipse.renameSearch", //$NON-NLS-0$
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", 'Name:', '')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			visibleWhen: function(items) {
 				items = Array.isArray(items) ? items : [items];
 				return items.length === 1 && items[0].query;
@@ -223,7 +226,6 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				}
 			}
 		});
-		this.commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
 		// register commands 
 		this.commandService.addCommand(renameSearchCommand);	
 		this.commandService.addCommand(deleteSearchCommand);	
@@ -260,8 +262,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				this.searchSelection = new mSelection.Selection(serviceRegistry, "orion.searches.selection"); //$NON-NLS-0$
 				// add commands to the search section heading
 				var selectionId = this.searchesSection.selectionNode.id;
-				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "searchContent"));//$NON-NLS-0$//$NON-NLS-1$	
-				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "searchContent"));//$NON-NLS-0$//$NON-NLS-1$	
+				var binding;
+				binding = new mKeyBinding.KeyBinding(113);
+				binding.domScope = "searchContent";
+				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1, null, false, binding); //$NON-NLS-0$
+				binding = new mKeyBinding.KeyBinding(46);
+				binding.domScope = "searchContent";
+				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2, null, false, binding); //$NON-NLS-0$
 				commandService.registerSelectionService(selectionId, this.searchSelection);
 				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = lib.node(selectionId);

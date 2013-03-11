@@ -11,10 +11,10 @@
  *******************************************************************************/
 /*global define document window */
 /*jslint */
-define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
+define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/fileClient', 'orion/operationsClient',
 		'orion/searchClient', 'orion/globalCommands', 'orion/sites/siteUtils', 'orion/sites/siteCommands', 
 		'orion/sites/viewOnSiteTree', 'orion/PageUtil', 'orion/webui/littlelib'],
-	function(mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
+	function(mBootstrap, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
 			mSiteUtils, mSiteCommands, ViewOnSiteTree, PageUtil, lib) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
@@ -23,11 +23,11 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', '
 			// Register services
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, 'statusPane', 'notifications', 'notificationArea'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+			var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 
 			var treeWidget;
 			function createTree(file) {
@@ -41,6 +41,7 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', '
 					parent: parentId,
 					label: labelId,
 					serviceRegistry: serviceRegistry,
+					commandRegistry: commandRegistry,
 					fileClient: fileClient,
 					fileLocation: file
 				});
@@ -50,12 +51,12 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', '
 				var file = params.file;
 				if (file) {
 					createTree(file);
-					mSiteCommands.createViewOnSiteCommands(serviceRegistry);
+					mSiteCommands.createViewOnSiteCommands(serviceRegistry, commandRegistry);
 				}
 			}
 			window.addEventListener("hashchange", processParameters()); //$NON-NLS-0$
 
 			processParameters();
-			mGlobalCommands.generateBanner('orion-viewSites', serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner('orion-viewSites', serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 	});
 });

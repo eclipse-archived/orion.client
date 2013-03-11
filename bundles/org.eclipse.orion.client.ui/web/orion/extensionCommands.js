@@ -12,7 +12,7 @@
 /*global window define orion URL*/
 /*browser:true*/
 
-define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/URL-shim"],
+define(["require", "orion/Deferred", "orion/commandRegistry", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/URL-shim"],
 	function(require, Deferred, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil){
 
 	/**

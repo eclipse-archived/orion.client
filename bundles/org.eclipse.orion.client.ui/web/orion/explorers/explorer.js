@@ -12,7 +12,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/treetable', 'orion/explorers/explorerNavHandler', 'orion/commands'], function(messages, require, lib, mTreeTable, mNavHandler, mCommands){
+define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/treetable', 'orion/explorers/explorerNavHandler', 'orion/commands', 'orion/commandRegistry'], 
+function(messages, require, lib, mTreeTable, mNavHandler, mCommands, mCommandRegistry){
 
 var exports = {};
 
@@ -26,11 +27,14 @@ exports.Explorer = (function() {
 	 * use for any services required by the explorer
 	 * @param {orion.selection.Selection} selection The initial selection
 	 * @param renderer
+	 * @param {orion.commandRegistry.CommandRegistry} commandRegistry The command registry to use for commands.  Optional.
 	 */
-	function Explorer(serviceRegistry, selection, renderer) {
+	function Explorer(serviceRegistry, selection, renderer, commandRegistry) {
 		this.registry = serviceRegistry;
 		this.renderer = renderer;
 		this.selection = selection;
+		this.commandService = commandRegistry;
+		
 		this.myTree = null;
 	}
 	Explorer.prototype = /** @lends orion.explorer.Explorer.prototype */ {
@@ -414,6 +418,9 @@ exports.ExplorerRenderer = (function() {
 				if (!this.actionScopeId) {
 					this.actionScopeId = options.actionScopeId;
 				}
+				if (!this.commandService) {
+					this.commandService = options.commandService;
+				}
 			}
 		},
 		
@@ -432,17 +439,16 @@ exports.ExplorerRenderer = (function() {
 		},
 		getActionsColumn: function(item, tableRow, renderType, columnClass, renderAsGrid){
 			renderType = renderType || "tool"; //$NON-NLS-0$
-			var commandService = this.explorer.registry.getService("orion.page.command"); //$NON-NLS-0$
 			var actionsColumn = document.createElement('td'); //$NON-NLS-0$
 			actionsColumn.id = tableRow.id + "actionswrapper"; //$NON-NLS-0$
 			if (columnClass) {
 				actionsColumn.classList.add(columnClass);
 			}
 			// contact the command service to render appropriate commands here.
-			if (this.actionScopeId) {
-				commandService.renderCommands(this.actionScopeId, actionsColumn, item, this.explorer, renderType, null, (renderAsGrid && this.explorer.getNavDict()) ? this.explorer.getNavDict().getGridNavHolder(item, true) : null);
+			if (this.actionScopeId && this.commandService) {
+				this.commandService.renderCommands(this.actionScopeId, actionsColumn, item, this.explorer, renderType, null, (renderAsGrid && this.explorer.getNavDict()) ? this.explorer.getNavDict().getGridNavHolder(item, true) : null);
 			} else {
-				window.console.log("Warning, no action scope was specified.  No commands rendered."); //$NON-NLS-0$
+				window.console.log("Warning, no command service or action scope was specified.  No commands rendered."); //$NON-NLS-0$
 			}
 			return actionsColumn;
 		},
@@ -653,17 +659,17 @@ exports.ExplorerRenderer = (function() {
 			}
 		},
 		updateCommands: function(){
-			var registry = this.explorer.registry;
-			var rows = lib.$$array(".treeTableRow"); //$NON-NLS-0$
-			for (var i=0; i<rows.length; i++) {
-				var node = rows[i];			
-				var actionsWrapperId = node.id + "actionswrapper"; //$NON-NLS-0$
-				var actionsWrapper = lib.node(actionsWrapperId);
-				var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$ 
-				commandService.destroy(actionsWrapper);
-				// contact the command service to render appropriate commands here.
-				if (this.actionScopeId) {
-					commandService.renderCommands(this.actionScopeId, actionsWrapper, node._item, this.explorer, "tool"); //$NON-NLS-0$
+			if (this.commandService) {
+				var rows = lib.$$array(".treeTableRow"); //$NON-NLS-0$
+				for (var i=0; i<rows.length; i++) {
+					var node = rows[i];			
+					var actionsWrapperId = node.id + "actionswrapper"; //$NON-NLS-0$
+					var actionsWrapper = lib.node(actionsWrapperId);
+					this.commandService.destroy(actionsWrapper);
+					// contact the command service to render appropriate commands here.
+					if (this.actionScopeId) {
+						this.commandService.renderCommands(this.actionScopeId, actionsWrapper, node._item, this.explorer, "tool"); //$NON-NLS-0$
+					}
 				}
 			}
 		},

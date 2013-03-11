@@ -42,7 +42,7 @@ function(messages, require, lib, popupdialog, mOperationsCommands) {
 	OperationsDialog.prototype._init = function(options) {
 		this._myOperations = [];
 		this._operationsDeferreds = [];
-		this._commandService = options.serviceRegistry.getService("orion.page.command");
+		this._commandService = options.commandRegistry;
 		mOperationsCommands.createOperationsCommands(this._commandService);		
 		this._commandService.registerCommandContribution("operationsDialogItems", "eclipse.cancelOperation", 1); //$NON-NLS-1$ //$NON-NLS-0$
 		this._initialize(options.triggerNode);

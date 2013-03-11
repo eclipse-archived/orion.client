@@ -14,12 +14,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/Deferred', 'orion/webui/lit
 function(messages, require, Deferred, lib, mOperationsDialog) {
 	
 	
-	function ProgressMonitorTool(progressPane, serviceRegistry){
+	function ProgressMonitorTool(progressPane, commandRegistry){
 		if(this._progressPane){
 			return;
 		}
 		this._progressPane = lib.node(progressPane);
-		this._operationsDialog = new mOperationsDialog.OperationsDialog({triggerNode: this._progressPane, serviceRegistry: serviceRegistry});
+		this._operationsDialog = new mOperationsDialog.OperationsDialog({triggerNode: this._progressPane, commandRegistry: commandRegistry});
 		var that = this;
 		this._progressPane.addEventListener("keydown", function(evt) {  //$NON-NLS-0$
 			if(evt.charOrCode === ' ' || evt.keyCode === lib.KEY.ENTER) { //$NON-NLS-0$
@@ -116,9 +116,10 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @param {orion.operationsclient.OperationsClient} operationsClient
 	 */
-	function ProgressService(serviceRegistry, operationsClient, progressMonitorClass){
+	function ProgressService(serviceRegistry, operationsClient, commandRegistry, progressMonitorClass){
 		this._serviceRegistry = serviceRegistry;
 		this._serviceRegistration = serviceRegistry.registerService("orion.page.progress", this); //$NON-NLS-0$ 
+		this._commandRegistry = commandRegistry;
 		this._operationsClient = operationsClient;
 		this._operations = {};
 		this._operationDeferrds = {};
@@ -133,7 +134,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 				if(this._progressMonitorClass){
 					return; // we have an other progress monitor implementation, we don't need to initialize our UI
 				}
-				this._progressMonitorTool = new ProgressMonitorTool(progressPane, this._serviceRegistry);
+				this._progressMonitorTool = new ProgressMonitorTool(progressPane, this._commandRegistry);
 			},
 			progress: function(deferred, operationName, progressMonitor){
 				var that = this;

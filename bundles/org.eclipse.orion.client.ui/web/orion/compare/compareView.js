@@ -11,22 +11,20 @@
 
 /*global define window document */
 
-define('orion/compare/compareView', ['orion/serviceregistry', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commands', 'orion/fileClient',
+define('orion/compare/compareView', ['orion/serviceregistry', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient',
 		'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/compare/compareUtils', 'orion/contentTypes', "orion/editor/textMateStyler",
 	"orion/editor/htmlGrammar", //$NON-NLS-0$
 	"examples/editor/textStyler" //$NON-NLS-0$
 ],
-function(mServiceregistry, mStatus, mProgress, mOperationsClient, mCommands, mFileClient, mCompareFeatures, mCompareContainer, mCompareUtils, mContentTypes, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+function(mServiceregistry, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mCompareFeatures, mCompareContainer, mCompareUtils, mContentTypes, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 		var serviceRegistry = window.serviceRegistry = new mServiceregistry.ServiceRegistry();
-		var commandService = new mCommands.CommandService({
-			serviceRegistry: serviceRegistry
-		});
+		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
 		// File operations
 		//var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
+		var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 		// Canned highlighter function for js, java, and css. Grammar-based highlighter for html
 		function SyntaxHighlighter() {

@@ -11,9 +11,9 @@
 
 /*global define console document Image */
 
-define(['i18n!git/nls/gitmessages', 'require', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/section', 'orion/globalCommands', 
+define(['i18n!git/nls/gitmessages', 'require', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/section', 'orion/globalCommands', 
         'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, mExplorer, PageUtil, lib, mCommands, mSection, mGlobalCommands, mGitCommands, mNavUtils, Deferred,
+		function(messages, require, mExplorer, PageUtil, lib, mSection, mGlobalCommands, mGitCommands, mNavUtils, Deferred,
 				mCommitTooltip) {
 var exports = {};
 
@@ -150,7 +150,7 @@ exports.GitLogExplorer = (function() {
 							that.makeHref(that.fileClient, seg, location, isRemote);
 						}, serviceRegistry: that.registry, commandService: that.commandService}); 
 						
-						mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", item); //$NON-NLS-1$ //$NON-NLS-0$
+						mGitCommands.updateNavTools(that.registry, that.commandService, that, "pageActions", "selectionTools", item); //$NON-NLS-1$ //$NON-NLS-0$
 						deferred.resolve();
 				}, function(error) { 
 					deferred.reject(error);
@@ -183,7 +183,7 @@ exports.GitLogExplorer = (function() {
 			
 			// update page navigation
 			if (that.toolbarId && that.selectionToolsId){
-				mGitCommands.updateNavTools(that.registry, that, that.toolbarId, that.selectionToolsId, remoteResource, that.pageNavId);
+				mGitCommands.updateNavTools(that.registry, that.commandService, that, that.toolbarId, that.selectionToolsId, remoteResource, that.pageNavId);
 			}
 			
 			var pageParams = PageUtil.matchResourceParameters();
@@ -303,7 +303,7 @@ exports.GitLogExplorer = (function() {
 						that.getOutgoingIncomingChanges(resource).then(function(items){
 							// update page navigation
 							if (that.toolbarId && that.selectionToolsId){
-								mGitCommands.updateNavTools(that.registry, that, that.toolbarId, that.selectionToolsId, items, that.pageNavId);
+								mGitCommands.updateNavTools(that.registry, that.commandService, that, that.toolbarId, that.selectionToolsId, items, that.pageNavId);
 							}
 						
 							that.displayLog(items.Children);
@@ -455,13 +455,14 @@ exports.GitLogExplorer = (function() {
 		}());
 		
 		var LogNavigator = (function() {
-			function LogNavigator(registry, selection, parentId, actionScopeId) {
+			function LogNavigator(registry, selection, parentId, actionScopeId, commandService) {
 				this.registry = registry;
 				this.checkbox = false;
 				this.parentId = parentId;
 				this.selection = selection;
 				this.actionScopeId = actionScopeId;
-				this.renderer = new LogRenderer({registry: this.registry, actionScopeId: this.actionScopeId, cachePrefix: "LogNavigator", checkbox: false}, this); //$NON-NLS-0$
+				this.commandService = commandService;
+				this.renderer = new LogRenderer({registry: this.registry, commandService: this.commandService, actionScopeId: this.actionScopeId, cachePrefix: "LogNavigator", checkbox: false}, this); //$NON-NLS-0$
 				this.createTree(this.parentId, new LogModel());
 			}
 			
@@ -478,7 +479,7 @@ exports.GitLogExplorer = (function() {
 			return LogNavigator;
 		}());
 		
-		var logNavigator = new LogNavigator(this.registry, this.selection, "logNode", this.actionScopeId); //$NON-NLS-0$
+		var logNavigator = new LogNavigator(this.registry, this.selection, "logNode", this.actionScopeId, this.commandService); //$NON-NLS-0$
 	};
 
 	return GitLogExplorer;

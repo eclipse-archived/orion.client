@@ -12,8 +12,8 @@
 /*global window document define setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/explorer', 'orion/explorers/navigatorRenderer', 'orion/explorers/navigationUtils'], 
-function(messages, require, lib, i18nUtil, mCommands, mSection, mSelection, mExplorer, mNavRenderer, mNavUtils){
+define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/commands', 'orion/commandRegistry', 'orion/keyBinding', 'orion/section', 'orion/selection', 'orion/explorers/explorer', 'orion/explorers/navigatorRenderer', 'orion/explorers/navigationUtils'], 
+function(messages, require, lib, i18nUtil, mCommands, mCommandRegistry, mKeyBinding, mSection, mSelection, mExplorer, mNavRenderer, mNavUtils){
 
 	function NavOutlineRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -117,7 +117,7 @@ function(messages, require, lib, i18nUtil, mCommands, mSection, mSelection, mExp
 			name: messages['Rename'],
 			imageClass: "core-sprite-rename", //$NON-NLS-0$
 			id: "eclipse.renameFave", //$NON-NLS-0$
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", 'Name:', '')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			visibleWhen: function(items) {
 				items = Array.isArray(items) ? items : [items];
 				return items.length === 1 && items[0].isFavorite;
@@ -213,8 +213,15 @@ function(messages, require, lib, i18nUtil, mCommands, mSection, mSelection, mExp
 				});
 				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection"); //$NON-NLS-0$
 				// add commands to the fave section heading
-				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "favoritesContent", "Favorites")); //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
-				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "favoritesContent", "Favorites")); //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
+				var binding;
+				binding = new mKeyBinding.KeyBinding(113);
+				binding.domScope = "favoritesContent"; //$NON-NLS-0$
+				binding.scopeName = "Favorites"; //$NON-NLS-0$
+				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1, null, false, binding); //$NON-NLS-0$
+				binding = new mKeyBinding.KeyBinding(46);
+				binding.domScope = "favoritesContent"; //$NON-NLS-0$
+				binding.scopeName = "Favorites"; //$NON-NLS-0$
+				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2, null, false, binding);  //$NON-NLS-0$
 				commandService.registerSelectionService(this.favoritesSection.selectionNode.id, this.favoritesSelection);
 				var selectionId = this.favoritesSection.selectionNode.id;
 				serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$

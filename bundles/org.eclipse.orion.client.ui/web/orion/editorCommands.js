@@ -16,8 +16,9 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/keyBinding', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
-	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils, mPageUtil) {
+define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 
+	'orion/keyBinding', 'orion/commandRegistry', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/keyBinding', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
+	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils, mPageUtil) {
 
 var exports = {};
 
@@ -158,13 +159,13 @@ exports.EditorCommandFactory = (function() {
 				
 					
 				this.commandService.addCommand(saveCommand);
-				this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mCommands.CommandKeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
 		
 				// page navigation commands (go to line)
-				var lineParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('line', 'number', 'Line:')], {hasOptionalParameters: false}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var lineParameter = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('line', 'number', 'Line:')], {hasOptionalParameters: false}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 																		function() {
 																			var line = editor.getModel().getLineAtOffset(editor.getCaretOffset()) + 1;
-																			return [new mCommands.CommandParameter('line', 'number', 'Line:', line.toString())]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+																			return [new mCommandRegistry.CommandParameter('line', 'number', 'Line:', line.toString())]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 																		});
 				
 				var gotoLineCommand =  new mCommands.Command({
@@ -189,7 +190,7 @@ exports.EditorCommandFactory = (function() {
 						}
 					}});
 				this.commandService.addCommand(gotoLineCommand);
-				this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mCommands.CommandKeyBinding('l', true), new mCommands.URLBinding("gotoLine", "line")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mKeyBinding.KeyBinding('l', true), new mCommandRegistry.URLBinding("gotoLine", "line")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				// override the editor binding 
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('l', true), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
 				editor.getTextView().setAction("gotoLine", function () { //$NON-NLS-0$
@@ -198,7 +199,7 @@ exports.EditorCommandFactory = (function() {
 				}, gotoLineCommand);
 
 				// find&&replace commands (find)
-				var findParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('find', 'text', 'Find:')], {clientCollect: true}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var findParameter = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('find', 'text', 'Find:')], {clientCollect: true}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 																		function() {
 																			var selection = editor.getSelection();
 																			var searchString = "";
@@ -206,7 +207,7 @@ exports.EditorCommandFactory = (function() {
 																				var model = editor.getModel();
 																				searchString = model.getText(selection.start, selection.end);
 																			}
-																			return [new mCommands.CommandParameter('find', 'text', 'Find:', searchString)]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+																			return [new mCommandRegistry.CommandParameter('find', 'text', 'Find:', searchString)]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 																		});
 				var that = this;
 				var findCommand =  new mCommands.Command({
@@ -250,7 +251,7 @@ exports.EditorCommandFactory = (function() {
 						return false;
 					}});
 				this.commandService.addCommand(findCommand);
-				this.commandService.registerCommandContribution(this.pageNavId, "orion.editor.find", 2, null, true, new mCommands.CommandKeyBinding('f', true), new mCommands.URLBinding("find", "find")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandService.registerCommandContribution(this.pageNavId, "orion.editor.find", 2, null, true, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				// override the editor binding 
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('f', true), "find"); //$NON-NLS-1$ //$NON-NLS-0$
 				editor.getTextView().setAction("find", function () { //$NON-NLS-0$

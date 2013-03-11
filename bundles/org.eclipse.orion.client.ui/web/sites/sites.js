@@ -11,10 +11,10 @@
  *******************************************************************************/
 /*global define window*/
 /*jslint browser:true*/
-define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
+define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/fileClient', 'orion/operationsClient',
 		'orion/searchClient', 'orion/selection', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteUtils', 'orion/sites/siteCommands', 
 		'orion/sites/sitesExplorer'], 
-	function(mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mSelection, mDialogs, mGlobalCommands, mSiteUtils, mSiteCommands, SitesExplorer) {
+	function(mBootstrap, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, mSelection, mDialogs, mGlobalCommands, mSiteUtils, mSiteCommands, SitesExplorer) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
@@ -22,30 +22,30 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', '
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			
 			var selection = new mSelection.Selection(serviceRegistry);
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+			var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 
 			function createCommands() {
 				var errorHandler = statusService.setProgressResult.bind(statusService);
 				var goToUrl = function(url) {
 					window.location = url;
 				};
-				mSiteCommands.createSiteServiceCommands(serviceRegistry, {
+				mSiteCommands.createSiteServiceCommands(serviceRegistry, commandRegistry, {
 					createCallback: goToUrl,
 					errorHandler: errorHandler
 				});
-				mSiteCommands.createSiteCommands(serviceRegistry);
+				mSiteCommands.createSiteCommands(serviceRegistry, commandRegistry);
 			}
 			
-			mGlobalCommands.generateBanner("orion-sites", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-sites", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 			mGlobalCommands.setPageTarget({task: "Sites"});
 			
-			var explorer = new SitesExplorer(serviceRegistry, selection, "table"); //$NON-NLS-0$
+			var explorer = new SitesExplorer(serviceRegistry, selection, commandRegistry, "table"); //$NON-NLS-0$
 			createCommands();
 			explorer.display();
 	});

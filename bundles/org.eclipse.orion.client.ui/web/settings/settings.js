@@ -13,10 +13,10 @@
 /*global define window widgets localStorage*/
 /*jslint browser:true devel:true*/
 
-define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/profile/usersClient',
+define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/profile/usersClient',
 		'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/webui/littlelib', 'orion/config',
 		'orion/metatype', 'orion/settings/settingsRegistry', 'orion/widgets/settings/SettingsContainer'],
-		function(messages, mBootstrap, mStatus, mProgress, mCommands, mUsersClient, mOperationsClient, mFileClient, mSearchClient, 
+		function(messages, mBootstrap, mStatus, mProgress, mCommandRegistry, mCommands, KeyBinding, mUsersClient, mOperationsClient, mFileClient, mSearchClient, 
 			mDialogs, mGlobalCommands, lib, mConfig, mMetaType, SettingsRegistry, SettingsContainer) {
 
 	mBootstrap.startup().then(function(core) {
@@ -27,15 +27,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 		// Register services
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		var preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mProgress.ProgressService(serviceRegistry, operationsClient);
-		var commandService = new mCommands.CommandService({
-			serviceRegistry: serviceRegistry
-		});
+		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({
 			serviceRegistry: serviceRegistry,
-			commandService: commandService,
+			commandService: commandRegistry,
 			fileService: fileClient
 		});
 		
@@ -53,11 +51,11 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 					preferencesStatusService.setMessage("Theme settings have been cleared.");
 				});
 			}});
-		commandService.addCommand(clearPrefsCommand);
+		commandRegistry.addCommand(clearPrefsCommand);
 		// add as a binding only command
-		commandService.registerCommandContribution("globalActions", "orion.clearThemes", 1,  null, true, new mCommands.CommandKeyBinding('t', true, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("globalActions", "orion.clearThemes", 1,  null, true, new KeyBinding.KeyBinding('t', true, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var preferenceDialogService = new mDialogs.DialogService(serviceRegistry);
-		mGlobalCommands.generateBanner("orion-settings", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-settings", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 
 		var settingsRegistry = new SettingsRegistry(serviceRegistry, new mMetaType.MetaTypeRegistry(serviceRegistry));
 
@@ -68,7 +66,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 		var containerParameters = { preferences: preferences, 
 									registry: serviceRegistry,
 									preferencesStatusService: preferencesStatusService,
-									commandService: commandService,
+									commandService: commandRegistry,
 									preferenceDialogService: preferenceDialogService,
 									settingsCore: core,
 									pageActions: "pageActions", //$NON-NLS-0$

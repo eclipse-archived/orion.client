@@ -59,6 +59,7 @@ mSiteMappingsTable.Renderer = (function() {
 		this._init(options);
 		this.options = options;
 		this.explorer = explorer;
+		this.commandService = options.commandService;
 	}
 	Renderer.prototype = new mExplorer.SelectionRenderer();
 	mixin(Renderer.prototype, {
@@ -187,7 +188,7 @@ mSiteMappingsTable.Renderer = (function() {
 mSiteMappingsTable.MappingsTable = (function() {
 	function MappingsTable(options) {
 		this.registry = options.serviceRegistry;
-		this.commandService = this.registry.getService("orion.page.command"); //$NON-NLS-0$
+		this.commandService = options.commandRegistry;
 		this.registerCommands();
 		this.siteClient = options.siteClient;
 		this.parentId = options.parentId;
@@ -198,6 +199,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 				siteConfiguration: options.siteConfiguration,
 				siteClient: options.siteClient,
 				fileClient: options.fileClient,
+				commandService: this.commandService,
 				progress: options.serviceRegistry.getService("orion.page.progress"),
 				actionScopeId: "siteMappingCommand" //$NON-NLS-0$
 			}, this);

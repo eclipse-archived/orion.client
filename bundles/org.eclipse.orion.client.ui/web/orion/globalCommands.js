@@ -12,12 +12,12 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
+define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/commandRegistry', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
 	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 
 	'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/globalSearch/advSearchOptContainer', 'orion/Deferred',
 	'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html', 'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html'], 
-        function(messages, require, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
+        function(messages, require, commonHTML, KeyBinding, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
         mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, 
         mAdvSearchOptContainer, Deferred, mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate){
 
@@ -203,14 +203,14 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				dropdown: dropdownNode
 			});
 		}
-		command._addMenuItem(dropdownNode, invocation);
+		mCommands.createCommandMenuItem(dropdownNode, command, invocation);
 	}	
 	/**
 	 * Adds the related links to the banner
 	 * @name orion.globalCommands#generateRelatedLinks
 	 * @function
 	 */
-	function generateRelatedLinks(serviceRegistry, item, exclusions, commandService, alternateItem) {
+	function generateRelatedLinks(serviceRegistry, item, exclusions, commandRegistry, alternateItem) {
 		var contentTypesCache;
 		function getContentTypes() {
 			if (contentTypesCache) {
@@ -255,7 +255,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					function enhanceCommand(command){
 						if (command) {
 							if (!command.visibleWhen || command.visibleWhen(item)) {
-								var invocation = new mCommands.CommandInvocation(commandService, item, item, null, command);
+								var invocation = new mCommands.CommandInvocation(item, item, null, command, commandRegistry);
 								_addRelatedLinkCommand(command, invocation);
 							} else if (typeof alternateItem === "function") { //$NON-NLS-0$
 								if (!alternateItemDeferred) {
@@ -265,7 +265,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 								Deferred.when(alternateItemDeferred, function (newItem) {
 									if (newItem && (item === pageItem)) { // there is an alternate, and it still applies to the current page target
 										if (!command.visibleWhen || command.visibleWhen(newItem)) {
-											_addRelatedLinkCommand(command, new mCommands.CommandInvocation(commandService, newItem, newItem, null, command));
+											_addRelatedLinkCommand(command, new mCommands.CommandInvocation(newItem, newItem, null, command, commandRegistry));
 										}
 									}
 								});
@@ -290,7 +290,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 						}
 						// If we couldn't compose one, see if one is already registered.
 						if (!command) {
-							command = commandService.findCommand(info.id);
+							command = commandRegistry.findCommand(info.id);
 							if(command){
 								enhanceCommand(command);
 								continue;
@@ -327,11 +327,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		});
 	}
 	
-	function renderGlobalCommands(commandService) {
+	function renderGlobalCommands(commandRegistry) {
 		var globalTools = lib.node("globalActions"); //$NON-NLS-0$
 		if (globalTools) {	
-			commandService.destroy(globalTools);
-			commandService.renderCommands(globalTools.id, globalTools, {}, {}, "tool"); //$NON-NLS-0$
+			commandRegistry.destroy(globalTools);
+			commandRegistry.renderCommands(globalTools.id, globalTools, {}, {}, "tool"); //$NON-NLS-0$
 		}
 	}
 	
@@ -614,7 +614,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	 * @name orion.globalCommands#generateBanner
 	 * @function
 	 */
-	function generateBanner(parentId, serviceRegistry, commandService, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
+	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
 		applyTheme( prefsService );
 		
 		var parent = lib.node(parentId);
@@ -660,7 +660,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		}
 		
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
-		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector(getToolbarElements, layoutToolbarElements));
+		commandRegistry.setParameterCollector(new mParameterCollectors.CommandParameterCollector(getToolbarElements, layoutToolbarElements));
 		
 		// place an empty div for keyAssist
 		var keyAssistDiv = document.createElement("div");//$NON-NLS-0$
@@ -799,8 +799,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					callback: function() {
 						mainSplitter.splitter.toggleSidePanel();}
 				});
-				commandService.addCommand(toggleSidePanelCommand);
-				commandService.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new mCommands.CommandKeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.addCommand(toggleSidePanelCommand);
+				commandRegistry.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new KeyBinding.KeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				// editor behavior if needed
 				if (editor) {
@@ -854,7 +854,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					progress.progress(favService.hasFavorite(item.ChildrenLocation || item.Location), "Checking favorite " + item.Name).then(doAdd(item));
 				}
 			}});
-		commandService.addCommand(favoriteCommand);
+		commandRegistry.addCommand(favoriteCommand);
 	
 		// open resource
 		var openResourceDialog = function(searcher, serviceRegistry, /* optional */ editor) {
@@ -897,8 +897,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				}, openResourceCommand);
 		}
 		
-		commandService.addCommand(openResourceCommand);
-		commandService.registerCommandContribution("globalActions", "eclipse.openResource", 100,  null, true, new mCommands.CommandKeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommand(openResourceCommand);
+		commandRegistry.registerCommandContribution("globalActions", "eclipse.openResource", 100,  null, true, new KeyBinding.KeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		var globalSearchCommand = new mCommands.Command({
 			name: messages["Global search"],
@@ -932,8 +932,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				}, globalSearchCommand);
 		}
 		
-		commandService.addCommand(globalSearchCommand);
-		commandService.registerCommandContribution("globalActions", "eclipse.globalSearch", 101,  null, true, new mCommands.CommandKeyBinding('h', true, false, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommand(globalSearchCommand);
+		commandRegistry.registerCommandContribution("globalActions", "eclipse.globalSearch", 101,  null, true, new KeyBinding.KeyBinding('h', true, false, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		// Toggle trim command
 		var toggleBanner = new mCommands.Command({
@@ -958,11 +958,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				}
 				return true;
 			}});
-		commandService.addCommand(toggleBanner);
-		commandService.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new mCommands.CommandKeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommand(toggleBanner);
+		commandRegistry.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new KeyBinding.KeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		if (editor) {
-			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('m', true, true), toggleBanner.id); //$NON-NLS-0$
+			editor.getTextView().setKeyBinding(new KeyBinding.KeyBinding('m', true, true), toggleBanner.id); //$NON-NLS-0$
 			editor.getTextView().setAction(toggleBanner.id, toggleBanner.callback, toggleBanner);
 		}
 						
@@ -991,8 +991,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				return require.toUrl("help/about.html"); //$NON-NLS-0$
 			}});
 					
-		commandService.addCommand(configDetailsCommand);
-		commandService.registerCommandContribution("globalActions", "orion.configDetailsPage", 100,  null, true, new mCommands.CommandKeyBinding(112, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommand(configDetailsCommand);
+		commandRegistry.registerCommandContribution("globalActions", "orion.configDetailsPage", 100,  null, true, new KeyBinding.KeyBinding(112, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		//	Background Operations Page, Ctrl+Shift+O
 		var operationsCommand = new mCommands.Command({
@@ -1003,8 +1003,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				return require.toUrl("operations/list.html"); //$NON-NLS-0$
 			}});
 					
-		commandService.addCommand(operationsCommand);
-		commandService.registerCommandContribution("globalActions", "orion.backgroundOperations", 100,  null, true, new mCommands.CommandKeyBinding('o', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommand(operationsCommand);
+		commandRegistry.registerCommandContribution("globalActions", "orion.backgroundOperations", 100,  null, true, new KeyBinding.KeyBinding('o', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		
 		// Key assist
@@ -1040,22 +1040,22 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					heading = document.createElement("h2"); //$NON-NLS-0$
 					heading.appendChild(document.createTextNode(messages["Global"]));
 					keyAssistDiv.appendChild(heading);
-					commandService.showKeyBindings(keyAssistDiv);
+					commandRegistry.showKeyBindings(keyAssistDiv);
 					keyAssistDiv.style.display = "block"; //$NON-NLS-0$
 				} else {
 					keyAssistDiv.style.display = "none"; //$NON-NLS-0$
 				}
 				return true;
 			}});
-		commandService.addCommand(keyAssistCommand);
-		commandService.registerCommandContribution("globalActions", "eclipse.keyAssist", 100, null, true, new mCommands.CommandKeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommand(keyAssistCommand);
+		commandRegistry.registerCommandContribution("globalActions", "eclipse.keyAssist", 100, null, true, new KeyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 		if (editor) {
 			var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, false, true, !isMac, isMac), keyAssistCommand.id);
+			editor.getTextView().setKeyBinding(new KeyBinding.KeyBinding(191, false, true, !isMac, isMac), keyAssistCommand.id);
 			editor.getTextView().setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 		}
 		
-		renderGlobalCommands(commandService);
+		renderGlobalCommands(commandRegistry);
 		
 		generateUserInfo(serviceRegistry, keyAssistCommand.callback);
 		
@@ -1064,7 +1064,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 
 		// check for commands in the hash
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
-			commandService.processURL(window.location.href);
+			commandRegistry.processURL(window.location.href);
 		}, false);
 		
 		function setTarget(target){

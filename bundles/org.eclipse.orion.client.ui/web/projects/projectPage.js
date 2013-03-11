@@ -12,14 +12,14 @@
  
 /*global define document window */
 
-define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes',
+define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/selection', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes',
 	'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil'],
  
-	function( mBootstrap, lib, mGlobalCommands, mSelection, mCommands, mFileClient, mSearchClient, mProgress, mOperationsClient, mContentTypes, mProjectTree, SFTPConfiguration, ProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
+	function( mBootstrap, lib, mGlobalCommands, mSelection, mCommandRegistry, mFileClient, mSearchClient, mProgress, mOperationsClient, mContentTypes, mProjectTree, SFTPConfiguration, ProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
 		
 		var serviceRegistry;
 		var preferences;
-		var commandService;
+		var commandRegistry;
 		var progressService;
 		var contentTypeService;
 		var fileClient;
@@ -31,9 +31,9 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'ori
 		
 		function addSubComponents( ){
 			var sidePanel = document.getElementById( 'projectNavigation' );
-			var projectTree = new ProjectNavigation( myproject, myworkspace, sidePanel, serviceRegistry, commandService, progressService, fileClient, contentTypeService, projectDataManager );		
+			var projectTree = new ProjectNavigation( myproject, myworkspace, sidePanel, serviceRegistry, commandRegistry, progressService, fileClient, contentTypeService, projectDataManager );		
 			lib.empty(mainPanel);
-			var configuration = new SFTPConfiguration( myproject, projectDataManager, mainPanel, commandService, serviceRegistry, fileClient );	
+			var configuration = new SFTPConfiguration( myproject, projectDataManager, mainPanel, commandRegistry, serviceRegistry, fileClient );	
 		}
 		
 		function startProjectComponents( project, workspace, dataManager ){
@@ -75,19 +75,19 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'ori
 		
 			var selection = new mSelection.Selection(serviceRegistry);
 
-			commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+			commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			
-			progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
+			progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 			
 			fileClient = new mFileClient.FileClient( serviceRegistry );			
 					
 			contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 			
-			mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences, searcher );			
+			mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandRegistry, preferences, searcher );			
 			
 			projectId = PageUtil.matchResourceParameters();
 
