@@ -967,16 +967,24 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var result = 0, range, length;
 			var lineOffset = model.getLineStart(lineIndex);
 			var document = child.ownerDocument;
+			var lineChild;
 			if (offset === model.getLineEnd(lineIndex)) {
+				lineChild = child.lastChild;
+				while (lineChild && lineChild.ignoreChars) {
+					lineChild = lineChild.previousSibling;
+				}
+				if (!lineChild) {
+					return lineOffset;
+				}
 				range = document.body.createTextRange();
-				range.moveToElementText(child.lastChild);
+				range.moveToElementText(lineChild);
 				length = range.text.length;
 				range.moveEnd(unit, direction);
 				result = offset + range.text.length - length;
 			} else if (offset === lineOffset && direction < 0) {
 				result = lineOffset;
 			} else {
-				var lineChild = child.firstChild;
+				lineChild = child.firstChild;
 				while (lineChild) {
 					var textNode = lineChild.firstChild;
 					var nodeLength = textNode.length;
