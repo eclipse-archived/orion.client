@@ -11,6 +11,7 @@
  *	Adrian Aichner - regular expression capture group support in replace
  ******************************************************************************/
 /*global define window document navigator*/
+/*jslint sub:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/editor/annotations', 'orion/commands', 'orion/searchUtils' ], 
 	function(messages, require, lib, mAnnotations, mCommands, mSearchUtils){

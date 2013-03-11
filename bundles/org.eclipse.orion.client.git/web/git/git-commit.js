@@ -14,9 +14,9 @@
 var eclipse;
 
 define([ 'i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/dialogs', 'orion/selection',
-		'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitCommitExplorer', 'orion/git/gitCommands',
+		'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitCommitExplorer', 'orion/git/gitCommands', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData',
 		'orion/git/gitClient', 'orion/links', 'orion/contentTypes', 'orion/PageUtil' ], function(messages, require, mBootstrap, mStatus, mProgress, CommandRegistry,
-		Commands, KeyBinding, mDialogs, mSelection, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mGitCommitExplorer, mGitCommands, mGitClient, mLinks,
+		Commands, KeyBinding, mDialogs, mSelection, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mGitCommitExplorer, mGitCommands, mThemePreferences, mThemeData, mGitClient, mLinks,
 		mContentTypes, PageUtil) {
 
 	mBootstrap.startup().then(
@@ -30,7 +30,9 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status
 				var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 				new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
-
+				var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
+				themePreferences.apply();
+	
 				// ...
 				var linkService = new mLinks.TextLinkService({ serviceRegistry : serviceRegistry
 				});

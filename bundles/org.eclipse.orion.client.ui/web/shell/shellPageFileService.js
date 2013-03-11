@@ -30,12 +30,11 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 	orion.shellPage.ShellPageFileService = (function() {
 		function ShellPageFileService() {
 			this.currentDirectory = null;
-			var self = this;
 			this.withNode(
 				this.SEPARATOR,
 				function(node) {
-					self.rootNode = node;
-				}
+					this.rootNode = node;
+				}.bind(this)
 			);
 			this.currentRetrievals = {};
 		}
@@ -78,7 +77,6 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 					}
 				} else {
 					parentNode = parentNode || this.getCurrentDirectory();
-					var self = this;
 					this.withChildren(
 						parentNode,
 						function(children) {
@@ -95,7 +93,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 									}
 								}
 							}
-							self.createDirectory(parentNode, directory).then(
+							this.createDirectory(parentNode, directory).then(
 								function(directory) {
 									result.resolve(directory);
 								},
@@ -103,7 +101,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 									result.reject(error);
 								}
 							);
-						},
+						}.bind(this),
 						function(error) {
 							result.reject(error);
 						}
@@ -122,7 +120,6 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 					}
 				} else {
 					parentNode = parentNode || this.getCurrentDirectory();
-					var self = this;
 					this.withChildren(
 						parentNode,
 						function(children) {
@@ -139,7 +136,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 									}
 								}
 							}
-							self.createFile(parentNode, file).then(
+							this.createFile(parentNode, file).then(
 								function(file) {
 									result.resolve(file);
 								},
@@ -147,7 +144,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 									result.reject(error);
 								}
 							);
-						},
+						}.bind(this),
 						function(error) {
 							result.reject(error);
 						}
@@ -259,11 +256,10 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 						func(node.Children);
 					}
 				} else if (node.ChildrenLocation) {
-					var self = this;
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					(progress ? progress.progress(fileClient.fetchChildren(node.ChildrenLocation), "Getting children of " + node.Name) : fileClient.fetchChildren(node.ChildrenLocation)).then( //$NON-NLS-0$
 						function(children) {
-							self._sort(children);
+							this._sort(children);
 							var parents = node.Parents ? node.Parents.slice(0) : [];
 							parents.unshift(node);
 							for (var i = 0; i < children.length; i++) {
@@ -274,7 +270,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 							if (func) {
 								func(children);
 							}
-						},
+						}.bind(this),
 						function(error) {
 							if (errorFunc) {
 								errorFunc(error);
@@ -288,12 +284,11 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 				}
 			},
 			withNode: function(location, func, errorFunc) {
-				var self = this;
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				(progress ? progress.progress(fileClient.loadWorkspace(location), "Loading workspace " + location) : fileClient.loadWorkspace(location)).then( //$NON-NLS-0$
 					function(node) {
-						self._retrieveNode(node, func, errorFunc);
-					},
+						this._retrieveNode(node, func, errorFunc);
+					}.bind(this),
 					errorFunc);
 			},
 			write: function(node, content) {
@@ -319,23 +314,22 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 				if (retrievals.length === 1) {
 					/* this is the first request to create this file or directory */
 					this.currentRetrievals[key] = retrievals;
-					var self = this;
 					var notifySuccess = function(result) {
 						/* work around core bug that results in created folders not having the correct name field */
 						if (isDirectory) {
 							result.Name = name;
 						}
-						self.currentRetrievals[key].forEach(function(current) {
+						this.currentRetrievals[key].forEach(function(current) {
 							current.resolve(result);
 						});
-						delete self.currentRetrievals[key];
-					};
+						delete this.currentRetrievals[key];
+					}.bind(this);
 					var notifyError = function(error) {
-						self.currentRetrievals[key].forEach(function(current) {
+						this.currentRetrievals[key].forEach(function(current) {
 							current.reject(error.responseText);
 						});
-						delete self.currentRetrievals[key];
-					};
+						delete this.currentRetrievals[key];
+					}.bind(this);
 					if (isDirectory) {
 						if (parentNode.Projects) {
 							/* parent is top-level folder, so create project and answer its content folder */
@@ -361,10 +355,9 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 					return;
 				}
 
-				var self = this;
 				var retrieveChildren = function(node, func, errorFunc) {
 					if (node.Directory && !node.Children) {
-						self.withChildren(
+						this.withChildren(
 							node,
 							function(children) {
 								if (func) {
@@ -377,23 +370,23 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 							func(node);
 						}
 					}
-				};
+				}.bind(this);
 				var updateParents = function(node) {
-					if (node.Location === self.SEPARATOR) {
+					if (node.Location === this.SEPARATOR) {
 						return;
 					}
 					if (!node.Parents) {
 						/* node is the root of a file service */
-						node.parent = self.rootNode;
+						node.parent = this.rootNode;
 					} else if (node.Parents.length === 0) {
 						/* node's parent is the root of a file service */
 						var location = fileClient.fileServiceRootURL(node.Location);
 						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 						(progress ? progress.progress(fileClient.loadWorkspace(location), "Loading workspace " + location) : fileClient.loadWorkspace(location)).then( //$NON-NLS-0$
 							function(parent) {
-								parent.parent = self.rootNode;
+								parent.parent = this.rootNode;
 								node.parent = parent;
-							}
+							}.bind(this)
 						);
 					} else {
 						node.parent = node.Parents[0];
@@ -402,8 +395,8 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 							node.Parents[i].Directory = true;
 						}
 					}
-				};
-				if (!node.Parents && !node.Projects && node.Location !== self.SEPARATOR && node.Name !== fileClient.fileServiceName(node.Location)) {
+				}.bind(this);
+				if (!node.Parents && !node.Projects && node.Location !== this.SEPARATOR && node.Name !== fileClient.fileServiceName(node.Location)) {
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					(progress ? progress.progress(fileClient.loadWorkspace(node.Location), "Loading workspace " + node.Location) : fileClient.loadWorkspace(node.Location)).then( //$NON-NLS-0$
 						function(metadata) {

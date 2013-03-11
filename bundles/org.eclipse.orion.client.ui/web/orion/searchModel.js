@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global define console window*/
-/*jslint regexp:false browser:true forin:true*/
+/*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/searchUtils'],
 

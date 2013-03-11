@@ -16,6 +16,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	
 	"orion/editor/textView", //$NON-NLS-0$
 	"orion/editor/textModel", //$NON-NLS-0$
+	"orion/editor/textTheme", //$NON-NLS-0$
 	"orion/editor/projectionTextModel", //$NON-NLS-0$
 	"orion/editor/eventTarget", //$NON-NLS-0$
 	"orion/keyBinding", //$NON-NLS-0$
@@ -38,7 +39,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	"orion/editor/textMateStyler", //$NON-NLS-0$
 	"orion/editor/htmlGrammar", //$NON-NLS-0$
 	"examples/editor/textStyler" //$NON-NLS-0$
-], function(mTextView, mTextModel, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations, mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist, mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+], function(mTextView, mTextModel, mTextTheme, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations, mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist, mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 
 	/**	@private */
 	function getTextFromElement(element) {
@@ -171,6 +172,20 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		if (!parent) { throw "no parent"; } //$NON-NLS-0$
 		options = mergeOptions(parent, options);
 	
+		if (typeof options.theme === "string") { //$NON-NLS-0$
+			var theme = mTextTheme.TextTheme.getTheme(options.theme);
+			var index = options.theme.lastIndexOf("/"); //$NON-NLS-0$
+			var themeClass = options.theme; 
+			if (index !== -1) {
+				themeClass = themeClass.substring(index + 1);
+			}
+			var extension = ".css"; //$NON-NLS-0$
+			if (themeClass.substring(themeClass.length - extension.length) === extension) {
+				themeClass = themeClass.substring(0, themeClass.length - extension.length);
+			}
+			theme.setThemeClass(themeClass, {href: options.theme});
+			options.theme = theme;
+		}
 		var textViewFactory = function() {
 			return new mTextView.TextView({
 				parent: parent,
@@ -181,6 +196,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 				tabMode: options.tabMode,
 				expandTab: options.expandTab,
 				themeClass: options.themeClass,
+				theme: options.theme,
 				wrapMode: options.wrapMode
 			});
 		};
