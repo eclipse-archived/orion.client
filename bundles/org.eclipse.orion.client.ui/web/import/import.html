@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<script	src="../../requirejs/require.js"></script>
+		<script>
+		/*global require*/
+		require({
+			baseUrl: '../',
+			paths: {
+				text: 'requirejs/text',
+				i18n: 'requirejs/i18n',
+				domReady: 'requirejs/domReady'
+			}
+		});
+		require(["import.js"]);
+		</script>
+</head>
+<body>Orion importer</body>
+</html>

@@ -2016,12 +2016,12 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			if (ruler) {
 				var location = ruler.getLocation();//"left" or "right"
 				var divRuler = location === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
-				var cells = divRuler.firstChild.rows[0].cells;
-				for (var i = 0; i < cells.length; i++) {
-					if (cells[i].firstChild._ruler === ruler) {
-						div = cells[i].firstChild;
+				div = divRuler.firstChild;
+				while (div) {
+					if (div._ruler === ruler) {
 						break;
 					}
+					div = div.nextSibling;
 				}
 			}
 			if (ruler) {
@@ -4293,17 +4293,20 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			div._ruler = ruler;
 			div.rulerChanged = true;
 			div.style.position = "relative"; //$NON-NLS-0$
-			var row = rulerParent.firstChild.rows[0];
-			var length = row.cells.length;
-			index = index === undefined || index < 0 || index > length ? length : index;
-			var cell = row.insertCell(index);
-			cell.vAlign = "top"; //$NON-NLS-0$
-			cell.style.verticalAlign = "top"; //$NON-NLS-0$
-			cell.style.borderWidth = "0px"; //$NON-NLS-0$
-			cell.style.margin = "0px"; //$NON-NLS-0$
-			cell.style.padding = "0px"; //$NON-NLS-0$
-			cell.style.outline = "none"; //$NON-NLS-0$
-			cell.appendChild(div);
+			div.style["float"] = "left"; //$NON-NLS-1$ //$NON-NLS-0$
+			div.style.borderWidth = "0px"; //$NON-NLS-0$
+			div.style.margin = "0px"; //$NON-NLS-0$
+			div.style.padding = "0px"; //$NON-NLS-0$
+			div.style.outline = "none"; //$NON-NLS-0$
+			if (index === undefined || index < 0 || index >= rulerParent.children.length) {
+				rulerParent.appendChild(div);
+			} else {
+				var sibling = rulerParent.firstChild;
+				while (sibling && --index > 0) {
+					sibling = sibling.nextSibling;
+				}
+				rulerParent.insertBefore(div, sibling);
+			}
 		},
 		_createView: function() {
 			if (this._clientDiv) { return; }
@@ -4318,7 +4321,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			rootDiv.style.overflow = "hidden"; //$NON-NLS-0$
 			rootDiv.style.width = "100%"; //$NON-NLS-0$
 			rootDiv.style.height = "100%"; //$NON-NLS-0$
-			parent.style.overflow = "hidden"; //$NON-NLS-0$
+			rootDiv.style.overflow = "hidden"; //$NON-NLS-0$
+			rootDiv.style.WebkitTextSizeAdjust = "100%"; //$NON-NLS-0$
 			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-0$
 			parent.appendChild(rootDiv);
 			
@@ -4335,22 +4339,6 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			leftDiv.style.cursor = "default"; //$NON-NLS-0$
 			leftDiv.style.display = "none"; //$NON-NLS-0$
 			leftDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			var table = util.createElement(document, "table"); //$NON-NLS-0$
-			leftDiv.appendChild(table);
-			table.cellPadding = "0px"; //$NON-NLS-0$
-			table.cellSpacing = "0px"; //$NON-NLS-0$
-			table.border = "0px"; //$NON-NLS-0$
-			table.style.borderWidth = "0px"; //$NON-NLS-0$
-			table.style.margin = "0px"; //$NON-NLS-0$
-			table.style.padding = "0px"; //$NON-NLS-0$
-			table.style.outline = "none"; //$NON-NLS-0$
-			table.style.lineHeight = "normal"; //$NON-NLS-0$
-			var tr = table.insertRow(0);
-			tr.style.borderWidth = "0px"; //$NON-NLS-0$
-			tr.style.margin = "0px"; //$NON-NLS-0$
-			tr.style.padding = "0px"; //$NON-NLS-0$
-			tr.style.outline = "none"; //$NON-NLS-0$
-			tr.style.lineHeight = "normal"; //$NON-NLS-0$
 			rootDiv.appendChild(leftDiv);
 
 			var viewDiv = util.createElement(document, "div"); //$NON-NLS-0$
@@ -4385,22 +4373,6 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			rightDiv.style.cursor = "default"; //$NON-NLS-0$
 			rightDiv.style.right = "0px"; //$NON-NLS-0$
 			rightDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			table = util.createElement(document, "table"); //$NON-NLS-0$
-			rightDiv.appendChild(table);
-			table.cellPadding = "0px"; //$NON-NLS-0$
-			table.cellSpacing = "0px"; //$NON-NLS-0$
-			table.border = "0px"; //$NON-NLS-0$
-			table.style.borderWidth = "0px"; //$NON-NLS-0$
-			table.style.margin = "0px"; //$NON-NLS-0$
-			table.style.padding = "0px"; //$NON-NLS-0$
-			table.style.outline = "none"; //$NON-NLS-0$
-			table.style.lineHeight = "normal"; //$NON-NLS-0$
-			tr = table.insertRow(0);
-			tr.style.borderWidth = "0px"; //$NON-NLS-0$
-			tr.style.margin = "0px"; //$NON-NLS-0$
-			tr.style.padding = "0px"; //$NON-NLS-0$
-			tr.style.outline = "none"; //$NON-NLS-0$
-			tr.style.lineHeight = "normal"; //$NON-NLS-0$
 			rootDiv.appendChild(rightDiv);
 				
 			var scrollDiv = util.createElement(document, "div"); //$NON-NLS-0$
@@ -4551,17 +4523,17 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var side = ruler.getLocation();
 			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
 			if (rulerParent) {
-				var row = rulerParent.firstChild.rows[0];
-				var cells = row.cells;
-				for (var index = 0; index < cells.length; index++) {
-					var cell = cells[index];
-					if (cell.firstChild._ruler === ruler) { break; }
-				}
-				if (index === cells.length) { return; }
-				row.cells[index]._ruler = undefined;
-				row.deleteCell(index);
-				if (cells.length === 0) {
-					rulerParent.style.display = "none"; //$NON-NLS-0$
+				var div = rulerParent.firstChild;
+				while (div) {
+					if (div._ruler === ruler) {
+						div._ruler = undefined;
+						rulerParent.removeChild(div);
+						if (rulerParent.children.length === 0) {
+							rulerParent.style.display = "none"; //$NON-NLS-0$
+						}
+						break;
+					}
+					div = div.nextSibling;
 				}
 			}
 		},
@@ -6266,12 +6238,11 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		},
 		_updateRuler: function (divRuler, topIndex, bottomIndex, parentHeight) {
 			if (!divRuler) { return; }
-			var cells = divRuler.firstChild.rows[0].cells;
 			var document = this._parent.ownerDocument;
 			var lineHeight = this._getLineHeight();
 			var viewPad = this._getViewPadding();
-			for (var i = 0; i < cells.length; i++) {
-				var div = cells[i].firstChild;
+			var div = divRuler.firstChild;
+			while (div) {
 				var ruler = div._ruler;
 				var offset = lineHeight;
 				var overview = ruler.getOverview();
