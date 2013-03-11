@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
-        'orion/commands', 'orion/favorites', 'orion/searchOutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/globalCommands', 
+        'orion/commandRegistry', 'orion/favorites', 'orion/searchOutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/globalCommands', 
         'orion/contentTypes', 'orion/searchUtils', 'orion/PageUtil'], 
-		function(messages, require, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mSearchOutliner, 
+		function(messages, require, mBootstrap, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mSearchOutliner, 
 				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil) {
 	function makeHref(fileClient, seg, location, searchParams, searcher){
 		var searchLocation = (!location || location === "" || location === "root") ? searcher.getSearchRootLocation() : location; //$NON-NLS-0$
@@ -62,29 +62,29 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/s
 		var dialogService = new mDialogs.DialogService(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var progress = new mProgress.ProgressService(serviceRegistry, operationsClient);
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+		var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		// favorites and saved searches
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		new mSearchOutliner.SavedSearches({serviceRegistry: serviceRegistry});
 
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		
-		var searchOutliner = new mSearchOutliner.SearchOutliner({parent: "searchProgress", serviceRegistry: serviceRegistry}); //$NON-NLS-0$
-		mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandService, preferences, searcher, searcher, null, null); //$NON-NLS-0$
+		var searchOutliner = new mSearchOutliner.SearchOutliner({parent: "searchProgress", serviceRegistry: serviceRegistry, commandService: commandRegistry}); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandRegistry, preferences, searcher, searcher, null, null); //$NON-NLS-0$
 		
-		var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient, searcher, false/*crawling*/); //$NON-NLS-0$
+		var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandRegistry, fileClient, searcher, false/*crawling*/); //$NON-NLS-0$
 
 		var startWidget = function(){
 			var searchParams = PageUtil.matchResourceParameters();
 			mSearchUtils.convertSearchParams(searchParams);
-			setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams, progress);
+			setPageInfo(serviceRegistry, fileClient, commandRegistry, searcher, searchResultsGenerator, searchParams, progress);
 			var toolbar = document.getElementById("pageActions"); //$NON-NLS-0$
 			if (toolbar) {	
-				commandService.destroy(toolbar);
-				commandService.renderCommands(toolbar.id, toolbar, searcher, searcher, "button"); //$NON-NLS-0$
+				commandRegistry.destroy(toolbar);
+				commandRegistry.renderCommands(toolbar.id, toolbar, searcher, searcher, "button"); //$NON-NLS-0$
 			}
 		};
 		//every time the user manually changes the hash, we need to load the results with that name

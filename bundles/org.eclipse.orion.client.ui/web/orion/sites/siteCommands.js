@@ -11,9 +11,9 @@
 
 /*global console define document window*/
 /*jslint sub:true*/
-define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
+define(['i18n!orion/sites/nls/messages', 'require', 'orion/commandRegistry', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
 			'orion/Deferred', 'orion/i18nUtil'],
-		function(messages, require, mCommands, mSiteUtils, mSiteClient, Deferred, i18nUtil) {
+		function(messages, require, mCommandRegistry, mCommands, mSiteUtils, mSiteClient, Deferred, i18nUtil) {
 	var Command = mCommands.Command;
 	var formatMessage = i18nUtil.formatMessage;
 	/**
@@ -23,17 +23,16 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 	 * @param {Function} options.errorCallback
 	 * @name orion.sites.siteCommands#createSiteServiceCommands
 	 */
-	function createSiteServiceCommands(serviceRegistry, options) {
+	function createSiteServiceCommands(serviceRegistry, commandService, options) {
 		function getFileService(siteServiceRef) {
 			return mSiteClient.getFileClient(serviceRegistry, siteServiceRef.getProperty('filePattern')); //$NON-NLS-0$
 		}
 		options = options || {};
-		var commandService = serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
 		var createCommand = new mCommands.Command({
 			name : messages["Create"],
 			tooltip: messages["Create a new site configuration"],
 			id: "orion.site.create", //$NON-NLS-0$
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'string', messages["Name"])]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'string', messages["Name"])]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			visibleWhen: function(bah) {
 				return true;
 			},
@@ -71,10 +70,9 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @name orion.sites.siteCommands#createSiteCommands
 	 */
-	function createSiteCommands(serviceRegistry) {
+	function createSiteCommands(serviceRegistry, commandService) {
 		
-		var commandService = serviceRegistry.getService("orion.page.command"), //$NON-NLS-0$
-		    dialogService = serviceRegistry.getService("orion.page.dialog"), //$NON-NLS-0$
+		var dialogService = serviceRegistry.getService("orion.page.dialog"), //$NON-NLS-0$
 		    progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		
 		var editCommand = new Command({
@@ -225,9 +223,8 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @name orion.sites.siteCommands#createViewOnSiteCommands
 	 */
-	function createViewOnSiteCommands(serviceRegistry, options) {
+	function createViewOnSiteCommands(serviceRegistry, commandService, options) {
 		var fileService = serviceRegistry.getService("orion.core.file"); //$NON-NLS-0$
-		var commandService = serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
 		commandService.addCommand(new Command({
 			name: messages["Add to site"],
 			tooltip: messages["Add the file to this site"],

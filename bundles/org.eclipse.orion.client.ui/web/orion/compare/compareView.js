@@ -20,13 +20,14 @@ define(['i18n!orion/compare/nls/messages',
 		'orion/compare/compare-rulers',
         'orion/editor/editor',
         'orion/editor/editorFeatures',
+        'orion/commandRegistry',
         'orion/commands',
         'orion/editor/textView',
         'orion/compare/compare-features',
         'orion/compare/compareUtils',
         'orion/compare/jsdiffAdapter',
         'orion/compare/diffTreeNavigator'],
-function(messages, require, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mCommands, mTextView,
+function(messages, require, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mCommandRegistry, mCommands, mTextView,
 		 mCompareFeatures, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
 var exports = {};
 //var messages = {};

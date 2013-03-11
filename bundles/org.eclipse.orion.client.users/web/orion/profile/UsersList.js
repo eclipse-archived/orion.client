@@ -19,8 +19,9 @@ var eclipse = eclipse || {};
 
 eclipse.UsersList = (function(){
 	
-	function UsersList(serviceRegistry, selection, searcher, parentId, toolbarId, selectionToolsId, actionScopeId) {
+	function UsersList(serviceRegistry, commandService, selection, searcher, parentId, toolbarId, selectionToolsId, actionScopeId) {
 		this.registry = serviceRegistry;
+		this.commandService = commandService;
 		this.selection = selection;
 		this.searcher = searcher;
 		this.parentId = parentId;
@@ -79,7 +80,7 @@ eclipse.UsersList = (function(){
 		flatModel.queryObject = queryObj;
 		this.queryObject = queryObj;
 		this.createTree(this.parentId, flatModel, {setFocus: true}); //$NON-NLS-0$
-		mUsersUtil.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, {});
+		mUsersUtil.updateNavTools(this.registry, this.commandService, this, this.toolbarId, this.selectionToolsId, {});
 	};
 	
 	UsersList.prototype.getUsersListSubset = function(root) {
