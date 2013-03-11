@@ -10,19 +10,19 @@
  ******************************************************************************/
 /*global define exports module document console URL window*/
 
-define(['require', 'import/bootstrap-import', 'import/import-fileClient', 'orion/URL-shim', 'orion/EventTarget',
+define(['require', 'orion/bootstrap', 'orion/fileClient', 'orion/URL-shim', 'orion/EventTarget',
 		'import/Injector', 'import/ImportHandler'],
-		function(require, bootstrapImport, mFileClient, _, EventTarget, Injector, ImportHandler) {
+		function(require, mBootstrap, mFileClient, _, EventTarget, Injector, ImportHandler) {
 	function debug(msg) { console.log('Orion: ' + msg); }
 
 	function ServiceProxy() {
 		EventTarget.attach(this);
 	}
 
-	bootstrapImport().then(function(core) {
+	mBootstrap.startup().then(function(core) {
 		debug('bootstrap done');
 		var serviceRegistry = core.serviceRegistry;
-//		var pluginRegistry = core.pluginRegistry;
+		var pluginRegistry = core.pluginRegistry;
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var injector = new Injector(fileClient, serviceRegistry);
 		require(['domReady!'], function() {
