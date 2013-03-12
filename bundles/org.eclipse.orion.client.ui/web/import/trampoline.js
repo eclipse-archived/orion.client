@@ -44,8 +44,9 @@ define(['../orion/URL-shim.js', '../orion/plugin.js', '../orion/EventTarget.js',
 	function injectImportIFrame(importerURL) {
 		console.log('trampoline: injecting iframe, src: ' + importerURL.href);
 		var iframe = document.createElement('iframe');
+		iframe.className = 'orion-import-frame';
 		iframe.src = importerURL.href;
-		iframe.style.opacity = '0.5';
+		iframe.style.display = 'none';
 		document.getElementsByTagName('body')[0].appendChild(iframe);
 		return iframe;
 	}
