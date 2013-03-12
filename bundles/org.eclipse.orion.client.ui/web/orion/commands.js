@@ -359,7 +359,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 	 * @name orion.commands.CommandInvocation
 	 * 
 	 */
-	function CommandInvocation (handler, items, userData, command, commandRegistry) {
+	function CommandInvocation (handler, items, /* optional */userData, command, /* optional */ commandRegistry) {
 		this.commandRegistry = commandRegistry;
 		this.handler = handler;
 		this.items = items;

@@ -104,7 +104,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 		}
 	}
 	
-	function fakeKeystroke(keyCode, mod1, mod2, mod3, mod4) {
+	function fakeKeystroke(bindings, keyCode, mod1, mod2, mod3, mod4) {
 		// We implement only the parts of event we know that the command framework uses.
 		var event = {target: parentDiv};
 		event.preventDefault = function() {};		
@@ -122,7 +122,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 		}
 		event.shiftKey = !!mod2;
 		event.altKey = !!mod3;
-		mCommands._testMethodProcessKey(event, commandRegistry._activeBindings);  // a total reach into the implementation
+		mCommands._testMethodProcessKey(event, bindings || commandRegistry._activeBindings);  // a total reach into the implementation
 	}
 	
 	
@@ -418,7 +418,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 		commandRegistry.renderCommands(contributionId, parentDiv, allItems, window, "button");
 		assert.equal(parentDiv.childNodes.length, 1);
 		hitCounters["test.delete"] = 0;
-		fakeKeystroke('z');
+		fakeKeystroke(null, 'z');
 		var d = new Deferred();
 		window.setTimeout(function(){
 			try {
@@ -440,7 +440,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 		commandRegistry.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 0);
 		hitCounters["test.noIcon"] = 0;
-		fakeKeystroke('z', true, true);
+		fakeKeystroke(null, 'z', true, true);
 		var d = new Deferred();
 		window.setTimeout(function(){
 			try {
@@ -498,6 +498,37 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 				d.reject(e);			
 			}
 		}, 1000);
+		return d;
+	};	
+	
+	/**
+	 * Test a command created without the command registry
+	 */
+	tests.testStandAloneCommand = function() {
+		init("testStandAloneCommand");
+		var commandInvocation = new mCommands.CommandInvocation(this, item1, null, newCommand);
+		mCommands.createCommandItem(parentDiv, newCommand, commandInvocation, "myButton");
+		assert.equal(parentDiv.childNodes.length, 1);
+	};	
+	
+		/**
+	 * Test a command with keybinding created without the command registry
+	 */
+	tests.testStandAloneCommandKeyBinding = function() {
+		init("testStandAloneCommand");
+		var commandInvocation = new mCommands.CommandInvocation(this, item1, null, newCommand);
+		mCommands.createCommandItem(parentDiv, newCommand, commandInvocation, "myButton", new mKeyBinding.KeyBinding('q', true));
+		hitCounters["test.new"] = 0;
+		fakeKeystroke(mCommands.localKeyBindings, 'q', true);
+		var d = new Deferred();
+		window.setTimeout(function(){
+			try {
+				assert.equal(hitCounters["test.new"], 1);
+				d.resolve();
+			} catch (e) {
+				d.reject(e);			
+			}
+		}, 500);
 		return d;
 	};	
 	
