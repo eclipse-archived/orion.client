@@ -224,21 +224,6 @@ exports.CompareView = (function() {
 			return delim;
 		},
 
-		resolveDiffByContents: function(onsave) {
-			if (typeof(this.options.baseFile.Content) === "string" && typeof(this.options.newFile.Content) === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
-				if(!this.options.diffContent && !this._mapper){
-					this.options.diffContent = ""; //$NON-NLS-0$
-				}
-				if(this._onLoadContents){
-					this._onLoadContents();
-				}
-				this.refresh(onsave);
-				return true;
-			} else {
-				return false;
-			}
-		},
-		
 		parseMapper: function(input, output, diff , detectConflicts ,doNotBuildNewFile){
 			var delim = this._getLineDelim(input , diff);
 			this._diffParser.setLineDelim(delim);
@@ -298,7 +283,7 @@ exports.CompareView = (function() {
 		startup: function(onsave, onLoadContents){
 			this.initEditors();
 			this._onLoadContents = onLoadContents;
-			this.resolveDiffByContents(onsave);
+			this.refresh(onsave);
 		}
 	};
 	return CompareView;
@@ -308,25 +293,25 @@ exports.CompareView = (function() {
  * Side by side diff view
 */
 exports.TwoWayCompareView = (function() {
-	function TwoWayCompareView(commandService, parentDivId, uiFactory, options) {
+	function TwoWayCompareView(options) {
+		this.setOptions(options, true);
 		//Init the diff navigator that controls the navigation on both block and word level.
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this.type = "twoWay"; //$NON-NLS-0$
-		this._commandService = commandService;
+		this._commandService = this.options.commandService;
 		
 		//Build the compare view UI by the UI factory
-		this._uiFactory = uiFactory;
+		this._uiFactory = this.options.uiFactory;
 		if(!this._uiFactory){
 			this._uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
-				parentDivID: parentDivId,
-				showTitle: false,
-				showLineStatus: false
+				parentDivID: this.options.parentDivId,
+				showTitle: (this.options.showTitle ? this.options.showTitle : false),
+				showLineStatus: (this.options.showLineStatus ? this.options.showLineStatus : false)
 			});
 			this._uiFactory.buildUI();
 		}
 		
 		this._viewLoadedCounter = 0;
-		this.setOptions(options, true);
 		
 		this.initCommands();
 		this._curveRuler = new mCompareRulers.CompareCurveRuler(this._uiFactory.getDiffCanvasDiv());
@@ -481,11 +466,13 @@ exports.TwoWayCompareView = (function() {
 			this._diffNavigator.gotoDiff(caretPos, textView);
 		}.bind(this)); 
 		
+		//If left editor's contents changes, we refesh the curver renderer to match new diff
+		textView.getModel().addEventListener("Changed", function(e){ //$NON-NLS-0$
+			if(!this._curveRuler.onChanged(e, !isLeft)) {
+				this.options.mapper = null;
+			}
+		}.bind(this));
 		if(isLeft){
-			//If left editor's contents changes, we refesh the curver renderer to match new diff
-			textView.getModel().addEventListener("Changed", function(e){ //$NON-NLS-0$
-				this._curveRuler.onChanged(e);
-			}.bind(this));
 			//If left editor scrolls, we scroll right editor to the appropriate position to match the diffs
 			textView.addEventListener("Scroll", function(scrollEvent){ //$NON-NLS-0$
 				if(this._curveRuler){
@@ -569,19 +556,18 @@ exports.TwoWayCompareView = (function() {
  * Unified diff view
 */
 exports.InlineCompareView = (function() {
-	function InlineCompareView(commandService, editorDivId, options ) {
+	function InlineCompareView(options ) {
+		this.setOptions(options, true);
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this.type = "inline"; //$NON-NLS-0$
-		this._commandService = commandService;
-		this.setOptions(options, true);
+		this._commandService = this.options.commandService;
 		
 		this.initCommands();
 		this._highlighter = [];
 		if(this.options.highlighter && typeof this.options.highlighter === "function") { //$NON-NLS-0$
 			this._highlighter.push(new this.options.highlighter());
 		}
-		this._editorDivId = editorDivId;
-		this.hasContent = false;
+		this._editorDivId = this.options.parentDivId;
 	}
 	InlineCompareView.prototype = new exports.CompareView();
 	
@@ -609,7 +595,6 @@ exports.InlineCompareView = (function() {
 			this._textView.setText("");
 			this.removeRulers();
 		}
-		this.hasContent = false;
 	};
 
 	InlineCompareView.prototype.destroy = function(){
@@ -681,7 +666,6 @@ exports.InlineCompareView = (function() {
 		var output = this.options.newFile.Content;
 		var diff = this.options.diffContent;
 
-		this.hasContent = true;
 		var result = this.parseMapper(input, output, diff, this.options.hasConflicts, !this.options.toggler);
 		if(!output){
 			output = result.output;
@@ -718,17 +702,15 @@ exports.InlineCompareView = (function() {
  * Toggleable diff view
 */
 exports.toggleableCompareView = (function() {
-	function toggleableCompareView(commandService, parentDivId, startWith, options ) {
+	function toggleableCompareView(startWith, options ) {
 		if(options){
 			options.toggler = this;
 		}
 		if(startWith === "inline"){ //$NON-NLS-0$
-			this._widget = new exports.InlineCompareView(commandService, parentDivId, options);
+			this._widget = new exports.InlineCompareView(options);
 		} else {
-			this._widget = new exports.TwoWayCompareView(commandService, parentDivId, null, options);
+			this._widget = new exports.TwoWayCompareView(options);
 		}
-		this._parentDivId = parentDivId;
-		this._commandService = commandService;
 	}
 	toggleableCompareView.prototype = {
 		startup: function(onLoadContents){
@@ -741,11 +723,11 @@ exports.toggleableCompareView = (function() {
 			options.blockNumber = diffPos.block;
 			options.changeNumber = diffPos.change;
 			this._widget.destroy();
-			lib.empty(lib.node(this._parentDivId));
+			lib.empty(lib.node(options.parentDivId));
 			if(this._widget.type === "inline"){ //$NON-NLS-0$
-				this._widget = new exports.TwoWayCompareView(this._commandService, this._parentDivId, null, options);
+				this._widget = new exports.TwoWayCompareView(options);
 			} else {
-				this._widget = new exports.InlineCompareView(this._commandService, this._parentDivId, options);
+				this._widget = new exports.InlineCompareView(options);
 			}
 			this._widget.initEditors();
 			this._widget.refresh();
