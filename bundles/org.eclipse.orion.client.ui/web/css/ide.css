@@ -141,6 +141,12 @@ h2 {
 	color: #fdfdfd;
 }
 
+.parameterPrompt {
+	color: #fdfdfd;
+	display: block;
+	padding: 6px 4px 0;
+}
+
 /* button contained in a slideout next to parameter fields */
 .parameterInlineButton {
 	vertical-align: baseline;
