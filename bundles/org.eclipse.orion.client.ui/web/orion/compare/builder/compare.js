@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document console prompt window*/
+/*global define require document console prompt XMLHttpRequest window*/
 
 define(['orion/commandRegistry',
 		'orion/commands',
@@ -44,6 +44,26 @@ function(mCommandRegistry, mCommands, Deferred, mCompareView, mTextMateStyler, m
 		return cType;
 	}
 	
+	function _getFile(fileURL){
+		var d = new Deferred(); // create a promise
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', fileURL, true); //$NON-NLS-0$
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				var response = typeof xhr.response !== 'undefined' ? xhr.response : xhr.responseText; //$NON-NLS-0$
+				var responseText = typeof response === 'string' ? response : null; //$NON-NLS-0$
+				var statusCode = xhr.status;
+				if (200 <= statusCode && statusCode < 400) {
+					d.resolve(responseText);
+				} else {
+					d.reject(responseText);
+				}
+			}
+		};
+		xhr.send();	
+		return d;
+	}
+	
 	/*
 	 * Default syntax highlighter for js, java, and css. Grammar-based highlighter for html.
 	*/
@@ -75,39 +95,42 @@ function(mCommandRegistry, mCommands, Deferred, mCompareView, mTextMateStyler, m
 			return null;
 		}
 	};
-    function compare(parentDivId, commandDivId, nameOnLeft, contentOnLeft, nameOnRight, contentOnRight, viewOptions){
-		if(!nameOnLeft){
-			nameOnLeft = "left.js"; //$NON-NLS-0$
+    function compare(options){
+		var vOptions = options;
+		if(!vOptions.highlighters){
+			vOptions.highlighters = [new DefaultHighlighter(), new DefaultHighlighter()];
 		}
-		if(!contentOnLeft){
-			contentOnLeft = "Sample Orion compare contents on left side\nvar left = 1\n"; //$NON-NLS-0$
+		if(!vOptions.commandService){
+			vOptions.commandService = commandService;
 		}
-		if(!nameOnRight){
-			nameOnRight = "right.js"; //$NON-NLS-0$
+		if(vOptions.baseFile && vOptions.baseFile.Name){
+			vOptions.baseFile.Type = _contentType(vOptions.baseFile.Name);
 		}
-		if(!contentOnRight){
-			contentOnRight = "Sample Orion compare contents on right side\nvar right = 2\n"; //$NON-NLS-0$
+		if(vOptions.newFile && vOptions.newFile.Name){
+			vOptions.newFile.Type = _contentType(vOptions.newFile.Name);
 		}
-        var options = {
-            hasConflicts: true,
-            commandSpanId: commandDivId,
-            highlighters: (viewOptions && viewOptions.highlighters) ? viewOptions.highlighters : [new DefaultHighlighter(), new DefaultHighlighter()],
-            newFile: {
-                Name: nameOnLeft,
-                readonly: false,
-                Type: _contentType(nameOnLeft),
-                Content: contentOnLeft
-            },
-            baseFile: {
-                Name: nameOnRight,
-                readonly: false,
-                Type: _contentType(nameOnRight),
-                Content: contentOnRight
-            }
-        };
-		var compareView = new mCompareView.toggleableCompareView(commandService, parentDivId, "twoWay", options); //$NON-NLS-0$
-		compareView.getWidget().setOptions({readonly: false, hasConflicts: false});
-		compareView.startup();
+		this.compareView = new mCompareView.toggleableCompareView("twoWay", vOptions); //$NON-NLS-0$
+		this.compareView.startup();
     }
+	compare.prototype = {
+		getCompareView: function(){
+			return this.compareView;
+		},
+		refresh: function(){
+			var options = this.getCompareView().getWidget().options;
+			if(options.baseFile.URL && options.newFile.URL){
+				var promises = [];
+				promises.push( _getFile(options.baseFile.URL));
+				promises.push( _getFile(options.newFile.URL));
+				Deferred.all(promises, function(error) { return {_error: error}; }).then(function(results){
+					this.getCompareView().getWidget().options.baseFile.Content = results[0];
+					this.getCompareView().getWidget().options.newFile.Content = results[1];
+					this.getCompareView().getWidget().refresh();
+				}.bind(this));
+			} else {
+				this.getCompareView().getWidget().refresh();
+			}
+		}
+	};
     return compare;
 });
