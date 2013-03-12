@@ -17,9 +17,9 @@
  */
 
 define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/fileClient', 'orion/operationsClient',
-	        'orion/searchClient', 'orion/globalCommands', 'orion/URITemplate', 'orion/PageUtil', 'orion/URL-shim'], 
+	        'orion/searchClient', 'orion/globalCommands', 'orion/URITemplate', 'orion/PageUtil', 'orion/URL-shim', 'orion/PageLinks'], 
 			function(messages, require, lib, mBootstrap, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, 
-			mGlobalCommands, URITemplate, PageUtil) {
+			mGlobalCommands, URITemplate, PageUtil, PageLinks) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
@@ -34,7 +34,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		
 		var fileMetadata;
-		var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
+		var orionHome = PageLinks.getOrionHome();
 		
 		/**
 		 * Utility method for saving file contents to a specified location
