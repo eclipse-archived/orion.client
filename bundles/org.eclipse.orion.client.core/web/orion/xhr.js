@@ -96,9 +96,6 @@ define(['orion/Deferred'], function(Deferred) {
 		if (typeof options.data !== 'undefined' && (method === 'POST' || method === 'PUT')) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			data = options.data;
 		}
-		if (typeof options.responseType === 'string') { //$NON-NLS-0$
-			xhr.responseType = options.responseType;
-		}
 		xhr.onprogress = function(progressEvent) {
 			progressEvent.xhr = xhr;
 			d.progress(progressEvent);
@@ -119,6 +116,9 @@ define(['orion/Deferred'], function(Deferred) {
 		};
 		try {
 			xhr.open(method, url, true /* async */);
+			if (typeof options.responseType === 'string') { //$NON-NLS-0$
+				xhr.responseType = options.responseType;
+			}
 			if (typeof options.timeout === 'number') { //$NON-NLS-0$
 				if (typeof xhr.timeout === 'number') { //$NON-NLS-0$
 					// Browser supports XHR timeout
