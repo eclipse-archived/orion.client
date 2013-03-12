@@ -4493,22 +4493,6 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			this._setReadOnly(this._readonly);
 			this._setThemeClass(this._themeClass, true);
 			this._setTabSize(this._tabSize, true);
-			if (!document.getElementById("_textviewStyle")) { //$NON-NLS-0$
-				var styleText = "";
-				if (util.isWebkit && this._metrics.scrollWidth > 0) {
-					styleText += "\n.textview ::-webkit-scrollbar-corner {background: #eeeeee;}"; //$NON-NLS-0$
-				}
-				if (util.isFirefox && util.isMac && this._highlightRGB && this._highlightRGB !== "Highlight") { //$NON-NLS-0$
-					styleText += "\n.textview ::-moz-selection {background: " + this._highlightRGB + ";}"; //$NON-NLS-1$ //$NON-NLS-0$
-				}
-				if (styleText) {
-					var stylesheet = util.createElement(document, "style"); //$NON-NLS-0$
-					stylesheet.id = "_textviewStyle"; //$NON-NLS-0$
-					var head = document.getElementsByTagName("head")[0] || document.documentElement; //$NON-NLS-0$
-					stylesheet.appendChild(document.createTextNode(styleText));
-					head.insertBefore(stylesheet, head.firstChild);
-				}
-			}
 			this._hookEvents();
 			var rulers = this._rulers;
 			for (var i=0; i<rulers.length; i++) {
@@ -6377,6 +6361,28 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				div = div.nextSibling;
 			}
 		},
+		_updateStyleSheet: function() {
+			var styleText = "";
+			if (util.isWebkit && this._metrics.scrollWidth > 0) {
+				styleText += "\n.textview ::-webkit-scrollbar-corner {background: #eeeeee;}"; //$NON-NLS-0$
+			}
+			if (util.isFirefox && util.isMac && this._highlightRGB && this._highlightRGB !== "Highlight") { //$NON-NLS-0$
+				styleText += "\n.textview ::-moz-selection {background: " + this._highlightRGB + ";}"; //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			if (styleText) {
+				var node = document.getElementById("_textviewStyle"); //$NON-NLS-0$
+				if (!node) {
+					node = util.createElement(document, "style"); //$NON-NLS-0$
+					node.id = "_textviewStyle"; //$NON-NLS-0$
+					var head = document.getElementsByTagName("head")[0] || document.documentElement; //$NON-NLS-0$
+					node.appendChild(document.createTextNode(styleText));
+					head.insertBefore(node, head.firstChild);
+				} else {
+					node.removeChild(node.firstChild);
+					node.appendChild(document.createTextNode(styleText));
+				}
+			}
+		},
 		_updateStyle: function (init) {
 			if (!init && util.isIE) {
 				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-0$
@@ -6387,6 +6393,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			} else {
 				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-0$
 			}
+			this._updateStyleSheet();
 			if (!init) {
 				this.redraw();
 				this._resetLineWidth();
