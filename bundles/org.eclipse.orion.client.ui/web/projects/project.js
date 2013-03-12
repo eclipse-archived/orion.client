@@ -12,9 +12,9 @@
  
 /*global define document */
 
-define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'projects/ProjectTree', 'projects/ProjectGrid', 'projects/ProjectData', 'projects/ProjectDataManager'],
+define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'projects/ProjectTree', 'projects/ProjectGrid', 'projects/ProjectData', 'projects/ProjectDataManager'],
  
-	function( mBootstrap, mGlobalCommands, lib, mSelection, mCommands, mFileClient, mSearchClient, mProjectTree, ProjectGrid, ProjectData, ProjectDataManager ){
+	function( mBootstrap, mGlobalCommands, lib, mSelection, mCommandRegistry, mFileClient, mSearchClient, mProjectTree, ProjectGrid, ProjectData, ProjectDataManager ){
 	
 		var projectGrid, mainPanel;
 		var projectMetaData;
@@ -48,11 +48,11 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'ori
 			
 				var selection = new mSelection.Selection(serviceRegistry);
 				
-				var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+				var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 				
-				var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+				var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 			
-				mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences, searcher );	
+				mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandRegistry, preferences, searcher );	
 				
 				/* Create the content */
 				

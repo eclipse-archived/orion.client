@@ -13,12 +13,12 @@
 /*browser:true*/
 
 define(['require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/dialogs',
-	'orion/commands', 'orion/favorites', 'stringexternalizer/stringexternalizerconfig', 'orion/searchClient',
+	'orion/commandRegistry', 'orion/favorites', 'stringexternalizer/stringexternalizerconfig', 'orion/searchClient',
 	'orion/fileClient', 'orion/operationsClient', 'stringexternalizer/strExternalizerResults', 'orion/globalCommands',
 	'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData',
 	'orion/contentTypes'],
 
-function(require, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mStringExternalizerConfig,
+function(require, mBootstrap, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mStringExternalizerConfig,
 mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mThemePreferences, mThemeData, mContentTypes) {
 
 
@@ -53,10 +53,8 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 		new mDialogs.DialogService(serviceRegistry); //yes we're bad
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var progress = new mProgress.ProgressService(serviceRegistry, operationsClient);
-		var commandService = new mCommands.CommandService({
-			serviceRegistry: serviceRegistry
-		});
+		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+		var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		// Favorites
 		new mFavorites.FavoritesService({
 			serviceRegistry: serviceRegistry
@@ -69,25 +67,19 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 		new mContentTypes.ContentTypeService(serviceRegistry); //yes we're bad
 		var searcher = new mSearchClient.Searcher({
 			serviceRegistry: serviceRegistry,
-			commandService: commandService,
+			commandService: commandRegistry,
 			fileService: fileClient
 		});
 
-		mGlobalCommands.generateBanner("orion-externalizeResults", serviceRegistry, commandService, preferences, searcher, searcher); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-externalizeResults", serviceRegistry, commandRegistry, preferences, searcher, searcher); //$NON-NLS-0$
 
-		var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient); //$NON-NLS-0$
-		var configOutliner = new mStringExternalizerConfig.StringExternalizerConfig({
-			parent: document.getElementById("favoriteProgress"),
-			serviceRegistry: serviceRegistry,
-			fileClient: fileClient,
-			commandService: commandService,
-			setConfig: searchResultsGenerator.setConfig.bind(searchResultsGenerator)
-		}); //$NON-NLS-0$
-		setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner, progress);
+		var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandRegistry, fileClient); //$NON-NLS-0$
+		var configOutliner = new mStringExternalizerConfig.StringExternalizerConfig({commandService: commandRegistry}); //$NON-NLS-0$
+		setPageInfo(fileClient, searcher, serviceRegistry, commandRegistry, configOutliner, progress);
 		searchResultsGenerator.loadResults(locationHash());
 		//every time the user manually changes the hash, we need to load the results with that name
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
-			setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner, progress);
+			setPageInfo(fileClient, searcher, serviceRegistry, commandRegistry, configOutliner, progress);
 			searchResultsGenerator.loadResults(locationHash());
 		}, false);
 	});

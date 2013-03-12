@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  /*global define window document*/
-define(['orion/webui/littlelib', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'], function(lib, mSelection, mCommands, mHTMLFragments){
+define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'orion/commonHTMLFragments'], function(lib, mSelection, mCommands, mHTMLFragments){
 	
 	/**
 	 * Generates a section

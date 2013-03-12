@@ -10,10 +10,10 @@
  ******************************************************************************/
 /*global define document */
 
-define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/commands', 'orion/profile/usersClient', 'orion/profile/profile',
+define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/commandRegistry', 'orion/profile/usersClient', 'orion/profile/profile',
 	        'orion/operationsClient', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/status', 'orion/progress',
 	        'orion/dialogs', 'orion/selection', 'orion/ssh/sshTools', 'orion/links'], 
-			function(mBootstrap, lib, mCommands, mUsersClient, mProfile, mOperationsClient, mSearchClient, mFileClient, mGlobalCommands, mStatus, mProgress,
+			function(mBootstrap, lib, mCommandRegistry, mUsersClient, mProfile, mOperationsClient, mSearchClient, mFileClient, mGlobalCommands, mStatus, mProgress,
 					mDialogs, mSelection, mSshTools, mLinks) {
 
 	mBootstrap.startup().then(function(core) {
@@ -22,39 +22,39 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/commands', 'orion/pro
 		var pluginRegistry = core.pluginRegistry;
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mProgress.ProgressService(serviceRegistry, operationsClient);
 		new mDialogs.DialogService(serviceRegistry);
 		var selection = new mSelection.Selection(serviceRegistry);
 		new mSshTools.SshService(serviceRegistry);
-		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+		var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
+		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 		var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
 	
 		// Git operations
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, fileService: fileClient, commandService: commandService});
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, fileService: fileClient, commandService: commandRegistry});
 		
 		var profile = new mProfile.Profile({
 			registry: serviceRegistry,
 			pluginRegistry: pluginRegistry,
 			profilePlaceholder: lib.node('table'), //$NON-NLS-0$
-			commandService: commandService,
+			commandService: commandRegistry,
 			pageActionsPlaceholder: lib.node('pageActions'), //$NON-NLS-0$
 			usersClient: usersClient
 		});
 		
 		mGlobalCommands.setPageCommandExclusions([]); //$NON-NLS-1$ //$NON-NLS-0$
-		mGlobalCommands.generateBanner("orion-profile", serviceRegistry, commandService, preferences, searcher, profile); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-profile", serviceRegistry, commandRegistry, preferences, searcher, profile); //$NON-NLS-0$
 
 		var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 		if (toolbar) {	
-			commandService.destroy(toolbar);
-			commandService.renderCommands(toolbar.id, toolbar, profile, profile, "button"); //$NON-NLS-0$
+			commandRegistry.destroy(toolbar);
+			commandRegistry.renderCommands(toolbar.id, toolbar, profile, profile, "button"); //$NON-NLS-0$
 		}
 		toolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
 		if (toolbar) {	
-			commandService.destroy(toolbar);
-			commandService.renderCommands(toolbar.id, toolbar, profile, profile, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
+			commandRegistry.destroy(toolbar);
+			commandRegistry.renderCommands(toolbar.id, toolbar, profile, profile, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
 		}
 	});
 });

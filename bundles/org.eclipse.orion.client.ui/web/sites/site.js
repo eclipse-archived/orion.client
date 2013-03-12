@@ -15,10 +15,10 @@
 /*
  * Glue code for site.html
  */
-define(['i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
+define(['i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 
 	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteCommands',
 	'orion/PageUtil', 'orion/sites/SiteEditor'], 
-	function(messages,mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteCommands, PageUtil, SiteEditor) {
+	function(messages,mBootstrap, mStatus, mProgress, mCommandRegistry, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteCommands, PageUtil, SiteEditor) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
@@ -26,14 +26,14 @@ define(['i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/status', 'ori
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+			var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		
 			var siteLocation = PageUtil.matchResourceParameters().resource;
 			var siteClient = mSiteClient.forLocation(serviceRegistry, siteLocation);
 			var fileClient = siteClient._getFileClient();
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			mGlobalCommands.generateBanner("orion-site", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
+			mGlobalCommands.generateBanner("orion-site", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 
 			var widget;
 			var updateTitle = function() {
@@ -49,7 +49,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/status', 'ori
 						makeBreadcrumbLink: function(seg, location){
 							seg.href = "/sites/sites.html"; //$NON-NLS-0$
 						},
-						serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandService
+						serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandRegistry
 					});
 					mGlobalCommands.setDirtyIndicator(widget.isDirty());
 				}
@@ -76,7 +76,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/status', 'ori
 					serviceRegistry: serviceRegistry,
 					fileClient: fileClient,
 					siteClient: siteClient,
-					commandService: commandService,
+					commandService: commandRegistry,
 					statusService: statusService,
 					progressService: progressService,
 					commandsContainer: document.getElementById("pageActions"), //$NON-NLS-0$
@@ -96,9 +96,9 @@ define(['i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/status', 'ori
 				}
 			};
 
-			mSiteCommands.createSiteCommands(serviceRegistry);
-			commandService.registerCommandContribution("pageActions", "orion.site.start", 1); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution("pageActions", "orion.site.stop", 2); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution("pageActions", "orion.site.convert", 3); //$NON-NLS-1$ //$NON-NLS-0$
+			mSiteCommands.createSiteCommands(serviceRegistry, commandRegistry);
+			commandRegistry.registerCommandContribution("pageActions", "orion.site.start", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("pageActions", "orion.site.stop", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("pageActions", "orion.site.convert", 3); //$NON-NLS-1$ //$NON-NLS-0$
 		});
 });

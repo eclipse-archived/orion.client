@@ -122,7 +122,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 			var value;
 			// item has the specified property
 			if (typeof(item[key]) !== "undefined") { //$NON-NLS-0$
-				if (typeof(match) === "undefined") {  //$NON-NLS-0$ // value doesn't matter, just the presence of the property is enough
+				if (typeof(match) === "undefined") {  //$NON-NLS-0$ // value doesn't matter, just the presence of the property is enough				if (!match) {  // value doesn't matter, just the presence of the property is enough
 					value = item[key];
 					valid = true;
 				} else if (typeof(match) === 'string') {  // the value is a regular expression that should match some string //$NON-NLS-0$
@@ -373,7 +373,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 						tooltip: info.tooltipKey ? commandMessages[info.tooltipKey] : info.tooltip,
 						isEditor: info.isEditor,
 						showGlobally: info.showGlobally
-				};
+					};
 				enhanceCommandOptions(commandOptions, deferred);
 			});
 		} else {

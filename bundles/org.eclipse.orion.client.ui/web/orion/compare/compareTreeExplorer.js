@@ -8,10 +8,11 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- /*global define document console window*/
+
+/*global define document console window*/
 /*jslint forin:true regexp:false sub:true*/
 
-define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 
+define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commandRegistry', 
 		'orion/explorers/navigationUtils', 'orion/crawler/searchCrawler', 'orion/compare/compareUtils', 'orion/searchUtils', 'orion/selection'], 
 		function(messages, require, lib, mExplorer, mNavHandler, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection) {
 

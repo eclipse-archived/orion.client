@@ -15,9 +15,8 @@
 define(['i18n!profile/nls/messages', 'orion/webui/littlelib'], function(messages, lib) {
 
 
-function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item) {
+function updateNavTools (registry, commandService, explorer, toolbarId, selectionToolbarId, item) {
 	var eclipse = eclipse || {};
-		var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
 		var toolbar = lib.node(toolbarId);
 		if (toolbar) {
 			commandService.destroy(toolbar);

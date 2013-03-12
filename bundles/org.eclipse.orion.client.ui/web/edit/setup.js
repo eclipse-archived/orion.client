@@ -13,23 +13,23 @@
 /*global define eclipse:true orion:true window*/
 
 define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
-        'orion/commands', 'orion/favorites', 'orion/extensionCommands', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
+        'orion/commandRegistry', 'orion/favorites', 'orion/extensionCommands', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/editor/textView', 'orion/editor/textModel', 
         'orion/editor/projectionTextModel', 'orion/keyBinding','orion/searchAndReplace/textSearcher',
         'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel',
         'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser'],
-		function(messages, require, Deferred, lib, mSelection, mStatus, mProgress, mDialogs, mCommands, mFavorites, mExtensionCommands,
+		function(messages, require, Deferred, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, mThemePreferences, mThemeData, mThemeChooser) {
+				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer,  mThemePreferences, mThemeData, mThemeChooser) {
 	
 var exports = exports || {};
 	
 exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var document = window.document;
 	var selection;
-	var commandService;
+	var commandRegistry;
 	var statusReportingService;
 	var problemService;
 	var outlineService;
@@ -41,9 +41,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		selection = new mSelection.Selection(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 		new mDialogs.DialogService(serviceRegistry);
-		commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+		commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
+		progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 		// Editor needs additional services
 		problemService = new mProblems.ProblemService(serviceRegistry);
@@ -59,7 +59,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var syntaxHighlighter = new Highlight.SyntaxHighlighter(serviceRegistry);
 	var syntaxModelWirer = new SyntaxModelWirer(serviceRegistry);
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 	
 	var textViewFactory = function() {
 		var textView = new mTextView.TextView({
@@ -117,16 +117,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							self._fileMetadata = metadata;
 							var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 							if (toolbar) {	
-								commandService.destroy(toolbar);
+								commandRegistry.destroy(toolbar);
 								// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
-								mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, "pageActions", 500).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
-									commandService.renderCommands("pageActions", toolbar, metadata, editor, "button"); //$NON-NLS-1$ //$NON-NLS-0$
-								});
-							}
+								mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, "pageActions", 500).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
+									commandRegistry.renderCommands("pageActions", toolbar, metadata, editor, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+								});							}
 							var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
 							if (rightToolbar) {	
-								commandService.destroy(rightToolbar);
-								commandService.renderCommands(rightToolbar.id, rightToolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
+								commandRegistry.destroy(rightToolbar);
+								commandRegistry.renderCommands(rightToolbar.id, rightToolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
 							}
 							self.setTitle(metadata.Location);
 							self._contentType = contentTypeService.getFileContentType(metadata);
@@ -156,7 +155,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 									return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
 								}
 							},
-							serviceRegistry: serviceRegistry, commandService: commandService,
+							serviceRegistry: serviceRegistry, commandService: commandRegistry,
 							searchService: searcher, fileService: fileClient});
 						mGlobalCommands.setDirtyIndicator(false);
 						syntaxHighlighter.setup(self._contentType, editor.getTextView(), editor.getAnnotationModel(), fileURI, true)
@@ -171,7 +170,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 								// Contents
 								editor.setInput(fileURI, null, contents);
 								editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
-								commandService.processURL(window.location.href);
+								commandRegistry.processURL(window.location.href);
 							});
 						clearTimeout(progressTimeout);
 					};
@@ -339,7 +338,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		
 		keyModeStack.push(tabHandler);
 		
-		var localSearcher = new mSearcher.TextSearcher(editor, commandService, undoStack);
+		var localSearcher = new mSearcher.TextSearcher(editor, commandRegistry, undoStack);
 		// Create keybindings for generic editing, no dependency on the service model
 		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , localSearcher);
 		keyModeStack.push(genericBindings);
@@ -355,7 +354,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		
 		// Register commands that depend on external services, the registry, etc.  Do this after
 		// the generic keybindings so that we can override some of them.
-		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher); //$NON-NLS-1$ //$NON-NLS-0$
+		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandRegistry, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher); //$NON-NLS-1$ //$NON-NLS-0$
 		commandGenerator.generateEditorCommands(editor);
 
 		
@@ -473,7 +472,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	
 	var editor = new mEditor.Editor({
 		textViewFactory: textViewFactory,
-		undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandService, "pageActions"), //$NON-NLS-0$
+		undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandRegistry, "pageActions"), //$NON-NLS-0$
 		textDNDFactory: new mEditorFeatures.TextDNDFactory(),
 		annotationFactory: annotationFactory,
 		foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
@@ -504,9 +503,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	window.addEventListener("hashchange", function() {inputManager.hashChanged(editor);}, false); //$NON-NLS-0$
 	inputManager.setInput(window.location.hash, editor);
 	
-	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandService, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
+	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
 	// Put the make favorite command in our toolbar."
-	commandService.registerCommandContribution("pageActions", "orion.makeFavorite", 2); //$NON-NLS-1$ //$NON-NLS-0$
+	commandRegistry.registerCommandContribution("pageActions", "orion.makeFavorite", 2); //$NON-NLS-1$ //$NON-NLS-0$
 
 		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
@@ -520,7 +519,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var outliner = new mOutliner.Outliner({parent: outlineDomNode,
 		serviceRegistry: serviceRegistry,
 		outlineService: serviceRegistry.getService("orion.edit.outline"), //$NON-NLS-0$
-		commandService: commandService,
+		commandService: commandRegistry,
 		selectionService: selection,
 		onSelectedProvider: function(/**ServiceReference*/ outlineProvider) { //$NON-NLS-0$
 			outlineService.setProvider(outlineProvider);

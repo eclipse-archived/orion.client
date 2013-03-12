@@ -21,12 +21,13 @@ define(['i18n!orion/compare/nls/messages',
         'orion/editor/editor',
         'orion/editor/editorFeatures',
         'orion/commands',
+        'orion/keyBinding',
         'orion/editor/textView',
         'orion/compare/compare-features',
         'orion/compare/compareUtils',
         'orion/compare/jsdiffAdapter',
         'orion/compare/diffTreeNavigator'],
-function(messages, require, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mCommands, mTextView,
+function(messages, require, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mCommands, mKeyBinding, mTextView,
 		 mCompareFeatures, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
 var exports = {};
 //var messages = {};
@@ -36,61 +37,25 @@ var exports = {};
 exports.CompareView = (function() {
 	function CompareView () {
 		this._diffParser = new mDiffParser.DiffParser();
-		//TODO: this has to be done outside of the widget
-		this._highlighterLoaded = 0;
 	}
 	CompareView.prototype = {
 		_clearOptions: function(){
 			this.options = {};
-			this.options.baseFile = {URL:"", Name:"", Type:""}; //$NON-NLS-1$ //$NON-NLS-0$
-			this.options.newFile = {URL:"", Name:"", Type:""}; //$NON-NLS-1$ //$NON-NLS-0$
 			this.options.blockNumber = 1;
 			this.options.changeNumber = 0;
 		},
-			
+		
 		setOptions: function(options, clearExisting){
 			if(clearExisting){
 				this._clearOptions();
 			}
-			if(options){
-				//mapper is purely internal option
-				this.options.mapper = options.mapper ? options.mapper : this.options.mapper;
-				
-				this.options.commandSpanId = typeof(options.commandSpanId) === "string" ? options.commandSpanId : this.options.commandSpanId; //$NON-NLS-0$
-				this.options.generateLink = (options.generateLink !== undefined &&  options.generateLink !== null) ? options.generateLink : this.options.generateLink;
-				this.options.editableInComparePage = (options.editableInComparePage !== undefined &&  options.editableInComparePage !== null) ? options.editableInComparePage : this.options.editableInComparePage;
-				this.options.gridRenderer = options.gridRenderer || this.options.gridRenderer;
-				this.options.readonly = (options.readonly !== undefined &&  options.readonly !== null) ? options.readonly : this.options.readonly;
-				this.options.onPage = (options.onPage !== undefined &&  options.onPage !== null) ? options.onPage : this.options.onPage;
-				this.options.wordLevelNav = (options.wordLevelNav !== undefined &&  options.wordLevelNav !== null) ? options.wordLevelNav : this.options.wordLevelNav;
-				this.options.charDiff = (options.charDiff !== undefined &&  options.charDiff !== null) ? options.charDiff : this.options.charDiff;
-				this.options.hasConflicts = (options.hasConflicts !== undefined &&  options.hasConflicts !== null) ? options.hasConflicts : this.options.hasConflicts;
-				this.options.diffProvider = options.diffProvider ? options.diffProvider : this.options.diffProvider;
-				this.options.resource = options.resource ?  options.resource : this.options.resource;
-				this.options.compareTo = options.compareTo ?  options.compareTo : this.options.compareTo;
-				
-				this.options.baseFile.URL = (options.baseFile && options.baseFile.URL) ? options.baseFile.URL : this.options.baseFile.URL;
-				this.options.baseFile.Name = (options.baseFile && typeof(options.baseFile.Name) === "string") ? options.baseFile.Name : this.options.baseFile.Name; //$NON-NLS-0$
-				this.options.baseFile.Type = (options.baseFile && options.baseFile.Type) ? options.baseFile.Type : this.options.baseFile.Type;
-				this.options.baseFile.Content = (options.baseFile && typeof(options.baseFile.Content) === "string") ? options.baseFile.Content : this.options.baseFile.Content; //$NON-NLS-0$
-				this.options.newFile.URL = (options.newFile && options.newFile.URL) ? options.newFile.URL : this.options.newFile.URL;
-				this.options.newFile.Name = (options.newFile && typeof(options.newFile.Name) === "string") ? options.newFile.Name : this.options.newFile.Name; //$NON-NLS-0$
-				this.options.newFile.Type = (options.newFile && options.newFile.Type) ? options.newFile.Type : this.options.newFile.Type;
-				this.options.newFile.Content = (options.newFile && typeof(options.newFile.Content) === "string") ? options.newFile.Content : this.options.newFile.Content; //$NON-NLS-0$
-				
-				this.options.diffURL = options.diffURL ? options.diffURL : this.options.diffURL;
-				this.options.diffContent = options.diffContent ? options.diffContent : this.options.diffContent;
-				this.options.diffArray = options.diffArray ? options.diffArray : this.options.diffArray;
-				
-				this.options.blockNumber = options.blockNumber ? options.blockNumber : this.options.blockNumber;
-				this.options.changeNumber = options.changeNumber ? options.changeNumber : this.options.changeNumber;
-
-				this.options.onSave = options.onSave ? options.onSave : this.options.onSave;
-				this.options.callback = options.callback ? options.callback : this.options.callback;
-				this._errorCallback = options.errorCallback ? options.errorCallback : this._errorCallback;
-				this.options.onSetTitle = options.onSetTitle ? options.onSetTitle : this.options.onSetTitle;
-				this.options.toggler = options.toggler ? options.toggler : this.options.toggler;
-				this.options.highlighters = options.highlighters ? options.highlighters : this.options.highlighters;
+			if(!this.options) {
+				this.options = {};
+			}
+			if(options) {
+				Object.keys(options).forEach(function(option) {
+					this.options[option] = options[option];
+				}.bind(this));
 			}
 		},
 		
@@ -108,6 +73,9 @@ exports.CompareView = (function() {
 				imageClass : "core-sprite-leftarrow", //$NON-NLS-0$
 				id: "orion.compare.copyToLeft", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
+				visibleWhen: function(item) {
+					return this.type === "twoWay"; //$NON-NLS-0$
+				}.bind(this),
 				callback : function(data) {
 					data.items.copyToLeft();
 			}});
@@ -118,7 +86,7 @@ exports.CompareView = (function() {
 				id: "orion.compare.toggle2Inline", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
-					return item.options.toggler && item.options.toggler.widgetType === "twoWay"; //$NON-NLS-0$
+					return item.options.toggler && item.options.toggler.getWidget().type === "twoWay"; //$NON-NLS-0$
 				},
 				callback : function(data) {
 					data.items.options.toggler.toggle();
@@ -130,7 +98,7 @@ exports.CompareView = (function() {
 				id: "orion.compare.toggle2TwoWay", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
-					return item.options.toggler && item.options.toggler.widgetType === "inline"; //$NON-NLS-0$
+					return item.options.toggler && item.options.toggler.getWidget().type === "inline"; //$NON-NLS-0$
 				},
 				callback : function(data) {
 					data.items.options.toggler.toggle();
@@ -180,19 +148,19 @@ exports.CompareView = (function() {
 			this._commandService.addCommand(prevChangeCommand);
 				
 			// Register command contributions
-			if (!this.options.readonly) {
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 109, null, false, new mCommands.CommandKeyBinding(37/*left arrow key*/, true, false, true)); //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2Inline", 109); //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2TwoWay", 110); //$NON-NLS-0$
+			if (!this.options.baseFile.readonly) {
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 111, null, false, new mKeyBinding.KeyBinding(37/*left arrow key*/, true, false, true)); //$NON-NLS-0$
 			}
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2Inline", 110); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2TwoWay", 111); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 112, null, false, new mCommands.CommandKeyBinding(40/*down arrow key*/, true)); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 113, null, false, new mCommands.CommandKeyBinding(38/*up arrow key*/, true)); //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 112, null, false, new mKeyBinding.KeyBinding(40/*down arrow key*/, true)); //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 113, null, false, new mKeyBinding.KeyBinding(38/*up arrow key*/, true)); //$NON-NLS-0$
 			if(this.options.wordLevelNav){
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, false, new mCommands.CommandKeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, false, new mCommands.CommandKeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, false, new mKeyBinding.KeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, false, new mKeyBinding.KeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
 			} else {
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, true, new mCommands.CommandKeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, true, new mCommands.CommandKeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, true, new mKeyBinding.KeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, true, new mKeyBinding.KeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
 			}
 		},
 		
@@ -264,7 +232,7 @@ exports.CompareView = (function() {
 				if(this._onLoadContents){
 					this._onLoadContents();
 				}
-				this.setEditor(onsave);
+				this.refresh(onsave);
 				return true;
 			} else {
 				return false;
@@ -328,6 +296,7 @@ exports.CompareView = (function() {
 		},
 
 		startup: function(onsave, onLoadContents){
+			this.initEditors();
 			this._onLoadContents = onLoadContents;
 			this.resolveDiffByContents(onsave);
 		}
@@ -342,6 +311,7 @@ exports.TwoWayCompareView = (function() {
 	function TwoWayCompareView(commandService, parentDivId, uiFactory, options) {
 		//Init the diff navigator that controls the navigation on both block and word level.
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
+		this.type = "twoWay"; //$NON-NLS-0$
 		this._commandService = commandService;
 		
 		//Build the compare view UI by the UI factory
@@ -358,8 +328,6 @@ exports.TwoWayCompareView = (function() {
 		this._viewLoadedCounter = 0;
 		this.setOptions(options, true);
 		
-		this._leftEditorDiv = this._uiFactory.getEditorParentDiv(true);
-		this._rightEditorDiv = this._uiFactory.getEditorParentDiv(false);
 		this.initCommands();
 		this._curveRuler = new mCompareRulers.CompareCurveRuler(this._uiFactory.getDiffCanvasDiv());
 		this._highlighter = [];
@@ -367,39 +335,40 @@ exports.TwoWayCompareView = (function() {
 			this._highlighter.push(new this.options.highlighter());
 			this._highlighter.push(new this.options.highlighter());
 		}
-		this.initEditorContainers("\n" , messages['fetching...'] , messages["fetching..."] , []); //$NON-NLS-0$
-		
 	}
 	TwoWayCompareView.prototype = new exports.CompareView();
 	
-	TwoWayCompareView.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler){	
-		//Create editor on the left side
-		this._leftEditor = this.createEditorContainer(leftContent, mapper, 0, this._uiFactory.getEditorParentDiv(true), this._uiFactory.getStatusDiv(true), this.options.readonly, this.options.newFile);
-		this._leftTextView = this._leftEditor.getTextView();
-		//TODO: move this.options.onPage to the comapre glue code
-		
+	TwoWayCompareView.prototype.initEditors = function(){
+		this._editors = [];//this._editors[0] represents the right side editor. this._editors[1] represents the left side editor
 		//Create editor on the right side
-		this._rightEditor = this.createEditorContainer(rightContent, mapper, 1, this._uiFactory.getEditorParentDiv(false), this._uiFactory.getStatusDiv(false), true, this.options.baseFile);
-		this._rightTextView = this._rightEditor.getTextView();
+		this._editors.push(this._createEditor(this._uiFactory.getEditorParentDiv(false), this._uiFactory.getStatusDiv(false), this.options.baseFile));
+		
+		//Create editor on the left side
+		this._editors.push(this._createEditor(this._uiFactory.getEditorParentDiv(true), this._uiFactory.getStatusDiv(true), this.options.newFile, true));
+		//TODO: move this.options.onPage to the comapre glue code
 		
 		//Create the overview ruler
 		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
                 function(lineIndex, ruler){this._diffNavigator.matchPositionFromOverview(lineIndex);}.bind(this));
-		
+		//If either editor is dirty, popup the warning message.
 		window.onbeforeunload = function() {
-			if (this._leftEditor.isDirty() || this._rightEditor.isDirty()) {
-				return messages["There are unsaved changes."];
+			if(this._editors) {
+				var dirty = this._editors.some(function(editor) {
+						return editor.isDirty();
+				});
+				if(dirty){
+					return messages["There are unsaved changes."];
+				}
 			}
 		}.bind(this);
-		
 	};
 	
 	TwoWayCompareView.prototype.getDefaultCommandSpanId = function(){
 		return this._uiFactory.getCommandSpanId();
 	};
 	
-	TwoWayCompareView.prototype.gotoDiff = function(lineNumber, offsetInTheLine, leftEditor){
-		var textView = leftEditor ? this._leftTextView : this._rightTextView;
+	TwoWayCompareView.prototype.gotoDiff = function(lineNumber, offsetInTheLine, updateLeft){
+		var textView = updateLeft ? this._editors[1].getTextView() : this._editors[0].getTextView();
 		var offset = textView.getModel().getLineStart(lineNumber) + offsetInTheLine;
 		this._diffNavigator.gotoDiff(offset, textView);
 	};
@@ -409,24 +378,22 @@ exports.TwoWayCompareView = (function() {
 	};
 	
 	TwoWayCompareView.prototype.resizeEditors = function(){	
-		if(this._leftTextView){
-			this._leftTextView.resize();
-		}
-		if(this._rightTextView){
-			this._rightTextView.resize();
-		}
+		this._editors.forEach(function(editor) {
+			editor.resize();
+		});
 	};
 	
 	TwoWayCompareView.prototype.getSplitter = function(){	
 		return this._uiFactory.getSplitter();
 	};
 	
-	TwoWayCompareView.prototype.createEditorContainer = function(content, mapper, columnIndex, parentDiv, statusDiv, readOnly, fileObj){
+	TwoWayCompareView.prototype._createEditor = function(parentDiv, statusDiv, fileOptions, isLeft){
 		//Create text view factory
+		var readonly = (typeof fileOptions.readonly === "undefined") ? true : fileOptions.readonly; //$NON-NLS-0$
 		var textViewFactory = function() {
 			var view = new mTextView.TextView({
 				parent: parentDiv,
-				readonly: readOnly,
+				readonly: readonly,
 				tabSize: 4
 			});
 			this._viewLoadedCounter++;
@@ -439,14 +406,13 @@ exports.TwoWayCompareView = (function() {
 			//We need to add the resize listener here to hadle the vertical splitter moves
 			var splitter = this.getSplitter();
 			if(splitter){
-				var creatingLeft = (columnIndex === 0);
 				splitter.addResizeListener(function(node){
 					if(node){
 						var doResize = false;
 						if (this._uiFactory.isLeftPane(node) ) {
-							doResize = creatingLeft;
+							doResize = isLeft;
 						} else {
-							doResize = !creatingLeft;
+							doResize = !isLeft;
 						}
 						if(doResize){
 							view.resize();
@@ -496,7 +462,7 @@ exports.TwoWayCompareView = (function() {
 		});
 				
 		editor.installTextView();
-		editor.setInput(null, null, content);
+		editor.setInput(null, null, fileOptions.Content ? fileOptions.Content : "");
 		editor.setOverviewRulerVisible(false);
 			
 		var textView = editor.getTextView();
@@ -515,7 +481,7 @@ exports.TwoWayCompareView = (function() {
 			this._diffNavigator.gotoDiff(caretPos, textView);
 		}.bind(this)); 
 		
-		if(columnIndex === 0){
+		if(isLeft){
 			//If left editor's contents changes, we refesh the curver renderer to match new diff
 			textView.getModel().addEventListener("Changed", function(e){ //$NON-NLS-0$
 				this._curveRuler.onChanged(e);
@@ -531,7 +497,7 @@ exports.TwoWayCompareView = (function() {
 				}
 			}.bind(this)); 
 		} else {
-			//If right editor scrolls, we only refresh the curver renderer
+			//If right editor scrolls, we only re-render the curve
 			textView.addEventListener("Scroll", function(scrollEvent){ //$NON-NLS-0$
 				if(this._curveRuler){
 					this._curveRuler.render();
@@ -542,26 +508,27 @@ exports.TwoWayCompareView = (function() {
 	};
 
 	TwoWayCompareView.prototype.destroy = function(){
-		if(this._leftEditor && this._rightEditor){
+		if(this._editors){
 			this._diffNavigator.destroy();
-			this._leftEditor.destroy();
-			this._rightEditor.destroy();
+			this._editors.forEach(function(editor) {
+				editor.destroy();
+			});
 			this._uiFactory.destroy();
 		}
 	};
 
 	TwoWayCompareView.prototype.addRulers = function(){
-		if(this._rightTextView && this._leftTextView && !this._hasRuler){
-			this._leftTextViewRuler= new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this._rightTextViewRuler = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this._leftTextView.addRuler(this._leftTextViewRuler);
-			this._rightTextView.addRuler(this._rightTextViewRuler);
-			this._rightTextView.addRuler(this._overviewRuler);
+		if(this._editors && !this._hasRuler){
+			var lRuler = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var rRuler = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this._editors[1].getTextView().addRuler(lRuler);
+			this._editors[0].getTextView().addRuler(rRuler);
+			this._editors[0].getTextView().addRuler(this._overviewRuler);
 			this._hasRuler = true;
 		}
 	};
 	
-	TwoWayCompareView.prototype.setEditor = function(onsave){	
+	TwoWayCompareView.prototype.refresh = function(onsave){	
 		var input = this.options.baseFile.Content;
 		var output = this.options.newFile.Content;
 		var diff = this.options.diffContent;
@@ -574,16 +541,16 @@ exports.TwoWayCompareView = (function() {
 			output = result.output;
 		}
 		
-		var rFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._rightTextView.getModel(), result.mapper, 1);
-		var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._leftTextView.getModel(), result.mapper, 0);
-		this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._rightEditor, this._leftEditor, rFeeder, lFeeder, this._overviewRuler, this._curveRuler); //$NON-NLS-1$ //$NON-NLS-0$
-		this._curveRuler.init(result.mapper ,this._leftEditor , this._rightEditor, this._diffNavigator);
+		var rFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._editors[0].getTextView().getModel(), result.mapper, 1);
+		var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._editors[1].getTextView().getModel(), result.mapper, 0);
+		this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editors[0], this._editors[1], rFeeder, lFeeder, this._overviewRuler, this._curveRuler); //$NON-NLS-1$ //$NON-NLS-0$
+		this._curveRuler.init(result.mapper ,this._editors[1], this._editors[0], this._diffNavigator);
 		if(!onsave){
-			this._leftEditor.setInput(this.options.newFile.Name, null, output);
+			this._editors[1].setInput(this.options.newFile.Name, null, output);
 		}
-		this._rightEditor.setInput(this.options.baseFile.Name, null, input);
-		this._initSyntaxHighlighter([{fileName: this.options.newFile.Name, contentType: this.options.newFile.Type, editor: this._leftEditor},
-									 {fileName: this.options.baseFile.Name, contentType: this.options.baseFile.Type, editor: this._rightEditor}]);
+		this._editors[0].setInput(this.options.baseFile.Name, null, input);
+		this._initSyntaxHighlighter([{fileName: this.options.newFile.Name, contentType: this.options.newFile.Type, editor: this._editors[1]},
+									 {fileName: this.options.baseFile.Name, contentType: this.options.baseFile.Type, editor: this._editors[0]}]);
 		this._highlightSyntax();
 		this.renderCommands();
 		this.addRulers();
@@ -591,8 +558,8 @@ exports.TwoWayCompareView = (function() {
 		if(this._viewLoadedCounter === 2){
 			this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 		}
-		var leftViewHeight = this._leftTextView.getModel().getLineCount() * this._leftTextView.getLineHeight() + 5;
-		var rightViewHeight = this._rightTextView.getModel().getLineCount() * this._rightTextView.getLineHeight() +5;
+		var leftViewHeight = this._editors[1].getTextView().getModel().getLineCount() * this._editors[1].getTextView().getLineHeight() + 5;
+		var rightViewHeight = this._editors[0].getTextView().getModel().getLineCount() * this._editors[0].getTextView().getLineHeight() +5;
 		return leftViewHeight > rightViewHeight ? leftViewHeight : rightViewHeight;
 	};
 	return TwoWayCompareView;
@@ -604,9 +571,9 @@ exports.TwoWayCompareView = (function() {
 exports.InlineCompareView = (function() {
 	function InlineCompareView(commandService, editorDivId, options ) {
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
+		this.type = "inline"; //$NON-NLS-0$
 		this._commandService = commandService;
 		this.setOptions(options, true);
-		this.setOptions({readonly: true});
 		
 		this.initCommands();
 		this._highlighter = [];
@@ -614,7 +581,6 @@ exports.InlineCompareView = (function() {
 			this._highlighter.push(new this.options.highlighter());
 		}
 		this._editorDivId = editorDivId;
-		this.createEditorContainer();
 		this.hasContent = false;
 	}
 	InlineCompareView.prototype = new exports.CompareView();
@@ -653,7 +619,7 @@ exports.InlineCompareView = (function() {
 		}
 	};
 
-	InlineCompareView.prototype.createEditorContainer = function(){
+	InlineCompareView.prototype.initEditors = function(){
 		var parentDiv = lib.node(this._editorDivId);
 		var textViewFactory = function(){
 			var textView = new mTextView.TextView({
@@ -710,11 +676,7 @@ exports.InlineCompareView = (function() {
 		}
 	};
 	
-	InlineCompareView.prototype.setDiffTitle =  function(title){
-		this._diffTitle = title;
-	};
-	
-	InlineCompareView.prototype.setEditor = function(){
+	InlineCompareView.prototype.refresh = function(){
 		var input = this.options.baseFile.Content;
 		var output = this.options.newFile.Content;
 		var diff = this.options.diffContent;
@@ -761,10 +723,8 @@ exports.toggleableCompareView = (function() {
 			options.toggler = this;
 		}
 		if(startWith === "inline"){ //$NON-NLS-0$
-			this.widgetType = "inline"; //$NON-NLS-0$
 			this._widget = new exports.InlineCompareView(commandService, parentDivId, options);
 		} else {
-			this.widgetType = "twoWay"; //$NON-NLS-0$
 			this._widget = new exports.TwoWayCompareView(commandService, parentDivId, null, options);
 		}
 		this._parentDivId = parentDivId;
@@ -782,14 +742,17 @@ exports.toggleableCompareView = (function() {
 			options.changeNumber = diffPos.change;
 			this._widget.destroy();
 			lib.empty(lib.node(this._parentDivId));
-			if(this.widgetType === "inline"){ //$NON-NLS-0$
-				this.widgetType = "twoWay"; //$NON-NLS-0$
+			if(this._widget.type === "inline"){ //$NON-NLS-0$
 				this._widget = new exports.TwoWayCompareView(this._commandService, this._parentDivId, null, options);
 			} else {
-				this.widgetType = "inline"; //$NON-NLS-0$
 				this._widget = new exports.InlineCompareView(this._commandService, this._parentDivId, options);
 			}
-			this._widget.setEditor();
+			this._widget.initEditors();
+			this._widget.refresh();
+		},
+		
+		getWidget: function() {
+			return this._widget;
 		}
 	};
 	return toggleableCompareView;

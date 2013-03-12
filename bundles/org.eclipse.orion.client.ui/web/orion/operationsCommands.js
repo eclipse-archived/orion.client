@@ -21,8 +21,8 @@ define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib'
 	(function() {
 		var doOnce = false;
 
-		exports.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
-			var service = registry.getService("orion.page.command"); //$NON-NLS-0$
+		exports.updateNavTools = function(registry, commandService, explorer, toolbarId, selectionToolbarId, item) {
+			var service = commandService;
 			var toolbar = lib.node(toolbarId);
 			if (toolbar) {
 				service.destroy(toolbar);
@@ -44,9 +44,8 @@ define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib'
 				registry.getService("orion.page.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = lib.node(selectionToolbarId);
 					if (selectionTools) {
-						var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
-						commandService.destroy(selectionTools);
-						commandService.renderCommands(selectionToolbarId, selectionTools, event.selections, explorer, "button"); //$NON-NLS-0$
+						service.destroy(selectionTools);
+						service.renderCommands(selectionToolbarId, selectionTools, event.selections, explorer, "button"); //$NON-NLS-0$
 					}
 				});
 			}
