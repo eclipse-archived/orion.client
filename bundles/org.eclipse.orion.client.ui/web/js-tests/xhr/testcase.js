@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global console define navigator setTimeout XMLHttpRequest*/
+/*global console define navigator setTimeout Blob XMLHttpRequest*/
 define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/editor/eventTarget"],
 		function(assert, mTest, Deferred, xhr, mEventTarget) {
 	var EventTarget = mEventTarget.EventTarget;
@@ -23,6 +23,14 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/edit
 			return true;
 		}
 		return false;
+	}());
+	var hasSetResponseTypeBeforeOpenBug = (function() {
+		try {
+			new XMLHttpRequest().responseType = 'blob';
+			return false;
+		} catch (e) {
+			return true;
+		}
 	}());
 
 	/**
@@ -68,6 +76,18 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/edit
 				}
 			}
 		});
+		Object.defineProperty(this, 'responseType', {
+			get: function() {
+				return this._responseType;
+			},
+			set: function(responseType) {
+				// Bug 403103: emulate browser's refusal to set exotic responseType prior to open() being called.
+				if (hasSetResponseTypeBeforeOpenBug && this.readyState === this.UNSENT && responseType !== 'text' && responseType !== '') {
+					throw new Error('Attempted to set responseType before calling open()');
+				}
+				this._responseType = responseType;
+			}
+		});
 		Object.defineProperty(this, 'status', {
 			get: function() {
 				if (hasReadyStateOpenedBug && this.readyState === this.OPENED) {
@@ -91,7 +111,6 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/edit
 		});
 		this.readyState = this.UNSENT;
 		this.headers = {};
-		this.responseType = '';
 		this._sendFlag = false;
 		this._errorFlag = false;
 		this._timeout = 0;
@@ -318,6 +337,11 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/edit
 		});
 		progressXhr._fakeProgressEvent({loaded: 31337});
 		return deferred;
+	};
+
+	tests['test responseType == "blob"'] = function() {
+		// Bug 403103: ensure that an exotic responseType like 'blob' can be passed without causing errors.
+		return xhr('GET', '/', { responseType: 'blob' }, new OkXhr());
 	};
 
 return tests;
