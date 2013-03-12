@@ -61,13 +61,17 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/
 				// Commands for the toolbar. 
 				// Step 1 is define the command.  This is done inside components as well as on the page, depending on scope.
 				var exampleCommand = new mCommands.Command({
-					name: "Push Me!", //$NON-NLS-0$
-					tooltip:"Example command", //$NON-NLS-0$
+					name: "Push Me!", 
+					tooltip:"Example command", 
 					id: "orion.pushme", //$NON-NLS-0$
-					callback: function() {
-						var content = lib.node("rightContent"); //$NON-NLS-0$
-						lib.empty(content);
-						content.appendChild(document.createTextNode("OUCH!"));  //$NON-NLS-0$
+					callback: function(data) {
+						commandRegistry.confirm(data.domNode, "Are you sure you want to push this button?", "Yes", "No", false, function(confirmed) {
+							if (confirmed) {
+								var content = lib.node("rightContent"); //$NON-NLS-0$
+								lib.empty(content);
+								content.appendChild(document.createTextNode("OUCH!"));  //$NON-NLS-0$
+							}
+						});
 					}
 				});
 				// Step 2.  Add to command service.  This is what makes it available to any DOM node on the page.

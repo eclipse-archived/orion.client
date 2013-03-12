@@ -114,7 +114,9 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 					this._oldFocusNode = window.document.activeElement;
 					window.setTimeout(function() {
 						focusNode.focus();
-						focusNode.select();
+						if (focusNode.select) {
+							focusNode.select();
+						}
 					}, 0);
 				}
 				if (this._activeElements.commandNode) {

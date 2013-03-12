@@ -143,6 +143,56 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		},
 		
 		/**
+		 * Open a parameter collector to confirm a command.
+		 *
+		 * @param {DOMElement} node the dom node that is displaying the command
+		 * @param {String} message the message to show when confirming the command
+		 * @param {String} yesString the label to show on a yes/true choice
+		 * @param {String} noString the label to show on a no/false choice
+		 * @param {Boolean} modal indicates whether the confirmation prompt should be modal.
+		 * @param {Function} onConfirm a function that will be called when the user confirms the command.  The function
+		 * will be called with boolean indicating whether the command was confirmed.
+		 */
+		confirm: function(node, message, yesString, noString, modal, onConfirm) {
+			var result = false;
+			if (this._parameterCollector && !modal) {
+				var self = this;
+				this._parameterCollector.close();
+				this._parameterCollector.open(node, 
+					function(parent, buttonParent) {
+						var label = document.createElement("span"); //$NON-NLS-0$
+						label.classList.add("parameterPrompt"); //$NON-NLS-0$
+						label.textContent = message;
+						parent.appendChild(label);
+						var yesButton = document.createElement("button"); //$NON-NLS-0$
+						yesButton.addEventListener("click", function(event) { //$NON-NLS-0$
+							result = true;
+							self._parameterCollector.close();
+						}, false);
+						buttonParent.appendChild(yesButton);
+						yesButton.appendChild(document.createTextNode(yesString)); //$NON-NLS-0$
+						yesButton.className = "dismissButton"; //$NON-NLS-0$
+						var button = document.createElement("button"); //$NON-NLS-0$
+						button.addEventListener("click", function(event) { //$NON-NLS-0$
+							result = false;
+							self._parameterCollector.close();
+						}, false);
+						buttonParent.appendChild(button);
+						button.appendChild(document.createTextNode(noString)); //$NON-NLS-0$
+						button.className = "dismissButton"; //$NON-NLS-0$
+						return yesButton;
+					},
+					function() {
+						onConfirm(result);
+					}
+				) ;
+			} else {
+				result = window.confirm(message);
+				onConfirm(result);
+			}
+		},
+		
+		/**
 		 * Close any active parameter collector.  This method should be used to deactivate a
 		 * parameter collector that was opened with <code>openParameterCollector</code>.
 		 * Commands that describe their required parameters do not need to use this method 
