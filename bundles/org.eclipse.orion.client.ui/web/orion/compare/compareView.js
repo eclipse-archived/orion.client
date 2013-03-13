@@ -20,14 +20,13 @@ define(['i18n!orion/compare/nls/messages',
 		'orion/compare/compare-rulers',
         'orion/editor/editor',
         'orion/editor/editorFeatures',
-        'orion/commands',
         'orion/keyBinding',
         'orion/editor/textView',
         'orion/compare/compare-features',
         'orion/compare/compareUtils',
         'orion/compare/jsdiffAdapter',
         'orion/compare/diffTreeNavigator'],
-function(messages, require, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mCommands, mKeyBinding, mTextView,
+function(messages, require, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mKeyBinding, mTextView,
 		 mCompareFeatures, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
 var exports = {};
 //var messages = {};
@@ -56,146 +55,6 @@ exports.CompareView = (function() {
 				Object.keys(options).forEach(function(option) {
 					this.options[option] = options[option];
 				}.bind(this));
-			}
-		},
-		
-		initCommands: function(/*mCommands*/){	
-			if(!this._commandService){
-				return;
-			}
-			var commandSpanId = this.getCommandSpanId();
-			if(!commandSpanId){
-				return;
-			}
-			var copyToLeftCommand = new mCommands.Command({
-				name : messages["Copy current change from right to left"],
-				tooltip : messages["Copy current change from right to left"],
-				imageClass : "core-sprite-leftarrow", //$NON-NLS-0$
-				id: "orion.compare.copyToLeft", //$NON-NLS-0$
-				groupId: "orion.compareGroup", //$NON-NLS-0$
-				visibleWhen: function(item) {
-					return this.type === "twoWay"; //$NON-NLS-0$
-				}.bind(this),
-				callback : function(data) {
-					data.items.copyToLeft();
-			}});
-			var toggle2InlineCommand = new mCommands.Command({
-				tooltip : messages["Switch to unified diff"],
-				name: messages["Unified"],
-				//imageClass : "core-sprite-link", //$NON-NLS-0$
-				id: "orion.compare.toggle2Inline", //$NON-NLS-0$
-				groupId: "orion.compareGroup", //$NON-NLS-0$
-				visibleWhen: function(item) {
-					return item.options.toggler && item.options.toggler.getWidget().type === "twoWay"; //$NON-NLS-0$
-				},
-				callback : function(data) {
-					data.items.options.toggler.toggle();
-			}});
-			var toggle2TwoWayCommand = new mCommands.Command({
-				tooltip : messages["Switch to side by side diff"],
-				name: messages["Side by side"],
-				//imageClass : "core-sprite-link", //$NON-NLS-0$
-				id: "orion.compare.toggle2TwoWay", //$NON-NLS-0$
-				groupId: "orion.compareGroup", //$NON-NLS-0$
-				visibleWhen: function(item) {
-					return item.options.toggler && item.options.toggler.getWidget().type === "inline"; //$NON-NLS-0$
-				},
-				callback : function(data) {
-					data.items.options.toggler.toggle();
-			}});
-			var nextDiffCommand = new mCommands.Command({
-				name: messages["Next diff block"],
-				tooltip : messages["Next diff block"],
-				imageClass : "core-sprite-move_down", //$NON-NLS-0$
-				id: "orion.compare.nextDiff", //$NON-NLS-0$
-				groupId: "orion.compareGroup", //$NON-NLS-0$
-				callback : function(data) {
-					data.items.nextDiff();
-			}});
-			var prevDiffCommand = new mCommands.Command({
-				name : messages["Previous diff block"],
-				tooltip : messages["Previous diff block"],
-				imageClass : "core-sprite-move_up", //$NON-NLS-0$
-				id: "orion.compare.prevDiff", //$NON-NLS-0$
-				groupId: "orion.compareGroup", //$NON-NLS-0$
-				callback : function(data) {
-					data.items.prevDiff();
-			}});
-			var nextChangeCommand = new mCommands.Command({
-				name : messages["Next diff change"],
-				tooltip : messages["Next diff change"],
-				imageClass : "core-sprite-move_down", //$NON-NLS-0$
-				id: "orion.compare.nextChange", //$NON-NLS-0$
-				groupId: "orion.compareGroup", //$NON-NLS-0$
-				callback : function(data) {
-					data.items.nextChange();
-			}});
-			var prevChangeCommand = new mCommands.Command({
-				name : messages["Previous diff change"],
-				tooltip : messages["Previous diff change"],
-				imageClass : "core-sprite-move_up", //$NON-NLS-0$
-				id: "orion.compare.prevChange", //$NON-NLS-0$
-				groupId: "orion.compareGroup", //$NON-NLS-0$
-				callback : function(data) {
-					data.items.prevChange(data);
-			}});
-			this._commandService.addCommand(copyToLeftCommand);
-			this._commandService.addCommand(toggle2TwoWayCommand);
-			this._commandService.addCommand(toggle2InlineCommand);
-			this._commandService.addCommand(nextDiffCommand);
-			this._commandService.addCommand(prevDiffCommand);
-			this._commandService.addCommand(nextChangeCommand);
-			this._commandService.addCommand(prevChangeCommand);
-				
-			// Register command contributions
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2Inline", 109); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2TwoWay", 110); //$NON-NLS-0$
-			if (!this.options.baseFile.readonly) {
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 111, null, false, new mKeyBinding.KeyBinding(37/*left arrow key*/, true, false, true)); //$NON-NLS-0$
-			}
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 112, null, false, new mKeyBinding.KeyBinding(40/*down arrow key*/, true)); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 113, null, false, new mKeyBinding.KeyBinding(38/*up arrow key*/, true)); //$NON-NLS-0$
-			if(this.options.wordLevelNav){
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, false, new mKeyBinding.KeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, false, new mKeyBinding.KeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
-			} else {
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, true, new mKeyBinding.KeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, true, new mKeyBinding.KeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
-			}
-		},
-		
-		getCommandSpanId: function(){
-			var commandSpanId = this.options.commandSpanId;
-			if(!commandSpanId && this.getDefaultCommandSpanId){
-				commandSpanId = this.getDefaultCommandSpanId();
-			}
-			return commandSpanId;
-		},
-		
-		renderCommands: function(){
-			if(!this._commandService){
-				return;
-			}
-			var commandSpanId = this.getCommandSpanId();
-			if(!commandSpanId){
-				return;
-			}
-			lib.empty(lib.node(commandSpanId));
-			if(this.options.gridRenderer && this.options.gridRenderer.navGridHolder){
-				this.options.gridRenderer.navGridHolder.splice(0, this.options.gridRenderer.navGridHolder.length);
-				if(this.options.gridRenderer.additionalCmdRender){
-					if(this.options.gridRenderer.before){
-						this.options.gridRenderer.additionalCmdRender(this.options.gridRenderer.navGridHolder);
-						this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "tool", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
-					} else {
-						this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "tool", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
-						this.options.gridRenderer.additionalCmdRender(this.options.gridRenderer.navGridHolder);
-					}
-				} else {
-					this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "tool", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
-				}
-			} else {
-				this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "tool", null); //$NON-NLS-0$
 			}
 		},
 		
@@ -298,7 +157,6 @@ exports.TwoWayCompareView = (function() {
 		//Init the diff navigator that controls the navigation on both block and word level.
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this.type = "twoWay"; //$NON-NLS-0$
-		this._commandService = this.options.commandService;
 		
 		//Build the compare view UI by the UI factory
 		this._uiFactory = this.options.uiFactory;
@@ -312,8 +170,9 @@ exports.TwoWayCompareView = (function() {
 		}
 		
 		this._viewLoadedCounter = 0;
-		
-		this.initCommands();
+		if(this.options.commandProvider){
+			this.options.commandProvider.initCommands(this);
+		}
 		this._curveRuler = new mCompareRulers.CompareCurveRuler(this._uiFactory.getDiffCanvasDiv());
 		this._highlighter = [];
 		if(this.options.highlighter && typeof this.options.highlighter === "function") { //$NON-NLS-0$
@@ -348,10 +207,6 @@ exports.TwoWayCompareView = (function() {
 		}.bind(this);
 	};
 	
-	TwoWayCompareView.prototype.getDefaultCommandSpanId = function(){
-		return this._uiFactory.getCommandSpanId();
-	};
-	
 	TwoWayCompareView.prototype.gotoDiff = function(lineNumber, offsetInTheLine, updateLeft){
 		var textView = updateLeft ? this._editors[1].getTextView() : this._editors[0].getTextView();
 		var offset = textView.getModel().getLineStart(lineNumber) + offsetInTheLine;
@@ -359,7 +214,11 @@ exports.TwoWayCompareView = (function() {
 	};
 
 	TwoWayCompareView.prototype.copyToLeft = function(){	
-		this._curveRuler.copyToLeft();
+		this._curveRuler.copyTo(true);
+	};
+	
+	TwoWayCompareView.prototype.copyToRight = function(){	
+		this._curveRuler.copyTo(true);
 	};
 	
 	TwoWayCompareView.prototype.resizeEditors = function(){	
@@ -539,7 +398,9 @@ exports.TwoWayCompareView = (function() {
 		this._initSyntaxHighlighter([{fileName: this.options.newFile.Name, contentType: this.options.newFile.Type, editor: this._editors[1]},
 									 {fileName: this.options.baseFile.Name, contentType: this.options.baseFile.Type, editor: this._editors[0]}]);
 		this._highlightSyntax();
-		this.renderCommands();
+		if(this.options.commandProvider){
+			this.options.commandProvider.renderCommands(this);
+		}
 		this.addRulers();
 		
 		if(this._viewLoadedCounter === 2){
@@ -560,9 +421,9 @@ exports.InlineCompareView = (function() {
 		this.setOptions(options, true);
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this.type = "inline"; //$NON-NLS-0$
-		this._commandService = this.options.commandService;
-		
-		this.initCommands();
+		if(this.options.commandProvider){
+			this.options.commandProvider.initCommands(this);
+		}
 		this._highlighter = [];
 		if(this.options.highlighter && typeof this.options.highlighter === "function") { //$NON-NLS-0$
 			this._highlighter.push(new this.options.highlighter());
@@ -681,7 +542,9 @@ exports.InlineCompareView = (function() {
 		
 		this._initSyntaxHighlighter([{fileName: this.options.baseFile.Name, contentType: this.options.baseFile.Type, editor: this._editor}]);
 		this._highlightSyntax();
-		this.renderCommands();
+		if(this.options.commandProvider){
+			this.options.commandProvider.renderCommands(this);
+		}
 		this.addRulers();
 		var drawLine = this._textView.getTopIndex() ;
 		this._textView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);

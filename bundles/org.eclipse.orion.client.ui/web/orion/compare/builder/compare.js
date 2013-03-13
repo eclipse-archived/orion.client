@@ -11,13 +11,13 @@
 /*global define require document console prompt XMLHttpRequest window*/
 
 define(['orion/commandRegistry',
-		'orion/commands',
 		'orion/Deferred',
 		'orion/compare/compareView',
+		'orion/compare/compareCommands',
 		"orion/editor/textMateStyler",
 		"orion/editor/htmlGrammar",
 		"examples/editor/textStyler"],
-function(mCommandRegistry, mCommands, Deferred, mCompareView, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 	var commandService = new mCommandRegistry.CommandRegistry({
 	});
 
@@ -109,6 +109,8 @@ function(mCommandRegistry, mCommands, Deferred, mCompareView, mTextMateStyler, m
 		if(vOptions.newFile && vOptions.newFile.Name){
 			vOptions.newFile.Type = _contentType(vOptions.newFile.Name);
 		}
+		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: vOptions.commandSpanId});
+		vOptions.commandProvider = cmdProvider;
 		this.compareView = new mCompareView.toggleableCompareView("twoWay", vOptions); //$NON-NLS-0$
 		this.compareView.startup();
     }
