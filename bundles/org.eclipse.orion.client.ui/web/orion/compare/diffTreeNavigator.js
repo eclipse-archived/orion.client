@@ -802,7 +802,7 @@ exports.TwoWayDiffBlockFeeder = (function() {
 		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []}); //$NON-NLS-0$
 	};
 	TwoWayDiffBlockFeeder.prototype.getCurrentBlockAnnoType = function(diffBlockIndex){
-		if(!this._diffBlocks || this._diffBlocks.length === 0){
+		if(!this._diffBlocks || this._diffBlocks.length === 0 || this._diffBlocks.length <= diffBlockIndex){
 			return null;
 		}
 		var mapperIndex = this._diffBlocks[diffBlockIndex][1];

@@ -226,13 +226,13 @@ orion.CompareCurveRuler =  (function() {
 	function CompareCurveRuler(canvasDiv) {
 		this._canvasDiv = canvasDiv;
 		this._mapper = undefined;
-		this._initialized = false;
 	}
 
 	CompareCurveRuler.prototype =  {
 		init: function(mapper , leftEditor , rightEditor, diffNavigator ){
-			this._initialized = true;
-			this._initing = true;
+			this._leftIniting = true;
+			this._rightIniting = true;
+			this._rightIniting = true;
 			this._mapper = mapper;
 			this._leftEditor = leftEditor;
 			this._rightEditor = rightEditor;
@@ -323,17 +323,23 @@ orion.CompareCurveRuler =  (function() {
 			context.stroke();
 		},
 		
-		onChanged: function(e) {
-			if(e.removedLineCount === e.addedLineCount){
-				return;
+		onChanged: function(e, isRightSide) {
+			var initing = isRightSide ? this._rightIniting : this._leftIniting;
+			if(e.removedLineCount !== e.addedLineCount){
+				var tView = isRightSide ? this._rightTextView : this._leftTextView;
+				if(!initing){
+					mCompareUtils.updateMapper(this._mapper , isRightSide ? 1 : 0 , tView.getModel().getLineAtOffset(e.start) , e.removedLineCount, e.addedLineCount);
+				}
+				if(e.removedLineCount > 0 || e.addedLineCount > 0){
+					this.render();
+				}
 			}
-			if(!this._initing){
-				mCompareUtils.updateMapper(this._mapper , 0 , this._leftTextView.getModel().getLineAtOffset(e.start) , e.removedLineCount, e.addedLineCount);
+			if(isRightSide) {
+				this._rightIniting = false;
+			} else {
+				this._leftIniting = false;
 			}
-			this._initing = false;
-			if(e.removedLineCount > 0 || e.addedLineCount > 0){
-				this.render();
-			}
+			return initing;
 		}
 	};
 	return CompareCurveRuler;
