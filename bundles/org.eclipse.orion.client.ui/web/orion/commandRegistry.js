@@ -158,7 +158,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 			if (this._parameterCollector && !modal) {
 				var self = this;
 				this._parameterCollector.close();
-				this._parameterCollector.open(node, 
+				var opened = this._parameterCollector.open(node, 
 					function(parent, buttonParent) {
 						var label = document.createElement("span"); //$NON-NLS-0$
 						label.classList.add("parameterPrompt"); //$NON-NLS-0$
@@ -185,11 +185,13 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 					function() {
 						onConfirm(result);
 					}
-				) ;
-			} else {
-				result = window.confirm(message);
-				onConfirm(result);
-			}
+				);
+				if (opened) {
+					return;
+				}
+			} 
+			result = window.confirm(message);
+			onConfirm(result);
 		},
 		
 		/**
