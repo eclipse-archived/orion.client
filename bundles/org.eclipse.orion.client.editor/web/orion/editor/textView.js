@@ -3935,6 +3935,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				case "textEnd": pixel = verticalMaximum - clientHeight; break; //$NON-NLS-0$
 				case "pageDown": pixel = verticalScrollOffset + clientHeight; break; //$NON-NLS-0$
 				case "pageUp": pixel = verticalScrollOffset - clientHeight; break; //$NON-NLS-0$
+				case "lineDown": pixel = verticalScrollOffset + lineHeight; break; //$NON-NLS-0$
+				case "lineUp": pixel = verticalScrollOffset - lineHeight; break; //$NON-NLS-0$
 				case "centerLine": //$NON-NLS-0$
 					var selection = this._getSelection();
 					var lineStart = model.getLineAtOffset(selection.start);
@@ -4233,6 +4235,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				bindings.push({actionID: "lineUp",		keyBinding: new KeyBinding(38, true), predefined: true}); //$NON-NLS-0$
 				bindings.push({actionID: "lineDown",	keyBinding: new KeyBinding(40, true), predefined: true}); //$NON-NLS-0$
 			}
+			if (util.isWindows) {
+				bindings.push({actionID: "scrollLineUp",	keyBinding: new KeyBinding(38, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "scrollLineDown",	keyBinding: new KeyBinding(40, true), predefined: true}); //$NON-NLS-0$
+			}
 
 			// Select Cursor Navigation
 			bindings.push({actionID: "selectLineUp",		keyBinding: new KeyBinding(38, null, true), predefined: true}); //$NON-NLS-0$
@@ -4349,6 +4355,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				"pageDown": {defaultHandler: function() {return self._doPageDown({select: false});}}, //$NON-NLS-0$
 				"scrollPageUp": {defaultHandler: function() {return self._doScroll({type: "pageUp"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"scrollPageDown": {defaultHandler: function() {return self._doScroll({type: "pageDown"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollLineUp": {defaultHandler: function() {return self._doScroll({type: "lineUp"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollLineDown": {defaultHandler: function() {return self._doScroll({type: "lineDown"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"wordPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"wordNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"textStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:true});}}, //$NON-NLS-0$
