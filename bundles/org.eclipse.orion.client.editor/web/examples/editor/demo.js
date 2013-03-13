@@ -33,6 +33,7 @@ function(mSetup, mTestPerformance, util) {
 	var sContents = document.getElementById("contentsSelect"); //$NON-NLS-0$
 	var sTheme = document.getElementById("themeSelect"); //$NON-NLS-0$
 	var sTabSize = document.getElementById('tabSize'); //$NON-NLS-0$
+	var sScrollAnimation = document.getElementById('scrollAnimation'); //$NON-NLS-0$
 	var bReadOnly = document.getElementById('readOnly'); //$NON-NLS-0$
 	var bFullSel = document.getElementById('fullSelection'); //$NON-NLS-0$
 	var bWrap = document.getElementById('wrap'); //$NON-NLS-0$
@@ -84,6 +85,7 @@ function(mSetup, mTestPerformance, util) {
 			fullSelection: bFullSel.checked,
 			expandTab: bExpandTab.checked,
 			tabSize: parseInt(sTabSize.value, 10),
+			scrollAnimation: parseInt(sScrollAnimation.value, 10),
 			wrapMode: bWrap.checked,
 			themeClass: sTheme.value
 		};
@@ -97,6 +99,7 @@ function(mSetup, mTestPerformance, util) {
 		bWrap.checked = options.wrapMode;
 		bExpandTab.checked = options.expandTab;
 		sTabSize.value = options.tabSize;
+		sScrollAnimation.value = options.scrollAnimation;
 		sTheme.value = options.themeClass;
 	}
 
@@ -157,10 +160,10 @@ function(mSetup, mTestPerformance, util) {
 	
 	function updateSetOptionsButton() {
 		if (bAutoSet.checked) {
-			bSetOptions.style.display = "none";
+			bSetOptions.style.display = "none"; //$NON-NLS-0$
 			setOptions();
 		} else {
-			bSetOptions.style.display = "block";
+			bSetOptions.style.display = "block"; //$NON-NLS-0$
 		}
 	}
 	function checkSetOptions() {
@@ -176,6 +179,7 @@ function(mSetup, mTestPerformance, util) {
 	sTheme.onchange = checkSetOptions;
 	bReadOnly.onchange = checkSetOptions;
 	sTabSize.onchange = checkSetOptions;
+	sScrollAnimation.onchange = checkSetOptions;
 	bFullSel.onchange = checkSetOptions;
 	bWrap.onchange = checkSetOptions;
 	bExpandTab.onchange = checkSetOptions;
@@ -197,8 +201,8 @@ function(mSetup, mTestPerformance, util) {
 	}
 	bTest.onclick = runTest;
 	var option = util.createElement(document, "option"); //$NON-NLS-0$
-	option.setAttribute("value", "test"); //$NON-NLS-0$
-	option.appendChild(document.createTextNode("Test"));
+	option.setAttribute("value", "test"); //$NON-NLS-1$ //$NON-NLS-0$
+	option.appendChild(document.createTextNode("Test")); //$NON-NLS-0$
 	sTest.appendChild(option);
 	var prefix = "test"; //$NON-NLS-0$
 	for (var property in mTestPerformance) {
