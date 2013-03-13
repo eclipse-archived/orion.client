@@ -208,15 +208,14 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 					var editor = this.editor;
 					var prefix = this._incrementalFindPrefix;
 					prefix = this._incrementalFindPrefix = prefix.substring(0, prefix.length-1);
+					editor.reportStatus(util.formatMessage(messages.incrementalFind, prefix));
 					if (prefix.length===0) {
 						this._incrementalFindSuccess = true;
 						this._incrementalFindIgnoreSelection = true;
 						editor.setCaretOffset(editor.getSelection().start);
 						this._incrementalFindIgnoreSelection = false;
-						this.toggleIncrementalFind();
 						return true;
 					}
-					editor.reportStatus(util.formatMessage(messages.incrementalFind, prefix));
 					var result = editor.getModel().find({
 						string: prefix,
 						start: editor.getCaretOffset() - prefix.length - 1,
