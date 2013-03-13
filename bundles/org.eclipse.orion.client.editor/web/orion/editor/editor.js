@@ -13,7 +13,6 @@
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
 define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBinding', 'orion/editor/eventTarget', 'orion/editor/tooltip', 'orion/editor/annotations', 'orion/util'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, util) { //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var Animation;
 	
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
 
@@ -608,23 +607,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 				var rulers = this._annotationFactory.createAnnotationRulers(this._annotationModel);
 				var ruler = this._annotationRuler = rulers.annotationRuler;
 				if (ruler) {
-					ruler.onClick = function(lineIndex, e) {
-						if (lineIndex === undefined) { return; }
-						if (lineIndex === -1) { return; }
-						var view = this.getView();
-						var viewModel = view.getModel();
-						var annotationModel = this.getAnnotationModel();
-						var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
-						var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
-						var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
-						while (annotations.hasNext()) {
-							var annotation = annotations.next();
-							if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
-							var model = editor.getModel();
-							editor.onGotoLine(model.getLineAtOffset(lineStart), annotation.start - lineStart, annotation.end - lineStart);
-							break;
-						}
-					};
 					ruler.onDblClick = addRemoveBookmark;
 					ruler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"}); //$NON-NLS-0$
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
@@ -636,11 +618,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 					
 				ruler = this._overviewRuler = rulers.overviewRuler;
 				if (ruler) {
-					ruler.onClick = function(lineIndex, e) {
-						if (lineIndex === undefined) { return; }
-						var offset = textView.getModel().getLineStart(lineIndex);
-						editor.moveSelection(editor.mapOffset(offset));
-					};
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
