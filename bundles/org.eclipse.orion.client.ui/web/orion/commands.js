@@ -25,10 +25,17 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		 */
 		var localKeyBindings = {};
 		
+		/*
+		 * Set a function that will provide key bindings when key events are processed.  This is used when an external party
+		 * (such as a command registry) wants its bindings to be honored by the command key listener.
+		 */
 		function setKeyBindingProvider(getBindingsFunction) {
 			getBindings = getBindingsFunction;
 		}
 		
+		/*
+		 * Process a key event against the provided bindings.
+		 */
 		function _processKey(event, bindings) {
 			for (var id in bindings) {
 				if (bindings[id] && bindings[id].keyBinding && bindings[id].command) {
