@@ -13,7 +13,6 @@
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
 define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBinding', 'orion/editor/eventTarget', 'orion/editor/tooltip', 'orion/editor/annotations', 'orion/util'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, util) { //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var Animation;
 	
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
 
@@ -297,14 +296,14 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 			}
 		},
 
-		setCaretOffset: function(caretOffset) {
+		setCaretOffset: function(caretOffset, show, callback) {
 			var textView = this._textView;
 			var model = textView.getModel();
 			if (model.getBaseModel) {
 				this._expandOffset(caretOffset);
 				caretOffset = model.mapOffset(caretOffset, true);
 			}
-			textView.setCaretOffset(caretOffset);
+			textView.setCaretOffset(caretOffset, show, callback);
 		},
 	
 		setText: function(text, start, end) {
@@ -330,7 +329,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 			this.setFoldingRulerVisible(enabled);
 		},
 		
-		setSelection: function(start, end, show) {
+		setSelection: function(start, end, show, callback) {
 			var textView = this._textView;
 			var model = textView.getModel();
 			if (model.getBaseModel) {
@@ -339,55 +338,28 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 				start = model.mapOffset(start, true);
 				end = model.mapOffset(end, true);
 			}
-			textView.setSelection(start, end, show);
+			textView.setSelection(start, end, show, callback);
 		},
 				
 		/**
-		 * @param {orion.editor.TextView} textView
 		 * @param {Number} start
 		 * @param {Number} [end]
-		 * @param {function} callBack A call back function that is used after the move animation is done
+		 * @param {function} [callback] if callback is specified, scrolling to show the selection is animated and callback is called when the animation is done.
+		 * @param {Boolean} [focus=true] whether the text view should be focused when the selection is done.
 		 * @private
+		 * @deprecated use #setSelection instead
 		 */
-		moveSelection: function(start, end, callBack, focus) {
+		moveSelection: function(start, end, callback, focus) {
 			end = end || start;
 			var textView = this._textView;
-			this.setSelection(start, end, false);
-			var topPixel = textView.getTopPixel();
-			var bottomPixel = textView.getBottomPixel();
-			var model = this.getModel();
-			var line = model.getLineAtOffset(start);
-			var linePixel = textView.getLinePixel(line);
-			if (linePixel < topPixel || linePixel > bottomPixel) {
-				var height = bottomPixel - topPixel;
-				var target = Math.max(0, linePixel- Math.floor((linePixel<topPixel?3:1)*height / 4));
-				var a = new Animation({
-					node: textView,
-					duration: 300,
-					curve: [topPixel, target],
-					onAnimate: function(x){
-						textView.setTopPixel(Math.floor(x));
-					},
-					onEnd: function() {
-						textView.showSelection();
-						if (focus === undefined || focus) {
-							textView.focus();
-						}
-						if(callBack) {
-							callBack();
-						}
-					}
-				});
-				a.play();
-			} else {
-				textView.showSelection();
+			this.setSelection(start, end, 1 / 3, function() {
 				if (focus === undefined || focus) {
 					textView.focus();
 				}
-				if(callBack) {
-					callBack();
+				if (callback) {
+					callback();
 				}
-			}
+			});
 		},
 		
 		/** @private */
@@ -635,23 +607,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 				var rulers = this._annotationFactory.createAnnotationRulers(this._annotationModel);
 				var ruler = this._annotationRuler = rulers.annotationRuler;
 				if (ruler) {
-					ruler.onClick = function(lineIndex, e) {
-						if (lineIndex === undefined) { return; }
-						if (lineIndex === -1) { return; }
-						var view = this.getView();
-						var viewModel = view.getModel();
-						var annotationModel = this.getAnnotationModel();
-						var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
-						var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
-						var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
-						while (annotations.hasNext()) {
-							var annotation = annotations.next();
-							if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
-							var model = editor.getModel();
-							editor.onGotoLine(model.getLineAtOffset(lineStart), annotation.start - lineStart, annotation.end - lineStart);
-							break;
-						}
-					};
 					ruler.onDblClick = addRemoveBookmark;
 					ruler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"}); //$NON-NLS-0$
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
@@ -663,11 +618,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 					
 				ruler = this._overviewRuler = rulers.overviewRuler;
 				if (ruler) {
-					ruler.onClick = function(lineIndex, e) {
-						if (lineIndex === undefined) { return; }
-						var offset = textView.getModel().getLineStart(lineIndex);
-						editor.moveSelection(editor.mapOffset(offset));
-					};
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
@@ -920,62 +870,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 		}
 	};
 	mEventTarget.EventTarget.addMixin(Editor.prototype);
-
-	/**
-	 * @class
-	 * @private
-	 * @name orion.editor.Animation
-	 * @description Creates an animation.
-	 * @param {Object} options Options controlling the animation.
-	 * @param {Array} options.curve Array of 2 values giving the start and end points for the animation.
-	 * @param {Number} [options.duration=350] Duration of the animation, in milliseconds.
-	 * @param {Function} [options.easing]
-	 * @param {Function} [options.onAnimate]
-	 * @param {Function} [options.onEnd]
-	 * @param {Number} [options.rate=20] The time between frames, in milliseconds.
-	 */
-	Animation = /** @ignore */ (function() {
-		function Animation(options) {
-			this.options = options;
-		}
-		/**
-		 * Plays this animation.
-		 * @methodOf orion.editor.Animation.prototype
-		 * @name play
-		 */
-		Animation.prototype.play = function() {
-			var duration = (typeof this.options.duration === "number") ? this.options.duration : 350, //$NON-NLS-0$
-			    rate = (typeof this.options.rate === "number") ? this.options.rate : 20, //$NON-NLS-0$
-			    easing = this.options.easing || this.defaultEasing,
-			    onAnimate = this.options.onAnimate || function() {},
-			    onEnd = this.options.onEnd || function () {},
-			    start = this.options.curve[0],
-			    end = this.options.curve[1],
-			    range = (end - start);
-			var propertyValue,
-			    interval,
-			    startedAt = -1;
-
-			function onFrame() {
-				startedAt = (startedAt === -1) ? new Date().getTime() : startedAt;
-				var now = new Date().getTime(),
-				    percentDone = (now - startedAt) / duration;
-				if (percentDone < 1) {
-					var eased = easing(percentDone);
-					propertyValue = start + (eased * range);
-					onAnimate(propertyValue);
-				} else {
-					clearInterval(interval);
-					onEnd();
-				}
-			}
-			interval = setInterval(onFrame, rate);
-		};
-		Animation.prototype.defaultEasing = function(x) {
-			return Math.sin(x * (Math.PI / 2));
-		};
-		return Animation;
-	}());
 
 	/**
 	 * @private

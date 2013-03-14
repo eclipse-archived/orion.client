@@ -249,6 +249,48 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 * @param {DOMEvent} e the click event.
 		 */
 		onClick: function(lineIndex, e) {
+			if (lineIndex === undefined) { return; }
+			var view = this._view;
+			var model = view.getModel();
+			var baseModel = model;
+			var start = model.getLineStart(lineIndex);
+			var end = start;
+			var annotationModel = this._annotationModel;
+			if (annotationModel) {
+				var selection = view.getSelection();
+				var offset = Math.max(selection.start, selection.end);
+				end = model.getLineEnd(lineIndex, true);
+				if (start <= offset && offset < model.getLineEnd(lineIndex)) {
+					start = offset + 1;
+				}
+				if (model.getBaseModel) {
+					start = model.mapOffset(start);
+					end = model.mapOffset(end);
+					baseModel = model.getBaseModel();
+				}
+				var annotation, iter = annotationModel.getAnnotations(start, end);
+				while (!annotation && iter.hasNext()) {
+					var a = iter.next();
+					if (!this.isAnnotationTypeVisible(a.type)) { continue; }
+					annotation = a;
+				}
+				if (annotation && baseModel.getLineAtOffset(annotation.start) === baseModel.getLineAtOffset(start)) {
+					start = annotation.start;
+					end = annotation.end;
+				} else {
+					end = start;
+				}
+				
+				if (model.getBaseModel) {
+					start = model.mapOffset(start, true);
+					end = model.mapOffset(end, true);
+				}
+			}
+			var tooltip = mTooltip.Tooltip.getTooltip(this._view);
+			if (tooltip) {
+				tooltip.setTarget(null);
+			}
+			this._view.setSelection(end, start, 1/3, function(){});
 		},
 		/**
 		 * This event is sent when the user double clicks a line annotation.
@@ -547,11 +589,6 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		var result = {style: {lineHeight: "1px", fontSize: "1px"}}; //$NON-NLS-1$ //$NON-NLS-0$
 		result = this._mergeStyle(result, this._rulerStyle);
 		return result;
-	};
-	/** @ignore */	
-	OverviewRuler.prototype.onClick = function(lineIndex, e) {
-		if (lineIndex === undefined) { return; }
-		this._view.setTopIndex(lineIndex);
 	};
 	/** @ignore */
 	OverviewRuler.prototype._getTooltipContents = function(lineIndex, annotations) {

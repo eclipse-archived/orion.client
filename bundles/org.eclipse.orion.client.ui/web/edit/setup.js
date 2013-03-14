@@ -66,6 +66,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			parent: editorDomNode,
 			model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
 			tabSize: 4,
+			scrollAnimation: 300,
 			readonly: isReadOnly
 		});
 		return textView;

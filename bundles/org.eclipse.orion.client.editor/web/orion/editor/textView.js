@@ -197,6 +197,70 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		return trim;
 	}
 	
+	/**
+	 * @class
+	 * @private
+	 * @name orion.editor.Animation
+	 * @description Creates an animation.
+	 * @param {Object} options Options controlling the animation.
+	 * @param {Array} options.curve Array of 2 values giving the start and end points for the animation.
+	 * @param {Number} [options.duration=350] Duration of the animation, in milliseconds.
+	 * @param {Function} [options.easing]
+	 * @param {Function} [options.onAnimate]
+	 * @param {Function} [options.onEnd]
+	 * @param {Number} [options.rate=20] The time between frames, in milliseconds.
+	 */
+	var Animation = /** @ignore */ (function() {
+		function Animation(options) {
+			this.options = options;
+		}
+		/**
+		 * Plays this animation.
+		 * @methodOf orion.editor.Animation.prototype
+		 * @name play
+		 */
+		Animation.prototype.play = function() {
+			var duration = (typeof this.options.duration === "number") ? this.options.duration : 350, //$NON-NLS-0$
+			    rate = (typeof this.options.rate === "number") ? this.options.rate : 20, //$NON-NLS-0$
+			    easing = this.options.easing || this.defaultEasing,
+			    onAnimate = this.options.onAnimate || function() {},
+			    start = this.options.curve[0],
+			    end = this.options.curve[1],
+			    range = (end - start),
+			    startedAt = -1,
+				propertyValue,
+				self = this;
+
+			function onFrame() {
+				startedAt = (startedAt === -1) ? new Date().getTime() : startedAt;
+				var now = new Date().getTime(),
+				    percentDone = (now - startedAt) / duration;
+				if (percentDone < 1) {
+					var eased = easing(percentDone);
+					propertyValue = start + (eased * range);
+					onAnimate(propertyValue);
+				} else {
+					onAnimate(end);
+					self.stop();
+				}
+			}
+			this.interval = this.options.window.setInterval(onFrame, rate);
+		};
+		/**
+		 * Stops this animation.
+		 * @methodOf orion.editor.Animation.prototype
+		 */
+		Animation.prototype.stop = function() {
+			this.options.window.clearInterval(this.interval);
+		    var onEnd = this.options.onEnd || function () {};
+			onEnd();
+		};
+		Animation.prototype.defaultEasing = function(x) {
+			return Math.sin(x * (Math.PI / 2));
+		};
+		return Animation;
+	}());
+	
 	/** 
 	 * Constructs a new Selection object.
 	 * 
@@ -1041,6 +1105,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 	 * @property {String} [themeClass] the CSS class for the view theming.
 	 * @property {Number} [tabSize=8] The number of spaces in a tab.
 	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
+	 * @property {Number} [scrollAnimation=0] the time duration in miliseconds for scrolling animation. <code>0</code> means no animation.
 	 */
 	/**
 	 * Constructs a new text view.
@@ -2172,17 +2237,23 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		 * Sets the caret offset relative to the start of the document.
 		 *
 		 * @param {Number} caret the caret offset relative to the start of the document.
-		 * @param {Boolean} [show=true] if <code>true</code>, the view will scroll if needed to show the caret location.
+		 * @param {Boolean|Number} [show=true] if <code>true</code>, the view will scroll the minimum amount necessary to show the caret location. If
+		 *					<code>show</code> is a <code>Number</code>, the view will scroll the minimum amount necessary to show the caret location plus a
+		 *					percentage of the client area height. The parameter is clamped to the [0,1] range.  In either case, the view will only scroll
+		 *					if the new caret location is visible already.
+		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
+		 *					the callback is called when the animation is done. Otherwise, callback is callback right away. The callback is not
+		 *					if the view does not scroll.
 		 *
 		 * @see #getCaretOffset
 		 * @see #setSelection
 		 * @see #getSelection
 		 */
-		setCaretOffset: function(offset, show) {
+		setCaretOffset: function(offset, show, callback) {
 			var charCount = this._model.getCharCount();
 			offset = Math.max(0, Math.min (offset, charCount));
 			var selection = new Selection(offset, offset, false);
-			this._setSelection (selection, show === undefined || show);
+			this._setSelection (selection, show === undefined || show, true, callback);
 		},
 		/**
 		 * Sets the horizontal pixel.
@@ -2304,11 +2375,17 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		 * 
 		 * @param {Number} start the start offset of the selection
 		 * @param {Number} end the end offset of the selection
-		 * @param {Boolean} [show=true] if <code>true</code>, the view will scroll if needed to show the caret location.
+		 * @param {Boolean|Number} [show=true] if <code>true</code>, the view will scroll the minimum amount necessary to show the caret location. If
+		 *					<code>show</code> is a <code>Number</code>, the view will scroll the minimum amount necessary to show the caret location plus a
+		 *					percentage of the client area height. The parameter is clamped to the [0,1] range.  In either case, the view will only scroll
+		 *					if the new caret location is visible already.
+		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
+		 *					the callback is called when the animation is done. Otherwise, callback is callback right away. The callback is not
+		 *					if the view does not scroll.
 		 *
 		 * @see #getSelection
 		 */
-		setSelection: function (start, end, show) {
+		setSelection: function (start, end, show, callback) {
 			var caret = start > end;
 			if (caret) {
 				var tmp = start;
@@ -2319,7 +2396,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			start = Math.max(0, Math.min (start, charCount));
 			end = Math.max(0, Math.min (end, charCount));
 			var selection = new Selection(start, end, caret);
-			this._setSelection(selection, show === undefined || show);
+			this._setSelection(selection, show === undefined || show, true, callback);
 		},
 		/**
 		 * Replaces the text in the given range with the given text.
@@ -2915,16 +2992,19 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleMouseOver: function (e) {
+			if (this._animation) { return; }
 			if (this.isListening("MouseOver")) { //$NON-NLS-0$
 				this.onMouseOver(this._createMouseEvent("MouseOver", e)); //$NON-NLS-0$
 			}
 		},
 		_handleMouseOut: function (e) {
+			if (this._animation) { return; }
 			if (this.isListening("MouseOut")) { //$NON-NLS-0$
 				this.onMouseOut(this._createMouseEvent("MouseOut", e)); //$NON-NLS-0$
 			}
 		},
 		_handleMouseMove: function (e) {
+			if (this._animation) { return; }
 			var inClient = this._isClientDiv(e);
 			if (this.isListening("MouseMove")) { //$NON-NLS-0$
 				if (inClient){
@@ -3229,7 +3309,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleScroll: function () {
-			var scroll = this._getScroll();
+			var scroll = this._getScroll(false);
 			var oldX = this._hScroll;
 			var oldY = this._vScroll;
 			if (oldX !== scroll.x || oldY !== scroll.y) {
@@ -3590,8 +3670,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		_doEnd: function (args) {
 			var selection = this._getSelection();
 			var model = this._model;
+			var callback;
 			if (args.ctrl) {
 				selection.extend(model.getCharCount());
+				callback = function() {};
 			} else {
 				var offset = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(offset);
@@ -3610,7 +3692,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				selection.extend(offset);
 			}
 			if (!args.select) { selection.collapse(); }
-			this._setSelection(selection, true);
+			this._setSelection(selection, true, true, callback);
 			return true;
 		},
 		_doEnter: function (args) {
@@ -3619,15 +3701,17 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			this._doContent(model.getLineDelimiter()); 
 			if (args && args.noCursor) {
 				selection.end = selection.start;
-				this._setSelection(selection);
+				this._setSelection(selection, true);
 			}
 			return true;
 		},
 		_doHome: function (args) {
 			var selection = this._getSelection();
 			var model = this._model;
+			var callback;
 			if (args.ctrl) {
 				selection.extend(0);
+				callback = function() {};
 			} else {
 				var offset = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(offset);
@@ -3642,7 +3726,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				selection.extend(offset); 
 			}
 			if (!args.select) { selection.collapse(); }
-			this._setSelection(selection, true);
+			this._setSelection(selection, true, true, callback);
 			return true;
 		},
 		_doLineDown: function (args) {
@@ -3719,6 +3803,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			return true;
 		},
 		_doPageDown: function (args) {
+			var self = this;
 			var model = this._model;
 			var selection = this._getSelection();
 			var caret = selection.getCaret();
@@ -3741,8 +3826,9 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				line.destroy();
 				selection.extend(caret);
 				if (!args.select) { selection.collapse(); }
-				this._setSelection(selection, true, true, rect.top + linePixel - caretRect.top);
-				this._columnX = x;
+				this._setSelection(selection, true, true, function() {
+					self._columnX = x;
+				}, rect.top + linePixel - caretRect.top);
 				return true;
 			}
 			if (caretLine < lineCount - 1) {
@@ -3765,12 +3851,14 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				if (scrollOffset + clientHeight > verticalMaximum) {
 					scrollOffset = verticalMaximum - clientHeight;
 				}
-				this._setSelection(selection, true, true, scrollOffset - scroll.y);
-				this._columnX = x;
+				this._setSelection(selection, true, true, function() {
+					self._columnX = x;
+				}, scrollOffset - scroll.y);
 			}
 			return true;
 		},
 		_doPageUp: function (args) {
+			var self = this;
 			var model = this._model;
 			var selection = this._getSelection();
 			var caret = selection.getCaret();
@@ -3792,8 +3880,9 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				line.destroy();
 				selection.extend(caret);
 				if (!args.select) { selection.collapse(); }
-				this._setSelection(selection, true, true, rect.top + linePixel - caretRect.top);
-				this._columnX = x;
+				this._setSelection(selection, true, true, function() {
+					self._columnX = x;
+				}, rect.top + linePixel - caretRect.top);
 				return true;
 			}
 			if (caretLine > 0) {
@@ -3811,8 +3900,9 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				line.destroy();
 				if (!args.select) { selection.collapse(); }
 				var scrollOffset = Math.max(0, scroll.y - scrollLines * lineHeight);
-				this._setSelection(selection, true, true, scrollOffset - scroll.y);
-				this._columnX = x;
+				this._setSelection(selection, true, true, function() {
+					self._columnX = x;
+				}, scrollOffset - scroll.y);
 			}
 			return true;
 		},
@@ -3845,6 +3935,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				case "textEnd": pixel = verticalMaximum - clientHeight; break; //$NON-NLS-0$
 				case "pageDown": pixel = verticalScrollOffset + clientHeight; break; //$NON-NLS-0$
 				case "pageUp": pixel = verticalScrollOffset - clientHeight; break; //$NON-NLS-0$
+				case "lineDown": pixel = verticalScrollOffset + lineHeight; break; //$NON-NLS-0$
+				case "lineUp": pixel = verticalScrollOffset - lineHeight; break; //$NON-NLS-0$
 				case "centerLine": //$NON-NLS-0$
 					var selection = this._getSelection();
 					var lineStart = model.getLineAtOffset(selection.start);
@@ -3855,7 +3947,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 			if (pixel !== undefined) {
 				pixel = Math.min(Math.max(0, pixel), verticalMaximum - clientHeight);
-				this._scrollView(0, pixel - verticalScrollOffset);
+				this._scrollViewAnimated(0, pixel - verticalScrollOffset, function() {});
 			}
 			return true;
 		},
@@ -4061,6 +4153,12 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			};
 			return {lineHeight: lineHeight, largestFontStyle: style, lineTrim: trim, viewPadding: pad, scrollWidth: scrollWidth, invalid: invalid};
 		},
+		_cancelAnimation: function() {
+			if (this._animation) {
+				this._animation.stop();
+				this._animation = null;
+			}
+		},
 		_clearSelection: function (direction) {
 			var selection = this._getSelection();
 			if (selection.isEmpty()) { return false; }
@@ -4136,6 +4234,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			if (util.isFirefox && util.isLinux) {
 				bindings.push({actionID: "lineUp",		keyBinding: new KeyBinding(38, true), predefined: true}); //$NON-NLS-0$
 				bindings.push({actionID: "lineDown",	keyBinding: new KeyBinding(40, true), predefined: true}); //$NON-NLS-0$
+			}
+			if (util.isWindows) {
+				bindings.push({actionID: "scrollLineUp",	keyBinding: new KeyBinding(38, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "scrollLineDown",	keyBinding: new KeyBinding(40, true), predefined: true}); //$NON-NLS-0$
 			}
 
 			// Select Cursor Navigation
@@ -4253,6 +4355,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				"pageDown": {defaultHandler: function() {return self._doPageDown({select: false});}}, //$NON-NLS-0$
 				"scrollPageUp": {defaultHandler: function() {return self._doScroll({type: "pageUp"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"scrollPageDown": {defaultHandler: function() {return self._doScroll({type: "pageDown"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollLineUp": {defaultHandler: function() {return self._doScroll({type: "lineUp"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollLineDown": {defaultHandler: function() {return self._doScroll({type: "lineDown"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"wordPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"wordNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"textStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:true});}}, //$NON-NLS-0$
@@ -4504,6 +4608,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			return {
 				parent: {value: undefined, update: null},
 				model: {value: undefined, update: this.setModel},
+				scrollAnimation: {value: 0, update: null},
 				readonly: {value: false, update: this._setReadOnly},
 				fullSelection: {value: true, update: this._setFullSelection},
 				tabMode: { value: true, update: null },
@@ -4886,7 +4991,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 			return Math.max(0, Math.min(lineCount - 1, lineIndex));
 		},
-		_getScroll: function() {
+		_getScroll: function(cancelAnimation) {
+			if (cancelAnimation === undefined || cancelAnimation) {
+				this._cancelAnimation();
+			}
 			var viewDiv = this._viewDiv;
 			return {x: viewDiv.scrollLeft, y: viewDiv.scrollTop};
 		},
@@ -5230,6 +5338,34 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				}
 			}
 		},
+		_scrollViewAnimated: function (pixelX, pixelY, callback) {
+			if (callback && this._scrollAnimation) {
+				var self = this;
+				this._animation = new Animation({
+					window: this._getWindow(),
+					duration: this._scrollAnimation,
+					curve: [pixelY, 0],
+					onAnimate: function(x) {
+						var deltaY = pixelY - Math.floor(x);
+						self._scrollView (0, deltaY);
+						pixelY -= deltaY;
+					},
+					onEnd: function() {
+						self._animation = null;
+						self._scrollView (pixelX, pixelY);
+						if (callback) {
+							callback();
+						}
+					}
+				});
+				this._animation.play();
+			} else {
+				this._scrollView (pixelX, pixelY);
+				if (callback) {
+					callback();
+				}
+			}
+		}, 
 		_scrollView: function (pixelX, pixelY) {
 			/*
 			* Always set _ensureCaretVisible to false so that the view does not scroll
@@ -5520,7 +5656,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				line = this._getLineNext(line);
 			}
 		},
-		_setSelection: function (selection, scroll, update, pageScroll) {
+		_setSelection: function (selection, scroll, update, callback, pageScroll) {
 			if (selection) {
 				this._columnX = -1;
 				if (update === undefined) { update = true; }
@@ -5533,7 +5669,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				* keyboard navigation when the selection does not chanage. For example, line down
 				* when the caret is already at the last line.
 				*/
-				if (scroll) { /*update = !*/this._showCaret(false, pageScroll); }
+				if (scroll !== false) { /*update = !*/this._showCaret(false, callback, scroll, pageScroll); }
 				
 				/* 
 				* Sometimes the browser changes the selection 
@@ -5765,7 +5901,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 			this._resetLineHeight();
 		},
-		_showCaret: function (allSelection, pageScroll) {
+		_showCaret: function (allSelection, callback, scrollAlign, pageScroll) {
 			if (!this._clientDiv) { return; }
 			var model = this._model;
 			var selection = this._getSelection();
@@ -5824,7 +5960,12 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				}
 			}
 			if (pixelX !== 0 || pixelY !== 0) {
-				this._scrollView (pixelX, pixelY);
+				if (pixelY !== 0 && typeof scrollAlign === "number") { //$NON-NLS-0$
+					if (scrollAlign < 0) { scrollAlign = 0; }
+					if (scrollAlign > 1) { scrollAlign = 1; }
+					pixelY += Math.floor(pixelY > 0 ? scrollAlign * clientHeight : -scrollAlign * clientHeight);
+				}
+				this._scrollViewAnimated(pixelX, pixelY, callback);
 				/*
 				* When the view scrolls it is possible that one of the scrollbars can show over the caret.
 				* Depending on the browser scrolling can be synchronous (Safari), in which case the change 
@@ -5918,7 +6059,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				this._ignoreQueueUpdate = false;
 			}
 			var model = this._model;
-			var scroll = this._getScroll();
+			var scroll = this._getScroll(false);
 			var viewPad = this._getViewPadding();
 			var lineCount = model.getLineCount();
 			var lineHeight = this._getLineHeight();
@@ -6130,7 +6271,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 					this._clipScrollDiv.style.width = width + "px"; //$NON-NLS-0$
 				}
 				/* Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset. */
-				scroll = this._getScroll();
+				scroll = this._getScroll(false);
 			}
 			if (this._vScrollDiv) {
 				var trackHeight = clientHeight - 8;

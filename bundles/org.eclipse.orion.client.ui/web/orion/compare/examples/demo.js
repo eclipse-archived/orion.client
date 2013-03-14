@@ -58,6 +58,8 @@ function(Compare) {
 			} else {
 				widget.options.baseFile.URL = oldContents;
 				widget.options.newFile.URL = newContents;
+				bCompareType.selectedIndex = 0;
+				compareType = bCompareType.options[bCompareType.selectedIndex].value;
 			}
 			widget.options.mapper = null;
 			compare.refresh();
@@ -78,6 +80,7 @@ function(Compare) {
 			widget.options.baseFile.URL = null;
 			widget.options.newFile.URL = null;
 		}
+		widget.options.mapper = null;
 		widget.refresh();
 	}
 	

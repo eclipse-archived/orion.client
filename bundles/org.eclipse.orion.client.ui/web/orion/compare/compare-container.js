@@ -696,7 +696,7 @@ exports.TwoWayCompareContainer = (function() {
 	};
 
 	TwoWayCompareContainer.prototype.copyToLeft = function(){	
-		this._curveRuler.copyToLeft();
+		this._curveRuler.copyTo(true);
 	};
 	
 	TwoWayCompareContainer.prototype.resizeEditors = function(){	

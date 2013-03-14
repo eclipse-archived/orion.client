@@ -251,14 +251,16 @@ orion.CompareCurveRuler =  (function() {
 			matchEditor.setTopIndex(matchLine);
 		},
 
-		copyToLeft: function(){
+		copyTo: function(left){
 			if(!this._diffNavigator.iterator){
 				return;
 			}
 			var currentDiff = this._diffNavigator.iterator.cursor();
 			if(currentDiff){
-				var textR = this._rightTextView.getText(currentDiff.oldA.start , currentDiff.oldA.end);
-				this._leftTextView.setText(textR , currentDiff.newA.start , currentDiff.newA.end);
+				var textToCopy = left ? this._rightTextView.getText(currentDiff.oldA.start , currentDiff.oldA.end) : this._leftTextView.getText(currentDiff.newA.start , currentDiff.newA.end);
+				var rangeToPaste = left ? currentDiff.newA :  currentDiff.oldA;
+				var viewToPaste = left ? this._leftTextView : this._rightTextView;
+				viewToPaste.setText(textToCopy , rangeToPaste.start , rangeToPaste.end);
 			}
 		},
 	
