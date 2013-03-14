@@ -198,7 +198,6 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 	 */
 	function TextActions(editor, undoStack, searcher) {
 		this.editor = editor;
-		this.textView = editor.getTextView();
 		this.undoStack = undoStack;
 		this._incrementalFind = new IncrementalFind(editor);
 		this._searcher =  searcher;
@@ -208,6 +207,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 	TextActions.prototype = {
 		init: function() {
 			var self = this;
+			var textView = this.editor.getTextView();
 			
 			this._lastEditListener = {
 				onModelChanged: function(e) {
@@ -216,14 +216,14 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 					}
 				}
 			};
-			this.textView.addEventListener("ModelChanged", this._lastEditListener.onModelChanged); //$NON-NLS-0$
+			textView.addEventListener("ModelChanged", this._lastEditListener.onModelChanged); //$NON-NLS-0$
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true), "findNext"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.textView.setAction("findNext", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true), "findNext"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("findNext", function() { //$NON-NLS-0$
 				if (this._searcher){
-					var selection = this.textView.getSelection();
+					var selection = textView.getSelection();
 					if(selection.start < selection.end) {
-						this._searcher.findNext(true, this.textView.getText(selection.start, selection.end));
+						this._searcher.findNext(true, textView.getText(selection.start, selection.end));
 					} else {
 						this._searcher.findNext(true);
 					}
@@ -232,12 +232,12 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return false;
 			}.bind(this), {name: messages.findNext});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true, true), "findPrevious"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.textView.setAction("findPrevious", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true, true), "findPrevious"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("findPrevious", function() { //$NON-NLS-0$
 				if (this._searcher){
-					var selection = this.textView.getSelection();
+					var selection = textView.getSelection();
 					if(selection.start < selection.end) {
-						this._searcher.findNext(false, this.textView.getText(selection.start, selection.end));
+						this._searcher.findNext(false, textView.getText(selection.start, selection.end));
 					} else {
 						this._searcher.findNext(false);
 					}
@@ -246,8 +246,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return false;
 			}.bind(this), {name: messages.findPrevious});
 	
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true), "incrementalFind"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.textView.setAction("incrementalFind", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true), "incrementalFind"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("incrementalFind", function() { //$NON-NLS-0$
 				if (this._searcher && this._searcher.visible()) {
 					return true;
 				}
@@ -258,13 +258,13 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				}
 				return true;
 			}.bind(this), {name: messages.incrementalFindKey});
-			this.textView.setAction("deletePrevious", function() { //$NON-NLS-0$
+			textView.setAction("deletePrevious", function() { //$NON-NLS-0$
 				return this._incrementalFind.backspace();
 			}.bind(this));
 			
-			this.textView.setAction("tab", function() { //$NON-NLS-0$
-				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				if(!this.textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
+			textView.setAction("tab", function() { //$NON-NLS-0$
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+				if(!textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -278,7 +278,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 					}
 					var lineStart = model.getLineStart(firstLine);
 					var lineEnd = model.getLineEnd(lastLine, true);
-					var options = this.textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
+					var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
 					var text = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
 					editor.setText(lines.join(text), lineStart, lineEnd);
 					editor.setSelection(lineStart === selection.start ? selection.start : selection.start + text.length, selection.end + ((lastLine - firstLine + 1) * text.length));
@@ -295,15 +295,15 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return false;
 			}.bind(this));
 	
-			this.textView.setAction("shiftTab", function() { //$NON-NLS-0$
-				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				if(!this.textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
+			textView.setAction("shiftTab", function() { //$NON-NLS-0$
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+				if(!textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
 				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				var tabSize = this.textView.getOptions("tabSize"); //$NON-NLS-0$
+				var tabSize = textView.getOptions("tabSize"); //$NON-NLS-0$
 				var spaceTab = new Array(tabSize + 1).join(" "); //$NON-NLS-0$
 				var lines = [], removeCount = 0, firstRemoveCount = 0;
 				for (var i = firstLine; i <= lastLine; i++) {
@@ -334,9 +334,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.unindentLines});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(38, false, false, true), "moveLinesUp"); //$NON-NLS-0$
-			this.textView.setAction("moveLinesUp", function() { //$NON-NLS-0$
-				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(38, false, false, true), "moveLinesUp"); //$NON-NLS-0$
+			textView.setAction("moveLinesUp", function() { //$NON-NLS-0$
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -367,9 +367,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.moveLinesUp});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(40, false, false, true), "moveLinesDown"); //$NON-NLS-0$
-			this.textView.setAction("moveLinesDown", function() { //$NON-NLS-0$
-				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(40, false, false, true), "moveLinesDown"); //$NON-NLS-0$
+			textView.setAction("moveLinesDown", function() { //$NON-NLS-0$
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -399,9 +399,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.moveLinesDown});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(38, true, false, true), "copyLinesUp"); //$NON-NLS-0$
-			this.textView.setAction("copyLinesUp", function() { //$NON-NLS-0$
-				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(38, true, false, true), "copyLinesUp"); //$NON-NLS-0$
+			textView.setAction("copyLinesUp", function() { //$NON-NLS-0$
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -421,9 +421,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.copyLinesUp});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(40, true, false, true), "copyLinesDown"); //$NON-NLS-0$
-			this.textView.setAction("copyLinesDown", function() { //$NON-NLS-0$
-				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(40, true, false, true), "copyLinesDown"); //$NON-NLS-0$
+			textView.setAction("copyLinesDown", function() { //$NON-NLS-0$
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -443,9 +443,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.copyLinesDown});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding('d', true, false, false), "deleteLines"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.textView.setAction("deleteLines", function() { //$NON-NLS-0$
-				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding('d', true, false, false), "deleteLines"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("deleteLines", function() { //$NON-NLS-0$
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var selection = editor.getSelection();
 				var model = editor.getModel();
@@ -458,8 +458,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			}.bind(this), {name: messages.deleteLines});
 			
 			// Go To Line action
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("l", true), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.textView.setAction("gotoLine", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("l", true), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("gotoLine", function() { //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var line = model.getLineAtOffset(editor.getCaretOffset());
@@ -526,18 +526,18 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				}
 				return true;
 			}
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(190, true), "nextAnnotation"); //$NON-NLS-0$
-			this.textView.setAction("nextAnnotation", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(190, true), "nextAnnotation"); //$NON-NLS-0$
+			textView.setAction("nextAnnotation", function() { //$NON-NLS-0$
 				return nextAnnotation(true);
 			}.bind(this), {name: messages.nextAnnotation});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(188, true), "previousAnnotation"); //$NON-NLS-0$
-			this.textView.setAction("previousAnnotation", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(188, true), "previousAnnotation"); //$NON-NLS-0$
+			textView.setAction("previousAnnotation", function() { //$NON-NLS-0$
 				return nextAnnotation(false);
 			}.bind(this), {name: messages.prevAnnotation});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, false, true, false), "expand"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.textView.setAction("expand", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, false, true, false), "expand"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("expand", function() { //$NON-NLS-0$
 				var editor = this.editor;
 				var annotationModel = editor.getAnnotationModel();
 				if(!annotationModel) { return true; }
@@ -565,8 +565,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.expand});
 	
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, false, true, false), "collapse"); //$NON-NLS-1$ //$NON-NLS-0$
-				this.textView.setAction("collapse", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, false, true, false), "collapse"); //$NON-NLS-1$ //$NON-NLS-0$
+				textView.setAction("collapse", function() { //$NON-NLS-0$
 				var editor = this.editor;
 				var annotationModel = editor.getAnnotationModel();
 				if(!annotationModel) { return true; }
@@ -594,14 +594,14 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.collapse});
 	
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, true, true, false), "expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.textView.setAction("expandAll", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, true, true, false), "expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("expandAll", function() { //$NON-NLS-0$
 				var editor = this.editor;
 				var annotationModel = editor.getAnnotationModel();
 				if(!annotationModel) { return true; }
 				var model = editor.getModel();
 				var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
-				this.textView.setRedraw(false);
+				textView.setRedraw(false);
 				while (iter.hasNext()) {
 					annotation = iter.next();
 					if (annotation.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
@@ -610,18 +610,18 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 						annotationModel.modifyAnnotation(annotation);
 					}
 				}
-				this.textView.setRedraw(true);
+				textView.setRedraw(true);
 				return true;
 			}.bind(this), {name: messages.expandAll});
 	
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, true, true, false), "collapseAll"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.textView.setAction("collapseAll", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, true, true, false), "collapseAll"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("collapseAll", function() { //$NON-NLS-0$
 				var editor = this.editor;
 				var annotationModel = editor.getAnnotationModel();
 				if(!annotationModel) { return true; }
 				var model = editor.getModel();
 				var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
-				this.textView.setRedraw(false);
+				textView.setRedraw(false);
 				while (iter.hasNext()) {
 					annotation = iter.next();
 					if (annotation.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
@@ -630,12 +630,12 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 						annotationModel.modifyAnnotation(annotation);
 					}
 				}
-				this.textView.setRedraw(true);
+				textView.setRedraw(true);
 				return true;
 			}.bind(this), {name: messages.collapseAll});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !util.isMac, false, false, util.isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.textView.setAction("lastEdit", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !util.isMac, false, false, util.isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("lastEdit", function() { //$NON-NLS-0$
 				if (typeof this._lastEditLocation === "number")  { //$NON-NLS-0$
 					this.editor.showSelection(this._lastEditLocation);
 				}
@@ -686,7 +686,6 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 	 */
 	function SourceCodeActions(editor, undoStack, contentAssist, linkedMode) {
 		this.editor = editor;
-		this.textView = editor.getTextView();
 		this.undoStack = undoStack;
 		this.contentAssist = contentAssist;
 		this.linkedMode = linkedMode;
@@ -708,8 +707,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			}
 		}, 
 		init: function() {
+			var textView = this.editor.getTextView();
 		
-			this.textView.setAction("lineStart", function() { //$NON-NLS-0$
+			textView.setAction("lineStart", function() { //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var caretOffset = editor.getCaretOffset();
@@ -732,9 +732,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			}.bind(this));
 		
 			// Block comment operations
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true), "toggleLineComment"); //$NON-NLS-0$
-			this.textView.setAction("toggleLineComment", function() { //$NON-NLS-0$
-				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true), "toggleLineComment"); //$NON-NLS-0$
+			textView.setAction("toggleLineComment", function() { //$NON-NLS-0$
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -816,9 +816,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return {commentStart: commentStart, commentEnd: commentEnd};
 			}
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, !util.isMac, false, util.isMac), "addBlockComment"); //$NON-NLS-0$
-			this.textView.setAction("addBlockComment", function() { //$NON-NLS-0$
-				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, !util.isMac, false, util.isMac), "addBlockComment"); //$NON-NLS-0$
+			textView.setAction("addBlockComment", function() { //$NON-NLS-0$
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -841,9 +841,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.addBlockComment});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, !util.isMac, false, util.isMac), "removeBlockComment"); //$NON-NLS-0$
-			this.textView.setAction("removeBlockComment", function() { //$NON-NLS-0$
-				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, !util.isMac, false, util.isMac), "removeBlockComment"); //$NON-NLS-0$
+			textView.setAction("removeBlockComment", function() { //$NON-NLS-0$
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -924,7 +924,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				this.linkedMode.enterLinkedMode(linkedModeModel);
 			} else if (proposal.escapePosition) {
 				//we don't want linked mode, but there is an escape position, so just set cursor position
-				this.textView.setCaretOffset(proposal.escapePosition);
+				var textView = this.editor.getTextView();
+				textView.setCaretOffset(proposal.escapePosition);
 			}
 			return true;
 		},
@@ -946,7 +947,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 		},
 		enter: function() {
 			// Auto indent
-			if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var textView = this.editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 			var editor = this.editor;
 			var selection = editor.getSelection();
 			if (selection.start === selection.end) {
@@ -974,7 +976,6 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 	
 	function LinkedMode(editor) {
 		this.editor = editor;
-		this.textView = editor.getTextView();
 		
 		/**
 		 * The variables used by the Linked Mode. The elements of linkedModePositions have following structure:
@@ -1059,18 +1060,19 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			this.linkedModeCurrentPositionIndex = 0;
 			this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
 
-			this.textView.addEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
+			var textView = this.editor.getTextView();
+			textView.addEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
 
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "nextLinkedModePosition"); //$NON-NLS-0$
-			this.textView.setAction("nextLinkedModePosition", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "nextLinkedModePosition"); //$NON-NLS-0$
+			textView.setAction("nextLinkedModePosition", function() { //$NON-NLS-0$
 				// Switch to the next group on TAB key
 				this.linkedModeCurrentPositionIndex = ++this.linkedModeCurrentPositionIndex % this.linkedModePositions.length;
 				this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
 				return true;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "previousLinkedModePosition"); //$NON-NLS-0$
-			this.textView.setAction("previousLinkedModePosition", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "previousLinkedModePosition"); //$NON-NLS-0$
+			textView.setAction("previousLinkedModePosition", function() { //$NON-NLS-0$
 				this.linkedModeCurrentPositionIndex = this.linkedModeCurrentPositionIndex > 0 ? this.linkedModeCurrentPositionIndex-1 : this.linkedModePositions.length-1;
 				this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
 				return true;
@@ -1098,12 +1100,13 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return;
 			}
 			this.linkedModeActive = false;
-			this.textView.removeEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "tab"); //$NON-NLS-0$
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "shiftTab"); //$NON-NLS-0$
+			var textView = this.editor.getTextView();
+			textView.removeEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "tab"); //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "shiftTab"); //$NON-NLS-0$
 			
 			if (!ignoreEscapePosition) {
-				this.textView.setCaretOffset(this.linkedModeEscapePosition, false);
+				textView.setCaretOffset(this.linkedModeEscapePosition, false);
 			}
 
 			this.editor.reportStatus(messages.linkedModeExited, null, true);
@@ -1119,7 +1122,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 		 * Updates the selection in the textView for given Linked Mode position.
 		 */
 		selectTextForLinkedModePosition: function(position) {
-			this.textView.setSelection(position.offset, position.offset + position.length);
+			var textView = this.editor.getTextView();
+			textView.setSelection(position.offset, position.offset + position.length);
 		}
 	};
 
