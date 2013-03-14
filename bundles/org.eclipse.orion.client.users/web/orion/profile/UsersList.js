@@ -30,7 +30,7 @@ eclipse.UsersList = (function(){
 		this.actionScopeId = actionScopeId;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new eclipse.UsersRenderer({actionScopeId: this.actionScopeId, checkbox: false, cachePrefix: "UsersNavigator"}, this); //$NON-NLS-0$
+		this.renderer = new eclipse.UsersRenderer({actionScopeId: this.actionScopeId, commandService: this.commandService, checkbox: false, cachePrefix: "UsersNavigator"}, this); //$NON-NLS-0$
 	}
 	
 	UsersList.prototype = new mExplorer.Explorer();
