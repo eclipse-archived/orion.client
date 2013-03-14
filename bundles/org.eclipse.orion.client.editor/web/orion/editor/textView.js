@@ -1178,8 +1178,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				clientDiv.style.width = clientWidth;
 			}
 			var viewPadding = this._getViewPadding();
-			w += viewPadding.right + viewPadding.left;
-			h += viewPadding.bottom + viewPadding.top;
+			w += viewPadding.right + viewPadding.left + this._metrics.scrollWidth;
+			h += viewPadding.bottom + viewPadding.top + this._metrics.scrollWidth;
 			return {width: w, height: h};
 		},
 		/**

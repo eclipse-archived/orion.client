@@ -141,7 +141,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				contentsView.addEventListener("LineStyle", listener.onLineStyle); //$NON-NLS-0$
 				contentsView.setModel(contents);
 				var size = contentsView.computeSize();
-				tooltipContents.style.width = (size.width + 20) + "px"; //$NON-NLS-0$
+				tooltipContents.style.width = size.width + "px"; //$NON-NLS-0$
 				tooltipContents.style.height = size.height + "px"; //$NON-NLS-0$
 				contentsView.resize();
 			} else {
