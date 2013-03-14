@@ -178,6 +178,10 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 				var focusItem = document.activeElement;
 				if (items.length && items.length > 0 && focusItem) {
 					var index = items.indexOf(focusItem);
+					// for inputs nested in labels, we should check the parent node since the label is the item
+					if (index < 0) {
+						index = items.indexOf(focusItem.parentNode);
+					}
 					if (index >= 0) {
 						if (event.keyCode === lib.KEY.UP && index > 0) {
 							index--;
