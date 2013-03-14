@@ -10,11 +10,18 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define */
-/*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/editorFeatures", ['i18n!orion/editor/nls/messages', 'orion/editor/undoStack', 'orion/keyBinding', //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	'orion/editor/rulers', 'orion/editor/annotations', 'orion/editor/tooltip', 'orion/editor/textDND', 'orion/editor/regex', 'orion/util'], //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTextDND, mRegex, util) {
+define("orion/editor/editorFeatures", [ //$NON-NLS-0$
+	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
+	'orion/editor/undoStack', //$NON-NLS-0$
+	'orion/keyBinding', //$NON-NLS-0$
+	'orion/editor/rulers', //$NON-NLS-0$
+	'orion/editor/annotations', //$NON-NLS-0$
+	'orion/editor/tooltip', //$NON-NLS-0$
+	'orion/editor/textDND', //$NON-NLS-0$
+	'orion/editor/regex', //$NON-NLS-0$
+	'orion/util' //$NON-NLS-0$
+], function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTextDND, mRegex, util) {
 
 	function UndoFactory() {
 	}
@@ -471,167 +478,34 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.gotoLine});
 			
-			function nextAnnotation(forward) {
-				var editor = self.editor;
-				var annotationModel = editor.getAnnotationModel();
-				if(!annotationModel) { return true; }
-				var model = editor.getModel();
-				var currentOffset = editor.getCaretOffset();
-				var annotations = annotationModel.getAnnotations(forward ? currentOffset : 0, forward ? model.getCharCount() : currentOffset);
-				var foundAnnotation = null;
-				while (annotations.hasNext()) {
-					var annotation = annotations.next();
-					if (forward) {
-						if (annotation.start <= currentOffset) { continue; }
-					} else {
-						if (annotation.start >= currentOffset) { continue; }
-					}
-					switch (annotation.type) {
-						case mAnnotations.AnnotationType.ANNOTATION_ERROR:
-						case mAnnotations.AnnotationType.ANNOTATION_WARNING:
-						case mAnnotations.AnnotationType.ANNOTATION_TASK:
-						case mAnnotations.AnnotationType.ANNOTATION_BOOKMARK:
-							break;
-						default:
-							continue;
-					}
-					foundAnnotation = annotation;
-					if (forward) {
-						break;
-					}
-				}
-				if (foundAnnotation) {
-					var view = self.textView;
-					var nextLine = model.getLineAtOffset(foundAnnotation.start);
-					var tooltip = mTooltip.Tooltip.getTooltip(view);
-					if (!tooltip) {
-						editor.moveSelection(foundAnnotation.start);
-						return true;
-					}
-					editor.moveSelection(foundAnnotation.start, foundAnnotation.start, function() {
-						tooltip.setTarget({
-							getTooltipInfo: function() {
-								var tooltipCoords = view.convert({
-									x: view.getLocationAtOffset(foundAnnotation.start).x, 
-									y: view.getLocationAtOffset(model.getLineStart(nextLine)).y
-								}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
-								return {
-									contents: [foundAnnotation],
-									x: tooltipCoords.x,
-									y: tooltipCoords.y + Math.floor(view.getLineHeight(nextLine) * 1.33)
-								};
-							}
-						}, 0);
-					});
-				}
-				return true;
-			}
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(190, true), "nextAnnotation"); //$NON-NLS-0$
 			textView.setAction("nextAnnotation", function() { //$NON-NLS-0$
-				return nextAnnotation(true);
+				return this.nextAnnotation(true);
 			}.bind(this), {name: messages.nextAnnotation});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(188, true), "previousAnnotation"); //$NON-NLS-0$
 			textView.setAction("previousAnnotation", function() { //$NON-NLS-0$
-				return nextAnnotation(false);
+				return this.nextAnnotation(false);
 			}.bind(this), {name: messages.prevAnnotation});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, false, true, false), "expand"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("expand", function() { //$NON-NLS-0$
-				var editor = this.editor;
-				var annotationModel = editor.getAnnotationModel();
-				if(!annotationModel) { return true; }
-				var model = editor.getModel();
-				var currentOffset = editor.getCaretOffset();
-				var lineIndex = model.getLineAtOffset(currentOffset);
-				var start = model.getLineStart(lineIndex);
-				var end = model.getLineEnd(lineIndex, true);
-				if (model.getBaseModel) {
-					start = model.mapOffset(start);
-					end = model.mapOffset(end);
-					model = model.getBaseModel();
-				}
-				var annotation, iter = annotationModel.getAnnotations(start, end);
-				while (!annotation && iter.hasNext()) {
-					var a = iter.next();
-					if (a.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
-					if (a.expanded) { continue; }
-					annotation = a;
-				}
-				if (annotation && !annotation.expanded) {
-					annotation.expand();
-					annotationModel.modifyAnnotation(annotation);
-				}
-				return true;
+				return this.expandAnnotation(true);
 			}.bind(this), {name: messages.expand});
 	
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, false, true, false), "collapse"); //$NON-NLS-1$ //$NON-NLS-0$
-				textView.setAction("collapse", function() { //$NON-NLS-0$
-				var editor = this.editor;
-				var annotationModel = editor.getAnnotationModel();
-				if(!annotationModel) { return true; }
-				var model = editor.getModel();
-				var currentOffset = editor.getCaretOffset();
-				var lineIndex = model.getLineAtOffset(currentOffset);
-				var start = model.getLineStart(lineIndex);
-				var end = model.getLineEnd(lineIndex, true);
-				if (model.getBaseModel) {
-					start = model.mapOffset(start);
-					end = model.mapOffset(end);
-					model = model.getBaseModel();
-				}
-				var annotation, iter = annotationModel.getAnnotations(start, end);
-				while (!annotation && iter.hasNext()) {
-					var a = iter.next();
-					if (a.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
-					annotation = a;
-				}
-				if (annotation && annotation.expanded) {
-					editor.setCaretOffset(annotation.start);
-					annotation.collapse();
-					annotationModel.modifyAnnotation(annotation);
-				}
-				return true;
+			textView.setAction("collapse", function() { //$NON-NLS-0$
+				return this.expandAnnotation(false);
 			}.bind(this), {name: messages.collapse});
 	
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, true, true, false), "expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("expandAll", function() { //$NON-NLS-0$
-				var editor = this.editor;
-				var annotationModel = editor.getAnnotationModel();
-				if(!annotationModel) { return true; }
-				var model = editor.getModel();
-				var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
-				textView.setRedraw(false);
-				while (iter.hasNext()) {
-					annotation = iter.next();
-					if (annotation.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
-					if (!annotation.expanded) {
-						annotation.expand();
-						annotationModel.modifyAnnotation(annotation);
-					}
-				}
-				textView.setRedraw(true);
-				return true;
+				return this.expandAnnotations(true);
 			}.bind(this), {name: messages.expandAll});
 	
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, true, true, false), "collapseAll"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("collapseAll", function() { //$NON-NLS-0$
-				var editor = this.editor;
-				var annotationModel = editor.getAnnotationModel();
-				if(!annotationModel) { return true; }
-				var model = editor.getModel();
-				var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
-				textView.setRedraw(false);
-				while (iter.hasNext()) {
-					annotation = iter.next();
-					if (annotation.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
-					if (annotation.expanded) {
-						annotation.collapse();
-						annotationModel.modifyAnnotation(annotation);
-					}
-				}
-				textView.setRedraw(true);
-				return true;
+				return this.expandAnnotations(false);
 			}.bind(this), {name: messages.collapseAll});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !util.isMac, false, false, util.isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -641,6 +515,120 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				}
 				return true;
 			}.bind(this), {name: messages.lastEdit});
+		},
+		
+		nextAnnotation: function (forward) {
+			var editor = this.editor;
+			var annotationModel = editor.getAnnotationModel();
+			if(!annotationModel) { return true; }
+			var model = editor.getModel();
+			var currentOffset = editor.getCaretOffset();
+			var annotations = annotationModel.getAnnotations(forward ? currentOffset : 0, forward ? model.getCharCount() : currentOffset);
+			var foundAnnotation = null;
+			while (annotations.hasNext()) {
+				var annotation = annotations.next();
+				if (forward) {
+					if (annotation.start <= currentOffset) { continue; }
+				} else {
+					if (annotation.start >= currentOffset) { continue; }
+				}
+				switch (annotation.type) {
+					case mAnnotations.AnnotationType.ANNOTATION_ERROR:
+					case mAnnotations.AnnotationType.ANNOTATION_WARNING:
+					case mAnnotations.AnnotationType.ANNOTATION_TASK:
+					case mAnnotations.AnnotationType.ANNOTATION_BOOKMARK:
+						break;
+					default:
+						continue;
+				}
+				foundAnnotation = annotation;
+				if (forward) {
+					break;
+				}
+			}
+			if (foundAnnotation) {
+				var view = editor.getTextView();
+				var nextLine = model.getLineAtOffset(foundAnnotation.start);
+				var tooltip = mTooltip.Tooltip.getTooltip(view);
+				if (!tooltip) {
+					editor.moveSelection(foundAnnotation.start);
+					return true;
+				}
+				editor.moveSelection(foundAnnotation.start, foundAnnotation.start, function() {
+					tooltip.setTarget({
+						getTooltipInfo: function() {
+							var tooltipCoords = view.convert({
+								x: view.getLocationAtOffset(foundAnnotation.start).x, 
+								y: view.getLocationAtOffset(model.getLineStart(nextLine)).y
+							}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
+							return {
+								contents: [foundAnnotation],
+								x: tooltipCoords.x,
+								y: tooltipCoords.y + Math.floor(view.getLineHeight(nextLine) * 1.33)
+							};
+						}
+					}, 0);
+				});
+			}
+			return true;
+		},
+		
+		expandAnnotation: function(expand) {
+			var editor = this.editor;
+			var annotationModel = editor.getAnnotationModel();
+			if(!annotationModel) { return true; }
+			var model = editor.getModel();
+			var currentOffset = editor.getCaretOffset();
+			var lineIndex = model.getLineAtOffset(currentOffset);
+			var start = model.getLineStart(lineIndex);
+			var end = model.getLineEnd(lineIndex, true);
+			if (model.getBaseModel) {
+				start = model.mapOffset(start);
+				end = model.mapOffset(end);
+				model = model.getBaseModel();
+			}
+			var annotation, iter = annotationModel.getAnnotations(start, end);
+			while (!annotation && iter.hasNext()) {
+				var a = iter.next();
+				if (a.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
+				annotation = a;
+			}
+			if (annotation) {
+				if (expand !== annotation.expanded) {
+					if (expand) {
+						annotation.expand();
+					} else {
+						editor.setCaretOffset(annotation.start);
+						annotation.collapse();
+					}
+					annotationModel.modifyAnnotation(annotation);
+				}
+			}
+			return true;
+		},
+
+		expandAnnotations: function(expand) {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			var annotationModel = editor.getAnnotationModel();
+			if(!annotationModel) { return true; }
+			var model = editor.getModel();
+			var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
+			textView.setRedraw(false);
+			while (iter.hasNext()) {
+				annotation = iter.next();
+				if (annotation.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
+				if (expand !== annotation.expanded) {
+					if (expand) {
+						annotation.expand();
+					} else {
+						annotation.collapse();
+					}
+					annotationModel.modifyAnnotation(annotation);
+				}
+			}
+			textView.setRedraw(true);
+			return true;
 		},
 		
 		startUndo: function() {
