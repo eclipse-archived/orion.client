@@ -4408,7 +4408,8 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			div._ruler = ruler;
 			div.rulerChanged = true;
 			div.style.position = "relative"; //$NON-NLS-0$
-			div.style["float"] = "left"; //$NON-NLS-1$ //$NON-NLS-0$
+			div.style.cssFloat = "left"; //$NON-NLS-0$
+			div.style.styleFloat = "left"; //$NON-NLS-0$
 			div.style.borderWidth = "0px"; //$NON-NLS-0$
 			div.style.margin = "0px"; //$NON-NLS-0$
 			div.style.padding = "0px"; //$NON-NLS-0$
