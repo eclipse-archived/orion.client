@@ -38,7 +38,7 @@ define(function() {
 		deleteUser : function(userURI, onLoad) {
 			return this._doServiceCall("deleteUser", arguments); //$NON-NLS-0$
 		},
-		createUser : function(userName, password, onLoad, onError) {
+		createUser : function(userInfo, onLoad, onError) {
 			return this._doServiceCall("createUser", arguments); //$NON-NLS-0$
 		},
 		updateUserInfo: function(userUri, data, onLoad){
