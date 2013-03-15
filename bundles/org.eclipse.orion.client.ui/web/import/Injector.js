@@ -17,16 +17,24 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 		this.usersClient = usersClient;
 	}
 	/**
-	 * @param {Boolean} createUser True to create a new user should be created, false to use an existing user.
-	 * @param {Object} userInfo User data for creating new user, or logging in.
-	 * @param {String} [userInfo.email] Required when createUser == true, otherwise ignored.
-	 * @param {String} [userInfo.Name] Required when createUser == true, otherwise ignored.
-	 * @param {String} [userInfo.login] Required when !createUser, otherwise optional.
-	 * @param {String} userInfo.password
+	 * @param {Boolean} createUser True to create a new user, false to use an existing user.
+	 * @param {Object} userInfo User data for creating new user, or for logging in.
+	 * When <code>createUser</code> is true, a guest user may be created by providing the following parameters in userInfo:
+	 * <dl>
+	 *  <dt>{Boolean} userInfo.Guest</dt> <dd><code>true</code></dd>
+	 *  <dt>{String} [userInfo.Name]</dt> <dd>Optional, provides the display name for the guest user.</dd>
+	 * </ul>
+	 * Alternatively, a regular Orion account may created by providing the following parameters in userInfo:
+	 * <dl>
+	 *  <dt>{String} userInfo.Email</dt> <dd>Required. May be user for email validation.</dd>
+	 *  <dt>{String} userInfo.Login</dt> <dd>Required.</dd>
+	 *  <dt>{String} userInfo.Password</dt> <dd>Required.</dd>
+	 *  <dt>{String} [userInfo.Name]</dt> <dd>Optional.</dd>
+	 * </dl>
 	 * @param {Blob} projectZipData
 	 * @param {String} projectName
 	 */
-	Injector.prototype.inject = function(createUser, userInfo, projectZipData, projectName) {
+	Injector.prototype.inject = function(isCreateUser, userInfo, projectZipData, projectName) {
 		projectName = projectName || 'Project';
 		var fileClient = this.fileClient;
 		var usersClient = this.usersClient;
@@ -48,17 +56,15 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 			});
 		};
 		var ensureUserLoggedIn = function() {
-			if (createUser) {
-				var randomSuffix = String(Math.random()).substring(2, 12);
-				var login = 'user' + randomSuffix;
+			if (isCreateUser) {
 				var displayName = userInfo.Name;
-				var password = userInfo.Password;
-				var email = 'user@' + randomSuffix;
-				return usersClient.createUser(login, password, email).then(function(user) {
+				return usersClient.createUser(userInfo).then(function(user) {
 					debug('user created');
 					return user;
-				}).then(function() {
-					return doLogin(login, password);
+				}).then(function(user) {
+					debug('login: ' + user.login);
+					debug('password: ' + user.password);
+					return doLogin(user.login, user.password);
 				}).then(function(user) {
 					debug('set display name of ' + user.login + ' to ' + displayName);
 					user.Name = displayName;
