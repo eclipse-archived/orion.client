@@ -39,6 +39,9 @@
 .ambience .string-quoted {
 	color: lightcoral;
 }
+.ambience .line_caret {
+	background-color: lightcyan;
+}
 .ambience .token_keyword {
 	color: cornFlowerBlue;
 }
