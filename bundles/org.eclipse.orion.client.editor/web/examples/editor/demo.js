@@ -105,8 +105,7 @@ function(mSetup, mTestPerformance, util) {
 
 	var contents, currentContents;
 	function setOptions() {
-		var view = mSetup.checkView(getOptions());
-		view.focus();
+		mSetup.checkView(getOptions());
 		updateOptions();
 		window.setTimeout(function() {
 			if (currentContents !== sContents.value) {
