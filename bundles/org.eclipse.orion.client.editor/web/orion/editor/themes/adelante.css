@@ -39,6 +39,9 @@
 .adelante .string-quoted {
 	color: #DE5D3B;
 }
+.adelante .line_caret {
+	background-color: #9e937b;
+}
 .adelante .token_keyword {
 	color: #AF473B;
 }

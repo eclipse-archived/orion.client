@@ -39,6 +39,9 @@
 .tierra .string-quoted {
 	color: orangered;
 }
+.tierra .line_caret {
+	background-color: #baa289;
+}
 .tierra .token_keyword {
 	color: darkred;
 }

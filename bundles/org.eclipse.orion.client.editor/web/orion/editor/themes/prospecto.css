@@ -39,6 +39,9 @@
 .prospecto .string-quoted {
 	color: #446FBD;
 }
+.prospecto .line_caret {
+	background-color: #EAF2FE;
+}
 .prospecto .token_keyword {
 	color: #CC4C07;
 }

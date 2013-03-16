@@ -174,6 +174,7 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			defineRule("string-quoted", settings.string, false); //$NON-NLS-0$
 			
 			//From textstyler.css
+			defineRule("line_caret", settings.currentLine, true); //$NON-NLS-0$
 			defineRule("token_keyword", settings.keyword, false); //$NON-NLS-0$
 			defineRule("token_string", settings.string, false); //$NON-NLS-0$
 			defineRule("token_singleline_comment", settings.comment, false); //$NON-NLS-0$

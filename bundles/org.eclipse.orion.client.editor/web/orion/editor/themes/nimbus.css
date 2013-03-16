@@ -39,6 +39,9 @@
 .nimbus .string-quoted {
 	color: cornflowerblue;
 }
+.nimbus .line_caret {
+	background-color: #aabfbb;
+}
 .nimbus .token_keyword {
 	color: darkorange;
 }

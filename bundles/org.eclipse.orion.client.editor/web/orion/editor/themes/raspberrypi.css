@@ -39,6 +39,9 @@
 .raspberrypi .string-quoted {
 	color: darkorange;
 }
+.raspberrypi .line_caret {
+	background-color: #F5B1AE;
+}
 .raspberrypi .token_keyword {
 	color: #E73E36;
 }
