@@ -41,14 +41,17 @@ define(["orion/bootstrap", "orion/xhr", "orion/Deferred", "orion/plugin", "domRe
 		                    "Orion-Version": "1" //$NON-NLS-0$
 		                },
 		                data: JSON.stringify(args),
-		                timeout: 15000
+		                timeout: 60000
 		            }).then(
 		            function(result) {
-		                var res = JSON.parse(result.response);
-		                return res.cmdOutput;
+						if(result.response){
+							var res = JSON.parse(result.response);
+							return res.cmdOutput;
+						} else {
+							return "";
+						}
 		            }, function(error) {
-						var err = JSON.parse(error.response);
-		                return err.Message;
+						return error.error;
 		            });
 		            return d;
 		        }
@@ -71,14 +74,17 @@ define(["orion/bootstrap", "orion/xhr", "orion/Deferred", "orion/plugin", "domRe
 		                    "Orion-Version": "1" //$NON-NLS-0$
 		                },
 		                data: JSON.stringify(args),
-		                timeout: 15000
+		                timeout: 60000
 		            }).then(
 		            function(result) {
-		                var res = JSON.parse(result.response);
-		                return res.cmdOutput;
+						if(result.response){
+							var res = JSON.parse(result.response);
+							return res.cmdOutput;
+						} else {
+							return "";
+						}
 		            }, function(error) {
-						var err = JSON.parse(error.response);
-		                return err.Message;
+						return error.error;
 		            });
 		            return d;
 		        }

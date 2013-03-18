@@ -101,18 +101,32 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 			});
 			return ret;
 		},
-		createUser : function(userName, password, email, onLoad, onError) {
+		createUser : function(userInfo, onLoad, onError) {
+			userInfo = userInfo || {};
+			var formData = {
+				login : userInfo.login,
+				password : userInfo.password,
+				email: userInfo.email
+			};
+			if (userInfo.guest) {
+				formData.guest = '';
+				if (typeof formData.login !== 'string') {
+					delete formData.login;
+				}
+				if (typeof formData.password !== 'string') {
+					delete formData.password;
+				}
+				if (typeof formData.email !== 'string') {
+					delete formData.email;
+				}
+			}
 			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Content-Type": "application/x-www-form-urlencoded", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout: 15000,
-				data: form.encodeFormData({
-					login : userName,
-					password : password,
-					email: email
-				})
+				data: form.encodeFormData(formData)
 			}).then(function(result) {
 				return new Deferred().resolve(getJSON(result.response));
 			}, function(result) {

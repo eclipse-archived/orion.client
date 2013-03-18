@@ -409,7 +409,9 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 				self.position();
 			}
 		};
-		document.addEventListener("scroll", this.scrollListener);
+		if (document.addEventListener) {
+			document.addEventListener("scroll", this.scrollListener);
+		}
 	}
 	ContentAssistWidget.prototype = /** @lends orion.editor.ContentAssistWidget.prototype */ {
 		/** @private */
