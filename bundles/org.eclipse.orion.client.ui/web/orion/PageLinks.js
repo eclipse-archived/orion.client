@@ -34,12 +34,11 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "ori
 		var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1); //$NON-NLS-0$
 		var locationObject = {OrionHome: orionHome, Location: params.resource};
 		var infos = [];
-		for (var i=0; i<navLinks.length; i++) {
+		navLinks.forEach(function(navLink) {
 			var info = {};
-			var propertyNames = navLinks[i].getPropertyKeys();
-			for (var j = 0; j < propertyNames.length; j++) {
-				info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
-			}
+			navLink.getPropertyKeys().forEach(function(key) {
+				info[key] = navLink.getProperty(key);
+			});
 			if(info.uriTemplate && info.nls && (info.name || info.nameKey)){
 				var d = new Deferred();
 				require(['i18n!'+info.nls], function(commandMessages){ //$NON-NLS-0$
@@ -61,7 +60,7 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "ori
 				info.textContent = info.name;
 				infos.push(new Deferred().resolve(info));
 			}
-		}
+		});
 		return Deferred.all(infos);
 	}
 
