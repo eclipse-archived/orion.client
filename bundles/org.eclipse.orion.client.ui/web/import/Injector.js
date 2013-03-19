@@ -42,15 +42,18 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 		// Log in -- TODO no service API for this, so it's hardcoded
 		var doLogin = function(login, password) {
 			debug('logging in...');
-			return xhr('POST', require.toUrl('login/form'), {
+			var formData = {
+				login: login
+			};
+			if (typeof password === 'string') {
+				formData.password = password;
+			}
+			return xhr('POST', '../login/form', {
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded',
 					'Orion-Version': '1'
 				},
-				data: form.encodeFormData({
-					login: login,
-					password: password
-				})
+				data: form.encodeFormData(formData)
 			}).then(function(xhrResult) {
 				return JSON.parse(xhrResult.response);
 			});
