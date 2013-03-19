@@ -39,6 +39,9 @@
 .blue .string-quoted {
 	color: cornFlowerBlue;
 }
+.blue .line_caret {
+	background-color: white;
+}
 .blue .token_keyword {
 	color: cornFlowerBlue;
 }
