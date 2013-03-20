@@ -12,6 +12,9 @@
 /*global define console window document*/
 
 define(function(){
+
+	var legalURICharacters = /^(?:[a-zA-Z0-9-_.!~*'()#;,\/?:@&=+$\[\]]|%[0-9A-F][0-9A-F])*$/;
+	
 	function matchResourceParameters(optURIText) {
 		optURIText = optURIText || window.location.toString();
 		var result = {resource:""};
@@ -21,8 +24,12 @@ define(function(){
 			if (text.length !== 0) {
 				var params = text.split(","); //$NON-NLS-0$
 				Object.defineProperty(result, "resourceRaw", {value: params[0]});
-				var decodedResource = decodeURIComponent(params[0]);
-				result.resource = encodeURI(decodedResource).replace(/%5B/g, '[').replace(/%5D/g, ']'); //$NON-NLS-1$ //$NON-NLS-0$
+				result.resource = decodeURIComponent(params[0]);
+				// FF and Safari can decode the hash
+				// this a best effort to detect and correct problems
+				if (!result.resource.match(legalURICharacters)) {
+					result.resource = encodeURI(result.resource).replace(/%5B/g, '[').replace(/%5D/g, ']'); //$NON-NLS-1$ //$NON-NLS-0$
+				}
 				for (var i = 1; i < params.length; i++) {
 					//We can not use params[i].split("=") here because a param's value may contain "=", which is not encoded.
 					var pair = params[i];
