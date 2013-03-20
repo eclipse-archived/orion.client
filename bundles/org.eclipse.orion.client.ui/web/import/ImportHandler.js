@@ -58,7 +58,8 @@ define(['require', 'orion/URITemplate', 'orion/URL-shim', 'orion/serviceTracker'
 				}
 				service.onresponse({
 					type: 'success', //$NON-NLS-0$
-					href: getHref(project.Location)
+					href: getHref(project.Location),
+					project: project
 				});
 			}, function(error) {
 				logError(error);
