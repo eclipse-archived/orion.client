@@ -103,6 +103,9 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 				return new Deferred.reject(e);
 			});
 		};
+		var readProject = function(project) {
+			return fileClient.read(project.ChildrenLocation, true);
+		};
 		var uploadZip = function(importLocation, zipData) {
 			// TODO why don't file service impls support this??
 			return xhr('POST', importLocation, {
@@ -117,10 +120,12 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 			return fileClient.loadWorkspace().then(function(workspace) {
 				console.log('loaded workspace ' + workspace.Location);
 				return ensureProjectExists(workspace.ChildrenLocation, projectName).then(function(project) {
-					return fileClient.read(project.ChildrenLocation, true).then(function(projectMetadata) {
+					return readProject(project).then(function(projectMetadata) {
 						console.log('Unzipping (importing) to ' + projectMetadata.ImportLocation);
 						return uploadZip(projectMetadata.ImportLocation, projectZipData).then(function() {
-							return projectMetadata;
+							return readProject(project).then(function(projectMetadata) {
+								return projectMetadata;
+							});
 						});
 					});
 				});
