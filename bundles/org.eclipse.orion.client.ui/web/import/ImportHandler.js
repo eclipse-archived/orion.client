@@ -62,7 +62,7 @@ define(['require', 'orion/URITemplate', 'orion/URL-shim', 'orion/serviceTracker'
 				});
 			}, function(error) {
 				logError(error);
-				service.onResponse({
+				service.onresponse({
 					type: 'error', //$NON-NLS-0$
 					error: error
 				});
