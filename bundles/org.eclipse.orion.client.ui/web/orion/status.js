@@ -62,31 +62,29 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 			this.currentMessage = msg;
 			var node = lib.node(this.domId);
 			if(typeof(isAccessible) === "boolean") { //$NON-NLS-0$
-				var that = this;
 				// this is kind of a hack; when there is good screen reader support for aria-busy,
 				// this should be done by toggling that instead
 				var readSetting = node.getAttribute("aria-live"); //$NON-NLS-0$
 				node.setAttribute("aria-live", isAccessible ? "polite" : "off"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				window.setTimeout(function() {
-					if (msg === that.currentMessage) {
+					if (msg === this.currentMessage) {
 						lib.empty(node);
 						node.appendChild(document.createTextNode(msg));
 						window.setTimeout(function() { node.setAttribute("aria-live", readSetting); }, 100); //$NON-NLS-0$
 					}
-				}, 100);
+				}.bind(this), 100);
 			}
 			else { 
 				lib.empty(node);
 				node.appendChild(document.createTextNode(msg));
 			}
 			if (typeof(timeout) === "number") { //$NON-NLS-0$
-				var that = this;
 				window.setTimeout(function() {
-					if (msg === that.currentMessage) {
+					if (msg === this.currentMessage) {
 						lib.empty(node);
 						node.appendChild(document.createTextNode("")); //$NON-NLS-0$
 					}
-				}, timeout);
+				}.bind(this), timeout);
 			}
 		},
 	
@@ -103,10 +101,12 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 			//could be: responseText from xhrGet, deferred error object, or plain string
 			var status = st.responseText || st.message || st;
 			//accept either a string or a JSON representation of an IStatus
-			try {
-				status = JSON.parse(status);
-			} catch(error) {
-				//it is not JSON, just continue;
+			if (typeof status === "string") {
+				try {
+					status = JSON.parse(status);
+				} catch(error) {
+					//it is not JSON, just continue;
+				}
 			}
 			var message = status.Message || status;
 			var color = "red"; //$NON-NLS-0$
