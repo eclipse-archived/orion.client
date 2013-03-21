@@ -12,14 +12,6 @@
 define(['require', 'orion/URITemplate', 'orion/URL-shim', 'orion/serviceTracker'], function(require, URITemplate, _, ServiceTracker) {
 	var AUTOIMPORT_SERVICE_NAME = 'orion.core.autoimport'; //$NON-NLS-0$
 
-	function getHref(location) {
-		var NAVIGATE_TO_TEMPLATE = new URITemplate('{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1'); //$NON-NLS-0$
-		return decodeURIComponent(NAVIGATE_TO_TEMPLATE.expand({
-			OrionHome: new URL(require.toUrl('.'), window.location.href).href.slice(0,-1),  //$NON-NLS-0$
-			NavigatorLocation: location
-		}));
-	}
-
 	function debug(msg) { console.log('Orion: ' + msg); }
 	function logError(msg) { console.log(msg); }
 
@@ -56,9 +48,16 @@ define(['require', 'orion/URITemplate', 'orion/URL-shim', 'orion/serviceTracker'
 				if (typeof service.onresponse !== 'function') {
 					logError('Expected ' + AUTOIMPORT_SERVICE_NAME + ' service to provide an "onresponse" method');
 				}
+				var OrionHome = new URL(require.toUrl('.').slice(0, -1), window.location.href).href;
 				service.onresponse({
 					type: 'success', //$NON-NLS-0$
-					href: getHref(project.Location)
+					project: project,
+					OrionHome: OrionHome,
+					templates: {
+						navigate: (OrionHome + 'navigate/table.html#{Location}?depth=1'),
+						edit: (OrionHome + 'edit/edit.html#{,Location,params*}'),
+						shell: (OrionHome + 'shell/shellPage.html#{Location}')
+					}
 				});
 			}, function(error) {
 				logError(error);
