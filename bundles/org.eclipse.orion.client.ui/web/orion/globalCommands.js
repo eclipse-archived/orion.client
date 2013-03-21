@@ -63,6 +63,9 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			var authService = registry.getService("orion.core.auth"); //$NON-NLS-0$
 			if (authService !== null) {
 				authService.getUser().then(function(jsonData){
+					if (!jsonData) {
+						return;
+					}
 					var text;
 					if( jsonData.Name ){
 						text = document.createTextNode(jsonData.Name); 

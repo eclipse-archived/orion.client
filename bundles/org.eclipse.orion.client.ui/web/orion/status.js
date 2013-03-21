@@ -169,10 +169,12 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 			//could either be responseText from xhrGet or just a string
 			var status = message.responseText || message;
 			//accept either a string or a JSON representation of an IStatus
-			try {
-				status = JSON.parse(status);
-			} catch(error) {
-				//it is not JSON, just continue;
+			if (typeof status === "string") {
+				try {
+					status = JSON.parse(status);
+				} catch(error) {
+					//it is not JSON, just continue;
+				}
 			}
 			this._init();
 			var msg = status.Message || status;
