@@ -41,7 +41,7 @@ define(["orion/bootstrap", "orion/xhr", "orion/Deferred", "orion/plugin", "domRe
 		                    "Orion-Version": "1" //$NON-NLS-0$
 		                },
 		                data: JSON.stringify(args),
-		                timeout: 60000
+		                timeout: 300000
 		            }).then(
 		            function(result) {
 						if(result.response){
@@ -74,7 +74,7 @@ define(["orion/bootstrap", "orion/xhr", "orion/Deferred", "orion/plugin", "domRe
 		                    "Orion-Version": "1" //$NON-NLS-0$
 		                },
 		                data: JSON.stringify(args),
-		                timeout: 60000
+		                timeout: 300000
 		            }).then(
 		            function(result) {
 						if(result.response){
