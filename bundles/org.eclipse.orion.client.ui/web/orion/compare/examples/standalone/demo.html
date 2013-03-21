@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+<title>Orion Compare Editor Sample</title>
+	<style type="text/css">
+		.compareContainer {
+			height:400px;
+			width:99%;
+			margin-left:5px;
+			border:1px solid grey;
+		}
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			background-color: #ededed;
+		}
+  	</style>
+  	<!--
+    <link rel="stylesheet" type="text/css" href="http://localhost:8080/file/A/OrionClient/modules/orionode/build/.temp/orion/compare/builder/built-compare.css"/>
+	<script src="http://requirejs.org/docs/release/2.1.4/minified/require.js"></script>
+	<script>
+    require(["http://localhost:8080/file/A/OrionClient/modules/orionode/build/.temp/orion/compare/builder/built-compare.js"], function(Compare) {
+    -->
+    <link rel="stylesheet" type="text/css" href="built-compare.css"/>
+	<script src="require.min.js"></script>
+	<script>
+    require(["built-compare.js"], function(Compare) {
+		var document = window.document;
+	
+		/** Buttons */	
+		var bCompare = document.getElementById("doCompare"); //$NON-NLS-0$
+		var bCompareType = document.getElementById("compareTypeSelect"); //$NON-NLS-0$
+		
+		var compareType = "byTwoContents"; //$NON-NLS-0$
+		var contentOnLeft = "Sample Orion compare contents on left side\n\nYou can replace the contents here and and click on [Refresh Compare] to see the new result\n"; //$NON-NLS-0$
+		var	contentOnRight = "Sample Orion compare contents on right side\n\nYou can replace the contents here and and click on [Refresh Compare] to see the new result\n"; //$NON-NLS-0$
+		var contentOnLeftURL = "Put file URL here\n"; //$NON-NLS-0$
+		var	contentOnRightURL = "Put file URL here\n"; //$NON-NLS-0$
+		
+	    var options = {
+	        parentDivId: "compareParentDiv", //$NON-NLS-0$
+	        commandSpanId: "compareCmdDiv", //$NON-NLS-0$
+	        newFile: {
+	            Name: "left.js", //$NON-NLS-0$
+	            readonly: false,
+	            Content: contentOnLeft
+	        },
+	        baseFile: {
+	            Name: "right.js", //$NON-NLS-0$
+	            readonly: false,
+	            Content: contentOnRight
+	        }
+	    };
+		
+		var compare = new Compare(options);
+	
+		function doCompare() {
+			var widget = compare.getCompareView().getWidget();
+			if(widget.type === "twoWay"){ //$NON-NLS-0$
+				var editors = widget._editors;
+				var oldContents = editors[0].getTextView().getText();
+				var newContents = editors[1].getTextView().getText();
+				if(compareType === "byTwoContents"){ //$NON-NLS-0$
+					widget.options.baseFile.Content = oldContents;
+					widget.options.newFile.Content = newContents;
+					widget.options.baseFile.URL = null;
+					widget.options.newFile.URL = null;
+				} else {
+					widget.options.baseFile.URL = oldContents;
+					widget.options.newFile.URL = newContents;
+					bCompareType.selectedIndex = 0;
+					compareType = bCompareType.options[bCompareType.selectedIndex].value;
+				}
+				widget.options.mapper = null;
+				compare.refresh();
+				//widget.refresh();
+			}
+		}
+		function onCType(evt) {
+			compareType = bCompareType.options[bCompareType.selectedIndex].value;
+			var widget = compare.getCompareView().getWidget();
+			if(compareType === "byTwoContents"){ //$NON-NLS-0$
+				widget.options.baseFile.Content = contentOnRight;
+				widget.options.newFile.Content = contentOnLeft;
+				widget.options.baseFile.URL = null;
+				widget.options.newFile.URL = null;
+			} else {
+				widget.options.baseFile.Content = contentOnRightURL;
+				widget.options.newFile.Content = contentOnLeftURL;
+				widget.options.baseFile.URL = null;
+				widget.options.newFile.URL = null;
+			}
+			widget.options.mapper = null;
+			widget.refresh();
+		}
+		
+		/* Adding events */
+		bCompare.onclick = doCompare;
+		bCompareType.onchange = onCType;
+	});
+    
+    
+</script>
+    
+</head>
+<body>
+    <h2>Orion compare demo</h2>
+    <hr>
+    <div style="height:30px;width:99%;">
+		<label style="padding-left:10px;" for="compareTypeSelect">Compare with</label>
+		<select id="compareTypeSelect">
+			<option value="byTwoContents">Two text contents</option>
+			<option value="byFileURLs">Two file URLs</option>
+			<!-- <option value="byDiff">Base contents + unified diff</option> -->
+		</select>
+    </div>
+    <hr>
+    <div style="height:30px;width:99%;">
+		<button id="doCompare" type="button" style="float:left;">Refresh Compare</button>
+        <span id="compareCmdDiv" style="float:right;"></span>   
+    </div>
+    <hr>
+    <div>
+        <div id="compareParentDiv" class="compareContainer"></div>
+    </div>
+</body>
+</html>
