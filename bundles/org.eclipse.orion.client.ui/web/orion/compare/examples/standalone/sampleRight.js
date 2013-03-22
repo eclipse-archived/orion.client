@@ -20,12 +20,9 @@ function(Compare) {
 	/** Buttons */	
 	var bCompare = document.getElementById("doCompare"); //$NON-NLS-0$
 	var bLoadSample = document.getElementById("loadSample"); //$NON-NLS-0$
-	var bAnimateDiffs = document.getElementById("animateDiffs"); //$NON-NLS-0$
-	
 	var bCompareType = document.getElementById("compareTypeSelect"); //$NON-NLS-0$
 	var bContentTypeTD = document.getElementById("contentTypes"); //$NON-NLS-0$
 	var bContentType = document.getElementById("contentTypeSelect"); //$NON-NLS-0$
-	var bAnimateInterval = document.getElementById("animateInterval"); //$NON-NLS-0$
 	
 	var compareType = "byTwoContents"; //$NON-NLS-0$
 	var contentType = "js"; //$NON-NLS-0$
@@ -85,19 +82,6 @@ function(Compare) {
 			compare.refresh();
 		}
 	}
-	function animateDiffs() {
-		var widget = compare.getCompareView().getWidget();
-		if(widget.nextChange()){
-			var interval = parseInt(bAnimateInterval.options[bAnimateInterval.selectedIndex].value, 10);
-			window.setTimeout(animateDiffs, interval);
-		}
-	}
-	function onAnimateDiffs() {
-		var widget = compare.getCompareView().getWidget();
-		widget.initDiffNav();
-		var interval = parseInt(bAnimateInterval.options[bAnimateInterval.selectedIndex].value, 10);
-		window.setTimeout(animateDiffs, interval);
-	}
 	function doCompare() {
 		var widget = compare.getCompareView().getWidget();
 		if(widget.type === "twoWay"){ //$NON-NLS-0$
@@ -151,7 +135,6 @@ function(Compare) {
 	/* Adding events */
 	bCompare.onclick = doCompare;
 	bLoadSample.onclick = onLoadSample;
-	bAnimateDiffs.onclick = onAnimateDiffs;
 	bCompareType.onchange = onCompareType;
 	bContentType.onchange = onContentType;
  });

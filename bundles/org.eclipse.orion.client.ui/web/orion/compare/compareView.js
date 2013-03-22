@@ -62,6 +62,10 @@ exports.CompareView = (function() {
 			return this._diffNavigator.getCurrentPosition();
 		},
 		
+		initDiffNav: function(){
+			this._diffNavigator.gotoBlock(0, 0);
+		},
+		
 		nextDiff: function(){	
 			this._diffNavigator.nextDiff();
 		},
@@ -71,7 +75,7 @@ exports.CompareView = (function() {
 		},
 		
 		nextChange: function(){	
-			this._diffNavigator.nextChange();
+			return this._diffNavigator.nextChange();
 		},
 		
 		prevChange: function(){	

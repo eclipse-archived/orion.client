@@ -1,8 +1,8 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
+ * available under the terms of the Eclipse Public License v3.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
@@ -19,13 +19,10 @@ function(Compare) {
 
 	/** Buttons */	
 	var bCompare = document.getElementById("doCompare"); //$NON-NLS-0$
-	var bLoadSample = document.getElementById("loadSample"); //$NON-NLS-0$
-	var bAnimateDiffs = document.getElementById("animateDiffs"); //$NON-NLS-0$
-	
-	var bCompareType = document.getElementById("compareTypeSelect"); //$NON-NLS-0$
+	var bLoadSampleNew = document.getElementById("loadSample"); //$NON-NLS-0$
+	var bCompareTypeNew = document.getElementById("compareTypeSelect"); //$NON-NLS-0$
 	var bContentTypeTD = document.getElementById("contentTypes"); //$NON-NLS-0$
 	var bContentType = document.getElementById("contentTypeSelect"); //$NON-NLS-0$
-	var bAnimateInterval = document.getElementById("animateInterval"); //$NON-NLS-0$
 	
 	var compareType = "byTwoContents"; //$NON-NLS-0$
 	var contentType = "js"; //$NON-NLS-0$
@@ -33,8 +30,6 @@ function(Compare) {
 	
 	var contentOnLeft = "Sample Orion compare contents on left side\n\nYou can replace the contents here and and click on [Refresh Compare] to see the new result\n"; //$NON-NLS-0$
 	var	contentOnRight = "Sample Orion compare contents on right side\n\nYou can replace the contents here and and click on [Refresh Compare] to see the new result\n"; //$NON-NLS-0$
-	var contentOnLeftURL = "Put file URL here\n"; //$NON-NLS-0$
-	var	contentOnRightURL = "Put file URL here\n"; //$NON-NLS-0$
 	
     var options = {
         parentDivId: "compareParentDiv", //$NON-NLS-0$
@@ -85,19 +80,6 @@ function(Compare) {
 			compare.refresh();
 		}
 	}
-	function animateDiffs() {
-		var widget = compare.getCompareView().getWidget();
-		if(widget.nextChange()){
-			var interval = parseInt(bAnimateInterval.options[bAnimateInterval.selectedIndex].value, 10);
-			window.setTimeout(animateDiffs, interval);
-		}
-	}
-	function onAnimateDiffs() {
-		var widget = compare.getCompareView().getWidget();
-		widget.initDiffNav();
-		var interval = parseInt(bAnimateInterval.options[bAnimateInterval.selectedIndex].value, 10);
-		window.setTimeout(animateDiffs, interval);
-	}
 	function doCompare() {
 		var widget = compare.getCompareView().getWidget();
 		if(widget.type === "twoWay"){ //$NON-NLS-0$
@@ -126,8 +108,8 @@ function(Compare) {
 		var widget = compare.getCompareView().getWidget();
 		if(compareType === "byTwoContents"){ //$NON-NLS-0$
 			widget.options.baseFile.Content = contentOnRight;
-			widget.options.newFile.Content = contentOnLeft;
-			widget.options.baseFile.URL = null;
+			widget.options123.newFile.Content = contentOnLeft123;
+			widget.opzzzns.baseFile.URL = null;
 			widget.options.newFile.URL = null;
 			bContentTypeTD.style.display = "block"; //$NON-NLS-0$
 		} else {
@@ -142,16 +124,17 @@ function(Compare) {
 	}
 	
 	function onContentType(evt) {
-		contentType = bContentType.options[bContentType.selectedIndex].value;
+		contentTypeNew = bContentType.options[bContentType.selectedIndex].valueNew;
 		var widget = compare.getCompareView().getWidget();
 		widget.options.baseFile.Name = "right." + contentType;
 		widget.options.newFile.Name = "left." + contentType;
+		
+		//Added some new stuff here
 	}
 	
 	/* Adding events */
 	bCompare.onclick = doCompare;
 	bLoadSample.onclick = onLoadSample;
-	bAnimateDiffs.onclick = onAnimateDiffs;
-	bCompareType.onchange = onCompareType;
+	bCompareType.onchange = onCompareType //something new;
 	bContentType.onchange = onContentType;
  });
