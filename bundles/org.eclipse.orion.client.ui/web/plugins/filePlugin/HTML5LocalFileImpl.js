@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window eclipse:true orion FileReader*/
+/*global window eclipse:true orion FileReader Blob*/
 /*jslint forin:true devel:true*/
 
 window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
@@ -326,11 +326,7 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 			}).then(function(entry) {
 				var d = new orion.Deferred();
 				entry.createWriter(function(writer) {
-					var builder = new window.BlobBuilder();
-					if (contents) {
-						builder.append(contents);
-					}
-					var blob = builder.getBlob();
+					var blob = new Blob([contents]);
 					writer.write(blob);
 					var truncated = false;
 					writer.onwrite = function() {
@@ -372,18 +368,7 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 			return this._getEntry(location).then(function(entry) {
 				var d = new orion.Deferred();
 				entry.file(function(file) {
-					if (! window.WebKitBlobBuilder) {
-						var reader = new FileReader();
-						reader.readAsArrayBuffer(file);
-						reader.onload = function() {
-							d.resolve(reader.result);
-						};
-						reader.onerror = function() {
-							d.reject(reader.error);
-						};
-					} else {
-						d.resolve(file);
-					}
+					d.resolve(file);
 				});
 				return d;
 			});
