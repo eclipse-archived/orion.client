@@ -213,7 +213,7 @@
 				enqueue(notify, true); //runAsync
 			}
 			return promise;
-		};
+		}.bind(this);
 
 		/**
 		 * The promise exposed by this Deferred.
