@@ -315,14 +315,17 @@ exports.DiffTreeNavigator = (function() {
 			
 		iterateOnChange: function(forward){
 			if(!this.iterator){
-				return;
+				return null;
 			}
-			this.iterator.iterate(forward);
-			var cursor = this.iterator.cursor();
-			if(cursor.type === "block" && cursor.children && cursor.children.length > 0){ //$NON-NLS-0$
-				this.iterator.iterate(forward);
+			var retVal = this.iterator.iterate(forward);
+			if(retVal) {
+				var cursor = this.iterator.cursor();
+				if(cursor.type === "block" && cursor.children && cursor.children.length > 0){ //$NON-NLS-0$
+					this.iterator.iterate(forward);
+				}
+				this.updateCurrentAnnotation(true);
 			}
-			this.updateCurrentAnnotation(true);
+			return retVal;
 		},
 		
 		gotoBlock: function(blockIndex, changeIndex){
@@ -623,8 +626,9 @@ exports.DiffTreeNavigator = (function() {
 		},
 		
 		nextChange: function(){
-			this.iterateOnChange(true);
+			var ret = this.iterateOnChange(true);
 			this._positionDiffBlock();
+			return ret;
 		},
 		
 		prevChange: function(){

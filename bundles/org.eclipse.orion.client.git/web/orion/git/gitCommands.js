@@ -14,9 +14,9 @@
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim'], 
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks'], 
         function(messages, require, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, mConfirmPush, mRemotePrompter,
-        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch) {
+        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -1838,7 +1838,7 @@ var exports = {};
 							"Getting repository details " + item.Name).then(
 						function(clone) {
 							var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
-							var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
+							var orionHome = PageLinks.getOrionHome();
 							var url = sshCheck(clone.Children[0].GitUrl);
 							var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
 							progress.progress(
@@ -1861,7 +1861,7 @@ var exports = {};
 					progress.progress(serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation),
 							"Getting git details " + item.Name).then(function(clone) {
 						var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
-						var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
+						var orionHome = PageLinks.getOrionHome();
 						var url = sshCheck(clone.Children[0].GitUrl);
 						var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
 						var dialog = new mReviewRequest.ReviewRequestDialog({ title : messages["Contribution Review Request"],

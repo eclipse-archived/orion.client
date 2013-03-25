@@ -22,20 +22,56 @@
 </script>
 </head>
 <body>
-    <h2>Orion compare demo</h2>
-    <hr>
     <div style="height:30px;width:99%;">
-		<label style="padding-left:10px;" for="compareTypeSelect">Compare with</label>
-		<select id="compareTypeSelect">
+	<table>
+	<tr>
+	<td>
+		<label style="padding-left:5px;margin-top:1px;" for="compareTypeSelect">Compare with</label>
+		<select id="compareTypeSelect" style="margin-top:5px;">
 			<option value="byTwoContents">Two text contents</option>
 			<option value="byFileURLs">Two file URLs</option>
 			<!-- <option value="byDiff">Base contents + unified diff</option> -->
 		</select>
+	</td>
+	<td id="contentTypes">
+		<label style="padding-left:5px;margin-top:1px;" for="fileTypeSelect">Content type</label>
+		<select id="contentTypeSelect" style="margin-top:5px;">
+			<option value="js">JavaScript</option>
+			<option value="html">HTML</option>
+			<option value="css">Css</option>
+			<option value="java">Java</option>
+			<option value="txt">Plain</option>
+		</select>
+	</td>
+	</tr>
+	</table>
     </div>
     <hr>
-    <div style="height:30px;width:99%;">
-		<button id="doCompare" type="button" style="float:left;">Refresh Compare</button>
-        <span id="compareCmdDiv" style="float:right;"></span>   
+    <div style="height:28px;width:99%;">
+	<table style="float:left;">
+	<tr>
+	<td>
+		<button id="loadSample" type="button">Load sample</button>
+    </td>
+	<td>
+		<button id="doCompare" type="button">Refresh Compare</button>
+    </td>
+	<td>
+		<button id="animateDiffs" type="button">Walk all diffs</button>
+    </td>
+	<td>
+		<label for="animateInterval">With</label>
+		<select id="animateInterval">
+			<option value="500">500ms</option>
+			<option value="1000">1000ms</option>
+			<option value="1500">1500ms</option>
+			<option value="2000">2000ms</option>
+			<option value="3000">2000ms</option>
+		</select>
+	</td>
+	</tr>
+	</table>
+        <span id="compareCmdDiv" style="float:right;"></span> 
     </div>
     <hr>
     <div>

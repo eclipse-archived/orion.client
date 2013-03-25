@@ -12,8 +12,8 @@
 /*global window define orion URL*/
 /*browser:true*/
 
-define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/URL-shim"],
-	function(require, Deferred, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil){
+define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/URL-shim", "orion/PageLinks"],
+	function(require, Deferred, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil, _, PageLinks){
 
 	/**
 	 * Utility methods
@@ -24,7 +24,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 	var extensionCommandUtils  = {};
 	
 	// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-	var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
+	var orionHome = PageLinks.getOrionHome();
 	
 	extensionCommandUtils._cloneItemWithoutChildren = function clone(item){
 	    if (item === null || typeof(item) !== 'object') { //$NON-NLS-0$

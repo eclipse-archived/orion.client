@@ -11,6 +11,13 @@
 define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "orion/URL-shim"], function(require, Deferred, PageUtil, URITemplate) {
 
 	/**
+	 * @returns {String} The value of the <code>{OrionHome}</code> variable.
+	 */
+	function getOrionHome() {
+		return new URL(require.toUrl("."), window.location).href.slice(0,-1); //$NON-NLS-0$
+	}
+
+	/**
 	 * Read info from an <code>orion.page.*</code> service extension.
 	 * @methodOf orion.PageLinks
 	 * @param {orion.ServiceRegistry} serviceRegistry The service registry.
@@ -31,7 +38,7 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "ori
 		var navLinks= serviceRegistry.getServiceReferences(serviceName); //$NON-NLS-0$
 		var params = PageUtil.matchResourceParameters(window.location.href);
 		// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-		var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1); //$NON-NLS-0$
+		var orionHome = getOrionHome();
 		var locationObject = {OrionHome: orionHome, Location: params.resource};
 		var infos = [];
 		navLinks.forEach(function(navLink) {
@@ -95,6 +102,7 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "ori
 	 */
 	return {
 		createPageLinks: createPageLinks,
-		getPageLinksInfo: getPageLinksInfo
+		getPageLinksInfo: getPageLinksInfo,
+		getOrionHome: getOrionHome
 	};
 });
