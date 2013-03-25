@@ -9,8 +9,8 @@
 
 /*global define window*/
 
-define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"],
-	function(messages, mShell, i18nUtil) {
+define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil", "orion/Deferred"],
+	function(messages, mShell, i18nUtil, Deferred) {
 
 	var orion = {};
 	orion.shellPage = {};
@@ -47,9 +47,10 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 			 * status and predictions for an argument with this parameter type.
 			 */
 			parse: function(arg) {
-				var string = arg.text || "";
-				var predictions = this._getPredictions(string);
-				return this._createCompletion(string, predictions);
+				var result = new Deferred();
+				var predictions = this._getPredictions(arg.text);
+				result.resolve(this._createCompletion(arg.text, predictions));
+				return result;
 			},
 
 			/**

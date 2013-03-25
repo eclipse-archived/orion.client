@@ -8,8 +8,15 @@
 	<script src="../requirejs/require.js"></script>
 	<script>
 		/*global require*/
-		require({ baseUrl: "..",
-			      paths: { text: "requirejs/text", i18n: "requirejs/i18n", domReady: "requirejs/domReady" }
+		require({
+			baseUrl: "..",
+			paths: {
+				text: "requirejs/text",
+				i18n: "requirejs/i18n",
+				domReady: "requirejs/domReady",
+				gcli: "gcli/gcli",
+				util: "gcli/util"
+			}
 		});
 		require(["shellPage.js"]);
 	</script>
