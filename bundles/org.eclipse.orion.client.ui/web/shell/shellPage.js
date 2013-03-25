@@ -788,6 +788,28 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegist
 		};
 	}
 
+	/*
+	 * Creates a gcli exec function that wraps a 'callback' function contributed by
+	 * an 'orion.shell.type' service implementation.
+	 */
+	function contributedFunc(service) {
+		if (typeof(service) !== "function") { //$NON-NLS-0$
+			return undefined;
+		}
+		return function(args, typeSpec) {
+			var promise = new Deferred();
+			service(args, typeSpec).then(
+				function(result) {
+					promise.resolve(result);
+				},
+				function(error) {
+					promise.reject(error);
+				}
+			);
+			return promise;
+		};
+	}
+
 	mBootstrap.startup().then(function(core) {
 		pluginRegistry = core.pluginRegistry;
 		serviceRegistry = core.serviceRegistry;
@@ -1016,27 +1038,57 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegist
 			}
 		});
 
-			// TODO
-			/* add types contributed through the plug-in API */
-//			var allReferences = serviceRegistry.getServiceReferences("orion.shell.type");
-//			for (var i = 0; i < allReferences.length; ++i) {
-//				var ref = allReferences[i];
-//				var service = serviceRegistry.getService(ref);
-//				if (service) {
-//					var type = {name: ref.getProperty("name"), parse: contributedParseFunc(service)};
-//					if (service.stringify) {
-//						type.stringify = service.stringify;
-//					}
-//					if (service.increment) {
-//						type.increment = service.increment;
-//					}
-//					if (service.decrement) {
-//						type.decrement = service.decrement;
-//					}
-//					shell.registerType(type);
+		/* add types contributed through the plug-in API */
+		var allReferences = serviceRegistry.getServiceReferences("orion.shell.type"); //$NON-NLS-0$
+		for (var i = 0; i < allReferences.length; ++i) {
+			var ref = allReferences[i];
+			var service = serviceRegistry.getService(ref);
+			if (service) {
+				var type = (function(name, parseFn, stringifyFn) {
+					return {
+						getName: function() {
+							return name;
+						},
+						parse: function(arg, typeSpec) {
+							var promise = new Deferred();
+							parseFn(arg, typeSpec).then(
+								function(result) {
+									promise.resolve(result);
+								},
+								function(error) {
+									promise.reject(error);
+								}
+							);
+							return promise;
+						},
+						stringify: function(arg, typeSpec) {
+							if (!stringifyFn) {
+								return arg.name;
+							}
+							var promise = new Deferred();
+							stringifyFn(arg, typeSpec).then(
+								function(result) {
+									promise.resolve(result);
+								},
+								function(error) {
+									promise.reject(error);
+								}
+							);
+							return promise;
+						}
+					};
+				}(ref.getProperty("name"), contributedFunc(service.parse), contributedFunc(service.stringify))); //$NON-NLS-0$
+
+//				if (service.increment) {
+//					type.increment = service.increment;
 //				}
-//			}
-			
+//				if (service.decrement) {
+//					type.decrement = service.decrement;
+//				}
+				shell.registerType(type);
+			}
+		}
+
 		/* add commands contributed through the plug-in API */
 		var allReferences = serviceRegistry.getServiceReferences("orion.shell.command"); //$NON-NLS-0$
 		var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
