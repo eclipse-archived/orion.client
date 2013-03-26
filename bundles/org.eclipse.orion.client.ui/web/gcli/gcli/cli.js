@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+ * This file is derived from the Original Code provided by mozilla.org.
+ * Changes to the original file were made by the Orion project on
+ * March 22, 2013 and are marked with trailing comment "//Orion-20130322".
+ */
+
 define(function(require, exports, module) {
 
 'use strict';
@@ -1165,13 +1171,13 @@ Requisition.prototype.exec = function(options) {
 
   var onDone = function(data) { output.complete(data, false); };
   var onError = function(error) { output.complete(error, true); };
-  var onProgress = function(data) { output.changed(data); };
+  var onProgress = function(data) { output.changed(data); }; //Orion-20130322
 
   try {
     var context = exports.createExecutionContext(this);
     var reply = command.exec(args, context);
 
-    this._then(reply, onDone, onError, onProgress);
+    this._then(reply, onDone, onError, onProgress); //Orion-20130322
   }
   catch (ex) {
     console.error(ex);
@@ -1220,7 +1226,7 @@ Requisition.prototype.clear = function() {
  * @param onDone The action to take if thing is resolved
  * @param onError The action to take if thing is rejected
  */
-Requisition.prototype._then = function(thing, onDone, onError, onProgress) {
+Requisition.prototype._then = function(thing, onDone, onError, onProgress) { //Orion-20130322
   var then = null;
   if (thing != null && typeof thing.then === 'function') {
     // Simple promises with a then function
@@ -1233,7 +1239,7 @@ Requisition.prototype._then = function(thing, onDone, onError, onProgress) {
   }
 
   if (then != null) {
-    then(onDone, onError, onProgress);
+    then(onDone, onError, onProgress); //Orion-20130322
   }
   else {
     onDone(thing);
