@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*globals define */
+/*globals define Node */
 
 define('orion/editor/edit', [ //$NON-NLS-0$
 	
@@ -42,6 +42,22 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 ], function(mTextView, mTextModel, mTextTheme, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations, mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist, mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 
 	/**	@private */
+	function getDisplay(window, document, element) {
+		var display;
+		var temp = element;
+		while (temp && temp !== document && display !== "none") { //$NON-NLS-0$
+			if (window.getComputedStyle) {
+				var style = window.getComputedStyle(temp, null);
+				display = style.getPropertyValue("display"); //$NON-NLS-0$
+			} else {
+				display = temp.currentStyle.display;
+			}
+			temp = temp.parentNode;
+		}
+		return display;
+	}
+
+	/**	@private */
 	function getTextFromElement(element) {
 		var firstChild = element.firstChild;
 		if (firstChild && firstChild.tagName === "TEXTAREA") { //$NON-NLS-0$
@@ -49,7 +65,10 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		}
 		var document = element.ownerDocument;
 		var window = document.defaultView || document.parentWindow;
-		if (!window.getSelection) {
+		if (!window.getSelection ||
+			(element.childNodes.length === 1 && firstChild.nodeType === Node.TEXT_NODE) ||
+			getDisplay(window, document, element) === "none") //$NON-NLS-0$
+		{
 			return element.innerText || element.textContent;
 		}
 		var newRange = document.createRange();
