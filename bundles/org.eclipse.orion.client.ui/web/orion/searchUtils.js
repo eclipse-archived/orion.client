@@ -13,16 +13,23 @@
 
 define(['i18n!orion/nls/messages', 'require', 'orion/editor/regex', 'orion/commandRegistry', 'orion/PageUtil', 'orion/URITemplate'], function(messages, require, mRegex, mCommands, PageUtil, URITemplate) {
 
-var exports = exports || {};
+/**
+ * @name orion.searchUtils.SearchParams
+ * @class
+ * @property {String} fileType
+ * @property {String} keyword
+ * @property {Boolean} regEx
+ * @property {Boolean} nameSearch
+ * @property {Boolean} caseSensitive
+ */
 
 /**
- * Utility methods
- * @namespace exports.searchUtils 
+ * @namespace Search utility functions.
+ * @name orion.searchUtils
  */
- 
-exports.searchUtils = exports.searchUtils || {};
+var searchUtils = {};
 
-exports.searchUtils.ALL_FILE_TYPE = "*.*"; //$NON-NLS-0$
+searchUtils.ALL_FILE_TYPE = "*.*"; //$NON-NLS-0$
 
 function _generateSearchHelperRegEx(inFileQuery, searchParams, fromStart){
 	var prefix = "";
@@ -42,22 +49,22 @@ function _generateSearchHelperRegEx(inFileQuery, searchParams, fromStart){
 	}
 }
 
-exports.searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions){
+searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions){
 	if (searcher) {
 		var newSearchStr = searchStr, commitSearch = true;
 		if(newSearchStr === "*"){ //$NON-NLS-0$
 			newSearchStr = "";
 		}
 		if(newSearchStr === ""){
-			commitSearch = advOptions && advOptions.type !== exports.searchUtils.ALL_FILE_TYPE;
+			commitSearch = advOptions && advOptions.type !== searchUtils.ALL_FILE_TYPE;
 		}
 		if (commitSearch) {
 			if(newSearchStr !== ""){
-				exports.searchUtils.addRecentSearch(serviceRegistry, newSearchStr, advOptions ? advOptions.regEx: false);
+				searchUtils.addRecentSearch(serviceRegistry, newSearchStr, advOptions ? advOptions.regEx: false);
 			}
 			var searchParams = searcher.createSearchParams(newSearchStr, false, false, advOptions);
-			var href = exports.searchUtils.generateSearchHref(searchParams);
-			exports.searchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
+			var href = searchUtils.generateSearchHref(searchParams);
+			searchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
 				if(openInNewTab){
 					window.open(href);
 				} else {
@@ -72,20 +79,21 @@ exports.searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, ad
 
 /**
  * Generate a helper query object used for search result renderer.
- * @param {Object} searchParams The search parameters.
+ * @param {orion.searchUtils.SearchParams} searchParams The search parameters.
  * @param {Boolean} fromStart True if doing file name search, otherwise false.
  * @returns {Object} An object having the properties:<ul>
- * <li>{@link Object} <code>searchParams</code> The search parameters.</li>
- * <li>{@link Object} <code>inFileQuery</code> The query object for in file search.</li>
+ * <li><code>{@link orion.searchUtils.SearchParams}</code> <code>params</code> The search parameters.</li>
+ * <li><code>{@link Object}</code> <code>inFileQuery</code> The query object for in file search.</li>
+ * <li><code>{@link String}</code> <code>displayedSearchTerm</code> The search term display string.</li>
  * </ul>
- * @name exports.searchUtils#generateSearchHelper
+ * @name orion.searchUtils.generateSearchHelper
  * @function
  */
-exports.searchUtils.generateSearchHelper = function(searchParams, fromStart) {
+searchUtils.generateSearchHelper = function(searchParams, fromStart) {
 	var searchStr = searchParams.keyword;
 	var displayedSearchTerm = searchStr;
 	var inFileQuery = {};
-	if(searchParams.fileType && searchParams.fileType !== exports.searchUtils.ALL_FILE_TYPE && searchStr === ""){
+	if(searchParams.fileType && searchParams.fileType !== searchUtils.ALL_FILE_TYPE && searchStr === ""){
 		displayedSearchTerm = "*." + searchParams.fileType; //$NON-NLS-0$
 	}
 	if(!searchParams.regEx){
@@ -113,7 +121,7 @@ exports.searchUtils.generateSearchHelper = function(searchParams, fromStart) {
 	return {params: searchParams, inFileQuery: inFileQuery, displayedSearchTerm: displayedSearchTerm};
 };
 
-exports.searchUtils.convertSearchParams = function(searchParams) {
+searchUtils.convertSearchParams = function(searchParams) {
 	if(searchParams.rows !== undefined){
 		searchParams.rows = parseInt(searchParams.rows, 10);
 	}
@@ -131,7 +139,7 @@ exports.searchUtils.convertSearchParams = function(searchParams) {
 	}
 };
 
-exports.searchUtils.copySearchParams = function(searchParams, copyReplace) {
+searchUtils.copySearchParams = function(searchParams, copyReplace) {
 	var result = {};
 	for (var prop in searchParams) {
 		if(searchParams[prop] !== undefined && searchParams[prop] !== null){
@@ -144,9 +152,9 @@ exports.searchUtils.copySearchParams = function(searchParams, copyReplace) {
 	return result;	
 };
 
-exports.searchUtils.generateSearchHref = function(options) {
+searchUtils.generateSearchHref = function(options) {
 	var base =  require.toUrl("search/search.html"); //$NON-NLS-0$
-	var sParams = exports.searchUtils.copySearchParams(options, true);
+	var sParams = searchUtils.copySearchParams(options, true);
 	var searchLocation = sParams.resource;
 	sParams.resource = undefined;
 	var href = new URITemplate(base + "#{,resource,params*}").expand({ //$NON-NLS-0$
@@ -156,7 +164,7 @@ exports.searchUtils.generateSearchHref = function(options) {
 	return href;
 };
 
-exports.searchUtils.generateFindURLBinding = function(searchParams, inFileQuery, lineNumber, replaceStr) {
+searchUtils.generateFindURLBinding = function(searchParams, inFileQuery, lineNumber, replaceStr) {
 	var params = {
 		find: inFileQuery.searchStr,
 		regEx: inFileQuery.wildCard ? true : undefined,
@@ -170,7 +178,7 @@ exports.searchUtils.generateFindURLBinding = function(searchParams, inFileQuery,
 	return "," + binding; //$NON-NLS-0$
 };
 
-exports.searchUtils.convertFindURLBinding = function(findParams) {
+searchUtils.convertFindURLBinding = function(findParams) {
 	if(typeof findParams.regEx === "string"){ //$NON-NLS-0$
 		findParams.regEx = (findParams.regEx.toLowerCase() === "true"); //$NON-NLS-0$
 	}
@@ -182,18 +190,18 @@ exports.searchUtils.convertFindURLBinding = function(findParams) {
 	}
 };
 
-exports.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
+searchUtils.replaceRegEx = function(text, regEx, replacingStr){
 	var regexp = new RegExp(regEx.pattern, regEx.flags);
 	return text.replace(regexp, replacingStr); 
 	
 };
 
-exports.searchUtils.replaceStringLiteral = function(text, keyword, replacingStr){
+searchUtils.replaceStringLiteral = function(text, keyword, replacingStr){
 	var regexp = mRegex.parse("/" + keyword + "/gim"); //$NON-NLS-1$ //$NON-NLS-0$
-	return exports.searchUtils.replaceRegEx(text,regexp, replacingStr);
+	return searchUtils.replaceRegEx(text,regexp, replacingStr);
 };
 
-exports.searchUtils.searchOnelineLiteral =  function(inFileQuery, lineString, onlyOnce){
+searchUtils.searchOnelineLiteral =  function(inFileQuery, lineString, onlyOnce){
 	var i,startIndex = 0;
 	var found = false;
 	var result = [];
@@ -219,20 +227,24 @@ exports.searchUtils.searchOnelineLiteral =  function(inFileQuery, lineString, on
 
 /**
  * Helper for finding regex matches in text contents.
- * 
+ *
+ * @param {String}
+ *            text Text to search in.
  * @param {String}
  *            pattern A valid regexp pattern.
  * @param {String}
- *            flags Valid regexp flags: [is]
+ *            flags Valid regexp flags. Allowed flags are: <code>"i"</code>, <code>"s"</code>, and any combination thereof.
  * @param {Number}
- *            [startIndex] Default is false.
+ *            [startIndex] Index to begin searching from.
  * @return {Object} An object giving the match details, or
  *         <code>null</code> if no match found. The
  *         returned object will have the properties:<br />
- *         {Number} index<br />
- *         {Number} length
+ *         <code>{Number} index</code><br />
+ *         <code>{Number} length</code>
+ * @name orion.searchUtils.findRegExp
+ * @function
  */
-exports.searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
+searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
 	if (!pattern) {
 		return null;
 	}
@@ -250,12 +262,12 @@ exports.searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
 	};
 };
 
-exports.searchUtils.searchOnelineRegEx =  function(inFileQuery, lineString, onlyOnce){
+searchUtils.searchOnelineRegEx =  function(inFileQuery, lineString, onlyOnce){
 	var startIndex = 0;
 	var found = false;
 	var result = [];
 	while(true){
-		var regExResult = exports.searchUtils.findRegExp(lineString, inFileQuery.regExp.pattern, inFileQuery.regExp.flags, startIndex);
+		var regExResult = searchUtils.findRegExp(lineString, inFileQuery.regExp.pattern, inFileQuery.regExp.flags, startIndex);
 		if(regExResult){
 			result.push(regExResult);
 			found = true;
@@ -273,7 +285,7 @@ exports.searchUtils.searchOnelineRegEx =  function(inFileQuery, lineString, only
 	return null;
 };
 
-exports.searchUtils.generateNewContents = function( updating, oldContents, newContents, fileModelNode, replaceStr, searchStrLength){
+searchUtils.generateNewContents = function( updating, oldContents, newContents, fileModelNode, replaceStr, searchStrLength){
 	if(fileModelNode && oldContents){
 		if(!updating){
 			newContents.contents = [];
@@ -310,7 +322,7 @@ exports.searchUtils.generateNewContents = function( updating, oldContents, newCo
 						fileModelNode.children[startNumber+k].newMatches = fileModelNode.children[startNumber+k].matches;
 					}
 				} else{
-					var result =  exports.searchUtils.replaceCheckedMatches(lineStringOrigin, replaceStr, originalMatches, checkedMatches, searchStrLength);
+					var result =  searchUtils.replaceCheckedMatches(lineStringOrigin, replaceStr, originalMatches, checkedMatches, searchStrLength);
 					newStr = result.replacedStr;
 					for(k = 0; k < fileModelNode.children[startNumber].matches.length; k++ ){
 						fileModelNode.children[startNumber+k].newMatches = result.newMatches;
@@ -328,7 +340,7 @@ exports.searchUtils.generateNewContents = function( updating, oldContents, newCo
 	}
 };
 
-exports.searchUtils.generateMatchContext = function(contextAroundLength, fileContents, lineNumber/*zero based*/){
+searchUtils.generateMatchContext = function(contextAroundLength, fileContents, lineNumber/*zero based*/){
 	var context = [];
 	var totalContextLength = contextAroundLength*2 + 1;
 	var startFrom, endTo;
@@ -358,12 +370,12 @@ exports.searchUtils.generateMatchContext = function(contextAroundLength, fileCon
 /**
  * Split file contents into lines. It also handles the mixed line endings with "\n", "\r" and "\r\n".
  *
- * @param {String} text The file contetns.
- * @returns {Array} Split file lines. 
- * @name exports.searchUtils#splitFile
+ * @param {String} text The file contents.
+ * @returns {String[]} Split file lines. 
+ * @name orion.searchUtils.splitFile
  * @function
  */
-exports.searchUtils.splitFile = function(text) {
+searchUtils.splitFile = function(text) {
 	var cr = 0, lf = 0, index = 0, start = 0;
 	var splitLines = [];
 	while (true) {
@@ -396,8 +408,8 @@ exports.searchUtils.splitFile = function(text) {
 	return splitLines;
 };
 
-exports.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, lineDelim, replacing, caseSensitive){
-	var fileContents = exports.searchUtils.splitFile(fileContentText);
+searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, lineDelim, replacing, caseSensitive){
+	var fileContents = searchUtils.splitFile(fileContentText);
 	if(replacing){
 		fileModelNode.contents = fileContents;
 	}
@@ -410,14 +422,14 @@ exports.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fil
 				var lineString = caseSensitive ? lineStringOrigin : lineStringOrigin.toLowerCase();
 				var result;
 				if(inFileQuery.wildCard){
-					result = exports.searchUtils.searchOnelineRegEx(inFileQuery, lineString);
+					result = searchUtils.searchOnelineRegEx(inFileQuery, lineString);
 				} else {
-					result = exports.searchUtils.searchOnelineLiteral(inFileQuery, lineString);
+					result = searchUtils.searchOnelineLiteral(inFileQuery, lineString);
 				}
 				if(result){
 					var detailNode, lineNumber = i+1;
 					if(!replacing){
-						detailNode = {parent: fileModelNode, context: exports.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, 
+						detailNode = {parent: fileModelNode, context: searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, 
 										  type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, //$NON-NLS-0$ 
 										  location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						fileModelNode.children.push(detailNode);
@@ -436,7 +448,7 @@ exports.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fil
 	}
 };
 
-exports.searchUtils.replaceCheckedMatches = function(text, replacingStr, originalMatches, checkedMatches, defaultMatchLength){
+searchUtils.replaceCheckedMatches = function(text, replacingStr, originalMatches, checkedMatches, defaultMatchLength){
 	var gap = defaultMatchLength;
 	var startIndex = 0;
 	var replacedStr = "";
@@ -470,7 +482,7 @@ exports.searchUtils.replaceCheckedMatches = function(text, replacingStr, origina
 	return {replacedStr: replacedStr, newMatches: newMatches};
 };
 
-exports.searchUtils.fullPathNameByMeta = function(parents){
+searchUtils.fullPathNameByMeta = function(parents){
 	var parentIndex = parents.length;
 	var fullPath = "";
 	//add parents chain top down if needed
@@ -483,20 +495,20 @@ exports.searchUtils.fullPathNameByMeta = function(parents){
 	return fullPath;
 };
 
-exports.searchUtils.path2FolderName = function(filePath, fileName, keepTailSlash){
+searchUtils.path2FolderName = function(filePath, fileName, keepTailSlash){
 	var tail = keepTailSlash ? 0: 1;
 	return filePath.substring(0, filePath.length-fileName.length-tail);
 };
 
 var MAX_RECENT_SEARCH_NUMBER = 20;
 
-exports.searchUtils._storeRecentSearch = function(serviceRegistry, searches){
+searchUtils._storeRecentSearch = function(serviceRegistry, searches){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		prefs.put("recentSearch", searches); //$NON-NLS-0$
 	});
 };
 
-exports.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useRegEx){
+searchUtils.addRecentSearch = function(serviceRegistry, searchName, useRegEx){
 	if(typeof searchName !== "string" || !searchName ){ //$NON-NLS-0$
 		return;
 	}
@@ -520,12 +532,12 @@ exports.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useR
 			searches = [];
 		}
 		searches.splice(0,0,{ "name": searchName, "regEx": useRegEx});//$NON-NLS-1$ //$NON-NLS-0$
-		exports.searchUtils._storeRecentSearch(serviceRegistry, searches);
+		searchUtils._storeRecentSearch(serviceRegistry, searches);
 		//prefs.put("recentSearch", searches); //$NON-NLS-0$
 	});
 };
 
-exports.searchUtils.getSearches = function(serviceRegistry, type, callback){
+searchUtils.getSearches = function(serviceRegistry, type, callback){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		var searches = prefs.get(type); //$NON-NLS-0$
 		if (typeof searches === "string") { //$NON-NLS-0$
@@ -537,7 +549,7 @@ exports.searchUtils.getSearches = function(serviceRegistry, type, callback){
 	});
 };
 
-exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, checkDuplication, callback){
+searchUtils.getMixedSearches = function(serviceRegistry, mixed, checkDuplication, callback){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		var searches = prefs.get("recentSearch"); //$NON-NLS-0$
 		if (typeof searches === "string") { //$NON-NLS-0$
@@ -551,7 +563,7 @@ exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, checkDup
 			if(savedSearches){
 				savedSearches.forEach(function(savedSearch) {
 					if(checkDuplication){
-						var qObj = exports.searchUtils.parseQueryStr(savedSearch.query);
+						var qObj = searchUtils.parseQueryStr(savedSearch.query);
 						var duplicated = searches.some(function(search) {
 								return qObj.searchStrTitle === search.name;
 						});
@@ -570,7 +582,7 @@ exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, checkDup
 	});
 };
 
-exports.searchUtils.getOpenSearchPref = function(serviceRegistry, callback){
+searchUtils.getOpenSearchPref = function(serviceRegistry, callback){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/cm/configurations").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		var properties = prefs.get("nav.config"); //$NON-NLS-0$
 		var openInNewTab;
@@ -583,11 +595,11 @@ exports.searchUtils.getOpenSearchPref = function(serviceRegistry, callback){
 	});
 };
 
-exports.searchUtils.setOpenSearchPref = function(serviceRegistry, openInNewTab){
+searchUtils.setOpenSearchPref = function(serviceRegistry, openInNewTab){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		prefs.put("openSearchPref", {"openInNewTab": openInNewTab}); //$NON-NLS-1$ //$NON-NLS-0$
 	});
 };
 
-return exports.searchUtils;
+return searchUtils;
 });
