@@ -69,6 +69,47 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegist
 		return CommandResult;
 	}());
 
+	var ContributedType = (function() {
+		function ContributedType(name, parseFn, stringifyFn) {
+			this.name = name;
+			this.parseFn = parseFn;
+			this.stringifyFn = stringifyFn;
+		}
+		ContributedType.prototype = {
+			getName: function() {
+				return this.name;
+			},
+			parse: function(arg, typeSpec, params) {
+				var promise = new Deferred();
+				this.parseFn(arg, typeSpec, params).then(
+					function(result) {
+						promise.resolve(result);
+					},
+					function(error) {
+						promise.reject(error);
+					}
+				);
+				return promise;
+			},
+			stringify: function(arg, typeSpec) {
+				if (!this.stringifyFn) {
+					return arg.name;
+				}
+				var promise = new Deferred();
+				this.stringifyFn(arg, typeSpec).then(
+					function(result) {
+						promise.resolve(result);
+					},
+					function(error) {
+						promise.reject(error);
+					}
+				);
+				return promise;
+			}
+		};
+		return ContributedType;
+	}());
+
 	/* model and renderer for displaying services */
 
 	var ServicesModel = (function() {
@@ -796,9 +837,10 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegist
 		if (typeof(service) !== "function") { //$NON-NLS-0$
 			return undefined;
 		}
-		return function(args, typeSpec) {
+		return function(args, typeSpec, context) {
 			var promise = new Deferred();
-			service(args, typeSpec).then(
+			context.cwd = getCWD();
+			service(args, typeSpec, context).then(
 				function(result) {
 					promise.resolve(result);
 				},
@@ -815,7 +857,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegist
 		serviceRegistry = core.serviceRegistry;
 		preferences = core.preferences;
 
-		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+		var commandRegistry = new mCommandRegistry.CommandRegistry({});
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
@@ -1044,47 +1086,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegist
 			var ref = allReferences[i];
 			var service = serviceRegistry.getService(ref);
 			if (service) {
-				var type = (function(name, parseFn, stringifyFn) {
-					return {
-						getName: function() {
-							return name;
-						},
-						parse: function(arg, typeSpec) {
-							var promise = new Deferred();
-							parseFn(arg, typeSpec).then(
-								function(result) {
-									promise.resolve(result);
-								},
-								function(error) {
-									promise.reject(error);
-								}
-							);
-							return promise;
-						},
-						stringify: function(arg, typeSpec) {
-							if (!stringifyFn) {
-								return arg.name;
-							}
-							var promise = new Deferred();
-							stringifyFn(arg, typeSpec).then(
-								function(result) {
-									promise.resolve(result);
-								},
-								function(error) {
-									promise.reject(error);
-								}
-							);
-							return promise;
-						}
-					};
-				}(ref.getProperty("name"), contributedFunc(service.parse), contributedFunc(service.stringify))); //$NON-NLS-0$
-
-//				if (service.increment) {
-//					type.increment = service.increment;
-//				}
-//				if (service.decrement) {
-//					type.decrement = service.decrement;
-//				}
+				var type = new ContributedType(ref.getProperty("name"), contributedFunc(service.parse), contributedFunc(service.stringify)); //$NON-NLS-0$
 				shell.registerType(type);
 			}
 		}
