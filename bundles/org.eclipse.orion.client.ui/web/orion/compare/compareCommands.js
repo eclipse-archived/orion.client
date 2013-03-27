@@ -140,7 +140,7 @@ exports.CompareCommandFactory = (function() {
 			if (!compareWidget.options.newFile.readonly) {
 				commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 110, null, false, new mKeyBinding.KeyBinding(37/*left arrow key*/, true, false, true)); //$NON-NLS-0$
 			}
-			if (!compareWidget.options.baseFile.readonly) {
+			if (!compareWidget.options.oldFile.readonly) {
 				commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToRight", 111, null, false, new mKeyBinding.KeyBinding(39/*left arrow key*/, true, false, true)); //$NON-NLS-0$
 			}
 			commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 112, null, false, new mKeyBinding.KeyBinding(40/*down arrow key*/, true)); //$NON-NLS-0$
