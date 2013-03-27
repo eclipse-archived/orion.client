@@ -26,7 +26,10 @@ var myapp = connect()
 /* .use( additional handlers ) */
 ```
 
-For full instructions, see the [Getting Started guide](http://wiki.eclipse.org/Orion/Getting_Started_with_Orion_node).
+For full instructions, see the [Getting Started guide](http://wiki.eclipse.org/Orion/Node/Getting_started).
+
+### Running the tests
+We use [Mocha](https://github.com/visionmedia/mocha) for our tests. Run ```npm test``` or ```mocha```.
 
 ## License
 Dual-licensed under the [Eclipse Public License v1.0](http://www.eclipse.org/legal/epl-v10.html) and the [Eclipse Distribution License v1.0](http://www.eclipse.org/org/documents/edl-v10.html).
