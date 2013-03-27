@@ -13,7 +13,6 @@
 /*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/compare/nls/messages',
-		'require',
 		'orion/Deferred',
 		'orion/webui/littlelib',
 		'orion/compare/diff-parser',
@@ -26,7 +25,7 @@ define(['i18n!orion/compare/nls/messages',
         'orion/compare/compareUtils',
         'orion/compare/jsdiffAdapter',
         'orion/compare/diffTreeNavigator'],
-function(messages, require, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mKeyBinding, mTextView,
+function(messages, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mKeyBinding, mTextView,
 		 mCompareFeatures, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
 var exports = {};
 //var messages = {};
@@ -143,6 +142,10 @@ exports.CompareView = (function() {
 			}
 		},
 
+		getWidget: function() {
+			return this;
+		},
+		
 		startup: function(onsave, onLoadContents){
 			this.initEditors();
 			this._onLoadContents = onLoadContents;
@@ -178,18 +181,13 @@ exports.TwoWayCompareView = (function() {
 			this.options.commandProvider.initCommands(this);
 		}
 		this._curveRuler = new mCompareRulers.CompareCurveRuler(this._uiFactory.getDiffCanvasDiv());
-		this._highlighter = [];
-		if(this.options.highlighter && typeof this.options.highlighter === "function") { //$NON-NLS-0$
-			this._highlighter.push(new this.options.highlighter());
-			this._highlighter.push(new this.options.highlighter());
-		}
 	}
 	TwoWayCompareView.prototype = new exports.CompareView();
 	
 	TwoWayCompareView.prototype.initEditors = function(){
 		this._editors = [];//this._editors[0] represents the right side editor. this._editors[1] represents the left side editor
 		//Create editor on the right side
-		this._editors.push(this._createEditor(this._uiFactory.getEditorParentDiv(false), this._uiFactory.getStatusDiv(false), this.options.baseFile));
+		this._editors.push(this._createEditor(this._uiFactory.getEditorParentDiv(false), this._uiFactory.getStatusDiv(false), this.options.oldFile));
 		
 		//Create editor on the left side
 		this._editors.push(this._createEditor(this._uiFactory.getEditorParentDiv(true), this._uiFactory.getStatusDiv(true), this.options.newFile, true));
@@ -222,7 +220,7 @@ exports.TwoWayCompareView = (function() {
 	};
 	
 	TwoWayCompareView.prototype.copyToRight = function(){	
-		this._curveRuler.copyTo(true);
+		this._curveRuler.copyTo(false);
 	};
 	
 	TwoWayCompareView.prototype.resizeEditors = function(){	
@@ -379,7 +377,7 @@ exports.TwoWayCompareView = (function() {
 	};
 	
 	TwoWayCompareView.prototype.refresh = function(onsave){	
-		var input = this.options.baseFile.Content;
+		var input = this.options.oldFile.Content;
 		var output = this.options.newFile.Content;
 		var diff = this.options.diffContent;
 		
@@ -398,9 +396,9 @@ exports.TwoWayCompareView = (function() {
 		if(!onsave){
 			this._editors[1].setInput(this.options.newFile.Name, null, output);
 		}
-		this._editors[0].setInput(this.options.baseFile.Name, null, input);
+		this._editors[0].setInput(this.options.oldFile.Name, null, input);
 		this._initSyntaxHighlighter([{fileName: this.options.newFile.Name, contentType: this.options.newFile.Type, editor: this._editors[1]},
-									 {fileName: this.options.baseFile.Name, contentType: this.options.baseFile.Type, editor: this._editors[0]}]);
+									 {fileName: this.options.oldFile.Name, contentType: this.options.oldFile.Type, editor: this._editors[0]}]);
 		this._highlightSyntax();
 		if(this.options.commandProvider){
 			this.options.commandProvider.renderCommands(this);
@@ -427,10 +425,6 @@ exports.InlineCompareView = (function() {
 		this.type = "inline"; //$NON-NLS-0$
 		if(this.options.commandProvider){
 			this.options.commandProvider.initCommands(this);
-		}
-		this._highlighter = [];
-		if(this.options.highlighter && typeof this.options.highlighter === "function") { //$NON-NLS-0$
-			this._highlighter.push(new this.options.highlighter());
 		}
 		this._editorDivId = this.options.parentDivId;
 	}
@@ -527,7 +521,7 @@ exports.InlineCompareView = (function() {
 	};
 	
 	InlineCompareView.prototype.refresh = function(){
-		var input = this.options.baseFile.Content;
+		var input = this.options.oldFile.Content;
 		var output = this.options.newFile.Content;
 		var diff = this.options.diffContent;
 
@@ -544,7 +538,7 @@ exports.InlineCompareView = (function() {
 		lFeeder.setModel(this._textView.getModel());
 		this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editor, this._editor, rFeeder, lFeeder, this._overviewRuler); //$NON-NLS-1$ //$NON-NLS-0$
 		
-		this._initSyntaxHighlighter([{fileName: this.options.baseFile.Name, contentType: this.options.baseFile.Type, editor: this._editor}]);
+		this._initSyntaxHighlighter([{fileName: this.options.oldFile.Name, contentType: this.options.oldFile.Type, editor: this._editor}]);
 		this._highlightSyntax();
 		if(this.options.commandProvider){
 			this.options.commandProvider.renderCommands(this);
