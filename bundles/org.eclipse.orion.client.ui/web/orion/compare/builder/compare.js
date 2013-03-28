@@ -127,10 +127,10 @@ function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mTextMateSt
 				Deferred.all(promises, function(error) { return {_error: error}; }).then(function(results){
 					this.getCompareView().getWidget().options.oldFile.Content = results[0];
 					this.getCompareView().getWidget().options.newFile.Content = results[1];
-					this.getCompareView().getWidget().refresh();
+					this.getCompareView().getWidget().refresh(true);
 				}.bind(this));
 			} else {
-				this.getCompareView().getWidget().refresh();
+				this.getCompareView().getWidget().refresh(true);
 			}
 		}
 	};

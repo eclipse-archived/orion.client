@@ -12,8 +12,9 @@
 /*global define document console prompt window*/
 /*jslint forin:true regexp:false sub:true*/
 
-define(['orion/Deferred', 'orion/compare/diff-provider', 'orion/compare/compareView', 'orion/highlight', 'orion/fileClient'], 
-		function(Deferred, mDiffProvider, mCompareView, Highlight, mFileClient) {
+define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/compare/diff-provider', 'orion/compare/compareView', 'orion/highlight', 
+		'orion/fileClient', 'orion/globalCommands', 'orion/searchAndReplace/textSearcher', 'orion/editorCommands', 'orion/editor/editorFeatures'], 
+		function(messages, require, Deferred, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mSearcher, mEditorCommands, mEditorFeatures) {
 
 var exports = {};
 
@@ -51,7 +52,7 @@ exports.DefaultDiffProvider = (function() {
 			Deferred.all([ that._getContentType(oldFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
 		},
 		
-		_resolveDiff: function(resource, compareTo, onlyDiff, errorCallback) {
+		_resolveDiff: function(resource, compareTo, errorCallback) {
 			if(compareTo){
 				this._resolveTwoFiles(compareTo, resource, errorCallback);
 			} else {
@@ -66,13 +67,7 @@ exports.DefaultDiffProvider = (function() {
 					} else {
 						that._diffContent = jsonData;
 					}
-					if (onlyDiff){
-						that.callBack({ 
-							diffContent: that._diffContent
-						 });
-					} else {
-						that._resolveComplexFileURL(resource);
-					}
+					that._resolveComplexFileURL(resource);
 				}, errorCallback);
 			}
 		},
@@ -96,10 +91,10 @@ exports.DefaultDiffProvider = (function() {
 			}, errorCallback);
 		},
 		
-		provide: function(resource, compareTo, onlyDiff, hasConflicts,callBack, errorCallBack) {
+		provide: function(resource, compareTo, hasConflicts,callBack, errorCallBack) {
 			this.callBack = callBack;
 			this._hasConflicts = hasConflicts;
-			this._resolveDiff(resource, compareTo, onlyDiff, errorCallBack);
+			this._resolveDiff(resource, compareTo, errorCallBack);
 		}
 	};
 	return DefaultDiffProvider;
@@ -118,9 +113,13 @@ CompareStyler.prototype = {
 };
 
 exports.ResourceComparer = (function() {
-	function ResourceComparer (serviceRegistry, options, viewOptions) {
+	function ResourceComparer (serviceRegistry, commandRegistry, options, viewOptions) {
 		this._registry = serviceRegistry;
+		this._commandService = commandRegistry;
 		this._fileClient = new mFileClient.FileClient(serviceRegistry);
+		this._fileClient = new mFileClient.FileClient(serviceRegistry);
+		this._searchService = this._registry.getService("orion.core.search"); //$NON-NLS-0$
+		this._progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
 		this.setOptions(options, true);
 		if(options.toggleable) {
 			this._compareView = new mCompareView.toggleableCompareView(options.type === "inline" ? "inline" : "twoWay", viewOptions);
@@ -130,9 +129,87 @@ exports.ResourceComparer = (function() {
 			this._compareView = new mCompareView.TwoWayCompareView(viewOptions);
 		}
 		if(!viewOptions.highlighters){
-			this._compareView.getWidget().setOptions({highlighters: [new CompareStyler(), new CompareStyler()]});
+			this._compareView.getWidget().setOptions({highlighters: [new CompareStyler(serviceRegistry), new CompareStyler(serviceRegistry)]});
+		}
+		if(!viewOptions.oldFile){
+			this._compareView.getWidget().setOptions({oldFile: {readonly: true}});
+		}
+		if(!viewOptions.newFile){
+			this._compareView.getWidget().setOptions({newFile: {readonly: options.readonly}});
+		}
+		var that = this;
+		this._inputManager = {
+			filePath: "",
+			getInput: function() {
+				return this.filePath;
+			},
+			
+			setDirty: function(dirty) {
+				mGlobalCommands.setDirtyIndicator(dirty);
+			},
+			
+			getFileMetadata: function() {
+				return this._fileMetadata;
+			},
+			
+			setInput: function(fileURI, editor) {
+				that._progress.progress(that._fileClient.read(fileURI, true), "Getting file metadata " + fileURI).then( //$NON-NLS-0$
+					function(metadata) {
+						this._fileMetadata = metadata;
+						this.setTitle(metadata.Location, metadata);
+					}.bind(this),
+					function(error) {
+						console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
+						this.setTitle(fileURI);
+					}.bind(this)
+				);
+				this.lastFilePath = fileURI;
+			},
+			
+			setTitle : function(title, /*optional*/ metadata) {
+				var name;
+				if (metadata) {
+					name = metadata.Name;
+				}
+				mGlobalCommands.setPageTarget({task: messages["Compare"], name: name, target: metadata,
+							serviceRegistry: serviceRegistry, commandService: that._commandService,
+							searchService: that._searchService, fileService: that._fileClient});
+				if (title.charAt(0) === '*') { //$NON-NLS-0$
+					mGlobalCommands.setDirtyIndicator(true);
+					name = title.substring(1);
+				} else {
+					mGlobalCommands.setDirtyIndicator(false);
+				} 
+			},
+			
+			afterSave: function(){
+				var editors = that._compareView.getWidget().getEditors();
+				var newContents = editors[1].getTextView().getText();
+				that._compareView.getWidget().options.newFile.Content = newContents;
+				that._compareView.getWidget().refresh();
+			}
+		};
+		if(!options.readonly && !options.toggleable && this._compareView.getWidget().type === "twoWay") { //$NON-NLS-0$
+			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
+				var localSearcher = new mSearcher.TextSearcher(editor, that._commandService, undoStack);
+				var commandGenerator = new mEditorCommands.EditorCommandFactory(that._registry, that._commandService,that._fileClient , that._inputManager, "pageActions", false, "pageNavigationActions", localSearcher); //$NON-NLS-1$ //$NON-NLS-0$
+				commandGenerator.generateEditorCommands(editor);
+				var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
+				keyModeStack.push(genericBindings);
+				// create keybindings for source editing
+				var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
+				keyModeStack.push(codeBindings);
+			};
+			this._compareView.getWidget().options.newFile.keyBindingFactory = keyBindingFactory;
 		}
 		this._compareView.getWidget().initEditors();
+		if(!options.readonly && !options.toggleable && this._compareView.getWidget().type === "twoWay") { //$NON-NLS-0$
+			var editors = this._compareView.getWidget().getEditors();
+			//right side editor
+			editors[1].addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
+				this._inputManager.setDirty(editors[1].isDirty());
+			}.bind(this));
+		}
 	}
 	ResourceComparer.prototype = {
 		_clearOptions: function(){
@@ -160,14 +237,22 @@ exports.ResourceComparer = (function() {
 			that.options.diffProvider.provide(that.options.resource, that.options.compareTo, that.options.hasConflicts, function(diffParam){
 				that._compareView.getWidget().setOptions(diffParam);
 				var viewOptions = that._compareView.getWidget().options;
+				viewOptions.oldFile.readonly = true;
+				if(that.options.readonly) {
+					viewOptions.newFile.readonly = true;
+				}
 				if(that.options.callback){
 					that.options.callback(viewOptions.oldFile.Name, viewOptions.newFile.Name);
 				}
 				var filesToLoad = ( viewOptions.diffContent ? [viewOptions.oldFile/*, viewOptions.newFile*/] : [viewOptions.oldFile, viewOptions.newFile]); 
 				that.getFilesContents(filesToLoad).then( function(){
-					var viewHeight = this._compareView.getWidget().setEditor();
-					if(this._onLoadContents){
-						this._onLoadContents(viewHeight);
+					var viewHeight = that._compareView.getWidget().refresh(true);
+					if(!that.options.readonly && !that.options.toggleable && that._compareView.getWidget().type === "twoWay") { //$NON-NLS-0$
+						this._inputManager.filePath = that._compareView.getWidget().options.newFile.URL;
+						that._inputManager.setInput(viewOptions.newFile.URL , that._compareView.getWidget().getEditors()[1]);
+					}
+					if(that._onLoadContents){
+						that._onLoadContents(viewHeight);
 					}
 				}.bind(that));
 			}, that.options.errorCallback);
@@ -195,7 +280,7 @@ exports.ResourceComparer = (function() {
 		        }.bind(this)
 			);
 	    },
-		compose: function(onLoadContents){
+		start: function(onLoadContents){
 			this._onLoadContents = onLoadContents;
 			if(this.options.resource){
 				this.resolveDiffByProvider();

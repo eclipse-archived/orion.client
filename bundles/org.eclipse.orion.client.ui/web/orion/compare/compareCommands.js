@@ -48,7 +48,7 @@ exports.CompareCommandFactory = (function() {
 				id: "orion.compare.copyToLeft", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
-					return compareWidget.type === "twoWay"; //$NON-NLS-0$
+					return compareWidget.type === "twoWay" && compareWidget.options.newFile && !compareWidget.options.newFile.readonly; //$NON-NLS-0$
 				}.bind(this),
 				callback : function(data) {
 					data.items.copyToLeft();
@@ -60,7 +60,7 @@ exports.CompareCommandFactory = (function() {
 				id: "orion.compare.copyToRight", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
-					return compareWidget.type === "twoWay"; //$NON-NLS-0$
+					return compareWidget.type === "twoWay" && compareWidget.options.oldFile && !compareWidget.options.oldFile.readonly; //$NON-NLS-0$
 				}.bind(this),
 				callback : function(data) {
 					data.items.copyToRight();
@@ -137,12 +137,8 @@ exports.CompareCommandFactory = (function() {
 			// Register command contributions
 			commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2Inline", 108); //$NON-NLS-0$
 			commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2TwoWay", 109); //$NON-NLS-0$
-			if (!compareWidget.options.newFile.readonly) {
-				commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 110, null, false, new mKeyBinding.KeyBinding(37/*left arrow key*/, true, false, true)); //$NON-NLS-0$
-			}
-			if (!compareWidget.options.oldFile.readonly) {
-				commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToRight", 111, null, false, new mKeyBinding.KeyBinding(39/*left arrow key*/, true, false, true)); //$NON-NLS-0$
-			}
+			commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 110, null, false, new mKeyBinding.KeyBinding(37/*left arrow key*/, true, false, true)); //$NON-NLS-0$
+			commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToRight", 111, null, false, new mKeyBinding.KeyBinding(39/*left arrow key*/, true, false, true)); //$NON-NLS-0$
 			commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 112, null, false, new mKeyBinding.KeyBinding(40/*down arrow key*/, true)); //$NON-NLS-0$
 			commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 113, null, false, new mKeyBinding.KeyBinding(38/*up arrow key*/, true)); //$NON-NLS-0$
 			if(compareWidget.options.wordLevelNav){

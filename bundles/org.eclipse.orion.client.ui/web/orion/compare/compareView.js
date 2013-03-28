@@ -146,10 +146,10 @@ exports.CompareView = (function() {
 			return this;
 		},
 		
-		startup: function(onsave, onLoadContents){
+		startup: function(onLoadContents){
 			this.initEditors();
 			this._onLoadContents = onLoadContents;
-			this.refresh(onsave);
+			this.refresh(true);
 		}
 	};
 	return CompareView;
@@ -207,6 +207,10 @@ exports.TwoWayCompareView = (function() {
 				}
 			}
 		}.bind(this);
+	};
+	
+	TwoWayCompareView.prototype.getEditors = function(){
+		return this._editors;
 	};
 	
 	TwoWayCompareView.prototype.gotoDiff = function(lineNumber, offsetInTheLine, updateLeft){
@@ -269,15 +273,18 @@ exports.TwoWayCompareView = (function() {
 			return view;
 		}.bind(this);
 		
+		var keyBindingFactory = fileOptions.keyBindingFactory;
 		//Create keybindings factory
-		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-			// Create keybindings for generic editing
-			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
-			keyModeStack.push(genericBindings);
-			// create keybindings for source editing
-			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
-			keyModeStack.push(codeBindings);
-		};
+		if(!keyBindingFactory) {
+			keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
+				// Create keybindings for generic editing
+				var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
+				keyModeStack.push(genericBindings);
+				// create keybindings for source editing
+				var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
+				keyModeStack.push(codeBindings);
+			};
+		}
 
 		//Create the status reporter if needed
 		var statusReporter = null;
@@ -376,16 +383,16 @@ exports.TwoWayCompareView = (function() {
 		}
 	};
 	
-	TwoWayCompareView.prototype.refresh = function(onsave){	
+	TwoWayCompareView.prototype.refresh = function(refreshEditors){	
 		var input = this.options.oldFile.Content;
 		var output = this.options.newFile.Content;
 		var diff = this.options.diffContent;
 		
 		var result;
 		if(output) {
-			result = this.parseMapper(input , output, diff , this.options.hasConflicts, true);
+			result = this.parseMapper(input , output, diff , this.options.hasConflicts);
 		} else {
-			result = this.parseMapper(input , output, diff , this.options.hasConflicts, onsave);
+			result = this.parseMapper(input , output, diff , this.options.hasConflicts);
 			output = result.output;
 		}
 		
@@ -393,10 +400,10 @@ exports.TwoWayCompareView = (function() {
 		var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._editors[1].getTextView().getModel(), result.mapper, 0);
 		this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editors[0], this._editors[1], rFeeder, lFeeder, this._overviewRuler, this._curveRuler); //$NON-NLS-1$ //$NON-NLS-0$
 		this._curveRuler.init(result.mapper ,this._editors[1], this._editors[0], this._diffNavigator);
-		if(!onsave){
+		if(refreshEditors) {
 			this._editors[1].setInput(this.options.newFile.Name, null, output);
+			this._editors[0].setInput(this.options.oldFile.Name, null, input);
 		}
-		this._editors[0].setInput(this.options.oldFile.Name, null, input);
 		this._initSyntaxHighlighter([{fileName: this.options.newFile.Name, contentType: this.options.newFile.Type, editor: this._editors[1]},
 									 {fileName: this.options.oldFile.Name, contentType: this.options.oldFile.Type, editor: this._editors[0]}]);
 		this._highlightSyntax();
@@ -407,6 +414,15 @@ exports.TwoWayCompareView = (function() {
 		
 		if(this._viewLoadedCounter === 2){
 			this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
+		}
+		
+		var newFileTitleNode = this._uiFactory.getTitleDiv(true);
+		var oldFileTitleNode = this._uiFactory.getTitleDiv(false);
+		if(oldFileTitleNode && newFileTitleNode){
+			lib.empty(oldFileTitleNode);
+			lib.empty(newFileTitleNode);
+			oldFileTitleNode.appendChild(document.createTextNode(this.options.oldFile.Name));
+			newFileTitleNode.appendChild(document.createTextNode(this.options.newFile.Name));
 		}
 		var leftViewHeight = this._editors[1].getTextView().getModel().getLineCount() * this._editors[1].getTextView().getLineHeight() + 5;
 		var rightViewHeight = this._editors[0].getTextView().getModel().getLineCount() * this._editors[0].getTextView().getLineHeight() +5;
@@ -575,7 +591,7 @@ exports.toggleableCompareView = (function() {
 	}
 	toggleableCompareView.prototype = {
 		startup: function(onLoadContents){
-			this._widget.startup(false, onLoadContents);
+			this._widget.startup(onLoadContents);
 		},
 		
 		toggle: function(){
@@ -591,7 +607,7 @@ exports.toggleableCompareView = (function() {
 				this._widget = new exports.InlineCompareView(options);
 			}
 			this._widget.initEditors();
-			this._widget.refresh();
+			this._widget.refresh(true);
 		},
 		
 		getWidget: function() {
