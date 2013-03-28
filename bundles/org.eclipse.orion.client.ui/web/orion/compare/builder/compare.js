@@ -103,8 +103,8 @@ function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mTextMateSt
 		if(!vOptions.commandService){
 			vOptions.commandService = commandService;
 		}
-		if(vOptions.baseFile && vOptions.baseFile.Name){
-			vOptions.baseFile.Type = _contentType(vOptions.baseFile.Name);
+		if(vOptions.oldFile && vOptions.oldFile.Name){
+			vOptions.oldFile.Type = _contentType(vOptions.oldFile.Name);
 		}
 		if(vOptions.newFile && vOptions.newFile.Name){
 			vOptions.newFile.Type = _contentType(vOptions.newFile.Name);
@@ -120,12 +120,12 @@ function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mTextMateSt
 		},
 		refresh: function(){
 			var options = this.getCompareView().getWidget().options;
-			if(options.baseFile.URL && options.newFile.URL){
+			if(options.oldFile.URL && options.newFile.URL){
 				var promises = [];
-				promises.push( _getFile(options.baseFile.URL));
+				promises.push( _getFile(options.oldFile.URL));
 				promises.push( _getFile(options.newFile.URL));
 				Deferred.all(promises, function(error) { return {_error: error}; }).then(function(results){
-					this.getCompareView().getWidget().options.baseFile.Content = results[0];
+					this.getCompareView().getWidget().options.oldFile.Content = results[0];
 					this.getCompareView().getWidget().options.newFile.Content = results[1];
 					this.getCompareView().getWidget().refresh();
 				}.bind(this));

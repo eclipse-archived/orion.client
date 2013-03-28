@@ -59,7 +59,7 @@
             readonly: false,
             Content: contentOnLeft
         },
-        baseFile: {
+        oldFile: {
             Name: "right." + contentType, //$NON-NLS-0$
             readonly: false,
             Content: contentOnRight
@@ -88,11 +88,11 @@
 			bContentTypeTD.style.display = "block"; //$NON-NLS-0$
 			
 			var widget = compare.getCompareView().getWidget();
-			widget.options.baseFile.Content = sampleRightText;
+			widget.options.oldFile.Content = sampleRightText;
 			widget.options.newFile.Content = sampleLeftText;
-			widget.options.baseFile.URL = null;
+			widget.options.oldFile.URL = null;
 			widget.options.newFile.URL = null;
-			widget.options.baseFile.Name = "sampleRight.js";
+			widget.options.oldFile.Name = "sampleRight.js";
 			widget.options.newFile.Name = "sampleLeft.js";
 			widget.options.mapper = null;
 			compare.refresh();
@@ -118,12 +118,12 @@
 			var oldContents = editors[0].getTextView().getText();
 			var newContents = editors[1].getTextView().getText();
 			if(compareType === "byTwoContents"){ //$NON-NLS-0$
-				widget.options.baseFile.Content = oldContents;
+				widget.options.oldFile.Content = oldContents;
 				widget.options.newFile.Content = newContents;
-				widget.options.baseFile.URL = null;
+				widget.options.oldFile.URL = null;
 				widget.options.newFile.URL = null;
 			} else {
-				widget.options.baseFile.URL = oldContents;
+				widget.options.oldFile.URL = oldContents;
 				widget.options.newFile.URL = newContents;
 				bCompareType.selectedIndex = 0;
 				compareType = bCompareType.options[bCompareType.selectedIndex].value;
@@ -138,15 +138,15 @@
 		compareType = bCompareType.options[bCompareType.selectedIndex].value;
 		var widget = compare.getCompareView().getWidget();
 		if(compareType === "byTwoContents"){ //$NON-NLS-0$
-			widget.options.baseFile.Content = contentOnRight;
+			widget.options.oldFile.Content = contentOnRight;
 			widget.options.newFile.Content = contentOnLeft;
-			widget.options.baseFile.URL = null;
+			widget.options.oldFile.URL = null;
 			widget.options.newFile.URL = null;
 			bContentTypeTD.style.display = "block"; //$NON-NLS-0$
 		} else {
-			widget.options.baseFile.Content = contentOnRightURL;
+			widget.options.oldFile.Content = contentOnRightURL;
 			widget.options.newFile.Content = contentOnLeftURL;
-			widget.options.baseFile.URL = null;
+			widget.options.oldFile.URL = null;
 			widget.options.newFile.URL = null;
 			bContentTypeTD.style.display = "none"; //$NON-NLS-0$
 		}
@@ -157,7 +157,7 @@
 	function onContentType(evt) {
 		contentType = bContentType.options[bContentType.selectedIndex].value;
 		var widget = compare.getCompareView().getWidget();
-		widget.options.baseFile.Name = "right." + contentType;
+		widget.options.oldFile.Name = "right." + contentType;
 		widget.options.newFile.Name = "left." + contentType;
 	}
 	
@@ -209,7 +209,7 @@
 				"            readonly: false,\n" + 
 				"            Content: contentOnLeft\n" + 
 				"        },\n" + 
-				"        baseFile: {\n" + 
+				"        oldFile: {\n" + 
 				"            Name: \"right.\" + contentType, //$NON-NLS-0$\n" + 
 				"            readonly: false,\n" + 
 				"            Content: contentOnRight\n" + 
@@ -240,11 +240,11 @@
 				"			bContentTypeTD.style.display = \"block\"; //$NON-NLS-0$\n" + 
 				"			\n" + 
 				"			var widget = compare.getCompareView().getWidget();\n" + 
-				"			widget.options.baseFile.Content = sampleRight;\n" + 
+				"			widget.options.oldFile.Content = sampleRight;\n" + 
 				"			widget.options.newFile.Content = sampleLeft;\n" + 
-				"			widget.options.baseFile.URL = null;\n" + 
+				"			widget.options.oldFile.URL = null;\n" + 
 				"			widget.options.newFile.URL = null;\n" + 
-				"			widget.options.baseFile.Name = \"sampRight.js\";\n" + 
+				"			widget.options.oldFile.Name = \"sampRight.js\";\n" + 
 				"			widget.options.newFile.Name = \"sampleLeft.js\";\n" + 
 				"			widget.options.mapper = null;\n" + 
 				"			compare.refresh();\n" + 
@@ -257,12 +257,12 @@
 				"			var oldContents = editors[0].getTextView().getText();\n" + 
 				"			var newContents = editors[1].getTextView().getText();\n" + 
 				"			if(compareType === \"byTwoContents\"){ //$NON-NLS-0$\n" + 
-				"				widget.options.baseFile.Content = oldContents;\n" + 
+				"				widget.options.oldFile.Content = oldContents;\n" + 
 				"				widget.options.newFile.Content = newContents;\n" + 
-				"				widget.options.baseFile.URL = null;\n" + 
+				"				widget.options.oldFile.URL = null;\n" + 
 				"				widget.options.newFile.URL = null;\n" + 
 				"			} else {\n" + 
-				"				widget.options.baseFile.URL = oldContents;\n" + 
+				"				widget.options.oldFile.URL = oldContents;\n" + 
 				"				widget.options.newFile.URL = newContents;\n" + 
 				"				bCompareType.selectedIndex = 0;\n" + 
 				"				compareType = bCompareType.options[bCompareType.selectedIndex].value;\n" + 
@@ -277,15 +277,15 @@
 				"		compareType = bCompareType.options[bCompareType.selectedIndex].value;\n" + 
 				"		var widget = compare.getCompareView().getWidget();\n" + 
 				"		if(compareType === \"byTwoContents\"){ //$NON-NLS-0$\n" + 
-				"			widget.options.baseFile.Content = contentOnRight;\n" + 
+				"			widget.options.oldFile.Content = contentOnRight;\n" + 
 				"			widget.options123.newFile.Content = contentOnLeft123;\n" + 
-				"			widget.opzzzns.baseFile.URL = null;\n" + 
+				"			widget.opzzzns.oldFile.URL = null;\n" + 
 				"			widget.options.newFile.URL = null;\n" + 
 				"			bContentTypeTD.style.display = \"block\"; //$NON-NLS-0$\n" + 
 				"		} else {\n" + 
-				"			widget.options.baseFile.Content = contentOnRightURL;\n" + 
+				"			widget.options.oldFile.Content = contentOnRightURL;\n" + 
 				"			widget.options.newFile.Content = contentOnLeftURL;\n" + 
-				"			widget.options.baseFile.URL = null;\n" + 
+				"			widget.options.oldFile.URL = null;\n" + 
 				"			widget.options.newFile.URL = null;\n" + 
 				"			bContentTypeTD.style.display = \"none\"; //$NON-NLS-0$\n" + 
 				"		}\n" + 
@@ -296,7 +296,7 @@
 				"	function onContentType(evt) {\n" + 
 				"		contentTypeNew = bContentType.options[bContentType.selectedIndex].valueNew;\n" + 
 				"		var widget = compare.getCompareView().getWidget();\n" + 
-				"		widget.options.baseFile.Name = \"right.\" + contentType;\n" + 
+				"		widget.options.oldFile.Name = \"right.\" + contentType;\n" + 
 				"		widget.options.newFile.Name = \"left.\" + contentType;\n" + 
 				"		\n" + 
 				"		//Added some new stuff here\n" + 
@@ -353,7 +353,7 @@
 			"            readonly: false,\n" + 
 			"            Content: contentOnLeft\n" + 
 			"        },\n" + 
-			"        baseFile: {\n" + 
+			"        oldFile: {\n" + 
 			"            Name: \"right.\" + contentType, //$NON-NLS-0$\n" + 
 			"            readonly: false,\n" + 
 			"            Content: contentOnRight\n" + 
@@ -384,11 +384,11 @@
 			"			bContentTypeTD.style.display = \"block\"; //$NON-NLS-0$\n" + 
 			"			\n" + 
 			"			var widget = compare.getCompareView().getWidget();\n" + 
-			"			widget.options.baseFile.Content = sampleRight;\n" + 
+			"			widget.options.oldFile.Content = sampleRight;\n" + 
 			"			widget.options.newFile.Content = sampleLeft;\n" + 
-			"			widget.options.baseFile.URL = null;\n" + 
+			"			widget.options.oldFile.URL = null;\n" + 
 			"			widget.options.newFile.URL = null;\n" + 
-			"			widget.options.baseFile.Name = \"sampRight.js\";\n" + 
+			"			widget.options.oldFile.Name = \"sampRight.js\";\n" + 
 			"			widget.options.newFile.Name = \"sampleLeft.js\";\n" + 
 			"			widget.options.mapper = null;\n" + 
 			"			compare.refresh();\n" + 
@@ -401,12 +401,12 @@
 			"			var oldContents = editors[0].getTextView().getText();\n" + 
 			"			var newContents = editors[1].getTextView().getText();\n" + 
 			"			if(compareType === \"byTwoContents\"){ //$NON-NLS-0$\n" + 
-			"				widget.options.baseFile.Content = oldContents;\n" + 
+			"				widget.options.oldFile.Content = oldContents;\n" + 
 			"				widget.options.newFile.Content = newContents;\n" + 
-			"				widget.options.baseFile.URL = null;\n" + 
+			"				widget.options.oldFile.URL = null;\n" + 
 			"				widget.options.newFile.URL = null;\n" + 
 			"			} else {\n" + 
-			"				widget.options.baseFile.URL = oldContents;\n" + 
+			"				widget.options.oldFile.URL = oldContents;\n" + 
 			"				widget.options.newFile.URL = newContents;\n" + 
 			"				bCompareType.selectedIndex = 0;\n" + 
 			"				compareType = bCompareType.options[bCompareType.selectedIndex].value;\n" + 
@@ -421,15 +421,15 @@
 			"		compareType = bCompareType.options[bCompareType.selectedIndex].value;\n" + 
 			"		var widget = compare.getCompareView().getWidget();\n" + 
 			"		if(compareType === \"byTwoContents\"){ //$NON-NLS-0$\n" + 
-			"			widget.options.baseFile.Content = contentOnRight;\n" + 
+			"			widget.options.oldFile.Content = contentOnRight;\n" + 
 			"			widget.options.newFile.Content = contentOnLeft;\n" + 
-			"			widget.options.baseFile.URL = null;\n" + 
+			"			widget.options.oldFile.URL = null;\n" + 
 			"			widget.options.newFile.URL = null;\n" + 
 			"			bContentTypeTD.style.display = \"block\"; //$NON-NLS-0$\n" + 
 			"		} else {\n" + 
-			"			widget.options.baseFile.Content = contentOnRightURL;\n" + 
+			"			widget.options.oldFile.Content = contentOnRightURL;\n" + 
 			"			widget.options.newFile.Content = contentOnLeftURL;\n" + 
-			"			widget.options.baseFile.URL = null;\n" + 
+			"			widget.options.oldFile.URL = null;\n" + 
 			"			widget.options.newFile.URL = null;\n" + 
 			"			bContentTypeTD.style.display = \"none\"; //$NON-NLS-0$\n" + 
 			"		}\n" + 
@@ -440,7 +440,7 @@
 			"	function onContentType(evt) {\n" + 
 			"		contentType = bContentType.options[bContentType.selectedIndex].value;\n" + 
 			"		var widget = compare.getCompareView().getWidget();\n" + 
-			"		widget.options.baseFile.Name = \"right.\" + contentType;\n" + 
+			"		widget.options.oldFile.Name = \"right.\" + contentType;\n" + 
 			"		widget.options.newFile.Name = \"left.\" + contentType;\n" + 
 			"	}\n" + 
 			"	\n" + 
