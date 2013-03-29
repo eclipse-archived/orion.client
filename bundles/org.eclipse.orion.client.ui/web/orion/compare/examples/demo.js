@@ -82,7 +82,7 @@ function(Compare) {
 			widget.options.oldFile.Name = "sampRight.js";
 			widget.options.newFile.Name = "sampleLeft.js";
 			widget.options.mapper = null;
-			compare.refresh();
+			compare.refresh(true);
 		}
 	}
 	function animateDiffs() {
@@ -101,7 +101,7 @@ function(Compare) {
 	function doCompare() {
 		var widget = compare.getCompareView().getWidget();
 		if(widget.type === "twoWay"){ //$NON-NLS-0$
-			var editors = widget._editors;
+			var editors = widget.getEditors();
 			var oldContents = editors[0].getTextView().getText();
 			var newContents = editors[1].getTextView().getText();
 			if(compareType === "byTwoContents"){ //$NON-NLS-0$
