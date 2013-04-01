@@ -31,14 +31,14 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 		var whitespace = "";
 		offset = offset-1;
 		while (offset > 0) {
-			var c = buffer.charAt(offset--);
-			if (c === '\n' || c === '\r') {
+			var char = buffer.charAt(offset--);
+			if (char === '\n' || char === '\r') {
 				//we hit the start of the line so we are done
 				break;
 			}
-			if (/\s/.test(c)) {
+			if (/\s/.test(char)) {
 				//we found whitespace to add it to our result
-				whitespace = c.concat(whitespace);
+				whitespace = char.concat(whitespace);
 			} else {
 				//we found non-whitespace, so reset our result
 				whitespace = "";
