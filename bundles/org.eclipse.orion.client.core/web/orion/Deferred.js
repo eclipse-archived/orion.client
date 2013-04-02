@@ -195,25 +195,26 @@
 				deferred: new Deferred()
 			};
 			var deferred = listener.deferred;
-			var thisCancel = this.cancel.bind(this);
+			var propagated = false;
 			var propagateCancel = function() {
+				if (propagated) {
+					return;
+				}
+				propagated = true;
 				enqueue(function() {
-					var cancel = deferred.cancel === propagateCancel ? thisCancel : deferred.cancel;
-					cancel();
+					var cancel = deferred.cancel === propagateCancel ? _this.cancel : deferred.cancel;
+					if (typeof cancel === "function") {
+						cancel();
+					}
 				}, true);
 			};
 			deferred.cancel = propagateCancel;
-			var promise = deferred.promise;
-			promise.cancel = function() {
-				deferred.cancel(); // require indirection since deferred.cancel will be assigned if a promise is returned by onResolve/onReject
-			};
-
 			listeners.push(listener);
 			if (state) {
 				enqueue(notify, true); //runAsync
 			}
-			return promise;
-		}.bind(this);
+			return deferred.promise;
+		};
 
 		/**
 		 * The promise exposed by this Deferred.
@@ -221,10 +222,19 @@
 		 * @fieldOf orion.Deferred.prototype
 		 * @type orion.Promise
 		 */
-		this.promise = {
-			then: this.then,
-			cancel: this.cancel
-		};
+		this.promise = Object.create(Object.prototype, {
+			then: {
+				value: _this.then
+			},
+			cancel: {
+				get: function() {
+					return _this.cancel;
+				},
+				set: function(value) {
+					_this.cancel = value;
+				}
+			}
+		});
 	}
 
 	/**
