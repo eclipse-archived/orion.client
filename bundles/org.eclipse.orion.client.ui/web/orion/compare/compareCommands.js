@@ -34,7 +34,9 @@ exports.CompareCommandFactory = (function() {
 				}.bind(this));
 			}
 		},
-		
+		getOptions: function() {
+			return this.options;
+		},
 		initCommands: function(compareWidget){	
 			var commandSpanId = this.options.commandSpanId;
 			var commandService = this.options.commandService;

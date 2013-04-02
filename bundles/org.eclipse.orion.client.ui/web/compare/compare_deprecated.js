@@ -12,8 +12,8 @@
 /*global define document window */
 
 define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
-		'orion/compare/compareCommands', 'orion/compare/resourceComparer', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/compare/compareUtils', 'orion/contentTypes', 'orion/PageUtil'],
-		function(mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mCompareCommands, mResourceComparer, mThemePreferences, mThemeData, mCompareUtils, mContentTypes, PageUtil) {
+		'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/compare/compareUtils', 'orion/contentTypes', 'orion/PageUtil'],
+		function(mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mCompareFeatures, mCompareContainer, mThemePreferences, mThemeData, mCompareUtils, mContentTypes, PageUtil) {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
@@ -30,16 +30,13 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsCl
 		var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
 		themePreferences.apply();
 		mGlobalCommands.generateBanner("orion-compare", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
-		/*
 		var uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
 			parentDivID: "compareContainer", //$NON-NLS-0$
 			showTitle: true,
 			showLineStatus: true
 		});
 		uiFactory.buildUI();
-		*/
-		var diffProvider = new mResourceComparer.DefaultDiffProvider(serviceRegistry);
-		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: "pageNavigationActions"}); //$NON-NLS-0$
+		var diffProvider = new mCompareContainer.DefaultDiffProvider(serviceRegistry);
 		
 		var startWidget = function(){
 			var compareParams = PageUtil.matchResourceParameters();
@@ -47,21 +44,16 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsCl
 				readonly: compareParams.readonly === "true", //$NON-NLS-0$
 				onPage: true,
 				generateLink: true,
+				commandSpanId: "pageNavigationActions", //$NON-NLS-0$
 				hasConflicts: compareParams.conflict === "true", //$NON-NLS-0$
 				diffProvider: diffProvider,
 				resource: compareParams.resource,
-				compareTo: compareParams.compareTo
-			};
-			var viewOptions = {
-				parentDivId: "compareContainer", //$NON-NLS-0$
-				commandProvider: cmdProvider,
-				showTitle: true,
-				showLineStatus: true,
+				compareTo: compareParams.compareTo,
 				blockNumber: compareParams.block,
 				changeNumber: compareParams.change
 			};
-			var comparer = new mResourceComparer.ResourceComparer(serviceRegistry, commandService, options, viewOptions);
-			comparer.start();
+			var twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(serviceRegistry, commandService, "compareContainer", uiFactory, options); //$NON-NLS-0$
+			twoWayCompareContainer.startup();
 		};
 		startWidget();
 		// every time the user manually changes the hash, we need to reastart the compare widget.
