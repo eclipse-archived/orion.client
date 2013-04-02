@@ -11,9 +11,9 @@
 /*global define document window Image*/
 define(
 		[ 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orion/selection', 'orion/section', 'orion/PageUtil', 'orion/webui/littlelib',
-				'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/git/util',
+				'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compareCommands', 'orion/compare/resourceComparer', 'orion/git/util',
 				'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'],
-		function(messages, mExplorer, mSelection, mSection, PageUtil, lib, i18nUtil, mGlobalCommands, mDiffProvider, mCompareContainer, mGitUtil, mGitCommands,
+		function(messages, mExplorer, mSelection, mSection, PageUtil, lib, i18nUtil, mGlobalCommands, mDiffProvider, mCompareCommands, mResourceComparer, mGitUtil, mGitCommands,
 				Deferred, mCommitTooltip) {
 
 			var exports = {};
@@ -461,22 +461,23 @@ define(
 									var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 									var hasConflict = isConflict(item.parent.type);
 									window.setTimeout(function() {
-										var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
-										var diffOptions = { gridRenderer : { navGridHolder : navGridHolder
-										},
-										commandSpanId : compareWidgetActionWrapper.id,
-										diffProvider : diffProvider,
-										hasConflicts : hasConflict,
-										readonly : true,
-										editableInComparePage : true,
-										resource : item.diffUri,
-										callback : function() {
-										}
+										var diffProvider = new mResourceComparer.DefaultDiffProvider(that.registry);
+										var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: that.commandService, commandSpanId: compareWidgetActionWrapper.id, gridRenderer: {navGridHolder: navGridHolder}});
+										var options = {
+											toggleable: true,
+											type: "inline",
+											readonly: true,
+											hasConflicts: hasConflict,
+											diffProvider: diffProvider,
+											resource : item.diffUri,
+											editableInComparePage : true
 										};
-
-										var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, that.commandService,
-												"diffArea_" + item.diffUri, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
-										inlineCompareContainer.startup(function(maxHeight) {
+										var viewOptions = {
+											parentDivId: "diffArea_" + item.diffUri, //$NON-NLS-0$
+											commandProvider: cmdProvider
+										};
+										var comparer = new mResourceComparer.ResourceComparer(that.registry, that.commandService, options, viewOptions);
+										comparer.start(function(maxHeight) {
 											var vH = 420;
 											if (maxHeight < vH) {
 												vH = maxHeight;
@@ -689,22 +690,23 @@ define(
 									var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 									var hasConflict = isConflict(item.parent.type);
 									window.setTimeout(function() {
-										var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
-
-										var diffOptions = { gridRenderer : { navGridHolder : navGridHolder
-										},
-										commandSpanId : compareWidgetActionWrapper.id,
-										diffProvider : diffProvider,
-										hasConflicts : hasConflict,
-										readonly : true,
-										resource : item.diffUri,
-										callback : function() {
-										}
+										var diffProvider = new mResourceComparer.DefaultDiffProvider(that.registry);
+										var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: that.commandService, commandSpanId: compareWidgetActionWrapper.id, gridRenderer: {navGridHolder: navGridHolder}});
+										var options = {
+											toggleable: true,
+											type: "inline",
+											readonly: true,
+											hasConflicts: hasConflict,
+											diffProvider: diffProvider,
+											resource : item.diffUri,
+											editableInComparePage : true
 										};
-
-										var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, that.commandService,
-												"diffArea_" + item.diffUri, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
-										inlineCompareContainer.startup(function(maxHeight) {
+										var viewOptions = {
+											parentDivId: "diffArea_" + item.diffUri, //$NON-NLS-0$
+											commandProvider: cmdProvider
+										};
+										var comparer = new mResourceComparer.ResourceComparer(that.registry, that.commandService, options, viewOptions);
+										comparer.start(function(maxHeight) {
 											var vH = 420;
 											if (maxHeight < vH) {
 												vH = maxHeight;
