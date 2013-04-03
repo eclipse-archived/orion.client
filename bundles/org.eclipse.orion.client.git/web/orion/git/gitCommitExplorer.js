@@ -13,8 +13,8 @@
 
 define(
 		[ 'i18n!git/nls/gitmessages', 'orion/section', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/i18nUtil', 'orion/webui/littlelib',
-				'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/git/gitCommands', 'orion/Deferred' ],
-		function(messages, mSection, mExplorer, PageUtil, i18nUtil, lib, mGlobalCommands, mDiffProvider, mCompareContainer, mGitCommands, Deferred) {
+				'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/util', 'orion/Deferred' ],
+		function(messages, mSection, mExplorer, PageUtil, i18nUtil, lib, mGlobalCommands, mGitCommands, mGitUtil, Deferred) {
 			var exports = {};
 
 			exports.GitCommitExplorer = (function() {
@@ -431,42 +431,26 @@ define(
 
 									var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 									window.setTimeout(function() {
-										var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
-										var diffOptions = {
-											gridRenderer : {
-												navGridHolder : navGridHolder,
-												additionalCmdRender : function(gridHolder) {
-													that.commandService.destroy(diffActionWrapper.id);
-													that.commandService.renderCommands(
-															"itemLevelCommands", diffActionWrapper.id, item.parent, that, "tool", false, gridHolder); //$NON-NLS-0$
-												},
-												before : true
-											},
-											commandSpanId : compareWidgetActionWrapper.id,
-											diffProvider : diffProvider,
-											hasConflicts : false,
-											readonly : true,
-											resource : item.parent.DiffLocation,
-											callback : function() {
-											}
-										};
-
-										var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, that.commandService, 
-												"diffArea_" + item.parent.DiffLocation, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
-										inlineCompareContainer.startup(function(maxHeight) {
-											var vH = 420;
-											if (maxHeight < vH) {
-												vH = maxHeight;
-											}
-
-											var diffContainer = lib.node("diffArea_" + item.parent.DiffLocation);
-											diffContainer.style.height = vH + "px";
-										});
+										mGitUtil.createCompareWidget(that.registry,
+																	 that.commandService, 
+																	 item.parent.DiffLocation, 
+																	 false, 
+																	 "diffArea_" + item.parent.DiffLocation, //$NON-NLS-0$
+																	 compareWidgetActionWrapper.id, 
+																	 false, //editableInComparePage
+																	 {
+																		navGridHolder : navGridHolder,
+																		additionalCmdRender : function(gridHolder) {
+																			that.commandService.destroy(diffActionWrapper.id);
+																			that.commandService.renderCommands(
+																					"itemLevelCommands", diffActionWrapper.id, item.parent, that, "tool", false, gridHolder); //$NON-NLS-0$
+																		},
+																		before : true
+																	 }
+																	 );
 									}, 500);
-
 									return td;
 								}
-
 								break;
 							}
 						};

@@ -24,52 +24,26 @@ exports.DefaultDiffProvider = (function() {
 		this._diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
 	}	
 	DefaultDiffProvider.prototype = {
-		_resolveTwoFiles: function(oldFileURL, newFileURL, errorCallback){
+		_resolveTwoFiles: function(oldFileURL, newFileURL){
 			var that = this;
 			var compareTwo = function(results) {
 				if(Array.isArray(results) && results.length === 2 && results[0] && results[1]){
-					if(results[0]._error && errorCallback){
-						errorCallback(results[0]._error);
-					}
-					if(results[1]._error && errorCallback){
-						errorCallback(results[1]._error);
-					}
 					var oldFileContentType = results[0];
 					var newFileContentType = results[1];
-					that.callBack({ oldFile:{URL: oldFileURL, Name: that._resolveFileName(oldFileURL), Type: oldFileContentType},
+					return new Deferred().resolve({ oldFile:{URL: oldFileURL, Name: that._resolveFileName(oldFileURL), Type: oldFileContentType},
 								newFile:{URL: newFileURL, Name: that._resolveFileName(newFileURL), Type: newFileContentType},
 								diffContent: that._diffContent
 							 });
 				} else {
 					var oldFileName = oldFileURL ? that._resolveFileName(oldFileURL) : ""; //$NON-NLS-0$
 					var newFileName = newFileURL ? that._resolveFileName(newFileURL) : ""; //$NON-NLS-0$
-					that.callBack({ oldFile:{URL: oldFileURL, Name: oldFileName, Type: null},
+					return new Deferred().resolve({ oldFile:{URL: oldFileURL, Name: oldFileName, Type: null},
 								newFile:{URL: newFileURL, Name: newFileName, Type: null},
 								diffContent: that._diffContent
 							 });
 				}
 			};
-			Deferred.all([ that._getContentType(oldFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
-		},
-		
-		_resolveDiff: function(resource, compareTo, errorCallback) {
-			if(compareTo){
-				this._resolveTwoFiles(compareTo, resource, errorCallback);
-			} else {
-				if(!this._diffProvider){
-					console.log("A diff provider is needed for compound diff URL"); //$NON-NLS-0$
-					return;
-				}
-				var that = this;
-				that._diffProvider.getDiffContent(resource).then(function(jsonData, secondArg) {
-					if (that._hasConflicts) {
-						that._diffContent = jsonData.split("diff --git")[1]; //$NON-NLS-0$
-					} else {
-						that._diffContent = jsonData;
-					}
-					that._resolveComplexFileURL(resource);
-				}, errorCallback);
-			}
+			return Deferred.all([ that._getContentType(oldFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
 		},
 		
 		//temporary
@@ -84,17 +58,32 @@ exports.DefaultDiffProvider = (function() {
 			return this.serviceRegistry.getService("orion.core.contenttypes").getFilenameContentType(filename); //$NON-NLS-0$
 		},
 		
-		_resolveComplexFileURL: function(complexURL, errorCallback) {
+		_resolveComplexFileURL: function(complexURL) {
 			var that = this;
-			this._diffProvider.getDiffFileURI(complexURL).then(function(jsonData, secondArg) {
-				that._resolveTwoFiles(jsonData.Old, jsonData.New, errorCallback);
-			}, errorCallback);
+			return this._diffProvider.getDiffFileURI(complexURL).then(function(jsonData, secondArg) {
+				return that._resolveTwoFiles(jsonData.Old, jsonData.New);
+			}, function(){});
 		},
 		
-		provide: function(resource, compareTo, hasConflicts,callBack, errorCallBack) {
-			this.callBack = callBack;
+		resolveDiff: function(resource, compareTo, hasConflicts) {
 			this._hasConflicts = hasConflicts;
-			this._resolveDiff(resource, compareTo, errorCallBack);
+			if(compareTo){
+				return this._resolveTwoFiles(compareTo, resource);
+			} else {
+				if(!this._diffProvider){
+					console.log("A diff provider is needed for compound diff URL"); //$NON-NLS-0$
+					return;
+				}
+				var that = this;
+				return that._diffProvider.getDiffContent(resource).then(function(jsonData, secondArg) {
+					if (that._hasConflicts) {
+						that._diffContent = jsonData.split("diff --git")[1]; //$NON-NLS-0$
+					} else {
+						that._diffContent = jsonData;
+					}
+					return that._resolveComplexFileURL(resource);
+				}, function(){});
+			}
 		}
 	};
 	return DefaultDiffProvider;
@@ -213,10 +202,9 @@ exports.ResourceComparer = (function() {
 			};
 			this._compareView.getWidget().options.newFile.keyBindingFactory = keyBindingFactory;
 		}
-		this._compareView.getWidget().initEditors();
+		this._compareView.getWidget().initEditors( messages['fetching...']);
 		if(!options.readonly && !options.toggleable && this._compareView.getWidget().type === "twoWay") { //$NON-NLS-0$
 			var editors = this._compareView.getWidget().getEditors();
-			//right side editor
 			editors[1].addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
 				this._inputManager.setDirty(editors[1].isDirty());
 			}.bind(this));
@@ -298,33 +286,7 @@ exports.ResourceComparer = (function() {
 				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 99, null, false, new mKeyBinding.KeyBinding('l', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
-		resolveDiffByProvider: function() {
-			if(!this.options.diffProvider){
-				console.log("A diff provider is needed for Complex diff URL"); //$NON-NLS-0$
-				return;
-			}
-			var that = this;
-			that.options.diffProvider.provide(that.options.resource, that.options.compareTo, that.options.hasConflicts, function(diffParam){
-				that._compareView.getWidget().setOptions(diffParam);
-				var viewOptions = that._compareView.getWidget().options;
-				viewOptions.oldFile.readonly = true;
-				if(that.options.readonly) {
-					viewOptions.newFile.readonly = true;
-				}
-				var filesToLoad = ( viewOptions.diffContent ? [viewOptions.oldFile/*, viewOptions.newFile*/] : [viewOptions.oldFile, viewOptions.newFile]); 
-				that.getFilesContents(filesToLoad).then( function(){
-					var viewHeight = that._compareView.getWidget().refresh(true);
-					if(!that.options.readonly && !that.options.toggleable && that._compareView.getWidget().type === "twoWay") { //$NON-NLS-0$
-						this._inputManager.filePath = that._compareView.getWidget().options.newFile.URL;
-						that._inputManager.setInput(viewOptions.newFile.URL , that._compareView.getWidget().getEditors()[1]);
-					}
-					if(that._onLoadContents){
-						that._onLoadContents(viewHeight);
-					}
-				}.bind(that));
-			}, that.options.errorCallback);
-		},
-	    getFilesContents: function(files){
+	    _getFilesContents: function(files){
 	        var promises = [];
 			files.forEach(function(file) {
 				promises.push(this._loadSingleFile(file));
@@ -340,17 +302,37 @@ exports.ResourceComparer = (function() {
 		        function(error, ioArgs) {
 					if (error.status === 404) {
 						file.Content = "";
-					} else if (this.errorCallback) {
-						this.errorCallback(error, ioArgs);
+					} else {
+						//TODO: show file loading error in the appropriate editor(error, ioArgs);
 					}
 					return file;
 		        }.bind(this)
 			);
 	    },
 		start: function(onLoadContents){
-			this._onLoadContents = onLoadContents;
 			if(this.options.resource){
-				this.resolveDiffByProvider();
+				if(!this.options.diffProvider){
+					console.log("A diff provider is needed for Complex diff URL"); //$NON-NLS-0$
+					return;
+				}
+				var that = this;
+				return that.options.diffProvider.resolveDiff(that.options.resource, that.options.compareTo, that.options.hasConflicts).then( function(diffParam){
+					that._compareView.getWidget().setOptions(diffParam);
+					var viewOptions = that._compareView.getWidget().options;
+					viewOptions.oldFile.readonly = true;
+					if(that.options.readonly) {
+						viewOptions.newFile.readonly = true;
+					}
+					var filesToLoad = ( viewOptions.diffContent ? [viewOptions.oldFile/*, viewOptions.newFile*/] : [viewOptions.oldFile, viewOptions.newFile]); 
+					return that._getFilesContents(filesToLoad).then( function(){
+						var viewHeight = that._compareView.getWidget().refresh(true);
+						if(!that.options.readonly && !that.options.toggleable && that._compareView.getWidget().type === "twoWay") { //$NON-NLS-0$
+							this._inputManager.filePath = that._compareView.getWidget().options.newFile.URL;
+							that._inputManager.setInput(viewOptions.newFile.URL , that._compareView.getWidget().getEditors()[1]);
+						}
+						return new Deferred().resolve(viewHeight);
+					}.bind(that));
+				});
 			}
 		}
 	};

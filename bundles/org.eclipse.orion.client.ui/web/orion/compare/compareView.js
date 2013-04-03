@@ -184,13 +184,13 @@ exports.TwoWayCompareView = (function() {
 	}
 	TwoWayCompareView.prototype = new exports.CompareView();
 	
-	TwoWayCompareView.prototype.initEditors = function(){
+	TwoWayCompareView.prototype.initEditors = function(initString){
 		this._editors = [];//this._editors[0] represents the right side editor. this._editors[1] represents the left side editor
 		//Create editor on the right side
-		this._editors.push(this._createEditor(this._uiFactory.getEditorParentDiv(false), this._uiFactory.getStatusDiv(false), this.options.oldFile));
+		this._editors.push(this._createEditor(initString, this._uiFactory.getEditorParentDiv(false), this._uiFactory.getStatusDiv(false), this.options.oldFile));
 		
 		//Create editor on the left side
-		this._editors.push(this._createEditor(this._uiFactory.getEditorParentDiv(true), this._uiFactory.getStatusDiv(true), this.options.newFile, true));
+		this._editors.push(this._createEditor(initString, this._uiFactory.getEditorParentDiv(true), this._uiFactory.getStatusDiv(true), this.options.newFile, true));
 		//TODO: move this.options.onPage to the comapre glue code
 		
 		//Create the overview ruler
@@ -237,7 +237,7 @@ exports.TwoWayCompareView = (function() {
 		return this._uiFactory.getSplitter();
 	};
 	
-	TwoWayCompareView.prototype._createEditor = function(parentDiv, statusDiv, fileOptions, isLeft){
+	TwoWayCompareView.prototype._createEditor = function(initString, parentDiv, statusDiv, fileOptions, isLeft){
 		//Create text view factory
 		var readonly = (typeof fileOptions.readonly === "undefined") ? true : fileOptions.readonly; //$NON-NLS-0$
 		var textViewFactory = function() {
@@ -315,7 +315,7 @@ exports.TwoWayCompareView = (function() {
 		});
 				
 		editor.installTextView();
-		editor.setInput(null, null, fileOptions.Content ? fileOptions.Content : "");
+		editor.setInput(null, null, fileOptions.Content ? fileOptions.Content : initString);
 		editor.setOverviewRulerVisible(false);
 			
 		var textView = editor.getTextView();
@@ -479,7 +479,7 @@ exports.InlineCompareView = (function() {
 		}
 	};
 
-	InlineCompareView.prototype.initEditors = function(){
+	InlineCompareView.prototype.initEditors = function(initString){
 		var parentDiv = lib.node(this._editorDivId);
 		var textViewFactory = function(){
 			var textView = new mTextView.TextView({
@@ -497,7 +497,7 @@ exports.InlineCompareView = (function() {
 		});
 				
 		this._editor.installTextView();
-		this._editor.setInput(null, null, "");
+		this._editor.setInput(null, null, initString);
 		this._editor.setOverviewRulerVisible(false);
 		this._editor.setAnnotationRulerVisible(false);
 			

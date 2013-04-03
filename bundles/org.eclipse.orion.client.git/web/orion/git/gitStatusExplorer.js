@@ -11,9 +11,8 @@
 /*global define document window Image*/
 define(
 		[ 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orion/selection', 'orion/section', 'orion/PageUtil', 'orion/webui/littlelib',
-				'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compareCommands', 'orion/compare/resourceComparer', 'orion/git/util',
-				'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'],
-		function(messages, mExplorer, mSelection, mSection, PageUtil, lib, i18nUtil, mGlobalCommands, mDiffProvider, mCompareCommands, mResourceComparer, mGitUtil, mGitCommands,
+				'orion/i18nUtil', 'orion/globalCommands', 'orion/git/util',	'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'],
+		function(messages, mExplorer, mSelection, mSection, PageUtil, lib, i18nUtil, mGlobalCommands, mGitUtil, mGitCommands,
 				Deferred, mCommitTooltip) {
 
 			var exports = {};
@@ -459,32 +458,16 @@ define(
 									div.appendChild(diffContainer);
 
 									var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
-									var hasConflict = isConflict(item.parent.type);
 									window.setTimeout(function() {
-										var diffProvider = new mResourceComparer.DefaultDiffProvider(that.registry);
-										var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: that.commandService, commandSpanId: compareWidgetActionWrapper.id, gridRenderer: {navGridHolder: navGridHolder}});
-										var options = {
-											toggleable: true,
-											type: "inline",
-											readonly: true,
-											hasConflicts: hasConflict,
-											diffProvider: diffProvider,
-											resource : item.diffUri,
-											editableInComparePage : true
-										};
-										var viewOptions = {
-											parentDivId: "diffArea_" + item.diffUri, //$NON-NLS-0$
-											commandProvider: cmdProvider
-										};
-										var comparer = new mResourceComparer.ResourceComparer(that.registry, that.commandService, options, viewOptions);
-										comparer.start(function(maxHeight) {
-											var vH = 420;
-											if (maxHeight < vH) {
-												vH = maxHeight;
-											}
-											var diffContainer = lib.node("diffArea_" + item.diffUri);
-											diffContainer.style.height = vH + "px";
-										});
+										mGitUtil.createCompareWidget(that.registry,
+																	 that.commandService, 
+																	 item.diffUri, 
+																	 isConflict(item.parent.type), 
+																	 "diffArea_" + item.diffUri, //$NON-NLS-0$
+																	 compareWidgetActionWrapper.id, 
+																	 true, //editableInComparePage
+																	 {navGridHolder: navGridHolder} //gridRenderer
+																	 );
 									}, 300);
 
 									return td;
@@ -690,30 +673,15 @@ define(
 									var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 									var hasConflict = isConflict(item.parent.type);
 									window.setTimeout(function() {
-										var diffProvider = new mResourceComparer.DefaultDiffProvider(that.registry);
-										var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: that.commandService, commandSpanId: compareWidgetActionWrapper.id, gridRenderer: {navGridHolder: navGridHolder}});
-										var options = {
-											toggleable: true,
-											type: "inline",
-											readonly: true,
-											hasConflicts: hasConflict,
-											diffProvider: diffProvider,
-											resource : item.diffUri,
-											editableInComparePage : true
-										};
-										var viewOptions = {
-											parentDivId: "diffArea_" + item.diffUri, //$NON-NLS-0$
-											commandProvider: cmdProvider
-										};
-										var comparer = new mResourceComparer.ResourceComparer(that.registry, that.commandService, options, viewOptions);
-										comparer.start(function(maxHeight) {
-											var vH = 420;
-											if (maxHeight < vH) {
-												vH = maxHeight;
-											}
-											var diffContainer = lib.node("diffArea_" + item.diffUri);
-											diffContainer.style.height = vH + "px";
-										});
+										mGitUtil.createCompareWidget(that.registry,
+																	 that.commandService, 
+																	 item.diffUri, 
+																	 isConflict(item.parent.type), 
+																	 "diffArea_" + item.diffUri, //$NON-NLS-0$
+																	 compareWidgetActionWrapper.id, 
+																	 false, //editableInComparePage
+																	 {navGridHolder: navGridHolder} //gridRenderer
+																	 );
 									}, 500);
 
 									return td;
