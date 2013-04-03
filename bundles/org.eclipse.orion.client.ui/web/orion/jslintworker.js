@@ -730,7 +730,7 @@ SOFTWARE.
     turquoise, type, u, ul, undef, unescape, "unicode-bidi", unused, 
     unwatch, updateNow, urls, value, valueOf, var, version, 
     "vertical-align", video, violet, visibility, watch, wheat, white, 
-    "white-space", whitesmoke, widget, width, windows, "word-spacing", 
+    "white-space", whitesmoke, widget, width, window, windows, "word-spacing", 
     "word-wrap", yahooCheckLogin, yahooLogin, yahooLogout, yellow, 
     yellowgreen, "z-index"
 */
@@ -868,6 +868,7 @@ var JSLINT = (function () {
             setTimeout      : false,
             status          : false,
             top             : false,
+            window          : false,
             XMLHttpRequest  : false
         },
 
