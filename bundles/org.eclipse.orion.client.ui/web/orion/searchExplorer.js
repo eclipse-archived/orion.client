@@ -12,9 +12,9 @@
 /*global define document console window*/
 /*jslint forin:true regexp:false sub:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/explorers/navigationUtils', 'orion/webui/tooltip'],
+define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compareView', 'orion/highlight', 'orion/explorers/navigationUtils', 'orion/webui/tooltip'],
 
-function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNavUtils, mTooltip) {
+function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareView, mHighlight, mNavUtils, mTooltip) {
     /* Internal wrapper functions*/
     function _empty(nodeToEmpty) {
         var node = lib.node(nodeToEmpty);
@@ -493,6 +493,17 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 
     SearchReportExplorer.prototype.constructor = SearchReportExplorer;
 
+	function CompareStyler(registry){
+		this._syntaxHighlither = new mHighlight.SyntaxHighlighter(registry);
+	}	
+	CompareStyler.prototype = {
+		highlight: function(fileName, contentType, editor) {
+			return this._syntaxHighlither.setup(contentType, editor.getTextView(), 
+										 null, //passing an AnnotationModel allows the styler to use it to annotate tasks/comment folding/etc, but we do not really need this in compare editor
+										 fileName,
+										 false /*bug 378193*/);
+		}
+	};
 
     /**
      * Creates a new search result explorer.
@@ -548,7 +559,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._popUpContext = false;
         this.timerRunning -= false;
         this._timer = null;
-        this.twoWayCompareContainer = null;
+        this.twoWayCompareView = null;
     };
 
     /* one-time setup of commands */
@@ -907,14 +918,14 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 parentDivID: this.getParentDivId()
             });
             this._uiFactory.buildUI();
-            this.twoWayCompareContainer = null;
+            this.twoWayCompareView = null;
             this._currentPreviewModel = null;
         } else {
             if (this._uiFactory) {
                 this._uiFactory.destroy();
             }
             this._uiFactory = null;
-            this.twoWayCompareContainer = null;
+            this.twoWayCompareView = null;
             this._currentPreviewModel = null;
         }
         this.initCommands();
@@ -1045,13 +1056,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                     Type: fType,
                     Content: that.model.getFileContents(fileItem)
                 },
-                baseFile: {
+                oldFile: {
                     Name: fileItem.location,
                     Type: fType,
                     Content: replacedContents
                 }
             };
-            if (!that.twoWayCompareContainer) {
+            if (!that.twoWayCompareView) {
                 that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
                     parentDivID: uiFactory.getCompareDivID(),
                     showTitle: true,
@@ -1060,19 +1071,21 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                     showLineStatus: false
                 });
                 that.uiFactoryCompare.buildUI();
-                that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, that._commandService, uiFactory.getCompareDivID(), that.uiFactoryCompare, options, this._commandService);
-                that.twoWayCompareContainer.startup(false, function() {
-                    that._uiFactory.setCompareWidget(that.twoWayCompareContainer);
-                });
+                options.uiFactory = that.uiFactoryCompare;
+                options.parentDivID =  uiFactory.getCompareDivID();
+                that.twoWayCompareView = new mCompareView.TwoWayCompareView(options);
+				that.twoWayCompareView.setOptions({highlighters: [new CompareStyler(that.registry), new CompareStyler(that.registry)]});
+                that.twoWayCompareView.startup();
+                that._uiFactory.setCompareWidget(that.twoWayCompareView);
             } else {
-                _empty(that.uiFactoryCompare.getTitleDiv());
-                _place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$ //$NON-NLS-0$
-                _empty(that.uiFactoryCompare.getTitleDiv(true));
-                _place(document.createTextNode(i18nUtil.formatMessage(messages['Original File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$ //$NON-NLS-0$
-                that.twoWayCompareContainer.setOptions(options);
-                that.twoWayCompareContainer.setEditor();
+                that.twoWayCompareView.setOptions(options);
+                that.twoWayCompareView.refresh(true);
             }
-            window.setTimeout(function() {
+             _empty(that.uiFactoryCompare.getTitleDiv());
+            _place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$ //$NON-NLS-0$
+            _empty(that.uiFactoryCompare.getTitleDiv(true));
+            _place(document.createTextNode(i18nUtil.formatMessage(messages['Original File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$ //$NON-NLS-0$
+           window.setTimeout(function() {
                 that.renderer.focus();
             }, 100);
         });
@@ -1307,7 +1320,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 			    return;
 			}*/
             var detailInfo = this.model.getDetailInfo(currentModel);
-            this.twoWayCompareContainer.gotoDiff(detailInfo.lineNumber, detailInfo.matches[detailInfo.matchNumber].startIndex, false);
+            this.twoWayCompareView.gotoDiff(detailInfo.lineNumber, detailInfo.matches[detailInfo.matchNumber].startIndex, false);
         }
     };
 

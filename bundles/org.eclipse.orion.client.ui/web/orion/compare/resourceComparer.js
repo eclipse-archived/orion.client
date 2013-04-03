@@ -101,8 +101,6 @@ CompareStyler.prototype = {
 	}
 };
 
-
-
 exports.ResourceComparer = (function() {
 	function ResourceComparer (serviceRegistry, commandRegistry, options, viewOptions) {
 		this._registry = serviceRegistry;
