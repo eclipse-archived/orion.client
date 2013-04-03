@@ -408,7 +408,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 						});
 					}.bind(this)); // this will force a sync
 					this.render();
-				});
+				}.bind(this));
 			}
 		},
 		
