@@ -15,7 +15,7 @@
  * @class This class contains static utility methods.
  * @name orion.util
  */
-define(['i18n!git/nls/gitmessages'], function(messages) {
+define(['i18n!git/nls/gitmessages', 'orion/compare/compareCommands', 'orion/compare/resourceComparer', 'orion/webui/littlelib'], function(messages, mCompareCommands, mResourceComparer, lib) {
                 
 	var interestedUnstagedGroup = ["Missing","Modified","Untracked","Conflicting"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var interestedStagedGroup = ["Added", "Changed","Removed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -29,7 +29,7 @@ define(['i18n!git/nls/gitmessages'], function(messages) {
 		"Changed":["gitImageSprite git-sprite-file",messages['Staged change']],	 //$NON-NLS-1$ //$NON-NLS-0$
 	    "Untracked":["gitImageSprite git-sprite-addition",messages['Unstaged addition']],	 //$NON-NLS-1$ //$NON-NLS-0$
 		"Added":["gitImageSprite git-sprite-addition",messages['Staged addition']],	 //$NON-NLS-1$ //$NON-NLS-0$
-		"Conflicting":["gitImageSprite git-sprite-conflict-file", messages['Conflicting']]	 //$NON-NLS-1$ //$NON-NLS-0$
+		"Conflicting":["gitImageSprite git-sprite-conflict-file", messages['Conflicting']] //$NON-NLS-1$ //$NON-NLS-0$
 	};
 	
 	var statusUILocation = "git/git-status2.html"; //$NON-NLS-0$
@@ -58,18 +58,47 @@ define(['i18n!git/nls/gitmessages'], function(messages) {
 	
 	function hasStagedChanges(status){
 		for(var i = 0; i < interestedStagedGroup.length ; i++){
-			if (status[interestedStagedGroup[i]].length > 0)
+			if (status[interestedStagedGroup[i]].length > 0) {
 				return true;
+			}
 		}
 		return false;
 	}
 	
 	function hasUnstagedChanges(status){
 		for(var i = 0; i < interestedUnstagedGroup.length ; i++){
-			if (status[interestedUnstagedGroup[i]].length > 0)
+			if (status[interestedUnstagedGroup[i]].length > 0) {
 				return true;
+			}
 		}
 		return false;
+	}
+	
+	function createCompareWidget(serviceRegistry, commandService, resource, hasConflicts, parentDivId, commandSpanId, editableInComparePage, gridRenderer){
+		var diffProvider = new mResourceComparer.DefaultDiffProvider(serviceRegistry);
+		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: commandSpanId, gridRenderer: gridRenderer});
+		var comparerOptions = {
+			toggleable: true,
+			type: "inline", //$NON-NLS-0$
+			readonly: true,
+			hasConflicts: hasConflicts,
+			diffProvider: diffProvider,
+			resource : resource,
+			editableInComparePage : editableInComparePage
+		};
+		var viewOptions = {
+			parentDivId: parentDivId,
+			commandProvider: cmdProvider
+		};
+		var comparer = new mResourceComparer.ResourceComparer(serviceRegistry, commandService, comparerOptions, viewOptions);
+		comparer.start().then(function(maxHeight) {
+			var vH = 420;
+			if (maxHeight < vH) {
+				vH = maxHeight;
+			}
+			var diffContainer = lib.node(parentDivId);
+			diffContainer.style.height = vH + "px"; //$NON-NLS-0$
+		});
 	}
 	
 	//return module exports
@@ -79,7 +108,8 @@ define(['i18n!git/nls/gitmessages'], function(messages) {
 		isUnstaged: isUnstaged,
 		isChange: isChange,
 		hasStagedChanges: hasStagedChanges,
-		hasUnstagedChanges: hasUnstagedChanges
+		hasUnstagedChanges: hasUnstagedChanges,
+		createCompareWidget: createCompareWidget
 	};
 
 });
