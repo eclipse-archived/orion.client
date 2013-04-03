@@ -12,9 +12,9 @@
 /*global define document console prompt window*/
 /*jslint forin:true regexp:false sub:true*/
 
-define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/compare/diff-provider', 'orion/compare/compareView', 'orion/highlight', 
-		'orion/fileClient', 'orion/globalCommands', 'orion/searchAndReplace/textSearcher', 'orion/editorCommands', 'orion/editor/editorFeatures'], 
-		function(messages, require, Deferred, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mSearcher, mEditorCommands, mEditorFeatures) {
+define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/compareView', 'orion/highlight', 
+		'orion/fileClient', 'orion/globalCommands', 'orion/commands', 'orion/keyBinding', 'orion/searchAndReplace/textSearcher', 'orion/editorCommands', 'orion/editor/editorFeatures'], 
+		function(messages, require, Deferred, lib, mCompareUtils, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mCommands, mKeyBinding, mSearcher, mEditorCommands, mEditorFeatures) {
 
 var exports = {};
 
@@ -112,6 +112,8 @@ CompareStyler.prototype = {
 	}
 };
 
+
+
 exports.ResourceComparer = (function() {
 	function ResourceComparer (serviceRegistry, commandRegistry, options, viewOptions) {
 		this._registry = serviceRegistry;
@@ -122,12 +124,13 @@ exports.ResourceComparer = (function() {
 		this._progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
 		this.setOptions(options, true);
 		if(options.toggleable) {
-			this._compareView = new mCompareView.toggleableCompareView(options.type === "inline" ? "inline" : "twoWay", viewOptions);
-		} else if(options.type === "inline") {
+			this._compareView = new mCompareView.toggleableCompareView(options.type === "inline" ? "inline" : "twoWay", viewOptions); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		} else if(options.type === "inline") { //$NON-NLS-0$
 			this._compareView = new mCompareView.inlineCompareView(viewOptions);
 		} else {
 			this._compareView = new mCompareView.TwoWayCompareView(viewOptions);
 		}
+		this._compareView.getWidget().setOptions({extCmdHolder: this});
 		if(!viewOptions.highlighters){
 			this._compareView.getWidget().setOptions({highlighters: [new CompareStyler(serviceRegistry), new CompareStyler(serviceRegistry)]});
 		}
@@ -137,6 +140,7 @@ exports.ResourceComparer = (function() {
 		if(!viewOptions.newFile){
 			this._compareView.getWidget().setOptions({newFile: {readonly: options.readonly}});
 		}
+		this.initExtCmds();
 		var that = this;
 		this._inputManager = {
 			filePath: "",
@@ -156,6 +160,13 @@ exports.ResourceComparer = (function() {
 				that._progress.progress(that._fileClient.read(fileURI, true), "Getting file metadata " + fileURI).then( //$NON-NLS-0$
 					function(metadata) {
 						this._fileMetadata = metadata;
+						if( that.options.savable){
+							var toolbar = lib.node("pageActions"); //$NON-NLS-0$
+							if (toolbar) {	
+								that._commandService.destroy(toolbar);
+								that._commandService.renderCommands(toolbar.id, toolbar, that._compareView.getWidget().getEditors()[1], that._compareView.getWidget().getEditors()[1], "button"); //$NON-NLS-0$
+							}
+						}
 						this.setTitle(metadata.Location, metadata);
 					}.bind(this),
 					function(error) {
@@ -228,6 +239,65 @@ exports.ResourceComparer = (function() {
 				}.bind(this));
 			}
 		},
+		generateLink: function(compareWidget){	
+			var diffPos = compareWidget.getCurrentDiffPos();
+			var href = mCompareUtils.generateCompareHref(this.options.resource, {
+				compareTo: this.options.compareTo,
+				readonly: this.options.readonly,
+				conflict: this.options.hasConflicts,
+				block: diffPos.block ? diffPos.block : 1, 
+				change: diffPos.change ? diffPos.change : 0 
+			});
+			prompt(messages["Copy the link URL:"], href);
+		},
+		
+		openComparePage: function(compareWidget){	
+			var diffPos = compareWidget.getCurrentDiffPos();
+			var href = mCompareUtils.generateCompareHref(this.options.resource, {
+				compareTo: this.options.compareTo,
+				readonly: !this.options.editableInComparePage,
+				conflict: this.options.hasConflicts,
+				block: diffPos.block ? diffPos.block : 1, 
+				change: diffPos.change ? diffPos.change : 0 
+			});
+			return href;
+		},
+		initExtCmds: function() {
+			var cmdProvider = this._compareView.getWidget().options.commandProvider;
+			if(cmdProvider && cmdProvider.getOptions().commandSpanId) {
+				var commandSpanId = cmdProvider.getOptions().commandSpanId;
+				var generateLinkCommand = new mCommands.Command({
+					tooltip : messages["Generate link of the current diff"],
+					name: messages["Generate Link"],
+					//imageClass : "core-sprite-link", //$NON-NLS-0$
+					id: "orion.compare.generateLink", //$NON-NLS-0$
+					groupId: "orion.compareGroup", //$NON-NLS-0$
+					visibleWhen: function(item) {
+						return item.options.extCmdHolder.options.resource && item.options.extCmdHolder.options.generateLink;
+					},
+					callback : function(data) {
+						data.items.options.extCmdHolder.generateLink(data.items);
+				}});
+				var openComparePageCommand = new mCommands.Command({
+					tooltip : messages["Open the compare page"],
+					name: messages["Compare"],
+					//imageClass : "core-sprite-link", //$NON-NLS-0$
+					id: "orion.compare.openComparePage", //$NON-NLS-0$
+					groupId: "orion.compareGroup", //$NON-NLS-0$
+					visibleWhen: function(item) {
+						return item.options.extCmdHolder.options.resource && !item.options.extCmdHolder.options.generateLink;
+					},
+					hrefCallback: function(data) {
+						return data.items.options.extCmdHolder.openComparePage(data.items);
+				}});
+				this._commandService.addCommand(generateLinkCommand);
+				this._commandService.addCommand(openComparePageCommand);
+					
+				// Register command contributions
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.openComparePage", 98); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 99, null, false, new mKeyBinding.KeyBinding('l', true, true)); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+		},
 		resolveDiffByProvider: function() {
 			if(!this.options.diffProvider){
 				console.log("A diff provider is needed for Complex diff URL"); //$NON-NLS-0$
@@ -240,9 +310,6 @@ exports.ResourceComparer = (function() {
 				viewOptions.oldFile.readonly = true;
 				if(that.options.readonly) {
 					viewOptions.newFile.readonly = true;
-				}
-				if(that.options.callback){
-					that.options.callback(viewOptions.oldFile.Name, viewOptions.newFile.Name);
 				}
 				var filesToLoad = ( viewOptions.diffContent ? [viewOptions.oldFile/*, viewOptions.newFile*/] : [viewOptions.oldFile, viewOptions.newFile]); 
 				that.getFilesContents(filesToLoad).then( function(){
