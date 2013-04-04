@@ -146,9 +146,8 @@ exports.CompareView = (function() {
 			return this;
 		},
 		
-		startup: function(onLoadContents){
+		startup: function(){
 			this.initEditors();
-			this._onLoadContents = onLoadContents;
 			this.refresh(true);
 		}
 	};
@@ -229,7 +228,7 @@ exports.TwoWayCompareView = (function() {
 	
 	TwoWayCompareView.prototype.resizeEditors = function(){	
 		this._editors.forEach(function(editor) {
-			editor.resize();
+			editor.getTextView().resize();
 		});
 	};
 	
