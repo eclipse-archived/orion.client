@@ -13,6 +13,7 @@ var crypto = require('crypto');
 var fs = require('fs');
 var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
 var path = require('path');
+var rimraf = require('rimraf');
 var url = require('url');
 var api = require('./api');
 var async = require('./async');
@@ -115,57 +116,7 @@ exports.generateDebugURL = function(debugMeta, hostName) {
  * @param {Function} callback Invoked as callback(error)
  */
 exports.rumRuff = function rumRuff(dirpath, callback) {
-	var unlinkRecursive, processDir, rmdirs;
-	/** @returns A promise that resolves once all files in the tree rooted at 'root' have been unlinked.
-	 * @param {Array} List of directories, in deepest-first order, that will have to be removed later.
-	 */
-	unlinkRecursive = function(root, dirlist) {
-		var stack = [root];
-		var treeDone = new Deferred();
-		(function handleNextDir() {
-			if (!stack.length) {
-				treeDone.resolve();
-				return;
-			}
-			var dir = stack.pop();
-			dirlist.unshift(dir);
-			processDir(stack, dir).then(handleNextDir);
-		}());
-		return treeDone;
-	};
-	/** @returns A promise that resolves once all items in 'dir' have been either: deleted (if simple file) or 
-	 * pushed to 'stack' for later handling (if directory).
-	 * @param {Array} stack
-	 * @param {String} dir
-	 */
-	processDir = function(stack, dir) {
-		return dfs.readdir(dir).then(function(files) {
-			return Deferred.all(files.map(function(filename) {
-				var fullpath = path.join(dir, filename);
-				return dfs.stat(fullpath).then(function(stat) {
-					if (stat.isDirectory()) {
-						stack.push(fullpath);
-						return new Deferred().resolve();
-					} else {
-//						console.log('unlink ' + fullpath);
-						return dfs.unlink(fullpath);
-					}
-				});
-			}));
-		});
-	};
-	rmdirs = function(dirlist) {
-//		console.log('about to remove: [' + dirlist.join(',') + ']');
-		return Deferred.all(dirlist.map(function(d) {
-//			console.log('rmdir  ' + d);
-			return dfs.rmdir(d);
-		}));
-	};
-	// recursively unlink files, then remove the (empty) dirs
-	var dirlist = [];
-	unlinkRecursive(dirpath, dirlist).then(function() {
-		return rmdirs(dirlist);
-	}).then(callback.bind(null, null), callback);
+	rimraf(dirpath, callback);
 };
 
 function _copyDir(srcPath, destPath, callback) {
