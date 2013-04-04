@@ -1,6 +1,6 @@
 {
   "name": "orion",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "An Eclipse Orion server based on Node.js and connect.",
   "homepage": "http://eclipse.org/orion/",
   "bugs": "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Node",
@@ -10,7 +10,8 @@
     "sax": "~0.4.2",
     "socket.io": "~0.9.11",
     "socket.io-client": "~0.9.11",
-    "deferred-fs": "~0.1.0"
+    "deferred-fs": "~0.1.0",
+    "rimraf": "~2.1.4"
   },
   "devDependencies": {
     "mocha": "*",
