@@ -11,11 +11,12 @@
 define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "orion/URL-shim"], function(require, Deferred, PageUtil, URITemplate) {
 
 	/**
+	 * Returns the value of the <code>{OrionHome}</code> variable.
+	 * @methodOf orion.PageLinks
 	 * @returns {String} The value of the <code>{OrionHome}</code> variable.
 	 */
 	function getOrionHome() {
-		var result = new URL(require.toUrl("orion/../"), window.location.href).href.slice(0, -1); //$NON-NLS-0$
-		return result;
+		return new URL(require.toUrl("orion/../"), window.location.href).href.slice(0, -1); //$NON-NLS-0$
 	}
 
 	/**
@@ -23,7 +24,7 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "ori
 	 * @methodOf orion.PageLinks
 	 * @param {orion.ServiceRegistry} serviceRegistry The service registry.
 	 * @param {String} serviceName Service name to read extensions from.
-	 * @return {Deferred} A promise that resolves to an Array of info objects.
+	 * @return {orion.Promise} A promise that resolves to an Array of info objects.
 	 */
 	function getPageLinksInfo(serviceRegistry, serviceName) {
 		serviceName = serviceName || "orion.page.link"; //$NON-NLS-0$
@@ -86,7 +87,7 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "ori
 	 * @methodOf orion.PageLinks
 	 * @param {orion.ServiceRegistry} serviceRegistry The service registry.
 	 * @param {String} serviceName Service name to read extensions from.
-	 * @return {Deferred} A promise that resolves to an Array of DOM elements which are the links.
+	 * @return {orion.Promise} A promise that resolves to an Array of DOM elements which are the links.
 	 */
 	function createPageLinks(serviceRegistry, serviceName) {
 		return getPageLinksInfo(serviceRegistry, serviceName).then(function(links) {
