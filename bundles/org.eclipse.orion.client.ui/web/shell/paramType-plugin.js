@@ -119,9 +119,10 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			 * status and predictions for an argument with this parameter type.
 			 */
 			parse: function(arg, typeSpec) {
-				var string = arg.text || "";
-				var predictions = this._getPredictions(string, typeSpec.multiple, typeSpec.excludeDefaultPlugins);
-				return this._createCompletion(string, predictions);
+				var result = new Deferred();
+				var predictions = this._getPredictions(arg.text, typeSpec);
+				result.resolve(this._createCompletion(arg.text, predictions));
+				return result;
 			},
 
 			/**
@@ -200,20 +201,20 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 				}
 				return last.trim();
 			},
-			_getPredictions: function(text, multiple, excludeDefaultPlugins) {
+			_getPredictions: function(text, typeSpec) {
 				var predictions = [];
 				if (this.plugins) {
 					this.plugins.forEach(function(current) {
-						if (!excludeDefaultPlugins || !this._defaultPluginUrls[current.getLocation()]) {
+						if (!typeSpec.excludeDefaultPlugins || !this._defaultPluginUrls[current.getLocation()]) {
 							if (current.name.indexOf(text) === 0) {
 								predictions.push({name: current.name, value: current});
 							}
 						}
 					}.bind(this));
-					if (multiple && NAME_ALL.indexOf(text) === 0) {
+					if (typeSpec.multiple && NAME_ALL.indexOf(text) === 0) {
 						predictions.push({
 							name: NAME_ALL,
-							value: new AllPlugin(this.plugins, excludeDefaultPlugins ? this._defaultPluginUrls : null)
+							value: new AllPlugin(this.plugins, typeSpec.excludeDefaultPlugins ? this._defaultPluginUrls : null)
 						});
 					}
 				}

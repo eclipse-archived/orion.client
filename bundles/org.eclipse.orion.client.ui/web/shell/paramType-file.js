@@ -147,9 +147,16 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 			 * status and predictions for an argument with this parameter type.
 			 */
 			parse: function(arg, typeSpec) {
-				var string = arg.text || "";
-				var predictions = this._getPredictions(string);
-				return this._createCompletion(string, predictions, typeSpec);
+				var result = new Deferred();
+				this._getPredictions(arg.text).then(
+					function(predictions) {
+						result.resolve(this._createCompletion(arg.text, predictions, typeSpec));
+					}.bind(this),
+					function(error) {
+						result.error(error);
+					}
+				);
+				return result;
 			},
 
 			/**
@@ -267,6 +274,9 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 			 * value's string representation.
 			 */
 			stringify: function(value) {
+				if (!value) {
+					return "";
+				}
 				return typeof(value) === "string" ? value : value.stringify(); //$NON-NLS-0$
 			},
 
@@ -365,55 +375,63 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				return null;
 			},
 			_getPredictions: function(text) {
+				var result = new Deferred();
 				var directoryNode = this.shellPageFileService.getDirectory(null, text);
 				if (!directoryNode) {
 					/* either invalid path or not yet retrieved */
-					return null;
-				}
+					result.resolve(null);
+				} else {
+					this.shellPageFileService.withChildren(
+						directoryNode,
+						function(childNodes) {
+							var index = text.lastIndexOf(this.shellPageFileService.SEPARATOR) + 1;
+							var directoriesSegment = text.substring(0, index);
+							var finalSegment = text.substring(index);
+							var inDirectoryNode = finalSegment.length === 0 || finalSegment === "."; //$NON-NLS-0$
+ 
+							var directoryPredictions = [];
+							var filePredictions = [];
+							var name;
+							if (inDirectoryNode) {
+								name = directoriesSegment + "."; //$NON-NLS-0$
+								directoryPredictions.push({name: name, value: directoryNode, incomplete: true});
+							}
+							if (inDirectoryNode || finalSegment === "..") { //$NON-NLS-0$
+							var parentNode = this.shellPageFileService.getParent(directoryNode);
+								if (parentNode) {
+									name = directoriesSegment + ".."; //$NON-NLS-0$
+									directoryPredictions.push({name: name, value: parentNode, incomplete: true});
+								}
+							}
 
-				var childNodes = directoryNode.Children || [];
-
-				var index = text.lastIndexOf(this.shellPageFileService.SEPARATOR) + 1;
-				var directoriesSegment = text.substring(0, index);
-				var finalSegment = text.substring(index);
-				var inDirectoryNode = finalSegment.length === 0 || finalSegment === "."; //$NON-NLS-0$
-
-				var directoryPredictions = [];
-				var filePredictions = [];
-				var name;
-				if (inDirectoryNode) {
-					name = directoriesSegment + "."; //$NON-NLS-0$
-					directoryPredictions.push({name: name, value: directoryNode, incomplete: true});
-				}
-				if (inDirectoryNode || finalSegment === "..") { //$NON-NLS-0$
-					var parentNode = this.shellPageFileService.getParent(directoryNode);
-					if (parentNode) {
-						name = directoriesSegment + ".."; //$NON-NLS-0$
-						directoryPredictions.push({name: name, value: parentNode, incomplete: true});
-					}
-				}
-				
-				if (finalSegment.trim().length === 0 && directoriesSegment.length > 0) {
-					name = directoriesSegment;
-					directoryPredictions.push({name: name, value: directoryNode, incomplete: false});
-				}
-				var testString = finalSegment.replace(/[\-(){}\[\]+,.\\\^$|#]/g, "\\$&"); //$NON-NLS-0$
-				testString = testString.replace(/\?/g, "."); //$NON-NLS-0$
-				testString = testString.replace(/\*/g, ".*"); //$NON-NLS-0$
-				var regExp = new RegExp("^" + testString); //$NON-NLS-0$
-				for (var i = 0; i < childNodes.length; i++) {
-					var candidate = childNodes[i];
-					if (candidate.Name.match(regExp)) {
-						var complete = !candidate.Directory || (candidate.Children && candidate.Children.length === 0);
-						name = directoriesSegment + candidate.Name;
-						if (candidate.Directory) {
-							directoryPredictions.push({name: name, value: candidate, incomplete: !complete});
-						} else {
-							filePredictions.push({name: name, value: candidate, incomplete: !complete});
+							if (finalSegment.trim().length === 0 && directoriesSegment.length > 0) {
+								name = directoriesSegment;
+								directoryPredictions.push({name: name, value: directoryNode, incomplete: false});
+							}
+							var testString = finalSegment.replace(/[\-(){}\[\]+,.\\\^$|#]/g, "\\$&"); //$NON-NLS-0$
+							testString = testString.replace(/\?/g, "."); //$NON-NLS-0$
+							testString = testString.replace(/\*/g, ".*"); //$NON-NLS-0$
+							var regExp = new RegExp("^" + testString); //$NON-NLS-0$
+							for (var i = 0; i < childNodes.length; i++) {
+								var candidate = childNodes[i];
+								if (candidate.Name.match(regExp)) {
+									var complete = !candidate.Directory || (candidate.Children && candidate.Children.length === 0);
+									name = directoriesSegment + candidate.Name;
+									if (candidate.Directory) {
+										directoryPredictions.push({name: name, value: candidate, incomplete: !complete});
+									} else {
+										filePredictions.push({name: name, value: candidate, incomplete: !complete});
+									}
+								}
+							}
+							result.resolve(directoryPredictions.concat(filePredictions));
+						}.bind(this),
+						function(error) {
+							result.error(error);
 						}
-					}
+					);
 				}
-				return directoryPredictions.concat(filePredictions);
+				return result;
 			}
 		};
 		return ParamTypeFile;
