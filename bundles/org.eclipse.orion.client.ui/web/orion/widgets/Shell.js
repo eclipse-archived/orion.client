@@ -14,8 +14,8 @@
 /*jslint browser:true*/
 
 define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli/types", "gcli/types/selection", "gcli/argument", "gcli/ui/fields",
-		"gcli/ui/fields/menu", "gcli/util", "gcli/settings", "gcli/canon", "gcli/cli", "gcli/commands/help"],
-	function(messages, i18nUtil, mGCLI, mTypes, mSelectionType, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp) {
+		"gcli/ui/fields/menu", "util/util", "gcli/settings", "gcli/canon", "gcli/cli", "gcli/commands/help", "util/promise"],
+	function(messages, i18nUtil, mGCLI, mTypes, mSelectionType, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp, mPromise) {
 
 	function CustomType(typeSpec) {}
 	CustomType.prototype = Object.create(mSelectionType.SelectionType.prototype);
@@ -77,8 +77,7 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 			 */
 			output: function(content) {
 				var output = new mCli.Output();
-				var commandOutputManager = mCanon.commandOutputManager;
-				commandOutputManager.onOutput({output: output});
+				this.commandOutputManager.onOutput({output: output});
 				output.complete(content);
 			},
 			/**
@@ -125,6 +124,18 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 				if (!command.params) {
 					command.params = command.parameters;
 				}
+				var fn = function(exec) {
+					return function(args, context) {
+						var result = exec(args, context);
+						this.registeredTypes.forEach(function(current) {
+							current.prototype.lastParseTimestamp = 0;
+						});
+						return result;
+					}.bind(this);
+				}.bind(this);
+				if (command.exec) {
+					command.exec = fn(command.exec);
+				}
 				mGCLI.addCommand(command);
 			},
 			/**
@@ -149,43 +160,61 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 			 * @param {orion.shell.ParameterType} type the parameter type to register in the Shell
 			 */
 			registerType: function(type) {
-				function NewType(typeSpec) {
-					this.typeSpec = typeSpec;
-				}
-
-				NewType.prototype = Object.create(CustomType.prototype);
-				NewType.prototype.name = type.getName();
-				NewType.prototype.parse = function(arg) {
-					var completion = type.parse(arg, this.typeSpec);
-					var status = mTypes.Status.VALID;
-					if (completion.status) {
-						switch (completion.status) {
-							case orion.shell.CompletionStatus.ERROR:
-								status = mTypes.Status.ERROR;
-								break;
-							case orion.shell.CompletionStatus.PARTIAL:
-								status = mTypes.Status.INCOMPLETE;
-								break;
-						}
-					}							
-					return new mTypes.Conversion(completion.value, arg, status, completion.message, completion.predictions);
-				};
-				if (type.stringify) {
-					NewType.prototype.stringify = function (arg) {
-						return type.stringify(arg, this.typeSpec);
+				var NewType = (function(type) {
+					function NewType(typeSpec) {
+						this.typeSpec = typeSpec;
+					}
+					NewType.prototype = Object.create(CustomType.prototype);
+					NewType.prototype.name = type.getName();
+					NewType.prototype.lastParseTimestamp = 0;
+					NewType.prototype.parse = function(arg) {
+						var prototype = Object.getPrototypeOf(this);
+						var lastParseTimestamp = prototype.lastParseTimestamp;
+						prototype.lastParseTimestamp = Math.round(new Date().getTime() / 1000);
+						return type.parse(arg, this.typeSpec, {lastParseTimestamp: lastParseTimestamp}).then(function(completion) {
+							var status = mTypes.Status.VALID;
+							if (completion.status) {
+								switch (completion.status) {
+									case orion.shell.CompletionStatus.ERROR:
+										status = mTypes.Status.ERROR;
+										break;
+									case orion.shell.CompletionStatus.PARTIAL:
+										status = mTypes.Status.INCOMPLETE;
+										break;
+								}
+							}
+							var predictionsPromise = mPromise.defer();
+							predictionsPromise.resolve(completion.predictions);
+							return new mTypes.Conversion(completion.value, arg, status, completion.message, predictionsPromise.promise);
+						});
 					};
-				}
-				if (type.increment) {
-					NewType.prototype.increment = function (arg) {
-						return type.increment(arg, this.typeSpec);
+					NewType.prototype.lookup = function() {
+						var prototype = Object.getPrototypeOf(this);
+						var lastParseTimestamp = prototype.lastParseTimestamp;
+						prototype.lastParseTimestamp = Math.round(new Date().getTime() / 1000);
+						return type.parse(new mArgument.Argument(), this.typeSpec, {lastParseTimestamp: lastParseTimestamp}).then(function(completion) {
+							return completion.predictions;
+						});
 					};
-				}
-				if (type.decrement) {
-					NewType.prototype.decrement = function (arg) {
-						return type.decrement(arg, this.typeSpec);
-					};
-				}
+					if (type.stringify) {
+						NewType.prototype.stringify = function(arg) {
+							return type.stringify(arg, this.typeSpec);
+						};
+					}
+//					if (type.increment) {
+//						NewType.prototype.increment = function(arg) {
+//							return type.increment(arg, this.typeSpec);
+//						};
+//					}
+//					if (type.decrement) {
+//						NewType.prototype.decrement = function(arg) {
+//							return type.decrement(arg, this.typeSpec);
+//						};
+//					}
+					return NewType;
+				}(type));
 				mTypes.registerType(NewType);
+				this.registeredTypes.push(NewType);
 			},
 			/**
 			 * Sets focus to the Shell's input area.
@@ -208,6 +237,8 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 				// TODO
 			},
 			_init: function(input, output) {
+				this.registeredTypes = [];
+
 				var outputDiv = document.createElement("div"); //$NON-NLS-0$
 				outputDiv.id = "gcli-display"; //$NON-NLS-0$
 				outputDiv.style.height = "100%"; //$NON-NLS-0$
@@ -229,7 +260,8 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 				 * layout before GCLI computes the locations for its created widgets.
 				 */
 				setTimeout(function() {
-					mGCLI.createDisplay();
+					this.commandOutputManager = new mCanon.CommandOutputManager();
+					mGCLI.createDisplay({commandOutputManager: this.commandOutputManager});
 					this.output(i18nUtil.formatMessage(messages["For a list of available commands type '${0}'."], "<b>help</b>")); //$NON-NLS-0$
 				}.bind(this), 1);
 				mHelp.startup();

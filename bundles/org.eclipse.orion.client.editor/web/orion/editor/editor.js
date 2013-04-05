@@ -593,6 +593,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE);
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_LINKED_GROUP);
 						styler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
 					}
 				}

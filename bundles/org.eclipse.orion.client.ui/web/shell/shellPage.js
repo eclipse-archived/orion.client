@@ -69,6 +69,47 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegist
 		return CommandResult;
 	}());
 
+	var ContributedType = (function() {
+		function ContributedType(name, parseFn, stringifyFn) {
+			this.name = name;
+			this.parseFn = parseFn;
+			this.stringifyFn = stringifyFn;
+		}
+		ContributedType.prototype = {
+			getName: function() {
+				return this.name;
+			},
+			parse: function(arg, typeSpec, params) {
+				var promise = new Deferred();
+				this.parseFn(arg, typeSpec, params).then(
+					function(result) {
+						promise.resolve(result);
+					},
+					function(error) {
+						promise.reject(error);
+					}
+				);
+				return promise;
+			},
+			stringify: function(arg, typeSpec) {
+				if (!this.stringifyFn) {
+					return arg.name;
+				}
+				var promise = new Deferred();
+				this.stringifyFn(arg, typeSpec).then(
+					function(result) {
+						promise.resolve(result);
+					},
+					function(error) {
+						promise.reject(error);
+					}
+				);
+				return promise;
+			}
+		};
+		return ContributedType;
+	}());
+
 	/* model and renderer for displaying services */
 
 	var ServicesModel = (function() {
@@ -788,12 +829,35 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegist
 		};
 	}
 
+	/*
+	 * Creates a gcli exec function that wraps a 'callback' function contributed by
+	 * an 'orion.shell.type' service implementation.
+	 */
+	function contributedFunc(service) {
+		if (typeof(service) !== "function") { //$NON-NLS-0$
+			return undefined;
+		}
+		return function(args, typeSpec, context) {
+			var promise = new Deferred();
+			context.cwd = getCWD();
+			service(args, typeSpec, context).then(
+				function(result) {
+					promise.resolve(result);
+				},
+				function(error) {
+					promise.reject(error);
+				}
+			);
+			return promise;
+		};
+	}
+
 	mBootstrap.startup().then(function(core) {
 		pluginRegistry = core.pluginRegistry;
 		serviceRegistry = core.serviceRegistry;
 		preferences = core.preferences;
 
-		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
+		var commandRegistry = new mCommandRegistry.CommandRegistry({});
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
@@ -1016,27 +1080,17 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegist
 			}
 		});
 
-			// TODO
-			/* add types contributed through the plug-in API */
-//			var allReferences = serviceRegistry.getServiceReferences("orion.shell.type");
-//			for (var i = 0; i < allReferences.length; ++i) {
-//				var ref = allReferences[i];
-//				var service = serviceRegistry.getService(ref);
-//				if (service) {
-//					var type = {name: ref.getProperty("name"), parse: contributedParseFunc(service)};
-//					if (service.stringify) {
-//						type.stringify = service.stringify;
-//					}
-//					if (service.increment) {
-//						type.increment = service.increment;
-//					}
-//					if (service.decrement) {
-//						type.decrement = service.decrement;
-//					}
-//					shell.registerType(type);
-//				}
-//			}
-			
+		/* add types contributed through the plug-in API */
+		var allReferences = serviceRegistry.getServiceReferences("orion.shell.type"); //$NON-NLS-0$
+		for (var i = 0; i < allReferences.length; ++i) {
+			var ref = allReferences[i];
+			var service = serviceRegistry.getService(ref);
+			if (service) {
+				var type = new ContributedType(ref.getProperty("name"), contributedFunc(service.parse), contributedFunc(service.stringify)); //$NON-NLS-0$
+				shell.registerType(type);
+			}
+		}
+
 		/* add commands contributed through the plug-in API */
 		var allReferences = serviceRegistry.getServiceReferences("orion.shell.command"); //$NON-NLS-0$
 		var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
