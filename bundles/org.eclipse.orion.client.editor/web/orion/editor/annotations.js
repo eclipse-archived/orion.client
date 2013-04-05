@@ -145,6 +145,21 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	 * Write Occurrence annotation type.
 	 */
 	AnnotationType.ANNOTATION_WRITE_OCCURRENCE = "orion.annotation.writeOccurrence"; //$NON-NLS-0$
+
+	/**
+	 * Selected linked group annotation type.
+	 */
+	AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP = "orion.annotation.selectedLinkedGroup"; //$NON-NLS-0$
+
+	/**
+	 * Current linked group annotation type.
+	 */
+	AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP = "orion.annotation.currentLinkedGroup"; //$NON-NLS-0$
+
+	/**
+	 * Linked group annotation type.
+	 */
+	AnnotationType.ANNOTATION_LINKED_GROUP = "orion.annotation.linkedGroup"; //$NON-NLS-0$
 	
 	/** @private */
 	var annotationTypes = {};
@@ -226,6 +241,9 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	registerType(AnnotationType.ANNOTATION_MATCHING_SEARCH);
 	registerType(AnnotationType.ANNOTATION_READ_OCCURRENCE);
 	registerType(AnnotationType.ANNOTATION_WRITE_OCCURRENCE);
+	registerType(AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP);
+	registerType(AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP);
+	registerType(AnnotationType.ANNOTATION_LINKED_GROUP);
 	registerType(AnnotationType.ANNOTATION_CURRENT_LINE, true);
 	AnnotationType.registerType(AnnotationType.ANNOTATION_FOLDING, FoldingAnnotation);
 	

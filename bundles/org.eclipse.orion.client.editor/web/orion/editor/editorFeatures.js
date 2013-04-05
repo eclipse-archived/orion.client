@@ -910,6 +910,11 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 					escapePosition: proposal.escapePosition
 				};
 				this.linkedMode.enterLinkedMode(linkedModeModel);
+			} else if (proposal.groups && this.linkedMode) {
+				this.linkedMode.enterLinkedMode({
+					groups: proposal.groups,
+					escapePosition: proposal.escapePosition
+				});
 			} else if (proposal.escapePosition) {
 				//we don't want linked mode, but there is an escape position, so just set cursor position
 				var textView = this.editor.getTextView();
@@ -962,49 +967,94 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		}
 	};
 	
-	function LinkedMode(editor) {
+	function LinkedMode(editor, undoStack) {
 		this.editor = editor;
+		this.undoStack = undoStack;
 		
-		/**
-		 * The variables used by the Linked Mode. The elements of linkedModePositions have following structure:
-		 * {
-		 *     offset: 10, // The offset of the position counted from the beginning of the text buffer
-		 *     length: 3 // The length of the position (selection)
-		 * }
-		 *
-		 * The linkedModeEscapePosition contains an offset (counted from the beginning of the text buffer) of a
-		 * position where the caret will be placed after exiting from the Linked Mode.
-		 */
 		this.linkedModeActive = false;
-		this.linkedModePositions = [];
-		this.linkedModeCurrentPositionIndex = 0;
-		this.linkedModeEscapePosition = 0;
+		this.linkedModeModel = null;
+		this.linkedModeGroupIndex = 0;
 		
 		/**
 		 * Listener called when Linked Mode is active. Updates position's offsets and length
 		 * on user change. Also escapes the Linked Mode if the text buffer was modified outside of the Linked Mode positions.
 		 */
 		this.linkedModeListener = {
+
 			onVerify: function(event) {
-				var changeInsideGroup = false;
-				var offsetDifference = 0;
-				for (var i = 0; i < this.linkedModePositions.length; ++i) {
-					var position = this.linkedModePositions[i];
-					if (changeInsideGroup) {
-						// The change has already been noticed, update the offsets of all positions next to the changed one
-						position.offset += offsetDifference;
-					} else if (event.start >= position.offset && event.end <= position.offset + position.length) {
-						// The change was done in the current position, update its length
-						var oldLength = position.length;
-						position.length = (event.start - position.offset) + event.text.length + (position.offset + position.length - event.end);
-						offsetDifference = position.length - oldLength;
-						changeInsideGroup = true;
+				if (this.ignoreVerify) { return; }
+				var start = event.start;
+				var addedCharCount = event.text.length;
+				var removedCharCount = event.end - event.start;
+				var end = start + removedCharCount;
+				var changeCount = addedCharCount - removedCharCount;
+				var sortedPositions = [];
+				var groups = this.linkedModeModel.groups, i;
+				for (i = 0; i < groups.length; i++) {
+					var positions = groups[i].positions;
+					for (var j = 0; j < positions.length; j++) {
+						sortedPositions.push({
+							group: i,
+							position: positions[j]
+						});
 					}
 				}
-
-				if (changeInsideGroup) {
-					// Update escape position too
-					this.linkedModeEscapePosition += offsetDifference;
+				sortedPositions.sort(function(a, b) {
+					return a.position.offset - b.position.offset;
+				});
+				var groupChanged, group, position;
+				var deltaStart = event.start, deltaEnd = event.end;
+				for (i = 0; i < sortedPositions.length; i++) {
+					group = sortedPositions[i].group;
+					position = sortedPositions[i].position;
+					if (position.offset <= start && end <= position.offset + position.length) {
+						deltaStart -= position.offset;
+						deltaEnd -= position.offset;
+						groupChanged = group;
+						break;
+					}
+				}
+				if (groupChanged !== undefined) {
+					if (this._compoundChange) {
+						if (this._compoundChange.owner.group !== groupChanged) {
+							this.linkedModeGroupIndex = groupChanged;
+							this.endUndo();
+							this.startUndo();
+						}
+					} else {
+						this.startUndo();
+					}
+					this.ignoreVerify = true;
+					var textView = this.editor.getTextView();
+					for (i = sortedPositions.length - 1; i >= 0; i--) {
+						group = sortedPositions[i].group;
+						position = sortedPositions[i].position;
+						if (group === groupChanged) {
+							textView.setText(event.text, position.offset + deltaStart , position.offset + deltaEnd);
+						}
+					}
+					this.ignoreVerify = false;
+					event.text = null;
+					var deltaCount = 0, escapePositionDeltaCount;
+					for (i = 0; i < sortedPositions.length; ++i) {
+						group = sortedPositions[i].group;
+						position = sortedPositions[i].position;
+						if (escapePositionDeltaCount === undefined && this.linkedModeModel.escapePosition < position.offset) {
+							escapePositionDeltaCount = deltaCount;
+						}
+						if (group === groupChanged) {
+							position.offset += deltaCount;
+							position.length += changeCount;
+							deltaCount += changeCount;
+						} else {
+							position.offset += deltaCount;
+						}
+					}
+					if (escapePositionDeltaCount === undefined) {
+						escapePositionDeltaCount = deltaCount;
+					}
+					this.linkedModeModel.escapePosition += escapePositionDeltaCount;
+					this._updateAnnotations();
 				} else {
 					// The change has been done outside of the positions, exit the Linked Mode
 					this.cancel();
@@ -1033,41 +1083,77 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				return;
 			}
 			this.linkedModeActive = true;
-
-			// NOTE: only the first position from each group is supported for now
-			this.linkedModePositions = [];
-			for (var i = 0; i < linkedModeModel.groups.length; ++i) {
-				var group = linkedModeModel.groups[i];
-				this.linkedModePositions[i] = {
-					offset: group.positions[0].offset,
-					length: group.positions[0].length
-				};
-			}
-
-			this.linkedModeEscapePosition = linkedModeModel.escapePosition;
-			this.linkedModeCurrentPositionIndex = 0;
-			this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
+			this.linkedModeModel = linkedModeModel;
+			this.selectLinkedGroup(0);
 
 			var textView = this.editor.getTextView();
 			textView.addEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
 
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "nextLinkedModePosition"); //$NON-NLS-0$
 			textView.setAction("nextLinkedModePosition", function() { //$NON-NLS-0$
-				// Switch to the next group on TAB key
-				this.linkedModeCurrentPositionIndex = ++this.linkedModeCurrentPositionIndex % this.linkedModePositions.length;
-				this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
+				this.selectLinkedGroup((this.linkedModeGroupIndex + 1) % this.linkedModeModel.groups.length);
 				return true;
 			}.bind(this));
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "previousLinkedModePosition"); //$NON-NLS-0$
 			textView.setAction("previousLinkedModePosition", function() { //$NON-NLS-0$
-				this.linkedModeCurrentPositionIndex = this.linkedModeCurrentPositionIndex > 0 ? this.linkedModeCurrentPositionIndex-1 : this.linkedModePositions.length-1;
-				this.selectTextForLinkedModePosition(this.linkedModePositions[this.linkedModeCurrentPositionIndex]);
+				this.selectLinkedGroup(this.linkedModeGroupIndex > 0 ? this.linkedModeGroupIndex-1 : this.linkedModeModel.groups.length-1);
 				return true;
 			}.bind(this));
 
 			this.editor.reportStatus(messages.linkedModeEntered, null, true);
 		},
+		_cloneModel: function() {
+			var model = this.linkedModeModel;
+			var newGroups = [];
+			var newModel = {
+				escapePosition: model.escapePosition,
+				groups: newGroups
+			};
+			var groups = model.groups;
+			for (var j = 0; j < groups.length; j++) {
+				var newPositions = [];
+				newGroups.push({positions: newPositions});
+				var positions = groups[j].positions;
+				for (var i = 0; i < positions.length; i++) {
+					newPositions.push({
+						offset: positions[i].offset,
+						length: positions[i].length
+					});
+				}
+			}
+			return newModel;
+		},
+		startUndo: function() {
+			if (this.undoStack) {
+				var self = this;
+				this._compoundChange = this.undoStack.startCompoundChange({
+					startModel: self._cloneModel(),
+					group: self.linkedModeGroupIndex,
+					end: function() {
+						self._compoundChange = null;
+						this.endModel = self._cloneModel();
+					},
+					redo: function() {
+						if (self.linkedModeActive) {
+							self.linkedModeModel = this.endModel;
+							self.selectLinkedGroup(0);
+						}
+					},
+					undo: function() {
+						if (self.linkedModeActive) {
+							self.linkedModeModel = this.startModel;
+							self.selectLinkedGroup(0);
+						}
+					}
+				});
+			}
+		}, 
+		endUndo: function() {
+			if (this.undoStack) {
+				this.undoStack.endCompoundChange();
+			}
+		}, 
 		isActive: function() {
 			return this.linkedModeActive;
 		},
@@ -1094,9 +1180,13 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "shiftTab"); //$NON-NLS-0$
 			
 			if (!ignoreEscapePosition) {
-				textView.setCaretOffset(this.linkedModeEscapePosition, false);
+				textView.setCaretOffset(this.linkedModeModel.escapePosition, false);
 			}
-
+			if (this._compoundChange) {
+				this.endUndo();
+				this._compoundChange = null;
+			}
+			this._updateAnnotations();
 			this.editor.reportStatus(messages.linkedModeExited, null, true);
 		},
 		lineUp: function() {
@@ -1106,12 +1196,50 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		lineDown: function() {
 			this.cancel(true);
 			return false;
-		},		/**
-		 * Updates the selection in the textView for given Linked Mode position.
-		 */
-		selectTextForLinkedModePosition: function(position) {
+		},
+		selectLinkedGroup: function(index) {
+			this.linkedModeGroupIndex = index;
+			var group = this.linkedModeModel.groups[index];
+			var position = group.positions[0];
 			var textView = this.editor.getTextView();
 			textView.setSelection(position.offset, position.offset + position.length);
+			this._updateAnnotations();
+		},
+		_updateAnnotations: function() {
+			var annotationModel = this.editor.getAnnotationModel();
+			if (!annotationModel) { return; }
+			var remove = [], add = [];
+			var model = annotationModel.getTextModel();
+			var annotations = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
+			while (annotations.hasNext()) {
+				annotation = annotations.next();
+				switch (annotation.type) {
+					case mAnnotations.AnnotationType.ANNOTATION_LINKED_GROUP:
+					case mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP:
+					case mAnnotations.AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP:
+						remove.push(annotation);
+				}
+			}
+			if (this.linkedModeActive) {
+				var groups = this.linkedModeModel.groups;
+				for (var j = 0; j < groups.length; j++) {
+					var positions = groups[j].positions;
+					for (var i = 0; i < positions.length; i++) {
+						var position = positions[i];
+						var type = mAnnotations.AnnotationType.ANNOTATION_LINKED_GROUP;
+						if (j === this.linkedModeGroupIndex) {
+							if (i === 0) {
+								type = mAnnotations.AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP;
+							} else {
+								type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP;
+							}
+						}
+						annotation = mAnnotations.AnnotationType.createAnnotation(type, position.offset, position.offset + position.length);
+						add.push(annotation);
+					}
+				}
+			}
+			annotationModel.replaceAnnotations(remove, add);
 		}
 	};
 
