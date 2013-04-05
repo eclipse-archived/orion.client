@@ -58,7 +58,7 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 				if (mapOffset < 0) { return; }
 				offset = mapOffset;
 			}
-			view.setText(text, offset, offset + previousText.length);
+			model.setText(text, offset, offset + previousText.length);
 			if (select) {
 				view.setSelection(offset, offset + text.length);
 			}
@@ -68,11 +68,14 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 	/** 
 	 * Constructs a new CompoundChange object.
 	 * 
+	 * @param owner the owner of the compound change
+	 *
 	 * @class 
 	 * @name orion.editor.CompoundChange
 	 * @private
 	 */
-	function CompoundChange () {
+	function CompoundChange (owner) {
+		this.owner = owner;
 		this.changes = [];
 	}
 	CompoundChange.prototype = {
@@ -84,6 +87,10 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		end: function (view) {
 			this.endSelection = view.getSelection();
 			this.endCaret = view.getCaretOffset();
+			var owner = this.owner;
+			if (owner && owner.end) {
+				owner.end();
+			}
 		},
 		/** @ignore */
 		undo: function (view, select) {
@@ -94,6 +101,10 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 				var start = this.startSelection.start;
 				var end = this.startSelection.end;
 				view.setSelection(this.startCaret ? start : end, this.startCaret ? end : start);
+			}
+			var owner = this.owner;
+			if (owner && owner.undo) {
+				owner.undo();
 			}
 		},
 		/** @ignore */
@@ -106,11 +117,19 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 				var end = this.endSelection.end;
 				view.setSelection(this.endCaret ? start : end, this.endCaret ? end : start);
 			}
+			var owner = this.owner;
+			if (owner && owner.redo) {
+				owner.redo();
+			}
 		},
 		/** @ignore */
 		start: function (view) {
 			this.startSelection = view.getSelection();
 			this.startCaret = view.getCaretOffset();
+			var owner = this.owner;
+			if (owner && owner.start) {
+				owner.start();
+			}
 		}
 	};
 
@@ -155,9 +174,6 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 * Adds a change to the stack.
 		 * 
 		 * @param change the change to add.
-		 * @param {Number} change.offset the offset of the change
-		 * @param {String} change.text the new text of the change
-		 * @param {String} change.previousText the previous text of the change
 		 */
 		add: function (change) {
 			if (this.compoundChange) {
@@ -315,14 +331,19 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 * with one single call to undo() or redo().
 		 * </p>
 		 *
+		 * @param owner the owner of the compound change which is called for start, end, undo and redo.
+		 *		 
+		 * @return the compound change
+		 *
 		 * @see #endCompoundChange
 		 */
-		startCompoundChange: function() {
+		startCompoundChange: function(owner) {
 			this._commitUndo();
-			var change = new CompoundChange();
+			var change = new CompoundChange(owner);
 			this.add(change);
 			this.compoundChange = change;
 			this.compoundChange.start(this.view);
+			return this.compoundChange;
 		},
 		_commitUndo: function () {
 			if (this._undoStart !== undefined) {
@@ -335,6 +356,7 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 				this._undoText = "";
 				this._undoType = 0;
 			}
+			this.endCompoundChange();
 		},
 		_onDestroy: function(evt) {
 			this.model.removeEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$

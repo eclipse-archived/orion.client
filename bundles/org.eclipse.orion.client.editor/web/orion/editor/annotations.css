@@ -12,9 +12,12 @@
 .annotation.matchingBracket, 
 .annotation.currentLine, 
 .annotation.matchingSearch,  
+.annotation.currentSearch,
 .annotation.readOccurrence,
 .annotation.writeOccurrence, 
-.annotation.currentSearch {
+.annotation.linkedGroup, 
+.annotation.currentLinkedGroup,
+.annotation.selectedLinkedGroup {
 }
 
 /* Styles for the annotation ruler (first line) */
@@ -183,14 +186,20 @@
 .annotationRange.matchingSearch {
 	background-color: #C3E1FF;
 }
-.annotationRange.currentSearch {
-	background-color: #53D1FF;
-}
 .annotationRange.readOccurrence {
 	background-color: lightgray;
 }
 .annotationRange.writeOccurrence {
 	background-color: yellow;
+}
+.annotationRange.linkedGroup {
+	outline: 1px solid grey;
+}
+.annotationRange.currentLinkedGroup {
+	background-color: #C3E1FF;
+}
+.annotationRange.selectedLinkedGroup {
+	background-color: #53D1FF;
 }
 
 /* Styles for lines of text */
