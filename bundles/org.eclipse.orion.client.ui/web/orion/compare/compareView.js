@@ -37,56 +37,19 @@ exports.CompareView = (function() {
 		this._diffParser = new mDiffParser.DiffParser();
 	}
 	CompareView.prototype = {
+		/** @private */
 		_clearOptions: function(){
 			this.options = {};
 			this.options.blockNumber = 1;
 			this.options.changeNumber = 0;
 		},
-		
-		setOptions: function(options, clearExisting){
-			if(clearExisting){
-				this._clearOptions();
-			}
-			if(!this.options) {
-				this.options = {};
-			}
-			if(options) {
-				Object.keys(options).forEach(function(option) {
-					this.options[option] = options[option];
-				}.bind(this));
-			}
-		},
-		
-		getCurrentDiffPos: function(){	
-			return this._diffNavigator.getCurrentPosition();
-		},
-		
-		initDiffNav: function(){
-			this._diffNavigator.gotoBlock(0, 0);
-		},
-		
-		nextDiff: function(){	
-			this._diffNavigator.nextDiff();
-		},
-		
-		prevDiff: function(){	
-			this._diffNavigator.prevDiff();
-		},
-		
-		nextChange: function(){	
-			return this._diffNavigator.nextChange();
-		},
-		
-		prevChange: function(){	
-			this._diffNavigator.prevChange();
-		},
-		
+		/** @private */
 		_getLineDelim: function(input , diff){	
 			var delim = "\n"; //$NON-NLS-0$
 			return delim;
 		},
-
-		parseMapper: function(input, output, diff , detectConflicts ,doNotBuildNewFile){
+		/** @private */
+		_generateMapper: function(input, output, diff , detectConflicts ,doNotBuildNewFile){
 			var delim = this._getLineDelim(input , diff);
 			this._diffParser.setLineDelim(delim);
 			if(this.options.mapper && this.options.toggler){
@@ -112,7 +75,7 @@ exports.CompareView = (function() {
 				return {delim:delim , mapper:result.mapper, output: result.outPutFile, diffArray:diffArray};
 			}
 		},
-		
+		/** @private */
 		_initSyntaxHighlighter: function(targetArray){
 			this._syntaxHighlighters = null;
 			if(this.options.highlighters && this.options.highlighters.length > 0){
@@ -125,7 +88,7 @@ exports.CompareView = (function() {
 				}
 			}
 		},
-
+		/** @private */
 		_highlightSyntax: function(){
 			if(this._syntaxHighlighters){//If syntax highlighter is used, we need to render all the diff annotations after syntax highlighting is done
 		        var promises = [];
@@ -141,14 +104,104 @@ exports.CompareView = (function() {
 				this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 			}
 		},
-
+		setOptions: function(options, clearExisting){
+			if(clearExisting){
+				this._clearOptions();
+			}
+			if(!this.options) {
+				this.options = {};
+			}
+			if(options) {
+				Object.keys(options).forEach(function(option) {
+					this.options[option] = options[option];
+				}.bind(this));
+			}
+		},
+		/**
+		 * Returns the 1-based {blockNumber, changeNumber} current diff location. 
+		 * <p>
+		 * If 0 is returned on the chnageNumber, it means the whole diff block is highlighted.
+		 * </p>
+		 * @returns the 1-based {blockNumber, changeNumber} current diff location.
+		 */
+		getCurrentDiffPos: function(){	
+			return this._diffNavigator.getCurrentPosition();
+		},
+		/**
+		 * Initialize the diff navigation to the starting position. 
+		 * <p>
+		 * Calling this function resets the "current diff block" to the first diff block in the compare view. 
+		 * If there are multiple changes in the diff block, the first change will be highlighted in a darker color. Otherwise the whole diff block will be highlighted in a darker color.
+		 * </p>
+		 */
+		initDiffNav: function(){
+			this._diffNavigator.gotoBlock(0, 0);
+		},
+		/**
+		 * Navigate from the current "diff block" to the next one. Also sets the next one as the current diff block after the function call.
+		 * <p>
+		 * This function will circulate the "diff block" level of navigation, which means if the current block is the last one then it will go to the first one after the function call.
+		 * It also highlights the whole diff block in a darker color.
+		 * </p>
+		 */
+		nextDiff: function(){	
+			this._diffNavigator.nextDiff();
+		},
+		/**
+		 * Navigate from the current "diff block" to the previous one. Also sets the previous one as the current diff block after the function call.
+		 * <p>
+		 * This function will circulate the "diff block" level of navigation, which means if the current block is the first one then it will go to the last one after the function call.
+		 * It also highlights the whole diff block in a darker color.
+		 * </p>
+		 */
+		prevDiff: function(){	
+			this._diffNavigator.prevDiff();
+		},
+		/**
+		 * Navigate from the current "diff change" to the next "diff change". Also sets the next one as the current diff change after the function call.
+		 * <p>
+		 * Continously calling this function will walk forward all the word level changes in all the diff blocks. 
+		 * If it hits the last change in a diff block, it will go to the next diff block at the first change.
+		 * If it hits the last change in the last diff block, it will do nothing.
+		 * It also highlights the current diff change in a darker color.
+		 * </p>
+		 */
+		nextChange: function(){	
+			return this._diffNavigator.nextChange();
+		},
+		/**
+		 * Navigate from the current "diff change" to the previous "diff change". Also sets the previous one as the current diff change after the function call.
+		 * <p>
+		 * Continously calling this function will walk backward all the word level changes in all the diff blocks. 
+		 * If it hits the first change in a diff block, it will go to the previous diff block at the last change.
+		 * If it hits the first change in the first diff block, it will do nothing.
+		 * It also highlights the current diff change in a darker color.
+		 * </p>
+		 */
+		prevChange: function(){	
+			this._diffNavigator.prevChange();
+		},
+		/**
+		 * A helper function to allow the consumer of compareView to get the widget instance easily.
+		 */
 		getWidget: function() {
 			return this;
 		},
-		
+		/**
+		 * A helper function to start the UI after a subclass instance is constructed.
+		 */
 		startup: function(){
 			this.initEditors();
 			this.refresh(true);
+		},
+		/**
+		 * An abstract function that should be overridden by a subclass.
+		 * <p>
+		 * The subclass implementation, inline or twoWay, should create the editor instances with an initial string or just leave it empty.
+		 * </p>
+		 * @param {String} initString the initial string that will dispaly when the editors are created. Optional.
+		 */
+		initEditors: function(initString){
 		}
 	};
 	return CompareView;
@@ -187,11 +240,8 @@ exports.TwoWayCompareView = (function() {
 		this._editors = [];//this._editors[0] represents the right side editor. this._editors[1] represents the left side editor
 		//Create editor on the right side
 		this._editors.push(this._createEditor(initString, this._uiFactory.getEditorParentDiv(false), this._uiFactory.getStatusDiv(false), this.options.oldFile));
-		
 		//Create editor on the left side
 		this._editors.push(this._createEditor(initString, this._uiFactory.getEditorParentDiv(true), this._uiFactory.getStatusDiv(true), this.options.newFile, true));
-		//TODO: move this.options.onPage to the comapre glue code
-		
 		//Create the overview ruler
 		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
                 function(lineIndex, ruler){this._diffNavigator.matchPositionFromOverview(lineIndex);}.bind(this));
@@ -389,9 +439,9 @@ exports.TwoWayCompareView = (function() {
 		
 		var result;
 		if(output) {
-			result = this.parseMapper(input , output, diff , this.options.hasConflicts);
+			result = this._generateMapper(input , output, diff , this.options.hasConflicts);
 		} else {
-			result = this.parseMapper(input , output, diff , this.options.hasConflicts);
+			result = this._generateMapper(input , output, diff , this.options.hasConflicts);
 			output = result.output;
 		}
 		
@@ -540,7 +590,7 @@ exports.InlineCompareView = (function() {
 		var output = this.options.newFile.Content;
 		var diff = this.options.diffContent;
 
-		var result = this.parseMapper(input, output, diff, this.options.hasConflicts, !this.options.toggler);
+		var result = this._generateMapper(input, output, diff, this.options.hasConflicts, !this.options.toggler);
 		if(!output){
 			output = result.output;
 		}
