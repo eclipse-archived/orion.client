@@ -1851,6 +1851,50 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			return this.dispatchEvent(lineStyleEvent);
 		},
 		/**
+		 * @class This is the event sent for all keyboard events.
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onKeyDown}<br/>
+		 * {@link orion.editor.TextView#event:onKeyPress}<br/>
+		 * {@link orion.editor.TextView#event:onKeyUp}<br/>
+		 * </p>
+		 * @name orion.editor.KeyEvent
+		 * 
+		 * @property {String} type The type of event.
+		 * @property {DOMEvent} event The key DOM event.
+		 * @property {Boolean} defaultPrevented Determines whether the user agent context menu should be shown. It is shown by default.
+		 * @property {Function} preventDefault If called prevents the user agent context menu from showing.
+		 */
+		/**
+		 * This event is sent for key down events.
+		 *
+		 * @event
+		 * @param {orion.editor.KeyEvent} keyEvent the event
+		 */
+		onKeyDown: function(keyEvent) {
+			return this.dispatchEvent(keyEvent);
+		},
+		/**
+		 * This event is sent for key press events. Key press events are only sent
+		 * for printable characters.
+		 *
+		 * @event
+		 * @param {orion.editor.KeyEvent} keyEvent the event
+		 */
+		onKeyPress: function(keyEvent) {
+			return this.dispatchEvent(keyEvent);
+		},
+		/**
+		 * This event is sent for key up events.
+		 *
+		 * @event
+		 * @param {orion.editor.KeyEvent} keyEvent the event
+		 */
+		onKeyUp: function(keyEvent) {
+			return this.dispatchEvent(keyEvent);
+		},
+		/**
 		 * @class This is the event sent when the text in the model has changed.
 		 * <p>
 		 * <b>See:</b><br/>
@@ -2753,6 +2797,22 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleKeyDown: function (e) {
+			if (this.isListening("KeyDown")) { //$NON-NLS-0$
+				var keyEvent = this._createKeyEvent("KeyDown", e); //$NON-NLS-0$
+				this.onKeyDown(keyEvent); //$NON-NLS-0$
+				if (keyEvent.defaultPrevented) {
+					/*
+					* Feature in Firefox. Keypress events still happen even if the keydown event
+					* was prevented. The fix is to remember that keydown was prevented and prevent
+					* the keypress ourselves.
+					*/
+					if (util.isFirefox) {
+						this._keyDownPrevented = true;
+					}
+					e.preventDefault();
+					return;
+				}
+			}
 			var modifier = false;
 			switch (e.keyCode) {
 				case 16: /* Shift */
@@ -2820,6 +2880,19 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		},
 		_handleKeyPress: function (e) {
 			/*
+			* Feature in Firefox. Keypress events still happen even if the keydown event
+			* was prevented. The fix is to remember that keydown was prevented and prevent
+			* the keypress ourselves.
+			*/
+			if (this._keyDownPrevented) { 
+				if (e.preventDefault) {
+					e.preventDefault(); 
+					e.stopPropagation(); 
+				} 
+				this._keyDownPrevented = undefined;
+				return;
+			}
+			/*
 			* Feature in Embedded WebKit.  Embedded WekKit on Mac runs in compatibility mode and
 			* generates key press events for these Unicode values (Function keys).  This does not
 			* happen in Safari or Chrome.  The fix is to ignore these key events.
@@ -2852,6 +2925,14 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 					}
 				}
 			}
+			if (this.isListening("KeyPress")) { //$NON-NLS-0$
+				var keyEvent = this._createKeyEvent("KeyPress", e); //$NON-NLS-0$
+				this.onKeyPress(keyEvent); //$NON-NLS-0$
+				if (keyEvent.defaultPrevented) {
+					e.preventDefault();
+					return;
+				}
+			}
 			var ignore = false;
 			if (util.isMac) {
 				if (e.ctrlKey || e.metaKey) { ignore = true; }
@@ -2874,6 +2955,14 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleKeyUp: function (e) {
+			if (this.isListening("KeyUp")) { //$NON-NLS-0$
+				var keyEvent = this._createKeyEvent("KeyUp", e); //$NON-NLS-0$
+				this.onKeyUp(keyEvent); //$NON-NLS-0$
+				if (keyEvent.defaultPrevented) {
+					e.preventDefault();
+					return;
+				}
+			}
 			var ctrlKey = util.isMac ? e.metaKey : e.ctrlKey;
 			if (!ctrlKey) {
 				this._setLinksVisible(false);
@@ -3091,6 +3180,15 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				temp = temp.parentNode;
 			}
 			return false;
+		},
+		_createKeyEvent: function(type, e) {
+			return {
+				type: type,
+				event: e,
+				preventDefault: function() {
+					this.defaultPrevented = true;
+				}
+			};
 		},
 		_createMouseEvent: function(type, e) {
 			var pt = this.convert({x: e.clientX, y: e.clientY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
