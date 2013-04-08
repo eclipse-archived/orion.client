@@ -11,166 +11,135 @@
  *******************************************************************************/
 /*global define */
 
-define("orion/editor/htmlContentAssist", [], function() {
+define("orion/editor/htmlContentAssist", ['orion/editor/templates'], function(mTemplates) { //$NON-NLS-1$ //$NON-NLS-0$
 
-/**
- * @name orion.contentAssist.HTMLContentAssistProvider
- * @class Provides content assist for HTML.
- */
-function HTMLContentAssistProvider() {
-}
-HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContentAssistProvider.prototype */ {
+	var simpleDocTemplate = new mTemplates.Template("", "Simple HTML document", //$NON-NLS-0$
+		"<!DOCTYPE html>\n" + //$NON-NLS-0$
+		"<html lang=\"en\">\n" + //$NON-NLS-0$
+		"\t<head>\n" + //$NON-NLS-0$
+		"\t\t<meta charset=utf-8>\n" + //$NON-NLS-0$
+		"\t\t<title>${title}</title>\n" + //$NON-NLS-0$
+		"\t</head>\n" + //$NON-NLS-0$
+		"\t<body>\n" + //$NON-NLS-0$
+		"\t\t<h1>${header}</h1>\n" + //$NON-NLS-0$
+		"\t\t<p>\n" + //$NON-NLS-0$
+		"\t\t\t${cursor}\n" + //$NON-NLS-0$
+		"\t\t</p>\n" + //$NON-NLS-0$
+		"\t</body>\n" + //$NON-NLS-0$
+		"</html>"); //$NON-NLS-0$
+		
+	var templates = [
+		{
+			prefix: "<img", //$NON-NLS-0$
+			description: "<img> - HTML image element",
+			template: "<img src=\"${cursor}\" alt=\"${Image}\"/>" //$NON-NLS-0$
+		},
+		{
+			prefix: "<a", //$NON-NLS-0$
+			description: "<a> - HTML anchor element",
+			template: "<a href=\"${cursor}\"></a>" //$NON-NLS-0$
+		},
+		{
+			prefix: "<ul", //$NON-NLS-0$
+			description: "<ul> - HTML unordered list",
+			template: "<ul>\n\t<li>${cursor}</li>\n</ul>" //$NON-NLS-0$
+		},
+		{
+			prefix: "<ol", //$NON-NLS-0$
+			description: "<ol> - HTML ordered list",
+			template: "<ol>\n\t<li>${cursor}</li>\n</ol>" //$NON-NLS-0$
+		},
+		{
+			prefix: "<dl", //$NON-NLS-0$
+			description: "<dl> - HTML definition list",
+			template: "<dl>\n\t<dt>${cursor}</dt>\n\t<dd></dd>\n</dl>" //$NON-NLS-0$
+		},
+		{
+			prefix: "<table", //$NON-NLS-0$
+			description: "<table> - basic HTML table",
+			template: "<table>\n\t<tr>\n\t\t<td>${cursor}</td>\n\t</tr>\n</table>" //$NON-NLS-0$
+		}
+	];
+
+	//elements that are typically placed on a single line (e.g., <b>, <h1>, etc)
+	var element, template, description, i;
+	var singleLineElements = [
+		"abbr","b","button","canvas","cite", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"command","dd","del","dfn","dt", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"em","embed","font","h1","h2", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"h3","h4","h5","h6","i", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"ins","kbd","label","li","mark", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"meter","object","option","output","progress", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"q","rp","rt","samp","small", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"strong","sub","sup","td","time", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"title","tt","u","var" //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	];
+	for (i = 0; i < singleLineElements.length; i++) {
+		element = singleLineElements[i];
+		description = "<" + element + "></" + element + ">"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		template = "<" + element + ">${cursor}</" + element + ">"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		templates.push({prefix: "<" + element, description: description, template: template}); //$NON-NLS-0$
+	}
+
+	//elements that typically start a block spanning multiple lines (e.g., <p>, <div>, etc)
+	var multiLineElements = [
+		"address","article","aside","audio","bdo", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"blockquote","body","caption","code","colgroup", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"datalist","details","div","fieldset","figure", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"footer","form","head","header","hgroup", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"iframe","legend","map","menu","nav", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"noframes","noscript","optgroup","p","pre", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"ruby","script","section","select","span", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"style","tbody","textarea","tfoot","th", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"thead","tr","video" //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	];
+	for (i = 0; i < multiLineElements.length; i++) {
+		element = multiLineElements[i];
+		description = "<" + element + "></" + element + ">"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		template = "<" + element + ">\n\t${cursor}\n</" + element + ">"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		templates.push({prefix: "<" + element, description: description, template: template}); //$NON-NLS-0$
+	}
+
+	//elements with no closing element (e.g., <hr>, <br>, etc)
+	var emptyElements = [
+		"area","base","br","col", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"hr","input","link","meta", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"param","keygen","source" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	];
+	for (i = 0; i < emptyElements.length; i++) {
+		element = emptyElements[i];
+		template = description = "<" + element + "/>"; //$NON-NLS-1$ //$NON-NLS-0$
+		templates.push({prefix: "<" + element, description: description, template: template}); //$NON-NLS-0$
+	}
 
 	/**
-	 * Returns a string of all the whitespace at the start of the current line.
-	 * @param {String} buffer The document
-	 * @param {Object} selection The current selection
-	 * @param {Integer} selection.offset The current selection offset
+	 * @name orion.contentAssist.HTMLContentAssistProvider
+	 * @class Provides content assist for HTML.
 	 */
-	leadingWhitespace: function(buffer, offset) {
-		var whitespace = "";
-		offset = offset-1;
-		while (offset > 0) {
-			var char = buffer.charAt(offset--);
-			if (char === '\n' || char === '\r') {
-				//we hit the start of the line so we are done
+	function HTMLContentAssistProvider() {
+	}
+	HTMLContentAssistProvider.prototype = new mTemplates.TemplateContentAssist([], templates);
+
+	HTMLContentAssistProvider.prototype.getPrefix = function(buffer, offset, context) {
+		var index = offset;
+		while (index && /[A-Za-z<]/.test(buffer.charAt(index - 1))) {
+			index--;
+			if (buffer.charAt(index) === "<") { //$NON-NLS-0$
 				break;
 			}
-			if (/\s/.test(char)) {
-				//we found whitespace to add it to our result
-				whitespace = char.concat(whitespace);
-			} else {
-				//we found non-whitespace, so reset our result
-				whitespace = "";
-			}
-
 		}
-		return whitespace;
-	},
-	computeProposals: function(buffer, offset, context) {
-		function removePrefix(string) {
-			return string.substring(context.prefix.length);
-		}
-
-		var proposals = [];
+		return index ? buffer.substring(index, offset) : "";
+	};
+	
+	HTMLContentAssistProvider.prototype.computeProposals = function(buffer, offset, context) {
 		//template - simple html document
 		if (buffer.length === 0) {
-			var text = "<!DOCTYPE html>\n" +
-				"<html lang=\"en\">\n" +
-				"\t<head>\n" +
-				"\t\t<meta charset=utf-8>\n" +
-				"\t\t<title>My Document</title>\n" +
-				"\t</head>\n" +
-				"\t<body>\n" +
-				"\t\t<h1>A basic HTML document</h1>\n" +
-				"\t\t<p>\n" +
-				"\t\t\t\n" + //cursor goes here
-				"\t\t</p>\n" +
-				"\t</body>\n" +
-				"</html>";
-			proposals.push({proposal: text, description: "Simple HTML document", escapePosition: offset+152});
-			return proposals;
+			return [simpleDocTemplate.getProposal("", offset, context)];
 		}
+		return mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, buffer, offset, context);
+	};
 
-		var prefix = context.prefix;
-		//only offer HTML element proposals if the character preceeding the prefix is the start of an HTML element
-		var precedingChar = buffer.charAt(offset-prefix.length-1);
-		if (precedingChar !== '<') {
-			return proposals;
-		}
-		
-		//elements that are typically placed on a single line (e.g., <b>, <h1>, etc)
-		var element, proposalText, description, exitOffset;
-		var singleLineElements = ["abbr","b","button","canvas","cite","command","dd","del","dfn","dt","em","embed",
-			"font","h1","h2","h3","h4","h5","h6","i","ins","kbd","label","li","mark","meter","object","option","output",
-			"progress","q","rp","rt","samp","small","strong","sub","sup","td","time","title","tt","u","var"];
-		for (var i = 0; i < singleLineElements.length; i++) {
-			element = singleLineElements[i];
-			if (element.indexOf(prefix) === 0) {
-				proposalText = element + "></" + element + ">";
-				//exit position is the end of the opening element tag, so we need to substract the prefix already typed
-				exitOffset = offset+element.length-prefix.length+1;
-				proposals.push({proposal: removePrefix(proposalText), description: "<" + proposalText, escapePosition: exitOffset});
-			}
-		}
-		
-		//elements that typically start a block spanning multiple lines (e.g., <p>, <div>, etc)
-		var multiLineElements = ["address","article","aside","audio","bdo","blockquote","body","caption","code",
-			"colgroup","datalist","details","div","fieldset","figure","footer","form","head","header",
-			"hgroup","iframe","legend","map","menu","nav","noframes","noscript","optgroup","p","pre",
-			"ruby","script","section","select","span","style","tbody","textarea","tfoot","th","thead",
-			"tr","video"];
-		var whitespace = this.leadingWhitespace(buffer, offset);
-		for (i = 0; i < multiLineElements.length; i++) {
-			element = multiLineElements[i];
-			if (element.indexOf(prefix) === 0) {
-				proposalText = element + ">\n" + whitespace + "\t\n" + whitespace + "</" + element + ">";
-				//exit position is the end of the opening element tag, so we need to substract the prefix already typed
-				exitOffset = offset+element.length-prefix.length + whitespace.length + 3;
-				proposals.push({proposal: removePrefix(proposalText), description: "<" + proposalText, escapePosition: exitOffset});
-			}
-		}
-
-		//elements with no closing element (e.g., <hr>, <br>, etc)
-		var emptyElements = ["area","base","br","col","hr","input","link","meta","param","keygen","source"];
-		for (i = 0; i < emptyElements.length; i++) {
-			element = emptyElements[i];
-			if (element.indexOf(prefix) === 0) {
-				proposalText = element + "/>";
-				//exit position is the end of the element, so we need to substract the prefix already typed
-				exitOffset = offset+element.length-prefix.length+2;
-				proposals.push({proposal: removePrefix(proposalText), description: "<" + proposalText, escapePosition: exitOffset});
-			}
-		}
-
-		//deluxe handling for very common elements
-		//image
-		if ("img".indexOf(prefix) === 0) {
-			proposalText = "img src=\"\" alt=\"Image\"/>";
-			proposals.push({proposal: removePrefix(proposalText), description: "<" + proposalText, escapePosition: offset+9-prefix.length});
-		}
-		//anchor
-		if (prefix === 'a') {
-			proposals.push({proposal: removePrefix("a href=\"\"></a>"), description: "<a></a> - HTML anchor element", escapePosition: offset+7});
-		}
-		
-		//lists should also insert first element
-		if ("ul".indexOf(prefix) === 0) {
-			proposalText = "ul>\n" + whitespace + "\t<li></li>\n" + whitespace + "</ul>";
-			description = "<ul> - unordered list";
-			//exit position inside first list item
-			exitOffset = offset-prefix.length + whitespace.length + 9;
-			proposals.push({proposal: removePrefix(proposalText), description: description, escapePosition: exitOffset});
-		}
-		if ("ol".indexOf(prefix) === 0) {
-			proposalText = "ol>\n" + whitespace + "\t<li></li>\n" + whitespace + "</ol>";
-			description = "<ol> - ordered list";
-			//exit position inside first list item
-			exitOffset = offset-prefix.length + whitespace.length + 9;
-			proposals.push({proposal: removePrefix(proposalText), description: description, escapePosition: exitOffset});
-		}
-		if ("dl".indexOf(prefix) === 0) {
-			proposalText = "dl>\n" + whitespace + "\t<dt></dt>\n" + whitespace + "\t<dd></dd>\n" + whitespace + "</dl>";
-			description = "<dl> - definition list";
-			//exit position inside first definition term
-			exitOffset = offset-prefix.length + whitespace.length + 9;
-			proposals.push({proposal: removePrefix(proposalText), description: description, escapePosition: exitOffset});
-		}
-		if ("table".indexOf(prefix) === 0) {
-			proposalText = "table>\n" + whitespace + "\t<tr>\n" + whitespace + "\t\t<td></td>\n" + 
-				whitespace + "\t</tr>\n" + whitespace + "</table>";
-			description = "<table> - basic HTML table";
-			//exit position inside first table data
-			exitOffset = offset-prefix.length + (whitespace.length*2) + 19;
-			proposals.push({proposal: removePrefix(proposalText), description: description, escapePosition: exitOffset});
-		}
-
-		return proposals;
-	}
-};
-
-return {
-	HTMLContentAssistProvider: HTMLContentAssistProvider
-};
-
+	return {
+		HTMLContentAssistProvider: HTMLContentAssistProvider
+	};
 });

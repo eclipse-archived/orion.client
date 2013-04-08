@@ -12,7 +12,13 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/keyBinding', 'orion/editor/eventTarget', 'orion/Deferred', 'orion/util'], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
+define("orion/editor/contentAssist", [ //$NON-NLS-0$
+	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
+	'orion/keyBinding', //$NON-NLS-0$
+	'orion/editor/eventTarget', //$NON-NLS-0$
+	'orion/Deferred', //$NON-NLS-0$
+	'orion/util' //$NON-NLS-0$
+], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -80,11 +86,11 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 	};
 	
 	var STYLES = {
-		selected : " selected",
-		hr : "proposal-hr",
-		emphasis : "proposal-emphasis",
-		noemphasis : "proposal-noemphasis",
-		dfault : "proposal-default"
+		selected : " selected", //$NON-NLS-0$
+		hr : "proposal-hr", //$NON-NLS-0$
+		emphasis : "proposal-emphasis", //$NON-NLS-0$
+		noemphasis : "proposal-noemphasis", //$NON-NLS-0$
+		dfault : "proposal-default" //$NON-NLS-0$
 	};
 	
 	function ContentAssist(textView) {
@@ -113,8 +119,8 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 				}
 			}
 		};
-		textView.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "contentAssist");
-		textView.setAction("contentAssist", function() {
+		textView.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "contentAssist"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		textView.setAction("contentAssist", function() { //$NON-NLS-0$
 			self.activate();
 			return true;
 		}, {name: messages.contentAssist});
@@ -148,7 +154,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 			this.setState(State.INACTIVE);
 			var proposalText = proposal.proposal || proposal;
 			this.textView.setText(proposalText, start, end);
-			this.dispatchEvent({type: "ProposalApplied", data: data});
+			this.dispatchEvent({type: "ProposalApplied", data: data}); //$NON-NLS-0$
 			return true;
 		},
 		activate: function() {
@@ -178,9 +184,9 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 		setState: function(state) {
 			var eventType;
 			if (state === State.ACTIVE) {
-				eventType = "Activating";
+				eventType = "Activating"; //$NON-NLS-0$
 			} else if (state === State.INACTIVE) {
-				eventType = "Deactivating";
+				eventType = "Deactivating"; //$NON-NLS-0$
 			}
 			if (eventType) {
 				this.dispatchEvent({type: eventType});
@@ -192,16 +198,16 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 		onStateChange: function(state) {
 			if (state === State.INACTIVE) {
 				if (this.listenerAdded) {
-					this.textView.removeEventListener("ModelChanging", this.contentAssistListener.onModelChanging);
-					this.textView.removeEventListener("Scroll", this.contentAssistListener.onScroll);
-					this.textView.removeEventListener("Selection", this.contentAssistListener.onSelection);
+					this.textView.removeEventListener("ModelChanging", this.contentAssistListener.onModelChanging); //$NON-NLS-0$
+					this.textView.removeEventListener("Scroll", this.contentAssistListener.onScroll); //$NON-NLS-0$
+					this.textView.removeEventListener("Selection", this.contentAssistListener.onSelection); //$NON-NLS-0$
 					this.listenerAdded = false;
 				}
 			} else if (state === State.ACTIVE) {
 				if (!this.listenerAdded) {
-					this.textView.addEventListener("ModelChanging", this.contentAssistListener.onModelChanging);
-					this.textView.addEventListener("Scroll", this.contentAssistListener.onScroll);
-					this.textView.addEventListener("Selection", this.contentAssistListener.onSelection);
+					this.textView.addEventListener("ModelChanging", this.contentAssistListener.onModelChanging); //$NON-NLS-0$
+					this.textView.addEventListener("Scroll", this.contentAssistListener.onScroll); //$NON-NLS-0$
+					this.textView.addEventListener("Selection", this.contentAssistListener.onSelection); //$NON-NLS-0$
 					this.listenerAdded = true;
 				}
 				this.computeProposals();
@@ -214,7 +220,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 			var self = this;
 			var offset = this.textView.getCaretOffset();
 			this._computeProposals(offset).then(function(proposals) {
-				self.dispatchEvent({type: "ProposalsComputed", data: {proposals: proposals}});
+				self.dispatchEvent({type: "ProposalsComputed", data: {proposals: proposals}}); //$NON-NLS-0$
 			});
 		},
 		/** @private */
@@ -226,8 +232,8 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 			return index;
 		},
 		handleError: function(error) {
-			if (typeof console !== "undefined") {
-				console.log("Error retrieving content assist proposals");
+			if (typeof console !== "undefined") { //$NON-NLS-0$
+				console.log("Error retrieving content assist proposals"); //$NON-NLS-0$
 				console.log(error);
 			}
 		},
@@ -241,10 +247,21 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 			var providers = this.providers;
 			var textView = this.textView, textModel = textView.getModel();
 			var buffer = textView.getText();
+			var line = textModel.getLine(textModel.getLineAtOffset(offset));
+			var index = 0;
+			while (index < line.length && /\s/.test(line.charAt(index))) {
+				index++;
+			}
+			var indentation = line.substring(0, index);
+			var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
+			var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
 			var context = {
-				line: textModel.getLine(textModel.getLineAtOffset(offset)),
+				line: line,
 				prefix: textView.getText(this.getPrefixStart(offset), offset),
-				selection: textView.getSelection()
+				selection: textView.getSelection(),
+				delimiter: textModel.getLineDelimiter(),
+				tab: tab,
+				indentation: indentation
 			};
 			var self = this;
 			var promises = providers.map(function(provider) {
@@ -298,7 +315,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 		this.widget = ContentAssistWidget;
 		this.proposals = [];
 		var self = this;
-		this.contentAssist.addEventListener("ProposalsComputed", function(event) {
+		this.contentAssist.addEventListener("ProposalsComputed", function(event) { //$NON-NLS-0$
 			self.proposals = event.data.proposals;
 			self.selectedIndex = self.proposals.length ? 0 : -1;
 		});
@@ -365,16 +382,16 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 		this.textView = this.contentAssist.getTextView();
 		this.textViewListenerAdded = false;
 		this.isShowing = false;
-		var document = this.textView.getOptions("parent").ownerDocument;
-		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode;
+		var document = this.textView.getOptions("parent").ownerDocument; //$NON-NLS-0$
+		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode; //$NON-NLS-0$
 		if (!this.parentNode) {
-			this.parentNode = util.createElement(document, "div");
-			this.parentNode.className = "contentassist";
-			var body = document.getElementsByTagName("body")[0];
+			this.parentNode = util.createElement(document, "div"); //$NON-NLS-0$
+			this.parentNode.className = "contentassist"; //$NON-NLS-0$
+			var body = document.getElementsByTagName("body")[0]; //$NON-NLS-0$
 			if (body) {
 				body.appendChild(this.parentNode);
 			} else {
-				throw new Error("parentNode is required");
+				throw new Error("parentNode is required"); //$NON-NLS-0$
 			}
 		}
 		var self = this;
@@ -387,19 +404,19 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 				// the click is handled by the onClick() function
 			}
 		};
-		this.contentAssist.addEventListener("ProposalsComputed", function(event) {
+		this.contentAssist.addEventListener("ProposalsComputed", function(event) { //$NON-NLS-0$
 			self.setProposals(event.data.proposals);
 			self.show();
 			if (!self.textViewListenerAdded) {
-				self.textView.addEventListener("MouseDown", self.textViewListener.onMouseDown);
+				self.textView.addEventListener("MouseDown", self.textViewListener.onMouseDown); //$NON-NLS-0$
 				self.textViewListenerAdded = true;
 			}
 		});
-		this.contentAssist.addEventListener("Deactivating", function(event) {
+		this.contentAssist.addEventListener("Deactivating", function(event) { //$NON-NLS-0$
 			self.setProposals([]);
 			self.hide();
 			if (self.textViewListenerAdded) {
-				self.textView.removeEventListener("MouseDown", self.textViewListener.onMouseDown);
+				self.textView.removeEventListener("MouseDown", self.textViewListener.onMouseDown); //$NON-NLS-0$
 				self.textViewListenerAdded = false;
 			}
 			self.textViewListenerAdded = false;
@@ -410,7 +427,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 			}
 		};
 		if (document.addEventListener) {
-			document.addEventListener("scroll", this.scrollListener);
+			document.addEventListener("scroll", this.scrollListener); //$NON-NLS-0$
 		}
 	}
 	ContentAssistWidget.prototype = /** @lends orion.editor.ContentAssistWidget.prototype */ {
@@ -422,17 +439,17 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 		/** @private */
 		createDiv: function(proposal, isSelected, parent, itemIndex) {
 			var document = parent.ownerDocument;
-			var div = util.createElement(document, "div");
-			div.id = "contentoption" + itemIndex;
-			div.setAttribute("role", "option");
+			var div = util.createElement(document, "div"); //$NON-NLS-0$
+			div.id = "contentoption" + itemIndex; //$NON-NLS-0$
+			div.setAttribute("role", "option"); //$NON-NLS-1$ //$NON-NLS-0$
 			var node;
-			if (proposal.style === "hr") {
-				node = util.createElement(document, "hr");
+			if (proposal.style === "hr") { //$NON-NLS-0$
+				node = util.createElement(document, "hr"); //$NON-NLS-0$
 			} else {
 				div.className = this.calculateClasses(proposal.style, isSelected);
 				node = document.createTextNode(this.getDisplayString(proposal));
 				if (isSelected) {
-					this.parentNode.setAttribute("aria-activedescendant", div.id);
+					this.parentNode.setAttribute("aria-activedescendant", div.id); //$NON-NLS-0$
 				}
 			}
 			div.appendChild(node, div);
@@ -441,7 +458,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 		/** @private */
 		createAccessible: function(mode) {
 			if(!this._isAccessible) {
-				this.parentNode.addEventListener("keydown", function(evt) {
+				this.parentNode.addEventListener("keydown", function(evt) { //$NON-NLS-0$
 					evt.preventDefault();
 					if(evt.keyCode === 27) {return mode.cancel(); }
 					else if(evt.keyCode === 38) { return mode.lineUp(); }
@@ -463,11 +480,11 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 		/** @private */
 		getDisplayString: function(proposal) {
 			//for simple string content assist, the display string is just the proposal
-			if (typeof proposal === "string") {
+			if (typeof proposal === "string") { //$NON-NLS-0$
 				return proposal;
 			}
 			//return the description if applicable
-			if (proposal.description && typeof proposal.description === "string") {
+			if (proposal.description && typeof proposal.description === "string") { //$NON-NLS-0$
 				return proposal.description;
 			}
 			//by default return the straight proposal text
@@ -504,7 +521,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 				}
 				if (child === node) {
 					child.className = child.className + STYLES.selected;
-					this.parentNode.setAttribute("aria-activedescendant", child.id);
+					this.parentNode.setAttribute("aria-activedescendant", child.id); //$NON-NLS-0$
 					child.focus();
 					if (child.offsetTop < this.parentNode.scrollTop) {
 						child.scrollIntoView(true);
@@ -534,18 +551,18 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 			if(this.parentNode.ownerDocument.activeElement === this.parentNode) {
 				this.textView.focus();
 			}
-			this.parentNode.style.display = "none";
+			this.parentNode.style.display = "none"; //$NON-NLS-0$
 			this.parentNode.onclick = null;
 			this.isShowing = false;
 		},
 		position: function() {
 			var caretLocation = this.textView.getLocationAtOffset(this.textView.getCaretOffset());
 			caretLocation.y += this.textView.getLineHeight();
-			this.textView.convert(caretLocation, "document", "page");
-			this.parentNode.style.position = "fixed";
-			this.parentNode.style.left = caretLocation.x + "px";
-			this.parentNode.style.top = caretLocation.y + "px";
-			this.parentNode.style.display = "block";
+			this.textView.convert(caretLocation, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.parentNode.style.position = "fixed"; //$NON-NLS-0$
+			this.parentNode.style.left = caretLocation.x + "px"; //$NON-NLS-0$
+			this.parentNode.style.top = caretLocation.y + "px"; //$NON-NLS-0$
+			this.parentNode.style.display = "block"; //$NON-NLS-0$
 			this.parentNode.scrollTop = 0;
 
 			// Make sure that the panel is never outside the viewport
@@ -553,10 +570,10 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/k
 			var viewportWidth = document.documentElement.clientWidth,
 			    viewportHeight =  document.documentElement.clientHeight;
 			if (caretLocation.y + this.parentNode.offsetHeight > viewportHeight) {
-				this.parentNode.style.top = (caretLocation.y - this.parentNode.offsetHeight - this.textView.getLineHeight()) + "px";
+				this.parentNode.style.top = (caretLocation.y - this.parentNode.offsetHeight - this.textView.getLineHeight()) + "px"; //$NON-NLS-0$
 			}
 			if (caretLocation.x + this.parentNode.offsetWidth > viewportWidth) {
-				this.parentNode.style.left = (viewportWidth - this.parentNode.offsetWidth) + "px";
+				this.parentNode.style.left = (viewportWidth - this.parentNode.offsetWidth) + "px"; //$NON-NLS-0$
 			}
 		}
 	};
