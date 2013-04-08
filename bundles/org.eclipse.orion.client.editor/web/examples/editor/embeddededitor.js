@@ -94,8 +94,12 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
 		keyModeStack.push(genericBindings);
 		
+		// Linked Mode
+		var linkedMode = new mEditorFeatures.LinkedMode(editor, undoStack);
+		keyModeStack.push(linkedMode);
+		
 		// create keybindings for source editing
-		var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
+		var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
 		keyModeStack.push(codeBindings);
 		
 		// save binding
