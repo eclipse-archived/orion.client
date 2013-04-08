@@ -91,6 +91,13 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "ori
 	 */
 	function createPageLinks(serviceRegistry, serviceName) {
 		return getPageLinksInfo(serviceRegistry, serviceName).then(function(links) {
+			links.sort(function(a, b) {
+				var n1 = a.textContent && a.textContent.toLowerCase();
+				var n2 = b.textContent && b.textContent.toLowerCase();
+				if (n1 < n2) { return -1; }
+				if (n1 > n2) { return 1; }
+				return 0;
+			}); 
 			return links.map(function(info) {
 				return createLink(info.href, "_self", info.textContent); //$NON-NLS-0$
 			});
