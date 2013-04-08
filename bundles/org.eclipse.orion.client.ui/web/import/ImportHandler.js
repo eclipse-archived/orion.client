@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global console define URL window*/
-define(['require', 'orion/URITemplate', 'orion/URL-shim', 'orion/serviceTracker'], function(require, URITemplate, _, ServiceTracker) {
+define(['require', 'orion/URITemplate', 'orion/URL-shim', 'orion/serviceTracker', 'orion/PageLinks'], function(require, URITemplate, _, ServiceTracker, PageLinks) {
 	var AUTOIMPORT_SERVICE_NAME = 'orion.core.autoimport'; //$NON-NLS-0$
 
 	function debug(msg) { console.log('Orion: ' + msg); }
@@ -48,15 +48,15 @@ define(['require', 'orion/URITemplate', 'orion/URL-shim', 'orion/serviceTracker'
 				if (typeof service.onresponse !== 'function') {
 					logError('Expected ' + AUTOIMPORT_SERVICE_NAME + ' service to provide an "onresponse" method');
 				}
-				var OrionHome = new URL(require.toUrl('.').slice(0, -1), window.location.href).href;
+				var OrionHome = PageLinks.getOrionHome();
 				service.onresponse({
 					type: 'success', //$NON-NLS-0$
 					project: project,
 					OrionHome: OrionHome,
 					templates: {
-						navigate: (OrionHome + 'navigate/table.html#{Location}?depth=1'),
-						edit: (OrionHome + 'edit/edit.html#{,Location,params*}'),
-						shell: (OrionHome + 'shell/shellPage.html#{Location}')
+						navigate: (OrionHome + '/navigate/table.html#{Location}?depth=1'),
+						edit: (OrionHome + '/edit/edit.html#{,Location,params*}'),
+						shell: (OrionHome + '/shell/shellPage.html#{Location}')
 					}
 				});
 			}, function(error) {
