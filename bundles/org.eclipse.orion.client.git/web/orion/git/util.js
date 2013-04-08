@@ -84,8 +84,9 @@ define(['i18n!git/nls/gitmessages', 'orion/compare/compareCommands', 'orion/comp
 	 * @param {Sting} commandSpanId The id of the DIV where all the commands of the compare view are rendered. "Open in compare page", "toggle", "navigate diff" commands will be rendered.
 	 * @param {Boolean} editableInComparePage The flag to indicate if opening compage will be editable on the left side. Default is false. Optional.
 	 * @param {Object} gridRenderer If all the commands have to be rendered as grids, especially inside a row of Orion explorer, this has to be provided. Optional.
+	 * @param {String} compareTo Optional. If the resource parameter is a simple file URL then this can be used as the second file URI to compare with.
 	 */
-	function createCompareWidget(serviceRegistry, commandService, resource, hasConflicts, parentDivId, commandSpanId, editableInComparePage, gridRenderer){
+	function createCompareWidget(serviceRegistry, commandService, resource, hasConflicts, parentDivId, commandSpanId, editableInComparePage, gridRenderer, compareTo){
 		var diffProvider = new mResourceComparer.DefaultDiffProvider(serviceRegistry);
 		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: commandSpanId, gridRenderer: gridRenderer});
 		var comparerOptions = {
@@ -95,6 +96,7 @@ define(['i18n!git/nls/gitmessages', 'orion/compare/compareCommands', 'orion/comp
 			hasConflicts: hasConflicts,
 			diffProvider: diffProvider,
 			resource : resource,
+			compareTo : compareTo,
 			editableInComparePage : editableInComparePage
 		};
 		var viewOptions = {
