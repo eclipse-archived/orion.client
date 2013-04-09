@@ -13,38 +13,16 @@
  *******************************************************************************/
 /*global define */
 
-define("orion/editor/jsTemplateContentAssist", [], function() {
+define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
+	'orion/editor/templates', //$NON-NLS-0$
+	'orion/editor/keywords' //$NON-NLS-0$
+], function(mTemplates, mKeywords) {
 
-	/**
-	 * Returns a string of all the whitespace at the start of the current line.
-	 * @param {String} buffer The document
-	 * @param {Integer} offset The current selection offset
-	 */
-	function leadingWhitespace(buffer, offset) {
-		var whitespace = "";
-		offset = offset-1;
-		while (offset > 0) {
-			var c = buffer.charAt(offset--);
-			if (c === '\n' || c === '\r') {
-				//we hit the start of the line so we are done
-				break;
-			}
-			if (/\s/.test(c)) {
-				//we found whitespace to add it to our result
-				whitespace = c.concat(whitespace);
-			} else {
-				//we found non-whitespace, so reset our result
-				whitespace = "";
-			}
-		}
-		return whitespace;
-	}
-	
 	function findPreviousChar(buffer, offset) {
 		var c = "";
 		while (offset >= 0) {
 			c = buffer[offset];
-			if (c === '\n' || c === '\r') {
+			if (c === '\n' || c === '\r') { //$NON-NLS-1$ //$NON-NLS-0$
 				//we hit the start of the line so we are done
 				break;
 			} else if (/\s/.test(c)) {
@@ -57,169 +35,136 @@ define("orion/editor/jsTemplateContentAssist", [], function() {
 		return c;
 	}
 	
-	var uninterestingChars = { 
-		':': ':',
-		'!': '!',
-		'@': '@',
-		'#': '#',
-		'$': '$',
-		'^': '^',
-		'&': '&',
-		'*': '*',
-		'.': '.',
-		'?': '?',
-		'<': '<',
-		'>': '>'
-	};
-	
-	/** 
-	 * Determines if the invocation location is a valid place to use
-	 * templates.  We are not being too precise here.  As an approximation,
-	 * just look at the previous character.
-	 *
-	 * @return {Boolean} true iff the current invocation location is 
-	 * a valid place for template proposals to appear.
-	 * This means that the invocation location is at the start of anew statement.
-	 */
-	function isValid(prefix, buffer, offset) {
-		var previousChar = findPreviousChar(buffer, offset-prefix.length-1);
-		return !uninterestingChars[previousChar];
-	}
-	
-	/** 
-	 * Removes prefix from string.
-	 * @param {String} prefix
-	 * @param {String} string
-	 */
-	function chop(prefix, string) {
-		return string.substring(prefix.length);
-	}
-	
-	/**
-	 * Returns proposals for javascript templates
-	 */
-	function getTemplateProposals(prefix, buffer, offset) {
-		//any returned positions need to be offset based on current cursor position and length of prefix
-		var startOffset = offset-prefix.length;
-		var proposals = [];
-		var whitespace = leadingWhitespace(buffer, offset);
-		//common vars for each proposal
-		var text, description, positions, groups, endOffset;
-		if ("if".indexOf(prefix) === 0) {
-			//if statement
-			text = "if (condition) {\n" + whitespace + "\t\n" + whitespace + '}';
-			description = "if - if statement";
-			positions = [{offset: startOffset+4, length: 9}];
-			endOffset = startOffset+whitespace.length+18;//after indentation inside if body
-			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
-			//if/else statement
-			text = "if (condition) {\n" + whitespace + "\t\n" + whitespace + "} else {\n" + whitespace + "\t\n" + whitespace + "}";
-			description = "if - if else statement";
-			positions = [{offset: startOffset+4, length: 9}];
-			endOffset = startOffset+whitespace.length+18;//after indentation inside if body
-			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
-		}
-		if ("for".indexOf(prefix) === 0) {
-			//for loop
-			text = "for (var i = 0; i < array.length; i++) {\n" + whitespace + "\t\n" + whitespace + '}';
-			description = "for - iterate over array";
-			groups = [
-				{positions: [{offset: startOffset+9, length: 1}, {offset: startOffset+16, length: 1}, {offset: startOffset+34, length: 1}]},
-				{positions: [{offset: startOffset+20, length: 5}]}
-			];
-			endOffset = startOffset+whitespace.length+42;//after indentation inside for loop body
-			proposals.push({proposal: chop(prefix, text), description: description, groups: groups, escapePosition: endOffset});
-			//for ... in statement
-			text = "for (var property in object) {\n" + whitespace + "\tif (object.hasOwnProperty(property)) {\n" + 
-				whitespace + "\t\t\n" + whitespace + "\t}\n" + whitespace + '}';
-			description = "for..in - iterate over properties of an object";
-			groups = [
-				{positions: [{offset: startOffset+9, length: 8}, {offset: startOffset+58+whitespace.length, length: 8}]},
-				{positions: [{offset: startOffset+21, length: 6}, {offset: startOffset+36+whitespace.length, length: 6}]}
-			];
-			endOffset = startOffset+(2*whitespace.length)+73;//after indentation inside if statement body
-			proposals.push({proposal: chop(prefix, text), description: description, groups: groups, escapePosition: endOffset});
-		}
-		//while loop
-		if ("while".indexOf(prefix) === 0) {
-			text = "while (condition) {\n" + whitespace + "\t\n" + whitespace + '}';
-			description = "while - while loop with condition";
-			positions = [{offset: startOffset+7, length: 9}];
-			endOffset = startOffset+whitespace.length+21;//after indentation inside while loop body
-			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
-		}
-		//do/while loop
-		if ("do".indexOf(prefix) === 0) {
-			text = "do {\n" + whitespace + "\t\n" + whitespace + "} while (condition);";
-			description = "do - do while loop with condition";
-			positions = [{offset: startOffset+16+(2*whitespace.length), length: 9}];
-			endOffset = startOffset+whitespace.length+6;//after indentation inside do/while loop body
-			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
-		}
-		//switch statement
-		if ("switch".indexOf(prefix) === 0) {
-			text = "switch (expression) {\n" + whitespace + "\tcase value1:\n" + whitespace + "\t\t\n" +
-			whitespace + "\t\tbreak;\n" + whitespace + "\tdefault:\n" + whitespace + "}";
-			description = "switch - switch case statement";
-			positions = [{offset: startOffset+8, length: 10}, {offset: startOffset + 28 + whitespace.length, length: 6}];
-			endOffset = startOffset+(2*whitespace.length)+38;//after indentation inside first case statement
-			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
-		}
-		if ("try".indexOf(prefix) === 0) {
-			//try..catch statement
-			text = "try {\n" + whitespace + "\t\n" + whitespace + "} catch (err) {\n" + whitespace + "}";
-			description = "try - try..catch statement";
-			positions = [{offset: startOffset+17+(2*whitespace.length), length: 3}];
-			endOffset = startOffset+7+whitespace.length;//after indentation inside try statement
-			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
-			//try..catch..finally statement
-			text = "try {\n" + whitespace + "\t\n" + whitespace + "} catch (err) {\n" + whitespace +
-				"} finally {\n" + whitespace + "}";
-			description = "try - try..catch statement with finally block";
-			positions = [{offset: startOffset+17+(2*whitespace.length), length: 3}];
-			endOffset = startOffset+whitespace.length+7;//after indentation inside try statement
-			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
-		}
-		return proposals;
-	}
+	var uninterestingChars = ":!@#$^&*.?<>"; //$NON-NLS-0$
 
-	/**
-	 * Returns proposals for javascript keywords.
-	 */
-	function getKeyWordProposals(prefix, buffer, offset) {
-		var keywords = ["break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else", "finally", 
-			"for", "function", "if", "in", "instanceof", "new", "return", "switch", "this", "throw", "try", "typeof", 
-			"var", "void", "while", "with"];
-		var proposals = [];
-		for (var i = 0; i < keywords.length; i++) {
-			if (keywords[i].indexOf(prefix) === 0) {
-				proposals.push({proposal: chop(prefix, keywords[i]), description: keywords[i] });
-			}
+	var templates = [
+		{
+			prefix: "if", //$NON-NLS-0$
+			description: "if - if statement",
+			template: "if (${condition}) {\n\t${cursor}\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "if", //$NON-NLS-0$
+			description: "if - if else statement",
+			template: "if (${condition}) {\n\t${cursor}\n} else {\n\t${cursor}\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "for", //$NON-NLS-0$
+			description: "for - iterate over array",
+			template: "for (var ${i}=0; ${i}<${array}.length; ${i}++) {\n\t${cursor}\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "for", //$NON-NLS-0$
+			description: "for - iterate over array with local var",
+			template: "for (var ${i}=0; ${i}<${array}.length; ${i}++) {\n\tvar ${v} = ${array}[${i}];\n\t${cursor}\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "for", //$NON-NLS-0$
+			description: "for..in - iterate over properties of an object",
+			template: "for (var ${property} in ${object} {\n\tif (${object}.hasOwnProperty(${property})) {\n\t\t${cursor}\n\t}\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "while", //$NON-NLS-0$
+			description: "while - while loop with condition",
+			template: "while (${condition}) {\n\t${cursor}\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "do", //$NON-NLS-0$
+			description: "do - do while loop with condition",
+			template: "do {\n\t${cursor}\n} while (${condition});" //$NON-NLS-0$
+		},
+		{
+			prefix: "switch", //$NON-NLS-0$
+			description: "switch - switch case statement",
+			template: "switch (${expression}) {\n\tcase ${value1}:\n\t\t${cursor}\n\t\tbreak;\n\tdefault:\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "case", //$NON-NLS-0$
+			description: "case - case statement",
+			template: "case ${value}:\n\t${cursor}\n\tbreak;" //$NON-NLS-0$
+		},
+		{
+			prefix: "try", //$NON-NLS-0$
+			description: "try - try..catch statement",
+			template: "try {\n\t${cursor}\n} catch (${err}) {\n}" //$NON-NLS-0$
+			},
+		{
+			prefix: "try", //$NON-NLS-0$
+			description: "try - try..catch statement with finally block",
+			template: "try {\n\t${cursor}\n} catch (${err}) {\n} finally {\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "var", //$NON-NLS-0$
+			description: "var - variable declaration",
+			template: "var ${name};" //$NON-NLS-0$
+		},
+		{
+			prefix: "var", //$NON-NLS-0$
+			description: "var - variable declaration with value",
+			template: "var ${name} = ${value};" //$NON-NLS-0$
+		},
+		{
+			prefix: "let", //$NON-NLS-0$
+			description: "let - local scope variable declaration",
+			template: "let ${name};" //$NON-NLS-0$
+		},
+		{
+			prefix: "let", //$NON-NLS-0$
+			description: "let - local scope variable declaration with value",
+			template: "let ${name} = ${value};" //$NON-NLS-0$
+		},
+		{
+			prefix: "return", //$NON-NLS-0$
+			description: "return - return result",
+			template: "return ${result};" //$NON-NLS-0$
+		},
+		{
+			prefix: "typeof", //$NON-NLS-0$
+			description: "typeof - typeof statement",
+			template: "typeof ${var} = \"${type}\"" //$NON-NLS-0$
+		},
+		{
+			prefix: "instanceof", //$NON-NLS-0$
+			description: "instanceof - instanceof statement",
+			template: "${var} instanceof ${type}" //$NON-NLS-0$
+		},
+		{
+			prefix: "with", //$NON-NLS-0$
+			description: "with - with statement",
+			template: "with (${object}) {\n\t${cursor}\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "function", //$NON-NLS-0$
+			description: "function - function declaration",
+			template: "function ${name} (${parameter}) {\n\t${cursor}\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "log", //$NON-NLS-0$
+			description: "log - console log",
+			template: "console.log(${object});" //$NON-NLS-0$
 		}
-		return proposals;
-	}
+	];
 
 	/**
 	 * @name orion.editor.JSTemplateContentAssistProvider
 	 * @class Provides content assist for JavaScript keywords.
 	 */
+	function JSTemplateContentAssistProvider() {
+	}
+	JSTemplateContentAssistProvider.prototype = new mTemplates.TemplateContentAssist(mKeywords.JSKeywords, templates);
 
-	function JSTemplateContentAssistProvider() {}
-
-	JSTemplateContentAssistProvider.prototype = /** @lends orion.editor.JSTemplateContentAssistProvider.prototype */
-	{
-		computeProposals: function(buffer, offset, context) {
-			var prefix = context.prefix;
-			var proposals = [];
-			if (!isValid(prefix, buffer, offset)) {
-				return proposals;
-			}
-
-			//we are not completing on an object member, so suggest templates and keywords
-			proposals = proposals.concat(getTemplateProposals(prefix, buffer, offset));
-			proposals = proposals.concat(getKeyWordProposals(prefix, buffer, offset));
-			return proposals;
-		}
+	/** 
+	 * Determines if the invocation location is a valid place to use
+	 * templates.  We are not being too precise here.  As an approximation,
+	 * just look at the previous character.
+	 *
+	 * @return {Boolean} true if the current invocation location is 
+	 * a valid place for template proposals to appear.
+	 * This means that the invocation location is at the start of a new statement.
+	 */
+	JSTemplateContentAssistProvider.prototype.isValid = function(prefix, buffer, offset, context) {
+		var previousChar = findPreviousChar(buffer, offset-prefix.length-1);
+		return uninterestingChars.indexOf(previousChar) === -1;
 	};
 
 	return {

@@ -894,7 +894,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			var proposal = event.data.proposal;
 			
 			//if the proposal specifies linked positions, build the model and enter linked mode
-			if (proposal.positions && this.linkedMode) {
+			if (proposal.positions && proposal.positions.length > 0 && this.linkedMode) {
 				var positionGroups = [];
 				for (var i = 0; i < proposal.positions.length; ++i) {
 					positionGroups[i] = {
@@ -910,7 +910,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 					escapePosition: proposal.escapePosition
 				};
 				this.linkedMode.enterLinkedMode(linkedModeModel);
-			} else if (proposal.groups && this.linkedMode) {
+			} else if (proposal.groups && proposal.groups.length > 0 && this.linkedMode) {
 				this.linkedMode.enterLinkedMode({
 					groups: proposal.groups,
 					escapePosition: proposal.escapePosition

@@ -12,82 +12,16 @@
 
 /*global define */
 
-define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnnotations) {
+define("examples/editor/textStyler", [ //$NON-NLS-0$
+	'orion/editor/annotations', //$NON-NLS-0$
+	'orion/editor/keywords' //$NON-NLS-0$
+], function(mAnnotations, mKeywords) {
 
-	var JS_KEYWORDS =
-		["break",
-		 "case", "class", "catch", "continue", "const", 
-		 "debugger", "default", "delete", "do",
-		 "else", "enum", "export", "extends",  
-		 "false", "finally", "for", "function",
-		 "if", "implements", "import", "in", "instanceof", "interface", 
-		 "let",
-		 "new", "null",
-		 "package", "private", "protected", "public",
-		 "return", 
-		 "static", "super", "switch",
-		 "this", "throw", "true", "try", "typeof",
-		 "undefined",
-		 "var", "void",
-		 "while", "with",
-		 "yield"];
+	var JS_KEYWORDS = mKeywords.JSKeywords;
 
-	var JAVA_KEYWORDS =
-		["abstract",
-		 "boolean", "break", "byte",
-		 "case", "catch", "char", "class", "continue",
-		 "default", "do", "double",
-		 "else", "extends",
-		 "false", "final", "finally", "float", "for",
-		 "if", "implements", "import", "instanceof", "int", "interface",
-		 "long",
-		 "native", "new", "null",
-		 "package", "private", "protected", "public",
-		 "return",
-		 "short", "static", "super", "switch", "synchronized",
-		 "this", "throw", "throws", "transient", "true", "try",
-		 "void", "volatile",
-		 "while"];
+	var JAVA_KEYWORDS = mKeywords.JAVAKeywords;
 
-	var CSS_KEYWORDS =
-		["alignment-adjust", "alignment-baseline", "animation", "animation-delay", "animation-direction", "animation-duration",
-		 "animation-iteration-count", "animation-name", "animation-play-state", "animation-timing-function", "appearance",
-		 "azimuth", "backface-visibility", "background", "background-attachment", "background-clip", "background-color",
-		 "background-image", "background-origin", "background-position", "background-repeat", "background-size", "baseline-shift",
-		 "binding", "bleed", "bookmark-label", "bookmark-level", "bookmark-state", "bookmark-target", "border", "border-bottom",
-		 "border-bottom-color", "border-bottom-left-radius", "border-bottom-right-radius", "border-bottom-style", "border-bottom-width",
-		 "border-collapse", "border-color", "border-image", "border-image-outset", "border-image-repeat", "border-image-slice",
-		 "border-image-source", "border-image-width", "border-left", "border-left-color", "border-left-style", "border-left-width",
-		 "border-radius", "border-right", "border-right-color", "border-right-style", "border-right-width", "border-spacing", "border-style",
-		 "border-top", "border-top-color", "border-top-left-radius", "border-top-right-radius", "border-top-style", "border-top-width",
-		 "border-width", "bottom", "box-align", "box-decoration-break", "box-direction", "box-flex", "box-flex-group", "box-lines",
-		 "box-ordinal-group", "box-orient", "box-pack", "box-shadow", "box-sizing", "break-after", "break-before", "break-inside",
-		 "caption-side", "clear", "clip", "color", "color-profile", "column-count", "column-fill", "column-gap", "column-rule",
-		 "column-rule-color", "column-rule-style", "column-rule-width", "column-span", "column-width", "columns", "content", "counter-increment",
-		 "counter-reset", "crop", "cue", "cue-after", "cue-before", "cursor", "direction", "display", "dominant-baseline",
-		 "drop-initial-after-adjust", "drop-initial-after-align", "drop-initial-before-adjust", "drop-initial-before-align", "drop-initial-size",
-		 "drop-initial-value", "elevation", "empty-cells", "fit", "fit-position", "flex-align", "flex-flow", "flex-inline-pack", "flex-order",
-		 "flex-pack", "float", "float-offset", "font", "font-family", "font-size", "font-size-adjust", "font-stretch", "font-style",
-		 "font-variant", "font-weight", "grid-columns", "grid-rows", "hanging-punctuation", "height", "hyphenate-after",
-		 "hyphenate-before", "hyphenate-character", "hyphenate-lines", "hyphenate-resource", "hyphens", "icon", "image-orientation",
-		 "image-rendering", "image-resolution", "inline-box-align", "left", "letter-spacing", "line-height", "line-stacking",
-		 "line-stacking-ruby", "line-stacking-shift", "line-stacking-strategy", "list-style", "list-style-image", "list-style-position",
-		 "list-style-type", "margin", "margin-bottom", "margin-left", "margin-right", "margin-top", "mark", "mark-after", "mark-before",
-		 "marker-offset", "marks", "marquee-direction", "marquee-loop", "marquee-play-count", "marquee-speed", "marquee-style", "max-height",
-		 "max-width", "min-height", "min-width", "move-to", "nav-down", "nav-index", "nav-left", "nav-right", "nav-up", "opacity", "orphans",
-		 "outline", "outline-color", "outline-offset", "outline-style", "outline-width", "overflow", "overflow-style", "overflow-x",
-		 "overflow-y", "padding", "padding-bottom", "padding-left", "padding-right", "padding-top", "page", "page-break-after", "page-break-before",
-		 "page-break-inside", "page-policy", "pause", "pause-after", "pause-before", "perspective", "perspective-origin", "phonemes", "pitch",
-		 "pitch-range", "play-during", "position", "presentation-level", "punctuation-trim", "quotes", "rendering-intent", "resize",
-		 "rest", "rest-after", "rest-before", "richness", "right", "rotation", "rotation-point", "ruby-align", "ruby-overhang", "ruby-position",
-		 "ruby-span", "size", "speak", "speak-header", "speak-numeral", "speak-punctuation", "speech-rate", "stress", "string-set", "table-layout",
-		 "target", "target-name", "target-new", "target-position", "text-align", "text-align-last", "text-decoration", "text-emphasis",
-		 "text-height", "text-indent", "text-justify", "text-outline", "text-shadow", "text-transform", "text-wrap", "top", "transform",
-		 "transform-origin", "transform-style", "transition", "transition-delay", "transition-duration", "transition-property",
-		 "transition-timing-function", "unicode-bidi", "vertical-align", "visibility", "voice-balance", "voice-duration", "voice-family",
-		 "voice-pitch", "voice-pitch-range", "voice-rate", "voice-stress", "voice-volume", "volume", "white-space", "white-space-collapse",
-		 "widows", "width", "word-break", "word-spacing", "word-wrap", "z-index"
-		];
+	var CSS_KEYWORDS = mKeywords.CSSKeywords;
 
 	// Scanner constants
 	var UNKOWN = 1;
@@ -105,21 +39,21 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 	var DOC_TAG = 13;
 	var TASK_TAG = 14;
 	
-	var BRACKETS = "{}()[]<>";
+	var BRACKETS = "{}()[]<>"; //$NON-NLS-0$
 
 	// Styles 
-	var singleCommentStyle = {styleClass: "comment"};
-	var multiCommentStyle = {styleClass: "token_multiline_comment"};
-	var docCommentStyle = {styleClass: "token_doc_comment"};
-	var htmlMarkupStyle = {styleClass: "token_doc_html_markup"};
-	var tasktagStyle = {styleClass: "token_task_tag"};
-	var doctagStyle = {styleClass: "token_doc_tag"};
-	var stringStyle = {styleClass: "token_string"};
-	var numberStyle = {styleClass: "token_number"};
-	var keywordStyle = {styleClass: "token_keyword"};
-	var spaceStyle = {styleClass: "token_space"};
-	var tabStyle = {styleClass: "token_tab"};
-	var caretLineStyle = {styleClass: "line_caret"};
+	var singleCommentStyle = {styleClass: "comment"}; //$NON-NLS-0$
+	var multiCommentStyle = {styleClass: "token_multiline_comment"}; //$NON-NLS-0$
+	var docCommentStyle = {styleClass: "token_doc_comment"}; //$NON-NLS-0$
+	var htmlMarkupStyle = {styleClass: "token_doc_html_markup"}; //$NON-NLS-0$
+	var tasktagStyle = {styleClass: "token_task_tag"}; //$NON-NLS-0$
+	var doctagStyle = {styleClass: "token_doc_tag"}; //$NON-NLS-0$
+	var stringStyle = {styleClass: "token_string"}; //$NON-NLS-0$
+	var numberStyle = {styleClass: "token_number"}; //$NON-NLS-0$
+	var keywordStyle = {styleClass: "token_keyword"}; //$NON-NLS-0$
+	var spaceStyle = {styleClass: "token_space"}; //$NON-NLS-0$
+	var tabStyle = {styleClass: "token_tab"}; //$NON-NLS-0$
+	var caretLineStyle = {styleClass: "line_caret"}; //$NON-NLS-0$
 	
 	function Scanner (keywords, whitespacesVisible) {
 		this.keywords = keywords;
@@ -436,13 +370,13 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 	};
 	
 	function TextStyler (view, lang, annotationModel) {
-		this.commentStart = "/*";
-		this.commentEnd = "*/";
+		this.commentStart = "/*"; //$NON-NLS-0$
+		this.commentEnd = "*/"; //$NON-NLS-0$
 		var keywords = [];
 		switch (lang) {
-			case "java": keywords = JAVA_KEYWORDS; break;
-			case "js": keywords = JS_KEYWORDS; break;
-			case "css": keywords = CSS_KEYWORDS; break;
+			case "java": keywords = JAVA_KEYWORDS; break; //$NON-NLS-0$
+			case "js": keywords = JS_KEYWORDS; break; //$NON-NLS-0$
+			case "css": keywords = CSS_KEYWORDS; break; //$NON-NLS-0$
 		}
 		this.whitespacesVisible = false;
 		this.detectHyperlinks = true;
@@ -454,7 +388,7 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 		this._commentScanner = new CommentScanner(this.whitespacesVisible);
 		this._whitespaceScanner = new WhitespaceScanner();
 		//TODO these scanners are not the best/correct way to parse CSS
-		if (lang === "css") {
+		if (lang === "css") { //$NON-NLS-0$
 			this._scanner.isCSS = true;
 			this._firstScanner.isCSS = true;
 		}
@@ -484,11 +418,11 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 		if (model.getBaseModel) {
 			model = model.getBaseModel();
 		}
-		model.addEventListener("Changed", this._listener.onChanged);
-		view.addEventListener("MouseDown", this._listener.onMouseDown);
-		view.addEventListener("Selection", this._listener.onSelection);
-		view.addEventListener("Destroy", this._listener.onDestroy);
-		view.addEventListener("LineStyle", this._listener.onLineStyle);
+		model.addEventListener("Changed", this._listener.onChanged); //$NON-NLS-0$
+		view.addEventListener("MouseDown", this._listener.onMouseDown); //$NON-NLS-0$
+		view.addEventListener("Selection", this._listener.onSelection); //$NON-NLS-0$
+		view.addEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
+		view.addEventListener("LineStyle", this._listener.onLineStyle); //$NON-NLS-0$
 		this._computeComments ();
 		this._computeFolding();
 		view.redrawLines();
@@ -502,11 +436,11 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 				if (model.getBaseModel) {
 					model = model.getBaseModel();
 				}
-				model.removeEventListener("Changed", this._listener.onChanged);
-				view.removeEventListener("MouseDown", this._listener.onMouseDown);
-				view.removeEventListener("Selection", this._listener.onSelection);
-				view.removeEventListener("Destroy", this._listener.onDestroy);
-				view.removeEventListener("LineStyle", this._listener.onLineStyle);
+				model.removeEventListener("Changed", this._listener.onChanged); //$NON-NLS-0$
+				view.removeEventListener("MouseDown", this._listener.onMouseDown); //$NON-NLS-0$
+				view.removeEventListener("Selection", this._listener.onSelection); //$NON-NLS-0$
+				view.removeEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
+				view.removeEventListener("LineStyle", this._listener.onLineStyle); //$NON-NLS-0$
 				this.view = null;
 			}
 		},
@@ -773,7 +707,7 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 		},
 		_detectHyperlinks: function(text, offset, styles, s) {
 			var href = null, index, linkStyle;
-			if ((index = text.indexOf("://")) > 0) {
+			if ((index = text.indexOf("://")) > 0) { //$NON-NLS-0$
 				href = text;
 				var start = index;
 				while (start > 0) {
@@ -784,12 +718,12 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 					start--;
 				}
 				if (start > 0) {
-					var brackets = "\"\"''(){}[]<>";
+					var brackets = "\"\"''(){}[]<>"; //$NON-NLS-0$
 					index = brackets.indexOf(href.substring(start - 1, start));
 					if (index !== -1 && (index & 1) === 0 && (index = href.lastIndexOf(brackets.substring(index + 1, index + 2))) !== -1) {
 						var end = index;
 						linkStyle = this._clone(s);
-						linkStyle.tagName = "A";
+						linkStyle.tagName = "A"; //$NON-NLS-0$
 						linkStyle.attributes = {href: href.substring(start, end)};
 						styles.push({start: offset, end: offset + start, style: s});
 						styles.push({start: offset + start, end: offset + end, style: linkStyle});
@@ -797,12 +731,12 @@ define("examples/editor/textStyler", ['orion/editor/annotations'], function(mAnn
 						return null;
 					}
 				}
-			} else if (text.toLowerCase().indexOf("bug#") === 0) {
-				href = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=" + parseInt(text.substring(4), 10);
+			} else if (text.toLowerCase().indexOf("bug#") === 0) { //$NON-NLS-0$
+				href = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=" + parseInt(text.substring(4), 10); //$NON-NLS-0$
 			}
 			if (href) {
 				linkStyle = this._clone(s);
-				linkStyle.tagName = "A";
+				linkStyle.tagName = "A"; //$NON-NLS-0$
 				linkStyle.attributes = {href: href};
 				return linkStyle;
 			}
