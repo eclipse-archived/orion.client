@@ -14,6 +14,15 @@
 
 define(["orion/assert", "orion/editor/eventTarget", "orion/editor/textModel", "orion/editor/annotations", "orion/editor/mirror"],
 		function(assert, mEventTarget, mTextModel) {
+		
+	function clone(obj) {
+		/*Note that this code only works because of the limited types used in TextViewOptions */
+		if (obj instanceof Array) {
+			return obj.slice(0);
+		}
+		return obj;
+	}
+
 	var EventTarget = mEventTarget.EventTarget;
 
 	function Selection (start, end, caret) {
@@ -77,7 +86,19 @@ define(["orion/assert", "orion/editor/eventTarget", "orion/editor/textModel", "o
 	MockTextView.prototype = /** @lends orion.test.editor.MockTextView.prototype */ {
 		_init: function(options) {
 			options = options || {};
-			this._model = options.model || new mTextModel.TextModel();
+			options.model = options.model || new mTextModel.TextModel();
+			var defaultOptions = this._defaultOptions();
+			for (var option in defaultOptions) {
+				if (defaultOptions.hasOwnProperty(option)) {
+					var value;
+					if (options[option] !== undefined) {
+						value = options[option];
+					} else {
+						value = defaultOptions[option].value;
+					}
+					this["_" + option] = value; //$NON-NLS-0$
+				}
+			}
 			this.lineStyles = [];
 			this._timer = null;
 			
@@ -149,6 +170,45 @@ define(["orion/assert", "orion/editor/eventTarget", "orion/editor/textModel", "o
 			this._hookEvents();
 			this._reset();
 			this._updatePage();
+		},
+		_defaultOptions: function() {
+			return {
+				parent: {value: undefined},
+				model: {value: undefined},
+				scrollAnimation: {value: 0},
+				readonly: {value: false},
+				fullSelection: {value: true},
+				tabMode: { value: true },
+				tabSize: {value: 8 },
+				expandTab: {value: false },
+				wrapMode: {value: false },
+				themeClass: {value: undefined }
+			};
+		},
+		getOptions: function() {
+			var options;
+			if (arguments.length === 0) {
+				options = this._defaultOptions();
+			} else if (arguments.length === 1) {
+				var arg = arguments[0];
+				if (typeof arg === "string") { //$NON-NLS-0$
+					return clone(this["_" + arg]); //$NON-NLS-0$
+				}
+				options = arg;
+			} else {
+				options = {};
+				for (var index in arguments) {
+					if (arguments.hasOwnProperty(index)) {
+						options[arguments[index]] = undefined;
+					}
+				}
+			}
+			for (var option in options) {
+				if (options.hasOwnProperty(option)) {
+					options[option] = clone(this["_" + option]); //$NON-NLS-0$
+				}
+			}
+			return options;
 		},
 		getSelection: function () {
 			var s = this._getSelection();
