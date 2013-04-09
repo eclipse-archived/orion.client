@@ -111,7 +111,7 @@ exports.CompareView = (function() {
 		},
 		
 		/**
-		 * @class This object describes options of a file. Two instances of this object contruct the core parameters of a compare view. 
+		 * @class This object describes options of a file. Two instances of this object construct the core parameters of a compare view. 
 		 * <p>
 		 * <b>See:</b><br/>
 		 * {@link orion.compare.CompareView}<br/>
@@ -135,7 +135,7 @@ exports.CompareView = (function() {
 		 * </p>		 
 		 * @name orion.compare.CompareViewOptions
 		 *
-		 * @property {String} parentDivID Required. the parent element id for the compare view. Mandatory. The parentDivID is required to prefix the ids of sub components in case of side by side view.
+		 * @property {String} parentDivID Required. the parent element id for the compare view. Required. The parentDivID is required to prefix the ids of sub components in case of side by side view.
 		 * @property {orion.compare.FileOptions} [oldFile] Required. the options of the file that is original. Required. In the two way compare case, this file is dispalyed on the left hand side.
 		 * @property {orion.compare.FileOptions} [newFile] Required. the options of the file that is compared against the original. Required. In the two way compare case, this file is dispalyed on the right hand side.
 		 * @property {String} [diffContent] Optional. the unified diff against the original/old file. If this option is defined, the newFile option is ignored or becomes optional.
