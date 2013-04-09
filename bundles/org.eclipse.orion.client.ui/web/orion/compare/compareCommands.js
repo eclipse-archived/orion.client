@@ -16,6 +16,12 @@ define(['i18n!orion/compare/nls/messages', 'orion/commands', 'orion/keyBinding',
 function(messages, mCommands, mKeyBinding, lib) {
 
 var exports = {};
+/**
+ * @name orion.compare.CompareCommandFactory
+ * @class Represents a command renderer to render all commands and key bindings of the command view.
+ * @property {String} options.commandSpanId The DOM element id where the commands are rendered. Required.
+ * @property {orion.commandRegistry.CommandRegistry} options.commandService The command service that is used to register all the commands. Required.
+ */
 exports.CompareCommandFactory = (function() {
 	function CompareCommandFactory(options){
 		this.setOptions(options, true);

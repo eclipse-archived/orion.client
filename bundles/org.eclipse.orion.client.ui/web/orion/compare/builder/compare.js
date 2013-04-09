@@ -14,10 +14,8 @@ define(['orion/commandRegistry',
 		'orion/Deferred',
 		'orion/compare/compareView',
 		'orion/compare/compareCommands',
-		"orion/editor/textMateStyler",
-		"orion/editor/htmlGrammar",
-		"examples/editor/textStyler"],
-function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+		'orion/compare/compareHighlighter'],
+function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mCompareHighlighter) {
 	var commandService = new mCommandRegistry.CommandRegistry({
 	});
 
@@ -64,41 +62,10 @@ function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mTextMateSt
 		return d;
 	}
 	
-	/*
-	 * Default syntax highlighter for js, java, and css. Grammar-based highlighter for html.
-	*/
-	function DefaultHighlighter() {
-		this.styler = null;
-	}
-	DefaultHighlighter.prototype = {
-		highlight: function(fileName, contentType, editor) {
-			if (this.styler) {
-				this.styler.destroy();
-				this.styler = null;
-			}
-			var lang = _fileExt(fileName);
-			if (lang){
-				var textView = editor.getTextView();
-				var annotationModel = editor.getAnnotationModel();
-				switch(lang) {
-					case "js": //$NON-NLS-0$
-					case "java": //$NON-NLS-0$
-					case "css": //$NON-NLS-0$
-						this.styler = new mTextStyler.TextStyler(textView, lang, annotationModel);
-						break;
-					case "html": //$NON-NLS-0$
-						this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
-						break;
-				}
-				return new Deferred().resolve(editor);
-			}
-			return null;
-		}
-	};
     function compare(options){
 		var vOptions = options;
 		if(!vOptions.highlighters){
-			vOptions.highlighters = [new DefaultHighlighter(), new DefaultHighlighter()];
+			vOptions.highlighters = [new mCompareHighlighter.DefaultHighlighter(), new mCompareHighlighter.DefaultHighlighter()];
 		}
 		if(!vOptions.commandService){
 			vOptions.commandService = commandService;
