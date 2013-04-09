@@ -46,7 +46,6 @@ exports.DefaultDiffProvider = (function() {
 			return Deferred.all([ that._getContentType(oldFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
 		},
 		
-		//temporary
 		//TODO : get the file name from file service
 		_resolveFileName: function(fileURL){
 			var fileName = fileURL.split("?")[0]; //$NON-NLS-0$
@@ -307,7 +306,7 @@ exports.ResourceComparer = (function() {
 		        }.bind(this)
 			);
 	    },
-		start: function(onLoadContents){
+		start: function(){
 			if(this.options.resource){
 				if(!this.options.diffProvider){
 					console.log("A diff provider is needed for Complex diff URL"); //$NON-NLS-0$

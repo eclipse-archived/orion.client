@@ -38,7 +38,6 @@ function(Compare) {
 	
     var options = {
         parentDivId: "compareParentDiv", //$NON-NLS-0$
-        commandSpanId: "compareCmdDiv", //$NON-NLS-0$
         newFile: {
             Name: "left." + contentType, //$NON-NLS-0$
             readonly: false,
@@ -51,7 +50,7 @@ function(Compare) {
         }
     };
 	
-	var compare = new Compare(options);
+	var compare = new Compare(options, "compareCmdDiv", "twoWay"/*, false*/); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	function getFile(file) {
 		try {
@@ -65,8 +64,8 @@ function(Compare) {
 	}
 
 	function onLoadSample() {
-		var sampleLeft = getFile("./standalone/sampleLeft.js");
-		var sampleRight = getFile("./standalone/sampleRight.js");
+		var sampleLeft = getFile("./standalone/sampleLeft.js"); //$NON-NLS-0$
+		var sampleRight = getFile("./standalone/sampleRight.js"); //$NON-NLS-0$
 		if(sampleLeft && sampleRight) {
 			bCompareType.selectedIndex = 0;
 			compareType = bCompareType.options[bCompareType.selectedIndex].value;
@@ -79,8 +78,8 @@ function(Compare) {
 			widget.options.newFile.Content = sampleLeft;
 			widget.options.oldFile.URL = null;
 			widget.options.newFile.URL = null;
-			widget.options.oldFile.Name = "sampRight.js";
-			widget.options.newFile.Name = "sampleLeft.js";
+			widget.options.oldFile.Name = "sampRight.js"; //$NON-NLS-0$
+			widget.options.newFile.Name = "sampleLeft.js"; //$NON-NLS-0$
 			widget.options.mapper = null;
 			compare.refresh(true);
 		}
@@ -144,8 +143,8 @@ function(Compare) {
 	function onContentType(evt) {
 		contentType = bContentType.options[bContentType.selectedIndex].value;
 		var widget = compare.getCompareView().getWidget();
-		widget.options.oldFile.Name = "right." + contentType;
-		widget.options.newFile.Name = "left." + contentType;
+		widget.options.oldFile.Name = "right." + contentType; //$NON-NLS-0$
+		widget.options.newFile.Name = "left." + contentType; //$NON-NLS-0$
 	}
 	
 	/* Adding events */
