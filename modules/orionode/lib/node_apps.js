@@ -268,7 +268,8 @@ var AppContext = function(options) {
 			// TODO this is bizarre. Can we host node-inspector on the same port as Orionode?
 			hostname: url.parse('http://' + headers.host).hostname,
 			port:  INSPECT_PORT,
-			pathname: url.resolve(parsedRequestUrl.pathname, '../../debug?port=' + port)
+			pathname: url.resolve(parsedRequestUrl.pathname, '../../debug'),
+			query: {port: port}
 		};
 		//Lazy spawn the node inspector procees for the first time when user wants to debug an app.
 		if(app && !inspector) {
