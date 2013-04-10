@@ -107,7 +107,8 @@ exports.generateDebugURL = function(debugMeta, hostName) {
 			protocol: debugMeta.protocol,
 			hostname: hName,
 			port:  debugMeta.port,
-			pathname: debugMeta.pathname
+			pathname: debugMeta.pathname,
+			query: debugMeta.query
 		});
 };
 

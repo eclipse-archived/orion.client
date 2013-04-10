@@ -28,10 +28,15 @@ define(['i18n!orion/compare/nls/messages',
 function(messages, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mKeyBinding, mTextView,
 		 mCompareFeatures, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
 var exports = {};
-//var messages = {};
-/*
- * Abstract diff view class
-*/
+/**
+ * @class An abstract comapre view class that holds all the common functions for both "side by side" and "unified" view.
+ * <p>
+ * <b>See:</b><br/>
+ * {@link orion.compare.TwoWayCompareView}<br/>
+ * {@link orion.compare.InlineCompareView}
+ * </p>		 
+ * @name orion.compare.CompareView
+ */
 exports.CompareView = (function() {
 	function CompareView () {
 		this._diffParser = new mDiffParser.DiffParser();
@@ -104,6 +109,41 @@ exports.CompareView = (function() {
 				this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 			}
 		},
+		
+		/**
+		 * @class This object describes options of a file. Two instances of this object construct the core parameters of a compare view. 
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.compare.CompareView}<br/>
+		 * {@link orion.compare.CompareViewOptions}
+		 * </p>		 
+		 * @name orion.compare.FileOptions
+		 *
+		 * @property {String} Content the text contents of the file unit. Requied.
+		 * @property {Boolean} [readonly=true] whether or not the file is in readonly mode. Optional.
+		 * @property {String} Name the file name. Optional but required if the compare view has to show file title.
+		 * @property {orion.core.ContentType} Type the type of the file. Optional but required if the compare view has to highlight the syntax.
+		 */
+		/**
+		 * @class This object describes the options for a compare view.
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.compare.FileOptions}<br/>
+		 * {@link orion.compare.CompareView}<br/>
+		 * {@link orion.compare.CompareView#setOptions}
+		 * {@link orion.compare.CompareView#getOptions}	 
+		 * </p>		 
+		 * @name orion.compare.CompareViewOptions
+		 *
+		 * @property {String} parentDivID Required. the parent element id for the compare view. Required. The parentDivID is required to prefix the ids of sub components in case of side by side view.
+		 * @property {orion.compare.FileOptions} [oldFile] Required. the options of the file that is original. Required. In the two way compare case, this file is dispalyed on the left hand side.
+		 * @property {orion.compare.FileOptions} [newFile] Required. the options of the file that is compared against the original. Required. In the two way compare case, this file is dispalyed on the right hand side.
+		 * @property {String} [diffContent] Optional. the unified diff against the original/old file. If this option is defined, the newFile option is ignored or becomes optional.
+		 * @property {Boolean} [showTitle=false] Optional. whether or not to show the two file names on each side of the compare view.
+		 * @property {Boolean} [showLineStatus=false] Optional. whether or not to show the current line and column number fo the caret on each side of the view. Not avaible for inline/unified compare view.
+		 * @property {orion.compare.CompareCommandFactory} [commandProvider] Optional. If defined it will render all the commands that the compare view requires.
+		 * @property {Array} [highlighters] Optional. An array of two instances of {@link orion.compare.CompareSyntaxHighlighter}. If defined the highlighters are used to highlight the syntax of both side of the comapre view, respectively.
+		 */
 		setOptions: function(options, clearExisting){
 			if(clearExisting){
 				this._clearOptions();
@@ -116,6 +156,9 @@ exports.CompareView = (function() {
 					this.options[option] = options[option];
 				}.bind(this));
 			}
+		},
+		getOptions: function() {
+			return this.options;
 		},
 		/**
 		 * Returns the 1-based {blockNumber, changeNumber} current diff location. 
@@ -207,9 +250,14 @@ exports.CompareView = (function() {
 	return CompareView;
 }());
 
-/*
- * Side by side diff view
-*/
+/**
+ * Constructs a side by side compare view.
+ * 
+ * @param {orion.compare.CompareViewOptions} options the compare view options.
+ * 
+ * @class A TwoWayCompareView is a side by side view of two files with diff annotations and navigations.
+ * @name orion.compare.TwoWayCompareView
+ */
 exports.TwoWayCompareView = (function() {
 	function TwoWayCompareView(options) {
 		this.setOptions(options, true);
@@ -480,9 +528,14 @@ exports.TwoWayCompareView = (function() {
 	return TwoWayCompareView;
 }());
 
-/*
- * Unified diff view
-*/
+/**
+ * Constructs a unifiled compare view.
+ * 
+ * @param {orion.compare.CompareViewOptions} options the compare view options.
+ * 
+ * @class A InlineCompareView is a unified view of two files with diff annotations and navigations. It displayed the old file + diff in one editor.
+ * @name orion.compare.TwoWayCompareView
+ */
 exports.InlineCompareView = (function() {
 	function InlineCompareView(options ) {
 		this.setOptions(options, true);
@@ -624,9 +677,15 @@ exports.InlineCompareView = (function() {
 	return InlineCompareView;
 }());
 
-/*
- * Toggleable diff view
-*/
+/**
+ * Constructs a toggleable compare view.
+ * 
+ * @param {String} [startWith="twoWay"] the default view of the toggleable compare view. Can be either "twoWay" or "inline".
+ * @param {orion.compare.CompareViewOptions} options the compare view options.
+ * 
+ * @class A toggleableCompareView is an interchangeable comapre view helper that helps user to switch between the "side by side" and "unified" by only button click. The commandProvider property has to be provided in the option in order to render the toggle command.
+ * @name orion.compare.toggleableCompareView
+ */
 exports.toggleableCompareView = (function() {
 	function toggleableCompareView(startWith, options ) {
 		if(options){
@@ -639,8 +698,8 @@ exports.toggleableCompareView = (function() {
 		}
 	}
 	toggleableCompareView.prototype = {
-		startup: function(onLoadContents){
-			this._widget.startup(onLoadContents);
+		startup: function(){
+			this._widget.startup();
 		},
 		
 		toggle: function(){

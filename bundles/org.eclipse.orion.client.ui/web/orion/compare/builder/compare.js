@@ -14,10 +14,8 @@ define(['orion/commandRegistry',
 		'orion/Deferred',
 		'orion/compare/compareView',
 		'orion/compare/compareCommands',
-		"orion/editor/textMateStyler",
-		"orion/editor/htmlGrammar",
-		"examples/editor/textStyler"],
-function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+		'orion/compare/compareHighlighter'],
+function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mCompareHighlighter) {
 	var commandService = new mCommandRegistry.CommandRegistry({
 	});
 
@@ -64,44 +62,37 @@ function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mTextMateSt
 		return d;
 	}
 	
-	/*
-	 * Default syntax highlighter for js, java, and css. Grammar-based highlighter for html.
-	*/
-	function DefaultHighlighter() {
-		this.styler = null;
-	}
-	DefaultHighlighter.prototype = {
-		highlight: function(fileName, contentType, editor) {
-			if (this.styler) {
-				this.styler.destroy();
-				this.styler = null;
-			}
-			var lang = _fileExt(fileName);
-			if (lang){
-				var textView = editor.getTextView();
-				var annotationModel = editor.getAnnotationModel();
-				switch(lang) {
-					case "js": //$NON-NLS-0$
-					case "java": //$NON-NLS-0$
-					case "css": //$NON-NLS-0$
-						this.styler = new mTextStyler.TextStyler(textView, lang, annotationModel);
-						break;
-					case "html": //$NON-NLS-0$
-						this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
-						break;
-				}
-				return new Deferred().resolve(editor);
-			}
-			return null;
-		}
-	};
-    function compare(options){
-		var vOptions = options;
+	/**
+	 * @class This object describes options of a file. Two instances of this object construct the core parameters of a compare view. 
+	 * @name orion.compare.FileOptions
+	 *
+	 * @property {String} Content the text contents of the file unit. Requied.
+	 * @property {String} Name the file name. Required for syntax highlight.
+	 * @property {Boolean} [readonly=true] whether or not the file is in readonly mode. Optional.
+	 */
+	/**
+	 * @class This object describes the options for <code>compare</code>.
+	 * @name orion.compare.CompareOptions
+	 *
+	 * @property {String} parentDivID Required. the parent element id for the compare view. Required. The parentDivID is required to prefix the ids of sub components in case of side by side view.
+	 * @property {orion.compare.FileOptions} [oldFile] Required. the options of the file that is original. Required. In the two way compare case, this file is dispalyed on the left hand side.
+	 * @property {orion.compare.FileOptions} [newFile] Required. the options of the file that is compared against the original. Required. In the two way compare case, this file is dispalyed on the right hand side.
+	 * @property {Boolean} [showTitle=false] Optional. whether or not to show the two file names on each side of the compare view.
+	 * @property {Boolean} [showLineStatus=false] Optional. whether or not to show the current line and column number fo the caret on each side of the view. Not avaible for inline/unified compare view.
+	 */
+	/**
+	 * Creates a compare view instance by given view options and othe parameters.
+	 * 
+	 * @param {orion.compare.CompareOptions} viewOptions Required. The comapre view option.
+	 * @param {String} commandSpanId Optional. The dom element id to render all the commands that toggles compare view and navigates diffs. If not defined, no command is rendered.
+	 * @param {String} [viewType="twoWay"] optional. The type of the compare view. Can be either "twoWay" or "inline". Id not defined default is "twoWay".
+	 * "twoWay" represents a side by side comapre editor while "inline" represents a unified comapre view.
+	 * @param {Boolean} [toggleable=true] optional. Weather or not the compare view is toggleable. A toggleable comapre view provides a toggle button which toggles between the "twoWay" and "inline" view.
+	 */
+    function compare(viewOptions, commandSpanId, viewType, toggleable){
+		var vOptions = viewOptions;
 		if(!vOptions.highlighters){
-			vOptions.highlighters = [new DefaultHighlighter(), new DefaultHighlighter()];
-		}
-		if(!vOptions.commandService){
-			vOptions.commandService = commandService;
+			vOptions.highlighters = [new mCompareHighlighter.DefaultHighlighter(), new mCompareHighlighter.DefaultHighlighter()];
 		}
 		if(vOptions.oldFile && vOptions.oldFile.Name){
 			vOptions.oldFile.Type = _contentType(vOptions.oldFile.Name);
@@ -109,9 +100,17 @@ function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mTextMateSt
 		if(vOptions.newFile && vOptions.newFile.Name){
 			vOptions.newFile.Type = _contentType(vOptions.newFile.Name);
 		}
-		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: vOptions.commandSpanId});
+		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: commandSpanId});
 		vOptions.commandProvider = cmdProvider;
-		this.compareView = new mCompareView.toggleableCompareView("twoWay", vOptions); //$NON-NLS-0$
+		var toggle = (typeof toggleable === "undefined") ? true : toggleable; //$NON-NLS-0$
+		var vType = (viewType === "inline") ? "inline" : "twoWay"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		if(toggle) {
+			this.compareView = new mCompareView.toggleableCompareView(vType, vOptions);
+		} else if(vType === "inline") { //$NON-NLS-0$
+			this.compareView = new mCompareView.inlineCompareView(vOptions);
+		} else {
+			this.compareView = new mCompareView.TwoWayCompareView(vOptions);
+		}
 		this.compareView.startup();
     }
 	compare.prototype = {
