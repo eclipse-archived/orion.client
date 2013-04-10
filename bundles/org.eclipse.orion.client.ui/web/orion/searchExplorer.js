@@ -12,9 +12,9 @@
 /*global define document console window*/
 /*jslint forin:true regexp:false sub:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compareView', 'orion/highlight', 'orion/explorers/navigationUtils', 'orion/webui/tooltip'],
+define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compareUIFactory', 'orion/compare/compareView', 'orion/highlight', 'orion/explorers/navigationUtils', 'orion/webui/tooltip'],
 
-function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareView, mHighlight, mNavUtils, mTooltip) {
+function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareUIFactory, mCompareView, mHighlight, mNavUtils, mTooltip) {
     /* Internal wrapper functions*/
     function _empty(nodeToEmpty) {
         var node = lib.node(nodeToEmpty);
@@ -1063,7 +1063,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 }
             };
             if (!that.twoWayCompareView) {
-                that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
+                that.uiFactoryCompare = new mCompareUIFactory.TwoWayCompareUIFactory({
                     parentDivID: uiFactory.getCompareDivID(),
                     showTitle: true,
                     rightTitle: i18nUtil.formatMessage(messages["Replaced File (${0})"], fileName),

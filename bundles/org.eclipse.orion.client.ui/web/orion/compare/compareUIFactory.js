@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*global define */
 
-define(['orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/compare/compare-features.html'], 
-function(lib, mSplitter, FeatureTemplate) {
+define(['orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/compare/sideBySideTemplate.html'], 
+function(lib, mSplitter, SideBySideTemplate) {
 
 var orion = orion || {};
 orion.TwoWayCompareUIFactory = (function() {
@@ -79,7 +79,7 @@ orion.TwoWayCompareUIFactory = (function() {
 		},
 				
 		buildUI:function(){
-			lib.node(this._parentDivID).innerHTML = FeatureTemplate;//appendChild(topNode);
+			lib.node(this._parentDivID).innerHTML = SideBySideTemplate;//appendChild(topNode);
 			this._init();
 			this._createSplitter();
 		},
