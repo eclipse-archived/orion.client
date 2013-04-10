@@ -27,25 +27,32 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 		this.serviceRegistry = serviceRegistry;
 	}
 	/**
-	 * @param {Boolean} createUser True to create a new user, false to use an existing user.
-	 * @param {Object} [userInfo=null] User data for creating new user, or for logging in.
+	 * @param {Boolean} data.createUser True to create a new user, false to use an existing user.
+	 * @param {Object} [data.userInfo=null] User data for creating new user, or for logging in.
 	 * When <code>createUser</code> is true, a guest user may be created by providing the following parameters in userInfo:
 	 * <dl>
-	 *  <dt>{Boolean} userInfo.Guest</dt> <dd><code>true</code></dd>
-	 *  <dt>{String} [userInfo.Name]</dt> <dd>Optional, provides the display name for the guest user.</dd>
+	 *  <dt>{Boolean} data.userInfo.Guest</dt> <dd><code>true</code></dd>
+	 *  <dt>{String} [data.userInfo.Name]</dt> <dd>Optional, provides the display name for the guest user.</dd>
 	 * </ul>
 	 * Alternatively, a regular Orion account may created by providing the following parameters in userInfo:
 	 * <dl>
-	 *  <dt>{String} userInfo.Email</dt> <dd>Required. May be user for email validation.</dd>
-	 *  <dt>{String} userInfo.Login</dt> <dd>Required.</dd>
-	 *  <dt>{String} userInfo.Password</dt> <dd>Required.</dd>
-	 *  <dt>{String} [userInfo.Name]</dt> <dd>Optional.</dd>
+	 *  <dt>{String} data.userInfo.Email</dt> <dd>Required. May be user for email validation.</dd>
+	 *  <dt>{String} data.userInfo.Login</dt> <dd>Required.</dd>
+	 *  <dt>{String} data.userInfo.Password</dt> <dd>Required.</dd>
+	 *  <dt>{String} [data.userInfo.Name]</dt> <dd>Optional.</dd>
 	 * </dl>
 	 * If <code>createUser</code> is false and userInfo is not provided, the client assumed to be authenticated already.
-	 * @param {Blob} projectZipData
-	 * @param {String} projectName
+	 * @param {Blob} data.zip
+	 * @param {String} data.projectName
+	 * @param {Boolean} [data.overwrite=false] Whether the project should be overwritten if it already exists.
 	 */
-	Injector.prototype.inject = function(isCreateUser, userInfo, projectZipData, projectName) {
+	Injector.prototype.inject = function(data) {
+		var isCreateUser = data.createUser;
+		var userInfo = data.userInfo;
+		var projectZipData = data.zip;
+		var projectName = data.projectName;
+		var isOverwrite = typeof data.overwrite !== 'undefined' ? !!data.overwrite : false;
+
 		projectName = projectName || 'Project';
 		var fileClient = this.fileClient;
 		var serviceRegistry = this.serviceRegistry;
@@ -106,28 +113,34 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 				return getLoggedInUser();
 			}
 		};
-		// Creates project if necessary, and returns its metadata
+		/**
+		 * Creates project if necessary, and returns its metadata
+		 * @returns {orion.Promise} Promise resolving to Object with the fields:
+		 *   {Object} project The project metadata.<br />
+		 *   {Boolean} created Whether we created the project (true) or it existed already (false).
+		 */
 		var ensureProjectExists = function(location, name) {
-			return fileClient.createProject(location, name).then(function(p) {
-				console.log('Created project: ' + p.Location);
-				return fileClient.read(p.ContentLocation, true);
-			}, function(e) {
-				e = e.response || e;
-				// This is awful, but there's no better way to check if a project exists?
-				if (typeof e === 'string' && e.toLowerCase().indexOf('duplicate') !== -1) {
-					return fileClient.read(location, true).then(function(workspace) {
-						var projects = workspace.Children, project;
-						projects.some(function(p) {
-							if (p.Name === name) {
-								project = p;
-								console.log('Got existing project: ' + p.Location);
-								return true;
-							}
+			return fileClient.read(location, true).then(function(workspace) {
+				var projects = workspace.Children, existingProject;
+				projects.some(function(p) {
+					if (p.Name === name) {
+						existingProject = p;
+						console.log('Found existing project: ' + p.Location);
+						return true;
+					}
+				});
+				if (existingProject) {
+					return fileClient.read(existingProject.ChildrenLocation /* !!! */, true).then(function(project) {
+						return { project: project, created: false};
+					});
+				} else {
+					return fileClient.createProject(location, name).then(function(newProject) {
+						console.log('Created project: ' + newProject.Location);
+						return fileClient.read(newProject.ContentLocation /* !!! */, true).then(function(project) {
+							return { project: project, created: true};
 						});
-						return project || new Deferred().reject(e);
 					});
 				}
-				return new Deferred.reject(e);
 			});
 		};
 		var readProject = function(project) {
@@ -142,16 +155,30 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 				data: zipData
 			});
 		};
+		/**
+		 * @param {Object} project
+		 * @param {Boolean} created Whether the project was just created by us.
+		 */
+		var maybeWrite = function(project, created) {
+			if (isOverwrite || created) {
+				return readProject(project).then(function(projectMetadata) {
+					console.log('Unzipping to ' + projectMetadata.ImportLocation);
+					return uploadZip(projectMetadata.ImportLocation, projectZipData);
+				});
+			} else {
+				console.log('Project exists; not overwriting: ' + project.Name);
+				return new Deferred().resolve();
+			}
+		};
 		var importContent = function() {
 			return fileClient.loadWorkspace().then(function(workspace) {
 				console.log('loaded workspace ' + workspace.Location);
-				return ensureProjectExists(workspace.ChildrenLocation, projectName).then(function(project) {
-					return readProject(project).then(function(projectMetadata) {
-						console.log('Unzipping (importing) to ' + projectMetadata.ImportLocation);
-						return uploadZip(projectMetadata.ImportLocation, projectZipData).then(function() {
-							return readProject(project).then(function(projectMetadata) {
-								return projectMetadata;
-							});
+				return ensureProjectExists(workspace.ChildrenLocation, projectName).then(function(projectResult) {
+					var project = projectResult.project;
+					var created = projectResult.created;
+					return maybeWrite(project, created).then(function() {
+						return readProject(project).then(function(projectMetadata) {
+							return projectMetadata;
 						});
 					});
 				});

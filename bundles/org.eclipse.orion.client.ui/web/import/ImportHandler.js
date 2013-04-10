@@ -43,8 +43,8 @@ define(['require', 'orion/URITemplate', 'orion/URL-shim', 'orion/serviceTracker'
 				return;
 			}
 			debug('ImportHandler got a message: ' + JSON.stringify(data));
-			debug('ImportHandler got zip (' + (data.zip.length || data.zip.byteLength) + ') bytes');
-			injector.inject(data.createUser, data.userInfo, data.zip, data.projectName).then(function(project) {
+			debug('ImportHandler got zip (' + (data.zip && (data.zip.length || data.zip.byteLength)) + ') bytes');
+			injector.inject(data).then(function(project) {
 				if (typeof service.onresponse !== 'function') {
 					logError('Expected ' + AUTOIMPORT_SERVICE_NAME + ' service to provide an "onresponse" method');
 				}
