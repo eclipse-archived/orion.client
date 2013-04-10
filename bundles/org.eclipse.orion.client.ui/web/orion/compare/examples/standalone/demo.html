@@ -29,7 +29,7 @@
 	<script src="require.min.js"></script>
 	<script>
 	/*global require window */
-    require(["built-compare.min.js"], function(Compare, sampleRight, sampleLeft) {
+    require(["built-compare.min.js"], function(Compare) {
 	var document = window.document;
 
 	/** Buttons */	
@@ -53,7 +53,6 @@
 	
     var options = {
         parentDivId: "compareParentDiv", //$NON-NLS-0$
-        commandSpanId: "compareCmdDiv", //$NON-NLS-0$
         newFile: {
             Name: "left." + contentType, //$NON-NLS-0$
             readonly: false,
@@ -66,7 +65,7 @@
         }
     };
 	
-	var compare = new Compare(options);
+	var compare = new Compare(options, "compareCmdDiv", "twoWay"); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	function getFile(file) {
 		try {
@@ -80,7 +79,7 @@
 	}
 
 	function onLoadSample() {
-		if(sampleRightText && sampleLeftText) {
+		if(sampleLeft && sampleRight) {
 			bCompareType.selectedIndex = 0;
 			compareType = bCompareType.options[bCompareType.selectedIndex].value;
 			bContentType.selectedIndex = 0;
@@ -88,14 +87,14 @@
 			bContentTypeTD.style.display = "block"; //$NON-NLS-0$
 			
 			var widget = compare.getCompareView().getWidget();
-			widget.options.oldFile.Content = sampleRightText;
-			widget.options.newFile.Content = sampleLeftText;
+			widget.options.oldFile.Content = sampleRight;
+			widget.options.newFile.Content = sampleLeft;
 			widget.options.oldFile.URL = null;
 			widget.options.newFile.URL = null;
-			widget.options.oldFile.Name = "sampleRight.js";
-			widget.options.newFile.Name = "sampleLeft.js";
+			widget.options.oldFile.Name = "sampleRight.js"; //$NON-NLS-0$
+			widget.options.newFile.Name = "sampleLeft.js"; //$NON-NLS-0$
 			widget.options.mapper = null;
-			compare.refresh();
+			compare.refresh(true);
 		}
 	}
 	function animateDiffs() {
@@ -114,7 +113,7 @@
 	function doCompare() {
 		var widget = compare.getCompareView().getWidget();
 		if(widget.type === "twoWay"){ //$NON-NLS-0$
-			var editors = widget._editors;
+			var editors = widget.getEditors();
 			var oldContents = editors[0].getTextView().getText();
 			var newContents = editors[1].getTextView().getText();
 			if(compareType === "byTwoContents"){ //$NON-NLS-0$
@@ -157,8 +156,8 @@
 	function onContentType(evt) {
 		contentType = bContentType.options[bContentType.selectedIndex].value;
 		var widget = compare.getCompareView().getWidget();
-		widget.options.oldFile.Name = "right." + contentType;
-		widget.options.newFile.Name = "left." + contentType;
+		widget.options.oldFile.Name = "right." + contentType; //$NON-NLS-0$
+		widget.options.newFile.Name = "left." + contentType; //$NON-NLS-0$
 	}
 	
 	/* Adding events */
@@ -168,7 +167,7 @@
 	bCompareType.onchange = onCompareType;
 	bContentType.onchange = onContentType;
 	
-		var sampleLeftText = "/*******************************************************************************\n" + 
+		var sampleLeft = "/*******************************************************************************\n" + 
 				" * @license\n" + 
 				" * Copyright (c) 2012, 2013 IBM Corporation and others.\n" + 
 				" * All rights reserved. This program and the accompanying materials are made \n" + 
@@ -310,7 +309,7 @@
 				" });\n" + 
 				"";
 				
-	var sampleRightText = "/*******************************************************************************\n" + 
+	var sampleRight = "/*******************************************************************************\n" + 
 			" * @license\n" + 
 			" * Copyright (c) 2011, 2012 IBM Corporation and others.\n" + 
 			" * All rights reserved. This program and the accompanying materials are made \n" + 
@@ -500,7 +499,7 @@
 			<option value="1000">1000ms</option>
 			<option value="1500">1500ms</option>
 			<option value="2000">2000ms</option>
-			<option value="3000">2000ms</option>
+			<option value="3000">3000ms</option>
 		</select>
 	</td>
 	</tr>
