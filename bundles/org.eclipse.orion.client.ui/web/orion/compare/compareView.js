@@ -15,18 +15,18 @@
 define(['i18n!orion/compare/nls/messages',
 		'orion/Deferred',
 		'orion/webui/littlelib',
-		'orion/compare/diff-parser',
-		'orion/compare/compare-rulers',
+		'orion/compare/diffParser',
+		'orion/compare/compareRulers',
         'orion/editor/editor',
         'orion/editor/editorFeatures',
         'orion/keyBinding',
         'orion/editor/textView',
-        'orion/compare/compare-features',
+        'orion/compare/compareUIFactory',
         'orion/compare/compareUtils',
         'orion/compare/jsdiffAdapter',
         'orion/compare/diffTreeNavigator'],
 function(messages, Deferred, lib, mDiffParser, mCompareRulers, mEditor, mEditorFeatures, mKeyBinding, mTextView,
-		 mCompareFeatures, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
+		 mCompareUIFactory, mCompareUtils, mJSDiffAdapter, mDiffTreeNavigator,  mTextMateStyler, mHtmlGrammar, mTextStyler) {
 var exports = {};
 /**
  * @class An abstract comapre view class that holds all the common functions for both "side by side" and "unified" view.
@@ -268,7 +268,7 @@ exports.TwoWayCompareView = (function() {
 		//Build the compare view UI by the UI factory
 		this._uiFactory = this.options.uiFactory;
 		if(!this._uiFactory){
-			this._uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
+			this._uiFactory = new mCompareUIFactory.TwoWayCompareUIFactory({
 				parentDivID: this.options.parentDivId,
 				showTitle: (this.options.showTitle ? this.options.showTitle : false),
 				showLineStatus: (this.options.showLineStatus ? this.options.showLineStatus : false)
