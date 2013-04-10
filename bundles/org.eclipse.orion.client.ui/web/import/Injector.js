@@ -22,13 +22,13 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 		return err;
 	}
 
-	function Injector(fileClient, usersClient) {
+	function Injector(fileClient, serviceRegistry) {
 		this.fileClient = fileClient;
-		this.usersClient = usersClient;
+		this.serviceRegistry = serviceRegistry;
 	}
 	/**
 	 * @param {Boolean} createUser True to create a new user, false to use an existing user.
-	 * @param {Object} userInfo User data for creating new user, or for logging in.
+	 * @param {Object} [userInfo=null] User data for creating new user, or for logging in.
 	 * When <code>createUser</code> is true, a guest user may be created by providing the following parameters in userInfo:
 	 * <dl>
 	 *  <dt>{Boolean} userInfo.Guest</dt> <dd><code>true</code></dd>
@@ -41,13 +41,19 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 	 *  <dt>{String} userInfo.Password</dt> <dd>Required.</dd>
 	 *  <dt>{String} [userInfo.Name]</dt> <dd>Optional.</dd>
 	 * </dl>
+	 * If <code>createUser</code> is false and userInfo is not provided, the client assumed to be authenticated already.
 	 * @param {Blob} projectZipData
 	 * @param {String} projectName
 	 */
 	Injector.prototype.inject = function(isCreateUser, userInfo, projectZipData, projectName) {
 		projectName = projectName || 'Project';
 		var fileClient = this.fileClient;
-		var usersClient = this.usersClient;
+		var serviceRegistry = this.serviceRegistry;
+		var authService = serviceRegistry.getService('orion.core.auth'); //$NON-NLS-0$
+		var userService = serviceRegistry.getService('orion.core.user'); //$NON-NLS-0$
+		if (!authService || !userService) {
+			throw "Missing auth or user service";
+		}
 
 		// Log in -- TODO no service API for this, so it's hardcoded
 		var doLogin = function(login, password) {
@@ -68,10 +74,18 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 				return JSON.parse(xhrResult.response);
 			});
 		};
+		var getLoggedInUser = function() {
+			return authService.getUser().then(function(user) {
+				if (!user) {
+					return new Deferred().reject("Not logged in");
+				}
+				return userService.getUserInfo(user.Location);
+			});
+		};
 		var ensureUserLoggedIn = function() {
 			if (isCreateUser) {
 				var displayName = userInfo.Name;
-				return usersClient.createUser(userInfo).then(function(user) {
+				return userService.createUser(userInfo).then(function(user) {
 					debug('user created');
 					return user;
 				}).then(function(user) {
@@ -81,12 +95,15 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 				}).then(function(user) {
 					debug('set display name of ' + user.login + ' to ' + displayName);
 					user.Name = displayName;
-					return usersClient.updateUserInfo(user.Location, user).then(function(/*xhrResult*/) {
+					return userService.updateUserInfo(user.Location, user).then(function(/*xhrResult*/) {
 						return user;
 					});
 				});
-			} else {
+			} else if (userInfo) {
 				return doLogin(userInfo.login, userInfo.password);
+			} else {
+				// !createUser and !userInfo implies we're already authenticated, so just get the user
+				return getLoggedInUser();
 			}
 		};
 		// Creates project if necessary, and returns its metadata
@@ -125,8 +142,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 				data: zipData
 			});
 		};
-
-		return ensureUserLoggedIn().then(function() {
+		var importContent = function() {
 			return fileClient.loadWorkspace().then(function(workspace) {
 				console.log('loaded workspace ' + workspace.Location);
 				return ensureProjectExists(workspace.ChildrenLocation, projectName).then(function(project) {
@@ -140,7 +156,11 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 					});
 				});
 			});
-		}, xhrErrorSanitizer);
+		};
+
+		return ensureUserLoggedIn().then(function(loggedInUser) {
+			return importContent();
+		}).then(null, xhrErrorSanitizer);
 	};
 	return Injector;
 });

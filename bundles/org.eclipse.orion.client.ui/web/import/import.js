@@ -10,9 +10,9 @@
  ******************************************************************************/
 /*global define exports module document console URL window*/
 
-define(['require', 'import/bootstrap-import', 'import/import-fileClient', 'orion/profile/usersClient', 'orion/URL-shim', 'orion/EventTarget',
+define(['require', 'import/bootstrap-import', 'import/import-fileClient', 'orion/URL-shim', 'orion/EventTarget',
 		'import/Injector', 'import/ImportHandler'],
-		function(require, bootstrapImport, mFileClient, mUsersClient, _, EventTarget, Injector, ImportHandler) {
+		function(require, bootstrapImport, mFileClient, _, EventTarget, Injector, ImportHandler) {
 	function debug(msg) { console.log('Orion: ' + msg); }
 
 	function ServiceProxy() {
@@ -22,10 +22,9 @@ define(['require', 'import/bootstrap-import', 'import/import-fileClient', 'orion
 	bootstrapImport().then(function(core) {
 		debug('bootstrap done');
 		var serviceRegistry = core.serviceRegistry;
-		var pluginRegistry = core.pluginRegistry;
+//		var pluginRegistry = core.pluginRegistry;
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
-		var injector = new Injector(fileClient, usersClient);
+		var injector = new Injector(fileClient, serviceRegistry);
 		require(['domReady!'], function() {
 			if (window.self === window.top) {
 				throw new Error('Orion: expected to be loaded inside an iframe.');
