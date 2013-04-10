@@ -12,6 +12,16 @@
 define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'], function(require, Deferred, xhr, form, _) {
 	function debug(msg) { console.log('orion injector: ' + msg); }
 
+	/**
+	 * Transformer for errors returned by XHRs
+	 */
+	function xhrErrorSanitizer(err) {
+		if (err && typeof err.xhr === 'object') {
+			delete err.xhr;
+		}
+		return err;
+	}
+
 	function Injector(fileClient, usersClient) {
 		this.fileClient = fileClient;
 		this.usersClient = usersClient;
@@ -130,7 +140,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 					});
 				});
 			});
-		});
+		}, xhrErrorSanitizer);
 	};
 	return Injector;
 });
