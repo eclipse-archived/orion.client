@@ -60,7 +60,7 @@ exports.CompareView = (function() {
 			if(this.options.mapper && this.options.toggler){
 				return {delim:delim , mapper:this.options.mapper, output: this.options.newFile.Content, diffArray:this.options.diffArray};
 			}
-			if(output){
+			if(typeof output === "string" && typeof input === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
 				var adapter = new mJSDiffAdapter.JSDiffAdapter();
 				var maps = adapter.adapt(input, output, delim);
 				if(this.options.toggler){
@@ -486,7 +486,7 @@ exports.TwoWayCompareView = (function() {
 		var diff = this.options.diffContent;
 		
 		var result;
-		if(output) {
+		if(typeof output === "string") {
 			result = this._generateMapper(input , output, diff , this.options.hasConflicts);
 		} else {
 			result = this._generateMapper(input , output, diff , this.options.hasConflicts);
@@ -644,7 +644,7 @@ exports.InlineCompareView = (function() {
 		var diff = this.options.diffContent;
 
 		var result = this._generateMapper(input, output, diff, this.options.hasConflicts, !this.options.toggler);
-		if(!output){
+		if(typeof output !== "string"){ //$NON-NLS-0$
 			output = result.output;
 		}
 		this._textView.getModel().setText(input);

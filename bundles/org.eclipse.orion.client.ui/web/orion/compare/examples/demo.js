@@ -116,7 +116,7 @@ function(Compare) {
 				bContentTypeTD.style.display = "block"; //$NON-NLS-0$
 			}
 			widget.options.mapper = null;
-			compare.refresh();
+			compare.refresh(true);
 			//widget.refresh();
 		}
 	}
@@ -137,7 +137,7 @@ function(Compare) {
 			bContentTypeTD.style.display = "none"; //$NON-NLS-0$
 		}
 		widget.options.mapper = null;
-		widget.refresh();
+		widget.refresh(true);
 	}
 	
 	function onContentType(evt) {

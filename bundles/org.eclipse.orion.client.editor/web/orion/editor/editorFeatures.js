@@ -980,8 +980,19 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		 * on user change. Also escapes the Linked Mode if the text buffer was modified outside of the Linked Mode positions.
 		 */
 		this.linkedModeListener = {
-
+		
+			onModelChanged: function(event) {
+				if (!this._viewEditing) {
+					this.cancel(true);
+				}
+			}.bind(this),
+			
+			onModify: function(event) {
+				this._viewEditing = false;
+			}.bind(this),
+			
 			onVerify: function(event) {
+				this._viewEditing = true;
 				if (this.ignoreVerify) { return; }
 				var start = event.start;
 				var addedCharCount = event.text.length;
@@ -1088,6 +1099,8 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 
 			var textView = this.editor.getTextView();
 			textView.addEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
+			textView.addEventListener("Modify", this.linkedModeListener.onModify); //$NON-NLS-0$
+			textView.addEventListener("ModelChanged", this.linkedModeListener.onModelChanged); //$NON-NLS-0$
 
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "nextLinkedModePosition"); //$NON-NLS-0$
 			textView.setAction("nextLinkedModePosition", function() { //$NON-NLS-0$
@@ -1176,6 +1189,8 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			this.linkedModeActive = false;
 			var textView = this.editor.getTextView();
 			textView.removeEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
+			textView.removeEventListener("Modify", this.linkedModeListener.onModify); //$NON-NLS-0$
+			textView.removeEventListener("ModelChanged", this.linkedModeListener.onModelChanged); //$NON-NLS-0$
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "tab"); //$NON-NLS-0$
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "shiftTab"); //$NON-NLS-0$
 			

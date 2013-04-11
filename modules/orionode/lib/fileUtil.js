@@ -122,6 +122,8 @@ exports.rumRuff = function rumRuff(dirpath, callback) {
 
 function _copyDir(srcPath, destPath, callback) {
 	var _copyRecursive, processDir, cpDir, cpFile;
+	destPath = destPath[destPath.length] === path.sep ? destPath : destPath + path.sep;
+
 	/** @returns A promise that resolves once all directories in the tree rooted at 'root' have been copied.
 	 * @param {Array} List of the mix of files and directories, in the top down order, that will be copied first for all folders then files.
 	 */
