@@ -983,7 +983,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		
 			onModelChanged: function(event) {
 				if (!this._viewEditing) {
-					window.console.log("cancel");
 					this.cancel(true);
 				}
 			}.bind(this),
