@@ -11,7 +11,7 @@
 /*global define JsDiff*/
 /*jslint forin:true regexp:false sub:true*/
 
-define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapter", "mapper-test-data.js", 'jsdiff/diff'], function(assert, mDiffParser, mJSDiffAdapter, mMapperTestData) {
+define(["orion/assert", "orion/compare/diffParser", "orion/compare/jsdiffAdapter", "mapper-test-data.js", 'jsdiff/diff'], function(assert, mDiffParser, mJSDiffAdapter, mMapperTestData) {
 	var tests = {};
 	var mapperTestCases = mMapperTestData.mapperTestCases;
 
