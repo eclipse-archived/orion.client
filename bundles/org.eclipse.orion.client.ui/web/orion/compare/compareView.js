@@ -105,8 +105,10 @@ exports.CompareView = (function() {
 					this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 				}.bind(this));
 			} else {//render all the diff annotations directly
-				this._diffNavigator.renderAnnotations();
-				this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
+				window.setTimeout(function () {
+					this._diffNavigator.renderAnnotations();
+					this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
+				}.bind(this), 50);
 			}
 		},
 		
