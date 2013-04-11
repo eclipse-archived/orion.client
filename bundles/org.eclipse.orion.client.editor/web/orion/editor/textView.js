@@ -2651,6 +2651,9 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				evt.screenY = e.screenY;
 				this.onContextMenu(evt);
 				preventDefault = evt.defaultPrevented;
+			} else if (util.isMac && util.isFirefox && e.button === 0) {
+				// hack to prevent CTRL+Space from showing the browser context menu
+				preventDefault = true;
 			}
 			if (preventDefault) {
 				if (e.preventDefault) { e.preventDefault(); }
