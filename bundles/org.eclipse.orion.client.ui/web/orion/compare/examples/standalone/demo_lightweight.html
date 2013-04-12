@@ -11,7 +11,7 @@
 		}
 		.compareContainer {
 			position: absolute;
-			top: 80px;  /* $ToolbarHeight + 1 */
+			top: 48px;  /* $ToolbarHeight + 1 */
 			bottom: 0;
 			width: 99%;
 			overflow-y: auto;
@@ -36,10 +36,6 @@
 	var bCompare = document.getElementById("doCompare"); //$NON-NLS-0$
 	var bLoadSample = document.getElementById("loadSample"); //$NON-NLS-0$
 	var bAnimateDiffs = document.getElementById("animateDiffs"); //$NON-NLS-0$
-	
-	var bCompareType = document.getElementById("compareTypeSelect"); //$NON-NLS-0$
-	var bContentTypeTD = document.getElementById("contentTypes"); //$NON-NLS-0$
-	var bContentType = document.getElementById("contentTypeSelect"); //$NON-NLS-0$
 	var bAnimateInterval = document.getElementById("animateInterval"); //$NON-NLS-0$
 	
 	var compareType = "byTwoContents"; //$NON-NLS-0$
@@ -48,51 +44,26 @@
 	
 	var contentOnLeft = "Sample Orion compare contents on left side\n\nYou can replace the contents here and and click on [Compare Again] to see the new result\n"; //$NON-NLS-0$
 	var	contentOnRight = "Sample Orion compare contents on right side\n\nYou can replace the contents here and and click on [Compare Again] to see the new result\n"; //$NON-NLS-0$
-	var contentOnLeftURL = "Put file URL here\n"; //$NON-NLS-0$
-	var	contentOnRightURL = "Put file URL here\n"; //$NON-NLS-0$
 	
     var options = {
         parentDivId: "compareParentDiv", //$NON-NLS-0$
         newFile: {
-            Name: "left." + contentType, //$NON-NLS-0$
             readonly: false,
             Content: contentOnLeft
         },
         oldFile: {
-            Name: "right." + contentType, //$NON-NLS-0$
             readonly: false,
             Content: contentOnRight
         }
     };
 	
-	var compare = new Compare(options, "compareCmdDiv", "twoWay", true/*toggleable*/); //$NON-NLS-1$ //$NON-NLS-0$
-	
-	function getFile(file) {
-		try {
-			var objXml = new XMLHttpRequest();
-			objXml.open("GET",file,false); //$NON-NLS-0$
-			objXml.send(null);
-			return objXml.responseText;
-		} catch (e) {
-			return null;
-		}
-	}
+	var compare = new Compare(options);
 
 	function onLoadSample() {
 		if(sampleLeft && sampleRight) {
-			bCompareType.selectedIndex = 0;
-			compareType = bCompareType.options[bCompareType.selectedIndex].value;
-			bContentType.selectedIndex = 0;
-			contentType = bContentType.options[bContentType.selectedIndex].value;
-			bContentTypeTD.style.display = "block"; //$NON-NLS-0$
-			
 			var widget = compare.getCompareView().getWidget();
 			widget.options.oldFile.Content = sampleRight;
 			widget.options.newFile.Content = sampleLeft;
-			widget.options.oldFile.URL = null;
-			widget.options.newFile.URL = null;
-			widget.options.oldFile.Name = "sampleRight.js"; //$NON-NLS-0$
-			widget.options.newFile.Name = "sampleLeft.js"; //$NON-NLS-0$
 			widget.options.mapper = null;
 			compare.refresh(true);
 		}
@@ -116,56 +87,17 @@
 			var editors = widget.getEditors();
 			var oldContents = editors[0].getTextView().getText();
 			var newContents = editors[1].getTextView().getText();
-			if(compareType === "byTwoContents"){ //$NON-NLS-0$
-				widget.options.oldFile.Content = oldContents;
-				widget.options.newFile.Content = newContents;
-				widget.options.oldFile.URL = null;
-				widget.options.newFile.URL = null;
-			} else {
-				widget.options.oldFile.URL = oldContents;
-				widget.options.newFile.URL = newContents;
-				bCompareType.selectedIndex = 0;
-				compareType = bCompareType.options[bCompareType.selectedIndex].value;
-				bContentTypeTD.style.display = "block"; //$NON-NLS-0$
-			}
+			widget.options.oldFile.Content = oldContents;
+			widget.options.newFile.Content = newContents;
 			widget.options.mapper = null;
 			compare.refresh(true);
-			//widget.refresh();
 		}
-	}
-	function onCompareType(evt) {
-		compareType = bCompareType.options[bCompareType.selectedIndex].value;
-		var widget = compare.getCompareView().getWidget();
-		if(compareType === "byTwoContents"){ //$NON-NLS-0$
-			widget.options.oldFile.Content = contentOnRight;
-			widget.options.newFile.Content = contentOnLeft;
-			widget.options.oldFile.URL = null;
-			widget.options.newFile.URL = null;
-			bContentTypeTD.style.display = "block"; //$NON-NLS-0$
-		} else {
-			widget.options.oldFile.Content = contentOnRightURL;
-			widget.options.newFile.Content = contentOnLeftURL;
-			widget.options.oldFile.URL = null;
-			widget.options.newFile.URL = null;
-			bContentTypeTD.style.display = "none"; //$NON-NLS-0$
-		}
-		widget.options.mapper = null;
-		widget.refresh(true);
-	}
-	
-	function onContentType(evt) {
-		contentType = bContentType.options[bContentType.selectedIndex].value;
-		var widget = compare.getCompareView().getWidget();
-		widget.options.oldFile.Name = "right." + contentType; //$NON-NLS-0$
-		widget.options.newFile.Name = "left." + contentType; //$NON-NLS-0$
 	}
 	
 	/* Adding events */
 	bCompare.onclick = doCompare;
 	bLoadSample.onclick = onLoadSample;
 	bAnimateDiffs.onclick = onAnimateDiffs;
-	bCompareType.onchange = onCompareType;
-	bContentType.onchange = onContentType;
 	
 		var sampleLeft = "/*******************************************************************************\n" + 
 				" * @license\n" + 
@@ -455,31 +387,6 @@
 </head>
 
 <body>
-    <div style="height:30px;width:99%;">
-	<table>
-	<tr>
-	<td>
-		<label style="padding-left:5px;margin-top:1px;" for="compareTypeSelect">Compare with</label>
-		<select id="compareTypeSelect" style="margin-top:5px;">
-			<option value="byTwoContents">Two text contents</option>
-			<option value="byFileURLs">Two file URLs</option>
-			<!-- <option value="byDiff">Base contents + unified diff</option> -->
-		</select>
-	</td>
-	<td id="contentTypes">
-		<label style="padding-left:5px;margin-top:1px;" for="fileTypeSelect">Content type</label>
-		<select id="contentTypeSelect" style="margin-top:5px;">
-			<option value="js">JavaScript</option>
-			<option value="html">HTML</option>
-			<option value="css">Css</option>
-			<option value="java">Java</option>
-			<option value="txt">Plain</option>
-		</select>
-	</td>
-	</tr>
-	</table>
-    </div>
-    <hr>
     <div style="height:28px;width:99%;">
 	<table style="float:left;">
 	<tr>

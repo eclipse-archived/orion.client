@@ -87,11 +87,11 @@ function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mCompareHig
 	 * @param {String} commandSpanId Optional. The dom element id to render all the commands that toggles compare view and navigates diffs. If not defined, no command is rendered.
 	 * @param {String} [viewType="twoWay"] optional. The type of the compare view. Can be either "twoWay" or "inline". Id not defined default is "twoWay".
 	 * "twoWay" represents a side by side comapre editor while "inline" represents a unified comapre view.
-	 * @param {Boolean} [toggleable=true] optional. Weather or not the compare view is toggleable. A toggleable comapre view provides a toggle button which toggles between the "twoWay" and "inline" view.
+	 * @param {Boolean} [toggleable=false] optional. Weather or not the compare view is toggleable. A toggleable comapre view provides a toggle button which toggles between the "twoWay" and "inline" view.
 	 */
     function compare(viewOptions, commandSpanId, viewType, toggleable){
 		var vOptions = viewOptions;
-		if(!vOptions.highlighters){
+		if(!vOptions.highlighters && vOptions.oldFile && vOptions.oldFile.Name && vOptions.newFile && vOptions.newFile.Name){
 			vOptions.highlighters = [new mCompareHighlighter.DefaultHighlighter(), new mCompareHighlighter.DefaultHighlighter()];
 		}
 		if(vOptions.oldFile && vOptions.oldFile.Name){
@@ -100,11 +100,12 @@ function(mCommandRegistry, Deferred, mCompareView, mCompareCommands, mCompareHig
 		if(vOptions.newFile && vOptions.newFile.Name){
 			vOptions.newFile.Type = _contentType(vOptions.newFile.Name);
 		}
-		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: commandSpanId});
-		vOptions.commandProvider = cmdProvider;
-		var toggle = (typeof toggleable === "undefined") ? true : toggleable; //$NON-NLS-0$
+		if(commandSpanId) {
+			var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: commandSpanId});
+			vOptions.commandProvider = cmdProvider;
+		}
 		var vType = (viewType === "inline") ? "inline" : "twoWay"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		if(toggle) {
+		if(toggleable) {
 			this.compareView = new mCompareView.toggleableCompareView(vType, vOptions);
 		} else if(vType === "inline") { //$NON-NLS-0$
 			this.compareView = new mCompareView.inlineCompareView(vOptions);

@@ -31,8 +31,8 @@ function(Compare) {
 	var contentType = "js"; //$NON-NLS-0$
 	
 	
-	var contentOnLeft = "Sample Orion compare contents on left side\n\nYou can replace the contents here and and click on [Refresh Compare] to see the new result\n"; //$NON-NLS-0$
-	var	contentOnRight = "Sample Orion compare contents on right side\n\nYou can replace the contents here and and click on [Refresh Compare] to see the new result\n"; //$NON-NLS-0$
+	var contentOnLeft = "Sample Orion compare contents on left side\n\nYou can replace the contents here and and click on [Compare Again] to see the new result\n"; //$NON-NLS-0$
+	var	contentOnRight = "Sample Orion compare contents on right side\n\nYou can replace the contents here and and click on [Compare Again] to see the new result\n"; //$NON-NLS-0$
 	var contentOnLeftURL = "Put file URL here\n"; //$NON-NLS-0$
 	var	contentOnRightURL = "Put file URL here\n"; //$NON-NLS-0$
 	
@@ -50,7 +50,7 @@ function(Compare) {
         }
     };
 	
-	var compare = new Compare(options, "compareCmdDiv", "twoWay"/*, false*/); //$NON-NLS-1$ //$NON-NLS-0$
+	var compare = new Compare(options, "compareCmdDiv", "twoWay", true/*toggleable*/); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	function getFile(file) {
 		try {
