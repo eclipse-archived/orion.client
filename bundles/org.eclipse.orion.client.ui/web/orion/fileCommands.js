@@ -232,7 +232,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	/**
 	 * Creates the commands related to file management.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use when creating commands
-	 * @param {orion.commands.CommandService} commandService The command service to get commands from
+	 * @param {orion.commandRegistry.CommandRegistry} commandRegistry The command registry to get commands from
 	 * @param {orion.explorer.Explorer} explorer The explorer view to add commands to
 	 * @param {orion.fileClient.FileClient} fileClient The file system client that the commands should use
 	 * @name orion.fileCommands#createFileCommands
@@ -687,11 +687,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					var expandZip = data.parameters && data.parameters.valueFor("unzip") && (sourceURL.indexOf(".zip") === sourceURL.length-4); //$NON-NLS-1$ //$NON-NLS-0$
 					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$
 					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}); //$NON-NLS-0$
-					var ex = explorer;
 					progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], sourceURL)).then(
-						function() {ex.changedItem.bind(ex)(this.treeRoot, true); },
+						null, //function() {explorer.changedItem(ex.treeRoot, true); }, //refresh the root
 						errorHandler
-					);//refresh the root
+					);
 				}
 			},
 			visibleWhen: function(item) {
@@ -956,13 +955,13 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						createProject(explorer, fileClient, progress, newFolderName, 
 							function(folder) {
 								data.parameters.clientCollect = true;
-								data.commandService.runCommand("orion.importZipURL", folder, explorer, data.parameters); //$NON-NLS-0$
+								data.commandRegistry.runCommand("orion.importZipURL", folder, explorer, data.parameters); //$NON-NLS-0$
 							}); 
 					} else {
 						getNewItemName(explorer, data.items, data.domNode.id, name, function(name) {
 								createProject(explorer, fileClient, progress, name,
 								function(folder) {
-									data.commandService.runCommand("orion.importZipURL", folder, explorer, data.parameters); //$NON-NLS-0$
+									data.commandRegistry.runCommand("orion.importZipURL", folder, explorer, data.parameters); //$NON-NLS-0$
 								});
 							});
 					}

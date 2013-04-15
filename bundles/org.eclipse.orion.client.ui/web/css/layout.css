@@ -38,7 +38,7 @@ hard-coded numbers elsewhere.
 	clear: both;
 	overflow: hidden;
     position: absolute;
-    top: 60px;  /* $HeaderHeight */
+    top: 54px;  /* $HeaderHeight */
     bottom: 0;
     left: 0;
     width: 100%;

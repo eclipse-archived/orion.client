@@ -95,7 +95,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			primaryNav.style.color = this.navtext;
 			primaryNav.style.fontSize = '8pt';
 			primaryNav.style.fontWeight = 'normal';
-			primaryNav.style.paddingTop = '6px';
+			primaryNav.style.paddingTop = '0';
 			primaryNav.style.verticalAlign = 'baseline';
 			
 			styles.push( primaryNav );

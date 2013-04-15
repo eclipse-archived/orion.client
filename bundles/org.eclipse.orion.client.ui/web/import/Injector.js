@@ -19,7 +19,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 		if (err && typeof err.xhr === 'object') {
 			delete err.xhr;
 		}
-		return err;
+		return new Deferred().reject(err);
 	}
 
 	function Injector(fileClient, serviceRegistry) {
