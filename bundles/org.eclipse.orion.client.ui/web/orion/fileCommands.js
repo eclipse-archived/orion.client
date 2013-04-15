@@ -687,11 +687,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					var expandZip = data.parameters && data.parameters.valueFor("unzip") && (sourceURL.indexOf(".zip") === sourceURL.length-4); //$NON-NLS-1$ //$NON-NLS-0$
 					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$
 					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}); //$NON-NLS-0$
-					var ex = explorer;
 					progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], sourceURL)).then(
-						function() {ex.changedItem.bind(ex)(this.treeRoot, true); },
+						null, //function() {explorer.changedItem(ex.treeRoot, true); }, //refresh the root
 						errorHandler
-					);//refresh the root
+					);
 				}
 			},
 			visibleWhen: function(item) {
