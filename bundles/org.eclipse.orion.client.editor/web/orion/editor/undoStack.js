@@ -29,10 +29,12 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		/** @ignore */
 		undo: function (view, select) {
 			this._doUndoRedo(this.offset, this.previousText, this.text, view, select);
+			return true;
 		},
 		/** @ignore */
 		redo: function (view, select) {
 			this._doUndoRedo(this.offset, this.text, this.previousText, view, select);
+			return true;
 		},
 		_doUndoRedo: function(offset, text, previousText, view, select) {
 			var model = view.getModel();
@@ -94,6 +96,9 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		},
 		/** @ignore */
 		undo: function (view, select) {
+			if (this.changes.length > 1) {
+				view.setRedraw(false);
+			}
 			for (var i=this.changes.length - 1; i >= 0; i--) {
 				this.changes[i].undo(view, false);
 			}
@@ -106,9 +111,16 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			if (owner && owner.undo) {
 				owner.undo();
 			}
+			if (this.changes.length > 1) {
+				view.setRedraw(true);
+			}
+			return this.changes.length > 0;
 		},
 		/** @ignore */
 		redo: function (view, select) {
+			if (this.changes.length > 1) {
+				view.setRedraw(false);
+			}
 			for (var i = 0; i < this.changes.length; i++) {
 				this.changes[i].redo(view, false);
 			}
@@ -121,6 +133,10 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			if (owner && owner.redo) {
 				owner.redo();
 			}
+			if (this.changes.length > 1) {
+				view.setRedraw(true);
+			}
+			return this.changes.length > 0;
 		},
 		/** @ignore */
 		start: function (view) {
@@ -283,14 +299,16 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 */
 		undo: function() {
 			this._commitUndo();
-			if (this.index <= 0) {
-				return false;
-			}
-			var change = this.stack[--this.index];
+			var change, result = false;
 			this._ignoreUndo = true;
-			change.undo(this.view, true);
+			do {
+				if (this.index <= 0) {
+					break;
+				}
+				change = this.stack[--this.index];
+			} while (!(result = change.undo(this.view, true)));
 			this._ignoreUndo = false;
-			return true;
+			return result;
 		},
 		/**
 		 * Redo the last change in the stack.
@@ -302,12 +320,14 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 */
 		redo: function() {
 			this._commitUndo();
-			if (this.index >= this.stack.length) {
-				return false;
-			}
-			var change = this.stack[this.index++];
+			var change, result = false;
 			this._ignoreUndo = true;
-			change.redo(this.view, true);
+			do {
+				if (this.index >= this.stack.length) {
+					break;
+				}
+				change = this.stack[this.index++];
+			} while (!(result = change.redo(this.view, true)));
 			this._ignoreUndo = false;
 			return true;
 		},

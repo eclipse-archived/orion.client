@@ -9,10 +9,14 @@
 	z-index:10;
 	cursor: default;
 	overflow: auto;
-	height: 150px;
-	width: 200px;
+	min-width: 70px;
+	min-height: 50px;
+	max-height: 150px;
+	max-width: 350px;
+	white-space: nowrap;
 }
 
 .contentassist .selected {
 	background-color: #EAF2FE;
+	font-weight: bold;
 }
