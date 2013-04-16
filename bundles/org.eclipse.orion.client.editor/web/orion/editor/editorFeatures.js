@@ -1304,7 +1304,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 								type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP;
 							}
 						}
-						annotation = mAnnotations.AnnotationType.createAnnotation(type, position.offset, position.offset + position.length);
+						annotation = mAnnotations.AnnotationType.createAnnotation(type, position.offset, position.offset + position.length, "");
 						add.push(annotation);
 					}
 				}

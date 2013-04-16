@@ -178,7 +178,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			constructor = function(start, end, title) {
 				this.start = start;
 				this.end = end;
-				if (title) { this.title = title; }
+				if (title !== undefined) { this.title = title; }
 			};
 			constructor.prototype = properties;
 		}
