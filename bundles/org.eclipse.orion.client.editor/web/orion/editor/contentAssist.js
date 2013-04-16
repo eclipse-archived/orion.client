@@ -152,7 +152,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				end: end
 			};
 			this.setState(State.INACTIVE);
-			var proposalText = proposal.proposal || proposal;
+			var proposalText = typeof proposal === "string" ? proposal : proposal.proposal; //$NON-NLS-0$
 			this.textView.setText(proposalText, start, end);
 			this.dispatchEvent({type: "ProposalApplied", data: data}); //$NON-NLS-0$
 			return true;
