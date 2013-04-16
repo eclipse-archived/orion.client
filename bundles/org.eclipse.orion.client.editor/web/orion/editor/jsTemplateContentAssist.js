@@ -63,7 +63,7 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 		{
 			prefix: "if", //$NON-NLS-0$
 			description: "if - if else statement",
-			template: "if (${condition}) {\n\t${cursor}\n} else {\n\t${cursor}\n}" //$NON-NLS-0$
+			template: "if (${condition}) {\n\t${cursor}\n} else {\n\t\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "for", //$NON-NLS-0$
@@ -138,7 +138,7 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 		{
 			prefix: "typeof", //$NON-NLS-0$
 			description: "typeof - typeof statement",
-			template: "typeof ${object} = \"${type:" + fromJSON(typeofValues) + "}\"" //$NON-NLS-1$ //$NON-NLS-0$
+			template: "typeof ${object} === \"${type:" + fromJSON(typeofValues) + "}\"" //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		{
 			prefix: "instanceof", //$NON-NLS-0$
