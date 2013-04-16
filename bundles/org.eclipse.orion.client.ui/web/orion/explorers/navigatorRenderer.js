@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,8 +11,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/navigationUtils', 'orion/extensionCommands', 'orion/contentTypes'],
-		function(messages, require, Deferred, lib, mExplorer, mNavUtils, mExtensionCommands){
+define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/navigationUtils', 'orion/extensionCommands', 'orion/contentTypes'],
+		function(messages, Deferred, lib, mExplorer, mNavUtils, mExtensionCommands){
 		
 	/* Internal */
 	function isImage(contentType) {
@@ -64,12 +64,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	/**
 	 * Exported so that it can be used by other UI that wants to use navigator-style links. commandService and contentTypeService  are necessary to compute 
 	 * the proper editor for a file.
+	 * @name orion.explorer.NavigatorRenderer.createLink
+	 * @function
 	 * @param {String} folderPageURL the page you want to direct folders to (such as navigator).  Using a blank string will just hash the current page.
 	 * @param {Object} item a json object describing an Orion file or folder
 	 * @param {Object} commandService necessary to compute the proper editor for a file. Must be a synchronous, in-page service, not retrieved 
 	 * from the service registry.
 	 * @param {Object[]} [openWithCommands] will be computed if not provided. However callers must have already processed the open with
-	 * service extension and added to the command registry (such as done in mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypesCache)).
+	 * service extension and added to the command registry (such as done in {@link orion.extensionCommands._createOpenWithCommands}).
 	 * @param {Object} [defaultEditor] will be computed if not provided, but subject to the same caveat as openWithCommands.
 	 * @param {Object} [linkProperties] gives additional properties to mix in to the HTML anchor element.
 	 */
@@ -126,7 +128,13 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	}
 		
 	/**
-	 * Renders json items into columns in the tree
+	 * @name orion.explorer.NavigatorRenderer
+	 * @class Renderer for a tree-table of files, like the Orion Navigator.
+	 * @description Renderer for a tree-table of files, like the Orion Navigator.
+	 * @param {Object} options
+	 * @param {orion.explorer.Explorer} explorer
+	 * @param {orion.commandRegistry.CommandRegistry} commandRegistry
+	 * @param {orion.core.ContentTypeService} contentTypeService
 	 */
 	function NavigatorRenderer (options, explorer, commandService, contentTypeService) {
 		this.explorer = explorer;
@@ -140,7 +148,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	}
 	NavigatorRenderer.prototype = new mExplorer.SelectionRenderer(); 
 	
-	// we are really only using the header for a spacer at this point.
+	/**
+	 * we are really only using the header for a spacer at this point.
+	 * @name orion.explorer.NavigatorRenderer.prototype.getCellHeaderElement
+	 * @function
+	 * @returns {Element}
+	 */
 	NavigatorRenderer.prototype.getCellHeaderElement = function(col_no){
 		// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
 		if (this.oneColumn && col_no !== 0) {
@@ -158,12 +171,24 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 	/**
 	 * Sets the link target to be used for file links.
+	 * @name orion.explorer.NavigatorRenderer#setTarget
+	 * @function
 	 * @param {String} target The target (eg. "new", "_self").
 	 */
 	NavigatorRenderer.prototype.setTarget = function(target){
 		this.target = target;
 	};
-	
+
+	/**
+	 * @name orion.explorer.NavigatorRenderer#folderLink
+	 * @type {String}
+	 * @description Base link URL to use on folder text. TODO see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121">Bug 400121</a>
+	 */
+	/**
+	 * @name orion.explorer.NavigatorRenderer#getCellElement
+	 * @function
+	 * @returns {Element}
+	 */
 	NavigatorRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		switch(col_no){
 
