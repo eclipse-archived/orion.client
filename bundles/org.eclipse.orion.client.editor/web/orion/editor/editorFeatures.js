@@ -998,7 +998,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				var changed = positionChanged.position;
 				if (changed === undefined) {
 					// The change has been done outside of the positions, exit the Linked Mode
-					this.cancel();
+					this.cancel(true);
 					return;
 				}
 
@@ -1034,7 +1034,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				var changed = positionChanged.position;
 				if (changed === undefined) {
 					// The change has been done outside of the positions, exit the Linked Mode
-					this.cancel();
+					this.cancel(true);
 					return;
 				}
 				
