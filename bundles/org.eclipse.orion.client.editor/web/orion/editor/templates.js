@@ -42,29 +42,32 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 			if (context.indentation) {
 				delimiter += context.indentation;
 			}
-			var variables = this.variables;
-			variables[delimiterVar] = delimiter;
-			variables[tabVar] = context.tab !== undefined ? context.tab : "\t"; //$NON-NLS-0$
-			variables[cursorVar] = "";
+			var tab = context.tab !== undefined ? context.tab : "\t"; //$NON-NLS-0$
 			var delta = 0;
+			var variables = this.variables;
 			var segments = this.segments, proposal = [];
 			for (var i = 0; i < segments.length; i++) {
-				var segment = segments[i], variable = segment;
-				var substitution = variables[segment];
-				if (substitution !== undefined) {
-					segment = substitution;
-					switch (variable) {
+				var segment = segments[i];
+				var variable = variables[segment];
+				if (variable !== undefined) {
+					switch (segment) {
 						case tabVar:
+							segment = tab;
+							break;
 						case delimiterVar:
+							segment = delimiter;
 							break;
 						case cursorVar:
+							segment = "";
 							escapePosition = delta;
 							break;
 						default:
 							var g = groups[segment];
 							if (!g) {
-								g = groups[segment] = {positions: []};
+								g = groups[segment] = {data: variable.data, positions: []};
 							}
+							segment = variable.substitution;
+							if (g.data && g.data.values) { segment = g.data.values[0]; }
 							g.positions.push({
 								offset: startOffset + delta,
 								length: segment.length
@@ -99,21 +102,26 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 			var segments = [], variables = {}, segment, start = 0;
 			template = template.replace(/\n/g, delimiterVar);
 			template = template.replace(/\t/g, tabVar);
-			template.replace(/\$\{([^\}]+)\}/g, function(group, text, index) {
-				var variable = text;
-				var colon = variable.indexOf(":"); //$NON-NLS-0$
+			template.replace(/\$\{((?:[^\\}]+|\\.))*\}/g, function(group, text1, index) {
+				var text = group.substring(2,group.length-1);
+				var variable = group, substitution = text, data = null;
+				var colon = substitution.indexOf(":"); //$NON-NLS-0$
 				if (colon !== -1) {
-					variable = variable.substring(0, colon);
+					substitution = substitution.substring(0, colon);
+					variable = "${"+ substitution + "}"; //$NON-NLS-1$ //$NON-NLS-0$
+					data = JSON.parse(text.substring(colon + 1).replace("\\}", "}").trim()); //$NON-NLS-1$ //$NON-NLS-0$
 				}
-				var v = variables[group];
-				if (!v) {
-					v = variables[group] = variable;
+				var v = variables[variable];
+				if (!v) { v = variables[variable] = {}; }
+				v.substitution = substitution;
+				if (data) {
+					v.data = data;
 				}
 				segment = template.substring(start, index);
 				if (segment) { segments.push(segment); }
-				segments.push(group);
+				segments.push(variable);
 				start = index + group.length;
-				return variable;
+				return substitution;
 			});
 			segment = template.substring(start, template.length);
 			if (segment) { segments.push(segment); }

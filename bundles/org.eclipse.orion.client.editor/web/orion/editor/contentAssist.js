@@ -220,6 +220,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var self = this;
 			var offset = this.textView.getCaretOffset();
 			this._computeProposals(offset).then(function(proposals) {
+				if (!self.isActive()) { return; }
 				self.dispatchEvent({type: "ProposalsComputed", data: {proposals: proposals}}); //$NON-NLS-0$
 			});
 		},
@@ -556,7 +557,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this.isShowing = false;
 		},
 		position: function() {
-			var caretLocation = this.textView.getLocationAtOffset(this.textView.getCaretOffset());
+			var contentAssist = this.contentAssist;
+			var offset = contentAssist.offset !== undefined ? contentAssist.offset : this.textView.getCaretOffset();
+			var caretLocation = this.textView.getLocationAtOffset(offset);
 			caretLocation.y += this.textView.getLineHeight();
 			this.textView.convert(caretLocation, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.parentNode.style.position = "fixed"; //$NON-NLS-0$

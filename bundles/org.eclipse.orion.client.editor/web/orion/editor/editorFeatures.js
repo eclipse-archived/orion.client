@@ -19,9 +19,10 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
 	'orion/editor/tooltip', //$NON-NLS-0$
 	'orion/editor/textDND', //$NON-NLS-0$
+	'orion/editor/templates', //$NON-NLS-0$
 	'orion/editor/regex', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTextDND, mRegex, util) {
+], function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTextDND, mTemplates, mRegex, util) {
 
 	function UndoFactory() {
 	}
@@ -967,9 +968,10 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		}
 	};
 	
-	function LinkedMode(editor, undoStack) {
+	function LinkedMode(editor, undoStack, contentAssist) {
 		this.editor = editor;
 		this.undoStack = undoStack;
+		this.contentAssist = contentAssist;
 		
 		this.linkedModeActive = false;
 		this.linkedModeModel = null;
@@ -981,24 +983,15 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		 */
 		this.linkedModeListener = {
 		
-			onModelChanged: function(event) {
-				if (!this._viewEditing) {
-					this.cancel(true);
+			onActivating: function(event) {
+				if (this._groupContentAssistProvider) {
+					this.contentAssist.setProviders([this._groupContentAssistProvider]);
+					this.contentAssist.setProgress(null);
 				}
 			}.bind(this),
-			
-			onModify: function(event) {
-				this._viewEditing = false;
-			}.bind(this),
-			
+
 			onVerify: function(event) {
-				this._viewEditing = true;
 				if (this.ignoreVerify) { return; }
-				var start = event.start;
-				var addedCharCount = event.text.length;
-				var removedCharCount = event.end - event.start;
-				var end = start + removedCharCount;
-				var changeCount = addedCharCount - removedCharCount;
 				var sortedPositions = [];
 				var groups = this.linkedModeModel.groups, i;
 				for (i = 0; i < groups.length; i++) {
@@ -1018,7 +1011,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				for (i = 0; i < sortedPositions.length; i++) {
 					group = sortedPositions[i].group;
 					position = sortedPositions[i].position;
-					if (position.offset <= start && end <= position.offset + position.length) {
+					if (position.offset <= event.start && event.end <= position.offset + position.length) {
 						deltaStart -= position.offset;
 						deltaEnd -= position.offset;
 						groupChanged = group;
@@ -1035,24 +1028,15 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 					} else {
 						this.startUndo();
 					}
-					this.ignoreVerify = true;
-					var textView = this.editor.getTextView();
-					for (i = sortedPositions.length - 1; i >= 0; i--) {
-						group = sortedPositions[i].group;
-						position = sortedPositions[i].position;
-						if (group === groupChanged) {
-							textView.setText(event.text, position.offset + deltaStart , position.offset + deltaEnd);
-						}
-					}
-					this.ignoreVerify = false;
-					event.text = null;
 					var deltaCount = 0, escapePositionDeltaCount;
+					var changeCount = event.text.length - (event.end - event.start);
 					for (i = 0; i < sortedPositions.length; ++i) {
 						group = sortedPositions[i].group;
 						position = sortedPositions[i].position;
 						if (escapePositionDeltaCount === undefined && this.linkedModeModel.escapePosition < position.offset) {
 							escapePositionDeltaCount = deltaCount;
 						}
+						position._oldOffset = position.offset;
 						if (group === groupChanged) {
 							position.offset += deltaCount;
 							position.length += changeCount;
@@ -1065,6 +1049,17 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 						escapePositionDeltaCount = deltaCount;
 					}
 					this.linkedModeModel.escapePosition += escapePositionDeltaCount;
+					this.ignoreVerify = true;
+					var textView = this.editor.getTextView();
+					for (i = sortedPositions.length - 1; i >= 0; i--) {
+						group = sortedPositions[i].group;
+						position = sortedPositions[i].position;
+						if (group === groupChanged) {
+							textView.setText(event.text, position._oldOffset + deltaStart , position._oldOffset + deltaEnd);
+						}
+					}
+					this.ignoreVerify = false;
+					event.text = null;
 					this._updateAnnotations();
 				} else {
 					// The change has been done outside of the positions, exit the Linked Mode
@@ -1095,12 +1090,21 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 			this.linkedModeActive = true;
 			this.linkedModeModel = linkedModeModel;
-			this.selectLinkedGroup(0);
+
+			if (this.undoStack) {
+				var self = this;
+				this.undoStack.startCompoundChange({
+					undo: function() {
+						self.cancel(true);
+					}
+				});
+				this.undoStack.endCompoundChange();
+			}
 
 			var textView = this.editor.getTextView();
 			textView.addEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
-			textView.addEventListener("Modify", this.linkedModeListener.onModify); //$NON-NLS-0$
-			textView.addEventListener("ModelChanged", this.linkedModeListener.onModelChanged); //$NON-NLS-0$
+			var contentAssist = this.contentAssist;
+			contentAssist.addEventListener("Activating", this.linkedModeListener.onActivating); //$NON-NLS-0$
 
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "nextLinkedModePosition"); //$NON-NLS-0$
 			textView.setAction("nextLinkedModePosition", function() { //$NON-NLS-0$
@@ -1115,6 +1119,8 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}.bind(this));
 
 			this.editor.reportStatus(messages.linkedModeEntered, null, true);
+			
+			this.selectLinkedGroup(0);
 		},
 		_cloneModel: function() {
 			var model = this.linkedModeModel;
@@ -1189,8 +1195,9 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			this.linkedModeActive = false;
 			var textView = this.editor.getTextView();
 			textView.removeEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
-			textView.removeEventListener("Modify", this.linkedModeListener.onModify); //$NON-NLS-0$
-			textView.removeEventListener("ModelChanged", this.linkedModeListener.onModelChanged); //$NON-NLS-0$
+			var contentAssist = this.contentAssist;
+			contentAssist.removeEventListener("Activating", this.linkedModeListener.onActivating); //$NON-NLS-0$
+			contentAssist.offset = undefined;
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "tab"); //$NON-NLS-0$
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "shiftTab"); //$NON-NLS-0$
 			
@@ -1218,6 +1225,29 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			var position = group.positions[0];
 			var textView = this.editor.getTextView();
 			textView.setSelection(position.offset, position.offset + position.length);
+			var contentAssist = this.contentAssist;
+			if (contentAssist) {
+				contentAssist.offset = undefined;
+				if (group.data && group.data.type === "link") { //$NON-NLS-0$
+					var provider = this._groupContentAssistProvider = new mTemplates.TemplateContentAssist(group.data.values);
+					provider.getPrefix = function() {
+						var selection = textView.getSelection();
+						if (selection.start === selection.end) {
+							var caretOffset = textView.getCaretOffset();
+							if (position.offset <= caretOffset && caretOffset <= position.offset + position.length) {
+								return textView.getText(position.offset, caretOffset);
+							}
+						}
+						return "";
+					};
+					contentAssist.offset = position.offset;
+					contentAssist.deactivate();
+					contentAssist.activate();
+				} else if (this._groupContentAssistProvider) {
+					this._groupContentAssistProvider = null;
+					contentAssist.deactivate();
+				}
+			}
 			this._updateAnnotations();
 		},
 		_updateAnnotations: function() {

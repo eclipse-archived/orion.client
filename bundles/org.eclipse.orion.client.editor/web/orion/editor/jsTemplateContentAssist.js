@@ -35,6 +35,23 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 		return c;
 	}
 	
+	var typeofValues = {
+		type: "link", //$NON-NLS-0$
+		values: [
+			"undefined", //$NON-NLS-0$
+			"object", //$NON-NLS-0$
+			"boolean", //$NON-NLS-0$
+			"number", //$NON-NLS-0$
+			"string", //$NON-NLS-0$
+			"function", //$NON-NLS-0$
+			"xml" //$NON-NLS-0$
+		]
+	};
+	
+	function fromJSON(o) {
+		return JSON.stringify(o).replace("}", "\\}"); //$NON-NLS-1$ //$NON-NLS-0$
+	}
+	
 	var uninterestingChars = ":!@#$^&*.?<>"; //$NON-NLS-0$
 
 	var templates = [
@@ -56,7 +73,7 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 		{
 			prefix: "for", //$NON-NLS-0$
 			description: "for - iterate over array with local var",
-			template: "for (var ${i}=0; ${i}<${array}.length; ${i}++) {\n\tvar ${v} = ${array}[${i}];\n\t${cursor}\n}" //$NON-NLS-0$
+			template: "for (var ${i}=0; ${i}<${array}.length; ${i}++) {\n\tvar ${value} = ${array}[${i}];\n\t${cursor}\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "for", //$NON-NLS-0$
@@ -121,12 +138,12 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 		{
 			prefix: "typeof", //$NON-NLS-0$
 			description: "typeof - typeof statement",
-			template: "typeof ${var} = \"${type}\"" //$NON-NLS-0$
+			template: "typeof ${object} = \"${type:" + fromJSON(typeofValues) + "}\"" //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		{
 			prefix: "instanceof", //$NON-NLS-0$
 			description: "instanceof - instanceof statement",
-			template: "${var} instanceof ${type}" //$NON-NLS-0$
+			template: "${object} instanceof ${type}" //$NON-NLS-0$
 		},
 		{
 			prefix: "with", //$NON-NLS-0$
