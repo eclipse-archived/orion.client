@@ -102,6 +102,9 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			for (var i=this.changes.length - 1; i >= 0; i--) {
 				this.changes[i].undo(view, false);
 			}
+			if (this.changes.length > 1) {
+				view.setRedraw(true);
+			}
 			if (select) {
 				var start = this.startSelection.start;
 				var end = this.startSelection.end;
@@ -110,9 +113,6 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			var owner = this.owner;
 			if (owner && owner.undo) {
 				owner.undo();
-			}
-			if (this.changes.length > 1) {
-				view.setRedraw(true);
 			}
 			return this.changes.length > 0;
 		},
@@ -124,6 +124,9 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			for (var i = 0; i < this.changes.length; i++) {
 				this.changes[i].redo(view, false);
 			}
+			if (this.changes.length > 1) {
+				view.setRedraw(true);
+			}
 			if (select) {
 				var start = this.endSelection.start;
 				var end = this.endSelection.end;
@@ -132,9 +135,6 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			var owner = this.owner;
 			if (owner && owner.redo) {
 				owner.redo();
-			}
-			if (this.changes.length > 1) {
-				view.setRedraw(true);
 			}
 			return this.changes.length > 0;
 		},
