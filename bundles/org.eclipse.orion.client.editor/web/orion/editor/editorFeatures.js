@@ -1229,27 +1229,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 			this._updateAnnotations();
 		},
-		_cloneModel: function() {
-			var model = this.linkedModeModel;
-			var newGroups = [];
-			var newModel = {
-				escapePosition: model.escapePosition,
-				groups: newGroups
-			};
-			var groups = model.groups;
-			for (var j = 0; j < groups.length; j++) {
-				var newPositions = [];
-				newGroups.push({positions: newPositions});
-				var positions = groups[j].positions;
-				for (var i = 0; i < positions.length; i++) {
-					newPositions.push({
-						offset: positions[i].offset,
-						length: positions[i].length
-					});
-				}
-			}
-			return newModel;
-		},
 		_getPositionChanged: function(start, end) {
 			var sortedPositions = [];
 			var groups = this.linkedModeModel.groups, i;
