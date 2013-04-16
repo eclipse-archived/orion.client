@@ -998,7 +998,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				var changed = positionChanged.position;
 				if (changed === undefined) {
 					// The change has been done outside of the positions, exit the Linked Mode
-					this.cancel(true);
+					this.cancel();
 					return;
 				}
 
@@ -1034,7 +1034,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				var changed = positionChanged.position;
 				if (changed === undefined) {
 					// The change has been done outside of the positions, exit the Linked Mode
-					this.cancel(true);
+					this.cancel();
 					return;
 				}
 				
@@ -1158,7 +1158,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return this.linkedModeActive;
 		},
 		enter: function() {
-			this.cancel();
+			this.cancel(true);
 			return true;
 		},
 		/** 
@@ -1166,7 +1166,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		 * @param {boolean} ignoreEscapePosition optional if true, do not place the caret at the 
 		 * escape position.
 		 */
-		cancel: function(ignoreEscapePosition) {
+		cancel: function(escapePosition) {
 			if (!this.linkedModeActive) {
 				return;
 			}
@@ -1180,7 +1180,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "tab"); //$NON-NLS-0$
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "shiftTab"); //$NON-NLS-0$
 			
-			if (!ignoreEscapePosition) {
+			if (escapePosition) {
 				textView.setCaretOffset(this.linkedModeModel.escapePosition, false);
 			}
 			if (this._compoundChange) {
@@ -1191,11 +1191,11 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			this.editor.reportStatus(messages.linkedModeExited, null, true);
 		},
 		lineUp: function() {
-			this.cancel(true);
+			this.cancel();
 			return false;
 		},
 		lineDown: function() {
-			this.cancel(true);
+			this.cancel();
 			return false;
 		},
 		selectLinkedGroup: function(index) {
