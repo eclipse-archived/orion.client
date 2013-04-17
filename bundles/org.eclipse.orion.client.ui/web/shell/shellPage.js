@@ -10,24 +10,24 @@
  *     Kris De Volder (VMWare) - initial API and implementation
  *******************************************************************************/
 
-/*global define window*/
+/*global define window URL*/
 /*jslint browser:true sub:true*/
 
-define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
+define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/widgets/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
 		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
-		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters"],
-	function(messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
+		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters", "orion/URL-shim"],
+	function(require, messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
 		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate, Deferred, mStatus, mProgress,
-		mOperationsClient, mResultWriters) {
+		mOperationsClient, mResultWriters, _) {
 
 	var shellPageFileService, fileClient, output, fileType;
 	var hashUpdated = false;
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 	var pluginRegistry, pluginType, preferences, serviceElementCounter = 0;
 
-	var ROOT_ORIONCONTENT = "/file"; //$NON-NLS-0$
-	var PAGE_TEMPLATE = "{OrionHome}/shell/shellPage.html#{,resource}"; //$NON-NLS-0$
+	var ROOT_ORIONCONTENT = new URL(require.toUrl("file"), window.location.href).pathname; //$NON-NLS-0$
+	var PAGE_TEMPLATE = require.toUrl("shell/shellPage.html") + "#{,resource}"; //$NON-NLS-0$
 
 	var CommandResult = (function() {
 		function CommandResult(value, type) {

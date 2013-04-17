@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- define(['orion/webui/littlelib', 'orion/webui/tooltip'], function(lib, mTooltip){
+ define(['require', 'orion/webui/littlelib', 'orion/webui/tooltip'], function(require, lib, mTooltip){
  
 	/**
 	* Progress indicator in form of a simple spinner.
@@ -37,7 +37,7 @@
 		start: function(){
 			var image = document.createElement("img");
 			image.id = this._prefix+this._id;
-			image.src = "/images/none.png";
+			image.src = require.toUrl("images/none.png");
 			image.className = "progressPane_running";
 			this._anchor.appendChild(image);
 		},
@@ -46,7 +46,7 @@
 		* [interface] stops the progress indicator
 		*/
 		stop: function(){
-			var indicator = lib.node(this._prefix+this._id)
+			var indicator = lib.node(this._prefix+this._id);
 			indicator.parentNode.removeChild(indicator);
 		},
 		
@@ -55,7 +55,7 @@
 		*/
 		error: function(err){
 			var indicator = lib.node(this._prefix+this._id);
-			indicator.src = "/images/problem.gif";
+			indicator.src = require.toUrl("images/problem.gif");
 			indicator.className = "";
 			
 			new mTooltip.Tooltip({
@@ -104,7 +104,7 @@
 		* [interface] stops the progress indicator
 		*/
 		stop: function(){
-			var indicator = lib.node(this._prefix+this._id)
+			var indicator = lib.node(this._prefix+this._id);
 			indicator.parentNode.removeChild(indicator);
 		},
 		
@@ -112,11 +112,11 @@
 		* [interface] renders the progress indicator after an population error
 		*/
 		error: function(err){
-			var indicator = lib.node(this._prefix+this._id)
+			var indicator = lib.node(this._prefix+this._id);
 			indicator.parentNode.removeChild(indicator);
 			
 			var image = document.createElement("img");
-			image.src = "/images/problem.gif";
+			image.src = require.toUrl("images/problem.gif");
 			this._anchor.appendChild(image);
 			
 			new mTooltip.Tooltip({

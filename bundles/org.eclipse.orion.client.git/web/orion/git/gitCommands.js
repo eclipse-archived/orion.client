@@ -2416,7 +2416,7 @@ var exports = {};
 						findCommitLocation(repositories, data.parameters.valueFor("commitName")).then( //$NON-NLS-0$
 							function(commitLocation){
 								if(commitLocation !== null){
-									var commitPageURL = "/git/git-commit.html#" + commitLocation + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
+									var commitPageURL = require.toUrl("git/git-commit.html#") + commitLocation + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
 									window.open(commitPageURL);
 								}
 							}, function () {

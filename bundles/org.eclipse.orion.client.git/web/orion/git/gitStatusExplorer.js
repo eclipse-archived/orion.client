@@ -10,9 +10,9 @@
  ******************************************************************************/
 /*global define document window Image*/
 define(
-		[ 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orion/selection', 'orion/section', 'orion/PageUtil', 'orion/webui/littlelib',
+		[ 'require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orion/selection', 'orion/section', 'orion/PageUtil', 'orion/webui/littlelib',
 				'orion/i18nUtil', 'orion/globalCommands', 'orion/git/util',	'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'],
-		function(messages, mExplorer, mSelection, mSection, PageUtil, lib, i18nUtil, mGlobalCommands, mGitUtil, mGitCommands,
+		function(require, messages, mExplorer, mSelection, mSection, PageUtil, lib, i18nUtil, mGlobalCommands, mGitUtil, mGitCommands,
 				Deferred, mCommitTooltip) {
 
 			var exports = {};
@@ -259,7 +259,7 @@ define(
 					target : repository,
 					breadcrumbTarget : item,
 					makeBreadcrumbLink : function(seg, location) {
-						seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
+						seg.href = require.toUrl("git/git-repository.html") + (location ? "#" + location : ""); //$NON-NLS-0$
 					},
 					serviceRegistry : this.registry,
 					commandService : this.commandService
@@ -778,7 +778,7 @@ define(
 														titleWrapper.actionsNode.id,
 														titleWrapper.actionsNode.id,
 														{
-															"ViewAllLink" : "/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel" : messages['See Full Log'], "ViewAllTooltip" : messages["See the full log"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+															"ViewAllLink" : require.toUrl("git/git-log.html#") + currentBranch.CommitLocation + "?page=1", "ViewAllLabel" : messages['See Full Log'], "ViewAllTooltip" : messages["See the full log"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 										if (tracksRemoteBranch) {
 											that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.fetch", 100); //$NON-NLS-0$
@@ -917,7 +917,7 @@ define(
 
 					var titleLink = document.createElement("a");
 					titleLink.className = "navlinkonpage";
-					titleLink.href = "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1";
+					titleLink.href = require.toUrl("git/git-commit.html#") + commit.Location + "?page=1&pageSize=1";
 					titleLink.textContent = commit.Message;
 					detailsView.appendChild(titleLink);
 
