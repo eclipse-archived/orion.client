@@ -9,11 +9,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document console prompt window*/
+/*global define document console prompt window URL*/
 /*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/compare/compareUtils', 'orion/compare/diffProvider', 'orion/compare/compareView', 'orion/highlight', 
-		'orion/fileClient', 'orion/globalCommands', 'orion/commands', 'orion/keyBinding', 'orion/searchAndReplace/textSearcher', 'orion/editorCommands', 'orion/editor/editorFeatures'], 
+		'orion/fileClient', 'orion/globalCommands', 'orion/commands', 'orion/keyBinding', 'orion/searchAndReplace/textSearcher', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/URL-shim'], 
 		function(messages, require, Deferred, lib, mCompareUtils, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mCommands, mKeyBinding, mSearcher, mEditorCommands, mEditorFeatures) {
 
 var exports = {};
@@ -233,7 +233,8 @@ exports.ResourceComparer = (function() {
 				block: diffPos.block ? diffPos.block : 1, 
 				change: diffPos.change ? diffPos.change : 0 
 			});
-			prompt(messages["Copy the link URL:"], href);
+			var url = new URL(href, window.location.href).href;
+			prompt(messages["Copy the link URL:"], url);
 		},
 		
 		openComparePage: function(compareWidget){	
