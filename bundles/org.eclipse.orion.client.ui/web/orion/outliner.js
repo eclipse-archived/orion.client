@@ -165,8 +165,8 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 		_init: function(options) {
 			var parent = options.parent;
 			parent = lib.node(parent);
-			if (!parent) { throw "no parent"; } //$NON-NLS-0$
-			if (!options.outlineService) {throw "no outline service"; } //$NON-NLS-0$
+			if (!parent) { throw new Error("no parent"); } //$NON-NLS-0$
+			if (!options.outlineService) {throw new Error("no outline service"); } //$NON-NLS-0$
 			this._parent = parent;
 			this._serviceRegistry = options.serviceRegistry;
 			this._outlineService = options.outlineService;
