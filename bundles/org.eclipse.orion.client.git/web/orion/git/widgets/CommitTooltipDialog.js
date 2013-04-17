@@ -39,7 +39,7 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/webui/littlelib', 'orion/
 		var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
 		var link = document.createElement("a");
 		link.className = "navlinkonpage";
-		link.href = "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1";
+		link.href = require.toUrl("git/git-commit.html#") + commit.Location + "?page=1&pageSize=1";
 		link.textContent = commitMessage0;
 		tableNode.appendChild(link);
 		
@@ -94,7 +94,7 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/webui/littlelib', 'orion/
 			
 			var parentLink = document.createElement("a");
 			parentLink.className = "navlinkonpage";
-			parentLink.href = "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1";
+			parentLink.href = require.toUrl("git/git-commit.html#") + commit.Parents[0].Location + "?page=1&pageSize=1";
 			parentLink.textContent = commit.Parents[0].Name;
 			parentNode.appendChild(parentLink);
 			

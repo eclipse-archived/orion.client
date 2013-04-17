@@ -10,8 +10,7 @@
  ******************************************************************************/
 /*globals define document clearTimeout setTimeout window Image*/
 
-define(['i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/webui/dialog', 'orion/webui/littlelib'], function(
-messages, i18nUtil, Deferred, dialog, lib) {
+define(['require', 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/webui/dialog', 'orion/webui/littlelib'], function(require, messages, i18nUtil, Deferred, dialog, lib) {
 
 	/**
 	 * Usage:
@@ -168,7 +167,7 @@ messages, i18nUtil, Deferred, dialog, lib) {
 		var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
 		var link = document.createElement("a");
 		link.className = "navlinkonpage";
-		link.href = "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1";
+		link.href = require.toUrl("git/git-commit.html#") + commit.Location + "?page=1&pageSize=1";
 		link.textContent = commitMessage0;
 		tableNode.appendChild(link);
 		
@@ -235,7 +234,7 @@ messages, i18nUtil, Deferred, dialog, lib) {
 			
 			var parentLink = document.createElement("a");
 			parentLink.className = "navlinkonpage";
-			parentLink.href = "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1";
+			parentLink.href = require.toUrl("git/git-commit.html#") + commit.Parents[0].Location + "?page=1&pageSize=1";
 			parentLink.textContent = commit.Parents[0].Name;
 			parentNode.appendChild(parentLink);
 			

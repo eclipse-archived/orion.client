@@ -12,9 +12,9 @@
 /*global define window console document Image */
 
 define(
-		[ 'i18n!git/nls/gitmessages', 'orion/section', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/i18nUtil', 'orion/webui/littlelib',
+		[ 'require', 'i18n!git/nls/gitmessages', 'orion/section', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/i18nUtil', 'orion/webui/littlelib',
 				'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/util', 'orion/Deferred' ],
-		function(messages, mSection, mExplorer, PageUtil, i18nUtil, lib, mGlobalCommands, mGitCommands, mGitUtil, Deferred) {
+		function(require, messages, mSection, mExplorer, PageUtil, i18nUtil, lib, mGlobalCommands, mGitCommands, mGitUtil, Deferred) {
 			var exports = {};
 
 			exports.GitCommitExplorer = (function() {
@@ -132,7 +132,7 @@ define(
 					target : commit,
 					breadcrumbTarget : item,
 					makeBreadcrumbLink : function(seg, location) {
-						seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
+						seg.href = require.toUrl("git/git-repository.html") + (location ? "#" + location : ""); //$NON-NLS-0$
 					},
 					serviceRegistry : that.registry,
 					commandService : that.commandService
@@ -189,7 +189,7 @@ define(
 						parentCommitName.style.paddingBottom = "15px";
 						var parentCommitLink = document.createElement("a");
 						parentCommitLink.className = "pnavlinkonpage";
-						parentCommitLink.href = "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1";
+						parentCommitLink.href = require.toUrl("git/git-commit.html#") + commit.Parents[0].Location + "?page=1&pageSize=1";
 						parentCommitLink.textContent = i18nUtil.formatMessage(messages["parent: 0"], commit.Parents[0].Name);
 						parentCommitName.appendChild(parentCommitLink);
 						detailsView.appendChild(parentCommitName);
