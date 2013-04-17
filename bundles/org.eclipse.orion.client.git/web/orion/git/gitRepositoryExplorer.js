@@ -241,7 +241,7 @@ exports.GitRepositoryExplorer = (function() {
 		updatePageActions(that.registry, that.commandService, "pageActions", scopeId, repository || {}); //$NON-NLS-1$ //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({task: "Repositories", target: repository, breadcrumbTarget: item,
 			makeBreadcrumbLink: function(seg, location) {
-				seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
+				seg.href = require.toUrl("git/git-repository.html") + (location ? "#" + location : ""); //$NON-NLS-0$
 			},
 			serviceRegistry: this.registry, commandService: this.commandService}); 
 	};
@@ -250,9 +250,7 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.decorateRepository = function(repository, mode, deferred){
 		var that = this;
-		if (deferred == null){
-			deferred = new Deferred();
-		}
+		deferred = deferred || new Deferred();
 		
 		if(!mode){
 			mode = "full";
@@ -412,7 +410,7 @@ exports.GitRepositoryExplorer = (function() {
 
 				if (links){
 					var link = document.createElement("a");
-					link.href = "/git/git-repository.html#" + repositories[i].Location;
+					link.href = require.toUrl("git/git-repository.html#") + repositories[i].Location;
 					link.appendChild(document.createTextNode(repositories[i].Name));
 					title.appendChild(link);
 				} else { 
@@ -426,7 +424,7 @@ exports.GitRepositoryExplorer = (function() {
 				detailsView.appendChild(div);
 				
 				var span = document.createElement("span");
-				span.textContent = (repositories[i].GitUrl != null ? "git url: " + repositories[i].GitUrl : messages["(no remote)"]);
+				span.textContent = (repositories[i].GitUrl !== null ? "git url: " + repositories[i].GitUrl : messages["(no remote)"]);
 				detailsView.appendChild(span);
 				
 				div = document.createElement("div");
@@ -516,7 +514,7 @@ exports.GitRepositoryExplorer = (function() {
 		
 		that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 		that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
-			{"ViewAllLink":"/git/git-status2.html#" + repository.StatusLocation, "ViewAllLabel": messages["See Full Status"], "ViewAllTooltip": messages["See the status"]}, that, "button");
+			{"ViewAllLink":"git/git-status2.html#" + repository.StatusLocation, "ViewAllLabel": messages["See Full Status"], "ViewAllTooltip": messages["See the status"]}, that, "button");
 		
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Loading status"); //$NON-NLS-0$
@@ -576,8 +574,7 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.decorateBranches = function(branches, deferred){
 		var that = this;
-		if (deferred == null)
-			deferred = new Deferred();
+		deferred = deferred || new Deferred();
 		
 		if (branches.length > 0) {
 			this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").doGitLog(branches[0].CommitLocation + "?page=1&pageSize=1"), "Getting branch last commit " + branches[0].Name).then( //$NON-NLS-1$ //$NON-NLS-0$
@@ -623,7 +620,7 @@ exports.GitRepositoryExplorer = (function() {
 				if (mode !== "full" && branches.length !== 0){ //$NON-NLS-0$
 					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
-						{"ViewAllLink":"/git/git-repository.html#" + branchLocation + "?page=1", "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all local and remote tracking branches"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						{"ViewAllLink":"git/git-repository.html#" + branchLocation + "?page=1", "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all local and remote tracking branches"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				
 				that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.addBranch", 200); //$NON-NLS-0$
@@ -737,8 +734,7 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.displayRemoteBranches2 = function(titleWrapper, remotes, repository, deferred, anyRemoteBranch, previousRemoteBranches){
 		var that = this;
-		if (deferred == null)
-			deferred = new Deferred();
+		deferred = deferred || new Deferred();
 		
 		if (remotes.length > 0) {
 			this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitRemote(remotes[0].Location), "Getting remote branches " + remotes[0].Name).then( //$NON-NLS-0$
@@ -838,7 +834,7 @@ exports.GitRepositoryExplorer = (function() {
 
 				that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 				that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
-					{"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":messages["See Full Log"], "ViewAllTooltip":messages["See the full log"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					{"ViewAllLink":"git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":messages["See Full Log"], "ViewAllTooltip":messages["See the full log"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				
 				if (tracksRemoteBranch){
 					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.fetch", 100); //$NON-NLS-0$
@@ -977,7 +973,7 @@ exports.GitRepositoryExplorer = (function() {
 
 		var titleLink = document.createElement("a");
 		titleLink.className = "navlinkonpage";
-		titleLink.href = "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1";
+		titleLink.href = require.toUrl("git/git-commit.html#") + commit.Location + "?page=1&pageSize=1";
 		titleLink.textContent = commit.Message;
 		detailsView.appendChild(titleLink);
 
@@ -1002,9 +998,7 @@ exports.GitRepositoryExplorer = (function() {
 	// Git tags
 	
 	GitRepositoryExplorer.prototype.decorateTag = function(tag, deferred){
-		if(deferred == null){
-			deferred = new Deferred();
-		}
+		deferred = deferred || new Deferred();
 		
 		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").doGitLog(tag.CommitLocation + "?page=1&pageSize=1"), "Getting tag last commit " + tag.Name).then(
 			function(resp){
@@ -1067,7 +1061,7 @@ exports.GitRepositoryExplorer = (function() {
 						if (mode !== "full" && tags.length !== 0){ //$NON-NLS-0$
 							that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 							that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id,
-									{"ViewAllLink":"/git/git-repository.html#" + repository.TagLocation + "?page=1&pageSize=20", "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all tags"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									{"ViewAllLink":require.toUrl("git/git-repository.html#") + repository.TagLocation + "?page=1&pageSize=20", "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all tags"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						}
 		
 						if (tags.length === 0) {
@@ -1132,7 +1126,7 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var link = document.createElement("a");
 		link.className = "navlinkonpage";
-		link.href = "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1";
+		link.href = require.toUrl("git/git-commit.html#") + commit.Location + "?page=1&pageSize=1";
 		link.textContent = commit.Message;
 		description.appendChild(link);
 		
@@ -1251,7 +1245,7 @@ exports.GitRepositoryExplorer = (function() {
 
 					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id,
-							{"ViewAllLink":"/git/git-repository.html#" + configLocation, "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all configuration entries"]}, that, "button"); //$NON-NLS-6$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							{"ViewAllLink":"git/git-repository.html#" + configLocation, "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all configuration entries"]}, that, "button"); //$NON-NLS-6$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				
 				if (mode === "full"){ //$NON-NLS-0$

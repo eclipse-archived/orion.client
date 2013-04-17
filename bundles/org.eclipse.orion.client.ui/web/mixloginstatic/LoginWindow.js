@@ -419,7 +419,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'per
 		checkemailrequest.setRequestHeader("Orion-Version", "1");
 		checkemailrequest.send();
 
-		xhr("GET", "/server-status.json", { //$NON-NLS-0$
+		xhr("GET", "../server-status.json", { //$NON-NLS-0$
 			timeout: 15000
 		}).then(function(result) {
 			var results = JSON.parse(result.response);

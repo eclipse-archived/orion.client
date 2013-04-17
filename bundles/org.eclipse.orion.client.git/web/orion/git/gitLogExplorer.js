@@ -424,7 +424,7 @@ exports.GitLogExplorer = (function() {
 
 					var titleLink = document.createElement("a");
 					titleLink.className = "navlinkonpage";
-					titleLink.href = "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1";
+					titleLink.href = require.toUrl("git/git-commit.html#") + commit.Location + "?page=1&pageSize=1";
 					titleLink.textContent = commit.Message;
 					detailsView.appendChild(titleLink);
 					
