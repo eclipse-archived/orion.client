@@ -685,8 +685,11 @@ textarea.parameterInput {
 	z-index:100;
 	cursor: default;
 	overflow: auto;
-	height: 150px;
-	width: 350px;
+	min-width: 70px;
+	min-height: 50px;
+	max-width: 350px;
+	max-height: 150px;
+	white-space: nowrap;
 }
 
 .contentassist:focus {

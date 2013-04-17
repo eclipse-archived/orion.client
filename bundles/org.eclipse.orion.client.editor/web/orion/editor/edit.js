@@ -265,7 +265,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 			keyModeStack.push(genericBindings);
 
 			// Linked Mode
-			var linkedMode = new mEditorFeatures.LinkedMode(editor, undoStack);
+			var linkedMode = new mEditorFeatures.LinkedMode(editor, undoStack, contentAssist);
 			keyModeStack.push(linkedMode);
 			
 			// create keybindings for source editing

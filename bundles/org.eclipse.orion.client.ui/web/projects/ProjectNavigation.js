@@ -11,9 +11,9 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 'orion/commands', 'orion/keyBinding', 'orion/selection', 'orion/section', 'projects/DriveTreeRenderer', 'orion/Deferred', 'orion/fileCommands', 'projects/ProjectExplorer' ], 
+define(['i18n!orion/settings/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/keyBinding', 'orion/selection', 'orion/section', 'projects/DriveTreeRenderer', 'orion/Deferred', 'orion/fileCommands', 'orion/extensionCommands', 'projects/ProjectExplorer' ], 
 	
-	function(messages, require, lib, mCommands, mKeyBinding, mSelection, mSection, DriveTreeRenderer, Deferred, mFileCommands, ProjectExplorer ) {
+	function(messages, lib, mCommands, mKeyBinding, mSelection, mSection, DriveTreeRenderer, Deferred, mFileCommands, ExtensionCommands, ProjectExplorer ) {
 
 		function ProjectNavigation( project, workspace, anchor, serviceRegistry, commandService, progressService, fileClient, contentTypeService, projectDataManager ){
 		
@@ -244,7 +244,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 			// bring in the standard navigator commands
 			// Contribute the navigator commands that don't have to do with SFTP or other import/export since presumably drives handle that already.
 			mFileCommands.createFileCommands(this.serviceRegistry, this.commandService, this.drivesExplorer, this.fileClient);
-			mFileCommands.createAndPlaceFileCommandsExtension(this.serviceRegistry, this.commandService, this.drivesExplorer, this.drivesSection.actionsNode.id, this.drivesSection.selectionNode.id, "orion.driveSelectionGroup");  //$NON-NLS-0$
+			ExtensionCommands.createAndPlaceFileCommandsExtension(this.serviceRegistry, this.commandService, this.drivesExplorer, this.drivesSection.actionsNode.id, this.drivesSection.selectionNode.id, "orion.driveSelectionGroup");  //$NON-NLS-0$
 			var menuid = this.drivesSection.selectionNode.id;
 			this.commandService.registerCommandContribution(menuid, "orion.makeFavorite", 1, "orion.driveSelectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var binding = new mKeyBinding.KeyBinding(113);
