@@ -1,4 +1,4 @@
-\/*******************************************************************************
+/*******************************************************************************
  * @license
  * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
@@ -18,11 +18,11 @@ define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/Even
         'orion/editor/textView', 'orion/editor/textModel',
         'orion/editor/projectionTextModel', 'orion/keyBinding','orion/searchAndReplace/textSearcher',
         'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel', 'orion/objects',
-        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser', 'edit/editorPreferences'],
+        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser', 'edit/editorPreferences', 'orion/sidebar'],
 		function(messages, require, Deferred, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, objects, mThemePreferences, mThemeData, mThemeChooser, mEditorPreferences) {
+				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, objects, mThemePreferences, mThemeData, mThemeChooser, mEditorPreferences, Sidebar) {
 	
 var exports = exports || {};
 	
@@ -51,8 +51,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 	}());
-	
-	var outlineDomNode = lib.node("outline"), //$NON-NLS-0$
+
+	var sidebarDomNode = lib.node("outline"), //$NON-NLS-0$
 		editorDomNode = lib.node("editor"), //$NON-NLS-0$
 		searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
 
@@ -535,101 +535,18 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
 	});
 
-	// Sidebar factory
-	var Sidebar = (function() {
-		function Sidebar(inputManager) {
-			this.filteredProviders = [];
-			this.outliner = null;
+	var sidebar = new Sidebar({
+		commandRegistry: commandRegistry,
+		contentTypeRegistry: contentTypeService,
+		inputManager: inputManager,
+		editor: editor,
+		fileClient: fileClient,
+		outlineService: outlineService,
+		parentNode: sidebarDomNode,
+		selection: selection,
+		serviceRegistry: serviceRegistry
+	});
 
-			// TODO mini nav
-
-			// Create outliner "gadget"
-			try {
-				this.outliner = new mOutliner.Outliner({parent: outlineDomNode,
-					serviceRegistry: serviceRegistry,
-					outlineService: serviceRegistry.getService("orion.edit.outline"), //$NON-NLS-0$
-					commandService: commandRegistry,
-					selectionService: selection,
-					onSelectedProvider: function(/**ServiceReference*/ outlineProvider) { //$NON-NLS-0$
-						outlineService.setProvider(outlineProvider);
-						outlineService.emitOutline(editor.getText(), editor.getTitle());
-					}
-				});
-				if (this.filteredProviders) {
-					this.outliner.setOutlineProviders(this.filteredProviders);
-				}
-			} catch (e) {
-				if (typeof console !== "undefined" && console) { console.log(e && e.stack); }
-			}
-
-			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-				outlineService.emitOutline(editor.getText(), editor.getTitle());
-			});
-			var _self = this;
-			inputManager.addEventListener("ContentTypeChanged", function(event) {
-				_self.setContentType(event.contentType, event.location);
-			});
-		}
-		/**
-		 * Called when the inputManager's contentType has changed.
-		 * @param {String} fileContentType
-		 * @param {String} title TODO this is deprecated, should be removed along with "pattern" property of outliners.
-		 */
-		Sidebar.prototype.setContentType = function(fileContentType, title) {
-			var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner"); //$NON-NLS-0$
-			var filteredProviders = this.filteredProviders = [];
-			var i;
-			for (i=0; i < outlineProviders.length; i++) {
-				var serviceReference = outlineProviders[i],
-				    contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
-				    pattern = serviceReference.getProperty("pattern"); // for backwards compatibility //$NON-NLS-0$
-				var isSupported = false;
-				if (contentTypeIds) {
-					isSupported = contentTypeIds.some(function(contentTypeId) {
-						return contentTypeService.isExtensionOf(fileContentType, contentTypeId);
-					});
-				} else if (pattern && new RegExp(pattern).test(title)) {
-					isSupported = true;
-				}
-				if (isSupported) {
-					filteredProviders.push(serviceReference);
-				}
-			}
-			var deferreds = []; 
-			for(i=0; i<filteredProviders.length; i++){
-				if(filteredProviders[i].getProperty("nameKey") && filteredProviders[i].getProperty("nls")){ //$NON-NLS-1$ //$NON-NLS-0$
-					var deferred = new Deferred();
-					deferreds.push(deferred);
-					var provider = filteredProviders[i];
-					var getDisplayName = function(commandMessages) { //$NON-NLS-0$
-						this.provider.displayName = commandMessages[provider.getProperty("nameKey")]; //$NON-NLS-0$
-						this.deferred.resolve();
-					};
-					i18nUtil.getMessageBundle(provider.getProperty("nls")).then(getDisplayName.bind({provider: provider, deferred: deferred}), deferred.reject); //$NON-NLS-0$
-				} else {
-					filteredProviders[i].displayName = filteredProviders[i].getProperty("name"); //$NON-NLS-0$
-				}
-			}
-			if (deferreds.length===0) {
-				outlineService.setOutlineProviders(filteredProviders);
-				if (this.outliner) {
-					this.outliner.setOutlineProviders(filteredProviders);
-				}
-			} else {
-				var _self = this;
-				Deferred.all(deferreds, function(error) { return error; }).then(function(){
-					outlineService.setOutlineProviders(filteredProviders);
-					if (_self.outliner) {
-						_self.outliner.setOutlineProviders(filteredProviders);
-					}
-				});
-			}
-		};
-		return Sidebar;
-	}());
-	var sidebar = new Sidebar(inputManager);
-
-	// end sidebar
 	window.onbeforeunload = function() {
 		if (editor.isDirty()) {
 			 return messages["There are unsaved changes."];
