@@ -1,4 +1,5 @@
 /*global console define*/
+/*jslint browser:true*/
 define(['orion/Deferred', 'orion/objects', 'orion/outliner', 'orion/explorers/explorer-table', 'orion/i18nUtil', 'orion/webui/littlelib',
 		'orion/widgets/nav/mini-nav'],
 		function(Deferred, objects, mOutliner, mExplorer, i18nUtil, lib, MiniNavRenderer) {
@@ -16,8 +17,8 @@ define(['orion/Deferred', 'orion/objects', 'orion/outliner', 'orion/explorers/ex
 	 * @param {orion.serviceregistry.ServiceRegistry} params.serviceRegistry
 	 *
 	 * TODO separate UI from rest of Sidebar
-	 * @param {Element|String} params.toolbarNode
-	 * @param {Element|String} params.parentNode
+	 * @param {Element|String} params.parent
+	 * @param {Element|String} params.toolbar
 	 */
 	function Sidebar(params) {
 		var commandRegistry = params.commandRegistry;
@@ -26,18 +27,20 @@ define(['orion/Deferred', 'orion/objects', 'orion/outliner', 'orion/explorers/ex
 		var fileClient = params.fileClient;
 		var inputManager = this.inputManager = params.inputManager;
 		var outlineService = this.outlineService = params.outlineService;
-		this.parentNode = lib.node(params.parentNode);
+		var parentNode = this.parentNode = lib.node(params.parent);
+		var toolbarNode = this.toolbarNode = lib.node(params.toolbar);
 		var selection = params.selection;
 		var serviceRegistry = this.serviceRegistry = params.serviceRegistry;
 
-		// Create child gadgets
-		this.viewModes = {
-			nav: 0,
-			outliner1: 0,
-			outliner2: 0
-		};
+		// set up toolbar contribution area for viewmodes
+		var modeContributionToolbar = document.createElement("div"); //$NON-NLS-0$
+		modeContributionToolbar.id = toolbarNode.id + "childModes"; //$NON-NLS-0$
+		modeContributionToolbar.classList.add("layoutLeft"); //$NON-NLS-0$
+		toolbarNode.appendChild(modeContributionToolbar);
+		var switcherToolbar = document.createElement("div"); //$NON-NLS-0$
+		switcherToolbar.classList.add("layoutRight"); //$NON-NLS-0$
+		toolbarNode.appendChild(switcherToolbar);
 
-		// Mini-nav. TODO can we move the miniNavExplorer into mini-nav.js?
 		this.miniNavExplorer = new mExplorer.FileExplorer({
 			selection: this.drivesSelection,
 			serviceRegistry: serviceRegistry,
@@ -50,12 +53,14 @@ define(['orion/Deferred', 'orion/objects', 'orion/outliner', 'orion/explorers/ex
 				return renderer;
 		}}); //$NON-NLS-0$
 
-		// TODO move Outliner filtering into outliner.js
+		// TODO move this state into outliner.js somewhere.
+		// Kind of strange -- the sidebar is expected to drive the outline service
 		this.filteredProviders = [];
 		this.outliner = null;
 		try {
 			this.outliner = new mOutliner.Outliner({
-				parent: this.parentNode,
+				parent: parentNode,
+				toolbar: modeContributionToolbar,
 				serviceRegistry: serviceRegistry,
 				outlineService: outlineService,
 				commandService: commandRegistry,
@@ -71,10 +76,10 @@ define(['orion/Deferred', 'orion/objects', 'orion/outliner', 'orion/explorers/ex
 		} catch (e) {
 			if (typeof console !== "undefined" && console) { console.log(e && e.stack); } //$NON-NLS-0$
 		}
-
 		editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			outlineService.emitOutline(editor.getText(), editor.getTitle()); //$NON-NLS-0$
 		});
+
 		var _self = this;
 		inputManager.addEventListener("ContentTypeChanged", function(event) {
 			_self.setContentType(event.contentType, event.location);
@@ -92,7 +97,8 @@ define(['orion/Deferred', 'orion/objects', 'orion/outliner', 'orion/explorers/ex
 		 * @param {String} title TODO this is deprecated, should be removed along with "pattern" property of outliners.
 		 */
 		setContentType: function(fileContentType, title) {
-			// This needs to go into the Outliner somewhere
+			// TODO! This outline filtering crud needs to go into outliner.js
+
 			var outlineProviders = this.serviceRegistry.getServiceReferences("orion.edit.outliner"); //$NON-NLS-0$
 			var filteredProviders = this.filteredProviders = [];
 			var _self = this;

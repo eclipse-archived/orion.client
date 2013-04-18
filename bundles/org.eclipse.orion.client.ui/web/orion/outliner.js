@@ -151,7 +151,8 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 	 * @class An Outliner is a visual component that renders an itemized overview of a resource and acts as 
 	 * a selection provider on that resource. The itemized overview is obtained from the {@link orion.outliner.OutlineService}.
 	 * @param {Object} options The options object
-	 * @param {Object} options.parent The parent DOM element to put this outliner inside
+	 * @param {Element} options.parent The parent DOM element to put this outliner inside.
+	 * @param {Element} options.toolbar The DOM element to render toolbar commands in.
 	 * @param {orion.serviceRegistry.ServiceRegistry} options.serviceRegistry The service registry.
 	 * @param {orion.commands.CommandService} options.commandService
 	 * @param {Service of type orion.outliner.OutlineService} options.outlineService The outline service to use.
@@ -163,11 +164,11 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 	}
 	Outliner.prototype = /** @lends orion.outliner.Outliner.prototype */ {
 		_init: function(options) {
-			var parent = options.parent;
-			parent = lib.node(parent);
+			var parent = lib.node(options.parent), toolbar = lib.node(options.toolbar);
 			if (!parent) { throw new Error("no parent"); } //$NON-NLS-0$
 			if (!options.outlineService) {throw new Error("no outline service"); } //$NON-NLS-0$
 			this._parent = parent;
+			this._toolbar = toolbar;
 			this._serviceRegistry = options.serviceRegistry;
 			this._outlineService = options.outlineService;
 			this._commandService = options.commandService;
@@ -177,7 +178,7 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 			Deferred.when(self._outlineService, function(service) {
 				service.addEventListener("outline", function(event) { //$NON-NLS-0$
 					self.providerId = event.providerId;
-					self._renderHeadingAndMenu(self.outlineProviders);
+					self._renderMenu(self.outlineProviders);
 					self._renderOutline(event.outline, event.title);
 				});
 			});
@@ -209,20 +210,21 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 		},
 		setOutlineProviders: function(providers) {
 			this.outlineProviders = providers;
-			this._renderHeadingAndMenu(this.outlineProviders);
+			this._renderMenu(this.outlineProviders);
 		},
 		_renderOutline: function(outlineModel, title) {
-			var contentParent = lib.node("outlinerHeading"); //$NON-NLS-0$
-			if (!contentParent) {
-				this._renderHeadingAndMenu();
-			}
-			var contentNode = lib.node("outlineSectionContent"); //$NON-NLS-0$
+//			var contentParent = this._parent;
+//			if (!contentParent) {
+//				this._commandService.registerCommandContribution(this._toolbar.id, "eclipse.edit.outline.switch", 1); //$NON-NLS-0$
+//				this._renderMenu();
+//			}
+			var contentNode = this._parent;
 			lib.empty(contentNode);
 			outlineModel = outlineModel instanceof Array ? outlineModel : [outlineModel];
 			if (outlineModel) {
 				var treeModel = new OutlineModel(outlineModel);
 				this.explorer = new OutlineExplorer(this._serviceRegistry, this._selectionService, title);
-				this.explorer.createTree("outlineSectionContent", treeModel, {selectionPolicy: "cursorOnly", setFocus: false}); //$NON-NLS-1$ //$NON-NLS-0$
+				this.explorer.createTree(contentNode, treeModel, {selectionPolicy: "cursorOnly", setFocus: false}); //$NON-NLS-1$ //$NON-NLS-0$
 				treeModel.doExpansions(this.explorer.myTree);
 			}
 		},
@@ -238,19 +240,23 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 			}
 			return choices;
 		},
-		_renderHeadingAndMenu: function(/**ServiceReference*/ outlineProviders) {
-			if (!this.outlineSection) {
-				this.outlineSection = new mSection.Section(this._parent, {
-					id: "outlinerHeading", //$NON-NLS-0$
-					title: messages["Outliner"],
-					content: '<div id="outlineSectionContent"></div>', //$NON-NLS-0$
-					useAuxStyle: true
-				});
-				this._commandService.registerCommandContribution(this.outlineSection.selectionNode.id, "eclipse.edit.outline.switch", 1); //$NON-NLS-0$
+		_renderMenu: function(/**ServiceReference*/ outlineProviders) {
+//			if (!outlineSection) {
+//				outlineSection = new mSection.Section(this._parent, {
+//					id: "outlinerHeading", //$NON-NLS-0$
+//					title: messages["Outliner"],
+//					content: '<div id="outlineSectionContent"></div>', //$NON-NLS-0$
+//					useAuxStyle: true
+//				});
+//			}
+			var toolbarNode = this._toolbar;
+			if (!this._registered) {
+				this._commandService.registerCommandContribution(toolbarNode.id, "eclipse.edit.outline.switch", 1); //$NON-NLS-0$
+				this._registered = /*true */ false;
 			}
-			this._commandService.destroy(this.outlineSection.selectionNode.id);
+			this._commandService.destroy(toolbarNode/*.id*/);
 			if (outlineProviders.length > 1) {
-				this._commandService.renderCommands(this.outlineSection.selectionNode.id, this.outlineSection.selectionNode.id, {}, this, "button"); //$NON-NLS-0$
+				this._commandService.renderCommands(toolbarNode.id, toolbarNode, {}, this, "button"); //$NON-NLS-0$
 			}
 		}
 	};
