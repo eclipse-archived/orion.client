@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright (C) 2013, SAP AG and others.
+
+   All rights reserved. This program and the accompanying materials
+   are made available under the terms of the Eclipse Public License v1.0
+   which accompanies this distribution, and is available at
+   http://www.eclipse.org/legal/epl-v10.html
+
+   Contributors:
+      Matthias Sohn - initial implementation
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<prerequisites>
+		<maven>3.0</maven>
+	</prerequisites>
+
+	<groupId>org.eclipse.orion</groupId>
+	<artifactId>org.eclipse.orion.client.parent</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Orion Client Parent</name>
+
+	<mailingLists>
+		<mailingList>
+			<name>orion-dev Mailing List</name>
+			<post>orion-dev@eclipse.org</post>
+			<subscribe>https://dev.eclipse.org/mailman/listinfo/orion-dev</subscribe>
+			<unsubscribe>https://dev.eclipse.org/mailman/listinfo/orion-dev</unsubscribe>
+			<archive>http://dev.eclipse.org/mhonarc/lists/orion-dev</archive>
+		</mailingList>
+	</mailingLists>
+
+	<issueManagement>
+		<url>https://bugs.eclipse.org/bugs/buglist.cgi?query_format=advanced;product=Orion;classification=Eclipse</url>
+		<system>Bugzilla</system>
+	</issueManagement>
+
+	<licenses>
+		<license>
+			<name>Eclipse Public License v1.0</name>
+			<comments>
+       All rights reserved.
+
+       This program and the accompanying materials are made
+       available under the terms of the Eclipse Public License v1.0
+       which accompanies this distribution, and is available at
+       http://www.eclipse.org/legal/epl-v10.htm
+      </comments>
+		</license>
+	</licenses>
+
+	<properties>
+		<orion-version>1.0.0-SNAPSHOT</orion-version>
+		<tycho-version>0.16.0</tycho-version>
+		<tycho-extras-version>0.16.0</tycho-extras-version>
+		<tycho.scmUrl>scm:git:http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git</tycho.scmUrl>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java-version>1.6</java-version>
+	</properties>
+
+	<modules>
+		<module>bundles/org.eclipse.orion.client.core</module>
+		<module>bundles/org.eclipse.orion.client.editor</module>
+		<module>bundles/org.eclipse.orion.client.git</module>
+		<module>bundles/org.eclipse.orion.client.ui</module>
+		<module>bundles/org.eclipse.orion.client.users</module>
+	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>${java-version}</source>
+					<target>${java-version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<source>${java-version}</source>
+					<target>${java-version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-source-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<executions>
+						<execution>
+							<id>attach-source</id>
+							<goals>
+								<goal>plugin-source</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-packaging-plugin</artifactId>
+					<version>${tycho-version}</version>
+					<configuration>
+						<format>'v'yyyyMMdd-HHmm</format>
+						<sourceReferences>
+							<generate>true</generate>
+						</sourceReferences>
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.eclipse.tycho.extras</groupId>
+							<artifactId>tycho-sourceref-jgit</artifactId>
+							<version>${tycho-extras-version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.5</version>
+					<configuration>
+						<encoding>ISO-8859-1</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.7</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

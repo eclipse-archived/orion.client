@@ -18,14 +18,14 @@
 
 	<groupId>org.eclipse.orion</groupId>
 	<artifactId>org.eclipse.orion.client.editor</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<parent>
-        <groupId>org.eclipse.orion</groupId>
-        <artifactId>org.eclipse.orion.parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../../../org.eclipse.orion.server</relativePath>
-    </parent>
+		<groupId>org.eclipse.orion</groupId>
+		<artifactId>org.eclipse.orion.client.parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../..</relativePath>
+	</parent>
 
 </project>
