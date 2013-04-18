@@ -499,21 +499,23 @@ orion.TextSearcher = (function() {
 					remove.push(annotation);
 				}
 			}
-			var searchStr = document.getElementById("localSearchFindWith").value; //$NON-NLS-0$
-			if(singleResult && searchStr) {
-				iter = this._editor.getModel().find({
-					string: searchStr,
-					regex: this._useRegExp,
-					wholeWord: this._wholeWord,
-					caseInsensitive: this._ignoreCase
-				});
-				add = [];
-				while (iter.hasNext()) {
-					var match = iter.next();
-					add.push(mAnnotations.AnnotationType.createAnnotation(type, match.start, match.end));
+			if (this.visible()) {
+				var searchStr = document.getElementById("localSearchFindWith").value; //$NON-NLS-0$
+				if(singleResult && searchStr) {
+					iter = this._editor.getModel().find({
+						string: searchStr,
+						regex: this._useRegExp,
+						wholeWord: this._wholeWord,
+						caseInsensitive: this._ignoreCase
+					});
+					add = [];
+					while (iter.hasNext()) {
+						var match = iter.next();
+						add.push(mAnnotations.AnnotationType.createAnnotation(type, match.start, match.end));
+					}
 				}
+				annotationModel.replaceAnnotations(remove, add);
 			}
-			annotationModel.replaceAnnotations(remove, add);
 		}
 	};
 	return TextSearcher;
