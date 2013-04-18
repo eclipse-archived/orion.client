@@ -1,6 +1,6 @@
 .textview {
 	background-color: white;
-	font-family: 'Lucida Sans Unicode', 'Lucida Grande', Verdana, Arial, Helvetica, Myriad, Tahoma, clean, sans-serif;
+	font-family: "Menlo", "sans-serif", "Consolas", "Vera Mono", "monospace";
 	font-size: 10pt;
 	min-width: 50px;
 	min-height: 50px;

@@ -17,4 +17,3 @@ define(['orion/bootstrap', 'edit/setup'], function(mBootstrap, mSetup) {
 		mSetup.setUpEditor(serviceRegistry, preferences, false);  // not read only
 	});
 });
-
