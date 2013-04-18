@@ -1,9 +1,9 @@
 .token_singleline_comment {
-	color: green;
+	color: #3C802C;
 }
 
 .token_multiline_comment {
-	color: green;
+	color: #3C802C;
 }
 
 .token_doc_comment {
@@ -27,7 +27,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 }
 
 .token_string {
-	color: blue;
+	color: #446fbd;
 }
 
 .token_number {
@@ -35,7 +35,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 }
 
 .token_keyword {
-	color: darkred;
+	color: #CC4C07;
 	font-weight: bold;
 }
 
