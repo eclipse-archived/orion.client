@@ -52,7 +52,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 	}());
 
-	var sidebarDomNode = lib.node("outline"), //$NON-NLS-0$
+	var sidebarDomNode = lib.node("sidebar"), //$NON-NLS-0$
+	    sidebarToolbar = lib.node("sidebarToolbar"), //$NON-NLS-0$
 		editorDomNode = lib.node("editor"), //$NON-NLS-0$
 		searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
 
@@ -529,7 +530,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	// Put the make favorite command in our toolbar."
 	commandRegistry.registerCommandContribution("pageActions", "orion.makeFavorite", 2); //$NON-NLS-1$ //$NON-NLS-0$
 
-		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
@@ -542,9 +542,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		editor: editor,
 		fileClient: fileClient,
 		outlineService: outlineService,
-		parentNode: sidebarDomNode,
 		selection: selection,
-		serviceRegistry: serviceRegistry
+		serviceRegistry: serviceRegistry,
+		parentNode: sidebarDomNode,
+		toolbarNode: sidebarToolbar
 	});
 
 	window.onbeforeunload = function() {
