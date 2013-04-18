@@ -733,6 +733,11 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 					result.styleClass = style.styleClass;
 				}
 				var prop;
+				if (style.tagName) {
+					if (!result.tagName) {
+						result.tagName = style.tagName;
+					}
+				}
 				if (style.style) {
 					if (!result.style) { result.style  = {}; }
 					for (prop in style.style) {
