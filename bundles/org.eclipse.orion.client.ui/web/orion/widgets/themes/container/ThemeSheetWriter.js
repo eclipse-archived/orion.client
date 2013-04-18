@@ -321,7 +321,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			auxpane.style.background ='-moz-linear-gradient(top, ' + this.sidepanel + ' 0%, ' + this.sidepanel + ' 100%)';
 			auxpane.style.overflowX = 'auto';
 			auxpane.style.minWidth = '200px';
-			auxpane.style.paddingTop = '16px';
+			/*auxpane.style.paddingTop = '16px';*/
 			
 			styles.push( auxpane );
 			

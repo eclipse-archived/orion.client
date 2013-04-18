@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- /*global define document window*/
-
+/*global define document window*/
+/*jslint sub:true*/
 define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/uiUtils', 'orion/section', 'orion/explorers/explorer', 'orion/commands', 'orion/URITemplate', 'orion/EventTarget'], function(messages, Deferred, lib, mUIUtils, mSection, mExplorer, mCommands, URITemplate, EventTarget) {
 
 	function OutlineRenderer (options, explorer, title, selectionService) {
