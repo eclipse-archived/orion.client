@@ -91,6 +91,8 @@ define({
 	"Reload all": "Reload all",
 	"Reload all installed plugins": "Reload all installed plugins",
 	"Create a new Orion Plugin": "Create a new Orion Plugin",
+	"Find More Orion Plugins": "Find More Orion Plugins",
+	"Get Plugins": "Get Plugins",
 	"Reload": "Reload",
 	"Reload the plugin": "Reload the plugin",
 	"Delete": "Delete",

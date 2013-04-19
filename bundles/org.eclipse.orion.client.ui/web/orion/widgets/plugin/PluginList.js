@@ -16,13 +16,15 @@
    to contain PluginEntry widgets */
 
 define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/commonHTMLFragments', 'orion/objects', 'orion/webui/littlelib',
-		'orion/widgets/plugin/PluginEntry', 'orion/explorers/explorer'
-		], function(messages, require, Deferred, mCommands, mCommandRegistry, mHTMLFragments, objects, lib, PluginEntry, mExplorer) {
+		'orion/widgets/plugin/PluginEntry', 'orion/explorers/explorer', 'orion/URITemplate', 'orion/PageLinks'
+		], function(messages, require, Deferred, mCommands, mCommandRegistry, mHTMLFragments, objects, lib, PluginEntry, mExplorer, URITemplate, PageLinks) {
 
 	var Explorer = mExplorer.Explorer;
 	var SelectionRenderer = mExplorer.SelectionRenderer;
 
 	var defaultPluginURLs = {};
+	
+	var VERSION = "2.0";
 	
 	function _normalizeURL(location) {
 		if (location.indexOf("://") === -1) { //$NON-NLS-0$
@@ -146,6 +148,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			this.createElements();
 
 			this.updateToolbar();
+			
+			
+			var findMorePluginsCommand = new mCommands.Command({
+				name: messages['Get Plugins'],
+				tooltip: messages["Find More Orion Plugins"],
+				id: "orion.findMorePluginsCommand", //$NON-NLS-0$
+				hrefCallback: function(data){
+					return this.getPluginsLink(data.items);
+				}.bind(this)
+			});
+			
+			this.commandService.addCommand(findMorePluginsCommand);
+			this.commandService.registerCommandContribution("pluginCommands", "orion.findMorePluginsCommand", 1); //$NON-NLS-1$ //$NON-NLS-0$
 
 			// set up the toolbar level commands	
 			var installPluginCommand = new mCommands.Command({
@@ -162,8 +177,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 					}
 				}.bind(this)
 			});
+			
 			this.commandService.addCommand(installPluginCommand);
-			this.commandService.registerCommandContribution("pluginCommands", "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommandRegistry.URLBinding("installPlugin", "url")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			this.commandService.registerCommandContribution("pluginCommands", "orion.installPlugin", 2, /* not grouped */ null, false, /* no key binding yet */ null, new mCommandRegistry.URLBinding("installPlugin", "url")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var reloadAllPluginsCommand = new mCommands.Command({
 				name: messages["Reload all"],
 				tooltip: messages["Reload all installed plugins"],
@@ -172,7 +189,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			});
 			this.commandService.addCommand(reloadAllPluginsCommand);
 			// register these with the toolbar
-			this.commandService.registerCommandContribution("pluginCommands", "orion.reloadAllPlugins", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution("pluginCommands", "orion.reloadAllPlugins", 3); //$NON-NLS-1$ //$NON-NLS-0$
 
 			var createPluginCommand = new mCommands.Command({
 				name: messages['Create'],
@@ -183,7 +200,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				}.bind(this)
 			});
 			
-			this.commandService.addCommand(createPluginCommand);
+			this.commandService.addCommand(createPluginCommand);		
 	
 			if( this.includeMaker === true ){
 				this.commandService.registerCommandContribution("pluginCommands", "orion.createPlugin", 2); //$NON-NLS-1$ //$NON-NLS-0$
@@ -317,7 +334,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			}); // this will force a sync
 			
 			this.render();
-
+		},
+		
+		getPluginsLink: function( data ){		
+			var uriTemplate = "http://mamacdon.github.io/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}";
+			var template = new URITemplate(uriTemplate);
+			var url = decodeURIComponent(template.expand({
+				OrionHome: PageLinks.getOrionHome()
+			}));
+			return url;
 		},
 
 		pluginError: function( error ){

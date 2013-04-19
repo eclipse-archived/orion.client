@@ -71,6 +71,9 @@ h2 {
 	margin-right:5px;
 }
 
+.toolbarTarget:focus{
+	outline:none;
+}
 
 .pageNav {
 	color: #808080;
