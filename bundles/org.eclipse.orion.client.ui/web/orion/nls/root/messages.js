@@ -90,7 +90,7 @@ define({
 	"Toggle side panel" : "Toggle side panel",
 	"Open or close the side panel": "Open or close the side panel",
 	"Projects" : "Projects",
-	"Toggle Outliner" : "Toggle Outliner",
+	"Toggle Sidebar" : "Toggle Sidebar",
 	"Sample HTML5 Site": "Sample HTML5 Site",
 	"Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.": "Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.",
 	"Sample Orion Plugin": "Sample Orion Plugin",
