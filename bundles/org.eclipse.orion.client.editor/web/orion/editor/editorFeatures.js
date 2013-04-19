@@ -132,7 +132,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 			return this.find(false);
 		},
-		find: function(forward) {
+		find: function(forward, lookAhead) {
 			if (!this.isActive()) {
 				return false;
 			}
@@ -145,13 +145,13 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			var start;
 			if (forward) {
 				if (this._success) {
-					start = editor.getSelection().start + 1;
+					start = editor.getSelection().start + (lookAhead ? 1 : 0);
 				} else {
 					start = 0;
 				}
 			} else {
 				if (this._success) {
-					start = editor.getCaretOffset() - prefix.length - 1;
+					start = editor.getCaretOffset() - prefix.length - (lookAhead ? 1 : 0);
 				} else {
 					start = model.getCharCount() - 1;
 				}
@@ -262,7 +262,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				if (!this._incrementalFind.isActive()) {
 					this._incrementalFind.setActive(true);
 				} else {
-					this._incrementalFind.find(true);
+					this._incrementalFind.find(true, true);
 				}
 				return true;
 			}.bind(this), {name: messages.incrementalFindKey});
@@ -657,10 +657,10 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		},
 		
 		lineUp: function() {
-			return this._incrementalFind.find(false);
+			return this._incrementalFind.find(false, true);
 		},
 		lineDown: function() {	
-			return this._incrementalFind.find(true);
+			return this._incrementalFind.find(true, true);
 		},
 		enter: function() {
 			return false;
