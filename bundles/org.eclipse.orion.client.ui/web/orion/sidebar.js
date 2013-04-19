@@ -1,15 +1,15 @@
 /*global console define*/
-/*jslint browser:true*/
-define(['orion/Deferred', 'orion/objects', 'orion/outliner', 'orion/explorers/explorer-table', 'orion/i18nUtil', 'orion/webui/littlelib',
-		'orion/widgets/nav/mini-nav'],
-		function(Deferred, objects, mOutliner, mExplorer, i18nUtil, lib, MiniNavRenderer) {
+/*jslint browser:true sub:true*/
+define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', 'orion/explorers/explorer-table', 'orion/webui/littlelib',
+		'orion/widgets/nav/mini-nav',
+		'i18n!orion/nls/messages'],
+		function(Deferred, objects, mCommands, mOutliner, mExplorer, lib, MiniNavRenderer, messages) {
 	/**
 	 * @name orion.sidebar.Sidebar
 	 * @class Sidebar that appears alongside an {@link orion.editor.Editor} in the Orion IDE.
 	 * @param {Object} params
 	 * @param {orion.commandRegistry.CommandRegistry} params.commandRegistry
 	 * @param {orion.core.ContentTypeService} params.contentTypeRegistry
-	 * @param {orion.editor.Editor} params.editor
 	 * @param {orion.fileClient.FileClient} params.fileClient
 	 * @param {orion.editor.InputManager} params.inputManager
 	 * @param {orion.outliner.OutlineService} params.outlineService
@@ -21,133 +21,172 @@ define(['orion/Deferred', 'orion/objects', 'orion/outliner', 'orion/explorers/ex
 	 * @param {Element|String} params.toolbar
 	 */
 	function Sidebar(params) {
-		var commandRegistry = params.commandRegistry;
-		var contentTypeRegistry = this.contentTypeRegistry = params.contentTypeRegistry;
-		var editor = this.editor = params.editor;
-		var fileClient = params.fileClient;
-		var inputManager = this.inputManager = params.inputManager;
-		var outlineService = this.outlineService = params.outlineService;
-		var parentNode = this.parentNode = lib.node(params.parent);
-		var toolbarNode = this.toolbarNode = lib.node(params.toolbar);
-		var selection = params.selection;
-		var serviceRegistry = this.serviceRegistry = params.serviceRegistry;
+		this.params = params;
+		this.commandRegistry = params.commandRegistry;
+		this.contentTypeRegistry = params.contentTypeRegistry;
+		this.editor = params.editor;
+		this.fileClient = params.fileClient;
+		this.inputManager = params.inputManager;
+		this.outlineService = params.outlineService;
+		this.parentNode = lib.node(params.parent);
+		this.toolbarNode = lib.node(params.toolbar);
+		this.selection = params.selection;
+		this.serviceRegistry = params.serviceRegistry;
+		this.viewModes = {};
+		this.activeViewMode = null;
+		this.switcherNode = null;
+	}
+	objects.mixin(Sidebar.prototype, /** @lends orion.sidebar.Sidebar.prototype */ {
+		show: function() {
+			if (this.created) {
+				return;
+			}
+			this.created = true;
+			var commandRegistry = this.commandRegistry;
+			var contentTypeRegistry = this.contentTypeRegistry;
+			var fileClient = this.fileClient;
+			var inputManager = this.inputManager;
+			var outlineService = this.outlineService;
+			var parentNode = this.parentNode;
+			var toolbarNode = this.toolbarNode;
+			var selection = this.selection;
+			var serviceRegistry = this.serviceRegistry;
 
-		// set up toolbar contribution area for viewmodes
-		var modeContributionToolbar = document.createElement("div"); //$NON-NLS-0$
-		modeContributionToolbar.id = toolbarNode.id + "childModes"; //$NON-NLS-0$
-		modeContributionToolbar.classList.add("layoutLeft"); //$NON-NLS-0$
-		toolbarNode.appendChild(modeContributionToolbar);
-		var switcherToolbar = document.createElement("div"); //$NON-NLS-0$
-		switcherToolbar.classList.add("layoutRight"); //$NON-NLS-0$
-		toolbarNode.appendChild(switcherToolbar);
+			// Create toolbar contribution area for use by viewmodes
+			var modeContributionToolbar = document.createElement("div"); //$NON-NLS-0$
+			modeContributionToolbar.id = toolbarNode.id + "childModes"; //$NON-NLS-0$
+			modeContributionToolbar.classList.add("layoutLeft"); //$NON-NLS-0$
+			modeContributionToolbar.classList.add("pageActions"); //$NON-NLS-0$
+			toolbarNode.appendChild(modeContributionToolbar);
+			var switcherNode = this.switcherNode = document.createElement("div"); //$NON-NLS-0$
+			switcherNode.classList.add("layoutRight"); //$NON-NLS-0$
+			switcherNode.classList.add("pageActions"); //$NON-NLS-0$
+			switcherNode.id = toolbarNode.id + "viewmodeSwitch"; //$NON-NLS-0$
+			toolbarNode.appendChild(switcherNode);
 
-		this.miniNavExplorer = new mExplorer.FileExplorer({
-			selection: this.drivesSelection,
-			serviceRegistry: serviceRegistry,
-			fileClient: fileClient,
-			parentId: "DriveContent", //$NON-NLS-0$
-			rendererFactory: function(explorer) { //$NON-NLS-0$
-				var renderer = new MiniNavRenderer({
-					checkbox: false,
-					cachePrefix: "Drives"}, explorer, commandRegistry, contentTypeRegistry); //$NON-NLS-0$
-				return renderer;
-		}}); //$NON-NLS-0$
+			var changeViewModeCommand = new mCommands.Command({
+				name: messages["View"],
+				tooltip: messages["ViewTooltip"],
+				id: "orion.sidebar.viewmode", //$NON-NLS-0$
+				visibleWhen: function(item) {
+					return true;
+				},
+				choiceCallback: this.viewModeMenuCallback.bind(this)
+			});
+			commandRegistry.addCommand(changeViewModeCommand);
+			commandRegistry.registerCommandContribution(switcherNode.id, "orion.sidebar.viewmode", 1); //$NON-NLS-0$
 
-		// TODO move this state into outliner.js somewhere.
-		// Kind of strange -- the sidebar is expected to drive the outline service
-		this.filteredProviders = [];
-		this.outliner = null;
-		try {
+			var _self = this;
+			// TODO refactor create and destroy into mini-nav.js
+			this.addViewMode("nav", { //$NON-NLS-0$
+				label: messages["Navigator"],
+				create: function() {
+					if (_self.miniNavExplorer) {
+						return;
+					}
+					_self.miniNavExplorer = new mExplorer.FileExplorer({
+						selection: this.drivesSelection,
+						serviceRegistry: serviceRegistry,
+						fileClient: fileClient,
+						parentId: parentNode,
+						rendererFactory: function(explorer) { //$NON-NLS-0$
+							var renderer = new MiniNavRenderer({
+								checkbox: false,
+								cachePrefix: "MiniNav"}, explorer, commandRegistry, contentTypeRegistry); //$NON-NLS-0$
+							return renderer;
+					}});
+				},
+				destroy: function() {
+				}
+			});
+
 			this.outliner = new mOutliner.Outliner({
 				parent: parentNode,
 				toolbar: modeContributionToolbar,
 				serviceRegistry: serviceRegistry,
+				contentTypeRegistry: contentTypeRegistry,
 				outlineService: outlineService,
 				commandService: commandRegistry,
 				selectionService: selection,
-				onSelectedProvider: function(/**ServiceReference*/ outlineProvider) { //$NON-NLS-0$
-					outlineService.setProvider(outlineProvider);
-					outlineService.emitOutline(editor.getText(), editor.getTitle());
-				}
+				inputManager: inputManager,
+				sidebar: this
 			});
-			if (this.filteredProviders) {
-				this.outliner.setOutlineProviders(this.filteredProviders);
+			/*
+			catch (e) {
+				if (typeof console !== "undefined" && console) { console.log(e && e.stack); } //$NON-NLS-0$
 			}
-		} catch (e) {
-			if (typeof console !== "undefined" && console) { console.log(e && e.stack); } //$NON-NLS-0$
-		}
-		editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-			outlineService.emitOutline(editor.getText(), editor.getTitle()); //$NON-NLS-0$
-		});
-
-		var _self = this;
-		inputManager.addEventListener("ContentTypeChanged", function(event) {
-			_self.setContentType(event.contentType, event.location);
-		});
-	}
-	objects.mixin(Sidebar.prototype, /** @lends orion.sidebar.Sidebar.prototype */ {
+			*/
+		},
+		/** @private */
+		viewModeMenuCallback: function() {
+			var _self = this;
+			return Object.keys(this.viewModes).map(function(modeId) {
+				var mode = _self.getViewMode(modeId);
+				return {
+					name: mode.label || modeId,
+					callback: _self.setViewMode.bind(_self, modeId)
+				};
+			});
+		},
 		addViewMode: function(id, mode) {
+			if (!id) {
+				throw new Error("Invalid id: " + id);
+			}
+			if (!mode || typeof mode !== "object") {
+				throw new Error("Invalid mode: "  + mode);
+			}
 			if (!Object.hasOwnProperty.call(this.viewModes, id)) {
 				this.viewModes[id] = mode;
 			}
 		},
-		/**
-		 * Called when the inputManager's contentType has changed.
-		 * @param {String} fileContentType
-		 * @param {String} title TODO this is deprecated, should be removed along with "pattern" property of outliners.
-		 */
-		setContentType: function(fileContentType, title) {
-			// TODO! This outline filtering crud needs to go into outliner.js
-
-			var outlineProviders = this.serviceRegistry.getServiceReferences("orion.edit.outliner"); //$NON-NLS-0$
-			var filteredProviders = this.filteredProviders = [];
-			var _self = this;
-			var i;
-			for (i=0; i < outlineProviders.length; i++) {
-				var serviceReference = outlineProviders[i],
-				    contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
-				    pattern = serviceReference.getProperty("pattern"); // for backwards compatibility //$NON-NLS-0$
-				var isSupported = false;
-				if (contentTypeIds) {
-					isSupported = contentTypeIds.some(function(contentTypeId) {
-						return _self.contentTypeRegistry.isExtensionOf(fileContentType, contentTypeId);
-					});
-				} else if (pattern && new RegExp(pattern).test(title)) {
-					isSupported = true;
-				}
-				if (isSupported) {
-					filteredProviders.push(serviceReference);
-				}
+		removeViewMode: function(id) {
+			var mode = this.getViewMode(id);
+			if (mode && typeof mode.destroy === "function") {
+				mode.destroy();
 			}
-			var deferreds = []; 
-			for(i=0; i<filteredProviders.length; i++){
-				if(filteredProviders[i].getProperty("nameKey") && filteredProviders[i].getProperty("nls")){ //$NON-NLS-1$ //$NON-NLS-0$
-					var deferred = new Deferred();
-					deferreds.push(deferred);
-					var provider = filteredProviders[i];
-					var getDisplayName = function(commandMessages) { //$NON-NLS-0$
-						this.provider.displayName = commandMessages[provider.getProperty("nameKey")]; //$NON-NLS-0$
-						this.deferred.resolve();
-					};
-					i18nUtil.getMessageBundle(provider.getProperty("nls")).then(getDisplayName.bind({provider: provider, deferred: deferred}), deferred.reject); //$NON-NLS-0$
-				} else {
-					filteredProviders[i].displayName = filteredProviders[i].getProperty("name"); //$NON-NLS-0$
-				}
+			delete this.viewModes[id];
+		},
+		getViewMode: function(id) {
+			if (Object.hasOwnProperty.call(this.viewModes, id)) {
+				return this.viewModes[id];
 			}
-			if (deferreds.length===0) {
-				this.outlineService.setOutlineProviders(filteredProviders);
-				if (this.outliner) {
-					this.outliner.setOutlineProviders(filteredProviders);
-				}
-			} else {
-				Deferred.all(deferreds, function(error) { return error; }).then(function(){
-					_self.outlineService.setOutlineProviders(filteredProviders);
-					if (_self.outliner) {
-						_self.outliner.setOutlineProviders(filteredProviders);
-					}
-				});
+			return null;
+		},
+		setViewMode: function(id) {
+			var mode = this.activeViewMode;
+			if (mode && typeof mode.destroy === "function") {
+				mode.destroy();
+			}
+			mode = this.activeViewMode = this.getViewMode(id);
+			if (mode && typeof mode.create === "function") {
+				mode.create();
+			}
+		},
+		renderViewModeMenu: function() {
+			var switcher = this.switcherNode;
+			this.commandRegistry.destroy(switcher);
+			var modes = Object.keys(this.viewModes);
+			if (modes.length > 1) {
+				this.commandRegistry.renderCommands(switcher.id, switcher, {}, this, "button"); //$NON-NLS-0$
 			}
 		}
 	});
+
+	/**
+	 * @name orion.sidebar.ViewMode
+	 * @class Interface for a view mode that can provide content to a {@link orion.sidebar.Sidebar}.
+	 */
+	/**
+	 * @name orion.sidebar.ViewMode#create
+	 * @function
+	 */
+	/**
+	 * @name orion.sidebar.ViewMode#destroy
+	 * @function
+	 */
+	/**
+	 * @name orion.sidebar.ViewMode#label
+	 * @type {String}
+	 */
 	return Sidebar;
 });

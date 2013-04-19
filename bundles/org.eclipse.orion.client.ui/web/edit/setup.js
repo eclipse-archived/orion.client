@@ -272,6 +272,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					}
 				}
 				return true;
+			},
+			getEditor: function() {
+				return this.editor;
 			}
 		});
 		return InputManager;
@@ -511,6 +514,20 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	
 	inputManager = new InputManager(editor);
 
+	var sidebar = new Sidebar({
+		commandRegistry: commandRegistry,
+		contentTypeRegistry: contentTypeService,
+		inputManager: inputManager,
+		editor: editor,
+		fileClient: fileClient,
+		outlineService: outlineService,
+		selection: selection,
+		serviceRegistry: serviceRegistry,
+		parent: sidebarDomNode,
+		toolbar: sidebarToolbar
+	});
+	sidebar.show();
+
 	// Establishing dependencies on registered services
 	serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 		editor.showProblems(event.problems);
@@ -538,19 +555,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
-	});
-
-	var sidebar = new Sidebar({
-		commandRegistry: commandRegistry,
-		contentTypeRegistry: contentTypeService,
-		inputManager: inputManager,
-		editor: editor,
-		fileClient: fileClient,
-		outlineService: outlineService,
-		selection: selection,
-		serviceRegistry: serviceRegistry,
-		parent: sidebarDomNode,
-		toolbar: sidebarToolbar
 	});
 
 	window.onbeforeunload = function() {
