@@ -1000,27 +1000,27 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				}
 
 				// Update position offsets for this change. Group changes are done in #onVerify
-				var deltaCount = 0, escapePositionDeltaCount;
+				var deltaCount = 0;
 				var changeCount = event.addedCharCount - event.removedCharCount;
-				var sortedPositions = positionChanged.positions, position;
+				var sortedPositions = positionChanged.positions, position, pos;
 				for (var i = 0; i < sortedPositions.length; ++i) {
-					position = sortedPositions[i].position;
-					if (escapePositionDeltaCount === undefined && model.escapePosition < position.offset) {
-						escapePositionDeltaCount = deltaCount;
-					}
+					pos = sortedPositions[i];
+					position = pos.position;
 					if (position === changed.position) {
 						position.offset += deltaCount;
 						position.length += changeCount;
 						deltaCount += changeCount;
 					} else {
 						position.offset += deltaCount;
+						if (pos.ansestor) {
+							position.length += changeCount;
+						}
+					}
+					if (pos.escape) {
+						pos.model.escapePosition = pos.position.offset;
 					}
 				}
-				if (escapePositionDeltaCount === undefined) {
-					escapePositionDeltaCount = deltaCount;
-				}
-				model.escapePosition += escapePositionDeltaCount;
-				this._updateAnnotations();
+				this._updateAnnotations(sortedPositions);
 			}.bind(this),
 
 			onVerify: function(event) {
@@ -1036,9 +1036,10 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 					return;
 				}
 				
-				// Make sure changes in a given group are compound
-				if (this._compoundChange) {
-					if (this._compoundChange.owner.group !== changed.group) {
+				// Make sure changes in a same group are compound
+				var undo = this._compoundChange;
+				if (undo) {
+					if (!(undo.owner.model === model && undo.owner.group === changed.group)) {
 						this.endUndo();
 						this.startUndo();
 					}
@@ -1049,43 +1050,41 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				model.selectedGroupIndex = changed.group;
 				
 				// Update position offsets taking into account all positions in the same group will change
-				var deltaCount = 0, escapePositionDeltaCount;
+				var deltaCount = 0;
 				var changeCount = event.text.length - (event.end - event.start);
-				var sortedPositions = positionChanged.positions, group, position;
+				var sortedPositions = positionChanged.positions, position, pos;
 				var deltaStart = event.start - changed.position.offset, deltaEnd = event.end - changed.position.offset;
 				for (var i = 0; i < sortedPositions.length; ++i) {
-					group = sortedPositions[i].group;
-					position = sortedPositions[i].position;
-					if (escapePositionDeltaCount === undefined && model.escapePosition < position.offset) {
-						escapePositionDeltaCount = deltaCount;
-					}
-					position._oldOffset = position.offset;
-					if (group === changed.group) {
+					pos = sortedPositions[i];
+					position = pos.position;
+					pos.oldOffset = position.offset;
+					if (pos.model === model && pos.group === changed.group) {
 						position.offset += deltaCount;
 						position.length += changeCount;
 						deltaCount += changeCount;
 					} else {
 						position.offset += deltaCount;
+						if (pos.ansestor) {
+							position.length += changed.count * changeCount;
+						}
+					}
+					if (pos.escape) {
+						pos.model.escapePosition = pos.position.offset;
 					}
 				}
-				if (escapePositionDeltaCount === undefined) {
-					escapePositionDeltaCount = deltaCount;
-				}
-				model.escapePosition += escapePositionDeltaCount;
 				
 				// Cancel this modification and apply same modification to all positions in group
 				this.ignoreVerify = true;
 				var textView = this.editor.getTextView();
 				for (i = sortedPositions.length - 1; i >= 0; i--) {
-					group = sortedPositions[i].group;
-					position = sortedPositions[i].position;
-					if (group === changed.group) {
-						textView.setText(event.text, position._oldOffset + deltaStart , position._oldOffset + deltaEnd);
+					pos = sortedPositions[i];
+					if (pos.model === model && pos.group === changed.group) {
+						textView.setText(event.text, pos.oldOffset + deltaStart , pos.oldOffset + deltaEnd);
 					}
 				}
 				this.ignoreVerify = false;
 				event.text = null;
-				this._updateAnnotations();
+				this._updateAnnotations(sortedPositions);
 			}.bind(this)
 		};
 	}
@@ -1131,6 +1130,8 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 			if (this.linkedModeModel) {
 				linkedModeModel.previousModel = this.linkedModeModel;
+				linkedModeModel.parentGroup = this.linkedModeModel.selectedGroupIndex;
+				this.linkedModeModel.nextModel = linkedModeModel;
 			}
 			this.linkedModeModel = linkedModeModel;
 			this.selectLinkedGroup(0);
@@ -1145,6 +1146,10 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 			var model = this.linkedModeModel;
 			this.linkedModeModel = model.previousModel;
+			model.parentGroup = model.previousModel = undefined;
+			if (this.linkedModeModel) {
+				this.linkedModeModel.nextModel = undefined;
+			}
 			if (!this.linkedModeModel) {
 				var textView = this.editor.getTextView();
 				textView.removeEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
@@ -1168,6 +1173,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				var self = this;
 				var model = this.linkedModeModel;
 				this._compoundChange = this.undoStack.startCompoundChange({
+					model: model,
 					group: model.selectedGroupIndex,
 					end: function() {
 						self._compoundChange = null;
@@ -1238,32 +1244,63 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 			this._updateAnnotations();
 		},
-		_getPositionChanged: function(model, start, end) {
-			var sortedPositions = [];
-			var groups = model.groups, i;
-			for (i = 0; i < groups.length; i++) {
+		_getModelPositions: function(all, model, delta) {
+			var groups = model.groups;
+			for (var i = 0; i < groups.length; i++) {
 				var positions = groups[i].positions;
 				for (var j = 0; j < positions.length; j++) {
-					sortedPositions.push({
+					var position = positions[j];
+					if (delta) {
+						position = {offset: position.offset + delta, length: position.length};
+					}
+					var pos = {
+						index: j,
 						group: i,
-						position: positions[j]
-					});
+						count: positions.length,
+						model: model,
+						position: position
+					};
+					all.push(pos);
+					if (model.nextModel && model.nextModel.parentGroup === i) {
+						pos.ansestor = true;
+						this._getModelPositions(all, model.nextModel, positions[j].offset - positions[0].offset);
+					}
 				}
 			}
-			sortedPositions.sort(function(a, b) {
+			if (model.escapePosition !== undefined) {
+				all.push({
+					escape: true,
+					model: model,
+					position: {offset: model.escapePosition, length: 0}
+				});
+			}
+		},
+		_getSortedPositions: function(model) {
+			var all = [];
+			// Get the root linked model
+			while (model.previousModel) {
+				model = model.previousModel;
+			}
+			// Get all positions under model expanding group positions of stacked linked modes
+			this._getModelPositions(all, model);
+			all.sort(function(a, b) {
 				return a.position.offset - b.position.offset;
 			});
-			var positionChanged;
-			for (i = 0; i < sortedPositions.length; i++) {
+			return all;
+		},
+		_getPositionChanged: function(model, start, end) {
+			var changed;
+			var sortedPositions = this._getSortedPositions(model);
+			for (var i = sortedPositions.length - 1; i >= 0; i--) {
 				var position = sortedPositions[i].position;
 				if (position.offset <= start && end <= position.offset + position.length) {
-					positionChanged = sortedPositions[i];
+					changed = sortedPositions[i];
 					break;
 				}
 			}
-			return {position: positionChanged, positions: sortedPositions};
+			return {position: changed, positions: sortedPositions};
 		},
-		_updateAnnotations: function() {
+		_updateAnnotations: function(positions) {
 			var annotationModel = this.editor.getAnnotationModel();
 			if (!annotationModel) { return; }
 			var remove = [], add = [];
@@ -1280,22 +1317,21 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 			var model = this.linkedModeModel;
 			if (model) {
-				var groups = model.groups;
-				for (var j = 0; j < groups.length; j++) {
-					var positions = groups[j].positions;
-					for (var i = 0; i < positions.length; i++) {
-						var position = positions[i];
-						var type = mAnnotations.AnnotationType.ANNOTATION_LINKED_GROUP;
-						if (j === model.selectedGroupIndex) {
-							if (i === 0) {
-								type = mAnnotations.AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP;
-							} else {
-								type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP;
-							}
+				positions = positions || this._getSortedPositions(model);
+				for (var i = 0; i < positions.length; i++) {
+					var position = positions[i];
+					if (position.model !== model) { continue; }
+					var type = mAnnotations.AnnotationType.ANNOTATION_LINKED_GROUP;
+					if (position.group === model.selectedGroupIndex) {
+						if (position.index === 0) {
+							type = mAnnotations.AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP;
+						} else {
+							type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP;
 						}
-						annotation = mAnnotations.AnnotationType.createAnnotation(type, position.offset, position.offset + position.length, "");
-						add.push(annotation);
 					}
+					position = position.position;
+					annotation = mAnnotations.AnnotationType.createAnnotation(type, position.offset, position.offset + position.length, "");
+					add.push(annotation);
 				}
 			}
 			annotationModel.replaceAnnotations(remove, add);
