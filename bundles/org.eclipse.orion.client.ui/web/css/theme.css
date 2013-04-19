@@ -140,6 +140,10 @@ a.currentLocation:hover {
 	border-bottom: 1px solid #ebebeb;
 }
 
+.sidebarToolbar {
+	padding-right: 4px;
+}
+
 /* Searchbox in the top navigation area seems a difficult thing to 
    get right. I've worked with a range of colors. What I notice is that
    if the edges are curved, then it seems to need a lighter shade. That
