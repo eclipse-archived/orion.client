@@ -131,29 +131,31 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			var result = [];
 			result.push("");
 			
-			//view container
-			var family = settings.fontFamily;
-			if (family === "sans serif") { //$NON-NLS-0$
-				family = '"Menlo", "Consolas", "Vera Mono", "monospace"'; //$NON-NLS-0$
-			} else {
-				family = 'monospace'; //$NON-NLS-0$
-			}	
-			
 			result.push("." + themeClass + " {"); //$NON-NLS-1$ //$NON-NLS-0$
-			result.push("\tfont-family: " + family + ";"); //$NON-NLS-1$ //$NON-NLS-0$
-			result.push("\tfont-size: " + settings.fontSize + ";"); //$NON-NLS-1$ //$NON-NLS-0$
-			result.push("\tcolor: " + settings.text + ";"); //$NON-NLS-1$ //$NON-NLS-0$
+			if (settings.fontFamily) {
+				result.push("\tfont-family: " + settings.fontFamily + ";"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			if (settings.fontSize) {
+				result.push("\tfont-size: " + settings.fontSize + ";"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			if (settings.fontSize) {			
+				result.push("\tcolor: " + settings.text + ";"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
 			result.push("}"); //$NON-NLS-0$
 			
 			//From textview.css
 			result.push("." + themeClass + ".textview {"); //$NON-NLS-1$ //$NON-NLS-0$
-			result.push("\tbackground-color: " + settings.background + ";"); //$NON-NLS-1$ //$NON-NLS-0$
+			if (settings.background) {		
+				result.push("\tbackground-color: " + settings.background + ";"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
 			result.push("}"); //$NON-NLS-0$
 			
 			function defineRule(className, value, isBackground) {
-				result.push("." + themeClass + " ." + className + " {"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				result.push("\t" + (isBackground ? "background-color" : "color") + ": " + value + ";"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				result.push("}"); //$NON-NLS-0$
+				if (value) {
+					result.push("." + themeClass + " ." + className + " {"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					result.push("\t" + (isBackground ? "background-color" : "color") + ": " + value + ";"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					result.push("}"); //$NON-NLS-0$
+				}
 			}
 			
 			//From rulers.css

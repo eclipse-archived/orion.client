@@ -1,6 +1,6 @@
 /* Default theme */
 .comment {
-	color: green;
+	color: #3C802C;
 }
 
 .comment-block-documentation {
@@ -86,11 +86,11 @@
 
 /* Hardcoded HTML styles */
 .entity-name-tag /*tag name*/ {
-	color: #3f7f7f;
+	color: #CC4C07;
 }
 
 .entity-other-attribute-name {
-	color: #7f007f;
+	color: #3C802C;
 }
 
 .punctuation-definition-comment {

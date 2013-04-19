@@ -42,7 +42,7 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 	var BRACKETS = "{}()[]<>"; //$NON-NLS-0$
 
 	// Styles 
-	var singleCommentStyle = {styleClass: "comment"}; //$NON-NLS-0$
+	var singleCommentStyle = {styleClass: "token_singleline_comment"}; //$NON-NLS-0$
 	var multiCommentStyle = {styleClass: "token_multiline_comment"}; //$NON-NLS-0$
 	var docCommentStyle = {styleClass: "token_doc_comment"}; //$NON-NLS-0$
 	var htmlMarkupStyle = {styleClass: "token_doc_html_markup"}; //$NON-NLS-0$

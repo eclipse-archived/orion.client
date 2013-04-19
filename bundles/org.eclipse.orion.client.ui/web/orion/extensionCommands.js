@@ -43,6 +43,9 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 
 	/**
 	 * Converts "orion.navigate.openWith" service contributions into orion.navigate.command that open the appropriate editors.
+	 * @name orion.extensionCommands._createOpenWithCommands
+	 * @function
+	 * @public Not really but it is linked to by renderer JSDoc.
 	 * @returns {Object[]} The "open with" fileCommands
 	 */
 	extensionCommandUtils._createOpenWithCommands = function(serviceRegistry, contentTypes) {
@@ -115,6 +118,8 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 	/**
 	 * Create a validator for a given set of service properties.  The validator should be able to 
 	 * validate a given item using the "contentType" and "validationProperties" service properties.
+	 * @name orion.extensionCommands._makeValidator
+	 * @function
 	 */
 	extensionCommandUtils._makeValidator = function(info, serviceRegistry, contentTypes, validationItemConverter) {
 		function checkItem(item, key, match, validationProperty, validator) {
@@ -404,6 +409,16 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 	
 	var contentTypesCache;
 
+	/**
+	 * @name orion.extensionCommands.createAndPlaceFileCommandsExtension
+	 * @function
+	 * @param {orion.serviceregistry.ServiceReference} serviceRegistry
+	 * @param {orion.commandRegistry.CommandRegistry} commandRegistry
+	 * @param {String} toolbarId
+	 * @param {Number} position
+	 * @param {String} commandGroup
+	 * @param {Boolean} isNavigator
+	 */
 	extensionCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, toolbarId, position, commandGroup, isNavigator) {
 	
 		var done = new Deferred();

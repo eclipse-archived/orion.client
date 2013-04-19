@@ -38,21 +38,8 @@ define(['orion/editor/textTheme'],
 			return resultString + result;
 		}
 		
-		
-		StyleSet.prototype.name = 'prospecto';
-		StyleSet.prototype.annotationRuler = 'darkSlateGray';
-		StyleSet.prototype.background = '#EFEFEF';
-		StyleSet.prototype.comment = '#3C802C';
-		StyleSet.prototype.keyword = '#CC4C07';
-		StyleSet.prototype.text = '#333';
-		StyleSet.prototype.string = '#446FBD';
-		StyleSet.prototype.overviewRuler = '#FBFBFB';
-		StyleSet.prototype.lineNumberOdd = 'white';
-		StyleSet.prototype.lineNumberEven = 'white';
-		StyleSet.prototype.lineNumber = 'silver';
-		StyleSet.prototype.tag = '#CC4C07';
-		StyleSet.prototype.attribute = 'cadetBlue';
-		StyleSet.prototypefontSize = '10pt';
+		var defaultFont = '"Menlo", "sans-serif", "Consolas", "Vera Mono", "monospace"';
+		var defaultFontSize = '10pt';
 
 		function ThemeData() {
 
@@ -74,7 +61,8 @@ define(['orion/editor/textTheme'],
 		eclipse.currentLine = '#EAF2FE';
 		eclipse.tag = 'darkorange';
 		eclipse.attribute = 'cadetBlue';
-		eclipse.fontSize = '10pt';
+		eclipse.fontFamily = defaultFont;
+		eclipse.fontSize = defaultFontSize;
 
 		this.styles.push(eclipse);
 
@@ -94,7 +82,8 @@ define(['orion/editor/textTheme'],
 		prospecto.currentLine = '#EAF2FE';
 		prospecto.tag = '#CC4C07';
 		prospecto.attribute = 'cadetBlue';
-		prospecto.fontSize = '10pt';
+		prospecto.fontFamily = defaultFont;
+		prospecto.fontSize = defaultFontSize;
 
 
 		this.styles.push(prospecto);
@@ -115,7 +104,8 @@ define(['orion/editor/textTheme'],
 		blue.currentLine = 'white';
 		blue.tag = 'cornFlowerBlue';
 		blue.attribute = 'cadetBlue';
-		blue.fontSize = '10pt';
+		blue.fontFamily = defaultFont;
+		blue.fontSize = defaultFontSize;
 
 		this.styles.push(blue);
 
@@ -135,7 +125,8 @@ define(['orion/editor/textTheme'],
 		ambience.currentLine = 'lightcyan';
 		ambience.tag = 'cornFlowerBlue';
 		ambience.attribute = 'cadetBlue';
-		ambience.fontSize = '10pt';
+		ambience.fontFamily = defaultFont;
+		ambience.fontSize = defaultFontSize;
 
 		this.styles.push(ambience);
 
@@ -155,7 +146,8 @@ define(['orion/editor/textTheme'],
 		tierra.currentLine = '#baa289';
 		tierra.tag = 'darkred';
 		tierra.attribute = 'cadetBlue';
-		tierra.fontSize = '10pt';
+		tierra.fontFamily = defaultFont;
+		tierra.fontSize = defaultFontSize;
 
 		this.styles.push(tierra);
 
@@ -175,7 +167,8 @@ define(['orion/editor/textTheme'],
 		nimbus.currentLine = '#aabfbb';
 		nimbus.tag = 'darkorange';
 		nimbus.attribute = 'cadetBlue';
-		nimbus.fontSize = '10pt';
+		nimbus.fontFamily = defaultFont;
+		nimbus.fontSize = defaultFontSize;
 
 		this.styles.push(nimbus);
 
@@ -195,7 +188,8 @@ define(['orion/editor/textTheme'],
 		adelante.currentLine = '#9e937b';
 		adelante.tag = '#AF473B';
 		adelante.attribute = 'cadetBlue';
-		adelante.fontSize = '10pt';
+		adelante.fontFamily = defaultFont;
+		adelante.fontSize = defaultFontSize;
 
 		this.styles.push(adelante);
 
@@ -215,7 +209,8 @@ define(['orion/editor/textTheme'],
 		raspberry.currentLine = '#F5B1AE';
 		raspberry.tag = '#E73E36';
 		raspberry.attribute = 'cadetBlue';
-		raspberry.fontSize = '10pt';
+		raspberry.fontFamily = defaultFont;
+		raspberry.fontSize = defaultFontSize;
 
 		this.styles.push(raspberry);
 
