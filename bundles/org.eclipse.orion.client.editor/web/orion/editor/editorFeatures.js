@@ -990,14 +990,19 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				if (this.ignoreVerify) { return; }
 
 				// Get the position being modified
-				var model = this.linkedModeModel;
-				var positionChanged = this._getPositionChanged(model, event.start, event.start + event.removedCharCount);
-				var changed = positionChanged.position;
-				if (changed === undefined) {
-					// The change has been done outside of the positions, exit the Linked Mode
-					this.exitLinkedMode(false);
-					return;
+				var model = this.linkedModeModel, positionChanged, changed;
+				while (model) {
+					positionChanged = this._getPositionChanged(model, event.start, event.start + event.removedCharCount);
+					changed = positionChanged.position;
+					if (changed === undefined || changed.model !== model) {
+						// The change has been done outside of the positions, exit the Linked Mode
+						this.exitLinkedMode(false);
+						model = this.linkedModeModel;
+					} else {
+						break;
+					}
 				}
+				if (!model) { return; }
 
 				// Update position offsets for this change. Group changes are done in #onVerify
 				var deltaCount = 0;
@@ -1006,18 +1011,19 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				for (var i = 0; i < sortedPositions.length; ++i) {
 					pos = sortedPositions[i];
 					position = pos.position;
-					if (position === changed.position) {
+					var inside = position.offset <= event.start && event.start <= position.offset + position.length;
+					if (inside && !pos.ansestor) {
 						position.offset += deltaCount;
 						position.length += changeCount;
 						deltaCount += changeCount;
 					} else {
 						position.offset += deltaCount;
-						if (pos.ansestor) {
+						if (pos.ansestor && inside) {
 							position.length += changeCount;
 						}
 					}
 					if (pos.escape) {
-						pos.model.escapePosition = pos.position.offset;
+						pos.model.escapePosition = position.offset;
 					}
 				}
 				this._updateAnnotations(sortedPositions);
@@ -1027,14 +1033,19 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				if (this.ignoreVerify) { return; }
 
 				// Get the position being modified
-				var model = this.linkedModeModel;
-				var positionChanged = this._getPositionChanged(model, event.start, event.end);
-				var changed = positionChanged.position;
-				if (changed === undefined) {
-					// The change has been done outside of the positions, exit the Linked Mode
-					this.exitLinkedMode(false);
-					return;
+				var model = this.linkedModeModel, positionChanged, changed;
+				while (model) {
+					positionChanged = this._getPositionChanged(model, event.start, event.end);
+					changed = positionChanged.position;
+					if (changed === undefined || changed.model !== model) {
+						// The change has been done outside of the positions, exit the Linked Mode
+						this.exitLinkedMode(false);
+						model = this.linkedModeModel;
+					} else {
+						break;
+					}
 				}
+				if (!model) { return; }
 				
 				// Make sure changes in a same group are compound
 				var undo = this._compoundChange;
@@ -1069,7 +1080,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 						}
 					}
 					if (pos.escape) {
-						pos.model.escapePosition = pos.position.offset;
+						pos.model.escapePosition = position.offset;
 					}
 				}
 				
@@ -1147,6 +1158,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 	
 				this.editor.reportStatus(messages.linkedModeEntered, null, true);
 			}
+			this._sortedPositions = null;
 			if (this.linkedModeModel) {
 				linkedModeModel.previousModel = this.linkedModeModel;
 				linkedModeModel.parentGroup = this.linkedModeModel.selectedGroupIndex;
@@ -1167,6 +1179,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				this.endUndo();
 				this._compoundChange = null;
 			}
+			this._sortedPositions = null;
 			var model = this.linkedModeModel;
 			this.linkedModeModel = model.previousModel;
 			model.parentGroup = model.previousModel = undefined;
@@ -1285,25 +1298,33 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 					}
 				}
 			}
-			if (model.escapePosition !== undefined) {
-				all.push({
-					escape: true,
-					model: model,
-					position: {offset: model.escapePosition, length: 0}
-				});
-			}
 		},
 		_getSortedPositions: function(model) {
-			var all = [];
-			// Get the root linked model
-			while (model.previousModel) {
-				model = model.previousModel;
+			var all = this._sortedPositions;
+			if (!all) {
+				all = [];
+				// Get the root linked model
+				while (model.previousModel) {
+					model = model.previousModel;
+				}
+				// Get all positions under model expanding group positions of stacked linked modes
+				this._getModelPositions(all, model);
+				// Add escape position for all models
+				while (model) {
+					if (model.escapePosition !== undefined) {
+						all.push({
+							escape: true,
+							model: model,
+							position: {offset: model.escapePosition, length: 0}
+						});
+					}
+					model = model.nextModel;
+				}
+				all.sort(function(a, b) {
+					return a.position.offset - b.position.offset;
+				});
+				this._sortedPositions = all;
 			}
-			// Get all positions under model expanding group positions of stacked linked modes
-			this._getModelPositions(all, model);
-			all.sort(function(a, b) {
-				return a.position.offset - b.position.offset;
-			});
 			return all;
 		},
 		_getPositionChanged: function(model, start, end) {
