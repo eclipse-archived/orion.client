@@ -417,12 +417,12 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 	 * @param {String} options.tooltip the tooltip description to use when explaining the purpose of the command.
 	 * @param {Function} [options.callback] the callback to call when the command is activated.  The callback should either 
 	 *  perform the command or return a deferred that represents the asynchronous performance of the command.  Optional.
-	 * @param {Function} [options.hrefcallback] if specified, this callback is used to retrieve
+	 * @param {Function} [options.hrefCallback] if specified, this callback is used to retrieve
 	 *  a URL that can be used as the location for a command represented as a hyperlink.  The callback should return 
 	 *  the URL.  In this release, the callback may also return a deferred that will eventually return the URL, but this 
 	 *  functionality may not be supported in the future.  See https://bugs.eclipse.org/bugs/show_bug.cgi?id=341540.
 	 *  Optional.
-	 * @param {Function} [options.choicecallback] a callback which retrieves choices that should be shown in a secondary
+	 * @param {Function} [options.choiceCallback] a callback which retrieves choices that should be shown in a secondary
 	 *  menu from the command itself.  Returns a list of choices that supply the name and image to show, and the callback
 	 *  to call when the choice is made.  Optional.
 	 * @param {String} [options.imageClass] a CSS class name suitable for showing a background image.  Optional.
