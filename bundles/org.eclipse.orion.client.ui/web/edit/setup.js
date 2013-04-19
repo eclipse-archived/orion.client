@@ -85,19 +85,21 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 		return textView;
 	};
-	
+
+	var inputManager;
 	var InputManager = (function() {
 		/**
 		 * @name orion.editor.InputManager
 		 * @class
 		 */
-		function InputManager() {
+		function InputManager(editor) {
+			this.editor = editor;
 			this.lastFilePath = "";
 			this.dispatcher = null;
 			EventTarget.attach(this);
 		}
 		objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
-			setInput: function(location, editor) {
+			setInput: function(location) {
 				function errorMessage(error) {
 					try {
 						error = JSON.parse(error.responseText);
@@ -113,6 +115,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						}
 					}
 				}
+				var editor = this.editor;
 				if (location && location[0] !== "#") { //$NON-NLS-0$
 					location = "#" + location; //$NON-NLS-0$
 				}
@@ -143,7 +146,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							if (metadataOrError._error) {
 								console.error("Error loading file metadata: " + errorMessage(metadataOrError._error)); //$NON-NLS-0$
 							}
-							self.setInputContents(editor, input, fileURI, contentOrError, metadataOrError);
+							self.setInputContents(input, fileURI, contentOrError, metadataOrError);
 							clearTimeout(progressTimeout);
 						};
 						new Deferred.all([progressService.progress(fileClient.read(fileURI), "Reading " + fileURI), progressService.progress(fileClient.read(fileURI, true), "Reading metedata of " + fileURI)], function(error) { return {_error: error}; }).then(load);
@@ -153,7 +156,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					editor.setInput(messages["No File Selected"], "", null);
 				}
 			},
-			setInputContents: function(editor, input, title, contents, metadata) {
+			setInputContents: function(input, title, contents, metadata) {
+				var editor = this.editor;
 				var altPageTarget, name;
 				if (metadata) {
 					this._fileMetadata = metadata;
@@ -240,7 +244,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			setDirty: function(dirty) {
 				mGlobalCommands.setDirtyIndicator(dirty);
 			},
-			hashChanged: function(editor) {
+			hashChanged: function() {
+				var editor = this.editor;
 				var oldInput = this.getInput();
 				selection.setSelections(window.location.hash); // may prompt, change input, or both //$NON-NLS-0$
 				var newHash = window.location.hash;
@@ -258,8 +263,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					this._lastHash = newHash;
 				}
 			},
-			shouldGoToURI: function(editor, fileURI) {
-				if (editor.isDirty()) {
+			shouldGoToURI: function(fileURI) {
+				if (this.editor.isDirty()) {
 					var oldStripped = PageUtil.matchResourceParameters("#" + this.lastFilePath).resource; //$NON-NLS-0$
 					var newStripped = PageUtil.matchResourceParameters(fileURI).resource;
 					if (oldStripped !== newStripped) {
@@ -272,7 +277,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		return InputManager;
 	}());
 
-	var inputManager = new InputManager();
 
 	var tabHandler = {
 		handlers: [],
@@ -312,7 +316,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			}
 		}
 	};
-	
+
 	var escHandler = {
 		handlers: [],
 		
@@ -505,8 +509,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	// Editor Settings
 	updateEditorSettings();
 	
-	
-	
+	inputManager = new InputManager(editor);
+
 	// Establishing dependencies on registered services
 	serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 		editor.showProblems(event.problems);
@@ -519,13 +523,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
 	selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 		var fileURI = event.selection;
-		if (inputManager.shouldGoToURI(editor, fileURI)) {
-			inputManager.setInput(fileURI, editor);
+		if (inputManager.shouldGoToURI(fileURI)) {
+			inputManager.setInput(fileURI);
 		} 
 	});
 	
-	window.addEventListener("hashchange", function() {inputManager.hashChanged(editor);}, false); //$NON-NLS-0$
-	inputManager.setInput(window.location.hash, editor);
+	window.addEventListener("hashchange", function() {inputManager.hashChanged();}, false); //$NON-NLS-0$
+	inputManager.setInput(window.location.hash);
+	
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
 	// Put the make favorite command in our toolbar."
 	commandRegistry.registerCommandContribution("pageActions", "orion.makeFavorite", 2); //$NON-NLS-1$ //$NON-NLS-0$
