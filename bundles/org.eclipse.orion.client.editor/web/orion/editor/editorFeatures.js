@@ -1049,7 +1049,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 
 				model.selectedGroupIndex = changed.group;
 				
-				// Update position offsets taking into account all positions in the same group will change
+				// Update position offsets taking into account all positions in the same changing group
 				var deltaCount = 0;
 				var changeCount = event.text.length - (event.end - event.start);
 				var sortedPositions = positionChanged.positions, position, pos;
@@ -1073,7 +1073,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 					}
 				}
 				
-				// Cancel this modification and apply same modification to all positions in group
+				// Cancel this modification and apply same modification to all positions in changing group
 				this.ignoreVerify = true;
 				var textView = this.editor.getTextView();
 				for (i = sortedPositions.length - 1; i >= 0; i--) {
@@ -1091,18 +1091,37 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 	LinkedMode.prototype = {
 		/**
 		 * Starts Linked Mode, selects the first position and registers the listeners.
-		 * @parma {Object} linkedModeModel An object describing the model to be used by linked mode.
-		 * Contains one or more position groups. If one positions in a group is edited, the other positions in the
-		 * group are edited the same way. The structure is as follows:<pre>
-		 * {
-		 *     groups: [{
-		 *         positions: [{
-		 *             offset: 10, // Relative to the text buffer
-		 *             length: 3
-		 *         }]
-		 *     }],
-		 *     escapePosition: 19, // Relative to the text buffer
+		 * @param {Object} linkedModeModel An object describing the model to be used by linked mode.
+		 * Contains one or more position groups. If a position in a group is edited, the other positions in
+		 * the same group are edited the same way. The model structure is as follows:
+		 * <pre>{
+		 *		groups: [{
+		 *			data: {},
+		 *			positions: [{
+		 *				offset: 10, // Relative to the text buffer
+		 *				length: 3
+		 *			}]
+		 *		}],
+		 *		escapePosition: 19, // Relative to the text buffer
 		 * }</pre>
+		 *
+		 * Each group in the model has an optional <code>data</code> property which can be
+		 * used to provide additional content assist for the group.  The <code>type</code> in
+		 * data determines what kind of content assist is provided. These are the support
+		 * structures for the <code>data</code> property.
+		 * <pre>{
+		 *		type: "link"
+		 *		values: ["proposal0", "proposal1", ...]
+		 * }</pre>
+		 *
+		 * The "link" data struture provides static content assist proposals stored in the
+		 * <code>values</code> property.
+		 *
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.editor.Template}<br/>
+		 * {@link orion.editor.TemplateContentAssist}<br/>
+		 * </p>
 		 */
 		enterLinkedMode: function(linkedModeModel) {
 			if (!this.linkedModeModel) {
@@ -1136,6 +1155,10 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			this.linkedModeModel = linkedModeModel;
 			this.selectLinkedGroup(0);
 		},
+		/** 
+		 * Exits Linked Mode. Optionally places the caret at linkedMode escapePosition. 
+		 * @param {Boolean} [escapePosition=false] if true, place the caret at the  escape position.
+		 */
 		exitLinkedMode: function(escapePosition) {
 			if (!this.isActive()) {
 				return;
@@ -1196,11 +1219,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			this.exitLinkedMode(true);
 			return true;
 		},
-		/** 
-		 * Exits Linked Mode. Optionally places the caret at linkedModeEscapePosition. 
-		 * @param {boolean} ignoreEscapePosition optional if true, do not place the caret at the 
-		 * escape position.
-		 */
 		cancel: function() {
 			this.exitLinkedMode(false);
 		},
@@ -1221,7 +1239,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				var contentAssist = this.contentAssist;
 				if (contentAssist) {
 					contentAssist.offset = undefined;
-					if (group.data && group.data.type === "link") { //$NON-NLS-0$
+					if (group.data && group.data.type === "link" && group.data.values) { //$NON-NLS-0$
 						var provider = this._groupContentAssistProvider = new mTemplates.TemplateContentAssist(group.data.values);
 						provider.getPrefix = function() {
 							var selection = textView.getSelection();
