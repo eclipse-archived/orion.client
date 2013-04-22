@@ -14,7 +14,7 @@
 /*jslint browser:true sub:true*/
 
 define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
-		"orion/widgets/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
+		"orion/shell/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
 		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
 		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters", "orion/URL-shim"],
 	function(require, messages, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,

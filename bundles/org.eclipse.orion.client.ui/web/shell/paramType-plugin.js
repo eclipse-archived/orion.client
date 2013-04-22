@@ -9,7 +9,7 @@
 
 /*global define document window localStorage*/
 
-define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orion/i18nUtil", "orion/Deferred"],
+define(["i18n!orion/shell/nls/messages", "require", "orion/shell/Shell", "orion/i18nUtil", "orion/Deferred"],
 	function(messages, require, mShell, i18nUtil, Deferred) {
 
 	var NAME_ALL = "all"; //$NON-NLS-0$
