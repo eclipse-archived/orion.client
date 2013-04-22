@@ -12,12 +12,12 @@
 				version: "1.0",
 				description: "This plugin integrates access to Orion's Shell page into other Orion pages."
 			};
-		
+
 			var provider = new orion.PluginProvider(headers);
 			provider.registerService("orion.navigate.command", {}, {
-				name: "Open in Shell",
+				nameKey: "Open in Shell",
 				id: "eclipse.shell.open",
-				tooltip: "Open in Shell page",
+				tooltipKey: "Open in Shell page",
 				nls: "orion/shell/nls/messages",
 				validationProperties: [
 					{source: "Directory", match: true}
