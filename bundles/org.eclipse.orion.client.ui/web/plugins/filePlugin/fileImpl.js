@@ -525,7 +525,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 		 */
 		search: function(searchParams) {
 			var query = _generateLuceneQuery(searchParams);
-			return xhr("GET", "../filesearch" + query, {
+			return xhr("GET", this.fileBase + "/../filesearch" + query, {
 				headers: {
 					"Accept": "application/json",
 					"Orion-Version": "1"
