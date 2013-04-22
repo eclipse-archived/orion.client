@@ -100,11 +100,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * @param {Object} options.treeRoot an Object representing the root of the tree.
 	 * @param {orion.selection.Selection} options.selection the selection service used to track selections.
 	 * @param {orion.fileClient.FileClient} options.fileClient the file service used to retrieve file information
-	 * @param {String} options.parentId the id of the parent DOM element
+	 * @param {String|Element} options.parentId the id of the parent DOM element, or the parent DOM element itself.
 	 * @param {Function} options.rendererFactory a factory that creates a renderer
 	 * @param {Boolean} options.excludeFiles specifies that files should not be shown. Optional.
 	 * @param {Boolean} options.excludeFolders specifies that folders should not be shown.  Optional.
-	 * @param {orion.serviceRegistry.ServiceRegistry} options.serviceRegistry  the service registry to use for retrieving other
+	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry  the service registry to use for retrieving other
 	 *	Orion services.  Optional.  If not specified, then some features of the explorer will not be enabled, such as status reporting,
 	 *  honoring preference settings, etc.
 	 */

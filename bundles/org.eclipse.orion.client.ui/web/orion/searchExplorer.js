@@ -162,22 +162,28 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }, 10);
     };
 
-    SearchResultRenderer.prototype.staleFileElement = function(item) {
+    SearchResultRenderer.prototype.staleFileElement = function(item, displayName) {
         if (item.stale) {
             var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
             mNavUtils.removeNavGrid(navGridHolder, lib.node(this.getItemLinkId(item)));
             var span = lib.node(this.getFileSpanId(item));
             _empty(span);
-            _place(document.createTextNode(this.explorer.model.getFileName(item)), span, "last"); //$NON-NLS-0$
+            _place(document.createTextNode(displayName ? displayName : this.explorer.model.getFileName(item)), span, "last"); //$NON-NLS-0$
             span = lib.node(this.getFileIconId(item));
             _empty(span);
         }
     };
 
     SearchResultRenderer.prototype.replaceFileElement = function(item) {
-        var renderName = item.totalMatches ? this.explorer.model.getFileName(item) + " (" + item.totalMatches + " matches)" : this.explorer.model.getFileName(item); //$NON-NLS-1$ //$NON-NLS-0$
-        var linkDiv = lib.node(this.getItemLinkId(item));
-        _place(document.createTextNode(renderName), linkDiv, "only"); //$NON-NLS-0$
+        var renderName = item.totalMatches ? this.explorer.model.getFileName(item) + " (" + item.totalMatches + " matches)" :  //$NON-NLS-1$ //$NON-NLS-0$
+						 this.explorer.model.getFileName(item) + " (" + messages["No matches"] + ")"; //$NON-NLS-1$ //$NON-NLS-0$
+		if(item.totalMatches) {
+			var linkDiv = lib.node(this.getItemLinkId(item));
+	        _place(document.createTextNode(renderName), linkDiv, "only"); //$NON-NLS-0$
+	    } else {
+			item.stale = true;
+			this.staleFileElement(item, renderName);
+	    }
     };
 
     SearchResultRenderer.prototype.replaceDetailIcon = function(item, direction) {
