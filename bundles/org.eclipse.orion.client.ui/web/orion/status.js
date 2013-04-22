@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*global define window document Image */
  
-define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(require, lib, mGlobalCommands) {
+define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageUtil', 'orion/urlUtils'], function(require, lib, mGlobalCommands, PageUtil, URLUtil) {
 	
 	/**
 	 * Service for reporting status
@@ -182,6 +182,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 			var extraClass = "progressInfo"; //$NON-NLS-0$
 			var image = document.createElement("span"); //$NON-NLS-0$
 			image.classList.add("imageSprite"); //$NON-NLS-0$
+			image.classList.add("progressIcon"); //$NON-NLS-0$
 			var removedClasses = [];
 			var alt = "info"; //$NON-NLS-0$
 			if (status.Severity) {
@@ -217,8 +218,16 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 				var span = document.createElement("span"); //$NON-NLS-0$
 				span.innerHTML = msg;
 				node.appendChild(span);
-			} else {  // msg is plain text
-				node.appendChild(document.createTextNode("   " + msg)); //$NON-NLS-0$
+			} else {
+				// msg is text. parse Markdown-style links
+				var chunks = URLUtil.detectValidURL(msg), msgNode;
+				if (chunks) {
+					msgNode = document.createDocumentFragment();
+					URLUtil.processURLSegments(msgNode, chunks);
+				} else {
+					msgNode = document.createTextNode(node);
+				}
+				node.appendChild(msgNode);
 			}
 			if (extraClass && this.progressDomId !== this.domId) {
 				container.classList.add(extraClass);
