@@ -328,11 +328,20 @@ textarea.parameterInput {
 	margin-right: 8px;
 }
 
+.progressIcon {
+	margin: 0 6px 0 0;
+}
+
 .progressInfo {
 	border: 1px solid #bce8f1;
 	color: #3a87ad !important;
 	background-color: #d9edf7;
 	padding: 3px;
+}
+
+/* More prominent hyperlinks in notification area */
+.progressInfo a {
+	text-decoration: underline;
 }
 
 .progressWarning {

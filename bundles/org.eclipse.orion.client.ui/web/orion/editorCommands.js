@@ -62,7 +62,19 @@ exports.EditorCommandFactory = (function() {
 				mKeyBinding.KeyBinding.apply(keyBinding, args);
 				return keyBinding;
 			}
-	
+
+			function handleStatus(status) {
+				if (status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
+					delete status.HTML;
+				}
+				var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				if (statusService) {
+					statusService.setProgressResult(status);
+				} else {
+					window.console.log(status);
+				}
+			}
+
 			function handleError(error) {
 				var errorToDisplay = {};
 				errorToDisplay.Severity = "Error"; //$NON-NLS-0$
@@ -71,12 +83,7 @@ exports.EditorCommandFactory = (function() {
 				} else {
 					errorToDisplay = error;
 				}
-				var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-				if (statusService) {
-					statusService.setProgressResult(errorToDisplay);
-				} else {
-					window.console.log(errorToDisplay);
-				}
+				handleStatus(errorToDisplay);
 			}
 
 			// create commands common to all editors
@@ -320,8 +327,8 @@ exports.EditorCommandFactory = (function() {
 									editor.getTextView().focus();
 								}
 							}
-						}; 
-						
+						};
+
 						progress.progress(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages['Running {0}'], info.name)).then(function(result){
 							if (result && result.uriTemplate) {
 								var uriTemplate = new URITemplate(result.uriTemplate);
@@ -353,12 +360,16 @@ exports.EditorCommandFactory = (function() {
 												// console.log("Delegated UI Cancelled");
 											} else if (data.result) {
 												processEditorResult(data.result);
+											} else if (data.Status || data.status) {
+												handleStatus(data.Status || data.status);
 											}
 											window.removeEventListener("message", _messageHandler, false); //$NON-NLS-0$
 											window.document.body.removeChild(iframe);
 										}
 									}
 								}, false);
+							} else if (result.Status || result.status) {
+								handleStatus(result.Status || result.status);
 							} else {
 								processEditorResult(result);
 							}
