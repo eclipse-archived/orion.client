@@ -13,7 +13,7 @@
 /*global define*/
 /*jslint browser:true*/
 
-define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil", "orion/Deferred", "shell/resultWriters"],
+define(["i18n!orion/shell/nls/messages", "orion/shell/Shell", "orion/i18nUtil", "orion/Deferred", "shell/resultWriters"],
 	function(messages, mShell, i18nUtil, Deferred, mResultWriters) {
 
 	var orion = {};
