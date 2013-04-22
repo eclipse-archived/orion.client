@@ -5757,6 +5757,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				}
 				line = this._getLineNext(line);
 			}
+			this._updateDOMSelection();
 		},
 		_setSelection: function (selection, scroll, update, callback, pageScroll) {
 			if (selection) {
