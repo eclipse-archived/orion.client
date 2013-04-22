@@ -1294,7 +1294,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 					all.push(pos);
 					if (model.nextModel && model.nextModel.parentGroup === i) {
 						pos.ansestor = true;
-						this._getModelPositions(all, model.nextModel, positions[j].offset - positions[0].offset);
+						this._getModelPositions(all, model.nextModel, (delta || 0) + positions[j].offset - positions[0].offset);
 					}
 				}
 			}
