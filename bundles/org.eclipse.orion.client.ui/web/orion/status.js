@@ -225,7 +225,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 					msgNode = document.createDocumentFragment();
 					URLUtil.processURLSegments(msgNode, chunks);
 				} else {
-					msgNode = document.createTextNode(node);
+					msgNode = document.createTextNode(msg);
 				}
 				node.appendChild(msgNode);
 			}
