@@ -61,27 +61,7 @@ module.exports = function(options) {
 	function getSafeFilePath(res, wwwpath) {
 		return fileUtil.safeFilePath(workspaceDir, wwwpath);
 	}
-
-	function getParents(filepath, wwwpath) {
-		var segs = wwwpath.split('/');
-		if(segs && segs.length > 0 && segs[segs.length-1] === ""){// pop the last segment if it is empty. In this case wwwpath ends with "/".
-			segs.pop();
-		}
-		segs.pop();//The last segment now is the directory itself. We do not need it in the parents array.
-		var loc = fileRoot;
-		var parents = [];
-		for (var i=0; i < segs.length; i++) {
-			var seg = segs[i];
-			loc = api.join(loc, seg);
-			parents.push({
-				Name: decodeURIComponent(seg),
-				ChildrenLocation: loc + '?depth=1', 
-				Location: loc
-			});
-		}
-		return parents.reverse();
-	}
-
+	
 	function writeFileMetadata(res, rest, filepath, stats, etag, includeChildren) {
 		var isDir = stats.isDirectory();
 		var metaObj = {
@@ -89,7 +69,7 @@ module.exports = function(options) {
 			Location: api.join(fileRoot, rest) + (isDir ? '/' : ''),
 			Directory: isDir,
 			LocalTimeStamp: stats.mtime.getTime(),
-			Parents: getParents(filepath, rest),
+			Parents: fileUtil.getParents(fileRoot, rest),
 			//Charset: "UTF-8",
 			Attributes: {
 				// TODO fix this
