@@ -347,7 +347,11 @@ exports.EditorCommandFactory = (function() {
 								if (result.height) {
 									iframe.style.height = result.height;
 								}
+								iframe.style.visibility = 'hidden';
 								window.document.body.appendChild(iframe);
+								iframe.style.left = (window.innerWidth - parseInt(iframe.clientWidth, 10))/2 + "px";
+								iframe.style.top = (window.innerHeight - parseInt(iframe.clientHeight, 10))/2 + "px";
+								iframe.style.visibility = '';
 								// Listen for notification from the iframe.  We expect either a "result" or a "cancelled" property.
 								window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
 									if (event.source !== iframe.contentWindow) {
