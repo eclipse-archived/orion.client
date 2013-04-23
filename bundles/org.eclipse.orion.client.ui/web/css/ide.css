@@ -866,8 +866,10 @@ input {
 .delegatedUI {
 	position: absolute; 
 	min-width: 600px; 
-	min-height: 400px; 
-	left: 150px; 
-	top: 150px; 
+	min-height: 400px;
+	/* width, height may be overridden by the provider */
+	width: 600px;
+	height: 400px;
 	z-index: 150;
+	border: 1px inset;
 }
