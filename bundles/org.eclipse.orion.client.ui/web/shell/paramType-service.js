@@ -9,7 +9,7 @@
 
 /*global define window*/
 
-define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil", "orion/Deferred"],
+define(["i18n!orion/shell/nls/messages", "orion/shell/Shell", "orion/i18nUtil", "orion/Deferred"],
 	function(messages, mShell, i18nUtil, Deferred) {
 
 	var orion = {};

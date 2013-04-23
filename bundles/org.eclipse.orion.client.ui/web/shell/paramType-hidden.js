@@ -12,7 +12,7 @@
 
 /*global define*/
 
-define(["orion/widgets/Shell"], function(mShell) {
+define(["orion/shell/Shell"], function(mShell) {
 
 	var orion = {};
 	orion.shellPage = {};
