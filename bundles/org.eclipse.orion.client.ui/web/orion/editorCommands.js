@@ -329,7 +329,7 @@ exports.EditorCommandFactory = (function() {
 							}
 						};
 
-						progress.progress(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages['Running {0}'], info.name)).then(function(result){
+						progress.showWhile(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages['Running {0}'], info.name)).then(function(result){
 							if (result && result.uriTemplate) {
 								var uriTemplate = new URITemplate(result.uriTemplate);
 								var href = uriTemplate.expand(input.getFileMetadata());
