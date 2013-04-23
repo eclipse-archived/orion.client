@@ -63,8 +63,8 @@ exports.EditorCommandFactory = (function() {
 				return keyBinding;
 			}
 
-			function handleStatus(status) {
-				if (status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
+			function handleStatus(status, allowHTML) {
+				if (!allowHTML && status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
 					delete status.HTML;
 				}
 				var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
@@ -83,7 +83,7 @@ exports.EditorCommandFactory = (function() {
 				} else {
 					errorToDisplay = error;
 				}
-				handleStatus(errorToDisplay);
+				handleStatus(errorToDisplay, true /*allow HTML for auth errors*/);
 			}
 
 			// create commands common to all editors
