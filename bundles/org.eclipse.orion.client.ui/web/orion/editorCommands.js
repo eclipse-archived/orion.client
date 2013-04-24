@@ -94,15 +94,18 @@ exports.EditorCommandFactory = (function() {
 				var self = this;
 				if (this.inputManager.onSave) {
 					editor.getTextView().setAction("save", function () { //$NON-NLS-0$
+						editor.reportStatus(messages['Saving...']);
 						var contents = editor.getText();
 						self.inputManager.onSave(self.inputManager.getInput(), contents,
 							function(result) {
 								editor.setInput(self.inputManager.getInput(), null, contents, true);
+								editor.reportStatus("");
 								if(self.inputManager.afterSave){
 									self.inputManager.afterSave();
 								}
 							},
 							function(error) {
+								editor.reportStatus("");
 								error.log = true;
 							}
 						);
@@ -110,6 +113,7 @@ exports.EditorCommandFactory = (function() {
 					}, {name: messages['Save']});
 				} else {
 					editor.getTextView().setAction("save", function () { //$NON-NLS-0$
+						editor.reportStatus(messages['Saving...']);
 						var contents = editor.getText();
 						var etag = self.inputManager.getFileMetadata().ETag;
 						var args = { "ETag" : etag }; //$NON-NLS-0$
@@ -122,6 +126,7 @@ exports.EditorCommandFactory = (function() {
 							function(result) {
 								self.inputManager.getFileMetadata().ETag = result.ETag;
 								editor.setInput(self.inputManager.getInput(), null, contents, true);
+								editor.reportStatus("");
 								if(self.inputManager.afterSave){
 									self.inputManager.afterSave();
 								}
@@ -141,6 +146,7 @@ exports.EditorCommandFactory = (function() {
 											function(result) {
 												self.inputManager.getFileMetadata().ETag = result.ETag;
 												editor.setInput(self.inputManager.getInput(), null, contents, true);
+												editor.reportStatus("");
 												if(self.inputManager.afterSave){
 													self.inputManager.afterSave();
 												}
@@ -148,6 +154,7 @@ exports.EditorCommandFactory = (function() {
 									}
 								} else {
 									// unknown error
+									editor.reportStatus("");
 									handleError(error);
 								}
 							}
