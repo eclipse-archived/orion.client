@@ -113,7 +113,7 @@ define("orion/editor/htmlContentAssist", ['orion/editor/templates'], function(mT
 	}
 
 	/**
-	 * @name orion.contentAssist.HTMLContentAssistProvider
+	 * @name orion.editor.HTMLContentAssistProvider
 	 * @class Provides content assist for HTML.
 	 */
 	function HTMLContentAssistProvider() {

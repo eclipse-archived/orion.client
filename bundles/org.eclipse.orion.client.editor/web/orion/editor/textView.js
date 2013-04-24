@@ -1122,7 +1122,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		this._init(options || {});
 	}
 	
-	TextView.prototype = /** @lends orion.editor.editor.prototype */ {
+	TextView.prototype = /** @lends orion.editor.TextView.prototype */ {
 		/**
 		 * Adds a ruler to the text view at the specified position.
 		 * <p>

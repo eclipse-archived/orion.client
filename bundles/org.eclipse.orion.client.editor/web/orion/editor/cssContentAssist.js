@@ -232,7 +232,7 @@ define("orion/editor/cssContentAssist", [ //$NON-NLS-0$
 	}
 
 	/**
-	 * @name orion.contentAssist.CssContentAssistProvider
+	 * @name orion.editor.CssContentAssistProvider
 	 * @class Provides content assist for CSS keywords.
 	 */
 	function CssContentAssistProvider() {
