@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,17 +12,17 @@
 /*jslint browser:true devel:true*/
 /*global define eclipse:true orion:true window*/
 
-define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
+define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/EventTarget', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/commandRegistry', 'orion/favorites', 'orion/extensionCommands', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
-        'orion/editor/textView', 'orion/editor/textModel', 
+        'orion/editor/textView', 'orion/editor/textModel',
         'orion/editor/projectionTextModel', 'orion/keyBinding','orion/searchAndReplace/textSearcher',
-        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel',
-        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser', 'edit/editorPreferences'],
-		function(messages, require, Deferred, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
+        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel', 'orion/objects',
+        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser', 'edit/editorPreferences', 'orion/sidebar'],
+		function(messages, require, Deferred, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer,  mThemePreferences, mThemeData, mThemeChooser, mEditorPreferences) {
+				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, objects, mThemePreferences, mThemeData, mThemeChooser, mEditorPreferences, Sidebar) {
 	
 var exports = exports || {};
 	
@@ -51,8 +51,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 	}());
-	
-	var outlineDomNode = lib.node("outline"), //$NON-NLS-0$
+
+	var sidebarDomNode = lib.node("sidebar"), //$NON-NLS-0$
+	    sidebarToolbar = lib.node("sidebarToolbar"), //$NON-NLS-0$
 		editorDomNode = lib.node("editor"), //$NON-NLS-0$
 		searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
 
@@ -84,191 +85,208 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 		return textView;
 	};
-	
-	var dispatcher;
-	
-	var inputManager = {
-		lastFilePath: "",
-		
-		setInput: function(location, editor) {
-			function errorMessage(error) {
-				try {
-					error = JSON.parse(error.responseText);
-					return error.Message;
-				} catch(e) {}
-				return error.responseText;
-			}
-			function parseNumericParams(input, params) {
-				for (var i=0; i < params.length; i++) {
-					var param = params[i];
-					if (input[param]) {
-						input[param] = parseInt(input[param], 10);
-					}
-				}
-			}
-			if (location && location[0] !== "#") { //$NON-NLS-0$
-				location = "#" + location; //$NON-NLS-0$
-			}
-			var input = PageUtil.matchResourceParameters(location);
-			var fileURI = input.resource;
-			parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			// populate editor
-			if (fileURI) {
-				if (fileURI === this.lastFilePath) {
-					editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
-				} else {
-					if (!editor.getTextView()) {
-						editor.installTextView();
-					}
-					var fullPathName = fileURI;
-					var progressTimeout = setTimeout(function() {
-						editor.setInput(fullPathName, messages["Fetching "] + fullPathName, null);
-					}, 800); // wait 800ms before displaying
-					var self = this;
-					var setInput = function(contents, metadata) {
-						var altPageTarget, name;
-						if (metadata) {
-							self._fileMetadata = metadata;
-							var toolbar = lib.node("pageActions"); //$NON-NLS-0$
-							if (toolbar) {	
-								commandRegistry.destroy(toolbar);
-								// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
-								mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, "pageActions", 500).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
-									commandRegistry.renderCommands("pageActions", toolbar, metadata, editor, "button"); //$NON-NLS-1$ //$NON-NLS-0$
-								});							}
-							var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
-							if (rightToolbar) {	
-								commandRegistry.destroy(rightToolbar);
-								commandRegistry.renderCommands(rightToolbar.id, rightToolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
-							}
-							self.setTitle(metadata.Location);
-							self._contentType = contentTypeService.getFileContentType(metadata);
-							// page target is the file, but if any interesting links fail, try the parent folder metadata.
-							altPageTarget = function() {
-								if (metadata.Parents && metadata.Parents.length > 0) {
-									return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
-								}
-							};
-							name = metadata.Name;
-						} else {
-							// No metadata
-							self._fileMetadata = null;
-							self.setTitle(fileURI);
-							self._contentType = contentTypeService.getFilenameContentType(self.getTitle());
-							name = self.getTitle();
-						}
-		
-						var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
-						themePreferences.apply();
-						var chooser = new mThemeChooser.MiniThemeChooser( themePreferences, editorPreferences);
-						mGlobalCommands.addSettings( chooser );
-						
-						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$
-							makeAlternate: function() {
-								if (metadata.Parents && metadata.Parents.length > 0) {
-									return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
-								}
-							},
-							serviceRegistry: serviceRegistry, commandService: commandRegistry,
-							searchService: searcher, fileService: fileClient});
-						mGlobalCommands.setDirtyIndicator(false);
-						syntaxHighlighter.setup(self._contentType, editor.getTextView(), editor.getAnnotationModel(), fileURI, true)
-							.then(function() {
-								// TODO folding should be a preference.
-								var styler = syntaxHighlighter.getStyler();
-								editor.setFoldingEnabled(styler && styler.foldingEnabled);
-								setOutlineProviders(self._contentType, location);
-								if (!dispatcher) {
-									dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor, self._contentType);
-								}
-								// Contents
-								editor.setInput(fileURI, null, contents);
-								editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
-								commandRegistry.processURL(window.location.href);
-							});
-						clearTimeout(progressTimeout);
-					};
-					var load = function(results) {
-						var contentOrError = results[0];
-						var metadataOrError = results[1];
-						clearTimeout(progressTimeout);
-						if (contentOrError._error) {
-							console.error("HTTP status code: ", contentOrError._error.status); //$NON-NLS-0$
-							contentOrError = messages["An error occurred: "] + errorMessage(contentOrError._error);
-						}
-						if (metadataOrError._error) {
-							console.error("Error loading file metadata: " + errorMessage(metadataOrError._error)); //$NON-NLS-0$
-						}
-						setInput(contentOrError, metadataOrError);
-					};
-					new Deferred.all([progressService.progress(fileClient.read(fileURI), "Reading " + fileURI), progressService.progress(fileClient.read(fileURI, true), "Reading metedata of " + fileURI)], function(error) { return {_error: error}; }).then(load);
-				}
-				this.lastFilePath = fileURI;
-			} else {
-				editor.setInput(messages["No File Selected"], "", null);
-			}
-		},
-		
-		getInput: function() {
-			return this.lastFilePath;
-		},
-			
-		setTitle : function(title) {
-			var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
-			var shortTitle = title;
-			if (indexOfSlash !== -1) {
-				shortTitle = shortTitle.substring(indexOfSlash + 1);
-			}
-			this._lastTitle = shortTitle;
-		},
-		
-		getTitle: function() {
-			return this._lastTitle;
-		},
-		
-		getFileMetadata: function() {
-			return this._fileMetadata;
-		},
 
-		getContentType: function() {
-			return this._contentType;
-		},
-
-		setDirty: function(dirty) {
-			mGlobalCommands.setDirtyIndicator(dirty);
-		},
-		
-		hashChanged: function(editor) {
-			var oldInput = this.getInput();
-			selection.setSelections(window.location.hash); // may prompt, change input, or both //$NON-NLS-0$
-			var newHash = window.location.hash;
-			var newInput = this.getInput();
-			var inputChanged = PageUtil.matchResourceParameters(oldInput).resource !== PageUtil.matchResourceParameters(newInput).resource; //$NON-NLS-1$ //$NON-NLS-0$
-			var hashMatchesInput = PageUtil.matchResourceParameters(newInput).resource === PageUtil.matchResourceParameters(newHash).resource; //$NON-NLS-1$ //$NON-NLS-0$
-			if (!inputChanged && !hashMatchesInput) {
-				this._lastHash = newHash;
-				window.location.hash = this._lastHash[0] === "#" ? this._lastHash.substring(1): this._lastHash; //$NON-NLS-0$
-			} else if (inputChanged) {
-				this.setInput(newHash, editor);
-				this._lastHash = newHash;
-			} else {
-				// Input didn't change and input matches hash, just remember the current hash
-				this._lastHash = newHash;
-			}
-		},
-		
-		shouldGoToURI: function(editor, fileURI) {
-			if (editor.isDirty()) {
-				var oldStripped = PageUtil.matchResourceParameters("#" + this.lastFilePath).resource; //$NON-NLS-0$
-				var newStripped = PageUtil.matchResourceParameters(fileURI).resource;
-				if (oldStripped !== newStripped) {
-					return window.confirm(messages["There are unsaved changes.  Do you still want to navigate away?"]);
-				}
-			}
-			return true;
+	var inputManager;
+	var InputManager = (function() {
+		/**
+		 * @name orion.editor.InputManager
+		 * @class
+		 */
+		function InputManager(editor) {
+			this.editor = editor;
+			this.lastFilePath = "";
+			this.dispatcher = null;
+			EventTarget.attach(this);
 		}
-	};	
-	
+		objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
+			setInput: function(location) {
+				function errorMessage(error) {
+					try {
+						error = JSON.parse(error.responseText);
+						return error.Message;
+					} catch(e) {}
+					return error.responseText;
+				}
+				function parseNumericParams(input, params) {
+					for (var i=0; i < params.length; i++) {
+						var param = params[i];
+						if (input[param]) {
+							input[param] = parseInt(input[param], 10);
+						}
+					}
+				}
+				var editor = this.editor;
+				if (location && location[0] !== "#") { //$NON-NLS-0$
+					location = "#" + location; //$NON-NLS-0$
+				}
+				var input = PageUtil.matchResourceParameters(location);
+				var fileURI = input.resource;
+				parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				// populate editor
+				if (fileURI) {
+					if (fileURI === this.lastFilePath) {
+						editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
+					} else {
+						if (!editor.getTextView()) {
+							editor.installTextView();
+						}
+						var fullPathName = fileURI;
+						var progressTimeout = setTimeout(function() {
+							editor.setInput(fullPathName, messages["Fetching "] + fullPathName, null);
+						}, 800); // wait 800ms before displaying
+						var self = this;
+						var load = function(results) {
+							var contentOrError = results[0];
+							var metadataOrError = results[1];
+							clearTimeout(progressTimeout);
+							if (contentOrError._error) {
+								console.error("HTTP status code: ", contentOrError._error.status); //$NON-NLS-0$
+								contentOrError = messages["An error occurred: "] + errorMessage(contentOrError._error);
+							}
+							if (metadataOrError._error) {
+								console.error("Error loading file metadata: " + errorMessage(metadataOrError._error)); //$NON-NLS-0$
+							}
+							self.setInputContents(input, fileURI, contentOrError, metadataOrError);
+							clearTimeout(progressTimeout);
+						};
+						new Deferred.all([progressService.progress(fileClient.read(fileURI), "Reading " + fileURI), progressService.progress(fileClient.read(fileURI, true), "Reading metedata of " + fileURI)], function(error) { return {_error: error}; }).then(load);
+					}
+					this.lastFilePath = fileURI;
+				} else {
+					editor.setInput(messages["No File Selected"], "", null);
+				}
+			},
+			setInputContents: function(input, title, contents, metadata) {
+				// TODO could potentially dispatch separate events for metadata and contents changing
+				this.dispatchEvent({ type: "InputChanged", metadata: metadata, contents: contents });
+				var editor = this.editor;
+				var altPageTarget, name;
+				if (metadata) {
+					this._fileMetadata = metadata;
+					var toolbar = lib.node("pageActions"); //$NON-NLS-0$
+					if (toolbar) {	
+						commandRegistry.destroy(toolbar);
+						// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
+						mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, "pageActions", 500).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
+							commandRegistry.renderCommands("pageActions", toolbar, metadata, editor, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+						});							}
+					var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
+					if (rightToolbar) {	
+						commandRegistry.destroy(rightToolbar);
+						commandRegistry.renderCommands(rightToolbar.id, rightToolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
+					}
+					this.setTitle(metadata.Location || String(metadata));
+					this._contentType = contentTypeService.getFileContentType(metadata);
+					// page target is the file, but if any interesting links fail, try the parent folder metadata.
+					altPageTarget = function() {
+						if (metadata.Parents && metadata.Parents.length > 0) {
+							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
+						}
+					};
+					name = metadata.Name;
+				} else {
+					// No metadata
+					this._fileMetadata = null;
+					this.setTitle(title);
+					this._contentType = contentTypeService.getFilenameContentType(this.getTitle());
+					name = this.getTitle();
+				}
+
+				var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
+				themePreferences.apply();
+				var chooser = new mThemeChooser.MiniThemeChooser( themePreferences );
+				mGlobalCommands.addSettings( chooser );
+
+				mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$
+					makeAlternate: function() {
+						if (metadata.Parents && metadata.Parents.length > 0) {
+							// The mini-nav in sidebar wants to do the same work, can we share it?
+							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
+						}
+					},
+					serviceRegistry: serviceRegistry, commandService: commandRegistry,
+					searchService: searcher, fileService: fileClient});
+				mGlobalCommands.setDirtyIndicator(false);
+				var _self = this;
+				syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true)
+					.then(function() {
+						// TODO folding should be a preference.
+						var styler = syntaxHighlighter.getStyler();
+						editor.setFoldingEnabled(styler && styler.foldingEnabled);
+						_self.dispatchEvent({ type: "ContentTypeChanged", contentType: _self._contentType, location: location });
+						if (!this.dispatcher) {
+							this.dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor, _self._contentType);
+						}
+						// Contents
+						editor.setInput(title, null, contents);
+						editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
+						commandRegistry.processURL(window.location.href);
+					});
+			},
+			getInput: function() {
+				return this.lastFilePath;
+			},
+			setTitle : function(title) {
+				var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
+				var shortTitle = title;
+				if (indexOfSlash !== -1) {
+					shortTitle = shortTitle.substring(indexOfSlash + 1);
+				}
+				this._lastTitle = shortTitle;
+			},
+			
+			getTitle: function() {
+				return this._lastTitle;
+			},
+			getFileMetadata: function() {
+				return this._fileMetadata;
+			},
+			getContentType: function() {
+				return this._contentType;
+			},
+			setDirty: function(dirty) {
+				mGlobalCommands.setDirtyIndicator(dirty);
+			},
+			hashChanged: function() {
+				var editor = this.editor;
+				var oldInput = this.getInput();
+				selection.setSelections(window.location.hash); // may prompt, change input, or both //$NON-NLS-0$
+				var newHash = window.location.hash;
+				var newInput = this.getInput();
+				var inputChanged = PageUtil.matchResourceParameters(oldInput).resource !== PageUtil.matchResourceParameters(newInput).resource; //$NON-NLS-1$ //$NON-NLS-0$
+				var hashMatchesInput = PageUtil.matchResourceParameters(newInput).resource === PageUtil.matchResourceParameters(newHash).resource; //$NON-NLS-1$ //$NON-NLS-0$
+				if (!inputChanged && !hashMatchesInput) {
+					this._lastHash = newHash;
+					window.location.hash = this._lastHash[0] === "#" ? this._lastHash.substring(1): this._lastHash; //$NON-NLS-0$
+				} else if (inputChanged) {
+					this.setInput(newHash, editor);
+					this._lastHash = newHash;
+				} else {
+					// Input didn't change and input matches hash, just remember the current hash
+					this._lastHash = newHash;
+				}
+			},
+			shouldGoToURI: function(fileURI) {
+				if (typeof fileURI !== "string") {
+					return false;
+				}
+				if (this.editor.isDirty()) {
+					var oldStripped = PageUtil.matchResourceParameters("#" + this.lastFilePath).resource; //$NON-NLS-0$
+					var newStripped = PageUtil.matchResourceParameters(fileURI).resource;
+					if (oldStripped !== newStripped) {
+						return window.confirm(messages["There are unsaved changes.  Do you still want to navigate away?"]);
+					}
+				}
+				return true;
+			},
+			getEditor: function() {
+				return this.editor;
+			}
+		});
+		return InputManager;
+	}());
+
+
 	var tabHandler = {
 		handlers: [],
 		
@@ -307,7 +325,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			}
 		}
 	};
-	
+
 	var escHandler = {
 		handlers: [],
 		
@@ -500,8 +518,23 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	// Editor Settings
 	updateEditorSettings();
 	
-	
-	
+	inputManager = new InputManager(editor);
+
+	var sidebar = new Sidebar({
+		commandRegistry: commandRegistry,
+		contentTypeRegistry: contentTypeService,
+		inputManager: inputManager,
+		editor: editor,
+		fileClient: fileClient,
+		outlineService: outlineService,
+		parent: sidebarDomNode,
+		progressService: progressService,
+		selection: selection,
+		serviceRegistry: serviceRegistry,
+		toolbar: sidebarToolbar
+	});
+	sidebar.show();
+
 	// Establishing dependencies on registered services
 	serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 		editor.showProblems(event.problems);
@@ -514,92 +547,23 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
 	selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 		var fileURI = event.selection;
-		if (inputManager.shouldGoToURI(editor, fileURI)) {
-			inputManager.setInput(fileURI, editor);
+		if (inputManager.shouldGoToURI(fileURI)) {
+			inputManager.setInput(fileURI);
 		} 
 	});
 	
-	window.addEventListener("hashchange", function() {inputManager.hashChanged(editor);}, false); //$NON-NLS-0$
-	inputManager.setInput(window.location.hash, editor);
+	window.addEventListener("hashchange", function() {inputManager.hashChanged();}, false); //$NON-NLS-0$
+	inputManager.setInput(window.location.hash);
+	
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
 	// Put the make favorite command in our toolbar."
 	commandRegistry.registerCommandContribution("pageActions", "orion.makeFavorite", 2); //$NON-NLS-1$ //$NON-NLS-0$
 
-		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
 	});
-	
-	var filteredProviders;
-	
-	// Create outliner "gadget"
-	var outliner = new mOutliner.Outliner({parent: outlineDomNode,
-		serviceRegistry: serviceRegistry,
-		outlineService: serviceRegistry.getService("orion.edit.outline"), //$NON-NLS-0$
-		commandService: commandRegistry,
-		selectionService: selection,
-		onSelectedProvider: function(/**ServiceReference*/ outlineProvider) { //$NON-NLS-0$
-			outlineService.setProvider(outlineProvider);
-			outlineService.emitOutline(editor.getText(), editor.getTitle());
-		}
-	});
-	if (filteredProviders) {
-		outliner.setOutlineProviders(filteredProviders);
-	}
-		
-	function setOutlineProviders(fileContentType, title) {
-		var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner"); //$NON-NLS-0$
-		filteredProviders = [];
-		var i;
-		for (i=0; i < outlineProviders.length; i++) {
-			var serviceReference = outlineProviders[i],
-			    contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
-			    pattern = serviceReference.getProperty("pattern"); // for backwards compatibility //$NON-NLS-0$
-			var isSupported = false;
-			if (contentTypeIds) {
-				isSupported = contentTypeIds.some(function(contentTypeId) {
-						return contentTypeService.isExtensionOf(fileContentType, contentTypeId);
-					});
-			} else if (pattern && new RegExp(pattern).test(title)) {
-				isSupported = true;
-			}
-			if (isSupported) {
-				filteredProviders.push(serviceReference);
-			}
-		}
-		var deferreds = []; 
-		for(i=0; i<filteredProviders.length; i++){
-			if(filteredProviders[i].getProperty("nameKey") && filteredProviders[i].getProperty("nls")){ //$NON-NLS-1$ //$NON-NLS-0$
-				var deferred = new Deferred();
-				deferreds.push(deferred);
-				var provider = filteredProviders[i];
-				var getDisplayName = function(commandMessages) { //$NON-NLS-0$
-					this.provider.displayName = commandMessages[provider.getProperty("nameKey")]; //$NON-NLS-0$
-					this.deferred.resolve();
-				};
-				i18nUtil.getMessageBundle(provider.getProperty("nls")).then(getDisplayName.bind({provider: provider, deferred: deferred}), deferred.reject); //$NON-NLS-0$
-			} else {
-				filteredProviders[i].displayName = filteredProviders[i].getProperty("name"); //$NON-NLS-0$
-			}
-		}
-		if(deferreds.length===0){
-			outlineService.setOutlineProviders(filteredProviders);
-			if (outliner) {
-				outliner.setOutlineProviders(filteredProviders);
-			}
-		}else{
-			Deferred.all(deferreds, function(error) { return error; }).then(function(){
-				outlineService.setOutlineProviders(filteredProviders);
-				if (outliner) {
-					outliner.setOutlineProviders(filteredProviders);
-				}
-			});
-		}
-	}
-	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-		outlineService.emitOutline(editor.getText(), editor.getTitle());
-	});
+
 	window.onbeforeunload = function() {
 		if (editor.isDirty()) {
 			 return messages["There are unsaved changes."];

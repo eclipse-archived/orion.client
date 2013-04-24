@@ -140,11 +140,12 @@ exports.Explorer = (function() {
 		/**
 		 * Displays tree table containing filled with data provided by given model
 		 * 
-		 * @param parentId id of parent dom element
-		 * @param model providing data to display
-		 * @param options optional parameters of the tree(custom indent, onCollapse callback)
+		 * @param {String|Element} parentId id of parent dom element, or the element itself
+		 * @param {Object} model providing data to display
+		 * @param {Object} options optional parameters of the tree(custom indent, onCollapse callback)
 		 */
 		createTree: function (parentId, model, options){
+			parentId = typeof parentId === "string" ? parentId : (parentId.id || parentId);
 			if(this.selection) {
 				this.selection.setSelections([]);
 			}
