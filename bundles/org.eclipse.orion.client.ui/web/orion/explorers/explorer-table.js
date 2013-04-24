@@ -95,8 +95,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 	/**
 	 * Creates a new file explorer.
-	 * @name orion.explorers.explorer-table.FileExplorer
+	 * @name orion.explorers.FileExplorer
 	 * @class A user interface component that displays a table-oriented file explorer
+	 * @extends orion.explorer.Explorer
+	 *
 	 * @param {Object} options.treeRoot an Object representing the root of the tree.
 	 * @param {orion.selection.Selection} options.selection the selection service used to track selections.
 	 * @param {orion.fileClient.FileClient} options.fileClient the file service used to retrieve file information
@@ -278,8 +280,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			node.addEventListener("drop", drop, false); //$NON-NLS-0$
 		}
 	};
-	
-	// we have changed an item on the server at the specified parent node
+
+	/**
+	 * @name FileExplorer#changedItem
+	 * @function
+	 * we have changed an item on the server at the specified parent node
+	 */
 	FileExplorer.prototype.changedItem = function(parent, forceExpand) {
 		var that = this;
 		var progress = this.registry.getService("orion.page.progress");
@@ -306,8 +312,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		}
 	};
 		
-	//This is an optional function for explorerNavHandler. It changes the href of the window.location to navigate to the parent page.
-	//The explorerNavHandler hooked up by the explorer will check if this optional function exist and call it when left arrow key hits on a top level item that is aleady collapsed.
+	/**
+	 * This is an optional function for explorerNavHandler. It changes the href of the window.location to navigate to the parent page.
+	 * The explorerNavHandler hooked up by the explorer will check if this optional function exist and call it when left arrow key hits on a top level item that is aleady collapsed.
+	 * @name orion.explorers.FileExplorer#scopeUp
+	 * @function
+	 */
 	FileExplorer.prototype.scopeUp = function(){
 		if(this.treeRoot && this.treeRoot.Parents){
 			if(this.treeRoot.Parents.length === 0){
@@ -320,6 +330,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	
 	/**
 	 * Load the resource at the given path.
+	 * @name orion.explorers.FileExplorer#loadResourceList
+	 * @function
 	 * @param path The path of the resource to load
 	 * @param {Boolean} [force] If true, force reload even if the path is unchanged. Useful
 	 * when the client knows the resource underlying the current path has changed.
@@ -344,6 +356,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	
 	/**
 	 * Load the explorer with the given root
+	 * @name orion.explorers.FileExplorer#load
+	 * @function
 	 * @param {Object} root a root object or a deferred that will return the root of the FileModel
 	 * @param {String} progress a string progress message describing the fetch of the root
 	 */
@@ -428,7 +442,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		);
 	};
 	/**
-	 * Clients can connect to this function to receive notification when the root item changes.
+	 * Called when the root item changes. This can be overridden.
+	 * @name orion.explorers.FileExplorer#onchange
+	 * @function
 	 * @param {Object} item
 	 */
 	FileExplorer.prototype.onchange = function(item) {
