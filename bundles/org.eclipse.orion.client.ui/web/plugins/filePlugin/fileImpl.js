@@ -84,12 +84,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 				newKeyword = encodeURIComponent(newKeyword);
 			}
 		}
-		var searchLocation = searchParams.resource;
-		var relativePath = searchLocation.indexOf("/file");
-		if( relativePath > 0){//If the search location does not start with /file, then we need to make the relative path starting with /file
-			searchLocation = searchLocation.substring(relativePath);
-		}
-		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + "+Location:" + searchLocation + "*";
+		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + "+Location:" + searchParams.resource + "*";
 	}
 	
 	/**
