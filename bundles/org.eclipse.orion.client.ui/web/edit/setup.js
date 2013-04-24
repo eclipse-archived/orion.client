@@ -157,6 +157,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				}
 			},
 			setInputContents: function(input, title, contents, metadata) {
+				// TODO could potentially dispatch separate events for metadata and contents changing
+				this.dispatchEvent({ type: "InputChanged", metadata: metadata, contents: contents });
 				var editor = this.editor;
 				var altPageTarget, name;
 				if (metadata) {
@@ -198,6 +200,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$
 					makeAlternate: function() {
 						if (metadata.Parents && metadata.Parents.length > 0) {
+							// The mini-nav in sidebar wants to do the same work, can we share it?
 							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
 						}
 					},
@@ -264,6 +267,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				}
 			},
 			shouldGoToURI: function(fileURI) {
+				if (typeof fileURI !== "string") {
+					return false;
+				}
 				if (this.editor.isDirty()) {
 					var oldStripped = PageUtil.matchResourceParameters("#" + this.lastFilePath).resource; //$NON-NLS-0$
 					var newStripped = PageUtil.matchResourceParameters(fileURI).resource;
@@ -521,9 +527,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		editor: editor,
 		fileClient: fileClient,
 		outlineService: outlineService,
+		parent: sidebarDomNode,
+		progressService: progressService,
 		selection: selection,
 		serviceRegistry: serviceRegistry,
-		parent: sidebarDomNode,
 		toolbar: sidebarToolbar
 	});
 	sidebar.show();
