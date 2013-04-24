@@ -389,7 +389,7 @@ var exports = {};
 					}, displayErrorOnStatus);
 				};
 				
-				var repositoryLocation = (item.Repository !== null) ? item.Repository.Location : item.CloneLocation;
+				var repositoryLocation = item.Repository ? item.Repository.Location : item.CloneLocation;
 				if (data.parameters.valueFor("name") && !data.parameters.optionsRequested) { //$NON-NLS-0$
 					checkoutTagFunction(repositoryLocation, item.Name, data.parameters.valueFor("name")); //$NON-NLS-0$
 				}
@@ -427,7 +427,7 @@ var exports = {};
 					);
 				} else {
 					var branchLocation;
-					if (item.Repository !== null) {
+					if (item.Repository) {
 						branchLocation = item.Repository.BranchLocation;
 					} else {
 						branchLocation = item.parent.parent.BranchLocation;
@@ -1654,7 +1654,7 @@ var exports = {};
 				return require.toUrl("git/git-log.html") + "#" + data.items.PreviousLocation; //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
-				if(item.Type === "RemoteTrackingBranch" || (item.toRef !== null && item.toRef.Type === "Branch") || item.RepositoryPath !== null){ //$NON-NLS-1$ //$NON-NLS-0$
+				if(item.Type === "RemoteTrackingBranch" || (item.toRef && item.toRef.Type === "Branch") || item.RepositoryPath !== null){ //$NON-NLS-1$ //$NON-NLS-0$
 					return item.PreviousLocation !== undefined;
 				}
 				return false;
@@ -1670,7 +1670,7 @@ var exports = {};
 				return require.toUrl("git/git-log.html") + "#" + data.items.NextLocation; //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
-				if(item.Type === "RemoteTrackingBranch" ||(item.toRef !== null && item.toRef.Type === "Branch") || item.RepositoryPath !== null){ //$NON-NLS-1$ //$NON-NLS-0$
+				if(item.Type === "RemoteTrackingBranch" ||(item.toRef && item.toRef.Type === "Branch") || item.RepositoryPath !== null){ //$NON-NLS-1$ //$NON-NLS-0$
 					return item.NextLocation !== undefined;
 				}
 				return false;
@@ -2415,7 +2415,7 @@ var exports = {};
 						serviceRegistry.getService("orion.page.message").setProgressMessage(messages['Looking for the commit']); //$NON-NLS-0$
 						findCommitLocation(repositories, data.parameters.valueFor("commitName")).then( //$NON-NLS-0$
 							function(commitLocation){
-								if(commitLocation !== null){
+								if(commitLocation){
 									var commitPageURL = require.toUrl("git/git-commit.html#") + commitLocation + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
 									window.open(commitPageURL);
 								}
