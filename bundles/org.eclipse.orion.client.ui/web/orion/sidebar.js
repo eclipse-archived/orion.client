@@ -3,8 +3,7 @@
 define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/littlelib',
 		'orion/widgets/nav/mini-nav',
 		'i18n!orion/nls/messages'],
-		function(Deferred, objects, mCommands, mOutliner, lib, MiniNav, messages) {
-	var MiniNavExplorer = MiniNav.MiniNavExplorer, MiniNavRenderer = MiniNav.MiniNavRenderer;
+		function(Deferred, objects, mCommands, mOutliner, lib, MiniNavViewMode, messages) {
 	/**
 	 * @name orion.sidebar.Sidebar
 	 * @class Sidebar that appears alongside an {@link orion.editor.Editor} in the Orion IDE.
@@ -78,37 +77,17 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			commandRegistry.addCommand(changeViewModeCommand);
 			commandRegistry.registerCommandContribution(switcherNode.id, "orion.sidebar.viewmode", 1); //$NON-NLS-0$
 
-			var _self = this;
-			this.addViewMode("nav", { //$NON-NLS-0$
-				label: messages["Navigator"],
-				create: function() {
-					if (_self.miniNavExplorer) {
-						return;
-					}
-					_self.miniNavExplorer = new MiniNavExplorer({
-						//treeRoot: ???
-						// TODO intercept selection from nav, grab the file URI from selected file object, and let selection continue 
-						// to the inputManager which will change the editor.
-						/*openWithCommands: openWithCommands*/
-						fileClient: fileClient,
-						inputManager: inputManager,
-						parentId: parentNode,
-						rendererFactory: function(explorer) { //$NON-NLS-0$
-							var renderer = new MiniNavRenderer({
-								checkbox: false,
-								cachePrefix: "MiniNav"}, explorer, commandRegistry, contentTypeRegistry); //$NON-NLS-0$
-							return renderer;
-						},
-						selection: _self.selection,
-						serviceRegistry: serviceRegistry
-					});
-					// tell it to load here
-				},
-				destroy: function() {
-					lib.empty(parentNode);
-				}
-			});
+			this.addViewMode("nav", new MiniNavViewMode({ //$NON-NLS-0$
+				commandRegistry: commandRegistry,
+				contentTypeRegistry: contentTypeRegistry,
+				fileClient: fileClient,
+				inputManager: inputManager,
+				parentNode: parentNode,
+				selection: selection,
+				serviceRegistry: serviceRegistry
+			}));
 
+			// Outliner is responsible for adding its view mode(s) to this sidebar
 			this.outliner = new mOutliner.Outliner({
 				parent: parentNode,
 				toolbar: modeContributionToolbar,
