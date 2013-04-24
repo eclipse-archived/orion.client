@@ -18,11 +18,11 @@ define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/webu
         'orion/editor/textView', 'orion/editor/textModel', 
         'orion/editor/projectionTextModel', 'orion/keyBinding','orion/searchAndReplace/textSearcher',
         'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel',
-        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser'],
+        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser', 'edit/editorPreferences'],
 		function(messages, require, Deferred, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer,  mThemePreferences, mThemeData, mThemeChooser) {
+				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer,  mThemePreferences, mThemeData, mThemeChooser, mEditorPreferences) {
 	
 var exports = exports || {};
 	
@@ -60,6 +60,19 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var syntaxModelWirer = new SyntaxModelWirer(serviceRegistry);
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
+	var editor;
+	var editorPreferences;
+	var updateSettings = function(prefs) {
+		editor.setAutoSaveTimeout(prefs.autoSaveEnabled ? prefs.autoSaveTimeout : -1);
+	};
+	var updateEditorSettings = function (prefs) {
+		if (!prefs) {
+			editorPreferences.getPrefs(updateSettings);
+		} else {
+			updateSettings(prefs);
+		}
+	};
+	editorPreferences = new mEditorPreferences.EditorPreferences (preferences, updateEditorSettings);
 	
 	var textViewFactory = function() {
 		var textView = new mTextView.TextView({
@@ -147,7 +160,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		
 						var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
 						themePreferences.apply();
-						var chooser = new mThemeChooser.MiniThemeChooser( themePreferences );
+						var chooser = new mThemeChooser.MiniThemeChooser( themePreferences, editorPreferences);
 						mGlobalCommands.addSettings( chooser );
 						
 						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$
@@ -170,7 +183,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 								}
 								// Contents
 								editor.setInput(fileURI, null, contents);
-								editor.setAutoSaveTimeout(1000);
 								editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 								commandRegistry.processURL(window.location.href);
 							});
@@ -472,7 +484,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	};
 	var annotationFactory = new mEditorFeatures.AnnotationFactory();
 	
-	var editor = new mEditor.Editor({
+	editor = new mEditor.Editor({
 		textViewFactory: textViewFactory,
 		undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandRegistry, "pageActions"), //$NON-NLS-0$
 		textDNDFactory: new mEditorFeatures.TextDNDFactory(),
@@ -484,6 +496,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		statusReporter: statusReporter,
 		domNode: editorDomNode
 	});
+	
+	// Editor Settings
+	updateEditorSettings();
+	
+	
 	
 	// Establishing dependencies on registered services
 	serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
@@ -504,7 +521,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	
 	window.addEventListener("hashchange", function() {inputManager.hashChanged(editor);}, false); //$NON-NLS-0$
 	inputManager.setInput(window.location.hash, editor);
-	
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
 	// Put the make favorite command in our toolbar."
 	commandRegistry.registerCommandContribution("pageActions", "orion.makeFavorite", 2); //$NON-NLS-1$ //$NON-NLS-0$
