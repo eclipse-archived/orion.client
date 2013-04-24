@@ -148,7 +148,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			path = path || "";
 			if (entry.isFile) {
 				// can't drop files directly into workspace.
-				if (target.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
+				if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
 					explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
 						Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
 				} else {
@@ -166,7 +166,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 					});
 				};
 				var progress = explorer.registry.getService("orion.page.progress");
-				if (target.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
+				if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
 					progress.progress(fileClient.createProject(target.ChildrenLocation, entry.name), "Initializing project " + entry.name).then(function(project) {
 					explorer.loadResourceList(explorer.treeRoot.Path, true);					
 					progress.progress(fileClient.read(project.ContentLocation, true), "Loading project info " + project.name).then(function(folder) {
@@ -261,7 +261,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 						if (!file.length && (!file.type || file.type === "")) {
 							explorer.registry.getService("orion.page.message").setProgressResult( //$NON-NLS-0$
 								{Severity: "Error", Message: i18nUtil.formatMessage(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], file.name)}); //$NON-NLS-1$ //$NON-NLS-0$ 
-						} else if (item.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
+						} else if (mFileUtils.isAtRoot(item.Location)){ //$NON-NLS-0$
 							explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
 								Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
 						} else {

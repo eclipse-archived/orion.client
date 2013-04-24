@@ -36,7 +36,7 @@ define(['require', 'i18n!orion/nls/messages', 'orion/URL-shim'], function(requir
 	 */
 	function isAtRoot(path) {
 		if (!path) {
-			return;
+			return false;
 		}
 		if (path === "/workspace") {
 			return true; // sad but true
