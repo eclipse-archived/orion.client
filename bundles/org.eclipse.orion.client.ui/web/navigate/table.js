@@ -54,7 +54,17 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion
 					return new mNavigatorRenderer.NavigatorRenderer({
 						checkbox: false, 
 						cachePrefix: "Navigator"}, explorer, commandRegistry, contentTypeService);  //$NON-NLS-0$
-				}}); 
+				}});
+		// On scope up, change the href of the window.location to navigate to the parent page.
+		explorer.scopeUp = function() {
+			if(this.treeRoot && this.treeRoot.Parents){
+				if(this.treeRoot.Parents.length === 0){
+					window.location.href = "#"; //$NON-NLS-0$
+				} else if(this.treeRoot.Parents[0].ChildrenLocation){
+					window.location.href = "#" + this.treeRoot.Parents[0].ChildrenLocation; //$NON-NLS-0$
+				}
+			}
+		}.bind(explorer);
 
 		function refresh() {
 			var pageParams = PageUtil.matchResourceParameters();

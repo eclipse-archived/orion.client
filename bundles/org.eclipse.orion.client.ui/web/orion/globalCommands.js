@@ -775,11 +775,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 							editor.getTextView().resize();
 						}
 					});
-					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
-					editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
+					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleSidebar"); //$NON-NLS-1$ //$NON-NLS-0$
+					editor.getTextView().setAction("toggleSidebar", function(){ //$NON-NLS-0$
 						mainSplitter.splitter.toggleSidePanel();
 						return true;
-					}, {name: messages["Toggle Outliner"]});
+					}, {name: messages["Toggle Sidebar"]});
 				}
 			}
 		}
