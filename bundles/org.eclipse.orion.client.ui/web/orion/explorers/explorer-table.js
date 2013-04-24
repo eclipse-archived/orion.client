@@ -109,6 +109,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry  the service registry to use for retrieving other
 	 *	Orion services.  Optional.  If not specified, then some features of the explorer will not be enabled, such as status reporting,
 	 *  honoring preference settings, etc.
+	 * @param {Boolean} [options.setFocus=true] Whether the explorer should steal keyboard focus when rendered. The default is to steal focus.
+	 */
+	/**
+	 * Root model item of the tree.
+	 * @name orion.explorers.FileExplorer#treeRoot
+	 * @type {Object}
 	 */
 	function FileExplorer(options) {
 		this.registry = options.serviceRegistry;
@@ -120,6 +126,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		this.parentId = options.parentId;
 		this.renderer = options.rendererFactory(this);
 		this.dragAndDrop = options.dragAndDrop;
+		this.setFocus = options.setFocus;
 		this.model = null;
 		this.myTree = null;
 		this.checkbox = false;
@@ -313,19 +320,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	};
 		
 	/**
-	 * This is an optional function for explorerNavHandler. It changes the href of the window.location to navigate to the parent page.
-	 * The explorerNavHandler hooked up by the explorer will check if this optional function exist and call it when left arrow key hits on a top level item that is aleady collapsed.
+	 * The explorerNavHandler hooked up by the explorer will call this function when left arrow key is pressed on a 
+	 * top level item that is aleady collapsed. The default implementation does nothing.
 	 * @name orion.explorers.FileExplorer#scopeUp
 	 * @function
 	 */
-	FileExplorer.prototype.scopeUp = function(){
-		if(this.treeRoot && this.treeRoot.Parents){
-			if(this.treeRoot.Parents.length === 0){
-				window.location.href = "#"; //$NON-NLS-0$
-			} else if(this.treeRoot.Parents[0].ChildrenLocation){
-				window.location.href = "#" + this.treeRoot.Parents[0].ChildrenLocation; //$NON-NLS-0$
-			}
-		}
+	FileExplorer.prototype.scopeUp = function() {
 	};
 	
 	/**
@@ -411,7 +411,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 					}
 				}
 
-				self.createTree(self.parentId, self.model, {setFocus: true, selectionPolicy: self.renderer.selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
+				self.createTree(self.parentId, self.model, {
+					setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), 
+					selectionPolicy: self.renderer.selectionPolicy, 
+					onCollapse: function(model){
+						if(self.getNavHandler()){
+							self.getNavHandler().onCollapse(model);
+						}
+					}});
 				if (typeof postLoad === "function") { //$NON-NLS-0$
 					try {
 						postLoad();
