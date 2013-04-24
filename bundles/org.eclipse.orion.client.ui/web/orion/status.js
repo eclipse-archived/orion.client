@@ -224,6 +224,10 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 				if (chunks) {
 					msgNode = document.createDocumentFragment();
 					URLUtil.processURLSegments(msgNode, chunks);
+					// All status links open in new window
+					Array.prototype.forEach.call(lib.$$("a", msgNode), function(link) { //$NON-NLS-0$
+						link.target = "_blank"; //$NON-NLS-0$
+					});
 				} else {
 					msgNode = document.createTextNode(msg);
 				}
