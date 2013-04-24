@@ -170,6 +170,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 								}
 								// Contents
 								editor.setInput(fileURI, null, contents);
+								editor.setAutoSaveTimeout(1000);
 								editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 								commandRegistry.processURL(window.location.href);
 							});
