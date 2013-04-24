@@ -95,8 +95,9 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			var items = this.getItems();
 			if (items.length > 0) {
 				if (!this._hookedAutoDismiss) {
-					// add auto dismiss.  Clicking anywhere but trigger and dropdown means close.
-					lib.addAutoDismiss([this._triggerNode, this._dropdownNode], this.close.bind(this));
+					// add auto dismiss.  Clicking anywhere but trigger or a submenu item means close.
+					var submenuNodes = lib.$$(".dropdownSubMenu", this._dropdownNode);
+					lib.addAutoDismiss([this._triggerNode].concat(Array.prototype.slice.call(submenuNodes)), this.close.bind(this));
 					this._hookedAutoDismiss = true;
 				}
 				this._positionDropdown();

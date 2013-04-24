@@ -63,8 +63,8 @@ exports.EditorCommandFactory = (function() {
 				return keyBinding;
 			}
 
-			function handleStatus(status) {
-				if (status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
+			function handleStatus(status, allowHTML) {
+				if (!allowHTML && status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
 					delete status.HTML;
 				}
 				var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
@@ -83,7 +83,7 @@ exports.EditorCommandFactory = (function() {
 				} else {
 					errorToDisplay = error;
 				}
-				handleStatus(errorToDisplay);
+				handleStatus(errorToDisplay, true /*allow HTML for auth errors*/);
 			}
 
 			// create commands common to all editors
@@ -329,7 +329,7 @@ exports.EditorCommandFactory = (function() {
 							}
 						};
 
-						progress.progress(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages['Running {0}'], info.name)).then(function(result){
+						progress.showWhile(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages['Running {0}'], info.name)).then(function(result){
 							if (result && result.uriTemplate) {
 								var uriTemplate = new URITemplate(result.uriTemplate);
 								var href = uriTemplate.expand(input.getFileMetadata());
@@ -347,7 +347,11 @@ exports.EditorCommandFactory = (function() {
 								if (result.height) {
 									iframe.style.height = result.height;
 								}
+								iframe.style.visibility = 'hidden';
 								window.document.body.appendChild(iframe);
+								iframe.style.left = (window.innerWidth - parseInt(iframe.clientWidth, 10))/2 + "px";
+								iframe.style.top = (window.innerHeight - parseInt(iframe.clientHeight, 10))/2 + "px";
+								iframe.style.visibility = '';
 								// Listen for notification from the iframe.  We expect either a "result" or a "cancelled" property.
 								window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
 									if (event.source !== iframe.contentWindow) {

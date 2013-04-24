@@ -112,6 +112,26 @@ exports.generateDebugURL = function(debugMeta, hostName) {
 		});
 };
 
+exports.getParents = function(fileRoot, relativePath) {
+	var segs = relativePath.split('/');
+	if(segs && segs.length > 0 && segs[segs.length-1] === ""){// pop the last segment if it is empty. In this case wwwpath ends with "/".
+		segs.pop();
+	}
+	segs.pop();//The last segment now is the directory itself. We do not need it in the parents array.
+	var loc = fileRoot;
+	var parents = [];
+	for (var i=0; i < segs.length; i++) {
+		var seg = segs[i];
+		loc = api.join(loc, seg);
+		parents.push({
+			Name: decodeURIComponent(seg),
+			ChildrenLocation: loc + '?depth=1', 
+			Location: loc
+		});
+	}
+	return parents.reverse();
+};
+
 /**
  * Performs the equivalent of rm -rf on a directory.
  * @param {Function} callback Invoked as callback(error)

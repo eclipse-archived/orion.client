@@ -15,6 +15,8 @@ var events = require('events'), EventEmitter = events.EventEmitter;
 var path = require('path');
 var util = require('util');
 var url = require('url');
+var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
+var async = require('./async');
 
 var api = require('./api');
 var fileUtil = require('./fileUtil');
@@ -145,8 +147,8 @@ var AppContext = function(options) {
 	 * @param {String} cwdPath The cwd, as a www path (eg. /file/whatever/myfolder)
 	 * @throws {Error} If modulePath is unsafe
 	 */
-	function _resolveCWD(fileRoot, workspaceDir, cwdPath) {
-		var filePath = api.rest(fileRoot, cwdPath);
+	function _resolveWWWPath(fileRoot, workspaceDir, wwwPath) {
+		var filePath = api.rest(fileRoot, wwwPath);
 		if(!filePath){
 			filePath = api.rest(fileRoot, fileRoot);
 		}
@@ -219,6 +221,43 @@ var AppContext = function(options) {
 		}
 	}.bind(this);
 	/**
+	 * @function
+	 * @private
+	 */
+	var _prepareNPMFolder = function(fileRoot, workspaceDir, cwdPath){
+		var relativePath = api.rest(fileRoot, cwdPath);
+		if(!relativePath){
+			relativePath = api.rest(fileRoot, fileRoot);
+		}
+		var dirlist = fileUtil.getParents(fileRoot, relativePath);
+		dirlist.unshift({Location: cwdPath});
+		var found = null;
+	    var promises = [];
+		dirlist.forEach(function(item) {
+			promises.push(function(){
+				if(!found){
+					item.Location = path.join(_resolveWWWPath(fileRoot, workspaceDir, item.Location), "node_modules");
+					return dfs.exists(item.Location).then(function(exists){
+						if(exists){
+							found = item.Location;
+						} 
+						return found;
+					});
+				} else {
+					return found;
+				}
+			});
+		});
+		return async.sequence(promises).then(function(existingPath){
+			if(!existingPath){
+				var absPath = dirlist[0].Location;
+				return dfs.mkdir(absPath);
+			} else {
+				return new Deferred().resolve();
+			}
+		});
+	}.bind(this);
+	/**
 	 * @name orionode.AppContext#startNPM
 	 * @function
 	 * @param {Array} [args] The args passed to NPM
@@ -228,13 +267,17 @@ var AppContext = function(options) {
 		var npmPath = configParams.npm_path;
 		var app = null;
 		if(npmPath){
-			var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
-			app = _startApp([npmPath].concat(args || []), cwdPath);
-			app.on('exit', function(code) {
-				console.log('App # ' + app.pid + ' exited, code=' + code);
-			});
+			return _prepareNPMFolder(fileRoot, workspaceDir, context.cwd).then(function() {
+				var cwdPath = _resolveWWWPath(fileRoot, workspaceDir, context.cwd);
+				app = _startApp([npmPath].concat(args || []), cwdPath);
+				app.on('exit', function(code) {
+					console.log('App # ' + app.pid + ' exited, code=' + code);
+				});
+				return new Deferred().resolve({app: app, error: configParams.npm_error_message});
+			}.bind(this));
+		} else {
+			return new Deferred().resolve({app: app, error: configParams.npm_error_message});
 		}
-		return {app: app, error: configParams.npm_error_message};
 	};
 	/**
 	 * @name orionode.AppContext#startApp
@@ -245,7 +288,7 @@ var AppContext = function(options) {
 	 * @param {Boolean} [hidden]
 	 */
 	this.startApp = function(modulePath, args, context, hidden) {
-		var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
+		var cwdPath = _resolveWWWPath(fileRoot, workspaceDir, context.cwd);
 		modulePath = resolveModulePath(workspaceDir, cwdPath, modulePath);
 		var app = _startApp([modulePath].concat(args || []), cwdPath, hidden);
 		app.on('exit', function(code) {
@@ -259,7 +302,7 @@ var AppContext = function(options) {
 	 * @param {Number} port
 	 */
 	this.debugApp = function(modulePath, port, args, context, headers, requestUrl) {
-		var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
+		var cwdPath = _resolveWWWPath(fileRoot, workspaceDir, context.cwd);
 		var resolvedPath = resolveModulePath(workspaceDir, cwdPath, modulePath);
 		var app = _startApp(["--debug-brk=" + port, resolvedPath].concat(args || []), cwdPath);
 		var parsedRequestUrl = url.parse(requestUrl);

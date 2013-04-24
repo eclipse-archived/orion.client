@@ -62,16 +62,17 @@ exports.install = function(options) {
 		var handshakeData = socket.handshake;
 		socket.on('npm', function(data) {
 			try {
-				var result = appContext.startNPM(data.args, data.context);
-				if(result.app){
-					pipeStreams(result.app, socket);
-					result.app.on('exit', function(c) {
-						socket.emit('stopped', result.app.toJson());
-					});
-					socket.emit('started', result.app.toJson());
-				} else if(result.error) {
-					socket.emit('stopped', {error: result.error});
-				}
+				appContext.startNPM(data.args, data.context).then (function (result) {
+					if(result.app){
+						pipeStreams(result.app, socket);
+						result.app.on('exit', function(c) {
+							socket.emit('stopped', result.app.toJson());
+						});
+						socket.emit('started', result.app.toJson());
+					} else if(result.error) {
+						socket.emit('stopped', {error: result.error});
+					}
+				});
 			} catch (error) {
 				console.log(error && error.stack);
 				emitError(socket, error);
