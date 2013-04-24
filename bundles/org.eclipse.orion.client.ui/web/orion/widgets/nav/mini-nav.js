@@ -16,6 +16,7 @@ define(['require', 'orion/explorers/explorer-table', 'orion/explorers/navigatorR
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
 
 	function MiniNavExplorer(options) {
+		options.setFocus = false;
 		FileExplorer.apply(this, arguments);
 		this.inputManager = options.inputManager;
 		this.progressService = options.progressService;
@@ -36,6 +37,20 @@ define(['require', 'orion/explorers/explorer-table', 'orion/explorers/navigatorR
 		load: {
 			value: function() {
 				FileExplorer.prototype.load.apply(this, arguments);
+			}
+		},
+		scopeUp: {
+			value: function() {
+				var root = this.treeRoot, parents = root && root.Parents;
+				if (parents){
+					if (parents.length === 0) {
+						// goto top
+						console.log('load the root');
+					} else if (parents[0].ChildrenLocation) {
+						// load it
+						console.log('load ' + parents[0].ChildrenLocation);
+					}
+				}
 			}
 		}
 	});
