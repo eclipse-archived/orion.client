@@ -71,6 +71,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		},
 		valueChanged: function() {
 			var currentPrefs = {
+				autoLoadEnabled: this.autoLoadFields[0].isChecked(),
 				autoSaveEnabled: this.autoSaveFields[0].isChecked(),
 				autoSaveTimeout: this.autoSaveFields[1].getValue()
 			};
@@ -86,10 +87,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		update: function() {
 			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 			
-			var checked = this.autoSaveFields[0].isChecked();
-			var timeOut = this.autoSaveFields[1].getValue();
 			var currentPrefs = this.valueChanged();
 			if (currentPrefs) {
+				var timeOut = this.autoSaveFields[1].getValue();
 				if (!isNaN(parseFloat(timeOut)) && isFinite(timeOut)) {
 					this._editorPref.setPrefs(currentPrefs, function (){ 
 						messageService.setProgressResult( {Message:"Editor preferences updated",Severity:"Normal"} ); 
@@ -104,6 +104,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			this.createElements();
 			this._editorPref.getPrefs(function (editorPrefs) {
 				this.oldPrefs = editorPrefs;
+				this.autoLoadFields[0].setChecked(editorPrefs.autoLoadEnabled);
 				this.autoSaveFields[0].setChecked(editorPrefs.autoSaveEnabled);
 				this.autoSaveFields[1].setValue(editorPrefs.autoSaveTimeout);
 			}.bind(this));
