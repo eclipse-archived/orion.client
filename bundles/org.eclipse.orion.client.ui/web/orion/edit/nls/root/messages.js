@@ -32,5 +32,6 @@ define({
 	"No response from server.  Check your internet connection and try again.": "No response from server.  Check your internet connection and try again.",
 	"Saving file {0}": "Saving file ${0}",
 	"Running {0}": "Running ${0}",
-	"Saving..." : "Saving..."
+	"Saving..." : "Saving...",
+	"Actions": "Actions"
 });

@@ -33,6 +33,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		this.serviceRegistry = params.serviceRegistry;
 		this.viewModes = {};
 		this.activeViewMode = null;
+		this.modeContributionToolbar = null;
 		this.switcherNode = null;
 	}
 	objects.mixin(Sidebar.prototype, /** @lends orion.sidebar.Sidebar.prototype */ {
@@ -54,7 +55,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			var toolbarNode = this.toolbarNode;
 
 			// Create toolbar contribution area for use by viewmodes
-			var modeContributionToolbar = document.createElement("div"); //$NON-NLS-0$
+			var modeContributionToolbar = this.modeContributionToolbar = document.createElement("div"); //$NON-NLS-0$
 			modeContributionToolbar.id = toolbarNode.id + "childModes"; //$NON-NLS-0$
 			modeContributionToolbar.classList.add("layoutLeft"); //$NON-NLS-0$
 			modeContributionToolbar.classList.add("pageActions"); //$NON-NLS-0$
@@ -84,7 +85,8 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				inputManager: inputManager,
 				parentNode: parentNode,
 				selection: selection,
-				serviceRegistry: serviceRegistry
+				serviceRegistry: serviceRegistry,
+				toolbarNode: modeContributionToolbar
 			}));
 
 			// Outliner is responsible for adding its view mode(s) to this sidebar
@@ -171,7 +173,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 	 */
 	/**
 	 * @name orion.sidebar.ViewMode#label
-	 * @type {String}
+	 * @type String
 	 */
 	return Sidebar;
 });

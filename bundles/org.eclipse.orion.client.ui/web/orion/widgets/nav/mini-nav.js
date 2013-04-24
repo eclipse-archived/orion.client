@@ -9,36 +9,65 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define*/
-/*jslint */
-define(['require', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/i18nUtil',
-	'i18n!orion/nls/messages'],
-	function(require, objects, lib, mExplorer, mNavigatorRenderer, i18nUtil, messages) {
+/*jslint sub:true*/
+define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table',
+	'orion/explorers/navigatorRenderer', 'orion/i18nUtil', 'orion/keyBinding', 'orion/fileCommands', 'orion/extensionCommands', 'orion/selection'
+	],
+	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, i18nUtil, mKeyBinding, FileCommands, ExtensionCommands, Selection) {
 	var FileExplorer = mExplorer.FileExplorer;
+	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
 
-	function MiniNavExplorer(options) {
-		options.setFocus = false;
+	function MiniNavExplorer(params) {
+		params.setFocus = false;
 		FileExplorer.apply(this, arguments);
-		this.inputManager = options.inputManager;
-		this.progressService = options.progressService;
+		this.commandRegistry = params.commandRegistry;
+		this.inputManager = params.inputManager;
+		this.progressService = params.progressService;
+		this.toolbarNode = params.toolbarNode;
+		this.actions = null;
+		this.selectionActions = null;
 		var _self = this;
-		this.inputManager.addEventListener("InputChanged", function(event) {
+		this.inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 			_self.load(event.metadata);
 		});
+		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
+		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+			_self.updateCommands(event.selections);
+		});
+		this.createToolbars();
+		this.commandsRegistered = this.registerCommands();
 	}
 	MiniNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(MiniNavExplorer.prototype, {
-		/** Load the parent directory of the given file */
+		createToolbars: function() {
+			if (!this.actions) {
+				var actions = this.actions = document.createElement("div"); //$NON-NLS-0$
+				actions.id = this.toolbarNode.id + "Actions"; //$NON-NLS-0$
+				this.toolbarNode.appendChild(actions);
+			}
+			if (!this.selectionActions) {
+				var selectionActions = this.selectionActions = document.createElement("div"); //$NON-NLS-0$
+				selectionActions.id = this.toolbarNode.id + "SelectionActions"; //$NON-NLS-0$
+				this.toolbarNode.appendChild(selectionActions);
+			}
+		},
+		/**
+		 * Override {@link orion.explorers.FileExplorer#load} to load the parent directory of the given file
+		 */
 		load: function(fileMetadata) {
+			this.createToolbars();
 			var parent = fileMetadata && fileMetadata.Parents && fileMetadata.Parents[0];
 			var rootPromise;
 			if (parent) {
-				// console.log('loading parent info for sidebar nav ' + JSON.stringify(parent));
-				// TODO should use progressService here
-				/*self.progressService.progress(___________, i18nUtil.formatMessage("Getting metadata of ${0}", metadata.Parents[0].Location));
-				*/
 				rootPromise = this.fileClient.read(parent.ChildrenLocation, true);
-				FileExplorer.prototype.load.call(this, rootPromise);
+				var _self = this;
+				this.commandsRegistered.then(function() {
+					FileExplorer.prototype.load.call(_self, rootPromise);
+				});
+//				rootPromise.then(function() {
+//					_self.updateCommands();
+//				});
 			} else {
 				console.log("Could not get parent directory");
 				console.log(fileMetadata);
@@ -53,6 +82,57 @@ define(['require', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/ex
 					// TODO load it
 				}
 			}
+		},
+		// Returns a deferred that completes once file command extensions have been processed
+		registerCommands: function() {
+			// Selection based command contributions in sidebar mini-nav
+			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
+			var selectionActionsId = this.selectionActions.id;
+			commandRegistry.addCommandGroup(selectionActionsId, "orion.miniNavSelectionGroup", 100, messages["Actions"]);
+
+			var renameBinding = new KeyBinding(113);
+			renameBinding.domScope = "sidebar"; //$NON-NLS-0$
+			renameBinding.scopeName = "Navigator"; //$NON-NLS-0$
+			var delBinding = new KeyBinding(46);
+			delBinding.domScope = "sidebar"; //$NON-NLS-0$
+			delBinding.scopeName = "Navigator"; //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "orion.makeFavorite", 1, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.renameResource", 2, "orion.miniNavSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.copyFile", 3, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.moveFile", 4, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.deleteFile", 5, "orion.miniNavSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.compareWithEachOther", 6, "orion.miniNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.compareWith", 7, "orion.miniNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "orion.importZipURL", 1, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "orion.import", 2, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.downloadFile", 3, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "orion.importSFTP", 4, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.exportSFTPCommand", 5, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+//			ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, this, actions.id, selectionActions.id, "orion.miniNavSelectionGroup"); //$NON-NLS-0$
+			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsId, 0, "orion.miniNavSelectionGroup", true);
+		},
+		updateCommands: function(selections) {
+			var toolbar = this.toolbarNode, actions = this.actions, selectionActions = this.selectionActions;
+			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
+			if (actions) {
+				commandRegistry.destroy(actions);
+			} else {
+				actions = this.actions = document.createElement("div"); //$NON-NLS-0$
+				actions.id = toolbar.id + "actions"; //$NON-NLS-0$
+				toolbar.appendChild(actions);
+			}
+			if (selectionActions) {
+				commandRegistry.destroy(selectionActions);
+			} else {
+				selectionActions = this.selectionActions = document.createElement("div"); //$NON-NLS-0$
+				selectionActions.id = toolbar.id + "selectionActions"; //$NON-NLS-0$
+				toolbar.appendChild(selectionActions);
+			}
+//			var explorer = this;
+//			FileCommands.createFileCommands(serviceRegistry, commandRegistry, explorer, fileClient);
+//			ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActions.id, 0, "orion.miniNavSelectionGroup");  //$NON-NLS-0$
+//			commandRegistry.renderCommands(selectionActions.id, selectionActions, selections, this, "button"); //$NON-NLS-0$
+			commandRegistry.renderCommands(actions.id /*scope*/, this.toolbarNode /*parent*/, this.treeRoot /*items*/, this /*handler??*/, "button"); //$NON-NLS-0$
 		}
 	});
 
@@ -74,7 +154,8 @@ define(['require', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/ex
 		this.fileClient = params.fileClient;
 		this.inputManager = params.inputManager;
 		this.parentNode = params.parentNode;
-		this.selection = params.selection;
+		this.toolbarNode = params.toolbarNode;
+//		this.selection = params.selection;
 		this.serviceRegistry = params.serviceRegistry;
 		this.explorer = null;
 	}
@@ -87,7 +168,7 @@ define(['require', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/ex
 			}
 			var _self = this;
 			this.explorer = new MiniNavExplorer({
-				/*openWithCommands: openWithCommands*/
+				commandRegistry: this.commandRegistry,
 				fileClient: this.fileClient,
 				inputManager: this.inputManager,
 				parentId: this.parentNode,
@@ -97,8 +178,9 @@ define(['require', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/ex
 						cachePrefix: "MiniNav"}, explorer, _self.commandRegistry, _self.contentTypeRegistry); //$NON-NLS-0$
 					return renderer;
 				},
-				selection: this.selection,
-				serviceRegistry: this.serviceRegistry
+//				selection: this.selection,
+				serviceRegistry: this.serviceRegistry,
+				toolbarNode: this.toolbarNode
 			});
 			// on initial creation we wait for an InputChanged event from inputManager -- possible race condition between rendering of Explorer and the InputChanged
 		},

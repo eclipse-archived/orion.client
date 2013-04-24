@@ -242,7 +242,7 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 			var _self = this;
 			if (oldProviders) {
 				oldProviders.forEach(function(provider) {
-					_self.sidebar.removeViewMode(provider.getProperty("id")); //$NON-NLS-0$
+					_self._sidebar.removeViewMode("outline." + provider.getProperty("id")); //$NON-NLS-0$
 				});
 			}
 			newProviders.forEach(function(provider) {
