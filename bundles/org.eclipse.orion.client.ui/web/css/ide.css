@@ -872,3 +872,45 @@ input {
 	z-index: 150;
 	border: 1px inset;
 }
+
+/* FOR NAVIGATION DROP DOWN */
+
+.centralNavigation {
+	width:'10px';
+	height:'10px';		
+	padding:'2px';
+}
+
+.dropDownContainer{
+	border-radius:3px;
+	background:#fefefe;
+	border: 1px solid #CCC;
+	padding:5px;
+	margin-top:5px;
+	position:absolute;
+	z-index:100;
+}
+
+
+.dropDownContainer ul {
+	list-style: none;
+	padding:0;
+}
+
+.dropDownContainer ul li a {
+	display: block;
+	padding: 5px 15px;
+	color:#3087B3;
+	line-height: 1;
+}
+
+.dropDownContainer ul li a:focus,
+.dropDownContainer ul li a:hover {
+	color:#F58B0F;
+}
+
+.dropDownContainer ul li a:active {
+	background: #ddd;
+}	
+
+
