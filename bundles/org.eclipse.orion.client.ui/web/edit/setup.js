@@ -68,31 +68,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
 
 	var editor;
-	var editorPreferences;
-	var inputManager;
-	var focusListener = function(e) { //$NON-NLS-0$
-		var fileURI = inputManager.getInput();
-		progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI)).then(function(data) {
-			if (inputManager.getFileMetadata().ETag !== data.ETag) {
-				inputManager._fileMetadata = data;
-				if (!editor.isDirty() || confirm(messages.loadOutOfSync)) {
-					progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
-						editor.setInput(fileURI, null, contents);										
-					});
-				}
-			}
-		});
-	};
+	var editorPreferences, settings;
 	var updateSettings = function(prefs) {
+		settings = prefs;
 		editor.setAutoSaveTimeout(prefs.autoSaveEnabled ? prefs.autoSaveTimeout : -1);
-		var textView = editor.getTextView();
-		if (textView) {
-			if (prefs.autoLoadEnabled) {
-				textView.addEventListener("Focus", focusListener); //$NON-NLS-0$
-			} else {
-				textView.removeEventListener("Focus", focusListener); //$NON-NLS-0$
-			}
-		}
 	};
 	var updateEditorSettings = function (prefs) {
 		if (!prefs) {
@@ -114,6 +93,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		return textView;
 	};
 
+	var inputManager;
 	var InputManager = (function() {
 		/**
 		 * @name orion.editor.InputManager
@@ -156,6 +136,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					} else {
 						if (!editor.getTextView()) {
 							editor.installTextView();
+							editor.getTextView().addEventListener("Focus", this.focusListener.bind(this)); //$NON-NLS-0$
 						}
 						var fullPathName = fileURI;
 						var progressTimeout = setTimeout(function() {
@@ -249,6 +230,21 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 						commandRegistry.processURL(window.location.href);
 					});
+			},
+			focusListener: function(e) {
+				if (!settings.autoLoadEnabled) { return; }
+				var fileURI = this.getInput();
+				progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI)).then(function(data) {
+					if (this.getFileMetadata().ETag !== data.ETag) {
+						this._fileMetadata = data;
+						var editor = this.editor;
+						if (!editor.isDirty() || confirm(messages.loadOutOfSync)) {
+							progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
+								editor.setInput(fileURI, null, contents);										
+							});
+						}
+					}
+				}.bind(this));
 			},
 			getInput: function() {
 				return this.lastFilePath;
