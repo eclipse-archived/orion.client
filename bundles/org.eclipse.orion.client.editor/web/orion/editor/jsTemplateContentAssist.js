@@ -78,7 +78,7 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 		{
 			prefix: "for", //$NON-NLS-0$
 			description: "for..in - iterate over properties of an object",
-			template: "for (var ${property} in ${object} {\n\tif (${object}.hasOwnProperty(${property})) {\n\t\t${cursor}\n\t}\n}" //$NON-NLS-0$
+			template: "for (var ${property} in ${object}) {\n\tif (${object}.hasOwnProperty(${property})) {\n\t\t${cursor}\n\t}\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "while", //$NON-NLS-0$
