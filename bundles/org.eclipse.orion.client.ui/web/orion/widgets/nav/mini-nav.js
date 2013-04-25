@@ -133,8 +133,32 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		NavigatorRenderer.apply(this, arguments);
 	}
 	MiniNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
-	MiniNavRenderer.prototype.showFolderLinks = true;
-//	MiniNavRenderer.prototype.folderLink = require.toUrl("navigate/table.html"); //$NON-NLS-0$
+	MiniNavRenderer.prototype.createFolderNode = function(folder) {
+		var node = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
+		node.classList.add("nav_expandinplace"); //$NON-NLS-0$;
+		// TODO wasteful, should not need listener per node. should get model item from nav handler
+		node.addEventListener("click", this.onFolderClick.bind(this, folder)); //$NON-NLS-0$
+		return node;
+	};
+	MiniNavRenderer.prototype.onFolderClick = function(folder, evt) {
+		var navHandler = this.explorer.getNavHandler();
+		if (navHandler) {
+			navHandler.cursorOn(folder);
+			navHandler.setSelection(folder, false);
+			// now toggle its expand/collapse state
+			var curModel = navHandler._modelIterator.cursor();
+			if (navHandler.isExpandable(curModel)){
+				if(!navHandler.isExpanded(curModel)){
+					this.explorer.myTree.expand(curModel);
+				} else {
+					this.explorer.myTree.collapse(curModel);
+				}
+				evt.preventDefault();
+				return false;
+			}
+		}
+	};
+	MiniNavRenderer.prototype.showFolderLinks = false;
 	MiniNavRenderer.prototype.oneColumn = true;
 
 	/**

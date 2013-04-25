@@ -310,11 +310,19 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		var rowId = this.model.getId(item);
 		return this.renderer.tableTree.isExpanded(rowId);
 	};
-		
+
+	/**
+	 * Returns the node that a rename text input box should appear over top of.
+	 * @name orion.explorers.FileExplorer#getNameNode
+	 * @function
+	 * @param {Object} item Item being renamed
+	 * @returns {Element}
+	 */
 	FileExplorer.prototype.getNameNode = function(item) {
 		var rowId = this.model.getId(item);
 		if (rowId) {
 			// I know this from my renderer below.
+			// TODO This approach fails utterly for a custom renderer, better hope they override this method.
 			return lib.node(rowId+"NameLink"); //$NON-NLS-0$
 		}
 	};

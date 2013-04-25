@@ -43,7 +43,11 @@ h2 {
 	padding: 2px;
 }
 
-.navlinkonpage {
+.nav_expandinplace:hover {
+	cursor: pointer;
+}
+
+.navlinkonpage, .nav_expandinplace {
 	text-decoration: none;
 	padding: 2px;
 }
