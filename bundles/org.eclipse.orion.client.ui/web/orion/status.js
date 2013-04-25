@@ -11,6 +11,7 @@
 /*global define window document Image */
  
 define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageUtil', 'orion/urlUtils'], function(require, lib, mGlobalCommands, PageUtil, URLUtil) {
+	var ProgressMonitor;
 	
 	/**
 	 * Service for reporting status
@@ -316,7 +317,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 	};
 	StatusReportingService.prototype.constructor = StatusReportingService;
 	
-	function ProgressMonitor(statusService, progressId, deferred, message){
+	ProgressMonitor = function(statusService, progressId, deferred, message){
 		this.statusService = statusService;
 		this.progressId = progressId;
 		if(deferred){
@@ -331,7 +332,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 						that.done.bind(that)();
 					});
 		}
-	}
+	};
 	
 	/**
 	 * Starts the progress monitor. Message will be shown in the status area.
