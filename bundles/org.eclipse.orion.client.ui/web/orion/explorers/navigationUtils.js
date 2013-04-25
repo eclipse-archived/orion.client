@@ -18,8 +18,8 @@ define([], function() {
 	 * Generate a grid navigation item into a given array. A grid navigation item is presented by a wrapper object wrapping the domNode. 
 	 *
 	 * @param {Array} domNodeWrapperList the array that holds the grid navigation item. Normally the .gridChildren property from a row model.
-	 * @param {DomNode} domNode the html dom node representing a grid. Normally left or right arrow keys on the current row highlight the dom node.
-	 *        When a grid is rendered, the caller has to decide what dom node can be passed. 
+	 * @param {Element} element the html dom element representing a grid. Normally left or right arrow keys on the current row highlight the dom element.
+	 *        When a grid is rendered, the caller has to decide what dom element can be passed. 
 	 */
 	 
 	 
@@ -41,8 +41,8 @@ define([], function() {
 	 *
 	 * @param {ExplorerNavDict} navDict the dictionary that holds the info of all navigation info from model id.
 	 * @param {object} rowModel the row model from the {treeModelIterator}.
-	 * @param {DomNode} domNode the html dom node representing a grid. Normally left or right arrow keys on the current row highlight the dom node.
-	 *        When a grid is rendered, the caller has to decide what dom node can be passed. 
+	 * @param {Element} element the html dom element representing a grid. Normally left or right arrow keys on the current row highlight the dom element.
+	 *        When a grid is rendered, the caller has to decide what dom element can be passed. 
 	 */
 	function addNavGrid(navDict, rowModel, domNode) {
 		if(!navDict){
