@@ -221,7 +221,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 
 				var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
 				themePreferences.apply();
-				var chooser = new mThemeChooser.MiniThemeChooser( themePreferences );
+				var chooser = new mThemeChooser.MiniThemeChooser( themePreferences, editorPreferences );
 				mGlobalCommands.addSettings( chooser );
 
 				mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$
