@@ -147,13 +147,15 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 			node.appendChild(image);
 			node.appendChild(document.createTextNode(message));
 			var container = lib.node(this.notificationContainerDomId);
+			container.classList.remove("notificationHide"); //$NON-NLS-0$
 			container.classList.add("progressNormal"); //$NON-NLS-0$
 			if (message && message.length > 0) {
-				container.classList.add("slideContainerActive"); //$NON-NLS-0$
+				container.classList.add("notificationShow"); //$NON-NLS-0$
 			} else if(this._progressMonitors && this._progressMonitors.length > 0){
 				return this._renderOngoingMonitors();
 			}else{
-				container.classList.remove("slideContainerActive"); //$NON-NLS-0$
+				container.classList.remove("notificationShow"); //$NON-NLS-0$
+				container.classList.add("notificationHide"); //$NON-NLS-0$
 			}
 			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
@@ -209,6 +211,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 					removedClasses.push("progressNormal");
 				}
 			}
+			removedClasses.push("notificationHide");
 			image.classList.add(imageClass); //$NON-NLS-0$
 			var node = lib.node(this.progressDomId);
 			var container = lib.node(this.notificationContainerDomId);
@@ -239,7 +242,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 					container.classList.remove(removedClasses[i]);
 				}
 			}
-			container.classList.add("slideContainerActive"); //$NON-NLS-0$
+			container.classList.add("notificationShow"); //$NON-NLS-0$
 			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
 		
