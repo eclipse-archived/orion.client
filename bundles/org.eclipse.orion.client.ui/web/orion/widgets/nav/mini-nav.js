@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define*/
-/*jslint sub:true*/
-define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table',
+/*jslint browser:true devel:true sub:true*/
+define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer', 'orion/i18nUtil', 'orion/keyBinding', 'orion/fileCommands', 'orion/extensionCommands', 'orion/selection'
 	],
 	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, i18nUtil, mKeyBinding, FileCommands, ExtensionCommands, Selection) {
@@ -52,6 +52,9 @@ define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/litt
 				this.toolbarNode.appendChild(selectionActions);
 			}
 		},
+		destroyToolbars: function() {
+			this.actions = this.selectionActions = null;
+		},
 		/**
 		 * Override {@link orion.explorers.FileExplorer#load} to load the parent directory of the given file
 		 */
@@ -65,9 +68,6 @@ define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/litt
 				this.commandsRegistered.then(function() {
 					FileExplorer.prototype.load.call(_self, rootPromise);
 				});
-//				rootPromise.then(function() {
-//					_self.updateCommands();
-//				});
 			} else {
 				console.log("Could not get parent directory");
 				console.log(fileMetadata);
@@ -108,30 +108,19 @@ define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/litt
 			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.downloadFile", 3, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsId, "orion.importSFTP", 4, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.exportSFTPCommand", 5, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-//			ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, this, actions.id, selectionActions.id, "orion.miniNavSelectionGroup"); //$NON-NLS-0$
+			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
 			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsId, 0, "orion.miniNavSelectionGroup", true);
 		},
 		updateCommands: function(selections) {
-			var toolbar = this.toolbarNode, actions = this.actions, selectionActions = this.selectionActions;
-			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
+			var actions = this.actions, selectionActions = this.selectionActions;
+			var commandRegistry = this.commandRegistry;
 			if (actions) {
 				commandRegistry.destroy(actions);
-			} else {
-				actions = this.actions = document.createElement("div"); //$NON-NLS-0$
-				actions.id = toolbar.id + "actions"; //$NON-NLS-0$
-				toolbar.appendChild(actions);
 			}
 			if (selectionActions) {
 				commandRegistry.destroy(selectionActions);
-			} else {
-				selectionActions = this.selectionActions = document.createElement("div"); //$NON-NLS-0$
-				selectionActions.id = toolbar.id + "selectionActions"; //$NON-NLS-0$
-				toolbar.appendChild(selectionActions);
 			}
-//			var explorer = this;
-//			FileCommands.createFileCommands(serviceRegistry, commandRegistry, explorer, fileClient);
-//			ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActions.id, 0, "orion.miniNavSelectionGroup");  //$NON-NLS-0$
-//			commandRegistry.renderCommands(selectionActions.id, selectionActions, selections, this, "button"); //$NON-NLS-0$
+			commandRegistry.renderCommands(selectionActions.id, selectionActions, selections, this, "button"); //$NON-NLS-0$
 			commandRegistry.renderCommands(actions.id /*scope*/, this.toolbarNode /*parent*/, this.treeRoot /*items*/, this /*handler??*/, "button"); //$NON-NLS-0$
 		}
 	});
@@ -186,6 +175,10 @@ define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/litt
 		},
 		destroy: function() {
 			lib.empty(this.parentNode);
+			lib.empty(this.toolbarNode);
+			if (this.explorer) {
+				this.explorer.destroyToolbars();
+			}
 		}
 	});
 
