@@ -35,21 +35,31 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var outlineService;
 	var contentTypeService;
 	var progressService;
+	var dialogService;
+	var favoriteService;
+	var syntaxHighlighter;
+	var syntaxModelWirer;
+	var fileClient;
+	var searcher;
 	
 	// Initialize the plugin registry
 	(function() {
 		selection = new mSelection.Selection(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mDialogs.DialogService(serviceRegistry);
+		dialogService = new mDialogs.DialogService(serviceRegistry);
 		commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 		progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 		// Editor needs additional services
 		problemService = new mProblems.ProblemService(serviceRegistry);
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
-		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+		favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+		syntaxHighlighter = new Highlight.SyntaxHighlighter(serviceRegistry);
+		syntaxModelWirer = new SyntaxModelWirer(serviceRegistry);
+		fileClient = new mFileClient.FileClient(serviceRegistry);
+		searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 	}());
 
 	var sidebarDomNode = lib.node("sidebar"), //$NON-NLS-0$
@@ -57,14 +67,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		editorDomNode = lib.node("editor"), //$NON-NLS-0$
 		searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
 
-	var syntaxHighlighter = new Highlight.SyntaxHighlighter(serviceRegistry);
-	var syntaxModelWirer = new SyntaxModelWirer(serviceRegistry);
-	var fileClient = new mFileClient.FileClient(serviceRegistry);
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 	var editor;
 	var editorPreferences;
 	var inputManager;
-	var setOutlineProviders;
 	var focusListener = function(e) { //$NON-NLS-0$
 		var fileURI = inputManager.getInput();
 		progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI)).then(function(data) {
