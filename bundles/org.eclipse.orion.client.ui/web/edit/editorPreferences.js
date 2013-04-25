@@ -34,8 +34,8 @@ define([], function() {
 				prefs.put(SETTINGS_KEY,
 				{	
 					autoSaveEnabled:false, 
-					autoSaveTimeout:520, 
-					autoLoadEnabled:false
+					autoSaveTimeout:1000, 
+					autoLoadEnabled:true
 				});
 			}
 		},

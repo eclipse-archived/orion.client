@@ -120,8 +120,8 @@ define({
 	"Deleted git credentials for ${0}" : "Deleted git credentials for ${0}",
 	"File Management" : "File Management",
 	"Autosave" : "Save",
-	"Autosave Enabled" : "Autosave Enabled",
+	"Autosave Enabled" : "Auto Save",
 	"Save interval" : "Save interval (ms)",
 	"Autoload" : "Load",
-	"Autoload Enabled" : "Autoload Enabled"
+	"Autoload Enabled" : "Auto Load"
 });

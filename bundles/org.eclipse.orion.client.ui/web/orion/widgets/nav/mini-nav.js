@@ -29,7 +29,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.selectionActions = null;
 		var _self = this;
 		this.inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
-			_self.load(event.metadata);
+			_self.loadParentOf(event.metadata);
 		});
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
@@ -52,25 +52,29 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				this.toolbarNode.appendChild(selectionActions);
 			}
 		},
+		destroy: function() {
+			this.destroyToolbars();
+		},
 		destroyToolbars: function() {
+			lib.empty(this.toolbarNode); // removes actions, selectionActions elements
 			this.actions = this.selectionActions = null;
 		},
 		/**
-		 * Override {@link orion.explorers.FileExplorer#load} to load the parent directory of the given file
+		 * Loads the parent directory of the given file.
+		 * @param {Object} fileMetadata
 		 */
-		load: function(fileMetadata) {
+		loadParentOf: function(fileMetadata) {
 			this.createToolbars();
 			var parent = fileMetadata && fileMetadata.Parents && fileMetadata.Parents[0];
-			var rootPromise;
 			if (parent) {
-				rootPromise = this.fileClient.read(parent.ChildrenLocation, true);
+				if (this.treeRoot && this.treeRoot.ChildrenLocation === parent.ChildrenLocation) {
+					return;
+				}
+				var rootPromise = this.fileClient.read(parent.ChildrenLocation, true);
 				var _self = this;
 				this.commandsRegistered.then(function() {
 					FileExplorer.prototype.load.call(_self, rootPromise);
 				});
-			} else {
-				console.log("Could not get parent directory");
-				console.log(fileMetadata);
 			}
 		},
 		scopeUp: function() {
@@ -151,10 +155,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	objects.mixin(MiniNavViewMode.prototype, {
 		label: messages["Navigator"],
 		create: function() {
-			if (this.explorer) {
-				this.explorer.load(this.inputManager.getFileMetadata());
-				return;
-			}
 			var _self = this;
 			this.explorer = new MiniNavExplorer({
 				commandRegistry: this.commandRegistry,
@@ -171,14 +171,14 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				serviceRegistry: this.serviceRegistry,
 				toolbarNode: this.toolbarNode
 			});
-			// on initial creation we wait for an InputChanged event from inputManager -- possible race condition between rendering of Explorer and the InputChanged
+			// On initial page load, metadata may not be loaded yet, but that's ok -- InputChanged will inform us later
+			this.explorer.loadParentOf(this.inputManager.getFileMetadata());
 		},
 		destroy: function() {
-			lib.empty(this.parentNode);
-			lib.empty(this.toolbarNode);
 			if (this.explorer) {
-				this.explorer.destroyToolbars();
+				this.explorer.destroy();
 			}
+			this.explorer = null;
 		}
 	});
 
