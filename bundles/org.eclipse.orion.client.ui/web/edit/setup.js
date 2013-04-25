@@ -63,8 +63,31 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 	var editor;
 	var editorPreferences;
+	var inputManager;
+	var setOutlineProviders;
+	var focusListener = function(e) { //$NON-NLS-0$
+		var fileURI = inputManager.getInput();
+		progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI)).then(function(data) {
+			if (inputManager.getFileMetadata().ETag !== data.ETag) {
+				inputManager._fileMetadata = data;
+				if (!editor.isDirty() || confirm(messages.loadOutOfSync)) {
+					progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
+						editor.setInput(fileURI, null, contents);										
+					});
+				}
+			}
+		});
+	};
 	var updateSettings = function(prefs) {
 		editor.setAutoSaveTimeout(prefs.autoSaveEnabled ? prefs.autoSaveTimeout : -1);
+		var textView = editor.getTextView();
+		if (textView) {
+			if (prefs.autoLoadEnabled) {
+				textView.addEventListener("Focus", focusListener); //$NON-NLS-0$
+			} else {
+				textView.removeEventListener("Focus", focusListener); //$NON-NLS-0$
+			}
+		}
 	};
 	var updateEditorSettings = function (prefs) {
 		if (!prefs) {
@@ -86,7 +109,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		return textView;
 	};
 
-	var inputManager;
 	var InputManager = (function() {
 		/**
 		 * @name orion.editor.InputManager
@@ -149,7 +171,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							self.setInputContents(input, fileURI, contentOrError, metadataOrError);
 							clearTimeout(progressTimeout);
 						};
-						new Deferred.all([progressService.progress(fileClient.read(fileURI), "Reading " + fileURI), progressService.progress(fileClient.read(fileURI, true), "Reading metedata of " + fileURI)], function(error) { return {_error: error}; }).then(load);
+						new Deferred.all([progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)), progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI))], function(error) { return {_error: error}; }).then(load);
 					}
 					this.lastFilePath = fileURI;
 				} else {
@@ -158,7 +180,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			},
 			setInputContents: function(input, title, contents, metadata) {
 				// TODO could potentially dispatch separate events for metadata and contents changing
-				this.dispatchEvent({ type: "InputChanged", metadata: metadata, contents: contents });
+				this.dispatchEvent({ type: "InputChanged", metadata: metadata, contents: contents }); //$NON-NLS-0$
 				var editor = this.editor;
 				var altPageTarget, name;
 				if (metadata) {
@@ -180,7 +202,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					// page target is the file, but if any interesting links fail, try the parent folder metadata.
 					altPageTarget = function() {
 						if (metadata.Parents && metadata.Parents.length > 0) {
-							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
+							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
 						}
 					};
 					name = metadata.Name;
@@ -201,7 +223,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					makeAlternate: function() {
 						if (metadata.Parents && metadata.Parents.length > 0) {
 							// The mini-nav in sidebar wants to do the same work, can we share it?
-							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
+							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
 						}
 					},
 					serviceRegistry: serviceRegistry, commandService: commandRegistry,
@@ -213,7 +235,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						// TODO folding should be a preference.
 						var styler = syntaxHighlighter.getStyler();
 						editor.setFoldingEnabled(styler && styler.foldingEnabled);
-						_self.dispatchEvent({ type: "ContentTypeChanged", contentType: _self._contentType, location: location });
+						_self.dispatchEvent({ type: "ContentTypeChanged", contentType: _self._contentType, location: location }); //$NON-NLS-0$
 						if (!this.dispatcher) {
 							this.dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor, _self._contentType);
 						}
@@ -267,7 +289,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				}
 			},
 			shouldGoToURI: function(fileURI) {
-				if (typeof fileURI !== "string") {
+				if (typeof fileURI !== "string") { //$NON-NLS-0$
 					return false;
 				}
 				if (this.editor.isDirty()) {
@@ -393,7 +415,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		// give our external escape handler a shot at handling escape
 		keyModeStack.push(escHandler);
 		
-		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-0$
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		// global search
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -466,7 +488,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var contentAssistFactory = isReadOnly ? null
 		: {
 			createContentAssistMode: function(editor) {
-				var progress = serviceRegistry.getService("orion.page.progress");
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
 				contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
 					// Content assist is about to be activated; set its providers.
