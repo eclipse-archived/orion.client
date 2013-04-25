@@ -141,6 +141,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 			this.currentMessage = message;
 			var image = document.createElement("span"); //$NON-NLS-0$
 			image.classList.add("imageSprite"); //$NON-NLS-0$
+			image.classList.add("progressIcon"); //$NON-NLS-0$
 			image.classList.add("core-sprite-progress");  //$NON-NLS-0$
 			var node = lib.node(this.progressDomId);
 			lib.empty(node);
