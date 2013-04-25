@@ -388,9 +388,21 @@ define(['require', 'orion/Deferred', 'orion/xhr'], function(require, Deferred, x
 	
 	PreferencesService.prototype = /** @lends orion.preferences.PreferencesService.prototype */ {
 	
-		listenForChangedSettings: function( callback ){
+		listenForChangedSettings: function(key, optScope, callback ){
+			if (!optScope || typeof(optScope) !== "number" || optScope > 7 || optScope < 1) { //$NON-NLS-0$
+				callback = optScope;
+				optScope = PreferencesService.DEFAULT_SCOPE | PreferencesService.LOCAL_SCOPE | PreferencesService.USER_SCOPE;
+			}
+			
+			//TODO: only have one window listener that dispatches callbacks
 			window.addEventListener("storage", callback, false); //$NON-NLS-0$
-			return "/orion/preferences/local/themes"; //$NON-NLS-0$
+			if ((PreferencesService.USER_SCOPE & optScope) !== 0 ) {
+				return "/orion/preferences/user" + key; //$NON-NLS-0$
+			} else if ((PreferencesService.LOCAL_SCOPE & optScope) !== 0) {
+				return "/orion/preferences/local" + key; //$NON-NLS-0$
+			}
+			
+			return "/orion/preferences/default" + key; //$NON-NLS-0$
 		},
 		
 		/**

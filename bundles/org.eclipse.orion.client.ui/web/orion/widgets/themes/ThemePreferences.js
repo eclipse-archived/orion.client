@@ -15,7 +15,8 @@ define([], function() {
 	function ThemePreferences(preferences, themeData) {
 		this._preferences = preferences;
 		this._themeData = themeData;
-		var storageKey = preferences.listenForChangedSettings(function(e) {
+		var themeInfo = themeData.getThemeStorageInfo();
+		var storageKey = preferences.listenForChangedSettings(themeInfo.storage, 2, function(e) {
 			if (e.key === storageKey) {
 				this.apply();
 			}

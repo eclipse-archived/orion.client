@@ -23,9 +23,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		'orion/widgets/themes/container/ThemeData', 
 		'orion/widgets/settings/SplitSelectionLayout',
 		'orion/widgets/plugin/PluginList',
-		'orion/widgets/settings/UserSettings'
+		'orion/widgets/settings/UserSettings',
+		'orion/widgets/settings/EditorSettings',
+		'edit/editorPreferences'
 		], function(messages, require, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
-			ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings) {
+			ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings, 
+			EditorSettings, mEditorPreferences) {
 
 	/**
 	 * @param {Object} options
@@ -50,6 +53,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 				id: "editorThemeBuilder", //$NON-NLS-0$
 				textContent: 'Editor Theme', // messages["Themes"],
 				show: this.showEditorThemeBuilder
+			},
+			{
+				id: "editorSettings", //$NON-NLS-0$
+				textContent: 'Editor Settings', // messages["Themes"],
+				show: this.showEditorSettings
 			},
 			{
 				id: "plugins", //$NON-NLS-0$
@@ -160,6 +168,35 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			this.table.appendChild(themeNode);
 
 			this.editorThemeWidget.renderData( themeNode, 'INITIALIZE' );
+		},
+		
+		showEditorSettings: function(id){
+		
+			this.selectCategory(id);
+
+			lib.empty(this.table);
+
+			if (this.editorSettingWidget) {
+				this.editorSettingWidget.destroy();
+			}
+
+			this.updateToolbar(id);
+			
+			var editorSettingsNode = document.createElement('div'); //$NON-NLS-0$
+			this.table.appendChild(editorSettingsNode);
+			
+			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
+			
+			this.editorSettings = new EditorSettings({
+				registry: this.registry,
+				preferences: editorPreferences,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				userClient: this.userClient
+			}, editorSettingsNode);
+			
+			this.editorSettings.show();
 		},
 		
 		showUserSettings: function(id){

@@ -180,9 +180,15 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 	};
 
 	/**
+	 * @name orion.explorer.NavigatorRenderer#showFolderLinks
+	 * @type {Boolean}
+	 * @description Whether folders should be links (<code>true</code>), or just plain text (<code>false</code>). Default is to show folders as links.
+	 */
+	NavigatorRenderer.prototype.showFolderLinks = true;
+	/**
 	 * @name orion.explorer.NavigatorRenderer#folderLink
 	 * @type {String}
-	 * @description Base link URL to use on folder text. TODO see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121">Bug 400121</a>
+	 * @description Base link URL to use on folder text. Only applies if {@link #showFolderLinks} is true. TODO see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121">Bug 400121</a>
 	 */
 	/**
 	 * @name orion.explorer.NavigatorRenderer#getCellElement
@@ -202,12 +208,16 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var image = this.getExpandImage(tableRow, span);
-				
-				// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
-				link = createLink(this.folderLink || "", item, tableRow.id, this.commandService, this.contentTypeService);
-				span.appendChild(link); //$NON-NLS-0$
+
+				if (this.showFolderLinks) { //$NON-NLS-0$
+					// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
+					link = createLink(this.folderLink || "", item, tableRow.id, this.commandService, this.contentTypeService);
+					span.appendChild(link); //$NON-NLS-0$
+					this.explorer._makeDropTarget(item, link);
+				} else {
+					span.appendChild(document.createTextNode(item.Name));
+				}
 				this.explorer._makeDropTarget(item, tableRow);
-				this.explorer._makeDropTarget(item, link);
 			} else {
 				var i;			
 				// Images: always generate link to file. Non-images: use the "open with" href if one matches,
@@ -223,7 +233,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 				link = createLink("", item, tableRow.id, this.commandService, this.contentTypeService, this.openWithCommands, this.defaultEditor, { target: this.target });
 				span.appendChild(link); //$NON-NLS-0$
 			}
-			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
+			if (link) {
+				mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
+			}
 			// render any inline commands that are present.
 			if (this.actionScopeId) {
 				this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool", null, true); //$NON-NLS-0$

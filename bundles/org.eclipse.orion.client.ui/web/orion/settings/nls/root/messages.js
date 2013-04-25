@@ -117,5 +117,11 @@ define({
 	"Do you wish to enable the Key Storage?" : "Do you wish to enable the Key Storage?",
 	"general": "General",
 	"validation": "Validation",
-	"Deleted git credentials for ${0}" : "Deleted git credentials for ${0}"
+	"Deleted git credentials for ${0}" : "Deleted git credentials for ${0}",
+	"File Management" : "File Management",
+	"Autosave" : "Save",
+	"Autosave Enabled" : "Autosave Enabled",
+	"Save interval" : "Save interval (ms)",
+	"Autoload" : "Load",
+	"Autoload Enabled" : "Autoload Enabled"
 });

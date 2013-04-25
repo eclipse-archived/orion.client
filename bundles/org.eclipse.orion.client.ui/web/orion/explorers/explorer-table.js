@@ -95,8 +95,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 	/**
 	 * Creates a new file explorer.
-	 * @name orion.explorers.explorer-table.FileExplorer
+	 * @name orion.explorers.FileExplorer
 	 * @class A user interface component that displays a table-oriented file explorer
+	 * @extends orion.explorer.Explorer
+	 *
 	 * @param {Object} options.treeRoot an Object representing the root of the tree.
 	 * @param {orion.selection.Selection} options.selection the selection service used to track selections.
 	 * @param {orion.fileClient.FileClient} options.fileClient the file service used to retrieve file information
@@ -107,6 +109,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry  the service registry to use for retrieving other
 	 *	Orion services.  Optional.  If not specified, then some features of the explorer will not be enabled, such as status reporting,
 	 *  honoring preference settings, etc.
+	 * @param {Boolean} [options.setFocus=true] Whether the explorer should steal keyboard focus when rendered. The default is to steal focus.
+	 */
+	/**
+	 * Root model item of the tree.
+	 * @name orion.explorers.FileExplorer#treeRoot
+	 * @type {Object}
 	 */
 	function FileExplorer(options) {
 		this.registry = options.serviceRegistry;
@@ -118,6 +126,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		this.parentId = options.parentId;
 		this.renderer = options.rendererFactory(this);
 		this.dragAndDrop = options.dragAndDrop;
+		this.setFocus = options.setFocus;
 		this.model = null;
 		this.myTree = null;
 		this.checkbox = false;
@@ -146,7 +155,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			path = path || "";
 			if (entry.isFile) {
 				// can't drop files directly into workspace.
-				if (target.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
+				if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
 					explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
 						Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
 				} else {
@@ -164,7 +173,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 					});
 				};
 				var progress = explorer.registry.getService("orion.page.progress");
-				if (target.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
+				if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
 					progress.progress(fileClient.createProject(target.ChildrenLocation, entry.name), "Initializing project " + entry.name).then(function(project) {
 					explorer.loadResourceList(explorer.treeRoot.Path, true);					
 					progress.progress(fileClient.read(project.ContentLocation, true), "Loading project info " + project.name).then(function(folder) {
@@ -259,7 +268,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 						if (!file.length && (!file.type || file.type === "")) {
 							explorer.registry.getService("orion.page.message").setProgressResult( //$NON-NLS-0$
 								{Severity: "Error", Message: i18nUtil.formatMessage(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], file.name)}); //$NON-NLS-1$ //$NON-NLS-0$ 
-						} else if (item.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
+						} else if (mFileUtils.isAtRoot(item.Location)){ //$NON-NLS-0$
 							explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
 								Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
 						} else {
@@ -278,8 +287,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			node.addEventListener("drop", drop, false); //$NON-NLS-0$
 		}
 	};
-	
-	// we have changed an item on the server at the specified parent node
+
+	/**
+	 * @name FileExplorer#changedItem
+	 * @function
+	 * we have changed an item on the server at the specified parent node
+	 */
 	FileExplorer.prototype.changedItem = function(parent, forceExpand) {
 		var that = this;
 		var progress = this.registry.getService("orion.page.progress");
@@ -306,20 +319,19 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		}
 	};
 		
-	//This is an optional function for explorerNavHandler. It changes the href of the window.location to navigate to the parent page.
-	//The explorerNavHandler hooked up by the explorer will check if this optional function exist and call it when left arrow key hits on a top level item that is aleady collapsed.
-	FileExplorer.prototype.scopeUp = function(){
-		if(this.treeRoot && this.treeRoot.Parents){
-			if(this.treeRoot.Parents.length === 0){
-				window.location.href = "#"; //$NON-NLS-0$
-			} else if(this.treeRoot.Parents[0].ChildrenLocation){
-				window.location.href = "#" + this.treeRoot.Parents[0].ChildrenLocation; //$NON-NLS-0$
-			}
-		}
+	/**
+	 * The explorerNavHandler hooked up by the explorer will call this function when left arrow key is pressed on a 
+	 * top level item that is aleady collapsed. The default implementation does nothing.
+	 * @name orion.explorers.FileExplorer#scopeUp
+	 * @function
+	 */
+	FileExplorer.prototype.scopeUp = function() {
 	};
 	
 	/**
 	 * Load the resource at the given path.
+	 * @name orion.explorers.FileExplorer#loadResourceList
+	 * @function
 	 * @param path The path of the resource to load
 	 * @param {Boolean} [force] If true, force reload even if the path is unchanged. Useful
 	 * when the client knows the resource underlying the current path has changed.
@@ -344,6 +356,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	
 	/**
 	 * Load the explorer with the given root
+	 * @name orion.explorers.FileExplorer#load
+	 * @function
 	 * @param {Object} root a root object or a deferred that will return the root of the FileModel
 	 * @param {String} progress a string progress message describing the fetch of the root
 	 */
@@ -397,7 +411,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 					}
 				}
 
-				self.createTree(self.parentId, self.model, {setFocus: true, selectionPolicy: self.renderer.selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
+				self.createTree(self.parentId, self.model, {
+					setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), 
+					selectionPolicy: self.renderer.selectionPolicy, 
+					onCollapse: function(model){
+						if(self.getNavHandler()){
+							self.getNavHandler().onCollapse(model);
+						}
+					}});
 				if (typeof postLoad === "function") { //$NON-NLS-0$
 					try {
 						postLoad();
@@ -428,7 +449,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		);
 	};
 	/**
-	 * Clients can connect to this function to receive notification when the root item changes.
+	 * Called when the root item changes. This can be overridden.
+	 * @name orion.explorers.FileExplorer#onchange
+	 * @function
 	 * @param {Object} item
 	 */
 	FileExplorer.prototype.onchange = function(item) {

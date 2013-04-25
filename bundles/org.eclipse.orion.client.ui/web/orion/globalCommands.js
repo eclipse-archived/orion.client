@@ -16,10 +16,10 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
 	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 
 	'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/globalSearch/advSearchOptContainer', 'orion/Deferred',
-	'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html', 'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html'], 
+	'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html', 'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 'orion/widgets/input/GroupedContent'], 
         function(messages, require, commonHTML, KeyBinding, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
         mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, mThemePreferences, mThemeData, mSearchUtils, mInputCompletion, 
-        mAdvSearchOptContainer, Deferred, mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate){
+        mAdvSearchOptContainer, Deferred, mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -201,12 +201,25 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	
 	function _addRelatedLinkCommand(command, invocation) {
 		var dropdownNode = lib.node("relatedDropdown"); //$NON-NLS-0$
+		
+		/* Evolving to a compound list of navigation and related links
+		   Some of this code was dedicated to the older dropdown. Will
+		   clean this up as a next step. 
+		
 		if (!linksDropdown) {
 			linksDropdown = new mDropdown.Dropdown({
 				dropdown: dropdownNode
 			});
-		}
+		} */
+		
 		mCommands.createCommandMenuItem(dropdownNode, command, invocation);
+		
+		var relatedlinks = lib.node('relatedlinks');
+		var link = mCommands.createCommandMenuItem(dropdownNode, command, invocation);
+		link.className = '';
+		var li = document.createElement( 'li' );
+		li.appendChild(link);
+		relatedlinks.appendChild(li);
 	}	
 	/**
 	 * Adds the related links to the banner
@@ -522,7 +535,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				CLICKED = true;
 		
 				var TAB_HEIGHT = 24;
-				var PANEL_HEIGHT = 150;
+				var PANEL_HEIGHT = 200;
 				var PANEL_WIDTH = 150;
 				var BORDER_RADIUS = '3px'; //$NON-NLS-0$
 				var COLOR = '#555'; //$NON-NLS-0$
@@ -647,12 +660,18 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			keyAssistDiv.style.display = "none"; //$NON-NLS-0$
 		});
 		
+		var navDropDown = new DropDownMenu( 'centralNavigation', { label:'Develop', icon:'core-sprite-hamburger-inverse' } );
+		var groupedContent = new GroupedContent();
+		navDropDown.addContent( groupedContent.getContentPane() );
+		
 		// generate primary nav links. 
-		var primaryNav = lib.node("primaryNav"); //$NON-NLS-0$
+		var primaryNav = lib.node("navigationlinks"); //$NON-NLS-0$
 		if (primaryNav) {
 			PageLinks.createPageLinks(serviceRegistry, "orion.page.link").then(function(links) { //$NON-NLS-0$
-				links.forEach(function(link) {
-					primaryNav.appendChild(link);
+				links.forEach(function(link) {		
+					var li = document.createElement( 'li' );	
+					li.appendChild(link);
+					navigationlinks.appendChild(li);
 				});
 			});
 		}
@@ -775,11 +794,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 							editor.getTextView().resize();
 						}
 					});
-					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
-					editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
+					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleSidebar"); //$NON-NLS-1$ //$NON-NLS-0$
+					editor.getTextView().setAction("toggleSidebar", function(){ //$NON-NLS-0$
 						mainSplitter.splitter.toggleSidePanel();
 						return true;
-					}, {name: messages["Toggle Outliner"]});
+					}, {name: messages["Toggle Sidebar"]});
 				}
 			}
 		}

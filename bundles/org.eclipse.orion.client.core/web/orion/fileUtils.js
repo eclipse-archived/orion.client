@@ -8,9 +8,9 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window document navigator*/
+/*global define window document navigator URL*/
 
-define(['i18n!orion/nls/messages'], function(messages) {
+define(['require', 'i18n!orion/nls/messages', 'orion/URL-shim'], function(require, messages) {
                 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -35,11 +35,15 @@ define(['i18n!orion/nls/messages'], function(messages) {
 	 * @function
 	 */
 	function isAtRoot(path) {
-		var relative = this.makeRelative(path);
-		// TODO better way?
-		// I thought it should be the line below but is actually the root of all workspaces
-		//  return relative == '/file/';
-		return relative.indexOf('/workspace') === 0; //$NON-NLS-0$
+		if (!path) {
+			return false;
+		}
+		if (path === "/workspace") {
+			return true; // sad but true
+		}
+		var workspaceUrl = new URL(require.toUrl("workspace"), window.location.href);
+		var pathUrl = new URL(path, window.location.href);
+		return pathUrl.href.indexOf(workspaceUrl.href) === 0; //$NON-NLS-0$
 	}
 	
 	//return module exports
