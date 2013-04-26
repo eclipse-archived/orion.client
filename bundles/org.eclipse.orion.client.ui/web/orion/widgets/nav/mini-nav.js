@@ -41,7 +41,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	objects.mixin(MiniNavExplorer.prototype, {
 		createActionSections: function() {
 			var _self = this;
-			["actions1", "actions2"].forEach(function(name) {
+			// Create some elements that we can hang actions on. Ideally we'd have just 1, but the
+			// CommandRegistry seems to require dropdowns to have their own element.
+			["actions1", "actions2", "actions3"].forEach(function(name) {
 				if (!_self[name]) {
 					var elem = _self[name] = document.createElement("ul"); //$NON-NLS-0$
 					elem.classList.add("commandList"); //$NON-NLS-0$
@@ -73,11 +75,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 		scopeUp: function() {
 			var root = this.treeRoot, parents = root && root.Parents;
-			if (parents){
+			if (parents) {
 				if (parents.length === 0) {
-					// TODO goto top
-				} else if (parents[0].ChildrenLocation) {
-					// TODO load it
+					this.loadResourceList(""); //$NON-NLS-0$
+				} else {
+					this.loadParentOf(this.treeRoot);
 				}
 			}
 		},
@@ -85,8 +87,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		registerCommands: function() {
 			// Selection based command contributions in sidebar mini-nav
 			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
-			var newActionsScope = this.newActionsScope = this.toolbarNode.id + "Actions"; //$NON-NLS-0$
-			var selectionActionsScope = this.selectionActionsScope = this.toolbarNode.id + "SelectionActions"; //$NON-NLS-0$
+			var newActionsScope = this.newActionsScope = this.toolbarNode.id + "New"; //$NON-NLS-0$
+			var selectionActionsScope = this.selectionActionsScope = this.toolbarNode.id + "Selection"; //$NON-NLS-0$
+			var folderNavActionsScope = this.folderNavActionsScope = this.toolbarNode.id + "Folder";
 			commandRegistry.addCommandGroup(newActionsScope, "orion.miniNavNewGroup", 1000, messages["New"]); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"]);
 
@@ -94,11 +97,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile", 1, "orion.miniNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFolder", 2, "orion.miniNavNewGroup", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// New project creation in the toolbar (in a group)
-			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.project", 1, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.linkProject", 2, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			// Go Up
-			// ??
-			//commandRegistry.registerCommandContribution(newActionsScope, "eclipse.upFolder", 3, "orion.miniNavNewGroup", true, new KeyBinding(38, false, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.project", 1, "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.linkProject", 2, "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			// Folder nav actions
+			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.upFolder", 1, null, true, new KeyBinding(38, false, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 
 			var renameBinding = new KeyBinding(113);
 			renameBinding.domScope = "sidebar"; //$NON-NLS-0$
@@ -126,8 +128,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var commandRegistry = this.commandRegistry;
 			commandRegistry.destroy(this.actions1);
 			commandRegistry.destroy(this.actions2);
+			commandRegistry.destroy(this.actions3);
 			commandRegistry.renderCommands(this.newActionsScope /*scope*/, this.actions1 /*parent*/, this.treeRoot /*items*/, this /*handler??*/, "button"); //$NON-NLS-0$
 			commandRegistry.renderCommands(this.selectionActionsScope, this.actions2, selections, this, "button"); //$NON-NLS-0$
+			commandRegistry.renderCommands(this.folderNavActionsScope, this.actions3, this.treeRoot, this, "button"); //$NON-NLS-0$
 		}
 	});
 
