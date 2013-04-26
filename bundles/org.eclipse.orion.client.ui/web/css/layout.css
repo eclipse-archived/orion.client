@@ -167,7 +167,7 @@ hard-coded numbers elsewhere.
 
 .toolbarTarget {
 	position: absolute;
-	top: 32px;  /* $ToolbarHeight + 1 */
+	top: 37px;  /* $ToolbarHeight + 1 */
  	width: 100%;
  	bottom: 0;
  	overflow-y: auto;
