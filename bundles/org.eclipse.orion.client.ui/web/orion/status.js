@@ -30,6 +30,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 		this.domId = domId;
 		this.progressDomId = progressDomId || domId;
 		this._hookedClose = false;
+		this._timer = null;
 	}
  
 	StatusReportingService.prototype = /** @lends orion.status.StatusReportingService.prototype */ {
@@ -37,11 +38,12 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 		_init: function() {
 			// this is a cheat, all dom ids should be passed in
 			var closeButton = lib.node("closeNotifications"); //$NON-NLS-0$
-			var self = this;
 			if (closeButton && !this._hookedClose) {
+				this._hookedClose = true;
 				closeButton.addEventListener("click", function() { //$NON-NLS-0$
-					self.setProgressMessage("");
-				}, false);
+					window.clearTimeout(this._timer);
+					this.setProgressMessage(""); 
+				}.bind(this));
 			}
 		},
 		
@@ -150,8 +152,8 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 			node.appendChild(document.createTextNode(message));
 			var container = lib.node(this.notificationContainerDomId);
 			container.classList.remove("notificationHide"); //$NON-NLS-0$
-			container.classList.add("progressNormal"); //$NON-NLS-0$
 			if (message && message.length > 0) {
+				container.classList.add("progressNormal"); //$NON-NLS-0$
 				container.classList.add("notificationShow"); //$NON-NLS-0$
 			} else if(this._progressMonitors && this._progressMonitors.length > 0){
 				return this._renderOngoingMonitors();
@@ -159,7 +161,6 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 				container.classList.remove("notificationShow"); //$NON-NLS-0$
 				container.classList.add("notificationHide"); //$NON-NLS-0$
 			}
-			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
 		
 		/**
@@ -234,6 +235,16 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 						link.target = "_blank"; //$NON-NLS-0$
 					});
 				} else {
+					//If the message is just neither warning nor error, without a URL link in it, then we will auto hide it in 5 seconds.
+					if(status.Severity !== "Warning" && status.Severity !== "Error"){ //$NON-NLS-1$ //$NON-NLS-0$
+						if(this._timer){
+							window.clearTimeout(this._timer);
+						}
+						this._timer = window.setTimeout(function(){
+							this.setProgressMessage("");
+							this._timer = null;
+						}.bind(this), 5000);
+					}
 					msgNode = document.createTextNode(msg);
 				}
 				node.appendChild(msgNode);
@@ -245,7 +256,6 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 				}
 			}
 			container.classList.add("notificationShow"); //$NON-NLS-0$
-			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
 		
 		/**
