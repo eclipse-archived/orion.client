@@ -55,8 +55,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			topRowBanner.style.margin = '0';
 			topRowBanner.style.border = '0';
 			topRowBanner.style.backgroundColor = this.navbar;
-			topRowBanner.style.background = '-webkit-gradient(linear, left top, left bottom, color-stop(0%,' + this.navbar + '), color-stop(100%,' + this.navbar + '))';
-			topRowBanner.style.background = '-moz-linear-gradient(top,' + this.navbar + '0%,' + this.navbar + '100%)';
+			topRowBanner.style.background = 'background-image: linear-gradient(to top, #444444 0%, #222222 100%)';
 			topRowBanner.style.height = '15px';
 			topRowBanner.style.padding = '10px';
 			
@@ -334,8 +333,9 @@ define(['orion/widgets/themes/ThemeClass'],
 			
 			var mainToolbar = new ThemeClass.ThemeClass( 'mainToolbar' );
 			mainToolbar.style.background = this.toolpanel;
-			mainToolbar.style.height = '31px';
+			mainToolbar.style.height = '34px';
 			mainToolbar.style.borderBottom = '1px solid #ebebeb';
+			mainToolbar.style.paddingTop = '2px';
 			
 			styles.push( mainToolbar );
 		
