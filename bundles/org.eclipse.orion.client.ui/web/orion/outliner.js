@@ -207,7 +207,6 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 		/** Invokes the outline service to produce an outline */
 		generateOutline: function() {
 			if (!this.active) {
-				console.log("not generating outline - outline view not active");
 				return;
 			}
 			var editor = this._inputManager.getEditor();

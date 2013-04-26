@@ -29,6 +29,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	 */
 
 
+
 	function qualifyURL(url){
 	    var a = document.createElement('a'); //$NON-NLS-0$
 	    a.href = url; // set string url
@@ -227,6 +228,10 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	 * @function
 	 */
 	function generateRelatedLinks(serviceRegistry, item, exclusions, commandRegistry, alternateItem) {
+	
+		var relatedlinks = lib.node('relatedlinks');
+		relatedlinks.innerHTML = '';
+	
 		var contentTypesCache;
 		function getContentTypes() {
 			if (contentTypesCache) {

@@ -75,12 +75,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 	 * @param {Object} [defaultEditor] will be computed if not provided, but subject to the same caveat as openWithCommands.
 	 * @param {Object} [linkProperties] gives additional properties to mix in to the HTML anchor element.
 	 */
-	function createLink(folderPageURL, item, idPrefix, commandService, contentTypeService, /* optional */ openWithCommands, /* optional */defaultEditor, /* optional */ linkProperties) {
+	function createLink(folderPageURL, item, commandService, contentTypeService, /* optional */ openWithCommands, /* optional */defaultEditor, /* optional */ linkProperties) {
 		var link;
 		if (item.Directory) {
 			link = document.createElement("a"); //$NON-NLS-0$
 			link.className = "navlinkonpage"; //$NON-NLS-0$
-			link.id = idPrefix+"NameLink"; //$NON-NLS-0$
 			link.href = folderPageURL + "#" + item.ChildrenLocation; //$NON-NLS-0$
 			link.appendChild(document.createTextNode(item.Name));
 		} else {
@@ -99,7 +98,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 			}
 			link = document.createElement("a"); //$NON-NLS-0$
 			link.className= "navlink targetSelector"; //$NON-NLS-0$
-			link.id = idPrefix+"NameLink"; //$NON-NLS-0$
 			if (linkProperties && typeof linkProperties === "object") { //$NON-NLS-0$
 				Object.keys(linkProperties).forEach(function(property) {
 					link[property] = linkProperties[property];
@@ -149,7 +147,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 	NavigatorRenderer.prototype = new mExplorer.SelectionRenderer(); 
 	
 	/**
-	 * we are really only using the header for a spacer at this point.
+	 * Creates the column header element. We are really only using the header for a spacer at this point.
 	 * @name orion.explorer.NavigatorRenderer.prototype.getCellHeaderElement
 	 * @function
 	 * @returns {Element}
@@ -180,43 +178,66 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 	};
 
 	/**
+	* Subclasses can override this function to customize the DOM Element that is created to represent a folder.
+	 * The default implementation creates either a hyperlink or a plain text node.
+	 * @name orion.explorer.NavigatorRenderer#createFolderNode
+	 * @type {Function}
+	 * @see #showFolderLinks
+	 * @see #folderLink
+	 * @param {Object} folder The folder to create a node for.
+	 * @returns {Element} The folder element.
+	 */
+	// The returned element must have an <code>id</code> property.
+	NavigatorRenderer.prototype.createFolderNode = function(folder, idPrefix) {
+		var itemNode;
+		if (this.showFolderLinks) { //$NON-NLS-0$
+			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
+			itemNode = createLink(this.folderLink || "", folder, this.commandService, this.contentTypeService); //$NON-NLS-0$
+		} else {
+			itemNode = document.createElement("span"); //$NON-NLS-0$
+			itemNode.textContent = folder.Name;
+		}
+		return itemNode;
+	};
+	/**
+	 * Whether the default implementation of {@link #createFolderNode} should show folders should as links (<code>true</code>),
+	 * or just plain text (<code>false</code>).
 	 * @name orion.explorer.NavigatorRenderer#showFolderLinks
 	 * @type {Boolean}
-	 * @description Whether folders should be links (<code>true</code>), or just plain text (<code>false</code>). Default is to show folders as links.
+	 * @default true
 	 */
 	NavigatorRenderer.prototype.showFolderLinks = true;
 	/**
+	 * Gives the base href to be used by the default implementation of {@link #createFolderNode} for creating folder links.
+	 * This property only takes effect if {@link #showFolderLinks} is <code>true</code>. 
+	 * TODO see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121">Bug 400121</a>
 	 * @name orion.explorer.NavigatorRenderer#folderLink
 	 * @type {String}
-	 * @description Base link URL to use on folder text. Only applies if {@link #showFolderLinks} is true. TODO see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121">Bug 400121</a>
+	 * @default ""
 	 */
 	/**
+	 * Generate the DOM element for a cell. If you override this function, you will most likely have to override {@link orion.explorers.FileExplorer#getNameNode}
+	 * in your explorer class.
 	 * @name orion.explorer.NavigatorRenderer#getCellElement
 	 * @function
 	 * @returns {Element}
 	 */
 	NavigatorRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		switch(col_no){
-
 		case 0:
 			var col = document.createElement('td'); //$NON-NLS-0$
 			var span = document.createElement("span"); //$NON-NLS-0$
 			span.id = tableRow.id+"MainCol"; //$NON-NLS-0$
 			col.appendChild(span);
 			span.className = "mainNavColumn"; //$NON-NLS-0$
-			var link;
+			var itemNode;
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var image = this.getExpandImage(tableRow, span);
+				itemNode = this.createFolderNode(item);
 
-				if (this.showFolderLinks) { //$NON-NLS-0$
-					// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
-					link = createLink(this.folderLink || "", item, tableRow.id, this.commandService, this.contentTypeService);
-					span.appendChild(link); //$NON-NLS-0$
-					this.explorer._makeDropTarget(item, link);
-				} else {
-					span.appendChild(document.createTextNode(item.Name));
-				}
+				span.appendChild(itemNode);
+				this.explorer._makeDropTarget(item, itemNode);
 				this.explorer._makeDropTarget(item, tableRow);
 			} else {
 				var i;			
@@ -230,11 +251,15 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 						}
 					}
 				}
-				link = createLink("", item, tableRow.id, this.commandService, this.contentTypeService, this.openWithCommands, this.defaultEditor, { target: this.target });
-				span.appendChild(link); //$NON-NLS-0$
+				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, this.defaultEditor, { target: this.target });
+				span.appendChild(itemNode); //$NON-NLS-0$
 			}
-			if (link) {
-				mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
+			if (itemNode) {
+				// orion.explorers.FileExplorer#getNameNode
+				itemNode.id = tableRow.id + "NameLink"; //$NON-NLS-0$
+				if (itemNode.nodeType === 1) {
+					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemNode);
+				}
 			}
 			// render any inline commands that are present.
 			if (this.actionScopeId) {

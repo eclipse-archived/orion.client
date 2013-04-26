@@ -35,21 +35,31 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var outlineService;
 	var contentTypeService;
 	var progressService;
+	var dialogService;
+	var favoriteService;
+	var syntaxHighlighter;
+	var syntaxModelWirer;
+	var fileClient;
+	var searcher;
 	
 	// Initialize the plugin registry
 	(function() {
 		selection = new mSelection.Selection(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mDialogs.DialogService(serviceRegistry);
+		dialogService = new mDialogs.DialogService(serviceRegistry);
 		commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 		progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 		// Editor needs additional services
 		problemService = new mProblems.ProblemService(serviceRegistry);
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
-		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+		favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+		syntaxHighlighter = new Highlight.SyntaxHighlighter(serviceRegistry);
+		syntaxModelWirer = new SyntaxModelWirer(serviceRegistry);
+		fileClient = new mFileClient.FileClient(serviceRegistry);
+		searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 	}());
 
 	var sidebarDomNode = lib.node("sidebar"), //$NON-NLS-0$
@@ -57,13 +67,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		editorDomNode = lib.node("editor"), //$NON-NLS-0$
 		searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
 
-	var syntaxHighlighter = new Highlight.SyntaxHighlighter(serviceRegistry);
-	var syntaxModelWirer = new SyntaxModelWirer(serviceRegistry);
-	var fileClient = new mFileClient.FileClient(serviceRegistry);
-	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 	var editor;
-	var editorPreferences;
+	var editorPreferences, settings;
 	var updateSettings = function(prefs) {
+		settings = prefs;
 		editor.setAutoSaveTimeout(prefs.autoSaveEnabled ? prefs.autoSaveTimeout : -1);
 	};
 	var updateEditorSettings = function (prefs) {
@@ -129,6 +136,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					} else {
 						if (!editor.getTextView()) {
 							editor.installTextView();
+							editor.getTextView().addEventListener("Focus", this.focusListener.bind(this)); //$NON-NLS-0$
 						}
 						var fullPathName = fileURI;
 						var progressTimeout = setTimeout(function() {
@@ -149,7 +157,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							self.setInputContents(input, fileURI, contentOrError, metadataOrError);
 							clearTimeout(progressTimeout);
 						};
-						new Deferred.all([progressService.progress(fileClient.read(fileURI), "Reading " + fileURI), progressService.progress(fileClient.read(fileURI, true), "Reading metedata of " + fileURI)], function(error) { return {_error: error}; }).then(load);
+						new Deferred.all([progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)), progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI))], function(error) { return {_error: error}; }).then(load);
 					}
 					this.lastFilePath = fileURI;
 				} else {
@@ -158,7 +166,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			},
 			setInputContents: function(input, title, contents, metadata) {
 				// TODO could potentially dispatch separate events for metadata and contents changing
-				this.dispatchEvent({ type: "InputChanged", metadata: metadata, contents: contents });
+				this.dispatchEvent({ type: "InputChanged", metadata: metadata, contents: contents }); //$NON-NLS-0$
 				var editor = this.editor;
 				var altPageTarget, name;
 				if (metadata) {
@@ -180,7 +188,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					// page target is the file, but if any interesting links fail, try the parent folder metadata.
 					altPageTarget = function() {
 						if (metadata.Parents && metadata.Parents.length > 0) {
-							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
+							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
 						}
 					};
 					name = metadata.Name;
@@ -194,14 +202,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 
 				var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
 				themePreferences.apply();
-				var chooser = new mThemeChooser.MiniThemeChooser( themePreferences );
+				var chooser = new mThemeChooser.MiniThemeChooser( themePreferences, editorPreferences );
 				mGlobalCommands.addSettings( chooser );
 
 				mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$
 					makeAlternate: function() {
 						if (metadata.Parents && metadata.Parents.length > 0) {
 							// The mini-nav in sidebar wants to do the same work, can we share it?
-							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
+							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
 						}
 					},
 					serviceRegistry: serviceRegistry, commandService: commandRegistry,
@@ -213,7 +221,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						// TODO folding should be a preference.
 						var styler = syntaxHighlighter.getStyler();
 						editor.setFoldingEnabled(styler && styler.foldingEnabled);
-						_self.dispatchEvent({ type: "ContentTypeChanged", contentType: _self._contentType, location: location });
+						_self.dispatchEvent({ type: "ContentTypeChanged", contentType: _self._contentType, location: location }); //$NON-NLS-0$
 						if (!this.dispatcher) {
 							this.dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor, _self._contentType);
 						}
@@ -222,6 +230,21 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 						commandRegistry.processURL(window.location.href);
 					});
+			},
+			focusListener: function(e) {
+				if (!settings.autoLoadEnabled) { return; }
+				var fileURI = this.getInput();
+				progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI)).then(function(data) {
+					if (this.getFileMetadata().ETag !== data.ETag) {
+						this._fileMetadata = data;
+						var editor = this.editor;
+						if (!editor.isDirty() || confirm(messages.loadOutOfSync)) {
+							progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
+								editor.setInput(fileURI, null, contents);										
+							});
+						}
+					}
+				}.bind(this));
 			},
 			getInput: function() {
 				return this.lastFilePath;
@@ -267,7 +290,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				}
 			},
 			shouldGoToURI: function(fileURI) {
-				if (typeof fileURI !== "string") {
+				if (typeof fileURI !== "string") { //$NON-NLS-0$
 					return false;
 				}
 				if (this.editor.isDirty()) {
@@ -393,7 +416,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		// give our external escape handler a shot at handling escape
 		keyModeStack.push(escHandler);
 		
-		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-0$
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		// global search
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -466,7 +489,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var contentAssistFactory = isReadOnly ? null
 		: {
 			createContentAssistMode: function(editor) {
-				var progress = serviceRegistry.getService("orion.page.progress");
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
 				contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
 					// Content assist is about to be activated; set its providers.

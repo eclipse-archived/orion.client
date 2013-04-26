@@ -22,6 +22,9 @@ define({
 	"There are unsaved changes.": "There are unsaved changes.",
 	"Save": "Save",
 	"Resource is out of sync with the server. Do you want to save it anyway?": "Resource is out of sync with the server. Do you want to save it anyway?",
+	"loadOutOfSync": "Resource is out of sync with the server. Do you want to load it anyway? This will overwrite your local changes.",
+	"Reading metedata of": "Reading metedata of ${0}",
+	"Reading": "Reading ${0}",
 	"Save this file": "Save this file",
 	"Go to Line": "Go to Line",
 	"Go to specified line number": "Go to specified line number",
@@ -33,5 +36,6 @@ define({
 	"Saving file {0}": "Saving file ${0}",
 	"Running {0}": "Running ${0}",
 	"Saving..." : "Saving...",
-	"Actions": "Actions"
+	"Actions": "Actions",
+	"Navigator": "Navigator"
 });

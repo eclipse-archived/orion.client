@@ -1050,6 +1050,7 @@ var exports = {};
 								paths+=path;
 							}
 							if(!isFirstPath){
+								display.Severity = "Error"; //$NON-NLS-0$
 								display.Message+= ". " + i18nUtil.formatMessage(messages['Failing paths: ${0}'], paths);
 							}
 						}

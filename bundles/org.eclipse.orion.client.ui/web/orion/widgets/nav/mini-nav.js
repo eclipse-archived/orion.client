@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define*/
-/*jslint sub:true*/
-define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table',
+/*jslint browser:true devel:true sub:true*/
+define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer', 'orion/i18nUtil', 'orion/keyBinding', 'orion/fileCommands', 'orion/extensionCommands', 'orion/selection'
 	],
 	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, i18nUtil, mKeyBinding, FileCommands, ExtensionCommands, Selection) {
@@ -29,7 +29,7 @@ define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/litt
 		this.selectionActions = null;
 		var _self = this;
 		this.inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
-			_self.load(event.metadata);
+			_self.loadParentOf(event.metadata);
 		});
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
@@ -52,25 +52,29 @@ define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/litt
 				this.toolbarNode.appendChild(selectionActions);
 			}
 		},
+		destroy: function() {
+			this.destroyToolbars();
+		},
+		destroyToolbars: function() {
+			lib.empty(this.toolbarNode); // removes actions, selectionActions elements
+			this.actions = this.selectionActions = null;
+		},
 		/**
-		 * Override {@link orion.explorers.FileExplorer#load} to load the parent directory of the given file
+		 * Loads the parent directory of the given file.
+		 * @param {Object} fileMetadata
 		 */
-		load: function(fileMetadata) {
+		loadParentOf: function(fileMetadata) {
 			this.createToolbars();
 			var parent = fileMetadata && fileMetadata.Parents && fileMetadata.Parents[0];
-			var rootPromise;
 			if (parent) {
-				rootPromise = this.fileClient.read(parent.ChildrenLocation, true);
+				if (this.treeRoot && this.treeRoot.ChildrenLocation === parent.ChildrenLocation) {
+					return;
+				}
+				var rootPromise = this.fileClient.read(parent.ChildrenLocation, true);
 				var _self = this;
 				this.commandsRegistered.then(function() {
 					FileExplorer.prototype.load.call(_self, rootPromise);
 				});
-//				rootPromise.then(function() {
-//					_self.updateCommands();
-//				});
-			} else {
-				console.log("Could not get parent directory");
-				console.log(fileMetadata);
 			}
 		},
 		scopeUp: function() {
@@ -108,30 +112,19 @@ define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/litt
 			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.downloadFile", 3, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsId, "orion.importSFTP", 4, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.exportSFTPCommand", 5, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-//			ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, this, actions.id, selectionActions.id, "orion.miniNavSelectionGroup"); //$NON-NLS-0$
+			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
 			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsId, 0, "orion.miniNavSelectionGroup", true);
 		},
 		updateCommands: function(selections) {
-			var toolbar = this.toolbarNode, actions = this.actions, selectionActions = this.selectionActions;
-			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
+			var actions = this.actions, selectionActions = this.selectionActions;
+			var commandRegistry = this.commandRegistry;
 			if (actions) {
 				commandRegistry.destroy(actions);
-			} else {
-				actions = this.actions = document.createElement("div"); //$NON-NLS-0$
-				actions.id = toolbar.id + "actions"; //$NON-NLS-0$
-				toolbar.appendChild(actions);
 			}
 			if (selectionActions) {
 				commandRegistry.destroy(selectionActions);
-			} else {
-				selectionActions = this.selectionActions = document.createElement("div"); //$NON-NLS-0$
-				selectionActions.id = toolbar.id + "selectionActions"; //$NON-NLS-0$
-				toolbar.appendChild(selectionActions);
 			}
-//			var explorer = this;
-//			FileCommands.createFileCommands(serviceRegistry, commandRegistry, explorer, fileClient);
-//			ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActions.id, 0, "orion.miniNavSelectionGroup");  //$NON-NLS-0$
-//			commandRegistry.renderCommands(selectionActions.id, selectionActions, selections, this, "button"); //$NON-NLS-0$
+			commandRegistry.renderCommands(selectionActions.id, selectionActions, selections, this, "button"); //$NON-NLS-0$
 			commandRegistry.renderCommands(actions.id /*scope*/, this.toolbarNode /*parent*/, this.treeRoot /*items*/, this /*handler??*/, "button"); //$NON-NLS-0$
 		}
 	});
@@ -140,8 +133,32 @@ define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/litt
 		NavigatorRenderer.apply(this, arguments);
 	}
 	MiniNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
-	MiniNavRenderer.prototype.showFolderLinks = true;
-//	MiniNavRenderer.prototype.folderLink = require.toUrl("navigate/table.html"); //$NON-NLS-0$
+	MiniNavRenderer.prototype.createFolderNode = function(folder) {
+		var node = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
+		node.classList.add("nav_expandinplace"); //$NON-NLS-0$;
+		// TODO wasteful, should not need listener per node. should get model item from nav handler
+		node.addEventListener("click", this.onFolderClick.bind(this, folder)); //$NON-NLS-0$
+		return node;
+	};
+	MiniNavRenderer.prototype.onFolderClick = function(folder, evt) {
+		var navHandler = this.explorer.getNavHandler();
+		if (navHandler) {
+			navHandler.cursorOn(folder);
+			navHandler.setSelection(folder, false);
+			// now toggle its expand/collapse state
+			var curModel = navHandler._modelIterator.cursor();
+			if (navHandler.isExpandable(curModel)){
+				if(!navHandler.isExpanded(curModel)){
+					this.explorer.myTree.expand(curModel);
+				} else {
+					this.explorer.myTree.collapse(curModel);
+				}
+				evt.preventDefault();
+				return false;
+			}
+		}
+	};
+	MiniNavRenderer.prototype.showFolderLinks = false;
 	MiniNavRenderer.prototype.oneColumn = true;
 
 	/**
@@ -162,10 +179,6 @@ define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/litt
 	objects.mixin(MiniNavViewMode.prototype, {
 		label: messages["Navigator"],
 		create: function() {
-			if (this.explorer) {
-				this.explorer.load(this.inputManager.getFileMetadata());
-				return;
-			}
 			var _self = this;
 			this.explorer = new MiniNavExplorer({
 				commandRegistry: this.commandRegistry,
@@ -182,10 +195,14 @@ define(['require', 'i18n!orion/nls/messages', 'orion/objects', 'orion/webui/litt
 				serviceRegistry: this.serviceRegistry,
 				toolbarNode: this.toolbarNode
 			});
-			// on initial creation we wait for an InputChanged event from inputManager -- possible race condition between rendering of Explorer and the InputChanged
+			// On initial page load, metadata may not be loaded yet, but that's ok -- InputChanged will inform us later
+			this.explorer.loadParentOf(this.inputManager.getFileMetadata());
 		},
 		destroy: function() {
-			lib.empty(this.parentNode);
+			if (this.explorer) {
+				this.explorer.destroy();
+			}
+			this.explorer = null;
 		}
 	});
 

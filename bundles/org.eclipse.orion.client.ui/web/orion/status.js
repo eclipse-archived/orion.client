@@ -11,6 +11,7 @@
 /*global define window document Image */
  
 define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageUtil', 'orion/urlUtils'], function(require, lib, mGlobalCommands, PageUtil, URLUtil) {
+	var ProgressMonitor;
 	
 	/**
 	 * Service for reporting status
@@ -141,19 +142,22 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 			this.currentMessage = message;
 			var image = document.createElement("span"); //$NON-NLS-0$
 			image.classList.add("imageSprite"); //$NON-NLS-0$
+			image.classList.add("progressIcon"); //$NON-NLS-0$
 			image.classList.add("core-sprite-progress");  //$NON-NLS-0$
 			var node = lib.node(this.progressDomId);
 			lib.empty(node);
 			node.appendChild(image);
 			node.appendChild(document.createTextNode(message));
 			var container = lib.node(this.notificationContainerDomId);
+			container.classList.remove("notificationHide"); //$NON-NLS-0$
 			container.classList.add("progressNormal"); //$NON-NLS-0$
 			if (message && message.length > 0) {
-				container.classList.add("slideContainerActive"); //$NON-NLS-0$
+				container.classList.add("notificationShow"); //$NON-NLS-0$
 			} else if(this._progressMonitors && this._progressMonitors.length > 0){
 				return this._renderOngoingMonitors();
 			}else{
-				container.classList.remove("slideContainerActive"); //$NON-NLS-0$
+				container.classList.remove("notificationShow"); //$NON-NLS-0$
+				container.classList.add("notificationHide"); //$NON-NLS-0$
 			}
 			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
@@ -209,6 +213,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 					removedClasses.push("progressNormal");
 				}
 			}
+			removedClasses.push("notificationHide");
 			image.classList.add(imageClass); //$NON-NLS-0$
 			var node = lib.node(this.progressDomId);
 			var container = lib.node(this.notificationContainerDomId);
@@ -239,7 +244,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 					container.classList.remove(removedClasses[i]);
 				}
 			}
-			container.classList.add("slideContainerActive"); //$NON-NLS-0$
+			container.classList.add("notificationShow"); //$NON-NLS-0$
 			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
 		
@@ -315,7 +320,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 	};
 	StatusReportingService.prototype.constructor = StatusReportingService;
 	
-	function ProgressMonitor(statusService, progressId, deferred, message){
+	ProgressMonitor = function(statusService, progressId, deferred, message){
 		this.statusService = statusService;
 		this.progressId = progressId;
 		if(deferred){
@@ -330,7 +335,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 						that.done.bind(that)();
 					});
 		}
-	}
+	};
 	
 	/**
 	 * Starts the progress monitor. Message will be shown in the status area.

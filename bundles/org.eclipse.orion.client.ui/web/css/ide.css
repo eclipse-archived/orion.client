@@ -43,7 +43,11 @@ h2 {
 	padding: 2px;
 }
 
-.navlinkonpage {
+.nav_expandinplace:hover {
+	cursor: pointer;
+}
+
+.navlinkonpage, .nav_expandinplace {
 	text-decoration: none;
 	padding: 2px;
 }
@@ -864,8 +868,8 @@ input {
 
 .delegatedUI {
 	position: absolute; 
-	min-width: 600px; 
-	min-height: 400px;
+	min-width: 250px;
+	min-height: 100px;
 	/* width, height may be overridden by the provider */
 	width: 600px;
 	height: 400px;
@@ -876,9 +880,14 @@ input {
 /* FOR NAVIGATION DROP DOWN */
 
 .centralNavigation {
-	width:'10px';
-	height:'10px';		
-	padding:'2px';
+	width:10px;
+	height:10px;		
+	padding:2px;
+	cursor:pointer;
+}
+
+.centralNavigation:hover{
+
 }
 
 .dropDownContainer{
