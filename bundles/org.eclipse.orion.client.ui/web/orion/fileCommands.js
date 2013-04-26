@@ -760,20 +760,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-move_up", //$NON-NLS-0$
 			id: "eclipse.upFolder", //$NON-NLS-0$
 			callback: function(data) {
-				var item = forceSingleItem(data.items);
-				var parents = item.Parents;
-				if (parents) {
-					if (parents.length > 0) {
-						window.document.location="#" + parents[0].ChildrenLocation; //$NON-NLS-0$
-					} else {
-						// move to file system root
-						window.document.location="#"; //$NON-NLS-0$
-					}
+				if (typeof explorer.scopeUp === "function") {
+					explorer.scopeUp();
 				}
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Parents;}});
+				return item.Parents;
+			}});
 		commandService.addCommand(goUpCommand);
 
 					
