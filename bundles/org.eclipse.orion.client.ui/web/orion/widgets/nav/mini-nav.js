@@ -35,36 +35,30 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			_self.updateCommands(event.selections);
 		});
-		this.createToolbars();
 		this.commandsRegistered = this.registerCommands();
 	}
 	MiniNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(MiniNavExplorer.prototype, {
-		createToolbars: function() {
-			if (!this.actions) {
-				var actions = this.actions = document.createElement("div"); //$NON-NLS-0$
-				actions.id = this.toolbarNode.id + "Actions"; //$NON-NLS-0$
-				this.toolbarNode.appendChild(actions);
-			}
-			if (!this.selectionActions) {
-				var selectionActions = this.selectionActions = document.createElement("div"); //$NON-NLS-0$
-				selectionActions.id = this.toolbarNode.id + "SelectionActions"; //$NON-NLS-0$
-				this.toolbarNode.appendChild(selectionActions);
-			}
+		createActionSections: function() {
+			var _self = this;
+			["actions1", "actions2"].forEach(function(name) {
+				if (!_self[name]) {
+					var elem = _self[name] = document.createElement("ul"); //$NON-NLS-0$
+					elem.classList.add("commandList"); //$NON-NLS-0$
+					elem.classList.add("layoutLeft"); //$NON-NLS-0$
+					elem.classList.add("pageActions"); //$NON-NLS-0$
+					_self.toolbarNode.appendChild(elem);
+				}
+			});
 		},
 		destroy: function() {
-			this.destroyToolbars();
-		},
-		destroyToolbars: function() {
-			lib.empty(this.toolbarNode); // removes actions, selectionActions elements
-			this.actions = this.selectionActions = null;
+			this.actions1 = this.actions2 = null;
 		},
 		/**
 		 * Loads the parent directory of the given file.
 		 * @param {Object} fileMetadata
 		 */
 		loadParentOf: function(fileMetadata) {
-			this.createToolbars();
 			var parent = fileMetadata && fileMetadata.Parents && fileMetadata.Parents[0];
 			if (parent) {
 				if (this.treeRoot && this.treeRoot.ChildrenLocation === parent.ChildrenLocation) {
@@ -91,41 +85,49 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		registerCommands: function() {
 			// Selection based command contributions in sidebar mini-nav
 			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
-			var selectionActionsId = this.selectionActions.id;
-			commandRegistry.addCommandGroup(selectionActionsId, "orion.miniNavSelectionGroup", 100, messages["Actions"]);
+			var newActionsScope = this.newActionsScope = this.toolbarNode.id + "Actions"; //$NON-NLS-0$
+			var selectionActionsScope = this.selectionActionsScope = this.toolbarNode.id + "SelectionActions"; //$NON-NLS-0$
+			commandRegistry.addCommandGroup(newActionsScope, "orion.miniNavNewGroup", 1000, messages["New"]); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"]);
+
+			// New file and new folder (in a group)
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile", 1, "orion.miniNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFolder", 2, "orion.miniNavNewGroup", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			// New project creation in the toolbar (in a group)
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.project", 1, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.linkProject", 2, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			// Go Up
+			// ??
+			//commandRegistry.registerCommandContribution(newActionsScope, "eclipse.upFolder", 3, "orion.miniNavNewGroup", true, new KeyBinding(38, false, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 
 			var renameBinding = new KeyBinding(113);
 			renameBinding.domScope = "sidebar"; //$NON-NLS-0$
-			renameBinding.scopeName = "Navigator"; //$NON-NLS-0$
+			renameBinding.scopeName = messages["Navigator"]; //$NON-NLS-0$
 			var delBinding = new KeyBinding(46);
 			delBinding.domScope = "sidebar"; //$NON-NLS-0$
-			delBinding.scopeName = "Navigator"; //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "orion.makeFavorite", 1, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.renameResource", 2, "orion.miniNavSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.copyFile", 3, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.moveFile", 4, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.deleteFile", 5, "orion.miniNavSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.compareWithEachOther", 6, "orion.miniNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.compareWith", 7, "orion.miniNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "orion.importZipURL", 1, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "orion.import", 2, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.downloadFile", 3, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "orion.importSFTP", 4, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsId, "eclipse.exportSFTPCommand", 5, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			delBinding.scopeName = messages["Navigator"];
+			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.makeFavorite", 1, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.renameResource", 2, "orion.miniNavSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.copyFile", 3, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.moveFile", 4, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.deleteFile", 5, "orion.miniNavSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWithEachOther", 6, "orion.miniNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWith", 7, "orion.miniNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importZipURL", 1, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.import", 2, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downloadFile", 3, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importSFTP", 4, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.exportSFTPCommand", 5, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
-			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsId, 0, "orion.miniNavSelectionGroup", true);
+			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.miniNavSelectionGroup", true);
 		},
 		updateCommands: function(selections) {
-			var actions = this.actions, selectionActions = this.selectionActions;
+			this.createActionSections();
 			var commandRegistry = this.commandRegistry;
-			if (actions) {
-				commandRegistry.destroy(actions);
-			}
-			if (selectionActions) {
-				commandRegistry.destroy(selectionActions);
-			}
-			commandRegistry.renderCommands(selectionActions.id, selectionActions, selections, this, "button"); //$NON-NLS-0$
-			commandRegistry.renderCommands(actions.id /*scope*/, this.toolbarNode /*parent*/, this.treeRoot /*items*/, this /*handler??*/, "button"); //$NON-NLS-0$
+			commandRegistry.destroy(this.actions1);
+			commandRegistry.destroy(this.actions2);
+			commandRegistry.renderCommands(this.newActionsScope /*scope*/, this.actions1 /*parent*/, this.treeRoot /*items*/, this /*handler??*/, "button"); //$NON-NLS-0$
+			commandRegistry.renderCommands(this.selectionActionsScope, this.actions2, selections, this, "button"); //$NON-NLS-0$
 		}
 	});
 
