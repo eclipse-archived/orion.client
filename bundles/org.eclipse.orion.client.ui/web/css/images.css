@@ -4,6 +4,14 @@
    No additional styling (padding, borders, etc.) should be added here.  
    Use additional classes in theme.css or layout.css where more treatment is needed. 
 */
+
+.logoFooter{
+	background: url(../images/orion-footer.png) no-repeat top left;
+	width:50px;
+	height:28px;
+	float:left;
+}
+
 .commandSprite {
    background: url(../images/core_sprites.png) no-repeat top left;
    vertical-align: middle;
@@ -83,6 +91,8 @@
 .core-sprite-stylesheet{ background-position: 0 -703px; width: 16px; height: 16px; } 
 .core-sprite-warning{ background-position: 0 -721px; width: 16px; height: 16px; } 
 .core-sprite-hamburger-inverse{  background: url(../images/hamburger.png) no-repeat top left; width: 16px; height: 16px;} 
+.core-sprite-silhouette-inverse{  background: url(../images/silhouette.png) no-repeat top left; width: 16px; height: 16px;} 
+   
    
 .core-sprite-settings {
    background: url(../images/gear.png) no-repeat top left;

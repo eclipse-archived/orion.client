@@ -13,7 +13,7 @@
 	border: 0;
 	background: #333;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#333), color-stop(100%,#333));
-	height: 32px;
+	height: 36px;
 }
 
 a {
@@ -84,7 +84,7 @@ a:hover {
 .breadcrumb {
 	font-size: 8pt;
 	text-decoration: none;
-	color: #3087B3;
+	color: #CCC;
 	padding-top:2px;
 }
 
@@ -188,7 +188,7 @@ a.currentLocation:hover {
 	vertical-align: baseline;
     display: inline-block;
     padding: 2px 6px 3px;
-    border-radius:1px;
+    border-radius:2px;
     line-height: 12px;
 	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
 	margin: 0;  /* to override user agent stylesheet */
@@ -198,6 +198,7 @@ a.currentLocation:hover {
 	color: #222;
 	border: 1px solid #dedede;
 	background-color: #efefef;
+	border-radius:2px;
 }
 
 .commandButton:hover, .commandButton:focus {
