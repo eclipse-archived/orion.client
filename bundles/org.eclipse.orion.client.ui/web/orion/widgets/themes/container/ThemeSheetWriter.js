@@ -57,7 +57,8 @@ define(['orion/widgets/themes/ThemeClass'],
 			topRowBanner.style.backgroundColor = this.navbar;
 			topRowBanner.style.background = '-webkit-gradient(linear, left top, left bottom, color-stop(0%,' + this.navbar + '), color-stop(100%,' + this.navbar + '))';
 			topRowBanner.style.background = '-moz-linear-gradient(top,' + this.navbar + '0%,' + this.navbar + '100%)';
-			topRowBanner.style.height = '28px';
+			topRowBanner.style.height = '15px';
+			topRowBanner.style.padding = '10px';
 			
 			styles.push( topRowBanner );
 			
@@ -147,7 +148,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			var breadcrumb = new ThemeClass.ThemeClass( 'breadcrumb' );
 			breadcrumb.style.fontSize = '8pt';
 			breadcrumb.style.textDecoration = 'none';
-			breadcrumb.style.color = this.content;
+			breadcrumb.style.color = '#ddd';
 			breadcrumb.style.paddingTop = '2px';
 			
 			styles.push( breadcrumb );
@@ -168,7 +169,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			var breadcrumbSeparator = new ThemeClass.ThemeClass( 'breadcrumbSeparator' );
 			breadcrumbSeparator.style.fontSize = '8pt';
 			breadcrumbSeparator.style.textDecoration = 'none';
-			breadcrumbSeparator.style.color = this.navbar;
+			breadcrumbSeparator.style.color = '#ddd'; // this.navbar;
 			breadcrumbSeparator.style.fontWeight = 'bold';
 			
 			styles.push( breadcrumbSeparator );
@@ -176,7 +177,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			var currentLocation = new ThemeClass.ThemeClass( 'currentLocation' );
 			currentLocation.style.fontWeight = 'bold';
 			currentLocation.style.fontSize = '8pt';
-			currentLocation.style.color = this.navbar; // should be a separate themeable item but hard coded for now.
+			currentLocation.style.color = '#ddd'; //this.navbar; // should be a separate themeable item but hard coded for now.
 			currentLocation.style.textDecoration = 'none';
 			currentLocation.style.textWrap = 'normal';
 			currentLocation.style.lineHeight = '10pt';
@@ -216,16 +217,16 @@ define(['orion/widgets/themes/ThemeClass'],
 			var styles = [];
 		
 			var commandButton = new ThemeClass.ThemeClass( 'commandButton' );
-			commandButton.style.color = '#222';
+			commandButton.style.color = '#666';
 			commandButton.style.border = '1px solid #dedede'; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386702#c2 
-			commandButton.style.backgroundColor = this.button;
+			commandButton.style.backgroundColor = '#ddd';//this.button;
 			commandButton.style.textAlign = 'center';
 			commandButton.style.verticalAlign = 'baseline';
 			commandButton.style.cursor = 'pointer';
 		    commandButton.style.display = 'inline-block';
 		    commandButton.style.padding = '6px';
 			commandButton.style.paddingTop = '4px'; /* To align with Command Menu */
-		    commandButton.style.borderRadius = '1px';
+		    commandButton.style.borderRadius = '3px';
 		    commandButton.style.lineHeight = '12px';
 			commandButton.style.fontSize = '8pt';
 			commandButton.style.userSelect = 'none';

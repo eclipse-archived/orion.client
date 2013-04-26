@@ -27,18 +27,23 @@ hard-coded numbers elsewhere.
 /* $FooterHeight */
 .footerLayout {
 	height: 28px;
+	height: 34px;
+	padding-left:10px;
+	font-size:0.9em;
+	font-weight:bold;
+	background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 28px;
 }
 
 /* $ToolbarHeight */
 .toolbarLayout {
-	height: 31px;
+	height: 34px;
 }
 
 .content-fixedHeight {
 	clear: both;
 	overflow: hidden;
     position: absolute;
-    top: 54px;  /* $HeaderHeight */
+    top: 36px;  /* $HeaderHeight */
     bottom: 0;
     left: 0;
     width: 100%;
@@ -59,17 +64,23 @@ hard-coded numbers elsewhere.
 	z-index: 50;
 	right: 0;
 	left: 0;
-	height: 28px;
+	height: 34px;
+	background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 28px;
 }
 
 .footerBlock {
 	float: left;
 	margin: 4px;
+	color: #7F7F7F;
+	font-weight: bold;
+	float: left;
+	padding-top: 3px;
 }
 
 .footerRightBlock {
 	float: right;
 	margin: 4px;
+	padding-top:3px;
 }
 
 .layoutBlock {
