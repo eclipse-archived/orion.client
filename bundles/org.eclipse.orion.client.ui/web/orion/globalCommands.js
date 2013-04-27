@@ -230,7 +230,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	function generateRelatedLinks(serviceRegistry, item, exclusions, commandRegistry, alternateItem) {
 	
 		var relatedlinks = lib.node('relatedlinks');
-		relatedlinks.innerHTML = '';
+		lib.empty( relatedlinks );
+//		relatedlinks.innerHTML = '';
 	
 		var contentTypesCache;
 		function getContentTypes() {

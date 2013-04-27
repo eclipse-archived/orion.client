@@ -126,6 +126,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				if (location && location[0] !== "#") { //$NON-NLS-0$
 					location = "#" + location; //$NON-NLS-0$
 				}
+				this._lastHash = location;
 				var input = PageUtil.matchResourceParameters(location);
 				var fileURI = input.resource;
 				parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -279,7 +280,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				var inputChanged = PageUtil.matchResourceParameters(oldInput).resource !== PageUtil.matchResourceParameters(newInput).resource; //$NON-NLS-1$ //$NON-NLS-0$
 				var hashMatchesInput = PageUtil.matchResourceParameters(newInput).resource === PageUtil.matchResourceParameters(newHash).resource; //$NON-NLS-1$ //$NON-NLS-0$
 				if (!inputChanged && !hashMatchesInput) {
-					this._lastHash = newHash;
 					window.location.hash = this._lastHash[0] === "#" ? this._lastHash.substring(1): this._lastHash; //$NON-NLS-0$
 				} else if (inputChanged) {
 					this.setInput(newHash, editor);

@@ -57,13 +57,11 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			// Create toolbar contribution area for use by viewmodes
 			var modeContributionToolbar = this.modeContributionToolbar = document.createElement("div"); //$NON-NLS-0$
 			modeContributionToolbar.id = toolbarNode.id + "childModes"; //$NON-NLS-0$
-			modeContributionToolbar.classList.add("layoutLeft"); //$NON-NLS-0$
-			modeContributionToolbar.classList.add("pageActions"); //$NON-NLS-0$
 			toolbarNode.appendChild(modeContributionToolbar);
 			var switcherNode = this.switcherNode = document.createElement("div"); //$NON-NLS-0$
+			switcherNode.id = toolbarNode.id + "viewmodeSwitch"; //$NON-NLS-0$
 			switcherNode.classList.add("layoutRight"); //$NON-NLS-0$
 			switcherNode.classList.add("pageActions"); //$NON-NLS-0$
-			switcherNode.id = toolbarNode.id + "viewmodeSwitch"; //$NON-NLS-0$
 			toolbarNode.appendChild(switcherNode);
 
 			var changeViewModeCommand = new mCommands.Command({

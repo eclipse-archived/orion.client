@@ -37,5 +37,6 @@ define({
 	"Running {0}": "Running ${0}",
 	"Saving..." : "Saving...",
 	"Actions": "Actions",
-	"Navigator": "Navigator"
+	"Navigator": "Navigator",
+	"New": "New"
 });

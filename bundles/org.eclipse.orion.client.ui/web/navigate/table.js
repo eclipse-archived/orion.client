@@ -56,6 +56,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion
 						cachePrefix: "Navigator"}, explorer, commandRegistry, contentTypeService);  //$NON-NLS-0$
 				}});
 		// On scope up, change the href of the window.location to navigate to the parent page.
+		// TODO reuse eclipse.upFolder
 		explorer.scopeUp = function() {
 			if(this.treeRoot && this.treeRoot.Parents){
 				if(this.treeRoot.Parents.length === 0){

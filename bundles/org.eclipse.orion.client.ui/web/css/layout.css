@@ -27,18 +27,22 @@ hard-coded numbers elsewhere.
 /* $FooterHeight */
 .footerLayout {
 	height: 28px;
+	padding-left:10px;
+	font-size:0.9em;
+	font-weight:bold;
+	background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 28px;
 }
 
 /* $ToolbarHeight */
 .toolbarLayout {
-	height: 31px;
+	height: 34px;
 }
 
 .content-fixedHeight {
 	clear: both;
 	overflow: hidden;
     position: absolute;
-    top: 54px;  /* $HeaderHeight */
+    top: 36px;  /* $HeaderHeight */
     bottom: 0;
     left: 0;
     width: 100%;
@@ -59,17 +63,23 @@ hard-coded numbers elsewhere.
 	z-index: 50;
 	right: 0;
 	left: 0;
-	height: 28px;
+	height: 28px; /* It has to be this */
+	background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 28px;
 }
 
 .footerBlock {
 	float: left;
 	margin: 4px;
+	color: #7F7F7F;
+	font-weight: bold;
+	float: left;
+	padding-top: 3px;
 }
 
 .footerRightBlock {
 	float: right;
 	margin: 4px;
+	padding-top:3px;
 }
 
 .layoutBlock {
@@ -156,7 +166,7 @@ hard-coded numbers elsewhere.
 
 .toolbarTarget {
 	position: absolute;
-	top: 32px;  /* $ToolbarHeight + 1 */
+	top: 37px;  /* $ToolbarHeight + 1 */
  	width: 100%;
  	bottom: 0;
  	overflow-y: auto;
@@ -250,19 +260,22 @@ splitVerticalThumbLayout {
 	margin-left: 15%; 
 	margin-right: auto; 
 	width: 70%; 
-	height: 20px; 
-	padding-top: 5px; 
-	border-bottom: 2px solid; 
-	border-color: #d6e9c6; 
+	height: 25px; 
+	overflow: hidden;
+	padding-top: 5px;/*
+	border-bottom: 2px solid;
+	border-color: #d6e9c6; */
 	z-index: 100; 
 	border-bottom-right-radius: 10px; 
 	border-bottom-left-radius: 10px; 
+	transition:height 1s;
+	-webkit-transition:height 1s;	
 }
 
 .notificationHide{
 	color: #b94a48;
-	background-color: #f2dede;
-	opacity:0;
+	/*background-color: #f2dede;*/
+	/*opacity:0;*/
 	position: fixed; 
 	float: left;
 	text-align:center;
@@ -270,13 +283,15 @@ splitVerticalThumbLayout {
 	margin-right: auto; 
 	width: 70%; 
 	height: 0; 
-	padding-top: 5px; 
+	overflow: hidden;/*
+	padding-top: 5px;
 	border-bottom: 2px solid; 
-	border-color: #eed3d7;
+	border-color: #eed3d7;*/
 	z-index: 100; 
 	border-bottom-right-radius: 10px; 
-	border-bottom-left-radius: 10px; 
+	border-bottom-left-radius: 10px;
 	transition:height 1s;
+	-webkit-transition:height 1s;	
 }
 
 
