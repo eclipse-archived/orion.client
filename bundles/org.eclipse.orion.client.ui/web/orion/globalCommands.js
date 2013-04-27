@@ -669,7 +669,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		var navDropDown = new DropDownMenu( 'centralNavigation', { label:'Develop', icon:'core-sprite-hamburger-inverse' } );
 		var groupedContent = new GroupedContent();
 		navDropDown.addContent( groupedContent.getContentPane() );
-		groupedContent.clickHandler( navDropDown.hide.bind(navDropDown) );
 		
 		// generate primary nav links. 
 		var primaryNav = lib.node("navigationlinks"); //$NON-NLS-0$
