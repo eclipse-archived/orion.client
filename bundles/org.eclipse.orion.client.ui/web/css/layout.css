@@ -27,7 +27,6 @@ hard-coded numbers elsewhere.
 /* $FooterHeight */
 .footerLayout {
 	height: 28px;
-	height: 34px;
 	padding-left:10px;
 	font-size:0.9em;
 	font-weight:bold;
@@ -64,7 +63,7 @@ hard-coded numbers elsewhere.
 	z-index: 50;
 	right: 0;
 	left: 0;
-	height: 34px;
+	height: 28px; /* It has to be this */
 	background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 28px;
 }
 
