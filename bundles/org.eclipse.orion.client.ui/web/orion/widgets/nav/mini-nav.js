@@ -19,7 +19,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
 
 	function MiniNavExplorer(params) {
-		params.setFocus = false;
+		params.setFocus = false;   // do not steal focus on load
+		params.cachePrefix = null; // do not persist table state
 		FileExplorer.apply(this, arguments);
 		this.commandRegistry = params.commandRegistry;
 		this.inputManager = params.inputManager;
@@ -57,27 +58,36 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			this.actions1 = this.actions2 = null;
 		},
 		/**
-		 * Loads the parent directory of the given file.
+		 * Loads the parent directory of the given file, then reveals it.
 		 * @param {Object} fileMetadata
 		 */
 		loadParentOf: function(fileMetadata) {
 			var parent = fileMetadata && fileMetadata.Parents && fileMetadata.Parents[0];
 			if (parent) {
 				if (this.treeRoot && this.treeRoot.ChildrenLocation === parent.ChildrenLocation) {
+					this.reveal(fileMetadata);
 					return;
 				}
 				var rootPromise = this.fileClient.read(parent.ChildrenLocation, true);
 				var _self = this;
-				this.commandsRegistered.then(function() {
-					FileExplorer.prototype.load.call(_self, rootPromise);
+				return this.commandsRegistered.then(function() {
+					return FileExplorer.prototype.load.call(_self, rootPromise).then(_self.reveal.bind(_self, fileMetadata));
 				});
+			}
+		},
+		reveal: function(fileMetadata) {
+			var navHandler = this.getNavHandler();
+			if (navHandler) {
+				navHandler.cursorOn(fileMetadata, true, false, false);
+				navHandler.setSelection(fileMetadata);
 			}
 		},
 		scopeUp: function() {
 			var root = this.treeRoot, parents = root && root.Parents;
 			if (parents) {
 				if (parents.length === 0) {
-					this.loadResourceList(""); //$NON-NLS-0$
+					// Show the top level
+					this.loadResourceList("").then(this.reveal.bind(this, this.treeRoot)); //$NON-NLS-0$
 				} else {
 					this.loadParentOf(this.treeRoot);
 				}

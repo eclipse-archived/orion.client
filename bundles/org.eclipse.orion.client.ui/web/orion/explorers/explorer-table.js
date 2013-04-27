@@ -353,11 +353,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		this._lastPath = path;
 		var self = this;
 		if (force || (path !== this.treeRoot.Path)) {
-			this.load(this.fileClient.loadWorkspace(path), "Loading " + path, function() {
+			return this.load(this.fileClient.loadWorkspace(path), "Loading " + path, function() {
 				self.treeRoot.Path = path;
 				if (typeof postLoad === "function") { //$NON-NLS-0$
 					postLoad();
 				}
+				return new Deferred().resolve(self.treeRoot);
 			});
 		}
 	};
@@ -368,6 +369,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * @function
 	 * @param {Object} root a root object or a deferred that will return the root of the FileModel
 	 * @param {String} progress a string progress message describing the fetch of the root
+	 * @returns {orion.Promise} A promise that resolves to the loaded <code>treeRoot</code>, or rejects with an error.
 	 */
 	FileExplorer.prototype.load = function(root, progressMessage, postLoad) {
 		var parent = lib.node(this.parentId);			
@@ -388,7 +390,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		}, 500); // wait 500ms before displaying
 					
 		var self = this;
-		Deferred.when(root, 
+		return Deferred.when(root,
 			function(root) {
 				self.treeRoot = {};
 				clearTimeout(progressTimeout);
@@ -439,6 +441,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 				if (typeof self.onchange === "function") { //$NON-NLS-0$
 					self.onchange(self.treeRoot);
 				}
+				return new Deferred().resolve(self.treeRoot);
 			},
 			function(error) {
 				clearTimeout(progressTimeout);
@@ -453,6 +456,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 				} else {
 					self.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
 				}
+				return new Deferred().reject(error);
 			}
 		);
 	};
