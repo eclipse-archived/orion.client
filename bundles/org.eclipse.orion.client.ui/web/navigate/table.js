@@ -163,7 +163,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion
 	
 		// selection based command contributions in nav toolbar
 		var binding;
-		commandRegistry.registerCommandContribution("selectionTools", "orion.makeFavorite", 1, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		//commandRegistry.registerCommandContribution("selectionTools", "orion.makeFavorite", 1, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		binding = new KeyBinding.KeyBinding(113);
 		binding.domScope = "explorer-tree"; //$NON-NLS-0$
 		binding.scopeName = "Navigator"; //$NON-NLS-0$
