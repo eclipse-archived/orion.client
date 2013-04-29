@@ -260,16 +260,22 @@ splitVerticalThumbLayout {
 	margin-left: 15%; 
 	margin-right: auto; 
 	width: 70%; 
-	height: 25px; 
+	box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+	height: 32px; 
 	overflow: hidden;
-	padding-top: 5px;/*
+	padding-top: 12px;
+	padding-left: 5px;
+	/*
 	border-bottom: 2px solid;
 	border-color: #d6e9c6; */
 	z-index: 100; 
-	border-bottom-right-radius: 10px; 
-	border-bottom-left-radius: 10px; 
+	border-bottom-right-radius: 5px; 
+	border-bottom-left-radius: 5px; 
 	transition:height 1s;
-	-webkit-transition:height 1s;	
+	-webkit-transition: height 1s;	
+	-moz-transition: height 1s;
+	-ms-transition: height 1s;
+	-o-transition: height 1s;
 }
 
 .notificationHide{
@@ -282,16 +288,15 @@ splitVerticalThumbLayout {
 	margin-left: 15%; 
 	margin-right: auto; 
 	width: 70%; 
+	box-shadow: 0 2px 0 rgba(0,0,0,0.1);
 	height: 0; 
-	overflow: hidden;/*
-	padding-top: 5px;
-	border-bottom: 2px solid; 
-	border-color: #eed3d7;*/
+	overflow: hidden;
 	z-index: 100; 
-	border-bottom-right-radius: 10px; 
-	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 5px; 
+	border-bottom-left-radius: 5px;
 	transition:height 1s;
-	-webkit-transition:height 1s;	
+	-webkit-transition: height 1s;	
+	-moz-transition: height 1s;
+	-ms-transition: height 1s;
+	-o-transition: height 1s;
 }
-
-
