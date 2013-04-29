@@ -884,6 +884,8 @@ input {
 .navigationLabel{
 	color:#ddd;
 	cursor:pointer;
+	display: inline;
+	padding-right: 3px;
 }
 
 .dropDownContainer{
@@ -918,4 +920,9 @@ input {
 	background: #ddd;
 }	
 
-
+.navigationBreadcrumb{
+	margin-left:20%;
+	margin-right:20%;
+	padding-bottom:5px;
+	display:inline;
+}
