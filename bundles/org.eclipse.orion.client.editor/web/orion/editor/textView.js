@@ -3847,10 +3847,11 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				lastLine = lineIndex === model.getLineCount() - 1;
 				lineIndex++;
 			}
+			var select = false;
 			if (lastLine) {
-				if (args.select) {
+				if (args.select || (util.isMac || util.isLinux)) {
 					selection.extend(model.getCharCount());
-					this._setSelection(selection, true, true);
+					select = true;
 				}
 			} else {
 				if (line.lineIndex !== lineIndex) {
@@ -3858,6 +3859,9 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 					line = this._getLine(lineIndex);
 				}
 				selection.extend(line.getOffset(x, y));
+				select = true;
+			}
+			if (select) {
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, true, true);
 			}
@@ -3885,10 +3889,11 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 					y = this._getLineHeight(lineIndex) - 1;
 				}
 			}
+			var select = false;
 			if (firstLine) {
-				if (args.select) {
+				if (args.select || (util.isMac || util.isLinux)) {
 					selection.extend(0);
-					this._setSelection(selection, true, true);
+					select = true;
 				}
 			} else {
 				if (line.lineIndex !== lineIndex) {
@@ -3896,6 +3901,9 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 					line = this._getLine(lineIndex);
 				}
 				selection.extend(line.getOffset(x, y));
+				select = true;
+			}
+			if (select) {
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, true, true);
 			}
