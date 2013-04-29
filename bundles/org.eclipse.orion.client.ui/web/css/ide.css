@@ -340,10 +340,8 @@ textarea.parameterInput {
 }
 
 .progressInfo {
-	/*border: 1px solid #bce8f1;*/
-	color: #3a87ad !important;
-	background-color: #d9edf7 !important;
-	/*padding: 3px;*/
+	color: #468847 !important;
+	background-color: #dff0d8 !important;
 }
 
 /* More prominent hyperlinks in notification area */
@@ -354,15 +352,9 @@ textarea.parameterInput {
 .progressWarning {
 	color: #c09853 !important;
 	background-color: #fcf8e3 !important;
-	/*
-	border: 1px solid #fbeed5;
-	padding: 3px;*/
 }
 
 .progressError {
-/*
-	border: 1px solid #eed3d7;
-	padding: 3px;*/
 	color: #b94a48 !important;
 	background-color: #f2dede !important;
 }
@@ -370,11 +362,7 @@ textarea.parameterInput {
 .progressNormal {
 	color: #468847 !important;
 	background-color: #dff0d8 !important;
-	/*
-	border-color: #d6e9c6;
-	padding: 3px;*/
 }
-
 .progressPane {
 	vertical-align: middle;
 	margin-right: 8px;
