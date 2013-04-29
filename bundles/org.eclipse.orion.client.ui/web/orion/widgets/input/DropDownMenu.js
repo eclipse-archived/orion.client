@@ -33,25 +33,33 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		}
 		
 		this.node.innerHTML = this.templateString;
+		this.node.title = 'Navigation';
 		
 		if( body.icon ){
 			this.node.className = this.node.className + ' ' + body.icon;
 			var centralNavigation = document.getElementById( 'navdropdown' );
 			centralNavigation.style.marginTop = '16px';
+			this.node.onclick = this.click.bind(this);	
 		}else{
 		
 			if( body.label ){
 				var navlabel = document.getElementById( 'navigationlabel' );
-				navlabel.innerHTML = body.label;
+				navlabel.textContent = body.label;
+				navlabel.onclick = this.click.bind(this);	
+			}
+			
+			if( body.caret ){
+				var navArrow = document.getElementById( 'dropDownArrow' );
+				navArrow.className = body.caret;
 			}
 		}
-		
-		this.node.onclick = this.click.bind(this);	
 	}
 	
 	objects.mixin(DropDownMenu.prototype, {
 	
-		templateString: '<label id="navigationlabel" ></label><div class="dropDownContainer" id="navdropdown" style="display:none;"></div>',
+		templateString: '<div id="navigationlabel" class="navigationLabel" ></div>' +
+						'<span id="dropDownArrow" class="dropDownArrow"></span>' + 
+						'<div class="dropDownContainer" id="navdropdown" style="display:none;"></div>',
 
 		click: function() {
 		
@@ -64,7 +72,10 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		},
 		
 		addContent: function( content ){
-			this.node.children[1].innerHTML= content;
+		
+			var centralNavigation = document.getElementById( 'navdropdown' );
+		
+			centralNavigation.innerHTML= content;
 		},
 
 		destroy: function() {
