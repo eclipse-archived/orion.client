@@ -3,6 +3,7 @@
 */
 
 @import "./theme.css";
+@import "./progress.css";
 
 html {
   overflow-x: hidden; /* workaround to get rid of horizontal scrollbar */
@@ -328,95 +329,6 @@ textarea.parameterInput {
 	font-size: 1.2em;
 	padding-left: 8px;
 	padding-right: 8px;
-}
-
-.progress {
-	text-align: right;
-	margin-right: 8px;
-}
-
-.progressIcon {
-	margin: 0 6px 0 0;
-}
-
-.progressInfo {
-	color: #468847 !important;
-	background-color: #dff0d8 !important;
-}
-
-/* More prominent hyperlinks in notification area */
-.progressInfo a {
-	text-decoration: underline;
-}
-
-.progressWarning {
-	color: #c09853 !important;
-	background-color: #fcf8e3 !important;
-}
-
-.progressError {
-	color: #b94a48 !important;
-	background-color: #f2dede !important;
-}
-
-.progressNormal {
-	color: #468847 !important;
-	background-color: #dff0d8 !important;
-}
-.progressPane {
-	vertical-align: middle;
-	margin-right: 8px;
-	background-position: 0 0; 
-	text-align: right;
-	border: 0;
-	width: 16px;
-	height: 16px;
-}
-
-.progressPane_operations {
-	/* background-image: url(../images/core_sprites.png); 
-	background-position: -96px -328px; */
-	width: 16px; height: 16px; 
-	visibility: hidden;  /* accessibility.  don't tab here when invisible */
-}
-
-/* we don't sprite an animated gif */
-.progressPane_running {
-	background: url(../images/progress_running.gif) no-repeat center;  
-	width: 16px; height: 16px;
-}
-
-.progressPane_running_dialog {
-	vertical-align: middle;
-	margin: 2px 8px 2px 2px;	
-	background-position: 0 0; 
-	text-align: right;
-	border: 0;
-	width: 16px;
-	height: 16px;
-}
-
-.progressPane_finished_dialog {
-	vertical-align: middle;
-	background: url(../images/none.png) no-repeat center;  
-	width: 16px; height: 16px;
-}
-
-.progressPane_error {
-	background-image: url(../images/core_sprites.png);
-	background-position: 0 -561px; 
-	width: 16px; height: 16px;
-}
-
-.progressPane_warning {
-	background-image: url(../images/core_sprites.png);
-	background-position: -96px -1440px; 
-	width: 16px; height: 16px;
-}
-
-.progressPane_empty {
-	background: inherit;
-	visibility: hidden; /* accessibility.  don't tab here when empty */
 }
 
 .footer {
