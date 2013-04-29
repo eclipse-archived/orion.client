@@ -3158,11 +3158,9 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var topEdge = viewRect.top + viewPad.top;
 			var rightEdge = viewRect.left + viewPad.left + width;
 			var bottomEdge = viewRect.top + viewPad.top + height;
-			var model = this._model;
-			var caretLine = model.getLineAtOffset(this._getSelection().getCaret());
-			if (y < topEdge && caretLine !== 0) {
+			if (y < topEdge) {
 				this._doAutoScroll("up", x, y - topEdge); //$NON-NLS-0$
-			} else if (y > bottomEdge && caretLine !== model.getLineCount() - 1) {
+			} else if (y > bottomEdge) {
 				this._doAutoScroll("down", x, y - bottomEdge); //$NON-NLS-0$
 			} else if (x < leftEdge && !this._wrapMode) {
 				this._doAutoScroll("left", x - leftEdge, y); //$NON-NLS-0$
@@ -4097,24 +4095,32 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		
 		/************************************ Internals ******************************************/
 		_autoScroll: function () {
+			var model = this._model;
 			var selection = this._getSelection();
 			var pt = this.convert({x: this._autoScrollX, y: this._autoScrollY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
 			var caret = selection.getCaret();
-			var caretLine = this._model.getLineAtOffset(caret), lineIndex, line;
+			var lineCount = model.getLineCount();
+			var caretLine = model.getLineAtOffset(caret), lineIndex, line;
 			if (this._autoScrollDir === "up" || this._autoScrollDir === "down") { //$NON-NLS-1$ //$NON-NLS-0$
 				var scroll = this._autoScrollY / this._getLineHeight();
 				scroll = scroll < 0 ? Math.floor(scroll) : Math.ceil(scroll);
 				lineIndex = caretLine;
-				lineIndex = Math.max(0, Math.min(this._model.getLineCount() - 1, lineIndex + scroll));
+				lineIndex = Math.max(0, Math.min(lineCount - 1, lineIndex + scroll));
 			} else if (this._autoScrollDir === "left" || this._autoScrollDir === "right") { //$NON-NLS-1$ //$NON-NLS-0$
 				lineIndex = this._getLineIndex(pt.y);
 				line = this._getLine(caretLine); 
 				pt.x += line.getBoundingClientRect(caret, false).left;
 				line.destroy();
 			}
-			line = this._getLine(lineIndex); 
-			selection.extend(line.getOffset(pt.x, pt.y - this._getLinePixel(lineIndex)));
-			line.destroy();
+			if (lineIndex === 0 && (util.isMac || util.isLinux)) {
+				selection.extend(0);
+			} else if (lineIndex === lineCount - 1 && (util.isMac || util.isLinux)) {
+				selection.extend(model.getCharCount());
+			} else {
+				line = this._getLine(lineIndex);
+				selection.extend(line.getOffset(pt.x, pt.y - this._getLinePixel(lineIndex)));
+				line.destroy();
+			}
 			this._setSelection(selection, true);
 		},
 		_autoScrollTimer: function () {
