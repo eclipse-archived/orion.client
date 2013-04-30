@@ -25,7 +25,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	
 		templateString: '<div style="float:left;">' +
 							'<section>' +
-							'<span style="color:#333;padding:20px;">Navigation</span>' +
+							'<span style="color:#333;padding:15px;">Navigation</span>' +
 							'<nav>' +
 								'<ul id="navigationlinks"></ul>' +
 							'</nav>' +
@@ -33,7 +33,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 						'</div>' +
 						'<div style="float:left;border-left:1px solid #eee;">' +
 							'<section>' +
-								'<span style="color:#333;padding:20px;">Related Links</span>' +
+								'<span style="color:#333;padding:15px;">Related Links</span>' +
 								'<nav>' +
 									'<ul id="relatedlinks">' +
 									'</ul>' +
