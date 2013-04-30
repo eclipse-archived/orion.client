@@ -98,9 +98,10 @@
 	margin-right: auto; 
 	width: 60%; 
 	box-shadow: 0 2px 0 rgba(0,0,0,0.1);
-	height: 32px; 
+	max-height: 1000px; 
 	overflow: hidden;
-	padding-top: 12px;
+	padding-top: 10px;
+	padding-bottom: 10px;
 	padding-left: 5px;
 	z-index: 100; 
 	border-bottom-right-radius: 5px; 
@@ -122,9 +123,8 @@
 	margin-right: auto; 
 	width: 60%; 
 	box-shadow: 0 2px 0 rgba(0,0,0,0.1);
-	height: 32px; 
+	max-height: 1000px; 
 	overflow: hidden;
-	padding-top: 12px;
 	padding-left: 5px;
 	z-index: 100; 
 	border-bottom-right-radius: 5px; 
