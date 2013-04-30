@@ -562,6 +562,7 @@ textarea.parameterInput {
 .treetable {
 	border-spacing: 0;
 	width:100%;
+	padding:5px;
 }
 
 .favoritesTable {
@@ -834,7 +835,6 @@ input {
 
 .navigationBreadcrumb{
 	margin-left:20%;
-	margin-right:20%;
 	padding-bottom:5px;
 	display:inline;
 }
