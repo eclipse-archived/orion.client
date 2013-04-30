@@ -28,6 +28,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.toolbarNode = params.toolbarNode;
 		this.actions = null;
 		this.selectionActions = null;
+		this.treeRoot = { }; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
 		this.inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 			_self.loadParentOf(event.metadata);
@@ -59,7 +60,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 		/**
 		 * Loads the parent directory of the given file, then reveals it.
-		 * @param {Object} fileMetadata
+		 * @param {Object} fileMetadata The file whose parent directory we want to load.
 		 */
 		loadParentOf: function(fileMetadata) {
 			var parent = fileMetadata && fileMetadata.Parents && fileMetadata.Parents[0];
@@ -68,10 +69,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					this.reveal(fileMetadata);
 					return;
 				}
-				var rootPromise = this.fileClient.read(parent.ChildrenLocation, true);
 				var _self = this;
+
 				return this.commandsRegistered.then(function() {
-					return FileExplorer.prototype.load.call(_self, rootPromise).then(_self.reveal.bind(_self, fileMetadata));
+					return FileExplorer.prototype.loadResourceList.call(_self, parent.ChildrenLocation).then(_self.reveal.bind(_self, fileMetadata));
 				});
 			}
 		},
