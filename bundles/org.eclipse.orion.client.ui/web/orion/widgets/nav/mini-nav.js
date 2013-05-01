@@ -63,25 +63,33 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			});
 		},
 		destroy: function() {
-			this.actions1 = this.actions2 = null;
+			this.actions1 = this.actions2 = this.actions3 = null;
 		},
 		/**
-		 * Loads the parent directory of the given file, then reveals it.
+		 * Loads the parent directory of the given file as the root, then reveals the file.
 		 * @param {Object} fileMetadata The file whose parent directory we want to load.
 		 */
 		loadParentOf: function(fileMetadata) {
 			var parent = fileMetadata && fileMetadata.Parents && fileMetadata.Parents[0];
 			if (parent) {
 				if (this.treeRoot && this.treeRoot.ChildrenLocation === parent.ChildrenLocation) {
+					// Do we still need to handle this case?
 					this.reveal(fileMetadata);
 					return;
 				}
-				var _self = this;
-
-				return this.commandsRegistered.then(function() {
-					return FileExplorer.prototype.loadResourceList.call(_self, parent.ChildrenLocation).then(_self.reveal.bind(_self, fileMetadata));
-				});
+				return this.loadRoot(parent.ChildrenLocation).then(this.reveal.bind(this, fileMetadata));
 			}
+		},
+		/**
+		 * Loads the given children location as the root.
+		 * @param {String|Object} The childrenLocation or an object with a ChildrenLocation field.
+		 */
+		loadRoot: function(childrenLocation) {
+			childrenLocation = childrenLocation.ChildrenLocation || childrenLocation;
+			var _self = this;
+			return this.commandsRegistered.then(function() {
+				return FileExplorer.prototype.loadResourceList.call(_self, childrenLocation);
+			});
 		},
 		reveal: function(fileMetadata) {
 			var navHandler = this.getNavHandler();
@@ -161,27 +169,28 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		var node = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 		node.classList.add("nav_expandinplace"); //$NON-NLS-0$;
 		// TODO wasteful, should not need listener per node. should get model item from nav handler
-		node.addEventListener("click", this.onFolderClick.bind(this, folder)); //$NON-NLS-0$
+		node.addEventListener("click", this.explorer.loadRoot.bind(this.explorer, folder)); //$NON-NLS-0$
 		return node;
 	};
-	MiniNavRenderer.prototype.onFolderClick = function(folder, evt) {
-		var navHandler = this.explorer.getNavHandler();
-		if (navHandler) {
-			navHandler.cursorOn(folder);
-			navHandler.setSelection(folder, false);
-			// now toggle its expand/collapse state
-			var curModel = navHandler._modelIterator.cursor();
-			if (navHandler.isExpandable(curModel)){
-				if(!navHandler.isExpanded(curModel)){
-					this.explorer.myTree.expand(curModel);
-				} else {
-					this.explorer.myTree.collapse(curModel);
-				}
-				evt.preventDefault();
-				return false;
-			}
-		}
-	};
+// Old expand-in-place code
+//	MiniNavRenderer.prototype.expandFolder = function(folder, evt) {
+//		var navHandler = this.explorer.getNavHandler();
+//		if (navHandler) {
+//			navHandler.cursorOn(folder);
+//			navHandler.setSelection(folder, false);
+//			// now toggle its expand/collapse state
+//			var curModel = navHandler._modelIterator.cursor();
+//			if (navHandler.isExpandable(curModel)){
+//				if(!navHandler.isExpanded(curModel)){
+//					this.explorer.myTree.expand(curModel);
+//				} else {
+//					this.explorer.myTree.collapse(curModel);
+//				}
+//				evt.preventDefault();
+//				return false;
+//			}
+//		}
+//	};
 	MiniNavRenderer.prototype.showFolderLinks = false;
 	MiniNavRenderer.prototype.oneColumn = true;
 
