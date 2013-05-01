@@ -161,7 +161,8 @@ hard-coded numbers elsewhere.
 	top: 0;
 	height: 100%;
 	width: 100%;
-	overflow-y: none;
+	overflow: hidden;
+	min-width: 250px;
 }
 
 .toolbarTarget {
