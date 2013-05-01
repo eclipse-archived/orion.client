@@ -28,10 +28,17 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.toolbarNode = params.toolbarNode;
 		this.actions = null;
 		this.selectionActions = null;
-		this.treeRoot = { }; // Needed by FileExplorer.prototype.loadResourceList
+		var initialRoot = { };
+		this.treeRoot = initialRoot; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
 		this.inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
-			_self.loadParentOf(event.metadata);
+			var editorInput = event.metadata;
+			if (_self.treeRoot === initialRoot) {
+				// Initial load: parent folder of editor input gives our current root
+				_self.loadParentOf(editorInput);
+			} else {
+				_self.reveal(editorInput);
+			}
 		});
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
