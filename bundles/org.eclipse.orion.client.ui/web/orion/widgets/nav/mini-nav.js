@@ -11,16 +11,50 @@
 /*global define*/
 /*jslint browser:true devel:true sub:true*/
 define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table',
-	'orion/explorers/navigatorRenderer', 'orion/i18nUtil', 'orion/keyBinding', 'orion/fileCommands', 'orion/extensionCommands', 'orion/selection'
+	'orion/explorers/navigatorRenderer', 'orion/explorers/explorerNavHandler', 'orion/i18nUtil', 'orion/keyBinding', 'orion/fileCommands',
+	'orion/extensionCommands', 'orion/selection'
 	],
-	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, i18nUtil, mKeyBinding, FileCommands, ExtensionCommands, Selection) {
+	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, i18nUtil, mKeyBinding, FileCommands,
+		ExtensionCommands, Selection) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
+	var FOLDER_CLASS = "nav_fakelink"; //$NON-NLS-0$
+
+	/*
+	 * Override the default ExplorerNavHandler to provide special handling of Enter key and click on folders.
+	 * If we decide to start representing folders as hyperlinks, this factory be removed and we can just use the default
+	 * ExplorerNavHandler.
+	 */
+	var navHandlerFactory = {
+		createNavHandler: function(explorer, explorerNavDict, options) {
+			var _super = mExplorerNavHandler.ExplorerNavHandler.prototype;
+			var handler = new mExplorerNavHandler.ExplorerNavHandler(explorer, explorerNavDict, options);
+			handler.onClick = function(modelItem, mouseEvent) {
+				var target = mouseEvent.target;
+				if (modelItem.Directory && target && target.classList.contains(FOLDER_CLASS)) {//$NON-NLS-0$
+					// modelItem && modelItem.Directory
+					explorer.loadRoot(modelItem);
+					return;
+				}
+				return _super.onClick.apply(this, arguments);
+			};
+			handler.onEnter = function(keyEvent) {
+				var modelItem = handler.currentModel();
+				if (modelItem && modelItem.Directory) {
+					explorer.loadRoot(modelItem);
+					return;
+				}
+				return _super.onEnter.apply(this, arguments);
+			};
+			return handler;
+		}
+	};
 
 	function MiniNavExplorer(params) {
 		params.setFocus = false;   // do not steal focus on load
 		params.cachePrefix = null; // do not persist table state
+		params.navHandlerFactory = navHandlerFactory;
 		FileExplorer.apply(this, arguments);
 		this.commandRegistry = params.commandRegistry;
 		this.inputManager = params.inputManager;
@@ -167,30 +201,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	MiniNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
 	MiniNavRenderer.prototype.createFolderNode = function(folder) {
 		var node = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
-		node.classList.add("nav_expandinplace"); //$NON-NLS-0$;
-		// TODO wasteful, should not need listener per node. should get model item from nav handler
-		node.addEventListener("click", this.explorer.loadRoot.bind(this.explorer, folder)); //$NON-NLS-0$
+		node.classList.add(FOLDER_CLASS);
 		return node;
 	};
-// Old expand-in-place code
-//	MiniNavRenderer.prototype.expandFolder = function(folder, evt) {
-//		var navHandler = this.explorer.getNavHandler();
-//		if (navHandler) {
-//			navHandler.cursorOn(folder);
-//			navHandler.setSelection(folder, false);
-//			// now toggle its expand/collapse state
-//			var curModel = navHandler._modelIterator.cursor();
-//			if (navHandler.isExpandable(curModel)){
-//				if(!navHandler.isExpanded(curModel)){
-//					this.explorer.myTree.expand(curModel);
-//				} else {
-//					this.explorer.myTree.collapse(curModel);
-//				}
-//				evt.preventDefault();
-//				return false;
-//			}
-//		}
-//	};
 	MiniNavRenderer.prototype.showFolderLinks = false;
 	MiniNavRenderer.prototype.oneColumn = true;
 

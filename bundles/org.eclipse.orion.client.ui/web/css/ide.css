@@ -44,11 +44,11 @@ h2 {
 	padding: 2px;
 }
 
-.nav_expandinplace:hover {
+.nav_fakelink:hover {
 	cursor: pointer;
 }
 
-.navlinkonpage, .nav_expandinplace {
+.navlinkonpage, .nav_fakelink {
 	text-decoration: none;
 	padding: 2px;
 }
