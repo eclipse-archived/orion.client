@@ -106,6 +106,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * @param {Function} options.rendererFactory a factory that creates a renderer
 	 * @param {Boolean} options.excludeFiles specifies that files should not be shown. Optional.
 	 * @param {Boolean} options.excludeFolders specifies that folders should not be shown.  Optional.
+	 * @param {Object} [options.navHandlerFactory] Optional factory to use for creating the explorer's nav handler. Must provide a function
+	 * <code>createNavHandler(explorer, explorerNavDict, options)</code>.
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry  the service registry to use for retrieving other
 	 *	Orion services.  Optional.  If not specified, then some features of the explorer will not be enabled, such as status reporting,
 	 *  honoring preference settings, etc.
@@ -123,6 +125,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		this.fileClient = options.fileClient;
 		this.excludeFiles = options.excludeFiles;
 		this.excludeFolders = options.excludeFolders;
+		this.navHandlerFactory = options.navHandlerFactory;
 		this.parentId = options.parentId;
 		this.renderer = options.rendererFactory(this);
 		this.dragAndDrop = options.dragAndDrop;
@@ -422,6 +425,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 				}
 
 				self.createTree(self.parentId, self.model, {
+					navHandlerFactory: self.navHandlerFactory,
 					setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), 
 					selectionPolicy: self.renderer.selectionPolicy, 
 					onCollapse: function(model){
