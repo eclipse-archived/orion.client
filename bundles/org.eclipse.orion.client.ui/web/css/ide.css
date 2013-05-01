@@ -809,6 +809,7 @@ input {
 	margin-top:5px;
 	position:absolute;
 	z-index:100;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -832,6 +833,15 @@ input {
 .dropDownContainer ul li a:active {
 	background: #ddd;
 }	
+
+.groupedContentDivider{
+	float: left;
+	width: 1px;
+	height: 160px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	border-left: dashed 1px #ddd;
+}
 
 .navigationBreadcrumb{
 	margin-left:20%;
