@@ -194,6 +194,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget) 
 		/**
 		 * Returns the service with the given name or reference.
 		 * @param {String|orion.serviceregistry.ServiceReference} nameOrServiceReference The service name or a service reference
+		 * @returns {Object|null} The service implementation, or <code>null</code> if no such service was found.
 		 */
 		getService: function(typeOrServiceReference) {
 			var service;
