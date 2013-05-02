@@ -197,13 +197,12 @@ a.currentLocation:hover {
 .commandButton {
 	color: #222;
 	border: 1px solid #dedede;
-	background-color: #efefef;
+	background-color: #ddd;
 	border-radius:2px;
 }
 
 .commandButton:hover, .commandButton:focus {
-	background-color: #e6e6e6;
-	border: 1px solid #808080;
+	background-color: #eee;
 }
 
 .commandButton.disabled {

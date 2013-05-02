@@ -18,6 +18,8 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	 */
 	 
 	function DropDownMenu( node, body ){
+	
+		this.OPEN = 'false';
 
 		if( node.nodeType ){
 			this.node = node;
@@ -33,12 +35,11 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		}
 		
 		this.node.innerHTML = this.templateString;
-		this.node.title = 'Navigation';
+//		this.node.title = 'Navigation';
 		
 		if( body.icon ){
 			this.node.className = this.node.className + ' ' + body.icon;
 			var centralNavigation = document.getElementById( 'navdropdown' );
-			centralNavigation.style.marginTop = '16px';
 			this.node.onclick = this.click.bind(this);	
 		}else{
 		
@@ -64,11 +65,23 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		click: function() {
 		
 			var centralNavigation = document.getElementById( 'navdropdown' );
-			centralNavigation.style.display = '';
+			
+			if( centralNavigation.style.display === 'none' ){
+					
+				centralNavigation.style.display = '';
+			
+				var dropDown = this;
+			
+				this.handle = lib.addAutoDismiss( [this.node, centralNavigation], this.clearPanel.bind(this) );
+				
+			}else{
+				this.clearPanel();
+			}
+		},
 		
-			lib.addAutoDismiss([centralNavigation], function() {
-				centralNavigation.style.display = 'none'; //$NON-NLS-0$
-			});			
+		clearPanel: function(){
+			var centralNavigation = document.getElementById( 'navdropdown' );
+			centralNavigation.style.display = 'none'; 	
 		},
 		
 		addContent: function( content ){
