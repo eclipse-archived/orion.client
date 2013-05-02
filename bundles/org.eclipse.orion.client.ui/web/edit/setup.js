@@ -336,13 +336,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			statusReportingService.setMessage(message, null, isAccessible);
 		}
 	};
-	var annotationFactory = new mEditorFeatures.AnnotationFactory();
 	
 	editor = new mEditor.Editor({
 		textViewFactory: textViewFactory,
 		undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandRegistry, "pageActions"), //$NON-NLS-0$
 		textDNDFactory: new mEditorFeatures.TextDNDFactory(),
-		annotationFactory: annotationFactory,
+		annotationFactory: new mEditorFeatures.AnnotationFactory(),
 		foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
 		lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
 		contentAssistFactory: contentAssistFactory,
@@ -360,8 +359,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		fileClient: fileClient,
 		progressService: progressService,
 		selection: selection,
-		contentTypeService: contentTypeService,
-		mGlobalCommands: mGlobalCommands
+		contentTypeService: contentTypeService
 	});
 	inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		var metadata = evt.metadata;
