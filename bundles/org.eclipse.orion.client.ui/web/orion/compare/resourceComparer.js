@@ -13,8 +13,8 @@
 /*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/compare/compareUtils', 'orion/compare/diffProvider', 'orion/compare/compareView', 'orion/highlight', 
-		'orion/fileClient', 'orion/globalCommands', 'orion/commands', 'orion/keyBinding', 'orion/searchAndReplace/textSearcher', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/URL-shim'], 
-		function(messages, require, Deferred, lib, mCompareUtils, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mCommands, mKeyBinding, mSearcher, mEditorCommands, mEditorFeatures) {
+		'orion/fileClient', 'orion/globalCommands', 'orion/commands', 'orion/keyBinding', 'orion/searchAndReplace/textSearcher', 'orion/editorCommands', 'orion/objects', 'orion/inputManager', 'orion/editor/editorFeatures', 'orion/URL-shim'], 
+		function(messages, require, Deferred, lib, mCompareUtils, mDiffProvider, mCompareView, Highlight, mFileClient, mGlobalCommands, mCommands, mKeyBinding, mSearcher, mEditorCommands, objects, mInputManager, mEditorFeatures) {
 
 var exports = {};
 
@@ -128,7 +128,13 @@ exports.ResourceComparer = (function() {
 		}
 		this.initExtCmds();
 		var that = this;
-		this._inputManager = {
+		this._inputManager = new mInputManager.InputManager({
+			serviceRegistry: serviceRegistry,
+			fileClient: that._fileClient,
+			progressService: that._progress,
+			mGlobalCommands: mGlobalCommands
+		});
+		objects.mixin(this._inputManager, {
 			filePath: "",
 			getInput: function() {
 				return this.filePath;
@@ -142,6 +148,10 @@ exports.ResourceComparer = (function() {
 				return this._fileMetadata;
 			},
 			
+			getEditor: function() {
+				return that._compareView.getWidget().getEditors()[1];
+			},
+						
 			setInput: function(fileURI, editor) {
 				that._progress.progress(that._fileClient.read(fileURI, true), "Getting file metadata " + fileURI).then( //$NON-NLS-0$
 					function(metadata) {
@@ -185,7 +195,7 @@ exports.ResourceComparer = (function() {
 				that._compareView.getWidget().options.newFile.Content = newContents;
 				that._compareView.getWidget().refresh();
 			}
-		};
+		});
 		if(!options.readonly && !options.toggleable && this._compareView.getWidget().type === "twoWay") { //$NON-NLS-0$
 			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 				var localSearcher = new mSearcher.TextSearcher(editor, that._commandService, undoStack);
