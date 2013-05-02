@@ -11,7 +11,7 @@
  *******************************************************************************/
 
 /*global define window */
-
+/*jslint browser:true*/
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/i18nUtil',
@@ -142,7 +142,10 @@ define([
 				}
 				this.lastFilePath = fileURI;
 			} else {
-				editor.setInput(messages["No File Selected"], "", null);
+				// No input, no editor.
+				this.lastFilePath = null;
+				editor.uninstallTextView();
+				this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
 			}
 		},
 		_setInputContents: function(input, title, contents, metadata) {
@@ -161,7 +164,7 @@ define([
 				name = this.getTitle();
 			}
 			// TODO could potentially dispatch separate events for metadata and contents changing
-			this.dispatchEvent({ type: "InputChanged", name: name, metadata: metadata, contents: contents }); //$NON-NLS-0$
+			this.dispatchEvent({ type: "InputChanged", input: input, name: name, metadata: metadata, contents: contents }); //$NON-NLS-0$
 			var self = this;
 			this.syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true)
 				.then(function() {
@@ -216,20 +219,31 @@ define([
 		 */
 		setAutoSaveTimeout: function(timeout){
 			if (!this._idle) {
-				var editor = this.getEditor();
-				var document = editor.getTextView().getOptions("parent").ownerDocument; //$NON-NLS-0$
-				var options = {
-					document: document,
-					timeout: timeout
-				};
-				this._idle = new Idle(options);
-				this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
-					if (editor.isDirty() && !this._saving) {
-						this.save();
-					}
-				}.bind(this));
+				var editor = this.getEditor(), textView = editor.getTextView();
+				var setIdle = function() {
+					editor.removeEventListener("TextViewInstalled", setIdle); //$NON-NLS-0$
+					var document = editor.getTextView().getOptions("parent").ownerDocument; //$NON-NLS-0$
+					var options = {
+						document: document,
+						timeout: timeout
+					};
+					this._idle = new Idle(options);
+					this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
+						if (editor.isDirty() && !this._saving) {
+							this.save();
+						}
+					}.bind(this));
+					this._idle.setTimeout(timeout);
+				}.bind(this);
+				if (textView) {
+					setIdle();
+				} else {
+					// wait for a textview to get installed
+					editor.addEventListener("TextViewInstalled", setIdle); //$NON-NLS-0$
+				}
+			} else {
+				this._idle.setTimeout(timeout);
 			}
-			this._idle.setTimeout(timeout);
 		},
 		setDirty: function(dirty) {
 			mGlobalCommands.setDirtyIndicator(dirty);

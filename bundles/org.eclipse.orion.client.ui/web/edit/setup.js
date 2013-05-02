@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*jslint browser:true devel:true*/
+/*jslint browser:true devel:true sub:true*/
 /*global define eclipse:true orion:true window*/
 
 define([
@@ -362,6 +362,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		contentTypeService: contentTypeService
 	});
 	inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+		if (evt.input === null || typeof evt.input === "undefined") {//$NON-NLS-0$
+			var noFile = document.createElement("div"); //$NON-NLS-0$
+			noFile.classList.add("noFile");
+			noFile.textContent = messages["NoFile"];
+			lib.empty(editorDomNode);
+			editorDomNode.appendChild(noFile);
+			return;
+		}
 		var metadata = evt.metadata;
 		if (metadata) {
 			var toolbar = lib.node("pageActions"); //$NON-NLS-0$

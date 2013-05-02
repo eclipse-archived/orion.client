@@ -38,5 +38,6 @@ define({
 	"Saving..." : "Saving...",
 	"Actions": "Actions",
 	"Navigator": "Navigator",
-	"New": "New"
+	"New": "New",
+	"NoFile": "Choose a file to edit from the Navigator pane."
 });
