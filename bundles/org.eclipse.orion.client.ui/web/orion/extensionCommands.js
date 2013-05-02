@@ -413,7 +413,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 	 * @name orion.extensionCommands.createAndPlaceFileCommandsExtension
 	 * @function
 	 * @param {orion.serviceregistry.ServiceReference} serviceRegistry
-	 * @param {orion.commandRegistry.CommandRegistry} commandRegistry
+	 * @param {orion.commandregistry.CommandRegistry} commandRegistry
 	 * @param {String} toolbarId
 	 * @param {Number} position
 	 * @param {String} commandGroup

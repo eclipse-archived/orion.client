@@ -17,9 +17,10 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 
 	/**
 	 * Constructs a new command registry with the given options.
-	 * @param {Object} options The registry options object which includes an optional selection service.
 	 * @class CommandRegistry can render commands appropriate for a particular scope and DOM element.
-	 * @name orion.commandRegistry.CommandRegistry
+	 * @name orion.commandregistry.CommandRegistry
+	 * @param {Object} options The registry options object
+	 * @param {orion.selection.Selection} [options.selection] Optional selection service.
 	 */
 	function CommandRegistry(options) {
 		this._commandList = {};
@@ -29,7 +30,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		this._init(options);
 		this._parameterCollector = null;
 	}
-	CommandRegistry.prototype = /** @lends orion.commands.CommandRegistry.prototype */ {
+	CommandRegistry.prototype = /** @lends orion.commandregistry.CommandRegistry.prototype */ {
 		_init: function(options) {
 			this._selectionService = options.selection;
 			var self = this;
@@ -65,6 +66,10 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 			}
 		},
 		
+		/**
+		 * @param {String} commandId
+		 * @returns {orion.commands.Command}
+		 */
 		findCommand: function(commandId) {
 			return this._commandList[commandId];
 		}, 
@@ -73,8 +78,8 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 * Run the command with the specified commandId.
 		 *
 		 * @param {String} commandId the id of the command to run.
-		 * @param {Object} the item on which the command should run.
-		 * @param {Object} the handler for the command.
+		 * @param {Object} item the item on which the command should run.
+		 * @param {Object} handler the handler for the command.
 		 * @param {orion.commands.ParametersDescription} parameters used on this invocation.  Optional.
 		 *
 		 * Note:  The current implementation will only run the command if a URL binding has been
@@ -105,7 +110,42 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		getSelectionService: function() {
 			return this._selectionService;
 		},
-		
+
+
+		/**
+		 * Interface for a parameter collector.
+		 * @name orion.commandregistry.ParameterCollector
+		 * @class
+		 */
+		/**
+		 * Open a parameter collector and return the dom node where parameter information should be inserted.
+		 * @name orion.commandregistry.ParameterCollector#open
+		 * @function
+		 * @param {String|DOMElement} commandNode the node containing the triggering command
+		 * @param {Function} fillFunction a function that will fill the parameter area
+		 * @param {Function} onClose a function that will be called when the parameter area is closed
+		 * @returns {Boolean} Whether the node is open.
+		 */
+		/**
+		 * Closes any active parameter collectors.
+		 * @name orion.commandregistry.ParameterCollector#close
+		 * @function
+		 */
+		/**
+		 * Returns a function that can be used to fill a specified parent node with parameter information.
+		 * @name orion.commandregistry.ParameterCollector#getFillFunction
+		 * @function
+		 * @param {orion.commands.CommandInvocation} the command invocation used when gathering parameters
+		 * @param {Function} closeFunction an optional function called when the area must be closed. 
+		 * @returns {Function} a function that can fill the specified dom node with parameter collection behavior
+		 */
+		/**
+		 * Collect parameters for the given command.
+		 * @name orion.commandregistry.ParameterCollector#collectParameters
+		 * @function
+		 * @param {orion.commands.CommandInvocation} commandInvocation The command invocation
+		 * @returns {Boolean} Whether or not required parameters were collected.
+		 */
 		/**
 		 * Provide an object that can collect parameters for a given "tool" command.  When a command that
 		 * describes its required parameters is shown in a toolbar (as an image, button, or link), clicking
@@ -114,14 +154,12 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 * appropriate for the page architecture.  If no parameterCollector is specified, then the command callback
 		 * will be responsible for collecting parameters.
 		 *
-		 * @param {Object} parameterCollector a collector which implements <code>open(commandNode, id, fillFunction)</code>,
-		 *  <code>close(commandNode)</code>, <code>getFillFunction(commandInvocation)</code>, and <code>collectParameters(commandInvocation)</code>.
-		 *
+		 * @param {orion.commandregistry.ParameterCollector} parameterCollector
 		 */
 		setParameterCollector: function(parameterCollector) {
 			this._parameterCollector = parameterCollector;
 		},
-				
+
 		/**
 		 * Open a parameter collector suitable for collecting information about a command.
 		 * Once a collector is created, the specified function is used to fill it with
@@ -201,7 +239,6 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 * because the command framework will open and close parameter collectors as needed and 
 		 * call the command callback with the values of those parameters.
 		 */
-
 		closeParameterCollector: function() {
 			if (this._parameterCollector) {
 				this._parameterCollector.close();
@@ -211,7 +248,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		/**
 		 * Returns whether this registry has been configured to collect command parameters
 		 *
-		 * @returns whether or not this registry is configured to collect parameters.
+		 * @returns {Boolean} whether or not this registry is configured to collect parameters.
 		 */
 		collectsParameters: function() {
 			return this._parameterCollector;
@@ -287,15 +324,15 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 *
 		 * {@link orion.commands.ParametersDescription}
 		 *
-		 * @param {orion.commands.CommandInvocation} the current invocation of the command 
+		 * @param {orion.commands.CommandInvocation} commandInvocation the current invocation of the command 
 		 */
 		collectParameters: function(commandInvocation) {
 			this._collectAndInvoke(commandInvocation, true); 
 		},
 		
 		/**
-		 * Show the keybindings that are registered with the command registry inside the specified domNode.
-		 * @param targetNode {DOMElement} the dom node where the key bindings should be shown.
+		 * Show the keybindings that are registered with the command registry inside the specified target node.
+		 * @param {DOMElement} targetNode the dom node where the key bindings should be shown.
 		 */
 		showKeyBindings: function(targetNode) {
 			var scopes = {};
@@ -339,7 +376,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		/** 
 		 * Add a command to the command registry.  Nothing will be shown in the UI
 		 * until this command is referenced in a contribution.
-		 * @param command {Command} the command being added.
+		 * @param {orion.commands.Command} command The command being added.
 		 */
 		addCommand: function(command) {
 			this._commandList[command.id] = command;
@@ -425,7 +462,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 *  a path of "group1Id/group2Id/command" indicates that the command belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
 		 * @param {boolean} [bindingOnly=false] if true, then the command is never rendered, but the key or URL binding is hooked.
-		 * @param {orion.KeyBinding} [keyBinding] a keyBinding for the command.  Optional.
+		 * @param {orion.editor.KeyBinding} [keyBinding] a keyBinding for the command.  Optional.
 		 * @param {orion.commands.URLBinding} [urlBinding] a url binding for the command.  Optional.
 		 */
 		registerCommandContribution: function(scopeId, commandId, position, parentPath, bindingOnly, keyBinding, urlBinding) {
@@ -501,7 +538,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 * @param {String} renderType The style in which the command should be rendered.  "tool" will render
 		 *  a tool image in the dom.  "button" will render a text button.  "menu" will render menu items.  
 		 * @param {Object} [userData] Optional user data that should be attached to generated command callbacks
-		 * @param {Array} [domNodeWrapperList] Optional an array used to record any DOM nodes that are rendered during this call.
+		 * @param {Object[]} [domNodeWrapperList] Optional an array used to record any DOM nodes that are rendered during this call.
 		 *  If an array is provided, then as commands are rendered, an object will be created to represent the command's node.  
 		 *  The object will always have the property "domNode" which contains the node created for the command.  If the command is
 		 *  rendered using other means (toolkit widget) then the optional property "widget" should contain the toolkit
@@ -818,6 +855,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 * of commands.  This function is useful when a page is precisely arranging groups of commands
 		 * (in a table or contiguous spans) and needs to use the same separator that the command registry
 		 * would use when rendering different groups of commands.
+		 * @param {DOMElement} parent
 		 */
 		generateSeparatorImage: function(parent) {
 			var sep;

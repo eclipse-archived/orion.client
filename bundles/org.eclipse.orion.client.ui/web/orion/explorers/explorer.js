@@ -27,7 +27,7 @@ exports.Explorer = (function() {
 	 * use for any services required by the explorer
 	 * @param {orion.selection.Selection} selection The initial selection
 	 * @param renderer
-	 * @param {orion.commandRegistry.CommandRegistry} commandRegistry The command registry to use for commands.  Optional.
+	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to use for commands.  Optional.
 	 */
 	function Explorer(serviceRegistry, selection, renderer, commandRegistry) {
 		this.registry = serviceRegistry;

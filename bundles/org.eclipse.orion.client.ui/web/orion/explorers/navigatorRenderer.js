@@ -131,7 +131,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 	 * @description Renderer for a tree-table of files, like the Orion Navigator.
 	 * @param {Object} options
 	 * @param {orion.explorer.Explorer} explorer
-	 * @param {orion.commandRegistry.CommandRegistry} commandRegistry
+	 * @param {orion.commandregistry.CommandRegistry} commandRegistry
 	 * @param {orion.core.ContentTypeService} contentTypeService
 	 */
 	function NavigatorRenderer (options, explorer, commandService, contentTypeService) {
