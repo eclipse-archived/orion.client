@@ -676,7 +676,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				links.forEach(function(link) {		
 					var li = document.createElement( 'li' );	
 					li.appendChild(link);
-					navigationlinks.appendChild(li);
+					primaryNav.appendChild(li);
 				});
 			});
 		}
