@@ -118,13 +118,13 @@ h2 {
 
 /* the left hand side of slideout containing parameter fields */
 .parameters {
-	color: silver;
+	color: whitesmoke;
 	vertical-align: middle;
 }
 
 /* the right hand side of slideout containing dismiss buttons */
 .parametersDismiss {
-	color: silver;
+	color: whitesmoke;
 	vertical-align: middle;
 	font-weight: normal;
 	padding: 3px;
@@ -135,7 +135,7 @@ h2 {
 .dismissButton {
 	border: 1px solid transparent;
 	background: transparent;
-	color: silver;
+	color: whitesmoke;
     border-radius: 1px;
 	padding: 2px;
 	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
@@ -162,7 +162,7 @@ h2 {
 
 /* parameter labels */
 label.parameterInput{
-	color: silver;
+	color: whitesmoke;
 	white-space: nowrap;
 }
 

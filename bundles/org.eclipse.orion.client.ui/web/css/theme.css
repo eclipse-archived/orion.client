@@ -323,6 +323,9 @@ a.currentLocation:hover {
 	border-radius: 3px;
 	border: 1px solid #DDD;
 	padding: 0;
+	background-color: white;
+	padding: 10px;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
 .dropdownMenuOpen {
@@ -347,12 +350,12 @@ a.currentLocation:hover {
 .dropdownMenu > li > a, .dropdownMenu > li > span {
 	width: 100%;
 	margin: 0;
-	padding: 4px 0;
 }
 
 .dropdownMenu > li > *:focus {
-	outline: 1px dotted #aaa;
+	outline: 1px dotted #ddd;
 	background: #f3f6fe;
+	padding-right:0;
 }
 
 .dropdownMenu > li:hover {
@@ -376,6 +379,7 @@ a.currentLocation:hover {
 	display: inline-block;
 	vertical-align: baseline;
 	color: #222 !important;
+	padding:5px;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -507,8 +511,9 @@ a.currentLocation:hover {
 	z-index: 175;  /* less than tooltips, more than the rest */
 	position: absolute;
 	background-color: #fbfbfb;
-	border-radius: 3px;
+	border-radius: 2px;
 	border: 1px solid #BBB;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
 .dialogShowing {
@@ -525,14 +530,14 @@ a.currentLocation:hover {
 	background: #555;
 	width: 100%;
 	padding-bottom: 5px;
-	border-top-left-radius: 2px;
-	border-top-right-radius: 2px;
+	border-top-left-radius: 1px;
+	border-top-right-radius: 1px;
 }
 
 
 .dialogTitleText {
 	margin: 2px 2px 0;
-	color: silver;
+	color: whitesmoke;;
 	font-size: 1em;
 	height: 18px;
 	padding-left: 4px;
