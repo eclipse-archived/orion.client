@@ -57,27 +57,35 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		params.navHandlerFactory = navHandlerFactory;
 		FileExplorer.apply(this, arguments);
 		this.commandRegistry = params.commandRegistry;
-		this.inputManager = params.inputManager;
+		this.editorInputManager = params.editorInputManager;
 		this.progressService = params.progressService;
+		var sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 		this.actions = null;
 		this.selectionActions = null;
+		this.followEditor = true;
 		var initialRoot = { };
 		this.treeRoot = initialRoot; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
-		this.inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
+		this.editorInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 			var editorInput = event.metadata;
-			if (_self.treeRoot === initialRoot) {
+			if (_self.treeRoot === initialRoot && _self.followEditor) {
 				// Initial load: parent folder of editor input gives our current root
 				_self.loadParentOf(editorInput);
 			} else {
 				_self.reveal(editorInput);
 			}
 		});
+		if (sidebarNavInputManager) {
+			sidebarNavInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
+				_self.followEditor = false;
+				_self.loadRoot(event.input);
+			});
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			_self.updateCommands(event.selections);
 		});
+		}
 		this.commandsRegistered = this.registerCommands();
 	}
 	MiniNavExplorer.prototype = Object.create(FileExplorer.prototype);
@@ -215,8 +223,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.commandRegistry = params.commandRegistry;
 		this.contentTypeRegistry = params.contentTypeRegistry;
 		this.fileClient = params.fileClient;
-		this.inputManager = params.inputManager;
+		this.editorInputManager = params.editorInputManager;
 		this.parentNode = params.parentNode;
+		this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 //		this.selection = params.selection;
 		this.serviceRegistry = params.serviceRegistry;
@@ -229,7 +238,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			this.explorer = new MiniNavExplorer({
 				commandRegistry: this.commandRegistry,
 				fileClient: this.fileClient,
-				inputManager: this.inputManager,
+				editorInputManager: this.editorInputManager,
+				sidebarNavInputManager: this.sidebarNavInputManager,
 				parentId: this.parentNode,
 				rendererFactory: function(explorer) {
 					var renderer = new MiniNavRenderer({
@@ -242,7 +252,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				toolbarNode: this.toolbarNode
 			});
 			// On initial page load, metadata may not be loaded yet, but that's ok -- InputChanged will inform us later
-			this.explorer.loadParentOf(this.inputManager.getFileMetadata());
+			this.explorer.loadParentOf(this.editorInputManager.getFileMetadata());
 		},
 		destroy: function() {
 			if (this.explorer) {

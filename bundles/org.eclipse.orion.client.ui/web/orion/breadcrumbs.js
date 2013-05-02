@@ -110,7 +110,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 						}
 						this.path += parents[i].Name; 
 						if(this._makeHref) {
-							this._makeHref(seg , parents[i].Location);
+							this._makeHref(seg , parents[i].Location, parents[i]);
 						}
 						else {
 							seg.href = require.toUrl("navigate/table.html") +"#" + parents[i].ChildrenLocation; //$NON-NLS-1$ //$NON-NLS-0$

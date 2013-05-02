@@ -18,11 +18,13 @@ define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/Even
         'orion/editor/textView', 'orion/editor/textModel',
         'orion/editor/projectionTextModel', 'orion/keyBinding','orion/searchAndReplace/textSearcher',
         'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel', 'orion/objects',
-        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser', 'edit/editorPreferences', 'orion/sidebar'],
+        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser', 'edit/editorPreferences', 'orion/sidebar',
+        'orion/URITemplate'],
 		function(messages, require, Deferred, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, objects, mThemePreferences, mThemeData, mThemeChooser, mEditorPreferences, Sidebar) {
+				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, objects, mThemePreferences, mThemeData, mThemeChooser, mEditorPreferences,
+				Sidebar, URITemplate) {
 	
 var exports = exports || {};
 	
@@ -212,6 +214,16 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							// The mini-nav in sidebar wants to do the same work, can we share it?
 							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
 						}
+					},
+					makeBreadcrumbLink: function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
+						var top = !folderLocation && !folder;
+						// Link to this page (edit page)
+						segment.href = new URITemplate("#{,Resource,params*}").expand({ //$NON-NLS-0$
+							Resource: inputManager.getInput(),
+							params: {
+								navigate: top ? "" : folder.ChildrenLocation //$NON-NLS-0$
+							}
+						});
 					},
 					serviceRegistry: serviceRegistry, commandService: commandRegistry,
 					searchService: searcher, fileService: fileClient});
@@ -543,10 +555,21 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	
 	inputManager = new InputManager(editor);
 
+	// Sidebar
+	function SidebarNavInputManager() {
+		EventTarget.attach(this);
+	}
+	SidebarNavInputManager.prototype.processHash = function() {
+		var newParams = PageUtil.matchResourceParameters(location.hash), navigate = newParams.navigate;
+		if (typeof navigate === "string") { //$NON-NLS-0$
+			this.dispatchEvent({type: "InputChanged", input: navigate}); //$NON-NLS-0$
+		}
+	};
+	var sidebarNavInputManager = new SidebarNavInputManager();
 	var sidebar = new Sidebar({
 		commandRegistry: commandRegistry,
 		contentTypeRegistry: contentTypeService,
-		inputManager: inputManager,
+		editorInputManager: inputManager,
 		editor: editor,
 		fileClient: fileClient,
 		outlineService: outlineService,
@@ -554,6 +577,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		progressService: progressService,
 		selection: selection,
 		serviceRegistry: serviceRegistry,
+		sidebarNavInputManager: sidebarNavInputManager,
 		toolbar: sidebarToolbar
 	});
 	sidebar.show();
@@ -568,15 +592,20 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	
 	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
-	selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
+	selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 		var fileURI = event.selection;
 		if (inputManager.shouldGoToURI(fileURI)) {
 			inputManager.setInput(fileURI);
 		} 
 	});
 	
-	window.addEventListener("hashchange", function() {inputManager.hashChanged();}, false); //$NON-NLS-0$
+	window.addEventListener("hashchange", function() { inputManager.hashChanged(); }, false); //$NON-NLS-0$
+	window.addEventListener("hashchange", function() { // $NON-NLS-0$;
+		// inform the sidebar
+		sidebarNavInputManager.processHash(window.location.hash);
+	});
 	inputManager.setInput(window.location.hash);
+	sidebarNavInputManager.processHash(window.location.hash);
 	
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
 	// Put the make favorite command in our toolbar."

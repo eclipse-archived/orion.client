@@ -11,11 +11,12 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 	 * @param {orion.commandRegistry.CommandRegistry} params.commandRegistry
 	 * @param {orion.core.ContentTypeService} params.contentTypeRegistry
 	 * @param {orion.fileClient.FileClient} params.fileClient
-	 * @param {orion.editor.InputManager} params.inputManager
+	 * @param {orion.editor.InputManager} params.editorInputManager
 	 * @param {orion.outliner.OutlineService} params.outlineService
 	 * @param {orion.progress.ProgressService} params.progressService
 	 * @param {orion.selection.Selection} params.selection
 	 * @param {orion.serviceregistry.ServiceRegistry} params.serviceRegistry
+	 * @param {Object} [params.sidebarNavInputManager]
 	 * @param {Element|String} params.parent
 	 * @param {Element|String} params.toolbar
 	 */
@@ -25,12 +26,13 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		this.contentTypeRegistry = params.contentTypeRegistry;
 		this.editor = params.editor;
 		this.fileClient = params.fileClient;
-		this.inputManager = params.inputManager;
+		this.editorInputManager = params.editorInputManager;
 		this.outlineService = params.outlineService;
 		this.parentNode = lib.node(params.parent);
 		this.toolbarNode = lib.node(params.toolbar);
 		this.selection = params.selection;
 		this.serviceRegistry = params.serviceRegistry;
+		this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.viewModes = {};
 		this.activeViewMode = null;
 		this.modeContributionToolbar = null;
@@ -46,7 +48,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			var commandRegistry = this.commandRegistry;
 			var contentTypeRegistry = this.contentTypeRegistry;
 			var fileClient = this.fileClient;
-			var inputManager = this.inputManager;
+			var editorInputManager = this.editorInputManager;
 			var outlineService = this.outlineService;
 			var parentNode = this.parentNode;
 			var progressService = this.progressService;
@@ -80,8 +82,9 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				commandRegistry: commandRegistry,
 				contentTypeRegistry: contentTypeRegistry,
 				fileClient: fileClient,
-				inputManager: inputManager,
+				editorInputManager: editorInputManager,
 				parentNode: parentNode,
+				sidebarNavInputManager: this.sidebarNavInputManager,
 				selection: selection,
 				serviceRegistry: serviceRegistry,
 				toolbarNode: modeContributionToolbar
@@ -96,7 +99,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				outlineService: outlineService,
 				commandService: commandRegistry,
 				selectionService: selection,
-				inputManager: inputManager,
+				inputManager: editorInputManager,
 				progressService: progressService,
 				sidebar: this
 			});
@@ -117,7 +120,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			if (!id) {
 				throw new Error("Invalid id: " + id);
 			}
-			if (!mode || typeof mode !== "object") {
+			if (!mode || typeof mode !== "object") { //$NON-NLS-0$
 				throw new Error("Invalid mode: "  + mode);
 			}
 			if (!Object.hasOwnProperty.call(this.viewModes, id)) {
@@ -126,7 +129,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		},
 		removeViewMode: function(id) {
 			var mode = this.getViewMode(id);
-			if (mode && typeof mode.destroy === "function") {
+			if (mode && typeof mode.destroy === "function") { //$NON-NLS-0$
 				mode.destroy();
 			}
 			delete this.viewModes[id];
@@ -139,11 +142,11 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		},
 		setViewMode: function(id) {
 			var mode = this.activeViewMode;
-			if (mode && typeof mode.destroy === "function") {
+			if (mode && typeof mode.destroy === "function") { //$NON-NLS-0$
 				mode.destroy();
 			}
 			mode = this.activeViewMode = this.getViewMode(id);
-			if (mode && typeof mode.create === "function") {
+			if (mode && typeof mode.create === "function") { //$NON-NLS-0$
 				mode.create();
 			}
 		},
