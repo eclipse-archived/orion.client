@@ -17,11 +17,17 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 
 	
 	/**
-	 * Constructs a new command parameter collector
-	 * @class CommandParameterCollector can collect parameters in a way that is integrated with the 
-	 * common header elements of pages or sections.
-	 * @name orion.parameterCollectors.CommandParameterCollector
-	 * @param toolbarLayout  
+	 * Constructs a new command parameter collector.
+	 * @name orion.parametercollectors.CommandParameterCollector
+	 * @class <code>CommandParameterCollector</code> can collect parameters in a way that is integrated with the common 
+	 * header elements of pages or sections.
+	 * @param {Function} getElementsFunction
+	 * @param {Function} toolbarLayoutFunction
+	 * @extends orion.commandregistry.ParameterCollector
+	 * @borrows orion.commandregistry.ParameterCollector#close as #close
+	 * @borrows orion.commandregistry.ParameterCollector#collectParameters as #collectParameters
+	 * @borrows orion.commandregistry.ParameterCollector#getFillFunction as #getFillFunction
+	 * @borrows orion.commandregistry.ParameterCollector#open as #open
 	 */	
 	function CommandParameterCollector (getElementsFunction, toolbarLayoutFunction) {
 		this._activeContainer = null;
@@ -29,11 +35,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 		this._toolbarLayoutFunction = toolbarLayoutFunction;
 	}
 	
-	CommandParameterCollector.prototype =  {
+	CommandParameterCollector.prototype = /** @lends orion.parametercollectors.CommandParameterCollector.prototype */ {
 	
-		/**
-		 * Closes any active parameter collectors
-		 */
 		close: function () {
 			if (this._activeElements) {
 				if (this._activeElements.parameterArea) {
@@ -60,15 +63,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 			this._activeElements = null;
 		},
 		
-		
-		/**
-		 * Open a parameter collector and return the dom node where parameter 
-		 * information should be inserted
-		 *
-		 * @param {String|DOMElement} commandNode the node containing the triggering command
-		 * @param {Function} fillFunction a function that will fill the parameter area
-		 * @param {Function} onClose a function that will be called when the parameter area is closed
-		 */
 		open: function(commandNode, fillFunction, onClose) {
 			if (typeof commandNode === "string") { //$NON-NLS-0$
 				commandNode = lib.node(commandNode);
@@ -144,12 +138,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 
 		},
 		
-		/**
-		 * Collect parameters for the given command.
-		 * 
-		 * @param {orion.commands.CommandInvocation} the command invocation
-		 * @returns {Boolean} whether or not required parameters were collected.
-		 */
 		collectParameters: function(commandInvocation) {
 			if (commandInvocation.parameters) {
 				if (commandInvocation.domNode) {
@@ -160,14 +148,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 			return false;
 		},
 		
-		/**
-		 * Returns a function that can be used to fill a specified parent node with parameter information.
-		 *
-		 * @param {orion.commands.CommandInvocation} the command invocation used when gathering parameters
-		 * @param {Function} an optional function called when the area must be closed. 
-		 * @returns {Function} a function that can fill the specified dom node with parameter collection behavior
-		 */
-		 getFillFunction: function(commandInvocation, closeFunction) {
+		getFillFunction: function(commandInvocation, closeFunction) {
 			var self = this;
 			return function(parameterArea, dismissArea) {
 				var first = null;
