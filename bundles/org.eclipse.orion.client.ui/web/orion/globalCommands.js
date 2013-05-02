@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global window document define login logout localStorage orion */
-/*browser:true*/
+/*jslint browser:true sub:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/commandRegistry', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
@@ -700,14 +700,15 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				commandRegistry.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new KeyBinding.KeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				// editor behavior if needed
-				if (editor) {
+				var textView;
+				if (editor && (textView = editor.getTextView())) {
 					mainSplitter.splitter.addResizeListener(function(node) {
 						if (editor && node === main) {
-							editor.getTextView().resize();
+							textView.resize();
 						}
 					});
-					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleSidebar"); //$NON-NLS-1$ //$NON-NLS-0$
-					editor.getTextView().setAction("toggleSidebar", function(){ //$NON-NLS-0$
+					textView.setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleSidebar"); //$NON-NLS-1$ //$NON-NLS-0$
+					textView.setAction("toggleSidebar", function(){ //$NON-NLS-0$
 						mainSplitter.splitter.toggleSidePanel();
 						return true;
 					}, {name: messages["Toggle Sidebar"]});
@@ -769,7 +770,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				searchRenderer:searcher.defaultRenderer, 
 				favoriteService:favoriteService,
 				onHide:  function() { 
-					if (editor) {
+					if (editor && editor.getTextView()) {
 						editor.getTextView().focus(); 
 					}
 				}
@@ -786,7 +787,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			}});
 			
 		// set binding in editor and a general one for other pages
-		if (editor) {
+		if (editor && editor.getTextView()) {
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), openResourceCommand.id);   //$NON-NLS-0$
 			editor.getTextView().setAction(openResourceCommand.id, function() {
 					openResourceDialog(searcher, serviceRegistry, editor);
@@ -809,7 +810,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			}});
 			
 		// set binding in editor and a general one for other pages
-		if (editor) {
+		if (editor && editor.getTextView()) {
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true, false, true), globalSearchCommand.id);   //$NON-NLS-0$
 			editor.getTextView().setAction(globalSearchCommand.id, function() {
 					var selection = editor.getSelection();
@@ -850,7 +851,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					footer.style.display = "none"; //$NON-NLS-0$
 					content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
 				}	
-				if (editor) {
+				if (editor && editor.getTextView()) {
 					editor.getTextView().resize();
 				}
 				return true;
@@ -858,7 +859,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		commandRegistry.addCommand(toggleBanner);
 		commandRegistry.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new KeyBinding.KeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
-		if (editor) {
+		if (editor && editor.getTextView()) {
 			editor.getTextView().setKeyBinding(new KeyBinding.KeyBinding('m', true, true), toggleBanner.id); //$NON-NLS-0$
 			editor.getTextView().setAction(toggleBanner.id, toggleBanner.callback, toggleBanner);
 		}
@@ -913,7 +914,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				if (keyAssistDiv.style.display === "none") { //$NON-NLS-0$
 					var heading;
 					lib.empty(keyAssistDiv);
-					if (editor) {
+					if (editor && editor.getTextView()) {
 						heading = document.createElement("h2"); //$NON-NLS-0$
 						heading.appendChild(document.createTextNode(messages["Editor"]));
 						keyAssistDiv.appendChild(heading);
@@ -946,7 +947,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			}});
 		commandRegistry.addCommand(keyAssistCommand);
 		commandRegistry.registerCommandContribution("globalActions", "eclipse.keyAssist", 100, null, true, new KeyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
-		if (editor) {
+		if (editor && editor.getTextView()) {
 			var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 			editor.getTextView().setKeyBinding(new KeyBinding.KeyBinding(191, false, true, !isMac, isMac), keyAssistCommand.id);
 			editor.getTextView().setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
