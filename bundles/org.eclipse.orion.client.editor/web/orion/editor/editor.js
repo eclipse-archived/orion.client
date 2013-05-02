@@ -16,44 +16,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 		
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
 
-	function Idle(options){
-		this._document = options.document || document;
-		this._timeout = options.timeout;
-		//TODO: remove listeners if there are no clients
-		//TODO: add support for multiple clients with different timeouts
-		var events = ["keypress","keydown","keyup","mousemove","mousedown","mousemove"]; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		var reset = function (e) { this._resetTimer(); }.bind(this);
-		for (var i=0; i<events.length; i++) {
-			var event = events[i];
-			this._document.addEventListener(event, reset, true);	
-		}
-	}
-	
-	Idle.prototype = {
-		_resetTimer: function() {
-			var window = document.defaultView || document.parentWindow;
-			if (this._timer) {
-				window.clearTimeout(this._timer);
-				this._timer = null;
-			}
-			if (this._timeout !== -1) {
-				this._timer = window.setTimeout(function() {
-					this.onIdle({type:"Idle"});	//$NON-NLS-0$ 
-					this._timer = null;
-					this._resetTimer();
-				}.bind(this), this._timeout);
-			}
-		},
-		onIdle: function (idleEvent) {
-			return this.dispatchEvent(idleEvent);
-		},
-		setTimeout: function(timeout) {
-			this._timeout = timeout;
-			this._resetTimer();
-		}
-	};
-	mEventTarget.EventTarget.addMixin(Idle.prototype);
-	
 	/**
 	 * @name orion.editor.Editor
 	 * @class An <code>Editor</code> is a user interface for editing text that provides additional features over the basic {@link orion.editor.TextView}.
@@ -863,27 +825,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 				contents: contents,
 				contentsSaved: contentsSaved
 			});
-		},
-		/**
-		 * Set the autosave timeout. If the timeout is <code>-1</code>, autosave is
-		 * disabled.
-		 * @param {Number} timeout - the autosave timeout in milliseconds
-		 */
-		setAutoSaveTimeout: function(timeout){
-			if (!this._idle) {
-				var document = this._textView.getOptions("parent").ownerDocument; //$NON-NLS-0$
-				var options = {
-					document: document,
-					timeout: timeout
-				};
-				this._idle = new Idle(options);
-				this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
-					if (this.isDirty()) {
-						this._textView.invokeAction("save"); //$NON-NLS-0$
-					}
-				}.bind(this));
-			}
-			this._idle.setTimeout(timeout);
 		},
 		/**
 		 * Called when the editor's contents have changed.
