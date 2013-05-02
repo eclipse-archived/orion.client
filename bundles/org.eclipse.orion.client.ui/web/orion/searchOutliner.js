@@ -13,8 +13,8 @@
 /*jslint forin:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/section', 'orion/commands', 'orion/commandRegistry', 
-	'orion/keyBinding', 'orion/selection', 'orion/explorers/explorer', 'orion/EventTarget'], 
-	function(messages, require, lib, i18nUtil, mSection, mCommands, mCommandRegistry, mKeyBinding, mSelection, mExplorer, EventTarget){
+	'orion/keyBinding', 'orion/selection', 'orion/explorers/explorer', 'orion/EventTarget', 'orion/globalSearch/advSearchOptContainer'], 
+	function(messages, require, lib, i18nUtil, mSection, mCommands, mCommandRegistry, mKeyBinding, mSelection, mExplorer, EventTarget, mAdvSearchOptContainer){
 
 	/**
 	 * Instantiates the saved search service. This service is used internally by the
@@ -292,10 +292,37 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		}
 	};//end navigation outliner prototype
 	SearchOutliner.prototype.constructor = SearchOutliner;
+	
+	/**
+	 * Creates a new user interface element to build all the search options and do the search
+	 *
+	 * @name orion.Searches.SearchBuilder
+	 * @class A user interface element building a search.
+	 * @param {Object} options The service options
+	 * @param {Object} options.parent The parent DOM node or id to hold all the builder controls
+	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry The service registry
+	 */
+	function SearchBuilder(options) {
+		var parent = lib.node(options.parent);
+		if (!parent) { throw "no parent"; } //$NON-NLS-0$
+		if (!options.serviceRegistry) {throw "no service registry"; } //$NON-NLS-0$
+		this._parent = parent;
+		this._registry = options.serviceRegistry;
+		var reg = options.serviceRegistry;
+		this.commandService = options.commandService;
+		this.advSearchOptContainer = new mAdvSearchOptContainer.advSearchOptContainer(this._parent, options.searcher, this._registry);
+	}
+	SearchBuilder.prototype = /** @lends orion.navoutliner.SearchOutliner.prototype */ {
+
+		render: function(searches, serviceRegistry) {
+		}
+	};//end navigation outliner prototype
+	SearchBuilder.prototype.constructor = SearchOutliner;
 
 	//return module exports
 	return {
 		SavedSearches: SavedSearches,
-		SearchOutliner: SearchOutliner
+		SearchOutliner: SearchOutliner,
+		SearchBuilder: SearchBuilder
 	};
 });
