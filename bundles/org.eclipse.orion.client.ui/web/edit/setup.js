@@ -12,19 +12,48 @@
 /*jslint browser:true devel:true*/
 /*global define eclipse:true orion:true window*/
 
-define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/EventTarget', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
-        'orion/commandRegistry', 'orion/favorites', 'orion/extensionCommands', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
-        'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
-        'orion/editor/textView', 'orion/editor/textModel',
-        'orion/editor/projectionTextModel', 'orion/keyBinding','orion/searchAndReplace/textSearcher',
-        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel', 'orion/objects',
-        'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/editor/MiniThemeChooser', 'edit/editorPreferences', 'orion/sidebar',
-        'orion/URITemplate'],
-		function(messages, require, Deferred, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
-				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
-				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, objects, mThemePreferences, mThemeData, mThemeChooser, mEditorPreferences,
-				Sidebar, URITemplate) {
+define([
+	'i18n!orion/edit/nls/messages',
+	'require',
+	'orion/EventTarget',
+	'orion/webui/littlelib',
+	'orion/selection',
+	'orion/status',
+	'orion/progress',
+	'orion/dialogs',
+	'orion/commandRegistry',
+	'orion/favorites',
+	'orion/extensionCommands',
+	'orion/fileClient',
+	'orion/operationsClient',
+	'orion/searchClient',
+	'orion/globalCommands',
+	'orion/outliner',
+	'orion/problems',
+	'orion/editor/contentAssist',
+	'orion/editorCommands',
+	'orion/editor/editorFeatures',
+	'orion/editor/editor',
+	'orion/syntaxchecker',
+	'orion/editor/textView',
+	'orion/editor/textModel',
+	'orion/editor/projectionTextModel',
+	'orion/keyBinding',
+	'orion/searchAndReplace/textSearcher',
+	'orion/contentTypes',
+	'orion/PageUtil',
+	'orion/inputManager',
+	'orion/i18nUtil',
+	'orion/widgets/themes/ThemePreferences',
+	'orion/widgets/themes/editor/ThemeData',
+	'orion/widgets/themes/editor/MiniThemeChooser',
+	'edit/editorPreferences',
+	'orion/URITemplate',
+	'orion/sidebar'
+], function(messages, require, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
+			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
+			mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
+			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, mThemeChooser, mEditorPreferences, URITemplate, Sidebar) {
 	
 var exports = exports || {};
 	
@@ -39,8 +68,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var progressService;
 	var dialogService;
 	var favoriteService;
-	var syntaxHighlighter;
-	var syntaxModelWirer;
 	var fileClient;
 	var searcher;
 	
@@ -58,8 +85,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
 		favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
-		syntaxHighlighter = new Highlight.SyntaxHighlighter(serviceRegistry);
-		syntaxModelWirer = new SyntaxModelWirer(serviceRegistry);
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 	}());
@@ -69,11 +94,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		editorDomNode = lib.node("editor"), //$NON-NLS-0$
 		searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
 
-	var editor;
+	var editor, inputManager;
 	var editorPreferences, settings;
 	var updateSettings = function(prefs) {
 		settings = prefs;
-		editor.setAutoSaveTimeout(prefs.autoSaveEnabled ? prefs.autoSaveTimeout : -1);
+		inputManager.setAutoLoadEnabled(prefs.autoLoadEnabled);
+		inputManager.setAutoSaveTimeout(prefs.autoSaveEnabled ? prefs.autoSaveTimeout : -1);
 	};
 	var updateEditorSettings = function (prefs) {
 		if (!prefs) {
@@ -83,6 +109,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		}
 	};
 	editorPreferences = new mEditorPreferences.EditorPreferences (preferences, updateEditorSettings);
+	var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
+	themePreferences.apply();
 	
 	var textViewFactory = function() {
 		var textView = new mTextView.TextView({
@@ -94,233 +122,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 		return textView;
 	};
-
-	var inputManager;
-	var InputManager = (function() {
-		/**
-		 * @name orion.editor.InputManager
-		 * @class
-		 */
-		function InputManager(editor) {
-			this.editor = editor;
-			this.lastFilePath = "";
-			this.dispatcher = null;
-			EventTarget.attach(this);
-		}
-		objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
-			setInput: function(location) {
-				function errorMessage(error) {
-					try {
-						error = JSON.parse(error.responseText);
-						return error.Message;
-					} catch(e) {}
-					return error.responseText;
-				}
-				function parseNumericParams(input, params) {
-					for (var i=0; i < params.length; i++) {
-						var param = params[i];
-						if (input[param]) {
-							input[param] = parseInt(input[param], 10);
-						}
-					}
-				}
-				var editor = this.editor;
-				if (location && location[0] !== "#") { //$NON-NLS-0$
-					location = "#" + location; //$NON-NLS-0$
-				}
-				this._lastHash = location;
-				var input = PageUtil.matchResourceParameters(location);
-				var fileURI = input.resource;
-				parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				// populate editor
-				if (fileURI) {
-					if (fileURI === this.lastFilePath) {
-						editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
-					} else {
-						if (!editor.getTextView()) {
-							editor.installTextView();
-							editor.getTextView().addEventListener("Focus", this.focusListener.bind(this)); //$NON-NLS-0$
-						}
-						var fullPathName = fileURI;
-						var progressTimeout = setTimeout(function() {
-							editor.setInput(fullPathName, messages["Fetching "] + fullPathName, null);
-						}, 800); // wait 800ms before displaying
-						var self = this;
-						var load = function(results) {
-							var contentOrError = results[0];
-							var metadataOrError = results[1];
-							clearTimeout(progressTimeout);
-							if (contentOrError._error) {
-								console.error("HTTP status code: ", contentOrError._error.status); //$NON-NLS-0$
-								contentOrError = messages["An error occurred: "] + errorMessage(contentOrError._error);
-							}
-							if (metadataOrError._error) {
-								console.error("Error loading file metadata: " + errorMessage(metadataOrError._error)); //$NON-NLS-0$
-							}
-							self.setInputContents(input, fileURI, contentOrError, metadataOrError);
-							clearTimeout(progressTimeout);
-						};
-						new Deferred.all([progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)), progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI))], function(error) { return {_error: error}; }).then(load);
-					}
-					this.lastFilePath = fileURI;
-				} else {
-					editor.setInput(messages["No File Selected"], "", null);
-				}
-			},
-			setInputContents: function(input, title, contents, metadata) {
-				// TODO could potentially dispatch separate events for metadata and contents changing
-				this.dispatchEvent({ type: "InputChanged", metadata: metadata, contents: contents }); //$NON-NLS-0$
-				var editor = this.editor;
-				var altPageTarget, name;
-				if (metadata) {
-					this._fileMetadata = metadata;
-					var toolbar = lib.node("pageActions"); //$NON-NLS-0$
-					if (toolbar) {	
-						commandRegistry.destroy(toolbar);
-						// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
-						mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, "pageActions", 500).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
-							commandRegistry.renderCommands("pageActions", toolbar, metadata, editor, "button"); //$NON-NLS-1$ //$NON-NLS-0$
-						});							}
-					var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
-					if (rightToolbar) {	
-						commandRegistry.destroy(rightToolbar);
-						commandRegistry.renderCommands(rightToolbar.id, rightToolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
-					}
-					this.setTitle(metadata.Location || String(metadata));
-					this._contentType = contentTypeService.getFileContentType(metadata);
-					// page target is the file, but if any interesting links fail, try the parent folder metadata.
-					altPageTarget = function() {
-						if (metadata.Parents && metadata.Parents.length > 0) {
-							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
-						}
-					};
-					name = metadata.Name;
-				} else {
-					// No metadata
-					this._fileMetadata = null;
-					this.setTitle(title);
-					this._contentType = contentTypeService.getFilenameContentType(this.getTitle());
-					name = this.getTitle();
-				}
-
-				var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
-				themePreferences.apply();
-				var chooser = new mThemeChooser.MiniThemeChooser( themePreferences, editorPreferences );
-				mGlobalCommands.addSettings( chooser );
-
-				mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$
-					makeAlternate: function() {
-						if (metadata.Parents && metadata.Parents.length > 0) {
-							// The mini-nav in sidebar wants to do the same work, can we share it?
-							return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
-						}
-					},
-					makeBreadcrumbLink: function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
-						var top = !folderLocation && !folder;
-						// Link to this page (edit page)
-						segment.href = new URITemplate("#{,Resource,params*}").expand({ //$NON-NLS-0$
-							Resource: inputManager.getInput(),
-							params: {
-								navigate: top ? "" : folder.ChildrenLocation //$NON-NLS-0$
-							}
-						});
-					},
-					serviceRegistry: serviceRegistry, commandService: commandRegistry,
-					searchService: searcher, fileService: fileClient});
-				mGlobalCommands.setDirtyIndicator(false);
-				var _self = this;
-				syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true)
-					.then(function() {
-						// TODO folding should be a preference.
-						var styler = syntaxHighlighter.getStyler();
-						editor.setFoldingEnabled(styler && styler.foldingEnabled);
-						_self.dispatchEvent({ type: "ContentTypeChanged", contentType: _self._contentType, location: location }); //$NON-NLS-0$
-						if (!this.dispatcher) {
-							this.dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor, _self._contentType);
-						}
-						// Contents
-						editor.setInput(title, null, contents);
-						editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
-						commandRegistry.processURL(window.location.href);
-					});
-			},
-			focusListener: function(e) {
-				if (!settings.autoLoadEnabled) { return; }
-				var fileURI = this.getInput();
-				progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI)).then(function(data) {
-					if (this.getFileMetadata().ETag !== data.ETag) {
-						this._fileMetadata = data;
-						var editor = this.editor;
-						if (!editor.isDirty() || confirm(messages.loadOutOfSync)) {
-							progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
-								editor.setInput(fileURI, null, contents);										
-							});
-						}
-					}
-				}.bind(this));
-			},
-			getInput: function() {
-				return this.lastFilePath;
-			},
-			setTitle : function(title) {
-				var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
-				var shortTitle = title;
-				if (indexOfSlash !== -1) {
-					shortTitle = shortTitle.substring(indexOfSlash + 1);
-				}
-				this._lastTitle = shortTitle;
-			},
-			
-			getTitle: function() {
-				return this._lastTitle;
-			},
-			getFileMetadata: function() {
-				return this._fileMetadata;
-			},
-			getContentType: function() {
-				return this._contentType;
-			},
-			setDirty: function(dirty) {
-				mGlobalCommands.setDirtyIndicator(dirty);
-			},
-			hashChanged: function() {
-				var editor = this.editor;
-				var oldInput = this.getInput();
-				selection.setSelections(window.location.hash); // may prompt, change input, or both //$NON-NLS-0$
-				var newHash = window.location.hash;
-				var newInput = this.getInput();
-				var inputChanged = PageUtil.matchResourceParameters(oldInput).resource !== PageUtil.matchResourceParameters(newInput).resource; //$NON-NLS-1$ //$NON-NLS-0$
-				var hashMatchesInput = PageUtil.matchResourceParameters(newInput).resource === PageUtil.matchResourceParameters(newHash).resource; //$NON-NLS-1$ //$NON-NLS-0$
-				if (!inputChanged && !hashMatchesInput) {
-					window.location.hash = this._lastHash[0] === "#" ? this._lastHash.substring(1): this._lastHash; //$NON-NLS-0$
-				} else if (inputChanged) {
-					this.setInput(newHash, editor);
-					this._lastHash = newHash;
-				} else {
-					// Input didn't change and input matches hash, just remember the current hash
-					this._lastHash = newHash;
-				}
-			},
-			shouldGoToURI: function(fileURI) {
-				if (typeof fileURI !== "string") { //$NON-NLS-0$
-					return false;
-				}
-				if (this.editor.isDirty()) {
-					var oldStripped = PageUtil.matchResourceParameters("#" + this.lastFilePath).resource; //$NON-NLS-0$
-					var newStripped = PageUtil.matchResourceParameters(fileURI).resource;
-					if (oldStripped !== newStripped) {
-						return window.confirm(messages["There are unsaved changes.  Do you still want to navigate away?"]);
-					}
-				}
-				return true;
-			},
-			getEditor: function() {
-				return this.editor;
-			}
-		});
-		return InputManager;
-	}());
-
 
 	var tabHandler = {
 		handlers: [],
@@ -553,7 +354,61 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	// Editor Settings
 	updateEditorSettings();
 	
-	inputManager = new InputManager(editor);
+	inputManager = new mInputManager.InputManager({
+		editor: editor,
+		serviceRegistry: serviceRegistry,
+		fileClient: fileClient,
+		progressService: progressService,
+		selection: selection,
+		contentTypeService: contentTypeService,
+		mGlobalCommands: mGlobalCommands
+	});
+	inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+		var metadata = evt.metadata;
+		if (metadata) {
+			var toolbar = lib.node("pageActions"); //$NON-NLS-0$
+			if (toolbar) {
+				commandRegistry.destroy(toolbar);
+				// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
+				mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, "pageActions", 500).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.renderCommands("pageActions", toolbar, metadata, editor, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+				});
+			}
+			var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
+			if (rightToolbar) {	
+				commandRegistry.destroy(rightToolbar);
+				commandRegistry.renderCommands(rightToolbar.id, rightToolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
+			}
+		}
+		var chooser = new mThemeChooser.MiniThemeChooser( themePreferences, editorPreferences );
+		mGlobalCommands.addSettings( chooser );
+		mGlobalCommands.setPageTarget({
+			task: "Coding", //$NON-NLS-0$
+			name: evt.name,
+			target: metadata,
+			makeAlternate: function() {
+				if (metadata.Parents && metadata.Parents.length > 0) {
+					// The mini-nav in sidebar wants to do the same work, can we share it?
+					return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
+				}
+			},
+			makeBreadcrumbLink: function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
+				var top = !folderLocation && !folder;
+				// Link to this page (edit page)
+				segment.href = new URITemplate("#{,Resource,params*}").expand({ //$NON-NLS-0$
+					Resource: inputManager.getInput(),
+					params: {
+						navigate: top ? "" : folder.ChildrenLocation //$NON-NLS-0$
+					}
+				});
+			},
+			serviceRegistry: serviceRegistry,
+			commandService: commandRegistry,
+			searchService: searcher,
+			fileService: fileClient
+		});
+		commandRegistry.processURL(window.location.href);
+	});
 
 	// Sidebar
 	function SidebarNavInputManager() {
@@ -600,7 +455,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	
 	window.addEventListener("hashchange", function() { inputManager.hashChanged(); }, false); //$NON-NLS-0$
-	window.addEventListener("hashchange", function() { // $NON-NLS-0$;
+	window.addEventListener("hashchange", function() { //$NON-NLS-0$
 		// inform the sidebar
 		sidebarNavInputManager.processHash(window.location.hash);
 	});

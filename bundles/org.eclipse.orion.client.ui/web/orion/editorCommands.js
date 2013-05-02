@@ -75,93 +75,31 @@ exports.EditorCommandFactory = (function() {
 				}
 			}
 
-			function handleError(error) {
-				var errorToDisplay = {};
-				errorToDisplay.Severity = "Error"; //$NON-NLS-0$
-				if (error.status === 0) {
-					errorToDisplay.Message = messages['No response from server.  Check your internet connection and try again.']; //$NON-NLS-1$
-				} else {
-					errorToDisplay = error;
-				}
-				handleStatus(errorToDisplay, true /*allow HTML for auth errors*/);
-			}
-
 			// create commands common to all editors
 			if (!this.isReadOnly) {
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
 				//If we are introducing other file system to provide save action, we need to define an onSave function in the input manager
 				//That way the file system knows how to implement their save mechanism
 				var self = this;
-				if (this.inputManager.onSave) {
-					editor.getTextView().setAction("save", function () { //$NON-NLS-0$
-						editor.reportStatus(messages['Saving...']);
+				editor.getTextView().setAction("save", function () { //$NON-NLS-0$
+					if (self.inputManager.save) {
+						self.inputManager.save();
+					} else if (self.inputManager.onSave) {
 						var contents = editor.getText();
 						self.inputManager.onSave(self.inputManager.getInput(), contents,
 							function(result) {
 								editor.setInput(self.inputManager.getInput(), null, contents, true);
-								editor.reportStatus("");
 								if(self.inputManager.afterSave){
 									self.inputManager.afterSave();
 								}
 							},
 							function(error) {
-								editor.reportStatus("");
 								error.log = true;
 							}
 						);
-						return true;
-					}, {name: messages['Save']});
-				} else {
-					editor.getTextView().setAction("save", function () { //$NON-NLS-0$
-						editor.reportStatus(messages['Saving...']);
-						var contents = editor.getText();
-						var etag = self.inputManager.getFileMetadata().ETag;
-						var args = { "ETag" : etag }; //$NON-NLS-0$
-						var def = self.fileClient.write(self.inputManager.getInput(), contents, args);
-						var progress = self.serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-						if(progress){
-							progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], self.inputManager.getInput()));
-						}
-						def.then(
-							function(result) {
-								self.inputManager.getFileMetadata().ETag = result.ETag;
-								editor.setInput(self.inputManager.getInput(), null, contents, true);
-								editor.reportStatus("");
-								if(self.inputManager.afterSave){
-									self.inputManager.afterSave();
-								}
-							},
-							function(error) {
-								// expected error - HTTP 412 Precondition Failed 
-								// occurs when file is out of sync with the server
-								if (error.status === 412) {
-									var forceSave = confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
-									if (forceSave) {
-										// repeat save operation, but without ETag 
-										var def = self.fileClient.write(self.inputManager.getInput(), contents);
-										if(progress){
-											progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], self.inputManager.getInput()));
-										}
-										def.then(
-											function(result) {
-												self.inputManager.getFileMetadata().ETag = result.ETag;
-												editor.setInput(self.inputManager.getInput(), null, contents, true);
-												editor.reportStatus("");
-												if(self.inputManager.afterSave){
-													self.inputManager.afterSave();
-												}
-											}, handleError);
-									}
-								} else {
-									// unknown error
-									editor.reportStatus("");
-									handleError(error);
-								}
-							}
-						);
-						return true;
-					}, {name: messages['Save']});
-				}
+					}
+					return true;
+				}, {name: messages['Save']});
 				var saveCommand = new mCommands.Command({
 					name: messages['Save'],
 					tooltip: messages["Save this file"],
