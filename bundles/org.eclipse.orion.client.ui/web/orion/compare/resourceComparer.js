@@ -131,8 +131,7 @@ exports.ResourceComparer = (function() {
 		this._inputManager = new mInputManager.InputManager({
 			serviceRegistry: serviceRegistry,
 			fileClient: that._fileClient,
-			progressService: that._progress,
-			mGlobalCommands: mGlobalCommands
+			progressService: that._progress
 		});
 		objects.mixin(this._inputManager, {
 			filePath: "",
