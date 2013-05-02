@@ -180,7 +180,7 @@ define([
 			this.setDirty(false);
 		},
 		_checkContents: function(e) {
-			if (!this._autoLoadEnabled.autoLoadEnabled) { return; }
+			if (!this._autoLoadEnabled) { return; }
 			var fileURI = this.getInput();
 			this.progressService.progress(this.fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI)).then(function(data) {
 				if (this.getFileMetadata().ETag !== data.ETag) {
