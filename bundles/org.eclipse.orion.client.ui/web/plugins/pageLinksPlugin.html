@@ -56,7 +56,12 @@
 			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/shell/shellPage.html"
 		});
-
+		provider.registerService("orion.page.link", serviceImpl, {
+			nameKey: "Search",
+			id: "orion.Search",
+			nls: "orion/nls/messages",
+			uriTemplate: "{OrionHome}/search/search.html"
+		});
 		provider.registerService("orion.page.link.related", null, {
 			id: "orion.navigateFromMetadata",
 			nameKey: "Navigator",
