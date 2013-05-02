@@ -231,7 +231,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	
 		var relatedlinks = lib.node('relatedlinks');
 		lib.empty( relatedlinks );
-//		relatedlinks.innerHTML = '';
 	
 		var contentTypesCache;
 		function getContentTypes() {
