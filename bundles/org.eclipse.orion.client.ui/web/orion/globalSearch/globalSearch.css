@@ -71,3 +71,57 @@
 	visibility: visible; 
 }
 
+.outlinerSplitLayout {
+	position: absolute;
+	top: 50%;  
+	width: 100%;
+	z-index: 50;
+	height: 3px;
+	cursor: n-resize;
+	background: #dedede;
+	visibility: visible; 
+}
+
+.advSearchOptContainer {
+	color: black;
+	display: block;
+	border:  1px solid #666;
+	background: white;
+	max-height: 300px;
+	max-width: 300px;
+	min-width: 150px;
+	position: absolute;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 2px;
+	z-index:200;
+}
+
+.advSearchOptUL {
+	list-style : none;
+	margin: 0;
+	padding: 0;
+}
+
+.advSearchOptLIControl {
+	margin-left: 8px;
+	margin-right: 0px;
+	margin-top: 1px;
+	margin-bottom: 8px;
+}
+
+.advSearchOptLILabel {
+	margin-left: 8px;
+	margin-right: 0px;
+	margin-top: 8px;
+	margin-bottom: 1px;
+}
+
+.advSearchOptButton {
+	text-align: center;
+	vertical-align: baseline;
+    cursor: pointer;
+    border-radius:3px;
+    padding: 2px;
+}
+

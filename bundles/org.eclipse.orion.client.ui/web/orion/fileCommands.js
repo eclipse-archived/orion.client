@@ -232,7 +232,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	/**
 	 * Creates the commands related to file management.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use when creating commands
-	 * @param {orion.commandRegistry.CommandRegistry} commandRegistry The command registry to get commands from
+	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to get commands from
 	 * @param {orion.explorer.Explorer} explorer The explorer view to add commands to
 	 * @param {orion.fileClient.FileClient} fileClient The file system client that the commands should use
 	 * @name orion.fileCommands#createFileCommands

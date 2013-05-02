@@ -35,7 +35,6 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		}
 		
 		this.node.innerHTML = this.templateString;
-//		this.node.title = 'Navigation';
 		
 		if( body.icon ){
 			this.node.className = this.node.className + ' ' + body.icon;

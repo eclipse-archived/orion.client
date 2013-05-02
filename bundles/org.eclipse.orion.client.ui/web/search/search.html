@@ -26,7 +26,16 @@
        <body id="orion-searchResults" class="orionPage">
 		<div class="content-fixedHeight">
 			<div id="outlineContainer" class="auxpane sidePanelLayout hasSplit">
-				<div class="sidePanelMargins" id="searchProgress"></div>
+				<div style="height:100%;width:100%;position:relative;">
+					<div id="outlineTop" class="topPanelLayout">
+						<div id="searchBuilder" class="sidePanelMargins">
+						</div>
+					</div>
+					<div class="outlinerSplitLayout"></div>
+					<div id="outlineBottom" class="bottomPanelLayout">
+						<div class="sidePanelMargins" id="searchProgress"></div>
+					</div>
+				</div>
 			</div>
 			<div class="split splitLayout"></div>
 			<div id="rightPane" class="mainpane mainPanelLayout hasSplit">

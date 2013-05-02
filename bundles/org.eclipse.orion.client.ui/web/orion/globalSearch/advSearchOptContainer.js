@@ -11,12 +11,12 @@
 /*global define window document XMLHttpRequest*/
 /*jslint sub:true*/
 
-define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', 'orion/i18nUtil', 'text!orion/globalSearch//advSearchOpt.html'], function(messages, require, mSearchUtils, mContentTypes, i18nUtil, optionTemplate){
+define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/inputCompletion/inputCompletion', 'orion/Deferred', 'text!orion/globalSearch/advSearchOpt.html'], 
+		function(messages, require, mSearchUtils, mContentTypes, i18nUtil, lib, mInputCompletion, Deferred, optionTemplate){
 
 	function advSearchOptRenderer(searcher, serviceRegistry, cancelCallBack) {
 		this._searcher = searcher;
 		this._serviceRegistry = serviceRegistry;
-		this._cancelCallBack = cancelCallBack;
 	}
 	
 	advSearchOptRenderer.prototype.getOptions = function(){
@@ -27,31 +27,89 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		};
 	};
 
-	advSearchOptRenderer.prototype.render = function(parentDiv, htmlTemplate){
+	advSearchOptRenderer.prototype.render = function(parentDiv){
 		this._parentDiv = parentDiv;
-		if (typeof(this._parentDiv) === "string") { //$NON-NLS-0$
-			this._parentDiv = document.getElementById(this._parentDiv);
-		}
 		var contentTypeService = this._serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 		if(!contentTypeService){
 			contentTypeService = new mContentTypes.ContentTypeService(this._serviceRegistry);
 			this.contentTypesCache = contentTypeService.getContentTypes();
-			this._render(htmlTemplate);
+			this._render();
 		} else {
 			var that = this;
 			contentTypeService.getContentTypes().then(function(ct) {
 				that.contentTypesCache = ct;
-				that._render(htmlTemplate);
+				that._render();
 			});
 		}
 	};
 
-	advSearchOptRenderer.prototype._render = function(htmlTemplate){
-		if(htmlTemplate){
-			this._renderHTML(htmlTemplate);
-		} else {
-			this._renderRaw();
-		}
+	advSearchOptRenderer.prototype._render = function(){
+		this._parentDiv.innerHTML = optionTemplate;
+		this._initHTMLLabels();
+	    this._initControls();
+		this._searchBox.focus();
+		
+		//Required. Reading recent&saved search from user preference. Once done call the uiCallback
+		var defaultProposalProvider = function(uiCallback){
+			mSearchUtils.getMixedSearches(this._serviceRegistry, true, false, function(searches){
+				var i, fullSet = [], hasSavedSearch = false, hasRecentSearch = false;
+				for (i in searches) {
+					if(searches[i].label && searches[i].value){
+						if(!hasSavedSearch){
+							fullSet.push({type: "category", label: messages["Saved searches"]});//$NON-NLS-0$
+							hasSavedSearch = true;
+						}
+						fullSet.push({type: "proposal", value: {name: searches[i].label, value: require.toUrl("search/search.html") + "#" + searches[i].value, type: "link"}});  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						//fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});//$NON-NLS-0$
+					} else {
+						if(!hasRecentSearch){
+							fullSet.push({type: "category", label: messages["Recent searches"]});//$NON-NLS-0$
+							hasRecentSearch = true;
+						}
+						fullSet.push({type: "proposal", label: searches[i].name, value: searches[i].name});//$NON-NLS-0$
+					}
+				}
+				uiCallback(fullSet);
+			});
+		}.bind(this);
+		//Optional. Reading extended search proposals by asking plugins, if any.
+		//If there are multiple plugins then merge all the proposals and call uiCallBack.
+		//Plugins(with service id "orion.search.proposal") should define the property "filterForMe" to true or false. Which means:
+		//If true the inputCompletion class will filter the proposals returned by the plugin.
+		//If false the inputCompletion class assumes that the proposals are already filtered by hte given kerword. 
+		//The false case happens when a plugin wants to use the keyword to ask for a set of filtered proposal from a web service by the keyword and Orion does not need to filter it again.
+		var exendedProposalProvider = function(keyWord, uiCallback){
+			var serviceReferences = this._serviceRegistry.getServiceReferences("orion.search.proposal"); //$NON-NLS-0$
+			if(!serviceReferences || serviceReferences.length === 0){
+				uiCallback(null);
+				return;
+			}
+            var promises = [];
+            var renderer = this;
+			serviceReferences.forEach(function(serviceRef) {
+				var filterForMe = serviceRef.getProperty("filterForMe");  //$NON-NLS-0$
+				promises.push( this._serviceRegistry.getService(serviceRef).run(keyWord).then(function(returnValue) {
+					//The return value has to be an array of {category : string, datalist: [string,string,string...]}
+					var proposalList = {filterForMe: filterForMe, proposals: []};
+					for (var i = 0; i < returnValue.length; i++) {
+						proposalList.proposals.push({type: "category", label: returnValue[i].category});//$NON-NLS-0$
+						for (var j = 0; j < returnValue[i].datalist.length; j++) {
+							proposalList.proposals.push({type: "proposal", label: returnValue[i].datalist[j], value: returnValue[i].datalist[j]});//$NON-NLS-0$
+						}
+					}
+					return proposalList;
+				}));
+			}.bind(renderer));
+			Deferred.all(promises).then(function(returnValues) {
+				//Render UI
+				uiCallback(returnValues);
+			});
+		}.bind(this);
+		//Create and hook up the inputCompletion instance with the search box dom node.
+		//The defaultProposalProvider provides proposals from the recent and saved searches.
+		//The exendedProposalProvider provides proposals from plugins.
+		new mInputCompletion.InputCompletion(this._searchBox, defaultProposalProvider,
+									{group: "globalSearch", extendedProvider: exendedProposalProvider}); //$NON-NLS-0$
 	};
 	
 	advSearchOptRenderer.prototype._submitSearch = function(){
@@ -88,11 +146,6 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 			if (keyCode === 13 ) {// ENTER
 				that._submitSearch();
 			} 
-			if (keyCode === 27 ) {// ESC
-				if(that._cancelCallBack){
-					that._cancelCallBack();
-				}
-			} 
 		});
 		
 		this._fileTypes.addEventListener("change", function(e) { //$NON-NLS-0$
@@ -118,98 +171,17 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		document.getElementById("advSearchSubmit").value = messages["Search"]; //$NON-NLS-1$ //$NON-NLS-0$
 	};
 	
-	advSearchOptRenderer.prototype._renderHTML = function(htmlTemplate){
-		var that = this;
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', require.toUrl(htmlTemplate), true); //$NON-NLS-0$
-		xhr.onreadystatechange = function() {
-		    if (this.readyState !== 4) {return;}
-		    if (this.status !== 200) {return;}
-		    that._parentDiv.innerHTML = this.responseText;
-		    that._initHTMLLabels();
-		    that._initControls();
-		};
-		xhr.send();	
-	};
-	
-	advSearchOptRenderer.prototype._renderRaw = function(){
-		this._parentDiv.innerHTML = optionTemplate;
-		this._initHTMLLabels();
-	    this._initControls();
-	};
-	
 	advSearchOptRenderer.prototype.constructor = advSearchOptRenderer;
 	/**
-	 * advSearchOptContainer is the drop down container for all advanced search options.
-	 * When binded with an html input element, it provides the search advanced options for the input field.
-	 * @param {DOMElement} inputFieldOrId The "text" type input html element. This is required.
+	 * advSearchOptContainer is the container for all search options.
+	 * @param {String|DOMElement} parent the parent element for the container, it can be either a DOM element or an ID for a DOM element.
 	 */
-	function advSearchOptContainer(inputFieldOrId, searcher, serviceRegistry, options) {
-		this._inputField = inputFieldOrId;
-		if (typeof(this._inputField) === "string") { //$NON-NLS-0$
-			this._inputField = document.getElementById(this._inputField);
-		}
-		var idFrefix = options ? options.group: null;
-		if(!idFrefix){
-			if(this._inputField.id){
-				idFrefix = this._inputField.id;
-			} else {
-				idFrefix = "default__dropDown__group"; //$NON-NLS-0$
-			}
-		}
-		this._idPrefix = idFrefix + "__dropDown__"; //$NON-NLS-0$
-		this.containerId = this._idPrefix + "UIContainer"; //$NON-NLS-0$
-		this._dismissed = true;
-		var that = this;
-		this._optRenderer = new advSearchOptRenderer(searcher, serviceRegistry, function(){that.dismiss();that._inputField.focus();});
-		this._initUI();
+	function advSearchOptContainer(parent, searcher, serviceRegistry) {
+		this._parent = lib.node(parent);
+		this._optRenderer = new advSearchOptRenderer(searcher, serviceRegistry);
+		this._optRenderer.render(this._parent);	
 	}
 	
-	advSearchOptContainer.prototype._initUI = function(){
-		this._optUIContainer = document.getElementById(this.containerId);
-		if(!this._optUIContainer){
-			this._optUIContainer = document.createElement('div'); //$NON-NLS-0$
-			this._optUIContainer.id = this.containerId;
-			this._optUIContainer.style.display = "none"; //$NON-NLS-0$
-			this._optUIContainer.className = "advSearchOptContainer"; //$NON-NLS-0$
-			document.body.appendChild(this._optUIContainer);
-			this._optRenderer.render(this._optUIContainer/*, 'orion/globalSearch/advSearchOpt.html'*/);			
-		}
-	};
-
-	
-	advSearchOptContainer.prototype.dismiss = function(valueToInputField){
-		this._dismissed = true;
-		this._optUIContainer.style.display = "none"; //$NON-NLS-0$
-	};
-	
-	advSearchOptContainer.prototype.show = function(defaultSearchStr){
-		var curLeft=0, curTop=0;
-		var offsetParent = this._inputField;
-		while (offsetParent) {
-			curLeft += offsetParent.offsetLeft;
-			curTop += offsetParent.offsetTop;
-	        offsetParent = offsetParent.offsetParent;
-		}
-		this._optUIContainer.style.display = "block"; //$NON-NLS-0$
-		this._optUIContainer.style.top = curTop + this._inputField.offsetHeight + 2 + "px"; //$NON-NLS-0$
-		this._optUIContainer.style.left = curLeft + "px"; //$NON-NLS-0$
-		this._optUIContainer.style.width = this._inputField.offsetWidth + "px"; //$NON-NLS-0$
-		
-		this._optRenderer._searchBox.value = defaultSearchStr;
-		this._optRenderer._searchBox.focus();
-		this._mouseDown = false;
-		this._dismissed = false;
-	};
-	
-	advSearchOptContainer.prototype.toggle = function(){
-		if(this._dismissed){
-			this.show(this._inputField.value);
-		} else {
-			this.dismiss();
-		}
-	};
-		
 	advSearchOptContainer.prototype.constructor = advSearchOptContainer;
 	
 	//return module exports
