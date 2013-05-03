@@ -183,9 +183,10 @@ define([
 		},
 		save: function() {
 			if (this._saving) { return; }
+			var editor = this.getEditor();
+			if (!editor.isDirty()) { return; }
 			this._saving = true;
 			var input = this.getInput();
-			var editor = this.getEditor();
 			editor.reportStatus(messages['Saving...']);
 			var contents = editor.getText();
 			var etag = this.getFileMetadata().ETag;
@@ -250,9 +251,7 @@ define([
 					};
 					this._idle = new Idle(options);
 					this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
-						if (editor.isDirty() && !this._saving) {
-							this.save();
-						}
+						this.save();
 					}.bind(this));
 					this._idle.setTimeout(timeout);
 				}.bind(this);
