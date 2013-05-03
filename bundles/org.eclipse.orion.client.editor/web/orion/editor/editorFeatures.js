@@ -466,7 +466,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}.bind(this), {name: messages.deleteLines});
 			
 			// Go To Line action
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("l", true), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("l", !util.isMac, false, false, util.isMac), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("gotoLine", function() { //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
