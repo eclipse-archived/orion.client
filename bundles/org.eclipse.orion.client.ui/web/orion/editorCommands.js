@@ -17,8 +17,8 @@
  * @namespace The global container for orion APIs.
  */ 
 define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 
-	'orion/keyBinding', 'orion/commandRegistry', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil', 'orion/PageLinks'], 
-	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mUndoStack, mSearchUtils, mPageUtil, PageLinks) {
+	'orion/keyBinding', 'orion/commandRegistry', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil', 'orion/PageLinks', 'orion/util'], 
+	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mUndoStack, mSearchUtils, mPageUtil, PageLinks, util) {
 
 var exports = {};
 
@@ -142,9 +142,8 @@ exports.EditorCommandFactory = (function() {
 						}
 					}});
 				this.commandService.addCommand(gotoLineCommand);
-				this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mKeyBinding.KeyBinding('l', true), new mCommandRegistry.URLBinding("gotoLine", "line")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				// override the editor binding 
-				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('l', true), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				// override the editor binding
 				editor.getTextView().setAction("gotoLine", function () { //$NON-NLS-0$
 					self.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
 					return true;
