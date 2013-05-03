@@ -119,6 +119,11 @@ define([
 		EventTarget.attach(this);
 	}
 	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
+		processParameters: function(input) {
+			var editor = this.getEditor();
+			parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
+		},
 		setInput: function(location) {
 			if (this._ignoreInput) { return; }
 			if (!location) {
@@ -131,10 +136,11 @@ define([
 			if (location && location[0] !== "#") { //$NON-NLS-0$
 				location = "#" + location; //$NON-NLS-0$
 			}
-			var oldLocation = this._location;
+			var input = PageUtil.matchResourceParameters(location);
 			if (editor.isDirty()) {
+				var oldLocation = this._location;
 				var oldResource = PageUtil.matchResourceParameters(oldLocation).resource;
-				var newResource = PageUtil.matchResourceParameters(location).resource;
+				var newResource = input.resource;
 				if (oldResource !== newResource) {
 					if (!window.confirm(messages["There are unsaved changes.  Do you still want to navigate away?"])) {
 						window.location.hash = oldLocation;
@@ -146,13 +152,10 @@ define([
 			this._ignoreInput = true;
 			this.selection.setSelections(location);
 			this._ignoreInput = false;
-			var input = PageUtil.matchResourceParameters(location);
 			var fileURI = input.resource;
-			parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			// populate editor
 			if (fileURI) {
 				if (fileURI === this._input) {
-					editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
+					this.processParameters(input);
 				} else {
 					if (!editor.getTextView()) {
 						editor.installTextView();
@@ -210,19 +213,18 @@ define([
 			// TODO could potentially dispatch separate events for metadata and contents changing
 			this.dispatchEvent({ type: "InputChanged", input: input, name: name, metadata: metadata, contents: contents }); //$NON-NLS-0$
 			var self = this;
-			this.syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true)
-				.then(function() {
-					// TODO folding should be a preference.
-					var styler = self.syntaxHighlighter.getStyler();
-					editor.setFoldingEnabled(styler && styler.foldingEnabled);
-					self.dispatchEvent({ type: "ContentTypeChanged", contentType: self._contentType, location: window.location }); //$NON-NLS-0$
-					if (!self.dispatcher) {
-						self.dispatcher = new mDispatcher.Dispatcher(self.serviceRegistry, editor, self._contentType);
-					}
-					// Contents
-					editor.setInput(title, null, contents);
-					editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
-				});
+			this.syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true).then(function() {
+				// TODO folding should be a preference.
+				var styler = self.syntaxHighlighter.getStyler();
+				editor.setFoldingEnabled(styler && styler.foldingEnabled);
+				self.dispatchEvent({ type: "ContentTypeChanged", contentType: self._contentType, location: window.location }); //$NON-NLS-0$
+				if (!self.dispatcher) {
+					self.dispatcher = new mDispatcher.Dispatcher(self.serviceRegistry, editor, self._contentType);
+				}
+				// Contents
+				editor.setInput(title, null, contents);
+				self.processParameters(input);
+			});
 
 			this.setDirty(false);
 		},
