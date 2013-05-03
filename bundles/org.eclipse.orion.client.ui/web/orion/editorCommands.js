@@ -17,8 +17,8 @@
  * @namespace The global container for orion APIs.
  */ 
 define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 
-	'orion/keyBinding', 'orion/commandRegistry', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
-	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mUndoStack, mSearchUtils, mPageUtil) {
+	'orion/keyBinding', 'orion/commandRegistry', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil', 'orion/PageLinks'], 
+	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mUndoStack, mSearchUtils, mPageUtil, PageLinks) {
 
 var exports = {};
 
@@ -277,7 +277,9 @@ exports.EditorCommandFactory = (function() {
 						progress.showWhile(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages['Running {0}'], info.name)).then(function(result){
 							if (result && result.uriTemplate) {
 								var uriTemplate = new URITemplate(result.uriTemplate);
-								var href = uriTemplate.expand(input.getFileMetadata());
+								var params = input.getFileMetadata();
+								params.OrionHome = params.OrionHome || PageLinks.getOrionHome();
+								var href = window.decodeURIComponent(uriTemplate.expand(params));
 								var iframe = document.createElement("iframe"); //$NON-NLS-0$
 								iframe.id = info.id;
 								iframe.name = info.id;
