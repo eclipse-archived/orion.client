@@ -63,6 +63,44 @@ define([
 		}
 	};
 	
+	function errorMessage(error) {
+		try {
+			error = JSON.parse(error.responseText);
+			return error.Message;
+		} catch(e) {}
+		return error.responseText;
+	}
+	function parseNumericParams(input, params) {
+		for (var i=0; i < params.length; i++) {
+			var param = params[i];
+			if (input[param]) {
+				input[param] = parseInt(input[param], 10);
+			}
+		}
+	}
+	
+	function handleStatus(statusService, status, allowHTML) {
+		if (!allowHTML && status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
+			delete status.HTML;
+		}
+		if (statusService) {
+			statusService.setProgressResult(status);
+		} else {
+			window.console.log(status);
+		}
+	}
+	
+	function handleError(statusService, error) {
+		var errorToDisplay = {};
+		errorToDisplay.Severity = "Error"; //$NON-NLS-0$
+		if (error.status === 0) {
+			errorToDisplay.Message = messages['No response from server.  Check your internet connection and try again.']; //$NON-NLS-1$
+		} else {
+			errorToDisplay = error;
+		}
+		handleStatus(errorToDisplay, true /*allow HTML for auth errors*/);
+	}
+
 	/**
 	 * @name orion.editor.InputManager
 	 * @class
@@ -82,26 +120,32 @@ define([
 	}
 	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
 		setInput: function(location) {
-			function errorMessage(error) {
-				try {
-					error = JSON.parse(error.responseText);
-					return error.Message;
-				} catch(e) {}
-				return error.responseText;
+			if (this._ignoreInput) { return; }
+			if (!location) {
+				location = window.location.hash;
 			}
-			function parseNumericParams(input, params) {
-				for (var i=0; i < params.length; i++) {
-					var param = params[i];
-					if (input[param]) {
-						input[param] = parseInt(input[param], 10);
-					}
-				}
+			if (typeof location !== "string") { //$NON-NLS-0$
+				return;
 			}
 			var editor = this.getEditor();
 			if (location && location[0] !== "#") { //$NON-NLS-0$
 				location = "#" + location; //$NON-NLS-0$
 			}
+			var oldLocation = this._lastHash;
+			if (editor.isDirty()) {
+				var oldResource = PageUtil.matchResourceParameters(oldLocation).resource;
+				var newResource = PageUtil.matchResourceParameters(location).resource;
+				if (oldResource !== newResource) {
+					if (!window.confirm(messages["There are unsaved changes.  Do you still want to navigate away?"])) {
+						window.location.hash = oldLocation;
+						return;
+					}
+				}
+			}
 			this._lastHash = location;
+			this._ignoreInput = true;
+			this.selection.setSelections(location);
+			this._ignoreInput = false;
 			var input = PageUtil.matchResourceParameters(location);
 			var fileURI = input.resource;
 			parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -197,6 +241,9 @@ define([
 				}
 			}.bind(this));
 		},
+		getEditor: function() {
+			return this.editor;
+		},
 		getInput: function() {
 			return this.lastFilePath;
 		},
@@ -217,7 +264,7 @@ define([
 		 * disabled.
 		 * @param {Number} timeout - the autosave timeout in milliseconds
 		 */
-		setAutoSaveTimeout: function(timeout){
+		setAutoSaveTimeout: function(timeout) {
 			if (!this._idle) {
 				var editor = this.getEditor(), textView = editor.getTextView();
 				var setIdle = function() {
@@ -256,27 +303,6 @@ define([
 			}
 			this._lastTitle = shortTitle;
 		},
-		_handleStatus: function(status, allowHTML) {
-			if (!allowHTML && status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
-				delete status.HTML;
-			}
-			var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-			if (statusService) {
-				statusService.setProgressResult(status);
-			} else {
-				window.console.log(status);
-			}
-		},
-		_handleError: function(error) {
-			var errorToDisplay = {};
-			errorToDisplay.Severity = "Error"; //$NON-NLS-0$
-			if (error.status === 0) {
-				errorToDisplay.Message = messages['No response from server.  Check your internet connection and try again.']; //$NON-NLS-1$
-			} else {
-				errorToDisplay = error;
-			}
-			this._handleStatus(errorToDisplay, true /*allow HTML for auth errors*/);
-		},
 		save: function() {
 			if (this._saving) { return; }
 			this._saving = true;
@@ -288,6 +314,7 @@ define([
 			var args = { "ETag" : etag }; //$NON-NLS-0$
 			var def = this.fileClient.write(input, contents, args);
 			var progress = this.progressService;
+			var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			if (progress) {
 				def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
 			}
@@ -303,7 +330,7 @@ define([
 			}
 			function errorHandler(error) {
 				editor.reportStatus("");
-				self._handleError(error);
+				handleError(statusService, error);
 				self._saving = false;
 			}
 			def.then(successHandler, function(error) {
@@ -324,41 +351,6 @@ define([
 					errorHandler(error);
 				}
 			});
-		},
-		hashChanged: function() {
-			var editor = this.getEditor();
-			var oldInput = this.getInput();
-			this.selection.setSelections(window.location.hash); // may prompt, change input, or both //$NON-NLS-0$
-			var newHash = window.location.hash;
-			var newInput = this.getInput();
-			var inputChanged = PageUtil.matchResourceParameters(oldInput).resource !== PageUtil.matchResourceParameters(newInput).resource; //$NON-NLS-1$ //$NON-NLS-0$
-			var hashMatchesInput = PageUtil.matchResourceParameters(newInput).resource === PageUtil.matchResourceParameters(newHash).resource; //$NON-NLS-1$ //$NON-NLS-0$
-			if (!inputChanged && !hashMatchesInput) {
-				window.location.hash = this._lastHash[0] === "#" ? this._lastHash.substring(1): this._lastHash; //$NON-NLS-0$
-			} else if (inputChanged) {
-				this.setInput(newHash, editor);
-				this._lastHash = newHash;
-			} else {
-				// Input didn't change and input matches hash, just remember the current hash
-				this._lastHash = newHash;
-			}
-		},
-		shouldGoToURI: function(fileURI) {
-			if (typeof fileURI !== "string") { //$NON-NLS-0$
-				return false;
-			}
-			var editor = this.getEditor();
-			if (editor.isDirty()) {
-				var oldStripped = PageUtil.matchResourceParameters("#" + this.lastFilePath).resource; //$NON-NLS-0$
-				var newStripped = PageUtil.matchResourceParameters(fileURI).resource;
-				if (oldStripped !== newStripped) {
-					return window.confirm(messages["There are unsaved changes.  Do you still want to navigate away?"]);
-				}
-			}
-			return true;
-		},
-		getEditor: function() {
-			return this.editor;
 		}
 	});
 	return {
