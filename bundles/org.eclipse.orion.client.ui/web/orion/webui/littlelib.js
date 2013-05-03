@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window define document */
+/*global console window define document */
 /*jslint regexp:false*/
 
 define(['require'], function(require) {
@@ -123,18 +123,27 @@ define(['require'], function(require) {
 					var exclusions = autoDismissNodes[i].excludeNodes;
 					var dismiss = autoDismissNodes[i].dismiss;
 					var inDocument = false;
-					var shouldDismiss = true;
-					for (var j=0; j<exclusions.length; j++) {
-						inDocument = document.compareDocumentPosition(document, exclusions[j]) !== 1; // DOCUMENT_POSITION_DISCONNECTED = 0x01;
-						if (inDocument && contains(exclusions[j], event.target)) {
-							shouldDismiss = false;
-							break;
-						} 
-					}
+					var node;
+					var shouldDismiss = exclusions.every(function(n) {
+						if (n) {
+							inDocument = document.compareDocumentPosition(document, n) !== 1; // DOCUMENT_POSITION_DISCONNECTED = 0x01;
+							if (inDocument && contains(n, event.target)) {
+								node = n;
+								return false;
+							}
+						}
+						return true;
+					});
 					if (shouldDismiss) {
-						dismiss();
+						try {
+							dismiss();
+						} catch (e) {
+							if (typeof console !== "undefined" && console) { //$NON-NLS-0$
+								console.error(e && e.message);
+							}
+						}
 						// might have been removed as part of the dismiss processing
-						inDocument = document.compareDocumentPosition(document, exclusions[j]) !== 1; // DOCUMENT_POSITION_DISCONNECTED = 0x01;
+						inDocument = document.compareDocumentPosition(document, node) !== 1; // DOCUMENT_POSITION_DISCONNECTED = 0x01;
 					}
 					if (inDocument) {
 						stillInDocument.push(autoDismissNodes[i]);
