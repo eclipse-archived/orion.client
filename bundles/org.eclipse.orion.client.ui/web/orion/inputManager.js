@@ -119,6 +119,48 @@ define([
 		EventTarget.attach(this);
 	}
 	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
+		load: function() {
+			var fileURI = this.getInput();
+			if (!fileURI) { return; }
+			var fileClient = this.fileClient;
+			var progressService = this.progressService;
+			var editor = this.getEditor();
+			if (this._fileMetadata) {
+				//Reload if auto of sync
+				progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI)).then(function(data) {
+					if (this._fileMetadata.ETag !== data.ETag) {
+						this._fileMetadata = data;
+						if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
+							progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
+								editor.setInput(fileURI, null, contents);										
+							});
+						}
+					}
+				}.bind(this));
+			} else {
+				var progressTimeout = window.setTimeout(function() {
+					editor.setInput(fileURI, messages["Fetching "] + fileURI, null);
+				}, 800);
+				new Deferred.all([
+					progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)),
+					progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI))
+				], function(error) { return {_error: error}; }).then(function(results) {
+					if (progressTimeout) {
+						window.clearTimeout(progressTimeout);
+					}
+					var contentOrError = results[0];
+					var metadataOrError = results[1];
+					if (contentOrError._error) {
+						window.console.error("HTTP status code: ", contentOrError._error.status); //$NON-NLS-0$
+						contentOrError = messages["An error occurred: "] + errorMessage(contentOrError._error);
+					}
+					if (metadataOrError._error) {
+						window.console.error("Error loading file metadata: " + errorMessage(metadataOrError._error)); //$NON-NLS-0$
+					}
+					this._setInputContents(this._parsedLocation, fileURI, contentOrError, metadataOrError);
+				}.bind(this));
+			}
+		},
 		processParameters: function(input) {
 			var editor = this.getEditor();
 			parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -149,6 +191,7 @@ define([
 				}
 			}
 			this._location = location;
+			this._parsedLocation = input;
 			this._ignoreInput = true;
 			this.selection.setSelections(location);
 			this._ignoreInput = false;
@@ -157,37 +200,17 @@ define([
 				if (fileURI === this._input) {
 					this.processParameters(input);
 				} else {
+					this._input = fileURI;
+					this._fileMetadata = null;
 					if (!editor.getTextView()) {
 						editor.installTextView();
-						editor.getTextView().addEventListener("Focus", this._checkContents.bind(this)); //$NON-NLS-0$
+						editor.getTextView().addEventListener("Focus", function(e) { //$NON-NLS-0$
+							if (!this._autoLoadEnabled) { return; }
+							this.load();
+						}.bind(this));
 					}
-					var fullPathName = fileURI;
-					var progressTimeout = window.setTimeout(function() {
-						editor.setInput(fullPathName, messages["Fetching "] + fullPathName, null);
-					}, 800); // wait 800ms before displaying
-					var self = this;
-					var load = function(results) {
-						var contentOrError = results[0];
-						var metadataOrError = results[1];
-						window.clearTimeout(progressTimeout);
-						if (contentOrError._error) {
-							window.console.error("HTTP status code: ", contentOrError._error.status); //$NON-NLS-0$
-							contentOrError = messages["An error occurred: "] + errorMessage(contentOrError._error);
-						}
-						if (metadataOrError._error) {
-							window.console.error("Error loading file metadata: " + errorMessage(metadataOrError._error)); //$NON-NLS-0$
-						}
-						self._setInputContents(input, fileURI, contentOrError, metadataOrError);
-						window.clearTimeout(progressTimeout);
-					};
-					var fileClient = this.fileClient;
-					var progressService = this.progressService;
-					new Deferred.all([
-						progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)),
-						progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI))
-					], function(error) { return {_error: error}; }).then(load);
+					this.load();
 				}
-				this._input = fileURI;
 			} else {
 				// No input, no editor.
 				this._input = null;
@@ -196,7 +219,6 @@ define([
 			}
 		},
 		_setInputContents: function(input, title, contents, metadata) {
-			var editor = this.getEditor();
 			var name;
 			if (metadata) {
 				this._fileMetadata = metadata;
@@ -213,6 +235,7 @@ define([
 			// TODO could potentially dispatch separate events for metadata and contents changing
 			this.dispatchEvent({ type: "InputChanged", input: input, name: name, metadata: metadata, contents: contents }); //$NON-NLS-0$
 			var self = this;
+			var editor = this.getEditor();
 			this.syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true).then(function() {
 				// TODO folding should be a preference.
 				var styler = self.syntaxHighlighter.getStyler();
@@ -225,23 +248,7 @@ define([
 				editor.setInput(title, null, contents);
 				self.processParameters(input);
 			});
-
 			this.setDirty(false);
-		},
-		_checkContents: function(e) {
-			if (!this._autoLoadEnabled) { return; }
-			var fileURI = this.getInput();
-			this.progressService.progress(this.fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI)).then(function(data) {
-				if (this.getFileMetadata().ETag !== data.ETag) {
-					this._fileMetadata = data;
-					var editor = this.getEditor();
-					if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
-						this.progressService.progress(this.fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
-							editor.setInput(fileURI, null, contents);										
-						});
-					}
-				}
-			}.bind(this));
 		},
 		getEditor: function() {
 			return this.editor;
