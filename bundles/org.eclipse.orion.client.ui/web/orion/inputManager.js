@@ -278,6 +278,7 @@ define([
 			this.handleStatus(errorToDisplay, true /*allow HTML for auth errors*/);
 		},
 		save: function() {
+			if (this._saving) { return; }
 			this._saving = true;
 			var input = this.getInput();
 			var editor = this.getEditor();
