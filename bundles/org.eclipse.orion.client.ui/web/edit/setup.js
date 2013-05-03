@@ -299,33 +299,32 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	};
 	
 	// Content Assist
-	var contentAssistFactory = isReadOnly ? null
-		: {
-			createContentAssistMode: function(editor) {
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
-				contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
-					// Content assist is about to be activated; set its providers.
-					var fileContentType = inputManager.getContentType();
-					var fileName = editor.getTitle();
-					var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist"); //$NON-NLS-0$
-					var providers = [];
-					for (var i=0; i < serviceReferences.length; i++) {
-						var serviceReference = serviceReferences[i],
-						    contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
-						    pattern = serviceReference.getProperty("pattern"); // backwards compatibility //$NON-NLS-0$
-						if ((contentTypeIds && contentTypeService.isSomeExtensionOf(fileContentType, contentTypeIds)) || 
-								(pattern && new RegExp(pattern).test(fileName))) {
-							providers.push(serviceRegistry.getService(serviceReference));
-						}
+	var contentAssistFactory = isReadOnly ? null : {
+		createContentAssistMode: function(editor) {
+			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+			var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
+			contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
+				// Content assist is about to be activated; set its providers.
+				var fileContentType = inputManager.getContentType();
+				var fileName = editor.getTitle();
+				var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist"); //$NON-NLS-0$
+				var providers = [];
+				for (var i=0; i < serviceReferences.length; i++) {
+					var serviceReference = serviceReferences[i],
+					    contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
+					    pattern = serviceReference.getProperty("pattern"); // backwards compatibility //$NON-NLS-0$
+					if ((contentTypeIds && contentTypeService.isSomeExtensionOf(fileContentType, contentTypeIds)) || 
+							(pattern && new RegExp(pattern).test(fileName))) {
+						providers.push(serviceRegistry.getService(serviceReference));
 					}
-					contentAssist.setProviders(providers);
-					contentAssist.setProgress(progress);
-				});
-				var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
-				return new mContentAssist.ContentAssistMode(contentAssist, widget);
-			}
-		};
+				}
+				contentAssist.setProviders(providers);
+				contentAssist.setProgress(progress);
+			});
+			var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
+			return new mContentAssist.ContentAssistMode(contentAssist, widget);
+		}
+	};
 
 	var statusReporter =  function(message, type, isAccessible) {
 		if (type === "progress") { //$NON-NLS-0$
@@ -364,7 +363,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		if (evt.input === null || typeof evt.input === "undefined") {//$NON-NLS-0$
 			var noFile = document.createElement("div"); //$NON-NLS-0$
-			noFile.classList.add("noFile");
+			noFile.classList.add("noFile"); //$NON-NLS-0$
 			noFile.textContent = messages["NoFile"];
 			lib.empty(editorDomNode);
 			editorDomNode.appendChild(noFile);
@@ -413,6 +412,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			searchService: searcher,
 			fileService: fileClient
 		});
+
+		// Put the make favorite command in our toolbar."
+		//commandRegistry.registerCommandContribution("pageActions", "orion.makeFavorite", 2); //$NON-NLS-1$ //$NON-NLS-0$
+
 		commandRegistry.processURL(window.location.href);
 	});
 
@@ -447,7 +450,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 		editor.showProblems(event.problems);
 	});
-	
+	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
+	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+		syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
+	});
+
 	editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
 		inputManager.setDirty(editor.isDirty());
 	});
@@ -467,13 +474,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	sidebarNavInputManager.processHash(window.location.hash);
 	
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
-	// Put the make favorite command in our toolbar."
-	//commandRegistry.registerCommandContribution("pageActions", "orion.makeFavorite", 2); //$NON-NLS-1$ //$NON-NLS-0$
-
-	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
-	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-		syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
-	});
 
 	window.onbeforeunload = function() {
 		if (editor.isDirty()) {
