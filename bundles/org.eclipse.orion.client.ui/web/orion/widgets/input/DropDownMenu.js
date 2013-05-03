@@ -95,24 +95,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 				lib.empty(this.node);
 				this.node = this.select = null;
 			}
-		},
-		
-		coordinates: function(elem) {
-		   
-		   if (!elem) {
-		      return {"x":0,"y":0};
-		   }
-		   
-		   var xy={"x":elem.offsetLeft,"y":elem.offsetTop};
-		   var par=getXYpos(elem.offsetParent);
-		   
-		   for( var key in par ){
-		      xy[key]+=par[key];
-		   }
-		   
-		   return xy;
 		}
-		
 	});
 	return DropDownMenu;
 });

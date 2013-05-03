@@ -3,9 +3,8 @@
 	<!-- Top row:  Logo + discovery links + search + user -->
 	<div id="staticBanner" class="layoutBlock topRowBanner"> <!-- primaryNav -->
 		<a id="home" class="layoutLeft \"></a>
-		
 		<nav id="primaryNav" class="layoutLeft" role="navigation">
-			<div class="centralNavigation" id="centralNavigation" style="margin-top:0;"></div>
+			<div class="centralNavigation" id="centralNavigation" tabindex="0" role="button" style="margin-top:0;"></div>
 		</nav>
 		<div class="clear navigationBreadcrumb">
 			<span id="location" class="currentLocation"></span>
@@ -21,7 +20,9 @@
 			<div id="searchOptions" class="layoutLeft" style="padding-top:1px;display:none;"></div>
 			<div id="userMenu" class="spacingLeft layoutLeft" style="color:#ccc;">
 				<img class="progressPane" id="progressPane" tabindex="0" role="progressbar"></img>
-				<span id="userTrigger" tabindex="0" role="button" class="dropdownTrigger">${Options}<span class="dropdownArrowDown"></span></span>
+				<span id="userTrigger" tabindex="0" role="button" class="dropdownTrigger">
+					<span class="dropdownArrowEmpty"></span>
+				</span>
 				<ul id="userDropdown" class="dropdownMenu" role="menu"></ul>
 			</div>
 		</div>
