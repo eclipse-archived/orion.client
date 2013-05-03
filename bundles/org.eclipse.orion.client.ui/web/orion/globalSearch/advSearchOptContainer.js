@@ -11,16 +11,18 @@
 /*global define window document XMLHttpRequest*/
 /*jslint sub:true*/
 
-define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/inputCompletion/inputCompletion', 'orion/Deferred', 'text!orion/globalSearch/advSearchOpt.html'], 
-		function(messages, require, mSearchUtils, mContentTypes, i18nUtil, lib, mInputCompletion, Deferred, optionTemplate){
+define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/inputCompletion/inputCompletion', 'orion/Deferred', 'orion/commands', 'text!orion/globalSearch/searchBuilder.html'], 
+		function(messages, require, mSearchUtils, mContentTypes, i18nUtil, lib, mInputCompletion, Deferred, mCommands, optionTemplate){
 
-	function advSearchOptRenderer(searcher, serviceRegistry, cancelCallBack) {
+	function advSearchOptRenderer(searcher, serviceRegistry, commandService) {
 		this._searcher = searcher;
 		this._serviceRegistry = serviceRegistry;
+		this._commandService = commandService;
 	}
 	
 	advSearchOptRenderer.prototype.getOptions = function(){
 		return {searchStr: this._searchBox.value,
+				replace:this._replaceBox.value,
 				caseSensitive: this._caseSensitiveCB.checked,
 		        regEx: this._regExCB.checked,
 		        type: this._fileTypes.options[this._fileTypes.selectedIndex].value
@@ -35,11 +37,10 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 			this.contentTypesCache = contentTypeService.getContentTypes();
 			this._render();
 		} else {
-			var that = this;
 			contentTypeService.getContentTypes().then(function(ct) {
-				that.contentTypesCache = ct;
-				that._render();
-			});
+				this.contentTypesCache = ct;
+				this._render();
+			}.bind(this));
 		}
 	};
 
@@ -114,11 +115,20 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 	
 	advSearchOptRenderer.prototype._submitSearch = function(){
 		var options = this.getOptions();
+		options.replace = null;
 		mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.searchStr, options);
+	};
+	
+	advSearchOptRenderer.prototype._preview = function(){
+		var options = this.getOptions();
+		if(options.searchStr && options.replace){
+			mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.searchStr, options);
+		}
 	};
 	
 	advSearchOptRenderer.prototype._initControls = function(){
 		this._searchBox = document.getElementById("advSearchInput"); //$NON-NLS-0$
+		this._replaceBox = document.getElementById("advReplaceInput"); //$NON-NLS-0$
 		this._fileTypes = document.getElementById("advSearchTypes"); //$NON-NLS-0$
 		this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
 		this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
@@ -140,35 +150,73 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		    option.value = fTypes[x].value;
 		}		
 		//Add listeners
-		var that = this;
 		this._searchBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
 			var keyCode= e.charCode || e.keyCode;
 			if (keyCode === 13 ) {// ENTER
-				that._submitSearch();
+				this._submitSearch();
 			} 
-		});
+		}.bind(this));
+		this._replaceBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			var keyCode= e.charCode || e.keyCode;
+			if (keyCode === 13 ) {// ENTER
+				this._preview();
+			} 
+		}.bind(this));
 		
 		this._fileTypes.addEventListener("change", function(e) { //$NON-NLS-0$
-			var type = that._fileTypes.options[that._fileTypes.selectedIndex].value;
+			var type = this._fileTypes.options[this._fileTypes.selectedIndex].value;
 			if(type === mSearchUtils.ALL_FILE_TYPE){
-				that._searchBox.placeholder = messages["Type a search term"];
+				this._searchBox.placeholder = messages["Type a search term"];
 			} else {
-				that._searchBox.placeholder =i18nUtil.formatMessage(messages["All ${0} files"], type);
+				this._searchBox.placeholder =i18nUtil.formatMessage(messages["All ${0} files"], type);
 			}
-		});
+		}.bind(this));
 		
+        var searchCommand = new mCommands.Command({
+            name: messages["Search On"],
+            //tooltip: messages["Hide compare view of changes"],
+            id: "orion.globalSearch.search", //$NON-NLS-0$
+            callback: function(data) {
+                this._submitSearch();
+            }.bind(this),
+            visibleWhen: function(item) {
+                return true;
+            }
+        });
+
+        var previewCurrentPageCommand = new mCommands.Command({
+            name: messages['Replace With'],
+            //tooltip: messages["Replace all matches with..."],
+            id: "orion.globalSearch.previewCurrentPage", //$NON-NLS-0$
+            callback: function(data) {
+                this._preview();
+            }.bind(this),
+            visibleWhen: function(item) {
+                return true;
+            }
+        });
+		
+		this._commandService.addCommand(searchCommand);	
+		this._commandService.addCommand(previewCurrentPageCommand);	
+        this._commandService.registerCommandContribution("advSearchCmd", "orion.globalSearch.search", 1);//$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.renderCommands("advSearchCmd", "advSearchCmd", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("advReplacePreviewCmd", "orion.globalSearch.previewCurrentPage", 1);//$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.renderCommands("advReplacePreviewCmd", "advReplacePreviewCmd", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		/*
 		this._submitButton.onclick = function(e){
-			that._submitSearch();
-		};
+			this._submitSearch();
+		}.bind(this);
+		*/
 	};
 	
 	advSearchOptRenderer.prototype._initHTMLLabels = function(){
-		document.getElementById("advSearchLabel").appendChild(document.createTextNode(messages["Files that contain:"])); //$NON-NLS-0$ //$NON-NLS-0$
+		//document.getElementById("advSearchLabel").appendChild(document.createTextNode(messages["Files that contain:"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchInput").placeholder = messages["Type a search term"]; //$NON-NLS-0$ //$NON-NLS-0$
+		document.getElementById("advReplaceInput").placeholder = messages["Type a replace term"]; //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchTypeLabel").appendChild(document.createTextNode(messages["File type:"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchCaseSensitiveLabel").appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-0$ //$NON-NLS-0$
-		document.getElementById("advSearchSubmit").value = messages["Search"]; //$NON-NLS-1$ //$NON-NLS-0$
+		//document.getElementById("advSearchSubmit").value = messages["Search"]; //$NON-NLS-1$ //$NON-NLS-0$
 	};
 	
 	advSearchOptRenderer.prototype.constructor = advSearchOptRenderer;
@@ -176,9 +224,9 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 	 * advSearchOptContainer is the container for all search options.
 	 * @param {String|DOMElement} parent the parent element for the container, it can be either a DOM element or an ID for a DOM element.
 	 */
-	function advSearchOptContainer(parent, searcher, serviceRegistry) {
+	function advSearchOptContainer(parent, searcher, serviceRegistry, commandService) {
 		this._parent = lib.node(parent);
-		this._optRenderer = new advSearchOptRenderer(searcher, serviceRegistry);
+		this._optRenderer = new advSearchOptRenderer(searcher, serviceRegistry, commandService);
 		this._optRenderer.render(this._parent);	
 	}
 	
