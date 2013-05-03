@@ -454,13 +454,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	
 	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
 	selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-		var fileURI = event.selection;
-		if (inputManager.shouldGoToURI(fileURI)) {
-			inputManager.setInput(fileURI);
-		} 
+		inputManager.setInput(event.selection);
 	});
-	
-	window.addEventListener("hashchange", function() { inputManager.hashChanged(); }, false); //$NON-NLS-0$
+	window.addEventListener("hashchange", function() { //$NON-NLS-0$
+		inputManager.setInput(window.location.hash);
+	});
 	window.addEventListener("hashchange", function() { //$NON-NLS-0$
 		// inform the sidebar
 		sidebarNavInputManager.processHash(window.location.hash);
