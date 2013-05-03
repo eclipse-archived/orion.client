@@ -275,7 +275,7 @@ define([
 			} else {
 				errorToDisplay = error;
 			}
-			this.handleStatus(errorToDisplay, true /*allow HTML for auth errors*/);
+			this._handleStatus(errorToDisplay, true /*allow HTML for auth errors*/);
 		},
 		save: function() {
 			if (this._saving) { return; }
@@ -303,7 +303,7 @@ define([
 			}
 			function errorHandler(error) {
 				editor.reportStatus("");
-				self.handleError(error);
+				self._handleError(error);
 				self._saving = false;
 			}
 			def.then(successHandler, function(error) {
