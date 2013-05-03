@@ -114,7 +114,7 @@ define([
 		this.selection = options.selection;
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
 		this.syntaxModelWirer = new SyntaxModelWirer(this.serviceRegistry);
-		this.lastFilePath = "";
+		this._input = this._title = "";
 		this.dispatcher = null;
 		EventTarget.attach(this);
 	}
@@ -131,7 +131,7 @@ define([
 			if (location && location[0] !== "#") { //$NON-NLS-0$
 				location = "#" + location; //$NON-NLS-0$
 			}
-			var oldLocation = this._lastHash;
+			var oldLocation = this._location;
 			if (editor.isDirty()) {
 				var oldResource = PageUtil.matchResourceParameters(oldLocation).resource;
 				var newResource = PageUtil.matchResourceParameters(location).resource;
@@ -142,7 +142,7 @@ define([
 					}
 				}
 			}
-			this._lastHash = location;
+			this._location = location;
 			this._ignoreInput = true;
 			this.selection.setSelections(location);
 			this._ignoreInput = false;
@@ -151,7 +151,7 @@ define([
 			parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// populate editor
 			if (fileURI) {
-				if (fileURI === this.lastFilePath) {
+				if (fileURI === this._input) {
 					editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 				} else {
 					if (!editor.getTextView()) {
@@ -184,10 +184,10 @@ define([
 						progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI))
 					], function(error) { return {_error: error}; }).then(load);
 				}
-				this.lastFilePath = fileURI;
+				this._input = fileURI;
 			} else {
 				// No input, no editor.
-				this.lastFilePath = null;
+				this._input = null;
 				editor.uninstallTextView();
 				this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
 			}
@@ -245,10 +245,10 @@ define([
 			return this.editor;
 		},
 		getInput: function() {
-			return this.lastFilePath;
+			return this._input;
 		},
 		getTitle: function() {
-			return this._lastTitle;
+			return this._title;
 		},
 		getFileMetadata: function() {
 			return this._fileMetadata;
@@ -301,7 +301,7 @@ define([
 			if (indexOfSlash !== -1) {
 				shortTitle = shortTitle.substring(indexOfSlash + 1);
 			}
-			this._lastTitle = shortTitle;
+			this._title = shortTitle;
 		},
 		save: function() {
 			if (this._saving) { return; }
