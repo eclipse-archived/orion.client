@@ -166,6 +166,109 @@ define([
 			parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 		},
+		getEditor: function() {
+			return this.editor;
+		},
+		getInput: function() {
+			return this._input;
+		},
+		getTitle: function() {
+			return this._title;
+		},
+		getFileMetadata: function() {
+			return this._fileMetadata;
+		},
+		getContentType: function() {
+			return this._contentType;
+		},
+		save: function() {
+			if (this._saving) { return; }
+			this._saving = true;
+			var input = this.getInput();
+			var editor = this.getEditor();
+			editor.reportStatus(messages['Saving...']);
+			var contents = editor.getText();
+			var etag = this.getFileMetadata().ETag;
+			var args = { "ETag" : etag }; //$NON-NLS-0$
+			var def = this.fileClient.write(input, contents, args);
+			var progress = this.progressService;
+			var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+			if (progress) {
+				def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
+			}
+			var self = this;
+			function successHandler(result) {
+				self.getFileMetadata().ETag = result.ETag;
+				editor.setInput(input, null, contents, true);
+				editor.reportStatus("");
+				if (self.afterSave) {
+					self.afterSave();
+				}
+				self._saving = false;
+			}
+			function errorHandler(error) {
+				editor.reportStatus("");
+				handleError(statusService, error);
+				self._saving = false;
+			}
+			def.then(successHandler, function(error) {
+				// expected error - HTTP 412 Precondition Failed 
+				// occurs when file is out of sync with the server
+				if (error.status === 412) {
+					var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
+					if (forceSave) {
+						// repeat save operation, but without ETag 
+						var def = self.fileClient.write(input, contents);
+						if (progress) {
+							def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
+						}
+						def.then(successHandler, errorHandler);
+					}
+				} else {
+					// unknown error
+					errorHandler(error);
+				}
+			});
+		},
+		setAutoLoadEnabled: function(enabled) {
+			this._autoLoadEnabled = enabled;
+		},
+		/**
+		 * Set the autosave timeout. If the timeout is <code>-1</code>, autosave is
+		 * disabled.
+		 * @param {Number} timeout - the autosave timeout in milliseconds
+		 */
+		setAutoSaveTimeout: function(timeout) {
+			if (!this._idle) {
+				var editor = this.getEditor(), textView = editor.getTextView();
+				var setIdle = function() {
+					editor.removeEventListener("TextViewInstalled", setIdle); //$NON-NLS-0$
+					var document = editor.getTextView().getOptions("parent").ownerDocument; //$NON-NLS-0$
+					var options = {
+						document: document,
+						timeout: timeout
+					};
+					this._idle = new Idle(options);
+					this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
+						if (editor.isDirty() && !this._saving) {
+							this.save();
+						}
+					}.bind(this));
+					this._idle.setTimeout(timeout);
+				}.bind(this);
+				if (textView) {
+					setIdle();
+				} else {
+					// wait for a textview to get installed
+					editor.addEventListener("TextViewInstalled", setIdle); //$NON-NLS-0$
+				}
+			} else {
+				this._idle.setTimeout(timeout);
+			}
+		},
+		setDirty: function(dirty) {
+			mGlobalCommands.setDirtyIndicator(dirty);
+		},
 		setInput: function(location) {
 			if (this._ignoreInput) { return; }
 			if (!location) {
@@ -250,60 +353,6 @@ define([
 			});
 			this.setDirty(false);
 		},
-		getEditor: function() {
-			return this.editor;
-		},
-		getInput: function() {
-			return this._input;
-		},
-		getTitle: function() {
-			return this._title;
-		},
-		getFileMetadata: function() {
-			return this._fileMetadata;
-		},
-		getContentType: function() {
-			return this._contentType;
-		},
-		setAutoLoadEnabled: function(enabled) {
-			this._autoLoadEnabled = enabled;
-		},
-		/**
-		 * Set the autosave timeout. If the timeout is <code>-1</code>, autosave is
-		 * disabled.
-		 * @param {Number} timeout - the autosave timeout in milliseconds
-		 */
-		setAutoSaveTimeout: function(timeout) {
-			if (!this._idle) {
-				var editor = this.getEditor(), textView = editor.getTextView();
-				var setIdle = function() {
-					editor.removeEventListener("TextViewInstalled", setIdle); //$NON-NLS-0$
-					var document = editor.getTextView().getOptions("parent").ownerDocument; //$NON-NLS-0$
-					var options = {
-						document: document,
-						timeout: timeout
-					};
-					this._idle = new Idle(options);
-					this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
-						if (editor.isDirty() && !this._saving) {
-							this.save();
-						}
-					}.bind(this));
-					this._idle.setTimeout(timeout);
-				}.bind(this);
-				if (textView) {
-					setIdle();
-				} else {
-					// wait for a textview to get installed
-					editor.addEventListener("TextViewInstalled", setIdle); //$NON-NLS-0$
-				}
-			} else {
-				this._idle.setTimeout(timeout);
-			}
-		},
-		setDirty: function(dirty) {
-			mGlobalCommands.setDirtyIndicator(dirty);
-		},
 		setTitle : function(title) {
 			var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
 			var shortTitle = title;
@@ -311,55 +360,6 @@ define([
 				shortTitle = shortTitle.substring(indexOfSlash + 1);
 			}
 			this._title = shortTitle;
-		},
-		save: function() {
-			if (this._saving) { return; }
-			this._saving = true;
-			var input = this.getInput();
-			var editor = this.getEditor();
-			editor.reportStatus(messages['Saving...']);
-			var contents = editor.getText();
-			var etag = this.getFileMetadata().ETag;
-			var args = { "ETag" : etag }; //$NON-NLS-0$
-			var def = this.fileClient.write(input, contents, args);
-			var progress = this.progressService;
-			var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-			if (progress) {
-				def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
-			}
-			var self = this;
-			function successHandler(result) {
-				self.getFileMetadata().ETag = result.ETag;
-				editor.setInput(input, null, contents, true);
-				editor.reportStatus("");
-				if (self.afterSave) {
-					self.afterSave();
-				}
-				self._saving = false;
-			}
-			function errorHandler(error) {
-				editor.reportStatus("");
-				handleError(statusService, error);
-				self._saving = false;
-			}
-			def.then(successHandler, function(error) {
-				// expected error - HTTP 412 Precondition Failed 
-				// occurs when file is out of sync with the server
-				if (error.status === 412) {
-					var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
-					if (forceSave) {
-						// repeat save operation, but without ETag 
-						var def = self.fileClient.write(input, contents);
-						if (progress) {
-							def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
-						}
-						def.then(successHandler, errorHandler);
-					}
-				} else {
-					// unknown error
-					errorHandler(error);
-				}
-			});
 		}
 	});
 	return {
