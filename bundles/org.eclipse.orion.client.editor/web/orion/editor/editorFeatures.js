@@ -271,9 +271,17 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}.bind(this));
 			
 			textView.setAction("tab", function() { //$NON-NLS-0$
+				var editor = this.editor;
+				var keyModes = editor.getKeyModes();
+				for (var j = 0; j < keyModes.length; j++) {
+					var mode = keyModes[j];
+					if (mode.isActive() && mode.tab) {
+						return mode.tab();
+					}
+				}
+
 				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				if(!textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
-				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
 				var firstLine = model.getLineAtOffset(selection.start);
@@ -292,14 +300,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 					editor.setSelection(lineStart === selection.start ? selection.start : selection.start + text.length, selection.end + ((lastLine - firstLine + 1) * text.length));
 					return true;
 				}
-				
-				var keyModes = editor.getKeyModes();
-				for (var j = 0; j < keyModes.length; j++) {
-					if (keyModes[j].isActive()) {
-						return keyModes[j].tab();
-					}
-				}
-				
 				return false;
 			}.bind(this));
 	
@@ -719,6 +719,38 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				}
 				return false;
 			}.bind(this));
+			
+			textView.setAction("enter", function() { //$NON-NLS-0$
+				var editor = this.editor;
+				var keyModes = editor.getKeyModes();
+				for (var j = 0; j < keyModes.length; j++) {
+					var mode = keyModes[j];
+					if (mode.isActive() && mode.enter) {
+						return mode.enter();
+					}
+				}
+
+				// Auto indent
+				var textView = editor.getTextView();
+				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+				var selection = editor.getSelection();
+				if (selection.start === selection.end) {
+					var model = editor.getModel();
+					var lineIndex = model.getLineAtOffset(selection.start);
+					var lineText = model.getLine(lineIndex, true);
+					var lineStart = model.getLineStart(lineIndex);
+					var index = 0, end = selection.start - lineStart, c;
+					while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
+					if (index > 0) {
+						//TODO still wrong when typing inside folding
+						var prefix = lineText.substring(0, index);
+						index = end;
+						while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
+						editor.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
+						return true;
+					}
+				}
+			}.bind(this));
 		
 			// Block comment operations
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true), "toggleLineComment"); //$NON-NLS-0$
@@ -925,7 +957,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return false;
 		},
 		isActive: function() {
-			return true;
+			return false;
 		},
 		isStatusActive: function() {
 			// SourceCodeActions never reports status
@@ -938,27 +970,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return false;
 		},
 		enter: function() {
-			// Auto indent
-			var textView = this.editor.getTextView();
-			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-			var editor = this.editor;
-			var selection = editor.getSelection();
-			if (selection.start === selection.end) {
-				var model = editor.getModel();
-				var lineIndex = model.getLineAtOffset(selection.start);
-				var lineText = model.getLine(lineIndex, true);
-				var lineStart = model.getLineStart(lineIndex);
-				var index = 0, end = selection.start - lineStart, c;
-				while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
-				if (index > 0) {
-					//TODO still wrong when typing inside folding
-					var prefix = lineText.substring(0, index);
-					index = end;
-					while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
-					editor.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
-					return true;
-				}
-			}
 			return false;
 		},
 		tab: function() {
