@@ -70,20 +70,23 @@ orion.TextSearcher = (function() {
 				that.createButton("Next", parentDiv, function() {that.findNext(true);}); //$NON-NLS-0$			
 				that.createButton("Previous", parentDiv, function() {that.findNext(false);}); //$NON-NLS-0$
 				
-				// create replace text
-				var replaceStringInput = document.createElement('input'); //$NON-NLS-0$
-				replaceStringInput.type = "text"; //$NON-NLS-0$
-				replaceStringInput.name = messages["ReplaceWith:"];
-				replaceStringInput.className = "parameterInput"; //$NON-NLS-0$
-				replaceStringInput.id = "localSearchReplaceWith"; //$NON-NLS-0$
-				replaceStringInput.placeholder=messages["Replace With"];
-				replaceStringInput.onkeydown = function(evt){
-					return that._handleKeyDown(evt, false);
-				};
-				parentDiv.appendChild(replaceStringInput);
-				
-				that.createButton(messages["Replace"], parentDiv, function() {that.replace();}); //$NON-NLS-0$		
-				that.createButton(messages["Replace All"], parentDiv, function() {that.replaceAll();});	//$NON-NLS-0$
+				var readonly = that._editor.getTextView().getOptions("readonly"); //$NON-NLS-0$
+				if (!readonly) {
+					// create replace text
+					var replaceStringInput = document.createElement('input'); //$NON-NLS-0$
+					replaceStringInput.type = "text"; //$NON-NLS-0$
+					replaceStringInput.name = messages["ReplaceWith:"];
+					replaceStringInput.className = "parameterInput"; //$NON-NLS-0$
+					replaceStringInput.id = "localSearchReplaceWith"; //$NON-NLS-0$
+					replaceStringInput.placeholder=messages["Replace With"];
+					replaceStringInput.onkeydown = function(evt){
+						return that._handleKeyDown(evt, false);
+					};
+					parentDiv.appendChild(replaceStringInput);
+					
+					that.createButton(messages["Replace"], parentDiv, function() {that.replace();}); //$NON-NLS-0$		
+					that.createButton(messages["Replace All"], parentDiv, function() {that.replaceAll();});	//$NON-NLS-0$
+				}
 
 				var optionsDiv = document.createElement("div"); //$NON-NLS-0$
 				parentDiv.appendChild(optionsDiv);
@@ -137,12 +140,14 @@ orion.TextSearcher = (function() {
 						optionMenu.dropdown.close(true);
 						that.findNext(true, null, true);
 					});
-				
-				mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Find after replace"], that._findAfterReplace,
-					function(event) {
-						that.setOptions({findAfterReplace: event.target.checked});
-						optionMenu.dropdown.close(true);
-					});
+
+				if (!readonly) {
+					mCommands.createCheckedMenuItem(optionMenu.menu,  messages["Find after replace"], that._findAfterReplace,
+						function(event) {
+							that.setOptions({findAfterReplace: event.target.checked});
+							optionMenu.dropdown.close(true);
+						});
+				}
 					
 				return searchStringInput;
 			},
