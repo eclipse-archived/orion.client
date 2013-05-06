@@ -24,7 +24,7 @@ var exports = {};
 
 var contentTypesCache = null;
 exports.EditorCommandFactory = (function() {
-	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId, searcher, editorSettings) {
+	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId, localSearcher, searcher, editorSettings) {
 		this.serviceRegistry = serviceRegistry;
 		this.commandService = commandService;
 		this.fileClient = fileClient;
@@ -32,6 +32,7 @@ exports.EditorCommandFactory = (function() {
 		this.toolbarId = toolbarId;
 		this.pageNavId = navToolbarId;
 		this.isReadOnly = isReadOnly;
+		this._localSearcher = localSearcher;
 		this._searcher = searcher;
 		this.editorSettings = editorSettings;
 	}
@@ -76,12 +77,76 @@ exports.EditorCommandFactory = (function() {
 				}
 			}
 
+			var self = this;
+
+			// global search
+			var searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
+			if (searchFloat && self._searcher) {
+				var searchCommand =  new mCommands.Command({
+					name: messages["Search Files"],
+					tooltip: messages["Search Files"],
+					id: "orion.searchFiles", //$NON-NLS-0$
+					callback: function(data) {
+						editor.getTextView().invokeAction("searchFiles"); //$NON-NLS-0$
+					}
+				});
+				this.commandService.addCommand(searchCommand);
+				this.commandService.registerCommandContribution(this.pageNavId, "orion.searchFiles", 1, null, true, new mKeyBinding.KeyBinding("h", true)); //$NON-NLS-1$ //$NON-NLS-0$
+
+				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
+				editor.getTextView().setAction("searchFiles", function() { //$NON-NLS-0$
+					window.setTimeout(function() {
+						var e = editor.getTextView();
+						var selection = e.getSelection();
+						var searchPattern = "";
+						if (selection.end > selection.start) {
+							searchPattern = e.getText().substring(selection.start, selection.end);
+						} if (searchPattern.length <= 0) {
+							searchPattern = prompt(messages["Enter search term:"], searchPattern);
+						} if (!searchPattern) {
+							return;
+						}
+						document.addEventListener("keydown", function (e){  //$NON-NLS-0$
+							if (e.charOrCode === lib.KEY.ESCAPE) {
+								searchFloat.style.display = "none"; //$NON-NLS-0$
+								if(lib.$$array("a", searchFloat).indexOf(document.activeElement) !== -1) { //$NON-NLS-0$
+									editor.getTextView().focus();
+								}
+							}
+						}, false);
+						searchFloat.appendChild(document.createTextNode(messages["Searching for occurrences of "])); 
+						var b = document.createElement("b"); //$NON-NLS-0$
+						searchFloat.appendChild(b);
+						b.appendChild(document.createTextNode("\"" + searchPattern + "\"...")); //$NON-NLS-1$ //$NON-NLS-0$
+						searchFloat.style.display = "block"; //$NON-NLS-0$
+						var searchParams = self._searcher.createSearchParams(searchPattern, false, true);
+						searchParams.sort = "Name asc"; //$NON-NLS-0$
+						var renderer = self._searcher.defaultRenderer.makeRenderFunction(null, searchFloat, false);
+						self._searcher.search(searchParams, self.inputManager.getInput(), renderer);
+					}, 0);
+					return true;
+				}, searchCommand);
+				var searchFloatMode = {
+					isActive: function() {
+						return searchFloat.style.display === "block"; //$NON-NLS-0$
+					},
+					tab: function() {
+						lib.$("a",searchFloat).focus(); //$NON-NLS-0$
+						return true;
+					},
+					cancel: function() {
+						searchFloat.style.display = "none"; //$NON-NLS-0$
+						return true;
+					}
+				};
+				editor.getKeyModes().push(searchFloatMode);
+			}
+
 			// create commands common to all editors
 			if (!this.isReadOnly) {
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
 				//If we are introducing other file system to provide save action, we need to define an onSave function in the input manager
 				//That way the file system knows how to implement their save mechanism
-				var self = this;
 				editor.getTextView().setAction("save", function () { //$NON-NLS-0$
 					if (self.inputManager.save) {
 						self.inputManager.save();
@@ -163,14 +228,13 @@ exports.EditorCommandFactory = (function() {
 																			}
 																			return [new mCommandRegistry.CommandParameter('find', 'text', 'Find:', searchString)]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 																		});
-				var that = this;
 				var findCommand =  new mCommands.Command({
 					name: messages.Find,
 					tooltip: messages.Find,
 					id: "orion.editor.find", //$NON-NLS-0$
 					parameters: findParameter,
 					callback: function(data) {
-						if (that._searcher) {
+						if (self._localSearcher) {
 							var searchString = "";
 							var parsedParam = null;
 							var selection = editor.getSelection();
@@ -185,20 +249,20 @@ exports.EditorCommandFactory = (function() {
 								}
 							}
 							if(parsedParam){
-								that._searcher.setOptions({useRegExp: parsedParam.regEx, ignoreCase: !parsedParam.caseSensitive});
+								self._localSearcher.setOptions({useRegExp: parsedParam.regEx, ignoreCase: !parsedParam.caseSensitive});
 								if(parsedParam.atLine){
 									var offset = editor.getModel().getLineStart(parsedParam.atLine-1);
 									editor.moveSelection(offset, offset, function(){
-										that._searcher.buildToolBar(searchString, parsedParam.replaceWith);
-										that._searcher.findNext(true);
+										self._localSearcher.buildToolBar(searchString, parsedParam.replaceWith);
+										self._localSearcher.findNext(true);
 										}, 
 									focus);
 								} else {
-									that._searcher.buildToolBar(searchString, parsedParam.replaceWith);
-									that._searcher.findNext(true);
+									self._localSearcher.buildToolBar(searchString, parsedParam.replaceWith);
+									self._localSearcher.findNext(true);
 								}
 							} else {
-								that._searcher.buildToolBar(searchString);
+								self._localSearcher.buildToolBar(searchString);
 							}
 							return true;
 						}

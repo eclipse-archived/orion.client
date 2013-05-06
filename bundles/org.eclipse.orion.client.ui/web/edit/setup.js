@@ -91,8 +91,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 
 	var sidebarDomNode = lib.node("sidebar"), //$NON-NLS-0$
 	    sidebarToolbar = lib.node("sidebarToolbar"), //$NON-NLS-0$
-		editorDomNode = lib.node("editor"), //$NON-NLS-0$
-		searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
+		editorDomNode = lib.node("editor"); //$NON-NLS-0$
 
 	var editor, inputManager, settings;
 	var updateSettings = function(prefs) {
@@ -124,45 +123,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			return textView;
 		};
 	
-		var tabHandler = {
-			handlers: [],
-			
-			addHandler: function(handler) {
-				this.handlers.push(handler);
-			},
-			
-			cancel: function() {
-				return false;
-			},
-		
-			isActive: function() {
-				for (var i=0; i<this.handlers.length; i++) {
-					if (this.handlers[i].isActive()) {
-						return true;
-					}
-				}
-				return false;
-			},
-		
-			lineUp: function() {
-				return false;
-			},
-			lineDown: function() {
-				return false;
-			},
-			enter: function() {
-				return false;
-			},
-			tab: function() {
-				for (var i=0; i<this.handlers.length; i++) {
-					if (this.handlers[i].isActive()) {
-						return this.handlers[i].tab();
-					}
-					
-				}
-			}
-		};
-	
 		var escHandler = {
 			handlers: [],
 			
@@ -187,25 +147,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					}
 				}
 				return false;
-			},
-		
-			lineUp: function() {
-				return false;
-			},
-			lineDown: function() {
-				return false;
-			},
-			enter: function() {
-				return false;
-			},
-			tab: function() {
-				return false;
 			}
 		};
 		
 		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-			
-			keyModeStack.push(tabHandler);
 			
 			var localSearcher = new mSearcher.TextSearcher(editor, commandRegistry, undoStack);
 			// Create keybindings for generic editing, no dependency on the service model
@@ -223,80 +168,13 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			
 			// Register commands that depend on external services, the registry, etc.  Do this after
 			// the generic keybindings so that we can override some of them.
-			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandRegistry, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher, settings); //$NON-NLS-1$ //$NON-NLS-0$
+			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandRegistry, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher, searcher, settings); //$NON-NLS-1$ //$NON-NLS-0$
 			commandGenerator.generateEditorCommands(editor);
-	
 			
 			// give our external escape handler a shot at handling escape
 			keyModeStack.push(escHandler);
 			
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			// global search
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
-			editor.getTextView().setAction("searchFiles", function() { //$NON-NLS-0$
-				window.setTimeout(function() {
-					var e = editor.getTextView();
-					var selection = e.getSelection();
-					var searchPattern = "";
-					if (selection.end > selection.start) {
-						searchPattern = e.getText().substring(selection.start, selection.end);
-					} if (searchPattern.length <= 0) {
-						searchPattern = prompt(messages["Enter search term:"], searchPattern);
-					} if (!searchPattern) {
-						return;
-					}
-					document.addEventListener("keydown", function (e){  //$NON-NLS-0$
-						if (e.charOrCode === lib.KEY.ESCAPE) {
-							searchFloat.style.display = "none"; //$NON-NLS-0$
-							if(lib.$$array("a", searchFloat).indexOf(document.activeElement) !== -1) { //$NON-NLS-0$
-								editor.getTextView().focus();
-							}
-						}
-					}, false);
-					
-					var searchFloatTabHandler = {
-						isActive: function() {
-							return searchFloat.style.display === "block"; //$NON-NLS-0$
-						},
-						
-						tab: function() {
-							if (this.isActive()) {
-								lib.$("a",searchFloat).focus(); //$NON-NLS-0$
-								return true;
-							}
-							return false;
-						}
-					};
-					tabHandler.addHandler(searchFloatTabHandler);
-					
-					var searchFloatEscHandler = {
-						isActive: function() {
-							return searchFloat.style.display === "block"; //$NON-NLS-0$
-						},
-						
-						cancel: function() {
-							if (this.isActive()) {
-								searchFloat.style.display = "none"; //$NON-NLS-0$
-								return true;
-							}
-							return false;   // not handled
-						}
-					};
-					escHandler.addHandler(searchFloatEscHandler);
-										
-					searchFloat.appendChild(document.createTextNode(messages["Searching for occurrences of "])); 
-					var b = document.createElement("b"); //$NON-NLS-0$
-					searchFloat.appendChild(b);
-					b.appendChild(document.createTextNode("\"" + searchPattern + "\"...")); //$NON-NLS-1$ //$NON-NLS-0$
-					searchFloat.style.display = "block"; //$NON-NLS-0$
-					var searchParams = searcher.createSearchParams(searchPattern, false, true);
-					searchParams.sort = "Name asc"; //$NON-NLS-0$
-					var renderer = searcher.defaultRenderer.makeRenderFunction(null, searchFloat, false);
-					searcher.search(searchParams, inputManager.getInput(), renderer);
-				}, 0);
-				return true;
-			}, {name: messages["Search Files"]}); //$NON-NLS-0$
 		};
 		
 		// Content Assist
