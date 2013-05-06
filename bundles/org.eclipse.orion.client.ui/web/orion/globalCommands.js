@@ -14,11 +14,10 @@
 
 define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/commandRegistry', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
-	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 
-	'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/Deferred',
+	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData',	'orion/Deferred',
 	'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html', 'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 'orion/widgets/input/GroupedContent'], 
         function(messages, require, commonHTML, KeyBinding, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
-        mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, mThemePreferences, mThemeData, mSearchUtils, mInputCompletion, 
+        mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, mThemePreferences, mThemeData, 
         Deferred, mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent){
 
 	/**
