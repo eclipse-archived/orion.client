@@ -572,31 +572,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     SearchResultExplorer.prototype.declareCommands = function() {
         var that = this;
         // page actions for search
-
-        var saveResultsCommand = new mCommands.Command({
-            name: messages["Save Search"],
-            tooltip: messages["Save search query"],
-            id: "orion.saveSearchResults", //$NON-NLS-0$
-            callback: function(data) {
-                that.saveSearch(that.model._searchHelper.params);
-            },
-            visibleWhen: function(item) {
-                return that.model && that.model._provideSearchHelper && !that.model.replaceMode();
-            }
-        });
-
-        var previewCurrentPageCommand = new mCommands.Command({
-            name: messages['Replace'],
-            tooltip: messages["Replace all matches with..."],
-            id: "orion.previewCurrentPage", //$NON-NLS-0$
-            callback: function(data) {
-                that.preview();
-            },
-            visibleWhen: function(item) {
-                return that.model && !that.model.replaceMode() && that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword !== "";
-            }
-        });
-
         var replaceAllCommand = new mCommands.Command({
             name: messages["Apply Changes"],
             tooltip: messages["Replace all selected matches"],
@@ -633,31 +608,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             }
         });
 
-        var searchAgainCommand = new mCommands.Command({
-            name: messages["Search Again"],
-            tooltip: messages["Search again"],
-            id: "orion.globalSearch.searchAgain", //$NON-NLS-0$
-            callback: function() {
-                return that.searchAgain();
-            },
-            visibleWhen: function(item) {
-                return that.model._provideSearchHelper ? (that._reporting || that.model && that.model.replaceMode()) : false;
-            }
-        });
-
-        this._commandService.addCommand(saveResultsCommand);
-        //this._commandService.addCommand(previewCurrentPageCommand);
-        //this._commandService.addCommand(searchAgainCommand);
         this._commandService.addCommand(hideCompareCommand);
         this._commandService.addCommand(showCompareCommand);
         this._commandService.addCommand(replaceAllCommand);
         this._commandService.addCommandGroup("pageActions", "orion.searchActions.unlabeled", 200); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageActions", "orion.saveSearchResults", 1, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        //this._commandService.registerCommandContribution("pageActions", "orion.previewCurrentPage", 2, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        //this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.searchAgain", 3, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.hideCompare", 4, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.showCompare", 5, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.replaceAll", 6, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.hideCompare", 1, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.showCompare", 2, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.replaceAll", 3, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
         var previousPage = new mCommands.Command({
             name: messages["< Previous Page"],
@@ -1162,29 +1119,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 
         this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
         this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        if (this.model._provideSearchHelper && this.model._provideSearchHelper().params.keyword !== "") {
-            var newMenu = mCommands.createDropdownMenu("pageNavigationActions", messages['Options'], function() { //$NON-NLS-0$
-                if (!that.model.replaceMode()) {
-                    mCommands.createCheckedMenuItem(newMenu.menu, messages["Sort by Name"], that.model.sortByName,
-
-                    function(event) {
-                        that.sortWithName(event.target.checked);
-                        window.setTimeout(function() {
-                            newMenu.dropdown.close(true);
-                        }, 100); // so user can see the check take effect briefly before it closes
-                    });
-                } else {
-                    mCommands.createCheckedMenuItem(newMenu.menu, messages["Compare changes"], true,
-
-                    function(event) {
-                        that.toggleCompare(event.target.checked);
-                        window.setTimeout(function() {
-                            newMenu.dropdown.close(true);
-                        }, 100);
-                    });
-                }
-            });
-        }
     };
 
     SearchResultExplorer.prototype.reportStatus = function(message) {
@@ -1445,17 +1379,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     //provide to the expandAll/collapseAll commands
     SearchResultExplorer.prototype.getItemCount = function() {
         return this.model.getListRoot().children.length;
-    };
-
-    SearchResultExplorer.prototype.sortWithName = function(byName) {
-        if (!this.model._provideSearchHelper || this.model.sortByName === byName) {
-            return;
-        }
-        var qParams = mSearchUtils.copySearchParams(this.model._provideSearchHelper().params);
-        qParams.sort = byName ? "NameLower asc" : "Path asc"; //$NON-NLS-1$ //$NON-NLS-0$
-        qParams.start = 0;
-        var href = mSearchUtils.generateSearchHref(qParams);
-        window.location.href = href;
     };
 
     SearchResultExplorer.prototype.getParentDivId = function(secondLevel) {

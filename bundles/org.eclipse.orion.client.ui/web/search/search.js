@@ -24,7 +24,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/s
 		seg.href = mSearchUtils.generateSearchHref(newParams);
 	}
 
-	function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams, progress){
+	function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchBuilder, searchParams, progress){
 		var searchLoc = searchParams.resource;
 		var title = searchParams.replace ? messages["Replace All Matches"] : messages["Search Results"];
 		if(searchLoc){
@@ -35,6 +35,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/s
 					commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: fileClient.fileServiceName(searchLoc),
 					makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
 					searcher.setChildrenLocationbyURL(searchLoc);
+					searchBuilder.loadSearchParams(searchParams);
 					searchResultsGenerator.loadResults(searchParams);
 			} else {
 				progress.progress(fileClient.read(searchLoc, true), "Loading file metadata " + searchLoc).then( //$NON-NLS-0$
@@ -42,6 +43,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/s
 						mGlobalCommands.setPageTarget({task: "Search", title: title, target: metadata, serviceRegistry: serviceRegistry,  //$NON-NLS-0$
 							fileService: fileClient, commandService: commandService, searchService: searcher, breadcrumbRootName: "Search", //$NON-NLS-0$
 							makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
+							searchBuilder.loadSearchParams(searchParams);
 							searchResultsGenerator.loadResults(searchParams);
 					}.bind(this),
 					function(error) {
@@ -82,7 +84,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/s
 		var startWidget = function(){
 			var searchParams = PageUtil.matchResourceParameters();
 			mSearchUtils.convertSearchParams(searchParams);
-			setPageInfo(serviceRegistry, fileClient, commandRegistry, searcher, searchResultsGenerator, searchParams, progress);
+			setPageInfo(serviceRegistry, fileClient, commandRegistry, searcher, searchResultsGenerator, searchBuilder, searchParams, progress);
 			var toolbar = document.getElementById("pageActions"); //$NON-NLS-0$
 			if (toolbar) {	
 				commandRegistry.destroy(toolbar);

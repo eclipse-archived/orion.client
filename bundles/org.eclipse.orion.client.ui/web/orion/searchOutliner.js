@@ -10,7 +10,7 @@
  ******************************************************************************/
  
 /*global window define setTimeout document*/
-/*jslint forin:true*/
+/*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/section', 'orion/commands', 'orion/commandRegistry', 
 	'orion/keyBinding', 'orion/selection', 'orion/explorers/explorer', 'orion/EventTarget', 'orion/globalSearch/advSearchOptContainer', 'orion/webui/splitter'], 
@@ -144,13 +144,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		var href;
 		if (item.query) {
 			href=require.toUrl("search/search.html") + "#" + item.query; //$NON-NLS-1$ //$NON-NLS-0$
-			var col = document.createElement("td"); //$NON-NLS-2
+			var col = document.createElement("td"); //$NON-NLS-0$
 			tableRow.appendChild(col);
-			col.classList.add('mainNavColumn'); //$NON-NLS-2
-			col.classList.add('singleNavColumn'); //$NON-NLS-2
-			var link = document.createElement('a');
+			col.classList.add('mainNavColumn'); //$NON-NLS-0$
+			col.classList.add('singleNavColumn'); //$NON-NLS-0$
+			var link = document.createElement('a'); //$NON-NLS-0$
 			link.href = href;
-			link.className = 'navlinkonpage'; //$NON-NLS-2
+			link.className = 'navlinkonpage'; //$NON-NLS-0$
 			col.appendChild(link);
 			link.appendChild(window.document.createTextNode(item.name));
 		} 
@@ -181,7 +181,6 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		if (!options.serviceRegistry) {throw "no service registry"; } //$NON-NLS-0$
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
-		var reg = options.serviceRegistry;
 		this.commandService = options.commandService;
 		
 		var renameSearchCommand = new mCommands.Command({
@@ -196,7 +195,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			callback: function(data) {
 				var item = Array.isArray(data.items) ? data.items[0] : data.items;
 				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
-					reg.getService("orion.core.savedSearches").renameSearch(item.query, data.parameters.valueFor('name')); //$NON-NLS-1$ //$NON-NLS-0$
+					this._registry.getService("orion.core.savedSearches").renameSearch(item.query, data.parameters.valueFor('name')); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}.bind(this)
 		});
@@ -264,10 +263,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				var selectionId = this.searchesSection.selectionNode.id;
 				var binding;
 				binding = new mKeyBinding.KeyBinding(113);
-				binding.domScope = "searchContent";
+				binding.domScope = "searchContent"; //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1, null, false, binding); //$NON-NLS-0$
 				binding = new mKeyBinding.KeyBinding(46);
-				binding.domScope = "searchContent";
+				binding.domScope = "searchContent"; //$NON-NLS-0$
 				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2, null, false, binding); //$NON-NLS-0$
 				commandService.registerSelectionService(selectionId, this.searchSelection);
 				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
@@ -284,9 +283,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 					return item.query;
 				}));	
 			} else {
-				var sContents = lib.node("searchContent");
+				var sContents = lib.node("searchContent"); //$NON-NLS-0$
 				if(sContents){
-					sContents.innerHTML = "<p>"+ i18nUtil.formatMessage(messages["You can save frequently used by searches by choosing ${0} in the search toolbar."], ["<b>"+"Save Search"+"</b>"])+"</p>";
+					sContents.innerHTML = "<p>"+ i18nUtil.formatMessage(messages["You can save frequently used by searches by choosing ${0} in the search toolbar."], ["<b>"+"Save Search"+"</b>"])+"</p>"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 		}
@@ -308,9 +307,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		if (!options.serviceRegistry) {throw "no service registry"; } //$NON-NLS-0$
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
-		var reg = options.serviceRegistry;
 		this.commandService = options.commandService;
-		this.advSearchOptContainer = new mAdvSearchOptContainer.advSearchOptContainer(this._parent, options.searcher, this._registry, this.commandService);
+		this.advSearchOptContainer = new mAdvSearchOptContainer.AdvSearchOptContainer(this._parent, options.searcher, this._registry, this.commandService);
 		var outlinerParent = lib.node("outlineContainer"); //$NON-NLS-0$
 		var top = lib.$("#outlineTop", outlinerParent); //$NON-NLS-0$
 		var bottom = lib.$("#outlineBottom", outlinerParent); //$NON-NLS-0$
@@ -319,14 +317,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		//The vertical splitter has to adjust the top and bottm pane when the outliner is refreshed by the click on browser's refresh.
 		//Otherwise there the bottom pane is a little offset.
 		window.setTimeout(function() { 
-			new splitter.Splitter({node: splitNode, sidePanel: top, mainPanel: bottom, vertical: true});
+			this._splitter = new splitter.Splitter({node: splitNode, sidePanel: top, mainPanel: bottom, vertical: true});
 		}, 100);
 	}
 	SearchBuilder.prototype = /** @lends orion.navoutliner.SearchOutliner.prototype */ {
-
-		render: function(searches, serviceRegistry) {
+		loadSearchParams: function(searchParams) {
+			this.advSearchOptContainer.getRenderer().loadSearchParams(searchParams);
 		}
-	};//end navigation outliner prototype
+	};
 	SearchBuilder.prototype.constructor = SearchOutliner;
 
 	//return module exports
