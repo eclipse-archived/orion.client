@@ -14,6 +14,7 @@
 define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', 'orion/PageLinks'], function(messages, require, lib, PageLinks) {
 	
 	function UserMenu(options) {
+		this._displaySignOut = true;
 		this._init(options);		
 	}
 	UserMenu.prototype = /** @lends orion.widgets.UserMenu.UserMenu.prototype */ {
@@ -25,7 +26,12 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			this._serviceRegistry = options.serviceRegistry;
 			this.authenticatedServices = {};
 			this.unauthenticatedServices = {};
-		},
+			
+			if( options.signOut !== null ){
+				this._displaySignOut = options.signOut;
+			}
+ 		},
+		
 		
 		isSingleService : function(){
 			return this.length(this.unauthenticatedServices) + this.length(this.authenticatedServices) === 1;
@@ -63,7 +69,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		_renderAuthenticatedService: function(key, startIndex){
 			var _self = this;
 			var authService = this.authenticatedServices[key].authService;
-			if (authService && authService.logout){
+			if (authService && authService.logout && this._displaySignOut){
 				var item = document.createElement("li");//$NON-NLS-0$
 				var element = this._makeMenuItem(messages["Sign Out"], function() {
 					authService.logout().then(function(){
