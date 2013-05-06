@@ -39,5 +39,6 @@ define({
 	"Actions": "Actions",
 	"Navigator": "Navigator",
 	"New": "New",
-	"NoFile": "Choose a file to edit from the Navigator pane."
+	"NoFile": "Choose a file to edit from the Navigator pane.",
+	"NoSelection": "Click on an item to make a selection, then use this menu to see what actions are available."
 });
