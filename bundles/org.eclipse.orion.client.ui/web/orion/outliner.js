@@ -146,7 +146,6 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 	};
 
 
-
 	/**
 	 * Constructs a new Outliner with the given options.
 	 * @name orion.outliner.Outliner
@@ -186,7 +185,7 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 			});
 
 			var editor = this._inputManager.getEditor();
-			editor.addEventListener("InputChanged", this.generateOutline.bind(this));
+			editor.addEventListener("InputChanged", this.generateOutline.bind(this)); //$NON-NLS-0$
 
 			Deferred.when(_self._outlineService, function(service) {
 				service.addEventListener("outline", function(event) { //$NON-NLS-0$
@@ -206,7 +205,11 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 		},
 		/** Invokes the outline service to produce an outline */
 		generateOutline: function() {
-			if (!this.active) {
+			if (!this._isActive()) {
+				return;
+			}
+			// Bail we're in the process of looking up capable providers
+			if (this._providerLookup) {
 				return;
 			}
 			var editor = this._inputManager.getEditor();
@@ -219,8 +222,12 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 		},
 		setOutlineProviders: function(providers) {
 			var oldProviders = this.outlineProviders;
+			var isActive = this._isActive();
 			this.outlineProviders = providers;
 			this._updateViewModes(oldProviders, this.outlineProviders);
+			if (isActive) {
+				this._selectNewProvider();
+			}
 		},
 		_renderOutline: function(outlineModel, title) {
 			var contentNode = this._parent;
@@ -233,6 +240,26 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 				treeModel.doExpansions(this.explorer.myTree);
 			}
 		},
+		_selectNewProvider: function() {
+			var newProviders = this.outlineProviders;
+			// If the currently selected provider is not among the new set of providers, pick another one
+			var _self = this, sidebar = _self._sidebar;
+			var isStaleProvider = newProviders.every(function(provider) {
+				return _self.providerId !== provider.getProperty("id"); //$NON-NLS-0$
+			});
+			if (isStaleProvider) {
+				var next = newProviders[0];
+				if (next) {
+					sidebar.setViewMode(this._viewModeId(next));
+				} else {
+					sidebar.setViewMode(sidebar.defaultViewMode);
+				}
+			}
+		},
+		/** @returns {String} view mode id for the outline provider */
+		_viewModeId: function(provider) {
+			return "outline." + provider.getProperty("id"); //$NON-NLS-1$ //$NON-NLS-0$
+		},
 		/**
 		 * @param {orion.serviceregistry.ServiceReference[]} oldProviders
 		 * @param {orion.serviceregistry.ServiceReference[]} newProviders
@@ -241,31 +268,34 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 			var _self = this;
 			if (oldProviders) {
 				oldProviders.forEach(function(provider) {
-					_self._sidebar.removeViewMode("outline." + provider.getProperty("id")); //$NON-NLS-0$
+					_self._sidebar.removeViewMode(_self._viewModeId(provider));
 				});
 			}
 			newProviders.forEach(function(provider) {
-				var providerId = provider.getProperty("id");
-				_self._sidebar.addViewMode("outline." + providerId, {//$NON-NLS-0$
+				_self._sidebar.addViewMode(_self._viewModeId(provider), { //$NON-NLS-0$
 					label: provider.displayName || provider.getProperty("name") || (provider.name + provider.serviceId) || "undefined", //$NON-NLS-1$ //$NON-NLS-0$
 					create: _self.createViewMode.bind(_self, provider),
 					destroy: _self.destroyViewMode.bind(_self, provider)
 				});
-//				var name = provider.displayName || provider.getProperty("name") || (provider.name + provider.serviceId) || "undefined", //$NON-NLS-1$ //$NON-NLS-0$
-//				    prefix = (provider.getProperty("id") === this.providerId) ? "* " : ""; //$NON-NLS-1$ //$NON-NLS-0$
-//				choices.push({
-//					name: prefix + name,
-//					callback: this.setSelectedProvider.bind(this, provider)});
 			});
-			_self._sidebar.renderViewModeMenu();
+			var sidebar = _self._sidebar;
+			sidebar.renderViewModeMenu();
+		},
+		_isActive: function() {
+			var viewModeId = this._sidebar.getActiveViewModeId();
+			if (!viewModeId) {
+				return false;
+			}
+			var _self = this;
+			return this.outlineProviders && this.outlineProviders.some(function(provider) {
+				return viewModeId === _self._viewModeId(provider);
+			});
 		},
 		createViewMode: function(provider) {
 			this.setSelectedProvider(provider);
-			this.active = true;
 			this.generateOutline();
 		},
 		destroyViewMode: function(provider) {
-			this.active = false;
 		},
 		/**
 		 * Called when the inputManager's contentType has changed, so we need to look up the capable outline providers.
@@ -289,6 +319,7 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 				return false;
 			});
 			// Load resource bundles
+			this._providerLookup = true;
 			var deferreds = filteredProviders.map(function(provider) {
 				if(provider.getProperty("nameKey") && provider.getProperty("nls")){ //$NON-NLS-1$ //$NON-NLS-0$
 					var deferred = new Deferred();
@@ -304,6 +335,7 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 				}
 			});
 			Deferred.all(deferreds, function(error) { return error; }).then(function(){
+				_self._providerLookup = false;
 				_self._outlineService.setOutlineProviders(filteredProviders);
 				_self.setOutlineProviders(filteredProviders);
 			});
