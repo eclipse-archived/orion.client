@@ -138,6 +138,7 @@ function build(optimizeElements) {
 		optimize: true,
 		css: true,
 		updateHtml: true,
+		updateJS: true,
 		copyBack: true
 	};
 	return dfs.exists(pathToTempDir).then(function(exists) {
@@ -245,6 +246,27 @@ function build(optimizeElements) {
 					htmlFile = htmlFile.replace('require(["' + name + '.js"]);', builtResult);
 					htmlFile = htmlFile.replace("requirejs/require.js", "requirejs/require.min.js");
 					return dfs.writeFile(op.htmlFilePath, htmlFile);
+				}, function(error) {
+					// log and continue
+					console.log(error.stack || error);
+					console.log('');
+				});
+			};
+		}));
+	}).then(function() {
+		if (steps.updateJS === false) { return new Deferred().resolve(); }
+		section('Running updateJS');
+		return async.sequence(optimizes.map(function(op) {
+			return function() {
+				// Replace define("{pageDir}/{name}" with define("built-{name}.js" in built js files
+				// TODO check existence of path.join(pageDir, name) -- skip if the file doesn't exist
+				var pageDir = op.pageDir, name = op.name, builtJsFile = op.minifiedFilePath;
+				var buildResult = 'define("built-' + name + '.js"';
+				console.log("updateJS " + builtJsFile);
+				return dfs.readFile(builtJsFile, 'utf8').then(function(jsFile) {
+					jsFile = jsFile.replace("define('" + pageDir + "/" + name + "'", buildResult);
+					jsFile = jsFile.replace('define("' + pageDir + '/' + name + '"', buildResult);
+					return dfs.writeFile(builtJsFile, jsFile);
 				}, function(error) {
 					// log and continue
 					console.log(error.stack || error);
