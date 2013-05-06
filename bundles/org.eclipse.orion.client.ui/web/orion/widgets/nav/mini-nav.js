@@ -33,7 +33,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			handler.onClick = function(modelItem, mouseEvent) {
 				var target = mouseEvent.target;
 				if (modelItem.Directory && target && target.classList.contains(FOLDER_CLASS)) {//$NON-NLS-0$
-					// modelItem && modelItem.Directory
 					explorer.loadRoot(modelItem);
 					return;
 				}
@@ -261,6 +260,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			if (this.explorer) {
 				this.explorer.destroy();
 			}
+			this.commandRegistry.destroy(this.toolbarNode);
 			this.explorer = null;
 		}
 	});
