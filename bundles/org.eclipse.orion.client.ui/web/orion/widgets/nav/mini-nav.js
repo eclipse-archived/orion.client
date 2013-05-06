@@ -58,7 +58,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.commandRegistry = params.commandRegistry;
 		this.editorInputManager = params.editorInputManager;
 		this.progressService = params.progressService;
-		var sidebarNavInputManager = params.sidebarNavInputManager;
+		var sidebarNavInputManager = this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 		this.actions = null;
 		this.selectionActions = null;
@@ -66,7 +66,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		var initialRoot = { };
 		this.treeRoot = initialRoot; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
-		this.editorInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
+		this.editorInputListener = function(event) { //$NON-NLS-0$
 			var editorInput = event.metadata;
 			if (_self.treeRoot === initialRoot && _self.followEditor) {
 				// Initial load: parent folder of editor input gives our current root
@@ -74,17 +74,19 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			} else {
 				_self.reveal(editorInput);
 			}
-		});
+		};
+		this.editorInputManager.addEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 		if (sidebarNavInputManager) {
-			sidebarNavInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
+			this.navInputListener = function(event) {
 				_self.followEditor = false;
 				_self.loadRoot(event.input);
-			});
+			};
+			sidebarNavInputManager.addEventListener("InputChanged", this.navInputListener);
+		}
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			_self.updateCommands(event.selections);
 		});
-		}
 		this.commandsRegistered = this.registerCommands();
 	}
 	MiniNavExplorer.prototype = Object.create(FileExplorer.prototype);
@@ -105,6 +107,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 		destroy: function() {
 			this.actions1 = this.actions2 = this.actions3 = null;
+			this.sidebarNavInputManager.removeEventListener("InputChanged", this.navInputListener); //$NON-NLS-0$
+			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 		},
 		/**
 		 * Loads the parent directory of the given file as the root, then reveals the file.
@@ -260,7 +264,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			if (this.explorer) {
 				this.explorer.destroy();
 			}
-			this.commandRegistry.destroy(this.toolbarNode);
 			this.explorer = null;
 		}
 	});
