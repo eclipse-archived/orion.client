@@ -12,11 +12,13 @@
 
 define({
 	"Files that contain:": "Files that contain:",
-	"Search": "Search",
+	"Search On": "Search On",
+	"Replace With": "Replace with",
 	"All types": "All types",
 	"File type:": "File type:",
 	"All ${0} files": "All ${0} files",
 	"Type a search term": "Type a search term",
+	"Type a replace term": "Type a replace term",
 	"Case sensitive": "Case sensitive",
 	"Regular expression" : "Regular expression"
 });

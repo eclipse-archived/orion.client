@@ -13,8 +13,8 @@
 /*jslint forin:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/section', 'orion/commands', 'orion/commandRegistry', 
-	'orion/keyBinding', 'orion/selection', 'orion/explorers/explorer', 'orion/EventTarget', 'orion/globalSearch/advSearchOptContainer'], 
-	function(messages, require, lib, i18nUtil, mSection, mCommands, mCommandRegistry, mKeyBinding, mSelection, mExplorer, EventTarget, mAdvSearchOptContainer){
+	'orion/keyBinding', 'orion/selection', 'orion/explorers/explorer', 'orion/EventTarget', 'orion/globalSearch/advSearchOptContainer', 'orion/webui/splitter'], 
+	function(messages, require, lib, i18nUtil, mSection, mCommands, mCommandRegistry, mKeyBinding, mSelection, mExplorer, EventTarget, mAdvSearchOptContainer, splitter){
 
 	/**
 	 * Instantiates the saved search service. This service is used internally by the
@@ -310,7 +310,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		this._registry = options.serviceRegistry;
 		var reg = options.serviceRegistry;
 		this.commandService = options.commandService;
-		this.advSearchOptContainer = new mAdvSearchOptContainer.advSearchOptContainer(this._parent, options.searcher, this._registry);
+		this.advSearchOptContainer = new mAdvSearchOptContainer.advSearchOptContainer(this._parent, options.searcher, this._registry, this.commandService);
+		var outlinerParent = lib.node("outlineContainer"); //$NON-NLS-0$
+		var top = lib.$("#outlineTop", outlinerParent); //$NON-NLS-0$
+		var bottom = lib.$("#outlineBottom", outlinerParent); //$NON-NLS-0$
+		var splitNode = lib.$(".outlinerSplitLayout", outlinerParent); //$NON-NLS-0$
+		splitNode.id = "searchOutlineSplitter"; //$NON-NLS-0$
+		//The vertical splitter has to adjust the top and bottm pane when the outliner is refreshed by the click on browser's refresh.
+		//Otherwise there the bottom pane is a little offset.
+		window.setTimeout(function() { 
+			new splitter.Splitter({node: splitNode, sidePanel: top, mainPanel: bottom, vertical: true});
+		}, 100);
 	}
 	SearchBuilder.prototype = /** @lends orion.navoutliner.SearchOutliner.prototype */ {
 

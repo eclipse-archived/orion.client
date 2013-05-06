@@ -194,7 +194,8 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				caseSensitive: advancedOptions ? advancedOptions.caseSensitive : undefined,
 				regEx: advancedOptions ? advancedOptions.regEx : undefined,
 				fileType: advancedOptions ? advancedOptions.type : undefined,
-				keyword: keyword
+				keyword: keyword,
+				replace: advancedOptions ? advancedOptions.replace : undefined
 			};
 		},
 

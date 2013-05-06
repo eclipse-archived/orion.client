@@ -55,9 +55,10 @@ define(['orion/widgets/themes/ThemeClass'],
 			topRowBanner.style.margin = '0';
 			topRowBanner.style.border = '0';
 			topRowBanner.style.backgroundColor = this.navbar;
-			topRowBanner.style.background = 'background-image: linear-gradient(to top, #444444 0%, #222222 100%)';
+//			topRowBanner.style.background = 'linear-gradient(to bottom, #959595 0%,#0d0d0d 46%,#010101 50%,#0a0a0a 53%,#1b1b1b 100%)';
 			topRowBanner.style.height = '15px';
 			topRowBanner.style.padding = '10px';
+			topRowBanner.style.paddingRight = '3px';
 			
 			styles.push( topRowBanner );
 			

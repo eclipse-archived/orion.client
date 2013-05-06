@@ -28,8 +28,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	 * @name orion.globalCommands
 	 */
 
-
-
 	function qualifyURL(url){
 	    var a = document.createElement('a'); //$NON-NLS-0$
 	    a.href = url; // set string url
@@ -58,6 +56,13 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		if(progressService) {
 			progressService.init.bind(progressService)("progressPane"); //$NON-NLS-0$
 		}
+	}
+	
+	function setUserIcon(){
+		var userTrigger = document.getElementById( 'userTrigger' );
+		var userTriggerClassName = userTrigger.className;
+		userTriggerClassName = userTriggerClassName + ' core-sprite-silhouette-inverse';
+		userTrigger.className = userTriggerClassName;
 	}
 	
 	function setUserName(registry, node){
@@ -115,7 +120,14 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			position: ["below", "left"] //$NON-NLS-1$ //$NON-NLS-0$
 		});
 			
-		setUserName(serviceRegistry, dropdownTrigger);
+		/*	To add user name call:
+		
+		    setUserName(serviceRegistry, dropdownTrigger);
+		    
+		 */
+
+		setUserIcon();
+
 		menuGenerator.setKeyAssist(keyAssistFunction);
 
 		for(var i=0; i<authServices.length; i++){
@@ -663,6 +675,14 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		}, false);
 		lib.addAutoDismiss([keyAssistDiv], function() {
 			keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+		});
+		
+		var nav = document.getElementById( 'centralNavigation' );
+		
+		new mTooltip.Tooltip({
+			node: nav,
+			text: 'Navigation Menu',
+			position: ["right"] //$NON-NLS-1$ //$NON-NLS-0$
 		});
 		
 		var navDropDown = new DropDownMenu( 'centralNavigation', { label:'Develop', icon:'core-sprite-hamburger-inverse' } );

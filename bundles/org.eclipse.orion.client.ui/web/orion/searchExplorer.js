@@ -646,15 +646,15 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         });
 
         this._commandService.addCommand(saveResultsCommand);
-        this._commandService.addCommand(previewCurrentPageCommand);
-        this._commandService.addCommand(searchAgainCommand);
+        //this._commandService.addCommand(previewCurrentPageCommand);
+        //this._commandService.addCommand(searchAgainCommand);
         this._commandService.addCommand(hideCompareCommand);
         this._commandService.addCommand(showCompareCommand);
         this._commandService.addCommand(replaceAllCommand);
         this._commandService.addCommandGroup("pageActions", "orion.searchActions.unlabeled", 200); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("pageActions", "orion.saveSearchResults", 1, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageActions", "orion.previewCurrentPage", 2, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.searchAgain", 3, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        //this._commandService.registerCommandContribution("pageActions", "orion.previewCurrentPage", 2, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        //this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.searchAgain", 3, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.hideCompare", 4, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.showCompare", 5, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.replaceAll", 6, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

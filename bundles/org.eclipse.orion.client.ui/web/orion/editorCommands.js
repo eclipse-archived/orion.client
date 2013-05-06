@@ -17,14 +17,14 @@
  * @namespace The global container for orion APIs.
  */ 
 define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 
-	'orion/keyBinding', 'orion/commandRegistry', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
-	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mUndoStack, mSearchUtils, mPageUtil) {
+	'orion/keyBinding', 'orion/commandRegistry', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil', 'orion/PageLinks', 'orion/util'], 
+	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mUndoStack, mSearchUtils, mPageUtil, PageLinks, util) {
 
 var exports = {};
 
 var contentTypesCache = null;
 exports.EditorCommandFactory = (function() {
-	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId, searcher) {
+	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId, searcher, editorSettings) {
 		this.serviceRegistry = serviceRegistry;
 		this.commandService = commandService;
 		this.fileClient = fileClient;
@@ -33,6 +33,7 @@ exports.EditorCommandFactory = (function() {
 		this.pageNavId = navToolbarId;
 		this.isReadOnly = isReadOnly;
 		this._searcher = searcher;
+		this.editorSettings = editorSettings;
 	}
 	EditorCommandFactory.prototype = {
 		/**
@@ -99,19 +100,21 @@ exports.EditorCommandFactory = (function() {
 						);
 					}
 					return true;
-				}, {name: messages['Save']});
-				var saveCommand = new mCommands.Command({
-					name: messages['Save'],
-					tooltip: messages["Save this file"],
-					id: "orion.save", //$NON-NLS-0$
-					callback: function(data) {
-						editor.getTextView().invokeAction("save"); //$NON-NLS-0$
-					}});
-					
+				}, {name: messages.Save});
 				
+				if (!this.editorSettings || !this.editorSettings.autoSaveEnabled) {
+					var saveCommand = new mCommands.Command({
+						name: messages.Save,
+						tooltip: messages["Save this file"],
+						id: "orion.save", //$NON-NLS-0$
+						callback: function(data) {
+							editor.getTextView().invokeAction("save"); //$NON-NLS-0$
+						}
+					});
+					this.commandService.addCommand(saveCommand);
+					this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
+				}
 					
-				this.commandService.addCommand(saveCommand);
-				this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
 		
 				// page navigation commands (go to line)
 				var lineParameter = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('line', 'number', 'Line:')], {hasOptionalParameters: false}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -142,9 +145,8 @@ exports.EditorCommandFactory = (function() {
 						}
 					}});
 				this.commandService.addCommand(gotoLineCommand);
-				this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mKeyBinding.KeyBinding('l', true), new mCommandRegistry.URLBinding("gotoLine", "line")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				// override the editor binding 
-				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('l', true), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				// override the editor binding
 				editor.getTextView().setAction("gotoLine", function () { //$NON-NLS-0$
 					self.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
 					return true;
@@ -163,8 +165,8 @@ exports.EditorCommandFactory = (function() {
 																		});
 				var that = this;
 				var findCommand =  new mCommands.Command({
-					name: messages["Find"],
-					tooltip: messages["Find"],
+					name: messages.Find,
+					tooltip: messages.Find,
 					id: "orion.editor.find", //$NON-NLS-0$
 					parameters: findParameter,
 					callback: function(data) {
@@ -277,7 +279,9 @@ exports.EditorCommandFactory = (function() {
 						progress.showWhile(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages['Running {0}'], info.name)).then(function(result){
 							if (result && result.uriTemplate) {
 								var uriTemplate = new URITemplate(result.uriTemplate);
-								var href = uriTemplate.expand(input.getFileMetadata());
+								var params = input.getFileMetadata();
+								params.OrionHome = params.OrionHome || PageLinks.getOrionHome();
+								var href = window.decodeURIComponent(uriTemplate.expand(params));
 								var iframe = document.createElement("iframe"); //$NON-NLS-0$
 								iframe.id = info.id;
 								iframe.name = info.id;
@@ -292,10 +296,10 @@ exports.EditorCommandFactory = (function() {
 								if (result.height) {
 									iframe.style.height = result.height;
 								}
-								iframe.style.visibility = 'hidden';
+								iframe.style.visibility = 'hidden'; //$NON-NLS-0$
 								window.document.body.appendChild(iframe);
-								iframe.style.left = (window.innerWidth - parseInt(iframe.clientWidth, 10))/2 + "px";
-								iframe.style.top = (window.innerHeight - parseInt(iframe.clientHeight, 10))/2 + "px";
+								iframe.style.left = (window.innerWidth - parseInt(iframe.clientWidth, 10))/2 + "px"; //$NON-NLS-0$
+								iframe.style.top = (window.innerHeight - parseInt(iframe.clientHeight, 10))/2 + "px"; //$NON-NLS-0$
 								iframe.style.visibility = '';
 								// Listen for notification from the iframe.  We expect either a "result" or a "cancelled" property.
 								window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
@@ -391,7 +395,7 @@ exports.UndoCommandFactory = (function() {
 		createUndoStack: function(editor) {
 			var undoStack =  new mUndoStack.UndoStack(editor.getTextView(), 200);
 			var undoCommand = new mCommands.Command({
-				name: messages['Undo'],
+				name: messages.Undo,
 				id: "orion.undo", //$NON-NLS-0$
 				callback: function(data) {
 					this.getTextView().invokeAction("undo"); //$NON-NLS-0$
@@ -403,7 +407,7 @@ exports.UndoCommandFactory = (function() {
 			this.commandService.addCommand(undoCommand);
 			
 			var redoCommand = new mCommands.Command({
-				name: messages['Redo'],
+				name: messages.Redo,
 				id: "orion.redo", //$NON-NLS-0$
 				callback: function(data) {
 					this.getTextView().invokeAction("redo"); //$NON-NLS-0$

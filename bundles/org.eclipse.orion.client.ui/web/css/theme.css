@@ -283,6 +283,14 @@ a.currentLocation:hover {
 .dropdown {
 } 
 
+.dropdownArrowEmpty{
+	width: 16px; 
+	height: 16px;
+	display: inline-block; 
+	vertical-align: top; 
+	cursor:pointer;
+}
+
 .dropdownArrowDown {
 	background-position: 0 -422px;	
 	width: 5px; height: 3px;
