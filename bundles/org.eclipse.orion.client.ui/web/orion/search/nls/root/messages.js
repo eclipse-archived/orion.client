@@ -90,6 +90,7 @@ define({
 	"Regular expression" : "Regular expression",
 	"Sort by" : "Sort by",
 	"File name": "File name",
-	"Path name": "Path name"
-
+	"Path name": "Path name",
+	"Scope Search": "Scope Search",
+	"Open in Search page for this directory": "Open in Search page for this directory"
 });
