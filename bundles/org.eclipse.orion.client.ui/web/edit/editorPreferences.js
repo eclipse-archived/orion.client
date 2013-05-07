@@ -15,6 +15,19 @@ define([], function() {
 	var SETTINGS_SECTION = "/editor/settings"; //$NON-NLS-0$
 	var SETTINGS_KEY = "editorSettings"; //$NON-NLS-0$
 
+	var defaults = {	
+		autoSaveEnabled:false, 
+		autoSaveTimeout:1000,
+		autoSaveVisible:true,
+		autoLoadEnabled:true,
+		autoLoadVisible:true,
+		tabSize:4,
+		tabSizeVisible:false,
+		scrollEnabled: true,
+		scrollAnimation:300,
+		scrollEnabledVisible:false
+	};
+
 	function EditorPreferences(preferences, callback) {
 		this._preferences = preferences;
 		this._callback = callback;
@@ -29,29 +42,27 @@ define([], function() {
 	
 	EditorPreferences.prototype = /** @lends edit.EditorPreferences.prototype */ {
 		_initialize: function(prefs) {
-			var settings = prefs.get(SETTINGS_KEY);
-			if (!settings) {
-				prefs.put(SETTINGS_KEY,
-				{	
-					autoSaveEnabled:false, 
-					autoSaveTimeout:1000, 
-					autoLoadEnabled:true
-				});
+			var settings = prefs.get(SETTINGS_KEY) || {};
+			for (var property in defaults) {
+				if (!settings.hasOwnProperty(property)) {
+					settings[property] = defaults[property];
+				}
 			}
+			return settings;
 		},
 		getPrefs: function(callback) {
 			this._preferences.getPreferences(SETTINGS_SECTION).then(function(prefs) {
-				this._initialize(prefs);
-				prefs = prefs.get(SETTINGS_KEY);
-				if (typeof prefs === "string") { //$NON-NLS-0$
-					prefs = JSON.parse(prefs);
+				var object = this._initialize(prefs);
+				if (typeof object === "string") { //$NON-NLS-0$
+					object = JSON.parse(object);
 				}
-				callback(prefs);
+				callback(object);
 			}.bind(this));
 		},
 		setPrefs: function(object, callback) {
 			this._preferences.getPreferences(SETTINGS_SECTION).then(function(prefs) {
 				prefs.put(SETTINGS_KEY, object);
+				object = this._initialize(prefs);
 				if (callback) {
 					callback(object);
 				}
