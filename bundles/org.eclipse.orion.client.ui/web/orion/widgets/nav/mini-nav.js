@@ -142,7 +142,14 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			childrenLocation = childrenLocation.ChildrenLocation || childrenLocation;
 			var _self = this;
 			return this.commandsRegistered.then(function() {
-				return FileExplorer.prototype.loadResourceList.call(_self, childrenLocation);
+				return _self.loadResourceList.call(_self, childrenLocation);
+			});
+		},
+		loadResourceList: function() {
+			var _self = this;
+			return FileExplorer.prototype.loadResourceList.apply(this, arguments).then(function(treeRoot) {
+				_self.sidebarNavInputManager.dispatchEvent({ type: "rootChanged", root: _self.treeRoot }); //$NON-NLS-0$
+				return treeRoot;
 			});
 		},
 		reveal: function(fileMetadata) {
