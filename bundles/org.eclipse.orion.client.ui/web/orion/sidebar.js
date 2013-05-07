@@ -89,7 +89,6 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				editorInputManager: editorInputManager,
 				parentNode: parentNode,
 				sidebarNavInputManager: this.sidebarNavInputManager,
-				selection: selection,
 				serviceRegistry: serviceRegistry,
 				toolbarNode: modeContributionToolbar
 			}));
