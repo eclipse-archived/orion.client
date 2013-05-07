@@ -351,7 +351,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	FileExplorer.prototype.loadResourceList = function(path, force, postLoad) {
 		path = mFileUtils.makeRelative(path);
 		if (!force && path === this._lastPath) {
-			return;
+			return new Deferred().resolve(this.treeRoot);
 		}			
 		this._lastPath = path;
 		var self = this;
@@ -364,6 +364,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 				return new Deferred().resolve(self.treeRoot);
 			});
 		}
+		return new Deferred().resolve(self.treeRoot);
 	};
 	
 	/**

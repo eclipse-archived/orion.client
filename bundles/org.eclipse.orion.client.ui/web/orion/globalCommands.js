@@ -461,14 +461,17 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			}
 		} 
 		window.document.title = title;
-		lib.empty(lib.node("location")); //$NON-NLS-0$
-		new mBreadcrumbs.BreadCrumbs({
-			container: "location",  //$NON-NLS-0$
-			resource: options.breadcrumbTarget || options.target,
-			rootSegmentName: breadcrumbRootName,
-			workspaceRootSegmentName: fileSystemRootName,
-			makeHref: options.makeBreadcrumbLink
-		});
+		var locationNode = lib.node("location"); //$NON-NLS-0$
+		if (locationNode) {
+			lib.empty(locationNode);
+			new mBreadcrumbs.BreadCrumbs({
+				container: locationNode,
+				resource: options.breadcrumbTarget || options.target,
+				rootSegmentName: breadcrumbRootName,
+				workspaceRootSegmentName: fileSystemRootName,
+				makeHref: options.makeBreadcrumbLink
+			});
+		}
 	}
 	
 	function getToolbarElements(toolNode) {

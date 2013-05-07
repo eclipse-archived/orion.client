@@ -214,7 +214,18 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				statusReportingService.setMessage(message, null, isAccessible);
 			}
 		};
-		
+
+		var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
+			var top = !folderLocation && !folder;
+			// Link to this page (edit page)
+			segment.href = new URITemplate("#{,Resource,params*}").expand({ //$NON-NLS-0$
+				Resource: inputManager.getInput() || "", //$NON-NLS-0$
+				params: {
+					navigate: top ? "" : folder.ChildrenLocation //$NON-NLS-0$
+				}
+			});
+		};
+
 		editor = new mEditor.Editor({
 			textViewFactory: textViewFactory,
 			undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandRegistry, "pageActions"), //$NON-NLS-0$
@@ -273,16 +284,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
 					}
 				},
-				makeBreadcrumbLink: function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
-					var top = !folderLocation && !folder;
-					// Link to this page (edit page)
-					segment.href = new URITemplate("#{,Resource,params*}").expand({ //$NON-NLS-0$
-						Resource: inputManager.getInput(),
-						params: {
-							navigate: top ? "" : folder.ChildrenLocation //$NON-NLS-0$
-						}
-					});
-				},
+				makeBreadcrumbLink: sidebarNavBreadcrumb,
 				serviceRegistry: serviceRegistry,
 				commandService: commandRegistry,
 				searchService: searcher,
@@ -330,7 +332,23 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
 		});
-	
+		sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
+			var target = evt.root;
+			if (!PageUtil.matchResourceParameters(location.hash).resource) {
+				// No primary resource (editor file), so target the folder being navigated in the sidebar.
+				mGlobalCommands.setPageTarget({
+					task: "Coding", //$NON-NLS-0$
+					name: target.Name,
+					target: target,
+					makeBreadcrumbLink: sidebarNavBreadcrumb,
+					serviceRegistry: serviceRegistry,
+					commandService: commandRegistry,
+					searchService: searcher,
+					fileService: fileClient
+				});
+			}
+		});
+
 		editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
 			inputManager.setDirty(editor.isDirty());
 		});
