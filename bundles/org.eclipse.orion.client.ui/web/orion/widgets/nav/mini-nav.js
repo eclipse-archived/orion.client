@@ -33,7 +33,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			handler.onClick = function(modelItem, mouseEvent) {
 				var target = mouseEvent.target;
 				if (modelItem.Directory && target && target.classList.contains(FOLDER_CLASS)) {//$NON-NLS-0$
-					// modelItem && modelItem.Directory
 					explorer.loadRoot(modelItem);
 					return;
 				}
@@ -59,15 +58,18 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.commandRegistry = params.commandRegistry;
 		this.editorInputManager = params.editorInputManager;
 		this.progressService = params.progressService;
-		var sidebarNavInputManager = params.sidebarNavInputManager;
+		var sidebarNavInputManager = this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
-		this.actions = null;
-		this.selectionActions = null;
+
+		this.newActionsScope = this.toolbarNode.id + "New"; //$NON-NLS-0$
+		this.selectionActionsScope = this.toolbarNode.id + "Selection"; //$NON-NLS-0$
+		this.folderNavActionsScope = this.toolbarNode.id + "Folder"; //$NON-NLS-0$
+
 		this.followEditor = true;
 		var initialRoot = { };
 		this.treeRoot = initialRoot; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
-		this.editorInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
+		this.editorInputListener = function(event) { //$NON-NLS-0$
 			var editorInput = event.metadata;
 			if (_self.treeRoot === initialRoot && _self.followEditor) {
 				// Initial load: parent folder of editor input gives our current root
@@ -75,17 +77,21 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			} else {
 				_self.reveal(editorInput);
 			}
-		});
+		};
+		this.editorInputManager.addEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 		if (sidebarNavInputManager) {
-			sidebarNavInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
+			this.navInputListener = function(event) {
 				_self.followEditor = false;
-				_self.loadRoot(event.input);
-			});
+				_self.loadRoot(event.input).then(function() {
+					_self.updateCommands();
+				});
+			};
+			sidebarNavInputManager.addEventListener("InputChanged", this.navInputListener);
+		}
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			_self.updateCommands(event.selections);
 		});
-		}
 		this.commandsRegistered = this.registerCommands();
 	}
 	MiniNavExplorer.prototype = Object.create(FileExplorer.prototype);
@@ -94,9 +100,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var _self = this;
 			// Create some elements that we can hang actions on. Ideally we'd have just 1, but the
 			// CommandRegistry seems to require dropdowns to have their own element.
-			["actions1", "actions2", "actions3"].forEach(function(name) {
-				if (!_self[name]) {
-					var elem = _self[name] = document.createElement("ul"); //$NON-NLS-0$
+			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope].forEach(function(id) {
+				if (!_self[id]) {
+					var elem = document.createElement("ul"); //$NON-NLS-0$
+					elem.id = id;
 					elem.classList.add("commandList"); //$NON-NLS-0$
 					elem.classList.add("layoutLeft"); //$NON-NLS-0$
 					elem.classList.add("pageActions"); //$NON-NLS-0$
@@ -105,7 +112,12 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			});
 		},
 		destroy: function() {
-			this.actions1 = this.actions2 = this.actions3 = null;
+			var _self = this;
+			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope].forEach(function(id) {
+				delete _self[id];
+			});
+			this.sidebarNavInputManager.removeEventListener("InputChanged", this.navInputListener); //$NON-NLS-0$
+			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 		},
 		/**
 		 * Loads the parent directory of the given file as the root, then reveals the file.
@@ -158,11 +170,12 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		registerCommands: function() {
 			// Selection based command contributions in sidebar mini-nav
 			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
-			var newActionsScope = this.newActionsScope = this.toolbarNode.id + "New"; //$NON-NLS-0$
-			var selectionActionsScope = this.selectionActionsScope = this.toolbarNode.id + "Selection"; //$NON-NLS-0$
-			var folderNavActionsScope = this.folderNavActionsScope = this.toolbarNode.id + "Folder";
+			var newActionsScope = this.newActionsScope;
+			var selectionActionsScope = this.selectionActionsScope;
+			var folderNavActionsScope = this.folderNavActionsScope;
 			commandRegistry.addCommandGroup(newActionsScope, "orion.miniNavNewGroup", 1000, messages["New"]); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"]);
+			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, messages["NoSelection"]);
+			commandRegistry.registerSelectionService(selectionActionsScope, this.selection);
 
 			// New file and new folder (in a group)
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile", 1, "orion.miniNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -196,13 +209,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 		updateCommands: function(selections) {
 			this.createActionSections();
-			var commandRegistry = this.commandRegistry;
-			commandRegistry.destroy(this.actions1);
-			commandRegistry.destroy(this.actions2);
-			commandRegistry.destroy(this.actions3);
-			commandRegistry.renderCommands(this.newActionsScope /*scope*/, this.actions1 /*parent*/, this.treeRoot /*items*/, this /*handler??*/, "button"); //$NON-NLS-0$
-			commandRegistry.renderCommands(this.selectionActionsScope, this.actions2, selections, this, "button"); //$NON-NLS-0$
-			commandRegistry.renderCommands(this.folderNavActionsScope, this.actions3, this.treeRoot, this, "button"); //$NON-NLS-0$
+			FileCommands.updateNavTools(this.registry, this.commandRegistry, this, this.newActionsScope, this.selectionActionsScope, this.treeRoot);
+				var commandRegistry = this.commandRegistry;
+				commandRegistry.destroy(this.folderNavActionsScope);
+				commandRegistry.renderCommands(this.folderNavActionsScope, this.folderNavActionsScope, this.treeRoot, this, "button"); //$NON-NLS-0$
 		}
 	});
 

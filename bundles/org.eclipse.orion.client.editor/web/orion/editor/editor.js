@@ -517,8 +517,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 				// loop through all modes in case multiple modes are active.  Keep track of whether we processed the key.
 				var keyUsed = false;
 				for (var i=0; i<this._keyModes.length; i++) {
-					if (this._keyModes[i].isActive()) {
-						keyUsed = this._keyModes[i].cancel() || keyUsed;
+					var mode = this._keyModes[i];
+					if (mode.isActive() && mode.cancel) {
+						keyUsed = mode.cancel() || keyUsed;
 					}
 				}
 				return keyUsed;
@@ -526,25 +527,18 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 
 			textView.setAction("lineUp", function() { //$NON-NLS-0$
 				for (var i=0; i<this._keyModes.length; i++) {
-					if (this._keyModes[i].isActive()) {
-						return this._keyModes[i].lineUp();
+					var mode = this._keyModes[i];
+					if (mode.isActive() && mode.lineUp) {
+						return mode.lineUp();
 					}
 				}
 				return false;
 			}.bind(this));
 			textView.setAction("lineDown", function() { //$NON-NLS-0$
 				for (var i=0; i<this._keyModes.length; i++) {
-					if (this._keyModes[i].isActive()) {
-						return this._keyModes[i].lineDown();
-					}
-				}
-				return false;
-			}.bind(this));
-
-			textView.setAction("enter", function() { //$NON-NLS-0$
-				for (var i=0; i<this._keyModes.length; i++) {
-					if (this._keyModes[i].isActive()) {
-						return this._keyModes[i].enter();
+					var mode = this._keyModes[i];
+					if (mode.isActive() && mode.lineDown) {
+						return mode.lineDown();
 					}
 				}
 				return false;

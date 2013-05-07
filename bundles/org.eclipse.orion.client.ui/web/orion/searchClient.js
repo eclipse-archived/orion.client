@@ -10,7 +10,7 @@
  * IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*global define window document */
+/*global define window document console*/
 /*jslint forin:true regexp:false sub:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/searchUtils', 'orion/crawler/searchCrawler'], 
@@ -188,12 +188,12 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 			}
 			return {
 				resource: searchOn,
-				sort: "Path asc", //$NON-NLS-0$
-				rows: 40,
+				sort: advancedOptions && advancedOptions.sort ? advancedOptions.sort : "Path asc", //$NON-NLS-0$
+				rows: advancedOptions && advancedOptions.rows ? advancedOptions.rows : 40,
 				start: 0,
 				caseSensitive: advancedOptions ? advancedOptions.caseSensitive : undefined,
 				regEx: advancedOptions ? advancedOptions.regEx : undefined,
-				fileType: advancedOptions ? advancedOptions.type : undefined,
+				fileType: advancedOptions ? advancedOptions.fileType : undefined,
 				keyword: keyword,
 				replace: advancedOptions ? advancedOptions.replace : undefined
 			};

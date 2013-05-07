@@ -16,7 +16,6 @@ define({
 	"ReplaceWith:": "ReplaceWith:",
 	"Replace With": "Replace With",
 	"Show all": "Show all",
-	"Case sensitive": "Case sensitive",
 	"Wrap search": "Wrap search",
 	"Incremental search": "Incremental search",
 	"Whole Word": "Whole Word",
@@ -48,7 +47,7 @@ define({
 	"Files replaced": "Files replaced",
 	"Status": "Status",
 	"${0} out of ${1}  matches replaced.": "${0} out of ${1}  matches replaced.",
-	"Save Search": "Save Search",
+	"Save Search As": "Save Search As",
 	"Save search query": "Save search query",
 	"Replace all matches with...": "Replace all matches with...",
 	"Apply Changes": "Apply Changes",
@@ -78,5 +77,19 @@ define({
 	"No matches": "No matches",
 	"Rename": "Rename",
 	"Searches": "Searches",
-	"You can save frequently used by searches by choosing ${0} in the search toolbar.": "You can save frequently used by searches by choosing ${0} in the search toolbar."
+	"You can save frequently used by searches by choosing ${0} in the search toolbar.": "You can save frequently used by searches by choosing ${0} in the search toolbar.",
+	"Files that contain:": "Files that contain:",
+	"Search For": "Search For",
+	"Replace With": "Replace with",
+	"All types": "All types",
+	"File type:": "File type:",
+	"All ${0} files": "All ${0} files",
+	"Type a search term": "Type a search term",
+	"Type a replace term": "Type a replace term",
+	"Case sensitive": "Case sensitive",
+	"Regular expression" : "Regular expression",
+	"Sort by" : "Sort by",
+	"File name": "File name",
+	"Path name": "Path name"
+
 });
