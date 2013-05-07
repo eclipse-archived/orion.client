@@ -252,7 +252,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			if (!this.searchesSection) {
 				this.searchesSection = new mSection.Section(this._parent, {
 					id: "searchSection", //$NON-NLS-0$
-					title: messages["Searches"],
+					title: messages["My saved searches"],
 					content: '<div id="searchContent"></div>', //$NON-NLS-0$
 					useAuxStyle: true,
 					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
