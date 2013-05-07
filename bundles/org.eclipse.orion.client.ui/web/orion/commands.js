@@ -192,6 +192,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		var menuButton = newMenu.previousSibling;
 		if (buttonCss) {
 			menuButton.classList.add(buttonCss);
+			menuButton.textContent = '';
 		} else {
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 			menuButton.classList.add("commandButton"); //$NON-NLS-0$
