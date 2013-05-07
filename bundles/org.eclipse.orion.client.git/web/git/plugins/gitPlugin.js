@@ -11,6 +11,14 @@ define(["orion/plugin", "orion/xhr", "orion/URL-shim", "domReady!"], function(Pl
 	};
 
 	var provider = new PluginProvider(headers);
+	
+	provider.registerService("orion.page.link", {}, {
+		nameKey: "Repositories",
+		id: "orion.git.repositories",
+		nls: "git/nls/gitmessages",
+		uriTemplate: "{OrionHome}/git/git-repository.html#"
+	});
+	
 	provider.registerService("orion.navigate.command", {}, {
 		nameKey: "Git Status",
 		id: "eclipse.git.status",

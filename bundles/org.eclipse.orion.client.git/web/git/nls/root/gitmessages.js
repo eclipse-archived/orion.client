@@ -18,7 +18,7 @@ define({
 	"Working Directory": "Working Directory",
 	"View the working directory version of the file": "View the working directory version of the file",
 	"Loading...": "Loading...",
-	"Repositories": "Repositories",
+	"Repositories": "Git Repositories",
 	"0 on 1 - Git": "${0} on ${1} - Git",
 	"Git": "Git",
 	"Show in eclipse.org": "Show in eclipse.org",

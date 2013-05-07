@@ -13,7 +13,6 @@
 define({
 	"Navigator": "Navigator",
 	"Sites": "Sites",
-	"Repositories": "Repositories",
 	"Shell": "Shell",
 	"Get Plugins": "Get Plugins",
 	"Global": "Global",
