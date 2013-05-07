@@ -398,7 +398,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 *  representing the group.  Optional.  If not specified, then the group UI element won't be shown when it is empty.
 		 */	
 		 
-		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage) {
+		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, icon) {
 			if (!this._contributionsByScopeId[scopeId]) {
 				this._contributionsByScopeId[scopeId] = {};
 			}
@@ -414,10 +414,19 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 				if (position) {
 					parentTable[groupId].position = position;
 				}
+				
+				if( icon ){
+					parentTable[groupId].imageClass = icon;
+				}
+				
 				parentTable[groupId].emptyGroupMessage = emptyGroupMessage;
 			} else {
 				// create new group definition
-				parentTable[groupId] = {title: title, position: position, emptyGroupMessage: emptyGroupMessage, children: {}};
+				parentTable[groupId] = {title: title, 
+										position: position, 
+										emptyGroupMessage: emptyGroupMessage,
+										imageClass:icon,
+										children: {}};
 				parentTable.sortedContributions = null;
 			}
 		},
@@ -625,6 +634,11 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 			var self = this;
 			sortedByPosition.forEach(function(contribution) {
 				var id, invocation;
+				
+				if( !contribution.imageClass ){
+					contribution.imageClass = null;
+				}
+				
 				if (contribution.children && Object.getOwnPropertyNames(contribution.children).length > 0) {
 					var childContributions = contribution.children;
 					var created;
@@ -637,7 +651,8 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 							// If we wait until the end of asynch processing to add the menu button, the layout will have 
 							// to be redone. The down side to always adding the menu button is that we may find out we didn't
 							// need it after all, which could cause layout to change.
-							created = self._createDropdownMenu(parent, contribution.title); 
+
+							created = self._createDropdownMenu(parent, contribution.title, null , null, contribution.imageClass ); 
 							if(domNodeWrapperList){
 								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
@@ -695,7 +710,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 					} else {
 						// group within a menu
 						if (contribution.title) {
-							var subMenu = self._createDropdownMenu(parent, contribution.title, true);
+							var subMenu = self._createDropdownMenu(parent, contribution.title, true, null, null, contribution.imageClass);
 							if (subMenu) {
 								self._render(childContributions, subMenu.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 								// If no items rendered in the submenu, we don't need it.
@@ -776,7 +791,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 							var populateFunction = function(menu) {
 								command.populateChoicesMenu(menu, items, handler, userData, self);
 							};
-							self._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command));
+							self._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command), command.imageClass );
 						} else {
 							// Rendering atomic commands as buttons or menus
 							invocation.handler = invocation.handler || this;
@@ -803,7 +818,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		/*
 		 * private.  Parent must exist in the DOM.
 		 */
-		_createDropdownMenu: function(parent, name, nested, populateFunction) {
+		_createDropdownMenu: function(parent, name, nested, populateFunction, icon) {
 			parent = lib.node(parent);
 			// We create dropdowns asynchronously so it's possible that the parent has been removed from the document 
 			// by the time we are called.  If so, don't bother building a submenu for an orphaned menu.
@@ -830,7 +845,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 					parent.appendChild(menuParent);
 					destroyButton = menuParent;
 				}
-				var created = Commands.createDropdownMenu(menuParent, name, populateFunction);
+				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, icon);
 				menuButton = created.menuButton;
 				newMenu = created.menu;
 			}
