@@ -554,7 +554,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				CLICKED = true;
 		
 				var TAB_HEIGHT = 24;
-				var PANEL_HEIGHT = 200;
+				var PANEL_HEIGHT = 150;
 				var PANEL_WIDTH = 150;
 				var BORDER_RADIUS = '3px'; //$NON-NLS-0$
 				var COLOR = '#555'; //$NON-NLS-0$
