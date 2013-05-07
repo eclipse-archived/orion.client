@@ -72,7 +72,7 @@ define({
 	"Replace All Matches": "Replace All Matches",
 	"No matches": "No matches",
 	"Rename": "Rename",
-	"Searches": "Searches",
+	"My saved searches": "My saved searches",
 	"You can save frequently used by searches by choosing ${0} in the search toolbar.": "You can save frequently used by searches by choosing ${0} in the search toolbar.",
 	"Files that contain:": "Files that contain:",
 	"Search": "Search",
