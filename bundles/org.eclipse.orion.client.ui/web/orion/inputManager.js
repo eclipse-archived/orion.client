@@ -63,13 +63,6 @@ define([
 		}
 	};
 	
-	function errorMessage(error) {
-		try {
-			error = JSON.parse(error.responseText);
-			return error.Message;
-		} catch(e) {}
-		return error.responseText;
-	}
 	function parseNumericParams(input, params) {
 		for (var i=0; i < params.length; i++) {
 			var param = params[i];
