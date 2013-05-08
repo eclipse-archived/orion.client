@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window define orion XMLHttpRequest*/
+/*global window define orion XMLHttpRequest confirm*/
 /*browser:true*/
 
 define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 
@@ -77,9 +77,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 * @name orion.fileCommands#uploadFile
 	 * @function
 	 */
-	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip) { 
+	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force) { 
 		this.req = new XMLHttpRequest();
-		this.req.open('post', targetFolder.ImportLocation, true); //$NON-NLS-0$
+		this.req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-0$
 		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
 		this.req.setRequestHeader("Slug", file.name); //$NON-NLS-0$
 		// TODO if we want to unzip zip files, don't use this...
@@ -87,11 +87,25 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			this.req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		this.req.setRequestHeader("Content-Type", file.type); //$NON-NLS-0$
-		this.req.onreadystatechange = function() {
+		this.req.onreadystatechange = function(state) {
+			if(this.req.readyState === 4 && this.req.status === 400){
+				var result = {};
+				try{
+					result = JSON.parse(this.req.responseText);
+				}catch(e){
+				}
+				if(result.JsonData && result.JsonData.ExistingFiles){
+					var confirmFunction = (explorer && explorer.serviceRegistry) ? explorer.serviceRegistry.getService("orion.page.dialog").confirm : confirm;
+					if(confirmFunction(result.Message + "\nWould you like to retry the import with force overwriting?")){
+						fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true);
+						return;
+					}
+				}
+			}
 			if (explorer) {
 				explorer.changedItem(targetFolder, true);
 			}
-		};
+		}.bind(this);
 		this.req.send(file);
 	};
 
