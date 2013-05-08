@@ -43,7 +43,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		 * @name orion.sidebar.Sidebar#defaultViewMode
 		 * @type String
 		 */
-		defaultViewMode: "nav",
+		defaultViewMode: "nav", //$NON-NLS-0$
 		show: function() {
 			if (this.created) {
 				return;
@@ -72,7 +72,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 
 			var changeViewModeCommand = new mCommands.Command({
 				// name: messages["View"],
-				imageClass: "core-sprite-outline",
+				imageClass: "core-sprite-outline", //$NON-NLS-0$
 				tooltip: messages["ViewTooltip"],
 				id: "orion.sidebar.viewmode", //$NON-NLS-0$
 				visibleWhen: function(item) {
