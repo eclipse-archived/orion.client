@@ -71,7 +71,8 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			toolbarNode.appendChild(switcherNode);
 
 			var changeViewModeCommand = new mCommands.Command({
-				name: messages["View"],
+				// name: messages["View"],
+				imageClass: "core-sprite-outline",
 				tooltip: messages["ViewTooltip"],
 				id: "orion.sidebar.viewmode", //$NON-NLS-0$
 				visibleWhen: function(item) {
@@ -89,7 +90,6 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				editorInputManager: editorInputManager,
 				parentNode: parentNode,
 				sidebarNavInputManager: this.sidebarNavInputManager,
-				selection: selection,
 				serviceRegistry: serviceRegistry,
 				toolbarNode: modeContributionToolbar
 			}));

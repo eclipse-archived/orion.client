@@ -172,7 +172,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 	
 	AdvSearchOptRenderer.prototype._replacePreview = function(){
 		var options = this.getOptions();
-		if(options.keyword && options.replace){
+		if(!options.replace){
+			options.replace = "";
+		}
+		if(options.keyword){
 			mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
 		}
 	};
@@ -240,7 +243,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 			} 
 		}.bind(this));
 		
-		this._searchBox.addEventListener("inputchange", function(e) { //$NON-NLS-0$
+		this._searchBox.addEventListener("change", function(e) { //$NON-NLS-0$
 			this._searchNameBox.value = this._getDefaultSaveName();
 		}.bind(this));
 		
@@ -262,7 +265,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 		}.bind(this));
 		
         var searchCommand = new mCommands.Command({
-            name: messages["Search For"],
+            name: messages["Search"],
             //tooltip: messages["Hide compare view of changes"],
             id: "orion.globalSearch.search", //$NON-NLS-0$
             callback: function(data) {
@@ -274,7 +277,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
         });
 
         var previewCurrentPageCommand = new mCommands.Command({
-            name: messages['Replace With'],
+            name: messages['Replace'],
             //tooltip: messages["Replace all matches with..."],
             id: "orion.globalSearch.previewCurrentPage", //$NON-NLS-0$
             callback: function(data) {
@@ -286,8 +289,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
         });
 		
         var saveSearchCommand = new mCommands.Command({
-            name: messages["Save Search As"],
-            tooltip: messages["Save search query"],
+            name: messages["Remember search as"],
+            tooltip: messages["Remember search as"],
             id: "orion.globalSearch.saveSearch", //$NON-NLS-0$
             callback: function(data) {
                 this._saveSearch();
@@ -312,7 +315,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 		//document.getElementById("advSearchLabel").appendChild(document.createTextNode(messages["Files that contain:"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchInput").placeholder = messages["Type a search term"]; //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advReplaceInput").placeholder = messages["Type a replace term"]; //$NON-NLS-0$ //$NON-NLS-0$
-		document.getElementById("advSearchTypeLabel").appendChild(document.createTextNode(messages["File type:"])); //$NON-NLS-0$ //$NON-NLS-0$
+		document.getElementById("advSearchTypeLabel").appendChild(document.createTextNode(messages["File type"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchCaseSensitiveLabel").appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSortByLabel").appendChild(document.createTextNode(messages["Sort by"])); //$NON-NLS-0$ //$NON-NLS-0$

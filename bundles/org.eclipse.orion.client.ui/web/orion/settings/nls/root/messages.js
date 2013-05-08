@@ -118,10 +118,13 @@ define({
 	"general": "General",
 	"validation": "Validation",
 	"Deleted git credentials for ${0}" : "Deleted git credentials for ${0}",
-	"File Management" : "File Management",
-	"Autosave" : "Save",
-	"Autosave Enabled" : "Auto Save",
+	"EditorSettings" : "Editor Settings",
+	"FileMgt" : "File Management",	"Autosave Enabled" : "Auto Save",
 	"Save interval" : "Save interval (ms)",
-	"Autoload" : "Load",
-	"Autoload Enabled" : "Auto Load"
+	"Autoload Enabled" : "Auto Load",
+	"Restore" : "Restore Defaults",
+	"Behaviour" : "Behaviour",
+	"TabSize" : "Tab Size",
+	"Scrolled" : "Scrolling Animation",
+	"ScrollAnimation" : "Scrolling Duration (ms)"
 });

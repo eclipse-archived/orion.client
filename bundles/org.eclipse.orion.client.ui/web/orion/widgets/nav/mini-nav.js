@@ -142,7 +142,14 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			childrenLocation = childrenLocation.ChildrenLocation || childrenLocation;
 			var _self = this;
 			return this.commandsRegistered.then(function() {
-				return FileExplorer.prototype.loadResourceList.call(_self, childrenLocation);
+				return _self.loadResourceList.call(_self, childrenLocation);
+			});
+		},
+		loadResourceList: function() {
+			var _self = this;
+			return FileExplorer.prototype.loadResourceList.apply(this, arguments).then(function(treeRoot) {
+				_self.sidebarNavInputManager.dispatchEvent({ type: "rootChanged", root: _self.treeRoot }); //$NON-NLS-0$
+				return treeRoot;
 			});
 		},
 		reveal: function(fileMetadata) {
@@ -173,8 +180,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var newActionsScope = this.newActionsScope;
 			var selectionActionsScope = this.selectionActionsScope;
 			var folderNavActionsScope = this.folderNavActionsScope;
-			commandRegistry.addCommandGroup(newActionsScope, "orion.miniNavNewGroup", 1000, messages["New"]); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, messages["NoSelection"]);
+			commandRegistry.addCommandGroup(newActionsScope, "orion.miniNavNewGroup", 1000, messages["New"], null, null, "core-sprite-add-content"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, messages["NoSelection"], "core-sprite-settings");
 			commandRegistry.registerSelectionService(selectionActionsScope, this.selection);
 
 			// New file and new folder (in a group)
@@ -240,7 +247,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.parentNode = params.parentNode;
 		this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
-//		this.selection = params.selection;
 		this.serviceRegistry = params.serviceRegistry;
 		this.explorer = null;
 	}
@@ -260,7 +266,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 						cachePrefix: "MiniNav"}, explorer, _self.commandRegistry, _self.contentTypeRegistry); //$NON-NLS-0$
 					return renderer;
 				},
-//				selection: this.selection,
 				serviceRegistry: this.serviceRegistry,
 				toolbarNode: this.toolbarNode
 			});

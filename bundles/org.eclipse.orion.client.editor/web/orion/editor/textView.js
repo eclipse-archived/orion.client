@@ -881,7 +881,27 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 							rangeLeft = rect.left * xFactor - lineRect.left;
 							rangeRight = rect.right * xFactor - lineRect.left;
 							//TODO test for character trailing (wrong for bidi)
-							if (x > (rangeLeft + (rangeRight - rangeLeft) / 2)) {
+							var trailing = x > (rangeLeft + (rangeRight - rangeLeft) / 2);
+							// Handle Unicode surrogates
+							var offsetInLine = offset - lineStart;
+							var lineText = model.getLine(lineIndex);
+							var c = lineText.charCodeAt(offsetInLine);
+							if (0xD800 <= c && c <= 0xDBFF && trailing) {
+								if (offsetInLine < lineText.length) {
+									c = lineText.charCodeAt(offsetInLine + 1);
+									if (0xDC00 <= c && c <= 0xDFFF) {
+										offset += 1;
+									}
+								}
+							} else if (0xDC00 <= c && c <= 0xDFFF && !trailing) {
+								if (offsetInLine > 0) {
+									c = lineText.charCodeAt(offsetInLine - 1);
+									if (0xD800 <= c && c <= 0xDBFF) {
+										offset -= 1;
+									}
+								}
+							}
+							if (trailing) {
 								offset++;
 							}
 						} else {
@@ -957,18 +977,17 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			function _isWhitespace(c) {
 				return c === 32 || c === 9;
 			}
+			var view = this.view;
+			var model = view._model;
+			var lineIndex = model.getLineAtOffset(offset);
+			var lineText = model.getLine(lineIndex);
+			var lineStart = model.getLineStart(lineIndex);
+			var lineEnd = model.getLineEnd(lineIndex);
+			var lineLength = lineText.length;
+			var offsetInLine = offset - lineStart;
+			var c;
 			if (unit === "word" || unit === "wordend") { //$NON-NLS-1$ //$NON-NLS-0$
-				var view = this.view;
-				var model = view._model;
-				var lineIndex = model.getLineAtOffset(offset);
-				var lineText = model.getLine(lineIndex);
-				var lineStart = model.getLineStart(lineIndex);
-				var lineEnd = model.getLineEnd(lineIndex);
-				var lineLength = lineText.length;
-				var offsetInLine = offset - lineStart;
-				
-				
-				var c, previousPunctuation, previousLetterOrDigit, punctuation, letterOrDigit;
+				var previousPunctuation, previousLetterOrDigit, punctuation, letterOrDigit;
 				if (direction > 0) {
 					if (offsetInLine === lineLength) { return lineEnd; }
 					c = lineText.charCodeAt(offsetInLine);
@@ -1018,9 +1037,21 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 						offsetInLine--;
 					}
 				}
-				return lineStart + offsetInLine;
+			} else {
+				offsetInLine += direction;
+				c = lineText.charCodeAt(offsetInLine);
+				// Handle Unicode surrogates
+				if (0xDC00 <= c && c <= 0xDFFF) {
+					if (offsetInLine > 0) {
+						c = lineText.charCodeAt(offsetInLine - 1);
+						if (0xD800 <= c && c <= 0xDBFF) {
+							var step = direction > 0 ? 1 : -1;
+							offsetInLine += step;
+						}
+					}
+				}
 			}
-			return offset + direction;
+			return lineStart + offsetInLine;
 		},
 		/** @private */
 		_getNextOffset_IE: function (offset, unit, direction) {

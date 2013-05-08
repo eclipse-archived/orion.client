@@ -461,14 +461,17 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			}
 		} 
 		window.document.title = title;
-		lib.empty(lib.node("location")); //$NON-NLS-0$
-		new mBreadcrumbs.BreadCrumbs({
-			container: "location",  //$NON-NLS-0$
-			resource: options.breadcrumbTarget || options.target,
-			rootSegmentName: breadcrumbRootName,
-			workspaceRootSegmentName: fileSystemRootName,
-			makeHref: options.makeBreadcrumbLink
-		});
+		var locationNode = lib.node("location"); //$NON-NLS-0$
+		if (locationNode) {
+			lib.empty(locationNode);
+			new mBreadcrumbs.BreadCrumbs({
+				container: locationNode,
+				resource: options.breadcrumbTarget || options.target,
+				rootSegmentName: breadcrumbRootName,
+				workspaceRootSegmentName: fileSystemRootName,
+				makeHref: options.makeBreadcrumbLink
+			});
+		}
 	}
 	
 	function getToolbarElements(toolNode) {
@@ -551,7 +554,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				CLICKED = true;
 		
 				var TAB_HEIGHT = 24;
-				var PANEL_HEIGHT = 200;
+				var PANEL_HEIGHT = 150;
 				var PANEL_WIDTH = 150;
 				var BORDER_RADIUS = '3px'; //$NON-NLS-0$
 				var COLOR = '#555'; //$NON-NLS-0$
@@ -561,7 +564,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				settingsNode.style.borderTopRightRadius = BORDER_RADIUS;
 				settingsNode.style.borderTopLeftRadius = BORDER_RADIUS;
 				
-				settingsButton.className = "core-sprite-settings-white"; //$NON-NLS-0$
+				settingsButton.className = "core-sprite-wrench-white"; //$NON-NLS-0$
 				
 				settingsNode.id = 'settingsNode'; //$NON-NLS-0$
 				settingsButton.id = 'settingsButton'; //$NON-NLS-0$
@@ -585,7 +588,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					
 					rightPane.appendChild( panel );
 					lib.addAutoDismiss([settingsButton, settingsNode, panel], function() {
-						settingsButton.className = "core-sprite-settings"; //$NON-NLS-0$
+						settingsButton.className = "core-sprite-wrench"; //$NON-NLS-0$
 						settingsNode.style.backgroundColor = 'white'; //$NON-NLS-0$
 						panel.style.visibility = 'hidden'; //$NON-NLS-0$
 						CLICKED = false;

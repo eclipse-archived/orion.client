@@ -1,36 +1,72 @@
-<ul class="advSearchOptUL">
-	<li class="advSearchOptLIControl">
-		<span id="advSearchCmd" ></span>
-	</li>
-	<li class="advSearchOptLIControl">
-		<input type="text" class="search-control" style="width:90%;" id="advSearchInput"></input>
-	</li>
-	<li class="advSearchOptLIControl">
-		<span id="advReplacePreviewCmd" ></span>
-	</li>
-	<li class="advSearchOptLIControl">
-		<input type="text" class="search-control" style="width:90%;" id="advReplaceInput"></input>
-	</li>
-	<li class="advSearchOptLIControl">
-		<span id="advSaveSearchCmd" ></span>
-	</li>
-	<li class="advSearchOptLIControl">
-		<input type="text" class="search-control" style="width:90%;" id="advSaveSeachInput"></input>
-	</li>
-	<li class="advSearchOptLIControl">
-		<label id="advSearchTypeLabel" ></label>
-		<select id="advSearchTypes"></select>
-	</li>
-	<li class="advSearchOptLIControl">
-		<label id="advSearchCaseSensitiveLabel" ></label>
-		<input type="checkbox" id="advSearchCaseSensitive"></input>
-	</li>
-	<li class="advSearchOptLIControl">
-		<label id="advSearchRegExLabel" ></label>
-		<input type="checkbox" id="advSearchRegEx"></input>
-	</li>
-	<li class="advSearchOptLIControl">
-		<label id="advSortByLabel" ></label>
-		<select id="advSortBy"></select>
-	</li>
-</ul>
+	<div class="searchOptionBlock">
+		<table>
+			<tr>
+				<td>
+					<input type="text" class="search-control" style="min-width:20em;" id="advSearchInput"></input>
+				</td>
+				<td>
+					<span id="advSearchCmd" ></span>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<input type="text" class="search-control" style="min-width:20em;" id="advReplaceInput"></input>
+				</td>
+				<td>
+					<span id="advReplacePreviewCmd" ></span>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div class="searchOptionBlock">
+		<table>
+			<tr>
+				<td>
+					<label id="advSearchTypeLabel"  class="search-label"></label>
+				</td>
+				<td>
+					<select id="advSearchTypes" class="search-control"></select>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label id="advSortByLabel"  class="search-label"></label>
+				</td>
+				<td>
+					<select id="advSortBy" class="search-control"></select>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div class="searchOptionBlock">
+		<table>
+			<tr>
+				<td>
+					<label id="advSearchCaseSensitiveLabel" class="search-label" ></label>
+				</td>
+				<td>
+					<input type="checkbox" id="advSearchCaseSensitive" class="search-control"></input>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label id="advSearchRegExLabel"  class="search-label"></label>
+				</td>
+				<td>
+					<input type="checkbox" id="advSearchRegEx" class="search-control"></input>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div class="searchOptionBlock">
+		<table>
+			<tr>
+				<td>
+					<span id="advSaveSearchCmd" ></span>
+				</td>
+				<td>
+					<input type="text" class="search-control" style="min-width:15em;" id="advSaveSeachInput"></input>
+				</td>
+			</tr>
+		</table>
+	</div>

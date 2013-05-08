@@ -80,6 +80,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			this.crawling = searchParams.regEx || searchParams.caseSensitive;
 			var parent = lib.node(this.resultsId);
 			var that = this, crawler;
+			lib.empty(lib.node("pageNavigationActions")); //$NON-NLS-0$
+			lib.empty(lib.node("pageActions")); //$NON-NLS-0$
 			if(this.crawling){
 				lib.empty(parent);
 				parent.appendChild(document.createTextNode(""));
@@ -87,10 +89,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				crawler.search(function(jsonData, incremental){that._renderSearchResult(true, resultsNode, searchParams, jsonData, incremental);});
 			} else {
 				lib.empty(parent);
-				parent.appendChild(document.createTextNode(messages["Searching..."]));
+				this.registry.getService("orion.page.message").setProgressMessage(messages["Searching..."]); //$NON-NLS-0$
+				//parent.appendChild(document.createTextNode(messages["Searching..."]));
 				try{
 					this.registry.getService("orion.page.progress").progress(this.fileService.search(searchParams), "Searching " + searchParams.keyword).then( //$NON-NLS-1$ //$NON-NLS-0$
 						function(jsonData) {
+							this.registry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
 							this._renderSearchResult(false, resultsNode, searchParams, jsonData);
 						}.bind(this));
 				}

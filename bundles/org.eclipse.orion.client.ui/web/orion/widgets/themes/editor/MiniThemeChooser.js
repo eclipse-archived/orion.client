@@ -27,8 +27,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/widgets/input/Select', 'orion
 													'<div id="sizecontainer">' +
 														'<span class="settingsPanelLabel">Font Size:</span>' + 
 														'<div id="fontsizepicker"></div>' +
-													'</div>' +
-													'<div id="autoSavecontainer">' +
+													'</div>';
+												
+		MiniThemeChooser.prototype.autoSaveTemplate = '<div id="autoSavecontainer">' +
 														'<span class="settingsPanelLabel">AutoSave:</span>' + 
 														'<div id="autosavecheck"></div>' +
 													'</div>' +
@@ -78,7 +79,14 @@ define(['i18n!orion/settings/nls/messages', 'orion/widgets/input/Select', 'orion
 				this.addFontSizePicker(themeStyles);
 				this.addThemePicker(themeStyles);	
 			}.bind(this));
-			this.addAutoSave();
+				
+			this.editorPreferences.getPrefs(function(prefs) {
+				if (true || prefs.autoSaveVisible) {
+					node.innerHTML += this.autoSaveTemplate;
+					node.style.height =  '200px';
+					this.addAutoSave();	
+				}
+			}.bind(this));
 		}
 		
 		MiniThemeChooser.prototype.appendTo = appendTo;	
@@ -147,20 +155,20 @@ define(['i18n!orion/settings/nls/messages', 'orion/widgets/input/Select', 'orion
 		MiniThemeChooser.prototype.addThemePicker = addThemePicker;
 		
 		function addAutoSave(){
-			var check = document.getElementById( 'autosavecheck' ); //$NON-NLS-0$
-			this.autoSaveCheck = new Checkbox({}, check); //$NON-NLS-0$
-			
 			this.editorPreferences.getPrefs(function (editorPrefs) {
 				this.editorPrefs = editorPrefs;
-				this.autoSaveCheck.setChecked(editorPrefs.autoSaveEnabled);
+				if (editorPrefs.autoSaveVisible) {
+					var check = document.getElementById( 'autosavecheck' ); //$NON-NLS-0$
+					this.autoSaveCheck = new Checkbox({}, check); //$NON-NLS-0$
+					this.autoSaveCheck.setChecked(editorPrefs.autoSaveEnabled);
+					this.autoSaveCheck.myfield.addEventListener('change', function () { //$NON-NLS-0$
+						this.editorPrefs.autoSaveEnabled = this.autoSaveCheck.myfield.checked;
+						this.editorPreferences.setPrefs(this.editorPrefs);
+					}.bind(this));
+					this.autoSaveCheck.show();
+				}
+				return editorPrefs.autoSaveVisible;
 			}.bind(this));
-
-
-			this.autoSaveCheck.myfield.addEventListener('change', function () { //$NON-NLS-0$
-				this.editorPrefs.autoSaveEnabled = this.autoSaveCheck.myfield.checked;
-				this.editorPreferences.setPrefs(this.editorPrefs);
-			}.bind(this));
-			this.autoSaveCheck.show();
 		}
 		
 		MiniThemeChooser.prototype.addAutoSave = addAutoSave;
