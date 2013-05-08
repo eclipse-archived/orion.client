@@ -135,7 +135,7 @@ h2 {
 .dismissButton {
 	border: 1px solid transparent;
 	background: transparent;
-	color: whitesmoke;
+	color: silver;
     border-radius: 1px;
 	padding: 2px;
 	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
