@@ -671,8 +671,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		document.body.appendChild(keyAssistDiv);
 		
 		document.addEventListener("keydown", function (e){  //$NON-NLS-0$
-			if (e.charOrCode === lib.KEY.ESCAPE) {
+			if (e.keyCode === lib.KEY.ESCAPE) {
 				keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+				var statusService =	serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				if(statusService){
+					statusService.setProgressMessage("");
+				}
 			}
 		}, false);
 		lib.addAutoDismiss([keyAssistDiv], function() {
