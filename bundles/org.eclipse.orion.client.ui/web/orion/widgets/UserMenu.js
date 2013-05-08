@@ -27,7 +27,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			this.authenticatedServices = {};
 			this.unauthenticatedServices = {};
 			
-			if( options.signOut !== null ){
+			if( options.signOut ){
 				this._displaySignOut = options.signOut;
 			}
  		},
