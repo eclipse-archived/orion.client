@@ -2317,8 +2317,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		 *					percentage of the client area height. The parameter is clamped to the [0,1] range.  In either case, the view will only scroll
 		 *					if the new caret location is visible already.
 		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
-		 *					the callback is called when the animation is done. Otherwise, callback is callback right away. The callback is not
-		 *					if the view does not scroll.
+		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
 		 *
 		 * @see #getCaretOffset
 		 * @see #setSelection
@@ -2455,8 +2454,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		 *					percentage of the client area height. The parameter is clamped to the [0,1] range.  In either case, the view will only scroll
 		 *					if the new caret location is visible already.
 		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
-		 *					the callback is called when the animation is done. Otherwise, callback is callback right away. The callback is not
-		 *					if the view does not scroll.
+		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
 		 *
 		 * @see #getSelection
 		 */
@@ -6126,6 +6124,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 					this._ensureCaretVisible = true;
 				}
 				return true;
+			} else {
+				if (callback) {
+					callback();
+				}
 			}
 			return false;
 		},
