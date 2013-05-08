@@ -139,7 +139,7 @@ define([
 				}.bind(this));
 			} else {
 				var progressTimeout = window.setTimeout(function() {
-					editor.setInput(fileURI, messages["Fetching "] + fileURI, null);
+					editor.reportStatus(i18nUtil.formatMessage(messages.Fetching, fileURI));
 				}, 800);
 				new Deferred.all([
 					progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)),
@@ -150,14 +150,14 @@ define([
 					}
 					var contentOrError = results[0];
 					var metadataOrError = results[1];
-					if (contentOrError._error) {
-						window.console.error("HTTP status code: ", contentOrError._error.status); //$NON-NLS-0$
-						contentOrError = messages["An error occurred: "] + errorMessage(contentOrError._error);
+					if (contentOrError._error || metadataOrError._error) {
+						var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+						handleError(statusService, contentOrError._error || metadataOrError._error);
+						this._setNoInput();
+					} else {
+						this._setInputContents(this._parsedLocation, fileURI, contentOrError, metadataOrError);
 					}
-					if (metadataOrError._error) {
-						window.console.error("Error loading file metadata: " + errorMessage(metadataOrError._error)); //$NON-NLS-0$
-					}
-					this._setInputContents(this._parsedLocation, fileURI, contentOrError, metadataOrError);
+					editor.reportStatus("");
 				}.bind(this));
 			}
 		},
@@ -314,11 +314,14 @@ define([
 					this.load();
 				}
 			} else {
-				// No input, no editor.
-				this._input = null;
-				editor.uninstallTextView();
-				this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
+				this._setNoInput();
 			}
+		},
+		_setNoInput: function() {
+			// No input, no editor.
+			this._input = null;
+			this.editor.uninstallTextView();
+			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
 		},
 		_setInputContents: function(input, title, contents, metadata) {
 			var name;
