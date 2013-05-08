@@ -7,8 +7,9 @@
 		<title>Navigator</title>
 		<link rel="stylesheet" type="text/css" href="table.css" />
 		<link rel="shortcut icon" href="/folder.ico" />
-		<script type="text/javascript" src="../requirejs/require.js"></script>
+		<script src="../requirejs/require.js"></script>
 		<script type="text/javascript">
+		/*global require*/
 		require({
 		  baseUrl: '..',
 		
@@ -28,10 +29,9 @@
     <body id="orion-navigate" class="orionPage">
 		<div class="content-fixedHeight">
 			<div id="outlineContainer" class="auxpane sidePanelLayout hasSplit">
-				<div class="sidePanelMargins" id="favorites"></div>
-				<div class="sidePanelMargins" id="gettingStarted"></div>
+				<div class="sidePanelMargins" id="fileSystems"></div>
 			</div>
-			<div class="split splitLayout"></div>
+			<div class="split splitLayout" style="left:0%;"></div>
 			<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
 				<div class="fixedToolbarHolder">
 					<div class="mainToolbar toolComposite" id="pageToolbar"></div>
