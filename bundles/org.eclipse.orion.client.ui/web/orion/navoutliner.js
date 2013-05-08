@@ -84,82 +84,11 @@ function(messages, require, lib, i18nUtil, mCommands, mCommandRegistry, mKeyBind
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
 		this.commandService = options.commandService;
-		var reg = options.serviceRegistry;
-		var self = this;
-		
-		var deleteFaveCommand = new mCommands.Command({
-			name: "Delete", //$NON-NLS-0$
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
-			id: "eclipse.deleteFave", //$NON-NLS-0$
-			visibleWhen: function(items) {
-				items = Array.isArray(items) ? items : [items];
-				if (items.length === 0) {
-					return false;
-				}
-				for (var i=0; i<items.length; i++) {
-					if (!items[i].isFavorite) {
-						return false;
-					}
-				}
-				return true;
-			},
-			callback: function(data) {
-				var items = Array.isArray(data.items) ? data.items : [data.items];
-				var confirmMessage = items.length === 1 ? i18nUtil.formatMessage(messages["Are you sure you want to delete '${0}' from the favorites?"], items[0].name) : i18nUtil.formatMessage(messages["Are you sure you want to delete these ${0} favorites?"], items.length);
-				if(window.confirm(confirmMessage)) {
-					for (var i=0; i<items.length; i++) {
-						options.serviceRegistry.getService("orion.page.progress").progress(options.serviceRegistry.getService("orion.core.favorite").removeFavorite(items[i].path), "Removing favorite " + items[i].name); //$NON-NLS-0$
-					}
-				}
-			}
-		});		
-		var renameFaveCommand = new mCommands.Command({
-			name: messages['Rename'],
-			imageClass: "core-sprite-rename", //$NON-NLS-0$
-			id: "eclipse.renameFave", //$NON-NLS-0$
-			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", 'Name:', '')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			visibleWhen: function(items) {
-				items = Array.isArray(items) ? items : [items];
-				return items.length === 1 && items[0].isFavorite;
-			},
-			callback: function(data) {
-				var item = Array.isArray(data.items) ? data.items[0] : data.items;
-				
-				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
-					reg.getService("orion.page.progress").progress(reg.getService("orion.core.favorite").renameFavorite(item.path, data.parameters.valueFor('name')), "Rename favorite " + item.name + " to " + data.parameters.valueFor('name')); //$NON-NLS-1$ //$NON-NLS-0$
-				}
-			}
-		});
-		// register commands 
-		this.commandService.addCommand(deleteFaveCommand);
-		this.commandService.addCommand(renameFaveCommand);
-		var favoritesService = this._registry.getService("orion.core.favorite"); //$NON-NLS-0$
-		var progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
-
-		if (favoritesService) {
-			// render the favorites
-			var registry = this._registry;
-			progress.progress(favoritesService.getFavorites(), "Getting favorites").then(function(favs) {
-				self.render(favs.navigator, registry);
-			});
-
-			favoritesService.addEventListener("favoritesChanged", //$NON-NLS-0$
-				function(event) {
-					// TODO temporary code, get rid of old "external favorites"
-					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=379435
-					var faves = [];
-					for (var i=0; i<event.navigator.length; i++) {
-						if (!event.navigator[i].isExternalResource) {
-							faves.push(event.navigator[i]);
-						}
-					}
-					self.render(faves, event.registry);
-				});
-		}
+		this.render();
 	}
 	NavigationOutliner.prototype = /** @lends orion.navoutliner.NavigationOutliner.prototype */ {
-
-		render: function(favorites, serviceRegistry) {
+		render: function() {
+			var serviceRegistry = this._registry;
 			var commandService = this.commandService;
 			var that = this;
 			if (serviceRegistry) {
@@ -191,61 +120,6 @@ function(messages, require, lib, i18nUtil, mCommands, mCommandRegistry, mKeyBind
 						}
 						return "";
 					}));
-				}
-			}
-			
-			// first time setup
-			if (!this.favoritesSection) {
-				this.favoritesSection = new mSection.Section(this._parent, {
-					id: "favoritesSection", //$NON-NLS-0$
-					title: messages["Favorites"], //$NON-NLS-0$
-					content: '<div id="favoritesContent"></div>', //$NON-NLS-0$
-					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
-					canHide: true,
-					useAuxStyle: true,
-					slideout: true,
-					onExpandCollapse: function(isExpanded, section) {
-						commandService.destroy(section.selectionNode);
-						if (isExpanded) {
-							commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button"); //$NON-NLS-0$
-						}
-					}
-				});
-				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection"); //$NON-NLS-0$
-				// add commands to the fave section heading
-				var binding;
-				binding = new mKeyBinding.KeyBinding(113);
-				binding.domScope = "favoritesContent"; //$NON-NLS-0$
-				binding.scopeName = "Favorites"; //$NON-NLS-0$
-				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1, null, false, binding); //$NON-NLS-0$
-				binding = new mKeyBinding.KeyBinding(46);
-				binding.domScope = "favoritesContent"; //$NON-NLS-0$
-				binding.scopeName = "Favorites"; //$NON-NLS-0$
-				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2, null, false, binding);  //$NON-NLS-0$
-				commandService.registerSelectionService(this.favoritesSection.selectionNode.id, this.favoritesSelection);
-				var selectionId = this.favoritesSection.selectionNode.id;
-				serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
-					var selectionTools = lib.node(selectionId);
-					if (selectionTools) {
-						commandService.destroy(selectionTools);
-						commandService.renderCommands(selectionId, selectionTools, event.selections, that, "button"); //$NON-NLS-0$
-					}
-				});
-			}
-			if (favorites.length > 0) {
-				this.explorer = new NavOutlineExplorer(serviceRegistry, this.favoritesSelection, this.commandService);
-				this.favoritesTable = this.explorer.createTree("favoritesContent", new mExplorer.SimpleFlatModel(favorites, "fav", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
-					return item.path || "";
-				}));
-				// TODO temporary hack from Libing 
-				this.explorer.getNavHandler()._clearSelection(false);
-			} else {
-				var faves = lib.node("favoritesContent"); //$NON-NLS-0$
-				if (faves) {
-					lib.empty(faves);
-					var p = document.createElement("p"); //$NON-NLS-0$
-					p.appendChild(document.createTextNode(i18nUtil.formatMessage(messages["You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the ${1} menu."], "'"+messages["Make Favorite"]+"'", "'"+messages["Actions"]+"'"))); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					faves.appendChild(p);
 				}
 			}
 		}
