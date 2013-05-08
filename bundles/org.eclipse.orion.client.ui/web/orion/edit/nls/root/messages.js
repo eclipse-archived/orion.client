@@ -8,39 +8,41 @@
  * 
  ******************************************************************************/
 
+/*global define */
+
 //NLS_CHARSET=UTF-8
 
 define({
-	"Fetching ": "Fetching ",
-	"An error occurred: ": "An error occurred: ",
-	"No File Selected": "No File Selected",
-	"There are unsaved changes.  Do you still want to navigate away?": "There are unsaved changes.  Do you still want to navigate away?",
-	"Search Files": "Search Files",
-	"Enter search term:": "Enter search term:",
-	"Searching for occurrences of ": "Searching for occurrences of ",
-	"Toggle Outliner": "Toggle Outliner",
-	"There are unsaved changes.": "There are unsaved changes.",
-	"Save": "Save",
-	"Resource is out of sync with the server. Do you want to save it anyway?": "Resource is out of sync with the server. Do you want to save it anyway?",
-	"loadOutOfSync": "Resource is out of sync with the server. Do you want to load it anyway? This will overwrite your local changes.",
-	"Reading metedata of": "Reading metedata of ${0}",
-	"Reading": "Reading ${0}",
-	"Save this file": "Save this file",
-	"Go to Line": "Go to Line",
-	"Go to specified line number": "Go to specified line number",
-	"Go to line:": "Go to line:",
-	"Undo": "Undo",
-	"Redo": "Redo",
-	"Find": "Find",
-	"No response from server.  Check your internet connection and try again.": "No response from server.  Check your internet connection and try again.",
-	"Saving file {0}": "Saving file ${0}",
-	"Running {0}": "Running ${0}",
-	"Saving..." : "Saving...",
-	"View": "View",
-	"ViewTooltip": "View",
-	"Actions": "Actions",
-	"Navigator": "Navigator",
-	"New": "New",
-	"NoFile": "Choose a file to edit from the Navigator pane.",
-	"NoSelection": "Click on an item to make a selection, then use this menu to see what actions are available."
+	"Fetching": "Fetching: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"An error occurred: ": "An error occurred: ", //$NON-NLS-1$ //$NON-NLS-0$
+	"No File Selected": "No File Selected", //$NON-NLS-1$ //$NON-NLS-0$
+	"There are unsaved changes.  Do you still want to navigate away?": "There are unsaved changes.  Do you still want to navigate away?", //$NON-NLS-1$ //$NON-NLS-0$
+	"Search Files": "Search Files", //$NON-NLS-1$ //$NON-NLS-0$
+	"Enter search term:": "Enter search term:", //$NON-NLS-1$ //$NON-NLS-0$
+	"Searching for occurrences of ": "Searching for occurrences of ", //$NON-NLS-1$ //$NON-NLS-0$
+	"Toggle Outliner": "Toggle Outliner", //$NON-NLS-1$ //$NON-NLS-0$
+	"There are unsaved changes.": "There are unsaved changes.", //$NON-NLS-1$ //$NON-NLS-0$
+	"Save": "Save", //$NON-NLS-1$ //$NON-NLS-0$
+	"Resource is out of sync with the server. Do you want to save it anyway?": "Resource is out of sync with the server. Do you want to save it anyway?", //$NON-NLS-1$ //$NON-NLS-0$
+	"loadOutOfSync": "Resource is out of sync with the server. Do you want to load it anyway? This will overwrite your local changes.", //$NON-NLS-1$ //$NON-NLS-0$
+	"Reading metedata of": "Reading metedata of ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"Reading": "Reading ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"Save this file": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
+	"Go to Line": "Go to Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"Go to specified line number": "Go to specified line number", //$NON-NLS-1$ //$NON-NLS-0$
+	"Go to line:": "Go to line:", //$NON-NLS-1$ //$NON-NLS-0$
+	"Undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
+	"Redo": "Redo", //$NON-NLS-1$ //$NON-NLS-0$
+	"Find": "Find", //$NON-NLS-1$ //$NON-NLS-0$
+	"No response from server.  Check your internet connection and try again.": "No response from server.  Check your internet connection and try again.", //$NON-NLS-1$ //$NON-NLS-0$
+	"Saving file {0}": "Saving file ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"Running {0}": "Running ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"Saving..." : "Saving...", //$NON-NLS-1$ //$NON-NLS-0$
+	"View": "View", //$NON-NLS-1$ //$NON-NLS-0$
+	"ViewTooltip": "View", //$NON-NLS-1$ //$NON-NLS-0$
+	"Actions": "Actions", //$NON-NLS-1$ //$NON-NLS-0$
+	"Navigator": "Navigator", //$NON-NLS-1$ //$NON-NLS-0$
+	"New": "New", //$NON-NLS-1$ //$NON-NLS-0$
+	"NoFile": "Choose a file to edit from the Navigator pane.", //$NON-NLS-1$ //$NON-NLS-0$
+	"NoSelection": "Click on an item to make a selection, then use this menu to see what actions are available." //$NON-NLS-1$ //$NON-NLS-0$
 });
