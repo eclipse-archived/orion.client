@@ -36,6 +36,8 @@ define({
 	"Saving file {0}": "Saving file ${0}",
 	"Running {0}": "Running ${0}",
 	"Saving..." : "Saving...",
+	"View": "View",
+	"ViewTooltip": "View",
 	"Actions": "Actions",
 	"Navigator": "Navigator",
 	"New": "New",

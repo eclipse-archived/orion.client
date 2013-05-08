@@ -2,7 +2,7 @@
 /*jslint browser:true sub:true*/
 define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/littlelib',
 		'orion/widgets/nav/mini-nav',
-		'i18n!orion/nls/messages'],
+		'i18n!orion/edit/nls/messages'],
 		function(Deferred, objects, mCommands, mOutliner, lib, MiniNavViewMode, messages) {
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -71,7 +71,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			toolbarNode.appendChild(switcherNode);
 
 			var changeViewModeCommand = new mCommands.Command({
-				// name: messages["View"],
+				name: messages["View"],
 				imageClass: "core-sprite-outline", //$NON-NLS-0$
 				tooltip: messages["ViewTooltip"],
 				id: "orion.sidebar.viewmode", //$NON-NLS-0$
