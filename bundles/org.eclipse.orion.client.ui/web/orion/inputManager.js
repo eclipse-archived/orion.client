@@ -98,7 +98,7 @@ define([
 		} else {
 			errorToDisplay = error;
 		}
-		handleStatus(errorToDisplay, true /*allow HTML for auth errors*/);
+		handleStatus(statusService, errorToDisplay, true /*allow HTML for auth errors*/);
 	}
 
 	/**
