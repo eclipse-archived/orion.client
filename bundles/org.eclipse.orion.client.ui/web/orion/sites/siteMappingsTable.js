@@ -156,7 +156,7 @@ mSiteMappingsTable.Renderer = (function() {
 							a.href = href;
 							a.target = "_new"; //$NON-NLS-0$
 							var span = document.createElement("span"); //$NON-NLS-0$
-							span.className += "imageSprite core-sprite error"; //$NON-NLS-0$
+							span.className += "imageSprite core-sprite-error"; //$NON-NLS-0$
 							span.title = i18nUtil.formatMessage(messages.WorkspaceResourceNotFound, href);
 							a.appendChild(span);
 							lib.empty(col);

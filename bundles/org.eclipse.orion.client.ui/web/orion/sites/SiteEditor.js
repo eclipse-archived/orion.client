@@ -331,7 +331,6 @@ objects.mixin(SiteEditor.prototype, {
 				var addMappingCommand = new mCommands.Command({
 					name: messages["Add"],
 					tooltip: messages["Add a directory mapping to the site configuration"],
-					imageClass: "core-sprite-add", //$NON-NLS-0$
 					id: "orion.site.mappings.add", //$NON-NLS-0$
 					visibleWhen: function(item) {
 						return true;
