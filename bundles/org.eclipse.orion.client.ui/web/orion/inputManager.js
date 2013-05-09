@@ -179,6 +179,7 @@ define([
 			var editor = this.getEditor();
 			if (!editor.isDirty()) { return; }
 			this._saving = true;
+			this._errorSaving = false;
 			var input = this.getInput();
 			editor.reportStatus(messages['Saving...']);
 			var contents = editor.getText();
@@ -204,6 +205,7 @@ define([
 				editor.reportStatus("");
 				handleError(statusService, error);
 				self._saving = false;
+				self._errorSaving = true;
 			}
 			def.then(successHandler, function(error) {
 				// expected error - HTTP 412 Precondition Failed 
@@ -233,6 +235,7 @@ define([
 		 * @param {Number} timeout - the autosave timeout in milliseconds
 		 */
 		setAutoSaveTimeout: function(timeout) {
+			this._autoSaveEnabled = timeout !== -1;
 			if (!this._idle) {
 				var editor = this.getEditor(), textView = editor.getTextView();
 				var setIdle = function() {
@@ -244,7 +247,9 @@ define([
 					};
 					this._idle = new Idle(options);
 					this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
-						this.save();
+						if (!this._errorSaving) {
+							this.save();
+						}
 					}.bind(this));
 					this._idle.setTimeout(timeout);
 				}.bind(this);
@@ -297,13 +302,6 @@ define([
 				} else {
 					this._input = fileURI;
 					this._fileMetadata = null;
-					if (!editor.getTextView()) {
-						editor.installTextView();
-						editor.getTextView().addEventListener("Focus", function(e) { //$NON-NLS-0$
-							if (!this._autoLoadEnabled) { return; }
-							this.load();
-						}.bind(this));
-					}
 					this.load();
 				}
 			} else {
@@ -312,7 +310,7 @@ define([
 		},
 		_setNoInput: function() {
 			// No input, no editor.
-			this._input = null;
+			this._input = this._title = this._contentType = null;
 			this.editor.uninstallTextView();
 			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
 		},
@@ -330,10 +328,24 @@ define([
 				this._contentType = this.contentTypeService.getFilenameContentType(this.getTitle());
 				name = this.getTitle();
 			}
+			var editor = this.getEditor();
+			if (!editor.getTextView()) {
+				editor.installTextView();
+				editor.getTextView().addEventListener("Focus", function(e) { //$NON-NLS-0$
+					// If there was an error while auto saving, auto save is temporarily disabled and
+					// we retry saving every time the editor gets focus
+					if (this._autoSaveEnabled && this._errorSaving) {
+						this.save();
+						return;
+					}
+					if (this._autoLoadEnabled) {
+						this.load();
+					}
+				}.bind(this));
+			}
 			// TODO could potentially dispatch separate events for metadata and contents changing
 			this.dispatchEvent({ type: "InputChanged", input: input, name: name, metadata: metadata, contents: contents }); //$NON-NLS-0$
 			var self = this;
-			var editor = this.getEditor();
 			this.syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true).then(function() {
 				// TODO folding should be a preference.
 				var styler = self.syntaxHighlighter.getStyler();

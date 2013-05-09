@@ -236,6 +236,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 
 			var pluginNode = document.createElement('div');
 			this.table.appendChild(pluginNode);
+			
+			/* TODO:Customizing and including a 'get plugins' link
+					needs some better thinking than defining it here. */
+			
+			var VERSION = "2.0";		
+			var pluginUriTemplate = "http://mamacdon.github.io/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}";
 
 			this.pluginWidget = new PluginList({
 				settings: this.settingsCore,
@@ -243,8 +249,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 				statusService: this.preferencesStatusService,
 				dialogService: this.preferenceDialogService,
 				commandService: this.commandService,
-				registry: this.registry
-//				toolbarID: "pageActions" //$NON-NLS-0$
+				registry: this.registry,
+				pluginsUri: pluginUriTemplate
 			}, pluginNode);
 			
 			this.pluginWidget.show();
