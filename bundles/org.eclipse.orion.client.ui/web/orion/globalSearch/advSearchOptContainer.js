@@ -102,6 +102,45 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 	    this._initControls();
 		this._searchBox.focus();
 		
+	};
+	
+	AdvSearchOptRenderer.prototype._submitSearch = function(){
+		var options = this.getOptions();
+		options.replace = null;
+		mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
+	};
+	
+	AdvSearchOptRenderer.prototype._replacePreview = function(){
+		var options = this.getOptions();
+		if(!options.replace){
+			options.replace = "";
+		}
+		if(options.keyword){
+			mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
+		}
+	};
+	
+    AdvSearchOptRenderer.prototype._saveSearch = function() {
+		if(this._searchBox.value && this._searchNameBox.value){
+			var searchParams = this.getOptions(true);
+		    var query = mSearchUtils.generateSearchHref(searchParams).split("#")[1]; //$NON-NLS-0$
+			this._serviceRegistry.getService("orion.core.savedSearches").addSearch(this._searchNameBox.value, query); //$NON-NLS-0$
+		}
+    };
+
+    AdvSearchOptRenderer.prototype._getDefaultSaveName = function() {
+        if (this._searchBox.value) {
+            var qName = "\'" + this._searchBox.value + "\' in "; //$NON-NLS-1$ //$NON-NLS-0$
+            var locName = "root"; //$NON-NLS-0$
+            if(this._locationName){
+				locName = this._locationName;
+            }
+            return qName + locName;
+        } 
+        return "";
+    };
+
+    AdvSearchOptRenderer.prototype._initCompletion = function() {
 		//Required. Reading recent&saved search from user preference. Once done call the uiCallback
 		var defaultProposalProvider = function(uiCallback){
 			mSearchUtils.getMixedSearches(this._serviceRegistry, true, false, function(searches){
@@ -162,44 +201,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 		//The defaultProposalProvider provides proposals from the recent and saved searches.
 		//The exendedProposalProvider provides proposals from plugins.
 		this._completion = new mInputCompletion.InputCompletion(this._searchBox, defaultProposalProvider, {group: "globalSearch", extendedProvider: exendedProposalProvider}); //$NON-NLS-0$
-	};
-	
-	AdvSearchOptRenderer.prototype._submitSearch = function(){
-		var options = this.getOptions();
-		options.replace = null;
-		mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
-	};
-	
-	AdvSearchOptRenderer.prototype._replacePreview = function(){
-		var options = this.getOptions();
-		if(!options.replace){
-			options.replace = "";
-		}
-		if(options.keyword){
-			mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.keyword, options);
-		}
-	};
-	
-    AdvSearchOptRenderer.prototype._saveSearch = function() {
-		if(this._searchBox.value && this._searchNameBox.value){
-			var searchParams = this.getOptions(true);
-		    var query = mSearchUtils.generateSearchHref(searchParams).split("#")[1]; //$NON-NLS-0$
-			this._serviceRegistry.getService("orion.core.savedSearches").addSearch(this._searchNameBox.value, query); //$NON-NLS-0$
-		}
     };
-
-    AdvSearchOptRenderer.prototype._getDefaultSaveName = function() {
-        if (this._searchBox.value) {
-            var qName = "\'" + this._searchBox.value + "\' in "; //$NON-NLS-1$ //$NON-NLS-0$
-            var locName = "root"; //$NON-NLS-0$
-            if(this._locationName){
-				locName = this._locationName;
-            }
-            return qName + locName;
-        } 
-        return "";
-    };
-
+    
 	AdvSearchOptRenderer.prototype._initControls = function(){
 		this._searchBox = document.getElementById("advSearchInput"); //$NON-NLS-0$
 		this._replaceBox = document.getElementById("advReplaceInput"); //$NON-NLS-0$
@@ -235,8 +238,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 		
 		this._init = true;
 		this._loadSearchParams();
+		this._initCompletion();
 		//Add listeners
 		this._searchBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
+				return;
+			}
 			var keyCode= e.charCode || e.keyCode;
 			if (keyCode === 13 ) {// ENTER
 				this._submitSearch();
