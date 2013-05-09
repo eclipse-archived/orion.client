@@ -74,19 +74,20 @@ define(['i18n!orion/settings/nls/messages', 'orion/widgets/input/Select', 'orion
 		function appendTo( node ){
 		
 			this.container = node;
-			node.innerHTML = this.template;
 			this.preferences.getTheme(function(themeStyles) {
-				this.addFontSizePicker(themeStyles);
-				this.addThemePicker(themeStyles);	
+				this.editorPreferences.getPrefs(function(prefs) {
+				var template =  this.template;
+					if (prefs.autoSaveVisible) {
+						template += this.autoSaveTemplate;
+						node.style.height =  '200px';
+						this.addAutoSave();	
+					}
+					node.innerHTML = template;
+					this.addThemePicker(themeStyles);	
+					this.addFontSizePicker(themeStyles);
+				}.bind(this));
 			}.bind(this));
 				
-			this.editorPreferences.getPrefs(function(prefs) {
-				if (true || prefs.autoSaveVisible) {
-					node.innerHTML += this.autoSaveTemplate;
-					node.style.height =  '200px';
-					this.addAutoSave();	
-				}
-			}.bind(this));
 		}
 		
 		MiniThemeChooser.prototype.appendTo = appendTo;	
