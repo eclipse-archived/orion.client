@@ -747,6 +747,10 @@ input {
 
 }
 
+.bogusRelatedLinks {
+	display: none;
+}
+
 .navigationLabel{
 	color:#ddd;
 	cursor:pointer;
