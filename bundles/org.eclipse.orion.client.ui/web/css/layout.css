@@ -42,11 +42,11 @@ hard-coded numbers elsewhere.
 	clear: both;
 	overflow: hidden;
     position: absolute;
-    top: 36px;  /* $HeaderHeight */
-    bottom: 0;
+    top: 35px;
+	bottom: 29px; /* $FooterHeight + footer border (1px) */
     left: 0;
     width: 100%;
-	margin-bottom: 28px;  /* $FooterHeight */   
+	/*margin-bottom: 29px;*/
 }
 
 .content-fixedHeight-maximized {
