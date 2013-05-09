@@ -24,8 +24,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 	var defaultPluginURLs = {};
 	
-	var VERSION = "2.0";
-	
 	function _normalizeURL(location) {
 		if (location.indexOf("://") === -1) { //$NON-NLS-0$
 			var temp = document.createElement('a'); //$NON-NLS-0$
@@ -149,6 +147,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 			this.updateToolbar();
 			
+			if( this.pluginsUri ){
 			
 			var findMorePluginsCommand = new mCommands.Command({
 				name: messages['Get Plugins'],
@@ -161,6 +160,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			
 			this.commandService.addCommand(findMorePluginsCommand);
 			this.commandService.registerCommandContribution("pluginCommands", "orion.findMorePluginsCommand", 1); //$NON-NLS-1$ //$NON-NLS-0$
+
+			}
 
 			// set up the toolbar level commands	
 			var installPluginCommand = new mCommands.Command({
@@ -337,7 +338,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 		},
 		
 		getPluginsLink: function( data ){		
-			var uriTemplate = "http://mamacdon.github.io/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}";
+			var uriTemplate = this.pluginsUri;
 			var template = new URITemplate(uriTemplate);
 			var url = decodeURIComponent(template.expand({
 				OrionHome: PageLinks.getOrionHome()
