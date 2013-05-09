@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console define orion*/
+/*global console define orion confirm*/
 /*jslint browser:true */
 
 define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui/dialog'], function(messages, lib, dialog) {
@@ -55,8 +55,21 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		this.$uploadButton.addEventListener("click", this.uploadSelected.bind(this), false); //$NON-NLS-0$
 	};
 
-	ImportDialog.prototype.handleReadyState = function(state){	
+	ImportDialog.prototype.handleReadyState = function(state, file){	
 		if( this.req.readyState === 4 ){
+			if(this.req.status === 400){
+				var result = {};
+				try{
+					result = JSON.parse(this.req.responseText);
+				}catch(e){
+				}
+				if(result.JsonData && result.JsonData.ExistingFiles){
+					if(confirm(result.Message + "\nWould you like to retry the import with force overwriting?")){
+						this.uploadFile.bind(this)(file, true);
+						return;
+					}
+				}
+			}
 			this.hide();
 			this._func();
 		}
@@ -71,17 +84,19 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		
 	};
 
-	ImportDialog.prototype.uploadFile = function(file) {
+	ImportDialog.prototype.uploadFile = function(file, force) {
 		var unzip = this.$unzipCheckbox.checked && (file.name.indexOf(".zip") === file.name.length-4);
 		this.req = new XMLHttpRequest();
-		this.req.open('post', this._importLocation, true); //$NON-NLS-0$
+		this.req.open('post', force ? this._importLocation + (this._importLocation.indexOf("?") > 0 ? "&force=true" : "?force=true") : this._importLocation, true); //$NON-NLS-0$
 		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
 		this.req.setRequestHeader("Slug", file.name); //$NON-NLS-0$
 		if (!unzip) {
 			this.req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		this.req.setRequestHeader("Content-Type", file.type); //$NON-NLS-0$
-		this.req.onreadystatechange = this.handleReadyState.bind(this);
+		this.req.onreadystatechange = function(state){
+			this.handleReadyState.bind(this)(state, file);
+		}.bind(this);
 		this.req.send(file);
 	};
 	

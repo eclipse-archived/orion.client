@@ -48,26 +48,17 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 	SearchCrawler.prototype.search = function(onComplete){
 		var contentTypeService = this.registry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 		this._onSearchComplete = onComplete;
-		var self = this;
-		var dialog = this.registry.getService("orion.page.dialog"); //$NON-NLS-0$
-		dialog.confirm(messages["The search term on this location will not use indexed files."] + "\n" + //$NON-NLS-1$
-			messages["It will take longer time. Do you want to proceed?"],
-			function(doit) {
-				if(!doit){
-					return;
-				}
-				contentTypeService.getContentTypes().then(function(ct) {
-					self.contentTypesCache = ct;
-					var result = self._visitRecursively(self._childrenLocation).then(function(){ //$NON-NLS-0$
-						//self._searchFiles().then(function(){
-							self._sort(self.fileLocations);
-							var response = {numFound: self.fileLocations.length, docs: self.fileLocations };
-							self._onSearchComplete({response: response});
-						//});
-					});
-				});
-			}
-		);
+		contentTypeService.getContentTypes().then(function(ct) {
+			this.contentTypesCache = ct;
+			var crawler = this;
+			this._visitRecursively(this._childrenLocation).then(function(){ //$NON-NLS-0$
+				//self._searchFiles().then(function(){
+					this._sort(this.fileLocations);
+					var response = {numFound: this.fileLocations.length, docs: this.fileLocations };
+					this._onSearchComplete({response: response});
+				//});
+			}.bind(crawler));
+		}.bind(this));
 	};
 	
 	/**

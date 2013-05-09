@@ -77,62 +77,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion
 				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, 
 					serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandRegistry});
 				mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", explorer.treeRoot);
-				var isAtRoot = mFileUtils.isAtRoot(explorer.treeRoot.Location);
-				var gettingStartedNode = lib.node("gettingStartedTasks"); //$NON-NLS-0$
-				if (isAtRoot && !gettingStartedNode) { 
-					// create a command that represents each "orion.core.content" extension point
-					var newContentContributions = serviceRegistry.getServiceReferences("orion.core.content"); //$NON-NLS-0$
-					var deferreds = [];
-					newContentContributions.forEach(function(contribution) {
-						var d = new Deferred();
-						deferreds.push(d);
-						var href, hrefContent, uriTemplate = null;
-						var id = contribution.getProperty("id"); //$NON-NLS-0$
-						var template = contribution.getProperty("uriTemplate"); //$NON-NLS-0$
-						if (template) {
-							uriTemplate = new URITemplate(template);
-							href = window.decodeURIComponent(uriTemplate.expand({OrionHome: orionHome}));
-						}
-						template = contribution.getProperty("contentURITemplate"); //$NON-NLS-0$
-						if (template) {
-							uriTemplate = new URITemplate(template);
-							hrefContent = window.decodeURIComponent(uriTemplate.expand({OrionHome: orionHome}));
-						}
-						if(contribution.getProperty("nls")) {//$NON-NLS-0$
-							i18nUtil.getMessageBundle(contribution.getProperty("nls")).then(function(commandMessages){ //$NON-NLS-0$
-								var name = contribution.getProperty("nameKey") ? commandMessages[contribution.getProperty("nameKey")] : contribution.getProperty("name"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-								var description = contribution.getProperty("descriptionKey") ? commandMessages[contribution.getProperty("descriptionKey")] : contribution.getProperty("description"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-								var wrappingCommand = mFileCommands.createNewContentCommand(id, name, href, hrefContent, explorer, fileClient, progress); //$NON-NLS-0$
-								wrappingCommand.contentDescription = description; //$NON-NLS-0$
-								commandRegistry.addCommand(wrappingCommand);
-								d.resolve(wrappingCommand);
-							});
-						} else {
-							var wrappingCommand = mFileCommands.createNewContentCommand(id, contribution.getProperty("name"), href, hrefContent, explorer, fileClient, progress); //$NON-NLS-0$
-							wrappingCommand.contentDescription = contribution.getProperty("description"); //$NON-NLS-0$
-							commandRegistry.addCommand(wrappingCommand);
-							d.resolve(wrappingCommand);
-						}
-					});
-					Deferred.all(deferreds,  function(error) { return {error: error}; }).then(function(commandsOrErrors) {
-						var tasks = [];
-						commandsOrErrors.forEach(function(commandOrError) {
-							if (commandOrError.error) {
-							} else {
-								tasks.push({commandId: commandOrError.id});
-							}
-						});
-						// Add the getting started task list.  Keep it collapsed unless there is no workspace content.
-						// We want project creation commands to always be valid from the task list (even if the explorer root is not the workspace.)
-						// So the item we pass into the task list for validating commands is a fake object that pretends to be the workspace.
-						new mTasks.TaskList({parent: "gettingStarted", id: "gettingStartedTasks", title: messages["Create new content"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							description: messages["Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files."],
-							tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandRegistry, item: {Location: "/workspace"}, handler: explorer, collapsed: false, //$NON-NLS-0$
-							descriptionProperty: "contentDescription"}); //$NON-NLS-0$
-					});
-				} else if (gettingStartedNode) {
-					lib.empty(gettingStartedNode.parentNode); 
-				}
 			});
 		}
 		refresh();
@@ -186,7 +130,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion
 			mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", explorer.treeRoot); //$NON-NLS-1$ //$NON-NLS-0$
 			explorer.updateCommands();	
 			// Must happen after the above call, so that all the open with commands are registered when we create our navigation links.
-			new mNavOutliner.NavigationOutliner({parent: "favorites", commandService: commandRegistry, serviceRegistry: serviceRegistry}); //$NON-NLS-0$
+			new mNavOutliner.NavigationOutliner({parent: "fileSystems", commandService: commandRegistry, serviceRegistry: serviceRegistry}); //$NON-NLS-0$
 		});
 
 		window.addEventListener("hashchange", function() {refresh();}, false); //$NON-NLS-0$

@@ -86,7 +86,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					_self.updateCommands();
 				});
 			};
-			sidebarNavInputManager.addEventListener("InputChanged", this.navInputListener);
+			sidebarNavInputManager.addEventListener("InputChanged", this.navInputListener); //$NON-NLS-0$
 		}
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
@@ -181,7 +181,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var selectionActionsScope = this.selectionActionsScope;
 			var folderNavActionsScope = this.folderNavActionsScope;
 			commandRegistry.addCommandGroup(newActionsScope, "orion.miniNavNewGroup", 1000, messages["New"], null, null, "core-sprite-add-content"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, messages["NoSelection"], "core-sprite-settings");
+			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, messages["NoSelection"], "core-sprite-settings"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerSelectionService(selectionActionsScope, this.selection);
 
 			// New file and new folder (in a group)

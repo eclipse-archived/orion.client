@@ -62,9 +62,18 @@ define(function() {
 
 		function _jsonXMLHttpRequestReplacer(name, value) {
 			if (value && value instanceof XMLHttpRequest) {
+				var status, statusText;
+				try {
+					status = value.status;
+					statusText = value.statusText;
+				} catch (e) {
+					// https://bugs.webkit.org/show_bug.cgi?id=45994
+					status = 0;
+					statusText = ""; //$NON-NLS-0
+				}
 				return {
-					status: value.status,
-					statusText: value.statusText
+					status: status || 0,
+					statusText: statusText
 				};
 			}
 			return value;

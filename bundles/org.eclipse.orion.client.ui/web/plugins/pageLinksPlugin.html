@@ -68,6 +68,19 @@
 			}],
 			uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
 		});
+		
+		provider.registerService("orion.page.link.related", null, {
+			id: "orion.editFromMetadata",
+			nameKey: "Editor",
+			nls: "orion/nls/messages",
+			tooltip: "Edit the code",
+			validationProperties: [{
+				source: "ChildrenLocation|ContentLocation",
+				variableName: "NavigatorLocation",
+				replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
+			}],
+			uriTemplate: "{OrionHome}/edit/edit.html#,navigate={NavigatorLocation}?depth=1"
+		});
 
 		provider.registerService("orion.page.link.user", null, {
 			id: "orion.help",
@@ -76,6 +89,7 @@
 			uriTemplate: require.toUrl("help/index.jsp"),
 			category: 0
 		});
+		
 		provider.registerService("orion.page.link.user", null, {
 			id: "orion.settings",
 			nameKey: "Settings",

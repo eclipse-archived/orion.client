@@ -148,7 +148,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 		};
 		var uploadZip = function(importLocation, zipData) {
 			// TODO why don't file service impls support this??
-			return xhr('POST', importLocation, {
+			return xhr('POST', importLocation + (importLocation.indexOf("?") > 0 ? "&force=true": "?force=true"), {
 				headers: {
 					Slug: 'data.zip' // Doesn't matter -- will be unzipped anyway
 				},
