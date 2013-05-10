@@ -432,9 +432,11 @@ textarea.parameterInput {
 	position: fixed;
 	left: 44px;
 	top: 60px;
+	max-height: 80%;
 	padding: 4px;
 	float: left;
 	z-index:100;
+	overflow-y: auto;
 }
 
 .inputCompletionContainer {
