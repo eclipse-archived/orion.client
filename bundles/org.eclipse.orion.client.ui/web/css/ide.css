@@ -6,7 +6,6 @@
 @import "./progress.css";
 
 html {
-  overflow-x: hidden; /* workaround to get rid of horizontal scrollbar */
   cursor: default;
   height: 100%;
 }

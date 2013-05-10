@@ -100,9 +100,9 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					lib.addAutoDismiss([this._triggerNode].concat(Array.prototype.slice.call(submenuNodes)), this.close.bind(this));
 					this._hookedAutoDismiss = true;
 				}
-				this._positionDropdown();
 				this._triggerNode.classList.add("dropdownTriggerOpen"); //$NON-NLS-0$
 				this._dropdownNode.classList.add("dropdownMenuOpen"); //$NON-NLS-0$
+				this._positionDropdown();
 				items[0].focus();
 				return true;
 			}
