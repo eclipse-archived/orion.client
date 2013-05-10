@@ -260,9 +260,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			if (metadata) {
 				var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 				if (toolbar) {
-					commandRegistry.destroy(toolbar);
 					// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
 					mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, "pageActions", 500).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.destroy(toolbar);
 						commandRegistry.renderCommands("pageActions", toolbar, metadata, editor, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 					});
 				}
