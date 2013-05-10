@@ -72,26 +72,31 @@ define([
 		}
 	}
 	
-	function handleStatus(statusService, status, allowHTML) {
-		if (!allowHTML && status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
-			delete status.HTML;
-		}
-		if (statusService) {
-			statusService.setProgressResult(status);
-		} else {
-			window.console.log(status);
-		}
-	}
-	
 	function handleError(statusService, error) {
-		var errorToDisplay = {};
-		errorToDisplay.Severity = "Error"; //$NON-NLS-0$
-		if (error.status === 0) {
-			errorToDisplay.Message = messages['No response from server.  Check your internet connection and try again.']; //$NON-NLS-1$
-		} else {
-			errorToDisplay = error;
+		if (!statusService) {
+			window.console.log(error);
+			return;
 		}
-		handleStatus(statusService, errorToDisplay, true /*allow HTML for auth errors*/);
+		if (error.status === 0) {
+			error = {
+				Severity: "Error", //$NON-NLS-0$
+				Message: messages['No response from server.  Check your internet connection and try again.'] //$NON-NLS-1$
+			};
+		} else {
+			var responseText = error.responseText;
+			if (responseText) {
+				try {
+					error = JSON.parse(responseText);
+				} catch(e) {
+					error = {
+						//HTML: true,
+						Severity: "Error", //$NON-NLS-0$
+						Message: responseText
+					};
+				}
+			}
+		}
+		statusService.setProgressResult(error);
 	}
 
 	/**
