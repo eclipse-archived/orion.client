@@ -11,9 +11,9 @@
 /*global window console define */
 /*jslint browser:true sub:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/git/gitPreferenceStorage', 'orion/webui/littlelib', 'orion/objects', 'orion/i18nUtil',
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/webui/littlelib', 'orion/objects', 'orion/i18nUtil',
 		'orion/widgets/settings/Subsection', 'profile/UsersService', 'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledCommand'
-		], function(messages, require, mCommands, mSection, GitPreferenceStorage, lib, objects, i18nUtil, Subsection, UsersService, LabeledTextfield, LabeledCheckbox, LabeledCommand) {
+		], function(messages, require, mCommands, mSection, lib, objects, i18nUtil, Subsection, UsersService, LabeledTextfield, LabeledCheckbox, LabeledCommand) {
 
 	function UserSettings(options, node) {
 		objects.mixin(this, options);
@@ -36,18 +36,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					
 				'</div>' + //$NON-NLS-0$
 				
-				'<div>' +  //$NON-NLS-0$
-					'<div class="sectionWrapper toolComposite">' +
-						'<div class="sectionAnchor sectionTitle layoutLeft">${Git Credentials Storage}</div>' + 
-						'<div id="gitCommands" class="layoutRight sectionActions"></div>' +
-					'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
-					'<div class="gitSections">' + //$NON-NLS-0$
-					
-					'</div>' + //$NON-NLS-0$
-					'<div></div>' +
-					
-				'</div>' + //$NON-NLS-0$
-				
 				'<div class="linkedSection"></div>',
 
 		createElements: function() {
@@ -55,7 +43,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			lib.processTextNodes(this.node, messages);
 			
 			this.sections = lib.$('.sections', this.node);
-			this.gitSections = lib.$('.gitSections', this.node);
 			this.linkedSection = lib.$('.linkedSection', this.node);
 			
 			this.createSections();
@@ -67,16 +54,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			}else{
 				iframe.src = iframe.src + "#" + hash; //$NON-NLS-0$
 			}
-		},
-		
-		refreshGitCredentials : function(){
-			var that = this;
-			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
-			gitPreferenceStorage.isEnabled().then(
-				function(isEnabled){
-					that.gitCredentialsFields[0].setChecked(isEnabled);
-				}
-			);
 		},
 		
 		createSections: function(){
@@ -100,14 +77,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var passwordSection = new Subsection( {sectionName:messages['Password'], parentNode: this.sections, children: this.passwordFields } );
 			passwordSection.show();
 
-			/* - git --------------------------------------------------------- */
-			this.gitFields = [
-				new LabeledTextfield( {fieldlabel:messages['Git Email Address']} ),
-				new LabeledTextfield( {fieldlabel:messages['Git Username']} )
-			];
-			var gitSection = new Subsection( {sectionName:messages["Git Config"], parentNode: this.sections, children: this.gitFields } );
-			gitSection.show();
-			
 			var updateCommand = new mCommands.Command({
 				name: messages["Update"],
 				tooltip: messages["Update Profile Settings"],
@@ -120,66 +89,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.commandService.addCommand(updateCommand);
 			this.commandService.registerCommandContribution('profileCommands', "orion.updateprofile", 3); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands('profileCommands', lib.node( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
-			
-			//--------- git credentials -------------------------------
-			this.gitCredentialsFields = [ new LabeledCheckbox( {fieldlabel:messages["Enable Storage"]} ) ];
-			var gitCredentialsSection;
-			var that = this;
-			
-			// erase credentials command
-			var erasePrivateKeyCommand = new mCommands.Command({
-				name: messages["Delete"],
-				id: "eclipse.orion.git.eraseGitCredentials",
-				callback : function(data){
-					var repository = data.items.gitUrl;
-					var keyIndex = data.items.keyIndex;
-					
-					var messageService = that.registry.getService("orion.page.message");
-					
-					var gitPreferenceStorage = new GitPreferenceStorage(that.registry);
-					gitPreferenceStorage.remove(repository).then(
-						function(){
-							messageService.setProgressResult(i18nUtil.formatMessage(messages["Deleted git credentials for ${0}"], [repository]));
-							that.gitCredentialsFields[keyIndex+1].destroy();
-						}
-					);
-				},
-				visibleWhen : function(item){
-					return true;
-				}
-			});
-			this.commandService.addCommand(erasePrivateKeyCommand);
-			this.commandService.registerCommandContribution("repositoryItemCommands", "eclipse.orion.git.eraseGitCredentials", 1);
-			
-			var that = this;
-			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
-			gitPreferenceStorage.getRepositories().then(
-				function(repositories){
-					for(var i=0; i<repositories.length; ++i){
-						var labeledCommand = new LabeledCommand( {keyIndex: i, fieldlabel: repositories[i], commandService: that.commandService, scopeId: "repositoryItemCommands"} );
-						that.gitCredentialsFields.push(labeledCommand);
-					}
-					
-					gitCredentialsSection = new Subsection( {sectionName:"", parentNode: that.gitSections, children: that.gitCredentialsFields} );
-					gitCredentialsSection.show();
-			
-					var updateGitCredentialsCommand = new mCommands.Command({
-						name: messages["Update"],
-						tooltip: messages["Update Git Credentials"],
-						id: "orion.updateGitCredentials", //$NON-NLS-0$
-						callback: function(data){
-							that.updateGitCredentials(data.items);
-						}.bind(that)
-					
-					});
-					
-					that.commandService.addCommand(updateGitCredentialsCommand);
-					that.commandService.registerCommandContribution('gitProfileCommands', "orion.updateGitCredentials", 2); //$NON-NLS-1$ //$NON-NLS-0$
-					
-					that.commandService.renderCommands('gitProfileCommands', lib.node( 'gitCommands' ), that, that, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
-					
-				}
-			);
 			
 			this.linkedAccountSection = new mSection.Section(this.linkedSection, {
 							id: "linkedAccountSection", //$NON-NLS-0$
@@ -218,9 +127,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var settingsWidget = this;
 			
 			var userdata = {};
-			
-			userdata.GitMail = settingsWidget.gitFields[0].getValue();
-			userdata.GitName = settingsWidget.gitFields[1].getValue();
 			
 			userdata.login = settingsWidget.accountFields[0].getValue();
 			userdata.Name = settingsWidget.accountFields[1].getValue();
@@ -288,28 +194,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			}
 		},
 		
-		updateGitCredentials : function(data){
-			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-			
-			// git authentication update
-			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
-			if( this.gitCredentialsFields[0].isChecked() ){
-				if(window.confirm(messages["Please be aware that your credentials will be stored persistently in the browser."] + '\n' + messages["Do you wish to enable the Key Storage?"])){
-					gitPreferenceStorage.enable().then(
-						function(){
-							messageService.setProgressResult( messages['Git Credentials successfully updated.'] );
-						}
-					);
-				} else { return; }
-			} else {
-				gitPreferenceStorage.disable().then(
-					function(){
-						messageService.setProgressResult( messages['Git Credentials successfully updated.'] );
-					}
-				);
-			}
-		},
-		
 		show:function(){
 			this.createElements();
 			
@@ -339,14 +223,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 							settingsWidget.accountFields[1].setValue( accountData.Name );
 							settingsWidget.accountFields[2].setValue( accountData.email );
 							settingsWidget.accountFields[3].setChecked( accountData.emailConfirmed );
-							
-							if( accountData.GitMail ){
-								settingsWidget.gitFields[0].setValue( accountData.GitMail );
-							}
-							
-							if( accountData.GitName ){
-								settingsWidget.gitFields[1].setValue( accountData.GitName );	
-							}
 						});
 						
 						settingsWidget.setHash( settingsWidget.iframe, jsonData.Location );	
@@ -354,14 +230,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				});
 			}
 			
-			// git authentication startup
-			this.refreshGitCredentials();
 		},
 
 		destroy: function() {
 			if (this.node) {
 				lib.empty(this.node);
-				this.node = this.sections = this.gitSections = this.linkedSection = null;
+				this.node = this.sections = this.linkedSection = null;
 			}
 		}
 	});

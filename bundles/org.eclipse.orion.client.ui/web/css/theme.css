@@ -334,10 +334,12 @@ a.currentLocation:hover {
 	background-color: white;
 	padding: 10px;
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+	display: none; /* don't take part in layout until open */
 }
 
 .dropdownMenuOpen {
 	min-width: 120px;
+	display: block;
 }
 
 .dropdownSubMenu {
