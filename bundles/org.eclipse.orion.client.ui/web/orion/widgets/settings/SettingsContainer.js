@@ -24,10 +24,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		'orion/widgets/settings/SplitSelectionLayout',
 		'orion/widgets/plugin/PluginList',
 		'orion/widgets/settings/UserSettings',
+		'orion/widgets/settings/GitSettings',
 		'orion/widgets/settings/EditorSettings',
 		'edit/editorPreferences'
 		], function(messages, require, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
-			ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings, 
+			ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings,  GitSettings,
 			EditorSettings, mEditorPreferences) {
 
 	/**
@@ -43,6 +44,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 				id: "userSettings", //$NON-NLS-0$
 				textContent: messages["User Profile"],
 				show: this.showUserSettings
+			},
+			{
+				id: "gitSettings", //$NON-NLS-0$
+				textContent: messages["Git Settings"],
+				show: this.showGitSettings
 			},
 			{
 				id: "themeBuilder", //$NON-NLS-0$
@@ -225,6 +231,34 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			}, userNode);
 			
 			this.userWidget.show();
+		},
+		
+		showGitSettings: function(id){
+		
+			this.selectCategory(id);
+
+			lib.empty(this.table);
+
+			if (this.gitWidget) {
+				this.gitWidget.destroy();
+			}
+
+			this.updateToolbar(id);
+			
+			var userNode = document.createElement('div'); //$NON-NLS-0$
+			this.table.appendChild(userNode);
+
+			this.gitWidget = new GitSettings({
+				registry: this.registry,
+				settings: this.settingsCore,
+				preferences: this.preferences,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				userClient: this.userClient
+			}, userNode);
+			
+			this.gitWidget.show();
 		},
 		
 		initPlugins: function(id){
