@@ -189,7 +189,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	var title;
 	
 	function _emptyLinksMenu() {
-		var related = lib.node("relatedLinks"); //$NON-NLS-0$
+		var related = lib.node("oldRelatedLinks"); //$NON-NLS-0$
 		if(!related){
 			// document not loaded
 			return;
@@ -199,7 +199,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			linksDropdown.empty();
 		}
 	}
-	
+
 	function _checkForEmptyLinksMenu() {
 		var triggerNode = lib.node("relatedTrigger"); //$NON-NLS-0$
 		if (linksDropdown && triggerNode) {
@@ -217,12 +217,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		/* Evolving to a compound list of navigation and related links
 		   Some of this code was dedicated to the older dropdown. Will
 		   clean this up as a next step. 
-		
+		*/
 		if (!linksDropdown) {
 			linksDropdown = new mDropdown.Dropdown({
 				dropdown: dropdownNode
 			});
-		} */
+		}
 		
 		mCommands.createCommandMenuItem(dropdownNode, command, invocation);
 		
@@ -264,7 +264,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		if (contributedLinks.length <= 0) {
 			return;
 		}
-		var related = lib.node("relatedLinks"); //$NON-NLS-0$
+		var related = lib.node("oldRelatedLinks"); //$NON-NLS-0$
 		if(!related){
 			// document not loaded
 			return;
