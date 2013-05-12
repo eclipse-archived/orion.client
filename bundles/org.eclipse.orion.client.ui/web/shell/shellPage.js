@@ -26,6 +26,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 	var pluginRegistry, pluginType, preferences, serviceElementCounter = 0;
 
+	var PREFIX_PROJECTFOR = "projectfor="; //$NON-NLS-0$
 	var ROOT_ORIONCONTENT = new URL(require.toUrl("file"), window.location.href).pathname; //$NON-NLS-0$
 	var PAGE_TEMPLATE = require.toUrl("shell/shellPage.html") + "#{,resource}"; //$NON-NLS-0$
 
@@ -207,12 +208,16 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 		return result.length > 0 ? result : null;
 	}
 
-	function setCWD(value) {
+	function setCWD(value, replace) {
 		var template = new URITemplate(PAGE_TEMPLATE);
 		var url = template.expand({
 			resource: value
 		});
-		window.location.href = url;
+		if (replace) {
+			window.location.replace(url);
+		} else {
+			window.location.href = url;
+		}
 	}
 
 	/* general functions for working with file system nodes */
@@ -288,9 +293,9 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 
 	/* implementations of built-in file system commands */
 
-	function getChangedToElement(dirName) {
+	function getChangedToElement(dirName, isInitial) {
 		var span = document.createElement("span"); //$NON-NLS-0$
-		span.appendChild(document.createTextNode(messages["Changed to: "]));
+		span.appendChild(document.createTextNode(isInitial ? messages["Initial directory: "] : messages["Changed to: "]));
 		var bold = document.createElement("b"); //$NON-NLS-0$
 		bold.appendChild(document.createTextNode(dirName));
 		span.appendChild(bold);
@@ -301,9 +306,9 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 		var node = args.directory.value[0];
 		shellPageFileService.setCurrentDirectory(node);
 		hashUpdated = true;
-		setCWD(node.Location);
+		setCWD(node.Location, false);
 		var pathString = shellPageFileService.computePathString(node);
-		return getChangedToElement(pathString);
+		return getChangedToElement(pathString, false);
 	}
 
 	function editExec(args) {
@@ -897,6 +902,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 			}
 		};
 
+		/* check the URL for a command string to seed the input field with */
 		var parameters = PageUtil.matchResourceParameters(window.location.href);
 		if (parameters.command) {
 			shell.setInputText(parameters.command);
@@ -908,16 +914,60 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 
 		shell.setFocusToInput();
 
+		/* check the URL for an initial folder location to open to */
+
 		shellPageFileService = new mShellPageFileService.ShellPageFileService();
-		var location = getCWD();
-		shellPageFileService.loadWorkspace(location || ROOT_ORIONCONTENT).then(
-			function(node) {
+		var defaultLocationFn = function(location, replace) {
+			var successFn = function(node) {
+				setCWD(node.Location, replace);
 				shellPageFileService.setCurrentDirectory(node);
+				var pathString = shellPageFileService.computePathString(node);
+				shell.output(getChangedToElement(pathString, true));
+			};
+			if (location) {	
+				shellPageFileService.loadWorkspace(location).then(
+					successFn,
+					function(error) {
+						shellPageFileService.loadWorkspace(ROOT_ORIONCONTENT).then(successFn);
+					}
+				);
+			} else {
+				shellPageFileService.loadWorkspace(ROOT_ORIONCONTENT).then(successFn);
 			}
-		);
-		if (!location) {
-			hashUpdated = true;
-			setCWD(ROOT_ORIONCONTENT);
+		};
+
+		if (parameters.resource && parameters.resource.indexOf(PREFIX_PROJECTFOR) === 0) {
+			/* Attempt to open to the project root of the specified resource */
+			var resourceValue = parameters.resource.substring(PREFIX_PROJECTFOR.length);
+			fileClient.read(resourceValue, true).then(
+				function(node) {
+					if (node.Directory === undefined) {
+						/*
+						 * The resource was read successfully but does not represent a file system
+						 * resource, so it cannot be used.  Revert to the default initial location.
+						 */
+						 defaultLocationFn(null, true);
+					} else if (node.Parents && node.Parents.length > 0) {
+						var projectLocation = node.Parents[node.Parents.length - 1].Location;
+						defaultLocationFn(projectLocation, true);
+					} else {
+						/*
+						 * The PREFIX_PROJECTFOR value is either a project root or is below the
+						 * level or projects, so just take it as the starting location.
+						 */
+						 defaultLocationFn(node.Location, true);
+					}
+				},
+				function(error) {
+					/*
+					 * The PREFIX_PROJECTFOR value does not refer to a valid file system
+					 * location, so open to the default location.
+					 */
+					defaultLocationFn(null, true);			
+				}
+			);
+		} else {
+			defaultLocationFn(getCWD(), false);
 		}
 
 		/* add the locally-defined types */
@@ -1160,9 +1210,16 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 					if (shellPageFileService.getCurrentDirectory().Location !== node.Location) {
 						shellPageFileService.setCurrentDirectory(node);
 						var buffer = shellPageFileService.computePathString(node);
-						shell.output(getChangedToElement(buffer));
-						setCWD(node.Location);
+						shell.output(getChangedToElement(buffer, false));
+						setCWD(node.Location, false);
 					}
+				},
+				function(error) {
+					/*
+					 * The hash has changed to point at an invalid resource, so reset it to
+					 * the previous current directory which was valid.
+					 */
+					setCWD(shellPageFileService.getCurrentDirectory().Location, true);
 				}
 			);
 		});
