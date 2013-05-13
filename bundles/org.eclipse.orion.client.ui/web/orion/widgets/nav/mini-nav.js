@@ -12,10 +12,10 @@
 /*jslint browser:true devel:true sub:true*/
 define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer', 'orion/explorers/explorerNavHandler', 'orion/i18nUtil', 'orion/keyBinding', 'orion/fileCommands',
-	'orion/extensionCommands', 'orion/selection'
+	'orion/extensionCommands', 'orion/selection', 'orion/EventTarget'
 	],
 	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, i18nUtil, mKeyBinding, FileCommands,
-		ExtensionCommands, Selection) {
+		ExtensionCommands, Selection, EventTarget) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
@@ -50,6 +50,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		}
 	};
 
+	/**
+	 * @class orion.sidebar.MiniNavExplorer
+	 * @extends orion.explorers.FileExplorer
+	 */
 	function MiniNavExplorer(params) {
 		params.setFocus = false;   // do not steal focus on load
 		params.cachePrefix = null; // do not persist table state
@@ -88,6 +92,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			};
 			sidebarNavInputManager.addEventListener("InputChanged", this.navInputListener); //$NON-NLS-0$
 		}
+		var modelManager = this.modelManager = new EventTarget();
+		var listener = this.modelChangeListener.bind(this);
+		["rename", "move", "delete"].forEach(function(type) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			modelManager.addEventListener(type, listener);
+		});
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 			_self.updateCommands(event.selections);
@@ -95,7 +104,34 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.commandsRegistered = this.registerCommands();
 	}
 	MiniNavExplorer.prototype = Object.create(FileExplorer.prototype);
-	objects.mixin(MiniNavExplorer.prototype, {
+	objects.mixin(MiniNavExplorer.prototype, /** @lends orion.sidebar.MiniNavExplorer.prototype */ {
+		modelChangeListener: function(event) {
+			var oldValue = event.oldValue, newValue = event.newValue;
+			// Detect if we moved/renamed/deleted the current file being edited, or an ancestor thereof.
+			var editorFile = this.editorInputManager.getFileMetadata();
+			var affectedAncestor;
+			[editorFile].concat(editorFile.Parents || []).some(function(ancestor) {
+				if (oldValue.Location === ancestor.Location) {
+					affectedAncestor = oldValue;
+					return true;
+				}
+				return false;
+			});
+			if (affectedAncestor) {
+				var newInput;
+				if (affectedAncestor.Location === editorFile.Location) {
+					// Current file was the target, see if we know its new name
+					newInput = (newValue && newValue.Location) || null;
+				} else {
+					newInput = null;
+				}
+				this.sidebarNavInputManager.dispatchEvent({
+					type: "editorInputRemoved", //$NON-NLS-0$
+					parent: this.treeRoot.ChildrenLocation,
+					newInput: newInput
+				});
+			}
+		},
 		createActionSections: function() {
 			var _self = this;
 			// Create some elements that we can hang actions on. Ideally we'd have just 1, but the
