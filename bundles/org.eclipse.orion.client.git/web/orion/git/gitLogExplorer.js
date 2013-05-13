@@ -67,26 +67,6 @@ exports.GitLogExplorer = (function() {
 		}
 		return fileURI;
 	};
-		
-	GitLogExplorer.prototype.getHeadFileUri = function(){
-		var fileURI;
-		
-		var pageParams = PageUtil.matchResourceParameters();
-		var path = pageParams.resource.split("gitapi/commit/"); //$NON-NLS-0$
-		if(path.length === 2){
-			path = path[1].split("/"); //$NON-NLS-0$
-			if(path.length > 1){
-				fileURI="";
-				for(var i=1; i<path.length-1; i++){
-					//first segment is a branch name
-					fileURI+= "/" + path[i]; //$NON-NLS-0$
-				}
-				fileURI+="/" + path[path.length-1].split("?")[0]; //$NON-NLS-1$ //$NON-NLS-0$
-			}
-		}
-		return fileURI;
-	};
-		
 	
 	GitLogExplorer.prototype.makeHref = function(fileClient, seg, location, isRemote) {
 		if (!location) {
@@ -122,9 +102,11 @@ exports.GitLogExplorer = (function() {
 		//TODO we are calculating file path from the URL, it should be returned by git API
 		var fileURI, branchName;
 		if (isRemote || isBranch) {
-			fileURI = this.getHeadFileUri();
+			fileURI = item.ContentLocation + item.RepositoryPath;
 			branchName = item.toRef.Name;
-		} else { fileURI = this.getCloneFileUri(); }	
+		} else {
+			fileURI = this.getCloneFileUri();
+		}
 			
 		var that = this;
 		
