@@ -40,7 +40,7 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'ori
 		
 			var titleArea = document.getElementById( 'titleArea');
 			
-			if(project){
+			if(project && titleArea){
 				titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
 			}
 			window.location.hash = '?project=' + project.id;
