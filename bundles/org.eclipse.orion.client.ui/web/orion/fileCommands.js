@@ -79,7 +79,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 */
 	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force) { 
 		this.req = new XMLHttpRequest();
-		this.req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-0$
+		this.req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
 		this.req.setRequestHeader("Slug", file.name); //$NON-NLS-0$
 		// TODO if we want to unzip zip files, don't use this...
@@ -95,7 +95,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				}catch(e){
 				}
 				if(result.JsonData && result.JsonData.ExistingFiles){
-					var confirmFunction = (explorer && explorer.serviceRegistry) ? explorer.serviceRegistry.getService("orion.page.dialog").confirm : confirm;
+					var confirmFunction = (explorer && explorer.serviceRegistry) ? explorer.serviceRegistry.getService("orion.page.dialog").confirm : confirm; //$NON-NLS-0$
 					if(confirmFunction(result.Message + "\nWould you like to retry the import with force overwriting?")){
 						fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true);
 						return;
@@ -221,7 +221,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			if (mFileUtils.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
 				loadedWorkspace = explorer.treeRoot;
 			} else {
-				loadedWorkspace = progressService.progress(fileClient.loadWorkspace(""), "Loading workspace");
+				loadedWorkspace = progressService.progress(fileClient.loadWorkspace(""), "Loading workspace"); //$NON-NLS-0$
 			}
 			Deferred.when(loadedWorkspace, function(workspace) {
 				var deferred = fileClient.createProject(workspace.ChildrenLocation, name);
@@ -495,8 +495,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						if(item.length === 2 && !item[0].Directory && !item[1].Directory){
 							var contentType1 = contentTypeService.getFilenameContentType(item[0].Name);
 							var contentType2 = contentTypeService.getFilenameContentType(item[1].Name);
-							if(contentType1 && (contentType1['extends'] === "text/plain" || contentType1.id === "text/plain") && //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-							   contentType2 && (contentType2['extends'] === "text/plain" || contentType2.id === "text/plain")){ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+							if(contentType1 && (contentType1['extends'] === "text/plain" || contentType1.id === "text/plain") && //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							   contentType2 && (contentType2['extends'] === "text/plain" || contentType2.id === "text/plain")){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								return true;
 							}
 						} else if(item.length === 2 && item[0].Directory && item[1].Directory){
@@ -774,7 +774,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-go-up", //$NON-NLS-0$
 			id: "eclipse.upFolder", //$NON-NLS-0$
 			callback: function(data) {
-				if (typeof explorer.scopeUp === "function") {
+				if (typeof explorer.scopeUp === "function") { //$NON-NLS-0$
 					explorer.scopeUp();
 				}
 			},
