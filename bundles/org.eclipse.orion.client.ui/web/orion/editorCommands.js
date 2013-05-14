@@ -457,11 +457,12 @@ exports.EditorCommandFactory = (function() {
 				Deferred.all(deferreds, function(error) {return {_error: error}; }).then(function(promises) {
 					// In the editor, we generate page level commands to the banner.  Don't bother if we don't know the input
 					// metadata, because we'll generate again once we know.
-					if (input.getFileMetadata()) {
+					var metadata;
+					if ((metadata = input.getFileMetadata())) {
 						var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 						if (toolbar) {	
 							self.commandService.destroy(toolbar);
-							self.commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button"); //$NON-NLS-0$
+							self.commandService.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
 						}
 						toolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
 						if (toolbar) {	
