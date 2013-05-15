@@ -34,8 +34,8 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         _init: function (options) {
             var container = lib.node(options.container);
             if (!container) {
-                throw "no parent container";
-            } //$NON-NLS-0$
+                throw "no parent container"; //$NON-NLS-0$
+            }
             this._container = container;
             container.classList.remove("currentLocation"); //$NON-NLS-0$
             this._id = options.id || "eclipse.breadcrumbs"; //$NON-NLS-0$
@@ -98,7 +98,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
 
 	            var collection = parents.splice(0);
 	
-	            if (direction === 'reverse') {
+	            if (direction === 'reverse') { //$NON-NLS-0$
 	                collection = collection.reverse().splice(0);
 	            }
 	
@@ -143,8 +143,8 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
                 this._container.appendChild(this.crumbs);
 
                 this.dirty = document.createElement('span'); //$NON-NLS-0$
-                this.dirty.id = "dirty";
-                this.dirty.className = "modifiedFileMarker";
+                this.dirty.id = "dirty"; //$NON-NLS-0$
+                this.dirty.className = "modifiedFileMarker"; //$NON-NLS-0$
                 this._container.appendChild(this.dirty);
             }
         },
@@ -233,7 +233,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
 
             this.refresh();
 
-            this.crumbs.style.visibility = 'hidden';
+            this.crumbs.style.visibility = 'hidden'; //$NON-NLS-0$
 
             var segment = this.getNavigatorWorkspaceRootSegment();
 
@@ -245,7 +245,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
                 this.finalSegment(segment, firstSegmentName);
 
                 if (this._resource) {
-                    this.buildSegments(firstSegmentName, 'reverse');
+                    this.buildSegments(firstSegmentName, 'reverse'); //$NON-NLS-0$
                     this.measureSegments();
                     this.firstSegment(segment);
 
@@ -259,10 +259,10 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         render: function () {
 
             this.refresh();
-			this.crumbs.style.width = 'auto';
-            this.crumbs.style.visibility = 'visible';
-            this.crumbs.parentNode.className = "currentLocation";
-            this.crumbs.parentNode.style.width = 'auto';
+			this.crumbs.style.width = 'auto'; //$NON-NLS-0$
+            this.crumbs.style.visibility = 'visible'; //$NON-NLS-0$
+            this.crumbs.parentNode.className = "currentLocation"; //$NON-NLS-0$
+            this.crumbs.parentNode.style.width = 'auto'; //$NON-NLS-0$
 
             var segment = this.getNavigatorWorkspaceRootSegment();
 
@@ -277,13 +277,13 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
                 }
 
                 if (this._resource) {
-                    this.buildSegments(firstSegmentName, 'forward');
+                    this.buildSegments(firstSegmentName, 'forward'); //$NON-NLS-0$
                     this.drawSegments();
                     this.finalSegment(segment, firstSegmentName);
                 }
             }
 
-            this.crumbs.parentNode.style.width = this.crumbs.offsetWidth + 20 + 'px';   
+            this.crumbs.parentNode.style.width = this.crumbs.offsetWidth + 20 + 'px';    //$NON-NLS-0$
         }
     };
 
