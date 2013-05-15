@@ -434,7 +434,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 	 *  to call when the choice is made.  Optional.
 	 * @param {String} [options.imageClass] a CSS class name suitable for showing a background image.  Optional.
 	 * @param {Boolean} [options.addImageClassToElement] If true, the image class will be added to the element's
-	 *  class list. Otherwise, a span element with the image class is created and appended to the element. 
+	 *  class list. Otherwise, a span element with the image class is created and appended to the element.  Optional.
 	 * @param {String} [options.spriteClass] an additional CSS class name that can be used to specify a sprite background image.  This
 	 *  useful with some sprite generation tools, where imageClass specifies the location in a sprite, and spriteClass describes the
 	 *  sprite itself.  Optional.
