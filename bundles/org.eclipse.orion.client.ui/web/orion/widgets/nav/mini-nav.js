@@ -28,6 +28,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	 */
 	var navHandlerFactory = {
 		createNavHandler: function(explorer, explorerNavDict, options) {
+			options.gridClickSelectionPolicy = "active"; //$NON-NLS-0$
 			var _super = mExplorerNavHandler.ExplorerNavHandler.prototype;
 			var handler = new mExplorerNavHandler.ExplorerNavHandler(explorer, explorerNavDict, options);
 			handler.onClick = function(modelItem, mouseEvent) {
