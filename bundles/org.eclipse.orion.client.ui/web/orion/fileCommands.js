@@ -784,6 +784,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 //			name: messages["Go Up"],
 			tooltip: messages["Move up to the parent folder"],
 			imageClass: "core-sprite-go-up", //$NON-NLS-0$
+			addImageClassToElement: true,
 			id: "eclipse.upFolder", //$NON-NLS-0$
 			callback: function(data) {
 				if (typeof explorer.scopeUp === "function") { //$NON-NLS-0$
