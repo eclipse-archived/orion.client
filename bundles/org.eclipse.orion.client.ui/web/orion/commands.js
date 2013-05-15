@@ -177,7 +177,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		}, false);
 
 
-	function createDropdownMenu(parent, name, populateFunction, buttonCss) {
+	function createDropdownMenu(parent, name, populateFunction, buttonCss, showName) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
@@ -192,7 +192,9 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		var menuButton = newMenu.previousSibling;
 		if (buttonCss) {
 			menuButton.classList.add(buttonCss);
-			menuButton.textContent = '';
+			if(!showName) {
+				menuButton.textContent = '';
+			}
 		} else {
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 			menuButton.classList.add("commandButton"); //$NON-NLS-0$
