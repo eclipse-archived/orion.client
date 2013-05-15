@@ -9,143 +9,286 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global window define document */
+define(['require', 'orion/webui/littlelib'], function (require, lib) {
 
-define(['require', 'orion/webui/littlelib'], function(require, lib) {
+    /**
+     * Constructs a new BreadCrumb with the given options.
+     * @param {Object} options The options object, which must specify the parent container.
+     * @param options.container The parent container for the bread crumb presentation
+     * @param [options.resource] The current resource
+     * @param [options.rootSegmentName] The name to use for the root segment in lieu of the metadata name.
+     * @param [options.workspaceRootSegmentName] The name to use for the workspace root. If not specified, the workspace root
+     * will not be shown.
+     * @param {Function} [options.makeHref] The callback function to make the href on a bread crumb item. If not defined "/navigate/table.html#" is used.
+     * @param {Function} [option.getFirstSegment] The callback function to make DOM node for the first segment in breadcrumb. 
+     * @class Bread crumbs show the current position within a resource tree and allow navigation
+     * to different places in the tree. Unlike the fairy tale, bread crumbs typically don't lead
+     * to a cottage made of gingerbread. Sorry!
+     * @name orion.breadcrumbs.BreadCrumbs
+     */
 
-	/**
-	 * Constructs a new BreadCrumb with the given options.
-	 * @param {Object} options The options object, which must specify the parent container.
-	 * @param options.container The parent container for the bread crumb presentation
-	 * @param [options.resource] The current resource
-	 * @param [options.rootSegmentName] The name to use for the root segment in lieu of the metadata name.
-	 * @param [options.workspaceRootSegmentName] The name to use for the workspace root. If not specified, the workspace root
-	 * will not be shown.
-	 * @param {Function} [options.makeHref] The callback function to make the href on a bread crumb item. If not defined "/navigate/table.html#" is used.
-	 * @param {Function} [option.getFirstSegment] The callback function to make DOM node for the first segment in breadcrumb. 
-	 * @class Bread crumbs show the current position within a resource tree and allow navigation
-	 * to different places in the tree. Unlike the fairy tale, bread crumbs typically don't lead
-	 * to a cottage made of gingerbread. Sorry!
-	 * @name orion.breadcrumbs.BreadCrumbs
-	 */
-	function BreadCrumbs(options) {
-		this._init(options);		
-	}
-	BreadCrumbs.prototype = /** @lends orion.breadcrumbs.BreadCrumbs.prototype */ {
-		_init: function(options) {
-			var container = lib.node(options.container);
-			if (!container) { throw "no parent container"; } //$NON-NLS-0$
-			this._container = container;
-			container.classList.remove("currentLocation"); //$NON-NLS-0$
-			this._id = options.id || "eclipse.breadcrumbs"; //$NON-NLS-0$
-			this._resource = options.resource|| null;
-			this._rootSegmentName = options.rootSegmentName;
-			this._workspaceRootSegmentName = options.workspaceRootSegmentName;
-			this._makeHref = options.makeHref;
-			this.path = "";
-			this.render();
-		},
-		getNavigatorWorkspaceRootSegment: function(){
-			if (this._workspaceRootSegmentName) {
-				var seg;
-				if (this._resource && this._resource.Parents) {
-					seg = document.createElement('a'); //$NON-NLS-0$
-					if(this._makeHref) {
-						this._makeHref(seg , "");
-					} else {
-						seg.href = require.toUrl("navigate/table.html") + "#"; //$NON-NLS-1$ //$NON-NLS-0$
-					}
-				} else {
-					seg = document.createElement('span'); //$NON-NLS-0$
-				}
-				lib.empty(seg);
-				seg.appendChild(document.createTextNode(this._workspaceRootSegmentName)); 
-				return seg;
-			}
-			return null;
-		},
+    function BreadCrumbs(options) {
+        this._init(options);
+    }
+    BreadCrumbs.prototype = /** @lends orion.breadcrumbs.BreadCrumbs.prototype */ {
+        _init: function (options) {
+            var container = lib.node(options.container);
+            if (!container) {
+                throw "no parent container";
+            } //$NON-NLS-0$
+            this._container = container;
+            container.classList.remove("currentLocation"); //$NON-NLS-0$
+            this._id = options.id || "eclipse.breadcrumbs"; //$NON-NLS-0$
+            this._resource = options.resource || null;
+            this._rootSegmentName = options.rootSegmentName;
+            this._workspaceRootSegmentName = options.workspaceRootSegmentName;
+            this._makeHref = options.makeHref;
+            this.path = "";
+            this.measure();
+            this.render();
+        },
 
-		render: function() {
-			var container = this._container;
-			var crumbs = lib.node(this._id);
-			if (crumbs) {
-				lib.empty(crumbs);
-			} else {
-				crumbs = document.createElement('span'); //$NON-NLS-0$
-				crumbs.id = this._id;
-				container.appendChild(crumbs);
-			}
-			var seg, slash;
-			seg = this.getNavigatorWorkspaceRootSegment();
-			if (seg) {
-				seg.classList.add("breadcrumb"); //$NON-NLS-0$
-				crumbs.appendChild(seg);
-				if (this._resource && this._resource.Parents) {
-					slash = document.createElement('span'); //$NON-NLS-0$
-					slash.appendChild(document.createTextNode(' / '));  //$NON-NLS-0$
-					this.path+="/"; //$NON-NLS-0$
-					slash.classList.add("breadcrumbSeparator"); //$NON-NLS-0$
-					crumbs.appendChild(slash);
-				} else {
-					// we are at the root.  Get rid of any href since we are already here
-					seg.href = "";
-					// don't need the breadcrumb style because we are here.
-					seg.classList.remove("breadcrumb"); //$NON-NLS-0$
-					seg.classList.add("currentLocation"); //$NON-NLS-0$
-					return;
-				}
-			}
-			var firstSegmentName = this._rootSegmentName;
-			if (this._resource) {
-				if (this._resource.Parents) {
-				// walk up the parent chain and insert a crumb for each parent
-					var parents = this._resource.Parents;
-					for (var i = parents.length; --i >= 0 ;){
-						seg = document.createElement('a'); //$NON-NLS-0$
-						seg.classList.add("breadcrumb"); //$NON-NLS-0$
-						if (firstSegmentName) {
-							seg.appendChild(document.createTextNode(firstSegmentName)); 
-							firstSegmentName = null;
-						} else {
-							seg.appendChild(document.createTextNode(parents[i].Name)); 
-						}
-						this.path += parents[i].Name; 
-						if(this._makeHref) {
-							this._makeHref(seg , parents[i].Location, parents[i]);
-						}
-						else {
-							seg.href = require.toUrl("navigate/table.html") +"#" + parents[i].ChildrenLocation; //$NON-NLS-1$ //$NON-NLS-0$
-						}
-						crumbs.appendChild(seg);
-						slash = document.createElement('span'); //$NON-NLS-0$
-						slash.appendChild(document.createTextNode(' / ')); //$NON-NLS-0$
-						this.path += '/'; //$NON-NLS-0$
-						slash.classList.add("breadcrumbSeparator"); //$NON-NLS-0$
-						crumbs.appendChild(slash);
-					}
-				}
-				//add a final entry for the current location
-				seg = document.createElement('span'); //$NON-NLS-0$
-				if (firstSegmentName) {
-					seg.appendChild(document.createTextNode(firstSegmentName)); 
-					firstSegmentName = null;
-				} else {
-					seg.appendChild(document.createTextNode(this._resource.Name)); 
-				}				
-				seg.classList.add("currentLocation"); //$NON-NLS-0$
-				this.path+=this._resource.Name;
-				crumbs.appendChild(seg);
-			} 
-			// if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
-			if (crumbs.childNodes.length === 0) {
-				seg = document.createElement('span'); //$NON-NLS-0$
-				seg.appendChild(document.createTextNode(firstSegmentName || document.title)); 
-				seg.classList.add("breadcrumb"); //$NON-NLS-0$
-				seg.classList.add("currentLocation"); //$NON-NLS-0$
-				crumbs.appendChild(seg);
-			}
-		}
-	};
-	BreadCrumbs.prototype.constructor = BreadCrumbs;
-	//return the module exports
-	return {BreadCrumbs: BreadCrumbs};
+        getNavigatorWorkspaceRootSegment: function () {
+            if (this._workspaceRootSegmentName) {
+                var seg;
+                if (this._resource && this._resource.Parents) {
+                    seg = document.createElement('a'); //$NON-NLS-0$
+                    if (this._makeHref) {
+                        this._makeHref(seg, "" );
+                    } else {
+                        seg.href = require.toUrl("navigate/table.html") + "#"; //$NON-NLS-1$ //$NON-NLS-0$
+                    }
+                } else {
+                    seg = document.createElement('span'); //$NON-NLS-0$
+                }
+                lib.empty(seg);
+                seg.appendChild(document.createTextNode(this._workspaceRootSegmentName));
+                return seg;
+            }
+            return null;
+        },
+
+        MAX_LENGTH: 500,
+        INCLUDE_FIRST_SECTION: true,
+
+        segments: [],
+
+        buildSegment: function (name) {
+            var segment = document.createElement('a'); //$NON-NLS-0$
+            segment.classList.add("breadcrumb"); //$NON-NLS-0$
+            segment.appendChild(document.createTextNode(name));
+            return segment;
+        },
+
+        addSegmentHref: function (seg, section) {
+            if (this._makeHref) {
+                this._makeHref(seg, section.Location, section);
+            } else {
+                seg.href = require.toUrl("navigate/table.html") + "#" + section.ChildrenLocation; //$NON-NLS-1$ //$NON-NLS-0$
+            }
+        },
+
+        buildSegments: function (firstSegmentName, direction) {
+
+            var parents = this._resource.Parents;
+            var seg;
+            var segmentName;
+            
+            if( parents ){
+
+	            var collection = parents.splice(0);
+	
+	            if (direction === 'reverse') {
+	                collection = collection.reverse().splice(0);
+	            }
+	
+	            collection.forEach(function (parent) {
+	
+	                if (firstSegmentName) {
+	                    segmentName = firstSegmentName;
+	                    firstSegmentName = null;
+	                } else {
+	                    segmentName = parent.Name;
+	                }
+	
+	                seg = this.buildSegment(segmentName);
+	                
+	
+		                this.path += parent.Name;
+		                this.addSegmentHref(seg, parent);
+	                
+	                seg.include = false;
+	                this.segments.push(seg);
+	
+	            }.bind(this));         
+            }
+        },
+
+        addDivider: function () {
+            var slash = document.createElement('span'); //$NON-NLS-0$
+            slash.appendChild(document.createTextNode(' / ')); //$NON-NLS-0$
+            this.path += "/"; //$NON-NLS-0$
+            slash.classList.add("breadcrumbSeparator"); //$NON-NLS-0$		
+            this.append(slash);
+        },
+
+        refresh: function () {
+            this.crumbs = lib.node(this._id);
+
+            if (this.crumbs) {
+                lib.empty(this.crumbs);
+            } else {
+                this.crumbs = document.createElement('span'); //$NON-NLS-0$
+                this.crumbs.id = this._id;
+                this._container.appendChild(this.crumbs);
+
+                this.dirty = document.createElement('span'); //$NON-NLS-0$
+                this.dirty.id = "dirty";
+                this.dirty.className = "modifiedFileMarker";
+                this._container.appendChild(this.dirty);
+            }
+        },
+
+        append: function (section) {
+            this.crumbs.appendChild(section);
+        },
+
+        addTitle: function (seg, firstSegmentName) {
+            // if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
+
+            if (this.crumbs.childNodes.length === 0) {
+                seg = document.createElement('span'); //$NON-NLS-0$
+                seg.appendChild(document.createTextNode(firstSegmentName || document.title));
+                seg.classList.add("breadcrumb"); //$NON-NLS-0$
+                seg.classList.add("currentLocation"); //$NON-NLS-0$
+                this.append(seg);
+            }
+        },
+
+        finalSegment: function (seg, firstSegmentName) {
+            seg = document.createElement('span'); //$NON-NLS-0$
+            if (firstSegmentName) {
+                seg.appendChild(document.createTextNode(firstSegmentName));
+                firstSegmentName = null;
+            } else {
+                seg.appendChild(document.createTextNode(this._resource.Name));
+            }
+            seg.classList.add("currentLocation"); //$NON-NLS-0$
+            this.path += this._resource.Name;
+            this.append(seg);
+        },
+
+        firstSegment: function (segment) {
+            if (segment) {
+                this.append(segment);
+
+                if (this._resource && this._resource.Parents) {
+                    segment.classList.add("breadcrumb"); //$NON-NLS-0$
+                    this.addDivider();
+                } else { // we are at the root.  Get rid of any href since we are already here
+                    segment.href = "";
+                    segment.classList.add("currentLocation"); //$NON-NLS-0$
+                    return;
+                }
+            }
+        },
+
+        drawSegments: function () {
+
+            if (this._resource.Parents) {
+                var reverseParents = this.segments.splice(0);
+                reverseParents.forEach(function (parent) {
+                    if (parent.include === true) {
+                        this.append(parent);
+                        this.addDivider();
+                    }
+                }.bind(this));
+            }
+        },
+
+        measureSegments: function () {
+
+            this.INCLUDE_FIRST_SECTION = true;
+
+            var totalWidth;
+
+            if (this._resource.Parents) {
+                var reverseParents = this.segments.splice(0).reverse();
+                reverseParents.forEach(function (parent) {
+                    this.append(parent);
+                    this.addDivider();
+                    if (this.crumbs.offsetWidth < this.MAX_LENGTH) {
+                        parent.include = true;
+                    } else {
+                        this.INCLUDE_FIRST_SECTION = false;
+                    }
+
+                }.bind(this));
+
+                this.segments = reverseParents.reverse();
+            }
+        },
+
+        measure: function () {
+
+            this.refresh();
+
+            this.crumbs.style.visibility = 'hidden';
+
+            var segment = this.getNavigatorWorkspaceRootSegment();
+
+            var firstSegmentName = this._rootSegmentName;
+
+            if (firstSegmentName) {
+                this.addTitle(segment, firstSegmentName);
+            } else {
+                this.finalSegment(segment, firstSegmentName);
+
+                if (this._resource) {
+                    this.buildSegments(firstSegmentName, 'reverse');
+                    this.measureSegments();
+                    this.firstSegment(segment);
+
+                    if (this.crumbs.offsetWidth >= this.MAX_LENGTH) {
+                        this.INCLUDE_FIRST_SECTION = false;
+                    }
+                }
+            }
+        },
+
+        render: function () {
+
+            this.refresh();
+			this.crumbs.style.width = 'auto';
+            this.crumbs.style.visibility = 'visible';
+            this.crumbs.parentNode.className = "currentLocation";
+            this.crumbs.parentNode.style.width = 'auto';
+
+            var segment = this.getNavigatorWorkspaceRootSegment();
+
+            var firstSegmentName = this._rootSegmentName;
+
+            if (firstSegmentName) {
+                this.addTitle(segment, firstSegmentName);
+            } else {
+
+                if (this.INCLUDE_FIRST_SECTION === true) {
+                    this.firstSegment(segment);
+                }
+
+                if (this._resource) {
+                    this.buildSegments(firstSegmentName, 'forward');
+                    this.drawSegments();
+                    this.finalSegment(segment, firstSegmentName);
+                }
+            }
+
+            this.crumbs.parentNode.style.width = this.crumbs.offsetWidth + 20 + 'px';   
+        }
+    };
+
+    BreadCrumbs.prototype.constructor = BreadCrumbs;
+    return {
+        BreadCrumbs: BreadCrumbs
+    };
 });

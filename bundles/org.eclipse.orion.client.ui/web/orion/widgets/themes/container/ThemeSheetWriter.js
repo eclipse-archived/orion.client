@@ -148,7 +148,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			var breadcrumb = new ThemeClass.ThemeClass( 'breadcrumb' );
 			breadcrumb.style.fontSize = '8pt';
 			breadcrumb.style.textDecoration = 'none';
-			breadcrumb.style.color = '#ddd';
+			breadcrumb.style.color = '#f1f1f2;';
 			breadcrumb.style.paddingTop = '2px';
 			
 			styles.push( breadcrumb );
@@ -169,7 +169,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			var breadcrumbSeparator = new ThemeClass.ThemeClass( 'breadcrumbSeparator' );
 			breadcrumbSeparator.style.fontSize = '8pt';
 			breadcrumbSeparator.style.textDecoration = 'none';
-			breadcrumbSeparator.style.color = '#ddd'; // this.navbar;
+			breadcrumbSeparator.style.color = '#f1f1f2'; // this.navbar;
 			breadcrumbSeparator.style.fontWeight = 'bold';
 			
 			styles.push( breadcrumbSeparator );
@@ -177,7 +177,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			var currentLocation = new ThemeClass.ThemeClass( 'currentLocation' );
 			currentLocation.style.fontWeight = 'bold';
 			currentLocation.style.fontSize = '8pt';
-			currentLocation.style.color = '#ddd'; //this.navbar; // should be a separate themeable item but hard coded for now.
+			currentLocation.style.color = '#f1f1f2'; //this.navbar; // should be a separate themeable item but hard coded for now.
 			currentLocation.style.textDecoration = 'none';
 			currentLocation.style.textWrap = 'normal';
 			currentLocation.style.lineHeight = '10pt';
