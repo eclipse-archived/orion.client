@@ -89,17 +89,16 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         },
 
         buildSegments: function (firstSegmentName, direction) {
-
-            var parents = this._resource.Parents;
+            var parents = this._resource.Parents.slice(0); // create a copy
             var seg;
             var segmentName;
             
             if( parents ){
 
-	            var collection = parents.splice(0);
+	            var collection = parents.slice(0);
 	
 	            if (direction === 'reverse') { //$NON-NLS-0$
-	                collection = collection.reverse().splice(0);
+	                collection = collection.reverse().slice(0);
 	            }
 	
 	            collection.forEach(function (parent) {
@@ -196,7 +195,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         drawSegments: function () {
 
             if (this._resource.Parents) {
-                var reverseParents = this.segments.splice(0);
+                var reverseParents = this.segments.slice(0);
                 reverseParents.forEach(function (parent) {
                     if (parent.include === true) {
                         this.append(parent);
@@ -213,7 +212,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
             var totalWidth;
 
             if (this._resource.Parents) {
-                var reverseParents = this.segments.splice(0).reverse();
+                var reverseParents = this.segments.slice(0).reverse();
                 reverseParents.forEach(function (parent) {
                     this.append(parent);
                     this.addDivider();
