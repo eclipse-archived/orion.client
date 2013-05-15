@@ -2100,7 +2100,36 @@ var exports = {};
 				};
 				
 				if (item.url && item.name){
-					cloneFunction(item.url, null, item.name);
+					
+					fileClient.loadWorkspace().then(function(projects){
+						for(var i=0; i<projects.Children.length; ++i){
+							var p = projects.Children[i];
+							if(p.Name === item.name){
+								if (p.Git){
+									gitService.getGitClone(p.Git.CloneLocation).then(
+										function(repoJson){
+											if (repoJson.Children[0].GitUrl === item.url){
+												var templateString = require.toUrl("edit/edit.html") + "#{,resource,params*}"; //$NON-NLS-1$ //$NON-NLS-0$
+												window.location = new URITemplate(templateString).expand({
+													resource: "", //$NON-NLS-0$
+													params: {
+														navigate: repoJson.Children[0].ContentLocation + "?depth=1"
+													}
+												});
+											} else {
+												console.info("Folder project is used");
+											}
+										}
+									)
+								} else {
+									console.info("Folder project is used");
+								}
+								return;
+							}
+						}	
+						
+						cloneFunction(item.url, null, item.name);	
+					});
 				}
 			},
 			visibleWhen : function(item) {
