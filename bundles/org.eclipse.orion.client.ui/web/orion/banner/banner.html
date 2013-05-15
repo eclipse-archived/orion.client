@@ -1,16 +1,15 @@
-<header id="banner" role="banner" class="headerLayout">
+<header id="banner" role="banner">
 	<!-- Requires some js code to bind the home link, link to progress image, and binding NLS variables  -->
 	<!-- Top row:  Logo + discovery links + search + user -->
 	<div id="staticBanner" class="layoutBlock topRowBanner"> <!-- primaryNav -->
 		<a id="home" class="layoutLeft "></a>
-		<nav id="primaryNav" class="layoutLeft" role="navigation">
+		<nav id="primaryNav" class="layoutLeft bannerLeftArea" role="navigation">
 			<div class="centralNavigation" id="centralNavigation" tabindex="0" role="button" style="margin-top:0;"></div>
 		</nav>
-		<div class="clear navigationBreadcrumb">
-			<span id="location" class="currentLocation"></span>
-			<span id="dirty" class="currentLocation"></span>
+		<div class="clear navigationBreadcrumb bannerMiddleArea" >
+			<div id="location" class="currentLocation"></div>
 		</div>
-		<div class="layoutRight">
+		<div class="layoutRight bannerRightArea">
 			<div id="globalActions" class="spacingLeft layoutLeft"></div>
 			<div id="oldRelatedLinks" class="spacingLeft layoutLeft oldRelatedLinks">
 				<span tabindex="0" role="button" id="relatedTrigger" class="dropdownTrigger hidden">${Related}<span class="dropdownArrowDown"></span></span>
@@ -18,7 +17,7 @@
 			</div>
 			<input type="text" id="search" autocomplete="off" class="layoutLeft spacingLeft searchbox" role="search" style="display:none;">
 			<div id="searchOptions" class="layoutLeft" style="padding-top:1px;display:none;"></div>
-			<div id="userMenu" class="spacingLeft layoutLeft" style="color:#ccc;">
+			<div id="userMenu" class="spacingRight layoutRight" style="color:#ccc;">
 				<img class="progressPane" id="progressPane" tabindex="0" role="progressbar"></img>
 				<span id="userTrigger" tabindex="0" role="button" class="dropdownTrigger">
 					<span class="dropdownArrowEmpty"></span>
