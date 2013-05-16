@@ -45,6 +45,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 	 *   <li>labelColumnIndex() // 0 based index of which td contains the primary label which will be indented</li>
 	 *   <li>rowsChanged // optional, perform any work (such as styling) that should happen after the row content changes</li>
 	 *   <li>updateExpandVisuals(row, isExpanded) // update any expand/collapse visuals for the row based on the specified state</li>
+	 *   TODO DOC
+	 *   tableCallback
+	 *   bodyCallback
+	 *   rowCallback
 	 * </ul>
 	 */
 	function TableTree (options) {
@@ -88,12 +92,18 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		_generate: function(children, indentLevel) {
 			lib.empty(this._parent);
 			var table = document.createElement(this._tableElement); //$NON-NLS-0$
+			if (this._renderer.tableCallback) {
+				this._renderer.tableCallback(table);
+			}
 			table.id = this._id;
 			if (this._tableStyle) {
 				table.classList.add(this._tableStyle);
 			}
 			this._renderer.initTable(table, this);
 			this._bodyElement = document.createElement(this._tableBodyElement); //$NON-NLS-0$
+			if (this._renderer.bodyCallback) {
+				this._renderer.bodyCallback(this._bodyElement);
+			}
 			this._bodyElement.id = this._id+"tbody"; //$NON-NLS-0$
 			this._generateChildren(children, indentLevel); //$NON-NLS-0$
 			table.appendChild(this._bodyElement);
@@ -105,6 +115,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			for (var i=0; i<children.length; i++) {
 				var row = document.createElement(this._tableRowElement); //$NON-NLS-0$
 				row.id = this._treeModel.getId(children[i]);
+				if (this._renderer.rowCallback) {
+					this._renderer.rowCallback(row);
+				}
 				row._depth = indentLevel;
 				// This is a perf problem and potential leak because we're bashing a dom node with
 				// a javascript object.  (Whereas above we are using simple numbers/strings). 
