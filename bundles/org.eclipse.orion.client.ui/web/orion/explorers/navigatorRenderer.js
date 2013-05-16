@@ -244,7 +244,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 			var col = document.createElement('td'); //$NON-NLS-0$
 			var span = document.createElement("span"); //$NON-NLS-0$
 			span.id = tableRow.id+"MainCol"; //$NON-NLS-0$
+			span.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 			col.appendChild(span);
+			col.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 			span.className = "mainNavColumn"; //$NON-NLS-0$
 			var itemNode;
 			if (item.Directory) {
