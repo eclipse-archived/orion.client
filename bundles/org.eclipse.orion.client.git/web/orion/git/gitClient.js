@@ -35,10 +35,9 @@ eclipse.GitService = (function() {
 	GitService.prototype = /** @lends eclipse.GitService.prototype */
 	{
 		checkGitService : function() {
-			var service = this;
 		},
 		
-		cloneGitRepository : function(gitName, gitRepoUrl, targetPath, repoLocation, gitSshUsername, gitSshPassword, gitSshKnownHost, privateKey, passphrase) {
+		cloneGitRepository : function(gitName, gitRepoUrl, targetPath, repoLocation, gitSshUsername, gitSshPassword, gitSshKnownHost, privateKey, passphrase, userInfo) {
 			var service = this;
 			var postData = {};
 			if(gitName){
@@ -60,9 +59,20 @@ eclipse.GitService = (function() {
 			if(gitSshKnownHost){
 				postData.GitSshKnownHost = gitSshKnownHost;
 			}
-			if(privateKey) postData.GitSshPrivateKey=privateKey;
-			if(passphrase) postData.GitSshPassphrase=passphrase;			
-			
+			if(privateKey) {
+				postData.GitSshPrivateKey=privateKey;
+			}
+			if(passphrase) {
+				postData.GitSshPassphrase=passphrase;
+			}
+			if(userInfo){
+				if( userInfo.GitMail ){
+					postData.GitMail = userInfo.GitMail;
+				}
+				if( userInfo.GitName ){
+					postData.GitName = userInfo.GitName;
+				}
+			}
 			//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
 			var gitapiCloneUrl = require.toUrl("gitapi/clone/._"); //$NON-NLS-0$
 			gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);

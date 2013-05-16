@@ -23,10 +23,25 @@ exports.ExplorerNavHandler = (function() {
 	/**
 	 * Creates a new tree iteration handler
 	 * 
-	 * @name orion.explorers.ExplorerNavHandler.ExplorerNavHandler
+	 * @name orion.explorerNavHandler.ExplorerNavHandler
 	 * @class A tree iteration handler based on an explorer.
-	 * @param {Object} explorer The orion.explorer.Explorer instance.
+	 * @param {Object} explorer The {@link orion.explorer.Explorer} instance.
 	 * @param {Object} options The options object which provides iterate patterns and all call back functions when iteration happens.
+	 * @param {String} [options.gridClickSelectionPolicy="none"] Controls how clicking on a grid model item -- for example, a link or a button -- affects
+	 * the selection (or how it affects the cursor, if the <code>selectionPolicy</code> is <code>"cursorOnly"</code>). Allowed values are:
+	 * <ul>
+	 * <li><code>"none"</code>: Clicking on a grid item will not change the selection (or cursor). This is the default.</li>
+	 * <li><code>"active"</code>: Clicking on a grid item will change the selection (or cursor).</li>
+	 * </ul>
+	 * @param {String} [options.selectionPolicy=null] Selection policy for this explorer. Allowed values are:
+	 * <ul>
+	 * <li><code>"cursorOnly"</code>: No selection of model items is allowed.</li>
+	 * <li><code>"singleSelection"</code>: Up to 1 model item can be selected.</li>
+	 * <li><code>null</code>: Zero or more model items can be selected. This is the default.</li>
+	 * </ul>
+	 * @param {Function} [options.postDefaultFunc] If this function provides addtional behaviors after the default behavior. Some explorers may want to do something else when the cursor is changed, etc.
+	 * @param {Function} [options.preventDefaultFunc] If this function returns true then the default behavior of all key press will stop at this time.
+	 * The key event is passed to preventDefaultFunc. It can implement its own behavior based on the key event.
 	 */
 	function ExplorerNavHandler(explorer, navDict, options) {
 		this.explorer = explorer;
@@ -100,7 +115,7 @@ exports.ExplorerNavHandler = (function() {
 		this._parentDiv = parentDiv;
 	}
 	
-	ExplorerNavHandler.prototype = /** @lends orion.ExplorerNavHandler.ExplorerNavHandler.prototype */ {
+	ExplorerNavHandler.prototype = /** @lends orion.explorerNavHandler.ExplorerNavHandler.prototype */ {
 		
 		_init: function(options){
 			this._linearGridMove = false;//temporary. If true right key on the last grid will go to first grid of next row
@@ -109,10 +124,9 @@ exports.ExplorerNavHandler = (function() {
 				return;
 			}
 			this._selectionPolicy = options.selectionPolicy;
-			this.preventDefaultFunc = options.preventDefaultFunc;//optional callback. If this function returns true then the default behavior of all key press will stop at this time.
-			                                                     //The key event is passed to preventDefaultFunc. It can implement its own behavior based o nteh key event.
-			this.postDefaultFunc = options.postDefaultFunc;//optional callback. If this function provides addtional behaviors after the default behavior.
-			                                               //Some explorers may want to do something else whne the cursor is changed, etc.
+			this.gridClickSelectionPolicy = options.gridClickSelectionPolicy || "none"; //$NON-NLS-0$
+			this.preventDefaultFunc = options.preventDefaultFunc;
+			this.postDefaultFunc = options.postDefaultFunc;
 		},
 		
 		_ctrlKeyOn: function(e){
@@ -494,7 +508,7 @@ exports.ExplorerNavHandler = (function() {
 			if(mouseEvt.target === twistieSpan){
 				return;
 			}
-			if(this._onModelGrid(model, mouseEvt)){
+			if(this.gridClickSelectionPolicy === "none" && this._onModelGrid(model, mouseEvt)){ //$NON-NLS-0$
 				return;
 			}
 			this.cursorOn(model, true, false, true);
@@ -657,7 +671,7 @@ exports.ExplorerNavDict = (function() {
 	 * The .modelItem property helps quickly looking up a model object by a given id. The .rowDomNode also helps to find out the row DOM node instead of doing a query. 
 	 * The .gridChildren is an array representing all the grid navigation information, which the caller has to fill the array out.
 	 *
-	 * @name orion.ExplorerNavHandler.ExplorerNavDict
+	 * @name orion.explorerNavHandler.ExplorerNavDict
 	 * @class A explorer navigation dictionary.
 	 * @param {Object} model The model object that represent the overall explorer.
 	 */
@@ -665,7 +679,7 @@ exports.ExplorerNavDict = (function() {
 		this._dict= {};
 		this._model = model;
 	}
-	ExplorerNavDict.prototype = /** @lends orion.ExplorerNavHandler.ExplorerNavDict.prototype */ {
+	ExplorerNavDict.prototype = /** @lends orion.explorerNavHandler.ExplorerNavDict.prototype */ {
 		
 		/**
 		 * Add a row to the dictionary.

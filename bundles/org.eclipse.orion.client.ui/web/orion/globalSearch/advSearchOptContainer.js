@@ -22,6 +22,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 	}
 	
 	AdvSearchOptRenderer.prototype.getOptions = function(includeLocation){
+		var resource;
+		if(includeLocation) {
+			resource = this._searchParams ? this._searchParams.resource : this._searcher.getSearchRootLocation();
+		}
 		return {keyword: this._searchBox.value,
 				sort: this._sortBy.options[this._sortBy.selectedIndex].value,
 				rows: 40,
@@ -30,7 +34,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 				caseSensitive: this._caseSensitiveCB.checked,
 		        regEx: this._regExCB.checked,
 		        fileType: this._fileTypes.options[this._fileTypes.selectedIndex].value,
-		        resource: includeLocation && this._searchParams ? this._searchParams.resource : undefined
+		        resource: resource
 		};
 	};
 

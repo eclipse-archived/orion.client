@@ -348,6 +348,16 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				});
 			}
 		});
+		sidebarNavInputManager.addEventListener("editorInputRemoved", function(evt) { //$NON-NLS-0$
+			var newInput = evt.newInput, parent = evt.parent;
+			var params = {};
+			// If we don't know where the file went, go to "no editor"
+			params.Resource = newInput || "";
+			params.params = {
+				navigate: parent
+			};
+			window.location = new URITemplate("#{,Resource,params*}").expand(params); //$NON-NLS-0$
+		});
 
 		editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
 			inputManager.setDirty(editor.isDirty());

@@ -292,20 +292,24 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	};
 
 	/**
-	 * @name FileExplorer#changedItem
+	 * @name orion.explorers.FileExplorer#changedItem
 	 * @function
 	 * we have changed an item on the server at the specified parent node
+	 * @param {Object} parent The parent item under which the change occurred.
+	 * @param {Boolean} forceExpand
+	 * @returns {orion.Promise}
 	 */
 	FileExplorer.prototype.changedItem = function(parent, forceExpand) {
 		var that = this;
 		var progress = this.registry.getService("orion.page.progress");
-		progress.progress(this.fileClient.fetchChildren(parent.ChildrenLocation), "Fetching children of " + parent.Name).then(function(children) {
+		return progress.progress(this.fileClient.fetchChildren(parent.ChildrenLocation), "Fetching children of " + parent.Name).then(function(children) {
 			children = that.model.processParent(parent, children);
 			//If a key board navigator is hooked up, we need to sync up the model
 			if(that.getNavHandler()){
 				//that._initSelModel();
 			}
 			that.myTree.refresh.bind(that.myTree)(parent, children, forceExpand);
+			return new Deferred().resolve(children);
 		});
 	};
 	

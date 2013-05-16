@@ -63,6 +63,19 @@
 		<java-version>1.6</java-version>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>repo.eclipse.org</id>
+			<name>Orion Repository - Releases</name>
+			<url>https://repo.eclipse.org/content/repositories/orion-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>repo.eclipse.org</id>
+			<name>Orion Repository - Snapshots</name>
+			<url>https://repo.eclipse.org/content/repositories/orion-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<modules>
 		<module>bundles/org.eclipse.orion.client.core</module>
 		<module>bundles/org.eclipse.orion.client.editor</module>

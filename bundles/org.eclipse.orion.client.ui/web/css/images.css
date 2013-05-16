@@ -7,9 +7,9 @@
 
 .logoFooter{
 	background: url(../images/orion-footer.png) no-repeat top left;
-	width:50px;
-	height:28px;
-	float:left;
+	width: 50px;
+	height: 28px;
+	float: left;
 }
 
 .commandSprite {
@@ -98,18 +98,17 @@
 	background: url(../images/addcontent.png) no-repeat top left; 
 	width: 16px; 
 	height: 16px;
-	border:none;
+	border: none;
 	margin: 4px;
 	margin-left: 6px;
-	cursor:pointer;
+	cursor: pointer;
 } 
    
 .core-sprite-go-up{  
-	background: url(../images/moveUp.png) no-repeat top left; 
-	width: 16px; 
-	height: 16px;
+	background: url(../images/moveUp.png) no-repeat center; 
+	width: 24px; 
+	height: 24px;
 	border:none;
-	margin: 2px;
 	cursor:pointer;
 } 
 
@@ -120,7 +119,7 @@
 	border:none;
 	margin-top: 4px;
 	margin-right: 4px;
-	cursor:pointer;
+	cursor: pointer;
 } 
    
 .core-sprite-settings {
@@ -130,8 +129,8 @@
    margin-top: 4px;
    height: 16px;
    width: 16px;
-   border:none;
-   cursor:pointer;
+   border: none;
+   cursor: pointer;
 }
 
 .core-sprite-wrench {
@@ -141,8 +140,8 @@
    margin-top: 4px;
    height: 16px;
    width: 16px;
-   border:none;
-   cursor:pointer;
+   border: none;
+   cursor: pointer;
 }
 
 .core-sprite-wrench-white {
@@ -152,6 +151,7 @@
    margin-top: 4px;
    height: 16px;
    width: 16px;
+   border: none;
 }
 
 .core-sprite-thumbnail {
