@@ -89,37 +89,40 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         },
 
         buildSegments: function (firstSegmentName, direction) {
-            var parents = this._resource.Parents.slice(0); // create a copy
-            var seg;
-            var segmentName;
-            
-            if( parents ){
-
-	            var collection = parents.slice(0);
 	
-	            if (direction === 'reverse') { //$NON-NLS-0$
-	                collection = collection.reverse().slice(0);
+			if( this._resource.Parents ){      
+	            var parents = this._resource.Parents.slice(0); // create a copy
+	            var seg;
+	            var segmentName;
+	            
+	            if( parents ){
+	
+		            var collection = parents.slice(0);
+		
+		            if (direction === 'reverse') { //$NON-NLS-0$
+		                collection = collection.reverse().slice(0);
+		            }
+		
+		            collection.forEach(function (parent) {
+		
+		                if (firstSegmentName) {
+		                    segmentName = firstSegmentName;
+		                    firstSegmentName = null;
+		                } else {
+		                    segmentName = parent.Name;
+		                }
+		
+		                seg = this.buildSegment(segmentName);
+		                
+		
+			                this.path += parent.Name;
+			                this.addSegmentHref(seg, parent);
+		                
+		                seg.include = false;
+		                this.segments.push(seg);
+		
+		            }.bind(this));         
 	            }
-	
-	            collection.forEach(function (parent) {
-	
-	                if (firstSegmentName) {
-	                    segmentName = firstSegmentName;
-	                    firstSegmentName = null;
-	                } else {
-	                    segmentName = parent.Name;
-	                }
-	
-	                seg = this.buildSegment(segmentName);
-	                
-	
-		                this.path += parent.Name;
-		                this.addSegmentHref(seg, parent);
-	                
-	                seg.include = false;
-	                this.segments.push(seg);
-	
-	            }.bind(this));         
             }
         },
 
@@ -155,9 +158,11 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         addTitle: function (seg, firstSegmentName) {
             // if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
 
+			var text = firstSegmentName || document.title;
+
             if (this.crumbs.childNodes.length === 0) {
                 seg = document.createElement('span'); //$NON-NLS-0$
-                seg.appendChild(document.createTextNode(firstSegmentName || document.title));
+                seg.appendChild(document.createTextNode( text ));
                 seg.classList.add("breadcrumb"); //$NON-NLS-0$
                 seg.classList.add("currentLocation"); //$NON-NLS-0$
                 this.append(seg);
@@ -209,8 +214,6 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
 
             this.INCLUDE_FIRST_SECTION = true;
 
-            var totalWidth;
-
             if (this._resource.Parents) {
                 var reverseParents = this.segments.slice(0).reverse();
                 reverseParents.forEach(function (parent) {
@@ -231,6 +234,8 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         measure: function () {
 
             this.refresh();
+            
+            this.segments = [];
 
             this.crumbs.style.visibility = 'hidden'; //$NON-NLS-0$
 

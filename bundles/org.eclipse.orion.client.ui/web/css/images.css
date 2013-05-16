@@ -91,7 +91,7 @@
 .core-sprite-stylesheet{ background-position: 0 -703px; width: 16px; height: 16px; } 
 .core-sprite-warning{ background-position: 0 -721px; width: 16px; height: 16px; } 
 .core-sprite-hamburger-inverse{  background: url(../images/hamburger.png) no-repeat top left; width: 16px; height: 16px;} 
-.core-sprite-silhouette-inverse{  background: url(../images/silhouette.png) no-repeat top left; width: 16px; height: 16px;margin-right: 15px;} 
+.core-sprite-silhouette-inverse{  background: url(../images/silhouette.png) no-repeat top left; width: 16px; height: 16px;} 
 .core-sprite-silhouette{  background: url(../images/silhouette-dark.png) no-repeat top left; width: 16px; height: 16px;} 
 
 .core-sprite-add-content{  

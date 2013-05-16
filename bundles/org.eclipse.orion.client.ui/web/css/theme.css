@@ -19,12 +19,9 @@
 	display: -ms-flexbox;     /* TWEENER - IE 10 */
 	display: -webkit-flex;     /* NEW - Chrome */
 	display: flex; 
-
-	width:100%; 
+	width:calc(100% - 10px - 3px);
+	whitespace:nowrap;
 }
-
-
-
 
 a {
 	text-decoration: none;
