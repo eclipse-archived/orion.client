@@ -35,7 +35,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				var target = mouseEvent.target;
 				if (modelItem.Directory && target && target.classList.contains(FOLDER_CLASS)) {//$NON-NLS-0$
 					explorer.loadRoot(modelItem);
-					return;
 				}
 				return _super.onClick.apply(this, arguments);
 			};
