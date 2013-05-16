@@ -422,14 +422,19 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				* Feature in WekKit. Adding a regular white space to the line will
 				* cause the longest line in the view to wrap even though "pre" is set.
 				* The fix is to use the zero-width non-joiner character (\u200C) instead.
-				* Note: To not use \uFEFF because in old version of Chrome this character 
+				* Note: Do not use \uFEFF because in old version of Chrome this character 
 				* shows a glyph;
 				*/
 				c = "\u200C"; //$NON-NLS-0$
 			}
-			ranges.push({text: c, style: view._metrics.largestFontStyle, ignoreChars: 1});
+			var range = {text: c, style: view._metrics.largestFontStyle, ignoreChars: 1};
+			if (ranges.length === 0 || !ranges[ranges.length - 1].style || ranges[ranges.length - 1].style.tagName !== "div") { //$NON-NLS-0$
+				ranges.push(range);
+			} else {
+				ranges.splice(ranges.length - 1, 0, range);
+			}
 			
-			var range, span, style, oldSpan, oldStyle, text, oldText, end = 0, oldEnd = 0, next;
+			var span, style, oldSpan, oldStyle, text, oldText, end = 0, oldEnd = 0, next;
 			var changeCount, changeStart;
 			if (div) {
 				var modelChangedEvent = div.modelChangedEvent;
@@ -498,15 +503,15 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			return lineDiv;
 		},
 		_createRanges: function(ranges, text, start, end, lineStart, data) {
-			if (start >= end) { return; }
+			if (start > end) { return; }
 			if (ranges) {
 				for (var i = 0; i < ranges.length; i++) {
 					var range = ranges[i];
-					if (range.end <= lineStart + start) { continue; }
+					if (range.end < lineStart + start) { continue; }
 					var styleStart = Math.max(lineStart + start, range.start) - lineStart;
-					if (styleStart >= end) { break; }
+					if (styleStart > end) { break; }
 					var styleEnd = Math.min(lineStart + end, range.end) - lineStart;
-					if (styleStart < styleEnd) {
+					if (styleStart <= styleEnd) {
 						styleStart = Math.max(start, styleStart);
 						styleEnd = Math.min(end, styleEnd);
 						if (start < styleStart) {
@@ -527,7 +532,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_createRange: function(text, start, end, style, data) {
-			if (start >= end) { return; }
+			if (start > end) { return; }
 			var tabSize = this.view._customTabSize, range;
 			if (tabSize && tabSize !== 8) {
 				var tabIndex = text.indexOf("\t", start); //$NON-NLS-0$
@@ -552,24 +557,38 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 					tabIndex = text.indexOf("\t", start); //$NON-NLS-0$
 				}
 			}
-			if (start < end) {
+			if (start <= end) {
 				range = {text: text.substring(start, end), style: style};
 				data.ranges.push(range);
 				data.tabOffset += range.text.length;
 			}
 		},
 		_createSpan: function(parent, text, style, ignoreChars) {
-			var isLink = style && style.tagName === "A"; //$NON-NLS-0$
+			var view = this.view;
+			var tagName = "span"; //$NON-NLS-0$
+			if (style && style.tagName) {
+				tagName = style.tagName.toLowerCase();
+			}
+			var isLink = tagName === "a"; //$NON-NLS-0$
 			if (isLink) { parent.hasLink = true; }
-			var tagName = isLink && this.view._linksVisible ? "a" : "span"; //$NON-NLS-1$ //$NON-NLS-0$
+			if (isLink && !view._linksVisible) {
+				tagName = "span"; //$NON-NLS-0$
+			}
 			var document = parent.ownerDocument;
 			var child = util.createElement(parent.ownerDocument, tagName);
-			child.appendChild(document.createTextNode(text));
+			if (style && style.html) {
+				child.innerHTML = style.html;
+				child.ignore = true;
+			} else if (style && style.node) {
+				child.appendChild(style.node);
+				child.ignore = true;
+			} else {
+				child.appendChild(document.createTextNode(style && style.text ? style.text : text));
+			}
 			applyStyle(style, child);
-			if (tagName === "A") { //$NON-NLS-0$
-				var self = this.view;
-				var window = this._getWindow();
-				addHandler(child, "click", function(e) { return self._handleLinkClick(e ? e : window.event); }, false); //$NON-NLS-0$
+			if (tagName === "a") { //$NON-NLS-0$
+				var window = view._getWindow();
+				addHandler(child, "click", function(e) { return view._handleLinkClick(e ? e : window.event); }, false); //$NON-NLS-0$
 			}
 			child.viewStyle = style;
 			if (ignoreChars) {
@@ -596,6 +615,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				var lineOffset = model.getLineStart(lineIndex);
 				var lineChild = child.firstChild;
 				while (lineChild) {
+					if (lineChild.ignore) {
+						lineChild = lineChild.nextSibling;
+						continue;
+					}
 					var textNode = lineChild.firstChild;
 					var nodeLength = textNode.length; 
 					if (lineChild.ignoreChars) {
@@ -707,6 +730,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var result = [];
 			var lineChild = child.firstChild, i, r, parentRect = child.getBoundingClientRect();
 			while (lineChild) {
+				if (lineChild.ignore) {
+					lineChild = lineChild.nextSibling;
+					continue;
+				}
 				var rects = this._getClientRects(lineChild, parentRect);
 				for (i = 0; i < rects.length; i++) {
 					var rect = rects[i], j;
@@ -820,6 +847,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var lineChild = child.firstChild;
 			done:
 			while (lineChild) {
+				if (lineChild.ignore) {
+					lineChild = lineChild.nextSibling;
+					continue;
+				}
 				var textNode = lineChild.firstChild;
 				var nodeLength = textNode.length;
 				if (lineChild.ignoreChars) {
@@ -2492,6 +2523,9 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var reset = start === undefined && end === undefined;
 			if (start === undefined) { start = 0; }
 			if (end === undefined) { end = this._model.getCharCount(); }
+			if (reset) {
+				this._variableLineHeight = false;
+			}
 			this._modifyContent({text: text, start: start, end: end, _code: true}, !reset);
 			if (reset) {
 				this._columnX = -1;
@@ -2566,6 +2600,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		
 		/**************************************** Event handlers *********************************/
 		_handleRootMouseDown: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (util.isFirefox && e.which === 1) {
 				this._clientDiv.contentEditable = false;
 				(this._overlayDiv || this._clientDiv).draggable = true;
@@ -2599,6 +2634,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleRootMouseUp: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (util.isFirefox && e.which === 1) {
 				this._clientDiv.contentEditable = true;
 				(this._overlayDiv || this._clientDiv).draggable = false;
@@ -2667,6 +2703,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleContextMenu: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (util.isIE && this._lastMouseButton === 3) {
 				// We need to update the DOM selection, because on
 				// right-click the caret moves to the mouse location.
@@ -2690,6 +2727,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleCopy: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (this._ignoreCopy) { return; }
 			if (this._doCopy(e)) {
 				if (e.preventDefault) { e.preventDefault(); }
@@ -2697,15 +2735,18 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleCut: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (this._doCut(e)) {
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
 			}
 		},
 		_handleDataModified: function(e) {
+			if (this._ignoreEvent(e)) { return; }
 			this._startIME();
 		},
 		_handleDblclick: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			var time = e.timeStamp ? e.timeStamp : new Date().getTime();
 			this._lastMouseTime = time;
 			if (this._clickCount !== 2) {
@@ -2714,6 +2755,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleDragStart: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (util.isFirefox) {
 				var self = this;
 				var window = this._getWindow();
@@ -2733,11 +2775,13 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleDrag: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (this.isListening("Drag")) { //$NON-NLS-0$
 				this.onDrag(this._createMouseEvent("Drag", e)); //$NON-NLS-0$
 			}
 		},
 		_handleDragEnd: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			this._dropTarget = false;
 			this._dragOffset = -1;
 			if (this.isListening("DragEnd")) { //$NON-NLS-0$
@@ -2756,6 +2800,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleDragEnter: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			var prevent = true;
 			this._dropTarget = true;
 			if (this.isListening("DragEnter")) { //$NON-NLS-0$
@@ -2773,6 +2818,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleDragOver: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			var prevent = true;
 			if (this.isListening("DragOver")) { //$NON-NLS-0$
 				prevent = false;
@@ -2790,12 +2836,14 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleDragLeave: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			this._dropTarget = false;
 			if (this.isListening("DragLeave")) { //$NON-NLS-0$
 				this.onDragLeave(this._createMouseEvent("DragLeave", e)); //$NON-NLS-0$
 			}
 		},
 		_handleDrop: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			this._dropTarget = false;
 			if (this.isListening("Drop")) { //$NON-NLS-0$
 				this.onDrop(this._createMouseEvent("Drop", e)); //$NON-NLS-0$
@@ -2829,6 +2877,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleKeyDown: function (e) {
+			if (this._ignoreEvent(e)) {	return;	}
 			if (this.isListening("KeyDown")) { //$NON-NLS-0$
 				var keyEvent = this._createKeyEvent("KeyDown", e); //$NON-NLS-0$
 				this.onKeyDown(keyEvent); //$NON-NLS-0$
@@ -2911,6 +2960,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleKeyPress: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			/*
 			* Feature in Firefox. Keypress events still happen even if the keydown event
 			* was prevented. The fix is to remember that keydown was prevented and prevent
@@ -2987,6 +3037,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleKeyUp: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (this.isListening("KeyUp")) { //$NON-NLS-0$
 				var keyEvent = this._createKeyEvent("KeyUp", e); //$NON-NLS-0$
 				this.onKeyUp(keyEvent); //$NON-NLS-0$
@@ -3052,6 +3103,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			return result;
 		},
 		_handleMouseDown: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (this._linksVisible) {
 				var target = e.target || e.srcElement;
 				if (target.tagName !== "A") { //$NON-NLS-0$
@@ -3113,12 +3165,14 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleMouseOver: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (this._animation) { return; }
 			if (this.isListening("MouseOver")) { //$NON-NLS-0$
 				this.onMouseOver(this._createMouseEvent("MouseOver", e)); //$NON-NLS-0$
 			}
 		},
 		_handleMouseOut: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (this._animation) { return; }
 			if (this.isListening("MouseOut")) { //$NON-NLS-0$
 				this.onMouseOut(this._createMouseEvent("MouseOut", e)); //$NON-NLS-0$
@@ -3234,6 +3288,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			};
 		},
 		_handleMouseUp: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			var left = e.which ? e.button === 0 : e.button === 1;
 			if (this.isListening("MouseUp")) { //$NON-NLS-0$
 				if (this._isClientDiv(e) || (left && this._isMouseDown)) {
@@ -3355,6 +3410,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handlePaste: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			if (this._ignorePaste) { return; }
 			if (this._doPaste(e)) {
 				if (util.isIE) {
@@ -3377,7 +3433,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var newWidth = this._parent.clientWidth;
 			var newHeight = this._parent.clientHeight;
 			if (this._parentWidth !== newWidth || this._parentHeight !== newHeight) {
-				if (this._parentWidth !== newWidth) {
+				if (this._parentWidth !== newWidth && this._wrapMode) {
 					this._resetLineHeight();
 				}
 				this._parentWidth = newWidth;
@@ -3521,6 +3577,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 		},
 		_handleTextInput: function (e) {
+			if (this._ignoreEvent(e)) { return; }
 			this._imeOffset = -1;
 			if (util.isAndroid) {
 				var selection = this._getWindow().getSelection();
@@ -4979,6 +5036,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var text = "", offset = 0;
 			while (lineChild) {
 				var textNode;
+				if (lineChild.ignore) {
+					lineChild = lineChild.nextSibling;
+					continue;
+				}
 				if (lineChild.ignoreChars) {
 					textNode = lineChild.lastChild;
 					var ignored = 0, childText = [], childOffset = -1;
@@ -5269,6 +5330,14 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		_getWindow: function() {
 			return getWindow(this._parent.ownerDocument);
 		},
+		_ignoreEvent: function(e) {
+			var node = e.target;
+			while (node !== this._clientDiv) {
+				if (node.ignore) { return true; }
+				node = node.parentNode;
+			}
+			return false;
+		},
 		_init: function(options) {
 			var parent = options.parent;
 			if (typeof(parent) === "string") { //$NON-NLS-0$
@@ -5424,7 +5493,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}, 0);
 		},
 		_resetLineHeight: function(startLine, endLine) {
-			if (this._wrapMode) {
+			if (this._wrapMode || this._variableLineHeight) {
 				if (startLine !== undefined && endLine !== undefined) {
 					for (var i = startLine; i < endLine; i++) {
 						this._lineHeight[i] = undefined;
@@ -5454,6 +5523,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			this._topChild = null;
 			this._bottomChild = null;
 			this._topIndexY = 0;
+			this._variableLineHeight = false;
 			this._resetLineHeight();
 			this._setSelection(new Selection (0, 0, false), false, false);
 			if (this._viewDiv) {
@@ -5603,6 +5673,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var node, nodeLength, model = this._model;
 			var startLineEnd = model.getLine(startNode.lineIndex).length;
 			while (lineChild) {
+				if (lineChild.ignore) {
+					lineChild = lineChild.nextSibling;
+					continue;
+				}
 				node = lineChild.firstChild;
 				nodeLength = node.length;
 				if (lineChild.ignoreChars) {
@@ -5623,6 +5697,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			lineChild = endNode.firstChild;
 			var endLineEnd = this._model.getLine(endNode.lineIndex).length;
 			while (lineChild) {
+				if (lineChild.ignore) {
+					lineChild = lineChild.nextSibling;
+					continue;
+				}
 				node = lineChild.firstChild;
 				nodeLength = node.length;
 				if (lineChild.ignoreChars) {
@@ -5790,6 +5868,10 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				if (line.hasLink) {
 					var lineChild = line.firstChild;
 					while (lineChild) {
+						if (lineChild.ignore) {
+							lineChild = lineChild.nextSibling;
+							continue;
+						}
 						var next = lineChild.nextSibling;
 						var style = lineChild.viewStyle;
 						if (style && style.tagName === "A") { //$NON-NLS-0$
@@ -6336,8 +6418,13 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 					if (lineWidth === undefined) {
 						rect = child._line.getBoundingClientRect();
 						lineWidth = child.lineWidth = Math.ceil(rect.right - rect.left);
+						var lh = rect.bottom - rect.top;
 						if (this._lineHeight) {
-							this._lineHeight[child.lineIndex] = Math.ceil(rect.bottom - rect.top);
+							this._lineHeight[child.lineIndex] = Math.ceil(lh);
+						} else if (lineHeight !== 0 && lh !== 0 && lineHeight !== lh) {
+							this._variableLineHeight = true;
+							this._lineHeight = [];
+							this._lineHeight[child.lineIndex] = Math.ceil(lh);
 						}
 					}
 					if (this._lineHeight && !foundBottomIndex) {
