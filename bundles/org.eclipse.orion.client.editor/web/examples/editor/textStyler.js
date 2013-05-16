@@ -723,7 +723,7 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 					if (index !== -1 && (index & 1) === 0 && (index = href.lastIndexOf(brackets.substring(index + 1, index + 2))) !== -1) {
 						var end = index;
 						linkStyle = this._clone(s);
-						linkStyle.tagName = "A"; //$NON-NLS-0$
+						linkStyle.tagName = "a"; //$NON-NLS-0$
 						linkStyle.attributes = {href: href.substring(start, end)};
 						styles.push({start: offset, end: offset + start, style: s});
 						styles.push({start: offset + start, end: offset + end, style: linkStyle});
@@ -736,7 +736,7 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 			}
 			if (href) {
 				linkStyle = this._clone(s);
-				linkStyle.tagName = "A"; //$NON-NLS-0$
+				linkStyle.tagName = "a"; //$NON-NLS-0$
 				linkStyle.attributes = {href: href};
 				return linkStyle;
 			}
