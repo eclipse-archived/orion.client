@@ -145,6 +145,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					elem.classList.add("layoutLeft"); //$NON-NLS-0$
 					elem.classList.add("pageActions"); //$NON-NLS-0$
 					_self.toolbarNode.appendChild(elem);
+					_self[id] = true;
 				}
 			});
 		},
