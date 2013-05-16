@@ -110,6 +110,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var oldValue = event.oldValue, newValue = event.newValue;
 			// Detect if we moved/renamed/deleted the current file being edited, or an ancestor thereof.
 			var editorFile = this.editorInputManager.getFileMetadata();
+			if (!editorFile) {
+				return;
+			}
 			var affectedAncestor;
 			[editorFile].concat(editorFile.Parents || []).some(function(ancestor) {
 				if (oldValue.Location === ancestor.Location) {
