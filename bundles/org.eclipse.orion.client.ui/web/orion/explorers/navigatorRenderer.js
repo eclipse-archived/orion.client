@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define window */
-/*jslint regexp:false browser:true forin:true*/
+/*jslint regexp:false browser:true forin:true sub:true*/
 
 define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/navigationUtils', 'orion/extensionCommands', 'orion/contentTypes'],
 		function(messages, Deferred, lib, mExplorer, mNavUtils, mExtensionCommands){
@@ -145,7 +145,23 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 		this.target = "_self"; //$NON-NLS-0$
 	}
 	NavigatorRenderer.prototype = new mExplorer.SelectionRenderer(); 
-	
+
+	NavigatorRenderer.prototype.tableCallback = function(tableElement) {
+		tableElement.setAttribute("aria-label", messages["Navigator"]); //$NON-NLS-1$ //$NON-NLS-0$
+		tableElement.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-0$
+	};
+
+	NavigatorRenderer.prototype.bodyCallback = function(tableElement) {
+		tableElement.setAttribute("role", "tree"); //$NON-NLS-1$ //$NON-NLS-0$
+	};
+
+	/**
+	 * @param {Element} rowElement
+	 */
+	NavigatorRenderer.prototype.rowCallback = function(rowElement) {
+		rowElement.setAttribute("role", "treeitem"); //$NON-NLS-1$ //$NON-NLS-0$
+	};
+
 	/**
 	 * Creates the column header element. We are really only using the header for a spacer at this point.
 	 * @name orion.explorer.NavigatorRenderer.prototype.getCellHeaderElement
@@ -259,6 +275,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 				itemNode.id = tableRow.id + "NameLink"; //$NON-NLS-0$
 				if (itemNode.nodeType === 1) {
 					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemNode);
+					itemNode.setAttribute("role", "link"); //$NON-NLS-1$ //$NON-NLS-0$
+					itemNode.setAttribute("tabindex", "-1"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 			// render any inline commands that are present.
