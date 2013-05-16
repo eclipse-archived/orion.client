@@ -56,8 +56,8 @@
 
 	<properties>
 		<orion-version>1.0.0-SNAPSHOT</orion-version>
-		<tycho-version>0.16.0</tycho-version>
-		<tycho-extras-version>0.16.0</tycho-extras-version>
+		<tycho-version>0.17.0</tycho-version>
+		<tycho-extras-version>0.17.0</tycho-extras-version>
 		<tycho.scmUrl>scm:git:http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git</tycho.scmUrl>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java-version>1.6</java-version>
@@ -82,6 +82,8 @@
 		<module>bundles/org.eclipse.orion.client.git</module>
 		<module>bundles/org.eclipse.orion.client.ui</module>
 		<module>bundles/org.eclipse.orion.client.users</module>
+
+		<module>releng/org.eclipse.orion.client.repository</module>
 	</modules>
 
 	<build>
