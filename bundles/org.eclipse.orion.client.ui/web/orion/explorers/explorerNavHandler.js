@@ -20,6 +20,7 @@ var isPad = userAgent.indexOf("iPad") !== -1; //$NON-NLS-0$
 var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 
 exports.ExplorerNavHandler = (function() {
+
 	/**
 	 * Creates a new tree iteration handler
 	 * 
@@ -315,7 +316,20 @@ exports.ExplorerNavHandler = (function() {
 			}
 			return null;
 		},
-		
+
+		/**
+		 * @returns {Element} The ancestor element of <code>node</code> that provides grid/tree/treegrid behavior,
+		 * or <code>null</code> if no such node was found.
+		 */
+		getAriaContainerElement: function(node) {
+			var stop = this._parentDiv, role;
+			while (node && node !== stop &&
+					(role = node.getAttribute("role")) !== "grid" && role !== "tree" && role !== "treegrid") {//$NON-NLS-3$//$NON-NLS-2$//$NON-NLS-1$//$NON-NLS-0$
+				node = node.parentNode;
+			}
+			return node === stop ? null : node;
+		},
+
 		toggleCursor:  function(model, on){
 			var currentRow = this.getRowDiv(model);
 			var currentgrid = this.getCurrentGrid(model);
@@ -328,8 +342,13 @@ exports.ExplorerNavHandler = (function() {
 					}
 				}
 				if(currentgrid.domNode){
+					var ariaElement = this.getAriaContainerElement(currentgrid.domNode);
 					if (on) {
 						currentgrid.domNode.classList.add("treeIterationCursor"); //$NON-NLS-0$
+						if (ariaElement) {
+							var activeDescendantId = currentgrid.domNode.id;
+							ariaElement.setAttribute("aria-activedescendant", activeDescendantId); //$NON-NLS-0$
+						}
 					} else {
 						currentgrid.domNode.classList.remove("treeIterationCursor"); //$NON-NLS-0$
 					}
