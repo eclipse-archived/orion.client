@@ -177,7 +177,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		}, false);
 
 
-	function createDropdownMenu(parent, name, populateFunction, buttonCss) {
+	function createDropdownMenu(parent, name, populateFunction, buttonCss, showName) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
@@ -192,7 +192,9 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		var menuButton = newMenu.previousSibling;
 		if (buttonCss) {
 			menuButton.classList.add(buttonCss);
-			menuButton.textContent = '';
+			if(!showName) {
+				menuButton.textContent = '';
+			}
 		} else {
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 			menuButton.classList.add("commandButton"); //$NON-NLS-0$
@@ -223,10 +225,14 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		element.classList.add("commandImage"); //$NON-NLS-0$
 		var node;
 		if (command.imageClass) {
-			node = document.createElement("span"); //$NON-NLS-0$
-			element.appendChild(node);
-			node.classList.add(command.spriteClass);
-			node.classList.add(command.imageClass);
+			if (command.addImageClassToElement) {
+				element.classList.add(command.imageClass);
+			} else {
+				node = document.createElement("span"); //$NON-NLS-0$
+				element.appendChild(node);
+				node.classList.add(command.spriteClass);
+				node.classList.add(command.imageClass);
+			}
 		} else {
 			node = new Image();
 			node.alt = command.name;
@@ -412,10 +418,10 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 
 	/**
 	 * Constructs a new command with the given options.
-	 * @param {Object} options The command options object.
-	 * @param {String} options.id the unique id to be used when referring to the command in the command service.
-	 * @param {String} options.name the name to be used when showing the command as text.
-	 * @param {String} options.tooltip the tooltip description to use when explaining the purpose of the command.
+	 * @param {Object} [options] The command options object.
+	 * @param {String} [options.id] the unique id to be used when referring to the command in the command service.
+	 * @param {String} [options.name] the name to be used when showing the command as text.
+	 * @param {String} [options.tooltip] the tooltip description to use when explaining the purpose of the command.
 	 * @param {Function} [options.callback] the callback to call when the command is activated.  The callback should either 
 	 *  perform the command or return a deferred that represents the asynchronous performance of the command.  Optional.
 	 * @param {Function} [options.hrefCallback] if specified, this callback is used to retrieve
@@ -427,6 +433,8 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 	 *  menu from the command itself.  Returns a list of choices that supply the name and image to show, and the callback
 	 *  to call when the choice is made.  Optional.
 	 * @param {String} [options.imageClass] a CSS class name suitable for showing a background image.  Optional.
+	 * @param {Boolean} [options.addImageClassToElement] If true, the image class will be added to the element's
+	 *  class list. Otherwise, a span element with the image class is created and appended to the element.  Optional.
 	 * @param {String} [options.spriteClass] an additional CSS class name that can be used to specify a sprite background image.  This
 	 *  useful with some sprite generation tools, where imageClass specifies the location in a sprite, and spriteClass describes the
 	 *  sprite itself.  Optional.
@@ -455,6 +463,8 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 														// A choice is an object with a name, callback, and optional image
 			this.image = options.image || require.toUrl("images/none.png"); //$NON-NLS-0$
 			this.imageClass = options.imageClass;   // points to the location in a sprite
+			this.addImageClassToElement = options.addImageClassToElement; // optional boolean if true will add the image class to the 
+																		// element's class list
 			this.spriteClass = options.spriteClass || "commandSprite"; // defines the background image containing sprites //$NON-NLS-0$
 			this.visibleWhen = options.visibleWhen;
 			this.parameters = options.parameters;  // only used when a command is used in the command registry.  

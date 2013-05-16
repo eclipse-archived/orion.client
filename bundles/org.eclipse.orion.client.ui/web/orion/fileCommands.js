@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global window define orion XMLHttpRequest confirm*/
-/*browser:true*/
+/*jslint browser:true sub:true*/
 
 define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 
 	'orion/commandRegistry', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
@@ -79,7 +79,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 */
 	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force) { 
 		this.req = new XMLHttpRequest();
-		this.req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-0$
+		this.req.open('post', force ? targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")>0 ? "&force=true" : "?force=true") : targetFolder.ImportLocation, true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
 		this.req.setRequestHeader("Slug", file.name); //$NON-NLS-0$
 		// TODO if we want to unzip zip files, don't use this...
@@ -95,7 +95,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				}catch(e){
 				}
 				if(result.JsonData && result.JsonData.ExistingFiles){
-					var confirmFunction = (explorer && explorer.serviceRegistry) ? explorer.serviceRegistry.getService("orion.page.dialog").confirm : confirm;
+					var confirmFunction = (explorer && explorer.serviceRegistry) ? explorer.serviceRegistry.getService("orion.page.dialog").confirm : confirm; //$NON-NLS-0$
 					if(confirmFunction(result.Message + "\nWould you like to retry the import with force overwriting?")){
 						fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true);
 						return;
@@ -221,7 +221,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			if (mFileUtils.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
 				loadedWorkspace = explorer.treeRoot;
 			} else {
-				loadedWorkspace = progressService.progress(fileClient.loadWorkspace(""), "Loading workspace");
+				loadedWorkspace = progressService.progress(fileClient.loadWorkspace(""), "Loading workspace"); //$NON-NLS-0$
 			}
 			Deferred.when(loadedWorkspace, function(workspace) {
 				var deferred = fileClient.createProject(workspace.ChildrenLocation, name);
@@ -247,7 +247,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 * Creates the commands related to file management.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use when creating commands
 	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to get commands from
-	 * @param {orion.explorer.Explorer} explorer The explorer view to add commands to
+	 * @param {orion.explorer.Explorer} explorer The explorer view to add commands to, and to update when model items change.
+	 * If this explorer has a <code>modelManager</code> field, it will be dispatched events describing the model changes that
+	 * were performed.
 	 * @param {orion.fileClient.FileClient} fileClient The file system client that the commands should use
 	 * @name orion.fileCommands#createFileCommands
 	 * @function
@@ -255,13 +257,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient) {
 		progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 
-		function contains(arr, item) {
-			for (var i=0; i<arr.length; i++) {
-				if (arr[i] === item) {
-					return true;
-				}
+		function dispatchModelEvent(event) {
+			if (explorer.modelManager) {
+				explorer.modelManager.dispatchEvent(event);
 			}
-			return false;
+		}
+
+		function contains(arr, item) {
+			return arr.indexOf(item) !== -1;
 		}
 		
 		function stripPath(location) {
@@ -280,8 +283,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		function makeMoveCopyTargetChoices(items, userData, isCopy) {
 			items = Array.isArray(items) ? items : [items];
 			var ex = explorer;
-			var refreshFunc = function() {
-				ex.changedItem.bind(ex)(ex.treeRoot, true);
+			var refreshFunc = function(newItem) {
+				ex.changedItem(ex.treeRoot, true);
+				dispatchModelEvent({ type: "copy", oldValue: null, newValue: newItem }); //$NON-NLS-0$
 			};
 			var callback = function(selectedItems) {
 				if (!Array.isArray(selectedItems)) {
@@ -475,6 +479,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 									if (forceExpand) {
 										ex.changedItem(forceExpand, true);
 									}
+									dispatchModelEvent({ type: "move", oldValue: item, newValue: newItem }); //$NON-NLS-0$
 								}, 
 								errorHandler
 							);
@@ -495,8 +500,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						if(item.length === 2 && !item[0].Directory && !item[1].Directory){
 							var contentType1 = contentTypeService.getFilenameContentType(item[0].Name);
 							var contentType2 = contentTypeService.getFilenameContentType(item[1].Name);
-							if(contentType1 && (contentType1['extends'] === "text/plain" || contentType1.id === "text/plain") && //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-							   contentType2 && (contentType2['extends'] === "text/plain" || contentType2.id === "text/plain")){ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+							if(contentType1 && (contentType1['extends'] === "text/plain" || contentType1.id === "text/plain") && //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							   contentType2 && (contentType2['extends'] === "text/plain" || contentType2.id === "text/plain")){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								return true;
 							}
 						} else if(item.length === 2 && item[0].Directory && item[1].Directory){
@@ -562,6 +567,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							count++;
 							if (count === items.length) {
 								explorer.changedItem(item, true);
+								dispatchModelEvent({ type: "delete", oldValue: item, newValue: null }); //$NON-NLS-0$
 							}
 						};
 						for (var i=0; i < items.length; i++) {
@@ -631,7 +637,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							var deferred = fileClient.createFile(item.Location, name);
 							var ex = explorer;
 							progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Creating ${0}"], name)).then(
-								function() {ex.changedItem.bind(ex)(item, true); },
+								function(newFile) {
+									ex.changedItem(item, true);
+									dispatchModelEvent({ type: "create", oldValue: null, newValue: item }); //$NON-NLS-0$
+								},
 								errorHandler);
 						}
 					};
@@ -669,7 +678,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							var deferred = fileClient.createFolder(item.Location, name);
 							var ex = explorer;
 							progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Creating ${0}"], name)).then(
-								function() { ex.changedItem.bind(ex)(item, true); },
+								function(newFolder) {
+									ex.changedItem(item, true);
+									dispatchModelEvent({ type: "create", oldValue: null, newValue: newFolder }); //$NON-NLS-0$
+								},
 								errorHandler);
 						}
 					};
@@ -772,9 +784,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 //			name: messages["Go Up"],
 			tooltip: messages["Move up to the parent folder"],
 			imageClass: "core-sprite-go-up", //$NON-NLS-0$
+			addImageClassToElement: true,
 			id: "eclipse.upFolder", //$NON-NLS-0$
 			callback: function(data) {
-				if (typeof explorer.scopeUp === "function") {
+				if (typeof explorer.scopeUp === "function") { //$NON-NLS-0$
 					explorer.scopeUp();
 				}
 			},
@@ -795,7 +808,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				var ex = explorer;
 				var dialog = new ImportDialog.ImportDialog({
 					importLocation: item.ImportLocation,
-					func: function() {ex.changedItem.bind(ex)(item, true); }
+					func: function() {
+						ex.changedItem(item, true);
+						dispatchModelEvent({ type: "import", oldValue: item, newValue: null}); //$NON-NLS-0$
+					}
 				});
 				dialog.show();
 			},
@@ -818,7 +834,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
 						var ex = explorer;
 						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], host)).then(
-							function() { ex.changedItem.bind(ex)(this.treeRoot, true); },
+							function(result) {
+								ex.changedItem(this.treeRoot, true);
+								dispatchModelEvent({ type: "import", oldValue: item, newValue: null }); //$NON-NLS-0$
+							},
 							errorHandler
 						);//refresh the root
 					}
@@ -844,7 +863,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
 						var ex = explorer;
 						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Exporting from ${0}"], host)).then(
-							function() {ex.changedItem.bind(ex)(this.treeRoot, true);},
+							function(result) { ex.changedItem(this.treeRoot, true); },
 							errorHandler);//refresh the root
 					}
 				});
@@ -927,7 +946,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 										var deferred = fileClient.copyFile(location, item.Location, name);
 										var ex = explorer;
 										progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Pasting ${0}"], location)).then(
-											function() { ex.changedItem.bind(ex) (item, true); },
+											function(result) { ex.changedItem(item, true, result); },
 											errorHandler);
 									}
 								}

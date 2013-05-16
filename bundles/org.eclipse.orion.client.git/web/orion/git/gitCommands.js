@@ -12,11 +12,11 @@
 /*globals window document define confirm URL*/
 /*jslint nomen:false sub:true forin:false laxbreak:true eqeqeq:false*/
 
-define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
+define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference',
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks'], 
-        function(messages, require, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, mConfirmPush, mRemotePrompter,
-        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks) {
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim', 'orion/PageLinks', 'orion/URITemplate'], 
+        function(messages, require, Deferred, i18nUtil, lib, mCommands, mCommandRegistry, mGitUtil, mCompareUtils, GitPreferenceStorage, GitConfigPreference, mConfirmPush, mRemotePrompter,
+        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch, _, PageLinks, URITemplate) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -2058,6 +2058,85 @@ var exports = {};
 			}
 			return item;
 		}
+		
+		var createGitProjectCommand = new mCommands.Command({
+			name : messages["Clone Repository"],
+			tooltip : messages["Clone an existing Git repository to a folder"],
+			id : "eclipse.createGitProject", //$NON-NLS-0$
+			callback : function(data) {
+				var item = data.items;
+				
+				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				
+				var cloneFunction = function(gitUrl, path, name) {
+					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
+						var func = arguments.callee;
+						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
+						gitConfigPreference.getConfig().then( function(userInfo){
+							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
+									options.gitPrivateKey, options.gitPassphrase, userInfo), "Cloning repository " + name);
+							serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
+									messages["Cloning repository: "] + gitUrl);
+							deferred.then(function(jsonData, secondArg) {
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
+									gitService.getGitClone(jsonData.Location).then(
+										function(repoJson){
+											var templateString = require.toUrl("edit/edit.html") + "#{,resource,params*}"; //$NON-NLS-1$ //$NON-NLS-0$
+											window.location = new URITemplate(templateString).expand({
+												resource: "", //$NON-NLS-0$
+												params: {
+													navigate: repoJson.Children[0].ContentLocation + "?depth=1"
+												}
+											});
+										}
+									)
+								}, func, messages['Clone Git Repository']);
+							}, function(jsonData, secondArg) {
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
+							});
+						});
+					});
+				};
+				
+				if (item.url && item.name){
+					
+					fileClient.loadWorkspace().then(function(projects){
+						for(var i=0; i<projects.Children.length; ++i){
+							var p = projects.Children[i];
+							if(p.Name === item.name){
+								if (p.Git){
+									gitService.getGitClone(p.Git.CloneLocation).then(
+										function(repoJson){
+											if (repoJson.Children[0].GitUrl === item.url){
+												var templateString = require.toUrl("edit/edit.html") + "#{,resource,params*}"; //$NON-NLS-1$ //$NON-NLS-0$
+												window.location = new URITemplate(templateString).expand({
+													resource: "", //$NON-NLS-0$
+													params: {
+														navigate: repoJson.Children[0].ContentLocation + "?depth=1"
+													}
+												});
+											} else {
+												console.info("Folder project is used");
+											}
+										}
+									)
+								} else {
+									console.info("Folder project is used");
+								}
+								return;
+							}
+						}	
+						
+						cloneFunction(item.url, null, item.name);	
+					});
+				}
+			},
+			visibleWhen : function(item) {
+				return true;
+			}
+		});
+		commandService.addCommand(createGitProjectCommand);
 
 		var cloneGitRepositoryCommand = new mCommands.Command({
 			name : messages["Clone Repository"],
@@ -2070,18 +2149,21 @@ var exports = {};
 				var cloneFunction = function(gitUrl, path, name) {
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
 						var func = arguments.callee;
-						var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
-								options.gitPrivateKey, options.gitPassphrase), "Cloning repository " + name);
-						serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
-								messages["Cloning repository: "] + gitUrl);
-						deferred.then(function(jsonData, secondArg) {
-							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
-								if (explorer.changedItem) {
-									explorer.changedItem();
-								}
-							}, func, messages['Clone Git Repository']);
-						}, function(jsonData, secondArg) {
-							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
+						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
+						gitConfigPreference.getConfig().then( function(userInfo){
+							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
+									options.gitPrivateKey, options.gitPassphrase, userInfo), "Cloning repository " + name);
+							serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
+									messages["Cloning repository: "] + gitUrl);
+							deferred.then(function(jsonData, secondArg) {
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
+									if (explorer.changedItem) {
+										explorer.changedItem();
+									}
+								}, func, messages['Clone Git Repository']);
+							}, function(jsonData, secondArg) {
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
+							});
 						});
 					});
 				};
@@ -2116,18 +2198,21 @@ var exports = {};
 				var cloneFunction = function(gitUrl, path, name) {
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
 						var func = arguments.callee;
-						var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
-								options.gitPrivateKey, options.gitPassphrase), "Cloning git repository " + name);
-						serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
-								messages["Cloning repository: "] + gitUrl);
-						deferred.then(function(jsonData, secondArg) {
-							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
-								if (explorer.changedItem) {
-									explorer.changedItem();
-								}
-							}, func, messages['Clone Git Repository']);
-						}, function(jsonData, secondArg) {
-							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
+						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
+						gitConfigPreference.getConfig().then( function(userInfo){
+							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
+									options.gitPrivateKey, options.gitPassphrase, userInfo), "Cloning git repository " + name);
+							serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
+									messages["Cloning repository: "] + gitUrl);
+							deferred.then(function(jsonData, secondArg) {
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
+									if (explorer.changedItem) {
+										explorer.changedItem();
+									}
+								}, func, messages['Clone Git Repository']);
+							}, function(jsonData, secondArg) {
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
+							});
 						});
 					});
 				};
@@ -2281,16 +2366,20 @@ var exports = {};
 				var initRepositoryFunction = function(gitUrl, path, name) {
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
-						var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath), messages["Initializing repository: "] + name); //$NON-NLS-0$
-						serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
-								messages["Initializing repository: "] + name);
-						deferred.then(function(jsonData, secondArg){
-							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData){
-								if(explorer.changedItem)
-									explorer.changedItem();
-							}, func, messages["Init Git Repository"]);
-						}, function(jsonData, secondArg) {
-							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Init Git Repository']);
+						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
+						gitConfigPreference.getConfig().then( function(userInfo){
+							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, null, null, null, null, null, userInfo), messages["Initializing repository: "] + name); //$NON-NLS-0$
+							serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
+									messages["Initializing repository: "] + name);
+							deferred.then(function(jsonData, secondArg){
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData){
+									if(explorer.changedItem) {
+										explorer.changedItem();
+									}
+								}, func, messages["Init Git Repository"]);
+							}, function(jsonData, secondArg) {
+								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Init Git Repository']);
+							});
 						});
 					});
 				};

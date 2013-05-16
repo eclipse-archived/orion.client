@@ -11,9 +11,9 @@
 /*global window console define */
 /*jslint browser:true sub:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/git/gitPreferenceStorage', 'orion/webui/littlelib', 'orion/objects', 'orion/i18nUtil',
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference', 'orion/webui/littlelib', 'orion/objects', 'orion/i18nUtil',
 		'orion/widgets/settings/Subsection', 'profile/UsersService', 'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledCommand'
-		], function(messages, require, mCommands, mSection, GitPreferenceStorage, lib, objects, i18nUtil, Subsection, UsersService, LabeledTextfield, LabeledCheckbox, LabeledCommand) {
+		], function(messages, require, mCommands, mSection, GitPreferenceStorage, GitConfigPreference, lib, objects, i18nUtil, Subsection, UsersService, LabeledTextfield, LabeledCheckbox, LabeledCommand) {
 
 	function GitSettings(options, node) {
 		objects.mixin(this, options);
@@ -129,7 +129,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.commandService.addCommand(erasePrivateKeyCommand);
 			this.commandService.registerCommandContribution("repositoryItemCommands", "eclipse.orion.git.eraseGitCredentials", 1);
 			
-			var that = this;
 			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
 			gitPreferenceStorage.getRepositories().then(
 				function(repositories){
@@ -162,55 +161,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		},
 		
 		update: function(data){
-			
-			var authenticationIds = [];
-			
-			var authServices = this.registry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
-			
+			var gitConfigPreference = new GitConfigPreference(this.registry);
 			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-			
-			var userService = this.userService;
-			
-			var settingsWidget = this;
-			
-			var userdata = {};
-			
-			userdata.GitMail = settingsWidget.gitFields[0].getValue();
-			userdata.GitName = settingsWidget.gitFields[1].getValue();
-			
-			if( this.dispatch === true ){
-			
-				for(var i=0; i<authServices.length; i++){
-					var servicePtr = authServices[i];
-					var authService = this.registry.getService(servicePtr);		
-	
-					authService.getKey().then(function(key){
-						authenticationIds.push(key);
-						authService.getUser().then(function(jsonData){
-						
-							var data = jsonData;
-							
-							var b = userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
-								if(args){
-									messageService.setProgressResult(args);
-								}else{
-									messageService.setProgressResult( messages['User profile data successfully updated.'] );
-								}
-
-								// TODO: don't reach into User Menu internals for this. Should dispatch a service event instead, etc.
-//								if( userdata.Name ){
-//									var userMenu = lib.node( 'userTrigger' ); //$NON-NLS-0$
-//									if (userMenu) {
-//										userMenu.replaceChild(document.createTextNode(userdata.Name), userMenu.firstChild);
-//									}
-//								}
-							}, function(error){
-								messageService.setProgressResult(error);
-							});
-						});
-					});
-				}	
-			}
+			gitConfigPreference.setConfig({GitMail: this.gitFields[0].getValue(),	GitName: this.gitFields[1].getValue()}).then(
+				function(){
+					messageService.setProgressResult( messages['User profile data successfully updated.'] );
+				}
+			);
 		},
 		
 		updateGitCredentials : function(data){
@@ -237,43 +194,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		
 		show:function(){
 			this.createElements();
-			
-			this.userService = this.registry.getService("orion.core.user"); //$NON-NLS-0$
-			
-			var authenticationIds = [];
-			
-			var authServices = this.registry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
-			
-			var userService = this.userService;
-			
-			var settingsWidget = this;
-			
-			for(var i=0; i<authServices.length; i++){
-				var servicePtr = authServices[i];
-				var authService = this.registry.getService(servicePtr);		
-
-				authService.getKey().then(function(key){
-					authenticationIds.push(key);
-					authService.getUser().then(function(jsonData){
-					
-						var data = jsonData;
-						
-						var b = userService.getUserInfo(jsonData.Location).then( function( accountData ){
-							
-							if( accountData.GitMail ){
-								settingsWidget.gitFields[0].setValue( accountData.GitMail );
-							}
-							
-							if( accountData.GitName ){
-								settingsWidget.gitFields[1].setValue( accountData.GitName );	
-							}
-						});
-						
-						settingsWidget.setHash( settingsWidget.iframe, jsonData.Location );	
-					});
-				});
-			}
-			
+			var gitConfigPreference = new GitConfigPreference(this.registry);
+			gitConfigPreference.getConfig().then(
+				function(userInfo){
+					if(userInfo){
+						if( userInfo.GitMail ){
+							this.gitFields[0].setValue( userInfo.GitMail );
+						}
+						if( userInfo.GitName ){
+							this.gitFields[1].setValue( userInfo.GitName );	
+						}
+					}
+				}.bind(this));
 			// git authentication startup
 			this.refreshGitCredentials();
 		},

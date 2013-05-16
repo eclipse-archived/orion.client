@@ -49,6 +49,7 @@ mBootstrap.startup().then(function(core) {
 	commandRegistry.addCommandGroup("pageActions", "eclipse.gitGroup", 200); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	commandRegistry.registerCommandContribution("reposPageActions", "eclipse.cloneGitRepository", 100, "eclipse.gitGroup", false, null, new mCommandRegistry.URLBinding("cloneGitRepository", "url")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	commandRegistry.registerCommandContribution("reposPageActions", "eclipse.createGitProject", 300, "eclipse.gitGroup", true, null, new mCommandRegistry.URLBinding("createProjectContext", "name")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	commandRegistry.registerCommandContribution("reposPageActions", "eclipse.initGitRepository", 200, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
 	commandRegistry.registerCommandContribution("repoPageActions", "eclipse.orion.git.pull", 100, "eclipse.gitGroup"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -100,14 +101,20 @@ mBootstrap.startup().then(function(core) {
 		}
 	});
 	commandRegistry.addCommand(viewAllCommand);
-		
-	// process the URL to find our bindings, since we can't be sure these bindings were defined when the URL was first processed.
-	commandRegistry.processURL(window.location.href);
+	
+	var params = PageUtil.matchResourceParameters();
+	if (typeof params["createProjectContext"] === "undefined") { //$NON-NLS-0$
+		commandRegistry.processURL(window.location.href);
+	}
 	
 	progress.progress(fileClient.loadWorkspace(), "Loading default workspace").then(
 		function(workspace){
 			explorer.setDefaultPath(workspace.Location);
-			explorer.redisplay();
+			commandRegistry.runCommand("eclipse.createGitProject", {url: params["cloneGit"], name: params["createProjectContext"]}, null, null);
+			
+			if (typeof params["createProjectContext"] === "undefined") { //$NON-NLS-0$
+				explorer.redisplay();
+			}
 		}	
 	);	
 	
