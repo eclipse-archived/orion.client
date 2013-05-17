@@ -112,7 +112,11 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 				return categories[number];
 			}
 			PageLinks.getPageLinksInfo(this._serviceRegistry, "orion.page.link.user").then(function(linkInfos) { //$NON-NLS-0$
-				this._dropdown.empty();
+				if(this._dropdown) {
+					this._dropdown.empty();
+				} else if(this._dropdownNode) {
+					lib.empty(this._dropdownNode);
+				}
 
 				// Read extension-contributed links
 				linkInfos.forEach(function(item) {
