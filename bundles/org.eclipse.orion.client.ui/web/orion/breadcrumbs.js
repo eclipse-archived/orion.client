@@ -149,6 +149,11 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
                 this.dirty.className = "modifiedFileMarker"; //$NON-NLS-0$
                 this._container.appendChild(this.dirty);
             }
+            
+            this.crumbs.style.width = 'auto'; //$NON-NLS-0$
+            this.crumbs.style.visibility = 'visible'; //$NON-NLS-0$
+            this.crumbs.parentNode.className = "currentLocation"; //$NON-NLS-0$
+            this.crumbs.parentNode.style.width = 'auto'; //$NON-NLS-0$
         },
 
         append: function (section) {
@@ -251,7 +256,6 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
                 if (this._resource) {
                     this.buildSegments(firstSegmentName, 'reverse'); //$NON-NLS-0$
                     this.measureSegments();
-                    this.firstSegment(segment);
 
                     if (this.crumbs.offsetWidth >= this.MAX_LENGTH) {
                         this.INCLUDE_FIRST_SECTION = false;
@@ -263,10 +267,6 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         render: function () {
 
             this.refresh();
-			this.crumbs.style.width = 'auto'; //$NON-NLS-0$
-            this.crumbs.style.visibility = 'visible'; //$NON-NLS-0$
-            this.crumbs.parentNode.className = "currentLocation"; //$NON-NLS-0$
-            this.crumbs.parentNode.style.width = 'auto'; //$NON-NLS-0$
 
             var segment = this.getNavigatorWorkspaceRootSegment();
 
@@ -275,10 +275,6 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
             if (firstSegmentName) {
                 this.addTitle(segment, firstSegmentName);
             } else {
-
-                if (this.INCLUDE_FIRST_SECTION === true) {
-                    this.firstSegment(segment);
-                }
 
                 if (this._resource) {
                     this.buildSegments(firstSegmentName, 'forward'); //$NON-NLS-0$
