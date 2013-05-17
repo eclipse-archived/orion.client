@@ -800,6 +800,7 @@ input {
 }
 
 .navigationBreadcrumb{
+	font-family: sans-serif;
 	padding-bottom:5px;
 }
 
