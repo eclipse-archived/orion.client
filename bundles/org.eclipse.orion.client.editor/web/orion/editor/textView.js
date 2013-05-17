@@ -3288,7 +3288,6 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			};
 		},
 		_handleMouseUp: function (e) {
-			if (this._ignoreEvent(e)) { return; }
 			var left = e.which ? e.button === 0 : e.button === 1;
 			if (this.isListening("MouseUp")) { //$NON-NLS-0$
 				if (this._isClientDiv(e) || (left && this._isMouseDown)) {
@@ -5332,7 +5331,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		},
 		_ignoreEvent: function(e) {
 			var node = e.target;
-			while (node !== this._clientDiv) {
+			while (node && node !== this._clientDiv) {
 				if (node.ignore) { return true; }
 				node = node.parentNode;
 			}
