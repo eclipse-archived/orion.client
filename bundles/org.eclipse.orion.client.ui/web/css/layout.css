@@ -50,6 +50,9 @@ hard-coded numbers elsewhere.
 	order: 1; 
 
 	-moz-box-flex: 1;
+
+	-webkit-box-flex:1;
+	-webkit-box-ordinal-group: 1;
     
     width: 20%; 
 }
@@ -63,6 +66,9 @@ hard-coded numbers elsewhere.
 
  	-moz-box-flex: 1;
     -moz-box-ordinal-group: 2;
+    
+    -webkit-box-flex:1;
+	-webkit-box-ordinal-group: 2;
     width: 60%; 
 }
 
@@ -78,6 +84,9 @@ hard-coded numbers elsewhere.
 
  	-moz-box-flex: 1;
     -moz-box-ordinal-group: 2;
+    
+    -webkit-box-flex:1;
+	-webkit-box-ordinal-group: 2;
     width: 59%; 
 }
   
@@ -92,6 +101,9 @@ hard-coded numbers elsewhere.
 	order: 3;  
 
 	-moz-box-flex: 1;
+	
+	-webkit-box-flex:1;
+	-webkit-box-ordinal-group: 3;
 
     width: 20%; 
 }
