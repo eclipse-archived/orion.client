@@ -113,7 +113,7 @@ hard-coded numbers elsewhere.
 	overflow: hidden;
     position: absolute;
     top: 36px;
-	bottom: 29px; /* $FooterHeight + footer border (1px) */
+	bottom: 33px; /* $FooterHeight + footer border (1px) */
     left: 0;
     width: 100%;
 	/*margin-bottom: 29px;*/
@@ -133,8 +133,8 @@ hard-coded numbers elsewhere.
 	z-index: 50;
 	right: 0;
 	left: 0;
-	height: 28px; /* It has to be this */
-	background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 28px;
+	height: 32px; /* It has to be this */
+	background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 32px;
 }
 
 .footerBlock {
@@ -143,13 +143,11 @@ hard-coded numbers elsewhere.
 	color: #7F7F7F;
 	font-weight: bold;
 	float: left;
-	padding-top: 3px;
 }
 
 .footerRightBlock {
 	float: right;
 	margin: 4px;
-	padding-top:3px;
 }
 
 .layoutBlock {
