@@ -20,11 +20,11 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	function DropDownMenu( node, body ){
 	
 		this.OPEN = 'false';
-
+		var nodeIdPrefix = "";
 		if( node.nodeType ){
 			this.node = node;
 		}else{
-		
+			nodeIdPrefix = node + "_";
 			var nodeById = document.getElementById( node );
 	
 			if( nodeById.nodeType ){
@@ -35,42 +35,48 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		}
 		
 		this.node.innerHTML = this.templateString;
+		//We need assign dynamic ids to all the children nodes loaded by the template, to support multiple drop down menus in the same page
+		this.navLabelId = nodeIdPrefix + 'navigationlabel';
+		document.getElementById( 'navigationlabel' ).id = this.navLabelId;
+		this.arrowId = nodeIdPrefix + 'dropDownArrow';
+		document.getElementById( 'dropDownArrow' ).id = this.arrowId;
+		this.navDropDownId = nodeIdPrefix + 'navdropdown';
+		document.getElementById( 'navdropdown' ).id = this.navDropDownId;
 		
 		if( body.icon ){
 			this.node.className = this.node.className + ' ' + body.icon;
-			var centralNavigation = document.getElementById( 'navdropdown' );
 			this.node.onclick = this.click.bind(this);	
 		}else{
 		
 			if( body.label ){
-				var navlabel = document.getElementById( 'navigationlabel' );
+				var navlabel = document.getElementById( this.navLabelId );
 				navlabel.textContent = body.label;
 				navlabel.onclick = this.click.bind(this);	
 			}
 			
 			if( body.caret ){
-				var navArrow = document.getElementById( 'dropDownArrow' );
+				var navArrow = document.getElementById( this.arrowId );
 				navArrow.className = body.caret;
 			}
 		}
+		this._dropdownNode = lib.node(this.navDropDownId); 
+		this._triggerNode = lib.node(this.navLabelId);
 	}
 	
 	objects.mixin(DropDownMenu.prototype, {
 	
-		templateString: '<div id="navigationlabel" class="navigationLabel" ></div>' +
+		templateString: '<div id="navigationlabel" class="navigationLabel dropdownTrigger" ></div>' +
 						'<span id="dropDownArrow" class="dropDownArrow"></span>' + 
 						'<div class="dropDownContainer" id="navdropdown" style="display:none;"></div>',
 
 		click: function() {
 		
-			var centralNavigation = document.getElementById( 'navdropdown' );
+			var centralNavigation = document.getElementById( this.navDropDownId );
 			
 			if( centralNavigation.style.display === 'none' ){
 					
 				centralNavigation.style.display = '';
-			
-				var dropDown = this;
-			
+				this._positionDropdown();
 				this.handle = lib.addAutoDismiss( [this.node, centralNavigation], this.clearPanel.bind(this) );
 				
 			}else{
@@ -79,15 +85,31 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		},
 		
 		clearPanel: function(){
-			var centralNavigation = document.getElementById( 'navdropdown' );
-			centralNavigation.style.display = 'none'; 	
+			var centralNavigation = document.getElementById( this.navDropDownId );
+			centralNavigation.style.display = 'none';
 		},
 		
 		addContent: function( content ){
 		
-			var centralNavigation = document.getElementById( 'navdropdown' );
+			var centralNavigation = document.getElementById( this.navDropDownId );
 		
 			centralNavigation.innerHTML= content;
+		},
+		
+		_positionDropdown: function() {
+			this._dropdownNode.style.left = "";
+			var bounds = lib.bounds(this._dropdownNode);
+			var totalBounds = lib.bounds(this._boundingNode(this._triggerNode));
+			if (bounds.left + bounds.width > (totalBounds.left + totalBounds.width)) {
+				this._dropdownNode.style.right = 0;
+			}
+		},
+		
+		_boundingNode: function(node) {
+			if (node.style.right !== "" || node.style.position === "absolute" || !node.parentNode || !node.parentNode.style) { //$NON-NLS-0$
+				return node;
+			}
+			return this._boundingNode(node.parentNode);
 		},
 
 		destroy: function() {
