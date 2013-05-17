@@ -256,6 +256,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
                 if (this._resource) {
                     this.buildSegments(firstSegmentName, 'reverse'); //$NON-NLS-0$
                     this.measureSegments();
+                    this.firstSegment(segment);
 
                     if (this.crumbs.offsetWidth >= this.MAX_LENGTH) {
                         this.INCLUDE_FIRST_SECTION = false;
@@ -275,6 +276,10 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
             if (firstSegmentName) {
                 this.addTitle(segment, firstSegmentName);
             } else {
+            
+             	if (this.INCLUDE_FIRST_SECTION === true) {
+                    this.firstSegment(segment);
+                }
 
                 if (this._resource) {
                     this.buildSegments(firstSegmentName, 'forward'); //$NON-NLS-0$
