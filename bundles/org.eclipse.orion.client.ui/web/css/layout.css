@@ -150,6 +150,23 @@ hard-coded numbers elsewhere.
 	margin: 4px;
 }
 
+.footerRightBlock ul {
+	margin: 0;
+}
+
+.footerRightBlock li {
+	display: inline;
+}
+
+.footerRightBlock li:after {
+	content: ' |';
+	padding: 0 5px;
+}
+
+.footerRightBlock li:last-child:after {
+	content: none;
+}
+
 .layoutBlock {
 	clear: both;
 	margin: 0;
