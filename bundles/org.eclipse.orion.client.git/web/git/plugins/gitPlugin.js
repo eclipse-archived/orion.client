@@ -84,11 +84,11 @@ define(["orion/plugin", "orion/xhr", "orion/URL-shim", "domReady!"], function(Pl
 	provider.registerService("orion.page.link.related", null, {
 		id: "eclipse.git.log"
 	});
-	
+	/*
 	provider.registerService("orion.page.link.related", null, {
 		id: "eclipse.git.remote"
 	});
-	
+	*/
 	provider.registerService("orion.page.link.related", null, {
 		nameKey: "Active Branch Log",
 		id: "eclipse.orion.git.switchToCurrentLocal",

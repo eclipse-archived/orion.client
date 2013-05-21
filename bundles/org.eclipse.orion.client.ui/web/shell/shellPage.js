@@ -868,7 +868,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
-		mGlobalCommands.setPageTarget({task: messages.Shell, serviceRegistry: serviceRegistry});
+		mGlobalCommands.setPageTarget({task: messages.Shell, serviceRegistry: serviceRegistry, commandService: commandRegistry});
 
 		output = document.getElementById("shell-output"); //$NON-NLS-0$
 		var input = document.getElementById("shell-input"); //$NON-NLS-0$
