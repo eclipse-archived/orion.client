@@ -30,6 +30,18 @@
 			provider.registerService("orion.page.link.related", null, {
 				id: "eclipse.shell.open"
 			});
+			provider.registerService("orion.page.link.related", null, {
+				nameKey: "Open in Shell",
+				id: "eclipse.shell.open",
+				tooltipKey: "Open in Shell page",
+				nls: "orion/shell/nls/messages",
+				validationProperties: [{
+					source: "NoTarget"
+				}],
+				uriTemplate: "{OrionHome}/shell/shellPage.html#",
+				forceSingleItem: true
+			});
+		
 			provider.connect();
 		};
 		</script>

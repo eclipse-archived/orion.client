@@ -96,6 +96,11 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			centralNavigation.innerHTML= content;
 		},
 		
+		toggleLabel: function(show){
+			document.getElementById( this.navLabelId ).style.display = (show ? '' : 'none');
+			document.getElementById( this.arrowId ).style.display = (show ? '' : 'none');
+		},
+		
 		_positionDropdown: function() {
 			this._dropdownNode.style.left = "";
 			var bounds = lib.bounds(this._dropdownNode);
