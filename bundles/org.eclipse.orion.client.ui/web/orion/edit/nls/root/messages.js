@@ -43,6 +43,6 @@ define({
 	"Actions": "Actions", //$NON-NLS-1$ //$NON-NLS-0$
 	"Navigator": "Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"New": "New", //$NON-NLS-1$ //$NON-NLS-0$
-	"NoFile": "Choose a file to edit from the Navigator pane.", //$NON-NLS-1$ //$NON-NLS-0$
+	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding.", //$NON-NLS-1$ //$NON-NLS-0$
 	"NoSelection": "Click on an item to make a selection, then use this menu to see what actions are available." //$NON-NLS-1$ //$NON-NLS-0$
 });

@@ -252,6 +252,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				var noFile = document.createElement("div"); //$NON-NLS-0$
 				noFile.classList.add("noFile"); //$NON-NLS-0$
 				noFile.textContent = messages["NoFile"];
+				var plusIcon = document.createElement("span"); //$NON-NLS-0$
+				plusIcon.classList.add("core-sprite-add-content"); //$NON-NLS-0$
+				plusIcon.classList.add("icon-inline"); //$NON-NLS-0$
+				lib.processDOMNodes(noFile, [plusIcon]);
+
 				lib.empty(editorDomNode);
 				editorDomNode.appendChild(noFile);
 				return;
