@@ -11,7 +11,11 @@
 /*global console window define document */
 /*jslint regexp:false*/
 
-define(['require'], function(require) {
+define([], function() {
+	/**
+	 * @name orion.webui.littlelib
+	 * @class A small library of DOM and UI helpers.
+	 */
 
 	function $(selector, node) {
 		if (!node) {
@@ -93,24 +97,58 @@ define(['require'], function(require) {
 		}
 		return null;
 	}
-	
+
 	var variableRegEx = /\$\{([^\}]+)\}/;
-	
-	function processTextNodes(node, messages) {
+	// Internal helper
+	function processNodes(node, replace) {
 		if (node.nodeType === 3) { // TEXT_NODE
 			var matches = variableRegEx.exec(node.nodeValue);
 			if (matches && matches.length > 1) {
-				var replaceText = messages[matches[1]] || matches[1];
-				node.parentNode.replaceChild(document.createTextNode(replaceText), node);
+				replace(node, matches);
 			}
 		}
 		if (node.hasChildNodes()) {
 			for (var i=0; i<node.childNodes.length; i++) {
-				processTextNodes(node.childNodes[i], messages);
+				processNodes(node.childNodes[i], replace);
 			}
 		}
 	}
-	
+
+	/**
+	 * Performs substitution of textContent within the given node and its descendants. Substitutes an occurrence of <code>${n}</code>
+	 * with <code>messages[n]</code>.
+	 * @name orion.webui.littlelib.processTextNodes
+	 * @function
+	 * @param {Node} node
+	 * @param {String[]} messages
+	 */
+	function processTextNodes(node, messages) {
+		processNodes(node, function(targetNode, matches) {
+			var replaceText = messages[matches[1]] || matches[1];
+			targetNode.parentNode.replaceChild(document.createTextNode(replaceText), targetNode);
+		});
+	}
+
+	/**
+	 * Performs substitution of DOM nodes into textContent within the given node and its descendents. An occurrence of <code>${n}</code>
+	 * in text content will be replaced by the DOM node <code>domNodes[n]</code>.
+	 * @param {Node} node
+	 * @param {Node[]} replaceNodes
+	 */
+	function processDOMNodes(node, replaceNodes) {
+		processNodes(node, function(targetNode, matches) {
+			var replaceNode = replaceNodes[matches[1]];
+			if (replaceNode) {
+				var range = document.createRange();
+				var start = matches.index;
+				range.setStart(targetNode, start);
+				range.setEnd(targetNode, start + matches[0].length);
+				range.deleteContents();
+				range.insertNode(replaceNode);
+			}
+		});
+	}
+
 	var autoDismissNodes = [];
 	
 	function addAutoDismiss(excludeNodes, dismissFunction) {
@@ -196,6 +234,7 @@ define(['require'], function(require) {
 		lastTabbable: lastTabbable,
 		stop: stop,
 		processTextNodes: processTextNodes,
+		processDOMNodes: processDOMNodes,
 		addAutoDismiss: addAutoDismiss,
 		KEY: KEY
 	};
