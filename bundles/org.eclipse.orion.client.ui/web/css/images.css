@@ -98,39 +98,24 @@
 	background: url(../images/addcontent.png) no-repeat top left; 
 	width: 16px; 
 	height: 16px;
-	border: none;
-	margin: 4px;
-	margin-left: 6px;
-	cursor: pointer;
 } 
-   
+
 .core-sprite-go-up{  
 	background: url(../images/moveUp.png) no-repeat center; 
-	width: 24px; 
-	height: 24px;
-	border:none;
-	cursor:pointer;
+	width: 16px;
+	height: 16px;
 } 
 
 .core-sprite-outline{  
 	background: url(../images/outline.png) no-repeat top left; 
 	width: 16px; 
 	height: 16px;
-	border:none;
-	margin-top: 4px;
-	margin-right: 4px;
-	cursor: pointer;
-} 
+}
    
 .core-sprite-settings {
    background: url(../images/gear.png) no-repeat top left;
-   vertical-align: middle;
-   display: inline-block;
-   margin-top: 4px;
    height: 16px;
    width: 16px;
-   border: none;
-   cursor: pointer;
 }
 
 .core-sprite-wrench {
