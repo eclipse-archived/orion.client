@@ -160,11 +160,6 @@ define(['orion/widgets/themes/ThemeClass'],
 			aBreadcrumbHover.style.cursor = 'pointer';
 			
 			styles.push( aBreadcrumbHover );
-			
-//			var aBreadcrumbVisited = new ThemeClass.ThemeClass( 'a.breadcrumb:visited' );
-//			aBreadcrumbVisited.style.color = this.content;
-//			
-//			styles.push( aBreadcrumbVisited );
 
 			var breadcrumbSeparator = new ThemeClass.ThemeClass( 'breadcrumbSeparator' );
 			breadcrumbSeparator.style.fontSize = '8pt';
@@ -198,6 +193,13 @@ define(['orion/widgets/themes/ThemeClass'],
 			
 			styles.push( navlinkonpage );
 			
+			var progressIndicator = new ThemeClass.ThemeClass( 'progressPane_running' );
+			progressIndicator.style.background = 'url(../images/progress_running_dark.gif) no-repeat center';
+			progressIndicator.style.width = '16px';
+			progressIndicator.style.height = '16px';
+			
+			styles.push( progressIndicator );
+						
 			for( var s in styles ){
 				styleBlock = styleBlock + styles[s].toString();
 			}
@@ -304,7 +306,6 @@ define(['orion/widgets/themes/ThemeClass'],
 			styles.push( searchboxFocus );
 			
 			var checkedRow = new ThemeClass.ThemeClass( 'checkedRow' );
-//			checkedRow.style.background = this.selection; /* was e3e3e3 */
 			checkedRow.style.cssText = 'background-color:' + this.selection + ' !important;';
 			
 			styles.push( checkedRow );
