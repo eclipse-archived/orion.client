@@ -652,7 +652,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 							// to be redone. The down side to always adding the menu button is that we may find out we didn't
 							// need it after all, which could cause layout to change.
 
-							created = self._createDropdownMenu(parent, contribution.title, null , null, contribution.imageClass ); 
+							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass); 
 							if(domNodeWrapperList){
 								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
@@ -845,7 +845,9 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 					parent.appendChild(menuParent);
 					destroyButton = menuParent;
 				}
-				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, icon);
+				// This class distinguishes dropdown buttons with an icon from those without
+				var buttonCss = icon ? "dropdownButtonWithIcon" : null; //$NON-NLS-0$
+				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon);
 				menuButton = created.menuButton;
 				newMenu = created.menu;
 			}
