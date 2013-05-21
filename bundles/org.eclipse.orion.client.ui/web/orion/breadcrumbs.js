@@ -180,7 +180,10 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
                 seg.appendChild(document.createTextNode(firstSegmentName));
                 firstSegmentName = null;
             } else {
-                seg.appendChild(document.createTextNode(this._resource.Name));
+            
+            	if( !this._workspaceRootSegmentName ){
+                	seg.appendChild(document.createTextNode(this._resource.Name));
+                }
             }
             seg.classList.add("currentLocation"); //$NON-NLS-0$
             this.path += this._resource.Name;
