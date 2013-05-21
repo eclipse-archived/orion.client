@@ -822,6 +822,5 @@ input {
 .icon-inline {
 	display: inline-block;
 	vertical-align: middle;
-	cursor: default !important; /* sorry mom */
-	margin: 0 !important;
+	margin: 0 2px 0 2px;
 }

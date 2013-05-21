@@ -176,8 +176,30 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 			_processKey(evt, allBindings);
 		}, false);
 
+	function _addImageToElement(command, element, name) {
+		element.classList.add("commandImage"); //$NON-NLS-0$
+		var node;
+		if (command.imageClass) {
+			if (command.addImageClassToElement) {
+				element.classList.add(command.imageClass);
+			} else {
+				node = document.createElement("span"); //$NON-NLS-0$
+				element.appendChild(node);
+				node.classList.add(command.spriteClass);
+				node.classList.add(command.imageClass);
+			}
+		} else {
+			node = new Image();
+			node.alt = command.name;
+			node.name = name;
+			node.id = name;
+			node.src = command.image;
+			element.appendChild(node);
+		}
+		return node;
+	}
 
-	function createDropdownMenu(parent, name, populateFunction, buttonCss, showName) {
+	function createDropdownMenu(parent, name, populateFunction, buttonImage, showName) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
@@ -190,11 +212,12 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		parent.appendChild(buttonFragment);
 		var newMenu = parent.lastChild;
 		var menuButton = newMenu.previousSibling;
-		if (buttonCss) {
-			menuButton.classList.add(buttonCss);
+		if (buttonImage) {
 			if(!showName) {
 				menuButton.textContent = '';
 			}
+			_addImageToElement({ spriteClass: "commandSprite", imageClass: buttonImage }, menuButton, name); //$NON-NLS-0$
+			menuButton.classList.add("orionButton"); // $NON-NLS-0$
 		} else {
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 			menuButton.classList.add("commandButton"); //$NON-NLS-0$
@@ -220,30 +243,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		checkbox.checked = checked;
 		checkbox.addEventListener("change", onChange, false); //$NON-NLS-0$
 	}
-	
-	function _addImageToElement(command, element, name) {
-		element.classList.add("commandImage"); //$NON-NLS-0$
-		var node;
-		if (command.imageClass) {
-			if (command.addImageClassToElement) {
-				element.classList.add(command.imageClass);
-			} else {
-				node = document.createElement("span"); //$NON-NLS-0$
-				element.appendChild(node);
-				node.classList.add(command.spriteClass);
-				node.classList.add(command.imageClass);
-			}
-		} else {
-			node = new Image();
-			node.alt = command.name;
-			node.name = name;
-			node.id = name;
-			node.src = command.image;	
-			element.appendChild(node);
-		}
-		return node;
-	}
-	
+
 	function createCommandItem(parent, command, commandInvocation, id, keyBinding, useImage, callback) {
 		var element;
 		useImage = useImage || (!command.name && command.hasImage());
