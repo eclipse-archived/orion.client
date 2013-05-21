@@ -91,7 +91,7 @@ orion.TextSearcher = (function() {
 				var optionsDiv = document.createElement("div"); //$NON-NLS-0$
 				parentDiv.appendChild(optionsDiv);
 				optionsDiv.classList.add("findOptionsDiv"); //$NON-NLS-0$
-				var optionMenu = mCommands.createDropdownMenu(optionsDiv, messages['Options'], null, "dismissButton", true); //$NON-NLS-0$
+				var optionMenu = mCommands.createDropdownMenu(optionsDiv, messages['Options'], null, "dismissButton", null, true); //$NON-NLS-0$
 				optionMenu.menuButton.classList.add("parameterInlineButton"); //$NON-NLS-0$
 				mCommands.createCheckedMenuItem(optionMenu.menu, messages["Show all"], that._showAllOccurrence,
 					function(event) {

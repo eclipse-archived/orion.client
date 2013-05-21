@@ -199,7 +199,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		return node;
 	}
 
-	function createDropdownMenu(parent, name, populateFunction, buttonImage, showName) {
+	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
@@ -212,15 +212,18 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		parent.appendChild(buttonFragment);
 		var newMenu = parent.lastChild;
 		var menuButton = newMenu.previousSibling;
-		if (buttonImage) {
-			if(!showName) {
-				menuButton.textContent = '';
-			}
-			_addImageToElement({ spriteClass: "commandSprite", imageClass: buttonImage }, menuButton, name); //$NON-NLS-0$
-			menuButton.classList.add("orionButton"); // $NON-NLS-0$
+		if (buttonClass) {
+			menuButton.classList.add(buttonClass); //$NON-NLS-0$
 		} else {
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 			menuButton.classList.add("commandButton"); //$NON-NLS-0$
+		}
+		if (buttonIconClass) {
+			if(!showName) {
+				menuButton.textContent = ""; //$NON-NLS-0$
+			}
+			_addImageToElement({ spriteClass: "commandSprite", imageClass: buttonIconClass }, menuButton, name); //$NON-NLS-0$
+			menuButton.classList.add("orionButton"); // $NON-NLS-0$
 		}
 		menuButton.dropdown = new Dropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
 		newMenu.dropdown = menuButton.dropdown;
