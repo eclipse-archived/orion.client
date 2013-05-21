@@ -19,10 +19,12 @@
 				id: "eclipse.shell.open",
 				tooltipKey: "Open in Shell page",
 				nls: "orion/shell/nls/messages",
-				validationProperties: [
-					{source: "Directory", match: true}
-				],
-				uriTemplate: "{OrionHome}/shell/shellPage.html#{Location}",
+				validationProperties: [{
+					source: "ChildrenLocation|ContentLocation",
+					variableName: "ShellLocation",
+					replacements: [{pattern: "\\?depth=1$", replacement: ""}] 
+				}],
+				uriTemplate: "{OrionHome}/shell/shellPage.html#{ShellLocation}",
 				forceSingleItem: true
 			});
 			provider.registerService("orion.page.link.related", null, {
