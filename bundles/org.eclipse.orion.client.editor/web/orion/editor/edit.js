@@ -226,7 +226,9 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 				createContentAssistMode: function(editor) {
 					contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
 					var contentAssistWidget = new mContentAssist.ContentAssistWidget(contentAssist);
-					return new mContentAssist.ContentAssistMode(contentAssist, contentAssistWidget);
+					var result = new mContentAssist.ContentAssistMode(contentAssist, contentAssistWidget);
+					contentAssist.setMode(result);
+					return result;
 				}
 			};
 		}
@@ -258,21 +260,6 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 			}
 		};
 		
-		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-			
-			// Create keybindings for generic editing
-			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
-			keyModeStack.push(genericBindings);
-
-			// Linked Mode
-			var linkedMode = new mEditorFeatures.LinkedMode(editor, undoStack, contentAssist);
-			keyModeStack.push(linkedMode);
-			
-			// create keybindings for source editing
-			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
-			keyModeStack.push(codeBindings);
-		};
-			
 		var editor = new mEditor.Editor({
 			textViewFactory: textViewFactory,
 			undoStackFactory: new mEditorFeatures.UndoFactory(),
@@ -281,7 +268,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 			foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
 			textDNDFactory: new mEditorFeatures.TextDNDFactory(),
 			contentAssistFactory: contentAssistFactory,
-			keyBindingFactory: keyBindingFactory, 
+			keyBindingFactory: new mEditorFeatures.KeyBindingsFactory(), 
 			statusReporter: options.statusReporter,
 			domNode: parent
 		});

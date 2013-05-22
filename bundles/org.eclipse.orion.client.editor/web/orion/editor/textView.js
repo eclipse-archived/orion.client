@@ -14,7 +14,7 @@
 
 /*global define document*/
 
-define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', 'orion/editor/eventTarget', 'orion/editor/textTheme', 'orion/util'], function(mTextModel, mKeyBinding, mEventTarget, mTextTheme, util) { //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', 'orion/editor/keyModes', 'orion/editor/eventTarget', 'orion/editor/textTheme', 'orion/util'], function(mTextModel, mKeyBinding, mKeyModes, mEventTarget, mTextTheme, util) { //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	/** @private */
 	function getWindow(document) {
@@ -77,6 +77,23 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			return obj.slice(0);
 		}
 		return obj;
+	}
+	/**	@private */
+	function merge(obj1, obj2) {
+		if (!obj1) {
+			return obj2;
+		}
+		if (!obj2) {
+			return obj1;
+		}
+		for (var p in obj2) {
+			if (obj2.hasOwnProperty(p)) {
+				if (!obj1.hasOwnProperty(p)) {
+					obj1[p] = obj2[p];
+				}
+			}
+		}
+		return obj1;
 	}
 	/** @private */
 	function compare(s1, s2) {
@@ -1186,6 +1203,23 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 	
 	TextView.prototype = /** @lends orion.editor.TextView.prototype */ {
 		/**
+		 * Adds a keyMode to the text view at the specified position.
+		 *
+		 * @param {orion.editor.KeyMode} mode the editor keyMode.
+		 * @param {Number} [index=length] the index.
+		 */
+		addKeyMode: function(mode, index) {
+			if (mode.setView) {
+				mode.setView(this);
+			}
+			var keyModes = this._keyModes;
+			if (index !== undefined) {
+				keyModes.splice(index, 0, mode);
+			} else {
+				keyModes.push(mode);
+			}
+		},
+		/**
 		 * Adds a ruler to the text view at the specified position.
 		 * <p>
 		 * The position is relative to the ruler location.
@@ -1318,7 +1352,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			this._theme = null;
 			this._selection = null;
 			this._doubleClickSelection = null;
-			this._keyBindings = null;
+			this._keyModes = null;
 			this._actions = null;
 		},
 		/**
@@ -1538,14 +1572,19 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		 * @see #setAction
 		 */
 		getKeyBindings: function (actionID) {
-			var result = [];
-			var keyBindings = this._keyBindings;
-			for (var i = 0; i < keyBindings.length; i++) {
-				if (keyBindings[i].actionID === actionID) {
-					result.push(keyBindings[i].keyBinding);
-				}
-			}
-			return result;
+			//TODO: Go through all key modes, get all matching bindings and concat - also look at setKeyBinding
+			return this._keyModes[0].getKeyBindings(actionID);
+		},
+		/**
+		 * Returns all the key modes added to text view.
+		 *
+		 * @returns {orion.editor.KeyMode[]} the array of key modes.
+		 *
+		 * @see #addKeyMode
+		 * @see #removeKeyMode
+		 */
+		getKeyModes: function() {
+			return this._keyModes.slice(0);
 		},
 		/**
 		 * Returns the line height for a given line index.  Returns the default line
@@ -1770,19 +1809,20 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		 *
 		 * @param {String} actionID the action ID.
 		 * @param {Boolean} [defaultAction] whether to always execute the predefined action.
+		 * @param {Object} [actionOptions] action specific options to be passed to the action handlers.
 		 * @returns {Boolean} <code>true</code> if the action was executed.
 		 *
 		 * @see #setAction
 		 * @see #getActions
 		 */
-		invokeAction: function (actionID, defaultAction) {
+		invokeAction: function (actionID, defaultAction, actionOptions) {
 			if (!this._clientDiv) { return; }
 			var action = this._actions[actionID];
 			if (action) {
 				if (!defaultAction && action.handler) {
-					if (action.handler()) { return; }
+					if (action.handler(actionOptions)) { return; }
 				}
-				if (action.defaultHandler) { return action.defaultHandler(); }
+				if (action.defaultHandler) { return action.defaultHandler(actionOptions); }
 			}
 			return false;
 		},
@@ -2252,6 +2292,23 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var startLine = model.getLineAtOffset(start);
 			var endLine = model.getLineAtOffset(Math.max(start, end - 1)) + 1;
 			this.redrawLines(startLine, endLine);
+		},	
+		/**
+		 * Removes a key mode from the text view.
+		 *
+		 * @param {orion.editor.KeyMode} mode the key mode.
+		 */
+		removeKeyMode: function (mode) {
+			if (mode.setView) {
+				mode.setView(null);
+			}
+			var keyModes = this._keyModes;
+			for (var i=0; i<keyModes.length; i++) {
+				if (keyModes[i] === mode) {
+					keyModes.splice(i, 1);
+					break;
+				}
+			}
 		},
 		/**
 		 * Removes a ruler from the text view.
@@ -2319,25 +2376,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 		 * @param {String} actionID the action ID
 		 */
 		setKeyBinding: function(keyBinding, actionID) {
-			var keyBindings = this._keyBindings;
-			for (var i = 0; i < keyBindings.length; i++) {
-				var kb = keyBindings[i]; 
-				if (kb.keyBinding.equals(keyBinding)) {
-					if (actionID) {
-						kb.actionID = actionID;
-					} else {
-						if (kb.predefined) {
-							kb.actionID = null;
-						} else {
-							keyBindings.splice(i, 1);
-						}
-					}
-					return;
-				}
-			}
-			if (actionID) {
-				keyBindings.push({keyBinding: keyBinding, actionID: actionID});
-			}
+			this._keyModes[0].setKeyBinding(keyBinding, actionID);
 		},
 		/**
 		 * Sets the caret offset relative to the start of the document.
@@ -3014,6 +3053,17 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 					e.preventDefault();
 					return;
 				}
+			}
+			if (this._doAction(e)) {
+				if (e.preventDefault) {
+					e.preventDefault(); 
+					e.stopPropagation(); 
+				} else {
+					e.cancelBubble = true;
+					e.returnValue = false;
+					e.keyCode = 0;
+				}
+				return false;
 			}
 			var ignore = false;
 			if (util.isMac) {
@@ -3711,32 +3761,45 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 
 		/************************************ Actions ******************************************/
 		_doAction: function (e) {
-			var keyBindings = this._keyBindings;
-			for (var i = 0; i < keyBindings.length; i++) {
-				var kb = keyBindings[i];
-				if (kb.keyBinding.match(e)) {
-					if (kb.actionID) {
-						var actions = this._actions;
-						var action = actions[kb.actionID];
-						if (action) {
-							if (action.handler) {
-								if (!action.handler()) {
-									if (action.defaultHandler) {
-										return typeof(action.defaultHandler()) === "boolean"; //$NON-NLS-0$
-									} else {
-										return false;
-									}
-								} else {
-									// Firefox feature. without this else branch execution goes into the else branch above 
-									// and defaults are *not* prevented
-								}
-							} else if (action.defaultHandler) {
-								return typeof(action.defaultHandler()) === "boolean"; //$NON-NLS-0$
-							}
-						}
-					}
-					return true;
+			var mode, i;
+			for (i=this._keyModes.length - 1 ; i>=0; i--) {
+				mode = this._keyModes[i];
+				if (typeof mode.match === "function") {
+					break;
 				}
+			}
+			if (!mode.match) {
+				return false;
+			}
+			var actionID = mode.match(e);
+			if (actionID !== undefined) {
+				var keyModes = this._keyModes;
+				for (i = keyModes.length - 1; i >= 0; i--) {
+					mode = keyModes[i];
+					if (mode.isActive() && typeof (mode[actionID]) === "function") {
+						return mode[actionID]();
+					}
+				}
+				
+				var actions = this._actions;
+				var action = actions[actionID];
+				if (action) {
+					if (action.handler) {
+						if (!action.handler()) {
+							if (action.defaultHandler) {
+								return typeof(action.defaultHandler()) === "boolean"; //$NON-NLS-0$
+							} else {
+								return false;
+							}
+						} else {
+							// Firefox feature. without this else branch execution goes into the else branch above 
+							// and defaults are *not* prevented
+						}
+					} else if (action.defaultHandler) {
+						return typeof(action.defaultHandler()) === "boolean"; //$NON-NLS-0$
+					}
+				}
+				return true;
 			}
 			return false;
 		},
@@ -3768,6 +3831,9 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
 			return true;
+		},
+		_doCancel: function () {
+			return false;
 		},
 		_doContent: function (text) {
 			var selection = this._getSelection();
@@ -4392,164 +4458,18 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			this._imeOffset = -1;
 		},
 		_createActions: function () {
-			var KeyBinding = mKeyBinding.KeyBinding;
-			//no duplicate keybindings
-			var bindings = this._keyBindings = [];
-
-			// Cursor Navigation
-			bindings.push({actionID: "lineUp",		keyBinding: new KeyBinding(38), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "lineDown",	keyBinding: new KeyBinding(40), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "charPrevious",	keyBinding: new KeyBinding(37), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "charNext",	keyBinding: new KeyBinding(39), predefined: true}); //$NON-NLS-0$
-			if (util.isMac) {
-				bindings.push({actionID: "scrollPageUp",		keyBinding: new KeyBinding(33), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "scrollPageDown",	keyBinding: new KeyBinding(34), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "pageUp",		keyBinding: new KeyBinding(33, null, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "pageDown",	keyBinding: new KeyBinding(34, null, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(37, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(39, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "wordPrevious",	keyBinding: new KeyBinding(37, null, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "wordNext",	keyBinding: new KeyBinding(39, null, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "scrollTextStart",	keyBinding: new KeyBinding(36), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "scrollTextEnd",		keyBinding: new KeyBinding(35), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "textStart",	keyBinding: new KeyBinding(38, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "textEnd",		keyBinding: new KeyBinding(40, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "scrollPageUp",	keyBinding: new KeyBinding(38, null, null, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "scrollPageDown",		keyBinding: new KeyBinding(40, null, null, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(37, null, null, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(39, null, null, null, true), predefined: true}); //$NON-NLS-0$
-				//TODO These two actions should be changed to paragraph start and paragraph end  when word wrap is implemented
-				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(38, null, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(40, null, null, true), predefined: true}); //$NON-NLS-0$
-			} else {
-				bindings.push({actionID: "pageUp",		keyBinding: new KeyBinding(33), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "pageDown",	keyBinding: new KeyBinding(34), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(36), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(35), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "wordPrevious",	keyBinding: new KeyBinding(37, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "wordNext",	keyBinding: new KeyBinding(39, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "textStart",	keyBinding: new KeyBinding(36, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "textEnd",		keyBinding: new KeyBinding(35, true), predefined: true}); //$NON-NLS-0$
-			}
-			if (util.isFirefox && util.isLinux) {
-				bindings.push({actionID: "lineUp",		keyBinding: new KeyBinding(38, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "lineDown",	keyBinding: new KeyBinding(40, true), predefined: true}); //$NON-NLS-0$
-			}
-			if (util.isWindows) {
-				bindings.push({actionID: "scrollLineUp",	keyBinding: new KeyBinding(38, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "scrollLineDown",	keyBinding: new KeyBinding(40, true), predefined: true}); //$NON-NLS-0$
-			}
-
-			// Select Cursor Navigation
-			bindings.push({actionID: "selectLineUp",		keyBinding: new KeyBinding(38, null, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "selectLineDown",		keyBinding: new KeyBinding(40, null, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "selectCharPrevious",	keyBinding: new KeyBinding(37, null, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "selectCharNext",		keyBinding: new KeyBinding(39, null, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "selectPageUp",		keyBinding: new KeyBinding(33, null, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "selectPageDown",		keyBinding: new KeyBinding(34, null, true), predefined: true}); //$NON-NLS-0$
-			if (util.isMac) {
-				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(37, true, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(39, true, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectWordPrevious",	keyBinding: new KeyBinding(37, null, true, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectWordNext",	keyBinding: new KeyBinding(39, null, true, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectTextStart",	keyBinding: new KeyBinding(36, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectTextStart",	keyBinding: new KeyBinding(38, true, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(40, true, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(37, null, true, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(39, null, true, null, true), predefined: true}); //$NON-NLS-0$
-				//TODO These two actions should be changed to select paragraph start and select paragraph end  when word wrap is implemented
-				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(38, null, true, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(40, null, true, true), predefined: true}); //$NON-NLS-0$
-			} else {
-				if (util.isLinux) {
-					bindings.push({actionID: "selectWholeLineUp",		keyBinding: new KeyBinding(38, true, true), predefined: true}); //$NON-NLS-0$
-					bindings.push({actionID: "selectWholeLineDown",		keyBinding: new KeyBinding(40, true, true), predefined: true}); //$NON-NLS-0$
-				}
-				bindings.push({actionID: "selectLineStart",		keyBinding: new KeyBinding(36, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectWordPrevious",	keyBinding: new KeyBinding(37, true, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectWordNext",		keyBinding: new KeyBinding(39, true, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectTextStart",		keyBinding: new KeyBinding(36, true, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(35, true, true), predefined: true}); //$NON-NLS-0$
-			}
-			
-			//Undo stack
-			bindings.push({actionID: "undo", keyBinding: new mKeyBinding.KeyBinding('z', true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-			if (util.isMac) {
-				bindings.push({actionID: "redo", keyBinding: new mKeyBinding.KeyBinding('z', true, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-			} else {
-				bindings.push({actionID: "redo", keyBinding: new mKeyBinding.KeyBinding('y', true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-			}
-
-			//Misc
-			bindings.push({actionID: "deletePrevious",		keyBinding: new KeyBinding(8), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "deletePrevious",		keyBinding: new KeyBinding(8, null, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "deleteNext",		keyBinding: new KeyBinding(46), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "deleteWordNext",		keyBinding: new KeyBinding(46, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "tab",			keyBinding: new KeyBinding(9), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "shiftTab",			keyBinding: new KeyBinding(9, null, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "enter",			keyBinding: new KeyBinding(13), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "enter",			keyBinding: new KeyBinding(13, null, true), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "selectAll",		keyBinding: new KeyBinding('a', true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-			bindings.push({actionID: "toggleTabMode",	keyBinding: new KeyBinding('m', true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-			if (util.isMac) {
-				bindings.push({actionID: "deleteNext",		keyBinding: new KeyBinding(46, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, null, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "deleteWordNext",		keyBinding: new KeyBinding(46, null, null, true), predefined: true}); //$NON-NLS-0$
-			}
-				
-			/*
-			* Feature in IE/Chrome: prevent ctrl+'u', ctrl+'i', and ctrl+'b' from applying styles to the text.
-			*
-			* Note that Chrome applies the styles on the Mac with Ctrl instead of Cmd.
-			*/
-			if (!util.isFirefox) {
-				var isMacChrome = util.isMac && util.isChrome;
-				bindings.push({actionID: null, keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: null, keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: null, keyBinding: new KeyBinding('b', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-0$
-			}
-
-			if (util.isFirefox) {
-				bindings.push({actionID: "copy", keyBinding: new KeyBinding(45, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "paste", keyBinding: new KeyBinding(45, null, true), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: "cut", keyBinding: new KeyBinding(46, null, true), predefined: true}); //$NON-NLS-0$
-			}
-
-			// Add the emacs Control+ ... key bindings.
-			if (util.isMac) {
-				bindings.push({actionID: "lineStart", keyBinding: new KeyBinding("a", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-				bindings.push({actionID: "lineEnd", keyBinding: new KeyBinding("e", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-				bindings.push({actionID: "lineUp", keyBinding: new KeyBinding("p", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-				bindings.push({actionID: "lineDown", keyBinding: new KeyBinding("n", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-				bindings.push({actionID: "charPrevious", keyBinding: new KeyBinding("b", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-				bindings.push({actionID: "charNext", keyBinding: new KeyBinding("f", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-				bindings.push({actionID: "deletePrevious", keyBinding: new KeyBinding("h", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-				bindings.push({actionID: "deleteNext", keyBinding: new KeyBinding("d", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-				bindings.push({actionID: "deleteLineEnd", keyBinding: new KeyBinding("k", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-				if (util.isFirefox) {
-					bindings.push({actionID: "scrollPageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-					bindings.push({actionID: "deleteLineStart", keyBinding: new KeyBinding("u", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-					bindings.push({actionID: "deleteWordPrevious", keyBinding: new KeyBinding("w", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-				} else {
-					bindings.push({actionID: "pageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-					bindings.push({actionID: "centerLine", keyBinding: new KeyBinding("l", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-					bindings.push({actionID: "enterNoCursor", keyBinding: new KeyBinding("o", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
-					//TODO implement: y (yank), t (transpose)
-				}
-			}
-
+			this.addKeyMode(new mKeyModes.KeyMode());
 			//1 to 1, no duplicates
 			var self = this;
 			this._actions = {
+				//TODO: Add NLS string for actions ex. {name: messages.cancelMode});
+				"cancel": {defaultHandler: function() {return self._doCancel();}}, //$NON-NLS-0$
+
 				"lineUp": {defaultHandler: function() {return self._doLineUp({select: false});}}, //$NON-NLS-0$
 				"lineDown": {defaultHandler: function() {return self._doLineDown({select: false});}}, //$NON-NLS-0$
 				"lineStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:false});}}, //$NON-NLS-0$
 				"lineEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:false});}}, //$NON-NLS-0$
-				"charPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"charPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: false, unit:"character"}));}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"charNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"pageUp": {defaultHandler: function() {return self._doPageUp({select: false});}}, //$NON-NLS-0$
 				"pageDown": {defaultHandler: function() {return self._doPageDown({select: false});}}, //$NON-NLS-0$
@@ -4557,7 +4477,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				"scrollPageDown": {defaultHandler: function() {return self._doScroll({type: "pageDown"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"scrollLineUp": {defaultHandler: function() {return self._doScroll({type: "lineUp"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"scrollLineDown": {defaultHandler: function() {return self._doScroll({type: "lineDown"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"wordPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"wordPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: false, unit:"word"}));}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"wordNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"textStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:true});}}, //$NON-NLS-0$
 				"textEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}}, //$NON-NLS-0$
@@ -4575,7 +4495,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				"selectCharNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"selectPageUp": {defaultHandler: function() {return self._doPageUp({select: true});}}, //$NON-NLS-0$
 				"selectPageDown": {defaultHandler: function() {return self._doPageDown({select: true});}}, //$NON-NLS-0$
-				"selectWordPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectWordPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: true, unit:"word"}));}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"selectWordNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"selectTextStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:true});}}, //$NON-NLS-0$
 				"selectTextEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}}, //$NON-NLS-0$
@@ -5357,6 +5277,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 					this["_" + option] = value; //$NON-NLS-0$
 				}
 			}
+			this._keyModes = [];
 			this._rulers = [];
 			this._selection = new Selection (0, 0, false);
 			this._linksVisible = false;

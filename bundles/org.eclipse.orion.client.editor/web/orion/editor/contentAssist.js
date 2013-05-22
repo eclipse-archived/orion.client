@@ -185,14 +185,20 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var eventType;
 			if (state === State.ACTIVE) {
 				eventType = "Activating"; //$NON-NLS-0$
+				this._mode.setActive(true);
+				
 			} else if (state === State.INACTIVE) {
 				eventType = "Deactivating"; //$NON-NLS-0$
+				this._mode.setActive(false);
 			}
 			if (eventType) {
 				this.dispatchEvent({type: eventType});
 			}
 			this.state = state;
 			this.onStateChange(state);
+		},
+		setMode: function(mode) {
+			this._mode = mode;
 		},
 		/** @private */
 		onStateChange: function(state) {
@@ -331,6 +337,13 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		},
 		isActive: function() {
 			return this.getContentAssist().isActive();
+		},
+		setActive: function(active) {
+			if (active) {
+				this.contentAssist.textView.addKeyMode(this);
+			} else {
+				this.contentAssist.textView.removeKeyMode(this);
+			}
 		},
 		lineUp: function() {
 			var newSelected = (this.selectedIndex === 0) ? this.proposals.length - 1 : this.selectedIndex - 1;

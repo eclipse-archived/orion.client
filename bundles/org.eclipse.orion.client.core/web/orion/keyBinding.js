@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -32,11 +32,13 @@ define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON
 	 * @property {Boolean} mod2 The secondary modifier (usually Shift).
 	 * @property {Boolean} mod3 The third modifier (usually Alt).
 	 * @property {Boolean} mod4 The fourth modifier (usually Control on the Mac).
+	 * @property {String} [type=keydown] The type of event that the keybinding matches; either "keydown" or "keypress"
 	 *
 	 * @see orion.editor.TextView#setKeyBinding
 	 */
-	function KeyBinding (keyCode, mod1, mod2, mod3, mod4) {
-		if (typeof(keyCode) === "string") { //$NON-NLS-0$
+	function KeyBinding (keyCode, mod1, mod2, mod3, mod4, type) {
+		this.type = type || "keydown"; //$NON-NLS-0$
+		if (typeof(keyCode) === "string" && this.type === "keydown") { //$NON-NLS-1$ //$NON-NLS-0$
 			this.keyCode = keyCode.toUpperCase().charCodeAt(0);
 		} else {
 			this.keyCode = keyCode;
@@ -54,10 +56,15 @@ define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON
 		 * @returns {Boolean} <code>true</code> whether the key binding matches the key event.
 		 */
 		match: function (e) {
-			if (this.keyCode === e.keyCode) {
+			if (e.type !== this.type) {
+				return false;
+			}
+			if (this.keyCode === e.keyCode || this.keyCode === String.fromCharCode(util.isOpera ? e.which : (e.charCode !== undefined ? e.charCode : e.keyCode))) {
 				var mod1 = util.isMac ? e.metaKey : e.ctrlKey;
 				if (this.mod1 !== mod1) { return false; }
-				if (this.mod2 !== e.shiftKey) { return false; }
+				if (this.type === "keydown") { //$NON-NLS-0$
+					if (this.mod2 !== e.shiftKey) { return false; }
+				}
 				if (this.mod3 !== e.altKey) { return false; }
 				if (util.isMac && this.mod4 !== e.ctrlKey) { return false; }
 				return true;
@@ -77,6 +84,7 @@ define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON
 			if (this.mod2 !== kb.mod2) { return false; }
 			if (this.mod3 !== kb.mod3) { return false; }
 			if (this.mod4 !== kb.mod4) { return false; }
+			if (this.type !== kb.type) { return false; }
 			return true;
 		} 
 	};

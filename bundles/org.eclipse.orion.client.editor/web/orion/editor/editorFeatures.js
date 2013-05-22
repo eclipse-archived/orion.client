@@ -24,6 +24,28 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
 ], function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTextDND, mTemplates, mRegex, util) {
 
+	var exports = {};
+	
+	function KeyBindingsFactory() {
+	}
+	KeyBindingsFactory.prototype = {
+		createKeyBindings: function(editor, undoStack, contentAssist, searcher) {
+			// Create keybindings for generic editing, no dependency on the service model
+			var textActions = new exports.TextActions(editor, undoStack , searcher);
+			// Linked Mode
+			var linkedMode = new exports.LinkedMode(editor, undoStack, contentAssist);
+			// create keybindings for source editing
+			// TODO this should probably be something that happens more dynamically, when the editor changes input
+			var sourceCodeActions = new exports.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
+			return {
+				textActions: textActions,
+				linkedMode: linkedMode,
+				sourceCodeActions: sourceCodeActions
+			};
+		}
+	};
+	exports.KeyBindingsFactory = KeyBindingsFactory;
+	
 	function UndoFactory() {
 	}
 	UndoFactory.prototype = {
@@ -42,6 +64,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return undoStack;
 		}
 	};
+	exports.UndoFactory = UndoFactory;
 
 	function LineNumberRulerFactory() {
 	}
@@ -50,6 +73,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return new mRulers.LineNumberRuler(annotationModel, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	};
+	exports.LineNumberRulerFactory = LineNumberRulerFactory;
 	
 	function FoldingRulerFactory() {
 	}
@@ -58,6 +82,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"}); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	};
+	exports.FoldingRulerFactory = FoldingRulerFactory;
 	
 	function AnnotationFactory() {
 	}
@@ -74,6 +99,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return {annotationRuler: annotationRuler, overviewRuler: overviewRuler};
 		}
 	};
+	exports.AnnotationFactory = AnnotationFactory;
 	
 	function TextDNDFactory() {
 	}
@@ -82,6 +108,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return new mTextDND.TextDND(editor.getTextView(), undoStack);
 		}
 	};
+	exports.TextDNDFactory = TextDNDFactory;
 	
 	function IncrementalFind(editor) {
 		this.editor = editor;
@@ -176,6 +203,9 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return this._active;
 		},
 		setActive: function(active) {
+			if (this._active === active) {
+				return;
+			}
 			this._active = active;
 			this._prefix = "";
 			this._success = true;
@@ -185,11 +215,28 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			if (this._active) {
 				textView.addEventListener("Verify", this._listener.onVerify); //$NON-NLS-0$
 				textView.addEventListener("Selection", this._listener.onSelection); //$NON-NLS-0$
+				textView.addKeyMode(this);
 			} else {
 				textView.removeEventListener("Verify", this._listener.onVerify); //$NON-NLS-0$
 				textView.removeEventListener("Selection", this._listener.onSelection); //$NON-NLS-0$
+				textView.removeKeyMode(this);
 			}
 			this._status();
+		},
+		cancel: function() {
+			this.setActive(false);
+		},
+		isStatusActive: function() {
+			return this.isActive();
+		},
+		lineUp: function() {
+			return this.find(false, true);
+		},
+		lineDown: function() {	
+			return this.find(true, true);
+		},
+		enter: function() {
+			return false;
 		},
 		_status: function() {
 			if (!this.isActive()) {
@@ -272,14 +319,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			
 			textView.setAction("tab", function() { //$NON-NLS-0$
 				var editor = this.editor;
-				var keyModes = editor.getKeyModes();
-				for (var j = 0; j < keyModes.length; j++) {
-					var mode = keyModes[j];
-					if (mode.isActive() && mode.tab) {
-						return mode.tab();
-					}
-				}
-
 				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				if(!textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
 				var model = editor.getModel();
@@ -642,30 +681,9 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			if (this.undoStack) {
 				this.undoStack.endCompoundChange();
 			}
-		}, 
-	
-		cancel: function() {
-			this._incrementalFind.setActive(false);
-		},
-		
-		isActive: function() {
-			return this._incrementalFind.isActive();
-		},
-		
-		isStatusActive: function() {
-			return this._incrementalFind.isActive();
-		},
-		
-		lineUp: function() {
-			return this._incrementalFind.find(false, true);
-		},
-		lineDown: function() {	
-			return this._incrementalFind.find(true, true);
-		},
-		enter: function() {
-			return false;
 		}
 	};
+	exports.TextActions = TextActions;
 	
 	/**
 	 * @param {orion.editor.Editor} editor
@@ -721,16 +739,8 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}.bind(this));
 			
 			textView.setAction("enter", function() { //$NON-NLS-0$
-				var editor = this.editor;
-				var keyModes = editor.getKeyModes();
-				for (var j = 0; j < keyModes.length; j++) {
-					var mode = keyModes[j];
-					if (mode.isActive() && mode.enter) {
-						return mode.enter();
-					}
-				}
-
 				// Auto indent
+				var editor = this.editor;
 				var textView = editor.getTextView();
 				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var selection = editor.getSelection();
@@ -952,30 +962,9 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				textView.setCaretOffset(proposal.escapePosition);
 			}
 			return true;
-		},
-		cancel: function() {
-			return false;
-		},
-		isActive: function() {
-			return false;
-		},
-		isStatusActive: function() {
-			// SourceCodeActions never reports status
-			return false;
-		},
-		lineUp: function() {
-			return false;
-		},
-		lineDown: function() {
-			return false;
-		},
-		enter: function() {
-			return false;
-		},
-		tab: function() {
-			return false;
 		}
 	};
+	exports.SourceCodeActions = SourceCodeActions;
 	
 	function LinkedMode(editor, undoStack, contentAssist) {
 		this.editor = editor;
@@ -1148,6 +1137,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		enterLinkedMode: function(linkedModeModel) {
 			if (!this.linkedModeModel) {
 				var textView = this.editor.getTextView();
+				textView.addKeyMode(this);
 				textView.addEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
 				textView.addEventListener("ModelChanged", this.linkedModeListener.onModelChanged); //$NON-NLS-0$
 				var contentAssist = this.contentAssist;
@@ -1199,6 +1189,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 			if (!this.linkedModeModel) {
 				var textView = this.editor.getTextView();
+				textView.removeKeyMode(this);
 				textView.removeEventListener("Verify", this.linkedModeListener.onVerify); //$NON-NLS-0$
 				textView.removeEventListener("ModelChanged", this.linkedModeListener.onModelChanged); //$NON-NLS-0$
 				var contentAssist = this.contentAssist;
@@ -1387,15 +1378,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			annotationModel.replaceAnnotations(remove, add);
 		}
 	};
+	exports.LinkedMode = LinkedMode;
 
-	return {
-		UndoFactory: UndoFactory,
-		LineNumberRulerFactory: LineNumberRulerFactory,
-		FoldingRulerFactory: FoldingRulerFactory,
-		AnnotationFactory: AnnotationFactory,
-		TextDNDFactory: TextDNDFactory,
-		TextActions: TextActions,
-		SourceCodeActions: SourceCodeActions,
-		LinkedMode: LinkedMode
-	};
+	return exports;
 });

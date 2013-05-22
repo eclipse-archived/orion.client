@@ -375,14 +375,7 @@ exports.TwoWayCompareView = (function() {
 		var keyBindingFactory = fileOptions.keyBindingFactory;
 		//Create keybindings factory
 		if(!keyBindingFactory) {
-			keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-				// Create keybindings for generic editing
-				var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
-				keyModeStack.push(genericBindings);
-				// create keybindings for source editing
-				var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
-				keyModeStack.push(codeBindings);
-			};
+			keyBindingFactory = new mEditorFeatures.KeyBindingsFactory();
 		}
 
 		//Create the status reporter if needed
