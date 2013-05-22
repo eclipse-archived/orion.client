@@ -322,7 +322,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 * this function if parameters are needed.  In this case, clients typically configure the parameters description
 		 * options with "options.clientWillCollect" set to true.
 		 *
-		 * {@link orion.commands.ParametersDescription}
+		 * @see orion.commands.ParametersDescription
 		 *
 		 * @param {orion.commands.CommandInvocation} commandInvocation the current invocation of the command 
 		 */
