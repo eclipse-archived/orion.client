@@ -110,35 +110,41 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	};
 
 	/**
-	 * Updates the explorer tool bar
+	 * Updates the explorer toolbar.
 	 * @name orion.fileCommands#updateNavTools
 	 * @function
+	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
+	 * @param {orion.commandregistry.CommandRegistry} commandRegistry
+	 * @param {orion.explorer.Explorer}
+	 * @param {String|Element} toolbarId
+	 * @param {String|Element} selectionToolbarId
+	 * @param {Object} item
 	 */
-	fileCommandUtils.updateNavTools = function(registry, commandService, explorer, toolbarId, selectionToolbarId, item) {
+	fileCommandUtils.updateNavTools = function(registry, commandRegistry, explorer, toolbarId, selectionToolbarId, item) {
 		var toolbar = lib.node(toolbarId);
 		if (toolbar) {
-			commandService.destroy(toolbar);
+			commandRegistry.destroy(toolbar);
 		} else {
 			throw "could not find toolbar " + toolbarId; //$NON-NLS-0$
 		}
 		// close any open slideouts because if we are retargeting the command
 		if (item.Location !== lastItemLoaded.Location) {
-			commandService.closeParameterCollector();
+			commandRegistry.closeParameterCollector();
 			lastItemLoaded.Location = item.Location;
 		}
 
-		commandService.renderCommands(toolbar.id, toolbar, item, explorer, "button"); //$NON-NLS-0$
+		commandRegistry.renderCommands(toolbar.id, toolbar, item, explorer, "button"); //$NON-NLS-0$
 		if (lastItemLoaded.Location) {
-			commandService.processURL(window.location.href);
+			commandRegistry.processURL(window.location.href);
 		} 
 		if (selectionToolbarId) {
 			var selectionTools = lib.node(selectionToolbarId);
 			if (selectionTools) {
-				commandService.destroy(selectionTools);
-				commandService.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button");  //$NON-NLS-0$
+				commandRegistry.destroy(selectionTools);
+				commandRegistry.renderCommands(selectionToolbarId, selectionTools, null /*use the selection service*/, explorer, "button");  //$NON-NLS-0$
 			}
 		}
-		
+
 		// Stuff we do only the first time
 		if (!favoritesCache) {
 			favoritesCache = new FavoriteFoldersCache(registry);
@@ -146,8 +152,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			selectionService.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 				var selectionTools = lib.node(selectionToolbarId);
 				if (selectionTools) {
-					commandService.destroy(selectionTools);
-					commandService.renderCommands(selectionTools.id, selectionTools, event.selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.destroy(selectionTools);
+					commandRegistry.renderCommands(selectionTools.id, selectionTools, event.selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			});
 		}
