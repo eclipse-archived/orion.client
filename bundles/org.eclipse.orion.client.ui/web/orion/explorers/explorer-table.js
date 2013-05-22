@@ -360,12 +360,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		this._lastPath = path;
 		var self = this;
 		if (force || (path !== this.treeRoot.Path)) {
-			return this.load(this.fileClient.loadWorkspace(path), "Loading " + path, function() {
+			return this.load(this.fileClient.loadWorkspace(path), "Loading " + path).then(function() {
 				self.treeRoot.Path = path;
 				if (typeof postLoad === "function") { //$NON-NLS-0$
 					postLoad();
 				}
 				return new Deferred().resolve(self.treeRoot);
+			}, function(err) {
+				self.treeRoot.Path = null;
+				return new Deferred().reject(err);
 			});
 		}
 		return new Deferred().resolve(self.treeRoot);
