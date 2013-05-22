@@ -458,16 +458,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			function(error) {
 				clearTimeout(progressTimeout);
 				// Show an error message when a problem happens during getting the workspace
-				if (error.status && error.status !== 401){
-					try {
-						error = JSON.parse(error.responseText);
-					} catch(e) {
-					}
-					lib.empty(progress);
-					progress.appendChild(document.createTextNode(messages["Sorry, an error occurred: "] + error.Message)); 
-				} else {
-					self.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
-				}
+				self.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
 				return new Deferred().reject(error);
 			}
 		);
