@@ -14,7 +14,14 @@
 
 /*global define document*/
 
-define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', 'orion/editor/keyModes', 'orion/editor/eventTarget', 'orion/editor/textTheme', 'orion/util'], function(mTextModel, mKeyBinding, mKeyModes, mEventTarget, mTextTheme, util) { //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/textView", [ //$NON-NLS-0$
+	'orion/editor/textModel', //$NON-NLS-0$
+	'orion/keyBinding', //$NON-NLS-0$
+	'orion/editor/keyModes', //$NON-NLS-0$
+	'orion/editor/eventTarget', //$NON-NLS-0$
+	'orion/editor/textTheme', //$NON-NLS-0$
+	'orion/util' //$NON-NLS-0$
+], function(mTextModel, mKeyBinding, mKeyModes, mEventTarget, mTextTheme, util) {
 
 	/** @private */
 	function getWindow(document) {
@@ -3764,7 +3771,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 			var mode, i;
 			for (i=this._keyModes.length - 1 ; i>=0; i--) {
 				mode = this._keyModes[i];
-				if (typeof mode.match === "function") {
+				if (typeof mode.match === "function") { //$NON-NLS-0$
 					break;
 				}
 			}
@@ -3776,7 +3783,7 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/keyBinding', '
 				var keyModes = this._keyModes;
 				for (i = keyModes.length - 1; i >= 0; i--) {
 					mode = keyModes[i];
-					if (mode.isActive() && typeof (mode[actionID]) === "function") {
+					if (mode.isActive() && typeof (mode[actionID]) === "function") { //$NON-NLS-0$
 						return mode[actionID]();
 					}
 				}
