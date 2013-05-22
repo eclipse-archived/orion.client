@@ -567,11 +567,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							count++;
 							if (count === items.length) {
 								explorer.changedItem(item, true);
-								dispatchModelEvent({ type: "delete", oldValue: item, newValue: null }); //$NON-NLS-0$
 							}
 						};
-						for (var i=0; i < items.length; i++) {
-							var item = items[i];
+						items.forEach(function(item) {
 							var deleteLocation = item.Location;
 							var refreshItem = item.parent;
 							if (item.parent.Projects) {
@@ -591,12 +589,13 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 								var deferred = fileClient.deleteFile(deleteLocation);
 								progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Deleting ${0}"], deleteLocation)).then(function() {
 									refresher(refreshItem);
+									dispatchModelEvent({ type: "delete", oldValue: item, newValue: null }); //$NON-NLS-0$
 								}, function(error) {
 									errorHandler(error);
 									refresher(refreshItem);
 								});
 							}
-						}
+						});
 					}
 				);	
 			}});
