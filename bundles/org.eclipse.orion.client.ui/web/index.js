@@ -12,7 +12,7 @@
 /*jslint browser:true devel:true*/
 /*global define window*/
 
-define(['orion/bootstrap', 'domReady!'], function(mBootstrap) {
+define(['orion/browserCompatibility', 'orion/bootstrap', 'domReady!'], function(mBrowserCompatibility, mBootstrap) {
 	mBootstrap.startup().then(function(core) {
 		window.location = "navigate/table.html";
 	});

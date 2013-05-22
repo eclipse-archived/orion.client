@@ -13,10 +13,10 @@
 
 var eclipse;
 
-define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/dialogs', 'orion/selection',
+define(['i18n!git/nls/gitmessages', 'require', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/dialogs', 'orion/selection',
 	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData',
 	'orion/git/gitStatusExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links', 'orion/contentTypes', 'orion/PageUtil'],
-	function(messages, require, mBootstrap, mStatus, mProgress, mCommandRegistry, mCommands, mDialogs, mSelection,
+	function(messages, require, mBrowserCompatibility, mBootstrap, mStatus, mProgress, mCommandRegistry, mCommands, mDialogs, mSelection,
 		mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mThemePreferences, mThemeData,
 		mGitStatusExplorer, mGitCommands, mGitClient, mSshTools, mLinks, mContentTypes, PageUtil) {
 
