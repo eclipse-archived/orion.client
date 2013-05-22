@@ -47,7 +47,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 	 * @param {Boolean} [data.overwrite=false] Whether the project should be overwritten if it already exists.
 	 */
 	Injector.prototype.inject = function(data) {
-		var isCreateUser = data.createUser;
+//		var isCreateUser = data.createUser;
 		var userInfo = data.userInfo;
 		var projectZipData = data.zip;
 		var projectName = data.projectName;
@@ -81,36 +81,38 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 				return JSON.parse(xhrResult.response);
 			});
 		};
-		var getLoggedInUser = function() {
-			return authService.getUser().then(function(user) {
-				if (!user) {
-					return new Deferred().reject("Not logged in");
-				}
-				return userService.getUserInfo(user.Location);
-			});
-		};
+//		var getLoggedInUser = function() {
+//			return authService.getUser().then(function(user) {
+//				if (!user) {
+//					return new Deferred().reject("Not logged in");
+//				}
+//				return userService.getUserInfo(user.Location);
+//			});
+//		};
 		var ensureUserLoggedIn = function() {
-			if (isCreateUser) {
-				var displayName = userInfo.Name;
-				return userService.createUser(userInfo).then(function(user) {
-					debug('user created');
-					return user;
-				}).then(function(user) {
-					debug('login: ' + user.login);
-					debug('password: ' + user.password);
-					return doLogin(user.login, user.password);
-				}).then(function(user) {
-					debug('set display name of ' + user.login + ' to ' + displayName);
-					user.Name = displayName;
-					return userService.updateUserInfo(user.Location, user).then(function(/*xhrResult*/) {
-						return user;
-					});
-				});
-			} else if (userInfo) {
+//			if (isCreateUser) {
+//				var displayName = userInfo.Name;
+//				return userService.createUser(userInfo).then(function(user) {
+//					debug('user created');
+//					return user;
+//				}).then(function(user) {
+//					debug('login: ' + user.login);
+//					debug('password: ' + user.password);
+//					return doLogin(user.login, user.password);
+//				}).then(function(user) {
+//					debug('set display name of ' + user.login + ' to ' + displayName);
+//					user.Name = displayName;
+//					return userService.updateUserInfo(user.Location, user).then(function(xhrResult) {
+//						return user;
+//					});
+//				});
+//			} else
+			if (userInfo) {
 				return doLogin(userInfo.login, userInfo.password);
 			} else {
-				// !createUser and !userInfo implies we're already authenticated, so just get the user
-				return getLoggedInUser();
+				// !createUser and !userInfo implies we're already authenticated, so just continue
+				//return getLoggedInUser();
+				return new Deferred().resolve();
 			}
 		};
 		/**
@@ -185,7 +187,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 			});
 		};
 
-		return ensureUserLoggedIn().then(function(loggedInUser) {
+		return ensureUserLoggedIn().then(function(/*loggedInUser*/) {
 			return importContent();
 		}).then(null, xhrErrorSanitizer);
 	};
