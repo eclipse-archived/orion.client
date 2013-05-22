@@ -612,7 +612,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	 * @name orion.globalCommands#generateBanner
 	 * @function
 	 */
-	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
+	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
 		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
 		
 		var parent = lib.node(parentId);
@@ -670,9 +670,25 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		keyAssistDiv.setAttribute("aria-live", "assertive");//$NON-NLS-1$ //$NON-NLS-0$
 		document.body.appendChild(keyAssistDiv);
 		
+		var keyAssistMode = {
+			isActive: function() {
+				return keyAssistDiv.style.display === "block"; //$NON-NLS-0$
+			},
+			
+			cancel: function() {
+				if (this.isActive()) {
+					keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+					if (editor) {
+						editor.getTextView().removeKeyMode(this);
+					}
+					return true;
+				}
+				return false;   // not handled
+			}
+		};
 		document.addEventListener("keydown", function (e){  //$NON-NLS-0$
 			if (e.keyCode === lib.KEY.ESCAPE) {
-				keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+				keyAssistMode.cancel();
 				var statusService =	serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 				if(statusService){
 					statusService.setProgressMessage("");
@@ -680,7 +696,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			}
 		}, false);
 		lib.addAutoDismiss([keyAssistDiv], function() {
-			keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+			keyAssistMode.cancel();
 		});
 		
 		var nav = document.getElementById( 'centralNavigation' );
@@ -890,22 +906,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			editor.getTextView().setAction(toggleBanner.id, toggleBanner.callback, toggleBanner);
 		}
 						
-		if (escapeProvider) {
-			var keyAssistEscHandler = {
-				isActive: function() {
-					return keyAssistDiv.style.display === "block"; //$NON-NLS-0$
-				},
-				
-				cancel: function() {
-					if (this.isActive()) {
-						keyAssistDiv.style.display = "none"; //$NON-NLS-0$
-						return true;
-					}
-					return false;   // not handled
-				}
-			};
-			escapeProvider.addHandler(keyAssistEscHandler);
-		}
 		//	Open configuration page, Ctrl+Shift+F1
 		var configDetailsCommand = new mCommands.Command({
 			name: messages["System Configuration Details"],
@@ -941,6 +941,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					var heading;
 					lib.empty(keyAssistDiv);
 					if (editor && editor.getTextView()) {
+						editor.getTextView().addKeyMode(keyAssistMode);
 						heading = document.createElement("h2"); //$NON-NLS-0$
 						heading.appendChild(document.createTextNode(messages["Editor"]));
 						keyAssistDiv.appendChild(heading);
@@ -967,7 +968,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					commandRegistry.showKeyBindings(keyAssistDiv);
 					keyAssistDiv.style.display = "block"; //$NON-NLS-0$
 				} else {
-					keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+					keyAssistMode.cancel();
 				}
 				return true;
 			}});

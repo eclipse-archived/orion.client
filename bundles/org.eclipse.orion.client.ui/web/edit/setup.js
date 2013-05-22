@@ -122,57 +122,17 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			});
 			return textView;
 		};
-	
-		var escHandler = {
-			handlers: [],
-			
-			addHandler: function(handler) {
-				this.handlers.push(handler);
-			},
-			
-			cancel: function() {
-				var handled = false;
-				// To be safe, we give all our handlers a chance, not just the first one.
-				// In case the user has left multiple modal popups open (such as key assist and search)
-				for (var i=0; i<this.handlers.length; i++) {
-					handled = this.handlers[i].cancel() || handled;
-				}
-				return handled;
-			},
-		
-			isActive: function() {
-				for (var i=0; i<this.handlers.length; i++) {
-					if (this.handlers[i].isActive()) {
-						return true;
-					}
-				}
-				return false;
-			}
-		};
 		
 		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 			
 			var localSearcher = new mSearcher.TextSearcher(editor, commandRegistry, undoStack);
-			// Create keybindings for generic editing, no dependency on the service model
-			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , localSearcher);
-			keyModeStack.push(genericBindings);
 			
-			// Linked Mode
-			var linkedMode = new mEditorFeatures.LinkedMode(editor, undoStack, contentAssist);
-			keyModeStack.push(linkedMode);
-			
-			// create keybindings for source editing
-			// TODO this should probably be something that happens more dynamically, when the editor changes input
-			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
-			keyModeStack.push(codeBindings);
-			
+			new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
+		
 			// Register commands that depend on external services, the registry, etc.  Do this after
 			// the generic keybindings so that we can override some of them.
 			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandRegistry, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher, searcher, settings); //$NON-NLS-1$ //$NON-NLS-0$
 			commandGenerator.generateEditorCommands(editor);
-			
-			// give our external escape handler a shot at handling escape
-			keyModeStack.push(escHandler);
 			
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-1$ //$NON-NLS-0$
 		};
@@ -201,7 +161,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					contentAssist.setProgress(progress);
 				});
 				var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
-				return new mContentAssist.ContentAssistMode(contentAssist, widget);
+				var result = new mContentAssist.ContentAssistMode(contentAssist, widget);
+				contentAssist.setMode(result);
+				return result;
 			}
 		};
 	
@@ -384,7 +346,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		sidebarNavInputManager.processHash(window.location.hash);
 		
 		//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-1$ //$NON-NLS-0$
-		mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor); //$NON-NLS-0$
 	
 		// Editor Settings
 		updateSettings(settings);

@@ -200,11 +200,7 @@ exports.ResourceComparer = (function() {
 				var localSearcher = new mSearcher.TextSearcher(editor, that._commandService, undoStack);
 				var commandGenerator = new mEditorCommands.EditorCommandFactory(that._registry, that._commandService,that._fileClient , that._inputManager, "pageActions", false, "pageNavigationActions", localSearcher); //$NON-NLS-1$ //$NON-NLS-0$
 				commandGenerator.generateEditorCommands(editor);
-				var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
-				keyModeStack.push(genericBindings);
-				// create keybindings for source editing
-				var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
-				keyModeStack.push(codeBindings);
+				new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
 			};
 			this._compareView.getWidget().options.newFile.keyBindingFactory = keyBindingFactory;
 		}

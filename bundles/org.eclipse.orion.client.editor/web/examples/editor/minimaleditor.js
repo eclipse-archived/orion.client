@@ -29,15 +29,7 @@ function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures){
 	var annotationFactory = new mEditorFeatures.AnnotationFactory();
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-		
-		// Create keybindings for generic editing
-		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
-		keyModeStack.push(genericBindings);
-		
-		// create keybindings for source editing
-		var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
-		keyModeStack.push(codeBindings);
-		
+		new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist);
 		// save binding
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "save");
 		editor.getTextView().setAction("save", function(){

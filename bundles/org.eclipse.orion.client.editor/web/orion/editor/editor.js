@@ -66,7 +66,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 		this._dirty = false;
 		this._contentAssist = null;
 		this._title = null;
-		this._keyModes = [];
 	}
 	Editor.prototype = /** @lends orion.editor.Editor.prototype */ {
 		/**
@@ -161,7 +160,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 		 * @returns {Array} the editor key modes.
 		 */
 		getKeyModes: function() {
-			return this._keyModes;
+			return  this._textView.getKeyModes();
 		},
 		
 		/**
@@ -449,7 +448,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 			}
 			if (this._contentAssistFactory) {
 				var contentAssistMode = this._contentAssistFactory.createContentAssistMode(this);
-				this._keyModes.push(contentAssistMode);
 				this._contentAssist = contentAssistMode.getContentAssist();
 			}
 			
@@ -508,41 +506,12 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
-				this._keyBindingFactory(this, this._keyModes, this._undoStack, this._contentAssist);
+				if (typeof this._keyBindingFactory === "function") {
+					this._keyBindingFactory(this, this.getKeyModes(), this._undoStack, this._contentAssist);
+				} else {
+					this._keyBindingFactory.createKeyBindings(editor, this._undoStack, this._contentAssist);
+				}
 			}
-			
-			// Set keybindings for keys that apply to different modes
-			textView.setKeyBinding(new mKeyBinding.KeyBinding(27), "cancelMode"); //$NON-NLS-0$
-			textView.setAction("cancelMode", function() { //$NON-NLS-0$
-				// loop through all modes in case multiple modes are active.  Keep track of whether we processed the key.
-				var keyUsed = false;
-				for (var i=0; i<this._keyModes.length; i++) {
-					var mode = this._keyModes[i];
-					if (mode.isActive() && mode.cancel) {
-						keyUsed = mode.cancel() || keyUsed;
-					}
-				}
-				return keyUsed;
-			}.bind(this), {name: messages.cancelMode});
-
-			textView.setAction("lineUp", function() { //$NON-NLS-0$
-				for (var i=0; i<this._keyModes.length; i++) {
-					var mode = this._keyModes[i];
-					if (mode.isActive() && mode.lineUp) {
-						return mode.lineUp();
-					}
-				}
-				return false;
-			}.bind(this));
-			textView.setAction("lineDown", function() { //$NON-NLS-0$
-				for (var i=0; i<this._keyModes.length; i++) {
-					var mode = this._keyModes[i];
-					if (mode.isActive() && mode.lineDown) {
-						return mode.lineDown();
-					}
-				}
-				return false;
-			}.bind(this));
 
 			var addRemoveBookmark = function(lineIndex, e) {
 				if (lineIndex === undefined) { return; }
@@ -663,7 +632,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 				this._annotationRuler = this._overviewRuler = this._lineNumberRuler =
 				this._foldingRuler = this._currentLineAnnotation = this._title = null;
 			this._dirty = false;
-			this._keyModes = [];
 			
 			var textViewUninstalledEvent = {
 				type: "TextViewUninstalled", //$NON-NLS-0$
@@ -679,8 +647,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 			var lineStart = model.getLineStart(lineIndex);
 			var offsetInLine = caretOffset - lineStart;
 			// If we are in a mode and it owns status reporting, we bail out from reporting the cursor position.
-			for (var i=0; i<this._keyModes.length; i++) {
-				var mode = this._keyModes[i];
+			var keyModes = this.getKeyModes();
+			for (var i=0; i<keyModes.length; i++) {
+				var mode = keyModes[i];
 				if (mode.isActive() && mode.isStatusActive && mode.isStatusActive()) {
 					return;
 				}
