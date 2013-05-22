@@ -353,7 +353,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil'
 			
 			mGlobalCommands.setPageTarget({
 				task: "Contribution Review Request",
-				breadcrumbTarget: item
+				breadcrumbTarget: item,
+				serviceRegistry: this.registry, commandService: this.commandService
 			});
 		};
 		

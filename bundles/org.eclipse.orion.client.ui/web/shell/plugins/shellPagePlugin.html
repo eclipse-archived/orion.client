@@ -15,9 +15,9 @@
 
 			var provider = new orion.PluginProvider(headers);
 			provider.registerService("orion.navigate.command", {}, {
-				nameKey: "Open in Shell",
+				nameKey: "Open Shell",
 				id: "eclipse.shell.open",
-				tooltipKey: "Open in Shell page",
+				tooltipKey: "Open Shell page",
 				nls: "orion/shell/nls/messages",
 				validationProperties: [{
 					source: "ChildrenLocation|ContentLocation",
@@ -31,9 +31,9 @@
 				id: "eclipse.shell.open"
 			});
 			provider.registerService("orion.page.link.related", null, {
-				nameKey: "Open in Shell",
+				nameKey: "Open Shell",
 				id: "eclipse.shell.open",
-				tooltipKey: "Open in Shell page",
+				tooltipKey: "Open Shell page",
 				nls: "orion/shell/nls/messages",
 				validationProperties: [{
 					source: "NoTarget"
