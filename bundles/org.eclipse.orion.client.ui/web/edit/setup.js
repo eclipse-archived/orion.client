@@ -308,8 +308,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		}
 		SidebarNavInputManager.prototype.processHash = function() {
 			var newParams = PageUtil.matchResourceParameters(location.hash), navigate = newParams.navigate;
-			if (typeof navigate === "string") { //$NON-NLS-0$
-				this.dispatchEvent({type: "InputChanged", input: navigate}); //$NON-NLS-0$
+			if (typeof navigate === "string" || !newParams.resource) { //$NON-NLS-0$
+				var input = navigate || ""; //$NON-NLS-0$
+				this.dispatchEvent({type: "InputChanged", input: input}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		};
 		var sidebarNavInputManager = new SidebarNavInputManager();

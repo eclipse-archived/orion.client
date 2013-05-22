@@ -179,7 +179,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		 * @param {String|Object} The childrenLocation or an object with a ChildrenLocation field.
 		 */
 		loadRoot: function(childrenLocation) {
-			childrenLocation = childrenLocation.ChildrenLocation || childrenLocation;
+			childrenLocation = (childrenLocation && childrenLocation.ChildrenLocation) || childrenLocation || ""; //$NON-NLS-0$
 			var _self = this;
 			return this.commandsRegistered.then(function() {
 				return _self.loadResourceList.call(_self, childrenLocation);
