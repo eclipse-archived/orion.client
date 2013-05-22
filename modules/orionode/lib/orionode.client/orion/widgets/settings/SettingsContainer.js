@@ -84,7 +84,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			}.bind(this), 100);
 			window.addEventListener("hashchange", this.processHash.bind(this)); //$NON-NLS-0$
 			
-			mGlobalCommands.setPageTarget({task: 'Settings'});
+			mGlobalCommands.setPageTarget({task: 'Settings', serviceRegistry: this.registry, commandService: this.commandService});
 		},
 		
 		processHash: function() {

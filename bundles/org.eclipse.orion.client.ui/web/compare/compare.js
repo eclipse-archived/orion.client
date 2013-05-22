@@ -32,7 +32,8 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsCl
 		mGlobalCommands.generateBanner("orion-compare", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({
 			task: messages["Compare"],
-			serviceRegistry: serviceRegistry
+			serviceRegistry: serviceRegistry,
+			commandService: commandService
 		});
 		var diffProvider = new mResourceComparer.DefaultDiffProvider(serviceRegistry);
 		var cmdProvider = new mCompareCommands.CompareCommandFactory({commandService: commandService, commandSpanId: "pageNavigationActions"}); //$NON-NLS-0$
