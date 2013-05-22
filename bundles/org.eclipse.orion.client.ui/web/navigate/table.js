@@ -12,10 +12,10 @@
 /*global define document window eclipse orion serviceRegistry:true widgets alert URL*/
 /*browser:true*/
 
-define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
+define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/keyBinding', 'orion/commandRegistry', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/extensionCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileUtils', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes', 'orion/URL-shim', 'orion/PageLinks'], 
-		function(require, messages, mBootstrap, Deferred, i18nUtil, lib, mSelection, mStatus, mProgress, mDialogs, mSsh, KeyBinding, mCommandRegistry, mFavorites, mTasks, mNavOutliner,
+		function(require, messages, mBrowserCompatibility, mBootstrap, Deferred, i18nUtil, lib, mSelection, mStatus, mProgress, mDialogs, mSsh, KeyBinding, mCommandRegistry, mFavorites, mTasks, mNavOutliner,
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExtensionCommands, mExplorerTable, mNavigatorRenderer, mFileUtils, PageUtil, URITemplate, mContentTypes, _, PageLinks) {
 
 	mBootstrap.startup().then(function(core) {

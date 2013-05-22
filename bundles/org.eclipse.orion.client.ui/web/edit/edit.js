@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define */
-define(['orion/bootstrap', 'edit/setup'], function(mBootstrap, mSetup) {
+define(['orion/browserCompatibility', 'orion/bootstrap', 'edit/setup'], function(mBrowserCompatibility, mBootstrap, mSetup) {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;

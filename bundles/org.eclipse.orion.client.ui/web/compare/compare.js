@@ -11,9 +11,9 @@
 
 /*global define document window */
 
-define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
+define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commandRegistry', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/compare/compareCommands', 'orion/compare/resourceComparer', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/editor/ThemeData', 'orion/compare/compareUtils', 'orion/contentTypes', 'orion/PageUtil', 'i18n!orion/compare/nls/messages'],
-		function(mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mCompareCommands, mResourceComparer, mThemePreferences, mThemeData, mCompareUtils, mContentTypes, PageUtil, messages) {
+		function(mBrowserCompatibility, mBootstrap, mStatus, mProgress, mOperationsClient, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mCompareCommands, mResourceComparer, mThemePreferences, mThemeData, mCompareUtils, mContentTypes, PageUtil, messages) {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;

@@ -11,11 +11,11 @@
  
 /*global define window */
 
-define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',
+define(['i18n!git/nls/gitmessages', 'require', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',
         'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/ssh/sshTools', 'orion/git/gitLogExplorer', 'orion/git/gitCommands',
 	    'orion/links', 'orion/PageUtil'], 
-		function(messages, require, mBootstrap, mStatus, mProgress, mCommandRegistry, mDialogs, mSelection, mFileClient, mOperationsClient,
+		function(messages, require, mBrowserCompatibility, mBootstrap, mStatus, mProgress, mCommandRegistry, mDialogs, mSelection, mFileClient, mOperationsClient,
 					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitLogExplorer, mGitCommands, mLinks, PageUtil) {
 
 		mBootstrap.startup().then(function(core) {

@@ -13,10 +13,10 @@
 /*global define window widgets localStorage*/
 /*jslint browser:true devel:true*/
 
-define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/profile/usersClient',
+define(['i18n!orion/settings/nls/messages', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry', 'orion/commands', 'orion/keyBinding', 'orion/profile/usersClient',
 		'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/webui/littlelib', 'orion/config',
 		'orion/metatype', 'orion/settings/settingsRegistry', 'orion/widgets/settings/SettingsContainer'],
-		function(messages, mBootstrap, mStatus, mProgress, mCommandRegistry, mCommands, KeyBinding, mUsersClient, mOperationsClient, mFileClient, mSearchClient, 
+		function(messages, mBrowserCompatibility, mBootstrap, mStatus, mProgress, mCommandRegistry, mCommands, KeyBinding, mUsersClient, mOperationsClient, mFileClient, mSearchClient, 
 			mDialogs, mGlobalCommands, lib, mConfig, mMetaType, SettingsRegistry, SettingsContainer) {
 
 	mBootstrap.startup().then(function(core) {
