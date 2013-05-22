@@ -13,33 +13,18 @@
 function isSupportedBrowser() {
 	var userAgent = navigator.userAgent;
 	var isSupported = false;
-	var browserData = {
-		'Chrome': {
-			regExp: /chrome\/(\d+)/i,
-			minVersion: 24
-		},
-		'Firefox': {
-			regExp: /firefox\/(\d+)/i,
-			minVersion: 4
-		},
-		'MSIE': {
-			regExp: /msie\s(\d+)/i,
-			minVersion: 10
-		},
-		'Safari': {
-			regExp: /version\/(\d+).*?safari/i,
-			minVersion: 5
+	var VERSION = 1;
+	var browserData = [	{name:'Chrome', regExp: /chrome\/(\d+)/i, minVersion: 24},
+						{name:'Firefox', regExp: /firefox\/(\d+)/i, minVersion: 5},
+						{name:'MSIE', regExp: /msie\s(\d+)/i, minVersion: 10},
+						{name:'Safari', regExp: /version\/(\d+).*?safari/i, minVersion: 6}];
+	
+	browserData.forEach( function( browser ){
+		var matches = userAgent.match(browser.regExp);
+		if(matches && matches[VERSION] >= browser.minVersion) {
+			isSupported = true;
 		}
-	};
-
-	for (var browser in browserData) {
-		var matches = userAgent.match(browserData[browser].regExp);
-		if (matches) {
-			if (matches[1] >= browserData[browser].minVersion) {
-				isSupported = true;
-			}
-		}
-	}
+	});
 
 	return isSupported;
 }
