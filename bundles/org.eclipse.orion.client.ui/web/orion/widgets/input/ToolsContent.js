@@ -29,7 +29,11 @@ define(['orion/objects'], function(objects) {
 								'<ul id="navigationlinks"></ul>' +
 							'</nav>' +
 							'</section>' +
-							'<hr>' +
+							'<ul>' + 
+								'<li class="dropdownSeparator">' +
+									'<span class="dropdownSeparator"></span>' +
+								'</li>' +
+							'</ul>' +
 							'<section>' +
 							'<nav>' +
 								'<ul id="additionalLinks"></ul>' +

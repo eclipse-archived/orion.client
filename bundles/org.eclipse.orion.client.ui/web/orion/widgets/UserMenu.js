@@ -26,7 +26,10 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			this._serviceRegistry = options.serviceRegistry;
 			this.authenticatedServices = {};
 			this.unauthenticatedServices = {};
-			
+			//Options to customize all drop down items 
+			this._noSeparator = options.noSeparator;
+			this._dropDownItemClass = options.dropDownItemClass;
+			this._keyAssistClass = options.keyAssistClass;
 			if( options.signOut !== undefined ){
 				this._displaySignOut = options.signOut;
 			}
@@ -55,7 +58,13 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			element.tabIndex = 0; //$NON-NLS-0$
 			var text = document.createTextNode(name);
 			element.appendChild(text);
-			element.classList.add("dropdownMenuItem"); //$NON-NLS-0$
+			if(typeof this._dropDownItemClass === "string") {//$NON-NLS-0$
+				if(this._dropDownItemClass !== "") {
+					element.classList.add(this._dropDownItemClass);
+				}
+			} else {
+				element.classList.add("dropdownMenuItem"); //$NON-NLS-0$
+			}
 			element.addEventListener("click", click, false); //$NON-NLS-0$
 			// onClick events do not register for spans when using the keyboard
 			element.addEventListener("keydown", function(e) { //$NON-NLS-0$
@@ -126,17 +135,29 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 					var li = doc.createElement("li");//$NON-NLS-0$
 					var link = doc.createElement("a"); //$NON-NLS-0$
 					link.role = "menuitem"; //$NON-NLS-0$
-					link.classList.add("dropdownMenuItem"); //$NON-NLS-0$
+					if(typeof this._dropDownItemClass === "string") {//$NON-NLS-0$
+						if(this._dropDownItemClass !== "") {
+							link.classList.add(this._dropDownItemClass);
+						}
+					} else {
+						link.classList.add("dropdownMenuItem"); //$NON-NLS-0$
+					}
 					link.href = item.href;
 					link.textContent = item.textContent;
 					li.appendChild(link);
 					category.appendChild(li);
-				});
+				}.bind(this));
 
 				if(this.keyAssistFunction){
 					var keyAssist = document.createElement("li"); //$NON-NLS-0$
 					var element = this._makeMenuItem(messages["Keyboard Shortcuts"], this.keyAssistFunction);
-					element.classList.add("key-assist-menuitem"); //$NON-NLS-0$
+					if(typeof this._keyAssistClass === "string") {//$NON-NLS-0$
+						if(this._keyAssistClass !== "") {
+							element.classList.add(this._keyAssistClass);
+						}
+					} else {
+						element.classList.add("key-assist-menuitem"); //$NON-NLS-0$
+					}
 					keyAssist.appendChild(element);
 					getCategory(0).appendChild(keyAssist);
 				}
@@ -144,7 +165,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 				// Add categories to _dropdownNode
 				var _self = this;
 				categories.sort(function(a, b) { return a - b; }).forEach(function(category, i) {
-					if (i < categories.length - 1) {
+					if (i < categories.length - 1 && !this._noSeparator) {
 						// Add a separator
 						var li = document.createElement("li"); //$NON-NLS-0$
 						li.classList.add("dropdownSeparator"); //$NON-NLS-0$
@@ -154,7 +175,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 						category.appendChild(li);
 					}
 					_self._dropdownNode.appendChild(category);
-				});
+				}.bind(this));
 
 				if(this.isSingleService()){
 					//add sign out only for single service.
