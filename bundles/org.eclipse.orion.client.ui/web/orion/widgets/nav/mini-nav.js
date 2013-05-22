@@ -221,7 +221,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var selectionActionsScope = this.selectionActionsScope;
 			var folderNavActionsScope = this.folderNavActionsScope;
 			commandRegistry.addCommandGroup(newActionsScope, "orion.miniNavNewGroup", 1000, messages["New"], null, null, "core-sprite-add-content"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, messages["NoSelection"], "core-sprite-settings"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, null, "core-sprite-settings"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerSelectionService(selectionActionsScope, this.selection);
 
 			// commands that don't appear but have keybindings
@@ -260,8 +260,16 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 		updateCommands: function(selections) {
 			this.createActionSections();
-			FileCommands.updateNavTools(this.registry, this.commandRegistry, this, this.newActionsScope, this.selectionActionsScope, this.treeRoot);
-			var commandRegistry = this.commandRegistry;
+			var selectionTools = this.selectionActionsScope;
+			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
+			if (!selections || (Array.isArray(selections) && selections.length === 0)) {
+				FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, null /*don't touch selectionTools*/, treeRoot);
+				// Now build the selectionTools. No selection in explorer, so they should target the treeRoot.
+				commandRegistry.destroy(selectionTools);
+				commandRegistry.renderCommands(selectionTools, selectionTools, treeRoot, this, "button");  //$NON-NLS-0$
+			} else {
+				FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot);
+			}
 			commandRegistry.destroy(this.folderNavActionsScope);
 			commandRegistry.renderCommands(this.folderNavActionsScope, this.folderNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
 		}
