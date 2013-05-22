@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  *******************************************************************************/
-/*global window document define login logout localStorage orion */
+/*global window document define login logout localStorage orion alert */
 /*jslint browser:true sub:true*/
 
 function isSupportedBrowser() {
@@ -42,4 +42,9 @@ function isSupportedBrowser() {
 	}
 
 	return isSupported;
+}
+
+if (!isSupportedBrowser()) {
+	alert("Sorry, your browser is not supported.\n\nTo use Orion, we recommend that you use the latest web browsers from Google Chrome, FireFox, or Safari.\n");
+	throw 'unsupported browser';
 }
