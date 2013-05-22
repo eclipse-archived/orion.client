@@ -967,7 +967,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/co
 				}
 			);
 		} else {
-			defaultLocationFn(getCWD(), false);
+			defaultLocationFn(getCWD(), true);
 		}
 
 		/* add the locally-defined types */
