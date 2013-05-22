@@ -396,9 +396,9 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 *  group2Id, which is itself a child of group1Id.  Optional.
 		 * @param {String} [emptyGroupMessage] A message to show if the group is empty and the user activates the UI element
 		 *  representing the group.  Optional.  If not specified, then the group UI element won't be shown when it is empty.
+		 * @param {String} [imageClass] CSS class of an image to use for this group.
 		 */	
-		 
-		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, icon) {
+		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, imageClass) {
 			if (!this._contributionsByScopeId[scopeId]) {
 				this._contributionsByScopeId[scopeId] = {};
 			}
@@ -414,18 +414,17 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 				if (position) {
 					parentTable[groupId].position = position;
 				}
-				
-				if( icon ){
-					parentTable[groupId].imageClass = icon;
+				if (imageClass) {
+					parentTable[groupId].imageClass = imageClass;
 				}
-				
+
 				parentTable[groupId].emptyGroupMessage = emptyGroupMessage;
 			} else {
 				// create new group definition
 				parentTable[groupId] = {title: title, 
 										position: position, 
 										emptyGroupMessage: emptyGroupMessage,
-										imageClass:icon,
+										imageClass: imageClass,
 										children: {}};
 				parentTable.sortedContributions = null;
 			}
