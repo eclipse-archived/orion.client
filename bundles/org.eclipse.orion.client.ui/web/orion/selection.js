@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,7 +14,7 @@ define(["orion/EventTarget"], function(EventTarget){
 
 	/**
 	 * Constructs a new selection service. Clients should obtain a selection service
-	 * by requesting the service <tt>orion.page.selection</tt> from the service registry.
+	 * by requesting the service <code>orion.page.selection</code> from the service registry.
 	 * This service constructor is only intended to be used by page service registry
 	 * initialization code.
 	 * @name orion.selection.Selection
@@ -36,7 +36,7 @@ define(["orion/EventTarget"], function(EventTarget){
 	Selection.prototype = /** @lends orion.selection.Selection.prototype */ {
 		/**
 		 * Obtains the current single selection and passes it to the provided function.
-		 * @param onDone The function to invoke with the selection
+		 * @param {Function} onDone The function to invoke with the selection.
 		 */
 		getSelection : function(onDone) {
 			//TODO this should return a promise rather than having an onDone parameter
@@ -45,7 +45,7 @@ define(["orion/EventTarget"], function(EventTarget){
 		
 		/**
 		 * Obtains all current selections and passes them to the provided function.
-		 * @param onDone The function to invoke with the selections
+		 * @param {Function} onDone The function to invoke with the selections.
 		 */
 		getSelections: function(onDone) {
 			onDone(Array.isArray(this._selections) ? this._selections.slice() : []);
@@ -59,8 +59,9 @@ define(["orion/EventTarget"], function(EventTarget){
 		},
 		
 		/**
-		 * Sets the current selection
-		 * @param itemOrArray A single selected item or an array of selected items
+		 * Sets the current selection. Dispatches a <code>selectionChanged</code> event.
+		 * @param {Object|Object[]|null} itemOrArray A single selected item, or an array of selected items, or <code>null</code> (meaning no selection).
+		 * @see #event:selectionChanged
 		 */
 		setSelections: function(itemOrArray) {
 			var oldSelection = this._selections;
@@ -75,6 +76,17 @@ define(["orion/EventTarget"], function(EventTarget){
 				this.dispatchEvent({type:"selectionChanged", selection: this._getSingleSelection(), selections: this._selections}); //$NON-NLS-0$
 			}
 		}
+		/**
+		 * Dispatched when the selection has changed.
+		 * @name orion.selection.Selection#selectionChanged
+		 * @class
+		 * @event
+		 * @param {selectionChangedEvent} selectionChangedEvent
+		 * @param {Object} selectionChangedEvent.selection The selected item. If there is no selection, this field is <code>null</code>. If multiple items are selected,
+		 * this field refers to the first item in the list.
+		 * @param {Object[]} selectionChangedEvent.selections The selected items. If there is no selection, this field is <code>null</code>.
+		 * @param {String} selectionChangedEvent.type The type event type. Value is always <code>"selectionChanged"</code>.
+		 */
 	};
 	Selection.prototype.constructor = Selection;
 
