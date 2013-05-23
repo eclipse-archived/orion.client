@@ -15,14 +15,16 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
 	'orion/editor/undoStack', //$NON-NLS-0$
 	'orion/keyBinding', //$NON-NLS-0$
+	'orion/editor/keyModes', //$NON-NLS-0$
 	'orion/editor/rulers', //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
 	'orion/editor/tooltip', //$NON-NLS-0$
 	'orion/editor/textDND', //$NON-NLS-0$
 	'orion/editor/templates', //$NON-NLS-0$
 	'orion/editor/regex', //$NON-NLS-0$
+	'orion/objects', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTextDND, mTemplates, mRegex, util) {
+], function(messages, mUndoStack, mKeyBinding, mKeyModes, mRulers, mAnnotations, mTooltip, mTextDND, mTemplates, mRegex, objects, util) {
 
 	var exports = {};
 	
@@ -111,11 +113,27 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 	exports.TextDNDFactory = TextDNDFactory;
 	
 	function IncrementalFind(editor) {
+		mKeyModes.KeyMode.call(this);
 		this.editor = editor;
 		this._active = false;
 		this._success = true;
 		this._ignoreSelection = false;
 		this._prefix = "";
+		
+		var textView = editor.getTextView();
+		textView.setAction("incrementalFindNext", function() { //$NON-NLS-0$
+			return this.lineDown();
+		}.bind(this));
+		textView.setAction("incrementalFindPrevious", function() { //$NON-NLS-0$
+			return this.lineUp();
+		}.bind(this));
+		textView.setAction("incrementalFindCancel", function() { //$NON-NLS-0$
+			return this.cancel();
+		}.bind(this));
+		textView.setAction("incrementalFindBackspace", function() { //$NON-NLS-0$
+			return this.backspace();
+		}.bind(this));
+		
 		var self = this;
 		this._listener = {
 			onVerify: function(e){
@@ -142,7 +160,18 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 		};
 	}
-	IncrementalFind.prototype = {
+	IncrementalFind.prototype = new mKeyModes.KeyMode();
+	objects.mixin(IncrementalFind.prototype, {
+		createKeyBindings: function() {
+			var KeyBinding = mKeyBinding.KeyBinding;
+			var bindings = [];
+			bindings.push({actionID: "incrementalFindBackspace", keyBinding: new KeyBinding(8)}); //$NON-NLS-0$
+			bindings.push({actionID: "incrementalFindCancel", keyBinding: new KeyBinding(13)}); //$NON-NLS-0$
+			bindings.push({actionID: "incrementalFindCancel", keyBinding: new KeyBinding(27)}); //$NON-NLS-0$
+			bindings.push({actionID: "incrementalFindPrevious", keyBinding: new KeyBinding(38)}); //$NON-NLS-0$
+			bindings.push({actionID: "incrementalFindNext", keyBinding: new KeyBinding(40)}); //$NON-NLS-0$
+			return bindings;
+		},
 		backspace: function() {
 			if (!this.isActive()) {
 				return false;
@@ -248,7 +277,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			var formattedMessage = util.formatMessage(this._success ? messages.incrementalFind : messages.incrementalFindNotFound, this._prefix);
 			this.editor.reportStatus(formattedMessage, this._success ? "" : "error"); //$NON-NLS-0$
 		}
-	};
+	});
 
 	/**
 	 * TextCommands connects common text editing keybindings onto an editor.
@@ -315,10 +344,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				}
 				return true;
 			}.bind(this), {name: messages.incrementalFindKey});
-			textView.setAction("deletePrevious", function() { //$NON-NLS-0$
-				return this._incrementalFind.backspace();
-			}.bind(this));
-			
+
 			textView.setAction("tab", function() { //$NON-NLS-0$
 				var editor = this.editor;
 				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
@@ -969,11 +995,30 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 	exports.SourceCodeActions = SourceCodeActions;
 	
 	function LinkedMode(editor, undoStack, contentAssist) {
+		mKeyModes.KeyMode.call(this);
 		this.editor = editor;
 		this.undoStack = undoStack;
 		this.contentAssist = contentAssist;
 		
 		this.linkedModeModel = null;
+		
+		var textView = editor.getTextView();
+		textView.setAction("linkedModeEnter", function() { //$NON-NLS-0$
+			return this.enter();
+		}.bind(this));
+		textView.setAction("linkedModeCancel", function() { //$NON-NLS-0$
+			return this.cancel();
+		}.bind(this));
+		textView.setAction("linkedModeNextGroup", function() { //$NON-NLS-0$
+			var model = this.linkedModeModel;
+			this.selectLinkedGroup((model.selectedGroupIndex + 1) % model.groups.length);
+			return true;
+		}.bind(this));
+		textView.setAction("linkedModePreviousGroup", function() { //$NON-NLS-0$
+			var model = this.linkedModeModel;
+			this.selectLinkedGroup(model.selectedGroupIndex > 0 ? model.selectedGroupIndex-1 : model.groups.length-1);
+			return true;
+		}.bind(this));
 		
 		/**
 		 * Listener called when Linked Mode is active. Updates position's offsets and length
@@ -1101,7 +1146,17 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}.bind(this)
 		};
 	}
-	LinkedMode.prototype = {
+	LinkedMode.prototype = new mKeyModes.KeyMode();
+	objects.mixin(LinkedMode.prototype, {
+		createKeyBindings: function() {
+			var KeyBinding = mKeyBinding.KeyBinding;
+			var bindings = [];
+			bindings.push({actionID: "linkedModeEnter", keyBinding: new KeyBinding(13)}); //$NON-NLS-0$
+			bindings.push({actionID: "linkedModeCancel", keyBinding: new KeyBinding(27)}); //$NON-NLS-0$
+			bindings.push({actionID: "linkedModeNextGroup", keyBinding: new KeyBinding(9)}); //$NON-NLS-0$
+			bindings.push({actionID: "linkedModePreviousGroup", keyBinding: new KeyBinding(9, false, true)}); //$NON-NLS-0$
+			return bindings;
+		},
 		/**
 		 * Starts Linked Mode, selects the first position and registers the listeners.
 		 * @param {Object} linkedModeModel An object describing the model to be used by linked mode.
@@ -1144,21 +1199,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				textView.addEventListener("ModelChanged", this.linkedModeListener.onModelChanged); //$NON-NLS-0$
 				var contentAssist = this.contentAssist;
 				contentAssist.addEventListener("Activating", this.linkedModeListener.onActivating); //$NON-NLS-0$
-	
-				textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "nextLinkedModePosition"); //$NON-NLS-0$
-				textView.setAction("nextLinkedModePosition", function() { //$NON-NLS-0$
-					var model = this.linkedModeModel;
-					this.selectLinkedGroup((model.selectedGroupIndex + 1) % model.groups.length);
-					return true;
-				}.bind(this));
-				
-				textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "previousLinkedModePosition"); //$NON-NLS-0$
-				textView.setAction("previousLinkedModePosition", function() { //$NON-NLS-0$
-					var model = this.linkedModeModel;
-					this.selectLinkedGroup(model.selectedGroupIndex > 0 ? model.selectedGroupIndex-1 : model.groups.length-1);
-					return true;
-				}.bind(this));
-	
 				this.editor.reportStatus(messages.linkedModeEntered, null, true);
 			}
 			this._sortedPositions = null;
@@ -1197,10 +1237,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				var contentAssist = this.contentAssist;
 				contentAssist.removeEventListener("Activating", this.linkedModeListener.onActivating); //$NON-NLS-0$
 				contentAssist.offset = undefined;
-	
-				textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "tab"); //$NON-NLS-0$
-				textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "shiftTab"); //$NON-NLS-0$
-				
 				this.editor.reportStatus(messages.linkedModeExited, null, true);
 				if (escapePosition) {
 					textView.setCaretOffset(model.escapePosition, false);
@@ -1238,12 +1274,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		},
 		cancel: function() {
 			this.exitLinkedMode(false);
-		},
-		lineUp: function() {
-			return false;
-		},
-		lineDown: function() {
-			return false;
 		},
 		selectLinkedGroup: function(index) {
 			var model = this.linkedModeModel;
@@ -1379,7 +1409,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 			annotationModel.replaceAnnotations(remove, add);
 		}
-	};
+	});
 	exports.LinkedMode = LinkedMode;
 
 	return exports;

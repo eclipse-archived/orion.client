@@ -69,34 +69,22 @@ exports.EditorCommandFactory = (function() {
 				this.commandService.addCommand(searchCommand);
 				this.commandService.registerCommandContribution(this.pageNavId, "orion.searchFiles", 1, null, true, new mKeyBinding.KeyBinding("h", true)); //$NON-NLS-1$ //$NON-NLS-0$
 
-				var searchFloatMode = {
-					isActive: function() {
-						return searchFloat.style.display === "block"; //$NON-NLS-0$
-					},
-					tab: function() {
-						lib.$("a",searchFloat).focus(); //$NON-NLS-0$
-						return true;
-					},
-					cancel: function() {
-						searchFloat.style.display = "none"; //$NON-NLS-0$
-						editor.getTextView().removeKeyMode(searchFloatMode);
-						return true;
-					}
-				};
 				document.addEventListener("keydown", function (e){  //$NON-NLS-0$
 					if (e.keyCode === lib.KEY.ESCAPE) {
-						var textView = editor.getTextView();
-						searchFloatMode.cancel();
+						searchFloat.style.display = "none"; //$NON-NLS-0$
 						if(lib.$$array("a", searchFloat).indexOf(document.activeElement) !== -1) { //$NON-NLS-0$
+							var textView = editor.getTextView();
 							textView.focus();
 						}
 					}
 				}, false);
+				lib.addAutoDismiss([searchFloat], function() {
+					searchFloat.style.display = "none"; //$NON-NLS-0$
+				});
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
 				editor.getTextView().setAction("searchFiles", function() { //$NON-NLS-0$
 					window.setTimeout(function() {
 						var e = editor.getTextView();
-						e.addKeyMode(searchFloatMode);
 						var selection = e.getSelection();
 						var searchPattern = "";
 						if (selection.end > selection.start) {
@@ -106,11 +94,14 @@ exports.EditorCommandFactory = (function() {
 						} if (!searchPattern) {
 							return;
 						}
+						lib.empty(searchFloat);
 						searchFloat.appendChild(document.createTextNode(messages["Searching for occurrences of "])); 
 						var b = document.createElement("b"); //$NON-NLS-0$
 						searchFloat.appendChild(b);
 						b.appendChild(document.createTextNode("\"" + searchPattern + "\"...")); //$NON-NLS-1$ //$NON-NLS-0$
 						searchFloat.style.display = "block"; //$NON-NLS-0$
+						searchFloat.tabIndex = 0;
+						searchFloat.focus();
 						var searchParams = self._searcher.createSearchParams(searchPattern, false, true);
 						searchParams.sort = "Name asc"; //$NON-NLS-0$
 						var renderer = self._searcher.defaultRenderer.makeRenderFunction(null, searchFloat, false);

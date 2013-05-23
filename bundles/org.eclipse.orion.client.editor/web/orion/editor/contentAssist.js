@@ -15,10 +15,12 @@
 define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
 	'orion/keyBinding', //$NON-NLS-0$
+	'orion/editor/keyModes', //$NON-NLS-0$
 	'orion/editor/eventTarget', //$NON-NLS-0$
 	'orion/Deferred', //$NON-NLS-0$
+	'orion/objects', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
+], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, util) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -318,6 +320,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	 * @param {orion.editor.ContentAssistWidget} [ContentAssistWidget]
 	 */
 	function ContentAssistMode(contentAssist, ContentAssistWidget) {
+		mKeyModes.KeyMode.call(this);
 		this.contentAssist = contentAssist;
 		this.widget = ContentAssistWidget;
 		this.proposals = [];
@@ -326,8 +329,35 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			self.proposals = event.data.proposals;
 			self.selectedIndex = self.proposals.length ? 0 : -1;
 		});
+		var textView = contentAssist.textView;
+		textView.setAction("contentAssistApply", function() { //$NON-NLS-0$
+			return this.enter();
+		}.bind(this));
+		textView.setAction("contentAssistCancel", function() { //$NON-NLS-0$
+			return this.cancel();
+		}.bind(this));
+		textView.setAction("contentAssistNextProposal", function() { //$NON-NLS-0$
+			return this.lineDown();
+		}.bind(this));
+		textView.setAction("contentAssistPreviousProposal", function() { //$NON-NLS-0$
+			return this.lineUp();
+		}.bind(this));
+		textView.setAction("contentAssistTab", function() { //$NON-NLS-0$
+			return this.tab();
+		}.bind(this));
 	}
-	ContentAssistMode.prototype = /** @lends orion.editor.ContentAssistMode.prototype */ {
+	ContentAssistMode.prototype = new mKeyModes.KeyMode();
+	objects.mixin(ContentAssistMode.prototype, {
+		createKeyBindings: function() {
+			var KeyBinding = mKeyBinding.KeyBinding;
+			var bindings = [];
+			bindings.push({actionID: "contentAssistApply", keyBinding: new KeyBinding(13)}); //$NON-NLS-0$
+			bindings.push({actionID: "contentAssistCancel", keyBinding: new KeyBinding(27)}); //$NON-NLS-0$
+			bindings.push({actionID: "contentAssistNextProposal", keyBinding: new KeyBinding(40)}); //$NON-NLS-0$
+			bindings.push({actionID: "contentAssistPreviousProposal", keyBinding: new KeyBinding(38)}); //$NON-NLS-0$
+			bindings.push({actionID: "contentAssistTab", keyBinding: new KeyBinding(9)}); //$NON-NLS-0$
+			return bindings;
+		},
 		cancel: function() {
 			this.getContentAssist().deactivate();
 		},
@@ -380,7 +410,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				return false;
 			}
 		}
-	};
+	});
 
 	/**
 	 * @name orion.editor.ContentAssistWidget
