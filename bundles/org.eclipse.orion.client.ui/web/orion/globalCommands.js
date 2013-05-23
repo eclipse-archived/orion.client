@@ -184,65 +184,24 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	
 	// Related links menu management.  The related menu is reused as content changes.  If the menu becomes
 	// empty, we hide the dropdown.
-	var linksDropdown;
 	var pageItem;
 	var exclusions = [];
 	var title;
 	
-	function _emptyLinksMenu() {
-		var related = lib.node("oldRelatedLinks"); //$NON-NLS-0$
-		if(!related){
-			// document not loaded
-			return;
-		}
-		if (linksDropdown) {
-			linksDropdown.close();
-			linksDropdown.empty();
-		}
-	}
-
-	function _checkForEmptyLinksMenu() {
-		var triggerNode = lib.node("relatedTrigger"); //$NON-NLS-0$
-		if (linksDropdown && triggerNode) {
-			if (linksDropdown.getItems().length === 0) {
-				triggerNode.style.visibility = "hidden"; //$NON-NLS-0$
-			} else {
-				triggerNode.style.visibility = "visible"; //$NON-NLS-0$ 
-			}
-		}
+	function _addRelatedLinkCommand(command, invocation) {
+		var relatedLinksNode = lib.node('relatedLinks');
+		var newRelatedLinkItem = mCommands.createCommandMenuItem(relatedLinksNode, command, invocation);
+		newRelatedLinkItem.classList.remove('dropdownMenuItem');
 	}
 	
-	function _addRelatedLinkCommand(command, invocation) {
-		var dropdownNode = lib.node("relatedDropdown"); //$NON-NLS-0$
-		
-		/* Evolving to a compound list of navigation and related links
-		   Some of this code was dedicated to the older dropdown. Will
-		   clean this up as a next step. 
-		*/
-		if (!linksDropdown) {
-			linksDropdown = new mDropdown.Dropdown({
-				dropdown: dropdownNode
-			});
-		}
-		
-		mCommands.createCommandMenuItem(dropdownNode, command, invocation);
-		
-		var relatedlinks = lib.node('relatedlinks');
-		var link = mCommands.createCommandMenuItem(dropdownNode, command, invocation);
-		link.className = '';
-		var li = document.createElement( 'li' );
-		li.appendChild(link);
-		relatedlinks.appendChild(li);
-	}	
 	/**
 	 * Adds the related links to the banner
 	 * @name orion.globalCommands#generateRelatedLinks
 	 * @function
 	 */
 	function generateRelatedLinks(serviceRegistry, item, exclusions, commandRegistry, alternateItem) {
-	
-		var relatedlinks = lib.node('relatedlinks');
-		lib.empty( relatedlinks );
+		var relatedLinksNode = lib.node('relatedLinks');
+		lib.empty(relatedLinksNode);
 	
 		var contentTypesCache;
 		function getContentTypes() {
@@ -265,15 +224,9 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		if (contributedLinks.length <= 0) {
 			return;
 		}
-		var related = lib.node("oldRelatedLinks"); //$NON-NLS-0$
-		if(!related){
-			// document not loaded
-			return;
-		}
 		
 		Deferred.when(getContentTypes(), function() {
 			var alternateItemDeferred;
-			_emptyLinksMenu();
 			var deferreds = [];
 			
 			// assemble the related links
@@ -354,9 +307,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					}
 				} 
 			}
-			Deferred.all(deferreds, function(error) { return error; }).then(function(){
-				_checkForEmptyLinksMenu();
-			});
+			Deferred.all(deferreds, function(error) { return error; });
 		});
 	}
 	
