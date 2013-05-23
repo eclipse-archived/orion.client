@@ -224,6 +224,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, messages["NoSelection"], "core-sprite-settings"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerSelectionService(selectionActionsScope, this.selection);
 
+			// commands that don't appear but have keybindings
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.copySelections", 1, null, true, new KeyBinding('c', true) /* Ctrl+C */); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.pasteSelections", 1, null, true, new KeyBinding('v', true) /* Ctrl+V */);//$NON-NLS-1$ //$NON-NLS-0$
+
 			// New file and new folder (in a group)
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile", 1, "orion.miniNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFolder", 2, "orion.miniNavNewGroup", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -231,12 +235,12 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.project", 1, "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.linkProject", 2, "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// Folder nav actions
-			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.upFolder", 1, null, true, new KeyBinding(38, false, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.upFolder", 1, null, true, new KeyBinding(38, false, false, true) /* Alt+UpArrow */); //$NON-NLS-0$
 
-			var renameBinding = new KeyBinding(113);
+			var renameBinding = new KeyBinding(113); // F2
 			renameBinding.domScope = "sidebar"; //$NON-NLS-0$
 			renameBinding.scopeName = messages["Navigator"]; //$NON-NLS-0$
-			var delBinding = new KeyBinding(46);
+			var delBinding = new KeyBinding(46); // Delete
 			delBinding.domScope = "sidebar"; //$NON-NLS-0$
 			delBinding.scopeName = messages["Navigator"];
 //			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.makeFavorite", 1, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
