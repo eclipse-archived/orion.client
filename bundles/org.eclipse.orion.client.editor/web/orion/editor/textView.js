@@ -3777,23 +3777,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			for (i = keyModes.length - 1 ; i >= 0; i--) {
 				mode = keyModes[i];
 				if (typeof mode.match === "function") { //$NON-NLS-0$
-					break;
-				}
-			}
-			if (!mode.match) {
-				return false;
-			}
-			var actionID = mode.match(e);
-			if (actionID !== undefined) {
-				for (i = keyModes.length - 1; i >= 0; i--) {
-					mode = keyModes[i];
-					if (mode.isActive() && typeof mode[actionID] === "function") { //$NON-NLS-0$
-						if (mode[actionID]()) {
-							return true;
-						}
+					var actionID = mode.match(e);
+					if (actionID !== undefined) {
+						return this.invokeAction(actionID);
 					}
 				}
-				return this.invokeAction(actionID);
 			}
 			return false;
 		},
@@ -3824,9 +3812,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
-			return true;
-		},
-		_doCancel: function () {
 			return true;
 		},
 		_doContent: function (text) {
@@ -4455,12 +4440,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._imeOffset = -1;
 		},
 		_createActions: function () {
-			this.addKeyMode(new mKeyModes.KeyMode());
+			this.addKeyMode(new mKeyModes.DefaultKeyMode());
 			//1 to 1, no duplicates
 			var self = this;
 			this._actions = {
-				//TODO: Add NLS string for actions ex. {name: messages.cancelMode});
-				"cancel": {defaultHandler: function() {return self._doCancel();}}, //$NON-NLS-0$
 				"noop": {defaultHandler: function() {return self._doNoop();}}, //$NON-NLS-0$
 
 				"lineUp": {defaultHandler: function() {return self._doLineUp({select: false});}}, //$NON-NLS-0$

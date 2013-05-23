@@ -670,25 +670,9 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		keyAssistDiv.setAttribute("aria-live", "assertive");//$NON-NLS-1$ //$NON-NLS-0$
 		document.body.appendChild(keyAssistDiv);
 		
-		var keyAssistMode = {
-			isActive: function() {
-				return keyAssistDiv.style.display === "block"; //$NON-NLS-0$
-			},
-			
-			cancel: function() {
-				if (this.isActive()) {
-					keyAssistDiv.style.display = "none"; //$NON-NLS-0$
-					if (editor) {
-						editor.getTextView().removeKeyMode(this);
-					}
-					return true;
-				}
-				return false;   // not handled
-			}
-		};
 		document.addEventListener("keydown", function (e){  //$NON-NLS-0$
 			if (e.keyCode === lib.KEY.ESCAPE) {
-				keyAssistMode.cancel();
+				keyAssistDiv.style.display = "none"; //$NON-NLS-0$
 				var statusService =	serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 				if(statusService){
 					statusService.setProgressMessage("");
@@ -696,7 +680,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			}
 		}, false);
 		lib.addAutoDismiss([keyAssistDiv], function() {
-			keyAssistMode.cancel();
+			keyAssistDiv.style.display = "none"; //$NON-NLS-0$
 		});
 		
 		var nav = document.getElementById( 'centralNavigation' );
@@ -941,7 +925,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					var heading;
 					lib.empty(keyAssistDiv);
 					if (editor && editor.getTextView()) {
-						editor.getTextView().addKeyMode(keyAssistMode);
 						heading = document.createElement("h2"); //$NON-NLS-0$
 						heading.appendChild(document.createTextNode(messages["Editor"]));
 						keyAssistDiv.appendChild(heading);
@@ -967,8 +950,10 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					keyAssistDiv.appendChild(heading);
 					commandRegistry.showKeyBindings(keyAssistDiv);
 					keyAssistDiv.style.display = "block"; //$NON-NLS-0$
+					keyAssistDiv.tabIndex = 0;
+					keyAssistDiv.focus();
 				} else {
-					keyAssistMode.cancel();
+					keyAssistDiv.style.display = "none"; //$NON-NLS-0$
 				}
 				return true;
 			}});
