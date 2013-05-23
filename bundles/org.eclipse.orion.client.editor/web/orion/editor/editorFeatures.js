@@ -225,6 +225,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		},
 		cancel: function() {
 			this.setActive(false);
+			return true;
 		},
 		isStatusActive: function() {
 			return this.isActive();
@@ -236,7 +237,8 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return this.find(true, true);
 		},
 		enter: function() {
-			return false;
+			this.setActive(false);
+			return true;
 		},
 		_status: function() {
 			if (!this.isActive()) {
