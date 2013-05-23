@@ -92,10 +92,12 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			};
 			sidebarNavInputManager.addEventListener("InputChanged", this.navInputListener); //$NON-NLS-0$
 		}
-		var modelManager = this.modelManager = new EventTarget();
-		var listener = this.modelChangeListener.bind(this);
-		["rename", "move", "delete"].forEach(function(type) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			modelManager.addEventListener(type, listener);
+
+		// Listen to model changes from fileCommands
+		var dispatcher = this.modelEventDispatcher;
+		var onChange = this.onFileModelChange.bind(this);
+		["move", "delete"].forEach(function(type) { //$NON-NLS-1$ //$NON-NLS-0$
+			dispatcher.addEventListener(type, onChange);
 		});
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
 		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
@@ -105,7 +107,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	}
 	MiniNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(MiniNavExplorer.prototype, /** @lends orion.sidebar.MiniNavExplorer.prototype */ {
-		modelChangeListener: function(event) {
+		onFileModelChange: function(event) {
 			var oldValue = event.oldValue, newValue = event.newValue;
 			// Detect if we moved/renamed/deleted the current file being edited, or an ancestor thereof.
 			var editorFile = this.editorInputManager.getFileMetadata();

@@ -9,11 +9,12 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define window */
-/*jslint regexp:false browser:true forin:true*/
+/*global clearTimeout console define document setTimeout window */
+/*jslint regexp:false forin:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/fileUtils', 'orion/explorers/explorer'],
-		function(messages, require, Deferred, lib, i18nUtil, mFileUtils, mExplorer){
+define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/fileUtils', 'orion/explorers/explorer',
+		'orion/EventTarget'],
+		function(messages, require, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -95,7 +96,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 	/**
 	 * Creates a new file explorer.
-	 * @name orion.explorers.FileExplorer
+	 * @name orion.explorer.FileExplorer
 	 * @class A user interface component that displays a table-oriented file explorer
 	 * @extends orion.explorer.Explorer
 	 *
@@ -115,8 +116,19 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 */
 	/**
 	 * Root model item of the tree.
-	 * @name orion.explorers.FileExplorer#treeRoot
-	 * @type {Object}
+	 * @name orion.explorer.FileExplorer#treeRoot
+	 * @field
+	 * @type Object
+	 */
+	/**
+	 * Dispatches events describing model changes.
+	 * @name orion.explorer.FileExplorer#modelEventDispatcher
+	 * @type orion.EventTarget
+	 */
+	/**
+	 * Handles model changes.
+	 * @name orion.explorer.FileExplorer#modelHandler
+	 * @type orion.explorer.FileExplorer.ModelHandler
 	 */
 	function FileExplorer(options) {
 		this.registry = options.serviceRegistry;
@@ -134,7 +146,22 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		this.myTree = null;
 		this.checkbox = false;
 		this._hookedDrag = false;
+		var modelEventDispatcher = this.modelEventDispatcher = new EventTarget();
 
+		// Listen to model changes from fileCommands
+		var _self = this;
+		["copy", "copyMultiple", "create", "delete", "deleteMultiple", "import", //$NON-NLS-5$//$NON-NLS-4$//$NON-NLS-3$//$NON-NLS-2$//$NON-NLS-1$//$NON-NLS-0$
+		 "move", "moveMultiple"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
+				modelEventDispatcher.addEventListener(eventType, _self.modelHandler[eventType].bind(_self));
+				modelEventDispatcher.addEventListener(eventType, function(evt) {
+					// DEBUG
+					if (typeof console !== "undefined" && console) { //$NON-NLS-)$
+						console.log(evt);
+					}
+				});
+			});
+
+		// Same tab/new tab setting
 		var renderer = this.renderer;
 		if (this.registry) {
 			this.registry.registerService("orion.cm.managedservice", //$NON-NLS-0$
@@ -152,7 +179,74 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	}
 	
 	FileExplorer.prototype = new mExplorer.Explorer();
-	
+
+	/**
+	 * Handles model changes. Subclasses can override these methods to control how the FileExplorer reacts to various types of model changes.
+	 * The default implementations generally just refresh the affected row(s) in the explorer.
+	 * @name orion.explorer.FileExplorer.ModelHandler
+	 * @class Handles model changes in a FileExplorer.
+	 */
+	FileExplorer.prototype.modelHandler = /** @lends orion.explorer.FileExplorer.ModelHandler.prototype */ {
+		copy: function(modelEvent) {
+			// handled by copyMultiple
+		},
+		copyMultiple: function(modelEvent) {
+			this.changedItem(this.treeRoot, true);
+		},
+		create: function(modelEvent) {
+			// refresh the node
+			this.changedItem(modelEvent.parent, true, modelEvent.newValue);
+		},
+		"delete": function(modelEvent) { //$NON-NLS-0$
+			// Handled by deleteMultiple
+		},
+		deleteMultiple: function(modelEvent) { //$NON-NLS-0$
+			// TODO: refresh every distinct parent in the list of affected parents, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=408650
+			var items = modelEvent.items;
+			var lastItem = items[items.length - 1];
+			this.changedItem(lastItem.parent, true);
+		},
+		"import": function(modelEvent) { //$NON-NLS-0$
+			this.changedItem(modelEvent.oldValue, true);
+			// TODO -- if it was an sftp import -- we should fresh the treeRoot (why?)
+			//this.changedItem(this.treeRoot, true);
+		},
+		move: function(modelEvent) {
+			var item = modelEvent.oldValue, newItem = modelEvent.newValue, parent = modelEvent.parent;
+			var ex = this;
+			var refreshItem;
+			var forceExpand = null;
+			if (parent.Projects) {
+				if (ex.treeRoot.Location === item.Location) {
+					//the treeRoot was moved
+					//ex.treeRoot = newItem;
+					//ex.loadResourceList(newItem.ChildrenLocation /*folder*/ || newItem.ContentLocation /*project*/);
+					alert('you moved/renamed the explorer root, something needs to happen here');
+				} else {
+					//special case for renaming a project. Use the treeRoot as the refresh item.
+					refreshItem = ex.treeRoot;
+					forceExpand = ex.isExpanded(item) && item;
+				}
+			} else {
+				// refresh the parent, which will update the child paths. 
+				// refreshing the newItem would cause "not found" in the tree since a rename has occurred.
+				refreshItem = parent;
+				if (item.Directory) {
+					forceExpand = ex.isExpanded(item) && newItem;
+				}
+			}
+			// Update the parent
+			ex.changedItem(parent, true);
+			// If the renamed item was an expanded directory, force an expand.
+			if (forceExpand) {
+				ex.changedItem(forceExpand, true);
+			}
+		},
+		moveMultiple: function(modelEvent) {
+			this.changedItem(this.treeRoot, true);
+		}
+	};
+
 	FileExplorer.prototype._makeDropTarget = function(item, node, persistAndReplace) {
 		function dropFileEntry(entry, path, target, explorer, performDrop, fileClient) {
 			path = path || "";
@@ -292,7 +386,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	};
 
 	/**
-	 * @name orion.explorers.FileExplorer#changedItem
+	 * @name orion.explorer.FileExplorer#changedItem
 	 * @function
 	 * we have changed an item on the server at the specified parent node
 	 * @param {Object} parent The parent item under which the change occurred.
@@ -320,7 +414,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 	/**
 	 * Returns the node that a rename text input box should appear over top of.
-	 * @name orion.explorers.FileExplorer#getNameNode
+	 * @name orion.explorer.FileExplorer#getNameNode
 	 * @function
 	 * @param {Object} item Item being renamed
 	 * @returns {Element}
@@ -337,7 +431,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	/**
 	 * The explorerNavHandler hooked up by the explorer will call this function when left arrow key is pressed on a 
 	 * top level item that is aleady collapsed. The default implementation does nothing.
-	 * @name orion.explorers.FileExplorer#scopeUp
+	 * @name orion.explorer.FileExplorer#scopeUp
 	 * @function
 	 */
 	FileExplorer.prototype.scopeUp = function() {
@@ -345,7 +439,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	
 	/**
 	 * Load the resource at the given path.
-	 * @name orion.explorers.FileExplorer#loadResourceList
+	 * @name orion.explorer.FileExplorer#loadResourceList
 	 * @function
 	 * @param path The path of the resource to load
 	 * @param {Boolean} [force] If true, force reload even if the path is unchanged. Useful
@@ -376,7 +470,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	
 	/**
 	 * Load the explorer with the given root
-	 * @name orion.explorers.FileExplorer#load
+	 * @name orion.explorer.FileExplorer#load
 	 * @function
 	 * @param {Object} root a root object or a deferred that will return the root of the FileModel
 	 * @param {String} progress a string progress message describing the fetch of the root
@@ -465,7 +559,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	};
 	/**
 	 * Called when the root item changes. This can be overridden.
-	 * @name orion.explorers.FileExplorer#onchange
+	 * @name orion.explorer.FileExplorer#onchange
 	 * @function
 	 * @param {Object} item
 	 */
