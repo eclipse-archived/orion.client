@@ -27,6 +27,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		this._contributionsByScopeId = {};
 		this._activeBindings = {};
 		this._urlBindings = {};
+		this._pendingBindings = {}; // bindings for as-yet-unknown commands
 		this._init(options);
 		this._parameterCollector = null;
 	}
@@ -377,9 +378,19 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 * Add a command to the command registry.  Nothing will be shown in the UI
 		 * until this command is referenced in a contribution.
 		 * @param {orion.commands.Command} command The command being added.
+		 * @see #registerCommandContribution
 		 */
 		addCommand: function(command) {
 			this._commandList[command.id] = command;
+			// Resolve any pending key/url bindings against this command
+			var pending = this._pendingBindings[command.id];
+			if (pending) {
+				var _self = this;
+				pending.forEach(function(binding) {
+					_self._addBinding(command, binding.type, binding.binding, binding.bindingOnly);
+				});
+				delete this._pendingBindings[command.id];
+			}
 		},
 		
 		/**
@@ -490,7 +501,9 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 			if (keyBinding) {
 				command = this._commandList[commandId];
 				if (command) {
-					this._activeBindings[commandId] = {command: command, keyBinding: keyBinding, bindingOnly: bindingOnly};
+					this._addBinding(command, "key", keyBinding, bindingOnly); //$NON-NLS-0$
+				} else {
+					this._addPendingBinding(commandId, "key", keyBinding, bindingOnly); //$NON-NLS-0$
 				}
 			}
 			
@@ -498,13 +511,42 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 			if (urlBinding) {
 				command = this._commandList[commandId];
 				if (command) {
-					this._urlBindings[commandId] = {command: command, urlBinding: urlBinding, bindingOnly: bindingOnly};
+					this._addBinding(command, "url", urlBinding, bindingOnly); //$NON-NLS-0$
+				} else {
+					this._addPendingBinding(commandId, "url", urlBinding, bindingOnly); //$NON-NLS-0$
 				}
 			}
 			// get rid of sort cache because we have a new contribution
 			parentTable.sortedContributions = null;
 		},
-		
+
+		/**
+		 * @param {"key"|"url"} type
+		 */
+		_addBinding: function(command, type, binding, bindingOnly) {
+			if (!command.id) {
+				throw new Error("No command id: " + command);
+			}
+			if (type === "key") { //$NON-NLS-0$
+				this._activeBindings[command.id] = {command: command, keyBinding: binding, bindingOnly: bindingOnly};
+			} else if (type === "url") { //$NON-NLS-0$
+				this._urlBindings[command.id] = {command: command, urlBinding: binding, bindingOnly: bindingOnly};
+			}
+		},
+
+		/**
+		 * Remembers a key or url binding that has not yet been resolved to a command.
+		 *  @param {"key"|"url"} type
+		 */
+		_addPendingBinding: function(commandId, type, binding, bindingOnly) {
+			this._pendingBindings[commandId] = this._pendingBindings[commandId] || [];
+			this._pendingBindings[commandId].push({
+				type: type,
+				binding: binding,
+				bindingOnly: bindingOnly
+			});
+		},
+
 		_checkForTrailingSeparator: function(parent, style, autoRemove) {
 			var last;
 			if (style === "tool" || style === "button") { //$NON-NLS-1$ //$NON-NLS-0$
