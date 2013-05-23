@@ -71,11 +71,25 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		}
 	};
 	FavoriteFoldersCache.prototype.constructor = FavoriteFoldersCache;
-	
+
+	function dispatchModelEventOn(explorer, event) {
+		var dispatcher = explorer.modelEventDispatcher;
+		if (dispatcher && typeof dispatcher.dispatchEvent === "function") { //$NON-NLS-0$
+			dispatcher.dispatchEvent(event);
+		}
+	}
+
 	/**
 	 * Uploads a file
 	 * @name orion.fileCommands#uploadFile
 	 * @function
+	 * @param {Object} targetFolder
+	 * @param {Object} file
+	 * @param {orion.explorer.FileExplorer} explorer
+	 * @param {orion.EventTarget} [explorer.modelEventDispatcher] If supplied, this dispatcher will be invoked to dispatch 
+	 * events describing the file upload.
+	 * @param {Boolean} unzip
+	 * @param {Boolean} force
 	 */
 	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip, force) { 
 		this.req = new XMLHttpRequest();
@@ -88,22 +102,22 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		}
 		this.req.setRequestHeader("Content-Type", file.type); //$NON-NLS-0$
 		this.req.onreadystatechange = function(state) {
-			if(this.req.readyState === 4 && this.req.status === 400){
-				var result = {};
-				try{
-					result = JSON.parse(this.req.responseText);
-				}catch(e){
-				}
-				if(result.JsonData && result.JsonData.ExistingFiles){
-					var confirmFunction = (explorer && explorer.serviceRegistry) ? explorer.serviceRegistry.getService("orion.page.dialog").confirm : confirm; //$NON-NLS-0$
-					if(confirmFunction(result.Message + "\nWould you like to retry the import with force overwriting?")){
-						fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true);
-						return;
+			if(this.req.readyState === 4) {
+				if (this.req.status === 400){
+					var result = {};
+					try{
+						result = JSON.parse(this.req.responseText);
+					}catch(e){
+					}
+					if(result.JsonData && result.JsonData.ExistingFiles){
+						var confirmFunction = (explorer && explorer.serviceRegistry) ? explorer.serviceRegistry.getService("orion.page.dialog").confirm : confirm; //$NON-NLS-0$
+						if(confirmFunction(result.Message + "\nWould you like to retry the import with force overwriting?")){
+							fileCommandUtils.uploadFile(targetFolder, file, explorer, unzip, true);
+							return;
+						}
 					}
 				}
-			}
-			if (explorer) {
-				explorer.changedItem(targetFolder, true);
+				dispatchModelEventOn(explorer, { type: "create", parent: targetFolder, newValue: null /* haven't fetched the new file in Orion yet */ }); //$NON-NLS-0$
 			}
 		}.bind(this);
 		this.req.send(file);
@@ -115,7 +129,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 * @function
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @param {orion.commandregistry.CommandRegistry} commandRegistry
-	 * @param {orion.explorer.Explorer}
+	 * @param {orion.explorer.Explorer} explorer
 	 * @param {String|Element} toolbarId
 	 * @param {String|Element} selectionToolbarId
 	 * @param {Object} item
@@ -248,26 +262,21 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		}
 	}
 
-
 	/**
 	 * Creates the commands related to file management.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use when creating commands
 	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to get commands from
-	 * @param {orion.explorer.Explorer} explorer The explorer view to add commands to, and to update when model items change.
-	 * If this explorer has a <code>modelManager</code> field, it will be dispatched events describing the model changes that
-	 * were performed.
+	 * @param {orion.explorer.FileExplorer} explorer The explorer view to add commands to, and to update when model items change.
+	 * To broadcast model change nodifications, this explorer must have a <code>modelEventDispatcher</code> field.
+	 * @param {orion.EventTarget} [explorer.modelEventDispatcher] If supplied, this dispatcher will be invoked to dispatch events
+	 * describing model changes that are performed by file commands.
 	 * @param {orion.fileClient.FileClient} fileClient The file system client that the commands should use
 	 * @name orion.fileCommands#createFileCommands
 	 * @function
 	 */
 	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient) {
 		progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-
-		function dispatchModelEvent(event) {
-			if (explorer.modelManager) {
-				explorer.modelManager.dispatchEvent(event);
-			}
-		}
+		var dispatchModelEvent = dispatchModelEventOn.bind(null, explorer);
 
 		function contains(arr, item) {
 			return arr.indexOf(item) !== -1;
@@ -288,23 +297,32 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		
 		function makeMoveCopyTargetChoices(items, userData, isCopy) {
 			items = Array.isArray(items) ? items : [items];
-			var ex = explorer;
-			var refreshFunc = function(newItem) {
-				ex.changedItem(ex.treeRoot, true);
-				dispatchModelEvent({ type: "copy", oldValue: null, newValue: newItem }); //$NON-NLS-0$
-			};
 			var callback = function(selectedItems) {
 				if (!Array.isArray(selectedItems)) {
 					selectedItems = [selectedItems];
 				}
-				for (var i=0; i < selectedItems.length; i++) {
-					var item = selectedItems[i];
+				var deferreds = [];
+				var summary = [];
+				selectedItems.forEach(function(item) {
 					var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
-					func.apply(fileClient, [item.Location, this.path]).then(
-						refreshFunc, //refresh the root
+					deferreds.push(func.apply(fileClient, [item.Location, this.path]).then(
+						function(newItem) {
+							summary.push({
+								oldValue: item,
+								newValue: newItem
+								// parent?
+							});
+							dispatchModelEvent({type: isCopy ? "copy" : "move", oldValue: item, newValue: newItem }); //$NON-NLS-1$ //$NON-NLS-0$
+						},
 						errorHandler
-					);
-				}
+					));
+				});
+				Deferred.all(deferreds).then(function() {
+					dispatchModelEvent({
+						type: isCopy ? "copyMultiple" : "moveMultiple", //$NON-NLS-1$ //$NON-NLS-0$
+						items: summary
+					});
+				});
 			};
 			
 			var prompt = function(selectedItems) {
@@ -317,9 +335,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							if (!Array.isArray(selectedItems)) {
 								selectedItems = [selectedItems];
 							}
-							for (var i=0; i < selectedItems.length; i++) {
+							var deferreds = [];
+							var summary = [];
+							selectedItems.forEach(function(item) {
 								var location = targetFolder.Location;
-								var item = selectedItems[i];
 								var newName = item.Name || null;
 								var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 								var message = i18nUtil.formatMessage(isCopy ? messages["Copying ${0}"] : messages["Moving ${0}"], item.Location);
@@ -332,12 +351,24 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 								}
 								if (location) {
 									var deferred = func.apply(fileClient, [item.Location, targetFolder.Location, newName]);
-									progressService.showWhile(deferred, message).then(
-										refreshFunc, //refresh the root
+									deferreds.push(progressService.showWhile(deferred, message).then(
+										function(newItem) {
+											summary.push({
+												oldValue: item,
+												newValue: newItem
+												//parent?
+											});
+										},
 										errorHandler
-									);
+									));
 								}
-							}
+							});
+							Deferred.all(deferreds).then(function() {
+								dispatchModelEvent({
+									type: isCopy ? "copyMultiple" : "moveMultiple", //$NON-NLS-1$ //$NON-NLS-0$
+									items: summary
+								});
+							});
 						}
 					}
 				});
@@ -429,11 +460,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		};
 
 		/**
-		 * Helper to find the parent of item (for the purposes of rename, move, etc).
-		 * and, the canonical item itself (don't ask, but sometimes when you get a project it doesn't have the Id)
-		 * @returns {orion.Promise}
+		 * Helper to find the parent of item (for the purposes of rename, move, etc) and the canonical item itself
+		 * (if item is a top-level folder).
+		 * @returns {orion.Promise|Object}
 		 */
-		function getLogicalItem(item) {
+		function getLogicalModelItems(item) {
 			if (item.parent) {
 				// synthetic 'parent' field added by FileExplorer
 				return { item: item, parent: item.parent };
@@ -468,65 +499,56 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					}
 					return item.Location;
 				},
+				parameters: new mCommandRegistry.ParametersDescription(null, {},
+					function(commandInvocation) {
+						var items = Array.isArray(commandInvocation.items) ? commandInvocation.items : [commandInvocation.items];
+						var treeRoot = explorer.treeRoot;
+						if (items.some(function(item) { return (item === treeRoot); })) {
+							// Renaming root of file explorer -- want a popup param collector since there is no convenient inplace rename node.
+							return [
+								new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'], treeRoot.Name) //$NON-NLS-1$ //$NON-NLS-0$
+							];
+						}
+						return null; // will do inplace rename in the callback
+					}),
 				callback: function(data) {
-					// we want to popup the edit box over the name in the explorer.
-					// if we can't find it, we'll pop it up over the command dom element.
 					var item = forceSingleItem(data.items);
-					var refNode = explorer.getNameNode(item);
-					if (!refNode) {
-						// TODO FIXME mamacdon: using domParent/domNode is bad when the command is triggered from a dropdown menu:
-						// it dumps the edit box into the menu, which is not visible. Need special case for menu: with a param collector
-						// since there is no convenient element. 
-						refNode = data.domParent || data.domNode; // mamacdon FIXME this is a travesty
+					function doMove(newText) {
+						var moveLocation = item.Location;
+						Deferred.when(getLogicalModelItems(item), function(logicalItems) {
+							item = logicalItems.item;
+							var parent = logicalItems.parent;
+							if (parent.Projects) {
+								//special case for moving a project. We want to move the project rather than move the project's content
+								parent.Projects.some(function(project) {
+									if (project.Id === item.Id) {
+										moveLocation = project.Location;
+										return true;
+									}
+									return false;
+								});
+							}
+							var deferred = fileClient.moveFile(moveLocation, parent.Location, newText);
+							progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Renaming ${0}"], moveLocation)).then(
+								function(newItem) {
+									dispatchModelEvent({ type: "move", oldValue: item, newValue: newItem, parent: parent }); //$NON-NLS-0$
+								},
+								errorHandler
+							);
+						});
 					}
-					mUIUtils.getUserText(refNode.id+"EditBox", refNode, true, item.Name,  //$NON-NLS-0$
-						function(newText) {
-							var moveLocation = item.Location;
-							Deferred.when(getLogicalItem(item), function(result) {
-								item = result.item;
-								var parent = result.parent;
-								if (parent.Projects) {
-									//special case for moving a project. We want to move the project rather than move the project's content
-									parent.Projects.some(function(project) {
-										if (project.Id === item.Id) {
-											moveLocation = project.Location;
-											return true;
-										}
-										return false;
-									});
-								}
-								var deferred = fileClient.moveFile(moveLocation, parent.Location, newText);
-								var ex = explorer;
-								progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Renaming ${0}"], moveLocation)).then(
-									function(newItem) {
-										var refreshItem;
-										var forceExpand = null;
-										if (parent.Projects) {
-											//special case for renaming a project. Use the treeroot as the refresh item.
-											refreshItem = ex.treeRoot;
-											forceExpand = ex.isExpanded(item) && item;
-										} else {
-											// refresh the parent, which will update the child paths. 
-											// refreshing the newItem would cause "not found" in the tree since a rename has occurred.
-											refreshItem = parent;
-											if (item.Directory) {
-												forceExpand = ex.isExpanded(item) && newItem;
-											}
-										}
-										// Update the parent
-										ex.changedItem(parent, true);
-										// If the renamed item was an expanded directory, force an expand.
-										if (forceExpand) {
-											ex.changedItem(forceExpand, true);
-										}
-										dispatchModelEvent({ type: "move", oldValue: item, newValue: newItem }); //$NON-NLS-0$
-									},
-									errorHandler
-								);
-							});
-						}, 
-						null, null, "." //$NON-NLS-0$
-					); 
+					var name;
+					if (data.parameters.hasParameters() && (name = data.parameters.valueFor("name")) !== null) { //$NON-NLS-0$
+						doMove(name);
+					} else {
+						// we want to popup the edit box over the name in the explorer.
+						// if we can't find it, we'll pop it up over the command dom element.
+						var refNode = explorer.getNameNode(item);
+						if (!refNode) {
+							refNode = data.domParent || data.domNode;
+						}
+						mUIUtils.getUserText(refNode.id+"EditBox", refNode, true, item.Name, doMove, null, null, ".");  //$NON-NLS-1$ //$NON-NLS-0$
+					}
 				}
 			});
 		commandService.addCommand(renameCommand);
@@ -603,13 +625,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						if (!doit) {
 							return;
 						}
-						var count = 0;
-						var refresher = function(item) {
-							count++;
-							if (count === items.length) {
-								explorer.changedItem(item, true);
-							}
-						};
+						var summary = [];
+						var deferreds = [];
 						items.forEach(function(item) {
 							var deleteLocation = item.Location;
 							var refreshItem = item.parent;
@@ -627,15 +644,23 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 								}
 							}
 							if (deleteLocation) {
-								var deferred = fileClient.deleteFile(deleteLocation);
-								progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Deleting ${0}"], deleteLocation)).then(function() {
-									refresher(refreshItem);
-									dispatchModelEvent({ type: "delete", oldValue: item, newValue: null }); //$NON-NLS-0$
-								}, function(error) {
-									errorHandler(error);
-									refresher(refreshItem);
-								});
+								var _delete = fileClient.deleteFile(deleteLocation);
+								deferreds.push(progressService.showWhile(_delete, i18nUtil.formatMessage(messages["Deleting ${0}"], deleteLocation)).then(
+									function() {
+										summary.push({
+											oldValue: item,
+											newValue: null,
+											parent: refreshItem
+										});
+										dispatchModelEvent({ type: "delete", oldValue: item, newValue: null, parent: refreshItem });
+									}, function(error) {
+										errorHandler(error);
+									})
+								);
 							}
+						});
+						Deferred.all(deferreds).then(function() {
+							dispatchModelEvent({ type: "deleteMultiple", items: summary }); //$NON-NLS-0$
 						});
 					}
 				);	
@@ -657,7 +682,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		
 		var newFileNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Name:'], messages['New File'])]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
-		var newFileCommand =  new mCommands.Command({
+		var newFileCommand = new mCommands.Command({
 			name: messages["New File"],
 			tooltip: messages["Create a new file"],
 			imageClass: "core-sprite-new_file", //$NON-NLS-0$
@@ -675,11 +700,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					var createFunction = function(name) {
 						if (name) {
 							var deferred = fileClient.createFile(item.Location, name);
-							var ex = explorer;
 							progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Creating ${0}"], name)).then(
 								function(newFile) {
-									ex.changedItem(item, true);
-									dispatchModelEvent({ type: "create", oldValue: null, newValue: item }); //$NON-NLS-0$
+									dispatchModelEvent({ type: "create", parent: item, newValue: newFile }); //$NON-NLS-0$
 								},
 								errorHandler);
 						}
@@ -716,11 +739,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					var createFunction = function(name) {
 						if (name) {
 							var deferred = fileClient.createFolder(item.Location, name);
-							var ex = explorer;
 							progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Creating ${0}"], name)).then(
 								function(newFolder) {
-									ex.changedItem(item, true);
-									dispatchModelEvent({ type: "create", oldValue: null, newValue: newFolder }); //$NON-NLS-0$
+									dispatchModelEvent({ type: "create", parent: item, newValue: newFolder }); //$NON-NLS-0$
 								},
 								errorHandler);
 						}
@@ -754,7 +775,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$
 					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}); //$NON-NLS-0$
 					progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], sourceURL)).then(
-						null, //function() {explorer.changedItem(ex.treeRoot, true); }, //refresh the root
+						function() {
+							dispatchModelEvent({ type: "import", target: targetFolder }); //$NON-NLS-0$
+						},
 						errorHandler
 					);
 				}
@@ -845,19 +868,18 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			id: "orion.import", //$NON-NLS-0$
 			callback : function(data) {
 				var item = forceSingleItem(data.items);
-				var ex = explorer;
 				var dialog = new ImportDialog.ImportDialog({
 					importLocation: item.ImportLocation,
 					func: function() {
-						ex.changedItem(item, true);
-						dispatchModelEvent({ type: "import", oldValue: item, newValue: null}); //$NON-NLS-0$
+						dispatchModelEvent({ type: "import", target: item }); //$NON-NLS-0$
 					}
 				});
 				dialog.show();
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);
+			}});
 		commandService.addCommand(importCommand);
 	
 		var importSFTPCommand = new mCommands.Command({
@@ -872,11 +894,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
 						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Port":port,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
-						var ex = explorer;
 						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], host)).then(
 							function(result) {
-								ex.changedItem(this.treeRoot, true);
-								dispatchModelEvent({ type: "import", oldValue: item, newValue: null }); //$NON-NLS-0$
+								// FIXME: this starts an operation, we need to wait for it to finish, then dispatch.
+								dispatchModelEvent({ type: "import", target: item }); //$NON-NLS-0$
 							},
 							errorHandler
 						);//refresh the root
@@ -901,10 +922,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
 						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
-						var ex = explorer;
 						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Exporting from ${0}"], host)).then(
-							function(result) { ex.changedItem(this.treeRoot, true); },
-							errorHandler);//refresh the root
+							null,
+							errorHandler);
 					}
 				});
 				dialog.show();
@@ -955,7 +975,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				id: "eclipse.pasteSelections", //$NON-NLS-0$
 				visibleWhen: function(item) {
 					item = forceSingleItem(item);
-					return item.Directory && !mFileUtils.isAtRoot(item.Location);},
+					return item.Directory && !mFileUtils.isAtRoot(item.Location);
+				},
 				callback: function(data) {
 					// Check selection service first.  If a single folder is selected, that is the target.  Otherwise the root is the target.
 					explorer.selection.getSelections(function(selections) {
@@ -971,6 +992,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 								errorHandler(messages["Cannot paste into the root"]);
 								return;
 							}
+							var summary = [];
+							var deferreds = [];
 							for (var i=0; i<bufferedSelection.length; i++) {
 								var location = bufferedSelection[i].Location;
 								var name = bufferedSelection[i].Name || null;
@@ -984,13 +1007,24 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 									}
 									if (location) {
 										var deferred = fileClient.copyFile(location, item.Location, name);
-										var ex = explorer;
-										progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Pasting ${0}"], location)).then(
-											function(result) { ex.changedItem(item, true, result); },
-											errorHandler);
+										deferreds.push(progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Pasting ${0}"], location)).then(
+											function(result) {
+												summary.push({
+													oldValue: item,
+													newValue: result
+												});
+												dispatchModelEvent({ type: "copy", oldValue: item, newValue: result }); //$NON-NLS-0$
+											},
+											errorHandler));
 									}
 								}
 							}
+							Deferred.all(deferreds, function() {
+								dispatchModelEvent({
+									type: "copyMultiple", //$NON-NLS-0$
+									items: summary
+								});
+							});
 						}
 					});
 				}
