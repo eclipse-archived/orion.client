@@ -12,8 +12,8 @@
 /*jslint browser:true sub:true*/
 
 define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference', 'orion/webui/littlelib', 'orion/objects', 'orion/i18nUtil',
-		'orion/widgets/settings/Subsection', 'profile/UsersService', 'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledCommand'
-		], function(messages, require, mCommands, mSection, GitPreferenceStorage, GitConfigPreference, lib, objects, i18nUtil, Subsection, UsersService, LabeledTextfield, LabeledCheckbox, LabeledCommand) {
+		'orion/widgets/settings/Subsection', 'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledCommand'
+		], function(messages, require, mCommands, mSection, GitPreferenceStorage, GitConfigPreference, lib, objects, i18nUtil, Subsection, LabeledTextfield, LabeledCheckbox, LabeledCommand) {
 
 	function GitSettings(options, node) {
 		objects.mixin(this, options);
@@ -88,16 +88,16 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			var updateCommand = new mCommands.Command({
 				name: messages["Update"],
-				tooltip: messages["Update Profile Settings"],
-				id: "orion.updateprofile", //$NON-NLS-0$
+				tooltip: messages["Update Git User Settings"],
+				id: "orion.updateGitUser", //$NON-NLS-0$
 				callback: function(data){
 					this.update(data.items);
 				}.bind(this)
 			});
 			
 			this.commandService.addCommand(updateCommand);
-			this.commandService.registerCommandContribution('profileCommands', "orion.updateprofile", 3); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands('profileCommands', lib.node( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+			this.commandService.registerCommandContribution('gitUserCommands', "orion.updateGitUser", 3); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands('gitUserCommands', lib.node( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
 			
 			//--------- git credentials -------------------------------
 			this.gitCredentialsFields = [ new LabeledCheckbox( {fieldlabel:messages["Enable Storage"]} ) ];
@@ -165,7 +165,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 			gitConfigPreference.setConfig({GitMail: this.gitFields[0].getValue(),	GitName: this.gitFields[1].getValue()}).then(
 				function(){
-					messageService.setProgressResult( messages['User profile data successfully updated.'] );
+					messageService.setProgressResult( messages['Git user data successfully updated.'] );
 				}
 			);
 		},
