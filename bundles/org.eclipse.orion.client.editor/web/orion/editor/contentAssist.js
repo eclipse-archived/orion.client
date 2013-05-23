@@ -185,11 +185,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var eventType;
 			if (state === State.ACTIVE) {
 				eventType = "Activating"; //$NON-NLS-0$
-				this._mode.setActive(true);
+				if (this._mode) { this._mode.setActive(true); }
 				
 			} else if (state === State.INACTIVE) {
 				eventType = "Deactivating"; //$NON-NLS-0$
-				this._mode.setActive(false);
+				if (this._mode) { this._mode.setActive(false); }
 			}
 			if (eventType) {
 				this.dispatchEvent({type: eventType});
