@@ -1815,7 +1815,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * </p>
 		 *
 		 * @param {String} actionID the action ID.
-		 * @param {Boolean} [defaultAction] whether to always execute the predefined action.
+		 * @param {Boolean} [defaultAction] whether to always execute the predefined action only.
 		 * @param {Object} [actionOptions] action specific options to be passed to the action handlers.
 		 * @returns {Boolean} <code>true</code> if the action was executed.
 		 *
@@ -1827,9 +1827,13 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var action = this._actions[actionID];
 			if (action) {
 				if (!defaultAction && action.handler) {
-					if (action.handler(actionOptions)) { return; }
+					if (action.handler(actionOptions)) {
+						return true;
+					}
 				}
-				if (action.defaultHandler) { return action.defaultHandler(actionOptions); }
+				if (action.defaultHandler) {
+					return typeof action.defaultHandler(actionOptions) === "boolean"; //$NON-NLS-0$
+				}
 			}
 			return false;
 		},
@@ -3769,8 +3773,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		/************************************ Actions ******************************************/
 		_doAction: function (e) {
 			var mode, i;
-			for (i=this._keyModes.length - 1 ; i>=0; i--) {
-				mode = this._keyModes[i];
+			var keyModes = this._keyModes;
+			for (i = keyModes.length - 1 ; i >= 0; i--) {
+				mode = keyModes[i];
 				if (typeof mode.match === "function") { //$NON-NLS-0$
 					break;
 				}
@@ -3780,33 +3785,15 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			var actionID = mode.match(e);
 			if (actionID !== undefined) {
-				var keyModes = this._keyModes;
 				for (i = keyModes.length - 1; i >= 0; i--) {
 					mode = keyModes[i];
-					if (mode.isActive() && typeof (mode[actionID]) === "function") { //$NON-NLS-0$
-						return mode[actionID]();
-					}
-				}
-				
-				var actions = this._actions;
-				var action = actions[actionID];
-				if (action) {
-					if (action.handler) {
-						if (!action.handler()) {
-							if (action.defaultHandler) {
-								return typeof(action.defaultHandler()) === "boolean"; //$NON-NLS-0$
-							} else {
-								return false;
-							}
-						} else {
-							// Firefox feature. without this else branch execution goes into the else branch above 
-							// and defaults are *not* prevented
+					if (mode.isActive() && typeof mode[actionID] === "function") { //$NON-NLS-0$
+						if (mode[actionID]()) {
+							return true;
 						}
-					} else if (action.defaultHandler) {
-						return typeof(action.defaultHandler()) === "boolean"; //$NON-NLS-0$
 					}
 				}
-				return true;
+				return this.invokeAction(actionID);
 			}
 			return false;
 		},
@@ -3840,7 +3827,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return true;
 		},
 		_doCancel: function () {
-			return false;
+			return true;
 		},
 		_doContent: function (text) {
 			var selection = this._getSelection();
@@ -4065,6 +4052,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			this._columnX = x;
 			line.destroy();
+			return true;
+		},
+		_doNoop: function () {
 			return true;
 		},
 		_doPageDown: function (args) {
@@ -4471,6 +4461,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._actions = {
 				//TODO: Add NLS string for actions ex. {name: messages.cancelMode});
 				"cancel": {defaultHandler: function() {return self._doCancel();}}, //$NON-NLS-0$
+				"noop": {defaultHandler: function() {return self._doNoop();}}, //$NON-NLS-0$
 
 				"lineUp": {defaultHandler: function() {return self._doLineUp({select: false});}}, //$NON-NLS-0$
 				"lineDown": {defaultHandler: function() {return self._doLineDown({select: false});}}, //$NON-NLS-0$
