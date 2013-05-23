@@ -65,7 +65,17 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/expl
 					function(/**Array*/ siteConfigurations) {
 						var item = {};
 						item.siteService = siteServices[0];
-						item.siteConfigurations = siteConfigurations;
+						if (siteConfigurations) {
+							item.siteConfigurations = siteConfigurations.sort(function(a, b) {
+								var n1 = a.Name && a.Name.toLowerCase();
+								var n2 = b.Name && b.Name.toLowerCase();
+								if (n1 < n2) { return -1; }
+								if (n1 > n2) { return 1; }
+								return 0;
+							});
+						} else {
+							item.siteConfigurations = [];
+						}
 						
 						result.push(item);
 						that._getSiteConfigurations(siteServices.slice(1), result, deferred);
