@@ -427,7 +427,36 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			}
 			return true;
 		};
-		
+
+		/**
+		 * Helper to find the parent of item (for the purposes of rename, move, etc).
+		 * and, the canonical item itself (don't ask, but sometimes when you get a project it doesn't have the Id)
+		 * @returns {orion.Promise}
+		 */
+		function getLogicalItem(item) {
+			if (item.parent) {
+				// synthetic 'parent' field added by FileExplorer
+				return { item: item, parent: item.parent };
+			} else if (item.Parents && item.Parents[0]) {
+				return { item: item, parent: item.Parents[0] };
+			}
+			// item is a top-level folder (ie. project). Find the workspace (which is the parent for rename purposes)
+			return fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+				return Deferred.when(workspace.Children || fileClient.fetchChildren(workspace)).then(function(children) {
+					workspace.Children = children;
+					var itemIsProject = workspace.Children.some(function(child) {
+						if (child.Location === item.Location) {
+							// This is the "canonical" project, with the Id field that we want.
+							item = child;
+							return true;
+						}
+						return false;
+					});
+					return { item: item, parent: (itemIsProject ? workspace : null) };
+				});
+			});
+		}
+
 		var renameCommand = new mCommands.Command({
 				name: messages["Rename"],
 				tooltip: messages["Rename the selected files or folders"],
@@ -445,50 +474,56 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					var item = forceSingleItem(data.items);
 					var refNode = explorer.getNameNode(item);
 					if (!refNode) {
-						refNode = data.domNode;
+						// TODO FIXME mamacdon: using domParent/domNode is bad when the command is triggered from a dropdown menu:
+						// it dumps the edit box into the menu, which is not visible. Need special case for menu: with a param collector
+						// since there is no convenient element. 
+						refNode = data.domParent || data.domNode; // mamacdon FIXME this is a travesty
 					}
 					mUIUtils.getUserText(refNode.id+"EditBox", refNode, true, item.Name,  //$NON-NLS-0$
 						function(newText) {
 							var moveLocation = item.Location;
-							if (item.parent.Projects) {
-								//special case for moving a project. We want to move the 
-								//project rather than move the project's content
-								for (var p=0; p < item.parent.Projects.length; p++) {
-									var project = item.parent.Projects[p];
-									if (project.Id === item.Id) {
-										moveLocation = project.Location;
-										break;
-									}
-								}
-							}
-							var deferred = fileClient.moveFile(moveLocation, item.parent.Location, newText);
-							var ex = explorer;
-							progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Renaming ${0}"], moveLocation)).then(
-								function(newItem) {
-									var refreshItem;
-									var forceExpand = null;
-									if (item.parent.Projects) {
-										//special case for renaming a project. Use the treeroot as the refresh item.
-										refreshItem = ex.treeRoot;
-										forceExpand = ex.isExpanded(item) && item;
-									} else {
-										// refresh the parent, which will update the child paths. 
-										// refreshing the newItem would cause "not found" in the tree since a rename has occurred.
-										refreshItem = item.parent;
-										if (item.Directory) {
-											forceExpand = ex.isExpanded(item) && newItem;
+							Deferred.when(getLogicalItem(item), function(result) {
+								item = result.item;
+								var parent = result.parent;
+								if (parent.Projects) {
+									//special case for moving a project. We want to move the project rather than move the project's content
+									parent.Projects.some(function(project) {
+										if (project.Id === item.Id) {
+											moveLocation = project.Location;
+											return true;
 										}
-									}
-									// Update the parent
-									ex.changedItem(item.parent, true);
-									// If the renamed item was an expanded directory, force an expand.
-									if (forceExpand) {
-										ex.changedItem(forceExpand, true);
-									}
-									dispatchModelEvent({ type: "move", oldValue: item, newValue: newItem }); //$NON-NLS-0$
-								}, 
-								errorHandler
-							);
+										return false;
+									});
+								}
+								var deferred = fileClient.moveFile(moveLocation, parent.Location, newText);
+								var ex = explorer;
+								progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Renaming ${0}"], moveLocation)).then(
+									function(newItem) {
+										var refreshItem;
+										var forceExpand = null;
+										if (parent.Projects) {
+											//special case for renaming a project. Use the treeroot as the refresh item.
+											refreshItem = ex.treeRoot;
+											forceExpand = ex.isExpanded(item) && item;
+										} else {
+											// refresh the parent, which will update the child paths. 
+											// refreshing the newItem would cause "not found" in the tree since a rename has occurred.
+											refreshItem = parent;
+											if (item.Directory) {
+												forceExpand = ex.isExpanded(item) && newItem;
+											}
+										}
+										// Update the parent
+										ex.changedItem(parent, true);
+										// If the renamed item was an expanded directory, force an expand.
+										if (forceExpand) {
+											ex.changedItem(forceExpand, true);
+										}
+										dispatchModelEvent({ type: "move", oldValue: item, newValue: newItem }); //$NON-NLS-0$
+									},
+									errorHandler
+								);
+							});
 						}, 
 						null, null, "." //$NON-NLS-0$
 					); 
