@@ -979,10 +979,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			editor.getTextView().setKeyBinding(new KeyBinding.KeyBinding(191, false, true, !isMac, isMac), keyAssistCommand.id);
 			editor.getTextView().setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 		};
-		if (editor && editor.getTextView()) {
-			addKeyAssistAction();
-		} else {
-			editor.addEventListener("TextViewInstalled", addKeyAssistAction); //$NON-NLS-0$
+		if (editor) {
+			if (editor.getTextView()) {
+				addKeyAssistAction();
+			} else {
+				editor.addEventListener("TextViewInstalled", addKeyAssistAction); //$NON-NLS-0$
+			}
 		}
 		
 		renderGlobalCommands(commandRegistry);
