@@ -786,7 +786,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		commandService.addCommand(linkProjectCommand);
 		
 		var goUpCommand = new mCommands.Command({
-//			name: messages["Go Up"],
+			name: messages["Go Up"],
 			tooltip: messages["Move up to the parent folder"],
 			imageClass: "core-sprite-go-up", //$NON-NLS-0$
 //			addImageClassToElement: true,
