@@ -974,10 +974,15 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			}});
 		commandRegistry.addCommand(keyAssistCommand);
 		commandRegistry.registerCommandContribution("globalActions", "eclipse.keyAssist", 100, null, true, new KeyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
-		if (editor && editor.getTextView()) {
+		var addKeyAssistAction = function() {
 			var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 			editor.getTextView().setKeyBinding(new KeyBinding.KeyBinding(191, false, true, !isMac, isMac), keyAssistCommand.id);
 			editor.getTextView().setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
+		};
+		if (editor && editor.getTextView()) {
+			addKeyAssistAction();
+		} else {
+			editor.addEventListener("TextViewInstalled", addKeyAssistAction); //$NON-NLS-0$
 		}
 		
 		renderGlobalCommands(commandRegistry);
