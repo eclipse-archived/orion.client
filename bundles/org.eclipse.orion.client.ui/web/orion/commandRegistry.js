@@ -389,6 +389,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 				pending.forEach(function(binding) {
 					_self._addBinding(command, binding.type, binding.binding, binding.bindingOnly);
 				});
+				delete this._pendingBindings[command.id];
 			}
 		},
 		
