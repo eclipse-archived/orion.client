@@ -122,6 +122,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 		}
 		event.shiftKey = !!mod2;
 		event.altKey = !!mod3;
+		event.type = "keydown";
 		mCommands._testMethodProcessKey(event, bindings || commandRegistry._activeBindings);  // a total reach into the implementation
 	}
 	
