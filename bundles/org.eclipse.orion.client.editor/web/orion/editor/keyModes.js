@@ -139,9 +139,9 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 			*/
 			if (!util.isFirefox) {
 				var isMacChrome = util.isMac && util.isChrome;
-				bindings.push({actionID: null, keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: null, keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-0$
-				bindings.push({actionID: null, keyBinding: new KeyBinding('b', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "noop", keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+				bindings.push({actionID: "noop", keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+				bindings.push({actionID: "noop", keyBinding: new KeyBinding('b', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 
 			if (util.isFirefox) {
@@ -226,7 +226,7 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 						kb.actionID = actionID;
 					} else {
 						if (kb.predefined) {
-							kb.actionID = "noop";
+							kb.actionID = "noop"; //$NON-NLS-0$
 						} else {
 							keyBindings.splice(i, 1);
 						}
