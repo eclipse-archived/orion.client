@@ -564,7 +564,9 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				settingsNode.style.borderTopRightRadius = BORDER_RADIUS;
 				settingsNode.style.borderTopLeftRadius = BORDER_RADIUS;
 				
-				settingsButton.className = "core-sprite-wrench-white"; //$NON-NLS-0$
+				settingsButton.classList.remove("commandImage"); //$NON-NLS-0$
+				settingsButton.classList.remove("core-sprite-wrench"); //$NON-NLS-0$
+				settingsButton.classList.add("core-sprite-wrench-white"); //$NON-NLS-0$
 				
 				settingsNode.id = 'settingsNode'; //$NON-NLS-0$
 				settingsButton.id = 'settingsButton'; //$NON-NLS-0$
@@ -588,7 +590,9 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					
 					rightPane.appendChild( panel );
 					lib.addAutoDismiss([settingsButton, settingsNode, panel], function() {
-						settingsButton.className = "core-sprite-wrench"; //$NON-NLS-0$
+						settingsButton.classList.remove("core-sprite-wrench-white"); //$NON-NLS-0$
+						settingsButton.classList.add("core-sprite-wrench"); //$NON-NLS-0$
+						settingsButton.classList.add("commandImage"); //$NON-NLS-0$
 						settingsNode.style.backgroundColor = 'white'; //$NON-NLS-0$
 						panel.style.visibility = 'hidden'; //$NON-NLS-0$
 						CLICKED = false;

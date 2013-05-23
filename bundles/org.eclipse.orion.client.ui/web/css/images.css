@@ -5,7 +5,7 @@
    Use additional classes in theme.css or layout.css where more treatment is needed. 
 */
 
-.logoFooter{
+.logoFooter {
 	background: url(../images/orion-logo.png) no-repeat top left;
 	width: 50px;
 	height: 28px;
@@ -119,23 +119,16 @@
 }
 
 .core-sprite-wrench {
-   background: url(../images/wrench.png) no-repeat top left;
-   vertical-align: middle;
-   display: inline-block;
-   margin-top: 4px;
-   height: 16px;
-   width: 16px;
+   background: url(../images/wrench.png) no-repeat center;
+   height: 21px;
+   width: 20px;
    border: none;
-   cursor: pointer;
 }
 
 .core-sprite-wrench-white {
-   background: url(../images/wrench-white.png) no-repeat top left;
-   vertical-align: middle;
-   display: inline-block;
-   margin-top: 4px;
-   height: 16px;
-   width: 16px;
+   background: url(../images/wrench-white.png) no-repeat center;
+   height: 21px;
+   width: 20px;
    border: none;
 }
 
