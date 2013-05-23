@@ -36,7 +36,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 							'<section>' +
 								'<span style="color:#333;padding:15px;">Related Links</span>' +
 								'<nav>' +
-									'<ul id="relatedlinks">' +
+									'<ul id="relatedLinks">' +
 									'</ul>' +
 								'</nav>' +
 							'</section>' +
