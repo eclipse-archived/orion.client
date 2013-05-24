@@ -289,7 +289,9 @@ define([
 				var oldResource = PageUtil.matchResourceParameters(oldLocation).resource;
 				var newResource = input.resource;
 				if (oldResource !== newResource) {
-					if (!window.confirm(messages["There are unsaved changes.  Do you still want to navigate away?"])) {
+					if (this._autoSaveEnabled) {
+						this.save();
+					} else if (!window.confirm(messages["There are unsaved changes.  Do you still want to navigate away?"])) {
 						window.location.hash = oldLocation;
 						return;
 					}
