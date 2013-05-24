@@ -718,7 +718,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			var main = lib.$(".mainPanelLayout"); //$NON-NLS-0$
 			if (side && main) {
 				mainSplitter = {side: side, main: main};
-				mainSplitter.splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main, toggle: true});
+				mainSplitter.splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main, toggle: true, closeByDefault: true});
 				var toggleSidePanelCommand = new mCommands.Command({
 					name: messages["Toggle side panel"],
 					tooltip: messages["Open or close the side panel"],

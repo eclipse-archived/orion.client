@@ -52,6 +52,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 				this._thumb.classList.add("splitThumb"); //$NON-NLS-0$
 				this._thumb.classList.add("splitThumbLayout"); //$NON-NLS-0$
 			}
+			this._closeByDefault = options.closeByDefault;
 			this._initializeFromStoredSettings();
 			
 			if (this._closed) {
@@ -95,17 +96,26 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		    positioning across browsers and devices.
 		  */
 		 _initializeFromStoredSettings: function() {
-			this._closed = localStorage.getItem(this._prefix+"/toggleState") === "closed";  //$NON-NLS-1$ //$NON-NLS-0$
+			var closedState = localStorage.getItem(this._prefix+"/toggleState");
+			if(!closedState){
+				this._closed = (this._closeByDefault ? true: false);
+			} else {
+				this._closed = closedState === "closed";  //$NON-NLS-1$ //$NON-NLS-0$
+			}
 			var pos;
 			if (this._vertical) {
 				pos = localStorage.getItem(this._prefix+"/yPosition"); //$NON-NLS-0$
 				if (pos) {
 					this._splitTop = parseInt(pos, 10);
+				} else if (this._closeByDefault ) {
+					this._splitTop = 150;
 				}
 			} else {
 				pos = localStorage.getItem(this._prefix+"/xPosition"); //$NON-NLS-0$
 				if (pos) {
 					this._splitLeft = parseInt(pos, 10);
+				} else if (this._closeByDefault ) {
+					this._splitLeft = 150;
 				}
 			}
 			
