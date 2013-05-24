@@ -15,13 +15,14 @@
 /*global define document*/
 
 define("orion/editor/textView", [ //$NON-NLS-0$
+	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
 	'orion/editor/textModel', //$NON-NLS-0$
 	'orion/keyBinding', //$NON-NLS-0$
 	'orion/editor/keyModes', //$NON-NLS-0$
 	'orion/editor/eventTarget', //$NON-NLS-0$
 	'orion/editor/textTheme', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(mTextModel, mKeyBinding, mKeyModes, mEventTarget, mTextTheme, util) {
+], function(messages, mTextModel, mKeyBinding, mKeyModes, mEventTarget, mTextTheme, util) {
 
 	/** @private */
 	function getWindow(document) {
@@ -4446,58 +4447,58 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._actions = {
 				"noop": {defaultHandler: function() {return self._doNoop();}}, //$NON-NLS-0$
 
-				"lineUp": {defaultHandler: function() {return self._doLineUp({select: false});}}, //$NON-NLS-0$
-				"lineDown": {defaultHandler: function() {return self._doLineDown({select: false});}}, //$NON-NLS-0$
-				"lineStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:false});}}, //$NON-NLS-0$
-				"lineEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:false});}}, //$NON-NLS-0$
-				"charPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: false, unit:"character"}));}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"charNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"pageUp": {defaultHandler: function() {return self._doPageUp({select: false});}}, //$NON-NLS-0$
-				"pageDown": {defaultHandler: function() {return self._doPageDown({select: false});}}, //$NON-NLS-0$
-				"scrollPageUp": {defaultHandler: function() {return self._doScroll({type: "pageUp"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollPageDown": {defaultHandler: function() {return self._doScroll({type: "pageDown"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollLineUp": {defaultHandler: function() {return self._doScroll({type: "lineUp"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollLineDown": {defaultHandler: function() {return self._doScroll({type: "lineDown"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"wordPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: false, unit:"word"}));}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"wordNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"textStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:true});}}, //$NON-NLS-0$
-				"textEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}}, //$NON-NLS-0$
-				"scrollTextStart": {defaultHandler: function() {return self._doScroll({type: "textStart"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollTextEnd": {defaultHandler: function() {return self._doScroll({type: "textEnd"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"centerLine": {defaultHandler: function() {return self._doScroll({type: "centerLine"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"lineUp": {defaultHandler: function() {return self._doLineUp({select: false});}, actionDescription: {name: messages.lineUp}}, //$NON-NLS-0$
+				"lineDown": {defaultHandler: function() {return self._doLineDown({select: false});}, actionDescription: {name: messages.lineDown}}, //$NON-NLS-0$
+				"lineStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:false});}, actionDescription: {name: messages.lineStart}}, //$NON-NLS-0$
+				"lineEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:false});}, actionDescription: {name: messages.lineEnd}}, //$NON-NLS-0$
+				"charPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: false, unit:"character"}));}, actionDescription: {name: messages.charPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"charNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}, actionDescription: {name: messages.charNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"pageUp": {defaultHandler: function() {return self._doPageUp({select: false});}, actionDescription: {name: messages.pageUp}}, //$NON-NLS-0$
+				"pageDown": {defaultHandler: function() {return self._doPageDown({select: false});}, actionDescription: {name: messages.pageDown}}, //$NON-NLS-0$
+				"scrollPageUp": {defaultHandler: function() {return self._doScroll({type: "pageUp"});}, actionDescription: {name: messages.scrollPageUp}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollPageDown": {defaultHandler: function() {return self._doScroll({type: "pageDown"});}, actionDescription: {name: messages.scrollPageDown}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollLineUp": {defaultHandler: function() {return self._doScroll({type: "lineUp"});}, actionDescription: {name: messages.scrollLineUp}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollLineDown": {defaultHandler: function() {return self._doScroll({type: "lineDown"});}, actionDescription: {name: messages.scrollLineDown}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"wordPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: false, unit:"word"}));}, actionDescription: {name: messages.wordPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"wordNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}, actionDescription: {name: messages.wordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"textStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:true});}, actionDescription: {name: messages.textStart}}, //$NON-NLS-0$
+				"textEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}, actionDescription: {name: messages.textEnd}}, //$NON-NLS-0$
+				"scrollTextStart": {defaultHandler: function() {return self._doScroll({type: "textStart"});}, actionDescription: {name: messages.scrollTextStart}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollTextEnd": {defaultHandler: function() {return self._doScroll({type: "textEnd"});}, actionDescription: {name: messages.scrollTextEnd}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"centerLine": {defaultHandler: function() {return self._doScroll({type: "centerLine"});}, actionDescription: {name: messages.centerLine}}, //$NON-NLS-1$ //$NON-NLS-0$
 				
-				"selectLineUp": {defaultHandler: function() {return self._doLineUp({select: true});}}, //$NON-NLS-0$
-				"selectLineDown": {defaultHandler: function() {return self._doLineDown({select: true});}}, //$NON-NLS-0$
-				"selectWholeLineUp": {defaultHandler: function() {return self._doLineUp({select: true, wholeLine: true});}}, //$NON-NLS-0$
-				"selectWholeLineDown": {defaultHandler: function() {return self._doLineDown({select: true, wholeLine: true});}}, //$NON-NLS-0$
-				"selectLineStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:false});}}, //$NON-NLS-0$
-				"selectLineEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:false});}}, //$NON-NLS-0$
-				"selectCharPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectCharNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectPageUp": {defaultHandler: function() {return self._doPageUp({select: true});}}, //$NON-NLS-0$
-				"selectPageDown": {defaultHandler: function() {return self._doPageDown({select: true});}}, //$NON-NLS-0$
-				"selectWordPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: true, unit:"word"}));}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectWordNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectTextStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:true});}}, //$NON-NLS-0$
-				"selectTextEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}}, //$NON-NLS-0$
+				"selectLineUp": {defaultHandler: function() {return self._doLineUp({select: true});}, actionDescription: {name: messages.selectLineUp}}, //$NON-NLS-0$
+				"selectLineDown": {defaultHandler: function() {return self._doLineDown({select: true});}, actionDescription: {name: messages.selectLineDown}}, //$NON-NLS-0$
+				"selectWholeLineUp": {defaultHandler: function() {return self._doLineUp({select: true, wholeLine: true});}, actionDescription: {name: messages.selectWholeLineUp}}, //$NON-NLS-0$
+				"selectWholeLineDown": {defaultHandler: function() {return self._doLineDown({select: true, wholeLine: true});}, actionDescription: {name: messages.selectWholeLineDown}}, //$NON-NLS-0$
+				"selectLineStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:false});}, actionDescription: {name: messages.selectLineStart}}, //$NON-NLS-0$
+				"selectLineEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:false});}, actionDescription: {name: messages.selectLineEnd}}, //$NON-NLS-0$
+				"selectCharPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"character"});}, actionDescription: {name: messages.selectCharPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectCharNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"character"});}, actionDescription: {name: messages.selectCharNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectPageUp": {defaultHandler: function() {return self._doPageUp({select: true});}, actionDescription: {name: messages.selectPageUp}}, //$NON-NLS-0$
+				"selectPageDown": {defaultHandler: function() {return self._doPageDown({select: true});}, actionDescription: {name: messages.selectPageDown}}, //$NON-NLS-0$
+				"selectWordPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: true, unit:"word"}));}, actionDescription: {name: messages.selectWordPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectWordNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}, actionDescription: {name: messages.selectWordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectTextStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:true});}, actionDescription: {name: messages.selectTextStart}}, //$NON-NLS-0$
+				"selectTextEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}, actionDescription: {name: messages.selectTextEnd}}, //$NON-NLS-0$
 
-				"deletePrevious": {defaultHandler: function() {return self._doBackspace({unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteNext": {defaultHandler: function() {return self._doDelete({unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteWordPrevious": {defaultHandler: function() {return self._doBackspace({unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteWordNext": {defaultHandler: function() {return self._doDelete({unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteLineStart": {defaultHandler: function() {return self._doBackspace({unit: "line"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteLineEnd": {defaultHandler: function() {return self._doDelete({unit: "line"});}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"tab": {defaultHandler: function() {return self._doTab();}}, //$NON-NLS-0$
-				"shiftTab": {defaultHandler: function() {return self._doShiftTab();}}, //$NON-NLS-0$
-				"enter": {defaultHandler: function() {return self._doEnter();}}, //$NON-NLS-0$
-				"enterNoCursor": {defaultHandler: function() {return self._doEnter({noCursor:true});}}, //$NON-NLS-0$
-				"selectAll": {defaultHandler: function() {return self._doSelectAll();}}, //$NON-NLS-0$
-				"copy": {defaultHandler: function() {return self._doCopy();}}, //$NON-NLS-0$
-				"cut": {defaultHandler: function() {return self._doCut();}}, //$NON-NLS-0$
-				"paste": {defaultHandler: function() {return self._doPaste();}}, //$NON-NLS-0$
+				"deletePrevious": {defaultHandler: function() {return self._doBackspace({unit:"character"});}, actionDescription: {name: messages.deletePrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteNext": {defaultHandler: function() {return self._doDelete({unit:"character"});}, actionDescription: {name: messages.deleteNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteWordPrevious": {defaultHandler: function() {return self._doBackspace({unit:"word"});}, actionDescription: {name: messages.deleteWordPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteWordNext": {defaultHandler: function() {return self._doDelete({unit:"word"});}, actionDescription: {name: messages.deleteWordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteLineStart": {defaultHandler: function() {return self._doBackspace({unit: "line"});}, actionDescription: {name: messages.deleteLineStart}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteLineEnd": {defaultHandler: function() {return self._doDelete({unit: "line"});}, actionDescription: {name: messages.deleteLineEnd}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"tab": {defaultHandler: function() {return self._doTab();}, actionDescription: {name: messages.tab}}, //$NON-NLS-0$
+				"shiftTab": {defaultHandler: function() {return self._doShiftTab();}, actionDescription: {name: messages.shiftTab}}, //$NON-NLS-0$
+				"enter": {defaultHandler: function() {return self._doEnter();}, actionDescription: {name: messages.enter}}, //$NON-NLS-0$
+				"enterNoCursor": {defaultHandler: function() {return self._doEnter({noCursor:true});}, actionDescription: {name: messages.enterNoCursor}}, //$NON-NLS-0$
+				"selectAll": {defaultHandler: function() {return self._doSelectAll();}, actionDescription: {name: messages.selectAll}}, //$NON-NLS-0$
+				"copy": {defaultHandler: function() {return self._doCopy();}, actionDescription: {name: messages.copy}}, //$NON-NLS-0$
+				"cut": {defaultHandler: function() {return self._doCut();}, actionDescription: {name: messages.cut}}, //$NON-NLS-0$
+				"paste": {defaultHandler: function() {return self._doPaste();}, actionDescription: {name: messages.paste}}, //$NON-NLS-0$
 				
-				"toggleWrapMode": {defaultHandler: function() {return self._doWrapMode();}}, //$NON-NLS-0$
-				"toggleTabMode": {defaultHandler: function() {return self._doTabMode();}} //$NON-NLS-0$
+				"toggleWrapMode": {defaultHandler: function() {return self._doWrapMode();}, actionDescription: {name: messages.toggleWrapMode}}, //$NON-NLS-0$
+				"toggleTabMode": {defaultHandler: function() {return self._doTabMode();}, actionDescription: {name: messages.toggleTabMode}} //$NON-NLS-0$
 			};
 		},
 		_createRuler: function(ruler, index) {
