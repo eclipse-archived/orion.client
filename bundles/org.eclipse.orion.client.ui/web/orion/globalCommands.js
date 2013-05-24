@@ -726,18 +726,15 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				commandRegistry.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new KeyBinding.KeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				// editor behavior if needed
-				var textView;
-				if (editor && (textView = editor.getTextView())) {
+				if (editor) {
 					mainSplitter.splitter.addResizeListener(function(node) {
 						if (editor && node === main) {
-							textView.resize();
+							var textView = editor.getTextView();
+							if (textView) {
+								textView.resize();
+							}
 						}
 					});
-					textView.setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleSidebar"); //$NON-NLS-1$ //$NON-NLS-0$
-					textView.setAction("toggleSidebar", function(){ //$NON-NLS-0$
-						mainSplitter.splitter.toggleSidePanel();
-						return true;
-					}, {name: messages["Toggle Sidebar"]});
 				}
 			}
 		}
@@ -812,15 +809,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				openResourceDialog(searcher, serviceRegistry, editor);
 			}});
 			
-		// set binding in editor and a general one for other pages
-		if (editor && editor.getTextView()) {
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), openResourceCommand.id);   //$NON-NLS-0$
-			editor.getTextView().setAction(openResourceCommand.id, function() {
-					openResourceDialog(searcher, serviceRegistry, editor);
-					return true;
-				}, openResourceCommand);
-		}
-		
 		commandRegistry.addCommand(openResourceCommand);
 		commandRegistry.registerCommandContribution("globalActions", "eclipse.openResource", 100,  null, true, new KeyBinding.KeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
@@ -829,32 +817,22 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			tooltip: messages["Global search"],
 			id: "eclipse.globalSearch", //$NON-NLS-0$
 			callback: function(data) {
-				var searchField = lib.node("search"); //$NON-NLS-0$
-				if(searchField){
-					searchField.focus();
-				}
-			}});
-			
-		// set binding in editor and a general one for other pages
-		if (editor && editor.getTextView()) {
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true, false, true), globalSearchCommand.id);   //$NON-NLS-0$
-			editor.getTextView().setAction(globalSearchCommand.id, function() {
+				var searchString = null;
+				if (editor) {
 					var selection = editor.getSelection();
-					var searchString = null;
 					if (selection.end > selection.start) {//If there is selection from editor, we want to use it as the default keyword
 						var model = editor.getModel();
 						searchString = model.getText(selection.start, selection.end);
 					}
-					var searchField = lib.node("search"); //$NON-NLS-0$
-					if(searchField){
-						if(searchString){
-							searchField.value = searchString;
-						}
-						searchField.focus();
+				}
+				var searchField = lib.node("search"); //$NON-NLS-0$
+				if(searchField){
+					if(searchString){
+						searchField.value = searchString;
 					}
-					return true;
-				}, globalSearchCommand);
-		}
+					searchField.focus();
+				}
+			}});
 		
 		commandRegistry.addCommand(globalSearchCommand);
 		commandRegistry.registerCommandContribution("globalActions", "eclipse.globalSearch", 101,  null, true, new KeyBinding.KeyBinding('h', true, false, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -885,11 +863,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		commandRegistry.addCommand(toggleBanner);
 		commandRegistry.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new KeyBinding.KeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
-		if (editor && editor.getTextView()) {
-			editor.getTextView().setKeyBinding(new KeyBinding.KeyBinding('m', true, true), toggleBanner.id); //$NON-NLS-0$
-			editor.getTextView().setAction(toggleBanner.id, toggleBanner.callback, toggleBanner);
-		}
-						
 		//	Open configuration page, Ctrl+Shift+F1
 		var configDetailsCommand = new mCommands.Command({
 			name: messages["System Configuration Details"],
