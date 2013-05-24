@@ -50,12 +50,101 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 			return true;
 		},
 		match: function(e) {
-			var keyBindings = this._keyBindings;
+			switch (e.keyCode) {
+				case 16: /* Shift */
+				case 17: /* Control */
+				case 18: /* Alt */
+				case 91: /* Command */
+					return false;
+			}
+			var keyBindingIndex = this.keyBindingIndex || (this.keyBindingIndex = 0);
+			var keyBindings = this.matchingKeyBindings || this._keyBindings;
+			var matchingKeyBindings = [];
 			for (var i = 0; i < keyBindings.length; i++) {
 				var kb = keyBindings[i];
-				if (kb.keyBinding.match(e)) {
+				var keyBinding = kb.keyBinding;
+				var match = keyBinding.match(e, keyBindingIndex);
+				if (match === true) {
+					this.keyBindingIndex = 0;
+					this.matchingKeyBindings = null;
 					return kb.actionID;
+				} else if (typeof match === "number") { //$NON-NLS-0$
+					matchingKeyBindings.push(kb);
 				}
+			}
+			if (matchingKeyBindings.length === 0) {
+				this.keyBindingIndex = 0;
+				this.matchingKeyBindings = null;
+			} else {
+				this.keyBindingIndex++;
+				this.matchingKeyBindings = matchingKeyBindings;
+			}
+			return undefined;
+		},
+		match1: function(e) {
+			switch (e.keyCode) {
+				case 16: /* Shift */
+				case 17: /* Control */
+				case 18: /* Alt */
+				case 91: /* Command */
+					return false;
+			}
+			var keyBindingIndex = this.keyBindingIndex || (this.keyBindingIndex = 0);
+			var keyBindings = this.matchingKeyBindings || (this.matchingKeyBindings = this._keyBindings.slice(0));
+			for (var i = 0; i < keyBindings.length; i++) {
+				var kb = keyBindings[i];
+				var keyBinding = kb.keyBinding;
+				var match = keyBinding.match(e, keyBindingIndex);
+				if (match === true) {
+					this.keyBindingIndex = 0;
+					this.matchingKeyBindings = null;
+					return kb.actionID;
+				} else if (match === false) {
+					keyBindings.splice(i, 1);
+					i--;
+				}
+			}
+			if (keyBindings.length === 0) {
+				this.keyBindingIndex = 0;
+				this.matchingKeyBindings = null;
+			} else {
+				this.keyBindingIndex++;
+			}
+			return undefined;
+		},
+		match2: function(e) {
+			switch (e.keyCode) {
+				case 16: /* Shift */
+				case 17: /* Control */
+				case 18: /* Alt */
+				case 91: /* Command */
+					return false;
+			}
+			var keyStrokes = this._keyStrokes || (this._keyStrokes = []);
+			keyStrokes.push({
+				type: e.type,
+				keyCode: e.keyCode,
+				charCode: e.charCode,
+				which: e.which,
+				ctrlKey: e.ctrlKey,
+				altKey: e.altKey,
+				shiftKey: e.shiftKey,
+				metaKey: e.metaKey
+			});
+			var keyBindings = this._keyBindings, partialMatch = false;
+			for (var i = 0; i < keyBindings.length; i++) {
+				var kb = keyBindings[i];
+				var keyBinding = kb.keyBinding;
+				var match = keyBinding.match(keyStrokes);
+				if (match === true) {
+					this._keyStrokes = null;
+					return kb.actionID;
+				} else if (typeof match === "number") { //$NON-NLS-0$
+					partialMatch = true;
+				}
+			}
+			if (!partialMatch) {
+				this._keyStrokes = null;
 			}
 			return undefined;
 		},
