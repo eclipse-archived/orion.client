@@ -27,6 +27,11 @@ orion.JSDiffAdapter = (function() {
 	}
 	
 	JSDiffAdapter.prototype = {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=401905
+		_specialLine: function(lineDelim, current, lastLineEnding) {
+			return (current.value === lineDelim && lastLineEnding !== lineDelim);
+		},
+		
 		adapt: function(oldStr, newStr, lineDelim){
 			if(!lineDelim){
 				lineDelim = "\n"; //$NON-NLS-0$
@@ -44,6 +49,9 @@ orion.JSDiffAdapter = (function() {
 			var changeIndex = -1;
 			var oFileLineCounter = 0;
 			var previousDelim = true;
+			//https://bugs.eclipse.org/bugs/show_bug.cgi?id=401905
+			//We have to reserve last line's ending 
+			var lastLineEnding = lineDelim;
 		    for (var i = 0; i < diff.length; i++){ 
 				var current = diff[i];
 		        //var lines = current.lines || current.value.replace(/\n$/, "").split("\n");
@@ -61,15 +69,17 @@ orion.JSDiffAdapter = (function() {
 		        }		        
 		        current.lines = lines;
 		        if (!current.added && !current.removed) {
-		            if (linesAdded || linesRemoved) {
-		                map.push([linesAdded, linesRemoved, changeIndex]);
-		                linesAdded = 0;
-		                linesRemoved = 0;
-		                changeIndex = -1;
-		                oFileLineCounter += linesRemoved;
+		            if(!this._specialLine(lineDelim, current, lastLineEnding)){
+			            if (linesAdded || linesRemoved) {
+			                map.push([linesAdded, linesRemoved, changeIndex]);
+			                linesAdded = 0;
+			                linesRemoved = 0;
+			                changeIndex = -1;
+			                oFileLineCounter += linesRemoved;
+			            }
+						map.push([currentLineNumber, currentLineNumber, 0]);
+						oFileLineCounter += currentLineNumber;
 		            }
-		            map.push([currentLineNumber, currentLineNumber, 0]);
-		            oFileLineCounter += currentLineNumber;
 		        } else if (current.added) {
 		            if (changeIndex === -1) {
 		                changeIndex = changContents.length + 1;
@@ -84,6 +94,12 @@ orion.JSDiffAdapter = (function() {
 		        previousDelim = false;
 		        if(lines.length > 1 && lines[lines.length-1] === ""){
 			        previousDelim = true;
+		        }
+		        //we want to reserverve the line ending to check next line
+		        if(current.value) {
+					lastLineEnding = current.value[current.value.length - 1];
+		        } else {
+					lastLineEnding = lineDelim;
 		        }
 		    }
 		    
