@@ -902,21 +902,29 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					var heading;
 					lib.empty(keyAssistDiv);
 					if (editor && editor.getTextView()) {
+						var textView = editor.getTextView();
 						heading = document.createElement("h2"); //$NON-NLS-0$
 						heading.appendChild(document.createTextNode(messages["Editor"]));
 						keyAssistDiv.appendChild(heading);
-						var editorActions = editor.getTextView().getActions(false);
+						var editorActions = textView.getActions(true);
+						editorActions.sort(function(a, b) {
+							var descA = textView.getActionDescription(a);
+							var descB = textView.getActionDescription(b);
+							if (!descA || !descA.name || !descB || !descB.name) {
+								return -1;
+							}
+							return descA.name.localeCompare(descB.name);
+						});
 						for(var i=0; i<editorActions.length; i++) {
-							var actionID = editorActions[i], actionName = actionID;
-							var textView = editor.getTextView();
+							var actionID = editorActions[i];
 							var actionDescription = textView.getActionDescription(actionID);
-							if (actionDescription && actionDescription.name) { actionName = actionDescription.name; }
+							if (!actionDescription || !actionDescription.name) { continue; }
 							var bindings = textView.getKeyBindings(actionID);
 							for (var j=0; j<bindings.length; j++) {
 								var bindingString = mUIUtils.getUserKeyString(bindings[j]);
 								var span = document.createElement("span"); //$NON-NLS-0$
 								span.role = "listitem"; //$NON-NLS-0$
-								span.appendChild(document.createTextNode(bindingString + " = " + actionName));  //$NON-NLS-0$
+								span.appendChild(document.createTextNode(bindingString + " = " + actionDescription.name));  //$NON-NLS-0$
 								span.appendChild(document.createElement("br")); //$NON-NLS-0$
 								keyAssistDiv.appendChild(span);
 							}

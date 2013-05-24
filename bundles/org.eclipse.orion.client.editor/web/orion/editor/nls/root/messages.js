@@ -28,40 +28,92 @@ define({
 	"currentLine": "Current Line", //$NON-NLS-1$ //$NON-NLS-0$
 	"matchingBracket": "Matching Bracket", //$NON-NLS-1$ //$NON-NLS-0$
 	"currentBracket": "Current Bracket", //$NON-NLS-1$ //$NON-NLS-0$
+	
+	"lineUp": "Line Up", //$NON-NLS-1$ //$NON-NLS-0$
+	"lineDown": "Line Down", //$NON-NLS-1$ //$NON-NLS-0$
+	"lineStart": "Line Start", //$NON-NLS-1$ //$NON-NLS-0$
+	"lineEnd": "Line End", //$NON-NLS-1$ //$NON-NLS-0$
+	"charPrevious": "Previous Character", //$NON-NLS-1$ //$NON-NLS-0$
+	"charNext": "Previous Character", //$NON-NLS-1$ //$NON-NLS-0$
+	"pageUp": "Page Up", //$NON-NLS-1$ //$NON-NLS-0$
+	"pageDown": "Page Down", //$NON-NLS-1$ //$NON-NLS-0$
+	"scrollPageUp": "Scroll Page Up", //$NON-NLS-1$ //$NON-NLS-0$
+	"scrollPageDown": "Scroll Page Down", //$NON-NLS-1$ //$NON-NLS-0$
+	"scrollLineUp": "Scroll Line Up", //$NON-NLS-1$ //$NON-NLS-0$
+	"scrollLineDown": "Scroll Line Down", //$NON-NLS-1$ //$NON-NLS-0$
+	"wordPrevious": "Previous Word", //$NON-NLS-1$ //$NON-NLS-0$
+	"wordNext": "Next World", //$NON-NLS-1$ //$NON-NLS-0$
+	"textStart": "Document Start", //$NON-NLS-1$ //$NON-NLS-0$
+	"textEnd": "Document End", //$NON-NLS-1$ //$NON-NLS-0$
+	"scrollTextStart": "Scroll Document Start", //$NON-NLS-1$ //$NON-NLS-0$
+	"scrollTextEnd": "Scroll Document End", //$NON-NLS-1$ //$NON-NLS-0$
+	"centerLine": "Center Line", //$NON-NLS-1$ //$NON-NLS-0$
+	
+	"selectLineUp": "Select Line Up", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectLineDown": "Select Line Down", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectWholeLineUp": " Select Whole Line Up", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectWholeLineDown": "Select Whole Line Down", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectLineStart": "Select Line Start", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectLineEnd": "Select Line End", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectCharPrevious": "Select Previous Character", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectCharNext": "Select Next Character", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectPageUp": "Select Page Up", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectPageDown": "Select Page Down", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectWordPrevious": "Select Previous Word", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectWordNext": "Select Next Word", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectTextStart": "Select Document Start", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectTextEnd": "Select Document End", //$NON-NLS-1$ //$NON-NLS-0$
+
+	"deletePrevious": "Delete Previous Character", //$NON-NLS-1$ //$NON-NLS-0$
+	"deleteNext": "Delete Next Character", //$NON-NLS-1$ //$NON-NLS-0$
+	"deleteWordPrevious": "Delete Previous Word", //$NON-NLS-1$ //$NON-NLS-0$
+	"deleteWordNext": "Delete Next Word", //$NON-NLS-1$ //$NON-NLS-0$
+	"deleteLineStart": "Delete Line Start", //$NON-NLS-1$ //$NON-NLS-0$
+	"deleteLineEnd": "Delete Line End", //$NON-NLS-1$ //$NON-NLS-0$
+	"tab": "Insert Tab", //$NON-NLS-1$ //$NON-NLS-0$
+	"enter": "Insert Line Delimiter", //$NON-NLS-1$ //$NON-NLS-0$
+	"enterNoCursor": "Insert Line Delimiter", //$NON-NLS-1$ //$NON-NLS-0$
+	"selectAll": "Select All", //$NON-NLS-1$ //$NON-NLS-0$
+	"copy": "Copy", //$NON-NLS-1$ //$NON-NLS-0$
+	"cut": "Cut", //$NON-NLS-1$ //$NON-NLS-0$
+	"paste": "Paste", //$NON-NLS-1$ //$NON-NLS-0$
+	
+	"toggleWrapMode": "Toggle Wrap Mode", //$NON-NLS-1$ //$NON-NLS-0$
+	"toggleTabMode": "Toggle Tab Mode", //$NON-NLS-1$ //$NON-NLS-0$
 			
-	"Comment": "Comment",
-	"Flat outline": "Flat outline",
-	"incrementalFind": "Incremental find: ${0}",
-	"incrementalFindNotFound": "Incremental find: ${0} (not found)",
-	"find": "Find...",
-	"undo": "Undo",
-	"redo": "Redo",
-	"cancelMode": "Cancel Current Mode",
-	"findNext": "Find Next Occurrence",
-	"findPrevious": "Find Previous Occurrence",
-	"incrementalFindKey": "Incremental Find",
-	"indentLines": "Indent Lines",
-	"unindentLines": "Unindent Lines",
-	"moveLinesUp": "Move Lines Up",
-	"moveLinesDown": "Move Lines Down",
-	"copyLinesUp": "Copy Lines Up",
-	"copyLinesDown": "Copy Lines Down",
-	"deleteLines": "Delete Lines",
-	"gotoLine": "Goto Line...",
-	"gotoLinePrompty": "Goto Line:",
-	"nextAnnotation": "Next Annotation",
-	"prevAnnotation": "Previous Annotation",
-	"expand": "Expand",
-	"collapse": "Collapse",
-	"expandAll": "Expand All", 
-	"collapseAll": "Collapse All",
-	"lastEdit": "Last Edit Location",
-	"toggleLineComment": "Toggle Line Comment",
-	"addBlockComment": "Add Block Comment",
-	"removeBlockComment": "Remove Block Comment",
-	"linkedModeEntered": "Linked Mode entered",
-	"linkedModeExited": "Linked Mode exited",
-	"syntaxError": "Syntax Error",
-	"contentAssist": "Content Assist",
-	"lineColumn": "Line ${0} : Col ${1}"
+	"Comment": "Comment", //$NON-NLS-1$ //$NON-NLS-0$
+	"Flat outline": "Flat outline", //$NON-NLS-1$ //$NON-NLS-0$
+	"incrementalFind": "Incremental find: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"incrementalFindNotFound": "Incremental find: ${0} (not found)", //$NON-NLS-1$ //$NON-NLS-0$
+	"find": "Find...", //$NON-NLS-1$ //$NON-NLS-0$
+	"undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
+	"redo": "Redo", //$NON-NLS-1$ //$NON-NLS-0$
+	"cancelMode": "Cancel Current Mode", //$NON-NLS-1$ //$NON-NLS-0$
+	"findNext": "Find Next Occurrence", //$NON-NLS-1$ //$NON-NLS-0$
+	"findPrevious": "Find Previous Occurrence", //$NON-NLS-1$ //$NON-NLS-0$
+	"incrementalFindKey": "Incremental Find", //$NON-NLS-1$ //$NON-NLS-0$
+	"indentLines": "Indent Lines", //$NON-NLS-1$ //$NON-NLS-0$
+	"unindentLines": "Unindent Lines", //$NON-NLS-1$ //$NON-NLS-0$
+	"moveLinesUp": "Move Lines Up", //$NON-NLS-1$ //$NON-NLS-0$
+	"moveLinesDown": "Move Lines Down", //$NON-NLS-1$ //$NON-NLS-0$
+	"copyLinesUp": "Copy Lines Up", //$NON-NLS-1$ //$NON-NLS-0$
+	"copyLinesDown": "Copy Lines Down", //$NON-NLS-1$ //$NON-NLS-0$
+	"deleteLines": "Delete Lines", //$NON-NLS-1$ //$NON-NLS-0$
+	"gotoLine": "Goto Line...", //$NON-NLS-1$ //$NON-NLS-0$
+	"gotoLinePrompty": "Goto Line:", //$NON-NLS-1$ //$NON-NLS-0$
+	"nextAnnotation": "Next Annotation", //$NON-NLS-1$ //$NON-NLS-0$
+	"prevAnnotation": "Previous Annotation", //$NON-NLS-1$ //$NON-NLS-0$
+	"expand": "Expand", //$NON-NLS-1$ //$NON-NLS-0$
+	"collapse": "Collapse", //$NON-NLS-1$ //$NON-NLS-0$
+	"expandAll": "Expand All", //$NON-NLS-1$ //$NON-NLS-0$
+	"collapseAll": "Collapse All", //$NON-NLS-1$ //$NON-NLS-0$
+	"lastEdit": "Last Edit Location", //$NON-NLS-1$ //$NON-NLS-0$
+	"toggleLineComment": "Toggle Line Comment", //$NON-NLS-1$ //$NON-NLS-0$
+	"addBlockComment": "Add Block Comment", //$NON-NLS-1$ //$NON-NLS-0$
+	"removeBlockComment": "Remove Block Comment", //$NON-NLS-1$ //$NON-NLS-0$
+	"linkedModeEntered": "Linked Mode entered", //$NON-NLS-1$ //$NON-NLS-0$
+	"linkedModeExited": "Linked Mode exited", //$NON-NLS-1$ //$NON-NLS-0$
+	"syntaxError": "Syntax Error", //$NON-NLS-1$ //$NON-NLS-0$
+	"contentAssist": "Content Assist", //$NON-NLS-1$ //$NON-NLS-0$
+	"lineColumn": "Line ${0} : Col ${1}" //$NON-NLS-1$ //$NON-NLS-0$
 });
