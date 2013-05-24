@@ -214,5 +214,37 @@ define(["orion/assert", "orion/compare/diffParser", "orion/compare/jsdiffAdapter
 		assert.equal(result.outPutFile, expectedOutput);
 	};
 	
+	tests["test bug 401905 -- 1"] = function() { //$NON-NLS-0$
+		var input = "12\r\n" +  //$NON-NLS-0$
+		  "34\r\n" +  //$NON-NLS-0$
+		  "56\r\n" +  //$NON-NLS-0$
+		  "";
+		var output = "21\r\n" +  //$NON-NLS-0$
+		  "43\r\n" +  //$NON-NLS-0$
+		  "56\r\n" +  //$NON-NLS-0$
+		  "";
+		
+		var expectedMapping = [[2, 2, 1], [2,2,0]];
+		var adapter = new mJSDiffAdapter.JSDiffAdapter();
+		var result = adapter.adapt(input, output, "\n"); //$NON-NLS-0$
+		_mapperPartialEqual(result.mapper, expectedMapping);
+	};
+	
+	tests["test bug 401905 -- 2"] = function() { //$NON-NLS-0$
+		var input = "11\r\n12\r\n" +  //$NON-NLS-0$
+		  "34\r\n" +  //$NON-NLS-0$
+		  "56\r\n" +  //$NON-NLS-0$
+		  "";
+		var output = "11\r\n21\r\n" +  //$NON-NLS-0$
+		  "43\r\n" +  //$NON-NLS-0$
+		  "56\r\n" +  //$NON-NLS-0$
+		  "";
+		
+		var expectedMapping = [[1,1,0], [2, 2, 1], [2,2,0]];
+		var adapter = new mJSDiffAdapter.JSDiffAdapter();
+		var result = adapter.adapt(input, output, "\n"); //$NON-NLS-0$
+		_mapperPartialEqual(result.mapper, expectedMapping);
+	};
+	
 	return tests;
 });
