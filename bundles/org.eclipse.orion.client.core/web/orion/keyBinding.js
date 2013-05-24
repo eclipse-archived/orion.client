@@ -15,17 +15,29 @@
 
 define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON-NLS-0$
 
+    /**
+	 * @class A KeyBinding is an interface used to define keyboard shortcuts.
+	 * @name orion.KeyBinding
+	 * 
+	 * @property {Function} match The function to match events.
+	 * @property {Function} equals The funtion to compare to key bindings.
+	 *
+	 * @see orion.KeyStroke
+	 * @see orion.KeySequence
+	 */
+
 	/**
-	 * Constructs a new key binding with the given key code and modifiers.
+	 * Constructs a new key stroke with the given key code, modifiers and event type.
 	 * 
 	 * @param {String|Number} keyCode the key code.
 	 * @param {Boolean} mod1 the primary modifier (usually Command on Mac and Control on other platforms).
 	 * @param {Boolean} mod2 the secondary modifier (usually Shift).
 	 * @param {Boolean} mod3 the third modifier (usually Alt).
 	 * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
+	 * @param {String} type the type of event that the keybinding matches; either "keydown" or "keypress".
 	 * 
-	 * @class A KeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
-	 * @name orion.editor.KeyBinding
+	 * @class A KeyStroke represents of a key code and modifier state that can be triggered by the user using the keyboard.
+	 * @name orion.KeyStroke
 	 * 
 	 * @property {String|Number} keyCode The key code.
 	 * @property {Boolean} mod1 The primary modifier (usually Command on Mac and Control on other platforms).
@@ -36,7 +48,7 @@ define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON
 	 *
 	 * @see orion.editor.TextView#setKeyBinding
 	 */
-	function KeyBinding (keyCode, mod1, mod2, mod3, mod4, type) {
+	function KeyStroke (keyCode, mod1, mod2, mod3, mod4, type) {
 		this.type = type || "keydown"; //$NON-NLS-0$
 		if (typeof(keyCode) === "string" && this.type === "keydown") { //$NON-NLS-1$ //$NON-NLS-0$
 			this.keyCode = keyCode.toUpperCase().charCodeAt(0);
@@ -48,14 +60,35 @@ define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON
 		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
 		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
 	}
-	KeyBinding.prototype = /** @lends orion.editor.KeyBinding.prototype */ {
+	KeyStroke.prototype = /** @lends orion.KeyStroke.prototype */ {
 		/**
-		 * Returns whether this key binding matches the given key event.
+		 * Determines either this key stroke matches the specifed event.  It can match either a
+		 * a whole sequence of key events or a single key event at a specified index.
+		 * <p>
+		 * <code>KeyStroke</code> only matches single key events. <code>KeySequence</code> handles
+		 * matching a sequence of events.
+		 * </p>
+		 * TODO explain this better
 		 * 
-		 * @param e the key event.
+		 * @param {DOMEvent|DOMEvent[]} e the key event or list of events to match.
+		 * @param index the key event to match.
 		 * @returns {Boolean} <code>true</code> whether the key binding matches the key event.
+		 *
+		 * @see orion.KeySequence#match
 		 */
-		match: function (e) {
+		match: function (e, index) {
+			if (index !== undefined) {
+				if (index !== 0) {
+					return false;
+				}
+			} else {
+				if (e instanceof Array) {
+					if (e.length > 1) {
+						return false;
+					}
+					e = e[0];
+				}
+			}
 			if (e.type !== this.type) {
 				return false;
 			}
@@ -72,9 +105,9 @@ define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON
 			return false;
 		},
 		/**
-		 * Returns whether this key binding is the same as the given parameter.
+		 * Returns whether this key stroke is the same as the given parameter.
 		 * 
-		 * @param {orion.editor.KeyBinding} kb the key binding to compare with.
+		 * @param {orion.KeyBinding} kb the key binding to compare with.
 		 * @returns {Boolean} whether or not the parameter and the receiver describe the same key binding.
 		 */
 		equals: function(kb) {
@@ -88,5 +121,74 @@ define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON
 			return true;
 		} 
 	};
-	return {KeyBinding: KeyBinding};
+	
+	/**
+	 * Constructs a new key sequence with the given key strokes.
+	 * 
+	 * @param {orion.KeyStroke[]} keys the key strokes for this sequence.
+	 * 
+	 * @class A KeySequence represents of a list of key codes and a modifiers state that can be triggered by the user using the keyboard.
+	 * @name orion.KeySequence
+	 * 
+	 * @property {orion.KeyStroke[]} keys the list of key strokes.
+	 *
+	 * @see orion.editor.TextView#setKeyBinding
+	 */
+	function KeySequence (keys) {
+		this.keys = keys;
+	}
+	KeySequence.prototype = /** @lends orion.KeySequence.prototype */ {
+		match: function (e, index) {
+			var keys = this.keys;
+			if (index !== undefined) {
+				if (index > keys.length) {
+					return false;
+				}
+				if (keys[index].match(e)) {
+					if (index === keys.length - 1) {
+						return true;
+					}
+					return index + 1;
+				}
+				return false;
+			} else {
+				if (!(e instanceof Array)) {
+					e = [e];
+				}
+				if (e.length > keys.length) {
+					return false;
+				}
+				var i;
+				for (i = 0; i < e.length; i++) {
+					if (!keys[i].match(e[i])) {
+						return false;
+					}
+				}
+				if (i === keys.length) {
+					return true;
+				}
+				return i;
+			}
+		},
+		/**
+		 * Returns whether this key sequence is the same as the given parameter.
+		 * 
+		 * @param {orion.KeyBinding|orion.KeySequence} kb the key binding to compare with.
+		 * @returns {Boolean} whether or not the parameter and the receiver describe the same key binding.
+		 */
+		equals: function(kb) {
+			if (!kb.keys) { return false; }
+			if (kb.keys.length !== this.keys.length) { return false; }
+			for (var i=0; i<kb.keys.length; i++) {
+				if (!kb.keys[i].equals(this.keys[i])) { return false; }
+			}
+			return true;
+		}	
+	};
+	
+	return {
+		KeyBinding: KeyStroke, // for backwards compatibility
+		KeyStroke: KeyStroke,
+		KeySequence: KeySequence
+	};
 });
