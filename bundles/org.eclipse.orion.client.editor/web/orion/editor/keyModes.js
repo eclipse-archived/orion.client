@@ -79,6 +79,7 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 			} else {
 				this._keyBindingIndex++;
 				this._matchingKeyBindings = matchingKeyBindings;
+				return "noop"; //$NON-NLS-0$
 			}
 			return undefined;
 		},
