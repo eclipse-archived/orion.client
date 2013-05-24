@@ -19,6 +19,7 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 
 	function KeyMode() {
 		this._keyBindings = this.createKeyBindings();
+		this._keyBindingIndex = 0;
 	}
 	KeyMode.prototype = /** @lends orion.editor.KeyMode.prototype */ {
 		createKeyBindings: function () {
@@ -57,27 +58,27 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 				case 91: /* Command */
 					return false;
 			}
-			var keyBindingIndex = this.keyBindingIndex || (this.keyBindingIndex = 0);
-			var keyBindings = this.matchingKeyBindings || this._keyBindings;
+			var keyBindingIndex = this._keyBindingIndex;
+			var keyBindings = this._matchingKeyBindings || this._keyBindings;
 			var matchingKeyBindings = [];
 			for (var i = 0; i < keyBindings.length; i++) {
 				var kb = keyBindings[i];
 				var keyBinding = kb.keyBinding;
 				var match = keyBinding.match(e, keyBindingIndex);
 				if (match === true) {
-					this.keyBindingIndex = 0;
-					this.matchingKeyBindings = null;
+					this._keyBindingIndex = 0;
+					this._matchingKeyBindings = null;
 					return kb.actionID;
 				} else if (typeof match === "number") { //$NON-NLS-0$
 					matchingKeyBindings.push(kb);
 				}
 			}
 			if (matchingKeyBindings.length === 0) {
-				this.keyBindingIndex = 0;
-				this.matchingKeyBindings = null;
+				this._keyBindingIndex = 0;
+				this._matchingKeyBindings = null;
 			} else {
-				this.keyBindingIndex++;
-				this.matchingKeyBindings = matchingKeyBindings;
+				this._keyBindingIndex++;
+				this._matchingKeyBindings = matchingKeyBindings;
 			}
 			return undefined;
 		},
