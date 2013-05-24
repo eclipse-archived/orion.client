@@ -235,7 +235,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.project", 1, "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.linkProject", 2, "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// Folder nav actions
-			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.upFolder", 1, null, true, new KeyBinding(38, false, false, true) /* Alt+UpArrow */); //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.upFolder", 1, null, false, new KeyBinding(38, false, false, true) /* Alt+UpArrow */); //$NON-NLS-0$
 
 			var renameBinding = new KeyBinding(113); // F2
 			renameBinding.domScope = "sidebar"; //$NON-NLS-0$
