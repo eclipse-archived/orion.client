@@ -17,12 +17,11 @@
 define("orion/editor/textView", [ //$NON-NLS-0$
 	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
 	'orion/editor/textModel', //$NON-NLS-0$
-	'orion/keyBinding', //$NON-NLS-0$
 	'orion/editor/keyModes', //$NON-NLS-0$
 	'orion/editor/eventTarget', //$NON-NLS-0$
 	'orion/editor/textTheme', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mTextModel, mKeyBinding, mKeyModes, mEventTarget, mTextTheme, util) {
+], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, util) {
 
 	/** @private */
 	function getWindow(document) {
