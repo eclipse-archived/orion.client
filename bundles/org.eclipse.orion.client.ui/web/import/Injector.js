@@ -184,6 +184,9 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/form', 'orion/URL-shim'
 						});
 					});
 				});
+			}, function() {
+				// An error occurred, return false to indicate no project was created
+				return false;
 			});
 		};
 
