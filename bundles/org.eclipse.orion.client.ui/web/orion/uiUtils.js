@@ -90,6 +90,19 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		return userString+String.fromCharCode(binding.keyCode);
 	}
 
+	/**
+	 * @name orion.uiUtils.getUserText
+	 * @function
+	 * @param {String} id
+	 * @param {Element} refNode
+	 * @param {Boolean} shouldHideRefNode
+	 * @param {String} initialText
+	 * @param {Function} onComplete
+	 * @param {Function} onEditDestroy
+	 * @param {String} promptMessage
+	 * @param {String} selectTo
+	 * @param {Boolean} isInitialValid
+	 */
 	function getUserText(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy, promptMessage, selectTo, isInitialValid) {
 		/** @return function(event) */
 		var done = false;
@@ -107,8 +120,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 					if (shouldHideRefNode) {
 						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
-					editBox.parentNode.removeChild(editBox);
 					done = true;
+					editBox.parentNode.removeChild(editBox);
 					if (onEditDestroy) {
 						onEditDestroy();
 					}
