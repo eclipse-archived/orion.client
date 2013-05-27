@@ -411,8 +411,10 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 * @param {String} [emptyGroupMessage] A message to show if the group is empty and the user activates the UI element
 		 *  representing the group.  Optional.  If not specified, then the group UI element won't be shown when it is empty.
 		 * @param {String} [imageClass] CSS class of an image to use for this group.
+		 * @param {String} [tooltip] Tooltip to show on this group. If not provided, and the group uses an <code>imageClass</code>,
+		 * the <code>title</code> will be used as the tooltip.
 		 */	
-		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, imageClass) {
+		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, imageClass, tooltip) {
 			if (!this._contributionsByScopeId[scopeId]) {
 				this._contributionsByScopeId[scopeId] = {};
 			}
@@ -431,6 +433,9 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 				if (imageClass) {
 					parentTable[groupId].imageClass = imageClass;
 				}
+				if (tooltip) {
+					parentTable[groupId].tooltip = tooltip;
+				}
 
 				parentTable[groupId].emptyGroupMessage = emptyGroupMessage;
 			} else {
@@ -439,6 +444,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 										position: position, 
 										emptyGroupMessage: emptyGroupMessage,
 										imageClass: imageClass,
+										tooltip: tooltip,
 										children: {}};
 				parentTable.sortedContributions = null;
 			}
@@ -696,7 +702,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 							// to be redone. The down side to always adding the menu button is that we may find out we didn't
 							// need it after all, which could cause layout to change.
 
-							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass);
+							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass, contribution.tooltip);
 							if(domNodeWrapperList){
 								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
