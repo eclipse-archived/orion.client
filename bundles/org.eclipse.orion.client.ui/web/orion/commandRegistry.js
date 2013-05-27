@@ -277,30 +277,33 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 					(forceCollect || commandInvocation.parameters.shouldCollectParameters())) {
 					var collecting = false;
 					commandInvocation.parameters.updateParameters(commandInvocation);
-					collecting = this._parameterCollector.collectParameters(commandInvocation);
-				
-					// The parameter collector cannot collect.  We will do a default implementation using a popup.
-					if (!collecting) {
-						var tooltip = new mTooltip.Tooltip({
-							node: commandInvocation.domNode,
-							trigger: "click", //$NON-NLS-0$
-							position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						});
-						var parameterArea = tooltip.contentContainer();
-						parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
-						var originalFocusNode = window.document.activeElement;
-						var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
-							if (originalFocusNode) {
-								originalFocusNode.focus();
-							}
-							tooltip.destroy();
-						})(parameterArea);
-						tooltip.show();
-						window.setTimeout(function() {
-							focusNode.focus();
-							focusNode.select();
-						}, 0);
-						collecting = true;
+					// Consult shouldCollectParameters() again to verify we still need collection. Due to updateParameters(), the CommandInvocation
+					// could have dynamically set its parameters to null (meaning no collection should be done).
+					if (commandInvocation.parameters.shouldCollectParameters()) {
+						collecting = this._parameterCollector.collectParameters(commandInvocation);
+						// The parameter collector cannot collect.  We will do a default implementation using a popup.
+						if (!collecting) {
+							var tooltip = new mTooltip.Tooltip({
+								node: commandInvocation.domNode,
+								trigger: "click", //$NON-NLS-0$
+								position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							});
+							var parameterArea = tooltip.contentContainer();
+							parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
+							var originalFocusNode = window.document.activeElement;
+							var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
+								if (originalFocusNode) {
+									originalFocusNode.focus();
+								}
+								tooltip.destroy();
+							})(parameterArea);
+							tooltip.show();
+							window.setTimeout(function() {
+								focusNode.focus();
+								focusNode.select();
+							}, 0);
+							collecting = true;
+						}
 					}
 					if (!collecting) {
 						// Just call the callback with the information we had.
@@ -1013,10 +1016,11 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 	 *			callback.  Default is false, which means the callback will not be called until an attempt has
 	 *			been made to collect parameters.
 	 * @param {Function} [getParameters] a function used to define the parameters just before the command is invoked.  This is used
-	 *			when a particular invocation of the command will change the parameters.  Any stored parameters will be ignored, and
-	 *          replaced with those returned by this function.  If no parameters (empty array or null) are returned, then it is assumed
-	 *          that the command should not try to obtain parameters before invoking the command's callback.  The function will be passed
-	 *          the CommandInvocation as a parameter.
+	 *			when a particular invocation of the command will change the parameters. The function will be passed
+	 *          the CommandInvocation as a parameter. Any stored parameters will be ignored, and
+	 *          replaced with those returned by this function. If no parameters (empty array or <code>null</code>) are returned,
+	 *          then it is assumed that the command should not try to obtain parameters before invoking the command's callback
+	 *          (similar to <code>options.clientCollect === true</code>).
 	 * @name orion.commands.ParametersDescription
 	 * @class
 	 */
