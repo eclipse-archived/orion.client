@@ -221,6 +221,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		if (buttonIconClass) {
 			if(!showName) {
 				menuButton.textContent = ""; //$NON-NLS-0$
+				menuButton.setAttribute("aria-label", name); //$NON-NLS-0$
 			}
 			_addImageToElement({ spriteClass: "commandSprite", imageClass: buttonIconClass }, menuButton, name); //$NON-NLS-0$
 			menuButton.classList.add("orionButton"); // $NON-NLS-0$
