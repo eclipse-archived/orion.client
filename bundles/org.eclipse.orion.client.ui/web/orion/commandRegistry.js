@@ -696,7 +696,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 							// to be redone. The down side to always adding the menu button is that we may find out we didn't
 							// need it after all, which could cause layout to change.
 
-							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass); 
+							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass);
 							if(domNodeWrapperList){
 								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
@@ -835,7 +835,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 							var populateFunction = function(menu) {
 								command.populateChoicesMenu(menu, items, handler, userData, self);
 							};
-							self._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command), command.imageClass );
+							self._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command), command.imageClass, command.tooltip || command.title);
 						} else {
 							// Rendering atomic commands as buttons or menus
 							invocation.handler = invocation.handler || this;
@@ -862,7 +862,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		/*
 		 * private.  Parent must exist in the DOM.
 		 */
-		_createDropdownMenu: function(parent, name, nested, populateFunction, icon) {
+		_createDropdownMenu: function(parent, name, nested, populateFunction, icon, tooltip) {
 			parent = lib.node(parent);
 			// We create dropdowns asynchronously so it's possible that the parent has been removed from the document 
 			// by the time we are called.  If so, don't bother building a submenu for an orphaned menu.
@@ -889,11 +889,22 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 					parent.appendChild(menuParent);
 					destroyButton = menuParent;
 				}
-				// This class distinguishes dropdown buttons with an icon from those without
-				var buttonCss = icon ? "dropdownButtonWithIcon" : null; //$NON-NLS-0$
+				var buttonCss = null;
+				if (icon) {
+					buttonCss = "dropdownButtonWithIcon"; //$NON-NLS-0$ // This class distinguishes dropdown buttons with an icon from those without
+					tooltip = tooltip || name; // No text and no tooltip => fallback to name
+				}
+				tooltip = icon ? (tooltip || name) : tooltip;
 				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon);
 				menuButton = created.menuButton;
 				newMenu = created.menu;
+				if (tooltip) {
+					menuButton.commandTooltip = new mTooltip.Tooltip({
+						node: menuButton,
+						text: tooltip,
+						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
+				}
 			}
 			
 			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton};
