@@ -42,7 +42,7 @@ define({
 	"scrollLineUp": "Scroll Line Up", //$NON-NLS-1$ //$NON-NLS-0$
 	"scrollLineDown": "Scroll Line Down", //$NON-NLS-1$ //$NON-NLS-0$
 	"wordPrevious": "Previous Word", //$NON-NLS-1$ //$NON-NLS-0$
-	"wordNext": "Next World", //$NON-NLS-1$ //$NON-NLS-0$
+	"wordNext": "Next Word", //$NON-NLS-1$ //$NON-NLS-0$
 	"textStart": "Document Start", //$NON-NLS-1$ //$NON-NLS-0$
 	"textEnd": "Document End", //$NON-NLS-1$ //$NON-NLS-0$
 	"scrollTextStart": "Scroll Document Start", //$NON-NLS-1$ //$NON-NLS-0$
