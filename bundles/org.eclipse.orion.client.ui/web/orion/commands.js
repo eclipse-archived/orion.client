@@ -367,14 +367,48 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
 	 * It represents a unique invocation of a command by the user.  Each time a user invokes a command (by click, keystroke, URL),
 	 * a new invocation is passed to the client.
-	 * Note:  When retrieving parameters from a command invocation, clients should always use <code>commandInvocation.parameters</code>
-	 * rather than obtaining the parameter object originally specified for the command (<code>commandInvocation.command.parameters</code>).
+	 * <p>Note:  When retrieving parameters from a command invocation, clients should always use {@link #parameters}
+	 * rather than obtaining the parameter object originally specified for the command (using {@link #command}.parameters).
 	 * This ensures that the parameter values for a unique invocation are used vs. any default parameters that may have been
 	 * specified originally.  Similarly, if a client wishes to store data that will preserved across multiple invocations of a command,
 	 * that data can be stored in the original parameters description and a reference maintained by the client.
+	 * </p>
 	 * 
 	 * @name orion.commands.CommandInvocation
-	 * 
+	 * @class Carries information about a command invocation.
+	 * @param {Object} handler
+	 * @param {Array} items
+	 * @param {Object} [userData]
+	 * @param {orion.commands.Command} command
+	 * @param {orion.commandregistry.CommandRegistry} [commandRegistry]
+	 */
+	/**
+	 * @name orion.commands.CommandInvocation#commandRegistry
+	 * @type orion.commandregistry.CommandRegistry
+	 */
+	/**
+	 * @name orion.commands.CommandInvocation#handler
+	 * @type Object
+	 */
+	/**
+	 * @name orion.commands.CommandInvocation#command
+	 * @type orion.commands.Command
+	 */
+	/**
+	 * @name orion.commands.CommandInvocation#items
+	 * @type Array
+	 */
+	/**
+	 * @name orion.commands.CommandInvocation#parameters
+	 * @type orion.commands.ParametersDescription
+	 */
+	/**
+	 * @name orion.commands.CommandInvocation#userData
+	 * @type Object
+	 */
+	/**
+	 * @name orion.commands.CommandInvocation#userData
+	 * @type Object
 	 */
 	function CommandInvocation (handler, items, /* optional */userData, command, /* optional */ commandRegistry) {
 		this.commandRegistry = commandRegistry;
