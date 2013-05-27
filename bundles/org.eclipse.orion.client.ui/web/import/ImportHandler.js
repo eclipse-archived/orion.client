@@ -49,16 +49,30 @@ define(['require', 'orion/URITemplate', 'orion/URL-shim', 'orion/serviceTracker'
 					logError('Expected ' + AUTOIMPORT_SERVICE_NAME + ' service to provide an "onresponse" method');
 				}
 				var OrionHome = PageLinks.getOrionHome();
-				service.onresponse({
-					type: 'success', //$NON-NLS-0$
-					project: project,
-					OrionHome: OrionHome,
-					templates: {
-						navigate: (OrionHome + '/navigate/table.html#{Location}?depth=1'),
-						edit: (OrionHome + '/edit/edit.html#{,Location,params*}'),
-						shell: (OrionHome + '/shell/shellPage.html#{Location}')
-					}
-				});
+				var responseParam;
+				// If an error occurs in project creation, project will be false
+				if (project) {
+					logError("Project creation succeeded");
+					responseParam = {
+						type: 'success', //$NON-NLS-0$
+						project: project,
+						OrionHome: OrionHome,
+						templates: {
+							navigate: (OrionHome + '/navigate/table.html#{Location}?depth=1'),
+							edit: (OrionHome + '/edit/edit.html#{,Location,params*}'),
+							shell: (OrionHome + '/shell/shellPage.html#{Location}')
+						}
+					};
+				} else {
+					logError("Project creation failed");
+					responseParam = {
+						type: 'failure', //$NON-NLS-0$
+						templates: {
+							navigate: (OrionHome + '/navigate/table.html')
+						}
+					};
+				}
+				service.onresponse(responseParam);
 			}, function(error) {
 				logError(error);
 				service.onresponse({
