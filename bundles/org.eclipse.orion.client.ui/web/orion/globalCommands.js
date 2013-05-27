@@ -718,7 +718,9 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			var main = lib.$(".mainPanelLayout"); //$NON-NLS-0$
 			if (side && main) {
 				mainSplitter = {side: side, main: main};
-				mainSplitter.splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main, toggle: true, closeByDefault: true});
+				//For any page that defines the splitter style as "left:0%", we treate it as a collasped left pane as default.
+				var closeByDefault = ( splitNode.style && splitNode.style.left === "0%" ); //$NON-NLS-0$
+				mainSplitter.splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main, toggle: true, closeByDefault: closeByDefault});
 				var toggleSidePanelCommand = new mCommands.Command({
 					name: messages["Toggle side panel"],
 					tooltip: messages["Open or close the side panel"],
