@@ -41,7 +41,7 @@ define({
 	"Related": "Related",
 	"Options": "Options",
 	"FAQ": "FAQ",
-	"Report a Bug": "Report a Bug",
+	"Report a Bug": "Bugs",
 	"Privacy Policy": "Privacy",
 	"Terms of Use": "Terms",
 	"Copyright Agent": "Copyright",
