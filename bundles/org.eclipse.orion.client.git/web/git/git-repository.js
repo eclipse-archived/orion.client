@@ -103,14 +103,22 @@ mBootstrap.startup().then(function(core) {
 	commandRegistry.addCommand(viewAllCommand);
 	
 	var params = PageUtil.matchResourceParameters();
-	if (typeof params["createProjectContext"] === "undefined") { //$NON-NLS-0$
+	if (typeof params["createProject.name"] === "undefined") { //$NON-NLS-0$
 		commandRegistry.processURL(window.location.href);
 	}
 	
 	progress.progress(fileClient.loadWorkspace(), "Loading default workspace").then(
 		function(workspace){
 			explorer.setDefaultPath(workspace.Location);
-			commandRegistry.runCommand("eclipse.createGitProject", {url: params["cloneGit"], name: params["createProjectContext"]}, null, null);
+			
+			var projectDescription = {};
+			for(var k in params){
+				if (k.indexOf("createProject") != -1){
+					projectDescription[k.replace("createProject.", "")] = params[k];
+				}
+			}
+
+			commandRegistry.runCommand("eclipse.createGitProject", {url: params["cloneGit"], projectDescription: projectDescription}, null, null);
 			
 			if (typeof params["createProjectContext"] === "undefined") { //$NON-NLS-0$
 				explorer.redisplay();
