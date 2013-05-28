@@ -40,13 +40,6 @@ define(["orion/assert", "orion/URL-shim", "domReady!"], function(assert) {
 		assert.equal(url.pathname, "/a/b/c.html");
 		assert.equal(url.search, "?p=q&r=s&p&p=t");
 		assert.equal(url.hash, "#hash");
-		
-		url.protocol = "ftp";
-		url.host = "example2.com:8877";
-		url.pathname = "/d/e/a/l/";
-		url.search="";
-		url.hash="";
-		assert.equal(url.href, "ftp://example2.com:8877/d/e/a/l/");
 	};
 
 	tests.testUsernamePasswordURL = function() {
@@ -103,34 +96,9 @@ define(["orion/assert", "orion/URL-shim", "domReady!"], function(assert) {
 		assert.equal(url.search, "");
 	};
 	
-	tests.testRelativeURL = function() {
-		var spec = "http://dvcs.w3.org/hg/url/raw-file/tip/Overview.html";
-		var url = new URL(spec);
-		
-		var rel1 = new URL("//localhost/a/cat", spec);
-		assert.equal(rel1.href, "http://localhost/a/cat");
-
-		var rel2 = new URL("/a/cat", spec);
-		assert.equal(rel2.href, "http://dvcs.w3.org/a/cat");
-
-		var rel3 = new URL("a/cat", spec);
-		assert.equal(rel3.href, "http://dvcs.w3.org/hg/url/raw-file/tip/a/cat");
-
-		var rel4 = new URL("../a/cat", spec);
-		assert.equal(rel4.href, "http://dvcs.w3.org/hg/url/raw-file/a/cat");
-
-		var rel5 = new URL("../../a/cat", spec);
-		assert.equal(rel5.href, "http://dvcs.w3.org/hg/url/a/cat");
-
-		var rel6 = new URL("./././././././././../././././././././../././././a/cat", spec);
-		assert.equal(rel6.href, "http://dvcs.w3.org/hg/url/a/cat");
-	};
-	
 	tests.testInvalidURL = function() {
-		assert.throws(function(){return new URL("ht@tp:::::::://///////invalid?a=1#bad");});
-		var url = new URL("http://localhost");
-		url.href = "ht@tp:::::::://///////invalid?a=1#bad";
-		assert.equal(url.href, "ht@tp:::::::://///////invalid?a=1#bad");
+		var url = new URL("http:::::::://///////invalid?a=1#bad");
+		assert.equal(url.href, "http:::::::://///////invalid?a=1#bad");
 		assert.equal(url.origin, "");
 		assert.equal(url.protocol, ":");
 		assert.equal(url.username, "");
