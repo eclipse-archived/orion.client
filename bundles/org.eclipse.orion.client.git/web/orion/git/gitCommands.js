@@ -2082,13 +2082,22 @@ var exports = {};
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
 									gitService.getGitClone(jsonData.Location).then(
 										function(repoJson){
-											var templateString = require.toUrl("edit/edit.html") + "#{,resource,params*}"; //$NON-NLS-1$ //$NON-NLS-0$
-											window.location = new URITemplate(templateString).expand({
-												resource: "", //$NON-NLS-0$
-												params: {
-													navigate: repoJson.Children[0].ContentLocation + "?depth=1"
+											var pDescContent = "";
+											for(var k in item.projectDescription){
+												pDescContent += k + "=" + item.projectDescription[k] + "\n";
+											}
+
+											fileClient.write(repoJson.Children[0].ContentLocation + '.git/.projectInfo', pDescContent).then(
+												function(){
+													var templateString = require.toUrl("edit/edit.html") + "#{,resource,params*}"; //$NON-NLS-1$ //$NON-NLS-0$
+													window.location = new URITemplate(templateString).expand({
+														resource: "", //$NON-NLS-0$
+														params: {
+															navigate: repoJson.Children[0].ContentLocation + "?depth=1"
+														}
+													});
 												}
-											});
+											)
 										}
 									)
 								}, func, messages['Clone Git Repository']);
@@ -2099,12 +2108,12 @@ var exports = {};
 					});
 				};
 				
-				if (item.url && item.name){
+				if (item.url && item.projectDescription.name){
 					
 					fileClient.loadWorkspace().then(function(projects){
 						for(var i=0; i<projects.Children.length; ++i){
 							var p = projects.Children[i];
-							if(p.Name === item.name){
+							if(p.Name === item.projectDescription.name){
 								if (p.Git){
 									gitService.getGitClone(p.Git.CloneLocation).then(
 										function(repoJson){
@@ -2128,7 +2137,7 @@ var exports = {};
 							}
 						}	
 						
-						cloneFunction(item.url, null, item.name);	
+						cloneFunction(item.url, null, item.projectDescription.name);	
 					});
 				}
 			},
