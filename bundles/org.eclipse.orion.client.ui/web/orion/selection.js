@@ -10,7 +10,7 @@
  *******************************************************************************/
  /*global define */
  
-define(["orion/EventTarget"], function(EventTarget){
+define(["orion/EventTarget", "orion/Deferred"], function(EventTarget, Deferred){
 
 	/**
 	 * Constructs a new selection service. Clients should obtain a selection service
@@ -36,19 +36,28 @@ define(["orion/EventTarget"], function(EventTarget){
 	Selection.prototype = /** @lends orion.selection.Selection.prototype */ {
 		/**
 		 * Obtains the current single selection and passes it to the provided function.
-		 * @param {Function} onDone The function to invoke with the selection.
+		 * @param {Function} onDone The function to invoke with the selection. Deprecated: just use the return value instead.
+		 * @returns {Object}
 		 */
 		getSelection : function(onDone) {
-			//TODO this should return a promise rather than having an onDone parameter
-			onDone(this._getSingleSelection());
+			var result = this._getSingleSelection();
+			if (typeof onDone === "function") { //$NON-NLS-0$
+				onDone(result);
+			}
+			return result;
 		},
 		
 		/**
 		 * Obtains all current selections and passes them to the provided function.
-		 * @param {Function} onDone The function to invoke with the selections.
+		 * @param {Function} onDone The function to invoke with the selections. Deprecated: just use the return value instead.
+		 * @returns {Array}
 		 */
 		getSelections: function(onDone) {
-			onDone(Array.isArray(this._selections) ? this._selections.slice() : []);
+			var result = Array.isArray(this._selections) ? this._selections.slice() : [];
+			if (typeof onDone === "function") { //$NON-NLS-0$
+				onDone(result);
+			}
+			return result;
 		},
 		
 		_getSingleSelection: function() {

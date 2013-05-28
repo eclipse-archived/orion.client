@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global window define orion XMLHttpRequest confirm*/
-/*jslint browser:true sub:true*/
+/*jslint sub:true*/
 
 define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 
 	'orion/commandRegistry', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
@@ -130,33 +130,54 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @param {orion.commandregistry.CommandRegistry} commandRegistry
 	 * @param {orion.explorer.Explorer} explorer
-	 * @param {String|Element} toolbarId
-	 * @param {String|Element} selectionToolbarId
-	 * @param {Object} item
+	 * @param {String} toolbarId Gives the scope for toolbar commands. Commands in this scope are rendered with the <code>item</code>
+	 * parameter as their target.
+	 * @param {String} [selectionToolbarId] Gives the scope for selection-based commands. Commands in this scope are rendered
+	 * with current selection as their target.
+	 * @param {Object} item The model item to render toolbar commands against.
+	 * @param {Boolean} [rootSelection=false] If <code>true</code>, any selection-based commands will be rendered with the <code>explorer</code>'s 
+	 * treeRoot as their target, when no selection has been made. If <code>false</code>, any selection-based commands will be inactive when no 
+	 * selection has been made.
 	 */
-	fileCommandUtils.updateNavTools = function(registry, commandRegistry, explorer, toolbarId, selectionToolbarId, item) {
+	fileCommandUtils.updateNavTools = function(registry, commandRegistry, explorer, toolbarId, selectionToolbarId, toolbarItem, rootSelection) {
+		function updateSelectionTools(selectionService, item) {
+			var selectionTools = lib.node(selectionToolbarId);
+			if (selectionTools) {
+				// Hacky: check for a local selection service of the selectionToolbarId, or the one associated with the commandRegistry
+				var contributions = commandRegistry._contributionsByScopeId[selectionToolbarId];
+				selectionService = selectionService || (contributions && contributions.localSelectionService) || commandRegistry.getSelectionService(); //$NON-NLS-0$
+				if (contributions && selectionService) {
+					Deferred.when(selectionService.getSelections(), function(selections) {
+						commandRegistry.destroy(selectionTools);
+						var isNoSelection = !selections || (Array.isArray(selections) && !selections.length);
+						if (rootSelection && isNoSelection) {
+							commandRegistry.renderCommands(selectionTools.id, selectionTools, item, explorer, "button");  //$NON-NLS-0$
+						} else {
+							commandRegistry.renderCommands(selectionTools.id, selectionTools, null, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+						}
+					});
+				}
+			}
+		}
+
 		var toolbar = lib.node(toolbarId);
 		if (toolbar) {
 			commandRegistry.destroy(toolbar);
 		} else {
-			throw "could not find toolbar " + toolbarId; //$NON-NLS-0$
+			throw new Error("could not find toolbar " + toolbarId); //$NON-NLS-0$
 		}
 		// close any open slideouts because if we are retargeting the command
-		if (item.Location !== lastItemLoaded.Location) {
+		if (toolbarItem.Location !== lastItemLoaded.Location) {
 			commandRegistry.closeParameterCollector();
-			lastItemLoaded.Location = item.Location;
+			lastItemLoaded.Location = toolbarItem.Location;
 		}
 
-		commandRegistry.renderCommands(toolbar.id, toolbar, item, explorer, "button"); //$NON-NLS-0$
+		commandRegistry.renderCommands(toolbar.id, toolbar, toolbarItem, explorer, "button"); //$NON-NLS-0$
 		if (lastItemLoaded.Location) {
 			commandRegistry.processURL(window.location.href);
 		} 
 		if (selectionToolbarId) {
-			var selectionTools = lib.node(selectionToolbarId);
-			if (selectionTools) {
-				commandRegistry.destroy(selectionTools);
-				commandRegistry.renderCommands(selectionToolbarId, selectionTools, null /*use the selection service*/, explorer, "button");  //$NON-NLS-0$
-			}
+			updateSelectionTools(null, explorer.treeRoot);
 		}
 
 		// Stuff we do only the first time
@@ -164,11 +185,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			favoritesCache = new FavoriteFoldersCache(registry);
 			var selectionService = registry.getService("orion.page.selection"); //$NON-NLS-0$
 			selectionService.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-				var selectionTools = lib.node(selectionToolbarId);
-				if (selectionTools) {
-					commandRegistry.destroy(selectionTools);
-					commandRegistry.renderCommands(selectionTools.id, selectionTools, event.selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
-				}
+				updateSelectionTools(selectionService, explorer.treeRoot);
 			});
 		}
 	};

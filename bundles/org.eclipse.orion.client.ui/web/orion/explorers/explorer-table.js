@@ -178,8 +178,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 				}, {pid: "nav.config"}); //$NON-NLS-0$
 		}
 	}
-	
-	FileExplorer.prototype = new mExplorer.Explorer();
+
+	FileExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 
 	/**
 	 * Handles model changes. Subclasses can override these methods to control how the FileExplorer reacts to various types of model changes.
@@ -443,7 +443,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * @param path The path of the resource to load
 	 * @param {Boolean} [force] If true, force reload even if the path is unchanged. Useful
 	 * when the client knows the resource underlying the current path has changed.
-	 * @param postLoad a function to call after loading the resource
+	 * @param {Function} postLoad a function to call after loading the resource. <b>Deprecated</b>: use the returned promise instead.
+	 * @returns {orion.Promise}
 	 */
 	FileExplorer.prototype.loadResourceList = function(path, force, postLoad) {
 		path = mFileUtils.makeRelative(path);

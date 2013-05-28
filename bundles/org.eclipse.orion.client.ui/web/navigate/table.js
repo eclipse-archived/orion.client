@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define document window eclipse orion serviceRegistry:true widgets alert URL*/
-/*browser:true*/
+/*jslint browser:true sub:true*/
 
 define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/keyBinding', 'orion/commandRegistry', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
@@ -80,10 +80,10 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		function refresh() {
 			var pageParams = PageUtil.matchResourceParameters();
 			// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-			explorer.loadResourceList(pageParams.resource, false, function() {
-				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, 
+			explorer.loadResourceList(pageParams.resource, false).then(function() {
+				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot,
 					serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandRegistry});
-				mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", explorer.treeRoot);
+				mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", explorer.treeRoot, true); //$NON-NLS-1$ //$NON-NLS-0$
 			});
 		}
 		refresh();
@@ -94,7 +94,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		// define the command contributions - where things appear, first the groups
 		commandRegistry.addCommandGroup("pageActions", "orion.new", 1000, messages["New"]); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup("pageActions", "orion.gitGroup", 200); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup("selectionTools", "orion.selectionGroup", 500, messages["Actions"], null, messages["Click on an item to make a selection, then use this menu to see what actions are available."]); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup("selectionTools", "orion.selectionGroup", 500, messages["Actions"], null, null); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup("selectionTools", "orion.importExportGroup", 100, null, "orion.selectionGroup");		 //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup("selectionTools", "orion.newResources", 101, null, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		// commands that don't appear but have keybindings
@@ -134,7 +134,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		commandRegistry.registerCommandContribution("selectionTools", "eclipse.exportSFTPCommand", 5, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 		mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, "selectionTools", 0, "orion.selectionGroup", true).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
-			mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", explorer.treeRoot); //$NON-NLS-1$ //$NON-NLS-0$
+			// If no selection, we have to build against the treeRoot
+			// This should be in the file explorer.
+			mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", explorer.treeRoot, true); //$NON-NLS-1$ //$NON-NLS-0$
 			explorer.updateCommands();	
 			// Must happen after the above call, so that all the open with commands are registered when we create our navigation links.
 			new mNavOutliner.NavigationOutliner({parent: "fileSystems", commandService: commandRegistry, serviceRegistry: serviceRegistry}); //$NON-NLS-0$
