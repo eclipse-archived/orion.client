@@ -320,7 +320,7 @@
             return null;
         }
         var url = {};
-        url.scheme = parsedURI[1];
+        url.scheme = parsedURI[1] || "";
         if (url.scheme && !_SCHEME_RE.test(url.scheme)) {
             return null;
         }
