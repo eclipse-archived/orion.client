@@ -264,14 +264,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			this.createActionSections();
 			var selectionTools = this.selectionActionsScope;
 			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
-			if (!selections || (Array.isArray(selections) && selections.length === 0)) {
-				FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, null /*don't touch selectionTools*/, treeRoot);
-				// Now build the selectionTools. No selection in explorer, so they should target the treeRoot.
-				commandRegistry.destroy(selectionTools);
-				commandRegistry.renderCommands(selectionTools, selectionTools, treeRoot, this, "button");  //$NON-NLS-0$
-			} else {
-				FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot);
-			}
+			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot, true);
 			commandRegistry.destroy(this.folderNavActionsScope);
 			commandRegistry.renderCommands(this.folderNavActionsScope, this.folderNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
 		}
