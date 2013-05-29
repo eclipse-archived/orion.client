@@ -137,18 +137,17 @@ exports.EditorCommandFactory = (function() {
 				return true;
 			}, {name: messages.Save});
 			
-			if (!this.editorSettings || !this.editorSettings.autoSaveEnabled) {
-				var saveCommand = new mCommands.Command({
-					name: messages.Save,
-					tooltip: messages["Save this file"],
-					id: "orion.save", //$NON-NLS-0$
-					callback: function(data) {
-						editor.getTextView().invokeAction("save"); //$NON-NLS-0$
-					}
-				});
-				this.commandService.addCommand(saveCommand);
-				this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
-			}
+			var saveCommand = new mCommands.Command({
+				name: messages.Save,
+				tooltip: messages["Save this file"],
+				id: "orion.save", //$NON-NLS-0$
+				visibleWhen: function() { return !self.editorSettings || !self.editorSettings.autoSaveEnabled; },
+				callback: function(data) {
+					editor.getTextView().invokeAction("save"); //$NON-NLS-0$
+				}
+			});
+			this.commandService.addCommand(saveCommand);
+			this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		_generateGotoLineCommnand: function(editor) {
 			var self = this;
