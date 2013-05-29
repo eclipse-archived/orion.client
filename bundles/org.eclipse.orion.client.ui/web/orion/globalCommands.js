@@ -676,7 +676,13 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		
 		document.addEventListener("keydown", function (e){  //$NON-NLS-0$
 			if (e.keyCode === lib.KEY.ESCAPE) {
+				var activeElement = document.activeElement;
+				var hasFocus = keyAssistDiv === activeElement || keyAssistDiv.compareDocumentPosition(activeElement) === 8;
 				keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+				if (hasFocus && document.compareDocumentPosition(keyAssistDiv._previousActiveElement) !== 1) {
+					keyAssistDiv._previousActiveElement.focus();
+				}
+				keyAssistDiv._previousActiveElement = null;
 				var statusService =	serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 				if(statusService){
 					statusService.setProgressMessage("");
@@ -936,6 +942,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					heading.appendChild(document.createTextNode(messages["Global"]));
 					keyAssistDiv.appendChild(heading);
 					commandRegistry.showKeyBindings(keyAssistDiv);
+					keyAssistDiv._previousActiveElement = document.activeElement;
 					keyAssistDiv.style.display = "block"; //$NON-NLS-0$
 					keyAssistDiv.tabIndex = 0;
 					keyAssistDiv.focus();
