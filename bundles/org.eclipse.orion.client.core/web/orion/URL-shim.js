@@ -280,7 +280,7 @@
     }
 
     function _normalizePort(port) {
-        return /[1-9]\d*$/.exec(port)[0];
+        return (/[1-9]\d*$/).exec(port)[0];
     }
 
     function _normalizePath(path) {
