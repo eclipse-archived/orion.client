@@ -91,7 +91,13 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				});
 			};
 			sidebarNavInputManager.addEventListener("InputChanged", this.navInputListener); //$NON-NLS-0$
+
+			// Broadcast changes of our explorer root to the sidebarNavInputManager
+			this.addEventListener("rootChanged", function(event) { //$NON-NLS-0$
+				_self.sidebarNavInputManager.dispatchEvent(event); //$NON-NLS-0$
+			});
 		}
+
 
 		// Listen to model changes from fileCommands
 		var dispatcher = this.modelEventDispatcher;
@@ -131,7 +137,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					newInput = null;
 				}
 				this.sidebarNavInputManager.dispatchEvent({
-					type: "editorInputRemoved", //$NON-NLS-0$
+					type: "editorInputMoved", //$NON-NLS-0$
 					parent: this.treeRoot.ChildrenLocation,
 					newInput: newInput
 				});
@@ -185,13 +191,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var _self = this;
 			return this.commandsRegistered.then(function() {
 				return _self.loadResourceList.call(_self, childrenLocation);
-			});
-		},
-		loadResourceList: function() {
-			var _self = this;
-			return FileExplorer.prototype.loadResourceList.apply(this, arguments).then(function(treeRoot) {
-				_self.sidebarNavInputManager.dispatchEvent({ type: "rootChanged", root: _self.treeRoot }); //$NON-NLS-0$
-				return treeRoot;
 			});
 		},
 		reveal: function(fileMetadata) {

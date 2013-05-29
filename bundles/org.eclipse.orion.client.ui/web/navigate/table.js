@@ -73,7 +73,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 				setResource(resource);
 			}
 		}.bind(explorer);
-		explorer.addEventListener("inputMoved", function(event) { //$NON-NLS-0$
+		explorer.addEventListener("rootMoved", function(event) { //$NON-NLS-0$
 			setResource(event.newInput);
 		});
 

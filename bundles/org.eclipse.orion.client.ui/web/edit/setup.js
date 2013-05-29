@@ -198,8 +198,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
 			var top = !folderLocation && !folder;
 			// Link to this page (edit page)
-			segment.href = new URITemplate("#{,Resource,params*}").expand({ //$NON-NLS-0$
-				Resource: inputManager.getInput() || "", //$NON-NLS-0$
+			segment.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+				resource: inputManager.getInput() || "", //$NON-NLS-0$
 				params: {
 					navigate: top ? "" : folder.ChildrenLocation //$NON-NLS-0$
 				}
@@ -305,13 +305,21 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
 		});
 		sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
-			var target = evt.root;
-			if (!PageUtil.matchResourceParameters(location.hash).resource) {
+			var root = evt.root;
+			// update the navigate param, if it's present
+			var pageParams = PageUtil.matchResourceParameters(location.hash);
+			if (Object.hasOwnProperty.call(pageParams, "navigate")) {//$NON-NLS-0$
+				var params = {};
+				params.resource = pageParams.resource || ""; //$NON-NLS-0$
+				params.params = { navigate: root.Path };
+				window.location = new URITemplate("#{,resource,params*}").expand(params); //$NON-NLS-0$
+			}
+			if (!pageParams.resource) {
 				// No primary resource (editor file), so target the folder being navigated in the sidebar.
 				mGlobalCommands.setPageTarget({
 					task: "Coding", //$NON-NLS-0$
-					name: target.Name,
-					target: target,
+					name: root.Name,
+					target: root,
 					makeBreadcrumbLink: sidebarNavBreadcrumb,
 					serviceRegistry: serviceRegistry,
 					commandService: commandRegistry,
@@ -320,15 +328,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				});
 			}
 		});
-		sidebarNavInputManager.addEventListener("editorInputRemoved", function(evt) { //$NON-NLS-0$
+		sidebarNavInputManager.addEventListener("editorInputMoved", function(evt) { //$NON-NLS-0$
 			var newInput = evt.newInput, parent = evt.parent;
 			var params = {};
 			// If we don't know where the file went, go to "no editor"
-			params.Resource = newInput || "";
+			params.resource = newInput || ""; //$NON-NLS-0$
 			params.params = {
 				navigate: parent
 			};
-			window.location = new URITemplate("#{,Resource,params*}").expand(params); //$NON-NLS-0$
+			window.location = new URITemplate("#{,resource,params*}").expand(params); //$NON-NLS-0$
 		});
 
 		editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
