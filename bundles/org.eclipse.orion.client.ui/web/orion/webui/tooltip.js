@@ -65,7 +65,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					}
 				}, false);
 			} else if (this._trigger === "mouseover") { //$NON-NLS-0$
-				this._showDelay = options.showDelay === undefined ? 1000 : options.showDelay;
+				this._showDelay = options.showDelay === undefined ? 500 : options.showDelay;
 				var leave = ["mouseout", "click"];  //$NON-NLS-1$ //$NON-NLS-0$
 				this._node.addEventListener("mouseover", function(event) { //$NON-NLS-0$
 					if (lib.contains(self._node, event.target)) {
@@ -125,13 +125,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		
 		_positionTip: function(position, force) {
 			this._makeTipNode();  // lazy initialize
-			if (this._tailBorder) {
-				// clear tails because position might have changed
-				this._tip.removeChild(this._tailBorder);
-				this._tailBorder = null;
-				this._tip.removeChild(this._tail);
-				this._tail = null;
-			}
+			
 			// special case for left tooltip to ensure inner span is adjacent to tail.
 			if (position === "left") { //$NON-NLS-0$
 				this._tipInner.classList.add("left"); //$NON-NLS-0$
@@ -190,16 +184,16 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					return false;
 				}
 			}
-			this._tailBorder = document.createElement("span"); //$NON-NLS-0$
-			this._tailBorder.classList.add("tooltipTailBorderFrom"+position); //$NON-NLS-0$
+
+
 			this._tail = document.createElement("span"); //$NON-NLS-0$
 			this._tail.classList.add("tooltipTailFrom"+position); //$NON-NLS-0$
 			if (position === "above" || position === "left") { //$NON-NLS-1$//$NON-NLS-0$
 				// tip goes after content
-				this._tip.appendChild(this._tailBorder);
+
 				this._tip.appendChild(this._tail);
 			} else {
-				this._tip.insertBefore(this._tailBorder, this._tipInner);
+
 				this._tip.insertBefore(this._tail, this._tipInner);
 			}
 			this._tip.style.top = top + "px"; //$NON-NLS-0$
@@ -276,7 +270,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 				this._tip = null;
 				this._tipInner = null;
 				this._tail = null;
-				this._tailBorder = null;
+
 			}
 		}
 	};
