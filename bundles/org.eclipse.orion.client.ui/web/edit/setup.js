@@ -94,10 +94,28 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		editorDomNode = lib.node("editor"); //$NON-NLS-0$
 
 	var editor, inputManager, settings;
+	function renderToolbars(metadata) {
+		if (!metadata) { return; }
+		var toolbar = lib.node("pageActions"); //$NON-NLS-0$
+		if (toolbar) {
+			// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
+			mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, "pageActions", 500).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.destroy(toolbar);
+				commandRegistry.renderCommands("pageActions", toolbar, metadata, editor, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+			});
+		}
+		var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
+		if (rightToolbar) {	
+			commandRegistry.destroy(rightToolbar);
+			commandRegistry.renderCommands(rightToolbar.id, rightToolbar, metadata, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
+		}
+	}
+
 	var updateSettings = function(prefs) {
 		settings = prefs;
 		inputManager.setAutoLoadEnabled(prefs.autoLoadEnabled);
 		inputManager.setAutoSaveTimeout(prefs.autoSaveEnabled ? prefs.autoSaveTimeout : -1);
+		renderToolbars(inputManager.getFileMetadata());
 	};
 	var editorPreferences = new mEditorPreferences.EditorPreferences (preferences, function (prefs) {
 		if (!prefs) {
@@ -131,7 +149,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		
 			// Register commands that depend on external services, the registry, etc.  Do this after
 			// the generic keybindings so that we can override some of them.
-			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandRegistry, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher, searcher, settings); //$NON-NLS-1$ //$NON-NLS-0$
+			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandRegistry, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher, searcher, function() { return settings; }); //$NON-NLS-1$ //$NON-NLS-0$
 			commandGenerator.generateEditorCommands(editor);
 			
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -224,21 +242,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				return;
 			}
 			var metadata = evt.metadata;
-			if (metadata) {
-				var toolbar = lib.node("pageActions"); //$NON-NLS-0$
-				if (toolbar) {
-					// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
-					mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, "pageActions", 500).then(function() { //$NON-NLS-1$ //$NON-NLS-0$
-						commandRegistry.destroy(toolbar);
-						commandRegistry.renderCommands("pageActions", toolbar, metadata, editor, "button"); //$NON-NLS-1$ //$NON-NLS-0$
-					});
-				}
-				var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
-				if (rightToolbar) {	
-					commandRegistry.destroy(rightToolbar);
-					commandRegistry.renderCommands(rightToolbar.id, rightToolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
-				}
-			}
+			renderToolbars(metadata);
 			var chooser = new mThemeChooser.MiniThemeChooser( themePreferences, editorPreferences );
 			mGlobalCommands.addSettings( chooser );
 			mGlobalCommands.setPageTarget({

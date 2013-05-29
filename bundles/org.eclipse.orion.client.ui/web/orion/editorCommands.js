@@ -141,7 +141,7 @@ exports.EditorCommandFactory = (function() {
 				name: messages.Save,
 				tooltip: messages["Save this file"],
 				id: "orion.save", //$NON-NLS-0$
-				visibleWhen: function() { return !self.editorSettings || !self.editorSettings.autoSaveEnabled; },
+				visibleWhen: function() { return !self.editorSettings || !self.editorSettings().autoSaveEnabled; },
 				callback: function(data) {
 					editor.getTextView().invokeAction("save"); //$NON-NLS-0$
 				}
