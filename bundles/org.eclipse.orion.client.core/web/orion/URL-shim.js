@@ -10,6 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global document window StopIteration*/
+/*jslint regexp:false*/
 // URL Shim -- see http://url.spec.whatwg.org/ and http://dvcs.w3.org/hg/url/raw-file/tip/Overview.html
 
 (function() {
@@ -20,15 +21,15 @@
     } catch (e) {}
 
     //[1]scheme, [2]authority, [3]path, [4]query, [5]fragment
-    var _URI_RE = /^(?:([^:/?#]+):)?(?:\/\/([^/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?$/;
+    var _URI_RE = /^(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?$/;
     //[ userinfo "@" ] host [ ":" port ]
     var _AUTHORITY_RE = /^(?:(.*)@)?(\[[^\]]*\]|[^:]*)(?::(.*))?$/;
 
     var _NO_WS_RE = /^\S*$/;
     var _SCHEME_RE = /^([a-zA-Z](?:[a-zA-Z0-9+-.])*)$/;
     var _PORT_RE = /^\d*$/;
-    var _HOST_RE = /^(\[[^\]/?#\s]*\]|[^:/?#\s]*)$/;
-    var _HOSTPORT_RE = /^(\[[^\]/?#\s]*\]|[^:/?#\s]*)(?::(\d*))?$/;
+    var _HOST_RE = /^(\[[^\]\/?#\s]*\]|[^:\/?#\s]*)$/;
+    var _HOSTPORT_RE = /^(\[[^\]\/?#\s]*\]|[^:\/?#\s]*)(?::(\d*))?$/;
     var _PATH_RE = /^([^?#\s]*)$/;
     var _QUERY_RE = /^([^\s]*)$/;
     var _FRAGMENT_RE = _NO_WS_RE;
@@ -268,7 +269,7 @@
             if (!url.path) {
                 url.path = base.path;
             } else if (url.path[0] !== "/") {
-                var basePath = /^(.*\/)[^/]*$/.exec(base.path)[1] || "/";
+                var basePath = /^(.*\/)[^\/]*$/.exec(base.path)[1] || "/";
                 url.path = basePath + url.path;
             }
         }
