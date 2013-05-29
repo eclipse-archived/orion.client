@@ -643,40 +643,40 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							return;
 						}
 						var summary = [];
-						var deferreds = [];
-						items.forEach(function(item) {
+						var deferredDeletes = items.map(function(item) {
 							var deleteLocation = item.Location;
-							var refreshItem = item.parent;
-							if (item.parent.Projects) {
-								//special case for deleting a project. We want to remove the 
-								//project rather than delete the project's content
-								refreshItem = explorer.treeRoot;
-								deleteLocation = null;
-								for (var p=0; p < item.parent.Projects.length; p++) {
-									var project = item.parent.Projects[p];
-									if (project.Id === item.Id) {
-										deleteLocation = project.Location;
-										break;
-									}
+							return Deferred.when(getLogicalModelItems(item), function(logicalItems) {
+								item = logicalItems.item;
+								var parent = logicalItems.parent;
+								if (parent.Projects) {
+									//special case for deleting a project. We want to remove the project rather than delete the project's content
+									deleteLocation = null;
+									parent.Projects.some(function(project) {
+										if (project.Id === item.Id) {
+											deleteLocation = project.Location;
+											return true;
+										}
+										return false;
+									});
 								}
-							}
-							if (deleteLocation) {
+								if (!deleteLocation) {
+									return new Deferred().resolve();
+								}
 								var _delete = fileClient.deleteFile(deleteLocation);
-								deferreds.push(progressService.showWhile(_delete, i18nUtil.formatMessage(messages["Deleting ${0}"], deleteLocation)).then(
+								return progressService.showWhile(_delete, i18nUtil.formatMessage(messages["Deleting ${0}"], deleteLocation)).then(
 									function() {
 										summary.push({
 											oldValue: item,
 											newValue: null,
-											parent: refreshItem
+											parent: parent
 										});
-										dispatchModelEvent({ type: "delete", oldValue: item, newValue: null, parent: refreshItem });
+										dispatchModelEvent({ type: "delete", oldValue: item, newValue: null, parent: parent });
 									}, function(error) {
 										errorHandler(error);
-									})
-								);
-							}
+									});
+							});
 						});
-						Deferred.all(deferreds).then(function() {
+						Deferred.all(deferredDeletes).then(function() {
 							dispatchModelEvent({ type: "deleteMultiple", items: summary }); //$NON-NLS-0$
 						});
 					}
