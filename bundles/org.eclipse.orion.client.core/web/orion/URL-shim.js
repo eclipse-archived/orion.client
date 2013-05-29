@@ -302,19 +302,24 @@
         if (url.port) {
             url.port = _normalizePort(url.port);
         }
-
         if (url.host && url.path) {
             url.path = _normalizePath(url.path);
         }
+    }
+
+    function _encodeWhitespace(text) {
+        return text.replace(/\s/g, function(c) {
+            return "%" + c.charCodeAt(0).toString(16);
+        });
     }
 
     function _parseURL(input, base) {
         if (typeof input !== "string") {
             throw new TypeError();
         }
-        if (!_NO_WS_RE.test(input)) {
-            return null;
-        }
+
+        input = _encodeWhitespace(input);
+
         var parsedURI = _URI_RE.exec(input);
         if (!parsedURI) {
             return null;
@@ -371,7 +376,7 @@
         if (base) {
             base = base.href || base;
             baseURL = _parseURL(base);
-            if (!baseURL) {
+            if (!baseURL || !baseURL.scheme) {
                 throw new SyntaxError();
             }
             Object.defineProperty(this, "_baseURL", {
