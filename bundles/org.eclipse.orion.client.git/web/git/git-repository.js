@@ -120,7 +120,7 @@ mBootstrap.startup().then(function(core) {
 
 			commandRegistry.runCommand("eclipse.createGitProject", {url: params["cloneGit"], projectDescription: projectDescription}, null, null);
 			
-			if (typeof params["createProjectContext"] === "undefined") { //$NON-NLS-0$
+			if (typeof params["createProject.name"] === "undefined") { //$NON-NLS-0$
 				explorer.redisplay();
 			}
 		}	
