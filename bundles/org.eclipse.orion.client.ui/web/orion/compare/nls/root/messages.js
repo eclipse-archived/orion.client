@@ -12,6 +12,7 @@
 
 define({
 	"Copy current change from right to left": "Copy current change from right to left",
+	"Copy current change from left to right": "Copy current change from left to right",
 	"Switch to unified diff": "Switch to unified diff",
 	"Unified": "Unified",
 	"Switch to side by side diff": "Switch to side by side diff",

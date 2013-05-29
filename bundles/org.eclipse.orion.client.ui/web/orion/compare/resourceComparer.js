@@ -162,7 +162,9 @@ exports.ResourceComparer = (function() {
 								that._commandService.renderCommands(toolbar.id, toolbar, that._compareView.getWidget().getEditors()[1], that._compareView.getWidget().getEditors()[1], "button"); //$NON-NLS-0$
 							}
 						}
-						this.setTitle(metadata.Location, metadata);
+						if(metadata){
+							this.setTitle(metadata.Location, metadata);
+						}
 					}.bind(this),
 					function(error) {
 						console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
