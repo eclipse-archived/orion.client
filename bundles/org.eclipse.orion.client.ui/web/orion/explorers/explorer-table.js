@@ -204,8 +204,21 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		deleteMultiple: function(modelEvent) { //$NON-NLS-0$
 			// TODO: refresh every distinct parent in the list of affected parents, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=408650
 			var items = modelEvent.items;
-			var lastItem = items[items.length - 1];
-			this.changedItem(lastItem.parent, true);
+			var _self = this;
+			var newRoot;
+			var treeRootDeleted = items.some(function(item) {
+				if (item.oldValue.Location === _self.treeRoot.Location) {
+					newRoot = item.parent;
+					return true;
+				}
+				return false;
+			});
+			if (treeRootDeleted) {
+				this.loadResourceList(newRoot);
+			} else {
+				var lastItem = items[items.length - 1];
+				this.changedItem(lastItem.parent, true);
+			}
 		},
 		"import": function(modelEvent) { //$NON-NLS-0$
 			this.changedItem(modelEvent.oldValue, true);
@@ -223,9 +236,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 					var oldRoot = ex.treeRoot;
 					var realNewItem = newItem.ChildrenLocation ? newItem : this.fileClient.read(newItem.ContentLocation, true);
 					Deferred.when(realNewItem, function(newItem) {
-						var newPath = (newItem.ChildrenLocation || newItem.ContentLocation);
 						ex.dispatchEvent({ type: "rootMoved", oldValue: oldRoot, newValue: newItem }); //$NON-NLS-0$
-						ex.loadResourceList(newPath);
+						ex.loadResourceList(newItem);
 					});
 				} else {
 					//special case for renaming a project. Use the treeRoot as the refresh item.
@@ -446,13 +458,16 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * Load the resource at the given path.
 	 * @name orion.explorer.FileExplorer#loadResourceList
 	 * @function
-	 * @param path The path of the resource to load
+	 * @param {String|Object} path The path of the resource to load, or an object with a ChildrenLocation or ContentLocation field giving the path.
 	 * @param {Boolean} [force] If true, force reload even if the path is unchanged. Useful
 	 * when the client knows the resource underlying the current path has changed.
 	 * @param {Function} postLoad a function to call after loading the resource. <b>Deprecated</b>: use the returned promise instead.
 	 * @returns {orion.Promise}
 	 */
 	FileExplorer.prototype.loadResourceList = function(path, force, postLoad) {
+		if (path && typeof path === "object") { //$NON-NLS-0$
+			path = path.ChildrenLocation || path.ContentLocation;
+		}
 		path = mFileUtils.makeRelative(path);
 		if (!force && path === this._lastPath) {
 			return new Deferred().resolve(this.treeRoot);
