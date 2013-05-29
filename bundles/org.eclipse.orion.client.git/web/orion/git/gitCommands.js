@@ -2073,11 +2073,11 @@ var exports = {};
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
 						var func = arguments.callee;
 						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
+						
+						serviceRegistry.getService("orion.page.message").setProgressMessage("Your project is being set up. This may take a minute...");
 						gitConfigPreference.getConfig().then( function(userInfo){
 							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
 									options.gitPrivateKey, options.gitPassphrase, userInfo), "Cloning repository " + name);
-							serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
-									messages["Cloning repository: "] + gitUrl);
 							deferred.then(function(jsonData, secondArg) {
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
 									gitService.getGitClone(jsonData.Location).then(
@@ -2109,7 +2109,7 @@ var exports = {};
 				};
 				
 				if (item.url && item.projectDescription.name){
-					
+					serviceRegistry.getService("orion.page.message").setProgressMessage("Looking for project " + item.projectDescription.name);
 					fileClient.loadWorkspace().then(function(projects){
 						for(var i=0; i<projects.Children.length; ++i){
 							var p = projects.Children[i];
