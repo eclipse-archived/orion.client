@@ -5370,6 +5370,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 				child = this._getLineNext(child);
 			}
+			if (this._lineHeight) {
+				var args = [startLine, removedLineCount].concat(new Array(addedLineCount));
+				Array.prototype.splice.apply(this._lineHeight, args);
+			}
 			if (!this._wrapMode) {
 				if (startLine <= this._maxLineIndex && this._maxLineIndex <= startLine + removedLineCount) {
 					this._checkMaxLineIndex = this._maxLineIndex;
