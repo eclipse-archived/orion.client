@@ -54,8 +54,8 @@ define(['orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/
 				commandProvider: cmdProvider,
 				showTitle: true,
 				showLineStatus: true,
-				blockNumber: compareParams.block,
-				changeNumber: compareParams.change
+				blockNumber: typeof compareParams.block === "undefined" ? 1 : compareParams.block, //$NON-NLS-0$
+				changeNumber: typeof compareParams.change === "undefined" ? 0 : compareParams.change //$NON-NLS-0$
 			};
 			var comparer = new mResourceComparer.ResourceComparer(serviceRegistry, commandService, options, viewOptions);
 			comparer.start();
