@@ -244,34 +244,36 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		NavigatorRenderer.apply(this, arguments);
 	}
 	MiniNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
-	MiniNavRenderer.prototype.showFolderLinks = true;
-	MiniNavRenderer.prototype.oneColumn = true;
-	MiniNavRenderer.prototype.createFolderNode = function(folder) {
-		var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
-		if (folderNode.tagName === "A") { //$NON-NLS-0$
-			folderNode.classList.add("miniNavFolder"); //$NON-NLS-0$
-			var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
-			this.setFolderHref(folderNode, editorFile || "", folder.ChildrenLocation);
-		}
-		return folderNode;
-	};
-	MiniNavRenderer.prototype.setFolderHref = function(linkElement, resource, navigate) {
-		linkElement.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-			resource: resource,
-			params: {
-				navigate: navigate
+	objects.mixin(MiniNavRenderer.prototype, {
+		showFolderLinks: true,
+		oneColumn: true,
+		createFolderNode: function(folder) {
+			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
+			if (folderNode.tagName === "A") { //$NON-NLS-0$
+				folderNode.classList.add("miniNavFolder"); //$NON-NLS-0$
+				var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
+				this.setFolderHref(folderNode, editorFile || "", folder.ChildrenLocation);
 			}
-		});
-	};
-	// Called when the editor file has changed
-	MiniNavRenderer.prototype.updateFolderLinks = function(rootNode) {
-		var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
-		var _self = this;
-		Array.prototype.slice.call(lib.$$("a.miniNavFolder", rootNode)).forEach(function(folderLink) { //$NON-NLS-0$
-			var folderLocation = PageUtil.matchResourceParameters(folderLink.href).navigate;
-			_self.setFolderHref(folderLink, editorFile || "", folderLocation); //$NON-NLS-0$
-		});
-	};
+			return folderNode;
+		},
+		setFolderHref: function(linkElement, resource, navigate) {
+			linkElement.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+				resource: resource,
+				params: {
+					navigate: navigate
+				}
+			});
+		},
+		// Called when the editor file has changed
+		updateFolderLinks: function(rootNode) {
+			var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
+			var _self = this;
+			Array.prototype.slice.call(lib.$$("a.miniNavFolder", rootNode)).forEach(function(folderLink) { //$NON-NLS-0$
+				var folderLocation = PageUtil.matchResourceParameters(folderLink.href).navigate;
+				_self.setFolderHref(folderLink, editorFile || "", folderLocation); //$NON-NLS-0$
+			});
+		}
+	});
 
 	/**
 	 * @name orion.sidebar.MiniNavViewMode
