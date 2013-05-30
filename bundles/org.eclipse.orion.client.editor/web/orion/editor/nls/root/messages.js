@@ -34,7 +34,7 @@ define({
 	"lineStart": "Line Start", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineEnd": "Line End", //$NON-NLS-1$ //$NON-NLS-0$
 	"charPrevious": "Previous Character", //$NON-NLS-1$ //$NON-NLS-0$
-	"charNext": "Previous Character", //$NON-NLS-1$ //$NON-NLS-0$
+	"charNext": "Next Character", //$NON-NLS-1$ //$NON-NLS-0$
 	"pageUp": "Page Up", //$NON-NLS-1$ //$NON-NLS-0$
 	"pageDown": "Page Down", //$NON-NLS-1$ //$NON-NLS-0$
 	"scrollPageUp": "Scroll Page Up", //$NON-NLS-1$ //$NON-NLS-0$
