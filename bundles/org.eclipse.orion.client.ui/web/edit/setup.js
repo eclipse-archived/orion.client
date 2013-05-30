@@ -39,6 +39,7 @@ define([
 	'orion/editor/textModel',
 	'orion/editor/projectionTextModel',
 	'orion/keyBinding',
+	'orion/editor/emacs',
 	'orion/searchAndReplace/textSearcher',
 	'orion/contentTypes',
 	'orion/PageUtil',
@@ -46,14 +47,14 @@ define([
 	'orion/i18nUtil',
 	'orion/widgets/themes/ThemePreferences',
 	'orion/widgets/themes/editor/ThemeData',
-	'orion/widgets/themes/editor/MiniThemeChooser',
+	'orion/widgets/themes/editor/LocalEditorSettings',
 	'edit/editorPreferences',
 	'orion/URITemplate',
 	'orion/sidebar'
 ], function(messages, require, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
 			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
-			mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, mThemeChooser, mEditorPreferences, URITemplate, Sidebar) {
+			mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mEmacs, mSearcher,
+			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, LocalEditorSettings, mEditorPreferences, URITemplate, Sidebar) {
 	
 var exports = exports || {};
 	
@@ -110,11 +111,21 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			commandRegistry.renderCommands(rightToolbar.id, rightToolbar, metadata, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
 		}
 	}
+	
+	//TODO should load emacs only when needed
+	var emacs = new mEmacs.EmacsMode();
 
 	var updateSettings = function(prefs) {
 		settings = prefs;
 		inputManager.setAutoLoadEnabled(prefs.autoLoadEnabled);
 		inputManager.setAutoSaveTimeout(prefs.autoSaveEnabled ? prefs.autoSaveTimeout : -1);
+		var textView = editor.getTextView();
+		if (textView) {
+			textView.removeKeyMode(emacs);
+			if (settings.keyBindings === "Emacs") { //$NON-NLS-0$
+				textView.addKeyMode(emacs);
+			}
+		}
 		renderToolbars(inputManager.getFileMetadata());
 	};
 	var editorPreferences = new mEditorPreferences.EditorPreferences (preferences, function (prefs) {
@@ -126,6 +137,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
 	themePreferences.apply();
+	var localSettings = new LocalEditorSettings( themePreferences, editorPreferences );
 	
 	editorPreferences.getPrefs(function(prefs) {
 		settings = prefs;
@@ -152,7 +164,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandRegistry, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher, searcher, function() { return settings; }); //$NON-NLS-1$ //$NON-NLS-0$
 			commandGenerator.generateEditorCommands(editor);
 			
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-1$ //$NON-NLS-0$
+			var textView = editor.getTextView();
+			textView.setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			if (settings.keyBindings === "Emacs") { //$NON-NLS-0$
+				textView.addKeyMode(emacs);
+			}
 		};
 		
 		// Content Assist
@@ -243,8 +260,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			}
 			var metadata = evt.metadata;
 			renderToolbars(metadata);
-			var chooser = new mThemeChooser.MiniThemeChooser( themePreferences, editorPreferences );
-			mGlobalCommands.addSettings( chooser );
+			mGlobalCommands.addSettings( localSettings );
 			mGlobalCommands.setPageTarget({
 				task: "Coding", //$NON-NLS-0$
 				name: evt.name,
