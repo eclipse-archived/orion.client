@@ -17,9 +17,16 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	 * @param {Object[]} param.options Array of {value:Object, label:String, selected:Boolean(optional)}
 	 */
 	 
-	function DropDownMenu( node, body ){
+	function DropDownMenu( node, body, panel ){
+	
+		if( panel !== null ){
+			this.CLEAR_PANEL = panel;
+		}else{
+			this.CLEAR_PANEL = true;
+		}
 	
 		this.OPEN = 'false';
+		
 		var nodeIdPrefix = "";
 		if( node.nodeType ){
 			this.node = node;
@@ -80,7 +87,10 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 				this.handle = lib.addAutoDismiss( [this.node, centralNavigation], this.clearPanel.bind(this) );
 				
 			}else{
-				this.clearPanel();
+			
+				if( this.CLEAR_PANEL ){
+					this.clearPanel();
+				}
 			}
 		},
 		
@@ -94,6 +104,11 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			var centralNavigation = document.getElementById( this.navDropDownId );
 		
 			centralNavigation.innerHTML= content;
+		},
+		
+		getContentNode: function(){
+			var contentNode = document.getElementById( this.navDropDownId );
+			return contentNode;
 		},
 		
 		toggleLabel: function(show){

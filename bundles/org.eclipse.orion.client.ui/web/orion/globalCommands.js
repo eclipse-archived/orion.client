@@ -540,66 +540,10 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		a settings gear will appear at the right hand side */
 	
 	function addSettings( settings ){
-		var settingsNode = document.getElementById("settingsTab"); //$NON-NLS-0$
-		var settingsButton = document.getElementById("settingsAction"); //$NON-NLS-0$
-		var CLICKED = false;
-		var panel;
 		
-		settingsNode.style.visibility = '';
-		settingsButton.style.visibility = '';
-		settingsButton.onclick = function(){
+		var navDropDown = new DropDownMenu( 'settingsTab', { label:'Develop', icon:'core-sprite-wrench' }, false );
+		settings.appendTo( navDropDown.getContentNode() );
 		
-			if( !CLICKED ){
-			
-				CLICKED = true;
-		
-				var TAB_HEIGHT = 24;
-				var BORDER_RADIUS = '3px'; //$NON-NLS-0$
-				var COLOR = '#555'; //$NON-NLS-0$
-			
-				settingsNode.style.backgroundColor = COLOR;
-				settingsNode.style.zIndex = '99'; //$NON-NLS-0$
-				settingsNode.style.borderTopRightRadius = BORDER_RADIUS;
-				settingsNode.style.borderTopLeftRadius = BORDER_RADIUS;
-				
-				settingsButton.classList.remove("commandImage"); //$NON-NLS-0$
-				settingsButton.classList.remove("core-sprite-wrench"); //$NON-NLS-0$
-				settingsButton.classList.add("core-sprite-wrench-white"); //$NON-NLS-0$
-				
-				settingsNode.id = 'settingsNode'; //$NON-NLS-0$
-				settingsButton.id = 'settingsButton'; //$NON-NLS-0$
-				
-				var rightPane = document.getElementById( 'innerPanels' );	 //$NON-NLS-0$
-				var rpBox = rightPane.getBoundingClientRect();
-				var box = settingsNode.getBoundingClientRect();
-				
-				if (!panel) {
-					panel = document.createElement( 'div' ); //$NON-NLS-0$
-					panel.className = 'settingsPanel'; //$NON-NLS-0$
-					panel.style.backgroundColor = COLOR;
-					panel.style.zIndex = '99'; //$NON-NLS-0$
-					panel.style.top = box.top - rpBox.top + TAB_HEIGHT -4 + 'px'; //$NON-NLS-0$
-					panel.id = 'settingsPanel';		 //$NON-NLS-0$
-					panel.style.borderTopLeftRadius = BORDER_RADIUS;
-					panel.style.borderBottomRightRadius = BORDER_RADIUS;
-					panel.style.borderBottomLeftRadius = BORDER_RADIUS;
-					
-					rightPane.appendChild( panel );
-					lib.addAutoDismiss([settingsButton, settingsNode, panel], function() {
-						settingsButton.classList.remove("core-sprite-wrench-white"); //$NON-NLS-0$
-						settingsButton.classList.add("core-sprite-wrench"); //$NON-NLS-0$
-						settingsButton.classList.add("commandImage"); //$NON-NLS-0$
-						settingsNode.style.backgroundColor = 'white'; //$NON-NLS-0$
-						panel.style.visibility = 'hidden'; //$NON-NLS-0$
-						CLICKED = false;
-					});	
-				} else {
-					panel.style.visibility = 'visible'; //$NON-NLS-0$
-				}
-				lib.empty(panel);	
-				settings.appendTo( panel );
-			}
-		};
 	}
 	
 	var mainSplitter = null;

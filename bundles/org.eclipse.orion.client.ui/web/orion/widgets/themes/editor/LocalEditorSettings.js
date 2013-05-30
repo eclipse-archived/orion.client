@@ -24,25 +24,25 @@ define(['i18n!orion/settings/nls/messages', 'orion/widgets/input/Select', 'orion
 				'<span class="settingsPanelLabel">' + //$NON-NLS-0$
 					'Theme:' +
 				'</span>' + //$NON-NLS-0$
-				'<div id="themepicker"></div>' + //$NON-NLS-0$
+				'<div class="settingsPanelValue" id="themepicker"></div>' + //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
 			'<div id="sizecontainer">' + //$NON-NLS-0$
 				'<span class="settingsPanelLabel">' + //$NON-NLS-0$
 					'Font Size:' +
 				'</span>' + //$NON-NLS-0$
-				'<div id="fontsizepicker"></div>' + //$NON-NLS-0$
+				'<div class="settingsPanelValue" id="fontsizepicker"></div>' + //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
 			'<div id="keyscontainer">' + //$NON-NLS-0$
 				'<span class="settingsPanelLabel">' + //$NON-NLS-0$
 					'Key Bindings:' +
 				'</span>' + //$NON-NLS-0$
-				'<div id="keyspicker"></div>' + //$NON-NLS-0$
+				'<div class="settingsPanelValue" id="keyspicker"></div>' + //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
 			'<div id="autoSaveContainer" style="display:none;">' + //$NON-NLS-0$
 				'<span class="settingsPanelLabel">' + //$NON-NLS-0$
 					'Auto Save:' +
 				'</span>' + //$NON-NLS-0$
-				'<div id="autosavecheck"></div>' + //$NON-NLS-0$
+				'<div class="settingsPanelValue" id="autosavecheck"></div>' + //$NON-NLS-0$
 			'</div>'; //$NON-NLS-0$
 
 		function isDescendant(parent, child) {
