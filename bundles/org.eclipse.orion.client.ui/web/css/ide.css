@@ -699,7 +699,7 @@ input {
 	display: inline-block;
 	width: 130px;
 	padding: 4px;
-	margin: 10px;
+	margin: 5px;
 	outline: none;
 	background-color: white;
 	border: 1px solid #CCC;
@@ -710,10 +710,14 @@ input {
 
 .settingsPanelLabel {
 	margin-top: 10px;
-	min-width: 145px;
+	min-width: 80px;
+	display:inline-block;
 	text-transform: uppercase;
-	color: #B3ADAA;
-	display: inline-block;
+	color: #555;
+}
+
+.settingsPanelValue {
+	display: inline;
 }
 
 .settingsPanel{
@@ -761,7 +765,7 @@ input {
 	border-radius:3px;
 	background:#fefefe;
 	border: 1px solid #CCC;
-	padding:5px;
+	padding:10px;
 	margin-top:5px;
 	position:absolute;
 	z-index:100;
