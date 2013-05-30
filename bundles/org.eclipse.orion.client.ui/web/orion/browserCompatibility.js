@@ -16,7 +16,7 @@ define(function() {
 		var isSupported = false;
 		var VERSION = 1;
 		var browserData = [	{name:'Chrome', regExp: /chrome\/(\d+)/i, minVersion: 24},
-							{name:'Firefox', regExp: /firefox\/(\d+)/i, minVersion: 5},
+							{name:'Firefox', regExp: /firefox\/(\d+)/i, minVersion: 20},
 							{name:'MSIE', regExp: /msie\s(\d+)/i, minVersion: 10},
 							{name:'Safari', regExp: /version\/(\d+).*?safari/i, minVersion: 6} ];
 
