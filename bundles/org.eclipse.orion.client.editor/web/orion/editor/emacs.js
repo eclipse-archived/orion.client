@@ -29,22 +29,22 @@ define("orion/editor/emacs", [ //$NON-NLS-0$
 		var bindings = [];
 
 		// Changing the Location of Point
-		bindings.push({actionID: "emacs-beginning-of-line", keyBinding: new KeyStroke('a', true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-end-of-line", keyBinding: new KeyStroke('e', true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-forward-char", keyBinding: new KeyStroke('f', true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-backward-char", keyBinding: new KeyStroke('b', true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-beginning-of-line", keyBinding: new KeyStroke('a', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-end-of-line", keyBinding: new KeyStroke('e', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-forward-char", keyBinding: new KeyStroke('f', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-backward-char", keyBinding: new KeyStroke('b', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-forward-word", keyBinding: new KeyStroke('f', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-backward-word", keyBinding: new KeyStroke('b', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-next-line", keyBinding: new KeyStroke('n', true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-previous-line", keyBinding: new KeyStroke('p', true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-next-line", keyBinding: new KeyStroke('n', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-previous-line", keyBinding: new KeyStroke('p', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		//TODO these 2 are not right
 		bindings.push({actionID: "emacs-beginning-of-buffer", keyBinding: new KeyStroke(',', false, true, true)}); //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-end-of-buffer", keyBinding: new KeyStroke('.', false, true, true)}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		// Erasing Text
-		bindings.push({actionID: "emacs-delete-backward-char", keyBinding: new KeyStroke(46, true)}); //$NON-NLS-0$
-		bindings.push({actionID: "emacs-delete-char", keyBinding: new KeyStroke('d', true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-kill-line", keyBinding: new KeyStroke('k', true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-delete-backward-char", keyBinding: new KeyStroke(46, !util.isMac, false, false, util.isMac)}); //$NON-NLS-0$
+		bindings.push({actionID: "emacs-delete-char", keyBinding: new KeyStroke('d', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-kill-line", keyBinding: new KeyStroke('k', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-kill-word", keyBinding: new KeyStroke('d', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-backward-kill-word", keyBinding: new KeyStroke(46, false, false, true)}); //$NON-NLS-0$
 
@@ -53,21 +53,21 @@ define("orion/editor/emacs", [ //$NON-NLS-0$
 		bindings.push({actionID: "redo", keyBinding: new KeySequence([new KeyStroke('x', true), new KeyStroke('r')])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		//Scrolling 
-		bindings.push({actionID: "emacs-scroll-up", keyBinding: new KeyStroke('v', true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-scroll-up", keyBinding: new KeyStroke('v', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-scroll-down", keyBinding: new KeyStroke('v', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
 
-		bindings.push({actionID: "emacs-set-mark-command", keyBinding: new KeyStroke(' ', true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-reset-mark-command", keyBinding: new KeyStroke('g', true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-exchange-point-and-mark", keyBinding: new KeySequence([new KeyStroke('x', true), new KeyStroke('x', true)])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-set-mark-command", keyBinding: new KeyStroke(' ', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-reset-mark-command", keyBinding: new KeyStroke('g', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-exchange-point-and-mark", keyBinding: new KeySequence([new KeyStroke('x', !util.isMac, false, false, util.isMac), new KeyStroke('x', !util.isMac, false, false, util.isMac)])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		for (var c=0; c<=9; c++) { //$NON-NLS-1$ //$NON-NLS-0$
-			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: new KeyStroke(48 + c, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: new KeyStroke(48 + c, !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: new KeyStroke(48 + c, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: new KeyStroke(48 + c, true, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: new KeyStroke(48 + c, !util.isMac, false, true, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, true, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, !util.isMac, false, true, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		//TODO should reassigning contentAssist be here? Note same as setMarker
 		bindings.push({actionID: "contentAssist", keyBinding: new KeyStroke(' ', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
