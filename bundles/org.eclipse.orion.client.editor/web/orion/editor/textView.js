@@ -1009,23 +1009,23 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return Math.min(lineEnd, Math.max(lineStart, offset));
 		},
 		/** @private */
-		getNextOffset: function (offset, unit, direction) {
-			if (unit === "line") { //$NON-NLS-0$
+		getNextOffset: function (offset, data) {
+			if (data.unit === "line") { //$NON-NLS-0$
 				var view = this.view;
 				var model = view._model;
 				var lineIndex = model.getLineAtOffset(offset);
-				if (direction > 0) {
+				if (data.count > 0) {
 					return model.getLineEnd(lineIndex);
 				}
 				return model.getLineStart(lineIndex);
 			}
-			if (unit === "wordend") { //$NON-NLS-0$
-				return this._getNextOffset_W3C(offset, unit, direction);
+			if (data.unit === "wordend" || data.unit === "wordWS") { //$NON-NLS-0$
+				return this._getNextOffset_W3C(offset, data);
 			}
-			return util.isIE ? this._getNextOffset_IE(offset, unit, direction) : this._getNextOffset_W3C(offset, unit, direction);
+			return util.isIE ? this._getNextOffset_IE(offset, data) : this._getNextOffset_W3C(offset, data);
 		},
 		/** @private */
-		_getNextOffset_W3C: function (offset, unit, direction) {
+		_getNextOffset_W3C: function (offset, data) {
 			function _isPunctuation(c) {
 				return (33 <= c && c <= 47) || (58 <= c && c <= 64) || (91 <= c && c <= 94) || c === 96 || (123 <= c && c <= 126);
 			}
@@ -1041,75 +1041,88 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var lineLength = lineText.length;
 			var offsetInLine = offset - lineStart;
 			var c;
-			if (unit === "word" || unit === "wordend") { //$NON-NLS-1$ //$NON-NLS-0$
+			var step = data.count < 0 ? -1 : 1;
+			if (data.unit === "word" || data.unit === "wordend" || data.unit === "wordWS") { //$NON-NLS-1$ //$NON-NLS-0$
 				var previousPunctuation, previousLetterOrDigit, punctuation, letterOrDigit;
-				if (direction > 0) {
-					if (offsetInLine === lineLength) { return lineEnd; }
-					c = lineText.charCodeAt(offsetInLine);
-					previousPunctuation = _isPunctuation(c); 
-					previousLetterOrDigit = !previousPunctuation && !_isWhitespace(c);
-					offsetInLine++;
-					while (offsetInLine < lineLength) {
+				while (data.count !== 0) {
+					if (data.count > 0) {
+						if (offsetInLine === lineLength) { return lineEnd; }
 						c = lineText.charCodeAt(offsetInLine);
-						punctuation = _isPunctuation(c);
-						if (unit === "wordend") { //$NON-NLS-0$
-							if (!punctuation && previousPunctuation) { break; }
-						} else {
-							if (punctuation && !previousPunctuation) { break; }
-						}
-						letterOrDigit  = !punctuation && !_isWhitespace(c);
-						if (unit === "wordend") { //$NON-NLS-0$
-							if (!letterOrDigit && previousLetterOrDigit) { break; }
-						} else {
-							if (letterOrDigit && !previousLetterOrDigit) { break; }
-						}
-						previousLetterOrDigit = letterOrDigit;
-						previousPunctuation = punctuation;
+						previousPunctuation = _isPunctuation(c); 
+						previousLetterOrDigit = !previousPunctuation && !_isWhitespace(c);
 						offsetInLine++;
-					}
-				} else {
-					if (offsetInLine === 0) { return lineStart; }
-					offsetInLine--;
-					c = lineText.charCodeAt(offsetInLine);
-					previousPunctuation = _isPunctuation(c); 
-					previousLetterOrDigit = !previousPunctuation && !_isWhitespace(c);
-					while (0 < offsetInLine) {
-						c = lineText.charCodeAt(offsetInLine - 1);
-						punctuation = _isPunctuation(c);
-						if (unit === "wordend") { //$NON-NLS-0$
-							if (punctuation && !previousPunctuation) { break; }
-						} else {
-							if (!punctuation && previousPunctuation) { break; }
+						while (offsetInLine < lineLength) {
+							c = lineText.charCodeAt(offsetInLine);
+							if (data.unit !== "wordWS") {
+								punctuation = _isPunctuation(c);
+								if (data.unit === "wordend") { //$NON-NLS-0$
+									if (!punctuation && previousPunctuation) { break; }
+								} else {
+									if (punctuation && !previousPunctuation) { break; }
+								}
+								letterOrDigit  = !punctuation && !_isWhitespace(c);
+							} else {
+								letterOrDigit  = !_isWhitespace(c);
+							}
+							if (data.unit === "wordend") { //$NON-NLS-0$
+								if (!letterOrDigit && previousLetterOrDigit) { break; }
+							} else {
+								if (letterOrDigit && !previousLetterOrDigit) { break; }
+							}
+							previousLetterOrDigit = letterOrDigit;
+							previousPunctuation = punctuation;
+							offsetInLine++;
 						}
-						letterOrDigit  = !punctuation && !_isWhitespace(c);
-						if (unit === "wordend") { //$NON-NLS-0$
-							if (letterOrDigit && !previousLetterOrDigit) { break; }
-						} else {
-							if (!letterOrDigit && previousLetterOrDigit) { break; }
-						}
-						previousLetterOrDigit = letterOrDigit;
-						previousPunctuation = punctuation;
+					} else {
+						if (offsetInLine === 0) { return lineStart; }
 						offsetInLine--;
+						c = lineText.charCodeAt(offsetInLine);
+						previousPunctuation = _isPunctuation(c); 
+						previousLetterOrDigit = !previousPunctuation && !_isWhitespace(c);
+						while (0 < offsetInLine) {
+							c = lineText.charCodeAt(offsetInLine - 1);
+							punctuation = _isPunctuation(c);
+							if (data.unit === "wordend") { //$NON-NLS-0$
+								if (punctuation && !previousPunctuation) { break; }
+							} else {
+								if (!punctuation && previousPunctuation) { break; }
+							}
+							letterOrDigit  = !punctuation && !_isWhitespace(c);
+							if (data.unit === "wordend") { //$NON-NLS-0$
+								if (letterOrDigit && !previousLetterOrDigit) { break; }
+							} else {
+								if (!letterOrDigit && previousLetterOrDigit) { break; }
+							}
+							previousLetterOrDigit = letterOrDigit;
+							previousPunctuation = punctuation;
+							offsetInLine--;
+						}
+						if (offsetInLine === 0) {
+							//get previous line
+						}
 					}
+					data.count -= step;
 				}
 			} else {
-				offsetInLine += direction;
-				c = lineText.charCodeAt(offsetInLine);
-				// Handle Unicode surrogates
-				if (0xDC00 <= c && c <= 0xDFFF) {
-					if (offsetInLine > 0) {
-						c = lineText.charCodeAt(offsetInLine - 1);
-						if (0xD800 <= c && c <= 0xDBFF) {
-							var step = direction > 0 ? 1 : -1;
-							offsetInLine += step;
+				while (data.count !== 0 && (0 <= offsetInLine + step && offsetInLine + step <= lineLength)) {
+					offsetInLine += step;
+					c = lineText.charCodeAt(offsetInLine);
+					// Handle Unicode surrogates
+					if (0xDC00 <= c && c <= 0xDFFF) {
+						if (offsetInLine > 0) {
+							c = lineText.charCodeAt(offsetInLine - 1);
+							if (0xD800 <= c && c <= 0xDBFF) {
+								offsetInLine += step;
+							}
 						}
 					}
+					data.count -= step;
 				}
 			}
 			return lineStart + offsetInLine;
 		},
 		/** @private */
-		_getNextOffset_IE: function (offset, unit, direction) {
+		_getNextOffset_IE: function (offset, data) {
 			var child = this._ensureCreated();
 			var view = this.view;
 			var model = view._model;
@@ -1118,46 +1131,50 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var lineOffset = model.getLineStart(lineIndex);
 			var document = child.ownerDocument;
 			var lineChild;
-			if (offset === model.getLineEnd(lineIndex)) {
-				lineChild = child.lastChild;
-				while (lineChild && lineChild.ignoreChars) {
-					lineChild = lineChild.previousSibling;
-				}
-				if (!lineChild) {
-					return lineOffset;
-				}
-				range = document.body.createTextRange();
-				range.moveToElementText(lineChild);
-				length = range.text.length;
-				range.moveEnd(unit, direction);
-				result = offset + range.text.length - length;
-			} else if (offset === lineOffset && direction < 0) {
-				result = lineOffset;
-			} else {
-				lineChild = child.firstChild;
-				while (lineChild) {
-					var textNode = lineChild.firstChild;
-					var nodeLength = textNode.length;
-					if (lineChild.ignoreChars) {
-						nodeLength -= lineChild.ignoreChars;
+			var step = data.count < 0 ? -1 : 1;
+			while (data.count !== 0) {
+				if (offset === model.getLineEnd(lineIndex)) {
+					lineChild = child.lastChild;
+					while (lineChild && lineChild.ignoreChars) {
+						lineChild = lineChild.previousSibling;
 					}
-					if (lineOffset + nodeLength > offset) {
-						range = document.body.createTextRange();
-						if (offset === lineOffset && direction < 0) {
-							range.moveToElementText(lineChild.previousSibling);
-						} else {
-							range.moveToElementText(lineChild);
-							range.collapse();
-							range.moveEnd("character", offset - lineOffset); //$NON-NLS-0$
+					if (!lineChild) {
+						return lineOffset;
+					}
+					range = document.body.createTextRange();
+					range.moveToElementText(lineChild);
+					length = range.text.length;
+					range.moveEnd(data.unit, data.count);
+					result = offset + range.text.length - length;
+				} else if (offset === lineOffset && data.count < 0) {
+					result = lineOffset;
+				} else {
+					lineChild = child.firstChild;
+					while (lineChild) {
+						var textNode = lineChild.firstChild;
+						var nodeLength = textNode.length;
+						if (lineChild.ignoreChars) {
+							nodeLength -= lineChild.ignoreChars;
 						}
-						length = range.text.length;
-						range.moveEnd(unit, direction);
-						result = offset + range.text.length - length;
-						break;
+						if (lineOffset + nodeLength > offset) {
+							range = document.body.createTextRange();
+							if (offset === lineOffset && data.count < 0) {
+								range.moveToElementText(lineChild.previousSibling);
+							} else {
+								range.moveToElementText(lineChild);
+								range.collapse();
+								range.moveEnd("character", offset - lineOffset); //$NON-NLS-0$
+							}
+							length = range.text.length;
+							range.moveEnd(data.unit, data.count);
+							result = offset + range.text.length - length;
+							break;
+						}
+						lineOffset = nodeLength + lineOffset;
+						lineChild = lineChild.nextSibling;
 					}
-					lineOffset = nodeLength + lineOffset;
-					lineChild = lineChild.nextSibling;
 				}
+				data.count -= step;
 			}
 			return result;
 		},
@@ -3791,24 +3808,35 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				var model = this._model;
 				var caret = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(caret);
-				var lineStart = model.getLineStart(lineIndex);
-				if (caret === lineStart) {
-					if (lineIndex > 0) {
-						selection.extend(model.getLineEnd(lineIndex - 1));
-					}
-				} else {
-					var removeTab = false;
-					if (this._expandTab && args.unit === "character" && (caret - lineStart) % this._tabSize === 0) { //$NON-NLS-0$
-						var lineText = model.getText(lineStart, caret);
-						removeTab = !/[^ ]/.test(lineText); // Only spaces between line start and caret.
-					}
-					if (removeTab) {
-						selection.extend(caret - this._tabSize);
+				if (!args.count) {
+					args.count = 1;
+				}
+				args.count *= -1;
+				while (args.count !== 0) {
+					var lineStart = model.getLineStart(lineIndex);
+					if (caret === lineStart) {
+						if (lineIndex > 0) {
+							if (args.unit === "character") { //$NON-NLS-0$
+								args.count++;
+							}
+							lineIndex--;
+							selection.extend(model.getLineEnd(lineIndex));
+						}
 					} else {
-						var line = this._getLine(lineIndex);
-						selection.extend(line.getNextOffset(caret, args.unit, -1));
-						line.destroy();
+						var removeTab = false;
+						if (this._expandTab && args.unit === "character" && (caret - lineStart) % this._tabSize === 0) { //$NON-NLS-0$
+							var lineText = model.getText(lineStart, caret);
+							removeTab = !/[^ ]/.test(lineText); // Only spaces between line start and caret.
+						}
+						if (removeTab) {
+							selection.extend(caret - this._tabSize);
+						} else {
+							var line = this._getLine(lineIndex);
+							selection.extend(line.getNextOffset(caret, args));
+							line.destroy();
+						}
 					}
+					caret = selection.getCaret();
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
@@ -3834,14 +3862,26 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var selection = this._getSelection();
 			var caret = selection.getCaret();
 			var lineIndex = model.getLineAtOffset(caret);
-			if (caret === model.getLineEnd(lineIndex)) {
-				if (lineIndex + 1 < model.getLineCount()) {
-					selection.extend(model.getLineStart(lineIndex + 1));
+			if (!args.count) {
+				args.count = 1;
+			}
+			while (args.count !== 0) {
+				if (caret === model.getLineEnd(lineIndex)) {
+					if (lineIndex + 1 < model.getLineCount()) {
+						if (args.unit === "character") { //$NON-NLS-0$
+							args.count--;
+						}
+						lineIndex++;
+						selection.extend(model.getLineStart(lineIndex));
+					} else {
+						break;
+					}
+				} else {
+					var line = this._getLine(lineIndex);
+					selection.extend(line.getNextOffset(caret, args));
+					line.destroy();
 				}
-			} else {
-				var line = this._getLine(lineIndex);
-				selection.extend(line.getNextOffset(caret, args.unit, 1));
-				line.destroy();
+				caret = selection.getCaret();
 			}
 			if (!args.select) { selection.collapse(); }
 			this._setSelection(selection, true);
@@ -3855,14 +3895,27 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var selection = this._getSelection();
 			var caret = selection.getCaret();
 			var lineIndex = model.getLineAtOffset(caret);
-			if (caret === model.getLineStart(lineIndex)) {
-				if (lineIndex > 0) {
-					selection.extend(model.getLineEnd(lineIndex - 1));
+			if (!args.count) {
+				args.count = 1;
+			}
+			args.count *= -1;
+			while (args.count !== 0) {
+				if (caret === model.getLineStart(lineIndex)) {
+					if (lineIndex > 0) {
+						if (args.unit === "character") { //$NON-NLS-0$
+							args.count++;
+						}
+						lineIndex--;
+						selection.extend(model.getLineEnd(lineIndex));
+					} else {
+						break;
+					}
+				} else {
+					var line = this._getLine(lineIndex);
+					selection.extend(line.getNextOffset(caret, args));
+					line.destroy();
 				}
-			} else {
-				var line = this._getLine(lineIndex);
-				selection.extend(line.getNextOffset(caret, args.unit, -1));
-				line.destroy();
+				caret = selection.getCaret();
 			}
 			if (!args.select) { selection.collapse(); }
 			this._setSelection(selection, true);
@@ -3883,14 +3936,24 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				var model = this._model;
 				var caret = selection.getCaret();
 				var lineIndex = model.getLineAtOffset(caret);
-				if (caret === model.getLineEnd (lineIndex)) {
-					if (lineIndex + 1 < model.getLineCount()) {
-						selection.extend(model.getLineStart(lineIndex + 1));
+				if (!args.count) {
+					args.count = 1;
+				}
+				while (args.count !== 0) {
+					if (caret === model.getLineEnd (lineIndex)) {
+						if (lineIndex + 1 < model.getLineCount()) {
+							if (args.unit === "character") { //$NON-NLS-0$
+								args.count--;
+							}
+							lineIndex++;
+							selection.extend(model.getLineStart(lineIndex));
+						}
+					} else {
+						var line = this._getLine(lineIndex);
+						selection.extend(line.getNextOffset(caret, args));
+						line.destroy();
 					}
-				} else {
-					var line = this._getLine(lineIndex);
-					selection.extend(line.getNextOffset(caret, args.unit, 1));
-					line.destroy();
+					caret = selection.getCaret();
 				}
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
@@ -4446,58 +4509,58 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._actions = {
 				"noop": {defaultHandler: function() {return self._doNoop();}}, //$NON-NLS-0$
 
-				"lineUp": {defaultHandler: function() {return self._doLineUp({select: false});}, actionDescription: {name: messages.lineUp}}, //$NON-NLS-0$
-				"lineDown": {defaultHandler: function() {return self._doLineDown({select: false});}, actionDescription: {name: messages.lineDown}}, //$NON-NLS-0$
-				"lineStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:false});}, actionDescription: {name: messages.lineStart}}, //$NON-NLS-0$
-				"lineEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:false});}, actionDescription: {name: messages.lineEnd}}, //$NON-NLS-0$
+				"lineUp": {defaultHandler: function(data) {return self._doLineUp(merge(data,{select: false}));}, actionDescription: {name: messages.lineUp}}, //$NON-NLS-0$
+				"lineDown": {defaultHandler: function(data) {return self._doLineDown(merge(data,{select: false}));}, actionDescription: {name: messages.lineDown}}, //$NON-NLS-0$
+				"lineStart": {defaultHandler: function(data) {return self._doHome(merge(data,{select: false, ctrl:false}));}, actionDescription: {name: messages.lineStart}}, //$NON-NLS-0$
+				"lineEnd": {defaultHandler: function(data) {return self._doEnd(merge(data,{select: false, ctrl:false}));}, actionDescription: {name: messages.lineEnd}}, //$NON-NLS-0$
 				"charPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: false, unit:"character"}));}, actionDescription: {name: messages.charPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"charNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}, actionDescription: {name: messages.charNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"pageUp": {defaultHandler: function() {return self._doPageUp({select: false});}, actionDescription: {name: messages.pageUp}}, //$NON-NLS-0$
-				"pageDown": {defaultHandler: function() {return self._doPageDown({select: false});}, actionDescription: {name: messages.pageDown}}, //$NON-NLS-0$
-				"scrollPageUp": {defaultHandler: function() {return self._doScroll({type: "pageUp"});}, actionDescription: {name: messages.scrollPageUp}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollPageDown": {defaultHandler: function() {return self._doScroll({type: "pageDown"});}, actionDescription: {name: messages.scrollPageDown}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollLineUp": {defaultHandler: function() {return self._doScroll({type: "lineUp"});}, actionDescription: {name: messages.scrollLineUp}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollLineDown": {defaultHandler: function() {return self._doScroll({type: "lineDown"});}, actionDescription: {name: messages.scrollLineDown}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"charNext": {defaultHandler: function(data) {return self._doCursorNext(merge(data,{select: false, unit:"character"}));}, actionDescription: {name: messages.charNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"pageUp": {defaultHandler: function(data) {return self._doPageUp(merge(data,{select: false}));}, actionDescription: {name: messages.pageUp}}, //$NON-NLS-0$
+				"pageDown": {defaultHandler: function(data) {return self._doPageDown(merge(data,{select: false}));}, actionDescription: {name: messages.pageDown}}, //$NON-NLS-0$
+				"scrollPageUp": {defaultHandler: function(data) {return self._doScroll(merge(data,{type: "pageUp"}));}, actionDescription: {name: messages.scrollPageUp}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollPageDown": {defaultHandler: function(data) {return self._doScroll(merge(data,{type: "pageDown"}));}, actionDescription: {name: messages.scrollPageDown}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollLineUp": {defaultHandler: function(data) {return self._doScroll(merge(data,{type: "lineUp"}));}, actionDescription: {name: messages.scrollLineUp}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollLineDown": {defaultHandler: function(data) {return self._doScroll(merge(data,{type: "lineDown"}));}, actionDescription: {name: messages.scrollLineDown}}, //$NON-NLS-1$ //$NON-NLS-0$
 				"wordPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: false, unit:"word"}));}, actionDescription: {name: messages.wordPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"wordNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}, actionDescription: {name: messages.wordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"textStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:true});}, actionDescription: {name: messages.textStart}}, //$NON-NLS-0$
-				"textEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}, actionDescription: {name: messages.textEnd}}, //$NON-NLS-0$
-				"scrollTextStart": {defaultHandler: function() {return self._doScroll({type: "textStart"});}, actionDescription: {name: messages.scrollTextStart}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"scrollTextEnd": {defaultHandler: function() {return self._doScroll({type: "textEnd"});}, actionDescription: {name: messages.scrollTextEnd}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"centerLine": {defaultHandler: function() {return self._doScroll({type: "centerLine"});}, actionDescription: {name: messages.centerLine}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"wordNext": {defaultHandler: function(data) {return self._doCursorNext(merge(data,{select: false, unit:"word"}));}, actionDescription: {name: messages.wordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"textStart": {defaultHandler: function(data) {return self._doHome(merge(data,{select: false, ctrl:true}));}, actionDescription: {name: messages.textStart}}, //$NON-NLS-0$
+				"textEnd": {defaultHandler: function(data) {return self._doEnd(merge(data,{select: false, ctrl:true}));}, actionDescription: {name: messages.textEnd}}, //$NON-NLS-0$
+				"scrollTextStart": {defaultHandler: function(data) {return self._doScroll(merge(data,{type: "textStart"}));}, actionDescription: {name: messages.scrollTextStart}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollTextEnd": {defaultHandler: function(data) {return self._doScroll(merge(data,{type: "textEnd"}));}, actionDescription: {name: messages.scrollTextEnd}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"centerLine": {defaultHandler: function(data) {return self._doScroll(merge(data,{type: "centerLine"}));}, actionDescription: {name: messages.centerLine}}, //$NON-NLS-1$ //$NON-NLS-0$
 				
-				"selectLineUp": {defaultHandler: function() {return self._doLineUp({select: true});}, actionDescription: {name: messages.selectLineUp}}, //$NON-NLS-0$
-				"selectLineDown": {defaultHandler: function() {return self._doLineDown({select: true});}, actionDescription: {name: messages.selectLineDown}}, //$NON-NLS-0$
-				"selectWholeLineUp": {defaultHandler: function() {return self._doLineUp({select: true, wholeLine: true});}, actionDescription: {name: messages.selectWholeLineUp}}, //$NON-NLS-0$
-				"selectWholeLineDown": {defaultHandler: function() {return self._doLineDown({select: true, wholeLine: true});}, actionDescription: {name: messages.selectWholeLineDown}}, //$NON-NLS-0$
-				"selectLineStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:false});}, actionDescription: {name: messages.selectLineStart}}, //$NON-NLS-0$
-				"selectLineEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:false});}, actionDescription: {name: messages.selectLineEnd}}, //$NON-NLS-0$
-				"selectCharPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"character"});}, actionDescription: {name: messages.selectCharPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectCharNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"character"});}, actionDescription: {name: messages.selectCharNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectPageUp": {defaultHandler: function() {return self._doPageUp({select: true});}, actionDescription: {name: messages.selectPageUp}}, //$NON-NLS-0$
-				"selectPageDown": {defaultHandler: function() {return self._doPageDown({select: true});}, actionDescription: {name: messages.selectPageDown}}, //$NON-NLS-0$
+				"selectLineUp": {defaultHandler: function(data) {return self._doLineUp(merge(data,{select: true}));}, actionDescription: {name: messages.selectLineUp}}, //$NON-NLS-0$
+				"selectLineDown": {defaultHandler: function(data) {return self._doLineDown(merge(data,{select: true}));}, actionDescription: {name: messages.selectLineDown}}, //$NON-NLS-0$
+				"selectWholeLineUp": {defaultHandler: function(data) {return self._doLineUp(merge(data,{select: true, wholeLine: true}));}, actionDescription: {name: messages.selectWholeLineUp}}, //$NON-NLS-0$
+				"selectWholeLineDown": {defaultHandler: function(data) {return self._doLineDown(merge(data,{select: true, wholeLine: true}));}, actionDescription: {name: messages.selectWholeLineDown}}, //$NON-NLS-0$
+				"selectLineStart": {defaultHandler: function(data) {return self._doHome(merge(data,{select: true, ctrl:false}));}, actionDescription: {name: messages.selectLineStart}}, //$NON-NLS-0$
+				"selectLineEnd": {defaultHandler: function(data) {return self._doEnd(merge(data,{select: true, ctrl:false}));}, actionDescription: {name: messages.selectLineEnd}}, //$NON-NLS-0$
+				"selectCharPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: true, unit:"character"}));}, actionDescription: {name: messages.selectCharPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectCharNext": {defaultHandler: function(data) {return self._doCursorNext(merge(data,{select: true, unit:"character"}));}, actionDescription: {name: messages.selectCharNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectPageUp": {defaultHandler: function(data) {return self._doPageUp(merge(data,{select: true}));}, actionDescription: {name: messages.selectPageUp}}, //$NON-NLS-0$
+				"selectPageDown": {defaultHandler: function(data) {return self._doPageDown(merge(data,{select: true}));}, actionDescription: {name: messages.selectPageDown}}, //$NON-NLS-0$
 				"selectWordPrevious": {defaultHandler: function(data) {return self._doCursorPrevious(merge(data,{select: true, unit:"word"}));}, actionDescription: {name: messages.selectWordPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectWordNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}, actionDescription: {name: messages.selectWordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"selectTextStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:true});}, actionDescription: {name: messages.selectTextStart}}, //$NON-NLS-0$
-				"selectTextEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}, actionDescription: {name: messages.selectTextEnd}}, //$NON-NLS-0$
+				"selectWordNext": {defaultHandler: function(data) {return self._doCursorNext(merge(data,{select: true, unit:"word"}));}, actionDescription: {name: messages.selectWordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectTextStart": {defaultHandler: function(data) {return self._doHome(merge(data,{select: true, ctrl:true}));}, actionDescription: {name: messages.selectTextStart}}, //$NON-NLS-0$
+				"selectTextEnd": {defaultHandler: function(data) {return self._doEnd(merge(data,{select: true, ctrl:true}));}, actionDescription: {name: messages.selectTextEnd}}, //$NON-NLS-0$
 
-				"deletePrevious": {defaultHandler: function() {return self._doBackspace({unit:"character"});}, actionDescription: {name: messages.deletePrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteNext": {defaultHandler: function() {return self._doDelete({unit:"character"});}, actionDescription: {name: messages.deleteNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteWordPrevious": {defaultHandler: function() {return self._doBackspace({unit:"word"});}, actionDescription: {name: messages.deleteWordPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteWordNext": {defaultHandler: function() {return self._doDelete({unit:"word"});}, actionDescription: {name: messages.deleteWordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteLineStart": {defaultHandler: function() {return self._doBackspace({unit: "line"});}, actionDescription: {name: messages.deleteLineStart}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"deleteLineEnd": {defaultHandler: function() {return self._doDelete({unit: "line"});}, actionDescription: {name: messages.deleteLineEnd}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"tab": {defaultHandler: function() {return self._doTab();}, actionDescription: {name: messages.tab}}, //$NON-NLS-0$
-				"shiftTab": {defaultHandler: function() {return self._doShiftTab();}, actionDescription: {name: messages.shiftTab}}, //$NON-NLS-0$
-				"enter": {defaultHandler: function() {return self._doEnter();}, actionDescription: {name: messages.enter}}, //$NON-NLS-0$
-				"enterNoCursor": {defaultHandler: function() {return self._doEnter({noCursor:true});}, actionDescription: {name: messages.enterNoCursor}}, //$NON-NLS-0$
-				"selectAll": {defaultHandler: function() {return self._doSelectAll();}, actionDescription: {name: messages.selectAll}}, //$NON-NLS-0$
-				"copy": {defaultHandler: function() {return self._doCopy();}, actionDescription: {name: messages.copy}}, //$NON-NLS-0$
-				"cut": {defaultHandler: function() {return self._doCut();}, actionDescription: {name: messages.cut}}, //$NON-NLS-0$
-				"paste": {defaultHandler: function() {return self._doPaste();}, actionDescription: {name: messages.paste}}, //$NON-NLS-0$
+				"deletePrevious": {defaultHandler: function(data) {return self._doBackspace(merge(data,{unit:"character"}));}, actionDescription: {name: messages.deletePrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteNext": {defaultHandler: function(data) {return self._doDelete(merge(data,{unit:"character"}));}, actionDescription: {name: messages.deleteNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteWordPrevious": {defaultHandler: function(data) {return self._doBackspace(merge(data,{unit:"word"}));}, actionDescription: {name: messages.deleteWordPrevious}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteWordNext": {defaultHandler: function(data) {return self._doDelete(merge(data,{unit:"word"}));}, actionDescription: {name: messages.deleteWordNext}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteLineStart": {defaultHandler: function(data) {return self._doBackspace(merge(data,{unit: "line"}));}, actionDescription: {name: messages.deleteLineStart}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteLineEnd": {defaultHandler: function(data) {return self._doDelete(merge(data,{unit: "line"}));}, actionDescription: {name: messages.deleteLineEnd}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"tab": {defaultHandler: function(data) {return self._doTab();}, actionDescription: {name: messages.tab}}, //$NON-NLS-0$
+				"shiftTab": {defaultHandler: function(data) {return self._doShiftTab();}, actionDescription: {name: messages.shiftTab}}, //$NON-NLS-0$
+				"enter": {defaultHandler: function(data) {return self._doEnter();}, actionDescription: {name: messages.enter}}, //$NON-NLS-0$
+				"enterNoCursor": {defaultHandler: function(data) {return self._doEnter(merge(data,{noCursor:true}));}, actionDescription: {name: messages.enterNoCursor}}, //$NON-NLS-0$
+				"selectAll": {defaultHandler: function(data) {return self._doSelectAll();}, actionDescription: {name: messages.selectAll}}, //$NON-NLS-0$
+				"copy": {defaultHandler: function(data) {return self._doCopy();}, actionDescription: {name: messages.copy}}, //$NON-NLS-0$
+				"cut": {defaultHandler: function(data) {return self._doCut();}, actionDescription: {name: messages.cut}}, //$NON-NLS-0$
+				"paste": {defaultHandler: function(data) {return self._doPaste();}, actionDescription: {name: messages.paste}}, //$NON-NLS-0$
 				
-				"toggleWrapMode": {defaultHandler: function() {return self._doWrapMode();}, actionDescription: {name: messages.toggleWrapMode}}, //$NON-NLS-0$
-				"toggleTabMode": {defaultHandler: function() {return self._doTabMode();}, actionDescription: {name: messages.toggleTabMode}} //$NON-NLS-0$
+				"toggleWrapMode": {defaultHandler: function(data) {return self._doWrapMode();}, actionDescription: {name: messages.toggleWrapMode}}, //$NON-NLS-0$
+				"toggleTabMode": {defaultHandler: function(data) {return self._doTabMode();}, actionDescription: {name: messages.toggleTabMode}} //$NON-NLS-0$
 			};
 		},
 		_createRuler: function(ruler, index) {
@@ -5848,14 +5911,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					if (this._doubleClickSelection) {
 						if (offset >= this._doubleClickSelection.start) {
 							start = this._doubleClickSelection.start;
-							end = line.getNextOffset(offset, "wordend", +1); //$NON-NLS-0$
+							end = line.getNextOffset(offset, {unit:"wordend", count:1}); //$NON-NLS-0$
 						} else {
-							start = line.getNextOffset(offset, "word", -1); //$NON-NLS-0$
+							start = line.getNextOffset(offset, {unit:"word", count:-1}); //$NON-NLS-0$
 							end = this._doubleClickSelection.end;
 						}
 					} else {
-						start = line.getNextOffset(offset, "word", -1); //$NON-NLS-0$
-						end = line.getNextOffset(start, "wordend", +1); //$NON-NLS-0$
+						start = line.getNextOffset(offset, {unit:"word", count:-1}); //$NON-NLS-0$
+						end = line.getNextOffset(start, {unit:"wordend", count:1}); //$NON-NLS-0$
 					}
 					line.destroy();
 				} else {
