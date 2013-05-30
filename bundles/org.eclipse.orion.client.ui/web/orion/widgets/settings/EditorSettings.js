@@ -8,10 +8,16 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 	'orion/webui/littlelib', //$NON-NLS-0$
 	'i18n!orion/settings/nls/messages', //$NON-NLS-0$ 
 	'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox',  //$NON-NLS-0$  //$NON-NLS-1$ 
+	'orion/widgets/input/Select', //$NON-NLS-0$ 
 	'orion/widgets/settings/Subsection', //$NON-NLS-0$ 
 	'orion/commands'//$NON-NLS-0$ 
-], function(require, util, objects, lib, messages,LabeledTextfield, LabeledCheckbox, Subsection, commands)  {
-
+], function(require, util, objects, lib, messages, LabeledTextfield, LabeledCheckbox, Select, Subsection, commands)  {
+    var KEY_MODES = [
+    "Default",
+	"Emacs" //$NON-NLS-0$
+	//"VI" //$NON-NLS-0$
+	];
+				
 	function EditorSettings(options, node) {
 		objects.mixin(this, options);
 		this.node = node;
@@ -76,6 +82,31 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				behavrSubsection.show();
 			}
 			
+			/* - key bindings  ---------------------------------------------------- */	
+			var kbFields = [];
+			
+			if (this.oldPrefs.keyBindingsVisible) {
+				var keys = KEY_MODES;
+				var options = [];
+				for( var i= 0; i < keys.length; i++ ){
+					var key = keys[i];
+					var set = {
+						value: key,
+						label: key
+					};	
+					if( key === this.oldPrefs.keyBindings ){
+						set.selected = true;
+					}
+					options.push(set);
+				}	
+			
+				kbFields.push(this.kbSelect = new Select( {options:options})); //$NON-NLS-0$
+					
+				var kbSubsection = new Subsection( {sectionName:messages['KeyBindings'], parentNode: this.sections, children: kbFields } );
+				kbSubsection.show();
+			}
+			
+			
 			var updateCommand = new commands.Command({
 				name: messages["Update"],
 				tooltip: messages["Update Editor Settings"],
@@ -120,22 +151,27 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 			return undefined;
 		},
+		validate: function() {
+			if (this.autoSaveField) {
+				var timeOut = this.autoSaveField.getValue();
+				if (isNaN(parseFloat(timeOut)) || !isFinite(timeOut)) {
+					return "Invalid save interval.";
+				}
+			}
+			return "";
+		},
 		update: function() {
 			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-			
 			var currentPrefs = this.valueChanged();
 			if (currentPrefs) {
-				if (this.autoSaveField) {
-					var timeOut = this.autoSaveField.getValue();
-					if (!isNaN(parseFloat(timeOut)) && isFinite(timeOut)) {
-						this._editorPref.setPrefs(currentPrefs, function (){ 
-							messageService.setProgressResult( {Message:"Editor preferences updated",Severity:"Normal"} ); 
-						});
-					} else {
-						messageService.setProgressResult( {Message:"Invalid save interval.",Severity:"Error"} );
-						this.autoSaveField.setValue(this.oldPrefs.autoSaveTimeout);
-					}
+				var msg=this.validate();
+				if (msg) {
+					messageService.setProgressResult({Message:msg,Severity:"Error"}); 
+					return;
 				}
+				this._editorPref.setPrefs(currentPrefs, function (){ 
+					messageService.setProgressResult( {Message:"Editor preferences updated",Severity:"Normal"} ); 
+				});
 			}
 		},
 		restore: function() {
@@ -178,6 +214,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			if (this.scrollField) {
 				editorPrefs.scrollAnimation = this.scrollField.getValue();
 			}
+			if (this.kbSelect) {
+				editorPrefs.keyBindings = this.kbSelect.getSelected();
+			}
 		},
 		setValues: function(editorPrefs) {
 			if (this.autoSaveCheck) {
@@ -198,6 +237,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 			if (this.scrollField) {
 				this.scrollField.setValue(editorPrefs.scrollAnimation);
+			}
+			if (this.kbSelect) {
+				this.kbSelect.setSelectedIndex(Math.max(KEY_MODES.indexOf(editorPrefs.keyBindings),0));
 			}
 		},
 		destroy: function() {

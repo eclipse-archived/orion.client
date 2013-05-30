@@ -129,5 +129,6 @@ define({
 	"Behaviour" : "Behaviour",
 	"TabSize" : "Tab Size",
 	"Scrolled" : "Scrolling Animation",
-	"ScrollAnimation" : "Scrolling Duration (ms)"
+	"ScrollAnimation" : "Scrolling Duration (ms)",
+	"KeyBindings" : "Key Bindings"
 });
