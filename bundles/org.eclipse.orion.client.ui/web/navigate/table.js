@@ -55,24 +55,31 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 						checkbox: false, 
 						cachePrefix: "Navigator"}, explorer, commandRegistry, contentTypeService);  //$NON-NLS-0$
 				}});
+		function setResource(resource) {
+			window.location = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+				resource: resource
+			});
+		}
 		// On scope up, change the href of the window.location to navigate to the parent page.
 		// TODO reuse eclipse.upFolder
 		explorer.scopeUp = function() {
 			if(this.treeRoot && this.treeRoot.Parents){
+				var resource;
 				if(this.treeRoot.Parents.length === 0){
-					window.location.href = "#"; //$NON-NLS-0$
+					resource = "";  //$NON-NLS-0$
 				} else if(this.treeRoot.Parents[0].ChildrenLocation){
-					window.location.href = "#" + this.treeRoot.Parents[0].ChildrenLocation; //$NON-NLS-0$
+					resource = this.treeRoot.Parents[0].ChildrenLocation;
 				}
+				setResource(resource);
 			}
 		}.bind(explorer);
+		explorer.addEventListener("inputMoved", function(event) { //$NON-NLS-0$
+			setResource(event.newInput);
+		});
 
 		function refresh() {
 			var pageParams = PageUtil.matchResourceParameters();
 			// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-			var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
-			var orionHome = PageLinks.getOrionHome();
-
 			explorer.loadResourceList(pageParams.resource, false, function() {
 				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, 
 					serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandRegistry});

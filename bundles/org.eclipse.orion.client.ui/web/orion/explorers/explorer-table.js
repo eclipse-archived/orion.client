@@ -131,6 +131,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * @type orion.explorer.FileExplorer.ModelHandler
 	 */
 	function FileExplorer(options) {
+		EventTarget.attach(this);
 		this.registry = options.serviceRegistry;
 		this.treeRoot = options.treeRoot;
 		this.selection = options.selection;
@@ -219,9 +220,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			if (parent.Projects) {
 				if (ex.treeRoot.Location === item.Location) {
 					//the treeRoot was moved
-					//ex.treeRoot = newItem;
-					//ex.loadResourceList(newItem.ChildrenLocation /*folder*/ || newItem.ContentLocation /*project*/);
-					alert('you moved/renamed the explorer root, something needs to happen here');
+					ex.dispatchEvent({ type: "inputMoved", newInput: (newItem.ChildrenLocation || newItem.ContentLocation) }); //$NON-NLS-0$
 				} else {
 					//special case for renaming a project. Use the treeRoot as the refresh item.
 					refreshItem = ex.treeRoot;
