@@ -322,9 +322,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 		sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
 			var root = evt.root;
-			// update the navigate param, if it's present
+			// update the navigate param, if it's present, or if this was a user action
 			var pageParams = PageUtil.matchResourceParameters(location.hash);
-			if (Object.hasOwnProperty.call(pageParams, "navigate")) {//$NON-NLS-0$
+			if (evt.force || Object.hasOwnProperty.call(pageParams, "navigate")) {//$NON-NLS-0$
 				var params = {};
 				params.resource = pageParams.resource || ""; //$NON-NLS-0$
 				params.params = { navigate: root.Path };
