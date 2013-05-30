@@ -177,12 +177,17 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		scopeUp: function() {
 			var root = this.treeRoot, parents = root && root.Parents;
 			if (parents) {
+				var deferred;
 				if (parents.length === 0) {
 					// Show the top level
-					this.loadResourceList("").then(this.reveal.bind(this, this.treeRoot)); //$NON-NLS-0$
+					deferred = this.loadResourceList("").then(this.reveal.bind(this, this.treeRoot)); //$NON-NLS-0$
 				} else {
-					this.loadParentOf(this.treeRoot);
+					deferred = this.loadParentOf(this.treeRoot);
 				}
+				var _self = this;
+				deferred.then(function() {
+					_self.dispatchEvent({ type: "rootChanged", root: _self.treeRoot, force: true });
+				});
 			}
 		},
 		// Returns a deferred that completes once file command extensions have been processed
