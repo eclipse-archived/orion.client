@@ -554,8 +554,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				CLICKED = true;
 		
 				var TAB_HEIGHT = 24;
-				var PANEL_HEIGHT = 150;
-				var PANEL_WIDTH = 150;
 				var BORDER_RADIUS = '3px'; //$NON-NLS-0$
 				var COLOR = '#555'; //$NON-NLS-0$
 			
@@ -578,8 +576,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				if (!panel) {
 					panel = document.createElement( 'div' ); //$NON-NLS-0$
 					panel.className = 'settingsPanel'; //$NON-NLS-0$
-					panel.style.width = PANEL_WIDTH + 'px'; //$NON-NLS-0$
-					panel.style.height = PANEL_HEIGHT + 'px'; //$NON-NLS-0$
 					panel.style.backgroundColor = COLOR;
 					panel.style.zIndex = '99'; //$NON-NLS-0$
 					panel.style.top = box.top - rpBox.top + TAB_HEIGHT -4 + 'px'; //$NON-NLS-0$
