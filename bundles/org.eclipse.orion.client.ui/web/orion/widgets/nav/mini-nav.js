@@ -12,43 +12,13 @@
 /*jslint browser:true devel:true sub:true*/
 define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer', 'orion/explorers/explorerNavHandler', 'orion/i18nUtil', 'orion/keyBinding', 'orion/fileCommands',
-	'orion/extensionCommands', 'orion/selection', 'orion/EventTarget'
+	'orion/extensionCommands', 'orion/selection', 'orion/EventTarget', 'orion/URITemplate', 'orion/PageUtil'
 	],
 	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, i18nUtil, mKeyBinding, FileCommands,
-		ExtensionCommands, Selection, EventTarget) {
+		ExtensionCommands, Selection, EventTarget, URITemplate, PageUtil) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
-	var FOLDER_CLASS = "nav_fakelink"; //$NON-NLS-0$
-
-	/*
-	 * Override the default ExplorerNavHandler to provide special handling of Enter key and click on folders.
-	 * If we decide to start representing folders as hyperlinks, this factory be removed and we can just use the default
-	 * ExplorerNavHandler.
-	 */
-	var navHandlerFactory = {
-		createNavHandler: function(explorer, explorerNavDict, options) {
-			options.gridClickSelectionPolicy = "active"; //$NON-NLS-0$
-			var _super = mExplorerNavHandler.ExplorerNavHandler.prototype;
-			var handler = new mExplorerNavHandler.ExplorerNavHandler(explorer, explorerNavDict, options);
-			handler.onClick = function(modelItem, mouseEvent) {
-				var target = mouseEvent.target;
-				if (modelItem.Directory && target && target.classList.contains(FOLDER_CLASS)) {//$NON-NLS-0$
-					explorer.loadRoot(modelItem);
-				}
-				return _super.onClick.apply(this, arguments);
-			};
-			handler.onEnter = function(keyEvent) {
-				var modelItem = handler.currentModel();
-				if (modelItem && modelItem.Directory) {
-					explorer.loadRoot(modelItem);
-					return;
-				}
-				return _super.onEnter.apply(this, arguments);
-			};
-			return handler;
-		}
-	};
 
 	/**
 	 * @class orion.sidebar.MiniNavExplorer
@@ -57,7 +27,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	function MiniNavExplorer(params) {
 		params.setFocus = false;   // do not steal focus on load
 		params.cachePrefix = null; // do not persist table state
-		params.navHandlerFactory = navHandlerFactory;
 		FileExplorer.apply(this, arguments);
 		this.commandRegistry = params.commandRegistry;
 		this.editorInputManager = params.editorInputManager;
@@ -73,12 +42,14 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		var initialRoot = { };
 		this.treeRoot = initialRoot; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
-		this.editorInputListener = function(event) { //$NON-NLS-0$
-			var editorInput = event.metadata;
+		this.editorInputListener = function(event) {
+			var editorInput = _self.editorInput = event.metadata;
 			if (_self.treeRoot === initialRoot && _self.followEditor) {
 				// Initial load: parent folder of editor input gives our current root
 				_self.loadParentOf(editorInput);
 			} else {
+				// The folder URLs are impacted by the change of editor input (eg. #someFileToEdit.js,navigate=/some/folder/to/view)
+				_self.renderer.updateFolderLinks(lib.node(_self._parentId));
 				_self.reveal(editorInput);
 			}
 		};
@@ -94,7 +65,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 
 			// Broadcast changes of our explorer root to the sidebarNavInputManager
 			this.addEventListener("rootChanged", function(event) { //$NON-NLS-0$
-				_self.sidebarNavInputManager.dispatchEvent(event); //$NON-NLS-0$
+				_self.sidebarNavInputManager.dispatchEvent(event);
 			});
 		}
 
@@ -273,13 +244,34 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		NavigatorRenderer.apply(this, arguments);
 	}
 	MiniNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
-	MiniNavRenderer.prototype.createFolderNode = function(folder) {
-		var node = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
-		node.classList.add(FOLDER_CLASS);
-		return node;
-	};
-	MiniNavRenderer.prototype.showFolderLinks = false;
+	MiniNavRenderer.prototype.showFolderLinks = true;
 	MiniNavRenderer.prototype.oneColumn = true;
+	MiniNavRenderer.prototype.createFolderNode = function(folder) {
+		var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
+		if (folderNode.tagName === "A") { //$NON-NLS-0$
+			folderNode.classList.add("miniNavFolder"); //$NON-NLS-0$
+			var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
+			this.setFolderHref(folderNode, editorFile || "", folder.ChildrenLocation);
+		}
+		return folderNode;
+	};
+	MiniNavRenderer.prototype.setFolderHref = function(linkElement, resource, navigate) {
+		linkElement.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+			resource: resource,
+			params: {
+				navigate: navigate
+			}
+		});
+	};
+	// Called when the editor file has changed
+	MiniNavRenderer.prototype.updateFolderLinks = function(rootNode) {
+		var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
+		var _self = this;
+		Array.prototype.slice.call(lib.$$("a.miniNavFolder", rootNode)).forEach(function(folderLink) { //$NON-NLS-0$
+			var folderLocation = PageUtil.matchResourceParameters(folderLink.href).navigate;
+			_self.setFolderHref(folderLink, editorFile || "", folderLocation); //$NON-NLS-0$
+		});
+	};
 
 	/**
 	 * @name orion.sidebar.MiniNavViewMode
