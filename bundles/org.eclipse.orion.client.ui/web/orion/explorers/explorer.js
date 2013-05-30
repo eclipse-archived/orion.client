@@ -731,8 +731,9 @@ exports.SelectionRenderer = (function(){
 			cell = this.getCellHeaderElement(++i);
 		}
 		thead.appendChild(row);
-		tableNode.appendChild(thead);
-		
+		if (i > 0) {
+			tableNode.appendChild(thead);
+		}
 	};
 	
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
