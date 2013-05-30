@@ -45,11 +45,12 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 	 *   <li>labelColumnIndex() // 0 based index of which td contains the primary label which will be indented</li>
 	 *   <li>rowsChanged // optional, perform any work (such as styling) that should happen after the row content changes</li>
 	 *   <li>updateExpandVisuals(row, isExpanded) // update any expand/collapse visuals for the row based on the specified state</li>
+	 * </ul>
 	 *   TODO DOC
+	 *   wrapperCallback
 	 *   tableCallback
 	 *   bodyCallback
 	 *   rowCallback
-	 * </ul>
 	 */
 	function TableTree (options) {
 		this._init(options);
@@ -91,6 +92,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		
 		_generate: function(children, indentLevel) {
 			lib.empty(this._parent);
+			var wrapper = document.createElement("div"); //$NON-NLS-0$
+			if (this._renderer.wrapperCallback) {
+				this._renderer.wrapperCallback(wrapper);
+			}
 			var table = document.createElement(this._tableElement); //$NON-NLS-0$
 			if (this._renderer.tableCallback) {
 				this._renderer.tableCallback(table);
@@ -107,7 +112,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			this._bodyElement.id = this._id+"tbody"; //$NON-NLS-0$
 			this._generateChildren(children, indentLevel); //$NON-NLS-0$
 			table.appendChild(this._bodyElement);
-			this._parent.appendChild(table);
+			wrapper.appendChild(table);
+			this._parent.appendChild(wrapper);
 			this._rowsChanged();
 		},
 		

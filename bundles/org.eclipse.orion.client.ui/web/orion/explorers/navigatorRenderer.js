@@ -146,13 +146,13 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 	}
 	NavigatorRenderer.prototype = new mExplorer.SelectionRenderer(); 
 
-	NavigatorRenderer.prototype.tableCallback = function(tableElement) {
-		tableElement.setAttribute("aria-label", messages["Navigator"]); //$NON-NLS-1$ //$NON-NLS-0$
-		tableElement.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-0$
+	NavigatorRenderer.prototype.wrapperCallback = function(wrapperElement) {
+		wrapperElement.setAttribute("role", "tree"); //$NON-NLS-1$ //$NON-NLS-0$
 	};
 
-	NavigatorRenderer.prototype.bodyCallback = function(tableElement) {
-		tableElement.setAttribute("role", "tree"); //$NON-NLS-1$ //$NON-NLS-0$
+	NavigatorRenderer.prototype.tableCallback = function(tableElement) {
+		tableElement.setAttribute("aria-label", messages["Navigator"]); //$NON-NLS-1$ //$NON-NLS-0$
+		tableElement.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 	};
 
 	/**
