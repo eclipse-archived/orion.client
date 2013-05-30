@@ -25,7 +25,9 @@ define([], function() {
 		tabSizeVisible:false,
 		scrollEnabled: true,
 		scrollAnimation:300,
-		scrollEnabledVisible:false
+		scrollEnabledVisible:false,
+		keyBindingsVisible: true,
+		keyBindings: "Default"
 	};
 
 	function EditorPreferences(preferences, callback) {
