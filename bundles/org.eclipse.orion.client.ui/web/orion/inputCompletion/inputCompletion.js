@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
+/*global window define require document*/
 define([], function(){
 
 	/**
@@ -61,43 +61,44 @@ define([], function(){
 		this._dataList = [];
 		this._initUI();
 		
-		var that = this;
 		this._completionUIContainer.addEventListener("mousedown", function(e) {
-			that._mouseDown = true;
-		});
+			this._mouseDown = true;
+		}.bind(this));
 		this._completionUIContainer.addEventListener("mouseup", function(e) {
-			that._mouseDown = false;
-		});
+			this._mouseDown = false;
+		}.bind(this));
 		this._inputField.addEventListener("blur", function(e) {
-			if(that._mouseDown){
+			if(this._mouseDown){
+				var completion = this;
 				window.setTimeout(function(){ //wait a few milliseconds for the input field to focus 
-					that._inputField.focus();
-				}, 200);
+					this._inputField.focus();
+				}.bind(completion), 200);
 			} else {
-				that._dismiss();
+				this._dismiss();
 			}
-		});
+		}.bind(this));
 		this._inputField.addEventListener("keydown", function(e) {
-			that.onKeyDown(e);
-		});
+			this.onKeyDown(e);
+		}.bind(this));
 		this._inputField.addEventListener("input", function(e) {
-			that._proposeOn(that._inputField.value);
-		});
+			this._proposeOn(this._inputField.value);
+		}.bind(this));
 		this._inputField.addEventListener("focus", function(e) {
-			if(!that._dismissed || !that._binderFunc){
+			if(!this._dismissed || !this._binderFunc){
 				return;
 			}
-			if(that._dismissing){
-				that._dismissing = false;
+			if(this._dismissing){
+				this._dismissing = false;
 				return;
 			}
-			if(that._binderFunc){// If a binder function is provided, every time when the input field is focused, we would ask for the full set of data and propose based on that
-				that._binderFunc(function(dataList){
-					that._bind(dataList);
-					that._proposeOn(that._inputField.value);
-				});
+			if(this._binderFunc){// If a binder function is provided, every time when the input field is focused, we would ask for the full set of data and propose based on that
+				var completion = this;
+				this._binderFunc(function(dataList){
+					this._bind(dataList);
+					this._proposeOn(this._inputField.value);
+				}.bind(completion));
 			}
-		});
+		}.bind(this));
 	}
 	
 	/**
@@ -156,7 +157,7 @@ define([], function(){
 			document.body.appendChild(this._completionUIContainer);
 		}
 		this._completionUIContainer.textContent = "";
-		this._completionUL = document.getElementById(this._getUIProposalListId())
+		this._completionUL = document.getElementById(this._getUIProposalListId());
 		if(!this._completionUL){
 			this._completionUL = document.createElement('ul');//$NON-NLS-0$
 			this._completionUL.id = this._getUIProposalListId();
@@ -173,11 +174,11 @@ define([], function(){
 		return link;
 	};
 	
-	InputCompletion.prototype._createBoldText = function(text, boldIndex, boldLength){
+	InputCompletion.prototype._createBoldText = function(text, boldIndex, boldLength, parent){
 		if(boldIndex < 0){
 			return document.createTextNode(text);
 		}
-		var parentSpan = document.createElement('span'); //$NON-NLS-0$
+		var parentSpan = parent ? parent: document.createElement('span'); //$NON-NLS-0$
 		var startIndex = 0;
 		var textNode;
 		if(startIndex !== boldIndex){
@@ -200,33 +201,63 @@ define([], function(){
 		if(categoryList.length === 0){
 			return;
 		}
-		var that = this;
+		var listEle;
 		if(categoryName){
-			var listEle = document.createElement('li');
+			listEle = document.createElement('li');
 			listEle.className = "inputCompletionLICategory"; //$NON-NLS-0$
- 			var liText = document.createTextNode(categoryName);
+			var liText = document.createTextNode(categoryName);
 			listEle.appendChild(liText);
- 			this._completionUL.appendChild(listEle);
+			this._completionUL.appendChild(listEle);
 		}
-		for(var i=0; i < categoryList.length; i++){
-			var listEle = document.createElement('li');
+		
+		categoryList.forEach(function(category) {
+			listEle = document.createElement('li');
 			listEle.onmouseover = function(e){
-				that._selectProposal(e.currentTarget);
-			};
+				this._selectProposal(e.currentTarget);
+			}.bind(this);
 			listEle.onclick = function(e){
-				that._dismiss(e.currentTarget.completionItem.value);
-			};
+				this._dismiss(e.currentTarget.completionItem.value);
+			}.bind(this);
 			listEle.className = "inputCompletionLINormal"; //$NON-NLS-0$
-			listEle.completionItem = categoryList[i].item;
-			if(typeof categoryList[i].item.value === "string"){
-				var liTextEle = this._createBoldText(categoryList[i].item.value, categoryList[i].boldIndex, categoryList[i].boldLength);
-				listEle.appendChild(liTextEle);
-			} else if(categoryList[i].item.value.name && categoryList[i].item.value.type === "link"){
-				listEle.appendChild(this._createProposalLink(categoryList[i].item.value.name, categoryList[i].item.value.value, categoryList[i].boldIndex, categoryList[i].boldLength));
+			listEle.completionItem = category.item;
+			var deleteBtn;
+			if(typeof category.item.value === "string"){
+				var tbl = document.createElement('table'); //$NON-NLS-0$
+				tbl.style.width = "100%"; //$NON-NLS-0$
+				tbl.style.tableLayout = 'fixed'; //$NON-NLS-0$
+				tbl.style.borderSpacing = "0"; //$NON-NLS-0$
+				var tr = document.createElement('tr');
+				tr.style.width = this._inputField.offsetWidth + "px"; //$NON-NLS-0$
+				tbl.appendChild(tr);
+				var td1 = document.createElement('td'); //$NON-NLS-0$
+				var liTextEle = this._createBoldText(category.item.value, category.boldIndex, category.boldLength);
+				td1.appendChild(liTextEle);
+				td1.style.overflow = 'hidden'; //$NON-NLS-0$
+				tr.appendChild(td1);
+				
+				deleteBtn = document.createElement('button');
+				deleteBtn.classList.add("dismissButton"); //$NON-NLS-0$
+				deleteBtn.classList.add("layoutRight"); //$NON-NLS-0$
+				deleteBtn.classList.add("core-sprite-close"); //$NON-NLS-0$
+				deleteBtn.classList.add("imageSprite"); //$NON-NLS-0$
+				deleteBtn.style.display = "none"; //$NON-NLS-0$
+				deleteBtn.style.margin = "0 0 0"; //$NON-NLS-0$
+				deleteBtn.title = "Delete the search term. You can also use delete key.";
+				deleteBtn.onclick = function(e){
+					e.stopPropagation();
+				}.bind(this);
+				
+				var td2 = document.createElement('td'); //$NON-NLS-0$
+				td2.style.width = "16px"; //$NON-NLS-0$
+				td2.appendChild(deleteBtn);
+				tr.appendChild(td2);
+				listEle.appendChild(tbl);
+			} else if(category.item.value.name && category.item.value.type === "link"){ //$NON-NLS-0$
+				listEle.appendChild(this._createProposalLink(category.item.value.name, category.item.value.value, category.boldIndex, category.boldLength));
 			}
- 			this._completionUL.appendChild(listEle);
- 			this._proposalList.push({item: categoryList[i].item, domNode: listEle});
-		}
+			this._completionUL.appendChild(listEle);
+			this._proposalList.push({item: category.item, domNode: listEle, deleteBtn: deleteBtn});
+		}.bind(this));
 	};
 
 	InputCompletion.prototype._domNode2Index = function(domNode){
@@ -240,17 +271,22 @@ define([], function(){
 	
 	InputCompletion.prototype._highlight = function(indexOrDomNode, selected){
 		var domNode = indexOrDomNode;
+		var deleteBtn;
 		var fromIndex = false;
 		if(!isNaN(domNode)){
 			fromIndex = true;
 			if(this._proposalList && indexOrDomNode >= 0 && indexOrDomNode < this._proposalList.length){
 				domNode = this._proposalList[indexOrDomNode].domNode;
+				deleteBtn = this._proposalList[indexOrDomNode].deleteBtn;
 			} else {
 				domNode = null;
 			}
 		}
 		if(domNode){
-			domNode.className = (selected ? "inputCompletionLISelected": "inputCompletionLINormal"); //$NON-NLS-0$ //$NON-NLS-0$
+			domNode.className = (selected ? "inputCompletionLISelected": "inputCompletionLINormal"); //$NON-NLS-1$ //$NON-NLS-0$
+			if(deleteBtn){
+				//deleteBtn.style.display = selected ? "": "none"; //$NON-NLS-0$
+			}
 			if(selected && fromIndex){
 				if (domNode.offsetTop < this._completionUIContainer.scrollTop) {
 					domNode.scrollIntoView(true);
@@ -292,10 +328,9 @@ define([], function(){
 				window.location.href = valueToInputField.value;
 			}
 		}
-		var that = this;
 		window.setTimeout(function(){ //wait a few milliseconds for the proposal pane to hide 
-			that._completionUIContainer.style.display = "none"; //$NON-NLS-0$
-		}, 200);
+			this._completionUIContainer.style.display = "none"; //$NON-NLS-0$
+		}.bind(this), 200);
 	};
 	
 	InputCompletion.prototype._show = function(){
@@ -335,20 +370,21 @@ define([], function(){
 		var categoryName = "";
 		var categoryList = [];
 		var searchTermLen = searchTerm ? searchTerm.length : 0;
-		for(var i=0; i < datalist.length; i++){
-			if(datalist[i].type === "category"){ //$NON-NLS-0$
+		
+		datalist.forEach(function(data) {
+			if(data.type === "category"){ //$NON-NLS-0$
 				this._proposeOnCategory(categoryName, categoryList);
-				categoryName = datalist[i].label;
+				categoryName = data.label;
 				categoryList = [];
 			} else {
 				var proposed = true;
 				var pIndex = -1;
 				if(searchTerm && filterForMe){
 					var searchOn;
-					if(typeof datalist[i].value === "string"){
-						searchOn = datalist[i].value.toLowerCase();
-					} else if(datalist[i].value.name){
-						searchOn = datalist[i].value.name.toLowerCase();
+					if(typeof data.value === "string"){
+						searchOn = data.value.toLowerCase();
+					} else if(data.value.name){
+						searchOn = data.value.name.toLowerCase();
 					}
 					pIndex = searchOn.indexOf(searchTerm);
 					if(pIndex < 0){
@@ -358,10 +394,10 @@ define([], function(){
 					} 
 				}
 				if(proposed){
-					categoryList.push({item: datalist[i], boldIndex: pIndex, boldLength: searchTermLen});
+					categoryList.push({item: data, boldIndex: pIndex, boldLength: searchTermLen});
 				}
 			}
-		}
+		}.bind(this));
 		this._proposeOnCategory(categoryName, categoryList);
 	};
 	
@@ -373,15 +409,15 @@ define([], function(){
 		//this._proposeOnList(topList, searchTerm, false);
 		this._proposeOnList(this._dataList, searchTerm, true);
 		if(this._extendedProvider && searchTerm){
-			var that = this;
 			this._extendedProvider(inputValue, function(extendedProposals){
 				if(extendedProposals){
-					for(var i = 0; i < extendedProposals.length; i++){
-						that._proposeOnList(extendedProposals[i].proposals, extendedProposals[i].filterForMe ? searchTerm : inputValue, extendedProposals[i].filterForMe);
-					}
+					var completion = this;
+					extendedProposals.forEach(function(extendedProposal) {
+						this._proposeOnList(extendedProposal.proposals, extendedProposal.filterForMe ? searchTerm : inputValue, extendedProposal.filterForMe);
+					}.bind(completion));
 				}
-				that._show();	
-			}, []);
+				this._show();	
+			}.bind(this), []);
 		} else {
 			this._show();
 		}
