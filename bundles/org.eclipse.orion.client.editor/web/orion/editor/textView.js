@@ -1019,7 +1019,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 				return model.getLineStart(lineIndex);
 			}
-			if (data.unit === "wordend" || data.unit === "wordWS") { //$NON-NLS-0$
+			if (data.unit === "wordend" || data.unit === "wordWS") { //$NON-NLS-1$ //$NON-NLS-0$
 				return this._getNextOffset_W3C(offset, data);
 			}
 			return util.isIE ? this._getNextOffset_IE(offset, data) : this._getNextOffset_W3C(offset, data);
@@ -1042,7 +1042,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var offsetInLine = offset - lineStart;
 			var c;
 			var step = data.count < 0 ? -1 : 1;
-			if (data.unit === "word" || data.unit === "wordend" || data.unit === "wordWS") { //$NON-NLS-1$ //$NON-NLS-0$
+			if (data.unit === "word" || data.unit === "wordend" || data.unit === "wordWS") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var previousPunctuation, previousLetterOrDigit, punctuation, letterOrDigit;
 				while (data.count !== 0) {
 					if (data.count > 0) {
@@ -1053,7 +1053,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						offsetInLine++;
 						while (offsetInLine < lineLength) {
 							c = lineText.charCodeAt(offsetInLine);
-							if (data.unit !== "wordWS") {
+							if (data.unit !== "wordWS") { //$NON-NLS-0$
 								punctuation = _isPunctuation(c);
 								if (data.unit === "wordend") { //$NON-NLS-0$
 									if (!punctuation && previousPunctuation) { break; }
@@ -5842,7 +5842,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						}
 						var next = lineChild.nextSibling;
 						var style = lineChild.viewStyle;
-						if (style && style.tagName === "A") { //$NON-NLS-0$
+						if (style && style.tagName && style.tagName.toLowerCase() === "a") { //$NON-NLS-0$
 							line.replaceChild(line._line._createSpan(line, lineChild.firstChild.data, style), lineChild);
 						}
 						lineChild = next;
