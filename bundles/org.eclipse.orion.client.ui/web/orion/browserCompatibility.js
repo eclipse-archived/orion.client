@@ -15,10 +15,10 @@ define(function() {
 		var userAgent = navigator.userAgent;
 		var isSupported = false;
 		var VERSION = 1;
-		var browserData = [	{name:'Chrome', regExp: /chrome\/(\d+)/i, minVersion: 24},
-							{name:'Firefox', regExp: /firefox\/(\d+)/i, minVersion: 20},
-							{name:'MSIE', regExp: /msie\s(\d+)/i, minVersion: 10},
-							{name:'Safari', regExp: /version\/(\d+).*?safari/i, minVersion: 6} ];
+		var browserData = [	{name: 'Chrome', regExp: /(?:chrome|crios)\/(\d+)/i, minVersion: 24},
+							{name: 'Firefox', regExp: /firefox\/(\d+)/i, minVersion: 20},
+							{name: 'MSIE', regExp: /msie\s(\d+)/i, minVersion: 10},
+							{name: 'Safari', regExp: /version\/(\d+).*?safari/i, minVersion: 6} ];
 
 		for (var i = 0; i < browserData.length; i++) {
 			var browser = browserData[i];
