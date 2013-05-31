@@ -33,7 +33,7 @@ define(function() {
 	}
 
 	if (!isSupportedBrowser()) {
-		alert("Sorry, your browser is not supported.\n\nTo use Orion, we recommend that you use the latest web browsers from Google Chrome, FireFox, or Safari.\n");
+		alert("Sorry, your browser is not supported.\n\nTo use Orion, the latest version of the Chrome, Firefox, or Safari web browser is recommended.\n");
 		throw 'unsupported browser';
 	}
 	
