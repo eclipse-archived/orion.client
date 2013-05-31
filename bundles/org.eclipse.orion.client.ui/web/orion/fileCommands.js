@@ -462,14 +462,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			choices.push({name: messages["Choose folder..."], callback: prompt});
 			return choices;
 		}
-		
+
 		var oneOrMoreFilesOrFolders = function(item) {
 			var items = Array.isArray(item) ? item : [item];
 			if (items.length === 0) {
 				return false;
 			}
 			for (var i=0; i < items.length; i++) {
-				if (!items[i].Location) {
+				item = items[i];
+				if (!item.Location || item.Projects /*Workspace root, not a file or folder*/) {
 					return false;
 				}
 			}
@@ -514,7 +515,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					if (Array.isArray(item)) {
 						return item.length === 1 && item[0].Name;
 					}
-					return item.Location;
+					return item.Location && !item.Projects;
 				},
 				parameters: new mCommandRegistry.ParametersDescription(null, {},
 					function(commandInvocation) {
@@ -535,7 +536,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						Deferred.when(getLogicalModelItems(item), function(logicalItems) {
 							item = logicalItems.item;
 							var parent = logicalItems.parent;
-							if (parent.Projects) {
+							if (parent && parent.Projects) {
 								//special case for moving a project. We want to move the project rather than move the project's content
 								parent.Projects.some(function(project) {
 									if (project.Id === item.Id) {
@@ -648,7 +649,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							return Deferred.when(getLogicalModelItems(item), function(logicalItems) {
 								item = logicalItems.item;
 								var parent = logicalItems.parent;
-								if (parent.Projects) {
+								if (parent && parent.Projects) {
 									//special case for deleting a project. We want to remove the project rather than delete the project's content
 									deleteLocation = null;
 									parent.Projects.some(function(project) {
@@ -671,14 +672,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 											parent: parent
 										});
 										dispatchModelEvent({ type: "delete", oldValue: item, newValue: null, parent: parent });
-									}, function(error) {
-										errorHandler(error);
-									});
+									}, errorHandler);
 							});
 						});
 						Deferred.all(deferredDeletes).then(function() {
 							dispatchModelEvent({ type: "deleteMultiple", items: summary }); //$NON-NLS-0$
-						});
+						}, errorHandler);
 					}
 				);	
 			}});
