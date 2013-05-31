@@ -434,6 +434,10 @@ a.currentLocation:hover {
 	min-width: 15em;
 }
 
+.tooltip .navlinkonpage {
+	color:skyblue;
+}
+
 .tooltipTailFromleft {
 	position: absolute;
 	display: inline-block;
