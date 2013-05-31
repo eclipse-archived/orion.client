@@ -90,9 +90,8 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 				* insensitive mode. The fix is to detect the presence of Turkish i's in the search pattern and 
 				* to modify the pattern to search for both upper and lower case.
 				*/
-				if (caseInsensitive && (pattern.indexOf("\u0130") !== -1 || pattern.indexOf("\u0131") !== -1)) {  //$NON-NLS-1$ //$NON-NLS-0$
-					pattern = pattern.replace(/[i\u0130]/g, "[i\u0130]"); //$NON-NLS-0$
-					pattern = pattern.replace(/[I\u0131]/g, "[I\u0131]"); //$NON-NLS-0$
+				if (caseInsensitive) {  //$NON-NLS-1$ //$NON-NLS-0$
+					pattern = pattern.replace(/[iI\u0130\u0131]/g, "[Ii\u0130\u0131]"); //$NON-NLS-0$
 				}
 			}
 			var current = null, skip;
