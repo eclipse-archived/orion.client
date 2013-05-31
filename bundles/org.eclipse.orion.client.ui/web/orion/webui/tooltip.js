@@ -133,7 +133,13 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 				this._tipInner.classList.remove("left"); //$NON-NLS-0$
 			}
 
-			var rect = lib.bounds(this._node);
+			// Sometimes _node is not visible (eg. if _node is a dropdown menu item in a closed menu), so find
+			// the nearest ancestor with a reasonable bound
+			var posNode = this._node;
+			var rect;
+			for (rect = lib.bounds(posNode); posNode && !rect.width && !rect.height; posNode = posNode.parentNode) {
+				rect = lib.bounds(posNode);
+			}
 			var tipRect = lib.bounds(this._tipInner);
 			var top, left;
 			
