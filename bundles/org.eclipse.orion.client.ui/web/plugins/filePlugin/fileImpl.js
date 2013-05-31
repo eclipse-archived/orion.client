@@ -392,7 +392,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 				url.query.set("parts", "meta");
 			}
 			return xhr("GET", url.href, {
-				timeout: 5000,
+				timeout: 15000,
 				headers: { "Orion-Version": "1" },
 				log: false
 			}).then(function(result) {
@@ -425,7 +425,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 				headerData["If-Match"] = args.ETag;
 			}
 			var options = {
-				timeout: 5000,
+				timeout: 15000,
 				headers: headerData,
 				data: contents,
 				log: false
