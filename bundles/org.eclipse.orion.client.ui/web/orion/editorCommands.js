@@ -187,7 +187,11 @@ exports.EditorCommandFactory = (function() {
 			this.commandService.addCommand(gotoLineCommand);
 			this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// override the editor binding
-			editor.getTextView().setAction("gotoLine", function () { //$NON-NLS-0$
+			editor.getTextView().setAction("gotoLine", function (data) { //$NON-NLS-0$
+				if (data) {
+					editor.onGotoLine(data.line - 1, 0);
+					return true;
+				} 
 				self.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
 				return true;
 			}, gotoLineCommand);
