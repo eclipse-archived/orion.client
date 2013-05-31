@@ -544,8 +544,26 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 			for (var j = startLine + removedLineCount + 1; j < lineCount; j++) {
 				this._lineOffsets[j] += changeCount;
 			}
-			var args = [startLine + 1, removedLineCount].concat(newLineOffsets);
-			Array.prototype.splice.apply(this._lineOffsets, args);
+			
+			/*
+			* Feature in Chrome.  Chrome exceeds the maximum call stack when calling splice
+			* around 62k arguments. The limit seems to be higher on IE (250K) and Firefox (450k).
+			* The fix is to break the splice in junks of 50k.
+			*/
+			var SPLICE_LIMIT = 50000;
+			var limit = SPLICE_LIMIT, args;
+			if (newLineOffsets.length < limit) {
+				args = [startLine + 1, removedLineCount].concat(newLineOffsets);
+				Array.prototype.splice.apply(this._lineOffsets, args);
+			} else {
+				index = startLine + 1;
+				this._lineOffsets.splice(index, removedLineCount);
+				for (var k = 0; k < newLineOffsets.length; k += limit) {
+					args = [index, 0].concat(newLineOffsets.slice(k, Math.min(newLineOffsets.length, k + limit)));
+					Array.prototype.splice.apply(this._lineOffsets, args);
+					index += limit;
+				}
+			}
 			
 			var offset = 0, chunk = 0, length;
 			while (chunk<this._text.length) {
