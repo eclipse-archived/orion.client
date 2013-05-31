@@ -4038,8 +4038,13 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if ((visualIndex = line.getLineIndex(caret)) < line.getLineCount() - 1) {
 				y = line.getClientRects(visualIndex + 1).top + 1;
 			} else {
-				lastLine = lineIndex === model.getLineCount() - 1;
-				lineIndex++;
+				var lastLineCount = model.getLineCount() - 1;
+				lastLine = lineIndex === lastLineCount;
+				if (args.count && args.count > 0) {
+					lineIndex = Math.min (lineIndex + args.count, lastLineCount);
+				} else {
+					lineIndex++;
+				}
 			}
 			var select = false;
 			if (lastLine) {
@@ -4079,7 +4084,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			} else {
 				firstLine = lineIndex === 0;
 				if (!firstLine) {
-					lineIndex--;
+					if (args.count && args.count > 0) {
+						lineIndex = Math.max (lineIndex - args.count, 0);
+					} else {
+						lineIndex--;
+					}
 					y = this._getLineHeight(lineIndex) - 1;
 				}
 			}
