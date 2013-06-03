@@ -1022,7 +1022,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 				return model.getLineStart(lineIndex);
 			}
-			if (data.unit === "wordend" || data.unit === "wordWS") { //$NON-NLS-1$ //$NON-NLS-0$
+			if (data.unit === "wordend" || data.unit === "wordWS" || data.unit === "wordendWS") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				return this._getNextOffset_W3C(offset, data);
 			}
 			return util.isIE ? this._getNextOffset_IE(offset, data) : this._getNextOffset_W3C(offset, data);
@@ -1045,7 +1045,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var offsetInLine = offset - lineStart;
 			var c;
 			var step = data.count < 0 ? -1 : 1;
-			if (data.unit === "word" || data.unit === "wordend" || data.unit === "wordWS") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			if (data.unit === "word" || data.unit === "wordend" || data.unit === "wordWS" || data.unit === "wordendWS") { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var previousPunctuation, previousLetterOrDigit, punctuation, letterOrDigit;
 				while (data.count !== 0) {
 					if (data.count > 0) {
@@ -1056,7 +1056,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						offsetInLine++;
 						while (offsetInLine < lineLength) {
 							c = lineText.charCodeAt(offsetInLine);
-							if (data.unit !== "wordWS") { //$NON-NLS-0$
+							if (data.unit !== "wordWS" && data.unit !== "wordendWS") { //$NON-NLS-1$ //$NON-NLS-0$
 								punctuation = _isPunctuation(c);
 								if (data.unit === "wordend") { //$NON-NLS-0$
 									if (!punctuation && previousPunctuation) { break; }
@@ -1067,7 +1067,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 							} else {
 								letterOrDigit  = !_isWhitespace(c);
 							}
-							if (data.unit === "wordend") { //$NON-NLS-0$
+							if (data.unit === "wordend" || data.unit === "wordendWS") { //$NON-NLS-1$ //$NON-NLS-0$
 								if (!letterOrDigit && previousLetterOrDigit) { break; }
 							} else {
 								if (letterOrDigit && !previousLetterOrDigit) { break; }
@@ -1084,14 +1084,18 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						previousLetterOrDigit = !previousPunctuation && !_isWhitespace(c);
 						while (0 < offsetInLine) {
 							c = lineText.charCodeAt(offsetInLine - 1);
-							punctuation = _isPunctuation(c);
-							if (data.unit === "wordend") { //$NON-NLS-0$
-								if (punctuation && !previousPunctuation) { break; }
+							if (data.unit !== "wordWS" && data.unit !== "wordendWS") { //$NON-NLS-1$ //$NON-NLS-0$ 
+								punctuation = _isPunctuation(c);
+								if (data.unit === "wordend") { //$NON-NLS-0$
+									if (punctuation && !previousPunctuation) { break; }
+								} else {
+									if (!punctuation && previousPunctuation) { break; }
+								}
+								letterOrDigit  = !punctuation && !_isWhitespace(c);
 							} else {
-								if (!punctuation && previousPunctuation) { break; }
+								letterOrDigit  = !_isWhitespace(c);
 							}
-							letterOrDigit  = !punctuation && !_isWhitespace(c);
-							if (data.unit === "wordend") { //$NON-NLS-0$
+							if (data.unit === "wordend" || data.unit === "wordendWS") { //$NON-NLS-1$ //$NON-NLS-0$
 								if (letterOrDigit && !previousLetterOrDigit) { break; }
 							} else {
 								if (!letterOrDigit && previousLetterOrDigit) { break; }
