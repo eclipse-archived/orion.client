@@ -460,13 +460,18 @@ textarea.parameterInput {
 .keyAssistItem {
 }
 
+.keyAssistItem:hover {
+	color: black;
+	background: rgba(255, 255, 255, 0.3);
+}
+
 .keyAssistFloat h2 {
 	color: gold;
 }
 
 .keyAssistItem.selected {
 	color: black;
-	background: #eee;
+	background: rgba(255, 255, 255, 0.6);
 }
 
 .keyAssistName {
