@@ -32,7 +32,7 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commandRegistry', 'or
 			name : messages["Create"],
 			tooltip: messages["Create a new site configuration"],
 			id: "orion.site.create", //$NON-NLS-0$
-			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'string', messages["Name"])]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages["Name"])]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			visibleWhen: function(bah) {
 				return true;
 			},
