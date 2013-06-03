@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -321,7 +321,6 @@ define(['orion/widgets/themes/ThemeClass'],
 			auxpane.style.background = this.sidepanel;
 			auxpane.style.background = '-webkit-gradient(linear, left top, left bottom, color-stop(0%,' + this.sidepanel + '), color-stop(100%,' + this.sidepanel + '))';
 			auxpane.style.background ='-moz-linear-gradient(top, ' + this.sidepanel + ' 0%, ' + this.sidepanel + ' 100%)';
-			auxpane.style.overflowX = 'auto';
 			/*auxpane.style.paddingTop = '16px';*/
 			
 			styles.push( auxpane );
