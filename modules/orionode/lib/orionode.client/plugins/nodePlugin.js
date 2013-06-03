@@ -18,7 +18,7 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 		return url && ('[' + url + '](' + url + ')');
 	}
 	function getSocketURL(path) {
-		var socketBaseUrl = new URL();
+		var socketBaseUrl = new URL("");
 		var location = window.location;
 		socketBaseUrl.protocol = location.protocol;
 		socketBaseUrl.hostname = location.hostname;
