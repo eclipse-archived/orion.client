@@ -122,13 +122,14 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		
 		var textView = editor.getTextView();
 		textView.setAction("incrementalFindNext", function() { //$NON-NLS-0$
-			return this.lineDown();
+			return this.find(true, true);
 		}.bind(this));
 		textView.setAction("incrementalFindPrevious", function() { //$NON-NLS-0$
-			return this.lineUp();
+			return this.find(false, true);
 		}.bind(this));
 		textView.setAction("incrementalFindCancel", function() { //$NON-NLS-0$
-			return this.cancel();
+			this.setActive(false);
+			return true;
 		}.bind(this));
 		textView.setAction("incrementalFindBackspace", function() { //$NON-NLS-0$
 			return this.backspace();
@@ -171,22 +172,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			bindings.push({actionID: "incrementalFindPrevious", keyBinding: new KeyBinding(38)}); //$NON-NLS-0$
 			bindings.push({actionID: "incrementalFindNext", keyBinding: new KeyBinding(40)}); //$NON-NLS-0$
 			return bindings;
-		},
-		backspace: function() {
-			if (!this.isActive()) {
-				return false;
-			}
-			var prefix = this._prefix;
-			prefix = this._prefix = prefix.substring(0, prefix.length-1);
-			if (prefix.length === 0) {
-				this._success = true;
-				this._ignoreSelection = true;
-				this.editor.setCaretOffset(this.editor.getSelection().start);
-				this._ignoreSelection = false;
-				this._status();
-				return true;
-			}
-			return this.find(false);
 		},
 		find: function(forward, lookAhead) {
 			if (!this.isActive()) {
@@ -231,6 +216,9 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		isActive: function() {
 			return this._active;
 		},
+		isStatusActive: function() {
+			return this.isActive();
+		},
 		setActive: function(active) {
 			if (this._active === active) {
 				return;
@@ -252,22 +240,21 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			}
 			this._status();
 		},
-		cancel: function() {
-			this.setActive(false);
-			return true;
-		},
-		isStatusActive: function() {
-			return this.isActive();
-		},
-		lineUp: function() {
-			return this.find(false, true);
-		},
-		lineDown: function() {	
-			return this.find(true, true);
-		},
-		enter: function() {
-			this.setActive(false);
-			return true;
+		_backspace: function() {
+			if (!this.isActive()) {
+				return false;
+			}
+			var prefix = this._prefix;
+			prefix = this._prefix = prefix.substring(0, prefix.length-1);
+			if (prefix.length === 0) {
+				this._success = true;
+				this._ignoreSelection = true;
+				this.editor.setCaretOffset(this.editor.getSelection().start);
+				this._ignoreSelection = false;
+				this._status();
+				return true;
+			}
+			return this.find(false);
 		},
 		_status: function() {
 			if (!this.isActive()) {
@@ -1004,10 +991,12 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		
 		var textView = editor.getTextView();
 		textView.setAction("linkedModeEnter", function() { //$NON-NLS-0$
-			return this.enter();
+			this.exitLinkedMode(true);
+			return true;
 		}.bind(this));
 		textView.setAction("linkedModeCancel", function() { //$NON-NLS-0$
-			return this.cancel();
+			this.exitLinkedMode(false);
+			return true;
 		}.bind(this));
 		textView.setAction("linkedModeNextGroup", function() { //$NON-NLS-0$
 			var model = this.linkedModeModel;
@@ -1267,13 +1256,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		},
 		isStatusActive: function() {
 			return !!this.linkedModeModel;
-		},
-		enter: function() {
-			this.exitLinkedMode(true);
-			return true;
-		},
-		cancel: function() {
-			this.exitLinkedMode(false);
 		},
 		selectLinkedGroup: function(index) {
 			var model = this.linkedModeModel;
