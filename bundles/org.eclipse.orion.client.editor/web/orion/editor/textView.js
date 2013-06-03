@@ -1599,8 +1599,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @see #setAction
 		 */
 		getKeyBindings: function (actionID) {
-			//TODO: Go through all key modes, get all matching bindings and concat - also look at setKeyBinding
-			return this._keyModes[0].getKeyBindings(actionID);
+			var result = [];
+			var keyModes = this._keyModes;
+			for (var i = 0; i < keyModes.length; i++) {
+				result = result.concat(keyModes[i].getKeyBindings(actionID));
+			}
+			return result;
 		},
 		/**
 		 * Returns all the key modes added to text view.
@@ -2396,7 +2400,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				action = actions[actionID] = {};
 			}
 			action.handler = handler;
-			action.actionDescription = actionDescription;
+			if (actionDescription !== undefined) {
+				action.actionDescription = actionDescription;
+			}
 		},
 		/**
 		 * Associates a key binding with the given action ID. Any previous
@@ -2991,6 +2997,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				if (util.isSafari && util.isMac) {
 					if (e.ctrlKey) {
 						startIME = false;
+						e.keyCode = 0x81;
 					}
 				}
 				if (startIME) {

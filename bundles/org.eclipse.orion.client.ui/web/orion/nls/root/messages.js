@@ -17,6 +17,7 @@ define({
 	"Get Plugins": "Get Plugins",
 	"Global": "Global",
 	"Editor": "Editor",
+	"Filter bindings": "Filter bindings",
 	"Orion Editor": "Orion Editor",
 	"View on Site": "View on Site",
 	"View this file or folder on a web site hosted by Orion": "View this file or folder on a web site hosted by Orion",

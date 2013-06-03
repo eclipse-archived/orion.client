@@ -336,11 +336,11 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		
 		/**
 		 * Show the keybindings that are registered with the command registry inside the specified target node.
-		 * @param {DOMElement} targetNode the dom node where the key bindings should be shown.
+		 * @param {KeyAssistPanel} keyAssist the key assist panel
 		 */
-		showKeyBindings: function(targetNode) {
+		showKeyBindings: function(keyAssist) {
 			var scopes = {};
-			var bindingString, binding, span;
+			var bindingString, binding;
 			for (var aBinding in this._activeBindings) {
 				binding = this._activeBindings[aBinding];
 				if (binding && binding.keyBinding && binding.command) {
@@ -352,26 +352,16 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 						scopes[binding.keyBinding.scopeName].push(binding);
 					} else {
 						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
-						span = document.createElement("span"); //$NON-NLS-0$
-						span.role = "listitem"; //$NON-NLS-0$
-						span.appendChild(document.createTextNode(bindingString+ " = " + binding.command.name)); //$NON-NLS-0$
-						span.appendChild(document.createElement("br")); //$NON-NLS-0$
-						targetNode.appendChild(span);
+						keyAssist.createItem(bindingString, binding.command.name);
 					}
 				}
 			}
 			for (var scopedBinding in scopes) {
 				if (scopes[scopedBinding].length && scopes[scopedBinding].length > 0) {
-					var heading = document.createElement("h2"); //$NON-NLS-0$
-					targetNode.appendChild(heading);
-					heading.appendChild(document.createTextNode(scopedBinding));
+					keyAssist.createHeader(scopedBinding);
 					scopes[scopedBinding].forEach(function(binding) {
 						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
-						span = document.createElement("span"); //$NON-NLS-0$
-						span.role = "listitem"; //$NON-NLS-0$
-						span.appendChild(document.createTextNode(bindingString+ " = " + binding.command.name)); //$NON-NLS-0$
-						span.appendChild(document.createElement("br")); //$NON-NLS-0$
-						targetNode.appendChild(span);
+						keyAssist.createItem(bindingString, binding.command.name);
 					});
 				}	
 			}

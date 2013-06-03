@@ -603,35 +603,15 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandRegistry.setParameterCollector(new mParameterCollectors.CommandParameterCollector(getToolbarElements, layoutToolbarElements));
-		
-		// place an empty div for keyAssist
-		var keyAssistDiv = document.createElement("div");//$NON-NLS-0$
-		keyAssistDiv.id = "keyAssist";//$NON-NLS-0$
-		keyAssistDiv.style.display = "none";//$NON-NLS-0$
-		keyAssistDiv.classList.add("keyAssistFloat");//$NON-NLS-0$
-		keyAssistDiv.role="list";//$NON-NLS-0$
-		keyAssistDiv.setAttribute("aria-atomic", "true");//$NON-NLS-1$ //$NON-NLS-0$
-		keyAssistDiv.setAttribute("aria-live", "assertive");//$NON-NLS-1$ //$NON-NLS-0$
-		document.body.appendChild(keyAssistDiv);
-		
+
 		document.addEventListener("keydown", function (e){  //$NON-NLS-0$
 			if (e.keyCode === lib.KEY.ESCAPE) {
-				var activeElement = document.activeElement;
-				var hasFocus = keyAssistDiv === activeElement || keyAssistDiv.compareDocumentPosition(activeElement) === 8;
-				keyAssistDiv.style.display = "none"; //$NON-NLS-0$
-				if (hasFocus && document.compareDocumentPosition(keyAssistDiv._previousActiveElement) !== 1) {
-					keyAssistDiv._previousActiveElement.focus();
-				}
-				keyAssistDiv._previousActiveElement = null;
 				var statusService =	serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 				if(statusService){
 					statusService.setProgressMessage("");
 				}
 			}
 		}, false);
-		lib.addAutoDismiss([keyAssistDiv], function() {
-			keyAssistDiv.style.display = "none"; //$NON-NLS-0$
-		});
 		
 		var nav = document.getElementById( 'centralNavigation' );
 		
@@ -841,53 +821,226 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 
 		
 		// Key assist
+		function KeyAssistPanel() {
+			this.create();
+			this._filterString = "";
+		}
+		KeyAssistPanel.prototype = {
+			create: function() {
+				var keyAssistDiv = this._keyAssistDiv = document.createElement("div");//$NON-NLS-0$
+				keyAssistDiv.id = "keyAssist";//$NON-NLS-0$
+				keyAssistDiv.style.display = "none";//$NON-NLS-0$
+				keyAssistDiv.classList.add("keyAssistFloat");//$NON-NLS-0$
+				keyAssistDiv.role="list";//$NON-NLS-0$
+				keyAssistDiv.setAttribute("aria-atomic", "true");//$NON-NLS-1$ //$NON-NLS-0$
+				keyAssistDiv.setAttribute("aria-live", "assertive");//$NON-NLS-1$ //$NON-NLS-0$
+				var keyAssistInput = this._keyAssistInput = document.createElement("input"); //$NON-NLS-0$
+				keyAssistInput.className = "keyAssistInput"; //$NON-NLS-0$
+				keyAssistInput.type = "search"; //$NON-NLS-0$
+				keyAssistInput.placeholder = messages["Filter bindings"];
+				keyAssistDiv.appendChild(keyAssistInput);
+				var keyAssistContents = this._keyAssistContents = document.createElement("div");//$NON-NLS-0$
+				keyAssistContents.classList.add("keyAssistContents");//$NON-NLS-0$
+				keyAssistDiv.appendChild(keyAssistContents);
+				var keyAssistTable = this._keyAssistTable = document.createElement('table'); //$NON-NLS-0$
+				keyAssistTable.classList.add("keyAssistList");//$NON-NLS-0$
+				keyAssistContents.appendChild(keyAssistTable);
+				document.body.appendChild(keyAssistDiv);
+				keyAssistInput.addEventListener("keydown", function (e) {  //$NON-NLS-0$
+					if (e.keyCode === 40) {
+						this.select(true);
+					} else if (e.keyCode === 38) {
+						this.select(false);
+					} else if (e.keyCode === 13) {
+						this.execute();
+					} else {
+						return;
+					}
+					e.preventDefault();
+				}.bind(this));
+				keyAssistInput.addEventListener("input", function (e) {  //$NON-NLS-0$
+					this.filterChanged();
+				}.bind(this));
+				document.addEventListener("keydown", function (e) {  //$NON-NLS-0$
+					if (e.keyCode === lib.KEY.ESCAPE) {
+						this.hide();
+					}
+				}.bind(this));
+				lib.addAutoDismiss([keyAssistDiv], function() {
+					this.hide();
+				}.bind(this));
+			},
+			createContents: function() {
+				var table = this._keyAssistTable;
+				lib.empty(table);
+				this._selectedIndex = -1;
+				this._selectedRow = null;
+				this._keyAssistContents.scrollTop = 0;
+
+				if (editor && editor.getTextView()) {
+					var textView = editor.getTextView();
+					var editorActions = textView.getActions(true);
+					editorActions.sort(function(a, b) {
+						var descA = textView.getActionDescription(a);
+						var descB = textView.getActionDescription(b);
+						if (!descA || !descA.name || !descB || !descB.name) {
+							return -1;
+						}
+						return descA.name.localeCompare(descB.name);
+					});
+					this.createHeader(messages["Editor"]);
+					var execute = function(actionID) {
+						return function() {
+							textView.focus();
+							return textView.invokeAction(actionID);
+						};
+					};
+					for(var i=0; i<editorActions.length; i++) {
+						var actionID = editorActions[i];
+						var actionDescription = textView.getActionDescription(actionID);
+						if (!actionDescription || !actionDescription.name) { continue; }
+						var bindings = textView.getKeyBindings(actionID);
+						for (var j=0; j<bindings.length; j++) {
+							var bindingString = mUIUtils.getUserKeyString(bindings[j]);
+							this.createItem(bindingString, actionDescription.name, execute(actionID));
+						}
+					}
+				}
+				this.createHeader(messages["Global"]);
+				commandRegistry.showKeyBindings(this);
+			},
+			createItem: function(bindingString, name, execute) {
+				if (this._filterString) {
+					var s = this._filterString.toLowerCase(), insensitive;
+					if (s !== this._filterString) {
+						s = this._filterString;
+						insensitive = function(str) { return str; };
+					} else {
+						insensitive = function(str) { return str.toLowerCase(); };
+					}
+					if (
+						insensitive(name).indexOf(s) === -1 && 
+						insensitive(bindingString).indexOf(s) === -1 && 
+						insensitive(this._lastHeader).indexOf(s) === -1
+					) {
+						return;
+					}
+				}
+				var row = this._keyAssistTable.insertRow(-1);
+				row._execute = execute;
+				row.classList.add("keyAssistItem"); //$NON-NLS-0$
+				row.addEventListener("click", function(e) { //$NON-NLS-0$
+					this._selectedRow = row;
+					this.execute();
+					e.preventDefault();
+				}.bind(this));
+				var column = row.insertCell(-1);
+				column.classList.add("keyAssistName"); //$NON-NLS-0$
+				column.appendChild(document.createTextNode(name));
+				column = row.insertCell(-1);
+				column.classList.add("keyAssistAccel"); //$NON-NLS-0$
+				column.appendChild(document.createTextNode(bindingString));
+			},
+			createHeader: function(name) {
+				this._lastHeader = name;
+				var row = this._keyAssistTable.insertRow(-1);
+				row.classList.add("keyAssistSection");//$NON-NLS-0$
+				var column = row.insertCell(-1);
+				var heading = document.createElement("h2"); //$NON-NLS-0$
+				heading.appendChild(document.createTextNode(name));
+				column.appendChild(heading);
+			},
+			execute: function() {
+				window.setTimeout(function() {
+					this.hide();
+					var row = this._selectedRow;
+					this._selectedRow = null;
+					if (row && row._execute) {
+							row._execute();
+					}
+				}.bind(this), 0);
+			},
+			filterChanged: function() {
+				if (this._timeout) {
+					window.clearTimeout(this._timeout);
+				}
+				this._timeout = window.setTimeout(function() {
+					this._timeout = null;
+					var value = this._keyAssistInput.value;
+					if (this._filterString !== value) {
+						this._filterString = value;
+						this.createContents();
+					}
+				}.bind(this), 100);
+			},
+			hide: function() {
+				var activeElement = document.activeElement;
+				var keyAssistDiv = this._keyAssistDiv;
+				var hasFocus = keyAssistDiv === activeElement || (keyAssistDiv.compareDocumentPosition(activeElement) & 16) !== 0;
+				keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+				if (hasFocus && document.compareDocumentPosition(this._previousActiveElement) !== 1) {
+					this._previousActiveElement.focus();
+				}
+				this._previousActiveElement = null;
+			},
+			isVisible: function() {
+				return this._keyAssistDiv.style.display === "block"; //$NON-NLS-0$
+			},
+			select: function(forward) {
+				var rows = this._keyAssistTable.querySelectorAll(".keyAssistItem"), row; //$NON-NLS-0$
+				if (rows.length === 0) {
+					this._selectedIndex = -1;
+					return;
+				}
+				var selectedIndex = this._selectedIndex;
+				selectedIndex += forward ? 1 : -1;
+				selectedIndex %= rows.length;
+				if (selectedIndex < 0) {
+					selectedIndex = rows.length - 1;
+				}
+				if (this._selectedIndex !== -1) {
+					row = rows[this._selectedIndex];
+					row.classList.remove("selected");//$NON-NLS-0$
+					this._selectedRow = null;
+				}
+				this._selectedIndex = selectedIndex;
+				if (this._selectedIndex !== -1) {
+					this._selectedRow = row = rows[this._selectedIndex];
+					row.classList.add("selected"); //$NON-NLS-0$
+					var rowRect = row.getBoundingClientRect();
+					var parent = this._keyAssistContents;
+					var rect = parent.getBoundingClientRect();
+					if (row.offsetTop < parent.scrollTop) {
+						if (selectedIndex === 0) {
+							parent.scrollTop = 0;
+						} else {
+							row.scrollIntoView(true);
+						}
+					} else if (rowRect.bottom > rect.bottom) {
+						row.scrollIntoView(false);
+					}
+				}
+			},
+			show: function() {
+				this._previousActiveElement = document.activeElement;
+				this.createContents();
+				this._keyAssistContents.style.height = Math.floor(this._keyAssistDiv.parentNode.clientHeight * 0.8) + "px"; //$NON-NLS-0$
+				this._keyAssistDiv.style.display = "block"; //$NON-NLS-0$
+				this._keyAssistInput.value = this._filterString;
+				this._keyAssistInput.focus();
+			}
+		};
+		var keyAssist = new KeyAssistPanel();
+		
 		var keyAssistCommand = new mCommands.Command({
 			name: messages["Show Keys"],
 			tooltip: messages["Show a list of all the keybindings on this page"],
 			id: "eclipse.keyAssist", //$NON-NLS-0$
 			callback: function() {
-				if (keyAssistDiv.style.display === "none") { //$NON-NLS-0$
-					var heading;
-					lib.empty(keyAssistDiv);
-					if (editor && editor.getTextView()) {
-						var textView = editor.getTextView();
-						heading = document.createElement("h2"); //$NON-NLS-0$
-						heading.appendChild(document.createTextNode(messages["Editor"]));
-						keyAssistDiv.appendChild(heading);
-						var editorActions = textView.getActions(true);
-						editorActions.sort(function(a, b) {
-							var descA = textView.getActionDescription(a);
-							var descB = textView.getActionDescription(b);
-							if (!descA || !descA.name || !descB || !descB.name) {
-								return -1;
-							}
-							return descA.name.localeCompare(descB.name);
-						});
-						for(var i=0; i<editorActions.length; i++) {
-							var actionID = editorActions[i];
-							var actionDescription = textView.getActionDescription(actionID);
-							if (!actionDescription || !actionDescription.name) { continue; }
-							var bindings = textView.getKeyBindings(actionID);
-							for (var j=0; j<bindings.length; j++) {
-								var bindingString = mUIUtils.getUserKeyString(bindings[j]);
-								var span = document.createElement("span"); //$NON-NLS-0$
-								span.role = "listitem"; //$NON-NLS-0$
-								span.appendChild(document.createTextNode(bindingString + " = " + actionDescription.name));  //$NON-NLS-0$
-								span.appendChild(document.createElement("br")); //$NON-NLS-0$
-								keyAssistDiv.appendChild(span);
-							}
-						}
-					}
-					heading = document.createElement("h2"); //$NON-NLS-0$
-					heading.appendChild(document.createTextNode(messages["Global"]));
-					keyAssistDiv.appendChild(heading);
-					commandRegistry.showKeyBindings(keyAssistDiv);
-					keyAssistDiv._previousActiveElement = document.activeElement;
-					keyAssistDiv.style.display = "block"; //$NON-NLS-0$
-					keyAssistDiv.tabIndex = 0;
-					keyAssistDiv.focus();
+				if (keyAssist.isVisible()) {
+					keyAssist.hide();
 				} else {
-					keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+					keyAssist.show();
 				}
 				return true;
 			}});

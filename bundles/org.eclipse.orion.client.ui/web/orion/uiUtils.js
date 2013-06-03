@@ -17,8 +17,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 	 * @class This class contains static utility methods.
 	 * @name orion.uiUtils
 	 */
-
-	function getUserKeyString(binding) {
+	
+	function getUserKeyStrokeString(binding) {
 		var userString = "";
 		var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 	
@@ -88,6 +88,18 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			return userString+"F"+ (binding.keyCode - 111); //$NON-NLS-0$
 		}
 		return userString+String.fromCharCode(binding.keyCode);
+	}
+
+	function getUserKeyString(binding) {
+		var result = "";
+		var keys = binding.getKeys();
+		for (var i = 0; i < keys.length; i++) {
+			if (i !== 0) {
+				result += " "; //$NON-NLS-0$
+			}
+			result += getUserKeyStrokeString(keys[i]);
+		}
+		return result;
 	}
 
 	/**
