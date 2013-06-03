@@ -38,7 +38,7 @@ define(['orion/editor/textTheme'],
 			return resultString + result;
 		}
 		
-		var defaultFont = '"Monaco", "Consolas", "Vera Mono", "monospace"';
+		var defaultFont = '"Consolas", "Monaco", "Vera Mono", "monospace"';
 		var defaultFontSize = '10pt';
 
 		function ThemeData() {
