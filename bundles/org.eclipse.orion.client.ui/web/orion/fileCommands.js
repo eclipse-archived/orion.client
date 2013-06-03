@@ -732,7 +732,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);
+			}
+		});
 		commandService.addCommand(newFileCommand);
 		
 		var newFolderNameParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Folder name:'], messages['New Folder'])]); //$NON-NLS-1$ //$NON-NLS-0$
@@ -771,8 +773,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
-	
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);
+			}
+		});
 		commandService.addCommand(newFolderCommand);
 
 		var zipURLParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('url', 'url', messages['File URL:'], 'URL'), new mCommandRegistry.CommandParameter('unzip', 'boolean', messages["Unzip *.zip files:"], true)]);//$NON-NLS-4$  //$NON-NLS-3$  //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
@@ -800,7 +803,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);}
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);
+			}
 		});
 		commandService.addCommand(importZipURLCommand);
 		
@@ -856,7 +860,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					errorHandler(messages["The name and server location were not specified."]);
 				}
 			},
-			visibleWhen: canCreateProject});
+			visibleWhen: canCreateProject
+		});
 		commandService.addCommand(linkProjectCommand);
 		
 		var goUpCommand = new mCommands.Command({
@@ -969,7 +974,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				return makeMoveCopyTargetChoices(items, userData, false);
 			},
 			visibleWhen: oneOrMoreFilesOrFolders
-			});
+		});
 		commandService.addCommand(moveCommand);
 		
 		var bufferedSelection = [];

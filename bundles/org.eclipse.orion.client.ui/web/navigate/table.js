@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -40,7 +40,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 			children:[]
 		};
 				
-	
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 		
 		var explorer = new mExplorerTable.FileExplorer({
@@ -92,10 +91,11 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		mFileCommands.createFileCommands(serviceRegistry, commandRegistry, explorer, fileClient); 
 		
 		// define the command contributions - where things appear, first the groups
-		commandRegistry.addCommandGroup("pageActions", "orion.new", 1000, messages["New"]); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup("pageActions", "orion.new", 1000, messages["New"], null, null, "core-sprite-add-content"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup("pageActions", "eclipse.new", 1000, messages["New"], null, null, "core-sprite-add-content"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup("pageActions", "orion.gitGroup", 200); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup("selectionTools", "orion.selectionGroup", 500, messages["Actions"], null, null); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup("selectionTools", "orion.importExportGroup", 100, null, "orion.selectionGroup");		 //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup("selectionTools", "orion.selectionGroup", 500, messages["Actions"], null, null, "core-sprite-settings"); //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.addCommandGroup("selectionTools", "orion.importExportGroup", 100, null, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup("selectionTools", "orion.newResources", 101, null, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		// commands that don't appear but have keybindings
 		commandRegistry.registerCommandContribution("pageActions", "eclipse.copySelections", 1, null, true, new KeyBinding.KeyBinding('c', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -104,9 +104,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		// commands appearing in nav tool bar
 		commandRegistry.registerCommandContribution("pageActions", "eclipse.openResource", 500); //$NON-NLS-1$ //$NON-NLS-0$
 		
-		//new file and new folder in the nav bar do not label the group (we don't want a menu)
-		commandRegistry.registerCommandContribution("pageActions", "eclipse.newFile", 1); //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution("pageActions", "eclipse.newFolder", 2, null, false, null, new mCommandRegistry.URLBinding("newFolder", "name")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		// new file and new folder in the nav bar (in a group)
+		commandRegistry.registerCommandContribution("pageActions", "eclipse.newFile", 1, "eclipse.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("pageActions", "eclipse.newFolder", 2, "eclipse.new", false, null, new mCommandRegistry.URLBinding("newFolder", "name")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution("pageActions", "eclipse.upFolder", 3, null, true, new KeyBinding.KeyBinding(38, false, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 		// new project creation in the toolbar (in a group)
 		commandRegistry.registerCommandContribution("pageActions", "orion.new.project", 1, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
