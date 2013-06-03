@@ -834,14 +834,13 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 
 				if (editor && editor.getTextView()) {
 					var textView = editor.getTextView();
-					var editorActions = textView.getActions(true);
+					// Remove actions without descriptions
+					var editorActions = textView.getActions(true).filter(function(element) {
+						var desc = textView.getActionDescription(element);
+						return desc && desc.name;
+					});
 					editorActions.sort(function(a, b) {
-						var descA = textView.getActionDescription(a);
-						var descB = textView.getActionDescription(b);
-						if (!descA || !descA.name || !descB || !descB.name) {
-							return -1;
-						}
-						return descA.name.localeCompare(descB.name);
+						return textView.getActionDescription(a).name.localeCompare(textView.getActionDescription(b).name);
 					});
 					this.createHeader(messages["Editor"]);
 					var execute = function(actionID) {
@@ -853,7 +852,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					for(var i=0; i<editorActions.length; i++) {
 						var actionID = editorActions[i];
 						var actionDescription = textView.getActionDescription(actionID);
-						if (!actionDescription || !actionDescription.name) { continue; }
 						var bindings = textView.getKeyBindings(actionID);
 						for (var j=0; j<bindings.length; j++) {
 							var bindingString = mUIUtils.getUserKeyString(bindings[j]);
