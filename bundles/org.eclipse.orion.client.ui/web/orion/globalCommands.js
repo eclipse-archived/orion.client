@@ -15,10 +15,11 @@
 define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/commandRegistry', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
 	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData',	'orion/Deferred',
-	'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html', 'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 'orion/widgets/input/GroupedContent'], 
+	'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html', 'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 'orion/widgets/input/GroupedContent',
+	'orion/util'], 
         function(messages, require, commonHTML, KeyBinding, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
         mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, mThemePreferences, mThemeData, 
-        Deferred, mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent){
+        Deferred, mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent, util){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -861,6 +862,9 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				keyAssistInput.addEventListener("input", function (e) {  //$NON-NLS-0$
 					this.filterChanged();
 				}.bind(this));
+				keyAssistContents.addEventListener(util.isFirefox ? "DOMMouseScroll" : "mousewheel", function (e) { //$NON-NLS-1$ //$NON-NLS-0$
+					this._scrollWheel(e);
+				}.bind(this));
 				document.addEventListener("keydown", function (e) {  //$NON-NLS-0$
 					if (e.keyCode === lib.KEY.ESCAPE) {
 						this.hide();
@@ -1028,6 +1032,23 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				this._keyAssistDiv.style.display = "block"; //$NON-NLS-0$
 				this._keyAssistInput.value = this._filterString;
 				this._keyAssistInput.focus();
+			},
+			_scrollWheel: function(e) {
+				var pixelY = 0;
+				if (util.isIE || util.isOpera) {
+					pixelY = -e.wheelDelta;
+				} else if (util.isFirefox) {
+					pixelY = e.detail * 40;
+				} else {
+					pixelY = -e.wheelDeltaY;
+				}
+				var parent = this._keyAssistContents;
+				var scrollTop = parent.scrollTop;
+				parent.scrollTop += pixelY;
+				if (scrollTop !== parent.scrollTop) {
+					if (e.preventDefault) { e.preventDefault(); }
+					return false;
+				}
 			}
 		};
 		var keyAssist = new KeyAssistPanel();
@@ -1047,8 +1068,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		commandRegistry.addCommand(keyAssistCommand);
 		commandRegistry.registerCommandContribution("globalActions", "eclipse.keyAssist", 100, null, true, new KeyBinding.KeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 		var addKeyAssistAction = function() {
-			var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			editor.getTextView().setKeyBinding(new KeyBinding.KeyBinding(191, false, true, !isMac, isMac), keyAssistCommand.id);
+			editor.getTextView().setKeyBinding(new KeyBinding.KeyBinding(191, false, true, !util.isMac, util.isMac), keyAssistCommand.id);
 			editor.getTextView().setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 		};
 		if (editor) {
