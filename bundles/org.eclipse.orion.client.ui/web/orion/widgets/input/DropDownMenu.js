@@ -81,10 +81,11 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			var centralNavigation = document.getElementById( this.navDropDownId );
 			
 			if( centralNavigation.style.display === 'none' ){
-					
-				centralNavigation.style.display = '';
-				this._positionDropdown();
-				this.handle = lib.addAutoDismiss( [this.node, centralNavigation], this.clearPanel.bind(this) );
+				this.updateContent ( this.getContentNode() , function () {
+					centralNavigation.style.display = '';
+					this._positionDropdown();
+					this.handle = lib.addAutoDismiss( [this.node, centralNavigation], this.clearPanel.bind(this) );
+				}.bind(this));
 				
 			}else{
 			
@@ -109,6 +110,12 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		getContentNode: function(){
 			var contentNode = document.getElementById( this.navDropDownId );
 			return contentNode;
+		},
+		
+		updateContent: function( contentNode, callback ){
+			// to be overridden to update the contents before showing
+			// the callback needs to be called once the content is up to date
+			callback();
 		},
 		
 		toggleLabel: function(show){

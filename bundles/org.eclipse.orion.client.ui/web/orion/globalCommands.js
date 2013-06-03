@@ -542,7 +542,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	function addSettings( settings ){
 		
 		var navDropDown = new DropDownMenu( 'settingsTab', { label:'Develop', icon:'core-sprite-wrench' }, false );
-		settings.appendTo( navDropDown.getContentNode() );
+		navDropDown.updateContent = settings.updateContent.bind(settings);
 		
 	}
 	

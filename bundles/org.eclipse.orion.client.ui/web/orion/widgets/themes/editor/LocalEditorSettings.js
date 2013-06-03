@@ -81,13 +81,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/widgets/input/Select', 'orion
 		
 		LocalEditorSettings.prototype.onRemove = onRemove;
 		
-		function appendTo( node ){
+		function updateContent( contentNode, callback ){
 		
-			this.container = node;
+			this.container = contentNode;
 			this.preferences.getTheme(function(themeStyles) {
 				this.editorPreferences.getPrefs(function(prefs) {
 					this.editorPrefs = prefs;
-					node.innerHTML = this.template;
+					contentNode.innerHTML = this.template;
 					this.addThemePicker(themeStyles);	
 					this.addFontSizePicker(themeStyles);
 					this.addKeysPicker(prefs);
@@ -96,12 +96,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/widgets/input/Select', 'orion
 						container.style.display = "block"; //$NON-NLS-0$
 						this.addAutoSave(prefs);	
 					}
+					callback();
 				}.bind(this));
 			}.bind(this));
 				
 		}
 		
-		LocalEditorSettings.prototype.appendTo = appendTo;	
+		LocalEditorSettings.prototype.updateContent = updateContent;	
 		
 		function selectTheme( name ) {
 			this.preferences.setTheme(name);
