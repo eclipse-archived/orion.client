@@ -61,6 +61,9 @@ define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON
 		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
 	}
 	KeyStroke.prototype = /** @lends orion.KeyStroke.prototype */ {
+		getKeys: function() {
+			return [this];
+		},
 		/**
 		 * Determines either this key stroke matches the specifed event.  It can match either a
 		 * a whole sequence of key events or a single key event at a specified index.
@@ -138,6 +141,9 @@ define("orion/keyBinding", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON
 		this.keys = keys;
 	}
 	KeySequence.prototype = /** @lends orion.KeySequence.prototype */ {
+		getKeys: function() {
+			return this.keys.slice(0);
+		},
 		match: function (e, index) {
 			var keys = this.keys;
 			if (index !== undefined) {
