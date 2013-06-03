@@ -80,6 +80,14 @@ define({
 	
 	"toggleWrapMode": "Toggle Wrap Mode", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleTabMode": "Toggle Tab Mode", //$NON-NLS-1$ //$NON-NLS-0$
+	
+	//Emacs
+	"emacs": "Emacs", //$NON-NLS-1$ //$NON-NLS-0$
+	"exchangeMarkPoint": "Exchange Mark and Point", //$NON-NLS-1$ //$NON-NLS-0$
+	"setMarkCommand": "Set Mark", //$NON-NLS-1$ //$NON-NLS-0$
+	"clearMark": "Clear Mark", //$NON-NLS-1$ //$NON-NLS-0$
+	"digitArgument": "Digit Argument ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"negativeArgument": "Negative Argument", //$NON-NLS-1$ //$NON-NLS-0$
 			
 	"Comment": "Comment", //$NON-NLS-1$ //$NON-NLS-0$
 	"Flat outline": "Flat outline", //$NON-NLS-1$ //$NON-NLS-0$
