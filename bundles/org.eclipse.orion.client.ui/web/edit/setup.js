@@ -40,6 +40,7 @@ define([
 	'orion/editor/projectionTextModel',
 	'orion/keyBinding',
 	'orion/editor/emacs',
+	'orion/editor/vi',
 	'orion/searchAndReplace/textSearcher',
 	'orion/contentTypes',
 	'orion/PageUtil',
@@ -53,7 +54,7 @@ define([
 	'orion/sidebar'
 ], function(messages, require, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
 			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
-			mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mEmacs, mSearcher,
+			mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mEmacs, mVI, mSearcher,
 			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, LocalEditorSettings, mEditorPreferences, URITemplate, Sidebar) {
 	
 var exports = exports || {};
@@ -112,9 +113,20 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		}
 	}
 	
+	var statusReporter =  function(message, type, isAccessible) {
+		if (type === "progress") { //$NON-NLS-0$
+			statusReportingService.setProgressMessage(message);
+		} else if (type === "error") { //$NON-NLS-0$
+			statusReportingService.setErrorMessage(message);
+		} else {
+			statusReportingService.setMessage(message, null, isAccessible);
+		}
+	};
+		
 	//TODO should load emacs only when needed
 	var emacs = new mEmacs.EmacsMode();
-
+	
+	var vi = new mVI.VIMode(statusReporter);
 	var updateSettings = function(prefs) {
 		settings = prefs;
 		inputManager.setAutoLoadEnabled(prefs.autoLoadEnabled);
@@ -122,8 +134,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		var textView = editor.getTextView();
 		if (textView) {
 			textView.removeKeyMode(emacs);
+			textView.removeKeyMode(vi);
 			if (settings.keyBindings === "Emacs") { //$NON-NLS-0$
 				textView.addKeyMode(emacs);
+			} else if (settings.keyBindings === "VI") { //$NON-NLS-0$
+				textView.addKeyMode(vi);
 			}
 		}
 		renderToolbars(inputManager.getFileMetadata());
@@ -152,7 +167,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			});
 			return textView;
 		};
-		
+
 		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 			
 			var localSearcher = new mSearcher.TextSearcher(editor, commandRegistry, undoStack);
@@ -169,6 +184,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			
 			if (settings.keyBindings === "Emacs") { //$NON-NLS-0$
 				textView.addKeyMode(emacs);
+			} else if (settings.keyBindings === "VI") { //$NON-NLS-0$
+				textView.addKeyMode(vi);
 			}
 		};
 		
@@ -199,16 +216,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				var result = new mContentAssist.ContentAssistMode(contentAssist, widget);
 				contentAssist.setMode(result);
 				return result;
-			}
-		};
-	
-		var statusReporter =  function(message, type, isAccessible) {
-			if (type === "progress") { //$NON-NLS-0$
-				statusReportingService.setProgressMessage(message);
-			} else if (type === "error") { //$NON-NLS-0$
-				statusReportingService.setErrorMessage(message);
-			} else {
-				statusReportingService.setMessage(message, null, isAccessible);
 			}
 		};
 
