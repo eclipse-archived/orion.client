@@ -835,8 +835,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				keyAssistDiv.setAttribute("aria-atomic", "true");//$NON-NLS-1$ //$NON-NLS-0$
 				keyAssistDiv.setAttribute("aria-live", "assertive");//$NON-NLS-1$ //$NON-NLS-0$
 				var keyAssistInput = this._keyAssistInput = document.createElement("input"); //$NON-NLS-0$
-				keyAssistInput.className = "keyAssistInput"; //$NON-NLS-0$
-				keyAssistInput.type = "search"; //$NON-NLS-0$
+				keyAssistInput.classList.add("keyAssistInput"); //$NON-NLS-0$
+				keyAssistInput.type = "text"; //$NON-NLS-0$
 				keyAssistInput.placeholder = messages["Filter bindings"];
 				keyAssistDiv.appendChild(keyAssistInput);
 				var keyAssistContents = this._keyAssistContents = document.createElement("div");//$NON-NLS-0$
