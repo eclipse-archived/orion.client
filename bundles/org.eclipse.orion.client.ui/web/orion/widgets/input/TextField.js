@@ -41,7 +41,6 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 
 		setStorageItem: function(){
 			// to be overridden with a choice of function to store the picked color
-			console.log( 'TextField setStorageIem' ); //$NON-NLS-0$
 		},
 		
 		width: function( value ){
