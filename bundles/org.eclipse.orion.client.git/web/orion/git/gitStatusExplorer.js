@@ -755,7 +755,7 @@ define(
 									function(resp) {
 										var branches = resp.Children;
 										var currentBranch;
-										for ( var i = 0; i < branches.length; i++) {
+										for (var i = 0; i < branches.length; i++) {
 											if (branches[i].Current) {
 												currentBranch = branches[i];
 												break;
@@ -770,7 +770,7 @@ define(
 										var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 
 										titleWrapper.setTitle(i18nUtil.formatMessage(messages["Commits for \"${0}\" branch"], currentBranch.Name));
-
+										that.commandService.destroy(titleWrapper.actionsNode.id);
 										that.commandService.registerCommandContribution(titleWrapper.actionsNode.id,
 												"eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 										that.commandService
@@ -778,8 +778,11 @@ define(
 														titleWrapper.actionsNode.id,
 														titleWrapper.actionsNode.id,
 														{
-															"ViewAllLink" : "git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel" : messages['See Full Log'], "ViewAllTooltip" : messages["See the full log"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
+															"ViewAllLink" : "git/git-log.html#" + currentBranch.CommitLocation + "?page=1",
+															"ViewAllLabel" : messages['See Full Log'],
+															"ViewAllTooltip" : messages["See the full log"]
+														}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+										
 										if (tracksRemoteBranch) {
 											that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.fetch", 100); //$NON-NLS-0$
 											that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.merge", 100); //$NON-NLS-0$
@@ -863,17 +866,15 @@ define(
 				};
 
 				GitStatusExplorer.prototype.renderNoCommit = function() {
+					var commitNode = lib.node("commitNode");
+					commitNode.innerHTML = "";
 					var sectionItem = document.createElement("div");
 					sectionItem.className = "sectionTableItem";
-					lib.node("commitNode").appendChild(sectionItem);
-
-					var horizontalBox = document.createElement("div");
-					horizontalBox.className = "sectionTableItem";
-					sectionItem.appendChild(horizontalBox);
+					commitNode.appendChild(sectionItem);
 
 					var detailsView = document.createElement("div");
 					detailsView.className = "stretch";
-					horizontalBox.appendChild(detailsView);
+					sectionItem.appendChild(detailsView);
 
 					var title = document.createElement("div");
 					title.appendChild(document.createTextNode(messages['The branch is up to date.']));
@@ -885,9 +886,11 @@ define(
 				};
 
 				GitStatusExplorer.prototype.renderCommit = function(commit, outgoing, index) {
+					var commitNode = lib.node("commitNode");
+					commitNode.innerHTML = "";
 					var sectionItem = document.createElement("div");
 					sectionItem.className = "sectionTableItem lightTreeTableRow";
-					lib.node("commitNode").appendChild(sectionItem);
+					commitNode.appendChild(sectionItem);
 
 					var horizontalBox = document.createElement("div");
 					horizontalBox.className = "sectionTableItem";
