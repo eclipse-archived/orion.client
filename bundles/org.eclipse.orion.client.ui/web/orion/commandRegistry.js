@@ -341,10 +341,31 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		showKeyBindings: function(keyAssist) {
 			var scopes = {};
 			var bindingString, binding;
-			var _self = this;
-			function execute(commandID) {
+			// see commands.js _processKey
+			function executeBinding(activeBinding) {
+				var invocation = activeBinding.invocation;
+				if (invocation) {
+					var command = activeBinding.command;
+					if (command.hrefCallback) {
+						var href = command.hrefCallback.call(invocation.handler || window, invocation);
+						if (href.then){
+							href.then(function(l){
+								window.open(l);
+							});
+						} else {
+							// We assume window open since there's no link gesture to tell us what to do.
+							window.open(href);
+						}
+						return;
+					} else if (command.onClick || command.callback) {
+						(command.onClick || command.callback).call(invocation.handler || window, invocation);
+						return;
+					}
+				}
+			}
+			function execute(activeBinding) {
 				return function() {
-					return _self.runCommand(commandID);
+					executeBinding(activeBinding);
 				};
 			}
 			for (var aBinding in this._activeBindings) {
@@ -358,7 +379,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 						scopes[binding.keyBinding.scopeName].push(binding);
 					} else {
 						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
-						keyAssist.createItem(bindingString, binding.command.name, execute(binding.command.id));
+						keyAssist.createItem(bindingString, binding.command.name, execute(binding));
 					}
 				}
 			}
@@ -367,7 +388,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 					keyAssist.createHeader(scopedBinding);
 					scopes[scopedBinding].forEach(function(binding) {
 						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
-						keyAssist.createItem(bindingString, binding.command.name, execute(binding.command.id));
+						keyAssist.createItem(bindingString, binding.command.name, execute(binding));
 					});
 				}	
 			}
