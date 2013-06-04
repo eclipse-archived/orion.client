@@ -455,6 +455,7 @@ textarea.parameterInput {
 .keyAssistList {
 	width: 100%;
 	border-collapse: collapse;
+	outline: none;
 }
 
 .keyAssistItem {
