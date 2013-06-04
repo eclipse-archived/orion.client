@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global window define require document*/
-define([], function(){
+define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtils'], function(messages, EventTarget, mSearchUtils){
 
 	/**
 	 * InputCompletion is an alternative to datalist support in html5.
@@ -40,6 +40,7 @@ define([], function(){
 	 */
 	function InputCompletion(inputFieldOrId, binderFunc, options) {
 		this._inputField = inputFieldOrId;
+		EventTarget.attach(this);
 		if (typeof(this._inputField) === "string") { //$NON-NLS-0$
 			this._inputField = document.getElementById(this._inputField);
 		}
@@ -55,11 +56,22 @@ define([], function(){
 		this._completionIdPrefix = idFrefix + "__completion__"; //$NON-NLS-0$
 		this._proposeFromStart = options ? options.proposeFromStart : false;
 		this._extendedProvider = options ? options.extendedProvider : null;
+		this._serviceRegistry = options ? options.serviceRegistry : null;
 		this._proposalIndex = -1;
 		this._dismissed = true;
 		this._mouseDown = false;
 		this._dataList = [];
 		this._initUI();
+		
+		this.addEventListener("recentSearchesChanged", function(event) {//$NON-NLS-0$
+			if(this._binderFunc){// If a binder function is provided, every time when the input field is focused, we would ask for the full set of data and propose based on that
+				var completion = this;
+				this._binderFunc(function(dataList){
+					this._bind(dataList);
+					this._proposeOn(this._inputField.value);
+				}.bind(completion));
+			}
+		}.bind(this));
 		
 		this._completionUIContainer.addEventListener("mousedown", function(e) {
 			this._mouseDown = true;
@@ -128,6 +140,14 @@ define([], function(){
 			e.preventDefault();
 			this._dismiss();//Dismiss the proposal UI and do nothing.
 			return false;
+		} else if(keyCode === 46/* DELETE */) {
+			if(this._proposalIndex > -1) { //If a proposal is highlighted in the suggestion, the delete key will delete the proposal.
+				e.preventDefault();
+				this._delete();
+				e.stopPropagation();
+				return false;
+			}
+			return true;
 		}
 		return true;
 	};
@@ -242,13 +262,16 @@ define([], function(){
 				deleteBtn.classList.add("imageSprite"); //$NON-NLS-0$
 				deleteBtn.style.display = "none"; //$NON-NLS-0$
 				deleteBtn.style.margin = "0 0 0"; //$NON-NLS-0$
-				deleteBtn.title = "Delete the search term. You can also use delete key.";
+				deleteBtn.title = messages['Click or use delete key to delete the search term'];
 				deleteBtn.onclick = function(e){
 					e.stopPropagation();
+					this._proposalIndex = -1;
+					mSearchUtils.removeRecentSearch(this._serviceRegistry, category.item.value, this);
 				}.bind(this);
 				
 				var td2 = document.createElement('td'); //$NON-NLS-0$
 				td2.style.width = "16px"; //$NON-NLS-0$
+				td2.style.height = "16px"; //$NON-NLS-0$
 				td2.appendChild(deleteBtn);
 				tr.appendChild(td2);
 				listEle.appendChild(tbl);
@@ -285,7 +308,7 @@ define([], function(){
 		if(domNode){
 			domNode.className = (selected ? "inputCompletionLISelected": "inputCompletionLINormal"); //$NON-NLS-1$ //$NON-NLS-0$
 			if(deleteBtn){
-				//deleteBtn.style.display = selected ? "": "none"; //$NON-NLS-0$
+				deleteBtn.style.display = selected ? "": "none"; //$NON-NLS-0$
 			}
 			if(selected && fromIndex){
 				if (domNode.offsetTop < this._completionUIContainer.scrollTop) {
@@ -364,6 +387,15 @@ define([], function(){
 			index = -1;
 		}
 		this._selectProposal(index);
+	};
+	
+	InputCompletion.prototype._delete = function(){
+		if(this._proposalIndex > -1) {
+			mSearchUtils.removeRecentSearch(this._serviceRegistry, this._proposalList[this._proposalIndex].item.value, this);
+			this._proposalIndex = -1;
+			return true;
+		}
+		return false;
 	};
 	
 	InputCompletion.prototype._proposeOnList = function(datalist, searchTerm, filterForMe){
