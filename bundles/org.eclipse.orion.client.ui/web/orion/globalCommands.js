@@ -981,6 +981,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				this._keyAssistDiv.style.display = "block"; //$NON-NLS-0$
 				this._keyAssistInput.value = this._filterString;
 				this._keyAssistInput.focus();
+				this._keyAssistInput.select();
 			},
 			_scrollWheel: function(e) {
 				var pixelY = 0;
