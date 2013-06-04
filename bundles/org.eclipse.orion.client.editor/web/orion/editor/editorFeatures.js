@@ -132,7 +132,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			return true;
 		}.bind(this));
 		textView.setAction("incrementalFindBackspace", function() { //$NON-NLS-0$
-			return this.backspace();
+			return this._backspace();
 		}.bind(this));
 		
 		var self = this;
