@@ -70,8 +70,11 @@ define("orion/editor/emacs", [ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, !util.isMac, false, true, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		
-		//TODO should reassigning contentAssist be here? Note same as setMarker
-		bindings.push({actionID: "contentAssist", keyBinding: new KeyStroke(' ', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		//TODO should these keys be done here?
+		bindings.push({actionID: "contentAssist", keyBinding: new KeyStroke(191, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "find", keyBinding: new KeyStroke('r', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "incrementalFind", keyBinding: new KeyStroke('s', true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "incrementalFind", keyBinding: new KeyStroke('r', true)}); //$NON-NLS-1$ //$NON-NLS-0$
 
 		return bindings;
 	};
