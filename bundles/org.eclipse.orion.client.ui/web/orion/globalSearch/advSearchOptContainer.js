@@ -204,7 +204,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 		//Create and hook up the inputCompletion instance with the search box dom node.
 		//The defaultProposalProvider provides proposals from the recent and saved searches.
 		//The exendedProposalProvider provides proposals from plugins.
-		this._completion = new mInputCompletion.InputCompletion(this._searchBox, defaultProposalProvider, {group: "globalSearch", extendedProvider: exendedProposalProvider}); //$NON-NLS-0$
+		this._completion = new mInputCompletion.InputCompletion(this._searchBox, defaultProposalProvider, {serviceRegistry: this._serviceRegistry, group: "globalSearch", extendedProvider: exendedProposalProvider}); //$NON-NLS-0$
     };
     
 	AdvSearchOptRenderer.prototype._initControls = function(){

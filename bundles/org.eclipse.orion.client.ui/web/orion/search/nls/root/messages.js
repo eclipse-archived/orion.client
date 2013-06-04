@@ -87,5 +87,6 @@ define({
 	"Path name": "Path name",
 	"Remember search as": "Remember search as",
 	"Scope Search": "Scope Search",
-	"Open in Search page for this directory": "Open in Search page for this directory"
+	"Open in Search page for this directory": "Open in Search page for this directory",
+	"Click or use delete key to delete the search term": "Click or use delete key to delete the search term"
 });
