@@ -429,14 +429,14 @@ textarea.parameterInput {
 	position: fixed;
 	right: 44px;
 	top: 80px;
-	min-width: 200px;
+	min-width: 250px;
 	padding: 5px;
 	z-index:100;
 	border-radius: 4px;
 }
 
 .keyAssistContents {
-	width: 100%;
+	width: auto;
 	height: 400px;
 	margin-top: 8px;
 	margin-bottom: 1px;
