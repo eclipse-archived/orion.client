@@ -184,6 +184,23 @@ define("orion/editor/vi", [
 			//bindings.push({actionID: "vi-]]",	keyBinding: new KeyBinding("]]", false, false, false, false, "keypress")}); //$NON-NLS-0$
 			//bindings.push({actionID: "vi-[[",	keyBinding: new KeyBinding("[[", false, false, false, false, "keypress")}); //$NON-NLS-0$
 		
+			//Lines
+			bindings.push({actionID: "vi-$",	keyBinding: new KeyBinding("$", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			
+			bindings.push({actionID: "vi-^_",	keyBinding: new KeyBinding("^", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-^_",	keyBinding: new KeyBinding("_", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			
+			bindings.push({actionID: "vi-+",	keyBinding: new KeyBinding("+", false, false, false, false, "keypress")}); 
+			bindings.push({actionID: "vi-+",	keyBinding:  new KeyBinding(13)});
+			bindings.push({actionID: "vi--",	keyBinding:  new KeyBinding("-", false, false, false, false, "keypress")});
+			bindings.push({actionID: "vi-|",	keyBinding:  new KeyBinding("|", false, false, false, false, "keypress")});
+			
+			bindings.push({actionID: "vi-H",	keyBinding: new KeyBinding("H", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-M",	keyBinding: new KeyBinding("M", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-L",	keyBinding: new KeyBinding("L", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			
+			//Screens
+			
 			//Line numbering
 			bindings.push({actionID: "vi-goToLine",	keyBinding: new KeyBinding("G", false, false, false, false, "keypress")}); //$NON-NLS-0$
 			
@@ -204,6 +221,21 @@ define("orion/editor/vi", [
 		},
 		_createActions: function() {
 			var view = this.getView();
+			
+			//Utility
+			function firstNonBlankChar(lineIndex) {
+				var model = view.getModel();
+				var lineText = model.getLine(lineIndex);
+				var offsetInLine = 0;
+				var c = lineText.charCodeAt(offsetInLine);
+				while (c === 32 || c === 9) {
+					offsetInLine++;
+					c = lineText.charCodeAt(offsetInLine);
+				}
+				return offsetInLine;
+			}
+			//
+			
 			if (view) {
 				var self = this;
 				//Movement
@@ -266,6 +298,96 @@ define("orion/editor/vi", [
 					var result = view.invokeAction("wordNext", true, {count:self.number >> 0, unit: "wordendWS"}); //$NON-NLS-1$ //$NON-NLS-0$
 					self.number = "";
 					return result;
+				});
+				
+				//Lines
+				view.setAction("vi-0", function() { //$NON-NLS-0$
+					var result = view.invokeAction("lineStart", true); //$NON-NLS-1$ //$NON-NLS-0$
+					self.number = "";
+					return result;
+				});
+				
+				view.setAction("vi-$", function() { //$NON-NLS-0$
+					var result = view.invokeAction("lineEnd", true); //$NON-NLS-1$ //$NON-NLS-0$
+					self.number = "";
+					return result;
+				});
+				
+				view.setAction("vi-^_", function() { //$NON-NLS-0$
+					var model = view.getModel();
+					var offset = view.getCaretOffset();
+					var lineIndex = model.getLineAtOffset(offset);
+					view.setCaretOffset(model.getLineStart(lineIndex) + firstNonBlankChar(lineIndex));
+					self.number = "";
+					return true;
+				});
+				
+				view.setAction("vi-+", function() { //$NON-NLS-0$
+					var num = 0;
+					if (self.number !== "") {
+						num = self.number >> 0;
+					}
+					var model = view.getModel();
+					var offset = view.getCaretOffset();
+					var lastLineCount = model.getLineCount() - 1;
+					var lineIndex = Math.min (model.getLineAtOffset(offset) + 1 + num, lastLineCount);
+					view.setCaretOffset(model.getLineStart(lineIndex) + firstNonBlankChar(lineIndex));
+					self.number = "";
+					return true;
+				});
+				
+				view.setAction("vi--", function() { //$NON-NLS-0$
+					var num = 0;
+					if (self.number !== "") {
+						num = self.number >> 0;
+					}
+					var model = view.getModel();
+					var offset = view.getCaretOffset();
+					var lineIndex = Math.max(model.getLineAtOffset(offset) - 1 - num, 0);
+					view.setCaretOffset(model.getLineStart(lineIndex) + firstNonBlankChar(lineIndex));
+					self.number = "";
+					return true;
+				});
+				
+				view.setAction("vi-|", function() { //$NON-NLS-0$
+					var num = 0;
+					if (self.number !== "") {
+						num = self.number >> 0;
+					}
+					var model = view.getModel();
+					var offset = view.getCaretOffset();
+					var lineIndex = model.getLineAtOffset(offset);
+					view.setCaretOffset(Math.min(model.getLineStart(lineIndex) + num - 1, model.getLineEnd(lineIndex)));
+					self.number = "";
+					return true;
+				});
+				
+				view.setAction("vi-H", function() { //$NON-NLS-0$
+					var num = 0;
+					if (self.number !== "") {
+						num = self.number >> 0;
+					}
+					var topIndex = view.getModel().getLineStart(view.getTopIndex(true) + num);
+					view.setCaretOffset(topIndex);
+					self.number = "";
+					return true;
+				});
+				
+				view.setAction("vi-M", function() { //$NON-NLS-0$
+					var middleIndex = Math.ceil((view.getBottomIndex(true) - view.getTopIndex(true))/2);
+					view.setCaretOffset(view.getModel().getLineStart(middleIndex));
+					self.number = "";
+					return true;
+				});
+				
+				view.setAction("vi-L", function() { //$NON-NLS-0$
+					var num = 0;
+					if (self.number !== "") {
+						num = self.number >> 0;
+					}
+					view.setCaretOffset(view.getModel().getLineStart(view.getBottomIndex(true) - num));
+					self.number = "";
+					return true;
 				});
 				
 				//Line numbering
@@ -334,7 +456,9 @@ define("orion/editor/vi", [
 		},
 		_storeNumber: function(index) {
 			if (index === 0 && !this.number) {
-				return false;
+				var result = this.getView().invokeAction("lineStart", true); //$NON-NLS-1$ //$NON-NLS-0$
+				this.number = "";
+				return true;
 			}
 			this.number += index;
 			return true;
