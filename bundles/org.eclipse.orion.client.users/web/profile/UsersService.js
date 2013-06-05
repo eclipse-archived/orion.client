@@ -172,7 +172,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 
 			xhr("PUT", uri, { //$NON-NLS-0$
 				headers : {
-					"Content-Type": "application/json", //$NON-NLS-1$ //$NON-NLS-0$
+					"Content-Type": "application/json; charset=UTF-8", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout : 15000,
