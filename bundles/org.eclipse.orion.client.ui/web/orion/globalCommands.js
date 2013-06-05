@@ -783,9 +783,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				keyAssistDiv.id = "keyAssist";//$NON-NLS-0$
 				keyAssistDiv.style.display = "none";//$NON-NLS-0$
 				keyAssistDiv.classList.add("keyAssistFloat");//$NON-NLS-0$
-				keyAssistDiv.role="list";//$NON-NLS-0$
-				keyAssistDiv.setAttribute("aria-atomic", "true");//$NON-NLS-1$ //$NON-NLS-0$
-				keyAssistDiv.setAttribute("aria-live", "assertive");//$NON-NLS-1$ //$NON-NLS-0$
+				keyAssistDiv.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-0$
 				var keyAssistInput = this._keyAssistInput = document.createElement("input"); //$NON-NLS-0$
 				keyAssistInput.classList.add("keyAssistInput"); //$NON-NLS-0$
 				keyAssistInput.type = "text"; //$NON-NLS-0$
@@ -795,20 +793,15 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				keyAssistContents.classList.add("keyAssistContents");//$NON-NLS-0$
 				keyAssistDiv.appendChild(keyAssistContents);
 				var keyAssistTable = this._keyAssistTable = document.createElement('table'); //$NON-NLS-0$
+				keyAssistTable.tabIndex = 0;
 				keyAssistTable.classList.add("keyAssistList");//$NON-NLS-0$
 				keyAssistContents.appendChild(keyAssistTable);
 				document.body.appendChild(keyAssistDiv);
 				keyAssistInput.addEventListener("keydown", function (e) {  //$NON-NLS-0$
-					if (e.keyCode === 40) {
-						this.select(true);
-					} else if (e.keyCode === 38) {
-						this.select(false);
-					} else if (e.keyCode === 13) {
-						this.execute();
-					} else {
-						return;
-					}
-					e.preventDefault();
+					this._keyDown(e);
+				}.bind(this));
+				keyAssistTable.addEventListener("keydown", function (e) {  //$NON-NLS-0$
+					this._keyDown(e);
 				}.bind(this));
 				keyAssistInput.addEventListener("input", function (e) {  //$NON-NLS-0$
 					this.filterChanged();
@@ -831,6 +824,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				this._selectedIndex = -1;
 				this._selectedRow = null;
 				this._keyAssistContents.scrollTop = 0;
+				this._idCount = 0;
 
 				if (editor && editor.getTextView()) {
 					var textView = editor.getTextView();
@@ -880,6 +874,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					}
 				}
 				var row = this._keyAssistTable.insertRow(-1);
+				row.id = "keyAssist-keyBinding-" + this._idCount++; //$NON-NLS-0$
+				row.setAttribute("role", "menuitem"); //$NON-NLS-1$ //$NON-NLS-0$
 				row._execute = execute;
 				row.classList.add("keyAssistItem"); //$NON-NLS-0$
 				row.addEventListener("click", function(e) { //$NON-NLS-0$
@@ -960,6 +956,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				if (this._selectedIndex !== -1) {
 					this._selectedRow = row = rows[this._selectedIndex];
 					row.classList.add("selected"); //$NON-NLS-0$
+					this._keyAssistTable.setAttribute("aria-activedescendant", row.id); //$NON-NLS-0$
+					this._keyAssistTable.focus();
 					var rowRect = row.getBoundingClientRect();
 					var parent = this._keyAssistContents;
 					var rect = parent.getBoundingClientRect();
@@ -981,6 +979,19 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				this._keyAssistDiv.style.display = "block"; //$NON-NLS-0$
 				this._keyAssistInput.value = this._filterString;
 				this._keyAssistInput.focus();
+				this._keyAssistInput.select();
+			},
+			_keyDown: function(e) {
+				if (e.keyCode === 40) {
+					this.select(true);
+				} else if (e.keyCode === 38) {
+					this.select(false);
+				} else if (e.keyCode === 13) {
+					this.execute();
+				} else {
+					return;
+				}
+				e.preventDefault();
 			},
 			_scrollWheel: function(e) {
 				var pixelY = 0;
