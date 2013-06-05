@@ -36,6 +36,14 @@ h2 {
 	margin-bottom: 4px;
 }
 
+/**
+ * Remove unwanted button padding in Firefox
+ */ 
+button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
 .navlink {
 	display: inline-block;
 	padding: 2px;
