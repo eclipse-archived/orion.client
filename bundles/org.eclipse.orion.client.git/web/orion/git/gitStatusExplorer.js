@@ -28,7 +28,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 			this.interestedUnstagedGroup = [ "Missing", "Modified", "Untracked", "Conflicting" ]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.interestedStagedGroup = [ "Added", "Changed", "Removed" ]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.conflictPatterns = [
-					[ "Both", "Modified", "Added", "Changed", "Missing" ], [ "RemoteDelete", "Untracked", "Removed" ], [ "LocalDelete", "Modified", "Added", "Missing" ] ]; //$NON-NLS-11$ //$NON-NLS-10$ //$NON-NLS-9$ //$NON-NLS-8$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				[ "Both", "Modified", "Added", "Changed", "Missing" ], [ "RemoteDelete", "Untracked", "Removed" ], [ "LocalDelete", "Modified", "Added", "Missing" ] ]; //$NON-NLS-11$ //$NON-NLS-10$ //$NON-NLS-9$ //$NON-NLS-8$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.conflictType = "Conflicting"; //$NON-NLS-0$
 
 			this.statusTypeMap = {
@@ -334,17 +334,17 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 				}
 
 				this.registry.getService("orion.unstagedSection.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
-							var selectionTools = lib.node(unstagedSection.selectionNode.id);
-							if (selectionTools) {
-								that.commandService.destroy(selectionTools);
-								that.commandService.renderCommands(unstagedSection.selectionNode.id, selectionTools, event.selections, that,
-									"button", { "Clone" : repository}); //$NON-NLS-1$ //$NON-NLS-0$
-							}
-						});
+					var selectionTools = lib.node(unstagedSection.selectionNode.id);
+					if (selectionTools) {
+						that.commandService.destroy(selectionTools);
+						that.commandService.renderCommands(unstagedSection.selectionNode.id, selectionTools, event.selections, that,
+							"button", { "Clone" : repository }); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+				});
 				this.unstagedOnce = true;
 			}
 
-			this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.stageCommand", 100);
+			this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.stageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
 
 			var UnstagedModel = (function() {
 				function UnstagedModel() {}
@@ -364,7 +364,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 														// this is required
 														// for selection
 														// model to be able
-														// to trverse into
+														// to traverse into
 														// children
 								parentItem.children = [];
 								parentItem.children.push({ "diffUri" : parentItem.diffURI, "Type" : "Diff", parent : parentItem}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -414,16 +414,17 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 	
 								var diffActionWrapper = document.createElement("span"); //$NON-NLS-0$
 								diffActionWrapper.id = "unstaged" + item.name + "DiffActionWrapper"; //$NON-NLS-0$
-								diffActionWrapper.className = "sectionExplorerActions";
+								diffActionWrapper.className = "sectionExplorerActions"; //$NON-NLS-0$
 								div.appendChild(diffActionWrapper);
 	
 								window.setTimeout(function() {
+									that.commandService.destroy(diffActionWrapper.id);
 									that.commandService.renderCommands(
-										"DefaultActionWrapper", diffActionWrapper.id, item, that, "tool", null, navGridHolder); //$NON-NLS-0$
+										"DefaultActionWrapper", diffActionWrapper.id, item, that, "tool", null, navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
 								}, 300);
 	
 								var icon = document.createElement("span"); //$NON-NLS-0$
-								icon.className = "gitImageSprite " + that._model.getClass(item.type);
+								icon.className = "gitImageSprite " + that._model.getClass(item.type); //$NON-NLS-0$
 								div.appendChild(icon);
 	
 								var itemLabel = document.createElement("span"); //$NON-NLS-0$
@@ -441,26 +442,27 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 	
 								var compareWidgetActionWrapper = document.createElement("div"); //$NON-NLS-0$
 								compareWidgetActionWrapper.className = "sectionExplorerActions"; //$NON-NLS-0$
-								compareWidgetActionWrapper.id = "unstaged" + item.parent.name + "CompareWidgetActionWrapper";
+								compareWidgetActionWrapper.id = "unstaged" + item.parent.name + "CompareWidgetActionWrapper"; //$NON-NLS-1$ //$NON-NLS-0$
 								div.appendChild(compareWidgetActionWrapper);
 	
 								var diffContainer = document.createElement("div"); //$NON-NLS-0$
 								diffContainer.id = "diffArea_" + item.diffUri; //$NON-NLS-0$
-								diffContainer.style.height = "420px";
-								diffContainer.style.border = "1px solid lightgray";
-								diffContainer.style.overflow = "hidden";
+								diffContainer.style.height = "420px"; //$NON-NLS-0$
+								diffContainer.style.border = "1px solid lightgray"; //$NON-NLS-0$
+								diffContainer.style.overflow = "hidden"; //$NON-NLS-0$
 								div.appendChild(diffContainer);
 	
 								var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 								window.setTimeout(function() {
-									mGitUtil.createCompareWidget(that.registry,
-																 that.commandService, 
-																 item.diffUri, 
-																 isConflict(item.parent.type), 
-																 "diffArea_" + item.diffUri, //$NON-NLS-0$
-																 compareWidgetActionWrapper.id, 
-																 true, //editableInComparePage
-																 {navGridHolder: navGridHolder} //gridRenderer
+									mGitUtil.createCompareWidget(
+										that.registry,
+										that.commandService, 
+										item.diffUri, 
+										isConflict(item.parent.type), 
+										"diffArea_" + item.diffUri, //$NON-NLS-0$
+										compareWidgetActionWrapper.id, 
+										true, //editableInComparePage
+										{navGridHolder: navGridHolder} //gridRenderer
 									);
 								}, 300);
 	
@@ -509,7 +511,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 																												 * sectionItemActionScopeId
 																												 */); //$NON-NLS-0$
 			this.commandService.renderCommands(unstagedSection.actionsNode.id, unstagedSection.actionsNode.id, unstagedNavigator, unstagedNavigator,
-					"button"); //$NON-NLS-0$
+				"button"); //$NON-NLS-0$
 		};
 
 		// Git staged changes
@@ -533,8 +535,8 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 			});
 
 			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "eclipse.orion.git.commitCommand", 100); //$NON-NLS-0$
-			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "orion.explorer.expandAll", 200); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "orion.explorer.collapseAll", 300); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "orion.explorer.expandAll", 200); //$NON-NLS-0$
+			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "orion.explorer.collapseAll", 300); //$NON-NLS-0$
 			this.commandService.registerCommandContribution(stagedSection.selectionNode.id, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
 
 			if (!this.stagedOnce) {
@@ -544,17 +546,17 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 				}
 
 				this.registry.getService("orion.stagedSection.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
-							var selectionTools = lib.node(stagedSection.selectionNode.id);
-							if (selectionTools) {
-								that.commandService.destroy(selectionTools);
-								that.commandService.renderCommands(stagedSection.selectionNode.id, selectionTools, event.selections, that,
-									"button", { "Clone" : repository}); //$NON-NLS-1$ //$NON-NLS-0$
-							}
-						});
+					var selectionTools = lib.node(stagedSection.selectionNode.id);
+					if (selectionTools) {
+						that.commandService.destroy(selectionTools);
+						that.commandService.renderCommands(stagedSection.selectionNode.id, selectionTools, event.selections, that,
+							"button", { "Clone" : repository}); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+				});
 				this.stagedOnce = true;
 			}
 
-			this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
+			this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
 
 			var StagedModel = (function() {
 				function StagedModel() {}
@@ -624,16 +626,17 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 
 								var diffActionWrapper = document.createElement("span"); //$NON-NLS-0$
 								diffActionWrapper.id = "staged" + item.name + "DiffActionWrapper"; //$NON-NLS-0$
-								diffActionWrapper.className = "sectionExplorerActions";
+								diffActionWrapper.className = "sectionExplorerActions"; //$NON-NLS-0$
 								div.appendChild(diffActionWrapper);
 
 								window.setTimeout(function() {
+									that.commandService.destroy(diffActionWrapper.id);
 									that.commandService.renderCommands(
-										"DefaultActionWrapper", diffActionWrapper.id, item, that, "tool", null, navGridHolder); //$NON-NLS-0$
+										"DefaultActionWrapper", diffActionWrapper.id, item, that, "tool", null, navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
 								}, 300);
 
 								var icon = document.createElement("span"); //$NON-NLS-0$
-								icon.className = "gitImageSprite " + that._model.getClass(item.type);
+								icon.className = "gitImageSprite " + that._model.getClass(item.type); //$NON-NLS-0$
 								div.appendChild(icon);
 
 								var itemLabel = document.createElement("span"); //$NON-NLS-0$
@@ -651,28 +654,29 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 
 								var compareWidgetActionWrapper = document.createElement("div"); //$NON-NLS-0$
 								compareWidgetActionWrapper.className = "sectionExplorerActions"; //$NON-NLS-0$
-								compareWidgetActionWrapper.id = "staged" + item.parent.name + "CompareWidgetActionWrapper";
+								compareWidgetActionWrapper.id = "staged" + item.parent.name + "CompareWidgetActionWrapper"; //$NON-NLS-1$ //$NON-NLS-0$
 								div.appendChild(compareWidgetActionWrapper);
 
 								var diffContainer = document.createElement("div"); //$NON-NLS-0$
 								diffContainer.id = "diffArea_" + item.diffUri; //$NON-NLS-0$
-								diffContainer.style.height = "420px";
-								diffContainer.style.border = "1px solid lightgray";
-								diffContainer.style.overflow = "hidden";
+								diffContainer.style.height = "420px"; //$NON-NLS-0$
+								diffContainer.style.border = "1px solid lightgray"; //$NON-NLS-0$
+								diffContainer.style.overflow = "hidden"; //$NON-NLS-0$
 								div.appendChild(diffContainer);
 
 								var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 								var hasConflict = isConflict(item.parent.type);
 								window.setTimeout(function() {
-									mGitUtil.createCompareWidget(that.registry,
-																 that.commandService, 
-																 item.diffUri, 
-																 isConflict(item.parent.type), 
-																 "diffArea_" + item.diffUri, //$NON-NLS-0$
-																 compareWidgetActionWrapper.id, 
-																 false, //editableInComparePage
-																 {navGridHolder: navGridHolder} //gridRenderer
-																 );
+									mGitUtil.createCompareWidget(
+										that.registry,
+										that.commandService, 
+										item.diffUri, 
+										isConflict(item.parent.type), 
+										"diffArea_" + item.diffUri, //$NON-NLS-0$
+										compareWidgetActionWrapper.id, 
+										false, //editableInComparePage
+										{navGridHolder: navGridHolder} //gridRenderer
+									);
 								}, 500);
 
 								return td;
@@ -694,9 +698,9 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
 					this.renderer = new StagedRenderer({ registry : this.registry, /*
-																					 * actionScopeId:
-																					 * sectionItemActionScopeId,
-																					 */
+																					* actionScopeId:
+																					* sectionItemActionScopeId,
+																					*/
 					cachePrefix : "StagedNavigator", checkbox : false}, this); //$NON-NLS-0$
 					this.createTree(this.parentId, new StagedModel());
 				}
@@ -762,15 +766,13 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 						that.commandService.destroy(titleWrapper.actionsNode.id);
 						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id,
 								"eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
-						that.commandService
-								.renderCommands(
-										titleWrapper.actionsNode.id,
-										titleWrapper.actionsNode.id,
-										{
-											"ViewAllLink" : "git/git-log.html#" + currentBranch.CommitLocation + "?page=1",
-											"ViewAllLabel" : messages['See Full Log'],
-											"ViewAllTooltip" : messages["See the full log"]
-										}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						that.commandService.renderCommands(
+							titleWrapper.actionsNode.id,
+							titleWrapper.actionsNode.id,
+							{	"ViewAllLink" : "git/git-log.html#" + currentBranch.CommitLocation + "?page=1",
+								"ViewAllLabel" : messages['See Full Log'],
+								"ViewAllTooltip" : messages["See the full log"]
+							}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						
 						if (tracksRemoteBranch) {
 							that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.fetch", 100); //$NON-NLS-0$
@@ -778,12 +780,12 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 							that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.rebase", 100); //$NON-NLS-0$
 							that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.resetIndex", 100); //$NON-NLS-0$
 							that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id,
-									currentBranch.RemoteLocation[0].Children[0], that, "button"); //$NON-NLS-0$
+								currentBranch.RemoteLocation[0].Children[0], that, "button"); //$NON-NLS-0$
 						}
 
 						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.push", 100); //$NON-NLS-0$
 						that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch, that,
-								"button"); //$NON-NLS-0$
+							"button"); //$NON-NLS-0$
 
 						if (currentBranch.RemoteLocation[0] === null) {
 							progress.done();
@@ -797,130 +799,130 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 							that.registry
 								.getService("orion.page.progress")
 								.progress(
-										that.registry.getService("orion.git.provider").getLog(
-												currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"),
-										i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], currentBranch.Name)).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-										function(resp) {
-											progress.worked(messages['Rendering commits']);
+									that.registry.getService("orion.git.provider").getLog(
+										currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"),
+									i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], currentBranch.Name)).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									function(resp) {
+										progress.worked(messages['Rendering commits']);
 
-											var commitsCount = resp.Children.length;
+										var commitsCount = resp.Children.length;
 
-											for (var i = 0; i < resp.Children.length; i++) {
-												that.renderCommit(resp.Children[i], true, i);
-											}
+										for (var i = 0; i < resp.Children.length; i++) {
+											that.renderCommit(resp.Children[i], true, i);
+										}
 
-											progress.worked(messages['Getting outgoing commits']);
-											that.registry
-													.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id), messages['Getting outgoing commits']).then( //$NON-NLS-1$ //$NON-NLS-0$
-													function(resp) {
-														progress.worked(messages['Rendering commits']);
-														for (var i = 0; i < resp.Children.length; i++) {
-															that.renderCommit(resp.Children[i], false, i + commitsCount);
-														}
+										progress.worked(messages['Getting outgoing commits']);
+										that.registry
+											.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id), messages['Getting outgoing commits']).then( //$NON-NLS-1$ //$NON-NLS-0$
+											function(resp) {
+												progress.worked(messages['Rendering commits']);
+												for (var i = 0; i < resp.Children.length; i++) {
+													that.renderCommit(resp.Children[i], false, i + commitsCount);
+												}
 
-														commitsCount = commitsCount + resp.Children.length;
+												commitsCount = commitsCount + resp.Children.length;
 
-														if (commitsCount === 0) {
-															that.renderNoCommit();
-														}
+												if (commitsCount === 0) {
+													that.renderNoCommit();
+												}
 
-														progress.done();
-													}, function(error) {
-														progress.done(error);
-													});
-										}, function(error) {
-											progress.done(error);
-										});
+												progress.done();
+											}, function(error) {
+												progress.done(error);
+											});
+									}, function(error) {
+										progress.done(error);
+									});
 						} else {
 							that.registry.getService("orion.page.progress").progress(
-									that.registry.getService("orion.git.provider").doGitLog(
-											currentBranch.CommitLocation + "?page=1&pageSize=20"),
-									i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], currentBranch.Name)).then( //$NON-NLS-1$ //$NON-NLS-0$
-							function(resp) {
-								progress.worked(messages['Rendering commits']);
-								for (var i = 0; i < resp.Children.length; i++) {
-									that.renderCommit(resp.Children[i], true, i);
+								that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20"),
+								i18nUtil.formatMessage(messages['Getting commits for \"${0}\" branch'], currentBranch.Name)).then( //$NON-NLS-1$ //$NON-NLS-0$
+								function(resp) {
+									progress.worked(messages['Rendering commits']);
+									for (var i = 0; i < resp.Children.length; i++) {
+										that.renderCommit(resp.Children[i], true, i);
+									}
+		
+									if (resp.Children.length === 0) {
+										that.renderNoCommit();
+									}
+		
+									progress.done();
+								}, function(error) {
+									progress.done(error);
 								}
-
-								if (resp.Children.length === 0) {
-									that.renderNoCommit();
-								}
-
-								progress.done();
-							}, function(error) {
-								progress.done(error);
-							});
+							);
 						}
 					});
 		};
 
 		GitStatusExplorer.prototype.renderNoCommit = function() {
-			var commitNode = lib.node("commitNode");
-			commitNode.innerHTML = "";
-			var sectionItem = document.createElement("div");
-			sectionItem.className = "sectionTableItem";
+			var commitNode = lib.node("commitNode"); //$NON-NLS-0$
+			commitNode.innerHTML = ""; //$NON-NLS-0$
+			var sectionItem = document.createElement("div"); //$NON-NLS-0$
+			sectionItem.className = "sectionTableItem"; //$NON-NLS-0$
 			commitNode.appendChild(sectionItem);
 
-			var detailsView = document.createElement("div");
-			detailsView.className = "stretch";
+			var detailsView = document.createElement("div"); //$NON-NLS-0$
+			detailsView.className = "stretch"; //$NON-NLS-0$
 			sectionItem.appendChild(detailsView);
 
-			var title = document.createElement("div");
+			var title = document.createElement("div"); //$NON-NLS-0$
 			title.appendChild(document.createTextNode(messages['The branch is up to date.']));
 			detailsView.appendChild(title);
 
-			var description = document.createElement("div");
+			var description = document.createElement("div"); //$NON-NLS-0$
 			description.appendChild(document.createTextNode(messages['You have no outgoing or incoming commits.']));
 			detailsView.appendChild(description);
 		};
 
 		GitStatusExplorer.prototype.renderCommit = function(commit, outgoing, index) {
-			var commitNode = lib.node("commitNode");
-			commitNode.innerHTML = "";
-			var sectionItem = document.createElement("div");
-			sectionItem.className = "sectionTableItem lightTreeTableRow";
+			var commitNode = lib.node("commitNode"); //$NON-NLS-0$
+			commitNode.innerHTML = ""; //$NON-NLS-0$
+			var sectionItem = document.createElement("div"); //$NON-NLS-0$
+			sectionItem.className = "sectionTableItem lightTreeTableRow"; //$NON-NLS-0$
 			commitNode.appendChild(sectionItem);
 
-			var horizontalBox = document.createElement("div");
-			horizontalBox.className = "sectionTableItem";
-			horizontalBox.style.overflow = "hidden";
+			var horizontalBox = document.createElement("div"); //$NON-NLS-0$
+			horizontalBox.className = "sectionTableItem"; //$NON-NLS-0$
+			horizontalBox.style.overflow = "hidden"; //$NON-NLS-0$
 			sectionItem.appendChild(horizontalBox);
 
 			var imgSpriteName = (outgoing ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit"); //$NON-NLS-1$ //$NON-NLS-0$
 
-			var direction = document.createElement("span");
-			direction.className = "sectionIcon gitImageSprite " + imgSpriteName;
+			var direction = document.createElement("span"); //$NON-NLS-0$
+			direction.className = "sectionIcon gitImageSprite " + imgSpriteName; //$NON-NLS-0$
 			horizontalBox.appendChild(direction);
 
 			if (commit.AuthorImage) {
-				var authorImage = document.createElement("div");
-				authorImage.style['float'] = "left";
+				var authorImage = document.createElement("div"); //$NON-NLS-0$
+				authorImage.style['float'] = "left"; //$NON-NLS-0$
 				var image = new Image();
 				image.src = commit.AuthorImage;
 				image.name = commit.AuthorName;
-				image.className = "git-author-icon";
+				image.className = "git-author-icon"; //$NON-NLS-0$
 				authorImage.appendChild(image);
 				horizontalBox.appendChild(authorImage);
 			}
 
-			var detailsView = document.createElement("div");
-			detailsView.className = "stretch";
+			var detailsView = document.createElement("div"); //$NON-NLS-0$
+			detailsView.className = "stretch"; //$NON-NLS-0$
 			horizontalBox.appendChild(detailsView);
 
-			var titleLink = document.createElement("a");
-			titleLink.className = "navlinkonpage";
-			titleLink.href = require.toUrl("git/git-commit.html#") + commit.Location + "?page=1&pageSize=1";
+			var titleLink = document.createElement("a"); //$NON-NLS-0$
+			titleLink.className = "navlinkonpage"; //$NON-NLS-0$
+			titleLink.href = require.toUrl("git/git-commit.html#") + commit.Location + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
 			titleLink.textContent = commit.Message;
 			detailsView.appendChild(titleLink);
 
 			new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
 
-			var d = document.createElement("div");
+			var d = document.createElement("div"); //$NON-NLS-0$
 			detailsView.appendChild(d);
 
-			var description = document.createElement("span");
+			var description = document.createElement("span"); //$NON-NLS-0$
 			description.textContent = " (SHA " + commit.Name + ") by " + commit.AuthorName //$NON-NLS-1$ //$NON-NLS-0$
-					+ " on " + new Date(commit.Time).toLocaleString(); //$NON-NLS-0$
+				+ " on " + new Date(commit.Time).toLocaleString(); //$NON-NLS-0$
 			detailsView.appendChild(description);
 		};
 
