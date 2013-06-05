@@ -114,6 +114,32 @@
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<inherited>false</inherited>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<configuration>
+							<tasks if="requirejsHome">
+								<echo message="Minification started..."/>
+								<property name="builder"
+									value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
+								<!-- <property name="requirejsHome" 
+                          			value="${basedir}/requirejs/"/> -->
+                          		<property name="buildDirectory" 
+                          			value="${basedir}"/>
+								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.mini.xml">
+									<target name="requirejs"/>
+								</ant>
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>			
 		</plugins>
 		<pluginManagement>
 			<plugins>
