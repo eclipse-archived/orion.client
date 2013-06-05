@@ -205,7 +205,6 @@ hard-coded numbers elsewhere.
 	display: block;
 	position: absolute;
 	left: 0;
-    overflow: auto;
 	width: 33%;
 	height: 100%;
 }
@@ -216,6 +215,7 @@ hard-coded numbers elsewhere.
 	-o-transition: width 0.5s ease;
 	transition: width 0.5s ease;
 	z-index: 50;
+    overflow: auto;
 }
 
 .sidePanelMargins {
@@ -246,7 +246,6 @@ hard-coded numbers elsewhere.
 	top: 0;
 	height: 100%;
 	width: 100%;
-	overflow: hidden;
 	min-width: 250px;
 }
 
@@ -260,7 +259,6 @@ hard-coded numbers elsewhere.
 
 .hasSplit {
    display: none;
-   overflow-x: auto;
 }
 
 .splitLayout {
@@ -312,6 +310,7 @@ splitVerticalThumbLayout {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+	overflow: auto;
 }
 
 /* command layout */

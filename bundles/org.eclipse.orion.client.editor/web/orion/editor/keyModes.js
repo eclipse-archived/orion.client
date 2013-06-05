@@ -56,7 +56,7 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 				case 17: /* Control */
 				case 18: /* Alt */
 				case 91: /* Command */
-					return false;
+					return undefined;
 			}
 			var keyBindingIndex = this._keyBindingIndex;
 			var keyBindings = this._matchingKeyBindings || this._keyBindings;
