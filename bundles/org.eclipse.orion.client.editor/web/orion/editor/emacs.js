@@ -75,6 +75,7 @@ define("orion/editor/emacs", [ //$NON-NLS-0$
 		bindings.push({actionID: "find", keyBinding: new KeyStroke('r', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "incrementalFind", keyBinding: new KeyStroke('s', true)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "incrementalFindReverse", keyBinding: new KeyStroke('r', true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "save", keyBinding: new KeySequence([new KeyStroke('x', !util.isMac, false, false, util.isMac), new KeyStroke('s', !util.isMac, false, false, util.isMac)])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		return bindings;
 	};
