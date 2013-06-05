@@ -10,9 +10,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define setTimeout clearTimeout addEventListener removeEventListener document console localStorage Worker XMLSerializer*/
+/*global define setTimeout clearTimeout addEventListener removeEventListener document console localStorage location URL Worker XMLSerializer*/
 
-define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
+define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Deferred, EventTarget, _){
 
 	function _equal(obj1, obj2) {
 		var keys1 = Object.keys(obj1);
@@ -40,13 +40,15 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 	
 	var httpOrHttps = new RegExp("^http[s]?","i");
 	
-	function _normalizeURL(location) {
-		if (location.indexOf("://") === -1) { //$NON-NLS-0$
-			var temp = document.createElement('a'); //$NON-NLS-0$
-			temp.href = location;
-	        return temp.href;
+	function _normalizeURL(url) {
+		if (url.indexOf("://") === -1) { //$NON-NLS-0$
+			try {
+				return new URL(url, location.href).href;
+			} catch (e) {
+				// URL SyntaxError, etc.
+			}
 		}
-		return location;
+		return url;
 	}
 	
 	function _asStorage(obj) {
