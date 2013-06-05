@@ -121,12 +121,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 		this._prefix = "";
 		
 		var textView = editor.getTextView();
-		textView.setAction("incrementalFindNext", function() { //$NON-NLS-0$
-			return this.find(true, true);
-		}.bind(this));
-		textView.setAction("incrementalFindPrevious", function() { //$NON-NLS-0$
-			return this.find(false, true);
-		}.bind(this));
 		textView.setAction("incrementalFindCancel", function() { //$NON-NLS-0$
 			this.setActive(false);
 			return true;
@@ -150,7 +144,7 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 					prefix = self._prefix += e.text;
 					self._success = true;
 					self._status();
-					self.find(true);
+					self.find(self._forward, true);
 					e.text = null;
 				}
 			},
@@ -169,12 +163,16 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			bindings.push({actionID: "incrementalFindBackspace", keyBinding: new KeyBinding(8)}); //$NON-NLS-0$
 			bindings.push({actionID: "incrementalFindCancel", keyBinding: new KeyBinding(13)}); //$NON-NLS-0$
 			bindings.push({actionID: "incrementalFindCancel", keyBinding: new KeyBinding(27)}); //$NON-NLS-0$
-			bindings.push({actionID: "incrementalFindPrevious", keyBinding: new KeyBinding(38)}); //$NON-NLS-0$
-			bindings.push({actionID: "incrementalFindNext", keyBinding: new KeyBinding(40)}); //$NON-NLS-0$
+			bindings.push({actionID: "incrementalFindReverse", keyBinding: new KeyBinding(38)}); //$NON-NLS-0$
+			bindings.push({actionID: "incrementalFind", keyBinding: new KeyBinding(40)}); //$NON-NLS-0$
+			bindings.push({actionID: "incrementalFindReverse", keyBinding: new KeyBinding('k', true, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+			bindings.push({actionID: "incrementalFind", keyBinding: new KeyBinding('k', true)}); //$NON-NLS-1$ //$NON-NLS-0$
 			return bindings;
 		},
-		find: function(forward, lookAhead) {
+		find: function(forward, change) {
+			this._forward = forward;
 			if (!this.isActive()) {
+				this.setActive(true);
 				return false;
 			}
 			var prefix = this._prefix;
@@ -186,13 +184,13 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			var start;
 			if (forward) {
 				if (this._success) {
-					start = editor.getSelection().start + (lookAhead ? 1 : 0);
+					start = change ? this._start : editor.getCaretOffset() + 1;
 				} else {
 					start = 0;
 				}
 			} else {
 				if (this._success) {
-					start = editor.getCaretOffset() - prefix.length - (lookAhead ? 1 : 0);
+					start = change ? this._start : editor.getCaretOffset();
 				} else {
 					start = model.getCharCount() - 1;
 				}
@@ -203,9 +201,12 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				reverse: !forward,
 				caseInsensitive: prefix.toLowerCase() === prefix}).next();
 			if (result) {
+				if (!change) {
+					this._start = start;
+				}
 				this._success = true;
 				this._ignoreSelection = true;
-				editor.moveSelection(result.start, result.end);
+				editor.moveSelection(forward ? result.start : result.end, forward ? result.end : result.start);
 				this._ignoreSelection = false;
 			} else {
 				this._success = false;
@@ -228,7 +229,8 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			this._success = true;
 			var editor = this.editor;
 			var textView = editor.getTextView();
-			this.editor.setCaretOffset(this.editor.getCaretOffset());
+			this._start = this.editor.getCaretOffset();
+			this.editor.setCaretOffset(this._start);
 			if (this._active) {
 				textView.addEventListener("Verify", this._listener.onVerify); //$NON-NLS-0$
 				textView.addEventListener("Selection", this._listener.onSelection); //$NON-NLS-0$
@@ -241,9 +243,6 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 			this._status();
 		},
 		_backspace: function() {
-			if (!this.isActive()) {
-				return false;
-			}
 			var prefix = this._prefix;
 			prefix = this._prefix = prefix.substring(0, prefix.length-1);
 			if (prefix.length === 0) {
@@ -254,15 +253,21 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 				this._status();
 				return true;
 			}
-			return this.find(false);
+			return this.find(this._forward, true);
 		},
 		_status: function() {
 			if (!this.isActive()) {
 				this.editor.reportStatus("");
 				return;
 			}
-			var formattedMessage = util.formatMessage(this._success ? messages.incrementalFind : messages.incrementalFindNotFound, this._prefix);
-			this.editor.reportStatus(formattedMessage, this._success ? "" : "error"); //$NON-NLS-0$
+			var msg;
+			if (this._forward) {
+				msg = this._success ? messages.incrementalFindStr : messages.incrementalFindStrNotFound;
+			} else {
+				msg = this._success ? messages.incrementalFindReverseStr : messages.incrementalFindReverseStrNotFound;
+			}
+			msg = util.formatMessage(msg, this._prefix);
+			this.editor.reportStatus(msg, this._success ? "" : "error"); //$NON-NLS-0$
 		}
 	});
 
@@ -321,14 +326,13 @@ define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 	
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true), "incrementalFind"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("incrementalFind", function() { //$NON-NLS-0$
-				if (this._searcher && this._searcher.visible()) {
-					return true;
-				}
-				if (!this._incrementalFind.isActive()) {
-					this._incrementalFind.setActive(true);
-				} else {
-					this._incrementalFind.find(true, true);
-				}
+				this._incrementalFind.find(true);
+				return true;
+			}.bind(this), {name: messages.incrementalFindKey});
+
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true, true), "incrementalFindReverse"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("incrementalFindReverse", function() { //$NON-NLS-0$
+				this._incrementalFind.find(false);
 				return true;
 			}.bind(this), {name: messages.incrementalFindKey});
 

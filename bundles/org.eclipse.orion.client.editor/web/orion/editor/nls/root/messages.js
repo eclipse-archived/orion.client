@@ -91,15 +91,18 @@ define({
 			
 	"Comment": "Comment", //$NON-NLS-1$ //$NON-NLS-0$
 	"Flat outline": "Flat outline", //$NON-NLS-1$ //$NON-NLS-0$
-	"incrementalFind": "Incremental find: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
-	"incrementalFindNotFound": "Incremental find: ${0} (not found)", //$NON-NLS-1$ //$NON-NLS-0$
+	"incrementalFindStr": "Incremental find: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"incrementalFindStrNotFound": "Incremental find: ${0} (not found)", //$NON-NLS-1$ //$NON-NLS-0$
+	"incrementalFindReverseStr": "Reverse Incremental find: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"incrementalFindReverseStrNotFound": "Reverse Incremental find: ${0} (not found)", //$NON-NLS-1$ //$NON-NLS-0$
 	"find": "Find...", //$NON-NLS-1$ //$NON-NLS-0$
 	"undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
 	"redo": "Redo", //$NON-NLS-1$ //$NON-NLS-0$
 	"cancelMode": "Cancel Current Mode", //$NON-NLS-1$ //$NON-NLS-0$
 	"findNext": "Find Next Occurrence", //$NON-NLS-1$ //$NON-NLS-0$
 	"findPrevious": "Find Previous Occurrence", //$NON-NLS-1$ //$NON-NLS-0$
-	"incrementalFindKey": "Incremental Find", //$NON-NLS-1$ //$NON-NLS-0$
+	"incrementalFind": "Incremental Find", //$NON-NLS-1$ //$NON-NLS-0$
+	"incrementalFindReverse": "Incremental Find Reverse", //$NON-NLS-1$ //$NON-NLS-0$
 	"indentLines": "Indent Lines", //$NON-NLS-1$ //$NON-NLS-0$
 	"unindentLines": "Unindent Lines", //$NON-NLS-1$ //$NON-NLS-0$
 	"moveLinesUp": "Move Lines Up", //$NON-NLS-1$ //$NON-NLS-0$
