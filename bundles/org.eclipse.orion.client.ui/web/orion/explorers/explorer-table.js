@@ -192,7 +192,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			// handled by copyMultiple
 		},
 		copyMultiple: function(modelEvent) {
-			this.changedItem(this.treeRoot, true);
+			var _self = this, changedLocations = {};
+			modelEvent.items.forEach(function(item) {
+				var parent = item.newValue.Parents[0] || _self.treeRoot;
+				changedLocations[parent.Location] = parent;
+			});
+			Object.keys(changedLocations).forEach(function(loc) {
+				_self.changedItem(changedLocations[loc], true);
+			});
 		},
 		create: function(modelEvent) {
 			// refresh the node
