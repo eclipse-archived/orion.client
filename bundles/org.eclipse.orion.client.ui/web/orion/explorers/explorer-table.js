@@ -209,7 +209,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			// Handled by deleteMultiple
 		},
 		deleteMultiple: function(modelEvent) { //$NON-NLS-0$
-			// TODO: refresh every distinct parent in the list of affected parents, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=408650
 			var items = modelEvent.items;
 			var _self = this;
 			var newRoot;
@@ -223,8 +222,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			if (treeRootDeleted) {
 				this.loadResourceList(newRoot);
 			} else {
-				var lastItem = items[items.length - 1];
-				this.changedItem(lastItem.parent, true);
+				// Refresh every parent folder
+				var changedLocations = {};
+				items.forEach(function(item) {
+					var parent = item.parent;
+					changedLocations[parent.Location] = parent;
+				});
+				Object.keys(changedLocations).forEach(function(loc) {
+					_self.changedItem(changedLocations[loc], true);
+				});
 			}
 		},
 		"import": function(modelEvent) { //$NON-NLS-0$
