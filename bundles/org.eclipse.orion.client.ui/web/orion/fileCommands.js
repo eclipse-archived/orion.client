@@ -320,9 +320,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				}
 				var deferreds = [];
 				var summary = [];
+				var choice = this;
 				selectedItems.forEach(function(item) {
 					var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
-					deferreds.push(func.apply(fileClient, [item.Location, this.path]).then(
+					deferreds.push(func.apply(fileClient, [item.Location, choice.path]).then(
 						function(newItem) {
 							summary.push({
 								oldValue: item,
