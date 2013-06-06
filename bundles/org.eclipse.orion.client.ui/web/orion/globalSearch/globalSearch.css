@@ -115,6 +115,10 @@
 	color: #222;
 }
 
+.search-filter-input {
+	min-width:20em;
+}
+
 .search-label {
 	display: inline-block;
 	padding: 4px 4px 4px 7px;
