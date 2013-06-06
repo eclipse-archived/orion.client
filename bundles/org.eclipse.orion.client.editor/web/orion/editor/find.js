@@ -222,6 +222,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 					this._startOffset = result.start;
 				}
 			}
+			if (this._hideAfterFind) {
+				this.hide();
+			}
 			return result;
 		},
 		getStartOffset: function() {
@@ -355,7 +358,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				if (options.findAfterReplace === true || options.findAfterReplace === false) {
 					this._findAfterReplace = options.findAfterReplace;
 				}
-				
+				if (options.hideAfterFind === true || options.hideAfterFind === false) {
+					this._hideAfterFind = options.hideAfterFind;
+				}
 				if (options.reverse === true || options.reverse === false) {
 					this._reverse = options.reverse;
 				}

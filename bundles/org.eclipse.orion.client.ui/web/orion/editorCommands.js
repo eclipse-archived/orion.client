@@ -234,7 +234,7 @@ exports.EditorCommandFactory = (function() {
 							}
 						}
 						if(parsedParam){
-							self._localSearcher.setOptions({useRegExp: parsedParam.regEx, ignoreCase: !parsedParam.caseSensitive});
+							self._localSearcher.setOptions({regex: parsedParam.regEx, caseInsensitive: !parsedParam.caseSensitive});
 							if(parsedParam.atLine){
 								var offset = editor.getModel().getLineStart(parsedParam.atLine-1);
 								editor.moveSelection(offset, offset, function(){
@@ -257,7 +257,12 @@ exports.EditorCommandFactory = (function() {
 			this.commandService.addCommand(findCommand);
 			this.commandService.registerCommandContribution(this.pageNavId, "orion.editor.find", 2, null, true, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// override the editor binding 
-			editor.getTextView().setAction("find", function () { //$NON-NLS-0$
+			editor.getTextView().setAction("find", function (data) { //$NON-NLS-0$
+				if (data) {
+					self._localSearcher.setOptions(data);
+					self._localSearcher.show();
+					return true;
+				}
 				self.commandService.runCommand("orion.editor.find"); //$NON-NLS-0$
 				return true;
 			}, findCommand);
