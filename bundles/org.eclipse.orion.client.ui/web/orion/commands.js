@@ -254,8 +254,12 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		if (command.hrefCallback) {
 			element = document.createElement("a"); //$NON-NLS-0$
 			element.id = id;
-			element.className = "commandLink"; //$NON-NLS-0$
-			element.appendChild(document.createTextNode(command.name));
+			if (useImage && command.hasImage()) {
+				_addImageToElement(command, element, id);
+			} else {
+				element.className = "commandLink"; //$NON-NLS-0$
+				element.appendChild(document.createTextNode(command.name));
+			}
 			var href = command.hrefCallback.call(commandInvocation.handler, commandInvocation);
 			if (href.then){
 				href.then(function(l){

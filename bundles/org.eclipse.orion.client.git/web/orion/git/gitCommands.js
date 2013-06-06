@@ -462,7 +462,6 @@ var exports = {};
 		var addBranchCommand = new mCommands.Command({
 			name: messages["New Branch"],
 			tooltip: messages["Add a new local branch to the repository"],
-			imageClass: "core-sprite-add", //$NON-NLS-0$
 			id: "eclipse.addBranch", //$NON-NLS-0$
 			parameters: branchNameParameters,
 			callback: function(data) {
@@ -554,7 +553,6 @@ var exports = {};
 		var addRemoteCommand = new mCommands.Command({
 			name: messages["New Remote"],
 			tooltip: messages["Add a new remote to the repository"],
-			imageClass: "core-sprite-add", //$NON-NLS-0$
 			id: "eclipse.addRemote", //$NON-NLS-0$
 			parameters: addRemoteParameters,
 			callback : function(data) {
@@ -656,8 +654,6 @@ var exports = {};
 			name : messages["Git Log"],
 			tooltip: messages["Open the log for the branch"],
 			id : "eclipse.openGitLog", //$NON-NLS-0$
-			imageClass: "git-sprite-log", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			hrefCallback : function(data) {
 				var item = data.items;
 				return require.toUrl("git/git-log.html")+"#" + item.CommitLocation + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -690,8 +686,6 @@ var exports = {};
 			name : messages['Git Status'],
 			tooltip: messages["Open the status for the repository"],
 			id : "eclipse.openGitStatus", //$NON-NLS-0$
-			imageClass: "git-sprite-status", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			hrefCallback : function(data) {
 				return require.toUrl(mGitUtil.statusUILocation) + "#" + data.items.StatusLocation; //$NON-NLS-0$
 			},
@@ -720,8 +714,6 @@ var exports = {};
 
 		var compareGitCommits = new mCommands.Command({
 			name : messages["Compare With Each Other"],
-			imageClass: "git-sprite-open_compare", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.compareGitCommits", //$NON-NLS-0$
 			hrefCallback : function(data) {
 				var item = data.items;
@@ -742,8 +734,6 @@ var exports = {};
 
 		var compareWithWorkingTree = new mCommands.Command({
 			name : messages["Compare With Working Tree"],
-			imageClass: "git-sprite-open_compare", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.compareWithWorkingTree", //$NON-NLS-0$
 			hrefCallback : function(data) {
 				return mCompareUtils.generateCompareHref(data.items.DiffLocation, {});
@@ -1979,7 +1969,6 @@ var exports = {};
 		var addConfigEntryCommand = new mCommands.Command({
 			name: messages["New Configuration Entry"],
 			tooltip: "Add a new entry to the repository configuration", //$NON-NLS-0$
-			imageClass: "core-sprite-add", //$NON-NLS-0$
 			id: "eclipse.orion.git.addConfigEntryCommand", //$NON-NLS-0$
 			parameters: addConfigParameters,
 			callback: function(data) {
@@ -2836,8 +2825,6 @@ var exports = {};
 		var showPatchCommand = new mCommands.Command({
 			name: messages["Show Patch"],
 			tooltip: messages["Show workspace changes as a patch"],
-			imageClass: "git-sprite-diff", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id: "eclipse.orion.git.showPatchCommand", //$NON-NLS-0$
 			hrefCallback : function(data) {
 				var items = forceArray(data.items);
