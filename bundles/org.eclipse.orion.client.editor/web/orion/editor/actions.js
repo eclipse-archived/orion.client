@@ -25,11 +25,11 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 	/**
 	 * TextCommands connects common text editing keybindings onto an editor.
 	 */
-	function TextActions(editor, undoStack, searcher) {
+	function TextActions(editor, undoStack, find) {
 		this.editor = editor;
 		this.undoStack = undoStack;
 		this._incrementalFind = new mFind.IncrementalFind(editor);
-		this._searcher =  searcher;
+		this._find = find ? find : new mFind.Find(editor, undoStack);
 		this._lastEditLocation = null;
 		this.init();
 	}
@@ -47,15 +47,21 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			};
 			textView.addEventListener("ModelChanged", this._lastEditListener.onModelChanged); //$NON-NLS-0$
 			
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("f", true), "find"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("find", function() { //$NON-NLS-0$
+				if (this._find) {
+					var selection = this.editor.getSelection();
+					var search = prompt(messages.find, this.editor.getText(selection.start, selection.end));
+					if (search) {
+						this._find.find(true, search);
+					}
+				}
+			}.bind(this), {name: messages.find});
+			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true), "findNext"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("findNext", function() { //$NON-NLS-0$
-				if (this._searcher){
-					var selection = textView.getSelection();
-					if(selection.start < selection.end) {
-						this._searcher.findNext(true, textView.getText(selection.start, selection.end));
-					} else {
-						this._searcher.findNext(true);
-					}
+				if (this._find){
+					this._find.find(true);
 					return true;
 				}
 				return false;
@@ -63,13 +69,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true, true), "findPrevious"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("findPrevious", function() { //$NON-NLS-0$
-				if (this._searcher){
-					var selection = textView.getSelection();
-					if(selection.start < selection.end) {
-						this._searcher.findNext(false, textView.getText(selection.start, selection.end));
-					} else {
-						this._searcher.findNext(false);
-					}
+				if (this._find){
+					this._find.find(false);
 					return true;
 				}
 				return false;
@@ -77,13 +78,17 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 	
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true), "incrementalFind"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("incrementalFind", function() { //$NON-NLS-0$
-				this._incrementalFind.find(true);
+				if (this._incrementalFind) {
+					this._incrementalFind.find(true);
+				}
 				return true;
 			}.bind(this), {name: messages.incrementalFindKey});
 
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true, true), "incrementalFindReverse"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("incrementalFindReverse", function() { //$NON-NLS-0$
-				this._incrementalFind.find(false);
+				if (this._incrementalFind) {
+					this._incrementalFind.find(false);
+				}
 				return true;
 			}.bind(this), {name: messages.incrementalFindKey});
 

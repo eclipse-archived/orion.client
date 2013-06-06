@@ -126,5 +126,10 @@ define({
 	"linkedModeExited": "Linked Mode exited", //$NON-NLS-1$ //$NON-NLS-0$
 	"syntaxError": "Syntax Error", //$NON-NLS-1$ //$NON-NLS-0$
 	"contentAssist": "Content Assist", //$NON-NLS-1$ //$NON-NLS-0$
-	"lineColumn": "Line ${0} : Col ${1}" //$NON-NLS-1$ //$NON-NLS-0$
+	"lineColumn": "Line ${0} : Col ${1}", //$NON-NLS-1$ //$NON-NLS-0$
+	
+	"replaceAll": "Replacing all...", //$NON-NLS-1$ //$NON-NLS-0$
+	"replacedMatches": "Replaced ${0} matches", //$NON-NLS-1$ //$NON-NLS-0$
+	"nothingReplaced": "Nothing replaced", //$NON-NLS-1$ //$NON-NLS-0$
+	"notFound": "Not found" //$NON-NLS-1$ //$NON-NLS-0$
 });

@@ -238,16 +238,16 @@ exports.EditorCommandFactory = (function() {
 							if(parsedParam.atLine){
 								var offset = editor.getModel().getLineStart(parsedParam.atLine-1);
 								editor.moveSelection(offset, offset, function(){
-									self._localSearcher.buildToolBar(searchString, parsedParam.replaceWith);
-									self._localSearcher.findNext(true);
+									self._localSearcher.show(searchString, parsedParam.replaceWith);
+									self._localSearcher.find(true);
 									}, 
 								focus);
 							} else {
-								self._localSearcher.buildToolBar(searchString, parsedParam.replaceWith);
-								self._localSearcher.findNext(true);
+								self._localSearcher.show(searchString, parsedParam.replaceWith);
+								self._localSearcher.find(true);
 							}
 						} else {
-							self._localSearcher.buildToolBar(searchString);
+							self._localSearcher.show(searchString);
 						}
 						return true;
 					}
@@ -257,7 +257,6 @@ exports.EditorCommandFactory = (function() {
 			this.commandService.addCommand(findCommand);
 			this.commandService.registerCommandContribution(this.pageNavId, "orion.editor.find", 2, null, true, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// override the editor binding 
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('f', true), "find"); //$NON-NLS-1$ //$NON-NLS-0$
 			editor.getTextView().setAction("find", function () { //$NON-NLS-0$
 				self.commandService.runCommand("orion.editor.find"); //$NON-NLS-0$
 				return true;
