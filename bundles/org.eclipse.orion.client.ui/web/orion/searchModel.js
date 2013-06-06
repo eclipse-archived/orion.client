@@ -41,6 +41,11 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
             isRoot: true,
             children: []
         };
+        this._filteredRoot = {
+            isRoot: true,
+            children: []
+        };
+        this._filterText = null;
         this._indexedFileItems = [];
         this._location2ModelMap = [];
         this._lineDelimiter = "\n"; //$NON-NLS-0$
@@ -107,7 +112,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
      * The bottom layer is the detail matches within a file, whose type is "detail". It should have a property called parent which points to the file item.
      */
     SearchResultModel.prototype.getListRoot = function() {
-        return this._listRoot;
+        return this._filterText ? this._filteredRoot : this._listRoot;
     };
 
     /**
@@ -371,10 +376,44 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
         return result;
     };
 
+    /**
+     * Filter the model by the given filter text. Optional.
+     * If defined, the explorer will render a filter input box in the tool bar. Typing in the input field filters the result on the fly.
+     */
+    SearchResultModel.prototype.filterOn = function(filterText) {
+		this._filterText = filterText;
+		if(this._filterText) {
+			var keyword = this._filterText.toLowerCase();
+			this._filteredRoot.children = [];
+			this._indexedFileItems.forEach(function(fileItem) {
+				var hitFlag = false;
+				if(this._filterSingleString(fileItem.name, keyword) || this._filterSingleString(fileItem.fullPathName, keyword)){
+					hitFlag = true;
+				} else if( fileItem.children){
+					fileItem.children.some(function(detailItem) {
+					    if (this._filterSingleString(detailItem.name, keyword)) {
+					        hitFlag = true;
+					        return true; // stops the filtering on details
+					    }
+					    return false;
+					}.bind(this));
+				}
+				if(hitFlag) {
+					this._filteredRoot.children.push(fileItem);
+				}
+			}.bind(this));
+		}
+    };
+
     /*** Internal model functions ***/
 
     SearchResultModel.prototype._provideSearchHelper = function() {
         return this._searchHelper;
+    };
+
+    SearchResultModel.prototype._filterSingleString = function(stringToFilter, keyword) {
+        var lowerCaseStr = stringToFilter.toLowerCase();
+        return (lowerCaseStr.indexOf(keyword) >= 0 );
     };
 
     SearchResultModel.prototype._model2Index = function(model, list) {

@@ -14,9 +14,9 @@
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
         'orion/commandRegistry', 'orion/favorites', 'orion/searchOutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/globalCommands', 
-        'orion/contentTypes', 'orion/searchUtils', 'orion/PageUtil'], 
+        'orion/contentTypes', 'orion/searchUtils', 'orion/PageUtil','orion/webui/littlelib'], 
 		function(messages, require, mBrowserCompatibility, mBootstrap, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mSearchOutliner, 
-				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil) {
+				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil, lib) {
 	function makeHref(fileClient, seg, location, searchParams, searcher){
 		var searchLocation = (!location || location === "" || location === "root") ? searcher.getSearchRootLocation() : location; //$NON-NLS-0$
 		var newParams = mSearchUtils.copySearchParams(searchParams);
@@ -82,6 +82,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility
 		var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandRegistry, fileClient, searcher, false/*crawling*/); //$NON-NLS-0$
 
 		var startWidget = function(){
+	        var filterNode = lib.node("filterBox");
+	        if (filterNode) {
+	            lib.empty(filterNode);
+	        }
 			var searchParams = PageUtil.matchResourceParameters();
 			mSearchUtils.convertSearchParams(searchParams);
 			setPageInfo(serviceRegistry, fileClient, commandRegistry, searcher, searchResultsGenerator, searchBuilder, searchParams, progress);

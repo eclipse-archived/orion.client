@@ -21,6 +21,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         if (node) {
             lib.empty(node);
         }
+        return node;
     }
 
     function _connect(nodeOrId, event, eventHandler) {
@@ -565,6 +566,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._popUpContext = false;
         this.timerRunning -= false;
         this._timer = null;
+        this._filterTimer = null;
         this.twoWayCompareView = null;
     };
 
@@ -1303,8 +1305,12 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultExplorer.prototype.startUp = function() {
+		var filterBox = _empty("filterBox");
 		var pagingParams = this.model.getPagingParams();
 		if (pagingParams.numberOnPage === 0) {
+	        if(filterBox){
+				filterBox.style.visibility = "hidden"; //$NON-NLS-0$
+	        }
 			var message = messages["No matches"];
 			if(this.model._provideSearchHelper){
 				message = i18nUtil.formatMessage(messages["No matches found for ${0}"], this.model._provideSearchHelper().displayedSearchTerm);
@@ -1315,6 +1321,23 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		    return;
 		} 
         var that = this;
+        if(filterBox && !this.model.replaceMode() && typeof this.model.filterOn === "function"){ //$NON-NLS-0$
+			filterBox.style.visibility = "visible"; //$NON-NLS-0$
+			var filterInput = _createElement('input', ["search-control", "search-filter-input"], null, filterBox); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			filterInput.type = "text";//$NON-NLS-0$
+			filterInput.placeholder = messages["Type filter text"];
+			filterInput.addEventListener("input", function(e) {//$NON-NLS-0$
+				if(this._filterTimer){
+					window.clearTimeout(this._filterTimer);
+				}
+				var explorer = this;
+				this._timer = window.setTimeout(function(){
+					this._filterTimer = null;
+					this.renderfiltered(filterInput.value);
+				}.bind(explorer), 1000);
+			}.bind(this));
+         }
+        
         this.model.buildResultModel();
         if (!this.model.replaceMode()) {
             this.initCommands();
@@ -1347,6 +1370,17 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             onCollapse: function(model) {
                 that.onCollapse(model);
             }
+        });
+    };
+
+    SearchResultExplorer.prototype.renderfiltered = function(filterText) {
+        this.model.filterOn(filterText);
+        this.createTree(this.getParentDivId(), this.model, {
+            selectionPolicy: "cursorOnly", //$NON-NLS-0$
+            indent: 0,
+            onCollapse: function(model) {
+                this.onCollapse(model);
+            }.bind(this)
         });
     };
 

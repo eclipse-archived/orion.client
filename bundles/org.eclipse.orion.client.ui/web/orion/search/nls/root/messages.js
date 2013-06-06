@@ -86,6 +86,7 @@ define({
 	"File name": "File name",
 	"Path name": "Path name",
 	"Remember search as": "Remember search as",
+	"Type filter text": "Type filter text",
 	"Scope Search": "Scope Search",
 	"Open in Search page for this directory": "Open in Search page for this directory",
 	"Click or use delete key to delete the search term": "Click or use delete key to delete the search term"
