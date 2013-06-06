@@ -805,6 +805,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 		onGotoLine: function(line, column, end) {
 			if (this._textView) {
 				var model = this.getModel();
+				line = Math.max(0, Math.min(line, model.getLineCount() - 1));
 				var lineStart = model.getLineStart(line);
 				var start = 0;
 				if (end === undefined) {
