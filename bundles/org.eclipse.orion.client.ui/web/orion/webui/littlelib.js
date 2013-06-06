@@ -130,8 +130,8 @@ define([], function() {
 	}
 
 	/**
-	 * Performs substitution of DOM nodes into textContent within the given node and its descendents. An occurrence of <code>${n}</code>
-	 * in text content will be replaced by the DOM node <code>domNodes[n]</code>.
+	 * Performs substitution of DOM nodes into textContent within the given node and its descendants. An occurrence of <code>${n}</code>
+	 * in text content will be replaced by the DOM node <code>replaceNodes[n]</code>.
 	 * @param {Node} node
 	 * @param {Node[]} replaceNodes
 	 */
