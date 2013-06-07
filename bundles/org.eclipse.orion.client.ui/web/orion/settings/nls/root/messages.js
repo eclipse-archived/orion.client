@@ -127,6 +127,7 @@ define({
 	"Autoload Enabled" : "Auto Load",
 	"Restore" : "Restore Defaults",
 	"Default": "Default",
+	"Scheme": "Scheme",
 	"Tabs" : "Tabs",
 	"TabSize" : "Tab Size",
 	"ExpandTab" : "Insert spaces for tabs",

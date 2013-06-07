@@ -30,7 +30,7 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Select'],
 
 		postCreate: function() {
 			Select.prototype.postCreate.call(this);
-			this.mylabel.textContent = this.fieldlabel + ':';
+			this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$
 		},
 
 		destroy: function() {

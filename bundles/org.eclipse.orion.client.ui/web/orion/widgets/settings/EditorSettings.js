@@ -8,10 +8,10 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 	'orion/webui/littlelib', //$NON-NLS-0$
 	'i18n!orion/settings/nls/messages', //$NON-NLS-0$ 
 	'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox',  //$NON-NLS-0$  //$NON-NLS-1$ 
-	'orion/widgets/input/Select', //$NON-NLS-0$ 
+	'orion/widgets/input/LabeledSelect', //$NON-NLS-0$ 
 	'orion/widgets/settings/Subsection', //$NON-NLS-0$ 
 	'orion/commands'//$NON-NLS-0$ 
-], function(require, util, objects, lib, messages, LabeledTextfield, LabeledCheckbox, Select, Subsection, commands)  {
+], function(require, util, objects, lib, messages, LabeledTextfield, LabeledCheckbox, LabeledSelect, Subsection, commands)  {
     var KEY_MODES = [
     messages.Default,
 	"Emacs" //$NON-NLS-0$
@@ -76,7 +76,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					}
 					options.push(set);
 				}	
-				kbFields.push(this.kbSelect = new Select( {options:options})); //$NON-NLS-0$
+				kbFields.push(this.kbSelect = new LabeledSelect( {fieldlabel:messages.Scheme, options:options}));
 				var kbSubsection = new Subsection( {sectionName:messages.KeyBindings, parentNode: this.sections, children: kbFields } );
 				kbSubsection.show();
 			}
