@@ -21,8 +21,7 @@
 		loggingLevel: 'WARNING'
 	},
 	paths: {
-        i18n: 'requirejs/i18n',
-        'orion/globalCommands': 'empty:'
+        i18n: 'requirejs/i18n'
 	},
 	name: "orion/editor/edit",
 	preserveLicenseComments: false,

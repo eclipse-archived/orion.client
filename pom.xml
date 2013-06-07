@@ -119,7 +119,7 @@
 				<inherited>false</inherited>
 				<executions>
 					<execution>
-						<phase>compile</phase>
+						<phase>verify</phase>
 						<configuration>
 							<tasks if="requirejsHome">
 								<echo message="Minification started..."/>
