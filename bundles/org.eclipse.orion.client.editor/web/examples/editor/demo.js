@@ -32,6 +32,7 @@ function(mSetup, mTestPerformance, util) {
 	var bSetOptions = document.getElementById("setOptions"); //$NON-NLS-0$
 	var sContents = document.getElementById("contentsSelect"); //$NON-NLS-0$
 	var sTheme = document.getElementById("themeSelect"); //$NON-NLS-0$
+	var sBindings = document.getElementById("bindingsSelect"); //$NON-NLS-0$
 	var sTabSize = document.getElementById('tabSize'); //$NON-NLS-0$
 	var sScrollAnimation = document.getElementById('scrollAnimation'); //$NON-NLS-0$
 	var bReadOnly = document.getElementById('readOnly'); //$NON-NLS-0$
@@ -40,6 +41,8 @@ function(mSetup, mTestPerformance, util) {
 	var bExpandTab = document.getElementById('expandTab'); //$NON-NLS-0$
 	var bAutoSet = document.getElementById('autoSetOptions'); //$NON-NLS-0$
 	var table = document.getElementById('table'); //$NON-NLS-0$
+	
+	var keyBindings = "";
 
 	function resize() {
 		var height = document.documentElement.clientHeight;
@@ -87,6 +90,7 @@ function(mSetup, mTestPerformance, util) {
 			tabSize: parseInt(sTabSize.value, 10),
 			scrollAnimation: parseInt(sScrollAnimation.value, 10),
 			wrapMode: bWrap.checked,
+			keyBindings: (keyBindings = sBindings.value),
 			themeClass: sTheme.value
 		};
 	}
@@ -101,6 +105,7 @@ function(mSetup, mTestPerformance, util) {
 		sTabSize.value = options.tabSize;
 		sScrollAnimation.value = options.scrollAnimation;
 		sTheme.value = options.themeClass;
+		sBindings.value = keyBindings;
 	}
 
 	var contents, currentContents;
@@ -176,6 +181,7 @@ function(mSetup, mTestPerformance, util) {
 	bSetOptions.onclick = setOptions;
 	sContents.onchange = checkSetOptions;
 	sTheme.onchange = checkSetOptions;
+	sBindings.onchange = checkSetOptions;
 	bReadOnly.onchange = checkSetOptions;
 	sTabSize.onchange = checkSetOptions;
 	sScrollAnimation.onchange = checkSetOptions;

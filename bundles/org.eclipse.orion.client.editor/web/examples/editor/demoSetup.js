@@ -14,6 +14,8 @@
  
 define(["require", 
 		"orion/keyBinding",
+		"orion/editor/emacs",
+		"orion/editor/vi",
 		"orion/editor/textModel",
 		"orion/editor/annotations", 
 		"orion/editor/projectionTextModel", 
@@ -27,12 +29,13 @@ define(["require",
 		"orion/editor/htmlGrammar",
 		"examples/editor/textStyler",
 		"orion/util"
-], function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextTheme, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler, util) {
+], function(require, mKeyBinding, mEmacs, mVI, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextTheme, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler, util) {
 
 	var exports = {};
 	var view = null;
 	var styler = null;
 	var annotationStyler = null;
+	var emacs, vi;
 	
 	var AnnotationType = mAnnotations.AnnotationType;
 		
@@ -53,11 +56,22 @@ define(["require",
 		theme.setThemeClass(themeClass, {href: "orion/editor/themes/" + themeClass}); //$NON-NLS-0$
 	}
 	
+	function updateKeyMode(view, options) {
+		view.removeKeyMode(vi);
+		view.removeKeyMode(emacs);
+		if (options.keyBindings === "emacs") { //$NON-NLS-0$
+			view.addKeyMode(emacs);
+		} else if (options.keyBindings === "vi") { //$NON-NLS-0$
+			view.addKeyMode(vi);
+		}
+	}
+	
 	function checkView(options) {
 		if (view) {
 			if (options) {
 				loadTheme(options.themeClass);
 				view.setOptions(options);
+				updateKeyMode(view, options);
 			}
 			return view;
 		}
@@ -72,6 +86,10 @@ define(["require",
 		options.parent = options.parent || "divParent"; //$NON-NLS-0$
 		options.model = viewModel;
 		exports.view = view = new mTextView.TextView(options);
+		
+		vi = new mVI.VIMode();
+		emacs = new mEmacs.EmacsMode();
+		updateKeyMode(view, options);
 		
 		/* Undo stack */
 		var undoStack = exports.undoStack = new mUndoStack.UndoStack(view, 200);
