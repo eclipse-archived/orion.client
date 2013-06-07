@@ -17,11 +17,10 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	 * @param {Object[]} param.options Array of {value:Object, label:String, selected:Boolean(optional)}
 	 */
 	function Select( params, node ){
+		objects.mixin(this, params);
 		this.node = node || document.createElement("div"); //$NON-NLS-0$
 		this.node.innerHTML = this.templateString;
-		this.mylabel = lib.$(".setting-label", this.node); //$NON-NLS-0$
 		this.select = lib.$(".setting-control", this.node); //$NON-NLS-0$
-		this.options = params.options;
 	}
 	objects.mixin(Select.prototype, {
 		templateString: '<select class="setting-control" id="selection"></select>', //$NON-NLS-0$
