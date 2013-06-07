@@ -22,10 +22,12 @@ define([], function() {
 		autoLoadEnabled:true,
 		autoLoadVisible:true,
 		tabSize:4,
-		tabSizeVisible:false,
-		scrollEnabled: true,
+		tabSizeVisible:true,
+		expandTab:false,
+		expandTabVisible:true,
+		scrollAnimationEnabled: true,
 		scrollAnimation:300,
-		scrollEnabledVisible:false,
+		scrollAnimationVisible:true,
 		keyBindingsVisible: true,
 		keyBindings: "Default"
 	};
