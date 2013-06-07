@@ -33,17 +33,19 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 		},
 		getReplaceString: function() {
 			var input = document.getElementById("localSearchReplaceWith"); //$NON-NLS-0$
-			var searchStr = input ? input.value : "";
-			return searchStr || mFind.Find.prototype.getReplaceString(this);
+			if (!input) {
+				return mFind.Find.prototype.getReplaceString(this);
+			}
+			return input.value;
 		},
-		hide : function() {
+		hide: function() {
 			var visible = this.isVisible();
 			mFind.Find.prototype.hide.call(this);
 			if(visible){
 				this._commandService.closeParameterCollector();
 			}
 		},
-		show : function(defaultSearchStr, defaultReplaceStr) {
+		show: function(defaultSearchStr, defaultReplaceStr) {
 			var findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			if (!findDiv) {
 				this._createActionTable();
@@ -62,7 +64,7 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 			}, 10);
 			mFind.Find.prototype.show.call(this);
 		},
-		_createActionTable : function() {
+		_createActionTable: function() {
 			var that = this;
 			this._commandService.openParameterCollector("pageNavigationActions", function(parentDiv) { //$NON-NLS-0$
 	
@@ -174,12 +176,8 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 			parent.appendChild(button);
 		},
 		_handleInput: function(evt){
-			if(this._incremental){
-				if(!this._noSelection){
-					this.find(true, null, true);
-				} else {
-					this._noSelection = false;
-				}
+			if (this._incremental) {
+				this.find(true, null, true);
 			}
 			return true;
 		},
@@ -216,7 +214,6 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 			return true;
 		}
 	});
-	
 
 	return {TextSearcher: TextSearcher};
 });
