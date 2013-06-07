@@ -28,7 +28,7 @@
 			</java>
 
 			<!-- optimize the page css -->
-			<!-- <java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="${buildDirectory}/optimization">
+			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="${buildDirectory}/optimization">
 				<classpath>
 					<pathelement location="${requirejsHome}/lib/rhino/js.jar" />
 					<pathelement location="${requirejsHome}/lib/closure/compiler.jar" />
@@ -38,7 +38,7 @@
 				<arg value="./orion.build.js"/>
 				<arg value="cssIn=@{pageDir}/@{name}.css" />
 				<arg value="out=@{pageDir}/@{name}.css" />
-			</java> -->
+			</java>
 
 			<antcall target="updateHTML">
 				<param name="minifiedScript" value="${buildDirectory}/optimization/@{pageDir}/built-@{name}.js" />
@@ -132,7 +132,7 @@
 		</copy>
 		
 		<!-- build standalone editor -->
-		<!-- <editorOptimize  filename="built-editor.css" scriptname="editor.build-css.js" optimize="closure"/> -->
+		<editorOptimize  filename="built-editor.css" scriptname="editor.build-css.js" optimize="closure"/>
 		<editorOptimize  filename="built-editor-amd.min.js" scriptname="editor.build-js.js" optimize="closure"/>
 		<editorOptimize  filename="built-editor-amd.js" scriptname="editor.build-js.js" optimize="none"/>
 		<editorOptimize  filename="built-editor.min.js" scriptname="editor.build.almond-js.js" optimize="closure"/>
@@ -168,7 +168,7 @@
 
 
 		<!-- copy css back -->
-		<!-- <copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web" >
+		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web" >
 			<fileset dir="${buildDirectory}/optimization" includes="**/*.css" excludes="git/,profile/"/>
 		</copy>
 		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.git/web" >
@@ -176,7 +176,7 @@
 		</copy>
 		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.users/web" >
 			<fileset dir="${buildDirectory}/optimization" includes="profile/**/*.css" />
-		</copy> -->
+		</copy>
 	</target>
 
 </project>

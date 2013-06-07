@@ -22,8 +22,7 @@
 	},
 	paths: {
         almond: 'requirejs/almond',
-        i18n: 'requirejs/i18n',
-        'orion/globalCommands': 'empty:'
+        i18n: 'requirejs/i18n'
 	},
 	name: "almond",
 	include: "orion/editor/edit",

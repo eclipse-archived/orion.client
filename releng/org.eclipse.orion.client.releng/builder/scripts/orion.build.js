@@ -32,7 +32,6 @@
         i18n: 'requirejs/i18n',
         domReady: 'requirejs/domReady',
         gcli: 'gcli/gcli',
-        util: 'gcli/util',
-        'orion/globalCommands': 'empty:'
+        util: 'gcli/util'
     }
 })
