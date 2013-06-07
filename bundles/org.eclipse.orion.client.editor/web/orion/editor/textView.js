@@ -3461,14 +3461,27 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					* 
 					* Note that the current approach does not calculate the correct
 					* pixel value for Mac mice when the delta is a multiple of 120.
+					*
+					* For values that are multiples of 120, the denominator varies on
+					* the time between events.
 					*/
-					var denominatorX = 40, denominatorY = 40;
-					if (e.wheelDeltaX % 120 !== 0) { denominatorX = 1; }
-					if (e.wheelDeltaY % 120 !== 0) { denominatorY = 1; }
-					pixelX = -e.wheelDeltaX / denominatorX;
+					var denominatorX, denominatorY;
+					var deltaTime = e.timeStamp - this._wheelTimeStamp;
+					this._wheelTimeStamp = e.timeStamp;
+					if (e.wheelDeltaX % 120 !== 0) { 
+						denominatorX = 1; 
+					} else {
+						denominatorX = deltaTime < 40 ? 40/(40-deltaTime) : 40;
+					}
+					if (e.wheelDeltaY % 120 !== 0) { 
+						denominatorY = 1; 
+					} else {
+						denominatorY = deltaTime < 40 ? 40/(40-deltaTime) : 40; 
+					}
+					pixelX = Math.ceil(-e.wheelDeltaX / denominatorX);
 					if (-1 < pixelX && pixelX < 0) { pixelX = -1; }
 					if (0 < pixelX && pixelX < 1) { pixelX = 1; }
-					pixelY = -e.wheelDeltaY / denominatorY;
+					pixelY = Math.ceil(-e.wheelDeltaY / denominatorY);
 					if (-1 < pixelY && pixelY < 0) { pixelY = -1; }
 					if (0 < pixelY && pixelY < 1) { pixelY = 1; }
 				} else {
