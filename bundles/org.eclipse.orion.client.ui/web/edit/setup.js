@@ -123,10 +123,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		}
 	};
 		
-	//TODO should load emacs only when needed
+	//TODO should load emacs and vi only when needed
 	var emacs = new mEmacs.EmacsMode();
-	
 	var vi = new mVI.VIMode(statusReporter);
+	
 	var updateSettings = function(prefs) {
 		settings = prefs;
 		inputManager.setAutoLoadEnabled(prefs.autoLoadEnabled);
@@ -163,6 +163,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
 				tabSize: 4,
 				scrollAnimation: 300,
+				wrappable: true,
 				readonly: isReadOnly
 			});
 			return textView;
@@ -180,8 +181,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			commandGenerator.generateEditorCommands(editor);
 			
 			var textView = editor.getTextView();
-			textView.setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-1$ //$NON-NLS-0$
-			
 			if (settings.keyBindings === "Emacs") { //$NON-NLS-0$
 				textView.addKeyMode(emacs);
 			} else if (settings.keyBindings === "VI") { //$NON-NLS-0$

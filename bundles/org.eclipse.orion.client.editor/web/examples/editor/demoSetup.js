@@ -85,6 +85,7 @@ define(["require",
 		loadTheme(options.themeClass);
 		options.parent = options.parent || "divParent"; //$NON-NLS-0$
 		options.model = viewModel;
+		options.wrappable = true;
 		exports.view = view = new mTextView.TextView(options);
 		
 		vi = new mVI.VIMode();
@@ -109,8 +110,6 @@ define(["require",
 			return true;
 		});
 		
-		view.setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-1$ //$NON-NLS-0$
-
 		var annotationModel = view.annotationModel = new mAnnotations.AnnotationModel(baseModel);
 		/* Example: Adding a keyBinding and action*/
 		view.setKeyBinding(new mKeyBinding.KeyBinding('h', true), "collapseAll"); //$NON-NLS-1$ //$NON-NLS-0$
