@@ -1016,12 +1016,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							}
 							var summary = [];
 							var deferreds = [];
-							for (var i=0; i<bufferedSelection.length; i++) {
-								var location = bufferedSelection[i].Location;
-								var name = bufferedSelection[i].Name || null;
+							bufferedSelection.forEach(function(selectedItem) {
+								var location = selectedItem.Location;
+								var name = selectedItem.Name || null;
 								if (location) {
-									if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === item.Location) {
-										name = window.prompt(i18nUtil.formatMessage(messages['Enter a new name for \'${0}\''], bufferedSelection[i].Name), i18nUtil.formatMessage(messages['Copy of ${0}'], bufferedSelection[i].Name));
+									if (selectedItem.parent && selectedItem.parent.Location === item.Location) {
+										name = window.prompt(i18nUtil.formatMessage(messages['Enter a new name for \'${0}\''], selectedItem.Name), i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name));
 										// user cancelled?  don't copy this one
 										if (!name) {
 											location = null;
