@@ -260,16 +260,16 @@ define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib
 							if(parsedParam.atLine){
 								var offset = editor.getModel().getLineStart(parsedParam.atLine-1);
 								editor.moveSelection(offset, offset, function(){
-									self._localSearcher.show(searchString, parsedParam.replaceWith);
+									self._localSearcher.show({findString: searchString, replaceString: parsedParam.replaceWith});
 									self._localSearcher.find(true);
 									}, 
 								focus);
 							} else {
-								self._localSearcher.show(searchString, parsedParam.replaceWith);
+								self._localSearcher.show({findString: searchString, replaceString: parsedParam.replaceWith});
 								self._localSearcher.find(true);
 							}
 						} else {
-							self._localSearcher.show(searchString);
+							self._localSearcher.show({findString: searchString});
 						}
 						return true;
 					}
@@ -281,8 +281,7 @@ define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib
 			// override the editor binding 
 			editor.getTextView().setAction("find", function (data) { //$NON-NLS-0$
 				if (data) {
-					self._localSearcher.setOptions(data);
-					self._localSearcher.show();
+					self._localSearcher.show(data);
 					return true;
 				}
 				self.commandService.runCommand("orion.editor.find"); //$NON-NLS-0$

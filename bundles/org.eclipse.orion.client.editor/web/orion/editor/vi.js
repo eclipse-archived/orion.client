@@ -4,7 +4,7 @@ define("orion/editor/vi", [
 		"orion/editor/keyModes", //$NON-NLS-0$
 		"orion/keyBinding"  //$NON-NLS-0$
 ], function (mKeyMode, mKeyBinding) {
-
+	
 	//Status Line Mode
 	function StatusLineMode(viMode){
 		mKeyMode.KeyMode.call(this);
@@ -49,7 +49,7 @@ define("orion/editor/vi", [
 			mKeyMode.KeyMode.prototype.setView.call(this, view);
 			this._createActions();
 		},
-		setNumber: function(n) {
+		storeNumber: function(n) {
 			this.number = n;
 		}
 	});
@@ -201,6 +201,10 @@ define("orion/editor/vi", [
 			
 			//Screens
 			
+			//Searches
+			bindings.push({actionID: "vi-/",	keyBinding: new KeyBinding("/", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-?",	keyBinding: new KeyBinding("?", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			
 			//Line numbering
 			bindings.push({actionID: "vi-goToLine",	keyBinding: new KeyBinding("G", false, false, false, false, "keypress")}); //$NON-NLS-0$
 			
@@ -213,8 +217,8 @@ define("orion/editor/vi", [
 			}
 			
 			//Insert
-			bindings.push({actionID: "insertBeforeCursor",	keyBinding: new KeyBinding("i", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
-			bindings.push({actionID: "insertAfterCursor",	keyBinding: new KeyBinding("I", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-i",	keyBinding: new KeyBinding("i", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-I",	keyBinding: new KeyBinding("I", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
 	
 			//Change
 			return bindings;
@@ -390,6 +394,27 @@ define("orion/editor/vi", [
 					return true;
 				});
 				
+				//Searches
+				view.setAction("vi-/", function() { //$NON-NLS-0$
+					var num = 0;
+					if (self.number !== "") {
+						num = self.number >> 0;
+					}
+					var result = view.invokeAction("find", false, {hideAfterFind:true, incremental:false, reverse:false}); //$NON-NLS-1$ //$NON-NLS-0$
+					self.number = "";
+					return true;
+				});
+				
+				view.setAction("vi-?", function() { //$NON-NLS-0$
+					var num = 0;
+					if (self.number !== "") {
+						num = self.number >> 0;
+					}
+					var result = view.invokeAction("find", false, {hideAfterFind:true, incremental:false, reverse:true}); //$NON-NLS-1$ //$NON-NLS-0$
+					self.number = "";
+					return true;
+				});
+				
 				//Line numbering
 				view.setAction("vi-goToLine", function() { //$NON-NLS-0$
 					if (self.statusReporter) {
@@ -409,14 +434,14 @@ define("orion/editor/vi", [
 				});
 				
 				//Insert
-				view.setAction("insertBeforeCursor", function() { //$NON-NLS-0$
+				view.setAction("vi-i", function() { //$NON-NLS-0$
 					self.insertMode.storeNumber(self.number);
 					view.addKeyMode(self.insertMode);
 					view.removeKeyMode(self);
 					return true;
 				});
 				
-				view.setAction("insertAfterCursor", function() { //$NON-NLS-0$
+				view.setAction("vi-I", function() { //$NON-NLS-0$
 					self.insertMode.storeNumber(self.number);
 					view.addKeyMode(self.insertMode);
 					view.removeKeyMode(self);
