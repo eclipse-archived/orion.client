@@ -9,17 +9,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define prompt */
+/*global define */
 
 define("orion/editor/factories", [ //$NON-NLS-0$
-	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
 	'orion/editor/actions', //$NON-NLS-0$
 	'orion/editor/undoStack', //$NON-NLS-0$
 	'orion/editor/rulers', //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
 	'orion/editor/textDND', //$NON-NLS-0$
 	'orion/editor/linkedMode' //$NON-NLS-0$
-], function(messages, mActions, mUndoStack, mRulers, mAnnotations, mTextDND, mLinkedMode) {
+], function(mActions, mUndoStack, mRulers, mAnnotations, mTextDND, mLinkedMode) {
 
 	var exports = {};
 	
@@ -48,17 +47,7 @@ define("orion/editor/factories", [ //$NON-NLS-0$
 	UndoFactory.prototype = {
 		createUndoStack: function(editor) {
 			var textView = editor.getTextView();
-			var undoStack =  new mUndoStack.UndoStack(textView, 200);
-			textView.setAction("undo", function() { //$NON-NLS-0$
-				undoStack.undo();
-				return true;
-			}, {name: messages.undo});
-			
-			textView.setAction("redo", function() { //$NON-NLS-0$
-				undoStack.redo();
-				return true;
-			}, {name: messages.redo});
-			return undoStack;
+			return new mUndoStack.UndoStack(textView, 200);
 		}
 	};
 	exports.UndoFactory = UndoFactory;
