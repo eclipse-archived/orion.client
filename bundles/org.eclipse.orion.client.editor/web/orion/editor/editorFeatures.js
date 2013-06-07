@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define prompt */
+/*global define */
 
 define("orion/editor/editorFeatures", [ //$NON-NLS-0$
 	'orion/editor/factories', //$NON-NLS-0$
