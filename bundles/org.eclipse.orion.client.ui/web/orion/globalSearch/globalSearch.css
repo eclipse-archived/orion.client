@@ -119,6 +119,10 @@
 	min-width:20em;
 }
 
+.search-button {
+	min-width:6em;
+}
+
 .search-label {
 	display: inline-block;
 	padding: 4px 4px 4px 7px;
