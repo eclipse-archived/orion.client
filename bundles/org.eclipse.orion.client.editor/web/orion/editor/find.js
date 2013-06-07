@@ -188,7 +188,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		if (!editor) { return; }	
 		this._editor = editor;
 		this._undoStack = undoStack;
-		this._showAllOccurrence = true;
+		this._showAll = true;
 		this._visible = false;
 		this._caseInsensitive = true;
 		this._wrap = true;
@@ -196,6 +196,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		this._incremental = true;
 		this._regex = false;
 		this._findAfterReplace = true;
+		this._hideAfterFind = false;
 		this._reverse = false;
 		this._start = null;
 		this._end = null;
@@ -237,11 +238,30 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			var selection = this._editor.getSelection();
 			return this._editor.getText(selection.start, selection.end) || this._lastString;
 		},
+		getOptions: function() {
+			return {
+				showAllOccurrence: this._showAll, 
+				caseInsensitive: this._caseInsensitive, 
+				wrap: this._wrap, 
+				wholeWord: this._wholeWord, 
+				incremental: this._incremental,
+				regex: this._regex,
+				findAfterReplace: this._findAfterReplace,
+				hideAfterFind: this._hideAfterFind,
+				reverse: this._reverse,
+				start: this._start,
+				end: this._end
+			};
+		},
 		getReplaceString: function() {
 			return "";
 		},
 		hide: function() {
 			this._visible = false;
+			if (this._savedOptions) {
+				this.setOptions(this._savedOptions);
+				this.savedOptions = null;
+			}
 			this._removeAllAnnotations();
 			this._editor.getTextView().removeEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
 			this._editor.getTextView().focus();
@@ -327,9 +347,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		setOptions : function(options) {
 			if (options) {
 				if (options.showAllOccurrence === true || options.showAllOccurrence === false) {
-					this._showAllOccurrence = options.showAllOccurrence;
+					this._showAll = options.showAllOccurrence;
 					if (this.isVisible()) {
-						if (this._showAllOccurrence) {
+						if (this._showAll) {
 							this.markAllOccurrences(true);
 						} else {
 							var annotationModel = this._editor.getAnnotationModel();
@@ -371,8 +391,12 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				}
 			}
 		},
-		show: function() {
+		show: function(tempOptions) {
 			this._visible = true;
+			if (tempOptions) {
+				this._savedOptions = this.getOptions();
+				this.setOptions(tempOptions);
+			}
 			this._startOffset = this._editor.getSelection().start;
 			this._editor.getTextView().addEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
 			if (this._incremental) {
@@ -388,6 +412,10 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			if (this._undoStack) {
 				this._undoStack.endCompoundChange();
 			}
+		},
+		_saveOptions: function() {
+		 	this.savedOptions = {};
+		 	
 		},
 		_doFind: function(string, startOffset) {
 			var editor = this._editor;
@@ -420,7 +448,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 							annotationModel.addAnnotation(mAnnotations.AnnotationType.createAnnotation(type, result.start, result.end));
 						}
 					}
-					if (this._showAllOccurrence) {
+					if (this._showAll) {
 						if (this._timer) {
 							window.clearTimeout(this._timer);
 						}

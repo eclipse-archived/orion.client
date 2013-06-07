@@ -45,24 +45,26 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 				this._commandService.closeParameterCollector();
 			}
 		},
-		show: function(defaultSearchStr, defaultReplaceStr) {
+		show: function(options) {
+			var findString = options.findString;
+			var replaceString = options.replaceString;
 			var findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			if (!findDiv) {
 				this._createActionTable();
 				findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			}
-			if (defaultSearchStr) {
-				findDiv.value = defaultSearchStr;
+			if (findString) {
+				findDiv.value = findString;
 			}
-			if (defaultReplaceStr) {
+			if (replaceString) {
 				var replaceDiv = document.getElementById("localSearchReplaceWith"); //$NON-NLS-0$
-				replaceDiv.value = defaultReplaceStr;
+				replaceDiv.value = replaceString;
 			}
 			window.setTimeout(function() {
 				findDiv.select();
 				findDiv.focus();
 			}, 10);
-			mFind.Find.prototype.show.call(this);
+			mFind.Find.prototype.show.call(this, options);
 		},
 		_createActionTable: function() {
 			var that = this;
@@ -196,7 +198,7 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 					evt.stopPropagation(); 
 				}
 				evt.cancelBubble = true;
-				this.find(!evt.shiftKey);
+				this.find(this._reverse ? evt.shiftKey : !evt.shiftKey);
 				return false;
 			}
 			if( ctrlKeyOnly &&  evt.keyCode === 82 /*"r"*/){
