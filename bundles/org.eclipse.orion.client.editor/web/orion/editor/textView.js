@@ -1215,6 +1215,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 	 * @property {String} [themeClass] the CSS class for the view theming.
 	 * @property {Number} [tabSize=8] The number of spaces in a tab.
 	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
+	 * @property {Boolean} [wrapable=false] whether or not the view is wrappable.
 	 * @property {Number} [scrollAnimation=0] the time duration in miliseconds for scrolling animation. <code>0</code> means no animation.
 	 */
 	/**
@@ -4816,6 +4817,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				tabSize: {value: 8, update: this._setTabSize},
 				expandTab: {value: false, update: null},
 				wrapMode: {value: false, update: this._setWrapMode},
+				wrappable: {value: false, update: null},
 				theme: {value: mTextTheme.TextTheme.getTheme(), update: this._setTheme},
 				themeClass: {value: undefined, update: this._setThemeClass}
 			};
@@ -6114,7 +6116,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._updateStyle(init);
 		},
 		_setWrapMode: function (wrapMode, init) {
-			this._wrapMode = wrapMode;
+			this._wrapMode = wrapMode && this._wrappable;
 			var clientDiv = this._clientDiv, viewDiv = this._viewDiv;
 			if (wrapMode) {
 				clientDiv.style.whiteSpace = "pre-wrap"; //$NON-NLS-0$
