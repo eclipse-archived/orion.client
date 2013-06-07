@@ -210,7 +210,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 	AdvSearchOptRenderer.prototype._initControls = function(){
 		this._searchBox = document.getElementById("advSearchInput"); //$NON-NLS-0$
 		this._replaceBox = document.getElementById("advReplaceInput"); //$NON-NLS-0$
-		this._searchNameBox = document.getElementById("advSaveSeachInput"); //$NON-NLS-0$
+		this._searchNameBox = document.getElementById("advSaveSearchInput"); //$NON-NLS-0$
 		this._fileTypes = document.getElementById("advSearchTypes"); //$NON-NLS-0$
 		this._sortBy = document.getElementById("advSortBy"); //$NON-NLS-0$
 		this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
@@ -300,8 +300,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
         });
 		
         var saveSearchCommand = new mCommands.Command({
-            name: messages["Remember search as"],
-            tooltip: messages["Remember search as"],
+            name: messages["Save"],
+            tooltip: messages["Save the current search"],
             id: "orion.globalSearch.saveSearch", //$NON-NLS-0$
             callback: function(data) {
                 this._saveSearch();
@@ -315,17 +315,24 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 		this._commandService.addCommand(previewCurrentPageCommand);	
 		this._commandService.addCommand(saveSearchCommand);	
         this._commandService.registerCommandContribution("advSearchCmd", "orion.globalSearch.search", 1);//$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.renderCommands("advSearchCmd", "advSearchCmd", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        var domWrapperList = [];
+        this._commandService.renderCommands("advSearchCmd", "advSearchCmd", this, this, "button", null, domWrapperList); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        domWrapperList[0].domNode.classList.add("search-button"); //$NON-NLS-0$
         this._commandService.registerCommandContribution("advReplacePreviewCmd", "orion.globalSearch.previewCurrentPage", 1);//$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.renderCommands("advReplacePreviewCmd", "advReplacePreviewCmd", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		domWrapperList = [];
+        this._commandService.renderCommands("advReplacePreviewCmd", "advReplacePreviewCmd", this, this, "button", null, domWrapperList); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        domWrapperList[0].domNode.classList.add("search-button"); //$NON-NLS-0$
         this._commandService.registerCommandContribution("advSaveSearchCmd", "orion.globalSearch.saveSearch", 1);//$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.renderCommands("advSaveSearchCmd", "advSaveSearchCmd", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		domWrapperList = [];
+        this._commandService.renderCommands("advSaveSearchCmd", "advSaveSearchCmd", this, this, "button", null, domWrapperList); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        domWrapperList[0].domNode.classList.add("search-button"); //$NON-NLS-0$
 	};
 	
 	AdvSearchOptRenderer.prototype._initHTMLLabels = function(){
 		//document.getElementById("advSearchLabel").appendChild(document.createTextNode(messages["Files that contain:"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchInput").placeholder = messages["Type a search term"]; //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advReplaceInput").placeholder = messages["Type a replace term"]; //$NON-NLS-0$ //$NON-NLS-0$
+		document.getElementById("advSaveSearchInput").placeholder = messages["Type a name for the search"]; //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchTypeLabel").appendChild(document.createTextNode(messages["File type"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchCaseSensitiveLabel").appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-0$ //$NON-NLS-0$
