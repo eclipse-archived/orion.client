@@ -18,7 +18,7 @@ define(function() {
 		var browserData = [	{name: 'Chrome/Chromium', regExp: /(?:chrome|crios|chromium)\/(\d+)/i, minVersion: 24},
 							{name: 'Firefox', regExp: /firefox\/(\d+)/i, minVersion: 17},
 							{name: 'MSIE', regExp: /msie\s(\d+)/i, minVersion: 10},
-							{name: 'Safari', regExp: /version\/(\d+).*?safari/i, minVersion: 6} ];
+							{name: 'Safari', regExp: /version\/(\d+).*?safari/i, minVersion: 5} ];
 
 		for (var i = 0; i < browserData.length; i++) {
 			var browser = browserData[i];
