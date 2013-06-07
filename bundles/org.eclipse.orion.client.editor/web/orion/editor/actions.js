@@ -23,7 +23,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 	var exports = {};
 
 	/**
-	 * TextCommands connects common text editing keybindings onto an editor.
+	 * TextActions connects common text editing keybindings onto an editor.
 	 */
 	function TextActions(editor, undoStack, find) {
 		this.editor = editor;
@@ -35,15 +35,14 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 	}
 	TextActions.prototype = {
 		init: function() {
-			var self = this;
 			var textView = this.editor.getTextView();
 			
 			this._lastEditListener = {
 				onModelChanged: function(e) {
-					if (self.editor.isDirty()) {
-						self._lastEditLocation = e.start + e.addedCharCount;
+					if (this.editor.isDirty()) {
+						this._lastEditLocation = e.start + e.addedCharCount;
 					}
-				}
+				}.bind(this)
 			};
 			textView.addEventListener("ModelChanged", this._lastEditListener.onModelChanged); //$NON-NLS-0$
 			
@@ -109,204 +108,41 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			}.bind(this), {name: messages.incrementalFindKey});
 
 			textView.setAction("tab", function() { //$NON-NLS-0$
-				var editor = this.editor;
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				if(!textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
-				var model = editor.getModel();
-				var selection = editor.getSelection();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				if (firstLine !== lastLine) {
-					var lines = [];
-					lines.push("");
-					for (var i = firstLine; i <= lastLine; i++) {
-						lines.push(model.getLine(i, true));
-					}
-					var lineStart = model.getLineStart(firstLine);
-					var lineEnd = model.getLineEnd(lastLine, true);
-					var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
-					var text = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
-					editor.setText(lines.join(text), lineStart, lineEnd);
-					editor.setSelection(lineStart === selection.start ? selection.start : selection.start + text.length, selection.end + ((lastLine - firstLine + 1) * text.length));
-					return true;
-				}
-				return false;
+				return this.indentLines();
 			}.bind(this));
 	
 			textView.setAction("shiftTab", function() { //$NON-NLS-0$
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				if(!textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
-				var editor = this.editor;
-				var model = editor.getModel();
-				var selection = editor.getSelection();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				var tabSize = textView.getOptions("tabSize"); //$NON-NLS-0$
-				var spaceTab = new Array(tabSize + 1).join(" "); //$NON-NLS-0$
-				var lines = [], removeCount = 0, firstRemoveCount = 0;
-				for (var i = firstLine; i <= lastLine; i++) {
-					var line = model.getLine(i, true);
-					if (model.getLineStart(i) !== model.getLineEnd(i)) {
-						if (line.indexOf("\t") === 0) { //$NON-NLS-0$
-							line = line.substring(1);
-							removeCount++;
-						} else if (line.indexOf(spaceTab) === 0) {
-							line = line.substring(tabSize);
-							removeCount += tabSize;
-						} else {
-							return true;
-						}
-					}
-					if (i === firstLine) {
-						firstRemoveCount = removeCount;
-					}
-					lines.push(line);
-				}
-				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineEnd(lastLine, true);
-				var lastLineStart = model.getLineStart(lastLine);
-				editor.setText(lines.join(""), lineStart, lineEnd);
-				var start = lineStart === selection.start ? selection.start : selection.start - firstRemoveCount;
-				var end = Math.max(start, selection.end - removeCount + (selection.end === lastLineStart+1 && selection.start !== selection.end ? 1 : 0));
-				editor.setSelection(start, end);
-				return true;
+				return this.unindentLines();
 			}.bind(this), {name: messages.unindentLines});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(38, false, false, true), "moveLinesUp"); //$NON-NLS-0$
 			textView.setAction("moveLinesUp", function() { //$NON-NLS-0$
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				var editor = this.editor;
-				var model = editor.getModel();
-				var selection = editor.getSelection();
-				var firstLine = model.getLineAtOffset(selection.start);
-				if (firstLine === 0) {
-					return true;
-				}
-				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				var lineCount = model.getLineCount();
-				var insertOffset = model.getLineStart(firstLine - 1);
-				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineEnd(lastLine, true);
-				var text = model.getText(lineStart, lineEnd);
-				var delimiterLength = 0;
-				if (lastLine === lineCount-1) {
-					// Move delimiter preceding selection to end of text
-					var delimiterStart = model.getLineEnd(firstLine - 1);
-					var delimiterEnd = model.getLineEnd(firstLine - 1, true);
-					text += model.getText(delimiterStart, delimiterEnd);
-					lineStart = delimiterStart;
-					delimiterLength = delimiterEnd - delimiterStart;
-				}
-				this.startUndo();
-				editor.setText("", lineStart, lineEnd);
-				editor.setText(text, insertOffset, insertOffset);
-				editor.setSelection(insertOffset, insertOffset + text.length - delimiterLength);
-				this.endUndo();
-				return true;
+				return this.moveLinesUp();
 			}.bind(this), {name: messages.moveLinesUp});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(40, false, false, true), "moveLinesDown"); //$NON-NLS-0$
 			textView.setAction("moveLinesDown", function() { //$NON-NLS-0$
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				var editor = this.editor;
-				var model = editor.getModel();
-				var selection = editor.getSelection();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				var lineCount = model.getLineCount();
-				if (lastLine === lineCount-1) {
-					return true;
-				}
-				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineEnd(lastLine, true);
-				var insertOffset = model.getLineEnd(lastLine+1, true) - (lineEnd - lineStart);
-				var text, delimiterLength = 0;
-				if (lastLine !== lineCount-2) {
-					text = model.getText(lineStart, lineEnd);
-				} else {
-					// Move delimiter following selection to front of the text
-					var lineEndNoDelimiter = model.getLineEnd(lastLine);
-					text = model.getText(lineEndNoDelimiter, lineEnd) + model.getText(lineStart, lineEndNoDelimiter);
-					delimiterLength += lineEnd - lineEndNoDelimiter;
-				}
-				this.startUndo();
-				editor.setText("", lineStart, lineEnd);
-				editor.setText(text, insertOffset, insertOffset);
-				editor.setSelection(insertOffset + delimiterLength, insertOffset + delimiterLength + text.length);
-				this.endUndo();
-				return true;
+				return this.moveLinesDown();
 			}.bind(this), {name: messages.moveLinesDown});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(38, true, false, true), "copyLinesUp"); //$NON-NLS-0$
 			textView.setAction("copyLinesUp", function() { //$NON-NLS-0$
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				var editor = this.editor;
-				var model = editor.getModel();
-				var selection = editor.getSelection();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineEnd(lastLine, true);
-				var lineCount = model.getLineCount();
-				var delimiter = "";
-				var text = model.getText(lineStart, lineEnd);
-				if (lastLine === lineCount-1) {
-					text += (delimiter = model.getLineDelimiter());
-				}
-				var insertOffset = lineStart;
-				editor.setText(text, insertOffset, insertOffset);
-				editor.setSelection(insertOffset, insertOffset + text.length - delimiter.length);
-				return true;
+				return this.copyLinesUp();
 			}.bind(this), {name: messages.copyLinesUp});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(40, true, false, true), "copyLinesDown"); //$NON-NLS-0$
 			textView.setAction("copyLinesDown", function() { //$NON-NLS-0$
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				var editor = this.editor;
-				var model = editor.getModel();
-				var selection = editor.getSelection();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineEnd(lastLine, true);
-				var lineCount = model.getLineCount();
-				var delimiter = "";
-				var text = model.getText(lineStart, lineEnd);
-				if (lastLine === lineCount-1) {
-					text = (delimiter = model.getLineDelimiter()) + text;
-				}
-				var insertOffset = lineEnd;
-				editor.setText(text, insertOffset, insertOffset);
-				editor.setSelection(insertOffset + delimiter.length, insertOffset + text.length);
-				return true;
+				return this.copyLinesDown();
 			}.bind(this), {name: messages.copyLinesDown});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding('d', true, false, false), "deleteLines"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("deleteLines", function() { //$NON-NLS-0$
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				var editor = this.editor;
-				var selection = editor.getSelection();
-				var model = editor.getModel();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineEnd(lastLine, true);
-				editor.setText("", lineStart, lineEnd);
-				return true;
+				return this.deleteLines();
 			}.bind(this), {name: messages.deleteLines});
 			
-			// Go To Line action
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("l", !util.isMac, false, false, util.isMac), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("gotoLine", function() { //$NON-NLS-0$
-				var editor = this.editor;
-				var model = editor.getModel();
-				var line = model.getLineAtOffset(editor.getCaretOffset());
-				line = prompt(messages.gotoLinePrompty, line + 1);
-				if (line) {
-					line = parseInt(line, 10);
-					editor.onGotoLine(line - 1, 0);
-				}
-				return true;
+				return this.gotoLine();
 			}.bind(this), {name: messages.gotoLine});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(190, true), "nextAnnotation"); //$NON-NLS-0$
@@ -341,13 +177,225 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !util.isMac, false, false, util.isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("lastEdit", function() { //$NON-NLS-0$
-				if (typeof this._lastEditLocation === "number")  { //$NON-NLS-0$
-					this.editor.showSelection(this._lastEditLocation);
-				}
-				return true;
+				return this.gotoLastEdit();
 			}.bind(this), {name: messages.lastEdit});
 		},
-		
+		copyLinesDown: function() {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var model = editor.getModel();
+			var selection = editor.getSelection();
+			var firstLine = model.getLineAtOffset(selection.start);
+			var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+			var lineStart = model.getLineStart(firstLine);
+			var lineEnd = model.getLineEnd(lastLine, true);
+			var lineCount = model.getLineCount();
+			var delimiter = "";
+			var text = model.getText(lineStart, lineEnd);
+			if (lastLine === lineCount-1) {
+				text = (delimiter = model.getLineDelimiter()) + text;
+			}
+			var insertOffset = lineEnd;
+			editor.setText(text, insertOffset, insertOffset);
+			editor.setSelection(insertOffset + delimiter.length, insertOffset + text.length);
+			return true;
+		},
+		copyLinesUp: function() {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var model = editor.getModel();
+			var selection = editor.getSelection();
+			var firstLine = model.getLineAtOffset(selection.start);
+			var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+			var lineStart = model.getLineStart(firstLine);
+			var lineEnd = model.getLineEnd(lastLine, true);
+			var lineCount = model.getLineCount();
+			var delimiter = "";
+			var text = model.getText(lineStart, lineEnd);
+			if (lastLine === lineCount-1) {
+				text += (delimiter = model.getLineDelimiter());
+			}
+			var insertOffset = lineStart;
+			editor.setText(text, insertOffset, insertOffset);
+			editor.setSelection(insertOffset, insertOffset + text.length - delimiter.length);
+			return true;
+		},
+		deleteLines: function() {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var selection = editor.getSelection();
+			var model = editor.getModel();
+			var firstLine = model.getLineAtOffset(selection.start);
+			var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+			var lineStart = model.getLineStart(firstLine);
+			var lineEnd = model.getLineEnd(lastLine, true);
+			editor.setText("", lineStart, lineEnd);
+			return true;
+		},
+		expandAnnotation: function(expand) {
+			var editor = this.editor;
+			var annotationModel = editor.getAnnotationModel();
+			if(!annotationModel) { return true; }
+			var model = editor.getModel();
+			var currentOffset = editor.getCaretOffset();
+			var lineIndex = model.getLineAtOffset(currentOffset);
+			var start = model.getLineStart(lineIndex);
+			var end = model.getLineEnd(lineIndex, true);
+			if (model.getBaseModel) {
+				start = model.mapOffset(start);
+				end = model.mapOffset(end);
+				model = model.getBaseModel();
+			}
+			var annotation, iter = annotationModel.getAnnotations(start, end);
+			while (!annotation && iter.hasNext()) {
+				var a = iter.next();
+				if (a.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
+				annotation = a;
+			}
+			if (annotation) {
+				if (expand !== annotation.expanded) {
+					if (expand) {
+						annotation.expand();
+					} else {
+						editor.setCaretOffset(annotation.start);
+						annotation.collapse();
+					}
+					annotationModel.modifyAnnotation(annotation);
+				}
+			}
+			return true;
+		},
+		expandAnnotations: function(expand) {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			var annotationModel = editor.getAnnotationModel();
+			if(!annotationModel) { return true; }
+			var model = editor.getModel();
+			var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
+			textView.setRedraw(false);
+			while (iter.hasNext()) {
+				annotation = iter.next();
+				if (annotation.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
+				if (expand !== annotation.expanded) {
+					if (expand) {
+						annotation.expand();
+					} else {
+						annotation.collapse();
+					}
+					annotationModel.modifyAnnotation(annotation);
+				}
+			}
+			textView.setRedraw(true);
+			return true;
+		},
+		indentLines: function() {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			if(!textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
+			var model = editor.getModel();
+			var selection = editor.getSelection();
+			var firstLine = model.getLineAtOffset(selection.start);
+			var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+			if (firstLine !== lastLine) {
+				var lines = [];
+				lines.push("");
+				for (var i = firstLine; i <= lastLine; i++) {
+					lines.push(model.getLine(i, true));
+				}
+				var lineStart = model.getLineStart(firstLine);
+				var lineEnd = model.getLineEnd(lastLine, true);
+				var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
+				var text = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
+				editor.setText(lines.join(text), lineStart, lineEnd);
+				editor.setSelection(lineStart === selection.start ? selection.start : selection.start + text.length, selection.end + ((lastLine - firstLine + 1) * text.length));
+				return true;
+			}
+			return false;
+		},
+		gotoLastEdit: function() {
+			if (typeof this._lastEditLocation === "number")  { //$NON-NLS-0$
+				this.editor.showSelection(this._lastEditLocation);
+			}
+			return true;
+		},
+		gotoLine: function() {
+			var editor = this.editor;
+			var model = editor.getModel();
+			var line = model.getLineAtOffset(editor.getCaretOffset());
+			line = prompt(messages.gotoLinePrompty, line + 1);
+			if (line) {
+				line = parseInt(line, 10);
+				editor.onGotoLine(line - 1, 0);
+			}
+			return true;
+		},
+		moveLinesDown: function() {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var model = editor.getModel();
+			var selection = editor.getSelection();
+			var firstLine = model.getLineAtOffset(selection.start);
+			var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+			var lineCount = model.getLineCount();
+			if (lastLine === lineCount-1) {
+				return true;
+			}
+			var lineStart = model.getLineStart(firstLine);
+			var lineEnd = model.getLineEnd(lastLine, true);
+			var insertOffset = model.getLineEnd(lastLine+1, true) - (lineEnd - lineStart);
+			var text, delimiterLength = 0;
+			if (lastLine !== lineCount-2) {
+				text = model.getText(lineStart, lineEnd);
+			} else {
+				// Move delimiter following selection to front of the text
+				var lineEndNoDelimiter = model.getLineEnd(lastLine);
+				text = model.getText(lineEndNoDelimiter, lineEnd) + model.getText(lineStart, lineEndNoDelimiter);
+				delimiterLength += lineEnd - lineEndNoDelimiter;
+			}
+			this.startUndo();
+			editor.setText("", lineStart, lineEnd);
+			editor.setText(text, insertOffset, insertOffset);
+			editor.setSelection(insertOffset + delimiterLength, insertOffset + delimiterLength + text.length);
+			this.endUndo();
+			return true;
+		},
+		moveLinesUp: function() {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var model = editor.getModel();
+			var selection = editor.getSelection();
+			var firstLine = model.getLineAtOffset(selection.start);
+			if (firstLine === 0) {
+				return true;
+			}
+			var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+			var lineCount = model.getLineCount();
+			var insertOffset = model.getLineStart(firstLine - 1);
+			var lineStart = model.getLineStart(firstLine);
+			var lineEnd = model.getLineEnd(lastLine, true);
+			var text = model.getText(lineStart, lineEnd);
+			var delimiterLength = 0;
+			if (lastLine === lineCount-1) {
+				// Move delimiter preceding selection to end of text
+				var delimiterStart = model.getLineEnd(firstLine - 1);
+				var delimiterEnd = model.getLineEnd(firstLine - 1, true);
+				text += model.getText(delimiterStart, delimiterEnd);
+				lineStart = delimiterStart;
+				delimiterLength = delimiterEnd - delimiterStart;
+			}
+			this.startUndo();
+			editor.setText("", lineStart, lineEnd);
+			editor.setText(text, insertOffset, insertOffset);
+			editor.setSelection(insertOffset, insertOffset + text.length - delimiterLength);
+			this.endUndo();
+			return true;
+		},
 		nextAnnotation: function (forward) {
 			var editor = this.editor;
 			var annotationModel = editor.getAnnotationModel();
@@ -403,71 +451,50 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			}
 			return true;
 		},
-		
-		expandAnnotation: function(expand) {
-			var editor = this.editor;
-			var annotationModel = editor.getAnnotationModel();
-			if(!annotationModel) { return true; }
-			var model = editor.getModel();
-			var currentOffset = editor.getCaretOffset();
-			var lineIndex = model.getLineAtOffset(currentOffset);
-			var start = model.getLineStart(lineIndex);
-			var end = model.getLineEnd(lineIndex, true);
-			if (model.getBaseModel) {
-				start = model.mapOffset(start);
-				end = model.mapOffset(end);
-				model = model.getBaseModel();
-			}
-			var annotation, iter = annotationModel.getAnnotations(start, end);
-			while (!annotation && iter.hasNext()) {
-				var a = iter.next();
-				if (a.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
-				annotation = a;
-			}
-			if (annotation) {
-				if (expand !== annotation.expanded) {
-					if (expand) {
-						annotation.expand();
-					} else {
-						editor.setCaretOffset(annotation.start);
-						annotation.collapse();
-					}
-					annotationModel.modifyAnnotation(annotation);
-				}
-			}
-			return true;
-		},
-
-		expandAnnotations: function(expand) {
+		unindentLines: function() {
 			var editor = this.editor;
 			var textView = editor.getTextView();
-			var annotationModel = editor.getAnnotationModel();
-			if(!annotationModel) { return true; }
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			if(!textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
 			var model = editor.getModel();
-			var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
-			textView.setRedraw(false);
-			while (iter.hasNext()) {
-				annotation = iter.next();
-				if (annotation.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
-				if (expand !== annotation.expanded) {
-					if (expand) {
-						annotation.expand();
+			var selection = editor.getSelection();
+			var firstLine = model.getLineAtOffset(selection.start);
+			var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+			var tabSize = textView.getOptions("tabSize"); //$NON-NLS-0$
+			var spaceTab = new Array(tabSize + 1).join(" "); //$NON-NLS-0$
+			var lines = [], removeCount = 0, firstRemoveCount = 0;
+			for (var i = firstLine; i <= lastLine; i++) {
+				var line = model.getLine(i, true);
+				if (model.getLineStart(i) !== model.getLineEnd(i)) {
+					if (line.indexOf("\t") === 0) { //$NON-NLS-0$
+						line = line.substring(1);
+						removeCount++;
+					} else if (line.indexOf(spaceTab) === 0) {
+						line = line.substring(tabSize);
+						removeCount += tabSize;
 					} else {
-						annotation.collapse();
+						return true;
 					}
-					annotationModel.modifyAnnotation(annotation);
 				}
+				if (i === firstLine) {
+					firstRemoveCount = removeCount;
+				}
+				lines.push(line);
 			}
-			textView.setRedraw(true);
+			var lineStart = model.getLineStart(firstLine);
+			var lineEnd = model.getLineEnd(lastLine, true);
+			var lastLineStart = model.getLineStart(lastLine);
+			editor.setText(lines.join(""), lineStart, lineEnd);
+			var start = lineStart === selection.start ? selection.start : selection.start - firstRemoveCount;
+			var end = Math.max(start, selection.end - removeCount + (selection.end === lastLineStart+1 && selection.start !== selection.end ? 1 : 0));
+			editor.setSelection(start, end);
 			return true;
 		},
-		
 		startUndo: function() {
 			if (this.undoStack) {
 				this.undoStack.startCompoundChange();
 			}
 		}, 
-		
 		endUndo: function() {
 			if (this.undoStack) {
 				this.undoStack.endCompoundChange();
@@ -493,217 +520,78 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		this.init();
 	}
 	SourceCodeActions.prototype = {
-		startUndo: function() {
-			if (this.undoStack) {
-				this.undoStack.startCompoundChange();
-			}
-		}, 
-		
-		endUndo: function() {
-			if (this.undoStack) {
-				this.undoStack.endCompoundChange();
-			}
-		}, 
 		init: function() {
 			var textView = this.editor.getTextView();
 		
 			textView.setAction("lineStart", function() { //$NON-NLS-0$
-				var editor = this.editor;
-				var model = editor.getModel();
-				var caretOffset = editor.getCaretOffset();
-				var lineIndex = model.getLineAtOffset(caretOffset);
-				var lineOffset = model.getLineStart(lineIndex);
-				var lineText = model.getLine(lineIndex);
-				var offset;
-				for (offset=0; offset<lineText.length; offset++) {
-					var c = lineText.charCodeAt(offset);
-					if (!(c === 32 || c === 9)) {
-						break;
-					}
-				}
-				offset += lineOffset;
-				if (caretOffset !== offset) {
-					editor.setSelection(offset, offset);
-					return true;
-				}
-				return false;
+				return this.lineStart();
 			}.bind(this));
 			
 			textView.setAction("enter", function() { //$NON-NLS-0$
-				// Auto indent
-				var editor = this.editor;
-				var textView = editor.getTextView();
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				var selection = editor.getSelection();
-				if (selection.start === selection.end) {
-					var model = editor.getModel();
-					var lineIndex = model.getLineAtOffset(selection.start);
-					var lineText = model.getLine(lineIndex, true);
-					var lineStart = model.getLineStart(lineIndex);
-					var index = 0, end = selection.start - lineStart, c;
-					while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
-					if (index > 0) {
-						//TODO still wrong when typing inside folding
-						var prefix = lineText.substring(0, index);
-						index = end;
-						while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
-						editor.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
-						return true;
-					}
-				}
+				return this.autoIndent();
 			}.bind(this));
-		
-			// Block comment operations
+
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true), "toggleLineComment"); //$NON-NLS-0$
 			textView.setAction("toggleLineComment", function() { //$NON-NLS-0$
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				var editor = this.editor;
-				var model = editor.getModel();
-				var selection = editor.getSelection();
-				var firstLine = model.getLineAtOffset(selection.start);
-				var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
-				var uncomment = true, lines = [], lineText, index;
-				for (var i = firstLine; i <= lastLine; i++) {
-					lineText = model.getLine(i, true);
-					lines.push(lineText);
-					if (!uncomment || (index = lineText.indexOf("//")) === -1) { //$NON-NLS-0$
-						uncomment = false;
-					} else {
-						if (index !== 0) {
-							var j;
-							for (j=0; j<index; j++) {
-								var c = lineText.charCodeAt(j);
-								if (!(c === 32 || c === 9)) {
-									break;
-								}
-							}
-							uncomment = j === index;
-						}
-					}
-				}
-				var text, selStart, selEnd;
-				var lineStart = model.getLineStart(firstLine);
-				var lineEnd = model.getLineEnd(lastLine, true);
-				if (uncomment) {
-					for (var k = 0; k < lines.length; k++) {
-						lineText = lines[k];
-						index = lineText.indexOf("//"); //$NON-NLS-0$
-						lines[k] = lineText.substring(0, index) + lineText.substring(index + 2);
-					}
-					text = lines.join("");
-					var lastLineStart = model.getLineStart(lastLine);
-					selStart = lineStart === selection.start ? selection.start : selection.start - 2;
-					selEnd = selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end === lastLineStart+1 ? 2 : 0);
-				} else {
-					lines.splice(0, 0, "");
-					text = lines.join("//"); //$NON-NLS-0$
-					selStart = lineStart === selection.start ? selection.start : selection.start + 2;
-					selEnd = selection.end + (2 * (lastLine - firstLine + 1));
-				}
-				editor.setText(text, lineStart, lineEnd);
-				editor.setSelection(selStart, selEnd);
-				return true;
+				return this.toggleLineComment();
 			}.bind(this), {name: messages.toggleLineComment});
-			
-			function findEnclosingComment(model, start, end) {
-				var open = "/*", close = "*/"; //$NON-NLS-1$ //$NON-NLS-0$
-				var firstLine = model.getLineAtOffset(start);
-				var lastLine = model.getLineAtOffset(end);
-				var i, line, extent, openPos, closePos;
-				var commentStart, commentEnd;
-				for (i=firstLine; i >= 0; i--) {
-					line = model.getLine(i);
-					extent = (i === firstLine) ? start - model.getLineStart(firstLine) : line.length;
-					openPos = line.lastIndexOf(open, extent);
-					closePos = line.lastIndexOf(close, extent);
-					if (closePos > openPos) {
-						break; // not inside a comment
-					} else if (openPos !== -1) {
-						commentStart = model.getLineStart(i) + openPos;
-						break;
-					}
-				}
-				for (i=lastLine; i < model.getLineCount(); i++) {
-					line = model.getLine(i);
-					extent = (i === lastLine) ? end - model.getLineStart(lastLine) : 0;
-					openPos = line.indexOf(open, extent);
-					closePos = line.indexOf(close, extent);
-					if (openPos !== -1 && openPos < closePos) {
-						break;
-					} else if (closePos !== -1) {
-						commentEnd = model.getLineStart(i) + closePos;
-						break;
-					}
-				}
-				return {commentStart: commentStart, commentEnd: commentEnd};
-			}
-			
+
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, !util.isMac, false, util.isMac), "addBlockComment"); //$NON-NLS-0$
 			textView.setAction("addBlockComment", function() { //$NON-NLS-0$
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				var editor = this.editor;
-				var model = editor.getModel();
-				var selection = editor.getSelection();
-				var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				
-				var result = findEnclosingComment(model, selection.start, selection.end);
-				if (result.commentStart !== undefined && result.commentEnd !== undefined) {
-					return true; // Already in a comment
-				}
-				
-				var text = model.getText(selection.start, selection.end);
-				if (text.length === 0) { return true; }
-				
-				var oldLength = text.length;
-				text = text.replace(commentTags, "");
-				var newLength = text.length;
-				
-				editor.setText(open + text + close, selection.start, selection.end);
-				editor.setSelection(selection.start + open.length, selection.end + open.length + (newLength-oldLength));
-				return true;
+				return this.addBlockComment();
 			}.bind(this), {name: messages.addBlockComment});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, !util.isMac, false, util.isMac), "removeBlockComment"); //$NON-NLS-0$
 			textView.setAction("removeBlockComment", function() { //$NON-NLS-0$
-				if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
-				var editor = this.editor;
-				var model = editor.getModel();
-				var selection = editor.getSelection();
-				var open = "/*", close = "*/"; //$NON-NLS-1$ //$NON-NLS-0$
-				
-				// Try to shrink selection to a comment block
-				var selectedText = model.getText(selection.start, selection.end);
-				var newStart, newEnd;
-				var i;
-				for(i=0; i < selectedText.length; i++) {
-					if (selectedText.substring(i, i + open.length) === open) {
-						newStart = selection.start + i;
-						break;
-					}
-				}
-				for (; i < selectedText.length; i++) {
-					if (selectedText.substring(i, i + close.length) === close) {
-						newEnd = selection.start + i;
-						break;
-					}
-				}
-				
-				if (newStart !== undefined && newEnd !== undefined) {
-					editor.setText(model.getText(newStart + open.length, newEnd), newStart, newEnd + close.length);
-					editor.setSelection(newStart, newEnd);
-				} else {
-					// Otherwise find enclosing comment block
-					var result = findEnclosingComment(model, selection.start, selection.end);
-					if (result.commentStart === undefined || result.commentEnd === undefined) {
-						return true;
-					}
-					
-					var text = model.getText(result.commentStart + open.length, result.commentEnd);
-					editor.setText(text, result.commentStart, result.commentEnd + close.length);
-					editor.setSelection(selection.start - open.length, selection.end - close.length);
-				}
-				return true;
+				return this.removeBlockComment();
 			}.bind(this), {name: messages.removeBlockComment});
+		},
+		autoIndent: function() {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var selection = editor.getSelection();
+			if (selection.start === selection.end) {
+				var model = editor.getModel();
+				var lineIndex = model.getLineAtOffset(selection.start);
+				var lineText = model.getLine(lineIndex, true);
+				var lineStart = model.getLineStart(lineIndex);
+				var index = 0, end = selection.start - lineStart, c;
+				while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
+				if (index > 0) {
+					//TODO still wrong when typing inside folding
+					var prefix = lineText.substring(0, index);
+					index = end;
+					while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
+					editor.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
+					return true;
+				}
+			}
+			return false;
+		},
+		addBlockComment: function() {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var model = editor.getModel();
+			var selection = editor.getSelection();
+			var open = "/*", close = "*/", commentTags = new RegExp("/\\*" + "|" + "\\*/", "g"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			var result = this._findEnclosingComment(model, selection.start, selection.end);
+			if (result.commentStart !== undefined && result.commentEnd !== undefined) {
+				return true; // Already in a comment
+			}
+			
+			var text = model.getText(selection.start, selection.end);
+			if (text.length === 0) { return true; }
+			
+			var oldLength = text.length;
+			text = text.replace(commentTags, "");
+			var newLength = text.length;
+			
+			editor.setText(open + text + close, selection.start, selection.end);
+			editor.setSelection(selection.start + open.length, selection.end + open.length + (newLength-oldLength));
+			return true;
 		},
 		/**
 		 * Called when a content assist proposal has been applied. Inserts the proposal into the
@@ -753,6 +641,161 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				textView.setCaretOffset(proposal.escapePosition);
 			}
 			return true;
+		},
+		_findEnclosingComment: function(model, start, end) {
+			var open = "/*", close = "*/"; //$NON-NLS-1$ //$NON-NLS-0$
+			var firstLine = model.getLineAtOffset(start);
+			var lastLine = model.getLineAtOffset(end);
+			var i, line, extent, openPos, closePos;
+			var commentStart, commentEnd;
+			for (i=firstLine; i >= 0; i--) {
+				line = model.getLine(i);
+				extent = (i === firstLine) ? start - model.getLineStart(firstLine) : line.length;
+				openPos = line.lastIndexOf(open, extent);
+				closePos = line.lastIndexOf(close, extent);
+				if (closePos > openPos) {
+					break; // not inside a comment
+				} else if (openPos !== -1) {
+					commentStart = model.getLineStart(i) + openPos;
+					break;
+				}
+			}
+			for (i=lastLine; i < model.getLineCount(); i++) {
+				line = model.getLine(i);
+				extent = (i === lastLine) ? end - model.getLineStart(lastLine) : 0;
+				openPos = line.indexOf(open, extent);
+				closePos = line.indexOf(close, extent);
+				if (openPos !== -1 && openPos < closePos) {
+					break;
+				} else if (closePos !== -1) {
+					commentEnd = model.getLineStart(i) + closePos;
+					break;
+				}
+			}
+			return {commentStart: commentStart, commentEnd: commentEnd};
+		},
+		lineStart: function() {
+			var editor = this.editor;
+			var model = editor.getModel();
+			var caretOffset = editor.getCaretOffset();
+			var lineIndex = model.getLineAtOffset(caretOffset);
+			var lineOffset = model.getLineStart(lineIndex);
+			var lineText = model.getLine(lineIndex);
+			var offset;
+			for (offset=0; offset<lineText.length; offset++) {
+				var c = lineText.charCodeAt(offset);
+				if (!(c === 32 || c === 9)) {
+					break;
+				}
+			}
+			offset += lineOffset;
+			if (caretOffset !== offset) {
+				editor.setSelection(offset, offset);
+				return true;
+			}
+			return false;
+		},
+		removeBlockComment: function() {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var model = editor.getModel();
+			var selection = editor.getSelection();
+			var open = "/*", close = "*/"; //$NON-NLS-1$ //$NON-NLS-0$
+			
+			// Try to shrink selection to a comment block
+			var selectedText = model.getText(selection.start, selection.end);
+			var newStart, newEnd;
+			var i;
+			for(i=0; i < selectedText.length; i++) {
+				if (selectedText.substring(i, i + open.length) === open) {
+					newStart = selection.start + i;
+					break;
+				}
+			}
+			for (; i < selectedText.length; i++) {
+				if (selectedText.substring(i, i + close.length) === close) {
+					newEnd = selection.start + i;
+					break;
+				}
+			}
+			
+			if (newStart !== undefined && newEnd !== undefined) {
+				editor.setText(model.getText(newStart + open.length, newEnd), newStart, newEnd + close.length);
+				editor.setSelection(newStart, newEnd);
+			} else {
+				// Otherwise find enclosing comment block
+				var result = this._findEnclosingComment(model, selection.start, selection.end);
+				if (result.commentStart === undefined || result.commentEnd === undefined) {
+					return true;
+				}
+				
+				var text = model.getText(result.commentStart + open.length, result.commentEnd);
+				editor.setText(text, result.commentStart, result.commentEnd + close.length);
+				editor.setSelection(selection.start - open.length, selection.end - close.length);
+			}
+			return true;
+		},
+		toggleLineComment: function() {
+			var editor = this.editor;
+			var textView = editor.getTextView();
+			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var model = editor.getModel();
+			var selection = editor.getSelection();
+			var firstLine = model.getLineAtOffset(selection.start);
+			var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+			var uncomment = true, lines = [], lineText, index;
+			for (var i = firstLine; i <= lastLine; i++) {
+				lineText = model.getLine(i, true);
+				lines.push(lineText);
+				if (!uncomment || (index = lineText.indexOf("//")) === -1) { //$NON-NLS-0$
+					uncomment = false;
+				} else {
+					if (index !== 0) {
+						var j;
+						for (j=0; j<index; j++) {
+							var c = lineText.charCodeAt(j);
+							if (!(c === 32 || c === 9)) {
+								break;
+							}
+						}
+						uncomment = j === index;
+					}
+				}
+			}
+			var text, selStart, selEnd;
+			var lineStart = model.getLineStart(firstLine);
+			var lineEnd = model.getLineEnd(lastLine, true);
+			if (uncomment) {
+				for (var k = 0; k < lines.length; k++) {
+					lineText = lines[k];
+					index = lineText.indexOf("//"); //$NON-NLS-0$
+					lines[k] = lineText.substring(0, index) + lineText.substring(index + 2);
+				}
+				text = lines.join("");
+				var lastLineStart = model.getLineStart(lastLine);
+				selStart = lineStart === selection.start ? selection.start : selection.start - 2;
+				selEnd = selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end === lastLineStart+1 ? 2 : 0);
+			} else {
+				lines.splice(0, 0, "");
+				text = lines.join("//"); //$NON-NLS-0$
+				selStart = lineStart === selection.start ? selection.start : selection.start + 2;
+				selEnd = selection.end + (2 * (lastLine - firstLine + 1));
+			}
+			editor.setText(text, lineStart, lineEnd);
+			editor.setSelection(selStart, selEnd);
+			return true;
+		},
+		startUndo: function() {
+			if (this.undoStack) {
+				this.undoStack.startCompoundChange();
+			}
+		}, 
+		
+		endUndo: function() {
+			if (this.undoStack) {
+				this.undoStack.endCompoundChange();
+			}
 		}
 	};
 	exports.SourceCodeActions = SourceCodeActions;
