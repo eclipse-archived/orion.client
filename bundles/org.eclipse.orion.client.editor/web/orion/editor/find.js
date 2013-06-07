@@ -216,7 +216,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				reverse : !forward
 			});
 			var startOffset = incremental ? this._startOffset : this.getStartOffset();
-			var result =  this._doFind(string, startOffset);
+			var result = this._doFind(string, startOffset);
 			if (result) {
 				if (!incremental) {
 					this._startOffset = result.start;
@@ -280,8 +280,8 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			if (string) {
 				this._replacingAll = true;
 				var editor = this._editor;
-				editor.reportStatus("");
-				editor.reportStatus(messages.replaceAll, "progress"); //$NON-NLS-0$
+				var textView = editor.getTextView();
+				editor.reportStatus(messages.replaceAll);
 				var replaceString = this.getReplaceString();
 				var self = this;
 				window.setTimeout(function() {
@@ -295,16 +295,16 @@ define("orion/editor/find", [ //$NON-NLS-0$
 						lastResult = result;
 						count++;
 						if (count === 1) {
+							textView.setRedraw(false);
 							self.startUndo();
 						}
-						var selection = editor.getSelection();
-						self._doReplace(selection.start, selection.end, string, replaceString);
+						self._doReplace(result.start, result.end, string, replaceString);
 						startPos = self.getStartOffset();
 					}
 					if (count > 0) {
 						self.endUndo();
+						textView.setRedraw(true);
 					}
-					editor.reportStatus("", "progress"); //$NON-NLS-0$
 					if (startPos > 0) {
 						editor.reportStatus(util.formatMessage(messages.replacedMatches, count));
 					} else {
@@ -312,7 +312,6 @@ define("orion/editor/find", [ //$NON-NLS-0$
 					}
 					self._replacingAll = false;
 				}, 100);				
-				
 			}
 		},
 		/**
@@ -334,7 +333,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 							this.markAllOccurrences(true);
 						} else {
 							var annotationModel = this._editor.getAnnotationModel();
-							if(annotationModel){
+							if (annotationModel) {
 								annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
 							}
 						}
@@ -432,24 +431,22 @@ define("orion/editor/find", [ //$NON-NLS-0$
 						}, 500);
 					}
 				}
-			}
-			if (result) {
-				editor.moveSelection(result.start, result.end, null, false);
+				if (result) {
+					editor.moveSelection(result.start, result.end, null, false);
+				}
 			}
 			return result;
 		},
 		_doReplace: function(start, end, searchStr, newStr) {
 			var editor = this._editor;
 			if (this._regex) {
-				var newStrWithSubstitutions = editor.getText().substring(start, end).replace(new RegExp(searchStr, this._caseInsensitive ? "i" : ""), newStr); //$NON-NLS-0$
-				if (newStrWithSubstitutions) {
-					editor.setText(newStrWithSubstitutions, start, end);
-					editor.setSelection(start, start + newStrWithSubstitutions.length, true);
+				newStr = editor.getText(start, end).replace(new RegExp(searchStr, this._caseInsensitive ? "i" : ""), newStr); //$NON-NLS-0$
+				if (!newStr) {
+					return;
 				}
-			} else {
-				editor.setText(newStr, start, end);
-				editor.setSelection(start, start + newStr.length, true);
 			}
+			editor.setText(newStr, start, end);
+			editor.setSelection(start, start + newStr.length, true);
 		},
 		_markAllOccurrences: function(match, string) {
 			var annotationModel = this._editor.getAnnotationModel();
@@ -496,7 +493,6 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			}
 		}
 	};
-	
 	exports.Find = Find;
 	
 	return exports;
