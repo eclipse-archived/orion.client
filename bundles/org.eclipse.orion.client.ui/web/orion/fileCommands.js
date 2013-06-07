@@ -376,6 +376,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 												newValue: newItem
 												//parent?
 											});
+											dispatchModelEvent({ type: isCopy ? "copy" : "move", oldValue: item, newValue: newItem }); //$NON-NLS-1$ //$NON-NLS-0$
 										},
 										errorHandler
 									));
@@ -672,7 +673,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 											newValue: null,
 											parent: parent
 										});
-										dispatchModelEvent({ type: "delete", oldValue: item, newValue: null, parent: parent });
+										dispatchModelEvent({ type: "delete", oldValue: item, newValue: null, parent: parent }); //$NON-NLS-0$
 									}, errorHandler);
 							});
 						});
