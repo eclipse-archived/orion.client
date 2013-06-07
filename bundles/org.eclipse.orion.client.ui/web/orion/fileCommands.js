@@ -1040,8 +1040,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 											errorHandler));
 									}
 								}
-							}
-							Deferred.all(deferreds, function() {
+							});
+							Deferred.all(deferreds).then(function() {
 								dispatchModelEvent({
 									type: "copyMultiple", //$NON-NLS-0$
 									items: summary
