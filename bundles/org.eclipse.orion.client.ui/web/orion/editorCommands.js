@@ -20,10 +20,10 @@ define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib
 	'orion/keyBinding', 'orion/commandRegistry', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil', 'orion/PageLinks', 'orion/util'], 
 	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mUndoStack, mSearchUtils, mPageUtil, PageLinks, util) {
 
-var exports = {};
-
-var contentTypesCache = null;
-exports.EditorCommandFactory = (function() {
+	var exports = {};
+	
+	var contentTypesCache = null;
+	
 	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId, localSearcher, searcher, editorSettings) {
 		this.serviceRegistry = serviceRegistry;
 		this.commandService = commandService;
@@ -44,6 +44,7 @@ exports.EditorCommandFactory = (function() {
 		generateEditorCommands: function(editor) {
 			this._generateSearchFilesCommand(editor);
 			if (!this.isReadOnly) {
+				this._generateUndoStackCommands(editor);
 				this._generateSaveCommand(editor);
 			}
 			this._generateGotoLineCommnand(editor);
@@ -51,6 +52,27 @@ exports.EditorCommandFactory = (function() {
 			if (!this.isReadOnly) {
 				this._generateEditCommands(editor);
 			}
+		},
+		_generateUndoStackCommands: function(editor) {
+			var undoCommand = new mCommands.Command({
+				name: messages.Undo,
+				id: "orion.undo", //$NON-NLS-0$
+				callback: function(data) {
+					editor.getTextView().invokeAction("undo"); //$NON-NLS-0$
+				}
+			});
+			this.commandService.addCommand(undoCommand);
+			this.commandService.registerCommandContribution(this.toolbarId, "orion.undo", 400, null, true, editor.getTextView().getKeyBindings("undo")[0]); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			var redoCommand = new mCommands.Command({
+				name: messages.Redo,
+				id: "orion.redo", //$NON-NLS-0$
+				callback: function(data) {
+					editor.getTextView().invokeAction("redo"); //$NON-NLS-0$
+				}
+			});
+			this.commandService.addCommand(redoCommand);
+			this.commandService.registerCommandContribution(this.toolbarId, "orion.redo", 401, null, true, editor.getTextView().getKeyBindings("redo")[0]); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		_generateSearchFilesCommand: function(editor) {
 			var self = this;
@@ -474,51 +496,7 @@ exports.EditorCommandFactory = (function() {
 			});
 		}
 	};
-	return EditorCommandFactory;
-}());
+	exports.EditorCommandFactory = EditorCommandFactory;
 
-exports.UndoCommandFactory = (function() {
-	function UndoCommandFactory(serviceRegistry, commandService, toolbarId) {
-		this.serviceRegistry = serviceRegistry;
-		this.commandService = commandService;
-		this.toolbarId = toolbarId;
-	}
-	UndoCommandFactory.prototype = {
-		createUndoStack: function(editor) {
-			var undoStack =  new mUndoStack.UndoStack(editor.getTextView(), 200);
-			var undoCommand = new mCommands.Command({
-				name: messages.Undo,
-				id: "orion.undo", //$NON-NLS-0$
-				callback: function(data) {
-					this.getTextView().invokeAction("undo"); //$NON-NLS-0$
-				}});
-			editor.getTextView().setAction("undo", function() { //$NON-NLS-0$
-				undoStack.undo();
-				return true;
-			}, undoCommand);
-			this.commandService.addCommand(undoCommand);
-			
-			var redoCommand = new mCommands.Command({
-				name: messages.Redo,
-				id: "orion.redo", //$NON-NLS-0$
-				callback: function(data) {
-					this.getTextView().invokeAction("redo"); //$NON-NLS-0$
-				}});
-			editor.getTextView().setAction("redo", function() { //$NON-NLS-0$
-				undoStack.redo();
-				return true;
-			}, redoCommand);
-	
-			this.commandService.addCommand(redoCommand);
-	
-			this.commandService.registerCommandContribution(this.toolbarId, "orion.undo", 400, null, true, editor.getTextView().getKeyBindings("undo")[0]); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.registerCommandContribution(this.toolbarId, "orion.redo", 401, null, true, editor.getTextView().getKeyBindings("redo")[0]); //$NON-NLS-1$ //$NON-NLS-0$
-
-			return undoStack;
-		}
-	};
-	return UndoCommandFactory;
-}());
-
-return exports;	
+	return exports;	
 });

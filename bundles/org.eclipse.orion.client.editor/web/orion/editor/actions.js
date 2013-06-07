@@ -47,6 +47,22 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			};
 			textView.addEventListener("ModelChanged", this._lastEditListener.onModelChanged); //$NON-NLS-0$
 			
+			textView.setAction("undo", function() { //$NON-NLS-0$
+				if (this.undoStack) {
+					this.undoStack.undo();
+					return true;
+				}
+				return false;
+			}.bind(this), {name: messages.undo});
+			
+			textView.setAction("redo", function() { //$NON-NLS-0$
+				if (this.undoStack) {
+					this.undoStack.redo();
+					return true;
+				}
+				return false;
+			}.bind(this), {name: messages.redo});
+			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("f", true), "find"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("find", function() { //$NON-NLS-0$
 				if (this._find) {

@@ -232,7 +232,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 
 		editor = new mEditor.Editor({
 			textViewFactory: textViewFactory,
-			undoStackFactory: new mEditorCommands.UndoCommandFactory(serviceRegistry, commandRegistry, "pageActions"), //$NON-NLS-0$
+			undoStackFactory: new mEditorFeatures.UndoFactory(),
 			textDNDFactory: new mEditorFeatures.TextDNDFactory(),
 			annotationFactory: new mEditorFeatures.AnnotationFactory(),
 			foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
