@@ -1,4 +1,4 @@
-/*globals define*/
+/*globals define document*/
 
 define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 [
@@ -13,7 +13,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 	'orion/commands'//$NON-NLS-0$ 
 ], function(require, util, objects, lib, messages, LabeledTextfield, LabeledCheckbox, Select, Subsection, commands)  {
     var KEY_MODES = [
-    "Default",
+    messages.Default,
 	"Emacs" //$NON-NLS-0$
 	//"VI" //$NON-NLS-0$
 	];
@@ -48,43 +48,20 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			this.createSections();
 		},
 		createSections: function(){
-			/* - file management ----------------------------------------------------- */
 			var fileMgtFields = [];
 			if (this.oldPrefs.autoSaveVisible) {
 				fileMgtFields.push(this.autoSaveCheck = new LabeledCheckbox( {fieldlabel:messages['Autosave Enabled']}));
 				fileMgtFields.push(this.autoSaveField = new LabeledTextfield( {fieldlabel:messages['Save interval']}));
 			}
-			
 			if (this.oldPrefs.autoLoadVisible) {
 				fileMgtFields.push(this.autoLoadCheck = new LabeledCheckbox( {fieldlabel:messages['Autoload Enabled']}));
 			}
-			
-			var fileMgtSubsection = new Subsection( {sectionName: messages['FileMgt'], parentNode: this.sections, children: fileMgtFields} );
 			if (fileMgtFields.length > 0) {
+				var fileMgtSubsection = new Subsection( {sectionName: messages.FileMgt, parentNode: this.sections, children: fileMgtFields} );
 				fileMgtSubsection.show();
 			}
 		
-		
-			/* - behaviour  ---------------------------------------------------- */			
-			var behavrFields = [];
-			
-			if (this.oldPrefs.tabSizeVisible) {
-				behavrFields.push(this.tabField = new LabeledTextfield( {fieldlabel:messages['TabSize']})); //$NON-NLS-0$
-			}
-			
-			if (this.oldPrefs.scrollEnabledVisible) {
-				behavrFields.push(this.scrollCheck = new LabeledCheckbox( {fieldlabel:messages['Scrolled']}));
-				behavrFields.push(this.scrollField = new LabeledTextfield( {fieldlabel:messages['ScrollAnimation']}));
-			}
-
-			var behavrSubsection = new Subsection( {sectionName:messages['Behaviour'], parentNode: this.sections, children: behavrFields } );
-			if (behavrFields.length > 0) {
-				behavrSubsection.show();
-			}
-			
-			/* - key bindings  ---------------------------------------------------- */	
 			var kbFields = [];
-			
 			if (this.oldPrefs.keyBindingsVisible) {
 				var keys = KEY_MODES;
 				var options = [];
@@ -99,37 +76,53 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					}
 					options.push(set);
 				}	
-			
 				kbFields.push(this.kbSelect = new Select( {options:options})); //$NON-NLS-0$
-					
-				var kbSubsection = new Subsection( {sectionName:messages['KeyBindings'], parentNode: this.sections, children: kbFields } );
+				var kbSubsection = new Subsection( {sectionName:messages.KeyBindings, parentNode: this.sections, children: kbFields } );
 				kbSubsection.show();
 			}
-			
-			
+		
+			var tabsFields = [];
+			if (this.oldPrefs.tabSizeVisible) {
+				tabsFields.push(this.tabField = new LabeledTextfield( {fieldlabel:messages.TabSize}));
+			}
+			if (this.oldPrefs.expandTabVisible) {
+				tabsFields.push(this.expandTabCheck = new LabeledCheckbox( {fieldlabel:messages.ExpandTab}));
+			}
+			if (tabsFields.length > 0) {
+				var tabsSubsection = new Subsection( {sectionName:messages.Tabs, parentNode: this.sections, children: tabsFields } );
+				tabsSubsection.show();
+			}
+					
+			var scrollingFields = [];
+			if (this.oldPrefs.scrollAnimationVisible) {
+				scrollingFields.push(this.scrollAnimationCheck = new LabeledCheckbox( {fieldlabel:messages.ScrollAnimationEnabled}));
+				scrollingFields.push(this.scrollAnimationField = new LabeledTextfield( {fieldlabel:messages.ScrollAnimationTimeout}));
+			}
+			if (scrollingFields.length > 0) {
+				var scrollingSubsection = new Subsection( {sectionName:messages.ScrollAnimation, parentNode: this.sections, children: scrollingFields } );
+				scrollingSubsection.show();
+			}
+
 			var updateCommand = new commands.Command({
-				name: messages["Update"],
+				name: messages.Update,
 				tooltip: messages["Update Editor Settings"],
 				id: "orion.updateeditorsettings", //$NON-NLS-0$
 				callback: function(data){
 					this.update(data.items);
 				}.bind(this)
 			});
-			
 			this.commandService.addCommand(updateCommand);
 			this.commandService.registerCommandContribution('editorSettingCommand', "orion.updateeditorsettings", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands('editorSettingCommand', lib.node( 'editorCommands' ), this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$		
-			
+
 			var restoreCommand = new commands.Command({
-				name: messages["Restore"],
+				name: messages.Restore,
 				tooltip: messages["Restore default Editor Settings"],
 				id: "orion.restoreeditorsettings", //$NON-NLS-0$
 				callback: function(data){
 					this.restore(data.items);
 				}.bind(this)
 			});
-		
-			
 			this.commandService.addCommand(restoreCommand);
 			this.commandService.registerCommandContribution('restoreEditorSettingCommand', "orion.restoreeditorsettings", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands('restoreEditorSettingCommand', lib.node( 'editorCommands' ), this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$			
@@ -151,36 +144,42 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 			return undefined;
 		},
-		validate: function() {
-			if (this.autoSaveField) {
-				var timeOut = this.autoSaveField.getValue();
-				if (isNaN(parseFloat(timeOut)) || !isFinite(timeOut)) {
-					return "Invalid save interval.";
-				}
+		validate: function(prefs) {
+			if (isNaN(prefs.autoSaveTimeout) || !isFinite(prefs.autoSaveTimeout)) {
+				return messages["Invalid save interval."];
+			}
+			if (isNaN(prefs.scrollAnimation) || !isFinite(prefs.scrollAnimation)) {
+				return messages["Invalid scrolling duration."];
+			}
+			if (!(1 <= prefs.tabSize && prefs.tabSize <= 16)) {
+				return messages["Invalid tab size."];
 			}
 			return "";
 		},
 		update: function() {
-			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 			var currentPrefs = this.valueChanged();
 			if (currentPrefs) {
-				var msg=this.validate();
+				var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+				var msg = this.validate(currentPrefs);
 				if (msg) {
-					messageService.setProgressResult({Message:msg,Severity:"Error"}); 
+					messageService.setProgressResult({Message:msg,Severity:"Error"}); //$NON-NLS-0$
 					return;
 				}
-				this._editorPref.setPrefs(currentPrefs, function (){ 
-					messageService.setProgressResult( {Message:"Editor preferences updated",Severity:"Normal"} ); 
+				var self = this;
+				this._editorPref.setPrefs(currentPrefs, function () { 
+					self.setValues(self.oldPrefs = currentPrefs);
+					messageService.setProgressResult( {Message:messages["Editor preferences updated"], Severity:"Normal"} ); //$NON-NLS-0$
 				});
+			} else {
+				this.setValues(this.oldPrefs);
 			}
 		},
 		restore: function() {
-			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-			
 			this._editorPref.setPrefs({}, function (editorPrefs){ 
-					messageService.setProgressResult( {Message:"Editor defaults restored",Severity:"Normal"} ); 
-					this._show(editorPrefs);
-				}.bind(this));
+				var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+				messageService.setProgressResult( {Message:messages["Editor defaults restored"], Severity:"Normal"} ); //$NON-NLS-0$
+				this._show(editorPrefs);
+			}.bind(this));
 		},
 		show: function() {
 			this._editorPref.getPrefs(function (editorPrefs) {
@@ -196,23 +195,23 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			if (this.autoSaveCheck) {
 				editorPrefs.autoSaveEnabled = this.autoSaveCheck.isChecked();
 			}
-			
 			if (this.autoSaveField) {
-				editorPrefs.autoSaveTimeout = this.autoSaveField.getValue();
+				editorPrefs.autoSaveTimeout = parseInt(this.autoSaveField.getValue(), 10);
 			}
-			
 			if (this.autoLoadCheck) {
 				editorPrefs.autoLoadEnabled = this.autoLoadCheck.isChecked();
 			}
-			
 			if (this.tabField) {
-				editorPrefs.tabSize = this.tabField.getValue();
+				editorPrefs.tabSize = parseInt(this.tabField.getValue(), 10);
 			} 
-			if (this.scrollCheck) {
-				editorPrefs.scrollEnabled = this.scrollCheck.isChecked();
+			if (this.expandTabCheck) {
+				editorPrefs.expandTab = this.expandTabCheck.isChecked();
 			}
-			if (this.scrollField) {
-				editorPrefs.scrollAnimation = this.scrollField.getValue();
+			if (this.scrollAnimationCheck) {
+				editorPrefs.scrollAnimationEnabled = this.scrollAnimationCheck.isChecked();
+			}
+			if (this.scrollAnimationField) {
+				editorPrefs.scrollAnimation = parseInt(this.scrollAnimationField.getValue(), 10);
 			}
 			if (this.kbSelect) {
 				editorPrefs.keyBindings = this.kbSelect.getSelected();
@@ -228,15 +227,17 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			if (this.autoLoadCheck) {
 				this.autoLoadCheck.setChecked(editorPrefs.autoLoadEnabled);
 			}
-			
 			if (this.tabField) {
 				this.tabField.setValue(editorPrefs.tabSize);
 			} 
-			if (this.scrollCheck) {
-				this.scrollCheck.setChecked(editorPrefs.scrollEnabled);
+			if (this.expandTabCheck) {
+				this.expandTabCheck.setChecked(editorPrefs.expandTab);
+			} 
+			if (this.scrollAnimationCheck) {
+				this.scrollAnimationCheck.setChecked(editorPrefs.scrollAnimationEnabled);
 			}
-			if (this.scrollField) {
-				this.scrollField.setValue(editorPrefs.scrollAnimation);
+			if (this.scrollAnimationField) {
+				this.scrollAnimationField.setValue(editorPrefs.scrollAnimation);
 			}
 			if (this.kbSelect) {
 				this.kbSelect.setSelectedIndex(Math.max(KEY_MODES.indexOf(editorPrefs.keyBindings),0));

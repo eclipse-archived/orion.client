@@ -141,6 +141,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				textView.addKeyMode(vi);
 			}
 		}
+		var options = {
+			tabSize: settings.tabSize || 4,
+			expandTab: settings.expandTab,
+			scrollAnimation: settings.scrollAnimationEnabled ? settings.scrollAnimation : 0
+		};
+		textView.setOptions(options);
 		renderToolbars(inputManager.getFileMetadata());
 	};
 	var editorPreferences = new mEditorPreferences.EditorPreferences (preferences, function (prefs) {
@@ -161,8 +167,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var textView = new mTextView.TextView({
 				parent: editorDomNode,
 				model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
-				tabSize: 4,
-				scrollAnimation: 300,
 				wrappable: true,
 				readonly: isReadOnly
 			});

@@ -126,9 +126,17 @@ define({
 	"Save interval" : "Save interval (ms)",
 	"Autoload Enabled" : "Auto Load",
 	"Restore" : "Restore Defaults",
-	"Behaviour" : "Behaviour",
+	"Default": "Default",
+	"Tabs" : "Tabs",
 	"TabSize" : "Tab Size",
-	"Scrolled" : "Scrolling Animation",
-	"ScrollAnimation" : "Scrolling Duration (ms)",
-	"KeyBindings" : "Key Bindings"
+	"ExpandTab" : "Insert spaces for tabs",
+	"ScrollAnimation" : "Smooth scrolling",
+	"ScrollAnimationEnabled" : "Scrolling Animation",
+	"ScrollAnimationTimeout" : "Scrolling Duration (ms)",
+	"KeyBindings" : "Key Bindings",
+	"Invalid save interval.": "Invalid save interval.",
+	"Invalid scrolling duration.": "Invalid scrolling duration.",
+	"Invalid tab size.": "Invalid tab size.",
+	"Editor preferences updated": "Editor preferences updated",
+	"Editor defaults restored": "Editor defaults restored"
 });
