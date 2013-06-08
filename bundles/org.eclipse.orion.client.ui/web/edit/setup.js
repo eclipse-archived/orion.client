@@ -140,13 +140,13 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			} else if (settings.keyBindings === "VI") { //$NON-NLS-0$
 				textView.addKeyMode(vi);
 			}
+			var options = {
+				tabSize: settings.tabSize || 4,
+				expandTab: settings.expandTab,
+				scrollAnimation: settings.scrollAnimationEnabled ? settings.scrollAnimation : 0
+			};
+			textView.setOptions(options);
 		}
-		var options = {
-			tabSize: settings.tabSize || 4,
-			expandTab: settings.expandTab,
-			scrollAnimation: settings.scrollAnimationEnabled ? settings.scrollAnimation : 0
-		};
-		textView.setOptions(options);
 		renderToolbars(inputManager.getFileMetadata());
 	};
 	var editorPreferences = new mEditorPreferences.EditorPreferences (preferences, function (prefs) {
@@ -168,6 +168,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				parent: editorDomNode,
 				model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
 				wrappable: true,
+				tabSize: settings.tabSize || 4,
+				expandTab: settings.expandTab,
+				scrollAnimation: settings.scrollAnimationEnabled ? settings.scrollAnimation : 0,
 				readonly: isReadOnly
 			});
 			return textView;
