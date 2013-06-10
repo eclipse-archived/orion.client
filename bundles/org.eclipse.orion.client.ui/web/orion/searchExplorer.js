@@ -239,9 +239,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         return tableNode;
     };
 
-    SearchResultRenderer.prototype.generateDetailHighlight = function(detailModel, parentSpan) {
+    SearchResultRenderer.prototype._generateDetailSegments = function(detailInfo) {
         var startIndex = 0;
-        var detailInfo = this.explorer.model.getDetailInfo(detailModel);
+        var segments = [];
         for (var i = 0; i < detailInfo.matches.length; i++) {
             if (startIndex >= detailInfo.lineString.length) {
 				break;
@@ -252,19 +252,82 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 }
             }
             if (startIndex !== detailInfo.matches[i].startIndex) {
-                _place(document.createTextNode(detailInfo.lineString.substring(startIndex, detailInfo.matches[i].startIndex)), parentSpan, "last"); //$NON-NLS-0$
+                segments.push({name: detailInfo.lineString.substring(startIndex, detailInfo.matches[i].startIndex), startIndex: startIndex, bold: false, highlight: false});
             }
-            var matchSegBold = _createElement('b', null, null, parentSpan); //$NON-NLS-0$
             var  gap = detailInfo.matches[i].length;
-            _place(document.createTextNode(detailInfo.lineString.substring(detailInfo.matches[i].startIndex, detailInfo.matches[i].startIndex + gap)), matchSegBold, "only"); //$NON-NLS-0$
+            segments.push({name: detailInfo.lineString.substring(detailInfo.matches[i].startIndex, detailInfo.matches[i].startIndex + gap), startIndex: detailInfo.matches[i].startIndex, bold: true, highlight: false});
             startIndex = detailInfo.matches[i].startIndex + gap;
             if (this.explorer.model.replaceMode()) {
                 break;
             }
         }
         if (startIndex < (detailInfo.lineString.length - 1)) {
-            _place(document.createTextNode(detailInfo.lineString.substring(startIndex)), parentSpan, "last"); //$NON-NLS-0$
+            segments.push({name: detailInfo.lineString.substring(startIndex), startIndex: startIndex, bold: false, highlight: false});
         }
+        return segments;
+    };
+
+    SearchResultRenderer.prototype._mergesingleSegment = function(segments, range) {
+		var newSegments = [];
+		
+		segments.forEach(function(segment) {
+			var startIndex = segment.startIndex;
+			var endIndex = segment.startIndex + segment.name.length;
+			if(range.start > startIndex && range.end < endIndex){
+				newSegments.push({name: segment.name.substring(0, range.start - startIndex), startIndex: segment.startIndex, bold: segment.bold, highlight: false});
+				newSegments.push({name: segment.name.substring(range.start - startIndex, range.end - startIndex), startIndex: range.start, bold: segment.bold, highlight: true});
+				newSegments.push({name: segment.name.substring(range.end - startIndex), startIndex: range.end, bold: segment.bold, highlight: false});
+			} else if(range.start > startIndex && range.start < endIndex){
+				newSegments.push({name: segment.name.substring(0, range.start - startIndex), startIndex: segment.startIndex, bold: segment.bold, highlight: false});
+				newSegments.push({name: segment.name.substring(range.start - startIndex), startIndex: range.start, bold: segment.bold, highlight: true});
+			} else if( startIndex >= range.start && endIndex <= range.end) {
+				segment.highlight = true;
+				newSegments.push(segment);
+			} else if(range.end > startIndex && range.end < endIndex){
+				newSegments.push({name: segment.name.substring(0, range.end - startIndex), startIndex: segment.startIndex, bold: segment.bold, highlight: true});
+				newSegments.push({name: segment.name.substring(range.end - startIndex), startIndex: range.end, bold: segment.bold, highlight: false});
+			} else {
+				newSegments.push(segment);
+			}
+		}.bind(this));
+		return newSegments;
+    };
+
+    SearchResultRenderer.prototype._mergeFilteredSegments = function(segments, stringToFilter) {
+		if(!this.explorer.model._filterText ) {
+			return segments;
+		}
+		var filteredResults = mSearchUtils.searchOnelineLiteral({searchStr: this.explorer.model._filterText, searchStrLength: this.explorer.model._filterText.length}, stringToFilter, false);
+		var newSegments = segments;
+		if(filteredResults) {
+			filteredResults.forEach(function(result) {
+				newSegments = this._mergesingleSegment(newSegments, {start: result.startIndex, end: result.startIndex + result.length});
+			}.bind(this));
+		}
+		return newSegments;
+    };
+
+    SearchResultRenderer.prototype.generateDetailHighlight = function(detailModel, parentSpan, useFilter) {
+        var detailInfo = this.explorer.model.getDetailInfo(detailModel);
+        var segments = this._generateDetailSegments(detailInfo);
+        if(useFilter) {
+			segments = this._mergeFilteredSegments(segments, detailInfo.lineString);
+        }
+		segments.forEach(function(segment) {
+			if(segment.bold){
+				var matchSegBold = _createElement('b', null, null, parentSpan); //$NON-NLS-0$
+				if(segment.highlight) {
+					matchSegBold.classList.add("search-filter-text");
+				}
+				_place(document.createTextNode(segment.name), matchSegBold, "only"); //$NON-NLS-0$				
+			} else {
+				var matchSpan = _createElement('span', null, null, parentSpan); //$NON-NLS-0$
+				if(segment.highlight) {
+					matchSpan.classList.add("search-filter-text");
+				}
+	           _place(document.createTextNode(segment.name), matchSpan, "only"); //$NON-NLS-0$
+			}
+		}.bind(this));
     };
 
     SearchResultRenderer.prototype.renderDetailElement = function(item, tableRow, spanHolder, renderNumber) {
@@ -272,7 +335,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         if (renderNumber) {
             this.renderDetailLineNumber(item, linkSpan);
         }
-        this.generateDetailHighlight(item, linkSpan);
+        this.generateDetailHighlight(item, linkSpan, true);
     };
 
     SearchResultRenderer.prototype.renderDetailLineNumber = function(item, spanHolder) {

@@ -123,6 +123,10 @@
 	min-width:6em;
 }
 
+.search-filter-text {
+	background : yellow;
+}
+
 .search-label {
 	display: inline-block;
 	padding: 4px 4px 4px 7px;
