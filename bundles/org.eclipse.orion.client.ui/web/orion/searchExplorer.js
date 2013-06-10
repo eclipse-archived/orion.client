@@ -1331,9 +1331,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 					window.clearTimeout(this._filterTimer);
 				}
 				var explorer = this;
-				this._timer = window.setTimeout(function(){
+				this._filterTimer = window.setTimeout(function(){
 					this._filterTimer = null;
-					this.renderfiltered(filterInput.value);
+					this._renderFiltered(filterInput.value);
 				}.bind(explorer), 1000);
 			}.bind(this));
          }
@@ -1373,7 +1373,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         });
     };
 
-    SearchResultExplorer.prototype.renderfiltered = function(filterText) {
+    SearchResultExplorer.prototype._renderFiltered = function(filterText) {
         this.model.filterOn(filterText);
         this.createTree(this.getParentDivId(), this.model, {
             selectionPolicy: "cursorOnly", //$NON-NLS-0$
