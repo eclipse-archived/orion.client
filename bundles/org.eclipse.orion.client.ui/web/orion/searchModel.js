@@ -63,8 +63,16 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
         if (!parentItem) {
             return;
         }
+        if(parentItem.type === "file" && this._filterText){
+			if(parentItem.filteredChildren) {
+				onComplete(parentItem.filteredChildren);
+			} else {
+				onComplete([]);
+			}
+			return;
+        }
         if (parentItem.children) {
-            onComplete(parentItem.children);
+			onComplete(parentItem.children);
         } else if (parentItem.type === "detail") { //$NON-NLS-0$
             onComplete([]);
         } else if (parentItem.type === "file" && parentItem.location) { //$NON-NLS-0$
@@ -389,7 +397,16 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
 				var hitFlag = false;
 				if(this._filterSingleString(fileItem.name, keyword) || this._filterSingleString(fileItem.fullPathName, keyword)){
 					hitFlag = true;
-				} else if( fileItem.children){
+				} 
+				if( fileItem.children){
+					fileItem.filteredChildren = [];
+					fileItem.children.forEach(function(detailItem) {
+					    if (this._filterSingleString(detailItem.name, keyword)) {
+					        fileItem.filteredChildren.push(detailItem);
+					        hitFlag = true;
+					    }
+					}.bind(this));
+					/*
 					fileItem.children.some(function(detailItem) {
 					    if (this._filterSingleString(detailItem.name, keyword)) {
 					        hitFlag = true;
@@ -397,12 +414,26 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
 					    }
 					    return false;
 					}.bind(this));
+					*/
 				}
 				if(hitFlag) {
 					this._filteredRoot.children.push(fileItem);
 				}
 			}.bind(this));
 		}
+    };
+
+    /**
+     * Get the filtered model children.
+     * If defined, the explorer will render only the filtered children.
+     */
+    SearchResultModel.prototype.getFilteredChildren = function(model) {
+        if(model.type === "file" && this._filterText && model.filteredChildren) {
+			return model.filteredChildren;
+        } else if(model.isRoot && this._filterText) {
+        	return this._filteredRoot.children;
+        }
+        return model.children;
     };
 
     /*** Internal model functions ***/

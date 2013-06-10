@@ -58,7 +58,8 @@ exports.ExplorerNavHandler = (function() {
 		parentDiv.classList.add("selectionModelContainer"); //$NON-NLS-0$
 		var self = this;
 		this._modelIterator = new mTreeModelIterator.TreeModelIterator([], {
-			isExpanded: this.isExpanded.bind(this),					 
+			isExpanded: this.isExpanded.bind(this),		
+			getChildrenFunc: options.getChildrenFunc,
 			isExpandable: this.explorer.renderer.isExpandable ? 
 				function(model) { return self.explorer.renderer.isExpandable(model); } : 
 				function(model) { return self.isExpandable(model); },
