@@ -376,6 +376,8 @@ define([
 
 	/**
 	 * Set the target of the page so that common infrastructure (breadcrumbs, related menu, etc.) can be added for the page.
+	 * @name orion.globalCommands#setPageTarget
+	 * @function
 	 *
 	 * @param {Object} options The target options object.
 	 * @param {String} options.task the name of the user task that the page represents.
@@ -392,13 +394,13 @@ define([
 	 * validate against a contribution. Optional.
 	 * @param {Function} options.makeBreadcrumbLink a function that will supply a breadcrumb link based on a location shown in a breadcrumb.
 	 * Optional. If not specified, and if a target is specified, the breadcrumb link will refer to the Navigator.
-	 * @param {Object} options.serviceRegistry the registry to use for obtaining any unspecified services. Optional. If not specified, then
+	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry the registry to use for obtaining any unspecified services. Optional. If not specified, then
 	 * any banner elements requiring Orion services will not be provided.
-	 * @param {Object} options.commandService the commandService used for accessing related page commands. Optional. If not specified, a
+	 * @param {orion.commandregistry.CommandRegistry} options.commandService the commandService used for accessing related page commands. Optional. If not specified, a
 	 * related page menu will not be shown.
-	 * @param {Object} options.searchService the searchService used for scoping the searchbox. Optional. If not specified, the searchbox will
+	 * @param {orion.searchClient.Searcher} options.searchService the searchService used for scoping the searchbox. Optional. If not specified, the searchbox will
 	 * not be scoped.
-	 * @param {Object} options.fileService the fileService used for retrieving additional metadata and managing the breadcrumb for multiple
+	 * @param {orion.fileClient.FileClient} options.fileService the fileService used for retrieving additional metadata and managing the breadcrumb for multiple
 	 * file services. If not specified, there may be reduced support for multiple file implementations.
 	 */
 	function setPageTarget(options) {
