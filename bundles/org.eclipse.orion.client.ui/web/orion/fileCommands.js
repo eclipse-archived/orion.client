@@ -811,7 +811,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		commandService.addCommand(importZipURLCommand);
 		
 		var newProjectCommand = new mCommands.Command({
-			name: messages["Folder"],
+			name: messages["New Folder"],
 			parameters: newFolderNameParameters,
 			imageClass: "core-sprite-new_folder", //$NON-NLS-0$
 			tooltip: messages["Create an empty folder"],
