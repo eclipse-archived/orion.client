@@ -618,7 +618,25 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.showCompare", 2, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.replaceAll", 3, "orion.searchActions.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-        var previousPage = new mCommands.Command({
+         var showAllCmd = new mCommands.Command({
+            name: messages["Show All"],
+            tooltip: messages["Show all the results in one page"],
+            id: "orion.search.showAll", //$NON-NLS-0$
+            hrefCallback: function() {
+                if (!this.model._provideSearchHelper) {
+                    return null;
+                }
+                var qParams = mSearchUtils.copySearchParams(this.model._provideSearchHelper().params, true);
+				qParams.start = 0;
+				qParams.rows = this.model.getPagingParams().totalNumber;
+                return mSearchUtils.generateSearchHref(qParams);
+            }.bind(this),
+            visibleWhen: function(item) {
+				var pagingParam = this.model.getPagingParams();
+                return (pagingParam.totalNumber > pagingParam.rows);
+            }.bind(this)
+        });
+		var previousPage = new mCommands.Command({
             name: messages["< Previous Page"],
             tooltip: messages["Show previous page of search result"],
             id: "orion.search.prevPage", //$NON-NLS-0$
@@ -678,6 +696,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 that.gotoNext(false, true);
             }
         });
+        this._commandService.addCommand(showAllCmd);
         this._commandService.addCommand(previousPage);
         this._commandService.addCommand(nextPage);
         this._commandService.addCommand(nextResultCommand);
@@ -694,8 +713,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._commandService.registerCommandContribution("pageNavigationActions", "orion.explorer.collapseAll", 2); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.nextResult", 3); //$NON-NLS-1$ //$NON-NLS-0$
         this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.prevResult", 4); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.prevPage", 5); //$NON-NLS-1$ //$NON-NLS-0$
-        this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.nextPage", 6); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.showAll", 5); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.prevPage", 6); //$NON-NLS-1$ //$NON-NLS-0$
+        this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.nextPage", 7); //$NON-NLS-1$ //$NON-NLS-0$
     };
 
     SearchResultExplorer.prototype._checkStale = function(model) {
