@@ -234,9 +234,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			}
 		},
 		"import": function(modelEvent) { //$NON-NLS-0$
-			this.changedItem(modelEvent.oldValue, true);
-			// TODO -- if it was an sftp import -- we should fresh the treeRoot (why?)
-			//this.changedItem(this.treeRoot, true);
+			var target = modelEvent.target;
+			if (this.treeRoot.Location === target.Location) {
+				this.loadResourceList(this.treeRoot, true);
+			} else {
+				this.changedItem(target, true);
+			}
 		},
 		move: function(modelEvent) {
 			var item = modelEvent.oldValue, newItem = modelEvent.newValue, parent = modelEvent.parent;
