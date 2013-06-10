@@ -39,17 +39,26 @@ exports.TreeModelIterator = (function() {
 			this.isExpanded = options.isExpanded;//optional callback providing that if a model item is expanded even if it has children. Default is true if it has children.
 			this.isExpandable = options.isExpandable;//optional  callback providing that if a model item is expandable.Default is true .
 			this.forceExpandFunc = options.forceExpandFunc;//optional  callback providing the expansion on the caller side.
+			this.getChildrenFunc = options.getChildrenFunc;//optional  callback providing the of a parent, instead of using the .children property.
 		},
 			
 		topLevel: function(modelItem) {
 			return modelItem.parent ? (modelItem.parent === this.root) : true;
 		},
 		
+		_getChildren: function(model){
+			if(typeof this.getChildrenFunc === "function") {
+				return this.getChildrenFunc(model);
+			}
+			return model ? model.children : null;
+		},
+		
 		_expanded: function(model){
 			if(!model){
 				return true;//root is always expanded
 			}
-			var expanded = (model.children && model.children.length > 0);
+			var children = this._getChildren(model);
+			var expanded = (children && children.length > 0);
 			if(this.isExpanded && expanded){
 				expanded = this.isExpanded(model);
 			}
@@ -69,7 +78,8 @@ exports.TreeModelIterator = (function() {
 		
 		_diveIn: function(model){
 			if( this._expanded(model)){
-				this.setCursor(model.children[0]);
+				var children = this._getChildren(model);
+				this.setCursor(children[0]);
 				return this.cursor();
 			}
 			return null;
@@ -77,7 +87,8 @@ exports.TreeModelIterator = (function() {
 		
 		_drillToLast: function(model){
 			if( this._expanded(model)){
-				return this._drillToLast(model.children[model.children.length-1]);
+				var children = this._getChildren(model);
+				return this._drillToLast(children[children.length-1]);
 			}
 			return model;
 		},
@@ -121,7 +132,8 @@ exports.TreeModelIterator = (function() {
 		
 		_findSibling: function(current, forward){
 			var isTopLevel = this.topLevel(current);
-			var siblings = isTopLevel ? this.firstLevelChildren: current.parent.children;
+			var children = this._getChildren(current.parent);
+			var siblings = isTopLevel ? this.firstLevelChildren: children;
 			for(var i = 0; i < siblings.length; i++){
 				if(siblings[i] === current){
 					if((i === 0 && !forward) ){

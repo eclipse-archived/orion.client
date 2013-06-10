@@ -233,7 +233,8 @@ exports.Explorer = (function() {
 				if (options && options.navHandlerFactory && typeof options.navHandlerFactory.createNavHandler === "function") {
 					this._navHandler = options.navHandlerFactory.createNavHandler(this, this._navDict, options);
 				} else {
-					this._navHandler = new mNavHandler.ExplorerNavHandler(this, this._navDict, {setFocus: options && options.setFocus, selectionPolicy: (options ? options.selectionPolicy : null)});
+					var getChildrenFunc = options ? options.getChildrenFunc : null;
+					this._navHandler = new mNavHandler.ExplorerNavHandler(this, this._navDict, {getChildrenFunc: getChildrenFunc, setFocus: options && options.setFocus, selectionPolicy: (options ? options.selectionPolicy : null)});
 				}
 			}
 			var that = this;

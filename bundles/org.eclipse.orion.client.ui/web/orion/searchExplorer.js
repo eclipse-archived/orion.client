@@ -1365,6 +1365,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             this.createTree(this.getParentDivId(), this.model, {
                 selectionPolicy: "cursorOnly", //$NON-NLS-0$
                 indent: 0,
+				getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
                 onCollapse: function(model) {
                     that.onCollapse(model);
                 }
@@ -1386,6 +1387,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this.model.buildResultModel();
         this.createTree(this.getParentDivId(), this.model, {
             selectionPolicy: "cursorOnly", //$NON-NLS-0$
+            getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
             indent: 0,
             onCollapse: function(model) {
                 that.onCollapse(model);
@@ -1402,6 +1404,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
                 this.onCollapse(model);
             }.bind(this)
         });
+        if(filterText) {
+			this.expandAll();
+        }
     };
 
     SearchResultExplorer.prototype.refreshValidFiles = function() {
