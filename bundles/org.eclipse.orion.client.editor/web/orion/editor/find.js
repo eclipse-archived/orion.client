@@ -211,13 +211,20 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		this.setOptions(options);
 	}
 	Find.prototype = {
-		find: function (forward, string, incremental) {
-			string = string || this.getFindString();
+		find: function (forward, tempOptions, incremental) {
 			this.setOptions({
 				reverse : !forward
 			});
+			var string = this.getFindString();
+			var count;
+			if (tempOptions) {
+				string = tempOptions.findString || this.getFindString();
+				count =  tempOptions.count;
+			}
+			var savedOptions = this.getOptions();
+			this.setOptions(tempOptions);
 			var startOffset = incremental ? this._startOffset : this.getStartOffset();
-			var result = this._doFind(string, startOffset);
+			var result = this._doFind(string, startOffset, count);
 			if (result) {
 				if (!incremental) {
 					this._startOffset = result.start;
@@ -226,6 +233,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			if (this._hideAfterFind) {
 				this.hide();
 			}
+			this.setOptions(savedOptions);
 			return result;
 		},
 		getStartOffset: function() {
@@ -413,18 +421,15 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				this._undoStack.endCompoundChange();
 			}
 		},
-		_saveOptions: function() {
-		 	this.savedOptions = {};
-		 	
-		},
-		_doFind: function(string, startOffset) {
+		_doFind: function(string, startOffset, count) {
+			count = count || 1;
 			var editor = this._editor;
 			if (!string) {
 				this._removeAllAnnotations();
 				return null;
 			}
 			this._lastString = string;
-			var result = editor.getModel().find({
+			var iterator = editor.getModel().find({
 				string: string,
 				start: startOffset,
 				reverse: this._reverse,
@@ -432,7 +437,11 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				regex: this._regex,
 				wholeWord: this._wholeWord,
 				caseInsensitive: this._caseInsensitive
-			}).next();
+			});
+			var result;
+			for (var i=0; i<count; i++) {
+				result = iterator.next();
+			}
 			if (!this._replacingAll) {
 				if (result) {
 					this._editor.reportStatus("");

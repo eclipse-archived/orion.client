@@ -204,6 +204,8 @@ define("orion/editor/vi", [
 			//Searches
 			bindings.push({actionID: "vi-/",	keyBinding: new KeyBinding("/", false, false, false, false, "keypress")}); //$NON-NLS-0$
 			bindings.push({actionID: "vi-?",	keyBinding: new KeyBinding("?", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-n",	keyBinding: new KeyBinding("n", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-N",	keyBinding: new KeyBinding("N", false, false, false, false, "keypress")}); //$NON-NLS-0$
 			
 			//Line numbering
 			bindings.push({actionID: "vi-goToLine",	keyBinding: new KeyBinding("G", false, false, false, false, "keypress")}); //$NON-NLS-0$
@@ -400,7 +402,7 @@ define("orion/editor/vi", [
 					if (self.number !== "") {
 						num = self.number >> 0;
 					}
-					var result = view.invokeAction("find", false, {hideAfterFind:true, incremental:false, reverse:false}); //$NON-NLS-1$ //$NON-NLS-0$
+					view.invokeAction("find", false, {hideAfterFind:true, incremental:false, reverse:false}); //$NON-NLS-1$ //$NON-NLS-0$
 					self.number = "";
 					return true;
 				});
@@ -410,7 +412,21 @@ define("orion/editor/vi", [
 					if (self.number !== "") {
 						num = self.number >> 0;
 					}
-					var result = view.invokeAction("find", false, {hideAfterFind:true, incremental:false, reverse:true}); //$NON-NLS-1$ //$NON-NLS-0$
+					view.invokeAction("find", false, {hideAfterFind:true, incremental:false, reverse:true}); //$NON-NLS-1$ //$NON-NLS-0$
+					self.number = "";
+					return true;
+				});
+				
+				view.setAction("vi-n", function() { //$NON-NLS-0$
+					var num = self.number >> 0 || 1;
+					view.invokeAction("findNext", false, {count:num}); //$NON-NLS-0$
+					self.number = "";
+					return true;
+				});
+				
+				view.setAction("vi-N", function() { //$NON-NLS-0$
+					var num = self.number >> 0 || 1;
+					view.invokeAction("findPrevious", false, {count:num}); //$NON-NLS-0$
 					self.number = "";
 					return true;
 				});
