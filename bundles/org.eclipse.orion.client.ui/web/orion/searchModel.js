@@ -406,15 +406,6 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
 					        hitFlag = true;
 					    }
 					}.bind(this));
-					/*
-					fileItem.children.some(function(detailItem) {
-					    if (this._filterSingleString(detailItem.name, keyword)) {
-					        hitFlag = true;
-					        return true; // stops the filtering on details
-					    }
-					    return false;
-					}.bind(this));
-					*/
 				}
 				if(hitFlag) {
 					this._filteredRoot.children.push(fileItem);
@@ -431,7 +422,7 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
         if(model.type === "file" && this._filterText && model.filteredChildren) {
 			return model.filteredChildren;
         } else if(model.isRoot && this._filterText) {
-        	return this._filteredRoot.children;
+			return this._filteredRoot.children;
         }
         return model.children;
     };
