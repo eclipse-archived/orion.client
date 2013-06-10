@@ -832,6 +832,9 @@ define([
 				keyAssistDiv.appendChild(keyAssistInput);
 				var keyAssistContents = this._keyAssistContents = document.createElement("div"); //$NON-NLS-0$
 				keyAssistContents.classList.add("keyAssistContents"); //$NON-NLS-0$
+				if (util.isIOS || util.isAndroid) {
+					keyAssistContents.style.overflowY = "auto"; //$NON-NLS-0$
+				}
 				keyAssistDiv.appendChild(keyAssistContents);
 				var keyAssistTable = this._keyAssistTable = document.createElement('table'); //$NON-NLS-0$
 				keyAssistTable.tabIndex = 0;
@@ -978,8 +981,7 @@ define([
 				return this._keyAssistDiv.style.display === "block"; //$NON-NLS-0$
 			},
 			select: function (forward) {
-				var rows = this._keyAssistTable.querySelectorAll(".keyAssistItem"),
-					row; //$NON-NLS-0$
+				var rows = this._keyAssistTable.querySelectorAll(".keyAssistItem"), row; //$NON-NLS-0$
 				if (rows.length === 0) {
 					this._selectedIndex = -1;
 					return;
@@ -1018,7 +1020,7 @@ define([
 			show: function () {
 				this._previousActiveElement = document.activeElement;
 				this.createContents();
-				this._keyAssistContents.style.height = Math.floor(this._keyAssistDiv.parentNode.clientHeight * 0.8) + "px"; //$NON-NLS-0$
+				this._keyAssistContents.style.height = Math.floor(this._keyAssistDiv.parentNode.clientHeight * 0.75) + "px"; //$NON-NLS-0$
 				this._keyAssistDiv.style.display = "block"; //$NON-NLS-0$
 				this._keyAssistInput.value = this._filterString;
 				this._keyAssistInput.focus();
