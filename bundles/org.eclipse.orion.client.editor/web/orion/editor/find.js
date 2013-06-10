@@ -237,6 +237,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			return result;
 		},
 		getStartOffset: function() {
+			if (this._start !== undefined) {
+				return this._start;
+			}
 			if (this._reverse) {
 				return this._editor.getSelection().start - 1;
 			}
@@ -358,7 +361,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 					this._showAll = options.showAllOccurrence;
 					if (this.isVisible()) {
 						if (this._showAll) {
-							this.markAllOccurrences(true);
+							this._markAllOccurrences(true);
 						} else {
 							var annotationModel = this._editor.getAnnotationModel();
 							if (annotationModel) {
@@ -432,6 +435,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			var iterator = editor.getModel().find({
 				string: string,
 				start: startOffset,
+				end: this._end,
 				reverse: this._reverse,
 				wrap: this._wrap,
 				regex: this._regex,
