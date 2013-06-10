@@ -62,6 +62,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			
 			this.themeData = args.themeData;
 			
+			this.toolbarId = args.toolbarId;
+			
 			init();	
 			
 			var commandTemplate = '<div id="commandButtons">' +
@@ -71,10 +73,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 
 			var commandArea = document.getElementById( 'pageActions' );
 			commandArea.innerHTML = commandTemplate;
-			
-			var pageToolBar = document.getElementById( 'pageToolbar' );
-			
-			pageToolBar.style.paddingBottom = '5px';
 			
 			this.commandService = args.commandService;
 			this.preferences = args.preferences;
@@ -164,7 +162,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 													'<span class="settingsLabel">New theme name:</span>' + 
 													'<div id="themesaver" class="themesaver"></div>' +
 												'</div>' +
-												'<div id="stringcontainer" style="position:absolute;left:425px;top:330px;display:none;">' +
+												'<div id="stringcontainer" style="position:relative;left:400px;top:-150px;display:none;">' +
 														'<span>OR HEX: </span>' + 
 														'<div id="colorstring" class="colorfield"></div>' +
 														'<button class = "commandButton" style="padding:5px;font-size:9pt;"type="button" id="colorButton"}">ok</button>' + 
@@ -940,7 +938,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 				this.addThemePicker(themeStyles);		
 			}.bind(this));
 			
-			this.commandService.renderCommands('themeCommands', document.getElementById( 'revertCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+			this.commandService.renderCommands('themeCommands', document.getElementById( this.toolbarId || "revertCommands" ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
 		}
 		
 		ThemeBuilder.prototype.renderData = renderData;

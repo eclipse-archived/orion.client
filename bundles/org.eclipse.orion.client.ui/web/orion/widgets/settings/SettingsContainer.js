@@ -19,7 +19,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		'orion/widgets/themes/ThemeBuilder', 
 		'orion/settings/ui/PluginSettings', 
 		'orion/widgets/themes/ThemePreferences', 
-		'orion/widgets/themes/editor/ThemeData', 
 		'orion/widgets/themes/container/ThemeData', 
 		'orion/widgets/settings/SplitSelectionLayout',
 		'orion/widgets/plugin/PluginList',
@@ -28,7 +27,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		'orion/widgets/settings/EditorSettings',
 		'edit/editorPreferences'
 		], function(messages, require, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
-			ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings,  GitSettings,
+			ThemeBuilder, SettingsList, mThemePreferences, containerThemeData, SplitSelectionLayout, PluginList, UserSettings,  GitSettings,
 			EditorSettings, mEditorPreferences) {
 
 	/**
@@ -56,14 +55,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 				show: this.showThemeBuilder
 			},
 			{
-				id: "editorThemeBuilder", //$NON-NLS-0$
-				textContent: 'Editor Theme', // messages["Themes"],
-				show: this.showEditorThemeBuilder
-			},
-			{
 				id: "editorSettings", //$NON-NLS-0$
-				textContent: 'Editor Settings', // messages["Themes"],
-				show: this.showEditorSettings
+				textContent: messages.Editor,
+				show: this.showEditor
 			},
 			{
 				id: "plugins", //$NON-NLS-0$
@@ -149,45 +143,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			this.themeWidget.renderData( themeNode, 'INITIALIZE' );
 		},
 		
-		showEditorThemeBuilder: function(id){
+		showEditor: function(id){
 		
 			this.selectCategory(id);
 			
-			this.updateToolbar(id);
-		
-			if(this.editorThemeWidget) {
-				this.editorThemeWidget.destroy();
-			}
-			
-			var editorTheme = new editorThemeData.ThemeData();
-			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
-		
-			this.editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme });
-			
-			var command = { name:'Import', tip:'Import a theme', id:0, callback: editorTheme.importTheme.bind(editorTheme) };
-			
-			this.editorThemeWidget.addAdditionalCommand( command );
 			
 			lib.empty(this.table);
-
-			var themeNode = document.createElement('div'); //$NON-NLS-0$
-			this.table.appendChild(themeNode);
-
-			this.editorThemeWidget.renderData( themeNode, 'INITIALIZE' );
-		},
 		
-		showEditorSettings: function(id){
-		
-			this.selectCategory(id);
-
-			lib.empty(this.table);
-
 			if (this.editorSettingWidget) {
 				this.editorSettingWidget.destroy();
 			}
 
 			this.updateToolbar(id);
-			
+
 			var editorSettingsNode = document.createElement('div'); //$NON-NLS-0$
 			this.table.appendChild(editorSettingsNode);
 			
