@@ -233,8 +233,8 @@ define([
 			});
 		}
 
-		var contributedLinks = serviceRegistry.getServiceReferences("orion.page.link.related"); //$NON-NLS-0$
-		if (contributedLinks.length <= 0) {
+		var contributedLinks = serviceRegistry && serviceRegistry.getServiceReferences("orion.page.link.related"); //$NON-NLS-0$
+		if (!contributedLinks || contributedLinks.length === 0) {
 			return;
 		}
 
