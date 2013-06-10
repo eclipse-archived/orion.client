@@ -3,39 +3,32 @@
 define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 [
 	'require', //$NON-NLS-0$
+	'orion/widgets/themes/ThemeBuilder', //$NON-NLS-0$
+	'orion/widgets/themes/ThemePreferences', //$NON-NLS-0$
+	'orion/widgets/themes/editor/ThemeData', //$NON-NLS-0$
 	'orion/util', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
 	'orion/webui/littlelib', //$NON-NLS-0$
 	'i18n!orion/settings/nls/messages', //$NON-NLS-0$ 
 	'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox',  //$NON-NLS-0$  //$NON-NLS-1$ 
 	'orion/widgets/input/LabeledSelect', //$NON-NLS-0$ 
-	'orion/widgets/settings/Subsection', //$NON-NLS-0$ 
+	'orion/section', //$NON-NLS-0$ 
+	'orion/widgets/settings/Subsection', //$NON-NLS-0$
 	'orion/commands'//$NON-NLS-0$ 
-], function(require, util, objects, lib, messages, LabeledTextfield, LabeledCheckbox, LabeledSelect, Subsection, commands)  {
+], function(require, ThemeBuilder, mThemePreferences, editorThemeData, util, objects, lib, messages, LabeledTextfield, LabeledCheckbox, LabeledSelect, mSection, Subsection, commands)  {
     var KEY_MODES = [
-    messages.Default,
-	"Emacs" //$NON-NLS-0$
-	//"VI" //$NON-NLS-0$
+	    messages.Default,
+		"Emacs" //$NON-NLS-0$
+		//"VI" //$NON-NLS-0$
 	];
 				
 	function EditorSettings(options, node) {
 		objects.mixin(this, options);
 		this.node = node;
-		this._editorPref = options.preferences; //$NON-NLS-0$
+		this._editorPref = options.preferences;
 	}
 	objects.mixin( EditorSettings.prototype, {
-		// TODO these should be real Orion sections, not fake DIVs
-		templateString: '' +  //$NON-NLS-0$
-				'<div>' +  //$NON-NLS-0$
-					'<div class="sectionWrapper toolComposite">' + //$NON-NLS-0$
-						'<div class="sectionAnchor sectionTitle layoutLeft">${EditorSettings}</div>' +  //$NON-NLS-0$
-					'</div>' + //$NON-NLS-0$
-					'<div class="sections">' + //$NON-NLS-0$
-					
-					'</div>' + //$NON-NLS-0$
-					'<div></div>' + //$NON-NLS-0$ 
-					
-				'</div>', //$NON-NLS-0$
+		templateString: '<div class="sections"></div>', //$NON-NLS-0$
 		commandTemplate:'<div id="commandButtons">' + //$NON-NLS-0$
 				'<div id="editorCommands" class="layoutRight sectionActions"></div>' + //$NON-NLS-0$
 				'</div>', //$NON-NLS-0$
@@ -43,11 +36,35 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			this.node.innerHTML = this.templateString;
 			var commandArea = document.getElementById( 'pageActions' ); //$NON-NLS-0$
 			commandArea.innerHTML = this.commandTemplate;
-			lib.processTextNodes(this.node, messages);
 			this.sections = lib.$('.sections', this.node); //$NON-NLS-0$
 			this.createSections();
 		},
 		createSections: function(){
+		
+			this.editorThemeSection = new mSection.Section(this.sections, {
+				id: "editorThemeSettings", //$NON-NLS-0$
+				title: messages.EditorThemes,
+				canHide: true,
+				slideout: true
+			});
+			
+			var editorTheme = new editorThemeData.ThemeData();
+			var themePreferences = new mThemePreferences.ThemePreferences(this._editorPref._preferences, editorTheme);
+		
+			this.editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea'}); //$NON-NLS-0$
+			
+			var command = { name:messages.Import, tip:messages['Import a theme'], id:0, callback: editorTheme.importTheme.bind(editorTheme) };
+			
+			this.editorThemeWidget.addAdditionalCommand( command );
+			this.editorThemeWidget.renderData( this.editorThemeSection.getContentElement(), 'INITIALIZE' ); //$NON-NLS-0$
+		
+			this.settingsSection = new mSection.Section(this.sections, {
+				id: "editorSettings", //$NON-NLS-0$
+				title: messages.EditorSettings,
+				canHide: true,
+				slideout: true
+			});
+			
 			var fileMgtFields = [];
 			if (this.oldPrefs.autoSaveVisible) {
 				fileMgtFields.push(this.autoSaveCheck = new LabeledCheckbox( {fieldlabel:messages['Autosave Enabled']}));
@@ -57,7 +74,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				fileMgtFields.push(this.autoLoadCheck = new LabeledCheckbox( {fieldlabel:messages['Autoload Enabled']}));
 			}
 			if (fileMgtFields.length > 0) {
-				var fileMgtSubsection = new Subsection( {sectionName: messages.FileMgt, parentNode: this.sections, children: fileMgtFields} );
+				var fileMgtSubsection = new Subsection( {sectionName: messages.FileMgt, parentNode: this.settingsSection.getContentElement(), children: fileMgtFields} );
 				fileMgtSubsection.show();
 			}
 		
@@ -77,7 +94,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					options.push(set);
 				}	
 				kbFields.push(this.kbSelect = new LabeledSelect( {fieldlabel:messages.Scheme, options:options}));
-				var kbSubsection = new Subsection( {sectionName:messages.KeyBindings, parentNode: this.sections, children: kbFields } );
+				var kbSubsection = new Subsection( {sectionName:messages.KeyBindings, parentNode: this.settingsSection.getContentElement(), children: kbFields } );
 				kbSubsection.show();
 			}
 		
@@ -89,7 +106,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				tabsFields.push(this.expandTabCheck = new LabeledCheckbox( {fieldlabel:messages.ExpandTab}));
 			}
 			if (tabsFields.length > 0) {
-				var tabsSubsection = new Subsection( {sectionName:messages.Tabs, parentNode: this.sections, children: tabsFields } );
+				var tabsSubsection = new Subsection( {sectionName:messages.Tabs, parentNode: this.settingsSection.getContentElement(), children: tabsFields } );
 				tabsSubsection.show();
 			}
 					
@@ -99,9 +116,22 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				scrollingFields.push(this.scrollAnimationField = new LabeledTextfield( {fieldlabel:messages.ScrollAnimationTimeout}));
 			}
 			if (scrollingFields.length > 0) {
-				var scrollingSubsection = new Subsection( {sectionName:messages.ScrollAnimation, parentNode: this.sections, children: scrollingFields } );
+				var scrollingSubsection = new Subsection( {sectionName:messages.ScrollAnimation, parentNode: this.settingsSection.getContentElement(), children: scrollingFields } );
 				scrollingSubsection.show();
 			}
+
+			var toolbar = lib.node( 'editorSettingsToolActionsArea' ); //$NON-NLS-0$
+			var restoreCommand = new commands.Command({
+				name: messages.Restore,
+				tooltip: messages["Restore default Editor Settings"],
+				id: "orion.restoreeditorsettings", //$NON-NLS-0$
+				callback: function(data){
+					this.restore(data.items);
+				}.bind(this)
+			});
+			this.commandService.addCommand(restoreCommand);
+			this.commandService.registerCommandContribution('restoreEditorSettingCommand', "orion.restoreeditorsettings", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands('restoreEditorSettingCommand', toolbar, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$			
 
 			var updateCommand = new commands.Command({
 				name: messages.Update,
@@ -113,19 +143,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			});
 			this.commandService.addCommand(updateCommand);
 			this.commandService.registerCommandContribution('editorSettingCommand', "orion.updateeditorsettings", 1); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands('editorSettingCommand', lib.node( 'editorCommands' ), this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$		
-
-			var restoreCommand = new commands.Command({
-				name: messages.Restore,
-				tooltip: messages["Restore default Editor Settings"],
-				id: "orion.restoreeditorsettings", //$NON-NLS-0$
-				callback: function(data){
-					this.restore(data.items);
-				}.bind(this)
-			});
-			this.commandService.addCommand(restoreCommand);
-			this.commandService.registerCommandContribution('restoreEditorSettingCommand', "orion.restoreeditorsettings", 2); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands('restoreEditorSettingCommand', lib.node( 'editorCommands' ), this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$			
+			this.commandService.renderCommands('editorSettingCommand', toolbar, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$		
 		},
 		valueChanged: function() {
 			var currentPrefs = {};
@@ -246,6 +264,10 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		destroy: function() {
 			if (this.node) {
 				this.node = null;
+			}
+			if (this.editorThemeWidget) {
+				this.editorThemeWidget.destroy();
+				this.editorThemeWidget = null;
 			}
 		}
 	});
