@@ -320,7 +320,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	 * @param {orion.editor.ContentAssistWidget} [ContentAssistWidget]
 	 */
 	function ContentAssistMode(contentAssist, ContentAssistWidget) {
-		mKeyModes.KeyMode.call(this);
+		var textView = contentAssist.textView;
+		mKeyModes.KeyMode.call(this, textView);
 		this.contentAssist = contentAssist;
 		this.widget = ContentAssistWidget;
 		this.proposals = [];
@@ -329,7 +330,6 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			self.proposals = event.data.proposals;
 			self.selectedIndex = self.proposals.length ? 0 : -1;
 		});
-		var textView = contentAssist.textView;
 		textView.setAction("contentAssistApply", function() { //$NON-NLS-0$
 			return this.enter();
 		}.bind(this));

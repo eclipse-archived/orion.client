@@ -1241,9 +1241,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Number} [index=length] the index.
 		 */
 		addKeyMode: function(mode, index) {
-			if (mode.setView) {
-				mode.setView(this);
-			}
 			var keyModes = this._keyModes;
 			if (index !== undefined) {
 				keyModes.splice(index, 0, mode);
@@ -2339,9 +2336,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {orion.editor.KeyMode} mode the key mode.
 		 */
 		removeKeyMode: function (mode) {
-			if (mode.setView) {
-				mode.setView(null);
-			}
 			var keyModes = this._keyModes;
 			for (var i=0; i<keyModes.length; i++) {
 				if (keyModes[i] === mode) {
