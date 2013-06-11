@@ -214,7 +214,7 @@ Component.prototype.render = render;
 		    subject.y = y;
 		    subject.render(context);
 		    subject.width = context.measureText( text ).width;
-		    subject.height = 10;
+		    subject.height = 15;
 		    return subject;
 		}
 		
