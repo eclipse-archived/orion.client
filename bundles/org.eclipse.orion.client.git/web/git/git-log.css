@@ -8,6 +8,8 @@
 
 @import "../css/sections.css";
 
+@import "../css/theme.css";
+
 .tag-description {
 	white-space: normal;
 	padding-right: 10px;

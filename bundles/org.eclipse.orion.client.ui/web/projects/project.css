@@ -2,6 +2,7 @@
 @import "../css/ide.css";
 @import "../css/images.css";
 @import "../css/sections.css"; /* for outliner */
+@import "../css/theme.css";
 
 .outlineExplorer {
 	overflow-y: none;

@@ -3,6 +3,7 @@
 @import "../css/sections.css";
 @import "../css/images.css";
 @import "./services.css";
+@import "../css/theme.css";
 
 #pluginUrlEntry {
 	background: white;

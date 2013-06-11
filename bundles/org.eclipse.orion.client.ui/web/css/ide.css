@@ -2,7 +2,6 @@
 	Items that should appear on top of other orion visual components should have a z-index of 100 or greater.
 */
 
-@import "./theme.css";
 @import "./progress.css";
 
 html {

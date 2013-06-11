@@ -4,6 +4,8 @@
 
 @import "../css/images.css";
 
+@import "../css/theme.css";
+
 button {
 	margin: 2px 8px 2px;
 }
