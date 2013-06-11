@@ -15,6 +15,7 @@
 					<pathelement location="${requirejsHome}/lib/rhino/js.jar" />
 					<pathelement location="${requirejsHome}/lib/closure/compiler.jar" />
 				</classpath>
+				<jvmarg value="-Xss1024k" />
 				<!-- JavaScript language version -->
 				<arg value="-version" />
 				<arg value="180" />
