@@ -216,8 +216,20 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             helper = this.explorer.model._provideSearchHelper();
         }
         var href = item.linkLocation + (helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, null, helper.params.replace) : "");
-        var link = _createLink('navlink', this.getItemLinkId(item), href, spanHolder, renderName); //$NON-NLS-0$
+        var link = _createLink('navlink', this.getItemLinkId(item), href, spanHolder, this.explorer.model._filterText ? null : renderName); //$NON-NLS-0$
         mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
+        if(this.explorer.model._filterText){
+			var parentSpan = _createElement('span', null, null, link); //$NON-NLS-0$
+			var filteredResults = mSearchUtils.searchOnelineLiteral({searchStr: this.explorer.model._filterText.toLowerCase(), searchStrLength: this.explorer.model._filterText.length}, renderName.toLowerCase(), false);
+			var newSegments = [];
+			newSegments.push({name: renderName, startIndex: 0, bold: false, highlight: false});
+			if(filteredResults) {
+				filteredResults.forEach(function(result) {
+					newSegments = this._mergesingleSegment(newSegments, {start: result.startIndex, end: result.startIndex + result.length});
+				}.bind(this));
+			}
+			this._renderSegments(newSegments, parentSpan);
+        }
     };
 
     SearchResultRenderer.prototype.generateContextTip = function(detailModel) {
@@ -297,7 +309,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		if(!this.explorer.model._filterText ) {
 			return segments;
 		}
-		var filteredResults = mSearchUtils.searchOnelineLiteral({searchStr: this.explorer.model._filterText, searchStrLength: this.explorer.model._filterText.length}, stringToFilter, false);
+		var filteredResults = mSearchUtils.searchOnelineLiteral({searchStr: this.explorer.model._filterText.toLowerCase(), searchStrLength: this.explorer.model._filterText.length}, stringToFilter.toLowerCase(), false);
 		var newSegments = segments;
 		if(filteredResults) {
 			filteredResults.forEach(function(result) {
@@ -307,12 +319,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		return newSegments;
     };
 
-    SearchResultRenderer.prototype.generateDetailHighlight = function(detailModel, parentSpan, useFilter) {
-        var detailInfo = this.explorer.model.getDetailInfo(detailModel);
-        var segments = this._generateDetailSegments(detailInfo);
-        if(useFilter) {
-			segments = this._mergeFilteredSegments(segments, detailInfo.lineString);
-        }
+    SearchResultRenderer.prototype._renderSegments = function(segments, parentSpan) {
 		segments.forEach(function(segment) {
 			if(segment.bold){
 				var matchSegBold = _createElement('b', null, null, parentSpan); //$NON-NLS-0$
@@ -328,6 +335,15 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 	           _place(document.createTextNode(segment.name), matchSpan, "only"); //$NON-NLS-0$
 			}
 		}.bind(this));
+    };
+
+    SearchResultRenderer.prototype.generateDetailHighlight = function(detailModel, parentSpan, useFilter) {
+        var detailInfo = this.explorer.model.getDetailInfo(detailModel);
+        var segments = this._generateDetailSegments(detailInfo);
+        if(useFilter) {
+			segments = this._mergeFilteredSegments(segments, detailInfo.lineString);
+        }
+        this._renderSegments(segments, parentSpan);
     };
 
     SearchResultRenderer.prototype.renderDetailElement = function(item, tableRow, spanHolder, renderNumber) {
@@ -398,13 +414,25 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         var spanHolder = onSpan ? onSpan : lib.node(this.getLocationSpanId(item));
         _empty(spanHolder);
         var scopeParams = this.explorer.model.getScopingParams(item);
-        var link = _createLink('navlinkonpage', null, scopeParams.href, spanHolder, scopeParams.name); //$NON-NLS-0$
+        var link = _createLink('navlinkonpage', null, scopeParams.href, spanHolder, this.explorer.model._filterText ? null: scopeParams.name); //$NON-NLS-0$
         link.title = scopeParams.tooltip;
         mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
         var that = this;
         _connect(link, "click", function() { //$NON-NLS-0$
             that.explorer.closeContextTip();
         });
+        if(this.explorer.model._filterText){
+			var parentSpan = _createElement('span', null, null, link); //$NON-NLS-0$
+			var filteredResults = mSearchUtils.searchOnelineLiteral({searchStr: this.explorer.model._filterText.toLowerCase(), searchStrLength: this.explorer.model._filterText.length}, scopeParams.name.toLowerCase(), false);
+			var newSegments = [];
+			newSegments.push({name: scopeParams.name, startIndex: 0, bold: false, highlight: false});
+			if(filteredResults) {
+				filteredResults.forEach(function(result) {
+					newSegments = this._mergesingleSegment(newSegments, {start: result.startIndex, end: result.startIndex + result.length});
+				}.bind(this));
+			}
+			this._renderSegments(newSegments, parentSpan);
+        }
     };
 
     SearchResultRenderer.prototype.getPrimColumnStyle = function() {
