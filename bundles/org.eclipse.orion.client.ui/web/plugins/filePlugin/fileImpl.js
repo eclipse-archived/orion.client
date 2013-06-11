@@ -464,6 +464,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 			};
 			if (options.OptionHeader) {
 				headerData["X-Xfer-Options"] = options.OptionHeader;
+				delete options.OptionHeader;
 			}
 			return xhr("POST", targetLocation, {
 				headers: headerData,
@@ -491,6 +492,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 			};
 			if (options.OptionHeader) {
 				headerData["X-Xfer-Options"] = options.OptionHeader;
+				delete options.OptionHeader;
 			}
 			return xhr("POST", sourceLocation, {
 				headers: headerData,
