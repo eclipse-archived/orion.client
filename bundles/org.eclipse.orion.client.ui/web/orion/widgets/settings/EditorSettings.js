@@ -18,8 +18,8 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 ], function(require, ThemeBuilder, mThemePreferences, editorThemeData, util, objects, lib, messages, LabeledTextfield, LabeledCheckbox, LabeledSelect, mSection, Subsection, commands)  {
     var KEY_MODES = [
 	    messages.Default,
-		"Emacs" //$NON-NLS-0$
-		//"VI" //$NON-NLS-0$
+		"Emacs", //$NON-NLS-0$
+		"VI" //$NON-NLS-0$
 	];
 				
 	function EditorSettings(options, node) {

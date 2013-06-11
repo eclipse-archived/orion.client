@@ -177,8 +177,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/widgets/input/Select', 'orion
 		function addKeysPicker( prefs ){
 			var keys = [
 				"Default",
-				"Emacs" //$NON-NLS-0$
-			//	"VI" //$NON-NLS-0$
+				"Emacs", //$NON-NLS-0$
+				"VI" //$NON-NLS-0$
 			];
 			var options = [];
 			for( var i= 0; i < keys.length; i++ ){

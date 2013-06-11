@@ -101,7 +101,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 				var wholeWord = options.wholeWord;
 				var start = options.start || 0;
 				var end = options.end;
-				var isRange = (options.end !== null && options.end !== undefined);
+				var isRange = (end !== null && end !== undefined);
 				var flags = "";
 				if (flags.indexOf("g") === -1) { flags += "g"; } //$NON-NLS-1$ //$NON-NLS-0$
 				if (caseInsensitive) {
@@ -112,8 +112,10 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 				}
 				var text = this._text[0], result, lastIndex, offset = 0;
 				if (isRange) {
-					text = text.substring(start, end);
-					offset = start;
+					var s = start < end ? start : end;
+					var e = start < end ? end : start;
+					text = text.substring(s, e);
+					offset = s;
 				}
 				var re = new RegExp(pattern, flags);
 				if (reverse) {
@@ -127,13 +129,13 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 								return null;
 							}
 							if (result) {
-								if (result.index < start) {
+								if (result.index + offset < start) {
 									match = {start: result.index + offset, end: re.lastIndex + offset};
 								} else {
 									if (!wrap || match) {
 										break;
 									}
-									start = text.length;
+									start = text.length + offset;
 									match = {start: result.index + offset, end: re.lastIndex + offset};
 								}
 							} else {
