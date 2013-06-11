@@ -198,7 +198,11 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 					evt.stopPropagation(); 
 				}
 				evt.cancelBubble = true;
-				this.find(this._reverse ? evt.shiftKey : !evt.shiftKey);
+				if (evt.keyCode === 13) {
+					this.find(this._reverse ? evt.shiftKey : !evt.shiftKey);
+				} else {
+					this.find(!evt.shiftKey);
+				}
 				return false;
 			}
 			if( ctrlKeyOnly &&  evt.keyCode === 82 /*"r"*/){
