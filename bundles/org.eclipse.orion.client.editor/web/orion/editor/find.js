@@ -230,10 +230,10 @@ define("orion/editor/find", [ //$NON-NLS-0$
 					this._startOffset = result.start;
 				}
 			}
+			this.setOptions(savedOptions);
 			if (this._hideAfterFind) {
 				this.hide();
 			}
-			this.setOptions(savedOptions);
 			return result;
 		},
 		getStartOffset: function() {
@@ -270,8 +270,10 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		hide: function() {
 			this._visible = false;
 			if (this._savedOptions) {
-				this.setOptions(this._savedOptions);
-				this.savedOptions = null;
+				this.setOptions(this._savedOptions.pop());
+				if (this._savedOptions.length === 0) {
+					this._savedOptions = null;
+				}
 			}
 			this._removeAllAnnotations();
 			this._editor.getTextView().removeEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
@@ -394,10 +396,10 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				if (options.reverse === true || options.reverse === false) {
 					this._reverse = options.reverse;
 				}
-				if (options.start) {
+				if (options.hasOwnProperty("start")) { //$NON-NLS-0$	
 					this._start = options.start;
 				}
-				if (options.end) {
+				if (options.hasOwnProperty("end")) { //$NON-NLS-0$
 					this._end = options.end;
 				}
 			}
@@ -405,7 +407,10 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		show: function(tempOptions) {
 			this._visible = true;
 			if (tempOptions) {
-				this._savedOptions = this.getOptions();
+				if (!this._savedOptions) {
+					this._savedOptions = [];
+				}	
+				this._savedOptions.push(this.getOptions());
 				this.setOptions(tempOptions);
 			}
 			this._startOffset = this._editor.getSelection().start;
@@ -443,7 +448,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				caseInsensitive: this._caseInsensitive
 			});
 			var result;
-			for (var i=0; i<count; i++) {
+			for (var i=0; i<count && iterator.hasNext(); i++) {
 				result = iterator.next();
 			}
 			if (!this._replacingAll) {

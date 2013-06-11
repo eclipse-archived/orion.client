@@ -46,6 +46,7 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 			}
 		},
 		show: function(options) {
+			mFind.Find.prototype.show.call(this, options);
 			var findString = options.findString;
 			var replaceString = options.replaceString;
 			var findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
@@ -64,7 +65,6 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 				findDiv.select();
 				findDiv.focus();
 			}, 10);
-			mFind.Find.prototype.show.call(this, options);
 		},
 		_createActionTable: function() {
 			var that = this;

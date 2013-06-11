@@ -256,18 +256,12 @@ define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib
 							}
 						}
 						if(parsedParam){
-							self._localSearcher.setOptions({regex: parsedParam.regEx, caseInsensitive: !parsedParam.caseSensitive});
+							var tempOptions = {regex: parsedParam.regEx, caseInsensitive: !parsedParam.caseSensitive};
 							if(parsedParam.atLine){
-								var offset = editor.getModel().getLineStart(parsedParam.atLine-1);
-								editor.moveSelection(offset, offset, function(){
-									self._localSearcher.show({findString: searchString, replaceString: parsedParam.replaceWith});
-									self._localSearcher.find(true);
-									}, 
-								focus);
-							} else {
-								self._localSearcher.show({findString: searchString, replaceString: parsedParam.replaceWith});
-								self._localSearcher.find(true);
+								tempOptions.start = editor.getModel().getLineStart(parsedParam.atLine-1);
 							}
+							self._localSearcher.show({findString: searchString, replaceString: parsedParam.replaceWith});
+							self._localSearcher.find(true);
 						} else {
 							self._localSearcher.show({findString: searchString});
 						}

@@ -206,6 +206,10 @@ define("orion/editor/vi", [
 			bindings.push({actionID: "vi-?",	keyBinding: new KeyBinding("?", false, false, false, false, "keypress")}); //$NON-NLS-0$
 			bindings.push({actionID: "vi-n",	keyBinding: new KeyBinding("n", false, false, false, false, "keypress")}); //$NON-NLS-0$
 			bindings.push({actionID: "vi-N",	keyBinding: new KeyBinding("N", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-f",	keyBinding: new KeyBinding("f", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-F",	keyBinding: new KeyBinding("F", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-,",	keyBinding: new KeyBinding(",", false, false, false, false, "keypress")}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-;",	keyBinding: new KeyBinding(";", false, false, false, false, "keypress")}); //$NON-NLS-0$
 			
 			//Line numbering
 			bindings.push({actionID: "vi-goToLine",	keyBinding: new KeyBinding("G", false, false, false, false, "keypress")}); //$NON-NLS-0$
@@ -224,6 +228,45 @@ define("orion/editor/vi", [
 	
 			//Change
 			return bindings;
+		},
+		_findNextChar: function (forward) {
+			var num = this.number >> 0 || 1;
+			if (this._charTempOptions) {
+				var view = this.getView();
+				var tempTempOptions = {};
+				tempTempOptions.count = num;
+				tempTempOptions.hideAfterFind = this._charTempOptions.hideAfterFind;
+				tempTempOptions.incremental = this._charTempOptions.incremental;
+				tempTempOptions.reverse = this._charTempOptions.reverse;
+				tempTempOptions.wrap = false;
+				var model = view.getModel();
+				if (forward) {
+					tempTempOptions.start  = view.getCaretOffset() + 1;
+					tempTempOptions.end= model.getLineEnd(model.getLineAtOffset(tempTempOptions.start));
+					tempTempOptions.reverse = false;
+					view.invokeAction("findNext", false, tempTempOptions); //$NON-NLS-0$
+				} else {
+					tempTempOptions.start = view.getCaretOffset() - 1;
+					tempTempOptions.end  = model.getLineStart(model.getLineAtOffset(tempTempOptions.start));
+					tempTempOptions.reverse = true;
+					view.invokeAction("findPrevious", false, tempTempOptions); //$NON-NLS-0$
+				}
+			}
+			this.number = "";
+			return true;
+		},
+		_findChar: function (start, end, reverse) {
+			var num = this.number >> 0 || 1;
+			this._charTempOptions = {};
+			this._charTempOptions.start  = start;
+			this._charTempOptions.end= end;
+			this._charTempOptions.count = num;
+			this._charTempOptions.hideAfterFind = true;
+			this._charTempOptions.incremental = false;
+			this._charTempOptions.reverse = reverse;
+			this.getView().invokeAction("find", false, this._charTempOptions); //$NON-NLS-0$
+			this.number = "";
+			return true;
 		},
 		_createActions: function() {
 			var view = this.getView();
@@ -429,6 +472,27 @@ define("orion/editor/vi", [
 					view.invokeAction("findPrevious", false, {count:num}); //$NON-NLS-0$
 					self.number = "";
 					return true;
+				});
+				
+				view.setAction("vi-f", function() { //$NON-NLS-0$
+					var model = view.getModel();
+					var start = view.getCaretOffset();
+					return self._findChar(start, model.getLineEnd(model.getLineAtOffset(start)), false);
+				});
+				
+				view.setAction("vi-F", function() { //$NON-NLS-0$
+					var model = view.getModel();
+					var end = view.getCaretOffset();
+					return self._findChar( model.getLineStart(model.getLineAtOffset(end)), end, true);
+				});
+				
+				
+				view.setAction("vi-,", function() { //$NON-NLS-0$
+					return self._findNextChar(self._charTempOptions.reverse);
+				});
+				
+				view.setAction("vi-;", function() { //$NON-NLS-0$
+					return self._findNextChar(!self._charTempOptions.reverse);
 				});
 				
 				//Line numbering
