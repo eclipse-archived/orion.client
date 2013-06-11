@@ -24,14 +24,14 @@ define("orion/editor/find", [ //$NON-NLS-0$
 	var exports = {};
 	
 	function IncrementalFind(editor) {
-		mKeyModes.KeyMode.call(this);
+		var textView = editor.getTextView();
+		mKeyModes.KeyMode.call(this, textView);
 		this.editor = editor;
 		this._active = false;
 		this._success = true;
 		this._ignoreSelection = false;
 		this._prefix = "";
 		
-		var textView = editor.getTextView();
 		textView.setAction("incrementalFindCancel", function() { //$NON-NLS-0$
 			this.setActive(false);
 			return true;

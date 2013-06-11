@@ -19,8 +19,8 @@ define("orion/editor/emacs", [ //$NON-NLS-0$
 	"orion/util" //$NON-NLS-0$
 ], function(messages, mKeyMode, mKeyBinding, util) {
 
-	function EmacsMode() {
-		mKeyMode.KeyMode.call(this);
+	function EmacsMode(textView) {
+		mKeyMode.KeyMode.call(this, textView);
 	}
 	EmacsMode.prototype = new mKeyMode.KeyMode();
 	EmacsMode.prototype.createKeyBindings = function () {
@@ -77,16 +77,12 @@ define("orion/editor/emacs", [ //$NON-NLS-0$
 		bindings.push({actionID: "incrementalFindReverse", keyBinding: new KeyStroke('r', true)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "save", keyBinding: new KeySequence([new KeyStroke('x', !util.isMac, false, false, util.isMac), new KeyStroke('s', !util.isMac, false, false, util.isMac)])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
+		//Create actions
+		this._createActions(this.getView());
+		
 		return bindings;
 	};
 	
-	EmacsMode.prototype.setView = function (view) {
-		mKeyMode.KeyMode.prototype.setView.call(this, view);
-		if (view) {
-			this._createActions(view);
-		}
-	};
-
 	EmacsMode.prototype._moveCursor = function (actionID) {
 		var data = {
 			count: (this._argument || 1) * (this._sign || 1)

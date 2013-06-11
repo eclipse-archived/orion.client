@@ -24,14 +24,14 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 	var exports = {};
 
 	function LinkedMode(editor, undoStack, contentAssist) {
-		mKeyModes.KeyMode.call(this);
+		var textView = editor.getTextView();
+		mKeyModes.KeyMode.call(this, textView);
 		this.editor = editor;
 		this.undoStack = undoStack;
 		this.contentAssist = contentAssist;
 		
 		this.linkedModeModel = null;
 		
-		var textView = editor.getTextView();
 		textView.setAction("linkedModeEnter", function() { //$NON-NLS-0$
 			this.exitLinkedMode(true);
 			return true;

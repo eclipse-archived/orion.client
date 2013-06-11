@@ -123,9 +123,28 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		}
 	};
 		
-	//TODO should load emacs and vi only when needed
-	var emacs = new mEmacs.EmacsMode();
-	var vi = new mVI.VIMode(statusReporter);
+	var emacs;
+	var vi;
+	function updateKeyMode(textView) {
+		if (emacs) {
+			textView.removeKeyMode(emacs);
+		}
+		if (vi) {
+			textView.removeKeyMode(vi);
+		}
+		//TODO should load emacs and vi modules only when needed
+		if (settings.keyBindings === "Emacs") { //$NON-NLS-0$
+			if (!emacs) {
+				emacs = new mEmacs.EmacsMode(textView);
+			}
+			textView.addKeyMode(emacs);
+		} else if (settings.keyBindings === "VI") { //$NON-NLS-0$
+			if (!vi) {
+				vi = new mVI.VIMode(textView, statusReporter);
+			}
+			textView.addKeyMode(vi);
+		}
+	}
 	
 	var updateSettings = function(prefs) {
 		settings = prefs;
@@ -133,13 +152,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		inputManager.setAutoSaveTimeout(prefs.autoSaveEnabled ? prefs.autoSaveTimeout : -1);
 		var textView = editor.getTextView();
 		if (textView) {
-			textView.removeKeyMode(emacs);
-			textView.removeKeyMode(vi);
-			if (settings.keyBindings === "Emacs") { //$NON-NLS-0$
-				textView.addKeyMode(emacs);
-			} else if (settings.keyBindings === "VI") { //$NON-NLS-0$
-				textView.addKeyMode(vi);
-			}
+			updateKeyMode(textView);
 			var options = {
 				tabSize: settings.tabSize || 4,
 				expandTab: settings.expandTab,
@@ -186,13 +199,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			// the generic keybindings so that we can override some of them.
 			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandRegistry, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher, searcher, function() { return settings; }); //$NON-NLS-1$ //$NON-NLS-0$
 			commandGenerator.generateEditorCommands(editor);
-			
+				
 			var textView = editor.getTextView();
-			if (settings.keyBindings === "Emacs") { //$NON-NLS-0$
-				textView.addKeyMode(emacs);
-			} else if (settings.keyBindings === "VI") { //$NON-NLS-0$
-				textView.addKeyMode(vi);
-			}
+			updateKeyMode(textView);
 		};
 		
 		// Content Assist

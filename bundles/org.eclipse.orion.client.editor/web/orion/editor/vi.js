@@ -7,7 +7,7 @@ define("orion/editor/vi", [
 	
 	//Status Line Mode
 	function StatusLineMode(viMode){
-		mKeyMode.KeyMode.call(this);
+		mKeyMode.KeyMode.call(this, viMode.getView());
 		this.viMode = viMode;
 	}
 	StatusLineMode.prototype = new mKeyMode.KeyMode(); 
@@ -25,6 +25,7 @@ define("orion/editor/vi", [
 			var KeyBinding = mKeyBinding.KeyBinding;
 			var bindings = [];
 			bindings.push({actionID: "cancel",		keyBinding: new KeyBinding(27), predefined: true}); //$NON-NLS-0$
+			this._createActions();
 			return bindings;
 		},
 		_createActions: function() {
@@ -44,10 +45,6 @@ define("orion/editor/vi", [
 				result = this.getView().getKeyModes()[0].match(e);
 			}
 			return result;
-		},
-		setView: function(view) {
-			mKeyMode.KeyMode.prototype.setView.call(this, view);
-			this._createActions();
 		},
 		storeNumber: function(n) {
 			this.number = n;
@@ -57,7 +54,7 @@ define("orion/editor/vi", [
 	
 	//Change Mode
 	function ChangeMode(viMode){
-		mKeyMode.KeyMode.call(this);
+		mKeyMode.KeyMode.call(this, viMode.getView());
 		this.viMode = viMode;
 	}
 	ChangeMode.prototype = new mKeyMode.KeyMode(); 
@@ -67,6 +64,7 @@ define("orion/editor/vi", [
 			var KeyBinding = mKeyBinding.KeyBinding;
 			var bindings = [];
 			bindings.push({actionID: "cancel",		keyBinding: new KeyBinding(27), predefined: true}); //$NON-NLS-0$
+			this._createActions();
 			return bindings;
 		},
 		_createActions: function() {
@@ -87,10 +85,6 @@ define("orion/editor/vi", [
 			}
 			return result;
 		},
-		setView: function(view) {
-			mKeyMode.KeyMode.prototype.setView.call(this, view);
-			this._createActions();
-		},
 		storeNumber: function(n ) {
 		}
 	});
@@ -98,7 +92,7 @@ define("orion/editor/vi", [
 	
 	//Insert Mode
 	function InsertMode(viMode){
-		mKeyMode.KeyMode.call(this);
+		mKeyMode.KeyMode.call(this, viMode.getView());
 		this.viMode = viMode;
 	}
 	InsertMode.prototype = new mKeyMode.KeyMode(); 
@@ -108,6 +102,7 @@ define("orion/editor/vi", [
 			var KeyBinding = mKeyBinding.KeyBinding;
 			var bindings = [];
 			bindings.push({actionID: "cancel",		keyBinding: new KeyBinding(27), predefined: true}); //$NON-NLS-0$
+			this._createActions();
 			return bindings;
 		},
 		_createActions: function() {
@@ -128,16 +123,12 @@ define("orion/editor/vi", [
 			}
 			return result;
 		},
-		setView: function(view) {
-			mKeyMode.KeyMode.prototype.setView.call(this, view);
-			this._createActions();
-		},
 		storeNumber: function(n ) {
 		}
 	});
 	
-	function VIMode(statusReporter){
-		mKeyMode.KeyMode.call(this);
+	function VIMode(textView, statusReporter){
+		mKeyMode.KeyMode.call(this, textView);
 		this.number = "";
 		this.insertMode = new InsertMode(this);
 		this.statusReporter = statusReporter;
@@ -227,6 +218,10 @@ define("orion/editor/vi", [
 			bindings.push({actionID: "vi-I",	keyBinding: new KeyBinding("I", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
 	
 			//Change
+			
+			//Create actions
+			this._createActions(this.getView());
+		
 			return bindings;
 		},
 		_findNextChar: function (forward) {
@@ -554,10 +549,6 @@ define("orion/editor/vi", [
 				result = "noop";
 			}
 			return result;
-		},
-		setView: function(view) {
-			mKeyMode.KeyMode.prototype.setView.call(this, view);
-			this._createActions();
 		},
 		_storeNumber: function(index) {
 			if (index === 0 && !this.number) {
