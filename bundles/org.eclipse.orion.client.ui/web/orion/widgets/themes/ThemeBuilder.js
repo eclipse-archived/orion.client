@@ -26,7 +26,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		
 		var zones = [];
 		var canvas = null; 
-		var position;
 		var ctx = null;
 		
 		var over = null;
@@ -40,7 +39,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			ARCS = true;
 			zones = [];
 			canvas = null; 
-			position = null;
 			ctx = null;
 			over = null;
 		}
@@ -148,7 +146,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 
 		
 		ThemeBuilder.prototype.template =	'<div id="themeContainer">' +
-												'<canvas id="orionui" width="800" height="380" style="padding-top:20px;"></canvas>' +
+												'<canvas id="orionui" width="800" height="380""></canvas>' +
 												'<div id="sizecontainer" style="display:none;">' +
 													'<span class="settingsLabel">Font Size:</span>' + 
 													'<div id="fontsizepicker" class="fontsizepicker"></div>' +
@@ -243,21 +241,10 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		function getCoordinates( e ){
 		
 			var x, y;
-		
-			if( e.pageX !== undefined && e.pageY !== undefined ){
-				x = e.pageX;
-				y = e.pageY;
-		    }
-		    else {
-				x = e.screenX + document.body.scrollLeft + document.documentElement.scrollLeft;
-				y = e.screenY + document.body.scrollTop + document.documentElement.scrollTop;
-		    }
-		    
-		    x -= canvas.offsetLeft -20;
-		    y -= canvas.offsetTop -15;
-		    
-		    x = x - position.x;
-		    y = y - position.y - 42;
+			
+			var rect = canvas.getBoundingClientRect();
+			x = e.clientX - rect.left;
+			y = e.clientY - rect.top;
 			
 		    return { x: x, y: y };
 		}
@@ -620,10 +607,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		
 			if( data ){ this.addData( data ); }
 
-			var bounds = lib.bounds( lib.node('themeContainer') );			
-			position = {x: bounds.left, y: bounds.top, w: bounds.width, h: bounds.height};
-			//console.log(position);
-	
 			if( !canvas ){
 				canvas = document.getElementById( 'orionui' );
 				ctx = canvas.getContext( '2d' );
