@@ -172,6 +172,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             _place(document.createTextNode(displayName ? displayName : this.explorer.model.getFileName(item)), span, "last"); //$NON-NLS-0$
             span = lib.node(this.getFileIconId(item));
             _empty(span);
+        } else {
+        	this.explorer._prepareFilter(item);
         }
     };
 
@@ -841,6 +843,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 	                return this._checkStale(fileItem).then(function(){
 	                   this.renderer.staleFileElement(fileItem);
 	                }.bind(this));
+	            } else {
+	            	this._prepareFilter(fileItem);
 	            }
 				return fileItem;
 	        }.bind(this),
@@ -1415,6 +1419,23 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
     };
 
+    SearchResultExplorer.prototype._prepareFilter = function(fileItem) {
+		if(!this._validateFilter()){
+			return;
+		}
+		if(fileItem) {
+			this.model.getChildren(fileItem, function(item){});
+		} else {
+			_validFiles(this.model).forEach(function(fileItem) {
+				this.model.getChildren(fileItem, function(item){});
+			}.bind(this));
+		}
+	};
+	
+    SearchResultExplorer.prototype._validateFilter = function() {
+		return (!this.model.replaceMode() && typeof this.model.filterOn === "function"); //$NON-NLS-0$
+    };
+    
     SearchResultExplorer.prototype.startUp = function() {
 		var filterBox = _empty("filterBox");
 		var pagingParams = this.model.getPagingParams();
@@ -1432,7 +1453,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		    return;
 		} 
         var that = this;
-        if(filterBox && !this.model.replaceMode() && typeof this.model.filterOn === "function"){ //$NON-NLS-0$
+        if(filterBox && this._validateFilter()){
 			filterBox.style.visibility = "visible"; //$NON-NLS-0$
 			var filterInput = _createElement('input', ["search-control", "search-filter-input"], null, filterBox); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			filterInput.type = "text";//$NON-NLS-0$
@@ -1467,6 +1488,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 	            this.staleCheck().then(function() {
 	                that.refreshValidFiles();
 	            });
+            } else {
+				that._prepareFilter();
             }
         } else {
             that.replacePreview(true, true);
