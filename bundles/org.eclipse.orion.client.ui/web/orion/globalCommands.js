@@ -769,13 +769,13 @@ define([
 				var header = lib.node("banner"); //$NON-NLS-0$
 				var footer = lib.node("footer"); //$NON-NLS-0$
 				var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
-				if (header.style.display === "none") { //$NON-NLS-0$
-					header.style.display = "block"; //$NON-NLS-0$
-					footer.style.display = "block"; //$NON-NLS-0$
+				if (header.style.visibility === "hidden") { //$NON-NLS-0$
+					header.style.visibility = "visible"; //$NON-NLS-0$
+					footer.style.visibility = "visible"; //$NON-NLS-0$
 					content.classList.remove("content-fixedHeight-maximized"); //$NON-NLS-0$
 				} else {
-					header.style.display = "none"; //$NON-NLS-0$
-					footer.style.display = "none"; //$NON-NLS-0$
+					header.style.visibility = "hidden"; //$NON-NLS-0$
+					footer.style.visibility = "hidden"; //$NON-NLS-0$
 					content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
 				}
 				if (editor && editor.getTextView()) {
