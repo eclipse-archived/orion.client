@@ -13,7 +13,7 @@
 /*jslint forin:true devel:true browser:true*/
 
 
-define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr) {
+define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], function(Deferred, xhr, _, operation) {
 	/**
 	 * An implementation of the file service that understands the Orion 
 	 * server file API. This implementation is suitable for invocation by a remote plugin.
@@ -23,6 +23,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 		temp.href = location;
 		return temp.href;
 	}
+
 	function _normalizeLocations(data) {
 		if (data && typeof data === "object") {
 			Object.keys(data).forEach(function(key) {
@@ -36,7 +37,22 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 		}
 		return data;
 	}
-	
+
+	// Wrap orion/xhr to handle long-running tasks.
+	function xhrTask() {
+		return xhr.apply(null, Array.prototype.slice.call(arguments)).then(function(result) {
+			if (result.xhr && result.xhr.status === 202) {
+				var response =  result.response ? JSON.parse(result.response) : null;
+				var d = new Deferred();
+				operation.handle(response.Location).then(d.resolve, d.reject, d.progress);
+				return d;
+			}
+			return result.then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
+			});
+		});
+	}
+
 	/**
 	 * Escapes all characters in the string that require escaping in Lucene queries.
 	 * See http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Escaping%20Special%20Characters
@@ -466,12 +482,10 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 				headerData["X-Xfer-Options"] = options.OptionHeader;
 				delete options.OptionHeader;
 			}
-			return xhr("POST", targetLocation, {
+			return xhrTask("POST", targetLocation, {
 				headers: headerData,
 				data: JSON.stringify(options),
 				timeout: 15000
-			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
 			}).then(function(result) {
 				if (this.makeAbsolute) {
 					_normalizeLocations(result);
@@ -494,12 +508,10 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 				headerData["X-Xfer-Options"] = options.OptionHeader;
 				delete options.OptionHeader;
 			}
-			return xhr("POST", sourceLocation, {
+			return xhrTask("POST", sourceLocation, {
 				headers: headerData,
 				data: JSON.stringify(options),
 				timeout: 15000
-			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
 			}).then(function(result) {
 				if (this.makeAbsolute) {
 					_normalizeLocations(result);

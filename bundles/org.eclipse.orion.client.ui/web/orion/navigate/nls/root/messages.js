@@ -78,7 +78,7 @@ define({
 	"Importing from ${0}": "Importing from ${0}",
 	"SFTP to...": "SFTP to...",
 	"Copy files and folders to a specified SFTP location": "Copy files and folders to a specified SFTP location",
-	"Exporting from ${0}": "Exporting from ${0}",
+	"Exporting": "Exporting to ${0}",
 	"Pasting ${0}": "Pasting ${0}",
 	"Copy to": "Copy to",
 	"Move to": "Move to",
