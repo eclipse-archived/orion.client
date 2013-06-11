@@ -107,7 +107,9 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 				var completion = this;
 				this._binderFunc(function(dataList){
 					this._bind(dataList);
-					this._proposeOn(this._inputField.value);
+					if(this._inputField.value) {
+						//this._proposeOn(this._inputField.value);
+					}
 				}.bind(completion));
 			}
 		}.bind(this));
@@ -284,9 +286,11 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 	};
 
 	InputCompletion.prototype._domNode2Index = function(domNode){
-		for(var i=0; i < this._proposalList.length; i++){
-			if(this._proposalList[i].domNode === domNode){
-				return i;
+		if(this._proposalList) {
+			for(var i=0; i < this._proposalList.length; i++){
+				if(this._proposalList[i].domNode === domNode){
+					return i;
+				}
 			}
 		}
 		return -1;
