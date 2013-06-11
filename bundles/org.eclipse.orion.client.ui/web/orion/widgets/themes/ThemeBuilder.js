@@ -160,7 +160,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 													'<span class="settingsLabel">New theme name:</span>' + 
 													'<div id="themesaver" class="themesaver"></div>' +
 												'</div>' +
-												'<div id="stringcontainer" style="position:relative;left:400px;top:-150px;display:none;">' +
+												'<div id="stringcontainer" style="position:relative;left:400px;top:-140px;display:none;">' +
 														'<span>OR HEX: </span>' + 
 														'<div id="colorstring" class="colorfield"></div>' +
 														'<button class = "commandButton" style="padding:5px;font-size:9pt;"type="button" id="colorButton"}">ok</button>' + 
