@@ -101,7 +101,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 				var wholeWord = options.wholeWord;
 				var start = options.start || 0;
 				var end = options.end;
-				var isRange = options.end !== undefined;
+				var isRange = (options.end !== null && options.end !== undefined);
 				var flags = "";
 				if (flags.indexOf("g") === -1) { flags += "g"; } //$NON-NLS-1$ //$NON-NLS-0$
 				if (caseInsensitive) {

@@ -198,9 +198,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		this._findAfterReplace = true;
 		this._hideAfterFind = false;
 		this._reverse = false;
-		this._start = null;
-		this._end = null;
-		this._timer = null;
+		this._start = undefined;
+		this._end = undefined;
+		this._timer = undefined;
 		this._lastString = "";
 		var that = this;
 		this._listeners = {
