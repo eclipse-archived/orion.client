@@ -423,7 +423,7 @@ define("orion/editor/vi", [
 				});
 				
 				view.setAction("vi-M", function() { //$NON-NLS-0$
-					var middleIndex = Math.ceil((view.getBottomIndex(true) - view.getTopIndex(true))/2);
+					var middleIndex = Math.ceil((view.getBottomIndex(true) - view.getTopIndex(true))/2) + view.getTopIndex(true);
 					view.setCaretOffset(view.getModel().getLineStart(middleIndex));
 					self.number = "";
 					return true;
