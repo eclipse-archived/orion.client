@@ -2,6 +2,7 @@
 @import "../css/ide.css";
 @import "../css/images.css";
 @import "../orion/shell/Shell.css";
+@import "../css/theme.css";
 
 html,body {
 	height: 100%;

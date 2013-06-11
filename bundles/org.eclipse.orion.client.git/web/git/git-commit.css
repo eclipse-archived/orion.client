@@ -10,6 +10,8 @@
 
 @import "css/git.css";
 
+@import "../css/theme.css";
+
 .lightTreeTableRow {
 	border-bottom: 1px solid #e6e6e6;
 }

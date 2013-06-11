@@ -4,6 +4,8 @@
 
 @import "../css/images.css";
 
+@import "../css/theme.css";
+
 #tasks-list{
 	padding: 10px;
 }
