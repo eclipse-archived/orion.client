@@ -798,8 +798,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], sourceURL)).then(
 						function() {
 							dispatchModelEvent({ type: "import", target: targetFolder }); //$NON-NLS-0$
-						},
-						errorHandler
+						}
 					);
 				}
 			},
@@ -919,8 +918,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
 						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], host)).then(
 							function(result) {
-								// FIXME: this starts an operation, we need to wait for it to finish, then dispatch.
 								dispatchModelEvent({ type: "import", target: item }); //$NON-NLS-0$
+								errorHandler(result);
 							},
 							errorHandler
 						);//refresh the root
@@ -952,9 +951,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							Passphrase: password
 						};
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
-						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Exporting from ${0}"], host)).then(
-							null,
-							errorHandler);
+						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Exporting"], host)).then(
+							errorHandler, errorHandler);
 					}
 				});
 				dialog.show();
