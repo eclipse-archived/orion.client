@@ -942,8 +942,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				var item = forceSingleItem(data.items);
 				var dialog = new SFTPDialog.SFTPConnectionDialog({
 					func: function(host, port, path, user, password, overwriteOptions){
-						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
-						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Port":port,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var optionHeader = overwriteOptions ? ("sftp," + overwriteOptions) : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
+						var exportOptions = {
+							OptionHeader: optionHeader,
+							Host: host,
+							Port: port,
+							Path: path,
+							UserName: user,
+							Passphrase: password
+						};
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
 						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Exporting from ${0}"], host)).then(
 							null,
