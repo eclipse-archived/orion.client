@@ -416,19 +416,6 @@ textarea.parameterInput {
 	height: 20px;
 }
 
-.searchFloat {
-	display: none;
-	background: #ffffe0;
-	position: absolute;
-	left: 20px;
-	top: 10px;
-	min-width: 300px;
-	max-width: 650px;
-	border: 1px solid #bfbfbf;
-	padding: 4px;
-	z-index: 100;
-}
-
 .keyAssistFloat {
 	color: white;
 	display: none;

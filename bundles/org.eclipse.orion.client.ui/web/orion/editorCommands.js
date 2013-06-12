@@ -16,9 +16,25 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 
-	'orion/keyBinding', 'orion/commandRegistry', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil', 'orion/PageLinks', 'orion/util'], 
-	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mUndoStack, mSearchUtils, mPageUtil, PageLinks, util) {
+define([
+	'i18n!orion/edit/nls/messages',
+	'orion/i18nUtil',
+	'orion/webui/littlelib',
+	'orion/webui/dialogs/OpenResourceDialog',
+	'orion/Deferred',
+	'orion/URITemplate',
+	'orion/commands', 
+	'orion/keyBinding',
+	'orion/commandRegistry',
+	'orion/globalCommands',
+	'orion/extensionCommands',
+	'orion/contentTypes',
+	'orion/editor/undoStack',
+	'orion/searchUtils',
+	'orion/PageUtil',
+	'orion/PageLinks',
+	'orion/util'
+], function(messages, i18nUtil, lib, openResource, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mUndoStack, mSearchUtils, mPageUtil, PageLinks, util) {
 
 	var exports = {};
 	
@@ -78,8 +94,7 @@ define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib
 			var self = this;
 
 			// global search
-			var searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
-			if (searchFloat && self._searcher) {
+			if (self._searcher) {
 				var searchCommand =  new mCommands.Command({
 					name: messages["Search Files"],
 					tooltip: messages["Search Files"],
@@ -91,43 +106,30 @@ define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib
 				this.commandService.addCommand(searchCommand);
 				this.commandService.registerCommandContribution(this.pageNavId, "orion.searchFiles", 1, null, true, new mKeyBinding.KeyBinding("h", true)); //$NON-NLS-1$ //$NON-NLS-0$
 
-				document.addEventListener("keydown", function (e){  //$NON-NLS-0$
-					if (e.keyCode === lib.KEY.ESCAPE) {
-						searchFloat.style.display = "none"; //$NON-NLS-0$
-						if(lib.$$array("a", searchFloat).indexOf(document.activeElement) !== -1) { //$NON-NLS-0$
-							var textView = editor.getTextView();
-							textView.focus();
-						}
-					}
-				}, false);
-				lib.addAutoDismiss([searchFloat], function() {
-					searchFloat.style.display = "none"; //$NON-NLS-0$
-				});
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
 				editor.getTextView().setAction("searchFiles", function() { //$NON-NLS-0$
-					window.setTimeout(function() {
-						var e = editor.getTextView();
-						var selection = e.getSelection();
-						var searchPattern = "";
-						if (selection.end > selection.start) {
-							searchPattern = e.getText().substring(selection.start, selection.end);
-						} if (searchPattern.length <= 0) {
-							searchPattern = prompt(messages["Enter search term:"], searchPattern);
-						} if (!searchPattern) {
-							return;
+					var selection = editor.getSelection();
+					var searchTerm = editor.getText(selection.start, selection.end);
+					var serviceRegistry = self.serviceRegistry;
+					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+					var favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
+					var dialog = new openResource.OpenResourceDialog({
+						searcher: self._searcher,
+						progress: progress,
+						favoriteService: favoriteService,
+						searchRenderer: self._searcher.defaultRenderer,
+						nameSearch: false,
+						title: messages["Search Files"],
+						message: messages["Enter search term:"],
+						initialText: searchTerm,
+						onHide: function () {
+							if (editor && editor.getTextView()) {
+								editor.getTextView().focus();
+							}
 						}
-						lib.empty(searchFloat);
-						searchFloat.appendChild(document.createTextNode(messages["Searching for occurrences of "])); 
-						var b = document.createElement("b"); //$NON-NLS-0$
-						searchFloat.appendChild(b);
-						b.appendChild(document.createTextNode("\"" + searchPattern + "\"...")); //$NON-NLS-1$ //$NON-NLS-0$
-						searchFloat.style.display = "block"; //$NON-NLS-0$
-						searchFloat.tabIndex = 0;
-						searchFloat.focus();
-						var searchParams = self._searcher.createSearchParams(searchPattern, false, true);
-						searchParams.sort = "Name asc"; //$NON-NLS-0$
-						var renderer = self._searcher.defaultRenderer.makeRenderFunction(null, searchFloat, false);
-						self._searcher.search(searchParams, self.inputManager.getInput(), renderer);
+					});
+					window.setTimeout(function () {
+						dialog.show(lib.node(self.toolbarId));
 					}, 0);
 					return true;
 				}, searchCommand);

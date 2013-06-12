@@ -13,8 +13,8 @@
 /*jslint browser:true*/
 /*global define orion window console*/
 
-define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'require', 'orion/webui/littlelib', 'orion/webui/dialog'], 
-		function(messages, mSearchCrawler, mContentTypes, require, lib, dialog) {
+define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'require', 'orion/webui/littlelib', 'orion/util', 'orion/webui/dialog'], 
+		function(messages, mSearchCrawler, mContentTypes, require, lib, util, dialog) {
 	/**
 	 * Usage: <code>new OpenResourceDialog(options).show();</code>
 	 * 
@@ -33,7 +33,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 
 	OpenResourceDialog.prototype.TEMPLATE = 
 		'<div role="search">' + //$NON-NLS-0$
-			'<div><label for="fileName">${Type the name of a file to open (? = any character, * = any string):}</label></div>' + //$NON-NLS-0$
+			'<div><label id="fileNameMessage" for="fileName">${Type the name of a file to open (? = any character, * = any string):}</label></div>' + //$NON-NLS-0$
 			'<div><input id="fileName" type="text" class="setting-control" style="width:90%;"/></div>' + //$NON-NLS-0$
 			'<div id="progress" style="padding: 2px 0 0; width: 100%;"><img src="'+ require.toUrl("../../../images/progress_running.gif") + '" class="progressPane_running_dialog" id="crawlingProgress"></img></div>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			'<div id="favresults" style="max-height:400px; height:auto; overflow-y:auto;"></div>' + //$NON-NLS-0$
@@ -56,6 +56,12 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		this._time = 0;
 		this._searcher.setCrawler(null);
 		this._forceUseCrawler = false;
+		this._initialText = options.initialText;
+		this._message = options.message;
+		this._nameSearch = true;
+		if (options.nameSearch !== undefined) {
+			this._nameSearch = options.nameSearch;
+		}
 		this._searchOnRoot = true;
 		this._fileService = this._searcher.getFileService();
 		if (!this._fileService) {
@@ -164,6 +170,14 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 					});
 			}
 		}, 0);
+		if (this._message) {
+			this.$fileNameMessage.removeChild(this.$fileNameMessage.firstChild);
+			this.$fileNameMessage.appendChild(document.createTextNode(this._message));
+		}
+		if (this._initialText) {
+			this.$fileName.value = this._initialText;
+			this.doSearch();
+		}
 	};
 
 	/** @private kick off initial population of favorites */
@@ -252,14 +266,14 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 
 		// don't do a server-side query for an empty text box
 		if (text) {
-			var div = document.createElement("div");
-			div.appendChild(document.createTextNode(messages['Searching...']));
+			var div = document.createElement("div"); //$NON-NLS-0$
+			div.appendChild(document.createTextNode(this._nameSearch ? messages['Searching...'] : util.formatMessage(messages["Searching for occurrences of"], text)));
 			lib.empty(this.$favresults);
 			this.$results.appendChild(div);
 			// Gives Webkit a chance to show the "Searching" message
 			var that = this;
 			setTimeout(function() {
-				var searchParams = that._searcher.createSearchParams(text, true, that._searchOnRoot);
+				var searchParams = that._searcher.createSearchParams(text, that._nameSearch, that._searchOnRoot);
 				var renderFunction = that._searchRenderer.makeRenderFunction(that._contentTypeService, that.$results, false, that.decorateResult.bind(that));
 				that._searcher.search(searchParams, false, renderFunction);
 			}, 0);
@@ -269,7 +283,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 	/** @private */
 	OpenResourceDialog.prototype.decorateResult = function(resultsDiv) {
 		var self = this;
-		var links = lib.$$array("a", resultsDiv);
+		var links = lib.$$array("a", resultsDiv); //$NON-NLS-0$
 		for (var i=0; i<links.length; i++) {
 			var link = links[i];
 			link.addEventListener("mouseup", function(evt) { //$NON-NLS-0$
