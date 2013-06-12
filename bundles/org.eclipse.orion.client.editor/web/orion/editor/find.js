@@ -415,9 +415,12 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			}
 			this._startOffset = this._editor.getSelection().start;
 			this._editor.getTextView().addEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
-			if (this._incremental) {
-				this.find(true, null, true);
-			}
+			var self = this;
+			window.setTimeout(function() {
+				if (self._incremental) {
+					self.find(true, null, true);
+				}
+			}, 0);
 		},
 		startUndo: function() {
 			if (this._undoStack) {
