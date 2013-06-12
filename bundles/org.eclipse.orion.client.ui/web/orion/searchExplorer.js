@@ -173,7 +173,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             span = lib.node(this.getFileIconId(item));
             _empty(span);
         } else {
-        	this.explorer._prepareFilter(item);
+			this.explorer._prepareFilter(item);
         }
     };
 
@@ -235,14 +235,14 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultRenderer.prototype.generateContextTip = function(detailModel) {
-        var tableNode = _createElement('table', "search_context_tip"); //$NON-NLS-1$ //$NON-NLS-0$
+        var tableNode = _createElement('table'); //$NON-NLS-1$ //$NON-NLS-0$
         for (var i = 0; i < detailModel.context.length; i++) {
             var lineDiv = _createElement('tr', null, null, tableNode); //$NON-NLS-0$
             var lineTd;
             if (detailModel.context[i].current) {
                 lineTd = _createElement('td', null, null, lineDiv); //$NON-NLS-0$
                 lineTd.noWrap = true;
-                var span = _createElement('span', "primaryColumn", null, lineTd); //$NON-NLS-1$ //$NON-NLS-0$
+                var span = _createElement('span', null, null, lineTd); //$NON-NLS-1$ //$NON-NLS-0$
                 this.generateDetailHighlight(detailModel, span); //$NON-NLS-1$ //$NON-NLS-0$
             } else {
                 lineTd = _createElement('td', null, null, lineDiv); //$NON-NLS-0$
