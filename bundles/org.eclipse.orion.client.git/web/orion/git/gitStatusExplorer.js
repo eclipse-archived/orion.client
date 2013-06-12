@@ -10,9 +10,10 @@
  ******************************************************************************/
 /*global define document window Image*/
 define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orion/selection', 'orion/section', 'orion/PageUtil', 'orion/webui/littlelib',
-		'orion/i18nUtil', 'orion/globalCommands', 'orion/git/util',	'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'],
+		'orion/i18nUtil', 'orion/globalCommands', 'orion/git/util',	'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog',
+		'orion/webui/tooltip'],
 		function(require, messages, mExplorer, mSelection, mSection, PageUtil, lib, i18nUtil, mGlobalCommands, mGitUtil, mGitCommands,
-				Deferred, mCommitTooltip) {
+				Deferred, mCommitTooltip, Tooltip) {
 				
 	var exports = {};
 	var conflictTypeStr = "Conflicting"; //$NON-NLS-0$
@@ -32,30 +33,30 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 			this.conflictType = "Conflicting"; //$NON-NLS-0$
 
 			this.statusTypeMap = {
-				"Missing" : [ "gitImageSprite git-sprite-removal", messages['Unstaged removal'] ], //$NON-NLS-1$ //$NON-NLS-0$
-				"Removed" : [ "gitImageSprite git-sprite-removal", messages['Staged removal'] ], //$NON-NLS-1$ //$NON-NLS-0$
-				"Modified" : [ "gitImageSprite git-sprite-file", messages['Unstaged change'] ], //$NON-NLS-1$ //$NON-NLS-0$
-				"Changed" : [ "gitImageSprite git-sprite-file", messages['Staged change'] ], //$NON-NLS-1$ //$NON-NLS-0$
-				"Untracked" : [ "gitImageSprite git-sprite-addition", messages["Unstaged addition"] ], //$NON-NLS-1$ //$NON-NLS-0$
-				"Added" : [ "gitImageSprite git-sprite-addition", messages["Staged addition"] ], //$NON-NLS-1$ //$NON-NLS-0$
-				"Conflicting" : [ "gitImageSprite git-sprite-conflict-file", messages['Conflicting'] ] //$NON-NLS-1$ //$NON-NLS-0$
+				"Missing" : { imageClass: "gitImageSprite git-sprite-removal", tooltip: messages['Unstaged removal'] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				"Removed" : { imageClass: "gitImageSprite git-sprite-removal", tooltip: messages['Staged removal'] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				"Modified" : { imageClass: "gitImageSprite git-sprite-file", tooltip: messages['Unstaged change'] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				"Changed" : { imageClass: "gitImageSprite git-sprite-file", tooltip: messages['Staged change'] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				"Untracked" : { imageClass: "gitImageSprite git-sprite-addition", tooltip: messages["Unstaged addition"] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				"Added" : { imageClass: "gitImageSprite git-sprite-addition", tooltip: messages["Staged addition"] }, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				"Conflicting" : { imageClass: "gitImageSprite git-sprite-conflict-file", tooltip: messages['Conflicting'] } //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			};
 		}
 		
 		GitStatusModel.prototype = { 
-			destroy : function() {},
+			destroy: function() {},
 
-			interestedCategory : function() {},
+			interestedCategory: function() {},
 
-			init : function(jsonData) {
+			init: function(jsonData) {
 				this.items = jsonData;
 			},
 
-			getModelType : function(groupItem, groupName) {
+			getModelType: function(groupItem, groupName) {
 				return groupName;
 			},
 
-			_markConflict : function(conflictPattern) {
+			_markConflict: function(conflictPattern) {
 				// if git status server API response a file with "Modified"
 				// ,"Added", "Changed","Missing" states , we treat it as a
 				// conflicting file
@@ -94,7 +95,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 				}
 			},
 
-			_findSameFile : function(fileLocation, groupData) {
+			_findSameFile: function(fileLocation, groupData) {
 				for (var j = 0; j < groupData.length; j++) {
 					if (groupData[j].Conflicting)
 						continue;
@@ -104,11 +105,11 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 				return undefined;
 			},
 
-			getGroupData : function(groupName) {
+			getGroupData: function(groupName) {
 				return this.items[groupName];
 			},
 
-			isStaged : function(type) {
+			isStaged: function(type) {
 				for (var i = 0; i < this.interestedStagedGroup.length; i++) {
 					if (type === this.interestedStagedGroup[i]) {
 						return true;
@@ -117,10 +118,15 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 				return false;
 			},
 
-			getClass : function(type) {
-				return this.statusTypeMap[type][0];
+			getClass: function(type) {
+				return this.statusTypeMap[type].imageClass;
+			},
+			
+			getTooltip: function(type) {
+				return this.statusTypeMap[type].tooltip;
 			}
 		};
+		
 		return GitStatusModel;
 	}());
 
@@ -424,7 +430,12 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 								}, 300);
 	
 								var icon = document.createElement("span"); //$NON-NLS-0$
-								icon.className = "gitImageSprite " + that._model.getClass(item.type); //$NON-NLS-0$
+								icon.className = that._model.getClass(item.type);
+								icon.commandTooltip = new Tooltip.Tooltip({
+									node: icon,
+									text: that._model.getTooltip(item.type),
+									position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								});
 								div.appendChild(icon);
 	
 								var itemLabel = document.createElement("span"); //$NON-NLS-0$
@@ -636,9 +647,14 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 								}, 300);
 
 								var icon = document.createElement("span"); //$NON-NLS-0$
-								icon.className = "gitImageSprite " + that._model.getClass(item.type); //$NON-NLS-0$
+								icon.className = that._model.getClass(item.type);
+								icon.commandTooltip = new Tooltip.Tooltip({
+									node: icon,
+									text: that._model.getTooltip(item.type),
+									position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								});
 								div.appendChild(icon);
-
+								
 								var itemLabel = document.createElement("span"); //$NON-NLS-0$
 								itemLabel.textContent = item.name;
 								div.appendChild(itemLabel);
