@@ -111,10 +111,10 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 				optionsDiv.classList.add("findOptionsDiv"); //$NON-NLS-0$
 				var optionMenu = mCommands.createDropdownMenu(optionsDiv, messages['Options'], null, "dismissButton", null, true); //$NON-NLS-0$
 				optionMenu.menuButton.classList.add("parameterInlineButton"); //$NON-NLS-0$
-				mCommands.createCheckedMenuItem(optionMenu.menu, messages["Show all"], that._showAllOccurrence,
+				mCommands.createCheckedMenuItem(optionMenu.menu, messages["Show all"], that._showAll,
 					function(event) {
 						var checked = event.target.checked;
-						that.setOptions({showAllOccurrence: checked});
+						that.setOptions({showAll: checked});
 						optionMenu.dropdown.close(true);
 					});
 				
