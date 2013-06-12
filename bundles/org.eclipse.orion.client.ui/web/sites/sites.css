@@ -6,6 +6,8 @@
 
 @import "../css/sections.css";
 
+@import "../css/theme.css";
+
 html,body {
 	height: 100%;
 }
