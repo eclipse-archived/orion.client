@@ -18,11 +18,11 @@ define([
 		'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
 		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html',
 		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 'orion/widgets/input/GroupedContent',
-		'orion/util', 'orion/customGlobalCommands'
+		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient'
 	],
 	function (messages, require, commonHTML, KeyBinding, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding,
 		mBreadcrumbs, lib, mSplitter, mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, mThemePreferences, mThemeData, Deferred,
-		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent, util, mCustomGlobalCommands) {
+		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent, util, mCustomGlobalCommands, mFileClient) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 *
@@ -441,11 +441,14 @@ define([
 		var locationNode = lib.node("location"); //$NON-NLS-0$
 		if (locationNode) {
 			lib.empty(locationNode);
+			var fileClient = new mFileClient.FileClient(options.serviceRegistry);
+			var resource = options.breadcrumbTarget || options.target;
 			new mBreadcrumbs.BreadCrumbs({
 				container: locationNode,
-				resource: options.breadcrumbTarget || options.target,
+				resource: resource,
 				rootSegmentName: breadcrumbRootName,
 				workspaceRootSegmentName: fileSystemRootName,
+				workspaceRootURL: resource && resource.Location ? fileClient.fileServiceRootURL(resource.Location) : null,
 				makeHref: options.makeBreadcrumbLink
 			});
 		}

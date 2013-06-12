@@ -235,12 +235,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		};
 
 		var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
-			var top = !folderLocation && !folder;
 			// Link to this page (edit page)
 			segment.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
 				resource: inputManager.getInput() || "", //$NON-NLS-0$
 				params: {
-					navigate: top ? "" : folder.ChildrenLocation //$NON-NLS-0$
+					navigate: folder ? folder.ChildrenLocation : fileClient.fileServiceRootURL(folderLocation || "")  //$NON-NLS-0$
 				}
 			});
 		};

@@ -42,6 +42,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
             this._resource = options.resource || null;
             this._rootSegmentName = options.rootSegmentName;
             this._workspaceRootSegmentName = options.workspaceRootSegmentName;
+			this._workspaceRootURL = options.workspaceRootURL;
             this._makeHref = options.makeHref;
             this.path = "";
             this.measure();
@@ -53,10 +54,11 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
                 var seg;
                 if (this._resource && this._resource.Parents) {
                     seg = document.createElement('a'); //$NON-NLS-0$
+					var param = this._workspaceRootURL ? this._workspaceRootURL : "";
                     if (this._makeHref) {
-                        this._makeHref(seg, "" );
+                        this._makeHref(seg, param );
                     } else {
-                        seg.href = require.toUrl("navigate/table.html") + "#"; //$NON-NLS-1$ //$NON-NLS-0$
+                        seg.href = require.toUrl("navigate/table.html") + "#" + param; //$NON-NLS-1$ //$NON-NLS-0$
                     }
                 } else {
                     seg = document.createElement('span'); //$NON-NLS-0$
