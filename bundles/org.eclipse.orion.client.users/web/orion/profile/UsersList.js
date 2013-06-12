@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -19,13 +19,14 @@ var eclipse = eclipse || {};
 
 eclipse.UsersList = (function(){
 	
-	function UsersList(serviceRegistry, commandService, selection, searcher, parentId, toolbarId, selectionToolsId, actionScopeId) {
+	function UsersList(serviceRegistry, commandService, selection, searcher, parentId, toolbarId, pageNavId, selectionToolsId, actionScopeId) {
 		this.registry = serviceRegistry;
 		this.commandService = commandService;
 		this.selection = selection;
 		this.searcher = searcher;
 		this.parentId = parentId;
 		this.toolbarId = toolbarId;
+		this.pageNavId = pageNavId;
 		this.selectionToolsId = selectionToolsId;
 		this.actionScopeId = actionScopeId;
 		this.model = null;
@@ -80,7 +81,7 @@ eclipse.UsersList = (function(){
 		flatModel.queryObject = queryObj;
 		this.queryObject = queryObj;
 		this.createTree(this.parentId, flatModel, {setFocus: true}); //$NON-NLS-0$
-		mUsersUtil.updateNavTools(this.registry, this.commandService, this, this.toolbarId, this.selectionToolsId, {});
+		mUsersUtil.updateNavTools(this.registry, this.commandService, this, this.toolbarId, this.pageNavId, this.selectionToolsId, {});
 	};
 	
 	UsersList.prototype.getUsersListSubset = function(root) {

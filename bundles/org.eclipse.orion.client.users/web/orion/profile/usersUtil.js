@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -15,15 +15,18 @@
 define(['i18n!profile/nls/messages', 'orion/webui/littlelib'], function(messages, lib) {
 
 
-function updateNavTools (registry, commandService, explorer, toolbarId, selectionToolbarId, item) {
+function updateNavTools (registry, commandService, explorer, toolbarId, pageNavId, selectionToolbarId, item) {
 	var eclipse = eclipse || {};
 		var toolbar = lib.node(toolbarId);
 		if (toolbar) {
 			commandService.destroy(toolbar);
-		} else {
-			throw messages["could not find toolbar "] + toolbarId;
+			commandService.renderCommands(toolbarId, toolbar, item, explorer, "button"); //$NON-NLS-0$
 		}
-		commandService.renderCommands(toolbarId, toolbar, item, explorer, "button"); //$NON-NLS-0$
+		toolbar = lib.node(pageNavId);
+		if (toolbar) {
+			commandService.destroy(toolbar);
+			commandService.renderCommands(pageNavId, toolbar, item, explorer, "button"); //$NON-NLS-0$
+		}
 		if (selectionToolbarId) {
 			var selectionTools = lib.node(selectionToolbarId);
 			if (selectionTools) {

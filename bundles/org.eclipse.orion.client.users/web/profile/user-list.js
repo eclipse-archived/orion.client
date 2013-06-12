@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -31,7 +31,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
-		var usersList = new mUsersList.UsersList(serviceRegistry, commandRegistry, selection, searcher, "usersList", "pageActions", "selectionTools", "userCommands"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var usersList = new mUsersList.UsersList(serviceRegistry, commandRegistry, selection, searcher, "usersList", "pageActions", "pageNavigationActions", "selectionTools", "userCommands"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		mGlobalCommands.generateBanner("orion-userList", serviceRegistry, commandRegistry, preferences, searcher, usersList); //$NON-NLS-0$	
 		
@@ -151,8 +151,8 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 		commandRegistry.addCommandGroup("pageActions", "eclipse.usersGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, messages["More"]); //$NON-NLS-1$ //$NON-NLS-0$
 		
-		commandRegistry.registerCommandContribution("pageActions", "orion.userlist.prevPage", 2, "eclipse.usersGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution("pageActions", "orion.userlist.nextPage", 3, "eclipse.usersGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("pageNavigationActions", "orion.userlist.prevPage", 1);  //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("pageNavigationActions", "orion.userlist.nextPage", 2);  //$NON-NLS-1$ //$NON-NLS-0$
 
 		commandRegistry.registerCommandContribution("pageActions", "eclipse.createUser", 1, "eclipse.usersGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
