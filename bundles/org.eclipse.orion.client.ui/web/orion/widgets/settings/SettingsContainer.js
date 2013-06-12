@@ -289,6 +289,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		showPlugins: function(id) {
 
 			this.selectCategory(id);
+			
+			this.updateToolbar(id);
 
 			this.initPlugins(id);
 		},
@@ -296,6 +298,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		showPluginSettings: function(category) {
 			var id = category;
 			this.selectCategory(id);
+			
+			this.updateToolbar(id);
 
 			this.initPluginSettings(category);
 		},
