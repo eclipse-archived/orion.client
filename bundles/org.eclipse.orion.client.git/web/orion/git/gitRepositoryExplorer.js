@@ -667,9 +667,6 @@ exports.GitRepositoryExplorer = (function() {
 		title.textContent = branch.Name;
 		detailsView.appendChild(title);
 
-		var div = document.createElement("div");
-		detailsView.appendChild(div);
-
 		var commit = branch.Commit.Children[0];
 		
 		var tracksMessage = ((branch.RemoteLocation.length && branch.RemoteLocation.length === 1 && branch.RemoteLocation[0].Children.length && branch.RemoteLocation[0].Children.length === 1) ? 
@@ -776,9 +773,6 @@ exports.GitRepositoryExplorer = (function() {
 		var title = document.createElement("span");
 		title.textContent = remoteBranch.Name;
 		detailsView.appendChild(title);
-		
-		var div = document.createElement("div");
-		detailsView.appendChild(div);
 		
 		var actionsArea = document.createElement("div");
 		actionsArea.className = "sectionTableItemActions";
@@ -929,14 +923,11 @@ exports.GitRepositoryExplorer = (function() {
 		detailsView.className = "stretch";
 		horizontalBox.appendChild(detailsView);
 
-		var title = document.createElement("span");
+		var title = document.createElement("div");
 		title.textContent = messages["The branch is up to date."];
 		detailsView.appendChild(title);
 		
-		var div = document.createElement("div");
-		detailsView.appendChild(div);
-		
-		var description = document.createElement("span");
+		var description = document.createElement("div");
 		description.textContent = messages["You have no outgoing or incoming commits."];
 		detailsView.appendChild(description);
 	};
