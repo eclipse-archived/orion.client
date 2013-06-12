@@ -143,14 +143,18 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		 * @param {Object} fileMetadata The file whose parent directory we want to load.
 		 */
 		loadParentOf: function(fileMetadata) {
-			var parent = fileMetadata && fileMetadata.Parents && fileMetadata.Parents[0];
-			if (parent) {
-				if (this.treeRoot && this.treeRoot.ChildrenLocation === parent.ChildrenLocation) {
-					// Do we still need to handle this case?
-					this.reveal(fileMetadata);
-					return;
+			if (fileMetadata) {
+				var parent = fileMetadata.Parents && fileMetadata.Parents[0];
+				if (parent) {
+					if (this.treeRoot && this.treeRoot.ChildrenLocation === parent.ChildrenLocation) {
+						// Do we still need to handle this case?
+						this.reveal(fileMetadata);
+						return;
+					}
+				} else {
+					parent = this.fileClient.fileServiceRootURL(fileMetadata.Location); //$NON-NLS-0$
 				}
-				return this.loadRoot(parent.ChildrenLocation).then(this.reveal.bind(this, fileMetadata));
+				return this.loadRoot(parent).then(this.reveal.bind(this, fileMetadata));
 			}
 		},
 		/**
