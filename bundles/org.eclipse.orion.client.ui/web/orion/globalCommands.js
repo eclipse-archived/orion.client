@@ -519,7 +519,7 @@ define([
 		var navDropDown = new DropDownMenu('settingsTab', {
 			label: 'Develop',
 			icon: 'core-sprite-wrench'
-		}, false);
+		}, true);
 		navDropDown.updateContent = settings.updateContent.bind(settings);
 	}
 
