@@ -57,10 +57,10 @@
 			uriTemplate: "{OrionHome}/shell/shellPage.html#projectfor={Location}"
 		});
 		provider.registerService("orion.page.link", serviceImpl, {
-			nameKey: "Get Plugins",
-			id: "orion.plugins.get",
+			nameKey: "Search",
+			id: "orion.Search",
 			nls: "orion/nls/messages",
-			uriTemplate: "http://mamacdon.github.io/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}"
+			uriTemplate: "{OrionHome}/search/search.html"
 		});
 		
 		provider.registerService("orion.page.link.related", null, {
