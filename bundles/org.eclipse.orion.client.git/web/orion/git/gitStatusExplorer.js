@@ -414,7 +414,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 								div.className = "sectionTableItem"; //$NON-NLS-0$
 								td.appendChild(div);
 	
-								this.getExpandImage(tableRow, div); //$NON-NLS-0$
+								this.getExpandImage(tableRow, div);
 	
 								var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 	
@@ -631,7 +631,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 								div.className = "sectionTableItem"; //$NON-NLS-0$
 								td.appendChild(div);
 
-								this.getExpandImage(tableRow, div); //$NON-NLS-0$
+								this.getExpandImage(tableRow, div);
 
 								var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 

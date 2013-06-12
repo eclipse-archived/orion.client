@@ -59,6 +59,8 @@ define({
 	"Staged change": "Staged change",
 	"Unstaged add": "Unstaged add",
 	"Staged add": "Staged add",
+	"Addition": "Addition",
+	"Deletion": "Deletion",
 	"Resolve Conflict": "Resolve Conflict",
 	"Conflicting": "Conflicting",
 	"Commit message": "Commit message",
