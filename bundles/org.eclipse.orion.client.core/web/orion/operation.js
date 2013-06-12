@@ -13,7 +13,7 @@
 
 /**
  * @name orion.operation
- * @namespace Provides a API for handling long running operations as Deferred
+ * @namespace Provides an API for handling long running operations as promises.
  */
 define(["orion/xhr", "orion/Deferred"], function(xhr, Deferred) {
 
@@ -103,6 +103,17 @@ define(["orion/xhr", "orion/Deferred"], function(xhr, Deferred) {
 		});
 	}
 
+	/**
+	 * Handles a long-running operation as a promise.
+	 * @name orion.operation.handle
+	 * @function
+	 * @param {String} operationLocation
+	 * @param {Function} [onSuccess] If provided, will be called to transform a successful operation into the resolve value of the 
+	 * returned promise.
+	 * @param {Function} [onError] If provided, will be called to trasnform a failed operation into the reject value of the 
+	 * returned promise.
+	 * @returns {orion.Promise}
+	 */
 	function handle(operationLocation, onSuccess, onError) {
 		var def = new Deferred();
 		_trackCancel(operationLocation, def);
