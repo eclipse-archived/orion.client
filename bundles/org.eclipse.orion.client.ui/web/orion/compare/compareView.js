@@ -532,14 +532,14 @@ exports.TwoWayCompareView = (function() {
  * @name orion.compare.TwoWayCompareView
  */
 exports.InlineCompareView = (function() {
-	function InlineCompareView(options ) {
+	function InlineCompareView(options) {
 		this.setOptions(options, true);
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this.type = "inline"; //$NON-NLS-0$
 		if(this.options.commandProvider){
 			this.options.commandProvider.initCommands(this);
 		}
-		this._editorDivId = this.options.parentDivId;
+		this._editorDiv = this.options.parentDivId;
 	}
 	InlineCompareView.prototype = new exports.CompareView();
 	
@@ -577,7 +577,7 @@ exports.InlineCompareView = (function() {
 	};
 
 	InlineCompareView.prototype.initEditors = function(initString){
-		var parentDiv = lib.node(this._editorDivId);
+		var parentDiv = lib.node(this._editorDiv);
 		var textViewFactory = function(){
 			var textView = new mTextView.TextView({
 				parent: parentDiv,
@@ -682,7 +682,7 @@ exports.InlineCompareView = (function() {
  * @name orion.compare.toggleableCompareView
  */
 exports.toggleableCompareView = (function() {
-	function toggleableCompareView(startWith, options ) {
+	function toggleableCompareView(startWith, options) {
 		if(options){
 			options.toggler = this;
 		}

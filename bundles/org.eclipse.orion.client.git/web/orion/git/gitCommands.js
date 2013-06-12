@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*globals window document define confirm URL*/
+/*globals window document define confirm URL console*/
 /*jslint nomen:false sub:true forin:false laxbreak:true eqeqeq:false*/
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/commandRegistry', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 'orion/git/gitConfigPreference',
@@ -109,7 +109,7 @@ var exports = {};
 							var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 							progress.removeOperation(options.failedOperation);
 						}
-						func({ knownHosts: options.knownHosts, gitSshUsername: credentials.gitSshUsername, gitSshPassword: credentials.gitSshPassword, gitPrivateKey: credentials.gitPrivateKey, gitPassphrase: credentials.gitPassphrase}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						func({knownHosts: options.knownHosts, gitSshUsername: credentials.gitSshUsername, gitSshPassword: credentials.gitSshPassword, gitPrivateKey: credentials.gitPrivateKey, gitPassphrase: credentials.gitPassphrase}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						return;
 					}
 					
@@ -273,12 +273,12 @@ var exports = {};
 						gitSshPassword : sshPassword
 					}).then(
 						function(){
-							triggerCallback({ gitSshUsername: sshUser, gitSshPassword: sshPassword, gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-0$
+							triggerCallback({gitSshUsername: sshUser, gitSshPassword: sshPassword, gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-0$
 						}
 					);
 					return;
 				} else {
-					triggerCallback({ gitSshUsername: sshUser, gitSshPassword: sshPassword, gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-0$
+					triggerCallback({gitSshUsername: sshUser, gitSshPassword: sshPassword, gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-0$
 					return;
 				}
 			}
@@ -1855,9 +1855,10 @@ var exports = {};
 						var orionHome = PageLinks.getOrionHome();
 						var url = sshCheck(clone.Children[0].GitUrl);
 						var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
-						var dialog = new mReviewRequest.ReviewRequestDialog({ title : messages["Contribution Review Request"],
-						url : reviewRequestUrl,
-						func : sendNotificationFunction
+						var dialog = new mReviewRequest.ReviewRequestDialog({
+							title : messages["Contribution Review Request"],
+							url : reviewRequestUrl,
+							func : sendNotificationFunction
 						});
 						dialog.show();
 					}, displayErrorOnStatus);
@@ -2064,7 +2065,7 @@ var exports = {};
 						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
 						
 						serviceRegistry.getService("orion.page.message").setProgressMessage("Your project is being set up. This may take a minute...");
-						gitConfigPreference.getConfig().then( function(userInfo){
+						gitConfigPreference.getConfig().then(function(userInfo){
 							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
 									options.gitPrivateKey, options.gitPassphrase, userInfo), "Cloning repository " + name);
 							deferred.then(function(jsonData, secondArg) {
@@ -2086,9 +2087,9 @@ var exports = {};
 														}
 													});
 												}
-											)
+											);
 										}
-									)
+									);
 								}, func, messages['Clone Git Repository']);
 							}, function(jsonData, secondArg) {
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
@@ -2118,7 +2119,7 @@ var exports = {};
 												console.info("Folder project is used");
 											}
 										}
-									)
+									);
 								} else {
 									console.info("Folder project is used");
 								}
@@ -2148,7 +2149,7 @@ var exports = {};
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
 						var func = arguments.callee;
 						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
-						gitConfigPreference.getConfig().then( function(userInfo){
+						gitConfigPreference.getConfig().then(function(userInfo){
 							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
 									options.gitPrivateKey, options.gitPassphrase, userInfo), "Cloning repository " + name);
 							serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
@@ -2197,7 +2198,7 @@ var exports = {};
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
 						var func = arguments.callee;
 						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
-						gitConfigPreference.getConfig().then( function(userInfo){
+						gitConfigPreference.getConfig().then(function(userInfo){
 							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
 									options.gitPrivateKey, options.gitPassphrase, userInfo), "Cloning git repository " + name);
 							serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
@@ -2365,7 +2366,7 @@ var exports = {};
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
 						var gitConfigPreference = new GitConfigPreference(serviceRegistry);
-						gitConfigPreference.getConfig().then( function(userInfo){
+						gitConfigPreference.getConfig().then(function(userInfo){
 							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, null, null, null, null, null, userInfo), messages["Initializing repository: "] + name); //$NON-NLS-0$
 							serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
 									messages["Initializing repository: "] + name);
@@ -2589,7 +2590,7 @@ var exports = {};
 					);
 				} else {
 					var paths = [];
-					for ( var i = 0; i < items.length; i++) {
+					for (var i = 0; i < items.length; i++) {
 						paths[i] = items[i].name;
 					}
 					
@@ -2643,7 +2644,7 @@ var exports = {};
 					);
 				} else {
 					var paths = [];
-					for ( var i = 0; i < items.length; i++) {
+					for (var i = 0; i < items.length; i++) {
 						paths[i] = items[i].name;
 					}
 					
@@ -2791,7 +2792,7 @@ var exports = {};
 						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 						
 						var paths = [];
-						for ( var i = 0; i < items.length; i++) {
+						for (var i = 0; i < items.length; i++) {
 							paths[i] = items[i].name;
 						}
 						
@@ -2941,11 +2942,10 @@ var exports = {};
 		});
 		
 		commandService.addCommand(rebaseAbortCommand);	
-
-		
-
 	};
 
 }());
+
 return exports;	
+
 });

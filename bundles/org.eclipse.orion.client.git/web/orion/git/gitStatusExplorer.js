@@ -321,7 +321,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 				onExpandCollapse : function(isExpanded, section) {
 					that.commandService.destroy(section.selectionNode);
 					if (isExpanded) {
-						that.commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button", { "Clone" : repository}); //$NON-NLS-1$ //$NON-NLS-0$
+						that.commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button", {"Clone" : repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				}
 			});
@@ -344,14 +344,14 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 					if (selectionTools) {
 						that.commandService.destroy(selectionTools);
 						that.commandService.renderCommands(unstagedSection.selectionNode.id, selectionTools, event.selections, that,
-							"button", { "Clone" : repository }); //$NON-NLS-1$ //$NON-NLS-0$
+							"button", {"Clone" : repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
 				this.unstagedOnce = true;
 			}
 
 			this.commandService.registerCommandContribution("DefaultActionWrapper", "eclipse.orion.git.stageCommand", 100); //$NON-NLS-1$ //$NON-NLS-0$
-
+			
 			var UnstagedModel = (function() {
 				function UnstagedModel() {}
 
@@ -423,11 +423,9 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 								diffActionWrapper.className = "sectionExplorerActions"; //$NON-NLS-0$
 								div.appendChild(diffActionWrapper);
 	
-								window.setTimeout(function() {
-									that.commandService.destroy(diffActionWrapper.id);
-									that.commandService.renderCommands(
-										"DefaultActionWrapper", diffActionWrapper.id, item, that, "tool", null, navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
-								}, 300);
+								that.commandService.destroy(diffActionWrapper);
+								that.commandService.renderCommands(
+											"DefaultActionWrapper", diffActionWrapper, item, that, "tool", null, navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
 	
 								var icon = document.createElement("span"); //$NON-NLS-0$
 								icon.className = that._model.getClass(item.type);
@@ -437,13 +435,14 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 									position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								});
 								div.appendChild(icon);
-	
+								
 								var itemLabel = document.createElement("span"); //$NON-NLS-0$
 								itemLabel.textContent = item.name;
 								div.appendChild(itemLabel);
 	
 								return td;
 							} else {
+								// render the compare widget
 								var td = document.createElement("td"); //$NON-NLS-0$
 								td.colSpan = 2;
 	
@@ -464,18 +463,16 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 								div.appendChild(diffContainer);
 	
 								var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
-								window.setTimeout(function() {
-									mGitUtil.createCompareWidget(
-										that.registry,
-										that.commandService, 
-										item.diffUri, 
-										isConflict(item.parent.type), 
-										"diffArea_" + item.diffUri, //$NON-NLS-0$
-										compareWidgetActionWrapper.id, 
-										true, //editableInComparePage
-										{navGridHolder: navGridHolder} //gridRenderer
-									);
-								}, 300);
+								mGitUtil.createCompareWidget(
+									that.registry,
+									that.commandService, 
+									item.diffUri, 
+									isConflict(item.parent.type), 
+									diffContainer,
+									compareWidgetActionWrapper.id, 
+									true, //editableInComparePage
+									{navGridHolder: navGridHolder} //gridRenderer
+								);
 	
 								return td;
 							}
@@ -561,7 +558,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 					if (selectionTools) {
 						that.commandService.destroy(selectionTools);
 						that.commandService.renderCommands(stagedSection.selectionNode.id, selectionTools, event.selections, that,
-							"button", { "Clone" : repository}); //$NON-NLS-1$ //$NON-NLS-0$
+							"button", {"Clone" : repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
 				this.stagedOnce = true;
@@ -640,11 +637,9 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 								diffActionWrapper.className = "sectionExplorerActions"; //$NON-NLS-0$
 								div.appendChild(diffActionWrapper);
 
-								window.setTimeout(function() {
-									that.commandService.destroy(diffActionWrapper.id);
-									that.commandService.renderCommands(
-										"DefaultActionWrapper", diffActionWrapper.id, item, that, "tool", null, navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
-								}, 300);
+								that.commandService.destroy(diffActionWrapper);
+								that.commandService.renderCommands(
+									"DefaultActionWrapper", diffActionWrapper, item, that, "tool", null, navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
 
 								var icon = document.createElement("span"); //$NON-NLS-0$
 								icon.className = that._model.getClass(item.type);
@@ -661,6 +656,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 
 								return td;
 							} else {
+								// render the compare widget
 								var td = document.createElement("td"); //$NON-NLS-0$
 								td.colSpan = 2;
 
@@ -682,18 +678,16 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 
 								var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 								var hasConflict = isConflict(item.parent.type);
-								window.setTimeout(function() {
-									mGitUtil.createCompareWidget(
-										that.registry,
-										that.commandService, 
-										item.diffUri, 
-										isConflict(item.parent.type), 
-										"diffArea_" + item.diffUri, //$NON-NLS-0$
-										compareWidgetActionWrapper.id, 
-										false, //editableInComparePage
-										{navGridHolder: navGridHolder} //gridRenderer
-									);
-								}, 500);
+								mGitUtil.createCompareWidget(
+									that.registry,
+									that.commandService, 
+									item.diffUri, 
+									isConflict(item.parent.type), 
+									diffContainer,
+									compareWidgetActionWrapper.id, 
+									false, //editableInComparePage
+									{navGridHolder: navGridHolder} //gridRenderer
+								);
 
 								return td;
 							}
@@ -701,7 +695,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 							break;
 					}
 				};
-
+				
 				return StagedRenderer;
 			}());
 

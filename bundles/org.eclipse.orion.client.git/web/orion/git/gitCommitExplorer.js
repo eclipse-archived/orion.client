@@ -443,25 +443,26 @@ define(
 									div.appendChild(diffContainer);
 
 									var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
-									window.setTimeout(function() {
-										mGitUtil.createCompareWidget(that.registry,
-																	 that.commandService, 
-																	 item.parent.DiffLocation, 
-																	 false, 
-																	 "diffArea_" + item.parent.DiffLocation, //$NON-NLS-0$
-																	 compareWidgetActionWrapper.id, 
-																	 false, //editableInComparePage
-																	 {
-																		navGridHolder : navGridHolder,
-																		additionalCmdRender : function(gridHolder) {
-																			that.commandService.destroy(diffActionWrapper.id);
-																			that.commandService.renderCommands(
-																					"itemLevelCommands", diffActionWrapper.id, item.parent, that, "tool", false, gridHolder); //$NON-NLS-0$
-																		},
-																		before : true
-																	 }
-																	 );
-									}, 500);
+									
+									mGitUtil.createCompareWidget(
+										that.registry,
+										that.commandService, 
+										item.parent.DiffLocation, 
+										false, 
+										diffContainer,
+										compareWidgetActionWrapper.id, 
+										false, //editableInComparePage
+										{
+											navGridHolder : navGridHolder,
+											additionalCmdRender : function(gridHolder) {
+												that.commandService.destroy(diffActionWrapper.id);
+												that.commandService.renderCommands(
+													"itemLevelCommands", diffActionWrapper.id, item.parent, that, "tool", false, gridHolder); //$NON-NLS-0$
+											},
+											before : true
+										}
+									);
+									
 									return td;
 								}
 								break;
