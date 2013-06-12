@@ -8,7 +8,7 @@
  * 
  ******************************************************************************/
 /*global define document window URL*/
-define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "orion/URL-shim"], function(require, Deferred, PageUtil, URITemplate) {
+define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "orion/i18nUtil", "orion/URL-shim"], function(require, Deferred, PageUtil, URITemplate, i18nUtil) {
 
 	/**
 	 * Returns the value of the <code>{OrionHome}</code> variable.
@@ -50,7 +50,7 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "ori
 			});
 			if(info.uriTemplate && info.nls && (info.name || info.nameKey)){
 				var d = new Deferred();
-				require(['i18n!'+info.nls], function(commandMessages){ //$NON-NLS-0$
+				i18nUtil.getMessageBundle(info.nls).then(function(commandMessages) {
 					var uriTemplate = new URITemplate(info.uriTemplate);
 					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
 					expandedHref = PageUtil.validateURLScheme(expandedHref);
