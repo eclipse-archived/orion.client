@@ -38,13 +38,15 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 		return data;
 	}
 
-	// Wrap orion/xhr to handle long-running tasks.
-	function xhrTask() {
+	// Wrap orion/xhr to handle long-running operations.
+	function sftpOperation() {
 		return xhr.apply(null, Array.prototype.slice.call(arguments)).then(function(result) {
 			if (result.xhr && result.xhr.status === 202) {
 				var response =  result.response ? JSON.parse(result.response) : null;
 				var d = new Deferred();
-				operation.handle(response.Location).then(d.resolve, d.reject, d.progress);
+				operation.handle(response.Location, function(operation) {
+					return operation.Result; // Final result of SFTP task is the operation's status.
+				}).then(d.resolve, d.reject, d.progress);
 				return d;
 			}
 			return result.then(function(result) {
@@ -482,7 +484,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				headerData["X-Xfer-Options"] = options.OptionHeader;
 				delete options.OptionHeader;
 			}
-			return xhrTask("POST", targetLocation, {
+			return sftpOperation("POST", targetLocation, {
 				headers: headerData,
 				data: JSON.stringify(options),
 				timeout: 15000
@@ -508,7 +510,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				headerData["X-Xfer-Options"] = options.OptionHeader;
 				delete options.OptionHeader;
 			}
-			return xhrTask("POST", sourceLocation, {
+			return sftpOperation("POST", sourceLocation, {
 				headers: headerData,
 				data: JSON.stringify(options),
 				timeout: 15000
