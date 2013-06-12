@@ -8,6 +8,8 @@
 
 @import "./siteEditor.css";
 
+@import "../css/theme.css";
+
 html,body {
 	height: 100%;
 }
