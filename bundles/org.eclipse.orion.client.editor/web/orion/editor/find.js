@@ -251,7 +251,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		},
 		getOptions: function() {
 			return {
-				showAllOccurrence: this._showAll, 
+				showAll: this._showAll, 
 				caseInsensitive: this._caseInsensitive, 
 				wrap: this._wrap, 
 				wholeWord: this._wholeWord, 
@@ -359,8 +359,8 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		 */
 		setOptions : function(options) {
 			if (options) {
-				if (options.showAllOccurrence === true || options.showAllOccurrence === false) {
-					this._showAll = options.showAllOccurrence;
+				if ((options.showAll === true || options.showAll === false) && this._showAll !== options.showAll) {
+					this._showAll = options.showAll;
 					if (this.isVisible()) {
 						if (this._showAll) {
 							this._markAllOccurrences(true);
