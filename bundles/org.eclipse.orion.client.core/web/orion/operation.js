@@ -48,7 +48,7 @@ define(["orion/xhr", "orion/Deferred"], function(xhr, Deferred) {
 		});
 	}
 
-	function _getOperation(operationLocation, deferred) {
+	function _getOperation(operationLocation, deferred, onResolve, onReject) {
 		xhr("GET", operationLocation, {
 			headers: {
 				"Orion-Version": "1"
@@ -59,14 +59,14 @@ define(["orion/xhr", "orion/Deferred"], function(xhr, Deferred) {
 			deferred.progress(operationJson);
 			if (_isRunning(operationJson.type)) {
 				setTimeout(function() {
-					_getOperation(operationLocation, deferred);
+					_getOperation(operationLocation, deferred, onResolve, onReject);
 				}, 2000);
 				return;
 			}
 			if (operationJson.type === "error" || operationJson.type === "abort") {
-				deferred.reject(operationJson.Result);
+				deferred.reject(onReject ? onReject(operationJson) : operationJson.Result);
 			} else {
-				deferred.resolve(operationJson.Result.JsonData);
+				deferred.resolve(onResolve ? onResolve(operationJson) : operationJson.Result.JsonData);
 			}
 			if (!operationJson.Location) {
 				_deleteTempOperation(operationLocation); //This operation should not be kept 
@@ -103,10 +103,10 @@ define(["orion/xhr", "orion/Deferred"], function(xhr, Deferred) {
 		});
 	}
 
-	function handle(operationLocation) {
+	function handle(operationLocation, onSuccess, onError) {
 		var def = new Deferred();
 		_trackCancel(operationLocation, def);
-		_getOperation(operationLocation, def);
+		_getOperation(operationLocation, def, onSuccess, onError);
 		return def;
 	}
 
