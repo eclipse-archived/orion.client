@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2011, 2012 IBM Corporation and others. All rights
+ * @license Copyright (c) 2011, 2013 IBM Corporation and others. All rights
  *          reserved. This program and the accompanying materials are made
  *          available under the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -13,8 +13,8 @@
 
 define(
 		[ 'require', 'i18n!git/nls/gitmessages', 'orion/section', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/i18nUtil', 'orion/webui/littlelib',
-				'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/util', 'orion/Deferred' ],
-		function(require, messages, mSection, mExplorer, PageUtil, i18nUtil, lib, mGlobalCommands, mGitCommands, mGitUtil, Deferred) {
+				'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/util', 'orion/Deferred', 'orion/webui/tooltip' ],
+		function(require, messages, mSection, mExplorer, PageUtil, i18nUtil, lib, mGlobalCommands, mGitCommands, mGitUtil, Deferred, Tooltip) {
 			var exports = {};
 
 			exports.GitCommitExplorer = (function() {
@@ -387,15 +387,28 @@ define(
 
 									var path = item.OldPath;
 									var sprite = "git-sprite-file"; //$NON-NLS-0$
+									var tooltip = messages["Diffs"]; //$NON-NLS-0$
 									if (item.ChangeType === "ADD") { //$NON-NLS-0$
 										path = item.NewPath;
 										sprite = "git-sprite-addition"; //$NON-NLS-0$
+										tooltip = messages["Addition"]; //$NON-NLS-0$
 									} else if (item.ChangeType === "DELETE") { //$NON-NLS-0$
 										sprite = "git-sprite-removal"; //$NON-NLS-0$
+										tooltip = messages["Deletion"]; //$NON-NLS-0$
 									}
 
-									this.getExpandImage(tableRow, div, "gitImageSprite", sprite); //$NON-NLS-0$
-
+									this.getExpandImage(tableRow, div);
+									
+									var icon = document.createElement("span"); //$NON-NLS-0$
+									icon.className = sprite;
+									icon.classList.add("gitImageSprite");
+									icon.commandTooltip = new Tooltip.Tooltip({
+										node: icon,
+										text: tooltip,
+										position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									});
+									div.appendChild(icon);
+									
 									var itemLabel = document.createElement("span"); //$NON-NLS-0$
 									itemLabel.className = "gitMainDescription"; //$NON-NLS-0$
 									itemLabel.textContent = path;
