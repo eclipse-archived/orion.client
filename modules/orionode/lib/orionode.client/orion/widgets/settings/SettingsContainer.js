@@ -19,13 +19,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		'orion/widgets/themes/ThemeBuilder', 
 		'orion/settings/ui/PluginSettings', 
 		'orion/widgets/themes/ThemePreferences', 
-		'orion/widgets/themes/editor/ThemeData', 
 		'orion/widgets/themes/container/ThemeData', 
 		'orion/widgets/settings/SplitSelectionLayout',
 		'orion/widgets/plugin/PluginList',
-		'orion/widgets/settings/UserSettings'
+		'orion/widgets/settings/UserSettings',
+		'orion/widgets/settings/EditorSettings',
+		'edit/editorPreferences'
 		], function(messages, require, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
-			ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings) {
+			ThemeBuilder, SettingsList, mThemePreferences, containerThemeData, SplitSelectionLayout, PluginList, UserSettings,
+			EditorSettings, mEditorPreferences) {
 
 	/**
 	 * @param {Object} options
@@ -47,9 +49,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 				show: this.showThemeBuilder
 			},
 			{
-				id: "editorThemeBuilder", //$NON-NLS-0$
-				textContent: 'Editor Theme', // messages["Themes"],
-				show: this.showEditorThemeBuilder
+				id: "editorSettings", //$NON-NLS-0$
+				textContent: messages.Editor,
+				show: this.showEditor
 			},
 			{
 				id: "plugins", //$NON-NLS-0$
@@ -135,31 +137,34 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			this.themeWidget.renderData( themeNode, 'INITIALIZE' );
 		},
 		
-		showEditorThemeBuilder: function(id){
+		showEditor: function(id){
 		
 			this.selectCategory(id);
 			
-			this.updateToolbar(id);
-		
-			if(this.editorThemeWidget) {
-				this.editorThemeWidget.destroy();
-			}
-			
-			var editorTheme = new editorThemeData.ThemeData();
-			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
-		
-			this.editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: editorTheme });
-			
-			var command = { name:'Import', tip:'Import a theme', id:0, callback: editorTheme.importTheme.bind(editorTheme) };
-			
-			this.editorThemeWidget.addAdditionalCommand( command );
 			
 			lib.empty(this.table);
+		
+			if (this.editorSettingWidget) {
+				this.editorSettingWidget.destroy();
+			}
 
-			var themeNode = document.createElement('div'); //$NON-NLS-0$
-			this.table.appendChild(themeNode);
+			this.updateToolbar(id);
 
-			this.editorThemeWidget.renderData( themeNode, 'INITIALIZE' );
+			var editorSettingsNode = document.createElement('div'); //$NON-NLS-0$
+			this.table.appendChild(editorSettingsNode);
+			
+			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
+			
+			this.editorSettings = new EditorSettings({
+				registry: this.registry,
+				preferences: editorPreferences,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				userClient: this.userClient
+			}, editorSettingsNode);
+			
+			this.editorSettings.show();
 		},
 		
 		showUserSettings: function(id){
