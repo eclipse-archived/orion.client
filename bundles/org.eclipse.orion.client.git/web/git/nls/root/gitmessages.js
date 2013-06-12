@@ -199,7 +199,7 @@ define({
 	"parent:": "parent: ",
 	"branches: ": "branches: ",
 	"tags: ": "tags: ",
-	" authored by ${0} {${1}) on ${2}": " authored by ${0} {${1}) on ${2}",
+	" authored by ${0} {${1}) on ${2}": " authored by ${0} (${1}) on ${2}",
 	"Content": "Content",
 	"Go to ${0} section": "Go to ${0} section",
 	"Find Commit": "Find Commit",
