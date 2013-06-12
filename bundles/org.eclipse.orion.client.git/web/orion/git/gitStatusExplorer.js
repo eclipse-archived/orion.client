@@ -888,7 +888,6 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 
 		GitStatusExplorer.prototype.renderCommit = function(commit, outgoing, index) {
 			var commitNode = lib.node("commitNode"); //$NON-NLS-0$
-			commitNode.innerHTML = ""; //$NON-NLS-0$
 			var sectionItem = document.createElement("div"); //$NON-NLS-0$
 			sectionItem.className = "sectionTableItem lightTreeTableRow"; //$NON-NLS-0$
 			commitNode.appendChild(sectionItem);
@@ -927,10 +926,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 
 			new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
 
-			var d = document.createElement("div"); //$NON-NLS-0$
-			detailsView.appendChild(d);
-
-			var description = document.createElement("span"); //$NON-NLS-0$
+			var description = document.createElement("div"); //$NON-NLS-0$
 			description.textContent = " (SHA " + commit.Name + ") by " + commit.AuthorName //$NON-NLS-1$ //$NON-NLS-0$
 				+ " on " + new Date(commit.Time).toLocaleString(); //$NON-NLS-0$
 			detailsView.appendChild(description);
