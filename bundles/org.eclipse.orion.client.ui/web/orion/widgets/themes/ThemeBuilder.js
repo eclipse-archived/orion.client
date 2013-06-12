@@ -934,6 +934,18 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		
 		ThemeBuilder.prototype.selectTheme = selectTheme;
 		
+		function addTheme ( style ) {
+			this.preferences.getTheme(function(themeStyles) {
+				var themename = style.name;
+				themeStyles.styles.push(style);
+				this.preferences.setTheme(themename, themeStyles.styles);
+				this.select( themename, themeStyles.styles );
+				this.updateThemePicker( themename, themeStyles.styles );
+			}.bind(this));
+		}
+		
+		ThemeBuilder.prototype.addTheme = addTheme;
+		
 		ThemeBuilder.prototype.destroy = function(){
 			var picker = this.themeSelect;
 			if (picker) {

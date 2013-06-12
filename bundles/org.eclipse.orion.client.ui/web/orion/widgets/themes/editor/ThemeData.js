@@ -690,9 +690,7 @@ define(['orion/editor/textTheme'],
 			newStyle.lineNumber = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
 			newStyle.currentLine = xml.getElementsByTagName("selectionBackground")[0].attributes[0].value;
 			
-			data.items.styles.push( newStyle );
-			data.items.updateThemePicker( newStyle.name );
-			data.items.select( newStyle.name );
+			data.items.addTheme( newStyle );
 		}
 		
 		ThemeData.prototype.importTheme = importTheme;
