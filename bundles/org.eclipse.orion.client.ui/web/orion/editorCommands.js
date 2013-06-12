@@ -261,7 +261,7 @@ define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib
 								tempOptions.start = editor.getModel().getLineStart(parsedParam.atLine-1);
 							}
 							self._localSearcher.show({findString: searchString, replaceString: parsedParam.replaceWith});
-							self._localSearcher.find(true);
+							self._localSearcher.find(true, tempOptions);
 						} else {
 							self._localSearcher.show({findString: searchString});
 						}
