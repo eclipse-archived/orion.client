@@ -66,7 +66,7 @@ define(["orion/xhr", "orion/Deferred"], function(xhr, Deferred) {
 			if (operationJson.type === "error" || operationJson.type === "abort") {
 				deferred.reject(operationJson.Result);
 			} else {
-				deferred.resolve(operationJson.Result.JsonData || operationJson.Result);
+				deferred.resolve(operationJson.Result.JsonData);
 			}
 			if (!operationJson.Location) {
 				_deleteTempOperation(operationLocation); //This operation should not be kept 
