@@ -733,33 +733,6 @@ define([
 		commandRegistry.addCommand(openResourceCommand);
 		commandRegistry.registerCommandContribution("globalActions", "eclipse.openResource", 100, null, true, new KeyBinding.KeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-		var globalSearchCommand = new mCommands.Command({
-			name: messages["Global search"],
-			tooltip: messages["Global search"],
-			id: "eclipse.globalSearch", //$NON-NLS-0$
-			callback: function (data) {
-				var searchString = null;
-				if (editor) {
-					var selection = editor.getSelection();
-					if (selection.end > selection.start) {
-						// If there is selection from editor we want to use it as the default keyword
-						var model = editor.getModel();
-						searchString = model.getText(selection.start, selection.end);
-					}
-				}
-				var searchField = lib.node("search"); //$NON-NLS-0$
-				if (searchField) {
-					if (searchString) {
-						searchField.value = searchString;
-					}
-					searchField.focus();
-				}
-			}
-		});
-
-		commandRegistry.addCommand(globalSearchCommand);
-		commandRegistry.registerCommandContribution("globalActions", "eclipse.globalSearch", 101, null, true, new KeyBinding.KeyBinding('h', true, false, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
 		// Toggle trim command
 		var toggleBanner = new mCommands.Command({
 			name: messages["Toggle banner and footer"],

@@ -252,7 +252,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			if (!this.searchesSection) {
 				this.searchesSection = new mSection.Section(this._parent, {
 					id: "searchSection", //$NON-NLS-0$
-					title: messages["My saved searches"],
+					title: messages["My Saved Searches"],
 					content: '<div id="searchContent"></div>', //$NON-NLS-0$
 					useAuxStyle: true,
 					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
@@ -264,9 +264,11 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				var binding;
 				binding = new mKeyBinding.KeyBinding(113);
 				binding.domScope = "searchContent"; //$NON-NLS-0$
+				binding.scopeName = messages["My Saved Searches"];
 				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1, null, false, binding); //$NON-NLS-0$
 				binding = new mKeyBinding.KeyBinding(46);
 				binding.domScope = "searchContent"; //$NON-NLS-0$
+				binding.scopeName = messages["My Saved Searches"];
 				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2, null, false, binding); //$NON-NLS-0$
 				commandService.registerSelectionService(selectionId, this.searchSelection);
 				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
