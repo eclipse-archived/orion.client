@@ -50,6 +50,7 @@ define({
 	"Populating favorites...": "Populating favorites...",
 	"Favorite": "Favorite",
 	"Searching...": "Searching...",
+	"Searching for occurrences of": "Searching for occurrences of: \"${0}\"",
 	"name": "name",
 	"orion.widgets.UserMenu": "orion.widgets.UserMenu",
 	"test": "test",

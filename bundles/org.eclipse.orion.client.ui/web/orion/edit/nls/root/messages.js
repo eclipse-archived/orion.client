@@ -19,7 +19,6 @@ define({
 	"There are unsaved changes.  Do you still want to navigate away?": "There are unsaved changes.  Do you still want to navigate away?", //$NON-NLS-1$ //$NON-NLS-0$
 	"Search Files": "Search Files", //$NON-NLS-1$ //$NON-NLS-0$
 	"Enter search term:": "Enter search term:", //$NON-NLS-1$ //$NON-NLS-0$
-	"Searching for occurrences of ": "Searching for occurrences of ", //$NON-NLS-1$ //$NON-NLS-0$
 	"Toggle Outliner": "Toggle Outliner", //$NON-NLS-1$ //$NON-NLS-0$
 	"There are unsaved changes.": "There are unsaved changes.", //$NON-NLS-1$ //$NON-NLS-0$
 	"Save": "Save", //$NON-NLS-1$ //$NON-NLS-0$
