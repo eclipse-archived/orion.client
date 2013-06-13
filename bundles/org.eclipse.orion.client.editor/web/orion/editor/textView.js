@@ -5700,7 +5700,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			cleanup();
 			return true;
 		},
-		_setDOMSelection: function (startNode, startOffset, endNode, endOffset, force, startCaret) {
+		_setDOMSelection: function (startNode, startOffset, endNode, endOffset, startCaret) {
 			var startLineNode, startLineOffset, endLineNode, endLineOffset;
 			var offset = 0;
 			var lineChild = startNode.firstChild;
@@ -5754,26 +5754,26 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			
 			this._setDOMFullSelection(startNode, startOffset, startLineEnd, endNode, endOffset, endLineEnd);
 
-			if (!this._hasFocus) { return; }
 			var range;
 			var window = this._getWindow();
 			var document = this._parent.ownerDocument;
 			if (window.getSelection) {
 				//W3C
 				var sel = window.getSelection();
-				if (!force && (
-					(sel.anchorNode === startLineNode && sel.anchorOffset === startLineOffset &&
-					sel.focusNode === endLineNode && sel.focusOffset === endLineOffset) ||
-					(sel.anchorNode === endLineNode && sel.anchorOffset === endLineOffset &&
-					sel.focusNode === startLineNode && sel.focusOffset === startLineOffset))) { return; }
-				
 				range = document.createRange();
 				range.setStart(startLineNode, startLineOffset);
 				range.setEnd(endLineNode, endLineOffset);
-				this._ignoreSelect = false;
-				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
-				sel.addRange(range);
-				this._ignoreSelect = true;
+				if (this._hasFocus && (
+					sel.anchorNode !== startLineNode || sel.anchorOffset !== startLineOffset ||
+					sel.focusNode !== endLineNode || sel.focusOffset !== endLineOffset ||
+					sel.anchorNode !== endLineNode || sel.anchorOffset !== endLineOffset ||
+					sel.focusNode !== startLineNode || sel.focusOffset !== startLineOffset))
+				{
+					this._ignoreSelect = false;
+					if (sel.rangeCount > 0) { sel.removeAllRanges(); }
+					sel.addRange(range);
+					this._ignoreSelect = true;
+				}
 				if (this._cursorDiv) {
 					if (startCaret) {
 						range.setEnd(startLineNode, startLineOffset);
@@ -5781,11 +5781,13 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						range.setStart(endLineNode, endLineOffset);
 					}
 					var rect = range.getClientRects()[0];
-					var clientRect = this._rootDiv.getBoundingClientRect();
-					this._cursorDiv.style.top = (rect.top - clientRect.top) + "px"; //$NON-NLS-0$
-					this._cursorDiv.style.left = (rect.left - clientRect.left) + "px"; //$NON-NLS-0$
+					var cursorParent = this._cursorDiv.parentNode;
+					var clientRect = cursorParent.getBoundingClientRect();
+					this._cursorDiv.style.top = (rect.top - clientRect.top + cursorParent.scrollTop) + "px"; //$NON-NLS-0$
+					this._cursorDiv.style.left = (rect.left - clientRect.left + cursorParent.scrollLeft) + "px"; //$NON-NLS-0$
 				}
 			} else if (document.selection) {
+				if (!this._hasFocus) { return; }
 				//IE < 9
 				var body = document.body;
 
@@ -6134,8 +6136,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					cursorDiv.style.position = "absolute"; //$NON-NLS-0$
 					cursorDiv.style.pointerEvents = "none"; //$NON-NLS-0$
 					cursorDiv.innerHTML = "&nbsp;"; //$NON-NLS-0$
-					this._rootDiv.appendChild(cursorDiv);
-					this._updateDOMSelection(true);
+					this._viewDiv.appendChild(cursorDiv);
+					this._updateDOMSelection();
 				}
 			} else {
 				if (this._cursorDiv) {
@@ -6312,7 +6314,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				this._mutationObserver = null;
 			}
 		},
-		_updateDOMSelection: function (force) {
+		_updateDOMSelection: function () {
 			if (this._ignoreDOMSelection) { return; }
 			if (!this._clientDiv) { return; }
 			var selection = this._getSelection();
@@ -6349,7 +6351,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				bottomNode = this._getLineNode(endLine);
 				bottomOffset = selection.end - model.getLineStart(endLine);
 			}
-			this._setDOMSelection(topNode, topOffset, bottomNode, bottomOffset, force, selection.caret);
+			this._setDOMSelection(topNode, topOffset, bottomNode, bottomOffset, selection.caret);
 		},
 		_update: function(hScrollOnly) {
 			if (this._redrawCount > 0) { return; }
