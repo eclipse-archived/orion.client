@@ -88,8 +88,8 @@ define(["require",
 		options.wrappable = true;
 		exports.view = view = new mTextView.TextView(options);
 		
-		vi = new mVI.VIMode();
-		emacs = new mEmacs.EmacsMode();
+		vi = new mVI.VIMode(view);
+		emacs = new mEmacs.EmacsMode(view);
 		updateKeyMode(view, options);
 		
 		/* Undo stack */
