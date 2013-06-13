@@ -97,7 +97,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					this._incrementalFind.find(true);
 				}
 				return true;
-			}.bind(this), {name: messages.incrementalFindKey});
+			}.bind(this), {name: messages.incrementalFind});
 
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("j", true, true), "incrementalFindReverse"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("incrementalFindReverse", function() { //$NON-NLS-0$
@@ -105,7 +105,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					this._incrementalFind.find(false);
 				}
 				return true;
-			}.bind(this), {name: messages.incrementalFindKey});
+			}.bind(this), {name: messages.incrementalFindReverse});
 
 			textView.setAction("tab", function() { //$NON-NLS-0$
 				return this.indentLines();
