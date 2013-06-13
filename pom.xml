@@ -75,6 +75,19 @@
 			<url>https://repo.eclipse.org/content/repositories/orion-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
+	
+	<dependencies>
+	    <dependency>
+	        <groupId>org.mozilla</groupId>
+	        <artifactId>rhino</artifactId>
+	        <version>1.7R4</version>
+	    </dependency>
+	    <dependency>
+	        <groupId>com.google.javascript</groupId>
+	        <artifactId>closure-compiler</artifactId>
+	        <version>v20130411</version>
+	    </dependency>
+	</dependencies>
 
 	<modules>
 		<module>bundles/org.eclipse.orion.client.core</module>
@@ -115,18 +128,35 @@
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
+	            <artifactId>maven-dependency-plugin</artifactId>
+	            <inherited>false</inherited>
+	            <executions>
+	                <execution>
+	                    <id>install-jar</id>
+	                    <phase>verify</phase>
+	                    <goals>
+	                        <goal>copy-dependencies</goal>
+	                    </goals>
+	                    <configuration>
+	                        <outputDirectory>${basedir}/releng/requirejs/lib/</outputDirectory>
+	                        <stripVersion>true</stripVersion>
+	                    </configuration>
+	                </execution>
+	            </executions>
+	        </plugin>
+			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<inherited>false</inherited>
 				<executions>
 					<execution>
 						<phase>verify</phase>
 						<configuration>
-							<tasks if="requirejsHome">
+							<tasks if="minify">
 								<echo message="Minification started..."/>
 								<property name="builder"
 									value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
-								<!-- <property name="requirejsHome" 
-                          			value="${basedir}/requirejs/"/> -->
+								<property name="requirejsHome" 
+                          			value="${basedir}/releng/requirejs/"/>
                           		<property name="buildDirectory" 
                           			value="${basedir}"/>
 								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.mini.xml">

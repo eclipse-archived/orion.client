@@ -12,14 +12,15 @@
 			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" 
 				  dir="${buildDirectory}/optimization">
 				<classpath>
-					<pathelement location="${requirejsHome}/lib/rhino/js.jar" />
-					<pathelement location="${requirejsHome}/lib/closure/compiler.jar" />
+					<fileset dir="${requirejsHome}/lib/">
+				    	<include name="**/*.jar"/>
+				    </fileset>
 				</classpath>
 				<jvmarg value="-Xss1024k" />
 				<!-- JavaScript language version -->
 				<arg value="-version" />
 				<arg value="180" />
-				<arg value="${requirejsHome}/dist/r.js"/>
+				<arg value="${requirejsHome}/r.js"/>
 				<arg value="-o" />
 				<arg value="./orion.build.js"/>
 				<arg value="optimize=closure" />
@@ -31,10 +32,11 @@
 			<!-- optimize the page css -->
 			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="${buildDirectory}/optimization">
 				<classpath>
-					<pathelement location="${requirejsHome}/lib/rhino/js.jar" />
-					<pathelement location="${requirejsHome}/lib/closure/compiler.jar" />
+				    <fileset dir="${requirejsHome}/lib/">
+				    	<include name="**/*.jar"/>
+				    </fileset>
 				</classpath>
-				<arg value="${requirejsHome}/dist/r.js"/>
+				<arg value="${requirejsHome}/r.js"/>
 				<arg value="-o" />
 				<arg value="./orion.build.js"/>
 				<arg value="cssIn=@{pageDir}/@{name}.css" />
@@ -69,13 +71,14 @@
 			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" 
 				 dir="${buildDirectory}/optimization">
 				<classpath>
-					<pathelement location="${requirejsHome}/lib/rhino/js.jar" />
-					<pathelement location="${requirejsHome}/lib/closure/compiler.jar" />
+					<fileset dir="${requirejsHome}/lib/">
+				    	<include name="**/*.jar"/>
+				    </fileset>
 				</classpath>
 				<!-- JavaScript language version -->
 				<arg value="-version" />
 				<arg value="180" />
-				<arg value="${requirejsHome}/dist/r.js"/>
+				<arg value="${requirejsHome}/r.js"/>
 				<arg value="-o" />
 				<arg value="@{scriptName}"/>
 				<arg value="optimize=@{optimize}" />
@@ -114,7 +117,7 @@
 		</replace>
 	</target>
 
-	<target name="requirejs" if="requirejsHome" >
+	<target name="requirejs">
 		<delete dir="${buildDirectory}/optimization" />
 		<delete dir="${minifyDirectory}" />
 		<mkdir dir="${minifyDirectory}" />
