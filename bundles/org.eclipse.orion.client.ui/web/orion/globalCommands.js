@@ -407,6 +407,7 @@ define([
 		var name;
 		var fileSystemRootName;
 		var breadcrumbRootName = options.breadcrumbRootName;
+		var serviceRegistry = options.serviceRegistry;
 		if (options.target) { // we have metadata
 			if (options.searchService) {
 				options.searchService.setLocationByMetaData(options.target);
@@ -418,13 +419,13 @@ define([
 			}
 			name = options.name || options.target.Name;
 			pageItem = options.target;
-			generateRelatedLinks(options.serviceRegistry, options.target, exclusions, options.commandService, options.makeAlternate);
+			generateRelatedLinks(serviceRegistry, options.target, exclusions, options.commandService, options.makeAlternate);
 		} else {
 			if (!options.breadcrumbTarget) {
 				breadcrumbRootName = breadcrumbRootName || options.task || options.name;
 			}
 			name = options.name;
-			generateRelatedLinks(options.serviceRegistry, {
+			generateRelatedLinks(serviceRegistry, {
 				NoTarget: ""
 			}, exclusions, options.commandService, options.makeAlternate);
 		}
@@ -441,14 +442,15 @@ define([
 		var locationNode = lib.node("location"); //$NON-NLS-0$
 		if (locationNode) {
 			lib.empty(locationNode);
-			var fileClient = new mFileClient.FileClient(options.serviceRegistry);
+			var fileClient = serviceRegistry && new mFileClient.FileClient(serviceRegistry);
 			var resource = options.breadcrumbTarget || options.target;
+			var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
 			new mBreadcrumbs.BreadCrumbs({
 				container: locationNode,
 				resource: resource,
 				rootSegmentName: breadcrumbRootName,
 				workspaceRootSegmentName: fileSystemRootName,
-				workspaceRootURL: resource && resource.Location ? fileClient.fileServiceRootURL(resource.Location) : null,
+				workspaceRootURL: workspaceRootURL,
 				makeHref: options.makeBreadcrumbLink
 			});
 		}
