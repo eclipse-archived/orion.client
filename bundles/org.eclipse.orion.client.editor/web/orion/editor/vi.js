@@ -214,9 +214,19 @@ define("orion/editor/vi", [
 			}
 			
 			//Insert
+			bindings.push({actionID: "vi-a",	keyBinding: new KeyBinding("a", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-A",	keyBinding: new KeyBinding("A", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
+		
 			bindings.push({actionID: "vi-i",	keyBinding: new KeyBinding("i", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
 			bindings.push({actionID: "vi-I",	keyBinding: new KeyBinding("I", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
 	
+			bindings.push({actionID: "vi-o",	keyBinding: new KeyBinding("o", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-O",	keyBinding: new KeyBinding("O", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
+	
+			bindings.push({actionID: "vi-R",	keyBinding: new KeyBinding("R", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-s",	keyBinding: new KeyBinding("s", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$	
+			bindings.push({actionID: "vi-S",	keyBinding: new KeyBinding("S", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
+			
 			//Change
 			
 			//Create actions
@@ -249,6 +259,12 @@ define("orion/editor/vi", [
 			}
 			this.number = "";
 			return true;
+		},
+		_modeAdded: function() {
+			this.getView().setOptions({blockCursorVisible: true});	
+		},
+		_modeRemoved: function() {
+			this.getView().setOptions({blockCursorVisible: false});	
 		},
 		_findChar: function (start, end, reverse) {
 			var num = this.number >> 0 || 1;
@@ -509,6 +525,22 @@ define("orion/editor/vi", [
 				});
 				
 				//Insert
+				view.setAction("vi-a", function() { //$NON-NLS-0$
+					self.insertMode.storeNumber(self.number);
+					view.invokeAction("charNext", true); //$NON-NLS-0$
+					view.addKeyMode(self.insertMode);
+					view.removeKeyMode(self);
+					return true;
+				});
+				
+				view.setAction("vi-A", function() { //$NON-NLS-0$
+					self.insertMode.storeNumber(self.number);
+					view.invokeAction("lineEnd", true); //$NON-NLS-0$
+					view.addKeyMode(self.insertMode);
+					view.removeKeyMode(self);
+					return true;
+				});
+				
 				view.setAction("vi-i", function() { //$NON-NLS-0$
 					self.insertMode.storeNumber(self.number);
 					view.addKeyMode(self.insertMode);
@@ -518,6 +550,49 @@ define("orion/editor/vi", [
 				
 				view.setAction("vi-I", function() { //$NON-NLS-0$
 					self.insertMode.storeNumber(self.number);
+					view.invokeAction("lineStart", true); //$NON-NLS-0$
+					view.addKeyMode(self.insertMode);
+					view.removeKeyMode(self);
+					return true;
+				});
+				
+				view.setAction("vi-O", function() { //$NON-NLS-0$
+					self.insertMode.storeNumber(self.number);
+					view.invokeAction("enter", false, {insert:"above"}); //$NON-NLS-1$ //$NON-NLS-0$
+					view.addKeyMode(self.insertMode);
+					view.removeKeyMode(self);
+					return true;
+				});
+				
+				view.setAction("vi-o", function() { //$NON-NLS-0$
+					self.insertMode.storeNumber(self.number);
+					view.invokeAction("enter", false, {insert:"below"}); //$NON-NLS-1$ //$NON-NLS-0$
+					view.addKeyMode(self.insertMode);
+					view.removeKeyMode(self);
+					return true;
+				});
+				
+				view.setAction("vi-R", function() { //$NON-NLS-0$
+					self.insertMode.storeNumber(self.number);
+					self.insertMode._overwriteModeEnabled = true;
+					view.invokeAction("toggleOverwriteMode", true); //$NON-NLS-0$
+					view.addKeyMode(self.insertMode);
+					view.removeKeyMode(self);
+					return true;
+				});
+				
+				view.setAction("vi-S", function() { //$NON-NLS-0$
+					self.insertMode.storeNumber(self.number);
+					view.invokeAction("enter", false, {insert:"below"}); //$NON-NLS-1$ //$NON-NLS-0$
+					view.addKeyMode(self.insertMode);
+					view.removeKeyMode(self);
+					return true;
+				});
+				
+				view.setAction("vi-s", function() { //$NON-NLS-0$
+					self.insertMode.storeNumber(self.number);
+					
+					view.invokeAction("enter", false, {insert:"below"}); //$NON-NLS-1$ //$NON-NLS-0$
 					view.addKeyMode(self.insertMode);
 					view.removeKeyMode(self);
 					return true;

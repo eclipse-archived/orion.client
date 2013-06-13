@@ -1218,6 +1218,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
 	 * @property {Boolean} [wrapable=false] whether or not the view is wrappable.
 	 * @property {Number} [scrollAnimation=0] the time duration in miliseconds for scrolling animation. <code>0</code> means no animation.
+	 * @property {Boolean} [blockCursorVisible=false] whether or not to show the block cursor.
 	 */
 	/**
 	 * Constructs a new text view.
@@ -1247,6 +1248,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				keyModes.splice(index, 0, mode);
 			} else {
 				keyModes.push(mode);
+			}
+			//TODO: API needed for this
+			if (mode._modeAdded) {
+				mode._modeAdded();
 			}
 		},
 		/**
@@ -2342,6 +2347,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			for (var i=0; i<keyModes.length; i++) {
 				if (keyModes[i] === mode) {
 					keyModes.splice(i, 1);
+					//TODO: API needed for this
+					if (mode._modeRemoved) {
+						mode._modeRemoved();
+					}
 					break;
 				}
 			}
@@ -2743,6 +2752,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					rootDiv.removeChild(child);
 				}
 			}
+			if (this._cursorDiv) {
+				this._cursorDiv.style.display = "none"; //$NON-NLS-0$
+			}
 			if (this._selDiv1) {
 				var color = "lightgray"; //$NON-NLS-0$
 				this._selDiv1.style.background = color;
@@ -2942,6 +2954,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				this._lastTouchOffset = undefined;
 			} else {
 				this._updateDOMSelection();
+			}
+			if (this._cursorDiv) {
+				this._cursorDiv.style.display = "block"; //$NON-NLS-0$
 			}
 			if (this._selDiv1) {
 				var color = this._highlightRGB;
@@ -4828,6 +4843,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				tabSize: {value: 8, update: this._setTabSize},
 				expandTab: {value: false, update: null},
 				overwriteMode: { value: false, update: this._setOverwriteMode },
+				blockCursorVisible: { value: false, update: this._setBlockCursor},
 				wrapMode: {value: false, update: this._setWrapMode},
 				wrappable: {value: false, update: null},
 				theme: {value: mTextTheme.TextTheme.getTheme(), update: this._setTheme},
@@ -6098,9 +6114,16 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}
 		},
+		_setBlockCursor: function (visible) {
+			this._blockCursorVisible = visible;
+			this._updateBlockCursorVisible();
+		},
 		_setOverwriteMode: function (overwrite) {
 			this._overwriteMode = overwrite;
-			if (overwrite) {
+			this._updateBlockCursorVisible();
+		},
+		_updateBlockCursorVisible: function () {
+			if (this._blockCursorVisible || this._overwriteMode) {
 				if (!this._cursorDiv) {
 					var cursorDiv = util.createElement(document, "div"); //$NON-NLS-0$
 					cursorDiv.className = "textviewBlockCursor"; //$NON-NLS-0$
