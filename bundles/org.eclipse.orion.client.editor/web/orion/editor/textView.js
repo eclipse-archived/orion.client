@@ -4827,7 +4827,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				tabMode: { value: true, update: null },
 				tabSize: {value: 8, update: this._setTabSize},
 				expandTab: {value: false, update: null},
-				overwriteMode: { value: false, update: null },
+				overwriteMode: { value: false, update: this._setOverwriteMode },
 				wrapMode: {value: false, update: this._setWrapMode},
 				wrappable: {value: false, update: null},
 				theme: {value: mTextTheme.TextTheme.getTheme(), update: this._setTheme},
@@ -5684,7 +5684,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			cleanup();
 			return true;
 		},
-		_setDOMSelection: function (startNode, startOffset, endNode, endOffset) {
+		_setDOMSelection: function (startNode, startOffset, endNode, endOffset, force, startCaret) {
 			var startLineNode, startLineOffset, endLineNode, endLineOffset;
 			var offset = 0;
 			var lineChild = startNode.firstChild;
@@ -5745,10 +5745,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (window.getSelection) {
 				//W3C
 				var sel = window.getSelection();
-				if ((sel.anchorNode === startLineNode && sel.anchorOffset === startLineOffset &&
+				if (!force && (
+					(sel.anchorNode === startLineNode && sel.anchorOffset === startLineOffset &&
 					sel.focusNode === endLineNode && sel.focusOffset === endLineOffset) ||
 					(sel.anchorNode === endLineNode && sel.anchorOffset === endLineOffset &&
-					sel.focusNode === startLineNode && sel.focusOffset === startLineOffset)) { return; }
+					sel.focusNode === startLineNode && sel.focusOffset === startLineOffset))) { return; }
 				
 				range = document.createRange();
 				range.setStart(startLineNode, startLineOffset);
@@ -5757,6 +5758,17 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
 				sel.addRange(range);
 				this._ignoreSelect = true;
+				if (this._cursorDiv) {
+					if (startCaret) {
+						range.setEnd(startLineNode, startLineOffset);
+					} else {
+						range.setStart(endLineNode, endLineOffset);
+					}
+					var rect = range.getClientRects()[0];
+					var clientRect = this._rootDiv.getBoundingClientRect();
+					this._cursorDiv.style.top = (rect.top - clientRect.top) + "px"; //$NON-NLS-0$
+					this._cursorDiv.style.left = (rect.left - clientRect.left) + "px"; //$NON-NLS-0$
+				}
 			} else if (document.selection) {
 				//IE < 9
 				var body = document.body;
@@ -6086,6 +6098,29 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}
 		},
+		_setOverwriteMode: function (overwrite) {
+			this._overwriteMode = overwrite;
+			if (overwrite) {
+				if (!this._cursorDiv) {
+					var cursorDiv = util.createElement(document, "div"); //$NON-NLS-0$
+					cursorDiv.className = "textviewBlockCursor"; //$NON-NLS-0$
+					this._cursorDiv = cursorDiv;
+					cursorDiv.tabIndex = -1;
+					cursorDiv.style.zIndex = "2"; //$NON-NLS-0$
+					cursorDiv.style.color = "transparent"; //$NON-NLS-0$
+					cursorDiv.style.position = "absolute"; //$NON-NLS-0$
+					cursorDiv.style.pointerEvents = "none"; //$NON-NLS-0$
+					cursorDiv.innerHTML = "&nbsp;"; //$NON-NLS-0$
+					this._rootDiv.appendChild(cursorDiv);
+					this._updateDOMSelection(true);
+				}
+			} else {
+				if (this._cursorDiv) {
+					this._cursorDiv.parentNode.removeChild(this._cursorDiv);
+					this._cursorDiv = null;
+				}
+			}
+		},
 		_setReadOnly: function (readOnly) {
 			this._readonly = readOnly;
 			this._clientDiv.setAttribute("aria-readonly", readOnly ? "true" : "false"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -6254,7 +6289,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				this._mutationObserver = null;
 			}
 		},
-		_updateDOMSelection: function () {
+		_updateDOMSelection: function (force) {
 			if (this._ignoreDOMSelection) { return; }
 			if (!this._clientDiv) { return; }
 			var selection = this._getSelection();
@@ -6291,7 +6326,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				bottomNode = this._getLineNode(endLine);
 				bottomOffset = selection.end - model.getLineStart(endLine);
 			}
-			this._setDOMSelection(topNode, topOffset, bottomNode, bottomOffset);
+			this._setDOMSelection(topNode, topOffset, bottomNode, bottomOffset, force, selection.caret);
 		},
 		_update: function(hScrollOnly) {
 			if (this._redrawCount > 0) { return; }
