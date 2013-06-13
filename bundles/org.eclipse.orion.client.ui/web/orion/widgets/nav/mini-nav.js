@@ -308,7 +308,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				fileClient: this.fileClient,
 				editorInputManager: this.editorInputManager,
 				sidebarNavInputManager: this.sidebarNavInputManager,
-				parentId: this.parentNode,
+				parentId: this.parentNode.id,
 				rendererFactory: function(explorer) {
 					var renderer = new MiniNavRenderer({
 						checkbox: false,
