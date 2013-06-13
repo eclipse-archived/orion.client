@@ -209,8 +209,9 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		_inSelection: function(model){
+			var modelId = this.model.getId(model);
 			for(var i = 0; i < this._selections.length; i++){
-				if(model === this._selections[i]){
+				if(modelId === this.model.getId(this._selections[i])){
 					return i;
 				}
 			}
