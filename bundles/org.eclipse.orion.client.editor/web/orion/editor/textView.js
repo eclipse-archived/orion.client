@@ -3873,7 +3873,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				var lineIndex = model.getLineAtOffset(selection.end);
 				if (selection.end < model.getLineEnd(lineIndex)) {
 					var line = this._getLine(lineIndex);
-					selection.extend(line.getNextOffset(selection.getCaret(), {unit:"character", count:1}));
+					selection.extend(line.getNextOffset(selection.getCaret(), {unit:"character", count:1})); //$NON-NLS-0$
 					line.destroy();
 				}
 			}
