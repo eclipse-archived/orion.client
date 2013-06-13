@@ -80,6 +80,7 @@ define({
 	
 	"toggleWrapMode": "Toggle Wrap Mode", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleTabMode": "Toggle Tab Mode", //$NON-NLS-1$ //$NON-NLS-0$
+	"toggleOverwriteMode": "Toggle Overwrite Mode", //$NON-NLS-1$ //$NON-NLS-0$
 	
 	//Emacs
 	"emacs": "Emacs", //$NON-NLS-1$ //$NON-NLS-0$

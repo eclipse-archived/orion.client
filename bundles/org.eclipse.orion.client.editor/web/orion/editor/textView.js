@@ -1214,6 +1214,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 	 * @property {orion.editor.TextTheme} [theme=orion.editor.TextTheme.getTheme()] the TextTheme manager. TODO more info on this
 	 * @property {String} [themeClass] the CSS class for the view theming.
 	 * @property {Number} [tabSize=8] The number of spaces in a tab.
+	 * @property {Boolean} [overwriteMode=false] whether or not the view is in insert/overwrite mode.
 	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
 	 * @property {Boolean} [wrapable=false] whether or not the view is wrappable.
 	 * @property {Number} [scrollAnimation=0] the time duration in miliseconds for scrolling animation. <code>0</code> means no animation.
@@ -1475,6 +1476,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *       <li>"shiftTab" - noop</li>
 		 *       <li>"toggleTabMode" - toggles tab mode.</li>
 		 *       <li>"toggleWrapMode" - toggles wrap mode.</li>
+		 *       <li>"toggleOverwriteMode" - toggles overwrite mode.</li>
 		 *       <li>"enter" - inserts a line delimiter at the caret</li>
 		 *     </ul>
 		 *   <li>Clipboard actions.</li>
@@ -3866,6 +3868,15 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		_doContent: function (text) {
 			var selection = this._getSelection();
+			if (this._overwriteMode && selection.isEmpty()) {
+				var model = this._model;
+				var lineIndex = model.getLineAtOffset(selection.end);
+				if (selection.end < model.getLineEnd(lineIndex)) {
+					var line = this._getLine(lineIndex);
+					selection.extend(line.getNextOffset(selection.getCaret(), {unit:"character", count:1}));
+					line.destroy();
+				}
+			}
 			this._modifyContent({text: text, start: selection.start, end: selection.end, _ignoreDOMSelection: true}, true);
 		},
 		_doCopy: function (e) {
@@ -4294,7 +4305,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return true;
 		},
 		_doTab: function (args) {
-			if(!this._tabMode || this._readonly) { return; }
+			if (!this._tabMode || this._readonly) { return; }
 			var text = "\t"; //$NON-NLS-0$
 			if (this._expandTab) {
 				var model = this._model;
@@ -4308,7 +4319,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return true;
 		},
 		_doShiftTab: function (args) {
-			if(!this._tabMode || this._readonly) { return; }
+			if (!this._tabMode || this._readonly) { return; }
+			return true;
+		},
+		_doOverwriteMode: function (args) {
+			if (this._readonly) { return; }
+			this.setOptions({overwriteMode: !this.getOptions("overwriteMode")}); //$NON-NLS-0$
 			return true;
 		},
 		_doTabMode: function (args) {
@@ -4589,9 +4605,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				"copy": {defaultHandler: function(data) {return self._doCopy();}, actionDescription: {name: messages.copy}}, //$NON-NLS-0$
 				"cut": {defaultHandler: function(data) {return self._doCut();}, actionDescription: {name: messages.cut}}, //$NON-NLS-0$
 				"paste": {defaultHandler: function(data) {return self._doPaste();}, actionDescription: {name: messages.paste}}, //$NON-NLS-0$
-				
-				"toggleWrapMode": {defaultHandler: function(data) {return self._doWrapMode();}, actionDescription: {name: messages.toggleWrapMode}}, //$NON-NLS-0$
-				"toggleTabMode": {defaultHandler: function(data) {return self._doTabMode();}, actionDescription: {name: messages.toggleTabMode}} //$NON-NLS-0$
+
+				"toggleOverwriteMode": {defaultHandler: function(data) {return self._doOverwriteMode();}, actionDescription: {name: messages.toggleOverwriteMode}}, //$NON-NLS-0$
+				"toggleTabMode": {defaultHandler: function(data) {return self._doTabMode();}, actionDescription: {name: messages.toggleTabMode}}, //$NON-NLS-0$
+				"toggleWrapMode": {defaultHandler: function(data) {return self._doWrapMode();}, actionDescription: {name: messages.toggleWrapMode}} //$NON-NLS-0$
 			};
 		},
 		_createRuler: function(ruler, index) {
@@ -4810,6 +4827,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				tabMode: { value: true, update: null },
 				tabSize: {value: 8, update: this._setTabSize},
 				expandTab: {value: false, update: null},
+				overwriteMode: { value: false, update: null },
 				wrapMode: {value: false, update: this._setWrapMode},
 				wrappable: {value: false, update: null},
 				theme: {value: mTextTheme.TextTheme.getTheme(), update: this._setTheme},
