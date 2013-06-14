@@ -5,33 +5,10 @@
    Use additional classes in theme.css or layout.css where more treatment is needed. 
 */
 
-.logoFooter {
-	background: url(../images/orion-logo.png) no-repeat top left;
-	width: 50px;
-	height: 28px;
-	float: left;
-}
-
 .commandSprite {
    background: url(../images/core_sprites.png) no-repeat top left;
    vertical-align: middle;
    display: inline-block;
-}
-
-.compareAdditionSprite {
-	background-image: url(../images/compare-addition.gif);  
-   	vertical-align: middle;
-   	display: inline-block;
-	width: 16px; 
-	height: 16px;
-}
-
-.compareRemovalSprite {
-	background-image: url(../images/compare-removal.gif);  
-   	vertical-align: middle;
-   	display: inline-block;
-	width: 16px; 
-	height: 16px;
 }
 
 .imageSprite {
@@ -41,117 +18,45 @@
 }
 
 /* Individual sprites */
-.core-sprite-check{ background-position: 0 0; width: 16px; height: 16px; } 
-.core-sprite-check_on{ background-position: 0 -18px; width: 16px; height: 16px; } 
-.core-sprite-close{ background-position: 0 -36px; width: 12px; height: 12px; } 
-.core-sprite-closedarrow{ background-position: 0 -54px; width: 16px; height: 16px; } 
-/* .core-sprite-collapseAll{ background-position: 0 -72px; width: 16px; height: 16px; } */
-.core-sprite-collapseAll{ background: url(../images/collapse.png) no-repeat top left; width: 16px; height: 16px; } 
-.core-sprite-delete{ background-position: 0 -90px; width: 16px; height: 16px; } 
-.core-sprite-diff-border-sel{ background-position: 0 -108px; width: 46px; height: 1px; } 
-.core-sprite-diff-border{ background-position: 0 -111px; width: 46px; height: 1px; } 
-.core-sprite-diff-empty-add-word-border{ background-position: 0 -114px; width: 4px; height: 18px; } 
-.core-sprite-diff-empty-del-word-border{ background-position: 0 -134px; width: 4px; height: 18px; } 
-.core-sprite-diff-empty-word-border-black{ background-position: 0 -154px; width: 2px; height: 18px; } 
-.core-sprite-edit{ background-position: 0 -174px; width: 16px; height: 16px; } 
-.core-sprite-error{ background: url(../images/error.png) no-repeat top left; width: 16px; height: 16px; }
-/* .core-sprite-error{ background-position: 0 -192px; width: 16px; height: 16px; } */
-/* .core-sprite-expandAll{ background-position: 0 -210px; width: 16px; height: 16px; } */
-.core-sprite-expandAll{ background: url(../images/expand.png) no-repeat top left; width: 16px; height: 16px; } 
-.core-sprite-favorite_sml{ background-position: 0 -228px; width: 12px; height: 12px; } 
-.core-sprite-file{ background-position: 0 -246px; width: 16px; height: 16px; } 
-.core-sprite-file_model{ background-position: 0 -264px; width: 16px; height: 16px; } 
-.core-sprite-folder{ background-position: 0 -282px; width: 16px; height: 16px; } 
-.core-sprite-glass{ background-position: 0 -300px; width: 12px; height: 12px; } 
-.core-sprite-html{ background-position: 0 -314px; width: 16px; height: 16px; } 
-.core-sprite-info{ background: url(../images/information.png) no-repeat top left; width: 16px; height: 16px; }
-/* .core-sprite-info{ background-position: 0 -332px; width: 16px; height: 16px; } */
-.core-sprite-javascript{ background-position: 0 -350px; width: 16px; height: 16px; } 
-.core-sprite-leftarrow{ background-position: 0 -368px; width: 16px; height: 16px; } 
-.core-sprite-link{ background-position: 0 -386px; width: 16px; height: 16px; } 
-/* .core-sprite-makeFavorite{ background-position: 0 -404px; width: 16px; height: 16px; } */ 
-.core-sprite-makeFavorite{ background:url(../images/favorite.png) no-repeat top left; width: 16px; height: 16px; } 
-.core-sprite-menu_twistie{ background-position: 0 -422px; width: 5px; height: 3px; } 
-.core-sprite-move_down{ background-position: 0 -427px; width: 16px; height: 16px; } 
-.core-sprite-move_up{ background-position: 0 -445px; width: 16px; height: 16px; } 
-.core-sprite-none{ background-position: 0 -463px; width: 16px; height: 16px; } 
-.core-sprite-ok{ background-position: 0 -481px; width: 16px; height: 16px; } 
-.core-sprite-openarrow{ background-position: 0 -499px; width: 16px; height: 16px; } 
-.core-sprite-orion-transparent{ background: url(../images/orion-dark.png) no-repeat top left; width: 37px; height: 14px; } 
-.core-sprite-problem{ background-position: 0 -533px; width: 16px; height: 16px; } 
-.core-sprite-progress_running{ background-position: 0 -551px; width: 16px; height: 16px; } 
-.core-sprite-refresh{ background-position: 0 -569px; width: 16px; height: 16px; } 
-.core-sprite-replaceAll{ background-position: 0 -587px; width: 16px; height: 16px; } 
-.core-sprite-rightarrow{ background-position: 0 -605px; width: 16px; height: 16px; } 
-.core-sprite-sep{ background-position: 0 -623px; width: 1px; height: 16px; } 
-.core-sprite-splitterleft{ background-position: 0 -641px; width: 6px; height: 11px; } 
-.core-sprite-splitterright{ background-position: 0 -654px; width: 6px; height: 11px; } 
-.core-sprite-start{ background-position: 0 -667px; width: 16px; height: 16px; } 
-.core-sprite-stop{ background-position: 0 -685px; width: 16px; height: 16px; } 
-.core-sprite-stylesheet{ background-position: 0 -703px; width: 16px; height: 16px; } 
-.core-sprite-warning{ background-position: 0 -721px; width: 16px; height: 16px; } 
-.core-sprite-hamburger-inverse{  background: url(../images/hamburger.png) no-repeat top left; width: 16px; height: 16px;} 
-.core-sprite-silhouette-inverse{  background: url(../images/silhouette.png) no-repeat top left; width: 16px; height: 16px;} 
-.core-sprite-silhouette{  background: url(../images/silhouette-dark.png) no-repeat top left; width: 16px; height: 16px;} 
-
-.core-sprite-add-content{  
-	background: url(../images/addcontent.png) no-repeat top left; 
-	width: 16px; 
-	height: 16px;
-} 
-
-.core-sprite-go-up{  
-	background: url(../images/moveUp.png) no-repeat center; 
-	width: 16px;
-	height: 16px;
-} 
-
-.core-sprite-outline{  
-	background: url(../images/outline.png) no-repeat top left; 
-	width: 16px; 
-	height: 16px;
-}
-   
-.core-sprite-settings {
-   background: url(../images/gear.png) no-repeat top left;
-   height: 16px;
-   width: 16px;
-}
-
-.core-sprite-wrench {
-   background: url(../images/wrench.png) no-repeat center;
-   height: 21px;
-   width: 20px;
-   border: none;
-}
-
-.core-sprite-wrench-white {
-   background: url(../images/wrench-white.png) no-repeat center;
-   height: 21px;
-   width: 20px;
-   border: none;
-}
-
-.core-sprite-thumbnail {
-   background: url(../images/thumbnail.png) no-repeat top left;
-   vertical-align: middle;
-   display: inline-block;
-   margin: 7px;
-   height: 16px;
-   width: 16px;
-}
-
-.core-sprite-list {
-   background: url(../images/list.png) no-repeat top left;
-   vertical-align: middle;
-   display: inline-block;
-   margin: 7px;
-   height: 16px;
-   width: 16px;
-}
-
-.core-sprite-copy-folder {
-   background: url(../images/copy-folder.png) no-repeat top left;
-   height: 16px;
-   width: 16px;
-}
+.core-sprite-addcontent{ background-position: 0 0; width: 16px; height: 16px; } 
+.core-sprite-check{ background-position: 0 -18px; width: 16px; height: 16px; } 
+.core-sprite-check_on{ background-position: 0 -36px; width: 16px; height: 16px; } 
+.core-sprite-close{ background-position: 0 -54px; width: 16px; height: 16px; } 
+.core-sprite-closedarrow{ background-position: 0 -72px; width: 16px; height: 16px; } 
+.core-sprite-collapseAll{ background-position: 0 -90px; width: 16px; height: 16px; } 
+.core-sprite-compare-addition{ background-position: 0 -108px; width: 16px; height: 16px; } 
+.core-sprite-compare-removal{ background-position: 0 -126px; width: 16px; height: 16px; } 
+.core-sprite-copy-folder{ background-position: 0 -144px; width: 16px; height: 16px; } 
+.core-sprite-delete{ background-position: 0 -162px; width: 16px; height: 16px; } 
+.core-sprite-edit{ background-position: 0 -180px; width: 16px; height: 16px; } 
+.core-sprite-error{ background-position: 0 -198px; width: 16px; height: 16px; } 
+.core-sprite-expandAll{ background-position: 0 -216px; width: 16px; height: 16px; } 
+.core-sprite-favorite{ background-position: 0 -234px; width: 16px; height: 16px; } 
+.core-sprite-file{ background-position: 0 -252px; width: 16px; height: 16px; } 
+.core-sprite-file_model{ background-position: 0 -270px; width: 16px; height: 16px; } 
+.core-sprite-folder{ background-position: 0 -288px; width: 16px; height: 16px; } 
+.core-sprite-gear{ background-position: 0 -306px; width: 16px; height: 16px; } 
+.core-sprite-go-up{ background-position: 0 -324px; width: 16px; height: 16px; } 
+.core-sprite-hamburger{ background-position: 0 -342px; width: 16px; height: 16px; } 
+.core-sprite-information{ background-position: 0 -360px; width: 16px; height: 16px; } 
+.core-sprite-leftarrow{ background-position: 0 -378px; width: 16px; height: 16px; } 
+.core-sprite-link{ background-position: 0 -396px; width: 16px; height: 16px; } 
+.core-sprite-list{ background-position: 0 -414px; width: 16px; height: 16px; } 
+.core-sprite-move_down{ background-position: 0 -432px; width: 16px; height: 16px; } 
+.core-sprite-move_up{ background-position: 0 -450px; width: 16px; height: 16px; } 
+.core-sprite-none{ background-position: 0 -468px; width: 16px; height: 16px; } 
+.core-sprite-ok{ background-position: 0 -486px; width: 16px; height: 16px; } 
+.core-sprite-openarrow{ background-position: 0 -504px; width: 16px; height: 16px; } 
+.core-sprite-orion-logo{ background-position: 0 -522px; width: 36px; height: 25px; } 
+.core-sprite-outline{ background-position: 0 -549px; width: 16px; height: 16px; } 
+.core-sprite-refresh{ background-position: 0 -567px; width: 16px; height: 16px; } 
+.core-sprite-replaceAll{ background-position: 0 -585px; width: 16px; height: 16px; } 
+.core-sprite-rightarrow{ background-position: 0 -603px; width: 16px; height: 16px; } 
+.core-sprite-sep{ background-position: 0 -621px; width: 1px; height: 16px; } 
+.core-sprite-silhouette{ background-position: 0 -639px; width: 16px; height: 16px; } 
+.core-sprite-start{ background-position: 0 -657px; width: 16px; height: 16px; } 
+.core-sprite-stop{ background-position: 0 -675px; width: 16px; height: 16px; } 
+.core-sprite-stylesheet{ background-position: 0 -693px; width: 16px; height: 16px; } 
+.core-sprite-thumbnail{ background-position: 0 -711px; width: 16px; height: 16px; } 
+.core-sprite-warning{ background-position: 0 -729px; width: 16px; height: 16px; } 
+.core-sprite-wrench{ background-position: 0 -747px; width: 16px; height: 16px; } 

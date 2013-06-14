@@ -418,7 +418,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				for (i=0; i<favorites.length; i++) {
 					var stripped = stripPath(favorites[i].path);
 					if (!contains(sourceLocations, stripped)) {
-						choices.push({name: favorites[i].name, imageClass: "core-sprite-makeFavorite", path: stripped, callback: callback}); //$NON-NLS-0$
+						choices.push({name: favorites[i].name, imageClass: "core-sprite-favorite", path: stripped, callback: callback}); //$NON-NLS-0$
 					}
 				}
 				if (favorites.length > 0) {

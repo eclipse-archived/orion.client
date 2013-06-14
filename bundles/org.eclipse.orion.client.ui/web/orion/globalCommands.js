@@ -52,7 +52,7 @@ define([
 	function setUserIcon() {
 		var userTrigger = document.getElementById('userTrigger');
 		var userTriggerClassName = userTrigger.className;
-		userTriggerClassName = userTriggerClassName + ' core-sprite-silhouette-inverse';
+		userTriggerClassName = userTriggerClassName + ' imageSprite core-sprite-silhouette';
 		userTrigger.className = userTriggerClassName;
 	}
 
@@ -111,7 +111,7 @@ define([
 
 			var navDropDown = new DropDownMenu('centralNavigation', {
 				label: 'Develop',
-				icon: 'core-sprite-hamburger-inverse'
+				icon: 'commandSprite core-sprite-hamburger'
 			});
 			var groupedContent = new GroupedContent();
 			navDropDown.addContent(groupedContent.getContentPane());
@@ -523,7 +523,7 @@ define([
 	function addSettings(settings) {
 		var navDropDown = new DropDownMenu('settingsTab', {
 			label: 'Develop',
-			icon: 'core-sprite-wrench'
+			icon: 'imageSprite core-sprite-wrench'
 		}, false);
 		navDropDown.updateContent = settings.updateContent.bind(settings);
 	}
@@ -661,7 +661,7 @@ define([
 		var favoriteCommand = new mCommands.Command({
 			name: messages["Make Favorite"],
 			tooltip: messages['Add to the favorites list'],
-			imageClass: "core-sprite-makeFavorite", //$NON-NLS-0$
+			imageClass: "core-sprite-favorite", //$NON-NLS-0$
 			id: "orion.makeFavorite", //$NON-NLS-0$
 			visibleWhen: function (item) {
 				var items = Array.isArray(item) ? item : [item];
