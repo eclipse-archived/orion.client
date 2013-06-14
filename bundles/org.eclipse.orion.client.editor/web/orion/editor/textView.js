@@ -3909,9 +3909,23 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._doMove(args, selection);
 			var text = this.getText(selection.start, selection.end);
 			this._setSelection(selection, true);
-			switch (args.action) {
+			switch (args.type) {
 				case "lower": text = text.toLowerCase(); break; //$NON-NLS-0$
 				case "capitalize": text = text.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); }); break; //$NON-NLS-0$
+				case "reverse":  //$NON-NLS-0$
+					var newText = "";
+					for (var i=0; i<text.length; i++) {
+						var s = text[i];
+						var l = s.toLowerCase();
+						if (l !== s) {
+							s = l;
+						} else {
+							s = s.toUpperCase();
+						}
+						newText += s;
+					} 
+					text = newText;
+					break;
 				default: text = text.toUpperCase(); break;
 			}
 			this._doContent(text);
@@ -4595,10 +4609,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				"cut": {defaultHandler: function(data) {return self._doCut();}, actionDescription: {name: messages.cut}}, //$NON-NLS-0$
 				"paste": {defaultHandler: function(data) {return self._doPaste();}, actionDescription: {name: messages.paste}}, //$NON-NLS-0$
 				
-				"uppercase": {defaultHandler: function(data) {return self._doCase(merge(data,{action: "upper"}));}, actionDescription: {name: messages.uppercase}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"lowercase": {defaultHandler: function(data) {return self._doCase(merge(data,{action: "lower"}));}, actionDescription: {name: messages.lowercase}}, //$NON-NLS-1$ //$NON-NLS-0$
-				"capitalize": {defaultHandler: function(data) {return self._doCase(merge(data,{unit: "word", action: "capitalize"}));}, actionDescription: {name: messages.capitalize}}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
+				"uppercase": {defaultHandler: function(data) {return self._doCase(merge(data,{type: "upper"}));}, actionDescription: {name: messages.uppercase}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"lowercase": {defaultHandler: function(data) {return self._doCase(merge(data,{type: "lower"}));}, actionDescription: {name: messages.lowercase}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"capitalize": {defaultHandler: function(data) {return self._doCase(merge(data,{unit: "word", type: "capitalize"}));}, actionDescription: {name: messages.capitalize}}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				"reversecase": {defaultHandler: function(data) {return self._doCase(merge(data,{type: "reverse"}));}, actionDescription: {name: messages.reverse}}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				
 				"toggleOverwriteMode": {defaultHandler: function(data) {return self._doOverwriteMode();}, actionDescription: {name: messages.toggleOverwriteMode}}, //$NON-NLS-0$
 				"toggleTabMode": {defaultHandler: function(data) {return self._doTabMode();}, actionDescription: {name: messages.toggleTabMode}}, //$NON-NLS-0$
 				"toggleWrapMode": {defaultHandler: function(data) {return self._doWrapMode();}, actionDescription: {name: messages.toggleWrapMode}} //$NON-NLS-0$

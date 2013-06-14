@@ -323,7 +323,8 @@ define("orion/editor/vi", [
 			//Change
 			bindings.push({actionID: "vi-c",	keyBinding: new KeyBinding("c", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
 			bindings.push({actionID: "vi-d",	keyBinding: new KeyBinding("d", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
-
+			bindings.push({actionID: "vi-~",	keyBinding: new KeyBinding("~", false, false, false, false, "keypress"), predefined: true}); //$NON-NLS-0$
+			
 			//Create actions
 			this._createActions(this.getView());
 		
@@ -719,6 +720,14 @@ define("orion/editor/vi", [
 					self.number = "";
 					return true;
 				});
+				
+				view.setAction("vi-~", function() { //$NON-NLS-0$
+					var num = self.number >> 0 || 1;
+					var result = view.invokeAction("reversecase", false, {count:num}); //$NON-NLS-1$ //$NON-NLS-0$
+					self.number = "";
+					return result;
+				});
+				
 				//Status Line Mode
 				view.setAction("statusLineMode", function() { //$NON-NLS-0$
 					self.insertMode.storeNumber(self.number);
