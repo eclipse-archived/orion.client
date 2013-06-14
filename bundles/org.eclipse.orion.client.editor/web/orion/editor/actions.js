@@ -136,8 +136,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			}.bind(this), {name: messages.copyLinesDown});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding('d', true, false, false), "deleteLines"); //$NON-NLS-1$ //$NON-NLS-0$
-			textView.setAction("deleteLines", function() { //$NON-NLS-0$
-				return this.deleteLines();
+			textView.setAction("deleteLines", function(data) { //$NON-NLS-0$
+				return this.deleteLines(data);
 			}.bind(this), {name: messages.deleteLines});
 			
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("l", !util.isMac, false, false, util.isMac), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -222,15 +222,24 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			editor.setSelection(insertOffset, insertOffset + text.length - delimiter.length);
 			return true;
 		},
-		deleteLines: function() {
+		deleteLines: function(data) {
 			var editor = this.editor;
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var count = 1;
+			if (data && data.count) {
+				count = data.count;
+			}
 			var selection = editor.getSelection();
 			var model = editor.getModel();
 			var firstLine = model.getLineAtOffset(selection.start);
-			var lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
 			var lineStart = model.getLineStart(firstLine);
+			var lastLine;
+			if (selection.start !== selection.end || count === 1) {
+				lastLine = model.getLineAtOffset(selection.end > selection.start ? selection.end - 1 : selection.end);
+			} else {
+				lastLine = Math.min(firstLine + count - 1, model.getLineCount() - 1);
+			}
 			var lineEnd = model.getLineEnd(lastLine, true);
 			editor.setText("", lineStart, lineEnd);
 			return true;
