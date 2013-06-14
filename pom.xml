@@ -61,6 +61,7 @@
 		<tycho.scmUrl>scm:git:http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git</tycho.scmUrl>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java-version>1.6</java-version>
+		<requirejsHome>${basedir}/target/requirejs/</requirejsHome>
 	</properties>
 
 	<distributionManagement>
@@ -75,7 +76,7 @@
 			<url>https://repo.eclipse.org/content/repositories/orion-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
-	
+
 	<dependencies>
 	    <dependency>
 	        <groupId>org.mozilla</groupId>
@@ -138,7 +139,7 @@
 	                        <goal>copy-dependencies</goal>
 	                    </goals>
 	                    <configuration>
-	                        <outputDirectory>${basedir}/releng/requirejs/lib/</outputDirectory>
+	                        <outputDirectory>${requirejsHome}/lib/</outputDirectory>
 	                        <stripVersion>true</stripVersion>
 	                    </configuration>
 	                </execution>
@@ -154,11 +155,12 @@
 							<tasks>
 								<property name="builder"
 									value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
-								<property name="requirejsHome" 
-                          			value="${basedir}/releng/requirejs/"/>
-                          		<property name="buildDirectory" 
+                                <property name="requirejsHome"
+                                    value="${requirejsHome}"/>
+                                <property name="buildDirectory"
                           			value="${basedir}"/>
 								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.mini.xml">
+								    <target name="download3rdPartyLibs"/>
 								    <target name="updateBuildLabel"/>
 									<target name="requirejs"/>
 								</ant>
@@ -169,7 +171,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>			
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>

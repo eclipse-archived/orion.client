@@ -3,6 +3,14 @@
 	<property name="super" value="Build specific targets and properties" />
 	<property name="minifyDirectory" value="${buildDirectory}/built-js" />
 
+    <target name="download3rdPartyLibs">
+        <mkdir dir="${requirejsHome}" />
+        <get src="http://requirejs.org/docs/release/2.1.6/r.js"
+             dest="${requirejsHome}/r.js"
+             usetimestamp="true"
+             maxtime="30" />
+    </target>
+
 	<target name="updateBuildLabel" if="buildLabel">
 	    <echo message="Updating build label..."/>
 		<replace dir="${buildDirectory}" includes="pluginVersions.properties,featureVersions.properties"  >
@@ -20,7 +28,7 @@
 		<attribute name="pageDir" default = "." />
 		<attribute name="bundle"  />
 		<sequential>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" 
+			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true"
 				  dir="${buildDirectory}/optimization">
 				<classpath>
 					<fileset dir="${requirejsHome}/lib/">
@@ -79,7 +87,7 @@
 		<attribute name="fileName" />
 		<attribute name="optimize" />
 		<sequential>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" 
+			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true"
 				 dir="${buildDirectory}/optimization">
 				<classpath>
 					<fileset dir="${requirejsHome}/lib/">
@@ -130,7 +138,7 @@
 
 	<target name="requirejs" if="minify">
 	    <echo message="Minification started..."/>
-	    
+
 		<delete dir="${buildDirectory}/optimization" />
 		<delete dir="${minifyDirectory}" />
 		<mkdir dir="${minifyDirectory}" />
@@ -147,14 +155,14 @@
 			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.git/web" includes="**"/>
 			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.users/web" includes="**"/>
 		</copy>
-		
+
 		<!-- build standalone editor -->
 		<editorOptimize  filename="built-editor.css" scriptname="editor.build-css.js" optimize="closure"/>
 		<editorOptimize  filename="built-editor-amd.min.js" scriptname="editor.build-js.js" optimize="closure"/>
 		<editorOptimize  filename="built-editor-amd.js" scriptname="editor.build-js.js" optimize="none"/>
 		<editorOptimize  filename="built-editor.min.js" scriptname="editor.build.almond-js.js" optimize="closure"/>
 		<editorOptimize  filename="built-editor.js" scriptname="editor.build.almond-js.js" optimize="none"/>
-		
+
 		<!-- build orion pages and plugins -->
 		<optimize pageDir="." name="index" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="navigate" name="table" bundle="org.eclipse.orion.client.ui" />
@@ -163,17 +171,17 @@
 		<optimize pageDir="operations" name="list" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="search" name="search" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="settings" name="settings" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="shell" name="shellPage" bundle="org.eclipse.orion.client.ui" />		
+		<optimize pageDir="shell" name="shellPage" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins/site" name="sitePlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="authenticationPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="fileClientPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="jslintPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="preferencesPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="taskPlugin" bundle="org.eclipse.orion.client.ui" />		
+		<optimize pageDir="plugins" name="taskPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="sites" name="site" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="sites" name="sites" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="sites" name="view" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="mixloginstatic" name="LoginWindow" bundle="org.eclipse.orion.client.ui" />		
+		<optimize pageDir="mixloginstatic" name="LoginWindow" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="mixloginstatic" name="manageOpenids" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="git/plugins" name="gitPlugin" bundle="org.eclipse.orion.client.git" />
 		<optimize pageDir="git" name="git-log" bundle="org.eclipse.orion.client.git" />
