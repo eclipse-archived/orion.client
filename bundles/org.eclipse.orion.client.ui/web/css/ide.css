@@ -35,6 +35,11 @@ h2 {
 	margin-bottom: 4px;
 }
 
+/** remove unwanted borders on img in IE **/
+img {
+	border: 0;
+}
+
 /**
  * Remove unwanted button padding in Firefox
  */ 
