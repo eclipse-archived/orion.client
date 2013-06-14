@@ -98,15 +98,15 @@
 .git-sprite-file{ background-position: 0 -144px; width: 16px; height: 16px; } 
 .git-sprite-incoming_commit{ background-position: 0 -162px; width: 16px; height: 16px; } 
 .git-sprite-merge{ background-position: 0 -180px; width: 16px; height: 16px; } 
-.git-sprite-merge_squash{ background: url( ../images/mergesquash.png ) no-repeat top left; width: 16px; height: 16px; }
-.git-sprite-notsure{ background-position: 0 -198px; width: 16px; height: 16px; } 
-.git-sprite-outgoing_commit{ background-position: 0 -216px; width: 16px; height: 16px; } 
-.git-sprite-pull{ background-position: 0 -234px; width: 16px; height: 16px; } 
-.git-sprite-rebase{ background-position: 0 -252px; width: 16px; height: 16px; } 
-.git-sprite-remote{ background-position: 0 -270px; width: 16px; height: 16px; } 
-.git-sprite-removal{ background-position: 0 -288px; width: 16px; height: 16px; } 
-.git-sprite-repository{ background-position: 0 -306px; width: 16px; height: 16px; } 
-.git-sprite-reset{ background-position: 0 -324px; width: 16px; height: 16px; } 
-.git-sprite-stage{ background-position: 0 -342px; width: 16px; height: 16px; } 
-.git-sprite-tag{ background-position: 0 -360px; width: 16px; height: 16px; } 
-.git-sprite-unstage{ background-position: 0 -378px; width: 16px; height: 16px; } 
+.git-sprite-merge_squash{ background-position: 0 -198px; width: 16px; height: 16px; } 
+.git-sprite-notsure{ background-position: 0 -216px; width: 16px; height: 16px; } 
+.git-sprite-outgoing_commit{ background-position: 0 -234px; width: 16px; height: 16px; } 
+.git-sprite-pull{ background-position: 0 -252px; width: 16px; height: 16px; } 
+.git-sprite-rebase{ background-position: 0 -270px; width: 16px; height: 16px; } 
+.git-sprite-remote{ background-position: 0 -288px; width: 16px; height: 16px; } 
+.git-sprite-removal{ background-position: 0 -306px; width: 16px; height: 16px; } 
+.git-sprite-repository{ background-position: 0 -324px; width: 16px; height: 16px; } 
+.git-sprite-reset{ background-position: 0 -342px; width: 16px; height: 16px; } 
+.git-sprite-stage{ background-position: 0 -360px; width: 16px; height: 16px; } 
+.git-sprite-tag{ background-position: 0 -378px; width: 16px; height: 16px; } 
+.git-sprite-unstage{ background-position: 0 -396px; width: 16px; height: 16px; }
