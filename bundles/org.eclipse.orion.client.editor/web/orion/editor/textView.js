@@ -3843,44 +3843,78 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			return false;
 		},
+		_doMove: function(args, selection) {
+			var model = this._model;
+			var caret = selection.getCaret();
+			var lineIndex = model.getLineAtOffset(caret);
+			if (!args.count) {
+				args.count = 1;
+			}
+			while (args.count !== 0) {
+				var lineStart = model.getLineStart(lineIndex);
+				if (args.count < 0 && caret === lineStart) {
+					if (lineIndex > 0) {
+						if (args.unit === "character") { //$NON-NLS-0$
+							args.count++;
+						}
+						lineIndex--;
+						selection.extend(model.getLineEnd(lineIndex));
+					} else {
+						break;
+					}
+				} else if (args.count > 0 && caret === model.getLineEnd(lineIndex)) {
+					if (lineIndex + 1 < model.getLineCount()) {
+						if (args.unit === "character") { //$NON-NLS-0$
+							args.count--;
+						}
+						lineIndex++;
+						selection.extend(model.getLineStart(lineIndex));
+					} else {
+						break;
+					}
+				} else {
+					var removeTab = false;
+					if (args.expandTab && args.unit === "character" && (caret - lineStart) % this._tabSize === 0) { //$NON-NLS-0$
+						var lineText = model.getText(lineStart, caret);
+						removeTab = !/[^ ]/.test(lineText); // Only spaces between line start and caret.
+					}
+					if (removeTab) {
+						selection.extend(caret - this._tabSize);
+						args.count += args.count < 0 ? 1 : -1;
+					} else {
+						var line = this._getLine(lineIndex);
+						selection.extend(line.getNextOffset(caret, args));
+						line.destroy();
+					}
+				}
+				caret = selection.getCaret();
+			}
+			return selection;
+		},
 		_doBackspace: function (args) {
 			var selection = this._getSelection();
 			if (selection.isEmpty()) {
-				var model = this._model;
-				var caret = selection.getCaret();
-				var lineIndex = model.getLineAtOffset(caret);
 				if (!args.count) {
 					args.count = 1;
 				}
 				args.count *= -1;
-				while (args.count !== 0) {
-					var lineStart = model.getLineStart(lineIndex);
-					if (caret === lineStart) {
-						if (lineIndex > 0) {
-							if (args.unit === "character") { //$NON-NLS-0$
-								args.count++;
-							}
-							lineIndex--;
-							selection.extend(model.getLineEnd(lineIndex));
-						}
-					} else {
-						var removeTab = false;
-						if (this._expandTab && args.unit === "character" && (caret - lineStart) % this._tabSize === 0) { //$NON-NLS-0$
-							var lineText = model.getText(lineStart, caret);
-							removeTab = !/[^ ]/.test(lineText); // Only spaces between line start and caret.
-						}
-						if (removeTab) {
-							selection.extend(caret - this._tabSize);
-						} else {
-							var line = this._getLine(lineIndex);
-							selection.extend(line.getNextOffset(caret, args));
-							line.destroy();
-						}
-					}
-					caret = selection.getCaret();
-				}
+				args.expandTab = this._expandTab;
+				this._doMove(args, selection);
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
+			return true;
+		},
+		_doCase: function (args) {
+			var selection = this._getSelection();
+			this._doMove(args, selection);
+			var text = this.getText(selection.start, selection.end);
+			this._setSelection(selection, true);
+			switch (args.action) {
+				case "lower": text = text.toLowerCase(); break; //$NON-NLS-0$
+				case "capitalize": text = text.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); }); break; //$NON-NLS-0$
+				default: text = text.toUpperCase(); break;
+			}
+			this._doContent(text);
 			return true;
 		},
 		_doContent: function (text) {
@@ -3905,67 +3939,26 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return true;
 		},
 		_doCursorNext: function (args) {
-			if (!args.select) {
-				if (this._clearSelection("next")) { return true; } //$NON-NLS-0$
-			}
-			var model = this._model;
 			var selection = this._getSelection();
-			var caret = selection.getCaret();
-			var lineIndex = model.getLineAtOffset(caret);
-			if (!args.count) {
-				args.count = 1;
-			}
-			while (args.count !== 0) {
-				if (caret === model.getLineEnd(lineIndex)) {
-					if (lineIndex + 1 < model.getLineCount()) {
-						if (args.unit === "character") { //$NON-NLS-0$
-							args.count--;
-						}
-						lineIndex++;
-						selection.extend(model.getLineStart(lineIndex));
-					} else {
-						break;
-					}
-				} else {
-					var line = this._getLine(lineIndex);
-					selection.extend(line.getNextOffset(caret, args));
-					line.destroy();
-				}
-				caret = selection.getCaret();
+			if (!selection.isEmpty() && !args.select) {
+				selection.start = selection.end;
+			} else {
+				this._doMove(args, selection);
 			}
 			if (!args.select) { selection.collapse(); }
 			this._setSelection(selection, true);
 			return true;
 		},
 		_doCursorPrevious: function (args) {
-			if (!args.select) {
-				if (this._clearSelection("previous")) { return true; } //$NON-NLS-0$
-			}
-			var model = this._model;
 			var selection = this._getSelection();
-			var caret = selection.getCaret();
-			var lineIndex = model.getLineAtOffset(caret);
-			if (!args.count) {
-				args.count = 1;
-			}
-			args.count *= -1;
-			while (args.count !== 0) {
-				if (caret === model.getLineStart(lineIndex)) {
-					if (lineIndex > 0) {
-						if (args.unit === "character") { //$NON-NLS-0$
-							args.count++;
-						}
-						lineIndex--;
-						selection.extend(model.getLineEnd(lineIndex));
-					} else {
-						break;
-					}
-				} else {
-					var line = this._getLine(lineIndex);
-					selection.extend(line.getNextOffset(caret, args));
-					line.destroy();
+			if (!selection.isEmpty() && !args.select) {
+				selection.end = selection.start;
+			} else {
+				if (!args.count) {
+					args.count = 1;
 				}
-				caret = selection.getCaret();
+				args.count *= -1;
+				this._doMove(args, selection);
 			}
 			if (!args.select) { selection.collapse(); }
 			this._setSelection(selection, true);
@@ -3983,28 +3976,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		_doDelete: function (args) {
 			var selection = this._getSelection();
 			if (selection.isEmpty()) {
-				var model = this._model;
-				var caret = selection.getCaret();
-				var lineIndex = model.getLineAtOffset(caret);
-				if (!args.count) {
-					args.count = 1;
-				}
-				while (args.count !== 0) {
-					if (caret === model.getLineEnd (lineIndex)) {
-						if (lineIndex + 1 < model.getLineCount()) {
-							if (args.unit === "character") { //$NON-NLS-0$
-								args.count--;
-							}
-							lineIndex++;
-							selection.extend(model.getLineStart(lineIndex));
-						}
-					} else {
-						var line = this._getLine(lineIndex);
-						selection.extend(line.getNextOffset(caret, args));
-						line.destroy();
-					}
-					caret = selection.getCaret();
-				}
+				this._doMove(args, selection);
 			}
 			this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
 			return true;
@@ -4622,6 +4594,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				"copy": {defaultHandler: function(data) {return self._doCopy();}, actionDescription: {name: messages.copy}}, //$NON-NLS-0$
 				"cut": {defaultHandler: function(data) {return self._doCut();}, actionDescription: {name: messages.cut}}, //$NON-NLS-0$
 				"paste": {defaultHandler: function(data) {return self._doPaste();}, actionDescription: {name: messages.paste}}, //$NON-NLS-0$
+				
+				"uppercase": {defaultHandler: function(data) {return self._doCase(merge(data,{action: "upper"}));}, actionDescription: {name: messages.uppercase}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"lowercase": {defaultHandler: function(data) {return self._doCase(merge(data,{action: "lower"}));}, actionDescription: {name: messages.lowercase}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"capitalize": {defaultHandler: function(data) {return self._doCase(merge(data,{unit: "word", action: "capitalize"}));}, actionDescription: {name: messages.capitalize}}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				"toggleOverwriteMode": {defaultHandler: function(data) {return self._doOverwriteMode();}, actionDescription: {name: messages.toggleOverwriteMode}}, //$NON-NLS-0$
 				"toggleTabMode": {defaultHandler: function(data) {return self._doTabMode();}, actionDescription: {name: messages.toggleTabMode}}, //$NON-NLS-0$
