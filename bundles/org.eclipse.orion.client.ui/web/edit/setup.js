@@ -271,7 +271,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				noFile.classList.add("noFile"); //$NON-NLS-0$
 				noFile.textContent = messages["NoFile"];
 				var plusIcon = document.createElement("span"); //$NON-NLS-0$
-				plusIcon.classList.add("core-sprite-add-content"); //$NON-NLS-0$
+				plusIcon.classList.add("core-sprite-addcontent"); //$NON-NLS-0$
 				plusIcon.classList.add("icon-inline"); //$NON-NLS-0$
 				lib.processDOMNodes(noFile, [plusIcon]);
 

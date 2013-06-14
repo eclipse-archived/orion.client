@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2009, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -122,12 +122,14 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			if(item.type){
 				switch (item.type) {
 					case "added": //$NON-NLS-0$
-						_addClass(diffStatusIcon, "compareAdditionSprite"); //$NON-NLS-0$
+						_addClass(diffStatusIcon, "imageSprite"); //$NON-NLS-0$
+						_addClass(diffStatusIcon, "core-sprite-compare-addition"); //$NON-NLS-0$
 						displayName = item.name;
 						linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL; //$NON-NLS-1$ //$NON-NLS-0$
 						break;
 					case "removed": //$NON-NLS-0$
-						_addClass(diffStatusIcon, "compareRemovalSprite"); //$NON-NLS-0$
+						_addClass(diffStatusIcon, "imageSprite"); //$NON-NLS-0$
+						_addClass(diffStatusIcon, "core-sprite-compare-removal"); //$NON-NLS-0$
 						displayName = item.name;
 						linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL; //$NON-NLS-1$ //$NON-NLS-0$
 						break;

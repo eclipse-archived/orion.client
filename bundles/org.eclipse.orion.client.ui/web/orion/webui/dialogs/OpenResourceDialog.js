@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -228,7 +228,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 	OpenResourceDialog.prototype.showFavoritesImage = function(col) {
 		var image = new Image();
 		image.classList.add("modelDecorationSprite"); //$NON-NLS-0$
-		image.classList.add("core-sprite-makeFavorite"); //$NON-NLS-0$
+		image.classList.add("core-sprite-favorite"); //$NON-NLS-0$
 		// without an image, chrome will draw a border  (?)
 		image.src = require.toUrl("images/none.png"); //$NON-NLS-0$
 		image.title = messages['Favorite'];
