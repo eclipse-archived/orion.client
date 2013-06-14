@@ -530,9 +530,13 @@ exports.GitRepositoryExplorer = (function() {
 	};
 		
 	GitRepositoryExplorer.prototype.renderStatus = function(repository, status){
+		var workingDirectoryNode = lib.node("workingDirectoryNode");
+		if (workingDirectoryNode) {
+			lib.empty(workingDirectoryNode);
+		}
 		var sectionItem = document.createElement("div");
 		sectionItem.className = "sectionTableItem";
-		lib.node("workingDirectoryNode").appendChild(sectionItem);
+		workingDirectoryNode.appendChild(sectionItem);
 
 		var horizontalBox = document.createElement("div");
 		horizontalBox.style.overflow = "hidden";
@@ -550,22 +554,16 @@ exports.GitRepositoryExplorer = (function() {
 		horizontalBox.appendChild(detailsView);
 		
 		if (status.RepositoryState !== "SAFE"){
-			var repositoryState = document.createElement("span");
+			var repositoryState = document.createElement("div");
 			repositoryState.textContent = messages["Rebase in progress!"];
 			detailsView.appendChild(repositoryState);
-			
-			var div = document.createElement("div");
-			detailsView.appendChild(div);
 		}
 		
-		var title = document.createElement("span");
+		var title = document.createElement("div");
 		title.textContent = workspaceState;
 		detailsView.appendChild(title);
 
-		var div = document.createElement("div");
-		detailsView.appendChild(div);
-		
-		var description = document.createElement("span");
+		var description = document.createElement("div");
 		description.textContent = i18nUtil.formatMessage(messages['${0} file(s) to stage and ${1} file(s) to commit.'], unstaged, staged);
 		detailsView.appendChild(description);
 	};
