@@ -151,8 +151,7 @@
 					<execution>
 						<phase>verify</phase>
 						<configuration>
-							<tasks if="minify">
-								<echo message="Minification started..."/>
+							<tasks>
 								<property name="builder"
 									value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
 								<property name="requirejsHome" 
@@ -160,6 +159,7 @@
                           		<property name="buildDirectory" 
                           			value="${basedir}"/>
 								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.mini.xml">
+								    <target name="updateBuildLabel"/>
 									<target name="requirejs"/>
 								</ant>
 							</tasks>
