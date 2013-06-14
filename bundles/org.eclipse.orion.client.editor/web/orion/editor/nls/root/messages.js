@@ -78,6 +78,10 @@ define({
 	"cut": "Cut", //$NON-NLS-1$ //$NON-NLS-0$
 	"paste": "Paste", //$NON-NLS-1$ //$NON-NLS-0$
 	
+	"uppercase": "To Upper Case", //$NON-NLS-1$ //$NON-NLS-0$
+	"lowercase": "To Lower Case", //$NON-NLS-1$ //$NON-NLS-0$
+	"capitalize": "Capitalize", //$NON-NLS-1$ //$NON-NLS-0$
+	
 	"toggleWrapMode": "Toggle Wrap Mode", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleTabMode": "Toggle Tab Mode", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleOverwriteMode": "Toggle Overwrite Mode", //$NON-NLS-1$ //$NON-NLS-0$

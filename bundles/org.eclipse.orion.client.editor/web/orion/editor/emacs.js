@@ -70,6 +70,10 @@ define("orion/editor/emacs", [ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, !util.isMac, false, true, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		
+		bindings.push({actionID: "emacs-uppercase", keyBinding: new KeyStroke('u', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-lowercase", keyBinding: new KeyStroke('l', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-capitalize", keyBinding: new KeyStroke('c', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+
 		//TODO should these keys be done here?
 		bindings.push({actionID: "contentAssist", keyBinding: new KeyStroke(191, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
 		bindings.push({actionID: "find", keyBinding: new KeyStroke('r', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
@@ -83,15 +87,20 @@ define("orion/editor/emacs", [ //$NON-NLS-0$
 		return bindings;
 	};
 	
-	EmacsMode.prototype._moveCursor = function (actionID) {
+	EmacsMode.prototype._getData = function() {
 		var data = {
 			count: (this._argument || 1) * (this._sign || 1)
 		};
+		this._argument = 0;
+		this._sign = 1;
+		return data;
+	};
+	
+	EmacsMode.prototype._moveCursor = function (actionID) {
+		var data = this._getData();
 		if (this._marker) {
 			data.select = true;
 		}
-		this._argument = 0;
-		this._sign = 1;
 		var view = this.getView();
 		return view.invokeAction(actionID, false, data);
 	};
@@ -224,6 +233,22 @@ define("orion/editor/emacs", [ //$NON-NLS-0$
 		view.setAction("emacs-negative-argument", function() { //$NON-NLS-0$
 			return self._negativeArgument();
 		}, {name: messages.negativeArgument});
+		
+		view.setAction("emacs-uppercase", function() { //$NON-NLS-0$
+			var data = self._getData();
+			data.unit = "word"; //$NON-NLS-0$
+			return view.invokeAction("uppercase", false, data); //$NON-NLS-0$
+		}, {name: messages.uppercase});
+		view.setAction("emacs-lowercase", function() { //$NON-NLS-0$
+			var data = self._getData();
+			data.unit = "word"; //$NON-NLS-0$
+			return view.invokeAction("lowercase", false, data); //$NON-NLS-0$
+		}, {name: messages.lowercase});
+		view.setAction("emacs-capitalize", function() { //$NON-NLS-0$
+			var data = self._getData();
+			data.unit = "word"; //$NON-NLS-0$
+			return view.invokeAction("capitalize", false, data); //$NON-NLS-0$
+		}, {name: messages.capitalize});
 	};
 
 	return {
