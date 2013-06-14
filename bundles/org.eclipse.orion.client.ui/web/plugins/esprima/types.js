@@ -11,140 +11,208 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  ******************************************************************************/
 
-/*global define */
-define("plugins/esprima/types", [], function() {
+/*
+This module defines the built in types for the scripted JS inferencer.
+It also contains functions for manipulating internal type signatures.
+*/
+
+/*jslint es5:true browser:true*/
+/*global define doctrine console */
+define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
+function(proposalUtils, scriptedLogger/*, doctrine*/) {
+
+	/**
+	 * Doctrine closure compiler style type objects
+	 */
+	function ensureTypeObject(signature) {
+		if (!signature) {
+			return signature;
+		}
+		if (signature.type) {
+			return signature;
+		}
+		try {
+			return doctrine.parseParamType(signature);
+		} catch(e) {
+			console.error("doctrine failure to parse: " + signature);
+			return {};
+		}
+	}
+
+
+	function createNameType(name) {
+	    if (typeof name !== 'string') {
+	        throw new Error('Expected string, but found: ' + JSON.parse(name));
+	    }
+		return { type: 'NameExpression', name: name };
+	}
+
+	var THE_UNKNOWN_TYPE = createNameType("Object");
+
+	var JUST_DOTS = '$$__JUST_DOTS__$$';
+	var JUST_DOTS_REGEX = /\$\$__JUST_DOTS__\$\$/g;
+	var UNDEFINED_OR_EMPTY_OBJ = /:undefined|:\{\}/g;
+
 
 	/**
 	 * The Definition class refers to the declaration of an identifier.
 	 * The start and end are locations in the source code.
 	 * Path is a URL corresponding to the document where the definition occurs.
 	 * If range is undefined, then the definition refers to the entire document
-	 * Range is a two element array with the start and end values 
+	 * Range is a two element array with the start and end values
 	 * (Exactly the same range field as is used in Esprima)
 	 * If the document is undefined, then the definition is in the current document.
 	 *
-	 * Types that begin with '?' are functions.  The values after the ':' are the 
-	 * argument names.
 	 * @param String typeName
-	 * @param {Array.<Number>} range
+	 * @param {[Number]} range
 	 * @param String path
 	 */
-	var Definition = function(typeName, range, path) {
-		this.typeName = typeName;
+	var Definition = function(typeObj, range, path) {
+		this._typeObj = ensureTypeObject(typeObj);
 		this.range = range;
 		this.path = path;
 	};
-	
+
+	Definition.prototype = {
+		set typeObj(val) {
+			var maybeObj = val;
+			if (typeof maybeObj === 'string') {
+				maybeObj = ensureTypeObject(maybeObj);
+			}
+			this._typeObj = maybeObj;
+		},
+
+		get typeObj() {
+			return this._typeObj;
+		}
+	};
+
+	/**
+	 * Revivies a Definition object from a regular object
+	 */
+	Definition.revive = function(obj) {
+		var defn = new Definition();
+		for (var prop in obj) {
+			if (obj.hasOwnProperty(prop)) {
+				if (prop === 'typeSig') {
+					defn.typeObj = obj[prop];
+				} else {
+					defn[prop] = obj[prop];
+				}
+			}
+		}
+		return defn;
+	};
+
 	// From ecma script manual 262 section 15
 	// the global object when not in browser or node
 	var Global = function() {};
 	Global.prototype = {
 		$$proto : new Definition("Object"),
-		
-		decodeURI : new Definition("?String:uri"),
-		encodeURI : new Definition("?String:uri"),
-		'eval' : new Definition("?Object:toEval"),
-		parseInt : new Definition("?Number:str,[radix]"),
-		parseFloat : new Definition("?Number:str,[radix]"),
-		"this": new Definition("Global"),  
+
+		decodeURI : new Definition("function(uri:String):String"),
+		encodeURI : new Definition("function(uri:String):String"),
+		'eval' : new Definition("function(toEval:String):Object"),
+		parseInt : new Definition("function(str:String,radix:Number=):Number"),
+		parseFloat : new Definition("function(str:String,radix:Number=):Number"),
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
-		Object: new Definition("*Object:[val]"),
-		Function: new Definition("*Function:"),
-		Array: new Definition("*Array:[val]"),
-		Boolean: new Definition("*Boolean:[val]"),
-		Number: new Definition("*Number:[val]"),
-		Date: new Definition("*Date:[val]"),
-		RegExp: new Definition("*RegExp:[val]"),
-		Error: new Definition("*Error:[err]"),
+		Object: new Definition("function(new:Object,val:Object=):Object"),
+		Function: new Definition("function(new:Function):Function"),
+		Array: new Definition("function(new:Array,val:Array=):Array"),
+		Boolean: new Definition("function(new:Boolean,val:Boolean=):Boolean"),
+		Number: new Definition("function(new:Number,val:Number=):Number"),
+		Date: new Definition("function(new:Date,val:Date=):Date"),
+		RegExp: new Definition("function(new:RegExp,val:RegExp=):RegExp"),
+		Error: new Definition("function(new:Error,err:Error=):Error"),
 		'undefined' : new Definition("undefined"),
-		isNaN : new Definition("?Boolean:num"),
-		isFinite : new Definition("?Boolean:num"),
+		isNaN : new Definition("function(num:Number):Boolean"),
+		isFinite : new Definition("function(num:Number):Boolean"),
 		"NaN" : new Definition("Number"),
 		"Infinity" : new Definition("Number"),
-		decodeURIComponent : new Definition("?String:encodedURIString"),
-		encodeURIComponent : new Definition("?String:decodedURIString")
+		decodeURIComponent : new Definition("function(encodedURIString:String):String"),
+		encodeURIComponent : new Definition("function(decodedURIString:String):String"),
 
+		"this": new Definition("Global")
 		// not included since not meant to be referenced directly
-		// EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError 
+		// EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError
 	};
-	
+
 	// Node module
 	var Module = function() {};
 	Module.prototype = {
 
-		// From Window
-		decodeURI : new Definition("?String:uri"),
-		encodeURI : new Definition("?String:uri"),
-		'eval' : new Definition("?Object:toEval"),
-		parseInt : new Definition("?Number:str,[radix]"),
-		parseFloat : new Definition("?Number:str,[radix]"),
-		"this": new Definition("Module"),  
+		// From Global
+		decodeURI : new Definition("function(uri:String):String"),
+		encodeURI : new Definition("function(uri:String):String"),
+		'eval' : new Definition("function(toEval:String):Object"),
+		parseInt : new Definition("function(str:String,radix:Number=):Number"),
+		parseFloat : new Definition("function(str:String,radix:Number=):Number"),
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
-		Object: new Definition("*Object:[val]"),
-		Function: new Definition("*Function:"),
-		Array: new Definition("*Array:[val]"),
-		Boolean: new Definition("*Boolean:[val]"),
-		Number: new Definition("*Number:[val]"),
-		Date: new Definition("*Date:[val]"),
-		RegExp: new Definition("*RegExp:[val]"),
-		Error: new Definition("*Error:[err]"),
+		Object: new Definition("function(new:Object,val:Object=):Object"),
+		Function: new Definition("function(new:Function):Function"),
+		Array: new Definition("function(new:Array,val:Array=):Array"),
+		Boolean: new Definition("function(new:Boolean,val:Boolean=):Boolean"),
+		Number: new Definition("function(new:Number,val:Number=):Number"),
+		Date: new Definition("function(new:Date,val:Date=):Date"),
+		RegExp: new Definition("function(new:RegExp,val:RegExp=):RegExp"),
+		Error: new Definition("function(new:Error,err:Error=):Error"),
 		'undefined' : new Definition("undefined"),
-		isNaN : new Definition("?Boolean:num"),
-		isFinite : new Definition("?Boolean:num"),
+		isNaN : new Definition("function(num:Number):Boolean"),
+		isFinite : new Definition("function(num:Number):Boolean"),
 		"NaN" : new Definition("Number"),
 		"Infinity" : new Definition("Number"),
-		decodeURIComponent : new Definition("?String:encodedURIString"),
-		encodeURIComponent : new Definition("?String:decodedURIString"),
+		decodeURIComponent : new Definition("function(encodedURIString:String):String"),
+		encodeURIComponent : new Definition("function(decodedURIString:String):String"),
 
-
+		"this": new Definition("Module"),
 		Buffer: new Definition("Object"),
 		console: new Definition("Object"),
 		module: new Definition("Module"),
 		process: new Definition("Process"),
 
-		require: new Definition("?Object:module"),
+		require: new Definition("function(module:String):Object"),
 //		exports: new Definition("Object"),
-		clearInterval: new Definition("?undefined:t"),
-		clearTimeout: new Definition("?undefined:t"),
-		setInterval: new Definition("?Number:callback,ms"),
-		setTimeout : new Definition("?Number:callback,ms"),
+		clearInterval: new Definition("function(t:Number)"),
+		clearTimeout: new Definition("function(t:Number)"),
+		setInterval: new Definition("function(callback:Function,ms:Number):Number"),
+		setTimeout : new Definition("function(callback:Function,ms:Number):Number"),
 		global: new Definition("Module"),
 		querystring: new Definition("String"),
 		__filename: new Definition("String"),
 		__dirname: new Definition("String")
 	};
-	
+
 	var Window = function() {};
 	Window.prototype = {
 		// copied from Global
 		$$proto : new Definition("Object"),
-		
-		decodeURI : new Definition("?String:uri"),
-		encodeURI : new Definition("?String:uri"),
-		'eval' : new Definition("?Object:toEval"),
-		parseInt : new Definition("?Number:str,[radix]"),
-		parseFloat : new Definition("?Number:str,[radix]"),
-		"this": new Definition("Window"),  
+
+		decodeURI : new Definition("function(uri:String):String"),
+		encodeURI : new Definition("function(uri:String):String"),
+		'eval' : new Definition("function(toEval:String):Object"),
+		parseInt : new Definition("function(str:String,radix:Number=):Number"),
+		parseFloat : new Definition("function(str:String,radix:Number=):Number"),
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
-		Object: new Definition("*Object:[val]"),
-		Function: new Definition("*Function:"),
-		Array: new Definition("*Array:[val]"),
-		Boolean: new Definition("*Boolean:[val]"),
-		Number: new Definition("*Number:[val]"),
-		Date: new Definition("*Date:[val]"),
-		RegExp: new Definition("*RegExp:[val]"),
-		Error: new Definition("*Error:[err]"),
+		Object: new Definition("function(new:Object,val:Object=):Object"),
+		Function: new Definition("function(new:Function):Function"),
+		Array: new Definition("function(new:Array,val:Array=):Array"),
+		Boolean: new Definition("function(new:Boolean,val:Boolean=):Boolean"),
+		Number: new Definition("function(new:Number,val:Number=):Number"),
+		Date: new Definition("function(new:Date,val:Date=):Date"),
+		RegExp: new Definition("function(new:RegExp,val:RegExp=):RegExp"),
+		Error: new Definition("function(new:Error,err:Error=):Error"),
 		'undefined' : new Definition("undefined"),
-		isNaN : new Definition("?Boolean:num"),
-		isFinite : new Definition("?Boolean:num"),
+		isNaN : new Definition("function(num:Number):Boolean"),
+		isFinite : new Definition("function(num:Number):Boolean"),
 		"NaN" : new Definition("Number"),
 		"Infinity" : new Definition("Number"),
-		decodeURIComponent : new Definition("?String:encodedURIString"),
-		encodeURIComponent : new Definition("?String:decodedURIString"),
+		decodeURIComponent : new Definition("function(encodedURIString:String):String"),
+		encodeURIComponent : new Definition("function(decodedURIString:String):String"),
 
+		"this": new Definition("Window"),
 		// see https://developer.mozilla.org/en/DOM/window
 			// Properties
 		applicationCache : new Definition("DOMApplicationCache"),
@@ -191,135 +259,126 @@ define("plugins/esprima/types", [], function() {
 
 			// Methods
 			// commented methods are mozilla-specific
-		addEventListener : new Definition("?undefined:"),
-		alert : new Definition("?undefined:String"),
-		atob : new Definition("?String:val"),
-		back : new Definition("?undefined:"),
-		blur : new Definition("?undefined:"),
-		btoa : new Definition("?String:val"),
-		clearInterval : new Definition("?undefined:interval"),
-		clearTimeout : new Definition("?undefined:timeout"),
-		close : new Definition("?undefined:"),
-		confirm : new Definition("?Boolean:msg"),
-		//disableExternalCapture : new Definition("???"),
-		dispatchEvent : new Definition("?undefined:domnode"),
-		dump : new Definition("?undefined:message"),
-		//enableExternalCapture : new Definition("???"),
-		escape : new Definition("?String:str"),
-		find : new Definition("?Boolean:text"),
-		focus : new Definition("?undefined:"),
-		forward : new Definition("?undefined:"),
-		getAttention : new Definition("?undefined:"),
-		getComputedStyle : new Definition("?CSSStyleDeclaration:dombode"),
-		getSelection : new Definition("?Selection:"),
-		home : new Definition("?undefined:"),
-		matchMedia : new Definition("?MediaQueryList:query"),
-		//maximize : new Definition("???"),
-		//minimize : new Definition("???"),
-		moveBy : new Definition("?undefined:deltaX,deltaY"),
-		moveTo : new Definition("?undefined:x,y"),
-		open : new Definition("?Window:strUrl,strWindowName,[strWindowFeatures]"),
-		openDialog : new Definition("?Window:strUrl,strWindowName,strWindowFeatures,[args]"),
-		postMessage : new Definition("?undefined:message,targetOrigin"),
-		print : new Definition("?undefined:"),
-		prompt : new Definition("?String:message"),
-		removeEventListener : new Definition("?undefined:type,listener,[useCapture]"),
-		resizeBy : new Definition("?undefined:deltaX,deltaY"),
-		resizeTo : new Definition("?undefined:x,y"),
-		scroll : new Definition("?undefined:x,y"),
-		scrollBy : new Definition("?undefined:deltaX,deltaY"),
-		scrollByLines : new Definition("?undefined:lines"),
-		scrollByPages : new Definition("?undefined:pages"),
-		scrollTo : new Definition("?undefined:x,y"),
-		setCursor : new Definition("?undefined:cursor"),
-		setInterval : new Definition("?Number:func,interval"),
-		//setResizable : new Definition("???"),
-		setTimeout : new Definition("?Number:func,timeout"),
-		sizeToContent : new Definition("?undefined:"),
-		stop : new Definition("?undefined:"),
-		unescape : new Definition("?String:str"),
-		updateCommands : new Definition("?undefined:cmdName"),
+		addEventListener : new Definition("function()"),
+		alert : new Definition("function(msg:String)"),
+		atob : new Definition("function(val:Object):String"),
+		back : new Definition("function()"),
+		blur : new Definition("function()"),
+		btoa : new Definition("function(val:Object):String"),
+		clearInterval: new Definition("function(t:Number)"),
+		clearTimeout: new Definition("function(t:Number)"),
+		close : new Definition("function()"),
+		confirm : new Definition("function(msg:String):Boolean"),
+		dispatchEvent : new Definition("function(domnode:Node)"),
+		dump : new Definition("function(msg:String)"),
+		escape : new Definition("function(str:String):String"),
+		find : new Definition("function(str:String):Boolean"),
+		focus : new Definition("function()"),
+		forward : new Definition("function()"),
+		getAttention : new Definition("function()"),
+		getComputedStyle : new Definition("function(domnode:Node):CSSStyleDeclaration"),
+		getSelection : new Definition("function():Selection"),
+		home : new Definition("function()"),
+		matchMedia : new Definition("function(query:Object):MediaQueryList"),
+		moveBy : new Definition("function(deltaX:Number,deltaY:Number)"),
+		moveTo : new Definition("function(x:Number,y:Number)"),
+		open : new Definition("function(strUrl:String,strWindowName:String,strWindowFeatures:String=):Window"),
+		openDialog : new Definition("function(strUrl:String,strWindowName:String,strWindowFeatures:String,args:String=):Window"),
+		postMessage : new Definition("function(message:String,targetOrigin:String)"),
+		print : new Definition("function()"),
+		prompt : new Definition("function(message:String):String"),
+		removeEventListener : new Definition("function(type:String,listener:Object,useCapture:Boolean=)"),
+		resizeBy : new Definition("function(deltaX:Number,deltaY:Number)"),
+		resizeTo : new Definition("function(x:Number,y:Number)"),
+		scroll : new Definition("function(x:Number,y:Number)"),
+		scrollBy : new Definition("function(deltaX:Number,deltaY:Number)"),
+		scrollByLines : new Definition("function(lines:Number)"),
+		scrollByPages : new Definition("function(pages:Number)"),
+		scrollTo : new Definition("function(x:Number,y:Number)"),
+		setCursor : new Definition("function(cursor)"),
+		setInterval: new Definition("function(callback:Function,ms:Number):Number"),
+		setTimeout : new Definition("function(callback:Function,ms:Number):Number"),
+		sizeToContent : new Definition("function()"),
+		stop : new Definition("function()"),
+		unescape : new Definition("function(str:String):String"),
+		updateCommands : new Definition("function(cmdName:String)"),
 
 			// Events
-		onabort : new Definition("?undefined:event"),
-		onbeforeunload : new Definition("?undefined:event"),
-		onblur : new Definition("?undefined:event"),
-		onchange : new Definition("?undefined:event"),
-		onclick : new Definition("?undefined:event"),
-		onclose : new Definition("?undefined:event"),
-		oncontextmenu : new Definition("?undefined:event"),
-		ondevicemotion : new Definition("?undefined:event"),
-		ondeviceorientation : new Definition("?undefined:event"),
-		ondragdrop : new Definition("?undefined:event"),
-		onerror : new Definition("?undefined:event"),
-		onfocus : new Definition("?undefined:event"),
-		onhashchange : new Definition("?undefined:event"),
-		onkeydown : new Definition("?undefined:event"),
-		onkeypress : new Definition("?undefined:event"),
-		onkeyup : new Definition("?undefined:event"),
-		onload : new Definition("?undefined:event"),
-		onmousedown : new Definition("?undefined:event"),
-		onmousemove : new Definition("?undefined:event"),
-		onmouseout : new Definition("?undefined:event"),
-		onmouseover : new Definition("?undefined:event"),
-		onmouseup : new Definition("?undefined:event"),
-		onpaint : new Definition("?undefined:event"),
-		onpopstate : new Definition("?undefined:event"),
-		onreset : new Definition("?undefined:event"),
-		onresize : new Definition("?undefined:event"),
-		onscroll : new Definition("?undefined:event"),
-		onselect : new Definition("?undefined:event"),
-		onsubmit : new Definition("?undefined:event"),
-		onunload : new Definition("?undefined:event"),
-		onpageshow : new Definition("?undefined:event"),
-		onpagehide : new Definition("?undefined:event"),
+		onabort : new Definition("function(event:Event)"),
+		onbeforeunload : new Definition("function(event:Event)"),
+		onblur : new Definition("function(event:Event)"),
+		onchange : new Definition("function(event:Event)"),
+		onclick : new Definition("function(event:Event)"),
+		onclose : new Definition("function(event:Event)"),
+		oncontextmenu : new Definition("function(event:Event)"),
+		ondevicemotion : new Definition("function(event:Event)"),
+		ondeviceorientation : new Definition("function(event:Event)"),
+		ondragdrop : new Definition("function(event:Event)"),
+		onerror : new Definition("function(event:Event)"),
+		onfocus : new Definition("function(event:Event)"),
+		onhashchange : new Definition("function(event:Event)"),
+		onkeydown : new Definition("function(event:Event)"),
+		onkeypress : new Definition("function(event:Event)"),
+		onkeyup : new Definition("function(event:Event)"),
+		onload : new Definition("function(event:Event)"),
+		onmousedown : new Definition("function(event:Event)"),
+		onmousemove : new Definition("function(event:Event)"),
+		onmouseout : new Definition("function(event:Event)"),
+		onmouseover : new Definition("function(event:Event)"),
+		onmouseup : new Definition("function(event:Event)"),
+		onpaint : new Definition("function(event:Event)"),
+		onpopstate : new Definition("function(event:Event)"),
+		onreset : new Definition("function(event:Event)"),
+		onresize : new Definition("function(event:Event)"),
+		onscroll : new Definition("function(event:Event)"),
+		onselect : new Definition("function(event:Event)"),
+		onsubmit : new Definition("function(event:Event)"),
+		onunload : new Definition("function(event:Event)"),
+		onpageshow : new Definition("function(event:Event)"),
+		onpagehide : new Definition("function(event:Event)"),
 
 			// Constructors
-		Image : new Definition("*HTMLImageElement:[width],[height]"),
-		Option : new Definition("*HTMLOptionElement:[text].[value],[defaultSelected],[selected]"),
-		Worker : new Definition("*Worker:url"),
-		XMLHttpRequest : new Definition("*XMLHttpRequest:"),
-		WebSocket : new Definition("*WebSocket:url,protocols"),
-		Event : new Definition("*Event:type"),
-		Node : new Definition("*Node:")
+		Image : new Definition("function(new:HTMLImageElement,width:Number=,height:Number=):HTMLImageElement"),
+		Option : new Definition("function(new:HTMLOptionElement,text:String=,value:Object=,defaultSelected:Boolean=,selected:Boolean=):HTMLOptionElement"),
+		Worker : new Definition("function(new:Worker,url:String):Worker"),
+		XMLHttpRequest : new Definition("function(new:XMLHttpRequest):XMLHttpRequest"),
+		WebSocket : new Definition("function(new:WebSocket,url,protocols):WebSocket"),
+		Event : new Definition("function(new:Event,type:String):Event"),
+		Node : new Definition("function(new:Node):Node")
 	};
-	
-	var initialGlobalProperties = [];
-	for (var prop in Global) {
-		if (Global.hasOwnProperty(prop)) {
-			initialGlobalProperties.push(prop);
-		}
-	}
-	
-	for (prop in Window) {
-		if (Window.hasOwnProperty(prop)) {
-			initialGlobalProperties.push(prop);
-		}
-	}
+
+	var initialGlobalProperties = {};
+	Object.keys(Global.prototype).forEach(function(key) {
+		initialGlobalProperties[key] = true;
+	});
+	Object.keys(Window.prototype).forEach(function(key) {
+		initialGlobalProperties[key] = true;
+	});
+	Object.keys(Module.prototype).forEach(function(key) {
+		initialGlobalProperties[key] = true;
+	});
+
 
 	/**
 	 * A prototype that contains the common built-in types
 	 */
 	var Types = function(globalObjName) {
-	
+		var globObj;
 		// this object can be touched by clients
 		// and so must not be in the prototype
 		// the global 'this'
 		if (globalObjName === 'Window') {
-			this.Window = new Window();
+			globObj = this.Window = new Window();
 		} else if (globalObjName === 'Module') {
-			this.Module = new Module();
+			globObj = this.Module = new Module();
 		} else {
-			this.Global = new Global();
+			globObj = this.Global = new Global();
 		}
-		
-		// TODO FIXADE should be declared on prototype
+
 		this.clearDefaultGlobal = function() {
-			for (var i = 0; i < initialGlobalProperties.length; i++) {
-				if (this.Global[initialGlobalProperties[i]]) {
-					delete this.Global[initialGlobalProperties[i]];
-				}
-			}
+			Object.keys(initialGlobalProperties).forEach(function(key) {
+				delete globObj[key];
+			});
 		};
 
 	};
@@ -339,23 +398,23 @@ define("plugins/esprima/types", [], function() {
 			$$isBuiltin: true,
 			// Can't use the real propoerty name here because would override the real methods of that name
 			$_$prototype : new Definition("Object"),
-			$_$toString: new Definition("?String:"),
-			$_$toLocaleString : new Definition("?String:"),
-			$_$valueOf: new Definition("?Object:"),
-			$_$hasOwnProperty: new Definition("?boolean:property"),
-			$_$isPrototypeOf: new Definition("?boolean:object"),
-			$_$propertyIsEnumerable: new Definition("?boolean:property")
+			$_$toString: new Definition("function():String"),
+			$_$toLocaleString : new Definition("function():String"),
+			$_$valueOf: new Definition("function():Object"),
+			$_$hasOwnProperty: new Definition("function(property:String):Boolean"),
+			$_$isPrototypeOf: new Definition("function(object:Object):Boolean"),
+			$_$propertyIsEnumerable: new Definition("function(property:String):Boolean")
 		},
-		
+
 		/**
 		 * See 15.3.4 Properties of the Function Prototype Object
 		 */
 		Function : {
 			$$isBuiltin: true,
-			apply : new Definition("?Object:func,[argArray]"),
+			apply : new Definition("function(func:function(),argArray:Array=):Object"),
 			"arguments" : new Definition("Arguments"),
-			bind : new Definition("?Object:func,[args...]"),
-			call : new Definition("?Object:func,[args...]"),
+			bind : new Definition("function(func:function(),...args:Object):Object"),
+			call : new Definition("function(func:function(),...args:Object):Object"),
 			caller : new Definition("Function"),
 			length : new Definition("Number"),
 			name : new Definition("String"),
@@ -368,56 +427,56 @@ define("plugins/esprima/types", [], function() {
 		Array : {
 			$$isBuiltin: true,
 
-			concat : new Definition("?Array:first,[rest...]"),
-			join : new Definition("?String:separator"),
+			concat : new Definition("function(first:Array,...rest:Array):Array"),
+			join : new Definition("function(separator:Object):String"),
 			length : new Definition("Number"),
-			pop : new Definition("?Object:"),
-			push : new Definition("?Object:[vals...]"),
-			reverse : new Definition("?Array:"),
-			shift : new Definition("?Object:"),
-			slice : new Definition("?Array:start,deleteCount,[items...]"),
-			splice : new Definition("?Array:start,end"),
-			sort : new Definition("?Array:[sorter]"),
-			unshift : new Definition("?Number:[items...]"),
-			indexOf : new Definition("?Number:searchElement,[fromIndex]"),
-			lastIndexOf : new Definition("?Number:searchElement,[fromIndex]"),
-			every : new Definition("?Boolean:callbackFn,[thisArg]"),
-			some : new Definition("?Boolean:callbackFn,[thisArg]"),
-			forEach : new Definition("?Object:callbackFn,[thisArg]"),  // should return 
-			map : new Definition("?Array:callbackFn,[thisArg]"),
-			filter : new Definition("?Array:callbackFn,[thisArg]"),
-			reduce : new Definition("?Array:callbackFn,[initialValue]"),
-			reduceRight : new Definition("?Array:callbackFn,[initialValue]"),
+			pop : new Definition("function():Object"),
+			push : new Definition("function(...vals:Object):Object"),
+			reverse : new Definition("function():Array"),
+			shift : new Definition("function():Object"),
+			slice : new Definition("function(start:Number,deleteCount:Number,...items:Object):Array"),
+			splice : new Definition("function(start:Number,end:Number):Array"),
+			sort : new Definition("function(sorter:Object=):Array"),
+			unshift : new Definition("function(...items:Object):Number"),
+			indexOf : new Definition("function(searchElement,fromIndex=):Number"),
+			lastIndexOf : new Definition("function(searchElement,fromIndex=):Number"),
+			every : new Definition("function(callbackFn:function(elt:Object),thisArg:Object=):Boolean"),
+			some : new Definition("function(callbackFn:function(elt:Object),thisArg:Object=):Boolean"),
+			forEach : new Definition("function(callbackFn:function(elt:Object),thisArg:Object=):Object"),
+			map : new Definition("function(callbackFn:function(elt:Object):Object,thisArg:Object=):Array"),
+			filter : new Definition("function(callbackFn:function(elt:Object):Boolean,thisArg:Object=):Array"),
+			reduce : new Definition("function(callbackFn:function(elt:Object):Object,initialValue:Object=):Array"),
+			reduceRight : new Definition("function(callbackFn:function(elt:Object):Object,initialValue:Object=):Array"),
 			$$proto : new Definition("Object")
 		},
-		
+
 		/**
 		 * See 15.5.4 Properties of the String Prototype Object
 		 */
 		String : {
 			$$isBuiltin: true,
-			charAt : new Definition("?String:index"),
-			charCodeAt : new Definition("?Number:index"),
-			concat : new Definition("?String:array"),
-			indexOf : new Definition("?Number:searchString,[start]"),
-			lastIndexOf : new Definition("?Number:searchString,[start]"),
+			charAt : new Definition("function(index:Number):String"),
+			charCodeAt : new Definition("function(index:Number):Number"),
+			concat : new Definition("function(str:String):String"),
+			indexOf : new Definition("function(searchString:String,start:Number=):Number"),
+			lastIndexOf : new Definition("function(searchString:String,start:Number=):Number"),
 			length : new Definition("Number"),
-			localeCompare : new Definition("?Number:Object"),
-			match : new Definition("?Boolean:regexp"),
-			replace : new Definition("?String:searchValue,replaceValue"),
-			search : new Definition("?String:regexp"),
-			slice : new Definition("?String:start,end"),
-			split : new Definition("?Array:separator,[limit]"),  // Array of string
-			substring : new Definition("?String:start,end"),
-			toLocaleUpperCase : new Definition("?String:"),
-			toLowerCase : new Definition("?String:"),
-			toLocaleLowerCase : new Definition("?String:"),
-			toUpperCase : new Definition("?String:"),
-			trim : new Definition("?String:"),
+			localeCompare : new Definition("function(str:String):Number"),
+			match : new Definition("function(regexp:(String|RegExp)):Boolean"),
+			replace : new Definition("function(searchValue:(String|RegExp),replaceValue:String):String"),
+			search : new Definition("function(regexp:(String|RegExp)):String"),
+			slice : new Definition("function(start:Number,end:Number):String"),
+			split : new Definition("function(separator:String,limit:Number=):[String]"),  // Array of string
+			substring : new Definition("function(start:Number,end:Number=):String"),
+			toLocaleUpperCase : new Definition("function():String"),
+			toLowerCase : new Definition("function():String"),
+			toLocaleLowerCase : new Definition("function():String"),
+			toUpperCase : new Definition("function():String"),
+			trim : new Definition("function():String"),
 
 			$$proto : new Definition("Object")
 		},
-		
+
 		/**
 		 * See 15.6.4 Properties of the Boolean Prototype Object
 		 */
@@ -425,27 +484,27 @@ define("plugins/esprima/types", [], function() {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		/**
 		 * See 15.7.4 Properties of the Number Prototype Object
 		 */
 		Number : {
 			$$isBuiltin: true,
-			toExponential : new Definition("?Number:digits"),
-			toFixed : new Definition("?Number:digits"),
-			toPrecision : new Definition("?Number:digits"),
-			// do we want to include NaN, MAX_VALUE, etc?	
-		
+			toExponential : new Definition("function(digits:Number):String"),
+			toFixed : new Definition("function(digits:Number):String"),
+			toPrecision : new Definition("function(digits:Number):String"),
+			// do we want to include NaN, MAX_VALUE, etc?
+
 			$$proto : new Definition("Object")
 		},
-		
+
 		/**
 		 * See 15.8.1 15.8.2 Properties and functions of the Math Object
 		 * Note that this object is not used as a prototype to define other objects
 		 */
 		Math : {
 			$$isBuiltin: true,
-		
+
 			// properties
 			E : new Definition("Number"),
 			LN2 : new Definition("Number"),
@@ -455,86 +514,86 @@ define("plugins/esprima/types", [], function() {
 			PI : new Definition("Number"),
 			SQRT1_2 : new Definition("Number"),
 			SQRT2 : new Definition("Number"),
-		
+
 			// Methods
-			abs : new Definition("?Number:val"),
-			acos : new Definition("?Number:val"),
-			asin : new Definition("?Number:val"),
-			atan : new Definition("?Number:val"),
-			atan2 : new Definition("?Number:val1,val2"),
-			ceil : new Definition("?Number:val"),
-			cos : new Definition("?Number:val"),
-			exp : new Definition("?Number:val"),
-			floor : new Definition("?Number:val"),
-			log : new Definition("?Number:val"),
-			max : new Definition("?Number:val1,val2"),
-			min : new Definition("?Number:val1,val2"),
-			pow : new Definition("?Number:x,y"),
-			random : new Definition("?Number:"),
-			round : new Definition("?Number:val"),
-			sin : new Definition("?Number:val"),
-			sqrt : new Definition("?Number:val"),
-			tan : new Definition("?Number:val"),
+			abs : new Definition("function(val:Number):Number"),
+			acos : new Definition("function(val:Number):Number"),
+			asin : new Definition("function(val:Number):Number"),
+			atan : new Definition("function(val:Number):Number"),
+			atan2 : new Definition("function(val1:Number,val2:Number):Number1"),
+			ceil : new Definition("function(val:Number):Number"),
+			cos : new Definition("function(val:Number):Number"),
+			exp : new Definition("function(val:Number):Number"),
+			floor : new Definition("function(val:Number):Number"),
+			log : new Definition("function(val:Number):Number"),
+			max : new Definition("function(val1:Number,val2:Number):Number"),
+			min : new Definition("function(val1:Number,val2:Number):Number"),
+			pow : new Definition("function(x:Number,y:Number):Number"),
+			random : new Definition("function():Number"),
+			round : new Definition("function(val:Number):Number"),
+			sin : new Definition("function(val:Number):Number"),
+			sqrt : new Definition("function(val:Number):Number"),
+			tan : new Definition("function(val:Number):Number"),
 			$$proto : new Definition("Object")
 		},
 
-		
+
 		/**
 		 * See 15.9.5 Properties of the Date Prototype Object
 		 */
 		Date : {
 			$$isBuiltin: true,
-			toDateString : new Definition("?String:"),
-			toTimeString : new Definition("?String:"),
-			toUTCString : new Definition("?String:"),
-			toISOString : new Definition("?String:"),
-			toJSON : new Definition("?Object:key"),
-			toLocaleDateString : new Definition("?String:"),
-			toLocaleTimeString : new Definition("?String:"),
-			
-			getTime : new Definition("?Number:"),
-			getTimezoneOffset : new Definition("?Number:"),
+			toDateString : new Definition("function():String"),
+			toTimeString : new Definition("function():String"),
+			toUTCString : new Definition("function():String"),
+			toISOString : new Definition("function():String"),
+			toJSON : new Definition("function(key:String):Object"),
+			toLocaleDateString : new Definition("function():String"),
+			toLocaleTimeString : new Definition("function():String"),
 
-			getDay : new Definition("?Number:"),
-			getUTCDay : new Definition("?Number:"),
-			getFullYear : new Definition("?Number:"),
-			getUTCFullYear : new Definition("?Number:"),
-			getHours : new Definition("?Number:"),
-			getUTCHours : new Definition("?Number:"),
-			getMinutes : new Definition("?Number:"),
-			getUTCMinutes : new Definition("?Number:"),
-			getSeconds : new Definition("?Number:"),
-			getUTCSeconds : new Definition("?Number:"),
-			getMilliseconds : new Definition("?Number:"),
-			getUTCMilliseconds : new Definition("?Number:"),
-			getMonth : new Definition("?Number:"),
-			getUTCMonth : new Definition("?Number:"),
-			getDate : new Definition("?Number:"),
-			getUTCDate : new Definition("?Number:"),
-			
-			setTime : new Definition("?Number:"),
-			setTimezoneOffset : new Definition("?Number:"),
+			getTime : new Definition("function():Number"),
+			getTimezoneOffset : new Definition("function():Number"),
 
-			setDay : new Definition("?Number:dayOfWeek"),
-			setUTCDay : new Definition("?Number:dayOfWeek"),
-			setFullYear : new Definition("?Number:year,[month],[date]"),
-			setUTCFullYear : new Definition("?Number:year,[month],[date]"),
-			setHours : new Definition("?Number:hour,[min],[sec],[ms]"),
-			setUTCHours : new Definition("?Number:hour,[min],[sec],[ms]"),
-			setMinutes : new Definition("?Number:min,[sec],[ms]"),
-			setUTCMinutes : new Definition("?Number:min,[sec],[ms]"),
-			setSeconds : new Definition("?Number:sec,[ms]"),
-			setUTCSeconds : new Definition("?Number:sec,[ms]"),
-			setMilliseconds : new Definition("?Number:ms"),
-			setUTCMilliseconds : new Definition("?Number:ms"),
-			setMonth : new Definition("?Number:month,[date]"),
-			setUTCMonth : new Definition("?Number:month,[date]"),
-			setDate : new Definition("?Number:date"),
-			setUTCDate : new Definition("?Number:gate"),
-			
+			getDay : new Definition("function():Number"),
+			getUTCDay : new Definition("function():Number"),
+			getFullYear : new Definition("function():Number"),
+			getUTCFullYear : new Definition("function():Number"),
+			getHours : new Definition("function():Number"),
+			getUTCHours : new Definition("function():Number"),
+			getMinutes : new Definition("function():Number"),
+			getUTCMinutes : new Definition("function():Number"),
+			getSeconds : new Definition("function():Number"),
+			getUTCSeconds : new Definition("function():Number"),
+			getMilliseconds : new Definition("function():Number"),
+			getUTCMilliseconds : new Definition("function():Number"),
+			getMonth : new Definition("function():Number"),
+			getUTCMonth : new Definition("function():Number"),
+			getDate : new Definition("function():Number"),
+			getUTCDate : new Definition("function():Number"),
+
+			setTime : new Definition("function():Number"),
+			setTimezoneOffset : new Definition("function():Number"),
+
+			setDay : new Definition("function(dayOfWeek:Number):Number"),
+			setUTCDay : new Definition("function(dayOfWeek:Number):Number"),
+			setFullYear : new Definition("function(year:Number,month:Number=,date:Number=):Number"),
+			setUTCFullYear : new Definition("function(year:Number,month:Number=,date:Number=):Number"),
+			setHours : new Definition("function(hour:Number,min:Number=,sec:Number=,ms:Number=):Number"),
+			setUTCHours : new Definition("function(hour:Number,min:Number=,sec:Number=,ms:Number=):Number"),
+			setMinutes : new Definition("function(min:Number,sec:Number=,ms:Number=):Number"),
+			setUTCMinutes : new Definition("function(min:Number,sec:Number=,ms:Number=):Number"),
+			setSeconds : new Definition("function(sec:Number,ms:Number=):Number"),
+			setUTCSeconds : new Definition("function(sec:Number,ms:Number=):Number"),
+			setMilliseconds : new Definition("function(ms:Number):Number"),
+			setUTCMilliseconds : new Definition("function(ms:Number):Number"),
+			setMonth : new Definition("function(month:Number,date:Number=):Number"),
+			setUTCMonth : new Definition("function(month:Number,date:Number=):Number"),
+			setDate : new Definition("function(date:Number):Number"),
+			setUTCDate : new Definition("function(date:Number):Number"),
+
 			$$proto : new Definition("Object")
 		},
-		
+
 		/**
 		 * See 15.10.6 Properties of the RexExp Prototype Object
 		 */
@@ -549,17 +608,17 @@ define("plugins/esprima/types", [], function() {
 			ignoreCase : new Definition("Boolean"),
 			multiline : new Definition("Boolean"),
 			lastIndex : new Definition("Boolean"),
-			
-			exec : new Definition("?Array:str"),
-			test : new Definition("?Boolean:str"),
-			
+
+			exec : new Definition("function(str:String):[String]"),
+			test : new Definition("function(str:String):Boolean"),
+
 			$$proto : new Definition("Object")
 		},
-		
-		"?RegExp:" : {
+
+		"function(new:RegExp):RegExp" : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Function"),
-		
+
 			$1 : new Definition("String"),
 			$2 : new Definition("String"),
 			$3 : new Definition("String"),
@@ -574,8 +633,8 @@ define("plugins/esprima/types", [], function() {
 			input : new Definition("String"),
 			name : new Definition("String")
 		},
-		
-		
+
+
 		/**
 		 * See 15.11.4 Properties of the Error Prototype Object
 		 * We don't distinguish between kinds of errors
@@ -595,7 +654,7 @@ define("plugins/esprima/types", [], function() {
 			$$isBuiltin: true,
 			callee : new Definition("Function"),
 			length : new Definition("Number"),
-			
+
 			$$proto : new Definition("Object")
 		},
 
@@ -605,16 +664,16 @@ define("plugins/esprima/types", [], function() {
 		JSON : {
 			$$isBuiltin: true,
 
-			parse : new Definition("?Object:str"),
-			stringify : new Definition("?String:obj"),
+			parse : new Definition("function(str:String):Object"),
+			stringify : new Definition("function(json:Object):String"),
 			$$proto : new Definition("Object")
 		},
-		
+
 		"undefined" : {
 			$$isBuiltin: true
 		},
-		
-		
+
+
 		///////////////////////////////////////////////////
 		// Node specific types
 		///////////////////////////////////////////////////
@@ -622,79 +681,79 @@ define("plugins/esprima/types", [], function() {
 		Process : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-		
-			on: new Definition("?undefined:kind,callback"),
 
-			abort: new Definition("?undefined:"),
+			on: new Definition("function(kind:String,callback:function())"),
+
+			abort: new Definition("function()"),
 			stdout: new Definition("Stream"),
 			stderr: new Definition("Stream"),
 			stdin: new Definition("Stream"),
 			argv: new Definition("Array"), // Array.<String>
 			execPath: new Definition("String"),
-			chdir: new Definition("?undefined:directory"),
-			cwd: new Definition("?String:"),
+			chdir: new Definition("function(directory:String)"),
+			cwd: new Definition("function():String"),
 			env: new Definition("Object"),
-			getgid: new Definition("?Number:"),
-			setgid: new Definition("?undefined:id"),
-			getuid: new Definition("?Number:"),
-			setuid: new Definition("?undefined:id"),
+			getgid: new Definition("function():Number"),
+			setgid: new Definition("function(id:Number)"),
+			getuid: new Definition("function():Number"),
+			setuid: new Definition("function(id:Number)"),
 			version: new Definition("String"),
 			versions: new Definition("Object"), // TODO create a versions object?
 			config: new Definition("Object"),
-			kill: new Definition("?undefined:pid,[signal]"),
+			kill: new Definition("function(pid:Number,signal:Number=)"),
 			pid: new Definition("Number"),
 			title: new Definition("String"),
 			arch: new Definition("String"),
 			platform: new Definition("String"),
-			memoryUsage: new Definition("?Object:"),
-			nextTick: new Definition("?undefined:callback"),
-			umask: new Definition("?undefined:[mask]"),
-			uptime: new Definition("?Number:"),
-			hrtime: new Definition("?Array:") // Array.<Number>
+			memoryUsage: new Definition("function():Object"),
+			nextTick: new Definition("function(callback:function())"),
+			umask: new Definition("function(mask:Number=)"),
+			uptime: new Definition("function():Number"),
+			hrtime: new Definition("function():Array") // Array.<Number>
 		},
-		
+
 		// See http://nodejs.org/api/stream.html
-		// Stream is a wierd one since it is built into the stream module, 
+		// Stream is a wierd one since it is built into the stream module,
 		// but this module isn't always around, so must explicitly define it.
 		Stream : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 			// combines readable and writable streams
-			
+
 			// readable
-			
+
 			// events
-			data: new Definition("?undefined:data"),
-			error: new Definition("?undefined:exception"),
-			close: new Definition("?undefined:"),
+			data: new Definition("function(data:Object)"),
+			error: new Definition("function(exception:Object)"),
+			close: new Definition("function()"),
 
 			readable: new Definition("Boolean"),
 
-			setEncoding: new Definition("?undefined:[encoding]"),
-			pause: new Definition("?undefined:"),
-			resume: new Definition("?undefined:"),
-			pipe: new Definition("?undefined:destingation,[options]"),
+			setEncoding: new Definition("function(encoding:String=)"),
+			pause: new Definition("function()"),
+			resume: new Definition("function()"),
+			pipe: new Definition("function(destination:Object,options:Object=)"),
 
 			// writable
-			drain: new Definition("?undefined:"),
+			drain: new Definition("function()"),
 
 			writable: new Definition("Boolean"),
 
-			write: new Definition("?undefined:[nuffer]"),
-			end: new Definition("?undefined:[string],[encoding]"),
-			destroy: new Definition("?undefined:"),
-			destroySoon: new Definition("?undefined:")
+			write: new Definition("function(buffer:Object=)"),
+			end: new Definition("function(string:String=,encoding:String=)"),
+			destroy: new Definition("function()"),
+			destroySoon: new Definition("function()")
 		},
-		
+
 		///////////////////////////////////////////////////
 		// Browser specific types
 		///////////////////////////////////////////////////
-		
+
 		// https://developer.mozilla.org/en/DOM/window.screen
 		Screen : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			availTop : new Definition("Number"),
 			availLeft : new Definition("Number"),
 			availHeight : new Definition("Number"),
@@ -712,49 +771,49 @@ define("plugins/esprima/types", [], function() {
 		BarInfo : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			visible : new Definition("Boolean")
 		},
-		
+
 		// http://w3c-test.org/webperf/specs/NavigationTiming/
 		// incomplete
 		Performance : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// https://developer.mozilla.org/en/DOM/window.navigator
 		Navigator : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			// properties
 			appName : new Definition("String"),
 			appVersion : new Definition("String"),
 			connection : new Definition("Connection"),
-			cookieEnabled : new Definition("Boolean"), 
+			cookieEnabled : new Definition("Boolean"),
 			language : new Definition("String"),
 			mimeTypes : new Definition("MimeTypeArray"),
-			onLine : new Definition("Boolean"), 
+			onLine : new Definition("Boolean"),
 			oscpu : new Definition("String"),
 			platform : new Definition("String"),
 			plugins : new Definition("String"),
 			userAgent : new Definition("String"),
-			
+
 			// methods
-			javaEnabled : new Definition("?Boolean:"),
-			registerContentHandler : new Definition("?undefined:mimType,url,title"),
-			registerProtocolHandler : new Definition("?undefined:protocol,url,title")
+			javaEnabled : new Definition("function():Boolean"),
+			registerContentHandler : new Definition("function(mimType:String,url:String,title:String)"),
+			registerProtocolHandler : new Definition("function(protocol:String,url:String,title:String)")
 		},
-		
+
 		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/MimeTypeArray.html
 		MimeTypeArray : {
 			$$isBuiltin: true,
 			length : new Definition("Number"),
-			item : new Definition("?MimeType:index"),
-			namedItem : new Definition("?MimeType:name")
+			item : new Definition("function(index:Number):MimeType"),
+			namedItem : new Definition("function(name:String):MimeType")
 		},
-		
+
 		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/MimeType.html
 		MimeType : {
 			$$isBuiltin: true,
@@ -763,7 +822,7 @@ define("plugins/esprima/types", [], function() {
 			type : new Definition("String"),
 			enabledPlugin : new Definition("Plugin")
 		},
-		
+
 		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/Plugin.html
 		Plugin : {
 			$$isBuiltin: true,
@@ -771,33 +830,33 @@ define("plugins/esprima/types", [], function() {
 			fileName : new Definition("String"),
 			length : new Definition("Number"),
 			name : new Definition("String"),
-			item : new Definition("?MimeType:index"),
-			namedItem : new Definition("?MimeType:name")
+			item : new Definition("function(index:Number):MimeType"),
+			namedItem : new Definition("function(name:String):MimeType")
 		},
-		
+
 		// http://dvcs.w3.org/hg/dap/raw-file/tip/network-api/Overview.html#the-connection-interface
 		Connection : {
 			$$isBuiltin: true,
 			bandwidth : new Definition("Number"),
 			metered : new Definition("Boolean"),
-			
+
 			onchange : new Definition("Function")
 		},
-		
+
 		// http://dev.w3.org/html5/webstorage/#storage-0
 		Storage : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 
 			length : new Definition("Number"),
-			
-			key : new Definition("?String:idx"),
-			getItem : new Definition("?String:key"),
-			setItem : new Definition("?undefined:key,value"),
-			removeItem : new Definition("?undefined:key"),
-			clear : new Definition("?undefined:")
+
+			key : new Definition("function(idx:Number):String"),
+			getItem : new Definition("function(key:String):String"),
+			setItem : new Definition("function(key:String,value:String)"),
+			removeItem : new Definition("function(key:String)"),
+			clear : new Definition("function()")
 		},
-		
+
 		// http://dvcs.w3.org/hg/xhr/raw-file/tip/Overview.html#interface-xmlhttprequest
 		XMLHttpRequest : {
 			$$isBuiltin: true,
@@ -806,17 +865,17 @@ define("plugins/esprima/types", [], function() {
 			onreadystatechange : new Definition("EventHandler"),
 
 			// request
-			open : new Definition("?undefined:method,url,[async],[user],[password]"),
-			setRequestHeader : new Definition("?undefined:header,value"),
+			open : new Definition("function(method:String,url:String,async:Boolean=,user:String=,password:String=)"),
+			setRequestHeader : new Definition("function(header,value)"),
 			timeout : new Definition("Number"),
 			withCredentials : new Definition("Boolean"),
 			upload : new Definition("Object"), // not right
-			send : new Definition("?undefined:[data]"),
-			abort : new Definition("?undefined:"),
-			
+			send : new Definition("function(data:String=)"),
+			abort : new Definition("function()"),
+
 			// response
-			getResponseHeader : new Definition("?String:header"),
-			getAllResponseHeaders : new Definition("?String:"),
+			getResponseHeader : new Definition("function(header:String):String"),
+			getAllResponseHeaders : new Definition("function():String"),
 			overrideMimType : new Definition("Object"),
 			responseType : new Definition("Object"),  // not right
 			readyState : new Definition("Number"),
@@ -826,23 +885,23 @@ define("plugins/esprima/types", [], function() {
 			status : new Definition("Number"),
 			statusText : new Definition("String")
 		},
-		
+
 		// http://www.w3.org/TR/workers/
 		Worker : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 
-			terminate : new Definition("?undefined:"),
-			postMessage : new Definition("?undefined:message,[transfer]"),
-			onmessage : new Definition("?undefined:")
+			terminate : new Definition("function()"),
+			postMessage : new Definition("function(message:String,transfer:Object=)"),
+			onmessage : new Definition("function()")
 		},
-		
+
 		// http://www.w3.org/TR/workers/#messageport
 		MessagePort : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// http://www.whatwg.org/specs/web-apps/current-work/multipage//network.html#websocket
 		WebSocket : {
 			$$isBuiltin: true,
@@ -852,30 +911,30 @@ define("plugins/esprima/types", [], function() {
 			onopen : new Definition("EventHandler"),
 			onerror : new Definition("EventHandler"),
 			onclose : new Definition("EventHandler"),
-			
+
 			readyState : new Definition("Number"),
 			extensions : new Definition("String"),
 			protocol : new Definition("String"),
-			
-			close : new Definition("?undefined:[reason]"),
-			send :  new Definition("?undefined:data")
+
+			close : new Definition("function(reason:Object=)"),
+			send :  new Definition("function(data)")
 		},
-		
+
 		// https://developer.mozilla.org/en/DOM/Console
 		Console : {
 			$$isBuiltin: true,
-			debug : new Definition("?undefined:msg"),
-			dir : new Definition("?undefined:obj"),
-			error : new Definition("?undefined:msg"),
-			group : new Definition("?undefined:"),
-			groupCollapsed : new Definition("?undefined:"),
-			groupEnd : new Definition("?undefined:"),
-			info : new Definition("?undefined:msg"),
-			log : new Definition("?undefined:msg"),
-			time : new Definition("?undefined:timerName"),
-			timeEnd : new Definition("?undefined:timerName"),
-			trace : new Definition("?undefined:"),
-			warn : new Definition("?undefined:msg")
+			debug : new Definition("function(msg:String)"),
+			dir : new Definition("function(obj)"),
+			error : new Definition("function(msg:String)"),
+			group : new Definition("function()"),
+			groupCollapsed : new Definition("function()"),
+			groupEnd : new Definition("function()"),
+			info : new Definition("function(msg:String)"),
+			log : new Definition("function(msg:String)"),
+			time : new Definition("function(timerName:String)"),
+			timeEnd : new Definition("function(timerName:String)"),
+			trace : new Definition("function()"),
+			warn : new Definition("function(msg:String)")
 		},
 
 		// TODO FIXADE remove ???
@@ -884,12 +943,12 @@ define("plugins/esprima/types", [], function() {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// https://developer.mozilla.org/en/DOM/Event
 		Event : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			// properties
 			bubbles : new Definition("Boolean"),
 			cancelable : new Definition("Boolean"),
@@ -901,59 +960,59 @@ define("plugins/esprima/types", [], function() {
 			target : new Definition("Object"),
 			timeStamp : new Definition("Number"),
 			isTrusted : new Definition("Boolean"),
-			
+
 			// methods
-			initEvent : new Definition("?undefined:type,bubbles,cancelable"),
-			preventDefault : new Definition("?undefined:"),
-			stopImmediatePropagation : new Definition("?undefined:"),
-			stopPropagation : new Definition("?undefined:")
+			initEvent : new Definition("function(type:String,bubbles:Boolean,cancelable:Boolean)"),
+			preventDefault : new Definition("function()"),
+			stopImmediatePropagation : new Definition("function()"),
+			stopPropagation : new Definition("function()")
 		},
-		
-		"?Event:" : {
+
+		"function(new:Event):Event" : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Function"),
-			
+
 			CAPTURING_PHASE : new Definition("Number"),
 			AT_TARGET : new Definition("Number"),
 			BUBBLING_PHASE : new Definition("Number")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#documenttype
 		DocumentType : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
-			
+
 			name : new Definition("String"),
 			publicId : new Definition("String"),
 			systemId : new Definition("String"),
-			
-			before : new Definition("?undefined:nodeOrString"),
-			after : new Definition("?undefined:nodeOrString"),
-			replace : new Definition("?undefined:nodeOrString"),
-			remove : new Definition("?undefined:")
+
+			before : new Definition("function(nodeOrString:(Node|String))"),
+			after : new Definition("function(nodeOrString:(Node|String))"),
+			replace : new Definition("function(nodeOrString:(Node|String))"),
+			remove : new Definition("function()")
 		},
-		
+
 		// see http://www.whatwg.org/specs/web-apps/current-work/multipage/history.html#the-history-interface
 		History : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			length : new Definition("Number"),
 			state : new Definition("Object"),
 
-			go : new Definition("?undefined:delta"),
-			back : new Definition("?undefined:"),
-			forward : new Definition("?undefined:"),
-			pushState : new Definition("?undefined:data,title,url"),
-			replaceState : new Definition("?undefined:data,title,url")
+			go : new Definition("function(delta:Number)"),
+			back : new Definition("function()"),
+			forward : new Definition("function()"),
+			pushState : new Definition("function(data:Object,title:String,url:String)"),
+			replaceState : new Definition("function(data:Object,title:String,url:String)")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#document (complete)
 		// see http://www.w3.org/TR/html5/dom.html#documents-in-the-dom (incomplete)
 		Document : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
-			
+
 			implementation : new Definition("DOMImplementation"),
 			URL : new Definition("String"),
 			documentURI : new Definition("String"),
@@ -964,39 +1023,36 @@ define("plugins/esprima/types", [], function() {
 			doctype : new Definition("DocumentType"),
 			documentElement : new Definition("Element"),
 
-			getElementsByTagName : new Definition("?HTMLCollection:localName"),
-			getElementsByTagNameNS : new Definition("?HTMLCollection:namespace,localName"),
-			getElementsByClassName : new Definition("?HTMLCollection:classNames"),
-			getElementById : new Definition("?Element:elementId"),
-			createElement : new Definition("?Element:elementId"),
-			createElementNS : new Definition("?Element:namespace,qualifiedName"),
-			createDocumentFragment : new Definition("?DocumentFragment:"),
-			createTextNode : new Definition("?Text:data"),
-			createComment : new Definition("?Comment:data"),
-			createProcessingInstruction : new Definition("?ProcessingInstruction:target,data"),
-			importNode : new Definition("?Node:node,[deep]"),
-			adoptNode : new Definition("?Node:node"),
-			createEvent : new Definition("?Event:eventInterfaceName"),
-			createRange : new Definition("?Range:"),
+			getElementsByTagName : new Definition("function(localName:String):HTMLCollection"),
+			getElementsByTagNameNS : new Definition("function(namespace,localName:String):HTMLCollection"),
+			getElementsByClassName : new Definition("function(classNames:String):HTMLCollection"),
+			getElementById : new Definition("function(elementId:String):Element"),
+			createElement : new Definition("function(elementId:String):Element"),
+			createElementNS : new Definition("function(namespace,qualifiedName:String):Element"),
+			createDocumentFragment : new Definition("function():DocumentFragment"),
+			createTextNode : new Definition("function(data):Text"),
+			createComment : new Definition("function(data):Comment"),
+			createProcessingInstruction : new Definition("function(target,data):ProcessingInstruction"),
+			importNode : new Definition("function(node:Node,deep:Boolean=):Node"),
+			adoptNode : new Definition("function(node:Node):Node"),
+			createEvent : new Definition("function(eventInterfaceName:String):Event"),
+			createRange : new Definition("function():Range"),
 
-			createNodeIterator : new Definition("?NodeIterator:root,[whatToShow],[filter]"),
-			createTreeWalker : new Definition("?TreeWalker:root,[whatToShow],[filter]"),
-
-			prepend : new Definition("?undefined:[nodes]"),
-			append : new Definition("?undefined:[nodes]")
+			createNodeIterator : new Definition("function(root:Node,whatToShow:Object=,filter:Object=):NodeIterator"),
+			createTreeWalker : new Definition("function(root:Node,whatToShow:Object=,filter:Object=):TreeWalker")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#domimplementation
 		DOMImplementation : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
-			createDocumentType : new Definition("?DocumentType:qualifiedName,publicId,systemId"),
-			createDocument : new Definition("?Document:namespace,qualifiedName,doctype"),
-			createHTMLDocument : new Definition("?Document:title"),
-			hasFeature : new Definition("?Boolean:feature")
+
+			createDocumentType : new Definition("function(qualifiedName:String,publicId:String,systemId:String):DocumentType"),
+			createDocument : new Definition("function(namespace:String,qualifiedName:String,doctype:String):Document"),
+			createHTMLDocument : new Definition("function(title:String):Document"),
+			hasFeature : new Definition("function(feature:String):Boolean")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#node
 		Node : {
 			$$isBuiltin: true,
@@ -1016,23 +1072,23 @@ define("plugins/esprima/types", [], function() {
 			nodeValue : new Definition("String"),
 			textContent : new Definition("String"),
 
-			hasChildNodes : new Definition("?Boolean:"),
-			compareDocumentPosition : new Definition("?Number:other"),
-			contains : new Definition("?Boolean:other"),
-			insertBefore : new Definition("?Node:node,child"),
-			appendChild : new Definition("?Node:node"),
-			replaceChild : new Definition("?Node:node,child"),
-			removeChild : new Definition("?Node:node,child"),
-			normalize : new Definition("?undefined:"),
-			cloneNode : new Definition("?Node:[deep]"),
-			isEqualNode : new Definition("?Boolean:node"),
-			lookupPrefix : new Definition("?String:namespace"),
-			lookupNamespaceURI : new Definition("?String:prefix"),
-			isDefaultNamespace : new Definition("?Boolean:namespace")
+			hasChildNodes : new Definition("function():Boolean"),
+			compareDocumentPosition : new Definition("function(other:Node):Number"),
+			contains : new Definition("function(other:Node):Boolean"),
+			insertBefore : new Definition("function(child:Node):Node"),
+			appendChild : new Definition("function(node:Node):Node"),
+			replaceChild : new Definition("function(child:Node):Node"),
+			removeChild : new Definition("function(child:Node):Node"),
+			normalize : new Definition("function()"),
+			cloneNode : new Definition("function(deep:Boolean=):Node"),
+			isEqualNode : new Definition("function(node:Node):Boolean"),
+			lookupPrefix : new Definition("function(namespace:String):String"),
+			lookupNamespaceURI : new Definition("function(prefix:String):String"),
+			isDefaultNamespace : new Definition("function(namespace:String):Boolean")
 		},
-		
+
 		// Constants declared on Node
-		"?Node:" : {
+		"function(new:Node):Node" : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Function"),
 			ELEMENT_NODE : new Definition("Number"),
@@ -1055,12 +1111,12 @@ define("plugins/esprima/types", [], function() {
 			DOCUMENT_POSITION_CONTAINED_BY : new Definition("Number"),
 			DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC : new Definition("Number")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#element
 		Element : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
-			
+
 			namespaceURI : new Definition("String"),
 			prefix : new Definition("String"),
 			localName : new Definition("String"),
@@ -1081,32 +1137,32 @@ define("plugins/esprima/types", [], function() {
 			previousElementSibling : new Definition("Element"),
 			nextElementSibling : new Definition("Element"),
 
-			getAttribute : new Definition("?String:name"),
-			getAttributeNS : new Definition("?String:namespace,localname"),
-			setAttribute : new Definition("?undefined:name,value"),
-			setAttributeNS : new Definition("?undefined:namespace,name,value"),
-			removeAttribute : new Definition("?undefined:name"),
-			removeAttributeNS : new Definition("?undefined:namespace,localname"),
-			hasAttribute : new Definition("?Boolean:name"),
-			hasAttributeNS : new Definition("?Boolean:namespace,localname"),
+			getAttribute : new Definition("function(name:String):String"),
+			getAttributeNS : new Definition("function(namespace:String,localname:String):String"),
+			setAttribute : new Definition("function(name:String,value:Object)"),
+			setAttributeNS : new Definition("function(namespace:String,name:String,value:Object)"),
+			removeAttribute : new Definition("function(name:String)"),
+			removeAttributeNS : new Definition("function(namespace:String,localname:String)"),
+			hasAttribute : new Definition("function(name:String):Boolean"),
+			hasAttributeNS : new Definition("function(namespace:String,localname:String):Boolean"),
 
-			getElementsByTagName : new Definition("?HTMLCollection:localName"),
-			getElementsByTagNameNS : new Definition("?HTMLCollection:namespace,localName"),
-			getElementsByClassName : new Definition("?HTMLCollection:classname"),
+			getElementsByTagName : new Definition("function(localName:String):HTMLCollection"),
+			getElementsByTagNameNS : new Definition("function(namespace:String,localName:String):HTMLCollection"),
+			getElementsByClassName : new Definition("function(classname:String):HTMLCollection"),
 
-			prepend : new Definition("?undefined:[nodes]"),
-			append : new Definition("?undefined:[nodes]"),
-			before : new Definition("?undefined:[nodes]"),
-			after : new Definition("?undefined:[nodes]"),
-			replace : new Definition("?undefined:[nodes]"),
-			remove : new Definition("?undefined:")
+			prepend : new Definition("function(...nodes:Node)"),
+			append : new Definition("function(...nodes:Node)"),
+			before : new Definition("function(...nodes:Node)"),
+			after : new Definition("function(...nodes:Node)"),
+			replace : new Definition("function(...nodes:Node)"),
+			remove : new Definition("function()")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#attr
 		Attr : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
-			
+
 			isId : new Definition("Boolean"),
 			name : new Definition("String"),
 			value : new Definition("String"),
@@ -1114,22 +1170,22 @@ define("plugins/esprima/types", [], function() {
 			prefix : new Definition("String"),
 			localName : new Definition("String")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#interface-nodelist
 		NodeList : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			item : new Definition("Node"),
 			length : new Definition("Number")
 		},
-		
+
 		// incomplete
 		DOMApplicationCache : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// incomplete
 		CSSStyleDeclaration : {
 			$$isBuiltin: true,
@@ -1144,10 +1200,10 @@ define("plugins/esprima/types", [], function() {
 		Location : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
-			assign : new Definition("?undefined:url"),
-			replace : new Definition("?undefined:url"),
-			reload : new Definition("?undefined:"),
+
+			assign : new Definition("function(url:String)"),
+			replace : new Definition("function(url:String)"),
+			reload : new Definition("function()"),
 
 			href : new Definition("String"),
 			protocol : new Definition("String"),
@@ -1158,12 +1214,12 @@ define("plugins/esprima/types", [], function() {
 			search : new Definition("String"),
 			hash : new Definition("String")
 		},
-		
+
 		// see http://dvcs.w3.org/hg/editing/raw-file/tip/editing.html#selections
 		Selection : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			anchorNode : new Definition("Node"),
 			anchorOffset : new Definition("Number"),
 			focusNode : new Definition("Node"),
@@ -1173,74 +1229,74 @@ define("plugins/esprima/types", [], function() {
 			isCollapsed : new Definition("Boolean"),
 
 
-			collapse : new Definition("?undefined:node,offset"),
-			collapseToStart : new Definition("?undefined:"),
-			collapseToEnd : new Definition("?undefined:"),
+			collapse : new Definition("function(node:Node,offset:Number)"),
+			collapseToStart : new Definition("function()"),
+			collapseToEnd : new Definition("function()"),
 
-			extend : new Definition("?undefined:node,offset"),
+			extend : new Definition("function(node:Node,offset:Number)"),
 
-			selectAllChildren : new Definition("?undefined:node"),
-			deleteFromDocument : new Definition("?undefined:"),
-			getRangeAt : new Definition("?Range:index"),
-			addRange : new Definition("?undefined:range"),
-			removeRange : new Definition("?undefined:range"),
-			removeAllRanges : new Definition("?undefined:")
+			selectAllChildren : new Definition("function(node:Node)"),
+			deleteFromDocument : new Definition("function()"),
+			getRangeAt : new Definition("function(index:Number):Range"),
+			addRange : new Definition("function(range:Range)"),
+			removeRange : new Definition("function(range:Range)"),
+			removeAllRanges : new Definition("function()")
 		},
-		
+
 		// see http://www.w3.org/TR/html5/the-html-element.html#the-html-element
 		// incomplete
 		HTMLElement : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Element"),
-			
+
 			id : new Definition("String"),
 			title : new Definition("String"),
 			lang : new Definition("String"),
 			dir : new Definition("String"),
 			className : new Definition("String")
 		},
-		 
+
 		// see http://www.w3.org/TR/html5/the-img-element.html#htmlimageelement
 		// incomplete
 		HTMLImageElement : {
 			$$isBuiltin: true,
 			$$proto : new Definition("HTMLElement")
 		},
-		 
+
 		// incomplete
 		HTMLOptionElement : {
 			$$isBuiltin: true,
 			$$proto : new Definition("HTMLElement")
 		},
-		 
+
 		// http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-75708506
 		HTMLCollection : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 			length : new Definition("Number"),
-			item : new Definition("?Element:index"),
-			namedItem : new Definition("?Element:name")
+			item : new Definition("function(index:Number):Element"),
+			namedItem : new Definition("function(name:String):Element")
 		},
-		
+
 		// incomplete
 		NodeIterator : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// incomplete
 		TreeWalker : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#interface-documentfragment
 		DocumentFragment : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
 
-			prepend : new Definition("?undefined:[nodes]"),
-			append : new Definition("?undefined:[nodes]")
+			prepend : new Definition("function(...nodes:Node)"),
+			append : new Definition("function(...nodes:Node)")
 		},
 
 		// incomplete
@@ -1248,19 +1304,19 @@ define("plugins/esprima/types", [], function() {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node")
 		},
-		
+
 		// incomplete
 		ProcessingInstruction : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node")
 		},
-		
+
 		// incomplete
 		Comment : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node")
 		},
-		
+
 		// see http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#ranges
 		Range: {
 			$$isBuiltin: true,
@@ -1273,43 +1329,43 @@ define("plugins/esprima/types", [], function() {
 			collapsed : new Definition("Boolean"),
 			commonAncestorContainer : new Definition("Node"),
 
-			setStart : new Definition("?undefined:refNode,offset"),
-			setEnd : new Definition("?undefined:refNode,offset"),
-			setStartBefore : new Definition("?undefined:refNode"),
-			setStartAfter : new Definition("?undefined:refNode"),
-			setEndBefore : new Definition("?undefined:refNode"),
-			setEndAfter : new Definition("?undefined:refNode"),
-			collapse : new Definition("?undefined:toStart"),
-			selectNode : new Definition("?undefined:refNode"),
-			selectNodeContents : new Definition("?undefined:refNode"),
+			setStart : new Definition("function(refNode:Node,offset:Number)"),
+			setEnd : new Definition("function(refNode:Node,offset:Number)"),
+			setStartBefore : new Definition("function(refNode:Node)"),
+			setStartAfter : new Definition("function(refNode:Node)"),
+			setEndBefore : new Definition("function(refNode:Node)"),
+			setEndAfter : new Definition("function(refNode:Node)"),
+			collapse : new Definition("function(toStart:Node)"),
+			selectNode : new Definition("function(refNode:Node)"),
+			selectNodeContents : new Definition("function(refNode:Node)"),
 
-			compareBoundaryPoints : new Definition("?Number:how,sourceRange"),
+			compareBoundaryPoints : new Definition("function(how:Object,sourceRange:Object):Number"),
 
-			deleteContents : new Definition("?undefined:"),
-			extractContents : new Definition("?DocumentFragment:"),
-			cloneContents : new Definition("?DocumentFragment:"),
-			insertNode : new Definition("?undefined:node"),
-			surroundContents : new Definition("?undefined:nodeParent"),
+			deleteContents : new Definition("function()"),
+			extractContents : new Definition("function():DocumentFragment"),
+			cloneContents : new Definition("function():DocumentFragment"),
+			insertNode : new Definition("function(node:Node)"),
+			surroundContents : new Definition("function(nodeParent:Node)"),
 
-			cloneRange : new Definition("?Range:"),
-			detach : new Definition("?undefined:"),
+			cloneRange : new Definition("function():Range"),
+			detach : new Definition("function()"),
 
 
-			isPointInRange : new Definition("?Boolean:node,offset"),
-			comparePoint : new Definition("?Number:node,offset"),
+			isPointInRange : new Definition("function(node:Node,offset:Number):Boolean"),
+			comparePoint : new Definition("function(node:Node,offset:Number):Number"),
 
-			intersectsNode : new Definition("?Boolean:node")
+			intersectsNode : new Definition("function(node:Node):Boolean")
 		},
-		
-		"?Range:" : {
+
+		"funciton():Range" : {
 			$$isBuiltin: true,
 			START_TO_START : new Definition("Number"),
 			START_TO_END : new Definition("Number"),
 			END_TO_END : new Definition("Number"),
 			END_TO_START : new Definition("Number")
 		},
-		
-		
+
+
 		// incomplete
 		DOMTokenList: {
 			$$isBuiltin: true,
@@ -1317,236 +1373,547 @@ define("plugins/esprima/types", [], function() {
 
 			length : new Definition("Number"),
 
-			item : new Definition("?String:index"),
-			contains : new Definition("?Boolean:token"),
-			add : new Definition("?undefined:token"),
-			remove : new Definition("?undefined:token"),
-			toggle : new Definition("?Boolean:token")
+			item : new Definition("function(index:Number):String"),
+			contains : new Definition("function(token:String):Boolean"),
+			add : new Definition("function(token:String)"),
+			remove : new Definition("function(token:String)"),
+			toggle : new Definition("function(token:String):Boolean")
 		}
-		
-// HTML constructors
-// http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-33759296
-/*		
-HTMLVideoElement
-HTMLAppletElement
-HTMLCollection
-HTMLOutputElement
-HTMLQuoteElement
-HTMLFrameElement
-HTMLTableSectionElement
-HTMLModElement
-HTMLTableCaptionElement
-HTMLCanvasElement
-HTMLOptGroupElement
-HTMLLinkElement
-HTMLImageElement
-HTMLBRElement
-HTMLProgressElement
-HTMLParagraphElement
-HTMLScriptElement
-HTMLOListElement
-HTMLTableCellElement
-HTMLTextAreaElement
-HTMLUListElement
-HTMLMarqueeElement
-HTMLFieldSetElement
-HTMLLIElement
-HTMLTableElement
-HTMLButtonElement
-HTMLAnchorElement
-HTMLAllCollection
-HTMLMetaElement
-HTMLLabelElement
-HTMLMenuElement
-HTMLMapElement
-HTMLParamElement
-HTMLTableColElement
-HTMLTableRowElement
-HTMLDocument
-HTMLSpanElement
-HTMLBaseFontElement
-HTMLEmbedElement
-HTMLDivElement
-HTMLBaseElement
-HTMLHeadElement
-HTMLTitleElement
-HTMLDirectoryElement
-HTMLUnknownElement
-HTMLHtmlElement
-HTMLHRElement
-HTMLInputElement
-HTMLDataListElement
-HTMLStyleElement
-HTMLSourceElement
-HTMLOptionElement
-HTMLFontElement
-HTMLElement
-HTMLBodyElement
-HTMLFormElement
-HTMLHeadingElement
-HTMLSelectElement
-HTMLPreElement
-HTMLIFrameElement
-HTMLMediaElement
-HTMLLegendElement
-HTMLObjectElement
-HTMLDListElement
-HTMLAudioElement
-HTMLAreaElement
-HTMLFrameSetElement
-HTMLMeterElement
-HTMLKeygenElement
-*/
-// SVG constructors
-// http://www.w3.org/TR/SVG11/struct.html#NewDocument
-/*
-SVGScriptElement
-SVGCircleElement
-SVGTitleElement
-SVGFEDistantLightElement
-SVGGElement
-SVGAnimatedString
-SVGFEConvolveMatrixElement
-SVGTransform
-SVGAltGlyphDefElement
-SVGAnimatedLengthList
-SVGCursorElement
-SVGAnimateColorElement
-SVGPathSegCurvetoQuadraticSmoothAbs
-SVGDefsElement
-SVGAnimateElement
-SVGPathSegLinetoVerticalAbs
-SVGAnimatedBoolean
-SVGVKernElement
-SVGElement
-SVGEllipseElement
-SVGForeignObjectElement
-SVGColor
-SVGFEPointLightElement
-SVGMissingGlyphElement
-SVGPathSegCurvetoCubicRel
-SVGPathSegMovetoRel
-SVGFEDisplacementMapElement
-SVGPathSegArcRel
-SVGAElement
-SVGFETurbulenceElement
-SVGMetadataElement
-SVGTextElement
-SVGElementInstanceList
-SVGFEBlendElement
-SVGTSpanElement
-SVGFESpecularLightingElement
-SVGPathSegArcAbs
-SVGZoomEvent
-SVGSVGElement
-SVGPathSegLinetoHorizontalRel
-SVGFEOffsetElement
-SVGAltGlyphItemElement
-SVGPaint
-SVGException
-SVGLengthList
-SVGFontFaceUriElement
-SVGPathSegLinetoAbs
-SVGMarkerElement
-SVGStyleElement
-SVGAnimatedRect
-SVGFilterElement
-SVGFEFuncGElement
-SVGAnimatedNumberList
-SVGPathSegLinetoHorizontalAbs
-SVGZoomAndPan
-SVGFEImageElement
-SVGAnimatedPreserveAspectRatio
-SVGPathSegLinetoVerticalRel
-SVGAltGlyphElement
-SVGSetElement
-SVGPathSegCurvetoCubicAbs
-SVGRect
-SVGPathSegClosePath
-SVGFEGaussianBlurElement
-SVGAngle
-SVGViewElement
-SVGMatrix
-SVGPreserveAspectRatio
-SVGTextPathElement
-SVGRenderingIntent
-SVGFEFloodElement
-SVGAnimateTransformElement
-SVGFEMergeNodeElement
-SVGPoint
-SVGTRefElement
-SVGFESpotLightElement
-SVGLinearGradientElement
-SVGPathSegList
-SVGTextContentElement
-SVGPointList
-SVGSwitchElement
-SVGPathSegCurvetoQuadraticSmoothRel
-SVGFontFaceElement
-SVGLineElement
-SVGLength
-SVGFECompositeElement
-SVGDocument
-SVGGlyphElement
-SVGFontFaceNameElement
-SVGFEMergeElement
-SVGPathSegCurvetoCubicSmoothRel
-SVGAnimatedInteger
-SVGAnimatedNumber
-SVGAnimateMotionElement
-SVGStopElement
-SVGUseElement
-SVGFontElement
-SVGGradientElement
-SVGPathSegLinetoRel
-SVGPathSegCurvetoQuadraticAbs
-SVGAnimatedEnumeration
-SVGNumber
-SVGTextPositioningElement
-SVGComponentTransferFunctionElement
-SVGFEDiffuseLightingElement
-SVGStringList
-SVGRadialGradientElement
-SVGPathElement
-SVGMaskElement
-SVGFEFuncBElement
-SVGPolygonElement
-SVGGlyphRefElement
-SVGFEColorMatrixElement
-SVGElementInstance
-SVGFontFaceSrcElement
-SVGAnimatedAngle
-SVGFontFaceFormatElement
-SVGHKernElement
-SVGPolylineElement
-SVGAnimatedTransformList
-SVGFEFuncRElement
-SVGDescElement
-SVGAnimatedLength
-SVGSymbolElement
-SVGNumberList
-SVGViewSpec
-SVGPathSegCurvetoCubicSmoothAbs
-SVGMPathElement
-SVGPatternElement
-SVGPathSegCurvetoQuadraticRel
-SVGFEComponentTransferElement
-SVGRectElement
-SVGTransformList
-SVGFETileElement
-SVGFEDropShadowElement
-SVGUnitTypes
-SVGPathSegMovetoAbs
-SVGClipPathElement
-SVGFEMorphologyElement
-SVGImageElement
-SVGPathSeg
-SVGFEFuncAElement
-*/
 	};
-	
+
+	var protoLength = "~proto".length;
 	return {
 		Types : Types,
-		Definition : Definition
+		Definition : Definition,
+
+		// now some functions that handle types signatures, styling, and parsing
+
+		/** constant that defines generated type name prefixes */
+		GEN_NAME : "gen~",
+
+
+		// type parsing
+		isArrayType : function(typeObj) {
+			return typeObj.type === 'ArrayType' || typeObj.type === 'TypeApplication';
+		},
+
+		isFunctionOrConstructor : function(typeObj) {
+			return typeObj.type === 'FunctionType';
+		},
+
+		isPrototypeName : function(typeName) {
+			return typeName.substr( - protoLength, protoLength) === "~proto";
+		},
+
+		/**
+		 * returns a parameterized array type with the given type parameter
+		 */
+		parameterizeArray : function(parameterTypeObj) {
+			return {
+				type: 'ArrayType',
+				elements: [parameterTypeObj]
+			};
+		},
+
+		createFunctionType : function(params, result, isConstructor) {
+			var functionTypeObj = {
+				type: 'FunctionType',
+				params: params,
+				result: result
+			};
+			if (isConstructor) {
+				functionTypeObj.params = functionTypeObj.params || [];
+			    // TODO should we also do 'this'?
+				functionTypeObj.params.push({
+					type: 'ParameterType',
+					name: 'new',
+					expression: result
+				});
+			}
+
+			return functionTypeObj;
+		},
+
+		/**
+		 * If this is a parameterized array type, then extracts the type,
+		 * Otherwise object
+		 */
+		extractArrayParameterType : function(arrayObj) {
+			var elts;
+			if (arrayObj.type === 'TypeApplication') {
+				if (arrayObj.expression.name === 'Array') {
+					elts = arrayObj.applications;
+				} else {
+					return arrayObj.expression;
+				}
+			} else if (arrayObj.type === 'ArrayType') {
+				elts = arrayObj.elements;
+			} else {
+				// not an array type
+				return arrayObj;
+			}
+
+			if (elts.length > 0) {
+				return elts[0];
+			} else {
+				return THE_UNKNOWN_TYPE;
+			}
+		},
+
+		extractReturnType : function(fnType) {
+			return fnType.result || (fnType.type === 'FunctionType' ? this.UNDEFINED_TYPE: fnType);
+		},
+
+		// TODO should we just return a typeObj here???
+		parseJSDocComment : function(docComment) {
+			var result = { };
+			result.params = {};
+			if (docComment) {
+				var commentText = docComment.value;
+				if (!commentText) {
+					return result;
+				}
+				try {
+					var rawresult = doctrine.parse("/*" + commentText + "*/", {unwrap : true, tags : ['param', 'type', 'return']});
+					// transform result into something more manageable
+					var rawtags = rawresult.tags;
+					if (rawtags) {
+						for (var i = 0; i < rawtags.length; i++) {
+							switch (rawtags[i].title) {
+								case "typedef":
+								case "define":
+								case "type":
+									result.type = rawtags[i].type;
+									break;
+								case "return":
+									result.rturn = rawtags[i].type;
+									break;
+								case "param":
+									// remove square brackets
+									var name = rawtags[i].name;
+									if (name.charAt(0) === '[' && name.charAt(name.length -1) === ']') {
+										name = name.substring(1, name.length-1);
+									}
+									result.params[name] = rawtags[i].type;
+									break;
+							}
+						}
+					}
+				} catch (e) {
+					scriptedLogger.error(e.message, "CONTENT_ASSIST");
+					scriptedLogger.error(e.stack, "CONTENT_ASSIST");
+					scriptedLogger.error("Error parsing doc comment:\n" + (docComment && docComment.value),
+							"CONTENT_ASSIST");
+				}
+			}
+			return result;
+		},
+
+
+		/**
+		 * takes this jsdoc type and recursively splits out all record types into their own type
+		 * also converts unknown name types into Objects
+		 * @see https://developers.google.com/closure/compiler/docs/js-for-compiler
+		 */
+		convertJsDocType : function(jsdocType, env, doCombine, depth) {
+		    if (typeof depth !== 'number') {
+		        depth = 0;
+		    }
+			if (!jsdocType) {
+				return THE_UNKNOWN_TYPE;
+			}
+
+			var self = this;
+			var name = jsdocType.name;
+			var allTypes = env.getAllTypes();
+			switch (jsdocType.type) {
+				case 'NullableLiteral':
+				case 'AllLiteral':
+				case 'NullLiteral':
+				case 'UndefinedLiteral':
+				case 'VoidLiteral':
+					return {
+						type: jsdocType.type
+					};
+
+				case 'UnionType':
+					return {
+						type: jsdocType.type,
+						elements: jsdocType.elements.map(function(elt) {
+							return self.convertJsDocType(elt, env, doCombine, depth);
+						})
+					};
+
+				case 'RestType':
+					return {
+						type: jsdocType.type,
+						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth)
+					};
+
+				case 'ArrayType':
+					return {
+						type: jsdocType.type,
+						elements: jsdocType.elements.map(function(elt) {
+							return self.convertJsDocType(elt, env, doCombine, depth);
+						})
+					};
+
+				case 'FunctionType':
+					var fnType = {
+						type: jsdocType.type,
+						params: jsdocType.params.map(function(elt) {
+							return self.convertJsDocType(elt, env, doCombine, depth);
+						})
+					};
+					if (jsdocType.result) {
+						// prevent recursion on functions that return themselves
+						fnType.result = depth > 1 && jsdocType.result.type === 'FunctionType' ?
+							{ type : 'NameExpression', name : JUST_DOTS } :
+							self.convertJsDocType(jsdocType.result, env, doCombine, depth);
+					}
+
+					// TODO should remove?  new and this are folded into params
+//					if (jsdocType['new']) {
+//						// prevent recursion on functions that return themselves
+//						fnType['new'] = depth < 2 && jsdocType['new'].type === 'FunctionType' ?
+//							self.convertJsDocType(jsdocType['new'], env, doCombine, depth) :
+//							{ type : 'NameExpression', name : JUST_DOTS };
+//					}
+//
+//					if (jsdocType['this']) {
+//						// prevent recursion on functions that return themselves
+//						fnType['this'] = depth < 2 && jsdocType['this'].type === 'FunctionType' ?
+//							self.convertJsDocType(jsdocType['this'], env, doCombine, depth) :
+//							{ type : 'NameExpression', name : JUST_DOTS };
+//					}
+
+					return fnType;
+
+				case 'TypeApplication':
+					var typeApp = {
+						type: jsdocType.type,
+						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth),
+
+					};
+					if (jsdocType.applications) {
+                        typeApp.applications = jsdocType.applications.map(function(elt) {
+							return self.convertJsDocType(elt, env, doCombine, depth);
+						});
+					}
+					return typeApp;
+
+				case 'ParameterType':
+					return {
+						type: jsdocType.type,
+						name: name,
+						expression: jsdocType.expression ?
+							self.convertJsDocType(jsdocType.expression, env, doCombine, depth) :
+							null
+					};
+
+				case 'NonNullableType':
+				case 'OptionalType':
+				case 'NullableType':
+					return {
+						prefix: true,
+						type: jsdocType.type,
+						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth)
+					};
+
+				case 'NameExpression':
+					if (doCombine && env.isSyntheticName(name)) {
+						// Must mush together all properties for this synthetic type
+						var origFields = allTypes[name];
+						// must combine a record type
+						var newFields = [];
+						Object.keys(origFields).forEach(function(key) {
+							if (key === '$$proto') {
+								// maybe should traverse the prototype
+								return;
+							}
+							var prop = origFields[key];
+							var fieldType = depth > 0 && (prop.typeObj.type === 'NameExpression' && env.isSyntheticName(prop.typeObj.name)) ?
+							     { type : 'NameExpression', name : JUST_DOTS } :
+							     self.convertJsDocType(prop.typeObj, env, doCombine, depth+1);
+							newFields.push({
+								type: 'FieldType',
+								key: key,
+								value: fieldType
+							});
+						});
+
+
+						return {
+							type: 'RecordType',
+							fields: newFields
+						};
+					} else {
+						if (allTypes[name]) {
+							return { type: 'NameExpression', name: name };
+						} else {
+							var capType = name[0].toUpperCase() + name.substring(1);
+							if (allTypes[capType]) {
+								return { type: 'NameExpression', name: capType };
+							}
+						}
+					}
+					return THE_UNKNOWN_TYPE;
+
+				case 'FieldType':
+					return {
+						type: jsdocType.type,
+						key: jsdocType.key,
+						value: self.convertJsDocType(jsdocType.value, env, doCombine, depth)
+					};
+
+				case 'RecordType':
+					if (doCombine) {
+						// when we are combining, do not do anything special for record types
+						return {
+							type: jsdocType.type,
+							params: jsdocType.fields.map(function(elt) {
+								return self.convertJsDocType(elt, env, doCombine, depth+1);
+							})
+						};
+					} else {
+						// here's where it gets interesting
+						// create a synthetic type in the env and then
+						// create a property in the env type for each record property
+						var fields = { };
+						for (var i = 0; i < jsdocType.fields.length; i++) {
+							var field = jsdocType.fields[i];
+							var convertedField = self.convertJsDocType(field, env, doCombine, depth+1);
+							fields[convertedField.key] = convertedField.value;
+						}
+						// create a new type to store the record
+						var obj = env.newFleetingObject();
+						for (var prop in fields) {
+							if (fields.hasOwnProperty(prop)) {
+								// add the variable to the new object, which happens to be the top-level scope
+								env.addVariable(prop, obj.name, fields[prop]);
+							}
+						}
+						return obj;
+					}
+			}
+			return THE_UNKNOWN_TYPE;
+		},
+
+		createNameType : createNameType,
+
+		createParamType : function(name, typeObj) {
+			return {
+				type: 'ParameterType',
+				name: name,
+				expression: typeObj
+			};
+		},
+
+		convertToSimpleTypeName : function(typeObj) {
+			switch (typeObj.type) {
+				case 'NullableLiteral':
+				case 'AllLiteral':
+				case 'NullLiteral':
+					return "Object";
+
+				case 'UndefinedLiteral':
+				case 'VoidLiteral':
+					return "undefined";
+
+				case 'NameExpression':
+					return typeObj.name;
+
+				case 'TypeApplication':
+				case 'ArrayType':
+					return "Array";
+
+				case 'FunctionType':
+					return "Function";
+
+				case 'UnionType':
+					return typeObj.expressions && typeObj.expressions.length > 0 ?
+						this.convertToSimpleTypeName(typeObj.expressions[0]) :
+						"Object";
+
+				case 'RecordType':
+					return "Object";
+
+				case 'FieldType':
+					return this.convertToSimpleTypeName(typeObj.value);
+
+				case 'NonNullableType':
+				case 'OptionalType':
+				case 'NullableType':
+				case 'ParameterType':
+					return this.convertToSimpleTypeName(typeObj.expression);
+			}
+		},
+
+		// type styling
+		styleAsProperty : function(prop, useHtml) {
+			return useHtml ? '<span style="color: blue;font-weight:bold;">' + prop + '</span>': prop;
+		},
+		styleAsType : function(type, useHtml) {
+			return useHtml ? '<span style="color: black;">' + type + '</span>': type;
+		},
+		styleAsOther : function(text, useHtml) {
+			return useHtml ? '<span style="font-weight:bold; color:purple;">' + text + '</span>': text;
+		},
+
+
+		/**
+		 * creates a human readable type name from the name given
+		 */
+		createReadableType : function(typeObj, env, useFunctionSig, depth, useHtml) {
+			if (useFunctionSig) {
+				typeObj = this.convertJsDocType(typeObj, env, true);
+				if (useHtml) {
+					return this.convertToHtml(typeObj, 0);
+				}
+				var res = doctrine.type.stringify(typeObj, {compact: true});
+				res = res.replace(JUST_DOTS_REGEX, "{...}");
+				res = res.replace(UNDEFINED_OR_EMPTY_OBJ, "");
+				return res;
+			} else {
+				typeObj = this.extractReturnType(typeObj);
+				return this.createReadableType(typeObj, env, true, depth, useHtml);
+			}
+		},
+		convertToHtml : function(typeObj, depth) {
+			// typeObj must already be converted to avoid infinite loops
+//			typeObj = this.convertJsDocType(typeObj, env, true);
+			var self = this;
+			var res;
+			var parts = [];
+			depth = depth || 0;
+
+			switch(typeObj.type) {
+				case 'NullableLiteral':
+					return this.styleAsType("?", true);
+				case 'AllLiteral':
+					return this.styleAsType("*", true);
+				case 'NullLiteral':
+					return this.styleAsType("null", true);
+				case 'UndefinedLiteral':
+					return this.styleAsType("undefined", true);
+				case 'VoidLiteral':
+					return this.styleAsType("void", true);
+
+				case 'NameExpression':
+					var name = typeObj.name === JUST_DOTS ? "{...}" : typeObj.name;
+					return this.styleAsType(name, true);
+
+				case 'UnionType':
+					parts = [];
+					if (typeObj.expressions) {
+						typeObj.expressions.forEach(function(elt) {
+							parts.push(self.convertToHtml(elt, depth+1));
+						});
+					}
+					return "( " + parts.join(", ") + " )";
+
+
+
+				case 'TypeApplication':
+					if (typeObj.applications) {
+						typeObj.applications.forEach(function(elt) {
+							parts.push(self.convertToHtml(elt, depth));
+						});
+					}
+					var isArray = typeObj.expression.name === 'Array';
+					if (!isArray) {
+						res = this.convertToHtml(typeObj.expression, depth) + ".<";
+					}
+					res += parts.join(",");
+					if (isArray) {
+						res += '[]';
+					} else {
+						res += ">";
+					}
+					return res;
+				case 'ArrayType':
+					if (typeObj.elements) {
+						typeObj.elements.forEach(function(elt) {
+							parts.push(self.convertToHtml(elt, depth+1));
+						});
+					}
+					return parts.join(", ") + '[]';
+
+				case 'NonNullableType':
+					return "!" +  this.convertToHtml(typeObj.expression, depth);
+				case 'OptionalType':
+					return this.convertToHtml(typeObj.expression, depth) + "=";
+				case 'NullableType':
+					return "?" +  this.convertToHtml(typeObj.expression, depth);
+				case 'RestType':
+					return "..." +  this.convertToHtml(typeObj.expression, depth);
+
+				case 'ParameterType':
+					return this.styleAsProperty(typeObj.name, true) +
+						(typeObj.expression.name === JUST_DOTS ? "" : (":" + this.convertToHtml(typeObj.expression, depth)));
+
+				case 'FunctionType':
+					var isCons = false;
+					var resType;
+					if (typeObj.params) {
+						typeObj.params.forEach(function(elt) {
+							if (elt.name === 'this') {
+								isCons = true;
+								resType = elt.expression;
+							} else if (elt.name === 'new') {
+								isCons = true;
+								resType = elt.expression;
+							} else {
+								parts.push(self.convertToHtml(elt, depth+1));
+							}
+						});
+					}
+
+					if (!resType && typeObj.result) {
+						resType = typeObj.result;
+					}
+
+					var resText;
+					if (resType && resType.type !== 'UndefinedLiteral' && resType.name !== 'undefined') {
+						resText = this.convertToHtml(resType, depth+1);
+					} else {
+						resText = '';
+					}
+					res = this.styleAsOther(isCons ? 'new ' : 'function', true);
+					if (isCons) {
+						res += resText;
+					}
+					res += '(' + parts.join(",") + ')';
+					if (!isCons && resText) {
+						res += '&rarr;' + resText;
+					}
+
+					return res;
+
+				case 'RecordType':
+					if (typeObj.fields && typeObj.fields.length > 0) {
+						typeObj.fields.forEach(function(elt) {
+							parts.push(proposalUtils.repeatChar('&nbsp;&nbsp;', depth+1) + self.convertToHtml(elt, depth+1));
+						});
+						return '{<br/>' + parts.join(',<br/>') + '<br/>' + proposalUtils.repeatChar('&nbsp;&nbsp;', depth) + '}';
+					} else {
+						return '{ }';
+					}
+					break;
+
+				case 'FieldType':
+					return this.styleAsProperty(typeObj.key, true) +
+						":" + this.convertToHtml(typeObj.value, depth);
+			}
+
+		},
+		ensureTypeObject: ensureTypeObject,
+		OBJECT_TYPE: THE_UNKNOWN_TYPE,
+		UNDEFINED_TYPE: createNameType("undefined"),
+		NUMBER_TYPE: createNameType("Number"),
+		BOOLEAN_TYPE: createNameType("Boolean"),
+		STRING_TYPE: createNameType("String"),
+		ARRAY_TYPE: createNameType("Array"),
+		FUNCTION_TYPE: createNameType("Function")
 	};
 });

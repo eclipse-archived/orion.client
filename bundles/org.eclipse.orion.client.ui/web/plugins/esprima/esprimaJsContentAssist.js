@@ -8,22 +8,25 @@
  * http://www.opensource.org/licenses/eclipse-1.0.php
  *
  * Contributors:
- *     Andy Clement (VMware) - initial API and implementation
- *     Andrew Eisenberg (VMware) - implemented visitor pattern
+ *	 Andy Clement (VMware) - initial API and implementation
+ *	 Andrew Eisenberg (VMware) - implemented visitor pattern
  ******************************************************************************/
 
-/*global define require eclipse esprima window scriptedLogger doctrine */
-define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "esprima/esprima", "doctrine/doctrine"],
-		function(mVisitor, mTypes) {
-	
-	/** @type {function(obj):Boolean} a safe way of checking for arrays */
+/*global define esprima doctrine */
+define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/esprima/proposalUtils", "scriptedLogger", "esprima/esprima"],
+		function(mVisitor, mTypes, proposalUtils, scriptedLogger) {
+
+	/**
+	 * TODO move this to a central location
+	 * @type {function(obj):Boolean} a safe way of checking for arrays
+	 */
 	var isArray = Array.isArray;
 	if (!isArray) {
-	    isArray = function isArray(ary) {
-	        return Object.prototype.toString.call(ary) === '[object Array]';
-	    };
+		isArray = function isArray(ary) {
+			return Object.prototype.toString.call(ary) === '[object Array]';
+		};
 	}
-	
+
 	var RESERVED_WORDS = {
 		"break" : true, "case" : true, "catch" : true, "continue" : true, "debugger" : true, "default" : true, "delete" : true, "do" : true, "else" : true, "finally" : true,
 		"for" : true, "function" : true, "if" : true, "in" : true, "instanceof" : true, "new" : true, "return" : true, "switch" : true, "this" : true, "throw" : true, "try" : true, "typeof" : true,
@@ -32,7 +35,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	function isReserverdWord(name) {
 		return RESERVED_WORDS[name] === true;
 	}
-	
+
 	/**
 	 * @param {String} char a string of at least one char14acter
 	 * @return {boolean} true iff uppercase ascii character
@@ -47,10 +50,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		}
 		return charCode >= 65 && charCode <= 90;
 	}
-	
-	/** constant that defines generated type name prefixes */
-	var GEN_NAME = "gen~";
-	
+
 	/**
 	 * finds the right-most segment of a dotted MemberExpression
 	 * if it is an identifier, or null otherwise
@@ -78,7 +78,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Recursively generates a name based on the given expression
 	 * @param {{type:String,name:String}} node
@@ -102,37 +102,46 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			return "";
 		}
 	}
-	
+
 	/**
 	 * Convert an array of parameters into a string and also compute linked editing positions
 	 * @param {String} name name of the function
-	 * @param {String} type the type of the function using the following structure '?Type:arg1,arg2,...'
+	 * @param {{}} typeObj the type object of the function
 	 * @param {Number} offset offset
-	 * @return {{ completion:String, positions:Array.<Number> }}
+	 * @return {{ completion:String, positions:[Number] }}
 	 */
-	function calculateFunctionProposal(name, type, offset) {
-		var paramsOffset = type.lastIndexOf(":"), paramsStr, params;
-		paramsStr = paramsOffset > 0 ? type.substring(paramsOffset+1) : "";
-		params = paramsStr.split(",");
-		if (!paramsStr || params.length === 0) {
-			return {completion: name + "()", positions:[]};
-		}
+	function calculateFunctionProposal(name, typeObj, offset) {
+		var params = typeObj.params || [];
+		var ret = typeObj.result;
+
 		var positions = [];
 		var completion = name + '(';
 		var plen = params.length;
 		for (var p = 0; p < plen; p++) {
+			if (params[p].name === 'new' || params[p].name === 'this') {
+				continue;
+			}
 			if (p > 0) {
 				completion += ', ';
 			}
-			var argName;
-			if (typeof params[p] === "string") {
-				// need this because jslintworker.js augments the String prototype with a name() function
-				// don't want confusion
-				argName = params[p];
-			} else if (params[p].name) {
-				argName = params[p].name();
-			} else {
-				argName = params[p];
+			var param = params[p];
+			var optional, rest;
+			if (param.type === 'OptionalType') {
+				param = param.expression;
+				optional=true;
+			}
+
+			if (param.type === 'RestType') {
+				param = param.expression;
+				rest = true;
+			}
+
+			var argName = param.name || 'arg' + p;
+			if (rest) {
+				argName = '...' + argName;
+			}
+			if (optional) {
+				argName = '[' + argName + ']';
 			}
 			positions.push({offset:offset+completion.length+1, length: argName.length});
 			completion += argName;
@@ -140,15 +149,15 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		completion += ')';
 		return {completion: completion, positions: positions.length === 0 ? null : positions};
 	}
-	
+
 	/**
 	 * checks that offset overlaps with the given range
 	 * Since esprima ranges are zero-based, inclusive of
 	 * the first char and exclusive of the last char, must
 	 * use a +1 at the end.
 	 * eg- (^ is the line start)
-	 *       ^x    ---> range[0,0]
-	 *       ^  xx ---> range[2,3]
+	 *	   ^x	---> range[0,0]
+	 *	   ^  xx ---> range[2,3]
 	 */
 	function inRange(offset, range, includeEdge) {
 		return range[0] <= offset && (includeEdge ? range[1] >= offset : range[1] > offset);
@@ -163,18 +172,6 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		}
 		return offset < range[0];
 	}
-	
-	// not used...OK to delete?
-//	/**
-//	 * checks that offset is after the range
-//	 * @return Boolean
-//	 */
-//	function isAfter(offset, range) {
-//		if (!range) {
-//			return true;
-//		}
-//		return offset > range[1];
-//	}
 
 	/**
 	 * Determines if the offset is inside this member expression, but after the '.' and before the
@@ -207,19 +204,19 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			offset > end) {
 			return false;
 		}
-		
+
 		var dotLoc = memberExpr.object.range[1];
 		while (contents.charAt(dotLoc) !== "." && dotLoc < end) {
 			dotLoc++;
 		}
-		
+
 		if (contents.charAt(dotLoc) !== ".") {
 			return false;
 		}
-		
+
 		return dotLoc < offset;
 	}
-	
+
 	/**
 	 * @return "top" if we are at a start of a new expression fragment (eg- at an empty line,
 	 * or a new parameter).  "member" if we are after a dot in a member expression.  false otherwise
@@ -238,21 +235,21 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			if (!node.extras) {
 				node.extras = {};
 			}
-			
+
 			if (!isInitialVisit) {
-			
+
 				// if we have reached the end of an inRange block expression then
 				// this means we are completing on an empty expression
 				if (node.type === "Program" || (node.type === "BlockStatement") &&
 						inRange(offset, node.range)) {
 					throw "done";
 				}
-			
+
 				parents.pop();
 				// return value is ignored
 				return false;
 			}
-			
+
 			// the program node is always in range even if the range numbers do not line up
 			if ((node.range && inRange(offset-1, node.range)) || node.type === "Program") {
 				if (node.type === "Identifier") {
@@ -282,19 +279,21 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				throw(done);
 			}
 		}
-		
+
 		// determine if we need to defer infering the enclosing function block
 		var toDefer;
 		if (parents && parents.length) {
 			var parent = parents.pop();
 			for (var i = 0; i < parents.length; i++) {
-				if (parents[i].type === "FunctionDeclaration" || parents[i].type === "FunctionExpression") {
+				if ((parents[i].type === "FunctionDeclaration" || parents[i].type === "FunctionExpression") &&
+						// don't defer if offset is over the function name
+						!(parents[i].id && inRange(offset, parents[i].id.range, true))) {
 					toDefer = parents[i];
 					break;
 				}
-				
+
 			}
-			
+
 			if (parent.type === "MemberExpression") {
 				if (parent.property && inRange(offset-1, parent.property.range)) {
 					// on the right hand side of a property, eg: foo.b^
@@ -318,7 +317,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		}
 		return { kind : "top", toDefer : toDefer };
 	}
-	
+
 	/**
 	 * finds the final return statement of a function declaration
 	 * @param node an ast statement node
@@ -347,7 +346,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		case "ForStatement":
 		case "ForInStatement":
 		case "CatchClause":
-			
+
 			return findReturn(node.body);
 		case "IfStatement":
 			maybe = findReturn(node.alternate);
@@ -393,7 +392,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				}
 			}
 			return null;
-			
+
 		case "ReturnStatement":
 			return node;
 		default:
@@ -403,31 +402,30 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			return null;
 		}
 	}
-	
+
 	/**
 	 * updates a function type to include a new return type.
-	 * function types are specified like this: ?returnType:[arg-n...]
-	 * return type is the name of the return type, arg-n is the name of
-	 * the nth argument.
+	 * makes a copy of the functiontype
+	 * TODO this is not a deep copy...should it be?
+	 * TOD move to mTypes
 	 */
-	function updateReturnType(originalFunctionType, newReturnType) {
-		if (! originalFunctionType) {
-			// not a valid function type
-			return newReturnType;
+	function updateReturnType(originalFunctionTypeObj, newReturnTypeObj) {
+		if (! originalFunctionTypeObj || originalFunctionTypeObj.type !== "FunctionType") {
+			return newReturnTypeObj;
+		} else {
+			var newFunctionTypeObj = {
+				type: originalFunctionTypeObj.type,
+				params: originalFunctionTypeObj.params,
+				result: newReturnTypeObj
+			};
+			if (originalFunctionTypeObj['this']) {
+				newFunctionTypeObj['this'] = originalFunctionTypeObj['this'];
+			}
+			if (originalFunctionTypeObj['new']) {
+				newFunctionTypeObj['new'] = originalFunctionTypeObj['new'];
+			}
+			return newFunctionTypeObj;
 		}
-		
-		var firstChar = originalFunctionType.charAt(0);
-		if (firstChar !== "?" && firstChar !== "*") {
-			// not a valid function type
-			return newReturnType;
-		}
-		
-		var end = originalFunctionType.lastIndexOf(":");
-		if (!end) {
-			// not a valid function type
-			return newReturnType;
-		}
-		return firstChar + newReturnType + originalFunctionType.substring(end);
 	}
 	/**
 	 * checks to see if this file looks like an AMD module
@@ -442,7 +440,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				body[0].expression &&
 				body[0].expression.type === "CallExpression" &&
 				body[0].expression.callee.name === "define") {
-				
+
 				// found it.
 				return body[0].expression;
 			}
@@ -464,13 +462,13 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					body[i].expression &&
 					body[i].expression.type === "CallExpression" &&
 					body[i].expression.callee.name === "define") {
-					
+
 					var callee = body[i].expression;
 					if (callee["arguments"] &&
 						callee["arguments"].length === 1 &&
 						callee["arguments"][0].type === "FunctionExpression" &&
 						callee["arguments"][0].params.length === 3) {
-						
+
 						var params = callee["arguments"][0].params;
 						if (params[0].name === "require" &&
 							params[1].name === "exports" &&
@@ -485,7 +483,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		}
 		return null;
 	}
-	
+
 	/**
 	 * if this method call ast node is a call to require with a single string constant
 	 * argument, then look that constant up in the indexer to get a summary
@@ -497,7 +495,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		}
 		if (call.type === "CallExpression" && call.callee.type === "Identifier" &&
 			call.callee.name === "require" && call["arguments"].length === 1) {
-		
+
 			var arg = call["arguments"][0];
 			if (arg.type === "Literal" && typeof arg.value === "string") {
 				// we're in business
@@ -514,31 +512,14 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						env.popScope();
 					}
 					env.mergeSummary(summary, mergeTypeName);
-					return typeName;
+					return mTypes.ensureTypeObject(typeName);
 				}
 			}
 		}
-		
+
 		return;
 	}
-	
-	function isFunctionOrConstructor(typeName) {
-		return typeName.charAt(0) === "?" || typeName.charAt(0) === "*";
-	}
-	
-	/**
-	 * if the type passed in is a function type, extracts the return type
-	 * otherwise returns as is
-	 */
-	function extractReturnType(fnType) {
-		if (isFunctionOrConstructor(fnType)) {
-			var typeEnd = fnType.lastIndexOf(':');
-			typeEnd = typeEnd >0 ? typeEnd : fnType.length;
-			fnType = fnType.substring(1,typeEnd);
-		}
-		return fnType;
-	}
-	
+
 	/**
 	 * checks to see if this function is a module definition
 	 * and if so returns an array of module definitions
@@ -584,7 +565,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 									paramTypes.push(env.newFleetingObject());
 								}
 							} else {
-								paramTypes.push("Object");
+								paramTypes.push(mTypes.OBJECT_TYPE);
 							}
 						}
 					}
@@ -598,218 +579,55 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		}
 		return paramTypes;
 	}
-	
-	function isArrayType(typeName) {
-		return typeName.indexOf("Array") === 0;
-	}
-	/**
-	 * returns a parameterized array type with the given type parameter
-	 */
-	function parameterizeArray(parameterType) {
-		return "Array.<" + parameterType + ">";
-	}
-	
-	/**
-	 * If this is a parameterized array type, then extracts the type,
-	 * Otherwise object
-	 */
-	function extractArrayParameterType(arrayType) {
-		if (arrayType.indexOf("Array.<") === 0 && arrayType.substr(-1, 1) === ">") {
-			return arrayType.substring("Array.<".length, arrayType.length -1);
-		} else {
-			return "Object";
-		}
-	}
-	
+
+
 	/**
 	 * Finds the closest doc comment to this node
-	 * @param {} node
-	 * @param {Array} comments
+	 * @param {{range:Array.<Number>}} node
+	 * @param {Array.<{range:Array.<Number>}>} doccomments
+	 * @return {{value:String,range:Array.<Number>}}
 	 */
 	function findAssociatedCommentBlock(node, doccomments) {
-//		look for closest doc comment that is before the start of this node
-//		just shift all the other ones
+		// look for closest doc comment that is before the start of this node
+		// just shift all the other ones
 		var candidate;
 		while (doccomments.length > 0 && doccomments[0].range[0] < node.range[0]) {
-			candidate = doccomments.shift().value;
+			candidate = doccomments.shift();
 		}
-		return candidate;
+		return candidate || { value : null };
 	}
-	
-	function parseJSDocComment(commentText) {
-		var result = { };
-		result.params = {};
-		if (commentText) {
-			try {
-				var rawresult = doctrine.parse("/*" + commentText + "*/", {unwrap : true, tags : ['param', 'type', 'return']});
-				// transform result into something more manageable
-				var rawtags = rawresult.tags;
-				if (rawtags) {
-					for (var i = 0; i < rawtags.length; i++) {
-						switch (rawtags[i].title) {
-							case "typedef":
-							case "define":
-							case "type":
-								result.type = rawtags[i].type;
-								break;
-							case "return":
-								result.rturn = rawtags[i].type;
-								break;
-							case "param":
-								result.params[rawtags[i].name] = rawtags[i].type;
-								break;
-						}
-					}
-				}
-			} catch (e) {
-				if (typeof scriptedLogger !== "undefined") {
-					scriptedLogger.error(e.message, "CONTENT_ASSIST");
-					scriptedLogger.error(e.stack, "CONTENT_ASSIST");
-				} else {
-					// TODO FIXADE not sure if we want to throw, or just log
-					throw (e);
-				}
+
+
+	/**
+	 * Extracts all doccomments that fall inside the given range.
+	 * Side effect is to remove the array elements
+	 * @param Array.<{range:Array.<Number}>> doccomments
+	 * @param Array.<Number> range
+	 * @return {{value:String,range:Array.<Number>}} array elements that are removed
+	 */
+	function extractDocComments(doccomments, range) {
+		var start = 0, end = 0, i, docStart, docEnd;
+		for (i = 0; i < doccomments.length; i++) {
+			docStart = doccomments[i].range[0];
+			docEnd = doccomments[i].range[1];
+			if (!isBefore(docStart, range) || !isBefore(docEnd, range)) {
+				break;
 			}
 		}
-		return result;
-	}
-	
-	/**
-	 * Best effort to recursively convert from a jsdoc type specification to a scripted type name.
-	 *
-	 * See here: https://developers.google.com/closure/compiler/docs/js-for-compiler
-	 * should handle:
-			NullableLiteral
-			AllLiteral
-			NullLiteral
-			UndefinedLiteral
-			VoidLiteral
-			UnionType
-			ArrayType
-			RecordType
-			FieldType
-			FunctionType
-			ParameterType
-			RestType
-			NonNullableType
-			OptionalType
-			NullableType
-			NameExpression
-			TypeApplication
-	 * @return {String} if the type is found, then return string, otherwise null
-	 */
-	function convertJsDocType(jsdocType, env) {
-		var allTypes = env.getAllTypes();
-		if (!jsdocType) {
-			return null;
+
+		if (i < doccomments.length) {
+			start = i;
+			for (i = i; i < doccomments.length; i++) {
+				docStart = doccomments[i].range[0];
+				docEnd = doccomments[i].range[1];
+				if (!inRange(docStart, range, true) || !inRange(docEnd, range, true)) {
+					break;
+				}
+			}
+			end = i;
 		}
-	
-		var i;
-		switch (jsdocType.type) {
-			case 'NullableLiteral':
-			case 'AllLiteral':
-			case 'NullLiteral':
-				return "Object";
 
-			case 'UndefinedLiteral':
-			case 'VoidLiteral':
-				return "undefined";
-
-			case 'UnionType':
-				// TODO no direct handling of union types
-				// for now, just return the first of the union
-				if (jsdocType.elements && jsdocType.elements.length > 0) {
-					return convertJsDocType(jsdocType.elements[0], env);
-				}
-				return "Object";
-				
-			case 'RestType':
-				return "Array.<" + convertJsDocType(jsdocType.expression, env) + ">";
-			case 'ArrayType':
-				if (jsdocType.elements && jsdocType.elements.length > 0) {
-					// assume array type is type of first element, not correct, but close enough
-					return "Array.<" + convertJsDocType(jsdocType.elements[0], env) + ">";
-				}
-				return "Array";
-
-			case 'FunctionType':
-				var ret = convertJsDocType(jsdocType.result, env);
-				if (!ret) {
-					ret = "Object";
-				}
-				var params = [];
-				if (jsdocType.params) {
-					for (i = 0; i < jsdocType.params.length; i++) {
-						// this means that if no name is used, then the type name is used (if a simple type)
-						var param = jsdocType.params[i].name;
-						if (!param) {
-							param = convertJsDocType(jsdocType.params[i], env);
-							if (!param) {
-								param = 'arg'+i;
-							}
-						}
-						params.push(param);
-					}
-				}
-				// TODO FIXADE must also handle @constructor
-				var funcConstr;
-				if (jsdocType['new'] && jsdocType['this']) {
-					// this is actually a constructor
-					var maybeRet = convertJsDocType(jsdocType['this'], env);
-					if (maybeRet) {
-						ret = maybeRet;
-					}
-					funcConstr = "*";
-				} else {
-					funcConstr = "?";
-				}
-				return funcConstr + ret + ":" + params.join(',');
-
-			case 'TypeApplication':
-				var expr = convertJsDocType(jsdocType.expression, env);
-				if (expr === "Array" && jsdocType.applications && jsdocType.applications.length > 0) {
-					// only parameterize arrays not handling objects yet
-					return "Array.<" + convertJsDocType(jsdocType.applications[0], env) + ">";
-				}
-				return expr;
-			case 'ParameterType':
-			case 'NonNullableType':
-			case 'OptionalType':
-			case 'NullableType':
-				return convertJsDocType(jsdocType.expression, env);
-				
-			case 'NameExpression':
-				var name = jsdocType.name;
-				name = name.trim();
-				if (allTypes[name]) {
-					return name;
-				} else {
-					var capType = name[0].toUpperCase() + name.substring(1);
-					if (allTypes[capType]) {
-						return capType;
-					}
-				}
-				return null;
-			case 'RecordType':
-				var fields = { };
-				for (i = 0; i < jsdocType.fields.length; i++) {
-					var field = jsdocType.fields[i];
-					var fieldType = convertJsDocType(field, env);
-					fields[field.key] = fieldType ? fieldType : "Object";
-				}
-				// create a new type to store the record
-				var obj = env.newFleetingObject();
-				for (var prop in fields) {
-					if (fields.hasOwnProperty(prop)) {
-						// add the variable to the new object, which happens to be the top-level scope
-						env.addVariable(prop, obj, fields[prop]);
-					}
-				}
-				return obj;
-			case 'FieldType':
-				return convertJsDocType(jsdocType.value, env);
-		}
-		return null;
+		return doccomments.splice(start, end-start);
 	}
 
 	/**
@@ -818,22 +636,13 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	 * @param env the context for the visitor.  See computeProposals below for full description of contents
 	 */
 	function inferencer(node, env) {
-		var type = node.type, name, i, property, params, newTypeName, jsdocResult, jsdocType;
-		
+		var type = node.type, name, i, property, params, newTypeObj, jsdocResult, jsdocType, docComment;
+
 		// extras prop is where we stuff everything that we have added
 		if (!node.extras) {
 			node.extras = {};
 		}
 
-		// defer the inferencing of the function containing the offset.
-		if (node === env.defer) {
-			node.extras.associatedComment = findAssociatedCommentBlock(node, env.comments);
-			node.extras.inferredType = "Object"; // will be filled in later
-			// need to remember the scope to place this function in for later
-			node.extras.scope = env.scope(node.extras.target);
-			return false;
-		}
-		
 		switch(type) {
 		case "Program":
 			// check for module kind
@@ -844,12 +653,18 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 			break;
 		case "BlockStatement":
-			node.extras.inferredType = env.newScope();
+			node.extras.inferredTypeObj = env.newScopeObj();
+			if (node.extras.stop) {
+				// this BlockStatement inferencing is deferred until after the rest of the file is inferred
+				inferencerPostOp(node, env);
+				delete node.extras.stop;
+				return false;
+			}
 			break;
 		case "Literal":
 			break;
 		case "ArrayExpression":
-			node.extras.inferredType = "Array";
+			node.extras.inferredTypeObj = mTypes.ARRAY_TYPE;
 			break;
 		case "ObjectExpression":
 			if (node.extras.fname) {
@@ -860,8 +675,8 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			// for object literals, create a new object type so that we can stuff new properties into it.
 			// we might be able to do better by walking into the object and inferring each RHS of a
 			// key-value pair
-			newTypeName = env.newObject(null, node.range);
-			node.extras.inferredType = newTypeName;
+			newTypeObj = env.newObject(null, node.range);
+			node.extras.inferredTypeObj = newTypeObj;
 			for (i = 0; i < node.properties.length; i++) {
 				property = node.properties[i];
 				// only remember if the property is an identifier
@@ -869,16 +684,23 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					// first just add as an object property (or use jsdoc if exists).
 					// after finishing the ObjectExpression, go and update
 					// all of the variables to reflect their final inferred type
-					jsdocResult = parseJSDocComment(findAssociatedCommentBlock(property.key, env.comments));
-					jsdocType = convertJsDocType(jsdocResult.type, env);
-					var keyType = jsdocType ? jsdocType : "Object";
-					env.addVariable(property.key.name, node, keyType, property.key.range);
+					docComment = findAssociatedCommentBlock(property.key, env.comments);
+					jsdocResult = mTypes.parseJSDocComment(docComment);
+					jsdocType = jsdocResult.type && mTypes.convertJsDocType(jsdocResult.type, env);
 					if (!property.key.extras) {
 						property.key.extras = {};
 					}
+					var keyType;
+					if (jsdocType) {
+						property.key.extras.inferredType = property.key.extras.jsdocType = keyType = jsdocType;
+					} else {
+						keyType = mTypes.OBJECT_TYPE;
+					}
+					env.addVariable(property.key.name, node, keyType, property.key.range, docComment.range);
+					property.key.extras.associatedComment = docComment;
 					// remember that this is the LHS so that we don't add the identifier to global scope
 					property.key.extras.isLHS = property.key.extras.isDecl = true;
-					
+
 					if (property.value.type === "FunctionExpression" || property.value.type === "ObjectExpression") {
 						if (!property.value.extras) {
 							property.value.extras = {};
@@ -886,7 +708,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						// RHS is a function, remember the name in case it is a constructor
 						property.value.extras.fname = property.key.name;
 						property.value.extras.cname = env.getQualifiedName() + property.key.name;
-						
+
 						if (property.value.type === "FunctionExpression") {
 							// now remember the jsdocResult so it doesn't need to be recomputed
 							property.value.extras.jsdocResult = jsdocResult;
@@ -913,60 +735,99 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					params[i] = node.params[i].name;
 				}
 			}
-			
+
 			if (node.extras.jsdocResult) {
 				jsdocResult = node.extras.jsdocResult;
+				docComment = { range : null };
 			} else {
-				jsdocResult = parseJSDocComment(node.extras.associatedComment || findAssociatedCommentBlock(node, env.comments));
+				docComment = node.extras.associatedComment || findAssociatedCommentBlock(node, env.comments);
+				jsdocResult = mTypes.parseJSDocComment(docComment);
 			}
 
 			// assume that function name that starts with capital is
 			// a constructor
-			var isConstuctor;
+			var isConstructor;
 			if (name && node.body && isUpperCaseChar(name)) {
 				if (node.extras.cname) {
 					// RHS of assignment
 					name = node.extras.cname;
 				}
 				// create new object so that there is a custom "this"
-				newTypeName = env.newObject(name, node.range);
-				isConstuctor = true;
+				newTypeObj = env.newObject(name, node.range);
+				isConstructor = true;
 			} else {
-				var jsdocReturn = convertJsDocType(jsdocResult.rturn, env);
-				if (jsdocReturn) {
+				if (jsdocResult.rturn) {
+					var jsdocReturn = mTypes.convertJsDocType(jsdocResult.rturn, env);
 					// keep track of the return type for the way out
 					node.extras.jsdocReturn = jsdocReturn;
-					newTypeName = jsdocReturn;
-					node.extras.inferredType = jsdocReturn;
+					newTypeObj = jsdocReturn;
+					node.extras.inferredTypeObj = jsdocReturn;
 				} else {
 					// temporarily use "undefined" as type, but this may change once we
 					// walk through to get to a return statement
-					newTypeName = "undefined";
+					newTypeObj = mTypes.UNDEFINED_TYPE;
 				}
-				isConstuctor = false;
+				isConstructor = false;
+			}
+
+			var callArgs = new Array(params.length);
+			if (node.extras.paramTypeObj && node.extras.paramTypeObj.type === 'FunctionType') {
+				// this function is an anonymous function being passed as an argument
+				// to another function and we have a hint of what the function type is
+				// shunt the argument types to this function's arguments
+				var paramTypes = node.extras.paramTypeObj.params;
+				var len = Math.min(params.length || 0, paramTypes.length || 0);
+				for (var i = 0; i < len; i++) {
+					callArgs[i] = paramTypes[i];
+				}
 			}
 			if (!node.body.extras) {
 				node.body.extras = {};
 			}
-			node.body.extras.isConstructor = isConstuctor;
-			var functionTypeName = (isConstuctor ? "*" : "?") + newTypeName + ":" + params;
-			if (isConstuctor) {
-				env.createConstructor(functionTypeName, newTypeName);
-				// assume that constructor will be available from global scope using qualified name
-				// this is not correct in all cases
-				env.addOrSetGlobalVariable(name, functionTypeName, nameRange);
+			node.body.extras.isConstructor = isConstructor;
+
+			// add parameters to the current scope
+			var paramTypeObjs = [];
+			if (params.length > 0) {
+				var moduleDefs = findModuleDefinitions(node, env);
+				for (i = 0; i < params.length; i++) {
+					// choose jsdoc tags over module definitions and both of those over call args
+					var jsDocParam = jsdocResult.params[params[i]];
+					var paramTypeObj = null;
+					if (jsDocParam) {
+						paramTypeObj = mTypes.convertJsDocType(jsDocParam, env);
+					} else {
+						paramTypeObj = moduleDefs[i];
+					}
+					if (callArgs[i] && leftTypeIsMoreGeneral(paramTypeObj, callArgs[i], env)) {
+						// unwrap parameter type since name is probably wrong
+						// TODO if param is wrapped in a RestType, then problem
+						paramTypeObj = callArgs[i].type === 'ParameterType' ? callArgs[i].expression : callArgs[i];
+					}
+
+					paramTypeObjs.push(mTypes.createParamType(params[i], paramTypeObj));
+				}
 			}
 
-			node.extras.inferredType = functionTypeName;
-			
+			var functionTypeObj = mTypes.createFunctionType(paramTypeObjs, newTypeObj, isConstructor);
+			if (isConstructor) {
+				env.createConstructor(name);
+				// assume that constructor will be available from global scope using qualified name
+				// this is not correct in all cases
+				env.addOrSetGlobalVariable(name, functionTypeObj, nameRange, docComment.range);
+			}
+
+			node.extras.inferredTypeObj = functionTypeObj;
+
 			if (name && !isBefore(env.offset, node.range)) {
 				// if we have a name, then add it to the scope
-				env.addVariable(name, node.extras.target, functionTypeName, nameRange);
+				env.addVariable(name, node.extras.target, functionTypeObj, nameRange, docComment.range);
 			}
-			
+
 			// now add the scope for inside the function
 			env.newScope();
-			env.addVariable("arguments", node.extras.target, "Arguments", node.range);
+			env.addVariable("arguments", node.extras.target, mTypes.createNameType("Arguments"), node.range);
+
 
 			// now determine if we need to add 'this'.  If this function has an appliesTo, the we know it is being assigned as a property onto something else
 			// the 'something else' is the 'this' type.
@@ -978,28 +839,16 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					var ownerTypeName = env.scope(appliesToOwner);
 					// for the special case of adding to the prototype, we want to make sure that we also add to the 'this' of
 					// the instantiated types
-					if (ownerTypeName.indexOf("*") === 0 && ownerTypeName.lastIndexOf('~proto') === ownerTypeName.length - '~proto'.length) {
-						ownerTypeName = ownerTypeName.substring(1, ownerTypeName.lastIndexOf(':'));
+					if (mTypes.isPrototypeName(ownerTypeName)) {
+						ownerTypeName = mTypes.extractReturnType(ownerTypeName);
 					}
-					env.addVariable("this", node.extras.target, ownerTypeName, node.range);
+					env.addVariable("this", node.extras.target, mTypes.createNameType(ownerTypeName), nameRange, docComment.range);
 				}
 			}
-			
-			// add parameters to the current scope
-			if (params.length > 0) {
-				var moduleDefs = findModuleDefinitions(node, env);
-				for (i = 0; i < params.length; i++) {
-					// choose jsdoc tags over module definitions
-					var jsDocParam = jsdocResult.params[params[i]];
-					var typeName = null;
-					if (jsDocParam) {
-						typeName = convertJsDocType(jsDocParam, env);
-					}
-					if (!typeName) {
-						typeName = moduleDefs[i];
-					}
-					env.addVariable(params[i], node.extras.target, typeName, node.params[i].range);
-				}
+
+			// add variables for all parameters
+			for (i = 0; i < params.length; i++) {
+				env.addVariable(params[i], node.extras.target, paramTypeObjs[i].expression, node.params[i].range);
 			}
 			break;
 		case "VariableDeclarator":
@@ -1020,12 +869,14 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					node.init.extras.fnameRange = node.id.range;
 				} else {
 					// not the RHS of a function, check for jsdoc comments
-					jsdocResult = parseJSDocComment(findAssociatedCommentBlock(node, env.comments));
-					jsdocType = convertJsDocType(jsdocResult.type, env);
+					docComment = findAssociatedCommentBlock(node, env.comments);
+					jsdocResult = mTypes.parseJSDocComment(docComment);
+					jsdocType = jsdocResult.type && mTypes.convertJsDocType(jsdocResult.type, env);
+					node.extras.docRange = docComment.range;
 					if (jsdocType) {
-						node.extras.inferredType = jsdocType;
+						node.extras.inferredTypeObj = jsdocType;
 						node.extras.jsdocType = jsdocType;
-						env.addVariable(node.id.name, node.extras.target, jsdocType, node.id.range);
+						env.addVariable(node.id.name, node.extras.target, jsdocType, node.id.range, docComment.range);
 					}
 				}
 			}
@@ -1034,7 +885,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		case "AssignmentExpression":
 			var rightMost = findRightMost(node.left);
 			var qualName = env.getQualifiedName() + findDottedName(node.left);
-			if (rightMost && rightMost.type === "Identifier" || rightMost.type === "Literal") {
+			if (rightMost && (rightMost.type === "Identifier" || rightMost.type === "Literal")) {
 				if (!rightMost.extras) {
 					rightMost.extras = {};
 				}
@@ -1047,37 +898,47 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					node.right.extras.fname = rightMost.name;
 					node.right.extras.cname = qualName;
 					node.right.extras.fnameRange = rightMost.range;
-					
+
 					if (!node.left.extras) {
 						node.left.extras = {};
 					}
+				}
+				docComment = findAssociatedCommentBlock(node, env.comments);
+				jsdocResult = mTypes.parseJSDocComment(docComment);
+				jsdocType = jsdocResult.type && mTypes.convertJsDocType(jsdocResult.type, env);
+				node.extras.docRange = docComment.range;
+				if (jsdocType) {
+					node.extras.inferredTypeObj = jsdocType;
+					node.extras.jsdocType = jsdocType;
+					env.addVariable(rightMost.name, node.extras.target, jsdocType, rightMost.range, docComment.range);
 				}
 			}
 			env.pushName(qualName);
 			break;
 		case "CatchClause":
 			// create a new scope for the catch parameter
-			node.extras.inferredType = env.newScope();
+			node.extras.inferredTypeObj = env.newScope();
 			if (node.param) {
 				if (!node.param.extras) {
 					node.param.extras = {};
 				}
-				node.param.extras.inferredType = "Error";
-				env.addVariable(node.param.name, node.extras.target, "Error", node.param.range);
+				var inferredTypeObj = mTypes.createNameType("Error");
+				node.param.extras.inferredTypeObj = inferredTypeObj;
+				env.addVariable(node.param.name, node.extras.target, inferredTypeObj, node.param.range);
 			}
 			break;
 		case "MemberExpression":
 			if (node.property) {
-				if (!node.computed ||  // like this: foo.at
-					(node.computed && node.property.type === "Literal" && typeof node.property.value === "string")) {  // like this: foo['at']
-					
+				if (!node.computed ||  // like this: foo.prop
+					(node.computed && node.property.type === "Literal" && typeof node.property.value === "string")) {  // like this: foo['prop']
+
 					// keep track of the target of the property expression
 					// so that its type can be used as the seed for finding properties
 					if (!node.property.extras) {
 						node.property.extras = {};
 					}
 					node.property.extras.target = node.object;
-				} else { // like this: foo[at] or foo[0]
+				} else { // like this: foo[prop] or foo[0]
 					// do nothing
 				}
 			}
@@ -1089,43 +950,67 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				if (args.length > 1 &&
 					args[args.length-1].type === "FunctionExpression" &&
 					args[args.length-2].type === "ArrayExpression") {
-					
+
 					// assume definition
 					if (!args[args.length-1].extras) {
 						args[args.length-1].extras = {};
 					}
 					args[args.length-1].extras.amdDefn = node;
 				}
+			} else {
+				// the type of the function call may help infer the types of the parameters
+				// keep track of that here
+				rightMost = findRightMost(node.callee);
+				if (rightMost && rightMost.type === "Identifier") {
+					rightMost.extras = rightMost.extras || {};
+					rightMost.extras.callArgs = node["arguments"];
+				}
 			}
 			break;
 		}
+
+		// defer the inferencing of the function's children containing the offset.
+		if (node === env.defer) {
+			node.extras.associatedComment = findAssociatedCommentBlock(node, env.comments);
+			node.extras.inferredTypeObj = node.extras.inferredTypeObj || mTypes.OBJECT_TYPE; // will be filled in later
+			// need to remember the scope to place this function in for later
+			node.extras.scope = env.scope(node.extras.target);
+
+			// need to infer the body of this function later
+			node.body.extras.stop = true;
+		}
+
 		return true;
 	}
-	
+
 	/**
 	 * called as the post operation for the proposalGenerator visitor.
 	 * Finishes off the inferencing and adds all proposals
 	 */
 	function inferencerPostOp(node, env) {
-		var type = node.type, name, inferredType, newTypeName, rightMost, kvps, i;
-		
+		var type = node.type, name, inferredTypeObj, newTypeObj, rightMost, kvps, i;
+
 		switch(type) {
 		case "Program":
 			if (env.defer) {
 				// finally, we can infer the deferred target function
+
+				// now use the comments that we deferred until later
+				env.comments = env.deferredComments;
+
 				var defer = env.defer;
 				env.defer = null;
-				env.targetType = null;
+				env.targetTypeName = null;
 				env.pushScope(defer.extras.scope);
-				mVisitor.visit(defer, env, inferencer, inferencerPostOp);
+				mVisitor.visit(defer.body, env, inferencer, inferencerPostOp);
 				env.popScope();
 			}
-			
+
 			// in case we haven't stored target yet, do so now.
 			env.storeTarget();
-			
+
 			// TODO FIXADE for historical reasons we end visit by throwing exception.  Should chamge
-			throw env.targetType;
+			throw env.targetTypeName;
 		case "BlockStatement":
 		case "CatchClause":
 			if (inRange(env.offset, node.range)) {
@@ -1133,7 +1018,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				// we are completing as a top-level entity with no prefix
 				env.storeTarget();
 			}
-		
+
 			env.popScope();
 			break;
 		case "MemberExpression":
@@ -1144,35 +1029,37 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 
 			// for arrays, inferred type is the dereferncing of the array type
 			// for non-arrays inferred type is the type of the property expression
-			if (isArrayType(node.object.extras.inferredType) && node.computed) {
+			if (mTypes.isArrayType(node.object.extras.inferredTypeObj) && node.computed) {
 				// inferred type of expression is the type of the dereferenced array
-				node.extras.inferredType = extractArrayParameterType(node.object.extras.inferredType);
+				node.extras.inferredTypeObj = mTypes.extractArrayParameterType(node.object.extras.inferredTypeObj);
 			} else if (node.computed && node.property && node.property.type !== "Literal") {
 				// we don't infer parameterized objects, but we have something like this: 'foo[at]'  just assume type is object
-				node.extras.inferredType = "Object";
+				node.extras.inferredTypeObj = mTypes.OBJECT_TYPE;
 			} else {
 				// a regular member expression: foo.bar or foo['bar']
 				// node.propery will be null for mal-formed asts
-				node.extras.inferredType = node.property ? node.property.extras.inferredType : node.object.extras.inferredType;
+				node.extras.inferredTypeObj = node.property ?
+					node.property.extras.inferredTypeObj :
+					node.object.extras.inferredTypeObj;
 			}
 			break;
 		case "CallExpression":
 			// first check to see if this is a require call
-			var fnType = extractRequireModule(node, env);
-			
+			var fnTypeObj = extractRequireModule(node, env);
+
 			// otherwise, apply the function
-			if (!fnType) {
-				fnType = node.callee.extras.inferredType;
-				fnType = extractReturnType(fnType);
+			if (!fnTypeObj) {
+				fnTypeObj = node.callee.extras.inferredTypeObj;
+				fnTypeObj = mTypes.extractReturnType(fnTypeObj);
 			}
-			node.extras.inferredType = fnType;
+			node.extras.inferredTypeObj = fnTypeObj;
 			break;
 		case "NewExpression":
 			// FIXADE we have a problem here.
 			// constructors that are called like this: new foo.Bar()  should have an inferred type of foo.Bar,
 			// This ensures that another constructor new baz.Bar() doesn't conflict.  However,
 			// we are only taking the final prefix and assuming that it is unique.
-			node.extras.inferredType = extractReturnType(node.callee.extras.inferredType);
+			node.extras.inferredTypeObj = mTypes.extractReturnType(node.callee.extras.inferredTypeObj);
 			break;
 		case "ObjectExpression":
 			// now that we know all the types of the values, use that to populate the types of the keys
@@ -1190,17 +1077,18 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						// and the key and value names match.
 						var range = null;
 						if (name === kvps[i].value.name) {
-							var def = env.lookupName(kvps[i].value.name, null, false, true);
-							if (def && def.range && (isFunctionOrConstructor(def.typeName))) {
+							var def = env.lookupTypeObj(kvps[i].value.name, null, true);
+							if (def && def.range && (mTypes.isFunctionOrConstructor(def.typeObj))) {
 								range = def.range;
 							}
 						}
 						if (!range) {
 							range = kvps[i].key.range;
 						}
-						
-						inferredType = kvps[i].value.extras.inferredType;
-						env.addVariable(name, node, inferredType, range);
+
+						inferredTypeObj =  kvps[i].key.extras.jsdocType || kvps[i].value.extras.inferredTypeObj;
+						var docComment = kvps[i].key.extras.associatedComment;
+						env.addVariable(name, node, inferredTypeObj, range, docComment.range);
 						if (inRange(env.offset-1, kvps[i].key.range)) {
 							// We found it! rmember for later, but continue to the end of file anyway
 							env.storeTarget(env.scope(node));
@@ -1219,12 +1107,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			switch (node.operator) {
 				case '+':
 					// special case: if either side is a string, then result is a string
-					if (node.left.extras.inferredType === "String" ||
-						node.right.extras.inferredType === "String") {
-						
-						node.extras.inferredType = "String";
+					if (node.left.extras.inferredTypeObj.name === "String" ||
+						node.right.extras.inferredTypeObj.name === "String") {
+
+						node.extras.inferredTypeObj = mTypes.STRING_TYPE;
 					} else {
-						node.extras.inferredType = "Number";
+						node.extras.inferredTypeObj = mTypes.NUMBER_TYPE;
 					}
 					break;
 				case '-':
@@ -1238,15 +1126,15 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				case '>>':
 				case '>>>':
 					// Numeric and bitwise operations always return a number
-					node.extras.inferredType = "Number";
+					node.extras.inferredTypeObj = mTypes.NUMBER_TYPE;
 					break;
 				case '&&':
 				case '||':
 					// will be the type of the left OR the right
 					// for now arbitrarily choose the left
-					node.extras.inferredType = node.left.extras.inferredType;
+					node.extras.inferredTypeObj = node.left.extras.inferredTypeObj;
 					break;
-					
+
 				case '!==':
 				case '!=':
 				case '===':
@@ -1255,22 +1143,22 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				case '<=':
 				case '>':
 				case '>=':
-					node.extras.inferredType = "Boolean";
+					node.extras.inferredTypeObj = mTypes.BOOLEAN_TYPE;
 					break;
-				
-				
+
+
 				default:
-					node.extras.inferredType = "Object";
+					node.extras.inferredTypeObj = mTypes.OBJECT_TYPE;
 			}
 			break;
 		case "UpdateExpression":
 		case "UnaryExpression":
 			if (node.operator === '!') {
-				node.extras.inferredType = "Boolean";
+				node.extras.inferredTypeObj = mTypes.BOOLEAN_TYPE;
 			} else {
 				// includes all unary operations and update operations
 				// ++ -- - and ~
-				node.extras.inferredType = "Number";
+				node.extras.inferredTypeObj = mTypes.NUMBER_TYPE;
 			}
 			break;
 		case "FunctionDeclaration":
@@ -1284,24 +1172,24 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					} else {
 						fnameRange = node.extras.fnameRange;
 					}
-					
+
 					// an extra scope was created for the implicit 'this'
 					env.popScope();
 
 					// now add a reference to the constructor
-					env.addOrSetVariable(extractReturnType(node.extras.inferredType), node.extras.target, node.extras.inferredType, fnameRange);
+					env.addOrSetVariable(mTypes.extractReturnType(node.extras.inferredTypeObj), node.extras.target, node.extras.inferredTypeObj, fnameRange);
 				} else {
 					// a regular function.  if we don't already know the jsdoc return,
 					// try updating to a more explicit return type
 					if (!node.extras.jsdocReturn) {
 						var returnStatement = findReturn(node.body);
 						var returnType;
-						if (returnStatement) {
-							returnType = returnStatement.extras.inferredType;
+						if (returnStatement && returnStatement.extras && returnStatement.extras.inferredTypeObj) {
+							returnType = returnStatement.extras.inferredTypeObj;
 						} else {
-							returnType = "undefined";
+							returnType = mTypes.UNDEFINED_TYPE;
 						}
-						node.extras.inferredType = updateReturnType(node.extras.inferredType, returnType);
+						node.extras.inferredTypeObj = updateReturnType(node.extras.inferredTypeObj, returnType);
 					}
 					// if there is a name, then update that as well
 					var fname;
@@ -1315,21 +1203,21 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						fnameRange = node.extras.fnameRange;
 					}
 					if (fname) {
-						env.addOrSetVariable(fname, node.extras.target, node.extras.inferredType, fnameRange);
+						env.addOrSetVariable(fname, node.extras.target, node.extras.inferredTypeObj, fnameRange);
 					}
 				}
 			}
 			break;
 		case "VariableDeclarator":
 			if (node.init) {
-				inferredType = node.init.extras.inferredType;
+				inferredTypeObj = node.init.extras.inferredTypeObj;
 			} else {
-				inferredType = env.newFleetingObject();
+				inferredTypeObj = env.newFleetingObject();
 			}
-			node.id.extras.inferredType = inferredType;
+			node.id.extras.inferredTypeObj = inferredTypeObj;
 			if (!node.extras.jsdocType) {
-				node.extras.inferredType = inferredType;
-				env.addVariable(node.id.name, node.extras.target, inferredType, node.id.range);
+				node.extras.inferredTypeObj = inferredTypeObj;
+				env.addVariable(node.id.name, node.extras.target, inferredTypeObj, node.id.range, node.extras.docRange);
 			}
 			if (inRange(env.offset-1, node.id.range)) {
 				// We found it! rmember for later, but continue to the end of file anyway
@@ -1337,31 +1225,39 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 			env.popName();
 			break;
-			
+
 		case "Property":
-			node.extras.inferredType = node.key.extras.inferredType = node.value.extras.inferredType;
+			if (node.key.extras.jsdocType) {
+				// use jsdoc instead of whatever we have inferred
+				node.extras.inferredTypeObj = node.key.extras.jsdocType;
+			} else {
+				node.extras.inferredTypeObj = node.key.extras.inferredTypeObj = node.value.extras.inferredTypeObj;
+			}
 			break;
-			
+
 		case "AssignmentExpression":
-			if (node.operator === '=') {
+			if (node.extras.jsdocType) {
+				// use jsdoc instead of whatever we have inferred
+				inferredTypeObj = node.extras.jsdocType;
+			} else if (node.operator === '=') {
 				// standard assignment
-				inferredType = node.right.extras.inferredType;
+				inferredTypeObj = node.right.extras.inferredTypeObj;
 			} else {
 				// +=, -=, *=, /=, >>=, <<=, >>>=, &=, |=, or ^=.
-				if (node.operator === '+=' && node.left.extras.inferredType === 'String') {
-					inferredType = "String";
+				if (node.operator === '+=' && node.left.extras.inferredTypeObj.name === 'String') {
+					inferredTypeObj = mTypes.STRING_TYPE;
 				} else {
-					inferredType = "Number";
+					inferredTypeObj = mTypes.NUMBER_TYPE;
 				}
 			}
-			
-			node.extras.inferredType = inferredType;
+
+			node.extras.inferredTypeObj = inferredTypeObj;
 			// when we have 'this.that.theOther.f' need to find the right-most identifier
 			rightMost = findRightMost(node.left);
 			if (rightMost && (rightMost.type === "Identifier" || rightMost.type === "Literal")) {
 				name = rightMost.name ? rightMost.name : rightMost.value;
-				rightMost.extras.inferredType = inferredType;
-				env.addOrSetVariable(name, rightMost.extras.target, inferredType, rightMost.range);
+				rightMost.extras.inferredTypeObj = inferredTypeObj;
+				env.addOrSetVariable(name, rightMost.extras.target, inferredTypeObj, rightMost.range, node.extras.docRange);
 				if (inRange(env.offset-1, rightMost.range)) {
 					// We found it! remember for later, but continue to the end of file anyway
 					env.storeTarget(env.scope(rightMost.extras.target));
@@ -1371,12 +1267,13 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				//   foo[at] = bar;
 				if (node.left.computed) {
 					rightMost = findRightMost(node.left.object);
-					if (rightMost) {
+					if (rightMost && !(rightMost.type === 'Identifier' && rightMost.name === 'prototype')) {
 						// yep...now go and update the type of the array
-						var arrayType = parameterizeArray(inferredType);
-						node.left.extras.inferredType = inferredType;
-						node.left.object.extras.inferredType = arrayType;
-						env.addOrSetVariable(rightMost.name, rightMost.extras.target, arrayType, rightMost.range);
+						// (also don't turn refs to prototype into an array. this breaks things)
+						var arrayType = mTypes.parameterizeArray(inferredTypeObj);
+						node.left.extras.inferredTypeObj = inferredTypeObj;
+						node.left.object.extras.inferredTypeObj = arrayType;
+						env.addOrSetVariable(rightMost.name, rightMost.extras.target, arrayType, rightMost.range, node.extras.docRange);
 					}
 				}
 			}
@@ -1384,24 +1281,48 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			break;
 		case 'Identifier':
 			name = node.name;
-			newTypeName = env.lookupName(name, node.extras.target);
-			if (newTypeName && !node.extras.isDecl) {
+			newTypeObj = env.lookupTypeObj(name, node.extras.target);
+			if (newTypeObj && !node.extras.isDecl) {
 				// name already exists but we are redeclaring it and so not being overridden
-				node.extras.inferredType = newTypeName;
+				node.extras.inferredTypeObj = newTypeObj;
 				if (inRange(env.offset, node.range, true)) {
 					// We found it! rmember for later, but continue to the end of file anyway
 					env.storeTarget(env.scope(node.extras.target));
 				}
+
+				// if this identifier refers to a function call, and we know the argument types, then push on to the arg nodes
+				if (node.extras.callArgs) {
+					if (newTypeObj.type === 'FunctionType') {
+						// match param types with args
+						var paramTypes = newTypeObj.params;
+						var args = node.extras.callArgs;
+						var len = Math.min(args.length || 0, paramTypes.length || 0);
+						for (var i = 0; i < len; i++) {
+							args[i].extras = args[i].extras || {};
+							args[i].extras.paramTypeObj = paramTypes[i].type === 'ParameterType' ? paramTypes[i].expression : paramTypes[i];
+						}
+					}
+				}
+
+				if (node.extras.paramTypeObj) {
+					// this identifier is an argument of a function call whose type we know
+					if (leftTypeIsMoreGeneral(newTypeObj, node.extras.paramTypeObj, env)) {
+						// the param type is more specific, use that one instead of the otherwise inferred type
+						node.extras.inferredTypeObj = newTypeObj = node.extras.paramTypeObj;
+						env.addOrSetVariable(name, node.extras.target /* should be null */, newTypeObj);
+					}
+				}
+
 			} else if (!node.extras.isLHS) {
 				if (!inRange(env.offset, node.range, true) && !isReserverdWord(name)) {
 					// we have encountered a read of a variable/property that we have never seen before
-					
+
 					if (node.extras.target) {
 						// this is a property on an object.  just add to the target
 						env.addVariable(name, node.extras.target, env.newFleetingObject(), node.range);
 					} else {
 						// add as a global variable
-						node.extras.inferredType = env.addOrSetGlobalVariable(name, null, node.range);
+						node.extras.inferredTypeObj = env.addOrSetGlobalVariable(name, null, node.range).typeObj;
 					}
 				} else {
 					// We found it! rmember for later, but continue to the end of file anyway
@@ -1414,7 +1335,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 			break;
 		case "ThisExpression":
-			node.extras.inferredType = env.lookupName("this");
+			node.extras.inferredTypeObj = env.lookupTypeObj("this");
 			if (inRange(env.offset-1, node.range)) {
 				// We found it! rmember for later, but continue to the end of file anyway
 				env.storeTarget(env.scope());
@@ -1422,50 +1343,50 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			break;
 		case "ReturnStatement":
 			if (node.argument) {
-				node.extras.inferredType = node.argument.extras.inferredType;
+				node.extras.inferredTypeObj = node.argument.extras.inferredTypeObj;
 			}
 			break;
-			
+
 		case "Literal":
 			if (node.extras.target && typeof node.value === "string") {
 				// we are inside a computed member expression.
 				// find the type of the property referred to if exists
 				name = node.value;
-				newTypeName = env.lookupName(name, node.extras.target);
-				node.extras.inferredType = newTypeName;
+				newTypeObj = env.lookupTypeObj(name, node.extras.target);
+				node.extras.inferredTypeObj = newTypeObj;
 			} else if (node.extras.target && typeof node.value === "number") {
 				// inside of an array access
-				node.extras.inferredType = "Number";
+				node.extras.inferredTypeObj = mTypes.NUMBER_TYPE;
 			} else {
 				var oftype = (typeof node.value);
-				node.extras.inferredType = oftype[0].toUpperCase() + oftype.substring(1, oftype.length);
+				node.extras.inferredTypeObj = mTypes.createNameType(oftype[0].toUpperCase() + oftype.substring(1, oftype.length));
 			}
 			break;
 
 		case "ConditionalExpression":
 			var target = node.consequent ? node.consequent : node.alternate;
 			if (target) {
-				node.extras.inferredType = target.extras.inferredType;
+				node.extras.inferredTypeObj = target.extras.inferredTypeObj;
 			}
 			break;
-		
+
 		case "ArrayExpression":
 			// parameterize this array by the type of its first non-null element
 			if (node.elements) {
 				for (i = 0; i < node.elements.length; i++) {
 					if (node.elements[i]) {
-						node.extras.inferredType = parameterizeArray(node.elements[i].extras.inferredType);
+						node.extras.inferredTypeObj = mTypes.parameterizeArray(node.elements[i].extras.inferredTypeObj);
 					}
 				}
 			}
 		}
-		
-		if (!node.extras.inferredType) {
-			node.extras.inferredType = "Object";
+
+		if (!node.extras.inferredTypeObj) {
+			node.extras.inferredTypeObj = mTypes.OBJECT_TYPE;
 		}
 	}
 
-	
+
 	/**
 	 * add variable names from inside a lint global directive
 	 */
@@ -1474,7 +1395,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		if (lintOptions && isArray(lintOptions.global)) {
 			for (i = 0; i < lintOptions.global.length; i++) {
 				globName = lintOptions.global[i];
-				if (!env.lookupName(globName)) {
+				if (!env.lookupTypeObj(globName)) {
 					env.addOrSetVariable(globName);
 				}
 			}
@@ -1495,7 +1416,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 							} else {
 								globName = splits[j].trim();
 							}
-							if (!env.lookupName(globName)) {
+							if (!env.lookupTypeObj(globName)) {
 								env.addOrSetVariable(globName, null, null, range);
 							}
 						}
@@ -1505,7 +1426,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 		}
 	}
-	
+
 	/**
 	 * Adds global variables defined in dependencies
 	 */
@@ -1522,7 +1443,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 		}
 	}
-	
+
 	/**
 	 * the prefix of a completion should not be included in the completion itself
 	 * must explicitly remove it
@@ -1530,66 +1451,39 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	function removePrefix(prefix, string) {
 		return string.substring(prefix.length);
 	}
-	
-	/**
-	 * creates a human readable type name from the name given
-	 */
-	function createReadableType(typeName, env, useFunctionSig, depth) {
-		var first = typeName.charAt(0);
-		if (first === "?" || first === "*") {
-			// a function
-			var nameEnd = typeName.lastIndexOf(":");
-			if (nameEnd === -1) {
-				nameEnd = typeName.length;
-			}
-			var funType = typeName.substring(1, nameEnd);
-			if (useFunctionSig) {
-				// convert into a function signature
-				var prefix = first === "?" ? "" : "new";
-				var args = typeName.substring(nameEnd+1, typeName.length);
-				return prefix + "(" + args + ") -> " + createReadableType(funType, env, useFunctionSig, 1);
-			} else {
-				// use the return type
-				return createReadableType(funType, env, useFunctionSig, depth);
-			}
-		} else if (typeName.indexOf(GEN_NAME) === 0) {
-			// a generated object
-			if (depth > 1) {
-				// don't show inner types
-				return "{...}";
-			}
-			
-			// create a summary
-			var type = env.findType(typeName);
-			var res = "{ ";
-			for (var val in type) {
-				if (type.hasOwnProperty(val) && val !== "$$proto") {
-					if (res.length > 2) {
-						res += ", ";
-					}
-					var name;
-					// don't show inner objects
-					if (!depth) {
-						name = createReadableType(type[val].typeName, env, false, 1);
-					} else {
-						name = createReadableType(type[val].typeName, env, false, 2);
-					}
-					res += val + " : " + name;
+
+	function isEmpty(generatedTypeName, allTypes) {
+		if (typeof generatedTypeName !== 'string') {
+			// original type was not a name expression
+			return false;
+		} else if (generatedTypeName === "Object" || generatedTypeName === "undefined") {
+			return true;
+		} else if (generatedTypeName.substring(0, mTypes.GEN_NAME.length) !== mTypes.GEN_NAME) {
+			// not a synthetic type, so not empty
+			return false;
+		}
+
+
+		// now check to see if there are any non-default fields in this type
+		var type = allTypes[generatedTypeName];
+		var popCount = 0;
+		// type should have a $$proto only and nothing else if it is empty
+		for (var property in type) {
+			if (type.hasOwnProperty(property)) {
+				popCount++;
+				if (popCount > 1) {
+					break;
 				}
 			}
-			return res + " }";
-		} else if (isArrayType(typeName)) {
-			var typeParameter = extractArrayParameterType(typeName);
-			if (typeParameter !== "Object") {
-				typeName = "Array[" + createReadableType(typeParameter, env, true, 1) + "]";
-			} else {
-				typeName = "Array";
-			}
-			return typeName;
-		} else {
-			return typeName;
 		}
+		if (popCount === 1) {
+			// we have an empty object literal, must check parent
+			// must traverse prototype hierarchy to make sure empty
+			return isEmpty(type.$$proto.typeObj.name, allTypes);
+		}
+		return false;
 	}
+
 
 	/**
 	 * Determines if the left type name is more general than the right type name.
@@ -1600,56 +1494,37 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	 * added to it.  Additionally, the type specified in the $$proto property is
 	 * either empty or is Object
 	 *
-	 * @param String leftTypeName
-	 * @param String rightTypeName
+	 * @param {{}} leftTypeObj
+	 * @param {{}} rightTypeObj
 	 * @param {{getAllTypes:function():Object}} env
 	 *
 	 * @return Boolean
 	 */
-	function leftTypeIsMoreGeneral(leftTypeName, rightTypeName, env) {
-		function isEmpty(generatedTypeName) {
-			if (generatedTypeName === "Object" || generatedTypeName === "undefined") {
-				return true;
-			} else if (leftTypeName.substring(0, GEN_NAME.length) !== GEN_NAME) {
-				return false;
+	function leftTypeIsMoreGeneral(leftTypeObj, rightTypeObj, env) {
+		var leftTypeName = leftTypeObj.name, rightTypeName = rightTypeObj.name;
+
+		if (!leftTypeName) {
+			if (leftTypeObj.type === 'NullLiteral' || leftTypeObj.type === 'UndefinedLiteral' || leftTypeObj.type === 'VoidLiteral') {
+				leftTypeName = 'undefined';
 			}
-			
-			
-			var type = env.getAllTypes()[generatedTypeName];
-			var popCount = 0;
-			// type should have a $$proto only and nothing else if it is empty
-			for (var property in type) {
-				if (type.hasOwnProperty(property)) {
-					popCount++;
-					if (popCount > 1) {
-						break;
-					}
-				}
-			}
-			if (popCount === 1) {
-				// we have an empty object literal, must check parent
-				// must traverse prototype hierarchy to make sure empty
-				return isEmpty(type.$$proto.typeName);
-			}
-			return false;
 		}
-		
+
 		function convertToNumber(typeName) {
 			if (typeName === "undefined") {
 				return 0;
 			} else if (typeName === "Object") {
 				return 1;
-			} else if (isEmpty(typeName)) {
+			} else if (isEmpty(typeName, env.getAllTypes())) {
 				return 2;
 			} else {
 				return 3;
 			}
 		}
-		
+
 		if (!rightTypeName) {
 			return false;
 		}
-		
+
 		var leftNum = convertToNumber(leftTypeName);
 		// avoid calculating the rightNum if possible
 		if (leftNum === 0) {
@@ -1657,12 +1532,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		} else if (leftNum === 1) {
 			return rightTypeName !== "undefined" && rightTypeName !== "Object";
 		} else if (leftNum === 2) {
-			return rightTypeName !== "undefined" && rightTypeName !== "Object" && !isEmpty(rightTypeName);
+			return rightTypeName !== "undefined" && rightTypeName !== "Object" && !isEmpty(rightTypeName, env.getAllTypes());
 		} else {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * @return boolean true iff the type contains
 	 * prop.  prop must not be coming from Object
@@ -1676,19 +1551,25 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			// check that here
 			return !type.hasOwnProperty(prop);
 		}
+		if (Object.prototype.hasOwnProperty(prop)) {
+			// this is one of the synthetic properties like __defineGetter__
+			// should be ignored, unless already exists in property
+			return type.hasOwnProperty(prop);
+		}
 		return true;
 	}
 
 	/**
 	 * Creates the environment object that stores type information
 	 * Called differently depending on what job this content assistant is being called to do.
+	 * TODO move to own module?
 	 */
 	function createEnvironment(options) {
 		var buffer = options.buffer, uid = options.uid, offset = options.offset, indexer = options.indexer, globalObjName = options.globalObjName;
 		if (!offset) {
 			offset = buffer.length+1;
 		}
-		
+
 		// must copy comments because the array is mutable
 		var comments = [];
 		if (options.comments) {
@@ -1696,11 +1577,28 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				comments[i] = options.comments[i];
 			}
 		}
-		
+
+
+		// create a hash of the path using a hashcode calculation similar to java's String.hashCode() method
+		var hashCode = function(str) {
+			var hash = 0, c, i;
+			if (str.length === 0) {
+				return hash;
+			}
+			for (i = 0; i < str.length; i++) {
+				c = str.charCodeAt(i);
+				hash = ((hash << 5) - hash) + c;
+				hash = hash & hash; // Convert to 32bit integer
+			}
+			return hash;
+		};
+
 		// prefix for generating local types
 		// need to add a unique id for each file so that types defined in dependencies don't clash with types
 		// defined locally
-		var namePrefix = GEN_NAME + uid + "~";
+		var namePrefix = mTypes.GEN_NAME + hashCode(uid) + "~";
+		// uncomment to show names
+//		var namePrefix = mTypes.GEN_NAME + (uid) + "~";
 
 		return {
 			/** Each element is the type of the current scope, which is a key into the types array */
@@ -1712,9 +1610,9 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			_allTypes : new mTypes.Types(globalObjName),
 			/** a counter used for creating unique names for object literals and scopes */
 			_typeCount : 0,
-			
+
 			_nameStack : [],
-			
+
 			/** if this is an AMD module, then the value of this property is the 'define' call expression */
 			amdModule : null,
 			/** if this is a wrapped commonjs module, then the value of this property is the 'define' call expression */
@@ -1725,14 +1623,22 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			offset : offset,
 			/** the entire contents being completed on */
 			contents : buffer,
-			uid : uid === 'local' ? null : uid,
-			
+			uid : uid === 'local' ? null : uid, // make the uid shorter
+
 			/** List of comments in the AST*/
 			comments : comments,
-			
+
 			newName: function() {
 				return namePrefix + this._typeCount++;
 			},
+
+			/**
+			 * @return {boolean} true iff this is an internally generated name
+			 */
+			isSyntheticName: function(name) {
+				return name.substr(0, mTypes.GEN_NAME.length) === mTypes.GEN_NAME;
+			},
+
 			/**
 			 * Creates a new empty scope and returns the name of the scope
 			 * must call this.popScope() when finished with this scope
@@ -1747,29 +1653,34 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				this._scopeStack.push(newScopeName);
 				return newScopeName;
 			},
-			
+
+			newScopeObj : function(range) {
+				return mTypes.createNameType(this.newScope(range));
+			},
+
 			pushScope : function(scopeName) {
 				this._scopeStack.push(scopeName);
 			},
-			
+
 			pushName : function(name) {
 				this._nameStack.push(name);
 			},
-			
+
 			popName : function() {
 				this._nameStack.pop();
 			},
-			
+
 			getQualifiedName : function() {
 				var name = this._nameStack.join('.');
 				return name.length > 0 ? name + '.' : name;
 			},
-			
+
 			/**
 			 * Creates a new empty object scope and returns the name of this object
 			 * must call this.popScope() when finished
+			 * @return {{type:String,name:String}} type object that was just created
 			 */
-			newObject: function(newObjectName, range) {
+			newObject : function(newObjectName, range) {
 				// object needs its own scope
 				this.newScope();
 				// if no name passed in, create a new one
@@ -1779,11 +1690,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				this._allTypes[newObjectName] = {
 					$$proto : new mTypes.Definition("Object", range, this.uid)
 				};
-				this.addVariable("this", null, newObjectName, range);
-				
-				return newObjectName;
+				var typeObj = mTypes.createNameType(newObjectName);
+				this.addVariable("this", null, typeObj, range);
+
+				return typeObj;
 			},
-			
+
 			/**
 			 * like a call to this.newObject(), but the
 			 * object created has not scope added to the scope stack
@@ -1793,58 +1705,72 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				this._allTypes[newObjectName] = {
 					$$proto : new mTypes.Definition("Object", range, this.uid)
 				};
+				return mTypes.createNameType(newObjectName);
+			},
+
+			/**
+			 * like a call to this.newObject(), but the
+			 * object created has not scope added to the scope stack
+			 * @return String the constructor name generated
+			 */
+			con: function(name, range) {
+				var newObjectName = name ? name : this.newName();
+				this._allTypes[newObjectName] = {
+					$$proto : new mTypes.Definition("Object", range, this.uid)
+				};
 				return newObjectName;
 			},
-			
+
 			/** removes the current scope */
 			popScope: function() {
 				// Can't delete old scope since it may have been assigned somewhere
 				var oldScope = this._scopeStack.pop();
 				return oldScope;
 			},
-			
+
 			/**
 			 * @param {ASTNode|String} target
-			 * returns the type name for the current scope
+			 * @return {{}} the type object for the current scope
 			 * if a target is passed in (optional), then use the
 			 * inferred type of the target instead (if it exists)
 			 */
 			scope : function(target) {
 				if (typeof target === "string") {
 					return target;
-				}
-			
-				if (target && target.extras.inferredType) {
-					// check for function literal
-					var inferredType = target.extras.inferredType;
-					// hmmmm... will be a problem here if there are nested ~protos
-					if (isFunctionOrConstructor(inferredType) && inferredType.indexOf("~proto") === -1) {
-						var noArgsType = inferredType.substring(0, inferredType.lastIndexOf(':')+1);
-						if (this._allTypes[noArgsType]) {
-							return noArgsType;
-						} else {
-							return "Function";
+				} else if (target && target.extras.inferredTypeObj) {
+					var inferredTypeObj = target.extras.inferredTypeObj;
+					// TODO what happens if not a NameExpression or FunctionType???
+					if (inferredTypeObj.type === 'NameExpression') {
+						return inferredTypeObj.name;
+					} else if (inferredTypeObj.type === 'FunctionType') {
+						if (inferredTypeObj.params) {
+							for (var i = 0; i < inferredTypeObj.params.length; i++) {
+								if ((inferredTypeObj.params[i].name === 'new' ||
+									inferredTypeObj.params[i].name === 'this') &&
+									inferredTypeObj.params[i].expression.name) {
+
+									return inferredTypeObj.params[i].expression.name;
+								}
+							}
 						}
-					} else if (isArrayType(inferredType)) {
-						// TODO FIXADE we are losing parameterization here
+						return "Function";
+					} else if (inferredTypeObj.type === 'ArrayType') {
 						return "Array";
-					} else {
-						return inferredType;
 					}
 				} else {
 					// grab topmost scope
 					return this._scopeStack[this._scopeStack.length -1];
 				}
 			},
-			
+
 			globalScope : function() {
 				return this._allTypes[this._scopeStack[0]];
 			},
-			
+
 			globalTypeName : function() {
 				return this._scopeStack[0];
 			},
-			
+
 			/**
 			 * adds the name to the target type.
 			 * if target is passed in then use the type corresponding to
@@ -1854,12 +1780,15 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			 * Will not add to a built in type
 			 *
 			 * @param {String} name
-			 * @param {String} typeName
+			 * @param {{}} typeObj
 			 * @param {Object} target
 			 * @param {Array.<Number>} range
+			 * @param {Array.<Number>} docRange
 			 */
-			addVariable : function(name, target, typeName, range) {
-				if (this._allTypes.Object["$_$" + name]) {
+			addVariable : function(name, target, typeObj, range, docRange) {
+				if (name === 'prototype' || name === '__proto__') {
+					name = '$$proto';
+				} else if (this._allTypes.Object["$_$" + name]) {
 					// this is a built in property of object.  do not redefine
 					return;
 				}
@@ -1867,44 +1796,48 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				// do not allow augmenting built in types
 				if (!type.$$isBuiltin) {
 					// if new type name is not more general than old type, do not replace
-					if (typeContainsProperty(type, name) && leftTypeIsMoreGeneral(typeName, type[name].typeName, this)) {
+					if (typeContainsProperty(type, name) && leftTypeIsMoreGeneral(typeObj, type[name].typeObj, this)) {
 						// do nuthin
 					} else {
-						type[name] = new mTypes.Definition(typeName ? typeName : "Object", range, this.uid);
+						type[name] = new mTypes.Definition(typeObj ? typeObj : mTypes.OBJECT_TYPE, range, this.uid);
+						type[name].docRange = docRange;
+						return type[name];
 					}
 				}
 			},
-			
-			addOrSetGlobalVariable : function(name, typeName, range) {
+
+			addOrSetGlobalVariable : function(name, typeObj, range, docRange) {
 				if (this._allTypes.Object["$_$" + name]) {
 					// this is a built in property of object.  do not redefine
 					return;
 				}
 				return this.addOrSetVariable(name,
 					// mock an ast node with a global type
-					{ extras : { inferredType : this.globalTypeName() } }, typeName, range);
+					this.globalTypeName(), typeObj, range, docRange);
 			},
-			
+
 			/**
 			 * like add variable, but first checks the prototype hierarchy
 			 * if exists in prototype hierarchy, then replace the type
 			 *
 			 * Will not override an existing variable if the new typeName is "Object" or "undefined"
 			 */
-			addOrSetVariable : function(name, target, typeName, range) {
-				if (name === 'prototype') {
+			addOrSetVariable : function(name, target, typeObj, range, docRange) {
+				if (name === 'prototype' || name === '__proto__') {
 					name = '$$proto';
 				} else if (this._allTypes.Object["$_$" + name]) {
 					// this is a built in property of object.  do not redefine
 					return;
 				}
 
-				var targetType = this.scope(target);
-				var current = this._allTypes[targetType], found = false;
+				var targetTypeName = this.scope(target);
+				var current = this._allTypes[targetTypeName], found = false;
 				// if no type provided, create a new type
-				typeName = typeName ? typeName : this.newFleetingObject();
+				typeObj = typeObj ? typeObj : this.newFleetingObject();
+				var defn;
 				while (current) {
 					if (typeContainsProperty(current, name)) {
+						defn = current[name];
 						// found it, just overwrite
 						// do not allow overwriting of built in types
 						// 3 cases to avoid:
@@ -1912,36 +1845,48 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						//  2. builtin types cannot be redefined
 						//  3. new type name is more general than old type
 						if (!current.$$isBuiltin && current.hasOwnProperty(name) &&
-								!leftTypeIsMoreGeneral(typeName, current[name].typeName, this)) {
-							current[name].typeName = typeName;
+								!leftTypeIsMoreGeneral(typeObj, defn.typeObj, this)) {
+							// since we are just overwriting the type we do not want to change
+							// the path or the range
+							defn.typeObj = typeObj;
+							if (docRange) {
+								defn.docRange = docRange;
+							}
 						}
 						found = true;
 						break;
 					} else if (current.$$proto) {
-						current = this._allTypes[current.$$proto.typeName];
+						var tname = current.$$proto.typeObj.name;
+						current = this._allTypes[tname || "Function"];
 					} else {
 						current = null;
 					}
 				}
-				
+
 				if (!found) {
 					// not found, so just add to current scope
 					// do not allow overwriting of built in types
-					var type = this._allTypes[targetType];
+					var type = this._allTypes[targetTypeName];
 					if (!type.$$isBuiltin) {
-						type[name] = new mTypes.Definition(typeName, range, this.uid);
+						defn = new mTypes.Definition(typeObj, range, this.uid);
+						defn.docRange = docRange;
+						type[name] = defn;
 					}
 				}
-				return typeName;
+				return defn;
 			},
-						
-			/** looks up the name in the hierarchy */
-			lookupName : function(name, target, applyFunction, includeDefinition) {
-			
+
+			/**
+			 * looks up the name in the hierarchy
+			 * @return {{}} type objec for the current name or null if doesn't exist
+			 */
+			lookupTypeObj : function(name, target, includeDefinition) {
+
 				// translate function names on object into safe names
 				var swapper = function(name) {
 					switch (name) {
 						case "prototype":
+						case "__proto__":
 							return "$$proto";
 						case "toString":
 						case "hasOwnProperty":
@@ -1954,21 +1899,21 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 							return name;
 					}
 				};
-			
+
 				var innerLookup = function(name, type, allTypes) {
 					var res = type[name];
-					
+
 					var proto = type.$$proto;
 					if (res) {
-						return includeDefinition ? res : res.typeName;
+						return includeDefinition ? res : res.typeObj;
 					} else if (proto) {
-						return innerLookup(name, allTypes[proto.typeName], allTypes);
+						return innerLookup(name, allTypes[proto.typeObj.name], allTypes);
 					} else {
 						return null;
 					}
 				};
 				var targetType = this._allTypes[this.scope(target)];
-				
+
 				// uncomment this if we want to hide errors where there is an unknown type being placed on the scope stack
 //				if (!targetType) {
 //					targetType = this.globalScope()
@@ -1976,7 +1921,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				var res = innerLookup(swapper(name), targetType, this._allTypes);
 				return res;
 			},
-			
+
 			/** removes the variable from the current type */
 			removeVariable : function(name, target) {
 				// do not allow deleting properties of built in types
@@ -1988,101 +1933,104 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					delete type[name];
 				}
 			},
-			
+
 			/**
 			 * adds a file summary to this module
+			 * @param {{types, provided}} summary
+			 * @param String targetTypeName
 			 */
 			mergeSummary : function(summary, targetTypeName) {
-			
+				var defn, existingDefn, property;
 				// add the extra types that don't already exists
-				for (var type in summary.types) {
-					if (summary.types.hasOwnProperty(type) && !this._allTypes[type]) {
-						this._allTypes[type] = summary.types[type];
+				for (var typeName in summary.types) {
+					if (summary.types.hasOwnProperty(typeName)) {
+						// create type if doesn't already exist, othewise merge
+						var type = this._allTypes[typeName];
+						var existingType = summary.types[typeName];
+						// if doesn't exist yet create it
+						// if type is built-in, then we must overwrite it with ours
+						if (!type || type.$$isBuiltin) {
+							type = this._allTypes[typeName] = {};
+							// for each property defined in the type from the sumamry,
+							// also add it to the current module's type
+							for (var typeProp in existingType) {
+								if (!type[typeProp]) {
+									type[typeProp] = mTypes.Definition.revive(existingType[typeProp]);
+								}
+							}
+						}
+
 					}
 				}
-				
+
 				// now augment the target type with the provided properties
 				// but only if a composite type is exported
 				var targetType = this._allTypes[targetTypeName];
 				if (typeof summary.provided !== 'string') {
+					// TODO summary.provided mightbe a RecordType
 					for (var providedProperty in summary.provided) {
 						if (summary.provided.hasOwnProperty(providedProperty)) {
+							// copy over the summary into the type den
 							// the targetType may already have the providedProperty defined
 							// but should override
-							targetType[providedProperty] = summary.provided[providedProperty];
+							targetType[providedProperty] = mTypes.Definition.revive(summary.provided[providedProperty]);
 						}
 					}
 				}
 			},
-			
+
 			/**
 			 * takes the name of a constructor and converts it into a type.
 			 * We need to ensure that ConstructorName.prototype = { ... } does the
 			 * thing that we expect.  This is why we set the $$proto property of the types
 			 */
-			createConstructor : function(constructorName, rawTypeName) {
+			createConstructor : function(rawTypeName) {
 				// don't include the parameter names since we don't want them confusing things when exported
-				constructorName = constructorName.substring(0,constructorName.lastIndexOf(":")+1);
-				this.newFleetingObject(constructorName);
-				var flobj = this.newFleetingObject(constructorName + "~proto");
-				this._allTypes[constructorName].$$proto = new mTypes.Definition(flobj, this.uidj);
-				this._allTypes[rawTypeName].$$proto = new mTypes.Definition(constructorName, this.uid);
+				this.newFleetingObject(rawTypeName);
+				var flobj = this.newFleetingObject(rawTypeName + "~proto");
+				this._allTypes[rawTypeName].$$proto = new mTypes.Definition(flobj.name, null, this.uid);
 			},
-			
-			findType : function(typeName) {
-				if (isArrayType(typeName)) {
-					// TODO is there anything we need to do here?
-					// parameterized array
-					typeName = "Array";
-				}
-				
-				// trim arguments if a constructor, careful to avoid a constructor prototypes
-				if (typeName.charAt(0) === "?") {
-					typeName = typeName.substring(0, typeName.lastIndexOf(':')+1);
-					
-					if (!this._allTypes[typeName]) {
-						// function type has not been explicitly added to list
-						// just return function instead
-						return this._allTypes.Function;
-					}
-				}
+
+			/** @returns {{}} entry in types array */
+			findType : function(typeObj) {
+				var typeName = mTypes.convertToSimpleTypeName(typeObj);
 				return this._allTypes[typeName];
 			},
-			
+
 			getAllTypes : function() {
 				return this._allTypes;
 			},
-			
+
 			/**
 			 * This function stores the target type
 			 * so it can be used as the result of this inferencing operation
 			 */
-			storeTarget : function(targetType) {
-				if (!this.targetType) {
-					if (!targetType) {
-						targetType = this.scope();
+			storeTarget : function(targetTypeName) {
+				if (!this.targetTypeName) {
+					if (!targetTypeName) {
+						targetTypeName = this.scope();
 					}
-					this.targetType = targetType;
+					this.targetTypeName = targetTypeName;
 					this.targetFound = true;
 				}
 			}
 		};
 	}
-	
+
 	function createProposalDescription(propName, propType, env) {
-		return propName + " : " + createReadableType(propType, env);
+		return propName + " : " + mTypes.createReadableType(propType, env);
 	}
-	
+
 	function createInferredProposals(targetTypeName, env, completionKind, prefix, replaceStart, proposals, relevance) {
-		var prop, propName, propType, res, type = env.findType(targetTypeName), proto = type.$$proto;
+		var prop, propTypeObj, propName, res, type = env.getAllTypes()[targetTypeName], proto = type.$$proto;
 		if (!relevance) {
 			relevance = 100;
 		}
 		// start at the top of the prototype hierarchy so that duplicates can be removed
 		if (proto) {
-			createInferredProposals(proto.typeName, env, completionKind, prefix, replaceStart, proposals, relevance - 10);
+			createInferredProposals(proto.typeObj.name, env, completionKind, prefix, replaceStart, proposals, relevance - 10);
 		}
-		
+
 		// add a separator proposal
 		proposals['---dummy' + relevance] = {
 			proposal: '',
@@ -2114,40 +2062,40 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					// (eg- this.this is wrong)
 					continue;
 				}
-				if (!type[prop].typeName) {
+				if (!type[prop].typeObj) {
 					// minified files sometimes have invalid property names (eg- numbers).  Ignore them)
 					continue;
 				}
-				if (propName.indexOf(prefix) === 0) {
-					propType = type[prop].typeName;
-					var first = propType.charAt(0);
-					if (first === "?" || first === "*") {
-						// we have a function
+				if (proposalUtils.looselyMatches(prefix, propName)) {
+					propTypeObj = type[prop].typeObj;
+					if (propTypeObj.type === 'FunctionType') {
 						res = calculateFunctionProposal(propName,
-								propType, replaceStart - 1);
-						var funcDesc = res.completion + " : " + createReadableType(propType, env);
+								propTypeObj, replaceStart - 1);
+						var funcDesc = res.completion + " : " + mTypes.createReadableType(propTypeObj, env);
 						proposals["$"+propName] = {
-							proposal: removePrefix(prefix, res.completion),
+							proposal: res.completion,
 							description: funcDesc,
 							positions: res.positions,
 							escapePosition: replaceStart + res.completion.length,
 							// prioritize methods over fields
 							relevance: relevance + 5,
-							style: 'emphasis'
+							style: 'emphasis',
+							overwrite: true
 						};
 					} else {
 						proposals["$"+propName] = {
-							proposal: removePrefix(prefix, propName),
+							proposal: propName,
 							relevance: relevance,
-							description: createProposalDescription(propName, propType, env),
-							style: 'emphasis'
+							description: createProposalDescription(propName, propTypeObj, env),
+							style: 'emphasis',
+							overwrite: true
 						};
 					}
 				}
 			}
 		}
 	}
-	
+
 	function createNoninferredProposals(environment, prefix, replaceStart, proposals) {
 		var proposalAdded = false;
 		// a property to return is one that is
@@ -2161,9 +2109,8 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		function forType(type) {
 			for (var prop in type) {
 				if (isInterestingProperty(type, prop)) {
-					var propType = type[prop].typeName;
-					var first = propType.charAt(0);
-					if (first === "?" || first === "*") {
+					var propType = type[prop].typeObj;
+					if (propType.type === 'FunctionType') {
 						var res = calculateFunctionProposal(prop, propType, replaceStart - 1);
 						proposals[prop] = {
 							proposal: removePrefix(prefix, res.completion),
@@ -2194,7 +2141,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				forType(allTypes[typeName]);
 			}
 		}
-		
+
 		if (proposalAdded) {
 			proposals['---dummy'] = {
 				proposal: '',
@@ -2205,90 +2152,219 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			};
 		}
 	}
-	
+
+	function visitTypeStructure(typeObj, operation) {
+		if (typeof typeObj !== 'object') {
+			return;
+		}
+		switch (typeObj.type) {
+			case 'NullableLiteral':
+			case 'AllLiteral':
+			case 'NullLiteral':
+			case 'UndefinedLiteral':
+			case 'VoidLiteral':
+				// leaf nodes
+				return;
+
+			case 'NameExpression':
+				operation(typeObj, operation);
+				return;
+
+			case 'ArrayType':
+				visitTypeStructure(typeObj.expression, operation);
+				// fall-through
+			case 'UnionType':
+				if (typeObj.elements) {
+					typeObj.elements.forEach(function(elt) { visitTypeStructure(elt, operation); });
+				}
+				return;
+
+			case 'RecordType':
+				if (typeObj.fields) {
+					typeObj.fields.forEach(function(elt) { visitTypeStructure(elt, operation); });
+				}
+				return;
+
+			case 'FieldType':
+				visitTypeStructure(typeObj.expression, operation);
+				return;
+
+			case 'FunctionType':
+				// do we need to check for serialized functions???
+				if (typeObj.params) {
+					typeObj.params.forEach(function(elt) { visitTypeStructure(elt, operation); });
+				}
+				if (typeObj.result) {
+					visitTypeStructure(typeObj.result, operation);
+				}
+				return;
+
+			case 'ParameterType':
+				// TODO FIXADE uncomment to make the size of summaries smaller
+				// by not including parameter types in summary.
+//				typeObj.expression = { name: 'Object', type: 'NameExpression' };
+				visitTypeStructure(typeObj.expression, operation);
+				return;
+
+			case 'TypeApplication':
+				if (typeObj.applications) {
+					typeObj.applications.forEach(function(elt) { visitTypeStructure(elt, operation); });
+				}
+
+				// fall-throudh
+			case 'RestType':
+			case 'NonNullableType':
+			case 'OptionalType':
+			case 'NullableType':
+				visitTypeStructure(typeObj.expression, operation);
+				return;
+
+
+		}
+	}
+
+	// finds unreachable types from the given type name
+	// and marks them as already seen
 	function findUnreachable(currentTypeName, allTypes, alreadySeen) {
 		var currentType = allTypes[currentTypeName];
+		var operation = function(typeObj, operation) {
+			if (alreadySeen[typeObj.name]) {
+				// prevent infinite recursion for circular refs
+				return;
+			}
+
+			alreadySeen[typeObj.name] = true;
+			findUnreachable(typeObj.name, allTypes, alreadySeen);
+		};
+
 		if (currentType) {
 			for(var prop in currentType) {
 				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
-					var propType = currentType[prop].typeName;
-					while (isFunctionOrConstructor(propType) || isArrayType(propType)) {
-						if (!alreadySeen[propType]) {
-							alreadySeen[propType] = true;
-							findUnreachable(propType, allTypes, alreadySeen);
-						}
-						if (isFunctionOrConstructor(propType)) {
-							propType = extractReturnType(propType);
-						} else if (isArrayType(propType)) {
-							propType = extractArrayParameterType(propType);
-						}
-					}
-					if (!alreadySeen[propType]) {
-						alreadySeen[propType] = true;
-						findUnreachable(propType, allTypes, alreadySeen);
-					}
+					var propType = currentType[prop].typeObj;
+					// must visit the type strucutre
+					visitTypeStructure(propType, operation);
 				}
 			}
 		}
 	}
-	
-	/**
-	 * filters types from the environment that should not be exported
-	 */
-	function filterTypes(environment, kind, moduleTypeName) {
-		var allTypes = environment.getAllTypes();
-		if (kind === "global") {
-			// for global dependencies must keep the global scope, but remove all builtin global variables
-			allTypes.clearDefaultGlobal();
-		} else {
-			delete allTypes.Global;
-		}
 
-		// recursively walk the type tree to find unreachable types and delete them, too
-		var reachable = { };
-		// if we have a function, then the function return type and its prototype are reachable
-		// also do same if parameterized array type
-		// in the module, so add them
-		if (isFunctionOrConstructor(moduleTypeName) || isArrayType(moduleTypeName)) {
-			var retType = moduleTypeName;
-			while (isFunctionOrConstructor(retType) || isArrayType(retType)) {
-				if (isFunctionOrConstructor(retType)) {
-					retType = retType.substring(0,retType.lastIndexOf(':')+1);
-					reachable[retType] = true;
-					var constrType;
-					if (retType.charAt(0) === "?") {
-						// this is a function, not a constructor, but we also
-						// need to expose the constructor if one exists.
-						constrType = "*" + retType.substring(1);
-						reachable[constrType] = true;
-					} else {
-						constrType = retType;
-					}
-					reachable[constrType + "~proto"] = true;
-					retType = extractReturnType(retType);
-				} else if (isArrayType(retType)) {
-					retType = extractArrayParameterType(retType);
-					if (retType) {
-						reachable[retType] = true;
-					} else {
-						retType = "Object";
+	/**
+	 * Before we can remove empty objects from the type graph, we need to update
+	 * the properties currently pointing to those types.  Make them point to the
+	 * closest non-empty type in their prototype hierarchy (most likely, this is Object).
+	 */
+	function fixMissingPointers(currentTypeObj, allTypes, empties, alreadySeen) {
+		alreadySeen = alreadySeen || {};
+		var operation = function(typeObj, operation) {
+			while (empties[typeObj.name]) {
+				// change this to the first non-epty prototype of the empty type
+				typeObj.name = allTypes[typeObj.name].$$proto.typeObj.name;
+				if (!typeObj.name) {
+					typeObj.name = 'Object';
+				}
+			}
+			if (alreadySeen[typeObj.name]) {
+				return;
+			}
+			alreadySeen[typeObj.name] = true;
+			var currentType = allTypes[typeObj.name];
+			if (currentType) {
+				for(var prop in currentType) {
+					if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
+						var propType = currentType[prop].typeObj;
+						// must visit the type strucutre
+						visitTypeStructure(propType, operation);
 					}
 				}
 			}
-			reachable[retType] = true;
+		};
+
+		visitTypeStructure(currentTypeObj, operation);
+	}
+	/**
+	 * filters types from the environment that should not be exported
+	 */
+	function filterTypes(environment, kind, moduleTypeObj, provided) {
+		var moduleTypeName = doctrine.type.stringify(moduleTypeObj, {compact: true});
+		var allTypes = environment.getAllTypes();
+		allTypes.clearDefaultGlobal();
+
+		// recursively walk the type tree to find unreachable types and delete them, too
+		var reachable = { };
+		var wasReachable = true;
+		if (moduleTypeObj.type !== "NameExpression") {
+			// TODO FIXADE duplicated code
+			visitTypeStructure(moduleTypeObj, function(typeObj, operation) {
+				if (reachable[typeObj.name]) {
+					// prevent infinite recursion for circular refs
+					return;
+				}
+				reachable[typeObj.name] = true;
+				findUnreachable(typeObj.name, allTypes, reachable);
+			});
+		} else {
+			// first remove any types that are unreachable
+			findUnreachable(moduleTypeName, allTypes, reachable);
+			if (!reachable[moduleTypeName]) {
+				// not really reachable, but need to keep it for now to track empties
+				reachable[moduleTypeName] = true;
+				wasReachable = false;
+			}
 		}
-		findUnreachable(moduleTypeName, allTypes, reachable);
 		for (var prop in allTypes) {
 			if (allTypes.hasOwnProperty(prop) && !reachable[prop]) {
 				delete allTypes[prop];
 			}
 		}
+
+		// now find empty types
+		var empties = {};
+		Object.keys(allTypes).forEach(function(key) {
+			if (isEmpty(key, allTypes)) {
+				empties[key] = true;
+			}
+		});
+		// now fix up pointers to empties
+		fixMissingPointers(moduleTypeObj, allTypes, empties);
+
+		if (!wasReachable) {
+			delete allTypes[moduleTypeName];
+		}
+		// don't need the empty types any more
+		Object.keys(empties).forEach(function(key) {
+			delete allTypes[key];
+		});
+
+		// now reformat the types so that they are combined and serialized
+		Object.keys(allTypes).forEach(function(typeName) {
+		    var type = allTypes[typeName];
+			for (var defName in type) {
+				if (type.hasOwnProperty(defName)) {
+					var def = type[defName];
+					def.typeSig = doctrine.type.stringify(def.typeObj, {compact: true});
+					delete def._typeObj;
+				}
+			}
+		});
+
+		if (typeof provided === 'object') {
+			for (var defName in provided) {
+				if (provided.hasOwnProperty(defName)) {
+					var def = provided[defName];
+					if (def.typeObj) {
+						def.typeSig = doctrine.type.stringify(def.typeObj, {compact: true});
+						delete def._typeObj;
+					}
+				}
+			}
+		}
+
 	}
-	
+
 	var browserRegExp = /browser\s*:\s*true/;
 	var nodeRegExp = /node\s*:\s*true/;
 	function findGlobalObject(comments, lintOptions) {
-	
+
 		for (var i = 0; i < comments.length; i++) {
 			var comment = comments[i];
 			if (comment.type === "Block" && (comment.value.substring(0, "jslint".length) === "jslint" ||
@@ -2312,7 +2388,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		}
 		return "Global";
 	}
-	
+
 	function filterAndSortProposals(proposalsObj) {
 		// convert from object to array
 		var proposals = [];
@@ -2328,7 +2404,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			} else if (r.relevance > l.relevance) {
 				return 1;
 			}
-			
+
 			var ldesc = l.description.toLowerCase();
 			var rdesc = r.description.toLowerCase();
 			if (ldesc < rdesc) {
@@ -2338,10 +2414,10 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 			return 0;
 		});
-		
+
 		// filter trailing and leading dummies, as well as double dummies
 		var toRemove = [];
-		
+
 		// now remove any leading or trailing dummy proposals as well as double dummies
 		var i = proposals.length -1;
 		while (i >= 0 && proposals[i].description.indexOf('---') === 0) {
@@ -2360,17 +2436,17 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 			i++;
 		}
-		
+
 		var newProposals = [];
 		for (i = 0; i < proposals.length; i++) {
 			if (!toRemove[i]) {
 				newProposals.push(proposals[i]);
 			}
 		}
-		
+
 		return newProposals;
 	}
-	
+
 
 	/**
 	 * indexer is optional.  When there is no indexer passed in
@@ -2382,17 +2458,17 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		this.indexer = indexer;
 		this.lintOptions = lintOptions;
 	}
-	
+
 	/**
 	 * Main entry point to provider
 	 */
 	EsprimaJavaScriptContentAssistProvider.prototype = {
-	
+
 		_doVisit : function(root, environment) {
 			// first augment the global scope with things we know
 			addLintGlobals(environment, this.lintOptions);
 			addIndexedGlobals(environment);
-			
+
 			// now we can remove all non-doc comments from the comments list
 			var newComments = [];
 			for (var i = 0; i < environment.comments.length; i++) {
@@ -2401,7 +2477,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				}
 			}
 			environment.comments = newComments;
-			
+
 			try {
 				mVisitor.visit(root, environment, inferencer, inferencerPostOp);
 			} catch (done) {
@@ -2413,11 +2489,16 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 			throw new Error("The visit function should always end with a throwable");
 		},
-		
+
 		/**
 		 * implements the Orion content assist API
 		 */
 		computeProposals: function(buffer, offset, context) {
+			if (context.selection && context.selection.start !== context.selection.end) {
+				// only propose if an empty selection.
+				return null;
+			}
+
 			try {
 				var root = mVisitor.parse(buffer);
 				if (!root) {
@@ -2430,6 +2511,10 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
 					// must defer inferring the containing function block until the end
 					environment.defer = completionKind.toDefer;
+					if (environment.defer) {
+						// remove these comments from consideration until we are inferring the deferred
+						environment.deferredComments = extractDocComments(environment.comments, environment.defer.range);
+					}
 					var target = this._doVisit(root, environment);
 					var proposalsObj = { };
 					createInferredProposals(target, environment, completionKind.kind, context.prefix, offset - context.prefix.length, proposalsObj);
@@ -2450,8 +2535,8 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				throw (e);
 			}
 		},
-		
-		
+
+
 		_internalFindDefinition : function(buffer, offset, findName) {
 			var toLookFor;
 			var root = mVisitor.parse(buffer);
@@ -2471,7 +2556,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				// This is fixed in trunk of esprima.
 				// after next upgrade of esprima if the following has correct slocs, then
 				// can remove the second part of the &&
-				//    mUsers.getUser().name
+				// mUsers.getUser().name
 				if (node.range[0] > offset &&
 						(node.type === "ExpressionStatement" ||
 						 node.type === "ReturnStatement" ||
@@ -2481,14 +2566,14 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					// not at a valid hover location
 					throw "no hover";
 				}
-				
+
 				// the last function pushed on is the one that we need to defer
 				if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression") {
 					funcList.push(node);
 				}
 				return true;
 			};
-			
+
 			try {
 				mVisitor.visit(root, {}, findIdentifier, function(node) {
 					if (node === funcList[funcList.length-1]) {
@@ -2512,23 +2597,27 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 			// must defer inferring the containing function block until the end
 			environment.defer = funcList.pop();
-			
+			if (environment.defer && toLookFor === environment.defer.id) {
+				// don't defer if target is name of function
+				delete environment.defer;
+			}
+
+			if (environment.defer) {
+				// remove these comments from consideration until we are inferring the deferred
+				environment.deferredComments = extractDocComments(environment.comments, environment.defer.range);
+			}
 
 			var target = this._doVisit(root, environment);
 			var lookupName = toLookFor.type === "Identifier" ? toLookFor.name : 'this';
-			var maybeType = environment.lookupName(lookupName, toLookFor.extras.target ? toLookFor.extras.target : target, false, true);
+			var maybeType = environment.lookupTypeObj(lookupName, toLookFor.extras.target || target, true);
 			if (maybeType) {
-				var hover = lookupName + " :: " + createReadableType(maybeType.typeName, environment, true);
-				if (findName) {
-					return hover;
-				} else {
-					maybeType.hover = lookupName + " :: " + createReadableType(maybeType.typeName, environment, true);
-					return maybeType;
-				}
+				var hover = mTypes.styleAsProperty(lookupName, findName) + " : " + mTypes.createReadableType(maybeType.typeObj, environment, true, 0, findName);
+				maybeType.hoverText = hover;
+				return maybeType;
 			} else {
 				return null;
 			}
-		
+
 		},
 		/**
 		 * Computes the hover information for the provided offset
@@ -2536,11 +2625,11 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		computeHover: function(buffer, offset) {
 			return this._internalFindDefinition(buffer, offset, true);
 		},
-		
+
 		findDefinition : function(buffer, offset) {
 			return this._internalFindDefinition(buffer, offset, false);
 		},
-		
+
 		/**
 		 * Computes a summary of the file that is suitable to be stored locally and used as a dependency
 		 * in another file
@@ -2558,62 +2647,73 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				this._doVisit(root, environment);
 			} catch (e) {
 				if (typeof scriptedLogger !== "undefined") {
+					scriptedLogger.error("Problem inferring in: " + fileName, "CONTENT_ASSIST");
 					scriptedLogger.error(e.message, "CONTENT_ASSIST");
 					scriptedLogger.error(e.stack, "CONTENT_ASSIST");
 				}
 				throw (e);
 			}
-			var provided;
+			var providedType;
 			var kind;
-			var modType;
+			var modTypeObj;
 			if (environment.amdModule) {
 				// provide the exports of the AMD module
 				// the exports is the return value of the final argument
 				var args = environment.amdModule["arguments"];
 				if (args && args.length > 0) {
-					modType = extractReturnType(args[args.length-1].extras.inferredType);
+					modTypeObj = mTypes.extractReturnType(args[args.length-1].extras.inferredTypeObj);
 				} else {
-					modType = "Object";
+					modTypeObj = mTypes.OBJECT_TYPE;
 				}
 				kind = "AMD";
 			} else if (environment.commonjsModule) {
 				// a wrapped commonjs module
 				// we have already checked the correctness of this function
 				var exportsParam = environment.commonjsModule["arguments"][0].params[1];
-				modType = exportsParam.extras.inferredType;
-				provided = provided = environment.findType(modType);
-					
+				modTypeObj = exportsParam.extras.inferredTypeObj;
+				providedType = environment.findType(modTypeObj);
+
 			} else {
 				// assume a non-module
-				provided = environment.globalScope();
-				
-				if (provided.exports) {
+				providedType = environment.globalScope();
+
+				// if there is an exports global or a module.exports global, then assume commonjs
+				var maybeExports = providedType.exports ||
+						(providedType.module && environment.getAllTypes()[providedType.module.typeObj.name] &&
+						environment.getAllTypes()[providedType.module.typeObj.name].exports);
+
+				if (maybeExports) {
 					// actually, commonjs
 					kind = "commonjs";
-					modType = provided.exports.typeName;
+					modTypeObj = maybeExports.typeObj;
 				} else {
 					kind = "global";
-					modType = environment.globalTypeName();
+					modTypeObj = providedType['this'].typeObj;
 				}
 			}
-			
+
 			// simplify the exported type
-			if (isFunctionOrConstructor(modType) || environment.findType(modType).$$isBuiltin) {
-				// this module provides a built in type or a function
-				provided = modType;
-			} else {
+			if (!mTypes.isFunctionOrConstructor(modTypeObj) &&
+				!environment.findType(modTypeObj).$$isBuiltin) {
+
 				// this module provides a composite type
-				provided = environment.findType(modType);
+				providedType = environment.findType(modTypeObj);
 			}
 
+			var allTypes = environment.getAllTypes();
 
 			// now filter the builtins since they are always available
-			filterTypes(environment, kind, modType);
-			
-			var allTypes = environment.getAllTypes();
-			
+			filterTypes(environment, kind, modTypeObj, providedType);
+
+			// Cases when provided type is not a record type.  store as a string
+			// warning...not all cases handled here...eg- union types
+			if (mTypes.isFunctionOrConstructor(modTypeObj) ||
+				(environment.findType(modTypeObj) && environment.findType(modTypeObj).$$isBuiltin)) {
+				providedType = doctrine.type.stringify(modTypeObj, {compact: true});
+			}
+
 			return {
-				provided : provided,
+				provided : providedType,
 				types : allTypes,
 				kind : kind
 			};
