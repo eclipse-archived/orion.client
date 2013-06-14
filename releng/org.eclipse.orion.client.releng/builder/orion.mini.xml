@@ -3,6 +3,17 @@
 	<property name="super" value="Build specific targets and properties" />
 	<property name="minifyDirectory" value="${buildDirectory}/built-js" />
 
+	<target name="updateBuildLabel" if="buildLabel">
+	    <echo message="Updating build label..."/>
+		<replace dir="${buildDirectory}" includes="pluginVersions.properties,featureVersions.properties"  >
+			<replacefilter token="HEAD" value="${buildLabel}" />
+			<replacefilter token="origin/mls -alaster" value="${buildLabel}" />
+		</replace>
+		<!-- Build Id in Orion page footer -->
+		<replace dir="${buildDirectory}" includes="**/web/orion/nls/root/messages.js"  >
+			<replacefilter token="@buildLabel@" value="${buildLabel}" />
+		</replace>
+	</target>
 
 	<macrodef name="optimize" >
 		<attribute name="name" />
@@ -117,7 +128,9 @@
 		</replace>
 	</target>
 
-	<target name="requirejs">
+	<target name="requirejs" if="minify">
+	    <echo message="Minification started..."/>
+	    
 		<delete dir="${buildDirectory}/optimization" />
 		<delete dir="${minifyDirectory}" />
 		<mkdir dir="${minifyDirectory}" />
