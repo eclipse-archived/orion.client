@@ -305,6 +305,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var _self = this;
 			this.explorer = new MiniNavExplorer({
 				commandRegistry: this.commandRegistry,
+				dragAndDrop: FileCommands.uploadFile,
 				fileClient: this.fileClient,
 				editorInputManager: this.editorInputManager,
 				sidebarNavInputManager: this.sidebarNavInputManager,
