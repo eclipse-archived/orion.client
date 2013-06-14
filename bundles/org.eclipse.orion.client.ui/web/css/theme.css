@@ -431,7 +431,7 @@ a.currentLocation:hover {
 	z-index: 200;
 }
 
-.tooltip .left {
+.tooltip.left {
 	min-width: 15em;
 }
 
