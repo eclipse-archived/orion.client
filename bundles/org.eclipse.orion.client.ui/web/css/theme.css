@@ -457,7 +457,6 @@ a.currentLocation:hover {
 	border: 8px solid;
 	border-color: transparent transparent transparent #555;
 	top: 4px;
-	right: -15px;
 	content: '';
 	z-index: 201;
 }
