@@ -23,6 +23,12 @@
 	whitespace: nowrap;
 }
 
+
+/* Footer */
+.logoFooter {
+	float: left;
+}
+
 a {
 	text-decoration: none;
 	color: #3087B3;
