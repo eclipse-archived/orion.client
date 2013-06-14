@@ -1018,8 +1018,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				var model = view._model;
 				var lineIndex = model.getLineAtOffset(offset);
 				if (data.count > 0) {
+					data.count--;
 					return model.getLineEnd(lineIndex);
 				}
+				data.count++;
 				return model.getLineStart(lineIndex);
 			}
 			if (data.unit === "wordend" || data.unit === "wordWS" || data.unit === "wordendWS") { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
