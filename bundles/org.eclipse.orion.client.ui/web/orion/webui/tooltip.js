@@ -262,6 +262,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			var self = this;
 			this._timeout = window.setTimeout(function() {
 				self._tip.classList.remove("tooltipShowing"); //$NON-NLS-0$
+				self._tip.removeAttribute("style"); //$NON-NLS-0$
 				if (self._afterHiding) {
 					self._afterHiding();
 				}
