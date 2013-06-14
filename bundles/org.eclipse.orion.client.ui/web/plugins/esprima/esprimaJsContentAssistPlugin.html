@@ -8,7 +8,10 @@
 <script type="text/javascript">
 /*global orion require */
 require({
-  baseUrl: '../..'
+  baseUrl: '../..',
+  paths: {
+    "scriptedLogger": "plugins/esprima/scriptedLogger"
+  },
 });
 require(["plugins/esprima/esprimaJsContentAssist"], function(esprimaContentAssistPlugin) {
 	var headers = {
