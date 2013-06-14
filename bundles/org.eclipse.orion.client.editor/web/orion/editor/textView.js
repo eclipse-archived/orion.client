@@ -4539,7 +4539,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._imeOffset = -1;
 		},
 		_createActions: function () {
-			this.addKeyMode(new mKeyModes.DefaultKeyMode());
+			this.addKeyMode(new mKeyModes.DefaultKeyMode(this));
 			//1 to 1, no duplicates
 			var self = this;
 			this._actions = {

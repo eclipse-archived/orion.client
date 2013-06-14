@@ -18,6 +18,9 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 ], function(mKeyBinding, util) {
 
 	function KeyMode(view) {
+		if (!view) {
+			return;
+		}
 		this._view = view;
 		this._keyBindings = this.createKeyBindings();
 		this._keyBindingIndex = 0;
@@ -118,8 +121,8 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 		}
 	};
 	
-	function DefaultKeyMode() {
-		KeyMode.call(this);
+	function DefaultKeyMode(view) {
+		KeyMode.call(this, view);
 	}
 	DefaultKeyMode.prototype = new KeyMode();
 	DefaultKeyMode.prototype.createKeyBindings = function () {
