@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -190,17 +190,16 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					return false;
 				}
 			}
-
-
-			this._tail = document.createElement("span"); //$NON-NLS-0$
-			this._tail.classList.add("tooltipTailFrom"+position); //$NON-NLS-0$
-			if (position === "above" || position === "left") { //$NON-NLS-1$//$NON-NLS-0$
-				// tip goes after content
-
-				this._tip.appendChild(this._tail);
-			} else {
-
-				this._tip.insertBefore(this._tail, this._tipInner);
+			
+			if (!this._tail) {
+				this._tail = document.createElement("span"); //$NON-NLS-0$
+				this._tail.classList.add("tooltipTailFrom"+position); //$NON-NLS-0$
+				if (position === "above" || position === "left") { //$NON-NLS-1$//$NON-NLS-0$
+					// tip goes after content
+					this._tip.appendChild(this._tail);
+				} else {
+					this._tip.insertBefore(this._tail, this._tipInner);
+				}
 			}
 			this._tip.style.top = top + "px"; //$NON-NLS-0$
 			this._tip.style.left = left + "px"; //$NON-NLS-0$ 
@@ -276,7 +275,6 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 				this._tip = null;
 				this._tipInner = null;
 				this._tail = null;
-
 			}
 		}
 	};
