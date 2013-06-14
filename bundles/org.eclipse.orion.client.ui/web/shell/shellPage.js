@@ -843,7 +843,10 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 		}
 		return function(args, typeSpec, context) {
 			var promise = new Deferred();
-			context.cwd = getCWD();
+			if (context) {
+				/* invoking parse() */
+				context.cwd = getCWD();
+			}
 			service(args, typeSpec, context).then(
 				function(result) {
 					promise.resolve(result);
