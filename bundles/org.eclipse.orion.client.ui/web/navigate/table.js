@@ -92,7 +92,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		
 		// define the command contributions - where things appear, first the groups
 		commandRegistry.addCommandGroup("pageActions", "orion.new", 1000, messages["New"], null, null, "core-sprite-addcontent"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.addCommandGroup("pageActions", "eclipse.new", 1000, messages["New"], null, null, "core-sprite-addcontent"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup("pageActions", "orion.gitGroup", 200); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup("selectionTools", "orion.selectionGroup", 500, messages["Actions"], null, null, "core-sprite-gear"); //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.addCommandGroup("selectionTools", "orion.importExportGroup", 100, null, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -105,8 +104,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		commandRegistry.registerCommandContribution("pageActions", "eclipse.openResource", 500); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		// new file and new folder in the nav bar (in a group)
-		commandRegistry.registerCommandContribution("pageActions", "eclipse.newFile", 1, "eclipse.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandRegistry.registerCommandContribution("pageActions", "eclipse.newFolder", 2, "eclipse.new", false, null, new mCommandRegistry.URLBinding("newFolder", "name")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("pageActions", "eclipse.newFile", 1, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandRegistry.registerCommandContribution("pageActions", "eclipse.newFolder", 2, "orion.new", false, null, new mCommandRegistry.URLBinding("newFolder", "name")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution("pageActions", "eclipse.upFolder", 3, null, true, new KeyBinding.KeyBinding(38, false, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 		// new project creation in the toolbar (in a group)
 		commandRegistry.registerCommandContribution("pageActions", "orion.new.project", 1, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
