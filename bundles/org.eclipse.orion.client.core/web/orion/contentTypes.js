@@ -21,16 +21,20 @@ define([], function() {
 	 * @property {String} id Unique identifier of this ContentType.
 	 * @property {String} name User-readable name of this ContentType.
 	 * @property {String} extends Optional; Gives the ID of another ContentType that is this one's parent.
-	 * @property {String[]} extension Optional; List of file extensions characterizing this ContentType.
+	 * @property {String[]} extension Optional; List of file extensions characterizing this ContentType. Extensions are not case-sensitive.
 	 * @property {String[]} filename Optional; List of filenames characterizing this ContentType.
 	 */
-	
+
+	function contains(array, item) {
+		return array.indexOf(item) !== -1;
+	}
+
 	function getFilenameContentType(/**String*/ filename, contentTypes) {
 		function winner(best, other, filename, extension) {
 			var nameMatch = other.filename.indexOf(filename) >= 0;
-			var extMatch = other.extension.indexOf(extension) >= 0;
+			var extMatch = contains(other.extension, extension.toLowerCase());
 			if (nameMatch || extMatch) {
-				if (!best || (nameMatch && best.extension.indexOf(extension) >= 0)) {
+				if (!best || (nameMatch && contains(best.extension, extension.toLowerCase()))) {
 					return other;
 				}
 			}
@@ -60,7 +64,10 @@ define([], function() {
 		function buildMap(serviceRegistry) {
 			function array(obj) {
 				if (obj === null || typeof obj === "undefined") { return []; } //$NON-NLS-0$
-				return (obj instanceof Array) ? obj : [obj];
+				return (Array.isArray(obj)) ? obj : [obj];
+			}
+			function arrayLowerCase(obj) {
+				return array(obj).map(function(str) { return String.prototype.toLowerCase.call(str); });
 			}
 			var serviceReferences = serviceRegistry.getServiceReferences(EXTENSION_ID).concat(
 					serviceRegistry.getServiceReferences(OLD_EXTENSION_ID));
@@ -75,7 +82,7 @@ define([], function() {
 							name: type.name,
 							image: type.image,
 							"extends": type["extends"], //$NON-NLS-1$ //$NON-NLS-0$
-							extension: array(type.extension),
+							extension: arrayLowerCase(type.extension),
 							filename: array(type.filename)
 						};
 					}
