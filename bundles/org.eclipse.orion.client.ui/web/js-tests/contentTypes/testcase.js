@@ -233,5 +233,15 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 		});
 	};
 
+	tests.testExtensionsCaseMismatch = function() {
+		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+			var type1 = contentTypeService.getFilenameContentType('test.TXT');
+			var type2 = contentTypeService.getFilenameContentType('test.txt');
+			var type3 = contentTypeService.getFilenameContentType('test.TxT');
+			assertContentTypesEqual(type1, type2);
+			assertContentTypesEqual(type2, type3);
+		});
+	};
+
 	return tests;
 });
