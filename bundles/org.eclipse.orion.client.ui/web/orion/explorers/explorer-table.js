@@ -73,7 +73,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		return children;
 	};
 		
-	FileModel.prototype.getChildren = function(parentItem, /* function(items) */ onComplete){
+	FileModel.prototype.getChildren = function(parentItem, /* function(items) */ onComplete) {
 		var self = this;
 		// the parent already has the children fetched
 		if (parentItem.children) {
@@ -91,6 +91,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			onComplete([]);
 		}
 	};
+	
+	FileModel.prototype.hasChildren = function() {
+		var result = false;
+		if (this.root.Children) {
+			result = this.root.Children.length > 0;
+		}
+		return result;
+	};
+	
 	FileModel.prototype.constructor = FileModel;
 
 
@@ -564,16 +573,31 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 						}
 					}
 				}
-
-				self.createTree(self.parentId, self.model, {
-					navHandlerFactory: self.navHandlerFactory,
-					setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), 
-					selectionPolicy: self.renderer.selectionPolicy, 
-					onCollapse: function(model){
-						if(self.getNavHandler()){
-							self.getNavHandler().onCollapse(model);
+				
+				if (self.model.hasChildren()) {
+					self.createTree(self.parentId, self.model, {
+						navHandlerFactory: self.navHandlerFactory,
+						setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), 
+						selectionPolicy: self.renderer.selectionPolicy, 
+						onCollapse: function(model) {
+							if(self.getNavHandler()){
+								self.getNavHandler().onCollapse(model);
+							}
 						}
-					}});
+					});
+				} else {
+					lib.empty(parent);
+					var noFile = document.createElement("div"); //$NON-NLS-0$
+					noFile.classList.add("noFile"); //$NON-NLS-0$
+					noFile.textContent = messages["NoFile"];
+					var plusIcon = document.createElement("span"); //$NON-NLS-0$
+					plusIcon.classList.add("core-sprite-addcontent"); //$NON-NLS-0$
+					plusIcon.classList.add("icon-inline"); //$NON-NLS-0$
+					plusIcon.classList.add("imageSprite"); //$NON-NLS-0$
+					lib.processDOMNodes(noFile, [plusIcon]);
+					parent.appendChild(noFile);
+				}
+				
 				if (typeof postLoad === "function") { //$NON-NLS-0$
 					try {
 						postLoad();

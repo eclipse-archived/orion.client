@@ -109,5 +109,6 @@ define({
 	"Extracted from:" : "Extracted from:",
 	"Did not drop ${0}.  Folder drop is not supported in this browser.": "Did not drop ${0}.  Folder drop is not supported in this browser.",
 	"You cannot copy files directly into the workspace.  Create a folder first.": "You cannot copy files directly into the workspace.  Create a folder first.",
-	"Unzip ${0}?": "Unzip ${0}?"
+	"Unzip ${0}?": "Unzip ${0}?",
+	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
 });
