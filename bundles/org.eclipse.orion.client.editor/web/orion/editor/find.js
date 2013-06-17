@@ -218,7 +218,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			var string = this.getFindString();
 			var count;
 			if (tempOptions) {
-				string = tempOptions.findString || this.getFindString();
+				string = tempOptions.findString || string;
 				count =  tempOptions.count;
 			}
 			var savedOptions = this.getOptions();
@@ -363,7 +363,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 					this._showAll = options.showAll;
 					if (this.isVisible()) {
 						if (this._showAll) {
-							this._markAllOccurrences(true);
+							this._markAllOccurrences();
 						} else {
 							var annotationModel = this._editor.getAnnotationModel();
 							if (annotationModel) {
@@ -475,7 +475,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 						}
 						var that = this;
 						this._timer = window.setTimeout(function(){
-							that._markAllOccurrences(!!result, string);
+							that._markAllOccurrences();
 							that._timer = null;
 						}, 500);
 					}
@@ -497,7 +497,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			editor.setText(newStr, start, end);
 			editor.setSelection(start, start + newStr.length, true);
 		},
-		_markAllOccurrences: function(match, string) {
+		_markAllOccurrences: function() {
 			var annotationModel = this._editor.getAnnotationModel();
 			if (!annotationModel) {
 				return;
@@ -512,18 +512,17 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				}
 			}
 			if (this.isVisible()) {
-				if (match && string) {
-					iter = this._editor.getModel().find({
-						string: string,
-						regex: this._regex,
-						wholeWord: this._wholeWord,
-						caseInsensitive: this._caseInsensitive
-					});
-					add = [];
-					while (iter.hasNext()) {
-						var range = iter.next();
-						add.push(mAnnotations.AnnotationType.createAnnotation(type, range.start, range.end));
-					}
+				var string = this.getFindString();
+				iter = this._editor.getModel().find({
+					string: string,
+					regex: this._regex,
+					wholeWord: this._wholeWord,
+					caseInsensitive: this._caseInsensitive
+				});
+				add = [];
+				while (iter.hasNext()) {
+					var range = iter.next();
+					add.push(mAnnotations.AnnotationType.createAnnotation(type, range.start, range.end));
 				}
 			}
 			annotationModel.replaceAnnotations(remove, add);
