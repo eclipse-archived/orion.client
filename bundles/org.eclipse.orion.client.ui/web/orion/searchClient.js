@@ -13,8 +13,174 @@
 /*global define window document console*/
 /*jslint forin:true regexp:false sub:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/searchUtils', 'orion/crawler/searchCrawler'], 
-function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
+define([
+	'i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/searchUtils', 'orion/crawler/searchCrawler',
+	'orion/explorers/navigatorRenderer', 'orion/extensionCommands'
+	],
+function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigatorRenderer, extensionCommands){
+	// We only set this once
+	var openWithCommands;
+
+	//default search renderer until we factor this out completely
+	function DefaultSearchRenderer(serviceRegistry, commandRegistry) {
+		this.serviceRegistry = serviceRegistry;
+		this.commandRegistry = commandRegistry;
+	}
+	/**
+	 * Create a renderer to display search results.
+	 * @public
+     * @param {DOMNode} resultsNode Node under which results will be added.
+	 * @param {String} [heading] the heading text, or null if none required
+	 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
+	 * @param {Function(DOMNode)} [decorator] A function to be called that knows how to decorate each row in the result table
+	 *   This function is passed a <td> element.
+	 * @returns a render function.
+	 */
+	DefaultSearchRenderer.prototype.makeRenderFunction = function(contentTypeService, resultsNode, heading, onResultReady, decorator) {
+		var serviceRegistry = this.serviceRegistry, commandRegistry = this.commandRegistry;
+		if (!openWithCommands) {
+			extensionCommands._createOpenWithCommands(serviceRegistry, contentTypeService);
+			openWithCommands = extensionCommands.getOpenWithCommands(commandRegistry);
+		}
+
+		/**
+		 * Displays links to resources under the given DOM node.
+		 * @param {Object[]} resources array of resources. The shape of a resource is {name, path, lineNumber, directory, isExternalResource}
+		 *	Both directory and isExternalResource cannot be true at the same time.
+		 * @param {String} [queryName] A human readable name to display when there are no matches.  If 
+		 *  not used, then there is nothing displayed for no matches
+		 * @param {String} [error] A human readable error to display.
+		 */
+		function render(resources, queryName, error) {
+			if (error) {
+				lib.empty(resultsNode);
+				var message = document.createElement("div"); //$NON-NLS-0$
+				message.appendChild(document.createTextNode(messages["Search failed."]));
+				resultsNode.appendChild(message);
+				if (typeof(onResultReady) === "function") { //$NON-NLS-0$
+					onResultReady(resultsNode);
+				}
+				return;
+			} 
+		
+			//Helper function to append a path String to the end of a search result dom node 
+			var appendPath = (function() { 
+			
+				//Map to track the names we have already seen. If the name is a key in the map, it means
+				//we have seen it already. Optionally, the value associated to the key may be a function' 
+				//containing some deferred work we need to do if we see the same name again.
+				var namesSeenMap = {};
+				
+				function doAppend(domElement, resource) {
+					var path = resource.folderName ? resource.folderName : resource.path;
+					var pathNode = document.createElement('span'); //$NON-NLS-0$
+					pathNode.id = path.replace(/[^a-zA-Z0-9_\.:\-]/g,'');
+					pathNode.appendChild(document.createTextNode(' - ' + path + ' ')); //$NON-NLS-1$ //$NON-NLS-0$
+					domElement.appendChild(pathNode);
+				}
+				
+				function appendPath(domElement, resource) {
+					var name = resource.name;
+					if (namesSeenMap.hasOwnProperty(name)) {
+						//Seen the name before
+						doAppend(domElement, resource);
+						var deferred = namesSeenMap[name];
+						if (typeof(deferred)==='function') { //$NON-NLS-0$
+							//We have seen the name before, but prior element left some deferred processing
+							namesSeenMap[name] = null;
+							deferred();
+						}
+					} else {
+						//Not seen before, so, if we see it again in future we must append the path
+						namesSeenMap[name] = function() { doAppend(domElement, resource); };
+					}
+				}
+				return appendPath;
+			}()); //End of appendPath function
+
+			var foundValidHit = false;
+			lib.empty(resultsNode);
+			if (resources && resources.length > 0) {
+				var table = document.createElement('table'); //$NON-NLS-0$
+				table.setAttribute('role', 'presentation'); //$NON-NLS-1$ //$NON-NLS-0$
+				for (var i=0; i < resources.length; i++) {
+					var resource = resources[i];
+					var col;
+					if (!foundValidHit) {
+						foundValidHit = true;
+						// Every caller is passing heading === false, consider removing this code.
+						if (heading) {
+							var headingRow = table.insertRow(0);
+							col = headingRow.insertCell(0);
+							col.textContent = heading;
+						}
+					}
+					var row = table.insertRow(-1);
+					col = row.insertCell(0);
+					col.colspan = 2;
+					if (decorator) {
+						decorator(col);
+					}
+					/*var resourceLink = document.createElement('a'); //$NON-NLS-0$
+					resourceLink.appendChild(document.createTextNode(resource.name));
+					var loc = resource.location;
+					if (resource.isExternalResource) {
+						// should open link in new tab, but for now, follow the behavior of navoutliner.js
+						loc = resource.path;
+						resourceLink.setAttribute('href', loc); //$NON-NLS-0$
+						resourceLink.setAttribute(); //$NON-NLS-0$
+						resourceLink.style.verticalAlign = "middle"; //$NON-NLS-0$
+						if(resource.directory){
+							loc = require.toUrl("navigate/table.html") + "#" + resource.path;  //$NON-NLS-1$ //$NON-NLS-0$
+						} else if(!_isText(resource.name)){
+							loc = resource.path;
+						} else {
+							loc	= require.toUrl("edit/edit.html") + "#" + resource.path; //$NON-NLS-1$ //$NON-NLS-0$
+						}
+						if (loc === "#") { //$NON-NLS-0$
+							loc = "";
+						}
+					} else {*/
+
+					// Transform into File object that navigatorRenderer can consume
+					var item = {
+						Name: resource.name,
+						Directory: resource.directory,
+						Location: resource.path || resource.location /*is location ever provided?*/
+					};
+					var resourceLink = navigatorRenderer.createLink(require.toUrl("navigate/table.html"), item, commandRegistry, contentTypeService,
+						openWithCommands /*openWithCommands*/, null /*defaultEditor*/, {
+							"aria-describedby": (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,''), //$NON-NLS-0$
+							style: {
+								verticalAlign: "middle" //$NON-NLS-0$
+							}
+						});
+					if (resource.LineNumber) { // FIXME LineNumber === 0 
+						resourceLink.appendChild(document.createTextNode(' (Line ' + resource.LineNumber + ')'));
+					}
+
+					col.appendChild(resourceLink);
+					appendPath(col, resource);
+				}
+				resultsNode.appendChild(table);
+				if (typeof(onResultReady) === "function") { //$NON-NLS-0$
+					onResultReady(resultsNode);
+				}
+			}
+			if (!foundValidHit) {
+				// only display no matches found if we have a proper name
+				if (queryName) {
+					var errorStr = i18nUtil.formatMessage(messages["No matches found for ${0}"], queryName); 
+					lib.empty(resultsNode);
+					resultsNode.appendChild(document.createTextNode(errorStr)); 
+					if (typeof(onResultReady) === "function") { //$NON-NLS-0$
+						onResultReady(resultsNode);
+					}
+				}
+			} 
+		}
+		return render;
+	};//end makeRenderFunction
 
 	/**
 	 * Creates a new search client.
@@ -27,6 +193,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 		this.registry= options.serviceRegistry;
 		this._commandService = options.commandService;
 		this._fileService = options.fileService;
+		this.defaultRenderer = new DefaultSearchRenderer(this.registry, this._commandService); //default search renderer until we factor this out completely
 		if(!this._fileService){
 			console.error("No file service on search client"); //$NON-NLS-0$
 		}
@@ -197,159 +364,9 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				keyword: keyword,
 				replace: advancedOptions ? advancedOptions.replace : undefined
 			};
-		},
-
-		//default search renderer until we factor this out completely
-		defaultRenderer: {
-	
-			/**
-			 * Create a renderer to display search results.
-			 * @public
-		     * @param {DOMNode} resultsNode Node under which results will be added.
-			 * @param {String} [heading] the heading text, or null if none required
-			 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
-			 * @param {Function(DOMNode)} [decorator] A function to be called that knows how to decorate each row in the result table
-			 *   This function is passed a <td> element.
-			 * @returns a render function.
-			 */
-			makeRenderFunction: function(contentTypeService, resultsNode, heading, onResultReady, decorator) {
-				
-				function _isText(fileName) {
-					if(!contentTypeService){
-						return true;
-					}
-					var contentType = contentTypeService.getFilenameContentType(fileName);
-					if(contentType && (contentType['extends'] === "text/plain" || contentType.id === "text/plain")){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						return true;
-					}
-					return false;
-				}
-				/**
-				 * Displays links to resources under the given DOM node.
-				 * @param {Object[]} resources array of resources. The shape of a resource is {name, path, lineNumber, directory, isExternalResource}
-				 *	Both directory and isExternalResource cannot be true at the same time.
-				 * @param {String} [queryName] A human readable name to display when there are no matches.  If 
-				 *  not used, then there is nothing displayed for no matches
-				 * @param {String} [error] A human readable error to display.
-				 */
-				function render(resources, queryName, error) {
-					if (error) {
-						lib.empty(resultsNode);
-						var message = document.createElement("div"); //$NON-NLS-0$
-						message.appendChild(document.createTextNode(messages["Search failed."]));
-						resultsNode.appendChild(message);
-						if (typeof(onResultReady) === "function") { //$NON-NLS-0$
-							onResultReady(resultsNode);
-						}
-						return;
-					} 
-				
-					//Helper function to append a path String to the end of a search result dom node 
-					var appendPath = (function() { 
-					
-						//Map to track the names we have already seen. If the name is a key in the map, it means
-						//we have seen it already. Optionally, the value associated to the key may be a function' 
-						//containing some deferred work we need to do if we see the same name again.
-						var namesSeenMap = {};
-						
-						function doAppend(domElement, resource) {
-							var path = resource.folderName ? resource.folderName : resource.path;
-							var pathNode = document.createElement('span'); //$NON-NLS-0$
-							pathNode.id = path.replace(/[^a-zA-Z0-9_\.:\-]/g,'');
-							pathNode.appendChild(document.createTextNode(' - ' + path + ' ')); //$NON-NLS-1$ //$NON-NLS-0$
-							domElement.appendChild(pathNode);
-						}
-						
-						function appendPath(domElement, resource) {
-							var name = resource.name;
-							if (namesSeenMap.hasOwnProperty(name)) {
-								//Seen the name before
-								doAppend(domElement, resource);
-								var deferred = namesSeenMap[name];
-								if (typeof(deferred)==='function') { //$NON-NLS-0$
-									//We have seen the name before, but prior element left some deferred processing
-									namesSeenMap[name] = null;
-									deferred();
-								}
-							} else {
-								//Not seen before, so, if we see it again in future we must append the path
-								namesSeenMap[name] = function() { doAppend(domElement, resource); };
-							}
-						}
-						return appendPath;
-					}()); //End of appendPath function
-		
-					var foundValidHit = false;
-					lib.empty(resultsNode);
-					if (resources && resources.length > 0) {
-						var table = document.createElement('table'); //$NON-NLS-0$
-						table.setAttribute('role', 'presentation'); //$NON-NLS-1$ //$NON-NLS-0$
-						for (var i=0; i < resources.length; i++) {
-							var resource = resources[i];
-							var col;
-							if (!foundValidHit) {
-								foundValidHit = true;
-								// Every caller is passing heading === false, consider removing this code.
-								if (heading) {
-									var headingRow = table.insertRow(0);
-									col = headingRow.insertCell(0);
-									col.textContent = heading;
-								}
-							}
-							var row = table.insertRow(-1);
-							col = row.insertCell(0);
-							col.colspan = 2;
-							if (decorator) {
-								decorator(col);
-							}
-							var resourceLink = document.createElement('a'); //$NON-NLS-0$
-							resourceLink.appendChild(document.createTextNode(resource.name));
-							if (resource.LineNumber) { // FIXME LineNumber === 0 
-								resourceLink.appendChild(document.createTextNode(' (Line ' + resource.LineNumber + ')')); //$NON-NLS-1$ //$NON-NLS-0$
-							}
-							var loc = resource.location;
-							if (resource.isExternalResource) {
-								// should open link in new tab, but for now, follow the behavior of navoutliner.js
-								loc = resource.path;
-							} else {
-								if(resource.directory){
-									loc = require.toUrl("navigate/table.html") + "#" + resource.path;  //$NON-NLS-1$ //$NON-NLS-0$
-								} else if(!_isText(resource.name)){
-									loc = resource.path;
-								} else {
-									loc	= require.toUrl("edit/edit.html") + "#" + resource.path; //$NON-NLS-1$ //$NON-NLS-0$
-								}
-								if (loc === "#") { //$NON-NLS-0$
-									loc = "";
-								}
-							}
-							resourceLink.setAttribute('href', loc); //$NON-NLS-0$
-							resourceLink.setAttribute('aria-describedby', (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,'')); //$NON-NLS-0$
-							resourceLink.style.verticalAlign = "middle"; //$NON-NLS-0$
-							col.appendChild(resourceLink);
-							appendPath(col, resource);
-						}
-						resultsNode.appendChild(table);
-						if (typeof(onResultReady) === "function") { //$NON-NLS-0$
-							onResultReady(resultsNode);
-						}
-					}
-					if (!foundValidHit) {
-						// only display no matches found if we have a proper name
-						if (queryName) {
-							var errorStr = i18nUtil.formatMessage(messages["No matches found for ${0}"], queryName); 
-							lib.empty(resultsNode);
-							resultsNode.appendChild(document.createTextNode(errorStr)); 
-							if (typeof(onResultReady) === "function") { //$NON-NLS-0$
-								onResultReady(resultsNode);
-							}
-						}
-					} 
-				}
-				return render;
-			}//end makeRenderFunction
-		}//end defaultRenderer
+		}
 	};
+
 	Searcher.prototype.constructor = Searcher;
 	//return module exports
 	return {Searcher:Searcher};
