@@ -41,6 +41,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		if (binding.alphaKey) {
 			return userString+binding.alphaKey;
 		}
+		if (binding.type === "keypress") {
+			return userString+binding.keyCode; 
+		}
 		for (var keyName in lib.KEY) {
 			if (typeof(lib.KEY[keyName] === "number")) { //$NON-NLS-0$
 				if (lib.KEY[keyName] === binding.keyCode) {
