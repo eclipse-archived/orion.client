@@ -12,6 +12,7 @@
 
 define(['require', 'orion/webui/littlelib'], function(require, lib) {
 
+	var MIN_SIDE_NODE_WIDTH = 5;//The minimium width/height of the splitted nodes by the splitter	
 	/**
 	 * Constructs a new Splitter with the given options.  A splitter manages the layout
 	 * of two panels, a side panel and a main panel.  An optional toggle button can open or close the 
@@ -246,20 +247,28 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		
 		_mouseMove: function(event) {
 			if (this._tracking) {
-				var parentRect;
+				var parentRect = lib.bounds(this.$node.parentNode);
 				if (this._vertical) {
 					this._splitTop = event.clientY;	
+					if(this._splitTop < parentRect.top + MIN_SIDE_NODE_WIDTH) {//If the top side of the splitted node is shorter than the min size
+						this._splitTop = parentRect.top + MIN_SIDE_NODE_WIDTH;
+					} else if(this._splitTop > parentRect.top + parentRect.height - MIN_SIDE_NODE_WIDTH) {//If the bottom side of the splitted node is shorter than the min size
+						this._splitTop = parentRect.top + parentRect.height - MIN_SIDE_NODE_WIDTH;
+					}
 					var top = this._splitTop;
 					if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$
-						parentRect = lib.bounds(this.$node.parentNode);
 						top = this._splitTop - parentRect.top;
 					}
 					this.$node.style.top = top + "px"; //$NON-NLS-0$ 
 				} else {
-					this._splitLeft = event.clientX;	
+					this._splitLeft = event.clientX;
+					if(this._splitLeft < parentRect.left + MIN_SIDE_NODE_WIDTH) {//If the left side of the splitted node is narrower than the min size
+						this._splitLeft = parentRect.left + MIN_SIDE_NODE_WIDTH;
+					} else if(this._splitLeft > parentRect.left + parentRect.width - MIN_SIDE_NODE_WIDTH) {//If the right side of the splitted node is narrower than the min size
+						this._splitLeft = parentRect.left + parentRect.width - MIN_SIDE_NODE_WIDTH;
+					}
 					var left = this._splitLeft;
 					if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$
-						parentRect = lib.bounds(this.$node.parentNode);
 						left = this._splitLeft - parentRect.left;
 					}
 					this.$node.style.left = left + "px"; //$NON-NLS-0$ 
