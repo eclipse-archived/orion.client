@@ -76,6 +76,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 	 * @param {Object} [linkProperties] gives additional properties to mix in to the HTML anchor element.
 	 */
 	function createLink(folderPageURL, item, commandService, contentTypeService, /* optional */ openWithCommands, /* optional */defaultEditor, /* optional */ linkProperties) {
+		// TODO FIXME folderPageURL is bad; need to use URITemplates here.
+		// TODO FIXME refactor the async href calculation portion of this function into a separate function, for clients who do not want the <A> created.
 		var link;
 		if (item.Directory) {
 			link = document.createElement("a"); //$NON-NLS-0$
