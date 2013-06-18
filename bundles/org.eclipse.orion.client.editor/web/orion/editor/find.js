@@ -260,6 +260,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				findAfterReplace: this._findAfterReplace,
 				hideAfterFind: this._hideAfterFind,
 				reverse: this._reverse,
+				findCallback: this._findCallback,
 				start: this._start,
 				end: this._end
 			};
@@ -396,6 +397,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				if (options.reverse === true || options.reverse === false) {
 					this._reverse = options.reverse;
 				}
+				if (options.hasOwnProperty("findCallback")) { //$NON-NLS-0$
+					this._findCallback = options.findCallback;
+				}
 				if (options.hasOwnProperty("start")) { //$NON-NLS-0$	
 					this._start = options.start;
 				}
@@ -480,7 +484,10 @@ define("orion/editor/find", [ //$NON-NLS-0$
 						}, 500);
 					}
 				}
-				if (result) {
+				if (this._findCallback) {
+					this._findCallback(result);
+				}
+				else if (result) {
 					editor.moveSelection(result.start, result.end, null, false);
 				}
 			}
