@@ -15,16 +15,15 @@
 
 define([
 	'i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/searchUtils', 'orion/crawler/searchCrawler',
-	'orion/explorers/navigatorRenderer', 'orion/extensionCommands'
+	'orion/explorers/navigatorRenderer', 'orion/extensionCommands', 'orion/Deferred'
 	],
-function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigatorRenderer, extensionCommands){
-	// We only set this once
-	var openWithCommands;
+function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigatorRenderer, extensionCommands, Deferred){
 
 	//default search renderer until we factor this out completely
 	function DefaultSearchRenderer(serviceRegistry, commandRegistry) {
 		this.serviceRegistry = serviceRegistry;
 		this.commandRegistry = commandRegistry;
+		this.openWithCommands = null;
 	}
 	/**
 	 * Create a renderer to display search results.
@@ -38,10 +37,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 	 */
 	DefaultSearchRenderer.prototype.makeRenderFunction = function(contentTypeService, resultsNode, heading, onResultReady, decorator) {
 		var serviceRegistry = this.serviceRegistry, commandRegistry = this.commandRegistry;
-		if (!openWithCommands) {
-			extensionCommands._createOpenWithCommands(serviceRegistry, contentTypeService);
-			openWithCommands = extensionCommands.getOpenWithCommands(commandRegistry);
-		}
+		this.openWithCommands = this.openWithCommands || extensionCommands.createOpenWithCommands(serviceRegistry, contentTypeService, commandRegistry);
 
 		/**
 		 * Displays links to resources under the given DOM node.
@@ -51,114 +47,117 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 		 *  not used, then there is nothing displayed for no matches
 		 * @param {String} [error] A human readable error to display.
 		 */
+		var _self = this;
 		function render(resources, queryName, error) {
-			if (error) {
-				lib.empty(resultsNode);
-				var message = document.createElement("div"); //$NON-NLS-0$
-				message.appendChild(document.createTextNode(messages["Search failed."]));
-				resultsNode.appendChild(message);
-				if (typeof(onResultReady) === "function") { //$NON-NLS-0$
-					onResultReady(resultsNode);
-				}
-				return;
-			} 
-		
-			//Helper function to append a path String to the end of a search result dom node 
-			var appendPath = (function() { 
-			
-				//Map to track the names we have already seen. If the name is a key in the map, it means
-				//we have seen it already. Optionally, the value associated to the key may be a function' 
-				//containing some deferred work we need to do if we see the same name again.
-				var namesSeenMap = {};
-				
-				function doAppend(domElement, resource) {
-					var path = resource.folderName ? resource.folderName : resource.path;
-					var pathNode = document.createElement('span'); //$NON-NLS-0$
-					pathNode.id = path.replace(/[^a-zA-Z0-9_\.:\-]/g,'');
-					pathNode.appendChild(document.createTextNode(' - ' + path + ' ')); //$NON-NLS-1$ //$NON-NLS-0$
-					domElement.appendChild(pathNode);
-				}
-				
-				function appendPath(domElement, resource) {
-					var name = resource.name;
-					if (namesSeenMap.hasOwnProperty(name)) {
-						//Seen the name before
-						doAppend(domElement, resource);
-						var deferred = namesSeenMap[name];
-						if (typeof(deferred)==='function') { //$NON-NLS-0$
-							//We have seen the name before, but prior element left some deferred processing
-							namesSeenMap[name] = null;
-							deferred();
-						}
-					} else {
-						//Not seen before, so, if we see it again in future we must append the path
-						namesSeenMap[name] = function() { doAppend(domElement, resource); };
-					}
-				}
-				return appendPath;
-			}()); //End of appendPath function
-
-			var foundValidHit = false;
-			lib.empty(resultsNode);
-			if (resources && resources.length > 0) {
-				var table = document.createElement('table'); //$NON-NLS-0$
-				table.setAttribute('role', 'presentation'); //$NON-NLS-1$ //$NON-NLS-0$
-				for (var i=0; i < resources.length; i++) {
-					var resource = resources[i];
-					var col;
-					if (!foundValidHit) {
-						foundValidHit = true;
-						// Every caller is passing heading === false, consider removing this code.
-						if (heading) {
-							var headingRow = table.insertRow(0);
-							col = headingRow.insertCell(0);
-							col.textContent = heading;
-						}
-					}
-					var row = table.insertRow(-1);
-					col = row.insertCell(0);
-					col.colspan = 2;
-					if (decorator) {
-						decorator(col);
-					}
-
-					// Transform into File object that navigatorRenderer can consume
-					var item = {
-						Name: resource.name,
-						Directory: resource.directory,
-						Location: resource.path || resource.location /*is location ever provided?*/
-					};
-					var resourceLink = navigatorRenderer.createLink(require.toUrl("navigate/table.html"), item, commandRegistry, contentTypeService,
-						openWithCommands, null /*defaultEditor*/, {
-							"aria-describedby": (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,''), //$NON-NLS-0$
-							style: {
-								verticalAlign: "middle" //$NON-NLS-0$
-							}
-						});
-					if (resource.LineNumber) { // FIXME LineNumber === 0 
-						resourceLink.appendChild(document.createTextNode(' (Line ' + resource.LineNumber + ')'));
-					}
-
-					col.appendChild(resourceLink);
-					appendPath(col, resource);
-				}
-				resultsNode.appendChild(table);
-				if (typeof(onResultReady) === "function") { //$NON-NLS-0$
-					onResultReady(resultsNode);
-				}
-			}
-			if (!foundValidHit) {
-				// only display no matches found if we have a proper name
-				if (queryName) {
-					var errorStr = i18nUtil.formatMessage(messages["No matches found for ${0}"], queryName); 
+			Deferred.when(_self.openWithCommands, function(openWithCommands) {
+				if (error) {
 					lib.empty(resultsNode);
-					resultsNode.appendChild(document.createTextNode(errorStr)); 
+					var message = document.createElement("div"); //$NON-NLS-0$
+					message.appendChild(document.createTextNode(messages["Search failed."]));
+					resultsNode.appendChild(message);
+					if (typeof(onResultReady) === "function") { //$NON-NLS-0$
+						onResultReady(resultsNode);
+					}
+					return;
+				} 
+			
+				//Helper function to append a path String to the end of a search result dom node 
+				var appendPath = (function() { 
+				
+					//Map to track the names we have already seen. If the name is a key in the map, it means
+					//we have seen it already. Optionally, the value associated to the key may be a function' 
+					//containing some deferred work we need to do if we see the same name again.
+					var namesSeenMap = {};
+					
+					function doAppend(domElement, resource) {
+						var path = resource.folderName ? resource.folderName : resource.path;
+						var pathNode = document.createElement('span'); //$NON-NLS-0$
+						pathNode.id = path.replace(/[^a-zA-Z0-9_\.:\-]/g,'');
+						pathNode.appendChild(document.createTextNode(' - ' + path + ' ')); //$NON-NLS-1$ //$NON-NLS-0$
+						domElement.appendChild(pathNode);
+					}
+					
+					function appendPath(domElement, resource) {
+						var name = resource.name;
+						if (namesSeenMap.hasOwnProperty(name)) {
+							//Seen the name before
+							doAppend(domElement, resource);
+							var deferred = namesSeenMap[name];
+							if (typeof(deferred)==='function') { //$NON-NLS-0$
+								//We have seen the name before, but prior element left some deferred processing
+								namesSeenMap[name] = null;
+								deferred();
+							}
+						} else {
+							//Not seen before, so, if we see it again in future we must append the path
+							namesSeenMap[name] = function() { doAppend(domElement, resource); };
+						}
+					}
+					return appendPath;
+				}()); //End of appendPath function
+	
+				var foundValidHit = false;
+				lib.empty(resultsNode);
+				if (resources && resources.length > 0) {
+					var table = document.createElement('table'); //$NON-NLS-0$
+					table.setAttribute('role', 'presentation'); //$NON-NLS-1$ //$NON-NLS-0$
+					for (var i=0; i < resources.length; i++) {
+						var resource = resources[i];
+						var col;
+						if (!foundValidHit) {
+							foundValidHit = true;
+							// Every caller is passing heading === false, consider removing this code.
+							if (heading) {
+								var headingRow = table.insertRow(0);
+								col = headingRow.insertCell(0);
+								col.textContent = heading;
+							}
+						}
+						var row = table.insertRow(-1);
+						col = row.insertCell(0);
+						col.colspan = 2;
+						if (decorator) {
+							decorator(col);
+						}
+	
+						// Transform into File object that navigatorRenderer can consume
+						var item = {
+							Name: resource.name,
+							Directory: resource.directory,
+							Location: resource.path || resource.location /*is location ever provided?*/
+						};
+						var resourceLink = navigatorRenderer.createLink(require.toUrl("navigate/table.html"), item, commandRegistry, contentTypeService,
+							openWithCommands, null /*defaultEditor*/, {
+								"aria-describedby": (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,''), //$NON-NLS-0$
+								style: {
+									verticalAlign: "middle" //$NON-NLS-0$
+								}
+							});
+						if (resource.LineNumber) { // FIXME LineNumber === 0 
+							resourceLink.appendChild(document.createTextNode(' (Line ' + resource.LineNumber + ')'));
+						}
+	
+						col.appendChild(resourceLink);
+						appendPath(col, resource);
+					}
+					resultsNode.appendChild(table);
 					if (typeof(onResultReady) === "function") { //$NON-NLS-0$
 						onResultReady(resultsNode);
 					}
 				}
-			} 
-		}
+				if (!foundValidHit) {
+					// only display no matches found if we have a proper name
+					if (queryName) {
+						var errorStr = i18nUtil.formatMessage(messages["No matches found for ${0}"], queryName); 
+						lib.empty(resultsNode);
+						resultsNode.appendChild(document.createTextNode(errorStr)); 
+						if (typeof(onResultReady) === "function") { //$NON-NLS-0$
+							onResultReady(resultsNode);
+						}
+					}
+				} 
+			});
+		} // end render
 		return render;
 	};//end makeRenderFunction
 
