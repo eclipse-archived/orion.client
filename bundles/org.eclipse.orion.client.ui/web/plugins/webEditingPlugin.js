@@ -129,7 +129,10 @@ define([
 		nls: "orion/nls/messages",
 		tooltipKey: "Open the raw file or folder in the browser",
 		uriTemplate: "{Location}",
-		forceSingleItem: true
+		forceSingleItem: true,
+		validationProperties: [{
+			source: "!Projects" // Filter out workspace; Raw only applies to regular files and folders.
+		}]
 	});
 
 	provider.registerService("orion.edit.editor", {}, {
