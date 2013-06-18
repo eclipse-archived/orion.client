@@ -52,7 +52,7 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 			return this._view;
 		},
 		isActive: function () {
-			return true;
+			return this._view.getKeyModes().indexOf(this) !== -1;
 		},
 		match: function(e) {
 			switch (e.keyCode) {
