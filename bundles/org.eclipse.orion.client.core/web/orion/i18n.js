@@ -56,7 +56,7 @@ define(function() {
 								if (locale) {
 									// see Bug 381042 - [Globalization] Messages are loaded even if their language is not used
 									var userLocale = config.locale || (typeof navigator !== "undefined" ? (navigator.language || navigator.userLanguage) : null);
-									if (!userLocale || userLocale.indexOf(locale) !== 0) {
+									if (!userLocale || userLocale.toLowerCase().indexOf(locale.toLowerCase()) !== 0) {
 										return;
 									}
 									// end
