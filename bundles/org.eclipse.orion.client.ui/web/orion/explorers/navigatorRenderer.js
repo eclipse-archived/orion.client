@@ -70,9 +70,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 	 * @param {Object} item a json object describing an Orion file or folder
 	 * @param {Object} commandService necessary to compute the proper editor for a file. Must be a synchronous, in-page service, not retrieved 
 	 * from the service registry.
-	 * @param {Object[]} [openWithCommands] will be computed if not provided. However callers must have already processed the open with
-	 * service extension and added to the command registry (such as done in {@link orion.extensionCommands._createOpenWithCommands}).
-	 * @param {Object} [defaultEditor] will be computed if not provided, but subject to the same caveat as openWithCommands.
+	 * @param {Object[]} [openWithCommands] The "open with" commands used to generate link hrefs. If this parameter is not provided, the caller must
+	 * have already processed the service extension and added to the command registry (usually by calling {@link orion.extensionCommands.createAndPlaceFileCommandsExtension}).
+	 * @param {Object} [defaultEditor] The default editor to use. If not provided, this will be computed from <code>openWithCommands</code>.
 	 * @param {Object} [linkProperties] gives additional properties to mix in to the HTML anchor element.
 	 */
 	function createLink(folderPageURL, item, commandService, contentTypeService, /* optional */ openWithCommands, /* optional */defaultEditor, /* optional */ linkProperties) {
