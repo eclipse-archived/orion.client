@@ -790,6 +790,7 @@ input {
 /* FOR NAVIGATION DROP DOWN */
 
 .centralNavigation {
+	padding-top:2px;
 	cursor:pointer;
 }
 
