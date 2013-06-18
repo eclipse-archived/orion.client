@@ -865,14 +865,32 @@ define([
 							return textView.invokeAction(actionID);
 						};
 					};
+					var scopes = {}, binding;
 					for (var i = 0; i < editorActions.length; i++) {
 						var actionID = editorActions[i];
 						var actionDescription = textView.getActionDescription(actionID);
 						var bindings = textView.getKeyBindings(actionID);
 						for (var j = 0; j < bindings.length; j++) {
-							var bindingString = mUIUtils.getUserKeyString(bindings[j]);
-							this.createItem(bindingString, actionDescription.name, execute(actionID));
+							binding = bindings[j];
+							var bindingString = mUIUtils.getUserKeyString(binding);
+							if (binding.scopeName) {
+								if (!scopes[binding.scopeName]) {
+									scopes[binding.scopeName] = [];
+								}
+								scopes[binding.scopeName].push({bindingString: bindingString, name: actionDescription.name, execute: execute(actionID)});
+							} else {
+								this.createItem(bindingString, actionDescription.name, execute(actionID));
+							}
 						}
+					}
+					for (var scopedBinding in scopes) {
+						if (scopes[scopedBinding].length) {
+							this.createHeader(scopedBinding);
+							for (var k = 0; k < scopes[scopedBinding].length; k++) {
+								binding = scopes[scopedBinding][k];
+								this.createItem(binding.bindingString, binding.name, binding.execute);
+							}
+						}	
 					}
 				}
 				this.createHeader(messages["Global"]);

@@ -24,67 +24,77 @@ define("orion/editor/emacs", [ //$NON-NLS-0$
 	}
 	EmacsMode.prototype = new mKeyMode.KeyMode();
 	EmacsMode.prototype.createKeyBindings = function () {
-		var KeyStroke = mKeyBinding.KeyStroke;
-		var KeySequence = mKeyBinding.KeySequence;
 		//no duplicate keybindings
 		var bindings = [];
 
 		// Changing the Location of Point
-		bindings.push({actionID: "emacs-beginning-of-line", keyBinding: new KeyStroke('a', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-end-of-line", keyBinding: new KeyStroke('e', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-forward-char", keyBinding: new KeyStroke('f', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-backward-char", keyBinding: new KeyStroke('b', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-forward-word", keyBinding: new KeyStroke('f', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-backward-word", keyBinding: new KeyStroke('b', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-next-line", keyBinding: new KeyStroke('n', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-previous-line", keyBinding: new KeyStroke('p', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-beginning-of-line", keyBinding: this._createStroke('a', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-end-of-line", keyBinding: this._createStroke('e', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-forward-char", keyBinding: this._createStroke('f', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-backward-char", keyBinding: this._createStroke('b', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-forward-word", keyBinding: this._createStroke('f', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-backward-word", keyBinding: this._createStroke('b', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-next-line", keyBinding: this._createStroke('n', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-previous-line", keyBinding: this._createStroke('p', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		//TODO these 2 are not right
-		bindings.push({actionID: "emacs-beginning-of-buffer", keyBinding: new KeyStroke(',', false, true, true)}); //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-end-of-buffer", keyBinding: new KeyStroke('.', false, true, true)}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-beginning-of-buffer", keyBinding: this._createStroke(188, false, true, true)}); //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-end-of-buffer", keyBinding: this._createStroke(190, false, true, true)}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		// Erasing Text
-		bindings.push({actionID: "emacs-delete-backward-char", keyBinding: new KeyStroke(46, !util.isMac, false, false, util.isMac)}); //$NON-NLS-0$
-		bindings.push({actionID: "emacs-delete-char", keyBinding: new KeyStroke('d', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-kill-line", keyBinding: new KeyStroke('k', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-kill-word", keyBinding: new KeyStroke('d', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-backward-kill-word", keyBinding: new KeyStroke(46, false, false, true)}); //$NON-NLS-0$
+		bindings.push({actionID: "emacs-delete-backward-char", keyBinding: this._createStroke(46, !util.isMac, false, false, util.isMac)}); //$NON-NLS-0$
+		bindings.push({actionID: "emacs-delete-char", keyBinding: this._createStroke('d', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-kill-line", keyBinding: this._createStroke('k', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-kill-word", keyBinding: this._createStroke('d', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-backward-kill-word", keyBinding: this._createStroke(46, false, false, true)}); //$NON-NLS-0$
 
 		// Undoing Changes
-		bindings.push({actionID: "undo", keyBinding: new KeySequence([new KeyStroke('x', true), new KeyStroke('u')])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "redo", keyBinding: new KeySequence([new KeyStroke('x', true), new KeyStroke('r')])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "undo", keyBinding: this._createSequence([this._createStroke('x', true), this._createStroke('u')])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "redo", keyBinding: this._createSequence([this._createStroke('x', true), this._createStroke('r')])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		//Scrolling 
-		bindings.push({actionID: "emacs-scroll-up", keyBinding: new KeyStroke('v', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-scroll-down", keyBinding: new KeyStroke('v', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-scroll-up", keyBinding: this._createStroke('v', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-scroll-down", keyBinding: this._createStroke('v', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
 
-		bindings.push({actionID: "emacs-set-mark-command", keyBinding: new KeyStroke(' ', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-reset-mark-command", keyBinding: new KeyStroke('g', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-exchange-point-and-mark", keyBinding: new KeySequence([new KeyStroke('x', !util.isMac, false, false, util.isMac), new KeyStroke('x', !util.isMac, false, false, util.isMac)])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-set-mark-command", keyBinding: this._createStroke(' ', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-reset-mark-command", keyBinding: this._createStroke('g', !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-exchange-point-and-mark", keyBinding: this._createSequence([this._createStroke('x', !util.isMac, false, false, util.isMac), this._createStroke('x', !util.isMac, false, false, util.isMac)])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		for (var c=0; c<=9; c++) { //$NON-NLS-1$ //$NON-NLS-0$
-			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: new KeyStroke(48 + c, !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: new KeyStroke(48 + c, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: new KeyStroke(48 + c, !util.isMac, false, true, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: this._createStroke(48 + c, !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: this._createStroke(48 + c, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+			bindings.push({actionID: "emacs-digit-argument-" + c, keyBinding: this._createStroke(48 + c, !util.isMac, false, true, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-negative-argument", keyBinding: new KeyStroke(189, !util.isMac, false, true, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-negative-argument", keyBinding: this._createStroke(189, !util.isMac, false, false, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-negative-argument", keyBinding: this._createStroke(189, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-negative-argument", keyBinding: this._createStroke(189, !util.isMac, false, true, util.isMac)}); //$NON-NLS-1$ //$NON-NLS-0$
 		
-		bindings.push({actionID: "emacs-uppercase", keyBinding: new KeyStroke('u', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-lowercase", keyBinding: new KeyStroke('l', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "emacs-capitalize", keyBinding: new KeyStroke('c', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-uppercase", keyBinding: this._createStroke('u', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-lowercase", keyBinding: this._createStroke('l', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "emacs-capitalize", keyBinding: this._createStroke('c', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
 
 		//TODO should these keys be done here?
-		bindings.push({actionID: "contentAssist", keyBinding: new KeyStroke(191, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "find", keyBinding: new KeyStroke('r', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "incrementalFind", keyBinding: new KeyStroke('s', true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "incrementalFindReverse", keyBinding: new KeyStroke('r', true)}); //$NON-NLS-1$ //$NON-NLS-0$
-		bindings.push({actionID: "save", keyBinding: new KeySequence([new KeyStroke('x', !util.isMac, false, false, util.isMac), new KeyStroke('s', !util.isMac, false, false, util.isMac)])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "contentAssist", keyBinding: this._createStroke(191, false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "find", keyBinding: this._createStroke('r', false, false, true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "incrementalFind", keyBinding: this._createStroke('s', true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "incrementalFindReverse", keyBinding: this._createStroke('r', true)}); //$NON-NLS-1$ //$NON-NLS-0$
+		bindings.push({actionID: "save", keyBinding: this._createSequence([this._createStroke('x', !util.isMac, false, false, util.isMac), this._createStroke('s', !util.isMac, false, false, util.isMac)])}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		//Create actions
 		this._createActions(this.getView());
 		
 		return bindings;
+	};
+	
+	EmacsMode.prototype._createStroke = function(keyCode, mod1, mod2, mod3, mod4) {
+		var result = new mKeyBinding.KeyStroke(keyCode, mod1, mod2, mod3, mod4);
+		result.scopeName = messages.emacs;
+		return result;
+	};
+	
+	EmacsMode.prototype._createSequence = function(keys) {
+		var result = new mKeyBinding.KeySequence(keys);
+		result.scopeName = messages.emacs;
+		return result;
 	};
 	
 	EmacsMode.prototype._getData = function() {
