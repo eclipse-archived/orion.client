@@ -42,10 +42,10 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 	};
 
 	/**
-	 * Converts "orion.navigate.openWith" service contributions into orion.navigate.command that open the appropriate editors.
+	 * Converts <code>"orion.navigate.openWith"</code> service contributions into <code>orion.navigate.command<code> that open the appropriate editors.
 	 * @name orion.extensionCommands._createOpenWithCommands
 	 * @function
-	 * @public Not really but it is linked to by renderer JSDoc.
+	 * @public Not really but called by other modules.
 	 * @returns {Object[]} The "open with" fileCommands
 	 */
 	extensionCommandUtils._createOpenWithCommands = function(serviceRegistry, contentTypes) {
@@ -395,7 +395,13 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 		
 		return deferred;
 	};
-	
+
+	/**
+	 * @name orion.extensionCommands.getOpenWithCommands
+	 * @function
+	 * @param {orion.commandregistry.CommandRegistry} The command registry to consult.
+	 * @returns {orion.commands.Command[]} All the "open with" commands added to the given <code>commandRegistry</code>.
+	 */
 	extensionCommandUtils.getOpenWithCommands = function(commandService) {
 		var openWithCommands = [];
 		for (var commandId in commandService._commandList) {
@@ -418,6 +424,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 	 * @param {Number} position
 	 * @param {String} commandGroup
 	 * @param {Boolean} isNavigator
+	 * @returns {orion.Promise}
 	 */
 	extensionCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, toolbarId, position, commandGroup, isNavigator) {
 	
