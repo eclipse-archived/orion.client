@@ -315,12 +315,11 @@ a.currentLocation:hover {
 }
 
 .dropdownArrowRight {
-	background-position: 0 -654px; 
-	width: 6px;
-	height: 11px;
+	background-position: 0 -72px; 
+	width: 16px;
+	height: 16px;
 	background-image: url(../images/core_sprites.png); 
 	margin-right: 4px;
-	vertical-align: middle; 
 	float: right;
 }
 
