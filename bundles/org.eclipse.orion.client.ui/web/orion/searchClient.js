@@ -121,26 +121,6 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 					if (decorator) {
 						decorator(col);
 					}
-					/*var resourceLink = document.createElement('a'); //$NON-NLS-0$
-					resourceLink.appendChild(document.createTextNode(resource.name));
-					var loc = resource.location;
-					if (resource.isExternalResource) {
-						// should open link in new tab, but for now, follow the behavior of navoutliner.js
-						loc = resource.path;
-						resourceLink.setAttribute('href', loc); //$NON-NLS-0$
-						resourceLink.setAttribute(); //$NON-NLS-0$
-						resourceLink.style.verticalAlign = "middle"; //$NON-NLS-0$
-						if(resource.directory){
-							loc = require.toUrl("navigate/table.html") + "#" + resource.path;  //$NON-NLS-1$ //$NON-NLS-0$
-						} else if(!_isText(resource.name)){
-							loc = resource.path;
-						} else {
-							loc	= require.toUrl("edit/edit.html") + "#" + resource.path; //$NON-NLS-1$ //$NON-NLS-0$
-						}
-						if (loc === "#") { //$NON-NLS-0$
-							loc = "";
-						}
-					} else {*/
 
 					// Transform into File object that navigatorRenderer can consume
 					var item = {
@@ -149,7 +129,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 						Location: resource.path || resource.location /*is location ever provided?*/
 					};
 					var resourceLink = navigatorRenderer.createLink(require.toUrl("navigate/table.html"), item, commandRegistry, contentTypeService,
-						openWithCommands /*openWithCommands*/, null /*defaultEditor*/, {
+						openWithCommands, null /*defaultEditor*/, {
 							"aria-describedby": (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,''), //$NON-NLS-0$
 							style: {
 								verticalAlign: "middle" //$NON-NLS-0$
