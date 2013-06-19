@@ -2451,11 +2451,56 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
+				var deferred = new Deferred();
 				var dialog = new mApplyPatch.ApplyPatchDialog({
 					title: messages['Apply Patch'],
-					diffLocation: item.DiffLocation
+					diffLocation: item.DiffLocation,
+					deferred: deferred
 				});
 				dialog.show();
+				var messageService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				deferred.then(function(result){
+					var message;
+					try{
+						var jsonResult = JSON.parse(result);
+						if(jsonResult.JsonData && jsonResult.JsonData.modifiedFieles){
+							message = "Patch applied, files modified: ";
+							var isFirst = true;
+							for(var i=0; i<jsonResult.JsonData.modifiedFieles.length; i++){
+								if(!isFirst){
+									message+=", ";
+								}
+								message+=jsonResult.JsonData.modifiedFieles[i];
+								isFirst = false;
+							}
+							
+							var display = [];
+							display.Severity = "Info"; //$NON-NLS-0$
+							display.HTML = false;
+							display.Message = message;
+							messageService.setProgressResult(display); //$NON-NLS-0$
+							return;
+						}
+					} catch (e){
+					}
+					message = "Patch applied";
+					messageService.setMessage(message);
+				}, function(error){
+					var jsonError = JSON.parse(error);
+					var message = "Apply patch failed.";
+					if(jsonError.DetailedMessage){
+						message += " "; 
+						message += jsonError.DetailedMessage;
+					} else if(jsonError.Message){
+						message += " "; 
+						message += jsonError.Message;
+					}
+					var display = [];
+					display.Severity = "Error"; //$NON-NLS-0$
+					display.HTML = false;
+					display.Message = message;
+					messageService.setProgressResult(display); //$NON-NLS-0$
+				});
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Clone" ; //$NON-NLS-0$

@@ -41,13 +41,21 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog' ], function(messages, 
 		},
 		text : 'OK'
 		});
+		
 
 		// Start the dialog initialization.
 		this._initialize();
 	};
 
 	ApplyPatchDialog.prototype._bindToDom = function(parent) {
-		// nothing to do
+		this.$selectedFile.onchange = function(event){
+			this.$urlRadio.checked = false;
+			this.$fileRadio.checked = "fileRadio";
+		}.bind(this);
+		this.$url.onchange = function(event){
+			this.$urlRadio.checked = "urlRadio";
+			this.$fileRadio.checked = false;
+		}.bind(this);
 	};
 
 	ApplyPatchDialog.prototype._applyPatch = function(parent) {
@@ -58,12 +66,22 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog' ], function(messages, 
 
 		this.req = new XMLHttpRequest();
 		this.req.open('post', this.options.diffLocation);
+		this.req.setRequestHeader("Orion-Version", "1");
 		this.req.onreadystatechange = this.handleReadyState.bind(this);
 		this.req.send(formData);
 	};
 
 	ApplyPatchDialog.prototype.handleReadyState = function(state) {
 		if (this.req.readyState === 4) {
+			if(this.req.status === 200){
+				if(this.options.deferred){
+					this.options.deferred.resolve(this.req.responseText);
+				}
+			} else {
+				if(this.options.deferred){
+					this.options.deferred.reject(this.req.responseText);
+				}
+			}
 			this.hide();
 		}
 	};
