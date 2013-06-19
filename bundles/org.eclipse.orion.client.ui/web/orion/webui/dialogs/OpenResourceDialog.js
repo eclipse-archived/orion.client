@@ -252,31 +252,21 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 	OpenResourceDialog.prototype.doSearch = function() {
 		var text = this.$fileName.value;
 
-		var showFavs = this.showFavorites();
-		// update favorites
-		if(this._progress){
-			this._progress.progress(this._favService.queryFavorites(text), "Getting favorites for: " + text).then(function(favs) {
-				showFavs(favs);
-			});
-		}else{
-			this._favService.queryFavorites(text).then(function(favs) {
-				showFavs(favs);
-			});
-		}
-
 		// don't do a server-side query for an empty text box
 		if (text) {
+			// Gives Webkit a chance to show the "Searching" message
+			var searchParams = this._searcher.createSearchParams(text, this._nameSearch, this._searchOnRoot);
+			var renderFunction = this._searchRenderer.makeRenderFunction(this._contentTypeService, this.$results, false, this.decorateResult.bind(this));
+			this.currentSearch = renderFunction;
 			var div = document.createElement("div"); //$NON-NLS-0$
 			div.appendChild(document.createTextNode(this._nameSearch ? messages['Searching...'] : util.formatMessage(messages["Searching for occurrences of"], text)));
-			lib.empty(this.$favresults);
+			lib.empty(this.$results);
 			this.$results.appendChild(div);
-			// Gives Webkit a chance to show the "Searching" message
-			var that = this;
-			setTimeout(function() {
-				var searchParams = that._searcher.createSearchParams(text, that._nameSearch, that._searchOnRoot);
-				var renderFunction = that._searchRenderer.makeRenderFunction(that._contentTypeService, that.$results, false, that.decorateResult.bind(that));
-				that._searcher.search(searchParams, false, renderFunction);
-			}, 0);
+			this._searcher.search(searchParams, false, function() {
+				if (renderFunction === this.currentSearch) {
+					renderFunction.apply(null, arguments);
+				}
+			}.bind(this));
 		}
 	};
 	
