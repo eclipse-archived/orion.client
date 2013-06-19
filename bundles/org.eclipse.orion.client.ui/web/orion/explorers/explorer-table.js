@@ -244,11 +244,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		},
 		"import": function(modelEvent) { //$NON-NLS-0$
 			var target = modelEvent.target;
-			if (this.treeRoot.Location === target.Location) {
-				this.loadResourceList(this.treeRoot, true);
-			} else {
-				this.changedItem(target, true);
-			}
+			this.changedItem(target, true);
 		},
 		move: function(modelEvent) {
 			var item = modelEvent.oldValue, newItem = modelEvent.newValue, parent = modelEvent.parent;
@@ -436,6 +432,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * @returns {orion.Promise}
 	 */
 	FileExplorer.prototype.changedItem = function(parent, forceExpand) {
+		if (parent === this.treeRoot) {
+			return this.loadResourceList(this.treeRoot, forceExpand);
+		}
 		var that = this;
 		var progress = this.registry.getService("orion.page.progress");
 		return progress.progress(this.fileClient.fetchChildren(parent.ChildrenLocation), "Fetching children of " + parent.Name).then(function(children) {
