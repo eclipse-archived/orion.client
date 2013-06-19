@@ -183,8 +183,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			if (parents) {
 				var deferred;
 				if (parents.length === 0) {
-					// Show the top level
-					deferred = this.loadResourceList("").then(this.reveal.bind(this, this.treeRoot)); //$NON-NLS-0$
+					var fileServiceRoot = this.fileClient.fileServiceRootURL(this.treeRoot.Location);
+					deferred = this.loadRoot(fileServiceRoot).then(this.reveal.bind(this, this.treeRoot));
 				} else {
 					deferred = this.loadParentOf(this.treeRoot);
 				}
