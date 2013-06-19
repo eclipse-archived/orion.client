@@ -802,7 +802,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 		 * @param {Number|String} column
 		 * @param {Number} [end]
 		 */
-		onGotoLine: function(line, column, end) {
+		onGotoLine: function(line, column, end, callback) {
 			if (this._textView) {
 				var model = this.getModel();
 				line = Math.max(0, Math.min(line, model.getLineCount() - 1));
@@ -823,7 +823,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 					start = Math.min(start, lineLength);
 					end = Math.min(end, lineLength);
 				}
-				this.moveSelection(lineStart + start, lineStart + end);
+				this.moveSelection(lineStart + start, lineStart + end, callback);
 			}
 		},
 		

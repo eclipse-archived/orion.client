@@ -213,7 +213,7 @@ define([
 			// override the editor binding
 			editor.getTextView().setAction("gotoLine", function (data) { //$NON-NLS-0$
 				if (data) {
-					editor.onGotoLine(data.line - 1, 0);
+					editor.onGotoLine(data.line - 1, 0, undefined, data.callback);
 					return true;
 				} 
 				self.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
