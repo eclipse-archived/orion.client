@@ -23,6 +23,7 @@ information.png \
 leftarrow.png \
 link.png \
 list.png \
+menu_twistie.gif \
 move_down.gif \
 move_up.gif \
 none.png \

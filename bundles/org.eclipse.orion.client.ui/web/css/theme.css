@@ -305,7 +305,7 @@ a.currentLocation:hover {
 }
 
 .dropdownArrowDown {
-	background-position: 0 -422px;	
+	background-position: 0 -432px;	
 	width: 5px;
 	height: 3px;
 	background-image: url(../images/core_sprites.png); 
