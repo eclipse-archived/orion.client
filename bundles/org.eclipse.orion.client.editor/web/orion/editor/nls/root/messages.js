@@ -134,6 +134,49 @@ define({
 	"contentAssist": "Content Assist", //$NON-NLS-1$ //$NON-NLS-0$
 	"lineColumn": "Line ${0} : Col ${1}", //$NON-NLS-1$ //$NON-NLS-0$
 	
+	//vi
+	"vi": "vi", //$NON-NLS-1$ //$NON-NLS-0$
+	"viLeft": "${0} Left", //$NON-NLS-1$ //$NON-NLS-0$
+	"viRight": "${0} Right", //$NON-NLS-1$ //$NON-NLS-0$
+	"viUp": "${0} Up", //$NON-NLS-1$ //$NON-NLS-0$
+	"viDown": "${0} Down", //$NON-NLS-1$ //$NON-NLS-0$
+	"viw": "${0} Next Word", //$NON-NLS-1$ //$NON-NLS-0$
+	"vib": "${0} Beginning of Word", //$NON-NLS-1$ //$NON-NLS-0$
+	"viW": "${0} Next Word (ws stop)", //$NON-NLS-1$ //$NON-NLS-0$
+	"viB": "${0} Beginning of Word (ws stop)", //$NON-NLS-1$ //$NON-NLS-0$
+	"vie": "${0} End of Word", //$NON-NLS-1$ //$NON-NLS-0$
+	"viE": "${0} End of Word (ws stop)", //$NON-NLS-1$ //$NON-NLS-0$
+	"vi$": "${0} End of the line", //$NON-NLS-1$ //$NON-NLS-0$
+	"vi^_": "${0} First non-blank Char Current Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"vi+": "${0} First Char Next Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"vi-": "${0} First Char Previous Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"vi|": "${0} nth Column in Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"viH": "${0} Top of Page", //$NON-NLS-1$ //$NON-NLS-0$
+	"viM": "${0} Middle of Page", //$NON-NLS-1$ //$NON-NLS-0$
+	"viL": "${0} Bottom of Page", //$NON-NLS-1$ //$NON-NLS-0$
+	"vi/": "${0} Search Forward", //$NON-NLS-1$ //$NON-NLS-0$
+	"vi?": "${0} Search Backward", //$NON-NLS-1$ //$NON-NLS-0$
+	"vin": "${0} Next Search", //$NON-NLS-1$ //$NON-NLS-0$
+	"viN": "${0} Previous Search", //$NON-NLS-1$ //$NON-NLS-0$
+	"vif": "${0} Search Char Fwd", //$NON-NLS-1$ //$NON-NLS-0$
+	"viF": "${0} Search Char Bckwd", //$NON-NLS-1$ //$NON-NLS-0$
+	"vit": "${0} Search Before Char Fwd", //$NON-NLS-1$ //$NON-NLS-0$
+	"viT": "${0} Search Before Char Bckwd", //$NON-NLS-1$ //$NON-NLS-0$
+	"vi,": "${0} Repeat Reverse Char Search", //$NON-NLS-1$ //$NON-NLS-0$
+	"vi;": "${0} Repeat Char Search", //$NON-NLS-1$ //$NON-NLS-0$
+	"viG": "${0} Go to Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"via": "Append after cursor", //$NON-NLS-1$ //$NON-NLS-0$
+	"viA": "Append to end of line", //$NON-NLS-1$ //$NON-NLS-0$
+	"vii": "Insert before cursor", //$NON-NLS-1$ //$NON-NLS-0$
+	"viI": "Insert at beginning of line", //$NON-NLS-1$ //$NON-NLS-0$
+	"viO": "Insert line above", //$NON-NLS-1$ //$NON-NLS-0$
+	"vio": "Insert line below", //$NON-NLS-1$ //$NON-NLS-0$
+	"viR": "Begin overwriting text", //$NON-NLS-1$ //$NON-NLS-0$
+	"vis": "Substitute a character", //$NON-NLS-1$ //$NON-NLS-0$
+	"viS": "Substitute entire line", //$NON-NLS-1$ //$NON-NLS-0$
+	"viC": "Change text until line end", //$NON-NLS-1$ //$NON-NLS-0$
+	"viD": "", //$NON-NLS-1$ //$NON-NLS-0$
+
 	"replaceAll": "Replacing all...", //$NON-NLS-1$ //$NON-NLS-0$
 	"replacedMatches": "Replaced ${0} matches", //$NON-NLS-1$ //$NON-NLS-0$
 	"nothingReplaced": "Nothing replaced", //$NON-NLS-1$ //$NON-NLS-0$
