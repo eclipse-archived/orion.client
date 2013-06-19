@@ -2349,12 +2349,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			for (var i=0; i<keyModes.length; i++) {
 				if (keyModes[i] === mode) {
 					keyModes.splice(i, 1);
-					//TODO: API needed for this
-					if (mode._modeRemoved) {
-						mode._modeRemoved();
-					}
 					break;
 				}
+			}
+			//TODO: API needed for this
+			if (mode._modeRemoved) {
+				mode._modeRemoved();
 			}
 		},
 		/**
