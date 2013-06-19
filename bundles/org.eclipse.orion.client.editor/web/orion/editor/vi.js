@@ -528,8 +528,8 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 					endOffset = model.getLineEnd(model.getLineAtOffset(endOffset), self.key === "c" ? false : true); //$NON-NLS-0$
 				}
 				view.setText("", startOffset, endOffset); 
-				view.addKeyMode(self.nextMode);
 				view.removeKeyMode(self);	
+				view.addKeyMode(self.nextMode);
 			};
 			NumberMode.prototype._invoke.call(this, action, data);
 			data.editDone();			
@@ -755,16 +755,16 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 			//Change actions
 			view.setAction("vi-c", function() { //$NON-NLS-0$
 				self.changeMode.storeNumber(self.number);
-				view.addKeyMode(self.changeMode);
 				view.removeKeyMode(self);
+				view.addKeyMode(self.changeMode);
 				self.number = "";
 				return true;
 			});
 			
 			view.setAction("vi-d", function() { //$NON-NLS-0$
 				self.deleteMode.storeNumber(self.number);
-				view.addKeyMode(self.deleteMode);
 				view.removeKeyMode(self);
+				view.addKeyMode(self.deleteMode);
 				self.number = "";
 				return true;
 			});
@@ -792,8 +792,8 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 //			Status Line Mode
 //			view.setAction("statusLineMode", function() { //$NON-NLS-0$
 //				self.insertMode.storeNumber(self.number);
-//				view.addKeyMode(self.insertMode);
 //				view.removeKeyMode(self);
+//				view.addKeyMode(self.insertMode);
 //				self.number = "";
 //				return true;
 //			});
@@ -813,8 +813,8 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 			var view = this.getView();
 			this.insertMode.storeNumber(this.number);
 			view.invokeAction(action, false, data);
-			view.addKeyMode(this.insertMode);
 			view.removeKeyMode(this);
+			view.addKeyMode(this.insertMode);
 			this.number = "";
 			return true;
 		},
@@ -822,7 +822,11 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 			this.getView().setOptions({blockCursorVisible: true});	
 		},
 		_modeRemoved: function() {
-			this.getView().setOptions({blockCursorVisible: false});	
+			var view = this.getView();
+			view.setOptions({blockCursorVisible: false});
+			view.removeKeyMode(this.insertMode);
+			view.removeKeyMode(this.changeMode);
+			view.removeKeyMode(this.deleteMode);
 		}
 	});
 	
