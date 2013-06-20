@@ -698,8 +698,12 @@ define([
 		commandRegistry.addCommand(favoriteCommand);
 
 		// open resource
+		var showingResourceDialog = false;
 		var openResourceDialog = function (searcher, serviceRegistry, /* optional */
 			editor) {
+			if (showingResourceDialog) {
+				return;
+			}
 			var favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			// TODO Shouldn't really be making service selection decisions at this level. See bug 337740
@@ -716,12 +720,14 @@ define([
 				searchRenderer: searcher.defaultRenderer,
 				favoriteService: favoriteService,
 				onHide: function () {
+					showingResourceDialog = false;
 					if (editor && editor.getTextView()) {
 						editor.getTextView().focus();
 					}
 				}
 			});
 			window.setTimeout(function () {
+				showingResourceDialog = true;
 				dialog.show();
 			}, 0);
 		};

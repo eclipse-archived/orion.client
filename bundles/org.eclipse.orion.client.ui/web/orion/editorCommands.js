@@ -95,6 +95,7 @@ define([
 
 			// global search
 			if (self._searcher) {
+				var showingSearchDialog = false;
 				var searchCommand =  new mCommands.Command({
 					name: messages["Search Files"],
 					tooltip: messages["Search Files"],
@@ -108,6 +109,9 @@ define([
 
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
 				editor.getTextView().setAction("searchFiles", function() { //$NON-NLS-0$
+					if (showingSearchDialog) {
+						return;
+					}
 					var selection = editor.getSelection();
 					var searchTerm = editor.getText(selection.start, selection.end);
 					var serviceRegistry = self.serviceRegistry;
@@ -123,12 +127,14 @@ define([
 						message: messages["Enter search term:"],
 						initialText: searchTerm,
 						onHide: function () {
+							showingSearchDialog = false;
 							if (editor && editor.getTextView()) {
 								editor.getTextView().focus();
 							}
 						}
 					});
 					window.setTimeout(function () {
+						showingSearchDialog = true;
 						dialog.show(lib.node(self.toolbarId));
 					}, 0);
 					return true;
