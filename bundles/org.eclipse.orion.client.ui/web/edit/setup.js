@@ -138,7 +138,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				emacs = new mEmacs.EmacsMode(textView);
 			}
 			textView.addKeyMode(emacs);
-		} else if (settings.keyBindings === "VI") { //$NON-NLS-0$
+		} else if (settings.keyBindings === "vi") { //$NON-NLS-0$
 			if (!vi) {
 				vi = new mVI.VIMode(textView, statusReporter);
 			}

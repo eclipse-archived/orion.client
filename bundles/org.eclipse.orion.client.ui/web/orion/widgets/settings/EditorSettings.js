@@ -19,7 +19,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
     var KEY_MODES = [
 	    messages.Default,
 		"Emacs", //$NON-NLS-0$
-		"VI" //$NON-NLS-0$
+		"vi" //$NON-NLS-0$
 	];
 				
 	function EditorSettings(options, node) {
