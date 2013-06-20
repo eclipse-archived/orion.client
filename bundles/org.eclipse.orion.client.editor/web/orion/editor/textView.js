@@ -6600,7 +6600,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var overlayDiv = this._overlayDiv;
 			var clipLeft, clipTop;
 			if (clipDiv) {
-				clipDiv.scrollLeft = left;			
+				clipDiv.scrollLeft = left;
+				clipDiv.scrollTop = 0;
 				clipLeft = leftWidth + viewPad.left;
 				clipTop = viewPad.top;
 				var clipWidth = clientWidth;
