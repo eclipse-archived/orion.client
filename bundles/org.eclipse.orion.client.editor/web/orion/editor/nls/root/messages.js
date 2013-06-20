@@ -136,6 +136,10 @@ define({
 	
 	//vi
 	"vi": "vi", //$NON-NLS-1$ //$NON-NLS-0$
+	"vimove": "(Move)", //$NON-NLS-1$ //$NON-NLS-0$
+	"viyank": "(Yank)", //$NON-NLS-1$ //$NON-NLS-0$
+	"videlete": "(Delete)", //$NON-NLS-1$ //$NON-NLS-0$
+	"vichange": "(Change)", //$NON-NLS-1$ //$NON-NLS-0$
 	"viLeft": "${0} Left", //$NON-NLS-1$ //$NON-NLS-0$
 	"viRight": "${0} Right", //$NON-NLS-1$ //$NON-NLS-0$
 	"viUp": "${0} Up", //$NON-NLS-1$ //$NON-NLS-0$
@@ -165,17 +169,19 @@ define({
 	"vi,": "${0} Repeat Reverse Char Search", //$NON-NLS-1$ //$NON-NLS-0$
 	"vi;": "${0} Repeat Char Search", //$NON-NLS-1$ //$NON-NLS-0$
 	"viG": "${0} Go to Line", //$NON-NLS-1$ //$NON-NLS-0$
-	"via": "Append after cursor", //$NON-NLS-1$ //$NON-NLS-0$
-	"viA": "Append to end of line", //$NON-NLS-1$ //$NON-NLS-0$
-	"vii": "Insert before cursor", //$NON-NLS-1$ //$NON-NLS-0$
-	"viI": "Insert at beginning of line", //$NON-NLS-1$ //$NON-NLS-0$
-	"viO": "Insert line above", //$NON-NLS-1$ //$NON-NLS-0$
-	"vio": "Insert line below", //$NON-NLS-1$ //$NON-NLS-0$
-	"viR": "Begin overwriting text", //$NON-NLS-1$ //$NON-NLS-0$
-	"vis": "Substitute a character", //$NON-NLS-1$ //$NON-NLS-0$
-	"viS": "Substitute entire line", //$NON-NLS-1$ //$NON-NLS-0$
-	"viC": "Change text until line end", //$NON-NLS-1$ //$NON-NLS-0$
-	"viD": "", //$NON-NLS-1$ //$NON-NLS-0$
+	"viycd": "${0} Current Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"via": "Append After Cursor", //$NON-NLS-1$ //$NON-NLS-0$
+	"viA": "Append to End of Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"vii": "Insert Before Cursor", //$NON-NLS-1$ //$NON-NLS-0$
+	"viI": "Insert at Beginning of Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"viO": "Insert Line Above", //$NON-NLS-1$ //$NON-NLS-0$
+	"vio": "Insert Line Below", //$NON-NLS-1$ //$NON-NLS-0$
+	"viR": "Begin Overwriting Text", //$NON-NLS-1$ //$NON-NLS-0$
+	"vis": "Substitute a Character", //$NON-NLS-1$ //$NON-NLS-0$
+	"viS": "Substitute Entire Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"viC": "Change Text Until Line End", //$NON-NLS-1$ //$NON-NLS-0$
+	"vip": "Paste After Char or Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"viP": "Paste Before Char or Line", //$NON-NLS-1$ //$NON-NLS-0$
 
 	"replaceAll": "Replacing all...", //$NON-NLS-1$ //$NON-NLS-0$
 	"replacedMatches": "Replaced ${0} matches", //$NON-NLS-1$ //$NON-NLS-0$

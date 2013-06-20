@@ -4015,6 +4015,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					}
 					line.destroy();
 				} else {
+					if (args.count && args.count > 0) {
+						lineIndex = Math.min (lineIndex  + args.count - 1, model.getLineCount() - 1);
+					}
 					offset = model.getLineEnd(lineIndex);
 				}
 				selection.extend(offset);
