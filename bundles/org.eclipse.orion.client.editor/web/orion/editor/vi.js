@@ -473,12 +473,12 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 	mixin(StatusLineMode.prototype, /** @lends orion.editor.viMode.StatusLineMode.prototype */ {
 		createKeyBindings: function() {
 			var bindings = [];
-			bindings.push({actionID: "cancel",		keyBinding: createStroke(27), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-:-ESC",		keyBinding: createStroke(27), predefined: true}); //$NON-NLS-0$
 			return bindings;
 		},
 		_createActions: function(view) {
 			var self = this;
-			view.setAction("cancel", function() { //$NON-NLS-0$
+			view.setAction("vi-:-ESC", function() { //$NON-NLS-0$
 				view.removeKeyMode(self);
 				view.addKeyMode(self.viMode);
 				return true;
@@ -508,7 +508,7 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 	mixin(EditMode.prototype, /** @lends orion.editor.viMode.EditMode.prototype */ {
 		createKeyBindings: function() {
 			var bindings = NumberMode.prototype.createKeyBindings.call(this);
-			bindings.push({actionID: "cancel",		keyBinding: createStroke(27), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-"+this.key+"ESC",		keyBinding: createStroke(27), predefined: true});//$NON-NLS-1$ //$NON-NLS-0$
 			bindings.push({actionID: "vi-"+this.key+"-"+this.key,	keyBinding: createStroke(this.key, false, false, false, false, "keypress")});//$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			return bindings;
 		},
@@ -560,7 +560,7 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 		_createActions: function(view) {
 			NumberMode.prototype._createActions.call(this, view);
 			var self = this;
-			view.setAction("cancel", function() { //$NON-NLS-0$
+			view.setAction("vi-"+self.key+"ESC", function() { //$NON-NLS-1$ //$NON-NLS-0$
 				view.removeKeyMode(self);
 				view.addKeyMode(self.viMode);
 				return true;
@@ -594,12 +594,12 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 	mixin(InsertMode.prototype, /** @lends orion.editor.viMode.InsertMode.prototype */ {
 		createKeyBindings: function() {
 			var bindings = [];
-			bindings.push({actionID: "cancel",		keyBinding: createStroke(27), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "vi-insert-ESC",		keyBinding: createStroke(27), predefined: true}); //$NON-NLS-0$
 			return bindings;
 		},
 		_createActions: function(view) {
 			var self = this;
-			view.setAction("cancel", function() { //$NON-NLS-0$
+			view.setAction("vi-insert-ESC", function() { //$NON-NLS-0$
 				view.removeKeyMode(self);
 				view.addKeyMode(self.viMode);
 				return true;
