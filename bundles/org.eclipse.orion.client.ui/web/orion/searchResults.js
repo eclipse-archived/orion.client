@@ -97,7 +97,7 @@ define(['i18n!orion/search/nls/messages', 'orion/i18nUtil','require', 'orion/web
 							this._renderSearchResult(false, resultsNode, searchParams, jsonData);
 						}.bind(this),
 						function(error) {
-							var message = i18nUtil.formatMessage(messages["${0}. Try your search again"], error && error.error ? error.error : "Error"); //$NON-NLS-0$
+							var message = i18nUtil.formatMessage(messages["${0}. Try your search again."], error && error.error ? error.error : "Error"); //$NON-NLS-0$
 							this.registry.getService("orion.page.message").setProgressResult({Message: message, Severity: "Error"}); //$NON-NLS-0$
 						}.bind(this)
 					);
