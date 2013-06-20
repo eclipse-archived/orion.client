@@ -2553,6 +2553,7 @@ var exports = {};
 									var commitPageURL = require.toUrl("git/git-commit.html#") + commitLocation + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
 									window.open(commitPageURL);
 								}
+								serviceRegistry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
 							}, function () {
 								var display = [];
 								display.Severity = "warning"; //$NON-NLS-0$
@@ -2564,6 +2565,13 @@ var exports = {};
 					}	
 				};
 
+				if (!data.parameters.optionsRequested && !data.parameters.valueFor("commitName")) {
+					// Workaround: if no data, this command was triggered by a keybinding. Invoke ourself through the commandRegistry to
+					// get a parameter prompt.
+					// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=410661
+					commandService.runCommand("eclipse.orion.git.openCommitCommand");
+					return;
+				}
 				if (data.items.Type === "Clone") { //$NON-NLS-0$
 					var repositories = [data.items];
 					openCommit(repositories);
