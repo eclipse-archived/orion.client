@@ -357,6 +357,9 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 							window.open(href);
 						}
 						return;
+					} else if (invocation.commandRegistry) {
+						invocation.commandRegistry._invoke(invocation);
+						return;
 					} else if (command.onClick || command.callback) {
 						(command.onClick || command.callback).call(invocation.handler || window, invocation);
 						return;
