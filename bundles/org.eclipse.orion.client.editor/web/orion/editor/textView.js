@@ -5768,10 +5768,13 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					this._ignoreSelect = true;
 				}
 				if (this._cursorDiv) {
+					range = document.createRange();
 					if (startCaret) {
+						range.setStart(startLineNode, startLineOffset);
 						range.setEnd(startLineNode, startLineOffset);
 					} else {
 						range.setStart(endLineNode, endLineOffset);
+						range.setEnd(endLineNode, endLineOffset);
 					}
 					var rect = range.getClientRects()[0];
 					var cursorParent = this._cursorDiv.parentNode;
