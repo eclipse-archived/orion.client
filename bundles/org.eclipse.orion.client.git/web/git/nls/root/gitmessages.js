@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -192,7 +192,7 @@ define({
 	"The commit message is required.": "The commit message is required.",
 	"Git Credentials": "Git Credentials",
 	"Username:": "Username:",
-	"Ssh password:": "Ssh password:",
+	"Ssh password:": "Password:",
 	"Private key:": "Private key:",
 	"Passphrase (optional):": "Passphrase (optional):",
 	"commit:": "commit: ",
@@ -254,7 +254,7 @@ define({
 	"Open": "Open",
 	"Fetch": "Fetch",
 	"Fetch from the remote": "Fetch from the remote",
-	"SSH Password:": "SSH Password:",
+	"SSH Password:": "Password:",
 	"SSH User Name:": "SSH User Name:",
 	"Fetching remote: ": "Fetching remote: ",
 	"Force Fetch": "Force Fetch",
