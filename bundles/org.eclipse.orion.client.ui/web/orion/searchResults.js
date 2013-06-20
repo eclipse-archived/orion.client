@@ -12,7 +12,7 @@
 /*global define window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/searchExplorer', 'orion/searchModel', 'orion/searchUtils', 'orion/crawler/searchCrawler'], function(messages, require, lib, mSearchExplorer, mSearchModel, mSearchUtils, mSearchCrawler){
+define(['i18n!orion/search/nls/messages', 'orion/i18nUtil','require', 'orion/webui/littlelib', 'orion/searchExplorer', 'orion/searchModel', 'orion/searchUtils', 'orion/crawler/searchCrawler'], function(messages, i18nUtil, require, lib, mSearchExplorer, mSearchModel, mSearchUtils, mSearchCrawler){
 
 	/**
 	 * Creates a new search results generator.
@@ -90,13 +90,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			} else {
 				lib.empty(parent);
 				this.registry.getService("orion.page.message").setProgressMessage(messages["Searching..."]); //$NON-NLS-0$
-				//parent.appendChild(document.createTextNode(messages["Searching..."]));
 				try{
 					this.registry.getService("orion.page.progress").progress(this.fileService.search(searchParams), "Searching " + searchParams.keyword).then( //$NON-NLS-1$ //$NON-NLS-0$
 						function(jsonData) {
 							this.registry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
 							this._renderSearchResult(false, resultsNode, searchParams, jsonData);
-						}.bind(this));
+						}.bind(this),
+						function(error) {
+							var message = i18nUtil.formatMessage(messages["${0}. Try your search again"], error && error.error ? error.error : "Error"); //$NON-NLS-0$
+							this.registry.getService("orion.page.message").setProgressResult({Message: message, Severity: "Error"}); //$NON-NLS-0$
+						}.bind(this)
+					);
 				}
 				catch(error){
 					lib.empty(parent);
