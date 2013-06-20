@@ -59,9 +59,14 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 										window.open(href);
 									}
 									return;
+								} else if (invocation.commandRegistry) {
+									// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=411282
+									lib.stop(event);
+									invocation.commandRegistry._invoke(invocation);
+									return;
 								} else if (command.onClick || command.callback) {
 									lib.stop(event);
-									window.setTimeout(function() {	
+									window.setTimeout(function() {
 										(command.onClick || command.callback).call(invocation.handler || window, invocation);
 									}, 0);
 									return;
