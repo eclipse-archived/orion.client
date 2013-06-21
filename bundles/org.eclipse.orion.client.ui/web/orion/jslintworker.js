@@ -656,7 +656,7 @@ SOFTWARE.
     "border-right-style", "border-right-width", "border-spacing", 
     "border-style", "border-top", "border-top-color", "border-top-style", 
     "border-top-width", "border-width", bottom, br, brown, browser, 
-    burlywood, button, bytesToUIString, c, cadetblue, call, callee, caller, 
+    burlywood, button, bytesToUIString, Buffer, c, cadetblue, call, callee, caller, 
     canvas, cap, caption, "caption-side", cases, center, charAt, charCodeAt, 
     character, chartreuse, chocolate, chooseColor, chooseFile, chooseFolder, 
     cite, clear, clearInterval, clearTimeout, clip, close, closeWidget, 
@@ -672,8 +672,8 @@ SOFTWARE.
     details, devel, dfn, dialog, dimension, dimgray, dir, direction, 
     display, div, dl, document, dodgerblue, dt, edition, else, em, embed, 
     empty, "empty-cells", encodeURI, encodeURIComponent, entityify, eqeqeq, 
-    errors, es5, escape, eval, event, evidence, evil, ex, exception, exec, exps, 
-    fieldset, figure, filesystem, firebrick, first, float, floor, 
+    errors, es5, escape, eval, event, evidence, evil, ex, exception, exec, exports, 
+    exps, fieldset, figure, filesystem, firebrick, first, float, floor, 
     floralwhite, focus, focusWidget, font, "font-face", "font-family", 
     "font-size", "font-size-adjust", "font-stretch", "font-style", 
     "font-variant", "font-weight", footer, forestgreen, forin, form, 
@@ -699,8 +699,9 @@ SOFTWARE.
     mediumpurple, mediumseagreen, mediumslateblue, mediumspringgreen, 
     mediumturquoise, mediumvioletred, member, menu, message, meta, meter, 
     midnightblue, "min-height", "min-width", mintcream, mistyrose, mm, 
-    moccasin, moveBy, moveTo, name, nav, navajowhite, navigator, navy, new, 
+    moccasin, module, moveBy, moveTo, name, nav, navajowhite, navigator, navy, new, 
     newcap, noframes, nomen, noscript, nud, object, ol, oldlace, olive, 
+    newcap, node, noframes, nomen, noscript, nud, object, ol, oldlace, olive, 
     olivedrab, on, onbeforeunload, onblur, onerror, onevar, onfocus, onload, 
     onresize, onunload, opacity, open, openURL, opener, opera, optgroup, 
     option, orange, orangered, orchid, outer, outline, "outline-color", 
@@ -711,9 +712,9 @@ SOFTWARE.
     palevioletred, papayawhip, param, parent, parseFloat, parseInt, 
     passfail, pc, peachpuff, peru, pink, play, plum, plusplus, pop, 
     popupMenu, position, powderblue, pre, predef, preferenceGroups, 
-    preferences, print, progress, prompt, prototype, pt, purple, push, px, 
+    preferences, print, process, progress, prompt, prototype, pt, purple, push, px, 
     q, quit, quotes, random, range, raw, reach, readFile, readUrl, reason, 
-    red, regexp, reloadWidget, removeEventListener, replace, report, 
+    red, regexp, reloadWidget, removeEventListener, replace, report, require, 
     reserved, resizeBy, resizeTo, resolvePath, resumeUpdates, rhino, right, 
     rosybrown, royalblue, rp, rt, ruby, runCommand, runCommandInBg, 
     saddlebrown, safe, salmon, samp, sandybrown, saveAs, savePreferences, 
@@ -732,7 +733,7 @@ SOFTWARE.
     "vertical-align", video, violet, visibility, watch, wheat, white, 
     "white-space", whitesmoke, widget, width, window, windows, "word-spacing", 
     "word-wrap", yahooCheckLogin, yahooLogin, yahooLogout, yellow, 
-    yellowgreen, "z-index"
+    yellowgreen, "z-index", __filename, __dirname
 */
 
 // We build the application inside a function so that we produce only a single
@@ -805,6 +806,7 @@ var JSLINT = (function () {
             immed      : true, // if immediate invocations must be wrapped in parens
             laxbreak   : true, // if line breaks should not be checked
             newcap     : true, // if constructor names must be capitalized
+            node       : true, // if Node.js globals should be predefined
             nomen      : true, // if names should be checked
             on         : true, // if HTML event handlers should be allowed
             onevar     : true, // if only one var statement per function should be allowed
@@ -871,7 +873,7 @@ var JSLINT = (function () {
             window          : false,
             XMLHttpRequest  : false
         },
-
+        
         cssAttributeData,
         cssAny,
 
@@ -1189,6 +1191,26 @@ var JSLINT = (function () {
         lookahead,
         member,
         membersOnly,
+
+// set of globals defined by Node.js according to http://www.jslint.com/lint.html#node
+
+        node = {
+            Buffer			: false,
+			clearInterval	: false,
+			clearTimeout		: false,
+			console			: false,
+			exports			: false,
+			global			: false,
+			module			: false,
+			process			: false,
+			//querystring	: false, //removed in Node v0.3.x
+			require			: false,
+			setInterval		: false,
+			setTimeout		: false,
+			__filename		: false,
+			__dirname		: false
+        },
+
         nexttoken,
         noreach,
         option,
@@ -1499,6 +1521,9 @@ var JSLINT = (function () {
             }
             if (option.browser) {
                 combine(predefined, browser);
+            }
+            if (option.node) {
+                combine(predefined, node);
             }
             if (option.windows) {
                 combine(predefined, windows);
