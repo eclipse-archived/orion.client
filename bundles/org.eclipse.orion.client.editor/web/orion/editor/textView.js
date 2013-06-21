@@ -1141,50 +1141,48 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var document = child.ownerDocument;
 			var lineChild;
 			var step = data.count < 0 ? -1 : 1;
-			while (data.count !== 0) {
-				if (offset === model.getLineEnd(lineIndex)) {
-					lineChild = child.lastChild;
-					while (lineChild && lineChild.ignoreChars) {
-						lineChild = lineChild.previousSibling;
-					}
-					if (!lineChild) {
-						return lineOffset;
-					}
-					range = document.body.createTextRange();
-					range.moveToElementText(lineChild);
-					length = range.text.length;
-					range.moveEnd(data.unit, data.count);
-					result = offset + range.text.length - length;
-				} else if (offset === lineOffset && data.count < 0) {
-					result = lineOffset;
-				} else {
-					lineChild = child.firstChild;
-					while (lineChild) {
-						var textNode = lineChild.firstChild;
-						var nodeLength = textNode.length;
-						if (lineChild.ignoreChars) {
-							nodeLength -= lineChild.ignoreChars;
-						}
-						if (lineOffset + nodeLength > offset) {
-							range = document.body.createTextRange();
-							if (offset === lineOffset && data.count < 0) {
-								range.moveToElementText(lineChild.previousSibling);
-							} else {
-								range.moveToElementText(lineChild);
-								range.collapse();
-								range.moveEnd("character", offset - lineOffset); //$NON-NLS-0$
-							}
-							length = range.text.length;
-							range.moveEnd(data.unit, data.count);
-							result = offset + range.text.length - length;
-							break;
-						}
-						lineOffset = nodeLength + lineOffset;
-						lineChild = lineChild.nextSibling;
-					}
+			if (offset === model.getLineEnd(lineIndex)) {
+				lineChild = child.lastChild;
+				while (lineChild && lineChild.ignoreChars) {
+					lineChild = lineChild.previousSibling;
 				}
-				data.count -= step;
+				if (!lineChild) {
+					return lineOffset;
+				}
+				range = document.body.createTextRange();
+				range.moveToElementText(lineChild);
+				length = range.text.length;
+				range.moveEnd(data.unit, step);
+				result = offset + range.text.length - length;
+			} else if (offset === lineOffset && data.count < 0) {
+				result = lineOffset;
+			} else {
+				lineChild = child.firstChild;
+				while (lineChild) {
+					var textNode = lineChild.firstChild;
+					var nodeLength = textNode.length;
+					if (lineChild.ignoreChars) {
+						nodeLength -= lineChild.ignoreChars;
+					}
+					if (lineOffset + nodeLength > offset) {
+						range = document.body.createTextRange();
+						if (offset === lineOffset && data.count < 0) {
+							range.moveToElementText(lineChild.previousSibling);
+						} else {
+							range.moveToElementText(lineChild);
+							range.collapse();
+							range.moveEnd("character", offset - lineOffset); //$NON-NLS-0$
+						}
+						length = range.text.length;
+						range.moveEnd(data.unit, step);
+						result = offset + range.text.length - length;
+						break;
+					}
+					lineOffset = nodeLength + lineOffset;
+					lineChild = lineChild.nextSibling;
+				}
 			}
+			data.count -= step;
 			return result;
 		},
 		/** @private */
@@ -5782,8 +5780,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					var rect = range.getClientRects()[0];
 					var cursorParent = this._cursorDiv.parentNode;
 					var clientRect = cursorParent.getBoundingClientRect();
-					this._cursorDiv.style.top = (rect.top - clientRect.top + cursorParent.scrollTop) + "px"; //$NON-NLS-0$
-					this._cursorDiv.style.left = (rect.left - clientRect.left + cursorParent.scrollLeft) + "px"; //$NON-NLS-0$
+					if (rect && clientRect) {
+						this._cursorDiv.style.top = (rect.top - clientRect.top + cursorParent.scrollTop) + "px"; //$NON-NLS-0$
+						this._cursorDiv.style.left = (rect.left - clientRect.left + cursorParent.scrollLeft) + "px"; //$NON-NLS-0$
+					}
 				}
 			} else if (document.selection) {
 				if (!this._hasFocus) { return; }
