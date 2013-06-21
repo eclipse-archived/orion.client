@@ -121,7 +121,7 @@ hard-coded numbers elsewhere.
 
 .content-fixedHeight-maximized {
 	top: 0;
-	margin-bottom: 0;
+	bottom: 0;
 }
 
 .content-fluid {
