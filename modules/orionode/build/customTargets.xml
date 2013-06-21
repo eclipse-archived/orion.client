@@ -195,6 +195,7 @@ lastMapTag=${mapsTagTag}
 		<optimize pageDir="shell" name="shellPage" bundle="org.eclipse.orion.client.ui" />		
 <!--		<optimize pageDir="plugins/site" name="sitePlugin" bundle="org.eclipse.orion.client.ui" />		-->
 <!--		<optimize pageDir="plugins" name="authenticationPlugin" bundle="org.eclipse.orion.client.ui" />		-->
+		<optimize pageDir="plugins" name="csslintPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="fileClientPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="jslintPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="pageLinksPlugin" bundle="org.eclipse.orion.client.ui" />
