@@ -224,6 +224,8 @@ define([
 							def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
 						}
 						def.then(successHandler, errorHandler);
+					} else {
+						self._saving = false;
 					}
 				} else {
 					// unknown error
