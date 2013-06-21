@@ -50,16 +50,6 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred
 
 		this.commitName = options.commitName;
 
-		this.buttons = [];
-
-		this.buttons.push({
-			callback: function() {
-				that.destroy();
-				that._execute();
-			},
-			text: 'OK'
-		});
-
 		// Start the dialog initialization.
 		this._initialize();
 	};
