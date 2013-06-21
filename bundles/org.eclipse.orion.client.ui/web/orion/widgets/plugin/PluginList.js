@@ -358,7 +358,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				} else {
 					this.settings.pluginRegistry.installPlugin(newPluginUrl).then(function(plugin) {
 						plugin.start({lazy:true}).then(this.addPlugin.bind(this, plugin.getLocation()), this.pluginError.bind(this));
-					}.bind(this));
+					}.bind(this), this.pluginError.bind(this));
 				}
 			}
 		},
