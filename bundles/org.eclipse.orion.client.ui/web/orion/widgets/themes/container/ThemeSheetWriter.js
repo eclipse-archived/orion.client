@@ -226,8 +226,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			commandButton.style.verticalAlign = 'baseline';
 			commandButton.style.cursor = 'pointer';
 		    commandButton.style.display = 'inline-block';
-		    commandButton.style.padding = '6px';
-			commandButton.style.paddingTop = '4px'; /* To align with Command Menu */
+		    commandButton.style.padding = '5px 6px';
 		    commandButton.style.borderRadius = '3px';
 		    commandButton.style.lineHeight = '12px';
 			commandButton.style.fontSize = '8pt';
