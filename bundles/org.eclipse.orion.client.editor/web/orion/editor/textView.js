@@ -4418,7 +4418,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var line = this._getLine(lineIndex);
 			var rect = line.getBoundingClientRect();
 			line.destroy();
-			return Math.max(1, Math.ceil(rect.bottom - rect.top));
+			return Math.max(1, rect.bottom - rect.top);
 		},
 		_calculateMetrics: function() {
 			var parent = this._clientDiv;
@@ -6497,11 +6497,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						lineWidth = child.lineWidth = Math.ceil(rect.right - rect.left);
 						var lh = rect.bottom - rect.top;
 						if (this._lineHeight) {
-							this._lineHeight[child.lineIndex] = Math.ceil(lh);
-						} else if (lineHeight !== 0 && lh !== 0 && lineHeight !== lh) {
+							this._lineHeight[child.lineIndex] = lh;
+						} else if (lineHeight !== 0 && lh !== 0 && Math.ceil(lineHeight) !== Math.ceil(lh)) {
 							this._variableLineHeight = true;
 							this._lineHeight = [];
-							this._lineHeight[child.lineIndex] = Math.ceil(lh);
+							this._lineHeight[child.lineIndex] = lh;
 						}
 					}
 					if (this._lineHeight && !foundBottomIndex) {
