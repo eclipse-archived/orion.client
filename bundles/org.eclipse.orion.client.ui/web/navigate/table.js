@@ -62,12 +62,13 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		// On scope up, change the href of the window.location to navigate to the parent page.
 		// TODO reuse eclipse.upFolder
 		explorer.scopeUp = function() {
-			if(this.treeRoot && this.treeRoot.Parents){
+			var root = this.treeRoot, parents = root && root.Parents;
+			if (parents) {
 				var resource;
-				if(this.treeRoot.Parents.length === 0){
-					resource = "";  //$NON-NLS-0$
-				} else if(this.treeRoot.Parents[0].ChildrenLocation){
-					resource = this.treeRoot.Parents[0].ChildrenLocation;
+				if (parents.length === 0) {
+					resource = fileClient.fileServiceRootURL(root.Location);
+				} else {
+					resource = parents[0].ChildrenLocation;
 				}
 				setResource(resource);
 			}
