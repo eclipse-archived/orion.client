@@ -9,8 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global console eclipse CSSLint window orion*/
-window.onload = function() {
+/*global console define CSSLint*/
+define(['orion/plugin', 'plugins/csslintPlugin/lib/csslint'], function(PluginProvider, _) {
 	function checkSyntax(title, contents) {
 		var cssResult = CSSLint.verify(contents),
 		    messages = cssResult.messages,
@@ -62,7 +62,7 @@ window.onload = function() {
 			}
 		});
 	}
-	
+
 	try {
 		var headers = {
 			name: "Orion CSSLint Support",
@@ -70,7 +70,7 @@ window.onload = function() {
 			description: "This plugin provides a CSSLint service to support outline and validation of CSS files."
 		};
 
-		var provider = new orion.PluginProvider(headers);
+		var provider = new PluginProvider(headers);
 		// Register validator
 		provider.registerService("orion.edit.validator",
 			{	checkSyntax: checkSyntax
@@ -97,5 +97,4 @@ window.onload = function() {
 	} catch (e) {
 		console.debug("Couldn't install csslintPlugin: " + e);
 	}
-};
-
+});
