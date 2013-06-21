@@ -3,9 +3,13 @@
 #
 # Usage: ./make-publish repo_dir publish_dir
 #
-# Where repo_dir is the folder where your orion.client repository lives and publish_dir is 
+# Where 'repo_dir' is the folder where your orion.client repository lives and 'publish_dir' is 
 # the target folder for the publishable Orionode. If the script completes with no errors, you 
 # should be able to run `npm publish` from publish_dir to update Orionode.
+#
+# Requirements:
+#  Node in your PATH, for running the build
+#  Mocha, for running the server sanity test
 #
 die() {
     echo >&2 "$@"
@@ -57,6 +61,18 @@ ensure_dir "$STAGING"/lib/orion.client
 ensure_dir "$STAGING"/lib/orion.client/bundles
 cp -r "$STAGING"/bundles/* "$STAGING"/lib/orion.client/bundles
 rm -rf "$STAGING"/bundles/
+
+# Minify the client-side code
+NODE="`which node`"
+if [ ! -f "$NODE" ] ; then
+	echo "Could not find node. Can't minify :("
+else
+	echo Minifying client-side code
+	pushd "$STAGING"/build
+	pwd
+	node build.js "$STAGING"/lib/orion.client/bundles
+	popd
+fi
 
 echo Rewriting ORION_CLIENT path in index.js
 # All we want to do is find the ORION_CLIENT line and replace '../../' with './lib/orion.client/' but unfortunately we are using sh and sed
