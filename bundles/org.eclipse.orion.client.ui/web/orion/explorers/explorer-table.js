@@ -163,12 +163,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		["copy", "copyMultiple", "create", "delete", "deleteMultiple", "import", //$NON-NLS-5$//$NON-NLS-4$//$NON-NLS-3$//$NON-NLS-2$//$NON-NLS-1$//$NON-NLS-0$
 		 "move", "moveMultiple"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
 				modelEventDispatcher.addEventListener(eventType, _self.modelHandler[eventType].bind(_self));
-				modelEventDispatcher.addEventListener(eventType, function(evt) {
-					// DEBUG
-					if (typeof console !== "undefined" && console) { //$NON-NLS-)$
-						console.log(evt);
-					}
-				});
 			});
 
 		// Same tab/new tab setting
