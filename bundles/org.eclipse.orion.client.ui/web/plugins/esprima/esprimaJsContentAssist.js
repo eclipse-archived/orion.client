@@ -1,6 +1,8 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2013 IBM Corporation.
+ *
  * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
  * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
@@ -10,6 +12,7 @@
  * Contributors:
  *	 Andy Clement (VMware) - initial API and implementation
  *	 Andrew Eisenberg (VMware) - implemented visitor pattern
+ *       Manu Sridharan (IBM) - Various improvements
  ******************************************************************************/
 
 /*global define esprima doctrine */
@@ -752,8 +755,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					// RHS of assignment
 					name = node.extras.cname;
 				}
-				// create new object so that there is a custom "this"
-				newTypeObj = env.newObject(name, node.range);
+				// a new object for "this" is created inside the initFunctionType
+				// call below
+				newTypeObj = mTypes.createNameType(name);
 				isConstructor = true;
 			} else {
 				if (jsdocResult.rturn) {
@@ -810,22 +814,24 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			}
 
 			var functionTypeObj = mTypes.createFunctionType(paramTypeObjs, newTypeObj, isConstructor);
+			// we use an object to represent the function type, to allow for properties
+			var newFunctionType = env.newFleetingObject();
+			if (name && !isBefore(env.offset, node.range)) {
+				// if we have a name, then add it to the scope.  make sure we add the name
+				// *before* calling initFunctionType(), which creates a new scope for within
+				// the function
+				env.addVariable(name, node.extras.target, newFunctionType, nameRange, docComment.range);
+			}
+			env.initFunctionType(functionTypeObj,node,newFunctionType,isConstructor ? newTypeObj.name : undefined);
 			if (isConstructor) {
-				env.createConstructor(name);
 				// assume that constructor will be available from global scope using qualified name
 				// this is not correct in all cases
-				env.addOrSetGlobalVariable(name, functionTypeObj, nameRange, docComment.range);
+				env.addOrSetGlobalVariable(name, newFunctionType, nameRange, docComment.range);
 			}
 
-			node.extras.inferredTypeObj = functionTypeObj;
+			node.extras.inferredTypeObj = newFunctionType;
 
-			if (name && !isBefore(env.offset, node.range)) {
-				// if we have a name, then add it to the scope
-				env.addVariable(name, node.extras.target, functionTypeObj, nameRange, docComment.range);
-			}
 
-			// now add the scope for inside the function
-			env.newScope();
 			env.addVariable("arguments", node.extras.target, mTypes.createNameType("Arguments"), node.range);
 
 
@@ -1049,8 +1055,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 
 			// otherwise, apply the function
 			if (!fnTypeObj) {
-				fnTypeObj = node.callee.extras.inferredTypeObj;
-				fnTypeObj = mTypes.extractReturnType(fnTypeObj);
+				fnTypeObj = mTypes.extractReturnType(env.getFnType(node.callee));
 			}
 			node.extras.inferredTypeObj = fnTypeObj;
 			break;
@@ -1059,7 +1064,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			// constructors that are called like this: new foo.Bar()  should have an inferred type of foo.Bar,
 			// This ensures that another constructor new baz.Bar() doesn't conflict.  However,
 			// we are only taking the final prefix and assuming that it is unique.
-			node.extras.inferredTypeObj = mTypes.extractReturnType(node.callee.extras.inferredTypeObj);
+			node.extras.inferredTypeObj = env.getNewType(node.callee);
 			break;
 		case "ObjectExpression":
 			// now that we know all the types of the values, use that to populate the types of the keys
@@ -1093,6 +1098,18 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 							// We found it! rmember for later, but continue to the end of file anyway
 							env.storeTarget(env.scope(node));
 						}
+					}
+				}
+			}
+			// now, we update the types of any function expressions assigned to literal properties,
+			// adding all the object literal's properties to each such type.  This is a heuristic
+			// based on the likelihood of the literal itself being passed as the 'this' argument
+			// to such functions
+			for (i = 0; i < kvps.length; i++) {
+				if (kvps[i].hasOwnProperty("key")) {
+					name = kvps[i].key.name;
+					if (name && kvps[i].value.type === "FunctionExpression") {
+						env.updateObjLitFunctionType(node,name,kvps[i].value);
 					}
 				}
 			}
@@ -1173,9 +1190,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						fnameRange = node.extras.fnameRange;
 					}
 
-					// an extra scope was created for the implicit 'this'
-					env.popScope();
-
 					// now add a reference to the constructor
 					env.addOrSetVariable(mTypes.extractReturnType(node.extras.inferredTypeObj), node.extras.target, node.extras.inferredTypeObj, fnameRange);
 				} else {
@@ -1189,7 +1203,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						} else {
 							returnType = mTypes.UNDEFINED_TYPE;
 						}
-						node.extras.inferredTypeObj = updateReturnType(node.extras.inferredTypeObj, returnType);
+						env.updateReturnType(node.extras.inferredTypeObj, returnType);
 					}
 					// if there is a name, then update that as well
 					var fname;
@@ -1786,7 +1800,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			 * @param {Array.<Number>} docRange
 			 */
 			addVariable : function(name, target, typeObj, range, docRange) {
-				if (name === 'prototype' || name === '__proto__') {
+				if (name === 'prototype') {
+					name = '$$prototype';
+				} else if (name === '__proto__') {
 					name = '$$proto';
 				} else if (this._allTypes.Object["$_$" + name]) {
 					// this is a built in property of object.  do not redefine
@@ -1823,7 +1839,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			 * Will not override an existing variable if the new typeName is "Object" or "undefined"
 			 */
 			addOrSetVariable : function(name, target, typeObj, range, docRange) {
-				if (name === 'prototype' || name === '__proto__') {
+				if (name === 'prototype') {
+					name = '$$prototype';
+				} else if (name === '__proto__') {
 					name = '$$proto';
 				} else if (this._allTypes.Object["$_$" + name]) {
 					// this is a built in property of object.  do not redefine
@@ -1852,6 +1870,13 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 							if (docRange) {
 								defn.docRange = docRange;
 							}
+							// special case: if we're updating $$prototype, and $$newtype is
+							// also present, update $$proto of newType appropriately
+							if (name === '$$prototype' && current.$$newtype) {
+							  var newType = this._allTypes[current.$$newtype.typeObj.name];
+							  newType.$$proto.typeObj = typeObj;
+							}
+
 						}
 						found = true;
 						break;
@@ -1886,6 +1911,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				var swapper = function(name) {
 					switch (name) {
 						case "prototype":
+							return "$$prototype";
 						case "__proto__":
 							return "$$proto";
 						case "toString":
@@ -1905,7 +1931,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 
 					var proto = type.$$proto;
 					if (res) {
-						return includeDefinition ? res : res.typeObj;
+						return includeDefinition || name === '$$fntype' ? res : res.typeObj;
 					} else if (proto) {
 						return innerLookup(name, allTypes[proto.typeObj.name], allTypes);
 					} else {
@@ -1980,16 +2006,102 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			},
 
 			/**
-			 * takes the name of a constructor and converts it into a type.
-			 * We need to ensure that ConstructorName.prototype = { ... } does the
-			 * thing that we expect.  This is why we set the $$proto property of the types
+			 * creates a new type for a function, and returns the type name.
 			 */
-			createConstructor : function(rawTypeName) {
-				// don't include the parameter names since we don't want them confusing things when exported
-				this.newFleetingObject(rawTypeName);
-				var flobj = this.newFleetingObject(rawTypeName + "~proto");
-				this._allTypes[rawTypeName].$$proto = new mTypes.Definition(flobj.name, null, this.uid);
+			initFunctionType : function(functionTypeObj,node,newObjectType,newTypeName) {
+				var newObjectName = newObjectType.name;
+			    // The 'prototype' field of a function points to a new empty object
+			    var emptyProtoName = this.newFleetingObject(newObjectName + "~proto");
+			    // __proto__ points to Function
+				this._allTypes[newObjectName].$$proto = new mTypes.Definition("Function",null,this.uid);
+				// we store the function signature in $$fntype
+				this._allTypes[newObjectName].$$fntype = functionTypeObj;
+				// store 'prototype' in $$prototype
+				this._allTypes[newObjectName].$$prototype = new mTypes.Definition(emptyProtoName,null,this.uid);
+				// to handle writes to 'this' inside the function, we create another type thisType.  thisType
+				// has the empty object as its $$proto.  And thisType is the type ascribed to a new invocation.
+				// in this manner, writes to fields of this override types in the empty prototype.
+				if (!newTypeName) {
+				  newTypeName = newObjectName + "~new";
+				}
+				this.newObject(newTypeName, node.range);
+				this._allTypes[newObjectName].$$newtype = new mTypes.Definition(newTypeName,null,this.uid);
+				this._allTypes[newTypeName].$$proto = new mTypes.Definition(emptyProtoName,null,this.uid);
 			},
+
+            /**
+             * update the $$newtype of a function expression created in an object literal to have the final
+             * types for all the object literal's properties
+             */
+            updateObjLitFunctionType: function(objLitNode,propName,funcExpNode) {
+              var objLitTypeName = objLitNode.extras.inferredTypeObj.name, funcTypeName = funcExpNode.extras.inferredTypeObj.name;
+              if (objLitTypeName && funcTypeName) {
+                var objLitType = this._allTypes[objLitTypeName];
+                var funcExpNewType = this._allTypes[this._allTypes[funcTypeName].$$newtype.typeObj.name];
+                for (var p in objLitType) {
+                  // NOTE we don't add a property if it already exists, to preserve writes to 'this'
+                  // inside the function.  Also, don't add a type for the corresponding property name
+                  if (objLitType.hasOwnProperty(p) && !funcExpNewType.hasOwnProperty(p) && p !== propName && p.indexOf("$$") !== 0) {
+                    funcExpNewType[p] = objLitType[p];
+                  }
+                }
+              }
+            },
+            /**
+             * updates a function type to include a new return type.
+             * function types are specified like this: ?returnType:[arg-n...]
+             * return type is the name of the return type, arg-n is the name of
+             * the nth argument.
+             */
+            updateReturnType : function(typeObj,newReturnTypeObj) {
+				if (! typeObj) {
+					return newReturnTypeObj;
+				}
+				var originalFunctionTypeObj = this._allTypes[typeObj.name].$$fntype;
+				if (!originalFunctionTypeObj) {
+					return newReturnTypeObj;
+				} else {
+					var newFunctionTypeObj = {
+						type: originalFunctionTypeObj.type,
+						params: originalFunctionTypeObj.params,
+						result: newReturnTypeObj
+					};
+					if (originalFunctionTypeObj['this']) {
+						newFunctionTypeObj['this'] = originalFunctionTypeObj['this'];
+					}
+					if (originalFunctionTypeObj['new']) {
+						newFunctionTypeObj['new'] = originalFunctionTypeObj['new'];
+					}
+					this._allTypes[typeObj.name].$$fntype = newFunctionTypeObj;
+					return newFunctionTypeObj;
+				}
+			},
+
+            /**
+             * get the result type for invoking target via a 'new' expression.
+             */
+            getNewType : function(target) {
+              var result = this.lookupTypeObj("$$newtype",target);
+              if (!result) {
+                // TODO MS get rid of this code once we fix types.js
+                var inferredTypeObj = target.extras.inferredTypeObj;
+                result = mTypes.extractReturnType(inferredTypeObj);
+              }
+              return result;
+            },
+
+            /**
+             * get the result type for invoking target via a 'new' expression.
+             */
+            getFnType : function(target) {
+              var result = this.lookupTypeObj("$$fntype",target);
+              if (!result) {
+                // TODO MS get rid of this code once we fix types.js
+                result = target.extras.inferredTypeObj;
+              }
+              return result;
+            },
+
 
 			/** @returns {{}} entry in types array */
 			findType : function(typeObj) {
@@ -2068,6 +2180,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				}
 				if (proposalUtils.looselyMatches(prefix, propName)) {
 					propTypeObj = type[prop].typeObj;
+					if ((env._allTypes[propTypeObj.name]) && (env._allTypes[propTypeObj.name].$$fntype)) {
+						propTypeObj = env._allTypes[propTypeObj.name].$$fntype;
+					}
 					if (propTypeObj.type === 'FunctionType') {
 						res = calculateFunctionProposal(propName,
 								propTypeObj, replaceStart - 1);
@@ -2104,7 +2219,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		//  3. doesn't already exist
 		//  4. is not an internal property
 		function isInterestingProperty(type, prop) {
-			return type.hasOwnProperty(prop) && prop.indexOf(prefix) === 0 && !proposals['$' + prop] && prop !== '$$proto'&& prop !== '$$isBuiltin';
+			return type.hasOwnProperty(prop) && prop.indexOf(prefix) === 0 && !proposals['$' + prop] && prop !== '$$proto'&& prop !== '$$isBuiltin' &&
+			prop !== '$$fntype' && prop !== '$$newtype' && prop !== '$$prototype';
 		}
 		function forType(type) {
 			for (var prop in type) {
@@ -2240,7 +2356,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		if (currentType) {
 			for(var prop in currentType) {
 				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
-					var propType = currentType[prop].typeObj;
+					var propType = prop === '$$fntype' ? currentType[prop] : currentType[prop].typeObj;
+					// don't count $$newtype as keeping a type reachable, since we inline function types
+					if (prop === '$$newtype') { continue; }
 					// must visit the type strucutre
 					visitTypeStructure(propType, operation);
 				}
@@ -2271,7 +2389,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			if (currentType) {
 				for(var prop in currentType) {
 					if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
-						var propType = currentType[prop].typeObj;
+						var propType = prop === '$$fntype' ? currentType[prop] : currentType[prop].typeObj;
 						// must visit the type strucutre
 						visitTypeStructure(propType, operation);
 					}
@@ -2281,6 +2399,40 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 
 		visitTypeStructure(currentTypeObj, operation);
 	}
+
+	/**
+	 * Is typeObj a reference to a function type?
+	 */
+	function fnTypeRef(typeObj, allTypes) {
+		return typeObj.type === "NameExpression" &&
+			allTypes[typeObj.name] && allTypes[typeObj.name].$$fntype;
+	}
+
+	/**
+	 * Inline all the function types referenced from the function type
+	 * def, by replacing references to object types with a $$fntype
+	 * property to the value of the $$fntype property
+	 */
+	function inlineFunctionTypes(def,allTypes,fnTypes) {
+		if (def.params) {
+			for (var i = 0; i < def.params.length; i++) {
+				var paramType = def.params[i];
+				if (fnTypeRef(paramType, allTypes)) {
+					if (fnTypes) { fnTypes[paramType.name] = true; }
+					inlineFunctionTypes(allTypes[paramType.name].$$fntype,allTypes,fnTypes);
+					def.params[i] = allTypes[paramType.name].$$fntype;
+				}
+			}
+		}
+		if (def.result) {
+			if (fnTypeRef(def.result, allTypes)) {
+				if (fnTypes) { fnTypes[def.result.name] = true; }
+				inlineFunctionTypes(allTypes[def.result.name].$$fntype,allTypes,fnTypes);
+				def.result = allTypes[def.result.name].$$fntype;
+			}
+		}
+	}
+
 	/**
 	 * filters types from the environment that should not be exported
 	 */
@@ -2288,6 +2440,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		var moduleTypeName = doctrine.type.stringify(moduleTypeObj, {compact: true});
 		var allTypes = environment.getAllTypes();
 		allTypes.clearDefaultGlobal();
+
 
 		// recursively walk the type tree to find unreachable types and delete them, too
 		var reachable = { };
@@ -2335,14 +2488,32 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			delete allTypes[key];
 		});
 
+		// for now, we delete *all* object types representing functions,
+		// "inlining" the function type wherever it appears
+		// TODO devise a serialized representation for function types with
+		// properties
+		var fnTypes = {};
+
 		// now reformat the types so that they are combined and serialized
 		Object.keys(allTypes).forEach(function(typeName) {
 		    var type = allTypes[typeName];
 			for (var defName in type) {
 				if (type.hasOwnProperty(defName)) {
 					var def = type[defName];
-					def.typeSig = doctrine.type.stringify(def.typeObj, {compact: true});
-					delete def._typeObj;
+					if (defName === '$$fntype') {
+						// here, we still need to "inline" function types for parameters
+						// and result
+						// TODO make this a visitor?
+						inlineFunctionTypes(def, allTypes, fnTypes);
+					} else {
+						var typeObj = def.typeObj;
+						if (fnTypeRef(typeObj, allTypes)) {
+							fnTypes[typeObj.name] = true;
+							typeObj = allTypes[typeObj.name].$$fntype;
+						}
+						def.typeSig = doctrine.type.stringify(typeObj, {compact: true});
+						delete def._typeObj;
+					}
 				}
 			}
 		});
@@ -2351,13 +2522,27 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			for (var defName in provided) {
 				if (provided.hasOwnProperty(defName)) {
 					var def = provided[defName];
-					if (def.typeObj) {
-						def.typeSig = doctrine.type.stringify(def.typeObj, {compact: true});
-						delete def._typeObj;
+					if (defName === '$$fntype') {
+						inlineFunctionTypes(def, allTypes, fnTypes);
+					} else {
+						if (def.typeObj) {
+							var typeObj = def.typeObj;
+							if (fnTypeRef(typeObj, allTypes)) {
+								fnTypes[typeObj.name] = true;
+								typeObj = allTypes[typeObj.name].$$fntype;
+							}
+							def.typeSig = doctrine.type.stringify(typeObj, {compact: true});
+							delete def._typeObj;
+						}
 					}
 				}
 			}
 		}
+
+		// finally, delete all function types
+		Object.keys(fnTypes).forEach(function(key) {
+			delete allTypes[key];
+		});
 
 	}
 
@@ -2611,6 +2796,12 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			var lookupName = toLookFor.type === "Identifier" ? toLookFor.name : 'this';
 			var maybeType = environment.lookupTypeObj(lookupName, toLookFor.extras.target || target, true);
 			if (maybeType) {
+				// if it's a reference to a function type, suck out $$fntype
+				var allTypes = environment.getAllTypes();
+				if (fnTypeRef(maybeType.typeObj,allTypes)) {
+					inlineFunctionTypes(allTypes[maybeType.typeObj.name].$$fntype,allTypes);
+					maybeType.typeObj = allTypes[maybeType.typeObj.name].$$fntype;
+				}
 				var hover = mTypes.styleAsProperty(lookupName, findName) + " : " + mTypes.createReadableType(maybeType.typeObj, environment, true, 0, findName);
 				maybeType.hoverText = hover;
 				return maybeType;
@@ -2661,7 +2852,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				// the exports is the return value of the final argument
 				var args = environment.amdModule["arguments"];
 				if (args && args.length > 0) {
-					modTypeObj = mTypes.extractReturnType(args[args.length-1].extras.inferredTypeObj);
+					modTypeObj = mTypes.extractReturnType(environment.getFnType(args[args.length-1]));
 				} else {
 					modTypeObj = mTypes.OBJECT_TYPE;
 				}
@@ -2710,6 +2901,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			if (mTypes.isFunctionOrConstructor(modTypeObj) ||
 				(environment.findType(modTypeObj) && environment.findType(modTypeObj).$$isBuiltin)) {
 				providedType = doctrine.type.stringify(modTypeObj, {compact: true});
+			} else if (providedType.$$fntype) {
+				providedType = doctrine.type.stringify(providedType.$$fntype, {compact: true});
 			}
 
 			return {
