@@ -267,6 +267,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			if (evt.input === null || typeof evt.input === "undefined") {//$NON-NLS-0$
+				// remove the toolbar
+				var toolbar = lib.node("pageActions"); //$NON-NLS-0$
+				if (toolbar) {
+					commandRegistry.destroy(toolbar);
+				}
 				return;
 			}
 			var metadata = evt.metadata;
