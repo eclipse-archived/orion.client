@@ -381,8 +381,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		});
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			inputManager.setInput(window.location.hash);
-		});
-		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			// inform the sidebar
 			sidebarNavInputManager.processHash(window.location.hash);
 		});
