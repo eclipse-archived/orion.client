@@ -426,7 +426,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * @returns {orion.Promise}
 	 */
 	FileExplorer.prototype.changedItem = function(parent, forceExpand) {
-		if (parent === this.treeRoot) {
+		if (this.treeRoot && this.treeRoot.Location === parent.Location) {
 			return this.loadResourceList(this.treeRoot, forceExpand);
 		}
 		var that = this;
