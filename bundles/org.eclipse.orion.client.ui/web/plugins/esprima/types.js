@@ -18,7 +18,7 @@ It also contains functions for manipulating internal type signatures.
 
 /*jslint es5:true browser:true*/
 /*global define doctrine console */
-define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
+define(["plugins/esprima/proposalUtils", "plugins/esprima/scriptedLogger", "doctrine/doctrine"],
 function(proposalUtils, scriptedLogger/*, doctrine*/) {
 
 	/**

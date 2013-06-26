@@ -13,7 +13,7 @@
  ******************************************************************************/
 
 /*global define esprima doctrine */
-define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/esprima/proposalUtils", "scriptedLogger", "esprima/esprima"],
+define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/esprima/proposalUtils", "plugins/esprima/scriptedLogger", "esprima/esprima"],
 		function(mVisitor, mTypes, proposalUtils, scriptedLogger) {
 
 	/**
