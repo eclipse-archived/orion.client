@@ -194,10 +194,12 @@ lastMapTag=${mapsTagTag}
 		<optimize pageDir="settings" name="settings" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="shell" name="shellPage" bundle="org.eclipse.orion.client.ui" />		
 <!--		<optimize pageDir="plugins/site" name="sitePlugin" bundle="org.eclipse.orion.client.ui" />		-->
+		<optimize pageDir="plugins/esprima" name="esprimaJsContentAssistPlugin" bundle="org.eclipse.orion.client.ui" />
 <!--		<optimize pageDir="plugins" name="authenticationPlugin" bundle="org.eclipse.orion.client.ui" />		-->
 		<optimize pageDir="plugins" name="csslintPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="fileClientPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="jslintPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins" name="npmPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="pageLinksPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="webEditingPlugin" bundle="org.eclipse.orion.client.ui" />
 <!--		<optimize pageDir="plugins" name="preferencesPlugin" bundle="org.eclipse.orion.client.ui" />
