@@ -23,7 +23,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		if (node) {
 			this._parent = node;
 		} else {
-			throw "Parent node of dropdown menu not found"; //$NON-NLS-0$
+			throw new Error("Parent node of dropdown menu not found"); //$NON-NLS-0$
 		}
 		
 		// Assign dynamic ids to the dropdown menu node to support multiple drop down menus in the same page
