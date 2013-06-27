@@ -41,7 +41,6 @@ define({
 	" has been added to the favorites list.": " has been added to the favorites list.",
 	"Related": "Related",
 	"Options": "Options",
-	"Editor Settings": "Editor Settings",
 	"FAQ": "FAQ",
 	"Report a Bug": "Bugs",
 	"Privacy Policy": "Privacy",

@@ -42,5 +42,6 @@ define({
 	"Actions": "Actions", //$NON-NLS-1$ //$NON-NLS-0$
 	"Navigator": "Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"New": "New", //$NON-NLS-1$ //$NON-NLS-0$
-	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
+	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding.", //$NON-NLS-1$ //$NON-NLS-0$
+	"LocalEditorSettings": "Local Editor Settings"
 });
