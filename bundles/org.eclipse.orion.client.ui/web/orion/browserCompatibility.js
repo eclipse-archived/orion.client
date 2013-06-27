@@ -10,7 +10,7 @@
 /*global alert confirm define localStorage*/
 /*jslint browser:true sub:true regexp:false*/
 
-define(function() {
+(function() {
 	function isSupportedBrowser() {
 		var userAgent = navigator.userAgent;
 		var isSupported = { 
@@ -73,4 +73,4 @@ define(function() {
 		supportsLocalStorage: supportsLocalStorage,
 		throwBrowserAlert: throwBrowserAlert
 	};
-});
+}());
