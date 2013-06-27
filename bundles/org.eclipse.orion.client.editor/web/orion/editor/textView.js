@@ -4719,15 +4719,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			scrollDiv.style.padding = "0px"; //$NON-NLS-0$
 			viewDiv.appendChild(scrollDiv);
 			
-			if (util.isFirefox) {
-				var clipboardDiv = util.createElement(document, "div"); //$NON-NLS-0$
-				this._clipboardDiv = clipboardDiv;
-				clipboardDiv.style.position = "fixed"; //$NON-NLS-0$
-				clipboardDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
-				clipboardDiv.style.left = "-1000px"; //$NON-NLS-0$
-				rootDiv.appendChild(clipboardDiv);
-			}
-
 			if (!util.isIE && !util.isIOS) {
 				var clipDiv = util.createElement(document, "div"); //$NON-NLS-0$
 				this._clipDiv = clipDiv;
@@ -4969,11 +4960,16 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		_getClipboardText: function (event, handler) {
 			var delimiter = this._model.getLineDelimiter();
 			var clipboadText, text;
+			// IE
 			var window = this._getWindow();
-			if (window.clipboardData) {
-				//IE
+			var clipboardData = window.clipboardData;
+			// WebKit and Firefox > 21
+			if (!clipboardData && event) {
+				clipboardData = event.clipboardData;
+			}
+			if (clipboardData) {
 				clipboadText = [];
-				text = window.clipboardData.getData("Text"); //$NON-NLS-0$
+				text = clipboardData.getData(util.isIE ? "Text" : "text/plain"); //$NON-NLS-1$"//$NON-NLS-0$
 				convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
 				text = clipboadText.join("");
 				if (handler) { handler(text); }
@@ -4982,6 +4978,15 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (util.isFirefox) {
 				this._ignoreFocus = true;
 				var clipboardDiv = this._clipboardDiv;
+				var document = this._rootDiv.ownerDocument;
+				if (!clipboardDiv) {
+					clipboardDiv = util.createElement(document, "div"); //$NON-NLS-0$
+					this._clipboardDiv = clipboardDiv;
+					clipboardDiv.style.position = "fixed"; //$NON-NLS-0$
+					clipboardDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
+					clipboardDiv.style.left = "-1000px"; //$NON-NLS-0$
+					this._rootDiv.appendChild(clipboardDiv);
+				}
 				clipboardDiv.innerHTML = "<pre contenteditable=''></pre>"; //$NON-NLS-0$
 				clipboardDiv.firstChild.focus();
 				var self = this;
@@ -5000,7 +5005,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				/* Do not try execCommand if middle-click is used, because if we do, we get the clipboard text, not the primary selection text. */
 				if (!util.isLinux || this._lastMouseButton !== 2) {
 					try {
-						var document = clipboardDiv.ownerDocument;
 						result = document.execCommand("paste", false, null); //$NON-NLS-0$
 					} catch (ex) {
 						/* Firefox can throw even when execCommand() works, see bug 362835. */
@@ -5034,23 +5038,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					handler(text);
 				}
 				return text;
-			}
-			//webkit
-			if (event && event.clipboardData) {
-				/*
-				* Webkit (Chrome/Safari) allows getData during the paste event
-				* Note: setData is not allowed, not even during copy/cut event
-				*/
-				clipboadText = [];
-				text = event.clipboardData.getData("text/plain"); //$NON-NLS-0$
-				convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
-				text = clipboadText.join("");
-				if (text && handler) {
-					handler(text);
-				}
-				return text;
-			} else {
-				//TODO try paste using extension (Chrome only)
 			}
 			return "";
 		},
@@ -5631,22 +5618,21 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		_setClipboardText: function (text, event) {
 			var clipboardText;
-			var document = this._parent.ownerDocument;
+			// IE
 			var window = this._getWindow();
-			if (window.clipboardData) {
-				//IE
-				clipboardText = [];
-				convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(util.platformDelimiter);});
-				return window.clipboardData.setData("Text", clipboardText.join("")); //$NON-NLS-0$
+			var clipboardData = window.clipboardData;
+			// WebKit and Firefox > 21
+			if (!clipboardData && event) {
+				clipboardData = event.clipboardData;
 			}
-			if (event && event.clipboardData) {
-				//webkit
+			if (clipboardData) {
 				clipboardText = [];
 				convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(util.platformDelimiter);});
-				if (event.clipboardData.setData("text/plain", clipboardText.join(""))) { //$NON-NLS-0$
+				if (clipboardData.setData(util.isIE ? "Text" : "text/plain", clipboardText.join(""))) { //$NON-NLS-1$ //$NON-NLS-0$
 					return true;
 				}
 			}
+			var document = this._parent.ownerDocument;
 			var child = util.createElement(document, "pre"); //$NON-NLS-0$
 			child.style.position = "fixed"; //$NON-NLS-0$
 			child.style.left = "-1000px"; //$NON-NLS-0$
