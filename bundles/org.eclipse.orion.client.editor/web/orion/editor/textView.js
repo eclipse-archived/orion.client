@@ -6314,6 +6314,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_updateDOMSelection: function () {
+			if (this._redrawCount > 0) { return; }
 			if (this._ignoreDOMSelection) { return; }
 			if (!this._clientDiv) { return; }
 			var selection = this._getSelection();
