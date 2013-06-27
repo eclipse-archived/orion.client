@@ -16,7 +16,7 @@
  * @class Utilities for dealing with regular expressions.
  * @description Utilities for dealing with regular expressions.
  */
-define("orion/editor/regex", [], function() {
+define("orion/editor/regex", [], function() { //$NON-NLS-0$
 	/**
 	 * @methodOf orion.editor.regex
 	 * @static
@@ -25,7 +25,7 @@ define("orion/editor/regex", [], function() {
 	 * @returns {String} A copy of <code>str</code> with regex special characters escaped.
 	 */
 	function escape(str) {
-		return str.replace(/([\\$\^*\/+?\.\(\)|{}\[\]])/g, "\\$&");
+		return str.replace(/([\\$\^*\/+?\.\(\)|{}\[\]])/g, "\\$&"); //$NON-NLS-0$
 	}
 
 	/**

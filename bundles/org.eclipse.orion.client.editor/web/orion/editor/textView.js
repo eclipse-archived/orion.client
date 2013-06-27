@@ -1403,7 +1403,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			* The fix is to call _updateDOMSelection() before calling focus().
 			*/
 			this._updateDOMSelection();
-			if (util.isOpera) { this._clientDiv.blur(); }
 			this._clientDiv.focus();
 			/*
 			* Feature in Safari. When focus is called the browser selects the clientDiv
