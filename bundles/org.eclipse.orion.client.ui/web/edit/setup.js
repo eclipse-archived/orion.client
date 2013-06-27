@@ -51,12 +51,15 @@ define([
 	'orion/widgets/themes/editor/LocalEditorSettings',
 	'edit/editorPreferences',
 	'orion/URITemplate',
-	'orion/sidebar'
+	'orion/sidebar',
+	'orion/webui/tooltip',
+	'orion/widgets/input/DropDownMenu'
 ], function(messages, require, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
 			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 			mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mEmacs, mVI, mSearcher,
-			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, LocalEditorSettings, mEditorPreferences, URITemplate, Sidebar) {
-	
+			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, LocalEditorSettings, mEditorPreferences, URITemplate, Sidebar,
+			mTooltip, DropDownMenu) {
+
 var exports = exports || {};
 	
 exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
@@ -145,7 +148,23 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			textView.addKeyMode(vi);
 		}
 	}
-	
+
+	/*
+	 * Adds the settings wrench
+	 */
+	var renderLocalEditorSettings = function(settings) {
+		var navDropDownTrigger = lib.node("settingsAction"); //$NON-NLS-0$
+
+		new mTooltip.Tooltip({
+			node: navDropDownTrigger,
+			text: messages['LocalEditorSettings'],
+			position: ["below", "left"] //$NON-NLS-1$ //$NON-NLS-0$
+		});
+
+		var navDropDown = new DropDownMenu('settingsTab', 'settingsAction');
+		navDropDown.updateContent = settings.updateContent.bind(settings);
+	};
+
 	var updateSettings = function(prefs) {
 		settings = prefs;
 		inputManager.setAutoLoadEnabled(prefs.autoLoadEnabled);
@@ -276,7 +295,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			}
 			var metadata = evt.metadata;
 			renderToolbars(metadata);
-			mGlobalCommands.addSettings( localSettings );
+			renderLocalEditorSettings(localSettings);
 			mGlobalCommands.setPageTarget({
 				task: "Coding", //$NON-NLS-0$
 				name: evt.name,
