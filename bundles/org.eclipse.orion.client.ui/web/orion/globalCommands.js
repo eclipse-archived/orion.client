@@ -109,10 +109,7 @@ define([
 				position: ["right"] //$NON-NLS-0$
 			});
 
-			var navDropDown = new DropDownMenu('centralNavigation', {
-				label: 'Develop',
-				icon: 'commandSprite core-sprite-hamburger'
-			});
+			var navDropDown = new DropDownMenu('primaryNav', 'centralNavigation');
 			var groupedContent = new GroupedContent();
 			navDropDown.addContent(groupedContent.getContentPane());
 		},
@@ -521,10 +518,7 @@ define([
 	 * This function adds a settings dialog to a page. It adds it so that a settings gear will appear at the right hand side
 	 */
 	function addSettings(settings) {
-		var navDropDown = new DropDownMenu('settingsTab', {
-			label: 'Develop',
-			icon: 'imageSprite core-sprite-wrench'
-		}, false);
+		var navDropDown = new DropDownMenu('settingsTab', 'settingsAction');
 		navDropDown.updateContent = settings.updateContent.bind(settings);
 	}
 
