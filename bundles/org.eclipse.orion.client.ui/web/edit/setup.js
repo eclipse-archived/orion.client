@@ -160,7 +160,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			position: ["below", "left"] //$NON-NLS-1$ //$NON-NLS-0$
 		});
 
-		var navDropDown = new DropDownMenu('settingsTab', 'settingsAction'); //$NON-NLS-1$ //$NON-NLS-0$
+		var navDropDown = new DropDownMenu('settingsTab', 'settingsAction', 'dropdownSelection'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		navDropDown.updateContent = settings.show.bind(settings);
 		navDropDown.__tooltip = tooltip;
 	};

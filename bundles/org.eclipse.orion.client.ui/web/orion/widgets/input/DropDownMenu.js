@@ -17,8 +17,9 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	 * Creates a dropdown menu for a node and its associated trigger node (button)
 	 * @param {Object} parent The dom object or string id of the node that will contain the dropdown menu
 	 * @param {Object} triggerNode The dom object or string id of the dom node that will trigger the dropdown menu appearance
+	 * @param {String} [selectionClass] CSS class to be appended when the trigger node is selected. Optional.
 	 */
-	function DropDownMenu( parent, triggerNode ){
+	function DropDownMenu( parent, triggerNode, selectionClass ){
 		var node = lib.node(parent);
 		if (node) {
 			this._parent = node;
@@ -28,6 +29,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		
 		// Assign dynamic ids to the dropdown menu node to support multiple drop down menus in the same page
 		this.navDropDownId = this._parent.id + '_navdropdown'; //$NON-NLS-0$
+		this.selectionClass = selectionClass;
 		
 		// Create dropdown container and append to parent dom
 		var dropDownContainer = document.createElement("div"); //$NON-NLS-0$
@@ -56,6 +58,9 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 				this.updateContent ( this.getContentNode() , function () {
 					this._dropdownMenu.style.display = '';
 					this._positionDropdown();
+					if (this.selectionClass) {
+						this._triggerNode.classList.add(this.selectionClass);
+					}
 					this.handle = lib.addAutoDismiss( [ this._triggerNode, this._dropdownMenu], this.clearPanel.bind(this) );
 				}.bind(this));
 			}else{
@@ -65,6 +70,9 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		
 		clearPanel: function(){
 			this._dropdownMenu.style.display = 'none'; //$NON-NLS-0$
+			if (this.selectionClass) {
+				this._triggerNode.classList.remove(this.selectionClass);
+			}
 		},
 		
 		// Add content to the dropdown container

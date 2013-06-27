@@ -427,8 +427,9 @@ define([
 		 * @param {String} [imageClass] CSS class of an image to use for this group.
 		 * @param {String} [tooltip] Tooltip to show on this group. If not provided, and the group uses an <code>imageClass</code>,
 		 * the <code>title</code> will be used as the tooltip.
+		 * @param {String} [selectionClass] CSS class to be appended when the command button is selected. Optional.
 		 */	
-		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, imageClass, tooltip) {
+		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, imageClass, tooltip, selectionClass) {
 			if (!this._contributionsByScopeId[scopeId]) {
 				this._contributionsByScopeId[scopeId] = {};
 			}
@@ -450,6 +451,9 @@ define([
 				if (tooltip) {
 					parentTable[groupId].tooltip = tooltip;
 				}
+				if (selectionClass) {
+					parentTable[groupId].selectionClass = selectionClass;
+				}
 
 				parentTable[groupId].emptyGroupMessage = emptyGroupMessage;
 			} else {
@@ -459,6 +463,7 @@ define([
 										emptyGroupMessage: emptyGroupMessage,
 										imageClass: imageClass,
 										tooltip: tooltip,
+										selectionClass: selectionClass,
 										children: {}};
 				parentTable.sortedContributions = null;
 			}
@@ -716,7 +721,7 @@ define([
 							// to be redone. The down side to always adding the menu button is that we may find out we didn't
 							// need it after all, which could cause layout to change.
 
-							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass, contribution.tooltip);
+							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass, contribution.tooltip, contribution.selectionClass);
 							if(domNodeWrapperList){
 								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
@@ -855,7 +860,7 @@ define([
 							var populateFunction = function(menu) {
 								command.populateChoicesMenu(menu, items, handler, userData, self);
 							};
-							self._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command), command.imageClass, command.tooltip || command.title);
+							self._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command), command.imageClass, command.tooltip || command.title, command.selectionClass);
 						} else {
 							// Rendering atomic commands as buttons or menus
 							invocation.handler = invocation.handler || this;
@@ -882,7 +887,7 @@ define([
 		/*
 		 * private.  Parent must exist in the DOM.
 		 */
-		_createDropdownMenu: function(parent, name, nested, populateFunction, icon, tooltip) {
+		_createDropdownMenu: function(parent, name, nested, populateFunction, icon, tooltip, selectionClass) {
 			parent = lib.node(parent);
 			// We create dropdowns asynchronously so it's possible that the parent has been removed from the document 
 			// by the time we are called.  If so, don't bother building a submenu for an orphaned menu.
@@ -915,7 +920,7 @@ define([
 					tooltip = tooltip || name; // No text and no tooltip => fallback to name
 				}
 				tooltip = icon ? (tooltip || name) : tooltip;
-				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon);
+				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon, false, selectionClass);
 				menuButton = created.menuButton;
 				newMenu = created.menu;
 				if (tooltip) {

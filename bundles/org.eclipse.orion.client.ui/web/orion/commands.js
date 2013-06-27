@@ -218,7 +218,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		return node;
 	}
 
-	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName) {
+	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
@@ -245,7 +245,11 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 			_addImageToElement({ spriteClass: "commandSprite", imageClass: buttonIconClass }, menuButton, name); //$NON-NLS-0$
 			menuButton.classList.add("orionButton"); // $NON-NLS-0$
 		}
-		menuButton.dropdown = new Dropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
+		menuButton.dropdown = new Dropdown.Dropdown({
+			dropdown: newMenu, 
+			populate: populateFunction,
+			selectionClass: selectionClass
+		});
 		newMenu.dropdown = menuButton.dropdown;
 		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown};
 	}
@@ -497,6 +501,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 	 * @param {String} [options.imageClass] a CSS class name suitable for showing a background image.  Optional.
 	 * @param {Boolean} [options.addImageClassToElement] If true, the image class will be added to the element's
 	 *  class list. Otherwise, a span element with the image class is created and appended to the element.  Optional.
+	 * @param {String} [options.selectionClass] a CSS class name to be appended when the command button is selected. Optional.
 	 * @param {String} [options.spriteClass] an additional CSS class name that can be used to specify a sprite background image.  This
 	 *  useful with some sprite generation tools, where imageClass specifies the location in a sprite, and spriteClass describes the
 	 *  sprite itself.  Optional.
@@ -527,6 +532,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 			this.imageClass = options.imageClass;   // points to the location in a sprite
 			this.addImageClassToElement = options.addImageClassToElement; // optional boolean if true will add the image class to the 
 																		// element's class list
+			this.selectionClass = options.selectionClass;
 			this.spriteClass = options.spriteClass || "commandSprite"; // defines the background image containing sprites //$NON-NLS-0$
 			this.visibleWhen = options.visibleWhen;
 			this.parameters = options.parameters;  // only used when a command is used in the command registry.  

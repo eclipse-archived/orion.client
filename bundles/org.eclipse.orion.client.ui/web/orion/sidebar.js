@@ -74,6 +74,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			var changeViewModeCommand = new mCommands.Command({
 				name: messages["View"],
 				imageClass: "core-sprite-outline", //$NON-NLS-0$
+				selectionClass: "dropdownSelection", //$NON-NLS-0$
 				tooltip: messages["ViewTooltip"],
 				id: "orion.sidebar.viewmode", //$NON-NLS-0$
 				visibleWhen: function(item) {

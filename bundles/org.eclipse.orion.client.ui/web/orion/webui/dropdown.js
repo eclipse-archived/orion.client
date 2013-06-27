@@ -49,6 +49,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			this._triggerNode = lib.$(".dropdownTrigger", this._dropdownNode.parentNode); //$NON-NLS-0$
 			if (!this._triggerNode) { throw "no dom node for dropdown trigger found"; } //$NON-NLS-0$
 			this._populate = options.populate;
+			this._selectionClass = options.selectionClass;
 			var self = this;
 			
 			// click on trigger opens.
@@ -101,6 +102,9 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					this._hookedAutoDismiss = true;
 				}
 				this._triggerNode.classList.add("dropdownTriggerOpen"); //$NON-NLS-0$
+				if (this._selectionClass) {
+					this._triggerNode.classList.add(this._selectionClass);
+				}
 				this._dropdownNode.classList.add("dropdownMenuOpen"); //$NON-NLS-0$
 				this._positionDropdown();
 				items[0].focus();
@@ -131,6 +135,9 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		 */			
 		close: function(restoreFocus) {
 			this._triggerNode.classList.remove("dropdownTriggerOpen"); //$NON-NLS-0$
+			if (this._selectionClass) {
+				this._triggerNode.classList.remove(this._selectionClass);
+			}
 			this._dropdownNode.classList.remove("dropdownMenuOpen"); //$NON-NLS-0$
 			if (restoreFocus) {
 				this._triggerNode.focus();
