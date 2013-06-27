@@ -40,6 +40,9 @@ define([], function() {
 			}
 			return best;
 		}
+		if (typeof filename !== "string") { //$NON-NLS-0$
+			return null;
+		}
 		var extension = filename && filename.split(".").pop(); //$NON-NLS-0$
 		var best = null;
 		for (var i=0; i < contentTypes.length; i++) {
