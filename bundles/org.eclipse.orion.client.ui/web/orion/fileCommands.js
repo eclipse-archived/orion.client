@@ -25,52 +25,13 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 */
 	var fileCommandUtils = {};
 
-	var favoritesCache = null;
-	
+	var selectionListenerAdded = false;
+
 	// This variable is used by a shared error handler so it is set up here.  Anyone using the error handler should set this
 	// variable first.
 	var progressService = null;
 	
 	var lastItemLoaded = {Location: null};
-
-	// I'm not sure where this belongs.  This is the first time an outer party consumes
-	// favorites and understands the structure.  We need a cache for synchronous requests
-	// for move/copy targets.
-	function FavoriteFoldersCache(registry) {
-		this.registry = registry;
-		this.favorites = [];
-		var self = this;
-		var service = this.registry.getService("orion.core.favorite"); //$NON-NLS-0$
-		if(!progressService) {
-			progressService = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
-		}
-		progressService.progress(service.getFavorites(), "Getting favorites").then(function(favs) {
-			self.cacheFavorites(favs.navigator);
-		});
-		service.addEventListener("favoritesChanged", function(event) { //$NON-NLS-0$
-			self.cacheFavorites(event.navigator);
-		});
-	}
-	FavoriteFoldersCache.prototype = {
-		cacheFavorites: function(faves) {
-			this.favorites = [];
-			for (var i=0; i<faves.length; i++) {
-				if (faves[i].directory) {
-					this.favorites.push(faves[i]);
-				}
-			}
-			this.favorites.sort(function(a,b) {
-				if (a < b) {
-					return -1;
-				}
-				if (a > b) {
-					return 1;
-				}
-				return 0;
-			});
-		}
-	};
-	FavoriteFoldersCache.prototype.constructor = FavoriteFoldersCache;
 
 	function dispatchModelEventOn(explorer, event) {
 		var dispatcher = explorer.modelEventDispatcher;
@@ -180,9 +141,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			updateSelectionTools(null, explorer.treeRoot);
 		}
 
-		// Stuff we do only the first time
-		if (!favoritesCache) {
-			favoritesCache = new FavoriteFoldersCache(registry);
+		// Attach selection listener once, keep forever
+		if (!selectionListenerAdded) {
+			selectionListenerAdded = true;
 			var selectionService = registry.getService("orion.page.selection"); //$NON-NLS-0$
 			selectionService.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 				updateSelectionTools(selectionService, explorer.treeRoot);
@@ -412,19 +373,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			}
 	
 			var choices = [];
-			// Propose any favorite that is not already a sourceLocation
-			if (favoritesCache) {
-				var favorites = favoritesCache.favorites;
-				for (i=0; i<favorites.length; i++) {
-					var stripped = stripPath(favorites[i].path);
-					if (!contains(sourceLocations, stripped)) {
-						choices.push({name: favorites[i].name, imageClass: "core-sprite-favorite", path: stripped, callback: callback}); //$NON-NLS-0$
-					}
-				}
-				if (favorites.length > 0) {
-					choices.push({});  //separator
-				}
-			}
 			var proposedPaths = [];
 			// All children of the root that are folders should be available for choosing.
 			var topLevel = explorer.treeRoot.Children;

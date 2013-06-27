@@ -47,8 +47,6 @@ define({
 	"Find File Named": "Find File Named",
 	"Type the name of a file to open (? = any character, * = any string):": "Type the name of a file to open (? = any character, * = any string):",
 	"Search": "Search",
-	"Populating favorites...": "Populating favorites...",
-	"Favorite": "Favorite",
 	"Searching...": "Searching...",
 	"Searching for occurrences of": "Searching for occurrences of: \"${0}\"",
 	"name": "name",

@@ -246,7 +246,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			mFileCommands.createFileCommands(this.serviceRegistry, this.commandService, this.drivesExplorer, this.fileClient);
 			ExtensionCommands.createAndPlaceFileCommandsExtension(this.serviceRegistry, this.commandService, this.drivesExplorer, this.drivesSection.actionsNode.id, this.drivesSection.selectionNode.id, "orion.driveSelectionGroup");  //$NON-NLS-0$
 			var menuid = this.drivesSection.selectionNode.id;
-			//this.commandService.registerCommandContribution(menuid, "orion.makeFavorite", 1, "orion.driveSelectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var binding = new mKeyBinding.KeyBinding(113);
 			binding.domScope = "DriveContent"; //$NON-NLS-0$
 			binding.scopeName = "Drives"; //TODO should be externalized

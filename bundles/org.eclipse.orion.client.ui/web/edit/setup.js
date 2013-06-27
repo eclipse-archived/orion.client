@@ -22,7 +22,6 @@ define([
 	'orion/progress',
 	'orion/dialogs',
 	'orion/commandRegistry',
-	'orion/favorites',
 	'orion/extensionCommands',
 	'orion/fileClient',
 	'orion/operationsClient',
@@ -54,7 +53,7 @@ define([
 	'orion/sidebar',
 	'orion/webui/tooltip',
 	'orion/widgets/input/DropDownMenu'
-], function(messages, require, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mFavorites, mExtensionCommands, 
+], function(messages, require, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mExtensionCommands, 
 			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 			mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mEmacs, mVI, mSearcher,
 			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, LocalEditorSettings, mEditorPreferences, URITemplate, Sidebar,
@@ -72,7 +71,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var contentTypeService;
 	var progressService;
 	var dialogService;
-	var favoriteService;
 	var fileClient;
 	var searcher;
 	
@@ -88,7 +86,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		// Editor needs additional services
 		problemService = new mProblems.ProblemService(serviceRegistry);
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
-		favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
@@ -312,9 +309,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				searchService: searcher,
 				fileService: fileClient
 			});
-	
-			// Put the make favorite command in our toolbar."
-			//commandRegistry.registerCommandContribution("pageActions", "orion.makeFavorite", 2); //$NON-NLS-1$ //$NON-NLS-0$
 	
 			commandRegistry.processURL(window.location.href);
 		});

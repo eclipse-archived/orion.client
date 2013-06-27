@@ -569,12 +569,6 @@ textarea.parameterInput {
 	padding:5px;
 }
 
-.favoritesTable {
-	border-collapse: separate;
-	border-spacing: 2;
-	overflow-x: hidden; /* because it is placed inside a div with overflow scrollbars */
-}
-
 .secondaryColumn {
 	color: #666666;	
 	padding-right: 8px;
