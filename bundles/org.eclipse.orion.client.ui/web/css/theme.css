@@ -412,6 +412,11 @@ a.currentLocation:hover {
 	user-select: none;
 }
 
+.dropdownSelection {
+	background-color: #e6e6e6 !important;
+	border: 1px solid #ccc !important;
+}
+
 .checkedMenuItem {
 	margin: 4px 6px 2px 0;
 	vertical-align: bottom;
