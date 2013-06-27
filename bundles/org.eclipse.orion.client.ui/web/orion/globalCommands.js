@@ -518,6 +518,14 @@ define([
 	 * This function adds a settings dialog to a page. It adds it so that a settings gear will appear at the right hand side
 	 */
 	function addSettings(settings) {
+		var navDropDownTrigger = lib.node("settingsAction"); //$NON-NLS-0$
+
+		new mTooltip.Tooltip({
+			node: navDropDownTrigger,
+			text: messages['Editor Settings'],
+			position: ["below", "left"] //$NON-NLS-1$ //$NON-NLS-0$
+		});
+		
 		var navDropDown = new DropDownMenu('settingsTab', 'settingsAction');
 		navDropDown.updateContent = settings.updateContent.bind(settings);
 	}
