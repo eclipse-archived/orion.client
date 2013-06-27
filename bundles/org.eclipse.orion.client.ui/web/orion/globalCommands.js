@@ -14,14 +14,14 @@
 define([
 		'i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/keyBinding', 'orion/commandRegistry', 'orion/commands',
 		'orion/parameterCollectors', 'orion/extensionCommands', 'orion/uiUtils', 'orion/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib',
-		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate',
+		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/URITemplate',
 		'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
 		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html',
 		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 'orion/widgets/input/GroupedContent',
 		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient'
 	],
 	function (messages, require, commonHTML, KeyBinding, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding,
-		mBreadcrumbs, lib, mSplitter, mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, mThemePreferences, mThemeData, Deferred,
+		mBreadcrumbs, lib, mSplitter, mDropdown, mTooltip, mContentTypes, URITemplate, PageUtil, mThemePreferences, mThemeData, Deferred,
 		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent, util, mCustomGlobalCommands, mFileClient) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -643,46 +643,6 @@ define([
 
 		// Assemble global commands, those that could be available from any page due to header content or common key bindings.
 
-		// make favorite
-		var favoriteCommand = new mCommands.Command({
-			name: messages["Make Favorite"],
-			tooltip: messages['Add to the favorites list'],
-			imageClass: "core-sprite-favorite", //$NON-NLS-0$
-			id: "orion.makeFavorite", //$NON-NLS-0$
-			visibleWhen: function (item) {
-				var items = Array.isArray(item) ? item : [item];
-				if (items.length === 0) {
-					return false;
-				}
-				for (var i = 0; i < items.length; i++) {
-					if (!items[i].Location) {
-						return false;
-					}
-				}
-				return true;
-			},
-			callback: function (data) {
-				var items = Array.isArray(data.items) ? data.items : [data.items];
-				var favService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				var doAdd = function (item) {
-					return function (result) {
-						if (!result) {
-							progress.progress(favService.makeFavorites(item), "Making favorite " + item.Name);
-						} else {
-							serviceRegistry.getService("orion.page.message").setMessage(item.Name + messages[' is already a favorite.'], 2000); //$NON-NLS-0$
-						}
-					};
-				};
-				for (var i = 0; i < items.length; i++) {
-					var item = items[i];
-					progress.progress(favService.hasFavorite(item.ChildrenLocation || item.Location), "Checking favorite " + item.Name).then(
-						doAdd(item));
-				}
-			}
-		});
-		commandRegistry.addCommand(favoriteCommand);
-
 		// open resource
 		var showingResourceDialog = false;
 		var openResourceDialog = function (searcher, serviceRegistry, /* optional */
@@ -690,21 +650,11 @@ define([
 			if (showingResourceDialog) {
 				return;
 			}
-			var favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-			// TODO Shouldn't really be making service selection decisions at this level. See bug 337740
-			if (!favoriteService) {
-				favoriteService = new mFavorites.FavoritesService({
-					serviceRegistry: serviceRegistry
-				});
-				// service must be accessed via the registry so we get async behaviour
-				favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
-			}
 			var dialog = new openResource.OpenResourceDialog({
 				searcher: searcher,
 				progress: progress,
 				searchRenderer: searcher.defaultRenderer,
-				favoriteService: favoriteService,
 				onHide: function () {
 					showingResourceDialog = false;
 					if (editor && editor.getTextView()) {

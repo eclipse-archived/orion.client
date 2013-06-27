@@ -13,9 +13,9 @@
 /*jslint browser:true sub:true*/
 
 define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
-        'orion/ssh/sshTools', 'orion/keyBinding', 'orion/commandRegistry', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
+        'orion/ssh/sshTools', 'orion/keyBinding', 'orion/commandRegistry', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/extensionCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileUtils', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes', 'orion/URL-shim', 'orion/PageLinks'], 
-		function(require, messages, mBrowserCompatibility, mBootstrap, Deferred, i18nUtil, lib, mSelection, mStatus, mProgress, mDialogs, mSsh, KeyBinding, mCommandRegistry, mFavorites, mTasks, mNavOutliner,
+		function(require, messages, mBrowserCompatibility, mBootstrap, Deferred, i18nUtil, lib, mSelection, mStatus, mProgress, mDialogs, mSsh, KeyBinding, mCommandRegistry, mTasks, mNavOutliner,
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExtensionCommands, mExplorerTable, mNavigatorRenderer, mFileUtils, PageUtil, URITemplate, mContentTypes, _, PageLinks) {
 
 	mBootstrap.startup().then(function(core) {
@@ -26,7 +26,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		new mDialogs.DialogService(serviceRegistry);
 		new mSsh.SshService(serviceRegistry);
-		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 		var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
@@ -114,7 +113,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 	
 		// selection based command contributions in nav toolbar
 		var binding;
-		//commandRegistry.registerCommandContribution("selectionTools", "orion.makeFavorite", 1, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		binding = new KeyBinding.KeyBinding(113); // F2
 		binding.domScope = "explorer-tree"; //$NON-NLS-0$
 		binding.scopeName = "Navigator"; //$NON-NLS-0$

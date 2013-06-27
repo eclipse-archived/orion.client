@@ -116,11 +116,9 @@ define([
 					var searchTerm = editor.getText(selection.start, selection.end);
 					var serviceRegistry = self.serviceRegistry;
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					var favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
 					var dialog = new openResource.OpenResourceDialog({
 						searcher: self._searcher,
 						progress: progress,
-						favoriteService: favoriteService,
 						searchRenderer: self._searcher.defaultRenderer,
 						nameSearch: false,
 						title: messages["Search Files"],
