@@ -70,7 +70,12 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 		mGlobalCommands.generateBanner("orion-externalizeResults", serviceRegistry, commandRegistry, preferences, searcher, searcher); //$NON-NLS-0$
 
 		var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandRegistry, fileClient); //$NON-NLS-0$
-		var configOutliner = new mStringExternalizerConfig.StringExternalizerConfig({commandService: commandRegistry}); //$NON-NLS-0$
+		var configOutliner = new mStringExternalizerConfig.StringExternalizerConfig({
+			commandService: commandRegistry,
+			fileClient: fileClient,
+			parent: "configContainer", //$NON-NLS-0$
+			serviceRegistry: serviceRegistry
+		}); //$NON-NLS-0$
 		setPageInfo(fileClient, searcher, serviceRegistry, commandRegistry, configOutliner, progress);
 		searchResultsGenerator.loadResults(locationHash());
 		//every time the user manually changes the hash, we need to load the results with that name

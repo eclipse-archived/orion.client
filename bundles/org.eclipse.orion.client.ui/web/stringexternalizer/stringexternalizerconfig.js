@@ -14,7 +14,7 @@
 
 define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/webui/littlelib', 'orion/commands', 'orion/webui/dialogs/DirectoryPrompterDialog'], function(messages, mSection, lib, mCommands, DirPrompter) {
 	function StringExternalizerConfig(options) {
-		this.parent = options.parent;
+		this.parent = lib.node(options.parent);
 		this.fileClient = options.fileClient;
 		this.commandService = options.commandService;
 		this.serviceRegistry = options.serviceRegistry;
@@ -51,7 +51,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/we
 		},
 
 		render: function(root) {
-			this.parent.innerHTML="";
+//			this.parent.innerHTML="";
 			if (!this.config) {
 				var savedConfig = localStorage.getItem("StringExternalizerConfig_" + root.Location); //$NON-NLS-0$
 				try {
