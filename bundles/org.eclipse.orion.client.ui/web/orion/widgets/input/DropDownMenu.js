@@ -38,7 +38,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		this._dropdownMenu = dropDownContainer;
 		
 		// Display trigger node and bind on click event
-		var triggerNode = lib.node(triggerNode);
+		triggerNode = lib.node(triggerNode);
 		if (triggerNode) {
 			this._triggerNode = triggerNode;
 		} else {
@@ -81,7 +81,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			// the callback needs to be called once the content is up to date
 			callback();
 		},
-		
+
 		_positionDropdown: function() {
 			this._dropdownMenu.style.left = "";
 			var bounds = lib.bounds(this._dropdownMenu);
