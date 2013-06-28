@@ -177,7 +177,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/we
 					}
 					that.config.messages = {};
 					for (var message in messages) {
-						that.config.messages[messages[message]] = message;
+						that.config.messages[message] = messages[message];
 					}
 					if (that.setConfig) {
 						that.setConfig(that.config);
