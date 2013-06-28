@@ -74,8 +74,9 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 			commandService: commandRegistry,
 			fileClient: fileClient,
 			parent: "configContainer", //$NON-NLS-0$
-			serviceRegistry: serviceRegistry
-		}); //$NON-NLS-0$
+			serviceRegistry: serviceRegistry,
+			setConfig: searchResultsGenerator.setConfig.bind(searchResultsGenerator)
+		});
 		setPageInfo(fileClient, searcher, serviceRegistry, commandRegistry, configOutliner, progress);
 		searchResultsGenerator.loadResults(locationHash());
 		//every time the user manually changes the hash, we need to load the results with that name
