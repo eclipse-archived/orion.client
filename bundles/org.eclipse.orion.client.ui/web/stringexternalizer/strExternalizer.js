@@ -55,7 +55,6 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var commandRegistry = new mCommandRegistry.CommandRegistry({ });
 		var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
-		});
 		
 		var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
 		themePreferences.apply();
