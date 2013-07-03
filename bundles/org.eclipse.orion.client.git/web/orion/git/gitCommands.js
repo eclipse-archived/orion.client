@@ -734,6 +734,8 @@ var exports = {};
 
 		var compareWithWorkingTree = new mCommands.Command({
 			name : messages["Compare With Working Tree"],
+			imageClass: "git-sprite-compare", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite",
 			id : "eclipse.compareWithWorkingTree", //$NON-NLS-0$
 			hrefCallback : function(data) {
 				return mCompareUtils.generateCompareHref(data.items.DiffLocation, {});
@@ -747,6 +749,8 @@ var exports = {};
 		var openGitCommit = new mCommands.Command({
 			name : messages["Open"],
 			id : "eclipse.openGitCommit", //$NON-NLS-0$
+			imageClass: "git-sprite-open", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite",
 			hrefCallback: function(data) {
 				return require.toUrl("edit/edit.html")+"#" + data.items.ContentLocation; //$NON-NLS-1$ //$NON-NLS-0$
 			},
