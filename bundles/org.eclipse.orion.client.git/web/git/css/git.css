@@ -112,25 +112,3 @@
 .git-sprite-stage{ background-position: 0 -360px; width: 16px; height: 16px; } 
 .git-sprite-tag{ background-image: url(../images/tag.png); width: 16px; height: 16px; } 
 .git-sprite-unstage{ background-position: 0 -396px; width: 16px; height: 16px; }
-
-.gitRemotesItem {
-	background: url(../images/remotes.gif);
-}
-
-
-.gitLogContent{
-	margin-top:5px;
-	margin-bottom:5px;
-	width:700px;
-}
-
-.gitLogContentLine{
-	margin-left:10px;
-	padding-top:5px;
-	display:block;
-}
- 
-.gitLogBold{
-	font-weight:bold;
-}
-
