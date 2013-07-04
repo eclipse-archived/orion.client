@@ -352,10 +352,9 @@ exports.GitLogExplorer = (function() {
 				switch(col_no){
 				case 0:	
 					var td = document.createElement("td"); //$NON-NLS-0$
-					td.style.width = "700px";
 
 					var sectionItem = document.createElement("div");
-					sectionItem.className = "gitLogContent sectionTableItem ";
+					sectionItem.className = "sectionTableItem";
 					td.appendChild(sectionItem);
 
 					var horizontalBox = document.createElement("div");
@@ -420,19 +419,9 @@ exports.GitLogExplorer = (function() {
 					detailsView.appendChild(d);
 
 					var description = document.createElement("span");
-					description.className = "gitLogContentLine";
-					description.textContent = "SHA: " + commit.Name;
+					description.textContent = messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName + " on "
+							+ new Date(commit.Time).toLocaleString();
 					detailsView.appendChild(description);
-					
-					var author = document.createElement("span");
-					author.className = "gitLogContentLine";
-					author.textContent = "Author: " + commit.AuthorName;
-					detailsView.appendChild(author);
-					
-					var date = document.createElement("span");
-					date.className = "gitLogContentLine";
-					date.textContent = "Date: " + new Date(commit.Time).toLocaleString();
-					detailsView.appendChild(date);
 
 					return td;
 					
