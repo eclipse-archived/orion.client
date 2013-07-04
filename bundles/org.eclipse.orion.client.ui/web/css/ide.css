@@ -572,11 +572,14 @@ textarea.parameterInput {
 .secondaryColumn {
 	color: #666666;	
 	padding-right: 8px;
+	padding-top: 8px;
+	vertical-align:top;
 }
 
 .primaryColumn {
 	color: #3087B3;
 	text-decoration: none;
+	vertical-align:top;
 }
 
 .checkColumn {
