@@ -322,7 +322,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 					var startPos = 0;
 					var count = 0, lastResult;
 					while (true) {
-						var result = self._doFind(string, startPos);
+						//For replace all, we need to ignore the wrap search from the user option
+						//Otherwise the loop will be dead, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=411813
+						var result = self._doFind(string, startPos, null, true);
 						if (!result) {
 							break;
 						}
@@ -436,7 +438,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				this._undoStack.endCompoundChange();
 			}
 		},
-		_doFind: function(string, startOffset, count) {
+		_doFind: function(string, startOffset, count, noWrap) {
 			count = count || 1;
 			var editor = this._editor;
 			if (!string) {
@@ -449,7 +451,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				start: startOffset,
 				end: this._end,
 				reverse: this._reverse,
-				wrap: this._wrap,
+				wrap: (noWrap ? false: this._wrap),
 				regex: this._regex,
 				wholeWord: this._wholeWord,
 				caseInsensitive: this._caseInsensitive
