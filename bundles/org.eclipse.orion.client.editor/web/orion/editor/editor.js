@@ -632,6 +632,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 				this._annotationRuler = this._overviewRuler = this._lineNumberRuler =
 				this._foldingRuler = this._currentLineAnnotation = this._title = null;
 			this._dirty = false;
+			this._foldingRulerVisible = this._overviewRulerVisible =
+				this._lineNumberRulerVisible = this._annotationRulerVisible = undefined;
 			
 			var textViewUninstalledEvent = {
 				type: "TextViewUninstalled", //$NON-NLS-0$
