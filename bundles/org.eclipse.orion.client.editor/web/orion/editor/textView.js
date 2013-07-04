@@ -3139,6 +3139,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}
 		},
+		_handleDocKeyUp: function (e) {
+			var ctrlKey = util.isMac ? e.metaKey : e.ctrlKey;
+			if (!ctrlKey) {
+				this._setLinksVisible(false);
+			}
+		},
 		_handleKeyUp: function (e) {
 			if (this._ignoreEvent(e)) { return; }
 			if (this.isListening("KeyUp")) { //$NON-NLS-0$
@@ -3149,10 +3155,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					return;
 				}
 			}
-			var ctrlKey = util.isMac ? e.metaKey : e.ctrlKey;
-			if (!ctrlKey) {
-				this._setLinksVisible(false);
-			}
+			this._handleDocKeyUp(e);
 			// don't commit for space (it happens during JP composition)  
 			if (e.keyCode === 13) {
 				this._commitIME();
@@ -4743,6 +4746,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var clientDiv = util.createElement(document, "div"); //$NON-NLS-0$
 			clientDiv.className = "textviewContent"; //$NON-NLS-0$
 			this._clientDiv = clientDiv;
+			clientDiv.tabIndex = 0;
 			clientDiv.style.position = "absolute"; //$NON-NLS-0$
 			clientDiv.style.borderWidth = "0px"; //$NON-NLS-0$
 			clientDiv.style.margin = "0px"; //$NON-NLS-0$
@@ -5265,6 +5269,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return self._handleKeyPress(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "keyup", handler: function(e) { return self._handleKeyUp(e ? e : window.event);}}); //$NON-NLS-0$
+			if (util.isIE) {
+				handlers.push({target: document, type: "keyup", handler: function(e) { return self._handleDocKeyUp(e ? e : window.event);}}); //$NON-NLS-0$
+			}
 			handlers.push({target: clientDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e ? e : window.event);}}); //$NON-NLS-0$
