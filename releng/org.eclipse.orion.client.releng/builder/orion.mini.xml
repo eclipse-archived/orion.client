@@ -190,7 +190,7 @@
 		<optimize pageDir="mixloginstatic" name="manageOpenids" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="git/plugins" name="gitPlugin" bundle="org.eclipse.orion.client.git" />
 		<optimize pageDir="git" name="git-log" bundle="org.eclipse.orion.client.git" />
-		<optimize pageDir="git" name="git-status2" bundle="org.eclipse.orion.client.git" />
+		<optimize pageDir="git" name="git-status" bundle="org.eclipse.orion.client.git" />
 		<optimize pageDir="git" name="git-repository" bundle="org.eclipse.orion.client.git" />
 		<optimize pageDir="git" name="git-commit" bundle="org.eclipse.orion.client.git" />
 		<optimize pageDir="profile" name="user-list" bundle="org.eclipse.orion.client.users" />

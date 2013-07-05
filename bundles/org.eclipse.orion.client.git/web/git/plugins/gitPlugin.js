@@ -28,7 +28,7 @@ define(["orion/plugin", "orion/xhr", "orion/URL-shim", "domReady!"], function(Pl
 			{source: "Git:StatusLocation", variableName: "GitStatusLocation"},
 			{source: "Directory", match: true}
 		],
-		uriTemplate: "{OrionHome}/git/git-status2.html#{GitStatusLocation}",
+		uriTemplate: "{OrionHome}/git/git-status.html#{GitStatusLocation}",
 		forceSingleItem: true
 	});
 	
@@ -78,7 +78,7 @@ define(["orion/plugin", "orion/xhr", "orion/URL-shim", "domReady!"], function(Pl
 			source: "StatusLocation|Clone:StatusLocation", 
 			variableName: "GitStatusLocation"
 		}],
-		uriTemplate: "{OrionHome}/git/git-status2.html#{GitStatusLocation}"
+		uriTemplate: "{OrionHome}/git/git-status.html#{GitStatusLocation}"
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
