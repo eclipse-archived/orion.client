@@ -51,7 +51,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/we
 		},
 
 		render: function(root) {
-//			this.parent.innerHTML="";
+			lib.empty(this.parent);
 			if (!this.config) {
 				var savedConfig = localStorage.getItem("StringExternalizerConfig_" + root.Location); //$NON-NLS-0$
 				try {
