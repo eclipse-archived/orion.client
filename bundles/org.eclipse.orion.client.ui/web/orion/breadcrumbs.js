@@ -70,7 +70,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
             return null;
         },
 
-        MAX_LENGTH: 400,
+        MAX_LENGTH: 500,
         INCLUDE_FIRST_SECTION: true,
 
         segments: [],
@@ -241,6 +241,8 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         measure: function () {
         
         	var middleWidth = document.getElementById( 'location' );
+
+			middleWidth.style.width = 'auto';
         
         	this.MAX_LENGTH = middleWidth.offsetWidth;
 
