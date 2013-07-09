@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  ******************************************************************************/
 
 //NLS_CHARSET=UTF-8
@@ -69,7 +69,8 @@ define({
 	"More" : "More",
 	"Saved searches" : "Saved searches",
 	"Recent searches" : "Recent searches",
-	"Open in new tab" : "Open in new tab", 
+	"Open in new tab" : "Open in new tab",
+	"Open in same tab": "Open in same tab",
 	"Regular expression" : "Regular expression",
 	"Search options" : "Search options",
 	"Global search" : "Global search",
@@ -86,5 +87,7 @@ define({
 	"Sample Orion Plugin": "Sample Orion Plugin",
 	"Generate a sample plugin for integrating with Orion.": "Generate a sample plugin for integrating with Orion.",
 	"Raw": "Raw",
-	"Open the raw file or folder in the browser": "Open the raw file or folder in the browser"
+	"Open the raw file or folder in the browser": "Open the raw file or folder in the browser",
+	"Navigation": "Navigation",
+	"Links": "Links"
 });

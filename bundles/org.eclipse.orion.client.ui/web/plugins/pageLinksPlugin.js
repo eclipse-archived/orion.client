@@ -12,8 +12,9 @@
 /*global define document*/
 define([
 	'require',
-	'orion/plugin'
-], function(require, PluginProvider) {
+	'orion/plugin',
+	'i18n!orion/nls/messages'
+], function(require, PluginProvider, messages) {
 	var serviceImpl = { /* All data is in properties */ };
 
 	var headers = {
@@ -115,16 +116,16 @@ define([
 	provider.registerService("orion.core.setting", null, {
 		settings: [
 			{	pid: "nav.config",
-				name: "Navigation",
+				name: messages["Navigation"],
 				category: 'general',
 				properties: [
 					{	id: "links.newtab",
-						name: "Links",
+						name: messages["Links"],
 						type: "boolean",
 						defaultValue: false,
 						options: [
-							{value: true, label: "Open in new tab"},
-							{value: false, label: "Open in same tab"}
+							{value: true, label: messages["Open in new tab"]},
+							{value: false, label: messages["Open in same tab"]}
 						]
 					}
 				]
