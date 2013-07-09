@@ -406,7 +406,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		 * Add a command to the command registry.  Nothing will be shown in the UI
 		 * until this command is referenced in a contribution.
 		 * @param {orion.commands.Command} command The command being added.
-		 * @see #registerCommandContribution
+		 * @see registerCommandContribution
 		 */
 		addCommand: function(command) {
 			this._commandList[command.id] = command;
@@ -555,7 +555,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 		},
 
 		/**
-		 * @param {"key"|"url"} type
+		 * @param {String} type One of <code>"key"</code>, <code>"url"</code>.
 		 */
 		_addBinding: function(command, type, binding, bindingOnly) {
 			if (!command.id) {
@@ -570,7 +570,7 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 
 		/**
 		 * Remembers a key or url binding that has not yet been resolved to a command.
-		 *  @param {"key"|"url"} type
+		 * @param {String} type One of <code>"key"</code>, <code>"url"</code>.
 		 */
 		_addPendingBinding: function(commandId, type, binding, bindingOnly) {
 			this._pendingBindings[commandId] = this._pendingBindings[commandId] || [];

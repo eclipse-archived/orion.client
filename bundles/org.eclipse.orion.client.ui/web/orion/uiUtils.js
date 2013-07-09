@@ -119,7 +119,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 	 * @param {Boolean} isInitialValid
 	 */
 	function getUserText(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy, promptMessage, selectTo, isInitialValid) {
-		/** @return function(event) */
+		/** @return {Function} function(event) */
 		var done = false;
 		var handler = function(isKeyEvent) {
 			return function(event) {

@@ -608,7 +608,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		 * @param {orion.editor.ContentAssist#ProposalAppliedEvent} event
 		 */
 		contentAssistProposalApplied: function(event) {
-			/**
+			/*
 			 * The event.proposal is an object with this shape:
 			 * {   proposal: "[proposal string]", // Actual text of the proposal
 			 *     description: "diplay string", // Optional

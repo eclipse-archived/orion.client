@@ -247,8 +247,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			}
 		},
 		/**
-		 * @private
 		 * Retrieves the proposals at the given offset.
+		 * @private
 		 * @param {Number} offset The caret offset.
 		 * @returns {Deferred} A promise that will provide the proposals.
 		 */

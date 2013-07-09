@@ -366,7 +366,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 	/**
 	 * Constructs an annotation model.
 	 * 
-	 * @param {textModel} textModel The text model.
+	 * @param {orion.editor.TextModel} textModel The text model.
 	 * 
 	 * @class This object manages annotations for a <code>TextModel</code>.
 	 * <p>
