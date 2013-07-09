@@ -2729,8 +2729,8 @@ var exports = {};
 			 {hasOptionalParameters: true});
 		
 		var commitCommand = new mCommands.Command({
-			name: "Commit", //$NON-NLS-0$
-			tooltip: "Commit", //$NON-NLS-0$
+			name: messages["Commit"],
+			tooltip: messages["Commit"],
 			id: "eclipse.orion.git.commitCommand", //$NON-NLS-0$
 			parameters: commitMessageParameters,
 			callback: function(data) {
