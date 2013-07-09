@@ -91,13 +91,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.commandService.renderCommands('profileCommands', lib.node( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
 			
 			this.linkedAccountSection = new mSection.Section(this.linkedSection, {
-							id: "linkedAccountSection", //$NON-NLS-0$
-							title: "Linked Accounts", //$NON-NLS-0$
-							content: '<div id="iFrameContent"></div>', //$NON-NLS-0$
-							canHide: true,
-							useAuxStyle: true,
-							hidden: true,
-							slideout: true
+				id: "linkedAccountSection", //$NON-NLS-0$
+				title: messages["Linked Accounts"],
+				content: '<div id="iFrameContent"></div>', //$NON-NLS-0$
+				canHide: true,
+				useAuxStyle: true,
+				hidden: true,
+				slideout: true
 			});
 			
 			
