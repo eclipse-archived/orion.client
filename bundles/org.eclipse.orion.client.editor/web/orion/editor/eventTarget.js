@@ -41,7 +41,7 @@ define("orion/editor/eventTarget", [], function() { //$NON-NLS-0$
 		 * @param {Function|EventListener} listener The function or the EventListener that will be executed when the event happens. 
 		 * @param {Boolean} [useCapture=false] <code>true</code> if the listener should be trigged in the capture phase.
 		 * 
-		 * @see #removeEventListener
+		 * @see orion.editor.EventTarget#removeEventListener
 		 */
 		addEventListener: function(type, listener, useCapture) {
 			if (!this._eventTypes) { this._eventTypes = {}; }
@@ -101,8 +101,8 @@ define("orion/editor/eventTarget", [], function() { //$NON-NLS-0$
 		 * 
 		 * @param {String} type The event type
 		 * 
-		 * @see #addEventListener
-		 * @see #removeEventListener
+		 * @see orion.editor.EventTarget#addEventListener
+		 * @see orion.editor.EventTarget#removeEventListener
 		 */
 		isListening: function(type) {
 			if (!this._eventTypes) { return false; }
@@ -118,7 +118,7 @@ define("orion/editor/eventTarget", [], function() { //$NON-NLS-0$
 		 * @param {Function|EventListener} listener The function or the EventListener that will be executed when the event happens. 
 		 * @param {Boolean} [useCapture=false] <code>true</code> if the listener should be trigged in the capture phase.
 		 * 
-		 * @see #addEventListener
+		 * @see orion.editor.EventTarget#addEventListener
 		 */
 		removeEventListener: function(type, listener, useCapture){
 			if (!this._eventTypes) { return; }

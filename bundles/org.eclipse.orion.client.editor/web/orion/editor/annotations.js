@@ -278,8 +278,8 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 *
 		 * @param {Object} type the annotation type to be shown
 		 * 
-		 * @see #removeAnnotationType
-		 * @see #isAnnotationTypeVisible
+		 * @see orion.editor.AnnotationTypeList#removeAnnotationType
+		 * @see orion.editor.AnnotationTypeList#isAnnotationTypeVisible
 		 */
 		addAnnotationType: function(type) {
 			if (!this._annotationTypes) { this._annotationTypes = []; }
@@ -295,9 +295,9 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 *
 		 * @param {Object} type the annotation type
 		 * 
-		 * @see #addAnnotationType
-		 * @see #removeAnnotationType
-		 * @see #isAnnotationTypeVisible
+		 * @see orion.editor.AnnotationTypeList#addAnnotationType
+		 * @see orion.editor.AnnotationTypeList#removeAnnotationType
+		 * @see orion.editor.AnnotationTypeList#isAnnotationTypeVisible
 		 */
 		getAnnotationTypePriority: function(type) {
 			if (this._annotationTypes) { 
@@ -338,8 +338,8 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * @param {Object} type the annotation type 
 		 * @returns {Boolean} whether the specified annotation type is shown
 		 * 
-		 * @see #addAnnotationType
-		 * @see #removeAnnotationType
+		 * @see orion.editor.AnnotationTypeList#addAnnotationType
+		 * @see orion.editor.AnnotationTypeList#removeAnnotationType
 		 */
 		isAnnotationTypeVisible: function(type) {
 			return this.getAnnotationTypePriority(type) !== 0;
@@ -349,8 +349,8 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 *
 		 * @param {Object} type the annotation type to be removed
 		 * 
-		 * @see #addAnnotationType
-		 * @see #isAnnotationTypeVisible
+		 * @see orion.editor.AnnotationTypeList#addAnnotationType
+		 * @see orion.editor.AnnotationTypeList#isAnnotationTypeVisible
 		 */
 		removeAnnotationType: function(type) {
 			if (!this._annotationTypes) { return; }
@@ -397,7 +397,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * 
 		 * @param {orion.editor.Annotation} annotation the annotation to be added.
 		 * 
-		 * @see #removeAnnotation
+		 * @see orion.editor.AnnotationModel#removeAnnotation
 		 */
 		addAnnotation: function(annotation) {
 			if (!annotation) { return; }
@@ -417,7 +417,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * 
 		 * @return {orion.editor.TextModel} The text model.
 		 * 
-		 * @see #setTextModel
+		 * @see orion.editor.AnnotationModel#setTextModel
 		 */
 		getTextModel: function() {
 			return this._model;
@@ -474,7 +474,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * 
 		 * @param {orion.editor.Annotation} annotation the modified annotation.
 		 * 
-		 * @see #addAnnotation
+		 * @see orion.editor.AnnotationModel#addAnnotation
 		 */
 		modifyAnnotation: function(annotation) {
 			if (!annotation) { return; }
@@ -506,7 +506,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * 
 		 * @param {Object} type the type of annotations to be removed.
 		 * 
-		 * @see #removeAnnotation
+		 * @see orion.editor.AnnotationModel#removeAnnotation
 		 */
 		removeAnnotations: function(type) {
 			var annotations = this._annotations;
@@ -538,7 +538,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * 
 		 * @param {orion.editor.Annotation} annotation the annotation to be removed.
 		 * 
-		 * @see #addAnnotation
+		 * @see orion.editor.AnnotationModel#addAnnotation
 		 */
 		removeAnnotation: function(annotation) {
 			if (!annotation) { return; }
@@ -559,8 +559,8 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * @param {orion.editor.Annotation} remove the annotations to be removed.
 		 * @param {orion.editor.Annotation} add the annotations to be added.
 		 * 
-		 * @see #addAnnotation
-		 * @see #removeAnnotation
+		 * @see orion.editor.AnnotationModel#addAnnotation
+		 * @see orion.editor.AnnotationModel#removeAnnotation
 		 */
 		replaceAnnotations: function(remove, add) {
 			var annotations = this._annotations, i, index, annotation, removed = [];
@@ -594,7 +594,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * 
 		 * @param {orion.editor.TextModel} textModel the text model.
 		 * 
-		 * @see #getTextModel
+		 * @see orion.editor.AnnotationModel#getTextModel
 		 */
 		setTextModel: function(textModel) {
 			if (this._model) {

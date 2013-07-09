@@ -212,7 +212,7 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 * This function is typically called when the content of view associated with the stack is saved.
 		 * </p>
 		 *
-		 * @see #isClean
+		 * @see orion.editor.UndoStack#isClean
 		 */
 		markClean: function() {
 			this.endCompoundChange();
@@ -234,7 +234,7 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 *
 		 * @return {Boolean} returns if the state is the same as the state when markClean() was called.
 		 *
-		 * @see #markClean
+		 * @see orion.editor.UndoStack#markClean
 		 */
 		isClean: function() {
 			return this.cleanIndex === this.getSize().undo;
@@ -244,8 +244,8 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 *
 		 * @return {Boolean} returns true if there is at least one change to undo.
 		 *
-		 * @see #canRedo
-		 * @see #undo
+		 * @see orion.editor.UndoStack#canRedo
+		 * @see orion.editor.UndoStack#undo
 		 */
 		canUndo: function() {
 			return this.getSize().undo > 0;
@@ -255,8 +255,8 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 *
 		 * @return {Boolean} returns true if there is at least one change to redo.
 		 *
-		 * @see #canUndo
-		 * @see #redo
+		 * @see orion.editor.UndoStack#canUndo
+		 * @see orion.editor.UndoStack#redo
 		 */
 		canRedo: function() {
 			return this.getSize().redo > 0;
@@ -264,7 +264,7 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		/**
 		 * Finishes a compound change.
 		 *
-		 * @see #startCompoundChange
+		 * @see orion.editor.UndoStack#startCompoundChange
 		 */
 		endCompoundChange: function() {
 			if (this.compoundChange) {
@@ -278,8 +278,8 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 * @return {object} a object where object.undo is the number of changes that can be un-done, 
 		 *  and object.redo is the number of changes that can be re-done.
 		 *
-		 * @see #canUndo
-		 * @see #canRedo
+		 * @see orion.editor.UndoStack#canUndo
+		 * @see orion.editor.UndoStack#canRedo
 		 */
 		getSize: function() {
 			var index = this.index;
@@ -294,8 +294,8 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 *
 		 * @return {Boolean} returns true if a change was un-done.
 		 *
-		 * @see #redo
-		 * @see #canUndo
+		 * @see orion.editor.UndoStack#redo
+		 * @see orion.editor.UndoStack#canUndo
 		 */
 		undo: function() {
 			this._commitUndo();
@@ -315,8 +315,8 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 *
 		 * @return {Boolean} returns true if a change was re-done.
 		 *
-		 * @see #undo
-		 * @see #canRedo
+		 * @see orion.editor.UndoStack#undo
+		 * @see orion.editor.UndoStack#canRedo
 		 */
 		redo: function() {
 			this._commitUndo();
@@ -355,7 +355,7 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 *		 
 		 * @return the compound change
 		 *
-		 * @see #endCompoundChange
+		 * @see orion.editor.UndoStack#endCompoundChange
 		 */
 		startCompoundChange: function(owner) {
 			this._commitUndo();

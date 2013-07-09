@@ -200,8 +200,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 	 * The default implementation creates either a hyperlink or a plain text node.
 	 * @name orion.explorer.NavigatorRenderer#createFolderNode
 	 * @type {Function}
-	 * @see #showFolderLinks
-	 * @see #folderLink
+	 * @see orion.explorer.NavigatorRenderer#showFolderLinks
+	 * @see orion.explorer.NavigatorRenderer#folderLink
 	 * @param {Object} folder The folder to create a node for.
 	 * @returns {Element} The folder element.
 	 */

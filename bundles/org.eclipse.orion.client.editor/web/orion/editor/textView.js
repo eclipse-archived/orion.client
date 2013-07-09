@@ -1331,10 +1331,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {String} from the source coordinate space.
 		 * @param {String} to the destination coordinate space.
 		 *
-		 * @see #getLocationAtOffset
-		 * @see #getOffsetAtLocation
-		 * @see #getTopPixel
-		 * @see #setTopPixel
+		 * @see orion.editor.TextView#getLocationAtOffset
+		 * @see orion.editor.TextView#getOffsetAtLocation
+		 * @see orion.editor.TextView#getTopPixel
+		 * @see orion.editor.TextView#setTopPixel
 		 */
 		convert: function(rect, from, to) {
 			if (!this._clientDiv) { return; }
@@ -1368,7 +1368,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * attached to view can release their references.
 		 * </p>
 		 *
-		 * @see #onDestroy
+		 * @see orion.editor.TextView#onDestroy
 		 */
 		destroy: function() {
 			/* Destroy rulers*/
@@ -1495,10 +1495,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Boolean} [defaultAction=false] whether or not the predefined actions are included.
 		 * @returns {String[]} an array of action IDs defined in the text view.
 		 *
-		 * @see #invokeAction
-		 * @see #setAction
-		 * @see #setKeyBinding
-		 * @see #getKeyBindings
+		 * @see orion.editor.TextView#invokeAction
+		 * @see orion.editor.TextView#setAction
+		 * @see orion.editor.TextView#setKeyBinding
+		 * @see orion.editor.TextView#getKeyBindings
 		 */
 		getActions: function (defaultAction) {
 			var result = [];
@@ -1523,8 +1523,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *    parameter is ignored if the view is not big enough to show one line.
 		 * @returns {Number} the index of the bottom line.
 		 *
-		 * @see #getTopIndex
-		 * @see #setTopIndex
+		 * @see orion.editor.TextView#getTopIndex
+		 * @see orion.editor.TextView#setTopIndex
 		 */
 		getBottomIndex: function(fullyVisible) {
 			if (!this._clientDiv) { return 0; }
@@ -1540,9 +1540,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *
 		 * @returns {Number} the bottom pixel.
 		 *
-		 * @see #getTopPixel
-		 * @see #setTopPixel
-		 * @see #convert
+		 * @see orion.editor.TextView#getTopPixel
+		 * @see orion.editor.TextView#setTopPixel
+		 * @see orion.editor.TextView#convert
 		 */
 		getBottomPixel: function() {
 			if (!this._clientDiv) { return 0; }
@@ -1551,11 +1551,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		/**
 		 * Returns the caret offset relative to the start of the document.
 		 *
-		 * @returns the caret offset relative to the start of the document.
+		 * @returns {Number} the caret offset relative to the start of the document.
 		 *
-		 * @see #setCaretOffset
-		 * @see #setSelection
-		 * @see #getSelection
+		 * @see orion.editor.TextView#setCaretOffset
+		 * @see orion.editor.TextView#setSelection
+		 * @see orion.editor.TextView#getSelection
 		 */
 		getCaretOffset: function () {
 			var s = this._getSelection();
@@ -1568,12 +1568,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * client area position is relative to the beginning of the document.
 		 * </p>
 		 *
-		 * @returns the client area rectangle {x, y, width, height}.
+		 * @returns {Object} the client area rectangle {x, y, width, height}.
 		 *
-		 * @see #getTopPixel
-		 * @see #getBottomPixel
-		 * @see #getHorizontalPixel
-		 * @see #convert
+		 * @see orion.editor.TextView#getTopPixel
+		 * @see orion.editor.TextView#getBottomPixel
+		 * @see orion.editor.TextView#getHorizontalPixel
+		 * @see orion.editor.TextView#convert
 		 */
 		getClientArea: function() {
 			if (!this._clientDiv) { return {x: 0, y: 0, width: 0, height: 0}; }
@@ -1590,8 +1590,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *
 		 * @returns {Number} the horizontal pixel.
 		 *
-		 * @see #setHorizontalPixel
-		 * @see #convert
+		 * @see orion.editor.TextView#setHorizontalPixel
+		 * @see orion.editor.TextView#convert
 		 */
 		getHorizontalPixel: function() {
 			if (!this._clientDiv) { return 0; }
@@ -1603,8 +1603,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {String} actionID the action ID.
 		 * @returns {orion.editor.KeyBinding[]} the array of key bindings associated to the given action ID.
 		 *
-		 * @see #setKeyBinding
-		 * @see #setAction
+		 * @see orion.editor.TextView#setKeyBinding
+		 * @see orion.editor.TextView#setAction
 		 */
 		getKeyBindings: function (actionID) {
 			var result = [];
@@ -1619,8 +1619,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *
 		 * @returns {orion.editor.KeyMode[]} the array of key modes.
 		 *
-		 * @see #addKeyMode
-		 * @see #removeKeyMode
+		 * @see orion.editor.TextView#addKeyMode
+		 * @see orion.editor.TextView#removeKeyMode
 		 */
 		getKeyModes: function() {
 			return this._keyModes.slice(0);
@@ -1632,7 +1632,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Number} [lineIndex] the line index.
 		 * @returns {Number} the height of the line in pixels.
 		 *
-		 * @see #getLinePixel
+		 * @see orion.editor.TextView#getLinePixel
 		 */
 		getLineHeight: function(lineIndex) {
 			if (!this._clientDiv) { return 0; }
@@ -1644,7 +1644,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Number} [y] the line pixel.
 		 * @returns {Number} the line index for the specified pixel position.
 		 *
-		 * @see #getLinePixel
+		 * @see orion.editor.TextView#getLinePixel
 		 */
 		getLineIndex: function(y) {
 			if (!this._clientDiv) { return 0; }
@@ -1660,9 +1660,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Number} lineIndex the line index.
 		 * @returns {Number} the pixel position of the line.
 		 *
-		 * @see #setTopPixel
-		 * @see #getLineIndex
-		 * @see #convert
+		 * @see orion.editor.TextView#setTopPixel
+		 * @see orion.editor.TextView#getLineIndex
+		 * @see orion.editor.TextView#convert
 		 */
 		getLinePixel: function(lineIndex) {
 			if (!this._clientDiv) { return 0; }
@@ -1677,10 +1677,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * </p>
 		 *
 		 * @param {Number} offset the character offset
-		 * @returns the {x, y} pixel location of the given offset.
+		 * @returns {Object} the {x, y} pixel location of the given offset.
 		 *
-		 * @see #getOffsetAtLocation
-		 * @see #convert
+		 * @see orion.editor.TextView#getOffsetAtLocation
+		 * @see orion.editor.TextView#convert
 		 */
 		getLocationAtOffset: function(offset) {
 			if (!this._clientDiv) { return {x: 0, y: 0}; }
@@ -1705,7 +1705,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {String|orion.editor.TextViewOptions} [options] The options to return.
 		 * @return {Object|orion.editor.TextViewOptions} The requested options or an option value.
 		 *
-		 * @see #setOptions
+		 * @see orion.editor.TextView#setOptions
 		 */
 		getOptions: function() {
 			var options;
@@ -1746,9 +1746,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *
 		 * @param x the x of the location
 		 * @param y the y of the location
-		 * @returns the character offset at the given location.
+		 * @returns {Number} the character offset at the given location.
 		 *
-		 * @see #getLocationAtOffset
+		 * @see orion.editor.TextView#getLocationAtOffset
 		 */
 		getOffsetAtLocation: function(x, y) {
 			if (!this._clientDiv) { return 0; }
@@ -1761,9 +1761,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		/**
 		 * Get the view rulers.
 		 *
-		 * @returns the view rulers
+		 * @returns {orion.editor.Ruler[]} the view rulers
 		 *
-		 * @see #addRuler
+		 * @see orion.editor.TextView#addRuler
 		 */
 		getRulers: function() {
 			return this._rulers.slice(0);
@@ -1777,7 +1777,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * 
 		 * @returns {orion.editor.Selection} the view selection
 		 *
-		 * @see #setSelection
+		 * @see orion.editor.TextView#setSelection
 		 */
 		getSelection: function () {
 			var s = this._getSelection();
@@ -1792,7 +1792,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Number} [start=0] the start offset of text range.
 		 * @param {Number} [end=char count] the end offset of text range.
 		 *
-		 * @see #setText
+		 * @see orion.editor.TextView#setText
 		 */
 		getText: function(start, end) {
 			var model = this._model;
@@ -1810,8 +1810,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *    parameter is ignored if the view is not big enough to show one line.
 		 * @returns {Number} the index of the top line.
 		 *
-		 * @see #getBottomIndex
-		 * @see #setTopIndex
+		 * @see orion.editor.TextView#getBottomIndex
+		 * @see orion.editor.TextView#setTopIndex
 		 */
 		getTopIndex: function(fullyVisible) {
 			if (!this._clientDiv) { return 0; }
@@ -1827,9 +1827,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *
 		 * @returns {Number} the top pixel.
 		 *
-		 * @see #getBottomPixel
-		 * @see #setTopPixel
-		 * @see #convert
+		 * @see orion.editor.TextView#getBottomPixel
+		 * @see orion.editor.TextView#setTopPixel
+		 * @see orion.editor.TextView#convert
 		 */
 		getTopPixel: function() {
 			if (!this._clientDiv) { return 0; }
@@ -1851,8 +1851,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Object} [actionOptions] action specific options to be passed to the action handlers.
 		 * @returns {Boolean} <code>true</code> if the action was executed.
 		 *
-		 * @see #setAction
-		 * @see #getActions
+		 * @see orion.editor.TextView#setAction
+		 * @see orion.editor.TextView#getActions
 		 */
 		invokeAction: function (actionID, defaultAction, actionOptions) {
 			if (!this._clientDiv) { return; }
@@ -1938,7 +1938,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @event
 		 * @param {orion.editor.DestroyEvent} destroyEvent the event
 		 *
-		 * @see #destroy
+		 * @see orion.editor.TextView#destroy
 		 */
 		onDestroy: function(destroyEvent) {
 			return this.dispatchEvent(destroyEvent);
@@ -2157,8 +2157,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * </p>		 
 		 * @name orion.editor.ScrollEvent
 		 * 
-		 * @property oldValue The old scroll {x,y}.
-		 * @property newValue The new scroll {x,y}.
+		 * @property {Object} oldValue The old scroll {x,y}.
+		 * @property {Object} newValue The new scroll {x,y}.
 		 */
 		/**
 		 * This event is sent when the text view scrolls vertically or horizontally.
@@ -2238,9 +2238,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		/**
 		 * Redraws the entire view, including rulers.
 		 *
-		 * @see #redrawLines
-		 * @see #redrawRange
-		 * @see #setRedraw
+		 * @see orion.editor.TextView#redrawLines
+		 * @see orion.editor.TextView#redrawRange
+		 * @see orion.editor.TextView#setRedraw
 		 */
 		redraw: function() {
 			if (this._redrawCount > 0) { return; }
@@ -2264,9 +2264,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Number} [startLine=0] the start line
 		 * @param {Number} [endLine=line count] the end line
 		 *
-		 * @see #redraw
-		 * @see #redrawRange
-		 * @see #setRedraw
+		 * @see orion.editor.TextView#redraw
+		 * @see orion.editor.TextView#redrawRange
+		 * @see orion.editor.TextView#setRedraw
 		 */
 		redrawLines: function(startLine, endLine, ruler) {
 			if (this._redrawCount > 0) { return; }
@@ -2323,9 +2323,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Number} [start=0] the start offset of text range
 		 * @param {Number} [end=char count] the end offset of text range
 		 *
-		 * @see #redraw
-		 * @see #redrawLines
-		 * @see #setRedraw
+		 * @see orion.editor.TextView#redraw
+		 * @see orion.editor.TextView#redrawLines
+		 * @see orion.editor.TextView#setRedraw
 		 */
 		redrawRange: function(start, end) {
 			if (this._redrawCount > 0) { return; }
@@ -2398,8 +2398,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Function} handler the action handler.
 		 * @param {orion.editor.ActionDescription} [actionDescription=undefined] the action description.
 		 *
-		 * @see #getActions
-		 * @see #invokeAction
+		 * @see orion.editor.TextView#getActions
+		 * @see orion.editor.TextView#invokeAction
 		 */
 		setAction: function(actionID, handler, actionDescription) {
 			if (!actionID) { return; }
@@ -2435,9 +2435,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
 		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
 		 *
-		 * @see #getCaretOffset
-		 * @see #setSelection
-		 * @see #getSelection
+		 * @see orion.editor.TextView#getCaretOffset
+		 * @see orion.editor.TextView#setSelection
+		 * @see orion.editor.TextView#getSelection
 		 */
 		setCaretOffset: function(offset, show, callback) {
 			var charCount = this._model.getCharCount();
@@ -2455,8 +2455,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *
 		 * @param {Number} pixel the horizontal pixel.
 		 *
-		 * @see #getHorizontalPixel
-		 * @see #convert
+		 * @see orion.editor.TextView#getHorizontalPixel
+		 * @see orion.editor.TextView#convert
 		 */
 		setHorizontalPixel: function(pixel) {
 			if (!this._clientDiv) { return; }
@@ -2475,7 +2475,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *
 		 * @param {Boolean} redraw the new redraw state
 		 * 
-		 * @see #redraw
+		 * @see orion.editor.TextView#redraw
 		 */
 		setRedraw: function(redraw) {
 			if (redraw) {
@@ -2531,7 +2531,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *
 		 * @param {orion.editor.TextViewOptions} options the view options.
 		 * 
-		 * @see #getOptions
+		 * @see orion.editor.TextView#getOptions
 		 */
 		setOptions: function (options) {
 			var defaultOptions = this._defaultOptions();
@@ -2572,7 +2572,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Function} [callback] if callback is specified and <code>scrollAnimation</code> is not zero, view scrolling is animated and
 		 *					the callback is called when the animation is done. Otherwise, callback is callback right away.
 		 *
-		 * @see #getSelection
+		 * @see orion.editor.TextView#getSelection
 		 */
 		setSelection: function (start, end, show, callback) {
 			var caret = start > end;
@@ -2602,7 +2602,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 * @param {Number} [start=0] the start offset of text range.
 		 * @param {Number} [end=char count] the end offset of text range.
 		 *
-		 * @see #getText
+		 * @see orion.editor.TextView#getText
 		 */
 		setText: function (text, start, end) {
 			var reset = start === undefined && end === undefined;
@@ -2635,8 +2635,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *
 		 * @param {Number} topIndex the index of the top line.
 		 *
-		 * @see #getBottomIndex
-		 * @see #getTopIndex
+		 * @see orion.editor.TextView#getBottomIndex
+		 * @see orion.editor.TextView#getTopIndex
 		 */
 		setTopIndex: function(topIndex) {
 			if (!this._clientDiv) { return; }
@@ -2652,9 +2652,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 *
 		 * @param {Number} pixel the top pixel.
 		 *
-		 * @see #getBottomPixel
-		 * @see #getTopPixel
-		 * @see #convert
+		 * @see orion.editor.TextView#getBottomPixel
+		 * @see orion.editor.TextView#getTopPixel
+		 * @see orion.editor.TextView#convert
 		 */
 		setTopPixel: function(pixel) {
 			if (!this._clientDiv) { return; }
@@ -2663,10 +2663,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		/**
 		 * Scrolls the selection into view if needed.
 		 *
-		 * @returns true if the view was scrolled. 
+		 * @returns {Boolean} true if the view was scrolled.
 		 *
-		 * @see #getSelection
-		 * @see #setSelection
+		 * @see orion.editor.TextView#getSelection
+		 * @see orion.editor.TextView#setSelection
 		 */
 		showSelection: function() {
 			return this._showCaret(true);
