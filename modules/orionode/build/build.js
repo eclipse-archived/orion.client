@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /**
- * Usage: node build.js [path_to_bundles_folder] [path_to_build.json_file] 
+ * Usage: node build.js [path_to_bundles_folder] [path_to_build.js_file]
  */
 
 /*global __dirname Buffer console process require*/
@@ -33,7 +33,7 @@ var pathToNode = process.execPath;
 var pathToRjs = require.resolve('requirejs');
 
 var pathToOrionClientBundlesFolder = path.resolve(__dirname, process.argv[2] || '../../../bundles/');
-var pathToBuildFile = path.resolve(__dirname, process.argv[3] || './orion.build.json');
+var pathToBuildFile = path.resolve(__dirname, process.argv[3] || './nodebuild.js');
 var pathToOrionodeClient = path.resolve(path.dirname(pathToBuildFile), '../lib/orionode.client/');
 var pathToTempDir = path.resolve(__dirname, '.temp');
 
