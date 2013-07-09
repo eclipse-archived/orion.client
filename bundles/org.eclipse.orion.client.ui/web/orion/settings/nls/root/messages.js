@@ -143,5 +143,9 @@ define({
 	"Invalid scrolling duration.": "Invalid scrolling duration.",
 	"Invalid tab size.": "Invalid tab size.",
 	"Editor preferences updated": "Editor preferences updated",
-	"Editor defaults restored": "Editor defaults restored"
+	"Editor defaults restored": "Editor defaults restored",
+	"Theme:": "Theme:",
+	"Font Size:": "Font Size:",
+	"Key Bindings:": "Key Bindings:",
+	"Auto Save:": "Auto Save:"
 });
