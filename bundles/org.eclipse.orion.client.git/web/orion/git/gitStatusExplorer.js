@@ -253,7 +253,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 			item.Parents[0].Location = repository.Location;
 			item.Parents[0].ChildrenLocation = repository.Location;
 			item.Parents[1] = {};
-			item.Parents[1].Name = "Repositories"; //$NON-NLS-0$
+			item.Parents[1].Name = messages["Repositories"];
 
 			mGlobalCommands.setPageTarget({
 				task : messages["Status"],
