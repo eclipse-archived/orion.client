@@ -36,7 +36,6 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		/**
 		 * @name orion.settings.Setting#isDefaults
 		 * @function
-		 * @description
 		 * @param {Object} properties A map of AttributeDefinition IDs to values.
 		 * @returns {Boolean} <code>true</code> if <code>properties</code> contains a key for each of this setting's
 		 * AttributeDefinitions, and the corresponding value equals the AttributeDefinition's default value.
@@ -44,37 +43,31 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		/**
 		 * @name orion.settings.Setting#getCategory
 		 * @function
-		 * @description
 		 * @returns {String} The category of this setting.
 		 */
 		/**
 		 * @name orion.settings.Setting#getPid
 		 * @function
-		 * @description
 		 * @returns {String}
 		 */
 		/**
 		 * @name orion.settings.Setting#getObjectClassDefinitionId
 		 * @function
-		 * @description
 		 * @returns {String}
 		 */
 		/**
 		 * @name orion.settings.Setting#getName
 		 * @function
-		 * @description
 		 * @returns {String}
 		 */
 		/**
 		 * @name orion.settings.Setting#getAttributeDefinitions
 		 * @function
-		 * @description
 		 * @returns {orion.metatype.AttributeDefinition[]}
 		 */
 		/**
 		 * @name orion.settings.Setting#getTags
 		 * @function
-		 * @description
 		 * @returns {String[]}
 		 */
 	function SettingImpl(json) {

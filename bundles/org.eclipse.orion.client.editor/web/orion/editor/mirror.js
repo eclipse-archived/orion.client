@@ -105,8 +105,8 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 	/**
 	 * @name orion.mirror.Mirror
 	 * @class A shim for CodeMirror's <code>CodeMirror</code> API.
-	 * @description A Mirror is a partial implementation of the API provided by the <a href="http://codemirror.net/doc/manual.html#api">
-	 * <code>CodeMirror</code> object</a>. Mirror provides functionality related to mode and MIME management.
+	 * @description A Mirror is a partial implementation of the API provided by the <code><a href="http://codemirror.net/doc/manual.html#api">CodeMirror object</a></code>.
+	 * Mirror provides functionality related to mode and MIME management.
 	 * 
 	 * <p>If clients intend to reuse modes provided by CodeMirror without modification, they must expose a Mirror as 
 	 * a property named <code>"CodeMirror"</code> of the global object so that modes may access it to register themselves,
@@ -224,7 +224,6 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 	/**
 	 * @name orion.mirror.MirrorLineStyle
 	 * @class Represents the style provided by a CodeMirror mode for a line.
-	 * @description 
 	 */
 	/**
 	 * @name orion.mirror.ModeApplier
@@ -606,11 +605,9 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 		 * @param {Number} [lineIndex] The line index of the line having the given style. If omitted, the returned 
 		 * {@link orion.editor.StyleRange[]} objects will have offsets relative to the line, not the document.
 		 * 
-		 * @returns {orion.editor.StyleRange[][]} An array of 2 elements. The first element is an {@link orion.editor.StyleRange[]}
-		 * giving the styles for the line. 
-		 * <p>The second element is an {@link orion.editor.StyleRange[]} containing only those elements of
-		 * the first array that represent syntax errors. (By CodeMirror convention, anything assigned the <code>"cm-error"</code> tag
-		 * is assumed to be an error).</p>
+		 * @returns {Array} An array of 2 elements. The first element is an {@link orion.editor.StyleRange[]} giving the styles for the line. 
+		 * The second element is an {@link orion.editor.StyleRange[]} containing only those elements of the first array that represent
+		 * syntax errors. (By CodeMirror convention, anything assigned the <code>"cm-error"</code> tag is assumed to be an error).</p>
 		 */
 		toStyleRangesAndErrors: function(lineStyle, lineIndex) {
 			function token2Class(token) {

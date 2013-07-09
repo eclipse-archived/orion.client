@@ -18,7 +18,7 @@ define({
 	 * Match ignoring case and checking camel case.
 	 * @param prefix
 	 * @param target
-	 * @return
+	 * @return {Boolean}
 	 */
 	looselyMatches: function(prefix, target) {
 		if (target === null || prefix === null) {
