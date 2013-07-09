@@ -35,8 +35,8 @@ define("orion/editor/keyModes", [ //$NON-NLS-0$
 		 * @param {String} actionID the action ID.
 		 * @returns {orion.editor.KeyBinding[]} the array of key bindings associated to the given action ID.
 		 *
-		 * @see #setKeyBinding
-		 * @see #setAction
+		 * @see orion.editor.KeyModesetKeyBinding
+		 * @see orion.editor.KeyModesetAction
 		 */
 		getKeyBindings: function (actionID) {
 			var result = [];

@@ -123,7 +123,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 *
 		 * @returns {orion.editor.AnnotationModel} the ruler annotation model.
 		 *
-		 * @see #setAnnotationModel
+		 * @see orion.editor.Ruler#setAnnotationModel
 		 */
 		getAnnotationModel: function() {
 			return this._annotationModel;
@@ -133,7 +133,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 *
 		 * @returns {String} the ruler location, which is either "left" or "right".
 		 *
-		 * @see #getOverview
+		 * @see orion.editor.Ruler#getOverview
 		 */
 		getLocation: function() {
 			return this._location;
@@ -143,7 +143,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 *
 		 * @returns {String} the overview type, which is either "page" or "document".
 		 *
-		 * @see #getLocation
+		 * @see orion.editor.Ruler#getLocation
 		 */
 		getOverview: function() {
 			return this._overview;
@@ -161,7 +161,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 *
 		 * @returns {orion.editor.TextView} the text view.
 		 *
-		 * @see #setView
+		 * @see orion.editor.Ruler#setView
 		 */
 		getView: function() {
 			return this._view;
@@ -178,7 +178,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 *
 		 * @returns {orion.editor.Annotation} the widest annotation.
 		 *
-		 * @see #getAnnotations
+		 * @see orion.editor.Ruler#getAnnotations
 		 */
 		getWidestAnnotation: function() {
 			return null;
@@ -188,7 +188,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 *
 		 * @param {orion.editor.AnnotationModel} annotationModel the annotation model.
 		 *
-		 * @see #getAnnotationModel
+		 * @see orion.editor.Ruler#getAnnotationModel
 		 */
 		setAnnotationModel: function (annotationModel) {
 			if (this._annotationModel) {
@@ -206,7 +206,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 *
 		 * @param {orion.editor.Annotation} annotation the annotation for lines with multiple annotations.
 		 * 
-		 * @see #setMultiAnnotationOverlay
+		 * @see orion.editor.Ruler#setMultiAnnotationOverlay
 		 */
 		setMultiAnnotation: function(annotation) {
 			this._multiAnnotation = annotation;
@@ -218,7 +218,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 *
 		 * @param {orion.editor.Annotation} annotation the annotation overlay for lines with multiple annotations.
 		 * 
-		 * @see #setMultiAnnotation
+		 * @see orion.editor.Ruler#setMultiAnnotation
 		 */
 		setMultiAnnotationOverlay: function(annotation) {
 			this._multiAnnotationOverlay = annotation;

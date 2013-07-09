@@ -205,7 +205,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 		 * @param {Boolean} [includeDelimiter=false] whether or not to include the line delimiter. 
 		 * @returns {String} the line text or <code>null</code> if out of range.
 		 *
-		 * @see #getLineAtOffset
+		 * @see orion.editor.TextModel#getLineAtOffset
 		 */
 		getLine: function(lineIndex, includeDelimiter) {
 			var lineCount = this.getLineCount();
@@ -311,7 +311,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 		 * @param {Boolean} [includeDelimiter=false] whether or not to include the line delimiter. 
 		 * @return {Number} the line end offset or <code>-1</code> if out of range.
 		 *
-		 * @see #getLineStart
+		 * @see orion.editor.TextModel#getLineStart
 		 */
 		getLineEnd: function(lineIndex, includeDelimiter) {
 			var lineCount = this.getLineCount();
@@ -343,7 +343,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 		 * @param {Number} lineIndex the zero based index of the line.
 		 * @return {Number} the line start offset or <code>-1</code> if out of range.
 		 *
-		 * @see #getLineEnd
+		 * @see orion.editor.TextModel#getLineEnd
 		 */
 		getLineStart: function(lineIndex) {
 			if (!(0 <= lineIndex && lineIndex < this.getLineCount())) {
@@ -361,7 +361,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 		 * @param {Number} [start=0] the zero based start offset of text range.
 		 * @param {Number} [end=char count] the zero based end offset of text range.
 		 *
-		 * @see #setText
+		 * @see orion.editor.TextModel#setText
 		 */
 		getText: function(start, end) {
 			if (start === undefined) { start = 0; }
@@ -476,7 +476,7 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/util'], fun
 		 * @param {Number} [start=0] the zero based start offset of text range.
 		 * @param {Number} [end=char count] the zero based end offset of text range.
 		 *
-		 * @see #getText
+		 * @see orion.editor.TextModel#getText
 		 */
 		setText: function(text, start, end) {
 			if (text === undefined) { text = ""; }
