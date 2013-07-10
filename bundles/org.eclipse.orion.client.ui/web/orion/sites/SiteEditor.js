@@ -275,7 +275,7 @@ objects.mixin(SiteEditor.prototype, {
 				dialog.show();
 			}.bind(this)
 		});
-		choices.push({name: "URL", imageClass: "core-sprite-link", callback: addUrl}); //$NON-NLS-1$ //$NON-NLS-0$
+		choices.push({name: messages["URL"], imageClass: "core-sprite-link", callback: addUrl}); //$NON-NLS-1$ //$NON-NLS-0$
 		return choices;
 	},
 
