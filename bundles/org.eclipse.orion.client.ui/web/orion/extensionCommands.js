@@ -58,7 +58,8 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 					name: serviceRef.getProperty("name"), //$NON-NLS-0$
 					nameKey: serviceRef.getProperty("nameKey"), //$NON-NLS-0$
 					nls: serviceRef.getProperty("nls"), //$NON-NLS-0$
-					uriTemplate: serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate") //$NON-NLS-1$ //$NON-NLS-0$
+					uriTemplate: serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate"), //$NON-NLS-1$ //$NON-NLS-0$
+					validationProperties: serviceRef.getProperty("validationProperties") || [] //$NON-NLS-0$
 				});
 			}
 			return editors;
@@ -106,7 +107,8 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 					uriTemplate: editor.uriTemplate,
 					nls: editor.nls,
 					forceSingleItem: true,
-					isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand //$NON-NLS-1$ //$NON-NLS-0$
+					isEditor: (isDefaultEditor ? "default": "editor"), // Distinguishes from a normal fileCommand //$NON-NLS-1$ //$NON-NLS-0$
+					validationProperties: editor.validationProperties
 				};
 				fileCommands.push({properties: properties, service: {}});
 			}
