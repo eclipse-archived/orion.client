@@ -89,5 +89,6 @@ define({
 	"Scope Search": "Scope Search",
 	"Open in Search page for this directory": "Open in Search page for this directory",
 	"${0}. Try your search again.": "${0}. Try your search again.",
-	"Click or use delete key to delete the search term": "Click or use delete key to delete the search term"
+	"Click or use delete key to delete the search term": "Click or use delete key to delete the search term",
+	"${0} matches": "${0} matches"
 });
