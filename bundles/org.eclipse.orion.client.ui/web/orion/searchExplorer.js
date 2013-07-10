@@ -178,7 +178,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     };
 
     SearchResultRenderer.prototype.replaceFileElement = function(item) {
-        var renderName = item.totalMatches ? this.explorer.model.getFileName(item) + " (" + item.totalMatches + " matches)" :  //$NON-NLS-1$ //$NON-NLS-0$
+        var renderName = item.totalMatches ? this.explorer.model.getFileName(item) + " (" + i18nUtil.formatMessage(messages["${0} matches"], item.totalMatches) + ")" :  //$NON-NLS-1$ //$NON-NLS-0$
 						 this.explorer.model.getFileName(item) + " (" + messages["No matches"] + ")"; //$NON-NLS-1$ //$NON-NLS-0$
 		if(item.totalMatches) {
 			var linkDiv = lib.node(this.getItemLinkId(item));
