@@ -76,8 +76,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			this.preferences = args.preferences;
 					
 			var revertCommand = new mCommands.Command({
-				name: 'Cancel',
-				tooltip: 'Revert Theme',
+				name: messages["Cancel"],
+				tooltip: messages["Revert Theme"],
 				id: "orion.reverttheme", //$NON-NLS-0$
 				callback: function(data){
 					this.revert(data.items);
@@ -86,8 +86,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			});
 			
 			var updateCommand = new mCommands.Command({
-				name: 'Apply',
-				tooltip: 'Apply Theme',
+				name: messages["Apply"],
+				tooltip: messages["Apply Theme"],
 				id: "orion.applytheme", //$NON-NLS-0$
 				callback: function(data){
 					this.apply(data.items);
@@ -96,8 +96,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			});
 			
 			var guideCommand = new mCommands.Command({
-				name: 'Show Guide',
-				tooltip: 'Check Guide',
+				name: messages["Show Guide"],
+				tooltip: messages["Check Guide"],
 				id: "orion.checkGuide", //$NON-NLS-0$
 				callback: function(data){
 					this.guide(data.items);
@@ -152,7 +152,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 													'<div id="fontsizepicker" class="fontsizepicker"></div>' +
 												'</div>' +
 												'<div id="pickercontainer" style="display:block;">' +
-													'<span class="settingsLabel">Theme:</span>' + 
+													'<span class="settingsLabel">' + 
+														messages["Theme:"] + 
+													'</span>' + 
 													'<div id="themepicker" class="themepicker"></div>' +
 												'</div>' +
 												'<br>' +
@@ -161,7 +163,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 													'<div id="themesaver" class="themesaver"></div>' +
 												'</div>' +
 												'<div id="stringcontainer" style="position:relative;left:400px;top:-140px;display:none;">' +
-														'<span>OR HEX: </span>' + 
+														'<span>' +
+															messages["OR HEX:"] +
+														'</span>' + 
 														'<div id="colorstring" class="colorfield"></div>' +
 														'<button class = "commandButton" style="padding:5px;font-size:9pt;"type="button" id="colorButton"}">ok</button>' + 
 												'</div>' +
@@ -299,13 +303,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			
 		    Component.drawText( ctx, component.description.toUpperCase(), LEFT + x, TOP + 10, 'bold 9pt sans-serif', '#555' );
 
-		    Component.drawText( ctx, 'COLOR:', LEFT + x, TOP + 50, '8pt sans-serif', '#555' ); 
+		    Component.drawText( ctx, messages["COLOR:"], LEFT + x, TOP + 50, '8pt sans-serif', '#555' ); 
 		    Component.drawRectangle( ctx, LEFT + x + 100, TOP + 40, 50, 10, component.fill, null );	    
-		    Component.drawText( ctx, 'COLOR STRING:', LEFT + x, TOP + 70, '8pt sans-serif', '#555' );    
+		    Component.drawText( ctx, messages["COLOR STRING:"], LEFT + x, TOP + 70, '8pt sans-serif', '#555' );    
 		    Component.drawText( ctx, component.fill, LEFT + x + 100, TOP + 70, '8pt sans-serif', '#555' );     
 		    Component.drawLine( ctx, LEFT + x, TOP + 25, LEFT + x + 190, TOP + 25, 10, '#555' );       
 		    Component.drawLine( ctx, LEFT + x, TOP + 85, LEFT + x + 190, TOP + 85, 5, '#555' );    
-		    Component.drawText( ctx, 'NEW COLOR:', LEFT + x, TOP + 115, 'bold 8pt sans-serif', '#555' ); 
+		    Component.drawText( ctx, messages["NEW COLOR:"], LEFT + x, TOP + 115, 'bold 8pt sans-serif', '#555' ); 
 		    
 		    if( ARCS === true){
 			    for( var row = 0; row < 7; row ++ ){
