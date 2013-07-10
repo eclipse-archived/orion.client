@@ -95,7 +95,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 			}
 		}, false);
 		parent.addEventListener("keydown", function(evt) { //$NON-NLS-0$
-			var links, searchFieldNode, currentFocus, currentSelectionIndex;
+			var links, searchFieldNode, currentFocus, currentSelectionIndex, ele;
 			var incrementFocus = function(currList, index, nextEntry) {
 				if (index < currList.length - 1) {
 					return currList[index+1];
@@ -117,19 +117,30 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 				currentSelectionIndex = links.indexOf(currentFocus);
 				if (evt.keyCode === lib.KEY.DOWN) {
 					if (currentSelectionIndex >= 0) {
-						incrementFocus(links, currentSelectionIndex, links[0]).focus();
+						currentFocus.classList.remove("treeIterationCursor");
+						ele = incrementFocus(links, currentSelectionIndex, links[0]);
+						ele.focus();
+						ele.classList.add("treeIterationCursor");
 					} else if (links.length > 0) {
 						// coming from the searchFieldNode
-						incrementFocus(links, -1, links[0]).focus();
+						ele = incrementFocus(links, -1, links[0]);
+						ele.focus();
+						ele.classList.add("treeIterationCursor");
 					}   
 				} else {
 					if (currentSelectionIndex >= 0) {
 						// jump to searchFieldNode if index === 0
+						currentFocus.classList.remove("treeIterationCursor");
 						searchFieldNode = self.$fileName;
-						decrementFocus(links, currentSelectionIndex, searchFieldNode).focus();
+						ele = decrementFocus(links, currentSelectionIndex, searchFieldNode);
+						ele.focus();
+						if(currentSelectionIndex > 0) {
+							ele.classList.add("treeIterationCursor");
+						}
 					} else if (links.length > 0) {
 						// coming from the searchFieldNode go to end of list
 						links[links.length-1].focus();
+						links[links.length-1].classList.add("treeIterationCursor");
 					}
 				}
 				lib.stop(evt);
