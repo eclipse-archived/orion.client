@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  ******************************************************************************/
 
 //NLS_CHARSET=UTF-8
@@ -147,5 +147,20 @@ define({
 	"Theme:": "Theme:",
 	"Font Size:": "Font Size:",
 	"Key Bindings:": "Key Bindings:",
-	"Auto Save:": "Auto Save:"
+	"Auto Save:": "Auto Save:",
+	"UI Theme": "UI Theme",
+	"Navigation Bar": "Navigation Bar",
+	"Navigation Text": "Navigation Text",
+	"Search Box": "Search Box",
+	"Tool Panel": "Tool Panel",
+	"Selection Bar": "Selection Bar",
+	"Location": "Location",
+	"Navigation Text": "Navigation Text",
+	"Content": "Content",
+	"Main Panel": "Main Panel",
+	"Button": "Button",
+	"Button Text": "Button Text",
+	"Section Text": "Section Text",
+	"Side Panel": "Side Panel",
+	"Line Color": "Line Color"
 });
