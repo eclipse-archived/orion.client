@@ -8,11 +8,18 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define window */
+/*global define */
 /*jslint regexp:false browser:true forin:true sub:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/navigationUtils', 'orion/extensionCommands', 'orion/contentTypes'],
-		function(messages, Deferred, lib, mExplorer, mNavUtils, mExtensionCommands){
+define([
+	'i18n!orion/navigate/nls/messages',
+	'orion/Deferred',
+	'orion/explorers/explorer',
+	'orion/explorers/navigationUtils',
+	'orion/extensionCommands',
+	'orion/objects',
+	'orion/webui/littlelib'
+], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, lib) {
 		
 	/* Internal */
 	function isImage(contentType) {
@@ -74,10 +81,12 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 	 * have already processed the service extension and added to the command registry (usually by calling {@link orion.extensionCommands.createAndPlaceFileCommandsExtension}).
 	 * @param {Object} [defaultEditor] The default editor to use. If not provided, this will be computed from <code>openWithCommands</code>.
 	 * @param {Object} [linkProperties] gives additional properties to mix in to the HTML anchor element.
+	 * @param {Object} [uriParams] A map giving additional parameters that will be provided to the URI template that generates the href.
 	 */
-	function createLink(folderPageURL, item, commandService, contentTypeService, /* optional */ openWithCommands, /* optional */defaultEditor, /* optional */ linkProperties) {
+	function createLink(folderPageURL, item, commandService, contentTypeService, openWithCommands, defaultEditor, linkProperties, uriParams) {
 		// TODO FIXME folderPageURL is bad; need to use URITemplates here.
 		// TODO FIXME refactor the async href calculation portion of this function into a separate function, for clients who do not want the <A> created.
+		item = objects.clone(item);
 		var link;
 		if (item.Directory) {
 			link = document.createElement("a"); //$NON-NLS-0$
@@ -108,6 +117,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/webui/littl
 			link.appendChild(document.createTextNode(item.Name)); //$NON-NLS-0$
 
 			var href = item.Location, foundEditor = false;
+			if (uriParams && typeof uriParams === "object") { //$NON-NLS-0$
+				item.params = {};
+				objects.mixin(item.params, uriParams);
+			}
 			for (i=0; i < openWithCommands.length; i++) {
 				var openWithCommand = openWithCommands[i];
 				if (openWithCommand.visibleWhen(item)) {
