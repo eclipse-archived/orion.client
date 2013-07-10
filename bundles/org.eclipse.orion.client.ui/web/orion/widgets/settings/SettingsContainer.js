@@ -51,7 +51,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			},
 			{
 				id: "themeBuilder", //$NON-NLS-0$
-				textContent: 'UI Theme', // messages["Themes"],
+				textContent: messages["UI Theme"],
 				show: this.showThemeBuilder
 			},
 			{
