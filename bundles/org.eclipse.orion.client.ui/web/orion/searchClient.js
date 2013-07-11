@@ -133,8 +133,10 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 							params.line = resource.LineNumber;
 						}
 						if (searchParams && searchParams.keyword && !searchParams.nameSearch) {
+							var searchHelper = mSearchUtils.generateSearchHelper(searchParams);
 							params = params || {};
-							params.find = searchParams.keyword;
+							params.find = searchHelper.inFileQuery.searchStr;
+							params.regEx = searchHelper.inFileQuery.wildCard ? true : undefined;
 						}
 						var resourceLink = navigatorRenderer.createLink(require.toUrl("navigate/table.html"), item, commandRegistry, contentTypeService,
 							openWithCommands, null /*defaultEditor*/, {

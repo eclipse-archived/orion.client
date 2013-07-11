@@ -251,7 +251,7 @@ define([
 						var searchString = "";
 						var parsedParam = null;
 						var selection = editor.getSelection();
-						if (selection.end > selection.start) {//If there is selection from editor, we want to use it as the default keyword
+						if (selection.end > selection.start && data.parameters.valueFor('useEditorSelection')) {//$NON-NLS-0$ If there is selection from editor, we want to use it as the default keyword
 							var model = editor.getModel();
 							searchString = model.getText(selection.start, selection.end);
 						} else {//If there is no selection from editor, we want to parse the parameter from URL binding
@@ -262,7 +262,8 @@ define([
 							}
 						}
 						if(parsedParam){
-							var tempOptions = {regex: parsedParam.regEx, caseInsensitive: !parsedParam.caseSensitive};
+							self._localSearcher.setOptions({regex: parsedParam.regEx, caseInsensitive: !parsedParam.caseSensitive});
+							var tempOptions = {};
 							if(parsedParam.atLine){
 								tempOptions.start = editor.getModel().getLineStart(parsedParam.atLine-1);
 							}
@@ -284,7 +285,9 @@ define([
 					self._localSearcher.show(data);
 					return true;
 				}
-				self.commandService.runCommand("orion.editor.find"); //$NON-NLS-0$
+				self.commandService.runCommand("orion.editor.find", null, null, new mCommandRegistry.ParametersDescription(
+					[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], 
+					{clientCollect: true})); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$); //$NON-NLS-0$
 				return true;
 			}, findCommand);
 		},
