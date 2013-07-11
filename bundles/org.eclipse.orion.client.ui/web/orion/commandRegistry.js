@@ -11,9 +11,19 @@
 /*jslint sub:true*/
  /*global define document window Image */
  
-define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/webui/dropdown', 
-	'text!orion/webui/dropdowntriggerbutton.html', 'text!orion/webui/submenutriggerbutton.html', 'text!orion/webui/checkedmenuitem.html', 'orion/webui/tooltip', 'orion/explorers/navigationUtils'], 
-	function(require, Commands, UIUtil, PageUtil, lib, mDropdown, DropdownButtonFragment, SubMenuButtonFragment, CheckedMenuItemFragment, mTooltip, mNavUtils) {
+define([
+	'require',
+	'orion/commands',
+	'orion/explorers/navigationUtils',
+	'orion/PageUtil',
+	'orion/uiUtils',
+	'orion/webui/littlelib',
+	'orion/webui/dropdown',
+	'orion/webui/tooltip',
+	'text!orion/webui/checkedmenuitem.html',
+	'text!orion/webui/dropdowntriggerbutton.html',
+	'text!orion/webui/submenutriggerbutton.html'
+], function(require, Commands, mNavUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, CheckedMenuItemFragment, DropdownButtonFragment, SubMenuButtonFragment) {
 
 	/**
 	 * Constructs a new command registry with the given options.
@@ -342,33 +352,9 @@ define(['require', 'orion/commands', 'orion/uiUtils', 'orion/PageUtil', 'orion/w
 			var scopes = {};
 			var bindingString, binding;
 			// see commands.js _processKey
-			function executeBinding(activeBinding) {
-				var invocation = activeBinding.invocation;
-				if (invocation) {
-					var command = activeBinding.command;
-					if (command.hrefCallback) {
-						var href = command.hrefCallback.call(invocation.handler || window, invocation);
-						if (href.then){
-							href.then(function(l){
-								window.open(l);
-							});
-						} else {
-							// We assume window open since there's no link gesture to tell us what to do.
-							window.open(href);
-						}
-						return;
-					} else if (invocation.commandRegistry) {
-						invocation.commandRegistry._invoke(invocation);
-						return;
-					} else if (command.onClick || command.callback) {
-						(command.onClick || command.callback).call(invocation.handler || window, invocation);
-						return;
-					}
-				}
-			}
 			function execute(activeBinding) {
 				return function() {
-					executeBinding(activeBinding);
+					Commands.executeBinding(activeBinding);
 				};
 			}
 			var bindings = [];
