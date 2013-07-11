@@ -2569,13 +2569,6 @@ var exports = {};
 					}	
 				};
 
-				if (!data.parameters.optionsRequested && !data.parameters.valueFor("commitName")) {
-					// Workaround: if no data, this command was triggered by a keybinding. Invoke ourself through the commandRegistry to
-					// get a parameter prompt.
-					// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=410661
-					commandService.runCommand("eclipse.orion.git.openCommitCommand");
-					return;
-				}
 				if (data.items.Type === "Clone") { //$NON-NLS-0$
 					var repositories = [data.items];
 					openCommit(repositories);
