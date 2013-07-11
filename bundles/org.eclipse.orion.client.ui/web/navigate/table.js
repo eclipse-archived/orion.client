@@ -115,13 +115,13 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		var binding;
 		binding = new KeyBinding.KeyBinding(113); // F2
 		binding.domScope = "explorer-tree"; //$NON-NLS-0$
-		binding.scopeName = "Navigator"; //$NON-NLS-0$
+		binding.scopeName = messages["Navigator"];
 		commandRegistry.registerCommandContribution("selectionTools", "eclipse.renameResource", 2, "orion.selectionGroup", false, binding); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution("selectionTools", "eclipse.copyFile", 3, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution("selectionTools", "eclipse.moveFile", 4, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		binding = new KeyBinding.KeyBinding(46); // Delete
 		binding.domScope = "explorer-tree"; //$NON-NLS-0$
-		binding.scopeName = "Navigator"; //$NON-NLS-0$
+		binding.scopeName = messages["Navigator"];
 		commandRegistry.registerCommandContribution("selectionTools", "eclipse.deleteFile", 5, "orion.selectionGroup", false, binding); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution("selectionTools", "eclipse.compareWithEachOther", 6, "orion.selectionGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandRegistry.registerCommandContribution("selectionTools", "eclipse.compareWith", 7, "orion.selectionGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
