@@ -199,7 +199,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		copyMultiple: function(modelEvent) {
 			var _self = this, changedLocations = {};
 			modelEvent.items.forEach(function(item) {
-				var parent = item.newValue.Parents[0] || _self.treeRoot;
+				var itemParent = (item.newValue.Parents && item.newValue.Parents[0]);
+				// if !itemParent we refresh the treeRoot (TODO this makes no sense when using Copy To > top-level folder in other filesystem)
+				var parent = itemParent || _self.treeRoot;
 				changedLocations[parent.Location] = parent;
 			});
 			Object.keys(changedLocations).forEach(function(loc) {
