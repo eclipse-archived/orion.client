@@ -84,6 +84,7 @@ define({
 	"Sample HTML5 Site": "Sample HTML5 Site",
 	"Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.": "Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.",
 	"Sample Orion Plugin": "Sample Orion Plugin",
-	"Generate a sample plugin for integrating with Orion.": "Generate a sample plugin for integrating with Orion."
-	
+	"Generate a sample plugin for integrating with Orion.": "Generate a sample plugin for integrating with Orion.",
+	"Raw": "Raw",
+	"Open the raw file or folder in the browser": "Open the raw file or folder in the browser"
 });
