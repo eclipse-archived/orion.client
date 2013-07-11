@@ -124,9 +124,10 @@ define([
 		});
 
 	provider.registerService("orion.navigate.command", {}, {
-		name: "Raw",
 		id: "orion.view.raw",
-		tooltip: "Open the raw file or folder in the browser",
+		nameKey: "Raw",
+		nls: "orion/nls/messages",
+		tooltipKey: "Open the raw file or folder in the browser",
 		uriTemplate: "{Location}",
 		forceSingleItem: true
 	});
