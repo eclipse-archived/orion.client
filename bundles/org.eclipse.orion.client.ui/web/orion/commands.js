@@ -32,7 +32,45 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		function setKeyBindingProvider(getBindingsFunction) {
 			getBindings = getBindingsFunction;
 		}
-		
+
+		/**
+		 * Executes a binding if possible.
+		 * @name orion.commands.executeBinding
+		 * @function
+		 * @static
+		 * @param {Object} binding
+		 * @returns {Boolean} <code>true</code> if the binding was executed, <code>false</code> otherwise.
+		 */
+		function executeBinding(binding) {
+			var invocation = binding.invocation;
+			if (invocation) {
+				var command = binding.command;
+				if (command.hrefCallback) {
+					var href = command.hrefCallback.call(invocation.handler || window, invocation);
+					if (href.then){
+						href.then(function(l){
+							window.open(l);
+						});
+					} else {
+						// We assume window open since there's no link gesture to tell us what to do.
+						window.open(href);
+					}
+					return true;
+				} else if (invocation.commandRegistry) {
+					// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=411282
+					invocation.commandRegistry._invoke(invocation);
+					return true;
+				} else if (command.onClick || command.callback) {
+					// TODO: what is this timeout for?
+					window.setTimeout(function() {
+						(command.onClick || command.callback).call(invocation.handler || window, invocation);
+					}, 0);
+					return true;
+				}
+			}
+			return false;
+		}
+
 		/*
 		 * Process a key event against the provided bindings.
 		 */
@@ -44,33 +82,9 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 						var keyBinding = activeBinding.keyBinding;
 						// Check for keys that are scoped to a particular part of the DOM
 						if (!keyBinding.domScope || lib.contains(lib.node(keyBinding.domScope), event.target)) {
-							var invocation = activeBinding.invocation;
-							if (invocation) {
-								var command = activeBinding.command;
-								if (command.hrefCallback) {
-									lib.stop(event);
-									var href = command.hrefCallback.call(invocation.handler || window, invocation);
-									if (href.then){
-										href.then(function(l){
-											window.open(l);
-										});
-									} else {
-										// We assume window open since there's no link gesture to tell us what to do.
-										window.open(href);
-									}
-									return;
-								} else if (invocation.commandRegistry) {
-									// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=411282
-									lib.stop(event);
-									invocation.commandRegistry._invoke(invocation);
-									return;
-								} else if (command.onClick || command.callback) {
-									lib.stop(event);
-									window.setTimeout(function() {
-										(command.onClick || command.callback).call(invocation.handler || window, invocation);
-									}, 0);
-									return;
-								}
+							if (executeBinding(activeBinding)) {
+								lib.stop(event);
+								return;
 							}
 						}
 					}
@@ -598,6 +612,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		createCheckedMenuItem: createCheckedMenuItem,
 		createCommandItem: createCommandItem,
 		createCommandMenuItem: createCommandMenuItem,
+		executeBinding: executeBinding,
 		setKeyBindingProvider: setKeyBindingProvider,
 		localKeyBindings: localKeyBindings,
 		_testMethodProcessKey: _processKey  // only exported for test cases
