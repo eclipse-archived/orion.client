@@ -19,6 +19,7 @@ define({
 	"View the working directory version of the file": "View the working directory version of the file",
 	"Loading...": "Loading...",
 	"Repositories": "Git Repositories",
+	"Repo": "Repositories",
 	"0 on 1 - Git": "${0} on ${1} - Git",
 	"Git": "Git",
 	"Show in eclipse.org": "Show in eclipse.org",
@@ -387,5 +388,6 @@ define({
 	"Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.": "Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.",
 	"URL:": "URL:",
 	"File:": "File:",
-	"Submit": "Submit"
+	"Submit": "Submit",
+	"git url:": "git url: "
 });
