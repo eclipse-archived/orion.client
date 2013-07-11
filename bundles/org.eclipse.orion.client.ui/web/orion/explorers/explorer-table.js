@@ -176,7 +176,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 						} else {
 							target = "_self"; //$NON-NLS-0$
 						}
-						renderer.setTarget(target);
+						if (renderer.setTarget) {
+							renderer.setTarget(target);
+						}
 					}
 				}, {pid: "nav.config"}); //$NON-NLS-0$
 		}
