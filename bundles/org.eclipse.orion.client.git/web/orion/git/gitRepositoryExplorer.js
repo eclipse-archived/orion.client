@@ -212,7 +212,7 @@ exports.GitRepositoryExplorer = (function() {
 	GitRepositoryExplorer.prototype.initTitleBar = function(resource, sectionName){
 		var that = this;
 		var item = {};
-		var task = "Repositories";
+		var task = messages.Repo;
 		var scopeId = "repoPageActions";
 
 		var repository;
@@ -225,21 +225,21 @@ exports.GitRepositoryExplorer = (function() {
 			item.Parents[0].Location = repository.Location;
 			item.Parents[0].ChildrenLocation = repository.Location;
 			item.Parents[1] = {};
-			item.Parents[1].Name = "Repositories"; //$NON-NLS-0$
+			item.Parents[1].Name = messages.Repo;
 			task = sectionName;
 		} else if (resource && resource.Type === "Clone") { //$NON-NLS-0$
 			repository = resource;
 			item.Name = repository.Name;
 			item.Parents = [];
 			item.Parents[0] = {};
-			item.Parents[0].Name = "Repositories"; //$NON-NLS-0$
+			item.Parents[0].Name = messages.Repo;
 		} else {
-			item.Name = "Repositories"; //$NON-NLS-0$
+			item.Name = messages.Repo;
 			scopeId = "reposPageActions";
 		}
 		
 		updatePageActions(that.registry, that.commandService, "pageActions", scopeId, repository || {}); //$NON-NLS-1$ //$NON-NLS-0$
-		mGlobalCommands.setPageTarget({task: "Repositories", target: repository, breadcrumbTarget: item,
+		mGlobalCommands.setPageTarget({task: messages.Repo, target: repository, breadcrumbTarget: item,
 			makeBreadcrumbLink: function(seg, location) {
 				seg.href = require.toUrl("git/git-repository.html") + (location ? "#" + location : ""); //$NON-NLS-0$
 			},
@@ -424,7 +424,7 @@ exports.GitRepositoryExplorer = (function() {
 				detailsView.appendChild(div);
 				
 				var span = document.createElement("span");
-				span.textContent = (repositories[i].GitUrl !== null ? "git url: " + repositories[i].GitUrl : messages["(no remote)"]);
+				span.textContent = (repositories[i].GitUrl !== null ? messages["git url:"] + repositories[i].GitUrl : messages["(no remote)"]);
 				detailsView.appendChild(span);
 				
 				div = document.createElement("div");
