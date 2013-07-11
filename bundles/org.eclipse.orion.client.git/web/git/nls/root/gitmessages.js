@@ -384,5 +384,7 @@ define({
 	"Failing paths: ${0}": "Failing paths: ${0}",
 	"Problem while performing the action": "Problem while performing the action",
 	"Clone Git Repository": "Clone Git Repository",
-	"Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.": "Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator."
+	"Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.": "Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.",
+	"URL:": "URL:",
+	"File:": "File:"
 });
