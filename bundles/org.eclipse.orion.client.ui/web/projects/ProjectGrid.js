@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -51,10 +51,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 		var template =	'<div id="projects" class="projects">' +
 							'<div class="buttonBox">' +
 								'<div role="button" class="leftButton" tabindex="0" aria-pressed="false" style="-webkit-user-select: none;" aria-label="Switch to List" data-tooltip="Switch to List">' +
-									'<div class="core-sprite-thumbnail"></div>' +
+									'<div class="imageSprite core-sprite-thumbnail" style="margin: 7px"></div>' +
 								'</div>' +
 								'<div role="button" class="rightButton" tabindex="0" aria-pressed="false" style="-webkit-user-select: none;" aria-label="Switch to List" data-tooltip="Switch to List">' +
-									'<div class="core-sprite-list"></div>' +
+									'<div class="imageSprite core-sprite-list" style="margin: 7px"></div>' +
 								'</div>' +
 							'</div>' +
 							'<div id="listNode" class="projectListNode"></div>' +
