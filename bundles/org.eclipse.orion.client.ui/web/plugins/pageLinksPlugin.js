@@ -50,6 +50,13 @@ define([
 		nls: "orion/nls/messages",
 		uriTemplate: "{OrionHome}/search/search.html"
 	});
+	provider.registerService("orion.page.link", null, {
+		nameKey: "Editor",
+		nls: "orion/nls/messages",
+		tooltip: "Edit the code",
+		uriTemplate: "{OrionHome}/edit/edit.html"
+	});
+	
 	provider.registerService("orion.page.link.related", null, {
 		id: "orion.navigateFromMetadata",
 		nameKey: "Navigator",
@@ -62,7 +69,7 @@ define([
 		}],
 		uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
 	});
-	
+
 	provider.registerService("orion.page.link.related", null, {
 		id: "orion.editFromMetadata",
 		nameKey: "Editor",
