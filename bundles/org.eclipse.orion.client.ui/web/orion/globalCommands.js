@@ -906,6 +906,9 @@ define([
 				}.bind(this), 100);
 			},
 			hide: function () {
+				if (!this.isVisible()) {
+					return;
+				}
 				var activeElement = document.activeElement;
 				var keyAssistDiv = this._keyAssistDiv;
 				var hasFocus = keyAssistDiv === activeElement || (keyAssistDiv.compareDocumentPosition(activeElement) & 16) !== 0;
@@ -956,6 +959,9 @@ define([
 				}
 			},
 			show: function () {
+				if (this.isVisible()) {
+					return;
+				}
 				this._previousActiveElement = document.activeElement;
 				this.createContents();
 				this._keyAssistContents.style.height = Math.floor(this._keyAssistDiv.parentNode.clientHeight * 0.75) + "px"; //$NON-NLS-0$
