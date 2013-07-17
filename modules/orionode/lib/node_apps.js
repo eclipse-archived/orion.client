@@ -306,18 +306,19 @@ var AppContext = function(options) {
 		var resolvedPath = resolveModulePath(workspaceDir, cwdPath, modulePath);
 		var app = _startApp(["--debug-brk=" + port, resolvedPath].concat(args || []), cwdPath);
 		var parsedRequestUrl = url.parse(requestUrl);
+		var node_inspector_port = configParams.node_inspector_port || INSPECT_PORT;
 		app.debug = /*url.format(*/{
 			protocol: 'http',//parsedRequestUrl.protocol,
 			// TODO this is bizarre. Can we host node-inspector on the same port as Orionode?
 			hostname: url.parse('http://' + headers.host).hostname,
-			port:  INSPECT_PORT,
+			port:  node_inspector_port,
 			pathname: url.resolve(parsedRequestUrl.pathname, '../../debug'),
 			query: {port: port}
 		};
 		//Lazy spawn the node inspector procees for the first time when user wants to debug an app.
 		if(app && !inspector) {
 			var inspectorPath = require.resolve(PATH_TO_NODE_INSPECTOR);
-			inspector = _startInspectorApp([inspectorPath, "--web-port=" + INSPECT_PORT], path.dirname(inspectorPath), headers, requestUrl, true);
+			inspector = _startInspectorApp([inspectorPath, "--web-port=" + node_inspector_port], path.dirname(inspectorPath), headers, requestUrl, true);
 		}
 		return app;
 	}.bind(this);
