@@ -5575,10 +5575,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_scrollViewAnimated: function (pixelX, pixelY, callback) {
+			var window = this._getWindow();
 			if (callback && this._scrollAnimation) {
 				var self = this;
 				this._animation = new Animation({
-					window: this._getWindow(),
+					window: window,
 					duration: this._scrollAnimation,
 					curve: [pixelY, 0],
 					onAnimate: function(x) {
@@ -5590,7 +5591,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						self._animation = null;
 						self._scrollView (pixelX, pixelY);
 						if (callback) {
-							callback();
+							window.setTimeout(callback, 0);
 						}
 					}
 				});
@@ -5598,7 +5599,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			} else {
 				this._scrollView (pixelX, pixelY);
 				if (callback) {
-					callback();
+					window.setTimeout(callback, 0);
 				}
 			}
 		}, 
