@@ -96,13 +96,23 @@ var SyntaxChecker = (function () {
 				problem.severity = problem.severity || "error"; //$NON-NLS-0$
 				problem.start = (typeof problem.start === "number") ? problem.start : problem.character; //$NON-NLS-0$
 				problem.end = (typeof problem.end === "number") ? problem.end : problem.start + 1; //$NON-NLS-0$
-				
+
 				// Range check
-				var lineLength = model.getLine(problem.line - 1, false).length;
-				problem.start = Math.max(1, problem.start);
-				problem.start = Math.min(problem.start, lineLength);
-				problem.end = Math.min(problem.end, lineLength);
-				problem.end = Math.max(problem.start, problem.end);
+				if (typeof problem.line === "number") {
+					// start, end are line offsets (1-based)
+					var lineLength = model.getLine(problem.line - 1, false).length;
+					problem.start = Math.max(1, problem.start);
+					problem.start = Math.min(problem.start, lineLength);
+					problem.end = Math.min(problem.end, lineLength);
+					problem.end = Math.max(problem.start, problem.end);
+				} else {
+					// start, end are document offsets (0-based)
+					var charCount = model.getCharCount();
+					problem.start = Math.max(0, problem.start);
+					problem.start = Math.min(problem.start, charCount);
+					problem.end = Math.min(problem.end, charCount);
+					problem.end = Math.max(problem.start, problem.end);
+				}
 			}
 		}
 	};

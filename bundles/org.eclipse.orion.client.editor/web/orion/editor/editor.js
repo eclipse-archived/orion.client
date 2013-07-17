@@ -679,12 +679,20 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 					if (problem) {
 						// escaping voodoo... we need to construct HTML that contains valid JavaScript.
 						var escapedDescription = problem.description.replace(/'/g, "&#39;").replace(/"/g, '&#34;'); //$NON-NLS-1$ //$NON-NLS-0$
-						var lineIndex = problem.line - 1;
-						var lineStart = model.getLineStart(lineIndex);
+						var start, end;
+						if (typeof problem.line === "number") {
+							// line/column
+							var lineIndex = problem.line - 1;
+							var lineStart = model.getLineStart(lineIndex);
+							start = lineStart + problem.start - 1;
+							end = lineStart + problem.end;
+						} else {
+							// document offsets
+							start = problem.start;
+							end = problem.end;
+						}
 						var severity = problem.severity;
 						var type = severity === "error" ? mAnnotations.AnnotationType.ANNOTATION_ERROR : mAnnotations.AnnotationType.ANNOTATION_WARNING; //$NON-NLS-0$
-						var start = lineStart + problem.start - 1;
-						var end = lineStart + problem.end;
 						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, escapedDescription);
 						add.push(annotation);
 					}
