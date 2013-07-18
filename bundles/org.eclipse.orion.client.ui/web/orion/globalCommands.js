@@ -488,6 +488,7 @@ define([
 					// assumes that there is never anything besides notifications and slideout between toolbar and its target 
 					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=391596
 					elements.toolbarTargetY = bounds.height + 1;
+					elements.toolbar = toolbarNode;
 				}
 			}
 		}
@@ -510,7 +511,7 @@ define([
 				heightExtras += 8; // padding
 			}
 			elements.toolbarTarget.style.top = elements.toolbarTargetY + heightExtras + "px"; //$NON-NLS-0$
-			elements.toolbarTarget.style.bottom = 0;
+			elements.toolbar.style.paddingBottom = heightExtras + "px"; //$NON-NLS-0$ 
 		}
 	}
 

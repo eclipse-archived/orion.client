@@ -360,6 +360,7 @@ textarea.parameterInput {
 	float: left;
 	margin: 2px;
 	margin-top: 3px;
+	margin-left: 4px;
 	display: none;
 	vertical-align: middle;
 	font-size: 11px;
