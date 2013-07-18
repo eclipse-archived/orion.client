@@ -63,7 +63,8 @@ var SyntaxChecker = (function () {
 				var self = this;
 				getValidators(this.registry, contentType).then(function(validators) {
 					var extractProblems = function(data) {
-						return data.problems || data.errors;
+						var problems = data && (data.problems || data.errors);
+						return problems || [];
 					};
 					var problemPromises = [];
 					var progress = self.registry.getService("orion.page.progress");
