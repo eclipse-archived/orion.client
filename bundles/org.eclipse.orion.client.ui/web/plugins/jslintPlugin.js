@@ -11,9 +11,13 @@
  *******************************************************************************/
 /*jslint forin:true regexp:false*/
 /*global define JSLINT require window*/
-define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvider) {
-	var validationOptions = {bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, maxerr: 300, newcap: true,
-				nomen: false, onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false};
+define(["orion/plugin", "orion/jslintworker", "orion/objects"], function(PluginProvider, _, objects) {
+	var DEFAULT_VALIDATION_OPTIONS = {
+			bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, maxerr: 300, newcap: true, nomen: false,
+			onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false
+	};
+	var validationOptions = DEFAULT_VALIDATION_OPTIONS;
+	var isEnabled = true;
 
 	function jslint(contents) {
 		JSLINT(contents, validationOptions);
@@ -64,7 +68,6 @@ define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvi
 		return isBogus(error) ? null : error;
 	}
 
-	var isEnabled = true;
 	var validationService = {
 		// ManagedService
 		updated: function(properties) {
@@ -75,21 +78,23 @@ define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvi
 				if (typeof properties.options === "string") {
 					var options = properties.options;
 					if (!/^\s*$/.test(options)) {
-						var optionsMap = {};
+						var userOptionsMap = {}, hasUserOption = false;
 						options.split(/,/).forEach(function(option) {
 							var match = /\s*(\w+)\s*:\s*(\w+)\s*/.exec(option); // name:value
 							if (match === null) {
-								console.log('JSLINT ignoring bad option: ' + option);
+								console.log('JSLint ignoring bad option: ' + option);
 							} else {
 								var name = match[1], value = match[2];
-								optionsMap[name] = value;
+								userOptionsMap[name] = value;
+								hasUserOption = true;
 							}
 						});
-						if (Object.keys(optionsMap).length > 0) {
-							validationOptions = optionsMap;
-							console.log('JSLINT using custom options: ' + Object.keys(validationOptions).map(function(k) {
-								return k + ':' + optionsMap[k];
-							}).join(','));
+						validationOptions = {};
+						objects.mixin(validationOptions, DEFAULT_VALIDATION_OPTIONS, userOptionsMap);
+						if (hasUserOption) {
+							console.log('JSLint using user-provided options: {' + Object.keys(userOptionsMap).map(function(k) {
+								return k + ':' + userOptionsMap[k];
+							}).join(',') + "}");
 						}
 					}
 				}
@@ -249,7 +254,7 @@ define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvi
 							type: 'boolean'
 						},
 						{	id: 'options',
-							name: 'Default Options',
+							name: 'Options to pass to JSLint (/*jslint ..*/)',
 							type: 'string'
 						}
 					]
