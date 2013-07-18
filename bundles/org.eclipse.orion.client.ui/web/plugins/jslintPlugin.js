@@ -164,22 +164,14 @@ define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvi
 	function toOutlineModel(title, jslintResult) {
 		var outline = [],
 		    functions = jslintResult.functions;
-		for (var func in functions) {
-			var f = functions[func],
+		for (var i=0; i < functions.length; i++) {
+			var f = functions[i],
 			    name = f.name,
 			    isAnonymousFunction = (name[0]==='"');
 			if (isAnonymousFunction) {
 				f.name = name = name.substring(1, name.length-1);
 			}
-			name += "(";
-			if (f.param) {
-				var params = [];
-				for (var p in f.param) {
-					params.push(f.param[p]);
-				}
-				name += params.join(",");
-			}
-			name += ")";
+			name += "(" + (f.param ? f.param.join(",") : "") + ")";
 			var element = {
 				label: name,
 				children: null,
