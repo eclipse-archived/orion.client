@@ -208,7 +208,6 @@ define({
 	"Search": "Search",
 	"Searching...": "Searching...",
 	"Looking for the commit": "Looking for the commit",
-	" authored by ${0} (${1})) on ${2}": " authored by ${0} (${1})) on ${2}",
 	"New Branch:": "New Branch:",
 	"OK": "OK",
 	" [New branch]": " [New branch]",
