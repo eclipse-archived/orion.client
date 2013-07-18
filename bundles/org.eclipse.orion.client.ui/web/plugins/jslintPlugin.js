@@ -64,34 +64,42 @@ define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvi
 		return isBogus(error) ? null : error;
 	}
 
+	var isEnabled = true;
 	var validationService = {
 		// ManagedService
 		updated: function(properties) {
-			if (properties && typeof properties.options === "string") {
-				var options = properties.options;
-				if (!/^\s*$/.test(options)) {
-					var optionsMap = {};
-					options.split(/,/).forEach(function(option) {
-						var match = /\s*(\w+)\s*:\s*(\w+)\s*/.exec(option); // name:value
-						if (match === null) {
-							console.log('JSLINT ignoring bad option: ' + option);
-						} else {
-							var name = match[1], value = match[2];
-							optionsMap[name] = value;
+			if (properties) {
+				if (typeof properties.enabled === "boolean") {
+					isEnabled = !!properties.enabled;
+				}
+				if (typeof properties.options === "string") {
+					var options = properties.options;
+					if (!/^\s*$/.test(options)) {
+						var optionsMap = {};
+						options.split(/,/).forEach(function(option) {
+							var match = /\s*(\w+)\s*:\s*(\w+)\s*/.exec(option); // name:value
+							if (match === null) {
+								console.log('JSLINT ignoring bad option: ' + option);
+							} else {
+								var name = match[1], value = match[2];
+								optionsMap[name] = value;
+							}
+						});
+						if (Object.keys(optionsMap).length > 0) {
+							validationOptions = optionsMap;
+							console.log('JSLINT using custom options: ' + Object.keys(validationOptions).map(function(k) {
+								return k + ':' + optionsMap[k];
+							}).join(','));
 						}
-					});
-					if (Object.keys(optionsMap).length > 0) {
-						validationOptions = optionsMap;
-						console.log('JSLINT using custom options: ' + Object.keys(validationOptions).map(function(k) {
-							return k + ':' + optionsMap[k];
-						}).join(','));
 					}
 				}
 			}
 		},
 		checkSyntax : function(title, contents) {
+			if (!isEnabled) {
+				return {problems: []};
+			}
 			var result = jslint(contents);
-			//this.dispatchEvent("syntaxChecked", {title: title, result: result});
 			var problems = [];
 			var i;
 			if (result.errors) {
@@ -243,6 +251,11 @@ define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvi
 					tags: 'validation javascript js jslint'.split(' '),
 					category: 'validation',
 					properties: [
+						{	id: 'enabled',
+							name: 'Use JSLint to check JavaScript code',
+							defaultValue: true,
+							type: 'boolean'
+						},
 						{	id: 'options',
 							name: 'Default Options',
 							type: 'string'
