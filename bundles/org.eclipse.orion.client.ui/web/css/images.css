@@ -19,7 +19,7 @@
 }
 
 /* Individual sprites */
-.core-sprite-addcontent{ background-position: 0 0; width: 16px; height: 16px; } 
+.core-sprite-addcontent{ background:url(../images/addcontent.png); width: 16px; height: 16px; } 
 .core-sprite-check{ background-position: 0 -18px; width: 16px; height: 16px; } 
 .core-sprite-check_on{ background-position: 0 -36px; width: 16px; height: 16px; } 
 .core-sprite-close{ background-position: 0 -54px; width: 16px; height: 16px; } 
@@ -28,15 +28,15 @@
 .core-sprite-compare-addition{ background-position: 0 -108px; width: 16px; height: 16px; } 
 .core-sprite-compare-removal{ background-position: 0 -126px; width: 16px; height: 16px; } 
 .core-sprite-copy-folder{ background-position: 0 -144px; width: 16px; height: 16px; } 
-.core-sprite-delete{ background-position: 0 -162px; width: 16px; height: 16px; } 
+.core-sprite-delete{  background-position: 0 -162px; width: 16px; height: 16px; } 
 .core-sprite-edit{ background-position: 0 -180px; width: 16px; height: 16px; } 
 .core-sprite-error{ background-position: 0 -198px; width: 16px; height: 16px; } 
 .core-sprite-expandAll{ background-position: 0 -216px; width: 16px; height: 16px; } 
 .core-sprite-file{ background-position: 0 -252px; width: 16px; height: 16px; } 
 .core-sprite-file_model{ background-position: 0 -270px; width: 16px; height: 16px; } 
 .core-sprite-folder{ background-position: 0 -288px; width: 16px; height: 16px; } 
-.core-sprite-gear{ background-position: 0 -306px; width: 16px; height: 16px; } 
-.core-sprite-go-up{ background-position: 0 -324px; width: 16px; height: 16px; } 
+.core-sprite-gear{ background:url(../images/gear.png); width: 16px; height: 16px; } 
+.core-sprite-go-up{ background:url(../images/go-up.png); width: 16px; height: 16px; } 
 .core-sprite-hamburger{ background-position: 0 -342px; width: 16px; height: 16px; } 
 .core-sprite-information{ background-position: 0 -360px; width: 16px; height: 16px; } 
 .core-sprite-leftarrow{ background-position: 0 -378px; width: 16px; height: 16px; } 
