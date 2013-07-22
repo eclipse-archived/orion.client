@@ -9,19 +9,30 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define*/
-define(['orion/plugin', 'orion/xhr', 'orion/Deferred'], function(PluginProvider, xhr, Deferred) {
+/*global document define*/
+define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred'], function(require, PluginProvider, xhr, Deferred) {
 	var headers = {
 		name: "Orion Shell Log Provider Service",
 		version: "1.0",
 		description: "This plugin integrates access to Orion log files."
 	};
 
+	var temp = document.createElement('a');
+	function createLocation(location) {
+		temp.href = location;
+		var absLocation = temp.href;
+		if(temp.host){
+			return absLocation.substring(absLocation.indexOf(temp.host)+temp.host.length);
+		}
+		
+		return absLocation;
+	}
+
 	function callLogService(url, raw){
 		var d = new Deferred();
 		var handler = raw ? "text/plain" : "json";
 		
-		xhr("GET", url, {
+		xhr("GET", createLocation(require.toUrl(url)), {
 			headers : {
 				"Orion-Version" : "1",
 				"Content-Type" : "charset=UTF-8"
@@ -60,7 +71,7 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred'], function(PluginProvider,
 		
 			//TODO: Workaround, see bug 413230
 			if(args.appenderName === ""){
-				callLogService("/logs/appenders").then(function(resp){
+				callLogService("logs/appenders").then(function(resp){
 					//TODO: Workaround, see bug 413230
 					if(args.verbose){ deferred.resolve(resp); }
 					else {
@@ -77,13 +88,13 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred'], function(PluginProvider,
 				});
 			} else {
 				if(args.verbose){
-					callLogService("/logs/appenders/" + args.appenderName).then(function(resp){
+					callLogService("logs/appenders/" + args.appenderName).then(function(resp){
 						deferred.resolve(resp);
 					}, function(error){
 						deferred.reject(error);
 					});
 				} else {
-					callLogService("/logs/appenders/" + args.appenderName + "/download", true).then(function(resp){
+					callLogService("logs/appenders/" + args.appenderName + "/download", true).then(function(resp){
 						deferred.resolve(resp);
 					}, function(error){
 						deferred.reject(error);
