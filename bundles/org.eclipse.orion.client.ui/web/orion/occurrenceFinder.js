@@ -66,9 +66,9 @@ var OccurrenceFinder = (function () {
 				}
 				occurrenceTimer = window.setTimeout(function() {
 					occurrenceTimer = null;
-					var sel = self.editor.getSelection();
-					var word = self.editor.getText(sel.start, sel.end);
-					occurrencesService.findOccurrences(self.editor.getText(), word, sel).then(function (occurrences) {
+					var editor = self.editor;
+					var sel = editor.getSelection();
+					occurrencesService.findOccurrences(self.editor.getText(), sel).then(function (occurrences) {
 						self.editor.showOccurrences(occurrences);
 					});	
 				}, 500);

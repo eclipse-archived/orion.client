@@ -74,6 +74,24 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
         }
         updateScope(node, scope);
     }
+    
+    function traverse1(node, context, func) {
+        func(node, context);
+        for (var key in node) {
+            if (node.hasOwnProperty(key)) {
+                var child = node[key];
+                if (typeof child === 'object' && child !== null) { //$NON-NLS-0$
+                    if (Array.isArray(child)) {
+                        for (var i=0; i<child.length; i++) {
+                            traverse1(child[i], context, func);
+                        }
+                    } else {
+                        traverse1(child, context, func);
+                    }
+                }
+            }
+        }
+    }
 
     /* convert ast array to String */
 
@@ -115,12 +133,14 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
                 readAccess = true;
             }
 
+			//SSQ: can this be done in the first traverse?
             var mScope = findMatchingDeclarationScope(scope);
             if (!mScope) {
                 return;
             }
 	
-			if ((node.range[0] === context.start) && (node.range[1] === context.end)) {
+			//SSQ: check for inclusion, not equality
+			if ((node.range[0] <= context.start) && (context.end <= node.range[1])) {
           //  if ((node.loc.start.line === context.line) && (node.loc.start.column === context.column.start)) {
                 if (mScope) {
                     context.scope = mScope;
@@ -128,6 +148,7 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
                     console.error("matching declaration scope for selected type not found " + context.word); //$NON-NLS-0$
                 }
             }
+            //SSQ ---------------------------------------------
 
             occurrences.push({
                 readAccess: readAccess,
@@ -311,11 +332,27 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
         if (ast) {
             var occurrences = [],
                 scope = [];
+                
+            // SSQ: traverse1 computes the context.word using text buffer and selection
+            // SSQ: traverse1 and traverse should be the same.  For that, stop passing "occurrences" and "scope" as parameters to traverse. Pass them inside the "context" object
+			traverse1(ast, context, function(node, context) {
+				if (node.range && node.name && (node.range[0] <= context.start) && (context.end <= node.range[1])) {
+					context.word = node.name;
+				}
+            });
+            window.console.log("word=" + context.word);
+            
+            // SSQ: if word (=identifier) not found, give up
+            if (!context || !context.word) {
+                return null;
+            }
+                
             traverse(ast, context, findOccurrence, occurrences, scope);
             occurrences = filterOccurrences(occurrences, context);
-            if (!occurrences) {
-                console.error("no matching occurrences found");	//$NON-NLS-0$
-            }
+//            SSQ: should not throw error, just return an empty array (or null)
+//            if (!occurrences) {
+//                console.error("no matching occurrences found");	//$NON-NLS-0$
+//            }
             return occurrences;
         }
         console.error("ast is null");	//$NON-NLS-0$
@@ -332,18 +369,17 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
     
     // Create the service implementation for getting selected text
     var serviceImpl = {
-        findOccurrences: function(text, word, selection) {
+        findOccurrences: function(text, selection) {
             var context = {
-				word: word,
                 text: text,
-                start : selection.start,
+                start: selection.start,
                 end: selection.end,
                 scope: null
             };
-
-            if (!context || !context.word) {
-                return null;
-            }
+//            SSQ: compute word using AST. Remove word parameter from findOccurrences. This check needs to happen later in getOccurrences
+//            if (!context || !context.word) {
+//                return null;
+//            }
 	        return  getOccurrences (context);
         }
     };
