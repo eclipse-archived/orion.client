@@ -11,6 +11,10 @@
  *******************************************************************************/
 /*global document define*/
 define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred'], function(require, PluginProvider, xhr, Deferred) {
+	
+	/* log provider server scope */
+	var LOGAPI_SCOPE = "logs/";
+	
 	var headers = {
 		name: "Orion Shell Log Provider Service",
 		version: "1.0",
@@ -32,7 +36,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred'], function(requ
 		var d = new Deferred();
 		var handler = raw ? "text/plain" : "json";
 		
-		xhr("GET", createLocation(require.toUrl(url)), {
+		xhr("GET", url, {
 			headers : {
 				"Orion-Version" : "1",
 				"Content-Type" : "charset=UTF-8"
@@ -40,7 +44,8 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred'], function(requ
 			timeout : 15000,
 			handleAs : handler
 		}).then(function(resp) {
-			d.resolve(resp.responseText);
+			if(raw){ d.resolve(resp.responseText); }
+			else { d.resolve(JSON.parse(resp.responseText)); }
 		}, function(error){
 			d.reject(error);
 		});
@@ -54,9 +59,9 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred'], function(requ
 		description: "Prints all file-based appenders in the current logger context.",
 		returnType: "string",
 		parameters: [{
-			name: "verbose",
+			name: "metadata",
 			type: "boolean",
-			description: "Displays some additional details in JSON format."
+			description: "Prints file-appender metadata in JSON format."
 		}, {
 			name: "appenderName",
 			type: "string",
@@ -64,38 +69,68 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred'], function(requ
 			defaultValue: ""
 		}]
 	};
-	 
+	
 	var printAppendersImpl = {
 		callback: function(args) {
 			var deferred = new Deferred();
-		
+			
 			//TODO: Workaround, see bug 413230
 			if(args.appenderName === ""){
-				callLogService("logs/appenders").then(function(resp){
-					//TODO: Workaround, see bug 413230
-					if(args.verbose){ deferred.resolve(resp); }
-					else {
-						var respJSON = JSON.parse(resp);
-						var appenders = [];
-						for(var i=0; i<respJSON.appenders.length; ++i){
-							appenders.push(respJSON.appenders[i].name);
-						}
-						
-						deferred.resolve(appenders.join("\n"));
-					}
+				callLogService(createLocation(require.toUrl(LOGAPI_SCOPE))).then(function(resp){
+					deferred.resolve(JSON.stringify(resp, undefined, 2));
 				}, function(error){
 					deferred.reject(error);
 				});
 			} else {
-				if(args.verbose){
-					callLogService("logs/appenders/" + args.appenderName).then(function(resp){
-						deferred.resolve(resp);
+				if(args.metadata){
+					callLogService(createLocation(require.toUrl(LOGAPI_SCOPE))).then(function(resp){
+						
+						var found = false;
+						for(var i=0; i<resp.Children.length; ++i){
+							var appender = resp.Children[i];
+							if(appender.Name === args.appenderName){
+								found = true;
+							
+								callLogService(appender.Location).then(function(response){
+									deferred.resolve(JSON.stringify(response, undefined, 2));
+								}, function(error){
+									deferred.reject(error);
+								});
+								
+								break;
+							}
+						}
+						
+						if(!found){
+							deferred.reject("No appender named " + args.appenderName + " present in current logger context.");
+						}
+						
 					}, function(error){
 						deferred.reject(error);
 					});
 				} else {
-					callLogService("logs/appenders/" + args.appenderName + "/download", true).then(function(resp){
-						deferred.resolve(resp);
+					callLogService(createLocation(require.toUrl(LOGAPI_SCOPE))).then(function(resp){
+					
+						var found = false;
+						for(var i=0; i<resp.Children.length; ++i){
+							var appender = resp.Children[i];
+							if(appender.Name === args.appenderName){
+								found = true;
+								
+								callLogService(appender.DownloadLocation, true).then(function(response){
+									deferred.resolve(response);
+								}, function(error){
+									deferred.reject(error);
+								});
+								
+								break;
+							}
+						}
+						
+						if(!found){
+							deferred.reject("No appender named " + args.appenderName + " present in current logger context.");
+						}
+						
 					}, function(error){
 						deferred.reject(error);
 					});
