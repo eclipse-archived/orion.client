@@ -2750,31 +2750,53 @@ var exports = {};
 					);
 				};
 				
+				var gatherCommitInformation = function(body, config){
+					for (var i=0; i < config.length; i++){
+						if (config[i].Key === "user.name"){ //$NON-NLS-0$
+							body.CommitterName = config[i].Value;
+							body.AuthorName = config[i].Value;
+						} else if (config[i].Key === "user.email"){ //$NON-NLS-0$
+							body.CommitterEmail = config[i].Value;
+							body.AuthorEmail = config[i].Value;
+						}					
+					}
+					
+					if (body.Message && body.CommitterName && body.CommitterEmail && !data.parameters.optionsRequested) {
+						commitFunction(body);
+					} else {
+						var dialog = new mCommit.CommitDialog({
+							body: body,
+							func: commitFunction
+						});
+	
+						dialog.show();
+					}
+				};
+				
 				var body = {};
 				body.Message = data.parameters.valueFor("name"); //$NON-NLS-0$
 				body.Amend = data.parameters.valueFor("amend"); //$NON-NLS-0$
 				
 				var config = item.Clone.Config;
-				for (var i=0; i < config.length; i++){
-					if (config[i].Key === "user.name"){ //$NON-NLS-0$
-						body.CommitterName = config[i].Value;
-						body.AuthorName = config[i].Value;
-					} else if (config[i].Key === "user.email"){ //$NON-NLS-0$
-						body.CommitterEmail = config[i].Value;
-						body.AuthorEmail = config[i].Value;
-					}					
-				}
-				
-
-				if (body.Message && body.CommitterName && body.CommitterEmail && !data.parameters.optionsRequested) {
-					commitFunction(body);
+				if(body.Amend && !body.Message){
+					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doGitLog(item.CommitLocation + "?page=1&pageSize=1"), messages["Committing changes"]); //$NON-NLS-0$ 
+					progressService.createProgressMonitor(
+						deferred,
+						messages["Committing changes"]);
+					deferred.then(
+						function(resp){
+							// use the last commit message
+							body.Message = resp.Children[0].Message;
+							gatherCommitInformation(body, config);
+						}, function(error){
+							//unexpected error, fall back to default
+							gatherCommitInformation(body, config);
+						}
+					);
 				} else {
-					var dialog = new mCommit.CommitDialog({
-						body: body,
-						func: commitFunction
-					});
-
-					dialog.show();
+					gatherCommitInformation(body, config);
 				}
 			},
 			visibleWhen: function(item) {
