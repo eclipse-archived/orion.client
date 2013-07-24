@@ -66,6 +66,13 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 				findDiv.focus();
 			}, 10);
 		},
+		_showReplaceInfo: function() {
+			if(this._regex) {
+				this._replaceInfo.style.display = "";
+			} else {
+				this._replaceInfo.style.display = "";
+			}
+		},
 		_createActionTable: function() {
 			var that = this;
 			this._commandService.openParameterCollector("pageNavigationActions", function(parentDiv) { //$NON-NLS-0$
@@ -101,7 +108,8 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 						return that._handleKeyDown(evt);
 					};
 					parentDiv.appendChild(replaceStringInput);
-					
+					that._replaceInfo = that._createImage(null, parentDiv, null);
+					that._showReplaceInfo();
 					that._createButton(messages["Replace"], parentDiv, function() {that.replace();}); //$NON-NLS-0$		
 					that._createButton(messages["Replace All"], parentDiv, function() {that.replaceAll();});	//$NON-NLS-0$
 				}
@@ -149,6 +157,7 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 						that.setOptions({regex: event.target.checked});
 						optionMenu.dropdown.close(true);
 						that.find(true);
+						that._showReplaceInfo();
 					});
 
 				if (!readonly) {
@@ -176,6 +185,14 @@ define(['i18n!orion/search/nls/messages', 'orion/editor/find', 'orion/commands',
 			button.className = "dismissButton parameterInlineButton"; //$NON-NLS-0$
 			
 			parent.appendChild(button);
+		},
+		_createImage: function(text, parent, callback) {
+			var image = document.createElement("img"); //$NON-NLS-0$
+			image.src = "data:image/gif;base64,R0lGODlhBwAIAMQAAMzX6cbT5kh4qFiIuKC40FCIuGSXwmWZw2SaxGacxmadxmWcxbPM4GigyJW92JzC26DI0P///////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAABIALAAAAAAHAAgAAAUmoEQUQkFI0PBEz5A2yII0w9AwkUPbRpTsjUNEQUsFIgCXiGSShAAAOw==";//$NON-NLS-0$
+			image.classList.add("replaceInfo"); //$NON-NLS-0$
+			image.title=messages["You can use options dropdown to turn the regular expression on for replacement - e.g. you can replace <td([\\s\\S]*?)</td> with <span$1</span>."];
+			parent.appendChild(image);
+			return image;
 		},
 		_handleInput: function(evt){
 			if (this._incremental) {

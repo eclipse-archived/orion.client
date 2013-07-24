@@ -90,5 +90,6 @@ define({
 	"Open in Search page for this directory": "Open in Search page for this directory",
 	"${0}. Try your search again.": "${0}. Try your search again.",
 	"Click or use delete key to delete the search term": "Click or use delete key to delete the search term",
-	"${0} matches": "${0} matches"
+	"${0} matches": "${0} matches",
+	"You can use options dropdown to turn the regular expression on for replacement - e.g. you can replace <td([\\s\\S]*?)</td> with <span$1</span>." : "You can use options dropdown to turn the regular expression on for replacement - e.g. you can replace <td([\\s\\S]*?)</td> with <span$1</span>."
 });
