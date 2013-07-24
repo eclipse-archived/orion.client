@@ -35,7 +35,6 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 		try {
 			return doctrine.parseParamType(signature);
 		} catch(e) {
-			debugger;
 			console.error("doctrine failure to parse: " + signature);
 			return {};
 		}
@@ -106,6 +105,98 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 		}
 		return defn;
 	};
+	
+	var GEN_NAME = "gen~";
+	
+	function isEmpty(generatedTypeName, allTypes) {
+		if (typeof generatedTypeName !== 'string') {
+			// original type was not a name expression
+			return false;
+		} else if (generatedTypeName === "Object" || generatedTypeName === "undefined") {
+			return true;
+		} else if (generatedTypeName.substring(0, GEN_NAME.length) !== GEN_NAME) {
+			// not a synthetic type, so not empty
+			return false;
+		}
+
+
+		// now check to see if there are any non-default fields in this type
+		var type = allTypes[generatedTypeName];
+		var popCount = 0;
+		// type should have a $$proto only and nothing else if it is empty
+		for (var property in type) {
+			if (type.hasOwnProperty(property)) {
+				popCount++;
+				if (popCount > 1) {
+					break;
+				}
+			}
+		}
+		if (popCount === 1) {
+			// we have an empty object literal, must check parent
+			// must traverse prototype hierarchy to make sure empty
+			return isEmpty(type.$$proto.typeObj.name, allTypes);
+		}
+		return false;
+	}
+
+
+
+	/**
+	 * Determines if the left type name is more general than the right type name.
+	 * Generality (>) is defined as follows:
+	 * undefined > Object > Generated empty type > all other types
+	 *
+	 * A generated empty type is a generated type that has only a $$proto property
+	 * added to it.  Additionally, the type specified in the $$proto property is
+	 * either empty or is Object
+	 *
+	 * @param {{}} leftTypeObj
+	 * @param {{}} rightTypeObj
+	 * @param {{getAllTypes:function():Object}} env
+	 *
+	 * @return Boolean
+	 */
+	function leftTypeIsMoreGeneral(leftTypeObj, rightTypeObj, env) {
+		var leftTypeName = leftTypeObj.name, rightTypeName = rightTypeObj.name;
+
+		if (!leftTypeName) {
+			if (leftTypeObj.type === 'NullLiteral' || leftTypeObj.type === 'UndefinedLiteral' || leftTypeObj.type === 'VoidLiteral') {
+				leftTypeName = 'undefined';
+			}
+		}
+
+		function convertToNumber(typeName) {
+			if (typeName === "undefined") {
+				return 0;
+			} else if (typeName === "Object") {
+				return 1;
+			} else if (isEmpty(typeName, env.getAllTypes())) {
+				return 2;
+			} else {
+				return 3;
+			}
+		}
+
+		if (!rightTypeName) {
+			return false;
+		}
+
+		var leftNum = convertToNumber(leftTypeName);
+		// avoid calculating the rightNum if possible
+		if (leftNum === 0) {
+			return rightTypeName !== "undefined";
+		} else if (leftNum === 1) {
+			return rightTypeName !== "undefined" && rightTypeName !== "Object";
+		} else if (leftNum === 2) {
+			return rightTypeName !== "undefined" && rightTypeName !== "Object" && !isEmpty(rightTypeName, env.getAllTypes());
+		} else {
+			return false;
+		}
+	}
+
+
+
 
 	var protoLength = "~proto".length;
 	return {
@@ -114,7 +205,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 		// now some functions that handle types signatures, styling, and parsing
 
 		/** constant that defines generated type name prefixes */
-		GEN_NAME : "gen~",
+		GEN_NAME : GEN_NAME,
 
 
 		// type parsing
@@ -636,6 +727,8 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 			}
 
 		},
+		leftTypeIsMoreGeneral: leftTypeIsMoreGeneral,
+		isEmpty: isEmpty,
 		ensureTypeObject: ensureTypeObject,
 		OBJECT_TYPE: THE_UNKNOWN_TYPE,
 		UNDEFINED_TYPE: createNameType("undefined"),
