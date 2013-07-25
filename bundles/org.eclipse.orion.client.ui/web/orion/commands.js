@@ -265,6 +265,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		var checkbox = lib.$(".checkedMenuItem", itemParent); //$NON-NLS-0$
 		checkbox.checked = checked;
 		checkbox.addEventListener("change", onChange, false); //$NON-NLS-0$
+		return checkbox;
 	}
 
 	function createCommandItem(parent, command, commandInvocation, id, keyBinding, useImage, callback) {
