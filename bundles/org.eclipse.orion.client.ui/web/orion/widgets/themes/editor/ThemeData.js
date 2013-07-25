@@ -351,16 +351,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme'],
 			font: '9pt sans-serif'
 		},
 		{
-			type: 'RECTANGLE',
-			name: messages["Current Line"],
-			x: LEFT + 46,
-			y: TOP + 87,
-			width: 290,
-			height: 18,
-			family: 'currentLine',
-			fill: '#eaf2fd'
-		},
-		{
 			type: 'TEXT',
 			name: messages.Strings,
 			label: '\'Result\'',
