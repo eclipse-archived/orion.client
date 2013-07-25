@@ -91,5 +91,8 @@ define({
 	"${0}. Try your search again.": "${0}. Try your search again.",
 	"Click or use delete key to delete the search term": "Click or use delete key to delete the search term",
 	"${0} matches": "${0} matches",
-	"You can use options dropdown to turn the regular expression on for replacement - e.g. you can replace <td([\\s\\S]*?)</td> with <span$1</span>." : "You can use options dropdown to turn the regular expression on for replacement - e.g. you can replace <td([\\s\\S]*?)</td> with <span$1</span>."
+	"Regular expression is off. You can click here or use options to turn it on for replacement - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>." : 
+	"Regular expression is off. You can click here or use options to turn it on for replacement - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>.",
+	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>." : 
+	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>."
 });
