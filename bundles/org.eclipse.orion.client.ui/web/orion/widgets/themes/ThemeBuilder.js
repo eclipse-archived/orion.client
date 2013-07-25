@@ -456,11 +456,10 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 					
 					labely = TOP + 10 + ( count * 28 );
 					
-					var originx = component.x-padding + ( component.width + (2*padding) ) * 0.5;
-					var originy = ( component.y-padding + ( component.height + (2*padding) )/2 );
+					var originx = Math.floor(component.x-padding + ( component.width + (2*padding) )/ 2);
+					var originy = Math.floor(component.y-padding + ( component.height + (2*padding) )/ 2);
 					
-					ctx.beginPath();
-					
+					var color = 'rgba(187,0,0,0.7)';
 					switch( component.family ){
 					
 						case 'background':
@@ -469,13 +468,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 								routine. Not pleased to do this. */
 
 							ctx.beginPath();
-							ctx.moveTo( originx + 70 , labely -4 );
-							ctx.lineTo( UI_SIZE + 50, labely -4 );
-							ctx.strokeStyle = 'rgba(187,0,0,0.7)';
-							ctx.lineWidth = 0.5;
+							ctx.moveTo( originx + 70 + 0.5 , labely -4 + 0.5 );
+							ctx.lineTo( UI_SIZE + 50 + 0.5, labely -4 + 0.5 );
+							ctx.strokeStyle = color;
+							ctx.lineWidth = 1;
 							ctx.stroke();
 							
-							Component.drawArc( ctx, originx + 70 , labely -4, 3, 0, 2 * Math.PI, false, null, 'rgba(187,0,0,0.7)' );
+							Component.drawArc( ctx, originx + 70 , labely -4, 3, 0, 2 * Math.PI, false, null, color );
 
 							break;
 							
@@ -483,31 +482,30 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 						case 'Side':
 						
 							ctx.beginPath();
-							ctx.moveTo( originx + 30 , labely -4 );
-							ctx.lineTo( UI_SIZE + 50, labely -4 );
+							ctx.moveTo( originx + 30 + 0.5 , labely -4 + 0.5 );
+							ctx.lineTo( UI_SIZE + 50 + 0.5, labely -4 + 0.5 );
 							ctx.strokeStyle = 'rgba(187,0,0,0.7)';
-							ctx.lineWidth = 0.5;
+							ctx.lineWidth = 1;
 							ctx.stroke();
 							
-							Component.drawArc( ctx, originx + 30 , labely -4, 3, 0, 2 * Math.PI, false, null, 'rgba(187,0,0,0.7)' );
+							Component.drawArc( ctx, originx + 30 , labely -4, 3, 0, 2 * Math.PI, false, null, color );
 
 							break;
 							
 						default: 
 						
-							ctx.moveTo( originx, originy );
-							ctx.lineTo( originx, labely -4 );
-							ctx.lineTo( UI_SIZE + 50, labely -4 );
+							ctx.moveTo( originx + 0.5, originy + 0.5 );
+							ctx.lineTo( originx + 0.5, labely -4 + 0.5 );
+							ctx.lineTo( UI_SIZE + 50 + 0.5, labely -4 + 0.5 );
 							ctx.strokeStyle = 'rgba(187,0,0,0.7)';
-							ctx.lineWidth = 0.5;
+							ctx.lineWidth = 1;
 							ctx.stroke();
 							
-							Component.drawArc( ctx, originx, originy, 3, 0, 2 * Math.PI, false, null, 'rgba(187,0,0,0.7)' );
+							Component.drawArc( ctx, originx, originy, 3, 0, 2 * Math.PI, false, null, color );
 							
 							break;
 					}
 
-					ctx.closePath();
 					ctx.globalAlpha = 1; 
 					
 					Component.drawText( ctx, component.description.toUpperCase(), LEFT + 5 + x, labely, 'bold 8pt sans-serif', '#333' );	
