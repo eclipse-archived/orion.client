@@ -9,12 +9,20 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define */
+/*global define exports module*/
 /*jslint eqeq: true */
 
 // This is an implementation of CommonJS UnitTesting 1.0 Assert
-
-define(function() {
+(function(root, factory) { // UMD
+	if (typeof define === "function" && define.amd) { //$NON-NLS-0$
+		define(factory);
+	} else if (typeof exports === "object") { //$NON-NLS-0$
+		module.exports = factory();
+	} else {
+		root.orion = root.orion || {};
+		root.orion.assert = factory();
+	}
+}(this, function() {
     function _stringify(obj) {
         try {
             return obj === undefined ? "undefined" : JSON.stringify(obj);
@@ -198,4 +206,4 @@ define(function() {
         }
     };
     return assert;
-});
+}));
