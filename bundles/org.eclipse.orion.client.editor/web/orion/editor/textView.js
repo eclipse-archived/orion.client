@@ -3560,8 +3560,23 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				* Feature in IE7. For some reason, sometimes Internet Explorer 7 
 				* returns incorrect values for element.getBoundingClientRect() when 
 				* inside a resize handler. The fix is to queue the work.
+				*/			
+				var queue = util.isIE < 9;
+
+				/*
+				* The calculated metrics may be out of date when the zoom level changes.
 				*/
-				if (util.isIE < 9) {
+				var metrics = this._calculateMetrics();
+				if (!compare(metrics, this._metrics)) {
+					if (this._variableLineHeight) {
+						this._variableLineHeight = false;
+						this._resetLineHeight();
+					}
+					this._metrics = metrics;
+					queue = true;
+				}
+
+				if (queue) {
 					this._queueUpdate();
 				} else {
 					this._update();
