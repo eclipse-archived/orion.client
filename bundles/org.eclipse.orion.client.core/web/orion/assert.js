@@ -14,14 +14,14 @@
 
 // This is an implementation of CommonJS UnitTesting 1.0 Assert
 (function(root, factory) { // UMD
-	if (typeof define === "function" && define.amd) { //$NON-NLS-0$
-		define(factory);
-	} else if (typeof exports === "object") { //$NON-NLS-0$
-		module.exports = factory();
-	} else {
-		root.orion = root.orion || {};
-		root.orion.assert = factory();
-	}
+    if (typeof define === "function" && define.amd) { //$NON-NLS-0$
+        define(factory);
+    } else if (typeof exports === "object") { //$NON-NLS-0$
+        module.exports = factory();
+    } else {
+        root.orion = root.orion || {};
+        root.orion.assert = factory();
+    }
 }(this, function() {
     function _stringify(obj) {
         try {
@@ -29,33 +29,37 @@
         } catch (ignore) {}
         return String(obj);
     }
-    
-    function _keys(obj) {
-        var keys = [];
-        for (var key in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                keys.push(key);
-            }
-        }
-        return keys;
-    }
 
     function _deepEqual(actual, expected) {
         if (actual === expected) {
             return true;
         } else if (actual === null || expected === null || typeof actual === "undefined" || typeof expected === "undefined") {
             return false;
-        } else if (actual instanceof Date && expected instanceof Date) {
+        } else if (actual instanceof Date) {
+            if (!expected instanceof Date) {
+                return false;
+            }
             return actual.getTime() === expected.getTime();
-        } else if (typeof actual !== 'object' || typeof expected !== 'object') {
+        } else if (actual instanceof RegExp) {
+            if (!expected instanceof RegExp) {
+                return false;
+            }
+            return actual.toString() === expected.toString();
+        } else if (typeof actual !== 'object' && typeof expected !== 'object') {
             return actual == expected; // use of == is defined in spec
         } else {
             if (actual.prototype !== expected.prototype) {
                 return false;
             }
 
-            var actualKeys = _keys(actual);
-            var expectedKeys = _keys(expected);
+			var actualKeys, expectedKeys;
+            try {
+                actualKeys = Object.keys(actual);
+                expectedKeys = Object.keys(expected);
+            } catch (e) {
+                return false;
+            }
+            
             if (actualKeys.length !== expectedKeys.length) {
                 return false;
             }
@@ -78,7 +82,7 @@
             return true;
         }
     }
-    
+
     function AssertionError(options) {
         if (options) {
             this.message = options.message;
@@ -115,7 +119,7 @@
     };
 
     var assert = function(guard, message_opt) {
-        if (!!!guard) {
+        if ( !! !guard) {
             throw new AssertionError({
                 message: message_opt || "ok failed",
                 expected: true,
