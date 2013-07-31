@@ -377,15 +377,17 @@ define([
 					var text = model.getText();
 					
 					var processEditorResult = function(result) {
-						if (result && result.text) {
-							editor.setText(result.text);
+						if (result) {
+							if (result.text) {
+								editor.setText(result.text);
+							}
 							if (result.selection) {
-								editor.setSelection(result.selection.start, result.selection.end);
+								editor.setSelection(result.selection.start, result.selection.end, true /*scroll to*/);
 								editor.getTextView().focus();
 							}
 						} else {
 							if (typeof result === 'string') { //$NON-NLS-0$
-								editor.setText(result, selection.start, selection.end);
+								editor.setText(result, selection.start, selection.end, true /*scroll to*/);
 								editor.setSelection(selection.start, selection.start + result.length);
 								editor.getTextView().focus();
 							}
