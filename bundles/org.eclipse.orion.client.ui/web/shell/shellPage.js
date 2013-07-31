@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -227,7 +227,9 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 		try {
 			error = JSON.parse(xhrResult.responseText);
 		} catch (e) {}
-		if (error && error.Message) {
+		if (error && error.DetailedMessage) {
+			error = i18nUtil.formatMessage(messages["Error: ${0}"], error.DetailedMessage);
+		} else if (error && error.Message) {
 			error = i18nUtil.formatMessage(messages["Error: ${0}"], error.Message);
 		} else if (typeof xhrResult.url === "string") {
 			if (xhrResult.status === 0) {
