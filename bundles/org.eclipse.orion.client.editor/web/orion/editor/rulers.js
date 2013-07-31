@@ -341,6 +341,8 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		onMouseOut: function(lineIndex, e) {
 			var tooltip = mTooltip.Tooltip.getTooltip(this._view);
 			if (!tooltip) { return; }
+			var relatedCompare = e.relatedTarget.compareDocumentPosition(this._view.getOptions("parent")); //$NON-NLS-0$
+			if (relatedCompare & 8) { return; }
 			tooltip.setTarget(null);
 		},
 		/** @ignore */

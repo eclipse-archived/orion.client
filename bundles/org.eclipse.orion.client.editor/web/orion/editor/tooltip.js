@@ -22,6 +22,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	/** @private */
 	function Tooltip (view) {
 		this._view = view;
+		this._hideDelay = 200;
 		this._create(view.getOptions("parent").ownerDocument); //$NON-NLS-0$
 		view.addEventListener("Destroy", this, this.destroy); //$NON-NLS-0$
 	}
@@ -41,7 +42,28 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			var tooltipContents = this._tooltipContents = util.createElement(document, "div"); //$NON-NLS-0$
 			tooltipDiv.appendChild(tooltipContents);
 			document.body.appendChild(tooltipDiv);
-			this.hide();
+			var self = this;
+			tooltipDiv.addEventListener("mouseover", function(event) { //$NON-NLS-0$
+				if (!self._hideDelay) { return; }
+				var window = self._getWindow();
+				if (self._delayedHideTimeout) {
+					window.clearTimeout(self._delayedHideTimeout);
+					self._delayedHideTimeout = null;
+				}
+				
+				if (self._hideTimeout) {
+					window.clearTimeout(self._hideTimeout);
+					self._hideTimeout = null;
+				}
+				self._nextTarget = null;
+			}, false);
+			
+			tooltipDiv.addEventListener("mouseout", function(event) { //$NON-NLS-0$
+				var relatedCompare = event.relatedTarget.compareDocumentPosition(tooltipDiv);
+				if (relatedCompare & 8) { return; }
+				self._hideImpl();
+			}, false);
+			this._hideImpl();
 		},
 		_getWindow: function() {
 			var document = this._tooltipDiv.ownerDocument;
@@ -49,12 +71,33 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		},
 		destroy: function() {
 			if (!this._tooltipDiv) { return; }
-			this.hide();
+			this._hideImpl();
 			var parent = this._tooltipDiv.parentNode;
 			if (parent) { parent.removeChild(this._tooltipDiv); }
 			this._tooltipDiv = null;
 		},
-		hide: function() {
+		hide: function(hideDelay) {
+			if (hideDelay === undefined) {
+				hideDelay = this._hideDelay;
+			}
+			var window = this._getWindow();
+			if (this._delayedHideTimeout) {
+				window.clearTimeout(this._delayedHideTimeout);
+				this._delayedHideTimeout = null;
+			}
+			var self = this;
+			if (!hideDelay) {
+				self._hideImpl();
+				self.setTarget(self._nextTarget, 0);
+			} else {
+				self._delayedHideTimeout = window.setTimeout(function() {
+					self._delayedHideTimeout = null;
+					self._hideImpl();
+					self.setTarget(self._nextTarget, 0);
+				}, hideDelay);
+			}
+		},
+		_hideImpl: function() {
 			if (this._contentsView) {
 				this._contentsView.destroy();
 				this._contentsView = null;
@@ -70,6 +113,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				window.clearTimeout(this._showTimeout);
 				this._showTimeout = null;
 			}
+			if (this._delayedHideTimeout) {
+				window.clearTimeout(this._delayedHideTimeout);
+				this._delayedHideTimeout = null;
+			}
 			if (this._hideTimeout) {
 				window.clearTimeout(this._hideTimeout);
 				this._hideTimeout = null;
@@ -82,20 +129,28 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		isVisible: function() {
 			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible"; //$NON-NLS-0$
 		},
-		setTarget: function(target, delay) {
-			if (this.target === target) { return; }
+		setTarget: function(target, delay, hideDelay) {
 			this._target = target;
-			this.hide();
-			if (target) {
-				var self = this;
-				if(delay === 0) {
-					self.show(true);
-				}
-				else {
-				var window = this._getWindow();
-					self._showTimeout = window.setTimeout(function() {
+			var visible = this.isVisible();
+			if (visible) {
+				this._nextTarget = target;
+				this.hide(hideDelay);
+			} else {
+				if (target) {
+					var self = this;
+					var window = this._getWindow();
+					if (self._showTimeout) {
+						window.clearTimeout(self._showTimeout);
+						self._showTimeout = null;
+					}
+					if (delay === 0) {
 						self.show(true);
-					}, delay ? delay : 500);
+					} else {
+						self._showTimeout = window.setTimeout(function() {
+							self._showTimeout = null;
+							self.show(true);
+						}, delay ? delay : 500);
+					}
 				}
 			}
 		},
@@ -170,6 +225,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				var self = this;
 				var window = this._getWindow();
 				self._hideTimeout = window.setTimeout(function() {
+					self._hideTimeout = null;
 					var opacity = parseFloat(self._getNodeStyle(tooltipDiv, "opacity", "1")); //$NON-NLS-1$ //$NON-NLS-0$
 					self._fadeTimeout = window.setInterval(function() {
 						if (tooltipDiv.style.visibility === "visible" && opacity > 0) { //$NON-NLS-0$
@@ -177,7 +233,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 							tooltipDiv.style.opacity = opacity;
 							return;
 						}
-						self.hide();
+						self._hideImpl();
 					}, 50);
 				}, 5000);
 			}
@@ -204,7 +260,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					title = getText(annotation.start, annotation.end);
 				}
 				title = title.replace(/</g, "&lt;").replace(/>/g, "&gt;"); //$NON-NLS-1$ //$NON-NLS-0$
-				result += "<span style='vertical-align:middle;'>" + title + "</span><div>"; //$NON-NLS-1$ //$NON-NLS-0$
+				result += "<span style='vertical-align:middle;'>" + title + "</span></div>"; //$NON-NLS-1$ //$NON-NLS-0$
 				return result;
 			}
 			if (annotations.length === 1) {
