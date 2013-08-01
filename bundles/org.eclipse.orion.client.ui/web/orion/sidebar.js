@@ -130,7 +130,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			if (!mode || typeof mode !== "object") { //$NON-NLS-0$
 				throw new Error("Invalid mode: "  + mode);
 			}
-			if (!Object.hasOwnProperty.call(this.viewModes, id)) {
+			if (!Object.prototype.hasOwnProperty.call(this.viewModes, id)) {
 				this.viewModes[id] = mode;
 			}
 		},
@@ -142,7 +142,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			delete this.viewModes[id];
 		},
 		getViewMode: function(id) {
-			if (Object.hasOwnProperty.call(this.viewModes, id)) {
+			if (Object.prototype.hasOwnProperty.call(this.viewModes, id)) {
 				return this.viewModes[id];
 			}
 			return null;

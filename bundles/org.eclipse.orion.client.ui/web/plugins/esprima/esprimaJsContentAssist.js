@@ -1559,7 +1559,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typesFromIndexFile", 
 		if (! (prop in type)) {
 			return false;
 		}
-		if (Object.hasOwnProperty(prop)) {
+		if (Object.prototype.hasOwnProperty(prop)) {
 			// the propery may be re-defined in the current type
 			// check that here
 			return !type.hasOwnProperty(prop);
