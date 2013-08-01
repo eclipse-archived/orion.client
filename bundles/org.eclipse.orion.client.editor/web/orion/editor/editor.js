@@ -506,7 +506,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
-				if (typeof this._keyBindingFactory === "function") {
+				if (typeof this._keyBindingFactory === "function") { //$NON-NLS-0$
 					this._keyBindingFactory(this, this.getKeyModes(), this._undoStack, this._contentAssist);
 				} else {
 					this._keyBindingFactory.createKeyBindings(editor, this._undoStack, this._contentAssist);
@@ -677,10 +677,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 				for (var i = 0; i < problems.length; i++) {
 					var problem = problems[i];
 					if (problem) {
-						// escaping voodoo... we need to construct HTML that contains valid JavaScript.
-						var escapedDescription = problem.description.replace(/'/g, "&#39;").replace(/"/g, '&#34;'); //$NON-NLS-1$ //$NON-NLS-0$
 						var start, end;
-						if (typeof problem.line === "number") {
+						if (typeof problem.line === "number") { //$NON-NLS-0$
 							// line/column
 							var lineIndex = problem.line - 1;
 							var lineStart = model.getLineStart(lineIndex);
@@ -693,7 +691,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 						}
 						var severity = problem.severity;
 						var type = severity === "error" ? mAnnotations.AnnotationType.ANNOTATION_ERROR : mAnnotations.AnnotationType.ANNOTATION_WARNING; //$NON-NLS-0$
-						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, escapedDescription);
+						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, problem.description);
 						add.push(annotation);
 					}
 				}

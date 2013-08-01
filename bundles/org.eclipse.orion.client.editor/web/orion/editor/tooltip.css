@@ -21,9 +21,14 @@
 	overflow: hidden;
 	white-space: pre;
 }
+
 .textviewTooltip em {
 	font-style: normal;
 	font-weight: bold;
+}
+
+.textviewTooltip span {
+	vertical-align: baseline;
 }
 
 .tooltip .annotationLine.currentLine {

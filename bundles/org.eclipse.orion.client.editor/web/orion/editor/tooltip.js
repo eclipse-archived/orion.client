@@ -242,6 +242,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			if (annotations.length === 0) {
 				return null;
 			}
+			var document = this._tooltipDiv.ownerDocument;
 			var model = this._view.getModel(), annotation;
 			var baseModel = model.getBaseModel ? model.getBaseModel() : model;
 			function getText(start, end) {
@@ -252,15 +253,22 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			function getAnnotationHTML(annotation) {
 				var title = annotation.title;
 				if (title === "") { return null; }
-				var result = "<div>"; //$NON-NLS-0$
+				var result = util.createElement(document, "div"); //$NON-NLS-0$
 				if (annotation.html) {
-					result += annotation.html + "&nbsp;"; //$NON-NLS-0$
+					result.innerHTML = annotation.html + "&nbsp;"; //$NON-NLS-0$
 				}
 				if (!title) {
 					title = getText(annotation.start, annotation.end);
 				}
-				title = title.replace(/</g, "&lt;").replace(/>/g, "&gt;"); //$NON-NLS-1$ //$NON-NLS-0$
-				result += "<span style='vertical-align:middle;'>" + title + "</span></div>"; //$NON-NLS-1$ //$NON-NLS-0$
+				if (typeof title === "function") { //$NON-NLS-0$
+					title = title();
+				}
+				if (typeof title === "string") { //$NON-NLS-0$
+					var span = util.createElement(document, "span"); //$NON-NLS-0$
+					span.appendChild(document.createTextNode(title));
+					title = span;
+				}
+				result.appendChild(title);
 				return result;
 			}
 			if (annotations.length === 1) {
@@ -280,12 +288,15 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					return newModel;
 				}
 			} else {
-				var tooltipHTML = "<div><em>" + messages.multipleAnnotations + "</em></div>"; //$NON-NLS-1$ //$NON-NLS-0$
+				var tooltipHTML = util.createElement(document, "div"); //$NON-NLS-0$
+				var em = util.createElement(document, "em"); //$NON-NLS-0$
+				em.appendChild(document.createTextNode(messages.multipleAnnotations));
+				tooltipHTML.appendChild(em);
 				for (var i = 0; i < annotations.length; i++) {
 					annotation = annotations[i];
 					var html = getAnnotationHTML(annotation);
 					if (html) {
-						tooltipHTML += html;
+						tooltipHTML.appendChild(html);
 					}
 				}
 				return tooltipHTML;
