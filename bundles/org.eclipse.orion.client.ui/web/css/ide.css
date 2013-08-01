@@ -392,7 +392,7 @@ textarea.parameterInput {
 	margin-right: 8px;
 	font-size: 7pt;
 	display: inline-block;
-	padding-tp:0 !important;
+	padding-top:0 !important;
 	vertical-align: baseline;
 }
 
@@ -607,8 +607,7 @@ textarea.parameterInput {
 
 input {
 	-moz-user-select: text;
-	text-indent: none;
-	text-indent: 0px;
+	text-indent: 0;
 	text-shadow: none;
 	border: solid 1px #666;
 	color: #333;
