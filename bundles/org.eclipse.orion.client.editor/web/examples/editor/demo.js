@@ -196,27 +196,34 @@ function(mSetup, mTestPerformance, util) {
 
 	/* Adding testing actions */
 	var tests = {};
-	function test() {
-		log("test"); //$NON-NLS-0$
-	}
-	tests.test = test;
-	
 	function runTest() {
 		tests[sTest.value]();
 	}
 	bTest.onclick = runTest;
-	var option = util.createElement(document, "option"); //$NON-NLS-0$
-	option.setAttribute("value", "test"); //$NON-NLS-1$ //$NON-NLS-0$
-	option.appendChild(document.createTextNode("Test")); //$NON-NLS-0$
-	sTest.appendChild(option);
+	
+	function test() {
+		log("test"); //$NON-NLS-0$
+	}
+	tests.testTest = test;
+	function destroyTest() {
+		mSetup.destroyView();
+	}
+	tests.testDestroyTest = destroyTest;
+	
 	var prefix = "test"; //$NON-NLS-0$
-	for (var property in mTestPerformance) {
+	var property, option;
+	for (property in mTestPerformance) {
 		if (property.indexOf(prefix) === 0) {
+			tests[property] = mTestPerformance[property];
+		}
+	}
+	for (property in tests) {
+		if (tests.hasOwnProperty(property)) {
 			option = util.createElement(document, "option"); //$NON-NLS-0$
 			option.setAttribute("value", property); //$NON-NLS-0$
-			option.appendChild(document.createTextNode(property.substring(prefix.length	)));
+			option.appendChild(document.createTextNode(property.substring(prefix.length)));
 			sTest.appendChild(option);
-			tests[property] = mTestPerformance[property];
+			tests[property] = tests[property];
 		}
 	}
 	
