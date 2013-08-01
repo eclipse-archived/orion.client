@@ -22,9 +22,11 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	/** @private */
 	function Tooltip (view) {
 		this._view = view;
+		this._fadeDelay = 500;
 		this._hideDelay = 200;
+		this._showDelay = 500;
+		this._autoHideDelay = 5000;
 		this._create(view.getOptions("parent").ownerDocument); //$NON-NLS-0$
-		view.addEventListener("Destroy", this, this.destroy); //$NON-NLS-0$
 	}
 	Tooltip.getTooltip = function(view) {
 		if (!view._tooltip) {
@@ -57,13 +59,16 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				}
 				self._nextTarget = null;
 			}, false);
-			
 			tooltipDiv.addEventListener("mouseout", function(event) { //$NON-NLS-0$
+				if (event.relatedTarget === tooltipDiv) { return; }
 				var relatedCompare = event.relatedTarget.compareDocumentPosition(tooltipDiv);
 				if (relatedCompare & 8) { return; }
-				self._hideImpl();
+				self._hide();
 			}, false);
-			this._hideImpl();
+			this._view.addEventListener("Destroy", function() { //$NON-NLS-0$
+				self.destroy();
+			});
+			this._hide();
 		},
 		_getWindow: function() {
 			var document = this._tooltipDiv.ownerDocument;
@@ -71,7 +76,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		},
 		destroy: function() {
 			if (!this._tooltipDiv) { return; }
-			this._hideImpl();
+			this._hide();
 			var parent = this._tooltipDiv.parentNode;
 			if (parent) { parent.removeChild(this._tooltipDiv); }
 			this._tooltipDiv = null;
@@ -87,17 +92,17 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 			var self = this;
 			if (!hideDelay) {
-				self._hideImpl();
+				self._hide();
 				self.setTarget(self._nextTarget, 0);
 			} else {
 				self._delayedHideTimeout = window.setTimeout(function() {
 					self._delayedHideTimeout = null;
-					self._hideImpl();
+					self._hide();
 					self.setTarget(self._nextTarget, 0);
 				}, hideDelay);
 			}
 		},
-		_hideImpl: function() {
+		_hide: function() {
 			if (this._contentsView) {
 				this._contentsView.destroy();
 				this._contentsView = null;
@@ -138,7 +143,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			} else {
 				if (target) {
 					var self = this;
-					var window = this._getWindow();
+					var window = self._getWindow();
 					if (self._showTimeout) {
 						window.clearTimeout(self._showTimeout);
 						self._showTimeout = null;
@@ -149,7 +154,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 						self._showTimeout = window.setTimeout(function() {
 							self._showTimeout = null;
 							self.show(true);
-						}, delay ? delay : 500);
+						}, delay ? delay : self._showDelay);
 					}
 				}
 			}
@@ -233,9 +238,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 							tooltipDiv.style.opacity = opacity;
 							return;
 						}
-						self._hideImpl();
-					}, 50);
-				}, 5000);
+						self._hide();
+					}, self._fadeDelay / 10);
+				}, self._autoHideDelay);
 			}
 		},
 		_getAnnotationContents: function(annotations) {
