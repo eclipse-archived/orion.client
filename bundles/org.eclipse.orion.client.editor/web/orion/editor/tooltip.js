@@ -61,8 +61,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}, false);
 			tooltipDiv.addEventListener("mouseout", function(event) { //$NON-NLS-0$
 				if (event.relatedTarget === tooltipDiv) { return; }
-				var relatedCompare = event.relatedTarget.compareDocumentPosition(tooltipDiv);
-				if (relatedCompare & 8) { return; }
+				if (event.relatedTarget) {
+					var relatedCompare = event.relatedTarget.compareDocumentPosition(tooltipDiv);
+					if (relatedCompare & 8) { return; }
+				}
 				self._hide();
 			}, false);
 			this._view.addEventListener("Destroy", function() { //$NON-NLS-0$
