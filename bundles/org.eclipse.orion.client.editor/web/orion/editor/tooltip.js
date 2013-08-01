@@ -38,6 +38,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		_create: function(document) {
 			if (this._tooltipDiv) { return; }
 			var tooltipDiv = this._tooltipDiv = util.createElement(document, "div"); //$NON-NLS-0$
+			tooltipDiv.tabIndex = 0;
 			tooltipDiv.className = "textviewTooltip"; //$NON-NLS-0$
 			tooltipDiv.setAttribute("aria-live", "assertive"); //$NON-NLS-1$ //$NON-NLS-0$
 			tooltipDiv.setAttribute("aria-atomic", "true"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -105,6 +106,15 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 		},
 		_hide: function() {
+			var tooltipDiv = this._tooltipDiv;
+			if (!tooltipDiv) { return; }
+			var document = tooltipDiv.ownerDocument;
+			var window = document.defaultView || document.parentWindow;
+			var activeElement = document.activeElement;
+			var hasFocus = tooltipDiv === activeElement || (tooltipDiv.compareDocumentPosition(activeElement) & 16) !== 0;
+			if (hasFocus) {
+				this._view.focus();
+			}
 			if (this._contentsView) {
 				this._contentsView.destroy();
 				this._contentsView = null;
@@ -112,10 +122,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			if (this._tooltipContents) {
 				this._tooltipContents.innerHTML = "";
 			}
-			if (this._tooltipDiv) {
-				this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
-			}
-			var window = this._getWindow();
+			tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
 			if (this._showTimeout) {
 				window.clearTimeout(this._showTimeout);
 				this._showTimeout = null;
