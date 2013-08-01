@@ -243,6 +243,14 @@ define(["require",
 		return view;
 	}
 	exports.setupView = setupView;
+	
+	function destroyView() {
+		if (view) {
+			view.destroy();
+		}
+		view = null;
+	}
+	exports.destroyView = destroyView;
 
 	return exports;
 });
