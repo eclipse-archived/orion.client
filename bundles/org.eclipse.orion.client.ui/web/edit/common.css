@@ -11,7 +11,7 @@
 @import "../css/theme.css";
 
 .outlineExplorer {
-	overflow-y: none;
+	overflow-y: hidden;
 }
 
 .findOptionsDiv {
