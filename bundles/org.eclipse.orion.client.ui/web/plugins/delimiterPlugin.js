@@ -33,7 +33,7 @@ define(["orion/plugin", "orion/editor/textModel"], function(PluginProvider, mTex
 	}, {
 		id: "orion.edit.tounix", //$NON-NLS-0$
 		name: "To UNIX",
-		tooltip: "Convert delimiters to UINX (\\n)"
+		tooltip: "Convert delimiters to UNIX (\\n)"
 	});
 		
 	provider.registerService("orion.edit.command", { //$NON-NLS-0$
