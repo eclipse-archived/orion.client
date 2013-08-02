@@ -61,13 +61,24 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				self._nextTarget = null;
 			}, false);
 			tooltipDiv.addEventListener("mouseout", function(event) { //$NON-NLS-0$
-				if (event.relatedTarget === tooltipDiv) { return; }
+				if (event.relatedTarget === tooltipDiv || self._hasFocus()) { return; }
 				if (event.relatedTarget) {
 					var relatedCompare = event.relatedTarget.compareDocumentPosition(tooltipDiv);
 					if (relatedCompare & 8) { return; }
 				}
 				self._hide();
 			}, false);
+			tooltipDiv.addEventListener("keydown", function(event) { //$NON-NLS-0$
+				if (event.keyCode === 27) {
+					self._hide();
+				}
+			}, false);
+			document.addEventListener("mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
+				if (!self.isVisible()) { return; }
+				var relatedCompare = event.target.compareDocumentPosition(tooltipDiv);
+				if (relatedCompare & 8) { return; }
+				self._hide();
+			}, true);
 			this._view.addEventListener("Destroy", function() { //$NON-NLS-0$
 				self.destroy();
 			});
@@ -82,7 +93,16 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			this._hide();
 			var parent = this._tooltipDiv.parentNode;
 			if (parent) { parent.removeChild(this._tooltipDiv); }
+			var document = this._tooltipDiv.ownerDocument;
+			document.removeEventListener("mousedown", this._mouseDownHandler, true); //$NON-NLS-0$
 			this._tooltipDiv = null;
+		},
+		_hasFocus: function() {
+			var tooltipDiv = this._tooltipDiv;
+			if (!tooltipDiv) { return false; }
+			var document = tooltipDiv.ownerDocument;
+			var activeElement = document.activeElement;
+			return tooltipDiv === activeElement || (tooltipDiv.compareDocumentPosition(activeElement) & 16) !== 0;
 		},
 		hide: function(hideDelay) {
 			if (hideDelay === undefined) {
@@ -108,11 +128,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 		_hide: function() {
 			var tooltipDiv = this._tooltipDiv;
 			if (!tooltipDiv) { return; }
-			var document = tooltipDiv.ownerDocument;
-			var window = document.defaultView || document.parentWindow;
-			var activeElement = document.activeElement;
-			var hasFocus = tooltipDiv === activeElement || (tooltipDiv.compareDocumentPosition(activeElement) & 16) !== 0;
-			if (hasFocus) {
+			if (this._hasFocus()) {
 				this._view.focus();
 			}
 			if (this._contentsView) {
@@ -123,6 +139,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				this._tooltipContents.innerHTML = "";
 			}
 			tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
+			var window = this._getWindow();
 			if (this._showTimeout) {
 				window.clearTimeout(this._showTimeout);
 				this._showTimeout = null;
@@ -144,12 +161,13 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible"; //$NON-NLS-0$
 		},
 		setTarget: function(target, delay, hideDelay) {
-			this._target = target;
 			var visible = this.isVisible();
 			if (visible) {
+				if (this._hasFocus()) { return; }
 				this._nextTarget = target;
 				this.hide(hideDelay);
 			} else {
+				this._target = target;
 				if (target) {
 					var self = this;
 					var window = self._getWindow();
@@ -256,8 +274,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			if (annotations.length === 0) {
 				return null;
 			}
+			var self = this;
 			var document = this._tooltipDiv.ownerDocument;
-			var model = this._view.getModel(), annotation;
+			var view = this._view;
+			var model = view.getModel(), annotation;
 			var baseModel = model.getBaseModel ? model.getBaseModel() : model;
 			function getText(start, end) {
 				var textStart = baseModel.getLineStart(baseModel.getLineAtOffset(start));
@@ -269,7 +289,13 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				if (title === "") { return null; }
 				var result = util.createElement(document, "div"); //$NON-NLS-0$
 				if (annotation.html) {
-					result.innerHTML = annotation.html + "&nbsp;"; //$NON-NLS-0$
+					result.innerHTML = annotation.html;
+					if (result.lastChild) {
+						result.lastChild.addEventListener("click", function(event) { //$NON-NLS-0$
+							view.setSelection(annotation.start, annotation.end, 1 / 3, function() { self._hide(); });
+						}, false);
+					}
+					result.appendChild(document.createTextNode("\u00A0")); //$NON-NLS-0$
 				}
 				if (!title) {
 					title = getText(annotation.start, annotation.end);
