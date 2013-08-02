@@ -285,9 +285,9 @@ define([
 					self._localSearcher.show(data);
 					return true;
 				}
-				self.commandService.runCommand("orion.editor.find", null, null, new mCommandRegistry.ParametersDescription(
-					[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], 
-					{clientCollect: true})); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$); //$NON-NLS-0$
+				self.commandService.runCommand("orion.editor.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
+					[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 
+					{clientCollect: true}));
 				return true;
 			}, findCommand);
 		},
