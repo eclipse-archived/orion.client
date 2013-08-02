@@ -40,6 +40,64 @@ define([
 	
 	var contentTypesCache = null;
 	
+	function createDelegatedUI(options) {
+		var uriTemplate = new URITemplate(options.uriTemplate);
+		var params = options.params || {};
+		params.OrionHome = params.OrionHome || PageLinks.getOrionHome();
+		var href = window.decodeURIComponent(uriTemplate.expand(params));
+		var iframe = document.createElement("iframe"); //$NON-NLS-0$
+		iframe.id = options.id;
+		iframe.name = options.id;
+		iframe.type = "text/html"; //$NON-NLS-0$
+		iframe.sandbox = "allow-scripts allow-same-origin"; //$NON-NLS-0$
+		iframe.frameborder = options.border !== undefined ? options.border : 1;
+		iframe.src = href;
+		iframe.className = "delegatedUI"; //$NON-NLS-0$
+		if (options.width) {
+			iframe.style.width = options.width;
+		}
+		if (options.height) {
+			iframe.style.height = options.height;
+		}
+		iframe.style.visibility = 'hidden'; //$NON-NLS-0$
+		if (options.parent !== null) {
+			(options.parent || window.document.body).appendChild(iframe);
+		}
+		iframe.style.left = options.left || (window.innerWidth - parseInt(iframe.clientWidth, 10))/2 + "px"; //$NON-NLS-0$
+		iframe.style.top = options.top || (window.innerHeight - parseInt(iframe.clientHeight, 10))/2 + "px"; //$NON-NLS-0$
+		iframe.style.visibility = '';
+		// Listen for notification from the iframe.  We expect either a "result" or a "cancelled" property.
+		window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
+			if (event.source !== iframe.contentWindow) {
+				return;
+			}
+			if (typeof event.data === "string") { //$NON-NLS-0$
+				var data = JSON.parse(event.data);
+				if (data.pageService === "orion.page.delegatedUI" && data.source === options.id) { //$NON-NLS-0$
+					if (data.cancelled) {
+						// console.log("Delegated UI Cancelled");
+						if (options.cancelled) {
+							options.cancelled();
+						}
+					} else if (data.result) {
+						if (options.done) {
+							options.done(data.result);
+						}
+					} else if (data.Status || data.status) {
+						if (options.status) {
+							options.status(data.Status || data.status);
+						}
+					}
+					window.removeEventListener("message", _messageHandler, false); //$NON-NLS-0$
+					iframe.parentNode.removeChild(iframe);
+				}
+			}
+		}, false);
+		
+		return iframe;
+	}
+	exports.createDelegatedUI = createDelegatedUI;
+			
 	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId, localSearcher, searcher, editorSettings) {
 		this.serviceRegistry = serviceRegistry;
 		this.commandService = commandService;
@@ -396,49 +454,15 @@ define([
 
 					progress.showWhile(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages['Running {0}'], info.name)).then(function(result){
 						if (result && result.uriTemplate) {
-							var uriTemplate = new URITemplate(result.uriTemplate);
-							var params = input.getFileMetadata();
-							params.OrionHome = params.OrionHome || PageLinks.getOrionHome();
-							var href = window.decodeURIComponent(uriTemplate.expand(params));
-							var iframe = document.createElement("iframe"); //$NON-NLS-0$
-							iframe.id = info.id;
-							iframe.name = info.id;
-							iframe.type = "text/html"; //$NON-NLS-0$
-							iframe.sandbox = "allow-scripts allow-same-origin"; //$NON-NLS-0$
-							iframe.frameborder = 1;
-							iframe.src = href;
-							iframe.className = "delegatedUI"; //$NON-NLS-0$
-							if (result.width) {
-								iframe.style.width = result.width;
-							}
-							if (result.height) {
-								iframe.style.height = result.height;
-							}
-							iframe.style.visibility = 'hidden'; //$NON-NLS-0$
-							window.document.body.appendChild(iframe);
-							iframe.style.left = (window.innerWidth - parseInt(iframe.clientWidth, 10))/2 + "px"; //$NON-NLS-0$
-							iframe.style.top = (window.innerHeight - parseInt(iframe.clientHeight, 10))/2 + "px"; //$NON-NLS-0$
-							iframe.style.visibility = '';
-							// Listen for notification from the iframe.  We expect either a "result" or a "cancelled" property.
-							window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
-								if (event.source !== iframe.contentWindow) {
-									return;
-								}
-								if (typeof event.data === "string") { //$NON-NLS-0$
-									var data = JSON.parse(event.data);
-									if (data.pageService === "orion.page.delegatedUI" && data.source === info.id) { //$NON-NLS-0$
-										if (data.cancelled) {
-											// console.log("Delegated UI Cancelled");
-										} else if (data.result) {
-											processEditorResult(data.result);
-										} else if (data.Status || data.status) {
-											handleStatus(data.Status || data.status);
-										}
-										window.removeEventListener("message", _messageHandler, false); //$NON-NLS-0$
-										window.document.body.removeChild(iframe);
-									}
-								}
-							}, false);
+						    var options = {};
+							options.uriTemplate = result.uriTemplate;
+						    options.params = input.getFileMetadata();
+							options.id = info.id;
+							options.width = result.width;
+							options.height = result.height;
+							options.done = processEditorResult;
+							options.status = handleStatus;
+						    createDelegatedUI(options);
 						} else if (result.Status || result.status) {
 							handleStatus(result.Status || result.status);
 						} else {
