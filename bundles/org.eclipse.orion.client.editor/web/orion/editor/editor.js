@@ -490,7 +490,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 				onScroll: function(e) {
 					var tooltip = mTooltip.Tooltip.getTooltip(textView);
 					if (!tooltip) { return; }
-					tooltip.setTarget(null);
+					tooltip.setTarget(null, 0, 0);
 				},
 				onSelection: function(e) {
 					self._updateCursorStatus();
