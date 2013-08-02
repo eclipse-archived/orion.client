@@ -290,7 +290,12 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					result.innerHTML = annotation.html;
 					if (result.lastChild) {
 						result.lastChild.addEventListener("click", function(event) { //$NON-NLS-0$
-							view.setSelection(annotation.start, annotation.end, 1 / 3, function() { self._hide(); });
+							var start = annotation.start, end = annotation.end;
+							if (model.getBaseModel) {
+								start = model.mapOffset(start, true);
+								end = model.mapOffset(end, true);
+							}
+							view.setSelection(start, end, 1 / 3, function() { self._hide(); });
 						}, false);
 					}
 					result.appendChild(document.createTextNode("\u00A0")); //$NON-NLS-0$
