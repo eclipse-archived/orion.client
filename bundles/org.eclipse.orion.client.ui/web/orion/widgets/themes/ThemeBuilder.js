@@ -86,8 +86,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			});
 			
 			var updateCommand = new mCommands.Command({
-				name: messages["Apply"],
-				tooltip: messages["Apply Theme"],
+				name: messages["Update"],
+				tooltip: messages["Update Theme"],
 				id: "orion.applytheme", //$NON-NLS-0$
 				callback: function(data){
 					this.apply(data.items);
