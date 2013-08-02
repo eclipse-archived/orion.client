@@ -301,7 +301,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 					title = getText(annotation.start, annotation.end);
 				}
 				if (typeof title === "function") { //$NON-NLS-0$
-					title = title();
+					title = annotation.title();
 				}
 				if (typeof title === "string") { //$NON-NLS-0$
 					var span = util.createElement(document, "span"); //$NON-NLS-0$
