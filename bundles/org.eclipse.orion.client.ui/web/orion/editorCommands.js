@@ -45,6 +45,7 @@ define([
 		var params = options.params || {};
 		params.OrionHome = params.OrionHome || PageLinks.getOrionHome();
 		var href = window.decodeURIComponent(uriTemplate.expand(params));
+		var delegatedParent = document.createElement("div"); //$NON-NLS-0$
 		var iframe = document.createElement("iframe"); //$NON-NLS-0$
 		iframe.id = options.id;
 		iframe.name = options.id;
@@ -54,15 +55,18 @@ define([
 		iframe.src = href;
 		iframe.className = "delegatedUI"; //$NON-NLS-0$
 		if (options.width) {
+			delegatedParent.style.width = options.width;
 			iframe.style.width = options.width;
 		}
 		if (options.height) {
+			delegatedParent.style.height = options.height;
 			iframe.style.height = options.height;
 		}
 		iframe.style.visibility = 'hidden'; //$NON-NLS-0$
 		if (options.parent !== null) {
-			(options.parent || window.document.body).appendChild(iframe);
+			(options.parent || window.document.body).appendChild(delegatedParent);
 		}
+		delegatedParent.appendChild(iframe);
 		iframe.style.left = options.left || (window.innerWidth - parseInt(iframe.clientWidth, 10))/2 + "px"; //$NON-NLS-0$
 		iframe.style.top = options.top || (window.innerHeight - parseInt(iframe.clientHeight, 10))/2 + "px"; //$NON-NLS-0$
 		iframe.style.visibility = '';
@@ -94,7 +98,7 @@ define([
 			}
 		}, false);
 		
-		return iframe;
+		return delegatedParent;
 	}
 	exports.createDelegatedUI = createDelegatedUI;
 			
