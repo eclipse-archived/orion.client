@@ -217,8 +217,6 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				}
 				options.themeClass = theme;
 				var contentsView = this._contentsView = new mTextView.TextView(options);
-				//TODO this is need to avoid Firefox from getting focus
-				contentsView._clientDiv.contentEditable = false;
 				//TODO need to find a better way of sharing the styler for multiple views
 				var listener = {
 					onLineStyle: function(e) {
