@@ -633,6 +633,29 @@ eclipse.GitService = (function() {
 			return clientDeferred;
 		},
 		
+		doRevert : function(gitHeadURI, commitName) {
+			var service = this;
+			
+			var clientDeferred = new Deferred();
+			xhr("POST", gitHeadURI, { 
+				headers : { 
+					"Orion-Version" : "1",
+					"Content-Type" : "charset=UTF-8"
+				},
+				timeout : 15000,
+				handleAs : "json", //$NON-NLS-0$
+				data: JSON.stringify({
+					"Revert" : commitName //$NON-NLS-0$
+				})
+			}).then(function(result) {
+				service._getGitServiceResponse(clientDeferred, result);
+			}, function(error){
+				service._handleGitServiceResponseError(clientDeferred, error);
+			});
+			
+			return clientDeferred;
+		},
+		
 		doRebase : function(gitHeadURI, commitName, operation) {
 			var service = this;
 			var postData = {};
