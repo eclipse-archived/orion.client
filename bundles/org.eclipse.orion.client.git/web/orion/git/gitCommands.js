@@ -1888,8 +1888,7 @@ var exports = {};
 				progress.progress(service.doCherryPick(headLocation, item.Name), "Cherry picking " + item.Name).then(function(jsonData) {
 					var display = [];
 
-					// TODO we should not craft locations in the
-					// code
+					// TODO we should not craft locations in the code
 					var statusLocation = item.Location.replace("commit/" + item.Name, "status"); //$NON-NLS-1$ //$NON-NLS-0$
 
 					if (jsonData.Result === "OK") { //$NON-NLS-0$
@@ -1907,9 +1906,11 @@ var exports = {};
 					else if (jsonData.Result === "CONFLICTING") { //$NON-NLS-0$
 						display.Severity = "Warning"; //$NON-NLS-0$
 						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result + messages[". Some conflicts occurred"] + //$NON-NLS-0$
-						+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
-						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						var link = i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+"</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						
+						display.Message = "<span>" + jsonData.Result + messages[". Some conflicts occurred"] + link; //$NON-NLS-0$
+						
 					} else if (jsonData.Result === "FAILED") { //$NON-NLS-0$
 						display.Severity = "Error"; //$NON-NLS-0$
 						display.HTML = true;
@@ -1929,7 +1930,7 @@ var exports = {};
 								}
 						}
 						display.Message += i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
-						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>";					} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+"</span>";					} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 					// handle other cases
 					else {
 						display.Severity = "Warning"; //$NON-NLS-0$
@@ -1972,7 +1973,7 @@ var exports = {};
 					// handle special cases
 					else if (jsonData.Result === "FAILURE") { //$NON-NLS-0$
 						var link = i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
-						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+"</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 					
 						display.Severity = "Warning"; //$NON-NLS-0$
 						display.HTML = true;
