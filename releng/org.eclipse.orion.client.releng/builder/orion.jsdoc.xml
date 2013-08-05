@@ -1,0 +1,31 @@
+<project name="Orion JSDoc ant tasks" >
+
+    <target name="download3rdPartyLibs">
+        <mkdir dir="${jsdocHome}" />
+        <get src="https://jsdoc-toolkit.googlecode.com/files/jsdoc_toolkit-2.4.0.zip"
+             dest="${jsdocHome}/jsdoc_toolkit-2.4.0.zip"
+             usetimestamp="true"
+             maxtime="30" />
+        <unzip src="${jsdocHome}/jsdoc_toolkit-2.4.0.zip"
+             dest="${jsdocHome}">
+             <cutdirsmapper dirs="2"/>
+        </unzip>
+        <delete dir="${jsdocHome}/jsdoc_toolkit-2.4.0"/>
+    </target>
+
+	<target name="jsdocs" if="jsdocHome" >
+		<java jar="${jsdocHome}/jsrun.jar" fork="true">
+			<arg line="${jsdocHome}/app/run.js -s -v -a " />
+			<arg value="-r=3" />
+			<arg value="-t=${jsdocHome}/templates/jsdoc" />
+			<!-- TODO: we should move the doc bundles from the server repository to the client repository
+			     until this happens we dump the generated jsdocs here -->
+			<arg value="-d=${buildDirectory}/target/jsdoc.out" />
+			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.core/web/orion/" />
+			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web/orion/" />
+			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.editor/web/orion/" />
+			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.git/web/orion/" />
+			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.users/web/orion/" />
+		</java>
+	</target>
+</project>
