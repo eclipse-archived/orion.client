@@ -1945,6 +1945,54 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(cherryPickCommand);
+		
+		var revertCommand = new mCommands.Command({
+			name : messages["Revert"],
+			tooltip: messages["Revert changes introduced by the commit into your active branch"],
+			id : "eclipse.orion.git.revert", //$NON-NLS-0
+			imageClass: "git-sprite-reset", //$NON-NLS-0$ //TODO: Change to custom revert icon when provided
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			callback: function(data) {
+				var item = data.items;
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+				var headLocation = item.Location.replace(item.Name, "HEAD"); //$NON-NLS-0$
+				progress.progress(service.doRevert(headLocation, item.Name), "Reverting " + item.Name).then(function(jsonData) {
+					var display = [];
+
+					// TODO we should not craft locations in the code
+					var statusLocation = item.Location.replace("commit/" + item.Name, "status"); //$NON-NLS-1$ //$NON-NLS-0$
+
+					if (jsonData.Result === "OK") { //$NON-NLS-0$
+						// operation succeeded
+						display.Severity = "Ok"; //$NON-NLS-0$
+						display.HTML = false;
+						display.Message = jsonData.Result;
+					}
+					// handle special cases
+					else if (jsonData.Result === "FAILURE") { //$NON-NLS-0$
+						var link = i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+					
+						display.Severity = "Warning"; //$NON-NLS-0$
+						display.HTML = true;
+						display.Message = "<span>" + jsonData.Result + messages[". Could not revert into active branch"] + link; //$NON-NLS-0$
+					} 
+					// handle other cases
+					else {
+						display.Severity = "Warning"; //$NON-NLS-0$
+						display.HTML = false;
+						display.Message = jsonData.Result;
+					}
+					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+				}, displayErrorOnStatus);
+
+			},
+			visibleWhen : function(item) {
+				return item.Type === "Commit"; //$NON-NLS-0$
+			}
+		});
+		commandService.addCommand(revertCommand);
 	};
 	
 
