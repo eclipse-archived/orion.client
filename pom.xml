@@ -97,6 +97,11 @@
 		<module>bundles/org.eclipse.orion.client.git</module>
 		<module>bundles/org.eclipse.orion.client.ui</module>
 		<module>bundles/org.eclipse.orion.client.users</module>
+		
+		<module>doc/org.eclipse.orion.doc.isv</module>
+		<module>doc/org.eclipse.orion.doc.user</module>
+		
+		<module>features/org.eclipse.orion.client-feature</module>
 
 		<module>releng/org.eclipse.orion.client.repository</module>
 	</modules>
