@@ -20,7 +20,7 @@
 			<arg value="-t=${jsdocHome}/templates/jsdoc" />
 			<!-- TODO: we should move the doc bundles from the server repository to the client repository
 			     until this happens we dump the generated jsdocs here -->
-			<arg value="-d=${buildDirectory}/target/jsdoc.out" />
+			<arg value="-d=${buildDirectory}/doc/org.eclipse.orion.doc.isv/jsdoc" />
 			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.core/web/orion/" />
 			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web/orion/" />
 			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.editor/web/orion/" />
