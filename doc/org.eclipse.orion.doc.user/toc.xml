@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+<!-- ============================================================================= -->
+<!-- Define the top level topics                                                   -->
+<!-- ============================================================================= -->
+
+<toc label="Orion User Guide">
+	<topic label="Getting started">
+		<link toc="topics_GettingStarted.xml" />
+	</topic>
+	<topic label="Concepts">
+		<link toc="topics_Concepts.xml" />
+	</topic>
+	<topic label="Tasks">
+		<link toc="topics_Tasks.xml" />
+	</topic>
+	<topic label="Reference">
+		<link toc="topics_Reference.xml" />
+	</topic>
+	<topic label="Legal" href="notices.html"/>
+</toc>

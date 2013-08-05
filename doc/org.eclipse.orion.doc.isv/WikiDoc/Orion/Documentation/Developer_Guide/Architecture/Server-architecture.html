@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Architecture overview - Server architecture</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Server architecture</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Client-architecture.html" title="Client architecture">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Client architecture</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Server_architecture">Server architecture</h1>
+		<h2 id="Server_APIs">Server APIs</h2>
+		<p>Orion defines a number of server APIs accessed via simple REST-oriented HTTP calls. These server APIs do not presuppose any particular server technology over straight HTTP, and JSON as the default representation format. Application developers are free to implement Orion server API with the server language and infrastructure of their choice. For a detailed listing of server APIs, see 
+			<a href="../../../../Orion/Server_API/Server-API.html" title="Orion/Server API">Orion/Server API</a>.
+		</p>
+		<h2 id="Example_server">Example server</h2>
+		<p>The current Orion server is written in Java, using 
+			<a href="http://wiki.eclipse.org/Jetty" title="Jetty" target="orion_external">Jetty</a> and 
+			<a href="http://wiki.eclipse.org/Equinox" title="Equinox" target="orion_external">Equinox</a> server infrastructure. This server does not currently define any Java API for extending or augmenting its behavior. Applications should be written against the HTTP server API, to allow for portability across server implementations. To avoid the perception of Orion providing a monolithic, definitive, extensible, irreplaceable server, the server is often referred to as an "example server".
+		</p>
+		<p>The current server is structured into the following bundles(bundle names subject to change):</p>
+		<dl>
+			<dt>org.eclipse.orion.server</dt>
+			<dd>Provides common provisional server API used by other parts of the server</dd>
+			<dt>org.eclipse.orion.server.servlets</dt>
+			<dd>Defines servlets for the core Orion services: file, workspace, preferences</dd>
+			<dt>org.eclipse.orion.server.search</dt>
+			<dd>Search servlet implementation using Apache Solr/Lucene</dd>
+			<dt>org.eclipse.orion.server.configurator</dt>
+			<dd>Defines an application, and configures the server (registers servlets and static content, specifies authentication and authorization settings)</dd>
+			<dt>org.eclipse.orion.server.authentication.*</dt>
+			<dd>Bundles providing various kinds of authentication support.</dd>
+		</dl>
+		<p>The server is split up this way to allow the pieces to be used in other server containers. You can discard the configurator bundle, and create your own server using the provided servlets and common code. This allows you to completely control the server layout, authentication, etc, for your server.</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Client-architecture.html" title="Client architecture">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Architecture.html" title="Architecture overview">
+						<img alt="Architecture overview" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Client architecture</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table>
+	</body>
+</html>

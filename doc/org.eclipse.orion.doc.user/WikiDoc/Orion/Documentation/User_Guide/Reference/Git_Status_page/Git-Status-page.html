@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Git Status page</title>
+		<link type="text/css" rel="stylesheet" href="../../../../../book.css"/>
+	</head>
+	<body>
+		<h1 id="Git_Status_page">Git Status page</h1>
+		<p>The <b>Git Status</b> page provides a summary of the current state of a Git clone associated with your Orion account. This page shows changes in your working tree, staged changes that are ready to commit, and a summary of commits in the active branch.  </p>
+		<p>
+			<img title="Git status page" alt="Git status page" border="0" src="images/Orion-status-page-overview.png"/>
+		</p>
+		<h2 id="Types_of_changes">Types of changes</h2>
+		<p>Typically, there are three types of changes: adding, changing and deleting. The types of changes are indicated by icons on the left of the files.</p>
+		<p>
+			<img title="Change type icons" alt="Change type icons" border="0" src="images/Orion-status-page-change-types.png"/>
+		</p>
+		<p>Files with conflicting changes will have additional annotations.</p>
+		<h2 id="Showing_patch">Showing patch</h2>
+		<p>You can select files from the unstaged section and click on the <b>Show Patch</b> link in the section header to view the patch on the selected files.
+			Please note that if you copy the patch contents from the browser and paste it into a patch file, make sure that the patch file has an <b>empty</b> line at the end. This will assure you to apply the patch successfully from either Orion or the git command line. </p>
+		<h2 id="Comparing_changes">Comparing changes</h2>
+		<p>To view the code diff for a particular change, you can use the twistie icon next at the left of the change to open the diff.  From there, you can traverse the changes using the commands above the diff.  You can also open a separate 
+			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Compare_page/Compare-page.html" title="Orion/Documentation/User Guide/Reference/Compare page">Compare page</a> by clicking the <b>Side by side compare</b> button.  The compare page allows you to merge changes or perform further edits on your uncommitted changes.
+		</p>
+		<p>
+			<img title="Code diff" alt="Code diff" border="0" src="images/Orion-status-page-diffs.png"/>
+		</p>
+		<p>You can also use the expand and collapse buttons at the top of the Unstaged and Staged sections to open and close all of the diffs in the list at once.</p>
+		<p>
+			<img title="Expanding and collapsing diffs" alt="Expanding and collapsing diffs" border="0" src="images/Orion-status-page-expandcollapse.png"/>
+		</p>
+		<h2 id="Staging_changes">Staging changes</h2>
+		<p>Before you can commit a file in Git, it must be added to your local index. This process is called <i>staging</i>, or <i>Git add</i>.  You can stage one file at a time using the stage icon adjacent to the file.</p>
+		<p>
+			<img title="Stage icon" alt="Stage icon" border="0" src="images/Orion-status-page-stagesingle-action.png"/>
+		</p>
+		<p>You can also stage one or more changes by selecting a group of changes (with Ctrl+Click or Shift+Click) and then clicking the <b>Stage</b> button at the top of the unstaged list.</p>
+		<p>
+			<img title="Stage button" alt="Stage button" border="0" src="images/Orion-status-page-stage-action.png"/>
+		</p>
+		<p>When the changes are staged, the files will be moved to the <b>Staged</b> area.</p>
+		<p>
+			<img title="Staged area" alt="Staged area" border="0" src="images/Orion-status-page-staged-change.png"/>
+		</p>
+		<h2 id="Reverting_an_unstaged_change">Reverting an unstaged change</h2>
+		<p>Suppose you have made a change in your working copy that you want to discard. You can discard a change by selecting one or more files that you wish to revert and performing a checkout of the file contents from your local index.</p>
+		<p>
+			<img title="Checkout button" alt="Checkout button" border="0" src="images/Orion-status-page-checkout-action.png"/>
+		</p>
+		<p>Clicking on the action pops up the confirmation dialog. Click <b>OK</b> to restore the change from the index or <b>Cancel</b> to cancel the action.</p>
+		<p>
+			<img title="Confirmation dialog" alt="Confirmation dialog" border="0" src="images/Orion-status-page-checkout-confirm.png"/>
+		</p>
+		<h2 id="Resetting_all_changes_from_the_index">Resetting all changes from the index</h2>
+		<p>You can reset all the unstaged and staged changes by clicking on the <b>Reset</b> button in the main toolbar.</p>
+		<p>
+			<img title="Reset button" alt="Reset button" border="0" src="images/Orion-status-page-reset-action.png"/>
+		</p>
+		<p>A confirmation dialog pops up when you click on the action. Click <b>OK</b> to reset the changes from the index or <b>Cancel</b> to cancel the action.</p>
+		<p>
+			<img title="Reset confirmation button" alt="Reset confirmation button" border="0" src="images/Orion-status-page-reset-confirm.png"/>
+		</p>
+		<h2 id="Unstaging_changes">Unstaging changes</h2>
+		<p>If you decide you don't want to commit a change, but want to continue working on it, you can remove it from your index by <i>unstaging</i> it. You can either unstage changes one by one with the icon, or select changes and use the <b>Unstage</b> button to unstage a group of changes.</p>
+		<p>
+			<img title="Unstage button" alt="Unstage button" border="0" src="images/Orion-status-page-unstage-action.png"/>
+		</p>
+		<h2 id="Committing_changes">Committing changes</h2>
+		<p>Once changes are staged, you can use the <b>Commit</b> button to commit the changes.  You will be prompted for a commit message.  The <b>Amend</b> check-box is used to amend the last commit.  Once you've provided a commit message, you can use the <b>Enter</b> key or <b>Submit</b> button to finish the commit.  </p>
+		<p>
+			<img title="Commit area" alt="Commit area" border="0" src="images/Orion-status-page-commit-action.png"/>
+		</p>
+		<h2 id="Commits_area">Commits area</h2>
+		<p>The git status page also shows the recent commits from your local branch. You can manage the local branch using the commands at the top of the area, such as fetch, merge, and push.  </p>
+		<p>
+			<img title="Status page logs" alt="Status page logs" border="0" src="images/Orion-status-page-mini-logs.png"/>
+		</p>
+		<p>Clicking on the <b>See Full Log</b> navigates to the 
+			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Log_page/Git-Log-page.html" title="Orion/Documentation/User Guide/Reference/Git Log page">Log page</a> for the local branch. There you can refer to the details of the commits, or switch to the remote tracking branch log.
+		</p>
+		<p>The typical workflow for committing changes on this page involves reviewing and staging changes, committing them, and then pushing them to the remote tracking branch.  Before pushing changes, it is useful to first click on the <b>Fetch</b> button to fetch all the recent commits, and to <b>Merge</b> them into your local branch.  Once commits from the remote branch are merged, click on the <b>Push</b> button to push all the outgoing commits to the remote tracking branch.</p>
+		<h2 id="Updating_this_document">Updating this document</h2>
+		<p>This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
+
+			<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Git_Status_page" target="orion_external">http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Git_Status_page</a>
+		</p>
+	</body>
+</html>

@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Working with Git</title>
+		<link type="text/css" rel="stylesheet" href="../../../../../book.css"/>
+	</head>
+	<body>
+		<h1 id="Working_with_Git">Working with Git</h1>
+		<h2 id="Cloning_a_Repository">Cloning a Repository</h2>
+		<ol>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html" title="Orion/Documentation/User Guide/Reference/Repositories page">Repositories page</a>
+			</li>
+			<li>Click <b>Clone Repository</b> in the tool bar.</li>
+			<li>Type or paste in the URL for the repository in the prompt.  
+				<ol>
+					<li>By default, a folder will be created using the name of the Git repository.   Press Enter or click <b>Submit</b> to get the default folder.  </li>
+					<li>Click the &lt;More&gt; button in the prompt if you wish to provide a different name or clone the repository into an already existing folder. </li>
+					<li>Press the Esc key to cancel the clone if you change your mind.</li>
+				</ol>
+			</li>
+		</ol>
+		<p>
+			<img title="Clone a repository" alt="Clone a repository" border="0" src="images/Orion-tasks-clone.png"/>
+		</p>
+		<h2 id="Committing_Changes">Committing Changes</h2>
+		<ol>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Git Status page</a>
+			</li>
+			<li>Click on each change to 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html#Comparing_changes" title="Orion/Documentation/User Guide/Reference/Git Status page#Comparing changes">compare</a> the changes and 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html#Staging_changes" title="Orion/Documentation/User Guide/Reference/Git Status page#Staging changes">stage</a> them.
+			</li>
+			<li>
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html#Committing_changes" title="Orion/Documentation/User Guide/Reference/Git Status page#Committing changes">Commit</a> the staged changes to your repository.
+			</li>
+		</ol>
+		<h2 id="Fetching_and_Merging_from_a_Remote">Fetching and Merging from a Remote</h2>
+		<p>You may fetch and merge from a remote from a number of different Orion pages.</p>
+		<ul>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html" title="Orion/Documentation/User Guide/Reference/Repositories page">Repositories page</a> and click the <b>Pull</b> icon.
+			</li>
+		</ul>
+		<p>
+			<img title="Pull a repository" alt="Pull a repository" border="0" src="images/Orion-tasks-pull.png"/>
+		</p>
+		<ul>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Repository_detailed_view" title="Orion/Documentation/User Guide/Reference/Repositories page#Repository detailed view">Repository detail page</a>.
+				<ul>
+					<li>Click <b>Pull</b> in the toolbar to pull (fetch and merge) the repository.  Changes are merged into your active branch.</li>
+					<li>Click <b>Fetch</b> in the <b>Commits</b> section to fetch the remote tracking branch for the current branch.  Click <b>Merge</b> to merge with the local branch.</li>
+					<li>Locate a particular branch in the <b>Branches</b> section and click <b>Fetch</b> to fetch that branch.  Click <b>Merge</b> to merge with your active branch.</li>
+				</ul>
+			</li>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Git Status page</a> and click on the <b>Fetch</b> and <b>Merge</b> buttons shown in the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html#Commits_area" title="Orion/Documentation/User Guide/Reference/Git Status page#Commits area">Commits Area</a> on the page.
+			</li>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Log_page/Git-Log-page.html" title="Orion/Documentation/User Guide/Reference/Git Log page">Git Log page</a> for the remote branch and click on the <b>Fetch</b> and <b>Merge</b> buttons in the toolbar.
+			</li>
+		</ul>
+		<h2 id="Pushing_to_a_Remote">Pushing to a Remote</h2>
+		<p>You may push to a remote from a number of different Orion pages.</p>
+		<ul>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Repository_detailed_view" title="Orion/Documentation/User Guide/Reference/Repositories page#Repository detailed view">Repository detail page</a>.
+				<ul>
+					<li>Click <b>Push All</b> in the 
+						<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Pushing_a_local_branch" title="Orion/Documentation/User Guide/Reference/Repositories page#Pushing a local branch">Commits Section</a> on the page.  This will push changes in the current branch to its remote tracking branch.
+					</li>
+				</ul>
+			</li>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Git Status page</a> and click on the <b>Push All</b> button shown in the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html#Commits_area" title="Orion/Documentation/User Guide/Reference/Git Status page#Commits area">Commits Area</a> on the page.
+			</li>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Log_page/Git-Log-page.html" title="Orion/Documentation/User Guide/Reference/Git Log page">Git Log page</a> for the local branch and click on the <b>Push All</b> button in the toolbar.  In rare cases, you may want to use the <b>Force Push All</b> button to override the remote tracking branch content with your local branch content.
+			</li>
+		</ul>
+		<h2 id="Switching_between_Branches">Switching between Branches</h2>
+		<ol>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Repository_detailed_view" title="Orion/Documentation/User Guide/Reference/Repositories page#Repository detailed view">Repository detail page</a>.
+			</li>
+			<li>The <b>Branches</b> section on the page will show you your most recently used branches.
+				<img title="Branches section" alt="Branches section" border="0" src="images/Orion-tasks-branches.png"/>
+			</li>
+			<li>Click <b>View All</b> to see a list of all local and remote branches.</li>
+			<li>You can checkout different branches, fetch, merge, rebase, and reset various branches.  See 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Working_with_branches" title="Orion/Documentation/User Guide/Reference/Repositories page#Working with branches">Working with branches</a> in the reference documentation for examples of these actions.
+			</li>
+		</ol>
+		<h2 id="Rebasing_Changes">Rebasing Changes</h2>
+		<p>When you have been making commits in a topic branch, with the intention of pushing the code into a different branch, it is often useful to rebase those commits on another branch.  Rebasing will make your commits appear as if the changes were made based on the code in another branch.</p>
+		<ol>
+			<li>First ensure that all of your changes are committed to your topic branch.  This is typically done on the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Git Status page</a>.
+			</li>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Repository_detailed_view" title="Orion/Documentation/User Guide/Reference/Repositories page#Repository detailed view">Repository detail page</a> and look for the branch you wish to rebase on in the <b>Branches</b> section.  If the branch is not visible, click <b>View All</b> to see all local and remote branches.
+			</li>
+			<li>Now make sure that the branch you wish to rebase on is up to date.  If you are rebasing on a remote branch, you will want to <b>Fetch</b> that branch.  If you are rebasing on a local branch, you will want to temporarily make that branch current, and fetch and merge the branch.</li>
+			<li>When you are sure that the branch you are rebasing upon is up to date, then 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Setting_the_active_branch" title="Orion/Documentation/User Guide/Reference/Repositories page#Setting the active branch">checkout</a> your topic branch (if it is not already the active branch) to make it active.
+			</li>
+			<li>Now find the other branch in the list and click on the <b>Rebase</b> icon.</li>
+		</ol>
+		<p>
+			<img title="Rebasing a branch" alt="Rebasing a branch" border="0" src="images/Orion-tasks-rebase.png"/>
+		</p>
+		<h2 id="Making_a_Patch">Making a Patch</h2>
+		<p>Some development teams might use patches to distribute code changes rather than relying on git branches and commits.  You can make a patch of your working changes in Orion.</p>
+		<ol>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Git Status page</a>.
+			</li>
+			<li>Select the changes in the <b>Unstaged</b> section that you wish to include in the patch.</li>
+			<li>Click on the <b>Show Patch</b> link.  This will open a browser page with a generated diff.  You can copy and paste this diff or save it into a file.</li>
+		</ol>
+		<h2 id="Applying_a_Patch">Applying a Patch</h2>
+		<p>If you are on the receiving end of a patch, you can apply it from the 
+			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Repository_detailed_view" title="Orion/Documentation/User Guide/Reference/Repositories page#Repository detailed view">Repository detail page</a>.
+		</p>
+		<ol>
+			<li>First ensure that you are working in the branch in which you wish to apply the patch.</li>
+			<li>Click <b>Apply Patch</b> in the main toolbar</li>
+			<li>You will be prompted for either a local file or URL containing the patch.  The URL can be used to directly link to patches in bug reporting or review systems.</li>
+		</ol>
+		<p>
+			<img title="Applying a Patch" alt="Applying a Patch" border="0" src="images/Orion-tasks-applypatch.png"/>
+		</p>
+		<h2 id="Finding_a_Commit">Finding a Commit</h2>
+		<p>When working in a team, a common situation is for someone to give you the commit id (sha) of a particular commit they would like you to review or otherwise work with.  To find a commit by id:</p>
+		<ol>
+			<li>Go to the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Repository_detailed_view" title="Orion/Documentation/User Guide/Reference/Repositories page#Repository detailed view">Repository detail page</a>.
+			</li>
+			<li>Enter <b>Ctrl+Shift+H</b> to trigger the Open Commit prompt.
+				<img title="Open commit command dialog" alt="Open commit command dialog" border="0" src="images/Orion-git-commit-open_tooltip.png"/>
+			</li>
+			<li>Paste in the id of the commit.</li>
+			<li>If the commit is found, you can open the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Commit_page/Git-Commit-page.html" title="Orion/Documentation/User_Guide/Reference/Git_Commit_page">Git Commit Page</a> to work with the commit.
+			</li>
+		</ol>
+		<h2 id="Preparing_a_Commit_for_Review">Preparing a Commit for Review</h2>
+		<ol>
+			<li>Open your commit in the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Commit_page/Git-Commit-page.html" title="Orion/Documentation/User_Guide/Reference/Git_Commit_page">Git Commit Page</a>.
+			</li>
+			<li>Click the <b>Ask for review</b> button to generate an email and link for finding and reviewing the commit.  (See 
+				<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Review_Request_page#Asking_for_Review" title="Orion/Documentation/User_Guide/Reference/Review_Request_page#Asking for Review" target="orion_external">Ask for Review</a> for details.)
+			</li>
+		</ol>
+		<h2 id="Reviewing_a_Code_Contribution">Reviewing a Code Contribution</h2>
+		<p>If you receive a link (via email, message, bug report) to an Orion review, click the review link to open the 
+			<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Review_Request_page#Asking_for_Review" title="Orion/Documentation/User_Guide/Reference/Review_Request_page#Asking for Review" target="orion_external">Ask for Review</a> page.
+		</p>
+		<h2 id="Storing_Credentials">Storing Credentials</h2>
+		<p>You may store your git repository credentials using the 
+			<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Git_Credentials_Storage#Enable_Storage" title="Orion/Documentation/User_Guide/Reference/Git_Credentials_Storage#Enable Storage" target="orion_external">User Profile</a> settings.
+		</p>
+		<h2 id="Comparing_File_Changes_in_the_Repository_History">Comparing File Changes in the Repository History</h2>
+		<p>Sometimes it is necessary to see what changes have occurred to a particular file over time.</p>
+		<ol>
+			<li>Locate the file of interest in the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Navigator_page/Navigator-page.html" title="Orion/Documentation/User_Guide/Reference/Navigator_page">Navigator</a> page.
+			</li>
+			<li>Select the file and choose the <b>Git Log</b> link in the <b>Actions</b> menu.</li>
+			<li>You can compare any change to the working copy using <b>Compare with working tree</b> or you can select two changes to review the differences between them.</li>
+		</ol>
+		<p>
+			<img title="Git log for a single file" alt="Git log for a single file" border="0" src="images/Orion-git-log-single-file.png"/>
+		</p>
+		<h2 id="Updating_this_document">Updating this document</h2>
+		<p>This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
+
+			<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Tasks/Working_with_Git" target="orion_external">http://wiki.eclipse.org/Orion/Documentation/User_Guide/Tasks/Working_with_Git</a>
+		</p>
+	</body>
+</html>

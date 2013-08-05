@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into Orion pages - orion.page.content</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.page.content</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Plugging-into-Orion-pages.html" title="Plugging into Orion pages">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-page-link.html" title="orion.page.link">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Plugging into Orion pages</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.page.link</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.page.content">orion.page.content</h1>
+		<p>Plugins can contribute page content for a page that is framed by the common Orion banner and equipped with standard Orion page services, such as the related pages menu.  The page content itself is rendered in an iframe inside the page.  Pages contributed in this way are opened in a URL that specifies the id of the extension.</p>
+		<h2 id="Service_methods">Service methods</h2>
+		<p>None. This service is purely declarative.</p>
+		<h2 id="Service_attributes">Service attributes</h2>
+		<p>Implementations of <tt>orion.page.content</tt> must define the following attributes:</p>
+		<dl>
+			<dt>name</dt>
+			<dd>The name of the content, which is shown as the page title in the Orion banner.</dd>
+			<dt>id</dt>
+			<dd>A symbolic id for referencing this extension point.</dd>
+			<dt>uriTemplate</dt>
+			<dd>a 
+				<a href="URI_Templates" title="Orion/Documentation/Developer Guide/Plugging into Orion pages#URI Templates">URI Template</a> that defines the href for the iframe content.  When content is opened, it might be targeted against a particular file or folder.   In this case, the template variables can refer to file or folder metadata from the target file.  In addition to the standard variables used in Orion and the file/folder metadata, some special variables are used:
+			</dd>
+		</dl>
+		<ul>
+			<li><tt>{SaveURL}</tt> refers to a URL that can be used to save content back to Orion.</li>
+			<li><tt>{ExitURL}</tt> refers to a URL that can be used if the user chooses to exit the embedded application.  </li>
+		</ul>
+		<dl>
+			<dt>saveToken</dt>
+			<dd>Optional.  An Array of objects describing token(s) that appear in the URL of the page that saves the content.  The saveToken is used to find the location of any content stored by the plugin.</dd>
+		</dl>
+		<h2 id="Examples">Examples</h2>
+		<p>The following snippet defines an orion.page.content extension for showing the Pixlr image editor inside Orion.</p>
+		<pre>  provider.registerServiceProvider("orion.page.content", {}, {
+     id: "orion.pixlr.content",
+     name: "Pixlr",
+     saveToken: [{token: "imgapi?image=", terminator: "&amp;"},
+     uriTemplate: "<a href="http://pixlr.com/editor/?image=" target="orion_external">http://pixlr.com/editor/?image=</a>{OrionHome}{Location}&amp;referrer=Orion&amp;title={Name}&amp;locktype=true&amp;exit={ExitURL}&amp;target={SaveURL}imgapi&amp;locktitle=true,contentProvider=orion.pixlr.content"});
+</pre>
+		<p>The URL to open this page is <tt>/content/content.html#{Location},contentProvider=orion.pixlr.content</tt></p>
+		<p>If the page content requires a resource location (for example, it is an editor), then typically the page would be linked using the orion editor extension point.  This ensures that the page were opened with a specified location parameter in the URL.   The pixlr plugin contributes an editor in this way.</p>
+		<pre>  provider.registerServiceProvider("orion.edit.editor", {}, {
+     id: "orion.pixlr",
+     name: "Pixlr Image Editor",
+     uriTemplate: "{OrionHome}/content/content.html#{Location},contentProvider=orion.pixlr.content"});
+</pre>
+		<p>The corresponding "open with" extension point is</p>
+		<pre>  provider.registerServiceProvider("orion.navigate.openWith", {}, {
+     editor: "orion.pixlr",
+     contentType: <a href="&quot;image/gif&quot;,">"image/jpeg", "image/ico", "image/png","image/tiff"</a>});
+</pre><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Plugging-into-Orion-pages.html" title="Plugging into Orion pages">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-Orion-pages.html" title="Plugging into Orion pages">
+						<img alt="Plugging into Orion pages" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-page-link.html" title="orion.page.link">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Plugging into Orion pages</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.page.link</td>
+			</tr>
+		</table>
+	</body>
+</html>

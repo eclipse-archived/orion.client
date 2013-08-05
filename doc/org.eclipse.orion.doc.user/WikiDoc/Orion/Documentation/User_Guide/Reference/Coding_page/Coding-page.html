@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Coding page</title>
+		<link type="text/css" rel="stylesheet" href="../../../../../book.css"/>
+	</head>
+	<body>
+		<h1 id="Coding_page">Coding page</h1>
+		<p>Navigate to the <b>Coding</b> page by clicking any file in the 
+			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Navigator_page/Navigator-page.html" title="Orion/Documentation/User_Guide/Reference/Navigator_page">Navigator page</a> that has a corresponding Orion editor. This page is comprised mainly of an editor area, and a collapsible navigator / code outline section on the left hand side. Error markers are shown in the gutter to the left of the line numbers, as underline squiggles in the text, and a birds-eye view of errors is shown next to the scroll bar on the right. The name of the file being edited, and the current line and column information are shown in the title area at the top of the page. Editor fonts and colors can be customized from the 
+			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Settings_page/Settings-page.html" title="Orion/Documentation/User_Guide/Reference/Settings_page">Settings page</a>.
+		</p>
+		<p>
+			<img title="Coding page" alt="Coding page" border="0" src="images/Orion-editor-overview.png"/>
+		</p>
+		<h2 id="Editor_features">Editor features</h2>
+		<p>When editing JavaScript, comments containing the word "TODO" will also appear as annotations in the ruler and overview bars. Hover on the annotation to see the comment associated with the TODO statement.</p>
+		<p>
+			<img title="TODO annotations" alt="TODO annotations" border="0" src="images/Orion-editor-todo.png"/>
+		</p>
+		<p>You can navigate into hyperlinks in the editor by holding down the Ctrl key (Cmd on Mac).</p>
+		<p>
+			<img title="Editor hyperlinks" alt="Editor hyperlinks" border="0" src="images/Orion-editor-hyperlinks.png"/>
+		</p>
+		<p>The Orion editor supports folding sections of a file that you aren't interested in looking at. For example, you can fold comments in JavaScript files. Folding sections are shown as little plus or minus icons in the editor ruler. Hovering on the annotation for a folded section will let you peek at hidden the contents.</p>
+		<p>
+			<img title="Peek folding annotation contents" alt="Peek folding annotation contents" border="0" src="images/Orion-editor-folding.png"/>
+		</p>
+		<p>The editor supports many of the typical key bindings from the Eclipse editor. To find out what key bindings are available select Options &gt; Keyboard Shortcuts or type Alt+Shift+? (or Ctrl+Shift+? on Mac OS X).</p>
+		<p>
+			<img title="Keyboard Help" alt="Keyboard Help" border="0" src="images/Orion-editor-key-assist.png"/>
+		</p>
+		<h2 id="Key_Bindings">Key Bindings</h2>
+		<p>The editor has a default set of keybindings. As part of the 3.0 release, an initial set of keybindings have been added for vi and emacs. These can be accessed through either the local editor settings combo or from the editor settings page.</p>
+		<p>
+			<img title="default bindings" alt="default bindings" border="0" src="images/DefaultBindings.png"/>
+			<img title="vi bindings" alt="vi bindings" border="0" src="images/ViBindings.png"/> 
+			<img title="emacs bindings" alt="emacs bindings" border="0" src="images/Emacs.png"/>
+		</p>
+		<p>It is possible to choose a keybinding set from either the local settings page:</p>
+		<p>
+			<img title="local editor settings" alt="local editor settings" border="0" src="images/LocalEditorSettings.png"/>
+		</p>
+		<p>Or from the Editor settings page:</p>
+		<p>
+			<img title="editor settings" alt="editor settings" border="0" src="images/EditorSettings.png"/>
+		</p>
+		<h2 id="Language_tools">Language tools</h2>
+		<p>Syntax highlighting for several languages is built into the Orion editor. In particular there is support for JavaScript, HTML, CSS, and Java. A 
+			<a href="http://mamacdon.github.com/orion-codemirror/codeMirrorPlugin.html" target="orion_external">CodeMirror plugin</a> is available that provides syntax highlighting for a large variety of other languages.
+		</p>
+		<p>Basic content assist is currently supported in JavaScript, CSS, and HTML files. Other file types may be supported depending on what plugins you have installed. Type Ctrl+Space to open content assist at the current cursor position in the editor. Some content assist proposals require you to fill in certain variables after the proposal is selected. For example, if you select the "for..in" proposal in JavaScript, the editor enters a linked mode to let you fill in the property name and object to be iterated.</p>
+		<p>
+			<img title="Editor linked mode" alt="Editor linked mode" border="0" src="images/Orion-editor-linked-mode.png"/>
+		</p>
+		<p>Type in an appropriate value for the variable, and hit Tab key to move to the next variable. When you are finished, exit linked mode by hitting Enter.</p>
+		<h2 id="Content_outline">Content outline</h2>
+		<p>The 
+			<b>Outline</b> pane to the left of the editor shows the structure of the file you are editing. Click entries in the outline to jump to the corresponding location in the editor. When not in use, you can collapse the Outline pane using Ctrl+O.
+		</p>
+		<p>There are plugins available that define additional outline capabilities for various file types. Click 
+			<b>Get Plugins</b> in the top banner to find additional outline plugins for HTML and JavaScript. When multiple outlines are available, a drop-down menu appears at the top of the outline, allowing you to select a particular outline presentation:
+		</p>
+		<p>
+			<img title="Outline dropdown menu" alt="Outline dropdown menu" border="0" src="images/Orion-editor-outline-menu.png"/>
+		</p>
+		<h2 id="Searching">Searching</h2>
+		<p>There are several ways to perform searches in the editor (some key bindings may be different on Mac OS):</p>
+		<ul>
+			<li>Ctrl+F will open a dialog to search for occurrences of some text in the current editor</li>
+			<li>Ctrl+J will perform an incremental search as you type. A message in the title area will let you know you are in incremental find mode, and will turn red to indicate no matches were found.</li>
+			<li>Ctrl+H will search for occurrences of the currently selected text across all files. The search results will pop up in a new window, from which you can navigate to files containing the matches</li>
+			<li>Typing search terms in the search box in the upper right corner of the title area will search for the terms across all files, and display matches in the 
+				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html" title="Orion/Documentation/User_Guide/Reference/Search_Results_page">Search Results page</a>. From there you can further filter and sort the results, and initiate a replace operation across multiple files.
+			</li>
+			<li>Ctrl+Shift+F will open the 
+				<b>Find File</b> dialog, where you can search for a file or bookmarked favorite by name, using simple wildcards.
+			</li>
+		</ul>
+		<p>
+			<img title="Find file named dialog" alt="Find file named dialog" border="0" src="images/Orion-openresource.png"/>
+		</p>
+		<h2 id="Updating_this_document">Updating this document</h2>
+		<p>This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
+
+			<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Coding_page" target="orion_external">http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Coding_page</a>
+		</p>
+	</body>
+</html>

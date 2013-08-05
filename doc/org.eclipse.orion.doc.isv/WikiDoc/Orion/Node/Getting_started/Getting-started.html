@@ -1,0 +1,217 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Getting started with Orion on Node</title>
+		<link type="text/css" rel="stylesheet" href="../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Getting started with Orion on Node</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table><hr/>
+		<p>Orion provides a minimal, single-user server deployment of Orion written in JavaScript that runs on 
+			<a href="http://nodejs.org" target="orion_external">Node.js</a>. This implementation of Orion supports developing your own Node applications with Orion's editing environment.
+		</p>
+		<h2 id="Features">Features</h2>
+		<p>The JavaScript Orion server implementation is still very early access. There are many rough edges and missing features compared to the full Java-based Orion server. The JavaScript-based Orion server currently supports:</p>
+		<ul>
+			<li>Basic Navigator operations (Create file/folder, delete file/folder, copy/move/rename a file)</li>
+			<li>Basic Editor operations (Edit file, save file, ETags)</li>
+			<li>Plugin operations (Install/uninstall plugins)</li>
+			<li>Shell commands for 
+				<a href="Getting-started.html#Developing_a_node.js_application">developing Node.js applications</a>. Type <code>help node</code> in the Shell page to find out more.
+			</li>
+			<li>Shell command for running the 
+				<a href="https://npmjs.org/" target="orion_external">npm package manager</a>. (works the same as the usual <code>npm</code> console command).
+			</li>
+			<li>Gzip on server traffic to reduce download times</li>
+			<li>Concatenation and minification of pages (requires a manual step)</li>
+		</ul>
+		<h2 id="Requirements">Requirements</h2>
+		<ul>
+			<li>Node.js and npm.</li>
+			<li>A modern web browser with Web Socket support (for example: Firefox 15, Chrome 22, Internet Explorer 10, Safari 6).</li>
+		</ul>
+		<h2 id="Getting_Orionode_and_starting_it">Getting Orionode and starting it</h2>
+		<p>You can obtain Orionode through npm (the easiest way) or by checking out its source repo and running it. Checking out the source is mainly of interest to developers wishing to work on or extend the Orion node server. For details on this approach see the Orion developer 
+			<a href="http://wiki.eclipse.org/Orion/Getting_the_source#Node.js_on_local_computer" title="Orion/Getting_the_source#Node.js_on_local_computer" target="orion_external">wiki page</a>.
+		</p>
+		<h3 id="Installing_with_npm">Installing with npm</h3>
+		<p>To install Orion with the Node Package Manager (npm), simply run the following command from the shell:</p>
+		<ol>
+			<li>Run this command from a shell:
+				<br/><code> npm install orion</code>
+				<br/>This should install Orionode into a node_modules subdirectory of your working directory.
+				<ul>
+					<li>If you're not interested in developing the Orionode server, add the <code>--production</code> flag for a slightly smaller download.</li>
+				</ul>
+			</li>
+		</ol>
+		<h3 id="Starting_and_stopping_the_server">Starting and stopping the server</h3>
+		<ol>
+			<li>Launch Orion by running:
+				<br/><code>npm start orion</code> 
+				<ul>
+					<li>If you need to pass 
+						<a href="Getting-started.html#Server_command_line_arguments">command line arguments</a> to the server, run the server.js file directly:
+						<br/><code>node node_modules/orion/server.js 
+						<a href="arguments">arguments</a></code>
+					</li>
+				</ul>
+			</li>
+			<li>Go to 
+				<a href="http://localhost:8081" target="orion_external">http://localhost:8081</a> (or whatever port you provided in the server arguments) in your web browser to start using Orionode. 
+			</li>
+			<li>Stop the server by sending a kill signal from the console (typically Ctrl+C)</li>
+		</ol>
+		<h3 id="The_orion.conf_file">The orion.conf file</h3>
+		<p>You can pass arguments to the server by editing the <code>orion.conf</code> file. It is found in the directory where you installed Orion (when installing from npm, this is typically <code>node_modules/orion/</code>).</p>
+		<h5 id="Password">Password</h5>
+		<ol>
+			<li>Add a line in your <code>orion.conf</code> file that looks like this:</li>
+		</ol>
+		<pre> pwd=mysecretpassword
+</pre>
+		<h5 id="Workspace">Workspace</h5>
+		<p>Edit the <code>orion.conf</code> file and change the <code>workspace</code> option to point to a directory in your user space. If not specified, a default <code>.workspace</code> directory will be created in the Orion install directory. For example:</p>
+		<pre> workspace=/home/pi/Workspace/
+</pre>
+		<h5 id="Making_sure_Orion_can_launch_npm">Making sure Orion can launch npm</h5>
+		<p>Orion on Node lets you use <code>npm</code> commands in the Orion shell to manage the dependencies of a project you're writing. To do this, the server makes a guess about the path where the npm internals (specifically, <code>npm-cli.js</code>) are located on your computer. If you installed a recent version of Node.js, npm should be installed automatically and the guess should work. If you installed npm separately, this guess may be wrong. If you see an error message when launching the server or when you try to run npm commands in the Orion shell, it means the server failed to guess where npm lives, so you have to specify the path to <code>npm-cli.js</code> yourself:</p>
+		<ol>
+			<li>Find out where npm lives on your computer (npm must be in your PATH environment variable for this to work). From a command shell, run:
+				<ul>
+					<li>On Windows: <code>where npm</code></li>
+					<li>On Mac OS/Linux: <code>which npm</code></li>
+					<li>The returned path will be a shell script (or a symbolic link to a script) that launches <code>npm-cli.js</code>. The path to <code>npm-cli.js</code> is what we need. Open up the script in a text editor, and copy the path of <code>npm-cli.js</code>.</li>
+				</ul>
+			</li>
+			<li>In the server directory, open the <code>orion.conf</code> file. You'll find a <code>npm_path</code> option (by default its value is empty).</li>
+			<li>Set the value of <code>npm_path</code> option equal to the path to <code>npm-cli.js</code>. 
+				<ul>
+					<li>You can provide the path as an absolute path, or a path relative to your node executable. </li>
+				</ul>
+			</li>
+			<li>Start or restart the server. If you do not see any "npm" errors printed to the console, your npm path is set properly.</li>
+		</ol>
+		<h2 id="Server_command_line_arguments">Server command line arguments</h2>
+		<p>When launching the server manually through node.js (<code>node 
+			<a href="orion">install dir</a>/server.js</code>), a number of optional arguments can be provided:
+		</p>
+		<dl>
+			<dt><code>-p</code> or <code>-port</code></dt>
+			<dd>The port that the Orion server will listen on. Defaults to 8081.</dd>
+			<dt><code>-pwd</code> or <code>-password</code></dt>
+			<dd>Path to a file containing a password. If provided, Orionode will enforce HTTP Basic Authentication with the password (the auth 'User' field is ignored -- Orionode only verifies the password). Use caution: if you don't provide a password file, 
+				<b>no authentication</b> is used (so anyone can access your Orionode server and read and write your files!). 
+			</dd>
+			<dt><code>-w</code> or <code>-workspace</code></dt>
+			<dd>The target directory for reading and writing files. Will be created if it doesn't exist. Defaults to a subdirectory named <code>.workspace</code> in the server directory. This option can also be set in your 
+				<a href="Getting-started.html#The_orion.conf_file">orion.conf file</a>.
+			</dd>
+			<dt><code>-dev</code></dt>
+			<dd>Starts the server in development mode. In this mode, some client-side code is not cached by the browser, to ease development.</dd>
+			<dt><code>-log</code></dt>
+			<dd>Logs each request served to standard output.</dd>
+		</dl>
+		<p>Arguments passed on the command line override arguments set in the orion.conf file, when both are provided.</p>
+		<h2 id="Developing_a_node.js_application">Developing a node.js application</h2>
+		<p>Now in the browser you can start to develop your node.js applications. Orionode uses largely the UI you're accustomed to from Orion. (Refer to 
+			<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide" title="Orion/Documentation/User_Guide" target="orion_external">Orion user guide</a> for basic instructions). Please note that the Sites and Git pages are not available in Orionode. Here is a typical workflow:
+		</p>
+		<ol>
+			<li>Use the Navigator and Edit pages to create and edit your folders and node applications.</li>
+			<li>Go to the Shell page.</li>
+			<li><code>cd</code> to the folder where your application lives.</li>
+			<li>Use <code>npm install</code> to install your dependency packages if needed. You can use basically all the npm arguments here.</li>
+			<li>Use <code>node start yourApp.js</code> to start your application.</li>
+			<li>Use <code>node list</code> to monitor any long-running applications you've started.</li>
+			<li>Use <code>node stop 
+				<a href="PID">PID</a></code> to stop an application if you want to force it to stop.
+			</li>
+		</ol>
+		<h2 id="Debugging_a_node.js_application">Debugging a node.js application</h2>
+		<p>You can use Orionode to debug your node.js application. If you have existing node.js applications, make sure the code is under a subfolder of the workspace (path provided by the -w option when you start Orionnode). This will give you easy access to your node.js apps from within Orionode.
+			You can also create a new node.js application in your workspace.</p>
+		<ol>
+			<li>After Orionode starts, open the shell page and use help to see what commands are available.</li>
+			<li><code>cd</code> to the folder where your application lives.</li>
+			<li>Use <code>node debug yourApp.js givenPort</code> to start your app in debug mode. You can start multiple apps in debug mode by repeating this step.</li>
+			<li>In the return value of the <code>node debug</code> command, you will see a "Debug URL", which you can click to start debugging your app.</li>
+		</ol>
+		<p>The debug interface currently only works with Webkit browsers (Chrome, Safari).</p>
+		<h2 id="Other_ways_of_using_Orionode">Other ways of using Orionode</h2>
+		<p>You can use Orionode as a file server, to access your local files from 
+			<a href="http://www.orionhub.org/" target="orion_external">http://www.orionhub.org/</a> (or any other Orion installation). All you need is 
+			Orionode and a publicly-accessible URL pointing to your local Orionode server.
+		</p>
+		<ol>
+			<li>Visit this page on your Orionode server (the hostname will differ from this example) and copy its URL:
+				<a href="http://yourOrionNodeServer:8081/plugins/fileClientPlugin.html" target="orion_external">http://yourOrionNodeServer:8081/plugins/fileClientPlugin.html</a>
+			</li>
+			<li>Log in to Orionhub.</li>
+			<li>Click the user menu in the top right-hand corner of the page, then click 
+				<b>Settings</b>.
+			</li>
+			<li>Select the 
+				<b>Plugins</b> category, click 
+				<b>Install</b>, paste in the URL, click 
+				<b>Submit</b>.
+			</li>
+			<li>Return to the Navigator page. Your Orionode files should appear as a new filesystem in the left-hand sidebar.</li>
+		</ol>
+		<h2 id="Security_Concerns">Security Concerns</h2>
+		<p>No security is guaranteed or even implied at this moment. Always run Orionode with the <code>-pwd</code> flag to prevent unauthorized access to your files.</p>
+		<h2 id="Known_Issues">Known Issues</h2>
+		<ul>
+			<li>See the 
+				<a href="https://bugs.eclipse.org/bugs/buglist.cgi?list_id=4064489&amp;classification=Eclipse&amp;query_format=advanced&amp;bug_status=UNCONFIRMED&amp;bug_status=NEW&amp;bug_status=ASSIGNED&amp;bug_status=REOPENED&amp;component=Node&amp;product=Orion" target="orion_external">list of open bugs</a>.
+			</li>
+			<li>There is no way to provide standard input to a running Node.js app.</li>
+			<li>There is no source control integration yet. E.g.: Git support.</li>
+		</ul>
+		<h2 id="See_also">See also</h2>
+		<ul>
+			<li>
+				<a href="http://wiki.eclipse.org/Orion/Node/Developing" title="Orion/Node/Developing" target="orion_external">Developing the Node server</a>
+			</li>
+		</ul>
+		<p>
+			<a href="http://wiki.eclipse.org/Category:Orion" title="Category:Orion" target="orion_external">N</a>
+
+			<a href="http://wiki.eclipse.org/Category:Orion/Node" title="Category:Orion/Node" target="orion_external">G</a>
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table>
+	</body>
+</html>

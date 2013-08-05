@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into the shell - orion.shell.type</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.shell.type</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-shell-command.html" title="orion.shell.command">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Example.html" title="Example">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.shell.command</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Example</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.shell.type">orion.shell.type</h1>
+		<p>The <tt>orion.shell.type</tt> service is used to contribute parameter types to the Shell page.  These enable contributed commands to have custom parameters with dynamically-computed completion suggestions.  The service is executed when the Shell page needs either completion suggestion values to display, or the string representation for a given value.</p>
+		<h2 id="Service_methods_2">Service methods</h2>
+		<p>Implementations of <tt>orion.shell.type</tt> define the following methods:</p>
+		<dl>
+			<dt>parse(arg, typeSpec, context)</dt>
+			<dd>Takes the currently-typed user string and returns an object with completion suggestions.  The arguments to this method are:
+				<dl>
+					<dt>arg</dt>
+					<dd>An object with properties {prefix: string, suffix: string, text: string}, contains the user's currently-typed string for an instance of this parameter</dd>
+					<dt>typeSpec</dt>
+					<dd>This parameter's typeSpec as defined by the command that is using it</dd>
+					<dt>context</dt>
+					<dd>An object with property {lastParseTimestamp: number}, which can aid in determining when the completion suggestions being returned should be recomputed</dd>
+				</dl>
+			</dd>
+		</dl>
+		<p>The return value for this method must be either an <tt>orion.Deferred</tt> (if computation of the result object has to be done asynchronously), or an object with the following properties:</p>
+		<dl>
+			<dt>
+				<dl>
+					<dt>status</dt>
+					<dd>One of the following numbers:
+						<dl>
+							<dd>0: (MATCH) the currently-typed string matches a valid value (ie.- the typing of this parameter value can now be considered complete)</dd>
+							<dd>1: (PARTIAL) the currently-typed string partially matches a valid value (ie.- the typing of a valid value in progress)</dd>
+							<dd>2: (ERROR) the currently-typed string does not match a subset of the initial characters of any valid values</dd>
+						</dl>
+					</dd>
+					<dt>message</dt>
+					<dd>(Optional) An error message to display in the Shell page</dd>
+					<dt>predictions</dt>
+					<dd>An array of {name: string, value: object} objects that are valid completions for the currently-typed string (name is the string to display in the suggestions list)</dd>
+					<dt>value</dt>
+					<dd>If the currently-typed string is a match for a valid value then set this property to that {name: string, value: object} value, otherwise set its value to undefined</dd>
+				</dl>
+			</dt>
+		</dl>
+		<dl>
+			<dt>stringify(object, typeSpec)</dt>
+			<dd>(Optional) Returns an object's string representation that is appropriate for display in the Shell page's output area.  An example case where this string may not be the same as the "name" that was provided for it by the parse service is if a typed relative path should be resolved to an absolute path.  If this service is not implemented then the object's "name" that was provided for it by the parse service implementation is used as its display string.  The arguments to this method are:
+				<dl>
+					<dt>object</dt>
+					<dd>The object to stringify</dd>
+					<dt>typeSpec</dt>
+					<dd>This parameter's typeSpec as defined by the command that is using it</dd>
+				</dl>
+			</dd>
+		</dl>
+		<h2 id="Service_attributes_2">Service attributes</h2>
+		<p>Implementations of <tt>orion.shell.type</tt> define the following attribute:</p>
+		<dl>
+			<dt>name</dt>
+			<dd>The name of the parameter type (used in the plug-in definition of contributed commands)</dd>
+		</dl><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-shell-command.html" title="orion.shell.command">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-the-shell.html" title="Plugging into the shell">
+						<img alt="Plugging into the shell" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Example.html" title="Example">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.shell.command</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Example</td>
+			</tr>
+		</table>
+	</body>
+</html>

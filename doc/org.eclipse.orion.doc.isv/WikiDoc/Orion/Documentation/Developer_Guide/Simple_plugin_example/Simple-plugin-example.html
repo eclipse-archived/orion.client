@@ -1,0 +1,259 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Simple plugin example</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Simple plugin example</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table><hr/>
+		<p>This section explains how to write a plugin for Orion. It is intended for developers who want to extend Orion's functionality.</p>
+		<h2 id="What_is_a_plugin.3F">What is a plugin?</h2>
+		<p>A <i>plugin</i> is an HTML file containing some JavaScript that knows how to connect to the Orion client. Plugins can be hosted on any web server and installed into Orion using their URL.</p>
+		<p>In order to be useful, a plugin should provide one or more <i>services</i>. When Orion needs a service contributed by a plugin, it loads the plugin inside an IFrame.</p>
+		<p>Orion currently supports a small set of <i>extension points</i>: service types that plugins can contribute to, in order to customize the client and add more functionality. These include things like:</p>
+		<ul>
+			<li>Adding more commands to the editor toolbar</li>
+			<li>Adding more commands to the navigator view</li>
+			<li>Adding content assist for new file types</li>
+			<li>Adding syntax highlighting rules for new file types</li>
+		</ul>
+		<p>For a full list of available services, see the 
+			<a href="http://wiki.eclipse.org/Orion/Documentation/Developer_Guide" title="Orion/Documentation/Developer_Guide" target="orion_external">Developer Guide</a>.
+		</p>
+		<h2 id="What_you_need">What you need</h2>
+		<p>Every plugin must include the following JavaScript library: 
+			<b><tt>
+				<a href="http://orionhub.org/orion/plugin.js" target="orion_external">plugin.js</a></tt>
+			</b>
+		</p>
+		<p>You can copy-paste its contents into a &lt;script&gt; tag in your plugin, or load it externally like so:</p>
+		<pre>&lt;script src="plugin.js"&gt;&lt;/script&gt;
+</pre>
+		<p>The plugin.js file is also an AMD module, so you can alternatively load it through a module loader like 
+			<a href="http://requirejs.org/" target="orion_external">RequireJS</a>.
+		</p>
+		<pre>require(<a href="'plugin'">'plugin'</a>, function(PluginProvider) {
+    // ...
+});
+</pre>
+		<h2 id="Writing_the_plugin">Writing the plugin</h2>
+		<p>Let's make a plugin that adds a button to the toolbar of the Orion editor. When clicked, it will reverse the selected text in the editor. This is not a very useful feature, but it'll be a good introduction to the concepts involved.</p>
+		<h3 id="Creating_the_HTML_file">Creating the HTML file</h3>
+		<p>Create a new HTML file called <tt>reversePlugin.html</tt> with the following content:</p>
+		<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;Reverse Plugin&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+		<p>What we have now isn't a plugin yet. It's just a bare-bones HTML file. The next step is to include the API we'll need to talk to Orion. Grab the <tt>plugin.js</tt> file (see 
+			<a href="Simple-plugin-example.html#What_you_need">What you need</a>) and put it in the same folder as <tt>reversePlugin.html</tt>. Then add this inside the &lt;head&gt; tags of the HTML file:
+		</p>
+		<pre>&lt;script src="plugin.js"&gt;&lt;/script&gt;
+</pre>
+		<h3 id="Making_it_a_plugin">Making it a plugin</h3>
+		<p>Next, we'll add some code that connects our file to Orion. Add the following, again inside the &lt;head&gt; tags:</p>
+		<pre>&lt;script&gt;
+  window.onload = function() {
+    var headers = {
+         name: "My Plugin",
+         version: "1.0",
+         description: "My first Orion plugin."
+    };
+    var provider = new orion.PluginProvider(headers);
+    provider.connect();
+  };
+&lt;/script&gt;
+</pre>
+		<p>At this point, we've got an honest-to-goodness Orion plugin, albeit one that does nothing. Let's go over the various parts in detail. </p>
+		<ul>
+			<li><tt>window.onload</tt> — Runs our function after <tt>plugin.js</tt> has been loaded by the browser. This ensures that the <tt>orion.PluginProvider</tt> constructor is available.</li>
+			<li><tt>var headers = ...</tt> - An optional object supplying metadata about the plugin's name, version and description. This is used to display information about the plugin on the plugin settings page.</li>
+			<li><tt>var provider = new orion.PluginProvider(headers)</tt> — Creates a new PluginProvider. The PluginProvider may provide one or more services, but right now ours doesn't provide any.
+				<br/>Optionally, an object giving metadata about the plugin can be provided as an argument to the constructor.
+			</li>
+			<li><tt>provider.connect()</tt> — This is where the magic happens. When our plugin is activated from Orion, this call opens an asynchronous communication channel. Orion adds information about our plugin, and any service contributions it makes, to the Orion registry.</li>
+		</ul>
+		<h3 id="Registering_the_service">Registering the service</h3>
+		<p>Now we're going to expose a service to Orion. We'll create and register a service with the 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#orion.edit.command" title="Orion/Documentation/Developer Guide/Plugging into the editor#orion.edit.command">orion.edit.command</a> service type.
+			Add the additional lines as shown:
+		</p>
+		<pre>window.onload = function() {
+  var headers = {name: "My Plugin", version: "1.0", description: "My first Orion plugin."};
+  var provider = new orion.PluginProvider(headers);
+  var serviceImpl = { };
+  var serviceProperties = { };
+  provider.registerService("orion.edit.command", serviceImpl, serviceProperties);
+  provider.connect();
+};
+</pre>
+		<p>Let's go over what we have now:</p>
+		<ul>
+			<li><tt>var serviceImpl</tt>: This object gives the implementation of our service, the part that will do the actual work. When someone requests our service,<!-- — for example, by getting a <tt>ServiceReference</tt> object and calling getService() &mdash; --> our plugin is loaded into an IFrame, and the service's methods are made available. The <tt>function</tt>-typed properties of the <tt>serviceImpl</tt> object define the service methods.</li>
+			<li><tt>var serviceProperties</tt>: Every service provider can supply 
+				<b>properties</b>, which is an object that holds metadata about the service provider. <!-- Orion stores these properties when a plugin is installed <span style="background-color: #00ff00;">(?)</span>, and they can later be queried without causing the plugin to be loaded.
+				<br/>Properties are often used to filter out service providers that are irrelevant to a particular task. For example, if you're writing a service provider for content assist, you'd specify what file types your provider applies to in its properties. The content assist loader then only loads plugins that provide content assist for the particular file type being edited.  This is important because plugin load can be an expensive operation, so we want to avoid doing it if possible. since these can be queried without loading the plugin itself. --> If you're familiar with Eclipse desktop, you can think of service properties as analogous to the extensions declared in a plugin.xml file.
+			</li>
+			<li><tt>provider.registerService("orion.edit.command", serviceImpl, serviceProperties);</tt>: This call registers our service implementation and properties with the service type 
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#orion.edit.command" title="Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.command">"orion.edit.command"</a>. At this point, if we tried installing our plugin into Orion, we'd have enough to make the Orion editor see our contribution. However, our contribution still does nothing. Let's fix that.
+			</li>
+		</ul>
+		<h3 id="Implementing_the_service">Implementing the service</h3>
+		<p>We'll fill in the <tt>serviceImpl</tt> and <tt>serviceProperties</tt> objects with the actual details of the service.
+			Change the <tt>serviceImpl</tt> object to look like this:</p>
+		<pre>var serviceImpl = {
+  run: function(text) {
+    return text.split("").reverse().join("");
+  }
+};
+</pre>
+		<p>Note that the functions defined in the service will depend on what service type you're contributing to. In our case, we're contributing to 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#orion.edit.command" title="Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.command">"orion.edit.command"</a>, which expects a <tt>run()</tt> function. (See the 
+			<a href="http://wiki.eclipse.org/Orion/Documentation/Developer_Guide" title="Orion/Documentation/Developer_Guide" target="orion_external">Developer Guide</a> for a list of extension points and their API.)
+		</p>
+		<p>Change the serviceProperties object to look like this:</p>
+		<pre>var serviceProperties = { 
+  name: "Reverse Text",
+  key: <a href="&quot;e&quot;,">true, true</a> // Ctrl+Shift+e
+};
+</pre>
+		<h3 id="The_finished_plugin_file">The finished plugin file</h3>
+		<p>Make sure that your copy of <tt>reversePlugin.html</tt> looks like this:</p>
+		<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;Reverse Plugin&lt;/title&gt;
+  &lt;script src="plugin.js"&gt;&lt;/script&gt;
+  &lt;script&gt;
+  window.onload = function() {
+      var headers = {name: "My Plugin", version: "1.0", description: "My first Orion plugin."};
+      var provider = new orion.PluginProvider(headers);
+      var serviceImpl = {
+              run: function(text) {
+                  return text.split("").reverse().join("");
+              }
+          };
+      var serviceProperties = { 
+              name: "Reverse Text",
+              key: <a href="&quot;e&quot;,">true, true</a> // Ctrl+Shift+e
+          };
+      provider.registerService("orion.edit.command", serviceImpl, serviceProperties);
+      provider.connect();
+  };
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+		<h3 id="Testing_the_plugin">Testing the plugin</h3>
+		<p>First we need to host our plugin somewhere. </p>
+		<ul>
+			<li>If you have a personal web server available, you can copy <tt>reversePlugin.html</tt> and <tt>plugin.js</tt> there.</li>
+			<li>If you're using Orionhub, you can put the plugin in a new folder in your Orionhub workspace. Then create a Site Configuration in Orion that launches your folder. See 
+				<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Getting_started#Launching_your_project_as_a_website" title="Orion/Documentation/User Guide/Getting started#Launching_your_project_as_a_website" target="orion_external">Launching your project as a website</a>.
+			</li>
+			<li>You can also use a pre-built version at 
+				<a href="http://mamacdon.github.com/1.0/plugins/reverse/reversePlugin.html" target="orion_external">http://mamacdon.github.com/1.0/plugins/reverse/reversePlugin.html</a>.
+			</li>
+		</ul>
+		<p>Now that you've got a URL for reversePlugin.html, install it into Orion:</p>
+		<ul>
+			<li>Go to 
+				<a href="http://yourOrionServer/settings/settings.html#,category=plugins,installPlugin=http://yourPluginServer/reversePlugin.html" target="orion_external">http://yourOrionServer/settings/settings.html#,category=plugins,installPlugin=http://yourPluginServer/reversePlugin.html</a>.
+			</li>
+			<li>You'll be prompted to install the plugin. Click 
+				<b>Yes</b>.
+			</li>
+		</ul>
+		<p>Let's try it out.</p>
+		<ul>
+			<li>In Orion, go to the navigator and create a new file called <tt>test.txt</tt>.</li>
+			<li>Click on <tt>test.txt</tt> to open the editor.</li>
+			<li>You'll see a new button on the editor toolbar (see screenshot below).</li>
+			<li>Select some text, click the button, and it should be reversed.</li>
+		</ul>
+		<p>
+			<img border="0" src="images/ReverseTextToolbar.png"/>
+		</p>
+		<h2 id="Examples">Examples</h2>
+		<p>Here are some existing plugins we've written. View their source code to see how they work:</p>
+		<dl>
+			<dt>
+				<a href="http://orionhub.org/plugins/sampleCommandsPlugin.html" target="orion_external">http://orionhub.org/plugins/sampleCommandsPlugin.html</a>
+			</dt>
+			<dd>Contributes several sample actions to the Orion navigator by using the <tt>orion.navigate.command</tt> service type.</dd>
+		</dl>
+		<dl>
+			<dt>
+				<a href="http://orionhub.org/plugins/webEditingPlugin.html" target="orion_external">http://orionhub.org/plugins/webEditingPlugin.html</a>
+			</dt>
+			<dd>Contributes syntax highlighting support for HTML files by using the <tt>orion.edit.highlighter</tt> service type.</dd>
+		</dl>
+		<dl>
+			<dt>
+				<a href="http://orionhub.org/plugins/sampleSearchProposalPlugin_notFiltered.html" target="orion_external">http://orionhub.org/plugins/sampleSearchProposalPlugin_notFiltered.html</a>
+			</dt>
+			<dd>Contributes extended search completion in addition to recent searches by using the <tt>orion.search.proposal</tt> service type.</dd>
+		</dl>
+		<dl>
+			<dt>
+				<a href="http://mamacdon.github.com/0.5/plugins/beautify/jsbeautify.html" target="orion_external">http://mamacdon.github.com/0.5/plugins/beautify/jsbeautify.html</a>
+			</dt>
+			<dd>Contributes a "Beautify JS" button to the editor toolbar by using the <tt>orion.edit.command</tt> service type. Visit 
+				<a href="http://mamacdon.github.com" target="orion_external">http://mamacdon.github.com</a> for a directory of other available plugins, organized by Orion version.
+			</dd>
+		</dl>
+		<dl>
+			<dt>
+				<a href="http://mamacdon.github.com/0.5/plugins/uglify/uglify-plugin.html" target="orion_external">http://mamacdon.github.com/0.5/plugins/uglify/uglify-plugin.html</a>
+			</dt>
+			<dd>Contributes an "Uglify JS" (minify, in other words) button to the editor toolbar by using the <tt>orion.edit.command</tt> service type.</dd>
+		</dl>
+		<h2 id="See_also">See also</h2>
+		<ul>
+			<li>
+				<a href="http://wiki.eclipse.org/Orion/How_Tos/Installing_A_Plugin" title="Orion/How Tos/Installing A Plugin" target="orion_external">Installing a plugin</a>
+			</li>
+		</ul><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table>
+	</body>
+</html>

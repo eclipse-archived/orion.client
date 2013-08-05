@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+<!-- ========================== -->
+<!-- Define topics for the Reference -->
+<!-- ========================== -->
+<toc label="Reference">
+	<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Login_page/Login-page.html" label="Login page"></topic>
+	<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Navigator_page/Navigator-page.html" label="Navigator page"></topic>
+	<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Coding_page/Coding-page.html" label="Coding page"></topic>
+	<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Shell_page/Shell-page.html" label="Shell page"></topic>
+	<link toc="WikiDoc/Orion-Documentation-User-Guide-Reference-Search-Results-page-toc.xml" />
+	<link toc="WikiDoc/Orion-Documentation-User-Guide-Reference-Settings-page-toc.xml" />
+	<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Profile_page/Profile-page.html" label="Profile page"></topic>
+	<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Operations_page/Operations-page.html" label="Operations page"></topic>
+	<topic label="Deploying and managing test sites">
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Sites_page/Sites-page.html" label="Sites page"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Edit_Site_page/Edit-Site-page.html" label="Edit Site page"></topic>
+	</topic>
+	<topic label="Team support with Git">
+		<link toc="WikiDoc/Orion-Documentation-User-Guide-Reference-Repositories-page-toc.xml" />
+		<link toc="WikiDoc/Orion-Documentation-User-Guide-Reference-Git-Status-page-toc.xml" />
+		<link toc="WikiDoc/Orion-Documentation-User-Guide-Reference-Git-Log-page-toc.xml" />
+		<link toc="WikiDoc/Orion-Documentation-User-Guide-Reference-Git-Commit-page-toc.xml" />
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Compare_page/Compare-page.html" label="Compare page"></topic>
+	</topic>
+</toc>

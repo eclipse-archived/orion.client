@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into the editor - orion.edit.contentAssist</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.edit.contentAssist</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-edit-command.html" title="orion.edit.command">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-edit-editor.html" title="orion.edit.editor">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.edit.command</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.edit.editor</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.edit.contentAssist">orion.edit.contentAssist</h1>
+		<p>The <tt>orion.edit.contentAssist</tt> service contributes content assist providers to the editor. A content assist provider produces suggestions for text that may be inserted into the editor at a given point. Providers are invoked when the user triggers the "content assist" action by pressing Ctrl+Space in the editor.</p>
+		<h2 id="Service_methods_2">Service methods</h2>
+		<p>Implementations of <tt>orion.edit.contentAssist</tt> must define the following function:</p>
+		<dl>
+			<dt>computeProposals(buffer, offset, context)</dt>
+			<dd>When content assist is triggered, the editor calls this function to obtain suggestions from a content assist provider.
+				<dl>
+					<dd>
+						<b>buffer</b> <tt>String</tt> The entire buffer being edited.
+					</dd>
+					<dd>
+						<b>offset</b> <tt>Number</tt> Offset in the text buffer at which content assist is being invoked.
+					</dd>
+					<dd>
+						<b>context</b> <tt>Object</tt> Additional contextual information about the content assist invocation. This object has the following properties:
+						<dl>
+							<dd>
+								<b>line</b> <tt>String</tt> Text of the entire line that the editing caret is on.
+							</dd>
+							<dd>
+								<b>prefix</b> <tt>String</tt> The substring extending from the first non-word character preceding the editing caret up to the editing caret. This may give a clue about what the user intended to type, and can be used to narrow down the results to be returned. The prefix may not be appropriate for all types of document, depending on their syntax rules.
+							</dd>
+							<dd>
+								<b>selection</b> <tt>orion.textview.Selection</tt> The current selection in the editor.
+							</dd>
+						</dl>
+					</dd>
+				</dl>
+			</dd>
+		</dl>
+		<p>Returns an <tt>Array</tt> giving possible completions that may be inserted into the editor. Result elements must be "proposal" objects having the following properties:</p>
+		<dl>
+			<dd><b>proposal</b> <tt>String</tt> completion text that will be inserted in the editor if chosen. The text is inserted at the <b>offset</b>.</dd>
+			<dd><b>description</b> A <tt>String</tt> describing the completion. This text will be shown in the content assist popup.</dd>
+			<dd><b>positions</b> An optional <tt>Array</tt> of positions within the completion proposal that require user input. Supplying this property will cause the editor to enter <i>linked mode</i>, and the user can use the <b>Tab</b> key to iterate through the regions of the proposal that require user input. For example if the completion is a function, the positions could indicate the function arguments that need to be supplied. Entries in this position array must be objects with two integer properties: <b>offset</b>, and <b>length</b> describing the regions requiring user input.</dd>
+			<dd><b>escapePosition</b> An optional <tt>Number</tt> indicating the offset the cursor should have in the document after the completion is inserted. If this value is not supplied, the cursor will be positioned at the end of the inserted text.</dd>
+			<dd><b>style</b> A String giving styling information for the proposal. The available styles are: <code>"default"</code> (no styling, also used if this property is not present), <code>"emphasis"</code> (proposal displayed in bold), <code>"noemphasis"</code> (proposal is greyed out with a colored background), <code>"hr"</code> (proposal displayed as a &lt;hr/&gt; and is not selectable by up and down arrows).</dd>
+		</dl>
+		<p>Alternatively, a Deferred may be returned, which allows the suggestions to be computed asynchronously.</p>
+		<h2 id="Service_attributes_2">Service attributes</h2>
+		<p>Implementations of <tt>orion.edit.contentAssist</tt> must define the following attributes:</p>
+		<dl>
+			<dt>name</dt>
+			<dd><tt>String</tt> Name for the content assist provider.</dd>
+			<dt>contentType</dt>
+			<dd><tt>Array</tt> An array of 
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> that this provider can provide content assist for. The provider's <tt>computeProposals</tt> function will be called only for files having one of these content types.
+			</dd>
+		</dl>
+		<h2 id="Examples_2">Examples</h2>
+		<p>The example below provides content assist suggestions for files whose name ends in <tt>.js</tt>. It offers JavaScript keywords as suggestions, by checking them against the prefix provided by the content assist engine.</p>
+		<pre>var provider = new eclipse.PluginProvider();
+provider.registerServiceProvider("orion.edit.contentAssist",
+  {
+     computeProposals: function(buffer, offset, context) {
+       var keywords = [ "break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else",
+                        "finally", "for", "function", "if", "in", "instanceof", "new", "return", "switch",
+                        "this", "throw", "try", "typeof", "var", "void", "while", "with" ];
+       var proposals = [];
+       for (var i=0; i &lt; keywords.length; i++) {
+           var keyword = keywords<a href="i">i</a>;
+           if (keyword.indexOf(context.prefix) === 0) {
+               proposals.push({
+                   proposal: keyword.substring(context.prefix.length),
+                   description: keyword
+               });
+           }
+        }
+       return proposals;
+     }
+  },
+  {
+    name: "JavaScript content assist",
+    contentType: <a href="&quot;application/javascript&quot;">"application/javascript"</a>
+  });
+provider.connect();
+</pre>
+		<p>The example below will provide completion on the character 'a' that will insert an HTML anchor element. After completion the cursor will be positioned within the <tt>href</tt> attribute.</p>
+		<pre>var provider = new eclipse.PluginProvider();
+provider.registerServiceProvider('orion.edit.contentAssist',
+  {
+    computeProposals: function(buffer, offset, context) {
+      var proposals = [];
+      if (context.prefix === 'a') {
+        proposals.push({
+          proposal: ' href=""&gt;&lt;/a&gt;',
+          description: '&lt;a&gt;&lt;/a&gt; - HTML anchor element', 
+          escapePosition: offset+7});
+      }
+      return proposals;
+  },
+  {
+    name: 'HTML content assist',
+    contentType: <a href="'text/html'">'text/html'</a>
+  });
+provider.connect();
+</pre><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-edit-command.html" title="orion.edit.command">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-the-editor.html" title="Plugging into the editor">
+						<img alt="Plugging into the editor" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-edit-editor.html" title="orion.edit.editor">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.edit.command</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.edit.editor</td>
+			</tr>
+		</table>
+	</body>
+</html>

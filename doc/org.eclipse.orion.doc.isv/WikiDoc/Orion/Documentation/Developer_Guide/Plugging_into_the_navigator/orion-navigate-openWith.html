@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into the navigator - orion.navigate.openWith</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.navigate.openWith</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-navigate-command.html" title="orion.navigate.command">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-contenttype.html" title="orion.core.contenttype">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.navigate.command</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.contenttype</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.navigate.openWith">orion.navigate.openWith</h1>
+		<p>The <tt>orion.navigate.openWith</tt> service is used to associate a registered editor (see 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html#orion.edit.editor" title="Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.editor">orion.edit.editor</a>) with a registered content type (see 
+			<a href="orion-core-contenttype.html#orion.core.contenttype">orion.core.contenttype</a>). Once this association has been made, the editor will be presented as a choice in the "Open With" menu beside files of that content type. 
+		</p>
+		<p>By default, the Orion client UI provides an editor with ID <code>orion.editor</code>, to be used for editing source code. You can refer to this editor ID when you want to associate a new content type with the Orion Editor.</p>
+		<h2 id="Service_methods_2">Service methods</h2>
+		<p>None. This service is purely declarative.</p>
+		<h2 id="Service_attributes_2">Service attributes</h2>
+		<p>Implementations of <tt>orion.navigate.openWith</tt> must define the following attributes:</p>
+		<dl>
+			<dt>editor</dt>
+			<dd><code>String</code> The ID of the editor we want to associate. This must match exactly the editor's ID as given in 
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html#orion.edit.editor" title="Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.editor">orion.edit.editor</a>.
+			</dd>
+			<dt>contentType</dt>
+			<dd><code>String[]</code> An array of one or more content type IDs that will be associated with the editor.</dd>
+		</dl>
+		<h2 id="Example_2">Example</h2>
+		<p>Here is a sample plug-in that associates the Orion Editor with the <code>"text/markdown"</code> content type. This example assumes that the <code>"text/markdown"</code> type has been previously registered with the 
+			<a href="orion-core-contenttype.html#orion.core.contenttype">orion.core.contenttype</a> service.
+		</p>
+		<pre> var provider = new eclipse.PluginProvider();
+ provider.registerServiceProvider("orion.navigate.openWith", {},
+   {  id: "orion.editor",
+      contentType: <a href="&quot;text/markdown&quot;">"text/markdown"</a>
+   });
+ provider.connect();
+</pre>
+		<p>When this plug-in is installed, the user will see the Orion Editor as an available target in the <b>Open With</b> Navigator menu beside  files of the Markdown content type:</p>
+		<p>
+			<img border="0" src="images/Orion-file-openWith-example.png"/>
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-navigate-command.html" title="orion.navigate.command">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-the-navigator.html" title="Plugging into the navigator">
+						<img alt="Plugging into the navigator" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-contenttype.html" title="orion.core.contenttype">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.navigate.command</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.contenttype</td>
+			</tr>
+		</table>
+	</body>
+</html>

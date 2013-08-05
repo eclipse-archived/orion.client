@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into the editor - orion.edit.validator</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.edit.validator</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-edit-outliner.html" title="orion.edit.outliner">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.edit.outliner</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.edit.validator">orion.edit.validator</h1>
+		<p>An <tt>orion.edit.validator</tt> service provides a function that can check the contents of a file and return a data structure indicating which lines (if any) have problems. The result of this service is used by the Orion UI to create annotations in the ruler beside each problematic line, and also to underline the specific portion of a line where the problem occurs.</p>
+		<h2 id="Service_methods_7">Service methods</h2>
+		<p>Implementations of <tt>orion.edit.validator</tt> must define the following function:</p>
+		<dl>
+			<dt>checkSyntax(title, contents)</dt>
+			<dd>
+				<b>title</b> <tt>String</tt> The path and filename of the file being edited.
+			</dd>
+			<dd>
+				<b>contents</b> <tt>String</tt> The contents of the file being edited.
+			</dd>
+		</dl>
+		<p>Returns an <tt>Object</tt> giving the validation result. The returned object must have a <tt>problems</tt> property whose value is an array giving the problems found in the file. Each problem object must have the properties:</p>
+		<dl>
+			<dd><b>description</b> <tt>String</tt> A description of the problem.</dd>
+			<dd><b>line</b> <tt>Number</tt> Gives the line number where the problem was found. (Line numbers begin counting from 1.)</dd>
+			<dd><b>start</b> <tt>Number</tt> Gives the column within the line where the problem begins.</dd>
+			<dd><b>end</b> <tt>Number</tt> 
+				<i>Optional</i> Gives the column within the line where the problems ends. (If omitted, <tt>start+1</tt> is assumed.)
+			</dd>
+			<dd><b>severity</b> <tt>String</tt> 
+				<i>Optional</i> Gives the severity of this problem. The severity affects how the problem is displayed in the Orion UI. Allowed values are <tt>"warning"</tt> and <tt>"error"</tt>. (If omitted, <tt>"error"</tt> is assumed.)
+			</dd>
+		</dl>
+		<h2 id="Service_attributes_7">Service attributes</h2>
+		<p>Implementations of <tt>orion.edit.validator</tt> must define the following attributes:</p>
+		<dl>
+			<dt>contentType</dt>
+			<dd><tt>Array</tt> An array of 
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> giving the types of files that this validator is capable of validating.
+			</dd>
+		</dl>
+		<h2 id="Examples_5">Examples</h2>
+		<pre>var provider = new eclipse.PluginProvider();
+var serviceProvider = provider.registerServiceProvider("orion.edit.validator",
+  {
+     checkSyntax: function(title, contents) {
+       var problems = [];
+       var lines = contents.split(/\r?\n/);
+       for (var i=0; i &lt; lines.length; i++) {
+         var line = lines<a href="i">i</a>;
+         var match = /\t \t| \t /.exec(line);
+         if (match) {
+           problems.push({
+             description: "Mixed spaces and tabs",
+             line: i + 1,
+             start: match.index + 1,
+             end: match.index + match<a href="0">0</a>.length + 1,
+             severity: "warning" });
+         }
+       }
+       var result = { problems: problems };
+       return result;
+     }
+  },
+  {
+     contentType: <a href="&quot;application/javascript&quot;">"application/javascript"</a>
+  });<!--
+service.dispatchEvent = serviceProvider.dispatchEvent;-->
+provider.connect();
+</pre>
+		<p>This example will validate JavaScript files. It finds lines containing a sequence of 
+			<i>space-tab-space</i> or 
+			<i>tab-space-tab</i> and produces a warning on every such line. Note that <tt>+1</tt> is necessary because column and line indices in the Orion UI are numbered from 1, not 0.
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-edit-outliner.html" title="orion.edit.outliner">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-the-editor.html" title="Plugging into the editor">
+						<img alt="Plugging into the editor" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.edit.outliner</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table>
+	</body>
+</html>

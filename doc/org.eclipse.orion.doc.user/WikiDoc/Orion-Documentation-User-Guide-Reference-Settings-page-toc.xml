@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<toc topic="WikiDoc/Orion/Documentation/User_Guide/Reference/Settings_page/Settings-page.html" label="Settings page">
+	<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Settings_page/Settings-page.html" label="Settings page">
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Settings_page/Settings-page.html#UI_Theme" label="UI Theme"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Settings_page/Settings-page.html#Editor_Theme" label="Editor Theme"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Settings_page/Settings-page.html#Plugins" label="Plugins">
+			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Settings_page/Settings-page.html#Installing_a_plugin" label="Installing a plugin"></topic>
+			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Settings_page/Settings-page.html#Inspecting_plugin_services" label="Inspecting plugin services"></topic>
+		</topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Settings_page/Settings-page.html#Updating_this_document" label="Updating this document"></topic>
+	</topic>
+</toc>

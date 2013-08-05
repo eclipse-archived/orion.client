@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<toc topic="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html" label="Simple plugin example">
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html" label="What is a plugin?"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html#What_you_need" label="What you need"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html#Writing_the_plugin" label="Writing the plugin">
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html#Creating_the_HTML_file" label="Creating the HTML file"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html#Making_it_a_plugin" label="Making it a plugin"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html#Registering_the_service" label="Registering the service"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html#Implementing_the_service" label="Implementing the service"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html#The_finished_plugin_file" label="The finished plugin file"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html#Testing_the_plugin" label="Testing the plugin"></topic>
+	</topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html#Examples" label="Examples"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html#See_also" label="See also"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Simple_plugin_example/Updating-this-document.html" label="Updating this document"></topic>
+</toc>

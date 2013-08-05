@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+<!-- ========================== -->
+<!-- Define topics for the Programmer's Guide -->
+<!-- ========================== -->
+<toc label="Programmer's Guide">
+	<topic label="Welcome to Orion" href="guide/welcome.html">
+		<link toc="WikiDoc/Orion-Project-mission-statement-toc.xml" />
+	</topic>
+   <topic label="Orion architecture">
+		<link toc="WikiDoc/Orion-Documentation-Developer-Guide-Architecture-toc.xml" />
+   </topic>
+   <topic label="Simple plugin example">
+		<link toc="WikiDoc/Orion-Documentation-Developer-Guide-Simple-plugin-example-toc.xml" />
+   </topic>
+   <topic label="Core client services">
+		<link toc="WikiDoc/Orion-Documentation-Developer-Guide-Core-client-services-toc.xml" />
+   </topic>
+   <topic label="Configuration services">
+      <link toc="WikiDoc/Orion-Documentation-Developer-Guide-Configuration-services-toc.xml"/>
+   </topic>
+   <topic label="User interface services">
+		<link toc="WikiDoc/Orion-Documentation-Developer-Guide-User-interface-services-toc.xml" />
+   </topic>
+   <topic label="Plugging into Orion pages">
+		<link toc="WikiDoc/Orion-Documentation-Developer-Guide-Plugging-into-Orion-pages-toc.xml" />
+   </topic>
+   <topic label="Plugging into the editor">
+		<link toc="WikiDoc/Orion-Documentation-Developer-Guide-Plugging-into-the-editor-toc.xml" />
+   </topic>
+   <topic label="Plugging into the navigator">
+		<link toc="WikiDoc/Orion-Documentation-Developer-Guide-Plugging-into-the-navigator-toc.xml" />
+   </topic>
+   <topic label="Plugging into the shell">
+      <link toc="WikiDoc/Orion-Documentation-Developer-Guide-Plugging-into-the-shell-toc.xml"/>
+   </topic>
+   <topic label="Plugging into the settings page">
+      <link toc="WikiDoc/Orion-Documentation-Developer-Guide-Plugging-into-the-settings-page-toc.xml"/>
+   </topic>
+</toc>

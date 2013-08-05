@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<toc topic="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html" label="Search and Replace page">
+	<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html" label="Search page">
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Search_completion" label="Search completion"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Filter_the_search_result" label="Filter the search result"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Search_scopes" label="Search scopes">
+			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Scoping_down" label="Scoping down"></topic>
+			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Scoping_up" label="Scoping up"></topic>
+		</topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#My_Saved_Searches" label="My Saved Searches">
+			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Saving_a_search" label="Saving a search"></topic>
+			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Edit_a_saved_search" label="Edit a saved search"></topic>
+		</topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Navigating_matches" label="Navigating matches"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Keyboard_navigation" label="Keyboard navigation"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Viewing_details" label="Viewing details"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Linking_to_the_editor" label="Linking to the editor"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Navigating_pages" label="Navigating pages"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Stale_files" label="Stale files"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Search_and_replace" label="Search and replace">
+			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Preview_changes" label="Preview changes"></topic>
+			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Apply_selected_changes" label="Apply selected changes"></topic>
+		</topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Current_limitations" label="Current limitations"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Related_Tasks" label="Related Tasks"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Search_Results_page/Search-Results-page.html#Updating_this_document" label="Updating this document"></topic>
+	</topic>
+</toc>

@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Core client services - orion.core.textlink</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.core.textlink</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-core-setting.html" title="orion.core.setting">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.core.setting</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.core.textlink">orion.core.textlink</h1>
+		<p>The text link service scans text for segments that could be interpreted as hyperlinks, and inserts appropriate anchor elements representing each link. For example the service could scan for email addresses in a piece of text and convert them to mailto: links.</p>
+		<p>Here is an example of using the text link service:</p>
+		<pre>var divWithLinks = linkService.addLinks(someText);
+dojo.place(divWithLinks, body, "first");
+</pre>
+		<p>The text link service makes use of 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/orion-core-linkScanner.html#orion.core.linkScanner" title="Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages#orion.core.linkScanner">link scanners</a> contributed by plugins to perform the analysis and replacement of text with links. If no link scanners are available, the text link service simply returns a DOM element containing the entire input text.
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-core-setting.html" title="orion.core.setting">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Core-client-services.html" title="Core client services">
+						<img alt="Core client services" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.core.setting</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table>
+	</body>
+</html>

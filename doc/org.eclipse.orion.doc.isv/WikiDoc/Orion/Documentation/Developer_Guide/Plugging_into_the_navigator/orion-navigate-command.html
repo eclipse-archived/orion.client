@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into the navigator - orion.navigate.command</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.navigate.command</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Plugging-into-the-navigator.html" title="Plugging into the navigator">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-navigate-openWith.html" title="orion.navigate.openWith">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Plugging into the navigator</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.navigate.openWith</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.navigate.command">orion.navigate.command</h1>
+		<p>The <tt>orion.navigate.command</tt> service is used to contribute commands that are relevant to a selected file or folder. When the service is executed, a file object or array of file objects is passed to the service's <tt>run</tt> method. The command can perform some operation on the provided files.  If the command is simply linking to another page, a <tt>uriTemplate</tt> can be used to specify the link.</p>
+		<h2 id="Service_methods">Service methods</h2>
+		<p>Implementations of <tt>orion.navigate.command</tt> may define the following function:</p>
+		<dl>
+			<dt>run(selection)</dt>
+			<dd>Takes the navigator selection as an argument, and runs a command against the selected objects.</dd>
+		</dl>
+		<p>This method will only be called when the implementation does not define a <tt>uriTemplate</tt> property.</p>
+		<h2 id="Service_attributes">Service attributes</h2>
+		<p>Implementations of <tt>orion.navigate.command</tt> may define the following attributes:</p>
+		<dl>
+			<dt>image</dt>
+			<dd>The URL of an icon to associate with the command</dd>
+			<dt>name</dt>
+			<dd>The command text show to the user</dd>
+			<dt>id</dt>
+			<dd>The command id</dd>
+			<dt>forceSingleItem</dt>
+			<dd>A boolean attribute specifying whether the command supports only a single selected item or multiple items</dd>
+			<dt>uriTemplate</dt>
+			<dd>Optional.  A 
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#URI_Templates" title="Orion/Documentation/Developer Guide/Plugging into Orion pages#URI Templates">URI Template</a> that defines a link to another page, using variables from the selected object's metadata or validation properties.  If this property is specified, then the run service method will never be called.
+			</dd>
+			<dt>tooltip</dt>
+			<dd>Tooltip text shown to the user when they hover on the command</dd>
+			<dt>validationProperties</dt>
+			<dd>Optional.  An array of 
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Validation_Properties" title="Orion/Documentation/Developer Guide/Plugging into Orion pages#Validation Properties">Validation Properties</a> used to determine if the selected object should offer this command.
+			</dd>
+			<dt>showGlobally</dt>
+			<dd>A boolean attribute specifying if this command should be shown on pages other than the navigator.  Optional.</dd>
+		</dl>
+		<h2 id="Example">Example</h2>
+		<p>Here is a sample plug-in that contributes a link to a Google search for the selected file's name:</p>
+		<pre>
+ var provider = new eclipse.PluginProvider({postInstallUrl:"/plugin/list.html"});
+ provider.registerServiceProvider("orion.navigate.command", {}, {
+   image: "http://www.google.com/favicon.ico",
+   name: "Google Search",
+   id: "sample.commands.sample4",
+   forceSingleItem: true,
+   uriTemplate: "http://www.google.com/#q={Name}",
+   tooltip: "Link to google search for this file name"
+ });
+ provider.connect();
+</pre>
+		<p>When this plug-in is installed, the user will see the google search command in the Navigator menu as follows:</p>
+		<p>
+			<img border="0" src="images/Orion-file-command-example.png"/>
+		</p>
+		<p>For more examples of contributing Navigator commands see the 
+			<a href="https://github.com/eclipse/orion.client/blob/master/bundles/org.eclipse.orion.client.core/web/plugins/sampleCommandsPlugin.html" target="orion_external">sample commands plugin</a>.
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Plugging-into-the-navigator.html" title="Plugging into the navigator">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-the-navigator.html" title="Plugging into the navigator">
+						<img alt="Plugging into the navigator" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-navigate-openWith.html" title="orion.navigate.openWith">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Plugging into the navigator</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.navigate.openWith</td>
+			</tr>
+		</table>
+	</body>
+</html>

@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>User interface services - orion.page.selection</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.page.selection</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="User-interface-services.html" title="User interface services">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-page-command.html" title="orion.page.command">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">User interface services</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.page.command</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.page.selection">orion.page.selection</h1>
+		<p>The selection service tracks the selection in the current page. The page is the provider of the selection, using service API to set the selection.  The page determines how selections are shown and made by the user, and whether single or multiple selections are allowed.  Typically selections are managed in a list, table, or tree.  The page also determines what kind of objects are stored to represent selections, such as a string, URI, or json object with certain properties. </p>
+		<p>Consumers of the selection service use API to get the current selection, or to register a listener that will be notified when the selection changes.</p>
+		<p>Here is an example of a selection consumer adding a listener to track selection changes:</p>
+		<pre> serviceRegistry.getService("orion.page.selection").addEventListener("selectionChanged", function(fileURI) {
+     //Do something with the selection.  Consumers must know what type of object is stored.
+     //The first parameter is a single selection, the second parameter is an array of selections.
+ });
+</pre>
+		<p>See <tt>orion.selection.Selection</tt> in the client API reference for a complete list of functions available on the selection service.</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="User-interface-services.html" title="User interface services">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="User-interface-services.html" title="User interface services">
+						<img alt="User interface services" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-page-command.html" title="orion.page.command">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">User interface services</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.page.command</td>
+			</tr>
+		</table>
+	</body>
+</html>

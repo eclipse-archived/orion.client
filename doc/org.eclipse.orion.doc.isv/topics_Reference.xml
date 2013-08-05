@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+<!-- ========================== -->
+<!-- Define topics for the Reference -->
+<!-- ========================== -->
+<toc label="Reference">
+	<topic label="Client API" href="jsdoc/index.html">
+	</topic>
+	<topic label="Server API">
+		<link toc="WikiDoc/Orion-Server-API-toc.xml" />
+		<topic label = "Server File API">
+			<link toc="WikiDoc/Orion-Server-API-File-API-toc.xml" />
+		</topic>
+	</topic>
+	<topic label = "Server administration guide">
+		<link toc="WikiDoc/Orion-Server-admin-guide-toc.xml" />
+	</topic>
+	<topic label = "Getting started with Orion on Node">
+		<link toc="WikiDoc/Orion-Node-Getting-started-toc.xml" />
+	</topic>
+</toc>

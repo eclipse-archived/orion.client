@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+<!-- ============================================================================= -->
+<!-- Define primary TOC                                                            -->
+<!-- ============================================================================= -->
+
+   <extension point="org.eclipse.help.toc">
+       <toc file="toc.xml" primary="true" />
+       <index path="index"/>
+   </extension>
+
+<!-- ============================================================================= -->
+<!-- Define TOCs                                                                   -->
+<!-- ============================================================================= -->
+
+   <extension point="org.eclipse.help.toc">
+       <toc file="topics_GettingStarted.xml" />
+       <toc file="topics_Concepts.xml" />
+       <toc file="topics_Tasks.xml" />
+       <toc file="topics_Reference.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Getting-started-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Tasks-Working-with-folders-and-files-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Tasks-Navigating-and-searching-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Tasks-Importing-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Tasks-Exporting-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Tasks-Comparing-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Tasks-Working-with-Git-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Reference-Repositories-page-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Reference-Search-Results-page-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Reference-Settings-page-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Reference-Git-Status-page-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Reference-Git-Log-page-toc.xml" />
+       <toc file="WikiDoc/Orion-Documentation-User-Guide-Reference-Git-Commit-page-toc.xml" />
+   </extension>
+   
+</plugin>

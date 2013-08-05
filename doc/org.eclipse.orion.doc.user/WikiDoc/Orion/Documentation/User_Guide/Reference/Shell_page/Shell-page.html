@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Shell page</title>
+		<link type="text/css" rel="stylesheet" href="../../../../../book.css"/>
+	</head>
+	<body>
+		<p>The 
+			<b>Shell</b> page provides a command line interface for interacting with Orion.  The list of available commands can be displayed at any time with the command 
+			<i>help</i>.
+		</p>
+		<p>
+			<img border="0" src="images/Screenshot-help.png"/>
+		</p>
+		<p>By default this page contains some basic commands for navigating the workspace file system and editing files.  Orion services 
+			<a href="http://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_shell_page#orion.shell.command" target="orion_external">orion.shell.command</a> and 
+			<a href="http://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_shell_page#orion.shell.type" target="orion_external">orion.shell.type</a> are provided to enable clients to register additional commands and parameter types on this page.
+		</p>
+		<p>The input line provides assistance with command arguments whenever it can based on the expected parameter types.  A command with invalid syntax or argument values will not be accepted.</p>
+		<p>
+			<img border="0" src="images/Screenshot-cd.png"/>
+		</p>
+		<p>The output of a command can be redirected to a workspace file by specifying a <tt>--output</tt> value.</p>
+		<h2 id="Updating_this_document">Updating this document</h2>
+		<p>This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
+
+			<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Shell_page" target="orion_external">http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Shell_page</a>
+		</p>
+	</body>
+</html>

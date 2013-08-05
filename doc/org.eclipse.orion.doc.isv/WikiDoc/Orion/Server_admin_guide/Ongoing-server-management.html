@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Server administration guide - Ongoing server management</title>
+		<link type="text/css" rel="stylesheet" href="../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Ongoing server management</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Administering-users.html" title="Administering users">
+						<img alt="Previous" border="0" src="../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Administering users</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Ongoing_server_management">Ongoing server management</h1>
+		<h2 id="Server_Messages_on_Login_Page">Server Messages on Login Page</h2>
+		<p>If you wish to display a message linked to a more detailed description of some server or service information you must modify the 
+			<i>server-status.json</i> file located in the web directory.  By default this file contains an example which is not displayed.  The example shows that a message must contain a 
+			<i>title</i> (not too long), a 
+			<i>startdate</i> (in YYYY/MM/DD format), an 
+			<i>enddate</i> and a longer textual 
+			<i>description</i> of the message.  If the date the user connects to the server and is presented with the login page is between the startdate and enddate then the login page will show the title along with a link to a page with all the recent server messages.
+		</p>
+		<p>Example contents of the 
+			<i>server-status.json</i> file:
+		</p>
+		<pre class="source-javascript">{
+"README.TXT" : "Each message needs to have a title, startdate, enddate and description field. Only the first message can be displayed on the login screen.",
+"messages" : [
+	{
+		"title" : "Provide a short description of the message here",
+		"startdate" : "2012/10/22",
+		"enddate" : "2012/10/23",
+		"description" : "This is the longer description of the message.  You can see that this message will be displayed from October 22nd until the end of October 23rd."
+	},
+	{
+		"title" : "This is an older message",
+		"startdate" : "2012/10/10",
+		"enddate" : "2012/10/12",
+		"description" : "This message will be display on the server messages page but not in the login page."
+	}
+],
+"example-messages" : [
+	{
+		"title" : "This is an older message never to be displayed",
+		"startdate" : "2012/10/22",
+		"enddate" : "2012/10/23",
+		"description" : "This is the longer description of the message.  You can see that this message will be displayed from October 22nd until the end of October 23rd."
+	}
+]
+}
+
+</pre>
+		<h2 id="Wiping_server_data">Wiping server data</h2>
+		<p>If you are deploying a demo server of Orion, you may want to periodically wipe out all user data, but preserve account names and passwords. This is done as follows:</p>
+		<ul>
+			<li>Stop the server</li>
+			<li>Rename serverworkspace to serverworkspace.old</li>
+			<li>Reinstall or reimage the server if you want to be paranoid</li>
+			<li>Create a new clean serverworkspace directory</li>
+			<li>Copy the following two directories from the old server workspace to the new one:</li>
+		</ul>
+		<pre> .metadata\.plugins\org.eclipse.core.runtime (contains server configuration file)
+ .metadata\.plugins\org.eclipse.orion.server.user.securestore (contains user account information)
+</pre>
+		<ul>
+			<li>Start the server again</li>
+		</ul>
+		<pre class="source-bash">#!/bin/bash
+
+BASE_PATH=/home/admin
+ECLIPSE_PATH=eclipse-orion-0.2M6
+
+
+cd $BASE_PATH || die "Cannot access home directory"
+
+kill $(ps aux | grep "[o]rg.eclipse.equinox.http.jetty.http.port=8080" | awk {'print $2'})
+rm -rf $ECLIPSE_PATH/serverworkspace.old
+mv $ECLIPSE_PATH/serverworkspace/ $ECLIPSE_PATH/serverworkspace.old
+mkdir $ECLIPSE_PATH/serverworkspace
+mkdir -p $ECLIPSE_PATH/serverworkspace/.metadata/.plugins/org.eclipse.core.runtime/
+rsync -av $ECLIPSE_PATH/serverworkspace.old/.metadata/.plugins/org.eclipse.core.runtime/ $ECLIPSE_PATH/serverworkspace/.metadata/.plugins/org.eclipse.core.runtime/
+rsync -av $ECLIPSE_PATH/serverworkspace.old/.metadata/.plugins/org.eclipse.orion.server.user.securestorage/ $ECLIPSE_PATH/serverworkspace/.metadata/.plugins/org.eclipse.orion.server.user.securestorage/
+
+$BASE_PATH/start_orion
+
+
+</pre>
+		<h2 id="Automating_account_creation_with_curl">Automating account creation with curl</h2>
+		<p>To automate account creation with curl, you need to issue one curl command to log into the Orion server and capture the returned cookie.  Subsequent curl calls must include the authentication cookie, and a POST payload, to create an account.</p>
+		<pre class="source-bash">#!/bin/bash
+
+# Create accounts on Orion server
+CURL=/usr/bin/curl
+SERVER=localhost
+
+# Log in
+$CURL -c curl_cookies.txt \ # Store cookies in this file
+      -d 'store=Orion'    \ # POST value: store type
+      -d 'login=admin'    \ # POST value: login
+      -d 'password=yourpass' http://$SERVER/login
+
+# Create one account
+# Loop here to create multiple accounts
+$CURL -b curl_cookies.txt    \ # Use this cookies file
+      -H "Orion-Version:1"   \ # Specify Orion version as an HTTP header
+      -d 'login=someaccount' \ # POST value: create account called someaccount
+      -d 'password=abc123'   \ # POST value: password is abc123
+      http://$SERVER/users
+
+
+
+</pre>
+		<p>
+			<a href="http://wiki.eclipse.org/Category:Orion/How_To" title="Category:Orion/How To" target="orion_external">Server admin guide</a>
+
+			<a href="http://wiki.eclipse.org/Category:Orion" title="Category:Orion" target="orion_external">Server admin guide</a>
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Administering-users.html" title="Administering users">
+						<img alt="Previous" border="0" src="../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Server-admin-guide.html" title="Server administration guide">
+						<img alt="Server administration guide" border="0" src="../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Administering users</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table>
+	</body>
+</html>

@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into Orion pages - orion.core.linkScanner</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.core.linkScanner</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-page-link-related.html" title="orion.page.link.related">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-content.html" title="orion.core.content">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.page.link.related</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.content</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.core.linkScanner">orion.core.linkScanner</h1>
+		<p>Link scanners are declarative services that specify patterns of text to replace with link anchors. Scanners contribute a regular expression pattern to match in the source text. They then provide a link to be inserted for each match. These scanners are used by the 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Core_client_services/orion-core-textlink.html#orion.core.textlink" title="Orion/Documentation/Developer_Guide/Core_client_services#orion.core.textlink">text link</a> service to convert text into a DOM node with appropriate anchor and text nodes as children.
+		</p>
+		<h2 id="Service_methods_4">Service methods</h2>
+		<p>None.</p>
+		<h2 id="Service_attributes_4">Service attributes</h2>
+		<p>Implementations of <tt>orion.core.linkScanner</tt> must define the following attributes:</p>
+		<dl>
+			<dt>pattern</dt>
+			<dd>A regular expression string to locate links in the source text</dd>
+			<dt>words</dt>
+			<dd>A <tt>Number</tt> identifying the number of white-space delimited words in each match</dd>
+			<dt>anchor</dt>
+			<dd>A template of the URL for each match. The template may contain variables of the form %1, %2, etc, which are substituted by each of the words in the match.</dd>
+		</dl>
+		<h2 id="Examples_4">Examples</h2>
+		<p>The following scanner will replace text of the form "bug 123456" with links of the form "
+			<a href="https://bugs.eclipse.org/123456" target="orion_external">https://bugs.eclipse.org/123456</a>
+		</p>
+		<pre>var provider = new eclipse.PluginProvider();
+var serviceImpl = {};
+var serviceProperties = { 
+  pattern: "bug\\s\\d{4,7}",
+  words: 2,
+  anchor: "<a href="https://bugs.eclipse.org/%2" target="orion_external">https://bugs.eclipse.org/%2</a>"
+};
+provider.registerServiceProvider("orion.core.linkScanner", serviceImpl, serviceProperties);
+provider.connect();
+</pre>
+		<p>This scanner will replace email addresses with mailto: URLs:</p>
+		<pre>var provider = new eclipse.PluginProvider();
+var serviceImpl = {};
+var serviceProperties = { 
+  pattern: "\\b<a href="A-Z0-9._%-">A-Z0-9._%-</a>+@<a href="A-Z0-9.-">A-Z0-9.-</a>+\\.<a href="A-Z">A-Z</a>{2,4}\\b",
+  words: 1,
+  anchor: "mailto:%1"
+};
+provider.registerServiceProvider("orion.core.linkScanner", serviceImpl, serviceProperties);
+provider.connect();
+</pre><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-page-link-related.html" title="orion.page.link.related">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-Orion-pages.html" title="Plugging into Orion pages">
+						<img alt="Plugging into Orion pages" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-content.html" title="orion.core.content">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.page.link.related</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.content</td>
+			</tr>
+		</table>
+	</body>
+</html>

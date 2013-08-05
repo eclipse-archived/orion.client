@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<toc topic="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Architecture.html" label="Architecture overview">
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Architecture.html" label="Architecture overview"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html" label="Client architecture">
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Web_components" label="Web components"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Services" label="Services">
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Service_definitions" label="Service definitions"></topic>
+		</topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Extensions" label="Extensions"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Plugins" label="Plugins"></topic>
+	</topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Server-architecture.html" label="Server architecture">
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Server-architecture.html#Server_APIs" label="Server APIs"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Server-architecture.html#Example_server" label="Example server"></topic>
+	</topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Updating-this-document.html" label="Updating this document"></topic>
+</toc>

@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Configuration services - orion.cm.configadmin</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.cm.configadmin</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Configuration-services.html" title="Configuration services">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-cm-managedservice.html" title="orion.cm.managedservice">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Configuration services</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.cm.managedservice</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.cm.configadmin">orion.cm.configadmin</h1>
+		<p>The <code>orion.cm.configadmin</code> service, also called 
+			<i>ConfigurationAdmin</i>, provides management of configuration information. Internally, the ConfigurationAdmin service is used by the 
+			<a href="http://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_settings_page" title="Orion/Documentation/Developer Guide/Plugging into the settings page" target="orion_external">Settings page</a> to manage the values of 
+			<a href="http://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_settings_page#orion.core.setting" title="Orion/Documentation/Developer Guide/Plugging into the settings page#orion.core.setting" target="orion_external">plugin Settings</a>.
+		</p>
+		<p>The service methods are:</p>
+		<dl>
+			<dt>getConfiguration(pid)</dt>
+			<dd>Returns the Configuration with the given PID from the database. If no such Configuration exists, a new one is created and then returned.</dd>
+			<dt>listConfigurations()</dt>
+			<dd>Returns an array of all current Configuration objects from the database.</dd>
+		</dl>
+		<p>Refer to <code>orion.cm.ConfigurationAdmin</code> in the client API reference for a full description of this service's API methods.</p>
+		<p>Here is an example of how to use the ConfigurationAdmin service to print out all existing configurations and their property values:</p>
+		<pre>var configurations = serviceRegistry.getService("orion.cm.configadmin").listConfigurations().then(function(configurations) {
+        configurations.forEach(function(configuration) {
+            var properties = configuration.getProperties();
+            var propertyInfo = Object.keys(properties).map(function(propertyName) {
+                if (propertyName !== "pid") {
+                    return "\n        " + propertyName + ": " + JSON.stringify(properties<a href="propertyName">propertyName</a>) + "\n";
+                }
+            }).join("");
+            console.log("Configuration pid: " + configuration.getPid() + "\n"
+                      + "  properties: {" + propertyInfo + "\n"
+                      + "  }");
+        });
+});
+</pre>
+		<p>The result might look something like this:</p>
+		<pre>Configuration pid: nonnls.config
+  properties: {
+        enabled: false
+  }
+Configuration pid: jslint.config
+  properties: {
+        options: "laxbreak:true, maxerr:50"
+  }
+</pre><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Configuration-services.html" title="Configuration services">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Configuration-services.html" title="Configuration services">
+						<img alt="Configuration services" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-cm-managedservice.html" title="orion.cm.managedservice">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Configuration services</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.cm.managedservice</td>
+			</tr>
+		</table>
+	</body>
+</html>

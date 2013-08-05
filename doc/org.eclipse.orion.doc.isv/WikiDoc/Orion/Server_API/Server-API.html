@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Server API</title>
+		<link type="text/css" rel="stylesheet" href="../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Server API</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Summary.html" title="Summary">
+						<img alt="Next" border="0" src="../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Summary</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Overview">Overview</h1>
+		<p>The Server API in Orion is not a single monolithic API. Rather Orion defines a series of distinct, standalone APIs for various kinds of tasks. A given server may implement one or more of these APIs, but not necessarily all of them. </p>
+		<p>All Orion server APIs have common design principles:</p>
+		<ul>
+			<li>They are built on simple HTTP GET/PUT/POST/DELETE verbs with standard HTTP semantics. </li>
+			<li>GET operations are always non-destructive read-only operations</li>
+			<li>GET/PUT/DELETE are always 
+				<a href="http://en.wikipedia.org/wiki/Idempotence" target="orion_external">idempotent</a>, meaning the same operation can be safely repeated multiple times. 
+			</li>
+			<li>The relationship between resources is specified in links within response representations, rather than being inferred from the URI structure. For example a file's parent is specified by the 
+				<b>Parent</b> element in the response object, rather than by removing the last segment of the file's URI.
+			</li>
+			<li>The default representation for request and response bodies is 
+				<a href="http://www.json.org/" target="orion_external">JSON</a>, although a server may provide additional representations based on content type negotiation.
+			</li>
+		</ul>
+		<h2 id="Version_header">Version header</h2>
+		<p>All server API requests must include the Orion-Version header. This allows the server to identify what protocol version is being used by the client, and produce appropriate responses for that version of client. This also allows a server to support other protocols for accessing the same resources (such as WebDAV). When the version header is absent, by default all modifying (PUT, POST) operations will fail. GET operations may return a reasonable default HTML response suitable for display in a browser.</p>
+		<h2 id="Exception_handling">Exception handling</h2>
+		<p>When using the Orion Server API, errors are conveyed back to the client via a non-OK error code (4xx or 5xx). The response body contains a representation of a more detailed error status from the server.</p>
+		<p>Currently only a JSON representation is supported, with the following attributes:</p>
+		<table style="text-align: center; width:90%" border="1">
+			<tr style="background:#ccccff; padding: 0 5px 0 5px;" align="center">
+				<th>Property</th>
+				<th>Value</th>
+				<th>Required</th>
+			</tr>
+			<tr>
+				<td>HttpCode</td>
+				<td>Integer HTTP response code</td>
+				<td>Yes</td>
+			</tr>
+			<tr>
+				<td>Code</td>
+				<td>Application specific integer response code</td>
+				<td>No</td>
+			</tr>
+			<tr>
+				<td>Severity</td>
+				<td>One of "Error", "Warning", "Info", "Cancel", or "Ok"</td>
+				<td>Yes</td>
+			</tr>
+			<tr>
+				<td>Message</td>
+				<td>A high level error message</td>
+				<td>Yes</td>
+			</tr>
+			<tr>
+				<td>DetailedMessage</td>
+				<td>Detailed error message</td>
+				<td>No</td>
+			</tr>
+			<tr>
+				<td>Cause</td>
+				<td>JSON object representation of another status that is the cause of this status (used for exception chaining)</td>
+				<td>No</td>
+			</tr>
+			<tr>
+				<td>SeeAlso</td>
+				<td>URL of a page for more information on how to resolve the error</td>
+				<td>No</td>
+			</tr>
+		</table>
+		<p>Example:</p>
+		<pre> { "Severity":"Error", 
+   "Code":0, 
+   "Message":"This is the error message", 
+   "DetailedMessage":"This is the exception message", 
+   "HttpCode":500
+ }
+</pre>
+		<h2 id="Progress_reporting">Progress reporting</h2>
+		<p><div id="progress"></div>
+			Long running operations that cannot complete within a single request will instead return the location of a resource for tracking progress on that operation. The typical client work flow is:</p>
+		<ol>
+			<li>Client sends request to start operation. The <tt>Location</tt> header in the response indicates the location of a progress resource. The response code is 202 Accepted, which helps the client distinguish long running operations from operations that complete within a single method invocation.</li>
+			<li>Client periodically checks state of progress resource. The response code will be 200 ok, but the Result (see below) will be undefined.</li>
+			<li>When long running task completes, progress resource includes a link to a resource representing the completed operation. Or maybe the Result is just what you want in the first place and the Location is somewhat related to something.</li>
+		</ol>
+		<p>A progress resource has the following attributes:</p>
+		<table style="text-align: center; width:90%" border="1">
+			<tr style="background:#ccccff; padding: 0 5px 0 5px;" align="center">
+				<th>Property</th>
+				<th>Value</th>
+				<th>Required</th>
+			</tr>
+			<tr>
+				<td>Id</td>
+				<td>String identifier of the long running operation</td>
+				<td>Yes</td>
+			</tr>
+			<tr>
+				<td>Message</td>
+				<td>A message indicating the current operation state</td>
+				<td>Yes</td>
+			</tr>
+			<tr>
+				<td>Running</td>
+				<td>A boolean indicating whether the operation has completed</td>
+				<td>Yes</td>
+			</tr>
+			<tr>
+				<td>PercentComplete</td>
+				<td>An integer between 0 and 100 indicating what percentage of the operation has completed</td>
+				<td>Yes</td>
+			</tr>
+			<tr>
+				<td>Location</td>
+				<td>Once the operation has completed, this is the location of the operation result. While the operation is running this is the location of the progress resource itself. A client can keep getting this location until it becomes the result they are looking for.</td>
+				<td>No</td>
+			</tr>
+			<tr>
+				<td>Result</td>
+				<td>Once the operation has completed, this is a status object describing the operation result. Looks like Result.JsonData is what the original GET would have supplied if the task was not needed. While the operation is running, this property is undefined</td>
+				<td>No</td>
+			</tr>
+		</table>
+		<h2 id="Resource_locations">Resource locations</h2>
+		<p><div id="location"></div>
+			All server API resources have a "Location" attribute. This attribute has the following properties:</p>
+		<ul>
+			<li>When a resource is created, the POST operation that created it will return the location property both as an HTTP header, and in the response representation (attribute "Location" in JSON representations).</li>
+			<li>Invoking GET on the resource location will return a representation of the resource.</li>
+			<li>Invoking PUT on the location will modify or replace the contents of the resource.</li>
+			<li>Invoking a DELETE on the location will delete the resource</li>
+		</ul><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Summary.html" title="Summary">
+						<img alt="Next" border="0" src="../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Summary</td>
+			</tr>
+		</table>
+	</body>
+</html>

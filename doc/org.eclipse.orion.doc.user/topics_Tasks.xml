@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+<!-- ========================== -->
+<!-- Define topics for the Tasks section -->
+<!-- ========================== -->
+<toc label="Tasks">
+	<link toc="WikiDoc/Orion-Documentation-User-Guide-Tasks-Working-with-folders-and-files-toc.xml" />
+	<link toc="WikiDoc/Orion-Documentation-User-Guide-Tasks-Navigating-and-searching-toc.xml" />
+	<link toc="WikiDoc/Orion-Documentation-User-Guide-Tasks-Importing-toc.xml" />
+	<link toc="WikiDoc/Orion-Documentation-User-Guide-Tasks-Exporting-toc.xml" />
+	<link toc="WikiDoc/Orion-Documentation-User-Guide-Tasks-Comparing-toc.xml" />
+	<link toc="WikiDoc/Orion-Documentation-User-Guide-Tasks-Working-with-Git-toc.xml" />
+</toc>
