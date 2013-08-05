@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<toc topic="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/Configuration-services.html" label="Configuration services">
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/Configuration-services.html" label="Overview of configuration services">
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/Configuration-services.html#Managed_Services" label="Managed Services"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/Configuration-services.html#Meta_Typing" label="Meta Typing"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/Configuration-services.html#Configuration_management" label="Configuration management"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/Configuration-services.html#Settings" label="Settings"></topic>
+	</topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-configadmin.html" label="orion.cm.configadmin"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-managedservice.html" label="orion.cm.managedservice">
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-managedservice.html#Service_properties" label="Service properties"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-managedservice.html#Service_methods" label="Service methods"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-managedservice.html#Examples" label="Examples"></topic>
+	</topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-metatype.html" label="orion.cm.metatype">
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-metatype.html#Service_properties_2" label="Service properties">
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-metatype.html#Define_an_OCD" label="Define an OCD"></topic>
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-metatype.html#Associate_an_OCD_with_a_PID" label="Associate an OCD with a PID"></topic>
+		</topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-metatype.html#Service_methods_2" label="Service methods"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-metatype.html#Examples_2" label="Examples"></topic>
+	</topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/See-also.html" label="See also"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Configuration_services/Updating-this-document.html" label="Updating this document"></topic>
+</toc>

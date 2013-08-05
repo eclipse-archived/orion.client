@@ -1,0 +1,172 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into the shell - Example</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Example</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-shell-type.html" title="orion.shell.type">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.shell.type</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Example">Example</h1>
+		<p>The following sample plug-in contributes a "lab" type and "printLab" command to the Shell:</p>
+		<pre>
+&lt;html&gt;
+&lt;head&gt;
+&lt;script src="/orion/plugin.js"&gt;&lt;/script&gt;
+&lt;script src="/orion/Deferred.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+
+ /* first, contribute a custom type that will be used by the contributed command */
+
+ var CompletionStatus = {
+   MATCH: 0,
+   PARTIAL: 1,
+   ERROR: 2
+ };
+ var labTypeProperties = { 
+   name: "lab"
+ };
+ var labTypeImpl = {
+   parse: function(arg, typeSpec, context) {
+     /*
+      * Compute all potential prediction objects here, can be done asynchronously
+      * if needed (eg.- if need to wait on an XHR).
+      */
+     var ottawaValue = {name: 'Ottawa', address: 'Kanata, actually', climate: 'colder'};
+     var rtpValue = {name: 'RTP', address: 'Raleigh', climate: 'warmer'};
+     var potentialPredictions = [
+       {
+         name: 'Ottawa', /* the string to be typed */
+         value: ottawaValue /* the corresponding object */
+       },
+       {
+         name: 'RTP', /* the string to be typed */
+         value: rtpValue /* the corresponding object */
+       }
+     ];
+
+     var value; /* undefined until a valid value is fully typed */
+     var status; /* one of the CompletionStatus values above */
+     var predictions = []; /* an [] of {name: typedString, value: object} */
+
+     for (var i = 0; i &lt; potentialPredictions.length; i++) {
+       if (potentialPredictions[i].name.indexOf(arg.text) === 0) {
+         predictions.push(potentialPredictions[i]);
+         if (potentialPredictions[i].name === arg.text) {
+           value = potentialPredictions[i].value;
+         }
+       }
+     }
+
+     status = CompletionStatus.ERROR;
+     if (predictions.length &gt; 0) {
+       status = value ? CompletionStatus.MATCH : CompletionStatus.PARTIAL;
+     }
+     var result = {
+       value: value,
+       message: (status === CompletionStatus.ERROR ? ("'" + arg.text + "' is not valid") : undefined),
+       status: status,
+       predictions: predictions
+     };
+
+     /*
+      * If all of the above can be computed synchronously then just return result directly.
+      * If the above cannot be done synchronously (eg.- waiting on an XHR) then return
+      * a promise as demonstrated below and resolve it when the result becomes ready.
+      */
+     var promise = new orion.Deferred();
+     setTimeout(
+       function() {
+         promise.resolve(result); /* result has become ready some time later */
+       }
+     );
+     return promise;
+   }
+ };
+
+ /* contribute a command that uses the custom type */
+
+ var printLabProperties = {
+   name: "printLab",
+   description: "Print a lab location",
+   parameters: [{
+     name: "lab",
+     type: {name: "lab", showClimateToo: true},
+     description: "The name of the lab to print info for"
+   }],
+   returnType: "string"
+ };
+ var printLabImpl = {
+   callback: function(args) {
+     var result = "Lab name: " + args.lab.name + "\nLocation: " + args.lab.address;
+     if (args.lab.climate) {
+       result += "\nClimate: " + args.lab.climate;
+     }
+     return result;
+   }
+ };
+
+ var provider = new orion.PluginProvider();
+ provider.registerServiceProvider("orion.shell.type", labTypeImpl, labTypeProperties);
+ provider.registerServiceProvider("orion.shell.command", printLabImpl, printLabProperties);
+ provider.connect();
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;/html&gt;
+</pre>
+		<p>When this plug-in is installed the user can use the "printLab" command in the Shell.  The first image below shows a user in the process of entering a printLab command, and is shown a list of valid argument values.</p>
+		<p>
+			<img border="0" src="images/Orion-shell-command-example1.jpg"/>
+		</p>
+		<p>In the following image the printLab command has executed and its result is shown in the output area.</p>
+		<p>
+			<img border="0" src="images/Orion-shell-command-example2.jpg"/>
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-shell-type.html" title="orion.shell.type">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-the-shell.html" title="Plugging into the shell">
+						<img alt="Plugging into the shell" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.shell.type</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table>
+	</body>
+</html>

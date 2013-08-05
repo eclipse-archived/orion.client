@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Server administration guide - Administering users</title>
+		<link type="text/css" rel="stylesheet" href="../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Administering users</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Configuring-the-server.html" title="Configuring the server">
+						<img alt="Previous" border="0" src="../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Ongoing-server-management.html" title="Ongoing server management">
+						<img alt="Next" border="0" src="../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Configuring the server</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Ongoing server management</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Administering_users">Administering users</h1>
+		<h2 id="Creating_and_deleting_users">Creating and deleting users</h2>
+		<p>Users can be created and deleted by logging in as admin, and visiting the user management page at "/profile/user-list.html". For example a server on your own machine can be managed from 
+			<a href="http://localhost:8080/profile/user-list.html" target="orion_external">http://localhost:8080/profile/user-list.html</a>. Click the button 
+			<img border="0" src="images/Orion-new-user.gif"/> to create a new user. To delete a user, click the 
+			<img border="0" src="images/Orion-delete-png.png"/> button in the "Action" column next to the user to be deleted.
+		</p>
+		<p>You can also create a user via the Orion server API. Use curl or another utility to send a POST request to "/users". The form requires the following parameters: "login" (user login id), "password" (initial password) and "passwordConf" (confirm password).</p>
+		<h2 id="Changing_passwords">Changing passwords</h2>
+		<p>To change a user's password, go to user-list.html. From there, click on a user to view that user's profile page. On the user profile page you can change the password, change the user's display name, etc. Each user can also change their password by selecting "Profile" from the drop-down menu in the top right corner of the Orion UI.</p>
+		<h2 id="Allowing_users_to_create_accounts">Allowing users to create accounts</h2>
+		<p>By default, any user is allowed to create an account. To disallow anonymous account creation, you can specify what user ids are allowed to create accounts via the <tt>orion.auth.user.creation</tt> property in the 
+			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>.
+		</p>
+		<pre> orion.auth.user.creation=admin
+</pre>
+		<p>When this property is specified, account creation can only be performed on the user management page. This page is currently only accessible for the 
+			<a href="Administering-users.html#Creating_an_admin_user">admin user</a>.
+		</p>
+		<h2 id="Requiring_users_to_add_email_while_creating_account">Requiring users to add email while creating account</h2>
+		<p>By default, user email is optional, however this may be changed via the <tt>orion.auth.user.creation.force.email</tt> property in the 
+			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>.
+		</p>
+		<pre> orion.auth.user.creation.force.email=true
+</pre>
+		<p>When this property is specified as 
+			<b>true</b>, users are required to provide an email address while creating the Orion account. Immediately after creating the user account an email will be sent to the provided address requesting confirmation. The account is confirmed by clicking on the generated link provided in the email. The user will be able to log in only after the given email address is confirmed. This option will only work correctly when email configuration is correctly set. See 
+			<a href="Configuring-the-server.html#Email_configuration">email configuration</a> section for directions.
+		</p>
+		<h2 id="Creating_an_admin_user">Creating an admin user</h2>
+		<p>No accounts are built into the Orion server by default. This avoids a vulnerability caused by well-known users and passwords that administrators neglect to change. While a small-scale server might not require an admin user at all, it is useful to create an admin account for larger-scale user management (seeing list of all users, adding/deleting users, etc). To create an admin account, add following line to the 
+			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a> (but please use a more creative password):
+		</p>
+		<pre>orion.auth.admin.default.password=abracadabra
+</pre>
+		<p>This will cause an administrator account to be created as the server starts up. The admin user name is "admin" and the password will be the value specified by the configuration property. Once the admin account has been created, the configuration property is no longer required on startup (the admin password can be changed later by logging in as the administrator and going to the profile management page).</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Configuring-the-server.html" title="Configuring the server">
+						<img alt="Previous" border="0" src="../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Server-admin-guide.html" title="Server administration guide">
+						<img alt="Server administration guide" border="0" src="../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Ongoing-server-management.html" title="Ongoing server management">
+						<img alt="Next" border="0" src="../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Configuring the server</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Ongoing server management</td>
+			</tr>
+		</table>
+	</body>
+</html>

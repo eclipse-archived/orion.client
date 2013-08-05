@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Compare page</title>
+		<link type="text/css" rel="stylesheet" href="../../../../../book.css"/>
+	</head>
+	<body>
+		<h1 id="Compare_page">Compare page</h1>
+		<p>The <b>Compare</b> page shows a comparison between two states of a single file or just two files. The right hand side is always read only while the left hand side can be write-able depending on how the compare page is brought up. You can browse through individual differences using the <b>Next Diff</b> and <b>Previous Diff</b> buttons at the top right hand side of the page. If the file on the left is write-able, you can merge changes from the right hand side using the <b>Copy Current Change From Right to Left</b> button, or edit the file directly. Once you have finished editing, hit Ctrl+S or click <b>Save</b> in the tool bar to save your changes.</p>
+		<p>
+			<img title="Compare Page" alt="Compare Page" border="0" src="images/Orion-compare-page_new.png"/>
+		</p>
+		<h2 id="Navigating_differences">Navigating differences</h2>
+		<p>There are two levels of differences: block and word. </p>
+		<h3 id="Navigating_diff_blocks">Navigating diff blocks</h3>
+		<p>The <b>block</b> level shows the difference between two paragraphs. Use the <b>Next Diff</b> and <b>Previous Diff</b> buttons to navigate among blocks. Or use <b>CTRL + UP/DOWN</b> arrow keys to do the same thing.</p>
+		<p>
+			<img title="Compare Page" alt="Compare Page" border="0" src="images/Orion-compare-page_diff_block.png"/>
+		</p>
+		<h3 id="Navigating_diff_words">Navigating diff words</h3>
+		<p>The <b>word</b> level shows the different words within a block. There is no buttons in the tool bar but you can use <b>CTRL + SHIFT + UP/DOWN</b> arrow keys to see next/previous different words.</p>
+		<p>
+			<img title="Compare Page" alt="Compare Page" border="0" src="images/Orion-compare-page_diff_word.png"/>
+		</p>
+		<h2 id="Merging_from_right_to_left_side">Merging from right to left side</h2>
+		<p>If the left hand side is write-able, you can use the <b>Copy Current Change From Right to Left</b> button to merge the current diff block. The merging does not save the left hand side until you save it manually. </p>
+		<h2 id="Generating_compare_link">Generating compare link</h2>
+		<p>If you are navigating to a certain difference block&amp;word and want to share the position of the difference, you can generate the compare URL with the current position. Note that the URL contains not only the file URL but also the block and word parameters.</p>
+		<p>
+			<img title="Compare Page" alt="Compare Page" border="0" src="images/Orion-compare-page_diff_link.png"/>
+		</p>
+		<h2 id="Key_bindings">Key bindings</h2>
+		<p>In addition to some common editor key bindings for the left hand side, there are several specific key bindings for the diff navigation. You can find them by clicking on you user <b>options</b> then click on <b>keyboard shortcuts</b> or use <b>SHIFT+?</b> keys. But note that <b>Ctrl+DOWN</b> and <b>Ctrl+UP</b> are already consumed by the editor if the current focus is in one of the editors. You have to click on somewhere outside of the editors in order to use those two key bindings for diff navigation.</p>
+		<p>
+			<img title="Compare Page" alt="Compare Page" border="0" src="images/Orion-compare-key_bindings.png"/>
+		</p>
+		<h2 id="Related_Tasks">Related Tasks</h2>
+		<ul>
+			<li>
+				<a href="../../../../../Orion/Documentation/User_Guide/Tasks/Comparing/Comparing.html" title="Orion/Documentation/User Guide/Tasks/Comparing">Comparing</a>
+			</li>
+			<li>
+				<a href="../../../../../Orion/Documentation/User_Guide/Tasks/Navigating_and_searching/Navigating-and-searching.html" title="Orion/Documentation/User_Guide/Tasks/Navigating_and_searching">Navigating and searching</a>
+			</li>
+		</ul>
+		<h2 id="Updating_this_document">Updating this document</h2>
+		<p>This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
+
+			<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Compare_page" target="orion_external">http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Compare_page</a>
+		</p>
+	</body>
+</html>

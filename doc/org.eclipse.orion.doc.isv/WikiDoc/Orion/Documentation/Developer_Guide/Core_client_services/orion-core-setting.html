@@ -1,0 +1,140 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Core client services - orion.core.setting</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.core.setting</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-core-preference.html" title="orion.core.preference">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-textlink.html" title="orion.core.textlink">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.core.preference</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.textlink</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.core.setting">orion.core.setting</h1>
+		<p>Orion plugins can define 
+			<i>settings</i> using the <code>orion.core.setting</code> service. A setting defines some persistent information that is provided to one of the plugin's services. Defined settings appear on Orion's <b>Settings</b> page, and their values can be changed using an automatically-generated UI.
+		</p>
+		<p>A setting is a combination of two more basic configuration elements:</p>
+		<ul>
+			<li>A 
+				<a href="../../../../Orion/Documentation/Developer_Guide/Configuration_services/Configuration-services.html#Managed_Services" title="Orion/Documentation/Developer Guide/Configuration services#Managed Services">''PID'' (persistent identifier)</a>, which uniquely identifies the configuration data for the setting.
+			</li>
+			<li>
+				<a href="../../../../Orion/Documentation/Developer_Guide/Configuration_services/Configuration-services.html#Meta_Typing" title="Orion/Documentation/Developer Guide/Configuration services#Meta Typing">''Metatype'' information</a>, which defines the "shape" of the setting. Specifically, it defines what named properties appear in the setting and what data type they have (string, boolean, number, etc). The Settings page uses this Metatype information to generate appropriate UI widgets (for example, text field, checkbox, etc).
+			</li>
+		</ul>
+		<h2 id="Service_properties">Service properties</h2>
+		<p>To contribute one or more settings, the 
+			<b>settings</b> service property is used:
+		</p>
+		<dl>
+			<dt>settings</dt>
+			<dd><code>Setting[]</code>. Defines Settings. Each <code>Setting</code> element has the following shape:
+				<dl>
+					<dt>pid</dt>
+					<dd><code>String</code>. The PID for this setting. This PID occupies the same namespace as the PIDs contributed by 
+						<a href="../../../../Orion/Documentation/Developer_Guide/Configuration_services/Configuration-services.html#Managed_Services" title="Orion/Documentation/Developer Guide/Configuration services#Managed Services">Managed Services</a>, and must be unique in that respect.
+					</dd>
+					<dt>name</dt>
+					<dd><code>String</code>. Human-readable name of this setting.</dd>
+					<dt>tags</dt>
+					<dd><code>String[]</code>. 
+						<i>Optional.</i> List of tags applying to this setting.
+					</dd>
+					<dt>properties</dt>
+					<dd><code>AttributeDefinition[]</code>. Gives the properties that make up this setting. The shape of the <code>AttributeDefinition</code> element is explained in 
+						<a href="../../../../Orion/Documentation/Developer_Guide/Configuration_services/orion-cm-metatype.html#Define_an_OCD" title="Orion/Documentation/Developer Guide/Configuration services#Define an OCD">Metatype documentation</a>.
+					</dd>
+				</dl>
+			</dd>
+		</dl>
+		<h2 id="Service_methods">Service methods</h2>
+		<p>None. This service is completely declarative.</p>
+		<h2 id="Examples">Examples</h2>
+		<p>This example shows how to define a Setting with PID <code>example.navconfig</code>. This Setting has a single property <code>newtab</code>, which is boolean-typed. Because we've enumerated the property's possible values using an 
+			<b>options</b>, the generated UI presentation will show a drop-down menu. Since we've provided a 
+			<b>defaultValue</b> of <code>false</code>, the second option "Open links in a same tab" will selected by default.
+		</p>
+		<pre>define(<a href="'orion/plugin'">'orion/plugin'</a>, function(PluginProvider) {
+    var pluginProvider = new PluginProvider();
+    pluginProvider.registerService('orion.core.setting',
+        {},
+        {  settings: [
+               {  pid: 'example.navconfig',
+                  name: 'Navigation settings',
+                  properties: [
+                      {  id: 'newtab',
+                         name: 'Links',
+                         type: 'boolean',
+                         defaultValue: false,
+                         options: [
+                             {  label: "Open links in a new tab",
+                                value: true
+                             },
+                             {  label: "Open links in same tab",
+                                value: false
+                             }
+                         ]
+                      }
+                  ]
+               }
+           ]
+        });
+    provider.connect();
+});
+</pre>
+		<p>When a user visits the Orion Settings page, they'll see an automatically-generated UI containing a drop-down menu, similar to the one shown below. Manipulating the drop-down menu causes the setting's value to change, and causes any Managed Services registered against the <code>example.navconfig</code> PID to have their [[Orion/Documentation/Developer Guide/Configuration services#Service methods|<code>updated()</code> methods]] invoked.</p>
+		<p>
+			<img title="border" alt="border" border="0" src="images/Orion_orion.core.setting_example.png"/>
+		</p>
+		<h2 id="See_also">See also</h2>
+		<ul>
+			<li>
+				<a href="../../../../Orion/Documentation/Developer_Guide/Configuration_services/Configuration-services.html" title="Orion/Documentation/Developer Guide/Configuration services">Configuration services</a>
+			</li>
+		</ul><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-core-preference.html" title="orion.core.preference">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Core-client-services.html" title="Core client services">
+						<img alt="Core client services" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-textlink.html" title="orion.core.textlink">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.core.preference</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.textlink</td>
+			</tr>
+		</table>
+	</body>
+</html>

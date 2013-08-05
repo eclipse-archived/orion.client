@@ -1,0 +1,234 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Configuration services - orion.cm.metatype</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.cm.metatype</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-cm-managedservice.html" title="orion.cm.managedservice">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="See-also.html" title="See also">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.cm.managedservice</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">See also</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.cm.metatype">orion.cm.metatype</h1>
+		<p>The <code>orion.cm.metatype</code> service contributes Metatype information. Metatype information is based around 
+			<i>Object Class Definitions</i> (OCDs), which are first-class reusable elements. An OCD contains one or more 
+			<i>Attribute Definitions</i>. An Attribute Definition defines an individual property that can appear within a particular instance of the containing OCD.
+		</p>
+		<p>The <code>orion.cm.metatype</code> service serves two purposes:</p>
+		<ul>
+			<li>Define an OCD.</li>
+			<li>Associate an OCD with a PID (see 
+				<a href="Configuration-services.html#Managed_Services">Managed Services</a>).
+			</li>
+		</ul>
+		<p>Object Classes are analogous to OSGi 
+			<a href="http://www.osgi.org/javadoc/r4v42/org/osgi/service/metatype/ObjectClassDefinition.html" target="orion_external">Object Class Definitions</a>, and Attribute Definitions to OSGi 
+			<a href="http://www.osgi.org/javadoc/r4v42/org/osgi/service/metatype/AttributeDefinition.html" target="orion_external">Attribute Definitions</a>. In OO terms, Object Classes are similar to classes, and Attribute Definitions are similar to fields or instance variables.
+		</p>
+		<h2 id="Service_properties_2">Service properties</h2>
+		<p>There are two top-level properties: 
+			<b>classes</b> (defines an OCD), and 
+			<b>designates</b> (associates an OCD with a PID). Either of these properties, or both of them, may be specified.
+		</p>
+		<h3 id="Define_an_OCD">Define an OCD</h3>
+		<p>To define one or more Object Class Definitions, the 
+			<b>classes</b> service property is used:
+		</p>
+		<dl>
+			<dt>classes</dt>
+			<dd><code>ObjectClass[]</code>.  Defines Object Classes. Object Classes defined here can be referenced elsewhere by their ID. Each <code>ObjectClass</code> element has the following shape:
+				<dl>
+					<dt>id</dt>
+					<dd><code>String</code>. Uniquely identifies this OCD.</dd>
+					<dt>name</dt>
+					<dd><code>String</code>. 
+						<i>Optional.</i> The name of this OCD.
+					</dd>
+					<dt>properties</dt>
+					<dd><code>AttributeDefinition[]</code>. Defines the Attribute Definitions that can appear in instances of this OCD. Each <code>AttributeDefinition</code> element has the following shape:
+						<dl>
+							<dt>id</dt>
+							<dd><code>String</code>. The property id. This is unique within the containing OCD.</dd>
+							<dt>name</dt>
+							<dd><code>String</code>. 
+								<i>Optional</i>. The name of this property.
+							</dd>
+							<dt>type</dt>
+							<dd><code>'string' | 'number' | 'boolean'</code>. 
+								<i>Optional, defaults to 'string</i>'. The data type.
+							</dd>
+							<dt>defaultValue</dt>
+							<dd><code>Object</code>. 
+								<i>Optional, defaults to <code>null</code></i>. The default value of this property. This is a literal whose type matches the property's 
+								<b>type</b>. 
+							</dd>
+							<dt>options</dt>
+							<dd><code>PropertyOption[].</code> 
+								<i>Optional, defaults to <code>null</code></i>. If nonnull, gives an enumeration of allowed values that this property can take. Each <code>PropertyOption</code> element has the following shape:
+								<dl>
+									<dt>value</dt>
+									<dd><code>Object</code>. The value of this option. This is a literal value whose type matches the property's 
+										<b>type</b>.
+									</dd>
+									<dt>label</dt>
+									<dd><code>String</code>. The label for this option.</dd>
+								</dl>
+							</dd>
+						</dl>
+					</dd>
+				</dl>
+			</dd>
+		</dl>
+		<h3 id="Associate_an_OCD_with_a_PID">Associate an OCD with a PID</h3>
+		<p>To create PID-to-Object-Class associations, the 
+			<b>designates</b> service property is used:
+		</p>
+		<dl>
+			<dt>designates</dt>
+			<dd><code>Designate[]</code>. Each <code>Designate</code> element has the following shape:
+				<dl>
+					<dt>pid</dt>
+					<dd><code>String</code>. The PID for which OCD information will be associated.</dd>
+					<dt>classId</dt>
+					<dd><code>String</code>. References an OCD by ID. The referenced OCD will be associated with the PID.</dd>
+				</dl>
+			</dd>
+		</dl>
+		<p>Object Classes are publicly visible, so the OCD referenced by a Designate element may be defined by a different Metatype service. The order in which Metatype services are registered does not matter.</p>
+		<h2 id="Service_methods_2">Service methods</h2>
+		<p>None. This service is purely declarative.</p>
+		<h2 id="Examples_2">Examples</h2>
+		<p>This example shows how to define an OCD with ID <code>example.customer</code>. The OCD has two AttributeDefinitions.</p>
+		<pre>define(<a href="'orion/plugin'">'orion/plugin'</a>, function(PluginProvider) {
+    var pluginProvider = new PluginProvider();
+    pluginProvider.registerService('orion.cm.metatype',
+        {},
+        {  classes: [
+               {  id: 'example.customer',
+                  properties: [
+                      {  id: 'fullname',
+                         name: 'Full Name',
+                         type: 'string'
+                      },
+                      {  id: 'address',
+                         name: 'Mailing Address',
+                         type: 'string'
+                      }
+                  ]
+               }
+           ]
+        });
+    provider.connect();
+});
+</pre>
+		<p>Building on the previous example, here's how we would use a 
+			<b>designates</b> to associate the <code>example.customer</code> OCD with a PID named <code>example.pid</code>.
+		</p>
+		<pre>define(<a href="'orion/plugin'">'orion/plugin'</a>, function(PluginProvider) {
+    var pluginProvider = new PluginProvider();
+    pluginProvider.registerService('orion.cm.metatype',
+        {},
+        {  classes: [
+               {  id: 'example.customer',
+                  properties: [
+                      {  id: 'fullname',
+                         name: 'Full Name',
+                         type: 'string'
+                      },
+                      {  id: 'address',
+                         name: 'Mailing Address',
+                         type: 'string'
+                      }
+                  ]
+               }
+           ]
+        });
+    // New code starts here
+    pluginProvider.registerService('orion.cm.metatype',
+        {},
+        {  designates: [
+               {  pid: 'example.pid',
+                  classId: 'example.customer'
+               }
+           ]
+        });
+    provider.connect();
+});
+</pre>
+		<p>Alternatively, we can use a single service registration, with both 
+			<b>classes</b> and 
+			<b>designates</b>, to achieve the same effect:
+		</p>
+		<pre>define(<a href="'orion/plugin'">'orion/plugin'</a>, function(PluginProvider) {
+    var pluginProvider = new PluginProvider();
+    pluginProvider.registerService('orion.cm.metatype',
+        {},
+        {  classes: [
+               {  id: 'example.customer',
+                  properties: [
+                      {  id: 'fullname',
+                         name: 'Full Name',
+                         type: 'string'
+                      },
+                      {  id: 'address',
+                         name: 'Mailing Address',
+                         type: 'string'
+                      }
+                  ]
+               }
+           ],
+           designates: [
+               {  pid: 'example.pid',
+                  classId: 'example.customer'
+               }
+           ]
+        });
+    provider.connect();
+});
+</pre><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-cm-managedservice.html" title="orion.cm.managedservice">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Configuration-services.html" title="Configuration services">
+						<img alt="Configuration services" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="See-also.html" title="See also">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.cm.managedservice</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">See also</td>
+			</tr>
+		</table>
+	</body>
+</html>

@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Search and Replace page</title>
+		<link type="text/css" rel="stylesheet" href="../../../../../book.css"/>
+	</head>
+	<body>
+		<h1 id="Search_page">Search page</h1>
+		<p>The <b>Search</b> page can be launched from any other Orion pages with a search scope. Refer to 
+			<a href="../../../../../Orion/Documentation/User_Guide/Getting_started/Getting-started.html#Searching_for_file_content" title="Orion/Documentation/User_Guide/Getting_started#Searching_for_file_content">Searching for file content section</a> on how to launch the search page from different places.
+			The left hand side of the page displays the search and replace field and all other options. The right hand side displays the result when you invoke the search. The header of the result pane displays the total number of matches and the number range of the first page. Each file is expandable to display all the lines that match the keyword. You can use right arrow key to pop up a 5-line context around the line. To view the file with the line located you can click on any match to open the editor. The page is designed to display multiple pages if the number of result files exceeds 40. To view more results you can use the previous and next page actions in the tool bar.
+		</p>
+		<p>
+			<img title="Search page" alt="Search page" border="0" src="images/Search-page-overall.png"/>
+		</p>
+		<h2 id="Search_completion">Search completion</h2>
+		<p>When you type on the search field, there is a suggested list popping up under the field. The suggested list contains the most recent searched keywords, filtered by the current typed. The max number of the recent keyword is 20.</p>
+		<p>You can also delete the recent keyword when it is highlighted. Note that if you use backspace key till the search field is empty, it will show you <b>all</b> the recent search terms.</p>
+		<p>
+			<img title="Search completion" alt="Search completion" border="0" src="images/Search-page-completion.png"/>
+		</p>
+		<h2 id="Filter_the_search_result">Filter the search result</h2>
+		<p>In the result pane, there is a way to narrow down the number of the files and the lines of matches. Type a keyword in the filter box and it will display only the files and matching lines that contain that filter keyword. Note that the search term is highlighted by bold and the filter term is highlighted by the yellow background. If you backspace the filter to empty, it will show you all the results as normal.</p>
+		<p>
+			<img title="Search completion" alt="Search completion" border="0" src="images/Search-page-filter.png"/>
+		</p>
+		<h2 id="Search_scopes">Search scopes</h2>
+		<p>When you launch the search page, the bread crumb shows the current scope. But once the result pane shows some results, you can scope up and down for the same keyword from there.</p>
+		<h3 id="Scoping_down">Scoping down</h3>
+		<p>Let's assume that you've just searched for "function" on a folder and you got 265 files but you want to see the results on a folder you are interested in. You can now click on the location column where the interesting folder is presented. The result will be scoped down to that folder by the same keyword.</p>
+		<p>
+			<img title="Search location column" alt="Search location column" border="0" src="images/SearchPage-scopedown.png"/>
+		</p>
+		<h3 id="Scoping_up">Scoping up</h3>
+		<p>If your search result presents a sub folder but you want a broader scope, you can click on any segment in the breadcrumb. The result will be scoped up to that folder by the same keyword.</p>
+		<p>
+			<img title="Search breadcrumb" alt="Search breadcrumb" border="0" src="images/SearchPage-scopeUp.png"/>
+		</p>
+		<h2 id="My_Saved_Searches">My Saved Searches</h2>
+		<p>On the left hand side of the page you can name a search and save it. </p>
+		<h3 id="Saving_a_search">Saving a search</h3>
+		<p>Let's say you are searching "foo" on folder "bar". The default name of the saved search is "foo in bar" when you invoke the search. You can click on the save button to decide if you want to save it. 
+			The saved searches are displayed in the bottom part of the left hand side pane, called <b>My Saved Searches</b>.</p>
+		<p>Note that this is a bookmark to the search, rather than a specific search result. Clicking on a link in the <b>My Saved Searches</b> will perform a new search with the same search terms. </p>
+		<p>
+			<img title="Save search button" alt="Save search button" border="0" src="images/SearchPage-saveSearches1.png"/>
+		</p>
+		<p>You can also filter and perform the saved searches from the search completion under the search field when you type.</p>
+		<p>
+			<img title="Save search button2" alt="Save search button2" border="0" src="images/SearchPage-saveSearches2.png"/>
+		</p>
+		<h3 id="Edit_a_saved_search">Edit a saved search</h3>
+		<p>You can select a search to delete or rename it. Note that multiple selection is allowed but only delete action is available for multiple selection.</p>
+		<p>
+			<img title="Save search edit" alt="Save search edit" border="0" src="images/SearchPage-saveSearchesEdit.png"/>
+		</p>
+		<h2 id="Navigating_matches">Navigating matches</h2>
+		<p>There are four actions in the tool bar for navigating matches. <b>Expand all</b> and <b>Collapse all</b> are convenient actions to view all matches or just view the file list. <b>Up</b> and <b>Down</b> allow you to just iterate all the files and matches top-down or bottom-up. While you are iterating, the current <b>row</b> is moving to indicate where you are. You can also jump over to a specific file or match by clicking on that row, which gives a quick switch-over to where you want to start the iteration. The current <b>row</b> is always cached as the browser's cookie based on the search URL. If you leave the page and come back or refresh the page, the current row is restored.</p>
+		<h2 id="Keyboard_navigation">Keyboard navigation</h2>
+		<p>When the pane is loaded, it is focused and the current row is highlighted where you can use the keyboard navigation.
+			Note that keyboard navigation is available only when the <b>result pane</b> gets focus. If focus is not on the result pane, just click on any place in the result pane to get it back.</p>
+		<ul>
+			<li>To move the current row, use up and down arrow keys. You can also change the current row by clicking on the anywhere of any row.</li>
+			<li>To expand or collapse the current row, use right and left arrow keys.</li>
+			<li>To open a file or go to the matching line with that file, use Enter key.</li>
+			<li>To open a file or go to the matching line with that file in a new tab, use Ctrl+Enter key.</li>
+		</ul>
+		<p>Keyboard navigation when doing replace is similar. But as the file and match names are not links to open the editor, enter key is not available. Also note that there is no context tip because you can view them in the compare view.</p>
+		<h2 id="Viewing_details">Viewing details</h2>
+		<p>There are two ways to view details on a match. When the current row is on a match, pressing <b>right arrow</b> key will pop up a context tip with five lines of code around the hit line. Note that if you use <b>up</b> and <b>down</b> arrow keys from now, the context tip changes contents when a match is iterated. Use <b>left arrow</b> key to cancel the context tip. If you want to view more details, press enter key or click on the link of the match. This will open the Orion editor with the line located at the matching place.</p>
+		<p>
+			<img title="View search result details" alt="View search result details" border="0" src="images/SearchPage_view_details.png"/>
+		</p>
+		<h2 id="Linking_to_the_editor">Linking to the editor</h2>
+		<p>When you choose to open the editor for more details, the editor will be opened with the find&amp;replace feature for you.
+			If you click on a file, the editor will open with the first match highlighted. If you click on a match, that match will be highlighted in the editor. You can then continue to work on this single file without bothering to bring the find&amp;replace up again.</p>
+		<p>
+			<img title="View search result in editor" alt="View search result in editor" border="0" src="images/Search_view_details_in_editor_new1.png"/>
+		</p>
+		<h2 id="Navigating_pages">Navigating pages</h2>
+		<p>If the number of matching files exceeds the page size, which is 40 by default, the <b>Next page</b> and <b>Previous page</b> actions will appear in the tool bar.</p>
+		<h2 id="Stale_files">Stale files</h2>
+		<p>Orion search is based on the file indexer on the server side. There may be some rare cases that your updated files are not synced up into indexer yet when you invoke the search. For example, if you search on <b>foo</b> and replace all the matches with <b>bar</b> in a file and then search on <b>foo</b> again right away. Depending on how many files on the server, the indexer may still hit the file but the file does not contain <b>foo</b> any more. In this case the file is greyed out in the result list but if you search again later it will disappear from the list completely.</p>
+		<p>
+			<img title="Stale files in the results" alt="Stale files in the results" border="0" src="images/Search_stale_files_new.png"/> 
+		</p>
+		<h2 id="Search_and_replace">Search and replace</h2>
+		<h3 id="Preview_changes">Preview changes</h3>
+		<p>Type both a search term and replace term, click replace button. Now you will see a replace preview on the result pane.
+			When the replace preview is loaded on the result pane, the compare view is displayed by default at the bottom of the result pane. While you are iterating matches, the compare view highlights the difference for the current row. Note that you can click on <b>Hide Compare</b> on the toolbar to hide it for a smoother iteration and bring it back later by <b>Show Compare</b>.</p>
+		<p>
+			<img title="View compare" alt="View compare" border="0" src="images/SearchPage_replace.png"/>
+		</p>
+		<h3 id="Apply_selected_changes">Apply selected changes</h3>
+		<p>Refer to 
+			<a href="../../../../../Orion/Documentation/User_Guide/Tasks/Navigating_and_searching/Navigating-and-searching.html#Search_and_replace_across_files" title="Orion/Documentation/User_Guide/Tasks/Navigating_and_searching#Search_and_replace_across_files">Search and replace across files</a> for details.
+		</p>
+		<h2 id="Current_limitations">Current limitations</h2>
+		<p>There are several limitations that will be addressed in the future releases.</p>
+		<ul>
+			<li>If you enter multiple words in the search box, it will search for that exact phrase. Phrase search does not support wildcards, and will ignore punctuation between words. For example, if you search for <b>foo bar</b>, it will find matches such as <b>foo. (bar)</b></li>
+			<li>Filter box in the replace preview is not available.</li>
+			<li>Case sensitive and regular expression search is not indexed.</li>
+		</ul>
+		<h2 id="Related_Tasks">Related Tasks</h2>
+		<ul>
+			<li>
+				<a href="../../../../../Orion/Documentation/User_Guide/Tasks/Navigating_and_searching/Navigating-and-searching.html" title="Orion/Documentation/User_Guide/Tasks/Navigating_and_searching">Navigating and searching</a>
+			</li>
+		</ul>
+		<h2 id="Updating_this_document">Updating this document</h2>
+		<p>This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
+
+			<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Search_Results_page" target="orion_external">http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Search_Results_page</a>
+		</p>
+	</body>
+</html>

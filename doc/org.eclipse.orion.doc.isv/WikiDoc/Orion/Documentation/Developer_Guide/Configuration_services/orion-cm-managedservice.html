@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Configuration services - orion.cm.managedservice</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.cm.managedservice</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-cm-configadmin.html" title="orion.cm.configadmin">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-cm-metatype.html" title="orion.cm.metatype">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.cm.configadmin</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.cm.metatype</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.cm.managedservice">orion.cm.managedservice</h1>
+		<p>Contributes a 
+			<i>Managed Service</i>. A Managed Service is a service that can receive configuration data.
+		</p>
+		<h2 id="Service_properties">Service properties</h2>
+		<p>A Managed Service must define the following property:</p>
+		<dl>
+			<dt>pid</dt>
+			<dd><code>String</code> Gives the PID for this Managed Service.</dd>
+		</dl>
+		<h2 id="Service_methods">Service methods</h2>
+		<p>A Managed Service must implement the following method:</p>
+		<dl>
+			<dt>updated(properties)</dt>
+			<dd>The ConfigurationAdmin invokes this method to provide configuration to this Managed Service. If no configuration exists for this Managed Service's PID, <code>properties</code> is <code>null</code>. Otherwise, <code>properties</code> is a dictionary containing the service's configuration data.</dd>
+		</dl>
+		<h2 id="Examples">Examples</h2>
+		<p>This minimal example shows the implementation of a plugin which registers a Managed Service under the PID "example.pid". When its updated() method is called, it simply prints out what it received:</p>
+		<pre>define(<a href="&quot;orion/plugin&quot;">"orion/plugin"</a>, function(PluginProvider) {
+    var provider = new PluginProvider();
+    provider.registerService(<a href="&quot;orion.cm.managedservice&quot;">"orion.cm.managedservice"</a>,
+        {  pid: "example.pid"
+        },
+        {  updated: function(properties) {
+               if (properties === null) {
+                 console.log("We have no properties :(");
+               } else {
+                 console.log("We got properties!");
+                 console.dir(properties);
+               }
+           }
+        });
+    provider.connect();
+});
+</pre>
+		<p>Here is a larger example, showing how a validation service (a spellchecker that checks for any occurrences of the misspelling "definately") might accept options through its configuration properties. The service implementation in this example is both a validator and a Managed Service.</p>
+		<pre>define(<a href="&quot;orion/plugin&quot;">"orion/plugin"</a>, function(PluginProvider) {
+    var provider = new PluginProvider();
+    var options;
+    provider.registerService(<a href="&quot;orion.cm.managedservice&quot;,">"orion.edit.validator"</a>,
+        {  pid: "example.validator",
+           contentType: <a href="&quot;text/plain&quot;">"text/plain"</a>
+        },
+        {  updated: function(properties) {
+               if (properties === null) {
+                   // No configuration, use default
+                   options = { enabled: true };
+               } else {
+                   options = { enabled: !!properties.enabled };
+               }
+           },
+           checkSyntax: function(title, contents) {
+               if (!options.enabled) {
+                   return { problems: [] };
+               }
+               var problems = [];
+               contents.split(/\r?\n/).forEach(function(line, i) {
+                   var index;
+                   if ((index = line.indexOf("definately") !== -1) {
+                       problems.push({
+                           description: "Misspelled word",
+                           line: i+1,
+                           start: index,
+                           end: index+10,
+                           severity: "warning"
+                       });
+                   }
+               });
+               return { problems: problems };
+           }
+        });
+    provider.connect();
+});
+</pre>
+		<p>The <code>updated()</code> method here checks its configuration dictionary for a boolean <code>enabled</code> property that determines whether the validator is active. In the case of <code>null</code> properties, the service uses a reasonable default. (It's a best practice for configurable services to behave sanely when no configuration has been defined for them.)</p>
+		<p>Note that, by virtue of the configuration framework's guarantee that <code>updated()</code> is called before all other service methods, our <code>checkSyntax()</code> method can safely assume that the <code>options</code> variable has been set.</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-cm-configadmin.html" title="orion.cm.configadmin">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Configuration-services.html" title="Configuration services">
+						<img alt="Configuration services" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-cm-metatype.html" title="orion.cm.metatype">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.cm.configadmin</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.cm.metatype</td>
+			</tr>
+		</table>
+	</body>
+</html>

@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Architecture overview - Client architecture</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Client architecture</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Architecture.html" title="Architecture overview">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Server-architecture.html" title="Server architecture">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Architecture overview</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Server architecture</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Client_architecture">Client architecture</h1>
+		<h2 id="Web_components">Web components</h2>
+		<p>Orion aims to provide independently useful web components with minimal coupling between them, so that application developers can choose to deploy only the subsets of interest to their applications. Each component is represented by a JavaScript library (typically a single JavaScript file) and any directly associated resources like style sheets or images. With Orion we consciously do not mandate the use of a special packaging format or component library requirement so you can for example use your favorite DOM manipulation library as is. </p>
+		<p>Dependencies between components in Orion are managed using the 
+			<a href="http://www.commonjs.org/" target="orion_external">CommonJS</a> 
+			<a href="http://wiki.commonjs.org/wiki/Modules/AsynchronousDefinition" target="orion_external">AMD</a> module format. However, as alluded to above, web components are not forced into using this model. For more loosely coupled functional interactions Orion provides a service registry similar to the OSGi service model, but with some of the declarative characteristics of Eclipse extension and extension points.
+		</p>
+		<h2 id="Services">Services</h2>
+		<p>References between client library objects are directed through a service registry. Library objects are provided with a service registry object on construction, allowing a developer using the library to override what service implementations are used by any given library object. For example, while the default implementation of the Preferences object uses the remote preference service over HTTP, a client could provide an implementation that uses HTML5 local storage, cookies, etc.</p>
+		<p>Here is a simplified example of the <tt>Explorer</tt> object using a service to prompt the user to confirm a file deletion:</p>
+		<pre> function Explorer(serviceRegistry, ...) {
+     this.registry = serviceRegistry;
+     ...
+  }
+  ...
+  deleteFile: function(itemId) {
+     var item = this.myTree.getItem(itemId);
+     var service = <b>registry.getService</b>("orion.page.dialog");
+     var message = "Are you sure you want to delete '" + item.Name + "'?";
+     service.confirm(message, function(doit) { /* perform deletion */});
+  }
+</pre>
+		<p>The <tt>getService</tt> function takes the service name as argument, and returns either the service instance or null. For this example we're assuming the service is present. However &mdash; especially when using services dynamically contributed from a plugin &mdash; you should check for <code>null</code>. One particularly important point to emphasize is that 
+			<i>all</i> service calls through the service registry are 
+			<i>asynchronous</i> and return a 
+			<a href="http://wiki.commonjs.org/wiki/Promises/A" target="orion_external">promise</a> object (such as a Dojo 
+			<a href="http://dojotoolkit.org/api/1.6/dojo/Deferred" target="orion_external">Deferred</a>). You cannot assume that the service function will have been executed by the time the service function returns and instead must chain any follow-on calls to the "promise". This allows the service implementation to employ a variety of long-running techniques to execute the service, such as calls to a remote web service, cross-domain postMessage, HTML5 web workers, etc.
+		</p>
+		<h3 id="Service_definitions">Service definitions</h3>
+		<p>A service definition includes both a declarative aspect, and optionally a concrete service object. Declarative service properties can be cached by the Orion service registry, avoiding loading of the plug-in providing that service until it is needed. The following is an example of a very simple service definition:</p>
+		<pre> var provider = new orion.PluginProvider();
+ var serviceImpl = {
+   run : function(text) {
+     return text.toUpperCase();
+   }
+ };
+ var serviceProps = {
+   name : "UPPERCASE",
+   img : "/images/gear.gif",
+   key : [ "u", true ]
+ };
+ provider.registerService("orion.edit.command", serviceImpl, serviceProps);
+ provider.connect();
+</pre>
+		<p>This service registers a new command in the editor. The service implementation has a single <tt>run</tt> method that converts the provided text to upper case. The service properties specify the name of the command, the icon, and key binding. This way the editor can display the command in the toolbar using the cached service properties, without actually loading the plugin.</p>
+		<h2 id="Extensions">Extensions</h2>
+		<p>Orion implements the Eclipse concept of extensions and extension points using the Orion service registry. An extension point is simply a service interface that clients are expected to implement. Each instance of that service is an extension. You will often see the terms "extension" and "service" used interchangeably in the Orion documentation. There is no technical difference between them; rather, it is an expression of how the service is intended to be used. Services provided by clients are conceptually extensions, and services used by clients are simply called services.</p>
+		<h2 id="Plugins">Plugins</h2>
+		<p>Services and extensions that reside on different web domains from the host Orion server are contributed to Orion by registering plugins. A plugin is declared via an HTML file, is opened in a "head-less" child <tt>IFrame</tt> and uses <tt>window.postMessage</tt> to advertise capabilities in the form of services and extensions back to Orion. Orion persists plugin information and at a later date when functionality is requested the plugin will be re-loaded either in an <tt>IFrame</tt>, in a Web Worker, or in-line as a web component based on security restrictions and functionality offered. Here is an example of a simple plug-in:</p>
+		<pre> &lt;!DOCTYPE html&gt;
+ &lt;html&gt;
+ &lt;head&gt;
+   &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+   &lt;!-- Dependencies --&gt;
+   &lt;script type="text/javascript" src="../orion/plugin.js"&gt;&lt;/script&gt;
+   &lt;script&gt;
+     window.onload = function() {
+       &lt;!-- Service declarations go here --&gt;
+     };
+   &lt;/script&gt;
+ &lt;/head&gt;
+ &lt;body&gt;
+ &lt;/body&gt;
+ &lt;/html&gt;
+</pre>
+		<p>A simple plugin can consist of only the plugin's HTML file, and the required <tt>plugin.js</tt> script from Orion. More complex plugins will typically include several script files containing the concrete service implementation objects.</p>
+		<p>Plugins are installed or uninstalled from the <b>Settings</b> page within the Orion user interface.</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Architecture.html" title="Architecture overview">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Architecture.html" title="Architecture overview">
+						<img alt="Architecture overview" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Server-architecture.html" title="Server architecture">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Architecture overview</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Server architecture</td>
+			</tr>
+		</table>
+	</body>
+</html>

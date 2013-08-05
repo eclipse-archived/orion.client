@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Core client services - orion.core.marker</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.core.marker</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-core-file.html" title="orion.core.file">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-preference.html" title="orion.core.preference">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.core.file</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.preference</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.core.marker">orion.core.marker</h1>
+		<p>The marker service is used to store problems found by a builder or syntax validator. A client can register with this service for notification when markers are changed. Here is an example of a component that is registering for notification of marker changes:</p>
+		<pre> serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", 
+     function(problems) {
+       //do something with the new problems
+     });
+</pre>
+		<p>Each marker is a simple JSON object with the following properties:</p>
+		<dl>
+			<dt>reason</dt>
+			<dd>A string stating the description of the problem or marker</dd>
+			<dt>line</dt>
+			<dd>The line number of the marker</dd>
+			<dt>character</dt>
+			<dd>The column position of the marker</dd>
+		</dl><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-core-file.html" title="orion.core.file">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Core-client-services.html" title="Core client services">
+						<img alt="Core client services" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-preference.html" title="orion.core.preference">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.core.file</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.preference</td>
+			</tr>
+		</table>
+	</body>
+</html>

@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Core client services - orion.core.favorite</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.core.favorite</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-core-contenttypes.html" title="orion.core.contenttypes">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-file.html" title="orion.core.file">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.core.contenttypes</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.file</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.core.favorite">orion.core.favorite</h1>
+		<p>The <tt>orion.core.favorite</tt> service is used to access and store the user's bookmarks or favorites. While a user may opt to use their own browser's bookmark mechanism instead, there are some specific advantages to using Orion's favorite service instead:</p>
+		<ul>
+			<li>Favorites are persisted on the server, so the user can switch to another client computer or browser and access their familiar bookmarks</li>
+			<li>Favorites are associated with a specific Orion application and user, so favorites from different users or applications are not all mixed into a single place.</li>
+			<li>Favorites are used to suggest file and folder based parameters for other actions in Orion, such as moving and copying files to a location, or finding specific files.</li>
+		</ul>
+		<p>Here is an example usage of the favorites service:</p>
+		<pre>serviceRegistry.getService("orion.core.favorite").makeFavorites(itemOrArray);
+</pre>
+		<p>See <tt>orion.favorites.FavoritesService</tt> in the Orion client API reference for a complete list of functions available on the favorite service.</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-core-contenttypes.html" title="orion.core.contenttypes">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Core-client-services.html" title="Core client services">
+						<img alt="Core client services" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-file.html" title="orion.core.file">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.core.contenttypes</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.file</td>
+			</tr>
+		</table>
+	</body>
+</html>

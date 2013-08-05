@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Configuration services</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Configuration services</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-cm-configadmin.html" title="orion.cm.configadmin">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.cm.configadmin</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Overview_of_configuration_services">Overview of configuration services</h1>
+		<p>Orion provides a number of service APIs related to service configuration. This page explains the service configuration APIs. For a basic overview of Orion's service architecture, see 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Services" title="Orion/Documentation/Developer_Guide/Architecture#Services">Architecture</a>.
+		</p>
+		<h2 id="Managed_Services">Managed Services</h2>
+		<p>A service may need configuration information before it can perform its intended functionality. Such services are called 
+			<i>
+				<a href="orion-cm-managedservice.html#orion.cm.managedservice">Managed Services</a>
+			</i>. A Managed Service implements a method, <code>updated()</code>, which is called by the Orion configuration framework to provide configuration data to the service. As with all service methods, <code>updated()</code> is called asynchronously. The configuration data takes the form of a dictionary of key-value pairs, called properties. If no configuration data exists for the Managed Service, <code>null</code> properties are passed.
+		</p>
+		<p>A Managed Service needs to receive its configuration information before the service is invoked to perform other work. For example, a configurable 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#orion.edit.validator" title="Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.validator">validation service</a> would want to receive any custom validation options (or <code>null</code>, if no custom options were configured) before actually performing any validation. For this reason, the framework guarantees that a Managed Service's <code>updated()</code> method will be called prior to any other service methods the service may implement.
+		</p>
+		<p>Managed Services can be contributed by registering against the 
+			<a href="orion-cm-managedservice.html#orion.cm.managedservice">orion.cm.managedservice</a> service name. Every Managed Service must provide a service property named <code>"pid"</code> which gives a 
+			<i>PID</i> (persistent identifier). The serves as a primary key for the configuration information of a Managed Service. 
+		</p>
+		<p>The Orion concept of a Managed Service is analogous to the OSGi 
+			<a href="http://www.osgi.org/javadoc/r4v42/org/osgi/service/cm/ManagedService.html" target="orion_external">Managed Service</a>.
+		</p>
+		<h2 id="Meta_Typing">Meta Typing</h2>
+		<p>A 
+			<i>Metatype</i> describes the shape of configuration data*. In other words, it specifies what property names can appear in the properties dictionary, and what data types (string, boolean, number, etc) their values may have. Metatype information is defined in terms of 
+			<i>Object Class Definitions</i> (OCDs), which can be reused. Metatype information is associated with a Managed Service's PID. Metatype information is optional, so not every Managed Service need have Metatype information associated with it.
+		</p>
+		<p>Metatype information can be contributed by registering a service with the 
+			<a href="orion-cm-metatype.html#orion.cm.metatype">orion.cm.metatype</a> service name.
+		</p>
+		<p>The Orion concept of a Metatype is analogous to the OSGi Metatype.</p>
+		<dl>
+			<dd>* In this page we discuss Metatype information solely in the context of configuration management. Strictly speaking, Metatypes are generic, and can be used for other purposes.</dd>
+		</dl>
+		<h2 id="Configuration_management">Configuration management</h2>
+		<p>Configuration data is managed by a 
+			<i>ConfigurationAdmin</i> service, which maintains a database of Configuration objects. The ConfigurationAdmin monitors the service registry and provides configuration data to Managed Services that are registered. Orion's implementation of ConfigurationAdmin persists configuration data to a 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Core_client_services/orion-core-preference.html#orion.core.preference" title="Orion/Documentation/Developer_Guide/Core_client_services#orion.core.preference">Preferences Service</a>.
+		</p>
+		<p>In JavaScript code, configuration information is represented as <code>Configuration</code> objects (refer to "orion.cm.Configuration" in the client API reference for JSDoc), which are returned by the ConfigurationAdmin's service methods. Because the ConfigurationAdmin service is currently only accessible to code running in the same window as the service registry, Configuration objects cannot be directly interacted with by external services. Managed Services can only receive configuration information via their <code>updated()</code> method. </p>
+		<p>The Orion ConfigurationAdmin service is analogous to the OSGi 
+			<a href="http://www.osgi.org/javadoc/r4v42/org/osgi/service/cm/ConfigurationAdmin.html" target="orion_external">ConfigurationAdmin</a>.
+		</p>
+		<h2 id="Settings">Settings</h2>
+		<p>On top of the basic configuration and metatype APIs, Orion also provides a higher-level Settings API. See 
+			<a href="http://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_settings_page" title="Orion/Documentation/Developer Guide/Plugging into the settings page" target="orion_external">Plugging into the settings page</a> for details.
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-cm-configadmin.html" title="orion.cm.configadmin">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.cm.configadmin</td>
+			</tr>
+		</table>
+	</body>
+</html>

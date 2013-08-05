@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<toc topic="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/Plugging-into-the-shell.html" label="Plugging into the shell">
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/Plugging-into-the-shell.html" label="Overview of contributing services to the Shell"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/orion-shell-command.html" label="orion.shell.command">
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/orion-shell-command.html#Service_methods" label="Service methods"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/orion-shell-command.html#Service_attributes" label="Service attributes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/orion-shell-command.html#Example_of_Using_a_Delegated_UI" label="Example of Using a Delegated UI"></topic>
+	</topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/orion-shell-type.html" label="orion.shell.type">
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/orion-shell-type.html#Service_methods_2" label="Service methods"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/orion-shell-type.html#Service_attributes_2" label="Service attributes"></topic>
+	</topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/Example.html" label="Example"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_shell/Updating-this-document.html" label="Updating this document"></topic>
+</toc>

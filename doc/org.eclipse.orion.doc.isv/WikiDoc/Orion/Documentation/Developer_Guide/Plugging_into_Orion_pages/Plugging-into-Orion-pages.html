@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into Orion pages</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Plugging into Orion pages</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-page-content.html" title="orion.page.content">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.page.content</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Overview_of_plugging_into_Orion_pages">Overview of plugging into Orion pages</h1>
+		<p>An important part of plugging into Orion pages is supplying links that connect the user to other pages inside and outside of Orion.  Page-level linking services allow plugins and page authors to contribute links and other forms of connectivity between an Orion page and other web pages.  The most general of these services can be used on any Orion page. </p>
+		<p>When specifying links to other pages, a service may need to use some information about the page to decide whether a link is applicable and how the link is composed.  This is accomplished for many services by using the <tt>validationProperties</tt>, <tt>uriTemplate</tt>, and <tt>contentType</tt> properties in the service definition.</p>
+		<h2 id="Validation_Properties">Validation Properties</h2>
+		<p>Validation properties describe the properties of a page object that should be analyzed to determine whether a particular service applies to the page.  They can optionally store information from page objects into variables that can be referenced in a URI template.  Linking services generally specify one or more of these properties in an array.  The general format of an individual validation property is as follows:</p>
+		<dl>
+			<dt>source</dt>
+			<dd><tt>String</tt> The name of a property to look for in the target object.  The ":" character represents nested properties, and the "|" character represents OR'ed properties.  For example, the source <tt>Location</tt> specifies that the page object must have a "Location" property, such as <tt>myObject.Location</tt>.  The source <tt>Git:ContentLocation</tt> specifies that the page object must have a sub-object and property such as <tt>myObject.Git.ContentLocation</tt>.  The source <tt>ChildrenLocation|ContentLocation</tt> means that the page object must have either a property such as <tt>myObject.ChildrenLocation</tt> or a property such as <tt>myObject.ContentLocation</tt>.  The first property found will be used.</dd>
+			<dt>match</dt>
+			<dd><tt>Object</tt> A value used to validate the source property.  In general, the value of the page object's property will be compared against this value.  However, if this value is a string, the string is assumed to specify a regular expression that will be passed to the RegExp constructor.  </dd>
+			<dt>variableName</dt>
+			<dd><tt>String</tt> Optional.  The name of a variable that represents the value of the source property.  If specified, then an associated URI template may use a variable of this name, and it will contain the value of the matched source property.</dd>
+			<dt>variableMatchPosition</dt>
+			<dd><tt>String</tt> Optional.  A string that specifies what part of a matching string is used in the variable value when a regular expression was used to match the property.  </dd>
+		</dl>
+		<ul>
+			<li><tt>"all"</tt> (default) means the entire property value should be substituted for the variable.  </li>
+			<li><tt>only</tt> means only the matching part of the property value should be substituted in the URI template.  </li>
+			<li><tt>before</tt> means the part before the match is substituted in the URI template. </li>
+			<li><tt>after</tt> means the part after the match is substituted in the URI template.</li>
+		</ul>
+		<dl>
+			<dt>replacements</dt>
+			<dd><tt>Array</tt> Optional.  Specifies an array of replacements (pattern and replace strings) that can be used to further modify a variable value used in a URI template.</dd>
+		</dl>
+		<h2 id="URI_Templates">URI Templates</h2>
+		<p>URI templates describe the link to another page.  Variables in the URI template can refer to the page object metadata, to variables named in the validation properties, or to special variables defined in Orion.  Variables are referenced using curly brackets.  The following variables are system wide variables (independent of the page object or variable names in the validation properties).</p>
+		<dl>
+			<dt>OrionHome</dt>
+			<dd>Specifies the hostname for the Orion server instance.  This variable can be used by a plugin that is installed in another domain to reference a page location in Orion.</dd>
+		</dl>
+		<p>For example, the URI template <tt>{OrionHome}/content/content.html#{Location}</tt> links to a particular page (content.html) in the running Orion instance, and includes the value of the <tt>Location</tt> property in the originating page's object metadata after the hash.</p>
+		<h2 id="Content_Types">Content Types</h2>
+		<p>Content types may be used to further validate file-based metadata.  For example, if a page link should only be visible when the page is showing HTML or CSS, a content type of <tt>
+			<a href="text/html,">text/css</a></tt>can be used to express this.
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-page-content.html" title="orion.page.content">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.page.content</td>
+			</tr>
+		</table>
+	</body>
+</html>

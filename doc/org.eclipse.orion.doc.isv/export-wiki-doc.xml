@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+    Copyright (c) 2010, 2013 Tasktop Technologies and others.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+   
+    Contributors:
+         Tasktop Technologies - initial API and implementation
+         IBM - adapted to Orion
+ -->
+
+<project name="org.eclipse.orion.doc.isv" default="all">
+    <description>
+            Generate Eclipse help content for the Orion ISV guide
+    </description>
+
+	<property name="mylyn.help.doc.url.base" value="http://wiki.eclipse.org"/>
+	<property name="orion.user.guide" value="Orion"/>
+	<property name="output.folder" value="WikiDoc"/>
+	<property name="mylyn.wiki.url.base" value="${mylyn.help.doc.url.base}/${orion.user.guide}"/>
+	<property name="imageFolder" value="images"/>
+
+	<path id="wikitext.tasks.classpath">
+		<pathelement path="${wikitext.tasks.classpath.path}"/>
+	</path>
+
+	<taskdef classpathref="wikitext.tasks.classpath" resource="org/eclipse/mylyn/internal/wikitext/mediawiki/core/tasks/tasks.properties"/>
+	<taskdef classpathref="wikitext.tasks.classpath" resource="org/eclipse/mylyn/wikitext/core/util/anttask/tasks.properties"/>
+	
+	<target name="clean" depends="init">
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="tmp"/>
+			<fileset dir="${output.folder}/Orion"/>
+			<fileset dir="${output.folder}">
+				<include name="Orion*.xml"/>
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="init">
+		<mkdir dir="tmp"/>
+	</target>
+
+    <target name="all" depends="clean, init" description="Generate Eclipse help content for the Orion ISV guide">
+		
+    	<mediawiki-to-eclipse-help
+    		wikiBaseUrl="${mylyn.help.doc.url.base}"
+			validate="true"
+			failonvalidationerror="true"
+			prependImagePrefix="${imageFolder}"
+			formatoutput="true"
+    		helpPrefix="${output.folder}"
+			defaultAbsoluteLinkTarget="orion_external"
+    		dest="${basedir}/${output.folder}"
+    		title="Orion"
+    		generateUnifiedToc="false">
+    		<path name="Orion/Project_mission_statement" title="Welcome to Orion" generateToc="true"/>
+    		<path name="Orion/Documentation/Developer_Guide/Architecture" title="Architecture overview" generateToc="true"/>
+    		<path name="Orion/Documentation/Developer_Guide/Simple_plugin_example" title="Simple plugin example" generateToc="true"/>
+    		<path name="Orion/Documentation/Developer_Guide/Core_client_services" title="Core client services" generateToc="true"/>
+    		<path name="Orion/Documentation/Developer_Guide/Configuration_services" title="Configuration services" generateToc="true"/>
+    		<path name="Orion/Documentation/Developer_Guide/User_interface_services" title="User interface services" generateToc="true"/>
+       		<path name="Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages" title="Plugging into Orion pages" generateToc="true"/>
+       		<path name="Orion/Documentation/Developer_Guide/Plugging_into_the_editor" title="Plugging into the editor" generateToc="true"/>
+    		<path name="Orion/Documentation/Developer_Guide/Plugging_into_the_navigator" title="Plugging into the navigator" generateToc="true"/>
+    		<path name="Orion/Documentation/Developer_Guide/Plugging_into_the_shell" title="Plugging into the shell" generateToc="true"/>
+    		<path name="Orion/Server_API" title="Server API" generateToc="true"/>
+    		<path name="Orion/Server_admin_guide" title="Server administration guide" generateToc="true"/>
+    		<path name="Orion/Node/Getting_started" title="Getting started with Orion on Node" generateToc="true"/>
+			<stylesheet url="book.css"/>
+    		<pageAppendum>
+
+= Updating this document =
+
+This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
+{url}</pageAppendum>
+    	</mediawiki-to-eclipse-help>
+    	<antcall target="test"/>
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="tmp"/>
+		</delete>
+    </target>
+	
+
+	<target name="test" depends="init" description="verify that all of the HTML files are well-formed XML">
+		<echo level="info">
+Validating help content XML and HTML files: The Eclipse help system expects well-formed XML
+			
+If validation fails it is because either:
+			
+* the userguide source code is poorly formed, or
+* the WikiText MediaWiki parser has a bug
+			
+Problems with userguide source are usually caused by improper use of HTML markup in the MediaWiki source,
+or inadvertently starting a line with a space character (in MediaWiki this starts a preformatted block)
+		</echo>
+
+		<!-- 
+		Don't bother with DTD validation: we only care if the files are well-formed.
+		We therefore provide an empty DTD 
+		-->
+		<mkdir dir="tmp"/>
+		<echo file="tmp/__empty.dtd" message=""/>
+		<xmlvalidate lenient="true">
+			<fileset dir="${output.folder}">
+				<include name="**/*.xml"/>
+			</fileset>
+			<fileset dir="${output.folder}">
+				<include name="**/*.html"/>
+			</fileset>
+			<fileset dir=".">
+				<include name="*toc.xml"/>
+			</fileset>
+			<dtd publicid="-//W3C//DTD XHTML 1.0 Transitional//EN" location="${basedir}/tmp/__empty.dtd"/>
+		</xmlvalidate>
+	</target>
+</project>

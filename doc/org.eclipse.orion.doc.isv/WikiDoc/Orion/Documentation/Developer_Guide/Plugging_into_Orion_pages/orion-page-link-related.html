@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into Orion pages - orion.page.link.related</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.page.link.related</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-page-link.html" title="orion.page.link">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-linkScanner.html" title="orion.core.linkScanner">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.page.link</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.linkScanner</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.page.link.related">orion.page.link.related</h1>
+		<p>The related link service provides a mechanism for plugins to contribute links to the "Related pages" menu in the Orion page header.  Clients can specify when the link is applicable using <tt>validationProperties</tt> and <tt>contentType</tt>.  </p>
+		<h2 id="Service_methods_3">Service methods</h2>
+		<p>None. This service is purely declarative.</p>
+		<h2 id="Service_attributes_3">Service attributes</h2>
+		<p>Implementations of <tt>orion.page.link.related</tt> must define the following attributes:</p>
+		<dl>
+			<dt>id</dt>
+			<dd>A symbolic id for referencing this link.  </dd>
+			<dt>name</dt>
+			<dd>A human readable link name, used in the "Related pages" menu.</dd>
+			<dt>tooltip</dt>
+			<dd>A tooltip used to describe the link.</dd>
+			<dt>uriTemplate</dt>
+			<dd>A 
+				<a href="URI_Templates" title="Orion/Documentation/Developer Guide/Plugging into Orion pages#URI Templates">URI Template</a> that defines the link.  This template may use page object metadata, declared variable names, or standard Orion URI template variables.
+			</dd>
+			<dt>contentType</dt>
+			<dd>Optional.  An array of 
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> for which this link is applicable.
+			</dd>
+			<dt>validationProperties</dt>
+			<dd>Optional.  An array of 
+				<a href="Validation_Properties" title="Orion/Documentation/Developer Guide/Plugging into Orion pages#Validation Properties">Validation Properties</a> describing whether the link is applicable, and optionally declaring variables to be used in the URI template.
+			</dd>
+		</dl>
+		<h2 id="Examples_3">Examples</h2>
+		<p>The following related page link will determine if the current page's target has a <tt>GitUrl</tt> that conforms to the URL of git repositories hosted at github.com.  If so, then parts of the URL are assigned to variables that are used to build the associated github URL.</p>
+		<pre>provider.registerServiceProvider("orion.page.link.related", null, {
+   id: "orion.git.gotoGithub",
+   name: "Show in GitHub",
+   tooltip: "Show this repository at GitHub",
+   validationProperties: [{
+      source: "GitUrl", 
+      match: "github\.com.*\.git", 
+      variableName: "GitHubLocation", 
+      variableMatchPosition: "only",
+      replacements: <a href="{pattern:">":", replacement: "/"}, {pattern: ".git$", replacement: ""}</a>
+   }],
+   uriTemplate: "https://{GitHubLocation}"
+});
+</pre>
+		<p>If the service extension does not describe a name, tooltip, and uriTemplate, the implementation will look for a command extension of the same id.  In this way, commands added to the navigator that link to other pages may be considered for the Related pages menu.</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-page-link.html" title="orion.page.link">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-Orion-pages.html" title="Plugging into Orion pages">
+						<img alt="Plugging into Orion pages" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-linkScanner.html" title="orion.core.linkScanner">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.page.link</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.linkScanner</td>
+			</tr>
+		</table>
+	</body>
+</html>

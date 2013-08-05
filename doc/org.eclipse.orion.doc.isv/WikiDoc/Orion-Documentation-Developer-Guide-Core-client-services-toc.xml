@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<toc topic="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/Core-client-services.html" label="Core client services">
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/Core-client-services.html" label="Overview of core client services"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-contenttypes.html" label="orion.core.contenttypes"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-favorite.html" label="orion.core.favorite"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-file.html" label="orion.core.file"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-marker.html" label="orion.core.marker"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-preference.html" label="orion.core.preference"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-setting.html" label="orion.core.setting">
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-setting.html#Service_properties" label="Service properties"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-setting.html#Service_methods" label="Service methods"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-setting.html#Examples" label="Examples"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-setting.html#See_also" label="See also"></topic>
+	</topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/orion-core-textlink.html" label="orion.core.textlink"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Core_client_services/Updating-this-document.html" label="Updating this document"></topic>
+</toc>

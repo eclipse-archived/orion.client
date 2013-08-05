@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<toc topic="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html" label="Working with Git">
+	<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html" label="Working with Git">
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Cloning_a_Repository" label="Cloning a Repository"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Committing_Changes" label="Committing Changes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Fetching_and_Merging_from_a_Remote" label="Fetching and Merging from a Remote"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Pushing_to_a_Remote" label="Pushing to a Remote"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Switching_between_Branches" label="Switching between Branches"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Rebasing_Changes" label="Rebasing Changes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Making_a_Patch" label="Making a Patch"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Applying_a_Patch" label="Applying a Patch"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Finding_a_Commit" label="Finding a Commit"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Preparing_a_Commit_for_Review" label="Preparing a Commit for Review"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Reviewing_a_Code_Contribution" label="Reviewing a Code Contribution"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Storing_Credentials" label="Storing Credentials"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Comparing_File_Changes_in_the_Repository_History" label="Comparing File Changes in the Repository History"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html#Updating_this_document" label="Updating this document"></topic>
+	</topic>
+</toc>

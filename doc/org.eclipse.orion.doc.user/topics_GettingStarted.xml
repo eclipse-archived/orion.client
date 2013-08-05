@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+<!-- ========================== -->
+<!-- Define topics for the GettingStarted -->
+<!-- ========================== -->
+<toc label="GettingStarted">
+	<link toc="WikiDoc/Orion-Documentation-User-Guide-Getting-started-toc.xml" />
+</toc>

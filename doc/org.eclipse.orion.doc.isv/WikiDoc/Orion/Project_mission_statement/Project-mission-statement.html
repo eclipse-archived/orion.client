@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Welcome to Orion</title>
+		<link type="text/css" rel="stylesheet" href="../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Welcome to Orion</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table><hr/>
+		<h2 id="Tooling_platforms">Tooling platforms</h2>
+		<p>The Eclipse Project started, more than ten years ago, with a core group of developers who wanted to create a new way to build software development tools. The vision then, was to create a generalized platform on the desktop with a well defined extensibility story that made it easy to "plug in" new capabilities. The first example of this was the Java development tools that were built out of necessity to support the creation of the platform itself, which was in turn being written in Java. The tight feedback loop that resulted -- which the developers took to calling "eating your own dog food" -- allowed for very rapid advancement of the platform.</p>
+		<p>As a result, within a brief time "Eclipse" grew beyond being a tooling platform. Today it is used to create a whole range of rich, cross-platform client applications, and the Eclipse Runtime is widely used on both the client and server sides. Throughout this time though, the Eclipse Project developers never lost sight of their roots as tool providers; the Eclipse Platform continues to be the best basis for building cross-platform, 
+			<i>desktop</i> tools.
+		</p>
+		<p>Although the development of Eclipse has been rapid, during effectively the same period another "platform" has far outstripped it, going from being a little more than a way to access remote content to something that may, in fact, be the true successor of the desktop. That platform is, of course, the World Wide Web. The rate of development of the web is such that today many sites are delivering "applications" as powerful as their desktop equivalents, albeit with different strengths and weaknesses.</p>
+		<h2 id="The_state_of_tools_for_the_open_web">The state of tools for the open web</h2>
+		<p>Looking at the tooling side of the web-as-an-application-platform however, the picture is not nearly as rosy. If you ask web developers what kinds of tools they actually use on a daily basis, you will find there are typically two camps. </p>
+		<p>A majority of them will say they use:</p>
+		<ol>
+			<li>A text editor (TextMate, FTW!)</li>
+			<li>FireBug (and increasingly Web Inspector)</li>
+			<li>Some kind of (usually command line based) VCM system, although that isn't nearly as universal.</li>
+		</ol>
+		<p>The remainder -- typically those who are enterprise developers -- will say they use some commercial, desktop-based IDE. The benefit of this kind of tool is that in one place you can get end-to-end support for a wide range of the tasks required for maintaining a site's client code, business logic, and server infrastructure. The issue with this kind of tooling is that it tends to grow to the point where it can no longer be agile enough to respond as the (ferociously active) web world changes. </p>
+		<p>Whichever group you talk to, you will hear that the state of today's web tooling is such that developers sometimes feel they must turn to proprietary technologies like Adobe's Flash simply because the tools to support it actually work well.</p>
+		<h2 id="The_challenge">The challenge</h2>
+		<p>This then is the crux of the problem: 
+			<b>How can we create tools for open web development that are both powerful enough 
+				<i>and</i> elastic enough to support the full scope of the web as it continues to advance and grow?
+			</b>
+		</p>
+		<p>The strengths of the web that have allowed it grow at its phenomenal rate include:</p>
+		<ol>
+			<li>Highly distributed content</li>
+			<li>Scalable computing power</li>
+			<li>Simple connectivity -- links</li>
+			<li>Trivial update mechanism (i.e. refresh the page)</li>
+			<li>Powerful rendering engine -- browsers</li>
+			<li>Very large and active community</li>
+		</ol>
+		<p>To understand the solution to the problem you need only to recognize that the tools must be built on these strengths, not just support them:</p>
+		<ol>
+			<li>Individual components, as well as the artifacts they manipulate, will come from all over the web</li>
+			<li>Elastic computing -- the "cloud" -- will allow large-scale analysis and manipulation of artifacts beyond what is possible on the desktop</li>
+			<li>There need be no central "IDE" or central artifact repository; components and artifacts will live where they are useful and be linked together through industry standard interfaces to support developer work-flows</li>
+			<li>Refreshing a web page will be all that it takes to be running the most current code</li>
+			<li>Look and feel will be highly configurable and tweak-able using standard web technology</li>
+			<li>
+				<i>Any</i> web based tool, built by anyone in the web community, should be usable as part of the development process
+			</li>
+		</ol>
+		<p>In short, 
+			<b>we will move software development to the web as a web experience, not by cloning the desktop IDE experience.</b>
+		</p>
+		<p>The key to all this is in finding ways to 
+			<i>integrate</i> tools that have been built (and will be built in the future) into coherent workflows that solve real world web developer problems. This is 
+			<b>not</b> about requiring a particular toolkit to implement user interfaces. Nor is it about building development middleware like source code and change management systems. The challenge rather is interfacing with those kinds of systems and in general providing access to development artifacts in an open, standard way. For example, the good work that is happening around open specifications for resources and interfaces at 
+			<a href="http://open-services.net/html/Home.html" target="orion_external">OSLC</a>. We will participate wherever work is happening that advances the state of tools for the open web, and we will "fill in the holes" wherever needed. Overall, we will drive development 
+			<i>on</i> the web until it is as popular as the web itself. That is Orion's mission.
+		</p>
+		<p>
+			<a href="http://wiki.eclipse.org/Category:Orion" title="Category:Orion" target="orion_external">Project mission statement</a>
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-this-document.html" title="Updating this document">
+						<img alt="Next" border="0" src="../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top"></td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating this document</td>
+			</tr>
+		</table>
+	</body>
+</html>

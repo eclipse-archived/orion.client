@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into the editor - orion.edit.editor</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.edit.editor</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-edit-contentAssist.html" title="orion.edit.contentAssist">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-edit-highlighter.html" title="orion.edit.highlighter">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.edit.contentAssist</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.edit.highlighter</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.edit.editor">orion.edit.editor</h1>
+		<p>This service declares a new editor. By default, the Orion client UI declares a single editor with id <code>"orion.editor"</code> which is used to edit source code. Using this service, you can declare entirely new editors (for example, you could register an editor that provided a paint interface for drawing images).</p>
+		<p>Contributions to this service do not directly affect the Orion UI. Instead, this service is typically used in conjunction with two other services, which allow new file types to be defined and associated with editors. See:</p>
+		<ul>
+			<li>
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">orion.core.contenttype</a>: Registers a new content type for files.
+			</li>
+			<li>
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-navigate-openWith.html#orion.navigate.openWith" title="Orion/Documentation/Developer_Guide/Plugging_into_the_navigator#orion.navigate.openWith">orion.navigate.openWith</a>: Associates a content type (registered via <code>orion.core.contenttype</code>) to an editor (registered via <code>orion.edit.editor</code>).
+			</li>
+		</ul>
+		<h2 id="Service_methods_3">Service methods</h2>
+		<p>None. This service is purely declarative.</p>
+		<h2 id="Service_attributes_3">Service attributes</h2>
+		<dl>
+			<dt>id</dt>
+			<dd><code>String</code> The unique identifier of this editor.</dd>
+			<dt>name</dt>
+			<dd><code>String</code> The user-readable name of this editor.</dd>
+			<dt>uriTemplate</dt>
+			<dd><code>String</code> Gives a URI template for constructing a URL that can be followed to drive this editor to a particular file. The parameter <tt>Location</tt> is substituted with the URL of the file being edited. The template is specified using the 
+				<a href="http://tools.ietf.org/html/draft-gregorio-uritemplate-08" target="orion_external">URI Template</a> syntax.
+			</dd>
+			<dt>orionTemplate</dt>
+			<dd><code>String</code> 
+				<i>Optional.</i> Gives an Orion template for constructing the editor URL. This serves the same purpose as the 
+				<b>uriTemplate</b> field. However an Orion template allows a more human-readable parameter encoding scheme than a 
+				<a href="http://tools.ietf.org/html/draft-gregorio-uritemplate-08" target="orion_external">URI Template</a>. If both fields are provided, the 
+				<b>orionTemplate</b> takes priority over the 
+				<b>uriTemplate</b>.&lt;br /&gt;
+				<b>NOTE:</b> Orion templates are not yet standardized.
+			</dd>
+		</dl>
+		<h2 id="Examples_3">Examples</h2>
+		<p>This example code declares an editor called "My Great Editor". When My Great Editor is used to edit a file in Orion, the user will be pointed to a URL containing the location of the file they want to edit as <code>"fileToEdit"</code> in the query portion of the URL. Presumably myGreatEditor.php would read the string and open the file. Authentication is beyond the scope of this example.</p>
+		<pre> var provider = new eclipse.PluginProvider();
+ provider.registerServiceProvider("orion.edit.editor", {}, 
+   { id: "example.mygreateditor",
+     name: "My Great Editor",
+     uriTemplate: "<a href="http://mysite.com/myGreatEditor.php?fileToEdit=" target="orion_external">http://mysite.com/myGreatEditor.php?fileToEdit=</a>{Location}"
+   });
+</pre>
+		<p>The code below shows a complete example of how to use the <code>orion.editor</code>, <code>orion.core.contenttype</code>, and <code>orion.navigate.openWith</code> services in conjunction to declare a new editor, declare new file types, and associate them together. The example is adapted from Orion's own source code.</p>
+		<pre> // Declare an editor
+ provider.registerServiceProvider("orion.edit.editor", {}, {
+   id: "orion.editor",
+   name: "Orion Editor",
+   uriTemplate: "../edit/edit.html#{Location,params*}",
+   orionTemplate: "../edit/edit.html#{,Location,params*}"});
+</pre>
+		<pre> // Declare content types
+ provider.registerServiceProvider("orion.core.contenttype", {}, {
+   contentTypes:
+     [{ id: "text/plain",
+        name: "Text",
+        extension: <a href="&quot;txt&quot;">"txt"</a>
+     },
+     {  id: "text/html",
+        "extends": "text/plain",
+        name: "HTML",
+        extension: <a href="&quot;html&quot;,">"htm"</a>
+     }]
+   });
+</pre>
+		<pre> // Associate editor with content types
+ provider.registerServiceProvider("orion.navigate.openWith", {}, {
+     editor: "orion.editor",
+     contentType: <a href="&quot;text/plain&quot;,">"text/html"</a>});
+</pre>
+		<pre> provider.connect();
+</pre>
+		<p>Note that the order of these registerServiceProvider() calls is not important.</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="orion-edit-contentAssist.html" title="orion.edit.contentAssist">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-the-editor.html" title="Plugging into the editor">
+						<img alt="Plugging into the editor" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-edit-highlighter.html" title="orion.edit.highlighter">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">orion.edit.contentAssist</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.edit.highlighter</td>
+			</tr>
+		</table>
+	</body>
+</html>

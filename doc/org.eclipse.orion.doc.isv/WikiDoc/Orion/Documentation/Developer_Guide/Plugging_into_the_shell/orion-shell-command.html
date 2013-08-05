@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into the shell - orion.shell.command</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">orion.shell.command</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Plugging-into-the-shell.html" title="Plugging into the shell">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-shell-type.html" title="orion.shell.type">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Plugging into the shell</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.shell.type</td>
+			</tr>
+		</table><hr/>
+		<h1 id="orion.shell.command">orion.shell.command</h1>
+		<p>The <tt>orion.shell.command</tt> service is used to contribute commands to the Shell page. When the service is executed, an object containing the user-supplied argument values is passed to the service's <tt>callback</tt> method. The command then optionally returns a response (a return value) to be displayed in the Shell page.</p>
+		<h2 id="Service_methods">Service methods</h2>
+		<p>Implementations of <tt>orion.shell.command</tt> may define the following method:</p>
+		<dl>
+			<dt>callback(args, context)</dt>
+			<dd>Takes the user-supplied command-line arguments and optionally returns a response value.  The arguments to this method are:
+				<dl>
+					<dt>args</dt>
+					<dd>An object with the user-supplied command-line arguments (if any)</dd>
+					<dt>context</dt>
+					<dd>An object with property {cwd: string}, indicating the user's current working directory in the Shell page</dd>
+				</dl>
+			</dd>
+			<dd>This method's basic return value types are:
+				<dl>
+					<dd><b>string</b> (note that occurrences of <tt>
+						<a href="link">text</a>(link address)</tt> are converted to links when output)
+					</dd>
+					<dd><b>file object</b>: <tt>{file: {path: string (relative to CWD), isDirectory: boolean (default: false), blob: aBlob (optional)}}</tt></dd>
+					<dd><b>blob object</b>: <tt>{blob: aBlob}</tt></dd>
+				</dl>
+			</dd>
+			<dd>Implementations of this method can return either a value with one of these basic types, or an <tt>orion.Deferred</tt>.  Returning an <tt>orion.Deferred</tt> facilitates the asynchronous return of a result value (by invoking <tt>Deferred.resolve()</tt>), the incremental display of progress (by invoking <tt>Deferred.progress(string)</tt>), and the interim use of a delegated UI that is shown in a frame provided by the Shell page.</dd>
+		</dl>
+		<dl>
+			<dd>To make use of a delegated UI invoke <tt>Deferred.progress({uriTemplate: url, width: string, height: string})</tt>, where url points at the content to show in the provided frame (
+				<a href="Example_of_Using_a_Delegated_UI" title="Orion/Documentation/Developer Guide/Plugging into the shell#Example of Using a Delegated UI">example</a>).  This content is subsequently responsible for sending the command's result value to the Shell page by posting the following message:
+				<dl>
+					<dd>
+						<dl>
+							<dd><code>window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", source: theCommandName, result: theResultValue}), "*");</code></dd>
+						</dl>
+					</dd>
+				</dl>
+			</dd>
+		</dl>
+		<p>The only context where a contributed command would not define this service method is to assist with the contribution of sub-commands.  For example, to contribute commands "tar create" and "tar extract", a parent command "tar" without a service method must first be contributed.</p>
+		<h2 id="Service_attributes">Service attributes</h2>
+		<p>Implementations of <tt>orion.shell.command</tt> define the following attributes:</p>
+		<dl>
+			<dt>name</dt>
+			<dd>The name that is typed at the command line to invoke the command</dd>
+			<dt>description</dt>
+			<dd>(Recommended) A brief description of the command</dd>
+			<dt>manual</dt>
+			<dd>(Optional) A longer description of the command</dd>
+			<dt>parameters</dt>
+			<dd>(Optional) An array of the parameters that the command accepts</dd>
+		</dl>
+		<p>The Shell page currently uses 
+			<a href="https://wiki.mozilla.org/DevTools/Features/GCLI" target="orion_external">GCLI</a> as its underlying shell widget, and consequently has adopted its syntax for parameter specification.  For details on this syntax begin reading at the "## Default argument values" header in the 
+			<a href="https://raw.github.com/mozilla/gcli/master/docs/writing-commands.md" target="orion_external">GCLI Writing Commands doc</a>.  The basic parameter object attributes are:
+		</p>
+		<dl>
+			<dt>
+				<dl>
+					<dt>
+						<dl>
+							<dt>name</dt>
+							<dd>The parameter's identifier</dd>
+							<dt>type</dt>
+							<dd>One of { string | boolean | number | array | selection | a custom orion.shell.type}</dd>
+							<dt>description</dt>
+							<dd>(Recommended) A brief description of the parameter</dd>
+							<dt>defaultValue</dt>
+							<dd>(Optional) The value assumed by the parameter if the user does not supply a value for it, makes the parameter optional</dd>
+						</dl>
+					</dt>
+				</dl>
+			</dt>
+		</dl>
+		<h2 id="Example_of_Using_a_Delegated_UI">Example of Using a Delegated UI</h2>
+		<p>The following "login" command implementation delegates to accompanying file "authenticationPrompter.html":</p>
+		<pre>
+callback: function(args, context) {
+ var result = new orion.Deferred();
+ var url = window.location.href;
+ url = url.substring(0, url.lastIndexOf('/')); //$NON-NLS-0$
+ setTimeout(function() {
+   result.progress({uriTemplate: url + "/authenticationPrompter.html", width: "400px", height: "100px"});
+ });
+ return result;
+}
+</pre>
+		<p>authenticationPrompter.html shows simple username/password fields in the frame that has been provided to it by the Shell page.  When the page's Submit button is pressed it performs the authentication and posts the result value.  The frame showing this page is subsequently removed by the Shell page.</p>
+		<pre>
+&lt;head&gt;
+&lt;script&gt;
+function authenticate() {
+ /* do authentication here, assume is fine, so post result back to Shell page */
+ var result = "Authenticated user: " + document.getElementById("username").value;
+ window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", source: "login", result: result}), "*");
+ return true;
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+ User name:&lt;input type="text" id="username"&gt;&lt;br&gt;
+ Password:&lt;input type="password" id="password"&gt;
+ &lt;button type="button" onclick="authenticate();" value="Submit"&gt;Submit&lt;/button&gt;
+&lt;/body&gt;
+</pre><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Plugging-into-the-shell.html" title="Plugging into the shell">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-the-shell.html" title="Plugging into the shell">
+						<img alt="Plugging into the shell" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-shell-type.html" title="orion.shell.type">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Plugging into the shell</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.shell.type</td>
+			</tr>
+		</table>
+	</body>
+</html>
