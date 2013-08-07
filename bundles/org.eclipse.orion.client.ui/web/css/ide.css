@@ -154,6 +154,18 @@ button::-moz-focus-inner {
 	min-width: 16px;
 }
 
+.cancelButton {
+	border: 1px solid transparent;
+	background: #D3D3D3 !important;
+	color: black;
+    border-radius: 3px;
+	padding: 2px;
+	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
+	margin: 0 4px 0;
+	vertical-align: middle;
+	min-height: 16px;
+}
+
 .dismissButton:hover {
 	color: #fdfdfd;
 }

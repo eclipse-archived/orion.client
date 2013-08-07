@@ -11,8 +11,8 @@
 /*global define window document console*/
 /*jslint sub:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/searchUtils', 'orion/contentTypes', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/inputCompletion/inputCompletion', 'orion/Deferred', 'orion/commands', 'text!orion/globalSearch/searchBuilder.html'], 
-		function(messages, require, mFileClient, mSearchUtils, mContentTypes, i18nUtil, lib, mInputCompletion, Deferred, mCommands, optionTemplate){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/searchUtils', 'orion/contentTypes', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/inputCompletion/inputCompletion', 'orion/Deferred', 'orion/commands', 'orion/section', 'text!orion/globalSearch/searchBuilder.html', 'text!orion/globalSearch/searchMoreOptions.html'], 
+		function(messages, require, mFileClient, mSearchUtils, mContentTypes, i18nUtil, lib, mInputCompletion, Deferred, mCommands, mSection, optionTemplate, moreOptionTemplate){
 
 	function AdvSearchOptRenderer(searcher, serviceRegistry, commandService) {
 		this._searcher = searcher;
@@ -310,7 +310,20 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
                 return true;
             }
         });
-
+		/*
+		//Init the "More..." option section
+		var tableNode = lib.node('moreOptions'); //$NON-NLS-0$
+		var moreOptionsSection = new mSection.Section(tableNode, {
+			id : "moreOptionsSection", //$NON-NLS-0$
+			title : "More...", //$NON-NLS-0$
+			content : moreOptionTemplate,
+			canHide : true,
+			useAuxStyle: true,
+			hidden: true,
+			onExpandCollapse : function(isExpanded, section) {
+			}
+		});
+		*/
 		this._commandService.addCommand(searchCommand);	
 		this._commandService.addCommand(previewCurrentPageCommand);	
 		this._commandService.addCommand(saveSearchCommand);	

@@ -31,6 +31,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 		this.progressDomId = progressDomId || domId;
 		this._hookedClose = false;
 		this._timer = null;
+		this._cancelMsg = null;
 	}
  
 	StatusReportingService.prototype = /** @lends orion.status.StatusReportingService.prototype */ {
@@ -38,11 +39,23 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 		_init: function() {
 			// this is a cheat, all dom ids should be passed in
 			var closeButton = lib.node("closeNotifications"); //$NON-NLS-0$
+			if(closeButton) {
+				closeButton.style.cursor = "pointer"; //$NON-NLS-0$
+			}
 			if (closeButton && !this._hookedClose) {
 				this._hookedClose = true;
 				closeButton.addEventListener("click", function() { //$NON-NLS-0$
 					window.clearTimeout(this._timer);
 					this.setProgressMessage(""); 
+					if(this._cancelMsg && this._cancelFunc) {
+						closeButton.innerHTML = "";
+						closeButton.classList.remove("cancelButton"); //$NON-NLS-0$
+						closeButton.classList.add("dismissButton"); //$NON-NLS-0$
+						closeButton.classList.add("core-sprite-close"); //$NON-NLS-0$
+						closeButton.classList.add("imageSprite"); //$NON-NLS-0$
+						this._cancelFunc();
+						this._cancelMsg = null;
+					}
 				}.bind(this));
 			}
 		},
@@ -164,12 +177,21 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 		},
 		
 		/**
+		 * Set a callback function for a cancellation, which can be triggered by the close button
+		 * @param {Function} cancelFunc The callback back function for the cancellation. 
+		 */
+		setCancelFunction: function(cancelFunc) {
+			this._cancelFunc = cancelFunc;
+		},
+		
+		/**
 		 * Set a message that indicates that a long-running (progress) operation is complete.
 		 * @param {String|orionError} message The error to display. Can be a simple String,
 		 * or an error object from a XHR error callback, or the body of an error response 
 		 * from the Orion server.
 		 */
-		setProgressResult : function(message) {
+		setProgressResult : function(message, cancelMsg) {
+			this._cancelMsg = cancelMsg;
 			this.currentMessage = message;
 			//could either be responseText from xhrGet or just a string
 			var status = message.responseText || message;
@@ -184,7 +206,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 			this._init();
 			var msg = status.Message || status;
 			var imageClass = "core-sprite-information"; //$NON-NLS-0$
-			var extraClass = "progressInfo"; //$NON-NLS-0$
+			var extraClass = "progressNormal"; //$NON-NLS-0$
 			var image = document.createElement("span"); //$NON-NLS-0$
 			image.classList.add("imageSprite"); //$NON-NLS-0$
 			image.classList.add("progressIcon"); //$NON-NLS-0$
@@ -209,6 +231,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 					removedClasses.push("progressNormal"); //$NON-NLS-0$
 					break;
 				default:
+					extraClass="progressNormal"; //$NON-NLS-0$
 					removedClasses.push("progressWarning");
 					removedClasses.push("progressError");
 					removedClasses.push("progressNormal");
@@ -256,6 +279,16 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 				}
 			}
 			container.classList.add("notificationShow"); //$NON-NLS-0$
+			var closeButton = lib.node("closeNotifications"); //$NON-NLS-0$
+			if(closeButton){
+				if(this._cancelMsg) {
+					closeButton.classList.add("cancelButton"); //$NON-NLS-0$
+					closeButton.classList.remove("dismissButton"); //$NON-NLS-0$
+					closeButton.classList.remove("core-sprite-close"); //$NON-NLS-0$
+					closeButton.classList.remove("imageSprite"); //$NON-NLS-0$
+					closeButton.innerHTML = this._cancelMsg;
+				} 
+			}
 		},
 		
 		/**
