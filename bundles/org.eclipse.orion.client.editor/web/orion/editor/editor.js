@@ -103,6 +103,14 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 			return this._annotationStyler;
 		},
 		/**
+		 * Returns the content assist of the editor. 
+		 *
+		 * @returns {orion.editor.LineNumberRuler}
+		 */
+		getContentAssist: function() {
+			return this._contentAssist;
+		},
+		/**
 		 * Returns the folding ruler of the editor. 
 		 *
 		 * @returns {orion.editor.FoldingRuler}
