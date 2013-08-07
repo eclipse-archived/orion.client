@@ -726,7 +726,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             }.bind(this),
             visibleWhen: function(item) {
 				var pagingParam = this.model.getPagingParams();
-                return (pagingParam.totalNumber > pagingParam.rows);
+                return ( !this._crawling && pagingParam.totalNumber > pagingParam.rows);
             }.bind(this)
         });
 		var previousPage = new mCommands.Command({
@@ -744,8 +744,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             },
             visibleWhen: function(item) {
                 var prevPage = that.caculatePrevPage();
-                return (prevPage.start !== that.model.getPagingParams().start);
-            }
+                return ( !this._crawling && prevPage.start !== that.model.getPagingParams().start);
+            }.bind(this)
         });
         var nextPage = new mCommands.Command({
             name: messages["Next Page >"],
@@ -762,8 +762,8 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             },
             visibleWhen: function(item) {
                 var nextPage = that.caculateNextPage();
-                return (nextPage.start !== that.model.getPagingParams().start);
-            }
+                return ( !this._crawling && nextPage.start !== that.model.getPagingParams().start);
+            }.bind(this)
         });
         var nextResultCommand = new mCommands.Command({
             tooltip: messages["Next result"],
