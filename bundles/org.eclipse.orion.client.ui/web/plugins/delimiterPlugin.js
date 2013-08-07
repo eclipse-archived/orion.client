@@ -45,6 +45,16 @@ define(["orion/plugin", "orion/editor/textModel"], function(PluginProvider, mTex
 		name: "To DOS",
 		tooltip: "Convert delimiters to DOS (\\r\\n)"
 	});
+		
+	provider.registerService("orion.edit.command", { //$NON-NLS-0$
+		run : function(selectionText, text) {
+			return convert(text, "auto"); //$NON-NLS-0$
+		}
+	}, {
+		id: "orion.edit.fixmixed", //$NON-NLS-0$
+		name: "To File",
+		tooltip: "Convert mixed delimiters"
+	});
 	
 	provider.connect();
 
