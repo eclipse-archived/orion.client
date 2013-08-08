@@ -18,7 +18,13 @@ define([], function() {
 	var defaults = {	
 		autoSaveEnabled:false, 
 		autoSaveTimeout:1000,
+		autoSaveTimeoutVisible:true,
 		autoSaveVisible:true,
+		autoSaveLocalVisible:true,
+		themeVisible:true,
+		themeLocalVisible:true,
+		fontSizeVisible:true,
+		fontSizeLocalVisible:true,
 		autoLoadEnabled:true,
 		autoLoadVisible:true,
 		tabSize:4,
@@ -26,9 +32,11 @@ define([], function() {
 		expandTab:false,
 		expandTabVisible:true,
 		scrollAnimationEnabled: true,
-		scrollAnimation:300,
+		scrollAnimationTimeout:300,
+		scrollAnimationTimeoutVisible:true,
 		scrollAnimationVisible:true,
 		keyBindingsVisible: true,
+		keyBindingsLocalVisible: true,
 		keyBindings: "Default"
 	};
 

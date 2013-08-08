@@ -767,22 +767,10 @@ input {
 	color: #222;
 }
 
-.settingsPanelLabel {
-	margin-top: 10px;
+.local .setting-label {
 	min-width: 80px;
-	display:inline-block;
+	display: inline-block;
 	text-transform: uppercase;
-	color: #555;
-}
-
-.settingsPanelValue {
-	display: inline;
-}
-
-.settingsPanel{
-	position: relative;
-	float: right;
-	padding: 10px;
 }
 
 .delegatedUI {
