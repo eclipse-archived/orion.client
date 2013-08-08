@@ -65,6 +65,11 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		
 		return d;
 	}
+	
+	function renderDownloadLink(url, linkName){
+		var name = linkName || "Download";
+		return "[" + name + "](" + url + ")";
+	}
 
 	var provider = new PluginProvider(headers);
 	
@@ -102,7 +107,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 					}
 					
 					/* provide the default one */
-					deferred.resolve(qualifyURL(child.DownloadLocation));
+					deferred.resolve(renderDownloadLink(qualifyURL(child.DownloadLocation)));
 					return; // success
 				}
 				
@@ -120,7 +125,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 				for(var i=0; i<resp.Children.length; ++i){
 					var child = resp.Children[i];
 					if(child.Name === appenderName){
-						deferred.resolve(qualifyURL(child.DownloadLocation));
+						deferred.resolve(renderDownloadLink(qualifyURL(child.DownloadLocation)));
 						return; // success
 					}
 				}
@@ -247,6 +252,15 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			if(!appenderName){
 				/* list all appender names */
 				callLogService(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
+					
+					if(resp.Children.length === 0){
+						var errorMessage = i18nUtil.formatMessage("ERROR: No file appenders were found in the current logger context.",
+							resp.Children.length);
+								
+						deferred.reject(errorMessage);
+						return deferred; // failed
+					}
+					
 					var names = [];
 					for(var i=0; i<resp.Children.length; ++i){
 						var child = resp.Children[i];
@@ -317,7 +331,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 				var names = [];
 				for(var i=0; i<appender.ArchivedLogFiles.length; ++i){
 					var log = appender.ArchivedLogFiles[i];
-					names.push(log.Name + " : " + qualifyURL(log.DownloadLocation));
+					names.push(log.Name + " : " + renderDownloadLink(qualifyURL(log.DownloadLocation)));
 				}
 				
 				deferred.resolve(names.join("\n"));
