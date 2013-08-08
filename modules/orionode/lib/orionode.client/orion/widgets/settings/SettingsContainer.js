@@ -20,13 +20,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		'orion/settings/ui/PluginSettings', 
 		'orion/widgets/themes/ThemePreferences', 
 		'orion/widgets/themes/container/ThemeData', 
+		'orion/widgets/themes/editor/ThemeData', 
 		'orion/widgets/settings/SplitSelectionLayout',
 		'orion/widgets/plugin/PluginList',
 		'orion/widgets/settings/UserSettings',
 		'orion/widgets/settings/EditorSettings',
 		'edit/editorPreferences'
 		], function(messages, require, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
-			ThemeBuilder, SettingsList, mThemePreferences, containerThemeData, SplitSelectionLayout, PluginList, UserSettings,
+			ThemeBuilder, SettingsList, mThemePreferences, containerThemeData, editorThemeData, SplitSelectionLayout, PluginList, UserSettings,
 			EditorSettings, mEditorPreferences) {
 
 	/**
@@ -152,12 +153,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 
 			var editorSettingsNode = document.createElement('div'); //$NON-NLS-0$
 			this.table.appendChild(editorSettingsNode);
+
+			var editorTheme = new editorThemeData.ThemeData();
+			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
 			
+			var editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea'}); //$NON-NLS-0$
+			editorThemeWidget.setFontSizePickerVisible(true);
+				
+			var command = { name:messages.Import, tip:messages['Import a theme'], id:0, callback: editorTheme.importTheme.bind(editorTheme) };
+			editorThemeWidget.addAdditionalCommand( command );
+
 			var editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences);
 			
 			this.editorSettings = new EditorSettings({
 				registry: this.registry,
 				preferences: editorPreferences,
+				themePreferences: themePreferences,
+				editorThemeWidget: editorThemeWidget,
 				statusService: this.preferencesStatusService,
 				dialogService: this.preferenceDialogService,
 				commandService: this.commandService,

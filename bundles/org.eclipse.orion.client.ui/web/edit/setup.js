@@ -47,7 +47,7 @@ define([
 	'orion/i18nUtil',
 	'orion/widgets/themes/ThemePreferences',
 	'orion/widgets/themes/editor/ThemeData',
-	'orion/widgets/themes/editor/LocalEditorSettings',
+	'orion/widgets/settings/EditorSettings',
 	'edit/editorPreferences',
 	'orion/URITemplate',
 	'orion/sidebar',
@@ -56,13 +56,12 @@ define([
 ], function(messages, require, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mExtensionCommands, 
 			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 			mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mEmacs, mVI, mSearcher,
-			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, LocalEditorSettings, mEditorPreferences, URITemplate, Sidebar,
+			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, EditorSettings, mEditorPreferences, URITemplate, Sidebar,
 			mTooltip, DropDownMenu) {
 
 var exports = exports || {};
 	
 exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
-	var document = window.document;
 	var selection;
 	var commandRegistry;
 	var statusReportingService;
@@ -152,14 +151,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var renderLocalEditorSettings = function(settings) {
 		var navDropDownTrigger = lib.node("settingsAction"); //$NON-NLS-0$
 
-		new mTooltip.Tooltip({
+		var tooltip = new mTooltip.Tooltip({
 			node: navDropDownTrigger,
 			text: messages['LocalEditorSettings'],
 			position: ["below", "left"] //$NON-NLS-1$ //$NON-NLS-0$
 		});
 
-		var navDropDown = new DropDownMenu('settingsTab', 'settingsAction');
-		navDropDown.updateContent = settings.updateContent.bind(settings);
+		var navDropDown = new DropDownMenu('settingsTab', 'settingsAction'); //$NON-NLS-1$ //$NON-NLS-0$
+		navDropDown.updateContent = settings.show.bind(settings);
+		navDropDown.__tooltip = tooltip;
 	};
 
 	var updateSettings = function(prefs) {
@@ -187,7 +187,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	var themePreferences = new mThemePreferences.ThemePreferences(preferences, new mThemeData.ThemeData());
 	themePreferences.apply();
-	var localSettings = new LocalEditorSettings( themePreferences, editorPreferences );
+	var localSettings = new EditorSettings({local: true, themePreferences: themePreferences, preferences: editorPreferences});
 	
 	editorPreferences.getPrefs(function(prefs) {
 		settings = prefs;

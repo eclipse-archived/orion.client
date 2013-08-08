@@ -52,6 +52,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
         
         change: function(){
             var value = this.myfield.value;
+            this.setStorageItem( value );
         },
         
         postCreate: function(){

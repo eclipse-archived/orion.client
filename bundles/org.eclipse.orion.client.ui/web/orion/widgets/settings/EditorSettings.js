@@ -2,20 +2,15 @@
 
 define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 [
-	'require', //$NON-NLS-0$
-	'orion/widgets/themes/ThemeBuilder', //$NON-NLS-0$
-	'orion/widgets/themes/ThemePreferences', //$NON-NLS-0$
-	'orion/widgets/themes/editor/ThemeData', //$NON-NLS-0$
-	'orion/util', //$NON-NLS-0$
-	'orion/objects', //$NON-NLS-0$
-	'orion/webui/littlelib', //$NON-NLS-0$
 	'i18n!orion/settings/nls/messages', //$NON-NLS-0$ 
 	'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox',  //$NON-NLS-0$  //$NON-NLS-1$ 
 	'orion/widgets/input/LabeledSelect', //$NON-NLS-0$ 
 	'orion/section', //$NON-NLS-0$ 
 	'orion/widgets/settings/Subsection', //$NON-NLS-0$
-	'orion/commands'//$NON-NLS-0$ 
-], function(require, ThemeBuilder, mThemePreferences, editorThemeData, util, objects, lib, messages, LabeledTextfield, LabeledCheckbox, LabeledSelect, mSection, Subsection, commands)  {
+	'orion/commands', //$NON-NLS-0$ 
+	'orion/objects', //$NON-NLS-0$
+	'orion/webui/littlelib' //$NON-NLS-0$
+], function(messages, LabeledTextfield, LabeledCheckbox, LabeledSelect, mSection, Subsection, commands, objects, lib)  {
     var KEY_MODES = [
 	    messages.Default,
 		"Emacs", //$NON-NLS-0$
@@ -25,102 +20,163 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 	function EditorSettings(options, node) {
 		objects.mixin(this, options);
 		this.node = node;
-		this._editorPref = options.preferences;
 	}
 	objects.mixin( EditorSettings.prototype, {
 		templateString: '<div class="sections"></div>', //$NON-NLS-0$
-		commandTemplate:'<div id="commandButtons">' + //$NON-NLS-0$
-				'<div id="editorCommands" class="layoutRight sectionActions"></div>' + //$NON-NLS-0$
+		commandTemplate:
+				'<div id="commandButtons">' + //$NON-NLS-0$
+					'<div id="editorCommands" class="layoutRight sectionActions"></div>' + //$NON-NLS-0$
 				'</div>', //$NON-NLS-0$
 		createElements: function() {
 			this.node.innerHTML = this.templateString;
-			var commandArea = document.getElementById( 'pageActions' ); //$NON-NLS-0$
-			commandArea.innerHTML = this.commandTemplate;
 			this.sections = lib.$('.sections', this.node); //$NON-NLS-0$
 			this.createSections();
+			if (this.local) {
+				this.sections.classList.add("local"); //$NON-NLS-0$
+			} else {
+				var commandArea = document.getElementById( 'pageActions' ); //$NON-NLS-0$
+				commandArea.innerHTML = this.commandTemplate;
+				this.createToolbar();
+			}
 		},
-		createSections: function(){
+		createSections: function() {
+			var prefs = this.oldPrefs;
 		
-			this.editorThemeSection = new mSection.Section(this.sections, {
-				id: "editorThemeSettings", //$NON-NLS-0$
-				title: messages.EditorThemes,
-				canHide: true,
-				slideout: true
-			});
-			
-			var editorTheme = new editorThemeData.ThemeData();
-			var themePreferences = new mThemePreferences.ThemePreferences(this._editorPref._preferences, editorTheme);
-		
-			this.editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea'}); //$NON-NLS-0$
-			this.editorThemeWidget.setFontSizePickerVisible(true);
-			
-			var command = { name:messages.Import, tip:messages['Import a theme'], id:0, callback: editorTheme.importTheme.bind(editorTheme) };
-			
-			this.editorThemeWidget.addAdditionalCommand( command );
-			this.editorThemeWidget.renderData( this.editorThemeSection.getContentElement(), 'INITIALIZE' ); //$NON-NLS-0$
-		
-			this.settingsSection = new mSection.Section(this.sections, {
-				id: "editorSettings", //$NON-NLS-0$
-				title: messages.EditorSettings,
-				canHide: true,
-				slideout: true
-			});
-			
-			var fileMgtFields = [];
-			if (this.oldPrefs.autoSaveVisible) {
-				fileMgtFields.push(this.autoSaveCheck = new LabeledCheckbox( {fieldlabel:messages['Autosave Enabled']}));
-				fileMgtFields.push(this.autoSaveField = new LabeledTextfield( {fieldlabel:messages['Save interval']}));
+			var fields = [], subSection, options, set, select;
+			var themePreferences = this.themePreferences;
+			if (!this.local && this.editorThemeWidget) {
+				this.editorThemeSection = new mSection.Section(this.sections, {
+					id: "editorThemeSettings", //$NON-NLS-0$
+					title: messages.EditorThemes,
+					canHide: true,
+					slideout: true
+				});
+				
+				this.editorThemeWidget.renderData( this.editorThemeSection.getContentElement(), 'INITIALIZE' ); //$NON-NLS-0$
+			} else {
+				var themeStyles = this.oldThemeStyles;
+				if (prefs.themeVisible && (!this.local || prefs.themeLocalVisible)) {
+					var styles = themeStyles.styles;
+					options = [];
+					for( var theme= 0; theme < styles.length; theme++ ){
+						set = {
+							value: styles[theme].name,
+							label: styles[theme].name
+						};	
+						if( styles[theme].name === themeStyles.style.name ){
+							set.selected = true;
+						}
+						options.push(set);
+					}	
+					fields.push(select = this.themeSelect = new LabeledSelect( {fieldlabel:messages.Theme, options:options}));
+					select.setStorageItem = function(name) {
+						themePreferences.setTheme(name);
+					};
+				}
+				if (prefs.fontSizeVisible && (!this.local || prefs.fontSizeLocalVisible)) {
+					var fontSize = themeStyles.style.fontSize;
+					options = [];
+					for( var size = 8; size < 19; size++ ){
+						set = {
+							value: size + 'pt', //$NON-NLS-0$
+							label: size + 'pt' //$NON-NLS-0$
+						};
+						if( set.label === fontSize ){
+							set.selected = true;
+						}
+						options.push(set);
+					}	
+					fields.push(select = this.sizeSelect = new LabeledSelect( {fieldlabel:messages["Font Size"], options:options}));
+					select.setStorageItem = function(size) {
+						themePreferences.setFontSize(size);
+					};
+				}
+				if (!this.local && fields.length > 0) {
+					subSection = new Subsection( {sectionName:messages.Theme, parentNode: this.editorThemeSection.getContentElement(), children: fields} );
+					subSection.show();
+					fields = [];
+				}
 			}
-			if (this.oldPrefs.autoLoadVisible) {
-				fileMgtFields.push(this.autoLoadCheck = new LabeledCheckbox( {fieldlabel:messages['Autoload Enabled']}));
-			}
-			if (fileMgtFields.length > 0) {
-				var fileMgtSubsection = new Subsection( {sectionName: messages.FileMgt, parentNode: this.settingsSection.getContentElement(), children: fileMgtFields} );
-				fileMgtSubsection.show();
+		
+			if (!this.local) {
+				this.settingsSection = new mSection.Section(this.sections, {
+					id: "editorSettings", //$NON-NLS-0$
+					title: messages.EditorSettings,
+					canHide: true,
+					slideout: true
+				});
 			}
 		
-			var kbFields = [];
-			if (this.oldPrefs.keyBindingsVisible) {
+			if (prefs.keyBindingsVisible && (!this.local || prefs.keyBindingsLocalVisible)) {
 				var keys = KEY_MODES;
-				var options = [];
+				options = [];
 				for( var i= 0; i < keys.length; i++ ){
 					var key = keys[i];
-					var set = {
+					set = {
 						value: key,
 						label: key
 					};	
-					if( key === this.oldPrefs.keyBindings ){
+					if( key === prefs.keyBindings ){
 						set.selected = true;
 					}
 					options.push(set);
 				}	
-				kbFields.push(this.kbSelect = new LabeledSelect( {fieldlabel:messages.Scheme, options:options}));
-				var kbSubsection = new Subsection( {sectionName:messages.KeyBindings, parentNode: this.settingsSection.getContentElement(), children: kbFields } );
-				kbSubsection.show();
+				fields.push(this.kbSelect = new LabeledSelect( {fieldlabel:messages.Scheme, options:options}));
+			}
+			if (!this.local && fields.length > 0) {
+				subSection = new Subsection( {sectionName:messages.KeyBindings, parentNode: this.settingsSection.getContentElement(), children: fields } );
+				subSection.show();
+				fields = [];
+			}
+			
+			if (prefs.autoSaveVisible && (!this.local || prefs.autoSaveLocalVisible)) {
+				fields.push(this.autoSaveCheck = new LabeledCheckbox( {fieldlabel:messages['Auto Save']}));
+			}
+			if (prefs.autoSaveTimeoutVisible && (!this.local || prefs.autoSaveTimeoutLocalVisible)) {
+				fields.push(this.autoSaveField = new LabeledTextfield( {fieldlabel:messages['Save interval']}));
+			}
+			if (prefs.autoLoadVisible && (!this.local || prefs.autoLoadLocalVisible)) {
+				fields.push(this.autoLoadCheck = new LabeledCheckbox( {fieldlabel:messages['Auto Load']}));
+			}
+			if (!this.local && fields.length > 0) {
+				subSection = new Subsection( {sectionName: messages.FileMgt, parentNode: this.settingsSection.getContentElement(), children: fields} );
+				subSection.show();
+				fields = [];
 			}
 		
-			var tabsFields = [];
-			if (this.oldPrefs.tabSizeVisible) {
-				tabsFields.push(this.tabField = new LabeledTextfield( {fieldlabel:messages.TabSize}));
+			if (prefs.tabSizeVisible && (!this.local || prefs.tabSizeLocalVisible)) {
+				fields.push(this.tabField = new LabeledTextfield( {fieldlabel:messages.TabSize}));
 			}
-			if (this.oldPrefs.expandTabVisible) {
-				tabsFields.push(this.expandTabCheck = new LabeledCheckbox( {fieldlabel:messages.ExpandTab}));
+			if (prefs.expandTabVisible && (!this.local || prefs.expandTabLocalVisible)) {
+				fields.push(this.expandTabCheck = new LabeledCheckbox( {fieldlabel:messages.ExpandTab}));
 			}
-			if (tabsFields.length > 0) {
-				var tabsSubsection = new Subsection( {sectionName:messages.Tabs, parentNode: this.settingsSection.getContentElement(), children: tabsFields } );
-				tabsSubsection.show();
+			if (!this.local && fields.length > 0) {
+				subSection = new Subsection( {sectionName:messages.Tabs, parentNode: this.settingsSection.getContentElement(), children: fields } );
+				subSection.show();
+				fields = [];
 			}
 					
-			var scrollingFields = [];
-			if (this.oldPrefs.scrollAnimationVisible) {
-				scrollingFields.push(this.scrollAnimationCheck = new LabeledCheckbox( {fieldlabel:messages.ScrollAnimationEnabled}));
-				scrollingFields.push(this.scrollAnimationField = new LabeledTextfield( {fieldlabel:messages.ScrollAnimationTimeout}));
+			if (prefs.scrollAnimationVisible && (!this.local || prefs.scrollAnimationLocalVisible)) {
+				fields.push(this.scrollAnimationCheck = new LabeledCheckbox( {fieldlabel:messages.ScrollAnimationEnabled}));
 			}
-			if (scrollingFields.length > 0) {
-				var scrollingSubsection = new Subsection( {sectionName:messages.ScrollAnimation, parentNode: this.settingsSection.getContentElement(), children: scrollingFields } );
-				scrollingSubsection.show();
+			if (prefs.scrollAnimationTimeoutVisible && (!this.local || prefs.scrollAnimationTimeoutLocalVisible)) {
+				fields.push(this.scrollAnimationField = new LabeledTextfield( {fieldlabel:messages.ScrollAnimationTimeout}));
 			}
-
+			if (!this.local && fields.length > 0) {
+				subSection = new Subsection( {sectionName:messages.ScrollAnimation, parentNode: this.settingsSection.getContentElement(), children: fields } );
+				subSection.show();
+				fields = [];
+			}
+			
+			if (this.local) {
+				fields.forEach(function(child) {
+					this.sections.appendChild( child.node );
+					child.setStorageItem = this.update.bind(this);
+					child.show();
+				}.bind(this));
+			}
+		},
+		createToolbar: function() {
 			var toolbar = lib.node( 'editorSettingsToolActionsArea' ); //$NON-NLS-0$
 			var restoreCommand = new commands.Command({
 				name: messages.Restore,
@@ -167,7 +223,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			if (isNaN(prefs.autoSaveTimeout) || !isFinite(prefs.autoSaveTimeout)) {
 				return messages["Invalid save interval."];
 			}
-			if (isNaN(prefs.scrollAnimation) || !isFinite(prefs.scrollAnimation)) {
+			if (isNaN(prefs.scrollAnimationTimeout) || !isFinite(prefs.scrollAnimationTimeout)) {
 				return messages["Invalid scrolling duration."];
 			}
 			if (!(1 <= prefs.tabSize && prefs.tabSize <= 16)) {
@@ -175,37 +231,51 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 			return "";
 		},
+		_progress: function(msg, severity) {
+			if (this.registry) {
+				var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+				messageService.setProgressResult( {Message:msg, Severity:severity} );
+			}
+		},
 		update: function() {
 			var currentPrefs = this.valueChanged();
 			if (currentPrefs) {
-				var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 				var msg = this.validate(currentPrefs);
 				if (msg) {
-					messageService.setProgressResult({Message:msg,Severity:"Error"}); //$NON-NLS-0$
+					this._progress(msg,"Error"); //$NON-NLS-0$
 					return;
 				}
-				var self = this;
-				this._editorPref.setPrefs(currentPrefs, function () { 
-					self.setValues(self.oldPrefs = currentPrefs);
-					messageService.setProgressResult( {Message:messages["Editor preferences updated"], Severity:"Normal"} ); //$NON-NLS-0$
-				});
+				this.preferences.setPrefs(currentPrefs, function () { 
+					this.setValues(this.oldPrefs = currentPrefs);
+					this._progress(messages["Editor preferences updated"], "Normal"); //$NON-NLS-0$
+				}.bind(this));
 			} else {
 				this.setValues(this.oldPrefs);
 			}
 		},
 		restore: function() {
-			this._editorPref.setPrefs({}, function (editorPrefs){ 
-				var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-				messageService.setProgressResult( {Message:messages["Editor defaults restored"], Severity:"Normal"} ); //$NON-NLS-0$
+			this.preferences.setPrefs({}, function (editorPrefs){ 
 				this._show(editorPrefs);
+				this._progress(messages["Editor defaults restored"], "Normal"); //$NON-NLS-0$
 			}.bind(this));
 		},
-		show: function() {
-			this._editorPref.getPrefs(function (editorPrefs) {
-				this._show(editorPrefs);
+		show: function(node, callback) {
+			if (node) {
+				this.node = node;
+			}
+			this.themePreferences.getTheme(function(themeStyles) {
+				this.preferences.getPrefs(function (editorPrefs) {
+					this._show(editorPrefs, themeStyles);
+					if (callback) {
+						callback();
+					}
+				}.bind(this));
 			}.bind(this));
 		},
-		_show: function(editorPrefs) {
+		_show: function(editorPrefs, themeStyles) {
+			if (themeStyles) {
+				this.oldThemeStyles = themeStyles;
+			}
 			this.oldPrefs = editorPrefs;
 			this.createElements();
 			this.setValues(editorPrefs);
@@ -230,7 +300,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				editorPrefs.scrollAnimationEnabled = this.scrollAnimationCheck.isChecked();
 			}
 			if (this.scrollAnimationField) {
-				editorPrefs.scrollAnimation = parseInt(this.scrollAnimationField.getValue(), 10);
+				editorPrefs.scrollAnimationTimeout = parseInt(this.scrollAnimationField.getValue(), 10);
 			}
 			if (this.kbSelect) {
 				editorPrefs.keyBindings = this.kbSelect.getSelected();
@@ -256,7 +326,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				this.scrollAnimationCheck.setChecked(editorPrefs.scrollAnimationEnabled);
 			}
 			if (this.scrollAnimationField) {
-				this.scrollAnimationField.setValue(editorPrefs.scrollAnimation);
+				this.scrollAnimationField.setValue(editorPrefs.scrollAnimationTimeout);
 			}
 			if (this.kbSelect) {
 				this.kbSelect.setSelectedIndex(Math.max(KEY_MODES.indexOf(editorPrefs.keyBindings),0));
