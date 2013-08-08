@@ -171,7 +171,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			if (this.local) {
 				fields.forEach(function(child) {
 					this.sections.appendChild( child.node );
-					child.setStorageItem = this.update.bind(this);
+					if (!child.hasOwnProperty("setStorageItem")) { //$NON-NLS-0$
+						child.setStorageItem = this.update.bind(this);
+					}
 					child.show();
 				}.bind(this));
 			}
