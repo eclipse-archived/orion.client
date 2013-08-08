@@ -52,6 +52,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			var themePreferences = new mThemePreferences.ThemePreferences(this._editorPref._preferences, editorTheme);
 		
 			this.editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea'}); //$NON-NLS-0$
+			this.editorThemeWidget.setFontSizePickerVisible(true);
 			
 			var command = { name:messages.Import, tip:messages['Import a theme'], id:0, callback: editorTheme.importTheme.bind(editorTheme) };
 			

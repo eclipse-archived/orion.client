@@ -147,20 +147,23 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		
 		ThemeBuilder.prototype.template =	'<div id="themeContainer">' +
 												'<canvas id="orionui" width="800" height="380""></canvas>' +
-												'<div id="sizecontainer" style="display:none;">' +
-													'<span class="settingsLabel">Font Size:</span>' + 
-													'<div id="fontsizepicker" class="fontsizepicker"></div>' +
-												'</div>' +
 												'<div id="pickercontainer" style="display:block;">' +
 													'<span class="settingsLabel">' + 
 														messages["Theme:"] + 
 													'</span>' + 
 													'<div id="themepicker" class="themepicker"></div>' +
 												'</div>' +
-												'<br>' +
 												'<div id="savecontainer" style="display:none;">' +
-													'<span class="settingsLabel">New theme name:</span>' + 
+													'<span class="settingsLabel">' + 
+														messages["New Theme Name:"] + 
+													'</span>' + 
 													'<div id="themesaver" class="themesaver"></div>' +
+												'</div>' +
+												'<div id="sizecontainer">' +
+													'<span class="settingsLabel">' +
+														messages["Font Size:"] +
+													'</span>' + 
+													'<div id="fontsizepicker" class="fontsizepicker"></div>' +
 												'</div>' +
 												'<div id="stringcontainer" style="position:relative;left:400px;top:-140px;display:none;">' +
 														'<span>' +
@@ -694,6 +697,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 				}
 			
 				this.preferences.setTheme(themename, styles);
+				this.preferences.setFontSize( this.settings.fontSize.value );
 				lib.node( 'savecontainer' ).style.display = 'none';
 				lib.node( 'pickercontainer' ).style.display = '';
 				this.updateThemePicker(themename, styles);
@@ -752,8 +756,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		ThemeBuilder.prototype.select = select;
 		
 		function selectFontSize( size ){
-			this.settings.fontSize = { value:size };	
-			this.preferences.setFontSize( size );
+			this.settings.fontSize = { value:size };
 		}
 		
 		ThemeBuilder.prototype.selectFontSize = selectFontSize;
@@ -777,7 +780,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			this.sizeSelect.destroy();
 			var newdiv = document.createElement('div');
 			newdiv.id = 'fontsizepicker';
-			document.getElementById( 'sizecontainer' ).appendChild(newdiv);
+			var container = document.getElementById( 'sizecontainer' );
+			container.style.display = this._fontSizePickerVisible ? "block" : "none";
+			container.appendChild(newdiv);
 			this.sizeSelect = new Select( {options:options}, newdiv );
 			this.sizeSelect.setStorageItem = this.selectFontSize.bind(this);
 			this.sizeSelect.show();
@@ -785,10 +790,18 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		
 		ThemeBuilder.prototype.updateFontSizePicker = updateFontSizePicker;
 		
+		function setFontSizePickerVisible(visible) {
+			this._fontSizePickerVisible = true;
+		}
+		
+		ThemeBuilder.prototype.setFontSizePickerVisible = setFontSizePickerVisible;
+		
 		function addFontSizePicker(themeStyles){
 		
 			var currentFont = themeStyles.style.fontSize;
 			
+			var container = document.getElementById( 'sizecontainer' );
+			container.style.display = this._fontSizePickerVisible ? "block" : "none";
 			var picker = document.getElementById( 'fontsizepicker' );
 	
 			var options = [];
