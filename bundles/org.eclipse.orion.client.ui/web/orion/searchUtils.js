@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define window */
 
-define(['i18n!orion/nls/messages', 'require', 'orion/editor/regex', 'orion/commandRegistry', 'orion/PageUtil', 'orion/URITemplate'], function(messages, require, mRegex, mCommands, PageUtil, URITemplate) {
+define(['i18n!orion/nls/messages', 'require', 'orion/regex', 'orion/commandRegistry', 'orion/PageUtil', 'orion/URITemplate'], function(messages, require, mRegex, mCommands, PageUtil, URITemplate) {
 
 /**
  * @name orion.searchUtils.SearchParams

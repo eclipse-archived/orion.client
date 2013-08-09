@@ -16,7 +16,7 @@
  * @class Utilities for dealing with regular expressions.
  * @description Utilities for dealing with regular expressions.
  */
-define("orion/editor/regex", [], function() { //$NON-NLS-0$
+define("orion/regex", [], function() { //$NON-NLS-0$
 	/**
 	 * @methodOf orion.editor.regex
 	 * @static

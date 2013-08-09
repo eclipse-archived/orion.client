@@ -23,7 +23,7 @@
  * depend on everything else in the file. 
  */
  
-define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/URL-shim", "orion/PageLinks"],
+define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/URL-shim", "orion/PageLinks"],
 	function(require, Deferred, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil, _, PageLinks){
 
 	/**
