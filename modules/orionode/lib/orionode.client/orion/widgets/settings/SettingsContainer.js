@@ -158,7 +158,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, editorTheme);
 			
 			var editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: themePreferences, themeData: editorTheme, toolbarId: 'editorThemeSettingsToolActionsArea'}); //$NON-NLS-0$
-			editorThemeWidget.setFontSizePickerVisible(true);
 				
 			var command = { name:messages.Import, tip:messages['Import a theme'], id:0, callback: editorTheme.importTheme.bind(editorTheme) };
 			editorThemeWidget.addAdditionalCommand( command );

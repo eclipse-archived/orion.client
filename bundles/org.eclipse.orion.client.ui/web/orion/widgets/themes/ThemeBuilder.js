@@ -697,7 +697,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 				}
 			
 				this.preferences.setTheme(themename, styles);
-				if (this._fontSizePickerVisible && this.settings.fontSize) {
+				if (this.settings.fontSize) {
 					this.preferences.setFontSize( this.settings.fontSize.value );
 				}
 				lib.node( 'savecontainer' ).style.display = 'none';
@@ -783,7 +783,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			var newdiv = document.createElement('div');
 			newdiv.id = 'fontsizepicker';
 			var container = document.getElementById( 'sizecontainer' );
-			container.style.display = this._fontSizePickerVisible ? "block" : "none";
 			container.appendChild(newdiv);
 			this.sizeSelect = new Select( {options:options}, newdiv );
 			this.sizeSelect.setStorageItem = this.selectFontSize.bind(this);
@@ -792,18 +791,11 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		
 		ThemeBuilder.prototype.updateFontSizePicker = updateFontSizePicker;
 		
-		function setFontSizePickerVisible(visible) {
-			this._fontSizePickerVisible = true;
-		}
-		
-		ThemeBuilder.prototype.setFontSizePickerVisible = setFontSizePickerVisible;
-		
 		function addFontSizePicker(themeStyles){
 		
 			var currentFont = themeStyles.style.fontSize;
 			
 			var container = document.getElementById( 'sizecontainer' );
-			container.style.display = this._fontSizePickerVisible ? "block" : "none";
 			var picker = document.getElementById( 'fontsizepicker' );
 	
 			var options = [];
@@ -922,15 +914,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			
 			element.id = this.colorFieldId;
 			
-			if( this.themeData.fontSettable ){
-			
-				/* Can enable font selection on the editor page by
-				   uncommenting this line ... choosing not to for 
-				   now because we can do it in page, and I feel this
-				   complicates the user interface 
-				   
-				lib.node( 'sizecontainer' ).style.display = '';   */
-			}
+			lib.node( 'sizecontainer' ).style.display = this.themeData.fontSettable ? "block" : "none";
 	
 			this.drawOutlineData(data);
 			this.preferences.getTheme(function(themeStyles) {
