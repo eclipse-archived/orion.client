@@ -4235,6 +4235,20 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		return testProposals(results, [["ffffff", "ffffff : Boolean"]]);
 	};	
 
+	tests["test tolerant parsing function 9"] = function() {
+		var results = computeContentAssist(
+			"function f(s) {}\n" +
+			"f(JSON.str", "str");
+		return testProposals(results, [["stringify(json)", "stringify(json) : String"]]);
+	};	
+
+	tests["test tolerant parsing function 10"] = function() {
+		var results = computeContentAssist(
+			"function f(a,b) {}\n" +
+			"f(0,JSON.str", "str");
+		return testProposals(results, [["stringify(json)", "stringify(json) : String"]]);
+	};	
+
 	// tests for richer function types
 	tests['test function with property'] = function() {
 		var results = computeContentAssist(
