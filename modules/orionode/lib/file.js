@@ -213,6 +213,7 @@ module.exports = function(options) {
 		},
 		POST: function(req, res, next, rest) {
 			function checkXCreateOptions(opts) {
+				// Can't have both copy and move
 				return opts.indexOf('copy') === -1 || opts.indexOf('move') === -1;
 			}
 			if (writeEmptyFilePathError(res, rest)) {
@@ -269,7 +270,7 @@ module.exports = function(options) {
 						}
 					});
 				}
-				var xCreateOptions = req.headers['x-create-options'] || [];
+				var xCreateOptions = (req.headers['x-create-options'] || "").split(",");
 				if (!checkXCreateOptions(xCreateOptions)) {
 					write(400, res, null, 'Illegal combination of X-Create-Options.');
 					return;
