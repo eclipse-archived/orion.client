@@ -16,28 +16,28 @@ define([], function() {
 	var SETTINGS_KEY = "editorSettings"; //$NON-NLS-0$
 
 	var defaults = {	
-		autoSaveEnabled:false, 
-		autoSaveTimeout:1000,
-		autoSaveTimeoutVisible:true,
+		autoSave:false, 
 		autoSaveVisible:true,
 		autoSaveLocalVisible:true,
+		autoSaveTimeout:1000,
+		autoSaveTimeoutVisible:true,
 		themeVisible:true,
 		themeLocalVisible:true,
 		fontSizeVisible:true,
 		fontSizeLocalVisible:true,
-		autoLoadEnabled:true,
+		autoLoad:true,
 		autoLoadVisible:true,
 		tabSize:4,
 		tabSizeVisible:true,
 		expandTab:false,
 		expandTabVisible:true,
-		scrollAnimationEnabled: true,
+		scrollAnimation: true,
+		scrollAnimationVisible:true,
 		scrollAnimationTimeout:300,
 		scrollAnimationTimeoutVisible:true,
-		scrollAnimationVisible:true,
+		keyBindings: "Default",
 		keyBindingsVisible: true,
-		keyBindingsLocalVisible: true,
-		keyBindings: "Default"
+		keyBindingsLocalVisible: true
 	};
 
 	function EditorPreferences(preferences, callback) {

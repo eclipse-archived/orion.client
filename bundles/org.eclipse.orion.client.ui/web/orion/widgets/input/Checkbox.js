@@ -15,7 +15,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 
 	function Checkbox(options, node) {
 		objects.mixin(this, options);
-		this.node = node || document.createElement('div');
+		this.node = node || document.createElement('div'); //$NON-NLS-0$
 		this.node.innerHTML = this.templateString;
 		this.myfield = lib.$('.setting-control', this.node); //$NON-NLS-0$
 	}
@@ -48,6 +48,14 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		
 		setChecked : function(value){
 			this.myfield.checked = value;
+		},
+		
+		getSelection: function(){
+			return this.isChecked();
+		},
+		
+		setSelection: function(value){
+			this.setChecked(value);
 		},
         
         change: function(){

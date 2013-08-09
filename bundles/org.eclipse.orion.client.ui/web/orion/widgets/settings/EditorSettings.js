@@ -3,7 +3,8 @@
 define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 [
 	'i18n!orion/settings/nls/messages', //$NON-NLS-0$ 
-	'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox',  //$NON-NLS-0$  //$NON-NLS-1$ 
+	'orion/widgets/input/LabeledTextfield', //$NON-NLS-0$
+	'orion/widgets/input/LabeledCheckbox',  //$NON-NLS-0$
 	'orion/widgets/input/LabeledSelect', //$NON-NLS-0$ 
 	'orion/section', //$NON-NLS-0$ 
 	'orion/widgets/settings/Subsection', //$NON-NLS-0$
@@ -16,6 +17,86 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		"Emacs", //$NON-NLS-0$
 		"vi" //$NON-NLS-0$
 	];
+	
+	function createBooleanProperty(property, options) {
+		return new LabeledCheckbox(options);
+	}
+	
+	function createIntegerProperty(property, options) {
+		options.inputType = "integer"; //$NON-NLS-0$
+		return new LabeledTextfield(options);
+	}
+	
+	function createSelectProperty(property, options, prefs) {
+		var keys = this.values;
+		options.options = [];
+		for( var i= 0; i < keys.length; i++ ){
+			var key = keys[i];
+			var set = {
+				value: key,
+				label: key
+			};	
+			if( key === prefs[property] ){
+				set.selected = true;
+			}
+			options.options.push(set);
+		}
+		return new LabeledSelect(options);
+	}
+	
+	function validateIntegerProperty(property, prefs) {
+		if (!(this.min <= prefs[property] && prefs[property] <= this.max)) {
+			return messages[property + "Invalid"]; //$NON-NLS-0$
+		}
+		return "";
+	}
+	
+	var sections = {
+		editorSettings: {
+			keys: {
+				keyBindings: {
+					values: KEY_MODES, 
+					create: createSelectProperty
+				}
+			},
+			fileManagement: {
+				autoSave: {
+					create: createBooleanProperty
+				},
+				autoSaveTimeout: {
+					min: 50,
+					max: 10000,
+					create: createIntegerProperty,
+					validate: validateIntegerProperty
+				},
+				autoLoad: {
+					create: createBooleanProperty
+				}
+			},
+			tabs: {
+				tabSize: {
+					min: 1,
+					max: 16,
+					create: createIntegerProperty,
+					validate: validateIntegerProperty
+				},
+				expandTab: {
+					create: createBooleanProperty
+				}
+			},
+			smoothScrolling: {
+				scrollAnimation: {
+					create: createBooleanProperty
+				},
+				scrollAnimationTimeout: {
+					min: 50,
+					max: 1000,
+					create: createIntegerProperty,
+					validate: validateIntegerProperty
+				}
+			}
+		}
+	};
 				
 	function EditorSettings(options, node) {
 		objects.mixin(this, options);
@@ -97,75 +178,36 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					fields = [];
 				}
 			}
-		
-			if (!this.local) {
-				this.settingsSection = new mSection.Section(this.sections, {
-					id: "editorSettings", //$NON-NLS-0$
-					title: messages.EditorSettings,
-					canHide: true,
-					slideout: true
-				});
-			}
-		
-			if (prefs.keyBindingsVisible && (!this.local || prefs.keyBindingsLocalVisible)) {
-				var keys = KEY_MODES;
-				options = [];
-				for( var i= 0; i < keys.length; i++ ){
-					var key = keys[i];
-					set = {
-						value: key,
-						label: key
-					};	
-					if( key === prefs.keyBindings ){
-						set.selected = true;
-					}
-					options.push(set);
-				}	
-				fields.push(this.kbSelect = new LabeledSelect( {fieldlabel:messages.Scheme, options:options}));
-			}
-			if (!this.local && fields.length > 0) {
-				subSection = new Subsection( {sectionName:messages.KeyBindings, parentNode: this.settingsSection.getContentElement(), children: fields } );
-				subSection.show();
-				fields = [];
-			}
 			
-			if (prefs.autoSaveVisible && (!this.local || prefs.autoSaveLocalVisible)) {
-				fields.push(this.autoSaveCheck = new LabeledCheckbox( {fieldlabel:messages['Auto Save']}));
-			}
-			if (prefs.autoSaveTimeoutVisible && (!this.local || prefs.autoSaveTimeoutLocalVisible)) {
-				fields.push(this.autoSaveField = new LabeledTextfield( {fieldlabel:messages['Save interval']}));
-			}
-			if (prefs.autoLoadVisible && (!this.local || prefs.autoLoadLocalVisible)) {
-				fields.push(this.autoLoadCheck = new LabeledCheckbox( {fieldlabel:messages['Auto Load']}));
-			}
-			if (!this.local && fields.length > 0) {
-				subSection = new Subsection( {sectionName: messages.FileMgt, parentNode: this.settingsSection.getContentElement(), children: fields} );
-				subSection.show();
-				fields = [];
-			}
-		
-			if (prefs.tabSizeVisible && (!this.local || prefs.tabSizeLocalVisible)) {
-				fields.push(this.tabField = new LabeledTextfield( {fieldlabel:messages.TabSize}));
-			}
-			if (prefs.expandTabVisible && (!this.local || prefs.expandTabLocalVisible)) {
-				fields.push(this.expandTabCheck = new LabeledCheckbox( {fieldlabel:messages.ExpandTab}));
-			}
-			if (!this.local && fields.length > 0) {
-				subSection = new Subsection( {sectionName:messages.Tabs, parentNode: this.settingsSection.getContentElement(), children: fields } );
-				subSection.show();
-				fields = [];
-			}
-					
-			if (prefs.scrollAnimationVisible && (!this.local || prefs.scrollAnimationLocalVisible)) {
-				fields.push(this.scrollAnimationCheck = new LabeledCheckbox( {fieldlabel:messages.ScrollAnimationEnabled}));
-			}
-			if (prefs.scrollAnimationTimeoutVisible && (!this.local || prefs.scrollAnimationTimeoutLocalVisible)) {
-				fields.push(this.scrollAnimationField = new LabeledTextfield( {fieldlabel:messages.ScrollAnimationTimeout}));
-			}
-			if (!this.local && fields.length > 0) {
-				subSection = new Subsection( {sectionName:messages.ScrollAnimation, parentNode: this.settingsSection.getContentElement(), children: fields } );
-				subSection.show();
-				fields = [];
+			var sectionWidget, subsectionWidget;
+			for (var section in sections) {
+				if (sections.hasOwnProperty(section)) {
+					if (!this.local) {
+						sectionWidget = new mSection.Section(this.sections, {
+							id: section,
+							title: messages[section],
+							canHide: true,
+							slideout: true
+						});
+					}
+					for (var subsection in sections[section]) {
+						if (sections[section].hasOwnProperty(subsection)) {
+							for (var property in sections[section][subsection]) {
+								if (prefs[property + "Visible"] && (!this.local || prefs[property + "LocalVisible"])) { //$NON-NLS-1$ //$NON-NLS-0$
+									var info = sections[section][subsection][property];
+									options = {};
+									options.fieldlabel = messages[property];
+									fields.push(this[property + "Widget"] = info.create(property, options, prefs)); //$NON-NLS-0$
+								}
+							}
+							if (!this.local && fields.length > 0) {
+								subsectionWidget = new Subsection( {sectionName:messages[subsection], parentNode: sectionWidget.getContentElement(), children: fields } );
+								subsectionWidget.show();
+								fields = [];
+							}
+						}
+					}
+				}
 			}
 			
 			if (this.local) {
@@ -222,16 +264,17 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			return undefined;
 		},
 		validate: function(prefs) {
-			if (isNaN(prefs.autoSaveTimeout) || !isFinite(prefs.autoSaveTimeout)) {
-				return messages["Invalid save interval."];
-			}
-			if (isNaN(prefs.scrollAnimationTimeout) || !isFinite(prefs.scrollAnimationTimeout)) {
-				return messages["Invalid scrolling duration."];
-			}
-			if (!(1 <= prefs.tabSize && prefs.tabSize <= 16)) {
-				return messages["Invalid tab size."];
-			}
-			return "";
+			var msg = "";
+			this._forEach(function(property, widget, info) {
+				if (info.validate) {
+					msg = info.validate(property, prefs);
+					if (msg) {
+						return false;
+					}
+				}
+				return true;
+			});
+			return msg;
 		},
 		_progress: function(msg, severity) {
 			if (this.registry) {
@@ -282,57 +325,37 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			this.createElements();
 			this.setValues(editorPrefs);
 		},
-		getValues: function(editorPrefs) {
-			if (this.autoSaveCheck) {
-				editorPrefs.autoSaveEnabled = this.autoSaveCheck.isChecked();
-			}
-			if (this.autoSaveField) {
-				editorPrefs.autoSaveTimeout = parseInt(this.autoSaveField.getValue(), 10);
-			}
-			if (this.autoLoadCheck) {
-				editorPrefs.autoLoadEnabled = this.autoLoadCheck.isChecked();
-			}
-			if (this.tabField) {
-				editorPrefs.tabSize = parseInt(this.tabField.getValue(), 10);
-			} 
-			if (this.expandTabCheck) {
-				editorPrefs.expandTab = this.expandTabCheck.isChecked();
-			}
-			if (this.scrollAnimationCheck) {
-				editorPrefs.scrollAnimationEnabled = this.scrollAnimationCheck.isChecked();
-			}
-			if (this.scrollAnimationField) {
-				editorPrefs.scrollAnimationTimeout = parseInt(this.scrollAnimationField.getValue(), 10);
-			}
-			if (this.kbSelect) {
-				editorPrefs.keyBindings = this.kbSelect.getSelected();
+		_forEach: function(callback) {
+			for (var section in sections) {
+				if (sections.hasOwnProperty(section)) {
+					for (var subsection in sections[section]) {
+						if (sections[section].hasOwnProperty(subsection)) {
+							for (var property in sections[section][subsection]) {
+								if (sections[section][subsection].hasOwnProperty(property)) {
+									var widget = this[property + "Widget"]; //$NON-NLS-0$
+									if (widget) {
+										if (!callback(property, widget, sections[section][subsection][property])) {
+											return;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		},
+		getValues: function(editorPrefs) {
+			this._forEach(function(property, widget) {
+				editorPrefs[property] = widget.getSelection();
+				return true;
+			});
+		},
 		setValues: function(editorPrefs) {
-			if (this.autoSaveCheck) {
-				this.autoSaveCheck.setChecked(editorPrefs.autoSaveEnabled);
-			}
-			if (this.autoSaveField) {
-				this.autoSaveField.setValue(editorPrefs.autoSaveTimeout);
-			}
-			if (this.autoLoadCheck) {
-				this.autoLoadCheck.setChecked(editorPrefs.autoLoadEnabled);
-			}
-			if (this.tabField) {
-				this.tabField.setValue(editorPrefs.tabSize);
-			} 
-			if (this.expandTabCheck) {
-				this.expandTabCheck.setChecked(editorPrefs.expandTab);
-			} 
-			if (this.scrollAnimationCheck) {
-				this.scrollAnimationCheck.setChecked(editorPrefs.scrollAnimationEnabled);
-			}
-			if (this.scrollAnimationField) {
-				this.scrollAnimationField.setValue(editorPrefs.scrollAnimationTimeout);
-			}
-			if (this.kbSelect) {
-				this.kbSelect.setSelectedIndex(Math.max(KEY_MODES.indexOf(editorPrefs.keyBindings),0));
-			}
+			this._forEach(function(property, widget) {
+				widget.setSelection(editorPrefs[property]);
+				return true;
+			});
 		},
 		destroy: function() {
 			if (this.node) {

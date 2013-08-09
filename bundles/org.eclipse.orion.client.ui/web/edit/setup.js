@@ -164,15 +164,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 
 	var updateSettings = function(prefs) {
 		settings = prefs;
-		inputManager.setAutoLoadEnabled(prefs.autoLoadEnabled);
-		inputManager.setAutoSaveTimeout(prefs.autoSaveEnabled ? prefs.autoSaveTimeout : -1);
+		inputManager.setAutoLoadEnabled(prefs.autoLoad);
+		inputManager.setAutoSaveTimeout(prefs.autoSave ? prefs.autoSaveTimeout : -1);
 		var textView = editor.getTextView();
 		if (textView) {
 			updateKeyMode(textView);
 			var options = {
 				tabSize: settings.tabSize || 4,
 				expandTab: settings.expandTab,
-				scrollAnimation: settings.scrollAnimationEnabled ? settings.scrollAnimation : 0
+				scrollAnimation: settings.scrollAnimation ? settings.scrollAnimationTimeout : 0
 			};
 			textView.setOptions(options);
 		}
@@ -199,7 +199,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				wrappable: true,
 				tabSize: settings.tabSize || 4,
 				expandTab: settings.expandTab,
-				scrollAnimation: settings.scrollAnimationEnabled ? settings.scrollAnimation : 0,
+				scrollAnimation: settings.scrollAnimation ? settings.scrollAnimationTimeout : 0,
 				readonly: isReadOnly
 			});
 			return textView;
