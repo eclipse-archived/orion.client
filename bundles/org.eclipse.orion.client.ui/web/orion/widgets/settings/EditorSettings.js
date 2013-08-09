@@ -18,13 +18,37 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		"vi" //$NON-NLS-0$
 	];
 	
-	function createBooleanProperty(property, options) {
-		return new LabeledCheckbox(options);
+	var localIndicatorClass = "setting-local-indicator"; //$NON-NLS-0$
+	var on = "on"; //$NON-NLS-0$
+	var off = "off"; //$NON-NLS-0$
+	function addLocalIndicator(widget, property, info, options, prefs) {
+		if (!options.local) {
+			var indicator = document.createElement("span"); //$NON-NLS-0$
+			indicator.classList.add(localIndicatorClass);
+			indicator.classList.add(prefs[property + "LocalVisible"] ? on : off); //$NON-NLS-0$
+			indicator.title = messages.localSettingsTooltip;
+			indicator.addEventListener("click", function(e) { //$NON-NLS-0$
+				if (indicator.classList.contains(off)) {
+					indicator.classList.add(on);
+					indicator.classList.remove(off);
+				} else {
+					indicator.classList.add(off);
+					indicator.classList.remove(on);
+				}
+			});
+			var label = lib.$("label", widget.node); //$NON-NLS-0$
+			label.parentNode.insertBefore(indicator, label);
+		}
+		return widget;
 	}
 	
-	function createIntegerProperty(property, options) {
+	function createBooleanProperty(property, options, prefs) {
+		return addLocalIndicator(new LabeledCheckbox(options), property, this, options, prefs);
+	}
+	
+	function createIntegerProperty(property, options, prefs) {
 		options.inputType = "integer"; //$NON-NLS-0$
-		return new LabeledTextfield(options);
+		return addLocalIndicator(new LabeledTextfield(options), property, this, options, prefs);
 	}
 	
 	function createSelectProperty(property, options, prefs) {
@@ -41,7 +65,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 			options.options.push(set);
 		}
-		return new LabeledSelect(options);
+		return addLocalIndicator(new LabeledSelect(options), property, this, options, prefs);
 	}
 	
 	function validateIntegerProperty(property, prefs) {
@@ -196,6 +220,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 								if (prefs[property + "Visible"] && (!this.local || prefs[property + "LocalVisible"])) { //$NON-NLS-1$ //$NON-NLS-0$
 									var info = sections[section][subsection][property];
 									options = {};
+									options.local = this.local;
 									options.fieldlabel = messages[property];
 									fields.push(info.widget = info.create(property, options, prefs));
 								}
@@ -348,12 +373,24 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		getValues: function(editorPrefs) {
 			this._forEach(function(property, info) {
 				editorPrefs[property] = info.widget.getSelection();
+				var indicator = lib.$("." + localIndicatorClass, info.widget.node); //$NON-NLS-0$
+				editorPrefs[property + "LocalVisible"] = indicator && indicator.classList.contains(on); //$NON-NLS-1$ //$NON-NLS-0$
 				return true;
 			});
 		},
 		setValues: function(editorPrefs) {
 			this._forEach(function(property, info) {
 				info.widget.setSelection(editorPrefs[property]);
+				var indicator = lib.$("." + localIndicatorClass, info.widget.node); //$NON-NLS-0$
+				if (indicator) {
+					if (editorPrefs[property + "LocalVisible"]) { //$NON-NLS-0$
+						indicator.classList.add(on);
+						indicator.classList.remove(off);
+					} else {
+						indicator.classList.add(off);
+						indicator.classList.remove(on);
+					}
+				}
 				return true;
 			});
 		},

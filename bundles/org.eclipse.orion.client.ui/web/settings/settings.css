@@ -160,6 +160,26 @@
 	padding-top: 10px;
 }
 
+.setting-local-indicator {
+	display: inline-block;
+	margin: 2px;
+	margin-right: 4px;
+	width: 6px;
+	height: 6px;
+	border-radius: 4px;
+	vertical-align: middle;
+}
+
+.setting-local-indicator.on {
+	border: 1px solid black;
+	background-color: green;
+}
+
+.setting-local-indicator.off {
+	border: 1px solid gray;
+	background-color: #eee;
+}
+
 .displaytable>section {
 	display: table-row;
 }
