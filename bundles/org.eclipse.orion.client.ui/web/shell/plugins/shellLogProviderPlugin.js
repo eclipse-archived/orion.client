@@ -175,7 +175,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			
 			var appender = undefined;
 			
-			/* there's only one appender, provide metada */
+			/* there's only one appender, provide default one */
 			if(resp.Children.length === 1){
 				var child = resp.Children[0];
 				
@@ -261,6 +261,23 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 						return deferred; // failed
 					}
 					
+					/* there's only one appender, provide default one metadata */
+					if(resp.Children.length === 1){
+						var child = resp.Children[0];
+						
+						/* provide the default one */
+						getAppenderJSON(child.Name).then(function(appender){
+							/* spare the user appender log-file history at this point */
+							appender.ArchivedLogFiles = undefined;
+							deferred.resolve(prettyPrint(appender, 0));
+						}, function(errorMessage){
+							/* pass error message */
+							deferred.reject(errorMessage);
+						});
+						
+						return deferred;
+					}
+					
 					var names = [];
 					for(var i=0; i<resp.Children.length; ++i){
 						var child = resp.Children[i];
@@ -310,8 +327,70 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			var deferred = new Deferred();
 			var appenderName = args['appender-name'];
 			
-			 getAppenderJSON(appenderName).then(function(appender){
-
+			if(!appenderName){
+				/* fall back to the default appender is present */
+				callLogService(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
+					if(resp.Children.length === 0){
+						var errorMessage = i18nUtil.formatMessage("ERROR: No file appenders were found in the current logger context.",
+							resp.Children.length);
+								
+						deferred.reject(errorMessage);
+						return deferred; // failed
+					}
+					
+					/* there's only one appender, provide default one history */
+					if(resp.Children.length === 1){
+						var child = resp.Children[0];
+						appenderName = child.Name;
+						
+						getAppenderJSON(appenderName).then(function(appender){
+							if(!appender.ArchivedLogFiles){
+								var errorMessage = i18nUtil.formatMessage("ERROR: ${0} does not support log-file history access.",
+									appenderName);
+										
+								deferred.reject(errorMessage);
+								return; // failed
+							}
+							
+							if(appender.ArchivedLogFiles.length === 0){
+								var errorMessage = i18nUtil.formatMessage("ERROR: ${0} has no log-file history.",
+									appenderName);
+										
+								deferred.reject(errorMessage);
+								return; // failed
+							}
+			
+							var names = [];
+							for(var i=0; i<appender.ArchivedLogFiles.length; ++i){
+								var log = appender.ArchivedLogFiles[i];
+								names.push(log.Name + " : " + renderDownloadLink(qualifyURL(log.DownloadLocation)));
+							}
+							
+							deferred.resolve(names.join("\n"));
+							
+						 }, function(errorMessage){
+							/* pass error message */
+							deferred.reject(errorMessage);
+						 });
+						
+						return deferred;
+					}
+					
+					/* there's no default appender, fail */
+					var errorMessage = i18nUtil.formatMessage("ERROR: Found ${0} file appenders in the current logger context. " +
+						"Could not determine which appender to use by default.", resp.Children.length);
+					
+					deferred.reject(errorMessage);
+					return; // failed
+					
+				}, function(error){
+					deferred.reject("ERROR: " + error);
+				});
+				
+				return deferred;
+			}
+			
+			getAppenderJSON(appenderName).then(function(appender){
 				if(!appender.ArchivedLogFiles){
 					var errorMessage = i18nUtil.formatMessage("ERROR: ${0} does not support log-file history access.",
 						appenderName);
@@ -348,12 +427,13 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 	/* shows appender history */
     var logsHistory = {
 		name: "logs history",
-		description: "Provides a list of archived log-file download links for the given appender.",
+		description: "Provides a list of archived log-file download links for the given appender. If none provided, the default appender will be used.",
 		returnType: "string",
 		parameters: [{
 			name: "appender-name",
 			type: "string",
-			description: "Appedner name which archived log-file download links should be provided."
+			description: "Appedner name which archived log-file download links should be provided.",
+			defaultValue: null
 		}]
     };
     
