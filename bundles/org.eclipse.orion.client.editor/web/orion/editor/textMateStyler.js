@@ -12,7 +12,7 @@
 /*jslint regexp:false laxbreak:true*/
 /*global define */
 
-define("orion/editor/textMateStyler", ['orion/editor/regex' ], function(mRegex) {
+define("orion/editor/textMateStyler", ['orion/regex' ], function(mRegex) {
 
 var RegexUtil = {
 	// Rules to detect some unsupported Oniguruma features

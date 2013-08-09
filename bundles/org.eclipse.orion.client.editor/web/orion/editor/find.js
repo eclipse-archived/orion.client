@@ -16,7 +16,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 	'orion/keyBinding', //$NON-NLS-0$
 	'orion/editor/keyModes', //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
-	'orion/editor/regex', //$NON-NLS-0$
+	'orion/regex', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
 ], function(messages, mKeyBinding, mKeyModes, mAnnotations, mRegex, objects, util) {
