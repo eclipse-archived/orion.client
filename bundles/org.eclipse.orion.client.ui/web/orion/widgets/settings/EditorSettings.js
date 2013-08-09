@@ -197,7 +197,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 									var info = sections[section][subsection][property];
 									options = {};
 									options.fieldlabel = messages[property];
-									fields.push(this[property + "Widget"] = info.create(property, options, prefs)); //$NON-NLS-0$
+									fields.push(info.widget = info.create(property, options, prefs));
 								}
 							}
 							if (!this.local && fields.length > 0) {
@@ -265,7 +265,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		},
 		validate: function(prefs) {
 			var msg = "";
-			this._forEach(function(property, widget, info) {
+			this._forEach(function(property, info) {
 				if (info.validate) {
 					msg = info.validate(property, prefs);
 					if (msg) {
@@ -332,9 +332,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						if (sections[section].hasOwnProperty(subsection)) {
 							for (var property in sections[section][subsection]) {
 								if (sections[section][subsection].hasOwnProperty(property)) {
-									var widget = this[property + "Widget"]; //$NON-NLS-0$
-									if (widget) {
-										if (!callback(property, widget, sections[section][subsection][property])) {
+									var info = sections[section][subsection][property];
+									if (info.widget) {
+										if (!callback(property, info)) {
 											return;
 										}
 									}
@@ -346,14 +346,14 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 		},
 		getValues: function(editorPrefs) {
-			this._forEach(function(property, widget) {
-				editorPrefs[property] = widget.getSelection();
+			this._forEach(function(property, info) {
+				editorPrefs[property] = info.widget.getSelection();
 				return true;
 			});
 		},
 		setValues: function(editorPrefs) {
-			this._forEach(function(property, widget) {
-				widget.setSelection(editorPrefs[property]);
+			this._forEach(function(property, info) {
+				info.widget.setSelection(editorPrefs[property]);
 				return true;
 			});
 		},
