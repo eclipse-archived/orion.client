@@ -143,6 +143,7 @@ define({
 	"autoSaveTimeoutInvalid": "Invalid save interval.",
 	"scrollAnimationTimeoutInvalid": "Invalid scrolling duration.",
 	"tabSizeInvalid": "Invalid tab size.",
+	"localSettingsTooltip" : "Toggle whether this setting is shown in local editor settings drop down.",
 	"Editor preferences updated": "Editor preferences updated",
 	"Editor defaults restored": "Editor defaults restored",
 	"Theme": "Theme",
