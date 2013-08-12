@@ -408,7 +408,9 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		nextAnnotation: function (forward) {
 			var editor = this.editor;
 			var annotationModel = editor.getAnnotationModel();
-			if(!annotationModel) { return true; }
+			if (!annotationModel) { return true; }
+			var styler = editor.getAnnotationStyler();
+			if (!styler) { return true; }
 			var model = editor.getModel();
 			var currentOffset = editor.getCaretOffset();
 			var annotations = annotationModel.getAnnotations(forward ? currentOffset : 0, forward ? model.getCharCount() : currentOffset);
@@ -420,14 +422,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				} else {
 					if (annotation.start >= currentOffset) { continue; }
 				}
-				switch (annotation.type) {
-					case mAnnotations.AnnotationType.ANNOTATION_ERROR:
-					case mAnnotations.AnnotationType.ANNOTATION_WARNING:
-					case mAnnotations.AnnotationType.ANNOTATION_TASK:
-					case mAnnotations.AnnotationType.ANNOTATION_BOOKMARK:
-						break;
-					default:
-						continue;
+				if (!(annotation.rangeStyle && styler.isAnnotationTypeVisible(annotation.type))) {
+					continue;
 				}
 				foundAnnotation = annotation;
 				if (forward) {
