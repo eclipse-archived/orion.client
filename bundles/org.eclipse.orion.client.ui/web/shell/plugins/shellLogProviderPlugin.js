@@ -45,7 +45,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		return toAbsoluteLocation(createLocation(require.toUrl(location)));
 	}
 
-	function callLogService(url, raw){
+	function callGET(url, raw){
 		var d = new Deferred();
 		var handler = raw ? "text/plain" : "json";
 		
@@ -66,7 +66,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		return d;
 	}
 	
-	function putLogService(url, dataJSON){
+	function callPUT(url, dataJSON){
 		var d = new Deferred();
 		_xhr("PUT", url, { 
 			headers : { 
@@ -92,6 +92,182 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 
 	var provider = new PluginProvider(headers);
 	
+	var CompletionStatus = {
+	   MATCH: 0,
+	   PARTIAL: 1,
+	   ERROR: 2
+	};
+	
+	var loggerLevelProperties = { 
+	   name: "level"
+	 };
+	 
+	var loggerLevelTypeImpl = {	
+	   parse: function(arg, typeSpec, context) {
+	     var potentialPredictions = [{
+	         name: 'ALL',
+	         value: 'ALL'
+	       }, {
+	         name: 'DEBUG',
+	         value: { name: 'DEBUG' }
+	       }, {
+	         name: 'ERROR',
+	         value: { name: 'ERROR' }
+	       }, {
+	         name: 'INFO',
+	         value: { name: 'INFO' }
+	       }, {
+	         name: 'OFF',
+	         value: { name: 'OFF' }
+	       }, {
+	         name: 'TRACE',
+	         value: { name: 'TRACE' }
+	       }, {
+	         name: 'WARN',
+	         value: { name: 'WARN' }
+	       }
+	     ];
+	
+	     var value; /* undefined until a valid value is fully typed */
+	     var status; /* one of the CompletionStatus values above */
+	     var predictions = []; /* an [] of {name: typedString, value: object} */
+	
+	     for (var i = 0; i < potentialPredictions.length; i++) {
+	       if (potentialPredictions[i].name.indexOf(arg.text) === 0) {
+	         predictions.push(potentialPredictions[i]);
+	         if (potentialPredictions[i].name === arg.text) {
+	           value = potentialPredictions[i].value;
+	         }
+	       }
+	     }
+	
+	     status = CompletionStatus.ERROR;
+	     if (predictions.length > 0) {
+	       status = value ? CompletionStatus.MATCH : CompletionStatus.PARTIAL;
+	     }
+	     var result = {
+	       value: value,
+	       message: (status === CompletionStatus.ERROR ? ("'" + arg.text + "' is not valid") : undefined),
+	       status: status,
+	       predictions: predictions
+	     };
+	
+	     return result;
+	   }
+	 };
+		
+	provider.registerServiceProvider("orion.shell.type", loggerLevelTypeImpl, loggerLevelProperties);
+	
+	var appenderProperties = { 
+	   name: "appender-name"
+	 };
+	 
+	var appenderTypeImpl = {	
+	   parse: function(arg, typeSpec, context) {
+	     var deferred = new Deferred();	     
+	     callGET(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
+	     
+			var potentialPredictions = [];
+			for(var i=0; i<resp.Children.length; ++i){
+				var child = resp.Children[i];
+				potentialPredictions.push({
+					name: child.Name,
+					value: { name: child.Name }
+				});
+			}
+			
+			var value; /* undefined until a valid value is fully typed */
+		    var status; /* one of the CompletionStatus values above */
+		    var predictions = []; /* an [] of {name: typedString, value: object} */
+		
+		    for (var i = 0; i < potentialPredictions.length; i++) {
+		      if (potentialPredictions[i].name.indexOf(arg.text) === 0) {
+		        predictions.push(potentialPredictions[i]);
+		        if (potentialPredictions[i].name === arg.text) {
+		          value = potentialPredictions[i].value;
+		        }
+		      }
+		    }
+		
+		    status = CompletionStatus.ERROR;
+		    if (predictions.length > 0) {
+		      status = value ? CompletionStatus.MATCH : CompletionStatus.PARTIAL;
+		    }
+		     
+		    var result = {
+		      value: value,
+		      message: (status === CompletionStatus.ERROR ? ("'" + arg.text + "' is not valid") : undefined),
+		      status: status,
+		      predictions: predictions
+		    };
+	
+			deferred.resolve(result);
+			
+	     }, function(error){
+			deferred.reject("Error: " + error);
+	     });
+	
+	     return deferred;
+	   }
+	 };
+		
+	provider.registerServiceProvider("orion.shell.type", appenderTypeImpl, appenderProperties);
+	
+	var loggerProperties = { 
+	   name: "logger-name"
+	 };
+	 
+	var loggerTypeImpl = {	
+	   parse: function(arg, typeSpec, context) {
+	     var deferred = new Deferred();	     
+	     callGET(createLocation(require.toUrl(LOG_API_SCOPE + "logger/"))).then(function(resp){
+	     
+			var potentialPredictions = [];
+			for(var i=0; i<resp.Children.length; ++i){
+				var child = resp.Children[i];
+				potentialPredictions.push({
+					name: child.Name,
+					value: { name: child.Name }
+				});
+			}
+			
+			var value; /* undefined until a valid value is fully typed */
+		    var status; /* one of the CompletionStatus values above */
+		    var predictions = []; /* an [] of {name: typedString, value: object} */
+		
+		    for (var i = 0; i < potentialPredictions.length; i++) {
+		      if (potentialPredictions[i].name.indexOf(arg.text) === 0) {
+		        predictions.push(potentialPredictions[i]);
+		        if (potentialPredictions[i].name === arg.text) {
+		          value = potentialPredictions[i].value;
+		        }
+		      }
+		    }
+		
+		    status = CompletionStatus.ERROR;
+		    if (predictions.length > 0) {
+		      status = value ? CompletionStatus.MATCH : CompletionStatus.PARTIAL;
+		    }
+		     
+		    var result = {
+		      value: value,
+		      message: (status === CompletionStatus.ERROR ? ("'" + arg.text + "' is not valid") : undefined),
+		      status: status,
+		      predictions: predictions
+		    };
+	
+			deferred.resolve(result);
+			
+	     }, function(error){
+			deferred.reject("Error: " + error);
+	     });
+	
+	     return deferred;
+	   }
+	 };
+		
+	provider.registerServiceProvider("orion.shell.type", loggerTypeImpl, loggerProperties);
+	
 	/* register base command */
 	provider.registerServiceProvider(
         "orion.shell.command", null, {
@@ -103,9 +279,9 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 	var logsDownloadImpl = {
 		callback: function(args){			
 			var deferred = new Deferred();
-			var appenderName = args['appender-name'];
+			var appenderName = args['appender-name'] ? args['appender-name'].name : undefined;
 
-			callLogService(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
+			callGET(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
 				if(resp.Children.length === 0){
 					var errorMessage = i18nUtil.formatMessage("ERROR: No file appenders were found in the current logger context.",
 						resp.Children.length);
@@ -171,7 +347,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		returnType: "string",
 		parameters: [{
 			name: "appender-name",
-			type: "string",
+			type: { name: "appender-name" },
 			description: "Appedner name which active log-file download link should be provided.",
 			defaultValue: null
 		}]
@@ -182,7 +358,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		
 	function getAppenderJSON(appenderName){
 		var deferred = new Deferred();
-		callLogService(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
+		callGET(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
 				
 			if(resp.Children.length === 0){
 				var errorMessage = i18nUtil.formatMessage("ERROR: No file appenders were found in the current logger context.",
@@ -211,7 +387,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			}
 			
 			if(appender){
-				callLogService(appender.Location).then(function(response){
+				callGET(appender.Location).then(function(response){
 					deferred.resolve(response);
 				}, function(error){
 					deferred.reject("ERROR: " + error);
@@ -235,7 +411,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 	
 	function getLoggerJSON(loggerName){
 		var deferred = new Deferred();
-		callLogService(createLocation(require.toUrl(LOG_API_SCOPE + "logger/"))).then(function(resp){
+		callGET(createLocation(require.toUrl(LOG_API_SCOPE + "logger/"))).then(function(resp){
 				
 			if(resp.Children.length === 0){
 				var errorMessage = i18nUtil.formatMessage("ERROR: No loggers were found in the current logger context.",
@@ -256,7 +432,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			}
 			
 			if(logger){
-				callLogService(logger.Location).then(function(response){
+				callGET(logger.Location).then(function(response){
 					deferred.resolve(response);
 				}, function(error){
 					deferred.reject("ERROR: " + error);
@@ -311,11 +487,11 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
     var logsShowImpl = {
 		callback: function(args){
 			var deferred = new Deferred();
-			var appenderName = args['appender-name'];
+			var appenderName = args['appender-name'] ? args['appender-name'].name : undefined;
 			
 			if(!appenderName){
 				/* list all appender names */
-				callLogService(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
+				callGET(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
 					
 					if(resp.Children.length === 0){
 						var errorMessage = i18nUtil.formatMessage("ERROR: No file appenders were found in the current logger context.",
@@ -376,7 +552,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		returnType: "string",
 		parameters: [{
 			name: "appender-name",
-			type: "string",
+			type: { name: "appender-name" },
 			description: "Appedner name which metadata should be provided.",
 			defaultValue: null
 		}]
@@ -389,11 +565,11 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
     var logsHistoryImpl = {
 		callback: function(args){
 			var deferred = new Deferred();
-			var appenderName = args['appender-name'];
+			var appenderName = args['appender-name'] ? args['appender-name'].name : undefined;
 			
 			if(!appenderName){
 				/* fall back to the default appender is present */
-				callLogService(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
+				callGET(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
 					if(resp.Children.length === 0){
 						var errorMessage = i18nUtil.formatMessage("ERROR: No file appenders were found in the current logger context.",
 							resp.Children.length);
@@ -495,7 +671,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		returnType: "string",
 		parameters: [{
 			name: "appender-name",
-			type: "string",
+			type: { name: "appender-name" },
 			description: "Appedner name which archived log-file download links should be provided.",
 			defaultValue: null
 		}]
@@ -515,11 +691,11 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
     var loggerShowImpl = {
 		callback: function(args){
 			var deferred = new Deferred();
-			var loggerName = args['logger-name'];
+			var loggerName = args['logger-name'] ? args['logger-name'].name : undefined;
 			
 			if(!loggerName){
 				/* list all appender names */
-				callLogService(createLocation(require.toUrl(LOG_API_SCOPE + "logger/"))).then(function(resp){
+				callGET(createLocation(require.toUrl(LOG_API_SCOPE + "logger/"))).then(function(resp){
 					
 					if(resp.Children.length === 0){
 						var errorMessage = i18nUtil.formatMessage("ERROR: No loggers were found in the current logger context.",
@@ -569,7 +745,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		returnType: "string",
 		parameters: [{
 			name: "logger-name",
-			type: "string",
+			type: { name: "logger-name" },
 			description: "Logger name which metadata should be provided.",
 			defaultValue: null
 		}]
@@ -578,91 +754,18 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 	provider.registerServiceProvider("orion.shell.command",
 		loggerShowImpl, loggerShow);
 		
-	var CompletionStatus = {
-	   MATCH: 0,
-	   PARTIAL: 1,
-	   ERROR: 2
-	};
-	
-	var loggerLevelProperties = { 
-	   name: "level"
-	 };
-	 
-	var loggerLevelTypeImpl = {
-	   parse: function(arg, typeSpec, context) {
-	     var potentialPredictions = [
-	       {
-	         name: 'ALL',
-	         value: 'ALL'
-	       },
-	       {
-	         name: 'DEBUG',
-	         value: 'DEBUG'
-	       },
-	       {
-	         name: 'ERROR',
-	         value: 'ERROR'
-	       },
-	       {
-	         name: 'INFO',
-	         value: 'INFO'
-	       },
-	       {
-	         name: 'OFF',
-	         value: 'OFF'
-	       },
-	       {
-	         name: 'TRACE',
-	         value: 'TRACE'
-	       },
-	       {
-	         name: 'WARN',
-	         value: 'WARN'
-	       }
-	     ];
-	
-	     var value; /* undefined until a valid value is fully typed */
-	     var status; /* one of the CompletionStatus values above */
-	     var predictions = []; /* an [] of {name: typedString, value: object} */
-	
-	     for (var i = 0; i < potentialPredictions.length; i++) {
-	       if (potentialPredictions[i].name.indexOf(arg.text) === 0) {
-	         predictions.push(potentialPredictions[i]);
-	         if (potentialPredictions[i].name === arg.text) {
-	           value = potentialPredictions[i].value;
-	         }
-	       }
-	     }
-	
-	     status = CompletionStatus.ERROR;
-	     if (predictions.length > 0) {
-	       status = value ? CompletionStatus.MATCH : CompletionStatus.PARTIAL;
-	     }
-	     var result = {
-	       value: value,
-	       message: (status === CompletionStatus.ERROR ? ("'" + arg.text + "' is not valid") : undefined),
-	       status: status,
-	       predictions: predictions
-	     };
-	
-	     return result;
-	   }
-	 };
-		
-	provider.registerServiceProvider("orion.shell.type", loggerLevelTypeImpl, loggerLevelProperties);
-	
 	/* shows loggers in current logger context */
     var loggerUpdateLevelImpl = {
 		callback: function(args){
 			var deferred = new Deferred();
-			var loggerName = args['logger-name'];
+			var loggerName = args['logger-name'] ? args['logger-name'].name : undefined;
 			
 			getLoggerJSON(loggerName).then(function(logger){
 				var dataJSON = {
-					"Level" : args.level
+					"Level" : args.level.name
 				};
 				
-				putLogService(logger.Location, dataJSON).then(function(response){
+				callPUT(logger.Location, dataJSON).then(function(response){
 					deferred.resolve(prettyPrint(response, 0));
 				}, function(error){
 					deferred.reject(error);
@@ -684,7 +787,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		returnType: "string",
 		parameters: [{
 			name: "logger-name",
-			type: "string",
+			type: { name: "logger-name" },
 			description: "Logger name which level should be updated."
 		}, {
 	     name: "level",
