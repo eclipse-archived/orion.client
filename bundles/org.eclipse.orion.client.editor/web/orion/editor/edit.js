@@ -290,12 +290,15 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		syntaxHighlighter.highlight(options.lang, editor);
 		if (contentAssist) {
 			var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
+			var htmlContentAssistProvider = new mHtmlContentAssist.HTMLContentAssistProvider();
 			var jsTemplateContentAssistProvider = new mJSContentAssist.JSTemplateContentAssistProvider();
 			contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
 				if (/css$/.test(options.lang)) {
 					contentAssist.setProviders([cssContentAssistProvider]);
 				} else if (/js$/.test(options.lang)) {
 					contentAssist.setProviders([jsTemplateContentAssistProvider]);
+				} else if (/html$/.test(options.lang)) {
+					contentAssist.setProviders([htmlContentAssistProvider]);
 				}
 			});
 		}
