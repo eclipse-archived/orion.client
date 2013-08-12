@@ -4660,7 +4660,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				rulerParent.appendChild(div);
 			} else {
 				var sibling = rulerParent.firstChild;
-				while (sibling && --index > 0) {
+				while (sibling && index-- > 0) {
 					sibling = sibling.nextSibling;
 				}
 				rulerParent.insertBefore(div, sibling);
