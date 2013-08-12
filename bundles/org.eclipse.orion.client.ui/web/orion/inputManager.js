@@ -356,9 +356,6 @@ define([
 			this.dispatchEvent({ type: "InputChanged", input: input, name: name, metadata: metadata, contents: contents }); //$NON-NLS-0$
 			var self = this;
 			this.syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true).then(function() {
-				// TODO folding should be a preference.
-				var styler = self.syntaxHighlighter.getStyler();
-				editor.setFoldingEnabled(styler && styler.foldingEnabled);
 				self.dispatchEvent({ type: "ContentTypeChanged", contentType: self._contentType, location: window.location }); //$NON-NLS-0$
 				if (!self.dispatcher) {
 					self.dispatcher = new mDispatcher.Dispatcher(self.serviceRegistry, editor, self._contentType);

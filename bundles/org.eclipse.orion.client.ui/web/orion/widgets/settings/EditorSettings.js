@@ -118,6 +118,20 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					create: createIntegerProperty,
 					validate: validateIntegerProperty
 				}
+			},
+			rulers: {
+				annotationRuler: {
+					create: createBooleanProperty
+				},
+				lineNumberRuler: {
+					create: createBooleanProperty
+				},
+				foldingRuler: {
+					create: createBooleanProperty
+				},
+				overviewRuler: {
+					create: createBooleanProperty
+				}
 			}
 		}
 	};

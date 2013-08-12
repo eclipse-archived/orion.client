@@ -176,6 +176,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			};
 			textView.setOptions(options);
 		}
+		editor.setAnnotationRulerVisible(prefs.annotationRuler);
+		editor.setLineNumberRulerVisible(prefs.lineNumberRuler);
+		editor.setFoldingRulerVisible(prefs.foldingRuler);
+		editor.setOverviewRulerVisible(prefs.overviewRuler);
 		renderToolbars(inputManager.getFileMetadata());
 	};
 	var editorPreferences = new mEditorPreferences.EditorPreferences (preferences, function (prefs) {
