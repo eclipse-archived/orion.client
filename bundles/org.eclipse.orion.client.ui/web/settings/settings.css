@@ -161,6 +161,7 @@
 }
 
 .setting-local-indicator {
+	cursor: pointer;
 	display: inline-block;
 	margin: 2px;
 	margin-right: 4px;
