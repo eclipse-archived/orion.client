@@ -227,6 +227,21 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				return result;
 			}.bind(this));
 		},
+		readProject: function(location) {
+			var url = new URL(location, window.location);
+			return xhr("GET", url.href, {
+				timeout: 15000,
+				headers: { "Orion-Version": "1" },
+				log: false
+			}).then(function(result) {
+					return result.response ? JSON.parse(result.response) : null;
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
+		},
 		/**
 		 * Adds a project to a workspace.
 		 * @param {String} url The workspace location

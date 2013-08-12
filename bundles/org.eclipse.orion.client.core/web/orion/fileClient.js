@@ -441,7 +441,12 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		 */
 		search: function(searchParams) {
 			return _doServiceCall(this._getService(searchParams.resource), "search", arguments); //$NON-NLS-0$
+		},
+		
+		readProject: function(location){
+			return _doServiceCall(this._getService(location), "readProject", arguments); //$NON-NLS-0$
 		}
+		
 	};//end FileClient prototype
 	FileClient.prototype.constructor = FileClient;
 

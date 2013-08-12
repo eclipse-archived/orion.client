@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -41,7 +41,10 @@ define({
 	"ViewTooltip": "View", //$NON-NLS-1$ //$NON-NLS-0$
 	"Actions": "Actions", //$NON-NLS-1$ //$NON-NLS-0$
 	"Navigator": "Navigator", //$NON-NLS-1$ //$NON-NLS-0$
+	"Project": "Project", //$NON-NLS-1$ //$NON-NLS-0$
 	"New": "New", //$NON-NLS-1$ //$NON-NLS-0$
+	"Add": "Add", //$NON-NLS-1$ //$NON-NLS-0$
 	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding.", //$NON-NLS-1$ //$NON-NLS-0$
-	"LocalEditorSettings": "Local Editor Settings"
+	"LocalEditorSettings": "Local Editor Settings",
+	"NoProject": "${0} is not a project. To convert it to project use ${1}"
 });
