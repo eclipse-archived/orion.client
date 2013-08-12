@@ -1215,6 +1215,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 	 * @property {String} [themeClass] the CSS class for the view theming.
 	 * @property {Number} [tabSize=8] The number of spaces in a tab.
 	 * @property {Boolean} [overwriteMode=false] whether or not the view is in insert/overwrite mode.
+	 * @property {Boolean} [singleMode=false] whether or not the editor is in single line mode.
 	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
 	 * @property {Boolean} [wrapable=false] whether or not the view is wrappable.
 	 * @property {Number} [scrollAnimation=0] the time duration in miliseconds for scrolling animation. <code>0</code> means no animation.
@@ -4517,13 +4518,16 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			parent.appendChild(div1);
 			var rect1 = div1.getBoundingClientRect();
 			var rect2 = div2.getBoundingClientRect();
-			div1.style.overflow = 'hidden'; //$NON-NLS-0$
-			div2.style.height = "200px"; //$NON-NLS-0$
-			var w1 = div1.clientWidth;
-			div1.style.overflow = 'scroll'; //$NON-NLS-0$
-			var w2 = div1.clientWidth;
-			parent.removeChild(div1);
-			var scrollWidth = w1 - w2;
+			var scrollWidth = 0;
+			if (!this._singleMode) {
+				div1.style.overflow = 'hidden'; //$NON-NLS-0$
+				div2.style.height = "200px"; //$NON-NLS-0$
+				var w1 = div1.clientWidth;
+				div1.style.overflow = 'scroll'; //$NON-NLS-0$
+				var w2 = div1.clientWidth;
+				parent.removeChild(div1);
+				scrollWidth = w1 - w2;
+			}
 			pad = {
 				left: rect2.left - rect1.left,
 				top: rect2.top - rect1.top,
@@ -4699,7 +4703,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			viewDiv.className = "textviewScroll"; //$NON-NLS-0$
 			this._viewDiv = viewDiv;
 			viewDiv.tabIndex = -1;
-			viewDiv.style.overflow = "auto"; //$NON-NLS-0$
 			viewDiv.style.position = "absolute"; //$NON-NLS-0$
 			viewDiv.style.top = "0px"; //$NON-NLS-0$
 			viewDiv.style.bottom = "0px"; //$NON-NLS-0$
@@ -4845,6 +4848,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				tabMode: { value: true, update: null },
 				tabSize: {value: 8, update: this._setTabSize},
 				expandTab: {value: false, update: null},
+				singleMode: {value: false, update: this._setSingleMode},
 				overwriteMode: { value: false, update: this._setOverwriteMode },
 				blockCursorVisible: { value: false, update: this._setBlockCursor},
 				wrapMode: {value: false, update: this._setWrapMode},
@@ -6157,6 +6161,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._readonly = readOnly;
 			this._clientDiv.setAttribute("aria-readonly", readOnly ? "true" : "false"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
+		_setSingleMode: function (singleMode, init) {
+			this._singleMode = singleMode;
+			this._updateOverflow();
+			this._updateStyle(init);
+		},
 		_setTabSize: function (tabSize, init) {
 			this._tabSize = tabSize;
 			this._customTabSize = undefined;
@@ -6196,18 +6205,15 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		_setWrapMode: function (wrapMode, init) {
 			this._wrapMode = wrapMode && this._wrappable;
-			var clientDiv = this._clientDiv, viewDiv = this._viewDiv;
-			if (wrapMode) {
+			var clientDiv = this._clientDiv;
+			if (this._wrapMode) {
 				clientDiv.style.whiteSpace = "pre-wrap"; //$NON-NLS-0$
 				clientDiv.style.wordWrap = "break-word"; //$NON-NLS-0$
-				viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
-				viewDiv.style.overflowY = "scroll"; //$NON-NLS-0$
 			} else {
 				clientDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
 				clientDiv.style.wordWrap = "normal"; //$NON-NLS-0$
-				viewDiv.style.overflowX = "auto"; //$NON-NLS-0$
-				viewDiv.style.overflowY = "auto"; //$NON-NLS-0$
 			}
+			this._updateOverflow();
 			if (!init) {
 				this.redraw();
 				this._resetLineWidth();
@@ -6693,6 +6699,21 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				this._update();
 				if (ensureCaretVisible) {
 					this._showCaret();
+				}
+			}
+		},
+		_updateOverflow: function() {
+			var viewDiv = this._viewDiv;
+			if (this._wrapMode) {
+				viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
+				viewDiv.style.overflowY = "scroll"; //$NON-NLS-0$
+			} else {
+				if (this._singleMode) {
+					viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
+					viewDiv.style.overflowY = "hidden"; //$NON-NLS-0$
+				} else {
+					viewDiv.style.overflowX = "auto"; //$NON-NLS-0$
+					viewDiv.style.overflowY = "auto"; //$NON-NLS-0$
 				}
 			}
 		},
