@@ -153,6 +153,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces.
 	 * @property {String} [themeClass] the CSS class for the view theming.
 	 * @property {Number} [tabSize=4] The number of spaces in a tab.
+	 * @property {Boolean} [singleMode=false] whether or not the editor is in single line mode.
 	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
 	 * @property {Function} [statusReporter] a status reporter.
 	 * @property {String} [title=""] the editor title.
@@ -214,6 +215,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 				fullSelection: options.fullSelection,
 				tabMode: options.tabMode,
 				expandTab: options.expandTab,
+				singleMode: options.singleMode,
 				themeClass: options.themeClass,
 				theme: options.theme,
 				wrapMode: options.wrapMode
