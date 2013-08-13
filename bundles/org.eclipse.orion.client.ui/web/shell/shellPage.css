@@ -19,7 +19,7 @@ html,body {
 }
 
 .gcli-row-out > p, .gcli-row-out > div > span {
-	white-space: pre;
+	white-space: pre-wrap;
 }
 
 .modelDecorationSprite { 
