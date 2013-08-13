@@ -342,6 +342,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		textView.setAction("contentAssistPreviousProposal", function() { //$NON-NLS-0$
 			return this.lineUp();
 		}.bind(this));
+		textView.setAction("contentAssistNextPage", function() { //$NON-NLS-0$
+			return this.pageDown();
+		}.bind(this));
+		textView.setAction("contentAssistPreviousPage", function() { //$NON-NLS-0$
+			return this.pageUp();
+		}.bind(this));
 		textView.setAction("contentAssistTab", function() { //$NON-NLS-0$
 			return this.tab();
 		}.bind(this));
@@ -355,6 +361,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			bindings.push({actionID: "contentAssistCancel", keyBinding: new KeyBinding(27)}); //$NON-NLS-0$
 			bindings.push({actionID: "contentAssistNextProposal", keyBinding: new KeyBinding(40)}); //$NON-NLS-0$
 			bindings.push({actionID: "contentAssistPreviousProposal", keyBinding: new KeyBinding(38)}); //$NON-NLS-0$
+			bindings.push({actionID: "contentAssistNextPage", keyBinding: new KeyBinding(34)}); //$NON-NLS-0$
+			bindings.push({actionID: "contentAssistPreviousPage", keyBinding: new KeyBinding(33)}); //$NON-NLS-0$
 			bindings.push({actionID: "contentAssistTab", keyBinding: new KeyBinding(9)}); //$NON-NLS-0$
 			return bindings;
 		},
@@ -377,6 +385,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		},
 		lineUp: function() {
 			var newSelected = (this.selectedIndex === 0) ? this.proposals.length - 1 : this.selectedIndex - 1;
+			return this._lineUp(newSelected);
+		},
+		_lineUp: function(newSelected) {
 			while (this.proposals[newSelected].unselectable && newSelected > 0) {
 				newSelected--;
 			}
@@ -388,6 +399,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		},
 		lineDown: function() {
 			var newSelected = (this.selectedIndex === this.proposals.length - 1) ? 0 : this.selectedIndex + 1;
+			return this._lineDown(newSelected);
+		},
+		_lineDown: function(newSelected) {
 			while (this.proposals[newSelected].unselectable && newSelected < this.proposals.length-1) {
 				newSelected++;
 			}
@@ -396,6 +410,30 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				this.widget.setSelectedIndex(this.selectedIndex);
 			}
 			return true;
+		},
+		pageUp: function() {
+			if (this.widget) {
+				var newSelected = this.widget.getTopIndex();
+				if (newSelected === this.selectedIndex) {
+					this.widget.scrollIndex(newSelected, false);
+					newSelected = this.widget.getTopIndex();
+				}
+				return this._lineUp(newSelected);
+			} else {
+				return this.lineUp();
+			}
+		},
+		pageDown: function() {
+			if (this.widget) {
+				var newSelected = this.widget.getBottomIndex();
+				if (newSelected === this.selectedIndex) {
+					this.widget.scrollIndex(newSelected, true);
+					newSelected = this.widget.getBottomIndex();
+				}
+				return this._lineDown(newSelected);
+			} else {
+				return this.lineDown();
+			}
 		},
 		enter: function() {
 			var proposal = this.proposals[this.selectedIndex] || null;
@@ -547,6 +585,32 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				nodeIndex++;
 			}
 			return null;
+		},
+		/** @private */
+		getTopIndex: function() {
+			var nodes = this.parentNode.childNodes;
+			for (var i=0; i < nodes.length; i++) {
+				var child = nodes[i];
+				if (child.offsetTop >= this.parentNode.scrollTop) {
+					return i;
+				}
+			}
+			return 0;
+		},
+		/** @private */
+		getBottomIndex: function() {
+			var nodes = this.parentNode.childNodes;
+			for (var i=0; i < nodes.length; i++) {
+				var child = nodes[i];
+				if ((child.offsetTop + child.offsetHeight) > (this.parentNode.scrollTop + this.parentNode.clientHeight)) {
+					return Math.max(0, i - 1);
+				}
+			}
+			return nodes.length - 1;
+		},
+		/** @private */
+		scrollIndex: function(index, top) {
+			this.parentNode.childNodes[index].scrollIntoView(top);
 		},
 		/** Sets the index of the currently selected proposal. */
 		setSelectedIndex: function(/**Number*/ index) {
