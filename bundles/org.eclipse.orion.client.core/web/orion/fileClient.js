@@ -445,8 +445,21 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		
 		readProject: function(location){
 			return _doServiceCall(this._getService(location), "readProject", arguments); //$NON-NLS-0$
-		}
+		},
 		
+		initProject: function(location){
+			return _doServiceCall(this._getService(location), "initProject", arguments); //$NON-NLS-0$
+		},
+		/**
+		* @param {String} location Project location
+		* @param {Object} dependency The JSON representation of the depenency
+		* @param {String} dependency.Type Type of the depenency (i.e. "file")
+		* @param {String} dependency.Name String description of the dependency (i.e. folder name)
+		* @param {String} dependency.Location Location of the depenency understood by the plugin of given type
+		*/
+		addProjectDepenency: function(location, depenency){
+			return _doServiceCall(this._getService(location), "addProjectDepenency", arguments); //$NON-NLS-0$
+		}
 	};//end FileClient prototype
 	FileClient.prototype.constructor = FileClient;
 

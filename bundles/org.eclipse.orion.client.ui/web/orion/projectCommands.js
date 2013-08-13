@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*global window define orion XMLHttpRequest confirm*/
 /*jslint sub:true*/
-define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred'],
-	function(messages, lib, mCommands, Deferred){
+define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog'],
+	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog){
 		var projectCommandUtils = {};
 		
 		var selectionListenerAdded = false;
@@ -117,13 +117,43 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	 */
 	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, explorer, fileClient) {
 		progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+		var that = this;
+		function errorHandler(error) {
+			if (progressService) {
+				progressService.setProgressResult(error);
+			} else {
+				window.console.log(error);
+			}
+		}
 		
 		var addFolderCommand = new mCommands.Command({
-			name: "Add folder",
-			tooltip: "Add an external folder",
+			name: "Add External Folder",
+			tooltip: "Add an external folder from workspace",
 			id: "orion.project.addFolder", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
+				
+				var dialog = new DirectoryPrompterDialog.DirectoryPrompterDialog({ title : messages["Choose a Folder"],
+					serviceRegistry : serviceRegistry,
+					fileClient : fileClient,
+					func : function(targetFolder) {
+						fileClient.read(targetFolder.Location, true).then(function(fileMetadata){
+							var fileLocation = "";
+							if(fileMetadata.Parents){
+								for(var i=fileMetadata.Parents.length-1; i>=0; i--){
+									fileLocation+=fileMetadata.Parents[i].Name;
+									fileLocation+= "/";
+								}
+								fileLocation+=fileMetadata.Name;
+							}
+							fileClient.addProjectDepenency(item.Location, {Name: fileMetadata.Name, Type: "file", Location: fileLocation}).then(function(){
+								explorer.changedItem();
+							}, errorHandler);
+						}, errorHandler);
+					}
+				});
+				
+				dialog.show();
 				
 			},
 			visibleWhen: function(item) {
@@ -138,6 +168,19 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			id: "orion.project.initProject", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
+				var parentProject;
+				if (item.Parents && item.Parents.length===0){
+					parentProject = item;
+				} else if(item.Parents){
+					parentProject = item.Parents[item.Parents.length-1];
+				}
+				if(parentProject){
+					fileClient.initProject(parentProject.Location).then(function(){
+						fileClient.read(item.Location, true).then(function(fileMetadata){
+							explorer.changedItem(fileMetadata);
+						}, errorHandler);
+					}, errorHandler);
+				}
 				
 			},
 			visibleWhen: function(item) {
