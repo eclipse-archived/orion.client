@@ -490,6 +490,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		this._oddStyle = oddStyle || {style: {backgroundColor: "white"}}; //$NON-NLS-0$
 		this._evenStyle = evenStyle || {style: {backgroundColor: "white"}}; //$NON-NLS-0$
 		this._numOfDigits = 0;
+		this._firstLine = 1;
 	}
 	LineNumberRuler.prototype = new Ruler(); 
 	/** @ignore */
@@ -504,7 +505,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 				mapLine = model.getBaseModel().getLineAtOffset(model.mapOffset(lineStart));
 			}
 			if (!result[lineIndex]) { result[lineIndex] = {}; }
-			result[lineIndex].html = (mapLine + 1) + "";
+			result[lineIndex].html = (this._firstLine + mapLine) + "";
 			if (!result[lineIndex].style) { result[lineIndex].style = style; }
 		}
 		return result;
@@ -514,12 +515,21 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		var lineCount = this._view.getModel().getLineCount();
 		return this.getAnnotations(lineCount - 1, lineCount)[lineCount - 1];
 	};
+	/**
+	 * Sets the line index displayed for the first line. The default value is
+	 * <code>1</code>.
+	 *
+	 * @param {Number} [lineIndex=1] the first line index displayed
+	 */
+	LineNumberRuler.prototype.setFirstLine = function(lineIndex) {
+		this._firstLine = lineIndex !== undefined ? lineIndex : 1;
+	};
 	/** @ignore */
 	LineNumberRuler.prototype._onTextModelChanged = function(e) {
 		var start = e.start;
 		var model = this._view.getModel();
 		var lineCount = model.getBaseModel ? model.getBaseModel().getLineCount() : model.getLineCount();
-		var numOfDigits = (lineCount+"").length;
+		var numOfDigits = ((this._firstLine + lineCount - 1)+"").length;
 		if (this._numOfDigits !== numOfDigits) {
 			this._numOfDigits = numOfDigits;
 			var startLine = model.getLineAtOffset(start);
