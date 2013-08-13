@@ -106,11 +106,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		 * Loads the given children location as the root.
 		 * @param {String|Object} The childrenLocation or an object with a ChildrenLocation field.
 		 */
-		loadRoot: function(childrenLocation) {
+		loadRoot: function(childrenLocation, force) {
 			childrenLocation = (childrenLocation && childrenLocation.ChildrenLocation) || childrenLocation || ""; //$NON-NLS-0$
 			var _self = this;
 			return this.commandsRegistered.then(function() {
-				return _self.loadResourceList.call(_self, childrenLocation);
+				return _self.loadResourceList.call(_self, childrenLocation, force);
 			});
 		},
 		reveal: function(fileMetadata) {
@@ -119,8 +119,13 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			}
 			var navHandler = this.getNavHandler();
 			if (navHandler) {
-				navHandler.cursorOn(fileMetadata, true, false, false);
-				navHandler.setSelection(fileMetadata);
+				if(fileMetadata.Location === this.treeRoot.Location && fileMetadata.Children && fileMetadata.Children.length){
+					navHandler.cursorOn(fileMetadata.Children[0], true, false, false);
+					navHandler.setSelection(fileMetadata.Children[0]);
+				} else {
+					navHandler.cursorOn(fileMetadata, true, false, false);
+					navHandler.setSelection(fileMetadata);
+				}
 			}
 		},
 		// Returns a deferred that completes once file command extensions have been processed
@@ -261,18 +266,21 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	}
 	
 	ProjectNavExplorer.prototype = {
-		display: function(fileMetadata){
+		display: function(fileMetadata, redisplay){
+		this.fileMetadata = fileMetadata;
 		var that = this;
+		
 			if(fileMetadata.ProjectInfo){
-				if(this.projectLocation && this.projectLocation === fileMetadata.ProjectInfo.Location){
+				if(!redisplay && this.projectLocation && this.projectLocation === fileMetadata.ProjectInfo.Location){
 					return;
 				}
+				lib.empty(this.parentNode);
 				this.projectLocation = fileMetadata.ProjectInfo.Location;
 				this.fileClient.readProject(fileMetadata.ProjectInfo.Location).then(
 					function(projectData){
 						projectData.type = "Project";
 						that.renderer.render(projectData);
-						that.fileExplorer.loadRoot(projectData.ContentLocation).then(that.fileExplorer.reveal.bind(that.fileExplorer, fileMetadata));
+						that.fileExplorer.loadRoot(projectData.ContentLocation, redisplay).then(that.fileExplorer.reveal.bind(that.fileExplorer, fileMetadata));
 						that.updateCommands(projectData);
 					},
 					function(error){
@@ -280,8 +288,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					}
 				);
 			} else {
-				this.projectLocation = null;
 				lib.empty(this.parentNode);
+				this.projectLocation = null;
 				var parentProject;
 				if (fileMetadata.Parents && fileMetadata.Parents.length===0){
 					parentProject = fileMetadata;
@@ -313,6 +321,13 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			elem.classList.add("layoutLeft"); //$NON-NLS-0$
 			elem.classList.add("pageActions"); //$NON-NLS-0$
 			this.toolbarNode.appendChild(elem);
+		},
+		changedItem: function(fileMetadata){
+			if(fileMetadata){
+				this.display(fileMetadata);
+				return;
+			}
+			this.display(this.fileMetadata, true);
 		},
 		registerCommands : function(){
 			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.serviceRegistry;
@@ -378,7 +393,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			});
 			// If there is a target in the navigator, open this target
 			if(this.navigatorInput){
-				var _self = this;
 				this.fileClient.read(this.navigatorInput, true).then(function(fileMetadata){
 					_self.explorer.display(fileMetadata);
 				}, function(error){

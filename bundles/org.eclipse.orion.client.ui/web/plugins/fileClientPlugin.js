@@ -71,12 +71,16 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domRea
 	temp.href = "../workspace";
 	// note global
 	var workspaceBase = makeParentRelative(temp.href);
+	
+	temp.href = "../project";
+	// note global
+	var projectBase = makeParentRelative(temp.href);
 
 	temp.href = "..";
 	var patternBase = makeParentRelative(temp.href);
 
 
-	var service = new FileServiceImpl(fileBase, workspaceBase);
+	var service = new FileServiceImpl(fileBase, workspaceBase, projectBase);
 	//provider.registerService("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
 	provider.registerService("orion.core.file", service, {
 		Name: 'Orion Content',  // HACK  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386509
