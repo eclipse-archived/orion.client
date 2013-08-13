@@ -671,8 +671,13 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 			var annotations = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
 			while (annotations.hasNext()) {
 				annotation = annotations.next();
-				if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_ERROR || annotation.type === mAnnotations.AnnotationType.ANNOTATION_WARNING) {
-					remove.push(annotation);
+				switch (annotation.type) {
+					case mAnnotations.AnnotationType.ANNOTATION_ERROR:
+					case mAnnotations.AnnotationType.ANNOTATION_WARNING:
+					case mAnnotations.AnnotationType.ANNOTATION_TASK:
+						if (annotation.creatorID === this) {
+							remove.push(annotation);
+						}
 				}
 			}
 			if (problems) { 
@@ -691,9 +696,15 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 							start = problem.start;
 							end = problem.end;
 						}
-						var severity = problem.severity;
-						var type = severity === "error" ? mAnnotations.AnnotationType.ANNOTATION_ERROR : mAnnotations.AnnotationType.ANNOTATION_WARNING; //$NON-NLS-0$
+						var type;
+						switch (problem.severity) {
+							case "error": type = mAnnotations.AnnotationType.ANNOTATION_ERROR; break;//$NON-NLS-0$
+							case "warning": type = mAnnotations.AnnotationType.ANNOTATION_WARNING; break;//$NON-NLS-0$
+							case "task": type = mAnnotations.AnnotationType.ANNOTATION_TASK; break;//$NON-NLS-0$
+							default: continue;
+						}
 						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, problem.description);
+						annotation.creatorID = this;
 						add.push(annotation);
 					}
 				}
