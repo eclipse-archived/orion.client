@@ -255,6 +255,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 												parentNode:this.parentNode,
 												serviceRegistry: this.serviceRegistry
 											});
+		this.rendererFactory = params.rendererFactory;
 		params.parentId = "filesNode";
 		params.newActionsScope = "filesSectionActionArea";
 		params.selectionActionsScope = "filesSectionSelectionArea";
@@ -282,9 +283,53 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 						that.renderer.render(projectData);
 						that.fileExplorer.loadRoot(projectData.ContentLocation, redisplay).then(that.fileExplorer.reveal.bind(that.fileExplorer, fileMetadata));
 						that.updateCommands(projectData);
+						
+						if(projectData.Dependencies){
+							for(var i=0; i<projectData.Dependencies.length; i++){
+								(function(depenency_no){
+									ProjectCommands.getDepenencyFileMetadata(projectData.Dependencies[i], that.fileClient).then(function(depenencyMetadata){
+									var filesNode = "filesNode" + depenency_no;
+										var titleWrapper = new mSection.Section(that.parentNode, { id : "depenenciesSection" + depenency_no, //$NON-NLS-0$
+												title : projectData.Dependencies[depenency_no].Name,
+												content : '<div id="'+ filesNode+'"></div>', //$NON-NLS-0$
+												canHide : true,
+												hidden: true,
+												preferenceService : that.serviceRegistry.getService("orion.core.preference") //$NON-NLS-0$
+											});
+	
+											
+											var depenencyExploer = new FilesNavExplorer({
+												commandRegistry : that.commandRegistry,
+												fileClient: that.fileClient,
+												editorInputManager: that.editorInputManager,
+												progressService: that.progressService,
+												parentId: filesNode,
+												toolbarNode: that.toolbarNode,
+												newActionsScope: "depenenciesSection" + depenency_no + "ActionArea",
+												selectionActionsScope: "depenenciesSection" + depenency_no + "SelectionArea",
+												rendererFactory: that.rendererFactory,
+												dragAndDrop: FileCommands.uploadFile,
+												serviceRegistry: that.serviceRegistry
+											});
+											
+											depenencyExploer.loadRoot(depenencyMetadata, redisplay).then(depenencyExploer.reveal.bind(depenencyExploer, depenencyMetadata));
+									}, function(error){
+											var titleWrapper = new mSection.Section(that.parentNode, { id : "depenenciesSection" + depenency_no, //$NON-NLS-0$
+												title : projectData.Dependencies[depenency_no].Name + " (disconnected)",
+												content : '<div id=unconnected_"'+ depenency_no +'"></div>', //$NON-NLS-0$
+												canHide : true,
+												hidden: true,
+												preferenceService : that.serviceRegistry.getService("orion.core.preference") //$NON-NLS-0$
+											});
+										console.error(error);
+									});
+								})(i);
+							}
+						}
+						
 					},
 					function(error){
-						console.error(error);//TODO
+						that.serviceRegistry.getService("orion.page.progress").setProgressResult(error);
 					}
 				);
 			} else {
@@ -396,7 +441,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				this.fileClient.read(this.navigatorInput, true).then(function(fileMetadata){
 					_self.explorer.display(fileMetadata);
 				}, function(error){
-					console.error(error); //TODO
+					_self.serviceRegistry.getService("orion.page.progress").setProgressResult(error);
 				});
 			} else {
 				this.explorer.display(this.editorInputManager.getFileMetadata());
