@@ -27,6 +27,8 @@ define([], function() {
 		fontSizeLocalVisible:true,
 		autoLoad:true,
 		autoLoadVisible:true,
+		saveDiffs:false,
+		saveDiffsVisible:true,
 		tabSize:4,
 		tabSizeVisible:true,
 		expandTab:false,

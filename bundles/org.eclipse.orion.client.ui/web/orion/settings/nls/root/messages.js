@@ -130,6 +130,7 @@ define({
 	"autoSave" : "Auto Save",
 	"autoSaveTimeout" : "Save interval (ms)",
 	"autoLoad" : "Auto Load",
+	"saveDiffs" : "Save file as diffs",
 	"Restore" : "Restore Defaults",
 	"Default": "Default",
 	"keys": "Keys",
