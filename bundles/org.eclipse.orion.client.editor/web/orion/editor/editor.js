@@ -161,7 +161,14 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 		getTitle: function() {
 			return this._title;
 		},
-		
+		/**
+		 * Returns the editor undo stack. 
+		 *
+		 * @returns {orion.editor.UndoStack} the editor undo stack.
+		 */
+		getUndoStack: function() {
+			return this._undoStack;
+		},
 		/**
 		 * Returns the editor's key modes.
 		 *
