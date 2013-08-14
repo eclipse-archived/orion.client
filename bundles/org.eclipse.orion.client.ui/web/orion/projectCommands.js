@@ -102,6 +102,43 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			});
 		}
 	};
+	
+	projectCommandUtils.getDepenencyFileMetadata = function(depenency, fileClient){
+		var deferred = new Deferred();
+		function getLastChild(childrenLocation, path){
+			fileClient.fetchChildren(childrenLocation).then(function(children){
+				for(var i=0; i<children.length; i++){
+					if(children[i].Name === path[0]){
+						if(path.length===1){
+							deferred.resolve(children[i]);
+						} else {
+							getLastChild(children[i].ChildrenLocation, path.splice(1, path.length-1));
+						}
+						return;
+					}
+				}
+					deferred.reject(depenency.Location + " could not be found in your workspace");
+			}, function(error){console.error(error);});
+		}
+		
+		if(depenency.Type==="file"){
+			var path = depenency.Location.split("/");
+			fileClient.loadWorkspace().then(function(workspace){
+						for(var i=0; i<workspace.Children.length; i++){
+							if(workspace.Children[i].Name===path[0]){
+								if(path.length===1){
+									deferred.resolve(workspace.Children[i]);
+								} else {
+									getLastChild(workspace.Children[i].ChildrenLocation, path.splice(1, path.length-1));
+								}
+								return;
+							}
+						}
+						deferred.reject(depenency.Location + " could not be found in your workspace");
+			}, function(error){console.error(error);});
+		}
+		return deferred;
+	};
 		
 	/**
 	 * Creates the commands related to file management.
