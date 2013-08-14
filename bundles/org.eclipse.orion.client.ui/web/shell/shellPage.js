@@ -95,8 +95,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 			stringify: function(arg, typeSpec) {
 				var promise = new Deferred();
 				if (!this.stringifyFn) {
-					if(!arg) { return ""; } /* arg may be optional */
-					return arg.name;
+					return arg ? arg.name : "";
 				}
 				
 				this.stringifyFn(arg, typeSpec).then(
