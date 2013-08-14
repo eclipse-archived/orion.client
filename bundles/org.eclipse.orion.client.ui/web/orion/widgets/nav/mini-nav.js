@@ -297,6 +297,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.toolbarNode = params.toolbarNode;
 		this.serviceRegistry = params.serviceRegistry;
 		this.explorer = null;
+		this.lastRoot = null;
+		var _self = this;
+		//store the last root just in case we switch between two view modes
+		this.sidebarNavInputManager.addEventListener("InputChanged", function(event){_self.lastRoot = event.input;}); //$NON-NLS-0$
 	}
 	objects.mixin(MiniNavViewMode.prototype, {
 		label: messages["Navigator"],
@@ -318,8 +322,13 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				serviceRegistry: this.serviceRegistry,
 				toolbarNode: this.toolbarNode
 			});
-			// On initial page load, metadata may not be loaded yet, but that's ok -- InputChanged will inform us later
-			this.explorer.loadParentOf(this.editorInputManager.getFileMetadata());
+			var fileMetadata = this.editorInputManager.getFileMetadata();
+			if(fileMetadata){
+				this.explorer.loadParentOf(fileMetadata);
+			} else if(this.lastRoot){ //if do not have metadata loaded yet and we switch from one view mode to another we should reload
+				this.explorer.loadRoot(this.lastRoot).then(function(){_self.explorer.updateCommands();});
+			}
+			//else{ On initial page load, metadata may not be loaded yet, but that's ok -- InputChanged will inform us later}
 		},
 		destroy: function() {
 			if (this.explorer) {

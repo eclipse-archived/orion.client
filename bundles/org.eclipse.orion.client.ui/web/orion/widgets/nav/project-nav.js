@@ -271,7 +271,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.fileMetadata = fileMetadata;
 		var that = this;
 		
-			if(fileMetadata.ProjectInfo){
+			if(fileMetadata && fileMetadata.ProjectInfo){
 				if(!redisplay && this.projectLocation && this.projectLocation === fileMetadata.ProjectInfo.Location){
 					return;
 				}
@@ -312,7 +312,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 												serviceRegistry: that.serviceRegistry
 											});
 											
-											depenencyExploer.loadRoot(depenencyMetadata, redisplay).then(depenencyExploer.reveal.bind(depenencyExploer, depenencyMetadata));
+											depenencyExploer.loadRoot(depenencyMetadata, redisplay).then(depenencyExploer.updateCommands.bind(depenencyExploer, depenencyMetadata));
 									}, function(error){
 											var titleWrapper = new mSection.Section(that.parentNode, { id : "depenenciesSection" + depenency_no, //$NON-NLS-0$
 												title : projectData.Dependencies[depenency_no].Name + " (disconnected)",
@@ -336,9 +336,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				lib.empty(this.parentNode);
 				this.projectLocation = null;
 				var parentProject;
-				if (fileMetadata.Parents && fileMetadata.Parents.length===0){
+				if (fileMetadata && fileMetadata.Parents && fileMetadata.Parents.length===0){
 					parentProject = fileMetadata;
-				} else if(fileMetadata.Parents){
+				} else if(fileMetadata && fileMetadata.Parents){
 					parentProject = fileMetadata.Parents[fileMetadata.Parents.length-1];
 				}
 				if(parentProject){
