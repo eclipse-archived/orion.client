@@ -95,6 +95,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				},
 				autoLoad: {
 					create: createBooleanProperty
+				},
+				saveDiffs: {
+					create: createBooleanProperty
 				}
 			},
 			tabs: {

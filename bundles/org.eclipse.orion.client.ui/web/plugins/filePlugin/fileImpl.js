@@ -477,7 +477,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 		 *   otherwise file contents are returned
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
-		read: function(location, isMetadata) {
+		read: function(location, isMetadata, acceptPatch) {
 			var url = new URL(location, window.location);
 			if (isMetadata) {
 				url.query.set("parts", "meta");
@@ -490,11 +490,15 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				if (isMetadata) {
 					return result.response ? JSON.parse(result.response) : null;
 				} else {
-					return result.response;
+					if (acceptPatch) {
+						return {result: result.response, acceptPatch: result.xhr.getResponseHeader("Accept-Patch")};
+					} else {
+						return result.response;
+					}
 				}
 			}).then(function(result) {
 				if (this.makeAbsolute) {
-					_normalizeLocations(result);
+					_normalizeLocations(acceptPatch ? result.result : result);
 				}
 				return result;
 			}.bind(this));
@@ -508,6 +512,8 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 		 * @return A deferred for chaining events after the write completes with new metadata object
 		 */		
 		write: function(location, contents, args) {
+			var url = new URL(location, window.location);
+			
 			var headerData = {
 					"Orion-Version": "1",
 					"Content-Type": "text/plain;charset=UTF-8"
@@ -523,17 +529,22 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 			};
 						
 			// check if we have raw contents or something else
+			var method = "PUT";
 			if (typeof contents !== "string") {
 				// look for remote content
 				if (contents.sourceLocation) {
 					options.query = {source: contents.sourceLocation};
 					options.data = null;
+				} else if (contents.diff) {
+					method = "POST";
+					headerData["X-HTTP-Method-Override"] = "PATCH";
+					options.data = JSON.stringify(options.data);
 				} else {
 					// assume we are putting metadata
-					options.query = {parts: "meta"};
+					url.query.set("parts", "meta");
 				}
 			}
-			return xhr("PUT", location, options).then(function(result) {
+			return xhr(method, url.href, options).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
 			}).then(function(result) {
 				if (this.makeAbsolute) {

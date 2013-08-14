@@ -80,7 +80,7 @@ define([
 		if (error.status === 0) {
 			error = {
 				Severity: "Error", //$NON-NLS-0$
-				Message: messages['No response from server.  Check your internet connection and try again.'] //$NON-NLS-1$
+				Message: messages['No response from server.  Check your internet connection and try again.']
 			};
 		} else {
 			var responseText = error.responseText;
@@ -140,7 +140,7 @@ define([
 					editor.reportStatus(i18nUtil.formatMessage(messages.Fetching, fileURI));
 				}, 800);
 				new Deferred.all([
-					progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)),
+					progressService.progress(fileClient.read(fileURI, false, true), i18nUtil.formatMessage(messages.Reading, fileURI)),
 					progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI))
 				], function(error) { return {_error: error}; }).then(function(results) {
 					if (progressTimeout) {
@@ -153,7 +153,13 @@ define([
 						handleError(statusService, contentOrError._error || metadataOrError._error);
 						this._setNoInput();
 					} else {
-						this._setInputContents(this._parsedLocation, fileURI, contentOrError, metadataOrError);
+						var content = contentOrError;
+						this._acceptPatch = null;
+						if (typeof contentOrError !== "string") {
+							content = contentOrError.result;
+							this._acceptPatch = contentOrError.acceptPatch;
+						}
+						this._setInputContents(this._parsedLocation, fileURI, content, metadataOrError);
 					}
 					editor.reportStatus("");
 				}.bind(this));
@@ -188,9 +194,20 @@ define([
 			var input = this.getInput();
 			editor.reportStatus(messages['Saving...']);
 			var contents = editor.getText();
+			var data = contents;
+			if (this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1) {  //$NON-NLS-0$
+				var changes = editor.getUndoStack().getRedoChanges();
+				var length = 0;
+				for (var i=0; i<changes.length; i++) {
+					length += changes[i].text.length;
+				}
+				if (contents.length > length) {
+					data = {diff: changes};
+				}
+			}
 			var etag = this.getFileMetadata().ETag;
 			var args = { "ETag" : etag }; //$NON-NLS-0$
-			var def = this.fileClient.write(input, contents, args);
+			var def = this.fileClient.write(input, data, args);
 			var progress = this.progressService;
 			var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			if (progress) {
@@ -219,7 +236,7 @@ define([
 					var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
 					if (forceSave) {
 						// repeat save operation, but without ETag 
-						var def = self.fileClient.write(input, contents);
+						var def = self.fileClient.write(input, data);
 						if (progress) {
 							def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
 						}
@@ -272,6 +289,9 @@ define([
 		},
 		setDirty: function(dirty) {
 			mGlobalCommands.setDirtyIndicator(dirty);
+		},
+		setSaveDiffsEnabled: function(enabled) {
+			this._saveDiffsEnabled = enabled;
 		},
 		setInput: function(location) {
 			if (this._ignoreInput) { return; }

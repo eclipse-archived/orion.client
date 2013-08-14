@@ -166,6 +166,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		settings = prefs;
 		inputManager.setAutoLoadEnabled(prefs.autoLoad);
 		inputManager.setAutoSaveTimeout(prefs.autoSave ? prefs.autoSaveTimeout : -1);
+		inputManager.setSaveDiffsEnabled(prefs.saveDiffs);
 		var textView = editor.getTextView();
 		if (textView) {
 			updateKeyMode(textView);
