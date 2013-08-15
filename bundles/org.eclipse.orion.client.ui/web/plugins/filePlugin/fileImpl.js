@@ -625,7 +625,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 					"Accept": "application/json",
 					"Orion-Version": "1"
 				},
-				timeout: 15000
+				timeout: 60000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : {};
 			}).then(function(result) {
