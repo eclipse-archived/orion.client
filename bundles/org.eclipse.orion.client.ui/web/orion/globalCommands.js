@@ -565,6 +565,15 @@ define([
 			closeNotification.setAttribute("aria-label", messages['Close notification']); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 
+		//Hack for FF17 Bug#415176
+		if (util.isFirefox <= 17) {
+			var staticBanner = lib.node("staticBanner"); //$NON-NLS-0$
+			if (staticBanner) {
+				staticBanner.style.width = "100%"; //$NON-NLS-0$
+				staticBanner.style.MozBoxSizing = "border-box"; //$NON-NLS-0$
+			}
+		}
+		
 		var footer = lib.node("footer"); //$NON-NLS-0$
 		if (footer) {
 			footer.innerHTML = FooterTemplate;
