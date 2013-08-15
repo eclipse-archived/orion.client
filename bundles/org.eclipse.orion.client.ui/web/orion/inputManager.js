@@ -155,7 +155,7 @@ define([
 					} else {
 						var content = contentOrError;
 						this._acceptPatch = null;
-						if (typeof contentOrError !== "string") {
+						if (typeof contentOrError !== "string") { //$NON-NLS-0$
 							content = contentOrError.result;
 							this._acceptPatch = contentOrError.acceptPatch;
 						}
