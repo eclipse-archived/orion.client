@@ -253,16 +253,13 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 			var view = this._view;
 			var model = view.getModel();
 			var baseModel = model;
-			var start = model.getLineStart(lineIndex);
+			var start = model.getLineStart(lineIndex), lineStart = start;
 			var end = start;
 			var annotationModel = this._annotationModel;
 			if (annotationModel) {
 				var selection = view.getSelection();
-				var offset = Math.max(selection.start, selection.end);
+				start = selection.start;
 				end = model.getLineEnd(lineIndex, true);
-				if (start <= offset && offset < model.getLineEnd(lineIndex)) {
-					start = offset + 1;
-				}
 				if (model.getBaseModel) {
 					start = model.mapOffset(start);
 					end = model.mapOffset(end);
@@ -271,14 +268,14 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 				var annotation, iter = annotationModel.getAnnotations(start, end);
 				while (!annotation && iter.hasNext()) {
 					var a = iter.next();
-					if (!this.isAnnotationTypeVisible(a.type)) { continue; }
+					if (a.start <= start || !this.isAnnotationTypeVisible(a.type)) { continue; }
 					annotation = a;
 				}
 				if (annotation && baseModel.getLineAtOffset(annotation.start) === baseModel.getLineAtOffset(start)) {
 					start = annotation.start;
 					end = annotation.end;
 				} else {
-					end = start;
+					end = start = lineStart;
 				}
 				
 				if (model.getBaseModel) {
