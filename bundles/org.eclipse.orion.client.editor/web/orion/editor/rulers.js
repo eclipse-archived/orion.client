@@ -258,8 +258,10 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 			var annotationModel = this._annotationModel;
 			if (annotationModel) {
 				var selection = view.getSelection();
-				start = selection.start;
 				end = model.getLineEnd(lineIndex, true);
+				if (start <= selection.start && selection.start < end) {
+					start = selection.start;
+				}
 				if (model.getBaseModel) {
 					start = model.mapOffset(start);
 					end = model.mapOffset(end);
