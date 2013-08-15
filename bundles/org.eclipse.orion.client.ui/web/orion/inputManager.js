@@ -196,7 +196,7 @@ define([
 			var contents = editor.getText();
 			var data = contents;
 			if (this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1) {  //$NON-NLS-0$
-				var changes = editor.getUndoStack().getRedoChanges();
+				var changes = editor.getUndoStack().getUncleanChanges();
 				var length = 0;
 				for (var i=0; i<changes.length; i++) {
 					length += changes[i].text.length;

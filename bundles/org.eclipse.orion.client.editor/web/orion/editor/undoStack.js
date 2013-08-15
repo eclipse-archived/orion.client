@@ -328,50 +328,60 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 * @property {String} text the text to be inserted
 		 */
 		/**
-		 * Returns the redo changes since the last clean point.
+		 * Returns the redo changes.
 		 *
 		 * @return {orion.editor.TextChange[]} an array of TextChanges that are returned in the order
 		 * that they occurred (most recent change last).
 		 *
 		 * @see orion.editor.UndoStack#getUndoChanges
-		 * @see orion.editor.UndoStack#markClean
 		 */
 		getRedoChanges: function() {
 			this._commitUndo();
 			var changes = [];
-			for (var i=this.cleanIndex; i<this.stack.length; i++) {
+			for (var i=this.index; i<this.stack.length; i++) {
 				changes = changes.concat(this.stack[i].getRedoChanges());
 			}
 			return changes;
 		},
 		/**
-		 * @class This object represents a text change.
-		 * <p>
-		 * <b>See:</b><br/>
-		 * {@link orion.editor.UndoStack}<br/>
-		 * {@link orion.editor.UndoStack#getUndoChanges}<br/>
-		 * {@link orion.editor.UndoStack#getRedoChanges}<br/>
-		 * </p>
-		 * @name orion.editor.TextChange
-		 * 
-		 * @property {Number} start The start offset in the model of the range to be replaced.
-		 * @property {Number} end The end offset in the model of the range to be replaced
-		 * @property {String} text the text to be inserted
-		 */
-		/**
-		 * Returns the undo changes up to the last clean point.
+		 * Returns the undo changes.
 		 *
 		 * @return {orion.editor.TextChange[]} an array of TextChanges that are returned in the reverse order
 		 * that they occurred (most recent change first).
 		 *
 		 * @see orion.editor.UndoStack#getRedoChanges
-		 * @see orion.editor.UndoStack#markClean
 		 */
 		getUndoChanges: function() {
 			this._commitUndo();
 			var changes = [];
-			for (var i=this.stack.length - 1; i >= this.cleanIndex; i--) {
+			for (var i=this.index; i >= 0; i--) {
 				changes = changes.concat(this.stack[i].getUndoChanges());
+			}
+			return changes;
+		},
+		/**
+		 * Returns the changes up to the last clean point.
+		 *
+		 * @return {orion.editor.TextChange[]} an array of TextChanges that are returned in the reverse order
+		 * that they occurred (most recent change first).
+		 *
+		 * @see orion.editor.UndoStack#markClean
+		 */
+		getUncleanChanges: function() {
+			this._commitUndo();
+			var changes = [], i;
+			if (this.index > this.cleanIndex) {
+				i = this.cleanIndex;
+				while (i < this.index) {
+					changes = changes.concat(this.stack[i].getRedoChanges());
+					i++;
+				}
+			} else {
+				i = this.cleanIndex - 1;
+				while (i >= this.index) {
+					changes = changes.concat(this.stack[i].getUndoChanges());
+					i--;
+				}
 			}
 			return changes;
 		},
