@@ -390,26 +390,30 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		getValues: function(editorPrefs) {
 			this._forEach(function(property, info) {
 				editorPrefs[property] = info.widget.getSelection();
-				var indicator = lib.$("." + localIndicatorClass, info.widget.node); //$NON-NLS-0$
-				editorPrefs[property + "LocalVisible"] = indicator && indicator.classList.contains(on); //$NON-NLS-1$ //$NON-NLS-0$
+				if (!this.local) {
+					var indicator = lib.$("." + localIndicatorClass, info.widget.node); //$NON-NLS-0$
+					editorPrefs[property + "LocalVisible"] = indicator && indicator.classList.contains(on); //$NON-NLS-1$ //$NON-NLS-0$
+				}
 				return true;
-			});
+			}.bind(this));
 		},
 		setValues: function(editorPrefs) {
 			this._forEach(function(property, info) {
 				info.widget.setSelection(editorPrefs[property]);
-				var indicator = lib.$("." + localIndicatorClass, info.widget.node); //$NON-NLS-0$
-				if (indicator) {
-					if (editorPrefs[property + "LocalVisible"]) { //$NON-NLS-0$
-						indicator.classList.add(on);
-						indicator.classList.remove(off);
-					} else {
-						indicator.classList.add(off);
-						indicator.classList.remove(on);
+				if (!this.local) {
+					var indicator = lib.$("." + localIndicatorClass, info.widget.node); //$NON-NLS-0$
+					if (indicator) {
+						if (editorPrefs[property + "LocalVisible"]) { //$NON-NLS-0$
+							indicator.classList.add(on);
+							indicator.classList.remove(off);
+						} else {
+							indicator.classList.add(off);
+							indicator.classList.remove(on);
+						}
 					}
 				}
 				return true;
-			});
+			}.bind(this));
 		},
 		destroy: function() {
 			if (this.node) {
