@@ -34,6 +34,10 @@ define("plugins/esprima/indexFiles/browserIndex", [], function () {
 					"!type": "fn(data: String)"
 				}
 			},
+			"WebSocket_obj": {
+				"!type": "fn(url: String, protocols: String)",
+				"prototype": "WebSocket"
+			},
 			"EventHandler": {
 				"!proto": "Object"
 			},
@@ -70,7 +74,11 @@ define("plugins/esprima/indexFiles/browserIndex", [], function () {
 				"status": "Number",
 				"statusText": "String"
 			},
-			"Worker": {
+			"XHR_obj": {
+				"!type": "fn()",
+				"prototype": "XMLHttpRequest"
+			},
+			"Worker_proto": {
 				"!proto": "Object",
 				"terminate": {
 					"!type": "fn()"
@@ -81,6 +89,10 @@ define("plugins/esprima/indexFiles/browserIndex", [], function () {
 				"onmessage": {
 					"!type": "fn()"
 				}
+			},
+			"Worker_obj": {
+				"!type": "fn(url: String)",
+				"prototype": "Worker_proto"
 			},
 			"HTMLOptionElement": {
 				"!proto": "HTMLElement"
@@ -120,6 +132,10 @@ define("plugins/esprima/indexFiles/browserIndex", [], function () {
 				"stopPropagation": {
 					"!type": "fn()"
 				}
+			},
+			"Event_obj": {
+				"!type": "fn(type: String)",
+				"prototype": "Event"
 			},
 			"MediaQueryList": {
 				"!proto": "Object"
@@ -298,6 +314,10 @@ define("plugins/esprima/indexFiles/browserIndex", [], function () {
 				"isDefaultNamespace": {
 					"!type": "fn(namespace: String) -> Boolean"
 				}
+			},
+			"Node_obj": {
+				"!type": "fn()",
+				"prototype": "Node"
 			},
 			"NodeList": {
 				"!proto": "Object",
@@ -957,20 +977,10 @@ define("plugins/esprima/indexFiles/browserIndex", [], function () {
 		"Option": {
 			"!type": "fn(text?: String, value?: Object, defaultSelected?: Boolean, selected?: Boolean)"
 		},
-		"Worker": {
-			"!type": "fn(url: String)"
-		},
-		"XMLHttpRequest": {
-			"!type": "fn()"
-		},
-		"WebSocket": {
-			"!type": "fn(url: String, protocols: String)"
-		},
-		"Event": {
-			"!type": "fn(type: String)"
-		},
-		"Node": {
-			"!type": "fn()"
-		}
+		"Worker": "Worker_obj",
+		"XMLHttpRequest": "XHR_obj",
+		"WebSocket": "WebSocket_obj",
+		"Event": "Event_obj",
+		"Node": "Node_obj"
 	};
 });

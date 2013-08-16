@@ -658,12 +658,23 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeUtils", "plugins/
 	}
 
 	/**
+	 * @param {String} name
+	 */
+	function findBuiltInNodeModuleType(name, env) {
+		if (name.indexOf(".") !== -1 || name.indexOf("/") !== -1) {
+			return null;
+		}
+		var typeObj = typeUtils.ensureTypeObject(name);
+		return env.findType(typeObj) ? typeObj : null;
+	}
+	
+	/**
 	 * if this method call ast node is a call to require with a single string constant
 	 * argument, then look that constant up in the indexer to get a summary
 	 * if a summary is found, then apply it to the current scope
 	 */
 	function extractRequireModule(call, env) {
-		if (!env.indexer) {
+		if (!env.indexer && !env.nodeJSModule) {
 			return;
 		}
 		if (call.type === "CallExpression" && call.callee.type === "Identifier" &&
@@ -672,20 +683,24 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeUtils", "plugins/
 			var arg = call["arguments"][0];
 			if (arg.type === "Literal" && typeof arg.value === "string") {
 				// we're in business
-				var summary = env.indexer.retrieveSummary(arg.value);
-				if (summary) {
-					var typeName;
-					var mergeTypeName;
-					if (typeof summary.provided === "string") {
-						mergeTypeName = typeName = summary.provided;
-					} else {
-						// module provides a composite type
-						// must create a type to add the summary to
-						mergeTypeName = typeName = env.newScope();
-						env.popScope();
+				if (env.nodeJSModule) {
+					return findBuiltInNodeModuleType(arg.value, env);
+				} else {
+					var summary = env.indexer.retrieveSummary(arg.value);
+					if (summary) {
+						var typeName;
+						var mergeTypeName;
+						if (typeof summary.provided === "string") {
+							mergeTypeName = typeName = summary.provided;
+						} else {
+							// module provides a composite type
+							// must create a type to add the summary to
+							mergeTypeName = typeName = env.newScope();
+							env.popScope();
+						}
+						env.mergeSummary(summary, mergeTypeName);
+						return typeUtils.ensureTypeObject(typeName);
 					}
-					env.mergeSummary(summary, mergeTypeName);
-					return typeUtils.ensureTypeObject(typeName);
 				}
 			}
 		}
