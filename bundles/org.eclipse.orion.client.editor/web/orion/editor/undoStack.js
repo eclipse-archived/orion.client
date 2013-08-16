@@ -266,7 +266,7 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 * @see orion.editor.UndoStack#markClean
 		 */
 		isClean: function() {
-			return this.cleanIndex === this.index && this._unsavedChanges.length === 0;
+			return this.cleanIndex === this.getSize().undo && this._unsavedChanges.length === 0;
 		},
 		/**
 		 * Returns true if there is at least one change to undo.
