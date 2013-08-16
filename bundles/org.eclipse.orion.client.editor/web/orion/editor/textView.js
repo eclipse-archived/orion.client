@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -5459,7 +5459,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var model = this._model;
 			try {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = true; }
-				model.setText (e.text, e.start, e.end);
+				model.setText(e.text, e.start, e.end);
 			} finally {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = false; }
 			}
