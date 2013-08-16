@@ -2320,10 +2320,10 @@ define([
 	tests["test node1"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
-			"mod", "mod"
+			"glo", "glo"
 		);
 		return testProposals(results, [
-			["module", "module : Global"]
+			["global", "global : Global"]
 		]);
 	};
 
@@ -2340,17 +2340,17 @@ define([
 	tests["test node3"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:false node:true*/\n" +
-			"mod", "mod"
+			"glo", "glo"
 		);
 		return testProposals(results, [
-			["module", "module : Global"]
+			["global", "global : Global"]
 		]);
 	};
 
 	tests["test node4"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:false*/\n" +
-			"mod", "mod"
+			"glo", "glo"
 		);
 		return testProposals(results, []);
 	};
@@ -2372,7 +2372,7 @@ define([
 	tests["test node6"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node: xxx true*/\n" +
-			"mod", "mod"
+			"glo", "glo"
 		);
 		return testProposals(results, []);
 	};
@@ -2381,7 +2381,7 @@ define([
 	tests["test node7"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node  xxxx : true*/\n" +
-			"mod", "mod"
+			"glo", "glo"
 		);
 		return testProposals(results, []);
 	};
@@ -2389,10 +2389,10 @@ define([
 	// configuration from .scripted
 	tests["test node8"] = function() {
 		var results = computeContentAssist(
-			"mod", "mod", null, {options:{node:true}}
+			"glo", "glo", null, {options:{node:true}}
 		);
 		return testProposals(results, [
-			["module", "module : Global"]
+			["global", "global : Global"]
 		]);
 	};
 
@@ -2400,7 +2400,7 @@ define([
 	tests["test node9"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:false*/\n" +
-			"mod", "mod", null, {options:{node:true}}
+			"glo", "glo", null, {options:{node:true}}
 		);
 		return testProposals(results, []);
 	};
@@ -2409,10 +2409,10 @@ define([
 	tests["test node10"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
-			"mod", "mod", null, {options:{browser:true}}
+			"glo", "glo", null, {options:{browser:true}}
 		);
 		return testProposals(results, [
-			["module", "module : Global"]
+			["global", "global : Global"]
 		]);
 	};
 
@@ -2424,6 +2424,37 @@ define([
 		);
 		return testProposals(results, [
 			["window", "window : Global"]
+		]);
+	};
+
+	tests["test node12"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"process.", ""
+		);
+		// just testing that we don't crash
+		return results.then(function () {});
+	};
+
+	tests["test node13"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"var x = require(\"fs\");\n" +
+			"x.o", "o"
+		);
+		return testProposals(results, [
+			["open(path, flags, mode, callback)", "open(path, flags, mode, callback) : undefined"],
+			["openSync(path, flags, [mode])", "openSync(path, flags, [mode]) : Number"]	
+		]);
+	};
+	
+	tests["test node14"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"process.stdout.wr", "wr"
+		);
+		return testProposals(results, [
+			["write(chunk, [encoding], [callback])", "write(chunk, [encoding], [callback]) : Boolean"]
 		]);
 	};
 

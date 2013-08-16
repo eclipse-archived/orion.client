@@ -451,7 +451,13 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 								// maybe should traverse the prototype
 								return;
 							}
+							if (key === '$$isBuiltin') {
+								return;
+							}
 							var prop = origFields[key];
+							// if we're already serializing an enclosing object type (depth > 0),
+							// and the field type is itself an object type, just represent the type
+							// with '...' rather than recursing further
 							var fieldType = depth > 0 && (prop.typeObj.type === 'NameExpression' && env.isSyntheticName(prop.typeObj.name) && !allTypes[prop.typeObj.name].$$fntype) ?
 							     { type : 'NameExpression', name : JUST_DOTS } :
 							     self.convertJsDocType(prop.typeObj, env, doCombine, depth+1);

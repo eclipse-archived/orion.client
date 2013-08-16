@@ -49,22 +49,32 @@ function(typeUtils, mTypes, Deferred) {
 	 * Returns a promise that is resolved with the populated 
 	 * mTypes.Types object.
 	 */ 
-	function initKnownTypes(globalObjName) {
-		var types = new mTypes.Types();
-		var result;
-		if (globalObjName === "Window") {
-			// browser code; load the browser module
-			result = mTypes.addLibrary(types,"browser");
-			
-		} else if (globalObjName === "Module") {
-			// node.js code
-			result = mTypes.addLibrary(types,"node");
-		} else {
-			var d = new Deferred();
-			d.resolve(types);
-			result = d.promise;
-		}
-		return result;
+	function initKnownTypes(globalObjName, indexData) {
+		var coreLibPromise = mTypes.init();
+		var finalResult = coreLibPromise.then(function () {
+			var types = new mTypes.Types();
+			if (indexData) {
+				indexData.forEach(function (d) {
+					// mutates types
+					mTypes.addIndexData(d, types);
+				});
+			}
+			var result = null;
+			if (globalObjName === "Window") {
+				// browser code; load the browser module
+				result = mTypes.addLibrary(types,"browser");
+				
+			} else if (globalObjName === "Module") {
+				// node.js code
+				result = mTypes.addLibrary(types,"node");
+			} else {
+				var d = new Deferred();
+				d.resolve(types);
+				result = d.promise;
+			}
+			return result;
+		});
+		return finalResult;
 	}
 	
 
@@ -76,7 +86,7 @@ function(typeUtils, mTypes, Deferred) {
 	 * Returns a promise that is resolved with the environment object.
 	 */
 	function createEnvironment(options) {
-		var buffer = options.buffer, uid = options.uid, offset = options.offset, indexer = options.indexer, globalObjName = options.globalObjName;
+		var buffer = options.buffer, uid = options.uid, offset = options.offset, indexer = options.indexer, globalObjName = options.globalObjName, indexData = options.indexData;
 		if (!offset) {
 			offset = buffer.length+1;
 		}
@@ -104,6 +114,47 @@ function(typeUtils, mTypes, Deferred) {
 			return hash;
 		};
 
+		// translate function names on object into safe names
+		var swapper = function(name) {
+			switch (name) {
+				case "prototype":
+					return "$$prototype";
+				case "__proto__":
+					return "$$proto";
+				case "toString":
+				case "hasOwnProperty":
+				case "toLocaleString":
+				case "valueOf":
+				case "isProtoTypeOf":
+				case "propertyIsEnumerable":
+					return "$_$" + name;
+				default:
+					return name;
+			}
+		};
+
+		// routine to lookup a member name of a type that follows the prototype chain
+		// to search for the member
+		function innerLookup(env, name, type, includeDefinition) {
+			var res = type[name];
+
+			var proto = type.$$proto;
+			if (res) {
+				// found it.  if includeDefinition is set, we return
+				// the Definition object res.  if we were looking for 
+				// a function type, then res represents the function 
+				// type directly, so we return it.  Otherwise, res
+				// is a Definition object, and we return its enclosed
+				// type object
+				return includeDefinition || name === '$$fntype' ? res : res.typeObj;
+			} else if (proto) {
+				return innerLookup(env, name, env.lookupQualifiedType(proto.typeObj.name), includeDefinition);
+			} else {
+				return null;
+			}
+		}
+	
+
 		// prefix for generating local types
 		// need to add a unique id for each file so that types defined in dependencies don't clash with types
 		// defined locally
@@ -111,7 +162,7 @@ function(typeUtils, mTypes, Deferred) {
 		// uncomment to show names
 //		var namePrefix = typeUtils.GEN_NAME + (uid) + "~";
 
-		var promise = initKnownTypes(globalObjName);
+		var promise = initKnownTypes(globalObjName, indexData);
 		var result = promise.then(function (knownTypes) {
 			return {
 				/** Each element is the type of the current scope, which is a key into the types array */
@@ -130,6 +181,8 @@ function(typeUtils, mTypes, Deferred) {
 				amdModule : null,
 				/** if this is a wrapped commonjs module, then the value of this property is the 'define' call expression */
 				commonjsModule : null,
+				/** is this a node.js module? */
+				nodeJSModule: globalObjName === "Module",
 				/** the indexer for thie content assist invocation.  Used to track down dependencies */
 				indexer: indexer,
 				/** the offset of content assist invocation */
@@ -269,6 +322,10 @@ function(typeUtils, mTypes, Deferred) {
 							return "Function";
 						} else if (inferredTypeObj.type === 'ArrayType') {
 							return "Array";
+						} else if (inferredTypeObj.type === 'TypeApplication') {
+							return inferredTypeObj.expression.name;
+						} else if (inferredTypeObj.type === 'UndefinedLiteral') {
+							return "Object";
 						}
 					} else {
 						// grab topmost scope
@@ -399,51 +456,38 @@ function(typeUtils, mTypes, Deferred) {
 					}
 					return defn;
 				},
-	
+
+				/**
+				 * lookup a qualified type name a..b..c.  '..' is used to 
+				 * separate members, to avoid confusion with the use of '.'
+				 * in names for constructors.  
+				 * returns the type itself (the object containing information
+				 * on members), rather than a type object with the type's name
+				 */
+				lookupQualifiedType : function(name, includeDefinition) {
+					var scopeNames = name.split("..");
+					var targetType = this._allTypes[scopeNames[0]];
+					for (var i = 1; i < scopeNames.length; i++) {
+						var typeObj = innerLookup(this, swapper(scopeNames[i]), targetType, includeDefinition);
+						targetType = this._allTypes[typeObj.name];
+					}	
+					return targetType;
+				},
+				
 				/**
 				 * looks up the name in the hierarchy
 				 * @return {{}} type objec for the current name or null if doesn't exist
 				 */
 				lookupTypeObj : function(name, target, includeDefinition) {
 	
-					// translate function names on object into safe names
-					var swapper = function(name) {
-						switch (name) {
-							case "prototype":
-								return "$$prototype";
-							case "__proto__":
-								return "$$proto";
-							case "toString":
-							case "hasOwnProperty":
-							case "toLocaleString":
-							case "valueOf":
-							case "isProtoTypeOf":
-							case "propertyIsEnumerable":
-								return "$_$" + name;
-							default:
-								return name;
-						}
-					};
-	
-					var innerLookup = function(name, type, allTypes) {
-						var res = type[name];
-	
-						var proto = type.$$proto;
-						if (res) {
-							return includeDefinition || name === '$$fntype' ? res : res.typeObj;
-						} else if (proto) {
-							return innerLookup(name, allTypes[proto.typeObj.name], allTypes);
-						} else {
-							return null;
-						}
-					};
-					var targetType = this._allTypes[this.scope(target)];
+					var scope = this.scope(target);
+					var targetType = this.lookupQualifiedType(scope, includeDefinition);
 	
 					// uncomment this if we want to hide errors where there is an unknown type being placed on the scope stack
 	//				if (!targetType) {
 	//					targetType = this.globalScope()
 	//				}
-					var res = innerLookup(swapper(name), targetType, this._allTypes);
+					var res = innerLookup(this, swapper(name), targetType, includeDefinition);
 					return res;
 				},
 	
@@ -512,13 +556,18 @@ function(typeUtils, mTypes, Deferred) {
 				    var emptyProtoName = this.newFleetingObject(newObjectName + "~proto");
 				    // __proto__ points to Function
 					this._allTypes[newObjectName].$$proto = new typeUtils.Definition("Function",null,this.uid);
-					// we store the function signature in $$fntype
+					// we store the function type itself in $$fntype
 					this._allTypes[newObjectName].$$fntype = functionTypeObj;
-					// store 'prototype' in $$prototype
+					// store type of 'prototype' object in $$prototype
 					this._allTypes[newObjectName].$$prototype = new typeUtils.Definition(emptyProtoName,null,this.uid);
-					// to handle writes to 'this' inside the function, we create another type thisType.  thisType
-					// has the empty object as its $$proto.  And thisType is the type ascribed to a new invocation.
-					// in this manner, writes to fields of this override types in the empty prototype.
+					// to handle writes to 'this' inside the function, we create another type $$newtype.  $$newtype
+					// has the function's $$prototype type as its $$proto.  And $$newtype is the type ascribed to an
+					// invocation of the function with the 'new' operator.
+					// in this manner, writes to fields of 'this' take precedence over fields defined
+					// in the prototype object.  
+					// E.g., if we have 
+					//    var AAA = function() { this.foo = 0; }; AAA.prototype = { foo : '' }; var x = new AAA();
+					// the type of x.foo should be Number, not String
 					if (!newTypeName) {
 					  newTypeName = newObjectName + "~new";
 					}
@@ -547,9 +596,6 @@ function(typeUtils, mTypes, Deferred) {
 	            },
 	            /**
 	             * updates a function type to include a new return type.
-	             * function types are specified like this: ?returnType:[arg-n...]
-	             * return type is the name of the return type, arg-n is the name of
-	             * the nth argument.
 	             */
 	            updateReturnType : function(typeObj,newReturnTypeObj) {
 					if (! typeObj) {
@@ -578,26 +624,21 @@ function(typeUtils, mTypes, Deferred) {
 	            /**
 	             * get the result type for invoking target via a 'new' expression.
 	             */
-	            getNewType : function(target) {
-	              var result = this.lookupTypeObj("$$newtype",target);
-	              if (!result) {
-	                // TODO MS get rid of this code once we fix types.js
-	                var inferredTypeObj = target.extras.inferredTypeObj;
-	                result = typeUtils.extractReturnType(inferredTypeObj);
-	              }
-	              return result;
+	            getNewType : function(target) {					
+					return this.lookupTypeObj("$$newtype",target);
 	            },
 	
 	            /**
 	             * get the result type for invoking target via a 'new' expression.
 	             */
 	            getFnType : function(target) {
-	              var result = this.lookupTypeObj("$$fntype",target);
-	              if (!result) {
-	                // TODO MS get rid of this code once we fix types.js
-	                result = target.extras.inferredTypeObj;
-	              }
-	              return result;
+					var result = this.lookupTypeObj("$$fntype",target);
+					if (!result) {
+						// this can occur, e.g., when target is the type attached to a CallExpression
+						// invoking a non-existent function
+						result = target.extras.inferredTypeObj;
+					}
+					return result;
 	            },
 	
 	

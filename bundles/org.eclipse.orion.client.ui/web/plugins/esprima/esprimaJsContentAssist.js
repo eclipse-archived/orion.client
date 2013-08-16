@@ -219,7 +219,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeEnvironment", "pl
 	}
 
 	function createInferredProposals(targetTypeName, env, completionKind, prefix, replaceStart, proposals, relevance) {
-		var prop, propTypeObj, propName, res, type = env.getAllTypes()[targetTypeName], proto = type.$$proto;
+		var prop, propTypeObj, propName, res, type = env.lookupQualifiedType(targetTypeName), proto = type.$$proto;
 		if (!relevance) {
 			relevance = 100;
 		}
@@ -265,6 +265,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeEnvironment", "pl
 				}
 				if (proposalUtils.looselyMatches(prefix, propName)) {
 					propTypeObj = type[prop].typeObj;
+					// if propTypeObj is a reference to a function type,
+					// extract the actual function type
 					if ((env._allTypes[propTypeObj.name]) && (env._allTypes[propTypeObj.name].$$fntype)) {
 						propTypeObj = env._allTypes[propTypeObj.name].$$fntype;
 					}
