@@ -220,11 +220,7 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 				this.compoundChange.add(change);
 			} else {
 				var length = this.stack.length;
-				var removed = this.stack.splice(this.index, length-this.index, change);
-				if (removed.length > 0 && this.cleanIndex > this.index) {
-					this._unsavedChanges = this._unsavedChanges.concat(removed);
-					this.cleanIndex = this.index;
-				}
+				this.stack.splice(this.index, length-this.index, change);
 				this.index++;
 				if (this.stack.length > this.size) {
 					this.stack.shift();
@@ -246,7 +242,6 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			this.endCompoundChange();
 			this._commitUndo();
 			this.cleanIndex = this.index;
-			this._unsavedChanges = [];
 		},
 		/**
 		 * Returns true if current state of stack is the same
@@ -266,7 +261,7 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		 * @see orion.editor.UndoStack#markClean
 		 */
 		isClean: function() {
-			return this.cleanIndex === this.getSize().undo && this._unsavedChanges.length === 0;
+			return this.cleanIndex === this.getSize().undo;
 		},
 		/**
 		 * Returns true if there is at least one change to undo.
@@ -365,35 +360,6 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			return changes;
 		},
 		/**
-		 * Returns the changes up to the last clean point.
-		 *
-		 * @return {orion.editor.TextChange[]} an array of TextChanges that are returned in the reverse order
-		 * that they occurred (most recent change first).
-		 *
-		 * @see orion.editor.UndoStack#markClean
-		 */
-		getUncleanChanges: function() {
-			this._commitUndo();
-			var changes = [], i;
-			for (i=this._unsavedChanges.length - 1; i >= 0; i--) {
-				changes = changes.concat(this._unsavedChanges[i].getUndoChanges());
-			}
-			if (this.index > this.cleanIndex) {
-				i = this.cleanIndex;
-				while (i < this.index) {
-					changes = changes.concat(this.stack[i].getRedoChanges());
-					i++;
-				}
-			} else {
-				i = this.cleanIndex - 1;
-				while (i >= this.index) {
-					changes = changes.concat(this.stack[i].getUndoChanges());
-					i--;
-				}
-			}
-			return changes;
-		},
-		/**
 		 * Undo the last change in the stack.
 		 *
 		 * @return {Boolean} returns true if a change was un-done.
@@ -441,7 +407,6 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 		reset: function() {
 			this.index = this.cleanIndex = 0;
 			this.stack = [];
-			this._unsavedChanges = [];
 			this._undoStart = undefined;
 			this._undoText = "";
 			this._undoType = 0;
