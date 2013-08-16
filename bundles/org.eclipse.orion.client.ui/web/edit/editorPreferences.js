@@ -16,27 +16,29 @@ define([], function() {
 	var SETTINGS_KEY = "editorSettings"; //$NON-NLS-0$
 
 	var defaults = {	
-		autoSave:false, 
-		autoSaveVisible:true,
-		autoSaveLocalVisible:true,
-		autoSaveTimeout:1000,
-		autoSaveTimeoutVisible:true,
-		themeVisible:true,
-		themeLocalVisible:true,
-		fontSizeVisible:true,
-		fontSizeLocalVisible:true,
-		autoLoad:true,
-		autoLoadVisible:true,
-		saveDiffs:false,
-		saveDiffsVisible:true,
-		tabSize:4,
-		tabSizeVisible:true,
-		expandTab:false,
-		expandTabVisible:true,
+		autoSave: false, 
+		autoSaveVisible: true,
+		autoSaveLocalVisible: true,
+		autoSaveTimeout: 1000,
+		autoSaveTimeoutVisible: true,
+		themeVisible: true,
+		themeLocalVisible: true,
+		fontSizeVisible: true,
+		fontSizeLocalVisible: true,
+		autoLoad: true,
+		autoLoadVisible: true,
+		saveDiffs: false,
+		saveDiffsVisible: true,
+		trimTrailingWhiteSpace: false,
+		trimTrailingWhiteSpaceVisible: true,
+		tabSize: 4,
+		tabSizeVisible: true,
+		expandTab: false,
+		expandTabVisible: true,
 		scrollAnimation: true,
-		scrollAnimationVisible:true,
-		scrollAnimationTimeout:300,
-		scrollAnimationTimeoutVisible:true,
+		scrollAnimationVisible: true,
+		scrollAnimationTimeout: 300,
+		scrollAnimationTimeoutVisible: true,
 		annotationRuler: true,
 		annotationRulerVisible: true,
 		lineNumberRuler: true,
@@ -95,6 +97,6 @@ define([], function() {
 		}
 	};
 	
-	return  {EditorPreferences : EditorPreferences};
+	return { EditorPreferences: EditorPreferences };
 });	
 	

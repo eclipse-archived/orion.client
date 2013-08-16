@@ -98,6 +98,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				},
 				saveDiffs: {
 					create: createBooleanProperty
+				},
+				trimTrailingWhiteSpace: {
+					create: createBooleanProperty
 				}
 			},
 			tabs: {

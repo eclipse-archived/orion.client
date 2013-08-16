@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -32,13 +32,13 @@ define([
 		//TODO: add support for multiple clients with different timeouts
 		var events = ["keypress","keydown","keyup","mousemove","mousedown","mousemove"]; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		var reset = function (e) { this._resetTimer(); }.bind(this);
-		for (var i=0; i<events.length; i++) {
+		for (var i = 0; i < events.length; i++) {
 			var event = events[i];
-			this._document.addEventListener(event, reset, true);	
+			this._document.addEventListener(event, reset, true);
 		}
 		EventTarget.attach(this);
 	}
-	
+
 	Idle.prototype = {
 		_resetTimer: function() {
 			var window = this._document.defaultView || this._document.parentWindow;
@@ -48,7 +48,7 @@ define([
 			}
 			if (this._timeout !== -1) {
 				this._timer = window.setTimeout(function() {
-					this.onIdle({type:"Idle"});	//$NON-NLS-0$ 
+					this.onIdle({type:"Idle"});	//$NON-NLS-0$
 					this._timer = null;
 					this._resetTimer();
 				}.bind(this), this._timeout);
@@ -62,16 +62,16 @@ define([
 			this._resetTimer();
 		}
 	};
-	
+
 	function parseNumericParams(input, params) {
-		for (var i=0; i < params.length; i++) {
+		for (var i = 0; i < params.length; i++) {
 			var param = params[i];
 			if (input[param]) {
 				input[param] = parseInt(input[param], 10);
 			}
 		}
 	}
-	
+
 	function handleError(statusService, error) {
 		if (!statusService) {
 			window.console.log(error);
@@ -216,6 +216,43 @@ define([
 			this._errorSaving = false;
 			var input = this.getInput();
 			editor.reportStatus(messages['Saving...']);
+
+			if (this._trimTrailingWhiteSpace) {
+				var model = editor.getModel();
+				var selection = editor.getSelection();
+				var caretLineIndex = model.getLineAtOffset(selection.start);
+				// caretOffsetDelta represents the caret offset from the start of the line
+				var caretOffsetDelta = selection.start - model.getLineStart(caretLineIndex); 
+				editor.getTextView().setRedraw(false);
+				editor.getUndoStack().startCompoundChange();
+				var matchTrailingWhiteSpace = /(\s+$)/;
+				for (var i = 0; i < model.getLineCount(); i++) {
+					var lineText = model.getLine(i);
+					var match = matchTrailingWhiteSpace.exec(lineText);
+					var lineStartOffset = model.getLineStart(i);
+					var start;
+					
+					if (match) {
+						start = lineStartOffset + match.index;
+						model.setText("", start, start + match[0].length); //$NON-NLS-0$
+					}
+					
+					/**
+					 * Move the caret to its original position prior to the save. If the caret
+					 * was in the trailing whitespaces, move the caret to the end of the line.
+					 */
+					if (caretLineIndex === i && selection.start === selection.end) {
+						if (start < selection.start) {
+							editor.setCaretOffset(start);
+						} else {
+							editor.setCaretOffset(lineStartOffset + caretOffsetDelta);
+						}
+					}
+				}
+				editor.getUndoStack().endCompoundChange();
+				editor.getTextView().setRedraw(true);
+			}
+			
 			editor.getUndoStack().markClean();
 			var contents = editor.getText();
 			var data = contents;
@@ -223,13 +260,14 @@ define([
 				var changes = this._unsavedChanges;
 				this._unsavedChanges = [];
 				var length = 0;
-				for (var i=0; i<changes.length; i++) {
+				for (var i = 0; i < changes.length; i++) {
 					length += changes[i].text.length;
 				}
 				if (contents.length > length) {
 					data = {diff: changes};
 				}
 			}
+
 			var etag = this.getFileMetadata().ETag;
 			var args = { "ETag" : etag }; //$NON-NLS-0$
 			var def = this.fileClient.write(input, data, args);
@@ -258,7 +296,7 @@ define([
 				self._errorSaving = true;
 			}
 			def.then(successHandler, function(error) {
-				// expected error - HTTP 412 Precondition Failed 
+				// expected error - HTTP 412 Precondition Failed
 				// occurs when file is out of sync with the server
 				if (error.status === 412) {
 					var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
@@ -429,13 +467,16 @@ define([
 			}.bind(this));
 			this.setDirty(false);
 		},
-		setTitle : function(title) {
+		setTitle: function(title) {
 			var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
 			var shortTitle = title;
 			if (indexOfSlash !== -1) {
 				shortTitle = shortTitle.substring(indexOfSlash + 1);
 			}
 			this._title = shortTitle;
+		},
+		setTrimTrailingWhiteSpace: function(enabled) {
+			this._trimTrailingWhiteSpace = enabled;
 		}
 	});
 	return {
