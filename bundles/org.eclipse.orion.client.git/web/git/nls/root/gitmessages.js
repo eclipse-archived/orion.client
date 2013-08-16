@@ -168,6 +168,8 @@ define({
 	"Staged addition": "Staged addition",
 	" (Rebase in Progress)": " (Rebase in Progress)",
 	"Status": "Status",
+	"Log (0)": "Log (${0})",
+	"Log (0) - 1": "Log (${0}) - ${1}",
 	"Status for ${0} - Git ": "Status for ${0} - Git ",
 	"No Unstaged Changes": "No Unstaged Changes",
 	"No Staged Changes": "No Staged Changes",
