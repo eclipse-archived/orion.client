@@ -9,11 +9,16 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*global define*/
- /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
+/*global define*/
 
-define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBinding', 'orion/editor/eventTarget', 'orion/editor/tooltip', 'orion/editor/annotations', 'orion/util'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, util) { //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		
+define("orion/editor/editor", [ //$NON-NLS-0$
+	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
+	'orion/editor/eventTarget', //$NON-NLS-0$
+	'orion/editor/tooltip', //$NON-NLS-0$
+	'orion/editor/annotations', //$NON-NLS-0$
+	'orion/util' //$NON-NLS-0$
+], function(messages, mEventTarget, mTooltip, mAnnotations, util) {
+
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
 
 	/**
