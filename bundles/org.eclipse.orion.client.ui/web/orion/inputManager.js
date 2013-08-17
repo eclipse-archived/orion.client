@@ -134,9 +134,6 @@ define([
 					}
 				}
 				self._unsavedChanges.push({start:start, end:end, text:e.text});
-			},
-			onInputChangd: function(e) {
-				self._unsavedChanges = [];
 			}
 		};
 		EventTarget.attach(this);
@@ -155,8 +152,9 @@ define([
 						this._fileMetadata = data;
 						if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
 							progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
-								editor.setInput(fileURI, null, contents);										
-							});
+								editor.setInput(fileURI, null, contents);
+								this._unsavedChanges = [];
+							}.bind(this));
 						}
 					}
 				}.bind(this));
@@ -218,10 +216,12 @@ define([
 			this._errorSaving = false;
 			var input = this.getInput();
 			editor.reportStatus(messages['Saving...']);
+			editor.getUndoStack().markClean();
 			var contents = editor.getText();
 			var data = contents;
 			if (this._getDiffsEnabled()) {
 				var changes = this._unsavedChanges;
+				this._unsavedChanges = [];
 				var length = 0;
 				for (var i=0; i<changes.length; i++) {
 					length += changes[i].text.length;
@@ -251,6 +251,9 @@ define([
 			function errorHandler(error) {
 				editor.reportStatus("");
 				handleError(statusService, error);
+				if (data.diff) {
+					self._unsavedChanges = data.diff.concat(self._unsavedChanges);
+				}
 				self._saving = false;
 				self._errorSaving = true;
 			}
@@ -261,7 +264,7 @@ define([
 					var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
 					if (forceSave) {
 						// repeat save operation, but without ETag 
-						var def = self.fileClient.write(input, data);
+						var def = self.fileClient.write(input, contents);
 						if (progress) {
 							def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
 						}
@@ -376,10 +379,8 @@ define([
 			if (!this.editor.getTextView()) { return; }
 			if (enable) {
 				this.editor.getModel().addEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
-				this.editor.addEventListener("InputChanged", this._listener.onInputChangd); //$NON-NLS-0$
 			} else {
 				this.editor.getModel().removeEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
-				this.editor.removeEventListener("InputChanged", this._listener.onInputChangd); //$NON-NLS-0$
 			}
 		},
 		_setInputContents: function(input, title, contents, metadata) {
@@ -416,16 +417,16 @@ define([
 			}
 			// TODO could potentially dispatch separate events for metadata and contents changing
 			this.dispatchEvent({ type: "InputChanged", input: input, name: name, metadata: metadata, contents: contents }); //$NON-NLS-0$
-			var self = this;
 			this.syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true).then(function() {
-				self.dispatchEvent({ type: "ContentTypeChanged", contentType: self._contentType, location: window.location }); //$NON-NLS-0$
-				if (!self.dispatcher) {
-					self.dispatcher = new mDispatcher.Dispatcher(self.serviceRegistry, editor, self._contentType);
+				this.dispatchEvent({ type: "ContentTypeChanged", contentType: this._contentType, location: window.location }); //$NON-NLS-0$
+				if (!this.dispatcher) {
+					this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor, this._contentType);
 				}
 				// Contents
 				editor.setInput(title, null, contents);
-				self.processParameters(input);
-			});
+				this._unsavedChanges = [];
+				this.processParameters(input);
+			}.bind(this));
 			this.setDirty(false);
 		},
 		setTitle : function(title) {
