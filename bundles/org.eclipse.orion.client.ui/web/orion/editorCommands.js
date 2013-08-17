@@ -9,13 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window widgets eclipse:true orion:true define */
-/*jslint maxerr:150 browser:true devel:true regexp:false*/
+/*global window define */
 
-
-/**
- * @namespace The global container for orion APIs.
- */ 
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/i18nUtil',
@@ -26,15 +21,13 @@ define([
 	'orion/commands', 
 	'orion/keyBinding',
 	'orion/commandRegistry',
-	'orion/globalCommands',
 	'orion/extensionCommands',
 	'orion/contentTypes',
-	'orion/editor/undoStack',
 	'orion/searchUtils',
 	'orion/PageUtil',
 	'orion/PageLinks',
 	'orion/util'
-], function(messages, i18nUtil, lib, openResource, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mGlobalCommands, mExtensionCommands, mContentTypes, mUndoStack, mSearchUtils, mPageUtil, PageLinks, util) {
+], function(messages, i18nUtil, lib, openResource, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, util) {
 
 	var exports = {};
 	
