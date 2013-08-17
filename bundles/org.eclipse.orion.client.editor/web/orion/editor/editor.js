@@ -790,11 +790,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 		setInput: function(title, message, contents, contentsSaved) {
 			this._title = title;
 			if (this._textView) {
-				if (contentsSaved) {
-					// don't reset undo stack on save, just mark it clean so that we don't lose the undo past the save
-					this._undoStack.markClean();
-					this.checkDirty();
-				} else {
+				if (!contentsSaved) {
 					if (message) {
 						this._textView.setText(message);
 					} else {
@@ -805,9 +801,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 						}
 					}
 					this._undoStack.reset();
-					this.checkDirty();
 					this._textView.focus();
 				}
+				this.checkDirty();
 			}
 			this.onInputChanged({
 				type: "InputChanged", //$NON-NLS-0$
