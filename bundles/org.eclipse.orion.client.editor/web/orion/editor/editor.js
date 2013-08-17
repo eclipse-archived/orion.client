@@ -668,49 +668,41 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 			this.reportStatus(util.formatMessage(messages.lineColumn, lineIndex + 1, offsetInLine + 1));
 		},
 		
-		showProblems: function(problems) {
+		showAnnotations: function(annotations, types, getType) {
 			var annotationModel = this._annotationModel;
 			if (!annotationModel) {
 				return;
 			}
 			var remove = [], add = [];
 			var model = annotationModel.getTextModel();
-			var annotations = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
-			while (annotations.hasNext()) {
-				annotation = annotations.next();
-				switch (annotation.type) {
-					case mAnnotations.AnnotationType.ANNOTATION_ERROR:
-					case mAnnotations.AnnotationType.ANNOTATION_WARNING:
-					case mAnnotations.AnnotationType.ANNOTATION_TASK:
-						if (annotation.creatorID === this) {
-							remove.push(annotation);
-						}
+			var iter = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
+			while (iter.hasNext()) {
+				annotation = iter.next();
+				if (types.indexOf(annotation.type) !== -1) {
+					if (annotation.creatorID === this) {
+						remove.push(annotation);
+					}
 				}
 			}
-			if (problems) { 
-				for (var i = 0; i < problems.length; i++) {
-					var problem = problems[i];
-					if (problem) {
+			if (annotations) { 
+				for (var i = 0; i < annotations.length; i++) {
+					annotation = annotations[i];
+					if (annotation) {
 						var start, end;
-						if (typeof problem.line === "number") { //$NON-NLS-0$
+						if (typeof annotation.line === "number") { //$NON-NLS-0$
 							// line/column
-							var lineIndex = problem.line - 1;
+							var lineIndex = annotation.line - 1;
 							var lineStart = model.getLineStart(lineIndex);
-							start = lineStart + problem.start - 1;
-							end = lineStart + problem.end;
+							start = lineStart + annotation.start - 1;
+							end = lineStart + annotation.end;
 						} else {
 							// document offsets
-							start = problem.start;
-							end = problem.end;
+							start = annotation.start;
+							end = annotation.end;
 						}
-						var type;
-						switch (problem.severity) {
-							case "error": type = mAnnotations.AnnotationType.ANNOTATION_ERROR; break;//$NON-NLS-0$
-							case "warning": type = mAnnotations.AnnotationType.ANNOTATION_WARNING; break;//$NON-NLS-0$
-							case "task": type = mAnnotations.AnnotationType.ANNOTATION_TASK; break;//$NON-NLS-0$
-							default: continue;
-						}
-						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, problem.description);
+						var type = getType(annotation);
+						if (!type) { continue; }
+						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, annotation.description);
 						annotation.creatorID = this;
 						add.push(annotation);
 					}
@@ -719,36 +711,28 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/keyBindi
 			annotationModel.replaceAnnotations(remove, add);
 		},
 		
+		showProblems: function(problems) {
+			this.showAnnotations(problems, [
+				mAnnotations.AnnotationType.ANNOTATION_ERROR,
+				mAnnotations.AnnotationType.ANNOTATION_WARNING,
+				mAnnotations.AnnotationType.ANNOTATION_TASK
+			], function(annotation) {
+				switch (annotation.severity) {
+					case "error": return mAnnotations.AnnotationType.ANNOTATION_ERROR; //$NON-NLS-0$
+					case "warning": return mAnnotations.AnnotationType.ANNOTATION_WARNING; //$NON-NLS-0$
+					case "task": return mAnnotations.AnnotationType.ANNOTATION_TASK; //$NON-NLS-0$
+				}
+				return null;
+			});
+		},
+		
 		showOccurrences: function(occurrences) {
-			var annotationModel = this._annotationModel;
-			if (!annotationModel) {
-				return;
-			}
-			var remove = [], add = [];
-			var model = annotationModel.getTextModel();
-			var annotations = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
-			while (annotations.hasNext()) {
-				annotation = annotations.next();
-				if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE || annotation.type === mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE) {
-					remove.push(annotation);
-				}
-			}
-			if (occurrences) { 
-				for (var i = 0; i < occurrences.length; i++) {
-					var occurrence = occurrences[i];
-					if (occurrence) {
-						var lineIndex = occurrence.line - 1;
-						var lineStart = model.getLineStart(lineIndex);
-						var start = lineStart + occurrence.start - 1;
-						var end = lineStart + occurrence.end;
-						var type = occurrence.readAccess === true ? mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE : mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE;
-						var description = occurrence.description;
-						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, description);
-						add.push(annotation);
-					}
-				}
-			}
-			annotationModel.replaceAnnotations(remove, add);
+			this.showAnnotations(occurrences, [
+				mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE,
+				mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE
+			], function(annotation) {
+				return annotation.readAccess ? mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE : mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE;
+			});
 		},
 		
 		/**
