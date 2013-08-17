@@ -562,17 +562,6 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return this.skipClosingBracket(']'); //$NON-NLS-0$
 			}.bind(this));
 			
-			// Autocomplete angle brackets <>
-			textView.setKeyBinding(new mKeyBinding.KeyBinding("<", false, false, false, false, "keypress"), "autoCompleteAngleBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			textView.setAction("autoCompleteAngleBracket", function() { //$NON-NLS-0$
-				return this.autoCompleteBrackets("<", ">"); //$NON-NLS-1$ //$NON-NLS-0$
-			}.bind(this));
-			
-			textView.setKeyBinding(new mKeyBinding.KeyBinding('>', false, false, false, false, "keypress"), "skipClosingAngleBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			textView.setAction("skipClosingAngleBracket", function() { //$NON-NLS-0$
-				return this.skipClosingBracket(">"); //$NON-NLS-0$
-			}.bind(this));
-
 			// Autocomplete parentheses ()
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("(", false, false, false, false, "keypress"), "autoCompleteParentheses"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("autoCompleteParentheses", function() { //$NON-NLS-0$
