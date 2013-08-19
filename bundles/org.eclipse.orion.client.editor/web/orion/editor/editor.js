@@ -19,6 +19,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
 ], function(messages, mEventTarget, mTooltip, mAnnotations, util) {
 
+	var AT = mAnnotations.AnnotationType;
+
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
 
 	/**
@@ -306,7 +308,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			var annotations = annotationModel.getAnnotations(offset, offset + 1);
 			while (annotations.hasNext()) {
 				var annotation = annotations.next();
-				if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_FOLDING) {
+				if (annotation.type === AT.ANNOTATION_FOLDING) {
 					if (annotation.expand) {
 						annotation.expand();
 						annotationModel.modifyAnnotation(annotation);
@@ -440,8 +442,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			var remove = annotation ? [annotation] : null;
 			var add;
 			if (newEmpty) {
-				var type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE;
-				annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end);
+				var type = AT.ANNOTATION_CURRENT_LINE;
+				annotation = AT.createAnnotation(type, start, end);
 				add = [annotation];
 			}
 			this._currentLineAnnotation = annotation;
@@ -539,7 +541,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				var bookmark = null;
 				while (annotations.hasNext()) {
 					var annotation = annotations.next();
-					if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_BOOKMARK) {
+					if (annotation.type === AT.ANNOTATION_BOOKMARK) {
 						bookmark = annotation;
 						break;
 					}
@@ -547,7 +549,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (bookmark) {
 					annotationModel.removeAnnotation(bookmark);
 				} else {
-					bookmark = mAnnotations.AnnotationType.createAnnotation(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK, lineStart, lineEnd);
+					bookmark = AT.createAnnotation(AT.ANNOTATION_BOOKMARK, lineStart, lineEnd);
 					bookmark.title = undefined;
 					annotationModel.addAnnotation(bookmark);
 				}
@@ -561,18 +563,18 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (this._annotationModel) {
 					var styler = this._annotationStyler = this._annotationFactory.createAnnotationStyler(textView, this._annotationModel);
 					if (styler) {
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_SELECTED_LINKED_GROUP);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINKED_GROUP);
-						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_LINKED_GROUP);
+						styler.addAnnotationType(AT.ANNOTATION_CURRENT_SEARCH);
+						styler.addAnnotationType(AT.ANNOTATION_MATCHING_SEARCH);
+						styler.addAnnotationType(AT.ANNOTATION_ERROR);
+						styler.addAnnotationType(AT.ANNOTATION_WARNING);
+						styler.addAnnotationType(AT.ANNOTATION_MATCHING_BRACKET);
+						styler.addAnnotationType(AT.ANNOTATION_CURRENT_BRACKET);
+						styler.addAnnotationType(AT.ANNOTATION_CURRENT_LINE);
+						styler.addAnnotationType(AT.ANNOTATION_READ_OCCURRENCE);
+						styler.addAnnotationType(AT.ANNOTATION_WRITE_OCCURRENCE);
+						styler.addAnnotationType(AT.ANNOTATION_SELECTED_LINKED_GROUP);
+						styler.addAnnotationType(AT.ANNOTATION_CURRENT_LINKED_GROUP);
+						styler.addAnnotationType(AT.ANNOTATION_LINKED_GROUP);
 						styler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
 					}
 				}
@@ -589,26 +591,26 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (ruler) {
 					ruler.onDblClick = addRemoveBookmark;
 					ruler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"}); //$NON-NLS-0$
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_TASK);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK);
+					ruler.addAnnotationType(AT.ANNOTATION_ERROR);
+					ruler.addAnnotationType(AT.ANNOTATION_WARNING);
+					ruler.addAnnotationType(AT.ANNOTATION_TASK);
+					ruler.addAnnotationType(AT.ANNOTATION_BOOKMARK);
 				}
 				this.setAnnotationRulerVisible(this._annotationRulerVisible || this._annotationRulerVisible === undefined, true);
 					
 				ruler = this._overviewRuler = rulers.overviewRuler;
 				if (ruler) {
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_TASK);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE);
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE);
+					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_SEARCH);
+					ruler.addAnnotationType(AT.ANNOTATION_MATCHING_SEARCH);
+					ruler.addAnnotationType(AT.ANNOTATION_ERROR);
+					ruler.addAnnotationType(AT.ANNOTATION_WARNING);
+					ruler.addAnnotationType(AT.ANNOTATION_TASK);
+					ruler.addAnnotationType(AT.ANNOTATION_BOOKMARK);
+					ruler.addAnnotationType(AT.ANNOTATION_MATCHING_BRACKET);
+					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_BRACKET);
+					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_LINE);
+					ruler.addAnnotationType(AT.ANNOTATION_READ_OCCURRENCE);
+					ruler.addAnnotationType(AT.ANNOTATION_WRITE_OCCURRENCE);
 				}
 				this.setOverviewRulerVisible(this._overviewRulerVisible || this._overviewRulerVisible === undefined, true);
 			}
@@ -621,7 +623,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			
 			if (this._foldingRulerFactory) {
 				this._foldingRuler = this._foldingRulerFactory.createFoldingRuler(this._annotationModel);
-				this._foldingRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_FOLDING);
+				this._foldingRuler.addAnnotationType(AT.ANNOTATION_FOLDING);
 				this.setFoldingRulerVisible(this._foldingRulerVisible || this._foldingRulerVisible === undefined, true);
 			}
 			
@@ -707,7 +709,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						}
 						var type = getType(annotation);
 						if (!type) { continue; }
-						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, annotation.description);
+						annotation = AT.createAnnotation(type, start, end, annotation.description);
 						annotation.creatorID = this;
 						add.push(annotation);
 					}
@@ -718,14 +720,14 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		
 		showProblems: function(problems) {
 			this.showAnnotations(problems, [
-				mAnnotations.AnnotationType.ANNOTATION_ERROR,
-				mAnnotations.AnnotationType.ANNOTATION_WARNING,
-				mAnnotations.AnnotationType.ANNOTATION_TASK
+				AT.ANNOTATION_ERROR,
+				AT.ANNOTATION_WARNING,
+				AT.ANNOTATION_TASK
 			], function(annotation) {
 				switch (annotation.severity) {
-					case "error": return mAnnotations.AnnotationType.ANNOTATION_ERROR; //$NON-NLS-0$
-					case "warning": return mAnnotations.AnnotationType.ANNOTATION_WARNING; //$NON-NLS-0$
-					case "task": return mAnnotations.AnnotationType.ANNOTATION_TASK; //$NON-NLS-0$
+					case "error": return AT.ANNOTATION_ERROR; //$NON-NLS-0$
+					case "warning": return AT.ANNOTATION_WARNING; //$NON-NLS-0$
+					case "task": return AT.ANNOTATION_TASK; //$NON-NLS-0$
 				}
 				return null;
 			});
@@ -733,10 +735,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		
 		showOccurrences: function(occurrences) {
 			this.showAnnotations(occurrences, [
-				mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE,
-				mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE
+				AT.ANNOTATION_READ_OCCURRENCE,
+				AT.ANNOTATION_WRITE_OCCURRENCE
 			], function(annotation) {
-				return annotation.readAccess ? mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE : mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE;
+				return annotation.readAccess ? AT.ANNOTATION_READ_OCCURRENCE : AT.ANNOTATION_WRITE_OCCURRENCE;
 			});
 		},
 		
@@ -861,9 +863,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		    fixed = Array.prototype.slice.call(arguments, 1);
 		if (fixed.length) {
 			return function() {
-				return arguments.length
-					? fn.apply(context, fixed.concat(Array.prototype.slice.call(arguments)))
-					: fn.apply(context, fixed);
+				return arguments.length	? fn.apply(context, fixed.concat(Array.prototype.slice.call(arguments))) : fn.apply(context, fixed);
 			};
 		}
 		return function() {
