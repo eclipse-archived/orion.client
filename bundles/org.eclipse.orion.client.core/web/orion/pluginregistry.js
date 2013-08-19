@@ -77,6 +77,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 					delete obj[key];
 				}.bind(this));
 				_keys = null;
+			},
+			get length() {
+				return _getKeys().length;
 			}
 		};
 	}
