@@ -610,11 +610,24 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var lineIndex = model.getLineAtOffset(selection.start);
 				var lineText = model.getLine(lineIndex, true);
 				var lineStart = model.getLineStart(lineIndex);
-				var index = 0, end = selection.start - lineStart, c;
+				var index = 0;
+				var end = selection.start - lineStart;
+				var c;
 				while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
-				if (index > 0) {
+				var prefix = lineText.substring(0, index);
+				if (lineText.charCodeAt(end - 1) === 123) {
+					// If the character before the caret is an opening brace, smart indent the next line.
+					var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
+					var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
+					var lineDelimiter = model.getLineDelimiter();
+					var text = lineText.charCodeAt(end) === 125 ? 
+							   lineDelimiter + prefix + tab + lineDelimiter + prefix :
+							   lineDelimiter + prefix + tab;
+					editor.setText(text, selection.start, selection.end);
+					editor.setCaretOffset(selection.start + prefix.length + tab.length + 1);
+					return true;
+				} else if (index > 0) {
 					//TODO still wrong when typing inside folding
-					var prefix = lineText.substring(0, index);
 					index = end;
 					while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
 					editor.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
