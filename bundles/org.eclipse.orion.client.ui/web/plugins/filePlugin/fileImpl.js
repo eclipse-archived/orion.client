@@ -109,10 +109,9 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 	 * @class Provides operations on files, folders, and projects.
 	 * @name FileServiceImpl
 	 */
-	function FileServiceImpl(fileBase, workspaceBase, projectBase) {
+	function FileServiceImpl(fileBase, workspaceBase) {
 		this.fileBase = fileBase;
 		this.workspaceBase = workspaceBase;
-		this.projectBase = projectBase;
 		this.makeAbsolute = workspaceBase && workspaceBase.indexOf("://") !== -1;
 	}
 	
@@ -228,48 +227,6 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				return result;
 			}.bind(this));
 		},
-		readProject: function(location) {
-			var url = new URL(location, window.location);
-			return xhr("GET", url.href, {
-				timeout: 15000,
-				headers: { "Orion-Version": "1" },
-				log: false
-			}).then(function(result) {
-					return result.response ? JSON.parse(result.response) : null;
-			}).then(function(result) {
-				if (this.makeAbsolute) {
-					_normalizeLocations(result);
-				}
-				return result;
-			}.bind(this));
-		},
-		
-		/**
-		 * Initializes a project in a folder.
-		 * @param {String} contentLocation The location of the parent folder
-		 * @return {Object} JSON representation of the created folder
-		 */
-		initProject: function(contentLocation) {
-			return xhr("POST", this.projectBase, {
-				headers: {
-					"Orion-Version": "1",
-					"X-Create-Options" : "no-overwrite",
-					"Slug": contentLocation,
-					"Content-Type": "application/json;charset=UTF-8"
-				},
-				data: JSON.stringify({
-					"ContentLocation": contentLocation
-				}),
-				timeout: 15000
-			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
-			}).then(function(result) {
-				if (this.makeAbsolute) {
-					_normalizeLocations(result);
-				}
-				return result;
-			}.bind(this));
-		},
 		
 		/**
 		 * Adds a project to a workspace.
@@ -300,34 +257,6 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				},
 				timeout: 15000,
 				data: JSON.stringify(data)
-			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
-			}).then(function(result) {
-				if (this.makeAbsolute) {
-					_normalizeLocations(result);
-				}
-				return result;
-			}.bind(this));
-		},
-		
-		/**
-		* @param {String} location Project location
-		* @param {Object} dependency The JSON representation of the depenency
-		* @param {String} dependency.Type Type of the depenency (i.e. "file")
-		* @param {String} dependency.Name String description of the dependency (i.e. folder name)
-		* @param {String} dependency.Location Location of the depenency understood by the plugin of given type
-		*/
-		addProjectDepenency: function(location, depenency) {
-			return xhr("PUT", location, {
-				headers: {
-					"Orion-Version": "1",
-					"X-Create-Options" : "no-overwrite",
-					"Content-Type": "application/json;charset=UTF-8"
-				},
-				data: JSON.stringify({
-					"Depenency": depenency
-				}),
-				timeout: 15000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
 			}).then(function(result) {
