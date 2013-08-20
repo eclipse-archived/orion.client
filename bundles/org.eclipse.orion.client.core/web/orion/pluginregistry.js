@@ -92,27 +92,47 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 	 * Creates a new plugin. This constructor is private and should only be called by the plugin registry.
 	 * @class Represents a single plugin in the plugin registry.
 	 * @description
-	 * <p>A plugin can be in one of three states:</p>
+	 * <p>At any given time, a plugin is in exactly one of the following six states:</p>
+	 *
 	 * <dl>
-	 * <dt>{@link orion.pluginregistry.Plugin.INSTALLED}</dt>
-	 * <dd>The plugin is not running, and is present in the plugin registry.
-	 * <p>From the <code>INSTALLED</code> state, the plugin will become <code>LOADED</code> if a service method provided by one
-	 * of the plugin's service references is called through the service registry.</p>
+	 *
+	 * <dt><code>"uninstalled"</code></dt>
+	 * <dd>The plugin has been uninstalled and may not be used.
+	 * <p>The <code>uninstalled</code> state is only visible after a plugin has been uninstalled; the plugin is unusable, but
+	 * references to its <code>Plugin</code> object may still be available and used for introspection.
 	 * </dd>
 	 *
-	 * <dt>{@link orion.pluginregistry.Plugin.LOADED}</dt>
-	 * <dd>The plugin is running, and is present in the plugin registry.
-	 * <p>From the <code>LOADED</code> state, the plugin will become <code>UNINSTALLED</code> if its {@link #uninstall} method
-	 * is called.</p>
+	 * <dt><code>"installed"</code></dt>
+	 * <dd>The plugin is installed, but not yet resolved.
+	 * <p></p>
 	 * </dd>
 	 *
-	 * <dt>{@link orion.pluginregistry.Plugin.UNINSTALLED}</dt>
-	 * <dd>The plugin is not running, and has been removed from the plugin registry.
-	 * <p>Any services formerly provided by the plugin have been unregistered and cannot be called. Although uninstalled plugins
-	 * do not appear in the plugin registry, they can be observed if references to a Plugin instance are kept after its
-	 * {@link #uninstall} method has been called.
-	 * <p>From the <code>UNINSTALLED</code> state, the plugin cannot change to any other state.</p>
+	 * <dt><code>"resolved"</code></dt>
+	 * <dd>The plugin is resolved and is able to be started.
+	 * <p>Note that the plugin is not active yet. A plugin must be in the <code>resolved</code> state before it can be started.</p>
+	 * <p>The <code>resolved</code> state is reserved for future use. Future versions of the framework may require successful
+	 * dependency resolution before moving a plugin to the <code>resolved</code> state.</p>
 	 * </dd>
+	 *
+	 * <dt><code>"starting"</code></dt>
+	 * <dd>The plugin is in the process of starting.
+	 * <p>A plugin is in the <code>starting</code> state when its {@link #start} method has been called but has not yet resolved.
+	 * Once the start call resolves, the plugin has successfully started and moves to the <code>active</code> state.</p>
+	 * <p>If the plugin has a lazy activation policy, it may remain in the <code>starting</code> state for some time until the
+	 * activation is triggered.</p>
+	 * </dd>
+	 *
+	 * <dt><code>"stopping"</code></dt>
+	 * <dd>The plugin is in the process of stopping. 
+	 * <p>A plugin is in the <code>stopping</code> state when its {@link #stop} method has been called but not yet resolved.
+	 * Once the stop call resolves, the plugin moves to the <code>resolved</code> state.</dd>
+	 *
+	 * <dt><code>"active"</code></dt>
+	 * <dd>The plugin is running. It has been successfully started and activated.
+	 * <p>In the <code>active</code> state, any services the plugin provides are available for use.</p></dd>
+	 *
+	 * </dl>
+	 *
 	 * @name orion.pluginregistry.Plugin
 	 */
 	function Plugin(_url, _manifest, _internalRegistry) {
@@ -281,9 +301,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 		};
 	
 		/**
-		 * Returns the URL location of this plugin
+		 * Returns the URL location of this plugin.
 		 * @name orion.pluginregistry.Plugin#getLocation
-		 * @return {String} The URL of this plugin
+		 * @return {String} The URL of this plugin.
 		 * @function
 		 */
 		this.getLocation = function() {
@@ -291,9 +311,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 		};
 		
 		/**
-		 * Returns the headers of this plugin
+		 * Returns the headers of this plugin.
 		 * @name orion.pluginregistry.Plugin#getHeaders
-		 * @return {Object} The plugin headers
+		 * @return {Object} The plugin headers.
 		 * @function
 		 */
 		this.getHeaders = function() {
@@ -321,10 +341,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 		};
 		
 		/**
-		 * Returns the service references provided by this plugin
+		 * Returns the service references provided by this plugin.
 		 * @name orion.pluginregistry.Plugin#getServiceReferences
-		 * @return {orion.serviceregistry.ServiceReference} The service references provided
-		 * by this plugin.
+		 * @return {orion.serviceregistry.ServiceReference[]} The service references provided by this plugin.
 		 * @function 
 		 */
 		this.getServiceReferences = function() {
@@ -339,12 +358,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 		/**
 		 * Returns this plugin's current state.
 		 * @name orion.pluginregistry.Plugin#getState
-		 * @returns {Number} This plugin's state. The value is one of:
-		 * <ul>
-		 * <li>{@link orion.pluginregistry.Plugin.INSTALLED}</li>
-		 * <li>{@link orion.pluginregistry.Plugin.LOADED}</li>
-		 * <li>{@link orion.pluginregistry.Plugin.UNINSTALLED}</li>
-		 * </ul>
+		 * @returns {String} This plugin's state.
 		 * @function
 		 */
 		this.getState = function() {
@@ -418,7 +432,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 				_state = "stopping";
 				_internalRegistry.dispatchEvent(new PluginEvent("stopping", _this));
 				Object.keys(_registeredServices).forEach(function(serviceId) {
-					_registeredServices[serviceId].registration.unregister();
+					_registeredServices[serviceId].registration.,m();
 					delete _registeredServices[serviceId];
 				});
 				_internalRegistry.disconnect(_channel);
@@ -457,7 +471,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 			_state = "stopping";
 			_internalRegistry.dispatchEvent(new PluginEvent("stopping", _this));
 			Object.keys(_registeredServices).forEach(function(serviceId) {
-				_registeredServices[serviceId].registration.unregister();
+				_registeredServices[serviceId].registration.ay();
 				delete _registeredServices[serviceId];
 			});
 			if (_channel) {
@@ -565,8 +579,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 		};
 		
 		/**
-		 * Uninstalls this plugin
+		 * Uninstalls this plugin.
 		 * @name orion.pluginregistry.Plugin#uninstall
+		 * @return {orion.Promise} A promise that will resolve when the plugin has been uninstalled.
 		 * @function
 		 */
 		this.uninstall = function() {
@@ -586,34 +601,62 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 	}
 	
 	/**
-	 * Dispatched when a plugin has been installed. The type of this event is <code>'pluginInstalled'</code>.
-	 * @name orion.pluginregistry.PluginRegistry#pluginInstalled
+	 * Dispatched when a plugin has been installed. The type of this event is <code>"installed"</code>.
+	 * @name orion.pluginregistry.PluginRegistry#installed
 	 * @event
-	 * @param {orion.pluginregistry.Plugin} plugin The plugin that was installed.
 	 */
 	/**
-	 * Dispatched when a plugin has been loaded. The type of this event is <code>'pluginLoaded'</code>.
-	 * @name orion.pluginregistry.PluginRegistry#pluginLoaded
+	 * Dispatched when a plugin has been resolved. The type of this event is <code>"resolved"</code>.
+	 * @name orion.pluginregistry.PluginRegistry#resolved
 	 * @event
-	 * @param {orion.pluginregistry.Plugin} plugin The plugin that was loaded.
 	 */
 	/**
-	 * Dispatched when a plugin has been uninstalled. The type of this event is <code>'pluginUninstalled'</code>.
-	 * @name orion.pluginregistry.PluginRegistry#pluginUninstalled
+	 * Dispatched when a plugin is starting due to a lazy activation. The type of this event is <code>"lazy activation"</code>.
+	 * @name orion.pluginregistry.PluginRegistry#lazy_activation
 	 * @event
-	 * @param {orion.pluginregistry.Plugin} plugin The plugin that was uninstalled.
 	 */
 	/**
-	 * Dispatched when a plugin has been updated. The type of this event is <code>'pluginUpdated'</code>.
-	 * @name orion.pluginregistry.PluginRegistry#pluginUpdated
+	 * Dispatched when a plugin is starting. The type of this event is <code>"starting"</code>.
+	 * @name orion.pluginregistry.PluginRegistry#starting
 	 * @event
-	 * @param {orion.pluginregistry.Plugin} plugin The plugin that was updated.
+	 */
+	/**
+	 * Dispatched when a plugin is started. The type of this event is <code>"started"</code>.
+	 * @name orion.pluginregistry.PluginRegistry#started
+	 * @event
+	 */
+	/**
+	 * Dispatched when a plugin is stopping. The type of this event is <code>"stopping"</code>.
+	 * @name orion.pluginregistry.PluginRegistry#stopping
+	 * @event
+	 */
+	/**
+	 * Dispatched when a plugin is stopped. The type of this event is <code>"stopped"</code>.
+	 * @name orion.pluginregistry.PluginRegistry#stopped
+	 * @event
+	 */
+	/**
+	 * Dispatched when a plugin has been updated. The type of this event is <code>"updated"</code>.
+	 * @name orion.pluginregistry.PluginRegistry#updated
+	 * @event
+	 */
+	/**
+	 * Dispatched when a plugin has been uninstalled. The type of this event is <code>"uninstalled"</code>.
+	 * @name orion.pluginregistry.PluginRegistry#uninstalled
+	 * @event
 	 */
 	
 	/**
 	 * Creates a new plugin registry.
 	 * @class The Orion plugin registry
 	 * @name orion.pluginregistry.PluginRegistry
+	 * @description The plugin registry maintains a list of {@link orion.pluginregistry.Plugin}s, which can provide services
+	 * to the given <code>serviceRegistry</code>.
+	 *
+	 * <p>The plugin registry dispatches plugin events when one of its plugins changes state. Each such event contains a
+	 * <code>plugin</code> field giving the affected {@link orion.pluginregistry.Plugin}.
+	 * </p>
+	 *
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to register plugin-provided services with.
 	 * @param {Object} [opt_storage=localStorage] Target object to read and write plugin metadata from.
 	 * @param {Boolean} [opt_visible=false] Whether a loaded plugin's iframe will be displayed. By default it is not displayed.
@@ -799,12 +842,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 			});
 		}
 
-		/**
-		 * Starts the plugin registry
-		 * @name orion.pluginregistry.PluginRegistry#startup
-		 * @return A promise that will resolve when the registry has been fully started
-		 * @function 
-		 */
+
 		this.init = function() {
 			if (_state === "starting" || _state === "active" || _state === "stopping") {
 				return;
@@ -846,6 +884,12 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 			_state = "starting";
 		};
 
+		/**
+		 * Starts the plugin registry.
+		 * @name orion.pluginregistry.PluginRegistry#start
+		 * @return {orion.Promise} A promise that will resolve when the registry has been fully started.
+		 * @function 
+		 */
 		this.start = function() {
 			if (_state !== "starting") {
 				this.init();
@@ -890,9 +934,10 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 		};
 		
 		/**
-		 * Shuts down the plugin registry
+		 * Shuts down the plugin registry.
 		 * @name orion.pluginregistry.PluginRegistry#stop
 		 * @function 
+		 * @returns {orion.Promise} A promise that will resolve when the registry has been stopped.
 		 */
 		this.stop = function() {
 			if (_state !== "starting" && _state !== "active") {
@@ -921,10 +966,10 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 		
 		
 		/**
-		 * Installs the plugin at the given location into the plugin registry
+		 * Installs the plugin at the given location into the plugin registry.
 		 * @name orion.pluginregistry.PluginRegistry#installPlugin
-		 * @param {String} url The location of the plugin
-		 * @param {Object} [optManifest] The plugin metadata
+		 * @param {String} url The location of the plugin.
+		 * @param {Object} [optManifest] The plugin metadata.
 		 * @returns {orion.Promise} A promise that will resolve when the plugin has been installed.
 		 * @function 
 		 */
@@ -966,7 +1011,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 		};
 		
 		/**
-		 * Returns all installed plugins
+		 * Returns all installed plugins.
 		 * @name orion.pluginregistry.PluginRegistry#getPlugins
 		 * @return {orion.pluginregistry.Plugin[]} An array of all installed plugins.
 		 * @function 
