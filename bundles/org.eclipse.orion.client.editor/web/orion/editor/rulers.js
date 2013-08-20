@@ -448,7 +448,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 				if (style.style) {
 					if (!result.style) { result.style  = {}; }
 					for (prop in style.style) {
-						if (!result.style[prop]) {
+						if (result.style[prop] === undefined) {
 							result.style[prop] = style.style[prop];
 						}
 					}
@@ -456,7 +456,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 				if (style.attributes) {
 					if (!result.attributes) { result.attributes  = {}; }
 					for (prop in style.attributes) {
-						if (!result.attributes[prop]) {
+						if (result.attributes[prop] === undefined) {
 							result.attributes[prop] = style.attributes[prop];
 						}
 					}
