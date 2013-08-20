@@ -26,8 +26,9 @@ define([
 	'orion/searchUtils',
 	'orion/PageUtil',
 	'orion/PageLinks',
+	'orion/blamer',
 	'orion/util'
-], function(messages, i18nUtil, lib, openResource, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, util) {
+], function(messages, i18nUtil, lib, openResource, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, blamer, util) {
 
 	var exports = {};
 	
@@ -120,6 +121,7 @@ define([
 			}
 			this._generateGotoLineCommnand(editor);
 			this._generateFindCommnand(editor);
+			this._generateBlame(editor);
 			if (!this.isReadOnly) {
 				this._generateEditCommands(editor);
 			}
@@ -346,6 +348,25 @@ define([
 				return true;
 			}, findCommand);
 		},
+		
+		_generateBlame: function(editor){
+			var self = this;
+			var blameCommand = new mCommands.Command({
+				name: messages.Blame,
+				tooltip: messages.BlameTooltip,
+				id: "orion.edit.blame",
+				visibleWhen: function() {
+					return  blamer.isVisible(self.serviceRegistry);
+
+				},
+				callback: function(data) {
+					blamer.getBlame(self.serviceRegistry, editor, self.inputManager.getInput());   
+				}
+			});
+			this.commandService.addCommand(blameCommand);
+			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, null, false, new mKeyBinding.KeyBinding('b', true,false,true)); //$NON-NLS-1$ //$NON-NLS-0
+		},
+		
 		_generateEditCommands: function(editor) {
 			var self = this;
 

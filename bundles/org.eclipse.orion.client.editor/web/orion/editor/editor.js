@@ -19,6 +19,18 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
 ], function(messages, mEventTarget, mTooltip, mAnnotations, util) {
 
+	/**	@private */
+	function merge(obj1, obj2) {
+		if (obj2) {
+			for (var p in obj2) {
+				if (obj2.hasOwnProperty(p)) {
+					obj1[p] = obj2[p];
+				}
+			}
+		}
+		return obj1;
+	}
+		
 	var AT = mAnnotations.AnnotationType;
 
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
@@ -602,6 +614,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (ruler) {
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_SEARCH);
 					ruler.addAnnotationType(AT.ANNOTATION_MATCHING_SEARCH);
+					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_BLAME);
 					ruler.addAnnotationType(AT.ANNOTATION_ERROR);
 					ruler.addAnnotationType(AT.ANNOTATION_WARNING);
 					ruler.addAnnotationType(AT.ANNOTATION_TASK);
@@ -617,6 +630,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			
 			if (this._lineNumberRulerFactory) {
 				this._lineNumberRuler = this._lineNumberRulerFactory.createLineNumberRuler(this._annotationModel);
+				this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_CURRENT_BLAME);
+				this._lineNumberRuler.addAnnotationType(AT.ANNOTATION_BLAME);
 				this._lineNumberRuler.onDblClick = addRemoveBookmark;
 				this.setLineNumberRulerVisible(this._lineNumberRulerVisible || this._lineNumberRulerVisible === undefined, true);
 			}
@@ -675,7 +690,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			this.reportStatus(util.formatMessage(messages.lineColumn, lineIndex + 1, offsetInLine + 1));
 		},
 		
-		showAnnotations: function(annotations, types, getType) {
+		showAnnotations: function(annotations, types, createAnnotation, getType) {
 			var annotationModel = this._annotationModel;
 			if (!annotationModel) {
 				return;
@@ -694,7 +709,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			if (annotations) { 
 				for (var i = 0; i < annotations.length; i++) {
 					annotation = annotations[i];
-					if (annotation) {
+					if (!annotation) { continue; }
+					if (createAnnotation) {
+						annotation = createAnnotation(annotation);
+					} else {
 						var start, end;
 						if (typeof annotation.line === "number") { //$NON-NLS-0$
 							// line/column
@@ -710,9 +728,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						var type = getType(annotation);
 						if (!type) { continue; }
 						annotation = AT.createAnnotation(type, start, end, annotation.description);
-						annotation.creatorID = this;
-						add.push(annotation);
 					}
+					annotation.creatorID = this;
+					add.push(annotation);
+					
 				}
 			}
 			annotationModel.replaceAnnotations(remove, add);
@@ -723,7 +742,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				AT.ANNOTATION_ERROR,
 				AT.ANNOTATION_WARNING,
 				AT.ANNOTATION_TASK
-			], function(annotation) {
+			], null, function(annotation) {
 				switch (annotation.severity) {
 					case "error": return AT.ANNOTATION_ERROR; //$NON-NLS-0$
 					case "warning": return AT.ANNOTATION_WARNING; //$NON-NLS-0$
@@ -737,8 +756,58 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			this.showAnnotations(occurrences, [
 				AT.ANNOTATION_READ_OCCURRENCE,
 				AT.ANNOTATION_WRITE_OCCURRENCE
-			], function(annotation) {
+			], null, function(annotation) {
 				return annotation.readAccess ? AT.ANNOTATION_READ_OCCURRENCE : AT.ANNOTATION_WRITE_OCCURRENCE;
+			});
+		},
+		
+		showBlame : function(blameMarkers) {
+			var blameRGB = this._blameRGB;
+			if (!blameRGB) {
+				var document = this.getTextView().getOptions("parent").ownerDocument; //$NON-NLS-0$
+				var div = util.createElement(document, "div"); //$NON-NLS-0$
+				div.className = "annotation blame"; //$NON-NLS-0$
+				document.body.appendChild(div);
+				var window = document.defaultView || document.parentWindow;
+				var blameStyle = window.getComputedStyle(div);
+				var color = blameStyle.getPropertyValue("background-color"); //$NON-NLS-0$
+				div.parentNode.removeChild(div);
+				var i1 = color.indexOf("("); //$NON-NLS-0$
+				var i2 = color.indexOf(")"); //$NON-NLS-0$
+				color = color.substring(i1 + 1, i2);
+				this._blameRGB = blameRGB = color.split(",").slice(0,3); //$NON-NLS-0$
+			}
+			var createGroupFunction = function() {
+				var annotation = mAnnotations.AnnotationType.createAnnotation(this.groupedType, this.start, this.end, "");
+				annotation.style = merge({}, annotation.style);
+				annotation.style.style = merge({}, annotation.style.style);
+				annotation.style.style.backgroundColor = "";
+				return annotation;
+			};
+			var model = this.getModel();
+			this.showAnnotations(blameMarkers, [
+				AT.ANNOTATION_BLAME
+			], function (blameMarker) {
+				var start = model.getLineStart(blameMarker.Start - 1);
+				var end = model.getLineEnd(blameMarker.End - 1, true);
+				var string = "Message: " + blameMarker.Message.substring(0, 80) + "\nID:" +
+						blameMarker.Name + "\nLocation: " +
+						blameMarker.CommitLocation + "\nAuthor: " +
+						blameMarker.AuthorName + " (" + blameMarker.AuthorEmail +
+						") " + blameMarker.Time + "\nCommitter: " +
+						blameMarker.CommitterName + " (" + blameMarker.CommitterEmail +
+						")";
+	
+				var annotation = mAnnotations.AnnotationType.createAnnotation(AT.ANNOTATION_BLAME, start, end, string);
+				var blameColor = blameRGB.slice(0);
+				blameColor.push(blameMarker.Shade);
+				annotation.style = merge({}, annotation.style);
+				annotation.style.style = merge({}, annotation.style.style);
+				annotation.style.style.backgroundColor = "rgba(" + blameColor.join() + ")"; //$NON-NLS-0$ //$NON-NLS-1$
+				annotation.groupId = blameMarker.Name;
+				annotation.groupedType = AT.ANNOTATION_CURRENT_BLAME;
+				annotation.createGroupedAnnotation = createGroupFunction;
+				return annotation;
 			});
 		},
 		

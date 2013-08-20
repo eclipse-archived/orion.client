@@ -19,6 +19,13 @@
 .annotation.currentLinkedGroup,
 .annotation.selectedLinkedGroup {
 }
+.annotation.blame {
+	background-color: rgb(255, 132, 44);
+}
+.annotation.currentBlame {
+	background-color: rgb(184, 103, 163);
+}
+
 
 /* Styles for the annotation ruler (first line) */
 .annotationHTML {
@@ -149,6 +156,11 @@
 	background-color: Gold;
 	border: 1px solid darkred;
 }
+.annotationOverview.currentBlame {
+	background-color: rgb(184, 103, 163);
+	border: 1px solid black;
+}
+
 
 /* Styles for text range */
 .annotationRange {

@@ -29,6 +29,7 @@ define([
 	'orion/globalCommands',
 	'orion/outliner',
 	'orion/problems',
+	'orion/blameAnnotations',
 	'orion/editor/contentAssist',
 	'orion/editorCommands',
 	'orion/editor/editorFeatures',
@@ -54,7 +55,7 @@ define([
 	'orion/webui/tooltip',
 	'orion/widgets/input/DropDownMenu'
 ], function(messages, require, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mExtensionCommands, 
-			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
+			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mBlameAnnotation, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 			mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mEmacs, mVI, mSearcher,
 			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, EditorSettings, mEditorPreferences, URITemplate, Sidebar,
 			mTooltip, DropDownMenu) {
@@ -66,6 +67,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var commandRegistry;
 	var statusReportingService;
 	var problemService;
+	var blameService;
 	var outlineService;
 	var contentTypeService;
 	var progressService;
@@ -88,6 +90,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
+		blameService = new mBlameAnnotation.BlameService(serviceRegistry);
 	}());
 
 	var sidebarDomNode = lib.node("sidebar"), //$NON-NLS-0$
@@ -350,6 +353,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 			editor.showProblems(event.problems);
 		});
+		
+		// Blame event listener
+		serviceRegistry.getService("orion.core.blame").addEventListener("blameChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
+			editor.showBlame(event.blameInfo);
+		});
+		
 		var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 		editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 			syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);

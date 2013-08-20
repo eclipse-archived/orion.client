@@ -329,6 +329,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 */
 		onMouseOver: function(lineIndex, e) {
 			this.onMouseMove(lineIndex, e);
+			this._showCurrentGroup(lineIndex, e);
 		},
 		/**
 		 * This event is sent when the mouse pointer exits a line annotation.
@@ -338,12 +339,9 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		 * @param {DOMEvent} e the mouse out event.
 		 */
 		onMouseOut: function(lineIndex, e) {
+			this._hideCurrentGroup();
 			var tooltip = mTooltip.Tooltip.getTooltip(this._view);
 			if (!tooltip) { return; }
-			if (e.relatedTarget) {
-				var relatedCompare = e.relatedTarget.compareDocumentPosition(this._view.getOptions("parent")); //$NON-NLS-0$
-				if (relatedCompare & 8) { return; }
-			}
 			tooltip.setTarget(null);
 		},
 		/** @ignore */
@@ -385,6 +383,10 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 		/** @ignore */
 		_getTooltipContents: function(lineIndex, annotations) {
 			return annotations;
+		},
+		_hideCurrentGroup: function() {
+			this._groupLineIndex = -1;
+			this._showGroupAnnotation(null);
 		},
 		/** @ignore */
 		_onAnnotationModelChanged: function(e) {
@@ -463,6 +465,57 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 				}
 			}
 			return result;
+		},
+		_showGroupAnnotation: function(groupAnnotation) {
+			var annotationModel = this._annotationModel;
+			if (!annotationModel) {
+				return;
+			}
+			if (this._groupedType) {
+				annotationModel.removeAnnotations(this._groupedType);
+			}
+			if (!groupAnnotation) { return; }
+			this._groupedType = groupAnnotation.groupedType;
+			var model = annotationModel.getTextModel();
+			var annotations = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
+			var hoveredId = groupAnnotation.groupId;
+			var add = [];
+			while (annotations.hasNext()) {
+				annotation = annotations.next();
+				if (annotation.groupId === hoveredId) {
+					annotation = annotation.createGroupedAnnotation();
+					add.push(annotation);
+				}
+			}
+			annotationModel.replaceAnnotations(null, add);
+		},
+		_showCurrentGroup: function(lineIndex, e) {
+			if (this._groupLineIndex === lineIndex) {
+				return;
+			}
+			this._groupLineIndex = lineIndex;
+			var self = this;
+			var annotationModel = self._annotationModel;
+			var model = annotationModel.getTextModel();
+			var start = model.getLineStart(lineIndex);
+			var end = model.getLineEnd(lineIndex);
+			if (model.getBaseModel) {
+				start = model.mapOffset(start);
+				end = model.mapOffset(end);
+			}
+			var annotations = annotationModel.getAnnotations(start, end);
+			var groupAnnotation = null;
+			while(annotations.hasNext()){
+				var annotation = annotations.next();
+				if (!self.isAnnotationTypeVisible(annotation.type)) { continue; }
+				if (annotation.start <= start && annotation.end >= end){
+					if (annotation.groupId !== undefined) {
+						groupAnnotation = annotation;
+						break;
+					}
+				}
+			}
+			self._showGroupAnnotation(groupAnnotation);
 		}
 	};
 	mAnnotations.AnnotationTypeList.addMixin(Ruler.prototype);
