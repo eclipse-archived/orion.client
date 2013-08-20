@@ -282,9 +282,16 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				var textEnd = baseModel.getLineEnd(baseModel.getLineAtOffset(end), true);
 				return baseModel.getText(textStart, textEnd);
 			}
+			var newAnnotations = [];
+			for (var j = 0; j < annotations.length; j++) {
+				annotation = annotations[j];
+				if (annotation.title !== "") { 
+					newAnnotations.push(annotation); 
+				}
+			}
+			annotations = newAnnotations;
 			function getAnnotationHTML(annotation) {
 				var title = annotation.title;
-				if (title === "") { return null; }
 				var result = util.createElement(document, "div"); //$NON-NLS-0$
 				if (annotation.html) {
 					result.innerHTML = annotation.html;
