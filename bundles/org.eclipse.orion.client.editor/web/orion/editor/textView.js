@@ -3621,7 +3621,16 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						if (ruler.onMouseOver) { ruler.onMouseOver(lineIndex, e); }
 						break;
 					case "mouseout": //$NON-NLS-0$
-						if (ruler.onMouseOut) { ruler.onMouseOut(lineIndex, e); }
+						if (ruler.onMouseOut) { 
+							var tmp = e.relatedTarget;
+							while (tmp && tmp !== this._rootDiv) {
+								if (tmp === element) {
+									return;
+								}
+								tmp = tmp.parentNode;
+							}
+							ruler.onMouseOut(lineIndex, e); 
+						}
 						break;
 				}
 			}
