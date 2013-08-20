@@ -102,43 +102,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			});
 		}
 	};
-	
-	projectCommandUtils.getDepenencyFileMetadata = function(depenency, fileClient){
-		var deferred = new Deferred();
-		function getLastChild(childrenLocation, path){
-			fileClient.fetchChildren(childrenLocation).then(function(children){
-				for(var i=0; i<children.length; i++){
-					if(children[i].Name === path[0]){
-						if(path.length===1){
-							deferred.resolve(children[i]);
-						} else {
-							getLastChild(children[i].ChildrenLocation, path.splice(1, path.length-1));
-						}
-						return;
-					}
-				}
-					deferred.reject(depenency.Location + " could not be found in your workspace");
-			}, function(error){console.error(error);});
-		}
-		
-		if(depenency.Type==="file"){
-			var path = depenency.Location.split("/");
-			fileClient.loadWorkspace().then(function(workspace){
-						for(var i=0; i<workspace.Children.length; i++){
-							if(workspace.Children[i].Name===path[0]){
-								if(path.length===1){
-									deferred.resolve(workspace.Children[i]);
-								} else {
-									getLastChild(workspace.Children[i].ChildrenLocation, path.splice(1, path.length-1));
-								}
-								return;
-							}
-						}
-						deferred.reject(depenency.Location + " could not be found in your workspace");
-			}, function(error){console.error(error);});
-		}
-		return deferred;
-	};
 		
 	/**
 	 * Creates the commands related to file management.
@@ -152,7 +115,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	 * @name orion.fileCommands#createFileCommands
 	 * @function
 	 */
-	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, explorer, fileClient) {
+	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, explorer, fileClient, projectClient) {
 		progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		var that = this;
 		function errorHandler(error) {
@@ -176,14 +139,16 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					func : function(targetFolder) {
 						fileClient.read(targetFolder.Location, true).then(function(fileMetadata){
 							var fileLocation = "";
-							if(fileMetadata.Parents){
+							var name = fileMetadata.Name;
+							if(fileMetadata.Parents && fileMetadata.Parents.length>0){
 								for(var i=fileMetadata.Parents.length-1; i>=0; i--){
 									fileLocation+=fileMetadata.Parents[i].Name;
 									fileLocation+= "/";
 								}
-								fileLocation+=fileMetadata.Name;
+								name += " (" + fileMetadata.Parents[fileMetadata.Parents.length-1].Name + ")";
 							}
-							fileClient.addProjectDepenency(item.Location, {Name: fileMetadata.Name, Type: "file", Location: fileLocation}).then(function(){
+							fileLocation+=fileMetadata.Name;
+							projectClient.addProjectDepenency(item, {Name: name, Type: "file", Location: fileLocation}).then(function(){
 								explorer.changedItem();
 							}, errorHandler);
 						}, errorHandler);
@@ -212,7 +177,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					parentProject = item.Parents[item.Parents.length-1];
 				}
 				if(parentProject){
-					fileClient.initProject(parentProject.Location).then(function(){
+					projectClient.initProject(parentProject.Location).then(function(){
 						fileClient.read(item.Location, true).then(function(fileMetadata){
 							explorer.changedItem(fileMetadata);
 						}, errorHandler);
