@@ -517,8 +517,8 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 					var annotation = annotations[i];
 					if (annotation.type === type) {
 						annotations.splice(i, 1);
+						removed.splice(0, 0, annotation);
 					}
-					removed.splice(0, 0, annotation);
 				}
 			} else {
 				removed = annotations;
