@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,8 +9,12 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global console define setTimeout*/
-define(['orion/Deferred', 'orion/serviceTracker'],
-	function(Deferred, ServiceTracker) {
+define([
+	'orion/Deferred',
+	'orion/serviceTracker',
+	'orion/objects'
+], function(Deferred, ServiceTracker, objects) {
+
 var ManagedServiceTracker, ConfigAdminFactory, ConfigStore, ConfigAdminImpl, ConfigImpl;
 
 var PROPERTY_PID = 'pid'; //$NON-NLS-0$
@@ -253,17 +257,9 @@ ConfigStore = /** @ignore */ (function() {
  * @private
  */
 ConfigImpl = /** @ignore */ (function() {
-	function clone(props) {
-		// Configurations cannot have nested properties, so a 1-level-deep clone is enough
-		var c = {}, keys = Object.keys(props);
-		for (var i=0; i < keys.length; i++) {
-			var key = keys[i], value = props[key];
-			c[key] = (value instanceof Array) ? value.slice() : value;
-		}
-		return c;
-	}
 	function setProperties(configuration, newProps) {
-		newProps = clone(newProps);
+		// Configurations cannot have nested properties, so a shallow clone is sufficient.
+		newProps = objects.clone(newProps);
 		delete newProps[PROPERTY_PID];
 		configuration.properties = newProps;
 	}
@@ -294,7 +290,7 @@ ConfigImpl = /** @ignore */ (function() {
 			this._checkRemoved();
 			var props = null;
 			if (this.properties) {
-				props = clone(this.properties);
+				props = objects.clone(this.properties);
 				if (!omitPid) {
 					props[PROPERTY_PID] = this.pid;
 				}
