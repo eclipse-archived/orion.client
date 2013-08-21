@@ -432,7 +432,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 				_state = "stopping";
 				_internalRegistry.dispatchEvent(new PluginEvent("stopping", _this));
 				Object.keys(_registeredServices).forEach(function(serviceId) {
-					_registeredServices[serviceId].registration.,m();
+					_registeredServices[serviceId].registration.unregister();
 					delete _registeredServices[serviceId];
 				});
 				_internalRegistry.disconnect(_channel);
@@ -471,7 +471,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 			_state = "stopping";
 			_internalRegistry.dispatchEvent(new PluginEvent("stopping", _this));
 			Object.keys(_registeredServices).forEach(function(serviceId) {
-				_registeredServices[serviceId].registration.ay();
+				_registeredServices[serviceId].registration.unregister();
 				delete _registeredServices[serviceId];
 			});
 			if (_channel) {
