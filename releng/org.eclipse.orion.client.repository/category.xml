@@ -1,19 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <bundle id="org.eclipse.orion.client.core" version="2.0.0.qualifier">
-      <category name="org.eclipse.orion.client"/>
-   </bundle>
-   <bundle id="org.eclipse.orion.client.editor" version="1.0.0.qualifier">
-      <category name="org.eclipse.orion.client"/>
-   </bundle>
-   <bundle id="org.eclipse.orion.client.git" version="1.0.0.qualifier">
-      <category name="org.eclipse.orion.client"/>
-   </bundle>
-   <bundle id="org.eclipse.orion.client.ui" version="2.0.0.qualifier">
-      <category name="org.eclipse.orion.client"/>
-   </bundle>
-   <bundle id="org.eclipse.orion.client.users" version="1.0.0.qualifier">
-      <category name="org.eclipse.orion.client"/>
-   </bundle>
+   <feature url="features/org.eclipse.orion.client.feature_0.0.0.jar" id="org.eclipse.orion.client.feature" version="0.0.0"/>
    <category-def name="org.eclipse.orion.client" label="Orion Client"/>
 </site>
