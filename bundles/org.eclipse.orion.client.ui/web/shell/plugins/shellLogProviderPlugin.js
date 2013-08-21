@@ -13,13 +13,13 @@
 define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUtil'],
  function(require, PluginProvider, _xhr, Deferred, i18nUtil) {
 	
-	/* log provider server scope */
-	var LOG_API_SCOPE = "logs/";
+	/* log service server scope */
+	var LOG_API_SCOPE = "logapi/";
 	
 	var headers = {
 		name: "Orion Log Provider Service",
 		version: "1.0",
-		description: "This plugin provides shell access to Orion log provider service."
+		description: "This plugin provides shell access to Orion log service."
 	};
 
 	var temp = document.createElement('a');
@@ -45,7 +45,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		return toAbsoluteLocation(createLocation(require.toUrl(location)));
 	}
 
-	function callGET(url, raw){
+	function GET(url, raw){
 		var d = new Deferred();
 		var handler = raw ? "text/plain" : "json";
 		
@@ -66,7 +66,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		return d;
 	}
 	
-	function callPUT(url, dataJSON){
+	function PUT(url, dataJSON){
 		var d = new Deferred();
 		_xhr("PUT", url, { 
 			headers : { 
@@ -83,6 +83,59 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		});
 		
 		return d;
+	}
+	
+	function getFileAppenders(){
+		var deferred = new Deferred();
+		var location = LOG_API_SCOPE + "fileAppender/";
+		GET(createLocation(require.toUrl(location))).then(function(resp){
+			deferred.resolve(resp.Children);
+		}, function(error){
+			deferred.reject("Error: " + error);
+		});
+		
+		return deferred;
+	}
+	
+	function getRollingFileAppenders(){
+		var deferred = new Deferred();
+		var location = LOG_API_SCOPE + "rollingFileAppender/";
+		GET(createLocation(require.toUrl(location))).then(function(resp){
+			deferred.resolve(resp.Children);
+		}, function(error){
+			deferred.reject("Error: " + error);
+		});
+		
+		return deferred;
+	}
+	
+	function getLoggers(){
+		var deferred = new Deferred();
+		var location = LOG_API_SCOPE + "logger/";
+		GET(createLocation(require.toUrl(location))).then(function(resp){
+			deferred.resolve(resp.Children);
+		}, function(error){
+			deferred.reject("Error: " + error);
+		});
+		
+		return deferred;
+	}
+	
+	function updateLogger(loggerName, level){
+		var deferred = new Deferred();
+		var location = LOG_API_SCOPE + "logger/" + loggerName;
+		
+		var dataJSON = {
+			"Level" : level
+		};
+		
+		PUT(createLocation(require.toUrl(location)), dataJSON).then(function(resp){
+			deferred.resolve(resp);
+		}, function(error){
+			deferred.reject("Error: " + error);
+		});
+		
+		return deferred;
 	}
 	
 	function renderDownloadLink(url, linkName){
@@ -165,11 +218,11 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 	var appenderTypeImpl = {	
 	   parse: function(arg, typeSpec, context) {
 	     var deferred = new Deferred();	     
-	     callGET(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
+	     getFileAppenders().then(function(resp){
 	     
 			var potentialPredictions = [];
-			for(var i=0; i<resp.Children.length; ++i){
-				var child = resp.Children[i];
+			for(var i=0; i<resp.length; ++i){
+				var child = resp[i];
 				potentialPredictions.push({
 					name: child.Name,
 					value: { name: child.Name }
@@ -213,6 +266,61 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		
 	provider.registerServiceProvider("orion.shell.type", appenderTypeImpl, appenderProperties);
 	
+	var rollingFileAppenderProperties = { 
+	   name: "rolling-appender-name"
+	};
+	 
+	var rollingFileAppenderTypeImpl = {	
+	   parse: function(arg, typeSpec, context) {
+	     var deferred = new Deferred();	     
+	     getRollingFileAppenders().then(function(resp){
+	     
+			var potentialPredictions = [];
+			for(var i=0; i<resp.length; ++i){
+				var child = resp[i];
+				potentialPredictions.push({
+					name: child.Name,
+					value: { name: child.Name }
+				});
+			}
+			
+			var value; /* undefined until a valid value is fully typed */
+		    var status; /* one of the CompletionStatus values above */
+		    var predictions = []; /* an [] of {name: typedString, value: object} */
+		
+		    for (var i = 0; i < potentialPredictions.length; i++) {
+		      if (potentialPredictions[i].name.indexOf(arg.text) === 0) {
+		        predictions.push(potentialPredictions[i]);
+		        if (potentialPredictions[i].name === arg.text) {
+		          value = potentialPredictions[i].value;
+		        }
+		      }
+		    }
+		
+		    status = CompletionStatus.ERROR;
+		    if (predictions.length > 0) {
+		      status = value ? CompletionStatus.MATCH : CompletionStatus.PARTIAL;
+		    }
+		     
+		    var result = {
+		      value: value,
+		      message: (status === CompletionStatus.ERROR ? ("'" + arg.text + "' is not valid") : undefined),
+		      status: status,
+		      predictions: predictions
+		    };
+	
+			deferred.resolve(result);
+			
+	     }, function(error){
+			deferred.reject("Error: " + error);
+	     });
+	
+	     return deferred;
+	   }
+	 };
+		
+	provider.registerServiceProvider("orion.shell.type", rollingFileAppenderTypeImpl, rollingFileAppenderProperties);
+	
 	var loggerProperties = { 
 	   name: "logger-name"
 	 };
@@ -220,11 +328,11 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 	var loggerTypeImpl = {	
 	   parse: function(arg, typeSpec, context) {
 	     var deferred = new Deferred();	     
-	     callGET(createLocation(require.toUrl(LOG_API_SCOPE + "logger/"))).then(function(resp){
+	     getLoggers().then(function(resp){
 	     
 			var potentialPredictions = [];
-			for(var i=0; i<resp.Children.length; ++i){
-				var child = resp.Children[i];
+			for(var i=0; i<resp.length; ++i){
+				var child = resp[i];
 				potentialPredictions.push({
 					name: child.Name,
 					value: { name: child.Name }
@@ -281,17 +389,17 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			var deferred = new Deferred();
 			var appenderName = args['appender-name'] ? args['appender-name'].name : undefined;
 
-			callGET(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
-				if(resp.Children.length === 0){
+			getFileAppenders().then(function(resp){
+				if(resp.length === 0){
 					var errorMessage = i18nUtil.formatMessage("ERROR: No file appenders were found in the current logger context.",
-						resp.Children.length);
+						resp.length);
 							
 					deferred.reject(errorMessage);
 					return; // failed
 				}
 				
-				if(resp.Children.length === 1){
-					var child = resp.Children[0];
+				if(resp.length === 1){
+					var child = resp[0];
 					if(appenderName && appenderName !== child.Name){
 						/* user is looking for a different appender then the default one */
 						var errorMessage = i18nUtil.formatMessage("ERROR: No file appender named ${0} found in the current logger context.",
@@ -302,7 +410,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 					}
 					
 					/* provide the default one */
-					deferred.resolve(renderDownloadLink(qualifyURL(child.DownloadLocation)));
+					deferred.resolve(renderDownloadLink(qualifyURL(child.Location)));
 					return; // success
 				}
 				
@@ -317,10 +425,10 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 					return; // failed
 				}
 					
-				for(var i=0; i<resp.Children.length; ++i){
-					var child = resp.Children[i];
+				for(var i=0; i<resp.length; ++i){
+					var child = resp[i];
 					if(child.Name === appenderName){
-						deferred.resolve(renderDownloadLink(qualifyURL(child.DownloadLocation)));
+						deferred.resolve(renderDownloadLink(qualifyURL(child.Location)));
 						return; // success
 					}
 				}
@@ -358,9 +466,9 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		
 	function getAppenderJSON(appenderName){
 		var deferred = new Deferred();
-		callGET(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
+		getFileAppenders().then(function(resp){
 				
-			if(resp.Children.length === 0){
+			if(resp.length === 0){
 				var errorMessage = i18nUtil.formatMessage("ERROR: No file appenders were found in the current logger context.",
 					resp.Children.length);
 						
@@ -368,26 +476,26 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 				return; // failed
 			}
 			
-			var appender = undefined;
+			var appender;
 			
 			/* there's only one appender, provide default one */
-			if(resp.Children.length === 1){
-				var child = resp.Children[0];
+			if(resp.length === 1){
+				var child = resp[0];
 				
 				/* provide the default one */
 				appender = child;
 			}
 				
 			/* get appender metadata */
-			for(var i=0; i<resp.Children.length; ++i){
-				var child = resp.Children[i];
+			for(var i=0; i<resp.length; ++i){
+				var child = resp[i];
 				if(child.Name === appenderName){
 					appender = child;
 				}
 			}
 			
 			if(appender){
-				callGET(appender.Location).then(function(response){
+				GET(appender.Location + "?parts=meta").then(function(response){
 					deferred.resolve(response);
 				}, function(error){
 					deferred.reject("ERROR: " + error);
@@ -411,28 +519,28 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 	
 	function getLoggerJSON(loggerName){
 		var deferred = new Deferred();
-		callGET(createLocation(require.toUrl(LOG_API_SCOPE + "logger/"))).then(function(resp){
+		getLoggers().then(function(resp){
 				
-			if(resp.Children.length === 0){
+			if(resp.length === 0){
 				var errorMessage = i18nUtil.formatMessage("ERROR: No loggers were found in the current logger context.",
-					resp.Children.length);
+					resp.length);
 						
 				deferred.reject(errorMessage);
 				return; // failed
 			}
 			
-			var logger = undefined;
+			var logger;
 			
 			/* get logger metadata */
-			for(var i=0; i<resp.Children.length; ++i){
-				var child = resp.Children[i];
+			for(var i=0; i<resp.length; ++i){
+				var child = resp[i];
 				if(child.Name === loggerName){
 					logger = child;
 				}
 			}
 			
 			if(logger){
-				callGET(logger.Location).then(function(response){
+				GET(logger.Location).then(function(response){
 					deferred.resolve(response);
 				}, function(error){
 					deferred.reject("ERROR: " + error);
@@ -491,19 +599,18 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			
 			if(!appenderName){
 				/* list all appender names */
-				callGET(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
-					
-					if(resp.Children.length === 0){
+				getFileAppenders().then(function(resp){
+					if(resp.length === 0){
 						var errorMessage = i18nUtil.formatMessage("ERROR: No file appenders were found in the current logger context.",
-							resp.Children.length);
+							resp.length);
 								
 						deferred.reject(errorMessage);
 						return deferred; // failed
 					}
 					
 					/* there's only one appender, provide default one metadata */
-					if(resp.Children.length === 1){
-						var child = resp.Children[0];
+					if(resp.length === 1){
+						var child = resp[0];
 						
 						/* provide the default one */
 						getAppenderJSON(child.Name).then(function(appender){
@@ -519,8 +626,8 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 					}
 					
 					var names = [];
-					for(var i=0; i<resp.Children.length; ++i){
-						var child = resp.Children[i];
+					for(var i=0; i<resp.length; ++i){
+						var child = resp[i];
 						names.push(child.Name);
 					}
 					
@@ -569,18 +676,18 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			
 			if(!appenderName){
 				/* fall back to the default appender is present */
-				callGET(createLocation(require.toUrl(LOG_API_SCOPE))).then(function(resp){
-					if(resp.Children.length === 0){
-						var errorMessage = i18nUtil.formatMessage("ERROR: No file appenders were found in the current logger context.",
-							resp.Children.length);
+				getRollingFileAppenders().then(function(resp){
+					if(resp.length === 0){
+						var errorMessage = i18nUtil.formatMessage("ERROR: No rolling file appenders were found in the current logger context.",
+							resp.length);
 								
 						deferred.reject(errorMessage);
 						return deferred; // failed
 					}
 					
 					/* there's only one appender, provide default one history */
-					if(resp.Children.length === 1){
-						var child = resp.Children[0];
+					if(resp.length === 1){
+						var child = resp[0];
 						appenderName = child.Name;
 						
 						getAppenderJSON(appenderName).then(function(appender){
@@ -603,7 +710,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 							var names = [];
 							for(var i=0; i<appender.ArchivedLogFiles.length; ++i){
 								var log = appender.ArchivedLogFiles[i];
-								names.push(log.Name + " : " + renderDownloadLink(qualifyURL(log.DownloadLocation)));
+								names.push(log.Name + " : " + renderDownloadLink(qualifyURL(log.Location)));
 							}
 							
 							deferred.resolve(names.join("\n"));
@@ -618,7 +725,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 					
 					/* there's no default appender, fail */
 					var errorMessage = i18nUtil.formatMessage("ERROR: Found ${0} file appenders in the current logger context. " +
-						"Could not determine which appender to use by default.", resp.Children.length);
+						"Could not determine which appender to use by default.", resp.length);
 					
 					deferred.reject(errorMessage);
 					return; // failed
@@ -650,7 +757,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 				var names = [];
 				for(var i=0; i<appender.ArchivedLogFiles.length; ++i){
 					var log = appender.ArchivedLogFiles[i];
-					names.push(log.Name + " : " + renderDownloadLink(qualifyURL(log.DownloadLocation)));
+					names.push(log.Name + " : " + renderDownloadLink(qualifyURL(log.Location)));
 				}
 				
 				deferred.resolve(names.join("\n"));
@@ -671,7 +778,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		returnType: "string",
 		parameters: [{
 			name: "appender-name",
-			type: { name: "appender-name" },
+			type: { name: "rolling-appender-name" },
 			description: "Appedner name which archived log-file download links should be provided.",
 			defaultValue: null
 		}]
@@ -695,26 +802,26 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			
 			if(!loggerName){
 				/* list all appender names */
-				callGET(createLocation(require.toUrl(LOG_API_SCOPE + "logger/"))).then(function(resp){
+				getLoggers().then(function(resp){
 					
-					if(resp.Children.length === 0){
+					if(resp.length === 0){
 						var errorMessage = i18nUtil.formatMessage("ERROR: No loggers were found in the current logger context.",
-							resp.Children.length);
+							resp.length);
 								
 						deferred.reject(errorMessage);
 						return deferred; // failed
 					}
 					
 					/* logger with levels first */
-					resp.Children.sort(function(a, b){
+					resp.sort(function(a, b){
 						if(a.Level && !b.Level) { return -1; }
 						if(!a.Level && b.Level) { return 1; }
 						return a.Name.localeCompare(b.Name);
 					});
 					
 					var names = [];
-					for(var i=0; i<resp.Children.length; ++i){
-						var child = resp.Children[i];
+					for(var i=0; i<resp.length; ++i){
+						var child = resp[i];
 						if(child.Level) { names.push(child.Name + " : " + child.Level); }
 						else { names.push(child.Name + " : (" + child.EffectiveLevel + ")"); }
 					}
@@ -760,22 +867,13 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			var deferred = new Deferred();
 			var loggerName = args['logger-name'] ? args['logger-name'].name : undefined;
 			
-			getLoggerJSON(loggerName).then(function(logger){
-				var dataJSON = {
-					"Level" : args.level.name
-				};
-				
-				callPUT(logger.Location, dataJSON).then(function(response){
-					deferred.resolve(prettyPrint(response, 0));
-				}, function(error){
-					deferred.reject(error);
-				});
-
+			updateLogger(loggerName, args.level.name).then(function(logger){
+				deferred.resolve(prettyPrint(logger, 0));
 			}, function(errorMessage){
 				/* pass error message */
 				deferred.reject(errorMessage);
 			});
-
+			
 			return deferred;
 		}
     };
