@@ -10,6 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global window define */
+/*jslint browser:true devel:true*/
 
 define([
 	'i18n!orion/edit/nls/messages',
@@ -354,7 +355,7 @@ define([
 			var blameCommand = new mCommands.Command({
 				name: messages.Blame,
 				tooltip: messages.BlameTooltip,
-				id: "orion.edit.blame",
+				id: "orion.edit.blame", //$NON-NLS-0$
 				visibleWhen: function() {
 					return  blamer.isVisible(self.serviceRegistry);
 
@@ -364,7 +365,7 @@ define([
 				}
 			});
 			this.commandService.addCommand(blameCommand);
-			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, null, false, new mKeyBinding.KeyBinding('b', true,false,true)); //$NON-NLS-1$ //$NON-NLS-0
+			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, null, false, new mKeyBinding.KeyBinding('b', true,false,true)); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
 		_generateEditCommands: function(editor) {
