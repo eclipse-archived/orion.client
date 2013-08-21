@@ -149,20 +149,20 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 												'<canvas id="orionui" width="800" height="380""></canvas>' +
 												'<div id="pickercontainer" style="display:block;">' +
 													'<span class="settingsLabel">' + 
-														messages["Theme"] + 
-													':</span>' + 
+														messages["Theme:"] + 
+													'</span>' + 
 													'<div id="themepicker" class="themepicker"></div>' +
 												'</div>' +
 												'<div id="savecontainer" style="display:none;">' +
 													'<span class="settingsLabel">' + 
-														messages["New Theme Name"] + 
-													':</span>' + 
+														messages["New Theme Name:"] + 
+													'</span>' + 
 													'<div id="themesaver" class="themesaver"></div>' +
 												'</div>' +
 												'<div id="sizecontainer">' +
 													'<span class="settingsLabel">' +
-														messages["Font Size"] +
-													':</span>' + 
+														messages["Font Size:"] +
+													'</span>' + 
 													'<div id="fontsizepicker" class="fontsizepicker"></div>' +
 												'</div>' +
 												'<div id="stringcontainer" style="position:relative;left:400px;top:-140px;display:none;">' +
@@ -170,7 +170,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 															messages["OR HEX:"] +
 														'</span>' + 
 														'<div id="colorstring" class="colorfield"></div>' +
-														'<button class = "commandButton" style="padding:5px;font-size:9pt;"type="button" id="colorButton"}">ok</button>' + 
+														'<button class="commandButton" style="padding:5px;font-size:9pt;" type="button" id="colorButton">ok</button>' + 
 												'</div>' +
 											'</div>';
 		
