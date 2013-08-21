@@ -23,19 +23,19 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
         return false;
     }
 
-	function filterOccurrences(occurrences, context) {
-        if (!context.scope) {
+	function filterOccurrences(context) {
+        if (!context.mScope) {
             return null;
         }
         var matches = [];
-        for (var i = 0; i < occurrences.length; i++) {
-            if (isOccurrenceInSelScope(occurrences[i].scope, context.scope)) {
+        for (var i = 0; i < context.occurrences.length; i++) {
+            if (isOccurrenceInSelScope(context.occurrences[i].scope, context.mScope)) {
                 matches.push({
-                    readAccess: occurrences[i].readAccess,
-                    line: occurrences[i].node.loc.start.line,
-                    start: occurrences[i].node.loc.start.column + 1,
-                    end: occurrences[i].node.loc.end.column,
-                    description: (occurrences[i].readAccess ? "occurrence of " : "write occurrence of") + context.word	//$NON-NLS-0$ //$NON-NLS-1$
+                    readAccess: context.occurrences[i].readAccess,
+                    line: context.occurrences[i].node.loc.start.line,
+                    start: context.occurrences[i].node.loc.start.column + 1,
+                    end: context.occurrences[i].node.loc.end.column,
+                    description: (context.occurrences[i].readAccess ? "occurrence of " : "write occurrence of") + context.word	//$NON-NLS-0$ //$NON-NLS-1$
                 }); 
             }
         }
@@ -43,7 +43,7 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
     }
     
     function updateScope(node, scope) {
-        if (!node || !node.type) {
+        if (!node || !node.type || !scope) {
 			return;
         }
         switch (node.type) {
@@ -56,41 +56,30 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
         }
     }
     
-    function traverse(node, context, func, occurrences, scope) {
-        func(node, context, occurrences, scope);
-        for (var key in node) {
-            if (node.hasOwnProperty(key)) {
-                var child = node[key];
-                if (typeof child === 'object' && child !== null) { //$NON-NLS-0$
-                    if (Array.isArray(child)) {
-                        child.forEach(function (node) {
-                            traverse(node, context, func, occurrences, scope);
-                        });
-                    } else {
-                        traverse(child, context, func, occurrences, scope);
-                    }
-                }
-            }
+    function traverse(node, context, func) {
+        if (func(node, context)) {
+			return false;	// stop traversal
         }
-        updateScope(node, scope);
-    }
-    
-    function traverse1(node, context, func) {
-        func(node, context);
         for (var key in node) {
             if (node.hasOwnProperty(key)) {
                 var child = node[key];
-                if (typeof child === 'object' && child !== null) { //$NON-NLS-0$
+                if (child && typeof child === 'object' && child !== null) { //$NON-NLS-0$
                     if (Array.isArray(child)) {
                         for (var i=0; i<child.length; i++) {
-                            traverse1(child[i], context, func);
-                        }
+                            if (!traverse(child[i], context, func)) {
+								return false;
+							}
+						}
                     } else {
-                        traverse1(child, context, func);
+                        if (!traverse(child, context, func)) {
+							return false;
+                        }
                     }
                 }
             }
         }
+        updateScope(node, context.scope);
+        return true;
     }
 
     /* convert ast array to String */
@@ -127,30 +116,26 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
         return null;
     }
 
-    function addOccurrence(scope, node, context, occurrences, readAccess) {
+    function addOccurrence(node, context, readAccess) {
         if (node) {
             if (readAccess === undefined) {
                 readAccess = true;
             }
 
-			//SSQ: can this be done in the first traverse?
-            var mScope = findMatchingDeclarationScope(scope);
+            var mScope = findMatchingDeclarationScope(context.scope);
             if (!mScope) {
                 return;
             }
 	
-			//SSQ: check for inclusion, not equality
 			if ((node.range[0] <= context.start) && (context.end <= node.range[1])) {
-          //  if ((node.loc.start.line === context.line) && (node.loc.start.column === context.column.start)) {
                 if (mScope) {
-                    context.scope = mScope;
+                    context.mScope = mScope;
                 } else {
                     console.error("matching declaration scope for selected type not found " + context.word); //$NON-NLS-0$
                 }
             }
-            //SSQ ---------------------------------------------
 
-            occurrences.push({
+            context.occurrences.push({
                 readAccess: readAccess,
                 node: node,
                 scope: mScope
@@ -158,43 +143,43 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
         }
     }
 
-    function findOccurrence(node, context, occurrences, scope) {
+    function findOccurrence(node, context) {
         if (!node || !node.type) {
-			return;
+			return null;
         }
-        var readAccess = true;
+        var varScope, curScope, i;
         switch (node.type) {
         case 'Program': //$NON-NLS-0$
-            var curScope = {
+            curScope = {
                 global: true,
                 name: null,
                 decl: false
             };
-            scope.push(curScope);
+            context.scope.push(curScope);
             break;
         case 'VariableDeclarator': //$NON-NLS-0$
             if (checkIdentifier(node.id, context)) {
-                var varScope = scope.pop();
+                varScope = context.scope.pop();
                 varScope.decl = true;
-                scope.push(varScope);
-                addOccurrence(scope, node.id, context, occurrences, false);
+                context.scope.push(varScope);
+                addOccurrence(node.id, context, false);
             }
             if (node.init) {
 				if (checkIdentifier(node.init, context)) {
-					addOccurrence(scope, node.init, context, occurrences);
+					addOccurrence(node.init, context);
 					break;
 				} 
                 if (node.init.type === 'ObjectExpression') { //$NON-NLS-0$
                     var properties = node.init.properties;
-                    for (var i = 0; i < properties.length; i++) {
-                        //						if (checkIdentifier (properties[i].key, context)) {
-                        //							var varScope = scope.pop();
-                        //							varScope.decl = true;
-                        //							scope.push(varScope);
-                        //							addOccurrence (scope, properties[i].key, context, occurrences, false);
-                        //						}
+                    for (i = 0; i < properties.length; i++) {
+                        //if (checkIdentifier (properties[i].key, context)) {
+                        //	var varScope = scope.pop();
+                        //	varScope.decl = true;
+                        //	scope.push(varScope);
+                        //	addOccurrence (scope, properties[i].key, context, occurrences, false);
+                        //}
                         if (checkIdentifier(properties[i].value, context)) {
-                            addOccurrence(scope, properties[i].value, context, occurrences);
+                            addOccurrence(properties[i].value, context);
                         }
                     }
                 }
@@ -202,9 +187,9 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
             break;
         case 'ArrayExpression': //$NON-NLS-0$
             if (node.elements) {
-                for (var i = 0; i < node.elements.length; i++) {
+                for (i = 0; i < node.elements.length; i++) {
                     if (checkIdentifier(node.elements[i], context)) {
-                        addOccurrence(scope, node.elements[i], context, occurrences);
+                        addOccurrence(node.elements[i], context);
                     }
                 }
             }
@@ -212,101 +197,103 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
         case 'AssignmentExpression': //$NON-NLS-0$
             var leftNode = node.left;
             if (checkIdentifier(leftNode, context)) {
-                addOccurrence(scope, leftNode, context, occurrences, false);
+                addOccurrence(leftNode, context, false);
             }
             if (leftNode.type === 'MemberExpression') { //$NON-NLS-0$
                 if (checkIdentifier(leftNode.object, context)) {
-                    addOccurrence(scope, leftNode.object, context, occurrences, false);
+                    addOccurrence(leftNode.object, context, false);
                 }
             }
             var rightNode = node.right;
             if (checkIdentifier(rightNode, context)) {
-                addOccurrence(scope, rightNode, context, occurrences);
+                addOccurrence(rightNode, context);
             }
             break;
         case 'MemberExpression': //$NON-NLS-0$
             if (checkIdentifier(node.object, context)) {
-                addOccurrence(scope, node.object, context, occurrences);
+                addOccurrence(node.object, context);
             }
             if (node.computed) { //computed = true for [], false for . notation
                 if (checkIdentifier(node.property, context)) {
-                    addOccurrence(scope, node.property, context, occurrences);
+                    addOccurrence(node.property, context);
                 }
             }
             break;
         case 'BinaryExpression': //$NON-NLS-0$
             if (checkIdentifier(node.left, context)) {
-                addOccurrence(scope, node.left, context, occurrences);
+                addOccurrence(node.left, context);
             }
             if (checkIdentifier(node.right, context)) {
-                addOccurrence(scope, node.right, context, occurrences);
+                addOccurrence(node.right, context);
             }
             break;
         case 'UnaryExpression': //$NON-NLS-0$
             if (checkIdentifier(node.argument, context)) {
-                addOccurrence(scope, node.argument, context, occurrences, node.operator === 'delete' ? false : true); //$NON-NLS-0$
+                addOccurrence(node.argument, context, node.operator === 'delete' ? false : true); //$NON-NLS-0$
             }
             break;
         case 'IfStatement': //$NON-NLS-0$
             if (checkIdentifier(node.test, context)) {
-                addOccurrence(scope, node.test, context, occurrences);
+                addOccurrence(node.test, context);
             }
             break;
         case 'SwitchStatement': //$NON-NLS-0$
             if (checkIdentifier(node.discriminant, context)) {
-                addOccurrence(scope, node.discriminant, context, occurrences, false);
+                addOccurrence(node.discriminant, context, false);
             }
             break;
         case 'UpdateExpression': //$NON-NLS-0$
             if (checkIdentifier(node.argument, context)) {
-                addOccurrence(scope, node.argument, context, occurrences, false);
+                addOccurrence(node.argument, context, false);
             }
             break;
         case 'ConditionalExpression': //$NON-NLS-0$
             if (checkIdentifier(node.test, context)) {
-                addOccurrence(scope, node.test, context, occurrences);
+                addOccurrence(node.test, context);
             }
             if (checkIdentifier(node.consequent, context)) {
-                addOccurrence(scope, node.consequent, context, occurrences);
+                addOccurrence(node.consequent, context);
             }
             if (checkIdentifier(node.alternate, context)) {
-                addOccurrence(scope, node.alternate, context, occurrences);
+                addOccurrence(node.alternate, context);
             }
             break;
         case 'FunctionDeclaration': //$NON-NLS-0$
-            var curScope = {
+            curScope = {
                 global: false,
                 name: node.id.name,
                 loc: node.loc,
                 decl: false
             };
-            scope.push(curScope);
+            context.scope.push(curScope);
             if (node.params) {
-                for (var i = 0; i < node.params.length; i++) {
+                for (i = 0; i < node.params.length; i++) {
                     if (checkIdentifier(node.params[i], context)) {
-                        var varScope = scope.pop();
+                        varScope = context.scope.pop();
                         varScope.decl = true;
-                        scope.push(varScope);
-                        addOccurrence(scope, node.params[i], context, occurrences, false);
+                        context.scope.push(varScope);
+                        addOccurrence(node.params[i], context, false);
                     }
                 }
             }
             break;
         case 'FunctionExpression': //$NON-NLS-0$
-            var curScope = {
+            curScope = {
                 global: false,
                 name: null,
                 loc: node.loc,
                 decl: false
             };
-            scope.push(curScope);
-            if (!node.params) break;
-            for (var i = 0; i < node.params.length; i++) {
+            context.scope.push(curScope);
+            if (!node.params) {
+				break;
+            }
+            for (i = 0; i < node.params.length; i++) {
                 if (checkIdentifier(node.params[i], context)) {
-                    var varScope = scope.pop();
+                    varScope = context.scope.pop();
                     varScope.decl = true;
-                    scope.push(varScope);
-                    addOccurrence(scope, node.params[i], context, occurrences, false);
+                    context.scope.push(varScope);
+                    addOccurrence(node.params[i], context, false);
                 }
             }
             break;
@@ -316,44 +303,37 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
             }
             for (var j = 0; j < node.arguments.length; j++) {
                 if (checkIdentifier(node.arguments[j], context)) {
-                    addOccurrence(scope, node.arguments[j], context, occurrences);
+                    addOccurrence(node.arguments[j], context);
                 }
             }
             break;
         case 'ReturnStatement': //$NON-NLS-0$
             if (checkIdentifier(node.argument, context)) {
-                addOccurrence(scope, node.argument, context, occurrences);
+                addOccurrence(node.argument, context);
             }
         }
+        return null;
     }
     
     function getOccurrences(context) {
         var ast = createAST(context);
         if (ast) {
-            var occurrences = [],
-                scope = [];
-                
-            // SSQ: traverse1 computes the context.word using text buffer and selection
-            // SSQ: traverse1 and traverse should be the same.  For that, stop passing "occurrences" and "scope" as parameters to traverse. Pass them inside the "context" object
-			traverse1(ast, context, function(node, context) {
+			traverse(ast, context, function(node, context) {
+				var found = false;
 				if (node.range && node.name && (node.range[0] <= context.start) && (context.end <= node.range[1])) {
 					context.word = node.name;
+					found = true;
 				}
+				return found;
             });
-            window.console.log("word=" + context.word);
             
-            // SSQ: if word (=identifier) not found, give up
             if (!context || !context.word) {
                 return null;
             }
-                
-            traverse(ast, context, findOccurrence, occurrences, scope);
-            occurrences = filterOccurrences(occurrences, context);
-//            SSQ: should not throw error, just return an empty array (or null)
-//            if (!occurrences) {
-//                console.error("no matching occurrences found");	//$NON-NLS-0$
-//            }
-            return occurrences;
+            context.scope = [];
+            context.occurrences = [];
+            traverse(ast, context, findOccurrence);
+            return filterOccurrences(context);
         }
         console.error("ast is null");	//$NON-NLS-0$
         return null;
@@ -374,13 +354,9 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
                 text: text,
                 start: selection.start,
                 end: selection.end,
-                scope: null
+                mScope: null
             };
-//            SSQ: compute word using AST. Remove word parameter from findOccurrences. This check needs to happen later in getOccurrences
-//            if (!context || !context.word) {
-//                return null;
-//            }
-	        return  getOccurrences (context);
+	        return getOccurrences (context);
         }
     };
 
