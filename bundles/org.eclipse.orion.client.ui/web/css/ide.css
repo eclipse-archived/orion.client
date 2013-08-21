@@ -245,6 +245,7 @@ textarea.parameterInput {
 	display: inline-block;
 	padding: 4px;
 	vertical-align: baseline;
+	white-space: nowrap;
 }
 
 .singleNavColumn {
