@@ -280,6 +280,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 			if (ruler && options.firstLineIndex !== undefined) {
 				ruler.setFirstLine(options.firstLineIndex);
 			}
+			editor.getSourceCodeActions().setAutoPairing(options.autoPairing);
 		});
 		
 		var contents = options.contents;
@@ -294,6 +295,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		editor.setOverviewRulerVisible(options.showOverviewRuler === undefined || options.showOverviewRuler);
 		editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 		editor.setInput(options.title, null, contents);
+		
 		syntaxHighlighter.highlight(options.lang, editor);
 		if (contentAssist) {
 			var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();

@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors:  IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define*/
@@ -15,8 +15,8 @@ define([], function() {
 	var SETTINGS_SECTION = "/editor/settings"; //$NON-NLS-0$
 	var SETTINGS_KEY = "editorSettings"; //$NON-NLS-0$
 
-	var defaults = {	
-		autoSave: false, 
+	var defaults = {
+		autoSave: false,
 		autoSaveVisible: true,
 		autoSaveLocalVisible: true,
 		autoSaveTimeout: 1000,
@@ -29,6 +29,8 @@ define([], function() {
 		autoLoadVisible: true,
 		saveDiffs: false,
 		saveDiffsVisible: true,
+		autoPairing: true,
+		autoPairingVisible: true,
 		trimTrailingWhiteSpace: false,
 		trimTrailingWhiteSpaceVisible: true,
 		tabSize: 4,
@@ -58,12 +60,12 @@ define([], function() {
 		if (callback) {
 			var storageKey = preferences.listenForChangedSettings(SETTINGS_SECTION, function (e) {
 				if (e.key === storageKey) {
-					callback();	
+					callback();
 				}
 			}.bind(this));
 		}
 	}
-	
+
 	EditorPreferences.prototype = /** @lends edit.EditorPreferences.prototype */ {
 		_initialize: function(prefs) {
 			var settings = prefs.get(SETTINGS_KEY) || {};
@@ -96,7 +98,6 @@ define([], function() {
 			}.bind(this));
 		}
 	};
-	
+
 	return { EditorPreferences: EditorPreferences };
-});	
-	
+});
