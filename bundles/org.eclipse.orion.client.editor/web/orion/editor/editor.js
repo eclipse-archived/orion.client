@@ -194,9 +194,32 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @returns {Array} the editor key modes.
 		 */
 		getKeyModes: function() {
-			return  this._textView.getKeyModes();
+			return this._textView.getKeyModes();
 		},
-		
+		/**
+		 * Returns the editor source code actions.
+		 *
+		 * @returns {orion.editor.sourceCodeActions}
+		 */
+		getSourceCodeActions: function() {
+			return this._sourceCodeActions;
+		},
+		/**
+		 * Returns the editor linked mode.
+		 *
+		 * @returns {orion.editor.LinkedMode}
+		 */
+		getLinkedMode: function() {
+			return this._linkedMode;
+		},
+		/**
+		 * Returns the editor text actions.
+		 *
+		 * @returns {orion.editor.textActions}
+		 */
+		getTextActions: function() {
+			return this._textActions;
+		},
 		/**
 		 * Returns <code>true</code> if the editor is dirty; <code>false</code> otherwise.
 		 * @returns {Boolean} 
@@ -537,7 +560,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (typeof this._keyBindingFactory === "function") { //$NON-NLS-0$
 					this._keyBindingFactory(this, this.getKeyModes(), this._undoStack, this._contentAssist);
 				} else {
-					this._keyBindingFactory.createKeyBindings(editor, this._undoStack, this._contentAssist);
+					var keyBindings = this._keyBindingFactory.createKeyBindings(editor, this._undoStack, this._contentAssist);
+					this._textActions = keyBindings.textActions;
+					this._linkedMode = keyBindings.linkedMode;
+					this._sourceCodeActions = keyBindings.sourceCodeActions;
 				}
 			}
 

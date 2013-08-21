@@ -98,7 +98,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	    sidebarToolbar = lib.node("sidebarToolbar"), //$NON-NLS-0$
 		editorDomNode = lib.node("editor"); //$NON-NLS-0$
 
-	var editor, inputManager, settings;
+	var editor, inputManager, settings, sourceCodeActions;
 	function renderToolbars(metadata) {
 		if (!metadata) { return; }
 		var toolbar = lib.node("pageActions"); //$NON-NLS-0$
@@ -182,6 +182,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			};
 			textView.setOptions(options);
 		}
+		sourceCodeActions.setAutoPairing(prefs.autoPairing);
 		editor.setAnnotationRulerVisible(prefs.annotationRuler);
 		editor.setLineNumberRulerVisible(prefs.lineNumberRuler);
 		editor.setFoldingRulerVisible(prefs.foldingRuler);
@@ -219,8 +220,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			
 			var localSearcher = new mSearcher.TextSearcher(editor, commandRegistry, undoStack);
 			
-			new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
-		
+			var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
+			sourceCodeActions = keyBindings.sourceCodeActions;
+			sourceCodeActions.setAutoPairing(settings.autoPairing);
+			
 			// Register commands that depend on external services, the registry, etc.  Do this after
 			// the generic keybindings so that we can override some of them.
 			var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandRegistry, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher, searcher, function() { return settings; }); //$NON-NLS-1$ //$NON-NLS-0$
