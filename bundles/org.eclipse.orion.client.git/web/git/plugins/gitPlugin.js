@@ -1,7 +1,8 @@
 /*global define document URL window*/
-define(["orion/plugin", "orion/xhr", "orion/URL-shim", "domReady!"], function(PluginProvider, xhr) {
+define(["orion/plugin", "orion/xhr", "orion/serviceRegistry", "orion/git/gitClient", "orion/Deferred", "orion/URL-shim", "domReady!"], function(PluginProvider, xhr, mServiceregistry, mGitClient, Deferred) {
 	var temp = document.createElement('a');
 	temp.href = "../mixloginstatic/LoginWindow.html";
+	var gitClient = new mGitClient.GitService(new mServiceregistry.ServiceRegistry());
 	var login = temp.href;
 	var headers = {
 		name: "Orion Git Support",
@@ -232,5 +233,51 @@ define(["orion/plugin", "orion/xhr", "orion/URL-shim", "domReady!"], function(Pl
 	}, {
 		pattern: base
 	});
+	
+	provider.registerService("orion.project.dependency.handler", {
+		getDependencyDescription: function(params){
+			return {Type: "git", Location: params.url};
+		},
+		initDependency: function(dependency, params, projectMetadata){
+			var deferred = new Deferred();
+			var gitUrl = dependency.Location || params.url;
+			gitClient.cloneGitRepository(null, gitUrl, null, projectMetadata.WorkspaceLocation).then(function(cloneResp){
+				gitClient.getGitClone(cloneResp.Location).then(function(clone){
+					if(clone.Children){
+						clone = clone.Children[0];
+					}
+					deferred.resolve({Type: "git", Location: clone.GitUrl, Name: clone.Name + " at " + clone.GitUrl});					
+				}, deferred.reject, deferred.progress);
+			}, deferred.reject, deferred.progress);
+			return deferred;
+		},
+		matchesDependency: function(item, dependency){
+			if(!item.Git){
+				return false;
+			}
+			var deferred = new Deferred();
+			gitClient.getGitClone(item.Git.CloneLocation).then(
+				function(clone){
+					if(clone.Children){
+						clone = clone.Children[0];
+					}
+					if(clone.GitUrl === dependency.Location){
+						deferred.resolve({Type: "git", Location: clone.GitUrl, Name: clone.Name + " at " + clone.GitUrl});
+					} else {
+						deferred.resolve(false);
+					}
+				},deferred.reject, deferred.progress
+			);
+			return deferred;
+		}
+	}, {
+		id: "orion.git.dependencyhandler",
+		type: "git",
+		addParamethers: [{id: "url", type: "url", name: "Url:"}],
+		name: "Add Git Repository",
+		tooltip: "Clonde git repository and add it to this project",
+		actionComment: "Clonning ${url}"
+	});
+	
 	provider.connect();
 });

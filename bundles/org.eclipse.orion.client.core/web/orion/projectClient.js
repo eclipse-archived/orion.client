@@ -20,10 +20,11 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 	function ProjectClient(serviceRegistry, fileClient) {
 		this.serviceRegistry = serviceRegistry;
 		this.fileClient = fileClient;
+		this.allDependencyHandlersReferences = serviceRegistry.getServiceReferences("orion.project.dependency.handler"); //$NON-NLS-0$
 	}
 
 	ProjectClient.prototype = /**@lends orion.ProjectClient.ProjectClient.prototype */ {
-		_getProjectJsonData : function(folderMetadata, children){
+		_getProjectJsonData : function(folderMetadata, children, workspace){
 			var deferred = new Deferred();
 			for(var i=0; i<children.length; i++){
 				if(children[i].Name === "project.json"){
@@ -32,6 +33,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 							var projectJson = content && content.length>0 ? JSON.parse(content) : {};
 							projectJson.Name = projectJson.Name || folderMetadata.Name;
 							projectJson.ContentLocation = folderMetadata.ChildrenLocation;
+							projectJson.WorkspaceLocation = workspace.Location;
 							deferred.resolve(projectJson);
 						} catch (e){
 							deferred.reject(e);
@@ -45,13 +47,27 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 		},
 		readProject : function(fileMetadata){
 			var that = this;
-			if(fileMetadata.Parents && fileMetadata.Parents.length>0){
-				var topFolder = fileMetadata.Parents[fileMetadata.Parents.length-1];
-				if(topFolder.Children){
-					return that._getProjectJsonData.bind(that)(topFolder, topFolder.Children);
-				} else if(topFolder.ChildrenLocation) {
-					return this.fileClient.fetchChildren(topFolder.ChildrenLocation).then(function(children){
-						return that._getProjectJsonData.bind(that)(topFolder, children);
+			return this.fileClient.loadWorkspace().then(function(workspace){
+				if(fileMetadata.Parents && fileMetadata.Parents.length>0){
+					var topFolder = fileMetadata.Parents[fileMetadata.Parents.length-1];
+					if(topFolder.Children){
+						return that._getProjectJsonData.bind(that)(topFolder, topFolder.Children, workspace);
+					} else if(topFolder.ChildrenLocation) {
+						return this.fileClient.fetchChildren(topFolder.ChildrenLocation).then(function(children){
+							return that._getProjectJsonData.bind(that)(topFolder, children, workspace);
+						},
+						function(error){return error;},
+						function(progress){return progress;});
+					} else {
+						var deferred = new Deferred();
+						deferred.resolve(null);
+						return deferred;
+					}
+				} else if(fileMetadata.Children) {
+					return that._getProjectJsonData.bind(that)(fileMetadata, fileMetadata.Children, workspace);
+				} else if(fileMetadata.ChildrenLocation){
+					return this.fileClient.fetchChildren(fileMetadata.ChildrenLocation).then(function(children){
+						return that._getProjectJsonData.bind(that)(fileMetadata, children, workspace);
 					},
 					function(error){return error;},
 					function(progress){return progress;});
@@ -60,19 +76,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 					deferred.resolve(null);
 					return deferred;
 				}
-			} else if(fileMetadata.Children) {
-				return that._getProjectJsonData.bind(that)(fileMetadata, fileMetadata.Children);
-			} else if(fileMetadata.ChildrenLocation){
-				return this.fileClient.fetchChildren(fileMetadata.ChildrenLocation).then(function(children){
-					return that._getProjectJsonData.bind(that)(fileMetadata, children);
-				},
-				function(error){return error;},
-				function(progress){return progress;});
-			} else {
-				var deferred = new Deferred();
-				deferred.resolve(null);
-				return deferred;
-			}
+			}.bind(that));
 		},
 		
 		/**
@@ -92,7 +96,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 				function(progress){return progress;});
 		},
 		
-		getDepenencyFileMetadata : function(depenency){
+		getDependencyFileMetadata : function(dependency, workspaceLocation){
 		var deferred = new Deferred();
 		var that = this;
 		function getLastChild(childrenLocation, path){
@@ -107,13 +111,13 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 						return;
 					}
 				}
-					deferred.reject(depenency.Location + " could not be found in your workspace");
+					deferred.reject(dependency.Location + " could not be found in your workspace");
 			}, function(error){deferred.reject(error);});
 		}
 		
-		if(depenency.Type==="file"){
-			var path = depenency.Location.split("/");
-			this.fileClient.loadWorkspace().then(function(workspace){
+		if(dependency.Type==="file"){
+			var path = dependency.Location.split("/");
+			this.fileClient.loadWorkspace(workspaceLocation).then(function(workspace){
 						for(var i=0; i<workspace.Children.length; i++){
 							if(workspace.Children[i].Name===path[0]){
 								if(path.length===1){
@@ -124,19 +128,49 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 								return;
 							}
 						}
-						deferred.reject(depenency.Location + " could not be found in your workspace");
+						deferred.reject(dependency.Location + " could not be found in your workspace");
 			}, function(error){deferred.reject(error);});
+		} else {
+			var handler = this.getDependencyHandler(dependency.Type);
+			if(handler===null){
+				deferred.reject(dependency.Type + " is not supported.");
+				return deferred;
+			}
+			this.fileClient.loadWorkspace(workspaceLocation).then(function(workspace){
+				var checkdefs = [];
+				var found = false;
+				for(var i=0; i<workspace.Children.length; i++){
+					if(found===true){
+						break;
+					}
+					var def = handler.matchesDependency(workspace.Children[i], dependency);
+					checkdefs.push(def);
+					(function(i, def){
+						def.then(function(matches){
+							if(matches){
+								found = true;
+								deferred.resolve(workspace.Children[i]);
+							}
+						});
+					})(i, def);
+				}
+				Deferred.all(checkdefs).then(function(){
+					if(!found){
+						deferred.reject(dependency.Name + " could not be found in your workspace");
+					}
+				});
+			}, deferred.reject);
 		}
 		return deferred;
 	},
 	/**
 		* @param {Object} projectMetadata Project metadata
-		* @param {Object} dependency The JSON representation of the depenency
-		* @param {String} dependency.Type Type of the depenency (i.e. "file")
+		* @param {Object} dependency The JSON representation of the dependency
+		* @param {String} dependency.Type Type of the dependency (i.e. "file")
 		* @param {String} dependency.Name String description of the dependency (i.e. folder name)
-		* @param {String} dependency.Location Location of the depenency understood by the plugin of given type
+		* @param {String} dependency.Location Location of the dependency understood by the plugin of given type
 		*/
-	addProjectDepenency: function(projectMetadata, depenency){
+	addProjectDependency: function(projectMetadata, dependency){
 		var deferred = new Deferred();
 		this.fileClient.fetchChildren(projectMetadata.ContentLocation).then(function(children){
 			for(var i=0; i<children.length; i++){
@@ -147,7 +181,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 							if(!projectJson.Dependencies){
 								projectJson.Dependencies = [];
 							}
-							projectJson.Dependencies.push(depenency);
+							projectJson.Dependencies.push(dependency);
 							this.fileClient.write(children[i].Location, JSON.stringify(projectJson)).then(
 								function(){
 									projectJson.ContentLocation = projectMetadata.ContentLocation;
@@ -167,6 +201,29 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 			}
 		}.bind(this), deferred.reject);
 		return deferred;
+	},
+	
+	getDependencyTypes: function(){
+		var types = [];
+		for(var i=0; i<this.allDependencyHandlersReferences.length; i++){
+			types.push(this.allDependencyHandlersReferences[i].getProperty("type"));
+		}
+		return types;
+	},
+	
+	getDependencyHandler: function(type){
+		for(var i=0; i<this.allDependencyHandlersReferences.length; i++){
+			if(this.allDependencyHandlersReferences[i].getProperty("type") === type){
+				var service = this.serviceRegistry.getService(this.allDependencyHandlersReferences[i]);
+				service.id = this.allDependencyHandlersReferences[i].getProperty("id");
+				service.addParamethers =  this.allDependencyHandlersReferences[i].getProperty("addParamethers");
+				service.name =  this.allDependencyHandlersReferences[i].getProperty("name");
+				service.tooltip = this.allDependencyHandlersReferences[i].getProperty("tooltip");
+				service.type = type;
+				service.actionComment = this.allDependencyHandlersReferences[i].getProperty("actionComment");
+				return service;
+			}
+		}
 	}
 		
 	};//end ProjectClient prototype
