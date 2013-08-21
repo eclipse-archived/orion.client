@@ -68,7 +68,7 @@ var OccurrenceFinder = (function () {
 					occurrenceTimer = null;
 					var editor = self.editor;
 					var sel = editor.getSelection();
-					occurrencesService.findOccurrences(self.editor.getText(), sel).then(function (occurrences) {
+					occurrencesService.findOccurrences(editor.getText(), sel).then(function (occurrences) {
 						self.editor.showOccurrences(occurrences);
 					});	
 				}, 500);
