@@ -490,6 +490,9 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 			annotationModel.replaceAnnotations(null, add);
 		},
 		_showCurrentGroup: function(lineIndex, e) {
+			if (this.getOverview() === "document") { //$NON-NLS-0$
+				return;
+			}
 			if (this._groupLineIndex === lineIndex) {
 				return;
 			}
