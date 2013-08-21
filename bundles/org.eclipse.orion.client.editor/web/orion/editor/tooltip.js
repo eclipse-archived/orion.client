@@ -269,19 +269,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}
 		},
 		_getAnnotationContents: function(annotations) {
-			if (annotations.length === 0) {
-				return null;
-			}
-			var self = this;
-			var document = this._tooltipDiv.ownerDocument;
-			var view = this._view;
-			var model = view.getModel(), annotation;
-			var baseModel = model.getBaseModel ? model.getBaseModel() : model;
-			function getText(start, end) {
-				var textStart = baseModel.getLineStart(baseModel.getLineAtOffset(start));
-				var textEnd = baseModel.getLineEnd(baseModel.getLineAtOffset(end), true);
-				return baseModel.getText(textStart, textEnd);
-			}
+			var annotation;
 			var newAnnotations = [];
 			for (var j = 0; j < annotations.length; j++) {
 				annotation = annotations[j];
@@ -290,6 +278,19 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				}
 			}
 			annotations = newAnnotations;
+			if (annotations.length === 0) {
+				return null;
+			}
+			var self = this;
+			var document = this._tooltipDiv.ownerDocument;
+			var view = this._view;
+			var model = view.getModel();
+			var baseModel = model.getBaseModel ? model.getBaseModel() : model;
+			function getText(start, end) {
+				var textStart = baseModel.getLineStart(baseModel.getLineAtOffset(start));
+				var textEnd = baseModel.getLineEnd(baseModel.getLineAtOffset(end), true);
+				return baseModel.getText(textStart, textEnd);
+			}
 			function getAnnotationHTML(annotation) {
 				var title = annotation.title;
 				var result = util.createElement(document, "div"); //$NON-NLS-0$
