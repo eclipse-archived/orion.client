@@ -510,7 +510,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 			}
 			this._currentGroupAnnotation = null;
 			if (currentGroupAnnotation) {
-				annotationModel.removeAnnotations(currentGroupAnnotation.groupedType);
+				annotationModel.removeAnnotations(currentGroupAnnotation.groupType);
 			}
 			if (!groupAnnotation) { return; }
 			
@@ -520,8 +520,9 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 			var add = [];
 			while (annotations.hasNext()) {
 				annotation = annotations.next();
+				delete annotation.groupAnnotation;
 				if (annotation.groupId === groupAnnotation.groupId) {
-					annotation = annotation.createGroupedAnnotation();
+					annotation = annotation.createGroupAnnotation();
 					add.push(annotation);
 				}
 			}

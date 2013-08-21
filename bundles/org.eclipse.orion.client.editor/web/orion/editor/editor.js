@@ -777,11 +777,12 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				color = color.substring(i1 + 1, i2);
 				this._blameRGB = blameRGB = color.split(",").slice(0,3); //$NON-NLS-0$
 			}
-			var createGroupFunction = function() {
-				var annotation = mAnnotations.AnnotationType.createAnnotation(this.groupedType, this.start, this.end, "");
+			var createGroup = function() {
+				var annotation = mAnnotations.AnnotationType.createAnnotation(this.groupType, this.start, this.end, this.title);
 				annotation.style = merge({}, annotation.style);
 				annotation.style.style = merge({}, annotation.style.style);
 				annotation.style.style.backgroundColor = "";
+				this.groupAnnotation = annotation;
 				return annotation;
 			};
 			var model = this.getModel();
@@ -805,8 +806,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				annotation.style.style = merge({}, annotation.style.style);
 				annotation.style.style.backgroundColor = "rgba(" + blameColor.join() + ")"; //$NON-NLS-0$ //$NON-NLS-1$
 				annotation.groupId = blameMarker.Name;
-				annotation.groupedType = AT.ANNOTATION_CURRENT_BLAME;
-				annotation.createGroupedAnnotation = createGroupFunction;
+				annotation.groupType = AT.ANNOTATION_CURRENT_BLAME;
+				annotation.createGroupAnnotation = createGroup;
 				return annotation;
 			});
 		},
