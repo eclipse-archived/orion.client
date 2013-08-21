@@ -273,7 +273,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			var newAnnotations = [];
 			for (var j = 0; j < annotations.length; j++) {
 				annotation = annotations[j];
-				if (annotation.title !== "") { 
+				if (annotation.title !== "" && !annotation.groupAnnotation) { 
 					newAnnotations.push(annotation); 
 				}
 			}
