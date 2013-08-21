@@ -153,6 +153,7 @@ define({
 	"Editor preferences updated": "Editor preferences updated",
 	"Editor defaults restored": "Editor defaults restored",
 	"Theme": "Theme",
+	"Font Size": "Font Size",
 	"New Theme Name:": "New Theme Name:",
 	"Font Size:": "Font Size:",
 	"UI Theme": "UI Theme",
