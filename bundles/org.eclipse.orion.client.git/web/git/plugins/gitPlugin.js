@@ -1,5 +1,5 @@
 /*global define document URL window*/
-define(["orion/plugin", "orion/xhr", "orion/serviceRegistry", "orion/git/gitClient", "orion/Deferred", "orion/URL-shim", "domReady!"], function(PluginProvider, xhr, mServiceregistry, mGitClient, Deferred) {
+define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClient", "orion/Deferred", "orion/URL-shim", "domReady!"], function(PluginProvider, xhr, mServiceregistry, mGitClient, Deferred) {
 	var temp = document.createElement('a');
 	temp.href = "../mixloginstatic/LoginWindow.html";
 	var gitClient = new mGitClient.GitService(new mServiceregistry.ServiceRegistry());
