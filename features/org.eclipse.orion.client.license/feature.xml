@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.eclipse.license"
+      id="org.eclipse.orion.client.license"
       version="1.0.0.qualifier">
-      <!-- image="eclipse_update_120.jpg"> -->
 
    <description>
       %description
