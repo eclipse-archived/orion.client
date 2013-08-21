@@ -294,7 +294,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				if(projectData.Dependencies){
 					for(var i=0; i<projectData.Dependencies.length; i++){
 						(function(depenency_no){
-							this.projectClient.getDepenencyFileMetadata(projectData.Dependencies[i]).then(function(depenencyMetadata){
+							this.projectClient.getDependencyFileMetadata(projectData.Dependencies[i], projectData.WorkspaceLocation).then(function(depenencyMetadata){
 							var filesNode = "filesNode" + depenency_no;
 								var titleWrapper = new mSection.Section(this.parentNode, { id : "depenenciesSection" + depenency_no, //$NON-NLS-0$
 										title : projectData.Dependencies[depenency_no].Name,
@@ -377,6 +377,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.addCommandGroup(this.addActionsScope, "orion.projectNavInitGroup", 1001, "Init Project", null, null, "core-sprite-initproject"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.addActionsScope, "orion.project.addFolder", 1, "orion.projectNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(this.addActionsScope, "orion.project.initProject", 1, "orion.projectNavInitGroup");
+			var dependencyTypes = this.projectClient.getDependencyTypes();
+			for(var i=0; i<dependencyTypes.length; i++){
+				commandRegistry.registerCommandContribution(this.addActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.projectNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
 			
 			ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient);
 		},

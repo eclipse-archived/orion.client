@@ -11,15 +11,15 @@
  *******************************************************************************/
 /*global window define orion XMLHttpRequest confirm*/
 /*jslint sub:true*/
-define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog'],
-	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog){
+define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/commandRegistry'],
+	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry){
 		var projectCommandUtils = {};
 		
 		var selectionListenerAdded = false;
 		
 		var lastItemLoaded = {Location: null};
 		
-		var progressService;
+		var progress;
 		
 			
 	function forceSingleItem(item) {
@@ -116,11 +116,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	 * @function
 	 */
 	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, explorer, fileClient, projectClient) {
-		progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+		progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		var that = this;
 		function errorHandler(error) {
-			if (progressService) {
-				progressService.setProgressResult(error);
+			if (progress) {
+				progress.setProgressResult(error);
 			} else {
 				window.console.log(error);
 			}
@@ -148,7 +148,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 								name += " (" + fileMetadata.Parents[fileMetadata.Parents.length-1].Name + ")";
 							}
 							fileLocation+=fileMetadata.Name;
-							projectClient.addProjectDepenency(item, {Name: name, Type: "file", Location: fileLocation}).then(function(){
+							projectClient.addProjectDependency(item, {Name: name, Type: "file", Location: fileLocation}).then(function(){
 								explorer.changedItem();
 							}, errorHandler);
 						}, errorHandler);
@@ -190,6 +190,105 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 		});
 		commandService.addCommand(initProjectCommand);
+		
+		function createAddDependencyCommand(type){
+			var handler = projectClient.getDependencyHandler(type);
+			
+			var commandParams = {
+				name: handler.name,
+				id: "orion.project.adddependency." + type,
+				tooltip: handler.tooltip,
+				callback: function(data){
+					var def = new Deferred();
+					var item = forceSingleItem(data.items);
+					var params;
+					if(handler.addParamethers){
+						params = {};
+						for(var i=0; i<handler.addParamethers.length; i++){
+							params[handler.addParamethers[i].id] = data.parameters.valueFor(handler.addParamethers[i].id);
+						}
+					}
+					
+					var searchLocallyDeferred = new Deferred();
+					handler.getDependencyDescription(params).then(function(dependency){
+						fileClient.loadWorkspace(item.WorkspaceLocation).then(function(workspace){
+							var checkdefs = [];
+							var found = false;
+							for(var i=0; i<workspace.Children.length; i++){
+								if(found===true){
+									break;
+								}
+								var def = handler.matchesDependency(workspace.Children[i], dependency);
+								checkdefs.push(def);
+								(function(i, def){
+									def.then(function(matches){
+										if(matches){
+											found = true;
+											searchLocallyDeferred.resolve(matches);
+										}
+									});
+								})(i, def);
+							}
+							Deferred.all(checkdefs).then(function(){
+								if(!found){
+									searchLocallyDeferred.resolve();
+								}
+							});
+						}, searchLocallyDeferred.reject);
+					}, errorHandler);
+					
+					progress.showWhile(searchLocallyDeferred, "Searching your workspace for matching content").then(function(resp){
+						if(resp) {
+							projectClient.addProjectDependency(item, resp).then(function(){
+								explorer.changedItem();
+							}, errorHandler);
+						} else {
+							var actionComment;
+							if(handler.actionComment){
+								if(params){
+									actionComment = handler.actionComment.replace(/\$\{([^\}]+)\}/g, function(str, key) {
+										return params[key];
+									});
+								} else {
+									actionComment = handler.actionComment;
+								}
+							} else {
+								actionComment = "Getting content from "	+ type;
+							}
+							progress.showWhile(handler.initDependency({}, params, item), actionComment).then(function(dependency){
+								projectClient.addProjectDependency(item, dependency).then(function(){
+										explorer.changedItem();
+									}, errorHandler);
+							}, errorHandler);
+						}
+					});
+					
+					
+
+				},
+				visibleWhen: function(item) {
+					return item.type==="Project";
+				}
+			};
+			
+			if(handler.addParamethers){
+				var paramDescps = [];
+				for(var i=0; i<handler.addParamethers.length; i++){
+					paramDescps.push(new mCommandRegistry.CommandParameter(handler.addParamethers[i].id, handler.addParamethers[i].type, handler.addParamethers[i].name));
+				}
+				commandParams.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
+			}
+			
+			
+			var command = new mCommands.Command(commandParams);
+			commandService.addCommand(command);
+		}
+		
+		var types = projectClient.getDependencyTypes();
+			for(var type_no=0; type_no<types.length; type_no++){
+				createAddDependencyCommand(types[type_no]);
+			}
+		
 		
 		};
 	
