@@ -1,8 +1,10 @@
-/*global define document URL window*/
-define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClient", "orion/Deferred", "orion/URL-shim", "domReady!"], function(PluginProvider, xhr, mServiceregistry, mGitClient, Deferred) {
+/*global define document URL window confirm*/
+define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClient", "orion/ssh/sshTools", "orion/i18nUtil", "orion/Deferred", "orion/URL-shim", "domReady!"], function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred) {
 	var temp = document.createElement('a');
 	temp.href = "../mixloginstatic/LoginWindow.html";
-	var gitClient = new mGitClient.GitService(new mServiceregistry.ServiceRegistry());
+	var serviceRegistry = new mServiceregistry.ServiceRegistry();
+	var gitClient = new mGitClient.GitService(serviceRegistry);
+	var sshService = new mSshTools.SshService(serviceRegistry);
 	var login = temp.href;
 	var headers = {
 		name: "Orion Git Support",
@@ -234,6 +236,24 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		pattern: base
 	});
 	
+	function parseGitUrl(gitUrl){
+		var gitPath = gitUrl;
+		var gitInfo = {};
+		if(gitUrl.indexOf("://")>0){
+			gitPath = gitUrl.substring(gitUrl.indexOf("://")+3);
+		}
+		var segments = gitPath.split("/");
+		gitInfo.serverName = segments[0];
+		if(gitInfo.serverName.indexOf("@")){
+			gitInfo.serverName = gitInfo.serverName.substring(gitInfo.serverName.indexOf("@"));
+		}
+		gitInfo.repoName = segments[segments.length-1];
+		if(gitInfo.repoName.indexOf(".git")>0){
+			gitInfo.repoName = gitInfo.repoName.substring(0, gitInfo.repoName.lastIndexOf(".git"));
+		}
+		return gitInfo;
+	}
+	
 	provider.registerService("orion.project.dependency.handler", {
 		getDependencyDescription: function(params){
 			return {Type: "git", Location: params.url};
@@ -241,15 +261,54 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		initDependency: function(dependency, params, projectMetadata){
 			var deferred = new Deferred();
 			var gitUrl = dependency.Location || params.url;
-			gitClient.cloneGitRepository(null, gitUrl, null, projectMetadata.WorkspaceLocation).then(function(cloneResp){
-				gitClient.getGitClone(cloneResp.Location).then(function(clone){
-					if(clone.Children){
-						clone = clone.Children[0];
+			function cloneRepository(){
+				var knownHosts = sshService.getKnownHosts();
+				gitClient.cloneGitRepository(null, gitUrl, null, projectMetadata.WorkspaceLocation, params.sshuser, params.sshpassword, knownHosts).then(function(cloneResp){
+					gitClient.getGitClone(cloneResp.Location).then(function(clone){
+						if(clone.Children){
+							clone = clone.Children[0];
+						}
+						var gitInfo = parseGitUrl(clone.GitUrl);
+						deferred.resolve({Type: "git", Location: clone.GitUrl, Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});					
+					}, deferred.reject, deferred.progress);
+				}, function(error){
+					try{
+						if (error && error.status !== undefined) {
+							try {
+								error = JSON.parse(error.responseText);
+							} catch (e) {
+								error = { 
+									Message : "Problem while performing the action"
+								};
+							}
+						}
+					}catch(e){
+						deferred.reject(error);
+						return;
 					}
-					deferred.resolve({Type: "git", Location: clone.GitUrl, Name: clone.Name + " at " + clone.GitUrl});					
-				}, deferred.reject, deferred.progress);
-			}, deferred.reject, deferred.progress);
-			return deferred;
+					if(error.JsonData){
+						if(error.JsonData.HostKey){
+							if(confirm(i18nUtil.formatMessage('Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.',
+								error.JsonData.KeyType, error.JsonData.Host, error.JsonData.HostFingerprint))){
+									sshService.addKnownHosts(error.JsonData.Host + " " + error.JsonData.KeyType + " " + error.JsonData.HostKey);
+									cloneRepository();
+							} else {
+								deferred.reject(error);
+							}
+							return;
+						} 
+						if(error.JsonData.Host){
+							error.retry = true;
+							error.addParamethers = [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"}];
+							deferred.reject(error);
+							return;
+						}
+					}
+					deferred.reject(error);
+				}, deferred.progress);
+			}
+		cloneRepository();
+		return deferred;
 		},
 		matchesDependency: function(item, dependency){
 			if(!item.Git){
@@ -262,7 +321,8 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 						clone = clone.Children[0];
 					}
 					if(clone.GitUrl === dependency.Location){
-						deferred.resolve({Type: "git", Location: clone.GitUrl, Name: clone.Name + " at " + clone.GitUrl});
+						var gitInfo = parseGitUrl(clone.GitUrl);
+						deferred.resolve({Type: "git", Location: clone.GitUrl, Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});
 					} else {
 						deferred.resolve(false);
 					}

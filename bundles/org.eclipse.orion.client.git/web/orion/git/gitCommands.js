@@ -179,6 +179,15 @@ var exports = {};
 					}
 					exports.handleKnownHostsError(serviceRegistry, jsonData.JsonData, options, callee);
 					return;
+				} else if(jsonData.JsonData && jsonData.JsonData.Host){
+					if(jsonData.JsonData){
+						options.errordata = jsonData.JsonData;
+					}
+					if(jsonData.failedOperation){
+						options.failedOperation = jsonData.failedOperation;
+					}
+					exports.handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title);
+					return;
 				}
 			default:
 				var display = [];
