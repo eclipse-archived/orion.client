@@ -87,6 +87,8 @@ define({
 	"toggleTabMode": "Toggle Tab Mode", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleOverwriteMode": "Toggle Overwrite Mode", //$NON-NLS-1$ //$NON-NLS-0$
 	
+	"committerOnTime": "${0} on ${1}", //$NON-NLS-1$ //$NON-NLS-0$
+	
 	//Emacs
 	"emacs": "Emacs", //$NON-NLS-1$ //$NON-NLS-0$
 	"exchangeMarkPoint": "Exchange Mark and Point", //$NON-NLS-1$ //$NON-NLS-0$
