@@ -191,6 +191,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		});
 		commandService.addCommand(initProjectCommand);
 		
+		
 		function createAddDependencyCommand(type){
 			var handler = projectClient.getDependencyHandler(type);
 			
@@ -201,12 +202,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				callback: function(data){
 					var def = new Deferred();
 					var item = forceSingleItem(data.items);
-					var params;
-					if(handler.addParamethers){
-						params = {};
-						for(var i=0; i<handler.addParamethers.length; i++){
-							params[handler.addParamethers[i].id] = data.parameters.valueFor(handler.addParamethers[i].id);
-						}
+					var params = data.oldParams || {};
+					for (var param in data.parameters.parameterTable) {
+						params[param] = data.parameters.valueFor(param);
 					}
 					
 					var searchLocallyDeferred = new Deferred();
@@ -259,7 +257,18 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 								projectClient.addProjectDependency(item, dependency).then(function(){
 										explorer.changedItem();
 									}, errorHandler);
-							}, errorHandler);
+							}, function(error){
+								if(error.retry && error.addParamethers){
+									var paramDescps = [];
+									for(var i=0; i<error.addParamethers.length; i++){
+										paramDescps.push(new mCommandRegistry.CommandParameter(error.addParamethers[i].id, error.addParamethers[i].type, error.addParamethers[i].name));
+									}
+									data.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
+									data.oldParams = params;
+									commandService.collectParameters(data);
+								}
+								errorHandler(error);
+							});
 						}
 					});
 					

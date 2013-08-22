@@ -269,6 +269,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	
 	ProjectNavExplorer.prototype = {
 		display: function(fileMetadata, redisplay){
+		
+		if(!fileMetadata){
+			return;
+		}
+		
 		this.fileMetadata = fileMetadata;
 		var that = this;
 		
