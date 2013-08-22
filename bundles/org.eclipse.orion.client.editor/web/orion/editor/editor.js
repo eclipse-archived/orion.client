@@ -614,6 +614,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (ruler) {
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_SEARCH);
 					ruler.addAnnotationType(AT.ANNOTATION_MATCHING_SEARCH);
+					ruler.addAnnotationType(AT.ANNOTATION_READ_OCCURRENCE);
+					ruler.addAnnotationType(AT.ANNOTATION_WRITE_OCCURRENCE);
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_BLAME);
 					ruler.addAnnotationType(AT.ANNOTATION_ERROR);
 					ruler.addAnnotationType(AT.ANNOTATION_WARNING);
@@ -622,8 +624,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					ruler.addAnnotationType(AT.ANNOTATION_MATCHING_BRACKET);
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_BRACKET);
 					ruler.addAnnotationType(AT.ANNOTATION_CURRENT_LINE);
-					ruler.addAnnotationType(AT.ANNOTATION_READ_OCCURRENCE);
-					ruler.addAnnotationType(AT.ANNOTATION_WRITE_OCCURRENCE);
 				}
 				this.setOverviewRulerVisible(this._overviewRulerVisible || this._overviewRulerVisible === undefined, true);
 			}
