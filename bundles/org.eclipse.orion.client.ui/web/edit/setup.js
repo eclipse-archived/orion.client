@@ -34,7 +34,7 @@ define([
 	'orion/editorCommands',
 	'orion/editor/editorFeatures',
 	'orion/editor/editor',
-	'orion/occurrenceFinder',
+	'orion/markOccurrences',
 	'orion/syntaxchecker',
 	'orion/editor/textView',
 	'orion/editor/textModel',
@@ -57,7 +57,7 @@ define([
 	'orion/widgets/input/DropDownMenu'
 ], function(messages, require, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mExtensionCommands, 
 			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mBlameAnnotation, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
-			mOccurrenceFinder, mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mEmacs, mVI, mSearcher,
+			mMarkOccurrences, mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mEmacs, mVI, mSearcher,
 			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, EditorSettings, mEditorPreferences, URITemplate, Sidebar,
 			mTooltip, DropDownMenu) {
 
@@ -360,9 +360,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			editor.showBlame(event.blameInfo);
 		});
 		// Occurrence service
-		var occurrenceFinder = new mOccurrenceFinder.OccurrenceFinder(serviceRegistry, editor);
+		var markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, editor);
 		editor.addEventListener("TextViewInstalled", function(event) { //$NON-NLS-0$
-			occurrenceFinder.findOccurrences(inputManager, event.textView);
+			markOccurrences.findOccurrences(inputManager, event.textView);
 		});
 		
 		var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
