@@ -282,6 +282,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				return null;
 			}
 			var self = this;
+			var html;
 			var document = this._tooltipDiv.ownerDocument;
 			var view = this._view;
 			var model = view.getModel();
@@ -294,6 +295,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			function getAnnotationHTML(annotation) {
 				var title = annotation.title;
 				var result = util.createElement(document, "div"); //$NON-NLS-0$
+				result.className = "tooltipRow"; //$NON-NLS-0$
 				if (annotation.html) {
 					result.innerHTML = annotation.html;
 					if (result.lastChild) {
@@ -316,6 +318,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				}
 				if (typeof title === "string") { //$NON-NLS-0$
 					var span = util.createElement(document, "span"); //$NON-NLS-0$
+//					span.className = "tooltipTitle"; //$NON-NLS-0$
 					span.appendChild(document.createTextNode(title));
 					title = span;
 				}
@@ -325,7 +328,11 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			if (annotations.length === 1) {
 				annotation = annotations[0];
 				if (annotation.title !== undefined) {
-					return getAnnotationHTML(annotation);
+					html = getAnnotationHTML(annotation);
+					if (html.firstChild) {
+						html.firstChild.classList.add("single"); //$NON-NLS-0$
+					}
+					return html;
 				} else {
 					var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 					var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
@@ -345,7 +352,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				tooltipHTML.appendChild(em);
 				for (var i = 0; i < annotations.length; i++) {
 					annotation = annotations[i];
-					var html = getAnnotationHTML(annotation);
+					html = getAnnotationHTML(annotation);
 					if (html) {
 						tooltipHTML.appendChild(html);
 					}

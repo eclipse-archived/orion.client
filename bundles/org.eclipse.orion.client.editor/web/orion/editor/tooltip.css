@@ -19,7 +19,6 @@
 	z-index: 100;
 	position: fixed;
 	overflow: hidden;
-	white-space: pre;
 }
 
 .textviewTooltip em {
@@ -29,6 +28,14 @@
 
 .textviewTooltip span {
 	vertical-align: baseline;
+}
+
+.textviewTooltip .tooltipRow {
+	display: table-row;
+}
+
+.textviewTooltip .tooltipTitle {
+	float: right;
 }
 
 .tooltip .annotationLine.currentLine {

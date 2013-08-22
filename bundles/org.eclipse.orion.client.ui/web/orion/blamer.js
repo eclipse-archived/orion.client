@@ -11,7 +11,10 @@
  *******************************************************************************/
 /*global window define */
 
-define ("orion/blamer", [], function() {
+define ([
+	'orion/PageLinks', //$NON-NLS-0$
+	'orion/URITemplate' //$NON-NLS-0$
+], function(PageLinks, URITemplate) {
 
 	function isVisible(serviceRegistry) {
 		return !!serviceRegistry.getService("orion.edit.blamer"); //$NON-NLS-0$
@@ -21,6 +24,14 @@ define ("orion/blamer", [], function() {
 		var service = serviceRegistry.getService("orion.edit.blamer"); //$NON-NLS-0$
 		if (service) {
 			service.doBlame(fileName).then(function(results) {
+				var orionHome = PageLinks.getOrionHome();
+				for (var i=0; i<results.length; i++) {
+					var range = results[i];
+					var uriTemplate = new URITemplate(range.CommitLink);
+					var params = {};
+					params.OrionHome = orionHome;
+					range.CommitLink = window.decodeURIComponent(uriTemplate.expand(params));
+				}
 				serviceRegistry.getService("orion.core.blame")._setAnnotations(results); //$NON-NLS-0$
 			});
 		}

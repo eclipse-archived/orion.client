@@ -16,9 +16,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	'orion/editor/eventTarget', //$NON-NLS-0$
 	'orion/editor/tooltip', //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
-	'orion/util', //$NON-NLS-0$
-	'require' //$NON-NLS-0$
-], function(messages, mEventTarget, mTooltip, mAnnotations, util, require) {
+	'orion/util' //$NON-NLS-0$
+], function(messages, mEventTarget, mTooltip, mAnnotations, util) {
 
 	/**	@private */
 	function merge(obj1, obj2) {
@@ -783,10 +782,23 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				annotation.style = merge({}, annotation.style);
 				annotation.style.style = merge({}, annotation.style.style);
 				annotation.style.style.backgroundColor = "";
-				annotation.blameMarker = this.blameMarker;
-				annotation.html = this.html;
 				this.groupAnnotation = annotation;
+				annotation.blame = this.blame;
+				annotation.html = this.html;
 				return annotation;
+			};
+			var title = function() {
+				var div = util.createElement(document, "div"); //$NON-NLS-0$
+				div.className = "tooltipTitle"; //$NON-NLS-0$
+				var index = this.blame.Message.indexOf("\n"); //$NON-NLS-0$
+				if (index === -1) { index = this.blame.Message.length; }
+				var commitLink = util.createElement(document, "a"); //$NON-NLS-0$
+				commitLink.href = this.blame.CommitLink;
+				commitLink.appendChild(document.createTextNode(this.blame.Message.substring(0, index)));
+				div.appendChild(commitLink);
+				div.appendChild(util.createElement(document, "br")); //$NON-NLS-0$
+				div.appendChild(document.createTextNode(this.blame.AuthorName + " on " + this.blame.Time));
+				return div;
 			};
 			var model = this.getModel();
 			this.showAnnotations(blameMarkers, [
@@ -794,42 +806,17 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			], function (blameMarker) {
 				var start = model.getLineStart(blameMarker.Start - 1);
 				var end = model.getLineEnd(blameMarker.End - 1, true);
-				
-					blameMarker.Message = blameMarker.Message.substring(0, 60);
-					blameMarker.CommitLocation = require.toUrl("git/git-commit.html#")+blameMarker.CommitLocation+"?page=1&pageSize=1"; //$NON-NLS-0$ //$NON-NLS-1$
-					var title = function(){
-						var blameMarker = this.blameMarker; 
-						var div = util.createElement(document, "div"); //$NON-NLS-0$
-						div.className =  "tooltipCommitInfo"; //$NON-NLS-0$
-						var h3 = util.createElement(document, "h3"); //$NON-NLS-0$
-						var a = util.createElement(document, "a"); //$NON-NLS-0$
-						a.href = blameMarker.CommitLocation;
-						h3.className = "title"; //$NON-NLS-0$
-						a.innerHTML = blameMarker.Message ;
-						h3.appendChild(a);
-						div.appendChild(h3);
-						var commitInfo = "Author: "+ blameMarker.AuthorName + " (" + blameMarker.AuthorEmail+") "+
-										blameMarker.Time +"\nCommitter: "+ blameMarker.CommitterName+" ("+
-										blameMarker.CommitterEmail+")\nCommit: "+blameMarker.Name;
-						div.appendChild(document.createTextNode(commitInfo));						
-						return div;				
- 					};
 				var annotation = mAnnotations.AnnotationType.createAnnotation(AT.ANNOTATION_BLAME, start, end, title);
 				var blameColor = blameRGB.slice(0);
 				blameColor.push(blameMarker.Shade);
 				annotation.style = merge({}, annotation.style);
 				annotation.style.style = merge({}, annotation.style.style);
 				annotation.style.style.backgroundColor = "rgba(" + blameColor.join() + ")"; //$NON-NLS-0$ //$NON-NLS-1$
-				
-				annotation.html =
-					"<div id='authorImage'>" +
-						"<img id='gravatar' src='"+blameMarker.AuthorImage+"'>"+
-					"</div>"; 
-
 				annotation.groupId = blameMarker.Name;
-				annotation.blameMarker = blameMarker;
 				annotation.groupType = AT.ANNOTATION_CURRENT_BLAME;
 				annotation.createGroupAnnotation = createGroup;
+				annotation.html = '<img class="annotationHTML blame" src="' + blameMarker.AuthorImage + '"/>'; //$NON-NLS-0$ //$NON-NLS-1$
+				annotation.blame = blameMarker;
 				return annotation;
 			});
 		},
