@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -13,12 +13,11 @@
 
 define(['orion/Deferred'], function(Deferred) {
 
-var OccurrenceFinder = (function () {
-	function OccurrenceFinder(serviceRegistry, editor) {
+	function MarkOccurrences(serviceRegistry, editor) {
 		this.registry = serviceRegistry;
 		this.editor = editor;
 	}
-	OccurrenceFinder.prototype = {
+	MarkOccurrences.prototype = {
 		/* Looks up applicable references of occurrence service, calls references, calls the editor to show the occurrences. */
 		findOccurrences: function(inputManager, textView) {
 			function getServiceRefs(registry, contentType, title) {
@@ -88,7 +87,5 @@ var OccurrenceFinder = (function () {
 			});
 		}
 	};
-	return OccurrenceFinder;			
-}());
-return {OccurrenceFinder: OccurrenceFinder};
+	return {MarkOccurrences: MarkOccurrences};
 });
