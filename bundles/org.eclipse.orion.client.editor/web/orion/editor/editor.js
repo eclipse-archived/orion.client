@@ -797,7 +797,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				commitLink.appendChild(document.createTextNode(this.blame.Message.substring(0, index)));
 				div.appendChild(commitLink);
 				div.appendChild(util.createElement(document, "br")); //$NON-NLS-0$
-				div.appendChild(document.createTextNode(this.blame.AuthorName + " on " + this.blame.Time));
+				div.appendChild(document.createTextNode(util.formatMessage(messages.committerOnTime, this.blame.AuthorName, this.blame.Time)));
 				return div;
 			};
 			var model = this.getModel();
