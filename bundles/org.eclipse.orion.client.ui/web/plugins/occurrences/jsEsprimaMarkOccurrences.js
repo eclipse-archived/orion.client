@@ -35,7 +35,7 @@ define(['orion/plugin', 'esprima/esprima'], function(PluginProvider) {
                     line: context.occurrences[i].node.loc.start.line,
                     start: context.occurrences[i].node.loc.start.column + 1,
                     end: context.occurrences[i].node.loc.end.column,
-                    description: (context.occurrences[i].readAccess ? "Occurrence of " : "Write occurrence of ") + context.word	//$NON-NLS-0$ //$NON-NLS-1$
+                    description: (context.occurrences[i].readAccess ? 'Occurrence of "' : 'Write occurrence of "') + context.word + '"'	//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
                 }); 
             }
         }
