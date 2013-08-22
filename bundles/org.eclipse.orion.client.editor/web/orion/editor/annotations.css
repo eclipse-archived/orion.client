@@ -20,9 +20,11 @@
 .annotation.selectedLinkedGroup {
 }
 .annotation.blame {
+	color: gray;
 	background-color: rgb(255, 132, 44);
 }
 .annotation.currentBlame {
+	color: black;
 	background-color: rgb(184, 103, 163);
 }
 
@@ -101,8 +103,18 @@
 	background-image: url("data:image/gif;base64,R0lGODlhEAAQANUAALClrLu1ubOpsKqdp6eapKufqMTAw7attLSrsrGnr62jq8C7v765vaebpb22vLmyuMbCxsnGycfEx8G+wcrIysTBxUltof//yf///v70jergpPvws+nWc/npqvrpqvrpq/raffffnvXVkfTVkvXUkd+9f+SiOemvV+uyXa2OX7mYZqeIXKuNX/ClO7KQYqiIXJ59Vp19VpFvTo9uTZBvTpNyUJNyUf///////wAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAADgALAAAAAAQABAAAAZ4QJxwSCwajS2aS1U6DlunzcagcuKgG4sn5HJiLZ2QiHbEbj6hEapVTKVYr3OItG5TIhVGLF0npigUEAsPAjV9Q24pEhMBCAoybEUmGRcrDgcAAzNGkxcYNzAJBQSbRJ0YqBc2DaVEHJ6pGTStRBqfGBcZILRWvThBADs=");
 }
 .annotationHTML.blame {
+	float: left;
 }
 .annotationHTML.currentBlame {
+	float: left;
+}
+.annotationHTML.blame.single {
+	width: 32px;
+	height: 32px;
+}
+.annotationHTML.currentBlame.single {
+	width: 32px;
+	height: 32px;
 }
 
 /* Styles for the overview ruler  */
@@ -225,35 +237,3 @@
 	background-color: #EAF2FE;
 }
 
-
-
-#gravatar{ 
-	height:64px;  
-	width:64px; 
-	position:absolute;
-	padding-top:8px;
-	padding-left:4px; 
-}
-#authorImage{ 
-	width: 72px; 
-	height: 80px; 
-	float:left;
-}
-
-.title{
-	height: 20px;
-    padding: 4px 0px 8px 0px;
-    margin: 0px;
-}
-
-
-.tooltipCommitInfo{
-	float:right;
-	background-color: InfoBackground;
-	color: InfoText;
-	margin-right: 4px;
-}
-
-.titleSpan{
-	width:100%;
-}
