@@ -333,6 +333,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 										hidden: true,
 										preferenceService : this.serviceRegistry.getService("orion.core.preference") //$NON-NLS-0$
 									});
+									this.commandRegistry.registerCommandContribution(titleWrapper.actionsNode.id, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
+									this.commandRegistry.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode, {Dependency: projectData.Dependencies[depenency_no], Project: projectData}, this, "button");
 								console.error(error);
 							}.bind(this));
 						}.bind(this))(i);

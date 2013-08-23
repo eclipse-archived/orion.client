@@ -143,11 +143,11 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 					if(found===true){
 						break;
 					}
-					var def = handler.matchesDependency(workspace.Children[i], dependency);
+					var def = handler.getDependencyDescription(workspace.Children[i]);
 					checkdefs.push(def);
 					(function(i, def){
 						def.then(function(matches){
-							if(matches){
+							if(matches && matches.Location === dependency.Location){
 								found = true;
 								deferred.resolve(workspace.Children[i]);
 							}
@@ -180,6 +180,12 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 							var projectJson = content && content.length>0 ? JSON.parse(content) : {};
 							if(!projectJson.Dependencies){
 								projectJson.Dependencies = [];
+							}
+							for(var j=0; j<projectJson.Dependencies.length; j++){
+								if(projectJson.Dependencies[j].Location === dependency.Location){
+									deferred.resolve(projectJson);	
+									return;
+								}
 							}
 							projectJson.Dependencies.push(dependency);
 							this.fileClient.write(children[i].Location, JSON.stringify(projectJson)).then(

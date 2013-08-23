@@ -245,7 +245,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		var segments = gitPath.split("/");
 		gitInfo.serverName = segments[0];
 		if(gitInfo.serverName.indexOf("@")){
-			gitInfo.serverName = gitInfo.serverName.substring(gitInfo.serverName.indexOf("@"));
+			gitInfo.serverName = gitInfo.serverName.substring(gitInfo.serverName.indexOf("@")+1);
 		}
 		gitInfo.repoName = segments[segments.length-1];
 		if(gitInfo.repoName.indexOf(".git")>0){
@@ -255,7 +255,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 	}
 	
 	provider.registerService("orion.project.dependency.handler", {
-		getDependencyDescription: function(params){
+		paramsToDependencyDescription: function(params){
 			return {Type: "git", Location: params.url};
 		},
 		initDependency: function(dependency, params, projectMetadata){
@@ -310,9 +310,9 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		cloneRepository();
 		return deferred;
 		},
-		matchesDependency: function(item, dependency){
+		getDependencyDescription: function(item){
 			if(!item.Git){
-				return false;
+				return null;
 			}
 			var deferred = new Deferred();
 			gitClient.getGitClone(item.Git.CloneLocation).then(
@@ -320,11 +320,9 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 					if(clone.Children){
 						clone = clone.Children[0];
 					}
-					if(clone.GitUrl === dependency.Location){
+					if(clone.GitUrl){
 						var gitInfo = parseGitUrl(clone.GitUrl);
 						deferred.resolve({Type: "git", Location: clone.GitUrl, Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});
-					} else {
-						deferred.resolve(false);
 					}
 				},deferred.reject, deferred.progress
 			);
