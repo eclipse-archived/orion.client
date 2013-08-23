@@ -254,13 +254,20 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		return gitInfo;
 	}
 	
+	function removeUserInformation(gitUrl){
+		if(gitUrl.indexOf("@")>0 && gitUrl.indexOf("ssh://")>=0){
+			return gitUrl.substring(0, gitUrl.indexOf("ssh://") + 6) + gitUrl.substring(gitUrl.indexOf("@")+1);
+		}
+		return gitUrl;
+	}
+	
 	provider.registerService("orion.project.dependency.handler", {
 		paramsToDependencyDescription: function(params){
-			return {Type: "git", Location: params.url};
+			return {Type: "git", Location: removeUserInformation(params.url)};
 		},
 		initDependency: function(dependency, params, projectMetadata){
 			var deferred = new Deferred();
-			var gitUrl = dependency.Location || params.url;
+			var gitUrl = removeUserInformation(dependency.Location || params.url);
 			function cloneRepository(){
 				var knownHosts = sshService.getKnownHosts();
 				gitClient.cloneGitRepository(null, gitUrl, null, projectMetadata.WorkspaceLocation, params.sshuser, params.sshpassword, knownHosts).then(function(cloneResp){
@@ -269,7 +276,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 							clone = clone.Children[0];
 						}
 						var gitInfo = parseGitUrl(clone.GitUrl);
-						deferred.resolve({Type: "git", Location: clone.GitUrl, Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});					
+						deferred.resolve({Type: "git", Location: removeUserInformation(clone.GitUrl), Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});					
 					}, deferred.reject, deferred.progress);
 				}, function(error){
 					try{
@@ -322,7 +329,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 					}
 					if(clone.GitUrl){
 						var gitInfo = parseGitUrl(clone.GitUrl);
-						deferred.resolve({Type: "git", Location: clone.GitUrl, Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});
+						deferred.resolve({Type: "git", Location: removeUserInformation(clone.GitUrl), Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});
 					}
 				},deferred.reject, deferred.progress
 			);
