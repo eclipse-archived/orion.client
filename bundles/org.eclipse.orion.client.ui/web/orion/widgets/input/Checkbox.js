@@ -17,7 +17,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		objects.mixin(this, options);
 		this.node = node || document.createElement('div'); //$NON-NLS-0$
 		this.node.innerHTML = this.templateString;
-		this.myfield = lib.$('.setting-control', this.node); //$NON-NLS-0$
+		this.checkbox = lib.$('.setting-control', this.node); //$NON-NLS-0$
 	}
 	objects.mixin(Checkbox.prototype, {
 		templateString: '' +  //$NON-NLS-0$
@@ -26,7 +26,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 				'</label>',  //$NON-NLS-0$
 						
 		show: function(){
-			this.myfield.addEventListener('change', this.change.bind(this)); //$NON-NLS-0$
+			this.checkbox.addEventListener('change', this.change.bind(this)); //$NON-NLS-0$
 			this.postCreate();
         },
 
@@ -34,7 +34,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			if (this.node) {
 				lib.empty(this.node);
 				this.node = null;
-				this.myfield = null;
+				this.checkbox = null;
 			}
 		},
 
@@ -43,11 +43,11 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		},
 		
 		isChecked : function(){
-			return this.myfield.checked;
+			return this.checkbox.checked;
 		},
 		
 		setChecked : function(value){
-			this.myfield.checked = value;
+			this.checkbox.checked = value;
 		},
 		
 		getSelection: function(){
@@ -59,15 +59,15 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		},
         
         change: function(){
-            var value = this.myfield.value;
+            var value = this.checkbox.value;
             this.setStorageItem( value );
         },
         
         postCreate: function(){
-            this.myfield.style.width = '20px';
+            this.checkbox.style.width = '20px';
             
             if( this.editmode && this.editmode === 'readonly' ){ //$NON-NLS-0$
-				this.myfield.setAttribute("disabled", "disabled"); //$NON-NLS-1$ //$NON-NLS-0$
+				this.checkbox.setAttribute("disabled", "disabled"); //$NON-NLS-1$ //$NON-NLS-0$
             }
         }
     });

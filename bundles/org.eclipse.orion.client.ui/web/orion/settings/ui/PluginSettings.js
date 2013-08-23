@@ -54,16 +54,16 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 			PropertyWidget.prototype.postCreate.apply(this, arguments);
 			var type = this.property.getType();
 			if (type === 'number') { //$NON-NLS-0$
-				this.myfield.type = 'number'; //$NON-NLS-0$
+				this.textfield.type = 'number'; //$NON-NLS-0$
 			} else {
-				this.myfield.type = 'text'; //$NON-NLS-0$
+				this.textfield.type = 'text'; //$NON-NLS-0$
 			}
 		},
 		change: function(event) {
-			this.changeProperty(this.myfield.value);
+			this.changeProperty(this.textfield.value);
 		},
 		updateField: function(value) {
-			this.myfield.value = value;
+			this.textfield.value = value;
 		}
 	});
 
@@ -83,7 +83,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 			LabeledCheckbox.prototype.postCreate.call(this);
 		},
 		updateField: function(value) {
-			this.myfield.checked = value;
+			this.checkbox.checked = value;
 		}
 	});
 
