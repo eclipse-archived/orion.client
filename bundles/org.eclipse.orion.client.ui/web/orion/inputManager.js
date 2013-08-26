@@ -436,37 +436,29 @@ define([
 			var editor = this.editor;	
 			var model = editor.getModel();
 			var selection = editor.getSelection();
-			var caretLineIndex = model.getLineAtOffset(selection.start);
-			// caretOffsetDelta represents the caret offset from the start of the line
-			var caretOffsetDelta = selection.start - model.getLineStart(caretLineIndex); 
 			editor.getTextView().setRedraw(false);
 			editor.getUndoStack().startCompoundChange();
 			var matchTrailingWhiteSpace = /(\s+$)/;
-			for (var i = 0; i < model.getLineCount(); i++) {
+			var lineCount = model.getLineCount();
+			for (var i = 0; i < lineCount; i++) {
 				var lineText = model.getLine(i);
 				var match = matchTrailingWhiteSpace.exec(lineText);
-				var lineStartOffset = model.getLineStart(i);
-				var start;
-				
 				if (match) {
-					start = lineStartOffset + match.index;
-					model.setText("", start, start + match[0].length); //$NON-NLS-0$
-				}
-				
-				/**
-				 * Move the caret to its original position prior to the save. If the caret
-				 * was in the trailing whitespaces, move the caret to the end of the line.
-				 */
-				if (caretLineIndex === i && selection.start === selection.end) {
-					if (start < selection.start) {
-						editor.setCaretOffset(start);
-					} else {
-						editor.setCaretOffset(lineStartOffset + caretOffsetDelta);
+					var lineStartOffset = model.getLineStart(i);
+					var length = match[0].length;
+					var start = lineStartOffset + match.index;
+					model.setText("", start, start + length);
+					if (selection.start > start) {
+						selection.start -= length;
+					}
+					if (selection.end > start) {
+						selection.end -= length;
 					}
 				}
 			}
 			editor.getUndoStack().endCompoundChange();
 			editor.getTextView().setRedraw(true);
+			editor.setSelection(selection.start, selection.end, false);
 		}
 	});
 	return {
