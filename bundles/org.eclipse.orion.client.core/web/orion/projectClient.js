@@ -209,6 +209,42 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 		return deferred;
 	},
 	
+	removeProjectDependency: function(projectMetadata, dependency){
+		var deferred = new Deferred();
+		this.fileClient.fetchChildren(projectMetadata.ContentLocation).then(function(children){
+			for(var i=0; i<children.length; i++){
+				if(children[i].Name==="project.json"){
+					this.fileClient.read(children[i].Location).then(function(content){
+						try{
+							var projectJson = content && content.length>0 ? JSON.parse(content) : {};
+							if(!projectJson.Dependencies){
+								projectJson.Dependencies = [];
+							}
+							for(var j=projectJson.Dependencies.length-1; j>=0; j--){
+								if(projectJson.Dependencies[j].Location === dependency.Location && projectJson.Dependencies[j].Type === dependency.Type){
+									projectJson.Dependencies.splice(j);
+								}
+							}
+							this.fileClient.write(children[i].Location, JSON.stringify(projectJson)).then(
+								function(){
+									projectJson.ContentLocation = projectMetadata.ContentLocation;
+									projectJson.Name = projectMetadata.Name;
+									deferred.resolve(projectJson);
+								},
+								deferred.reject
+							);
+							
+						} catch (e){
+							deferred.reject(e);
+						}
+					}.bind(this), deferred.reject, deferred.progress);
+					return;
+				}
+			}
+		}.bind(this), deferred.reject);
+		return deferred;
+	},
+	
 	getDependencyTypes: function(){
 		var types = [];
 		for(var i=0; i<this.allDependencyHandlersReferences.length; i++){
