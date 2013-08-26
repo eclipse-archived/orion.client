@@ -133,7 +133,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			// Selection based command contributions in sidebar project-nav
 			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
 			var newActionsScope = this.newActionsScope;
-			var selectionActionsScope = this.selectionActionsScope;
+			var selectionActionsScope = this.selectionActionsScope; 
 
 			commandRegistry.addCommandGroup(newActionsScope, "orion.miniExplorerNavNewGroup", 1000, messages["New"], null, null, "core-sprite-addcontent"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, null, "core-sprite-gear"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -308,6 +308,14 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 										hidden: true,
 										preferenceService : this.serviceRegistry.getService("orion.core.preference") //$NON-NLS-0$
 									});
+									
+									var sectionActionsArea = lib.node("depenenciesSection" + depenency_no + "ActionArea");
+									var actionsArea = document.createElement("span");
+									actionsArea.id = "depenenciesSection" + depenency_no + "NewActionArea";
+									sectionActionsArea.appendChild(actionsArea);
+									var disconnectActionArea = document.createElement("span");
+									disconnectActionArea.id = "depenenciesSection" + depenency_no + "DisconnectActionArea";
+									sectionActionsArea.appendChild(disconnectActionArea);
 
 									
 									var depenencyExploer = new FilesNavExplorer({
@@ -317,14 +325,17 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 										progressService: this.progressService,
 										parentId: filesNode,
 										toolbarNode: this.toolbarNode,
-										newActionsScope: "depenenciesSection" + depenency_no + "ActionArea",
+										newActionsScope: actionsArea.id,
 										selectionActionsScope: "depenenciesSection" + depenency_no + "SelectionArea",
 										rendererFactory: this.rendererFactory,
 										dragAndDrop: FileCommands.uploadFile,
 										serviceRegistry: this.serviceRegistry
 									});
 									
-									depenencyExploer.loadRoot(depenencyMetadata, redisplay).then(depenencyExploer.updateCommands.bind(depenencyExploer, depenencyMetadata));
+									this.commandRegistry.registerCommandContribution(disconnectActionArea.id, "orion.project.dependency.disconnect", 1); //$NON-NLS-0$
+									this.commandRegistry.renderCommands(disconnectActionArea.id, disconnectActionArea, {Dependency: projectData.Dependencies[depenency_no], Project: projectData}, this, "tool");
+									
+									depenencyExploer.loadRoot(depenencyMetadata, redisplay).then(depenencyExploer.updateCommands.bind(depenencyExploer)(depenencyMetadata));
 							}.bind(this), function(error){
 									var titleWrapper = new mSection.Section(this.parentNode, { id : "depenenciesSection" + depenency_no, //$NON-NLS-0$
 										title : projectData.Dependencies[depenency_no].Name + " (disconnected)",
@@ -334,7 +345,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 										preferenceService : this.serviceRegistry.getService("orion.core.preference") //$NON-NLS-0$
 									});
 									this.commandRegistry.registerCommandContribution(titleWrapper.actionsNode.id, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
-									this.commandRegistry.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode, {Dependency: projectData.Dependencies[depenency_no], Project: projectData}, this, "button");
+									this.commandRegistry.registerCommandContribution(titleWrapper.actionsNode.id, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
+									this.commandRegistry.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode, {Dependency: projectData.Dependencies[depenency_no], Project: projectData}, this, "tool");
 								console.error(error);
 							}.bind(this));
 						}.bind(this))(i);

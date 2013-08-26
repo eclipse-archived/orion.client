@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*global window define orion XMLHttpRequest confirm*/
 /*jslint sub:true*/
-define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/commandRegistry'],
-	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry){
+define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/commandRegistry', 'orion/i18nUtil'],
+	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil){
 		var projectCommandUtils = {};
 		
 		var selectionListenerAdded = false;
@@ -358,6 +358,28 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 		});
 		commandService.addCommand(connectDependencyCommand);
+		
+				
+		var disconnectDependencyCommand = new mCommands.Command({
+			name: "Disconnect from project",
+			tooltip: "Do not treat this folder as a part of the project",
+			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			id: "orion.project.dependency.disconnect", //$NON-NLS-0$
+			callback: function(data) {
+				var item = forceSingleItem(data.items);
+				progress.progress(projectClient.removeProjectDependency(item.Project, item.Dependency),
+					i18nUtil.formatMessage("Removing ${0} from project ${1}", item.Dependency.Name, item.Project.Name)).then(function(resp){
+						explorer.changedItem();
+					});
+			},
+			visibleWhen: function(item) {
+				if(!(item.Dependency && item.Project)){
+					return false;	
+				}
+				return true;
+			}
+		});
+		commandService.addCommand(disconnectDependencyCommand);
 		
 		};
 	
