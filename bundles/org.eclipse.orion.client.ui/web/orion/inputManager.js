@@ -115,27 +115,6 @@ define([
 		this._input = this._title = "";
 		this.dispatcher = null;
 		this._unsavedChanges = [];
-		var self = this;
-		this._listener = {
-			onChanging: function(e) {
-				var length = self._unsavedChanges.length;
-				var removedCharCount = e.removedCharCount;
-				var start = e.start;
-				var end = e.start + removedCharCount;
-				if (length > 0) {
-					var previousChange = self._unsavedChanges[length-1];
-					if (removedCharCount === 0 && start === previousChange.end + previousChange.text.length) {
-						previousChange.text += e.text;
-						return;
-					}
-					if (e.addedCharCount === 0 && end === previousChange.start) {
-						previousChange.start = start;
-						return;
-					}
-				}
-				self._unsavedChanges.push({start:start, end:end, text:e.text});
-			}
-		};
 		EventTarget.attach(this);
 	}
 	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
@@ -256,7 +235,7 @@ define([
 			editor.getUndoStack().markClean();
 			var contents = editor.getText();
 			var data = contents;
-			if (this._getDiffsEnabled()) {
+			if (this._getSaveDiffsEnabled()) {
 				var changes = this._unsavedChanges;
 				this._unsavedChanges = [];
 				var length = 0;
@@ -358,7 +337,6 @@ define([
 		},
 		setSaveDiffsEnabled: function(enabled) {
 			this._saveDiffsEnabled = enabled;
-			this._enableDiffs(enabled);
 		},
 		setInput: function(location) {
 			if (this._ignoreInput) { return; }
@@ -404,7 +382,7 @@ define([
 				this._setNoInput();
 			}
 		},
-		_getDiffsEnabled: function() {
+		_getSaveDiffsEnabled: function() {
 			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
 		},
 		_setNoInput: function() {
@@ -412,14 +390,6 @@ define([
 			this._input = this._title = this._contentType = null;
 			this.editor.uninstallTextView();
 			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
-		},
-		_enableDiffs: function(enable) {
-			if (!this.editor.getTextView()) { return; }
-			if (enable) {
-				this.editor.getModel().addEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
-			} else {
-				this.editor.getModel().removeEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
-			}
 		},
 		_setInputContents: function(input, title, contents, metadata) {
 			var name;
@@ -449,9 +419,25 @@ define([
 						this.load();
 					}
 				}.bind(this));
-				if (this._getDiffsEnabled()) {
-					this._enableDiffs(true);
-				}
+				editor.getModel().addEventListener("Changing", function(e) { //$NON-NLS-0$
+					if (!this._getSaveDiffsEnabled()) { return; }
+					var length = this._unsavedChanges.length;
+					var removedCharCount = e.removedCharCount;
+					var start = e.start;
+					var end = e.start + removedCharCount;
+					if (length > 0) {
+						var previousChange = this._unsavedChanges[length-1];
+						if (removedCharCount === 0 && start === previousChange.end + previousChange.text.length) {
+							previousChange.text += e.text;
+							return;
+						}
+						if (e.addedCharCount === 0 && end === previousChange.start) {
+							previousChange.start = start;
+							return;
+						}
+					}
+					this._unsavedChanges.push({start:start, end:end, text:e.text});	
+				}.bind(this));
 			}
 			// TODO could potentially dispatch separate events for metadata and contents changing
 			this.dispatchEvent({ type: "InputChanged", input: input, name: name, metadata: metadata, contents: contents }); //$NON-NLS-0$
