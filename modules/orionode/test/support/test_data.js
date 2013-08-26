@@ -14,6 +14,7 @@ var fs = require('fs');
 var path = require('path');
 var connect = require('connect');
 var request = require('supertest');
+var rimraf = require('rimraf');
 
 function debug(msg) {
 	if (exports.DEBUG) {
@@ -36,10 +37,11 @@ function sequential_commands(cwd, commands, callback) {
 	next();
 }
 
+/**
+ * Deletes dir and everything in it.
+ */
 function tearDown(dir, callback) {
-	sequential_commands(dir, [
-		{ cmd: 'rm', args: ['-rf', 'project'] }
-	], callback);
+	rimraf(dir, callback);
 }
 
 
@@ -79,7 +81,13 @@ function setUp(dir, callback) {
 	fs.exists(dir, function(exists) {
 		if (exists) {
 			debug('\nDirectory exists; cleaning...');
-			tearDown(dir, generateContent);
+			tearDown(dir, function(err) {
+				if (err) {
+					debug(err);
+					return;
+				}
+				fs.mkdir(dir, generateContent);
+			});
 		} else {
 			fs.mkdir(dir, generateContent);
 		}
