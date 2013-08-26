@@ -346,6 +346,8 @@ describe('File API', function() {
 	});
 	/**
 	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Copy.2C_move.2C_and_delete
+	 * and 
+	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Notes_on_POST_method
 	 */
 	describe('copy', function() {
 		it('copy a file', function(done) {
@@ -368,7 +370,7 @@ describe('File API', function() {
 			.set('Slug', 'buzz.txt')
 			.set('X-Create-Options', 'copy')
 			.send({ Location: PREFIX + '/project/fizz.txt' })
-			.expect(201)
+			.expect(200) // 200 means overwritten
 			.end(function(err, res) {
 				assert.ifError(err);
 				// It's in the expected place:
