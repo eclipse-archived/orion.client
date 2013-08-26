@@ -449,9 +449,9 @@ define([
 					var start = lineStartOffset + match.index;
 					model.setText("", start, start + matchLength);
 					/**
-			         * Move the caret to its original position prior to the save. If the caret
-			         * was in the trailing whitespaces, move the caret to the end of the line.
-			         */
+					 * Move the caret to its original position prior to the save. If the caret
+					 * was in the trailing whitespaces, move the caret to the end of the line.
+					 */
 					if (selection.start > start) {
 						selection.start -= matchLength;
 					}
