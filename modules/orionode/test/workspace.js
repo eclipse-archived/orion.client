@@ -129,7 +129,46 @@ describe('Workspace API', function() {
 		});
 	});
 	/**
-	 * Orionode does not support "Projects" so we're ignoring this:
-	 * http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Actions_on_projects
+	 * see http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Actions_on_projects
+	 * Most Project actions are unsupported.
 	 */
+	describe('project', function(done) {
+		/**
+		 * Rename Project. The Orion UI requires this operation to support rename of top-level folders.
+		 */
+		it('rename a project should succeed', function(done) {
+			var oldProjectLocation = PREFIX_FILE + '/project';
+			withDefaultWorkspace(function(workspace) {
+				app.request()
+				.post(workspace.Location)
+				.set('X-Create-Options', 'move')
+				.send({Location: oldProjectLocation, Name: 'project_renamed'})
+				.expect(200)
+				.end(function(e, res) {
+					assert.ifError(e);
+					assert.equal(res.body.Name, 'project_renamed');
+
+					// GETting the new ContentLocation should return the project metadata
+					app.request()
+					.get(res.body.ContentLocation)
+					.expect(200)
+					.end(function(err, res) {
+						assert.ifError(err);
+
+						// and GETting the ChildrenLocation should return the children
+						app.request()
+						.get(res.body.ChildrenLocation)
+						.expect(200)
+						.end(function(err, res){
+							var foundFizz = res.body.Children.some(function(child) {
+								return child.Name === 'fizz.txt';
+							});
+							assert.ok(foundFizz, 'fizz.txt was found at the new ContentLocation');
+							done();
+						});
+					});
+				});
+			});
+		});
+	});
 });

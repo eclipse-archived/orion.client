@@ -31,7 +31,7 @@ var async = require('./async');
  * @returns {Array}
  */
 // TODO depth
-exports.getChildren = function(directory, parentLocation, excludes, callback) {
+var getChildren = exports.getChildren = function(directory, parentLocation, excludes, callback) {
 	// If 'excludes' is omitted, the callback can be given as the 3rd argument
 	callback = excludes || callback;
 	dfs.readdir(directory).then(function(files) {
@@ -74,7 +74,7 @@ exports.getChildren = function(directory, parentLocation, excludes, callback) {
  * @parma {String} p A location in the local filesystem (eg C:\\Users\\whatever\\foo)
  * @throws {Error} If p is outside the workspaceDir (and thus is unsafe)
  */
-var _safeFilePath = exports.safePath = function(workspaceDir, p) {
+var safePath = exports.safePath = function(workspaceDir, p) {
 	workspaceDir = path.normalize(workspaceDir);
 	p = path.normalize(p);
 	var relativePath = path.relative(workspaceDir, p);
@@ -90,8 +90,8 @@ var _safeFilePath = exports.safePath = function(workspaceDir, p) {
  * The returned value is URL-decoded.
  * @throws {Error} If rest is outside of the workspaceDir (and thus is unsafe)
  */
-exports.safeFilePath = function(workspaceDir, filepath) {
-	return _safeFilePath(workspaceDir, path.join(workspaceDir, decodeURIComponent(filepath)));
+var safeFilePath = exports.safeFilePath = function(workspaceDir, filepath) {
+	return safePath(workspaceDir, path.join(workspaceDir, decodeURIComponent(filepath)));
 };
 
 /**
@@ -112,7 +112,7 @@ exports.generateDebugURL = function(debugMeta, hostName) {
 		});
 };
 
-exports.getParents = function(fileRoot, relativePath) {
+var getParents = exports.getParents = function(fileRoot, relativePath) {
 	var segs = relativePath.split('/');
 	if(segs && segs.length > 0 && segs[segs.length-1] === ""){// pop the last segment if it is empty. In this case wwwpath ends with "/".
 		segs.pop();
@@ -228,7 +228,7 @@ function _copyDir(srcPath, destPath, callback) {
  * @param {String} destPath
  * @param {Function} callback Invoked as callback(error, destPath)
  */
-exports.copy = function(srcPath, destPath, callback) {
+var copy = exports.copy = function(srcPath, destPath, callback) {
 	fs.stat(srcPath, function(error, stats) {
 		if (error) { callback(error); }
 		else {
@@ -248,7 +248,7 @@ exports.copy = function(srcPath, destPath, callback) {
 /**
  * @param {Function} callback Invoked as callback(error, stats)
  */
-exports.withStats = function(filepath, callback) {
+var withStats = exports.withStats = function(filepath, callback) {
 	fs.stat(filepath, function(error, stats) {
 		if (error) { callback(error); }
 		else {
@@ -300,4 +300,168 @@ exports.withStatsAndETag = function(filepath, callback) {
 			callback(null, stats, null);
 		}
 	});
+};
+
+/**
+ * @returns {String} The Location of for a file resource.
+ */
+function getFileLocation(fileRoot, wwwpath, isDir) {
+	return api.join(fileRoot, wwwpath) + (isDir ? '/' : '');
+}
+
+/**
+ * Helper for fulfilling a file metadata GET request.
+ * @param {String} fileRoot The "/file" prefix or equivalent.
+ * @param {Object} res HTTP response object
+ * @param {String} wwwpath The WWW path of the file relative to the fileRoot.
+ * @param {String} filepath The physical path to the file on the server.
+ * @param {Object} stats
+ * @param {String} etag
+ * @param {Boolean} [includeChildren=false]
+ * @param {Object} [metadataMixins] Additional metadata to mix in to the response object.
+ */
+var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwpath, filepath, stats, etag, includeChildren, metadataMixins) {
+	includeChildren = includeChildren || false;
+	var isDir = stats.isDirectory();
+	var metaObj = {
+		Name: decodeURIComponent(path.basename(filepath)),
+		Location: getFileLocation(fileRoot, wwwpath, isDir),
+		Directory: isDir,
+		LocalTimeStamp: stats.mtime.getTime(),
+		Parents: getParents(fileRoot, wwwpath),
+		//Charset: "UTF-8",
+		Attributes: {
+			// TODO fix this
+			ReadOnly: false,//!(stats.mode & USER_WRITE_FLAG === USER_WRITE_FLAG),
+			Executable: false//!(stats.mode & USER_EXECUTE_FLAG === USER_EXECUTE_FLAG)
+		}
+	};
+	if (metadataMixins) {
+		Object.keys(metadataMixins).forEach(function(property) {
+			metaObj[property] = metadataMixins[property];
+		});
+	}
+	if (etag) {
+		metaObj.ETag = etag;
+		res.setHeader('ETag', etag);
+	}
+	if (!isDir) {
+		api.write(null, res, null, metaObj);
+	} else {
+		// Orion's File Client expects ChildrenLocation to always be present
+		metaObj.ChildrenLocation = api.join(fileRoot, wwwpath) + '?depth=1';
+		if (!includeChildren) {
+			api.write(null, res, null, metaObj);
+		} else {
+			getChildren(filepath, api.join(fileRoot, wwwpath)/*this dir*/, null/*omit nothing*/, function(children) {
+				var name = path.basename(filepath);
+				if (name[name.length-1] === path.sep) {
+					name = name.substring(0, name.length-1);
+				}
+				metaObj.Children = children;
+//				var childrenJSON = JSON.stringify(children);
+//				var folder = JSON.stringify({
+//					ChildrenLocation: api.join(fileRoot, rest) + '?depth=1',
+//					LocalTimeStamp: stats.mtime.getTime(),
+//					Location: api.join(fileRoot, rest),
+//					Name: decodeURIComponent(name),
+//					Parents: getParents(filepath, rest)
+//				});
+//				api.write(200, res, null, folder)
+				api.write(null, res, null, metaObj);
+			});
+		}
+	}
+};
+
+/**
+ * Helper for fulfilling a file POST request (for example, copy, move, or create).
+ * @param {String} fileRoot
+ * @param {Object} req
+ * @parma {Object} res
+ * @param {String} srcFilepath
+ * @param {String} destFilepath
+ * @param {Object} [metadata] Additional metadata to be mixed in to the File response.
+ * @param {Number} [statusCode] Status code to send on a successful response. By default, `201 Created` is sent if
+ * a new resource was created, and and `200 OK` if an existing resource was overwritten.
+ */
+exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, destFilepath, metadataMixins, statusCode) {
+	var getSafeFilePath = safeFilePath.bind(null, workspaceDir);
+	var isDirectory = req.body && Object.prototype.hasOwnProperty.call(req.body, 'Directory') && !!req.body.Directory;
+
+	fs.exists(destFilepath, function(destExists) {
+		function checkXCreateOptions(opts) {
+			// Can't have both copy and move
+			return opts.indexOf('copy') === -1 || opts.indexOf('move') === -1;
+		}
+		function writeCreatedFile(error) {
+			if (error) {
+				api.writeError(500, res, error);
+				return;
+			} else if (req.body) {
+				// var fileAtts = req.body.Attributes;
+				// TODO: maybe set ReadOnly and Executable based on fileAtts
+			}
+			if (typeof statusCode === 'number') {
+				res.statusCode = statusCode;
+			} else {
+				// Status code 200 indicates that an existing resource was replaced, or we're POSTing to a URL
+				res.statusCode = destExists ? 200 : 201;
+			}
+			withStats(destFilepath, function(error, stats) {
+				if (error) {
+					api.writeError(500, res, error);
+					return;
+				}
+				writeFileMetadata(fileRoot, res, wwwpath, destFilepath, stats, /*etag*/null, /*includeChildren*/false, metadataMixins);
+			});
+		}
+		function createFile() {
+			if (isDirectory) {
+				fs.mkdir(destFilepath, writeCreatedFile);
+			} else {
+				fs.writeFile(destFilepath, '', writeCreatedFile);
+			}
+		}
+		function doCopyOrMove(isCopy) {
+			var sourceUrl = req.body.Location;
+			if (!sourceUrl) {
+				api.writeError(400, res, 'Missing Location property in request body');
+				return;
+			}
+			var sourceFilepath = getSafeFilePath(api.rest(fileRoot, api.matchHost(req, sourceUrl)));
+			fs.exists(sourceFilepath, function(sourceExists) {
+				if (!sourceExists) {
+					api.write(404, res, null, 'File not found: ' + sourceUrl);
+					return;
+				}
+				if (isCopy) {
+					copy(sourceFilepath, destFilepath, writeCreatedFile);
+				} else {
+					fs.rename(sourceFilepath, destFilepath, writeCreatedFile);
+				}
+			});
+		}
+		var xCreateOptions = (req.headers['x-create-options'] || "").split(",");
+		if (!checkXCreateOptions(xCreateOptions)) {
+			api.write(400, res, null, 'Illegal combination of X-Create-Options.');
+			return;
+		}
+		if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
+			res.setHeader('Content-Type', 'application/json');
+			res.statusCode = 412;
+			res.end(JSON.stringify({Message: 'A file or folder with the same name already exists at this location.'}));
+			return;
+		} 
+		var isCopy;
+		if ((isCopy = xCreateOptions.indexOf('copy') !== -1) || (xCreateOptions.indexOf('move') !== -1)) {
+			doCopyOrMove(isCopy);
+		} else {
+			if (destExists) {
+				fs.unlink(destFilepath, createFile);
+			} else {
+				createFile();
+			}
+		}
+	});	
 };
