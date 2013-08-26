@@ -445,14 +445,18 @@ define([
 				var match = matchTrailingWhiteSpace.exec(lineText);
 				if (match) {
 					var lineStartOffset = model.getLineStart(i);
-					var length = match[0].length;
+					var matchLength = match[0].length;
 					var start = lineStartOffset + match.index;
-					model.setText("", start, start + length);
+					model.setText("", start, start + matchLength);
+					/**
+			         * Move the caret to its original position prior to the save. If the caret
+			         * was in the trailing whitespaces, move the caret to the end of the line.
+			         */
 					if (selection.start > start) {
-						selection.start -= length;
+						selection.start -= matchLength;
 					}
-					if (selection.end > start) {
-						selection.end -= length;
+					if (selection.start !== selection.end && selection.end > start) {
+						selection.end -= matchLength;
 					}
 				}
 			}
