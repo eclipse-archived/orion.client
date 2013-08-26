@@ -27,6 +27,13 @@ module.exports = function(options) {
 	var workspaceId = 'orionode';
 	var workspaceName = 'Orionode Workspace';
 
+	var makeProjectContentLocation = function(projectName) {
+		return api.join(fileRoot, projectName);
+	};
+	var makeProjectLocation = function(projectName) {
+		return api.join(workspaceRoot, 'project', projectName);
+	};
+
 	return connect()
 	.use(connect.json())
 	.use(resource(workspaceRoot, {
@@ -85,33 +92,47 @@ module.exports = function(options) {
 				res.statusCode = 403;
 				res.end(JSON.stringify(err));
 			} else if (rest === workspaceId) {
-				// Create project
 				var projectName = req.headers.slug || (req.body && req.body.Name);
 				if (!projectName) {
 					err = {Message: 'Missing "Slug" header or "Name" parameter'};
 					res.statusCode = 400;
 					res.setHeader('Content-Type', 'application/json');
 					res.end(JSON.stringify(err));
-				} else {
-					fs.mkdir(fileUtil.safeFilePath(workspaceDir, projectName), parseInt('0755', 8), function(error) {
-						if (error) {
-							err = {Message: error};
-							res.statusCode = 400;
-							res.end(JSON.stringify(error));
-						} else {
-							var newProject = JSON.stringify({
-								ContentLocation: api.join(fileRoot, projectName), // Important
-								Id: projectName,
-								Location: api.join(workspaceRoot, 'project', projectName) // not important
-								
-							});
-							res.statusCode = 201;
-							res.setHeader('Content-Type', 'application/json');
-							res.setHeader('Content-Length', newProject.length);
-							res.end(newProject);
-						}
-					});
+					return;
 				}
+				// Move/Rename a project
+				var location = req.body && req.body.Location;
+				if (location) {
+					var wwwpath = location,
+					    filepath = fileUtil.safeFilePath(workspaceDir, projectName);
+
+					// Call the File POST helper to handle the filesystem operation. We inject the Project-specific metadata
+					// into the resulting File object.
+					fileUtil.handleFilePOST(workspaceDir, fileRoot, req, res, wwwpath, filepath, {
+						Id: projectName,
+						ContentLocation: makeProjectContentLocation(projectName),
+						Location: makeProjectLocation(projectName)
+					}, /*renaming a project is always 200 status*/ 200);
+					return;
+				}
+				// Create a project
+				fs.mkdir(fileUtil.safeFilePath(workspaceDir, projectName), parseInt('0755', 8), function(error) {
+					if (error) {
+						err = {Message: error};
+						res.statusCode = 400;
+						res.end(JSON.stringify(error));
+					} else {
+						var newProject = JSON.stringify({
+							Id: projectName,
+							ContentLocation: makeProjectContentLocation(projectName), // Important
+							Location: makeProjectLocation(projectName) // not important
+						});
+						res.statusCode = 201;
+						res.setHeader('Content-Type', 'application/json');
+						res.setHeader('Content-Length', newProject.length);
+						res.end(newProject);
+					}
+				});
 			}
 		},
 		PUT: function(req, res, next, rest) {

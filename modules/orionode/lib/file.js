@@ -58,57 +58,8 @@ module.exports = function(options) {
 	if (!fileRoot) { throw 'options.root is required'; }
 	if (!workspaceDir) { throw 'options.workspaceDir is required'; }
 
-	function getSafeFilePath(res, wwwpath) {
-		return fileUtil.safeFilePath(workspaceDir, wwwpath);
-	}
-	
-	function writeFileMetadata(res, rest, filepath, stats, etag, includeChildren) {
-		var isDir = stats.isDirectory();
-		var metaObj = {
-			Name: decodeURIComponent(path.basename(filepath)),
-			Location: api.join(fileRoot, rest) + (isDir ? '/' : ''),
-			Directory: isDir,
-			LocalTimeStamp: stats.mtime.getTime(),
-			Parents: fileUtil.getParents(fileRoot, rest),
-			//Charset: "UTF-8",
-			Attributes: {
-				// TODO fix this
-				ReadOnly: false,//!(stats.mode & USER_WRITE_FLAG === USER_WRITE_FLAG),
-				Executable: false//!(stats.mode & USER_EXECUTE_FLAG === USER_EXECUTE_FLAG)
-			}
-		};
-		if (etag) {
-			metaObj.ETag = etag;
-			res.setHeader('ETag', etag);
-		}
-		if (!isDir) {
-			write(null, res, null, metaObj);
-		} else {
-			// Orion's File Client expects ChildrenLocation to always be present
-			metaObj.ChildrenLocation = api.join(fileRoot, rest) + '?depth=1';
-			if (!includeChildren) {
-				write(null, res, null, metaObj);
-			} else {
-				fileUtil.getChildren(filepath, api.join(fileRoot, rest)/*this dir*/, null/*omit nothing*/, function(children) {
-					var name = path.basename(filepath);
-					if (name[name.length-1] === path.sep) {
-						name = name.substring(0, name.length-1);
-					}
-					metaObj.Children = children;
-	//				var childrenJSON = JSON.stringify(children);
-	//				var folder = JSON.stringify({
-	//					ChildrenLocation: api.join(fileRoot, rest) + '?depth=1',
-	//					LocalTimeStamp: stats.mtime.getTime(),
-	//					Location: api.join(fileRoot, rest),
-	//					Name: decodeURIComponent(name),
-	//					Parents: getParents(filepath, rest)
-	//				});
-	//				write(200, res, null, folder)
-					write(null, res, null, metaObj);
-				});
-			}
-		}
-	}
+	var writeFileMetadata = fileUtil.writeFileMetadata.bind(null, fileRoot);
+	var getSafeFilePath = fileUtil.safeFilePath.bind(null, workspaceDir);
 
 	function writeFileContents(res, rest, filepath, stats, etag) {
 		if (stats.isDirectory()) {
@@ -140,7 +91,7 @@ module.exports = function(options) {
 			if (writeEmptyFilePathError(res, rest)) {
 				return;
 			}
-			var filepath = getSafeFilePath(res, rest);
+			var filepath = getSafeFilePath(rest);
 			fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
 				if (error && error.code === 'ENOENT') {
 					writeError(404, res, 'File not found: ' + rest);
@@ -160,7 +111,7 @@ module.exports = function(options) {
 			if (writeEmptyFilePathError(res, rest)) {
 				return;
 			}
-			var filepath = getSafeFilePath(res, rest);
+			var filepath = getSafeFilePath(rest);
 			if (getParam(req, 'parts') === 'meta') {
 				// TODO implement put of file attributes
 				res.statusCode = 501;
@@ -212,10 +163,6 @@ module.exports = function(options) {
 			}
 		},
 		POST: function(req, res, next, rest) {
-			function checkXCreateOptions(opts) {
-				// Can't have both copy and move
-				return opts.indexOf('copy') === -1 || opts.indexOf('move') === -1;
-			}
 			if (writeEmptyFilePathError(res, rest)) {
 				return;
 			}
@@ -224,80 +171,17 @@ module.exports = function(options) {
 				write(400, res, 'Missing Slug header or Name property');
 				return;
 			}
-			var destFilepath = getSafeFilePath(res, path.join(rest, name));
-			fs.exists(destFilepath, function(destExists) {
-				function writeCreatedFile(error) {
-					if (error) {
-						writeError(500, res, error);
-						return;
-					} else if (req.body) {
-						// var fileAtts = req.body.Attributes;
-						// TODO: maybe set ReadOnly and Executable based on fileAtts
-					}
-					// serialize the file metadata and we're done
-					res.statusCode = 201;
-					fileUtil.withStats(destFilepath, function(error, stats) {
-						if (error) {
-							writeError(500, res, error);
-							return;
-						}
-						writeFileMetadata(res, api.join(rest, encodeURIComponent(name)), destFilepath, stats, null);
-					});
-				}
-				function createFile() {
-					if (req.body && parseBoolean(req.body.Directory) ) {
-						fs.mkdir(destFilepath, writeCreatedFile);
-					} else {
-						fs.writeFile(destFilepath, '', writeCreatedFile);
-					}
-				}
-				function doCopyOrMove(isCopy) {
-					var sourceUrl = req.body.Location;
-					if (!sourceUrl) {
-						writeError(400, res, 'Missing Location property in request body');
-						return;
-					}
-					var sourceFilepath = getSafeFilePath(res, api.rest(fileRoot, api.matchHost(req, sourceUrl)));
-					fs.exists(sourceFilepath, function(sourceExists) {
-						if (!sourceExists) {
-							write(404, res, null, 'File not found: ' + sourceUrl);
-							return;
-						}
-						if (isCopy) {
-							fileUtil.copy(sourceFilepath, destFilepath, writeCreatedFile);
-						} else {
-							fs.rename(sourceFilepath, destFilepath, writeCreatedFile);
-						}
-					});
-				}
-				var xCreateOptions = (req.headers['x-create-options'] || "").split(",");
-				if (!checkXCreateOptions(xCreateOptions)) {
-					write(400, res, null, 'Illegal combination of X-Create-Options.');
-					return;
-				}
-				if (xCreateOptions.indexOf('no-overwrite') !== -1 && destExists) {
-					res.setHeader('Content-Type', 'application/json');
-					res.statusCode = 412;
-					res.end(JSON.stringify({Message: 'A file or folder with the same name already exists at this location.'}));
-					return;
-				} 
-				var isCopy;
-				if ((isCopy = xCreateOptions.indexOf('copy') !== -1) || (xCreateOptions.indexOf('move') !== -1)) {
-					doCopyOrMove(isCopy);
-				} else {
-					if (destExists) {
-						fs.unlink(destFilepath, createFile);
-					} else {
-						createFile();
-					}
-				}
-			});
+
+			var wwwpath = api.join(rest, encodeURIComponent(name)),
+			    filepath = getSafeFilePath(path.join(rest, name));
+
+			fileUtil.handleFilePOST(workspaceDir, fileRoot, req, res, wwwpath, filepath);
 		},
 		DELETE: function(req, res, next, rest) {
 			if (writeEmptyFilePathError(res, rest)) {
 				return;
 			}
-			var filepath = getSafeFilePath(res, rest);
+			var filepath = getSafeFilePath(rest);
 			fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
 				var ifMatchHeader = req.headers['if-match'];
 				if (error && error.code === 'ENOENT') {
@@ -324,3 +208,4 @@ module.exports = function(options) {
 		}
 	}));
 };
+
