@@ -51,8 +51,8 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 	var stringStyle = {styleClass: "token_string"}; //$NON-NLS-0$
 	var numberStyle = {styleClass: "token_number"}; //$NON-NLS-0$
 	var keywordStyle = {styleClass: "token_keyword"}; //$NON-NLS-0$
-	var spaceStyle = {styleClass: "token_space"}; //$NON-NLS-0$
-	var tabStyle = {styleClass: "token_tab"}; //$NON-NLS-0$
+	var spaceStyle = {styleClass: "token_space", unmergeable: true}; //$NON-NLS-0$
+	var tabStyle = {styleClass: "token_tab", unmergeable: true}; //$NON-NLS-0$
 	var caretLineStyle = {styleClass: "line_caret"}; //$NON-NLS-0$
 	
 	function Scanner (keywords, whitespacesVisible) {

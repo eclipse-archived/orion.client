@@ -541,10 +541,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						if (start < styleStart) {
 							this._createRange(text, start, styleStart, null, data);
 						}
-						while (i + 1 < ranges.length && ranges[i + 1].start - lineStart === styleEnd && compare(range.style, ranges[i + 1].style)) {
-							range = ranges[i + 1];
-							styleEnd = Math.min(lineStart + end, range.end) - lineStart;
-							i++;
+						if (!range.style || !range.style.unmergeable) {
+							while (i + 1 < ranges.length && ranges[i + 1].start - lineStart === styleEnd && compare(range.style, ranges[i + 1].style)) {
+								range = ranges[i + 1];
+								styleEnd = Math.min(lineStart + end, range.end) - lineStart;
+								i++;
+							}
 						}
 						this._createRange(text, styleStart, styleEnd, range.style, data);
 						start = styleEnd;
