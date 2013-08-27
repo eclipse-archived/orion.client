@@ -453,10 +453,10 @@ define([
 					 * was in the trailing whitespaces, move the caret to the end of the line.
 					 */
 					if (selection.start > start) {
-						selection.start -= matchLength;
+						selection.start = Math.max(start, selection.start - matchLength);
 					}
 					if (selection.start !== selection.end && selection.end > start) {
-						selection.end -= matchLength;
+						selection.end = Math.max(start, selection.end - matchLength);
 					}
 				}
 			}
