@@ -153,6 +153,7 @@ define({
 	"tabSizeInvalid": "Invalid tab size.",
 	"localSettingsTooltip" : "Toggle whether this setting is shown in local editor settings drop down.",
 	"autoPairing": "Automatically pair brackets and quotations",
+	"smartIndentation": "Smart Indentation",
 	"Editor preferences updated": "Editor preferences updated",
 	"Editor defaults restored": "Editor defaults restored",
 	"Theme": "Theme",

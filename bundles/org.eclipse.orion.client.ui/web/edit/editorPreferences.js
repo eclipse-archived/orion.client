@@ -31,6 +31,8 @@ define([], function() {
 		saveDiffsVisible: true,
 		autoPairing: true,
 		autoPairingVisible: true,
+		smartIndentation: true,
+		smartIndentationVisible: true,
 		trimTrailingWhiteSpace: false,
 		trimTrailingWhiteSpaceVisible: true,
 		tabSize: 4,

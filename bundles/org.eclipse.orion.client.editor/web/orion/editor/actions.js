@@ -616,7 +616,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var c;
 				while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
 				var prefix = lineText.substring(0, index);
-				if (lineText.charCodeAt(end - 1) === 123) {
+				if (this.smartIndentation && lineText.charCodeAt(end - 1) === 123) {
 					// If the character before the caret is an opening brace, smart indent the next line.
 					var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
 					var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -969,6 +969,9 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		},
 		setAutoPairing: function(enabled) {
 			this.autoPairing = enabled;
+		},
+		setSmartIndentation: function(enabled) {
+			this.smartIndentation = enabled;
 		}
 	};
 	exports.SourceCodeActions = SourceCodeActions;

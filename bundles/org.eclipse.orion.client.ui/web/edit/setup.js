@@ -183,6 +183,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			textView.setOptions(options);
 		}
 		sourceCodeActions.setAutoPairing(prefs.autoPairing);
+		sourceCodeActions.setSmartIndentation(prefs.smartIndentation);
 		editor.setAnnotationRulerVisible(prefs.annotationRuler);
 		editor.setLineNumberRulerVisible(prefs.lineNumberRuler);
 		editor.setFoldingRulerVisible(prefs.foldingRuler);
@@ -223,6 +224,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
 			sourceCodeActions = keyBindings.sourceCodeActions;
 			sourceCodeActions.setAutoPairing(settings.autoPairing);
+			sourceCodeActions.setSmartIndentation(prefs.smartIndentation);
 			
 			// Register commands that depend on external services, the registry, etc.  Do this after
 			// the generic keybindings so that we can override some of them.
