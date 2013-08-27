@@ -45,6 +45,29 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 			deferred.resolve(null);
 			return deferred;
 		},
+		readAllProjects : function(workspaceMetadata){
+			var deferred = new Deferred();
+
+			if(!workspaceMetadata.Children){
+				deferred.resolve([]);
+				return deferred;
+			}	
+			var projects = [];
+			var projectDeferrds = [];
+			for(var i=0; i<workspaceMetadata.Children.length; i++){
+				var projectDeferred = this.readProject(workspaceMetadata.Children[i]);
+				projectDeferrds.push(projectDeferred);
+				projectDeferred.then(function(projectMetadata){
+					if(projectMetadata){
+						projects.push(projectMetadata);
+					}
+				});
+			}
+			Deferred.all(projectDeferrds).then(function(){
+				deferred.resolve(projects);
+			});
+			return deferred;
+		},
 		readProject : function(fileMetadata){
 			var that = this;
 			return this.fileClient.loadWorkspace().then(function(workspace){
