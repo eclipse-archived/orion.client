@@ -106,6 +106,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			typing: {
 				autoPairing: {
 					create: createBooleanProperty
+				},
+				smartIndentation: {
+					create: createBooleanProperty
 				}
 			},
 			tabs: {
