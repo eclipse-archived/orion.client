@@ -459,8 +459,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				toolbarNode: this.toolbarNode
 			});
 			// If there is a target in the navigator, open this target
-			if(this.navigatorInput){
-				this.fileClient.read(this.navigatorInput, true).then(function(fileMetadata){
+			if(this.navigatorInput || !this.editorInputManager.getFileMetadata()){
+				this.fileClient.loadWorkspace(this.navigatorInput, true).then(function(fileMetadata){
 					_self.explorer.display(fileMetadata);
 				}, function(error){
 					_self.serviceRegistry.getService("orion.page.progress").setProgressResult(error);
