@@ -1601,6 +1601,20 @@ parseStatement: true, parseSourceElement: true */
         return throwUnexpected(lex());
     }
 
+    /**
+     * add the error if not already reported.
+     */
+    function pushError(error) {
+        var len = extra.errors.length;
+        for (var e=0; e < len; e++) {
+            var existingError = extra.errors[e];
+            if (existingError.index === error.index && existingError.message === error.message) {
+                return; // do not add duplicate
+            }
+        }
+        extra.errors.push(error);
+    }
+
     // 11.2 Left-Hand-Side Expressions
 
     function parseArguments() {
@@ -1614,11 +1628,30 @@ parseStatement: true, parseSourceElement: true */
                 if (match(')')) {
                     break;
                 }
-                expect(',');
+                try {
+                    expect(',');
+                } catch (e) {
+                    if (extra.errors) {
+                        // pretend the argument list is done
+                        pushError(e);
+                        break;
+                    } else {
+                        throw e;
+                    }
+                }
             }
         }
 
-        expect(')');
+		try {
+            expect(')');
+        } catch (e) {
+            if (extra.errors) {   
+                // soldier on...
+                pushError(e);
+            } else {
+                throw e;
+            }
+        }
 
         return args;
     }
@@ -2287,27 +2320,13 @@ parseStatement: true, parseSourceElement: true */
         };
     }
     
-    /**
-     * add the error if not already reported.
-     */
-    function pushError(error) {
-        var len = extra.errors.length;
-        for (var e=0; e < len; e++) {
-            var existingError = extra.errors[e];
-            if (existingError.index === error.index && existingError.message === error.message) {
-                return; // do not add duplicate
-            }
-        }
-        extra.errors.push(error);
-    }
-
 	/**
 	 * for statements like if, while, for, etc.
 	 * Check for the ')' on the condition.  If
 	 * it is not present, catch the error, and backtrack
 	 * if we see a '{' instead (to continue parsing the block)
 	 */
-	function expectCloseParenWrapThrow() {
+	function expectConditionCloseParenWrapThrow() {
         // needs generalizing to a 'expect A but don't consume if you hit B or C'
         try {
             expect(')');
@@ -2341,7 +2360,7 @@ parseStatement: true, parseSourceElement: true */
 
 		test = parseExpression();
 
-		expectCloseParenWrapThrow();
+		expectConditionCloseParenWrapThrow();
 		
         consequent = parseStatement();
         // required because of the check in wrapTracking that returns nothing if node is undefined
@@ -2406,7 +2425,7 @@ parseStatement: true, parseSourceElement: true */
 
         test = parseExpression();
 
-		expectCloseParenWrapThrow();
+		expectConditionCloseParenWrapThrow();
 		
         oldInIteration = state.inIteration;
         state.inIteration = true;
@@ -2490,7 +2509,7 @@ parseStatement: true, parseSourceElement: true */
         }
 
 //        expect(')');
-		expectCloseParenWrapThrow();
+		expectConditionCloseParenWrapThrow();
 		
         oldInIteration = state.inIteration;
         state.inIteration = true;
