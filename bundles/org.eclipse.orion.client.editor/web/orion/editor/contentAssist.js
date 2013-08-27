@@ -328,7 +328,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		var self = this;
 		this.contentAssist.addEventListener("ProposalsComputed", function(event) { //$NON-NLS-0$
 			self.proposals = event.data.proposals;
-			self.selectedIndex = self.proposals.length ? 0 : -1;
+			if (self.proposals.length === 0) {
+				self.selectedIndex = -1;
+				self.cancel();
+			} else {
+				self.selectedIndex = 0;	
+			}
 		});
 		textView.setAction("contentAssistApply", function() { //$NON-NLS-0$
 			return this.enter();
