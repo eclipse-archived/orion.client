@@ -447,20 +447,26 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 		setHighlightCaretLine: function(highlight) {
 			this.highlightCaretLine = highlight;
 		},
-		setWhitespacesVisible: function(visible) {
+		setWhitespacesVisible: function(visible, redraw) {
 			if (this.whitespacesVisible === visible) { return; }
 			this.whitespacesVisible = visible;
 			this._scanner.whitespacesVisible = visible;
 			this._commentScanner.whitespacesVisible = visible;
-			this.view.redraw();
+			if (redraw) {
+				this.view.redraw();
+			}
 		},
 		setTabsVisible: function(visible) {
+			if (this.tabsVisible === visible) { return; }
 			this.tabsVisible = visible;
-			this.setWhitespacesVisible(this.tabsVisible || this.spacesVisible);
+			this.setWhitespacesVisible(this.tabsVisible || this.spacesVisible, false);
+			this.view.redraw();
 		},
 		setSpacesVisible: function(visible) {
+			if (this.spacesVisible === visible) { return; }
 			this.spacesVisible = visible;
-			this.setWhitespacesVisible(this.tabsVisible || this.spacesVisible);
+			this.setWhitespacesVisible(this.tabsVisible || this.spacesVisible, false);
+			this.view.redraw();
 		},
 		setDetectHyperlinks: function(enabled) {
 			this.detectHyperlinks = enabled;
