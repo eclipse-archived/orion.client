@@ -191,6 +191,7 @@ define([
 			if (this._saving) { return; }
 			var editor = this.getEditor();
 			if (!editor.isDirty()) { return; }
+			var failedSaving = this._errorSaving;
 			this._saving = true;
 			this._errorSaving = false;
 			var input = this.getInput();
@@ -199,7 +200,7 @@ define([
 			if (this._trimTrailingWhiteSpaceEnabled) {
 				this._trimTrailingWhiteSpaces();
 			}
-			
+
 			editor.getUndoStack().markClean();
 			var contents = editor.getText();
 			var data = contents;
@@ -228,6 +229,9 @@ define([
 				self.getFileMetadata().ETag = result.ETag;
 				editor.setInput(input, null, contents, true);
 				editor.reportStatus("");
+				if (failedSaving) {
+					statusService.setProgressResult({Message:messages.Saved, Severity:"Normal"}); //$NON-NLS-0$
+				}
 				if (self.afterSave) {
 					self.afterSave();
 				}
@@ -248,7 +252,7 @@ define([
 				if (error.status === 412) {
 					var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
 					if (forceSave) {
-						// repeat save operation, but without ETag 
+						// repeat save operation, but without ETag
 						var def = self.fileClient.write(input, contents);
 						if (progress) {
 							def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
@@ -404,7 +408,7 @@ define([
 							return;
 						}
 					}
-					this._unsavedChanges.push({start:start, end:end, text:e.text});	
+					this._unsavedChanges.push({start:start, end:end, text:e.text});
 				}.bind(this));
 			}
 			// TODO could potentially dispatch separate events for metadata and contents changing
@@ -433,7 +437,7 @@ define([
 			this._trimTrailingWhiteSpaceEnabled = enabled;
 		},
 		_trimTrailingWhiteSpaces: function() {
-			var editor = this.editor;	
+			var editor = this.editor;
 			var model = editor.getModel();
 			var selection = editor.getSelection();
 			editor.getTextView().setRedraw(false);
