@@ -2,20 +2,19 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<title>Blame Plugin</title>
+	<title>Git Blame Plugin</title>
 	<script src="../requirejs/require.js"></script>
 	<script>
 		/*global require*/
 		require({
-		  baseUrl: '..',
-		  paths: {
- 			text: 'requirejs/text',
-			i18n: 'requirejs/i18n',
-			domReady: 'requirejs/domReady'
-		  }
+			baseUrl: '..',
+			paths: {
+				text: 'requirejs/text',
+				i18n: 'requirejs/i18n',
+				domReady: 'requirejs/domReady'
+			}
 		});
-
-		require(['blamePlugin.js']);
+		require(['gitBlamePlugin.js']);
 	</script>
 </head>
 <body>
