@@ -76,7 +76,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility
 		var searchOutliner = new mSearchOutliner.SearchOutliner({parent: "searchProgress", serviceRegistry: serviceRegistry, commandService: commandRegistry}); //$NON-NLS-0$
 		var searchBuilder = new mSearchOutliner.SearchBuilder({parent: "searchBuilder", searcher: searcher, serviceRegistry: serviceRegistry, commandService: commandRegistry}); //$NON-NLS-0$
 		
-		mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandRegistry, preferences, searcher, searcher, null, null); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandRegistry, preferences, searcher, searcher, null, false); //$NON-NLS-0$
 		
 		var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandRegistry, fileClient, searcher, false/*crawling*/); //$NON-NLS-0$
 
