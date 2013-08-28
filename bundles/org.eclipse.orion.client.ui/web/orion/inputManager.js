@@ -212,7 +212,10 @@ define([
 					length += changes[i].text.length;
 				}
 				if (contents.length > length) {
-					data = {diff: changes};
+					data = {
+						diff: changes,
+						contents: contents //TODO: temporary code for file diffs debug
+					};
 				}
 			}
 

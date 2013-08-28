@@ -27,7 +27,7 @@ define([], function() {
 		fontSizeLocalVisible: true,
 		autoLoad: true,
 		autoLoadVisible: true,
-		saveDiffs: false,
+		saveDiffs: true,
 		saveDiffsVisible: true,
 		autoPairing: true,
 		autoPairingVisible: true,
