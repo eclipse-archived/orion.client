@@ -122,6 +122,14 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					create: createBooleanProperty
 				}
 			},
+			whitespaces: {
+				showTabs: {
+					create: createBooleanProperty
+				},
+				showSpaces: {
+					create: createBooleanProperty
+				}
+			},
 			smoothScrolling: {
 				scrollAnimation: {
 					create: createBooleanProperty
