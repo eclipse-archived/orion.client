@@ -391,7 +391,7 @@ objects.mixin(SiteEditor.prototype, {
 		if (!this.mappings) {
 			this.titleWrapper = new mSection.Section(document.getElementById(this.mappingsPlaceholder.id), {
 				id: "workingDirectorySection", //$NON-NLS-0$
-				title: "Mappings", //$NON-NLS-0$
+				title: messages["Mappings"],
 				content: '<div id="mappingsNode"/>', //$NON-NLS-0$
 				canHide: true
 			});
