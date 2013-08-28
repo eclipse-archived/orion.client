@@ -526,8 +526,17 @@ define([
 	 *
 	 * @name orion.globalCommands#generateBanner
 	 * @function
+	 * 
+	 * @param parentId
+	 * @param serviceRegistry
+	 * @param commandRegistry
+	 * @param prefsService
+	 * @param searcher
+	 * @param handler
+	 * @param editor
+	 * @param defaultState {boolean} True if the default splitter state should be closed and false otherwise.
 	 */
-	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
+	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, defaultState) {
 		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
 
 		var parent = lib.node(parentId);
@@ -618,7 +627,7 @@ define([
 					main: main
 				};
 				// For any page that defines the splitter style as "left:0%", we treate it as a collasped left pane as default.
-				var closeByDefault = (splitNode.style && splitNode.style.left === "0%"); //$NON-NLS-0$
+				var closeByDefault = defaultState || (splitNode.style && splitNode.style.left === "0%"); //$NON-NLS-0$
 				mainSplitter.splitter = new mSplitter.Splitter({
 					node: splitNode,
 					sidePanel: side,

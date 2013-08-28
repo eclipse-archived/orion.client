@@ -441,7 +441,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		sidebarNavInputManager.processHash(window.location.hash);
 		
 		//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-1$ //$NON-NLS-0$
-		mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, window.location.hash !== ""); //$NON-NLS-0$
 	
 		// Editor Settings
 		updateSettings(settings);

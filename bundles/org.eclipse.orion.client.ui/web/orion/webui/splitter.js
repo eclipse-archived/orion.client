@@ -97,11 +97,12 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		    positioning across browsers and devices.
 		  */
 		 _initializeFromStoredSettings: function() {
-			var closedState = localStorage.getItem(this._prefix+"/toggleState");
-			if(!closedState){
-				this._closed = (this._closeByDefault ? true: false);
+			if (!this._closeByDefault) {
+				this._closed = this._closedByDefault;
+				localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
 			} else {
-				this._closed = closedState === "closed";  //$NON-NLS-1$ //$NON-NLS-0$
+				var closedState = localStorage.getItem(this._prefix+"/toggleState");
+				this._closed = closedState === "closed" || false;
 			}
 			var pos;
 			if (this._vertical) {
@@ -119,7 +120,6 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					this._splitLeft = 150;
 				}
 			}
-			
 		 },
 		 
 		_adjustToSplitPosition: function(updateStorage) {
