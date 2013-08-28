@@ -14,7 +14,7 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 
 	var headers = {
 		name: "Git Blame Plugin",
-		version: "1.0",
+		version: "1.0", //$NON-NLS-0$
 		description: "Git Blame Plugin"
 	};
 	var provider = new PluginProvider(headers);
@@ -23,10 +23,10 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 		getCommitInfo: function(location) {
 			var service = this;
 			var clientDeferred = new Deferred();
-			xhr("GET", location, {
+			xhr("GET", location, { //$NON-NLS-0$
 				headers: {
-					"Orion-Version": "1",
-					"Content-Type": "charset=UTF-8"
+					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
+					"Content-Type": "charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout: 15000,
 				handleAs: "json" //$NON-NLS-0$
@@ -43,10 +43,10 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 
 			var clientDeferred = new Deferred();
 
-			xhr("GET", "/gitapi/blame/master" + location, {
+			xhr("GET", "/gitapi/blame/master" + location, { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
-					"Orion-Version": "1",
-					"Content-Type": "charset=UTF-8"
+					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
+					"Content-Type": "charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout: 15000,
 				handleAs: "json" //$NON-NLS-0$
@@ -112,7 +112,7 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 			}
 
 			for (i = 0; i < commits.length; i++) {
-				commits[i] = blameRequest.getCommitInfo(commits[i] + "?pageSize=1");
+				commits[i] = blameRequest.getCommitInfo(commits[i] + "?pageSize=1"); //$NON-NLS-0$
 			}
 
 			Deferred.all(commits, function(error) {
@@ -145,7 +145,7 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 							range.Name = c.Name;
 							range.Time = new Date(c.Time).toLocaleString();
 							range.Shade = (1 / (blame.length + 1)) * (blame.length - j + 1);
-							range.CommitLink = "{OrionHome}/git/git-commit.html#" + range.CommitLocation + "?page=1&pageSize=1";
+							range.CommitLink = "{OrionHome}/git/git-commit.html#" + range.CommitLocation + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
 							break;
 						}
 					}
@@ -163,9 +163,9 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 	};
 	var properties = {
 		name: "Git Blame",
-		key: ["b", true, false, true] // Ctrl+Alt+b
+		key: ["b", true, false, true] // Ctrl+Alt+b  //$NON-NLS-0$
 	};
 
-	provider.registerService("orion.edit.blamer", serviceImpl, properties);
+	provider.registerService("orion.edit.blamer", serviceImpl, properties); //$NON-NLS-0$
 	provider.connect();
 });
