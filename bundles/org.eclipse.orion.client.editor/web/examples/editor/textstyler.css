@@ -43,14 +43,14 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 	/* images/white_space.png */
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAAXNSR0IArs4c6QAAABVJREFUCNdj3L17938GBgYGJgYoAAAxOAM004kASgAAAABJRU5ErkJggg==");
 	background-repeat: no-repeat;
- 	background-position: center center;
+	background-position: center center;
 }
 
 .token_tab {
 	/* images/white_tab.png */
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAAXNSR0IArs4c6QAAABtJREFUCNdj2L17938GKEBmYwgQJ0m8IAMDAwDemh/hgxuOkwAAAABJRU5ErkJggg==");
 	background-repeat: no-repeat;
- 	background-position: left center;
+	background-position: left center;
 }
 
 .line_caret {
