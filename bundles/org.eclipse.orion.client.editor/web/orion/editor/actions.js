@@ -702,13 +702,14 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var currentOffset = editor.getCaretOffset();
 			var prevChar = (currentOffset === 0) ? "" : model.getText(selection.start - 1, selection.start).trim(); //$NON-NLS-0$
 			var nextChar = (currentOffset === model.getCharCount()) ? "" : model.getText(selection.start, selection.start + 1).trim(); //$NON-NLS-0$
-			var isQuotation = new RegExp("[\"']"); //$NON-NLS-0$
+			var isQuotation = new RegExp("^\"$|^'$"); //$NON-NLS-0$
 			var isAlpha = new RegExp("\\w"); //$NON-NLS-0$
 			var isClosingBracket = new RegExp("^$|[)}\\]>]"); //$NON-NLS-0$ // matches any empty string and closing bracket
 			
 			// Wrap the selected text with the specified opening and closing quotation marks and keep selection on text
 			if (selection.start !== selection.end) {
 				var text = model.getText(selection.start, selection.end);
+				if (isQuotation.test(text)) { return false; }
 				editor.setText(quotation + text + quotation, selection.start, selection.end);
 				editor.setSelection(selection.start + 1, selection.end + 1);
 			} else if (nextChar === quotation) {
