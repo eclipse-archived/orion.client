@@ -51,6 +51,10 @@ define([], function() {
 		foldingRulerVisible: true,
 		overviewRuler: true,
 		overviewRulerVisible: true,
+		showTabs: false,
+		showTabsVisible: true,
+		showSpaces: false,
+		showSpacesVisible: true,
 		keyBindings: "Default",
 		keyBindingsVisible: true,
 		keyBindingsLocalVisible: true

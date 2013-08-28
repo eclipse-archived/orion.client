@@ -165,13 +165,24 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		navDropDown.updateContent = settings.show.bind(settings);
 		navDropDown.__tooltip = tooltip;
 	};
-
+	function updateStyler(prefs) {
+		var styler = inputManager.syntaxHighlighter.getStyler();
+		if (styler) {
+			if (styler.setTabsVisible) {
+				styler.setTabsVisible(prefs.showTabs);
+			}
+			if (styler.setSpacesVisible) {
+				styler.setSpacesVisible(prefs.showSpaces);
+			}
+		}
+	}
 	var updateSettings = function(prefs) {
 		settings = prefs;
 		inputManager.setAutoLoadEnabled(prefs.autoLoad);
 		inputManager.setAutoSaveTimeout(prefs.autoSave ? prefs.autoSaveTimeout : -1);
 		inputManager.setSaveDiffsEnabled(prefs.saveDiffs);
 		inputManager.setTrimTrailingWhiteSpace(prefs.trimTrailingWhiteSpace);
+		updateStyler(prefs);
 		var textView = editor.getTextView();
 		if (textView) {
 			updateKeyMode(textView);
@@ -326,6 +337,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			});
 	
 			commandRegistry.processURL(window.location.href);
+		});
+		inputManager.addEventListener("ContentTypeChanged", function(event) { //$NON-NLS-0$
+			updateStyler(settings);
 		});
 	
 		// Sidebar
