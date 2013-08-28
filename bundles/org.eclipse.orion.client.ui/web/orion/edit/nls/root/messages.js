@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  ******************************************************************************/
 
 /*global define */
@@ -22,6 +22,7 @@ define({
 	"Toggle Outliner": "Toggle Outliner", //$NON-NLS-1$ //$NON-NLS-0$
 	"There are unsaved changes.": "There are unsaved changes.", //$NON-NLS-1$ //$NON-NLS-0$
 	"Save": "Save", //$NON-NLS-1$ //$NON-NLS-0$
+	"Saved": "Saved", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "Blame", //$NON-NLS-1$ //$NON-NLS-0$
 	"BlameTooltip":"Show blame annotations", //$NON-NLS-1$ //$NON-NLS-0$
 	"Resource is out of sync with the server. Do you want to save it anyway?": "Resource is out of sync with the server. Do you want to save it anyway?", //$NON-NLS-1$ //$NON-NLS-0$
