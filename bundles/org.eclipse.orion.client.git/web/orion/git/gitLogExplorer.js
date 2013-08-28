@@ -426,7 +426,7 @@ exports.GitLogExplorer = (function() {
 					detailsView.appendChild(d);
 
 					var description = document.createElement("span");
-					description.textContent = messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName + " on "
+					description.textContent = messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName + messages[" on "]
 							+ new Date(commit.Time).toLocaleString();
 					detailsView.appendChild(description);
 
