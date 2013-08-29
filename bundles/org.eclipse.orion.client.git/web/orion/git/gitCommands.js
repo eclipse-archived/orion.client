@@ -1722,8 +1722,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
-				if(confirm(messages["The content of your active branch will be replaced with "] + item.Name + ". " + //$NON-NLS-1$
-						messages["All unstaged and staged changes will be discarded and cannot be recovered. Are you sure?"])){
+				if(confirm(i18nUtil.formatMessage(messages["GitResetIndexConfirm"], item.Name))) { //$NON-NLS-0$
 					var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
