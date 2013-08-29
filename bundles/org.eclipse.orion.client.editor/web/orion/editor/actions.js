@@ -33,7 +33,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		this._lastEditLocation = null;
 		this.init();
 	}
-	
+
 	TextActions.prototype = {
 		init: function() {
 			var textView = this.editor.getTextView();
@@ -551,7 +551,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			textView.setAction("removeBlockComment", function() { //$NON-NLS-0$
 				return this.removeBlockComment();
 			}.bind(this), {name: messages.removeBlockComment});
-			
+
 			// Autocomplete square brackets []
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("[", false, false, false, false, "keypress"), "autoPairSquareBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("autoPairSquareBracket", function() { //$NON-NLS-0$
@@ -562,7 +562,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			textView.setAction("skipClosingSquareBracket", function() { //$NON-NLS-0$
 				return this.skipClosingBracket(']'); //$NON-NLS-0$
 			}.bind(this));
-			
+
 			// Autocomplete parentheses ()
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("(", false, false, false, false, "keypress"), "autoPairParentheses"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("autoPairParentheses", function() { //$NON-NLS-0$
@@ -573,7 +573,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			textView.setAction("skipClosingParenthesis", function() { //$NON-NLS-0$
 				return this.skipClosingBracket(")"); //$NON-NLS-0$
 			}.bind(this));
-			
+
 			// Autocomplete braces {}
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("{", false, false, false, false, "keypress"), "autoPairBraces"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("autoPairBraces", function() { //$NON-NLS-0$
@@ -590,7 +590,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			textView.setAction("autoPairSingleQuotation", function() { //$NON-NLS-0$
 				return this.autoPairQuotations("'"); //$NON-NLS-1$ //$NON-NLS-0$
 			}.bind(this));
-			
+
 			// Autocomplete double quotations
 			textView.setKeyBinding(new mKeyBinding.KeyBinding('"', false, false, false, false, "keypress"), "autoPairDblQuotation"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("autoPairDblQuotation", function() { //$NON-NLS-0$
@@ -616,17 +616,59 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var c;
 				while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
 				var prefix = lineText.substring(0, index);
+				var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
+				var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
+				var lineDelimiter = model.getLineDelimiter();
+				var matchStartDoc = /^\/\*\*/;
+				var matchDocComment = /^\*/;
+				var matchEndDoc = /^\*\//;
+				var lineTextTrimmed = lineText.trimLeft();
 				if (this.smartIndentation && lineText.charCodeAt(end - 1) === 123) {
 					// If the character before the caret is an opening brace, smart indent the next line.
-					var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
-					var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
-					var lineDelimiter = model.getLineDelimiter();
 					var text = lineText.charCodeAt(end) === 125 ?
 							   lineDelimiter + prefix + tab + lineDelimiter + prefix :
 							   lineDelimiter + prefix + tab;
 					editor.setText(text, selection.start, selection.end);
 					editor.setCaretOffset(selection.start + lineDelimiter.length + prefix.length + tab.length);
 					return true;
+				} else if ((!matchEndDoc.test(lineTextTrimmed)) && (matchStartDoc.test(lineTextTrimmed) || matchDocComment.test(lineTextTrimmed))) {
+					/**
+					 * Documentation block comment
+					 */
+
+					var text;
+
+					// Matches the start of a block comment (/**)
+					var match = matchStartDoc.exec(lineTextTrimmed);
+					if (match) {
+						// Continue the block comment
+						text = lineText.substring(selection.start) + lineDelimiter + prefix + " * "; //$NON-NLS-0$
+						editor.setText(text, selection.start, selection.end);
+						editor.setCaretOffset(selection.start + text.length);
+						return true;
+					}
+
+					/**
+					 * Matches a star (*) as the start of the trimmed line, and traverse up the lines to confirm if
+					 * it is a multi-line block comment by matching the start of a block comment.
+					 */
+					match = matchDocComment.exec(lineTextTrimmed);
+					if (match) {
+						for (var i = lineIndex - 1; i > 0; i--) {
+							var newLine = model.getLine(i, true).trimLeft();
+							if (matchStartDoc.test(newLine)) {
+								text = lineText.substring(selection.start) + lineDelimiter + prefix + "* "; //$NON-NLS-0$
+								editor.setText(text, selection.start, selection.end);
+								editor.setCaretOffset(selection.start + text.length);
+								return true;
+							} else if (!matchDocComment.test(newLine)) {
+								return false;
+							}
+						}
+
+					}
+
+					return false;
 				} else if (index > 0) {
 					//TODO still wrong when typing inside folding
 					index = end;
