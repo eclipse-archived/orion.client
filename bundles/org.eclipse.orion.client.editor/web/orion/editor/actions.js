@@ -625,7 +625,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 							   lineDelimiter + prefix + tab + lineDelimiter + prefix :
 							   lineDelimiter + prefix + tab;
 					editor.setText(text, selection.start, selection.end);
-					editor.setCaretOffset(selection.start + prefix.length + tab.length + 2);
+					editor.setCaretOffset(selection.start + lineDelimiter.length + prefix.length + tab.length);
 					return true;
 				} else if (index > 0) {
 					//TODO still wrong when typing inside folding
