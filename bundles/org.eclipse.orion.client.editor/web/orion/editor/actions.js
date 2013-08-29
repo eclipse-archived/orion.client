@@ -669,6 +669,12 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					}
 
 					return false;
+				} else if (matchEndDoc.test(lineTextTrimmed)) {
+					// Matches the end of a block comment. Fix the indentation for the following line.
+					var text = lineText.substring(selection.start) + lineDelimiter + prefix.substring(0, prefix.length -1);
+					editor.setText(text, selection.start, selection.end);
+					editor.setCaretOffset(selection.start + text.length);
+					return true;
 				} else if (index > 0) {
 					//TODO still wrong when typing inside folding
 					index = end;
