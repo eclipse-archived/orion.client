@@ -621,7 +621,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var lineDelimiter = model.getLineDelimiter();
 				var matchStartDoc = /^\/\*/;
 				var matchDocComment = /^\*/;
-				var matchEndDoc = /^\*\//;
+				var matchEndDoc = /\*\//;
 				var lineTextTrimmed = lineText.trimLeft();
 				if (this.smartIndentation && lineText.charCodeAt(end - 1) === 123) {
 					// If the character before the caret is an opening brace, smart indent the next line.
@@ -650,7 +650,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 
 					/**
 					 * Matches a star (*) as the start of the trimmed line, and traverse up the lines to confirm if
-					 * it is a multi-line block comment by matching the start of a block comment.
+					 * it is a multi-line block comment by matching the start of a block comment. If so,
+					 * continue multi-line block comment in the next line.
 					 */
 					match = matchDocComment.exec(lineTextTrimmed);
 					if (match) {
