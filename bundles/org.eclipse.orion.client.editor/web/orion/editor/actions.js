@@ -619,7 +619,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
 				var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
 				var lineDelimiter = model.getLineDelimiter();
-				var matchStartDoc = /^\/\*\*/;
+				var matchStartDoc = /^\/\*/;
 				var matchDocComment = /^\*/;
 				var matchEndDoc = /^\*\//;
 				var lineTextTrimmed = lineText.trimLeft();
@@ -641,7 +641,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					// Matches the start of a block comment (/**)
 					var match = matchStartDoc.exec(lineTextTrimmed);
 					if (match) {
-						// Continue the block comment
+						// Continue multi-line block comment in the next line
 						text = lineText.substring(selection.start) + lineDelimiter + prefix + " * "; //$NON-NLS-0$
 						editor.setText(text, selection.start, selection.end);
 						editor.setCaretOffset(selection.start + text.length);
