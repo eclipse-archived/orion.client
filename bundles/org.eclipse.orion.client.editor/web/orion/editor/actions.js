@@ -622,7 +622,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var matchStartDoc = /^\/\*/;
 				var matchDocComment = /^\*/;
 				var matchEndDoc = /\*\//;
-				var lineTextTrimmed = lineText.trimLeft();
+				var lineTextBeforeCaret = lineText.substring(0, end).trimLeft();
 				if (this.smartIndentation && lineText.charCodeAt(end - 1) === 123) {
 					// If the character before the caret is an opening brace, smart indent the next line.
 					var text = lineText.charCodeAt(end) === 125 ?
@@ -631,7 +631,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					editor.setText(text, selection.start, selection.end);
 					editor.setCaretOffset(selection.start + lineDelimiter.length + prefix.length + tab.length);
 					return true;
-				} else if ((!matchEndDoc.test(lineTextTrimmed)) && (matchStartDoc.test(lineTextTrimmed) || matchDocComment.test(lineTextTrimmed))) {
+				} else if ((!matchEndDoc.test(lineText)) && (matchStartDoc.test(lineTextBeforeCaret) || matchDocComment.test(lineTextBeforeCaret))) {
 					/**
 					 * Documentation block comment
 					 */
@@ -639,7 +639,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					var text;
 
 					// Matches the start of a block comment (/**)
-					var match = matchStartDoc.exec(lineTextTrimmed);
+					var match = matchStartDoc.exec(lineTextBeforeCaret);
 					if (match) {
 						// Continue multi-line block comment in the next line
 						text = lineText.substring(selection.start) + lineDelimiter + prefix + " * "; //$NON-NLS-0$
@@ -653,7 +653,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					 * it is a multi-line block comment by matching the start of a block comment. If so,
 					 * continue multi-line block comment in the next line.
 					 */
-					match = matchDocComment.exec(lineTextTrimmed);
+					match = matchDocComment.exec(lineTextBeforeCaret);
 					if (match) {
 						for (var i = lineIndex - 1; i > 0; i--) {
 							var newLine = model.getLine(i, true).trimLeft();
@@ -670,7 +670,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					}
 
 					return false;
-				} else if (matchEndDoc.test(lineTextTrimmed)) {
+				} else if (matchEndDoc.test(lineText)) {
 					// Matches the end of a block comment. Fix the indentation for the following line.
 					var text = lineText.substring(selection.start) + lineDelimiter + prefix.substring(0, prefix.length -1);
 					editor.setText(text, selection.start, selection.end);
