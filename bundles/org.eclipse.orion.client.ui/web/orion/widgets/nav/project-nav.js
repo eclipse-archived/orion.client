@@ -147,25 +147,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		destroy: function() {
 		},
 		/**
-		 * Loads the parent directory of the given file as the root, then reveals the file.
-		 * @param {Object} fileMetadata The file whose parent directory we want to load.
-		 */
-		loadParentOf: function(fileMetadata) {
-			if (fileMetadata) {
-				var parent = fileMetadata.Parents && fileMetadata.Parents[0];
-				if (parent) {
-					if (this.treeRoot && this.treeRoot.ChildrenLocation === parent.ChildrenLocation) {
-						// Do we still need to handle this case?
-						this.reveal(fileMetadata);
-						return;
-					}
-				} else {
-					parent = this.fileClient.fileServiceRootURL(fileMetadata.Location); //$NON-NLS-0$
-				}
-				return this.loadRoot(parent).then(this.reveal.bind(this, fileMetadata));
-			}
-		},
-		/**
 		 * Loads the given children location as the root.
 		 * @param {String|Object} The childrenLocation or an object with a ChildrenLocation field.
 		 */
@@ -319,10 +300,18 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			this.createActionSections();
 			var selectionTools = this.selectionActionsScope;
 			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
-			if(!selections || selections.length===0){
+			if((!selections || selections.length===0) && treeRoot.children){
 				this.selection.setSelections(treeRoot.children[0]);
 			}
 			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot, true);			
+		},
+		
+		changedItem: function(item, forceExpand){
+			if(item.Location || forceExpand){
+				return FileExplorer.prototype.changedItem.call(this, item, forceExpand);
+			}
+			this.model.processParent(item, item.children ? item.children : []);
+			this.renderer.updateRow(item, lib.node(this.model.getId(item)));
 		}
 	});
 
@@ -360,6 +349,29 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			});
 		},
 		
+		updateRow: function(item, tableRow){
+			lib.empty(tableRow);
+			var i = 0;
+			var cell = this.getCellElement(i, item, tableRow);
+			while(cell){
+				tableRow.appendChild(cell);
+				if (i===0) {
+					if(this.getPrimColumnStyle){
+						cell.classList.add(this.getPrimColumnStyle()); //$NON-NLS-0$
+					} else {
+						cell.classList.add("navColumn"); //$NON-NLS-0$
+					}
+				} else {
+					if(this.getSecondaryColumnStyle){
+						cell.classList.add(this.getSecondaryColumnStyle()); //$NON-NLS-0$
+					} else {
+						cell.classList.add("secondaryColumn"); //$NON-NLS-0$
+					}
+				}
+				cell = this.getCellElement(++i, item, tableRow);
+			}
+		},
+		
 		getCellElement: function(col_no, item, tableRow){
 			if((item.Dependency || item.type==="ProjectRoot") && col_no===0){
 				var col = document.createElement('td'); //$NON-NLS-0$
@@ -372,7 +384,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				span.className = "mainNavColumn"; //$NON-NLS-0$
 					// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var image = this.getExpandImage(tableRow, span);
-				var itemNode = document.createTextNode(item.Dependency ? item.Dependency.Name : item.Name);
+				var nameText = item.Dependency ? item.Dependency.Name : item.Name;
+				if(item.disconnected){
+					nameText += " (disconnected)";
+				}
+				var itemNode = document.createTextNode(nameText);
 				
 				if(item.Dependency){
 					var actions = document.createElement("span");
@@ -477,8 +493,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[depenency_no], FileMetadata: depenencyMetadata, Location: depenencyMetadata.Location, ChildrenLocation: depenencyMetadata.ChildrenLocation}, true);
 								return;
 							}.bind(this), function(error){
-								//TODO refresh current item, not children
-//								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[depenency_no], disconnected: true});
+								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[depenency_no], disconnected: true});
 								console.error(error);
 							}.bind(this));
 						}.bind(this))(i);
