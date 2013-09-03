@@ -50,8 +50,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					var children = [];
 					content.type = "ProjectRoot";
 					children.push(content);
-					for(var i=0; i<parentItem.Dependencies.length; i++){
-						children.push({Dependency: parentItem.Dependencies[i]});
+					if(parentItem.Dependencies){
+						for(var i=0; i<parentItem.Dependencies.length; i++){
+							children.push({Dependency: parentItem.Dependencies[i]});
+						}
 					}
 					onComplete(self.processParent(parentItem, children));
 				});
@@ -500,7 +502,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					}
 				}
 				this.renderer.render(projectData);
-				this.fileExplorer.loadRoot(projectData, redisplay).then(function(){that.fileExplorer.reveal.bind(that.fileExplorer)(fileMetadata);});
+				this.fileExplorer.loadRoot(projectData, redisplay).then(function(){
+					that.fileExplorer.reveal.bind(that.fileExplorer)(fileMetadata);
+				});
 				this.updateCommands(projectData);
 			} else {
 				lib.empty(this.parentNode);
@@ -543,6 +547,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		registerCommands : function(){
 			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.serviceRegistry;
 			commandRegistry.addCommandGroup(this.addActionsScope, "orion.projectNavInitGroup", 1001, "Init Project", null, null, "core-sprite-initproject"); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			commandRegistry.registerCommandContribution(this.addActionsScope, "orion.project.initProject", 1, "orion.projectNavInitGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			
 			ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient);
 		},
 		updateCommands: function(treeRoot) {
@@ -601,14 +608,14 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				toolbarNode: this.toolbarNode
 			});
 			// If there is a target in the navigator, open this target
-			if(this.navigatorInput || !this.editorInputManager.getFileMetadata()){
+			if(this.editorInputManager.getFileMetadata()){
+				this.explorer.display(this.editorInputManager.getFileMetadata());
+			} else {
 				this.fileClient.loadWorkspace(this.navigatorInput, true).then(function(fileMetadata){
 					_self.explorer.display(fileMetadata);
 				}, function(error){
 					_self.serviceRegistry.getService("orion.page.progress").setProgressResult(error);
-				});
-			} else {
-				this.explorer.display(this.editorInputManager.getFileMetadata());
+				});				
 			}
 		},
 		destroy: function() {
