@@ -193,8 +193,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			};
 			textView.setOptions(options);
 		}
-		sourceCodeActions.setAutoPairing(prefs.autoPairing);
-		sourceCodeActions.setSmartIndentation(prefs.smartIndentation);
+		if(sourceCodeActions){
+			sourceCodeActions.setAutoPairing(prefs.autoPairing);
+			sourceCodeActions.setSmartIndentation(prefs.smartIndentation);
+		}
 		editor.setAnnotationRulerVisible(prefs.annotationRuler);
 		editor.setLineNumberRulerVisible(prefs.lineNumberRuler);
 		editor.setFoldingRulerVisible(prefs.foldingRuler);
