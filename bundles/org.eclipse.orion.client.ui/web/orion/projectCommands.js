@@ -346,7 +346,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				
 			},
 			visibleWhen: function(item) {
-				if(!(item.Dependency && item.Project)){
+				if(!(item.Dependency && item.Project && item.disconnected)){
 					return false;	
 				}
 				for(var i=0; i<dependencyTypes.length; i++){

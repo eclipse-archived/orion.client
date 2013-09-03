@@ -870,3 +870,12 @@ input {
 	vertical-align: middle;
 	margin: 0 2px 0 2px;
 }
+
+.projectNavColumn {
+	background: none repeat scroll 0 0 whiteSmoke;
+    color: #999;
+    font-weight: bold;
+    padding-bottom: 0.5em;
+    padding-top: 0.5em;
+    border-top: 4px solid #FBFBFB;
+}

@@ -34,6 +34,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 							projectJson.Name = projectJson.Name || folderMetadata.Name;
 							projectJson.ContentLocation = folderMetadata.ChildrenLocation;
 							projectJson.WorkspaceLocation = workspace.Location;
+							projectJson.ProjectJsonLocation = children[i].Location;
 							deferred.resolve(projectJson);
 						} catch (e){
 							deferred.reject(e);

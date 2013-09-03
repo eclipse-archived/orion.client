@@ -17,8 +17,70 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, i18nUtil, mKeyBinding, FileCommands, ProjectCommands,
 		ExtensionCommands, Selection, EventTarget, URITemplate, PageUtil, mSection, mProjectClient) {
 	var FileExplorer = mExplorer.FileExplorer;
+	var FileModel = mExplorer.FileModel;
 	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
+
+
+	function ProjectNavModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders){
+		FileModel.apply(this, arguments);
+		this.project = root;
+	}
+	
+	ProjectNavModel.prototype = Object.create(FileModel.prototype);
+	objects.mixin(ProjectNavModel.prototype, /** @lends orion.sidebar.FilesNavExplorer.prototype */ {
+		processParent: function(item, children){
+			var res = FileModel.prototype.processParent.call(this, item, children);
+			if(!item.Project){
+				item.Project = this.project;
+			}
+			for(var i=0; i<children.length; i++){
+				children[i].Project = this.project;
+			}
+			return children;
+		},
+		getChildren : function(parentItem, /* function(items) */ onComplete) {
+			if(parentItem.children){
+				onComplete(parentItem.children);
+				return;
+			}
+			var self = this;
+			if(parentItem.type==="Project"){
+				this.fileClient.loadWorkspace(parentItem.ContentLocation).then(function(content){
+					var children = [];
+					content.type = "ProjectRoot";
+					children.push(content);
+					for(var i=0; i<parentItem.Dependencies.length; i++){
+						children.push({Dependency: parentItem.Dependencies[i]});
+					}
+					onComplete(self.processParent(parentItem, children));
+				});
+			} else if(parentItem.Dependency){
+				if(parentItem.FileMetadata){
+					return FileModel.prototype.getChildren.call(this, parentItem.FileMetadata, /* function(items) */ onComplete);
+				} else {
+					onComplete([]);
+					return;
+				}
+			}
+			return FileModel.prototype.getChildren.call(this, parentItem, /* function(items) */ onComplete);
+		},
+		getId: function(item){
+			if(item.type==="Project"){
+				return "Project";
+			}
+			if(item.type==="ProjectRoot"){
+				return "ProjectRoot";
+			}
+			if(item.Dependency){
+				return FileModel.prototype.getId.call(this, item.Dependency);
+			}
+			return FileModel.prototype.getId.call(this, item);
+		},
+		hasChildren: function(){
+			return true;
+		}
+	});
 
 	/**
 	 * @class orion.sidebar.ProjectNavExplorer
@@ -29,6 +91,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		params.cachePrefix = null; // do not persist table state
 		FileExplorer.apply(this, arguments);
 		this.commandRegistry = params.commandRegistry;
+		this.projectClient = params.projectClient;
 		this.editorInputManager = params.editorInputManager;
 		this.progressService = params.progressService;
 		var sidebarNavInputManager = this.sidebarNavInputManager = params.sidebarNavInputManager;
@@ -110,8 +173,62 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			childrenLocation = (childrenLocation && childrenLocation.ChildrenLocation) || childrenLocation || ""; //$NON-NLS-0$
 			var _self = this;
 			return this.commandsRegistered.then(function() {
-				return _self.loadResourceList.call(_self, childrenLocation, force);
+				if (childrenLocation && typeof childrenLocation === "object"){
+					return _self.load.call(_self, childrenLocation);
+				} else {
+					return _self.loadResourceList.call(_self, childrenLocation, force);
+				}
 			});
+		},
+		load: function(root){
+			var self = this;
+				self.treeRoot = root;
+				self.model = new ProjectNavModel(self.registry, self.treeRoot, self.fileClient, self.parentId, self.excludeFiles, self.excludeFolders);
+				if (self.dragAndDrop) {
+					if (self._hookedDrag) {
+						// rehook on the parent to indicate the new root location
+						self._makeDropTarget(self.treeRoot, parent, true);
+					} else {
+						// uses two different techniques from Modernizr
+						// first ascertain that drag and drop in general is supported
+						var supportsDragAndDrop = parent && (('draggable' in parent) || ('ondragstart' in parent && 'ondrop' in parent));  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$ 
+						// then check that file transfer is actually supported, since this is what we will be doing.
+						// For example IE9 has drag and drop but not file transfer
+						supportsDragAndDrop = supportsDragAndDrop && !!(window.File && window.FileList && window.FileReader);
+						self._hookedDrag = true;
+						if (supportsDragAndDrop) {
+							self._makeDropTarget(self.treeRoot, parent, true);
+						} else {
+							self.dragAndDrop = null;
+							window.console.log("Local file drag and drop is not supported in this browser."); //$NON-NLS-0$
+						}
+					}
+				}
+				
+				if (self.model.hasChildren()) {
+					self.createTree(self.parentId, self.model, {
+						navHandlerFactory: self.navHandlerFactory,
+						setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), 
+						selectionPolicy: self.renderer.selectionPolicy, 
+						onCollapse: function(model) {
+							if(self.getNavHandler()){
+								self.getNavHandler().onCollapse(model);
+							}
+						}
+					});
+				} else {
+					lib.empty(parent);
+					var noFile = document.createElement("div"); //$NON-NLS-0$
+					noFile.classList.add("noFile"); //$NON-NLS-0$
+					noFile.textContent = messages["NoFile"];
+					var plusIcon = document.createElement("span"); //$NON-NLS-0$
+					plusIcon.classList.add("core-sprite-addcontent"); //$NON-NLS-0$
+					plusIcon.classList.add("icon-inline"); //$NON-NLS-0$
+					plusIcon.classList.add("imageSprite"); //$NON-NLS-0$
+					lib.processDOMNodes(noFile, [plusIcon]);
+					parent.appendChild(noFile);
+				}
+
 		},
 		reveal: function(fileMetadata) {
 			if (!fileMetadata) {
@@ -135,7 +252,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var newActionsScope = this.newActionsScope;
 			var selectionActionsScope = this.selectionActionsScope; 
 
-			commandRegistry.addCommandGroup(newActionsScope, "orion.miniExplorerNavNewGroup", 1000, messages["New"], null, null, "core-sprite-addcontent"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(newActionsScope, "orion.miniExplorerNavNewGroup", 1000, messages["Add"], null, null, "core-sprite-addcontent"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, null, "core-sprite-gear"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerSelectionService(selectionActionsScope, this.selection);
 
@@ -144,11 +261,24 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.pasteSelections", 1, null, true, new KeyBinding('v', true) /* Ctrl+V */);//$NON-NLS-1$ //$NON-NLS-0$
 
 			// New file and new folder (in a group)
-			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile", 1, "orion.miniExplorerNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFolder", 2, "orion.miniExplorerNavNewGroup", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile", 1, "orion.miniExplorerNavNewGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFolder", 2, "orion.miniExplorerNavNewGroup/orion.newContentGroup", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.addFolder", 1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
+			var dependencyTypes = this.projectClient.getDependencyTypes();
+			for(var i=0; i<dependencyTypes.length; i++){
+				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			
+			ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient);
+
+		
 			// New project creation in the toolbar (in a group)
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.project", 1, "orion.miniExplorerNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.linkProject", 2, "orion.miniExplorerNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
 
 			var renameBinding = new KeyBinding(113); // F2
 			renameBinding.domScope = "sidebar"; //$NON-NLS-0$
@@ -170,10 +300,29 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
 			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.miniNavSelectionGroup", true);
 		},
+		createActionSections: function() {
+			var _self = this;
+			[this.newActionsScope, this.selectionActionsScope].forEach(function(id) {
+				if (!_self[id]) {
+					var elem = document.createElement("ul"); //$NON-NLS-0$
+					elem.id = id;
+					elem.classList.add("commandList"); //$NON-NLS-0$
+					elem.classList.add("layoutLeft"); //$NON-NLS-0$
+					elem.classList.add("pageActions"); //$NON-NLS-0$
+					_self.toolbarNode.appendChild(elem);
+					_self[id] = elem;
+				}
+			});
+		},
+
 		updateCommands: function(selections) {
+			this.createActionSections();
 			var selectionTools = this.selectionActionsScope;
 			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
-			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot, true);
+			if(!selections || selections.length===0){
+				this.selection.setSelections(treeRoot.children[0]);
+			}
+			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot, true);			
 		}
 	});
 
@@ -209,6 +358,40 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				var folderLocation = PageUtil.matchResourceParameters(folderLink.href).navigate;
 				_self.setFolderHref(folderLink, editorFile || "", folderLocation); //$NON-NLS-0$
 			});
+		},
+		
+		getCellElement: function(col_no, item, tableRow){
+			if((item.Dependency || item.type==="ProjectRoot") && col_no===0){
+				var col = document.createElement('td'); //$NON-NLS-0$
+				col.className = "projectNavColumn";
+				var span = document.createElement("span"); //$NON-NLS-0$
+				span.id = tableRow.id+"MainCol"; //$NON-NLS-0$
+				span.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+				col.appendChild(span);
+				col.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+				span.className = "mainNavColumn"; //$NON-NLS-0$
+					// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
+				var image = this.getExpandImage(tableRow, span);
+				var itemNode = document.createTextNode(item.Dependency ? item.Dependency.Name : item.Name);
+				
+				if(item.Dependency){
+					var actions = document.createElement("span");
+					actions.className = "mainNavColumn"; //$NON-NLS-0$
+					actions.style.cssFloat = "right";
+					this.explorer.commandRegistry.renderCommands("dependencyCommands", actions, item, this, "tool");
+					col.appendChild(actions);
+				}
+	
+				span.appendChild(itemNode);
+				this.explorer._makeDropTarget(item, itemNode);
+				this.explorer._makeDropTarget(item, tableRow);
+
+				// orion.explorers.FileExplorer#getNameNode
+				itemNode.id = tableRow.id + "NameLink"; //$NON-NLS-0$
+
+				return col;
+			}
+			return NavigatorRenderer.prototype.getCellElement.call(this, col_no, item, tableRow);
 		}
 	});
 	
@@ -222,23 +405,16 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		render: function(projectData){
 		
 		var titleWrapper = new mSection.Section(this.parentNode, { id : "projectSection", //$NON-NLS-0$
-					title : "Project",
-					content : '<div id="projectInfoNode"></div>', //$NON-NLS-0$
-					canHide : true,
+					title : projectData.Name,
+					content : '', //$NON-NLS-0$
+					canHide : false,
 					preferenceService : this.serviceRegistry.getService("orion.core.preference") //$NON-NLS-0$
 					});
-		var projectInfoNode = lib.node("projectInfoNode");
-		var span = document.createElement("span"); 
-		span.appendChild(document.createTextNode("Name: " + projectData.Name));
-		projectInfoNode.appendChild(span);
+		var projectInfoNode = document.createElement("div");
+		projectInfoNode.id = "projectInfoNode";
 		
+		this.parentNode.appendChild(projectInfoNode);
 		
-		titleWrapper = new mSection.Section(this.parentNode, { id : "filesSection", //$NON-NLS-0$
-					title : "Files",
-					content : '<div id="filesNode"></div>', //$NON-NLS-0$
-					canHide : true,
-					preferenceService : this.serviceRegistry.getService("orion.core.preference") //$NON-NLS-0$
-					});
 		},
 		constructor: ProjectNavRenderer
 	};
@@ -257,7 +433,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 												serviceRegistry: this.serviceRegistry
 											});
 		this.rendererFactory = params.rendererFactory;
-		params.parentId = "filesNode";
+		params.parentId = "projectInfoNode";
 		params.newActionsScope = "filesSectionActionArea";
 		params.selectionActionsScope = "filesSectionSelectionArea";
 		this.fileExplorer = new FilesNavExplorer(params);
@@ -292,66 +468,25 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				lib.empty(this.parentNode);
 				this.projectLocation = parentProject ? parentProject.Location : null;
 				projectData.type = "Project";
-				this.renderer.render(projectData);
-				this.fileExplorer.loadRoot(projectData.ContentLocation, redisplay).then(function(){that.fileExplorer.reveal.bind(that.fileExplorer)(fileMetadata);});
-				this.updateCommands(projectData);
+				projectData.Directory = true;
 				
 				if(projectData.Dependencies){
 					for(var i=0; i<projectData.Dependencies.length; i++){
 						(function(depenency_no){
 							this.projectClient.getDependencyFileMetadata(projectData.Dependencies[i], projectData.WorkspaceLocation).then(function(depenencyMetadata){
-							var filesNode = "filesNode" + depenency_no;
-								var titleWrapper = new mSection.Section(this.parentNode, { id : "depenenciesSection" + depenency_no, //$NON-NLS-0$
-										title : projectData.Dependencies[depenency_no].Name,
-										content : '<div id="'+ filesNode+'"></div>', //$NON-NLS-0$
-										canHide : true,
-										hidden: true,
-										preferenceService : this.serviceRegistry.getService("orion.core.preference") //$NON-NLS-0$
-									});
-									
-									var sectionActionsArea = lib.node("depenenciesSection" + depenency_no + "ActionArea");
-									var actionsArea = document.createElement("span");
-									actionsArea.id = "depenenciesSection" + depenency_no + "NewActionArea";
-									sectionActionsArea.appendChild(actionsArea);
-									var disconnectActionArea = document.createElement("span");
-									disconnectActionArea.id = "depenenciesSection" + depenency_no + "DisconnectActionArea";
-									sectionActionsArea.appendChild(disconnectActionArea);
-
-									
-									var depenencyExploer = new FilesNavExplorer({
-										commandRegistry : this.commandRegistry,
-										fileClient: this.fileClient,
-										editorInputManager: this.editorInputManager,
-										progressService: this.progressService,
-										parentId: filesNode,
-										toolbarNode: this.toolbarNode,
-										newActionsScope: actionsArea.id,
-										selectionActionsScope: "depenenciesSection" + depenency_no + "SelectionArea",
-										rendererFactory: this.rendererFactory,
-										dragAndDrop: FileCommands.uploadFile,
-										serviceRegistry: this.serviceRegistry
-									});
-									
-									this.commandRegistry.registerCommandContribution(disconnectActionArea.id, "orion.project.dependency.disconnect", 1); //$NON-NLS-0$
-									this.commandRegistry.renderCommands(disconnectActionArea.id, disconnectActionArea, {Dependency: projectData.Dependencies[depenency_no], Project: projectData}, this, "tool");
-									
-									depenencyExploer.loadRoot(depenencyMetadata, redisplay).then(depenencyExploer.updateCommands.bind(depenencyExploer)(depenencyMetadata));
+								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[depenency_no], FileMetadata: depenencyMetadata, Location: depenencyMetadata.Location, ChildrenLocation: depenencyMetadata.ChildrenLocation}, true);
+								return;
 							}.bind(this), function(error){
-									var titleWrapper = new mSection.Section(this.parentNode, { id : "depenenciesSection" + depenency_no, //$NON-NLS-0$
-										title : projectData.Dependencies[depenency_no].Name + " (disconnected)",
-										content : '<div id=unconnected_"'+ depenency_no +'"></div>', //$NON-NLS-0$
-										canHide : true,
-										hidden: true,
-										preferenceService : this.serviceRegistry.getService("orion.core.preference") //$NON-NLS-0$
-									});
-									this.commandRegistry.registerCommandContribution(titleWrapper.actionsNode.id, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
-									this.commandRegistry.registerCommandContribution(titleWrapper.actionsNode.id, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
-									this.commandRegistry.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode, {Dependency: projectData.Dependencies[depenency_no], Project: projectData}, this, "tool");
+								//TODO refresh current item, not children
+//								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[depenency_no], disconnected: true});
 								console.error(error);
 							}.bind(this));
 						}.bind(this))(i);
 					}
 				}
+				this.renderer.render(projectData);
+				this.fileExplorer.loadRoot(projectData, redisplay).then(function(){that.fileExplorer.reveal.bind(that.fileExplorer)(fileMetadata);});
+				this.updateCommands(projectData);
 			} else {
 				lib.empty(this.parentNode);
 				this.projectLocation = null;
@@ -392,15 +527,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 		registerCommands : function(){
 			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.serviceRegistry;
-			commandRegistry.addCommandGroup(this.addActionsScope, "orion.projectNavNewGroup", 1000, messages["Add"], null, null, "core-sprite-addcontent"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(this.addActionsScope, "orion.projectNavInitGroup", 1001, "Init Project", null, null, "core-sprite-initproject"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(this.addActionsScope, "orion.project.addFolder", 1, "orion.projectNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(this.addActionsScope, "orion.project.initProject", 1, "orion.projectNavInitGroup");
-			var dependencyTypes = this.projectClient.getDependencyTypes();
-			for(var i=0; i<dependencyTypes.length; i++){
-				commandRegistry.registerCommandContribution(this.addActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.projectNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			}
-			
 			ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient);
 		},
 		updateCommands: function(treeRoot) {
