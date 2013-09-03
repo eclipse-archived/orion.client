@@ -98,7 +98,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			
 			//TODO remove check for the orion.projects when projects are delivered
 			if(this.serviceRegistry.getServiceReferences("orion.projects").length>0){
-				this.addViewMode("project", new ProjectNavViewMode({ //$NON-NLS-0$
+				var projectViewMode = new ProjectNavViewMode({ //$NON-NLS-0$
 					commandRegistry: commandRegistry,
 					contentTypeRegistry: contentTypeRegistry,
 					fileClient: fileClient,
@@ -107,8 +107,34 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 					sidebarNavInputManager: this.sidebarNavInputManager,
 					serviceRegistry: serviceRegistry,
 					toolbarNode: modeContributionToolbar
-				}));
-				this.renderViewModeMenu();
+				});
+				if(this.editorInputManager.getFileMetadata()){
+					this.addViewMode("project", projectViewMode);
+					this.renderViewModeMenu();
+				}
+				var _self = this;
+				this.editorInputManager.addEventListener("InputChanged", function(event){
+					if(event.input){
+						_self.addViewMode("project", projectViewMode);
+						_self.renderViewModeMenu();
+					} else {
+						_self.removeViewMode("project");
+						_self.renderViewModeMenu();
+					}
+				});
+				this.sidebarNavInputManager.addEventListener("InputChanged", function(event){
+					if(_self.editorInputManager.getFileMetadata()){
+						//if there is a file opened we display its project
+						return;
+					}
+					if(event.input){
+						_self.addViewMode("project", projectViewMode);
+						_self.renderViewModeMenu();
+					} else {
+						_self.removeViewMode("project");
+						_self.renderViewModeMenu();
+					}
+				});
 			}
 
 			// Outliner is responsible for adding its view mode(s) to this sidebar
