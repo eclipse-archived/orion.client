@@ -133,6 +133,60 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 		parameters: []
 	});
 
+	provider.registerService('orion.shell.type', {
+		cache: [],
+		lastCacheUpdate: 0,
+		CACHE_TIMEOUT: 3,
+		parse: function(arg, typeSpec, context) {
+			function resolveResult(promise, ids) {
+				var value, status;
+				var predictions = [];
+				for (var i = 0; i < ids.length; i++) {
+					if (ids[i].indexOf(arg.text) === 0) {
+						predictions.push({name: ids[i], value: ids[i]});
+						if (ids[i] === arg.text) {
+							value = ids[i];
+						}
+					}
+				}
+
+				status = 2;	/* CompletionStatus.ERROR */
+				if (predictions.length > 0) {
+					status = value ? 0 : 1;	/* CompletionStatus.MATCH : CompletionStatus.PARTIAL */
+				}
+				promise.resolve({
+					value: value,
+					message: (status === 2 /*CompletionStatus.ERROR */ ? ("'" + arg.text + "' is not valid") : undefined),
+					status: status,
+					predictions: predictions
+				});
+			};
+
+			var promise = new Deferred();
+
+			if (context.lastParseTimestamp && (context.lastParseTimestamp - lastCacheUpdate) < this.CACHE_TIMEOUT) {
+				resolveResult(promise, cache);
+			} else {
+				xhr('GET', '/node', {}).then(function(xhrResult) {
+					var ids = [];
+					var data = fromJson(xhrResult);
+					if (data.Apps.length) {
+						data.Apps.forEach(function(app) {
+							ids.push(app.Id.toString());
+						});
+					}
+					cache = ids;
+					lastCacheUpdate = context.lastParseTimestamp;
+					resolveResult(promise, ids);
+				}.bind(this));
+			}
+
+			return promise;
+		}
+	}, {
+		name: 'nodePID'
+	});
+	
 	provider.registerService('orion.shell.command', {
 		callback: function(commandArgs) {
 			var pid = commandArgs.pid;
@@ -147,7 +201,7 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 		description: 'Stops a running Node.js app.',
 		parameters: [{
 			name: 'pid',
-			type: 'string'
+			type: 'nodePID'
 		}]
 	});
 
