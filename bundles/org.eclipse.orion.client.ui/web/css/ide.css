@@ -771,7 +771,6 @@ input {
 .local .setting-label {
 	min-width: 80px;
 	display: inline-block;
-	text-transform: uppercase;
 }
 
 .delegatedUI {
