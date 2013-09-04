@@ -12,10 +12,10 @@
 /*jslint browser:true devel:true sub:true*/
 define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer', 'orion/explorers/explorerNavHandler', 'orion/i18nUtil', 'orion/keyBinding', 'orion/fileCommands', 'orion/projectCommands',
-	'orion/extensionCommands', 'orion/selection', 'orion/EventTarget', 'orion/URITemplate', 'orion/PageUtil', 'orion/section', 'orion/projectClient'
+	'orion/extensionCommands', 'orion/selection', 'orion/Deferred','orion/EventTarget', 'orion/URITemplate', 'orion/PageUtil', 'orion/section', 'orion/projectClient'
 	],
 	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, i18nUtil, mKeyBinding, FileCommands, ProjectCommands,
-		ExtensionCommands, Selection, EventTarget, URITemplate, PageUtil, mSection, mProjectClient) {
+		ExtensionCommands, Selection, Deferred, EventTarget, URITemplate, PageUtil, mSection, mProjectClient) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var FileModel = mExplorer.FileModel;
 	var KeyBinding = mKeyBinding.KeyBinding;
@@ -70,9 +70,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		getId: function(item){
 			if(item.type==="Project"){
 				return "Project";
-			}
-			if(item.type==="ProjectRoot"){
-				return "ProjectRoot";
 			}
 			if(item.Dependency){
 				return FileModel.prototype.getId.call(this, item.Dependency);
@@ -167,6 +164,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var self = this;
 				self.treeRoot = root;
 				self.model = new ProjectNavModel(self.registry, self.treeRoot, self.fileClient, self.parentId, self.excludeFiles, self.excludeFolders);
+				var deferred = new Deferred();
 				if (self.dragAndDrop) {
 					if (self._hookedDrag) {
 						// rehook on the parent to indicate the new root location
@@ -199,6 +197,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 							}
 						}
 					});
+					deferred.resolve();
 				} else {
 					lib.empty(parent);
 					var noFile = document.createElement("div"); //$NON-NLS-0$
@@ -210,8 +209,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					plusIcon.classList.add("imageSprite"); //$NON-NLS-0$
 					lib.processDOMNodes(noFile, [plusIcon]);
 					parent.appendChild(noFile);
+					deferred.resolve();
 				}
-
+				return deferred;
 		},
 		reveal: function(fileMetadata) {
 			if (!fileMetadata) {
@@ -307,7 +307,18 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			}
 			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot, true);			
 		},
-		
+		expandToItem: function(item, afterExpand){
+			var itemId = this.model.getId(item);
+			var itemNode = lib.node(itemId);
+			if(itemNode){
+				this.myTree.expand(itemId, afterExpand);
+			} else if(item.Parents && item.Parents.length>0) {
+				item.Parents[0].Parents = item.Parents.slice(1);
+				this.expandToItem(item.Parents[0], function(){
+					this.myTree.expand(itemId, afterExpand);					
+				}.bind(this));
+			}
+		},
 		changedItem: function(item, forceExpand){
 			if(item.Location || forceExpand){
 				return FileExplorer.prototype.changedItem.call(this, item, forceExpand);
@@ -350,7 +361,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				_self.setFolderHref(folderLink, editorFile || "", folderLocation); //$NON-NLS-0$
 			});
 		},
-		
 		updateRow: function(item, tableRow){
 			lib.empty(tableRow);
 			var i = 0;
@@ -503,7 +513,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				}
 				this.renderer.render(projectData);
 				this.fileExplorer.loadRoot(projectData, redisplay).then(function(){
-					that.fileExplorer.reveal.bind(that.fileExplorer)(fileMetadata);
+					setTimeout(function(){ //The root might not have been loaded yet
+						that.fileExplorer.expandToItem.bind(that.fileExplorer)(fileMetadata,function(){
+								that.fileExplorer.reveal.bind(that.fileExplorer)(fileMetadata);
+							});
+					}, 500);
 				});
 				this.updateCommands(projectData);
 			} else {
