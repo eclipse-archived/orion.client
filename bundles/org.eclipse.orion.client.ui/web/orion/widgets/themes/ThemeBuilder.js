@@ -304,7 +304,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 
 			var x = UI_SIZE + 40;
 			
-		    Component.drawText( ctx, component.description.toUpperCase(), LEFT + x, TOP + 10, 'bold 9pt sans-serif', '#555' );
+		    Component.drawText( ctx, component.description, LEFT + x, TOP + 10, 'bold 9pt sans-serif', '#555' );
 
 		    Component.drawText( ctx, messages["COLOR:"], LEFT + x, TOP + 50, '8pt sans-serif', '#555' ); 
 		    Component.drawRectangle( ctx, LEFT + x + 100, TOP + 40, 50, 10, component.fill, null );	    
@@ -511,7 +511,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 
 					ctx.globalAlpha = 1; 
 					
-					Component.drawText( ctx, component.description.toUpperCase(), LEFT + 5 + x, labely, 'bold 8pt sans-serif', '#333' );	
+					Component.drawText( ctx, component.description, LEFT + 5 + x, labely, 'bold 8pt sans-serif', '#333' );	
 					
 					if( component.family ){ families.push( component.family ); }
 					
@@ -519,9 +519,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 				}
 			}
 			
-			Component.drawText( ctx, 'CLICK DIAGRAM TO STYLE', LEFT + 5 + x, labely + 50, 'bold 8pt sans-serif', '#cc0000' );
-			Component.drawText( ctx, 'PRESS APPLY BUTTON TO', LEFT + 5 + x, labely + 65, 'bold 8pt sans-serif', '#cc0000' );
-			Component.drawText( ctx, 'APPLY PREVIEW', LEFT + 5 + x, labely + 80, 'bold 8pt sans-serif', '#cc0000' );
+			Component.drawText( ctx, 'Click diagram to style.', LEFT + 5 + x, labely + 50, 'bold 8pt sans-serif', '#cc0000' );
+			Component.drawText( ctx, 'Click Apply button to apply preview.', LEFT + 5 + x, labely + 65, 'bold 8pt sans-serif', '#cc0000' );
 			
 			var stringcontainer = document.getElementById( 'stringcontainer' );
 				stringcontainer.style.display = 'none';

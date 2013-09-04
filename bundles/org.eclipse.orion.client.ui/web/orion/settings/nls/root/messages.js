@@ -198,8 +198,8 @@ define({
 	"CSS Attribute": "CSS Attribute",
 	"CSS Value": "CSS Value",
 	"CSS Text": "CSS Text",
-	"COLOR:": "COLOR:",
-	"COLOR STRING:": "COLOR STRING:",
-	"NEW COLOR:": "NEW COLOR:",
-	"OR HEX:": "OR HEX: "
+	"COLOR:": "Color:",
+	"COLOR STRING:": "Color String:",
+	"NEW COLOR:": "New Color:",
+	"OR HEX:": "Or Hex: "
 });
