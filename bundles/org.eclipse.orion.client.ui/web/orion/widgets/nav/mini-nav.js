@@ -194,6 +194,15 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				});
 			}
 		},
+		scopeDown: function(item) {
+			var href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+				resource: item.Location,
+				params: {
+					navigate: item.ChildrenLocation
+				}
+			});
+			window.location = href;
+		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
 			// Selection based command contributions in sidebar mini-nav
@@ -217,6 +226,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.linkProject", 2, "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// Folder nav actions
 			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.upFolder", 1, null, false, new KeyBinding(38, false, false, true) /* Alt+UpArrow */); //$NON-NLS-0$
+			
+			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.downFolder", 1, null, false, new KeyBinding(40, false, false, true) /* Alt+UpArrow */); //$NON-NLS-1$ //$NON-NLS-0$
 
 			var renameBinding = new KeyBinding(113); // F2
 			renameBinding.domScope = "sidebar"; //$NON-NLS-0$
@@ -250,6 +261,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 
 	function MiniNavRenderer() {
 		NavigatorRenderer.apply(this, arguments);
+		this.goIntoDirectory = false;
+		this.openDirectory = true;
 	}
 	MiniNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
 	objects.mixin(MiniNavRenderer.prototype, {
@@ -265,6 +278,15 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			return folderNode;
 		},
 		setFolderHref: function(linkElement, resource, navigate) {
+			if (this.openDirectory && !this.goIntoDirectory) {
+				return;
+			}
+			if (this.openDirectory && navigate) {
+				resource = navigate;
+			}
+			if (!this.goIntoDirectory) {
+				navigate = undefined;
+			}
 			linkElement.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
 				resource: resource,
 				params: {

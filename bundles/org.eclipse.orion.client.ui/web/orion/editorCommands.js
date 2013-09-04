@@ -131,6 +131,9 @@ define([
 			var undoCommand = new mCommands.Command({
 				name: messages.Undo,
 				id: "orion.undo", //$NON-NLS-0$
+				visibleWhen: function() {
+					return !!editor.getTextView();
+				},
 				callback: function(data) {
 					editor.getTextView().invokeAction("undo"); //$NON-NLS-0$
 				}
@@ -141,6 +144,9 @@ define([
 			var redoCommand = new mCommands.Command({
 				name: messages.Redo,
 				id: "orion.redo", //$NON-NLS-0$
+				visibleWhen: function() {
+					return !!editor.getTextView();
+				},
 				callback: function(data) {
 					editor.getTextView().invokeAction("redo"); //$NON-NLS-0$
 				}
@@ -158,6 +164,9 @@ define([
 					name: messages["Search Files"],
 					tooltip: messages["Search Files"],
 					id: "orion.searchFiles", //$NON-NLS-0$
+					visibleWhen: function() {
+						return !!editor.getTextView();
+					},
 					callback: function(data) {
 						editor.getTextView().invokeAction("searchFiles"); //$NON-NLS-0$
 					}
@@ -227,7 +236,12 @@ define([
 				name: messages.Save,
 				tooltip: messages["Save this file"],
 				id: "orion.save", //$NON-NLS-0$
-				visibleWhen: function() { return !self.editorSettings || !self.editorSettings().autoSave; },
+				visibleWhen: function() {
+					if (!editor.getTextView()) {
+						return false;
+					}
+					return !self.editorSettings || !self.editorSettings().autoSave;
+				},
 				callback: function(data) {
 					editor.getTextView().invokeAction("save"); //$NON-NLS-0$
 				}
@@ -252,6 +266,9 @@ define([
 				name: messages["Go to Line"],
 				tooltip: messages["Go to specified line number"],
 				id: "orion.gotoLine", //$NON-NLS-0$
+				visibleWhen: function() {
+					return !!editor.getTextView();
+				},
 				parameters: lineParameter,
 				callback: function(data) {
 					var line;
@@ -303,6 +320,9 @@ define([
 				name: messages.Find,
 				tooltip: messages.Find,
 				id: "orion.editor.find", //$NON-NLS-0$
+				visibleWhen: function() {
+					return !!editor.getTextView();
+				},
 				parameters: findParameter,
 				callback: function(data) {
 					if (self._localSearcher) {
@@ -357,8 +377,10 @@ define([
 				tooltip: messages.BlameTooltip,
 				id: "orion.edit.blame", //$NON-NLS-0$
 				visibleWhen: function() {
+					if (!editor.getTextView()) {
+						return false;
+					}
 					return  blamer.isVisible(self.serviceRegistry);
-
 				},
 				callback: function(data) {
 					blamer.getBlame(self.serviceRegistry, editor, self.inputManager.getInput());   
@@ -446,6 +468,9 @@ define([
 			var input = this.inputManager;
 			var progress = this.serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			var makeCommand = function(info, service, options) {
+				options.visibleWhen = function() {
+					return !!editor.getTextView();
+				};
 				options.callback = function(data) {
 					// command service will provide editor parameter but editor widget callback will not
 					editor = this;

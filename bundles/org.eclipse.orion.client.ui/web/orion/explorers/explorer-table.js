@@ -475,6 +475,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 */
 	FileExplorer.prototype.scopeUp = function() {
 	};
+		
+	/**
+	 * The explorerNavHandler hooked up by the explorer will call this function when the focus into command is clicked.
+	 * The default implementation does nothing.
+	 * @name orion.explorer.FileExplorer#scopeDown
+	 * @function
+	 */
+	FileExplorer.prototype.scopeDown = function(item) {
+	};
 	
 	/**
 	 * Load the resource at the given path.
