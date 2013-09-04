@@ -345,12 +345,13 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				toolbarNode: this.toolbarNode
 			});
 			var fileMetadata = this.editorInputManager.getFileMetadata();
-			if(fileMetadata){
+			if (fileMetadata){
 				this.explorer.loadParentOf(fileMetadata);
-			} else if(this.lastRoot){ //if do not have metadata loaded yet and we switch from one view mode to another we should reload
+			} else if (this.lastRoot){
+				//if do not have metadata loaded yet and we switch from one view mode to another we should reload
 				this.explorer.loadRoot(this.lastRoot).then(function(){_self.explorer.updateCommands();});
 			}
-			//else{ On initial page load, metadata may not be loaded yet, but that's ok -- InputChanged will inform us later}
+			//else {On initial page load, metadata may not be loaded yet, but that's ok -- InputChanged will inform us later}
 		},
 		destroy: function() {
 			if (this.explorer) {
