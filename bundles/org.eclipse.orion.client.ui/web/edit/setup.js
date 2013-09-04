@@ -53,12 +53,13 @@ define([
 	'edit/editorPreferences',
 	'orion/URITemplate',
 	'orion/sidebar',
+	'orion/folderView',
 	'orion/webui/tooltip',
 	'orion/widgets/input/DropDownMenu'
 ], function(messages, require, EventTarget, lib, mSelection, mStatus, mProgress, mDialogs, mCommandRegistry, mExtensionCommands, 
 			mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mBlameAnnotation, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 			mMarkOccurrences, mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mEmacs, mVI, mSearcher,
-			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, EditorSettings, mEditorPreferences, URITemplate, Sidebar,
+			mContentTypes, PageUtil, mInputManager, i18nUtil, mThemePreferences, mThemeData, EditorSettings, mEditorPreferences, URITemplate, Sidebar, mFolderView,
 			mTooltip, DropDownMenu) {
 
 var exports = exports || {};
@@ -164,6 +165,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		var navDropDown = new DropDownMenu('settingsTab', 'settingsAction', 'dropdownSelection'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		navDropDown.updateContent = settings.show.bind(settings);
 		navDropDown.__tooltip = tooltip;
+		
+		if (!editor.getTextView()) {
+			navDropDownTrigger.style.visibility = "hidden"; //$NON-NLS-0$
+		}
 	};
 	function updateStyler(prefs) {
 		var styler = inputManager.syntaxHighlighter.getStyler();
@@ -309,7 +314,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			selection: selection,
 			contentTypeService: contentTypeService
 		});
+		var folderView;
 		inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+			if (folderView) {
+				folderView.destroy();
+				folderView = null;
+			}
 			if (evt.input === null || typeof evt.input === "undefined") {//$NON-NLS-0$
 				// remove the toolbar
 				var toolbar = lib.node("pageActions"); //$NON-NLS-0$
@@ -339,6 +349,16 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			});
 	
 			commandRegistry.processURL(window.location.href);
+			
+			if (metadata.Directory) {
+				folderView = new mFolderView.FolderView({
+					parent: editorDomNode,
+					input: evt.input,
+					metadata: evt.metadata,
+					contents: JSON.parse(evt.contents)
+				});
+				folderView.create();
+			}
 		});
 		inputManager.addEventListener("ContentTypeChanged", function(event) { //$NON-NLS-0$
 			updateStyler(settings);

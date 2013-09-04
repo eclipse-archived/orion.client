@@ -367,12 +367,13 @@ define([
 			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
 		},
 		_setInputContents: function(input, title, contents, metadata) {
-			var name;
+			var name, isDir = false;
 			if (metadata) {
 				this._fileMetadata = metadata;
 				this.setTitle(metadata.Location || String(metadata));
 				this._contentType = this.contentTypeService.getFileContentType(metadata);
 				name = metadata.Name;
+				isDir = metadata.Directory;
 			} else {
 				// No metadata
 				this._fileMetadata = null;
@@ -381,61 +382,67 @@ define([
 				name = this.getTitle();
 			}
 			var editor = this.getEditor();
-			if (!editor.getTextView()) {
-				editor.installTextView();
-				editor.getTextView().addEventListener("Focus", function(e) { //$NON-NLS-0$
-					// If there was an error while auto saving, auto save is temporarily disabled and
-					// we retry saving every time the editor gets focus
-					if (this._autoSaveEnabled && this._errorSaving) {
-						this.save();
-						return;
-					}
-					if (this._autoLoadEnabled) {
-						this.load();
-					}
-				}.bind(this));
-				editor.getModel().addEventListener("Changing", function(e) { //$NON-NLS-0$
-					if (!this._getSaveDiffsEnabled()) { return; }
-					var length = this._unsavedChanges.length;
-					var addedCharCount = e.addedCharCount;
-					var removedCharCount = e.removedCharCount;
-					var start = e.start;
-					var end = e.start + removedCharCount;
-					var type = 0;
-					if (addedCharCount === 0) {
-						type = -1;
-					} else if (removedCharCount === 0) {
-						type = 1;
-					}
-					if (length > 0) {
-						if (type === this.previousChangeType) {
-							var previousChange = this._unsavedChanges[length-1];
-							if (removedCharCount === 0 && start === previousChange.end + previousChange.text.length) {
-								previousChange.text += e.text;
-								return;
-							}
-							if (e.addedCharCount === 0 && end === previousChange.start) {
-								previousChange.start = start;
-								return;
+			if (isDir) {
+				this.editor.uninstallTextView();
+			} else {
+				if (!editor.getTextView()) {
+					editor.installTextView();
+					editor.getTextView().addEventListener("Focus", function(e) { //$NON-NLS-0$
+						// If there was an error while auto saving, auto save is temporarily disabled and
+						// we retry saving every time the editor gets focus
+						if (this._autoSaveEnabled && this._errorSaving) {
+							this.save();
+							return;
+						}
+						if (this._autoLoadEnabled) {
+							this.load();
+						}
+					}.bind(this));
+					editor.getModel().addEventListener("Changing", function(e) { //$NON-NLS-0$
+						if (!this._getSaveDiffsEnabled()) { return; }
+						var length = this._unsavedChanges.length;
+						var addedCharCount = e.addedCharCount;
+						var removedCharCount = e.removedCharCount;
+						var start = e.start;
+						var end = e.start + removedCharCount;
+						var type = 0;
+						if (addedCharCount === 0) {
+							type = -1;
+						} else if (removedCharCount === 0) {
+							type = 1;
+						}
+						if (length > 0) {
+							if (type === this.previousChangeType) {
+								var previousChange = this._unsavedChanges[length-1];
+								if (removedCharCount === 0 && start === previousChange.end + previousChange.text.length) {
+									previousChange.text += e.text;
+									return;
+								}
+								if (e.addedCharCount === 0 && end === previousChange.start) {
+									previousChange.start = start;
+									return;
+								}
 							}
 						}
-					}
-					this.previousChangeType = type;
-					this._unsavedChanges.push({start:start, end:end, text:e.text});
-				}.bind(this));
+						this.previousChangeType = type;
+						this._unsavedChanges.push({start:start, end:end, text:e.text});
+					}.bind(this));
+				}
 			}
 			// TODO could potentially dispatch separate events for metadata and contents changing
 			this.dispatchEvent({ type: "InputChanged", input: input, name: name, metadata: metadata, contents: contents }); //$NON-NLS-0$
-			this.syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true).then(function() {
-				this.dispatchEvent({ type: "ContentTypeChanged", contentType: this._contentType, location: window.location }); //$NON-NLS-0$
-				if (!this.dispatcher) {
-					this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor, this._contentType);
-				}
-				// Contents
-				editor.setInput(title, null, contents);
-				this._unsavedChanges = [];
-				this.processParameters(input);
-			}.bind(this));
+			if (!isDir) {
+				this.syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true).then(function() {
+					this.dispatchEvent({ type: "ContentTypeChanged", contentType: this._contentType, location: window.location }); //$NON-NLS-0$
+					if (!this.dispatcher) {
+						this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor, this._contentType);
+					}
+					// Contents
+					editor.setInput(title, null, contents);
+					this._unsavedChanges = [];
+					this.processParameters(input);
+				}.bind(this));
+			}
 			this.setDirty(false);
 		},
 		setTitle: function(title) {

@@ -67,6 +67,8 @@ define({
 	"The name and server location were not specified.": "The name and server location were not specified.",
 	"Go Up": "Go Up",
 	"Move up to the parent folder": "Move up to the parent folder",
+	"Go Into": "Go Into",
+	"Move into the selected folder": "Move into the selected folder",
 	"Import local file...": "Import local file...",
 	"Copy files and folders from your local file system": "Copy files and folders from your local file system",
 	"SFTP from...": "SFTP from...",

@@ -830,6 +830,26 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			}});
 		commandService.addCommand(goUpCommand);
 
+		var goIntoCommand = new mCommands.Command({
+			name: messages["Go Into"],
+			tooltip: messages["Move into the selected folder"],
+			imageClass: "core-sprite-go-down", //$NON-NLS-0$
+			id: "eclipse.downFolder", //$NON-NLS-0$
+			callback: function(data) {
+				if (typeof explorer.scopeDown === "function") { //$NON-NLS-0$
+					explorer.selection.getSelections(function(selections) {
+						explorer.scopeDown(selections[0]);
+					});
+				}
+			},
+			visibleWhen: function(item) {
+				var result = false;
+				explorer.selection.getSelections(function(selections) {
+					result = selections.length === 1 && selections[0].Directory;
+				});
+				return result;
+			}});
+		commandService.addCommand(goIntoCommand);
 					
 		var importCommand = new mCommands.Command({
 			name : messages["Import local file..."],
