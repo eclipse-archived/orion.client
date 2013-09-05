@@ -27,16 +27,16 @@ define([
 	'orion/widgets/settings/EditorSettings',
 	'orion/searchAndReplace/textSearcher',
 	'orion/editorCommands',
+	'orion/edit/ast',
 	'orion/edit/dispatcher',
 	'orion/highlight',
-	'orion/edit/syntaxmodel',
 	'orion/markOccurrences',
 	'orion/syntaxchecker'
 ], function(
 	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist, mEmacs, mVI,
 	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands,
-	mDispatcher, Highlight, SyntaxModelWirer,
+	ASTManager, mDispatcher, Highlight,
 	mMarkOccurrences, mSyntaxchecker
 ) {
 
@@ -60,7 +60,7 @@ define([
 		this.readonly = options.readonly;
 		this.searcher = options.searcher;
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
-		this.syntaxModelWirer = new SyntaxModelWirer(this.serviceRegistry);
+		this.astManager = new ASTManager(this.serviceRegistry, this.inputManager);
 		this.settings = {};
 		this._init();
 	}
@@ -265,6 +265,7 @@ define([
 			});
 			var markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, editor);
 			editor.addEventListener("TextViewInstalled", function(event) { //$NON-NLS-0$
+				event.textView.getModel().addEventListener("Changed", self.astManager.updated.bind(self.astManager)); //$NON-NLS-0$
 				markOccurrences.findOccurrences(inputManager, event.textView);
 			});
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);

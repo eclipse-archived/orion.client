@@ -100,6 +100,7 @@ define([
 	 * @class
 	 */
 	function InputManager(options) {
+		EventTarget.attach(this);
 		this.editor = options.editor;
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
@@ -109,7 +110,6 @@ define([
 		this._input = this._title = "";
 		this.dispatcher = null;
 		this._unsavedChanges = [];
-		EventTarget.attach(this);
 	}
 	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
 		load: function() {
