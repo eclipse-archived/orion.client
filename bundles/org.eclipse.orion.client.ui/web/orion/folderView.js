@@ -21,11 +21,12 @@ define([], function() { //$NON-NLS-0$
 		this._input = options.input;
 		this._contents = options.contents;
 		this._metadata = options.metadata;
+		this.fileClient = options.fileService;
+		this.progress = options.progress;
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
-		create: function() {
+		displayFolderView: function(children){
 			var found = false;
-			var children = this._contents.Children;
 			for (var i=0; i<children.length; i++) {
 				var child = children[i];
 				if (!child.Directory && child.Name === "project.json") { //$NON-NLS-0$
@@ -36,6 +37,18 @@ define([], function() { //$NON-NLS-0$
 			if (found) {
 				this._node = document.createTextNode("This is a project.");
 				this._parent.appendChild(this._node);
+			}			
+		},
+		create: function() {
+			if(this._contents.Children){
+				this.displayFolderView(this._contents.Children);
+			} else if(this._contents.ChildrenLocation){
+				var _self = this;
+				this.progress.progress(this.fileClient.fetchChildren(this._contents.ChildrenLocation), "Fetching children of " + this._contents.Name).then( 
+					function(children) {
+						_self.displayFolderView.call(_self, children);
+					}
+				);
 			}
 		},
 		destroy: function() {

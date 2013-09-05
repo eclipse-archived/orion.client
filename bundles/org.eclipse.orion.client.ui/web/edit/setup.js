@@ -355,7 +355,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					parent: editorDomNode,
 					input: evt.input,
 					metadata: evt.metadata,
-					contents: JSON.parse(evt.contents)
+					contents: JSON.parse(evt.contents),
+					fileService: fileClient,
+					progress: progressService
 				});
 				folderView.create();
 			}
