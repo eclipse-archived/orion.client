@@ -8,8 +8,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global define */
-define([], function() { //$NON-NLS-0$
+/*global define document*/
+define(['orion/markdownView'], function(mMarkdownView) { //$NON-NLS-0$
 	/** 
 	 * Constructs a new FolderView object.
 	 * 
@@ -23,21 +23,36 @@ define([], function() { //$NON-NLS-0$
 		this._metadata = options.metadata;
 		this.fileClient = options.fileService;
 		this.progress = options.progress;
+		this._init();
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
+		_init: function(){
+			this.markdownView = new mMarkdownView.MarkdownView({
+				fileClient : this.fileClient,
+				progress : this.progress
+			});
+		},
 		displayFolderView: function(children){
-			var found = false;
+			var projectJson;
+			var readmeMd;
 			for (var i=0; i<children.length; i++) {
 				var child = children[i];
 				if (!child.Directory && child.Name === "project.json") { //$NON-NLS-0$
-					found = true;
-					break;
+					projectJson = child;
 				}
+				if (!child.Directory && child.Name && child.Name.toLowerCase() === "readme.md") { //$NON-NLS-0$
+					readmeMd = child;
+				}
+
 			}
-			if (found) {
-				this._node = document.createTextNode("This is a project.");
+			if (readmeMd) {
+				this._node = document.createElement("div");
+				this.markdownView.displayContents(this._node, readmeMd);
 				this._parent.appendChild(this._node);
-			}			
+			} else if(projectJson){
+				this._node = document.createTextNode("This is a project " + this._contents.Name);
+				this._parent.appendChild(this._node);
+			}
 		},
 		create: function() {
 			if(this._contents.Children){
