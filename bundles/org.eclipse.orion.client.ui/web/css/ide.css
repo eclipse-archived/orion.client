@@ -878,3 +878,11 @@ input {
     padding-top: 0.5em;
     border-top: 4px solid #FBFBFB;
 }
+
+div.orionMarkdown {
+	padding: 1em;
+}
+
+.orionMarkdown h1 {
+	position: relative;
+}
