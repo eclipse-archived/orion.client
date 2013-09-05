@@ -331,6 +331,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var metadata = evt.metadata;
 			renderToolbars(metadata);
 			renderLocalEditorSettings(localSettings);
+			commandRegistry.closeParameterCollector();
 			mGlobalCommands.setPageTarget({
 				task: "Coding", //$NON-NLS-0$
 				name: evt.name,

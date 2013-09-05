@@ -277,8 +277,11 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				}
 			}
 			this._removeAllAnnotations();
-			this._editor.getTextView().removeEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
-			this._editor.getTextView().focus();
+			var textView = this._editor.getTextView();
+			if (textView) {
+				textView.removeEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
+				textView.focus();
+			}
 		},
 		isVisible: function() {
 			return this._visible;
