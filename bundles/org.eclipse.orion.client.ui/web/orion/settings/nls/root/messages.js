@@ -194,6 +194,8 @@ define({
 	"Revert Theme": "Revert Theme",
 	"Update Theme": "Update Theme",
 	"Theme:": "Theme:",
+	"clickDiagram": "Click diagram to style.",
+	"clickUpdate": "Click Update button to save preview.",
 	"CSS Class Name": "CSS Class Name",
 	"CSS Attribute": "CSS Attribute",
 	"CSS Value": "CSS Value",

@@ -519,8 +519,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 				}
 			}
 			
-			Component.drawText( ctx, 'Click diagram to style.', LEFT + 5 + x, labely + 50, 'bold 8pt sans-serif', '#cc0000' );
-			Component.drawText( ctx, 'Click Apply button to apply preview.', LEFT + 5 + x, labely + 65, 'bold 8pt sans-serif', '#cc0000' );
+			Component.drawText( ctx, messages.clickDiagram, LEFT + 5 + x, labely + 50, 'bold 8pt sans-serif', '#cc0000' );
+			Component.drawText( ctx, messages.clickUpdate, LEFT + 5 + x, labely + 65, 'bold 8pt sans-serif', '#cc0000' );
 			
 			var stringcontainer = document.getElementById( 'stringcontainer' );
 				stringcontainer.style.display = 'none';
