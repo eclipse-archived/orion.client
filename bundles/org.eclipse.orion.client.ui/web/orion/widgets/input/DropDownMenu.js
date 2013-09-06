@@ -19,7 +19,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	 * @param {Object} triggerNode The dom object or string id of the dom node that will trigger the dropdown menu appearance
 	 * @param {String} [selectionClass] CSS class to be appended when the trigger node is selected. Optional.
 	 */
-	function DropDownMenu( parent, triggerNode, selectionClass, noClick ){
+	function DropDownMenu( parent, triggerNode, selectionClass, options ){
 		var node = lib.node(parent);
 		if (node) {
 			this._parent = node;
@@ -49,9 +49,16 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		if (this._triggerNode.style.visibility === 'hidden') { //$NON-NLS-0$
 			this._triggerNode.style.visibility = 'visible'; //$NON-NLS-0$
 		}
-		if (!noClick) {
+		options = options || {};
+		this.options = options;
+		if (!options.noClick) {
 			this._triggerNode.onclick = this.click.bind(this);
 		}
+		this._dropdownMenu.addEventListener("keydown", function (e) { //$NON-NLS-0$
+			if (e.keyCode === lib.KEY.ESCAPE) {
+				this.clearPanel();
+			}
+		}.bind(this));
 	}
 	
 	objects.mixin(DropDownMenu.prototype, {
@@ -64,6 +71,9 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 						this._triggerNode.classList.add(this.selectionClass);
 					}
 					this.handle = lib.addAutoDismiss( [ this._triggerNode, this._dropdownMenu], this.clearPanel.bind(this) );
+					if (this.options.onShow) {
+						this.options.onShow();
+					}
 				}.bind(this));
 			}else{
 				this.clearPanel();
@@ -71,9 +81,13 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		},
 		
 		clearPanel: function(){
+			if (!this.isVisible()) { return; }
 			this._dropdownMenu.style.display = 'none'; //$NON-NLS-0$
 			if (this.selectionClass) {
 				this._triggerNode.classList.remove(this.selectionClass);
+			}
+			if (this.options.onHide) {
+				this.options.onHide();
 			}
 		},
 		
@@ -110,6 +124,14 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		
 		isDestroyed: function() {
 			return !this._dropdownMenu.parentNode;
+		},
+
+		isVisible: function() {
+			return this._dropdownMenu.style.display !== "none" && !this.isDestroyed(); //$NON-NLS-0$
+		},
+
+		focus: function() {
+			this._dropdownMenu.focus();
 		},
 
 		destroy: function() {
