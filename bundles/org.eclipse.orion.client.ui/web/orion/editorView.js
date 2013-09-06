@@ -105,7 +105,12 @@ define([
 			}
 			var sourceCodeActions = editor.getSourceCodeActions();
 			if (sourceCodeActions) {
-				sourceCodeActions.setAutoPairing(prefs.autoPairing);
+				sourceCodeActions.setAutoPairParentheses(prefs.autoPairParentheses);
+				sourceCodeActions.setAutoPairBraces(prefs.autoPairBraces);
+				sourceCodeActions.setAutoPairSquareBrackets(prefs.autoPairSquareBrackets);
+				sourceCodeActions.setAutoPairAngleBrackets(prefs.autoPairAngleBrackets);
+				sourceCodeActions.setAutoPairQuotations(prefs.autoPairQuotations);
+				sourceCodeActions.setAutoCompleteComments(prefs.autoCompleteComments);
 				sourceCodeActions.setSmartIndentation(prefs.smartIndentation);
 			}
 			editor.setAnnotationRulerVisible(prefs.annotationRuler);
@@ -179,7 +184,12 @@ define([
 
 				var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
 				var sourceCodeActions = keyBindings.sourceCodeActions;
-				sourceCodeActions.setAutoPairing(self.settings.autoPairing);
+				sourceCodeActions.setAutoPairParentheses(self.settings.autoPairParentheses);
+				sourceCodeActions.setAutoPairBraces(self.settings.autoPairBraces);
+				sourceCodeActions.setAutoPairSquareBrackets(self.settings.autoPairSquareBrackets);
+				sourceCodeActions.setAutoPairAngleBrackets(self.settings.autoPairAngleBrackets);
+				sourceCodeActions.setAutoPairQuotations(self.settings.autoPairQuotations);
+				sourceCodeActions.setAutoCompleteComments(self.settings.autoCompleteComments);
 				sourceCodeActions.setSmartIndentation(self.settings.smartIndentation);
 
 				// Register commands that depend on external services, the registry, etc.  Do this after
@@ -246,7 +256,7 @@ define([
 				statusReporter: this.statusReporter.bind(this),
 				domNode: editorDomNode
 			});
-			
+
 			this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor);
 			localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
 
