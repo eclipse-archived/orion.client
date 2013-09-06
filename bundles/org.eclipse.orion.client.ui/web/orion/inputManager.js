@@ -108,7 +108,7 @@ define([
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
 		this.progressService = options.progressService;
-		this.contentTypeService = options.contentTypeService;
+		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.selection = options.selection;
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
 		this.syntaxModelWirer = new SyntaxModelWirer(this.serviceRegistry);
@@ -281,28 +281,16 @@ define([
 		setAutoSaveTimeout: function(timeout) {
 			this._autoSaveEnabled = timeout !== -1;
 			if (!this._idle) {
-				var editor = this.getEditor(), textView = editor.getTextView();
-				var setIdle = function() {
-					editor.removeEventListener("TextViewInstalled", setIdle); //$NON-NLS-0$
-					var document = editor.getTextView().getOptions("parent").ownerDocument; //$NON-NLS-0$
-					var options = {
-						document: document,
-						timeout: timeout
-					};
-					this._idle = new Idle(options);
-					this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
-						if (!this._errorSaving) {
-							this.save();
-						}
-					}.bind(this));
-					this._idle.setTimeout(timeout);
-				}.bind(this);
-				if (textView) {
-					setIdle();
-				} else {
-					// wait for a textview to get installed
-					editor.addEventListener("TextViewInstalled", setIdle); //$NON-NLS-0$
-				}
+				var options = {
+					document: document,
+					timeout: timeout
+				};
+				this._idle = new Idle(options);
+				this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
+					if (!this._errorSaving) {
+						this.save();
+					}
+				}.bind(this));
 			} else {
 				this._idle.setTimeout(timeout);
 			}
@@ -371,14 +359,14 @@ define([
 			if (metadata) {
 				this._fileMetadata = metadata;
 				this.setTitle(metadata.Location || String(metadata));
-				this._contentType = this.contentTypeService.getFileContentType(metadata);
+				this._contentType = this.contentTypeRegistry.getFileContentType(metadata);
 				name = metadata.Name;
 				isDir = metadata.Directory;
 			} else {
 				// No metadata
 				this._fileMetadata = null;
 				this.setTitle(title);
-				this._contentType = this.contentTypeService.getFilenameContentType(this.getTitle());
+				this._contentType = this.contentTypeRegistry.getFilenameContentType(this.getTitle());
 				name = this.getTitle();
 			}
 			var editor = this.getEditor();

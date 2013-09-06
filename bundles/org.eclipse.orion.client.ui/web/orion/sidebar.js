@@ -25,7 +25,6 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		this.params = params;
 		this.commandRegistry = params.commandRegistry;
 		this.contentTypeRegistry = params.contentTypeRegistry;
-		this.editor = params.editor;
 		this.fileClient = params.fileClient;
 		this.editorInputManager = params.editorInputManager;
 		this.outlineService = params.outlineService;
