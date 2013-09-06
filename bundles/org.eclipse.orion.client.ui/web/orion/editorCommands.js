@@ -17,6 +17,7 @@ define([
 	'orion/i18nUtil',
 	'orion/webui/littlelib',
 	'orion/webui/dialogs/OpenResourceDialog',
+	'orion/widgets/input/DropDownMenu',
 	'orion/Deferred',
 	'orion/URITemplate',
 	'orion/commands', 
@@ -29,7 +30,7 @@ define([
 	'orion/PageLinks',
 	'orion/blamer',
 	'orion/util'
-], function(messages, i18nUtil, lib, openResource, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, blamer, util) {
+], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, blamer, util) {
 
 	var exports = {};
 	
@@ -97,7 +98,7 @@ define([
 	}
 	exports.createDelegatedUI = createDelegatedUI;
 			
-	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId, localSearcher, searcher, editorSettings) {
+	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId, localSearcher, searcher, editorSettings, localSettings) {
 		this.serviceRegistry = serviceRegistry;
 		this.commandService = commandService;
 		this.fileClient = fileClient;
@@ -108,6 +109,7 @@ define([
 		this._localSearcher = localSearcher;
 		this._searcher = searcher;
 		this.editorSettings = editorSettings;
+		this.localSettings = localSettings;
 	}
 	EditorCommandFactory.prototype = {
 		/**
@@ -115,6 +117,7 @@ define([
 		 * contribute editor actions.  
 		 */
 		generateEditorCommands: function(editor) {
+			this._generateSettingsCommand(editor);
 			this._generateSearchFilesCommand(editor);
 			if (!this.isReadOnly) {
 				this._generateUndoStackCommands(editor);
@@ -126,6 +129,27 @@ define([
 			if (!this.isReadOnly) {
 				this._generateEditCommands(editor);
 			}
+		},
+		_generateSettingsCommand: function(editor) {
+			var self = this;
+			var settingsCommand = new mCommands.Command({
+				imageClass: "core-sprite-wrench", //$NON-NLS-0$
+				tooltip: messages.LocalEditorSettings,
+				id: "orion.edit.settings", //$NON-NLS-0$
+				visibleWhen: function() {
+					return !!editor.getTextView();
+				},
+				callback: function(data) {
+					var dropDown = settingsCommand.settingsDropDown;
+					if (!dropDown || dropDown.isDestroyed()) {
+						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domParent, data.domNode, 'dropdownSelection', true); //$NON-NLS-0$
+						dropDown.updateContent = self.localSettings.show.bind(self.localSettings);
+					}
+					dropDown.click();
+				}
+			});
+			this.commandService.addCommand(settingsCommand);
+			this.commandService.registerCommandContribution("settingsActions", "orion.edit.settings", 1, null, false, new mKeyBinding.KeyBinding("s", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		_generateUndoStackCommands: function(editor) {
 			var undoCommand = new mCommands.Command({

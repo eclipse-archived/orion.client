@@ -769,7 +769,8 @@ input {
 }
 
 .local .setting-label {
-	min-width: 80px;
+	width: 100px;
+	text-align: right;
 	display: inline-block;
 }
 

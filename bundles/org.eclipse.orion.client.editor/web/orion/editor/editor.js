@@ -557,10 +557,13 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
+				var keyBindings;
 				if (typeof this._keyBindingFactory === "function") { //$NON-NLS-0$
-					this._keyBindingFactory(this, this.getKeyModes(), this._undoStack, this._contentAssist);
+					keyBindings = this._keyBindingFactory(this, this.getKeyModes(), this._undoStack, this._contentAssist);
 				} else {
-					var keyBindings = this._keyBindingFactory.createKeyBindings(editor, this._undoStack, this._contentAssist);
+					keyBindings = this._keyBindingFactory.createKeyBindings(editor, this._undoStack, this._contentAssist);
+				}
+				if (keyBindings) {
 					this._textActions = keyBindings.textActions;
 					this._linkedMode = keyBindings.linkedMode;
 					this._sourceCodeActions = keyBindings.sourceCodeActions;

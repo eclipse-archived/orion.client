@@ -25,7 +25,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		'orion/widgets/plugin/PluginList',
 		'orion/widgets/settings/UserSettings',
 		'orion/widgets/settings/EditorSettings',
-		'edit/editorPreferences'
+		'orion/editorPreferences'
 		], function(messages, require, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
 			ThemeBuilder, SettingsList, mThemePreferences, containerThemeData, editorThemeData, SplitSelectionLayout, PluginList, UserSettings,
 			EditorSettings, mEditorPreferences) {

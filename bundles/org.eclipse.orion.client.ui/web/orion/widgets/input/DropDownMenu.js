@@ -19,7 +19,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	 * @param {Object} triggerNode The dom object or string id of the dom node that will trigger the dropdown menu appearance
 	 * @param {String} [selectionClass] CSS class to be appended when the trigger node is selected. Optional.
 	 */
-	function DropDownMenu( parent, triggerNode, selectionClass ){
+	function DropDownMenu( parent, triggerNode, selectionClass, noClick ){
 		var node = lib.node(parent);
 		if (node) {
 			this._parent = node;
@@ -49,7 +49,9 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		if (this._triggerNode.style.visibility === 'hidden') { //$NON-NLS-0$
 			this._triggerNode.style.visibility = 'visible'; //$NON-NLS-0$
 		}
-		this._triggerNode.onclick = this.click.bind(this);
+		if (!noClick) {
+			this._triggerNode.onclick = this.click.bind(this);
+		}
 	}
 	
 	objects.mixin(DropDownMenu.prototype, {
@@ -104,6 +106,10 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 				return node;
 			}
 			return this._boundingNode(node.parentNode);
+		},
+		
+		isDestroyed: function() {
+			return !this._dropdownMenu.parentNode;
 		},
 
 		destroy: function() {

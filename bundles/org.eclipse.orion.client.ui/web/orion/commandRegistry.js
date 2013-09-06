@@ -360,12 +360,14 @@ define([
 			var bindings = [];
 			for (var aBinding in this._activeBindings) {
 				binding = this._activeBindings[aBinding];
-				if (binding && binding.keyBinding && binding.command) {
+				if (binding && binding.keyBinding && binding.command && (binding.command.name || binding.command.tooltip)) {
 					bindings.push(binding);
 				}
 			}
 			bindings.sort(function (a, b) {
-				return a.command.name.localeCompare(b.command.name);
+				var ta = a.command.name || a.command.tooltip;
+				var tb = b.command.name || b.command.tooltip;
+				return ta.localeCompare(tb);
 			});
 			for (var i=0; i<bindings.length; i++) {
 				binding = bindings[i];
@@ -377,7 +379,7 @@ define([
 					scopes[binding.keyBinding.scopeName].push(binding);
 				} else {
 					bindingString = UIUtil.getUserKeyString(binding.keyBinding);
-					keyAssist.createItem(bindingString, binding.command.name, execute(binding));
+					keyAssist.createItem(bindingString, binding.command.name || binding.command.tooltip, execute(binding));
 				}
 			}
 			for (var scopedBinding in scopes) {
@@ -385,7 +387,7 @@ define([
 					keyAssist.createHeader(scopedBinding);
 					scopes[scopedBinding].forEach(function(binding) {
 						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
-						keyAssist.createItem(bindingString, binding.command.name, execute(binding));
+						keyAssist.createItem(bindingString, binding.command.name || binding.command.tooltip, execute(binding));
 					});
 				}	
 			}
