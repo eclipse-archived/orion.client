@@ -18,12 +18,11 @@ define([
 	'orion/Deferred',
 	'orion/EventTarget',
 	'orion/objects',
-	'orion/globalCommands',
 	'orion/edit/dispatcher',
 	'orion/highlight',
 	'orion/edit/syntaxmodel',
 	'orion/PageUtil'
-], function(messages, i18nUtil, Deferred, EventTarget, objects, mGlobalCommands, mDispatcher, Highlight, SyntaxModelWirer, PageUtil) {
+], function(messages, i18nUtil, Deferred, EventTarget, objects, mDispatcher, Highlight, SyntaxModelWirer, PageUtil) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -295,9 +294,6 @@ define([
 				this._idle.setTimeout(timeout);
 			}
 		},
-		setDirty: function(dirty) {
-			mGlobalCommands.setDirtyIndicator(dirty);
-		},
 		setSaveDiffsEnabled: function(enabled) {
 			this._saveDiffsEnabled = enabled;
 		},
@@ -431,7 +427,6 @@ define([
 					this.processParameters(input);
 				}.bind(this));
 			}
-			this.setDirty(false);
 		},
 		setTitle: function(title) {
 			var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
