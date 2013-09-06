@@ -250,7 +250,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	});
 
 	editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
-		inputManager.setDirty(editor.isDirty());
+		mGlobalCommands.setDirtyIndicator(editor.isDirty());
 	});
 
 	selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
