@@ -484,13 +484,42 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
                 assert.equal(plugin.getState(), "starting", "Plugin installed");
                 return serviceRegistry.getService("test").test().then(function() {
                     assert.equal(plugin.getState(), "active", "Plugin loaded (lazy)");
-                    return plugin.uninstall().then(function(){
-	                    assert.equal(plugin.getState(), "uninstalled", "Plugin uninstalled");
-	                    pluginRegistry.stop();
+                    return plugin.uninstall().then(function() {
+                        assert.equal(plugin.getState(), "uninstalled", "Plugin uninstalled");
+                        pluginRegistry.stop();
                     });
-                    
+
                 });
             });
+        });
+    };
+
+    tests["test plugin object reference call"] = function() {
+        var serviceRegistry = new mServiceregistry.ServiceRegistry();
+        var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, {
+            storage: {}
+        });
+
+        var called = false;
+
+        return pluginRegistry.start().then(function() {
+            var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+                return plugin.start({
+                    "lazy": true
+                }).then(function() {
+                    return serviceRegistry.getService("test").testCallback({
+                        test: function() {
+                            called = true;
+                            return "testCallback";
+                        }
+                    });
+                });
+            }).then(function(result) {
+                assert.equal(called, true);
+                assert.equal(result, "testCallback");
+                return pluginRegistry.stop();
+            });
+            return promise;
         });
     };
 
