@@ -85,24 +85,31 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 
 	var editor, inputManager, folderView, editorView;
 	function renderToolbars(metadata) {
-		if (!metadata) { return; }
 		var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 		if (toolbar) {
-			// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
-			mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, toolbar.id, 500).then(function() {
+			if (metadata) {
+				// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
+				mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, toolbar.id, 500).then(function() {
+					commandRegistry.destroy(toolbar);
+					commandRegistry.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
+				});
+			} else {
 				commandRegistry.destroy(toolbar);
-				commandRegistry.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
-			});
+			}
 		}
 		var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
 		if (rightToolbar) {
 			commandRegistry.destroy(rightToolbar);
-			commandRegistry.renderCommands(rightToolbar.id, rightToolbar, metadata, editor, "button"); //$NON-NLS-0$
+			if (metadata) {
+				commandRegistry.renderCommands(rightToolbar.id, rightToolbar, metadata, editor, "button"); //$NON-NLS-0$
+			}
 		}
 		var settingsToolbar = lib.node("settingsActions"); //$NON-NLS-0$
 		if (settingsToolbar) {
 			commandRegistry.destroy(settingsToolbar);
-			commandRegistry.renderCommands(settingsToolbar.id, settingsToolbar, metadata, editor, "button"); //$NON-NLS-0$
+			if (metadata) {
+				commandRegistry.renderCommands(settingsToolbar.id, settingsToolbar, metadata, editor, "button"); //$NON-NLS-0$
+			}
 		}
 	}
 
@@ -145,23 +152,18 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 			folderView.destroy();
 			folderView = null;
 		}
-		if (evt.input === null || typeof evt.input === "undefined") {//$NON-NLS-0$
-			// remove the toolbar
-			var toolbar = lib.node("pageActions"); //$NON-NLS-0$
-			if (toolbar) {
-				commandRegistry.destroy(toolbar);
-			}
-			return;
-		}
 		var metadata = evt.metadata;
 		renderToolbars(metadata);
 		commandRegistry.closeParameterCollector();
+		if (evt.input === null || evt.input === undefined) {
+			return;
+		}
 		mGlobalCommands.setPageTarget({
 			task: "Coding", //$NON-NLS-0$
 			name: evt.name,
 			target: metadata,
 			makeAlternate: function() {
-				if (metadata.Parents && metadata.Parents.length > 0) {
+				if (metadata && metadata.Parents && metadata.Parents.length > 0) {
 					// The mini-nav in sidebar wants to do the same work, can we share it?
 					return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
 				}
@@ -175,7 +177,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 
 		commandRegistry.processURL(window.location.href);
 
-		if (metadata.Directory) {
+		if (metadata && metadata.Directory) {
 			folderView = new mFolderView.FolderView({
 				parent: editorDomNode,
 				input: evt.input,
