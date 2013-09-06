@@ -320,16 +320,20 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			}
 		},
 		changedItem: function(item, forceExpand){
+			var res;
 			if(item.Location || forceExpand){
-				return FileExplorer.prototype.changedItem.call(this, item, forceExpand);
+				res =  FileExplorer.prototype.changedItem.call(this, item, forceExpand);
 			}
 			this.model.processParent(item, item.children ? item.children : []);
 			this.renderer.updateRow(item, lib.node(this.model.getId(item)));
+			return res;
 		}
 	});
 
 	function FilesNavRenderer() {
 		NavigatorRenderer.apply(this, arguments);
+		this.goIntoDirectory = false;
+		this.openDirectory = true;
 	}
 	FilesNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
 	objects.mixin(FilesNavRenderer.prototype, {
@@ -345,6 +349,15 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			return folderNode;
 		},
 		setFolderHref: function(linkElement, resource, navigate) {
+			if (this.openDirectory && !this.goIntoDirectory) {
+				return;
+			}
+			if (this.openDirectory && navigate) {
+				resource = navigate;
+			}
+			if (!this.goIntoDirectory) {
+				navigate = undefined;
+			}
 			linkElement.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
 				resource: resource,
 				params: {
@@ -397,10 +410,21 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var image = this.getExpandImage(tableRow, span);
 				var nameText = item.Dependency ? item.Dependency.Name : item.Name;
+				var itemNode = document.createElement("a");
 				if(item.disconnected){
 					nameText += " (disconnected)";
+				} else {
+					if(item.Dependency && item.FileMetadata){
+						itemNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+							resource: item.FileMetadata.Location
+						});
+					} else if(item.Location){
+						itemNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+							resource: item.Location
+						});
+					}
 				}
-				var itemNode = document.createTextNode(nameText);
+				itemNode.appendChild(document.createTextNode(nameText));
 				
 				if(item.Dependency){
 					var actions = document.createElement("span");
@@ -440,6 +464,16 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					});
 		var projectInfoNode = document.createElement("div");
 		projectInfoNode.id = "projectInfoNode";
+		var a = document.createElement("a");
+		a.style.color = "black";
+		a.href =  new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+				resource: projectData.ContentLocation
+			});
+		
+		
+		a.appendChild(document.createTextNode(projectData.Name));
+		lib.empty(titleWrapper.titleNode);
+		titleWrapper.titleNode.appendChild(a);
 		
 		this.parentNode.appendChild(projectInfoNode);
 		
@@ -500,13 +534,12 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				
 				if(projectData.Dependencies){
 					for(var i=0; i<projectData.Dependencies.length; i++){
-						(function(depenency_no){
-							this.projectClient.getDependencyFileMetadata(projectData.Dependencies[i], projectData.WorkspaceLocation).then(function(depenencyMetadata){
-								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[depenency_no], FileMetadata: depenencyMetadata, Location: depenencyMetadata.Location, ChildrenLocation: depenencyMetadata.ChildrenLocation}, true);
+						(function(dependency_no){
+							this.projectClient.getDependencyFileMetadata(projectData.Dependencies[i], projectData.WorkspaceLocation).then(function(dependencyMetadata){
+								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[dependency_no], FileMetadata: dependencyMetadata, Location: dependencyMetadata.Location, ChildrenLocation: dependencyMetadata.ChildrenLocation}, true);
 								return;
 							}.bind(this), function(error){
-								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[depenency_no], disconnected: true});
-								console.error(error);
+								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[dependency_no], disconnected: true});
 							}.bind(this));
 						}.bind(this))(i);
 					}
