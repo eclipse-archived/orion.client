@@ -17,6 +17,7 @@ define([
 	'orion/URITemplate',
 	'i18n!orion/nls/messages'
 ], function(require, PageLinks, PluginProvider, URITemplate, messages) {
+
 	var serviceImpl = { /* All data is in properties */ };
 
 	var headers = {
@@ -34,12 +35,18 @@ define([
 		nls: "orion/nls/messages",
 		uriTemplate: "{OrionHome}/navigate/table.html#"
 	});
-	provider.registerService("orion.page.link", serviceImpl, {
-		nameKey: "Sites",
-		id: "orion.sites",
-		nls: "orion/nls/messages",
-		uriTemplate: "{OrionHome}/sites/sites.html"
-	});
+//		provider.registerService("orion.page.link", serviceImpl, {
+//			nameKey: "Sites",
+//			id: "orion.sites",
+//			nls: "orion/nls/messages",
+//			uriTemplate: "{OrionHome}/sites/sites.html"
+//		});
+//		provider.registerService("orion.page.link", serviceImpl, {
+//			nameKey: "Repositories",
+//			id: "orion.repositories",
+//			nls: "orion/nls/messages",
+//			uriTemplate: "{OrionHome}/git/git-repository.html#"
+//		});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Shell",
 		id: "orion.shell",
@@ -69,30 +76,16 @@ define([
 			variableName: "NavigatorLocation",
 			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
 		}],
-		uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
-	});
-
-	provider.registerService("orion.page.link.related", null, {
-		id: "orion.editFromMetadata",
-		nameKey: "Editor",
-		nls: "orion/nls/messages",
-		tooltip: "Edit the code",
-		validationProperties: [{
-			source: "ChildrenLocation|ContentLocation",
-			variableName: "NavigatorLocation",
-			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
-		}],
-		uriTemplate: "{OrionHome}/edit/edit.html#,navigate={NavigatorLocation}?depth=1"
+			uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
 	});
 
 	provider.registerService("orion.page.link.user", null, {
 		id: "orion.help",
 		nameKey: "Help",
 		nls: "orion/widgets/nls/messages",
-		uriTemplate: require.toUrl("help/index.jsp"),
+		uriTemplate: 'http://wiki.eclipse.org/Orion/Getting_Started_with_Orion_node',
 		category: 0
 	});
-	
 	provider.registerService("orion.page.link.user", null, {
 		id: "orion.settings",
 		nameKey: "Settings",
@@ -108,33 +101,31 @@ define([
 
 	provider.registerService("orion.core.content", null, {
 		id: "orion.content.html5",
-		nameKey: "Sample HTML5 Site",
-		nls: "orion/nls/messages",
-		descriptionKey: "Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.",
+		name: "Sample HTML5 Site",
+		description: 'Generate an HTML5 "Hello World" website, including JavaScript, HTML, and CSS files.',
 		contentURITemplate: htmlHelloWorld.href
 	});
 
 	provider.registerService("orion.core.content", null, {
 		id: "orion.content.plugin",
-		nameKey: "Sample Orion Plugin",
-		nls: "orion/nls/messages",
-		descriptionKey: "Generate a sample plugin for integrating with Orion.",
+		name: "Sample Orion Plugin",
+		description: "Generate a sample plugin for integrating with Orion.",
 		contentURITemplate: pluginHelloWorld.href
 	});
 
 	provider.registerService("orion.core.setting", null, {
 		settings: [
 			{	pid: "nav.config",
-				name: messages["Navigation"],
+				name: "Navigation",
 				category: 'general',
 				properties: [
 					{	id: "links.newtab",
-						name: messages["Links"],
+						name: "Links",
 						type: "boolean",
 						defaultValue: false,
 						options: [
-							{value: true, label: messages["Open in new tab"]},
-							{value: false, label: messages["Open in same tab"]}
+							{value: true, label: "Open in new tab"},
+							{value: false, label: "Open in same tab"}
 						]
 					}
 				]
