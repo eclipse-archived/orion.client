@@ -568,6 +568,17 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return this.skipClosingBracket(']'); //$NON-NLS-0$
 			}.bind(this));
 
+			// Autocomplete angle brackets <>
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("<", false, false, false, false, "keypress"), "autoPairAngleBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("autoPairAngleBracket", function() { //$NON-NLS-0$
+				return this.autoPairBrackets("<", ">"); //$NON-NLS-1$ //$NON-NLS-0$
+			}.bind(this));
+
+			textView.setKeyBinding(new mKeyBinding.KeyBinding('>', false, false, false, false, "keypress"), "skipClosingSquareBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("skipClosingSquareBracket", function() { //$NON-NLS-0$
+				return this.skipClosingBracket('>'); //$NON-NLS-0$
+			}.bind(this));
+
 			// Autocomplete parentheses ()
 			textView.setKeyBinding(new mKeyBinding.KeyBinding("(", false, false, false, false, "keypress"), "autoPairParentheses"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("autoPairParentheses", function() { //$NON-NLS-0$
@@ -646,7 +657,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					return true;
 				// Proceed with autocompleting multi-line comment if the text before the caret matches
 				// the start or comment delimiter (*) of a multi-line comment
-				} else if ((!matchCommentEnd.test(lineTextBeforeCaret)) &&
+				} else if (this.autoCompleteComments && !matchCommentEnd.test(lineTextBeforeCaret) &&
 							(matchCommentStart.test(lineTextBeforeCaret) || matchCommentDelimiter.test(lineTextBeforeCaret))) {
 					var caretOffset;
 
@@ -754,7 +765,16 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		 * Automatically inserts the specified opening and closing brackets around the caret or selected text.
 		 */
 		autoPairBrackets: function(openBracket, closeBracket) {
-			if (!this.autoPairing) { return false; }
+			if (openBracket === "[" && !this.autoPairSquareBrackets) {
+				return false;
+			} else if (openBracket === "{" && !this.autoPairBraces) {
+				return false;
+			} else if (openBracket === "(" && !this.autoPairParentheses) {
+				return false;
+			} else if (openBracket === "<" && !this.autoPairAngleBrackets) {
+				return false;
+			}
+
 			var editor = this.editor;
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
@@ -784,7 +804,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		 * Automatically inserts a pair of the specified quotation around the caret the caret or selected text.
 		 */
 		autoPairQuotations: function(quotation) {
-			if (!this.autoPairing) { return false; }
+			if (!this.autoPairQuotation) { return false; }
 			var editor = this.editor;
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
@@ -1087,8 +1107,23 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				this.undoStack.endCompoundChange();
 			}
 		},
-		setAutoPairing: function(enabled) {
-			this.autoPairing = enabled;
+		setAutoPairParentheses: function(enabled) {
+			this.autoPairParentheses = enabled;
+		},
+		setAutoPairBraces: function(enabled) {
+			this.autoPairBraces = enabled;
+		},
+		setAutoPairSquareBrackets: function(enabled) {
+			this.autoPairSquareBrackets = enabled;
+		},
+		setAutoPairAngleBrackets: function(enabled) {
+			this.autoPairAngleBrackets = enabled;
+		},
+		setAutoPairQuotations: function(enabled) {
+			this.autoPairQuotation = enabled;
+		},
+		setAutoCompleteComments: function(enabled) {
+			this.autoCompleteComments = enabled;
 		},
 		setSmartIndentation: function(enabled) {
 			this.smartIndentation = enabled;

@@ -2,13 +2,13 @@
 
 define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 [
-	'i18n!orion/settings/nls/messages', //$NON-NLS-0$ 
+	'i18n!orion/settings/nls/messages', //$NON-NLS-0$
 	'orion/widgets/input/LabeledTextfield', //$NON-NLS-0$
 	'orion/widgets/input/LabeledCheckbox',  //$NON-NLS-0$
-	'orion/widgets/input/LabeledSelect', //$NON-NLS-0$ 
-	'orion/section', //$NON-NLS-0$ 
+	'orion/widgets/input/LabeledSelect', //$NON-NLS-0$
+	'orion/section', //$NON-NLS-0$
 	'orion/widgets/settings/Subsection', //$NON-NLS-0$
-	'orion/commands', //$NON-NLS-0$ 
+	'orion/commands', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
 	'orion/webui/littlelib' //$NON-NLS-0$
 ], function(messages, LabeledTextfield, LabeledCheckbox, LabeledSelect, mSection, Subsection, commands, objects, lib)  {
@@ -17,7 +17,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		"Emacs", //$NON-NLS-0$
 		"vi" //$NON-NLS-0$
 	];
-	
+
 	var localIndicatorClass = "setting-local-indicator"; //$NON-NLS-0$
 	var on = "on"; //$NON-NLS-0$
 	var off = "off"; //$NON-NLS-0$
@@ -41,16 +41,16 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		}
 		return widget;
 	}
-	
+
 	function createBooleanProperty(property, options, prefs) {
 		return addLocalIndicator(new LabeledCheckbox(options), property, this, options, prefs);
 	}
-	
+
 	function createIntegerProperty(property, options, prefs) {
 		options.inputType = "integer"; //$NON-NLS-0$
 		return addLocalIndicator(new LabeledTextfield(options), property, this, options, prefs);
 	}
-	
+
 	function createSelectProperty(property, options, prefs) {
 		var keys = this.values;
 		options.options = [];
@@ -59,7 +59,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			var set = {
 				value: key,
 				label: key
-			};	
+			};
 			if( key === prefs[property] ){
 				set.selected = true;
 			}
@@ -67,19 +67,19 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		}
 		return addLocalIndicator(new LabeledSelect(options), property, this, options, prefs);
 	}
-	
+
 	function validateIntegerProperty(property, prefs) {
 		if (!(this.min <= prefs[property] && prefs[property] <= this.max)) {
 			return messages[property + "Invalid"]; //$NON-NLS-0$
 		}
 		return "";
 	}
-	
+
 	var sections = {
 		editorSettings: {
 			keys: {
 				keyBindings: {
-					values: KEY_MODES, 
+					values: KEY_MODES,
 					create: createSelectProperty
 				}
 			},
@@ -104,7 +104,22 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				}
 			},
 			typing: {
-				autoPairing: {
+				autoPairQuotations: {
+					create: createBooleanProperty
+				},
+				autoPairParentheses: {
+					create: createBooleanProperty
+				},
+				autoPairBraces: {
+					create: createBooleanProperty
+				},
+				autoPairSquareBrackets: {
+					create: createBooleanProperty
+				},
+				autoPairAngleBrackets: {
+					create: createBooleanProperty
+				},
+				autoCompleteComments: {
 					create: createBooleanProperty
 				},
 				smartIndentation: {
@@ -157,7 +172,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 		}
 	};
-				
+
 	function EditorSettings(options, node) {
 		objects.mixin(this, options);
 		this.node = node;
@@ -182,7 +197,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		},
 		createSections: function() {
 			var prefs = this.oldPrefs;
-		
+
 			var fields = [], subSection, options, set, select;
 			var themePreferences = this.themePreferences;
 			if (!this.local && this.editorThemeWidget) {
@@ -192,7 +207,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					canHide: true,
 					slideout: true
 				});
-				
+
 				this.editorThemeWidget.renderData( this.editorThemeSection.getContentElement(), 'INITIALIZE' ); //$NON-NLS-0$
 			} else {
 				var themeStyles = this.oldThemeStyles;
@@ -203,12 +218,12 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 						set = {
 							value: styles[theme].name,
 							label: styles[theme].name
-						};	
+						};
 						if( styles[theme].name === themeStyles.style.name ){
 							set.selected = true;
 						}
 						options.push(set);
-					}	
+					}
 					fields.push(select = this.themeSelect = new LabeledSelect( {fieldlabel:messages.Theme, options:options}));
 					select.setStorageItem = function(name) {
 						themePreferences.setTheme(name);
@@ -226,7 +241,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 							set.selected = true;
 						}
 						options.push(set);
-					}	
+					}
 					fields.push(select = this.sizeSelect = new LabeledSelect( {fieldlabel:messages["Font Size"], options:options}));
 					select.setStorageItem = function(size) {
 						themePreferences.setFontSize(size);
@@ -238,7 +253,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					fields = [];
 				}
 			}
-			
+
 			var sectionWidget, subsectionWidget;
 			for (var section in sections) {
 				if (sections.hasOwnProperty(section)) {
@@ -270,7 +285,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					}
 				}
 			}
-			
+
 			if (this.local) {
 				fields.forEach(function(child) {
 					this.sections.appendChild( child.node );
@@ -293,7 +308,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			});
 			this.commandService.addCommand(restoreCommand);
 			this.commandService.registerCommandContribution('restoreEditorSettingCommand', "orion.restoreeditorsettings", 2); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands('restoreEditorSettingCommand', toolbar, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$			
+			this.commandService.renderCommands('restoreEditorSettingCommand', toolbar, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 			var updateCommand = new commands.Command({
 				name: messages.Update,
@@ -305,7 +320,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			});
 			this.commandService.addCommand(updateCommand);
 			this.commandService.registerCommandContribution('editorSettingCommand', "orion.updateeditorsettings", 1); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands('editorSettingCommand', toolbar, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$		
+			this.commandService.renderCommands('editorSettingCommand', toolbar, this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		valueChanged: function() {
 			var currentPrefs = {};
@@ -351,7 +366,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					this._progress(msg,"Error"); //$NON-NLS-0$
 					return;
 				}
-				this.preferences.setPrefs(currentPrefs, function () { 
+				this.preferences.setPrefs(currentPrefs, function () {
 					this.setValues(this.oldPrefs = currentPrefs);
 					this._progress(messages["Editor preferences updated"], "Normal"); //$NON-NLS-0$
 				}.bind(this));
@@ -363,7 +378,7 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 		},
 		restore: function() {
-			this.preferences.setPrefs({}, function (editorPrefs){ 
+			this.preferences.setPrefs({}, function (editorPrefs){
 				this._show(editorPrefs);
 				this._progress(messages["Editor defaults restored"], "Normal"); //$NON-NLS-0$
 			}.bind(this));
@@ -447,6 +462,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			}
 		}
 	});
-	
+
 	return EditorSettings;
 });
