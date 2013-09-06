@@ -441,35 +441,10 @@ define([
 		},
 		_trimTrailingWhiteSpaces: function() {
 			var editor = this.editor;
-			var model = editor.getModel();
-			var selection = editor.getSelection();
-			editor.getTextView().setRedraw(false);
-			editor.getUndoStack().startCompoundChange();
-			var matchTrailingWhiteSpace = /(\s+$)/;
-			var lineCount = model.getLineCount();
-			for (var i = 0; i < lineCount; i++) {
-				var lineText = model.getLine(i);
-				var match = matchTrailingWhiteSpace.exec(lineText);
-				if (match) {
-					var lineStartOffset = model.getLineStart(i);
-					var matchLength = match[0].length;
-					var start = lineStartOffset + match.index;
-					model.setText("", start, start + matchLength);
-					/**
-					 * Move the caret to its original position prior to the save. If the caret
-					 * was in the trailing whitespaces, move the caret to the end of the line.
-					 */
-					if (selection.start > start) {
-						selection.start = Math.max(start, selection.start - matchLength);
-					}
-					if (selection.start !== selection.end && selection.end > start) {
-						selection.end = Math.max(start, selection.end - matchLength);
-					}
-				}
+			var textView = editor.getTextView();
+			if (textView) {
+				textView.invokeAction("trimTrailingWhitespaces"); //$NON-NLS-0$
 			}
-			editor.getUndoStack().endCompoundChange();
-			editor.getTextView().setRedraw(true);
-			editor.setSelection(selection.start, selection.end, false);
 		}
 	});
 	return {

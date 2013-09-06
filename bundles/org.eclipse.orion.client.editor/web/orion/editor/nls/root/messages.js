@@ -127,6 +127,7 @@ define({
 	"expandAll": "Expand All", //$NON-NLS-1$ //$NON-NLS-0$
 	"collapseAll": "Collapse All", //$NON-NLS-1$ //$NON-NLS-0$
 	"lastEdit": "Last Edit Location", //$NON-NLS-1$ //$NON-NLS-0$
+	"trimTrailingWhitespaces": "Trim Trailing Whitespaces", //$NON-NLS-1$ //$NON-NLS-0$
 	"toggleLineComment": "Toggle Line Comment", //$NON-NLS-1$ //$NON-NLS-0$
 	"addBlockComment": "Add Block Comment", //$NON-NLS-1$ //$NON-NLS-0$
 	"removeBlockComment": "Remove Block Comment", //$NON-NLS-1$ //$NON-NLS-0$
