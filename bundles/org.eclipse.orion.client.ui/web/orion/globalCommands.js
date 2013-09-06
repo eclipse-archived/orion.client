@@ -676,8 +676,8 @@ define([
 				searchRenderer: searcher.defaultRenderer,
 				onHide: function () {
 					showingResourceDialog = false;
-					if (editor && editor.getTextView()) {
-						editor.getTextView().focus();
+					if (editor) {
+						editor.focus();
 					}
 				}
 			});

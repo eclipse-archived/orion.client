@@ -140,7 +140,7 @@ define([
 			}.bind(this));
 			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, new mThemeData.ThemeData());
 			themePreferences.apply();
-			var localSettings = new EditorSettings({local: true, themePreferences: themePreferences, preferences: editorPreferences});
+			var localSettings;
 
 			var self = this;
 
@@ -240,6 +240,8 @@ define([
 				statusReporter: this.statusReporter.bind(this),
 				domNode: editorDomNode
 			});
+			
+			localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
 
 			inputManager.addEventListener("ContentTypeChanged", function(event) { //$NON-NLS-0$
 				self.updateStyler(self.settings);

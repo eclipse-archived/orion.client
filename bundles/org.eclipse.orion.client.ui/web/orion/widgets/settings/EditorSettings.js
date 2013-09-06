@@ -358,6 +358,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			} else {
 				this.setValues(this.oldPrefs);
 			}
+			if (this.editor) {
+				this.editor.focus();
+			}
 		},
 		restore: function() {
 			this.preferences.setPrefs({}, function (editorPrefs){ 

@@ -142,8 +142,17 @@ define([
 				callback: function(data) {
 					var dropDown = settingsCommand.settingsDropDown;
 					if (!dropDown || dropDown.isDestroyed()) {
-						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domParent, data.domNode, 'dropdownSelection', true); //$NON-NLS-0$
+						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domParent, data.domNode, 'dropdownSelection', { //$NON-NLS-0$
+							noClick: true,
+							onShow: function() {
+								dropDown.focus();
+							},
+							onHide: function() {
+								editor.focus();
+							}
+						});
 						dropDown.updateContent = self.localSettings.show.bind(self.localSettings);
+						dropDown.getContentNode().tabIndex = 0;
 					}
 					dropDown.click();
 				}
@@ -217,9 +226,7 @@ define([
 						initialText: searchTerm,
 						onHide: function () {
 							showingSearchDialog = false;
-							if (editor && editor.getTextView()) {
-								editor.getTextView().focus();
-							}
+							editor.focus();
 						}
 					});
 					window.setTimeout(function () {
@@ -509,13 +516,13 @@ define([
 							}
 							if (result.selection) {
 								editor.setSelection(result.selection.start, result.selection.end, true /*scroll to*/);
-								editor.getTextView().focus();
+								editor.focus();
 							}
 						} else {
 							if (typeof result === 'string') { //$NON-NLS-0$
 								editor.setText(result, selection.start, selection.end, true /*scroll to*/);
 								editor.setSelection(selection.start, selection.start + result.length);
-								editor.getTextView().focus();
+								editor.focus();
 							}
 						}
 					};

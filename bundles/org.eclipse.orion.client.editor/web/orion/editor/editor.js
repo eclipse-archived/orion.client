@@ -221,6 +221,14 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._textActions;
 		},
 		/**
+		 * Gives focus to the text view.
+		 */
+		focus: function() {
+			if (this._textView) {
+				this._textView.focus();
+			}
+		},
+		/**
 		 * Returns <code>true</code> if the editor is dirty; <code>false</code> otherwise.
 		 * @returns {Boolean} 
 		 */
