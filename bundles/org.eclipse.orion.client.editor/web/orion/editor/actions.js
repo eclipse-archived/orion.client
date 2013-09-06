@@ -537,6 +537,11 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return this.autoIndent();
 			}.bind(this));
 
+			textView.setKeyBinding(new mKeyBinding.KeyBinding("t", true, false, true), "trimTrailingWhitespaces"); //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("trimTrailingWhitespaces", function() { //$NON-NLS-0$
+				return this.trimTrailingWhitespaces();
+			}.bind(this), {name: messages.trimTrailingWhitespaces});
+
 			textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true), "toggleLineComment"); //$NON-NLS-0$
 			textView.setAction("toggleLineComment", function() { //$NON-NLS-0$
 				return this.toggleLineComment();
@@ -700,7 +705,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					return false;
 				} else if (matchCommentEnd.test(lineTextBeforeCaret)) {
 					// Matches the end of a block comment. Fix the indentation for the following line.
-					var text = lineText.substring(selection.start) + lineDelimiter + prefix.substring(0, prefix.length - 1);
+					text = lineText.substring(selection.start) + lineDelimiter + prefix.substring(0, prefix.length - 1);
 					editor.setText(text, selection.start, selection.end);
 					editor.setCaretOffset(selection.start + text.length);
 					return true;
@@ -1018,6 +1023,38 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			editor.setText(text, lineStart, lineEnd);
 			editor.setSelection(selStart, selEnd);
 			return true;
+		},
+		trimTrailingWhitespaces: function() {
+			var editor = this.editor;
+			var model = editor.getModel();
+			var selection = editor.getSelection();
+			editor.getTextView().setRedraw(false);
+			editor.getUndoStack().startCompoundChange();
+			var matchTrailingWhiteSpace = /(\s+$)/;
+			var lineCount = model.getLineCount();
+			for (var i = 0; i < lineCount; i++) {
+				var lineText = model.getLine(i);
+				var match = matchTrailingWhiteSpace.exec(lineText);
+				if (match) {
+					var lineStartOffset = model.getLineStart(i);
+					var matchLength = match[0].length;
+					var start = lineStartOffset + match.index;
+					model.setText("", start, start + matchLength);
+					/**
+					 * Move the caret to its original position prior to the save. If the caret
+					 * was in the trailing whitespaces, move the caret to the end of the line.
+					 */
+					if (selection.start > start) {
+						selection.start = Math.max(start, selection.start - matchLength);
+					}
+					if (selection.start !== selection.end && selection.end > start) {
+						selection.end = Math.max(start, selection.end - matchLength);
+					}
+				}
+			}
+			editor.getUndoStack().endCompoundChange();
+			editor.getTextView().setRedraw(true);
+			editor.setSelection(selection.start, selection.end, false);
 		},
 		startUndo: function() {
 			if (this.undoStack) {
