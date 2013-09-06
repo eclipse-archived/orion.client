@@ -879,6 +879,11 @@ input {
     border-top: 4px solid #FBFBFB;
 }
 
+.projectNavColumn a{
+	color: #999;
+    font-weight: bold;
+}
+
 div.orionMarkdown {
 	padding: 1em;
 }
