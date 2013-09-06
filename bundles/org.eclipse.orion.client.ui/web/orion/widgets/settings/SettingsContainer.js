@@ -40,6 +40,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 	function SettingsContainer(options, node) {
 		SplitSelectionLayout.apply(this, arguments);
 
+		var getPluginsRefs = this.registry.getServiceReferences("orion.core.getplugins"); //$NON-NLS-0$
+		this.pluginsUri = getPluginsRefs[0] && getPluginsRefs[0].getProperty("uri"); //$NON-NLS-0$
+
 		this.settingsCategories = [
 			{
 				id: "userSettings", //$NON-NLS-0$
@@ -251,10 +254,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			var pluginNode = document.createElement('div');
 			this.table.appendChild(pluginNode);
 
-			/* TODO:Customizing and including a 'get plugins' link needs some better thinking than defining it here. */
-			var VERSION = "4.0";
-			var pluginUriTemplate = "http://mamacdon.github.io/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}";
-
 			this.pluginWidget = new PluginList({
 				settings: this.settingsCore,
 				preferences: this.preferences,
@@ -262,7 +261,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 				dialogService: this.preferenceDialogService,
 				commandService: this.commandService,
 				registry: this.registry,
-				pluginsUri: pluginUriTemplate
+				pluginsUri: this.pluginsUri
 			}, pluginNode);
 			
 			this.pluginWidget.show();

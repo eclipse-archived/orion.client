@@ -338,12 +338,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 		},
 		
 		getPluginsLink: function( data ){		
-			var uriTemplate = this.pluginsUri;
-			var template = new URITemplate(uriTemplate);
-			var url = decodeURIComponent(template.expand({
-				OrionHome: PageLinks.getOrionHome()
-			}));
-			return url;
+			return this.pluginsUri;
 		},
 
 		pluginError: function( error ){
