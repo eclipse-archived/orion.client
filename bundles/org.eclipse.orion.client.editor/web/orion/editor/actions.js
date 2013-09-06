@@ -631,12 +631,18 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var lineTextAfterCaret = lineText.substring(lineOffset);
 				var text;
 				// If the character before the caret is an opening brace, smart indent the next line.
-				if (this.smartIndentation && lineText.charCodeAt(lineOffset - 1) === 123) {
-					text = lineText.charCodeAt(lineOffset) === 125 ?
+				var prevCharIdx = lineTextBeforeCaret.trimRight().length - 1;
+				if (this.smartIndentation && lineText.charCodeAt(prevCharIdx) === 123) {
+					// Remove any extra whitespace
+					var whitespaceBeforeCaret = lineOffset - prevCharIdx - 1;
+					var whitespaceAfterCaret = lineTextAfterCaret.length - lineTextAfterCaret.trimLeft().length;
+
+					text = lineText.charCodeAt(lineOffset + whitespaceAfterCaret) === 125 ?
 						   lineDelimiter + prefix + tab + lineDelimiter + prefix :
 						   lineDelimiter + prefix + tab;
-					editor.setText(text, selection.start, selection.end);
-					editor.setCaretOffset(selection.start + lineDelimiter.length + prefix.length + tab.length);
+
+					editor.setText(text, selection.start - whitespaceBeforeCaret, selection.end + whitespaceAfterCaret);
+					editor.setCaretOffset(selection.start + lineDelimiter.length + prefix.length + tab.length - whitespaceBeforeCaret);
 					return true;
 				// Proceed with autocompleting multi-line comment if the text before the caret matches
 				// the start or comment delimiter (*) of a multi-line comment
