@@ -183,6 +183,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 				input: evt.input,
 				metadata: evt.metadata,
 				contents: JSON.parse(evt.contents),
+				serviceRegistry: serviceRegistry,
 				fileService: fileClient,
 				progress: progressService
 			});
