@@ -20,29 +20,16 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 	'orion/editor/keyModes', //$NON-NLS-0$
 	'orion/editor/eventTarget', //$NON-NLS-0$
 	'orion/editor/textTheme', //$NON-NLS-0$
+	'orion/editor/util', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, util) {
+], function(messages, mTextModel, mKeyModes, mEventTarget, mTextTheme, textUtil, util) {
 
 	/** @private */
 	function getWindow(document) {
 		return document.defaultView || document.parentWindow;
 	}
-	/** @private */
-	function addHandler(node, type, handler, capture) {
-		if (typeof node.addEventListener === "function") { //$NON-NLS-0$
-			node.addEventListener(type, handler, capture === true);
-		} else {
-			node.attachEvent("on" + type, handler); //$NON-NLS-0$
-		}
-	}
-	/** @private */
-	function removeHandler(node, type, handler, capture) {
-		if (typeof node.removeEventListener === "function") { //$NON-NLS-0$
-			node.removeEventListener(type, handler, capture === true);
-		} else {
-			node.detachEvent("on" + type, handler); //$NON-NLS-0$
-		}
-	}
+	var addHandler = textUtil.addEventListener;
+	var removeHandler = textUtil.removeEventListener;
 	/** @private */
 	function applyStyle(style, node, reset) {
 		if (reset) {
@@ -906,6 +893,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 									range.moveToElementText(lineChild);
 									range.move("character", start); //$NON-NLS-0$
 									range.moveEnd("character", end - start); //$NON-NLS-0$
+									console.log("step=" + start + " " + end);
 								}
 								rects = range.getClientRects();
 								var found = false;
@@ -917,6 +905,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 									rangeBottom = rect.bottom * yFactor - lineRect.top;
 									if (rangeLeft <= x && x < rangeRight && (!view._wrapMode || (rangeTop <= y && y < rangeBottom))) {
 										found = true;
+										console.log("found");
 										break;
 									}
 								}
@@ -928,6 +917,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 							}
 							offset += high;
 							start = high;
+							console.log("step1=" + start + " " + end);
+							console.log("nodeLenght=" + nodeLength + " ignoreChars=" + lineChild.ignoreChars + " textLength=" + textNode.length + " high=" + high); 
 							end = high === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : Math.min(high + 1, textNode.length);
 							if (view._isRangeRects) {
 								range.setStart(textNode, start);
@@ -937,7 +928,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 								range.move("character", start); //$NON-NLS-0$
 								range.moveEnd("character", end - start); //$NON-NLS-0$
 							}
-							rect = range.getClientRects()[0];
+							rects = range.getClientRects();
+							console.log(start + " " + end);
+							rect = rects[0];
 							rangeLeft = rect.left * xFactor - lineRect.left;
 							rangeRight = rect.right * xFactor - lineRect.left;
 							//TODO test for character trailing (wrong for bidi)

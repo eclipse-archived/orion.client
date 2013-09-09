@@ -11,13 +11,14 @@
 /*global define*/
 define([], function() {
 	function mixin(target/*, source..*/) {
-		Array.prototype.slice.call(arguments, 1).forEach(function(source) {
-			var keys = Object.keys(source);
-			for (var i=0; i < keys.length; i++) {
-				var key = keys[i];
-				target[key] = source[key];
+		for (var j = 1; j < arguments.length; j++) {
+			var source = arguments[j];
+			for (var key in source) {
+				if (source.hasOwnProperty(key)) {
+					target[key] = source[key];
+				}
 			}
-		});
+		}
 	}
 
 	/**

@@ -16,8 +16,9 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 	'orion/editor/textView', //$NON-NLS-0$
 	'orion/editor/textModel', //$NON-NLS-0$
 	'orion/editor/projectionTextModel', //$NON-NLS-0$
+	'orion/editor/util', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mTextView, mTextModel, mProjectionTextModel, util) {
+], function(messages, mTextView, mTextModel, mProjectionTextModel, textUtil, util) {
 
 	/** @private */
 	function Tooltip (view) {
@@ -46,7 +47,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			tooltipDiv.appendChild(tooltipContents);
 			document.body.appendChild(tooltipDiv);
 			var self = this;
-			tooltipDiv.addEventListener("mouseover", function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "mouseover", function(event) { //$NON-NLS-0$
 				if (!self._hideDelay) { return; }
 				var window = self._getWindow();
 				if (self._delayedHideTimeout) {
@@ -60,7 +61,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				}
 				self._nextTarget = null;
 			}, false);
-			tooltipDiv.addEventListener("mouseout", function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "mouseout", function(event) { //$NON-NLS-0$
 				if (event.relatedTarget === tooltipDiv || self._hasFocus()) { return; }
 				if (event.relatedTarget) {
 					var relatedCompare = event.relatedTarget.compareDocumentPosition(tooltipDiv);
@@ -68,12 +69,12 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				}
 				self._hide();
 			}, false);
-			tooltipDiv.addEventListener("keydown", function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(tooltipDiv, "keydown", function(event) { //$NON-NLS-0$
 				if (event.keyCode === 27) {
 					self._hide();
 				}
 			}, false);
-			document.addEventListener("mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
+			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
 				if (!self.isVisible()) { return; }
 				var relatedCompare = event.target.compareDocumentPosition(tooltipDiv);
 				if (relatedCompare & 8) { return; }
@@ -94,15 +95,14 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			var parent = this._tooltipDiv.parentNode;
 			if (parent) { parent.removeChild(this._tooltipDiv); }
 			var document = this._tooltipDiv.ownerDocument;
-			document.removeEventListener("mousedown", this._mouseDownHandler, true); //$NON-NLS-0$
+			textUtil.removeEventListener(document, "mousedown", this._mouseDownHandler, true); //$NON-NLS-0$
 			this._tooltipDiv = null;
 		},
 		_hasFocus: function() {
 			var tooltipDiv = this._tooltipDiv;
 			if (!tooltipDiv) { return false; }
 			var document = tooltipDiv.ownerDocument;
-			var activeElement = document.activeElement;
-			return tooltipDiv === activeElement || (tooltipDiv.compareDocumentPosition(activeElement) & 16) !== 0;
+			return textUtil.contains(tooltipDiv, document.activeElement);
 		},
 		hide: function(hideDelay) {
 			if (hideDelay === undefined) {
@@ -299,7 +299,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				if (annotation.html) {
 					result.innerHTML = annotation.html;
 					if (result.lastChild) {
-						result.lastChild.addEventListener("click", function(event) { //$NON-NLS-0$
+						textUtil.addEventListener(result.lastChild, "click", function(event) { //$NON-NLS-0$
 							var start = annotation.start, end = annotation.end;
 							if (model.getBaseModel) {
 								start = model.mapOffset(start, true);
