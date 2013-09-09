@@ -57,7 +57,7 @@ define(['orion/markdownView', 'orion/projects/projectEditor'], function(mMarkdow
 				this._parent.appendChild(this._node);
 			} else if (readmeMd) {
 				this._node = document.createElement("div");
-				this.markdownView.displayContents(this._node, readmeMd);
+				this.markdownView.displayInFrame(this._node, readmeMd);
 				this._parent.appendChild(this._node);
 			}
 		},
