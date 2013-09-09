@@ -111,6 +111,8 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient'], f
 					var child = children[i];
 					if (!child.Directory && child.Name && child.Name.toLowerCase() === "readme.md") { //$NON-NLS-0$
 						div = document.createElement("div");
+						div.style.overflow = "auto";
+						div.style.maxHeight = "400px";
 						this.fileClient.read(child.Location).then(function(markdown){
 							this.markdownView.display(div, markdown);
 						}.bind(this));
