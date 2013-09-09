@@ -9,7 +9,7 @@
  ******************************************************************************/
  
 /*global define document*/
-define(['orion/markdownView'], function(mMarkdownView) { //$NON-NLS-0$
+define(['orion/markdownView', 'orion/projects/projectEditor'], function(mMarkdownView, mProjectEditor) { //$NON-NLS-0$
 	/** 
 	 * Constructs a new FolderView object.
 	 * 
@@ -23,6 +23,7 @@ define(['orion/markdownView'], function(mMarkdownView) { //$NON-NLS-0$
 		this._metadata = options.metadata;
 		this.fileClient = options.fileService;
 		this.progress = options.progress;
+		this.serviceRegistry = options.serviceRegistry;
 		this._init();
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
@@ -30,6 +31,11 @@ define(['orion/markdownView'], function(mMarkdownView) { //$NON-NLS-0$
 			this.markdownView = new mMarkdownView.MarkdownView({
 				fileClient : this.fileClient,
 				progress : this.progress
+			});
+			this.projectEditor = new mProjectEditor.ProjectEditor({
+				fileClient : this.fileClient,
+				progress : this.progress,
+				serviceRegistry: this.serviceRegistry
 			});
 		},
 		displayFolderView: function(children){
@@ -45,12 +51,13 @@ define(['orion/markdownView'], function(mMarkdownView) { //$NON-NLS-0$
 				}
 
 			}
-			if (readmeMd) {
+			if(projectJson){
+				this._node = document.createElement("div");
+				this.projectEditor.displayContents(this._node, this._contents);
+				this._parent.appendChild(this._node);
+			} else if (readmeMd) {
 				this._node = document.createElement("div");
 				this.markdownView.displayContents(this._node, readmeMd);
-				this._parent.appendChild(this._node);
-			} else if(projectJson){
-				this._node = document.createTextNode("This is a project " + this._contents.Name);
 				this._parent.appendChild(this._node);
 			}
 		},

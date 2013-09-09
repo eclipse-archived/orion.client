@@ -891,3 +891,32 @@ div.orionMarkdown {
 .orionMarkdown h1 {
 	position: relative;
 }
+
+.orionProject table {
+	text-align: left;
+	border-collapse: collapse;
+	border-spacing: 0;
+	border-right: 1px solid lightgrey;
+	border-left: 1px solid lightgrey;
+	width: 90%;
+	margin-left: 5%;
+	margin-right: 5%;
+	margin-top: 30px;
+}
+
+.orionProject td {
+	border-bottom: 1px solid lightgrey;
+	padding: 8px;
+	color: grey;
+}
+
+.orionProject th {
+	border-bottom: 1px solid lightgrey;
+	border-top: 1px solid lightgrey;
+	background: none repeat scroll 0 0 whitesmoke;
+	font-weight: normal;
+	padding: 8px;
+	text-transform:uppercase;
+	color: grey;
+}
+
