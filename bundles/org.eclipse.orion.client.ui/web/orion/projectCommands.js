@@ -381,6 +381,47 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		});
 		commandService.addCommand(disconnectDependencyCommand);
 		
+		var editReadmeCommand = new mCommands.Command({
+			name: "Edit",
+			tooltip: "Edit this project readme.md",
+			id: "orion.project.edit.readme",
+			hrefCallback: function(data){
+				var item = forceSingleItem(data.items);
+				return "./edit.html#" + item.Location;
+			},
+			visibleWhen: function(item) {
+				if(!item.Location || !item.Name){
+					return false;
+				}
+				return item.Name.toLowerCase() === "readme.md";
+			}
+		});
+				
+		commandService.addCommand(editReadmeCommand);
+		
+		var addReadmeCommand = new mCommands.Command({
+			name: "Create readme",
+			tooltip: "Create README.md file in this project",
+			id: "orion.project.create.readme",
+			callback: function(data){
+				var item = forceSingleItem(data.items);
+				progress.progress(fileClient.createFile(item.Location, "README.md"), "Creating README.md").then(function(readmeMeta){
+					if(item.Project){
+						progress.progress(fileClient.write(readmeMeta.Location, "# " + item.Project.Name), "Writing sample readme").then(function(){
+							explorer.changedItem();							
+						});
+					} else {
+						explorer.changedItem();
+					}
+				});
+			},
+			visibleWhen: function(item) {
+				return(!!item.Location && !!item.Project);
+			}
+		});
+		
+		commandService.addCommand(addReadmeCommand);
+		
 		};
 	
 		return projectCommandUtils;
