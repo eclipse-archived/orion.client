@@ -73,9 +73,9 @@ define(['orion/Deferred'], function(Deferred) {
 				}, 500);
 			};
 						
-			inputManager.addEventListener("ContentTypeChanged", function(event) {//$NON-NLS-0$
+			inputManager.addEventListener("InputChanged", function(event) {//$NON-NLS-0$
 				textView.removeEventListener("Selection", selectionListener); //$NON-NLS-0$
-				getServiceRefs(self.registry, event.contentType, self.editor.getTitle()).then(function(serviceRefs) {
+				getServiceRefs(self.registry, event.contentType, event.title).then(function(serviceRefs) {
 					if (!serviceRefs || serviceRefs.length === 0) {
 						if (occurrenceTimer) {
 							window.clearTimeout(occurrenceTimer);

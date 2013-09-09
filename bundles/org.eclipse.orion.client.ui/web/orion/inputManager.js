@@ -18,11 +18,8 @@ define([
 	'orion/Deferred',
 	'orion/EventTarget',
 	'orion/objects',
-	'orion/edit/dispatcher',
-	'orion/highlight',
-	'orion/edit/syntaxmodel',
 	'orion/PageUtil'
-], function(messages, i18nUtil, Deferred, EventTarget, objects, mDispatcher, Highlight, SyntaxModelWirer, PageUtil) {
+], function(messages, i18nUtil, Deferred, EventTarget, objects, PageUtil) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -109,8 +106,6 @@ define([
 		this.progressService = options.progressService;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.selection = options.selection;
-		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
-		this.syntaxModelWirer = new SyntaxModelWirer(this.serviceRegistry);
 		this._input = this._title = "";
 		this.dispatcher = null;
 		this._unsavedChanges = [];
@@ -413,19 +408,20 @@ define([
 					}.bind(this));
 				}
 			}
-			// TODO could potentially dispatch separate events for metadata and contents changing
-			this.dispatchEvent({ type: "InputChanged", input: input, name: name, metadata: metadata, contents: contents }); //$NON-NLS-0$
+			this.dispatchEvent({
+				type: "InputChanged", //$NON-NLS-0$
+				input: input,
+				name: name,
+				title: title,
+				contentType: this._contentType,
+				metadata: metadata,
+				location: window.location,
+				contents: contents
+			});
 			if (!isDir) {
-				this.syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), title, true).then(function() {
-					this.dispatchEvent({ type: "ContentTypeChanged", contentType: this._contentType, location: window.location }); //$NON-NLS-0$
-					if (!this.dispatcher) {
-						this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor, this._contentType);
-					}
-					// Contents
-					editor.setInput(title, null, contents);
-					this._unsavedChanges = [];
-					this.processParameters(input);
-				}.bind(this));
+				editor.setInput(title, null, contents);
+				this._unsavedChanges = [];
+				this.processParameters(input);
 			}
 		},
 		setTitle: function(title) {
