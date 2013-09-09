@@ -9,19 +9,34 @@
  ******************************************************************************/
  
 /*global define document*/
-define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient'], function(mMarkdownView, lib, mProjectClient) { //$NON-NLS-0$
+define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'orion/projectCommands', 'orion/commandRegistry'],
+	function(mMarkdownView, lib, mProjectClient, mProjectCommands, mCommandRegistry) { //$NON-NLS-0$
 	function ProjectEditor(options){
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
 		this.progress = options.progress;
 		this.projectClient = new mProjectClient.ProjectClient(this.serviceRegistry, this.fileClient);
+		this.commandService = new mCommandRegistry.CommandRegistry({ });
 		this._node = null;
 		this.markdownView = new mMarkdownView.MarkdownView({
 			fileClient : this.fileClient,
 			progress : this.progress
 		});
+		this.redmeCommandsScope = "readmeActions";
+		this.createCommands();
 	}
 	ProjectEditor.prototype = {
+		createCommands: function(){
+			mProjectCommands.createProjectCommands(this.serviceRegistry, this.commandService, this, this.fileClient, this.projectClient);
+			this.commandService.registerCommandContribution(this.redmeCommandsScope, "orion.project.edit.readme", 1); 
+			this.commandService.registerCommandContribution(this.redmeCommandsScope, "orion.project.create.readme", 2); 
+		},
+		changedItem: function(){
+			this.fileClient.read(this.parentFolder.Location, true).then(function(metadata){
+				lib.empty(this.node);
+				this.displayContents(this.node, metadata);
+			}.bind(this));
+		},
 		display: function(node, projectData){
 			this.node = node;
 			this.node.className = "orionProject";				
@@ -98,6 +113,11 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient'], f
 			table.appendChild(tr);
 			var td = document.createElement("th");
 			td.appendChild(document.createTextNode("readme.md"));
+			var actionsSpan = document.createElement("span");
+			actionsSpan.id = this.redmeCommandsScope;
+			actionsSpan.style.cssFloat = "right";
+			actionsSpan.style.textTransform = "none";
+			td.appendChild(actionsSpan);
 			tr.appendChild(td);
 
 			tr = document.createElement("tr");
@@ -115,6 +135,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient'], f
 						div.style.maxHeight = "400px";
 						this.fileClient.read(child.Location).then(function(markdown){
 							this.markdownView.display(div, markdown);
+							this.commandService.renderCommands(this.redmeCommandsScope, actionsSpan, child, this, "tool");
 						}.bind(this));
 						td.appendChild(div);
 						break;
@@ -122,6 +143,8 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient'], f
 				}
 				if(!div){
 					td.appendChild(document.createTextNode("No readme in this project"));
+					this.parentFolder.Project = this.projectData;
+					this.commandService.renderCommands(this.redmeCommandsScope, actionsSpan, this.parentFolder, this, "tool");
 				}
 			}
 			
