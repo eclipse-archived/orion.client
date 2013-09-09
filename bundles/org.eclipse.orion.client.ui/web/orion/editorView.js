@@ -27,12 +27,16 @@ define([
 	'orion/widgets/settings/EditorSettings',
 	'orion/searchAndReplace/textSearcher',
 	'orion/editorCommands',
+	'orion/edit/dispatcher',
+	'orion/highlight',
+	'orion/edit/syntaxmodel',
 	'orion/markOccurrences',
 	'orion/syntaxchecker'
 ], function(
 	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist, mEmacs, mVI,
 	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands,
+	mDispatcher, Highlight, SyntaxModelWirer,
 	mMarkOccurrences, mSyntaxchecker
 ) {
 
@@ -55,6 +59,8 @@ define([
 		this.preferences = options.preferences;
 		this.readonly = options.readonly;
 		this.searcher = options.searcher;
+		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
+		this.syntaxModelWirer = new SyntaxModelWirer(this.serviceRegistry);
 		this.settings = {};
 		this._init();
 	}
@@ -111,7 +117,7 @@ define([
 			}
 		},
 		updateStyler: function(prefs) {
-			var styler = this.inputManager.syntaxHighlighter.getStyler();
+			var styler = this.syntaxHighlighter.getStyler();
 			if (styler) {
 				if (styler.setTabsVisible) {
 					styler.setTabsVisible(prefs.showTabs);
@@ -228,7 +234,7 @@ define([
 				}
 			};
 
-			var editor = self.editor = new mEditor.Editor({
+			var editor = this.editor = new mEditor.Editor({
 				textViewFactory: textViewFactory,
 				undoStackFactory: new mEditorFeatures.UndoFactory(),
 				textDNDFactory: new mEditorFeatures.TextDNDFactory(),
@@ -241,11 +247,15 @@ define([
 				domNode: editorDomNode
 			});
 			
+			this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor);
 			localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
 
-			inputManager.addEventListener("ContentTypeChanged", function(event) { //$NON-NLS-0$
-				self.updateStyler(self.settings);
-			});
+			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
+				this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {
+					this.dispatcher.setContentType(event.contentType);
+					this.updateStyler(this.settings);
+				}.bind(this));
+			}.bind(this));
 
 			serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 				editor.showProblems(event.problems);
@@ -265,10 +275,10 @@ define([
 			this.editorPreferences.getPrefs(this.updateSettings.bind(this));
 		},
 		create: function() {
-
+			this.editor.installTextView();
 		},
 		destroy: function() {
-
+			this.editor.uninstallTextView();
 		}
 	};
 	return {EditorView: EditorView};

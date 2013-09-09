@@ -180,7 +180,7 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 			this._sidebar = options.sidebar;
 			var _self = this;
 
-			this._inputManager.addEventListener("ContentTypeChanged", function(event) { //$NON-NLS-0$
+			this._inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				_self.setContentType(event.contentType, event.location);
 			});
 

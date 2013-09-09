@@ -15,12 +15,10 @@ define(['orion/edit/dispatcher'], function() {
 	 * @class Forwards events from an {@link orion.editor.Editor} to interested services.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry 
 	 * @param {orion.editor.Editor} editor
-	 * @param {orion.core.ContentType} contentType
 	 */
-	function Dispatcher(serviceRegistry, editor, contentType) {
+	function Dispatcher(serviceRegistry, editor) {
 		this.serviceRegistry = serviceRegistry;
 		this.editor = editor;
-		this.contentType = contentType;
 		this.contentTypeService = serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 		this.serviceReferences = {};
 
@@ -38,6 +36,9 @@ define(['orion/edit/dispatcher'], function() {
 		this._init();
 	}
 	Dispatcher.prototype = /** @lends orion.edit.Dispatcher.prototype */ {
+		setContentType: function(contentType) {
+			this.contentType = contentType;
+		},
 		_init: function() {
 			var self = this;
 			if (this.editor.getTextView()) {
