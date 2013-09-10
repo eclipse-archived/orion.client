@@ -5892,7 +5892,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			sel1Div.style.top = (sel1Top - vd) + "px"; //$NON-NLS-0$
 			sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px"; //$NON-NLS-0$
 			sel1Div.style.height = Math.max(0, sel1Bottom - sel1Top) + "px"; //$NON-NLS-0$
-			if (startRect.top === endRect.top) {
+			if (startNode.lineIndex === endNode.lineIndex) {
 				sel1Right = Math.min(r, right);
 				sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px"; //$NON-NLS-0$
 			} else {
@@ -5905,7 +5905,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				sel3Div.style.top = (sel3Top - vd) + "px"; //$NON-NLS-0$
 				sel3Div.style.width = Math.max(0, sel3Right - sel3Left) + "px"; //$NON-NLS-0$
 				sel3Div.style.height = Math.max(0, sel3Bottom - sel3Top) + "px"; //$NON-NLS-0$
-				if (sel3Top - sel1Bottom > 0) {
+				if (Math.abs(startNode.lineIndex - endNode.lineIndex) > 1) {
 					var sel2Div = this._selDiv2;
 					sel2Div.style.left = (left - hd)  + "px"; //$NON-NLS-0$
 					sel2Div.style.top = (sel1Bottom - vd) + "px"; //$NON-NLS-0$
