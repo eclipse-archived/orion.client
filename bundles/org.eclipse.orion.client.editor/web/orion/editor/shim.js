@@ -12,8 +12,13 @@
 /*global define*/
 
 define("orion/editor/shim", [], function() { //$NON-NLS-0$
+
+	/**
+	 * Partial ECMAScript 5 shim.
+	 */
 	
 	if (!Object.create) {
+		/* This shim does not properly support the props paramenter. It only works for Deferred.js. */
 		Object.create = function(proto, props) {
 			function N() {}
 			N.prototype = proto;
