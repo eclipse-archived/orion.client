@@ -341,7 +341,8 @@ define([
 		},
 		_setNoInput: function() {
 			// No input, no editor.
-			this._input = this._title = this._contentType = null;
+			this._input = this._title = null;
+			this.setContentType(null);
 			this.editor.uninstallTextView();
 			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
 		},
@@ -350,14 +351,14 @@ define([
 			if (metadata) {
 				this._fileMetadata = metadata;
 				this.setTitle(metadata.Location || String(metadata));
-				this._contentType = this.contentTypeRegistry.getFileContentType(metadata);
+				this.setContentType(this.contentTypeRegistry.getFileContentType(metadata));
 				name = metadata.Name;
 				isDir = metadata.Directory;
 			} else {
 				// No metadata
 				this._fileMetadata = null;
 				this.setTitle(title);
-				this._contentType = this.contentTypeRegistry.getFilenameContentType(this.getTitle());
+				this.setContentType(this.contentTypeRegistry.getFilenameContentType(this.getTitle()));
 				name = this.getTitle();
 			}
 			var editor = this.getEditor();
@@ -413,7 +414,7 @@ define([
 				input: input,
 				name: name,
 				title: title,
-				contentType: this._contentType,
+				contentType: this.getContentType(),
 				metadata: metadata,
 				location: window.location,
 				contents: contents
@@ -423,6 +424,9 @@ define([
 				this._unsavedChanges = [];
 				this.processParameters(input);
 			}
+		},
+		setContentType: function(contentType) {
+			this._contentType = contentType;
 		},
 		setTitle: function(title) {
 			var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
