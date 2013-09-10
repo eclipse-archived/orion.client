@@ -16,13 +16,14 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 		this.fileClient = options.fileClient;
 		this.progress = options.progress;
 		this.projectClient = new mProjectClient.ProjectClient(this.serviceRegistry, this.fileClient);
-		this.commandService = new mCommandRegistry.CommandRegistry({ });
+		this.commandService = options.commandService;
 		this._node = null;
 		this.markdownView = new mMarkdownView.MarkdownView({
 			fileClient : this.fileClient,
 			progress : this.progress
 		});
 		this.redmeCommandsScope = "readmeActions";
+		this.allDependenciesActions = "dependenciesActions";
 		this.createCommands();
 	}
 	ProjectEditor.prototype = {
@@ -30,6 +31,12 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			mProjectCommands.createProjectCommands(this.serviceRegistry, this.commandService, this, this.fileClient, this.projectClient);
 			this.commandService.registerCommandContribution(this.redmeCommandsScope, "orion.project.edit.readme", 1); 
 			this.commandService.registerCommandContribution(this.redmeCommandsScope, "orion.project.create.readme", 2); 
+			this.commandService.addCommandGroup(this.allDependenciesActions, "orion.miniExplorerNavNewGroup", 1000, "Add", null, null, "core-sprite-addcontent"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.allDependenciesActions, "orion.project.addFolder", 1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
+			var dependencyTypes = this.projectClient.getDependencyTypes();
+			for(var i=0; i<dependencyTypes.length; i++){
+				this.commandService.registerCommandContribution(this.allDependenciesActions, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
 		},
 		changedItem: function(){
 			this.fileClient.read(this.parentFolder.Location, true).then(function(metadata){
@@ -170,6 +177,11 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			table.appendChild(tr);
 			var td = document.createElement("th");
 			td.appendChild(document.createTextNode("Associated Content"));
+			var actionsSpan = document.createElement("span");
+			actionsSpan.id = this.allDependenciesActions;
+			actionsSpan.style.cssFloat = "right";
+			actionsSpan.style.textTransform = "none";
+			td.appendChild(actionsSpan);
 			tr.appendChild(td);
 			
 			if(this.projectData.Dependencies && this.projectData.Dependencies.length>0){
@@ -207,6 +219,8 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			}
 			
 			parent.appendChild(table);
+			this.projectData.type = "Project";
+			this.commandService.renderCommands(this.allDependenciesActions, actionsSpan, this.projectData, this, "tool");
 		}
 	};
 	

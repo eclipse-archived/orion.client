@@ -24,6 +24,7 @@ define(['orion/markdownView', 'orion/projects/projectEditor'], function(mMarkdow
 		this.fileClient = options.fileService;
 		this.progress = options.progress;
 		this.serviceRegistry = options.serviceRegistry;
+		this.commandService = options.commandService;
 		this._init();
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
@@ -35,7 +36,8 @@ define(['orion/markdownView', 'orion/projects/projectEditor'], function(mMarkdow
 			this.projectEditor = new mProjectEditor.ProjectEditor({
 				fileClient : this.fileClient,
 				progress : this.progress,
-				serviceRegistry: this.serviceRegistry
+				serviceRegistry: this.serviceRegistry,
+				commandService: this.commandService
 			});
 		},
 		displayFolderView: function(children){
