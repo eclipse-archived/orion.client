@@ -19,8 +19,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	'orion/editor/eventTarget', //$NON-NLS-0$
 	'orion/Deferred', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
+	'orion/editor/util', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, util) {
+], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, textUtil, util) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -513,14 +514,13 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				self.position();
 			}
 		};
-		if (document.addEventListener) {
-			document.addEventListener("scroll", this.scrollListener); //$NON-NLS-0$
-		}
+		textUtil.addEventListener(document, "scroll", this.scrollListener); //$NON-NLS-0$
 	}
 	ContentAssistWidget.prototype = /** @lends orion.editor.ContentAssistWidget.prototype */ {
 		/** @private */
 		onClick: function(e) {
-			this.contentAssist.apply(this.getProposal(e.target));
+			if (!e) { e = window.event; }
+			this.contentAssist.apply(this.getProposal(e.target || e.srcElement));
 			this.textView.focus();
 		},
 		/** @private */
@@ -545,12 +545,19 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		/** @private */
 		createAccessible: function(mode) {
 			if(!this._isAccessible) {
-				this.parentNode.addEventListener("keydown", function(evt) { //$NON-NLS-0$
-					evt.preventDefault();
+				textUtil.addEventListener(this.parentNode, "keydown", function(evt) { //$NON-NLS-0$
+					if (!evt) { evt = window.event; }
 					if(evt.keyCode === 27) {return mode.cancel(); }
 					else if(evt.keyCode === 38) { return mode.lineUp(); }
 					else if(evt.keyCode === 40) { return mode.lineDown(); }
 					else if(evt.keyCode === 13) { return mode.enter(); }
+					if (evt.preventDefault) {
+						evt.preventDefault();
+					} else {
+						evt.cancelBubble = true;
+						evt.returnValue = false;
+						evt.keyCode = 0;
+					}
 					return false;
 				});
 			}

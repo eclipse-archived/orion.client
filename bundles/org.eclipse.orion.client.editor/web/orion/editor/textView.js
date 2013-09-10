@@ -643,7 +643,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					if (lineOffset + nodeLength > offset) {
 						var index = offset - lineOffset;
 						var range;
-						if (view._isRangeRects) {
+						if (textNode.length === 1) {
+							result = new TextRect(lineChild.getBoundingClientRect());
+						} else if (view._isRangeRects) {
 							range = document.createRange();
 							range.setStart(textNode, index);
 							range.setEnd(textNode, index + 1);
@@ -652,9 +654,19 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 							range = document.body.createTextRange();
 							range.moveToElementText(lineChild);
 							range.collapse();
+							/*
+							* Bug in IE8. TextRange.getClientRects() and TextRange.getBoundingClientRect() fails
+							* if the line child is not the first element in the line and if the start offset is 0. 
+							* The fix is to use Node.getClientRects() left edge instead.
+							*/
+							var fixIE8 = index === 0 && util.isIE === 8;
+							if (fixIE8) { index = 1; }
 							range.moveEnd("character", index + 1); //$NON-NLS-0$
 							range.moveStart("character", index); //$NON-NLS-0$
 							result = new TextRect(range.getBoundingClientRect());
+							if (fixIE8) {
+								result.left = lineChild.getClientRects()[0].left;
+							}
 						} else {
 							var text = textNode.data;
 							lineChild.removeChild(textNode);
@@ -878,6 +890,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					rect = rects[j];
 					if (rect.left <= x && x < rect.right && (!view._wrapMode || (rect.top <= y && y < rect.bottom))) {
 						var range, start, end;
+						var rl = rect.left, fixIE8;
 						if (util.isIE || view._isRangeRects) {
 							range = view._isRangeRects ? document.createRange() : document.body.createTextRange();
 							var high = nodeLength;
@@ -886,26 +899,31 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 								var mid = Math.floor((high + low) / 2);
 								start = low + 1;
 								end = mid === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : mid + 1;
+								/*
+								* Bug in IE8. TextRange.getClientRects() and TextRange.getBoundingClientRect() fails
+								* if the line child is not the first element in the line and if the start offset is 0. 
+								* The fix is to use Node.getClientRects() left edge instead.
+								*/
+								fixIE8 = start === 0 && util.isIE === 8;
 								if (view._isRangeRects) {
 									range.setStart(textNode, start);
 									range.setEnd(textNode, end);
 								} else {
+									if (fixIE8) { start = 1; } 
 									range.moveToElementText(lineChild);
 									range.move("character", start); //$NON-NLS-0$
 									range.moveEnd("character", end - start); //$NON-NLS-0$
-									console.log("step=" + start + " " + end);
 								}
 								rects = range.getClientRects();
 								var found = false;
 								for (var k = 0; k < rects.length; k++) {
 									rect = rects[k];
-									rangeLeft = rect.left * xFactor - lineRect.left;
+									rangeLeft = (fixIE8 ? rl : rect.left) * xFactor - lineRect.left;
 									rangeRight = rect.right * xFactor - lineRect.left;
 									rangeTop = rect.top * yFactor - lineRect.top;
 									rangeBottom = rect.bottom * yFactor - lineRect.top;
 									if (rangeLeft <= x && x < rangeRight && (!view._wrapMode || (rangeTop <= y && y < rangeBottom))) {
 										found = true;
-										console.log("found");
 										break;
 									}
 								}
@@ -917,8 +935,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 							}
 							offset += high;
 							start = high;
-							console.log("step1=" + start + " " + end);
-							console.log("nodeLenght=" + nodeLength + " ignoreChars=" + lineChild.ignoreChars + " textLength=" + textNode.length + " high=" + high); 
 							end = high === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : Math.min(high + 1, textNode.length);
 							if (view._isRangeRects) {
 								range.setStart(textNode, start);
@@ -929,12 +945,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 								range.moveEnd("character", end - start); //$NON-NLS-0$
 							}
 							rects = range.getClientRects();
-							console.log(start + " " + end);
-							rect = rects[0];
-							rangeLeft = rect.left * xFactor - lineRect.left;
-							rangeRight = rect.right * xFactor - lineRect.left;
-							//TODO test for character trailing (wrong for bidi)
-							var trailing = x > (rangeLeft + (rangeRight - rangeLeft) / 2);
+							var trailing = false;
+							if (rects.length > 0) {
+								rect = rects[0];
+								rangeLeft = (fixIE8 ? rl : rect.left) * xFactor - lineRect.left;
+								rangeRight = rect.right * xFactor - lineRect.left;
+								//TODO test for character trailing (wrong for bidi)
+								trailing = x > (rangeLeft + (rangeRight - rangeLeft) / 2);
+							}
 							// Handle Unicode surrogates
 							var offsetInLine = offset - lineStart;
 							var lineText = model.getLine(lineIndex);

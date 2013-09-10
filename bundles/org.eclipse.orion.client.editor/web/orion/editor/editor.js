@@ -970,29 +970,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	};
 	mEventTarget.EventTarget.addMixin(Editor.prototype);
 
-	/**
-	 * @private
-	 * @param context Value to be used as the returned function's <code>this</code> value.
-	 * @param [arg1, arg2, ...] Fixed argument values that will prepend any arguments passed to the returned function when it is invoked.
-	 * @returns {Function} A function that always executes this function in the given <code>context</code>.
-	 */
-	function bind(context) {
-		var fn = this,
-		    fixed = Array.prototype.slice.call(arguments, 1);
-		if (fixed.length) {
-			return function() {
-				return arguments.length	? fn.apply(context, fixed.concat(Array.prototype.slice.call(arguments))) : fn.apply(context, fixed);
-			};
-		}
-		return function() {
-			return arguments.length ? fn.apply(context, arguments) : fn.call(context);
-		};
-	}
-
-	if (!Function.prototype.bind) {
-		Function.prototype.bind = bind;
-	}
-
 	return {
 		Editor: Editor
 	};
