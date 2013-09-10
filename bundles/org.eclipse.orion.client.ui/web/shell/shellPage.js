@@ -51,7 +51,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 				return this.array;
 			},
 			stringify: function() {
-				if (this.type !== "string") { //$NON-NLS-0$
+				if (this.type !== "string" && this.type !== "markdown") { //$NON-NLS-0$ //$NON-NLS-1$
 					return "(" + (this.array ? "[" : "") + this.value + (this.array ? "]" : "") + ")"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				if (!this.array) {
@@ -604,13 +604,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 				object = object.toString();
 			}
 		}
-		var string = object;
-		var segments = string.split("\n"); //$NON-NLS-0$
-		segments.forEach(function(segment) {
-			writer.appendText(segment);
-			writer.appendNewline();
-		});
-		return writer.write();
+		return writer.write(object);
 	}
 
 	function processBlobResult(promise, result, output, isProgress) {
@@ -658,7 +652,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 			writer = new mResultWriters.FileStringWriter(output, shellPageFileService);
 		} else {
 			element = document.createElement("div"); //$NON-NLS-0$
-			writer = new mResultWriters.ShellStringWriter(element);
+			writer = new mResultWriters.ShellStringWriter(element, result.getType() === "markdown"); //$NON-NLS-0$
 		}
 
 		outputString(result.stringify(), writer).then(
