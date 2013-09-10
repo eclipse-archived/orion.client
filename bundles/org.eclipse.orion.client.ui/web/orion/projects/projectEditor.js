@@ -47,6 +47,9 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			span = document.createElement("span");
 			this.node.appendChild(span);
 			this.renderReadmeMd(span);
+			span = document.createElement("span");
+			this.node.appendChild(span);
+			this.renderDependencies(span);
 		},
 		displayContents: function(node, parentFolder){
 			this.parentFolder = parentFolder;
@@ -157,6 +160,51 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			}
 			
 			tr.appendChild(td);
+			
+			parent.appendChild(table);
+		},
+		
+		renderDependencies: function(parent){
+			var table = document.createElement("table");
+			var tr = document.createElement("tr");
+			table.appendChild(tr);
+			var td = document.createElement("th");
+			td.appendChild(document.createTextNode("Associated Content"));
+			tr.appendChild(td);
+			
+			if(this.projectData.Dependencies && this.projectData.Dependencies.length>0){
+				for(var i=0; i<this.projectData.Dependencies.length; i++){
+					var dependency = this.projectData.Dependencies[i];
+					tr = document.createElement("tr");
+					table.appendChild(tr);
+					td = document.createElement("td");
+					td.appendChild(document.createTextNode(dependency.Name));
+					
+					(function(td, dependency){
+						this.projectClient.getDependencyFileMetadata(dependency, this.projectData.WorkspaceLocation).then(function(dependencyMetadata){
+							if(dependencyMetadata){
+								lib.empty(td);
+								var a = document.createElement("a");
+								a.href = "./edit.html#" + dependencyMetadata.Location;
+								a.appendChild(document.createTextNode(dependency.Name));
+								td.appendChild(a);
+							}
+						}, function(){
+							lib.empty(td);
+							td.appendChild(document.createTextNode(dependency.Name + " (disconnected)"));
+						});
+					}).bind(this)(td, dependency);
+					
+					tr.appendChild(td);
+				}
+				
+			} else {
+				tr = document.createElement("tr");
+				table.appendChild(tr);
+				td = document.createElement("td");
+				td.appendChild(document.createTextNode("No associated content"));
+				tr.appendChild(td);
+			}
 			
 			parent.appendChild(table);
 		}
