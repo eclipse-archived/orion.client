@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * Copyright (c) 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -43,23 +43,6 @@ define("orion/editor/util", [], function() { //$NON-NLS-0$
 			return false;
 		}
 		return topNode === node || (topNode.compareDocumentPosition(node) & 16) !== 0;
-	}
-	
-	if (!Array.prototype.indexOf) {
-		Array.prototype.indexOf = function(c) {
-			for (var i=0; i<this.length; i++) {
-				if (this[i] === c) {
-					return i;
-				}
-			}
-			return -1;
-		};
-	}
-	
-	if (!String.prototype.trim) {
-		String.prototype.trim = function(){
-				return this.replace(/^\s+|\s+$/g, '');
-		};
 	}
 
 	return {

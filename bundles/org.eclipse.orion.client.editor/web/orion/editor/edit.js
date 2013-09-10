@@ -13,6 +13,7 @@
 /*globals define Node */
 
 define('orion/editor/edit', [ //$NON-NLS-0$
+	"orion/editor/shim", //$NON-NLS-0$
 	
 	"orion/editor/textView", //$NON-NLS-0$
 	"orion/editor/textModel", //$NON-NLS-0$
@@ -39,7 +40,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	"orion/editor/textMateStyler", //$NON-NLS-0$
 	"orion/editor/htmlGrammar", //$NON-NLS-0$
 	"examples/editor/textStyler" //$NON-NLS-0$
-], function(mTextView, mTextModel, mTextTheme, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations, mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist, mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+], function(shim, mTextView, mTextModel, mTextTheme, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations, mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist, mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 
 	/**	@private */
 	function getDisplay(window, document, element) {
@@ -130,16 +131,8 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	
 	/**	@private */
 	function getHeight(node) {
-		var document = node.ownerDocument;
-		var window = document.defaultView || document.parentWindow;
-		var height;
-		if (window.getComputedStyle) {
-			var style = window.getComputedStyle(node, null);
-			height = style.getPropertyValue("height"); //$NON-NLS-0$
-		} else if (node.currentStyle) {
-			height = node.currentStyle.height;
-		}
-		return parseInt(height, 10) || 0;
+		var rect = node.getBoundingClientRect();
+		return rect.bottom - rect.top;
 	}
 	
 	/**

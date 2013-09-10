@@ -62,10 +62,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				self._nextTarget = null;
 			}, false);
 			textUtil.addEventListener(tooltipDiv, "mouseout", function(event) { //$NON-NLS-0$
-				if (event.relatedTarget === tooltipDiv || self._hasFocus()) { return; }
-				if (event.relatedTarget) {
-					var relatedCompare = event.relatedTarget.compareDocumentPosition(tooltipDiv);
-					if (relatedCompare & 8) { return; }
+				var relatedTarget = event.relatedTarget || event.toElement;
+				if (relatedTarget === tooltipDiv || self._hasFocus()) { return; }
+				if (relatedTarget) {
+					if (textUtil.contains(tooltipDiv, relatedTarget)) { return; }
 				}
 				self._hide();
 			}, false);
@@ -76,8 +76,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 			}, false);
 			textUtil.addEventListener(document, "mousedown", this._mouseDownHandler = function(event) { //$NON-NLS-0$
 				if (!self.isVisible()) { return; }
-				var relatedCompare = event.target.compareDocumentPosition(tooltipDiv);
-				if (relatedCompare & 8) { return; }
+				if (textUtil.contains(tooltipDiv, event.target || event.srcElement)) { return; }
 				self._hide();
 			}, true);
 			this._view.addEventListener("Destroy", function() { //$NON-NLS-0$
@@ -330,7 +329,10 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				if (annotation.title !== undefined) {
 					html = getAnnotationHTML(annotation);
 					if (html.firstChild) {
-						html.firstChild.classList.add("single"); //$NON-NLS-0$
+						var className = html.firstChild.className;
+						if (className) { className += " "; } //$NON-NLS-0$
+						className += "single"; //$NON-NLS-0$
+						html.firstChild.className = className;
 					}
 					return html;
 				} else {
