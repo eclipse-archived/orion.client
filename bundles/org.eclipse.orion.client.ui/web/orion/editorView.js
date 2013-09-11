@@ -29,6 +29,7 @@ define([
 	'orion/editorCommands',
 	'orion/edit/ast',
 	'orion/edit/dispatcher',
+	'orion/edit/editorContext',
 	'orion/highlight',
 	'orion/markOccurrences',
 	'orion/syntaxchecker'
@@ -36,7 +37,7 @@ define([
 	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist, mEmacs, mVI,
 	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands,
-	ASTManager, mDispatcher, Highlight,
+	ASTManager, mDispatcher, EditorContext, Highlight,
 	mMarkOccurrences, mSyntaxchecker
 ) {
 
@@ -222,17 +223,19 @@ define([
 						// Content assist is about to be activated; set its providers.
 						var fileContentType = inputManager.getContentType();
 						var fileName = editor.getTitle();
-						var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist"); //$NON-NLS-0$
-						var providers = [];
-						for (var i=0; i < serviceReferences.length; i++) {
-							var serviceReference = serviceReferences[i],
-							    contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
-							    pattern = serviceReference.getProperty("pattern"); // backwards compatibility //$NON-NLS-0$
+						var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.contentAssist").concat(serviceRegistry.getServiceReferences("orion.edit.contentassist")); //$NON-NLS-1$ //$NON-NLS-0$
+						var providers = serviceRefs.map(function(serviceRef) {
+							var contentTypeIds = serviceRef.getProperty("contentType"), //$NON-NLS-0$
+							    pattern = serviceRef.getProperty("pattern"); // backwards compatibility //$NON-NLS-0$
 							if ((contentTypeIds && contentTypeRegistry.isSomeExtensionOf(fileContentType, contentTypeIds)) ||
 									(pattern && new RegExp(pattern).test(fileName))) {
-								providers.push(serviceRegistry.getService(serviceReference));
+								return serviceRegistry.getService(serviceRef);
 							}
-						}
+							return null;
+						}).filter(function(provider) {
+							return !!provider;
+						});
+						contentAssist.setEditorContextFactory(EditorContext.getEditorContext.bind(null, serviceRegistry));
 						contentAssist.setProviders(providers);
 						contentAssist.setProgress(progress);
 					});
@@ -286,6 +289,10 @@ define([
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
 			});
+
+			serviceRegistry.registerService("orion.edit.context", { //$NON-NLS-0$
+				getText: editor.getText.bind(editor)
+			}, null);
 
 			this.editorPreferences.getPrefs(this.updateSettings.bind(this));
 		},

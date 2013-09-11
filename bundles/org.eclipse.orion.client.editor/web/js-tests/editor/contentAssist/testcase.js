@@ -1,4 +1,4 @@
-/*******************************************************************************
+2/*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
@@ -9,8 +9,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define setTimeout*/
-define(['orion/Deferred', 'orion/assert', 'orion/editor/textModel', 'js-tests/editor/mockTextView', 'orion/editor/contentAssist'],
-		function(Deferred, assert, mTextModel, mMockTextView, mContentAssist) {
+define([
+	'orion/Deferred',
+	'orion/assert',
+	'orion/editor/textModel',
+	'js-tests/editor/mockTextView',
+	'orion/editor/contentAssist'
+], function(Deferred, assert, mTextModel, mMockTextView, mContentAssist) {
 	var ContentAssist = mContentAssist.ContentAssist,
 	    TextModel = mTextModel.TextModel,
 	    MockTextView = mMockTextView.MockTextView;
@@ -52,12 +57,12 @@ define(['orion/Deferred', 'orion/assert', 'orion/editor/textModel', 'js-tests/ed
 	}
 	
 	/**
-	 * Creates a provider using the given factory and tests that its method receives the expected params properly.
-	 * @param {Function} contentAssistProviderFactory Takes a callback function to use as the method body, and returns
-	 * {@link orion.editor.ContentAssistProvider}
+	 * Creates a provider using the given callback and tests that its method receives the expected params properly.
+	 * @param {Function} providerCallback Callback that returns a {@link orion.editor.ContentAssistProvider}.
+	 * Takes 1 parameter, which is the body of the provider's <code>computeProposals</code> that performs assertions.
 	 * @returns {Deferred} A deferred that rejects on assertion failure or error.
 	 */
-	function assertProviderInvoked(text, contentAssistProviderFactory) {
+	function assertProviderInvoked(text, providerCallback) {
 		var deferred = new Deferred();
 		withData(function(view, contentAssist) {
 			var offset = setText(view, text);
@@ -77,7 +82,45 @@ define(['orion/Deferred', 'orion/assert', 'orion/editor/textModel', 'js-tests/ed
 					deferred.reject(e);
 				}
 			};
-			var provider = contentAssistProviderFactory(checkParams);
+			var provider = providerCallback(checkParams);
+			contentAssist.setProviders([ provider ]);
+			contentAssist.activate();
+		});
+		return deferred;
+	}
+
+	/**
+	 * Like assertProviderInvoked(), but tests the v4 content assist API.
+	 */
+	function assertProviderInvokedWithContext(text, providerCallback) {
+		var deferred = new Deferred();
+		withData(function(view, contentAssist) {
+			var expectedOffset = setText(view, text);
+			text = text.replace('@@@', '');
+			var expectedLine = view.getModel().getLine(view.getModel().getLineAtOffset(expectedOffset));
+			var expectedPrefix = getContentAssistPrefix(view, expectedOffset);
+
+			var checkParams = function(editorContext, context) {
+				try {
+					assert.equal(typeof editorContext.foo, "function");
+					assert.equal(context.offset, expectedOffset);
+					assert.equal(context.line, expectedLine);
+					assert.equal(context.prefix, expectedPrefix);
+					assert.equal(context.selection.start, expectedOffset);
+					assert.equal(context.selection.end, expectedOffset);
+					deferred.resolve();
+				} catch (e) {
+					deferred.reject(e);
+				}
+			};
+
+			var provider = providerCallback(checkParams);
+			var mockEditorContext = {
+				foo: function() {}
+			};
+			contentAssist.setEditorContextFactory(function() {
+				return mockEditorContext;
+			});
 			contentAssist.setProviders([ provider ]);
 			contentAssist.activate();
 		});
@@ -243,6 +286,15 @@ define(['orion/Deferred', 'orion/assert', 'orion/editor/textModel', 'js-tests/ed
 			contentAssist.activate();
 		});
 		return Deferred.all([d1, d2, d3]);
+	};
+
+	// Tests that content assist calls a provider's computeProposalsWithContext function with the expected parameters.
+	tests.testComputeProposalsWithContext = function() {
+		return assertProviderInvokedWithContext("line1\nline@@@2", function(checkParamsCallback) {
+			return {
+				computeProposalsWithContext: checkParamsCallback
+			};
+		});
 	};
 
 	// TODO Test ContentAssistMode
