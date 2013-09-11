@@ -73,12 +73,14 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'ori
 		
 			commandRegistry.addCommandGroup(newActionsScope, "orion.projectsNewGroup", 1, "Create Project", null, null, "core-sprite-addcontent"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.basic", 1, "orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.fromfile", 2, "orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, projectExplorer, fileClient, projectClient);
 			
 			projectExplorer.changedItem = function(){
 				progress.progress(fileClient.loadWorkspace(), "Getting workspace information").then(function(workspace){
 					progress.progress(projectClient.readAllProjects(workspace), "Listing projects").then(function(projects){
+						lib.empty(newActionsSpan);
 						commandRegistry.renderCommands(newActionsScope, newActionsSpan, workspace, projectExplorer, "tool");
 						projectExplorer.loadProjects(projects);
 					});
