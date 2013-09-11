@@ -1156,7 +1156,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var step = data.count < 0 ? -1 : 1;
 			if (offset === model.getLineEnd(lineIndex)) {
 				lineChild = child.lastChild;
-				while (lineChild && lineChild.ignoreChars) {
+				while (lineChild && lineChild.ignoreChars === lineChild.firstChild.length) {
 					lineChild = lineChild.previousSibling;
 				}
 				if (!lineChild) {
