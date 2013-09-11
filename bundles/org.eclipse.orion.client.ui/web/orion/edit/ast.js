@@ -42,7 +42,9 @@ define([
 			this.tracker.open();
 
 			this.registration = this.serviceRegistry.registerService("orion.core.astmanager", this, null); //$NON-NLS-0$
-			this.contextRegistration = this.serviceRegistry.registerService("orion.edit.context", { getAST: this.getAST.bind(this) }, null); //$NON-NLS-0$
+			this.contextRegistration = this.serviceRegistry.registerService("orion.edit.context", {
+				getAST: this.getAST.bind(this)
+			}, null); //$NON-NLS-0$
 		},
 		stop: function() {
 			this.registration.unregister();

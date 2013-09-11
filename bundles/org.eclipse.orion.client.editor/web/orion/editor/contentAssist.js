@@ -9,8 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define */
-/*jslint maxerr:150 browser:true devel:true */
+/*global console define */
+/*jslint browser:true */
 
 define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
@@ -82,6 +82,18 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	 * @name orion.editor.ContentAssist#ProposalsComputedEvent
 	 * @event
 	 */
+
+	/**
+	 * Flattens an array of arrays into a one-dimensional array.
+	 * @param {Array[]} array
+	 * @returns {Array}
+	 */
+	function flatten(array) {
+		return array.reduce(function(prev, curr) {
+			return Array.isArray(curr) ? prev.concat(curr) : prev;
+		}, []);
+	}
+
 	// INACTIVE --Ctrl+Space--> ACTIVE --ModelChanging--> FILTERING
 	var State = {
 		INACTIVE: 1,
@@ -252,7 +264,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		handleError: function(error) {
 			if (typeof console !== "undefined") { //$NON-NLS-0$
 				console.log("Error retrieving content assist proposals"); //$NON-NLS-0$
-				console.log(error);
+				console.log(error && error.stack);
 			}
 		},
 		/**
@@ -272,7 +284,6 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				sel.end = model.mapOffset(sel.end);
 				model = model.getBaseModel();
 			}
-			var buffer = model.getText();
 			var line = model.getLine(model.getLineAtOffset(mapOffset));
 			var index = 0;
 			while (index < line.length && /\s/.test(line.charAt(index))) {
@@ -283,6 +294,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
 			var context = {
 				line: line,
+				offset: mapOffset,
 				prefix: model.getText(this.getPrefixStart(model, mapOffset), mapOffset),
 				selection: sel,
 				delimiter: model.getLineDelimiter(),
@@ -291,25 +303,33 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			};
 			var self = this;
 			var promises = providers.map(function(provider) {
-				//prefer computeProposals but support getProposals for backwards compatibility
-				var func = provider.computeProposals || provider.getProposals;
 				var proposals;
 				try {
-					if (typeof func === "function") { //$NON-NLS-0$
-						var def = func.apply(provider, [buffer, mapOffset, context]);
-						proposals = self.progress ? self.progress.progress(def, "Generating content assist proposal") : def;
+					var func, promise;
+					if ((func = provider.computeProposalsWithContext)) {
+						var editorContext = self.editorContextProvider && self.editorContextProvider();
+						promise = func.apply(provider, [editorContext, context]);
+					} else if ((func = provider.getProposals || provider.computeProposals)) {
+						promise = func.apply(provider, [textView.getText(), mapOffset, context]);
 					}
+					proposals = self.progress ? self.progress.progress(promise, "Generating content assist proposal") : promise; //$NON-NLS-0$
 				} catch (e) {
 					self.handleError(e);
 				}
 				return Deferred.when(proposals);
 			});
-			return Deferred.all(promises, this.handleError).then(function(proposalArrays) {
-				return proposalArrays.reduce(function(prev, curr) {
-					return (curr instanceof Array) ? prev.concat(curr) : prev;
-				}, []);
-			});
+			return Deferred.all(promises, this.handleError).then(flatten);
 		},
+
+		/**
+		 * Sets the editor context factory that this ContentAssist will invoke to generate an <code>{@link orion.edit.EditorContext}</code>.
+		 * The EditorContext is passed to providers that implement the v4.0 content assist API.
+		 * @param {Function} editorContextProvider A function that returns an {@link orion.edit.EditorContext}.
+		 */
+		setEditorContextFactory: function(editorContextFactory) {
+			this.editorContextProvider = editorContextFactory;
+		},
+
 		/**
 		 * Sets the content assist providers that this ContentAssist will consult to obtain proposals.
 		 * @param {orion.editor.ContentAssistProvider[]} providers The providers.
