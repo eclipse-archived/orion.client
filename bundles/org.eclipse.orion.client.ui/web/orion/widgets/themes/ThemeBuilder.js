@@ -170,7 +170,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 															messages["OR HEX:"] +
 														'</span>' + 
 														'<div id="colorstring" class="colorfield"></div>' +
-														'<button class="commandButton" style="padding:5px;font-size:9pt;" type="button" id="colorButton">ok</button>' + 
+														'<button class="commandButton" style="padding:5px;font-size:9pt;" type="button" id="colorButton">' +
+															messages["Ok"] +
+														'</button>' + 
 												'</div>' +
 											'</div>';
 		
@@ -307,9 +309,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		    Component.drawText( ctx, component.description, LEFT + x, TOP + 10, 'bold 9pt sans-serif', '#555' );
 
 		    Component.drawText( ctx, messages["COLOR:"], LEFT + x, TOP + 50, '8pt sans-serif', '#555' ); 
-		    Component.drawRectangle( ctx, LEFT + x + 100, TOP + 40, 50, 10, component.fill, null );	    
-		    Component.drawText( ctx, messages["COLOR STRING:"], LEFT + x, TOP + 70, '8pt sans-serif', '#555' );    
-		    Component.drawText( ctx, component.fill, LEFT + x + 100, TOP + 70, '8pt sans-serif', '#555' );     
+		    Component.drawRectangle( ctx, LEFT + x + 5, TOP + 60, 40, 15, component.fill, null );	    
+		    Component.drawText( ctx, component.fill, LEFT + x + 5 + 40 + 5, TOP + 70, '8pt sans-serif', '#555' );     
 		    Component.drawLine( ctx, LEFT + x, TOP + 25, LEFT + x + 190, TOP + 25, 10, '#555' );       
 		    Component.drawLine( ctx, LEFT + x, TOP + 85, LEFT + x + 190, TOP + 85, 5, '#555' );    
 		    Component.drawText( ctx, messages["NEW COLOR:"], LEFT + x, TOP + 115, 'bold 8pt sans-serif', '#555' ); 
