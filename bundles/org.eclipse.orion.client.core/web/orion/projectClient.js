@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global define */
-define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages, Deferred){
+define(['i18n!orion/navigate/nls/messages', 'orion/Deferred'], function(messages, Deferred){
 
 	/**
 	 * Creates a new project client.
@@ -120,14 +120,20 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 		 */
 		initProject : function(contentLocation, projectMetadata){
 			var that = this;
-			return this.fileClient.createFile(contentLocation, "project.json").then(function(fileMetadata){
+			var deferred = new Deferred();
+			this.fileClient.createFile(contentLocation, "project.json").then(function(fileMetadata){
 				if(projectMetadata){
-					return that.fileClient.write(fileMetadata.Location, JSON.stringify(projectMetadata));
+					that.fileClient.write(fileMetadata.Location, JSON.stringify(projectMetadata)).then(function(){
+						deferred.resolve({ContentLocation: contentLocation, projectMetadata: projectMetadata});
+					}, deferred.reject, deferred.progress);
+				} else {
+					deferred.resolve({fileMetadata: fileMetadata});
 				}
-				return fileMetadata;
 			}, 
-				function(error){return error;},
-				function(progress){return progress;});
+				deferred.reject,
+				deferred.progress);
+			
+			return deferred;
 		},
 		
 		createProject: function(workspaceLocation, projectMetadata){

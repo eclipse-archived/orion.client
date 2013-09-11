@@ -11,8 +11,9 @@
  *******************************************************************************/
 /*global window define orion XMLHttpRequest confirm*/
 /*jslint sub:true*/
-define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/commandRegistry', 'orion/i18nUtil'],
-	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil){
+define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
+ 'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/ImportDialog'],
+	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog){
 		var projectCommandUtils = {};
 		
 		var selectionListenerAdded = false;
@@ -423,7 +424,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		commandService.addCommand(addReadmeCommand);
 		
 		var createBasicProjectCommand = new mCommands.Command({
-			name: "Create Basic Project",
+			name: "Create a basic project",
 			tooltip: "Create an empty project",
 			id: "orion.project.create.basic",
 			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
@@ -444,6 +445,37 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			);
 			
 			commandService.addCommand(createBasicProjectCommand);
+			
+			var createZipProjectCommand = new mCommands.Command({
+			name: "Create a project from a zipped folder",
+			tooltip: "Create project and fill it with data from local file",
+			id: "orion.project.create.fromfile",
+			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
+			callback: function(data){
+					var name = data.parameters.valueFor("name");
+					if(!name){
+						return;
+					}
+					var item = forceSingleItem(data.items);
+					progress.progress(projectClient.createProject(item.Location, {Name: name}), "Creating project " + name).then(function(projectInfo){
+						progress.progress(fileClient.read(projectInfo.ContentLocation, true)).then(function(projectMetadata){
+							var dialog = new ImportDialog.ImportDialog({
+								importLocation: projectMetadata.ImportLocation,
+								func: function() {
+									explorer.changedItem();
+								}
+							});
+							dialog.show();
+						});
+					});
+				},
+			visibleWhen: function(item) {
+					return(!!item.Location);
+				}
+			}
+			);
+			
+			commandService.addCommand(createZipProjectCommand);
 		};
 	
 		return projectCommandUtils;
