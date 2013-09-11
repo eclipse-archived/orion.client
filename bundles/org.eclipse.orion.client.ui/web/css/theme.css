@@ -200,7 +200,7 @@ a.currentLocation:hover {
 	vertical-align: baseline;
     display: inline-block;
     padding: 2px 6px 3px;
-    border-radius: 2px;
+    border-radius: 1px;
     line-height: 12px;
 	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
 	margin: 0;  /* to override user agent stylesheet */
@@ -223,7 +223,7 @@ a.currentLocation:hover {
 
 .commandImage {
 	border: 1px solid transparent;
-    border-radius: 2px;
+    border-radius: 1px;
 	background-color: transparent;
 	vertical-align: baseline;
 	cursor: pointer;
@@ -341,12 +341,12 @@ a.currentLocation:hover {
 	z-index: 150;
 	position: absolute;
 	list-style-type: none;
-	border-radius: 3px;
-	border: 1px solid #DDD;
+	border-radius: 1px;
+	border: 1px solid #EEE;
 	padding: 0;
 	background-color: white;
 	padding: 10px;
-	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 	display: none; /* don't take part in layout until open */
 }
 
