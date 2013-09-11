@@ -32,6 +32,7 @@ define(['marked/marked', 'orion/webui/littlelib'], function(marked, lib) { //$NO
 			var tr = document.createElement("tr");
 			table.appendChild(tr);
 			var td = document.createElement("th");
+			td.style.textTransform = "uppercase";
 			td.appendChild(document.createTextNode(file.Name || "readme"));
 			tr.appendChild(td);
 

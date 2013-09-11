@@ -56,12 +56,14 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 			var projects = [];
 			var projectDeferrds = [];
 			for(var i=0; i<workspaceMetadata.Children.length; i++){
-				var projectDeferred = this.readProject(workspaceMetadata.Children[i]);
+				var projectDeferred = this.readProject(workspaceMetadata.Children[i], workspaceMetadata);
 				projectDeferrds.push(projectDeferred);
 				projectDeferred.then(function(projectMetadata){
 					if(projectMetadata){
 						projects.push(projectMetadata);
 					}
+				}, function(error){
+					console.error(error);
 				});
 			}
 			Deferred.all(projectDeferrds).then(function(){
@@ -69,9 +71,10 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 			});
 			return deferred;
 		},
-		readProject : function(fileMetadata){
+		readProject : function(fileMetadata, workspaceMetadata){
 			var that = this;
-			return this.fileClient.loadWorkspace().then(function(workspace){
+			
+			function readProjectFromWorkspace(fileMetadata, workspace){
 				if(fileMetadata.Parents && fileMetadata.Parents.length>0){
 					var topFolder = fileMetadata.Parents[fileMetadata.Parents.length-1];
 					if(topFolder.Children){
@@ -100,7 +103,14 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 					deferred.resolve(null);
 					return deferred;
 				}
-			}.bind(that));
+			}
+			if(workspaceMetadata){
+				return readProjectFromWorkspace.call(that, fileMetadata, workspaceMetadata);
+			} else {
+				return this.fileClient.loadWorkspace().then(function(workspace){
+					return readProjectFromWorkspace.call(that, fileMetadata, workspace);
+				});
+			}
 		},
 		
 		/**
@@ -118,6 +128,15 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred"], function(messages
 			}, 
 				function(error){return error;},
 				function(progress){return progress;});
+		},
+		
+		createProject: function(workspaceLocation, projectMetadata){
+				return this.fileClient.createProject(workspaceLocation, projectMetadata.Name, null, true).then(function(fileMetadata){
+					return this.initProject(fileMetadata.ContentLocation, projectMetadata);
+				}.bind(this), 
+				function(error){return error;},
+				function(progress){return progress;}
+			);
 		},
 		
 		getDependencyFileMetadata : function(dependency, workspaceLocation){

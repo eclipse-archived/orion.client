@@ -70,7 +70,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			table.appendChild(tr);
 			var td = document.createElement("th");
 			td.colSpan = 2;
-			td.appendChild(document.createTextNode("Project Information"));
+			td.appendChild(document.createTextNode("PROJECT INFORMATION"));
 			tr.appendChild(td);
 
 			tr = document.createElement("tr");
@@ -101,7 +101,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			table.appendChild(tr);
 			td = document.createElement("td");
 			b = document.createElement("b");
-			b.appendChild(document.createTextNode("Website"));
+			b.appendChild(document.createTextNode("Site"));
 			td.appendChild(b);
 			tr.appendChild(td);
 			td = document.createElement("td");
@@ -122,7 +122,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			var tr = document.createElement("tr");
 			table.appendChild(tr);
 			var td = document.createElement("th");
-			td.appendChild(document.createTextNode("readme.md"));
+			td.appendChild(document.createTextNode("README.MD"));
 			var actionsSpan = document.createElement("span");
 			actionsSpan.id = this.redmeCommandsScope;
 			actionsSpan.style.cssFloat = "right";
@@ -176,7 +176,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			var tr = document.createElement("tr");
 			table.appendChild(tr);
 			var td = document.createElement("th");
-			td.appendChild(document.createTextNode("Associated Content"));
+			td.appendChild(document.createTextNode("ASSOCIATED CONTENT"));
 			var actionsSpan = document.createElement("span");
 			actionsSpan.id = this.allDependenciesActions;
 			actionsSpan.style.cssFloat = "right";

@@ -422,6 +422,28 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		
 		commandService.addCommand(addReadmeCommand);
 		
+		var createBasicProjectCommand = new mCommands.Command({
+			name: "Create Basic Project",
+			tooltip: "Create an empty project",
+			id: "orion.project.create.basic",
+			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
+			callback: function(data){
+					var name = data.parameters.valueFor("name");
+					if(!name){
+						return;
+					}
+					var item = forceSingleItem(data.items);
+					progress.progress(projectClient.createProject(item.Location, {Name: name}), "Creating project " + name).then(function(){
+						explorer.changedItem();
+					});
+				},
+			visibleWhen: function(item) {
+					return(!!item.Location);
+				}
+			}
+			);
+			
+			commandService.addCommand(createBasicProjectCommand);
 		};
 	
 		return projectCommandUtils;
