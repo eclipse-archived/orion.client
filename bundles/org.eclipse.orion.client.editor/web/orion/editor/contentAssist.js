@@ -142,21 +142,28 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			// now handle prefixes
 			// if there is a non-empty selection, then replace it,
 			// if overwrite is truthy, then also replace the prefix
-			var sel = this.textView.getSelection();
-			var start = Math.min(sel.start, sel.end);
-			var end = Math.max(sel.start, sel.end);
+			var view = this.textView;
+			var sel = view.getSelection();
+			var start = Math.min(sel.start, sel.end), mapStart = start;
+			var end = Math.max(sel.start, sel.end), mapEnd = end;
+			var model = view.getModel();
+			if (model.getBaseModel) {
+				mapStart = model.mapOffset(mapStart);
+				mapEnd = model.mapOffset(mapEnd);
+				model = model.getBaseModel();
+			}
 			if (proposal.overwrite) {
-				start = this.getPrefixStart(start);
+				start = this.getPrefixStart(model, mapStart);
 			}
 
 			var data = {
 				proposal: proposal,
-				start: start,
-				end: end
+				start: mapStart,
+				end: mapEnd
 			};
 			this.setState(State.INACTIVE);
 			var proposalText = typeof proposal === "string" ? proposal : proposal.proposal; //$NON-NLS-0$
-			this.textView.setText(proposalText, start, end);
+			view.setText(proposalText, start, end);
 			this.dispatchEvent({type: "ProposalApplied", data: data}); //$NON-NLS-0$
 			return true;
 		},
@@ -234,9 +241,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			});
 		},
 		/** @private */
-		getPrefixStart: function(end) {
+		getPrefixStart: function(model, end) {
 			var index = end;
-			while (index > 0 && /[A-Za-z0-9_]/.test(this.textView.getText(index - 1, index))) {
+			while (index > 0 && /[A-Za-z0-9_]/.test(model.getText(index - 1, index))) {
 				index--;
 			}
 			return index;
@@ -255,9 +262,17 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		 */
 		_computeProposals: function(offset) {
 			var providers = this.providers;
-			var textView = this.textView, textModel = textView.getModel();
-			var buffer = textView.getText();
-			var line = textModel.getLine(textModel.getLineAtOffset(offset));
+			var textView = this.textView;
+			var sel = textView.getSelection();
+			var model = textView.getModel(), mapOffset = offset;
+			if (model.getBaseModel) {
+				mapOffset = model.mapOffset(mapOffset);
+				sel.start = model.mapOffset(sel.start);
+				sel.end = model.mapOffset(sel.end);
+				model = model.getBaseModel();
+			}
+			var buffer = model.getText();
+			var line = model.getLine(model.getLineAtOffset(mapOffset));
 			var index = 0;
 			while (index < line.length && /\s/.test(line.charAt(index))) {
 				index++;
@@ -267,9 +282,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
 			var context = {
 				line: line,
-				prefix: textView.getText(this.getPrefixStart(offset), offset),
-				selection: textView.getSelection(),
-				delimiter: textModel.getLineDelimiter(),
+				prefix: model.getText(this.getPrefixStart(model, mapOffset), mapOffset),
+				selection: sel,
+				delimiter: model.getLineDelimiter(),
 				tab: tab,
 				indentation: indentation
 			};
@@ -280,7 +295,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				var proposals;
 				try {
 					if (typeof func === "function") { //$NON-NLS-0$
-						proposals = self.progress ? self.progress.progress(func.apply(provider, [buffer, offset, context]), "Generating content assist proposal"): func.apply(provider, [buffer, offset, context]);
+						var def = func.apply(provider, [buffer, mapOffset, context]);
+						proposals = self.progress ? self.progress.progress(def, "Generating content assist proposal") : def;
 					}
 				} catch (e) {
 					self.handleError(e);
@@ -677,9 +693,19 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		},
 		position: function() {
 			var contentAssist = this.contentAssist;
-			var offset = contentAssist.offset !== undefined ? contentAssist.offset : this.textView.getCaretOffset();
-			var caretLocation = this.textView.getLocationAtOffset(offset);
-			caretLocation.y += this.textView.getLineHeight();
+			var offset;
+			var view = this.textView;
+			if (contentAssist.offset !== undefined) {
+				offset = contentAssist.offset;
+				var model = view.getModel();
+				if (model.getBaseModel) {
+					offset = model.mapOffset(offset, true);
+				}
+			} else {
+				offset = this.textView.getCaretOffset();
+			}
+			var caretLocation = view.getLocationAtOffset(offset);
+			caretLocation.y += view.getLineHeight();
 			this.textView.convert(caretLocation, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.parentNode.style.position = "fixed"; //$NON-NLS-0$
 			this.parentNode.style.left = caretLocation.x + "px"; //$NON-NLS-0$
