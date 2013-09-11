@@ -247,7 +247,11 @@ define("orion/editor/find", [ //$NON-NLS-0$
 		},
 		getFindString: function() {
 			var selection = this._editor.getSelection();
-			return this._editor.getText(selection.start, selection.end) || this._lastString;
+			var searchString = this._editor.getText(selection.start, selection.end);
+			if (this._regex) {
+				searchString = mRegex.escape(searchString);
+			}
+			return searchString || this._lastString;
 		},
 		getOptions: function() {
 			return {
