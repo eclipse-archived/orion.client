@@ -29,8 +29,9 @@ define([
 	'orion/PageUtil',
 	'orion/PageLinks',
 	'orion/blamer',
+	'orion/regex',
 	'orion/util'
-], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, blamer, util) {
+], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, blamer, regex, util) {
 
 	var exports = {};
 	
@@ -343,6 +344,9 @@ define([
 					if (selection.end > selection.start) {
 						var model = editor.getModel();
 						searchString = model.getText(selection.start, selection.end);
+						if (self._localSearcher && self._localSearcher.getOptions().regex) {
+							searchString = regex.escape(searchString);
+						}
 					}
 					return [new mCommandRegistry.CommandParameter('find', 'text', 'Find:', searchString)]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
@@ -363,6 +367,9 @@ define([
 						if (selection.end > selection.start && data.parameters.valueFor('useEditorSelection')) {//$NON-NLS-0$ If there is selection from editor, we want to use it as the default keyword
 							var model = editor.getModel();
 							searchString = model.getText(selection.start, selection.end);
+							if (self._localSearcher.getOptions().regex) {
+								searchString = regex.escape(searchString);
+							}
 						} else {//If there is no selection from editor, we want to parse the parameter from URL binding
 							if (data.parameters && data.parameters.valueFor('find')) { //$NON-NLS-0$
 								searchString = data.parameters.valueFor('find'); //$NON-NLS-0$
