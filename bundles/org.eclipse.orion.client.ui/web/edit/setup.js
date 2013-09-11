@@ -149,12 +149,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 
 	inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		if (folderView) {
+			commandRegistry.closeParameterCollector();
 			folderView.destroy();
 			folderView = null;
 		}
 		var metadata = evt.metadata;
 		renderToolbars(metadata);
-		commandRegistry.closeParameterCollector();
 		if (evt.input === null || evt.input === undefined) {
 			return;
 		}
@@ -178,6 +178,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		commandRegistry.processURL(window.location.href);
 
 		if (metadata && metadata.Directory) {
+			commandRegistry.closeParameterCollector();
 			folderView = new mFolderView.FolderView({
 				parent: editorDomNode,
 				input: evt.input,
