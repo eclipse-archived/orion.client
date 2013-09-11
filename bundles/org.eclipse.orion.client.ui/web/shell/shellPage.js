@@ -652,7 +652,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 			writer = new mResultWriters.FileStringWriter(output, shellPageFileService);
 		} else {
 			element = document.createElement("div"); //$NON-NLS-0$
-			writer = new mResultWriters.ShellStringWriter(element, result.getType() === "markdown"); //$NON-NLS-0$
+			writer = new mResultWriters.ShellStringWriter(element/*, result.getType() === "markdown"*/); //$NON-NLS-0$
 		}
 
 		outputString(result.stringify(), writer).then(
