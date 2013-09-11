@@ -445,15 +445,8 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				this._undoStack.endCompoundChange();
 			}
 		},
-		_doFind: function(string, startOffset, count, noWrap) {
-			count = count || 1;
-			var editor = this._editor;
-			if (!string) {
-				this._removeAllAnnotations();
-				return null;
-			}
-			this._lastString = string;
-			var iterator = editor.getModel().find({
+		_find: function(string, startOffset, noWrap) {
+			return this._editor.getModel().find({
 				string: string,
 				start: startOffset,
 				end: this._end,
@@ -463,7 +456,26 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				wholeWord: this._wholeWord,
 				caseInsensitive: this._caseInsensitive
 			});
-			var result;
+		},
+		_doFind: function(string, startOffset, count, noWrap) {
+			count = count || 1;
+			var editor = this._editor;
+			if (!string) {
+				this._removeAllAnnotations();
+				return null;
+			}
+			this._lastString = string;
+			var result, iterator;
+			if (this._regex) {
+				try {
+					iterator = this._find(string, startOffset, noWrap);
+				} catch (ex) {
+					editor.reportStatus(ex.message, "error"); //$NON-NLS-0$
+					return;
+				}
+			} else {
+				iterator = this._find(string, startOffset, noWrap);
+			}
 			for (var i=0; i<count && iterator.hasNext(); i++) {
 				result = iterator.next();
 			}
