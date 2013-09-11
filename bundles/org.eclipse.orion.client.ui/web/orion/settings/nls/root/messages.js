@@ -201,7 +201,7 @@ define({
 	"CSS Value": "CSS Value",
 	"CSS Text": "CSS Text",
 	"COLOR:": "Color:",
-	"COLOR STRING:": "Color String:",
 	"NEW COLOR:": "New Color:",
+	"Ok": "Ok",
 	"OR HEX:": "Or Hex: "
 });
