@@ -574,8 +574,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				return this.autoPairBrackets("<", ">"); //$NON-NLS-1$ //$NON-NLS-0$
 			}.bind(this));
 
-			textView.setKeyBinding(new mKeyBinding.KeyBinding('>', false, false, false, false, "keypress"), "skipClosingSquareBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			textView.setAction("skipClosingSquareBracket", function() { //$NON-NLS-0$
+			textView.setKeyBinding(new mKeyBinding.KeyBinding('>', false, false, false, false, "keypress"), "skipClosingAngleBracket"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setAction("skipClosingAngleBracket", function() { //$NON-NLS-0$
 				return this.skipClosingBracket('>'); //$NON-NLS-0$
 			}.bind(this));
 
