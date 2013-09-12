@@ -684,7 +684,7 @@ define([
 				sortedByPosition = [];
 				var pushedItem = false;
 				for (var key in contributions) {
-				    if (!contributions.hasOwnProperty || contributions.hasOwnProperty(key)) {
+					if (Object.prototype.hasOwnProperty.call(contributions, key)) {
 						var item = contributions[key];
 						if (item && typeof(item.position) === "number") { //$NON-NLS-0$
 							item.id = key;

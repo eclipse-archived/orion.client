@@ -284,7 +284,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 				var variableExpansions = {};
 				// we need the properties of the item
 				for (var property in item){
-					if(item.hasOwnProperty(property)){
+					if(Object.prototype.hasOwnProperty.call(item, property)){
 						variableExpansions[property] = item[property];
 					}
 				}

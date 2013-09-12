@@ -14,7 +14,7 @@ define([], function() {
 		for (var j = 1; j < arguments.length; j++) {
 			var source = arguments[j];
 			for (var key in source) {
-				if (source.hasOwnProperty(key)) {
+				if (Object.prototype.hasOwnProperty.call(source, key)) {
 					target[key] = source[key];
 				}
 			}
