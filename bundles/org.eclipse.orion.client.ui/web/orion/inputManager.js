@@ -190,9 +190,7 @@ define([
 			var input = this.getInput();
 			editor.reportStatus(messages['Saving...']);
 
-			if (this._trimTrailingWhiteSpaceEnabled) {
-				this._trimTrailingWhiteSpaces();
-			}
+			this.dispatchEvent({ type: "Saving", inputManager: this}); //$NON-NLS-0$
 
 			editor.getUndoStack().markClean();
 			var contents = editor.getText();
@@ -286,8 +284,8 @@ define([
 				this._idle.setTimeout(timeout);
 			}
 		},
-		setSaveDiffsEnabled: function(enabled) {
-			this._saveDiffsEnabled = enabled;
+		setContentType: function(contentType) {
+			this._contentType = contentType;
 		},
 		setInput: function(location) {
 			if (this._ignoreInput) { return; }
@@ -333,6 +331,17 @@ define([
 				this._setNoInput();
 			}
 		},
+		setTitle: function(title) {
+			var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
+			var shortTitle = title;
+			if (indexOfSlash !== -1) {
+				shortTitle = shortTitle.substring(indexOfSlash + 1);
+			}
+			this._title = shortTitle;
+		},
+		setSaveDiffsEnabled: function(enabled) {
+			this._saveDiffsEnabled = enabled;
+		},
 		_getSaveDiffsEnabled: function() {
 			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
 		},
@@ -360,7 +369,7 @@ define([
 			}
 			var editor = this.getEditor();
 			if (isDir) {
-				this.editor.uninstallTextView();
+				editor.uninstallTextView();
 			} else {
 				if (!editor.getTextView()) {
 					editor.installTextView();
@@ -420,27 +429,6 @@ define([
 				editor.setInput(title, null, contents);
 				this._unsavedChanges = [];
 				this.processParameters(input);
-			}
-		},
-		setContentType: function(contentType) {
-			this._contentType = contentType;
-		},
-		setTitle: function(title) {
-			var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
-			var shortTitle = title;
-			if (indexOfSlash !== -1) {
-				shortTitle = shortTitle.substring(indexOfSlash + 1);
-			}
-			this._title = shortTitle;
-		},
-		setTrimTrailingWhiteSpace: function(enabled) {
-			this._trimTrailingWhiteSpaceEnabled = enabled;
-		},
-		_trimTrailingWhiteSpaces: function() {
-			var editor = this.editor;
-			var textView = editor.getTextView();
-			if (textView) {
-				textView.invokeAction("trimTrailingWhitespaces"); //$NON-NLS-0$
 			}
 		}
 	});

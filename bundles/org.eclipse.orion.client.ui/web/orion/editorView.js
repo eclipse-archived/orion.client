@@ -266,6 +266,11 @@ define([
 					this.updateStyler(this.settings);
 				}.bind(this));
 			}.bind(this));
+			inputManager.addEventListener("Saving", function(event) {
+				if (self.settings.trimTrailingWhiteSpace) {
+					editor.getTextView().invokeAction("trimTrailingWhitespaces"); //$NON-NLS-0$
+				}
+			});
 
 			serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 				editor.showProblems(event.problems);
