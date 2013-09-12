@@ -16,21 +16,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	'orion/editor/eventTarget', //$NON-NLS-0$
 	'orion/editor/tooltip', //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
+	'orion/objects', //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
-], function(messages, mEventTarget, mTooltip, mAnnotations, util) {
+], function(messages, mEventTarget, mTooltip, mAnnotations, objects, util) {
 
-	/**	@private */
-	function merge(obj1, obj2) {
-		if (obj2) {
-			for (var p in obj2) {
-				if (obj2.hasOwnProperty(p)) {
-					obj1[p] = obj2[p];
-				}
-			}
-		}
-		return obj1;
-	}
-		
 	var AT = mAnnotations.AnnotationType;
 
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
@@ -818,8 +807,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			var createGroup = function() {
 				var annotation = mAnnotations.AnnotationType.createAnnotation(this.groupType, this.start, this.end, this.title);
-				annotation.style = merge({}, annotation.style);
-				annotation.style.style = merge({}, annotation.style.style);
+				annotation.style = objects.mixin({}, annotation.style);
+				annotation.style.style = objects.mixin({}, annotation.style.style);
 				annotation.style.style.backgroundColor = "";
 				this.groupAnnotation = annotation;
 				annotation.blame = this.blame;
@@ -848,8 +837,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				var annotation = mAnnotations.AnnotationType.createAnnotation(AT.ANNOTATION_BLAME, start, end, title);
 				var blameColor = blameRGB.slice(0);
 				blameColor.push(blameMarker.Shade);
-				annotation.style = merge({}, annotation.style);
-				annotation.style.style = merge({}, annotation.style.style);
+				annotation.style = objects.mixin({}, annotation.style);
+				annotation.style.style = objects.mixin({}, annotation.style.style);
 				annotation.style.style.backgroundColor = "rgba(" + blameColor.join() + ")"; //$NON-NLS-0$ //$NON-NLS-1$
 				annotation.groupId = blameMarker.Name;
 				annotation.groupType = AT.ANNOTATION_CURRENT_BLAME;
