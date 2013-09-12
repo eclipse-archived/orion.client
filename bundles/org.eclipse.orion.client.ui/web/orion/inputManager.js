@@ -187,7 +187,6 @@ define([
 			if (!editor.isDirty()) { return; }
 			var failedSaving = this._errorSaving;
 			this._saving = true;
-			this._errorSaving = false;
 			var input = this.getInput();
 			editor.reportStatus(messages['Saving...']);
 
@@ -198,20 +197,21 @@ define([
 			editor.getUndoStack().markClean();
 			var contents = editor.getText();
 			var data = contents;
-			if (this._getSaveDiffsEnabled()) {
+			if (this._getSaveDiffsEnabled() && !this._errorSaving) {
 				var changes = this._unsavedChanges;
-				this._unsavedChanges = [];
 				var length = 0;
 				for (var i = 0; i < changes.length; i++) {
 					length += changes[i].text.length;
 				}
 				if (contents.length > length) {
 					data = {
-						diff: changes,
-						contents: contents //TODO: temporary code for file diffs debug
+						contents: contents, //TODO: temporary code for file diffs debug
+						diff: changes
 					};
 				}
 			}
+			this._unsavedChanges = [];
+			this._errorSaving = false;
 
 			var etag = this.getFileMetadata().ETag;
 			var args = { "ETag" : etag }; //$NON-NLS-0$
@@ -237,9 +237,6 @@ define([
 			function errorHandler(error) {
 				editor.reportStatus("");
 				handleError(statusService, error);
-				if (data.diff) {
-					self._unsavedChanges = data.diff.concat(self._unsavedChanges);
-				}
 				self._saving = false;
 				self._errorSaving = true;
 			}
