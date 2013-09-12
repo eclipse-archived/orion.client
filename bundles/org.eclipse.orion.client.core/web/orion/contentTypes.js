@@ -107,7 +107,7 @@ define([], function() {
 			var map = this.getContentTypesMap();
 			var types = [];
 			for (var type in map) {
-				if (map.hasOwnProperty(type)) {
+				if (Object.prototype.hasOwnProperty.call(map, type)) {
 					types.push(map[type]);
 				}
 			}
