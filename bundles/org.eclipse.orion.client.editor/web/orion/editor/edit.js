@@ -273,7 +273,16 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 			if (ruler && options.firstLineIndex !== undefined) {
 				ruler.setFirstLine(options.firstLineIndex);
 			}
-			editor.getSourceCodeActions().setAutoPairing(options.autoPairing);
+			var sourceCodeActions = editor.getSourceCodeActions();
+			if (sourceCodeActions) {
+				sourceCodeActions.setAutoPairParentheses(options.autoPairParentheses);
+				sourceCodeActions.setAutoPairBraces(options.autoPairBraces);
+				sourceCodeActions.setAutoPairSquareBrackets(options.autoPairSquareBrackets);
+				sourceCodeActions.setAutoPairAngleBrackets(options.autoPairAngleBrackets);
+				sourceCodeActions.setAutoPairQuotations(options.autoPairQuotations);
+				sourceCodeActions.setAutoCompleteComments(options.autoCompleteComments);
+				sourceCodeActions.setSmartIndentation(options.smartIndentation);
+			}
 		});
 		
 		var contents = options.contents;
