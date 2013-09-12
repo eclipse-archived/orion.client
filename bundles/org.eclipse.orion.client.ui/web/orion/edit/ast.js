@@ -38,11 +38,6 @@ define([
 				throw new Error("Already started");
 			}
 
-			this.listener = function(event) { //$NON-NLS-0$
-				this.contentType = event.contentType;
-			}.bind(this);
-			this.inputManager.addEventListener("ContentTypeChanged", this.listener); //$NON-NLS-0$
-
 			this.tracker = new ServiceTracker(this.serviceRegistry, "orion.core.astprovider"); //$NON-NLS-0$
 			this.tracker.open();
 
@@ -53,7 +48,6 @@ define([
 			this.registration.unregister();
 			this.contextRegistration.unregister();
 			this.tracker.close();
-			this.inputManager.removeEventListener("ContentTypeChanged", this.listener); //$NON-NLS-0$	
 			this.listener = this.cachedAST = null;
 		},
 		/**
