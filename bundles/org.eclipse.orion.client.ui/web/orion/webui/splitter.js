@@ -221,7 +221,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			window.setTimeout(function() {
 				self.$sideNode.classList.remove(self._vertical ? "sidePanelVerticalLayoutAnimation" : "sidePanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$ 
 				self.$mainNode.classList.remove(self._vertical ? "mainPanelVerticalLayoutAnimation" : "mainPanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$ 
-				self.$node.classList.remove(this._vertical ? "splitVerticalLayoutAnimation" : "splitLayoutAnimation"); //$NON-NLS-0$ 
+				self.$node.classList.remove(self._vertical ? "splitVerticalLayoutAnimation" : "splitLayoutAnimation"); //$NON-NLS-0$ 
 			}, this._animationDelay);
 		},
 		
