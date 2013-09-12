@@ -910,6 +910,10 @@ div.orionMarkdown {
 	color: grey;
 }
 
+.orionProject input, .orionProject textarea{
+	border: 1px solid lightgrey;
+}
+
 .orionMarkdown th, .orionProject th {
 	border-bottom: 1px solid lightgrey;
 	border-top: 1px solid lightgrey;

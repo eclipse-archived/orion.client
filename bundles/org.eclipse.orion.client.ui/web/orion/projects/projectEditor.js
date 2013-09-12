@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global define document*/
+/*global define document setTimeout*/
 define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'orion/projectCommands', 'orion/commandRegistry'],
 	function(mMarkdownView, lib, mProjectClient, mProjectCommands, mCommandRegistry) { //$NON-NLS-0$
 	function ProjectEditor(options){
@@ -64,6 +64,61 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 				this.display.bind(this)(node, projectData);
 			}.bind(this));
 		},
+		_renderEditableFields: function(td, span, input, property){
+			
+			function showInput(event){
+				input.value = span.innerText || span.textContent;
+				span.style.visibility = "hidden";
+				input.style.visibility = "";
+				input.focus();
+				td.onclick = null;
+			}
+			
+			span.appendChild(document.createTextNode(this.projectData[property] || " "));
+			td.title = "Click to edit";
+			span.style.position = "absolute";
+			td.onclick = showInput.bind(this);
+			
+			input.value = this.projectData[property] || "";
+			input.style.position = "absolute";
+			input.style.visibility = "hidden";
+			input.title = "Press Enter to save";
+			input.style.width = "70%";
+			input.style.marginLeft = "0";
+			input.onkeyup = function(event){
+				if(event.keyCode === 13){
+					var properties = {};
+					properties[property] = event.target.value;
+					this.progress.progress(this.projectClient.changeProjectProperties(this.projectData, properties), "Saving project " + this.projectData.Name).then(
+						function(newProjectData){
+							if(newProjectData){
+								this.projectData = newProjectData;
+								lib.empty(span);
+								span.appendChild(document.createTextNode(event.target.value));
+								if(span.href){
+									span.href = event.target.value;
+								}
+								span.style.visibility = "";
+								event.target.style.visibility = "hidden";
+								td.onclick = showInput.bind(this);
+							}
+						}.bind(this)
+					);
+				} else if(event.keyCode === 27) {
+					span.style.visibility = "";
+					event.target.style.visibility = "hidden";
+					td.onclick = showInput.bind(this);
+				}
+			}.bind(this);
+			input.onblur = function(event){
+				span.style.visibility = "";
+				event.target.style.visibility = "hidden";
+				setTimeout(function(){
+					//don't add onclick too soon, to avoid catching the event that triggered blur
+					td.onclick = showInput.bind(this);
+				}.bind(this), 100);
+			};
+		},
 		renderProjectInfo: function(parent){
 			var table = document.createElement("table");
 			var tr = document.createElement("tr");
@@ -79,9 +134,18 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			var b = document.createElement("b");
 			b.appendChild(document.createTextNode("Name"));
 			td.appendChild(b);
+			td.width = "20%";
 			tr.appendChild(td);
 			td = document.createElement("td");
-			td.appendChild(document.createTextNode(this.projectData.Name));
+			td.style.verticalAlign = "top";
+			var nameSpan = document.createElement("span");
+			var nameInput = document.createElement("input");
+			
+			this._renderEditableFields(td, nameSpan, nameInput, "Name");
+			
+			td.appendChild(nameSpan);
+			td.appendChild(nameInput);
+			
 			tr.appendChild(td);
 			table.appendChild(tr);
 			
@@ -91,9 +155,22 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			b = document.createElement("b");
 			b.appendChild(document.createTextNode("Description"));
 			td.appendChild(b);
+			td.width = "20%";
 			tr.appendChild(td);
 			td = document.createElement("td");
-			td.appendChild(document.createTextNode(this.projectData.Description ? this.projectData.Description: ""));
+			td.style.verticalAlign = "top";
+			td.style.height = "40px";
+			var descriptionSpan = document.createElement("span");
+			descriptionSpan.style.height = "40px";
+			descriptionSpan.style.verticalAlign = "middle";
+			descriptionSpan.style.overflow = "auto";
+			descriptionSpan.style.width = "70%";
+			var descriptionInput = document.createElement("textarea");
+			descriptionInput.style.height = "40px";
+			this._renderEditableFields(td, descriptionSpan, descriptionInput, "Description");
+			
+			td.appendChild(descriptionSpan);
+			td.appendChild(descriptionInput);
 			tr.appendChild(td);
 			table.appendChild(tr);
 			
@@ -103,12 +180,18 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			b = document.createElement("b");
 			b.appendChild(document.createTextNode("Site"));
 			td.appendChild(b);
+			td.width = "20%";
 			tr.appendChild(td);
 			td = document.createElement("td");
+			td.style.verticalAlign = "top";
 			var a = document.createElement("a");
 			a.href = this.projectData.Url;
-			a.appendChild(document.createTextNode(this.projectData.Url ? this.projectData.Url : ""));
+			var urlInput = document.createElement("input");
+			
+			this._renderEditableFields(td, a, urlInput, "Url");
+			
 			td.appendChild(a);
+			td.appendChild(urlInput);
 			tr.appendChild(td);
 			table.appendChild(tr);
 			
