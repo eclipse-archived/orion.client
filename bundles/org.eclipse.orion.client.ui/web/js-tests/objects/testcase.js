@@ -84,5 +84,13 @@ define([
 		assert.equal(Object.keys(source).length, 1);
 		assert.equal(source.a, 1);
 	};
+	tests.test_toArray = function() {
+		var arr = ['a'];
+		assert.strictEqual(objects.toArray(arr), arr);
+
+		var a = null, arrayA = objects.toArray(a);
+		assert.equal(arrayA.length, 1);
+		assert.strictEqual(arrayA[0], null);
+	};
 	return tests;
 });

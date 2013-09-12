@@ -53,6 +53,18 @@ define([], function() {
 		 * @param {Object} target
 		 * @param {Object} source
 		 */
-		mixin: mixin
+		mixin: mixin,
+		/**
+		 * Wraps an object into an Array if necessary.
+		 * @name orion.objects.toArray
+		 * @function
+		 * @static
+		 * @param {Object} obj An object.
+		 * @returns {Array} Returns <code>obj</code> unchanged, if <code>obj</code> is an Array. Otherwise returns a 1-element Array
+		 * whose sole element is <code>obj</code>.
+		 */
+		toArray: function(o) {
+			return Array.isArray(o) ? o : [o];
+		}
 	};
 });
