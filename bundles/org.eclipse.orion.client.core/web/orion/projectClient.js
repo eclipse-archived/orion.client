@@ -294,6 +294,41 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred'], function(messages
 		return deferred;
 	},
 	
+	changeProjectProperties: function(projectMetadata, properties){
+		if(!properties){
+			return;
+		}
+		var deferred = new Deferred();
+		
+		function saveProperties(projectJsonLocation){
+			this.fileClient.read(projectJsonLocation).then(function(content){
+				try{
+					var projectJson = content && content.length>0 ? JSON.parse(content) : {};
+					for(var key in properties){
+						projectJson[key] = properties[key];
+					}
+					this.fileClient.write(projectJsonLocation, JSON.stringify(projectJson)).then(
+						function(){
+							projectJson.ContentLocation = projectMetadata.ContentLocation;
+							projectJson.ProjectJsonLocation = projectJsonLocation;
+							projectJson.Name = projectMetadata.Name;
+							deferred.resolve(projectJson);
+						},
+						deferred.reject
+					);
+					
+				} catch (e){
+					deferred.reject(e);
+				}
+			}.bind(this), deferred.reject);
+		}
+		
+		if(projectMetadata.ProjectJsonLocation){
+			saveProperties.bind(this)(projectMetadata.ProjectJsonLocation);
+		}
+		return deferred;
+	},
+	
 	getDependencyTypes: function(){
 		var types = [];
 		for(var i=0; i<this.allDependencyHandlersReferences.length; i++){
