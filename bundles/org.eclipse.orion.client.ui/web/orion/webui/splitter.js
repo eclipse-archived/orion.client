@@ -58,7 +58,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			
 			if (this._closed) {
 				this._closed = false;  // _thumbDown will toggle it, so turn it off and then call _thumbDown.
-				this._thumbDown();
+				this._thumbDown(true);
 			} else {
 				this._adjustToSplitPosition();
 			}
@@ -156,27 +156,32 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			}
 		},
 		
-		_resize: function(animationDelay) {
+		_resize: function(animationDelay, left, top) {
 			animationDelay = animationDelay || 0;
 			var parentRect = lib.bounds(this.$node.parentNode);
 			var rect = lib.bounds(this.$node);
 			if (this._vertical) {
-				var top = rect.top + rect.height;
-				if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$		
-					top -= parentRect.top;
+				if (top === undefined) {
+					top = rect.top;
+					if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$		
+						top -= parentRect.top;
+					}
 				}
+				top += rect.height;
 				this.$mainNode.style.top = top + "px"; //$NON-NLS-0$ 
 			} else {
-				var left = rect.left + rect.width;
-				if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$		
-					left -= parentRect.left;
+				if (left === undefined) {
+					left = rect.left;
+					if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$		
+						left -= parentRect.left;
+					}
 				}
+				left += rect.width;
 				this.$mainNode.style.left = left + "px"; //$NON-NLS-0$
 			}
 			var self = this;
 			window.setTimeout(function() { self._notifyResizeListeners(self.$mainNode); }, animationDelay);
 			window.setTimeout(function() { self._notifyResizeListeners(self.$sideNode); }, animationDelay);
-
 		},
 		
 		_notifyResizeListeners: function(node) {
@@ -185,34 +190,29 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			}
 		}, 
 		
-		_thumbDown: function() {
+		_thumbDown: function(noAnimation) {
+			if (!noAnimation) {
+				this._addAnimation();
+			}
+			var top = this._splitTop, left = this._splitLeft;
 			if (this._closed) {
 				this._closed = false;
-				this._addAnimation();
-				if (this._vertical) {
-					this.$sideNode.style.height = this._splitTop+"px"; //$NON-NLS-0$ 
-					this.$node.style.top = this._splitTop+"px"; //$NON-NLS-0$
-				} else {
-					this.$sideNode.style.width = this._splitLeft+"px"; //$NON-NLS-0$ 
-					this.$node.style.left = this._splitLeft+"px"; //$NON-NLS-0$
-				}
-				this._resize(this._animationDelay);
-				this._removeAnimation();
 			} else {
 				this._closed = true;
-				this._addAnimation();
-				if (this._vertical) {
-					this.$sideNode.style.height = 0;
-					this.$node.style.top = "1px"; //$NON-NLS-0$ 
-				} else {
-					this.$sideNode.style.width = 0;
-					this.$node.style.left = "1px"; //$NON-NLS-0$ 
-				}
-				this._resize(this._animationDelay);
+				top = left = 0;
+			}
+			if (this._vertical) {
+				this.$sideNode.style.height = top+"px"; //$NON-NLS-0$ 
+				this.$node.style.top = top+"px"; //$NON-NLS-0$
+			} else {
+				this.$sideNode.style.width = left+"px"; //$NON-NLS-0$ 
+				this.$node.style.left = left+"px"; //$NON-NLS-0$
+			}
+			this._resize(this._animationDelay, left, top);
+			if (!noAnimation) {
 				this._removeAnimation();
 			}
 			localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
-
 		},
 		
 		_removeAnimation: function() {
@@ -221,26 +221,20 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			window.setTimeout(function() {
 				self.$sideNode.classList.remove(self._vertical ? "sidePanelVerticalLayoutAnimation" : "sidePanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$ 
 				self.$mainNode.classList.remove(self._vertical ? "mainPanelVerticalLayoutAnimation" : "mainPanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$ 
-				self.$node.classList.remove("splitLayoutAnimation"); //$NON-NLS-0$ 
-				if (self._thumb) {
-					self._thumb.classList.remove("splitLayoutAnimation"); //$NON-NLS-0$
-				}
+				self.$node.classList.remove(this._vertical ? "splitVerticalLayoutAnimation" : "splitLayoutAnimation"); //$NON-NLS-0$ 
 			}, this._animationDelay);
 		},
 		
 		_addAnimation: function() {
 			this.$sideNode.classList.add(this._vertical ? "sidePanelVerticalLayoutAnimation" : "sidePanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$ 
 			this.$mainNode.classList.add(this._vertical ? "mainPanelVerticalLayoutAnimation" : "mainPanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$ 
-			this.$node.classList.add("splitLayoutAnimation"); //$NON-NLS-0$ 
-			if (this._thumb) {
-				this._thumb.classList.add("splitLayoutAnimation"); //$NON-NLS-0$ 
-			}
+			this.$node.classList.add(this._vertical ? "splitVerticalLayoutAnimation" : "splitLayoutAnimation"); //$NON-NLS-0$ 
 		},
 		
 		_mouseDown: function(event) {
 			if (event.target === this._thumb) {
 				lib.stop(event);
-				return this._thumbDown(event);
+				return this._thumbDown();
 			}
 			if (this._tracking) {
 				return;

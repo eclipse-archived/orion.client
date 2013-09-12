@@ -316,7 +316,17 @@ hard-coded numbers elsewhere.
 }
 
 .splitLayoutAnimation {
-	background: transparent !important;
+	-webkit-transition: left 0.5s ease;
+	-moz-transition: left 0.5s ease;
+	-o-transition: left 0.5s ease;
+	transition: left 0.5s ease;
+}
+
+.splitVerticalLayoutAnimation {
+	-webkit-transition: top 0.5s ease;
+	-moz-transition: top 0.5s ease;
+	-o-transition: top 0.5s ease;
+	transition: top 0.5s ease;
 }
 
 .panelTracking {
