@@ -319,7 +319,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		//The vertical splitter has to adjust the top and bottm pane when the outliner is refreshed by the click on browser's refresh.
 		//Otherwise there the bottom pane is a little offset.
 		window.setTimeout(function() { 
-			this._splitter = new splitter.Splitter({node: splitNode, sidePanel: top, mainPanel: bottom, vertical: true});
+			this._splitter = new splitter.Splitter({node: splitNode, sidePanel: top, mainPanel: bottom, toggle: true, vertical: true});
 		}, 100);
 	}
 	SearchBuilder.prototype = /** @lends orion.navoutliner.SearchOutliner.prototype */ {

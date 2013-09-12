@@ -284,6 +284,7 @@ hard-coded numbers elsewhere.
 	width: 4px;
 	margin-right: 3px;
 	cursor: e-resize;
+	overflow: hidden;
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 }
 
@@ -295,6 +296,7 @@ hard-coded numbers elsewhere.
 	height: 4px;
 	margin-bottom: 3px;
 	cursor: n-resize;
+	overflow: hidden;
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 }
 

@@ -60,9 +60,10 @@
 	top: 50%;  
 	width: 100%;
 	z-index: 50;
-	height: 3px;
+	height: 4px;
 	cursor: n-resize;
-	background: #dedede;
+	background: #efefef;
+	overflow: hidden;
 	visibility: visible; 
 }
 
@@ -71,9 +72,10 @@
 	top: 50%;  
 	width: 100%;
 	z-index: 50;
-	height: 3px;
+	height: 4px;
 	cursor: n-resize;
-	background: #dedede;
+	background: #efefef;
+	overflow: hidden;
 	visibility: visible; 
 }
 
