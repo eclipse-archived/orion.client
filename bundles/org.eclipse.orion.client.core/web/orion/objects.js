@@ -19,6 +19,7 @@ define([], function() {
 				}
 			}
 		}
+		return target;
 	}
 
 	/**
