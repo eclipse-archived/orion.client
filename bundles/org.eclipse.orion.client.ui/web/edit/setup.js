@@ -165,7 +165,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 			makeAlternate: function() {
 				if (metadata && metadata.Parents && metadata.Parents.length > 0) {
 					// The mini-nav in sidebar wants to do the same work, can we share it?
-					return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages["Reading metedata of"], metadata.Parents[0].Location));
+					return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages.ReadingMetadata, metadata.Parents[0].Location));
 				}
 			},
 			makeBreadcrumbLink: sidebarNavBreadcrumb,
@@ -274,7 +274,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 
 	window.onbeforeunload = function() {
 		if (editor.isDirty()) {
-			 return messages["There are unsaved changes."];
+			 return messages.unsavedChanges;
 		}
 	};
 };
