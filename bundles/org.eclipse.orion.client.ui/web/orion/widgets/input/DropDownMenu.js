@@ -17,9 +17,13 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 	 * Creates a dropdown menu for a node and its associated trigger node (button)
 	 * @param {Object} parent The dom object or string id of the node that will contain the dropdown menu
 	 * @param {Object} triggerNode The dom object or string id of the dom node that will trigger the dropdown menu appearance
-	 * @param {String} [selectionClass] CSS class to be appended when the trigger node is selected. Optional.
+	 * @param {Object} [options] options for the drop down menu.
+	 * @param {String} [options.selectionClass] CSS class to be appended when the trigger node is selected.
+	 * @param {String} [options.noClick] Do not add the click handler to the trigger node.
+	 * @param {String} [options.onShow] Callback called when the menu is shown.
+	 * @param {String} [options.onHide] Callback called when the menu is hidden.
 	 */
-	function DropDownMenu( parent, triggerNode, selectionClass, options ){
+	function DropDownMenu( parent, triggerNode, options ){
 		var node = lib.node(parent);
 		if (node) {
 			this._parent = node;
@@ -27,9 +31,12 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			throw new Error("Parent node of dropdown menu not found"); //$NON-NLS-0$
 		}
 		
+		options = options || {};
+		this.options = options;
+		
 		// Assign dynamic ids to the dropdown menu node to support multiple drop down menus in the same page
 		this.navDropDownId = this._parent.id + '_navdropdown'; //$NON-NLS-0$
-		this.selectionClass = selectionClass;
+		this.selectionClass = options.selectionClass;
 		
 		// Create dropdown container and append to parent dom
 		var dropDownContainer = document.createElement("div"); //$NON-NLS-0$
@@ -49,8 +56,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		if (this._triggerNode.style.visibility === 'hidden') { //$NON-NLS-0$
 			this._triggerNode.style.visibility = 'visible'; //$NON-NLS-0$
 		}
-		options = options || {};
-		this.options = options;
+		
 		if (!options.noClick) {
 			this._triggerNode.onclick = this.click.bind(this);
 		}

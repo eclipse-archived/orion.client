@@ -143,8 +143,9 @@ define([
 				callback: function(data) {
 					var dropDown = settingsCommand.settingsDropDown;
 					if (!dropDown || dropDown.isDestroyed()) {
-						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domParent, data.domNode, 'dropdownSelection', { //$NON-NLS-0$
+						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domParent, data.domNode, { 
 							noClick: true,
+							selectionClass: 'dropdownSelection', //$NON-NLS-0$
 							onShow: function() {
 								dropDown.focus();
 							},
