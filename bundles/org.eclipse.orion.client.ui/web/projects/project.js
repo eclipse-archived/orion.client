@@ -77,9 +77,19 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'ori
 			
 			ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, projectExplorer, fileClient, projectClient);
 			
+			function initTitleBar(projects){
+				mGlobalCommands.setPageTarget({task: "Projects", target: projects, breadcrumbTarget: {Name: "Projects", Children: projects, Parents: []},
+					makeBreadcrumbLink: function(seg, location) {
+					},
+					serviceRegistry: serviceRegistry, commandService: commandRegistry}); 
+			}
+			
+			initTitleBar([]);
+			
 			projectExplorer.changedItem = function(){
 				progress.progress(fileClient.loadWorkspace(), "Getting workspace information").then(function(workspace){
 					progress.progress(projectClient.readAllProjects(workspace), "Listing projects").then(function(projects){
+						initTitleBar(projects);
 						lib.empty(newActionsSpan);
 						commandRegistry.renderCommands(newActionsScope, newActionsSpan, workspace, projectExplorer, "tool");
 						projectExplorer.loadProjects(projects);
