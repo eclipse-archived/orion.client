@@ -91,7 +91,6 @@ define([
 			inputManager.setAutoLoadEnabled(prefs.autoLoad);
 			inputManager.setAutoSaveTimeout(prefs.autoSave ? prefs.autoSaveTimeout : -1);
 			inputManager.setSaveDiffsEnabled(prefs.saveDiffs);
-			inputManager.setTrimTrailingWhiteSpace(prefs.trimTrailingWhiteSpace);
 			this.updateStyler(prefs);
 			var textView = editor.getTextView();
 			if (textView) {
