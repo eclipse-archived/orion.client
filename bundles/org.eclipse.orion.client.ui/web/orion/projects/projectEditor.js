@@ -24,6 +24,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 		});
 		this.redmeCommandsScope = "readmeActions";
 		this.allDependenciesActions = "dependenciesActions";
+		this.dependencyActions = "dependencyActions";
 		this.createCommands();
 	}
 	ProjectEditor.prototype = {
@@ -37,6 +38,8 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			for(var i=0; i<dependencyTypes.length; i++){
 				this.commandService.registerCommandContribution(this.allDependenciesActions, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
+			this.commandService.registerCommandContribution(this.dependencyActions, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.dependencyActions, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
 		},
 		changedItem: function(){
 			this.fileClient.read(this.parentFolder.Location, true).then(function(metadata){
@@ -259,6 +262,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			var tr = document.createElement("tr");
 			table.appendChild(tr);
 			var td = document.createElement("th");
+			td.colSpan = 2;
 			td.appendChild(document.createTextNode("ASSOCIATED CONTENT"));
 			var actionsSpan = document.createElement("span");
 			actionsSpan.id = this.allDependenciesActions;
@@ -274,8 +278,9 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 					table.appendChild(tr);
 					td = document.createElement("td");
 					td.appendChild(document.createTextNode(dependency.Name));
+					var span = document.createElement("span");
 					
-					(function(td, dependency){
+					(function(td, span, dependency){
 						this.projectClient.getDependencyFileMetadata(dependency, this.projectData.WorkspaceLocation).then(function(dependencyMetadata){
 							if(dependencyMetadata){
 								lib.empty(td);
@@ -287,9 +292,17 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 						}, function(){
 							lib.empty(td);
 							td.appendChild(document.createTextNode(dependency.Name + " (disconnected)"));
-						});
-					}).bind(this)(td, dependency);
+							lib.empty(span);
+							this.commandService.renderCommands(this.dependencyActions, span, {Dependency: dependency,  disconnected: true, Project: this.projectData}, this, "tool");
+						}.bind(this));
+					}).bind(this)(td, span, dependency);
 					
+					tr.appendChild(td);
+					
+					td = document.createElement("td");
+					span.style.cssFloat = "right";
+					td.appendChild(span);
+					this.commandService.renderCommands(this.dependencyActions, span, {Dependency: dependency, Project: this.projectData}, this, "tool");
 					tr.appendChild(td);
 				}
 				
