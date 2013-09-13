@@ -147,17 +147,17 @@ define([
 			editor: "orion.editor"});
 
 	// Register content assist providers
-	provider.registerService("orion.edit.contentAssist",
+	provider.registerService("orion.edit.contentassist",
 		new cssContentAssist.CssContentAssistProvider(),
 		{	name: "CSS content assist",
 			contentType: ["text/css"]
 		});
-	provider.registerService("orion.edit.contentAssist",
+	provider.registerService("orion.edit.contentassist",
 		new jsTemplateContentAssist.JSTemplateContentAssistProvider(),
 		{	name: "JavaScript content assist",
 			contentType: ["application/javascript"]
 		});
-	provider.registerService("orion.edit.contentAssist",
+	provider.registerService("orion.edit.contentassist",
 		new htmlContentAssist.HTMLContentAssistProvider(),
 		{	name: "HTML content assist",
 			contentType: ["text/html"]
