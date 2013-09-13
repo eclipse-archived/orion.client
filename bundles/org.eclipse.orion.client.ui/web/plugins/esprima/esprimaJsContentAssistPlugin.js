@@ -21,7 +21,7 @@ define([
 		description: "This plugin provides content assist for JavaScript using the Esprima JavaScript parser."
 	};
 	var provider = new PluginProvider(headers);
-	provider.registerServiceProvider("orion.edit.contentAssist", 
+	provider.registerServiceProvider("orion.edit.contentassist",
 			new esprimaContentAssistPlugin.EsprimaJavaScriptContentAssistProvider(), {
 		contentType: ["application/javascript"],
 		name: "Esprima based JavaScript content assist",
