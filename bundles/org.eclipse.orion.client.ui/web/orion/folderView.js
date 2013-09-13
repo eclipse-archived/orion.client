@@ -25,20 +25,26 @@ define(['orion/markdownView', 'orion/projects/projectEditor'], function(mMarkdow
 		this.progress = options.progress;
 		this.serviceRegistry = options.serviceRegistry;
 		this.commandService = options.commandService;
+		this.showProjectView = true;
 		this._init();
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
 		_init: function(){
+			if(this.serviceRegistry.getServiceReferences("orion.projects").length===0){
+				this.showProjectView = false;
+			}
 			this.markdownView = new mMarkdownView.MarkdownView({
 				fileClient : this.fileClient,
 				progress : this.progress
 			});
-			this.projectEditor = new mProjectEditor.ProjectEditor({
-				fileClient : this.fileClient,
-				progress : this.progress,
-				serviceRegistry: this.serviceRegistry,
-				commandService: this.commandService
-			});
+			if(this.showProjectView){
+				this.projectEditor = new mProjectEditor.ProjectEditor({
+					fileClient : this.fileClient,
+					progress : this.progress,
+					serviceRegistry: this.serviceRegistry,
+					commandService: this.commandService
+				});
+			}
 		},
 		displayFolderView: function(children){
 			var projectJson;
@@ -53,7 +59,7 @@ define(['orion/markdownView', 'orion/projects/projectEditor'], function(mMarkdow
 				}
 
 			}
-			if(projectJson){
+			if(projectJson && this.showProjectView){
 				this._node = document.createElement("div");
 				this.projectEditor.displayContents(this._node, this._contents);
 				this._parent.appendChild(this._node);

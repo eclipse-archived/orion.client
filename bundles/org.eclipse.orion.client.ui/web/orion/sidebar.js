@@ -95,6 +95,8 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				toolbarNode: modeContributionToolbar
 			}));
 			
+			//TODO remove check for the orion.projects when projects are delivered
+			if(this.serviceRegistry.getServiceReferences("orion.projects").length>0){
 				var projectViewMode = new ProjectNavViewMode({ //$NON-NLS-0$
 					commandRegistry: commandRegistry,
 					contentTypeRegistry: contentTypeRegistry,
@@ -110,7 +112,6 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 					this.renderViewModeMenu();
 				}
 				var _self = this;
-				//add the project view everywhere except on root
 				this.editorInputManager.addEventListener("InputChanged", function(event){
 					if(event.input){
 						_self.addViewMode("project", projectViewMode);
@@ -133,6 +134,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 						_self.renderViewModeMenu();
 					}
 				});
+			}
 
 			// Outliner is responsible for adding its view mode(s) to this sidebar
 			this.outliner = new mOutliner.Outliner({

@@ -15,6 +15,7 @@
 		"plugins/esprima/esprimaJsContentAssistPlugin.html":true,
 		"plugins/npmPlugin.html": true,
 		"shell/plugins/shellPagePlugin.html":true,
-		"search/plugins/searchPagePlugin.html":true
+		"search/plugins/searchPagePlugin.html":true,
+		"plugins/projectsPlugin.html" :true
 	}
 }

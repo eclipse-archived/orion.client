@@ -26,13 +26,18 @@
 	
 		var provider = new PluginProvider(headers);
 		
-		//TODO time will come to add a "Projects" link
-/*		provider.registerService("orion.page.link", {}, {
+		provider.registerService("orion.projects", {}, {
+			nameKey: "Projects",
+			id: "orion.projects",
+			nls: "orion/nls/messages"
+		});
+		
+		provider.registerService("orion.page.link", {}, {
 			nameKey: "Projects",
 			id: "orion.projects.pagelink",
 			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/projects/project.html"
-		});*/
+		});
 		provider.connect();
 	});
 	</script>
