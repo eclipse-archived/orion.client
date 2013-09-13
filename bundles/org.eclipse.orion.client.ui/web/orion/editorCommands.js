@@ -195,8 +195,8 @@ define([
 			if (self._searcher) {
 				var showingSearchDialog = false;
 				var searchCommand =  new mCommands.Command({
-					name: messages["Search Files"],
-					tooltip: messages["Search Files"],
+					name: messages.searchFiles,
+					tooltip: messages.searchFiles,
 					id: "orion.searchFiles", //$NON-NLS-0$
 					visibleWhen: function() {
 						return !!editor.getTextView();
@@ -222,8 +222,8 @@ define([
 						progress: progress,
 						searchRenderer: self._searcher.defaultRenderer,
 						nameSearch: false,
-						title: messages["Search Files"],
-						message: messages["Enter search term:"],
+						title: messages.searchFiles,
+						message: messages.searchTerm,
 						initialText: searchTerm,
 						onHide: function () {
 							showingSearchDialog = false;
@@ -266,7 +266,7 @@ define([
 			
 			var saveCommand = new mCommands.Command({
 				name: messages.Save,
-				tooltip: messages["Save this file"],
+				tooltip: messages.saveFile,
 				id: "orion.save", //$NON-NLS-0$
 				visibleWhen: function() {
 					if (!editor.getTextView()) {
@@ -295,8 +295,8 @@ define([
 			);
 			
 			var gotoLineCommand =  new mCommands.Command({
-				name: messages["Go to Line"],
-				tooltip: messages["Go to specified line number"],
+				name: messages.gotoLine,
+				tooltip: messages.gotoLineTooltip,
 				id: "orion.gotoLine", //$NON-NLS-0$
 				visibleWhen: function() {
 					return !!editor.getTextView();
@@ -309,7 +309,7 @@ define([
 						line = data.parameters.valueFor('line'); //$NON-NLS-0$
 					} else {
 						line = model.getLineAtOffset(editor.getCaretOffset());
-						line = prompt(messages["Go to line:"], line + 1);
+						line = prompt(messages.gotoLinePrompt, line + 1);
 						if (line) {
 							line = parseInt(line, 10);
 						}
@@ -534,7 +534,7 @@ define([
 						}
 					};
 
-					progress.showWhile(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages['Running {0}'], info.name)).then(function(result){
+					progress.showWhile(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages.running, info.name)).then(function(result){
 						if (result && result.uriTemplate) {
 						    var options = {};
 							options.uriTemplate = result.uriTemplate;

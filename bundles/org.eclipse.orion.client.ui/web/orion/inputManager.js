@@ -76,7 +76,7 @@ define([
 		if (error.status === 0) {
 			error = {
 				Severity: "Error", //$NON-NLS-0$
-				Message: messages['No response from server.  Check your internet connection and try again.']
+				Message: messages.noResponse
 			};
 		} else {
 			var responseText = error.responseText;
@@ -120,7 +120,7 @@ define([
 			var editor = this.getEditor();
 			if (this._fileMetadata) {
 				//Reload if auto of sync
-				progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI)).then(function(data) {
+				progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI)).then(function(data) {
 					if (this._fileMetadata.ETag !== data.ETag) {
 						this._fileMetadata = data;
 						if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
@@ -137,7 +137,7 @@ define([
 				}, 800);
 				new Deferred.all([
 					progressService.progress(fileClient.read(fileURI, false, true), i18nUtil.formatMessage(messages.Reading, fileURI)),
-					progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages["Reading metedata of"], fileURI))
+					progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI))
 				], function(error) { return {_error: error}; }).then(function(results) {
 					if (progressTimeout) {
 						window.clearTimeout(progressTimeout);
@@ -217,7 +217,7 @@ define([
 			var progress = this.progressService;
 			var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			if (progress) {
-				def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
+				def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
 			}
 			var self = this;
 			function successHandler(result) {
@@ -242,7 +242,7 @@ define([
 				// expected error - HTTP 412 Precondition Failed
 				// occurs when file is out of sync with the server
 				if (error.status === 412) {
-					var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
+					var forceSave = window.confirm(messages.saveOutOfSync);
 					if (forceSave) {
 						// repeat save operation, but without ETag
 						var def = self.fileClient.write(input, contents);
@@ -307,7 +307,7 @@ define([
 				if (oldResource !== newResource) {
 					if (this._autoSaveEnabled) {
 						this.save();
-					} else if (!window.confirm(messages["There are unsaved changes.  Do you still want to navigate away?"])) {
+					} else if (!window.confirm(messages.confirmUnsavedChanges)) {
 						window.location.hash = oldLocation;
 						return;
 					}
