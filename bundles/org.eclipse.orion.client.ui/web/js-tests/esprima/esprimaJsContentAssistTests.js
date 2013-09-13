@@ -15,11 +15,31 @@
  ******************************************************************************/
 
 /*global define esprima console setTimeout doctrine*/
-define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/esprima", "doctrine/doctrine"], function(mEsprimaPlugin, assert) {
+define([
+	"plugins/esprima/esprimaJsContentAssist",
+	"plugins/esprima/esprimaVisitor",
+	"orion/assert",
+	"esprima/esprima",
+	"doctrine/doctrine",
+	"orion/Deferred"
+], function(mEsprimaPlugin, mVisitor, assert, _, __, Deferred) {
 
 	//////////////////////////////////////////////////////////
 	// helpers
 	//////////////////////////////////////////////////////////
+	function parse(contents) {
+		// Can't change hte parse options here since tests depend on the stringified AST
+		return esprima.parse(contents,{
+			range: false,
+			loc: false,
+			tolerant: true
+		});
+	}
+
+	function parseFull(contents) {
+		return mVisitor.parse(contents);
+	}
+
 	function computeContentAssist(buffer, prefix, offset, lintOptions) {
 		if (!prefix) {
 			prefix = "";
@@ -31,7 +51,15 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			}
 		}
 		var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider(null, lintOptions);
-		return esprimaContentAssistant.computeProposals(buffer, offset, {prefix : prefix, inferredOnly : true });
+		var mockContext = {
+			getAST: function() {
+				return new Deferred().resolve(parseFull(buffer));
+			},
+			getText: function() {
+				return new Deferred().resolve(buffer);
+			}
+		};
+		return esprimaContentAssistant.computeProposalsWithContext(mockContext, {offset: offset, prefix : prefix, inferredOnly : true });
 	}
 
 	function testProposal(proposal, text, description) {
@@ -67,14 +95,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			}
 		}, function (error) {
 			assert.fail(error);
-		});
-	}
-
-	function parse(contents) {
-		return esprima.parse(contents,{
-			range: false,
-			loc: false,
-			tolerant: true
 		});
 	}
 

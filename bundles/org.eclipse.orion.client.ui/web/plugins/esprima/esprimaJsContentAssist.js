@@ -735,9 +735,17 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeEnvironment", "pl
 	EsprimaJavaScriptContentAssistProvider.prototype = {
 
 		/**
-		 * implements the Orion content assist API
+		 * Implements the Orion content assist API v4.0
 		 */
-		computeProposals: function(buffer, offset, context) {
+		computeProposalsWithContext: function(editorContext, context) {
+			var self = this;
+			// TODO Can we avoid getText() here? The AST should have all we need.
+			return Deferred.all([editorContext.getAST(), editorContext.getText()]).then(function(results) {
+				var ast = results[0], buffer = results[1];
+				return self._computeProposalsFromAST(ast, buffer, context);
+			});
+		},
+		_computeProposalsFromAST: function(ast, buffer, context) {
 			function emptyArrayPromise() {
 				var d = new Deferred();
 				d.resolve([]);
@@ -749,11 +757,13 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeEnvironment", "pl
 			}
 
 			try {
-				var root = mVisitor.parse(buffer);
+				var root = ast;
 				if (!root) {
 					// assume a bad parse
 					return emptyArrayPromise();
 				}
+
+				var offset = context.offset;
 				// note that if selection has length > 0, then just ignore everything past the start
 				var completionKind = shouldVisit(root, offset, context.prefix, buffer);
 				if (completionKind) {
