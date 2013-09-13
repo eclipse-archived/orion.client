@@ -501,7 +501,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		var self = this;
 		this.textViewListener = {
 			onMouseDown: function(event) {
-				if (event.event.target.parentElement !== self.parentNode) {
+				var target = event.event.target || event.event.srcElement;
+				if (target.parentElement !== self.parentNode) {
 					self.contentAssist.deactivate();
 				}
 				// ignore the event if this is a click inside of the parentNode
