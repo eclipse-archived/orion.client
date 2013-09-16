@@ -642,8 +642,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var lineTextAfterCaret = lineText.substring(lineOffset);
 				var text;
 				// If the character before the caret is an opening brace, smart indent the next line.
-				var prevCharIdx = lineTextBeforeCaret.trimRight().length - 1;
-				if (this.smartIndentation && lineText.charCodeAt(prevCharIdx) === 123) {
+				var prevCharIdx;
+				if (this.smartIndentation && lineText.charCodeAt(prevCharIdx = lineTextBeforeCaret.trimRight().length - 1) === 123) {
 					// Remove any extra whitespace
 					var whitespaceBeforeCaret = lineOffset - prevCharIdx - 1;
 					var whitespaceAfterCaret = lineTextAfterCaret.length - lineTextAfterCaret.trimLeft().length;
