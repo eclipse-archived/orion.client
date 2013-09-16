@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,13 +12,13 @@
 /*global define */
 /*jslint browser:true regexp:false*/
 /**
- * @name orion.editor.regex
+ * @name orion.regex
  * @class Utilities for dealing with regular expressions.
  * @description Utilities for dealing with regular expressions.
  */
 define("orion/regex", [], function() { //$NON-NLS-0$
 	/**
-	 * @memberOf orion.editor.regex
+	 * @memberOf orion.regex
 	 * @function
 	 * @static
 	 * @description Escapes regex special characters in the input string.
@@ -30,7 +30,7 @@ define("orion/regex", [], function() { //$NON-NLS-0$
 	}
 
 	/**
-	 * @memberOf orion.editor.regex
+	 * @memberOf orion.regex
 	 * @function
 	 * @static
 	 * @description Parses a pattern and flags out of a regex literal string.
