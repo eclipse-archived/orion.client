@@ -261,7 +261,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		return gitUrl;
 	}
 	
-	provider.registerService("orion.project.dependency.handler", {
+	provider.registerService("orion.project.handler", {
 		paramsToDependencyDescription: function(params){
 			return {Type: "git", Location: removeUserInformation(params.url)};
 		},
@@ -338,13 +338,43 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 				},deferred.reject, deferred.progress
 			);
 			return deferred;
+		},
+		getAdditionalProjectProperties: function(item, projectMetadata){
+			if(!item.Git){
+				return null;
+			}
+			var deferred = new Deferred();
+			gitClient.getGitClone(item.Git.CloneLocation).then(
+			function(clone){
+				if(clone.Children){
+					clone = clone.Children[0];
+				}
+				deferred.resolve([
+					{
+						Name: "GIT",
+						Children: [
+							{
+								Name: "Git Url",
+								Value: clone.GitUrl
+							},
+							{
+								Name: "Git Status",
+								Value: "Git Status",
+								Href: "{OrionHome}/git/git-status.html#" + item.Git.StatusLocation
+							}
+						]
+					}
+				]);
+			},deferred.reject, deferred.progress
+			);
+			return deferred;
 		}
 	}, {
-		id: "orion.git.dependencyhandler",
+		id: "orion.git.projecthandler",
 		type: "git",
 		addParamethers: [{id: "url", type: "url", name: "Url:"}],
-		name: "Add Git Repository",
-		tooltip: "Clonde git repository and add it to this project",
+		addDependencyName: "Add Git Repository",
+		addDependencyTooltip: "Clonde git repository and add it to this project",
 		addProjectName: "Create a project from a Git Repository",
 		addProjectTooltip: "Clone a Git Repository and add it as a project",
 		actionComment: "Clonning ${url}"

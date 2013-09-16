@@ -20,7 +20,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred'], function(messages
 	function ProjectClient(serviceRegistry, fileClient) {
 		this.serviceRegistry = serviceRegistry;
 		this.fileClient = fileClient;
-		this.allDependencyHandlersReferences = serviceRegistry.getServiceReferences("orion.project.dependency.handler"); //$NON-NLS-0$
+		this.allProjectHandlersReferences = serviceRegistry.getServiceReferences("orion.project.handler"); //$NON-NLS-0$
 	}
 
 	ProjectClient.prototype = /**@lends orion.ProjectClient.ProjectClient.prototype */ {
@@ -180,7 +180,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred'], function(messages
 						deferred.reject(dependency.Location + " could not be found in your workspace");
 			}, function(error){deferred.reject(error);});
 		} else {
-			var handler = this.getDependencyHandler(dependency.Type);
+			var handler = this.getProjectHandler(dependency.Type);
 			if(handler===null){
 				deferred.reject(dependency.Type + " is not supported.");
 				return deferred;
@@ -329,26 +329,26 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred'], function(messages
 		return deferred;
 	},
 	
-	getDependencyTypes: function(){
+	getProjectHandlerTypes: function(){
 		var types = [];
-		for(var i=0; i<this.allDependencyHandlersReferences.length; i++){
-			types.push(this.allDependencyHandlersReferences[i].getProperty("type"));
+		for(var i=0; i<this.allProjectHandlersReferences.length; i++){
+			types.push(this.allProjectHandlersReferences[i].getProperty("type"));
 		}
 		return types;
 	},
 	
-	getDependencyHandler: function(type){
-		for(var i=0; i<this.allDependencyHandlersReferences.length; i++){
-			if(this.allDependencyHandlersReferences[i].getProperty("type") === type){
-				var service = this.serviceRegistry.getService(this.allDependencyHandlersReferences[i]);
-				service.id = this.allDependencyHandlersReferences[i].getProperty("id");
-				service.addParamethers =  this.allDependencyHandlersReferences[i].getProperty("addParamethers");
-				service.name =  this.allDependencyHandlersReferences[i].getProperty("name");
-				service.tooltip = this.allDependencyHandlersReferences[i].getProperty("tooltip");
+	getProjectHandler: function(type){
+		for(var i=0; i<this.allProjectHandlersReferences.length; i++){
+			if(this.allProjectHandlersReferences[i].getProperty("type") === type){
+				var service = this.serviceRegistry.getService(this.allProjectHandlersReferences[i]);
+				service.id = this.allProjectHandlersReferences[i].getProperty("id");
+				service.addParamethers =  this.allProjectHandlersReferences[i].getProperty("addParamethers");
+				service.addDependencyName =  this.allProjectHandlersReferences[i].getProperty("addDependencyName");
+				service.addDependencyTooltip = this.allProjectHandlersReferences[i].getProperty("addDependencyTooltip");
 				service.type = type;
-				service.actionComment = this.allDependencyHandlersReferences[i].getProperty("actionComment");
-				service.addProjectName = this.allDependencyHandlersReferences[i].getProperty("addProjectName");
-				service.addProjectTooltip = this.allDependencyHandlersReferences[i].getProperty("addProjectTooltip");
+				service.actionComment = this.allProjectHandlersReferences[i].getProperty("actionComment");
+				service.addProjectName = this.allProjectHandlersReferences[i].getProperty("addProjectName");
+				service.addProjectTooltip = this.allProjectHandlersReferences[i].getProperty("addProjectTooltip");
 				return service;
 			}
 		}
