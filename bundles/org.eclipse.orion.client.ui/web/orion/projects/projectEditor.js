@@ -34,7 +34,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			this.commandService.registerCommandContribution(this.redmeCommandsScope, "orion.project.create.readme", 2); 
 			this.commandService.addCommandGroup(this.allDependenciesActions, "orion.miniExplorerNavNewGroup", 1000, "Add", null, null, "core-sprite-addcontent"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.registerCommandContribution(this.allDependenciesActions, "orion.project.addFolder", 1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
-			var dependencyTypes = this.projectClient.getDependencyTypes();
+			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
 			for(var i=0; i<dependencyTypes.length; i++){
 				this.commandService.registerCommandContribution(this.allDependenciesActions, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
@@ -54,6 +54,9 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			var span = document.createElement("span");
 			this.node.appendChild(span);
 			this.renderProjectInfo(span);
+			span = document.createElement("span");
+			this.node.appendChild(span);
+			this.renderAdditionalProjectProperties(span);
 			span = document.createElement("span");
 			this.node.appendChild(span);
 			this.renderReadmeMd(span);
@@ -256,7 +259,63 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			
 			parent.appendChild(table);
 		},
-		
+		renderAdditionalProjectProperties: function(parent){
+			if(!this.projectData.type){
+				return;
+			}
+			var projectHandler = this.projectClient.getProjectHandler(this.projectData.type);
+			if(!projectHandler || !projectHandler.getAdditionalProjectProperties){
+				return;
+			}
+			this.progress.progress(projectHandler.getAdditionalProjectProperties(this.parentFolder, this.projectData), "Getting additional project information").then(function(additionalProperties){
+				if(!additionalProperties || !additionalProperties.length || additionalProperties.length === 0){
+					return;
+				}
+				for(var i=0; i<additionalProperties.length; i++){
+					var cat = additionalProperties[i];
+					if(!cat.Name){
+						continue;
+					}
+					var table = document.createElement("table");
+					var tr = document.createElement("tr");
+					table.appendChild(tr);
+					var td = document.createElement("th");
+					td.colSpan = 2;
+					td.appendChild(document.createTextNode(cat.Name));
+					var actionsSpan = document.createElement("span");
+					td.appendChild(actionsSpan);
+					tr.appendChild(td);
+					
+					if(cat.Children){
+						for(var j=0; j<cat.Children.length; j++){
+							var child = cat.Children[j];
+							tr = document.createElement("tr");
+							table.appendChild(tr);
+							td = document.createElement("td");
+							var b = document.createElement("b");
+							b.appendChild(document.createTextNode(child.Name));
+							td.appendChild(b);
+							td.width = "20%";
+							tr.appendChild(td);
+							
+							td = document.createElement("td");
+							if(child.Href){
+								var a = document.createElement("a");
+								a.href = child.Href.replace("{OrionHome}", "..");
+								a.appendChild(document.createTextNode(child.Value || " "));
+								td.appendChild(a);
+							} else {
+								td.appendChild(document.createTextNode(child.Value || " "));
+							}
+							
+							tr.appendChild(td);
+						}
+					}
+					
+					parent.appendChild(table);
+				}
+			}.bind(this));
+		},
 		renderDependencies: function(parent){
 			var table = document.createElement("table");
 			var tr = document.createElement("tr");

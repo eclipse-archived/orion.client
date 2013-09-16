@@ -127,7 +127,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 		}
 		
-		var dependencyTypes = projectClient.getDependencyTypes();		
+		var dependencyTypes = projectClient.getProjectHandlerTypes();		
 		
 		var addFolderCommand = new mCommands.Command({
 			name: "Add External Folder",
@@ -165,7 +165,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 									if(isOtherDependency) {
 										return;
 									}
-									var def = projectClient.getDependencyHandler(dependencyTypes[i]).getDependencyDescription(fileMetadata);
+									var def = projectClient.getProjectHandler(dependencyTypes[i]).getDependencyDescription(fileMetadata);
 									otherTypesDefs.push(def);
 									def.then(function(dependency){
 										if(dependency){
@@ -256,18 +256,23 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		}
 		
 		function createAddDependencyCommand(type){
-			var handler = projectClient.getDependencyHandler(type);
+			var handler = projectClient.getProjectHandler(type);
+			if(!handler.initDependency){
+				return;
+			}
 			
 			var commandParams = {
-				name: handler.name,
+				name: handler.addDependencyName,
 				id: "orion.project.adddependency." + type,
-				tooltip: handler.tooltip,
+				tooltip: handler.addDependencyTooltip,
 				callback: function(data){
 					var def = new Deferred();
 					var item = forceSingleItem(data.items);
 					var params = data.oldParams || {};
-					for (var param in data.parameters.parameterTable) {
-						params[param] = data.parameters.valueFor(param);
+					if(data.parameters){
+						for (var param in data.parameters.parameterTable) {
+							params[param] = data.parameters.valueFor(param);
+						}
 					}
 					
 					var searchLocallyDeferred = new Deferred();
@@ -329,7 +334,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		
 				
 		function createInitProjectCommand(type){
-			var handler = projectClient.getDependencyHandler(type);
+			var handler = projectClient.getProjectHandler(type);
+			if(!handler.initProject){
+				return;
+			}
 			
 			var commandParams = {
 				name: handler.addProjectName,
@@ -407,7 +415,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						params[param] = data.parameters.valueFor(param);
 					}
 				}
-				initDependency(projectClient.getDependencyHandler(item.Dependency.Type), item.Dependency, item.Project, data, params);
+				initDependency(projectClient.getProjectHandler(item.Dependency.Type), item.Dependency, item.Project, data, params);
 				
 			},
 			visibleWhen: function(item) {
