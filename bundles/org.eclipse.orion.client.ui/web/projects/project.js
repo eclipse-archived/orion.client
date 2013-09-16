@@ -75,6 +75,11 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'ori
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.basic", 1, "orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.fromfile", 2, "orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
+			var dependencyTypes = projectClient.getDependencyTypes();
+			for(var i=0; i<dependencyTypes.length; i++){
+				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.createproject." + dependencyTypes[i], i+3, "orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			
 			ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, projectExplorer, fileClient, projectClient);
 			
 			function initTitleBar(projects){

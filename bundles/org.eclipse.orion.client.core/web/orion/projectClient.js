@@ -347,6 +347,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred'], function(messages
 				service.tooltip = this.allDependencyHandlersReferences[i].getProperty("tooltip");
 				service.type = type;
 				service.actionComment = this.allDependencyHandlersReferences[i].getProperty("actionComment");
+				service.addProjectName = this.allDependencyHandlersReferences[i].getProperty("addProjectName");
+				service.addProjectTooltip = this.allDependencyHandlersReferences[i].getProperty("addProjectTooltip");
 				return service;
 			}
 		}
