@@ -18,7 +18,8 @@
  */
 define("orion/regex", [], function() { //$NON-NLS-0$
 	/**
-	 * @methodOf orion.editor.regex
+	 * @memberOf orion.editor.regex
+	 * @function
 	 * @static
 	 * @description Escapes regex special characters in the input string.
 	 * @param {String} str The string to escape.
@@ -29,7 +30,8 @@ define("orion/regex", [], function() { //$NON-NLS-0$
 	}
 
 	/**
-	 * @methodOf orion.editor.regex
+	 * @memberOf orion.editor.regex
+	 * @function
 	 * @static
 	 * @description Parses a pattern and flags out of a regex literal string.
 	 * @param {String} str The string to parse. Should look something like <code>"/ab+c/"</code> or <code>"/ab+c/i"</code>.

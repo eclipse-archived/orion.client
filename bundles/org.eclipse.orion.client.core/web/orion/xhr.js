@@ -64,7 +64,8 @@ define(['orion/Deferred'], function(Deferred) {
 	/**
 	 * Wrapper for {@link XMLHttpRequest} that returns a promise.
 	 * @name xhr
-	 * @methodOf orion.xhr
+	 * @function
+	 * @memberOf orion.xhr
 	 * @param {String} method One of 'GET', 'POST', 'PUT', 'DELETE'.
 	 * @param {String} url The URL to request.
 	 * @param {Object} [options]

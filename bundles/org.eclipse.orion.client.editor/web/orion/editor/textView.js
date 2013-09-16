@@ -227,7 +227,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		}
 		/**
 		 * Plays this animation.
-		 * @methodOf orion.editor.Animation.prototype
+		 * @function
+		 * @memberOf orion.editor.Animation.prototype
 		 * @name play
 		 */
 		Animation.prototype.play = function() {
@@ -259,7 +260,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		};
 		/**
 		 * Stops this animation.
-		 * @methodOf orion.editor.Animation.prototype
+		 * @function
+		 * @memberOf orion.editor.Animation.prototype
 		 */
 		Animation.prototype.stop = function() {
 			this.options.window.clearInterval(this.interval);
