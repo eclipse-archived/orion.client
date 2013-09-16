@@ -27,7 +27,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	 * @class Interface defining a provider of content assist proposals.
 	 */
 	/**
-	 * @methodOf orion.editor.ContentAssistProvider.prototype
+	 * @memberOf orion.editor.ContentAssistProvider.prototype
+	 * @function
 	 * @name computeProposals
 	 * @param {String} buffer The buffer being edited.
 	 * @param {Number} offset The position in the buffer at which content assist is being requested.

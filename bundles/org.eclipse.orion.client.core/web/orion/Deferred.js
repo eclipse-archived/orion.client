@@ -70,7 +70,8 @@
 	 */
 	/**
 	 * @name then
-	 * @methodOf orion.Promise.prototype
+	 * @function
+	 * @memberOf orion.Promise.prototype
 	 * @description Adds handlers to be called on fulfillment or progress of this promise.
 	 * @param {Function} [onResolve] Called when this promise is resolved.
 	 * @param {Function} [onReject] Called when this promise is rejected.
@@ -81,7 +82,8 @@
 	/**
 	 * Cancels this promise.
 	 * @name cancel
-	 * @methodOf orion.Promise.prototype
+	 * @function
+	 * @memberOf orion.Promise.prototype
 	 * @param {Object} reason The reason for canceling this promise.
 	 * @param {Boolean} [strict]
 	 */
@@ -127,7 +129,8 @@
 		/**
 		 * Rejects this Deferred.
 		 * @name reject
-		 * @methodOf orion.Deferred.prototype
+		 * @function
+		 * @memberOf orion.Deferred.prototype
 		 * @param {Object} error
 		 * @param {Boolean} [strict]
 		 * @returns {orion.Promise}
@@ -146,7 +149,8 @@
 		/**
 		 * Resolves this Deferred.
 		 * @name resolve
-		 * @methodOf orion.Deferred.prototype
+		 * @function
+		 * @memberOf orion.Deferred.prototype
 		 * @param {Object} value
 		 * @param {Boolean} [strict]
 		 * @returns {orion.Promise}
@@ -165,7 +169,8 @@
 		/**
 		 * Notifies listeners of progress on this Deferred.
 		 * @name progress
-		 * @methodOf orion.Deferred.prototype
+		 * @function
+		 * @memberOf orion.Deferred.prototype
 		 * @param {Object} update The progress update.
 		 * @param {Boolean} [strict]
 		 * @returns {orion.Promise}
@@ -247,7 +252,8 @@
 	 * To obtain <dfn>lazy</dfn> semantics (meaning the returned promise waits for every input promise to fulfill), pass the
 	 * optional parameter <code>optOnError</code>.
 	 * @name all
-	 * @methodOf orion.Deferred
+	 * @function
+	 * @memberOf orion.Deferred
 	 * @static
 	 * @param {orion.Promise[]} promises The input promises.
 	 * @param {Function} [optOnError] Handles a rejected input promise. <code>optOnError</code> is invoked for every rejected
@@ -309,7 +315,8 @@
 	/**
 	 * Applies callbacks to a promise or to a regular object.
 	 * @name when
-	 * @methodOf orion.Deferred
+	 * @function
+	 * @memberOf orion.Deferred
 	 * @static
 	 * @param {Object|orion.Promise} value Either a {@link orion.Promise}, or a normal value.
 	 * @param {Function} onResolve Called when the <code>value</code> promise is resolved. If <code>value</code> is not a promise,
