@@ -6746,8 +6746,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 
 			var ensureCaretVisible = this._ensureCaretVisible;
 			this._ensureCaretVisible = false;
-			if (ensureCaretVisible) {
-				this._showCaret();
+			if (clientHeight !== this._getClientHeight() || clientWidth !== this._getClientWidth()) {
+				this._update();
+				if (ensureCaretVisible) {
+					this._showCaret();
+				}
 			}
 		},
 		_updateOverflow: function() {
