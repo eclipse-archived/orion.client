@@ -265,12 +265,10 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		paramsToDependencyDescription: function(params){
 			return {Type: "git", Location: removeUserInformation(params.url)};
 		},
-		initDependency: function(dependency, params, projectMetadata){
+		_cloneRepository: function(gitUrl, params, workspaceLocation, isProject){
 			var deferred = new Deferred();
-			var gitUrl = removeUserInformation(dependency.Location || params.url);
-			function cloneRepository(){
-				var knownHosts = sshService.getKnownHosts();
-				gitClient.cloneGitRepository(null, gitUrl, null, projectMetadata.WorkspaceLocation, params.sshuser, params.sshpassword, knownHosts).then(function(cloneResp){
+			var knownHosts = sshService.getKnownHosts();
+				gitClient.cloneGitRepository(null, gitUrl, null, workspaceLocation, params.sshuser, params.sshpassword, knownHosts, null, null, null, isProject).then(function(cloneResp){
 					gitClient.getGitClone(cloneResp.Location).then(function(clone){
 						if(clone.Children){
 							clone = clone.Children[0];
@@ -278,7 +276,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 						var gitInfo = parseGitUrl(clone.GitUrl);
 						deferred.resolve({Type: "git", Location: removeUserInformation(clone.GitUrl), Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});					
 					}, deferred.reject, deferred.progress);
-				}, function(error){
+				}.bind(this), function(error){
 					try{
 						if (error && error.status !== undefined) {
 							try {
@@ -298,7 +296,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 							if(confirm(i18nUtil.formatMessage('Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.',
 								error.JsonData.KeyType, error.JsonData.Host, error.JsonData.HostFingerprint))){
 									sshService.addKnownHosts(error.JsonData.Host + " " + error.JsonData.KeyType + " " + error.JsonData.HostKey);
-									cloneRepository();
+									this._cloneRepository(gitUrl, params, workspaceLocation);
 							} else {
 								deferred.reject(error);
 							}
@@ -312,10 +310,16 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 						}
 					}
 					deferred.reject(error);
-				}, deferred.progress);
-			}
-		cloneRepository();
-		return deferred;
+				}.bind(this), deferred.progress);
+			return deferred;
+		},
+		initDependency: function(dependency, params, projectMetadata){
+			var gitUrl = removeUserInformation(dependency.Location || params.url);
+			return this._cloneRepository(gitUrl, params, projectMetadata.WorkspaceLocation);
+		},
+		initProject: function(params, projectMetadata){
+			var gitUrl = removeUserInformation(params.url);
+			return this._cloneRepository(gitUrl, params, projectMetadata.WorkspaceLocation, true);
 		},
 		getDependencyDescription: function(item){
 			if(!item.Git){
@@ -341,6 +345,8 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		addParamethers: [{id: "url", type: "url", name: "Url:"}],
 		name: "Add Git Repository",
 		tooltip: "Clonde git repository and add it to this project",
+		addProjectName: "Create a project from a Git Repository",
+		addProjectTooltip: "Clone a Git Repository and add it as a project",
 		actionComment: "Clonning ${url}"
 	});
 	

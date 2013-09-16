@@ -327,8 +327,72 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			commandService.addCommand(command);
 		}
 		
+				
+		function createInitProjectCommand(type){
+			var handler = projectClient.getDependencyHandler(type);
+			
+			var commandParams = {
+				name: handler.addProjectName,
+				id: "orion.project.createproject." + type,
+				tooltip: handler.addProjectTooltip,
+				callback: function(data){
+					var def = new Deferred();
+					var item = forceSingleItem(data.items);
+					var params = data.oldParams || {};
+					for (var param in data.parameters.parameterTable) {
+						params[param] = data.parameters.valueFor(param);
+					}
+
+					var actionComment;
+					if(handler.actionComment){
+						if(params){
+							actionComment = handler.actionComment.replace(/\$\{([^\}]+)\}/g, function(str, key) {
+								return params[key];
+							});
+						} else {
+							actionComment = handler.actionComment;
+						}
+					} else {
+						actionComment = "Getting content from "	+ handler.type;
+					}
+					progress.showWhile(handler.initProject(params, {WorkspaceLocation: item.Location}), actionComment).then(function(dependency){
+								explorer.changedItem();
+					}, function(error){
+						if(error.retry && error.addParamethers){
+							var paramDescps = [];
+							for(var i=0; i<error.addParamethers.length; i++){
+								paramDescps.push(new mCommandRegistry.CommandParameter(error.addParamethers[i].id, error.addParamethers[i].type, error.addParamethers[i].name));
+							}
+							data.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
+							data.oldParams = params;
+							commandService.collectParameters(data);
+						}
+						errorHandler(error);
+					});
+
+				},
+				visibleWhen: function(item) {
+					return item.Location;
+				}
+			};
+			
+			if(handler.addParamethers){
+				var paramDescps = [];
+				for(var i=0; i<handler.addParamethers.length; i++){
+					paramDescps.push(new mCommandRegistry.CommandParameter(handler.addParamethers[i].id, handler.addParamethers[i].type, handler.addParamethers[i].name));
+				}
+				commandParams.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
+			}
+			
+			
+			var command = new mCommands.Command(commandParams);
+			commandService.addCommand(command);
+		}
+		
 			for(var type_no=0; type_no<dependencyTypes.length; type_no++){
-				createAddDependencyCommand(dependencyTypes[type_no]);
+				var dependencyType = dependencyTypes[type_no];
+				createAddDependencyCommand(dependencyType);
+				createInitProjectCommand(dependencyType);
 			}
 		
 		var connectDependencyCommand = new mCommands.Command({
