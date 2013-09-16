@@ -11,8 +11,9 @@
 /*global define esprima */
 define([
 	'orion/plugin',
+	'orion/serialize',
 	'esprima/esprima'
-], function(PluginProvider, _) {
+], function(PluginProvider, serialize, _) {
 	var provider = new PluginProvider({
 		name: 'Esprima AST Provider for JavaScript',
 		description: 'Provides an abstract syntax tree (AST) for JavaScript code.',
@@ -22,7 +23,7 @@ define([
 	provider.registerService('orion.core.astprovider',
 		{
 			getAST: function(context) {
-				return esprima.parse(context.text, {
+				var ast = esprima.parse(context.text, {
 					loc: true,
 					range: true,
 					raw: true,
@@ -30,6 +31,10 @@ define([
 					comment: true,
 					tolerant: true
 				});
+				if (ast.errors) {
+					ast.errors = ast.errors.map(serialize.serializeError);
+				}
+				return ast;
 			}
 		}, {
 			contentType: ['application/javascript']
