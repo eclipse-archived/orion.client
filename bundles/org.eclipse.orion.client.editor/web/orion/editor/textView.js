@@ -6400,6 +6400,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				hScrollOnly = false;
 			}
 			var clientDiv = this._clientDiv;
+			var viewDiv = this._viewDiv;
 			if (!clientDiv) { return; }
 			if (this._metrics.invalid) {
 				this._ignoreQueueUpdate = true;
@@ -6411,9 +6412,18 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var viewPad = this._getViewPadding();
 			var lineCount = model.getLineCount();
 			var lineHeight = this._getLineHeight();
-			var clientWidth = this._getClientWidth();
-			if (this._wrapMode) {
-				clientDiv.style.width = clientWidth + "px"; //$NON-NLS-0$
+			var clientWidth = this._getClientWidth(), clientWidthNoScroll, clientWidthScroll;
+			if (!this._singleMode && !this._wrapMode) {
+				if (viewDiv.style.overflowY === "scroll") { //$NON-NLS-0$
+					clientWidthNoScroll = clientWidth + this._metrics.scrollWidth;
+					clientWidthScroll = clientWidth;
+				} else {
+					clientWidthNoScroll = clientWidth;
+					clientWidthScroll = clientWidth - this._metrics.scrollWidth;
+				}
+				if (this._wrapMode) {
+					clientDiv.style.width = clientWidth + "px"; //$NON-NLS-0$
+				}
 			}
 			
 			/*
@@ -6454,6 +6464,16 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var parentWidth = parent.clientWidth;
 			var parentHeight = parent.clientHeight;
 			clientHeight = this._getClientHeight();
+			var clientHeightNoScroll, clientHeightScroll;
+			if (!this._singleMode && !this._wrapMode) {
+				if (viewDiv.style.overflowX === "scroll") { //$NON-NLS-0$
+					clientHeightNoScroll = clientHeight + this._metrics.scrollWidth;
+					clientHeightScroll = clientHeight;
+				} else {
+					clientHeightNoScroll = clientHeight;
+					clientHeightScroll = clientHeight - this._metrics.scrollWidth;
+				}
+			}
 			if (hScrollOnly) {
 				leftWidth = 0;
 				if (this._leftDiv) {
@@ -6472,7 +6492,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				scrollHeight = totalHeight;
 			} else {
 
-				var viewDiv = this._viewDiv;
 				var linesPerPage = Math.floor((clientHeight + topIndexY) / lineHeight);
 				var bottomIndex = Math.min(topIndex + linesPerPage, lineCount - 1);
 				var lineEnd = Math.min(bottomIndex + 1, lineCount - 1);
@@ -6603,12 +6622,27 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				/* Need to set the height first in order for the width to consider the vertical scrollbar */
 				var scrollDiv = this._scrollDiv;
 				scrollDiv.style.height = scrollHeight + "px"; //$NON-NLS-0$
-				/*
-				* TODO if frameHeightWithoutHScrollbar < scrollHeight  < frameHeightWithHScrollbar and the horizontal bar is visible, 
-				* then the clientWidth is wrong because the vertical scrollbar is showing. To correct code should hide both scrollbars 
-				* at this point.
-				*/
-				clientWidth = this._getClientWidth();
+				
+				if (!this._singleMode && !this._wrapMode) {
+					var hScroll = false, vScroll = false;
+					clientHeight = clientHeightNoScroll;
+					clientWidth = clientWidthNoScroll;
+					if (scrollHeight > clientHeight) {
+						vScroll = true;
+						clientWidth = clientWidthScroll;
+					}
+					if (this._maxLineWidth > clientWidth) {
+						hScroll = true;
+						clientHeight = clientHeightScroll;
+						if (scrollHeight > clientHeight) {
+							vScroll = true;
+							clientWidth = clientWidthScroll;
+						}
+					}
+					viewDiv.style.overflowX = hScroll ? "scroll" : "hidden"; //$NON-NLS-1$ //$NON-NLS-0$
+					viewDiv.style.overflowY = vScroll ? "scroll" : "hidden"; //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				
 				var width = clientWidth;
 				if (!this._wrapMode) {
 					width = Math.max(this._maxLineWidth, width);
@@ -6710,20 +6744,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			this._updateDOMSelection();
 
-			/*
-			* If the client height changed during the update page it means that scrollbar has either been shown or hidden.
-			* When this happens update page has to run again to ensure that the top and bottom lines div are correct.
-			* 
-			* Note: On IE, updateDOMSelection() has to be called before getting the new client height because it
-			* forces the client area to be recomputed.
-			*/
 			var ensureCaretVisible = this._ensureCaretVisible;
 			this._ensureCaretVisible = false;
-			if (clientHeight !== this._getClientHeight()) {
-				this._update();
-				if (ensureCaretVisible) {
-					this._showCaret();
-				}
+			if (ensureCaretVisible) {
+				this._showCaret();
 			}
 		},
 		_updateOverflow: function() {
@@ -6735,9 +6759,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				if (this._singleMode) {
 					viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
 					viewDiv.style.overflowY = "hidden"; //$NON-NLS-0$
-				} else {
-					viewDiv.style.overflowX = "auto"; //$NON-NLS-0$
-					viewDiv.style.overflowY = "auto"; //$NON-NLS-0$
 				}
 			}
 		},
