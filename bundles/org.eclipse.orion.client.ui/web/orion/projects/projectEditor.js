@@ -273,7 +273,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 					}
 					for(var i=0; i<additionalProperties.length; i++){
 						var cat = additionalProperties[i];
-						if(!cat.Name){
+						if(!cat.name){
 							continue;
 						}
 						var table = document.createElement("table");
@@ -281,31 +281,31 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 						table.appendChild(tr);
 						var td = document.createElement("th");
 						td.colSpan = 2;
-						td.appendChild(document.createTextNode(cat.Name));
+						td.appendChild(document.createTextNode(cat.name));
 						var actionsSpan = document.createElement("span");
 						td.appendChild(actionsSpan);
 						tr.appendChild(td);
 						
-						if(cat.Children){
-							for(var j=0; j<cat.Children.length; j++){
-								var child = cat.Children[j];
+						if(cat.children){
+							for(var j=0; j<cat.children.length; j++){
+								var child = cat.children[j];
 								tr = document.createElement("tr");
 								table.appendChild(tr);
 								td = document.createElement("td");
 								var b = document.createElement("b");
-								b.appendChild(document.createTextNode(child.Name));
+								b.appendChild(document.createTextNode(child.name));
 								td.appendChild(b);
 								td.width = "20%";
 								tr.appendChild(td);
 								
 								td = document.createElement("td");
-								if(child.Href){
+								if(child.href){
 									var a = document.createElement("a");
-									a.href = child.Href.replace("{OrionHome}", "..");
-									a.appendChild(document.createTextNode(child.Value || " "));
+									a.href = child.href.replace("{OrionHome}", "..");
+									a.appendChild(document.createTextNode(child.value || " "));
 									td.appendChild(a);
 								} else {
-									td.appendChild(document.createTextNode(child.Value || " "));
+									td.appendChild(document.createTextNode(child.value || " "));
 								}
 								
 								tr.appendChild(td);
