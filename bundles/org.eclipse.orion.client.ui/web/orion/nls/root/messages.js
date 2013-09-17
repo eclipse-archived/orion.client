@@ -89,5 +89,6 @@ define({
 	"Raw": "Raw",
 	"Open the raw file or folder in the browser": "Open the raw file or folder in the browser",
 	"Navigation": "Navigation",
-	"Links": "Links"
+	"Links": "Links",
+	"OutlineProgress": "Getting outline for ${0} from ${1}"
 });
