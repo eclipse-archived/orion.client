@@ -6412,6 +6412,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var viewPad = this._getViewPadding();
 			var lineCount = model.getLineCount();
 			var lineHeight = this._getLineHeight();
+			var needUpdate = false;
 			
 			/*
 			* topIndex - top line index of the view (maybe be particialy visible)
@@ -6606,13 +6607,15 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				if (!this._singleMode && !this._wrapMode) {
 					var scrollbarWidth = this._metrics.scrollWidth;
 					var clientHeightNoScroll = clientHeight, clientHeightScroll = clientHeight;
-					if (viewDiv.style.overflowX === "scroll") { //$NON-NLS-0$
+					var oldHScroll = viewDiv.style.overflowX === "scroll"; //$NON-NLS-0$
+					if (oldHScroll) {
 						clientHeightNoScroll += scrollbarWidth;
 					} else {
 						clientHeightScroll -= scrollbarWidth;
 					}
 					var clientWidthNoScroll = clientWidth, clientWidthScroll = clientWidth;
-					if (viewDiv.style.overflowY === "scroll") { //$NON-NLS-0$
+					var oldVScroll = viewDiv.style.overflowY === "scroll"; //$NON-NLS-0$
+					if (oldVScroll) {
 						clientWidthNoScroll += scrollbarWidth;
 					} else {
 						clientWidthScroll -= scrollbarWidth;
@@ -6632,8 +6635,13 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 							clientWidth = clientWidthScroll;
 						}
 					}
-					viewDiv.style.overflowX = hScroll ? "scroll" : "hidden"; //$NON-NLS-1$ //$NON-NLS-0$
-					viewDiv.style.overflowY = vScroll ? "scroll" : "hidden"; //$NON-NLS-1$ //$NON-NLS-0$
+					if (oldHScroll !== hScroll) {
+						viewDiv.style.overflowX = hScroll ? "scroll" : "hidden"; //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					if (oldVScroll !== vScroll) {
+						viewDiv.style.overflowY = vScroll ? "scroll" : "hidden"; //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					needUpdate = oldHScroll !== hScroll || oldVScroll !== vScroll;
 				}
 				
 				var width = clientWidth;
@@ -6741,6 +6749,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._ensureCaretVisible = false;
 			if (ensureCaretVisible) {
 				this._showCaret();
+			}
+			if (needUpdate) {
+				this._queueUpdate();
 			}
 		},
 		_updateOverflow: function() {
