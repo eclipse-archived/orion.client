@@ -165,8 +165,12 @@ define(["orion/plugin", "orion/jslintworker", "orion/objects"], function(PluginP
 		}
 	};
 	
-	// Converts jslint's "functions" list to a flat outline model
-	function toOutlineModel(title, jslintResult) {
+	/**
+	 * Converts jslint's output to a flat outline model
+	 * @param {Object} jslintResult Result of calling JSLINT() on the file
+	 * @returns {Object[]} Outline model
+	 */
+	function jsOutline(jslintResult) {
 		var outline = [],
 		    functions = jslintResult.functions;
 		for (var i=0; i < functions.length; i++) {
@@ -187,41 +191,53 @@ define(["orion/plugin", "orion/jslintworker", "orion/objects"], function(PluginP
 		}
 		return outline;
 	}
-	var outlineService = {
-			getOutline : function(contents, title) {
-				if (/\.js$/.test(title)) {
-					var jslintResult = jslint(contents);
-					return toOutlineModel(title, jslintResult);
-				} else if (/\.html?$/.test(title)) {
-					var outline = [];
-					var pattern = /id=['"]\S*["']/gi, // experimental: |<head[^>]*|<body[^>]*|<script[^>]*/gi;
-					    match;
-					while ((match = pattern.exec(contents)) !== null) {
-						var start = match.index,
-						    name = match[0],
-						    end;
-						if (name[0]==='<') {
-							name = "&lt;" + name.substring(1) + "&gt;";
-							start += 1;
-							end = start + name.length;
-						} else {
-							start += 4;
-							name = name.substring(4, name.length-1);
-							end = start+name.length;
-						}
-						var element = {
-							label: name,
-							children: null,
-							start: start,
-							end: end
-						};
-						outline.push(element);
-					}
-					return outline;
-				}
+
+	/**
+	 * Generates outline for an HTML document.
+	 * @param {String} contents
+	 * @returns {Object[]} Outline model
+	 */
+	function htmlOutline(contents) {
+		var outline = [];
+		var pattern = /id=['"]\S*["']/gi, // experimental: |<head[^>]*|<body[^>]*|<script[^>]*/gi;
+		    match;
+		while ((match = pattern.exec(contents)) !== null) {
+			var start = match.index,
+			    name = match[0],
+			    end;
+			if (name[0]==='<') {
+				name = "&lt;" + name.substring(1) + "&gt;";
+				start += 1;
+				end = start + name.length;
+			} else {
+				start += 4;
+				name = name.substring(4, name.length-1);
+				end = start+name.length;
 			}
+			var element = {
+				label: name,
+				children: null,
+				start: start,
+				end: end
+			};
+			outline.push(element);
+		}
+		return outline;
+	}
+
+	var outlineService = {
+		computeOutlineWithContext: function(editorContext, context) {
+			return editorContext.getText().then(function(contents) {
+				var contentType = context.contentType;
+				if (contentType === "application/javascript") {
+					var jslintResult = jslint(contents);
+					return jsOutline(jslintResult);
+				} else if (contentType === "text/html") {
+					return htmlOutline(contents);
+				}
+			});
+		}
 	};
-	
 
 	var headers = {
 		name: "Orion JSLint Service",
