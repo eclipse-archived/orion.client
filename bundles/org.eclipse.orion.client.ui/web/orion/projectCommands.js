@@ -363,8 +363,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					} else {
 						actionComment = "Getting content from "	+ handler.type;
 					}
-					progress.showWhile(handler.initProject(params, {WorkspaceLocation: item.Location}), actionComment).then(function(dependency){
-								explorer.changedItem();
+					progress.showWhile(handler.initProject(params, {WorkspaceLocation: item.Location}), actionComment).then(function(project){
+								explorer.changedItem(project, null, "created");
 					}, function(error){
 						if(error.retry && error.addParamethers){
 							var paramDescps = [];
@@ -506,8 +506,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						return;
 					}
 					var item = forceSingleItem(data.items);
-					progress.progress(projectClient.createProject(item.Location, {Name: name}), "Creating project " + name).then(function(){
-						explorer.changedItem();
+					progress.progress(projectClient.createProject(item.Location, {Name: name}), "Creating project " + name).then(function(project){
+						explorer.changedItem(project, null, "created");
 					});
 				},
 			visibleWhen: function(item) {
@@ -534,7 +534,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 							var dialog = new ImportDialog.ImportDialog({
 								importLocation: projectMetadata.ImportLocation,
 								func: function() {
-									explorer.changedItem();
+									explorer.changedItem(projectInfo, null, "created");
 								}
 							});
 							dialog.show();

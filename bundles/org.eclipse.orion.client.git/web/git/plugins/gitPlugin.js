@@ -274,7 +274,11 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 							clone = clone.Children[0];
 						}
 						var gitInfo = parseGitUrl(clone.GitUrl);
-						deferred.resolve({Type: "git", Location: removeUserInformation(clone.GitUrl), Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});					
+						if(isProject){
+							deferred.resolve({ContentLocation: clone.ContentLocation});					
+						} else {
+							deferred.resolve({Type: "git", Location: removeUserInformation(clone.GitUrl), Name: (gitInfo.repoName || clone.Name) + " at " + gitInfo.serverName});					
+						}
 					}, deferred.reject, deferred.progress);
 				}.bind(this), function(error){
 					try{
