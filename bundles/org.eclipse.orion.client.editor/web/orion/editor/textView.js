@@ -6412,19 +6412,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var viewPad = this._getViewPadding();
 			var lineCount = model.getLineCount();
 			var lineHeight = this._getLineHeight();
-			var clientWidth = this._getClientWidth(), clientWidthNoScroll, clientWidthScroll;
-			if (!this._singleMode && !this._wrapMode) {
-				if (viewDiv.style.overflowY === "scroll") { //$NON-NLS-0$
-					clientWidthNoScroll = clientWidth + this._metrics.scrollWidth;
-					clientWidthScroll = clientWidth;
-				} else {
-					clientWidthNoScroll = clientWidth;
-					clientWidthScroll = clientWidth - this._metrics.scrollWidth;
-				}
-				if (this._wrapMode) {
-					clientDiv.style.width = clientWidth + "px"; //$NON-NLS-0$
-				}
-			}
 			
 			/*
 			* topIndex - top line index of the view (maybe be particialy visible)
@@ -6434,7 +6421,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			*/
 			var topIndex, lineStart, top, topIndexY,
 				leftWidth, leftRect,
-				clientHeight, scrollWidth, scrollHeight,
+				clientWidth, clientHeight, scrollWidth, scrollHeight,
 				totalHeight = 0, totalLineIndex = 0, tempLineHeight;
 			if (this._lineHeight) {
 				while (totalLineIndex < lineCount) {
@@ -6463,23 +6450,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var parent = this._parent;
 			var parentWidth = parent.clientWidth;
 			var parentHeight = parent.clientHeight;
-			clientHeight = this._getClientHeight();
-			var clientHeightNoScroll, clientHeightScroll;
-			if (!this._singleMode && !this._wrapMode) {
-				if (viewDiv.style.overflowX === "scroll") { //$NON-NLS-0$
-					clientHeightNoScroll = clientHeight + this._metrics.scrollWidth;
-					clientHeightScroll = clientHeight;
-				} else {
-					clientHeightNoScroll = clientHeight;
-					clientHeightScroll = clientHeight - this._metrics.scrollWidth;
-				}
-			}
 			if (hScrollOnly) {
 				leftWidth = 0;
 				if (this._leftDiv) {
 					leftRect = this._leftDiv.getBoundingClientRect();
 					leftWidth = leftRect.right - leftRect.left;
 				}
+				clientWidth = this._getClientWidth();
+				clientHeight = this._getClientHeight();
 				scrollWidth = clientWidth;
 				if (!this._wrapMode) {
 					scrollWidth = Math.max(this._maxLineWidth, scrollWidth);
@@ -6491,6 +6469,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 				scrollHeight = totalHeight;
 			} else {
+				clientHeight = this._getClientHeight();
 
 				var linesPerPage = Math.floor((clientHeight + topIndexY) / lineHeight);
 				var bottomIndex = Math.min(topIndex + linesPerPage, lineCount - 1);
@@ -6623,7 +6602,24 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				var scrollDiv = this._scrollDiv;
 				scrollDiv.style.height = scrollHeight + "px"; //$NON-NLS-0$
 				
+				clientWidth = this._getClientWidth();
 				if (!this._singleMode && !this._wrapMode) {
+					var clientHeightNoScroll, clientHeightScroll;
+					if (viewDiv.style.overflowX === "scroll") { //$NON-NLS-0$
+						clientHeightNoScroll = clientHeight + this._metrics.scrollWidth;
+						clientHeightScroll = clientHeight;
+					} else {
+						clientHeightNoScroll = clientHeight;
+						clientHeightScroll = clientHeight - this._metrics.scrollWidth;
+					}
+					var clientWidthNoScroll, clientWidthScroll;
+					if (viewDiv.style.overflowY === "scroll") { //$NON-NLS-0$
+						clientWidthNoScroll = clientWidth + this._metrics.scrollWidth;
+						clientWidthScroll = clientWidth;
+					} else {
+						clientWidthNoScroll = clientWidth;
+						clientWidthScroll = clientWidth - this._metrics.scrollWidth;
+					}
 					var hScroll = false, vScroll = false;
 					clientHeight = clientHeightNoScroll;
 					clientWidth = clientWidthNoScroll;
@@ -6746,11 +6742,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 
 			var ensureCaretVisible = this._ensureCaretVisible;
 			this._ensureCaretVisible = false;
-			if (clientHeight !== this._getClientHeight() || clientWidth !== this._getClientWidth()) {
-				this._update();
-				if (ensureCaretVisible) {
-					this._showCaret();
-				}
+			if (ensureCaretVisible) {
+				this._showCaret();
 			}
 		},
 		_updateOverflow: function() {
