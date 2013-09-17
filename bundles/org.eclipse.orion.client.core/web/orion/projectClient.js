@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global define */
-define(['i18n!orion/navigate/nls/messages', 'orion/Deferred'], function(messages, Deferred){
+define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCommands'], function(messages, Deferred, mExtensionCommands){
 
 	/**
 	 * Creates a new project client.
@@ -185,6 +185,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred'], function(messages
 				deferred.reject(dependency.Type + " is not supported.");
 				return deferred;
 			}
+			var validator;
+			if(handler.validationProperties){
+				validator = mExtensionCommands._makeValidator(handler, this.serviceRegistry, []);
+			}
+			
 			this.fileClient.loadWorkspace(workspaceLocation).then(function(workspace){
 				var checkdefs = [];
 				var found = false;
@@ -192,16 +197,18 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred'], function(messages
 					if(found===true){
 						break;
 					}
-					var def = handler.getDependencyDescription(workspace.Children[i]);
-					checkdefs.push(def);
-					(function(i, def){
-						def.then(function(matches){
-							if(matches && matches.Location === dependency.Location){
-								found = true;
-								deferred.resolve(workspace.Children[i]);
-							}
-						});
-					})(i, def);
+					if(validator && validator.validationFunction(workspace.Children[i])){
+						var def = handler.getDependencyDescription(workspace.Children[i]);
+						checkdefs.push(def);
+						(function(i, def){
+							def.then(function(matches){
+								if(matches && matches.Location === dependency.Location){
+									found = true;
+									deferred.resolve(workspace.Children[i]);
+								}
+							});
+						})(i, def);
+					}
 				}
 				Deferred.all(checkdefs).then(function(){
 					if(!found){
@@ -337,21 +344,38 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred'], function(messages
 		return types;
 	},
 	
+	_getProjectHandlerService: function(serviceReference){
+		var service = this.serviceRegistry.getService(serviceReference);
+		service.id = serviceReference.getProperty("id");
+		service.addParamethers =  serviceReference.getProperty("addParamethers");
+		service.addDependencyName =  serviceReference.getProperty("addDependencyName");
+		service.addDependencyTooltip = serviceReference.getProperty("addDependencyTooltip");
+		service.type = serviceReference.getProperty("type");
+		service.actionComment = serviceReference.getProperty("actionComment");
+		service.addProjectName = serviceReference.getProperty("addProjectName");
+		service.addProjectTooltip = serviceReference.getProperty("addProjectTooltip");
+		service.validationProperties = serviceReference.getProperty("validationProperties");
+		return service;
+	},
+	
 	getProjectHandler: function(type){
 		for(var i=0; i<this.allProjectHandlersReferences.length; i++){
 			if(this.allProjectHandlersReferences[i].getProperty("type") === type){
-				var service = this.serviceRegistry.getService(this.allProjectHandlersReferences[i]);
-				service.id = this.allProjectHandlersReferences[i].getProperty("id");
-				service.addParamethers =  this.allProjectHandlersReferences[i].getProperty("addParamethers");
-				service.addDependencyName =  this.allProjectHandlersReferences[i].getProperty("addDependencyName");
-				service.addDependencyTooltip = this.allProjectHandlersReferences[i].getProperty("addDependencyTooltip");
-				service.type = type;
-				service.actionComment = this.allProjectHandlersReferences[i].getProperty("actionComment");
-				service.addProjectName = this.allProjectHandlersReferences[i].getProperty("addProjectName");
-				service.addProjectTooltip = this.allProjectHandlersReferences[i].getProperty("addProjectTooltip");
-				return service;
+				return this._getProjectHandlerService(this.allProjectHandlersReferences[i]);
 			}
 		}
+	},
+	
+	getMatchingProjectHandlers: function(item){
+		var handlers = [];
+		for(var i=0; i<this.allProjectHandlersReferences.length; i++){
+			var handlerInfo = this.allProjectHandlersReferences[i]._properties;
+			var validator = mExtensionCommands._makeValidator(handlerInfo, this.serviceRegistry, []);
+			if(validator.validationFunction(item)){
+				handlers.push(this._getProjectHandlerService(this.allProjectHandlersReferences[i]));
+			}
+		}
+		return handlers;
 	}
 		
 	};//end ProjectClient prototype

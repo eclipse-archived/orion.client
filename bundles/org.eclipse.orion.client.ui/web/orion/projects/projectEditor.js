@@ -260,61 +260,62 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			parent.appendChild(table);
 		},
 		renderAdditionalProjectProperties: function(parent){
-			if(!this.projectData.type){
-				return;
-			}
-			var projectHandler = this.projectClient.getProjectHandler(this.projectData.type);
-			if(!projectHandler || !projectHandler.getAdditionalProjectProperties){
-				return;
-			}
-			this.progress.progress(projectHandler.getAdditionalProjectProperties(this.parentFolder, this.projectData), "Getting additional project information").then(function(additionalProperties){
-				if(!additionalProperties || !additionalProperties.length || additionalProperties.length === 0){
+			var matchingProjectHandlers = this.projectClient.getMatchingProjectHandlers(this.parentFolder);
+			for(var projectHandlerIndex = 0; projectHandlerIndex<matchingProjectHandlers.length; matchingProjectHandlers++){
+				var projectHandler = matchingProjectHandlers[projectHandlerIndex];
+
+				if(!projectHandler || !projectHandler.getAdditionalProjectProperties){
 					return;
 				}
-				for(var i=0; i<additionalProperties.length; i++){
-					var cat = additionalProperties[i];
-					if(!cat.Name){
-						continue;
+				this.progress.progress(projectHandler.getAdditionalProjectProperties(this.parentFolder, this.projectData), "Getting additional project information").then(function(additionalProperties){
+					if(!additionalProperties || !additionalProperties.length || additionalProperties.length === 0){
+						return;
 					}
-					var table = document.createElement("table");
-					var tr = document.createElement("tr");
-					table.appendChild(tr);
-					var td = document.createElement("th");
-					td.colSpan = 2;
-					td.appendChild(document.createTextNode(cat.Name));
-					var actionsSpan = document.createElement("span");
-					td.appendChild(actionsSpan);
-					tr.appendChild(td);
-					
-					if(cat.Children){
-						for(var j=0; j<cat.Children.length; j++){
-							var child = cat.Children[j];
-							tr = document.createElement("tr");
-							table.appendChild(tr);
-							td = document.createElement("td");
-							var b = document.createElement("b");
-							b.appendChild(document.createTextNode(child.Name));
-							td.appendChild(b);
-							td.width = "20%";
-							tr.appendChild(td);
-							
-							td = document.createElement("td");
-							if(child.Href){
-								var a = document.createElement("a");
-								a.href = child.Href.replace("{OrionHome}", "..");
-								a.appendChild(document.createTextNode(child.Value || " "));
-								td.appendChild(a);
-							} else {
-								td.appendChild(document.createTextNode(child.Value || " "));
-							}
-							
-							tr.appendChild(td);
+					for(var i=0; i<additionalProperties.length; i++){
+						var cat = additionalProperties[i];
+						if(!cat.Name){
+							continue;
 						}
+						var table = document.createElement("table");
+						var tr = document.createElement("tr");
+						table.appendChild(tr);
+						var td = document.createElement("th");
+						td.colSpan = 2;
+						td.appendChild(document.createTextNode(cat.Name));
+						var actionsSpan = document.createElement("span");
+						td.appendChild(actionsSpan);
+						tr.appendChild(td);
+						
+						if(cat.Children){
+							for(var j=0; j<cat.Children.length; j++){
+								var child = cat.Children[j];
+								tr = document.createElement("tr");
+								table.appendChild(tr);
+								td = document.createElement("td");
+								var b = document.createElement("b");
+								b.appendChild(document.createTextNode(child.Name));
+								td.appendChild(b);
+								td.width = "20%";
+								tr.appendChild(td);
+								
+								td = document.createElement("td");
+								if(child.Href){
+									var a = document.createElement("a");
+									a.href = child.Href.replace("{OrionHome}", "..");
+									a.appendChild(document.createTextNode(child.Value || " "));
+									td.appendChild(a);
+								} else {
+									td.appendChild(document.createTextNode(child.Value || " "));
+								}
+								
+								tr.appendChild(td);
+							}
+						}
+						
+						parent.appendChild(table);
 					}
-					
-					parent.appendChild(table);
-				}
-			}.bind(this));
+				}.bind(this));
+			}
 		},
 		renderDependencies: function(parent){
 			var table = document.createElement("table");
