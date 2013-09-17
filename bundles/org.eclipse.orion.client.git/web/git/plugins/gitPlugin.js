@@ -351,16 +351,16 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 				}
 				deferred.resolve([
 					{
-						Name: "GIT",
-						Children: [
+						name: "GIT",
+						children: [
 							{
-								Name: "Git Url",
-								Value: clone.GitUrl
+								name: "Git Url",
+								value: clone.GitUrl
 							},
 							{
-								Name: "Git Status",
-								Value: "Git Status",
-								Href: "{OrionHome}/git/git-status.html#" + item.Git.StatusLocation
+								name: "Git Status",
+								value: "Git Status",
+								href: "{OrionHome}/git/git-status.html#" + item.Git.StatusLocation
 							}
 						]
 					}
