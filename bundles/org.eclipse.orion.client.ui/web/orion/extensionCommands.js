@@ -189,7 +189,21 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 		function matchSinglePattern(item, propertyName, validationProperty, validator){
 			var value = validationProperty.match;
 			var key, keyLastSegments;
-			if (propertyName.indexOf("|") >= 0) { //$NON-NLS-0$
+			if (propertyName.indexOf("[") === 0) { //$NON-NLS-0$
+				if(propertyName.indexOf("]")<0){
+					return false;
+				}
+				if(!Array.isArray(item)){
+					return false;
+				}
+				key = propertyName.replace("[", "").replace("]", "");
+				for(var i=0; i<item.length; i++){
+					if (matchSinglePattern(item[i], key, validationProperty, validator)) {
+						return true;
+					}
+				}
+				
+			} else if (propertyName.indexOf("|") >= 0) { //$NON-NLS-0$
 				// the pipe means that any one of the piped properties can match
 				key = propertyName.substring(0, propertyName.indexOf("|")); //$NON-NLS-0$
 				keyLastSegments = propertyName.substring(propertyName.indexOf("|")+1); //$NON-NLS-0$
