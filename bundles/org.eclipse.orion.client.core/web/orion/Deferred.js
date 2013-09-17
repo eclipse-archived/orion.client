@@ -225,7 +225,8 @@
 		/**
 		 * The promise exposed by this Deferred.
 		 * @name promise
-		 * @fieldOf orion.Deferred.prototype
+		 * @field
+		 * @memberOf orion.Deferred.prototype
 		 * @type orion.Promise
 		 */
 		this.promise = Object.create(Object.prototype, {
