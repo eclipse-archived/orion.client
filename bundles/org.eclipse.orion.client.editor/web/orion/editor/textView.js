@@ -6604,21 +6604,18 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				
 				clientWidth = this._getClientWidth();
 				if (!this._singleMode && !this._wrapMode) {
-					var clientHeightNoScroll, clientHeightScroll;
+					var scrollbarWidth = this._metrics.scrollWidth;
+					var clientHeightNoScroll = clientHeight, clientHeightScroll = clientHeight;
 					if (viewDiv.style.overflowX === "scroll") { //$NON-NLS-0$
-						clientHeightNoScroll = clientHeight + this._metrics.scrollWidth;
-						clientHeightScroll = clientHeight;
+						clientHeightNoScroll += scrollbarWidth;
 					} else {
-						clientHeightNoScroll = clientHeight;
-						clientHeightScroll = clientHeight - this._metrics.scrollWidth;
+						clientHeightScroll -= scrollbarWidth;
 					}
-					var clientWidthNoScroll, clientWidthScroll;
+					var clientWidthNoScroll = clientWidth, clientWidthScroll = clientWidth;
 					if (viewDiv.style.overflowY === "scroll") { //$NON-NLS-0$
-						clientWidthNoScroll = clientWidth + this._metrics.scrollWidth;
-						clientWidthScroll = clientWidth;
+						clientWidthNoScroll += scrollbarWidth;
 					} else {
-						clientWidthNoScroll = clientWidth;
-						clientWidthScroll = clientWidth - this._metrics.scrollWidth;
+						clientWidthScroll -= scrollbarWidth;
 					}
 					var hScroll = false, vScroll = false;
 					clientHeight = clientHeightNoScroll;
