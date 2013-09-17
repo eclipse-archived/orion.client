@@ -18,7 +18,7 @@ define(['marked/marked', 'orion/webui/littlelib'], function(marked, lib) { //$NO
 	MarkdownView.prototype = {
 		display: function(node, markdown){
 			node.className = "orionMarkdown";				
-			node.innerHTML = marked(markdown);
+			node.innerHTML = marked(markdown, {sanitize: true});
 		},
 		displayContents: function(node, file){
 			var location = file.Location || file;
