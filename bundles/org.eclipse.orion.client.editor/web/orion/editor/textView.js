@@ -4549,9 +4549,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				var w1 = div1.clientWidth;
 				div1.style.overflow = 'scroll'; //$NON-NLS-0$
 				var w2 = div1.clientWidth;
-				parent.removeChild(div1);
 				scrollWidth = w1 - w2;
 			}
+			parent.removeChild(div1);
 			pad = {
 				left: rect2.left - rect1.left,
 				top: rect2.top - rect1.top,
