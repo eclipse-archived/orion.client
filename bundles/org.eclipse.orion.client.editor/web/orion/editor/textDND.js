@@ -13,7 +13,7 @@
  
 /*global define */
 
-define("orion/editor/textDND", [], function() { //$NON-NLS-0$
+define("orion/editor/textDND", ['orion/util'], function(util) { //$NON-NLS-1$ //$NON-NLS-0$
 
 	function TextDND(view, undoStack) {
 		this._view = view;
@@ -82,9 +82,13 @@ define("orion/editor/textDND", [], function() { //$NON-NLS-0$
 		},
 		_onDragEnd: function(e) {
 			var view = this._view;
+			var dropEffect = util.isFirefox ? e.event.dataTransfer.dropEffect : this._dropEffect;
+			if (!util.isFirefox) {
+				e.event.dataTransfer.dropEffect = this._dropEffect; //$NON-NLS-1$ //$NON-NLS-0$
+			}
 			if (this._dragSelection) {
 				if (this._undoStack) { this._undoStack.startCompoundChange(); }
-				var move = e.event.dataTransfer.dropEffect === "move"; //$NON-NLS-0$
+				var move = dropEffect === "move"; //$NON-NLS-0$
 				if (move) {
 					view.setText("", this._dragSelection.start, this._dragSelection.end);
 				}
@@ -112,13 +116,19 @@ define("orion/editor/textDND", [], function() { //$NON-NLS-0$
 		},
 		_onDragOver: function(e) {
 			var types = e.event.dataTransfer.types;
-			if (types) {
-				var allowed = !this._view.getOptions("readonly"); //$NON-NLS-0$
-				if (allowed) {
-					allowed = types.contains ? types.contains("text/plain") : types.indexOf("text/plain") !== -1; //$NON-NLS-1$ //$NON-NLS-0$
-				}
-				if (!allowed) {
-					e.event.dataTransfer.dropEffect = "none"; //$NON-NLS-0$
+			var allowed = !this._view.getOptions("readonly"); //$NON-NLS-0$
+			if (allowed) {
+				if (types) {
+					allowed = types.contains ? 
+						types.contains("text/plain") || types.contains("Text") : //$NON-NLS-1$ //$NON-NLS-0$
+						types.indexOf("text/plain") !== -1 || types.indexOf("Text") !== -1; //$NON-NLS-1$ //$NON-NLS-0$
+					}
+			}
+			if (!allowed) {
+				e.event.dataTransfer.dropEffect = "none"; //$NON-NLS-0$
+			} else {
+				if (!util.isFirefox) {
+					this._dropEffect = e.event.dataTransfer.dropEffect = e.event.ctrlKey ? "copy" : "move"; //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 		},
@@ -126,6 +136,9 @@ define("orion/editor/textDND", [], function() { //$NON-NLS-0$
 			var view = this._view;
 			var text = e.event.dataTransfer.getData("Text"); //$NON-NLS-0$
 			if (text) {
+				if (!util.isFirefox) {
+					e.event.dataTransfer.dropEffect = this._dropEffect; //$NON-NLS-1$ //$NON-NLS-0$
+				}
 				var offset = view.getOffsetAtLocation(e.x, e.y);
 				if (this._dragSelection) {
 					this._dropOffset = offset;
