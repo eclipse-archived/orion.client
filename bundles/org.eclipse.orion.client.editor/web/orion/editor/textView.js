@@ -6745,12 +6745,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			this._updateDOMSelection();
 
-			var ensureCaretVisible = this._ensureCaretVisible;
-			this._ensureCaretVisible = false;
-			if (ensureCaretVisible) {
-				this._showCaret();
-			}
 			if (needUpdate) {
+				var ensureCaretVisible = this._ensureCaretVisible;
+				this._ensureCaretVisible = false;
+				if (ensureCaretVisible) {
+					this._showCaret();
+				}
 				this._queueUpdate();
 			}
 		},
@@ -6760,10 +6760,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
 				viewDiv.style.overflowY = "scroll"; //$NON-NLS-0$
 			} else {
-				if (this._singleMode) {
-					viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
-					viewDiv.style.overflowY = "hidden"; //$NON-NLS-0$
-				}
+				viewDiv.style.overflow = "hidden"; //$NON-NLS-0$
 			}
 		},
 		_updateRuler: function (divRuler, topIndex, bottomIndex, parentHeight) {
