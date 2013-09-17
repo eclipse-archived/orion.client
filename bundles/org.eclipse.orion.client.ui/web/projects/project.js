@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*global define document */
+/*global define document window*/
 
 define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry',
 	'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/operationsClient',
@@ -91,7 +91,11 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'ori
 			
 			initTitleBar([]);
 			
-			projectExplorer.changedItem = function(){
+			projectExplorer.changedItem = function(parent, children, changeType){
+				if(changeType === "created" && parent.ContentLocation){
+					window.location = "../edit/edit.html#" + parent.ContentLocation + "?depth=1";
+					return;
+				}
 				progress.progress(fileClient.loadWorkspace(), "Getting workspace information").then(function(workspace){
 					progress.progress(projectClient.readAllProjects(workspace), "Listing projects").then(function(projects){
 						initTitleBar(projects);
