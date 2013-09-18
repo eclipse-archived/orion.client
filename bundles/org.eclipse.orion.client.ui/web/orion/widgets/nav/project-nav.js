@@ -95,9 +95,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.progressService = params.progressService;
 		var sidebarNavInputManager = this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
+		this.scopeUp = params.scopeUp;
 
-		this.newActionsScope = params.newActionsScope; //$NON-NLS-0$
-		this.selectionActionsScope = params.selectionActionsScope; //$NON-NLS-0$
+		this.newActionsScope = params.newActionsScope;
+		this.selectionActionsScope = params.selectionActionsScope;
+		this.goUpActionsScope = "GoUpActions"; //$NON-NLS-0$
 
 		this.followEditor = true;
 		var initialRoot = { };
@@ -234,6 +236,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
 			var newActionsScope = this.newActionsScope;
 			var selectionActionsScope = this.selectionActionsScope; 
+			var goUpActionsScope = this.goUpActionsScope;
 
 			commandRegistry.addCommandGroup(newActionsScope, "orion.miniExplorerNavNewGroup", 1000, messages["Add"], null, null, "core-sprite-addcontent"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, null, "core-sprite-gear"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -242,6 +245,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			// commands that don't appear but have keybindings
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.copySelections", 1, null, true, new KeyBinding('c', true) /* Ctrl+C */); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.pasteSelections", 1, null, true, new KeyBinding('v', true) /* Ctrl+V */);//$NON-NLS-1$ //$NON-NLS-0$
+			
+			commandRegistry.registerCommandContribution(goUpActionsScope, "eclipse.upFolder", 1); //$NON-NLS-1$ //$NON-NLS-0$
 
 			// New file and new folder (in a group)
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile", 1, "orion.miniExplorerNavNewGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -285,8 +290,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 		createActionSections: function() {
 			var _self = this;
-			[this.newActionsScope, this.selectionActionsScope].forEach(function(id) {
-				if (!_self[id]) {
+			lib.empty(_self.toolbarNode);
+			[this.newActionsScope, this.selectionActionsScope, this.goUpActionsScope].forEach(function(id) {
 					var elem = document.createElement("ul"); //$NON-NLS-0$
 					elem.id = id;
 					elem.classList.add("commandList"); //$NON-NLS-0$
@@ -294,7 +299,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					elem.classList.add("pageActions"); //$NON-NLS-0$
 					_self.toolbarNode.appendChild(elem);
 					_self[id] = elem;
-				}
 			});
 		},
 
@@ -305,7 +309,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			if((!selections || selections.length===0) && treeRoot.children){
 				this.selection.setSelections(treeRoot.children[0]);
 			}
-			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot, true);			
+			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot, true);
+			if(treeRoot.children){
+				var goUpActions = lib.node(this.goUpActionsScope);
+				commandRegistry.renderCommands(this.goUpActionsScope, goUpActions, treeRoot.children[0], this, "tool");
+			}
 		},
 		expandToItem: function(item, afterExpand){
 			var itemId = this.model.getId(item);
@@ -623,6 +631,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.toolbarNode = params.toolbarNode;
 		this.serviceRegistry = params.serviceRegistry;
 		this.projectClient = new mProjectClient.ProjectClient(this.serviceRegistry, this.fileClient);
+		this.scopeUp = params.scopeUp;
 		this.explorer = null;
 		var _self = this;
 		if(this.sidebarNavInputManager){
@@ -652,7 +661,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					return renderer;
 				},
 				serviceRegistry: this.serviceRegistry,
-				toolbarNode: this.toolbarNode
+				toolbarNode: this.toolbarNode,
+				scopeUp: this.scopeUp
 			});
 			// If there is a target in the navigator, open this target
 			if(this.editorInputManager.getFileMetadata()){

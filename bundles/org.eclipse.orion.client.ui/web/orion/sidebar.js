@@ -95,7 +95,8 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				toolbarNode: modeContributionToolbar
 			}));
 			
-			//TODO remove check for the orion.projects when projects are delivered
+			var _self = this;
+			
 			if(this.serviceRegistry.getServiceReferences("orion.projects").length>0){
 				var projectViewMode = new ProjectNavViewMode({ //$NON-NLS-0$
 					commandRegistry: commandRegistry,
@@ -105,17 +106,36 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 					parentNode: parentNode,
 					sidebarNavInputManager: this.sidebarNavInputManager,
 					serviceRegistry: serviceRegistry,
-					toolbarNode: modeContributionToolbar
+					toolbarNode: modeContributionToolbar,
+					scopeUp: function(){_self.setViewMode("nav");}
 				});
 				if(this.editorInputManager.getFileMetadata()){
 					this.addViewMode("project", projectViewMode);
 					this.renderViewModeMenu();
 				}
-				var _self = this;
 				this.editorInputManager.addEventListener("InputChanged", function(event){
 					if(event.input){
 						_self.addViewMode("project", projectViewMode);
 						_self.renderViewModeMenu();
+						if(event.metadata && event.metadata.Directory){
+							if(event.metadata.Children){
+								for(var i=0; i<event.metadata.Children.length; i++){
+									if(event.metadata.Children[i].Name === "project.json"){
+										_self.setViewMode("project");
+										return;
+									}
+								}
+							} else if(event.metadata.ChildrenLocation){
+								_self.fileClient.fetchChildren(event.metadata.ChildrenLocation).then(function(children){
+									for(var i=0; i<children.length; i++){
+										if(children[i].Name === "project.json"){
+											_self.setViewMode("project");
+											return;											
+										}
+									}
+								});
+							}
+						}
 					} else {
 						_self.removeViewMode("project");
 						_self.renderViewModeMenu();
