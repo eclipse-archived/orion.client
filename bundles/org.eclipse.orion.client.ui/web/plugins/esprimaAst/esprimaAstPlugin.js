@@ -22,7 +22,7 @@ define([
 
 	provider.registerService('orion.core.astprovider',
 		{
-			getAST: function(context) {
+			computeAST: function(context) {
 				var ast = esprima.parse(context.text, {
 					loc: true,
 					range: true,

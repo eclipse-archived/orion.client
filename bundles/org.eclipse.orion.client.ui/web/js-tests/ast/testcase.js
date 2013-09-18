@@ -45,7 +45,7 @@ define([
 		    inputManager = result.inputManager;
 
 		serviceRegistry.registerService("orion.core.astprovider", {
-				getAST: function(context) {
+				computeAST: function(context) {
 					return { ast: "this is the AST" };
 				}
 			}, { contentType: ["text/foo"] });
@@ -62,7 +62,7 @@ define([
 
 		var promise = new Deferred();
 		serviceRegistry.registerService("orion.core.astprovider", {
-				getAST: function(options) {
+				computeAST: function(options) {
 					assert.equal(options.foo, "bar");
 					assert.equal(options.text, "the text");
 					promise.resolve();
@@ -81,7 +81,7 @@ define([
 
 		var i = 0;
 		serviceRegistry.registerService("orion.core.astprovider", {
-				getAST: function(options) {
+				computeAST: function(options) {
 					return "AST " + (i++);
 				}
 			}, { contentType: ["text/foo"] });
@@ -104,7 +104,7 @@ define([
 
 		var i = 0;
 		serviceRegistry.registerService("orion.core.astprovider", {
-				getAST: function(options) {
+				computeAST: function(options) {
 					return "AST " + (i++);
 				}
 			}, { contentType: ["text/foo"] });
