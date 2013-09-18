@@ -408,7 +408,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		getCellElement: function(col_no, item, tableRow){
 			if((item.Dependency || item.type==="ProjectRoot") && col_no===0){
 				var col = document.createElement('td'); //$NON-NLS-0$
-				col.className = "projectNavColumn";
+				col.className = item.type==="ProjectRoot" ? "projectNavColumn projectPrimaryNavColumn" : "projectNavColumn";
 				var span = document.createElement("span"); //$NON-NLS-0$
 				span.id = tableRow.id+"MainCol"; //$NON-NLS-0$
 				span.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -417,18 +417,18 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				span.className = "mainNavColumn"; //$NON-NLS-0$
 					// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var image = this.getExpandImage(tableRow, span);
-				var nameText = item.Dependency ? item.Dependency.Name : item.Name;
+				var nameText = item.Dependency ? item.Dependency.Name : (item.Project ? item.Project.Name : item.Name);
 				var itemNode = document.createElement("a");
 				if(item.disconnected){
 					nameText += " (disconnected)";
 				} else {
 					if(item.Dependency && item.FileMetadata){
 						itemNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-							resource: item.FileMetadata.Location
+							resource: item.FileMetadata.ChildrenLocation
 						});
 					} else if(item.Location){
 						itemNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-							resource: item.Location
+							resource: item.ChildrenLocation
 						});
 					}
 				}
@@ -463,13 +463,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	
 	ProjectNavRenderer.prototype = {
 		render: function(projectData){
-		
-		var titleWrapper = new mSection.Section(this.parentNode, { id : "projectSection", //$NON-NLS-0$
-					title : projectData.Name,
-					content : '', //$NON-NLS-0$
-					canHide : false,
-					preferenceService : this.serviceRegistry.getService("orion.core.preference") //$NON-NLS-0$
-					});
+
 		var projectInfoNode = document.createElement("div");
 		projectInfoNode.id = "projectInfoNode";
 		var a = document.createElement("a");
@@ -477,11 +471,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		a.href =  new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
 				resource: projectData.ContentLocation
 			});
-		
-		
-		a.appendChild(document.createTextNode(projectData.Name));
-		lib.empty(titleWrapper.titleNode);
-		titleWrapper.titleNode.appendChild(a);
 		
 		this.parentNode.appendChild(projectInfoNode);
 		
