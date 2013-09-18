@@ -310,6 +310,18 @@ function getFileLocation(fileRoot, wwwpath, isDir) {
 }
 
 /**
+ * Gets a boolean associated with a key. Copes with Orion server REST API's use of "true" and "false" strings.
+ * @param {Object} obj
+ * @param {String} key
+ * @returns {Boolean} Returns <code>false</code> if there is no such key, or if the value is not the boolean <code>true</code> 
+ * or the string <code>"true"</code>.
+ */
+function getBoolean(obj, key) {
+	var val = obj[key];
+	return Object.prototype.hasOwnProperty.call(obj, key) && (val === true || val === 'true');
+}
+
+/**
  * Helper for fulfilling a file metadata GET request.
  * @param {String} fileRoot The "/file" prefix or equivalent.
  * @param {Object} res HTTP response object
@@ -387,7 +399,7 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
  */
 exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, destFilepath, metadataMixins, statusCode) {
 	var getSafeFilePath = safeFilePath.bind(null, workspaceDir);
-	var isDirectory = req.body && Object.prototype.hasOwnProperty.call(req.body, 'Directory') && !!req.body.Directory;
+	var isDirectory = req.body && getBoolean(req.body, 'Directory');
 
 	fs.exists(destFilepath, function(destExists) {
 		function checkXCreateOptions(opts) {
