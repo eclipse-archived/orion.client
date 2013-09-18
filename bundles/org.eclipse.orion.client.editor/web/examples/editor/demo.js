@@ -38,6 +38,8 @@ function(mSetup, mTestPerformance, util) {
 	var bReadOnly = document.getElementById('readOnly'); //$NON-NLS-0$
 	var bFullSel = document.getElementById('fullSelection'); //$NON-NLS-0$
 	var bWrap = document.getElementById('wrap'); //$NON-NLS-0$
+	var sMarginOffset = document.getElementById('marginOffset'); //$NON-NLS-0$
+	var sWrapOffset = document.getElementById('wrapOffset'); //$NON-NLS-0$
 	var bExpandTab = document.getElementById('expandTab'); //$NON-NLS-0$
 	var bAutoSet = document.getElementById('autoSetOptions'); //$NON-NLS-0$
 	var table = document.getElementById('table'); //$NON-NLS-0$
@@ -91,6 +93,8 @@ function(mSetup, mTestPerformance, util) {
 			scrollAnimation: parseInt(sScrollAnimation.value, 10),
 			wrapMode: bWrap.checked,
 			keyBindings: (keyBindings = sBindings.value),
+			marginOffset: parseInt(sMarginOffset.value, 10),
+			wrapOffset: parseInt(sWrapOffset.value, 10),
 			themeClass: sTheme.value
 		};
 	}
@@ -101,6 +105,8 @@ function(mSetup, mTestPerformance, util) {
 		bReadOnly.checked = options.readonly;
 		bFullSel.checked = options.fullSelection;
 		bWrap.checked = options.wrapMode;
+		sWrapOffset.value = options.wrapOffset;
+		sMarginOffset.value = options.marginOffset;
 		bExpandTab.checked = options.expandTab;
 		sTabSize.value = options.tabSize;
 		sScrollAnimation.value = options.scrollAnimation;
@@ -187,6 +193,8 @@ function(mSetup, mTestPerformance, util) {
 	sScrollAnimation.onchange = checkSetOptions;
 	bFullSel.onchange = checkSetOptions;
 	bWrap.onchange = checkSetOptions;
+	sMarginOffset.onchange = checkSetOptions;
+	sWrapOffset.onchange = checkSetOptions;
 	bExpandTab.onchange = checkSetOptions;
 	bAutoSet.onchange = updateSetOptionsButton;
 	
