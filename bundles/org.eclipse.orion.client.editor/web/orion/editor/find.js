@@ -287,6 +287,35 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				textView.focus();
 			}
 		},
+		_processReplaceString: function(str) {
+			var newStr = "";
+			if (this._regex) {
+				var escape = false;
+				var delimiter = this._editor.getModel().getLineDelimiter();
+				for (var i=0; i<str.length; i++) {
+					var c = str.substring(i, i + 1);
+					if (escape) {
+						switch (c) {
+							case "R": newStr += delimiter; break;
+							case "r": newStr += "\r"; break;
+							case "n": newStr += "\n"; break;
+							case "t": newStr += "\t"; break;
+							case "\\": newStr += "\\"; break;
+							default: newStr += "\\" + c;
+						}
+						escape = false;
+					} else if (c === "\\") {
+						escape = true;
+					} else {
+						newStr += c;
+					}
+				}
+				if (escape) {
+					newStr += "\\";
+				}
+			}
+			return newStr;
+		},
 		isVisible: function() {
 			return this._visible;
 		},
@@ -294,7 +323,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			var string = this.getFindString();
 			if (string) {
 				var editor = this._editor;
-				var replaceString = this.getReplaceString();
+				var replaceString = this._processReplaceString(this.getReplaceString());
 				var selection = editor.getSelection();
 				var start = selection.start;
 				var result = editor.getModel().find({
@@ -323,7 +352,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				var editor = this._editor;
 				var textView = editor.getTextView();
 				editor.reportStatus(messages.replaceAll);
-				var replaceString = this.getReplaceString();
+				var replaceString = this._processReplaceString(this.getReplaceString());
 				var self = this;
 				window.setTimeout(function() {
 					var startPos = 0;
