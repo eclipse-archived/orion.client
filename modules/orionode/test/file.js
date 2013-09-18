@@ -254,6 +254,35 @@ describe('File API', function() {
 				done();
 			});
 		});
+		it('works when a string-typed Directory "true" is provided', function(done) {
+			app.request()
+			.post(PREFIX + '/project')
+			.type('json')
+			.send({ Name: 'new directory', Directory: 'true' })
+			.expect(201)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(res.body.Directory, true);
+				assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); // FIXME
+				assert.equal(res.body.Name, 'new directory');
+				done();
+			});
+		});
+		it('works when a string-typed Directory "false" is provided', function(done) {
+			app.request()
+			.post(PREFIX + '/project')
+			.type('json')
+			.set('Slug', 'Not a directory')
+			.send({ Directory: "false" })
+			.expect(201)
+			.end(function(err, res) {
+				assert.ifError(err);
+				assert.equal(res.body.Directory, false);
+				assert.equal(res.body.Location, PREFIX + '/project/Not%20a%20directory'); //FIXME
+				assert.equal(res.body.Name, 'Not a directory');
+				done();
+			});
+		});
 	});
 	/**
 	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Creating_files_and_directories

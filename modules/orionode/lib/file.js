@@ -26,18 +26,6 @@ function getParam(req, paramName) {
 	return parsedUrl && parsedUrl.query && parsedUrl.query[paramName];
 }
 
-/**
- * Copes with Orion server REST API's use of "true" and "false" strings
- */
-function parseBoolean(obj) {
-	if (typeof obj === 'boolean') {
-		return obj;
-	} else if (obj === 'false') {
-		return false;
-	}
-	return !!obj;
-}
-
 function writeEmptyFilePathError(res, rest) {
 	if (rest === '') {
 		// I think this is an implementation detail, not API, but emulate the Java Orion server's behavior here anyway.
