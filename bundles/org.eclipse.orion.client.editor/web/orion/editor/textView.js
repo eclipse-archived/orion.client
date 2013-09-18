@@ -1231,6 +1231,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 	 * @property {Number} [tabSize=8] The number of spaces in a tab.
 	 * @property {Boolean} [overwriteMode=false] whether or not the view is in insert/overwrite mode.
 	 * @property {Boolean} [singleMode=false] whether or not the editor is in single line mode.
+	 * @property {Number} [marginOffset=0] the offset in a line where the print margin should be displayed. <code>0</code> means no print margin.
+	 * @property {Number} [wrapOffset=0] the offset in a line where text should wrap. <code>0</code> means wrap at the client area right edge.
 	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
 	 * @property {Boolean} [wrapable=false] whether or not the view is wrappable.
 	 * @property {Number} [scrollAnimation=0] the time duration in miliseconds for scrolling animation. <code>0</code> means no animation.
@@ -2292,8 +2294,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var div = this._clientDiv;
 			if (!div) { return; }
 			if (ruler) {
-				var location = ruler.getLocation();//"left" or "right"
-				var divRuler = location === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
+				var divRuler = this._getRulerParent(ruler);
 				div = divRuler.firstChild;
 				while (div) {
 					if (div._ruler === ruler) {
@@ -4558,7 +4559,32 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				right: rect1.right - rect2.right,
 				bottom: rect1.bottom - rect2.bottom
 			};
-			return {lineHeight: lineHeight, largestFontStyle: style, lineTrim: trim, viewPadding: pad, scrollWidth: scrollWidth, invalid: invalid};
+			var wrapWidth = 0, marginWidth = 0;
+			if (!invalid) {
+				if (this._wrapOffset || this._marginOffset) {
+					div1 = util.createElement(document, "div"); //$NON-NLS-0$
+					div1.style.position = "fixed"; //$NON-NLS-0$
+					div1.style.left = "-1000px"; //$NON-NLS-0$
+					div1.innerHTML = new Array(this._wrapOffset + 1).join(" "); //$NON-NLS-0$
+					parent.appendChild(div1);
+					rect1 = div1.getBoundingClientRect();
+					wrapWidth = Math.ceil(rect1.right - rect1.left);
+					div1.innerHTML = new Array(this._marginOffset + 1).join(" "); //$NON-NLS-0$
+					rect2 = div1.getBoundingClientRect();
+					marginWidth = Math.ceil(rect2.right - rect2.left);
+					parent.removeChild(div1);
+				}
+			}
+			return {
+				lineHeight: lineHeight,
+				largestFontStyle: style,
+				lineTrim: trim,
+				viewPadding: pad,
+				scrollWidth: scrollWidth,
+				wrapWidth: wrapWidth,
+				marginWidth: marginWidth,
+				invalid: invalid
+			};
 		},
 		_cancelAnimation: function() {
 			if (this._animation) {
@@ -4665,10 +4691,26 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				"toggleWrapMode": {defaultHandler: function(data) {return self._doWrapMode();}, actionDescription: {name: messages.toggleWrapMode}} //$NON-NLS-0$
 			};
 		},
+		_createRulerParent: function(className) {
+			var div = util.createElement(document, "div"); //$NON-NLS-0$
+			div.className = className;
+			div.tabIndex = -1;
+			div.style.overflow = "hidden"; //$NON-NLS-0$
+			div.style.MozUserSelect = "none"; //$NON-NLS-0$
+			div.style.WebkitUserSelect = "none"; //$NON-NLS-0$
+			div.style.position = "absolute"; //$NON-NLS-0$
+			div.style.top = "0px"; //$NON-NLS-0$
+			div.style.bottom = "0px"; //$NON-NLS-0$
+			div.style.cursor = "default"; //$NON-NLS-0$
+			div.style.display = "none"; //$NON-NLS-0$
+			div.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._rootDiv.appendChild(div);
+			return div;
+		},
 		_createRuler: function(ruler, index) {
 			if (!this._clientDiv) { return; }
-			var side = ruler.getLocation();
-			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
+			var rulerParent = this._getRulerParent(ruler);
+			if (!rulerParent) { return; }
 			rulerParent.style.display = "block"; //$NON-NLS-0$
 			var div = util.createElement(rulerParent.ownerDocument, "div"); //$NON-NLS-0$
 			div._ruler = ruler;
@@ -4708,20 +4750,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-0$
 			parent.appendChild(rootDiv);
 			
-			var leftDiv = util.createElement(document, "div"); //$NON-NLS-0$
-			leftDiv.className = "textviewLeftRuler"; //$NON-NLS-0$
-			this._leftDiv = leftDiv;
-			leftDiv.tabIndex = -1;
-			leftDiv.style.overflow = "hidden"; //$NON-NLS-0$
-			leftDiv.style.MozUserSelect = "none"; //$NON-NLS-0$
-			leftDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
-			leftDiv.style.position = "absolute"; //$NON-NLS-0$
-			leftDiv.style.top = "0px"; //$NON-NLS-0$
-			leftDiv.style.bottom = "0px"; //$NON-NLS-0$
-			leftDiv.style.cursor = "default"; //$NON-NLS-0$
-			leftDiv.style.display = "none"; //$NON-NLS-0$
-			leftDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			rootDiv.appendChild(leftDiv);
+			var leftDiv = this._leftDiv = this._createRulerParent("textviewLeftRuler"); //$NON-NLS-0$
 
 			var viewDiv = util.createElement(document, "div"); //$NON-NLS-0$
 			viewDiv.className = "textviewScroll"; //$NON-NLS-0$
@@ -4740,21 +4769,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			rootDiv.appendChild(viewDiv);
 			
-			var rightDiv = util.createElement(document, "div"); //$NON-NLS-0$
-			rightDiv.className = "textviewRightRuler"; //$NON-NLS-0$
-			this._rightDiv = rightDiv;
-			rightDiv.tabIndex = -1;
-			rightDiv.style.display = "none"; //$NON-NLS-0$
-			rightDiv.style.overflow = "hidden"; //$NON-NLS-0$
-			rightDiv.style.MozUserSelect = "none"; //$NON-NLS-0$
-			rightDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
-			rightDiv.style.position = "absolute"; //$NON-NLS-0$
-			rightDiv.style.top = "0px"; //$NON-NLS-0$
-			rightDiv.style.bottom = "0px"; //$NON-NLS-0$
-			rightDiv.style.cursor = "default"; //$NON-NLS-0$
+			var rightDiv = this._rightDiv = this._createRulerParent("textviewRightRuler"); //$NON-NLS-0$
 			rightDiv.style.right = "0px"; //$NON-NLS-0$
-			rightDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			rootDiv.appendChild(rightDiv);
 				
 			var scrollDiv = util.createElement(document, "div"); //$NON-NLS-0$
 			this._scrollDiv = scrollDiv;
@@ -4762,6 +4778,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			scrollDiv.style.borderWidth = "0px"; //$NON-NLS-0$
 			scrollDiv.style.padding = "0px"; //$NON-NLS-0$
 			viewDiv.appendChild(scrollDiv);
+			
+			var marginDiv = this._marginDiv = this._createRulerParent("textviewMarginRuler"); //$NON-NLS-0$
+			marginDiv.style.zIndex = "4"; //$NON-NLS-0$
 			
 			if (!util.isIE && !util.isIOS) {
 				var clipDiv = util.createElement(document, "div"); //$NON-NLS-0$
@@ -4855,6 +4874,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._setReadOnly(this._readonly);
 			this._setThemeClass(this._themeClass, true);
 			this._setTabSize(this._tabSize, true);
+			this._setMarginOffset(this._marginOffset, true);
 			this._hookEvents();
 			var rulers = this._rulers;
 			for (var i=0; i<rulers.length; i++) {
@@ -4875,6 +4895,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				singleMode: {value: false, update: this._setSingleMode},
 				overwriteMode: { value: false, update: this._setOverwriteMode },
 				blockCursorVisible: { value: false, update: this._setBlockCursor},
+				marginOffset: {value: 0, update: this._setMarginOffset},
+				wrapOffset: {value: 0, update: this._setWrapOffset},
 				wrapMode: {value: false, update: this._setWrapMode},
 				wrappable: {value: false, update: null},
 				theme: {value: mTextTheme.TextTheme.getTheme(), update: this._setTheme},
@@ -4882,8 +4904,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			};
 		},
 		_destroyRuler: function(ruler) {
-			var side = ruler.getLocation();
-			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
+			var rulerParent = this._getRulerParent(ruler);
 			if (rulerParent) {
 				var div = rulerParent.firstChild;
 				while (div) {
@@ -4933,6 +4954,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._overlayDiv = null;
 			this._leftDiv = null;
 			this._rightDiv = null;
+			this._marginDiv = null;
+			this._cursorDiv = null;
 			this._vScrollDiv = null;
 			this._hScrollDiv = null;
 		},
@@ -5253,6 +5276,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			return Math.max(0, Math.min(lineCount - 1, lineIndex));
 		},
+		_getRulerParent: function(ruler) {
+			switch (ruler.getLocation()) {
+				case "left": return this._leftDiv; //$NON-NLS-0$
+				case "right": return this._rightDiv; //$NON-NLS-0$
+				case "margin": return this._marginDiv; //$NON-NLS-0$
+			}
+			return null;
+		},
 		_getScroll: function(cancelAnimation) {
 			if (cancelAnimation === undefined || cancelAnimation) {
 				this._cancelAnimation();
@@ -5341,6 +5372,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				handlers.push({target: topNode, type: "dragleave", handler: function(e) { return self._handleDragLeave(e ? e : window.event);}}); //$NON-NLS-0$
 				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e ? e : window.event);}}); //$NON-NLS-0$
 				handlers.push({target: this._clientDiv, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
+				if (this._clipDiv) {
+					handlers.push({target: this._clipDiv, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
+				}
 				if (util.isFirefox && (!util.isWindows || util.isFirefox >= 15)) {
 					var MutationObserver = window.MutationObserver || window.MozMutationObserver;
 					if (MutationObserver) {
@@ -5361,30 +5395,28 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}
 
-			var leftDiv = this._leftDiv, rightDiv = this._rightDiv;
-			if (util.isIE) {
-				handlers.push({target: leftDiv, type: "selectstart", handler: function() {return false;}}); //$NON-NLS-0$
-			}
-			handlers.push({target: leftDiv, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
-			handlers.push({target: leftDiv, type: "click", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
-			handlers.push({target: leftDiv, type: "dblclick", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
-			handlers.push({target: leftDiv, type: "mousemove", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
-			handlers.push({target: leftDiv, type: "mouseover", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
-			handlers.push({target: leftDiv, type: "mouseout", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
-			if (util.isIE) {
-				handlers.push({target: rightDiv, type: "selectstart", handler: function() {return false;}}); //$NON-NLS-0$
-			}
-			handlers.push({target: rightDiv, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
-			handlers.push({target: rightDiv, type: "click", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
-			handlers.push({target: rightDiv, type: "dblclick", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
-			handlers.push({target: rightDiv, type: "mousemove", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
-			handlers.push({target: rightDiv, type: "mouseover", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
-			handlers.push({target: rightDiv, type: "mouseout", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
+			this._hookRulerEvents(this._leftDiv, handlers);
+			this._hookRulerEvents(this._rightDiv, handlers);
+			this._hookRulerEvents(this._marginDiv, handlers);
 			
 			for (var i=0; i<handlers.length; i++) {
 				var h = handlers[i];
 				addHandler(h.target, h.type, h.handler, h.capture);
 			}
+		},
+		_hookRulerEvents: function(div, handlers) {
+			if (!div) { return; }
+			var self = this;
+			var window = this._getWindow();
+			if (util.isIE) {
+				handlers.push({target: div, type: "selectstart", handler: function() {return false;}}); //$NON-NLS-0$
+			}
+			handlers.push({target: div, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
+			handlers.push({target: div, type: "click", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
+			handlers.push({target: div, type: "dblclick", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
+			handlers.push({target: div, type: "mousemove", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
+			handlers.push({target: div, type: "mouseover", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
+			handlers.push({target: div, type: "mouseout", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
 		},
 		_getWindow: function() {
 			return getWindow(this._parent.ownerDocument);
@@ -6181,6 +6213,21 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 			}
 		},
+		_setMarginOffset: function(marginOffset, init) {
+			this._marginOffset = marginOffset;
+			this._marginDiv.style.display = marginOffset ? "block" : "none"; //$NON-NLS-1$ //$NON-NLS-0$
+			if (!init) {
+				this._metrics = this._calculateMetrics();
+				this._queueUpdate();
+			}
+		},
+		_setWrapOffset: function(wrapOffset, init) {
+			this._wrapOffset = wrapOffset;
+			if (!init) {
+				this._metrics = this._calculateMetrics();
+				this._queueUpdate();
+			}
+		},
 		_setReadOnly: function (readOnly) {
 			this._readonly = readOnly;
 			this._clientDiv.setAttribute("aria-readonly", readOnly ? "true" : "false"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -6413,6 +6460,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var lineCount = model.getLineCount();
 			var lineHeight = this._getLineHeight();
 			var needUpdate = false;
+			var hScroll = false, vScroll = false;
+			var scrollbarWidth = this._metrics.scrollWidth;
+			
+			if (this._wrapMode) {
+				clientDiv.style.width = (this._metrics.wrapWidth || this._getClientWidth()) + "px"; //$NON-NLS-0$
+			}
 			
 			/*
 			* topIndex - top line index of the view (maybe be particialy visible)
@@ -6460,7 +6513,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				clientWidth = this._getClientWidth();
 				clientHeight = this._getClientHeight();
 				scrollWidth = clientWidth;
-				if (!this._wrapMode) {
+				if (this._wrapMode) {
+					if (this._metrics.wrapWidth) {
+						scrollWidth = this._metrics.wrapWidth;
+					}
+				} else {
 					scrollWidth = Math.max(this._maxLineWidth, scrollWidth);
 				}
 				while (totalLineIndex < lineCount) {
@@ -6585,6 +6642,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				// Update rulers
 				this._updateRuler(this._leftDiv, topIndex, lineEnd, parentHeight);
 				this._updateRuler(this._rightDiv, topIndex, lineEnd, parentHeight);
+				this._updateRuler(this._marginDiv, topIndex, lineEnd, parentHeight);
 				
 				leftWidth = 0;
 				if (this._leftDiv) {
@@ -6605,7 +6663,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				
 				clientWidth = this._getClientWidth();
 				if (!this._singleMode && !this._wrapMode) {
-					var scrollbarWidth = this._metrics.scrollWidth;
 					var clientHeightNoScroll = clientHeight, clientHeightScroll = clientHeight;
 					var oldHScroll = viewDiv.style.overflowX === "scroll"; //$NON-NLS-0$
 					if (oldHScroll) {
@@ -6620,7 +6677,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					} else {
 						clientWidthScroll -= scrollbarWidth;
 					}
-					var hScroll = false, vScroll = false;
 					clientHeight = clientHeightNoScroll;
 					clientWidth = clientWidthNoScroll;
 					if (scrollHeight > clientHeight) {
@@ -6645,7 +6701,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 				
 				var width = clientWidth;
-				if (!this._wrapMode) {
+				if (this._wrapMode) {
+					if (this._metrics.wrapWidth) {
+						width = this._metrics.wrapWidth;
+					}
+				} else {
 					width = Math.max(this._maxLineWidth, width);
 				}
 				/*
@@ -6678,7 +6738,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var left = scroll.x;	
 			var clipDiv = this._clipDiv;
 			var overlayDiv = this._overlayDiv;
+			var marginDiv = this._marginDiv;
 			var clipLeft, clipTop;
+			if (marginDiv) {
+				marginDiv.style.left = (-left + leftWidth + this._metrics.marginWidth + viewPad.left) + "px"; //$NON-NLS-0$
+				marginDiv.style.bottom = (viewDiv.style.overflowX === "scroll" ? scrollbarWidth : 0) + "px"; //$NON-NLS-1$ //$NON-NLS-0$
+			}
 			if (clipDiv) {
 				clipDiv.scrollLeft = left;
 				clipDiv.scrollTop = 0;
@@ -6728,7 +6793,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				if (scroll.y + clientHeight === scrollHeight) { clipBottom += viewPad.bottom; }
 				clientDiv.style.clip = "rect(" + clipTop + "px," + clipRight + "px," + clipBottom + "px," + clipLeft + "px)"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px"; //$NON-NLS-0$
-				clientDiv.style.width = (util.isWebkit ? scrollWidth : clientWidth + left) + "px"; //$NON-NLS-0$
+				clientDiv.style.width = (this._wrapMode || util.isWebkit ? scrollWidth : clientWidth + left) + "px"; //$NON-NLS-0$
 				if (!hScrollOnly) {
 					clientDiv.style.top = (-top + viewPad.top) + "px"; //$NON-NLS-0$
 					clientDiv.style.height = (clientHeight + top) + "px"; //$NON-NLS-0$
