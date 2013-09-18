@@ -81,7 +81,7 @@ define([
 			var provider = this._getASTProvider(contentTypeId);
 			if (provider) {
 				options.text = this.inputManager.getEditor().getText();
-				return provider.getAST(options);
+				return provider.computeAST(options);
 			}
 			return null;
 		},
