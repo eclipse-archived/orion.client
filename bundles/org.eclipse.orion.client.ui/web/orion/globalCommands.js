@@ -650,10 +650,7 @@ define([
 				if (editor) {
 					mainSplitter.splitter.addResizeListener(function (node) {
 						if (editor && node === main) {
-							var textView = editor.getTextView();
-							if (textView) {
-								textView.resize();
-							}
+							editor.resize();
 						}
 					});
 				}
@@ -717,8 +714,8 @@ define([
 					footer.style.visibility = "hidden"; //$NON-NLS-0$
 					content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
 				}
-				if (editor && editor.getTextView()) {
-					editor.getTextView().resize();
+				if (editor) {
+					editor.resize();
 				}
 				return true;
 			}
@@ -809,7 +806,7 @@ define([
 				this._keyAssistContents.scrollTop = 0;
 				this._idCount = 0;
 
-				if (editor && editor.getTextView()) {
+				if (editor && editor.getTextView && editor.getTextView()) {
 					var textView = editor.getTextView();
 					// Remove actions without descriptions
 					var editorActions = textView.getActions(true).filter(function (element) {
@@ -1042,7 +1039,7 @@ define([
 			editor.getTextView().setKeyBinding(new KeyBinding.KeyBinding(191, false, true, !util.isMac, util.isMac), keyAssistCommand.id);
 			editor.getTextView().setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 		};
-		if (editor) {
+		if (editor && editor.getTextView) {
 			if (editor.getTextView()) {
 				addKeyAssistAction();
 			} else {

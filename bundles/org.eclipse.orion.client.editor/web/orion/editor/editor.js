@@ -23,6 +23,154 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	var AT = mAnnotations.AnnotationType;
 
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
+	
+	/**
+	 * @name orion.editor.BaseEditor
+	 * @class This is the base interface for text and visual editors based on a text buffer.
+	 * 
+	 * @description Creates a new Base Editor with the given options.
+	 * @param {Object} options Creation options for this editor.
+	 * @param {Object} options.domNode
+	 * @param {Object} options.statusReporter
+	 *
+	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.editor.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
+	 */
+	function BaseEditor(options) {
+		options = options || {};
+		this._domNode = options.domNode;
+		this._statusReporter = options.statusReporter;
+		this._dirty = false;
+	}
+	BaseEditor.prototype = /** @lends orion.editor.BaseEditor.prototype */ {
+		/**
+		 * Destroys the editor. Uninstall the editor view.
+		 */
+		destroy: function() {
+			this.uninstall();
+			this._statusReporter = this._domNode = null;
+		},
+		/**
+		 * Focus the the editor view. The default implementation does nothing.
+		 */
+		focus: function() {
+		},
+		/**
+		 * Returns the text model of the editor.
+		 *
+		 * @returns {orion.editor.TextModel} the text model of the view.
+		 */
+		getModel: function() {
+			return this._model;	
+		},
+		/**
+		 * Returns the text for the given range.
+		 * <p>
+		 * The text does not include the character at the end offset.
+		 * </p>
+		 *
+		 * @param {Number} [start=0] the start offset of text range.
+		 * @param {Number} [end=char count] the end offset of text range.
+		 *
+		 * @see orion.editor.TextView#setText
+		 */
+		getText: function(start, end) {
+			return this.getModel().getText(start, end);
+		},
+		/**
+		 * Returns the editor title. 
+		 *
+		 * @returns {String} the editor title.
+		 */
+		getTitle: function() {
+			return this._title;
+		},
+		/**
+		 * Creates the DOM hierarchy of the editor and add it to the document.
+		 */
+		install: function() {
+		},
+		/**
+		 * Returns <code>true</code> if the editor is dirty; <code>false</code> otherwise.
+		 * @returns {Boolean} whether the editor is dirty
+		 */
+		isDirty: function() {
+			return this._dirty;
+		},
+		/** 
+		 * Marks the current state of the editor as clean. Meaning there are no unsaved modifications.
+		 */
+		markClean: function() {
+			this.setDirty(false);	
+		},
+		/**
+		 * Called when the dirty state of the editor changes.
+		 * @param {Event} dirtyChangedEvent
+		 */
+		onDirtyChanged: function(dirtyChangedEvent) {
+			return this.dispatchEvent(dirtyChangedEvent);
+		},
+		/**
+		 * Called when the editor's contents have been changed or saved.
+		 * @param {Event} inputChangedEvent
+		 */
+		onInputChanged: function (inputChangedEvent) {
+			return this.dispatchEvent(inputChangedEvent);
+		},
+		/**
+		 * Report the message to the user.
+		 * 
+		 * @param {String} message the message to show
+		 * @param {String} [type] the message type. Either normal or "progress" or "error";
+		 * @param {Boolean} [isAccessible] If <code>true</code>, a screen reader will read this message.
+		 * Otherwise defaults to the domNode default.
+		 */
+		reportStatus: function(message, type, isAccessible) {
+			if (this._statusReporter) {
+				this._statusReporter(message, type, isAccessible);
+			}
+		},
+		/**
+		 * Resizes the editor view. The default implementation does nothing.
+		 */
+		resize: function() {
+		},
+		/**
+		 * Sets whether the editor is dirty.
+		 *
+		 * @param {Boolean} dirty
+		 */
+		setDirty: function(dirty) {
+			if (this._dirty === dirty) { return; }
+			this._dirty = dirty;
+			this.onDirtyChanged({type: "DirtyChanged"}); //$NON-NLS-0$
+		},
+		/**
+		 * Sets the editor's contents.
+		 *
+		 * @param {String} title the editor title
+		 * @param {String} message an error message
+		 * @param {String} contents the editor contents
+		 * @param {Boolean} contentsSaved whether the editor contents was saved.
+		 */
+		setInput: function(title, message, contents, contentsSaved) {
+			this._title = title;
+			this.onInputChanged({
+				type: "InputChanged", //$NON-NLS-0$
+				title: title,
+				message: message,
+				contents: contents,
+				contentsSaved: contentsSaved
+			});
+		},
+		/**
+		 * Removes the DOM hierarchy of the editor from the document.
+		 */
+		uninstall: function() {
+		}
+	};
+	mEventTarget.EventTarget.addMixin(BaseEditor.prototype);
 
 	/**
 	 * @name orion.editor.Editor
@@ -54,6 +202,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function Editor(options) {
+		options = options || {};
+		BaseEditor.call(this, options);
 		this._textViewFactory = options.textViewFactory;
 		this._undoStackFactory = options.undoStackFactory;
 		this._textDNDFactory = options.textDNDFactory;
@@ -62,8 +212,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._lineNumberRulerFactory = options.lineNumberRulerFactory;
 		this._contentAssistFactory = options.contentAssistFactory;
 		this._keyBindingFactory = options.keyBindingFactory;
-		this._statusReporter = options.statusReporter;
-		this._domNode = options.domNode;
 		
 		this._annotationStyler = null;
 		this._annotationModel = null;
@@ -75,16 +223,16 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._contentAssist = null;
 		this._title = null;
 	}
-	Editor.prototype = /** @lends orion.editor.Editor.prototype */ {
+	Editor.prototype = new BaseEditor();
+	objects.mixin(Editor.prototype, /** @lends orion.editor.Editor.prototype */ {
 		/**
 		 * Destroys the editor.
 		 */
 		destroy: function() {
-			this.uninstallTextView();
+			BaseEditor.prototype.destroy.call(this);
 			this._textViewFactory = this._undoStackFactory = this._textDNDFactory = 
 			this._annotationFactory = this._foldingRulerFactory = this._lineNumberRulerFactory = 
-			this._contentAssistFactory = this._keyBindingFactory = this._statusReporter =
-			this._domNode = null;
+			this._contentAssistFactory = this._keyBindingFactory = null;
 		},
 		/**
 		 * Returns the annotation model of the editor. 
@@ -162,14 +310,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._textView;
 		},
 		/**
-		 * Returns the editor title. 
-		 *
-		 * @returns {String} the editor title.
-		 */
-		getTitle: function() {
-			return this._title;
-		},
-		/**
 		 * Returns the editor undo stack. 
 		 *
 		 * @returns {orion.editor.UndoStack} the editor undo stack.
@@ -217,12 +357,16 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				this._textView.focus();
 			}
 		},
+		markClean: function() {
+			this.getUndoStack().markClean();
+		},
 		/**
-		 * Returns <code>true</code> if the editor is dirty; <code>false</code> otherwise.
-		 * @returns {Boolean} 
+		 * Resizes the text view.
 		 */
-		isDirty: function() {
-			return this._dirty;
+		resize: function() {
+			if (this._textView) {
+				this._textView.resize();
+			}
 		},
 		/**
 		 * Sets whether the annotation ruler is visible.
@@ -256,16 +400,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			} else {
 				textView.removeRuler(this._foldingRuler);
 			}
-		},
-		/**
-		 * Sets whether the editor is dirty.
-		 *
-		 * @param {Boolean} dirty
-		 */
-		setDirty: function(dirty) {
-			if (this._dirty === dirty) { return; }
-			this._dirty = dirty;
-			this.onDirtyChanged({type: "DirtyChanged"}); //$NON-NLS-0$
 		},
 		/**
 		 * Sets whether the line numbering ruler is visible.
@@ -322,15 +456,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				selection.end = model.mapOffset(selection.end);
 			}
 			return selection;
-		},
-		
-		getText: function(start, end) {
-			var textView = this._textView;
-			var model = textView.getModel();
-			if (model.getBaseModel) {
-				model = model.getBaseModel();
-			}
-			return model.getText(start, end);
 		},
 		
 		_expandOffset: function(offset) {
@@ -413,15 +538,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			this.setDirty(!this._undoStack.isClean());
 		},
 		
-		/**
-		 * @private
-		 */
-		reportStatus: function(message, type, isAccessible) {
-			if (this._statusReporter) {
-				this._statusReporter(message, type, isAccessible);
-			}
-		},
-		
 		/** @private */
 		_getTooltipInfo: function(x, y) {
 			var textView = this._textView;			
@@ -480,6 +596,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			this._currentLineAnnotation = annotation;
 			annotationModel.replaceAnnotations(remove, add);
+		},
+		
+		install: function() {
+			this.installTextView();
 		},
 		
 		/**
@@ -675,6 +795,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				textView: textView
 			};
 			this.dispatchEvent(textViewInstalledEvent);
+		},
+
+		uninstall: function() {
+			this.uninstallTextView();
 		},
 		
 		/**
@@ -886,7 +1010,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @param {Boolean} contentsSaved
 		 */
 		setInput: function(title, message, contents, contentsSaved) {
-			this._title = title;
 			if (this._textView) {
 				if (!contentsSaved) {
 					if (message) {
@@ -903,20 +1026,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				}
 				this.checkDirty();
 			}
-			this.onInputChanged({
-				type: "InputChanged", //$NON-NLS-0$
-				title: title,
-				message: message,
-				contents: contents,
-				contentsSaved: contentsSaved
-			});
-		},
-		/**
-		 * Called when the editor's contents have changed.
-		 * @param {Event} inputChangedEvent
-		 */
-		onInputChanged: function (inputChangedEvent) {
-			return this.dispatchEvent(inputChangedEvent);
+			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
 		},
 		/**
 		 * Reveals a line in the editor, and optionally selects a portion of the line.
@@ -947,19 +1057,11 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				}
 				this.moveSelection(lineStart + start, lineStart + end, callback);
 			}
-		},
-		
-		/**
-		 * Called when the dirty state of the editor changes.
-		 * @param {Event} dirtyChangedEvent
-		 */
-		onDirtyChanged: function(dirtyChangedEvent) {
-			return this.dispatchEvent(dirtyChangedEvent);
 		}
-	};
-	mEventTarget.EventTarget.addMixin(Editor.prototype);
+	});
 
 	return {
+		BaseEditor: BaseEditor,
 		Editor: Editor
 	};
 });
