@@ -192,7 +192,7 @@ define([
 
 			this.dispatchEvent({ type: "Saving", inputManager: this}); //$NON-NLS-0$
 
-			editor.getUndoStack().markClean();
+			editor.markClean();
 			var contents = editor.getText();
 			var data = contents;
 			if (this._getSaveDiffsEnabled() && !this._errorSaving) {
@@ -349,7 +349,7 @@ define([
 			// No input, no editor.
 			this._input = this._title = null;
 			this.setContentType(null);
-			this.editor.uninstallTextView();
+			this.editor.uninstall();
 			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
 		},
 		_setInputContents: function(input, title, contents, metadata) {
@@ -369,10 +369,10 @@ define([
 			}
 			var editor = this.getEditor();
 			if (isDir) {
-				editor.uninstallTextView();
+				editor.uninstall();
 			} else {
 				if (!editor.getTextView()) {
-					editor.installTextView();
+					editor.install();
 					editor.getTextView().addEventListener("Focus", function(e) { //$NON-NLS-0$
 						// If there was an error while auto saving, auto save is temporarily disabled and
 						// we retry saving every time the editor gets focus
