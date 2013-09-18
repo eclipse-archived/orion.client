@@ -871,16 +871,26 @@ input {
 }
 
 .projectNavColumn {
-	background: none repeat scroll 0 0 whiteSmoke;
-    color: #999;
+	background: none repeat scroll 0 0 #bcbdc0;
+    color: #666;
     font-weight: bold;
     padding-bottom: 0.5em;
     padding-top: 0.5em;
     border-top: 4px solid #FBFBFB;
 }
 
+.projectPrimaryNavColumn {
+	background: none repeat scroll 0 0 #70a6c5;
+	color: #000;
+}
+
 .projectNavColumn a{
-	color: #999;
+	color: #666;
+    font-weight: bold;
+}
+
+.projectPrimaryNavColumn a{
+	color: #fff;
     font-weight: bold;
 }
 
