@@ -70,6 +70,11 @@ define("orion/editor/shim", [], function() { //$NON-NLS-0$
 	}
 
 	
+	if (!Array.isArray) {
+		Array.isArray = function(obj) {
+			return Object.prototype.toString.call(obj) === "[object Array]";
+		};
+	}
 	if (!Array.prototype.indexOf) {
 		Array.prototype.indexOf = function(c) {
 			for (var i=0; i<this.length; i++) {
