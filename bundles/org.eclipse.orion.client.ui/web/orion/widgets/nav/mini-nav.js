@@ -270,10 +270,15 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		oneColumn: true,
 		createFolderNode: function(folder) {
 			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
-			if (folderNode.tagName === "A") { //$NON-NLS-0$
+			if (this.showFolderLinks && folderNode.tagName === "A") { //$NON-NLS-0$
 				folderNode.classList.add("miniNavFolder"); //$NON-NLS-0$
 				var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
 				this.setFolderHref(folderNode, editorFile || "", folder.ChildrenLocation);
+
+				// TODO wasteful. Should attach 1 listener to parent element, then get folder model item from nav handler
+				folderNode.addEventListener("click", this.toggleFolderExpansionState.bind(this, folder, false)); //$NON-N
+			} else {
+				folderNode.classList.add("nav_fakelink"); //$NON-NLS-0$
 			}
 			return folderNode;
 		},
@@ -302,6 +307,32 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				var folderLocation = PageUtil.matchResourceParameters(folderLink.href).navigate;
 				_self.setFolderHref(folderLink, editorFile || "", folderLocation); //$NON-NLS-0$
 			});
+		},
+		/**
+		 * @param {Object} folder
+		 * @param {Boolean} preventDefault
+		 * @param {Event} evt
+		 */
+		toggleFolderExpansionState: function(folder, preventDefault, evt) {
+			var navHandler = this.explorer.getNavHandler();
+			if (!navHandler) {
+				return;
+			}
+			navHandler.cursorOn(folder);
+			navHandler.setSelection(folder, false);
+			// now toggle its expand/collapse state
+			var curModel = navHandler._modelIterator.cursor();
+			if (navHandler.isExpandable(curModel)){
+				if (!navHandler.isExpanded(curModel)){
+						this.explorer.myTree.expand(curModel);
+				} else {
+						this.explorer.myTree.collapse(curModel);
+				}
+				if (preventDefault) {
+					evt.preventDefault();
+				}
+				return false;
+			}
 		}
 	});
 
