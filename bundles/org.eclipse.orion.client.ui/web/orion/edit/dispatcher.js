@@ -15,10 +15,12 @@ define(['orion/edit/dispatcher'], function() {
 	 * @class Forwards events from an {@link orion.editor.Editor} to interested services.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry 
 	 * @param {orion.editor.Editor} editor
+	 * @param {orion.InputManger} inputManager
 	 */
-	function Dispatcher(serviceRegistry, editor) {
+	function Dispatcher(serviceRegistry, editor, inputManager) {
 		this.serviceRegistry = serviceRegistry;
 		this.editor = editor;
+		this.inputManager = inputManager;
 		this.contentTypeService = serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 		this.serviceReferences = {};
 
@@ -36,9 +38,6 @@ define(['orion/edit/dispatcher'], function() {
 		this._init();
 	}
 	Dispatcher.prototype = /** @lends orion.edit.Dispatcher.prototype */ {
-		setContentType: function(contentType) {
-			this.contentType = contentType;
-		},
 		_init: function() {
 			var self = this;
 			if (this.editor.getTextView()) {
@@ -60,7 +59,7 @@ define(['orion/edit/dispatcher'], function() {
 			var refContentType = serviceRef.getProperty("contentType"); //$NON-NLS-0$
 			if (typeof refContentType !== undefined && refContentType !== null) {
 				var self = this;
-				this.contentTypeService.isSomeExtensionOf(this.contentType, refContentType).then(
+				this.contentTypeService.isSomeExtensionOf(this.inputManager.getContentType(), refContentType).then(
 					function(isSupported) {
 						if (isSupported) {
 							self._wireService(serviceRef, self.serviceRegistry.getService(serviceRef));
