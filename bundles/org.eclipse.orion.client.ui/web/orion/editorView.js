@@ -267,12 +267,11 @@ define([
 				this.showSelection(params.start, params.end, params.line, params.offset, params.length);
 			};
 
-			this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor);
+			this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor, inputManager);
 			localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
 
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {
-					this.dispatcher.setContentType(event.contentType);
 					this.updateStyler(this.settings);
 				}.bind(this));
 			}.bind(this));
