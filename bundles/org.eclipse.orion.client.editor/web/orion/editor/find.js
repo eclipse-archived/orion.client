@@ -288,8 +288,9 @@ define("orion/editor/find", [ //$NON-NLS-0$
 			}
 		},
 		_processReplaceString: function(str) {
-			var newStr = "";
+			var newStr = str;
 			if (this._regex) {
+				newStr = "";
 				var escape = false;
 				var delimiter = this._editor.getModel().getLineDelimiter();
 				for (var i=0; i<str.length; i++) {
