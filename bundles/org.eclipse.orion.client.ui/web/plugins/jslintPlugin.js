@@ -10,8 +10,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint forin:true regexp:false*/
-/*global define JSLINT require window*/
-define(["orion/plugin", "orion/jslintworker", "orion/objects"], function(PluginProvider, _, objects) {
+/*global console define JSLINT window*/
+define([
+	"orion/plugin",
+	"orion/jslintworker",
+	"orion/objects"
+], function(PluginProvider, _, objects) {
 	var DEFAULT_VALIDATION_OPTIONS = {
 			bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, maxerr: 300, newcap: true, nomen: false,
 			onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false
@@ -23,7 +27,7 @@ define(["orion/plugin", "orion/jslintworker", "orion/objects"], function(PluginP
 		JSLINT(contents, validationOptions);
 		return JSLINT.data();
 	}
-	
+
 	function cleanup(error) {
 		function fixWith(fixes, severity, force) {
 			var description = error.description;
@@ -68,6 +72,70 @@ define(["orion/plugin", "orion/jslintworker", "orion/objects"], function(PluginP
 		return isBogus(error) ? null : error;
 	}
 
+	function _computeProblems(contents) {
+		if (!isEnabled) {
+			return {problems: []};
+		}
+		var result = jslint(contents);
+		var problems = [];
+		var i;
+		if (result.errors) {
+			var errors = result.errors;
+			for (i=0; i < errors.length; i++) {
+				var error = errors[i];
+				if (error) {
+					var start = error.character - 1,
+					    end = start + 1;
+					if (error.evidence) {
+						var index = error.evidence.substring(start).search(/.\b/);
+						if (index > -1) {
+							end += index;
+						}
+					}
+					// Convert to format expected by validation service
+					error.description = error.reason;
+					error.start = error.character;
+					error.end = end;
+					error = cleanup(error);
+					if (error) { problems.push(error); }
+				}
+			}
+		}
+		if (result.functions) {
+			var functions = result.functions;
+			var lines;
+			for (i=0; i < functions.length; i++) {
+				var func = functions[i];
+				var unused = func.unused;
+				if (!unused || unused.length === 0) {
+					continue;
+				}
+				if (!lines) {
+					lines = contents.split(/\r?\n/);
+				}
+				var nameGuessed = func.name[0] === '"';
+				var name = nameGuessed ? func.name.substring(1, func.name.length - 1) : func.name;
+				var line = lines[func.line - 1];
+				for (var j=0; j < unused.length; j++) {
+					// Find "function" token in line based on where fName appears.
+					// nameGuessed implies "foo:function()" or "foo = function()", and !nameGuessed implies "function foo()"
+					var nameIndex = line.indexOf(name);
+					var funcIndex = nameGuessed ? line.indexOf("function", nameIndex) : line.lastIndexOf("function", nameIndex);
+					if (funcIndex !== -1) {
+						problems.push({
+							reason: "Function declares unused variable '" + unused[j] + "'.",
+							line: func.line,
+							character: funcIndex + 1,
+							end: funcIndex + "function".length,
+							severity: "warning"
+						});
+					}
+				}
+			}
+		}
+		return { problems: problems };
+	}
+
 	var validationService = {
 		// ManagedService
 		updated: function(properties) {
@@ -100,68 +168,9 @@ define(["orion/plugin", "orion/jslintworker", "orion/objects"], function(PluginP
 				}
 			}
 		},
-		checkSyntax : function(title, contents) {
-			if (!isEnabled) {
-				return {problems: []};
-			}
-			var result = jslint(contents);
-			var problems = [];
-			var i;
-			if (result.errors) {
-				var errors = result.errors;
-				for (i=0; i < errors.length; i++) {
-					var error = errors[i];
-					if (error) {
-						var start = error.character - 1,
-						    end = start + 1;
-						if (error.evidence) {
-							var index = error.evidence.substring(start).search(/.\b/);
-							if (index > -1) {
-								end += index;
-							}
-						}
-						// Convert to format expected by validation service
-						error.description = error.reason;
-						error.start = error.character;
-						error.end = end;
-						error = cleanup(error);
-						if (error) { problems.push(error); }
-					}
-				}
-			}
-			if (result.functions) {
-				var functions = result.functions;
-				var lines;
-				for (i=0; i < functions.length; i++) {
-					var func = functions[i];
-					var unused = func.unused;
-					if (!unused || unused.length === 0) {
-						continue;
-					}
-					if (!lines) {
-						lines = contents.split(/\r?\n/);
-					}
-					var nameGuessed = func.name[0] === '"';
-					var name = nameGuessed ? func.name.substring(1, func.name.length - 1) : func.name;
-					var line = lines[func.line - 1];
-					for (var j=0; j < unused.length; j++) {
-						// Find "function" token in line based on where fName appears.
-						// nameGuessed implies "foo:function()" or "foo = function()", and !nameGuessed implies "function foo()"
-						var nameIndex = line.indexOf(name);
-						var funcIndex = nameGuessed ? line.indexOf("function", nameIndex) : line.lastIndexOf("function", nameIndex);
-						if (funcIndex !== -1) {
-							problems.push({
-								reason: "Function declares unused variable '" + unused[j] + "'.",
-								line: func.line,
-								character: funcIndex + 1,
-								end: funcIndex + "function".length,
-								severity: "warning"
-							});
-						}
-					}
-				}
-			}
-			return { problems: problems };
+		// orion.edit.validator
+		computeProblems: function(editorContext, context) {
+			return editorContext.getText().then(_computeProblems);
 		}
 	};
 	
