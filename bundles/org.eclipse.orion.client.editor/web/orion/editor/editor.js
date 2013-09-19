@@ -42,6 +42,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._domNode = options.domNode;
 		this._statusReporter = options.statusReporter;
 		this._dirty = false;
+		this._title = null;
 	}
 	BaseEditor.prototype = /** @lends orion.editor.BaseEditor.prototype */ {
 		/**
@@ -174,6 +175,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 
 	/**
 	 * @name orion.editor.Editor
+	 * @augments orion.editor.BaseEditor
 	 * @class An <code>Editor</code> is a user interface for editing text that provides additional features over the basic {@link orion.editor.TextView}.
 	 * Some of <code>Editor</code>'s features include:
 	 * <ul>
@@ -196,10 +198,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	 * @param {Object} options.textViewFactory
 	 * @param {Object} options.undoStackFactory
 	 * @param {Object} options.textDNDFactory
-	 *
-	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
-	 * @borrows orion.editor.EventTarget#removeEventListener as #removeEventListener
-	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function Editor(options) {
 		options = options || {};
@@ -219,9 +217,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._lineNumberRuler = null;
 		this._overviewRuler = null;
 		this._foldingRuler = null;
-		this._dirty = false;
 		this._contentAssist = null;
-		this._title = null;
 	}
 	Editor.prototype = new BaseEditor();
 	objects.mixin(Editor.prototype, /** @lends orion.editor.Editor.prototype */ {
