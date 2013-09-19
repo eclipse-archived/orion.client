@@ -409,7 +409,7 @@ define([
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var outlineProviderService = serviceRegistry.getService(provider);
 				var method, args;
-				if ((method = outlineProviderService.computeOutlineWithContext)) {
+				if ((method = outlineProviderService.computeOutline)) {
 					var contentType = inputManager.getContentType();
 					args = [EditorContext.getEditorContext(serviceRegistry), {
 						contentType: contentType && contentType.id

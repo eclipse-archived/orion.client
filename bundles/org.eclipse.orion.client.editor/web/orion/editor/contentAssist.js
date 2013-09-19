@@ -306,10 +306,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				var proposals;
 				try {
 					var func, promise;
-					if ((func = provider.computeProposalsWithContext)) {
+					if ((func = provider.computeContentAssist)) {
 						var editorContext = self.editorContextProvider && self.editorContextProvider();
 						promise = func.apply(provider, [editorContext, context]);
 					} else if ((func = provider.getProposals || provider.computeProposals)) {
+						// old API
 						promise = func.apply(provider, [model.getText(), mapOffset, context]);
 					}
 					proposals = self.progress ? self.progress.progress(promise, "Generating content assist proposal") : promise; //$NON-NLS-0$

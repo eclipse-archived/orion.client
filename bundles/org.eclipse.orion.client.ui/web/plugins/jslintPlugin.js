@@ -226,7 +226,7 @@ define(["orion/plugin", "orion/jslintworker", "orion/objects"], function(PluginP
 	}
 
 	var outlineService = {
-		computeOutlineWithContext: function(editorContext, context) {
+		computeOutline: function(editorContext, context) {
 			return editorContext.getText().then(function(contents) {
 				var contentType = context.contentType;
 				if (contentType === "application/javascript") {

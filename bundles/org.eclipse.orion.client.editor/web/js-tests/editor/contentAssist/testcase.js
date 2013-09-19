@@ -92,7 +92,7 @@ define([
 	/**
 	 * Like assertProviderInvoked(), but tests the v4 content assist API.
 	 */
-	function assertProviderInvokedWithContext(text, providerCallback) {
+	function assertProviderInvoked_v4(text, providerCallback) {
 		var deferred = new Deferred();
 		withData(function(view, contentAssist) {
 			var expectedOffset = setText(view, text);
@@ -288,11 +288,11 @@ define([
 		return Deferred.all([d1, d2, d3]);
 	};
 
-	// Tests that content assist calls a provider's computeProposalsWithContext function with the expected parameters.
-	tests.testComputeProposalsWithContext = function() {
-		return assertProviderInvokedWithContext("line1\nline@@@2", function(checkParamsCallback) {
+	// Tests that content assist calls a provider's computeContentAssist function with the expected parameters.
+	tests.test_computeContentAssist = function() {
+		return assertProviderInvoked_v4("line1\nline@@@2", function(checkParamsCallback) {
 			return {
-				computeProposalsWithContext: checkParamsCallback
+				computeContentAssist: checkParamsCallback
 			};
 		});
 	};
