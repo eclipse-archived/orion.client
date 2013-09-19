@@ -40,6 +40,15 @@ define([
 	ASTManager, mDispatcher, EditorContext, Highlight,
 	mMarkOccurrences, mSyntaxchecker
 ) {
+	
+	function parseNumericParams(input, params) {
+		for (var i = 0; i < params.length; i++) {
+			var param = params[i];
+			if (input[param]) {
+				input[param] = parseInt(input[param], 10);
+			}
+		}
+	}
 
 	/**
 	 * Constructs a new EditorView object.
@@ -258,6 +267,10 @@ define([
 				statusReporter: this.statusReporter.bind(this),
 				domNode: editorDomNode
 			});
+			editor.processParameters = function(params) {
+				parseNumericParams(params, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				this.showSelection(params.start, params.end, params.line, params.offset, params.length);
+			};
 
 			this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor);
 			localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});

@@ -59,15 +59,6 @@ define([
 		}
 	};
 
-	function parseNumericParams(input, params) {
-		for (var i = 0; i < params.length; i++) {
-			var param = params[i];
-			if (input[param]) {
-				input[param] = parseInt(input[param], 10);
-			}
-		}
-	}
-
 	function handleError(statusService, error) {
 		if (!statusService) {
 			window.console.log(error);
@@ -163,8 +154,9 @@ define([
 		},
 		processParameters: function(input) {
 			var editor = this.getEditor();
-			parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
+			if (editor.processParameters) {
+				editor.processParameters(input);
+			}
 		},
 		getEditor: function() {
 			return this.editor;
