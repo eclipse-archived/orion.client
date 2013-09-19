@@ -81,12 +81,14 @@ define("orion/editor/textDND", ['orion/util'], function(util) { //$NON-NLS-1$ //
 			}
 		},
 		_onDragEnd: function(e) {
-			var view = this._view;
-			var dropEffect = util.isFirefox ? e.event.dataTransfer.dropEffect : this._dropEffect;
-			if (!util.isFirefox) {
-				e.event.dataTransfer.dropEffect = this._dropEffect; //$NON-NLS-1$ //$NON-NLS-0$
-			}
 			if (this._dragSelection) {
+				var view = this._view;
+				var dropEffect = e.event.dataTransfer.dropEffect;
+				if (!util.isFirefox) {
+					if (dropEffect !== "none" || this._dropText) { //$NON-NLS-0$
+						dropEffect = e.event.dataTransfer.dropEffect = this._dropEffect;
+					}
+				}
 				if (this._undoStack) { this._undoStack.startCompoundChange(); }
 				var move = dropEffect === "move"; //$NON-NLS-0$
 				if (move) {
