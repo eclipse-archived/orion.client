@@ -75,23 +75,34 @@ define([
 		this._init();
 	}
 	EditorView.prototype = /** @lends orion.EditorView.prototype */ {
-		updateKeyMode: function(textView) {
+		updateKeyMode: function(prefs, textView) {
 			if (this.emacs) {
 				textView.removeKeyMode(this.emacs);
 			}
 			if (this.vi) {
 				textView.removeKeyMode(this.vi);
 			}
-			if (this.settings.keyBindings === "Emacs") { //$NON-NLS-0$
+			if (prefs.keyBindings === "Emacs") { //$NON-NLS-0$
 				if (!this.emacs) {
 					this.emacs = new mEmacs.EmacsMode(textView);
 				}
 				textView.addKeyMode(this.emacs);
-			} else if (this.settings.keyBindings === "vi") { //$NON-NLS-0$
+			} else if (prefs.keyBindings === "vi") { //$NON-NLS-0$
 				if (!this.vi) {
 					this.vi = new mVI.VIMode(textView, this.statusReporter.bind(this));
 				}
 				textView.addKeyMode(this.vi);
+			}
+		},
+		updateSourceCodeActions: function(prefs, sourceCodeActions) {
+			if (sourceCodeActions) {
+				sourceCodeActions.setAutoPairParentheses(prefs.autoPairParentheses);
+				sourceCodeActions.setAutoPairBraces(prefs.autoPairBraces);
+				sourceCodeActions.setAutoPairSquareBrackets(prefs.autoPairSquareBrackets);
+				sourceCodeActions.setAutoPairAngleBrackets(prefs.autoPairAngleBrackets);
+				sourceCodeActions.setAutoPairQuotations(prefs.autoPairQuotations);
+				sourceCodeActions.setAutoCompleteComments(prefs.autoCompleteComments);
+				sourceCodeActions.setSmartIndentation(prefs.smartIndentation);
 			}
 		},
 		updateSettings: function(prefs) {
@@ -104,7 +115,7 @@ define([
 			this.updateStyler(prefs);
 			var textView = editor.getTextView();
 			if (textView) {
-				this.updateKeyMode(textView);
+				this.updateKeyMode(prefs, textView);
 				var options = {
 					tabSize: prefs.tabSize || 4,
 					expandTab: prefs.expandTab,
@@ -112,16 +123,7 @@ define([
 				};
 				textView.setOptions(options);
 			}
-			var sourceCodeActions = editor.getSourceCodeActions();
-			if (sourceCodeActions) {
-				sourceCodeActions.setAutoPairParentheses(prefs.autoPairParentheses);
-				sourceCodeActions.setAutoPairBraces(prefs.autoPairBraces);
-				sourceCodeActions.setAutoPairSquareBrackets(prefs.autoPairSquareBrackets);
-				sourceCodeActions.setAutoPairAngleBrackets(prefs.autoPairAngleBrackets);
-				sourceCodeActions.setAutoPairQuotations(prefs.autoPairQuotations);
-				sourceCodeActions.setAutoCompleteComments(prefs.autoCompleteComments);
-				sourceCodeActions.setSmartIndentation(prefs.smartIndentation);
-			}
+			this.updateSourceCodeActions(prefs, editor.getSourceCodeActions());
 			editor.setAnnotationRulerVisible(prefs.annotationRuler);
 			editor.setLineNumberRulerVisible(prefs.lineNumberRuler);
 			editor.setFoldingRulerVisible(prefs.foldingRuler);
@@ -192,14 +194,7 @@ define([
 				var localSearcher = new mSearcher.TextSearcher(editor, commandRegistry, undoStack);
 
 				var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
-				var sourceCodeActions = keyBindings.sourceCodeActions;
-				sourceCodeActions.setAutoPairParentheses(self.settings.autoPairParentheses);
-				sourceCodeActions.setAutoPairBraces(self.settings.autoPairBraces);
-				sourceCodeActions.setAutoPairSquareBrackets(self.settings.autoPairSquareBrackets);
-				sourceCodeActions.setAutoPairAngleBrackets(self.settings.autoPairAngleBrackets);
-				sourceCodeActions.setAutoPairQuotations(self.settings.autoPairQuotations);
-				sourceCodeActions.setAutoCompleteComments(self.settings.autoCompleteComments);
-				sourceCodeActions.setSmartIndentation(self.settings.smartIndentation);
+				self.updateSourceCodeActions(self.settings, keyBindings.sourceCodeActions);
 
 				// Register commands that depend on external services, the registry, etc.  Do this after
 				// the generic keybindings so that we can override some of them.
@@ -219,7 +214,7 @@ define([
 				commandGenerator.generateEditorCommands(editor);
 
 				var textView = editor.getTextView();
-				self.updateKeyMode(textView);
+				self.updateKeyMode(self.settings, textView);
 
 				return keyBindings;
 			};
