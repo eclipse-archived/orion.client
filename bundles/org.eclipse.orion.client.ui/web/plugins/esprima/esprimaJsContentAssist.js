@@ -737,7 +737,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeEnvironment", "pl
 		/**
 		 * Implements the Orion content assist API v4.0
 		 */
-		computeProposalsWithContext: function(editorContext, context) {
+		computeContentAssist: function(editorContext, context) {
 			var self = this;
 			// TODO Can we avoid getText() here? The AST should have all we need.
 			return Deferred.all([editorContext.getAST(), editorContext.getText()]).then(function(results) {

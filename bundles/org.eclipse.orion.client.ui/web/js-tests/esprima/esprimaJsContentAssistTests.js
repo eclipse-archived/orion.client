@@ -59,7 +59,7 @@ define([
 				return new Deferred().resolve(buffer);
 			}
 		};
-		return esprimaContentAssistant.computeProposalsWithContext(mockContext, {offset: offset, prefix : prefix, inferredOnly : true });
+		return esprimaContentAssistant.computeContentAssist(mockContext, {offset: offset, prefix : prefix, inferredOnly : true });
 	}
 
 	function testProposal(proposal, text, description) {
