@@ -56,14 +56,16 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 			var projects = [];
 			var projectDeferrds = [];
 			for(var i=0; i<workspaceMetadata.Children.length; i++){
-				var projectDeferred = this.readProject(workspaceMetadata.Children[i], workspaceMetadata);
+				var projectDeferred = new Deferred();
+				this.readProject(workspaceMetadata.Children[i], workspaceMetadata).then(projectDeferred.resolve,
+					function(error){
+						this.resolve(null);
+					}.bind(projectDeferred));
 				projectDeferrds.push(projectDeferred);
 				projectDeferred.then(function(projectMetadata){
 					if(projectMetadata){
 						projects.push(projectMetadata);
 					}
-				}, function(error){
-					console.error(error);
 				});
 			}
 			Deferred.all(projectDeferrds).then(function(){
@@ -73,44 +75,46 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		},
 		readProject : function(fileMetadata, workspaceMetadata){
 			var that = this;
+			var deferred = new Deferred();
 			
-			function readProjectFromWorkspace(fileMetadata, workspace){
+			function readProjectFromWorkspace(fileMetadata, workspace, deferred){
 				if(fileMetadata.Parents && fileMetadata.Parents.length>0){
 					var topFolder = fileMetadata.Parents[fileMetadata.Parents.length-1];
 					if(topFolder.Children){
-						return that._getProjectJsonData.bind(that)(topFolder, topFolder.Children, workspace);
+						that._getProjectJsonData.bind(that)(topFolder, topFolder.Children, workspace).then(deferred.resolve, deferred.reject, deferred.progress);
 					} else if(topFolder.ChildrenLocation) {
-						return this.fileClient.fetchChildren(topFolder.ChildrenLocation).then(function(children){
-							return that._getProjectJsonData.bind(that)(topFolder, children, workspace);
+						this.fileClient.fetchChildren(topFolder.ChildrenLocation).then(function(children){
+							that._getProjectJsonData.bind(that)(topFolder, children, workspace).then(deferred.resolve, deferred.reject, deferred.progress);
 						},
-						function(error){return error;},
-						function(progress){return progress;});
+						deferred.reject,
+						deferred.progress);
 					} else {
-						var deferred = new Deferred();
 						deferred.resolve(null);
-						return deferred;
 					}
+					return deferred;
 				} else if(fileMetadata.Children) {
-					return that._getProjectJsonData.bind(that)(fileMetadata, fileMetadata.Children, workspace);
+					that._getProjectJsonData.bind(that)(fileMetadata, fileMetadata.Children, workspace).then(deferred.resolve, deferred.reject, deferred.progress);
+					return deferred;
 				} else if(fileMetadata.ChildrenLocation){
-					return this.fileClient.fetchChildren(fileMetadata.ChildrenLocation).then(function(children){
-						return that._getProjectJsonData.bind(that)(fileMetadata, children, workspace);
+					this.fileClient.fetchChildren(fileMetadata.ChildrenLocation).then(function(children){
+						that._getProjectJsonData.bind(that)(fileMetadata, children, workspace).then(deferred.resolve, deferred.reject, deferred.progress);
 					},
-					function(error){return error;},
-					function(progress){return progress;});
+					deferred.reject,
+					deferred.progress);
+					return deferred;
 				} else {
-					var deferred = new Deferred();
 					deferred.resolve(null);
 					return deferred;
 				}
 			}
 			if(workspaceMetadata){
-				return readProjectFromWorkspace.call(that, fileMetadata, workspaceMetadata);
+				readProjectFromWorkspace.call(that, fileMetadata, workspaceMetadata, deferred);
 			} else {
-				return this.fileClient.loadWorkspace().then(function(workspace){
-					return readProjectFromWorkspace.call(that, fileMetadata, workspace);
+				this.fileClient.loadWorkspace().then(function(workspace){
+					readProjectFromWorkspace.call(that, fileMetadata, workspace, deferred);
 				});
 			}
+			return deferred;
 		},
 		
 		/**
