@@ -297,9 +297,14 @@ define([
 				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
 			});
 
-			serviceRegistry.registerService("orion.edit.context", { //$NON-NLS-0$
-				getText: editor.getText.bind(editor)
-			}, null);
+			var contextImpl = {};
+			[	"getCaretOffset", "setCaretOffset",
+				"getSelection", "setSelection",
+				"getText", "setText"
+			].forEach(function(method) {
+				contextImpl[method] = editor[method].bind(editor);
+			});
+			serviceRegistry.registerService("orion.edit.context", contextImpl, null); //$NON-NLS-0$
 
 			this.editorPreferences.getPrefs(this.updateSettings.bind(this));
 		},
