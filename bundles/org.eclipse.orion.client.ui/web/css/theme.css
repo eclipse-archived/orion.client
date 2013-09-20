@@ -140,6 +140,7 @@ a.currentLocation:hover {
 	background: #fbfbfb;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fbfbfb), color-stop(100%,#fbfbfb));
 	background: -moz-linear-gradient(top, #fbfbfb 0%, #fbfbfb 100%);
+	overflow:hidden;
 }
 
 .mainpane {
@@ -342,7 +343,7 @@ a.currentLocation:hover {
 	position: absolute;
 	list-style-type: none;
 	border-radius: 1px;
-	border: 1px solid #EEE;
+	border: 1px solid #DDD;
 	padding: 0;
 	background-color: white;
 	padding: 10px;
