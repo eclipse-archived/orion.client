@@ -681,8 +681,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				});
 			},
 			visibleWhen: function(item) {
-				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);
+				// Check selection first, then use the provided item
+				var canCreateFile = function(item) {
+					item = forceSingleItem(item);
+					return item.Directory && !mFileUtils.isAtRoot(item.Location);
+				};
+				return canCreateFile(explorer.selection.getSelections()) || canCreateFile(item);
 			}
 		});
 		commandService.addCommand(newFileCommand);
@@ -843,11 +847,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				}
 			},
 			visibleWhen: function(item) {
-				var result = false;
-				explorer.selection.getSelections(function(selections) {
-					result = selections.length === 1 && selections[0].Directory;
-				});
-				return result;
+				var selections = explorer.selection.getSelections();
+				return selections.length === 1 && selections[0].Directory;
 			}});
 		commandService.addCommand(goIntoCommand);
 					
