@@ -494,7 +494,7 @@ define([
 					 * @deprecated: command services should implement execute() instead.
 					 */
 					var processEditorResult = function(result) {
-						if (result) {
+						if (typeof result === "object" && result) { //$NON-NLS-0$
 							if (result.text) {
 								editor.setText(result.text);
 							}
@@ -502,12 +502,10 @@ define([
 								editor.setSelection(result.selection.start, result.selection.end, true /*scroll to*/);
 								editor.focus();
 							}
-						} else {
-							if (typeof result === 'string') { //$NON-NLS-0$
-								editor.setText(result, selection.start, selection.end, true /*scroll to*/);
-								editor.setSelection(selection.start, selection.start + result.length);
-								editor.focus();
-							}
+						} else if (typeof result === 'string') { //$NON-NLS-0$
+							editor.setText(result, selection.start, selection.end, true /*scroll to*/);
+							editor.setSelection(selection.start, selection.start + result.length);
+							editor.focus();
 						}
 					};
 
