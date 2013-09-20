@@ -114,12 +114,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	}
 
 	var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
-		// Link to this page (edit page)
 		segment.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-			resource: inputManager.getInput() || "", //$NON-NLS-0$
-			params: {
-				navigate: folder ? folder.ChildrenLocation : fileClient.fileServiceRootURL(folderLocation || "")  //$NON-NLS-0$
-			}
+			resource: folderLocation || "" //$NON-NLS-0$
 		});
 	};
 
@@ -197,13 +193,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	function SidebarNavInputManager() {
 		EventTarget.attach(this);
 	}
-	SidebarNavInputManager.prototype.processHash = function() {
-		var newParams = PageUtil.matchResourceParameters(location.hash), navigate = newParams.navigate;
-		if (typeof navigate === "string" || !newParams.resource) { //$NON-NLS-0$
-			var input = navigate || "";
-			this.dispatchEvent({type: "InputChanged", input: input}); //$NON-NLS-0$
-		}
-	};
+
 	var sidebarNavInputManager = new SidebarNavInputManager();
 	var sidebar = new Sidebar({
 		commandRegistry: commandRegistry,
@@ -220,16 +210,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	});
 	sidebar.show();
 	sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
-		var root = evt.root;
-		// update the navigate param, if it's present, or if this was a user action
 		var pageParams = PageUtil.matchResourceParameters(location.hash);
-		if (evt.force || Object.prototype.hasOwnProperty.call(pageParams, "navigate")) {//$NON-NLS-0$
-			var params = {};
-			params.resource = pageParams.resource || ""; //$NON-NLS-0$
-			params.params = { navigate: root.Path };
-			window.location = new URITemplate("#{,resource,params*}").expand(params); //$NON-NLS-0$
-		}
 		if (!pageParams.resource) {
+			var root = evt.root;
 			// No primary resource (editor file), so target the folder being navigated in the sidebar.
 			mGlobalCommands.setPageTarget({
 				task: "Coding", //$NON-NLS-0$
@@ -244,13 +227,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		}
 	});
 	sidebarNavInputManager.addEventListener("editorInputMoved", function(evt) { //$NON-NLS-0$
-		var newInput = evt.newInput, parent = evt.parent;
+		var newInput = evt.newInput;
 		var params = {};
 		// If we don't know where the file went, go to "no editor"
 		params.resource = newInput || "";
-		params.params = {
-			navigate: parent
-		};
 		window.location = new URITemplate("#{,resource,params*}").expand(params); //$NON-NLS-0$
 	});
 
@@ -263,11 +243,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	});
 	window.addEventListener("hashchange", function() { //$NON-NLS-0$
 		inputManager.setInput(window.location.hash);
-		// inform the sidebar
-		sidebarNavInputManager.processHash(window.location.hash);
 	});
 	inputManager.setInput(window.location.hash);
-	sidebarNavInputManager.processHash(window.location.hash);
 
 	//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, window.location.hash !== ""); //$NON-NLS-0$

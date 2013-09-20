@@ -38,34 +38,18 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.selectionActionsScope = this.toolbarNode.id + "Selection"; //$NON-NLS-0$
 		this.folderNavActionsScope = this.toolbarNode.id + "Folder"; //$NON-NLS-0$
 
-		this.followEditor = true;
 		var initialRoot = { };
 		this.treeRoot = initialRoot; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
 		this.editorInputListener = function(event) {
-			var editorInput = _self.editorInput = event.metadata;
-			if (_self.treeRoot === initialRoot && _self.followEditor) {
-				// Initial load: parent folder of editor input gives our current root
-				_self.loadParentOf(editorInput);
-			} else {
-				// The folder URLs are impacted by the change of editor input (eg. #someFileToEdit.js,navigate=/some/folder/to/view)
-				_self.renderer.updateFolderLinks(lib.node(_self._parentId));
-				_self.reveal(editorInput);
-			}
+			_self.reveal(event.metadata, true);
 		};
 		this.editorInputManager.addEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 		if (sidebarNavInputManager) {
-			this.navInputListener = function(event) {
-				_self.followEditor = false;
-				_self.loadRoot(event.input).then(function() {
-					_self.updateCommands();
-				});
-			};
-			sidebarNavInputManager.addEventListener("InputChanged", this.navInputListener); //$NON-NLS-0$
-
 			// Broadcast changes of our explorer root to the sidebarNavInputManager
 			this.addEventListener("rootChanged", function(event) { //$NON-NLS-0$
 				_self.sidebarNavInputManager.dispatchEvent(event);
+				_self.sidebarNavInputManager.dispatchEvent({type: "InputChanged", input: event.root.Parents ? event.root.ChildrenLocation : ""}); //$NON-NLS-0$
 			});
 		}
 
@@ -154,7 +138,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				} else {
 					parent = this.fileClient.fileServiceRootURL(fileMetadata.Location); //$NON-NLS-0$
 				}
-				return this.loadRoot(parent).then(this.reveal.bind(this, fileMetadata));
+				return this.loadRoot(parent);
 			}
 		},
 		/**
@@ -168,40 +152,68 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				return _self.loadResourceList.call(_self, childrenLocation);
 			});
 		},
-		reveal: function(fileMetadata) {
+		reveal: function(fileMetadata, expand){
 			if (!fileMetadata) {
 				return;
 			}
-			var navHandler = this.getNavHandler();
-			if (navHandler) {
-				navHandler.cursorOn(fileMetadata, true, false, false);
-				navHandler.setSelection(fileMetadata);
+			if (!expand) {
+				var navHandler = this.getNavHandler();
+				if (navHandler) {
+					navHandler.cursorOn(fileMetadata, true, false, false);
+					navHandler.setSelection(fileMetadata);
+				}
+				return;
+			}
+			
+			var _self = this;
+			var func = function () {
+				var tree = _self.myTree;
+				if (!tree) { return; }
+				var startIndex = -1;
+				for (var i=0; i<fileMetadata.Parents.length; i++) {
+					var parent = fileMetadata.Parents[i];
+					if (parent.Location === _self.treeRoot.Location || tree.isExpanded(parent)) {
+						startIndex = i;
+						break;
+					}
+				}
+				if (startIndex === -1) {
+					startIndex = fileMetadata.Parents.length;
+				}
+				var postExpand = function (startIndex) {
+					if (startIndex < 0) {
+						_self.reveal(fileMetadata);
+						return;
+					}
+					tree.expand(fileMetadata.Parents[startIndex], postExpand, [startIndex-1]);
+				};
+				postExpand(startIndex-1);
+			};
+			
+			if (this.fileInCurrentTree(fileMetadata)) {
+				func();
+			} else {
+				this.loadParentOf({}).then(func);
 			}
 		},
 		scopeUp: function() {
-			var root = this.treeRoot, parents = root && root.Parents;
-			if (parents) {
-				var deferred;
-				if (parents.length === 0) {
-					var fileServiceRoot = this.fileClient.fileServiceRootURL(this.treeRoot.Location);
-					deferred = this.loadRoot(fileServiceRoot).then(this.reveal.bind(this, this.treeRoot));
-				} else {
-					deferred = this.loadParentOf(this.treeRoot);
-				}
-				var _self = this;
-				deferred.then(function() {
-					_self.dispatchEvent({ type: "rootChanged", root: _self.treeRoot, force: true });
-				});
-			}
+			var root = this.treeRoot;
+			this.loadParentOf(root).then(this.reveal.bind(this, root));
 		},
 		scopeDown: function(item) {
-			var href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-				resource: item.Location,
-				params: {
-					navigate: item.ChildrenLocation
+			this.loadRoot(item).then();
+		},
+		fileInCurrentTree: function(fileMetadata) {
+			//TODO: this will fail for opening a file on a different filesystem  
+			if (!this.treeRoot.Parents) { return true; }
+			if (fileMetadata && fileMetadata.Parents && this.treeRoot && this.treeRoot.ChildrenLocation) {
+				for (var i=0; i<fileMetadata.Parents.length; i++) {
+					if (fileMetadata.Parents[i].ChildrenLocation === this.treeRoot.ChildrenLocation) {
+						return true;
+					}
 				}
-			});
-			window.location = href;
+			}
+			return false;
 		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
@@ -227,14 +239,13 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			// Folder nav actions
 			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.upFolder", 1, null, false, new KeyBinding(38, false, false, true) /* Alt+UpArrow */); //$NON-NLS-0$
 			
-			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.downFolder", 1, null, false, new KeyBinding(40, false, false, true) /* Alt+UpArrow */); //$NON-NLS-1$ //$NON-NLS-0$
-
 			var renameBinding = new KeyBinding(113); // F2
 			renameBinding.domScope = "sidebar"; //$NON-NLS-0$
 			renameBinding.scopeName = messages["Navigator"]; //$NON-NLS-0$
 			var delBinding = new KeyBinding(46); // Delete
 			delBinding.domScope = "sidebar"; //$NON-NLS-0$
 			delBinding.scopeName = messages["Navigator"];
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downFolder", 1, "orion.miniNavSelectionGroup", false, new KeyBinding(40, false, false, true) /* Alt+UpArrow */); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.renameResource", 2, "orion.miniNavSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.copyFile", 3, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.moveFile", 4, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -272,41 +283,12 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (this.showFolderLinks && folderNode.tagName === "A") { //$NON-NLS-0$
 				folderNode.classList.add("miniNavFolder"); //$NON-NLS-0$
-				var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
-				this.setFolderHref(folderNode, editorFile || "", folder.ChildrenLocation);
-
 				// TODO wasteful. Should attach 1 listener to parent element, then get folder model item from nav handler
 				folderNode.addEventListener("click", this.toggleFolderExpansionState.bind(this, folder, false)); //$NON-N
 			} else {
 				folderNode.classList.add("nav_fakelink"); //$NON-NLS-0$
 			}
 			return folderNode;
-		},
-		setFolderHref: function(linkElement, resource, navigate) {
-			if (this.openDirectory && !this.goIntoDirectory) {
-				return;
-			}
-			if (this.openDirectory && navigate) {
-				resource = navigate;
-			}
-			if (!this.goIntoDirectory) {
-				navigate = undefined;
-			}
-			linkElement.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-				resource: resource,
-				params: {
-					navigate: navigate
-				}
-			});
-		},
-		// Called when the editor file has changed
-		updateFolderLinks: function(rootNode) {
-			var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
-			var _self = this;
-			Array.prototype.slice.call(lib.$$("a.miniNavFolder", rootNode)).forEach(function(folderLink) { //$NON-NLS-0$
-				var folderLocation = PageUtil.matchResourceParameters(folderLink.href).navigate;
-				_self.setFolderHref(folderLink, editorFile || "", folderLocation); //$NON-NLS-0$
-			});
 		},
 		/**
 		 * @param {Object} folder
@@ -353,7 +335,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.lastRoot = null;
 		var _self = this;
 		//store the last root just in case we switch between two view modes
-		this.sidebarNavInputManager.addEventListener("InputChanged", function(event){_self.lastRoot = event.input;}); //$NON-NLS-0$
+		this.sidebarNavInputManager.addEventListener("InputChanged", function(event){ //$NON-NLS-0$
+			_self.lastRoot = event.input;
+		});
 	}
 	objects.mixin(MiniNavViewMode.prototype, {
 		label: messages["Navigator"],
@@ -375,14 +359,12 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				serviceRegistry: this.serviceRegistry,
 				toolbarNode: this.toolbarNode
 			});
-			var fileMetadata = this.editorInputManager.getFileMetadata();
-			if (fileMetadata){
-				this.explorer.loadParentOf(fileMetadata);
-			} else if (this.lastRoot){
-				//if do not have metadata loaded yet and we switch from one view mode to another we should reload
-				this.explorer.loadRoot(this.lastRoot).then(function(){_self.explorer.updateCommands();});
-			}
-			//else {On initial page load, metadata may not be loaded yet, but that's ok -- InputChanged will inform us later}
+
+			var root = this.lastRoot || this.fileClient.fileServiceRootURL("");
+			this.explorer.loadRoot(root).then(function(){
+				_self.explorer.updateCommands();
+				_self.explorer.reveal(_self.editorInputManager.getFileMetadata(), true);
+			});
 		},
 		destroy: function() {
 			if (this.explorer) {
