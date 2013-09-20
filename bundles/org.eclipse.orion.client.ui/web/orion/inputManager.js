@@ -195,7 +195,6 @@ define([
 				}
 				if (contents.length > length) {
 					data = {
-						contents: contents, //TODO: temporary code for file diffs debug
 						diff: changes
 					};
 				}
