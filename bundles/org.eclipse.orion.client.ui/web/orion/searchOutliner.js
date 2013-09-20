@@ -287,7 +287,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			} else {
 				var sContents = lib.node("searchContent"); //$NON-NLS-0$
 				if(sContents){
-					sContents.innerHTML = "<p>"+ i18nUtil.formatMessage(messages["Save frequently used searches by choosing ${0} shown above."], ["<b>"+"Remember search as"+"</b>"])+"</p>"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					sContents.innerHTML = "<p>"+ i18nUtil.formatMessage(messages["Save frequently used searches by clicking on the ${0} button above."], ["<b>"+"Save"+"</b>"])+"</p>"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 		}
