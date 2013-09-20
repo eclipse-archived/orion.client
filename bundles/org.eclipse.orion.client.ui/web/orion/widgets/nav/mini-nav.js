@@ -253,10 +253,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			this.createActionSections();
 			var selectionTools = this.selectionActionsScope;
 			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
-			var modelItems = selections || treeRoot;
-			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, modelItems, true);
+			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot, true);
 			commandRegistry.destroy(this.folderNavActionsScope);
-			commandRegistry.renderCommands(this.folderNavActionsScope, this.folderNavActionsScope, modelItems, this, "tool"); //$NON-NLS-0$
+			commandRegistry.renderCommands(this.folderNavActionsScope, this.folderNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
 		}
 	});
 
