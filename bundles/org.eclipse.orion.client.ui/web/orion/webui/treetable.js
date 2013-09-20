@@ -215,7 +215,8 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			}
 		},
 		
-		isExpanded: function(id) {
+		isExpanded: function(itemOrId) {
+			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId); //$NON-NLS-0$
 			var row =lib.node(id);
 			if (row) {
 				return row._expanded;
