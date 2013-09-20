@@ -803,14 +803,14 @@ input {
 }
 
 .dropDownContainer{
-	border-radius:3px;
+	border-radius:1px;
 	background:#fefefe;
-	border: 1px solid #CCC;
+	border: 1px solid #DDD;
 	padding:10px;
 	margin-top: 5px;
 	position:absolute;
 	z-index:100;
-	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
 
