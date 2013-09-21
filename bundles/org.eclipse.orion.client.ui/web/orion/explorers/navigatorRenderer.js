@@ -207,6 +207,19 @@ define([
 	NavigatorRenderer.prototype.setTarget = function(target){
 		this.target = target;
 	};
+		
+	/**
+	 * Creates a image DOM Element for the specified folder.
+	 * @name orion.explorer.NavigatorRenderer#getFolderImage
+	 * @type {Function}
+	 * @param {Object} folder The folder to create an image for.
+	 * @returns {Element} The folder image element.
+	 */
+	NavigatorRenderer.prototype.getFolderImage = function(folder) {
+		var span = document.createElement("span");
+		span.className = "core-sprite-folder modelDecorationSprite";
+		return span;
+	};
 
 	/**
 	* Subclasses can override this function to customize the DOM Element that is created to represent a folder.
@@ -224,6 +237,10 @@ define([
 		if (this.showFolderLinks) { //$NON-NLS-0$
 			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
 			itemNode = createLink(this.folderLink || "", folder, this.commandService, this.contentTypeService); //$NON-NLS-0$
+			var image = this.getFolderImage(folder);
+			if (image) {
+				itemNode.insertBefore(image, itemNode.firstChild);
+			}
 		} else {
 			itemNode = document.createElement("span"); //$NON-NLS-0$
 			itemNode.textContent = folder.Name;
