@@ -112,7 +112,7 @@ define([
 			if (this._fileMetadata) {
 				//Reload if auto of sync
 				progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI)).then(function(data) {
-					if (this._fileMetadata.ETag !== data.ETag) {
+					if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
 						this._fileMetadata = data;
 						if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
 							progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
