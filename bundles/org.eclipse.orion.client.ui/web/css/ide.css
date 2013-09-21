@@ -894,15 +894,11 @@ input {
     font-weight: bold;
 }
 
-div.orionMarkdown {
-	padding: 1em;
-}
-
 .orionMarkdown h1 {
 	position: relative;
 }
 
-.orionMarkdown table, .orionProject table {
+.orionMarkdown table, .orionProject table, .folderNav table {
 	text-align: left;
 	border-collapse: collapse;
 	border-spacing: 0;
@@ -912,6 +908,22 @@ div.orionMarkdown {
 	margin-left: 5%;
 	margin-right: 5%;
 	margin-top: 30px;
+}
+
+.folderNav td {
+	border-bottom: 1px solid lightgrey;
+	padding-left: 8px;
+	padding-right: 8px;
+	color: grey;
+}
+.folderNav th {
+	border-bottom: 1px solid lightgrey;
+	border-top: 1px solid lightgrey;
+	background: none repeat scroll 0 0 whitesmoke;
+	vertical-align: middle;
+	font-weight: normal;
+	padding: 8px;
+	color: grey;
 }
 
 .orionMarkdown td, .orionProject td {
