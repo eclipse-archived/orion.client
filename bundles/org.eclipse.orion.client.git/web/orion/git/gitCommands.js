@@ -1633,7 +1633,6 @@ var exports = {};
 											});
 										}
 										
-										dialog.startup();
 										dialog.show();
 									}
 								);
