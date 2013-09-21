@@ -43,7 +43,7 @@ define([
 				if (col_no === 0) {
 					td = document.createElement("th"); //$NON-NLS-0$
 					td.colSpan = 1;
-					td.appendChild(document.createTextNode("CONTENTS"));
+					td.appendChild(document.createTextNode(explorer.treeRoot.Name));
 					return td;
 				} else if (col_no === 1) {
 					td = document.createElement("th"); //$NON-NLS-0$
@@ -64,6 +64,7 @@ define([
 			return renderer;
 		};
 		FileExplorer.apply(this, arguments);
+		this.commandsId = ".folderNav";
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
 		this.commandRegistry = options.commandRegistry;
@@ -117,15 +118,15 @@ define([
 			commandRegistry.registerSelectionService(selectionActionsScope, this.selection);
 
 			// commands that don't appear but have keybindings
-			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.copySelections", 1, null, true, new KeyBinding('c', true) /* Ctrl+C */); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.pasteSelections", 1, null, true, new KeyBinding('v', true) /* Ctrl+V */);//$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.copySelections" + this.commandsId, 1, null, true, new KeyBinding('c', true) /* Ctrl+C */); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.pasteSelections" + this.commandsId, 1, null, true, new KeyBinding('v', true) /* Ctrl+V */);//$NON-NLS-1$ //$NON-NLS-0$
 
 			// New file and new folder (in a group)
-			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile", 1, "orion.folderNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFolder", 2, "orion.folderNavNewGroup", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile" + this.commandsId, 1, "orion.folderNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFolder" + this.commandsId, 2, "orion.folderNavNewGroup", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// New project creation in the toolbar (in a group)
-			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.project", 1, "orion.folderNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.linkProject", 2, "orion.folderNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.project" + this.commandsId, 1, "orion.folderNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.linkProject" + this.commandsId, 2, "orion.folderNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			var parent = lib.node(this.parentId);
 			var renameBinding = new KeyBinding(113); // F2
@@ -134,17 +135,17 @@ define([
 			var delBinding = new KeyBinding(46); // Delete
 			delBinding.domScope = parent.id;
 			delBinding.scopeName = messages.Navigator;
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.renameResource", 2, "orion.folderNavSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.copyFile", 3, "orion.folderNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.moveFile", 4, "orion.folderNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.deleteFile", 5, "orion.folderNavSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWithEachOther", 6, "orion.folderNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWith", 7, "orion.folderNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importZipURL", 1, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.import", 2, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downloadFile", 3, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importSFTP", 4, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.exportSFTPCommand", 5, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.renameResource" + this.commandsId, 2, "orion.folderNavSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.copyFile" + this.commandsId, 3, "orion.folderNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.moveFile" + this.commandsId, 4, "orion.folderNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.deleteFile" + this.commandsId, 5, "orion.folderNavSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWithEachOther" + this.commandsId, 6, "orion.folderNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWith" + this.commandsId, 7, "orion.folderNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importZipURL" + this.commandsId, 1, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.import" + this.commandsId, 2, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downloadFile" + this.commandsId, 3, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importSFTP" + this.commandsId, 4, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.exportSFTPCommand" + this.commandsId, 5, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
 			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.folderNavSelectionGroup", true);
 		},
@@ -175,7 +176,7 @@ define([
 		this.commandService = options.commandService;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.showProjectView = true;
-		this.showFolderNav = false;
+		this.showFolderNav = true;
 		this._init();
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
