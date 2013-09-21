@@ -114,8 +114,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	}
 
 	var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
+		var resource = folder ? folder.ChildrenLocation : ""; //$NON-NLS-0$
 		segment.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-			resource: folderLocation || "" //$NON-NLS-0$
+			resource: resource
 		});
 	};
 
@@ -182,6 +183,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 				contents: JSON.parse(evt.contents),
 				serviceRegistry: serviceRegistry,
 				commandService: commandRegistry,
+				contentTypeRegistry: contentTypeRegistry,
+				selection: selection,
 				fileService: fileClient,
 				progress: progressService
 			});
