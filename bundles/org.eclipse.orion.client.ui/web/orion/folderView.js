@@ -81,14 +81,18 @@ define([
 	}
 	FolderNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(FolderNavExplorer.prototype, /** @lends orion.FolderNavExplorer.prototype */ {
-		refresh: function() {
+		loadRoot: function(root) {
 			var self = this;
-			var pageParams = PageUtil.matchResourceParameters();
-			this.loadResourceList(pageParams.resource, false).then(function() {
+			function loaded() {
 				self.registerCommands().then(function() {
 					self.updateCommands();
 				});
-			});
+			}
+			if (root) {
+				this.load(root, "Loading " + root.Name).then(loaded);
+			} else {
+				this.loadResourceList(PageUtil.matchResourceParameters().resource, false).then(loaded);
+			}
 		},
 		destroy: function() {
 			var _self = this;
@@ -231,7 +235,7 @@ define([
 					commandRegistry: this.commandService,
 					contentTypeRegistry: this.contentTypeRegistry
 				});
-				this.folderNavExplorer.refresh();
+				this.folderNavExplorer.loadRoot(this._metadata);
 				this._node.appendChild(navNode);
 			}
 			
