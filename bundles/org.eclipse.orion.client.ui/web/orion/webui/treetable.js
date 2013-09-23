@@ -231,12 +231,14 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 				if (row._expanded) {
 					return;
 				}
-				row._expanded = true;
 				var tree = this;
 				this._renderer.updateExpandVisuals(row, true);
 				this._treeModel.getChildren(row._item, function(children) {
-					tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
-					tree._rowsChanged();
+					if (!row._expanded) {
+						row._expanded = true;
+						tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
+						tree._rowsChanged();
+					}
 					if (postExpandFunc) {
 						postExpandFunc.apply(tree, args);
 					}
