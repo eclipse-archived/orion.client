@@ -339,6 +339,7 @@ define([
 		_setNoInput: function(loadRoot) {
 			if (loadRoot) {
 				this.fileClient.loadWorkspace("").then(function(root) {
+					this._input = root.ChildrentLocation;
 					this._setInputContents(root.ChildrenLocation, null, root, root);
 				}.bind(this));
 				return;
