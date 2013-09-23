@@ -913,6 +913,8 @@ input {
 
 .folderNav tr {
 	border-bottom: 1px solid #eee;
+	border-right: 1px solid lightgrey;
+	border-left: 1px solid lightgrey;
 	padding-left: 8px;
 	padding-right: 8px;
 	color: grey;
