@@ -911,11 +911,14 @@ input {
 	margin-bottom: 30px;
 }
 
-.folderNav td {
-	border-bottom: 1px solid lightgrey;
+.folderNav tr {
+	border-bottom: 1px solid #eee;
 	padding-left: 8px;
 	padding-right: 8px;
 	color: grey;
+}
+.folderNav tr:last-child {
+	border-bottom: 1px solid lightgrey;
 }
 .folderNav th {
 	border-bottom: 1px solid lightgrey;
