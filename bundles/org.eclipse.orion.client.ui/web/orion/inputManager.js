@@ -110,18 +110,20 @@ define([
 			var progressService = this.progressService;
 			var editor = this.getEditor();
 			if (this._fileMetadata) {
-				//Reload if auto of sync
-				progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI)).then(function(data) {
-					if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
-						this._fileMetadata = data;
-						if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
-							progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
-								editor.setInput(fileURI, null, contents);
-								this._unsavedChanges = [];
-							}.bind(this));
+				//Reload if out of sync, unless we are already in the process of saving
+				if (!this._saving) {
+					progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI)).then(function(data) {
+						if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
+							this._fileMetadata = data;
+							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
+								progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
+									editor.setInput(fileURI, null, contents);
+									this._unsavedChanges = [];
+								}.bind(this));
+							}
 						}
-					}
-				}.bind(this));
+					}.bind(this));
+				}
 			} else {
 				var progressTimeout = window.setTimeout(function() {
 					editor.reportStatus(i18nUtil.formatMessage(messages.Fetching, fileURI));
