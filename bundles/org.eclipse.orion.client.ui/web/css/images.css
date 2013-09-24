@@ -35,6 +35,7 @@
 .core-sprite-file{ background-position: 0 -252px; width: 16px; height: 16px; } 
 .core-sprite-file_model{ background:url(../images/file.png); width: 16px; height: 16px; } 
 .core-sprite-folder{ background-position: 0 -288px; width: 16px; height: 16px; } 
+.core-sprite-folder_model{ background:url(../images/folder.png); width: 16px; height: 16px; background-repeat: no-repeat; } 
 .core-sprite-gear{ background:url(../images/gear.png); width: 16px; height: 16px; } 
 .core-sprite-go-up{ background:url(../images/go-up.png); width: 16px; height: 16px; } 
 .core-sprite-hamburger{ background-position: 0 -342px; width: 16px; height: 16px; } 

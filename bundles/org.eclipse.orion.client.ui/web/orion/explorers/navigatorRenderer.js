@@ -217,7 +217,7 @@ define([
 	 */
 	NavigatorRenderer.prototype.getFolderImage = function(folder) {
 		var span = document.createElement("span");
-		span.className = "core-sprite-folder modelDecorationSprite";
+		span.className = "core-sprite-folder_model modelDecorationSprite";
 		return span;
 	};
 
