@@ -33,7 +33,7 @@
 .core-sprite-error{ background-position: 0 -198px; width: 16px; height: 16px; } 
 .core-sprite-expandAll{ background-position: 0 -216px; width: 16px; height: 16px; } 
 .core-sprite-file{ background-position: 0 -252px; width: 16px; height: 16px; } 
-.core-sprite-file_model{ background-position: 0 -270px; width: 16px; height: 16px; } 
+.core-sprite-file_model{ background:url(../images/file.png); width: 16px; height: 16px; } 
 .core-sprite-folder{ background-position: 0 -288px; width: 16px; height: 16px; } 
 .core-sprite-gear{ background:url(../images/gear.png); width: 16px; height: 16px; } 
 .core-sprite-go-up{ background:url(../images/go-up.png); width: 16px; height: 16px; } 
