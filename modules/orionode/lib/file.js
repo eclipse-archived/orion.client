@@ -57,6 +57,7 @@ module.exports = function(options) {
 			var stream = fs.createReadStream(filepath);
 			res.setHeader('Content-Length', stats.size);
 			res.setHeader('ETag', etag);
+			res.setHeader('Accept-Patch', 'application/json-patch; charset=UTF-8');
 			stream.pipe(res);
 			stream.on('error', function(e) {
 				res.writeHead(500, e.toString());
@@ -67,6 +68,96 @@ module.exports = function(options) {
 				res.end();
 			});
 		}
+	}
+	
+	function writeDiffContents(req, res, next, rest) {
+		var requestBodyETag = new ETag(req);
+		var requestBody = new Buffer(0);
+				req.on('data', function(data) {
+					requestBody = Buffer.concat([requestBody,data]);
+				});
+				req.on('error', function(e) {
+					writeError(500, res, e.toString());
+				});
+				req.on('end', function(e) {
+				var diffs = JSON.parse(requestBody).diff;
+				var contents = JSON.parse(requestBody).contents;
+				var patchPath = getSafeFilePath(rest);
+				fs.exists(patchPath, function(destExists) {
+					if (destExists) {
+						fs.readFile(patchPath,function (error, data) {
+							if (error) {
+								writeError(500, res, error);
+								return;
+							}
+						
+							var newContents = data.toString();
+							var buffer = {
+								_text: [newContents], 
+								replaceText: function (text, start, end) {
+									var offset = 0, chunk = 0, length;
+									while (chunk<this._text.length) {
+										length = this._text[chunk].length; 
+										if (start <= offset + length) { break; }
+										offset += length;
+										chunk++;
+									}
+									var firstOffset = offset;
+									var firstChunk = chunk;
+									while (chunk<this._text.length) {
+										length = this._text[chunk].length; 
+										if (end <= offset + length) { break; }
+										offset += length;
+										chunk++;
+									}
+									var lastOffset = offset;
+									var lastChunk = chunk;
+									var firstText = this._text[firstChunk];
+									var lastText = this._text[lastChunk];
+									var beforeText = firstText.substring(0, start - firstOffset);
+									var afterText = lastText.substring(end - lastOffset);
+									var params = [firstChunk, lastChunk - firstChunk + 1];
+									if (beforeText) { params.push(beforeText); }
+									if (text) { params.push(text); }
+									if (afterText) { params.push(afterText); }
+									Array.prototype.splice.apply(this._text, params);
+									if (this._text.length === 0) { this._text = [""]; }
+								},
+								getText: function() {
+									return this._text.join("");									
+								}
+							};
+							for (var i=0; i<diffs.length; i++) {
+								var change = diffs[i];
+								buffer.replaceText(change.text, change.start, change.end);
+							}
+							newContents = buffer.getText();
+	
+							if (contents) {
+								if (newContents !== contents) {
+									write(400, res, 'Contents not the same. Using full contents.');
+									newContents = contents;
+								}
+							}
+							
+							fs.writeFile(patchPath, newContents, function(err) {
+								if (err) {
+									writeError(500, res, error);
+									return;
+								} else {
+									fs.stat(patchPath, function(error, stats) {
+										writeFileMetadata(res, rest, patchPath, stats, requestBodyETag.getValue() /*the new ETag*/);
+									});											
+								}
+							});
+							
+							
+						});
+					} else {
+						writeError(500, res, 'Destination does not exist.');
+					}
+				});
+				});
 	}
 
 	/*
@@ -152,6 +243,11 @@ module.exports = function(options) {
 		},
 		POST: function(req, res, next, rest) {
 			if (writeEmptyFilePathError(res, rest)) {
+				return;
+			}
+			var diffPatch = req.headers['x-http-method-override'];
+			if (diffPatch === "PATCH") {
+				writeDiffContents(req, res, next, rest);
 				return;
 			}
 			var name = req.headers.slug || (req.body && req.body.Name);
