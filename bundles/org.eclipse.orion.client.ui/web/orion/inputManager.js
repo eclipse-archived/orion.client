@@ -319,7 +319,7 @@ define([
 					this.load();
 				}
 			} else {
-				this._setNoInput();
+				this._setNoInput(true);
 			}
 		},
 		setTitle: function(title) {
@@ -336,7 +336,13 @@ define([
 		_getSaveDiffsEnabled: function() {
 			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
 		},
-		_setNoInput: function() {
+		_setNoInput: function(loadRoot) {
+			if (loadRoot) {
+				this.fileClient.loadWorkspace("").then(function(root) {
+					this._setInputContents(root.ChildrenLocation, null, root, root);
+				}.bind(this));
+				return;
+			}
 			// No input, no editor.
 			this._input = this._title = null;
 			this.setContentType(null);

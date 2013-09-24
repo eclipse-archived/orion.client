@@ -83,7 +83,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		sidebarToolbar = lib.node("sidebarToolbar"), //$NON-NLS-0$
 		editorDomNode = lib.node("editor"); //$NON-NLS-0$
 
-	var editor, inputManager, folderView, editorView;
+	var editor, inputManager, folderView, editorView, lastRoot;
 	function renderToolbars(metadata) {
 		var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 		if (toolbar) {
@@ -152,13 +152,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		}
 		var metadata = evt.metadata;
 		renderToolbars(metadata);
+		var name = evt.name, target = metadata;
 		if (evt.input === null || evt.input === undefined) {
-			return;
+			name = lastRoot ? lastRoot.Name : "";
+			target = lastRoot;
 		}
 		mGlobalCommands.setPageTarget({
 			task: "Coding", //$NON-NLS-0$
-			name: evt.name,
-			target: metadata,
+			name: name,
+			target: target,
 			makeAlternate: function() {
 				if (metadata && metadata.Parents && metadata.Parents.length > 0) {
 					// The mini-nav in sidebar wants to do the same work, can we share it?
@@ -179,8 +181,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 			folderView = new mFolderView.FolderView({
 				parent: editorDomNode,
 				input: evt.input,
-				metadata: evt.metadata,
-				contents: JSON.parse(evt.contents),
+				metadata: metadata,
+				contents: typeof evt.contents === "string" ? JSON.parse(evt.contents) : evt.contents, //$NON-NLS-0$
 				serviceRegistry: serviceRegistry,
 				commandService: commandRegistry,
 				contentTypeRegistry: contentTypeRegistry,
@@ -213,21 +215,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	});
 	sidebar.show();
 	sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
-		var pageParams = PageUtil.matchResourceParameters(location.hash);
-		if (!pageParams.resource) {
-			var root = evt.root;
-			// No primary resource (editor file), so target the folder being navigated in the sidebar.
-			mGlobalCommands.setPageTarget({
-				task: "Coding", //$NON-NLS-0$
-				name: root.Name,
-				target: root,
-				makeBreadcrumbLink: sidebarNavBreadcrumb,
-				serviceRegistry: serviceRegistry,
-				commandService: commandRegistry,
-				searchService: searcher,
-				fileService: fileClient
-			});
-		}
+		lastRoot = evt.root;
 	});
 	sidebarNavInputManager.addEventListener("editorInputMoved", function(evt) { //$NON-NLS-0$
 		var newInput = evt.newInput;
