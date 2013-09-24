@@ -87,7 +87,7 @@
 	vertical-align: middle;
 }
 
-.git-sprite-addition{ background-position: 0 0; width: 16px; height: 16px; } 
+.git-sprite-addition{ background-image: url(../images/git-add.png); width: 16px; height: 16px; } 
 .git-sprite-apply_patch{ background-position: 0 -18px; width: 16px; height: 16px; } 
 .git-sprite-branch{ background-position: 0 -36px; width: 16px; height: 16px; } 
 .git-sprite-branch_active{ background-position: 0 -54px; width: 16px; height: 16px; } 
@@ -97,7 +97,7 @@
 .git-sprite-open{ background-image: url(../images/git-open.png); width: 16px; height: 16px; }
 .git-sprite-conflict-file{ background-position: 0 -108px; width: 16px; height: 16px; } 
 .git-sprite-fetch{ background-position: 0 -126px; width: 16px; height: 16px; } 
-.git-sprite-file{ background-position: 0 -144px; width: 16px; height: 16px; } 
+.git-sprite-file{ background-image: url(../images/git-file.png); width: 16px; height: 16px; } 
 .git-sprite-incoming_commit{ background-position: 0 -162px; width: 16px; height: 16px; } 
 .git-sprite-merge{ background-position: 0 -180px; width: 16px; height: 16px; } 
 .git-sprite-merge_squash{ background-position: 0 -198px; width: 16px; height: 16px; } 
@@ -109,6 +109,6 @@
 .git-sprite-removal{ background-position: 0 -306px; width: 16px; height: 16px; } 
 .git-sprite-repository{ background-image: url(../images/repository.png); width: 16px; height: 16px; } 
 .git-sprite-reset{ background-position: 0 -342px; width: 16px; height: 16px; } 
-.git-sprite-stage{ background-position: 0 -360px; width: 16px; height: 16px; } 
+.git-sprite-stage{background-image: url(../images/git-stage.png); width: 16px; height: 16px; } 
 .git-sprite-tag{ background-image: url(../images/tag.png); width: 16px; height: 16px; } 
-.git-sprite-unstage{ background-position: 0 -396px; width: 16px; height: 16px; }
+.git-sprite-unstage{ background-image: url(../images/git-unstage.png); width: 16px; height: 16px; }
