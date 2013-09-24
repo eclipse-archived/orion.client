@@ -30,7 +30,7 @@ hard-coded numbers elsewhere.
 	padding-left:10px;
 	font-size:0.9em;
 	font-weight:bold;
-	background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 28px;
+	/* background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 28px;*/
 }
 
 /* $ToolbarHeight */
@@ -113,7 +113,7 @@ hard-coded numbers elsewhere.
 	overflow: hidden;
     position: absolute;
     top: 36px;
-	bottom: 33px; /* $FooterHeight + footer border (1px) */
+	bottom: 36px; /* $FooterHeight + footer border (1px) */
     left: 0;
     width: 100%;
 	/*margin-bottom: 29px;*/
@@ -133,13 +133,13 @@ hard-coded numbers elsewhere.
 	z-index: 50;
 	right: 0;
 	left: 0;
-	height: 32px; /* It has to be this */
-	background:linear-gradient( rgba(242, 242, 242, 0.9), rgba(222, 222, 222, 0.9)) 32px;
+	height: 36px; /* It has to be this */
+	background:#ededed;
 }
 
 .footerBlock {
 	float: left;
-	margin: 4px;
+	margin: 8px;
 	color: #7F7F7F;
 	font-weight: bold;
 	float: left;
@@ -152,6 +152,9 @@ hard-coded numbers elsewhere.
 
 .footerRightBlock ul {
 	margin: 0;
+	margin-top:4px;
+	font-size: .9em;
+	margin-right: 4px;
 }
 
 .footerRightBlock li {
@@ -159,8 +162,8 @@ hard-coded numbers elsewhere.
 }
 
 .footerRightBlock li:after {
-	content: ' |';
-	padding: 0 5px;
+	content: ' ';
+	padding: 0 8px;
 }
 
 .footerRightBlock li:last-child:after {

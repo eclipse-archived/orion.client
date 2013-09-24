@@ -39,25 +39,25 @@ define([
 				"extends": "text/plain",
 				name: "HTML",
 				extension: ["html", "htm"],
-				image: "../images/html.gif"
+				image: "../images/html.png"
 			},
 			{	id: "text/css",
 				"extends": "text/plain",
 				name: "CSS",
 				extension: ["css"],
-				image: "../images/stylesheet.gif"
+				image: "../images/css.png"
 			},
 			{	id: "application/javascript",
 				"extends": "text/plain",
 				name: "JavaScript",
 				extension: ["js"],
-				image: "../images/javascript.gif"
+				image: "../images/javascript.png"
 			},
 			{	id: "application/json",
 				"extends": "text/plain",
 				name: "JSON",
 				extension: ["json"],
-				image: "../images/wtp/json.gif"
+				image: "../images/file.png"
 			},
 			{	id: "application/xml",
 				"extends": "text/plain",
