@@ -123,17 +123,21 @@ define([
 
 	provider.registerService("orion.core.setting", null, {
 		settings: [
-			{	pid: "nav.config",
-				name: "Navigation",
-				category: 'general',
+			{
+				pid: "nav.config",
+				nls: "orion/settings/nls/messages",
+				nameKey: "Navigation",
+				category: "general",
+				categoryKey: "General",
 				properties: [
-					{	id: "links.newtab",
-						name: "Links",
+					{
+						id: "links.newtab",
+						nameKey: "Links",
 						type: "boolean",
 						defaultValue: false,
 						options: [
-							{value: true, label: "Open in new tab"},
-							{value: false, label: "Open in same tab"}
+							{ value: true, labelKey: "Open in new tab" },
+							{ value: false, labelKey: "Open in same tab" }
 						]
 					}
 				]
