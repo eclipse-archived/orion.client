@@ -116,10 +116,15 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		_positionDropdown: function() {
 			this._dropdownNode.style.left = "";
 			var bounds = lib.bounds(this._dropdownNode);
-			var totalBounds = lib.bounds(this._boundingNode(this._triggerNode));
-			if (bounds.left + bounds.width > (totalBounds.left + totalBounds.width)) {
-				var triggerBounds = lib.bounds(this._triggerNode);
-				this._dropdownNode.style.left = (triggerBounds.left  - totalBounds.left - bounds.width + triggerBounds.width) + "px"; //$NON-NLS-0$
+			var bodyBounds = lib.bounds(document.body);
+			if (bounds.left + bounds.width > (bodyBounds.left + bodyBounds.width)) {
+				if (this._triggerNode.classList.contains("dropdownMenuItem")) { //$NON-NLS-0$
+					this._dropdownNode.style.left = -bounds.width + "px"; //$NON-NLS-0$
+				} else {
+					var totalBounds = lib.bounds(this._boundingNode(this._triggerNode));
+					var triggerBounds = lib.bounds(this._triggerNode);
+					this._dropdownNode.style.left = (triggerBounds.left  - totalBounds.left - bounds.width + triggerBounds.width) + "px"; //$NON-NLS-0$
+				}
 			}
 		},
 		
