@@ -12,10 +12,10 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
 	'orion/webui/littlelib' //$NON-NLS-0$
 ], function(messages, LabeledTextfield, LabeledCheckbox, LabeledSelect, mSection, Subsection, commands, objects, lib)  {
-    var KEY_MODES = [
-	    messages.Default,
-		"Emacs", //$NON-NLS-0$
-		"vi" //$NON-NLS-0$
+	var KEY_MODES = [
+		{value: "", label: messages.Default},
+		{value: "Emacs", label: "Emacs"}, //$NON-NLS-1$ //$NON-NLS-0$
+		{value: "vi", label: "vi"} //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
 	var localIndicatorClass = "setting-local-indicator"; //$NON-NLS-0$
@@ -57,10 +57,10 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 		for( var i= 0; i < keys.length; i++ ){
 			var key = keys[i];
 			var set = {
-				value: key,
-				label: key
+				value: key.value,
+				label: key.label
 			};
-			if( key === prefs[property] ){
+			if( key.value === prefs[property] ){
 				set.selected = true;
 			}
 			options.options.push(set);
@@ -143,6 +143,20 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				},
 				showSpaces: {
 					create: createBooleanProperty
+				}
+			},
+			wrapping: {
+				wordWrap: {
+					create: createBooleanProperty
+				},
+				showMargin: {
+					create: createBooleanProperty
+				},
+				marginOffset: {
+					min: 10,
+					max: 200,
+					create: createIntegerProperty,
+					validate: validateIntegerProperty
 				}
 			},
 			smoothScrolling: {

@@ -65,6 +65,12 @@ define([], function() {
 		showTabsVisible: true,
 		showSpaces: false,
 		showSpacesVisible: true,
+		wordWrap: false,
+		wordWrapVisible: true,
+		showMargin: false,
+		showMarginVisible: true,
+		marginOffset: 80,
+		marginOffsetVisible: true,
 		keyBindings: "Default",
 		keyBindingsVisible: true,
 		keyBindingsLocalVisible: true
