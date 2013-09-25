@@ -32,15 +32,17 @@ define([
 	'orion/edit/editorContext',
 	'orion/highlight',
 	'orion/markOccurrences',
-	'orion/syntaxchecker'
+	'orion/syntaxchecker',
+	'orion/objects'
 ], function(
 	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist, mEmacs, mVI,
 	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands,
 	ASTManager, mDispatcher, EditorContext, Highlight,
-	mMarkOccurrences, mSyntaxchecker
+	mMarkOccurrences, mSyntaxchecker,
+	objects
 ) {
-	
+
 	function parseNumericParams(input, params) {
 		for (var i = 0; i < params.length; i++) {
 			var param = params[i];
@@ -105,6 +107,27 @@ define([
 				sourceCodeActions.setSmartIndentation(prefs.smartIndentation);
 			}
 		},
+		updateViewOptions: function(prefs) {
+			var marginOffset = 0;
+			if (prefs.showMargin) {
+				marginOffset = prefs.marginOffset;
+				if (typeof marginOffset !== "number") { //$NON-NLS-0$
+					marginOffset = prefs.marginOffset = parseInt(marginOffset, 10);
+				}
+			}
+			var wrapOffset = 0;
+			if (prefs.wordWrap) {
+				wrapOffset = marginOffset;
+			}
+			return {
+				tabSize: prefs.tabSize || 4,
+				expandTab: prefs.expandTab,
+				wrapMode: prefs.wordWrap,
+				wrapOffset: wrapOffset,
+				marginOffset: marginOffset,
+				scrollAnimation: prefs.scrollAnimation ? prefs.scrollAnimationTimeout : 0
+			};
+		},
 		updateSettings: function(prefs) {
 			this.settings = prefs;
 			var editor = this.editor;
@@ -116,12 +139,7 @@ define([
 			var textView = editor.getTextView();
 			if (textView) {
 				this.updateKeyMode(prefs, textView);
-				var options = {
-					tabSize: prefs.tabSize || 4,
-					expandTab: prefs.expandTab,
-					scrollAnimation: prefs.scrollAnimation ? prefs.scrollAnimationTimeout : 0
-				};
-				textView.setOptions(options);
+				textView.setOptions(this.updateViewOptions(prefs));
 			}
 			this.updateSourceCodeActions(prefs, editor.getSourceCodeActions());
 			editor.setAnnotationRulerVisible(prefs.annotationRuler);
@@ -177,15 +195,14 @@ define([
 			var contentTypeRegistry = this.contentTypeRegistry;
 
 			var textViewFactory = function() {
-				var textView = new mTextView.TextView({
+				var options = self.updateViewOptions(self.settings);
+				objects.mixin(options, {
 					parent: editorDomNode,
 					model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
 					wrappable: true,
-					tabSize: self.settings.tabSize || 4,
-					expandTab: self.settings.expandTab,
-					scrollAnimation: self.settings.scrollAnimation ? self.settings.scrollAnimationTimeout : 0,
 					readonly: readonly
 				});
+				var textView = new mTextView.TextView(options);
 				return textView;
 			};
 
@@ -214,6 +231,13 @@ define([
 				commandGenerator.generateEditorCommands(editor);
 
 				var textView = editor.getTextView();
+				textView.setAction("toggleWrapMode", function() { //$NON-NLS-0$
+					textView.invokeAction("toggleWrapMode", true); //$NON-NLS-0$
+					var wordWrap = textView.getOptions("wrapMode"); //$NON-NLS-0$
+					self.settings.wordWrap = wordWrap;
+					editorPreferences.setPrefs(self.settings);
+					return true;
+				});
 				self.updateKeyMode(self.settings, textView);
 
 				return keyBindings;
