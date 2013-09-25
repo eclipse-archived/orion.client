@@ -186,7 +186,7 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 	 */
 	JSTemplateContentAssistProvider.prototype.isValid = function(prefix, buffer, offset, context) {
 		var previousChar = findPreviousChar(buffer, offset-prefix.length-1);
-		return uninterestingChars.indexOf(previousChar) === -1;
+		return !previousChar || uninterestingChars.indexOf(previousChar) === -1;
 	};
 
 	return {
