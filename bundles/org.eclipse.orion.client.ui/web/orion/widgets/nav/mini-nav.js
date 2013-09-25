@@ -365,6 +365,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 
 			var root = this.lastRoot || this.fileClient.fileServiceRootURL("");
 			this.explorer.loadRoot(root).then(function(){
+				if (!_self.explorer) { return; }
 				_self.explorer.updateCommands();
 				_self.explorer.reveal(_self.editorInputManager.getFileMetadata(), true);
 			});
