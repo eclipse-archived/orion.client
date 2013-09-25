@@ -910,7 +910,7 @@ input {
 }
 
 .folderNav tr {
-	border-bottom: 1px solid #eee;
+	border-bottom: 1px solid whiteSmoke;
 	border-right: 1px solid lightgrey;
 	border-left: 1px solid lightgrey;
 	padding-left: 8px;
