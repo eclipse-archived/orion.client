@@ -97,7 +97,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			if (items.length > 0) {
 				if (!this._hookedAutoDismiss) {
 					// add auto dismiss.  Clicking anywhere but trigger or a submenu item means close.
-					var submenuNodes = lib.$$(".dropdownSubMenu", this._dropdownNode);
+					var submenuNodes = lib.$$(".dropdownSubMenu", this._dropdownNode); //$NON-NLS-0$
 					lib.addAutoDismiss([this._triggerNode].concat(Array.prototype.slice.call(submenuNodes)), this.close.bind(this));
 					this._hookedAutoDismiss = true;
 				}
@@ -118,12 +118,18 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			var bounds = lib.bounds(this._dropdownNode);
 			var totalBounds = lib.bounds(this._boundingNode(this._triggerNode));
 			if (bounds.left + bounds.width > (totalBounds.left + totalBounds.width)) {
-				this._dropdownNode.style.right = 0;
+				var triggerBounds = lib.bounds(this._triggerNode);
+				this._dropdownNode.style.left = (triggerBounds.left  - totalBounds.left - bounds.width + triggerBounds.width) + "px"; //$NON-NLS-0$
 			}
 		},
 		
 		_boundingNode: function(node) {
-			if (node.style.right !== "" || node.style.position === "absolute" || !node.parentNode || !node.parentNode.style) { //$NON-NLS-0$
+			var style = window.getComputedStyle(node, null);
+			if (style === null) {
+				return node;
+			}
+			var position = style.getPropertyValue("position"); //$NON-NLS-0$
+			if (position === "absolute" || !node.parentNode || node === document.body) { //$NON-NLS-0$
 				return node;
 			}
 			return this._boundingNode(node.parentNode);

@@ -64,9 +64,10 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			var modeContributionToolbar = this.modeContributionToolbar = document.createElement("div"); //$NON-NLS-0$
 			modeContributionToolbar.id = toolbarNode.id + "childModes"; //$NON-NLS-0$
 			toolbarNode.appendChild(modeContributionToolbar);
-			var switcherNode = this.switcherNode = document.createElement("div"); //$NON-NLS-0$
+			var switcherNode = this.switcherNode = document.createElement("ul"); //$NON-NLS-0$
 			switcherNode.id = toolbarNode.id + "viewmodeSwitch"; //$NON-NLS-0$
 			switcherNode.classList.add("layoutRight"); //$NON-NLS-0$
+			switcherNode.classList.add("commandList"); //$NON-NLS-0$
 			switcherNode.classList.add("pageActions"); //$NON-NLS-0$
 			toolbarNode.appendChild(switcherNode);
 
