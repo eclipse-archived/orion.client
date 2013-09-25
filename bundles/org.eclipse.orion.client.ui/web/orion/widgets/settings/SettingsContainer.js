@@ -14,23 +14,29 @@
 /* This SettingsContainer widget manages a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
-		'orion/PageUtil', 'orion/webui/littlelib', 'orion/objects', 'orion/URITemplate', 
-		'orion/widgets/themes/ThemeBuilder', 
-		'orion/settings/ui/PluginSettings', 
-		'orion/widgets/themes/ThemePreferences', 
-		'orion/widgets/themes/container/ThemeData', 
-		'orion/widgets/themes/editor/ThemeData', 
-		'orion/widgets/settings/SplitSelectionLayout',
-		'orion/widgets/plugin/PluginList',
-		'orion/widgets/settings/UserSettings',
-		'orion/widgets/settings/GitSettings',
-		'orion/widgets/settings/EditorSettings',
-		'orion/editorPreferences'
-		], function(messages, require, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
-			ThemeBuilder, SettingsList, mThemePreferences, containerThemeData, editorThemeData, SplitSelectionLayout, PluginList, UserSettings,
-			GitSettings,
-			EditorSettings, mEditorPreferences) {
+define([
+	'i18n!orion/settings/nls/messages',
+	'orion/Deferred',
+	'orion/globalCommands',
+	'orion/PageUtil',
+	'orion/webui/littlelib',
+	'orion/objects',
+	'orion/URITemplate',
+	'orion/widgets/themes/ThemeBuilder',
+	'orion/settings/ui/PluginSettings',
+	'orion/widgets/themes/ThemePreferences',
+	'orion/widgets/themes/editor/ThemeData',
+	'orion/widgets/themes/container/ThemeData',
+	'orion/widgets/settings/SplitSelectionLayout',
+	'orion/widgets/plugin/PluginList',
+	'orion/widgets/settings/UserSettings',
+	'orion/widgets/settings/GitSettings',
+	'orion/widgets/settings/EditorSettings',
+	'orion/editorPreferences'
+], function(messages, Deferred, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
+		ThemeBuilder, SettingsList, mThemePreferences, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings,
+		GitSettings,
+		EditorSettings, mEditorPreferences) {
 
 	/**
 	 * @param {Object} options
@@ -69,35 +75,58 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 				textContent: messages["Plugins"],
 				show: this.showPlugins
 			}];
+
 		this.settingsCategories.forEach(function(item) {
 			item.show = item.show.bind(this, item.id);
 		}.bind(this));
 
-		// Add extension categories
-		this.settingsRegistry.getCategories().sort().forEach(function(category, i) {
-			this.settingsCategories.push({
-				id: category,
-				textContent: messages[category] || category,
-				show: this.showPluginSettings.bind(this, category)
-			});
-		}.bind(this));
+		// Kick off async work
+		this.manageDefaultData();
 	}
-	SettingsContainer.prototype = Object.create(SplitSelectionLayout.prototype);
+	SettingsContainer.prototype = Object.create(superPrototype);
 	objects.mixin(SettingsContainer.prototype, {
-		show: function() {
+		/**
+		 * @returns {orion.Promise}
+		 */
+		loadTranslatedPluginSettings: function() {
+			function byLabel(a, b) {
+				return a.label.localeCompare(b.label);
+			}
 
+			var settingsRegistry = this.settingsRegistry;
+			return settingsRegistry.loadI18n().then(function() {
+				var categories = settingsRegistry.getCategories();
+				var data = categories.map(function(category, i) {
+					return {
+						category: category,
+						label: settingsRegistry.getCategoryLabel(category) || messages[category] || category
+					};
+				});
+				var _self = this;
+				data.sort(byLabel).forEach(function(currData) {
+					var category = currData.category;
+					_self.settingsCategories.push({
+						id: category,
+						textContent: currData.label,
+						show: _self.showPluginSettings.bind(_self, category)
+					});
+				});
+			}.bind(this));
+		},
+
+		show: function() {
 			this.itemToIndexMap = {};
 			this.toolbar = lib.node( this.pageActions );
-			this.manageDefaultData();
-			// TODO revisit
-			// hack/workaround.  We may still be initializing the settings asynchronously in manageDefaultData, so we do not want
+
+			// We may still be initializing the settings asynchronously in manageDefaultData, so we do not want
 			// to build the UI until there are settings to be found there.
-			window.setTimeout(function() {
+			this.manageDefaultData().then(function() {
 				this.drawUserInterface();
-			}.bind(this), 100);
-			window.addEventListener("hashchange", this.processHash.bind(this)); //$NON-NLS-0$
-			
-			mGlobalCommands.setPageTarget({task: 'Settings', serviceRegistry: this.registry, commandService: this.commandService});
+
+				window.addEventListener("hashchange", this.processHash.bind(this)); //$NON-NLS-0$
+
+				mGlobalCommands.setPageTarget({task: 'Settings', serviceRegistry: this.registry, commandService: this.commandService});
+			}.bind(this));
 		},
 		
 		processHash: function() {
@@ -282,10 +311,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 				this.pluginSettingsWidget.destroy();
 			}
 
+			var settingsInCategory = this.settingsRegistry.getSettings(category).sort(settingsCompare);
 			this.pluginSettingsWidget = new SettingsList({
 				parent: this.table,
 				serviceRegistry: this.registry,
-				settings: this.settingsRegistry.getSettings(category).sort(settingsCompare),
+				settings: settingsInCategory,
 				title: messages[category] || category
 			});
 		},
@@ -378,16 +408,24 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			console.log( error );
 		},
 
+		/**
+		 * Performs asnyc initialization work that has to finish before we can render the UI.
+		 * @returns {orion.Promise}
+		 */
 		manageDefaultData: function() {
-		
-			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
-				
-				var selection = prefs.get( 'selection' );
-				
-				if (!selection) {
-					prefs.put( 'selection', 'userSettings' );
-				}
-			} );
+			if (this.defaultDataPromise) {
+				return this.defaultDataPromise;
+			}
+			this.defaultDataPromise = Deferred.all([
+				this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
+					var selection = prefs.get( 'selection' );
+
+					if (!selection) {
+						prefs.put( 'selection', 'userSettings' );
+					}
+				}),
+				this.loadTranslatedPluginSettings()
+			], function(error) { return error; });
 		}
 	});
 	return SettingsContainer;
