@@ -1125,7 +1125,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 				replacedContents = that._currentReplacedContents.contents.join(that._currentReplacedContents.lineDelim);
 			}
             // Diff operations
-            var contentTypeService = new mContentTypes.ContentTypeService(that.registry);
+            var contentTypeService = new mContentTypes.ContentTypeRegistry(that.registry);
             var fileName = that.model.getFileName(fileItem);
             var fType = contentTypeService.getFilenameContentType(fileName);
             var options = {

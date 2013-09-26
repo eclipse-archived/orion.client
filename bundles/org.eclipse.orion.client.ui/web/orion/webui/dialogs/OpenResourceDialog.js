@@ -47,7 +47,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		this._searcher = options.searcher;
 		this._progress = options.progress;
 		this._onHide = options.onHide;
-		this._contentTypeService = new mContentTypes.ContentTypeService(this._searcher.registry);
+		this._contentTypeService = new mContentTypes.ContentTypeRegistry(this._searcher.registry);
 		if (!this._searcher) {
 			throw new Error("Missing required argument: searcher"); //$NON-NLS-0$
 		}	

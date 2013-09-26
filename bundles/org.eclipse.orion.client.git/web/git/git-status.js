@@ -37,7 +37,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/browserCompatibility', 'or
 		var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 		var gitClient = new mGitClient.GitService(serviceRegistry);
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+		var contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 
 		var explorer = new mGitStatusExplorer.GitStatusExplorer(serviceRegistry, commandRegistry, linkService, /* selection */ null, "artifacts", "pageActions", null, "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

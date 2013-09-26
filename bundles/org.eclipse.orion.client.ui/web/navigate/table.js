@@ -39,7 +39,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 			children:[]
 		};
 				
-		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+		var contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		
 		var explorer = new mExplorerTable.FileExplorer({
 				serviceRegistry: serviceRegistry, 

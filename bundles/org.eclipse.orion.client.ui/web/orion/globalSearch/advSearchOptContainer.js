@@ -89,7 +89,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 		this._parentDiv = parentDiv;
 		var contentTypeService = this._serviceRegistry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 		if(!contentTypeService){
-			contentTypeService = new mContentTypes.ContentTypeService(this._serviceRegistry);
+			contentTypeService = new mContentTypes.ContentTypeRegistry(this._serviceRegistry);
 			this.contentTypesCache = contentTypeService.getContentTypes();
 			this._render();
 		} else {

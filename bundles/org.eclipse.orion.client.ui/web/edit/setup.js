@@ -73,7 +73,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		// Editor needs additional services
 		problemService = new mProblems.ProblemService(serviceRegistry);
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
-		contentTypeRegistry = new mContentTypes.ContentTypeService(serviceRegistry);
+		contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		blameService = new mBlameAnnotation.BlameService(serviceRegistry);

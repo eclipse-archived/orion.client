@@ -10,7 +10,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 	 * @class Sidebar that appears alongside an {@link orion.editor.Editor} in the Orion IDE.
 	 * @param {Object} params
 	 * @param {orion.commandregistry.CommandRegistry} params.commandRegistry
-	 * @param {orion.core.ContentTypeService} params.contentTypeRegistry
+	 * @param {orion.core.ContentTypeRegistry} params.contentTypeRegistry
 	 * @param {orion.fileClient.FileClient} params.fileClient
 	 * @param {orion.editor.InputManager} params.editorInputManager
 	 * @param {orion.outliner.OutlineService} params.outlineService

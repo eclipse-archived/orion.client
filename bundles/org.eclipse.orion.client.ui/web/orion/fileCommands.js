@@ -522,7 +522,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			});
 		commandService.addCommand(renameCommand);
 		
-		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+		var contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		var compareWithEachOtherCommand = new mCommands.Command({
 				name: messages["Compare with each other"],
 				tooltip: messages["Compare the selected 2 files with each other"],

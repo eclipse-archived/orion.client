@@ -60,7 +60,7 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 		themePreferences.apply();
 
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		new mContentTypes.ContentTypeService(serviceRegistry); //yes we're bad
+		new mContentTypes.ContentTypeRegistry(serviceRegistry); //yes we're bad
 		var searcher = new mSearchClient.Searcher({
 			serviceRegistry: serviceRegistry,
 			commandService: commandRegistry,
