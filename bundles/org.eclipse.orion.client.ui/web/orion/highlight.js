@@ -137,7 +137,7 @@ define(['examples/editor/textStyler', 'orion/editor/textMateStyler', 'orion/edit
 				this.styler = null;
 			}
 			var self = this;
-			return createStyler(this.serviceRegistry, this.serviceRegistry.getService("orion.core.contenttypes"), //$NON-NLS-0$
+			return createStyler(this.serviceRegistry, this.serviceRegistry.getService("orion.core.contentTypeRegistry"), //$NON-NLS-0$
 				fileContentType, textView, annotationModel, fileName, allowAsync).then(
 					function(styler) {
 						self.styler = styler;

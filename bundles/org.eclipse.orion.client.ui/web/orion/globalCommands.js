@@ -218,11 +218,11 @@ define([
 			if (contentTypesCache) {
 				return contentTypesCache;
 			}
-			var contentTypeService = serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
+			var contentTypeService = serviceRegistry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 			// TODO Shouldn't really be making service selection decisions at this level. See bug 337740
 			if (!contentTypeService) {
 				contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
-				contentTypeService = serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
+				contentTypeService = serviceRegistry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 			}
 			return contentTypeService.getContentTypes().then(function (ct) {
 				contentTypesCache = ct;

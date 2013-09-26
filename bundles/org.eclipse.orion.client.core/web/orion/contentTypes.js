@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define */
 define([], function() {
-	var SERVICE_ID = "orion.core.contenttypes"; //$NON-NLS-0$
+	var SERVICE_ID = "orion.core.contentTypeRegistry"; //$NON-NLS-0$
 	var EXTENSION_ID = "orion.core.contenttype"; //$NON-NLS-0$
 	var OLD_EXTENSION_ID = "orion.file.contenttype"; // backwards compatibility //$NON-NLS-0$
 
@@ -57,7 +57,7 @@ define([], function() {
 	/**
 	 * @name orion.core.ContentTypeService
 	 * @class A service for querying {@link orion.core.ContentType}s.
-	 * @description A service for querying {@link orion.core.ContentType}s. Clients should request the <code>"orion.core.contenttypes"</code>
+	 * @description A service for querying {@link orion.core.ContentType}s. Clients should request the <code>"orion.core.contentTypeRegistry"</code>
 	 * service from the {@link orion.serviceregistry.ServiceRegistry} rather than instantiate this class directly. This constructor is 
 	 * intended for use only by page initialization code.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use for looking up registered content types

@@ -48,7 +48,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 	 * @param {Function} onComplete The callback function on search complete. The array of hit file locations are passed to the callback.
 	 */
 	SearchCrawler.prototype.search = function(onComplete){
-		var contentTypeService = this.registry.getService("orion.core.contenttypes"); //$NON-NLS-0$
+		var contentTypeService = this.registry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 		this._onSearchComplete = onComplete;
 		this._cancelled = false;
 		this._deferredArray = [];
@@ -106,7 +106,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 	 */
 	SearchCrawler.prototype.buildSkeleton = function(onBegin, onComplete){
 		this._buildingSkeleton = true;
-		var contentTypeService = this.registry.getService("orion.core.contenttypes"); //$NON-NLS-0$
+		var contentTypeService = this.registry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 		var that = this;
 		onBegin();
 		contentTypeService.getContentTypes().then(function(ct) {
