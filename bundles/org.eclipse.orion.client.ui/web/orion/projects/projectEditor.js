@@ -131,7 +131,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			table.appendChild(tr);
 			var td = document.createElement("th");
 			td.colSpan = 2;
-			td.appendChild(document.createTextNode("PROJECT INFORMATION"));
+			td.appendChild(document.createTextNode("Project Information"));
 			tr.appendChild(td);
 
 			tr = document.createElement("tr");
@@ -211,17 +211,20 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			var tr = document.createElement("tr");
 			table.appendChild(tr);
 			var td = document.createElement("th");
-			td.appendChild(document.createTextNode("README.MD"));
-			var actionsSpan = document.createElement("span");
+			td.appendChild(document.createTextNode("Readme.md"));
+			tr.appendChild(td);
+			td = document.createElement("th");
+			var actionsSpan = document.createElement("ul"); //$NON-NLS-0$
 			actionsSpan.id = this.redmeCommandsScope;
-			actionsSpan.style.cssFloat = "right";
-			actionsSpan.style.textTransform = "none";
+			actionsSpan.classList.add("commandList"); //$NON-NLS-0$
+			actionsSpan.classList.add("layoutRight"); //$NON-NLS-0$
 			td.appendChild(actionsSpan);
 			tr.appendChild(td);
 
 			tr = document.createElement("tr");
 			table.appendChild(tr);
 			td = document.createElement("td");
+			td.colSpan = 2;
 			//README.MD
 			
 			function displayReadmeFromChildren(children){
@@ -322,12 +325,13 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			var tr = document.createElement("tr");
 			table.appendChild(tr);
 			var td = document.createElement("th");
-			td.colSpan = 2;
-			td.appendChild(document.createTextNode("ASSOCIATED CONTENT"));
-			var actionsSpan = document.createElement("span");
+			td.appendChild(document.createTextNode("Associated Content"));
+			tr.appendChild(td);
+			td = document.createElement("th");
+			var actionsSpan = document.createElement("ul"); //$NON-NLS-0$
 			actionsSpan.id = this.allDependenciesActions;
-			actionsSpan.style.cssFloat = "right";
-			actionsSpan.style.textTransform = "none";
+			actionsSpan.classList.add("commandList"); //$NON-NLS-0$
+			actionsSpan.classList.add("layoutRight"); //$NON-NLS-0$
 			td.appendChild(actionsSpan);
 			tr.appendChild(td);
 			
@@ -370,6 +374,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 				tr = document.createElement("tr");
 				table.appendChild(tr);
 				td = document.createElement("td");
+				td.colSpan = 2;
 				td.appendChild(document.createTextNode("No associated content"));
 				tr.appendChild(td);
 			}
