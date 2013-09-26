@@ -156,13 +156,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		this.myTree = null;
 		this.checkbox = false;
 		this._hookedDrag = false;
-		var modelEventDispatcher = this.modelEventDispatcher = new EventTarget();
+		var modelEventDispatcher = options.modelEventDispatcher ? options.modelEventDispatcher : new EventTarget();
+		this.modelEventDispatcher = modelEventDispatcher;
 
 		// Listen to model changes from fileCommands
 		var _self = this;
+		this._modelListeners = {};
 		["copy", "copyMultiple", "create", "delete", "deleteMultiple", "import", //$NON-NLS-5$//$NON-NLS-4$//$NON-NLS-3$//$NON-NLS-2$//$NON-NLS-1$//$NON-NLS-0$
 		 "move", "moveMultiple"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
-				modelEventDispatcher.addEventListener(eventType, _self.modelHandler[eventType].bind(_self));
+				modelEventDispatcher.addEventListener(eventType, _self._modelListeners[eventType] = _self.modelHandler[eventType].bind(_self));
 			});
 
 		// Same tab/new tab setting
@@ -185,6 +187,13 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	}
 
 	FileExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
+	
+	FileExplorer.prototype.destroy = function() {
+		var _self = this;
+		Object.keys(this._modelListeners).forEach(function(eventType) {
+			_self.modelEventDispatcher.removeEventListener(eventType, _self._modelListeners[eventType]);
+		});
+	};
 
 	/**
 	 * Handles model changes. Subclasses can override these methods to control how the FileExplorer reacts to various types of model changes.

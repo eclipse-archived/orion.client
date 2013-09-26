@@ -14,8 +14,9 @@
 
 define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 
 	'orion/commandRegistry', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
-	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog', 'orion/webui/dialogs/ImportDialog'],
-	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mCommandRegistry, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, ImportDialog){
+	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog', 'orion/webui/dialogs/ImportDialog',
+	'orion/EventTarget'],
+	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mCommandRegistry, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, ImportDialog, EventTarget){
 
 	/**
 	 * Utility methods
@@ -39,6 +40,20 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			dispatcher.dispatchEvent(event);
 		}
 	}
+	
+	/**
+	 * Returns a shared model event dispatcher that can be used by multiple <code>orion.explorer.FileExplorer</code>
+	 * so that all explorers are notified of model changes from other explorers.
+	 * @name orion.fileCommands#getModelEventDispatcher
+	 * @function
+	 */
+	var sharedModelEventDispatcher;
+	fileCommandUtils.getModelEventDispatcher = function() {
+		if (!sharedModelEventDispatcher) {
+			sharedModelEventDispatcher = new EventTarget();
+		}
+		return sharedModelEventDispatcher;
+	};
 
 	/**
 	 * Uploads a file
