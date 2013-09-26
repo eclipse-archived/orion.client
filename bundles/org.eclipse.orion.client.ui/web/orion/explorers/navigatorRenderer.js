@@ -36,7 +36,7 @@ define([
 	}
 	
 	/* Internal */
-	function addImageToLink(contentType, link, location) {
+	function addImageToLink(contentType, link, location, replace) {
 		var image;
 		switch (contentType && contentType.id) {
 			case "image/jpeg": //$NON-NLS-0$
@@ -55,16 +55,11 @@ define([
 					image.src = contentType.image;
 					// to minimize the height/width in case of a large one
 					image.classList.add("thumbnail"); //$NON-NLS-0$
-				} else {	
-					image = document.createElement("span"); //$NON-NLS-0$
-					image.className = "core-sprite-file_model modelDecorationSprite"; //$NON-NLS-0$
 				}
 				break;
 		}
-		if (link.firstChild) {
-			link.insertBefore(image, link.firstChild);
-		} else {
-			link.appendChild(image);
+		if (image) {
+			link.replaceChild(image, replace);
 		}
 	}
 		
@@ -114,6 +109,9 @@ define([
 					link[property] = linkProperties[property];
 				});
 			}
+			var image = document.createElement("span"); //$NON-NLS-0$
+			image.className = "core-sprite-file_model modelDecorationSprite"; //$NON-NLS-0$
+			link.appendChild(image);
 			link.appendChild(document.createTextNode(item.Name)); //$NON-NLS-0$
 
 			var href = item.Location, foundEditor = false;
@@ -133,7 +131,7 @@ define([
 				if (!foundEditor && defaultEditor && !isImage(contentType)) {
 					href = defaultEditor.hrefCallback({items: item});
 				}
-				addImageToLink(contentType, link, item.Location);			
+				addImageToLink(contentType, link, item.Location, image);			
 				link.href = href;
 			});
 		}

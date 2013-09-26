@@ -159,7 +159,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			if (!expand) {
 				var navHandler = this.getNavHandler();
 				if (navHandler) {
-					navHandler.cursorOn(fileMetadata, true, false, false);
+					navHandler.cursorOn(fileMetadata, true);
 					navHandler.setSelection(fileMetadata);
 				}
 				return;

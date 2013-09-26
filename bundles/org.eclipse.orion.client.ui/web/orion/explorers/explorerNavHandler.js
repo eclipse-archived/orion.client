@@ -371,7 +371,6 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		cursorOn: function(model, force, next, noScroll){
-			var forward = next === undefined ? false : next;
 			var previousModel, currentModel;
 			if(model || force){
 				if(currentModel === this._modelIterator.cursor()){
@@ -394,8 +393,30 @@ exports.ExplorerNavHandler = (function() {
 			this.moveColumn(null, 0);
 			this.toggleCursor(currentModel, true);
 			var currentRowDiv = this.getRowDiv();
-			if(currentRowDiv && !noScroll && !this._visible(currentRowDiv)) {
-				currentRowDiv.scrollIntoView(!forward);
+			if(currentRowDiv && !noScroll) {
+				var offsetParent = currentRowDiv.parentNode;
+				while (offsetParent) {
+					var style = window.getComputedStyle(offsetParent, null);
+					if (!style) { break; }
+					var overflow = style.getPropertyValue("overflow-y");
+					if (overflow === "hidden" || overflow === "auto" || overflow === "scroll") { break; }
+					offsetParent = offsetParent.parentNode;
+				}
+				var visible = true;
+				if(currentRowDiv.offsetTop <= offsetParent.scrollTop){
+					visible = false;
+					if(next === undefined){
+						next = false;
+					}
+				}else if((currentRowDiv.offsetTop + currentRowDiv.offsetHeight) >= (offsetParent.scrollTop + offsetParent.clientHeight)){
+					visible = false;
+					if(next === undefined){
+						next = true;
+					}
+				}
+				if(!visible){
+					currentRowDiv.scrollIntoView(!next);
+				}
 			}
 			if(this.explorer.onCursorChanged){
 				this.explorer.onCursorChanged(previousModel, currentModel);
@@ -452,52 +473,6 @@ exports.ExplorerNavHandler = (function() {
 			}
 		},
 		
-		_vpWidth: function() {
-			return window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-		},
-		
-		_vpHeight: function(){
-			return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-		},
-		
-		_getToolBarHeight: function(toolBarId){
-			var toolbar = lib.node(toolBarId);
-			if(toolbar){
-				var bounds = lib.bounds(toolbar);
-				return bounds.height;
-			}
-			return 0;
-		},
-		
-		_visible: function(rowDiv) {
-			if (rowDiv.offsetWidth === 0 || rowDiv.offsetHeight === 0) {
-				return false;
-			}
-			
-			var headerHeight = 0;
-			//TODO not so great to know about these ids here
-			headerHeight += this._getToolBarHeight("staticBanner"); //$NON-NLS-0$
-			headerHeight += this._getToolBarHeight("titleArea"); //$NON-NLS-0$
-			headerHeight += this._getToolBarHeight("pageToolbar"); //$NON-NLS-0$
-			
-		    var parentNode = this._getEventListeningDiv(true);
-			var parentRect = parentNode.getClientRects()[0];
-			var vPortRect = {top: headerHeight, left: 0, bottom : this._vpHeight(), right: this._vpWidth()};
-			
-			var vTop = parentRect.top >  vPortRect.top ? parentRect.top :  vPortRect.top;
-			var vBottom = parentRect.bottom <  vPortRect.bottom ? parentRect.bottom :  vPortRect.bottom;
-
-			var rects = rowDiv.getClientRects();
-			for (var i = 0, l = rects.length; i < l; i++) {
-				var r = rects[i];
-			    var in_viewport = (r.top >= vTop && r.top <= vBottom && r.bottom >= vTop && r.bottom <= vBottom);
-			    if (in_viewport ) {
-					return true;
-			    }
-			}
-			return false;
-		},
-			
 		_select: function(model, toggling){
 			if(!model){
 				model = this._modelIterator.cursor();
