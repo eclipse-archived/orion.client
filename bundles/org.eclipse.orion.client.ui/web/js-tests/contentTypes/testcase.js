@@ -96,7 +96,7 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 		mockRegistry._registerServiceProvider("orion.core.contenttype", {}, {
 				contentTypes: basicTypes
 			});
-		contentTypeService = new contentTypesModule.ContentTypeService(mockRegistry);
+		contentTypeService = new contentTypesModule.ContentTypeRegistry(mockRegistry);
 		testbody(mockRegistry, contentTypeService, basicTypes);
 	}
 
@@ -203,7 +203,7 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 		mockRegistry._registerServiceProvider("orion.core.contenttype", {}, {
 			contentTypes: [ bad ]
 		});
-		var contentTypeService = new contentTypesModule.ContentTypeService(mockRegistry);
+		var contentTypeService = new contentTypesModule.ContentTypeRegistry(mockRegistry);
 		assert.throws(function() {
 				contentTypeService.isExtensionOf(bad, bad);
 			}, Error, "Cycle detected");

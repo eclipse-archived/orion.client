@@ -477,7 +477,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 	 * @name orion.extensionCommands.createFileCommands
 	 * @function
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
-	 * @param {orion.core.ContentTypeService} [contentTypeRegistry] If not provided, will be obtained from the serviceRegistry.
+	 * @param {orion.core.ContentTypeRegistry} [contentTypeRegistry] If not provided, will be obtained from the serviceRegistry.
 	 * @param {String} [includeNavCommands="global"] What kinds of <code>orion.navigate.command</code> contributions to include in the list of returned file commands.
 	 * Allowed values are:
 	 * <dl>
@@ -579,7 +579,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 	 * @function
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @param {orion.commandregistry.CommandRegistry} [commandRegistry]
-	 * @param {orion.core.ContentTypeService} [contentTypeRegistry] If not provided, will be obtained from the serviceRegistry.
+	 * @param {orion.core.ContentTypeRegistry} [contentTypeRegistry] If not provided, will be obtained from the serviceRegistry.
 	 * @returns {orion.Promise} A promise resolving to an {@link orion.commands.Command[]} giving an array of file commands.
 	 */
 	extensionCommandUtils.createOpenWithCommands = function(serviceRegistry, contentTypeService, commandRegistry) {

@@ -70,7 +70,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility
 		new mSearchOutliner.SavedSearches({serviceRegistry: serviceRegistry});
 
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+		var contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		
 		var searchOutliner = new mSearchOutliner.SearchOutliner({parent: "searchProgress", serviceRegistry: serviceRegistry, commandService: commandRegistry}); //$NON-NLS-0$

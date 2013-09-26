@@ -1117,7 +1117,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 		});
 
 		/* initialize the editors cache (used by some of the built-in commands */
-		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+		contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		serviceRegistry.getService("orion.core.contentTypeRegistry").getContentTypes().then(function(contentTypes) { //$NON-NLS-0$
 			var commands = mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypes);
 			var fn = function(command) {

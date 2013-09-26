@@ -145,7 +145,7 @@ define([
 	 * @param {Object} options
 	 * @param {orion.explorer.Explorer} explorer
 	 * @param {orion.commandregistry.CommandRegistry} commandRegistry
-	 * @param {orion.core.ContentTypeService} contentTypeService
+	 * @param {orion.core.ContentTypeRegistry} contentTypeService
 	 */
 	function NavigatorRenderer (options, explorer, commandService, contentTypeService) {
 		this.explorer = explorer;

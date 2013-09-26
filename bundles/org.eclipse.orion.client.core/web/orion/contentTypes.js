@@ -55,7 +55,7 @@ define([], function() {
 	}
 
 	/**
-	 * @name orion.core.ContentTypeService
+	 * @name orion.core.ContentTypeRegistry
 	 * @class A service for querying {@link orion.core.ContentType}s.
 	 * @description A service for querying {@link orion.core.ContentType}s. Clients should request the <code>"orion.core.contentTypeRegistry"</code>
 	 * service from the {@link orion.serviceregistry.ServiceRegistry} rather than instantiate this class directly. This constructor is 
@@ -63,7 +63,7 @@ define([], function() {
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use for looking up registered content types
 	 * and for registering this service.
 	 */
-	function ContentTypeService(serviceRegistry) {
+	function ContentTypeRegistry(serviceRegistry) {
 		function buildMap(serviceRegistry) {
 			function array(obj) {
 				if (obj === null || typeof obj === "undefined") { return []; } //$NON-NLS-0$
@@ -98,7 +98,7 @@ define([], function() {
 		this.map = buildMap(serviceRegistry);
 		serviceRegistry.registerService(SERVICE_ID, this);
 	}
-	ContentTypeService.prototype = /** @lends orion.core.ContentTypeService.prototype */ {
+	ContentTypeRegistry.prototype = /** @lends orion.core.ContentTypeRegistry.prototype */ {
 		/**
 		 * Gets all the ContentTypes in the registry.
 		 * @returns {orion.core.ContentType[]} An array of all registered ContentTypes.
@@ -183,7 +183,7 @@ define([], function() {
 		}
 	};
 	return {
-		ContentTypeService: ContentTypeService,
+		ContentTypeRegistry: ContentTypeRegistry,
 		getFilenameContentType: getFilenameContentType
 	};
 });
