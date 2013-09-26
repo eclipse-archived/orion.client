@@ -34,6 +34,7 @@ define([
 		options.setFocus = false;   // do not steal focus on load
 		options.cachePrefix = null; // do not persist table state
 		options.dragAndDrop = FileCommands.uploadFile;
+		options.modelEventDispatcher = FileCommands.getModelEventDispatcher();
 		options.rendererFactory = function(explorer) {
 			var renderer =  new mNavigatorRenderer.NavigatorRenderer({
 				checkbox: false, 
@@ -96,6 +97,7 @@ define([
 			}
 		},
 		destroy: function() {
+			FileExplorer.prototype.destroy.call(this);
 			var _self = this;
 			[this.newActionsScope, this.selectionActionsScope].forEach(function(id) {
 				delete _self[id];

@@ -27,6 +27,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	function MiniNavExplorer(params) {
 		params.setFocus = false;   // do not steal focus on load
 		params.cachePrefix = null; // do not persist table state
+		params.modelEventDispatcher = FileCommands.getModelEventDispatcher();
 		FileExplorer.apply(this, arguments);
 		this.commandRegistry = params.commandRegistry;
 		this.editorInputManager = params.editorInputManager;
@@ -63,7 +64,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 
 		// Listen to model changes from fileCommands
 		var dispatcher = this.modelEventDispatcher;
-		var onChange = this.onFileModelChange.bind(this);
+		var onChange = this._modelListener = this.onFileModelChange.bind(this);
 		["move", "delete"].forEach(function(type) { //$NON-NLS-1$ //$NON-NLS-0$
 			dispatcher.addEventListener(type, onChange);
 		});
@@ -123,6 +124,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 		destroy: function() {
 			var _self = this;
+			var dispatcher = this.modelEventDispatcher;
+			["move", "delete"].forEach(function(type) { //$NON-NLS-1$ //$NON-NLS-0$
+				dispatcher.removeEventListener(type, _self._modelListener);
+			});
+			FileExplorer.prototype.destroy.call(this);
 			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope].forEach(function(id) {
 				delete _self[id];
 			});
