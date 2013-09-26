@@ -21,7 +21,7 @@ define(['orion/Deferred'], function(Deferred) {
 		/* Looks up applicable references of occurrence service, calls references, calls the editor to show the occurrences. */
 		findOccurrences: function(inputManager, textView) {
 			function getServiceRefs(registry, contentType, title) {
-				var contentTypeService = registry.getService("orion.core.contenttypes"); //$NON-NLS-0$
+				var contentTypeService = registry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 				function getFilteredServiceRef(registry, sReference, contentType) {
 					var contentTypeIds = sReference.getProperty("contentType"); //$NON-NLS-0$
 					return contentTypeService.isSomeExtensionOf(contentType, contentTypeIds).then(function(result) {

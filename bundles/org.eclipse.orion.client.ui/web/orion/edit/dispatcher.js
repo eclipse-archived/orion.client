@@ -21,7 +21,7 @@ define(['orion/edit/dispatcher'], function() {
 		this.serviceRegistry = serviceRegistry;
 		this.editor = editor;
 		this.inputManager = inputManager;
-		this.contentTypeService = serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
+		this.contentTypeService = serviceRegistry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 		this.serviceReferences = {};
 
 		var self = this;

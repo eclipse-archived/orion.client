@@ -87,7 +87,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/fileClient', 'orion/
 
 	AdvSearchOptRenderer.prototype.render = function(parentDiv){
 		this._parentDiv = parentDiv;
-		var contentTypeService = this._serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
+		var contentTypeService = this._serviceRegistry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 		if(!contentTypeService){
 			contentTypeService = new mContentTypes.ContentTypeService(this._serviceRegistry);
 			this.contentTypesCache = contentTypeService.getContentTypes();

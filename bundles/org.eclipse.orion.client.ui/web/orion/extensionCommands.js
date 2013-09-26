@@ -541,7 +541,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 		}
 
 		function getContentTypes() {
-			var contentTypes = serviceRegistry.getService("orion.core.contenttypes") || contentTypeRegistry;
+			var contentTypes = serviceRegistry.getService("orion.core.contentTypeRegistry") || contentTypeRegistry;
 			return contentTypesCache || Deferred.when(contentTypes.getContentTypes(), function(ct) { //$NON-NLS-0$
 				contentTypesCache = ct;
 				return contentTypesCache;

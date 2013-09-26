@@ -54,7 +54,7 @@ exports.DefaultDiffProvider = (function() {
 		
 		_getContentType: function(fileURL){
 			var filename = this._resolveFileName(fileURL);
-			return this.serviceRegistry.getService("orion.core.contenttypes").getFilenameContentType(filename); //$NON-NLS-0$
+			return this.serviceRegistry.getService("orion.core.contentTypeRegistry").getFilenameContentType(filename); //$NON-NLS-0$
 		},
 		
 		_resolveComplexFileURL: function(complexURL) {

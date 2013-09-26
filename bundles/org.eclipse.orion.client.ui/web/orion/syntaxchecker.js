@@ -32,7 +32,7 @@ var SyntaxChecker = (function () {
 		 */
 		checkSyntax: function (contentType, title, message, contents) {
 			function getValidators(registry, contentType) {
-				var contentTypeService = registry.getService("orion.core.contenttypes"); //$NON-NLS-0$
+				var contentTypeService = registry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 				function getFilteredValidator(registry, validator, contentType) {
 					var contentTypeIds = validator.getProperty("contentType"); //$NON-NLS-0$
 					return contentTypeService.isSomeExtensionOf(contentType, contentTypeIds).then(function(result) {

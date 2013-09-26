@@ -60,7 +60,7 @@ function(messages, require, lib, i18nUtil, mCommands, mCommandRegistry, mKeyBind
 		this.registry = serviceRegistry;
 		this.renderer = new NavOutlineRenderer({checkbox: false}, this);
 		this.renderer.commandService = commandService;
-		this.renderer.contentTypeService = serviceRegistry.getService("orion.core.contenttypes");
+		this.renderer.contentTypeService = serviceRegistry.getService("orion.core.contentTypeRegistry");
 	}
 	NavOutlineExplorer.prototype = mExplorer.Explorer.prototype;	
 	NavOutlineExplorer.prototype.constructor = NavOutlineExplorer;
