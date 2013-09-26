@@ -355,7 +355,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 				}
 				deferred.resolve([
 					{
-						name: "GIT",
+						name: "Git",
 						children: [
 							{
 								name: "Git Url",

@@ -16,24 +16,29 @@ define(['orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer'],
 		this._init(options);
 	}
 	
+	var newActionsScope = "newProjectActions";
+	
 	ProjectsRenderer.prototype = Object.create(mExplorer.ExplorerRenderer.prototype);
 	
 	ProjectsRenderer.prototype.renderTableHeader = function(tableNode){
-		tableNode.style.marginTop = "0";
 		var thead = document.createElement('thead'); //$NON-NLS-0$
 		var row = document.createElement('tr'); //$NON-NLS-0$
 		
 		var cell = document.createElement("th");
-		cell.appendChild(document.createTextNode("Project Name"));
+		cell.appendChild(document.createTextNode("Projects"));
 		row.appendChild(cell);
 		
-		cell = document.createElement("th");
-		cell.appendChild(document.createTextNode("Description"));
+		var cell = document.createElement("th");
+		cell.colSpan = 2;
+		
+		this.explorer.newActionsSpan = document.createElement("ul"); //$NON-NLS-0$
+		this.explorer.newActionsSpan.id = this.explorer.newActionsScope;
+		this.explorer.newActionsSpan.classList.add("commandList"); //$NON-NLS-0$
+		this.explorer.newActionsSpan.classList.add("layoutRight"); //$NON-NLS-0$
+		cell.appendChild(this.explorer.newActionsSpan);
+		
 		row.appendChild(cell);
-
-		cell = document.createElement("th");
-		cell.appendChild(document.createTextNode("Site"));
-		row.appendChild(cell);			
+		
 
 		thead.appendChild(row);
 		tableNode.appendChild(thead);
@@ -80,8 +85,8 @@ define(['orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer'],
 			if(!item.Description){
 				return " ";
 			}
-			if(item.Description.length>50){
-				return item.Description.substring(0, 40) + "...";
+			if(item.Description.length>200){
+				return item.Description.substring(0, 180) + "...";
 			}
 			return item.Description;
 		}
@@ -112,6 +117,7 @@ define(['orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer'],
 		this.renderer = new ProjectsRenderer({});
 		this.renderer.explorer = this;
 		this.myTree = null;
+		this.newActionsScope = newActionsScope;
 	}
 	
 	ProjectExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
@@ -129,7 +135,8 @@ define(['orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer'],
 	};
 	
 	return{
-		ProjectExplorer: ProjectExplorer
+		ProjectExplorer: ProjectExplorer,
+		newActionsScope: newActionsScope
 	};
 
 //end of define

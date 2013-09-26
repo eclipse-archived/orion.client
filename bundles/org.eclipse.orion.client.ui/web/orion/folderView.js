@@ -22,8 +22,9 @@ define([
 	'orion/PageUtil',
 	'orion/URITemplate',
 	'orion/webui/littlelib',
-	'orion/objects'
-], function(messages, mExplorerTable, mNavigatorRenderer, Selection, FileCommands, ExtensionCommands, mKeyBinding, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects) {
+	'orion/objects',
+	'orion/projects/projectView'
+], function(messages, mExplorerTable, mNavigatorRenderer, Selection, FileCommands, ExtensionCommands, mKeyBinding, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, mProjectView) {
 	
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
@@ -199,6 +200,25 @@ define([
 					serviceRegistry: this.serviceRegistry,
 					commandService: this.commandService
 				});
+				this.projectView = new mProjectView.ProjectView({
+					fileClient : this.fileClient,
+					progress : this.progress,
+					serviceRegistry: this.serviceRegistry,
+					commandService: this.commandService
+				});
+			}
+		},
+		displayWorkspaceView: function(){
+			var _self = this;
+			if(!this._node){
+				this._node = document.createElement("div"); //$NON-NLS-0$
+			}
+			this._parent.appendChild(this._node);
+			
+			if(this.showProjectView){
+				var div = document.createElement("div"); //$NON-NLS-0$
+				_self._node.appendChild(div);
+				this.projectView.display(this._contents, div);
 			}
 		},
 		displayFolderView: function(children){
@@ -215,7 +235,9 @@ define([
 
 			}
 			var div;
-			this._node = document.createElement("div"); //$NON-NLS-0$
+			if(!this._node){
+				this._node = document.createElement("div"); //$NON-NLS-0$
+			}
 			this._parent.appendChild(this._node);
 				
 			if(projectJson && this.showProjectView){
@@ -246,10 +268,13 @@ define([
 			}
 		},
 		create: function() {
+			var _self = this;
+			if(this._contents.Projects){ //this is a workspace root
+				_self.displayWorkspaceView();
+			}
 			if(this._contents.Children){
 				this.displayFolderView(this._contents.Children);
 			} else if(this._contents.ChildrenLocation){
-				var _self = this;
 				this.progress.progress(this.fileClient.fetchChildren(this._contents.ChildrenLocation), "Fetching children of " + this._contents.Name).then( 
 					function(children) {
 						_self.displayFolderView.call(_self, children);
