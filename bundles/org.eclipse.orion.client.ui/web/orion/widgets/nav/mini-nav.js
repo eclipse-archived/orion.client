@@ -49,8 +49,15 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			// Broadcast changes of our explorer root to the sidebarNavInputManager
 			this.addEventListener("rootChanged", function(event) { //$NON-NLS-0$
 				_self.sidebarNavInputManager.dispatchEvent(event);
-				_self.sidebarNavInputManager.dispatchEvent({type: "InputChanged", input: event.root.Parents ? event.root.ChildrenLocation : ""}); //$NON-NLS-0$
+				_self.sidebarNavInputManager.dispatchEvent({type: "InputChanged", input: event.root.ChildrenLocation}); //$NON-NLS-0$
 			});
+			sidebarNavInputManager.setInput = function(input) {
+				if (_self.treeRoot && _self.treeRoot.ChildrenLocation !== input) {
+					_self.loadRoot(input).then(function() {
+						_self.updateCommands();
+					});
+				}
+			};
 		}
 
 
@@ -198,7 +205,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			
 			if (this.fileInCurrentTree(fileMetadata)) {
 				func();
-			} else {
+			} else if (!PageUtil.matchResourceParameters(window.location.hash).navigate) {
 				this.loadParentOf({}).then(func);
 			}
 		},
@@ -366,12 +373,15 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				toolbarNode: this.toolbarNode
 			});
 
-			var root = this.lastRoot || this.fileClient.fileServiceRootURL("");
-			this.explorer.loadRoot(root).then(function(){
-				if (!_self.explorer) { return; }
-				_self.explorer.updateCommands();
-				_self.explorer.reveal(_self.editorInputManager.getFileMetadata(), true);
-			});
+			var navigate = PageUtil.matchResourceParameters(window.location.hash).navigate;
+			if (!navigate) {
+				var root = this.lastRoot || this.fileClient.fileServiceRootURL("");
+				this.explorer.loadRoot(root).then(function(){
+					if (!_self.explorer) { return; }
+					_self.explorer.updateCommands();
+					_self.explorer.reveal(_self.editorInputManager.getFileMetadata(), true);
+				});
+			}
 		},
 		destroy: function() {
 			if (this.explorer) {

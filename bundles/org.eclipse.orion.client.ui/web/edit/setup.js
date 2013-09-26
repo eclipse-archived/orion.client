@@ -198,6 +198,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	function SidebarNavInputManager() {
 		EventTarget.attach(this);
 	}
+	SidebarNavInputManager.prototype.processHash = function() {
+		var navigate = PageUtil.matchResourceParameters(location.hash).navigate;
+		if (typeof navigate === "string" && this.setInput) { //$NON-NLS-0$
+			this.setInput(navigate);
+		}
+	};
 
 	var sidebarNavInputManager = new SidebarNavInputManager();
 	var sidebar = new Sidebar({
@@ -234,8 +240,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	});
 	window.addEventListener("hashchange", function() { //$NON-NLS-0$
 		inputManager.setInput(window.location.hash);
+		sidebarNavInputManager.processHash(window.location.hash);
 	});
 	inputManager.setInput(window.location.hash);
+	sidebarNavInputManager.processHash(window.location.hash);
 
 	//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, window.location.hash !== ""); //$NON-NLS-0$
