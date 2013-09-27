@@ -44,8 +44,10 @@ define([], function() {
 	}
 	
 	function contains(parent, child) {
+		if (!parent || !child) { return false; }
+		if (parent === child) { return true; }
 		var compare = parent.compareDocumentPosition(child);  // useful to break out for debugging
-		return parent === child || Boolean(compare & 16);
+		return Boolean(compare & 16);
 	}
 	
 	function bounds(node) {

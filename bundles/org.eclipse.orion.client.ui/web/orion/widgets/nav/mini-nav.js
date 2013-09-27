@@ -245,9 +245,18 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.addCommandGroup(selectionActionsScope, "orion.miniNavSelectionGroup", 100, messages["Actions"], null, null, "core-sprite-gear", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerSelectionService(selectionActionsScope, this.selection);
 
+			var renameBinding = new KeyBinding(113); // F2
+			var delBinding = new KeyBinding(46); // Delete
+			var copySelections = new KeyBinding('c', true); /* Ctrl+C */
+			var pasteSelections = new KeyBinding('v', true); /* Ctrl+V */
+			var upFolder = new KeyBinding(38, false, false, true); /* Alt+UpArrow */
+			var downFolder = new KeyBinding(40, false, false, true); /* Alt+UpArrow */
+			downFolder.domScope = upFolder.domScope = pasteSelections.domScope = copySelections.domScope = delBinding.domScope = renameBinding.domScope = "sidebar"; //$NON-NLS-0$
+			downFolder.scopeName = upFolder.scopeName = pasteSelections.scopeName = copySelections.scopeName = delBinding.scopeName = renameBinding.scopeName = messages.Navigator; //$NON-NLS-0$
+
 			// commands that don't appear but have keybindings
-			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.copySelections", 1, null, true, new KeyBinding('c', true) /* Ctrl+C */); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.pasteSelections", 1, null, true, new KeyBinding('v', true) /* Ctrl+V */);//$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.copySelections", 1, null, true, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.pasteSelections", 1, null, true, pasteSelections);//$NON-NLS-1$ //$NON-NLS-0$
 
 			// New file and new folder (in a group)
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile", 1, "orion.miniNavNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -256,15 +265,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.project", 1, "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.new.linkProject", 2, "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// Folder nav actions
-			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.upFolder", 1, null, false, new KeyBinding(38, false, false, true) /* Alt+UpArrow */); //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.upFolder", 1, null, false, upFolder); //$NON-NLS-0$
 			
-			var renameBinding = new KeyBinding(113); // F2
-			renameBinding.domScope = "sidebar"; //$NON-NLS-0$
-			renameBinding.scopeName = messages["Navigator"]; //$NON-NLS-0$
-			var delBinding = new KeyBinding(46); // Delete
-			delBinding.domScope = "sidebar"; //$NON-NLS-0$
-			delBinding.scopeName = messages["Navigator"];
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downFolder", 1, "orion.miniNavSelectionGroup", false, new KeyBinding(40, false, false, true) /* Alt+UpArrow */); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downFolder", 1, "orion.miniNavSelectionGroup", false, downFolder); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.renameResource", 2, "orion.miniNavSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.copyFile", 3, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.moveFile", 4, "orion.miniNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
