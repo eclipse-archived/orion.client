@@ -169,17 +169,20 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 					row._item = item;
 					// If the row should be expanded
 					if (row && (forceExpand || row._expanded)) {
-						row._expanded = true;
 						this._removeChildRows(parentId);
 						this._renderer.updateExpandVisuals(row, true);
 						if(children){
+							row._expanded = true;
 							this._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
 							this._rowsChanged();
 						} else {
 							tree = this;
 							children = this._treeModel.getChildren(row._item, function(children) {
-								tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
-								tree._rowsChanged();
+								if (!row._expanded) {
+									row._expanded = true;
+									tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
+									tree._rowsChanged();
+								}
 							});
 						}
 					} else {
