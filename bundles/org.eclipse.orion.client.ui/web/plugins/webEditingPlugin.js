@@ -33,7 +33,7 @@ define([
 			[{	id: "text/plain",
 				name: "Text",
 				extension: ["txt"],
-				image: "../images/file_model.gif"
+				image: "../images/file.png"
 			},
 			{	id: "text/html",
 				"extends": "text/plain",
