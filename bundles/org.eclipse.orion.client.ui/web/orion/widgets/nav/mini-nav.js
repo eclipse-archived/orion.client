@@ -298,6 +298,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	objects.mixin(MiniNavRenderer.prototype, {
 		showFolderLinks: true,
 		oneColumn: true,
+		getFolderImage: function(folder) {
+			return null;
+		},
 		createFolderNode: function(folder) {
 			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (this.showFolderLinks && folderNode.tagName === "A") { //$NON-NLS-0$
