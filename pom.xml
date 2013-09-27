@@ -90,6 +90,14 @@
 	        <version>v20130411</version>
 	    </dependency>
 	</dependencies>
+	
+	<repositories>
+		<repository>
+			<id>eclipse-license</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/eclipse/updates/license/</url>
+		</repository>
+  </repositories>
 
 	<modules>
 		<module>bundles/org.eclipse.orion.client.core</module>
@@ -102,7 +110,6 @@
 		<module>doc/org.eclipse.orion.doc.user</module>
 		
 		<module>features/org.eclipse.orion.client-feature</module>
-		<module>features/org.eclipse.license</module>
 
 		<module>releng/org.eclipse.orion.client.repository</module>
 	</modules>
