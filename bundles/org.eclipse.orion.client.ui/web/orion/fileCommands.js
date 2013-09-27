@@ -543,7 +543,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						if (!refNode) {
 							refNode = data.domParent || data.domNode;
 						}
-						mUIUtils.getUserText(refNode.id+"EditBox", refNode, true, item.Name, doMove, null, null, ".");  //$NON-NLS-1$ //$NON-NLS-0$
+						var id = refNode.id+"EditBox";
+						if (lib.node(id)) {
+							return;
+						}
+						mUIUtils.getUserText(id, refNode, true, item.Name, doMove, null, null, ".");  //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				}
 			});
