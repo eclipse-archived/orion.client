@@ -255,6 +255,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		}
 	}
 
+	// Shared for the whole page
+	var bufferedSelection = [];
+		
 	/**
 	 * Creates the commands related to file management.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use when creating commands
@@ -969,7 +972,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		});
 		commandService.addCommand(moveCommand);
 		
-		var bufferedSelection = [];
 		var copyToBufferCommand = new mCommands.Command({
 				name: messages["Copy Items"],
 				tooltip: messages["Copy the selected items to the copy/paste buffer"],
