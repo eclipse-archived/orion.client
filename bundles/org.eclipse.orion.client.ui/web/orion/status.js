@@ -31,6 +31,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 		this.progressDomId = progressDomId || domId;
 		this._hookedClose = false;
 		this._timer = null;
+		this._clickToDisMiss = true;
 		this._cancelMsg = null;
 	}
  
@@ -39,24 +40,33 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 		_init: function() {
 			// this is a cheat, all dom ids should be passed in
 			var closeButton = lib.node("closeNotifications"); //$NON-NLS-0$
-			if(closeButton) {
-				closeButton.style.cursor = "pointer"; //$NON-NLS-0$
-			}
 			if (closeButton && !this._hookedClose) {
+				closeButton.style.cursor = "pointer"; //$NON-NLS-0$
 				this._hookedClose = true;
-				closeButton.addEventListener("click", function() { //$NON-NLS-0$
-					window.clearTimeout(this._timer);
-					this.setProgressMessage(""); 
-					if(this._cancelMsg && this._cancelFunc) {
-						closeButton.innerHTML = "";
-						closeButton.classList.remove("cancelButton"); //$NON-NLS-0$
-						closeButton.classList.add("dismissButton"); //$NON-NLS-0$
-						closeButton.classList.add("core-sprite-close"); //$NON-NLS-0$
-						closeButton.classList.add("imageSprite"); //$NON-NLS-0$
-						this._cancelFunc();
-						this._cancelMsg = null;
+				var container = lib.node(this.notificationContainerDomId);
+				lib.addAutoDismiss([container],  function(){
+					if(this._clickToDisMiss) {
+						this.close();
 					}
 				}.bind(this));
+				closeButton.addEventListener("click", function() { //$NON-NLS-0$
+					this.close();
+				}.bind(this));
+			}
+		},
+		
+		close: function(){
+			window.clearTimeout(this._timer);
+			this.setProgressMessage(""); 
+			var closeButton = lib.node("closeNotifications"); //$NON-NLS-0$
+			if(this._cancelMsg && this._cancelFunc && closeButton) {
+				closeButton.innerHTML = "";
+				closeButton.classList.remove("cancelButton"); //$NON-NLS-0$
+				closeButton.classList.add("dismissButton"); //$NON-NLS-0$
+				closeButton.classList.add("core-sprite-close"); //$NON-NLS-0$
+				closeButton.classList.add("imageSprite"); //$NON-NLS-0$
+				this._cancelFunc();
+				this._cancelMsg = null;
 			}
 		},
 		
@@ -112,6 +122,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 		 * from the Orion server.
 		 */
 		setErrorMessage : function(st) {
+			this._clickToDisMiss = true;
 			this.currentMessage = st;
 			this._init();
 			//could be: responseText from xhrGet, deferred error object, or plain string
@@ -191,6 +202,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 		 * from the Orion server.
 		 */
 		setProgressResult : function(message, cancelMsg) {
+			this._clickToDisMiss = false;
 			this._cancelMsg = cancelMsg;
 			this.currentMessage = message;
 			//could either be responseText from xhrGet or just a string
@@ -221,6 +233,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 					removedClasses.push("progressInfo");
 					removedClasses.push("progressError");
 					removedClasses.push("progressNormal"); //$NON-NLS-0$
+					this._clickToDisMiss = true;
 					break;
 				case "Error": //$NON-NLS-0$
 					imageClass = "core-sprite-error"; //$NON-NLS-0$
@@ -229,6 +242,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 					removedClasses.push("progressWarning");
 					removedClasses.push("progressInfo");
 					removedClasses.push("progressNormal"); //$NON-NLS-0$
+					this._clickToDisMiss = true;
 					break;
 				default:
 					extraClass="progressNormal"; //$NON-NLS-0$
@@ -259,7 +273,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 					});
 				} else {
 					//If the message is just neither warning nor error, without a URL link in it, then we will auto hide it in 5 seconds.
-					if(status.Severity !== "Warning" && status.Severity !== "Error"){ //$NON-NLS-1$ //$NON-NLS-0$
+					if(status.Severity !== "Warning" && status.Severity !== "Error" && !cancelMsg){ //$NON-NLS-1$ //$NON-NLS-0$
 						if(this._timer){
 							window.clearTimeout(this._timer);
 						}
