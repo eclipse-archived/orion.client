@@ -474,6 +474,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				});
 			});
 		}
+		
+		function checkFolderSelection(item) {
+			// Check selection first, then use the provided item
+			var canCreateFile = function(item) {
+				item = forceSingleItem(item);
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);
+			};
+			return canCreateFile(explorer.selection.getSelections()) || canCreateFile(item);
+		}
 
 		var renameCommand = new mCommands.Command({
 				name: messages["Rename"],
@@ -699,14 +708,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					}
 				});
 			},
-			visibleWhen: function(item) {
-				// Check selection first, then use the provided item
-				var canCreateFile = function(item) {
-					item = forceSingleItem(item);
-					return item.Directory && !mFileUtils.isAtRoot(item.Location);
-				};
-				return canCreateFile(explorer.selection.getSelections()) || canCreateFile(item);
-			}
+			visibleWhen: checkFolderSelection
 		});
 		commandService.addCommand(newFileCommand);
 		
@@ -773,10 +775,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					);
 				}
 			},
-			visibleWhen: function(item) {
-				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);
-			}
+			visibleWhen: checkFolderSelection
 		});
 		commandService.addCommand(importZipURLCommand);
 		
@@ -886,10 +885,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				});
 				dialog.show();
 			},
-			visibleWhen: function(item) {
-				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);
-			}});
+			visibleWhen: checkFolderSelection
+		});
 		commandService.addCommand(importCommand);
 	
 		var importSFTPCommand = new mCommands.Command({
@@ -915,9 +912,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				});
 				dialog.show();
 			},
-			visibleWhen: function(item) {
-				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
+			visibleWhen: checkFolderSelection
+		});
 		commandService.addCommand(importSFTPCommand);
 	
 		var exportSFTPCommand = new mCommands.Command({
@@ -945,9 +941,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				});
 				dialog.show();
 			},
-			visibleWhen: function(item) {
-				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
+			visibleWhen: checkFolderSelection
+		});
 		commandService.addCommand(exportSFTPCommand);
 		
 		var copyCommand = new mCommands.Command({
@@ -988,10 +983,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				name: messages["Paste Items"],
 				tooltip: messages["Paste items from the copy/paste buffer"],
 				id: "eclipse.pasteSelections" + idSuffix, //$NON-NLS-0$
-				visibleWhen: function(item) {
-					item = forceSingleItem(item);
-					return item.Directory && !mFileUtils.isAtRoot(item.Location);
-				},
+				visibleWhen: checkFolderSelection,
 				callback: function(data) {
 					// Check selection service first.  If a single folder is selected, that is the target.  Otherwise the root is the target.
 					explorer.selection.getSelections(function(selections) {
