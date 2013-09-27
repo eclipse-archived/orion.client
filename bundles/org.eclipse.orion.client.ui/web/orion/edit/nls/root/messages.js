@@ -41,6 +41,7 @@ define({
 	"ViewTooltip": "View", //$NON-NLS-1$ //$NON-NLS-0$
 	"Actions": "Actions", //$NON-NLS-1$ //$NON-NLS-0$
 	"Navigator": "Navigator", //$NON-NLS-1$ //$NON-NLS-0$
+	"FolderNavigator": "Folder Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"Project": "Project", //$NON-NLS-1$ //$NON-NLS-0$
 	"New": "New", //$NON-NLS-1$ //$NON-NLS-0$
 	"Add": "Add", //$NON-NLS-1$ //$NON-NLS-0$
