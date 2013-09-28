@@ -40,6 +40,7 @@ define([
 				checkbox: false, 
 				cachePrefix: "FolderNavigator" //$NON-NLS-0$
 			}, explorer, options.commandRegistry, options.contentTypeRegistry);
+			renderer.showFolderImage = true;
 			renderer.getCellHeaderElement = function(col_no) {
 				var td;
 				if (col_no === 0) {

@@ -214,8 +214,11 @@ define([
 	 * @returns {Element} The folder image element.
 	 */
 	NavigatorRenderer.prototype.getFolderImage = function(folder) {
-		var span = document.createElement("span");
-		span.className = "core-sprite-folder_model modelDecorationSprite";
+		if (!this.showFolderImage) {
+			return null;
+		}
+		var span = document.createElement("span"); //$NON-NLS-0$
+		span.className = "core-sprite-folder_model modelDecorationSprite"; //$NON-NLS-0$
 		return span;
 	};
 
