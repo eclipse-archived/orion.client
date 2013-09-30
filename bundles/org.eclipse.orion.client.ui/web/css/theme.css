@@ -431,20 +431,16 @@ a.currentLocation:hover {
 	z-index: 200;
 	background: transparent;
 	position: absolute;
-	min-width: 15em;
-	max-width: 110em;
+	max-width: 50em;
 }
 .tooltip {
 	color: #fafafa;
 	background-color: #555;
 	border-radius: 3px;
-	position: absolute;
 	padding: 8px;
-	z-index: 200;
 }
 
 .tooltip.left {
-	min-width: 15em;
 }
 
 .tooltip .navlinkonpage {
