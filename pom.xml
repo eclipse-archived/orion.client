@@ -8,7 +8,7 @@
    http://www.eclipse.org/legal/epl-v10.html
 
    Contributors:
-      Matthias Sohn - initial implementation
+	  Matthias Sohn - initial implementation
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -44,13 +44,13 @@
 		<license>
 			<name>Eclipse Public License v1.0</name>
 			<comments>
-       All rights reserved.
+	   All rights reserved.
 
-       This program and the accompanying materials are made
-       available under the terms of the Eclipse Public License v1.0
-       which accompanies this distribution, and is available at
-       http://www.eclipse.org/legal/epl-v10.htm
-      </comments>
+	   This program and the accompanying materials are made
+	   available under the terms of the Eclipse Public License v1.0
+	   which accompanies this distribution, and is available at
+	   http://www.eclipse.org/legal/epl-v10.htm
+	  </comments>
 		</license>
 	</licenses>
 
@@ -79,16 +79,16 @@
 	</distributionManagement>
 
 	<dependencies>
-	    <dependency>
-	        <groupId>org.mozilla</groupId>
-	        <artifactId>rhino</artifactId>
-	        <version>1.7R4</version>
-	    </dependency>
-	    <dependency>
-	        <groupId>com.google.javascript</groupId>
-	        <artifactId>closure-compiler</artifactId>
-	        <version>v20130411</version>
-	    </dependency>
+		<dependency>
+			<groupId>org.mozilla</groupId>
+			<artifactId>rhino</artifactId>
+			<version>1.7R4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.javascript</groupId>
+			<artifactId>closure-compiler</artifactId>
+			<version>v20130411</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>
@@ -97,7 +97,14 @@
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/eclipse/updates/license/</url>
 		</repository>
-  </repositories>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>repo.eclipse.org.cbi-releases</id>
+			<url>https://repo.eclipse.org/content/repositories/cbi-releases/</url>
+		</pluginRepository>
+	</pluginRepositories>
 
 	<modules>
 		<module>bundles/org.eclipse.orion.client.core</module>
@@ -143,22 +150,22 @@
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
-	            <artifactId>maven-dependency-plugin</artifactId>
-	            <inherited>false</inherited>
-	            <executions>
-	                <execution>
-	                    <id>install-jar</id>
-	                    <phase>verify</phase>
-	                    <goals>
-	                        <goal>copy-dependencies</goal>
-	                    </goals>
-	                    <configuration>
-	                        <outputDirectory>${requirejsHome}/lib/</outputDirectory>
-	                        <stripVersion>true</stripVersion>
-	                    </configuration>
-	                </execution>
-	            </executions>
-	        </plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<inherited>false</inherited>
+				<executions>
+					<execution>
+						<id>install-jar</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${requirejsHome}/lib/</outputDirectory>
+							<stripVersion>true</stripVersion>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<inherited>false</inherited>
@@ -167,25 +174,25 @@
 						<phase>verify</phase>
 						<configuration>
 							<tasks>
-							    <!-- minify javascript -->
+								<!-- minify javascript -->
 								<property name="builder"
 									value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
-                                <property name="requirejsHome"
-                                    value="${requirejsHome}"/>
-                                <property name="buildDirectory"
-                          			value="${basedir}"/>
+								<property name="requirejsHome"
+									value="${requirejsHome}"/>
+								<property name="buildDirectory"
+									value="${basedir}"/>
 								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.mini.xml">
-								    <target name="download3rdPartyLibs"/>
-								    <target name="updateBuildLabel"/>
+									<target name="download3rdPartyLibs"/>
+									<target name="updateBuildLabel"/>
 									<target name="requirejs"/>
 								</ant>
 
 								<!-- generate jsdocs -->
-                                <property name="jsdocHome"
-                                    value="${jsdocHome}"/>
+								<property name="jsdocHome"
+									value="${jsdocHome}"/>
 								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.jsdoc.xml">
-								    <target name="download3rdPartyLibs"/>
-								    <target name="jsdocs"/>
+									<target name="download3rdPartyLibs"/>
+									<target name="jsdocs"/>
 								</ant>
 							</tasks>
 						</configuration>
@@ -230,6 +237,31 @@
 					</dependencies>
 				</plugin>
 				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-maven-plugin</artifactId>
+					<version>${tycho-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-plugin</artifactId>
+					<version>${tycho-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho.extras</groupId>
+					<artifactId>tycho-pack200a-plugin</artifactId>
+					<version>${tycho-extras-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho.extras</groupId>
+					<artifactId>tycho-pack200b-plugin</artifactId>
+					<version>${tycho-extras-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.cbi.maven.plugins</groupId>
+					<artifactId>eclipse-jarsigner-plugin</artifactId>
+					<version>1.0.4</version>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>2.5</version>
@@ -245,4 +277,131 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>eclipse-sign</id>
+			<build>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>target-platform-configuration</artifactId>
+					<configuration>
+						<includePackedArtifacts>true</includePackedArtifacts>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho.extras</groupId>
+					<artifactId>tycho-pack200a-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>pack200-normalize</id>
+							<goals>
+								<goal>normalize</goal>
+							</goals>
+							<phase>verify</phase>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.cbi.maven.plugins</groupId>
+					<artifactId>eclipse-jarsigner-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>sign</id>
+							<goals>
+								<goal>sign</goal>
+							</goals>
+							<phase>verify</phase>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho.extras</groupId>
+					<artifactId>tycho-pack200b-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>pack200-pack</id>
+							<goals>
+								<goal>pack</goal>
+							</goals>
+							<phase>verify</phase>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>p2-metadata</id>
+							<goals>
+								<goal>p2-metadata</goal>
+							</goals>
+							<phase>verify</phase>
+						</execution>
+					</executions>
+					<configuration>
+						<defaultP2Metadata>false</defaultP2Metadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</build>
+	</profile>
+	<profile>
+		<id>eclipse-pack</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.eclipse.tycho</groupId>
+						<artifactId>target-platform-configuration</artifactId>
+						<configuration>
+							<includePackedArtifacts>true</includePackedArtifacts>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.eclipse.tycho.extras</groupId>
+						<artifactId>tycho-pack200a-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>pack200-normalize</id>
+								<goals>
+									<goal>normalize</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.eclipse.tycho.extras</groupId>
+						<artifactId>tycho-pack200b-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>pack200-pack</id>
+								<goals>
+									<goal>pack</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.eclipse.tycho</groupId>
+						<artifactId>tycho-p2-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>p2-metadata</id>
+								<goals>
+									<goal>p2-metadata</goal>
+								</goals>
+								<phase>package</phase>
+							</execution>
+						</executions>
+						<configuration>
+							<defaultP2Metadata>false</defaultP2Metadata>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>
