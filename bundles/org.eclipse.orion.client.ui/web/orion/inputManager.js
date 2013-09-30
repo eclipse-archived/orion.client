@@ -107,16 +107,17 @@ define([
 			var fileURI = this.getInput();
 			if (!fileURI) { return; }
 			var fileClient = this.fileClient;
+			var resourceRaw = this._parsedLocation.resourceRaw;
 			var progressService = this.progressService;
 			var editor = this.getEditor();
 			if (this._fileMetadata) {
 				//Reload if out of sync, unless we are already in the process of saving
 				if (!this._saving) {
-					progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI)).then(function(data) {
+					progressService.progress(fileClient.read(resourceRaw, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI)).then(function(data) {
 						if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
 							this._fileMetadata = data;
 							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
-								progressService.progress(fileClient.read(fileURI), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
+								progressService.progress(fileClient.read(resourceRaw), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
 									editor.setInput(fileURI, null, contents);
 									this._unsavedChanges = [];
 								}.bind(this));
@@ -129,8 +130,8 @@ define([
 					editor.reportStatus(i18nUtil.formatMessage(messages.Fetching, fileURI));
 				}, 800);
 				new Deferred.all([
-					progressService.progress(fileClient.read(fileURI, false, true), i18nUtil.formatMessage(messages.Reading, fileURI)),
-					progressService.progress(fileClient.read(fileURI, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI))
+					progressService.progress(fileClient.read(resourceRaw, false, true), i18nUtil.formatMessage(messages.Reading, fileURI)),
+					progressService.progress(fileClient.read(resourceRaw, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI))
 				], function(error) { return {_error: error}; }).then(function(results) {
 					if (progressTimeout) {
 						window.clearTimeout(progressTimeout);
@@ -206,7 +207,8 @@ define([
 
 			var etag = this.getFileMetadata().ETag;
 			var args = { "ETag" : etag }; //$NON-NLS-0$
-			var def = this.fileClient.write(input, data, args);
+			var resourceRaw = this._parsedLocation.resourceRaw;
+			var def = this.fileClient.write(resourceRaw, data, args);
 			var progress = this.progressService;
 			var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			if (progress) {
@@ -238,7 +240,7 @@ define([
 					var forceSave = window.confirm(messages.saveOutOfSync);
 					if (forceSave) {
 						// repeat save operation, but without ETag
-						var def = self.fileClient.write(input, contents);
+						var def = self.fileClient.write(resourceRaw, contents);
 						if (progress) {
 							def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
 						}
