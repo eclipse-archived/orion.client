@@ -236,34 +236,31 @@ exports.GitLogExplorer = (function() {
 			var resp = JSON.parse(error.responseText);
 			display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
 		} catch (Exception) {
-			display.Message = error.message;
+			display.Message = error.DetailedMessage || error.Message || error.message;
 		}
 		this.registry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 	};
 	
 	GitLogExplorer.prototype.loadResource = function(location){
-		var loadingDeferred = new Deferred();
-		var progressService = this.registry.getService("orion.page.message");
-		progressService.showWhile(loadingDeferred, messages['Loading git log...']);
-		
 		var that = this;
+		var progressService = this.registry.getService("orion.page.message");
 		var gitService = this.registry.getService("orion.git.provider"); //$NON-NLS-0$
-		this.registry.getService("orion.page.progress").progress(gitService.doGitLog(location), "Getting git log").then(
+		var loadingDeferred = this.registry.getService("orion.page.progress").progress(gitService.doGitLog(location), "Getting git log").then(
 			function(resp) {
 				var resource = resp;
-				that.registry.getService("orion.page.progress").progress(gitService.getGitClone(resource.CloneLocation), "Getting repository details for " + resource.Name).then(
+				return that.registry.getService("orion.page.progress").progress(gitService.getGitClone(resource.CloneLocation), "Getting repository details for " + resource.Name).then(
 					function(resp){
 						var clone = resp.Children[0];	
 						resource.Clone = clone;
 						resource.ContentLocation = clone.ContentLocation;
-						that.registry.getService("orion.page.progress").progress(gitService.getGitBranch(clone.BranchLocation), "Getting default branch details for " + resource.Name).then(
+						return that.registry.getService("orion.page.progress").progress(gitService.getGitBranch(clone.BranchLocation), "Getting default branch details for " + resource.Name).then(
 							function(branches){
 								for(var i=0; i<branches.Children.length; i++){
 									var branch = branches.Children[i];
 									
 									if (branch.Current === true){
 										resource.Clone.ActiveBranch = branch.CommitLocation;
-										loadingDeferred.resolve(resource);
+										return resource;
 									}
 								}
 							}
@@ -272,7 +269,7 @@ exports.GitLogExplorer = (function() {
 				);
 			}
 		);
-		
+		progressService.showWhile(loadingDeferred, messages['Loading git log...']);
 		return loadingDeferred;
 	};
 	
