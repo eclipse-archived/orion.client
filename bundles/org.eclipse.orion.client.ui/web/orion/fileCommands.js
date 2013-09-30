@@ -143,7 +143,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			throw new Error("could not find toolbar " + toolbarId); //$NON-NLS-0$
 		}
 		// close any open slideouts because if we are retargeting the command
-		if (toolbarItem.Location !== lastItemLoaded.Location) {
+		if (lastItemLoaded.Location && toolbarItem.Location !== lastItemLoaded.Location) {
 			commandRegistry.closeParameterCollector();
 			lastItemLoaded.Location = toolbarItem.Location;
 		}
