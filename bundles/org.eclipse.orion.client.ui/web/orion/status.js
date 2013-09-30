@@ -10,7 +10,12 @@
  *******************************************************************************/
 /*global define window document Image */
  
-define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageUtil', 'orion/urlUtils'], function(require, lib, mGlobalCommands, PageUtil, URLUtil) {
+define([
+	'i18n!orion/nls/messages',
+	'orion/webui/littlelib',
+	'orion/globalCommands',
+	'orion/urlUtils'
+], function(messages, lib, mGlobalCommands, URLUtil) {
 	var ProgressMonitor;
 	
 	/**
@@ -217,7 +222,8 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 				}
 			}
 			this._init();
-			var msg = status.Message || status;
+			var msg = status.Message || status.toString();
+			var fallbackMessage = messages.UnknownError;
 			var imageClass = "core-sprite-information"; //$NON-NLS-0$
 			var extraClass = "progressNormal"; //$NON-NLS-0$
 			var image = document.createElement("span"); //$NON-NLS-0$
@@ -228,6 +234,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 			if (status.Severity) {
 				switch (status.Severity) {
 				case "Warning": //$NON-NLS-0$
+					fallbackMessage = messages.UnknownWarning;
 					imageClass = "core-sprite-warning"; //$NON-NLS-0$
 					alt = "warning"; //$NON-NLS-0$
 					extraClass="progressWarning"; //$NON-NLS-0$
@@ -254,10 +261,16 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 			}
 			removedClasses.push("notificationHide");
 			image.classList.add(imageClass); //$NON-NLS-0$
+
 			var node = lib.node(this.progressDomId);
 			var container = lib.node(this.notificationContainerDomId);
 			lib.empty(node);
 			node.appendChild(image);
+
+			if (msg === Object.prototype.toString()) {
+				// Last ditch effort to prevent user from seeing meaningless "[object Object]" message
+				msg = fallbackMessage;
+			}
 			if (status.HTML) { // msg is HTML to be inserted directly
 				var span = document.createElement("span"); //$NON-NLS-0$
 				span.innerHTML = msg;

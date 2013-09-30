@@ -83,5 +83,7 @@ define({
 	"Generate a sample plugin for integrating with Orion.": "Generate a sample plugin for integrating with Orion.",
 	"Raw": "Raw",
 	"Open the raw file or folder in the browser": "Open the raw file or folder in the browser",
-	"OutlineProgress": "Getting outline for ${0} from ${1}"
+	"OutlineProgress": "Getting outline for ${0} from ${1}",
+	"UnknownError": "An unknown error occurred.",
+	"UnknownWarning": "An unknown warning occurred."
 });
