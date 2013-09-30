@@ -57,7 +57,7 @@ define("plugins/esprima/indexFiles/nodeIndex", [], function () {
 			},
 			"buffer": {
 				"INSPECT_MAX_BYTES": {
-					"!type": "Object"
+					"!type": "Number"
 				},
 				"Buffer": {
 					"!type": "fn()",
@@ -170,6 +170,18 @@ define("plugins/esprima/indexFiles/nodeIndex", [], function () {
 						"length": {
 							"!type": "Object"
 						}
+					},
+					"isEncoding": {
+						"!type": "fn(encoding: Object)"
+					},
+					"isBuffer": {
+						"!type": "fn(obj: Object)"
+					},
+					"byteLength": {
+						"!type": "fn(string: Object, encoding?: Object)"
+					},
+					"concat": {
+						"!type": "fn(list: Object, totalLength?: Object)"
 					}
 				},
 				"SlowBuffer": {
@@ -595,6 +607,9 @@ define("plugins/esprima/indexFiles/nodeIndex", [], function () {
 						"emit": {
 							"!type": "fn(event: Object, arg1?: Object, arg2?: Object, other?: Object)"
 						}
+					},
+					"listenerCount": {
+						"!type": "fn(emitter: Object, event: Object)"
 					}
 				}
 			},
@@ -1690,7 +1705,8 @@ define("plugins/esprima/indexFiles/nodeIndex", [], function () {
 		"!name": "node",
 		"this": "<top>",
 		"global": "<top>",
-		"buffer": "+Buffer",
+		"buffer": "buffer",
+		"Buffer": "buffer.Buffer",
 		"require": {
 			"!type": "fn(name: String) -> Object"
 		},
