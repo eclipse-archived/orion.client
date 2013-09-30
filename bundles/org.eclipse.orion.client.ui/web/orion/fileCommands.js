@@ -149,9 +149,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		}
 
 		commandRegistry.renderCommands(toolbar.id, toolbar, toolbarItem, explorer, "button"); //$NON-NLS-0$
-		if (lastItemLoaded.Location) {
-			commandRegistry.processURL(window.location.href);
-		} 
 		if (selectionToolbarId) {
 			updateSelectionTools(null, explorer.treeRoot);
 		}
