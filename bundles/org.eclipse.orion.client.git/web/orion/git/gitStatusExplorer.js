@@ -167,7 +167,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 				var resp = JSON.parse(error.responseText);
 				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
 			} catch (Exception) {
-				display.Message = error.message;
+				display.Message = error.DetailedMessage || error.Message || error.message;
 			}
 			this.registry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 
@@ -863,7 +863,8 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 								}
 							);
 						}
-					});
+					},
+					that.handleError.bind(that));
 		};
 
 		GitStatusExplorer.prototype.renderNoCommit = function() {
