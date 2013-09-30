@@ -2458,6 +2458,50 @@ define([
 		]);
 	};
 
+	tests["test node15"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"buffer.IN", "IN"
+		);
+		return testProposals(results, [
+			["INSPECT_MAX_BYTES", "INSPECT_MAX_BYTES : Number"]
+		]);
+	};
+
+	tests["test node16"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"var x = new Buffer(10);\n" +
+			"x.c", "c"
+		);
+		return testProposals(results, [
+			["copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd])", "copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd]) : undefined"]
+		]);
+	};
+
+	tests["test node17"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"var x = new buffer.Buffer(10);\n" +
+			"x.c", "c"
+		);
+		return testProposals(results, [
+			["copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd])", "copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd]) : undefined"]
+		]);
+	};
+
+
+	tests["test node18"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"Buffer.is", "is"
+		);
+		return testProposals(results, [
+			["isBuffer(obj)", "isBuffer(obj) : undefined"],
+			["isEncoding(encoding)", "isEncoding(encoding) : undefined"]
+		]);
+	};
+
 
 	////////////////////////////////////////
 	// jsdoc tests

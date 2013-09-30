@@ -323,14 +323,14 @@ define("plugins/esprima/typesFromIndexFile", ["orion/Deferred", "plugins/esprima
 			if (type.slice(0,1) === "+") {
 				type = type.slice(1,type.length) + "..prototype";
 			}
-			return name ? new typeUtils.Definition(name) : new typeUtils.Definition(type);
+			return new typeUtils.Definition(type);
 		} else { // an object type
 			var parsed = parseObjType(type, name);
 			var newTypeName = parsed.def.typeObj.name;
 			// here we check if type["!type"] is a plain type name.  if so,
 			// we just have an empty type description for it (with no
 			// properties), and there is no need to update the type object
-			if (newTypeName && !emptyTypeName(type["!type"])) {
+			if (newTypeName && newTypeName !== "Global" && !emptyTypeName(type["!type"])) {
 				if (newTypeName === "Object") {
 					// need to mangle the property names as in original types.js
 					var mangled = {};
@@ -374,7 +374,6 @@ define("plugins/esprima/typesFromIndexFile", ["orion/Deferred", "plugins/esprima
 	 * adds the info from the given json index file.  global variables are added to globals,
 	 * and type information to typeInfo
 	 */
-
 	function addIndexInfo(json, globals, typeInfo) {
 		var p;
 		for (p in json) {
@@ -394,7 +393,9 @@ define("plugins/esprima/typesFromIndexFile", ["orion/Deferred", "plugins/esprima
 						}
 					}
 				} else if (typeof json[p] === "string") {
-					globals[p] = json[p] === "<top>" ? new typeUtils.Definition("Global") : new typeUtils.Definition(json[p]);
+					var typeStr = json[p];
+					var typeObj = { "!type": typeStr };
+					globals[p] = definitionForType(typeInfo, typeObj, p);
 				} else {
 					// new global
 					var type = json[p];

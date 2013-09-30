@@ -150,10 +150,17 @@ define(["plugins/esprima/typesFromIndexFile", "plugins/esprima/typeEnvironment",
 			}
 		};
 		return checkEnvironment(index, function (env) {
-			var t = env.lookupTypeObj("x", "Fizz..prototype");
-			// TODO figureout out what to check here!!!
+			assert.equal("String", env.lookupTypeObj("x", "Fizz..prototype").name, "bad environment");
 		});
 	};
 	
+	tests["test top-level dot"] = function() {
+		var index = {
+			Fizz: "foo.bazz"
+		};
+		return checkEnvironment(index, function (env) {
+			assert.equal("foo..bazz", env.lookupTypeObj("Fizz").name, "bad environment");
+		});
+	};
 	return tests;
 });
