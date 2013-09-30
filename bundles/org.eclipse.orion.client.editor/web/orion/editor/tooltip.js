@@ -205,7 +205,7 @@ define("orion/editor/tooltip", [ //$NON-NLS-0$
 				var options = view.getOptions();
 				options.wrapMode = false;
 				options.parent = tooltipContents;
-				var tooltipTheme = "tooltip"; //$NON-NLS-0$
+				var tooltipTheme = "tooltipTheme"; //$NON-NLS-0$
 				var theme = options.themeClass;
 				if (theme) {
 					theme = theme.replace(tooltipTheme, "");

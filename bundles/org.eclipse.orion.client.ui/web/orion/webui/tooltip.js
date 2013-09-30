@@ -88,7 +88,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			if (!this._tip) {
 				this._tip = document.createElement("span"); //$NON-NLS-0$
 				this._tip.classList.add("tooltipContainer"); //$NON-NLS-0$
-				this._tipInner = document.createElement("span");  //$NON-NLS-0$
+				this._tipInner = document.createElement("div");  //$NON-NLS-0$
 				this._tipInner.classList.add("tooltip");  //$NON-NLS-0$
 				if (this._text) {
 					var textNode = document.createTextNode(this._text);
@@ -206,8 +206,6 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			}
 			this._tip.style.top = top + "px"; //$NON-NLS-0$
 			this._tip.style.left = left + "px"; //$NON-NLS-0$ 
-			this._tip.style.width = tipRect.width + "px"; //$NON-NLS-0$ 
-			this._tip.style.height = tipRect.height + "px"; //$NON-NLS-0$ 
 			return true;
 		},
 		

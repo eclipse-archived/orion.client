@@ -1,9 +1,9 @@
-.tooltip.textview {
+.tooltipTheme.textview {
 	background-color: InfoBackground !important;
 	color: InfoText !important;
 }
 
-.tooltip .textviewScroll {
+.tooltipTheme .textviewScroll {
 	padding: 0px;
 }
 
@@ -38,6 +38,6 @@
 	float: right;
 }
 
-.tooltip .annotationLine.currentLine {
+.tooltipTheme .annotationLine.currentLine {
 	background-color: transparent !important;
 }
