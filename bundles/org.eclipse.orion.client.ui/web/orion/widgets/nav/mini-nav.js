@@ -199,9 +199,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				var postExpand = function (startIndex) {
 					if (startIndex < 0) {
 						_self.reveal(fileMetadata);
-						if (fileMetadata.Directory) {
-							tree.expand(fileMetadata);
-						}
 						return;
 					}
 					tree.expand(fileMetadata.Parents[startIndex], postExpand, [startIndex-1]);
