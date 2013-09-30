@@ -164,6 +164,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/PageU
 		 * @param {String} message The progress message to display. 
 		 */
 		setProgressMessage : function(message) {
+			this._clickToDisMiss = false;
 			this._init();
 			this.currentMessage = message;
 			var image = document.createElement("span"); //$NON-NLS-0$
