@@ -56,8 +56,8 @@
 
 	<properties>
 		<orion-version>1.0.0-SNAPSHOT</orion-version>
-		<tycho-version>0.17.0</tycho-version>
-		<tycho-extras-version>0.17.0</tycho-extras-version>
+		<tycho-version>0.18.1</tycho-version>
+		<tycho-extras-version>0.18.1</tycho-extras-version>
 		<tycho.scmUrl>scm:git:http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git</tycho.scmUrl>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java-version>1.6</java-version>
@@ -90,7 +90,7 @@
 	        <version>v20130411</version>
 	    </dependency>
 	</dependencies>
-	
+
 	<repositories>
 		<repository>
 			<id>eclipse-license</id>
@@ -105,10 +105,10 @@
 		<module>bundles/org.eclipse.orion.client.git</module>
 		<module>bundles/org.eclipse.orion.client.ui</module>
 		<module>bundles/org.eclipse.orion.client.users</module>
-		
+
 		<module>doc/org.eclipse.orion.doc.isv</module>
 		<module>doc/org.eclipse.orion.doc.user</module>
-		
+
 		<module>features/org.eclipse.orion.client-feature</module>
 
 		<module>releng/org.eclipse.orion.client.repository</module>
@@ -179,7 +179,7 @@
 								    <target name="updateBuildLabel"/>
 									<target name="requirejs"/>
 								</ant>
-								
+
 								<!-- generate jsdocs -->
                                 <property name="jsdocHome"
                                     value="${jsdocHome}"/>
