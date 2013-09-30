@@ -402,6 +402,9 @@ exports.ExplorerNavHandler = (function() {
 					if (overflow === "hidden" || overflow === "auto" || overflow === "scroll") { break; }
 					offsetParent = offsetParent.parentNode;
 				}
+				if (!offsetParent) {
+					offsetParent = document.body;
+				}
 				var visible = true;
 				if(currentRowDiv.offsetTop <= offsetParent.scrollTop){
 					visible = false;
