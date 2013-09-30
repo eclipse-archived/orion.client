@@ -83,6 +83,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot,
 					serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandRegistry});
 				mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, "pageActions", "selectionTools", explorer.treeRoot, true); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.processURL(window.location.href);
 			});
 		}
 		refresh();
@@ -147,6 +148,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 			});
 			// Must happen after the above call, so that all the open with commands are registered when we create our navigation links.
 			new mNavOutliner.NavigationOutliner({parent: "fileSystems", commandService: commandRegistry, serviceRegistry: serviceRegistry}); //$NON-NLS-0$
+			
+			commandRegistry.processURL(window.location.href);
 		});
 
 		window.addEventListener("hashchange", function() {refresh();}, false); //$NON-NLS-0$
