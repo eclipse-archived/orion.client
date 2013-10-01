@@ -26,6 +26,7 @@ define({
 	"loadOutOfSync": "Resource is out of sync with the server. Do you want to load it anyway? This will overwrite your local changes.", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "Reading metadata of ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"Reading": "Reading ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLine": "Go to Line", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLineTooltip": "Go to specified line number", //$NON-NLS-1$ //$NON-NLS-0$

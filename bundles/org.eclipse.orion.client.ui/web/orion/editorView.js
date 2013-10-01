@@ -13,6 +13,7 @@
 /*global define */
 
 define([
+	'i18n!orion/edit/nls/messages',
 	'orion/editor/editor',
 	'orion/editor/textView',
 	'orion/editor/textModel',
@@ -35,6 +36,7 @@ define([
 	'orion/syntaxchecker',
 	'orion/objects'
 ], function(
+	messages,
 	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist, mEmacs, mVI,
 	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands,
@@ -120,6 +122,7 @@ define([
 				wrapOffset = marginOffset;
 			}
 			return {
+				readonly: this.readonly || this.inputManager.getReadOnly(),
 				tabSize: prefs.tabSize || 4,
 				expandTab: prefs.expandTab,
 				wrapMode: prefs.wordWrap,
@@ -199,8 +202,7 @@ define([
 				objects.mixin(options, {
 					parent: editorDomNode,
 					model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
-					wrappable: true,
-					readonly: readonly
+					wrappable: true
 				});
 				var textView = new mTextView.TextView(options);
 				return textView;
@@ -319,6 +321,9 @@ define([
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
+				if (inputManager.getReadOnly()) {
+					editor.reportStatus(messages.readonly, "error"); //$NON-NLS-0$
+				}
 			});
 
 			var contextImpl = {};

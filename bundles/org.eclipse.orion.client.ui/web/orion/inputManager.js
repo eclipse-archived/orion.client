@@ -138,6 +138,7 @@ define([
 					}
 					var contentOrError = results[0];
 					var metadataOrError = results[1];
+					editor.reportStatus("");
 					if (contentOrError._error || metadataOrError._error) {
 						var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 						handleError(statusService, contentOrError._error || metadataOrError._error);
@@ -151,7 +152,6 @@ define([
 						}
 						this._setInputContents(this._parsedLocation, fileURI, content, metadataOrError);
 					}
-					editor.reportStatus("");
 				}.bind(this));
 			}
 		},
@@ -172,6 +172,10 @@ define([
 		},
 		getFileMetadata: function() {
 			return this._fileMetadata;
+		},
+		getReadOnly: function() {
+			var data = this._fileMetadata;
+			return !data || (data.Attributes && data.Attributes.ReadOnly);
 		},
 		getContentType: function() {
 			return this._contentType;
