@@ -137,7 +137,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		};
 		textView.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "contentAssist"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		textView.setAction("contentAssist", function() { //$NON-NLS-0$
-			if (!textView.getOptions("readonly")) {
+			if (!textView.getOptions("readonly")) { //$NON-NLS-0$
 				self.activate();
 			}
 			return true;
