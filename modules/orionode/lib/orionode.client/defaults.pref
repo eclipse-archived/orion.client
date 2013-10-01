@@ -10,5 +10,11 @@
 		"shell/plugins/shellPagePlugin.html":true,
 		"plugins/nodePlugin.html":true,
 		"search/plugins/searchPagePlugin.html":true
+	},
+	"/settingsContainer":{
+		"categories":{
+			"showUserSettings":false,
+			"showGitSettings":false
+		}
 	}
 }
