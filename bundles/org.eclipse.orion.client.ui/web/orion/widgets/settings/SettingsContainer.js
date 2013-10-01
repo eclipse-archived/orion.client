@@ -85,7 +85,8 @@ define([
 		show: function() {
 			var _self = this;
 			this.preferences.getPreferences('/settingsContainer').then(function(prefs){
-				if (prefs.showUserSettings === undefined || prefs.showUserSettings) {
+				var categories = prefs.get( 'categories' );
+				if (categories.showUserSettings === undefined || categories.showUserSettings) {
 					_self.settingsCategories.push({
 						id: "userSettings", //$NON-NLS-0$
 						textContent: messages["User Profile"],
@@ -93,7 +94,7 @@ define([
 					});
 				}
 				
-				if (prefs.showGitSettings === undefined || prefs.showGitSettings) {
+				if (categories.showGitSettings === undefined || categories.showGitSettings) {
 					_self.settingsCategories.push({
 						id: "gitSettings", //$NON-NLS-0$
 						textContent: messages["Git Settings"],
@@ -101,7 +102,7 @@ define([
 					});
 				}
 				
-				if (prefs.showEditorSettings === undefined || prefs.showEditorSettings) {
+				if (categories.showEditorSettings === undefined || categories.showEditorSettings) {
 					_self.settingsCategories.push({
 						id: "editorSettings", //$NON-NLS-0$
 						textContent: messages.Editor,
@@ -109,7 +110,7 @@ define([
 					});
 				}
 				
-				if (prefs.showThemeSettings === undefined || prefs.showThemeSettings) {
+				if (categories.showThemeSettings === undefined || categories.showThemeSettings) {
 					_self.settingsCategories.push({
 						id: "themeBuilder", //$NON-NLS-0$
 						textContent: messages["UI Theme"],
@@ -117,7 +118,7 @@ define([
 					});
 				}
 				
-				if (prefs.showPluginSettings === undefined || prefs.showPluginSettings) {
+				if (categories.showPluginSettings === undefined || categories.showPluginSettings) {
 					_self.settingsCategories.push({
 						id: "plugins", //$NON-NLS-0$
 						textContent: messages["Plugins"],
