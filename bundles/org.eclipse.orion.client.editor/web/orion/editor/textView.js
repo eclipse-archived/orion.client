@@ -4720,9 +4720,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			div.style.position = "relative"; //$NON-NLS-0$
 			div.style.cssFloat = "left"; //$NON-NLS-0$
 			div.style.styleFloat = "left"; //$NON-NLS-0$
-			div.style.borderWidth = "0px"; //$NON-NLS-0$
-			div.style.margin = "0px"; //$NON-NLS-0$
-			div.style.padding = "0px"; //$NON-NLS-0$
 			div.style.outline = "none"; //$NON-NLS-0$
 			if (index === undefined || index < 0 || index >= rulerParent.children.length) {
 				rulerParent.appendChild(div);
