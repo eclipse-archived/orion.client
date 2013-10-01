@@ -481,7 +481,10 @@ define([
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			var makeCommand = function(info, service, options) {
 				options.visibleWhen = function() {
-					return !!editor.getTextView();
+					if (!editor.getTextView() || self.inputManager.getReadOnly()) {
+						return false;
+					}
+					return true;
 				};
 				options.callback = function(data) {
 					// command service will provide editor parameter but editor widget callback will not
