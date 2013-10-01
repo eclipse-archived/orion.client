@@ -85,7 +85,7 @@ define([
 		show: function() {
 			var _self = this;
 			this.preferences.getPreferences('/settingsContainer').then(function(prefs){
-				var categories = prefs.get( 'categories' );
+				var categories = prefs.get( 'categories' ) || {};
 				if (categories.showUserSettings === undefined || categories.showUserSettings) {
 					_self.settingsCategories.push({
 						id: "userSettings", //$NON-NLS-0$
