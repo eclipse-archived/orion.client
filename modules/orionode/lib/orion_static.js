@@ -42,6 +42,8 @@ exports = module.exports = function(options) {
 	return connect(
 		statik(path.resolve(orionClientRoot, './bundles/org.eclipse.orion.client.core/web'), options),
 		statik(path.resolve(orionClientRoot, './bundles/org.eclipse.orion.client.editor/web'), options),
-		statik(path.resolve(orionClientRoot, './bundles/org.eclipse.orion.client.ui/web'), options)
+		statik(path.resolve(orionClientRoot, './bundles/org.eclipse.orion.client.ui/web'), options),
+		statik(path.resolve(orionClientRoot, './bundles/org.eclipse.orion.client.git/web'), options),
+		statik(path.resolve(orionClientRoot, './bundles/org.eclipse.orion.client.users/web'), options)
 	);
 };
