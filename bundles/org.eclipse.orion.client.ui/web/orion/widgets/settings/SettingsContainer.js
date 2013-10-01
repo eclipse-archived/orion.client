@@ -57,34 +57,14 @@ define([
 		 * @returns {orion.Promise}
 		 */
 		loadTranslatedPluginSettings: function() {
-			function byLabel(a, b) {
-				return a.label.localeCompare(b.label);
-			}
-
-			var settingsRegistry = this.settingsRegistry;
-			return settingsRegistry.loadI18n().then(function() {
-				var categories = settingsRegistry.getCategories();
-				var data = categories.map(function(category, i) {
-					return {
-						category: category,
-						label: settingsRegistry.getCategoryLabel(category) || messages[category] || category
-					};
-				});
-				var _self = this;
-				data.sort(byLabel).forEach(function(currData) {
-					var category = currData.category;
-					_self.settingsCategories.push({
-						id: category,
-						textContent: currData.label,
-						show: _self.showPluginSettings.bind(_self, category)
-					});
-				});
-			}.bind(this));
+			return this.settingsRegistry.loadI18n();
 		},
 
 		show: function() {
 			var _self = this;
-			this.preferences.getPreferences('/settingsContainer').then(function(prefs){
+
+			Deferred.all([this.preferences.getPreferences('/settingsContainer'), this.loadTranslatedPluginSettings()]).then(function(results){
+				var prefs = results[0];
 				var categories = prefs.get( 'categories' ) || {};
 				if (categories.showUserSettings === undefined || categories.showUserSettings) {
 					_self.settingsCategories.push({
@@ -118,32 +98,27 @@ define([
 					});
 				}
 				
-				if (categories.showPluginSettings === undefined || categories.showPluginSettings) {
-					_self.settingsCategories.push({
-						id: "plugins", //$NON-NLS-0$
-						textContent: messages["Plugins"],
-						show: _self.showPlugins
-					});
-				}
-				
-				_self.settingsCategories.forEach(function(item) {
-					item.show = item.show.bind(_self, item.id);
-				}.bind(_self));
-	
-				// Add extension categories
-				_self.settingsRegistry.getCategories().sort().forEach(function(category, i) {
+				// Add plugin-contributed extension categories
+				var settingsRegistry = _self.settingsRegistry;
+				settingsRegistry.getCategories().map(function(category, i) {
+					return {
+						category: category,
+						label: settingsRegistry.getCategoryLabel(category) || messages[category] || category
+					};
+				}).sort(function byLabel(a, b) {
+					return a.label.localeCompare(b.label);
+				}).forEach(function(currData) {
+					var category = currData.category;
 					_self.settingsCategories.push({
 						id: category,
-						textContent: messages[category] || category,
+						textContent: currData.label,
 						show: _self.showPluginSettings.bind(_self, category)
 					});
-				}.bind(_self));
-				
+				});
+
 				_self.itemToIndexMap = {};
 				_self.toolbar = lib.node( _self.pageActions );
 	
-				// We may still be initializing the settings asynchronously in manageDefaultData, so we do not want
-				// to build the UI until there are settings to be found there.
 				_self.manageDefaultData(prefs);
 				
 				_self.drawUserInterface();
@@ -433,19 +408,11 @@ define([
 			console.log( error );
 		},
 
-		/**
-		 * Performs asnyc initialization work that has to finish before we can render the UI.
-		 * @returns {orion.Promise}
-		 */
 		manageDefaultData: function(prefs) {
-			if (this.defaultDataPromise) {
-				return this.defaultDataPromise;
-			}
 			var selection = prefs.get( 'selection' );
 			if (!selection) {
 				prefs.put( 'selection', 'userSettings' );
 			}
-			this.loadTranslatedPluginSettings();
 		}
 	});
 	return SettingsContainer;
