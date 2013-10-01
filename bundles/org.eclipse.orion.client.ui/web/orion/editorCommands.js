@@ -271,7 +271,7 @@ define([
 				tooltip: messages.saveFile,
 				id: "orion.save", //$NON-NLS-0$
 				visibleWhen: function() {
-					if (!editor.getTextView() || (self.inputManager.getReadOnly())) {
+					if (!editor.getTextView() || self.inputManager.getReadOnly()) {
 						return false;
 					}
 					return !self.editorSettings || !self.editorSettings().autoSave;
