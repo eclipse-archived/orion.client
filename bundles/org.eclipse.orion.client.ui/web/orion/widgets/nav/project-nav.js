@@ -55,7 +55,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 							children.push({Dependency: parentItem.Dependencies[i]});
 						}
 					}
-					onComplete(self.processParent(parentItem, children));
+					onComplete(children);
 				});
 			} else if(parentItem.Dependency){
 				if(parentItem.FileMetadata){
@@ -123,6 +123,14 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		onFileModelChange: function(event) {
 			var oldValue = event.oldValue, newValue = event.newValue;
 			// Detect if we moved/renamed/deleted the current file being edited, or an ancestor thereof.
+			if(oldValue.ChildrenLocation === this.treeRoot.ContentLocation){
+				this.sidebarNavInputManager.dispatchEvent({
+					type: "editorInputMoved", //$NON-NLS-0$
+					parent: newValue ? (newValue.ChildrenLocation || newValue.ContentLocation) : null,
+					newInput: newValue ? (newValue.ChildrenLocation || newValue.ContentLocation) : null
+				});
+				return;
+			}
 			var editorFile = this.editorInputManager.getFileMetadata();
 			if (!editorFile) {
 				return;
@@ -139,10 +147,15 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				var newInput;
 				if (affectedAncestor.Location === editorFile.Location) {
 					// Current file was the target, see if we know its new name
-					newInput = (newValue && newValue.Location) || null;
+					newInput = (newValue && newValue.ContentLocation) ||(newValue && newValue.ChildrenLocation) || (newValue && newValue.Location) || null;
 				} else {
 					newInput = null;
 				}
+				this.sidebarNavInputManager.dispatchEvent({
+					type: "editorInputMoved", //$NON-NLS-0$
+					parent: this.treeRoot.ChildrenLocation,
+					newInput: newInput
+				});
 			}
 		},
 		destroy: function() {
@@ -328,6 +341,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			}
 		},
 		changedItem: function(item, forceExpand){
+			if(item.Projects){
+				return;
+			}
 			var res;
 			if(item.Location || forceExpand){
 				res =  FileExplorer.prototype.changedItem.call(this, item, forceExpand);
@@ -383,6 +399,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			});
 		},
 		updateRow: function(item, tableRow){
+			if(!tableRow){
+				return;
+			}
 			lib.empty(tableRow);
 			var i = 0;
 			var cell = this.getCellElement(i, item, tableRow);
