@@ -49,39 +49,7 @@ define([
 		var getPluginsRefs = this.registry.getServiceReferences("orion.core.getplugins"); //$NON-NLS-0$
 		this.pluginsUri = getPluginsRefs[0] && getPluginsRefs[0].getProperty("uri"); //$NON-NLS-0$
 
-		this.settingsCategories = [
-			{
-				id: "userSettings", //$NON-NLS-0$
-				textContent: messages["User Profile"],
-				show: this.showUserSettings
-			},
-			{
-				id: "gitSettings", //$NON-NLS-0$
-				textContent: messages["Git Settings"],
-				show: this.showGitSettings
-			},
-			{
-				id: "themeBuilder", //$NON-NLS-0$
-				textContent: messages["UI Theme"],
-				show: this.showThemeBuilder
-			},
-			{
-				id: "editorSettings", //$NON-NLS-0$
-				textContent: messages.Editor,
-				show: this.showEditor
-			},
-			{
-				id: "plugins", //$NON-NLS-0$
-				textContent: messages["Plugins"],
-				show: this.showPlugins
-			}];
-
-		this.settingsCategories.forEach(function(item) {
-			item.show = item.show.bind(this, item.id);
-		}.bind(this));
-
-		// Kick off async work
-		this.manageDefaultData();
+		this.settingsCategories = [];
 	}
 	SettingsContainer.prototype = Object.create(superPrototype);
 	objects.mixin(SettingsContainer.prototype, {
@@ -115,18 +83,74 @@ define([
 		},
 
 		show: function() {
-			this.itemToIndexMap = {};
-			this.toolbar = lib.node( this.pageActions );
-
-			// We may still be initializing the settings asynchronously in manageDefaultData, so we do not want
-			// to build the UI until there are settings to be found there.
-			this.manageDefaultData().then(function() {
-				this.drawUserInterface();
-
-				window.addEventListener("hashchange", this.processHash.bind(this)); //$NON-NLS-0$
-
-				mGlobalCommands.setPageTarget({task: 'Settings', serviceRegistry: this.registry, commandService: this.commandService});
-			}.bind(this));
+			var _self = this;
+			this.preferences.getPreferences('/settingsContainer').then(function(prefs){
+				if (prefs.showUserSettings === undefined || prefs.showUserSettings) {
+					_self.settingsCategories.push({
+						id: "userSettings", //$NON-NLS-0$
+						textContent: messages["User Profile"],
+						show: _self.showUserSettings
+					});
+				}
+				
+				if (prefs.showGitSettings === undefined || prefs.showGitSettings) {
+					_self.settingsCategories.push({
+						id: "gitSettings", //$NON-NLS-0$
+						textContent: messages["Git Settings"],
+						show: _self.showGitSettings
+					});
+				}
+				
+				if (prefs.showEditorSettings === undefined || prefs.showEditorSettings) {
+					_self.settingsCategories.push({
+						id: "editorSettings", //$NON-NLS-0$
+						textContent: messages.Editor,
+						show: _self.showEditor
+					});
+				}
+				
+				if (prefs.showThemeSettings === undefined || prefs.showThemeSettings) {
+					_self.settingsCategories.push({
+						id: "themeBuilder", //$NON-NLS-0$
+						textContent: messages["UI Theme"],
+						show: _self.showThemeBuilder
+					});
+				}
+				
+				if (prefs.showPluginSettings === undefined || prefs.showPluginSettings) {
+					_self.settingsCategories.push({
+						id: "plugins", //$NON-NLS-0$
+						textContent: messages["Plugins"],
+						show: _self.showPlugins
+					});
+				}
+				
+				_self.settingsCategories.forEach(function(item) {
+					item.show = item.show.bind(_self, item.id);
+				}.bind(_self));
+	
+				// Add extension categories
+				_self.settingsRegistry.getCategories().sort().forEach(function(category, i) {
+					_self.settingsCategories.push({
+						id: category,
+						textContent: messages[category] || category,
+						show: _self.showPluginSettings.bind(_self, category)
+					});
+				}.bind(_self));
+				
+				_self.itemToIndexMap = {};
+				_self.toolbar = lib.node( _self.pageActions );
+	
+				// We may still be initializing the settings asynchronously in manageDefaultData, so we do not want
+				// to build the UI until there are settings to be found there.
+				_self.manageDefaultData(prefs);
+				
+				_self.drawUserInterface();
+	
+				window.addEventListener("hashchange", _self.processHash.bind(_self)); //$NON-NLS-0$
+	
+				mGlobalCommands.setPageTarget({task: 'Settings', serviceRegistry: _self.registry, commandService: _self.commandService});
+			});
 		},
 		
 		processHash: function() {
@@ -134,7 +158,7 @@ define([
 			
 			var container = this;
 			
-			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
+			this.preferences.getPreferences('/settingsContainer').then(function(prefs){
 
 				var selection = prefs.get( 'selection' );
 
@@ -346,7 +370,7 @@ define([
 		},
 		
 		selectCategory: function(id) {
-			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
+			this.preferences.getPreferences('/settingsContainer').then(function(prefs){
 				prefs.put( 'selection', id );
 			} );
 
@@ -412,20 +436,15 @@ define([
 		 * Performs asnyc initialization work that has to finish before we can render the UI.
 		 * @returns {orion.Promise}
 		 */
-		manageDefaultData: function() {
+		manageDefaultData: function(prefs) {
 			if (this.defaultDataPromise) {
 				return this.defaultDataPromise;
 			}
-			this.defaultDataPromise = Deferred.all([
-				this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
-					var selection = prefs.get( 'selection' );
-
-					if (!selection) {
-						prefs.put( 'selection', 'userSettings' );
-					}
-				}),
-				this.loadTranslatedPluginSettings()
-			], function(error) { return error; });
+			var selection = prefs.get( 'selection' );
+			if (!selection) {
+				prefs.put( 'selection', 'userSettings' );
+			}
+			this.loadTranslatedPluginSettings();
 		}
 	});
 	return SettingsContainer;
