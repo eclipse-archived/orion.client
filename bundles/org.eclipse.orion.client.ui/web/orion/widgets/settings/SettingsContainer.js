@@ -97,7 +97,19 @@ define([
 						show: _self.showThemeBuilder
 					});
 				}
-				
+
+				if (categories.showPluginSettings === undefined || categories.showPluginSettings) {
+					_self.settingsCategories.push({
+						id: "plugins", //$NON-NLS-0$
+						textContent: messages["Plugins"],
+						show: _self.showPlugins
+					});
+				}
+
+				_self.settingsCategories.forEach(function(item) {
+					item.show = item.show.bind(_self, item.id);
+				}.bind(_self));
+
 				// Add plugin-contributed extension categories
 				var settingsRegistry = _self.settingsRegistry;
 				settingsRegistry.getCategories().map(function(category, i) {
