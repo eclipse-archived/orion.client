@@ -920,6 +920,10 @@ input {
 .folderNav tr:last-child {
 	border-bottom: 1px solid lightgrey;
 }
+.folderNav th:first-child {
+	padding-top: 9px;
+	padding-bottom: 9px;
+}
 .folderNav th {
 	border-bottom: 1px solid lightgrey;
 	border-top: 1px solid lightgrey;
