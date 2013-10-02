@@ -750,11 +750,16 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 			}, {name: messages.viI});
 			
 			view.setAction("vi-O", function() { //$NON-NLS-0$
-				return self._toInsertMode("enter", {insert:"above"}); //$NON-NLS-1$ //$NON-NLS-0$
+				self._invoke("lineUp"); //$NON-NLS-0$
+				self._invoke("lineEnd"); //$NON-NLS-0$
+				self._toInsertMode("enter"); //$NON-NLS-0$
+				return true;
 			}, {name: messages.viO});
 			
 			view.setAction("vi-o", function() { //$NON-NLS-0$
-				return self._toInsertMode("enter", {insert:"below"}); //$NON-NLS-1$ //$NON-NLS-0$
+				self._invoke("lineEnd"); //$NON-NLS-0$
+				self._toInsertMode("enter"); //$NON-NLS-0$
+				return true;
 			}, {name: messages.vio});
 			
 			view.setAction("vi-R", function() { //$NON-NLS-0$
