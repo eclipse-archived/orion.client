@@ -926,19 +926,6 @@ input {
 .folderNav tr:last-child {
 	border-bottom: 1px solid lightgrey;
 }
-.folderNav th:first-child {
-	padding-top: 9px;
-	padding-bottom: 9px;
-}
-.folderNav th {
-	border-bottom: 1px solid lightgrey;
-	border-top: 1px solid lightgrey;
-	background: none repeat scroll 0 0 whitesmoke;
-	vertical-align: middle;
-	font-weight: normal;
-	padding: 6px;
-	color: grey;
-}
 
 orionMarkdown td, .orionProject td {
 	border-bottom: 1px solid lightgrey;
@@ -951,12 +938,17 @@ orionMarkdown td, .orionProject td {
 	border: 1px solid lightgrey;
 }
 
-.orionMarkdown th, .orionProject th {
+.folderNav th, .orionMarkdown th, .orionProject th {
 	border-bottom: 1px solid lightgrey;
 	border-top: 1px solid lightgrey;
 	background: none repeat scroll 0 0 whitesmoke;
+	vertical-align: middle;
 	font-weight: normal;
 	padding: 6px;
-	color: grey;
+	color: gray;
+}
+.folderNav th:first-child, .orionMarkdown th:first-child, .orionProject th:first-child {
+	padding-top: 9px;
+	padding-bottom: 9px;
 }
 
