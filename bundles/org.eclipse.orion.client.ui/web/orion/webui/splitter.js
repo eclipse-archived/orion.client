@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -10,28 +10,36 @@
  ******************************************************************************/
 /*global window define document localStorage */
 
-define(['require', 'orion/EventTarget', 'orion/webui/littlelib'], function(require, EventTarget, lib) {
+define([
+	'require',
+	'orion/EventTarget',
+	'orion/webui/littlelib'
+], function(require, EventTarget, lib) {
 
 	var MIN_SIDE_NODE_WIDTH = 5;//The minimium width/height of the splitted nodes by the splitter
+
 	/**
-	 * Constructs a new Splitter with the given options.  A splitter manages the layout
+	 * @name orion.webui.Splitter
+	 * @class A splitter manages the layout of two panels, a side panel and a main panel.
+	 * @description Constructs a new Splitter with the given options.  A splitter manages the layout
 	 * of two panels, a side panel and a main panel.  An optional toggle button can open or close the
 	 * side panel.
 	 *
-	 * The relative proportions of the side and main panels are determined by the position of the splitter bar
-	 * in the document.  The panels will pin themselves to the splitter by default.  Once the user moves
-	 * the splitter, the positions are remembered.
+	 * <p>The relative proportions of the side and main panels are determined by the initial style of
+	 * the splitter bar in the document. The panels will pin themselves to the splitter by default.
+	 * Once the user moves the splitter, the positions are remembered.</p>
+	 *
+	 * <p>By default, a splitter is open. The client can create a closed splitter by setting a 
+	 * <code>data-initial-state</code> attribute with value <code>"closed"</code> on the 
+	 * splitter's <code>node</code> element.</p>
 	 *
 	 * @param {Object} options The options object which must specify the split dom node
-	 * @param options.node The node for the splitter presentation.  Required.
-	 * @param options.sidePanel The node for the side (toggling) panel.  Required.
-	 * @param options.mainPanel The node for the main panel.  Required.
-	 * @param options.toggle Specifies that the side node should be able to toggle.  Optional.
-	 * @param options.vertical Specifies that the nodes are stacked vertically rather than horizontal.
-	 * @name orion.splitter.Splitter
-	 * 
-	 * @class A splitter manages the layout of two panels, a side panel and a main panel.
-	 * @name orion.splitter.Splitter
+	 * @param {Element} options.node The node for the splitter presentation.  Required.
+	 * @param {Element} options.sidePanel The node for the side (toggling) panel.  Required.
+	 * @param {Element} options.mainPanel The node for the main panel.  Required.
+	 * @param {Boolean} [options.toggle=false] Specifies that the side node should be able to toggle.
+	 * @param {Boolean} [options.vertical=false] Specifies that the nodes are stacked vertically rather than horizontal.
+	 *
 	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
 	 * @borrows orion.editor.EventTarget#removeEventListener as #removeEventListener
 	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
@@ -40,7 +48,7 @@ define(['require', 'orion/EventTarget', 'orion/webui/littlelib'], function(requi
 		EventTarget.attach(this);
 		this._init(options);
 	}
-	Splitter.prototype = /** @lends orion.splitter.Splitter.prototype */ {
+	Splitter.prototype = /** @lends orion.webui.Splitter.prototype */ {
 
 		_init: function(options) {
 			this._tracking = null;
@@ -59,12 +67,15 @@ define(['require', 'orion/EventTarget', 'orion/webui/littlelib'], function(requi
 				this._thumb.classList.add("splitThumb"); //$NON-NLS-0$
 				this._thumb.classList.add(this._vertical ? "splitVerticalThumbLayout" : "splitThumbLayout"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			this._closeByDefault = options.closeByDefault;
+			this._closeByDefault = this.$node.getAttribute("data-initial-state") === "closed"; //$NON-NLS-1$ //$NON-NLS-0$
+			if (typeof options.closeByDefault !== "undefined") { //$NON-NLS-0$
+				this._closeByDefault = options.closeByDefault; // param overrides page's initial-state
+			}
 			this._initializeFromStoredSettings();
 
 			if (this._closed) {
-				this._closed = false;  // _thumbDown will toggle it, so turn it off and then call _thumbDown.
-				this._thumbDown(true);
+				this._closed = false;        // _thumbDown will toggle it, so turn it off and then call _thumbDown.
+				this._thumbDown(true, true); // do not animate. do not persist the initial state
 			} else {
 				this._adjustToSplitPosition();
 			}
@@ -110,28 +121,41 @@ define(['require', 'orion/EventTarget', 'orion/webui/littlelib'], function(requi
 		 * We use local storage vs. prefs because we don't presume the user wants the same window positioning across browsers and devices.
 		 */
 		_initializeFromStoredSettings: function() {
-			if (!this._closeByDefault) {
-				this._closed = this._closedByDefault;
-				localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
+			var closedState = localStorage.getItem(this._prefix+"/toggleState"); //$NON-NLS-0$
+			if (typeof closedState === "string") { //$NON-NLS-0$
+				this._closed = closedState === "closed"; //$NON-NLS-0$
 			} else {
-				var closedState = localStorage.getItem(this._prefix+"/toggleState"); //$NON-NLS-0$
-				this._closed = closedState === "closed" || false; //$NON-NLS-0$
+				this._closed = this._closeByDefault;
 			}
+
 			var pos;
 			if (this._vertical) {
 				pos = localStorage.getItem(this._prefix+"/yPosition"); //$NON-NLS-0$
 				if (pos) {
 					this._splitTop = parseInt(pos, 10);
-				} else if (this._closeByDefault ) {
-					this._splitTop = 150;
+				} else if (this._closeByDefault) {
+					this._initialSplit = this._getSplitPosition();
+					this._splitTop = 0;
 				}
 			} else {
 				pos = localStorage.getItem(this._prefix+"/xPosition"); //$NON-NLS-0$
 				if (pos) {
 					this._splitLeft = parseInt(pos, 10);
-				} else if (this._closeByDefault ) {
-					this._splitLeft = 150;
+				} else if (this._closeByDefault) {
+					this._initialSplit = this._getSplitPosition();
+					this._splitLeft = 0;
 				}
+			}
+		},
+
+		// Gets the current splitter position from the style
+		_getSplitPosition: function() {
+			var rect = lib.bounds(this.$node);
+			var parentRect = lib.bounds(this.$node.parentNode);
+			if (this.vertical) {
+				return rect.top - parentRect.top;
+			} else {
+				return rect.left - parentRect.left;
 			}
 		},
 
@@ -207,13 +231,17 @@ define(['require', 'orion/EventTarget', 'orion/webui/littlelib'], function(requi
 			this.dispatchEvent({type: "toggle", closed: this._closed}); //$NON-NLS-0$
 		},
 
-		_thumbDown: function(noAnimation) {
+		_thumbDown: function(noAnimation, noUpdateStorage) {
 			if (!noAnimation) {
 				this._addAnimation();
 			}
 			var top = this._splitTop, left = this._splitLeft;
 			if (this._closed) {
 				this._closed = false;
+				// Expanding: restore initial size from style if present
+				if (!this._splitLeft && !this._splitTop && typeof this._initialSplit === "number") { //$NON-NLS-0$
+					top = left = this._initialSplit;
+				}
 			} else {
 				this._closed = true;
 				top = left = 0;
@@ -229,7 +257,9 @@ define(['require', 'orion/EventTarget', 'orion/webui/littlelib'], function(requi
 			if (!noAnimation) {
 				this._removeAnimation();
 			}
-			localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
+			if (!noUpdateStorage) {
+				localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
+			}
 			var self = this;
 			window.setTimeout(function() {
 				self._notifyToggleListeners();
