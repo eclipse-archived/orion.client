@@ -433,7 +433,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				span.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 				col.appendChild(span);
 				col.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
-				span.className = "mainNavColumn"; //$NON-NLS-0$
+				span.className = "mainNavColumn projectInformationNode"; //$NON-NLS-0$
 					// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var image = this.getExpandImage(tableRow, span);
 				var nameText = item.Dependency ? item.Dependency.Name : (item.Project ? item.Project.Name : item.Name);

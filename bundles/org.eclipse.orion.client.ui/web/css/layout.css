@@ -112,7 +112,7 @@ hard-coded numbers elsewhere.
 	clear: both;
 	overflow: hidden;
     position: absolute;
-    top: 36px;
+    top: 37px;
 	bottom: 36px; /* $FooterHeight + footer border (1px) */
     left: 0;
     width: 100%;
@@ -264,12 +264,13 @@ hard-coded numbers elsewhere.
 	top: 0;
 	height: 100%;
 	width: 100%;
-	min-width: 140px;
+	min-width:140px;
+
 }
 
 .toolbarTarget {
 	position: absolute;
-	top: 37px;  /* $ToolbarHeight + 1 */
+	top: 36px;  /* $ToolbarHeight + 1 */
  	width: 100%;
  	bottom: 0;
  	overflow-y: auto;
