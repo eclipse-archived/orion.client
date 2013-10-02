@@ -534,9 +534,9 @@ define([
 	 * @param searcher
 	 * @param handler
 	 * @param editor
-	 * @param defaultState {boolean} True if the default splitter state should be closed and false otherwise.
+	 * @param {Boolean} closeSplitter true to make the splitter's initial state "closed".
 	 */
-	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, defaultState) {
+	function generateBanner(parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor, closeSplitter) {
 		new mThemePreferences.ThemePreferences(prefsService, new mThemeData.ThemeData()).apply();
 
 		var parent = lib.node(parentId);
@@ -626,14 +626,12 @@ define([
 					side: side,
 					main: main
 				};
-				// For any page that defines the splitter style as "left:0%", we treate it as a collasped left pane as default.
-				var closeByDefault = defaultState || (splitNode.style && splitNode.style.left === "0%"); //$NON-NLS-0$
 				mainSplitter.splitter = new mSplitter.Splitter({
 					node: splitNode,
 					sidePanel: side,
 					mainPanel: main,
 					toggle: true,
-					closeByDefault: closeByDefault
+					closeByDefault: closeSplitter
 				});
 				var toggleSidePanelCommand = new mCommands.Command({
 					name: messages["Toggle side panel"],
