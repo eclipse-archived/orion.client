@@ -445,7 +445,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 	 * @param {Function} visibleWhen
 	 * @returns {orion.Promise}
 	 */
-	extensionCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, toolbarId, position, commandGroup, isNavigator, visibleWhen) {
+	extensionCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, toolbarId, position, commandGroup, isNavigator, visibleWhen, commandIdSuffix) {
 		var navCommands = (isNavigator ? "all" : undefined); //$NON-NLS-0$
 		var openWithCommands = !!isNavigator;
 		return extensionCommandUtils.createFileCommands(serviceRegistry, null, navCommands, openWithCommands).then(function(fileCommands) {
@@ -454,6 +454,8 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 			var openWithGroupCreated = false;
 			fileCommands.forEach(function(command) {
 				if (visibleWhen) {
+					//TODO - hack to be able to hide commands on folder nav
+					command.id += commandIdSuffix;
 					if (command.visibleWhen) {
 						var commandVisibleWhen = command.visibleWhen;
 						command.visibleWhen = function(item) {
