@@ -32,7 +32,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			mProjectCommands.createProjectCommands(this.serviceRegistry, this.commandService, this, this.fileClient, this.projectClient);
 			this.commandService.registerCommandContribution(this.redmeCommandsScope, "orion.project.edit.readme", 1); 
 			this.commandService.registerCommandContribution(this.redmeCommandsScope, "orion.project.create.readme", 2); 
-			this.commandService.addCommandGroup(this.allDependenciesActions, "orion.miniExplorerNavNewGroup", 1000, "Add", null, null, "core-sprite-addcontent"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.addCommandGroup(this.allDependenciesActions, "orion.miniExplorerNavNewGroup", 1000, "Add", null, null, "core-sprite-expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.registerCommandContribution(this.allDependenciesActions, "orion.project.addFolder", 1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
 			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
 			for(var i=0; i<dependencyTypes.length; i++){

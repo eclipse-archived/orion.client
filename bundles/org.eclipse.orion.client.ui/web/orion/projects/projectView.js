@@ -52,7 +52,7 @@ define(['orion/projects/projectExplorer',
 				}
 			},
 			createCommands: function(){
-				this.commandService.addCommandGroup(mProjectExplorer.newActionsScope, "orion.projectsNewGroup", 1, "Create Project", null, null, "core-sprite-addcontent"); //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandService.addCommandGroup(mProjectExplorer.newActionsScope, "orion.projectsNewGroup", 1, "Create Project", null, null, "core-sprite-expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
 				this.commandService.registerCommandContribution(mProjectExplorer.newActionsScope, "orion.project.create.basic", 1, "orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				this.commandService.registerCommandContribution(mProjectExplorer.newActionsScope, "orion.project.create.fromfile", 2, "orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				
