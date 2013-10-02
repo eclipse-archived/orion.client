@@ -391,7 +391,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			var choices = [];
 			var proposedPaths = [];
 			// All children of the root that are folders should be available for choosing.
-			var topLevel = explorer.treeRoot.Children;
+			var topLevel = explorer.treeRoot.Children || (explorer.treeRoot.Workspace ? explorer.treeRoot.Workspace.Children : {});
 			for (i=0; i<topLevel.length; i++) {
 				var child = topLevel[i];
 				child.stripped = child.stripped || (child.Directory ? stripPath(child.Location) : null);
