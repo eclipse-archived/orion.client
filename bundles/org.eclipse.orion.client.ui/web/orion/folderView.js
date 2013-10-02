@@ -11,6 +11,7 @@
 /*global define document window*/
 define([
 	'i18n!orion/edit/nls/messages',
+	'orion/globalCommands',
 	'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer',
 	'orion/selection',
@@ -24,7 +25,7 @@ define([
 	'orion/webui/littlelib',
 	'orion/objects',
 	'orion/projects/projectView'
-], function(messages, mExplorerTable, mNavigatorRenderer, Selection, FileCommands, ExtensionCommands, mKeyBinding, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, mProjectView) {
+], function(messages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, Selection, FileCommands, ExtensionCommands, mKeyBinding, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, mProjectView) {
 	
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
@@ -41,6 +42,7 @@ define([
 				cachePrefix: "FolderNavigator" //$NON-NLS-0$
 			}, explorer, options.commandRegistry, options.contentTypeRegistry);
 			renderer.showFolderImage = true;
+			renderer.selectionPolicy = "cursorOnly";
 			renderer.getCellHeaderElement = function(col_no) {
 				var td;
 				if (col_no === 0) {
@@ -105,7 +107,7 @@ define([
 			});
 		},
 		createActionSections: function(toolbar) {
-			[this.selectionActionsScope, this.newActionsScope].forEach(function(id) {
+			[this.newActionsScope, this.selectionActionsScope].forEach(function(id) {
 				if (!lib.node(id)) {
 					var elem = document.createElement("ul"); //$NON-NLS-0$
 					elem.id = id;
@@ -156,7 +158,19 @@ define([
 			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importSFTP" + this.commandsId, 4, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.exportSFTPCommand" + this.commandsId, 5, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
-			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.folderNavSelectionGroup", true);
+			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.folderNavSelectionGroup", true, this.commandsVisibleWhen);
+		},
+		commandsVisibleWhen: function(item) {
+			return mGlobalCommands.getMainSplitter().splitter.isClosed();
+		},
+		setCommandsVisible: function(visible) {
+			this.updateCommands();
+			var selectionPolicy = visible ? null : "cursorOnly"; //$NON-NLS-0$
+			this.renderer.selectionPolicy = selectionPolicy;
+			var navHandler = this.getNavHandler();
+			if (navHandler) {
+				navHandler.setSelectionPolicy(selectionPolicy);
+			}
 		},
 		updateCommands: function(selections) {
 			var toolbar = lib.node(this.toolbarId);
@@ -211,6 +225,13 @@ define([
 					commandService: this.commandService
 				});
 			}
+			mGlobalCommands.getMainSplitter().splitter.addEventListener("toggle", this._splitterToggleListener = function(e) { //$NON-NLS-0$
+				[this.markdownView, this.projectEditor, this.projectView, this.folderNavExplorer].forEach(function(view) {
+					if (view && view.setCommandsVisible) {
+						view.setCommandsVisible(e.closed);
+					}
+				});
+			}.bind(this));
 		},
 		displayWorkspaceView: function(){
 			var _self = this;
@@ -287,6 +308,7 @@ define([
 			}
 		},
 		destroy: function() {
+			mGlobalCommands.getMainSplitter().splitter.removeEventListener("toggle", this._splitterToggleListener); //$NON-NLS-0$
 			if (this.folderNavExplorer) {
 				this.folderNavExplorer.destroy();
 			}

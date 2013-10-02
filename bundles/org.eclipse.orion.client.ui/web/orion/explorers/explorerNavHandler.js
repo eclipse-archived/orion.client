@@ -119,6 +119,11 @@ exports.ExplorerNavHandler = (function() {
 	
 	ExplorerNavHandler.prototype = /** @lends orion.explorerNavHandler.ExplorerNavHandler.prototype */ {
 		
+		destroy: function() {
+			this._parentDiv.classList.remove("selectionModelContainer"); //$NON-NLS-0$
+			this.removeListeners();	
+		},
+		
 		_init: function(options){
 			this._linearGridMove = false;//temporary. If true right key on the last grid will go to first grid of next row
 			                            // Left key on the first grid will go to the last line grid of the previous line
@@ -227,6 +232,20 @@ exports.ExplorerNavHandler = (function() {
 			}
 			this._selections = [];
 			//this._selections.splice(0, this._selections.length);
+		},
+		
+		getSelectionPolicy: function() {
+			return this._selectionPolicy;
+		},
+		
+		setSelectionPolicy: function(policy) {
+			if (this._selectionPolicy === policy) {
+				return;
+			}
+			this._selectionPolicy = policy;
+			if(this._selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
+				this._clearSelection(true);
+			}
 		},
 		
 		setSelection: function(model, toggling){
