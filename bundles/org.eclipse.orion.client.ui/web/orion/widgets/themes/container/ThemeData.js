@@ -26,7 +26,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme', 'orion/wid
 		
 		
 		StyleSet.prototype.name = 'Orion';
-		StyleSet.prototype.navbar = '#333';
+		StyleSet.prototype.navbar = '#404648';
 		StyleSet.prototype.button = '#EFEFEF';
 		StyleSet.prototype.location = '#333';
 		StyleSet.prototype.breadcrumb = '#3087B3';
@@ -45,7 +45,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme', 'orion/wid
 			
 			var orion = new StyleSet();
 			orion.name = 'Orion';
-			orion.navbar = '#333';
+			orion.navbar = '#404648';
 			orion.button = '#EFEFEF';
 			orion.location = '#efefef';
 			orion.selection = 'FEC';
