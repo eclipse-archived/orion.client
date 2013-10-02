@@ -246,7 +246,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	sidebarNavInputManager.processHash(window.location.hash);
 
 	//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
-	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, window.location.hash !== ""); //$NON-NLS-0$
+	// Do not collapse sidebar, https://bugs.eclipse.org/bugs/show_bug.cgi?id=418558
+	var collapseSidebar = false; //window.location.hash !== ""
+	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, collapseSidebar); //$NON-NLS-0$
 
 	window.onbeforeunload = function() {
 		if (editor.isDirty()) {
