@@ -28,7 +28,7 @@
 .core-sprite-compare-addition{ background-position: 0 -108px; width: 16px; height: 16px; } 
 .core-sprite-compare-removal{ background-position: 0 -126px; width: 16px; height: 16px; } 
 .core-sprite-copy-folder{ background-position: 0 -144px; width: 16px; height: 16px; } 
-.core-sprite-delete{  background-position: 0 -162px; width: 16px; height: 16px; } 
+.core-sprite-delete{ background:url(../images/delete.png); width: 16px; height: 16px; } 
 .core-sprite-edit{ background-position: 0 -180px; width: 16px; height: 16px; } 
 .core-sprite-error{ background-position: 0 -198px; width: 16px; height: 16px; } 
 .core-sprite-expandAll{ background-position: 0 -216px; width: 16px; height: 16px; } 
