@@ -45,6 +45,23 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		return toAbsoluteLocation(createLocation(require.toUrl(location)));
 	}
 
+	function handleLogServiceErrorMessage(error){
+		//TODO: Should rely on server error messages, not error statuses.
+		var status = error.status;
+		switch(status){
+			case 405:
+				return '(405) Unsupported log service request.';
+			case 404:
+				return '(404) Could not find the log service resource.';
+			case 403:
+				return '(403) Unauthorized log service request.';
+			case 401:
+				return '(403) Unauthorized log service request.';
+			default:
+				return 'Unexpected log service exception.';
+		}
+	}
+
 	function GET(url, raw){
 		var d = new Deferred();
 		var handler = raw ? "text/plain" : "json";
@@ -91,7 +108,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		GET(createLocation(require.toUrl(location))).then(function(resp){
 			deferred.resolve(resp.Children);
 		}, function(error){
-			deferred.reject("Error: " + error);
+			deferred.reject(handleLogServiceErrorMessage(error));
 		});
 		
 		return deferred;
@@ -103,7 +120,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		GET(createLocation(require.toUrl(location))).then(function(resp){
 			deferred.resolve(resp.Children);
 		}, function(error){
-			deferred.reject("Error: " + error);
+			deferred.reject(handleLogServiceErrorMessage(error));
 		});
 		
 		return deferred;
@@ -115,7 +132,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		GET(createLocation(require.toUrl(location))).then(function(resp){
 			deferred.resolve(resp.Children);
 		}, function(error){
-			deferred.reject("Error: " + error);
+			deferred.reject(handleLogServiceErrorMessage(error));
 		});
 		
 		return deferred;
@@ -132,7 +149,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 		PUT(createLocation(require.toUrl(location)), dataJSON).then(function(resp){
 			deferred.resolve(resp);
 		}, function(error){
-			deferred.reject("Error: " + error);
+			deferred.reject(handleLogServiceErrorMessage(error));
 		});
 		
 		return deferred;
@@ -257,7 +274,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			deferred.resolve(result);
 			
 	     }, function(error){
-			deferred.reject("Error: " + error);
+			deferred.reject('ERROR: ' + error);
 	     });
 	
 	     return deferred;
@@ -312,7 +329,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			deferred.resolve(result);
 			
 	     }, function(error){
-			deferred.reject("Error: " + error);
+			deferred.reject('ERROR: ' + error);
 	     });
 	
 	     return deferred;
@@ -367,7 +384,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			deferred.resolve(result);
 			
 	     }, function(error){
-			deferred.reject("Error: " + error);
+			deferred.reject('ERROR: ' + error);
 	     });
 	
 	     return deferred;
@@ -441,7 +458,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 				return; // failed
 					
 			}, function(error){
-				deferred.reject("Error: " + error);
+				deferred.reject('ERROR: ' + error);
 			});
 		
 			return deferred;
@@ -498,7 +515,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 				GET(appender.Location + "?parts=meta").then(function(response){
 					deferred.resolve(response);
 				}, function(error){
-					deferred.reject("ERROR: " + error);
+					deferred.reject('ERROR: ' + handleLogServiceErrorMessage(error));
 				});
 				return;
 			}
@@ -511,7 +528,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			return; // failed
 			
 		}, function(error){
-			deferred.reject("Error: " + error);
+			deferred.reject('ERROR: ' + error);
 		});
 			
 		return deferred;
@@ -543,7 +560,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 				GET(logger.Location).then(function(response){
 					deferred.resolve(response);
 				}, function(error){
-					deferred.reject("ERROR: " + error);
+					deferred.reject('ERROR: ' + handleLogServiceErrorMessage(error));
 				});
 				return;
 			}
@@ -556,7 +573,7 @@ define(['require', 'orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/i18nUti
 			return; // failed
 			
 		}, function(error){
-			deferred.reject("Error: " + error);
+			deferred.reject('ERROR: ' + error);
 		});
 			
 		return deferred;
