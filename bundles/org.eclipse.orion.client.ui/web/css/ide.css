@@ -102,6 +102,7 @@ button::-moz-focus-inner {
 /* 4px margin used by toolbar, plus 4px of border/padding */
 .status {
 	padding-top: 8px;
+	color:#555;
 	vertical-align: baseline;
 }
 
@@ -913,12 +914,13 @@ input {
 	margin-right: 5%;
 	margin-top: 30px;
 	margin-bottom: 30px;
+	border-color:#daedf1;
 }
 
 .folderNav tr {
-	border-bottom: 1px solid whiteSmoke;
-	border-right: 1px solid lightgrey;
-	border-left: 1px solid lightgrey;
+	border-bottom: 1px solid #e6f3f6;
+	border-right: 1px solid #daedf1;
+	border-left: 1px solid #daedf1;
 	padding-left: 8px;
 	padding-right: 8px;
 	color: grey;
@@ -927,9 +929,9 @@ input {
 	border-bottom: 1px solid lightgrey;
 }
 
-orionMarkdown td, .orionProject td {
-	border-bottom: 1px solid lightgrey;
-	border: 1px solid lightgrey;
+.orionMarkdown td, .orionProject td {
+	border-bottom: 1px solid #daedf1;
+	border: 1px solid #daedf1;
 	padding: 8px;
 	color: grey;
 }
@@ -939,9 +941,10 @@ orionMarkdown td, .orionProject td {
 }
 
 .folderNav th, .orionMarkdown th, .orionProject th {
-	border-bottom: 1px solid lightgrey;
-	border-top: 1px solid lightgrey;
-	background: none repeat scroll 0 0 whitesmoke;
+	border-color:#daedf1;
+	border-bottom: 1px solid #daedf1;
+	border-top: 1px solid #daedf1;
+	background: none repeat scroll 0 0 #f2f9fa;
 	vertical-align: middle;
 	font-weight: normal;
 	padding: 6px;
