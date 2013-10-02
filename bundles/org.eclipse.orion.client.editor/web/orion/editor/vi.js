@@ -209,7 +209,10 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 			}, this._msg("viB")); //$NON-NLS-0$
 			
 			view.setAction("vi" + key + "e", function() { //$NON-NLS-1$ //$NON-NLS-0$
-				return self._invoke("wordNext", {unit: "wordend"}); //$NON-NLS-1$ //$NON-NLS-0$
+				self._invoke("charNext", {unit: "character"}); //$NON-NLS-1$ //$NON-NLS-0$
+				self._invoke("wordNext", {unit: "wordend"}); //$NON-NLS-1$ //$NON-NLS-0$
+				self._invoke("charPrevious", {unit: "character"}); //$NON-NLS-1$ //$NON-NLS-0$
+				return true;
 			}, this._msg("vie")); //$NON-NLS-0$
 			
 			view.setAction("vi" + key + "E", function() { //$NON-NLS-1$ //$NON-NLS-0$
