@@ -69,7 +69,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 		getId: function(item){
 			if(item.type==="Project"){
-				return "Project";
+				return FileModel.prototype.getId.call(this, {Location: item.ContentLocation});
 			}
 			if(item.Dependency){
 				return FileModel.prototype.getId.call(this, item.Dependency);
@@ -345,7 +345,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				return;
 			}
 			var res;
-			if(item.Location || forceExpand){
+			if(item.Location && forceExpand){
 				res =  FileExplorer.prototype.changedItem.call(this, item, forceExpand);
 			}
 			this.model.processParent(item, item.children ? item.children : []);
@@ -541,8 +541,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		if(!redisplay &&  parentProject && parentProject.Location === this.projectLocation){
 			return;
 		}
-		this.projectClient.readProject(fileMetadata).then(function(projectData){
+		this.fileClient.loadWorkspace().then(function(workspaceMetadata){
+		this.projectClient.readProject(fileMetadata, workspaceMetadata).then(function(projectData){
 			if(projectData) {
+				projectData.Workspace = workspaceMetadata;
 				lib.empty(this.parentNode);
 				this.projectLocation = parentProject ? parentProject.Location : null;
 				projectData.type = "Project";
@@ -590,6 +592,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					
 				}
 			}
+		}.bind(this));
 		}.bind(this));
 		},
 		createToolbar : function(){
