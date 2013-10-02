@@ -164,7 +164,7 @@ searchUtils.generateSearchHref = function(options) {
 	return href;
 };
 
-searchUtils.generateFindURLBinding = function(searchParams, inFileQuery, lineNumber, replaceStr) {
+searchUtils.generateFindURLBinding = function(searchParams, inFileQuery, lineNumber, replaceStr, paramOnly) {
 	var params = {
 		find: inFileQuery.searchStr,
 		regEx: inFileQuery.wildCard ? true : undefined,
@@ -172,6 +172,9 @@ searchUtils.generateFindURLBinding = function(searchParams, inFileQuery, lineNum
 		replaceWith: typeof(replaceStr) === "string" ? replaceStr : undefined, //$NON-NLS-0$
 		atLine: typeof(lineNumber) === "number" ? lineNumber : undefined //$NON-NLS-0$
 	};
+	if(paramOnly){
+		return params;
+	}
 	var binding = new URITemplate("{,params*}").expand({ //$NON-NLS-0$
 		params: params
 	});
