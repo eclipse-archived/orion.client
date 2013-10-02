@@ -232,7 +232,6 @@ textarea.parameterInput {
 
 .navColumn {
 	min-width: 150px;
-	padding-right: 8px;
 	vertical-align: baseline;
 }
 
@@ -243,7 +242,7 @@ textarea.parameterInput {
 
 .mainNavColumn {
 	display: inline-block;
-	padding: 4px;
+	padding: 2px;
 	vertical-align: baseline;
 	white-space: nowrap;
 }
@@ -609,6 +608,9 @@ textarea.parameterInput {
 
 .selectionModelContainer {
 	outline: none;
+	padding-top:1px;
+	margin-right: 2px;
+	margin-left: 1px;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -638,7 +640,7 @@ input {
 }
 
 .treeIterationCursorRow_Dotted {
-	outline: #AAA 1px dotted !important;
+	outline: skyblue 1px dotted !important;
 	background-color: #f3f6fe;
 }
 
@@ -870,26 +872,30 @@ input {
 }
 
 .projectNavColumn {
-	background: none repeat scroll 0 0 #bcbdc0;
+	background: none repeat scroll 0 0 #eee;
     color: #666;
     font-weight: bold;
-    padding-bottom: 0.5em;
-    padding-top: 0.5em;
+    padding-bottom: 0.2em;
+    padding-top: 0.2em;
 }
 
 .projectPrimaryNavColumn {
-	background: none repeat scroll 0 0 #70a6c5;
+	background: none repeat scroll 0 0 #d6ebf0;
 	color: #000;
 }
 
 .projectNavColumn a{
-	color: #666;
+	color: #444;
     font-weight: bold;
 }
 
 .projectPrimaryNavColumn a{
-	color: #fff;
+	color: #444;
     font-weight: bold;
+}
+
+.projectInformationNode{
+	margin-top:3px;
 }
 
 .orionMarkdown h1 {
@@ -934,8 +940,9 @@ input {
 	color: grey;
 }
 
-.orionMarkdown td, .orionProject td {
+orionMarkdown td, .orionProject td {
 	border-bottom: 1px solid lightgrey;
+	border: 1px solid lightgrey;
 	padding: 8px;
 	color: grey;
 }
