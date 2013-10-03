@@ -423,7 +423,12 @@ define([
 					return  blamer.isVisible(self.serviceRegistry);
 				},
 				callback: function(data) {
-					blamer.getBlame(self.serviceRegistry, editor, self.inputManager.getInput());   
+					blameCommand.visible = !blameCommand.visible;
+					if (blameCommand.visible) {
+						blamer.getBlame(self.serviceRegistry, editor, self.inputManager.getInput());
+					} else{
+						editor.showBlame([]);
+					}
 				}
 			});
 			this.commandService.addCommand(blameCommand);
