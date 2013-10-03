@@ -9,35 +9,26 @@
  ******************************************************************************/
  
 /*global define document setTimeout*/
-define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'orion/projectCommands', 'orion/commandRegistry'],
-	function(mMarkdownView, lib, mProjectClient, mProjectCommands, mCommandRegistry) { //$NON-NLS-0$
+define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectCommands', 'orion/commandRegistry'],
+	function(mMarkdownView, lib, mProjectCommands, mCommandRegistry) { //$NON-NLS-0$
 	function ProjectEditor(options){
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
 		this.progress = options.progress;
-		this.projectClient = new mProjectClient.ProjectClient(this.serviceRegistry, this.fileClient);
+		this.projectClient = this.serviceRegistry.getService("orion.project.client");
 		this.commandService = options.commandService;
 		this._node = null;
 		this.markdownView = new mMarkdownView.MarkdownView({
 			fileClient : this.fileClient,
 			progress : this.progress
 		});
-		this.redmeCommandsScope = "readmeActions";
-		this.allDependenciesActions = "dependenciesActions";
 		this.dependencyActions = "dependencyActions";
 		this.createCommands();
 	}
 	ProjectEditor.prototype = {
 		createCommands: function(){
 			mProjectCommands.createProjectCommands(this.serviceRegistry, this.commandService, this, this.fileClient, this.projectClient);
-			this.commandService.registerCommandContribution(this.redmeCommandsScope, "orion.project.edit.readme", 1); 
-			this.commandService.registerCommandContribution(this.redmeCommandsScope, "orion.project.create.readme", 2); 
-			this.commandService.addCommandGroup(this.allDependenciesActions, "orion.miniExplorerNavNewGroup", 1000, "Add", null, null, "core-sprite-expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.registerCommandContribution(this.allDependenciesActions, "orion.project.addFolder", 1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
 			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
-			for(var i=0; i<dependencyTypes.length; i++){
-				this.commandService.registerCommandContribution(this.allDependenciesActions, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
-			}
 			this.commandService.registerCommandContribution(this.dependencyActions, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.registerCommandContribution(this.dependencyActions, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
 		},
@@ -214,11 +205,6 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			td.appendChild(document.createTextNode("Readme.md"));
 			tr.appendChild(td);
 			td = document.createElement("th");
-			var actionsSpan = document.createElement("ul"); //$NON-NLS-0$
-			actionsSpan.id = this.redmeCommandsScope;
-			actionsSpan.classList.add("commandList"); //$NON-NLS-0$
-			actionsSpan.classList.add("layoutRight"); //$NON-NLS-0$
-			td.appendChild(actionsSpan);
 			tr.appendChild(td);
 
 			tr = document.createElement("tr");
@@ -237,7 +223,6 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 						div.style.maxHeight = "400px";
 						this.fileClient.read(child.Location).then(function(markdown){
 							this.markdownView.display(div, markdown);
-							this.commandService.renderCommands(this.redmeCommandsScope, actionsSpan, child, this, "tool");
 						}.bind(this));
 						td.appendChild(div);
 						break;
@@ -246,7 +231,6 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 				if(!div){
 					td.appendChild(document.createTextNode("No readme in this project"));
 					this.parentFolder.Project = this.projectData;
-					this.commandService.renderCommands(this.redmeCommandsScope, actionsSpan, this.parentFolder, this, "tool");
 				}
 			}
 			
@@ -321,6 +305,11 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			}
 		},
 		renderDependencies: function(parent){
+			
+			if(!this.projectData.Dependencies || this.projectData.Dependencies.length===0){
+				return;
+			}
+			
 			var table = document.createElement("table");
 			var tr = document.createElement("tr");
 			table.appendChild(tr);
@@ -328,60 +317,44 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectClient', 'o
 			td.appendChild(document.createTextNode("Associated Content"));
 			tr.appendChild(td);
 			td = document.createElement("th");
-			var actionsSpan = document.createElement("ul"); //$NON-NLS-0$
-			actionsSpan.id = this.allDependenciesActions;
-			actionsSpan.classList.add("commandList"); //$NON-NLS-0$
-			actionsSpan.classList.add("layoutRight"); //$NON-NLS-0$
-			td.appendChild(actionsSpan);
 			tr.appendChild(td);
 			
-			if(this.projectData.Dependencies && this.projectData.Dependencies.length>0){
-				for(var i=0; i<this.projectData.Dependencies.length; i++){
-					var dependency = this.projectData.Dependencies[i];
-					tr = document.createElement("tr");
-					table.appendChild(tr);
-					td = document.createElement("td");
-					td.appendChild(document.createTextNode(dependency.Name));
-					var span = document.createElement("span");
-					
-					(function(td, span, dependency){
-						this.projectClient.getDependencyFileMetadata(dependency, this.projectData.WorkspaceLocation).then(function(dependencyMetadata){
-							if(dependencyMetadata){
-								lib.empty(td);
-								var a = document.createElement("a");
-								a.href = "./edit.html#" + dependencyMetadata.Location;
-								a.appendChild(document.createTextNode(dependency.Name));
-								td.appendChild(a);
-							}
-						}, function(){
-							lib.empty(td);
-							td.appendChild(document.createTextNode(dependency.Name + " (disconnected)"));
-							lib.empty(span);
-							this.commandService.renderCommands(this.dependencyActions, span, {Dependency: dependency,  disconnected: true, Project: this.projectData}, this, "tool");
-						}.bind(this));
-					}).bind(this)(td, span, dependency);
-					
-					tr.appendChild(td);
-					
-					td = document.createElement("td");
-					span.style.cssFloat = "right";
-					td.appendChild(span);
-					this.commandService.renderCommands(this.dependencyActions, span, {Dependency: dependency, Project: this.projectData}, this, "tool");
-					tr.appendChild(td);
-				}
-				
-			} else {
+			for(var i=0; i<this.projectData.Dependencies.length; i++){
+				var dependency = this.projectData.Dependencies[i];
 				tr = document.createElement("tr");
 				table.appendChild(tr);
 				td = document.createElement("td");
-				td.colSpan = 2;
-				td.appendChild(document.createTextNode("No associated content"));
+				td.appendChild(document.createTextNode(dependency.Name));
+				var span = document.createElement("span");
+				
+				(function(td, span, dependency){
+					this.projectClient.getDependencyFileMetadata(dependency, this.projectData.WorkspaceLocation).then(function(dependencyMetadata){
+						if(dependencyMetadata){
+							lib.empty(td);
+							var a = document.createElement("a");
+							a.href = "./edit.html#" + dependencyMetadata.Location;
+							a.appendChild(document.createTextNode(dependency.Name));
+							td.appendChild(a);
+						}
+					}, function(){
+						lib.empty(td);
+						td.appendChild(document.createTextNode(dependency.Name + " (disconnected)"));
+						lib.empty(span);
+						this.commandService.renderCommands(this.dependencyActions, span, {Dependency: dependency,  disconnected: true, Project: this.projectData}, this, "tool");
+					}.bind(this));
+				}).bind(this)(td, span, dependency);
+				
+				tr.appendChild(td);
+				
+				td = document.createElement("td");
+				span.style.cssFloat = "right";
+				td.appendChild(span);
+				this.commandService.renderCommands(this.dependencyActions, span, {Dependency: dependency, Project: this.projectData}, this, "tool");
 				tr.appendChild(td);
 			}
-			
+				
 			parent.appendChild(table);
 			this.projectData.type = "Project";
-			this.commandService.renderCommands(this.allDependenciesActions, actionsSpan, this.projectData, this, "tool");
 		}
 	};
 	

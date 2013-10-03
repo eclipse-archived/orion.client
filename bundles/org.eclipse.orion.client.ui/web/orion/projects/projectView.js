@@ -10,16 +10,15 @@
  
 /*global define document window*/
 define(['orion/projects/projectExplorer',
-	'orion/projectClient',
 	'orion/selection',
 	'orion/projectCommands',
-	'orion/webui/littlelib'], function(mProjectExplorer, mProjectClient, Selection, ProjectCommands, lib) {
+	'orion/webui/littlelib'], function(mProjectExplorer, Selection, ProjectCommands, lib) {
 		function ProjectView(options){
 			this.progress = options.progress;
 			this.fileClient = options.fileClient;
 			this.serviceRegistry = options.serviceRegistry;
 			this.commandService = options.commandService;
-			this.projectClient = new mProjectClient.ProjectClient(this.serviceRegistry, this.fileClient);
+			this.projectClient = this.serviceRegistry.getService("orion.project.client");
 			this.createCommands();
 		};
 		ProjectView.prototype = {

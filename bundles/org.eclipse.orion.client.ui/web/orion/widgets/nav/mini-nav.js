@@ -11,11 +11,11 @@
 /*global define*/
 /*jslint browser:true devel:true sub:true*/
 define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui/littlelib', 'orion/explorers/explorer-table',
-	'orion/explorers/navigatorRenderer', 'orion/explorers/explorerNavHandler', 'orion/i18nUtil', 'orion/keyBinding', 'orion/fileCommands',
-	'orion/extensionCommands', 'orion/selection', 'orion/EventTarget', 'orion/URITemplate', 'orion/PageUtil'
+	'orion/explorers/navigatorRenderer', 'orion/explorers/explorerNavHandler', 'orion/i18nUtil', 'orion/keyBinding', 'orion/fileCommands', 'orion/projectCommands',
+	'orion/extensionCommands', 'orion/selection', 'orion/EventTarget', 'orion/URITemplate', 'orion/PageUtil', 'orion/Deferred'
 	],
-	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, i18nUtil, mKeyBinding, FileCommands,
-		ExtensionCommands, Selection, EventTarget, URITemplate, PageUtil) {
+	function(require, messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, i18nUtil, mKeyBinding, FileCommands, ProjectCommands,
+		ExtensionCommands, Selection, EventTarget, URITemplate, PageUtil, Deferred) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
@@ -277,7 +277,25 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importSFTP", 4, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.exportSFTPCommand", 5, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
-			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.miniNavSelectionGroup", true); //$NON-NLS-0$
+			
+			commandRegistry.addCommandGroup(newActionsScope, "orion.projectsNewGroup", 100, "New Project", "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.basic", 1, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.fromfile", 2, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			var fileCommandsRegistered = ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.miniNavSelectionGroup", true); //$NON-NLS-0$
+			
+			var projectClient = serviceRegistry.getService("orion.project.client");
+			var dependencyTypesDef = new Deferred();
+			projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
+				for(var i=0; i<dependencyTypes.length; i++){
+					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.createproject." + dependencyTypes[i], i+3, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				
+				ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, projectClient, dependencyTypes).then(dependencyTypesDef.resolve, dependencyTypesDef.resolve);
+			}.bind(this), dependencyTypesDef.resolve);
+			
+			return Deferred.all([fileCommandsRegistered, dependencyTypesDef]);
 		},
 		updateCommands: function(selections) {
 			this.createActionSections();
