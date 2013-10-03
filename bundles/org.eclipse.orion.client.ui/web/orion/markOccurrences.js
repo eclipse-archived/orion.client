@@ -16,13 +16,14 @@ define([
 	'orion/Deferred'
 ], function(EditorContext, Deferred) {
 
-	function MarkOccurrences(serviceRegistry, editor) {
+	function MarkOccurrences(serviceRegistry, inputManager, editor) {
 		this.registry = serviceRegistry;
+		this.inputManager = inputManager;
 		this.editor = editor;
 	}
 	MarkOccurrences.prototype = {
 		/* Looks up applicable references of occurrence service, calls references, calls the editor to show the occurrences. */
-		findOccurrences: function(inputManager, textView) {
+		findOccurrences: function() {
 			function getServiceRefs(registry, contentType, title) {
 				var contentTypeService = registry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
 				function getFilteredServiceRef(registry, sReference, contentType) {
@@ -78,7 +79,8 @@ define([
 				}, 500);
 			};
 						
-			inputManager.addEventListener("InputChanged", function(event) {//$NON-NLS-0$
+			self.inputManager.addEventListener("InputChanged", function(event) {//$NON-NLS-0$
+				var textView = self.editor.getTextView();
 				textView.removeEventListener("Selection", selectionListener); //$NON-NLS-0$
 				getServiceRefs(self.registry, event.contentType, event.title).then(function(serviceRefs) {
 					if (!serviceRefs || serviceRefs.length === 0) {
