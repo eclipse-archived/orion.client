@@ -11,18 +11,8 @@
  ******************************************************************************/
 
 /*jslint browser:true*/
-/*global define orion console esprima */
-define(['orion/plugin', "orion/Deferred", 'esprima/esprima'], function(PluginProvider, Deferred) {
-
-	function createAST(context) {
-		var ast = esprima.parse(context.text, {
-			range: true,
-			loc: true,
-			tolerant: true
-		});
-		//	if (ast !== null) {console.log(stringify(ast));}
-		return ast;
-	}
+/*global define orion console */
+define(['orion/plugin', "orion/Deferred"], function(PluginProvider, Deferred) {
 
 	function isOccurrenceInSelScope(oScope, wScope) {
 		if (oScope.global && wScope.global) {
@@ -92,22 +82,6 @@ define(['orion/plugin', "orion/Deferred", 'esprima/esprima'], function(PluginPro
 		}
 		updateScope(node, context.scope);
 		return true;
-	}
-
-	/* convert ast array to String */
-
-	function stringify(parsedProgram) {
-		var body = parsedProgram.body;
-		if (body.length === 1) {
-			body = body[0];
-		}
-		var replacer = function (key, value) {
-			if (key === 'computed') { //$NON-NLS-0$
-				return;
-			}
-			return value;
-		};
-		return JSON.stringify(body, replacer).replace(/"/g, '');
 	}
 
 	function checkIdentifier(node, context) {
@@ -327,8 +301,7 @@ define(['orion/plugin', "orion/Deferred", 'esprima/esprima'], function(PluginPro
 		return null;
 	}
 
-	function getOccurrences(context) {
-		var ast = createAST(context);
+	function getOccurrences(ast, context) {
 		if (ast) {
 			traverse(ast, context, function(node, context) {
 				var found = false;
@@ -362,15 +335,13 @@ define(['orion/plugin', "orion/Deferred", 'esprima/esprima'], function(PluginPro
 	var serviceImpl = {
 		computeOccurrences: function(editorContext, ctx) {
 			var d = new Deferred();
-			Deferred.all([editorContext.getText()]).then(function(results) {
-				var text = results[0];
+			editorContext.getAST().then(function(ast) {
 				var context = {
-					text: text,
 					start: ctx.selection.start,
 					end: ctx.selection.end,
 					mScope: null
 				};
-				d.resolve(getOccurrences (context));
+				d.resolve(getOccurrences (ast, context));
 			});
 			return d;
 		}
