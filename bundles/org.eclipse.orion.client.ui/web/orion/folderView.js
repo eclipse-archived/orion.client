@@ -42,7 +42,7 @@ define([
 				cachePrefix: "FolderNavigator" //$NON-NLS-0$
 			}, explorer, options.commandRegistry, options.contentTypeRegistry);
 			renderer.showFolderImage = true;
-			renderer.selectionPolicy = "cursorOnly";
+			renderer.selectionPolicy = self.getCommandsVisible() ? null : "cursorOnly"; //$NON-NLS-0$
 			renderer.getCellHeaderElement = function(col_no) {
 				var td;
 				if (col_no === 0) {
