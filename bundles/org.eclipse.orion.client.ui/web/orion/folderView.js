@@ -160,11 +160,16 @@ define([
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
 			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.folderNavSelectionGroup", true, this.commandsVisibleWhen, this.commandsId);
 		},
-		commandsVisibleWhen: function(item) {
+		getCommandsVisible: function() {
 			return mGlobalCommands.getMainSplitter().splitter.isClosed();
 		},
 		setCommandsVisible: function(visible) {
-			this.updateCommands();
+			if (visible) {
+				this.updateCommands();
+			} else {
+				this.commandRegistry.destroy(this.newActionsScope);
+				this.commandRegistry.destroy(this.selectionActionsScope);
+			}
 			var selectionPolicy = visible ? null : "cursorOnly"; //$NON-NLS-0$
 			this.renderer.selectionPolicy = selectionPolicy;
 			var navHandler = this.getNavHandler();
@@ -174,7 +179,7 @@ define([
 		},
 		updateCommands: function(selections) {
 			var toolbar = lib.node(this.toolbarId);
-			if (!toolbar) {
+			if (!toolbar || !this.getCommandsVisible()) {
 				return;
 			}
 			this.createActionSections(toolbar);
