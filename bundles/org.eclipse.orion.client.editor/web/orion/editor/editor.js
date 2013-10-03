@@ -910,6 +910,15 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		},
 		
 		showBlame : function(blameMarkers) {
+			var blameVisible = this._blameVisible || false;
+			if (blameVisible) {
+				var annotationModel = this._annotationModel;
+				if (annotationModel) {
+					annotationModel.removeAnnotations(AT.ANNOTATION_BLAME);
+				}
+				this._blameVisible = false;
+				return;
+			}
 			var blameRGB = this._blameRGB;
 			var document = this.getTextView().getOptions("parent").ownerDocument; //$NON-NLS-0$
 			if (!blameRGB) {
@@ -967,6 +976,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				annotation.blame = blameMarker;
 				return annotation;
 			});
+			this._blameVisible = true;
 		},
 		
 		/**
