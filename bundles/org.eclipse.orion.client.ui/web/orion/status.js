@@ -59,7 +59,10 @@ define([
 				}.bind(this));
 				container.addEventListener("click", function(evt) { //$NON-NLS-0$
 					if(evt && evt.target && evt.target.nodeName.toLowerCase() === "a") { //$NON-NLS-0$)
-						this.close();
+						var anchors = lib.$$("a", container);//$NON-NLS-0$) //lib.container.getElementsByTagName("a");
+						if(anchors && anchors.length && anchors.length === 1) {// We should only auto dismiss the status bar if there is only one "a" element in the bar.
+							this.close();
+						}
 					}
 				}.bind(this));
 			}
