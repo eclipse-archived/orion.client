@@ -27,7 +27,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectCommands', 
 	}
 	ProjectEditor.prototype = {
 		createCommands: function(){
-			mProjectCommands.createProjectCommands(this.serviceRegistry, this.commandService, this, this.fileClient, this.projectClient);
+			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandService, this, this.fileClient, this.projectClient);
 			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
 			this.commandService.registerCommandContribution(this.dependencyActions, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.registerCommandContribution(this.dependencyActions, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
