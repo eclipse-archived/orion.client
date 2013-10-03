@@ -565,16 +565,15 @@ textarea.parameterInput {
 	color: white;
 }
 
+/* TODO these "item" classes should be removed. Check for users. */
 .folderItem {
-	background: url(../images/folder.gif);
+	background: url(../images/folder.png);
 }
-
 .fileItem {
-	background: url(../images/file.gif);
+	background: url(../images/file.png);
 }
-
 .newItem {
-	background: url(../images/add.gif);
+	background: url(../images/addcontent.png);
 }
 
 .treetable {
