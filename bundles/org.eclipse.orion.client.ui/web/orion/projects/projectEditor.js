@@ -50,9 +50,6 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectCommands', 
 			this.renderAdditionalProjectProperties(span);
 			span = document.createElement("span");
 			this.node.appendChild(span);
-			this.renderReadmeMd(span);
-			span = document.createElement("span");
-			this.node.appendChild(span);
 			this.renderDependencies(span);
 		},
 		displayContents: function(node, parentFolder){
@@ -191,58 +188,6 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectCommands', 
 			td.appendChild(urlInput);
 			tr.appendChild(td);
 			table.appendChild(tr);
-			
-			parent.appendChild(table);
-		},
-		renderReadmeMd: function(parent){
-			
-			var that = this;
-			
-			var table = document.createElement("table");
-			var tr = document.createElement("tr");
-			table.appendChild(tr);
-			var td = document.createElement("th");
-			td.appendChild(document.createTextNode("Readme.md"));
-			tr.appendChild(td);
-			td = document.createElement("th");
-			tr.appendChild(td);
-
-			tr = document.createElement("tr");
-			table.appendChild(tr);
-			td = document.createElement("td");
-			td.colSpan = 2;
-			//README.MD
-			
-			function displayReadmeFromChildren(children){
-				var div;
-				for(var i=0; i<children.length; i++){
-					var child = children[i];
-					if (!child.Directory && child.Name && child.Name.toLowerCase() === "readme.md") { //$NON-NLS-0$
-						div = document.createElement("div");
-						div.style.overflow = "auto";
-						div.style.maxHeight = "400px";
-						this.fileClient.read(child.Location).then(function(markdown){
-							this.markdownView.display(div, markdown);
-						}.bind(this));
-						td.appendChild(div);
-						break;
-					}
-				}
-				if(!div){
-					td.appendChild(document.createTextNode("No readme in this project"));
-					this.parentFolder.Project = this.projectData;
-				}
-			}
-			
-			if(this.parentFolder.Children){
-				displayReadmeFromChildren.call(this, this.parentFolder.Children);
-			} else if(this.parentFolder.ChildrenLocation){
-				this.progress.progress(this.fileClient.fetchChildren(this.parentFolder.ChildrenLocation), "Fetching children of " + this.parentFolder.Name).then( 
-					displayReadmeFromChildren.bind(that)
-				);
-			}
-			
-			tr.appendChild(td);
 			
 			parent.appendChild(table);
 		},

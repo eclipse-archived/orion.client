@@ -291,7 +291,7 @@ define([
 				this._node.appendChild(navNode);
 			}
 			
-			if (!(projectJson && this.showProjectView) && readmeMd) {
+			if (readmeMd) {
 				div = document.createElement("div"); //$NON-NLS-0$
 				this.markdownView.displayInFrame(div, readmeMd);
 				this._node.appendChild(div);
