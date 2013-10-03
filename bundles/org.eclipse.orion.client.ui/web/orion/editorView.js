@@ -317,10 +317,10 @@ define([
 			serviceRegistry.getService("orion.core.blame").addEventListener("blameChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 				editor.showBlame(event.blameInfo);
 			});
-			var markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, editor);
+			var markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
 			editor.addEventListener("TextViewInstalled", function(event) { //$NON-NLS-0$
 				event.textView.getModel().addEventListener("Changed", self.astManager.updated.bind(self.astManager)); //$NON-NLS-0$
-				markOccurrences.findOccurrences(inputManager, event.textView);
+				markOccurrences.findOccurrences();
 			});
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
