@@ -14,9 +14,9 @@
 
 define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibility', 'orion/bootstrap', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/keyBinding', 'orion/commandRegistry', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
-        'orion/fileCommands', 'orion/extensionCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileUtils', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes', 'orion/URL-shim', 'orion/PageLinks'], 
+        'orion/fileCommands', 'orion/extensionCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileUtils', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes', 'orion/URL-shim', 'orion/PageLinks', 'orion/projectClient'], 
 		function(require, messages, mBrowserCompatibility, mBootstrap, Deferred, i18nUtil, lib, mSelection, mStatus, mProgress, mDialogs, mSsh, KeyBinding, mCommandRegistry, mTasks, mNavOutliner,
-				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExtensionCommands, mExplorerTable, mNavigatorRenderer, mFileUtils, PageUtil, URITemplate, mContentTypes, _, PageLinks) {
+				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExtensionCommands, mExplorerTable, mNavigatorRenderer, mFileUtils, PageUtil, URITemplate, mContentTypes, _, PageLinks, mProjectClient) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
@@ -29,6 +29,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/browserCompatibili
 		var commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 		var progress = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
+		var projectClient = new mProjectClient.ProjectClient(serviceRegistry, fileClient);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 
 		// global commands

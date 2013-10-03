@@ -116,7 +116,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	 * @name orion.fileCommands#createFileCommands
 	 * @function
 	 */
-	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, explorer, fileClient, projectClient) {
+	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, explorer, fileClient, projectClient, dependencyTypes) {
 		progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		var that = this;
 		function errorHandler(error) {
@@ -127,7 +127,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 		}
 		
-		var dependencyTypes = projectClient.getProjectHandlerTypes();		
+		dependencyTypes =  dependencyTypes || [];
 		
 		var addFolderCommand = new mCommands.Command({
 			name: "Add External Folder",
@@ -165,7 +165,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 									if(isOtherDependency) {
 										return;
 									}
-									var def = projectClient.getProjectHandler(dependencyTypes[i]).getDependencyDescription(fileMetadata);
+									var def = projectClient.getProjectHandler(dependencyTypes[i]).then(function(projectHandler){
+										return projectHandler.getDependencyDescription(fileMetadata);
+									});
 									otherTypesDefs.push(def);
 									def.then(function(dependency){
 										if(dependency){
@@ -256,151 +258,155 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		}
 		
 		function createAddDependencyCommand(type){
-			var handler = projectClient.getProjectHandler(type);
-			if(!handler.initDependency){
-				return;
-			}
-			
-			var commandParams = {
-				name: handler.addDependencyName,
-				id: "orion.project.adddependency." + type,
-				tooltip: handler.addDependencyTooltip,
-				callback: function(data){
-					var def = new Deferred();
-					var item = forceSingleItem(data.items);
-					var params = data.oldParams || {};
-					if(data.parameters){
-						for (var param in data.parameters.parameterTable) {
-							params[param] = data.parameters.valueFor(param);
-						}
-					}
-					
-					var searchLocallyDeferred = new Deferred();
-					handler.paramsToDependencyDescription(params).then(function(dependency){
-						fileClient.loadWorkspace(item.WorkspaceLocation).then(function(workspace){
-							var checkdefs = [];
-							var found = false;
-							for(var i=0; i<workspace.Children.length; i++){
-								if(found===true){
-									break;
-								}
-								var def = handler.getDependencyDescription(workspace.Children[i]);
-								checkdefs.push(def);
-								(function(i, def){
-									def.then(function(matches){
-										if(matches && matches.Location === dependency.Location){
-											found = true;
-											searchLocallyDeferred.resolve(matches);
-										}
-									});
-								})(i, def);
+			return projectClient.getProjectHandler(type).then(function(handler){
+				if(!handler.initDependency){
+					return;
+				}
+				
+				var commandParams = {
+					name: handler.addDependencyName,
+					id: "orion.project.adddependency." + type,
+					tooltip: handler.addDependencyTooltip,
+					callback: function(data){
+						var def = new Deferred();
+						var item = forceSingleItem(data.items);
+						var params = data.oldParams || {};
+						if(data.parameters){
+							for (var param in data.parameters.parameterTable) {
+								params[param] = data.parameters.valueFor(param);
 							}
-							Deferred.all(checkdefs).then(function(){
-								if(!found){
-									searchLocallyDeferred.resolve();
-								}
-							});
-						}, searchLocallyDeferred.reject);
-					}, errorHandler);
-					
-					progress.showWhile(searchLocallyDeferred, "Searching your workspace for matching content").then(function(resp){
-						if(resp) {
-							projectClient.addProjectDependency(item, resp).then(function(){
-								explorer.changedItem();
-							}, errorHandler);
-						} else {
-							initDependency(handler, {}, item, data, params);
 						}
-					});
-
-				},
-				visibleWhen: function(item) {
-					return item.type==="Project";
+						
+						var searchLocallyDeferred = new Deferred();
+						handler.paramsToDependencyDescription(params).then(function(dependency){
+							fileClient.loadWorkspace(item.WorkspaceLocation).then(function(workspace){
+								var checkdefs = [];
+								var found = false;
+								for(var i=0; i<workspace.Children.length; i++){
+									if(found===true){
+										break;
+									}
+									var def = handler.getDependencyDescription(workspace.Children[i]);
+									checkdefs.push(def);
+									(function(i, def){
+										def.then(function(matches){
+											if(matches && matches.Location === dependency.Location){
+												found = true;
+												searchLocallyDeferred.resolve(matches);
+											}
+										});
+									})(i, def);
+								}
+								Deferred.all(checkdefs).then(function(){
+									if(!found){
+										searchLocallyDeferred.resolve();
+									}
+								});
+							}, searchLocallyDeferred.reject);
+						}, errorHandler);
+						
+						progress.showWhile(searchLocallyDeferred, "Searching your workspace for matching content").then(function(resp){
+							if(resp) {
+								projectClient.addProjectDependency(item, resp).then(function(){
+									explorer.changedItem();
+								}, errorHandler);
+							} else {
+								initDependency(handler, {}, item, data, params);
+							}
+						});
+	
+					},
+					visibleWhen: function(item) {
+						return item.type==="Project";
+					}
+				};
+				
+				if(handler.addParamethers){
+					var paramDescps = [];
+					for(var i=0; i<handler.addParamethers.length; i++){
+						paramDescps.push(new mCommandRegistry.CommandParameter(handler.addParamethers[i].id, handler.addParamethers[i].type, handler.addParamethers[i].name));
+					}
+					commandParams.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
 				}
-			};
-			
-			if(handler.addParamethers){
-				var paramDescps = [];
-				for(var i=0; i<handler.addParamethers.length; i++){
-					paramDescps.push(new mCommandRegistry.CommandParameter(handler.addParamethers[i].id, handler.addParamethers[i].type, handler.addParamethers[i].name));
-				}
-				commandParams.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
-			}
-			
-			
-			var command = new mCommands.Command(commandParams);
-			commandService.addCommand(command);
+				
+				
+				var command = new mCommands.Command(commandParams);
+				commandService.addCommand(command);
+			});
 		}
 		
 				
 		function createInitProjectCommand(type){
-			var handler = projectClient.getProjectHandler(type);
-			if(!handler.initProject){
-				return;
-			}
-			
-			var commandParams = {
-				name: handler.addProjectName,
-				id: "orion.project.createproject." + type,
-				tooltip: handler.addProjectTooltip,
-				callback: function(data){
-					var def = new Deferred();
-					var item = forceSingleItem(data.items);
-					var params = data.oldParams || {};
-					for (var param in data.parameters.parameterTable) {
-						params[param] = data.parameters.valueFor(param);
-					}
-
-					var actionComment;
-					if(handler.actionComment){
-						if(params){
-							actionComment = handler.actionComment.replace(/\$\{([^\}]+)\}/g, function(str, key) {
-								return params[key];
-							});
-						} else {
-							actionComment = handler.actionComment;
+			return projectClient.getProjectHandler(type).then(function(handler){
+				if(!handler.initProject){
+					return;
+				}
+				
+				var commandParams = {
+					name: handler.addProjectName,
+					id: "orion.project.createproject." + type,
+					tooltip: handler.addProjectTooltip,
+					callback: function(data){
+						var def = new Deferred();
+						var item = forceSingleItem(data.items);
+						var params = data.oldParams || {};
+						for (var param in data.parameters.parameterTable) {
+							params[param] = data.parameters.valueFor(param);
 						}
-					} else {
-						actionComment = "Getting content from "	+ handler.type;
-					}
-					progress.showWhile(handler.initProject(params, {WorkspaceLocation: item.Location}), actionComment).then(function(project){
-								explorer.changedItem(project, null, "created");
-					}, function(error){
-						if(error.retry && error.addParamethers){
-							var paramDescps = [];
-							for(var i=0; i<error.addParamethers.length; i++){
-								paramDescps.push(new mCommandRegistry.CommandParameter(error.addParamethers[i].id, error.addParamethers[i].type, error.addParamethers[i].name));
+	
+						var actionComment;
+						if(handler.actionComment){
+							if(params){
+								actionComment = handler.actionComment.replace(/\$\{([^\}]+)\}/g, function(str, key) {
+									return params[key];
+								});
+							} else {
+								actionComment = handler.actionComment;
 							}
-							data.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
-							data.oldParams = params;
-							commandService.collectParameters(data);
+						} else {
+							actionComment = "Getting content from "	+ handler.type;
 						}
-						errorHandler(error);
-					});
-
-				},
-				visibleWhen: function(item) {
-					return item.Location;
+						progress.showWhile(handler.initProject(params, {WorkspaceLocation: item.Location}), actionComment).then(function(project){
+									explorer.changedItem(project, null, "created");
+						}, function(error){
+							if(error.retry && error.addParamethers){
+								var paramDescps = [];
+								for(var i=0; i<error.addParamethers.length; i++){
+									paramDescps.push(new mCommandRegistry.CommandParameter(error.addParamethers[i].id, error.addParamethers[i].type, error.addParamethers[i].name));
+								}
+								data.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
+								data.oldParams = params;
+								commandService.collectParameters(data);
+							}
+							errorHandler(error);
+						});
+	
+					},
+					visibleWhen: function(item) {
+						return item.Location;
+					}
+				};
+				
+				if(handler.addParamethers){
+					var paramDescps = [];
+					for(var i=0; i<handler.addParamethers.length; i++){
+						paramDescps.push(new mCommandRegistry.CommandParameter(handler.addParamethers[i].id, handler.addParamethers[i].type, handler.addParamethers[i].name));
+					}
+					commandParams.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
 				}
-			};
-			
-			if(handler.addParamethers){
-				var paramDescps = [];
-				for(var i=0; i<handler.addParamethers.length; i++){
-					paramDescps.push(new mCommandRegistry.CommandParameter(handler.addParamethers[i].id, handler.addParamethers[i].type, handler.addParamethers[i].name));
-				}
-				commandParams.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
-			}
-			
-			
-			var command = new mCommands.Command(commandParams);
-			commandService.addCommand(command);
+				
+				
+				var command = new mCommands.Command(commandParams);
+				commandService.addCommand(command);
+			});
 		}
+		
+		var allContributedCommandsDeferreds = [];
 		
 			for(var type_no=0; type_no<dependencyTypes.length; type_no++){
 				var dependencyType = dependencyTypes[type_no];
-				createAddDependencyCommand(dependencyType);
-				createInitProjectCommand(dependencyType);
+				allContributedCommandsDeferreds.push(createAddDependencyCommand(dependencyType));
+				allContributedCommandsDeferreds.push(createInitProjectCommand(dependencyType));
 			}
 		
 		var connectDependencyCommand = new mCommands.Command({
@@ -454,31 +460,13 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		});
 		commandService.addCommand(disconnectDependencyCommand);
 		
-		var editReadmeCommand = new mCommands.Command({
-			name: "Edit",
-			tooltip: "Edit this project readme.md",
-			id: "orion.project.edit.readme",
-			hrefCallback: function(data){
-				var item = forceSingleItem(data.items);
-				return "./edit.html#" + item.Location;
-			},
-			visibleWhen: function(item) {
-				if(!item.Location || !item.Name){
-					return false;
-				}
-				return item.Name.toLowerCase() === "readme.md";
-			}
-		});
-				
-		commandService.addCommand(editReadmeCommand);
-		
 		var addReadmeCommand = new mCommands.Command({
-			name: "Create readme",
+			name: "Create Readme",
 			tooltip: "Create README.md file in this project",
 			id: "orion.project.create.readme",
 			callback: function(data){
 				var item = forceSingleItem(data.items);
-				progress.progress(fileClient.createFile(item.Location, "README.md"), "Creating README.md").then(function(readmeMeta){
+				progress.progress(fileClient.createFile(item.Project.ContentLocation, "README.md"), "Creating README.md").then(function(readmeMeta){
 					if(item.Project){
 						progress.progress(fileClient.write(readmeMeta.Location, "# " + item.Project.Name), "Writing sample readme").then(function(){
 							explorer.changedItem();							
@@ -489,7 +477,15 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				});
 			},
 			visibleWhen: function(item) {
-				return(!!item.Location && !!item.Project);
+				if(!item.Project || !item.Project.children || !item.Project.ContentLocation){
+					return false;
+				}
+				for(var i=0; i<item.Project.children.length; i++){
+					if(item.Project.children[i].Name && item.Project.children[i].Name.toLowerCase() === "readme.md"){
+						return false;
+					}
+				}
+				return true;
 			}
 		});
 		
@@ -548,6 +544,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			);
 			
 			commandService.addCommand(createZipProjectCommand);
+			return Deferred.all(allContributedCommandsDeferreds);
 		};
 	
 		return projectCommandUtils;

@@ -21,6 +21,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		this.serviceRegistry = serviceRegistry;
 		this.fileClient = fileClient;
 		this.allProjectHandlersReferences = serviceRegistry.getServiceReferences("orion.project.handler"); //$NON-NLS-0$
+		this._serviceRegistration = serviceRegistry.registerService("orion.project.client", this); //$NON-NLS-0$ 
 	}
 
 	ProjectClient.prototype = /**@lends orion.ProjectClient.ProjectClient.prototype */ {

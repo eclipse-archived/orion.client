@@ -37,13 +37,14 @@ define([
 	'orion/URITemplate',
 	'orion/i18nUtil',
 	'orion/PageUtil',
-	'orion/webui/littlelib'
+	'orion/webui/littlelib',
+	'orion/projectClient'
 ], function(
 	messages, Sidebar, mInputManager, mGlobalCommands,
 	mFolderView, mEditorView,
 	mCommandRegistry, mContentTypes, mFileClient, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
-	EventTarget, URITemplate, i18nUtil, PageUtil, lib
+	EventTarget, URITemplate, i18nUtil, PageUtil, lib, mProjectClient
 ) {
 
 var exports = {};
@@ -59,6 +60,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	var progressService;
 	var dialogService;
 	var fileClient;
+	var projectClient;
 	var searcher;
 
 	// Initialize the plugin registry
@@ -75,6 +77,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
 		contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		fileClient = new mFileClient.FileClient(serviceRegistry);
+		projectClient = new mProjectClient.ProjectClient(serviceRegistry, fileClient);
 		searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		blameService = new mBlameAnnotation.BlameService(serviceRegistry);
 	}());

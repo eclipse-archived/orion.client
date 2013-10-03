@@ -55,11 +55,15 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 							children.push({Dependency: parentItem.Dependencies[i]});
 						}
 					}
+					this.processParent(parentItem, children);
 					onComplete(children);
-				});
+				}.bind(this));
 			} else if(parentItem.Dependency){
 				if(parentItem.FileMetadata){
-					return FileModel.prototype.getChildren.call(this, parentItem.FileMetadata, /* function(items) */ onComplete);
+					FileModel.prototype.getChildren.call(this, parentItem.FileMetadata, function(children){
+						this.processParent(parentItem, children);
+						onComplete(children);
+					}.bind(this));
 				} else {
 					onComplete([]);
 					return;
@@ -85,7 +89,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	 * @class orion.sidebar.ProjectNavExplorer
 	 * @extends orion.explorers.FileExplorer
 	 */
-	function FilesNavExplorer(params) {
+	function FilesNavExplorer(params, projectExplorer) {
 		params.setFocus = false;   // do not steal focus on load
 		params.cachePrefix = null; // do not persist table state
 		FileExplorer.apply(this, arguments);
@@ -96,6 +100,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		var sidebarNavInputManager = this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 		this.scopeUp = params.scopeUp;
+		this.projectExplorer = projectExplorer;
 
 		this.newActionsScope = params.newActionsScope;
 		this.selectionActionsScope = params.selectionActionsScope;
@@ -266,12 +271,15 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFolder", 2, "orion.miniExplorerNavNewGroup/orion.newContentGroup", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.addFolder", 1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
-			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
-			for(var i=0; i<dependencyTypes.length; i++){
-				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
-			}
-			
-			ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient);
+			var projectCommandsDef = new Deferred();
+			this.projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
+				for(var i=0; i<dependencyTypes.length; i++){
+					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.miniExplorerNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				
+				ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient, dependencyTypes).then(projectCommandsDef.resolve, projectCommandsDef.resolve);
+			}.bind(this), projectCommandsDef.resolve);
+			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.readme", 2,"orion.miniExplorerNavNewGroup/orion.newContentGroup"); 
 
 		
 			// New project creation in the toolbar (in a group)
@@ -299,7 +307,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importSFTP", 4, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.exportSFTPCommand", 5, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
-			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.miniNavSelectionGroup", true);
+			var fileCommandsDef = ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.miniNavSelectionGroup", true);
+			return Deferred.all([projectCommandsDef, fileCommandsDef]);
 		},
 		createActionSections: function() {
 			var _self = this;
@@ -341,6 +350,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			}
 		},
 		changedItem: function(item, forceExpand){
+			if(!item){
+				this.projectExplorer.changedItem.call(this.projectExplorer, null, true);
+				return;
+			}
 			if(item.Projects){
 				return;
 			}
@@ -512,11 +525,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 											});
 		this.rendererFactory = params.rendererFactory;
 		params.parentId = "projectInfoNode";
-		params.newActionsScope = "filesSectionActionArea";
-		params.selectionActionsScope = "filesSectionSelectionArea";
-		this.fileExplorer = new FilesNavExplorer(params);
-		this.explorer = null;
 		this.addActionsScope = this.toolbarNode.id + "Add"; //$NON-NLS-0$
+		params.newActionsScope = this.addActionsScope;
+		this.selectionActionsScope = params.selectionActionsScope = "filesSectionSelectionArea";
+		this.fileExplorer = new FilesNavExplorer(params, this);
+		this.explorer = null;
 		this.createToolbar();
 		this.registerCommands();
 	}
@@ -570,7 +583,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 							});
 					}, 500);
 				});
-				this.updateCommands(projectData);
 			} else {
 				lib.empty(this.parentNode);
 				this.projectLocation = null;
@@ -588,7 +600,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					lib.processDOMNodes(noProject, [projectName, plusIcon]);
 					this.parentNode.appendChild(noProject);
 					parentProject.type = "Folder";
-					this.updateCommands(parentProject);
+					ProjectCommands.updateNavTools(this.serviceRegistry, this.commandRegistry, this, this.addActionsScope, this.selectionActionsScope, parentProject, true);
 					
 				}
 			}
@@ -619,7 +631,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient);
 		},
 		updateCommands: function(treeRoot) {
-			ProjectCommands.updateNavTools(this.serviceRegistry, this.commandRegistry, this, this.addActionsScope, this.selectionActionsScope, treeRoot, true);
+
 		},
 		destroy : function(){
 		},
@@ -641,7 +653,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 		this.serviceRegistry = params.serviceRegistry;
-		this.projectClient = new mProjectClient.ProjectClient(this.serviceRegistry, this.fileClient);
+		this.projectClient = this.serviceRegistry.getService("orion.project.client");
 		this.scopeUp = params.scopeUp;
 		this.explorer = null;
 		var _self = this;
