@@ -95,7 +95,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				var newInput;
 				if (affectedAncestor.Location === editorFile.Location) {
 					// Current file was the target, see if we know its new name
-					newInput = (newValue && newValue.Location) || null;
+					newInput = (newValue && newValue.ChildrenLocation) || (newValue && newValue.ContentLocation) || (newValue && newValue.Location) || null;
 				} else {
 					newInput = null;
 				}
