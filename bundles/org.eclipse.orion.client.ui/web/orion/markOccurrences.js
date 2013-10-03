@@ -81,16 +81,18 @@ define([
 						
 			self.inputManager.addEventListener("InputChanged", function(event) {//$NON-NLS-0$
 				var textView = self.editor.getTextView();
-				textView.removeEventListener("Selection", selectionListener); //$NON-NLS-0$
-				getServiceRefs(self.registry, event.contentType, event.title).then(function(serviceRefs) {
-					if (!serviceRefs || serviceRefs.length === 0) {
-						if (occurrenceTimer) {
-							window.clearTimeout(occurrenceTimer);
+				if (textView) {
+					textView.removeEventListener("Selection", selectionListener); //$NON-NLS-0$
+					getServiceRefs(self.registry, event.contentType, event.title).then(function(serviceRefs) {
+						if (!serviceRefs || serviceRefs.length === 0) {
+							if (occurrenceTimer) {
+								window.clearTimeout(occurrenceTimer);
+							}
+						} else {
+							textView.addEventListener("Selection", selectionListener); //$NON-NLS-0$
 						}
-					} else {
-						textView.addEventListener("Selection", selectionListener); //$NON-NLS-0$
-					}
-				});
+					});
+				}
 			});
 		}
 	};
