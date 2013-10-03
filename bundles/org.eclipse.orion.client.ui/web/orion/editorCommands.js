@@ -524,8 +524,8 @@ define([
 						editorContext.openDelegatedUI = createDelegatedUI;
 						editorContext.setStatus = handleStatus;
 
-						serviceCall = service.compute(editorContext, context);
-						handleResult = null; // compute() returns nothing
+						serviceCall = service.execute(editorContext, context);
+						handleResult = null; // execute() returns nothing
 					} else {
 						serviceCall = service.run(model.getText(selection.start,selection.end), model.getText(), selection, inputManager.getInput());
 						handleResult = function(result){
