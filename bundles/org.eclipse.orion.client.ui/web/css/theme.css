@@ -435,7 +435,10 @@ a.currentLocation:hover {
 	z-index: 200;
 	background: transparent;
 	position: absolute;
-	max-width: 50em;
+	max-width: 110em;
+}
+.tooltip .textContent {
+	max-width: 40em;
 }
 .tooltip {
 	color: #fafafa;
