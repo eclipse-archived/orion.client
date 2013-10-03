@@ -63,7 +63,7 @@ define([
 				"extends": "text/plain",
 				name: "XML",
 				extension: ["xml"],
-				image: "../images/wtp/xmlfile.gif"
+				image: "../images/wtp/xmlfile.png"
 			},
 			{	id: "text/x-java-source",
 				"extends": "text/plain",

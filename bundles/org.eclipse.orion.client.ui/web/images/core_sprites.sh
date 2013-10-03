@@ -21,6 +21,7 @@ go-down.png \
 go-up.png \
 hamburger.png \
 information.png \
+initproject.png \
 leftarrow.png \
 link.png \
 list.png \
