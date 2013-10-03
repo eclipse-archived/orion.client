@@ -57,6 +57,11 @@ define([
 				closeButton.addEventListener("click", function() { //$NON-NLS-0$
 					this.close();
 				}.bind(this));
+				container.addEventListener("click", function(evt) { //$NON-NLS-0$
+					if(evt && evt.target && evt.target.nodeName.toLowerCase() === "a") { //$NON-NLS-0$)
+						this.close();
+					}
+				}.bind(this));
 			}
 		},
 		
