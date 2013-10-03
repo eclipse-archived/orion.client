@@ -350,8 +350,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			}
 		},
 		changedItem: function(item, forceExpand){
-			if(!item){
-				this.projectExplorer.changedItem.call(this.projectExplorer, null, true);
+			if(!item || !this.model){
+				this.projectExplorer.changedItem.call(this.projectExplorer, item, true);
 				return;
 			}
 			if(item.Projects){
