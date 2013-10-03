@@ -11,7 +11,10 @@
 
 /*global define window */
 
-define(['orion/Deferred'], function(Deferred) {
+define([
+	'orion/edit/editorContext',
+	'orion/Deferred'
+], function(EditorContext, Deferred) {
 
 	function MarkOccurrences(serviceRegistry, editor) {
 		this.registry = serviceRegistry;
@@ -66,8 +69,10 @@ define(['orion/Deferred'], function(Deferred) {
 				occurrenceTimer = window.setTimeout(function() {
 					occurrenceTimer = null;
 					var editor = self.editor;
-					var sel = editor.getSelection();
-					occurrencesService.findOccurrences(editor.getText(), sel).then(function (occurrences) {
+					var context = {
+						selection: editor.getSelection()	
+					};
+					occurrencesService.computeOccurrences(EditorContext.getEditorContext(self.registry), context).then(function (occurrences) {
 						self.editor.showOccurrences(occurrences);
 					});	
 				}, 500);
