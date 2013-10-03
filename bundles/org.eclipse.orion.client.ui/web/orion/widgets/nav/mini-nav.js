@@ -277,25 +277,28 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importSFTP", 4, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.exportSFTPCommand", 5, "orion.miniNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
-			
-			commandRegistry.addCommandGroup(newActionsScope, "orion.projectsNewGroup", 100, "New Project", "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			
-			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.basic", 1, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.fromfile", 2, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			
 			var fileCommandsRegistered = ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.miniNavSelectionGroup", true); //$NON-NLS-0$
 			
-			var projectClient = serviceRegistry.getService("orion.project.client");
-			var dependencyTypesDef = new Deferred();
-			projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
-				for(var i=0; i<dependencyTypes.length; i++){
-					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.createproject." + dependencyTypes[i], i+3, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				}
+			if(serviceRegistry.getServiceReferences("orion.projects").length>0){
+				commandRegistry.addCommandGroup(newActionsScope, "orion.projectsNewGroup", 100, "New Project", "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				
-				ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, projectClient, dependencyTypes).then(dependencyTypesDef.resolve, dependencyTypesDef.resolve);
-			}.bind(this), dependencyTypesDef.resolve);
-			
-			return Deferred.all([fileCommandsRegistered, dependencyTypesDef]);
+				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.basic", 1, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.fromfile", 2, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				
+				var projectClient = serviceRegistry.getService("orion.project.client");
+				var dependencyTypesDef = new Deferred();
+				projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
+					for(var i=0; i<dependencyTypes.length; i++){
+						commandRegistry.registerCommandContribution(newActionsScope, "orion.project.createproject." + dependencyTypes[i], i+3, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					
+					ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, projectClient, dependencyTypes).then(dependencyTypesDef.resolve, dependencyTypesDef.resolve);
+				}.bind(this), dependencyTypesDef.resolve);
+				
+				return Deferred.all([fileCommandsRegistered, dependencyTypesDef]);
+			} else {
+				return fileCommandsRegistered;
+			}
 		},
 		updateCommands: function(selections) {
 			this.createActionSections();
