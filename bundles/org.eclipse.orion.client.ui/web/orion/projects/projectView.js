@@ -11,15 +11,13 @@
 /*global define document window*/
 define(['orion/projects/projectExplorer',
 	'orion/selection',
-	'orion/projectCommands',
-	'orion/webui/littlelib'], function(mProjectExplorer, Selection, ProjectCommands, lib) {
+	'orion/webui/littlelib'], function(mProjectExplorer, Selection, lib) {
 		function ProjectView(options){
 			this.progress = options.progress;
 			this.fileClient = options.fileClient;
 			this.serviceRegistry = options.serviceRegistry;
 			this.commandService = options.commandService;
 			this.projectClient = this.serviceRegistry.getService("orion.project.client");
-			this.createCommands();
 		};
 		ProjectView.prototype = {
 			display: function(workspace, parent){
@@ -49,18 +47,6 @@ define(['orion/projects/projectExplorer',
 						});
 					});
 				}
-			},
-			createCommands: function(){
-				this.commandService.addCommandGroup(mProjectExplorer.newActionsScope, "orion.projectsNewGroup", 1, "Create Project", null, null, "core-sprite-expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
-				this.commandService.registerCommandContribution(mProjectExplorer.newActionsScope, "orion.project.create.basic", 1, "orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				this.commandService.registerCommandContribution(mProjectExplorer.newActionsScope, "orion.project.create.fromfile", 2, "orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				
-				var dependencyTypes = this.projectClient.getProjectHandlerTypes();
-				for(var i=0; i<dependencyTypes.length; i++){
-					this.commandService.registerCommandContribution(mProjectExplorer.newActionsScope, "orion.project.createproject." + dependencyTypes[i], i+3, "orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				}
-				
-				ProjectCommands.createProjectCommands(this.serviceRegistry, this.commandService, this, this.fileClient, this.projectClient);
 			}
 		};
 		

@@ -103,6 +103,108 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			});
 		}
 	};
+	
+			
+	function initDependency(projectClient, explorer, commandService, errorHandler, handler, dependency, project, data, params){
+			var actionComment;
+			if(handler.actionComment){
+				if(params){
+					actionComment = handler.actionComment.replace(/\$\{([^\}]+)\}/g, function(str, key) {
+						return params[key];
+					});
+				} else {
+					actionComment = handler.actionComment;
+				}
+			} else {
+				actionComment = "Getting content from "	+ handler.type;
+			}
+			progress.showWhile(handler.initDependency(dependency, params, project), actionComment).then(function(dependency){
+				projectClient.addProjectDependency(project, dependency).then(function(){
+						explorer.changedItem();
+					}, errorHandler);
+			}, function(error){
+				if(error.retry && error.addParamethers){
+					var paramDescps = [];
+					for(var i=0; i<error.addParamethers.length; i++){
+						paramDescps.push(new mCommandRegistry.CommandParameter(error.addParamethers[i].id, error.addParamethers[i].type, error.addParamethers[i].name));
+					}
+					data.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
+					data.oldParams = params;
+					commandService.collectParameters(data);
+				}
+				errorHandler(error);
+			});
+	}
+	
+	projectCommandUtils.createDependencyCommands = function(serviceRegistry, commandService, explorer, fileClient, projectClient, dependencyTypes) {
+		progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+		
+		function errorHandler(error) {
+			if (progress) {
+				progress.setProgressResult(error);
+			} else {
+				window.console.log(error);
+			}
+		}
+		
+		var connectDependencyCommand = new mCommands.Command({
+			name: "Connect",
+			tooltip: "Fetch content",
+			id: "orion.project.dependency.connect", //$NON-NLS-0$
+			callback: function(data) {
+				var item = forceSingleItem(data.items);
+				var params = data.oldParams || {};
+				if(data.parameters){
+					for (var param in data.parameters.parameterTable) {
+						params[param] = data.parameters.valueFor(param);
+					}
+				}
+				var projectHandler = projectClient.getProjectHandler(item.Dependency.Type);
+				if(projectHandler.then){
+					projectHandler.then(function(projectHandler){
+						initDependency(projectClient, explorer, commandService, errorHandler,projectHandler, item.Dependency, item.Project, data, params);
+					});
+				} else {
+					initDependency(projectClient, explorer, commandService, errorHandler,projectHandler, item.Dependency, item.Project, data, params);
+				}
+				
+			},
+			visibleWhen: function(item) {
+				if(!(item.Dependency && item.Project && item.disconnected)){
+					return false;	
+				}
+				for(var i=0; i<dependencyTypes.length; i++){
+					if(dependencyTypes[i]===item.Dependency.Type){
+						return true;	
+					}
+				}
+				return false;
+			}
+		});
+		commandService.addCommand(connectDependencyCommand);
+		
+				
+		var disconnectDependencyCommand = new mCommands.Command({
+			name: "Disconnect from project",
+			tooltip: "Do not treat this folder as a part of the project",
+			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			id: "orion.project.dependency.disconnect", //$NON-NLS-0$
+			callback: function(data) {
+				var item = forceSingleItem(data.items);
+				progress.progress(projectClient.removeProjectDependency(item.Project, item.Dependency),
+					i18nUtil.formatMessage("Removing ${0} from project ${1}", item.Dependency.Name, item.Project.Name)).then(function(resp){
+						explorer.changedItem();
+					});
+			},
+			visibleWhen: function(item) {
+				if(!(item.Dependency && item.Project)){
+					return false;	
+				}
+				return true;
+			}
+		});
+		commandService.addCommand(disconnectDependencyCommand);
+	};
 		
 	/**
 	 * Creates the commands related to file management.
@@ -226,37 +328,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		});
 		commandService.addCommand(initProjectCommand);
 		
-		function initDependency(handler, dependency, project, data, params){
-			var actionComment;
-			if(handler.actionComment){
-				if(params){
-					actionComment = handler.actionComment.replace(/\$\{([^\}]+)\}/g, function(str, key) {
-						return params[key];
-					});
-				} else {
-					actionComment = handler.actionComment;
-				}
-			} else {
-				actionComment = "Getting content from "	+ handler.type;
-			}
-			progress.showWhile(handler.initDependency(dependency, params, project), actionComment).then(function(dependency){
-				projectClient.addProjectDependency(project, dependency).then(function(){
-						explorer.changedItem();
-					}, errorHandler);
-			}, function(error){
-				if(error.retry && error.addParamethers){
-					var paramDescps = [];
-					for(var i=0; i<error.addParamethers.length; i++){
-						paramDescps.push(new mCommandRegistry.CommandParameter(error.addParamethers[i].id, error.addParamethers[i].type, error.addParamethers[i].name));
-					}
-					data.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
-					data.oldParams = params;
-					commandService.collectParameters(data);
-				}
-				errorHandler(error);
-			});
-		}
-		
 		function createAddDependencyCommand(type){
 			return projectClient.getProjectHandler(type).then(function(handler){
 				if(!handler.initDependency){
@@ -311,7 +382,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 									explorer.changedItem();
 								}, errorHandler);
 							} else {
-								initDependency(handler, {}, item, data, params);
+								initDependency(projectClient, explorer, commandService, errorHandler,handler, {}, item, data, params);
 							}
 						});
 	
@@ -367,7 +438,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 							actionComment = "Getting content from "	+ handler.type;
 						}
 						progress.showWhile(handler.initProject(params, {WorkspaceLocation: item.Location}), actionComment).then(function(project){
-									explorer.changedItem(project, null, "created");
+									explorer.changedItem(item, true);
 						}, function(error){
 							if(error.retry && error.addParamethers){
 								var paramDescps = [];
@@ -408,57 +479,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				allContributedCommandsDeferreds.push(createAddDependencyCommand(dependencyType));
 				allContributedCommandsDeferreds.push(createInitProjectCommand(dependencyType));
 			}
-		
-		var connectDependencyCommand = new mCommands.Command({
-			name: "Connect",
-			tooltip: "Fetch content",
-			id: "orion.project.dependency.connect", //$NON-NLS-0$
-			callback: function(data) {
-				var item = forceSingleItem(data.items);
-				var params = data.oldParams || {};
-				if(data.parameters){
-					for (var param in data.parameters.parameterTable) {
-						params[param] = data.parameters.valueFor(param);
-					}
-				}
-				initDependency(projectClient.getProjectHandler(item.Dependency.Type), item.Dependency, item.Project, data, params);
-				
-			},
-			visibleWhen: function(item) {
-				if(!(item.Dependency && item.Project && item.disconnected)){
-					return false;	
-				}
-				for(var i=0; i<dependencyTypes.length; i++){
-					if(dependencyTypes[i]===item.Dependency.Type){
-						return true;	
-					}
-				}
-				return false;
-			}
-		});
-		commandService.addCommand(connectDependencyCommand);
-		
-				
-		var disconnectDependencyCommand = new mCommands.Command({
-			name: "Disconnect from project",
-			tooltip: "Do not treat this folder as a part of the project",
-			imageClass: "core-sprite-delete", //$NON-NLS-0$
-			id: "orion.project.dependency.disconnect", //$NON-NLS-0$
-			callback: function(data) {
-				var item = forceSingleItem(data.items);
-				progress.progress(projectClient.removeProjectDependency(item.Project, item.Dependency),
-					i18nUtil.formatMessage("Removing ${0} from project ${1}", item.Dependency.Name, item.Project.Name)).then(function(resp){
-						explorer.changedItem();
-					});
-			},
-			visibleWhen: function(item) {
-				if(!(item.Dependency && item.Project)){
-					return false;	
-				}
-				return true;
-			}
-		});
-		commandService.addCommand(disconnectDependencyCommand);
 		
 		var addReadmeCommand = new mCommands.Command({
 			name: "Create Readme",
@@ -503,7 +523,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					}
 					var item = forceSingleItem(data.items);
 					progress.progress(projectClient.createProject(item.Location, {Name: name}), "Creating project " + name).then(function(project){
-						explorer.changedItem(project, null, "created");
+						explorer.changedItem(item, true);
 					});
 				},
 			visibleWhen: function(item) {
@@ -530,7 +550,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 							var dialog = new ImportDialog.ImportDialog({
 								importLocation: projectMetadata.ImportLocation,
 								func: function() {
-									explorer.changedItem(projectInfo, null, "created");
+									explorer.changedItem(item, true);
 								}
 							});
 							dialog.show();
@@ -544,6 +564,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			);
 			
 			commandService.addCommand(createZipProjectCommand);
+			
+			projectCommandUtils.createDependencyCommands(serviceRegistry, commandService, explorer, fileClient, projectClient, dependencyTypes);
+			
 			return Deferred.all(allContributedCommandsDeferreds);
 		};
 	
