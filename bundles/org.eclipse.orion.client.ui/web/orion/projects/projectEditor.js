@@ -192,7 +192,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectCommands', 
 			parent.appendChild(table);
 		},
 		renderAdditionalProjectProperties: function(parent){
-			var matchingProjectHandlers = this.projectClient.getMatchingProjectHandlers(this.parentFolder);
+			this.projectClient.getMatchingProjectHandlers(this.parentFolder).then(function(matchingProjectHandlers){
 			for(var projectHandlerIndex = 0; projectHandlerIndex<matchingProjectHandlers.length; matchingProjectHandlers++){
 				var projectHandler = matchingProjectHandlers[projectHandlerIndex];
 
@@ -248,6 +248,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectCommands', 
 					}
 				}.bind(this));
 			}
+			}.bind(this));
 		},
 		renderDependencies: function(parent){
 			
