@@ -399,9 +399,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				toolbarNode: this.toolbarNode
 			});
 
-			var navigate = PageUtil.matchResourceParameters(window.location.hash).navigate;
+			var params = PageUtil.matchResourceParameters(window.location.hash);
+			var navigate = params.navigate, resource = params.resource /*TODO resourceRaw? */;
 			if (!navigate) {
-				var root = this.lastRoot || this.fileClient.fileServiceRootURL("");
+				var root = this.lastRoot || this.fileClient.fileServiceRootURL(resource || ""); //$NON-NLS-0$
 				this.explorer.loadRoot(root).then(function(){
 					if (!_self.explorer) { return; }
 					_self.explorer.updateCommands();
