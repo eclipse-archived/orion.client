@@ -278,7 +278,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectCommands', 
 						if(dependencyMetadata){
 							lib.empty(td);
 							var a = document.createElement("a");
-							a.href = "./edit.html#" + dependencyMetadata.ChildrenLocation;
+							a.href = "./edit.html#" + dependencyMetadata.Location;
 							a.appendChild(document.createTextNode(dependency.Name));
 							td.appendChild(a);
 						}

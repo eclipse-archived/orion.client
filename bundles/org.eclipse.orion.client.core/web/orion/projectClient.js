@@ -33,7 +33,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 						try{
 							var projectJson = content && content.length>0 ? JSON.parse(content) : {};
 							projectJson.Name = projectJson.Name || folderMetadata.Name;
-							projectJson.ContentLocation = folderMetadata.ChildrenLocation;
+							projectJson.ContentLocation = folderMetadata.Location;
 							projectJson.WorkspaceLocation = workspace.Location;
 							projectJson.ProjectJsonLocation = children[i].Location;
 							deferred.resolve(projectJson);
