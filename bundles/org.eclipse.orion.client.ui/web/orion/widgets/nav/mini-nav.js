@@ -312,8 +312,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 
 	function MiniNavRenderer() {
 		NavigatorRenderer.apply(this, arguments);
-		this.goIntoDirectory = false;
-		this.openDirectory = true;
 	}
 	MiniNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
 	objects.mixin(MiniNavRenderer.prototype, {
@@ -322,6 +320,9 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		createFolderNode: function(folder) {
 			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (this.showFolderLinks && folderNode.tagName === "A") { //$NON-NLS-0$
+				folderNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+					resource: folder.Location
+				});
 				folderNode.classList.add("miniNavFolder"); //$NON-NLS-0$
 				// TODO wasteful. Should attach 1 listener to parent element, then get folder model item from nav handler
 				folderNode.addEventListener("click", this.toggleFolderExpansionState.bind(this, folder, false)); //$NON-NLS-0$

@@ -369,8 +369,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 
 	function FilesNavRenderer() {
 		NavigatorRenderer.apply(this, arguments);
-		this.goIntoDirectory = false;
-		this.openDirectory = true;
 	}
 	FilesNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
 	objects.mixin(FilesNavRenderer.prototype, {
@@ -380,36 +378,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (folderNode.tagName === "A") { //$NON-NLS-0$
 				folderNode.classList.add("projectNavFolder"); //$NON-NLS-0$
-				var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
-				this.setFolderHref(folderNode, editorFile || "", folder.ChildrenLocation);
+				folderNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+					resource: folder.Location
+				});
 			}
 			return folderNode;
-		},
-		setFolderHref: function(linkElement, resource, navigate) {
-			if (this.openDirectory && !this.goIntoDirectory) {
-				return;
-			}
-			if (this.openDirectory && navigate) {
-				resource = navigate;
-			}
-			if (!this.goIntoDirectory) {
-				navigate = undefined;
-			}
-			linkElement.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-				resource: resource,
-				params: {
-					navigate: navigate
-				}
-			});
-		},
-		// Called when the editor file has changed
-		updateFolderLinks: function(rootNode) {
-			var editorFile = this.explorer.editorInput && this.explorer.editorInput.Location;
-			var _self = this;
-			Array.prototype.slice.call(lib.$$("a.projectNavFolder", rootNode)).forEach(function(folderLink) { //$NON-NLS-0$
-				var folderLocation = PageUtil.matchResourceParameters(folderLink.href).navigate;
-				_self.setFolderHref(folderLink, editorFile || "", folderLocation); //$NON-NLS-0$
-			});
 		},
 		updateRow: function(item, tableRow){
 			if(!tableRow){
@@ -456,11 +429,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				} else {
 					if(item.Dependency && item.FileMetadata){
 						itemNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-							resource: item.FileMetadata.ChildrenLocation
+							resource: item.FileMetadata.Location
 						});
 					} else if(item.Location){
 						itemNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-							resource: item.ChildrenLocation
+							resource: item.Location
 						});
 					}
 				}

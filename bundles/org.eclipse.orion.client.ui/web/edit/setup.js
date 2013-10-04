@@ -117,7 +117,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	}
 
 	var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
-		var resource = folder ? folder.ChildrenLocation : ""; //$NON-NLS-0$
+		var resource = folder ? folder.Location : ""; //$NON-NLS-0$
 		segment.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
 			resource: resource
 		});
@@ -185,7 +185,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 				parent: editorDomNode,
 				input: evt.input,
 				metadata: metadata,
-				contents: typeof evt.contents === "string" ? JSON.parse(evt.contents) : evt.contents, //$NON-NLS-0$
 				serviceRegistry: serviceRegistry,
 				commandService: commandRegistry,
 				contentTypeRegistry: contentTypeRegistry,
