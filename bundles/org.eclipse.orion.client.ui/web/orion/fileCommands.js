@@ -979,8 +979,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				explorer.selection.getSelections(function(selections) {
 					bufferedSelection = selections;
 				});
-			},
-			visibleWhen: oneOrMoreFilesOrFolders
+			}
 		});
 		commandService.addCommand(copyToBufferCommand);
 			
