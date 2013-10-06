@@ -381,7 +381,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		addDependencyTooltip: "Clone git repository and add it to this project",
 		addProjectName: "Create a project from a Git Repository",
 		addProjectTooltip: "Clone a Git Repository and add it as a project",
-		actionComment: "Clonning ${url}",
+		actionComment: "Cloning ${url}",
 		validationProperties: [
 			{source: "Git"} // alternate {soruce: "Children:[Name]", match: ".git"}
 		]
