@@ -643,16 +643,6 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				var text;
 				// If the character before the caret is an opening brace, smart indent the next line.
 				var prevCharIdx;
-				if (!String.prototype.trimLeft) {
-					String.prototype.trimLeft = function(){
-						return this.replace(/^\s+/g, '');
-					};
-				}
-				if (!String.prototype.trimRight) {
-					String.prototype.trimRight = function(){
-						return this.replace(/\s+$/g, '');
-					};
-				}
 				if (this.smartIndentation && lineText.charCodeAt(prevCharIdx = lineTextBeforeCaret.trimRight().length - 1) === 123) {
 					// Remove any extra whitespace
 					var whitespaceBeforeCaret = lineOffset - prevCharIdx - 1;
@@ -1140,6 +1130,17 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		}
 	};
 	exports.SourceCodeActions = SourceCodeActions;
+
+	if (!String.prototype.trimLeft) {
+		String.prototype.trimLeft = function(){
+			return this.replace(/^\s+/g, '');
+		};
+	}
+	if (!String.prototype.trimRight) {
+		String.prototype.trimRight = function(){
+			return this.replace(/\s+$/g, '');
+		};
+	}
 
 	return exports;
 });
