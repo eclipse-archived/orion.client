@@ -38,6 +38,12 @@ hard-coded numbers elsewhere.
 	height: 34px;
 }
 
+/*
+ * Filesystem switcher toolbar.
+ */
+.fsToolbarLayout {
+	height: 30px; /* $FSToolbarHeight */
+}
 
 /* Banner Layout Classes */
 
@@ -268,12 +274,17 @@ hard-coded numbers elsewhere.
 
 }
 
-.toolbarTarget {
+.toolbarTarget, .miniNavToolbarTarget {
 	position: absolute;
-	top: 36px;  /* $ToolbarHeight + 1 */
+	top: 36px;  /* $ToolbarHeight + 2 */
  	width: 100%;
  	bottom: 0;
  	overflow-y: auto;
+}
+
+/* Positions the main panel of the LHS navigator below the filesystem switcher toolbar. */
+.miniNavToolbarTarget {
+	top: calc(34px + 2px + 30px + 4px);  /* $ToolbarHeight + 2 + $FSToolbarHeight + $FSToolbarPadding*/
 }
 
 .hasSplit {
