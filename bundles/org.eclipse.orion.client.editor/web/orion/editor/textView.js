@@ -892,7 +892,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					rect = rects[j];
 					if (rect.left <= x && x < rect.right && (!view._wrapMode || (rect.top <= y && y < rect.bottom))) {
 						var range, start, end;
-						var rl = rect.left, fixIE8;
+						var rl = rect.left + lineRect.left, fixIE8;
 						if (util.isIE || view._isRangeRects) {
 							range = view._isRangeRects ? document.createRange() : document.body.createTextRange();
 							var high = nodeLength;
