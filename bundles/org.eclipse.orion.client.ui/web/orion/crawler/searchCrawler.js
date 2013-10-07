@@ -78,6 +78,8 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 			this.onSearchNameComplete = onComplete;
 		}
 		var results = [];
+		this._cancelled = false;
+		this._deferredArray = [];
 		this._sort(this.fileSkeleton);
 		if(this.fileSkeleton.length > 0){
 			for (var i = 0; i < this.fileSkeleton.length ; i++){
@@ -107,6 +109,8 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 	SearchCrawler.prototype.buildSkeleton = function(onBegin, onComplete){
 		this._buildingSkeleton = true;
 		var contentTypeService = this.registry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
+		this._cancelled = false;
+		this._deferredArray = [];
 		var that = this;
 		onBegin();
 		contentTypeService.getContentTypes().then(function(ct) {
