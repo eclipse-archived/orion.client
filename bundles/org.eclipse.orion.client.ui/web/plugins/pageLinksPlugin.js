@@ -81,7 +81,7 @@ define([
 			variableName: "NavigatorLocation",
 			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
 		}],
-		uriTemplate: "{OrionHome}/edit/edit.html#,navigate={NavigatorLocation}?depth=1"
+		uriTemplate: "{OrionHome}/edit/edit.html#{NavigatorLocation},navigate={NavigatorLocation}?depth=1"
 	});
 
 	provider.registerService("orion.page.link.user", null, {
