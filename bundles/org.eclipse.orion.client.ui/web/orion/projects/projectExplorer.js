@@ -51,7 +51,7 @@ define(['orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer'],
 			cell.colSpan = 3;
 			var noProjects = document.createElement("div"); 
 			noProjects.classList.add("noFile"); 
-			noProjects.textContent = "There are no projects in your workspace use ${0} to add projects";
+			noProjects.textContent = "There are no projects in your workspace, use ${0} to add projects";
 			var plusIcon = document.createElement("span"); 
 			plusIcon.classList.add("core-sprite-addcontent"); 
 			plusIcon.classList.add("icon-inline"); 
