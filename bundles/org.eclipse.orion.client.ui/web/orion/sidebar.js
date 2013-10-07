@@ -186,6 +186,10 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		getActiveViewModeId: function() {
 			return this.activeViewModeId;
 		},
+		/**
+		 * @param {String} id
+		 * @param {orion.sidebar.ViewMode} mode
+		 */
 		addViewMode: function(id, mode) {
 			if (!id) {
 				throw new Error("Invalid id: " + id);
@@ -197,6 +201,9 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				this.viewModes[id] = mode;
 			}
 		},
+		/**
+		 * @param {String} id
+		 */
 		removeViewMode: function(id) {
 			var mode = this.getViewMode(id);
 			if (mode && typeof mode.destroy === "function") { //$NON-NLS-0$
@@ -204,12 +211,18 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			}
 			delete this.viewModes[id];
 		},
+		/**
+		 * @param {String} id
+		 */
 		getViewMode: function(id) {
 			if (Object.prototype.hasOwnProperty.call(this.viewModes, id)) {
 				return this.viewModes[id];
 			}
 			return null;
 		},
+		/**
+		 * @param {String} id
+		 */
 		setViewMode: function(id) {
 			var mode = this.activeViewMode;
 			if (mode && typeof mode.destroy === "function") { //$NON-NLS-0$
