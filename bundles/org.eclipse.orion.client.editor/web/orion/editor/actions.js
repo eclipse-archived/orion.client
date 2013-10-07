@@ -20,6 +20,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 	'orion/util' //$NON-NLS-0$
 ], function(messages, mKeyBinding, mAnnotations, mTooltip, mFind, util) {
 
+	var AT = mAnnotations.AnnotationType;
+
 	var exports = {};
 
 	/**
@@ -410,8 +412,8 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var editor = this.editor;
 			var annotationModel = editor.getAnnotationModel();
 			if (!annotationModel) { return true; }
-			var styler = editor.getAnnotationStyler();
-			if (!styler) { return true; }
+			var list = editor.getOverviewRuler() || editor.getAnnotationStyler();
+			if (!list) { return true; }
 			var model = editor.getModel();
 			var currentOffset = editor.getCaretOffset();
 			var annotations = annotationModel.getAnnotations(forward ? currentOffset : 0, forward ? model.getCharCount() : currentOffset);
@@ -423,7 +425,12 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				} else {
 					if (annotation.start >= currentOffset) { continue; }
 				}
-				if (!(annotation.rangeStyle && styler.isAnnotationTypeVisible(annotation.type))) {
+				if (
+					annotation.lineStyle ||
+					annotation.type === AT.ANNOTATION_MATCHING_BRACKET ||
+					annotation.type === AT.ANNOTATION_CURRENT_BRACKET ||
+					!list.isAnnotationTypeVisible(annotation.type)
+				) {
 					continue;
 				}
 				foundAnnotation = annotation;
