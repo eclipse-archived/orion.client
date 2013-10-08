@@ -268,11 +268,11 @@ define([], function() {
 	 * @static
 	 * @param {Event} event
 	 */
-	// TODO check IE10 to see if necessary
 	function stop(event) {
 		if (window.document.all) { 
 			event.keyCode = 0;
-		} else { 
+		}
+		if (event.preventDefault) {
 			event.preventDefault();
 			event.stopPropagation();
 		}
