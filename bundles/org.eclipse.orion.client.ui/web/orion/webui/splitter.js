@@ -112,7 +112,7 @@ define([
 		 * @deprecated use addEventListener instead
 		 */
 		addResizeListener: function(listener) {
-			this.addEventListener("resize", function(event) {
+			this.addEventListener("resize", function(event) { //$NON-NLS-0$
 				listener(event.node);
 			});
 		},
@@ -272,14 +272,14 @@ define([
 			window.setTimeout(function() {
 				self.$sideNode.classList.remove(self._vertical ? "sidePanelVerticalLayoutAnimation" : "sidePanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$
 				self.$mainNode.classList.remove(self._vertical ? "mainPanelVerticalLayoutAnimation" : "mainPanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$
-				self.$node.classList.remove(self._vertical ? "splitVerticalLayoutAnimation" : "splitLayoutAnimation"); //$NON-NLS-0$
+				self.$node.classList.remove(self._vertical ? "splitVerticalLayoutAnimation" : "splitLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$
 			}, this._animationDelay);
 		},
 
 		_addAnimation: function() {
 			this.$sideNode.classList.add(this._vertical ? "sidePanelVerticalLayoutAnimation" : "sidePanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.$mainNode.classList.add(this._vertical ? "mainPanelVerticalLayoutAnimation" : "mainPanelLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$
-			this.$node.classList.add(this._vertical ? "splitVerticalLayoutAnimation" : "splitLayoutAnimation"); //$NON-NLS-0$
+			this.$node.classList.add(this._vertical ? "splitVerticalLayoutAnimation" : "splitLayoutAnimation"); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 
 		_mouseDown: function(event) {
