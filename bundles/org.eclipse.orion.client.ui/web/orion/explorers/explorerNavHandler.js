@@ -474,7 +474,13 @@ exports.ExplorerNavHandler = (function() {
 			if(this._modelIterator.iterate(forward, forceExpand)){
 				this.cursorOn(null, false, forward);
 				if(selecting){
-					this.setSelection(this.currentModel(), true);
+					var previousModelInSelection = this._inSelection(this._modelIterator.prevCursor());
+					var currentModelInselection = this._inSelection(this._modelIterator.cursor());
+					if(previousModelInSelection >= 0 && currentModelInselection >= 0) {
+						this.setSelection(this._modelIterator.prevCursor(), true);
+					} else {
+						this.setSelection(this.currentModel(), true);
+					}
 				}
 			}
 		},
