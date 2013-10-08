@@ -660,6 +660,9 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 			bindings.push({actionID: "vi-p",	keyBinding: createStroke("p", false, false, false, false, "keypress"), predefined: true});  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$
 			bindings.push({actionID: "vi-P",	keyBinding: createStroke("P", false, false, false, false, "keypress"), predefined: true});  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$
 			
+			// Undo
+			bindings.push({actionID: "vi-u",	keyBinding: createStroke("u", false, false, false, false, "keypress"), predefined: true});  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$
+			
 			//Change
 			bindings.push({actionID: "vi-c",	keyBinding: createStroke("c", false, false, false, false, "keypress"), predefined: true});  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$
 			bindings.push({actionID: "vi-d",	keyBinding: createStroke("d", false, false, false, false, "keypress"), predefined: true});  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$
@@ -811,6 +814,11 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 					view.setText(yankText, selection.start, selection.end);
 				}); 
 			}, {name: messages.viP});
+			
+			// Undo
+			view.setAction("vi-u", function() { //$NON-NLS-0$
+				return self._invoke("undo"); //$NON-NLS-0$
+			}, {name: messages.Undo});
 			
 			//Change actions
 			view.setAction("vi-c", function() { //$NON-NLS-0$
