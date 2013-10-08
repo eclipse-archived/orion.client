@@ -421,6 +421,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						var def = new Deferred();
 						var item = forceSingleItem(data.items);
 						var params = data.oldParams || {};
+						if(data.parameters)
 						for (var param in data.parameters.parameterTable) {
 							params[param] = data.parameters.valueFor(param);
 						}
