@@ -109,15 +109,19 @@ define([
 			var fileClient = this.fileClient;
 			var resourceRaw = this._parsedLocation.resourceRaw;
 			var progressService = this.progressService;
+			var progress = function(deferred, msgKey, uri) {
+				if (!progressService) { return deferred; }
+				return progressService.progress(deferred, i18nUtil.formatMessage(msgKey, uri));
+			};
 			var editor = this.getEditor();
 			if (this._fileMetadata) {
 				//Reload if out of sync, unless we are already in the process of saving
-				if (!this._saving) {
-					progressService.progress(fileClient.read(resourceRaw, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI)).then(function(data) {
+				if (!this._saving && !this._fileMetadata.Directory) {
+					progress(fileClient.read(resourceRaw, true), messages.ReadingMetadata, fileURI).then(function(data) {
 						if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
 							this._fileMetadata = data;
 							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
-								progressService.progress(fileClient.read(resourceRaw), i18nUtil.formatMessage(messages.Reading, fileURI)).then(function(contents) {
+								progress(fileClient.read(resourceRaw), messages.Reading, fileURI).then(function(contents) {
 									editor.setInput(fileURI, null, contents);
 									this._unsavedChanges = [];
 								}.bind(this));
@@ -127,32 +131,40 @@ define([
 				}
 			} else {
 				var progressTimeout = window.setTimeout(function() {
+					progressTimeout = null;
 					editor.reportStatus(i18nUtil.formatMessage(messages.Fetching, fileURI));
 				}, 800);
-				new Deferred.all([
-					progressService.progress(fileClient.read(resourceRaw, false, true), i18nUtil.formatMessage(messages.Reading, fileURI)),
-					progressService.progress(fileClient.read(resourceRaw, true), i18nUtil.formatMessage(messages.ReadingMetadata, fileURI))
-				], function(error) { return {_error: error}; }).then(function(results) {
+				var clearTimeout = function() {
+					editor.reportStatus("");
 					if (progressTimeout) {
 						window.clearTimeout(progressTimeout);
 					}
-					var contentOrError = results[0];
-					var metadataOrError = results[1];
-					editor.reportStatus("");
-					if (contentOrError._error || metadataOrError._error) {
-						var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-						handleError(statusService, contentOrError._error || metadataOrError._error);
-						this._setNoInput();
+				};
+				var errorHandler = function(error) {
+					clearTimeout();
+					var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+					handleError(statusService, error);
+					this._setNoInput();
+				}.bind(this);
+				this._acceptPatch = null;
+				progress(fileClient.read(resourceRaw, true), messages.ReadingMetadata, fileURI).then(function(metadata) {
+					if (metadata.Directory) {
+						progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI).then(function(contents) {
+							clearTimeout();
+							metadata.Children = contents;
+							this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
+						}.bind(this), errorHandler);
 					} else {
-						var content = contentOrError;
-						this._acceptPatch = null;
-						if (typeof contentOrError !== "string") { //$NON-NLS-0$
-							content = contentOrError.result;
-							this._acceptPatch = contentOrError.acceptPatch;
-						}
-						this._setInputContents(this._parsedLocation, fileURI, content, metadataOrError);
+						progress(fileClient.read(resourceRaw, false, true), messages.Reading, fileURI).then(function(contents) {
+							clearTimeout();
+							if (typeof contents !== "string") { //$NON-NLS-0$
+								this._acceptPatch = contents.acceptPatch;
+								contents = contents.result;
+							}
+							this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
+						}.bind(this), errorHandler);
 					}
-				}.bind(this));
+				}.bind(this), errorHandler);
 			}
 		},
 		processParameters: function(input) {
