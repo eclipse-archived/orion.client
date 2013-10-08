@@ -12,8 +12,8 @@
 /*global window document define orion */
 /*browser:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'], 
-        function(messages, require, lib) {
+define(['i18n!orion/nls/messages', 'require', 'orion/util', 'orion/webui/littlelib'], 
+        function(messages, require, util, lib) {
 
 	
 	/**
@@ -223,7 +223,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 				var parentDismiss = dismissArea;
 				if (!parentDismiss) {
 					parentDismiss = document.createElement("span"); //$NON-NLS-0$
-					parentDismiss.className = "layoutRight parametersDismiss"; //$NON-NLS-0$
+					//TODO See bug#418877 - IE10 does not allocate enough space for the children when the parent has padding set
+					// and one of the children has float set to right.
+					if (!util.isIE) {
+						parentDismiss.classList.add("layoutRight"); //$NON-NLS-0$
+					}
+					parentDismiss.classList.add("parametersDismiss"); //$NON-NLS-0$
 					parameterArea.appendChild(parentDismiss);
 				}
 				var finish = function (collector) {
