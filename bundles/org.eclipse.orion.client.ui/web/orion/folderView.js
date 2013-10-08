@@ -41,9 +41,7 @@ define([
 		createFolderNode: function(folder) {
 			var folderNode = mNavigatorRenderer.NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (this.showFolderLinks && folderNode.tagName === "A") { //$NON-NLS-0$
-				folderNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-					resource: folder.Location
-				});
+				folderNode.href = "#" + folder.Location; //$NON-NLS-0$
 			}
 			folderNode.classList.add("folderNavFolder"); //$NON-NLS-0$
 			folderNode.classList.add("navlink"); //$NON-NLS-0$

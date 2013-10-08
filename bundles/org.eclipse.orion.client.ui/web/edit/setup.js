@@ -118,9 +118,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 
 	var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
 		var resource = folder ? folder.Location : ""; //$NON-NLS-0$
-		segment.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
-			resource: resource
-		});
+		segment.href = "#" + resource; //$NON-NLS-0$
 	};
 
 	inputManager = new mInputManager.InputManager({
@@ -226,11 +224,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		lastRoot = evt.root;
 	});
 	sidebarNavInputManager.addEventListener("editorInputMoved", function(evt) { //$NON-NLS-0$
-		var newInput = evt.newInput;
-		var params = {};
-		// If we don't know where the file went, go to "no editor"
-		params.resource = newInput || "";
-		window.location = new URITemplate("#{,resource,params*}").expand(params); //$NON-NLS-0$
+		var newInput = evt.newInput || "";
+		window.location = "#" + newInput; //$NON-NLS-0$
 	});
 
 	editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
