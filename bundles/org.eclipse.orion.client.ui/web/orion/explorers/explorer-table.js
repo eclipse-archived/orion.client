@@ -292,6 +292,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		}
 	};
 
+	var dragStartTarget;
 	FileExplorer.prototype._makeDropTarget = function(item, node, persistAndReplace) {
 		function dropFileEntry(entry, path, target, explorer, performDrop, fileClient) {
 			path = path || "";
@@ -334,6 +335,29 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		if (this.dragAndDrop) {
 			var explorer = this;
 			var performDrop = this.dragAndDrop;
+			
+			var dragStart = function(evt) {
+				dragStartTarget = evt.target;
+			};
+			if (persistAndReplace) {
+				if (this._oldDragStart) {
+					node.removeEventListener("dragstart", this._oldDragStart, false); //$NON-NLS-0$
+				}
+				this._oldDragStart = dragStart;
+			}
+			node.addEventListener("dragstart", dragStart, false); //$NON-NLS-0$
+			
+			
+			var dragEnd = function(evt) {
+				dragStartTarget = null;
+			};
+			if (persistAndReplace) {
+				if (this._oldDragEnd) {
+					node.removeEventListener("dragend", this._oldDragEnd, false); //$NON-NLS-0$
+				}
+				this._oldDragEnd = dragEnd;
+			}
+			node.addEventListener("dragend", dragEnd, false); //$NON-NLS-0$
 			
 			var dragLeave = function(evt) { //$NON-NLS-0$
 				node.classList.remove("dragOver"); //$NON-NLS-0$
@@ -387,9 +411,26 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 			var drop = function(evt) { //$NON-NLS-0$
 				node.classList.remove("dragOver"); //$NON-NLS-0$
+				
+				if (dragStartTarget) {
+					var fileClient = explorer.fileClient;
+					var location = dragStartTarget.href;
+					var index = location.indexOf("#"); //$NON-NLS-0$
+					location = location.substring(index + 1);
+					var progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
+					progress.showWhile(fileClient.copyFile(location, item.Location), i18nUtil.formatMessage(messages["Copying ${0}"], location)).then(function(result) {
+						explorer.changedItem(item, true);
+					}, function(error) {
+						if (progress) {
+							progress.setProgressResult(error);
+						} else {
+							window.console.log(error);
+						}
+					});
+					
 				// webkit supports testing for and traversing directories
 				// http://wiki.whatwg.org/wiki/DragAndDropEntries
-				if (evt.dataTransfer.items && evt.dataTransfer.items.length > 0) {
+				} else if (evt.dataTransfer.items && evt.dataTransfer.items.length > 0) {
 					for (var i=0; i<evt.dataTransfer.items.length; i++) {
 						var entry = null;
 						if (typeof evt.dataTransfer.items[i].getAsEntry === "function") { //$NON-NLS-0$
