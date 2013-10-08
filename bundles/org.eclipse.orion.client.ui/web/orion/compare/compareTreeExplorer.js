@@ -30,13 +30,13 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 		}
 	}
 	
-	function _place(ndoeToPlace, parent, position){
+	function _place(nodeToPlace, parent, position){
 		var parentNode = lib.node(parent);
 		if(parentNode){
 			if(position === "only"){ //$NON-NLS-0$
 				lib.empty(parentNode);
 			}
-			parentNode.appendChild(ndoeToPlace);
+			parentNode.appendChild(nodeToPlace);
 		}
 	}
 	
