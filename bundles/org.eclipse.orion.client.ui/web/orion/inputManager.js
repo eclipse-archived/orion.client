@@ -258,7 +258,7 @@ define([
 						// repeat save operation, but without ETag
 						var def = self.fileClient.write(resourceRaw, contents);
 						if (progress) {
-							def = progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], input));
+							def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
 						}
 						def.then(successHandler, errorHandler);
 					} else {
