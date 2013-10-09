@@ -232,8 +232,10 @@ define([
 			}
 			var self = this;
 			function successHandler(result) {
-				self.getFileMetadata().ETag = result.ETag;
-				editor.setInput(input, null, contents, true);
+				if (input === self.getInput()) {
+					self.getFileMetadata().ETag = result.ETag;
+					editor.setInput(input, null, contents, true);
+				}
 				editor.reportStatus("");
 				if (failedSaving) {
 					statusService.setProgressResult({Message:messages.Saved, Severity:"Normal"}); //$NON-NLS-0$
