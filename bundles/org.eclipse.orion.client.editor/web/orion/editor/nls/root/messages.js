@@ -185,6 +185,8 @@ define({
 	"viC": "Change Text Until Line End", //$NON-NLS-1$ //$NON-NLS-0$
 	"vip": "Paste After Char or Line", //$NON-NLS-1$ //$NON-NLS-0$
 	"viP": "Paste Before Char or Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"viStar": "Search Word Under Cursor", //$NON-NLS-1$ //$NON-NLS-0$
+
 
 	"replaceAll": "Replacing all...", //$NON-NLS-1$ //$NON-NLS-0$
 	"replacedMatches": "Replaced ${0} matches", //$NON-NLS-1$ //$NON-NLS-0$
