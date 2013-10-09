@@ -29,7 +29,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						'<div class="sectionAnchor sectionTitle layoutLeft">${User Profile}</div>' + 
 						'<div id="userCommands" class="layoutRight sectionActions"></div>' +
 					'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
-					'<div class="sections">' + //$NON-NLS-0$
+					'<div class="sectionTable sections">' + //$NON-NLS-0$
 					
 					'</div>' + //$NON-NLS-0$
 					'<div></div>' +

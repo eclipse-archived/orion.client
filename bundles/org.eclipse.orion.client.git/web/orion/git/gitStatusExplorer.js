@@ -875,7 +875,6 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 			commitNode.appendChild(sectionItem);
 
 			var detailsView = document.createElement("div"); //$NON-NLS-0$
-			detailsView.className = "stretch"; //$NON-NLS-0$
 			sectionItem.appendChild(detailsView);
 
 			var title = document.createElement("div"); //$NON-NLS-0$
