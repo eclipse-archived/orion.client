@@ -473,6 +473,8 @@ a.currentLocation:hover {
 	background-color: #555;
 	border-radius: 3px;
 	padding: 8px;
+	clear: both;
+	float: left;
 }
 
 .tooltip.left {
