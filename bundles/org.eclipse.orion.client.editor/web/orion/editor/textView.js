@@ -1713,6 +1713,20 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return {x: x, y: y};
 		},
 		/**
+		 * Returns the next character offset after the given offset and options
+		 *
+		 * @param {Number} offset the offset to start from
+		 * @param {Object} options
+		 *   { unit: the type of unit to advance to (eg "character", "word", "wordend", "wordWS", "wordendWS"),
+		 *    count: the number of units to advance (negative to advance backwards) }
+		 * @returns {Number} the next character offset
+		 */
+		getNextOffset: function(offset, options) {
+		  var selection = new Selection(offset, offset, false);
+		  this._doMove(options, selection);
+		  return selection.getCaret();
+		},
+        /**
 		 * Returns the specified view options.
 		 * <p>
 		 * The returned value is either a <code>orion.editor.TextViewOptions</code> or an option value. An option value is returned when only one string paremeter

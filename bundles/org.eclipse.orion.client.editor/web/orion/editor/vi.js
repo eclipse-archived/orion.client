@@ -671,7 +671,8 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 			
 			bindings.push({actionID: "vi-C",	keyBinding: createStroke("C", false, false, false, false, "keypress"), predefined: true});  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$
 			bindings.push({actionID: "vi-D",	keyBinding: createStroke("D", false, false, false, false, "keypress"), predefined: true});  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$
-		
+			bindings.push({actionID: "vi-*",  keyBinding: createStroke("*", false, false, false, false, "keypress"), predefined: true});  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$
+			
 			return bindings;
 		},
 		getKeyBindings: function (actionID) {
@@ -855,6 +856,24 @@ define("orion/editor/vi", [ //$NON-NLS-0$
 			view.setAction("vi-D", function() { //$NON-NLS-0$
 				return self._invoke("deleteLineEnd"); //$NON-NLS-0$
 			}, {name: messages.deleteLineEnd});
+			
+      view.setAction("vi-*", function() { //$NON-NLS-0$
+		// Get word under caret
+		var view = self.getView();
+		var caret = view.getCaretOffset();
+		var wordStart = view.getNextOffset(caret + 1, {count: -1, unit: "word"}); //$NON-NLS-0$
+		var wordEnd = view.getNextOffset(wordStart, {count: 1, unit: "wordend"}); //$NON-NLS-0$
+		var text = view.getText(wordStart, wordEnd);
+		// Search for the word
+		self._searchFwd = true;
+		var data = {
+		  hideAfterFind: true,
+		  incremental: false,
+		  reverse: false,
+		  findString: text
+		};
+		return self._invoke("find", data); //$NON-NLS-0$
+		}, {name: messages.viStar});
 				
 //			Status Line Mode
 //			view.setAction("statusLineMode", function() { //$NON-NLS-0$
