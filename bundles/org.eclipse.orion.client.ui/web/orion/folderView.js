@@ -54,7 +54,8 @@ define([
 			if (col_no === 0) {
 				td = document.createElement("th"); //$NON-NLS-0$
 				td.colSpan = 1;
-				td.appendChild(document.createTextNode(this.explorer.treeRoot.Name));
+				var root = this.explorer.treeRoot;
+				td.appendChild(document.createTextNode(root.Parents ? root.Name : this.explorer.fileClient.fileServiceName(root.Location)));
 				return td;
 			} else if (col_no === 1) {
 				td = document.createElement("th"); //$NON-NLS-0$

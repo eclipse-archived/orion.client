@@ -453,6 +453,18 @@ define([
 		}
 	}
 
+	function boundingNode(node) {
+		var style = window.getComputedStyle(node, null);
+		if (style === null) {
+			return node;
+		}
+		var position = style.getPropertyValue("position"); //$NON-NLS-0$
+		if (position === "absolute" || !node.parentNode || node === document.body) { //$NON-NLS-0$
+			return node;
+		}
+		return boundingNode(node.parentNode);
+	}
+
 	function getToolbarElements(toolNode) {
 		var elements = {};
 		var toolbarNode = null;
@@ -484,10 +496,9 @@ define([
 			if (toolbarNode.parentNode) {
 				elements.toolbarTarget = lib.$(".toolbarTarget", toolbarNode.parentNode); //$NON-NLS-0$
 				if (elements.toolbarTarget) {
-					var bounds = lib.bounds(toolbarNode);
-					// assumes that there is never anything besides notifications and slideout between toolbar and its target 
-					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=391596
-					elements.toolbarTargetY = bounds.height + 1;
+					var bounds = lib.bounds(elements.toolbarTarget);
+					var parentBounds = lib.bounds(boundingNode(elements.toolbarTarget.parentNode));
+					elements.toolbarTargetY = bounds.top - parentBounds.top;
 					elements.toolbar = toolbarNode;
 				}
 			}
@@ -510,8 +521,12 @@ define([
 			if (heightExtras > 0) {
 				heightExtras += 8; // padding
 			}
-			elements.toolbarTarget.style.top = elements.toolbarTargetY + heightExtras + "px"; //$NON-NLS-0$
-			elements.toolbar.style.paddingBottom = heightExtras + "px"; //$NON-NLS-0$ 
+			if (heightExtras) {
+				elements.toolbarTarget.style.top = elements.toolbarTargetY + heightExtras + "px"; //$NON-NLS-0$
+				elements.toolbar.style.paddingBottom = heightExtras + "px"; //$NON-NLS-0$ 
+			} else {
+				elements.toolbarTarget.style.top = elements.toolbar.style.paddingBottom = "";
+			}
 		}
 	}
 
