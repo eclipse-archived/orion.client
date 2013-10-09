@@ -477,7 +477,7 @@ exports.GitRepositoryExplorer = (function() {
 		var status = repository.Status;
 		
 		if (mode === "full"){ //$NON-NLS-0$
-			var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length;
+			var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length + status.Missing.length;
 			var staged = status.Changed.length + status.Added.length + status.Removed.length;
 			
 			var workspaceState = ((unstaged > 0 || staged > 0) 
@@ -542,7 +542,7 @@ exports.GitRepositoryExplorer = (function() {
 		horizontalBox.style.overflow = "hidden";
 		sectionItem.appendChild(horizontalBox);
 		
-		var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length;
+		var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length + status.Missing.length;
 		var staged = status.Changed.length + status.Added.length + status.Removed.length;
 		var workspaceState = messages["You have no changes to commit."];
 		
