@@ -49,9 +49,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				}).then(d.resolve, d.reject, d.progress);
 				return d;
 			}
-			return result.then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
-			});
+			return result.response ? JSON.parse(result.response) : null;
 		});
 	}
 
