@@ -117,7 +117,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	}
 
 	var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
-		var resource = folder ? folder.Location : ""; //$NON-NLS-0$
+		var resource = "";
+		if (folder) {
+			resource = folder.Location;
+		} else if (folderLocation && folderLocation !== "/file") { //$NON-NLS-0$
+			resource = fileClient.fileServiceRootURL(folderLocation);
+		}
 		segment.href = "#" + resource; //$NON-NLS-0$
 	};
 
