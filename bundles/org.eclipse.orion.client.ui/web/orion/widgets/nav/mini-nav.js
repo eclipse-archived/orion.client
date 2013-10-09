@@ -437,8 +437,12 @@ define([
 		render: function() {
 			this.fsName = document.createElement("div"); //$NON-NLS-0$
 			this.fsName.classList.add("filesystemName"); //$NON-NLS-0$
-			this.menu = document.createElement("div"); //$NON-NLS-0$
+			this.fsName.classList.add("layoutLeft"); //$NON-NLS-0$
+			this.menu = document.createElement("ul"); //$NON-NLS-0$
 			this.menu.classList.add("filesystemSwitcher"); //$NON-NLS-0$
+			this.menu.classList.add("commandList"); //$NON-NLS-0$
+			this.menu.classList.add("layoutRight"); //$NON-NLS-0$
+			this.menu.classList.add("pageActions"); //$NON-NLS-0$
 			this.node.appendChild(this.fsName);
 			this.node.appendChild(this.menu);
 
