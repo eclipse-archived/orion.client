@@ -165,18 +165,15 @@ a.currentLocation:hover {
 
 /* Filesystem switcher toolbar */
 .fsToolbar {
-	padding: 2px 6px 2px 4px; /*$FSToolbarPadding*/
+	padding: 2px 4px 2px 4px; /*$FSToolbarPadding*/
 	background-color: white;
 	border-bottom: 1px solid rgb(235, 235, 235);
-	height: 30px; /*$FSToolbarHeight*/
-	line-height: 30px; /* vertical center */
 }
 
 .filesystemName {
 	font-weight: bold;
-	position: absolute;
-	left: 0;
-	margin-left: 6px;
+	margin-left: 4px;
+	margin-top: 8px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -189,9 +186,6 @@ a.currentLocation:hover {
 }
 
 .filesystemSwitcher {
-	position: absolute;
-	right: 0;
-	margin-right: 4px;
 }
 
 .sidebarToolbar {
