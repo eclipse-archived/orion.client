@@ -130,6 +130,8 @@ define([
 					}.bind(this));
 				}
 			} else {
+				//TODO this URL parsing to retrieve the should be done in the server side.
+				//TODO /gitapi/commit URLs are not supported be the orion file client.
 				var metadataURI = resourceRaw;
 				if (metadataURI.indexOf("/gitapi/commit/") === 0) { //$NON-NLS-0$
 					var start = metadataURI.indexOf("/file"); //$NON-NLS-0$
