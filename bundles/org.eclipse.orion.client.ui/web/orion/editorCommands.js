@@ -416,14 +416,18 @@ define([
 				name: messages.Blame,
 				tooltip: messages.BlameTooltip,
 				id: "orion.edit.blame", //$NON-NLS-0$
+				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('blame', 'boolean')], {clientCollect: true}), //$NON-NLS-1$ //$NON-NLS-0$
 				visibleWhen: function() {
 					if (!editor.getTextView()) {
 						return false;
 					}
-					return  blamer.isVisible(self.serviceRegistry);
+					return blamer.isVisible(self.serviceRegistry);
 				},
 				callback: function(data) {
 					blameCommand.visible = !blameCommand.visible;
+					if (data.parameters && data.parameters.valueFor('blame')) { //$NON-NLS-0$
+						blameCommand.visible = data.parameters.valueFor('blame') === "true"; //$NON-NLS-1$ //$NON-NLS-0$
+					}
 					if (blameCommand.visible) {
 						blamer.getBlame(self.serviceRegistry, editor, self.inputManager.getInput());
 					} else{
@@ -432,7 +436,7 @@ define([
 				}
 			});
 			this.commandService.addCommand(blameCommand);
-			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, null, false, new mKeyBinding.KeyBinding('b', true,false,true)); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, null, false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
 		_generateEditCommands: function(editor) {

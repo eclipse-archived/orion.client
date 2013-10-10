@@ -20,12 +20,12 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 
 	var blameRequest = {
 
-		getBlameInfo: function(location) {
+		getBlameInfo: function(location, commit) {
 			var service = this; //$NON-NLS-0$
 
 			var clientDeferred = new Deferred();
-
-			xhr("GET", "/gitapi/blame/master" + location, { //$NON-NLS-1$ //$NON-NLS-0$
+			
+			xhr("GET", "/gitapi/blame/" + (commit ? commit : "HEAD") + location, { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 						"Content-Type": "charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
@@ -73,9 +73,23 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 	 * Makes a server requests for the blame data, as well as server
 	 * requests for all of the commits that make up the blame data
 	 */
-	function blameFile(url) {
+	function blame(location) {
+		//TODO there muist be a way to get the commit id and file name without having to parse the URL
+		var commit;
+		var prefix = "/gitapi/commit/"; //$NON-NLS-0$
+		var start = location.indexOf(prefix), end;
+		if (start === 0) {
+			start = prefix.length;
+			end = location.indexOf("/", start); //$NON-NLS-0$
+			commit = location.substring(start, end);
+			start = location.indexOf("/file"); //$NON-NLS-0$
+			end = location.indexOf("?", start); //$NON-NLS-0$
+			if (end === -1) { end = location.length; }
+			location = location.substring(start, end);
+		}
+		
 		var wrappedResult = new Deferred();
-		blameRequest.getBlameInfo(url).then(function(response) {
+		blameRequest.getBlameInfo(location, commit).then(function(response) {
 			var annotations = [];
 			Deferred.all(annotations, function(error) {
 				return {
@@ -116,16 +130,13 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 	}
 
 	var serviceImpl = {
-		doBlame: function(fileName) {
-			return blameFile(fileName);
+		doBlame: function(location) {
+			return blame(location);
 		}
 	};
 	var properties = {
-		name: "Git Blame",
-		key: ["b", true, false, true] //$NON-NLS-0$
-		// Ctrl+Alt+b
+		name: "Git Blame"
 	};
-
 	provider.registerService("orion.edit.blamer", serviceImpl, //$NON-NLS-0$
 	properties);
 	provider.connect();
