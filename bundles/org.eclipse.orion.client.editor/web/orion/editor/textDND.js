@@ -130,7 +130,8 @@ define("orion/editor/textDND", ['orion/util'], function(util) { //$NON-NLS-1$ //
 				e.event.dataTransfer.dropEffect = "none"; //$NON-NLS-0$
 			} else {
 				if (!util.isFirefox) {
-					this._dropEffect = e.event.dataTransfer.dropEffect = e.event.ctrlKey ? "copy" : "move"; //$NON-NLS-1$ //$NON-NLS-0$
+					var copy = util.isMac ? e.event.altKey : e.event.ctrlKey;
+					this._dropEffect = e.event.dataTransfer.dropEffect = copy ? "copy" : "move"; //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 		},
