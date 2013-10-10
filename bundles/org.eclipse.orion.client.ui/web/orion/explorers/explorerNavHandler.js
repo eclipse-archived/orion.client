@@ -248,7 +248,7 @@ exports.ExplorerNavHandler = (function() {
 			}
 		},
 		
-		setSelection: function(model, toggling){
+		setSelection: function(model, toggling, shiftSelectionAnchor){
 			if(this._selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
 				if(toggling && this.explorer.renderer._useCheckboxSelection){
 					this._checkRow(model,true);
@@ -273,6 +273,9 @@ exports.ExplorerNavHandler = (function() {
 					this._selections.push(model);
 					this._lastSelection = model;
 				}
+			}
+			if(shiftSelectionAnchor){
+				this._shiftSelectionAnchor = this._lastSelection;
 			}
 			if (this.explorer.selection) {
 				this.explorer.renderer.storeSelections();
@@ -539,9 +542,9 @@ exports.ExplorerNavHandler = (function() {
 			if(isPad){
 				this.setSelection(model, true);
 			} else if(this._ctrlKeyOn(mouseEvt)){
-				this.setSelection(model, true);
-			} else if(mouseEvt.shiftKey && this._lastSelection){
-				var scannedSel = this._modelIterator.scan(this._lastSelection, model);
+				this.setSelection(model, true, true);
+			} else if(mouseEvt.shiftKey && this._shiftSelectionAnchor){
+				var scannedSel = this._modelIterator.scan(this._shiftSelectionAnchor, model);
 				if(scannedSel){
 					this._clearSelection(true);
 					for(var i = 0; i < scannedSel.length; i++){
@@ -549,7 +552,7 @@ exports.ExplorerNavHandler = (function() {
 					}
 				}
 			} else {
-				this.setSelection(model, false);
+				this.setSelection(model, false, true);
 			}
 		},
 		
@@ -564,7 +567,7 @@ exports.ExplorerNavHandler = (function() {
 		onUpArrow: function(e) {
 			this.iterate(false, false, e.shiftKey);
 			if(!this._ctrlKeyOn(e) && !e.shiftKey){
-				this.setSelection(this.currentModel(), false);
+				this.setSelection(this.currentModel(), false, true);
 			}
 			e.preventDefault();
 			return false;
@@ -575,7 +578,7 @@ exports.ExplorerNavHandler = (function() {
 		onDownArrow: function(e) {
 			this.iterate(true, false, e.shiftKey);
 			if(!this._ctrlKeyOn(e) && !e.shiftKey){
-				this.setSelection(this.currentModel(), false);
+				this.setSelection(this.currentModel(), false, true);
 			}
 			e.preventDefault();
 			return false;
@@ -615,7 +618,7 @@ exports.ExplorerNavHandler = (function() {
 			}
 			if(!this._modelIterator.topLevel(curModel)){
 				this.cursorOn(curModel.parent);
-				this.setSelection(curModel.parent, false);
+				this.setSelection(curModel.parent, false, true);
 			//The cursor is now on a top level item which is collapsed. We need to ask the explorer is it wants to scope up.	
 			} else if (this.explorer.scopeUp && typeof this.explorer.scopeUp === "function"){ //$NON-NLS-0$
 				this.explorer.scopeUp();
@@ -648,7 +651,7 @@ exports.ExplorerNavHandler = (function() {
 
 		//Space key toggles the check box on the current row if the renderer uses check box
 		onSpace: function(e) {
-			this.setSelection(this.currentModel(), true);
+			this.setSelection(this.currentModel(), true, true);
 			e.preventDefault();
 		},
 		
