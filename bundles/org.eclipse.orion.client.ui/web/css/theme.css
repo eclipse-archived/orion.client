@@ -179,6 +179,7 @@ a.currentLocation:hover {
 	text-overflow: ellipsis;
 	/* 100% - filesystemName_margin - filesystemName_margin - filesystemSwitcher_width */
 	max-width: calc(100% - 6px - 4px - 24px);
+	max-width: -webkit-calc(100% - 6px - 4px - 24px);
 	-moz-user-select: -moz-none;
 	-webkit-user-select: none;
 	-ms-user-select: none;
