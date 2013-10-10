@@ -92,6 +92,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	function FilesNavExplorer(params, projectExplorer) {
 		params.setFocus = false;   // do not steal focus on load
 		params.cachePrefix = null; // do not persist table state
+		params.modelEventDispatcher = FileCommands.getModelEventDispatcher();
 		FileExplorer.apply(this, arguments);
 		this.commandRegistry = params.commandRegistry;
 		this.projectClient = params.projectClient;
@@ -113,7 +114,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 
 		// Listen to model changes from fileCommands
 		var dispatcher = this.modelEventDispatcher;
-		var onChange = this.onFileModelChange.bind(this);
+		var onChange = this._modelListener = this.onFileModelChange.bind(this);
 		["move", "delete"].forEach(function(type) { //$NON-NLS-1$ //$NON-NLS-0$
 			dispatcher.addEventListener(type, onChange);
 		});
@@ -164,6 +165,12 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			}
 		},
 		destroy: function() {
+			var _self = this;
+			var dispatcher = this.modelEventDispatcher;
+			["move", "delete"].forEach(function(type) { //$NON-NLS-1$ //$NON-NLS-0$
+				dispatcher.removeEventListener(type, _self._modelListener);
+			});
+			FileExplorer.prototype.destroy.call(this);
 		},
 		/**
 		 * Loads the given children location as the root.
@@ -605,6 +612,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 
 		},
 		destroy : function(){
+			if (this.fileExplorer) {
+				this.fileExplorer.destroy();
+				this.fileExplorer = null;
+			}
 		},
 		constructor: ProjectNavExplorer
 	};
