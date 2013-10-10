@@ -347,6 +347,7 @@ define([
 					this.processParameters(input);
 				} else {
 					this._input = fileURI;
+					this._readonly = false;
 					this._fileMetadata = null;
 					this.load();
 				}
