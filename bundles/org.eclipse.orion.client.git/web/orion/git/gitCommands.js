@@ -711,7 +711,7 @@ var exports = {};
 			tooltip: messages["Show the repository folder in the file navigator"],
 			id : "eclipse.openCloneContent", //$NON-NLS-0$
 			hrefCallback : function(data) {
-				return require.toUrl("navigate/table.html")+"#" + data.items.ContentLocation+"?depth=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				return require.toUrl("edit/edit.html")+"#" + data.items.ContentLocation+"?depth=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
 				if (!item.ContentLocation)

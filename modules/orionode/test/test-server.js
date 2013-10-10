@@ -44,7 +44,7 @@ describe('orionode', function() {
 			workspaceDir: WORKSPACE
 		}))
 		.request()
-		.get('/navigate/table.html')
+		.get('/index.html')
 		.expect(200)
 		.end(function(err, res) {
 			assert.ifError(err);

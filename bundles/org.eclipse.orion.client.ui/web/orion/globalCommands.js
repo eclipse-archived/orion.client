@@ -574,7 +574,7 @@ define([
 		// TODO not entirely happy with this. Dynamic behavior that couldn't be in the html template, maybe it could be
 		// dynamically bound in a better way like we do with NLS strings
 		var home = lib.node("home"); //$NON-NLS-0$
-		home.href = require.toUrl("navigate/table.html"); //$NON-NLS-0$
+		home.href = require.toUrl("edit/edit.html"); //$NON-NLS-0$
 		home.setAttribute("aria-label", messages['Orion Home']); //$NON-NLS-1$ //$NON-NLS-0$
 		var progressPane = lib.node("progressPane"); //$NON-NLS-0$
 		progressPane.src = require.toUrl("images/none.png"); //$NON-NLS-0$

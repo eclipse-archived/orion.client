@@ -138,7 +138,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 							params.find = searchHelper.inFileQuery.searchStr;
 							params.regEx = searchHelper.inFileQuery.wildCard ? true : undefined;
 						}
-						var resourceLink = navigatorRenderer.createLink(require.toUrl("navigate/table.html"), item, commandRegistry, contentTypeService,
+						var resourceLink = navigatorRenderer.createLink(require.toUrl("edit/edit.html"), item, commandRegistry, contentTypeService,
 							openWithCommands, null /*defaultEditor*/, {
 								"aria-describedby": (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,''), //$NON-NLS-0$
 								style: {
