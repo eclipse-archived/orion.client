@@ -359,6 +359,11 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 			} else {  // no href
 				element.href = "#"; //$NON-NLS-0$
 			}
+			element.addEventListener("keydown", function(e) { //$NON-NLS-0$
+				if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
+					element.click();
+				}
+			}, false);
 		} else {
 			element = document.createElement("span"); //$NON-NLS-0$
 			element.tabIndex = 0;
@@ -369,6 +374,12 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 				element.addEventListener("click", function(e) { //$NON-NLS-0$
 					dropdown.close(true);
 					onClick.call(commandInvocation.handler, commandInvocation);
+				}, false);
+				element.addEventListener("keydown", function(e) { //$NON-NLS-0$
+					if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
+						e.preventDefault(); /* prevents dropdown from receiving event and re-opening */
+						element.click();
+					}
 				}, false);
 			}
 		}
