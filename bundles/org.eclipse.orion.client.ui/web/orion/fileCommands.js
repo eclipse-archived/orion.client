@@ -243,7 +243,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						if (populateFunction) {
 							populateFunction(folder);
 						}
-						explorer.loadResourceList("", true);
+						dispatchModelEventOn(explorer, {type: "create", parent: loadedWorkspace, newValue: folder }); //$NON-NLS-0$
 					}, errorHandler);
 				}, 
 				errorHandler);
