@@ -163,7 +163,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			div = _createElement('div', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			span = _createElement('span', "primaryColumn", null, div); //$NON-NLS-1$ //$NON-NLS-0$
-			linkRef = require.toUrl("navigate/table.html") + "#" + item.parentLocation; //$NON-NLS-1$ //$NON-NLS-0$
+			linkRef = require.toUrl("edit/edit.html") + "#" + item.parentLocation; //$NON-NLS-1$ //$NON-NLS-0$
 			var fileService = this.explorer.getFileServiceName(item);
 			_place(document.createTextNode(fileService + "/" + item.fullPathName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
