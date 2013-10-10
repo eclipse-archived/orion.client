@@ -284,7 +284,10 @@ hard-coded numbers elsewhere.
 
 /* Positions the main panel of the LHS navigator below the filesystem switcher toolbar. */
 .miniNavToolbarTarget {
-	top: calc(34px + 2px + 30px + 4px);  /* $ToolbarHeight + 2 + $FSToolbarHeight + $FSToolbarPadding*/
+	/* $ToolbarHeight + 2 + $FSToolbarHeight + $FSToolbarPadding
+	 = 34px + 2px + 30px + 4px
+	*/
+	top: 70px; 
 }
 
 .hasSplit {
