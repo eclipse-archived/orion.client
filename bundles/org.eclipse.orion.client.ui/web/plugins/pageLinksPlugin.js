@@ -27,11 +27,11 @@ define([
 	var provider = new PluginProvider(headers);
 	
 	// Primary navigation links
-	provider.registerService("orion.page.link", serviceImpl, {
-		nameKey: "Navigator",
-		id: "orion.navigator",
+	provider.registerService("orion.page.link", null, {
+		nameKey: "Editor",
 		nls: "orion/nls/messages",
-		uriTemplate: "{OrionHome}/navigate/table.html#"
+		tooltip: "Edit code",
+		uriTemplate: "{OrionHome}/edit/edit.html"
 	});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Sites",
@@ -51,37 +51,18 @@ define([
 		nls: "orion/nls/messages",
 		uriTemplate: "{OrionHome}/search/search.html"
 	});
-	provider.registerService("orion.page.link", null, {
-		nameKey: "Editor",
-		nls: "orion/nls/messages",
-		tooltip: "Edit the code",
-		uriTemplate: "{OrionHome}/edit/edit.html"
-	});
 	
-	provider.registerService("orion.page.link.related", null, {
-		id: "orion.navigateFromMetadata",
-		nameKey: "Navigator",
-		nls: "orion/nls/messages",
-		tooltip: "Go to the navigator",
-		validationProperties: [{
-			source: "ChildrenLocation|ContentLocation",
-			variableName: "NavigatorLocation",
-			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
-		}],
-		uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
-	});
-
 	provider.registerService("orion.page.link.related", null, {
 		id: "orion.editFromMetadata",
 		nameKey: "Editor",
 		nls: "orion/nls/messages",
-		tooltip: "Edit the code",
+		tooltip: "Open Editor page",
 		validationProperties: [{
 			source: "ChildrenLocation|ContentLocation",
-			variableName: "NavigatorLocation",
+			variableName: "EditorLocation",
 			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
 		}],
-		uriTemplate: "{OrionHome}/edit/edit.html#{NavigatorLocation},navigate={NavigatorLocation}?depth=1"
+		uriTemplate: "{OrionHome}/edit/edit.html#{EditorLocation},navigate={EditorLocation}?depth=1"
 	});
 
 	provider.registerService("orion.page.link.user", null, {
