@@ -421,7 +421,7 @@ define([
 					if (!editor.getTextView()) {
 						return false;
 					}
-					return blamer.isVisible(self.serviceRegistry);
+					return blamer.isVisible(self.serviceRegistry, self.inputManager);
 				},
 				callback: function(data) {
 					blameCommand.visible = !blameCommand.visible;
@@ -429,7 +429,7 @@ define([
 						blameCommand.visible = data.parameters.valueFor('blame') === "true"; //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					if (blameCommand.visible) {
-						blamer.getBlame(self.serviceRegistry, editor, self.inputManager.getInput());
+						blamer.getBlame(self.serviceRegistry, self.inputManager);
 					} else{
 						editor.showBlame([]);
 					}
