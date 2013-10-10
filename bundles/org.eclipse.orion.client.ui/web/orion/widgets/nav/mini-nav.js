@@ -503,7 +503,9 @@ define([
 			if (location.ChildrenLocation) {
 				target = location.ChildrenLocation;
 			}
-			this.explorer.loadRoot(this.fileClient.fileServiceRootURL(target));
+			var rootURL = this.fileClient.fileServiceRootURL(target);
+			this.explorer.loadRoot(rootURL);
+			this.explorer.sidebarNavInputManager.dispatchEvent({ type: "filesystemChanged", newInput: rootURL }); //$NON-NLS-0$
 		}
 	});
 
