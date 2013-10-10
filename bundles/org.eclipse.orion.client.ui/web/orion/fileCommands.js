@@ -821,9 +821,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				var createFunction = function(name, url) {
 					if (name && url) {
 						var deferred = fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, true);
-						var ex = explorer;
-						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Linking to ${0}"], url)).then(function() {
-						    ex.loadResourceList(ex.treeRoot.Path, true); // refresh the root
+						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Linking to ${0}"], url)).then(function(newFolder) {
+							dispatchModelEventOn(explorer, {type: "create", parent: explorer.treeRoot, newValue: newFolder });
 						}, errorHandler);
 					}
 				};
