@@ -135,7 +135,10 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 		}
 	};
 	var properties = {
-		name: "Git Blame"
+		name: "Git Blame",
+		validationProperties: [
+			{source: "Git", variableName: "Git"} //$NON-NLS-1$ //$NON-NLS-0$
+		]
 	};
 	provider.registerService("orion.edit.blamer", serviceImpl, //$NON-NLS-0$
 	properties);
