@@ -88,11 +88,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 
 	var editor, inputManager, folderView, editorView, lastRoot;
 	function renderToolbars(metadata) {
+		var deferred;
 		var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 		if (toolbar) {
 			if (metadata) {
 				// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
-				mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, toolbar.id, 500).then(function() {
+				deferred = mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, toolbar.id, 500).then(function() {
 					commandRegistry.destroy(toolbar);
 					commandRegistry.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
 				});
@@ -114,6 +115,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 				commandRegistry.renderCommands(settingsToolbar.id, settingsToolbar, metadata, editor, "button"); //$NON-NLS-0$
 			}
 		}
+		return deferred;
 	}
 
 	var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
@@ -157,7 +159,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 			folderView = null;
 		}
 		var metadata = evt.metadata;
-		renderToolbars(metadata);
+		var deferred = renderToolbars(metadata);
 		var name = evt.name, target = metadata;
 		if (evt.input === null || evt.input === undefined) {
 			name = lastRoot ? lastRoot.Name : "";
@@ -180,7 +182,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 			fileService: fileClient
 		});
 
-		commandRegistry.processURL(window.location.href);
+		function processURL() {
+			commandRegistry.processURL(window.location.href);
+		}
+		if (deferred) {
+			deferred.then(processURL);
+		} else {
+			processURL();
+		}
 
 		if (metadata && metadata.Directory) {
 			commandRegistry.closeParameterCollector();

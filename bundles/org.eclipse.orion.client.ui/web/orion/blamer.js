@@ -17,7 +17,7 @@ define ([
 ], function(PageLinks, URITemplate) {
 
 	function isVisible(serviceRegistry) {
-		return !!serviceRegistry.getService("orion.edit.blamer"); //$NON-NLS-0$
+		return !!serviceRegistry.getService("orion.edit.blamer") && !!serviceRegistry.getService("orion.core.blame"); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 
 	function getBlame(serviceRegistry, editor, fileName){
