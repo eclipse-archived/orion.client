@@ -74,7 +74,7 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 	 * requests for all of the commits that make up the blame data
 	 */
 	function blame(location) {
-		//TODO there muist be a way to get the commit id and file name without having to parse the URL
+		//TODO this URL parsing needs to be done by the server
 		var commit;
 		var prefix = "/gitapi/commit/"; //$NON-NLS-0$
 		var start = location.indexOf(prefix), end;
