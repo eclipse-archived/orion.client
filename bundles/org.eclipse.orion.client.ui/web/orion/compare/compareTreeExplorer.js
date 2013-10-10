@@ -12,9 +12,9 @@
 /*global define document console window*/
 /*jslint forin:true regexp:false sub:true*/
 
-define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commandRegistry', 
+define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commandRegistry', 
 		'orion/explorers/navigationUtils', 'orion/crawler/searchCrawler', 'orion/compare/compareUtils', 'orion/searchUtils', 'orion/selection'], 
-		function(messages, require, lib, mExplorer, mNavHandler, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection) {
+		function(messages, require, lib, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection) {
 
 	function _empty(nodeToEmpty){
 		var node = lib.node(nodeToEmpty);
@@ -230,6 +230,12 @@ define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', '
 			var that = this;
 			if(this._compareResults.length > 0){
 				this._loadOneFileMetaData(0,function(){that._renderUI(); that._addOptions();});
+			} else {
+				var message = i18nUtil.formatMessage(messages["${0} files compared. The two folders are identical."], this._totalFiles);
+			    var parentNode = lib.node(this.parentId);
+			    parentNode.textContent = "";
+			    var textBold = _createElement('b', null, null, parentNode); //$NON-NLS-1$ //$NON-NLS-0$
+			    _place(document.createTextNode(message), textBold, "only"); //$NON-NLS-0$
 			}
 			console.log("completed compare"); //$NON-NLS-0$
 			this.reportStatus("");	
