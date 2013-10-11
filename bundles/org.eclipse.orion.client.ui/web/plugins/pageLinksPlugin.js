@@ -49,7 +49,7 @@ define([
 		nameKey: "Search",
 		id: "orion.Search",
 		nls: "orion/nls/messages",
-		uriTemplate: "{OrionHome}/search/search.html"
+		uriTemplate: "{OrionHome}/search/search.html#{Location},useRootLocation=true"
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
