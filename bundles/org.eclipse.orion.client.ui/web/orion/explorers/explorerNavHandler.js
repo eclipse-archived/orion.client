@@ -187,6 +187,13 @@ exports.ExplorerNavHandler = (function() {
 					}
 					if(that._selections.length > 0){
 						that.cursorOn(that._selections[0], true, false, noScroll);
+					} else {//If there is no selection, we should just the first item as the cursored items.  
+						that.cursorOn();
+					}
+					//If shift selection anchor exists and in the refreshed selection range, we just keep it otherwise clear the anchor
+					//See https://bugs.eclipse.org/bugs/show_bug.cgi?id=419170
+					if(!(that._shiftSelectionAnchor && that._inSelection(that._shiftSelectionAnchor) >= 0)){
+						that._shiftSelectionAnchor = null;
 					}
 				});
 			}
@@ -204,6 +211,8 @@ exports.ExplorerNavHandler = (function() {
 			}
 			this._modelIterator.setTree(this.topIterationNodes);
 			if(!noReset && this.explorer.selection){
+				//refresh the current cursor visual, otherwise the next cursorOn() call will not remove the previoous cursor visual properly.
+				this.toggleCursor(this._modelIterator.cursor(), false);
 				this._modelIterator.reset();
 			}
 			this.refreshSelection(true);
