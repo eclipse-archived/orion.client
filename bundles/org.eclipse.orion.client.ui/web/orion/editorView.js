@@ -240,6 +240,8 @@ define([
 					editorPreferences.setPrefs(self.settings);
 					return true;
 				});
+				
+				self.vi = self.emacs = null;
 				self.updateKeyMode(self.settings, textView);
 
 				return keyBindings;
