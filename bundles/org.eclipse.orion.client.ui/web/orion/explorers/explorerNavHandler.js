@@ -74,7 +74,7 @@ exports.ExplorerNavHandler = (function() {
 			parentDiv.focus();
 	    }
 	    var keyListener = function (e) { 
-			if(e.target !== parentDiv){
+			if(e.target !== parentDiv && e.currentTarget !== parentDiv ){
 				return;
 			}
 			if(self.explorer.preventDefaultFunc && self.explorer.preventDefaultFunc(e, self._modelIterator.cursor())){
