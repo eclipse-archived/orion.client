@@ -228,7 +228,6 @@ define([
 				func();
 			} else if (!PageUtil.matchResourceParameters(window.location.hash).navigate) {
 				this.loadParentOf(fileMetadata, true /* reveal from the top */).then(func);
-				//this.loadParentOf({}).then(func);
 			}
 		},
 		scopeUp: function() {
@@ -512,7 +511,6 @@ define([
 				target = location.ChildrenLocation;
 			}
 			var rootURL = this.fileClient.fileServiceRootURL(target);
-			//this.explorer.loadRoot(rootURL);
 			this.explorer.sidebarNavInputManager.dispatchEvent({ type: "filesystemChanged", newInput: rootURL }); //$NON-NLS-0$
 		}
 	});
