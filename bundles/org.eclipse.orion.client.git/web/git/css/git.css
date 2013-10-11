@@ -88,24 +88,24 @@
 }
 
 .git-sprite-addition{ background-image: url(../images/git-add.png); width: 16px; height: 16px; } 
-.git-sprite-apply_patch{ background-position: 0 -18px; width: 16px; height: 16px; } 
+.git-sprite-apply_patch{ background-image: url(../images/bandaid.png); width: 16px; height: 16px; } 
 .git-sprite-branch{ background-position: 0 -36px; width: 16px; height: 16px; } 
-.git-sprite-branch_active{ background-position: 0 -54px; width: 16px; height: 16px; } 
+.git-sprite-branch_active{  background-image: url(../images/active.png); width: 16px; height: 16px; } 
 .git-sprite-checkout{ background-position: 0 -72px; width: 16px; height: 16px; } 
 .git-sprite-cherry_pick{ background-image: url(../images/cherry-pick.png); width: 16px; height: 16px; }
 .git-sprite-compare{ background-image: url(../images/compare.png); width: 16px; height: 16px; }
 .git-sprite-open{ background-image: url(../images/git-open.png); width: 16px; height: 16px; }
 .git-sprite-conflict-file{ background-position: 0 -108px; width: 16px; height: 16px; } 
-.git-sprite-fetch{ background-position: 0 -126px; width: 16px; height: 16px; } 
+.git-sprite-fetch{ background-image:url(../images/fetch.png); width: 16px; height: 16px; } 
 .git-sprite-file{ background-image: url(../images/git-file.png); width: 16px; height: 16px; } 
-.git-sprite-incoming_commit{ background-position: 0 -162px; width: 16px; height: 16px; } 
+.git-sprite-incoming_commit{ background-image:url(../images/incoming-commit.png); width: 16px; height: 16px; } 
 .git-sprite-merge{ background-position: 0 -180px; width: 16px; height: 16px; } 
 .git-sprite-merge_squash{ background-position: 0 -198px; width: 16px; height: 16px; } 
 .git-sprite-notsure{ background-position: 0 -216px; width: 16px; height: 16px; } 
 .git-sprite-outgoing_commit{ background-position: 0 -234px; width: 16px; height: 16px; } 
-.git-sprite-pull{ background-position: 0 -252px; width: 16px; height: 16px; } 
+.git-sprite-pull{ background-image: url(../images/git-pull.png); width: 16px; height: 16px; } 
 .git-sprite-rebase{ background-position: 0 -270px; width: 16px; height: 16px; } 
-.git-sprite-remote{ background-position: 0 -288px; width: 16px; height: 16px; } 
+.git-sprite-remote{ background-image: url(../images/repository.png); width: 16px; height: 16px; } 
 .git-sprite-removal{ background-position: 0 -306px; width: 16px; height: 16px; } 
 .git-sprite-repository{ background-image: url(../images/repository.png); width: 16px; height: 16px; } 
 .git-sprite-reset{ background-position: 0 -342px; width: 16px; height: 16px; } 

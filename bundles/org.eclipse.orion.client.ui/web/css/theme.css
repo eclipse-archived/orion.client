@@ -184,6 +184,7 @@ a.currentLocation:hover {
 	-webkit-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+	color:#444;
 }
 
 .filesystemSwitcher {
