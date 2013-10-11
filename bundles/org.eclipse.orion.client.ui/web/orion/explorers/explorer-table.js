@@ -13,8 +13,8 @@
 /*jslint regexp:false forin:true*/
 
 define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/fileUtils', 'orion/explorers/explorer',
-		'orion/EventTarget'],
-		function(messages, require, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget){
+		'orion/EventTarget', 'orion/util'],
+		function(messages, require, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget, util){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -373,11 +373,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			}
 			node.addEventListener("dragleave", dragLeave, false); //$NON-NLS-0$
 
-			var dragEnter = function (evt) { //$NON-NLS-0$
-				if (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
+			var dragEnter = function (evt) {
+				/* accessing dataTransfer.effectAllowed here throws an error on IE */
+				if (!util.isIE && (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
 					evt.dataTransfer.effectAllowed === "uninitialized" ||  //$NON-NLS-0$
-					evt.dataTransfer.effectAllowed.indexOf("copy") >= 0) {   //$NON-NLS-0$
-					// only supported in Chrome.
+					evt.dataTransfer.effectAllowed.indexOf("copy") >= 0)) {   //$NON-NLS-0$
 						evt.dataTransfer.dropEffect = "copy";  //$NON-NLS-0$
 				}   
 				node.classList.add("dragOver"); //$NON-NLS-0$
@@ -392,14 +392,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			node.addEventListener("dragenter", dragEnter, false); //$NON-NLS-0$
 
 			// this listener is the same for any time, so we don't need to remove/rehook.
-			var dragOver = function (evt) { //$NON-NLS-0$
+			var dragOver = function (evt) {
 				// default behavior is to not trigger a drop, so we override the default
 				// behavior in order to enable drop.  
 				// we have to specify "copy" again here, even though we did in dragEnter
-				if (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
+				/* accessing dataTransfer.effectAllowed here throws an error on IE */
+				if (!util.isIE && (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
 					evt.dataTransfer.effectAllowed === "uninitialized" ||  //$NON-NLS-0$
-					evt.dataTransfer.effectAllowed.indexOf("copy") >= 0) {   //$NON-NLS-0$
-					// only supported in Chrome.
+					evt.dataTransfer.effectAllowed.indexOf("copy") >= 0)) {   //$NON-NLS-0$
 						evt.dataTransfer.dropEffect = "copy";  //$NON-NLS-0$
 				}   
 				lib.stop(evt);
@@ -409,7 +409,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 				this._oldDragOver = dragOver;
 			}
 
-			var drop = function(evt) { //$NON-NLS-0$
+			var drop = function(evt) {
 				node.classList.remove("dragOver"); //$NON-NLS-0$
 				
 				if (dragStartTarget) {
