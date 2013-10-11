@@ -255,7 +255,7 @@ define([
 			return null;
 		}
 		var span = document.createElement("span"); //$NON-NLS-0$
-		span.className = "core-sprite-folder_model modelDecorationSprite"; //$NON-NLS-0$
+		span.className = "core-sprite-folder modelDecorationSprite"; //$NON-NLS-0$
 		return span;
 	};
 
