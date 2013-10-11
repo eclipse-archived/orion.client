@@ -211,7 +211,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 				return transformed;
 			};
 			if(this._crawler && searchParams.nameSearch){
-				this._crawler.searchName(searchParams, function(jsonData){renderer(transform(jsonData), null, null, searchParams);});
+				this._crawler.searchName(searchParams, function(jsonData){renderer(transform(jsonData), searchParams.keyword, null, searchParams);});
 			} else {
 				try {
 					this.registry.getService("orion.page.progress").progress(this._fileService.search(searchParams), "Searching " + searchParams.keyword).then(function(jsonData) { //$NON-NLS-1$ //$NON-NLS-0$
