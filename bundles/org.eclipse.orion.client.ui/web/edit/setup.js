@@ -241,8 +241,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		var newInput = evt.newInput || ""; //$NON-NLS-0$
 		window.location = "#" + newInput; //$NON-NLS-0$
 	};
-	sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput);
-	sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput);
+	sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
+	sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
 
 	editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
 		mGlobalCommands.setDirtyIndicator(editor.isDirty());
