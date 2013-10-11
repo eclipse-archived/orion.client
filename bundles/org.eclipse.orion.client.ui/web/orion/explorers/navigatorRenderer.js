@@ -190,6 +190,27 @@ define([
 	NavigatorRenderer.prototype.rowCallback = function(rowElement) {
 		rowElement.setAttribute("role", "treeitem"); //$NON-NLS-1$ //$NON-NLS-0$
 	};
+	
+	
+	/**
+	 * @param {Element} bodyElement
+	 */
+	NavigatorRenderer.prototype.emptyCallback = function(bodyElement) {
+		var tr = document.createElement("tr"); //$NON-NLS-0$
+		var td = document.createElement("td"); //$NON-NLS-0$
+		td.colSpan = this.oneColumn ? 1 : 3;
+		var noFile = document.createElement("div"); //$NON-NLS-0$
+		noFile.classList.add("noFile"); //$NON-NLS-0$
+		noFile.textContent = messages["NoFile"];
+		var plusIcon = document.createElement("span"); //$NON-NLS-0$
+		plusIcon.classList.add("core-sprite-addcontent"); //$NON-NLS-0$
+		plusIcon.classList.add("icon-inline"); //$NON-NLS-0$
+		plusIcon.classList.add("imageSprite"); //$NON-NLS-0$
+		lib.processDOMNodes(noFile, [plusIcon]);
+		td.appendChild(noFile);
+		tr.appendChild(td);
+		bodyElement.appendChild(tr);
+	};
 
 	/**
 	 * Creates the column header element. We are really only using the header for a spacer at this point.

@@ -44,24 +44,24 @@ define(['orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer'],
 		tableNode.appendChild(thead);
 	};
 	
+	ProjectsRenderer.prototype.emptyCallback = function(bodyElement) {
+		var tr = document.createElement("tr"); //$NON-NLS-0$
+		var td = document.createElement("td"); //$NON-NLS-0$
+		td.colSpan = this.oneColumn ? 1 : 3;
+		var noProjects = document.createElement("div"); //$NON-NLS-0$
+		noProjects.classList.add("noFile"); //$NON-NLS-0$
+		noProjects.textContent = "There are no projects in your workspace, use ${0} to add projects";
+		var plusIcon = document.createElement("span"); //$NON-NLS-0$
+		plusIcon.classList.add("core-sprite-addcontent"); //$NON-NLS-0$
+		plusIcon.classList.add("icon-inline"); //$NON-NLS-0$
+		plusIcon.classList.add("imageSprite"); //$NON-NLS-0$
+		lib.processDOMNodes(noProjects, [plusIcon]);
+		td.appendChild(noProjects);
+		tr.appendChild(td);
+		bodyElement.appendChild(tr);
+	};
+	
 	ProjectsRenderer.prototype.renderRow = function(item, tableRow) {
-		
-		if(item.type==="noProjects"){
-			var cell = document.createElement("td");
-			cell.colSpan = 3;
-			var noProjects = document.createElement("div"); 
-			noProjects.classList.add("noFile"); 
-			noProjects.textContent = "There are no projects in your workspace, use ${0} to add projects";
-			var plusIcon = document.createElement("span"); 
-			plusIcon.classList.add("core-sprite-addcontent"); 
-			plusIcon.classList.add("icon-inline"); 
-			plusIcon.classList.add("imageSprite"); 
-			lib.processDOMNodes(noProjects, [plusIcon]);
-			
-			cell.appendChild(noProjects);
-			tableRow.appendChild(cell);
-			return;
-		}
 		
 		var navDict = this.explorer.getNavDict();
 		if(navDict){
@@ -123,9 +123,6 @@ define(['orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer'],
 	ProjectExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	
 	ProjectExplorer.prototype.loadProjects = function(projects){
-		if(projects.length === 0){
-			projects.push({type: "noProjects", ContentLocation: "noProjects"});
-		}
 		this.model = new mExplorer.SimpleFlatModel(projects, "orion.project.", function(item){
 			if(item.ContentLocation){
 				return item.ContentLocation.replace(/[\\\/]/g, "");
