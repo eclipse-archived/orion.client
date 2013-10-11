@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define */
+/*global define console*/
 /*jslint browser:true forin:true*/
 define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/eventTarget", "orion/editor/annotations"], function(messages, mEventTarget, mAnnotations) {
 	// TODO this affects indentation, which we don't support. Should be a parameter.
@@ -103,6 +103,17 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 	};
 
 	/**
+	 * Creates a mode that consumes a stream and generates no tokens.
+	 */
+	function NullModeFactory(cmConfig, modeConfig) {
+		return {
+			token: function(stream, state) {
+				return stream.skipToEnd();
+			}
+		};
+	}
+
+	/**
 	 * @name orion.mirror.Mirror
 	 * @class A shim for CodeMirror's <code>CodeMirror</code> API.
 	 * @description A Mirror is a partial implementation of the API provided by the <code><a href="http://codemirror.net/doc/manual.html#api">CodeMirror object</a></code>.
@@ -129,6 +140,9 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 		// Expose Stream as a property named "StringStream". This is required to support CodeMirror's Perl mode,
 		// which monkey-patches CodeMirror.StringStream.prototype and will fail if that object doesn't exist.
 		this.StringStream = Stream;
+
+		this.defineMode("null", NullModeFactory);
+		this.defineMIME("text/plain", "null");
 	}
 	function keys(obj) {
 		var k = [];
@@ -161,6 +175,13 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 			}
 			return newState;
 		},
+		/**
+		 * Alias for mode.startState().
+		 * @returns {Object} The start state returned by <code>mode</code>.
+		 */
+		startState: function(/**Object*/ mode, /**Number?*/ basecolumn) {
+			return mode.startState(basecolumn);
+		},
 		/** @see <a href="http://codemirror.net/doc/manual.html#modeapi">http://codemirror.net/doc/manual.html#modeapi</a> */
 		defineMode: function(/**String*/ name, /**Function(options, config)*/ modeFactory) {
 			this._modes[name] = modeFactory;
@@ -189,7 +210,11 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 			}
 			modeFactory = modeFactory || this._modes[modeSpec];
 			if (typeof modeFactory !== "function") {
-				throw "Mode not found " + modeSpec;
+				if (typeof console !== "undefined" && console) {
+					console.log("Mode not found: " + modeSpec);
+				}
+				// Return the null mode here for compatibility with CodeMirror
+				return this.getMode(options, "null");
 			}
 			return modeFactory(options, config);
 		},
