@@ -165,7 +165,6 @@
 
 		<!-- build orion pages and plugins -->
 		<optimize pageDir="." name="index" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="navigate" name="table" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="edit" name="edit" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="compare" name="compare" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="operations" name="list" bundle="org.eclipse.orion.client.ui" />
