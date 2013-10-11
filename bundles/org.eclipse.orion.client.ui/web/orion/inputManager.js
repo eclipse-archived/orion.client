@@ -103,6 +103,30 @@ define([
 		this._unsavedChanges = [];
 	}
 	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
+		/**
+		 * @returns {orion.Promise} Promise resolving to the new Location we should use
+		 */
+		_maybeLoadWorkspace: function(resourceRaw) {
+			var fileClient = this.fileClient;
+			// If it appears to be a workspaceRootURL we cannot load it directly, have to get the workspace first
+			if (resourceRaw === fileClient.fileServiceRootURL(resourceRaw)) {
+				return fileClient.loadWorkspace(resourceRaw).then(function(workspace) {
+					return workspace.Location;
+				});
+			}
+			return new Deferred().resolve(resourceRaw);
+		},
+		/**
+		 * Wrapper for fileClient.read() that tolerates a filesystem root URL passed as location. If location is indeed
+		 * a filesystem root URL, the original read() operation is instead performed on the workspace.
+		 */
+		_read: function(location /**, readArgs*/) {
+			var fileClient = this.fileClient;
+			var readArgs = Array.prototype.slice.call(arguments, 1);
+			return this._maybeLoadWorkspace(location).then(function(newLocation) {
+				return fileClient.read.apply(fileClient, [newLocation].concat(readArgs));
+			});
+		},
 		load: function() {
 			var fileURI = this.getInput();
 			if (!fileURI) { return; }
@@ -157,14 +181,17 @@ define([
 					this._setNoInput();
 				}.bind(this);
 				this._acceptPatch = null;
-				progress(fileClient.read(metadataURI, true), messages.ReadingMetadata, metadataURI).then(function(metadata) {
+				// Read metadata
+				progress(this._read(metadataURI, true), messages.ReadingMetadata, metadataURI).then(function(metadata) {
 					if (metadata.Directory) {
+						// Fetch children
 						progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI).then(function(contents) {
 							clearTimeout();
 							metadata.Children = contents;
 							this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
 						}.bind(this), errorHandler);
 					} else {
+						// Read contents
 						progress(fileClient.read(resourceRaw, false, true), messages.Reading, fileURI).then(function(contents) {
 							clearTimeout();
 							if (typeof contents !== "string") { //$NON-NLS-0$
@@ -372,7 +399,7 @@ define([
 		_setNoInput: function(loadRoot) {
 			if (loadRoot) {
 				this.fileClient.loadWorkspace("").then(function(root) {
-					this._input = root.ChildrentLocation;
+					this._input = root.ChildrenLocation;
 					this._setInputContents(root.ChildrenLocation, null, root, root);
 				}.bind(this));
 				return;
