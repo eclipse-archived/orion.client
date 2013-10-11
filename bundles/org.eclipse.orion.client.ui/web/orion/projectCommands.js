@@ -350,30 +350,34 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						
 						var searchLocallyDeferred = new Deferred();
 						handler.paramsToDependencyDescription(params).then(function(dependency){
-							fileClient.loadWorkspace(item.WorkspaceLocation).then(function(workspace){
-								var checkdefs = [];
-								var found = false;
-								for(var i=0; i<workspace.Children.length; i++){
-									if(found===true){
-										break;
+							if(dependency && dependency.Location){
+								fileClient.loadWorkspace(item.WorkspaceLocation).then(function(workspace){
+									var checkdefs = [];
+									var found = false;
+									for(var i=0; i<workspace.Children.length; i++){
+										if(found===true){
+											break;
+										}
+										var def = handler.getDependencyDescription(workspace.Children[i]);
+										checkdefs.push(def);
+										(function(i, def){
+											def.then(function(matches){
+												if(matches && matches.Location === dependency.Location){
+													found = true;
+													searchLocallyDeferred.resolve(matches);
+												}
+											});
+										})(i, def);
 									}
-									var def = handler.getDependencyDescription(workspace.Children[i]);
-									checkdefs.push(def);
-									(function(i, def){
-										def.then(function(matches){
-											if(matches && matches.Location === dependency.Location){
-												found = true;
-												searchLocallyDeferred.resolve(matches);
-											}
-										});
-									})(i, def);
-								}
-								Deferred.all(checkdefs).then(function(){
-									if(!found){
-										searchLocallyDeferred.resolve();
-									}
-								});
-							}, searchLocallyDeferred.reject);
+									Deferred.all(checkdefs).then(function(){
+										if(!found){
+											searchLocallyDeferred.resolve();
+										}
+									});
+								}, searchLocallyDeferred.reject);
+							} else {
+								searchLocallyDeferred.resolve();
+							}
 						}, errorHandler);
 						
 						progress.showWhile(searchLocallyDeferred, "Searching your workspace for matching content").then(function(resp){
