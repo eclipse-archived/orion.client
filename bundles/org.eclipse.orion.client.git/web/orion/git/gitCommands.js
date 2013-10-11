@@ -2139,13 +2139,8 @@ var exports = {};
 
 											fileClient.write(repoJson.Children[0].ContentLocation + '.git/.projectInfo', pDescContent).then(
 												function(){
-													var templateString = require.toUrl("edit/edit.html") + "#{,resource,params*}"; //$NON-NLS-1$ //$NON-NLS-0$
-													window.location = new URITemplate(templateString).expand({
-														resource: "", //$NON-NLS-0$
-														params: {
-															navigate: repoJson.Children[0].ContentLocation + "?depth=1"
-														}
-													});
+													var editLocation = require.toUrl("edit/edit.html") + "#" + repoJson.Children[0].ContentLocation + "?depth=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+													window.location = editLocation;
 												}
 											);
 										}
