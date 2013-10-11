@@ -27,14 +27,14 @@
 .core-sprite-check_on{ background-position: 0 -36px; width: 16px; height: 16px; } 
 .core-sprite-close{ background-position: 0 -54px; width: 16px; height: 16px; } 
 .core-sprite-closedarrow{ background-position: 0 -72px; width: 16px; height: 16px; } 
-.core-sprite-collapseAll{ background-position: 0 -90px; width: 16px; height: 16px; } 
+.core-sprite-collapseAll{ background:url(../images/collapseAll.png); width: 16px; height: 16px; } 
 .core-sprite-compare-addition{ background-position: 0 -108px; width: 16px; height: 16px; } 
 .core-sprite-compare-removal{ background-position: 0 -126px; width: 16px; height: 16px; } 
 .core-sprite-copy-folder{ background-position: 0 -144px; width: 16px; height: 16px; } 
 .core-sprite-delete{ background:url(../images/delete.png); width: 16px; height: 16px; } 
-.core-sprite-edit{ background-position: 0 -180px; width: 16px; height: 16px; } 
+.core-sprite-edit{ background:url(../images/edit.png); width: 16px; height: 16px; } 
 .core-sprite-error{ background-position: 0 -198px; width: 16px; height: 16px; } 
-.core-sprite-expandAll{ background-position: 0 -216px; width: 16px; height: 16px; } 
+.core-sprite-expandAll{ background:url(../images/expandAll.png); width: 16px; height: 16px; } 
 .core-sprite-file{ background-position: 0 -252px; width: 16px; height: 16px; } 
 .core-sprite-file_model{ background:url(../images/file.png); width: 16px; height: 16px; } 
 .core-sprite-folder{ background-position: 0 -288px; width: 16px; height: 16px; } 

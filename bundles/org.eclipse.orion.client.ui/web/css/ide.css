@@ -910,25 +910,25 @@ input {
 	margin-right: 5%;
 	margin-top: 30px;
 	margin-bottom: 0;
-	border-color:#daedf1;
+	border-color:#D6EBF0;
 	width: 90%;
 }
 
 .folderNav tr {
 	border-bottom: 1px solid #e6f3f6;
-	border-right: 1px solid #daedf1;
-	border-left: 1px solid #daedf1;
+	border-right: 1px solid #D6EBF0;
+	border-left: 1px solid #D6EBF0;
 	padding-left: 8px;
 	padding-right: 8px;
 	color: grey;
 }
 .folderNav tr:last-child {
-	border-bottom: 1px solid #daedf1;
+	border-bottom: 1px solid #D6EBF0;
 }
 
 .orionMarkdown td, .orionProject td {
-	border-bottom: 1px solid #daedf1;
-	border: 1px solid #daedf1;
+	border-bottom: 1px solid #D6EBF0;
+	border: 1px solid #D6EBF0;
 	padding: 8px;
 	color: grey;
 }
@@ -938,12 +938,12 @@ input {
 }
 
 .folderNav th, .orionMarkdown th, .orionProject th, .sectionWrapper{
-	border-color:#daedf1;
-	border-bottom: 1px solid #daedf1;
-	border-top: 1px solid #daedf1;
-	background: none repeat scroll 0 0 #f2f9fa;
+	border-color:#D6EBF0;
+	border-bottom: 1px solid #D6EBF0;
+	border-top: 1px solid #D6EBF0;
+	background: none repeat scroll 0 0 #EAF5F7;
 	vertical-align: middle;
-	font-weight: normal;
+	font-weight: bold;
 	padding: 6px;
 	color: gray;
 }
@@ -963,5 +963,5 @@ input {
 }
 
 .lightTreeTableRow, .darkTreeTableRow {
-	border-bottom: 1px solid #daedf1;
+	border-bottom: 1px solid #D6EBF0;
 }
