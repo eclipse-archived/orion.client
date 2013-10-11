@@ -1,3 +1,4 @@
+#!/bin/sh
 zip core_sprites.zip \
 addcontent.png \
 check.gif \
@@ -9,10 +10,10 @@ compare-addition.gif \
 compare-removal.gif \
 copy-folder.png \
 delete.png \
-edit.gif \
+downarrow.gif \
+edit.png \
 error.png \
 expandAll.png \
-favorite.png \
 file.png \
 file_model.gif \
 folder.png \
@@ -25,7 +26,6 @@ initproject.png \
 leftarrow.png \
 link.png \
 list.png \
-menu_twistie.gif \
 move_down.gif \
 move_up.gif \
 none.png \
@@ -40,7 +40,6 @@ sep.gif \
 silhouette.png \
 start.gif \
 stop.gif \
-stylesheet.gif \
 thumbnail.png \
 warning.gif \
 wrench.png
