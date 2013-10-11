@@ -110,7 +110,13 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 				this._renderer.bodyCallback(this._bodyElement);
 			}
 			this._bodyElement.id = this._id+"tbody"; //$NON-NLS-0$
-			this._generateChildren(children, indentLevel); //$NON-NLS-0$
+			if (children.length === 0) {
+				if (this._renderer.emptyCallback) {
+					this._renderer.emptyCallback(this._bodyElement);
+				}
+			} else {
+				this._generateChildren(children, indentLevel); //$NON-NLS-0$
+			}
 			table.appendChild(this._bodyElement);
 			wrapper.appendChild(table);
 			this._parent.appendChild(wrapper);

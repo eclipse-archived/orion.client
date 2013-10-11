@@ -630,29 +630,16 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 					}
 				}
 				
-				if (self.model.hasChildren()) {
-					self.createTree(self.parentId, self.model, {
-						navHandlerFactory: self.navHandlerFactory,
-						setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), 
-						selectionPolicy: self.renderer.selectionPolicy, 
-						onCollapse: function(model) {
-							if(self.getNavHandler()){
-								self.getNavHandler().onCollapse(model);
-							}
+				self.createTree(self.parentId, self.model, {
+					navHandlerFactory: self.navHandlerFactory,
+					setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), 
+					selectionPolicy: self.renderer.selectionPolicy, 
+					onCollapse: function(model) {
+						if(self.getNavHandler()){
+							self.getNavHandler().onCollapse(model);
 						}
-					});
-				} else {
-					lib.empty(parent);
-					var noFile = document.createElement("div"); //$NON-NLS-0$
-					noFile.classList.add("noFile"); //$NON-NLS-0$
-					noFile.textContent = messages["NoFile"];
-					var plusIcon = document.createElement("span"); //$NON-NLS-0$
-					plusIcon.classList.add("core-sprite-addcontent"); //$NON-NLS-0$
-					plusIcon.classList.add("icon-inline"); //$NON-NLS-0$
-					plusIcon.classList.add("imageSprite"); //$NON-NLS-0$
-					lib.processDOMNodes(noFile, [plusIcon]);
-					parent.appendChild(noFile);
-				}
+					}
+				});
 				
 				if (typeof postLoad === "function") { //$NON-NLS-0$
 					try {
