@@ -137,6 +137,9 @@ searchUtils.convertSearchParams = function(searchParams) {
 	if(typeof searchParams.nameSearch === "string"){ //$NON-NLS-0$
 		searchParams.nameSearch = (searchParams.nameSearch.toLowerCase() === "true"); //$NON-NLS-0$
 	}
+	if(typeof searchParams.useRootLocation === "string"){ //$NON-NLS-0$
+		searchParams.useRootLocation = (searchParams.useRootLocation.toLowerCase() === "true"); //$NON-NLS-0$
+	}
 };
 
 searchUtils.copySearchParams = function(searchParams, copyReplace) {

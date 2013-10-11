@@ -25,7 +25,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility
 	}
 
 	function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchBuilder, searchParams, progress){
-		var searchLoc = searchParams.resource;
+		var searchLoc = searchParams.useRootLocation ? fileClient.fileServiceRootURL(searchParams.resource) : searchParams.resource;
 		var title = searchParams.replace ? messages["Replace All Matches"] : messages["Search Results"];
 		if(searchLoc){
 			if(searchLoc === fileClient.fileServiceRootURL(searchLoc)){
