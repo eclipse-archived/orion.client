@@ -151,13 +151,16 @@ define([
 			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 		},
 		/**
-		 * Loads the parent directory of the given file as the root, then reveals the file.
-		 * @param {Object} fileMetadata The file whose parent directory we want to load.
+		 * Roots this explorer at the parent directory of the given file (or, at the top of the filesystem, if <code>top</code> is passed).
+		 * Then reveals the given file.
+		 * @param {Object} fileMetadata The file we want to reveal.
+		 * @param {Boolean} [top=false] <code>true</code> roots this explorer at the top of the filesystem.
+		 * <code>false</code> roots the explorer at the the direct parent of <code>fileMetadata</code>.
 		 */
-		loadParentOf: function(fileMetadata) {
+		loadParentOf: function(fileMetadata, top) {
 			if (fileMetadata) {
 				var parent = fileMetadata.Parents && fileMetadata.Parents[0];
-				if (parent) {
+				if (!top && parent) {
 					if (this.treeRoot && this.treeRoot.ChildrenLocation === parent.ChildrenLocation) {
 						// Do we still need to handle this case?
 						this.reveal(fileMetadata);
@@ -224,7 +227,8 @@ define([
 			if (this.fileInCurrentTree(fileMetadata)) {
 				func();
 			} else if (!PageUtil.matchResourceParameters(window.location.hash).navigate) {
-				this.loadParentOf({}).then(func);
+				this.loadParentOf(fileMetadata, true /* reveal from the top */).then(func);
+				//this.loadParentOf({}).then(func);
 			}
 		},
 		scopeUp: function() {
@@ -235,11 +239,15 @@ define([
 			this.loadRoot(item).then();
 		},
 		fileInCurrentTree: function(fileMetadata) {
-			//TODO: this will fail for opening a file on a different filesystem  
-			if (!this.treeRoot.Parents) { return true; }
-			if (fileMetadata && fileMetadata.Parents && this.treeRoot && this.treeRoot.ChildrenLocation) {
+			var fileClient = this.fileClient, treeRoot = this.treeRoot;
+			if (treeRoot && fileClient.fileServiceRootURL(fileMetadata.Location) !== fileClient.fileServiceRootURL(treeRoot.Location)) {
+				return false;
+			}
+			// Already at the workspace root?
+			if (!treeRoot.Parents) { return true; }
+			if (fileMetadata && fileMetadata.Parents && treeRoot && treeRoot.ChildrenLocation) {
 				for (var i=0; i<fileMetadata.Parents.length; i++) {
-					if (fileMetadata.Parents[i].ChildrenLocation === this.treeRoot.ChildrenLocation) {
+					if (fileMetadata.Parents[i].ChildrenLocation === treeRoot.ChildrenLocation) {
 						return true;
 					}
 				}
@@ -504,7 +512,7 @@ define([
 				target = location.ChildrenLocation;
 			}
 			var rootURL = this.fileClient.fileServiceRootURL(target);
-			this.explorer.loadRoot(rootURL);
+			//this.explorer.loadRoot(rootURL);
 			this.explorer.sidebarNavInputManager.dispatchEvent({ type: "filesystemChanged", newInput: rootURL }); //$NON-NLS-0$
 		}
 	});
