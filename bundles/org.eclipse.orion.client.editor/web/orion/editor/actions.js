@@ -49,17 +49,31 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			};
 			textView.addEventListener("ModelChanged", this._lastEditListener.onModelChanged); //$NON-NLS-0$
 
-			textView.setAction("undo", function() { //$NON-NLS-0$
+			textView.setAction("undo", function(data) { //$NON-NLS-0$
 				if (this.undoStack) {
-					this.undoStack.undo();
+					var count = 1;
+					if (data && data.count) {
+						count = data.count;
+					}
+					while (count > 0) {
+						this.undoStack.undo();
+						--count;
+					}
 					return true;
 				}
 				return false;
 			}.bind(this), {name: messages.undo});
 
-			textView.setAction("redo", function() { //$NON-NLS-0$
+			textView.setAction("redo", function(data) { //$NON-NLS-0$
 				if (this.undoStack) {
-					this.undoStack.redo();
+					var count = 1;
+					if (data && data.count) {
+						count = data.count;
+					}
+					while (count > 0) {
+						this.undoStack.redo();
+						--count;
+					}
 					return true;
 				}
 				return false;
