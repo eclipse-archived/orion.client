@@ -119,13 +119,23 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			dispatcher.addEventListener(type, onChange);
 		});
 		this.selection = new Selection.Selection(this.registry, "projectNavFileSelection"); //$NON-NLS-0$
-		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+		this._selectionListener =  function(event) { //$NON-NLS-0$
 			_self.updateCommands(event.selections);
-		});
+		};
+		this._editorInputListener = function(event){
+			_self.onEditorInputChanged.call(_self, event);
+		};
+		this.selection.addEventListener("selectionChanged", this._selectionListener);
+		this.editorInputManager.addEventListener("InputChanged", this._editorInputListener);
 		this.commandsRegistered = this.registerCommands();
 	}
 	FilesNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(FilesNavExplorer.prototype, /** @lends orion.sidebar.FilesNavExplorer.prototype */ {
+		onEditorInputChanged : function(event){
+			this.expandToItem(event.metadata, function(){
+				this.reveal(event.metadata, true);
+			}.bind(this));
+		},
 		onFileModelChange: function(event) {
 			var oldValue = event.oldValue, newValue = event.newValue;
 			// Detect if we moved/renamed/deleted the current file being edited, or an ancestor thereof.
@@ -170,6 +180,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			["move", "delete"].forEach(function(type) { //$NON-NLS-1$ //$NON-NLS-0$
 				dispatcher.removeEventListener(type, _self._modelListener);
 			});
+			this.editorInputManager.removeEventListener("InputChanged", this._editorInputListener);
+			this.selection.removeEventListener("selectionChanged", this._selectionListener);
 			FileExplorer.prototype.destroy.call(this);
 		},
 		/**
@@ -240,10 +252,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				}
 				return deferred;
 		},
-		reveal: function(fileMetadata) {
+		reveal: function(fileMetadata, expand) {
 			if (!fileMetadata) {
 				return;
 			}
+
 			var navHandler = this.getNavHandler();
 			if (navHandler) {
 				if(fileMetadata.Location === this.treeRoot.Location && fileMetadata.Children && fileMetadata.Children.length){
@@ -332,6 +345,10 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 
 		updateCommands: function(selections) {
+			if((this._lastSelections && this._lastSelections.length===1 && selections && selections.length===1) && this._lastSelections[0].Location === selections[0].Location){
+				return;
+			}
+			this._lastSelections = selections;
 			this.createActionSections();
 			var selectionTools = this.selectionActionsScope;
 			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
@@ -345,10 +362,17 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			}
 		},
 		expandToItem: function(item, afterExpand){
+			if(!item || !this.model){
+				return;
+			}
 			var itemId = this.model.getId(item);
 			var itemNode = lib.node(itemId);
 			if(itemNode){
-				this.myTree.expand(itemId, afterExpand);
+				if(this.myTree.isExpanded(item)){
+					afterExpand();
+				} else {
+					this.myTree.expand(itemId, afterExpand);
+				}
 			} else if(item.Parents && item.Parents.length>0) {
 				item.Parents[0].Parents = item.Parents.slice(1);
 				this.expandToItem(item.Parents[0], function(){
