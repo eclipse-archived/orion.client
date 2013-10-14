@@ -84,9 +84,10 @@ define([
 			dispatcher.addEventListener(type, onChange);
 		});
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
-		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+		this._selectionListener = function(event) { //$NON-NLS-0$
 			_self.updateCommands(event.selections);
-		});
+		};
+		this.selection.addEventListener("selectionChanged", this._selectionListener);
 		this.commandsRegistered = this.registerCommands();
 	}
 	MiniNavExplorer.prototype = Object.create(FileExplorer.prototype);
@@ -149,6 +150,7 @@ define([
 			});
 			this.sidebarNavInputManager.removeEventListener("InputChanged", this.navInputListener); //$NON-NLS-0$
 			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
+			this.selection.removeEventListener("selectionChanged", this._selectionListener);
 		},
 		/**
 		 * Roots this explorer at the parent directory of the given file (or, at the top of the filesystem, if <code>top</code> is passed).
