@@ -522,6 +522,30 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
             return promise;
         });
     };
+    tests["test testNotAnOrionMesssage"] = function() {
+        var serviceRegistry = new mServiceregistry.ServiceRegistry();
+        var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, {
+            storage: {}
+        });
+
+        return pluginRegistry.start().then(function() {
+            assert.equal(pluginRegistry.getPlugins().length, 0);
+            assert.equal(serviceRegistry.getServiceReferences().length, 0);
+            var promise = pluginRegistry.installPlugin("testPlugin3.html").then(function(plugin) {
+                return plugin.start({
+                    "lazy": true
+                }).then(function() {
+                    return serviceRegistry.getService("test").test("echo");
+                });
+            }).then(function(result) {
+                assert.equal(result, "echo");
+                return pluginRegistry.stop();
+            }).then(function() {
+                assert.equal("resolved", pluginRegistry.getState());
+            });
+            return promise;
+        });
+    };
 
     return tests;
 });
