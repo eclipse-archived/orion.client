@@ -194,7 +194,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
 
         var _currentMessageId = 0;
         var _currentObjectId = 0;
-        var _currentServiceId = 0;
+        //var _currentServiceId = 0; not supported yet...
 
         var _requestReferences = {};
         var _responseReferences = {};
@@ -1030,10 +1030,19 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
             var source = event.source;
             _channels.some(function(channel) {
                 if (source === channel.target) {
-                    if (typeof channel.useStructuredClone === "undefined") { //$NON-NLS-0$
-                        channel.useStructuredClone = typeof event.data !== "string"; //$NON-NLS-0$
+                    try {
+                        var message;
+                        if (typeof channel.useStructuredClone === "undefined") {
+                            var useStructuredClone = typeof event.data !== "string"; //$NON-NLS-0$
+                            message = useStructuredClone ? event.data : JSON.parse(event.data);
+                            channel.useStructuredClone = useStructuredClone;
+                        } else {
+                            message = channel.useStructuredClone ? event.data : JSON.parse(event.data);
+                        }
+                        channel.handler(message);
+                    } catch (e) {
+                        // not a valid message -- ignore it
                     }
-                    channel.handler(channel.useStructuredClone ? event.data : JSON.parse(event.data));
                     return true; // e.g. break
                 }
             });
