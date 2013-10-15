@@ -52,9 +52,7 @@ cp "$REPO"/modules/orionode/.gitignore $STAGING
 
 # Remove unneeded bundles
 echo Removing unneeded bundles
-rm -rf "$STAGING"/bundles/org.eclipse.orion.client.git
 rm -rf "$STAGING"/bundles/org.eclipse.orion.client.git.greasemonkey
-rm -rf "$STAGING"/bundles/org.eclipse.orion.client.users
 
 # Move bundles/ into lib/orion.client/
 ensure_dir "$STAGING"/lib/orion.client
