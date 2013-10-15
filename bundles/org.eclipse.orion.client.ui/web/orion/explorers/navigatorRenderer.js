@@ -122,7 +122,7 @@ define([
 			}
 			if(imageHolderDom) {
 				image = document.createElement("span"); //$NON-NLS-0$
-				image.className = "core-sprite-file_model modelDecorationSprite"; //$NON-NLS-0$
+				image.className = "core-sprite-file modelDecorationSprite"; //$NON-NLS-0$
 				imageHolderDom.appendChild(image);
 			}
 			if(item.Name){
