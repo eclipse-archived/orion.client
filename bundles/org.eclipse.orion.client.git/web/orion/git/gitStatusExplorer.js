@@ -901,7 +901,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 			horizontalBox.style.overflow = "hidden"; //$NON-NLS-0$
 			sectionItem.appendChild(horizontalBox);
 
-			var imgSpriteName = (outgoing ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit"); //$NON-NLS-1$ //$NON-NLS-0$
+			var imgSpriteName = (outgoing ? "git-sprite-outgoing-commit" : "git-sprite-incoming-commit"); //$NON-NLS-1$ //$NON-NLS-0$
 
 			var direction = document.createElement("span"); //$NON-NLS-0$
 			direction.className = "sectionIcon gitImageSprite " + imgSpriteName; //$NON-NLS-0$

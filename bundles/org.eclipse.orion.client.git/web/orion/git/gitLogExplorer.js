@@ -391,7 +391,7 @@ exports.GitLogExplorer = (function() {
 						var direction = document.createElement("span");
 						horizontalBox.appendChild(direction);
 					} else {
-						var imgSpriteName = (outgoingCommit ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit");
+						var imgSpriteName = (outgoingCommit ? "git-sprite-outgoing-commit" : "git-sprite-incoming-commit");
 						var direction = document.createElement("span");
 						direction.className = "sectionIcon gitImageSprite " + imgSpriteName;
 						horizontalBox.appendChild(direction);

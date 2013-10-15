@@ -658,7 +658,7 @@ exports.GitRepositoryExplorer = (function() {
 
 		if (branch.Current){
 			var span = document.createElement("span");
-			span.className = "sectionIcon gitImageSprite git-sprite-branch_active";
+			span.className = "sectionIcon gitImageSprite git-sprite-branch-active";
 			horizontalBox.appendChild(span);
 		}
 		
@@ -945,7 +945,7 @@ exports.GitRepositoryExplorer = (function() {
 		horizontalBox.style.overflow = "hidden";
 		sectionItem.appendChild(horizontalBox);
 
-		var imgSpriteName = (outgoing ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit"); //$NON-NLS-1$ //$NON-NLS-0$
+		var imgSpriteName = (outgoing ? "git-sprite-outgoing-commit" : "git-sprite-incoming-commit"); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var span = document.createElement("span");
 		span.className = "sectionIcon gitImageSprite " + imgSpriteName;

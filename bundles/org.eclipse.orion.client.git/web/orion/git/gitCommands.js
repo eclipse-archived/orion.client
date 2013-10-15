@@ -1116,7 +1116,7 @@ var exports = {};
 		var mergeSquashCommand = new mCommands.Command({
 			name : messages["Merge Squash"],
 			tooltip: messages["Squash the content of the branch to the index"],
-			imageClass: "git-sprite-merge_squash", //$NON-NLS-0$
+			imageClass: "git-sprite-merge-squash", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.mergeSquash", //$NON-NLS-0$
 			callback: function(data) {
@@ -1896,7 +1896,7 @@ var exports = {};
 			name : messages["Cherry-Pick"],
 			tooltip: messages["Apply the change introduced by the commit to your active branch"],
 			id : "eclipse.orion.git.cherryPick", //$NON-NLS-0$
-			imageClass: "git-sprite-cherry_pick", //$NON-NLS-0$
+			imageClass: "git-sprite-cherry-pick", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;
@@ -2509,7 +2509,7 @@ var exports = {};
 			name : messages['Apply Patch'],
 			tooltip: messages["Apply a patch on the selected repository"],
 			id : "eclipse.orion.git.applyPatch", //$NON-NLS-0$
-			imageClass: "git-sprite-apply_patch", //$NON-NLS-0$
+			imageClass: "git-sprite-apply-patch", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
@@ -2576,7 +2576,7 @@ var exports = {};
 			name : messages["Open Commit"],
 			tooltip: messages["Open the commit with the given name"],
 			id : "eclipse.orion.git.openCommitCommand", //$NON-NLS-0$
-			imageClass: "git-sprite-apply_patch", //$NON-NLS-0$
+			imageClass: "git-sprite-apply-patch", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			parameters: openCommitParameters,
 			callback: function(data) {
