@@ -119,7 +119,7 @@
                                 } else {
                                     delete deferred._protected(queue).parentCancel;
                                 }
-                                listenerThen.call(listenerResult, noReturn(deferred.resolve), noReturn(deferred.reject));
+                                listenerThen.call(listenerResult, noReturn(deferred.resolve), noReturn(deferred.reject), noReturn(deferred.progress));
                             }
                         } else {
                             deferred.resolve(listenerResult);
@@ -166,7 +166,7 @@
                             var deferred = new Deferred();
                             value = deferred.promise;
                             try {
-                                valueThen(deferred.resolve, deferred.reject);
+                                valueThen(deferred.resolve, deferred.reject, deferred.progress);
                             } catch (thenError) {
                                 deferred.reject(thenError);
                             }
@@ -239,14 +239,17 @@
          * @function
          * @memberOf orion.Deferred.prototype
          * @param {Object} update The progress update.
-         * @param {Boolean} [strict]
          * @returns {orion.Promise}
          */
-        this.progress = function(update, strict) {
+        this.progress = function(update) {
             if (!state) {
                 listeners.forEach(function(listener) {
                     if (listener.progress) {
-                        listener.progress(update);
+                        try {
+                            listener.progress(update);
+                        } catch (ignore) {
+                            // ignore
+                        }
                     }
                 });
             }
@@ -254,7 +257,12 @@
         };
 
         this.cancel = function() {
-            setTimeout(cancel, 0);
+            if (_protected.parentCancel) {
+                setTimeout(cancel, 0);
+            } else {
+                cancel();
+            }
+
             return _this;
         };
 
