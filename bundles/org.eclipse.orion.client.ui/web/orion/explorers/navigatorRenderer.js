@@ -18,8 +18,9 @@ define([
 	'orion/explorers/navigationUtils',
 	'orion/extensionCommands',
 	'orion/objects',
+	'orion/URITemplate',
 	'orion/webui/littlelib'
-], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, lib) {
+], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, lib) {
 		
 	/* Internal */
 	function isImage(contentType) {
@@ -89,7 +90,7 @@ define([
 		if (item.Directory) {
 			link = document.createElement("a"); //$NON-NLS-0$
 			link.className = "navlinkonpage"; //$NON-NLS-0$
-			link.href = folderPageURL + "#" + item.ChildrenLocation; //$NON-NLS-0$
+			link.href = new URITemplate(folderPageURL + "#{,resource,params*}").expand({resource: item.ChildrenLocation}); //$NON-NLS-0$
 			if(item.Name){
 				link.appendChild(document.createTextNode(item.Name));
 			}
@@ -128,7 +129,8 @@ define([
 			if(item.Name){
 				link.appendChild(document.createTextNode(item.Name));
 			}
-			var href = item.Location, foundEditor = false;
+			var foundEditor = false;
+			var href = new URITemplate("#{,resource,params*}").expand({resource: item.Location}); //$NON-NLS-0$
 			if (uriParams && typeof uriParams === "object") { //$NON-NLS-0$
 				item.params = {};
 				objects.mixin(item.params, uriParams);

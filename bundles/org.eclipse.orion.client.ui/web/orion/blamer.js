@@ -47,7 +47,7 @@ define ([
 					var uriTemplate = new URITemplate(range.CommitLink);
 					var params = {};
 					params.OrionHome = orionHome;
-					range.CommitLink = window.decodeURIComponent(uriTemplate.expand(params));
+					range.CommitLink = uriTemplate.expand(params);
 				}
 				serviceRegistry.getService("orion.core.blame")._setAnnotations(results); //$NON-NLS-0$
 			});

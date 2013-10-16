@@ -112,7 +112,7 @@ define([
 						{	source: 'Directory'
 						}
 					],
-		uriTemplate: '{OrionHome}/stringexternalizer/strExternalizer.html#{Location}'
+		uriTemplate: '{+OrionHome}/stringexternalizer/strExternalizer.html#{,Location}'
 	});
 
 	provider.registerService("orion.core.setting",

@@ -33,31 +33,31 @@ define([
 		nameKey: "Editor",
 		nls: "orion/nls/messages",
 		tooltip: "Edit code",
-		uriTemplate: "{OrionHome}/edit/edit.html"
+		uriTemplate: "{+OrionHome}/edit/edit.html"
 	});
 //		provider.registerService("orion.page.link", serviceImpl, {
 //			nameKey: "Sites",
 //			id: "orion.sites",
 //			nls: "orion/nls/messages",
-//			uriTemplate: "{OrionHome}/sites/sites.html"
+//			uriTemplate: "{+OrionHome}/sites/sites.html"
 //		});
 //		provider.registerService("orion.page.link", serviceImpl, {
 //			nameKey: "Repositories",
 //			id: "orion.repositories",
 //			nls: "orion/nls/messages",
-//			uriTemplate: "{OrionHome}/git/git-repository.html#"
+//			uriTemplate: "{+OrionHome}/git/git-repository.html#"
 //		});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Shell",
 		id: "orion.shell",
 		nls: "orion/nls/messages",
-		uriTemplate: "{OrionHome}/shell/shellPage.html#projectfor={Location}"
+		uriTemplate: "{+OrionHome}/shell/shellPage.html#projectfor={,Location}"
 	});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Search",
 		id: "orion.Search",
 		nls: "orion/nls/messages",
-		uriTemplate: "{OrionHome}/search/search.html"
+		uriTemplate: "{+OrionHome}/search/search.html"
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
@@ -70,7 +70,7 @@ define([
 			variableName: "EditorLocation",
 			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
 		}],
-		uriTemplate: "{OrionHome}/edit/edit.html#{EditorLocation},navigate={EditorLocation}?depth=1"
+		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation},navigate={,EditorLocation}?depth=1"
 	});
 
 
@@ -85,7 +85,7 @@ define([
 		id: "orion.settings",
 		nameKey: "Settings",
 		nls: "orion/widgets/nls/messages",
-		uriTemplate: "{OrionHome}/settings/settings.html",
+		uriTemplate: "{+OrionHome}/settings/settings.html",
 		category: 1
 	});
 

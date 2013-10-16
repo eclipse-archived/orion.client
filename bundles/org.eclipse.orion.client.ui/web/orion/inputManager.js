@@ -106,15 +106,15 @@ define([
 		/**
 		 * @returns {orion.Promise} Promise resolving to the new Location we should use
 		 */
-		_maybeLoadWorkspace: function(resourceRaw) {
+		_maybeLoadWorkspace: function(resource) {
 			var fileClient = this.fileClient;
 			// If it appears to be a workspaceRootURL we cannot load it directly, have to get the workspace first
-			if (resourceRaw === fileClient.fileServiceRootURL(resourceRaw)) {
-				return fileClient.loadWorkspace(resourceRaw).then(function(workspace) {
+			if (resource === fileClient.fileServiceRootURL(resource)) {
+				return fileClient.loadWorkspace(resource).then(function(workspace) {
 					return workspace.Location;
 				});
 			}
-			return new Deferred().resolve(resourceRaw);
+			return new Deferred().resolve(resource);
 		},
 		/**
 		 * Wrapper for fileClient.read() that tolerates a filesystem root URL passed as location. If location is indeed
@@ -131,7 +131,7 @@ define([
 			var fileURI = this.getInput();
 			if (!fileURI) { return; }
 			var fileClient = this.fileClient;
-			var resourceRaw = this._parsedLocation.resourceRaw;
+			var resource = this._parsedLocation.resource;
 			var progressService = this.progressService;
 			var progress = function(deferred, msgKey, uri) {
 				if (!progressService) { return deferred; }
@@ -141,11 +141,11 @@ define([
 			if (this._fileMetadata) {
 				//Reload if out of sync, unless we are already in the process of saving
 				if (!this._saving && !this._fileMetadata.Directory && !this._readonly) {
-					progress(fileClient.read(resourceRaw, true), messages.ReadingMetadata, fileURI).then(function(data) {
+					progress(fileClient.read(resource, true), messages.ReadingMetadata, fileURI).then(function(data) {
 						if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
 							this._fileMetadata = data;
 							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
-								progress(fileClient.read(resourceRaw), messages.Reading, fileURI).then(function(contents) {
+								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
 									editor.setInput(fileURI, null, contents);
 									this._unsavedChanges = [];
 								}.bind(this));
@@ -156,7 +156,7 @@ define([
 			} else {
 				//TODO this URL parsing to retrieve the should be done in the server side.
 				//TODO /gitapi/commit URLs are not supported be the orion file client.
-				var metadataURI = resourceRaw;
+				var metadataURI = resource;
 				if (metadataURI.indexOf("/gitapi/commit/") === 0) { //$NON-NLS-0$
 					var start = metadataURI.indexOf("/file"); //$NON-NLS-0$
 					var end = metadataURI.indexOf("?", start); //$NON-NLS-0$
@@ -192,7 +192,7 @@ define([
 						}.bind(this), errorHandler);
 					} else {
 						// Read contents
-						progress(fileClient.read(resourceRaw, false, true), messages.Reading, fileURI).then(function(contents) {
+						progress(fileClient.read(resource, false, true), messages.Reading, fileURI).then(function(contents) {
 							clearTimeout();
 							if (typeof contents !== "string") { //$NON-NLS-0$
 								this._acceptPatch = contents.acceptPatch;
@@ -260,8 +260,8 @@ define([
 
 			var etag = this.getFileMetadata().ETag;
 			var args = { "ETag" : etag }; //$NON-NLS-0$
-			var resourceRaw = this._parsedLocation.resourceRaw;
-			var def = this.fileClient.write(resourceRaw, data, args);
+			var resource = this._parsedLocation.resource;
+			var def = this.fileClient.write(resource, data, args);
 			var progress = this.progressService;
 			var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			if (progress) {
@@ -295,7 +295,7 @@ define([
 					var forceSave = window.confirm(messages.saveOutOfSync);
 					if (forceSave) {
 						// repeat save operation, but without ETag
-						var def = self.fileClient.write(resourceRaw, contents);
+						var def = self.fileClient.write(resource, contents);
 						if (progress) {
 							def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
 						}
@@ -340,7 +340,7 @@ define([
 		setInput: function(location) {
 			if (this._ignoreInput) { return; }
 			if (!location) {
-				location = window.location.hash;
+				location = PageUtil.hash();
 			}
 			if (typeof location !== "string") { //$NON-NLS-0$
 				return;

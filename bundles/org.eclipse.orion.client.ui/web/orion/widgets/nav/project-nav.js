@@ -409,7 +409,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (folderNode.tagName === "A") { //$NON-NLS-0$
 				folderNode.classList.add("projectNavFolder"); //$NON-NLS-0$
-				folderNode.href = "#" + folder.Location; //$NON-NLS-0$
+				folderNode.href = new URITemplate("#{,resource,params*}").expand({resource: folder.Location}); //$NON-NLS-0$
 			}
 			return folderNode;
 		},

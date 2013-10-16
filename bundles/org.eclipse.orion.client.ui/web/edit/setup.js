@@ -120,7 +120,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 
 	var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
 		var resource = folder ? folder.Location : fileClient.fileServiceRootURL(folderLocation);
-		segment.href = "#" + resource; //$NON-NLS-0$
+		segment.href = new URITemplate("#{,resource,params*}").expand({resource: resource}); //$NON-NLS-0$
 	};
 
 	inputManager = new mInputManager.InputManager({
@@ -208,7 +208,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		EventTarget.attach(this);
 	}
 	SidebarNavInputManager.prototype.processHash = function() {
-		var navigate = PageUtil.matchResourceParameters(location.hash).navigate;
+		var navigate = PageUtil.matchResourceParameters().navigate;
 		if (typeof navigate === "string" && this.setInput) { //$NON-NLS-0$
 			this.setInput(navigate);
 		}
@@ -247,15 +247,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		inputManager.setInput(event.selection);
 	});
 	window.addEventListener("hashchange", function() { //$NON-NLS-0$
-		inputManager.setInput(window.location.hash);
-		sidebarNavInputManager.processHash(window.location.hash);
+		inputManager.setInput(PageUtil.hash());
+		sidebarNavInputManager.processHash(PageUtil.hash());
 	});
-	inputManager.setInput(window.location.hash);
-	sidebarNavInputManager.processHash(window.location.hash);
+	inputManager.setInput(PageUtil.hash());
+	sidebarNavInputManager.processHash(PageUtil.hash());
 
 	//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
 	// Do not collapse sidebar, https://bugs.eclipse.org/bugs/show_bug.cgi?id=418558
-	var collapseSidebar = false; //window.location.hash !== ""
+	var collapseSidebar = false; //PageUtil.hash() !== ""
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, collapseSidebar); //$NON-NLS-0$
 
 	window.onbeforeunload = function() {

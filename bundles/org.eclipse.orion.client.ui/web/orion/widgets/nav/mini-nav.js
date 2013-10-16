@@ -228,7 +228,7 @@ define([
 			
 			if (this.fileInCurrentTree(fileMetadata)) {
 				func();
-			} else if (!PageUtil.matchResourceParameters(window.location.hash).navigate) {
+			} else if (!PageUtil.matchResourceParameters().navigate) {
 				this.loadParentOf(fileMetadata, true /* reveal from the top */).then(func);
 			}
 		},
@@ -344,7 +344,7 @@ define([
 		createFolderNode: function(folder) {
 			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (this.showFolderLinks && folderNode.tagName === "A") { //$NON-NLS-0$
-				folderNode.href = "#" + folder.Location; //$NON-NLS-0$
+				folderNode.href = new URITemplate("#{,resource,params*}").expand({resource: folder.Location}); //$NON-NLS-0$
 				folderNode.classList.add("miniNavFolder"); //$NON-NLS-0$
 				// TODO wasteful. Should attach 1 listener to parent element, then get folder model item from nav handler
 				folderNode.addEventListener("click", this.toggleFolderExpansionState.bind(this, folder, false)); //$NON-NLS-0$
@@ -581,8 +581,8 @@ define([
 				serviceRegistry: this.serviceRegistry
 			});
 
-			var params = PageUtil.matchResourceParameters(window.location.hash);
-			var navigate = params.navigate, resource = params.resource /*TODO resourceRaw? */;
+			var params = PageUtil.matchResourceParameters();
+			var navigate = params.navigate, resource = params.resource;
 			if (!navigate) {
 				var root = this.lastRoot || this.fileClient.fileServiceRootURL(resource || ""); //$NON-NLS-0$
 				this.explorer.loadRoot(root).then(function(){

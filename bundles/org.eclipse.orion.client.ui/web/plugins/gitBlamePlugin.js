@@ -119,7 +119,7 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 						range.Name = c.Name;
 						range.Time = new Date(c.Time).toLocaleString();
 						range.Shade = (1 / (commits.length + 1)) * (commits.length - i + 1);
-						range.CommitLink = "{OrionHome}/git/git-commit.html#" + c.CommitLocation + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
+						range.CommitLink = "{+OrionHome}/git/git-commit.html#" + c.CommitLocation + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
 						annotations.push(range);
 					}
 				}

@@ -42,7 +42,7 @@ define([
 		var uriTemplate = new URITemplate(options.uriTemplate);
 		var params = options.params || {};
 		params.OrionHome = params.OrionHome || PageLinks.getOrionHome();
-		var href = window.decodeURIComponent(uriTemplate.expand(params));
+		var href = uriTemplate.expand(params);
 		var delegatedParent = document.createElement("div"); //$NON-NLS-0$
 		var iframe = document.createElement("iframe"); //$NON-NLS-0$
 		iframe.id = options.id;

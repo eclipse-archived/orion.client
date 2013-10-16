@@ -1201,7 +1201,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 				return;
 			}
 
-			var hash = window.location.hash.substring(1);
+			var hash = PageUtil.hash().substring(1);
 			if (hash.length === 0) {
 				hash = ROOT_ORIONCONTENT;
 			}

@@ -128,7 +128,7 @@ define([
 		nameKey: "Raw",
 		nls: "orion/nls/messages",
 		tooltipKey: "Open the raw file or folder in the browser",
-		uriTemplate: "{Location}",
+		uriTemplate: "{,Location}",
 		forceSingleItem: true
 	});
 
@@ -136,7 +136,7 @@ define([
 		id: "orion.editor",
 		nameKey: "Orion Editor",
 		nls: "orion/nls/messages",
-		uriTemplate: "../edit/edit.html#{Location,params*}",
+		uriTemplate: "../edit/edit.html#{,Location,params*}",
 		orionTemplate: "../edit/edit.html#{,Location,params*}"});
 
 	provider.registerService("orion.navigate.openWith", {}, {

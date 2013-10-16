@@ -19,7 +19,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		nameKey: "Repositories",
 		id: "orion.git.repositories",
 		nls: "git/nls/gitmessages",
-		uriTemplate: "{OrionHome}/git/git-repository.html#"
+		uriTemplate: "{+OrionHome}/git/git-repository.html#"
 	});
 	
 	provider.registerService("orion.navigate.command", {}, {
@@ -31,7 +31,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 			{source: "Git:StatusLocation", variableName: "GitStatusLocation"},
 			{source: "Directory", match: true}
 		],
-		uriTemplate: "{OrionHome}/git/git-status.html#{GitStatusLocation}",
+		uriTemplate: "{+OrionHome}/git/git-status.html#{,GitStatusLocation}",
 		forceSingleItem: true
 	});
 	
@@ -43,7 +43,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		validationProperties: [
 			{source: "Git:CommitLocation", variableName: "GitLogLocation"}
 		],
-		uriTemplate: "{OrionHome}/git/git-log.html#{GitLogLocation}?page=1",
+		uriTemplate: "{+OrionHome}/git/git-log.html#{,GitLogLocation}?page=1",
 		forceSingleItem: true
 	});
 
@@ -56,7 +56,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 			source: "Git:DefaultRemoteBranchLocation", 
 			variableName: "GitRemoteLocation"
 		}],
-		uriTemplate: "{OrionHome}/git/git-log.html#{GitRemoteLocation}?page=1",
+		uriTemplate: "{+OrionHome}/git/git-log.html#{,GitRemoteLocation}?page=1",
 		forceSingleItem: true
 	});
 	
@@ -65,7 +65,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		nls: "git/nls/gitmessages",
 		nameKey: "Clone Git Repository",
 		descriptionKey: "Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.",
-		uriTemplate: "{OrionHome}/git/git-repository.html#,cloneGitRepository=URL"
+		uriTemplate: "{+OrionHome}/git/git-repository.html#,cloneGitRepository=URL"
 	});
 
 	provider.registerService("orion.page.link.related", null, {
@@ -81,7 +81,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 			source: "StatusLocation|Clone:StatusLocation", 
 			variableName: "GitStatusLocation"
 		}],
-		uriTemplate: "{OrionHome}/git/git-status.html#{GitStatusLocation}"
+		uriTemplate: "{+OrionHome}/git/git-status.html#{,GitStatusLocation}"
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
@@ -101,7 +101,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 			{source: "Clone:ActiveBranch", variableName: "GitBranchLocation"},
 			{source: "toRef:Type", match: "RemoteTrackingBranch"}
 		],
-		uriTemplate: "{OrionHome}/git/git-log.html#{GitBranchLocation}?page=1",
+		uriTemplate: "{+OrionHome}/git/git-log.html#{,GitBranchLocation}?page=1",
 		forceSingleItem: true
 	});
 	
@@ -113,7 +113,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		validationProperties: [
 			{source: "toRef:RemoteLocation:0:Children:0:CommitLocation", variableName: "GitRemoteLocation"}
 		],
-		uriTemplate: "{OrionHome}/git/git-log.html#{GitRemoteLocation}?page=1",
+		uriTemplate: "{+OrionHome}/git/git-log.html#{,GitRemoteLocation}?page=1",
 		forceSingleItem: true
 	});
 	
@@ -126,7 +126,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 			{source: "CloneLocation", variableName: "GitCloneLocation"},
 			{source: "Type", match: "Commit"}
 		],
-		uriTemplate: "{OrionHome}/git/git-repository.html#{GitCloneLocation}"
+		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitCloneLocation}"
 	});
 
 	provider.registerService("orion.page.link.related", null, {
@@ -138,7 +138,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 			source: "Git:CloneLocation",
 			variableName: "GitRepoLocation"
 		}],
-		uriTemplate: "{OrionHome}/git/git-repository.html#{GitRepoLocation}"
+		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitRepoLocation}"
 	});
 
 	provider.registerService("orion.page.link.related", null, {
@@ -152,7 +152,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 			variableName: "EclipseGitLocation", 
 			variableMatchPosition: "after"
 		}],
-		uriTemplate: "http://git.eclipse.org/c{EclipseGitLocation}"
+		uriTemplate: "http://git.eclipse.org/c{,EclipseGitLocation}"
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
@@ -364,7 +364,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 							{
 								name: "Git Status",
 								value: "Git Status",
-								href: "{OrionHome}/git/git-status.html#" + item.Git.StatusLocation
+								href: "{+OrionHome}/git/git-status.html#" + item.Git.StatusLocation
 							}
 						]
 					}

@@ -314,7 +314,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 				// special properties.  Should already be in metadata.  See bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
 				variableExpansions.OrionHome = orionHome;
 				var uriTemplate = new URITemplate(this.info.uriTemplate);
-				return window.decodeURIComponent(uriTemplate.expand(variableExpansions));
+				return uriTemplate.expand(variableExpansions);
 			} 
 			return null;
 		};

@@ -31,7 +31,7 @@ define([
 			variableName: "ShellLocation",
 			replacements: [{pattern: "\\?depth=1$", replacement: ""}] 
 		}],
-		uriTemplate: "{OrionHome}/shell/shellPage.html#{ShellLocation}",
+		uriTemplate: "{+OrionHome}/shell/shellPage.html#{,ShellLocation}",
 		forceSingleItem: true
 	});
 	provider.registerService("orion.page.link.related", null, {
@@ -45,7 +45,7 @@ define([
 		validationProperties: [{
 			source: "NoTarget"
 		}],
-		uriTemplate: "{OrionHome}/shell/shellPage.html#",
+		uriTemplate: "{+OrionHome}/shell/shellPage.html#",
 		forceSingleItem: true
 	});
 
