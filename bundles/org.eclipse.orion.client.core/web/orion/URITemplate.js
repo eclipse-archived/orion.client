@@ -22,7 +22,7 @@ define(function(){
 		"?": {first:"?", sep:"&", named: true, ifemp: "=", allow: "U"}, //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"&": {first:"&", sep:"&", named: true, ifemp: "=", allow: "U"}, //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"#": {first:"#", sep:",", named: false, ifemp: "", allow: "U+R"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		",": {first:"", sep:",", named: false, ifemp: "", allow: "U+R-,"}		 //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		",": {first:"", sep:",", named: false, ifemp: "", allow: "U+R-,"} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	};
 
 	var VARSPEC_REGEXP = /^((?:(?:[a-zA-Z0-9_])|(?:%[0-9A-F][0-9A-F]))(?:(?:[a-zA-Z0-9_.])|(?:%[0-9A-F][0-9A-F]))*)(?:(\*)|:([0-9]+))?$/;
@@ -52,7 +52,7 @@ define(function(){
 			return encodeURI(value).replace(/%5B/g, '[').replace(/%5D/g, ']').replace(PCT_ENCODED_G, decodePercent); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		if (encoding === "U+R-,") { //$NON-NLS-0$
-			return encodeURI(value).replace(/%5B/g, '[').replace(/%5D/g, ']').replace(PCT_ENCODED_G, decodePercent).replace(/,/g, '%2C'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			return encodeURI(value).replace(/%5B/g, '[').replace(/%5D/g, ']').replace(/,/g, '%2C'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		throw new Error("Unknown allowed character set: " + encoding);
 	}
