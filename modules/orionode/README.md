@@ -2,20 +2,21 @@
 A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orion/). Orion provides an extensible IDE that runs in your browser. It's particularly good for writing Javascript.
 
 ## Features
-* Basic Navigator operations
-* Basic Editor operations
-* Plugin operations
+* Basic file management
+* Source code editing
+* Install plugins to customize your environment
 * Shell command for launching a node app (type ```help node``` in the Shell page to find out more)
-* Shell command for supporting npm.
+* Shell command for supporting npm
 * Client caching for static content
 * Gzip
-* Concatenation and minification of pages
+* Pages are concatenated and minified so they load faster
 
 ## Usage
 For full instructions, see the [Getting Started guide](http://wiki.eclipse.org/Orion/Node/Getting_started).
+
 ### Running the server
-# Run ```npm start orion``` or ```node [node_modules]/orion/server.js```.
-# Go to [localhost:8081](http://localhost:8081) to use Orion. (You can change the port by passing the```-p``` option).
+1. Run ```npm start orion``` or ```node [node_modules]/orion/server.js```.
+2. Go to [localhost:8081](http://localhost:8081) to use Orion. (You can change the port by passing the```-p``` option).
 
 ### Using Orion within a larger app
 Use ```require('orion')``` to get access to our startServer function, which is suitable for use within a larger [connect](https://github.com/senchalabs/connect/) project:
