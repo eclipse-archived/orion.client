@@ -234,7 +234,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	});
 	var gotoInput = function(evt) { //$NON-NLS-0$
 		var newInput = evt.newInput || ""; //$NON-NLS-0$
-		window.location = "#" + newInput; //$NON-NLS-0$
+		window.location = new URITemplate("#{,resource,params*}").expand({resource: newInput}); //$NON-NLS-0$
 	};
 	sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
 	sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
