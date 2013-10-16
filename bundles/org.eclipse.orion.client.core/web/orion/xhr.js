@@ -117,7 +117,14 @@ define(['orion/Deferred'], function(Deferred) {
 		};
 		xhr.onload = function() {
 			var result = makeResult(url, options, xhr);
-			d.resolve(result);
+			if(200 <= xhr.status && xhr.status < 400) {
+				d.resolve(result);
+			} else {
+				d.reject(result);
+				if(log && typeof console !== 'undefined') { //$NON-NLS-0$
+					console.log(new Error(xhr.statusText));
+				}
+			}
 		};
 		xhr.onerror = function() {
 			var result = makeResult(url, options, xhr);

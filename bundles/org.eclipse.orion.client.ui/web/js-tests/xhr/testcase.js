@@ -63,16 +63,7 @@ function(assert, mTest, Deferred, xhr, mEventTarget) {
                             this.onabort();
                         }
                     } else {
-                        var status = this.status;
-                        if (200 <= status && status < 400) {
-                            if (typeof this.onload === 'function') {
-                                this.onload();
-                            }
-                        } else {
-                            if (typeof this.onerror === 'function') {
-                                this.onerror();
-                            }
-                        }
+                        this.onload();
                     }
                 }
             }
