@@ -7,7 +7,7 @@
  * 
  * Contributors: IBM Corporation - initial implementation
  * *******************************************************************************/
-package com.eclipse.orion.android;
+package org.eclipse.orion.android;
 
 import android.net.Uri;
 import android.os.Bundle;
