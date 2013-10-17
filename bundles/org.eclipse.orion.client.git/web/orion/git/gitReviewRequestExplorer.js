@@ -11,9 +11,9 @@
 
 /*global define document window*/
 
-define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/globalCommands',
+define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil', 'orion/URITemplate', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/globalCommands',
         'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, mSection, i18nUtil, PageUtil, lib, mGlobalCommands, mGitCommands, Deferred, mCommitTooltip) {
+		function(messages, require, mSection, i18nUtil, URITemplate, PageUtil, lib, mGlobalCommands, mGitCommands, Deferred, mCommitTooltip) {
 	var exports = {};
 
 	exports.GitReviewRequestExplorer = (function() {
@@ -224,8 +224,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil'
 								if(foundRemote){
 									findCommitLocation(repositories, sha, null, that).then(	
 										function(commitLocation){
-											var commitPageURL = require.toUrl("git/git-commit.html#") + commitLocation + "?page=1&pageSize=1";
-											var repoURL = require.toUrl("git/git-repository.html#") + resp.Children[0].Location;
+											var commitPageURL = require.toUrl(new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1").expand({resource: commitLocation})); //$NON-NLS-1$ //$NON-NLS-0$
+											var repoURL = require.toUrl(new URITemplate("git/git-repository.html#{,resource,params*}").expand({resource: resp.Children[0].Location})); //$NON-NLS-1$ //$NON-NLS-0$
 											
 											var sectionItem = document.createElement("div");
 											sectionItem.className = "sectionTableItem lightTreeTableRow";
@@ -269,7 +269,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil'
 													index = i;
 												}
 											}
-											var repoURL = require.toUrl("git/git-repository.html#") + resp.Children[0].Location;
+											var repoURL = require.toUrl(new URITemplate("git/git-repository.html#{,resource,params*}").expand({resource: resp.Children[0].Location})); //$NON-NLS-1$ //$NON-NLS-0$
 											
 											var sectionItem = document.createElement("div");
 											sectionItem.className = "sectionTableItem lightTreeTableRow";
@@ -299,7 +299,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil'
 										}
 									);	
 								} else {
-									var repoURL = require.toUrl("git/git-repository.html#") + resp.Children[0].Location;
+									var repoURL = require.toUrl(new URITemplate("git/git-repository.html#{,resource,params*}").expand({resource: resp.Children[0].Location})); //$NON-NLS-1$ //$NON-NLS-0$
 									
 									var sectionItem = document.createElement("div");
 									sectionItem.className = "sectionTableItem lightTreeTableRow";

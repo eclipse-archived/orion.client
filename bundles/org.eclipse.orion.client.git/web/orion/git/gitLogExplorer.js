@@ -11,9 +11,9 @@
 
 /*global define console document Image */
 
-define(['i18n!git/nls/gitmessages', 'require', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/section', 'orion/i18nUtil', 'orion/globalCommands', 
+define(['i18n!git/nls/gitmessages', 'require', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/section', 'orion/i18nUtil', 'orion/globalCommands', 
         'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, mExplorer, PageUtil, lib, mSection, i18nUtil, mGlobalCommands, mGitCommands, mNavUtils, Deferred,
+		function(messages, require, mExplorer, PageUtil, URITemplate, lib, mSection, i18nUtil, mGlobalCommands, mGitCommands, mNavUtils, Deferred,
 				mCommitTooltip) {
 var exports = {};
 
@@ -81,12 +81,12 @@ exports.GitLogExplorer = (function() {
 						this.registry.getService("orion.page.progress").progress(
 								gitService.getDefaultRemoteBranch(metadata.Git.RemoteLocation),
 								"Getting default branch for " + metadata.Name).then(function(defaultRemoteBranchJsonData, secondArg) {
-							seg.href = require.toUrl("git/git-log.html") + "#" + defaultRemoteBranchJsonData.Location + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							seg.href = require.toUrl(new URITemplate("git/git-log.html#{,resource,params*}?page=1").expand({resource: defaultRemoteBranchJsonData.Location})); //$NON-NLS-0$
 						});
 					}
 				} else {
 					if (metadata.Git) {
-						seg.href = require.toUrl("git/git-log.html") + "#" + metadata.Git.CommitLocation + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						seg.href = require.toUrl(new URITemplate("git/git-log.html#{,resource,params*}?page=1").expand({resource: metadata.Git.CommitLocation})); //$NON-NLS-0$
 					}
 				}
 			}, function(error) {
@@ -133,7 +133,7 @@ exports.GitLogExplorer = (function() {
 						target : item,
 						breadcrumbTarget : breadcrumbItem,
 						makeBreadcrumbLink : function(seg, location) {
-							seg.href = require.toUrl("git/git-repository.html") + (location ? "#" + location : ""); //$NON-NLS-0$
+							seg.href = require.toUrl(new URITemplate("git/git-repository.html#{,resource,params*}").expand({resource: location || "".Location})); //$NON-NLS-0$
 						},
 						serviceRegistry : that.registry,
 						commandService : that.commandService
@@ -410,7 +410,7 @@ exports.GitLogExplorer = (function() {
 
 					var titleLink = document.createElement("a");
 					titleLink.className = "navlinkonpage";
-					titleLink.href = require.toUrl("git/git-commit.html#") + commit.Location + "?page=1&pageSize=1";
+					titleLink.href = require.toUrl(new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1").expand({resource: commit.Location})); //$NON-NLS-0$
 					titleLink.textContent = commit.Message;
 					detailsView.appendChild(titleLink);
 					

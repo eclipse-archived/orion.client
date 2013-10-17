@@ -11,8 +11,8 @@
  
  /*globals define window document Image*/
 
-define([ 'i18n!git/nls/gitmessages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/webui/popupdialog'], 
-	function(messages, require, lib, i18nUtil, popupdialog) {
+define([ 'i18n!git/nls/gitmessages', 'require', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/webui/popupdialog'], 
+	function(messages, require, URITemplate, lib, i18nUtil, popupdialog) {
 
 	function CommitTooltipDialog(options) {
 		this._init(options);
@@ -39,7 +39,7 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/webui/littlelib', 'orion/
 		var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
 		var link = document.createElement("a"); //$NON-NLS-0$
 		link.className = "navlinkonpage"; //$NON-NLS-0$
-		link.href = require.toUrl("git/git-commit.html#") + commit.Location + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
+		link.href = require.toUrl(new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1").expand({resource: commit.Location})); //$NON-NLS-0$
 		link.textContent = commitMessage0;
 		tableNode.appendChild(link);
 		
@@ -75,7 +75,7 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/webui/littlelib', 'orion/
 			
 			var parentLink = document.createElement("a");
 			parentLink.className = "navlinkonpage"; //$NON-NLS-0$
-			parentLink.href = require.toUrl("git/git-commit.html#") + commit.Parents[0].Location + "?page=1&pageSize=1"; //$NON-NLS-1$ //$NON-NLS-0$
+			parentLink.href = require.toUrl(new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1").expand({resource: commit.Parents[0].Location})); //$NON-NLS-0$
 			parentLink.textContent = commit.Parents[0].Name;
 			parentNode.appendChild(parentLink);
 			
