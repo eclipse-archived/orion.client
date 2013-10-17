@@ -26,7 +26,6 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 	var pluginRegistry, pluginType, preferences, serviceElementCounter = 0;
 
-	var PREFIX_PROJECTFOR = "projectfor="; //$NON-NLS-0$
 	var ROOT_ORIONCONTENT = new URL(require.toUrl("file"), window.location.href).pathname; //$NON-NLS-0$
 	var PAGE_TEMPLATE = require.toUrl("shell/shellPage.html") + "#{,resource}"; //$NON-NLS-0$
 
@@ -914,8 +913,6 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 
 		shell.setFocusToInput();
 
-		/* check the URL for an initial folder location to open to */
-
 		shellPageFileService = new mShellPageFileService.ShellPageFileService();
 		var defaultLocationFn = function(location, replace) {
 			var successFn = function(node) {
@@ -935,40 +932,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 				shellPageFileService.loadWorkspace(ROOT_ORIONCONTENT).then(successFn);
 			}
 		};
-
-		if (parameters.resource && parameters.resource.indexOf(PREFIX_PROJECTFOR) === 0) {
-			/* Attempt to open to the project root of the specified resource */
-			var resourceValue = parameters.resource.substring(PREFIX_PROJECTFOR.length);
-			fileClient.read(resourceValue, true).then(
-				function(node) {
-					if (node.Directory === undefined) {
-						/*
-						 * The resource was read successfully but does not represent a file system
-						 * resource, so it cannot be used.  Revert to the default initial location.
-						 */
-						 defaultLocationFn(null, true);
-					} else if (node.Parents && node.Parents.length > 0) {
-						var projectLocation = node.Parents[node.Parents.length - 1].Location;
-						defaultLocationFn(projectLocation, true);
-					} else {
-						/*
-						 * The PREFIX_PROJECTFOR value is either a project root or is below the
-						 * level or projects, so just take it as the starting location.
-						 */
-						 defaultLocationFn(node.Location, true);
-					}
-				},
-				function(error) {
-					/*
-					 * The PREFIX_PROJECTFOR value does not refer to a valid file system
-					 * location, so open to the default location.
-					 */
-					defaultLocationFn(null, true);			
-				}
-			);
-		} else {
-			defaultLocationFn(getCWD(), true);
-		}
+		defaultLocationFn(getCWD(), true);
 
 		/* add the locally-defined types */
 		fileType = new mFileParamType.ParamTypeFile(shellPageFileService);
