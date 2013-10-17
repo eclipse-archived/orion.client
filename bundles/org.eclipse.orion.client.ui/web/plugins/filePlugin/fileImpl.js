@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global window define URL XMLHttpRequest BlobBuilder*/
-/*jslint forin:true devel:true browser:true*/
+/*jslint forin:true devel:true browser:true regexp:false*/
 
 
 define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], function(Deferred, xhr, _, operation) {
@@ -36,6 +36,13 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 			});
 		}
 		return data;
+	}
+
+	/**
+	 * http://tools.ietf.org/html/rfc5023#section-9.7.1
+	 */
+	function encodeSlug(s) {
+		return s.replace(/([^\u0020-\u007e]|%)+/g, encodeURIComponent);
 	}
 
 	// Wrap orion/xhr to handle long-running operations.
@@ -157,7 +164,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 			return xhr("POST", this.workspaceBase, {
 				headers: {
 					"Orion-Version": "1",
-					"Slug": name
+					"Slug": encodeSlug(name)
 				},
 				timeout: 15000
 			}).then(function(result) {
@@ -276,7 +283,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				headers: {
 					"Orion-Version": "1",
 					"X-Create-Options" : "no-overwrite",
-					"Slug": folderName,
+					"Slug": encodeSlug(folderName),
 					"Content-Type": "application/json;charset=UTF-8"
 				},
 				data: JSON.stringify({
@@ -306,7 +313,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 				headers: {
 					"Orion-Version": "1",
 					"X-Create-Options" : "no-overwrite",
-					"Slug": fileName,
+					"Slug": encodeSlug(fileName),
 					"Content-Type": "application/json;charset=UTF-8"
 				},
 				data: JSON.stringify({
@@ -383,7 +390,7 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim", "orion/operation"], fun
 			return xhr("POST", targetLocation, {
 				headers: {
 					"Orion-Version": "1",
-					"Slug": name,
+					"Slug": encodeSlug(name),
 					"X-Create-Options": "no-overwrite," + (isMove ? "move" : "copy"),
 					"Content-Type": "application/json;charset=UTF-8"
 				},
