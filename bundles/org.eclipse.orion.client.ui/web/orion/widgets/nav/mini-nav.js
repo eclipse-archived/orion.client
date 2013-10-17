@@ -354,6 +354,8 @@ define([
 			}
 			return folderNode;
 		},
+		emptyCallback: function() {
+		},
 		/**
 		 * @param {Object} folder
 		 * @param {Boolean} preventDefault
