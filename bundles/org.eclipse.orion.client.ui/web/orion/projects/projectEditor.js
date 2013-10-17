@@ -9,8 +9,8 @@
  ******************************************************************************/
  
 /*global define document setTimeout*/
-define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectCommands', 'orion/commandRegistry'],
-	function(mMarkdownView, lib, mProjectCommands, mCommandRegistry) { //$NON-NLS-0$
+define(['orion/markdownView', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', 'orion/commandRegistry'],
+	function(mMarkdownView, URITemplate, lib, mProjectCommands, mCommandRegistry) { //$NON-NLS-0$
 	function ProjectEditor(options){
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
@@ -278,7 +278,7 @@ define(['orion/markdownView', 'orion/webui/littlelib', 'orion/projectCommands', 
 						if(dependencyMetadata){
 							lib.empty(td);
 							var a = document.createElement("a");
-							a.href = "./edit.html#" + dependencyMetadata.Location;
+							a.href = new URITemplate("./edit.html#{,resource,params*}").expand({resource: dependencyMetadata.Location}); //$NON-NLS-0$
 							a.appendChild(document.createTextNode(dependency.Name));
 							td.appendChild(a);
 						}
