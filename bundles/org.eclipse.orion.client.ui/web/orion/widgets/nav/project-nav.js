@@ -398,6 +398,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		}
 	});
 
+	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	function FilesNavRenderer() {
 		NavigatorRenderer.apply(this, arguments);
 	}
@@ -409,7 +410,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (folderNode.tagName === "A") { //$NON-NLS-0$
 				folderNode.classList.add("projectNavFolder"); //$NON-NLS-0$
-				folderNode.href = new URITemplate("#{,resource,params*}").expand({resource: folder.Location}); //$NON-NLS-0$
+				folderNode.href = uriTemplate.expand({resource: folder.Location}); //$NON-NLS-0$
 			}
 			return folderNode;
 		},
@@ -457,11 +458,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 					nameText += " (disconnected)";
 				} else {
 					if(item.Dependency && item.FileMetadata){
-						itemNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+						itemNode.href = uriTemplate.expand({ //$NON-NLS-0$
 							resource: item.FileMetadata.Location
 						});
 					} else if(item.Location){
-						itemNode.href = new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+						itemNode.href = uriTemplate.expand({ //$NON-NLS-0$
 							resource: item.Location
 						});
 					}
@@ -502,7 +503,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		projectInfoNode.id = "projectInfoNode";
 		var a = document.createElement("a");
 		a.style.color = "black";
-		a.href =  new URITemplate("#{,resource,params*}").expand({ //$NON-NLS-0$
+		a.href = uriTemplate.expand({ //$NON-NLS-0$
 				resource: projectData.ContentLocation
 			});
 		

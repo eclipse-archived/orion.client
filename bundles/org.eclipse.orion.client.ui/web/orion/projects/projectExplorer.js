@@ -11,6 +11,8 @@
 /*globals define window document*/
 define(['orion/Deferred', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/explorers/explorer'],
 		function(Deferred, URITemplate, lib, mExplorer){
+	
+	var editTemplate = new URITemplate("../edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 			
 	function ProjectsRenderer(options){
 		this._init(options);
@@ -77,7 +79,7 @@ define(['orion/Deferred', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/e
 		var cell = document.createElement("td");
 		var a = document.createElement("a");
 		a.appendChild(document.createTextNode(item.Name));
-		a.href = new URITemplate("../edit/edit.html#{,resource,params*}").expand({resource: item.ContentLocation}); //$NON-NLS-0$
+		a.href = editTemplate.expand({resource: item.ContentLocation}); //$NON-NLS-0$
 		cell.appendChild(a);
 		tableRow.appendChild(cell);
 		

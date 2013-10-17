@@ -334,6 +334,7 @@ define([
 		}
 	});
 
+	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	function MiniNavRenderer() {
 		NavigatorRenderer.apply(this, arguments);
 	}
@@ -344,7 +345,7 @@ define([
 		createFolderNode: function(folder) {
 			var folderNode = NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (this.showFolderLinks && folderNode.tagName === "A") { //$NON-NLS-0$
-				folderNode.href = new URITemplate("#{,resource,params*}").expand({resource: folder.Location}); //$NON-NLS-0$
+				folderNode.href = uriTemplate.expand({resource: folder.Location});
 				folderNode.classList.add("miniNavFolder"); //$NON-NLS-0$
 				// TODO wasteful. Should attach 1 listener to parent element, then get folder model item from nav handler
 				folderNode.addEventListener("click", this.toggleFolderExpansionState.bind(this, folder, false)); //$NON-NLS-0$
