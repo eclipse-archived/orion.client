@@ -211,6 +211,15 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{+Location}"), serviceRegistry, contentTypesCache);
 		assert.equal(validator.getURI(item1), item1.Location);		
 	};
-	
+
+	tests.testVariableMissing = function() {
+		var validationProperty = {
+			source: "!Location"
+		};
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty), serviceRegistry, contentTypesCache);
+		assert.equal(validator.validationFunction(item1), false);
+		assert.equal(validator.validationFunction(item2), true);
+	};
+
 	return tests;
 });
