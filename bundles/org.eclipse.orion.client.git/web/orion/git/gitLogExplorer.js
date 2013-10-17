@@ -153,7 +153,7 @@ exports.GitLogExplorer = (function() {
 	
 	GitLogExplorer.prototype.redisplay = function(){
 		var pageParams = PageUtil.matchResourceParameters();
-		this.display(pageParams.resourceRaw);
+		this.display(pageParams.resource);
 	};
 	
 	GitLogExplorer.prototype.changedItem = function(parent, children) {
