@@ -65,12 +65,13 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status'
 			// object contributions
 			commandRegistry.registerCommandContribution("itemLevelCommands", "eclipse.removeTag", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 
+			var editTemplate = new URITemplate("edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 			var showDiffCommand = new Commands.Command({ 
 				name: messages["Working Directory Version"],
 				tooltip: messages["View the working directory version of the file"],
 				id: "eclipse.orion.git.diff.showCurrent", //$NON-NLS-0$
 				hrefCallback: function(data) {
-					return require.toUrl(new URITemplate("edit/edit.html#{,resource,params*}").expand({resource: data.items.ContentLocation})); //$NON-NLS-0$
+					return require.toUrl(editTemplate.expand({resource: data.items.ContentLocation}));
 				},
 				visibleWhen: function(item) {
 					return item.Type === "Diff"; //$NON-NLS-0$

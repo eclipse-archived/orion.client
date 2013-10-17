@@ -25,6 +25,16 @@ var exports = {};
 //this function is just a closure for the global "doOnce" flag
 (function() {
 	var doOnce = false;
+	
+	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
+	var logTemplate = new URITemplate("git/git-log.html#{,resource,params*}?page=1"); //$NON-NLS-0$
+	var logTemplateNoPage = new URITemplate("git/git-log.html#{,resource,params*}"); //$NON-NLS-0$
+	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
+	var statusTemplate = new URITemplate(mGitUtil.statusUILocation + "#{,resource,params*}"); //$NON-NLS-0$
+	var editTemplate = new URITemplate("edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
+	function statusURL(statusLocation) {
+		return require.toUrl(statusTemplate.expand({resource: statusLocation}));
+	}
 
 	exports.updateNavTools = function(registry, commandRegistry, explorer, toolbarId, selectionToolbarId, item, pageNavId) {
 		var toolbar = lib.node(toolbarId);
@@ -665,7 +675,7 @@ var exports = {};
 			id : "eclipse.openGitLog", //$NON-NLS-0$
 			hrefCallback : function(data) {
 				var item = data.items;
-				return require.toUrl(new URITemplate("git/git-log.html#{,resource,params*}?page=1").expand({resource: item.CommitLocation})); //$NON-NLS-0$
+				return require.toUrl(logTemplate.expand({resource: item.CommitLocation}));
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Branch" || item.Type === "RemoteTrackingBranch"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -681,7 +691,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			hrefCallback : function(data) {
 				var item = data.items;
-				return require.toUrl(new URITemplate("git/git-log.html#{,resource,params*}?page=1").expand({resource: item.CommitLocation})); //$NON-NLS-0$
+				return require.toUrl(logTemplate.expand({resource: item.CommitLocation}));
 			},
 			visibleWhen : function(item) {
 				// show only for a repo
@@ -692,10 +702,6 @@ var exports = {};
 		});
 		commandService.addCommand(openGitLogAll);
 		
-		function statusURL(statusLocation) {
-			return require.toUrl(new URITemplate(mGitUtil.statusUILocation + "#{,resource,params*}").expand({resource: statusLocation})); //$NON-NLS-0$
-		}
-
 		var openGitStatus = new mCommands.Command({
 			name : messages['Git Status'],
 			tooltip: messages["Open the status for the repository"],
@@ -716,7 +722,7 @@ var exports = {};
 			tooltip: messages["Show the repository folder in the file navigator"],
 			id : "eclipse.openCloneContent", //$NON-NLS-0$
 			hrefCallback : function(data) {
-				return require.toUrl(new URITemplate("edit/edit.html#{,resource,params*}").expand({resource: data.items.ContentLocation})); //$NON-NLS-0$
+				return require.toUrl(editTemplate.expand({resource: data.items.ContentLocation}));
 			},
 			visibleWhen : function(item) {
 				if (!item.ContentLocation)
@@ -766,7 +772,7 @@ var exports = {};
 			imageClass: "git-sprite-open", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite",
 			hrefCallback: function(data) {
-				return require.toUrl(new URITemplate("edit/edit.html#{,resource,params*}").expand({resource: data.items.ContentLocation})); //$NON-NLS-0$
+				return require.toUrl(editTemplate.expand({resource: data.items.ContentLocation}));
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit" && item.ContentLocation != null && !explorer.isDirectory; //$NON-NLS-0$
@@ -1659,7 +1665,7 @@ var exports = {};
 			tooltip: messages["Show previous page of git log"],
 			id : "eclipse.orion.git.previousLogPage", //$NON-NLS-0$
 			hrefCallback : function(data) {
-				return require.toUrl(new URITemplate("git/git-log.html#{,resource,params*}").expand({resource: data.items.PreviousLocation})); //$NON-NLS-0$
+				return require.toUrl(logTemplateNoPage.expand({resource: data.items.PreviousLocation}));
 			},
 			visibleWhen : function(item) {
 				if(item.Type === "RemoteTrackingBranch" || (item.toRef && item.toRef.Type === "Branch") || item.RepositoryPath !== null){ //$NON-NLS-1$ //$NON-NLS-0$
@@ -1675,7 +1681,7 @@ var exports = {};
 			tooltip: messages["Show next page of git log"],
 			id : "eclipse.orion.git.nextLogPage", //$NON-NLS-0$
 			hrefCallback : function(data) {
-				return require.toUrl(new URITemplate("git/git-log.html#{,resource,params*}").expand({resource: data.items.NextLocation})); //$NON-NLS-0$
+				return require.toUrl(logTemplateNoPage.expand({resource: data.items.NextLocation}));
 			},
 			visibleWhen : function(item) {
 				if(item.Type === "RemoteTrackingBranch" ||(item.toRef && item.toRef.Type === "Branch") || item.RepositoryPath !== null){ //$NON-NLS-1$ //$NON-NLS-0$
@@ -1691,7 +1697,7 @@ var exports = {};
 			tooltip : messages["Show previous page of git tags"],
 			id : "eclipse.orion.git.previousTagPage",
 			hrefCallback : function(data) {
-				return require.toUrl(new URITemplate("git/git-repository.html#{,resource,params*}").expand({resource: data.items.PreviousLocation})); //$NON-NLS-0$
+				return require.toUrl(repoTemplate.expand({resource: data.items.PreviousLocation}));
 			},
 			visibleWhen : function(item){
 				if(item.Type === "Tag"){
@@ -1707,7 +1713,7 @@ var exports = {};
 			tooltip : messages["Show next page of git tags"],
 			id : "eclipse.orion.git.nextTagPage",
 			hrefCallback : function(data){
-				return require.toUrl(new URITemplate("git/git-repository.html#{,resource,params*}").expand({resource: data.items.NextLocation})); //$NON-NLS-0$
+				return require.toUrl(repoTemplate.expand({resource: data.items.NextLocation}));
 			},
 			visibleWhen : function(item){
 				if(item.Type === "Tag"){
@@ -2144,7 +2150,7 @@ var exports = {};
 
 											fileClient.write(repoJson.Children[0].ContentLocation + '.git/.projectInfo', pDescContent).then(
 												function(){
-													var editLocation = new URITemplate("edit/edit.html#{,resource,params*}").expand({resource: repoJson.Children[0].ContentLocation}); //$NON-NLS-0$
+													var editLocation = editTemplate.expand({resource: repoJson.Children[0].ContentLocation});
 													window.location = editLocation;
 												}
 											);
@@ -2168,11 +2174,10 @@ var exports = {};
 									gitService.getGitClone(p.Git.CloneLocation).then(
 										function(repoJson){
 											if (repoJson.Children[0].GitUrl === item.url){
-												var templateString = require.toUrl("edit/edit.html") + "#{,resource,params*}"; //$NON-NLS-1$ //$NON-NLS-0$
-												window.location = new URITemplate(templateString).expand({
-													resource: "", //$NON-NLS-0$
+												window.location = editTemplate.expand({
+													resource: "",
 													params: {
-														navigate: repoJson.Children[0].ContentLocation + "?depth=1"
+														navigate: repoJson.Children[0].ContentLocation + "?depth=1" //$NON-NLS-0$
 													}
 												});
 											} else {
@@ -2610,7 +2615,7 @@ var exports = {};
 						findCommitLocation(repositories, data.parameters.valueFor("commitName")).then( //$NON-NLS-0$
 							function(commitLocation){
 								if(commitLocation){
-									var commitPageURL = require.toUrl(new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1").expand({resource: commitLocation})); //$NON-NLS-0$
+									var commitPageURL = require.toUrl(commitTemplate.expand({resource: commitLocation})); //$NON-NLS-0$
 									window.open(commitPageURL);
 								}
 								serviceRegistry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$

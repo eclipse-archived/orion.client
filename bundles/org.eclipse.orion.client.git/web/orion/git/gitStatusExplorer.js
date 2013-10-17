@@ -18,6 +18,10 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 	var exports = {};
 	var conflictTypeStr = "Conflicting"; //$NON-NLS-0$
 
+	var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
+	var logTemplate = new URITemplate("git/git-log.html#{,resource,params*}?page=1"); //$NON-NLS-0$
+	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
+
 	function isConflict(type) {
 		return type === conflictTypeStr;
 	}
@@ -260,7 +264,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 				target : repository,
 				breadcrumbTarget : item,
 				makeBreadcrumbLink : function(seg, location) {
-					seg.href = require.toUrl(new URITemplate("git/git-repository.html#{,resource,params*}").expand({resource: location || ""})); //$NON-NLS-0$
+					seg.href = require.toUrl(repoTemplate.expand({resource: location || ""})); //$NON-NLS-0$
 				},
 				serviceRegistry : this.registry,
 				commandService : this.commandService
@@ -779,7 +783,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 						that.commandService.renderCommands(
 							titleWrapper.actionsNode.id,
 							titleWrapper.actionsNode.id,
-							{	"ViewAllLink" : new URITemplate("git/git-log.html#{,resource,params*}?page=1").expand({resource: currentBranch.CommitLocation}),
+							{	"ViewAllLink" : logTemplate.expand({resource: currentBranch.CommitLocation}),
 								"ViewAllLabel" : messages['See Full Log'],
 								"ViewAllTooltip" : messages["See the full log"]
 							}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -920,7 +924,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 
 			var titleLink = document.createElement("a"); //$NON-NLS-0$
 			titleLink.className = "navlinkonpage"; //$NON-NLS-0$
-			titleLink.href = require.toUrl(new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1").expand({resource: commit.Location})); //$NON-NLS-0$
+			titleLink.href = require.toUrl(commitTemplate.expand({resource: commit.Location})); //$NON-NLS-0$
 			titleLink.textContent = commit.Message;
 			detailsView.appendChild(titleLink);
 

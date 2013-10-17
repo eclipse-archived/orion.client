@@ -16,6 +16,9 @@ define(
 				'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/util', 'orion/Deferred', 'orion/webui/tooltip' ],
 		function(require, messages, mSection, mExplorer, URITemplate, PageUtil, i18nUtil, lib, mGlobalCommands, mGitCommands, mGitUtil, Deferred, Tooltip) {
 			var exports = {};
+			
+			var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
+			var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
 
 			exports.GitCommitExplorer = (function() {
 
@@ -132,7 +135,7 @@ define(
 					target : commit,
 					breadcrumbTarget : item,
 					makeBreadcrumbLink : function(seg, location) {
-						seg.href = require.toUrl(new URITemplate("git/git-repository.html#{,resource,params*}").expand({resource: location || ""})); //$NON-NLS-1$ //$NON-NLS-0$
+						seg.href = require.toUrl(repoTemplate.expand({resource: location || ""}));
 					},
 					serviceRegistry : that.registry,
 					commandService : that.commandService
@@ -189,7 +192,7 @@ define(
 						parentCommitName.style.paddingBottom = "15px";
 						var parentCommitLink = document.createElement("a");
 						parentCommitLink.className = "pnavlinkonpage";
-						parentCommitLink.href = require.toUrl(new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1").expand({resource: commit.Parents[0].Location})); //$NON-NLS-1$ //$NON-NLS-0$
+						parentCommitLink.href = require.toUrl(commitTemplate.expand({resource: commit.Parents[0].Location})); //$NON-NLS-1$ //$NON-NLS-0$
 						parentCommitLink.textContent = i18nUtil.formatMessage(messages["parent: 0"], commit.Parents[0].Name);
 						parentCommitName.appendChild(parentCommitLink);
 						detailsView.appendChild(parentCommitName);
