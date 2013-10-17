@@ -152,7 +152,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 			match: "fileSystem1",
 			variableName: "MyLocation"
 		};
-		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{MyLocation}"), serviceRegistry, contentTypesCache);
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{+MyLocation}"), serviceRegistry, contentTypesCache);
 		assert.equal(validator.getURI(item1), item1.AlternateLocation, "variableMatchPosition all");
 		
 		validationProperty.variableMatchPosition = "only";
@@ -175,7 +175,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 			variableName: "MyLocation",
 			variableMatchPosition: "only"
 		};
-		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{MyLocation}"), serviceRegistry, contentTypesCache);
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{+MyLocation}"), serviceRegistry, contentTypesCache);
 		assert.equal(validator.getURI(item1), "fileSystem1", "variableMatchPosition only");
 		validationProperty.variableMatchPosition = "all";
 		assert.equal(validator.getURI(item1), "fileSystem1", "variableMatchPosition uses cached value for same item");
@@ -194,7 +194,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 			variableName: "MyLocation",
 			replacements: [{pattern: "fileSystem\\d*", replacement: "fs"}]
 		};
-		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{MyLocation}?user={User}"), serviceRegistry, contentTypesCache);
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{+MyLocation}?user={+User}"), serviceRegistry, contentTypesCache);
 		assert.equal(validator.getURI(item1), "/fs/foo/bar/Foo?user=John");	
 		
 		validationProperty.replacements = [{pattern: "fileSystem\\d*", replacement: "fs"},{pattern: "/foo"}, {pattern: "/bar", replacement: "*"}];
@@ -208,7 +208,7 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 			source: "AlternateLocation",
 			variableName: "Location"
 		};
-		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{Location}"), serviceRegistry, contentTypesCache);
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{+Location}"), serviceRegistry, contentTypesCache);
 		assert.equal(validator.getURI(item1), item1.Location);		
 	};
 	
