@@ -69,17 +69,25 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.changedItem = function(parent, children) {
-		// An item changed so we do not need to process any URLs
-		this.redisplay(false);
+		if(parent){
+			this.redisplay(true, parent.Location);
+		} else {
+			// An item changed so we do not need to process any URLs
+			this.redisplay(false);
+		}
 	};
 	
-	GitRepositoryExplorer.prototype.redisplay = function(processURLs){
+	GitRepositoryExplorer.prototype.redisplay = function(processURLs, newUrl){
 		// make sure to have this flag
 		if(processURLs === undefined){
 			processURLs = true;
 		}
 	
 		var pageParams = PageUtil.matchResourceParameters();
+		if(newUrl !== undefined && pageParams.resource !== newUrl){
+			window.location = require.toUrl(repoTemplate.expand({resource: newUrl}));
+			return;
+		}
 		if (pageParams.resource) {
 			this.displayRepository(pageParams.resource);
 		} else {
