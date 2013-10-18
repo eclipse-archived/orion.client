@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-		<title>Core client services - orion.core.contenttypes</title>
+		<title>Core client services - orion.core.contentTypeRegistry</title>
 		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
 	</head>
 	<body>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
-				<th style="width: 100%" align="center" colspan="3">orion.core.contenttypes</th>
+				<th style="width: 100%" align="center" colspan="3">orion.core.contentTypeRegistry</th>
 			</tr>
 			<tr>
 				<td style="width: 20%" align="left">
@@ -29,24 +29,23 @@
 				<td style="width: 20%" align="right" valign="top">orion.core.favorite</td>
 			</tr>
 		</table><hr/>
-		<h1 id="orion.core.contenttypes">orion.core.contenttypes</h1>
-		<p>The <tt>orion.core.contenttypes</tt> service provides information about the 
+		<h1 id="orion.core.contentTypeRegistry">orion.core.contentTypeRegistry</h1>
+		<p>The <tt>orion.core.contentTypeRegistry</tt> service provides information about the 
 			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Types</a> that have been registered with Orion.
 		</p>
 		<p>Here is an example usage showing how to query all registered content types and print them to the console:</p>
-		<pre>serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(contentTypes) {
-  for (var i=0; i &lt; contentTypes.length; i++) {
-    var contentType = contentTypes<a href="i">i</a>;
-    console.log("Content Type ID: " + contentType.id + ", " +
+		<pre>serviceRegistry.getService("orion.core.contentTypeRegistry").getContentTypes().then(function(contentTypes) {
+    contentTypes.forEach(function(contentType) {
+        console.log("Content Type ID: " + contentType.id + ", " +
                 "name: " + contentType.name + ", " +
                 "extends from: " + contentType<a href="'extends'">'extends'</a> + ", " +
                 "file extension(s): <a href="&quot;">+ contentType.extension.join(",") + "</a>, " +
                 "filename(s): <a href="&quot;">+ contentType.filename.join(",") + "</a>, " +
                 "image: " + contentType.image + "\n");
-  }
+    });
 });
 </pre>
-		<p>See <tt>orion.core.ContentTypeService</tt> in the Orion client API reference for a complete list of functions available.</p><hr/>
+		<p>See <tt>orion.core.ContentTypeRegistry</tt> in the Orion client API reference for a complete list of functions available.</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
 				<td style="width: 20%" align="left">

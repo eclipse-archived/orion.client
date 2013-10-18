@@ -30,7 +30,7 @@
 			</tr>
 		</table><hr/>
 		<h1 id="orion.edit.validator">orion.edit.validator</h1>
-		<p>An <tt>orion.edit.validator</tt> service provides a function that can check the contents of a file and return a data structure indicating which lines (if any) have problems. The result of this service is used by the Orion UI to create annotations in the ruler beside each problematic line, and also to underline the specific portion of a line where the problem occurs.</p>
+		<p>An <tt>orion.edit.validator</tt> service provides a function that can check the contents of a file and return a data structure indicating where problems are in the document. The result of this service is used by the Orion UI to create annotations in the ruler beside each problematic line, and also to underline the specific portion of the document where the problem occurs.</p>
 		<h2 id="Service_methods_7">Service methods</h2>
 		<p>Implementations of <tt>orion.edit.validator</tt> must define the following function:</p>
 		<dl>
@@ -42,18 +42,36 @@
 				<b>contents</b> <tt>String</tt> The contents of the file being edited.
 			</dd>
 		</dl>
-		<p>Returns an <tt>Object</tt> giving the validation result. The returned object must have a <tt>problems</tt> property whose value is an array giving the problems found in the file. Each problem object must have the properties:</p>
+		<p>Returns an <tt>Object</tt> giving the validation result. The returned object must have a <tt>problems</tt> property whose value is an array giving the problems found in the file. </p>
+		<h3 id="The_problem_object">The problem object</h3>
+		<p>A problem object has the following properties:</p>
 		<dl>
 			<dd><b>description</b> <tt>String</tt> A description of the problem.</dd>
-			<dd><b>line</b> <tt>Number</tt> Gives the line number where the problem was found. (Line numbers begin counting from 1.)</dd>
-			<dd><b>start</b> <tt>Number</tt> Gives the column within the line where the problem begins.</dd>
-			<dd><b>end</b> <tt>Number</tt> 
-				<i>Optional</i> Gives the column within the line where the problems ends. (If omitted, <tt>start+1</tt> is assumed.)
-			</dd>
 			<dd><b>severity</b> <tt>String</tt> 
 				<i>Optional</i> Gives the severity of this problem. The severity affects how the problem is displayed in the Orion UI. Allowed values are <tt>"warning"</tt> and <tt>"error"</tt>. (If omitted, <tt>"error"</tt> is assumed.)
 			</dd>
 		</dl>
+		<p>A problem will have additional properties that give its location within the file. The location can be specified using line+column, or using offsets.</p>
+		<p>For a 
+			<i>line-based</i> problem, you provide a line number and columns:
+		</p>
+		<dl>
+			<dd><b>line</b> <tt>Number</tt> The line number where the problem was found. (Line numbers begin counting from 1.)</dd>
+			<dd><b>start</b> <tt>Number</tt> The column within the line where the problem begins. (Columns begin counting from 1.)</dd>
+			<dd><b>end</b> <tt>Number</tt> 
+				<i>Optional</i> The column within the line where the problems ends. (If omitted, <tt>start+1</tt> is assumed.)
+			</dd>
+		</dl>
+		<p>For a 
+			<i>document-based</i> problem, you provide character offsets:
+		</p>
+		<dl>
+			<dd><b>start</b> <tt>Number</tt> The offset at which the problem begins. (0=first character in the document.)</dd>
+			<dd><b>end</b> <tt>Number</tt> 
+				<i>Optional</i> The offset at which the problem ends. (If omitted, <tt>start+1</tt> is assumed.)
+			</dd>
+		</dl>
+		<p>A document-based problem can span several lines.</p>
 		<h2 id="Service_attributes_7">Service attributes</h2>
 		<p>Implementations of <tt>orion.edit.validator</tt> must define the following attributes:</p>
 		<dl>

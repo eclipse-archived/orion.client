@@ -35,7 +35,7 @@
 			<li>Basic Editor operations (Edit file, save file, ETags)</li>
 			<li>Plugin operations (Install/uninstall plugins)</li>
 			<li>Shell commands for 
-				<a href="Getting-started.html#Developing_a_node.js_application">developing Node.js applications</a>. Type <code>help node</code> in the Shell page to find out more.
+				<a href="#Developing_a_node.js_application">developing Node.js applications</a>. Type <code>help node</code> in the Shell page to find out more.
 			</li>
 			<li>Shell command for running the 
 				<a href="https://npmjs.org/" target="orion_external">npm package manager</a>. (works the same as the usual <code>npm</code> console command).
@@ -69,7 +69,7 @@
 				<br/><code>npm start orion</code> 
 				<ul>
 					<li>If you need to pass 
-						<a href="Getting-started.html#Server_command_line_arguments">command line arguments</a> to the server, run the server.js file directly:
+						<a href="#Server_command_line_arguments">command line arguments</a> to the server, run the server.js file directly:
 						<br/><code>node node_modules/orion/server.js 
 						<a href="arguments">arguments</a></code>
 					</li>
@@ -83,10 +83,12 @@
 		<h3 id="The_orion.conf_file">The orion.conf file</h3>
 		<p>You can pass arguments to the server by editing the <code>orion.conf</code> file. It is found in the directory where you installed Orion (when installing from npm, this is typically <code>node_modules/orion/</code>).</p>
 		<h5 id="Password">Password</h5>
-		<ol>
-			<li>Add a line in your <code>orion.conf</code> file that looks like this:</li>
-		</ol>
+		<p>Add a line in your <code>orion.conf</code> file that looks like this:</p>
 		<pre> pwd=mysecretpassword
+</pre>
+		<h5 id="Node_inspector_web_port">Node inspector web port</h5>
+		<p>Orion on Node runs a node inspector process with the "--web-port" arguments to avoid conflicting port number with others. The default port number is 8900 but you can change it in the conf file. The port number will be represented in the debug URL link like: yourOrionServer:node_inspector_port/debug?port=yourDebugPort</p>
+		<pre> node_inspector_port=myPreferredPortNumber
 </pre>
 		<h5 id="Workspace">Workspace</h5>
 		<p>Edit the <code>orion.conf</code> file and change the <code>workspace</code> option to point to a directory in your user space. If not specified, a default <code>.workspace</code> directory will be created in the Orion install directory. For example:</p>
@@ -123,7 +125,7 @@
 			</dd>
 			<dt><code>-w</code> or <code>-workspace</code></dt>
 			<dd>The target directory for reading and writing files. Will be created if it doesn't exist. Defaults to a subdirectory named <code>.workspace</code> in the server directory. This option can also be set in your 
-				<a href="Getting-started.html#The_orion.conf_file">orion.conf file</a>.
+				<a href="#The_orion.conf_file">orion.conf file</a>.
 			</dd>
 			<dt><code>-dev</code></dt>
 			<dd>Starts the server in development mode. In this mode, some client-side code is not cached by the browser, to ease development.</dd>

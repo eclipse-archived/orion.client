@@ -7,6 +7,7 @@
 		<topic href="WikiDoc/Orion/Node/Getting_started/Getting-started.html#Starting_and_stopping_the_server" label="Starting and stopping the server"></topic>
 		<topic href="WikiDoc/Orion/Node/Getting_started/Getting-started.html#The_orion.conf_file" label="The orion.conf file">
 			<topic href="WikiDoc/Orion/Node/Getting_started/Getting-started.html#Password" label="Password"></topic>
+			<topic href="WikiDoc/Orion/Node/Getting_started/Getting-started.html#Node_inspector_web_port" label="Node inspector web port"></topic>
 			<topic href="WikiDoc/Orion/Node/Getting_started/Getting-started.html#Workspace" label="Workspace"></topic>
 			<topic href="WikiDoc/Orion/Node/Getting_started/Getting-started.html#Making_sure_Orion_can_launch_npm" label="Making sure Orion can launch npm"></topic>
 		</topic>

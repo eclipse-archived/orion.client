@@ -39,7 +39,9 @@
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-outliner.html#Examples_4" label="Examples"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html" label="orion.edit.validator">
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#Service_methods_7" label="Service methods"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#Service_methods_7" label="Service methods">
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#The_problem_object" label="The problem object"></topic>
+		</topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#Service_attributes_7" label="Service attributes"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#Examples_5" label="Examples"></topic>
 	</topic>

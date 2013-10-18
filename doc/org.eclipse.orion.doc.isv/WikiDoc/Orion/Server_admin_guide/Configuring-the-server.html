@@ -61,13 +61,13 @@ ServerAlias *.orion.eclipse.org
 		<pre>keytool -keystore keystore -alias jetty -genkey -keyalg RSA
 </pre>
 		<p>You will be prompted for information about the certificate and passwords for protecting the keystore and keys in it. Once it is done a file named <code>keystore</code> is created in the current working directory and you may proceed to 
-			<a href="Configuring-the-server.html#Setting_the_Orion_configuration">Setting the Orion configuration</a>
+			<a href="#Setting_the_Orion_configuration">Setting the Orion configuration</a>
 		</p>
 		<h3 id="Getting_the_certificate_from_a_known_authority">Getting the certificate from a known authority</h3>
 		<p>The keys and certificate generated in the previous step are sufficient to run Orion over https however will not be trusted by the browser what will end up with a prompt on accessing Orion pages. You may request a well known certificate authority like Thawte, VISA, ValiCert, Verisign etc. to sign your key and certificate.</p>
 		<h3 id="Setting_the_Orion_configuration">Setting the Orion configuration</h3>
 		<p>Now set the following properties in the 
-			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>:
+			<a href="#Server_configuration_file">server configuration file</a>:
 		</p>
 		<pre>jetty.https.enabled = true
 jetty.https.port = 8443
@@ -78,7 +78,7 @@ jetty.ssl.protocol = SSLv3
 </pre>
 		<h2 id="Configuring_paths_where_users_can_store_files">Configuring paths where users can store files</h2>
 		<p>By default all files created by users are stored in the Orion "server workspace". This is the location specified by the "-data" argument when launching the server. By default this workspace is stored at eclipse/serverworkspace/. To allow users to link files in other locations to their workspace, the <tt>orion.file.allowedPaths</tt> property can be set in the 
-			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>. The property value is a comma-separated list of absolute file system paths. Users will be allowed to link to and edit files in any of those locations. This line in the server configuration file will enable storing of files in <tt>/home/orion</tt> on the server, or in any sub-directory thereof.
+			<a href="#Server_configuration_file">server configuration file</a>. The property value is a comma-separated list of absolute file system paths. Users will be allowed to link to and edit files in any of those locations. This line in the server configuration file will enable storing of files in <tt>/home/orion</tt> on the server, or in any sub-directory thereof.
 		</p>
 		<pre>orion.file.allowedPaths=/home/orion
 </pre>
@@ -87,7 +87,7 @@ jetty.ssl.protocol = SSLv3
 </pre>
 		<h2 id="Configuring_project_layout">Configuring project layout</h2>
 		<p>By default, projects are stored in the server workspace in a flat layout at the root of the workspace directory. This layout works well for single-user or small team installs. However in a large installation with hundreds or thousands of users, you may hit limits on the number of entries that can be stored in a directory. The layout can be changed to a hierarchy tree of projects organized by user id with the following property in the 
-			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>:
+			<a href="#Server_configuration_file">server configuration file</a>:
 		</p>
 		<pre>orion.file.layout=userTree
 </pre>
@@ -96,7 +96,7 @@ jetty.ssl.protocol = SSLv3
 </pre>
 		<h2 id="Authentication_type">Authentication type</h2>
 		<p>To configure the kind of authentication used by the server, set the <tt>orion.auth.name</tt> property in the 
-			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>. For example, the following line will configure the server to use simple form-based authentication:
+			<a href="#Server_configuration_file">server configuration file</a>. For example, the following line will configure the server to use simple form-based authentication:
 		</p>
 		<pre> orion.auth.name=FORM+OpenID
 </pre>
@@ -130,13 +130,13 @@ jetty.ssl.protocol = SSLv3
 </pre>
 		<h2 id="Enabling_anonymous_read_access">Enabling anonymous read access</h2>
 		<p>By default, each user can only read and write projects they created. When self-hosting or in small team installations, it may be useful to enable users to access each other's projects in a read-only fashion. This can be done by setting the following property in the 
-			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>:
+			<a href="#Server_configuration_file">server configuration file</a>:
 		</p>
 		<pre>orion.file.anonymous.read=true
 </pre>
 		<h2 id="Email_configuration">Email configuration</h2>
 		<p>Orion allows to users to add their email account in profile, that will be later used to send email notifications, for instance resetting the password. This option is however only available if email and SMTP server configuration is present in the 
-			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>:
+			<a href="#Server_configuration_file">server configuration file</a>:
 		</p>
 		<p>SMTP host that will send email:</p>
 		<pre>mail.smtp.host=<a href="smtp_host">smtp_host</a>
@@ -165,7 +165,7 @@ jetty.ssl.protocol = SSLv3
 		<p>The HTML fragment is defined as bottomHTMLFragment in <tt>org.eclipse.orion.client.core/static/js/globalCommands.js</tt>. The div containing this fragment is assigned a class "footer" and this class is defined in ide.css</p>
 		<h2 id="Configuring_virtual_host_names_for_launching_sites">Configuring virtual host names for launching sites</h2>
 		<p>In Orion, users can select files and folders from their workspace and launch them as a stand-alone website. For this to work, you should tell the Orion server what virtual host names will be used to host sites. This is done by setting the <tt>orion.site.virtualHosts</tt> property in the 
-			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>:
+			<a href="#Server_configuration_file">server configuration file</a>:
 		</p>
 		<pre>orion.site.virtualHosts=*.planetorion.org
 </pre>
@@ -181,7 +181,7 @@ jetty.ssl.protocol = SSLv3
 			<b>must</b> be aliases for the Orion server. Orion will listen to incoming requests for these hosts (based on the HTTP "Host" header), and serve up the user's files as necessary.
 		</p>
 		<p>In a multi-user environment, you'll most likely want to supply a domain wildcard (or some externally-reachable IP address) that resolves to your server. By contrast, if you're running the Orion server for yourself on your local machine, you can simply pass a list of aliases for localhost (see 
-			<a href="Configuring-the-server.html#Hosting_locally">Hosting locally</a> below).
+			<a href="#Hosting_locally">Hosting locally</a> below).
 		</p>
 		<h4 id="Defaults">Defaults</h4>
 		<p>If you don't supply the <tt>orion.site.virtualHosts</tt> property, Orion will use a default setting. On Windows and Linux, the default assigns up to 16 addresses in the range 127.0.0.2 to 127.0.0.254. On Mac OS X, there are no default addresses, so you will receive an error ("No more hosts available") when you attempt to start a site.</p>
@@ -191,7 +191,7 @@ jetty.ssl.protocol = SSLv3
 			<dd>Makes 1 host name, <code>site.myhost.net</code>, available for allocation as a virtual host name.<p></p></dd>
 			<dt><code>orion.site.virtualHosts=127.0.0.2,127.0.0.3</code> </dt>
 			<dd>Makes the 2 IP addresses available as virtual host names. Since they happen to be loopback addresses, any hosted site assigned to them will only be reachable from the local machine. (See 
-				<a href="Configuring-the-server.html#Hosting_locally">Hosting locally</a>).<p></p>
+				<a href="#Hosting_locally">Hosting locally</a>).<p></p>
 			</dd>
 			<dt><code>orion.site.virtualHosts=*.myhost.net</code> </dt>
 			<dd>Makes all of <code>*.myhost.net</code> available for allocation. Hosted sites will be assigned to subdomains, for example <code>site1.myhost.net</code>, <code>site2.myhost.net</code>, etc.<p></p></dd>
