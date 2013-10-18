@@ -112,7 +112,7 @@
 .git-sprite-remote{ background-image: url(../images/repository.png); width: 16px; height: 16px; } 
 .git-sprite-removal{ background-image: url(../images/git-remove.png); width: 16px; height: 16px; } 
 .git-sprite-repository{ background-image: url(../images/repository.png); width: 16px; height: 16px; } 
-.git-sprite-reset{ background-position: 0 -342px; width: 16px; height: 16px; } 
+.git-sprite-reset{ background-image: url(../images/git-reset.png); width: 16px; height: 16px; } 
 .git-sprite-stage{background-image: url(../images/git-stage.png); width: 16px; height: 16px; } 
 .git-sprite-tag{ background-image: url(../images/tag.png); width: 16px; height: 16px; } 
 .git-sprite-unstage{ background-image: url(../images/git-unstage.png); width: 16px; height: 16px; }
