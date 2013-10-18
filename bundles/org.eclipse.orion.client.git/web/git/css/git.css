@@ -46,23 +46,15 @@
 }
 
 .gitRepoItem {
-	background: url(../images/repository.gif);
-}
-
-.gitRemotesItem {
-	background: url(../images/remotes.gif);
-}
-
-.gitBranchesItem {
-	background: url(../images/branches.gif);
+	background: url(../images/repository.png);
 }
 
 .gitBranchItem {
-	background: url(../images/branch.gif);
+	background: url(../images/branch.png);
 }
 
 .gitRemoteItem {
-	background: url(../images/remote.gif);
+	background: url(../images/remote.png);
 }
 
 .gitDefaultItem {
