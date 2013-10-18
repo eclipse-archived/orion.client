@@ -2150,7 +2150,7 @@ var exports = {};
 
 											fileClient.write(repoJson.Children[0].ContentLocation + '.git/.projectInfo', pDescContent).then(
 												function(){
-													var editLocation = editTemplate.expand({resource: repoJson.Children[0].ContentLocation});
+													var editLocation = require.toUrl(editTemplate.expand({resource: repoJson.Children[0].ContentLocation}));
 													window.location = editLocation;
 												}
 											);
@@ -2174,12 +2174,12 @@ var exports = {};
 									gitService.getGitClone(p.Git.CloneLocation).then(
 										function(repoJson){
 											if (repoJson.Children[0].GitUrl === item.url){
-												window.location = editTemplate.expand({
+												window.location = require.toUrl(editTemplate.expand({
 													resource: "",
 													params: {
 														navigate: repoJson.Children[0].ContentLocation + "?depth=1" //$NON-NLS-0$
 													}
-												});
+												}));
 											} else {
 												console.info("Folder project is used");
 											}
