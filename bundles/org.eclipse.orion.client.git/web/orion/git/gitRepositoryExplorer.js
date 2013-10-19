@@ -69,25 +69,17 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.changedItem = function(parent, children) {
-		if(parent){
-			this.redisplay(true, parent.Location);
-		} else {
-			// An item changed so we do not need to process any URLs
-			this.redisplay(false);
-		}
+		// An item changed so we do not need to process any URLs
+		this.redisplay(false);
 	};
 	
-	GitRepositoryExplorer.prototype.redisplay = function(processURLs, newUrl){
+	GitRepositoryExplorer.prototype.redisplay = function(processURLs){
 		// make sure to have this flag
 		if(processURLs === undefined){
 			processURLs = true;
 		}
 	
 		var pageParams = PageUtil.matchResourceParameters();
-		if(newUrl !== undefined && pageParams.resource !== newUrl){
-			window.location = require.toUrl(repoTemplate.expand({resource: newUrl}));
-			return;
-		}
 		if (pageParams.resource) {
 			this.displayRepository(pageParams.resource);
 		} else {
@@ -141,6 +133,9 @@ exports.GitRepositoryExplorer = (function() {
 				if(pageNav){
 					lib.empty(pageNav);
 					that.commandService.renderCommands(that.pageNavId, pageNav, resp, that, "button");
+				}
+				if (!resp.Children) {
+					return;
 				}
 				
 				if (resp.Children.length === 0) {
@@ -382,6 +377,9 @@ exports.GitRepositoryExplorer = (function() {
 		
 			initialRender : function(){
 				var tableNode = lib.node('table');	 //$NON-NLS-0$
+				if (!tableNode) {
+					return;
+				}
 				lib.empty(tableNode);
 				
 				if(!repositories || repositories.length === 0){
@@ -487,7 +485,11 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.renderRepository = function(repository, index, length, mode, links){
-		lib.node("location"+index).textContent = messages["location: "] + repository.Content.Path;
+		var locationnode = lib.node("location"+index);
+		if (!locationnode) {
+			return;
+		}
+		locationnode.textContent = messages["location: "] + repository.Content.Path;
 		var status = repository.Status;
 		
 		if (mode === "full"){ //$NON-NLS-0$
@@ -1055,9 +1057,12 @@ exports.GitRepositoryExplorer = (function() {
 				var tagRenderer = {
 					initialRender : function(){
 						progress.done();
-						
-						lib.empty(lib.node("tagNode"));
-						lib.node("tagNode").appendChild(tagsContainer);
+						var tagNode = lib.node("tagNode");
+						if (!tagNode) {
+							return;
+						}
+						lib.empty(tagNode);
+						tagNode.appendChild(tagsContainer);
 						
 						that.commandService.destroy(titleWrapper.actionsNode.id);
 						

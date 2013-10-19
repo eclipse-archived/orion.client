@@ -2495,7 +2495,7 @@ var exports = {};
 						progress.progress(gitService.removeGitRepository(item.Location), "Removing repository " + item.Name).then(
 							function(jsonData){
 								if(explorer.changedItem){
-									explorer.changedItem({Location: ""});
+									window.location = require.toUrl(repoTemplate.expand({})); //reset the location
 								}
 							},
 							displayErrorOnStatus);
