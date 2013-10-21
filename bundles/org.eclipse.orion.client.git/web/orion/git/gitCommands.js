@@ -2101,7 +2101,14 @@ var exports = {};
 		});
 		commandService.addCommand(addConfigEntryCommand);
 		
-		var editConfigParameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('value', 'text', messages['Value:'])]); //$NON-NLS-1$ //$NON-NLS-0$
+		var editConfigParameters = new mCommandRegistry.ParametersDescription([], null, function(commandInvocation) {
+			var items = commandInvocation.items;
+			var val;
+			if(items) {
+				val = items.Value;
+			}
+			return [new mCommandRegistry.CommandParameter('value', 'text', messages['Value:'], val)]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		});
 		
 		var editConfigEntryCommand = new mCommands.Command({
 			name: messages["Edit"],
