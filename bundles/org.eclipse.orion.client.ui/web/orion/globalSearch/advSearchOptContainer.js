@@ -98,18 +98,24 @@ define([
 	        if (this._searchParams.resource.length > 0) {
 	            this._serviceRegistry.getService("orion.page.progress").progress(this.fileClient.read(this._searchParams.resource, true), "Getting file metadata " + this._searchParams.resource).then( //$NON-NLS-1$ //$NON-NLS-0$
 	            function(meta) {
-	                var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
+	                var parentName = meta.Parents ? mSearchUtils.fullPathNameByMeta(meta.Parents) : "";
 	                this._locationName = parentName.length === 0 ? meta.Name : parentName + "/" + meta.Name; //$NON-NLS-0$
-					this._searchNameBox.value = this._getDefaultSaveName();
+		            if(this._searchNameBox){
+						this._searchNameBox.value = this._getDefaultSaveName();
+					}
 	            }.bind(this),
 	
 	            function(error) {
 	                this._locationName = "root"; //$NON-NLS-0$
-					this._searchNameBox.value = this._getDefaultSaveName();
+		            if(this._searchNameBox){
+						this._searchNameBox.value = this._getDefaultSaveName();
+					}
 	            }.bind(this));
 	        } else {
 	            this._locationName = "root"; //$NON-NLS-0$
-				this._searchNameBox.value = this._getDefaultSaveName();
+	            if(this._searchNameBox){
+					this._searchNameBox.value = this._getDefaultSaveName();
+				}
 	        }
 	        //this._searchHelper = mSearchUtils.generateSearchHelper(searchParams);
 			this._loadSearchParams();
@@ -185,7 +191,7 @@ define([
 	    },
 	
 	    _getDefaultSaveName: function() {
-	        if (this._searchBox.value) {
+	        if (this._searchBox && this._searchBox.value) {
 	            var qName = "\'" + this._searchBox.value + "\' in "; //$NON-NLS-1$ //$NON-NLS-0$
 	            var locName = "root"; //$NON-NLS-0$
 	            if(this._locationName){

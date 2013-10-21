@@ -1468,6 +1468,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		    this.parentNode.textContent = "";
 		    var textBold = _createElement('b', null, null, this.parentNode); //$NON-NLS-1$ //$NON-NLS-0$
 		    _place(document.createTextNode(message), textBold, "only"); //$NON-NLS-0$
+            this.reportStatus("");
 		    return;
 		} 
         var that = this;
