@@ -199,6 +199,10 @@ define([
 
 	}
 
+	function continueOnError(error) {
+		return error;
+	}
+
 	// Related links menu management. The related menu is reused as content changes. If the menu becomes empty, we hide the dropdown.
 	var pageItem;
 	var exclusions = [];
@@ -230,18 +234,46 @@ define([
 			});
 		}
 
+		var alternateItemDeferred;
+		/**
+		 * Calculates the CommandInvocation for a given Command.
+		 * @returns {orion.Promise} A promise resolving to a 2-element array: [Command, CommandInvocation]
+		 */
+		function enhanceCommand(command) {
+			if (command) {
+				if (!command.visibleWhen || command.visibleWhen(item)) {
+					var invocation = new mCommands.CommandInvocation(item, item, null, command, commandRegistry);
+					return new Deferred().resolve([command, invocation]);
+				} else if (typeof alternateItem === "function") { //$NON-NLS-0$
+					if (!alternateItemDeferred) {
+						alternateItemDeferred = alternateItem();
+					}
+					return Deferred.when(alternateItemDeferred, function (newItem) {
+						if (newItem && (item === pageItem)) {
+							// there is an alternate, and it still applies to the current page target
+							if (!command.visibleWhen || command.visibleWhen(newItem)) {
+								var invocation = new mCommands.CommandInvocation(newItem, newItem, null, command, commandRegistry);
+								return [command, invocation];
+							}
+						}
+					});
+				}
+			}
+			return new Deferred().resolve();
+		}
+
 		var contributedLinks = serviceRegistry && serviceRegistry.getServiceReferences("orion.page.link.related"); //$NON-NLS-0$
 		if (!contributedLinks || contributedLinks.length === 0) {
 			return;
 		}
 
 		Deferred.when(getContentTypes(), function () {
-			var alternateItemDeferred;
 			if (!customGlobalCommands.beforeGenerateRelatedLinks.apply(this, globalArguments)) {
 				return;
 			}
 
-			var deferreds = [];
+			// Array of promises, each resolving to either a Command, or a commandOptions object.
+			var deferredCommandItems = [];
 
 			// assemble the related links
 			for (var i = 0; i < contributedLinks.length; i++) {
@@ -252,28 +284,6 @@ define([
 					info[propertyNames[j]] = contributedLinks[i].getProperty(propertyNames[j]);
 				}
 				if (info.id) {
-					function enhanceCommand(command) {
-						if (command) {
-							if (!command.visibleWhen || command.visibleWhen(item)) {
-								var invocation = new mCommands.CommandInvocation(item, item, null, command, commandRegistry);
-								customGlobalCommands.addRelatedLinkCommand(command, invocation);
-							} else if (typeof alternateItem === "function") { //$NON-NLS-0$
-								if (!alternateItemDeferred) {
-									alternateItemDeferred = alternateItem();
-								}
-								Deferred.when(alternateItemDeferred, function (newItem) {
-									if (newItem && (item === pageItem)) {
-										// there is an alternate, and it still applies to the current page target
-										if (!command.visibleWhen || command.visibleWhen(newItem)) {
-											customGlobalCommands.addRelatedLinkCommand(command, new mCommands.CommandInvocation(newItem, newItem, null,
-												command, commandRegistry));
-										}
-									}
-								});
-							}
-						}
-					}
-
 					var command = null;
 					var deferred = null;
 					// exclude anything in the list of exclusions
@@ -282,20 +292,14 @@ define([
 						// First see if we have a uriTemplate and name, which is enough to build a command internally.
 						if (((info.nls && info.nameKey) || info.name) && info.uriTemplate) {
 							deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true);
-							deferreds.push(deferred);
-							deferred.then(function (commandOptions) {
-								var command = new mCommands.Command(commandOptions);
-								enhanceCommand(command);
-							});
+							deferredCommandItems.push(deferred);
 							continue;
 						}
 						// If we couldn't compose one, see if one is already registered.
 						if (!command) {
 							command = commandRegistry.findCommand(info.id);
-							if (command) {
-								enhanceCommand(command);
-								continue;
-							}
+							deferredCommandItems.push(new Deferred().resolve(command));
+							continue;
 						}
 						// If it's not registered look for it in orion.navigate.command and create it
 						if (!command) {
@@ -310,11 +314,7 @@ define([
 									}
 									deferred = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry,
 										contentTypesCache, true);
-									deferreds.push(deferred);
-									deferred.then(function (commandOptions) {
-										command = new mCommands.Command(commandOptions);
-										enhanceCommand(command);
-									});
+									deferredCommandItems.push(deferred);
 									break;
 								}
 							}
@@ -323,10 +323,20 @@ define([
 					}
 				}
 			}
-			Deferred.all(deferreds, function (error) {
-				return error;
-			}).then(function () {
-				customGlobalCommands.afterGenerateRelatedLinks.apply(this, globalArguments);
+			Deferred.all(deferredCommandItems, continueOnError).then(function(items) {
+				var commands = items.map(function(item) {
+					return (item instanceof mCommands.Command) ? item : new mCommands.Command(item);
+				}).sort(function(a, b) {
+					return a.name.localeCompare(b.name);
+				});
+				return Deferred.all(commands.map(enhanceCommand), continueOnError).then(function(enhanced) {
+					enhanced.forEach(function(array) {
+						if (array) {
+							customGlobalCommands.addRelatedLinkCommand(array[0], array[1]);
+						}
+					});
+					customGlobalCommands.afterGenerateRelatedLinks.apply(this, globalArguments);
+				});
 			});
 		});
 	}
