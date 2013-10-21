@@ -2904,7 +2904,7 @@ var exports = {};
 
 		var checkoutCommand = new mCommands.Command({
 			name: messages['Checkout'],
-			tooltip: messages["Checkout files, discarding all changes"],
+			tooltip: messages["Checkout all the selected files, discarding all changes"],
 			imageClass: "git-sprite-checkout", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id: "eclipse.orion.git.checkoutCommand", //$NON-NLS-0$
