@@ -2496,6 +2496,7 @@ var exports = {};
 							function(jsonData){
 								if(explorer.changedItem){
 									window.location = require.toUrl(repoTemplate.expand({})); //reset the location
+									explorer.changedItem();
 								}
 							},
 							displayErrorOnStatus);
