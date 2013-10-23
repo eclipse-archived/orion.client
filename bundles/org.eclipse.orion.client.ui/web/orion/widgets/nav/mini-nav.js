@@ -228,10 +228,54 @@ define([
 			};
 			
 			if (this.fileInCurrentTree(fileMetadata)) {
-				func();
+				var outOfSync = this.outOfSync(fileMetadata);
+				if (outOfSync) {
+					this.changedItem(outOfSync, true).then(func);
+				} else {
+					func();
+				}
 			} else if (!PageUtil.matchResourceParameters().navigate) {
 				this.loadParentOf(fileMetadata, true /* reveal from the top */).then(func);
 			}
+		},
+		outOfSync: function(fileMetadata) {
+			// Determines whether the cached children is out of date since it does not contain the specified file/folder.
+			var treeRoot = this.treeRoot;
+			var metadatas = [];
+			if (treeRoot.Parents) {
+				if (fileMetadata && fileMetadata.Parents && treeRoot && treeRoot.ChildrenLocation) {
+					for (var i=0; i<fileMetadata.Parents.length; i++) {
+						if (fileMetadata.Parents[i].ChildrenLocation === treeRoot.ChildrenLocation) {
+							break;
+						}
+						metadatas.push(fileMetadata.Parents[i]);
+					}
+				}
+			} else {
+				metadatas = fileMetadata.Parents.slice(0);
+			}
+			metadatas.reverse();
+			metadatas.push(fileMetadata);
+			var temp = treeRoot;
+			for (var j=0; j<metadatas.length && temp; j++) {
+				var children = temp.children;
+				if (children) {
+					var found = false;
+					for (var k=0; k<children.length; k++) {
+						if (children[k].Location === metadatas[j].Location) {
+							temp = children[k];
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						return temp;
+					}
+				} else {
+					break;
+				}
+			}
+			return null;
 		},
 		scopeUp: function() {
 			var root = this.treeRoot;
