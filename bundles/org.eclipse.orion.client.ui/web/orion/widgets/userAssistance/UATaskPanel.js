@@ -43,11 +43,7 @@ define(['orion/webui/littlelib'], function(lib) {
 				this.backdrop.className = 'UAModalBackground';
 				document.body.appendChild( this.backdrop );
 				document.body.appendChild( this.container );
-				
-				lib.addAutoDismiss([this.container], function () {			
-					this.destroy();
-				}.bind(this));
-				
+				lib.addAutoDismiss([this.container], this.destroy.bind(this));
 			}else{
 				anchor.appendChild( this.taskPanel );
 			}		

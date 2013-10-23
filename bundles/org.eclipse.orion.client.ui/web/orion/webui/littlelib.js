@@ -232,7 +232,7 @@ define([], function() {
 					var node;
 					var shouldDismiss = exclusions.every(function(n) {
 						if (n) {
-							inDocument = document.compareDocumentPosition(document, n) !== 1; // DOCUMENT_POSITION_DISCONNECTED = 0x01;
+							inDocument = document.body.contains(n);
 							if (inDocument && contains(n, event.target)) {
 								node = n;
 								return false;
@@ -248,12 +248,16 @@ define([], function() {
 								console.error(e && e.message);
 							}
 						}
-						// might have been removed as part of the dismiss processing
-						inDocument = document.compareDocumentPosition(document, node) !== 1; // DOCUMENT_POSITION_DISCONNECTED = 0x01;
+						
+						// check if exclusion nodes have been removed
+						var exclusionNodesInDocument = exclusions.some(function(n) {
+							return document.body.contains(n);
+						});
+						if (!exclusionNodesInDocument) {
+							continue;
+						}
 					}
-					if (inDocument) {
-						stillInDocument.push(autoDismissNodes[i]);
-					}
+					stillInDocument.push(autoDismissNodes[i]);
 				}
 				autoDismissNodes = stillInDocument;
 			}, true); //$NON-NLS-0$
