@@ -3,6 +3,7 @@
 */
 
 @import "./progress.css";
+@import "./assistance.css";
 
 html {
   cursor: default;

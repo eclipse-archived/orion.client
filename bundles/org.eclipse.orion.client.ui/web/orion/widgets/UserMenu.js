@@ -11,7 +11,8 @@
 
 /*global define window document localStorage*/
 
-define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', 'orion/PageLinks'], function(messages, require, lib, PageLinks) {
+define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', 'orion/PageLinks' ,
+	'orion/widgets/userAssistance/UATaskPanel', 'orion/webui/dialog'], function(messages, require, lib, PageLinks, UATaskPanel, dialog) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -166,6 +167,12 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 					keyAssist.appendChild(element);
 					getCategory(0).appendChild(keyAssist);
 				}
+				
+				var getStarted = document.createElement('li');
+				var startElement = this._makeMenuItem( "Getting Started", this.getStartedDialog);
+				getStarted.appendChild(startElement);
+				getCategory(0).appendChild(getStarted);
+				
 
 				// Add categories to _dropdownNode
 				var _self = this;
@@ -191,6 +198,10 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 					}
 				}
 			}.bind(this));
+		},
+		
+		getStartedDialog: function(){
+			var taskPanel = new UATaskPanel( null, true );
 		},
 		
 		setKeyAssist: function(keyAssistFunction){
