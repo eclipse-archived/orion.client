@@ -9,7 +9,6 @@
     -moz-box-direction: normal;
     -webkit-box-orient: horizontal;
     -moz-box-orient: horizontal;
-    -webkit-flex-direction: column;
     -ms-flex-direction: column;
     flex-direction: column;
 	
@@ -89,12 +88,11 @@ UAItemBackground{
 	overflow:hidden;
 	margin:20px;
 	flex-direction: column;
-	/* border: 1px solid #e1e1e1;  #FBC992; */
+	-webkit-flex-direction: column;
+	-moz-flex-direction: column;
  	padding: 40px;
 	border-radius: 4px;
-	background: white;/* #FEF4E9; */
-/*	border: 1px solid #EEE; */
-/*	transition: all 1.0s ease-in-out; */
+	background: white;
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33);
 	transition: opacity .25s ease-in-out;
    -moz-transition: opacity .25s ease-in-out;
@@ -117,6 +115,7 @@ UAItemBackground{
 	overflow:hidden;
 	margin:20px;
 	flex-direction: column;
+	-webkit-flex-direction: column;
 	/* border: 1px solid #e1e1e1;  #FBC992; */
  	padding: 40px;
 	border-radius: 4px;
@@ -128,6 +127,7 @@ UAItemBackground{
    -moz-transition: opacity .25s ease-in-out;
    -webkit-transition: opacity .25s ease-in-out;
    -webkit-box-orient: vertical;
+   text-align: center;
 }
 
 .UAContainer-switches{
@@ -189,7 +189,6 @@ UAItemBackground{
     display: -webkit-flex;
 	display: flex;
   	flex-direction: column;
-  	-webkit-flex-direction: column;
   	-ms-flex-direction: column;
   	flex-direction: column;
 }
@@ -231,6 +230,9 @@ UAItemBackground{
     -o-transition: opacity 0.4s ease-in;
      opacity: 0;
      border: 1px solid #ddd;
+     margin:20px;
+     margin-left:0;
+     margin-right:0;
 }
 
 .UAContainer-switch-body{
@@ -280,6 +282,7 @@ UAItemBackground{
     display: -ms-flexbox;
     display: -webkit-flex;
 	-webkit-box-pack: center;
+	text-align: center;
 }
 
 .UAIcon-learn {
@@ -314,6 +317,8 @@ UAItemBackground{
 	font-weight: bold;
 	font-size:1.6em;
 	display: block;
+	text-align:center;
+	width:100%;
 }
 
 .UALabel-live{
@@ -329,6 +334,8 @@ UAItemBackground{
 	font-weight: bold;
 	font-size:1.6em;
 	display: block;
+	text-align:center;
+	width:100%;
 }
 
 .UALearnLabel{
