@@ -1,44 +1,39 @@
 .UAContainer {
-	display: -webkit-box;
-    display: -moz-box;
-    display: -ms-flexbox;
-    display: -webkit-flex;
-	display: flex;
-	
-	-webkit-box-direction: normal;
-    -moz-box-direction: normal;
-    -webkit-box-orient: horizontal;
-    -moz-box-orient: horizontal;
-    -ms-flex-direction: column;
-    flex-direction: column;
 	
 	height:440px;
 	width:600px;
 	padding:10px;
 	border-radius:3px;
-	
-	-webkit-box-align: center; 
-	-moz-box-align: center; 
-	-ms-flex-align: center; 
-	-webkit-align-items: center; 
-	align-items: center;  
-	-webkit-box-pack: center; 
-	-moz-box-pack: center;  
-	-ms-flex-pack: center;  
-	-webkit-justify-content: center; 
-	justify-content: center;
-	
-	display: -webkit-flex;
-	display: -moz-flex;
-	display: flex;
-	
-	-webkit-flex-flow: row wrap;
-	-moz-flex-flow: row wrap;
-	-webkit-box-orient: vertical;
-	
-	flex-flow: row wrap;
 	font-family:sans-serif;
 	color:#999;
+	
+	display: flex;
+	flex-direction: column;
+	align-items: center; 
+	justify-content: center;
+	flex-flow: row wrap;	
+	
+	display: -webkit-box;
+    display: -webkit-flex;
+    -webkit-box-direction: normal;
+    -webkit-box-align: center; 
+	-webkit-box-pack: center; 
+	-webkit-justify-content: center;
+	-webkit-align-items: center; 
+	-webkit-flex-flow: row wrap;
+	-webkit-box-orient: vertical;
+    
+    display: -moz-box;
+    display: -moz-flex;
+    -moz-box-direction: normal;
+	-moz-box-orient: horizontal;
+	-moz-box-align: center; 
+	-moz-flex-flow: row wrap;	
+	
+	display: -ms-flexbox;
+	-ms-flex-direction: column;
+	-ms-flex-pack: center;
+	-ms-flex-align: center;
 }
 
 .UAModalBackground{
@@ -90,6 +85,7 @@ UAItemBackground{
 	flex-direction: column;
 	-webkit-flex-direction: column;
 	-moz-flex-direction: column;
+	-ms-flex-direction: column;
  	padding: 40px;
 	border-radius: 4px;
 	background: white;
@@ -116,12 +112,10 @@ UAItemBackground{
 	margin:20px;
 	flex-direction: column;
 	-webkit-flex-direction: column;
-	/* border: 1px solid #e1e1e1;  #FBC992; */
+	-ms-flex-direction: column;
  	padding: 40px;
 	border-radius: 4px;
 	background: #dddddd;/* #FEF4E9; */
-/*	border: 1px solid #EEE; */
-/*	transition: all 1.0s ease-in-out; */
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33);
 	transition: opacity .25s ease-in-out;
    -moz-transition: opacity .25s ease-in-out;
@@ -199,7 +193,7 @@ UAItemBackground{
 
 .UAContainer-body {
     flex-direction: row;
-    flex: 1;
+    -ms-flex-direction: row;
 }
 
 .UAContainer-switchbody {
