@@ -132,7 +132,7 @@ define([
 				link.appendChild(document.createTextNode(item.Name));
 			}
 			var foundEditor = false;
-			var href = uriTemplate.expand({resource: item.Location});
+			var href = item.Location;
 			if (uriParams && typeof uriParams === "object") { //$NON-NLS-0$
 				item.params = {};
 				objects.mixin(item.params, uriParams);
