@@ -295,31 +295,27 @@ define([
 							deferredCommandItems.push(deferred);
 							continue;
 						}
-						// If we couldn't compose one, see if one is already registered.
-						if (!command) {
-							command = commandRegistry.findCommand(info.id);
+						// We couldn't compose one, so see if one is already registered.
+						if ((command = commandRegistry.findCommand(info.id))) {
 							deferredCommandItems.push(new Deferred().resolve(command));
 							continue;
 						}
-						// If it's not registered look for it in orion.navigate.command and create it
-						if (!command) {
-							var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
-							for (j = 0; j < commandsReferences.length; j++) {
-								var id = commandsReferences[j].getProperty("id"); //$NON-NLS-0$
-								if (id === info.id) {
-									var navInfo = {};
-									propertyNames = commandsReferences[j].getPropertyKeys();
-									for (var k = 0; k < propertyNames.length; k++) {
-										navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
-									}
-									deferred = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry,
-										contentTypesCache, true);
-									deferredCommandItems.push(deferred);
-									break;
+						// It's not registered, so look for it in orion.navigate.command and create it
+						var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
+						for (j = 0; j < commandsReferences.length; j++) {
+							var id = commandsReferences[j].getProperty("id"); //$NON-NLS-0$
+							if (id === info.id) {
+								var navInfo = {};
+								propertyNames = commandsReferences[j].getPropertyKeys();
+								for (var k = 0; k < propertyNames.length; k++) {
+									navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
 								}
+								deferred = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry,
+									contentTypesCache, true);
+								deferredCommandItems.push(deferred);
+								break;
 							}
 						}
-
 					}
 				}
 			}
