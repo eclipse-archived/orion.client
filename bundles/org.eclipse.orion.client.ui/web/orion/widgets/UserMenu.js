@@ -11,8 +11,14 @@
 
 /*global define window document localStorage*/
 
-define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', 'orion/PageLinks' ,
-	'orion/widgets/userAssistance/UATaskPanel', 'orion/webui/dialog'], function(messages, require, lib, PageLinks, UATaskPanel, dialog) {
+define([
+	'i18n!orion/widgets/nls/messages',
+	'require',
+	'orion/webui/littlelib',
+	'orion/PageLinks',
+	'orion/widgets/userAssistance/UATaskPanel',
+	'orion/webui/dialog'
+], function(messages, require, lib, PageLinks, UATaskPanel, dialog) {
 	
 	function UserMenu(options) {
 		this._displaySignOut = true;
@@ -121,7 +127,8 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 				}
 				return categories[number];
 			}
-			PageLinks.getPageLinksInfo(this._serviceRegistry, "orion.page.link.user").then(function(linkInfos) { //$NON-NLS-0$
+			var serviceRegistry = this._serviceRegistry;
+			PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link.user").then(function(linkInfos) { //$NON-NLS-0$
 				if(this._dropdown) {
 					this._dropdown.empty();
 				} else if(this._dropdownNode) {
@@ -167,12 +174,16 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 					keyAssist.appendChild(element);
 					getCategory(0).appendChild(keyAssist);
 				}
-				
-				var getStarted = document.createElement('li');
-				var startElement = this._makeMenuItem( "Getting Started", this.getStartedDialog);
-				getStarted.appendChild(startElement);
-				getCategory(0).appendChild(getStarted);
-				
+
+				// TODO need i18n on this eventually
+				var getStartedServiceRef = serviceRegistry.getServiceReferences("orion.page.getstarted")[0]; //$NON-NLS-0$
+				if (getStartedServiceRef) {
+					var data = getStartedServiceRef.getProperty("data"); //$NON-NLS-0$
+					var getStarted = document.createElement('li');
+					var startElement = this._makeMenuItem("Getting Started", this.getStartedDialog.bind(this, data));
+					getStarted.appendChild(startElement);
+					getCategory(0).appendChild(getStarted);
+				}
 
 				// Add categories to _dropdownNode
 				var _self = this;
@@ -200,8 +211,8 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			}.bind(this));
 		},
 		
-		getStartedDialog: function(){
-			var taskPanel = new UATaskPanel( null, true );
+		getStartedDialog: function(getStartedData){
+			var taskPanel = new UATaskPanel( null, true, getStartedData );
 		},
 		
 		setKeyAssist: function(keyAssistFunction){

@@ -141,5 +141,32 @@ define([
 		}))
 	});
 
+	// Getting Started
+	provider.registerService("orion.page.getstarted", null, {
+		data: [
+			{
+				label:"Add",
+				image:"../images/add.png",
+				secondaryImage: "../images/add-large-dulled.png",
+				alt: "Add Content",
+				media:"../media/Create.gif"
+			},
+			{
+				label:"Modify",
+				image:"../images/modify.png",
+				secondaryImage: "../images/gear-large-dulled.png",
+				alt: "Modify Content",
+				media:"../media/Modify.gif"
+			},
+			{
+				label:"Manage",
+				image:"../images/manage.png",
+				secondaryImage: "../images/hamburger-large-dulled.png",
+				alt: "Manage Content",
+				media:"../media/Manage.gif"
+			}
+		]
+	});
+
 	provider.connect();
 });

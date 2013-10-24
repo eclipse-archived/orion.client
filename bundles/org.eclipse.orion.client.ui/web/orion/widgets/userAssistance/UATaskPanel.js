@@ -13,8 +13,9 @@
 
 define(['orion/webui/littlelib'], function(lib) {
 	
-		function UATaskPanel( anchor, modal ){
-							
+		function UATaskPanel( anchor, modal, elementData ){
+			this.elements = elementData;
+
 			this.taskPanel = document.createElement( 'div' );
 			this.taskPanel.className = "UAContainer";
 			this.taskPanel.innerHTML = '<header class="UAHeader">Develop software from within the cloud</header>';
@@ -51,20 +52,16 @@ define(['orion/webui/littlelib'], function(lib) {
 			this.chosenSwitch = this.createSwitch( null, true );			
 			this.chosenSwitch.firstChild.className = "chosenCircle";
 			this.initialize();	
+
 			this.elements.forEach( this.createSwitch.bind(this) );
 		}
-		
+
 		UATaskPanel.prototype.elementNode = null;
 		UATaskPanel.prototype.switchesContainer = null;
 		UATaskPanel.prototype.switches = null;
 		UATaskPanel.prototype.radioButtons = null;
 		UATaskPanel.prototype.chosenSwitch = null;
 		
-		/* Images need to be 64 * 64 pixels right now */
-		
-		UATaskPanel.prototype.elements = [	{label:"Add", image:"add.png", secondaryImage: 'add-large-dulled.png', alt: "Add Content", media:"Create.gif"},
-											{label:"Modify", image:"modify.png", secondaryImage: 'gear-large-dulled.png', alt: "Modify Content", media:"Modify.gif"},
-											{label:"Manage", image:"manage.png", secondaryImage: 'hamburger-large-dulled.png', alt: "Manage Content", media:"Manage.gif"} ];
 							
 		UATaskPanel.prototype.addElement = function( elementData ){
 			
@@ -72,7 +69,7 @@ define(['orion/webui/littlelib'], function(lib) {
 			element.className = "UAContainer-icon";
 			
 			element.innerHTML = '<span class="workingSpan">' +
-									'<img src="../images/' + elementData.image + '" id="' + elementData.label + 'ImageNode' + '" alt="' + elementData.alt + '" height="64" width="64">' +
+									'<img src="' + elementData.image + '" id="' + elementData.label + 'ImageNode' + '" alt="' + elementData.alt + '" height="64" width="64">' +
 								'</span>' +
 								'<span class="UAIcon-label">' +
 									'<span class="UALabel" id="' + elementData.label + 'LabelNode" >' + elementData.label + '</span>' +
@@ -80,7 +77,7 @@ define(['orion/webui/littlelib'], function(lib) {
 							
 			element.onmouseover = function(){
 				var learn = document.getElementById( elementData.label + 'ImageNode' );
-				learn.src = "../images/" + elementData.secondaryImage;
+				learn.src = elementData.secondaryImage;
 				var labelNode = document.getElementById( elementData.label + 'LabelNode' );
 				labelNode.className = "UALabel-live";
 				element.className = "UAContainer-icon-live";
@@ -88,7 +85,7 @@ define(['orion/webui/littlelib'], function(lib) {
 			
 			element.onmouseout = function(){
 				var learn = document.getElementById( elementData.label + 'ImageNode' );
-				learn.src = "../images/" + elementData.image;
+				learn.src = elementData.image;
 				var labelNode = document.getElementById( elementData.label + 'LabelNode' );
 				labelNode.className = "UALabel";
 				element.className = "UAContainer-icon";
@@ -116,11 +113,11 @@ define(['orion/webui/littlelib'], function(lib) {
 			var clip = document.createElement( 'span' );
 			clip.className = "UAContainer-media";
 			
-			clip.innerHTML = '<div></div><div></div><span class="mediaSpan"><img src="../media/' + elementData.media + '" alt="'+ elementData.alt + '" height="300" width="400"></span>';
+			clip.innerHTML = '<div></div><div></div><span class="mediaSpan"><img src="' + elementData.media + '" alt="'+ elementData.alt + '" height="300" width="400"></span>';
 			
 			this.elementNode.appendChild( clip );
 			
-			setInterval(function(){clip.style.opacity = 1;},100);
+			setTimeout(function(){clip.style.opacity = 1;},100);
 			
 			var radioButton = document.getElementById( elementData.label + 'switch' );
 			
