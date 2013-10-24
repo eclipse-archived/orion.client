@@ -242,17 +242,13 @@ define([
 			// Determines whether the cached children is out of date since it does not contain the specified file/folder.
 			var treeRoot = this.treeRoot;
 			var metadatas = [];
-			if (treeRoot.Parents) {
-				if (fileMetadata && fileMetadata.Parents && treeRoot && treeRoot.ChildrenLocation) {
-					for (var i=0; i<fileMetadata.Parents.length; i++) {
-						if (fileMetadata.Parents[i].ChildrenLocation === treeRoot.ChildrenLocation) {
-							break;
-						}
-						metadatas.push(fileMetadata.Parents[i]);
+			if (fileMetadata && fileMetadata.Parents && treeRoot && treeRoot.ChildrenLocation) {
+				for (var i=0; i<fileMetadata.Parents.length; i++) {
+					if (fileMetadata.Parents[i].ChildrenLocation === treeRoot.ChildrenLocation) {
+						break;
 					}
+					metadatas.push(fileMetadata.Parents[i]);
 				}
-			} else {
-				metadatas = fileMetadata.Parents.slice(0);
 			}
 			metadatas.reverse();
 			metadatas.push(fileMetadata);
