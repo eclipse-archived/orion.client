@@ -95,6 +95,7 @@ UAItemBackground{
    -webkit-transition: opacity .25s ease-in-out;
    -webkit-box-orient: vertical;
    -webkit-box-pack: center;
+   cursor:pointer;
 }
 
 .UAContainer-icon-live{
@@ -122,6 +123,7 @@ UAItemBackground{
    -webkit-transition: opacity .25s ease-in-out;
    -webkit-box-orient: vertical;
    text-align: center;
+   cursor:pointer;
 }
 
 .UAContainer-switches{
@@ -367,6 +369,7 @@ UAItemBackground{
 	border: 1px solid #aaa;
 	background: #ccc;
 	margin:10px;
+	cursor:pointer;
 }
 
 .circle {
@@ -375,4 +378,5 @@ UAItemBackground{
 	height: 10px; 
 	border: 1px solid #aaa;
 	margin:10px;
+	cursor:pointer;
 }
