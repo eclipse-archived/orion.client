@@ -739,7 +739,7 @@ var exports = {};
 				var item = data.items;
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				return progress.progress(serviceRegistry.getService("orion.git.provider").getDiff(item[1].DiffLocation, item[0].Name), "Generating Diff for " + item[0].Name + " and " + item[1].Name).then(function(diffLocation) {
-					return mCompareUtils.generateCompareHref(diffLocation, {readonly: true});
+					return mCompareUtils.generateCompareHref(diffLocation.Location, {readonly: true});
 				});
 			},
 			visibleWhen : function(item) {
