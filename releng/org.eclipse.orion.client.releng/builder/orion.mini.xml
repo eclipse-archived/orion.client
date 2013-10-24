@@ -184,6 +184,7 @@
 		<optimize pageDir="plugins" name="preferencesPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="taskPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="webEditingPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins" name="gitBlamePlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="sites" name="site" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="sites" name="sites" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="sites" name="view" bundle="org.eclipse.orion.client.ui" />
