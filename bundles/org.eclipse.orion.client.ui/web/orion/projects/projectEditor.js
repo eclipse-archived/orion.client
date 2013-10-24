@@ -196,11 +196,11 @@ define(['orion/markdownView', 'orion/URITemplate', 'orion/webui/littlelib', 'ori
 		},
 		renderAdditionalProjectProperties: function(parent){
 			this.projectClient.getMatchingProjectHandlers(this.parentFolder).then(function(matchingProjectHandlers){
-			for(var projectHandlerIndex = 0; projectHandlerIndex<matchingProjectHandlers.length; matchingProjectHandlers++){
+			for(var projectHandlerIndex = 0; projectHandlerIndex<matchingProjectHandlers.length; projectHandlerIndex++){
 				var projectHandler = matchingProjectHandlers[projectHandlerIndex];
 
 				if(!projectHandler || !projectHandler.getAdditionalProjectProperties){
-					return;
+					continue;
 				}
 				this.progress.progress(projectHandler.getAdditionalProjectProperties(this.parentFolder, this.projectData), "Getting additional project information").then(function(additionalProperties){
 					if(!additionalProperties || !additionalProperties.length || additionalProperties.length === 0){
