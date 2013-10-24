@@ -718,8 +718,8 @@ var exports = {};
 		commandService.addCommand(openGitStatus);
 
 		var openCloneContent = new mCommands.Command({
-			name : messages["Show in Navigator"],
-			tooltip: messages["Show the repository folder in the file navigator"],
+			name : messages["ShowInEditor"],
+			tooltip: messages["ShowInEditorTooltip"],
 			id : "eclipse.openCloneContent", //$NON-NLS-0$
 			hrefCallback : function(data) {
 				return require.toUrl(editTemplate.expand({resource: data.items.ContentLocation}));
