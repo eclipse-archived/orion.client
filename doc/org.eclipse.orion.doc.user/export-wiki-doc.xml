@@ -63,8 +63,7 @@
     		<path name="${orion.user.guide}/Tasks/Comparing" title="Comparing" generateToc="true"/>
     		<path name="${orion.user.guide}/Tasks/Working_with_Git" title="Working with Git" generateToc="true"/>
     		<path name="${orion.user.guide}/Reference/Login_page" title="Login page" generateToc="false"/>
-    		<path name="${orion.user.guide}/Reference/Navigator_page" title="Navigator page" generateToc="false"/>
-    		<path name="${orion.user.guide}/Reference/Coding_page" title="Coding page" generateToc="false"/>
+    		<path name="${orion.user.guide}/Reference/Editor_page" title="Editor page" generateToc="false"/>
     		<path name="${orion.user.guide}/Reference/Shell_page" title="Shell page" generateToc="false"/>
     		<path name="${orion.user.guide}/Reference/Search_Results_page" title="Search and Replace page" generateToc="true"/>
     		<path name="${orion.user.guide}/Reference/Settings_page" title="Settings page" generateToc="true"/>
