@@ -143,6 +143,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		
 		createProject: function(workspaceLocation, projectMetadata){
 				return this.fileClient.createProject(workspaceLocation, projectMetadata.Name, null, true).then(function(fileMetadata){
+					delete projectMetadata.Name;
 					return this.initProject(fileMetadata.ContentLocation, projectMetadata);
 				}.bind(this), 
 				function(error){return error;},
