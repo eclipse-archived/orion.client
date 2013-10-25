@@ -162,7 +162,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 			target = lastRoot;
 		}
 		mGlobalCommands.setPageTarget({
-			task: "Editing", //$NON-NLS-0$
+			task: "Editor", //$NON-NLS-0$
 			name: name,
 			target: target,
 			makeAlternate: function() {
