@@ -2138,7 +2138,7 @@ var exports = {};
 						serviceRegistry.getService("orion.page.message").setProgressMessage("Your project is being set up. This may take a minute...");
 						gitConfigPreference.getConfig().then(function(userInfo){
 							var deferred = progress.progress(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
-									options.gitPrivateKey, options.gitPassphrase, userInfo), "Cloning repository " + name);
+									options.gitPrivateKey, options.gitPassphrase, userInfo, true), "Cloning repository " + name);
 							deferred.then(function(jsonData, secondArg) {
 								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
 									gitService.getGitClone(jsonData.Location).then(
