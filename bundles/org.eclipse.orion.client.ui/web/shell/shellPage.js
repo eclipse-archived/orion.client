@@ -21,7 +21,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate, Deferred, mStatus, mProgress,
 		mOperationsClient, mResultWriters, _) {
 
-	var shellPageFileService, fileClient, output, fileType;
+	var shellPageFileService, fileClient, commandRegistry, output, fileType;
 	var hashUpdated = false;
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 	var pluginRegistry, pluginType, preferences, serviceElementCounter = 0;
@@ -208,16 +208,17 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 		return result.length > 0 ? result : null;
 	}
 
-	function setCWD(value, replace) {
+	function setCWD(node, replace) {
 		var template = new URITemplate(PAGE_TEMPLATE);
 		var url = template.expand({
-			resource: value
+			resource: node.Location
 		});
 		if (replace) {
 			window.location.replace(url);
 		} else {
 			window.location.href = url;
 		}
+		mGlobalCommands.setPageTarget({task: messages.Shell, serviceRegistry: serviceRegistry, commandService: commandRegistry, target: node});
 	}
 
 	/* general functions for working with file system nodes */
@@ -308,7 +309,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 		var node = args.directory.value[0];
 		shellPageFileService.setCurrentDirectory(node);
 		hashUpdated = true;
-		setCWD(node.Location, false);
+		setCWD(node, false);
 		var pathString = shellPageFileService.computePathString(node);
 		return getChangedToElement(pathString, false);
 	}
@@ -860,7 +861,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 		serviceRegistry = core.serviceRegistry;
 		preferences = core.preferences;
 
-		var commandRegistry = new mCommandRegistry.CommandRegistry({});
+		commandRegistry = new mCommandRegistry.CommandRegistry({});
 		fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
@@ -916,7 +917,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 		shellPageFileService = new mShellPageFileService.ShellPageFileService();
 		var defaultLocationFn = function(location, replace) {
 			var successFn = function(node) {
-				setCWD(node.Location, replace);
+				setCWD(node, replace);
 				shellPageFileService.setCurrentDirectory(node);
 				var pathString = shellPageFileService.computePathString(node);
 				shell.output(getChangedToElement(pathString, true));
@@ -1175,7 +1176,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 						shellPageFileService.setCurrentDirectory(node);
 						var buffer = shellPageFileService.computePathString(node);
 						shell.output(getChangedToElement(buffer, false));
-						setCWD(node.Location, false);
+						setCWD(node, false);
 					}
 				},
 				function(error) {
@@ -1183,7 +1184,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 					 * The hash has changed to point at an invalid resource, so reset it to
 					 * the previous current directory which was valid.
 					 */
-					setCWD(shellPageFileService.getCurrentDirectory().Location, true);
+					setCWD(shellPageFileService.getCurrentDirectory(), true);
 				}
 			);
 		});
