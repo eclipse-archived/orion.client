@@ -75,11 +75,21 @@ define(['orion/plugin', 'plugins/site/siteServiceImpl'], function(PluginProvider
 
 	provider.registerService('orion.site',
 		new siteImpl.SiteImpl(fileBase, workspaceBase),
-		{	id: 'orion.site.' + host.hostname,
+		{
+			id: 'orion.site.' + host.hostname,
 			name: 'Orion Sites at ' + host.hostname,
-			canSelfHost: true,
 			pattern: siteBase,
-			filePattern: fileBase
+			filePattern: fileBase,
+			canSelfHost: true,
+			selfHostingConfig: {
+				folders: [
+					{
+						name: "orion.client",
+						labelKey: "orionClientLabel",
+						nls: "orion/sites/nls/messages"
+					}
+				]
+			}
 		});
 
 	provider.connect();

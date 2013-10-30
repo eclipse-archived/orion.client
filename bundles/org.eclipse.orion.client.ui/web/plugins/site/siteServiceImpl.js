@@ -10,8 +10,14 @@
  ******************************************************************************/
 /*global define document window*/
 /*jslint regexp:false*/
-define(['require', 'orion/xhr', 'orion/regex'], function(require, xhr, regex) {
-	
+define([
+	'require',
+	'orion/i18nUtil',
+	'orion/xhr',
+	'orion/regex',
+	'plugins/site/selfHostingRules'
+], function(require, i18nUtil, xhr, regex, mSelfHostingRules) {
+
 	var temp = document.createElement('a');
 	
 	function qualifyURL(url) {
@@ -114,47 +120,23 @@ define(['require', 'orion/xhr', 'orion/regex'], function(require, xhr, regex) {
 			return this.projects[workspaceId];
 		};
 	}
-	/*
-	 * TYPE_FILE: TargetSuffix represents a workspace path
-	 * TYPE_API: TargetSuffix represents a URL on this server
+
+	// TODO move this onto the orion site client side?
+	var SELF_HOSTING_TEMPLATE = mSelfHostingRules.Rules;
+	var TYPE_FILE = mSelfHostingRules.Types.File;
+	var TYPE_API = mSelfHostingRules.Types.API;
+	/**
+	 * @param {String[]} folderPaths
 	 */
-	var TYPE_FILE = 0, TYPE_API = 1;
-	var SELF_HOSTING_TEMPLATE = [
-			{ type: TYPE_FILE, source: "/", targetSuffix: "/bundles/org.eclipse.orion.client.ui/web/index.html" },
-			{ type: TYPE_FILE, source: "/", targetSuffix: "/bundles/org.eclipse.orion.client.ui/web" },
-			{ type: TYPE_FILE, source: "/", targetSuffix: "/bundles/org.eclipse.orion.client.core/web" },
-			{ type: TYPE_FILE, source: "/", targetSuffix: "/bundles/org.eclipse.orion.client.editor/web" },
-			{ type: TYPE_API, source: "/file", targetSuffix: "file" },
-			{ type: TYPE_API, source: "/prefs", targetSuffix: "prefs" },
-			{ type: TYPE_API, source: "/workspace", targetSuffix: "workspace" },
-			{ type: TYPE_API, source: "/users", targetSuffix: "users" },
-			{ type: TYPE_API, source: "/authenticationPlugin.html", targetSuffix: "authenticationPlugin.html" },
-			{ type: TYPE_API, source: "/login", targetSuffix: "login" },
-			{ type: TYPE_API, source: "/loginstatic", targetSuffix: "loginstatic" },
-			{ type: TYPE_API, source: "/useremailconfirmation", targetSuffix: "useremailconfirmation" },
-			{ type: TYPE_API, source: "/site", targetSuffix: "site" },
-			{ type: TYPE_FILE, source: "/", targetSuffix: "/bundles/org.eclipse.orion.client.git/web" },
-			{ type: TYPE_API, source: "/gitapi", targetSuffix: "gitapi" },
-			{ type: TYPE_FILE, source: "/", targetSuffix: "/bundles/org.eclipse.orion.client.users/web" },
-			{ type: TYPE_API, source: "/xfer", targetSuffix: "xfer" },
-			{ type: TYPE_API, source: "/filesearch", targetSuffix: "filesearch" },
-			{ type: TYPE_API, source: "/index.jsp", targetSuffix: "index.jsp" },
-			{ type: TYPE_API, source: "/plugins/git", targetSuffix: "plugins/git" },
-			{ type: TYPE_API, source: "/plugins/user", targetSuffix: "plugins/user" },
-			{ type: TYPE_API, source: "/logout", targetSuffix: "logout" },
-			{ type: TYPE_API, source: "/mixlogin/manageopenids", targetSuffix: "mixlogin/manageopenids" },
-			{ type: TYPE_API, source: "/openids", targetSuffix: "openids" },
-			{ type: TYPE_API, source: "/task", targetSuffix: "task" },
-			{ type: TYPE_API, source: "/help", targetSuffix: "help" }
-	];
-	function generateSelfHostingMappings(basePath, port) {
-		var hostPrefix = "http://localhost" + ":" + port + makeHostRelative(getContext());
+	function generateSelfHostingMappings(folderPaths, port) {
+		var hostPrefix = "http://localhost" + ":" + port + makeHostRelative(getContext()); //$NON-NLS-0$
 		return SELF_HOSTING_TEMPLATE.map(function(item) {
 			var target;
 			if (item.type === TYPE_FILE) {
-				target = basePath + item.targetSuffix;
-			} else {
-				target = hostPrefix + item.targetSuffix;
+				// Replace occurrence of ${n} in targetPattern with the n'th folderPath
+				target = i18nUtil.formatMessage.apply(i18nUtil, [item.targetPattern].concat(folderPaths));
+			} else { // TYPE_API
+				target = i18nUtil.formatMessage(item.targetPattern, hostPrefix);
 			}
 			return {Source: item.source, Target: target};
 		});
@@ -166,10 +148,10 @@ define(['require', 'orion/xhr', 'orion/regex'], function(require, xhr, regex) {
 			return site.Mappings.some(function(mapping) {
 				if (mapping.Source === item.source) {
 					if (item.type === TYPE_FILE) {
-						return mapping.Target === (basePath + item.targetSuffix);
+						return mapping.Target === (basePath + item.targetPattern);
 					} else if (item.type === TYPE_API) {
 						return new RegExp(
-							regex.escape("http://localhost") + "(:\\d+)?" + regex.escape(makeHostRelative(getContext())) + regex.escape(item.targetSuffix)
+							regex.escape("http://localhost") + "(:\\d+)?" + regex.escape(makeHostRelative(getContext())) + regex.escape(item.targetPattern)
 						).test(mapping.Target);
 					}
 				}
@@ -384,9 +366,12 @@ define(['require', 'orion/xhr', 'orion/regex'], function(require, xhr, regex) {
 				});
 			});
 		},
-		convertToSelfHosting: function(site, selfHostfileLocation, port) {
-			var internalPath = this.toInternalForm(selfHostfileLocation);
-			var mappings = generateSelfHostingMappings(internalPath, port);
+		/**
+		 * @parram {String[]} folderLocations
+		 */
+		convertToSelfHosting: function(site, folderLocations, port) {
+			var internalPaths = folderLocations.map(this.toInternalForm.bind(this));
+			var mappings = generateSelfHostingMappings(internalPaths, port);
 			site.Mappings = mappings;
 			return site;
 		},
