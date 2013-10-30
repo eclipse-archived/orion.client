@@ -2,9 +2,11 @@
 <toc topic="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Architecture.html" label="Architecture overview">
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Architecture.html" label="Architecture overview"></topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html" label="Client architecture">
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Web_components" label="Web components"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Components" label="Components"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Services" label="Services">
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Communication_with_Services" label="Communication with Services"></topic>
 			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Service_definitions" label="Service definitions"></topic>
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Object_References" label="Object References"></topic>
 		</topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Extensions" label="Extensions"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Plugins" label="Plugins"></topic>

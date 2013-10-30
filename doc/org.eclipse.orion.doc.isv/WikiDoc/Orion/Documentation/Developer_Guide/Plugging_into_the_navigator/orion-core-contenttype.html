@@ -33,59 +33,70 @@
 		<p>The content type service tells Orion about a new kind of file. The content types contributed to this service don't have any direct effect on the Orion UI, but they can be referred to by other services that need to associate themselves with a particular kind of file. For an example, see 
 			<a href="orion.navigate.openWith" title="Orion/Documentation/Developer_Guide/Plugging_into_the_navigator#orion.navigate.openWith">orion.navigate.openWith</a>.
 		</p>
-		<p>The Orion client UI defines a bunch of content types by default: see <code>webEditingPlugin.html</code> in the client UI code.</p>
+		<p>The Orion client UI defines a bunch of content types by default, including JavaScript, CSS, HTML, Markdown, and several others. See <code>webEditingPlugin.js</code> in the client UI code for a full list. (If you are contributing tools that deal with one of Orion's predefined content types, you 
+			<b>must</b> use the same content type ID rather than define your own, as file extensions can be registered by only a single content type.)
+		</p>
 		<h2 id="Service_attributes_3">Service attributes</h2>
 		<dl>
-			<dt>contentTypes</dt>
-			<dd>An <tt>Array</tt> containing one or more content types to register. Each element of the array defines a new content type, and must have this  shape:
-				<dl>
-					<dt>
-						<dl>
-							<dt>id</dt>
-							<dd><tt>String</tt> The unique identifier of the content type. This is a simple hierarchical name and should start with a category like "text" or "image".</dd>
-							<dt>name</dt>
-							<dd><tt>String</tt> The user-readable name of the content type.</dd>
-							<dt>extension</dt>
-							<dd><tt>String[]</tt> 
-								<i>Optional.</i> Array of file extensions characterizing this content type. (Extensions are given without the leading "." character).
-							</dd>
-							<dt>filename</dt>
-							<dd><tt>String[]</tt> 
-								<i>Optional.</i> Array of filenames characterizing this content type. Use this when a type does not have a characteristic file extension, but rather a filename. (For example, "Makefile", "README", "passwd").
-							</dd>
-							<dt>extends</dt>
-							<dd><tt>String</tt> 
-								<i>Optional.</i> If this content type is a subtype of another, this gives the parent content type's ID.
-							</dd>
-							<dt>image</dt>
-							<dd><tt>String</tt> 
-								<i>Optional.</i> URL of an image to display beside files of this type (for example, in the Orion navigator).
-							</dd>
-						</dl>
-					</dt>
-				</dl>
+			<dt>
+				<b>contentTypes</b>
+			</dt>
+			<dd><code>
+				<a href="#The_ContentType_object">ContentType</a>[]</code>. An array of one or more content types to register. Each element of the array defines a new content type.
+			</dd>
+		</dl>
+		<h3 id="The_ContentType_object">The ContentType object</h3>
+		<p>A ContentType object has the following shape:</p>
+		<dl>
+			<dt>id</dt>
+			<dd><tt>String</tt> The unique identifier of the content type. This is a simple hierarchical name and should start with a category like "text" or "image".</dd>
+			<dt>name</dt>
+			<dd><tt>String</tt> The user-readable name of the content type.</dd>
+			<dt>extension</dt>
+			<dd><tt>String[]</tt> 
+				<i>Optional.</i> Array of file extensions characterizing this content type. (Extensions are given without the leading "." character). Note that extensions are unique: if two content types both register against the same extension, one content type will be chosen arbitrarily over the other.
+			</dd>
+			<dt>filename</dt>
+			<dd><tt>String[]</tt> 
+				<i>Optional.</i> Array of filenames characterizing this content type. Use this when a type does not have a characteristic file extension, but rather a filename. (For example, "Makefile", "README", "passwd").
+			</dd>
+			<dt>extends</dt>
+			<dd><tt>String</tt> 
+				<i>Optional.</i> If this content type is a subtype of another, this gives the parent content type's ID.
+			</dd>
+			<dt>image</dt>
+			<dd><tt>String</tt> 
+				<i>Optional.</i> URL of an image to display beside files of this type (for example, in the Orion navigator).
 			</dd>
 		</dl>
 		<h2 id="Service_methods_3">Service methods</h2>
 		<p>None. This service is purely declarative.</p>
 		<h2 id="Example_3">Example</h2>
 		<p>This example code contributes contributes a new content type for Perl files. A Perl file extends from <code>"text/plain"</code> and has the extension <code>.pl</code>.</p>
-		<pre> provider.registerServiceProvider("orion.core.contenttype", {}, {
-   contentTypes: [{  id: "application/perl",
-                     name: "Perl",
-                     extension: <a href="&quot;pl&quot;">"pl"</a>,
-                     "extends": "text/plain"
-                  }] });
- provider.connect();
+		<pre class="source-javascript">provider.registerServiceProvider("orion.core.contenttype", {}, {
+    contentTypes: [
+        {
+            id: "application/perl",
+            name: "Perl",
+            extension: ["pl"],
+            "extends": "text/plain"
+        }
+    ]});
+provider.connect();
+
 </pre>
-		<p>The example code below contributes a new content type for Ant build files. An Ant build file is a special kind of XML file that always has the name "build.xml".</p>
-		<pre> provider.registerServiceProvider("orion.core.contenttype", {}, {
-   contentTypes: [{  id: "text/ant",
-                     name: "Ant build file",
-                     filename: <a href="&quot;build.xml&quot;">"build.xml"</a>,
-                     "extends": "application/xml"
-                  }] });
- provider.connect();
+		<p>The example code below contributes a new content type for Maven build files. A Maven build file is a special kind of XML file that always has the name "pom.xml".</p>
+		<pre class="source-javascript">provider.registerServiceProvider("orion.core.contenttype", {}, {
+    contentTypes: [
+        {
+            id: "text/x-maven-pom",
+            name: "Maven build file",
+            filename: ["pom.xml"],
+            "extends": "application/xml"
+        }
+    ]});
+provider.connect();
+
 </pre><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>

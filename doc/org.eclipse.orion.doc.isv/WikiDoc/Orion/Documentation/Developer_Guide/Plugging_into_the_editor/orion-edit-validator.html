@@ -30,25 +30,52 @@
 			</tr>
 		</table><hr/>
 		<h1 id="orion.edit.validator">orion.edit.validator</h1>
-		<p>An <tt>orion.edit.validator</tt> service provides a function that can check the contents of a file and return a data structure indicating where problems are in the document. The result of this service is used by the Orion UI to create annotations in the ruler beside each problematic line, and also to underline the specific portion of the document where the problem occurs.</p>
-		<h2 id="Service_methods_7">Service methods</h2>
-		<p>Implementations of <tt>orion.edit.validator</tt> must define the following function:</p>
+		<p>An <code>orion.edit.validator</code> service provides a function that can check the contents of a file and return a data structure indicating where problems are. The result of this service is used by the Orion UI to create annotations in the ruler beside each problematic line, and also to underline the specific portion of the document where the problem occurs.</p>
+		<h2 id="Service_methods_.28Orion_4.0.29_4">Service methods (Orion 4.0)</h2>
+		<dl>
+			<dt>computeProblems(editorContext, options)</dt>
+			<dd>
+				<b>editorContext</b> <code>ObjectReference</code> The 
+				<a href="The-Editor-Context-object.html#The_Editor_Context_object">Editor Context object</a>.
+			</dd>
+			<dd>
+				<b>options </b> <code>Object</code> 
+				<dl>
+					<dd>
+						<b>options.contentType</b> <code>String</code> The 
+						<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type ID</a> of the file being edited.
+					</dd>
+					<dd>
+						<b>options.title</b>  <code>String</code> The path and filename of the file being edited.
+					</dd>
+				</dl>
+			</dd>
+		</dl>
+		<p>Returns (or fulfills to) an <code>Object</code> giving the validation result. The returned object must have a <code>problems</code> property giving an Array of 
+			<a href="#The_Problem_object">problems</a> found in the file.
+		</p>
+		<h2 id="Service_methods_.28Orion_3.0.29_4">Service methods (Orion 3.0)</h2>
 		<dl>
 			<dt>checkSyntax(title, contents)</dt>
 			<dd>
-				<b>title</b> <tt>String</tt> The path and filename of the file being edited.
+				<b>title</b> <code>String</code> The path and filename of the file being edited.
 			</dd>
 			<dd>
-				<b>contents</b> <tt>String</tt> The contents of the file being edited.
+				<b>contents</b> <code>String</code> The contents of the file being edited.
 			</dd>
 		</dl>
-		<p>Returns an <tt>Object</tt> giving the validation result. The returned object must have a <tt>problems</tt> property whose value is an array giving the problems found in the file. </p>
-		<h3 id="The_problem_object">The problem object</h3>
-		<p>A problem object has the following properties:</p>
+		<p>Returns an <code>Object</code> giving the validation result. The returned object must have a <code>problems</code> property whose value is an array giving the 
+			<a href="#The_Problem_object">problems</a> found in the file. 
+		</p>
+		<h2 id="The_Problem_object">The Problem object</h2>
+		<p>A Problem object has the following properties:</p>
 		<dl>
-			<dd><b>description</b> <tt>String</tt> A description of the problem.</dd>
-			<dd><b>severity</b> <tt>String</tt> 
-				<i>Optional</i> Gives the severity of this problem. The severity affects how the problem is displayed in the Orion UI. Allowed values are <tt>"warning"</tt> and <tt>"error"</tt>. (If omitted, <tt>"error"</tt> is assumed.)
+			<dd>
+				<b>description</b> <code>String</code> A description of the problem.
+			</dd>
+			<dd>
+				<b>severity</b> <code>String</code> 
+				<i>Optional.</i> Gives the severity of this problem. The severity affects how the problem is displayed in the Orion UI. Allowed values are <code>"warning"</code> and <code>"error"</code>. (If omitted, <code>"error"</code> is assumed.)
 			</dd>
 		</dl>
 		<p>A problem will have additional properties that give its location within the file. The location can be specified using line+column, or using offsets.</p>
@@ -56,62 +83,62 @@
 			<i>line-based</i> problem, you provide a line number and columns:
 		</p>
 		<dl>
-			<dd><b>line</b> <tt>Number</tt> The line number where the problem was found. (Line numbers begin counting from 1.)</dd>
-			<dd><b>start</b> <tt>Number</tt> The column within the line where the problem begins. (Columns begin counting from 1.)</dd>
-			<dd><b>end</b> <tt>Number</tt> 
-				<i>Optional</i> The column within the line where the problems ends. (If omitted, <tt>start+1</tt> is assumed.)
+			<dd><b>line</b> <code>Number</code> The line number where the problem was found. (Line numbers begin counting from 1.)</dd>
+			<dd><b>start</b> <code>Number</code> The column within the line where the problem begins. (Columns begin counting from 1.)</dd>
+			<dd><b>end</b> <code>Number</code> 
+				<i>Optional</i> The column within the line where the problems ends. (If omitted, <code>start+1</code> is assumed.)
 			</dd>
 		</dl>
 		<p>For a 
 			<i>document-based</i> problem, you provide character offsets:
 		</p>
 		<dl>
-			<dd><b>start</b> <tt>Number</tt> The offset at which the problem begins. (0=first character in the document.)</dd>
-			<dd><b>end</b> <tt>Number</tt> 
-				<i>Optional</i> The offset at which the problem ends. (If omitted, <tt>start+1</tt> is assumed.)
+			<dd><b>start</b> <code>Number</code> The offset at which the problem begins. (0=first character in the document.)</dd>
+			<dd><b>end</b> <code>Number</code> 
+				<i>Optional</i> The offset at which the problem ends. (If omitted, <code>start+1</code> is assumed.)
 			</dd>
 		</dl>
 		<p>A document-based problem can span several lines.</p>
-		<h2 id="Service_attributes_7">Service attributes</h2>
-		<p>Implementations of <tt>orion.edit.validator</tt> must define the following attributes:</p>
+		<h2 id="Service_attributes_9">Service attributes</h2>
+		<p>Implementations of <code>orion.edit.validator</code> must define the following attributes:</p>
 		<dl>
 			<dt>contentType</dt>
-			<dd><tt>Array</tt> An array of 
+			<dd><code>Array</code> An array of 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> giving the types of files that this validator is capable of validating.
 			</dd>
 		</dl>
-		<h2 id="Examples_5">Examples</h2>
-		<pre>var provider = new eclipse.PluginProvider();
-var serviceProvider = provider.registerServiceProvider("orion.edit.validator",
-  {
-     checkSyntax: function(title, contents) {
-       var problems = [];
-       var lines = contents.split(/\r?\n/);
-       for (var i=0; i &lt; lines.length; i++) {
-         var line = lines<a href="i">i</a>;
-         var match = /\t \t| \t /.exec(line);
-         if (match) {
-           problems.push({
-             description: "Mixed spaces and tabs",
-             line: i + 1,
-             start: match.index + 1,
-             end: match.index + match<a href="0">0</a>.length + 1,
-             severity: "warning" });
-         }
-       }
-       var result = { problems: problems };
-       return result;
-     }
-  },
-  {
-     contentType: <a href="&quot;application/javascript&quot;">"application/javascript"</a>
-  });<!--
-service.dispatchEvent = serviceProvider.dispatchEvent;-->
-provider.connect();
+		<h2 id="Examples_7">Examples</h2>
+		<pre class="source-javascript"> var provider = new eclipse.PluginProvider();
+ var serviceProvider = provider.registerServiceProvider("orion.edit.validator",
+   {
+      checkSyntax: function(title, contents) {
+        var problems = [];
+        var lines = contents.split(/\r?\n/);
+        for (var i=0; i &lt; lines.length; i++) {
+          var line = lines[i];
+          var match = /\t \t| \t /.exec(line);
+          if (match) {
+            problems.push({
+              description: "Mixed spaces and tabs",
+              line: i + 1,
+              start: match.index + 1,
+              end: match.index + match[0].length + 1,
+              severity: "warning" });
+          }
+        }
+        var result = { problems: problems };
+        return result;
+      }
+   },
+   {
+      contentType: ["application/javascript"]
+   });
+ provider.connect();
+
 </pre>
 		<p>This example will validate JavaScript files. It finds lines containing a sequence of 
 			<i>space-tab-space</i> or 
-			<i>tab-space-tab</i> and produces a warning on every such line. Note that <tt>+1</tt> is necessary because column and line indices in the Orion UI are numbered from 1, not 0.
+			<i>tab-space-tab</i> and produces a warning on every such line. Note that <code>+1</code> is necessary because column and line indices in the Orion UI are numbered from 1, not 0.
 		</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>

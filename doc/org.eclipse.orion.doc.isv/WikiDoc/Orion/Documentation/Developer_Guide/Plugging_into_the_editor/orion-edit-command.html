@@ -12,7 +12,7 @@
 			</tr>
 			<tr>
 				<td style="width: 20%" align="left">
-					<a href="Plugging-into-the-editor.html" title="Plugging into the editor">
+					<a href="orion-core-astprovider.html" title="orion.core.astprovider">
 						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
 					</a>
 				</td>
@@ -24,82 +24,144 @@
 				</td>
 			</tr>
 			<tr>
-				<td style="width: 20%" align="left" valign="top">Plugging into the editor</td>
+				<td style="width: 20%" align="left" valign="top">orion.core.astprovider</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right" valign="top">orion.edit.contentAssist</td>
 			</tr>
 		</table><hr/>
 		<h1 id="orion.edit.command">orion.edit.command</h1>
-		<p>The <tt>orion.edit.command</tt> service allows plugins to provide a function that takes some editor text as input, performs some operation or transformation on the text, and returns a new text value. The command can also optionally receive and return selection information for changing the editor selection.  The transformation can happen directly, or indirectly through a delegated UI provided by the plugin.</p>
-		<h2 id="Service_methods">Service methods</h2>
-		<p>Implementations of <tt>orion.edit.command</tt> must define the following function:</p>
+		<p>The <code>orion.edit.command</code> service allows plugins to provide a command that operates on the editor. Typically, the command that takes some editor text as input, performs some operation or transformation on the text, and generates a new text value. The command can also optionally receive and return selection information for changing the editor selection. The transformation can happen directly, or indirectly through a &lt;dfn&gt;delegated UI&lt;/dfn&gt; provided by the plugin.</p>
+		<h2 id="Service_methods_.28Orion_4.0.29">Service methods (Orion 4.0)</h2>
+		<p>The 4.0 version of the command API allows a command to take arbitrary action using the editorContext.</p>
+		<dl>
+			<dt>execute(editorContext, options)</dt>
+			<dd>
+				<b>editorContext</b> <code>ObjectReference</code> The 
+				<a href="The-Editor-Context-object.html#The_Editor_Context_object">Editor Context object</a>.
+			</dd>
+			<dd>
+				<b>options </b> <code>Object</code>
+				<dl>
+					<dd>
+						<b>options.contentType</b> <code>String</code> The 
+						<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type ID</a> of the file being edited.
+					</dd>
+					<dd>
+						<b>options.input</b> <code>String</code> Path and filename being edited.
+					</dd>
+				</dl>
+			</dd>
+		</dl>
+		<p>The <code>execute()</code> method should return a Promise, which the provider is expected to resolve when it has finished performing the command action. The command action should be performed using the Editor Context object: for example, use <code>editorContext.setText()</code>to change the editor text, or <code>editorContext.setSelection()</code> to change the editor selection. The fulfillment value of the promise is ignored.</p>
+		<p>Note: Future versions of Orion will expose delegated UI functionality through the EditorContext object. This is currently not supported, due to 
+			<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=419764" target="orion_external">Bug 419764</a>.
+		</p>
+		<h2 id="Service_methods_.28Orion_3.0.29">Service methods (Orion 3.0)</h2>
 		<dl>
 			<dt>run(selectedText, text, selection, resource)</dt>
-			<dd>selectedText is a string containing the text that is currently selected in the editor. The <tt>text</tt> argument provides the entire editor buffer. The <tt>selection</tt> argument is a selection object with <tt>start</tt> and <tt>end</tt> fields. The <tt>resource</tt> argument describes the full path name of the text being edited.  The return value is either a string which will replace the current editor selection, or an object. The object must either have a <tt>text</tt> property or a <tt>uriTemplate</tt> property.  If it has a <tt>text</tt> property, then the text is a replacement string for the entire editor buffer.  It may optionally have a <tt>selection</tt> object indicating the new selection value.  If the return object has a <tt>uriTemplate</tt> property, then a delegated UI iframe will be opened on the specified URI.  It may optionally have a <tt>width</tt> and/or <tt>height</tt> property that describes the desired size of the UI.  Width and height are specified as CSS strings, such as "100px" or "50em".  The delegated UI must post a message back to the host window with an object that identifies itself as a delegatedUI and contains a <tt>result</tt> property that describes the new selection text or the replacement text object.  (See example).</dd>
+			<dd>
+				<b>selectedText</b> <code>String</code>. The text that is currently selected in the editor.
+			</dd>
+			<dd>
+				<b>text</b> <code>String</code>. Provides the entire buffer being edited. 
+			</dd>
+			<dd>
+				<b>selection</b> <code>orion.editor.Selection</code> The current selection in the editor.
+			</dd>
+			<dd>
+				<b>resource</b> <code>String</code> The full path and filename of the file being edited.
+			</dd>
 		</dl>
-		<h2 id="Service_attributes">Service attributes</h2>
-		<p>Implementations of <tt>orion.edit.command</tt> may define the following attributes:</p>
+		<p>The return value of <code>run()</code> is a 
+			<a href="#The_CommandResult_object">CommandResult</a> object.
+		</p>
+		<h3 id="The_CommandResult_object">The CommandResult object</h3>
+		<p>A CommandResult object is either a simple <code>String</code> which will replace the current editor selection, or an <code>object</code>.</p>
+		<ul>
+			<li>The object must either have a <code>text</code> property or a <code>uriTemplate</code> property.
+				<ul>
+					<li>If it has a <code>text</code> property, then the text is a replacement string for the entire editor buffer.</li>
+					<li>If it has a <code>uriTemplate</code> property, then a delegated UI iframe will be opened on the specified URI. </li>
+				</ul>
+			</li>
+			<li>It may optionally have a <code>width</code> and/or <code>height</code> property that describes the desired size of the UI. Width and height are specified in CSS units, such as "100px" or "50em". The delegated UI must post a message back to the host window with an object that identifies itself as a delegatedUI and contains a <code>result</code> property that describes the new selection text or the replacement text object. (See example). </li>
+			<li>It may optionally have a <code>selection</code> object indicating the new selection value.</li>
+			<li>It may optionally have a [[#The_Status_object|<code>status</code> field]] giving status information to show in the notification area.</li>
+		</ul>
+		<h3 id="The_Status_object">The Status object</h3>
+		<p>A Status object has the following fields:</p>
+		<dl>
+			<dd>
+				<b>Severity</b> <code>String</code>. Allowed values are: <code>"Warning"</code>, <code>"Error"</code>.
+			</dd>
+			<dd>
+				<b>Message</b> <code>String</code>. The status message to display. May include hyperlinks, given in Markdown syntax.
+			</dd>
+		</dl>
+		<h2 id="Service_attributes_2">Service attributes</h2>
+		<p>Implementations of <code>orion.edit.command</code> must define the following attributes:</p>
 		<dl>
 			<dt>name</dt>
-			<dd><tt>String</tt> The command text to show to the user.</dd>
+			<dd><code>String</code> The command text to show to the user.</dd>
 			<dt>id</dt>
-			<dd><tt>String</tt> The id of the command contribution.</dd>
+			<dd><code>String</code> The id of the command contribution.</dd>
 			<dt>tooltip</dt>
 		</dl>
-		<p><tt>String</tt> Optional.  A tooltip describing the command.</p>
+		<p><code>String</code> Optional.  A tooltip describing the command.</p>
 		<dl>
 			<dt>img</dt>
-			<dd><tt>String</tt> Optional.  The URL of an icon to associate with the command.  The icon may not appear in all situations.  For example, the main toolbar may not show the icon, but a menu item might show the icon.</dd>
+			<dd><code>String</code> Optional.  The URL of an icon to associate with the command.  The icon may not appear in all situations.  For example, the main toolbar may not show the icon, but a menu item might show the icon.</dd>
 			<dt>key</dt>
-			<dd><tt>Array</tt> Optional.  A key binding for the command. The structure of this array matches the arguments of the <tt>orion.textview.KeyBinding</tt> constructor. See its entry in the Client API reference for details.</dd>
+			<dd><code>Array</code> Optional.  A key binding for the command. The structure of this array matches the arguments of the <code>orion.textview.KeyBinding</code> constructor. See its entry in the Client API reference for details.</dd>
 			<dt>validationProperties</dt>
-			<dd><tt>Array</tt> Optional.  An array 
+			<dd><code>Array</code> Optional.  An array 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Validation_Properties" title="Orion/Documentation/Developer Guide/Plugging into Orion pages#Validation Properties">Validation Properties</a> that must match the editor's file in order for the command to appear.
 			</dd>
 			<dt>contentType</dt>
-			<dd><tt>Array</tt> Optional.  An array of 
+			<dd><code>Array</code> Optional.  An array of 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> for which this command is valid.
 			</dd>
 		</dl>
-		<h2 id="Examples">Examples</h2>
+		<h2 id="Examples_2">Examples</h2>
 		<p>The following examples start with the simplest editor command and then add more complexity.</p>
 		<h3 id="Replacing_the_selection">Replacing the selection</h3>
 		<p>This example converts the selected text to upper case. The function return value is a simple string, so this is interpreted by the editor as replacement for the original editor selection. In the service properties, we see the command provides a key binding of Ctrl+U (or Cmd+U on Mac). </p>
-		<pre> var provider = new eclipse.PluginProvider();
+		<pre class="source-javascript"> var provider = new eclipse.PluginProvider();
  provider.registerServiceProvider("orion.edit.command", {
-   run&amp;nbsp;: function(text) {
+   run : function(text) {
      return text.toUpperCase();
    }
  }, {
-   name&amp;nbsp;: "UPPERCASE",
-   id&amp;nbsp;: "uppercase.example"
-   img&amp;nbsp;: "/images/gear.gif",
-   key&amp;nbsp;: [ "u", true ]
+   name : "UPPERCASE",
+   id : "uppercase.example"
+   img : "/images/gear.gif",
+   key : [ "u", true ]
  });
  provider.connect();
+
 </pre>
-		<p> </p>
 		<h3 id="Replacing_the_editor_contents">Replacing the editor contents</h3>
-		<p>This example takes the selection and wraps it in C-style block comments. In this example the function returns a complex object with both <tt>text</tt> and <tt>selection</tt> fields. These are interpreted by the editor as the new editor buffer contents, and the new editor selection. A content type is used so that this command is only available for javascript files. </p>
-		<pre> contentType: ["application/javascript"],
- run&amp;nbsp;: function(selectedText, text, selection) {
+		<p>This example takes the selection and wraps it in C-style block comments. In this example the function returns a complex object with both <code>text</code> and <code>selection</code> fields. These are interpreted by the editor as the new editor buffer contents, and the new editor selection. A content type is used so that this command is only available for javascript files. </p>
+		<pre class="source-javascript"> contentType: ["application/javascript"],
+ run : function(selectedText, text, selection) {
    return {text: text.substring(0,selection.start) + "/*" + 
      text.substring(selection.start,selection.end) + "*/" + 
      text.substring(selection.end),
      selection: {start:selection.start,end:selection.end+4}};
  }
+
 </pre>
-		<p> </p>
 		<h3 id="Delegating_a_UI_before_manipulating_the_editor">Delegating a UI before manipulating the editor</h3>
-		<p>Here is an example of a delegated UI run function that computes a URL for the delegated UI based on the file name of the edited file. In this example, the function returns a complex object with a <tt>uriTemplate</tt> field and <tt>width</tt> and <tt>height</tt> properties. The UI that is opened will be responsible for posting a message back to the editor with a result object that contains either a String for the selected text or a complex object with replacement content. </p>
-		<pre> id: "delegatedUI.example",
- run&amp;nbsp;: function(selectedText, text, selection, fileName) {
+		<p>Here is an example of a delegated UI run function that computes a URL for the delegated UI based on the file name of the edited file. In this example, the function returns a complex object with a <code>uriTemplate</code> field and <code>width</code> and <code>height</code> properties. The UI that is opened will be responsible for posting a message back to the editor with a result object that contains either a String for the selected text or a complex object with replacement content. </p>
+		<pre class="source-javascript"> id: "delegatedUI.example",
+ run : function(selectedText, text, selection, fileName) {
    return {uriTemplate: "http://com.example/myDelegatedUI#" + fileName, width: "600px", height: "400px"};
  }
+
 </pre>
 		<p> 
-			The delegated UI would post a message identifying itself and including a result. The message must include a <tt>pageService</tt> property of "orion.page.delegatedUI", a <tt>source</tt> that matches the orion.edit.command service id, and either a <tt>result</tt> or a <tt>cancelled</tt> property. The following examples illustrate the different ways the result could be returned. </p>
-		<pre>/* a message containing replacement selected text */
+			The delegated UI would post a message identifying itself and including a result. The message must include a <code>pageService</code> property of "orion.page.delegatedUI", a <code>source</code> that matches the orion.edit.command service id, and either a <code>result</code> or a <code>cancelled</code> property. The following examples illustrate the different ways the result could be returned. </p>
+		<pre class="source-javascript">/* a message containing replacement selected text */
 window.parent.postMessage(JSON.stringify({
    pageService: "orion.page.delegatedUI", 
    source: "delegatedUI.example", 
@@ -119,6 +181,7 @@ window.parent.postMessage(JSON.stringify({
    source: "delegatedUI.example", 
    cancelled: true
 }), "*");
+
 </pre>
 		<h3 id="Google_Picker_example">Google Picker example</h3>
 		<p>The Google Picker is a fully functioning example of a delegated UI in an editor command.  It opens a Google Picker allowing the user to pick a resource, and then inserts a link to that resource into the editor text.
@@ -129,7 +192,7 @@ window.parent.postMessage(JSON.stringify({
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
 				<td style="width: 20%" align="left">
-					<a href="Plugging-into-the-editor.html" title="Plugging into the editor">
+					<a href="orion-core-astprovider.html" title="orion.core.astprovider">
 						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
 					</a>
 				</td>
@@ -145,7 +208,7 @@ window.parent.postMessage(JSON.stringify({
 				</td>
 			</tr>
 			<tr>
-				<td style="width: 20%" align="left" valign="top">Plugging into the editor</td>
+				<td style="width: 20%" align="left" valign="top">orion.core.astprovider</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right" valign="top">orion.edit.contentAssist</td>
 			</tr>

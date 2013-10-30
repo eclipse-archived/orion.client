@@ -74,7 +74,7 @@
 			<b>options</b>, the generated UI presentation will show a drop-down menu. Since we've provided a 
 			<b>defaultValue</b> of <code>false</code>, the second option "Open links in a same tab" will selected by default.
 		</p>
-		<pre>define(<a href="'orion/plugin'">'orion/plugin'</a>, function(PluginProvider) {
+		<pre class="source-javascript">define(['orion/plugin'], function(PluginProvider) {
     var pluginProvider = new PluginProvider();
     pluginProvider.registerService('orion.core.setting',
         {},
@@ -85,7 +85,7 @@
                       {  id: 'newtab',
                          name: 'Links',
                          type: 'boolean',
-                         defaultValue: false,
+                        defaultValue: false,
                          options: [
                              {  label: "Open links in a new tab",
                                 value: true
@@ -101,6 +101,7 @@
         });
     provider.connect();
 });
+
 </pre>
 		<p>When a user visits the Orion Settings page, they'll see an automatically-generated UI containing a drop-down menu, similar to the one shown below. Manipulating the drop-down menu causes the setting's value to change, and causes any Managed Services registered against the <code>example.navconfig</code> PID to have their [[Orion/Documentation/Developer Guide/Configuration services#Service methods|<code>updated()</code> methods]] invoked.</p>
 		<p>

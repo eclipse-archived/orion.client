@@ -28,8 +28,11 @@
 		<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html#Configuring_virtual_host_names_for_launching_sites" label="Configuring virtual host names for launching sites">
 			<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html#Defaults" label="Defaults"></topic>
 			<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html#Examples" label="Examples"></topic>
-			<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html#Hosting_locally" label="Hosting locally"></topic>
+			<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html#Hosting_locally" label="Hosting locally">
+				<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html#Running_on_Mac_OS_X" label="Running on Mac OS X"></topic>
+			</topic>
 		</topic>
+		<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html#Changing_the_backend_metadata_format" label="Changing the backend metadata format"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Server_admin_guide/Administering-users.html" label="Administering users">
 		<topic href="WikiDoc/Orion/Server_admin_guide/Administering-users.html#Creating_and_deleting_users" label="Creating and deleting users"></topic>

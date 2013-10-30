@@ -54,8 +54,7 @@
 		</dl>
 		<h2 id="Example">Example</h2>
 		<p>Here is a sample plug-in that defines a content zip file that is colocated with the Orion plugin.</p>
-		<pre>
-var provider = new orion.PluginProvider();
+		<pre class="source-javascript">var provider = new orion.PluginProvider();
 var temp = document.createElement('a');
 temp.href = "testContent.zip";
 
@@ -66,6 +65,7 @@ provider.registerService("orion.core.content", null, {
 	contentURITemplate: temp.href
 });
 provider.connect();
+
 </pre>
 		<p>When this plug-in is installed, the user will be offered "Another Exemplary Sample Site" as possible content for a project.</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">

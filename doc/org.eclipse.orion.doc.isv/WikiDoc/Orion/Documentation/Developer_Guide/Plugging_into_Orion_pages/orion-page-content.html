@@ -43,35 +43,36 @@
 			<dt>uriTemplate</dt>
 			<dd>a 
 				<a href="URI_Templates" title="Orion/Documentation/Developer Guide/Plugging into Orion pages#URI Templates">URI Template</a> that defines the href for the iframe content.  When content is opened, it might be targeted against a particular file or folder.   In this case, the template variables can refer to file or folder metadata from the target file.  In addition to the standard variables used in Orion and the file/folder metadata, some special variables are used:
+				<dl>
+					<dd><tt>SaveURL</tt> refers to a URL that can be used to save content back to Orion.</dd>
+					<dd><tt>ExitURL</tt> refers to a URL that can be used if the user chooses to exit the embedded application.  </dd>
+				</dl>
 			</dd>
-		</dl>
-		<ul>
-			<li><tt>{SaveURL}</tt> refers to a URL that can be used to save content back to Orion.</li>
-			<li><tt>{ExitURL}</tt> refers to a URL that can be used if the user chooses to exit the embedded application.  </li>
-		</ul>
-		<dl>
 			<dt>saveToken</dt>
 			<dd>Optional.  An Array of objects describing token(s) that appear in the URL of the page that saves the content.  The saveToken is used to find the location of any content stored by the plugin.</dd>
 		</dl>
 		<h2 id="Examples">Examples</h2>
 		<p>The following snippet defines an orion.page.content extension for showing the Pixlr image editor inside Orion.</p>
-		<pre>  provider.registerServiceProvider("orion.page.content", {}, {
-     id: "orion.pixlr.content",
-     name: "Pixlr",
-     saveToken: [{token: "imgapi?image=", terminator: "&amp;"},
-     uriTemplate: "<a href="http://pixlr.com/editor/?image=" target="orion_external">http://pixlr.com/editor/?image=</a>{OrionHome}{Location}&amp;referrer=Orion&amp;title={Name}&amp;locktype=true&amp;exit={ExitURL}&amp;target={SaveURL}imgapi&amp;locktitle=true,contentProvider=orion.pixlr.content"});
+		<pre class="source-javascript">   provider.registerServiceProvider("orion.page.content", {}, {
+      id: "orion.pixlr.content",
+      name: "Pixlr",
+      saveToken: [{token: "imgapi?image=", terminator: "&amp;"},
+      uriTemplate: "http://pixlr.com/editor/?image={+OrionHome}{+Location}&amp;referrer=Orion&amp;title={Name}&amp;locktype=true&amp;exit={+ExitURL}&amp;target={+SaveURL}imgapi&amp;locktitle=true,contentProvider=orion.pixlr.content"});
+
 </pre>
-		<p>The URL to open this page is <tt>/content/content.html#{Location},contentProvider=orion.pixlr.content</tt></p>
+		<p>The URL to open this page is <tt>/content/content.html#{+Location},contentProvider=orion.pixlr.content</tt></p>
 		<p>If the page content requires a resource location (for example, it is an editor), then typically the page would be linked using the orion editor extension point.  This ensures that the page were opened with a specified location parameter in the URL.   The pixlr plugin contributes an editor in this way.</p>
-		<pre>  provider.registerServiceProvider("orion.edit.editor", {}, {
-     id: "orion.pixlr",
-     name: "Pixlr Image Editor",
-     uriTemplate: "{OrionHome}/content/content.html#{Location},contentProvider=orion.pixlr.content"});
+		<pre class="source-javascript">   provider.registerServiceProvider("orion.edit.editor", {}, {
+      id: "orion.pixlr",
+      name: "Pixlr Image Editor",
+      uriTemplate: "{+OrionHome}/content/content.html#{+Location},contentProvider=orion.pixlr.content"});
+
 </pre>
 		<p>The corresponding "open with" extension point is</p>
-		<pre>  provider.registerServiceProvider("orion.navigate.openWith", {}, {
-     editor: "orion.pixlr",
-     contentType: <a href="&quot;image/gif&quot;,">"image/jpeg", "image/ico", "image/png","image/tiff"</a>});
+		<pre class="source-javascript">   provider.registerServiceProvider("orion.navigate.openWith", {}, {
+      editor: "orion.pixlr",
+      contentType: ["image/gif", "image/jpeg", "image/ico", "image/png","image/tiff"]});
+
 </pre><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>

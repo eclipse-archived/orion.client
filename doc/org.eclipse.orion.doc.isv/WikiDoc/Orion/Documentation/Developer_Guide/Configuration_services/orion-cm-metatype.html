@@ -119,92 +119,95 @@
 		<p>None. This service is purely declarative.</p>
 		<h2 id="Examples_2">Examples</h2>
 		<p>This example shows how to define an OCD with ID <code>example.customer</code>. The OCD has two AttributeDefinitions.</p>
-		<pre>define(<a href="'orion/plugin'">'orion/plugin'</a>, function(PluginProvider) {
-    var pluginProvider = new PluginProvider();
-    pluginProvider.registerService('orion.cm.metatype',
-        {},
-        {  classes: [
-               {  id: 'example.customer',
-                  properties: [
-                      {  id: 'fullname',
-                         name: 'Full Name',
-                         type: 'string'
-                      },
-                      {  id: 'address',
-                         name: 'Mailing Address',
-                         type: 'string'
-                      }
-                  ]
-               }
-           ]
-        });
-    provider.connect();
-});
+		<pre class="source-javascript"> define(['orion/plugin'], function(PluginProvider) {
+     var pluginProvider = new PluginProvider();
+     pluginProvider.registerService('orion.cm.metatype',
+         {},
+         {  classes: [
+                {  id: 'example.customer',
+                   properties: [
+                       {  id: 'fullname',
+                          name: 'Full Name',
+                          type: 'string'
+                       },
+                       {  id: 'address',
+                          name: 'Mailing Address',
+                          type: 'string'
+                       }
+                   ]
+                }
+            ]
+         });
+     provider.connect();
+ });
+
 </pre>
 		<p>Building on the previous example, here's how we would use a 
 			<b>designates</b> to associate the <code>example.customer</code> OCD with a PID named <code>example.pid</code>.
 		</p>
-		<pre>define(<a href="'orion/plugin'">'orion/plugin'</a>, function(PluginProvider) {
-    var pluginProvider = new PluginProvider();
-    pluginProvider.registerService('orion.cm.metatype',
-        {},
-        {  classes: [
-               {  id: 'example.customer',
-                  properties: [
-                      {  id: 'fullname',
-                         name: 'Full Name',
-                         type: 'string'
-                      },
-                      {  id: 'address',
-                         name: 'Mailing Address',
-                         type: 'string'
-                      }
-                  ]
-               }
-           ]
-        });
-    // New code starts here
-    pluginProvider.registerService('orion.cm.metatype',
-        {},
-        {  designates: [
-               {  pid: 'example.pid',
-                  classId: 'example.customer'
-               }
-           ]
-        });
-    provider.connect();
-});
+		<pre class="source-javascript"> define(['orion/plugin'], function(PluginProvider) {
+     var pluginProvider = new PluginProvider();
+     pluginProvider.registerService('orion.cm.metatype',
+         {},
+         {  classes: [
+                {  id: 'example.customer',
+                   properties: [
+                       {  id: 'fullname',
+                          name: 'Full Name',
+                          type: 'string'
+                       },
+                       {  id: 'address',
+                          name: 'Mailing Address',
+                          type: 'string'
+                       }
+                   ]
+                }
+            ]
+         });
+     // New code starts here
+     pluginProvider.registerService('orion.cm.metatype',
+         {},
+         {  designates: [
+                {  pid: 'example.pid',
+                   classId: 'example.customer'
+                }
+            ]
+         });
+     provider.connect();
+ });
+
 </pre>
 		<p>Alternatively, we can use a single service registration, with both 
 			<b>classes</b> and 
 			<b>designates</b>, to achieve the same effect:
 		</p>
-		<pre>define(<a href="'orion/plugin'">'orion/plugin'</a>, function(PluginProvider) {
-    var pluginProvider = new PluginProvider();
-    pluginProvider.registerService('orion.cm.metatype',
-        {},
-        {  classes: [
-               {  id: 'example.customer',
-                  properties: [
-                      {  id: 'fullname',
-                         name: 'Full Name',
-                         type: 'string'
-                      },
-                      {  id: 'address',
-                         name: 'Mailing Address',
-                         type: 'string'
-                      }
-                  ]
-               }
-           ],
-           designates: [
-               {  pid: 'example.pid',
-                  classId: 'example.customer'
-               }
-           ]
-        });
-    provider.connect();
-});
+		<pre class="source-javascript"> define(['orion/plugin'], function(PluginProvider) {
+     var pluginProvider = new PluginProvider();
+     pluginProvider.registerService('orion.cm.metatype',
+         {},
+         {  classes: [
+                {  id: 'example.customer',
+                   properties: [
+                       {  id: 'fullname',
+                          name: 'Full Name',
+                          type: 'string'
+                       },
+                       {  id: 'address',
+                          name: 'Mailing Address',
+                          type: 'string'
+                       }
+                   ]
+                }
+            ],
+            designates: [
+                {  pid: 'example.pid',
+                   classId: 'example.customer'
+                }
+            ]
+         });
+     provider.connect();
+ });
+
 </pre><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>

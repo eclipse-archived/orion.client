@@ -18,7 +18,7 @@
 				</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right">
-					<a href="orion-core-favorite.html" title="orion.core.favorite">
+					<a href="orion-core-file.html" title="orion.core.file">
 						<img alt="Next" border="0" src="../../../../images/next.gif"/>
 					</a>
 				</td>
@@ -26,7 +26,7 @@
 			<tr>
 				<td style="width: 20%" align="left" valign="top">Core client services</td>
 				<td style="width: 60%" align="center"></td>
-				<td style="width: 20%" align="right" valign="top">orion.core.favorite</td>
+				<td style="width: 20%" align="right" valign="top">orion.core.file</td>
 			</tr>
 		</table><hr/>
 		<h1 id="orion.core.contentTypeRegistry">orion.core.contentTypeRegistry</h1>
@@ -34,16 +34,17 @@
 			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Types</a> that have been registered with Orion.
 		</p>
 		<p>Here is an example usage showing how to query all registered content types and print them to the console:</p>
-		<pre>serviceRegistry.getService("orion.core.contentTypeRegistry").getContentTypes().then(function(contentTypes) {
+		<pre class="source-javascript">serviceRegistry.getService("orion.core.contentTypeRegistry").getContentTypes().then(function(contentTypes) {
     contentTypes.forEach(function(contentType) {
         console.log("Content Type ID: " + contentType.id + ", " +
                 "name: " + contentType.name + ", " +
-                "extends from: " + contentType<a href="'extends'">'extends'</a> + ", " +
-                "file extension(s): <a href="&quot;">+ contentType.extension.join(",") + "</a>, " +
-                "filename(s): <a href="&quot;">+ contentType.filename.join(",") + "</a>, " +
+                "extends from: " + contentType['extends'] + ", " +
+                "file extension(s): [" + contentType.extension.join(",") + "], " +
+                "filename(s): [" + contentType.filename.join(",") + "], " +
                 "image: " + contentType.image + "\n");
     });
 });
+
 </pre>
 		<p>See <tt>orion.core.ContentTypeRegistry</tt> in the Orion client API reference for a complete list of functions available.</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
@@ -59,7 +60,7 @@
 					</a>
 				</td>
 				<td style="width: 20%" align="right">
-					<a href="orion-core-favorite.html" title="orion.core.favorite">
+					<a href="orion-core-file.html" title="orion.core.file">
 						<img alt="Next" border="0" src="../../../../images/next.gif"/>
 					</a>
 				</td>
@@ -67,7 +68,7 @@
 			<tr>
 				<td style="width: 20%" align="left" valign="top">Core client services</td>
 				<td style="width: 60%" align="center"></td>
-				<td style="width: 20%" align="right" valign="top">orion.core.favorite</td>
+				<td style="width: 20%" align="right" valign="top">orion.core.file</td>
 			</tr>
 		</table>
 	</body>

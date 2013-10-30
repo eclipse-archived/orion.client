@@ -33,10 +33,12 @@
 		<p>The selection service tracks the selection in the current page. The page is the provider of the selection, using service API to set the selection.  The page determines how selections are shown and made by the user, and whether single or multiple selections are allowed.  Typically selections are managed in a list, table, or tree.  The page also determines what kind of objects are stored to represent selections, such as a string, URI, or json object with certain properties. </p>
 		<p>Consumers of the selection service use API to get the current selection, or to register a listener that will be notified when the selection changes.</p>
 		<p>Here is an example of a selection consumer adding a listener to track selection changes:</p>
-		<pre> serviceRegistry.getService("orion.page.selection").addEventListener("selectionChanged", function(fileURI) {
-     //Do something with the selection.  Consumers must know what type of object is stored.
-     //The first parameter is a single selection, the second parameter is an array of selections.
- });
+		<pre class="source-javascript">  serviceRegistry.getService("orion.page.selection").addEventListener("selectionChanged", function(event) {
+      // Do something with the selection.  Consumers must know what type of object is stored.
+      // event.selection - A single selected item.
+      // event.selections - Array of selected items.
+  });
+
 </pre>
 		<p>See <tt>orion.selection.Selection</tt> in the client API reference for a complete list of functions available on the selection service.</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">

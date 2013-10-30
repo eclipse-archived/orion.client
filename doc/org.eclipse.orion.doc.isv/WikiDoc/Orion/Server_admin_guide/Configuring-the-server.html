@@ -38,7 +38,7 @@
 		<p>If the configuration file is not in the working directory, Orion will check the platform instance location - the location specified by the -data command line argument. By default this is a directory called "serverworkspace". Alternatively, the location of the configuration file can be specified via the system property <tt>orion.core.configFile</tt>. For example add this line to orion.ini:</p>
 		<pre>-Dorion.core.configFile=/home/fran/orion.conf
 </pre>
-		<p>The file is a simple text configuration file with key/value pairs delimited by '=' character. Lines starting with '#' are treated as comments and ignored</p>
+		<p>The file is a simple text properties file with key/value pairs delimited by '=' character. Lines starting with '#' are treated as comments and ignored.</p>
 		<p>
 			<b>Note:</b> For those developing Orion, the server configuration file can be specified in your Eclipse launch configuration. The launch configuration file included in the bundle <tt>org.eclipse.orion.client.core</tt> will automatically use the configuration file <tt>web-ide.conf</tt> in the same bundle.
 		</p>
@@ -46,13 +46,15 @@
 		<p>By default Orion will run on port 8080. To change the port, edit the file <tt>orion.ini</tt>, and change the value of the "org.eclipse.equinox.http.jetty.http.port" system property.</p>
 		<h2 id="Safely_running_on_port_80">Safely running on port 80</h2>
 		<p>Running a server on port 80 usually requires running the application as the root user. For security reasons, running the Orion server as root is not recommended. Instead, you can run a basic Apache server as root, with the following entries in the Apache virtual host configuration file:</p>
-		<pre>RewriteEngine On
+		<pre class="source-apache">RewriteEngine On
 ProxyPreserveHost On
-RewriteRule ^/(.*) <a href="http://localhost:8080/$1" target="orion_external">http://localhost:8080/$1</a> <a href="P,L">P,L</a>
+RewriteRule ^/(.*) http://localhost:8080/$1 [P,L]
+
 </pre>
 		<p>Also, for the wildcard hosting, this is used as well (in addition to a wildcard DNS entry):</p>
-		<pre>ServerName orion.eclipse.org
+		<pre class="source-apache">ServerName orion.eclipse.org
 ServerAlias *.orion.eclipse.org
+
 </pre>
 		<h2 id="Configuring_to_run_over_SSL">Configuring to run over SSL</h2>
 		<p>The Orion server can be configured to run over the secure https protocol. In order to do it you need to generate or obtain a public/private key pair and x509 certificate and set the Orion configuration as described below..</p>
@@ -69,41 +71,47 @@ ServerAlias *.orion.eclipse.org
 		<p>Now set the following properties in the 
 			<a href="#Server_configuration_file">server configuration file</a>:
 		</p>
-		<pre>jetty.https.enabled = true
+		<pre class="source-properties">jetty.https.enabled = true
 jetty.https.port = 8443
-jetty.ssl.keystore = <a href="the">keystore location</a>
-jetty.ssl.password =  <a href="password">password</a>
-jetty.ssl.keypassword = <a href="password">password</a>
+jetty.ssl.keystore = [the keystore location]
+jetty.ssl.password =  [password]
+jetty.ssl.keypassword = [password]
 jetty.ssl.protocol = SSLv3
+
 </pre>
 		<h2 id="Configuring_paths_where_users_can_store_files">Configuring paths where users can store files</h2>
 		<p>By default all files created by users are stored in the Orion "server workspace". This is the location specified by the "-data" argument when launching the server. By default this workspace is stored at eclipse/serverworkspace/. To allow users to link files in other locations to their workspace, the <tt>orion.file.allowedPaths</tt> property can be set in the 
 			<a href="#Server_configuration_file">server configuration file</a>. The property value is a comma-separated list of absolute file system paths. Users will be allowed to link to and edit files in any of those locations. This line in the server configuration file will enable storing of files in <tt>/home/orion</tt> on the server, or in any sub-directory thereof.
 		</p>
-		<pre>orion.file.allowedPaths=/home/orion
+		<pre class="source-properties">orion.file.allowedPaths=/home/orion
+
 </pre>
 		<p>On Windows two backslashes must be used to separate path entries:</p>
-		<pre>orion.file.allowedPaths=C:\\Users\\orion
+		<pre class="source-properties">orion.file.allowedPaths=C:\\Users\\orion
+
 </pre>
 		<h2 id="Configuring_project_layout">Configuring project layout</h2>
 		<p>By default, projects are stored in the server workspace in a flat layout at the root of the workspace directory. This layout works well for single-user or small team installs. However in a large installation with hundreds or thousands of users, you may hit limits on the number of entries that can be stored in a directory. The layout can be changed to a hierarchy tree of projects organized by user id with the following property in the 
 			<a href="#Server_configuration_file">server configuration file</a>:
 		</p>
-		<pre>orion.file.layout=userTree
+		<pre class="source-properties">orion.file.layout=userTree
+
 </pre>
 		<p>To use the default flat directory structure, you can either omit the property entirely, or specify: </p>
-		<pre>orion.file.layout=flat
+		<pre class="source-properties">orion.file.layout=flat
+
 </pre>
 		<h2 id="Authentication_type">Authentication type</h2>
 		<p>To configure the kind of authentication used by the server, set the <tt>orion.auth.name</tt> property in the 
 			<a href="#Server_configuration_file">server configuration file</a>. For example, the following line will configure the server to use simple form-based authentication:
 		</p>
-		<pre> orion.auth.name=FORM+OpenID
+		<pre class="source-properties">orion.auth.name=FORM+OpenID
+
 </pre>
 		<p>Valid values for this property are:</p>
 		<ul>
-			<li>Basic: Basic HTTP authentication (not secure unless running on https)</li>
-			<li>FORM+OpenID: User can select form-based authentication or OpenID authentication</li>
+			<li><code>Basic</code>: Basic HTTP authentication (not secure unless running on https)</li>
+			<li><code>FORM+OpenID</code>: User can select form-based authentication or OpenID authentication</li>
 		</ul>
 		<h2 id="Configuring_Mozilla_Persona_authentication">Configuring Mozilla Persona authentication</h2>
 		<p>Orion supports login using 
@@ -113,13 +121,17 @@ jetty.ssl.protocol = SSLv3
 		<p>Mozilla Persona credentials supplied by a user are verified against an "audience" parameter, which identifies the server (scheme + domain + port) they're trying to log in to. The following property sets the audience parameter that your server expects. The value of this property should exactly match the client-facing URL of your website. For example, here is what an entry for 
 			<a href="http://orionhub.org" target="orion_external">orionhub.org</a> would look like:
 		</p>
-		<pre>orion.auth.host=<a href="http://orionhub.org:80" target="orion_external">http://orionhub.org:80</a>
+		<pre class="source-properties">orion.auth.host=http://orionhub.org:80
+
 </pre>
-		<p>If this property is not set, Orion will only allow Persona logins from a local loopback device (localhost, 127.0.0.1, etc.). All other attempts attempts to log in with Persona will fail with a message like this:
-<blockquote>			Error logging in: Authentication host not configured. Contact your system administrator for assistance.</blockquote></p>
+		<p>If this property is not set, Orion will only allow Persona logins from a local loopback device (localhost, 127.0.0.1, etc.). All other attempts attempts to log in with Persona will fail with a message like this:</p>
+		<dl>
+			<dd>Error logging in: Authentication host not configured. Contact your system administrator for assistance.</dd>
+		</dl>
 		<h3 id="Setting_the_verifier">Setting the verifier</h3>
 		<p>When logging in with Mozilla Persona credentials, the user's information is verified using a third-party web service. The following property specifies the URL of the service to be used:</p>
-		<pre>orion.auth.persona.verifier=<a href="https://verifier.login.persona.org/verify" target="orion_external">https://verifier.login.persona.org/verify</a>
+		<pre class="source-properties">orion.auth.persona.verifier=https://verifier.login.persona.org/verify
+
 </pre>
 		<p>If this property is not set, <code>
 			<a href="https://verifier.login.persona.org/verify" target="orion_external">https://verifier.login.persona.org/verify</a></code> is used by default.
@@ -132,33 +144,41 @@ jetty.ssl.protocol = SSLv3
 		<p>By default, each user can only read and write projects they created. When self-hosting or in small team installations, it may be useful to enable users to access each other's projects in a read-only fashion. This can be done by setting the following property in the 
 			<a href="#Server_configuration_file">server configuration file</a>:
 		</p>
-		<pre>orion.file.anonymous.read=true
+		<pre class="source-properties">orion.file.anonymous.read=true
+
 </pre>
 		<h2 id="Email_configuration">Email configuration</h2>
 		<p>Orion allows to users to add their email account in profile, that will be later used to send email notifications, for instance resetting the password. This option is however only available if email and SMTP server configuration is present in the 
 			<a href="#Server_configuration_file">server configuration file</a>:
 		</p>
 		<p>SMTP host that will send email:</p>
-		<pre>mail.smtp.host=<a href="smtp_host">smtp_host</a>
+		<pre class="source-properties"> mail.smtp.host=[smtp_host]
+
 </pre>
-		<p>port if different than 25 (default):</p>
-		<pre>mail.smtp.port=25
+		<p>Port, if different than 25 (default):</p>
+		<pre class="source-properties"> mail.smtp.port=25
+
 </pre>
-		<p>information if authentication to SMTP server is needed</p>
-		<pre>mail.smtp.auth=true
+		<p>Information, if authentication to SMTP server is needed:</p>
+		<pre class="source-properties"> mail.smtp.auth=true
+
 </pre>
-		<p>SMTP server user name if authentication to SMTP server is needed:</p>
-		<pre>mail.smtp.user=<a href="smtp_user">smtp_user</a>
+		<p>SMTP server user name, if authentication to SMTP server is needed:</p>
+		<pre class="source-properties"> mail.smtp.user=[smtp_user]
+
 </pre>
-		<p>SMTP server password if authentication to SMTP server is needed:</p>
-		<pre>mail.smtp.password=<a href="password">password</a> 
+		<p>SMTP server password, if authentication to SMTP server is needed:</p>
+		<pre class="source-properties"> mail.smtp.password=[password] 
+
 </pre>
-		<p>email that messages will come from (for instance webmaster@orion.eclipse.org):</p>
-		<pre>mail.from=<a href="sender_of_mails">sender_of_mails</a>
+		<p>Email that messages will come from (for instance webmaster@orion.eclipse.org):</p>
+		<pre class="source-properties"> mail.from=[sender_of_mails]
+
 </pre>
 		<h2 id="Automatic_git_projects">Automatic git projects</h2>
 		<p>There is a server configuration property to automatically create a git repository for each created project. This allows a user to stage/commit changes, compare with committed changes, etc. This repository cannot currently be synchronized with a remote replica. To enable this setting, the following property must be specified in the server configuration file:</p>
-		<pre> orion.file.defaultSCM=git
+		<pre class="source-properties">orion.file.defaultSCM=git
+
 </pre>
 		<h2 id="Custom_page_footer">Custom page footer</h2>
 		<p>Installations of Orion can use a hook for providing a custom footer at the bottom of every page. This area is useful for adding copyright notices, legal disclaimers, etc.</p>
@@ -167,7 +187,8 @@ jetty.ssl.protocol = SSLv3
 		<p>In Orion, users can select files and folders from their workspace and launch them as a stand-alone website. For this to work, you should tell the Orion server what virtual host names will be used to host sites. This is done by setting the <tt>orion.site.virtualHosts</tt> property in the 
 			<a href="#Server_configuration_file">server configuration file</a>:
 		</p>
-		<pre>orion.site.virtualHosts=*.planetorion.org
+		<pre class="source-properties">orion.site.virtualHosts=*.planetorion.org
+
 </pre>
 		<p>The value after the 
 			<i>=</i> sign is a comma-separated list of domains, such as:
@@ -186,44 +207,65 @@ jetty.ssl.protocol = SSLv3
 		<h4 id="Defaults">Defaults</h4>
 		<p>If you don't supply the <tt>orion.site.virtualHosts</tt> property, Orion will use a default setting. On Windows and Linux, the default assigns up to 16 addresses in the range 127.0.0.2 to 127.0.0.254. On Mac OS X, there are no default addresses, so you will receive an error ("No more hosts available") when you attempt to start a site.</p>
 		<h3 id="Examples">Examples</h3>
-		<dl>
-			<dt><code>orion.site.virtualHosts=site.myhost.net</code></dt>
-			<dd>Makes 1 host name, <code>site.myhost.net</code>, available for allocation as a virtual host name.<p></p></dd>
-			<dt><code>orion.site.virtualHosts=127.0.0.2,127.0.0.3</code> </dt>
-			<dd>Makes the 2 IP addresses available as virtual host names. Since they happen to be loopback addresses, any hosted site assigned to them will only be reachable from the local machine. (See 
-				<a href="#Hosting_locally">Hosting locally</a>).<p></p>
-			</dd>
-			<dt><code>orion.site.virtualHosts=*.myhost.net</code> </dt>
-			<dd>Makes all of <code>*.myhost.net</code> available for allocation. Hosted sites will be assigned to subdomains, for example <code>site1.myhost.net</code>, <code>site2.myhost.net</code>, etc.<p></p></dd>
-			<dt><code>orion.site.virtualHosts=foo.myhost.net,*.myhost.net</code> </dt>
-			<dd>Makes 1 domain and 1 wildcard domain available. They will be allocated in the order provided. That is, <code>foo.myhost.net</code> will be assigned to the first hosted site that is launched, and subsequent launches will be assigned subdomains of <code>myhost.net</code>.</dd>
-		</dl>
+		<p>
+			<b>Example 1.</b> Make 1 host name, <code>site.myhost.net</code>, available for allocation as a virtual host name.
+		</p>
+		<pre class="source-properties">orion.site.virtualHosts=site.myhost.net
+</pre>
+		<p>
+			<b>Example 2.</b> Make the 2 IP addresses available as virtual host names. Since they happen to be loopback addresses, any hosted site assigned to them will only be reachable from the local machine. (See 
+			<a href="#Hosting_locally">Hosting locally</a>):
+		</p>
+		<pre class="source-properties">orion.site.virtualHosts=127.0.0.2,127.0.0.3
+</pre>
+		<p> </p>
+		<p>
+			<b>Example 3.</b> Make all of <code>*.myhost.net</code> available for allocation. Hosted sites will be assigned to subdomains, for example <code>site1.myhost.net</code>, <code>site2.myhost.net</code>, etc.
+		</p>
+		<pre class="source-properties">orion.site.virtualHosts=*.myhost.net
+</pre>
+		<p> </p>
+		<p>
+			<b>Example 4.</b> Make 1 domain and 1 wildcard domain available. They will be allocated in the order provided. That is, <code>foo.myhost.net</code> will be assigned to the first hosted site that is launched, and subsequent launches will be assigned subdomains of <code>myhost.net</code>.
+		</p>
+		<pre class="source-properties">orion.site.virtualHosts=foo.myhost.net,*.myhost.net
+</pre>
 		<h3 id="Hosting_locally">Hosting locally</h3>
 		<p>When you are the only user of your Orion server, you can just use some aliases for localhost to host on. On most platforms, any 127.x.x.x address will work, so you can do this:</p>
-		<pre>orion.site.virtualHosts=127.0.0.2,127.0.0.3
+		<pre class="source-properties">orion.site.virtualHosts=127.0.0.2,127.0.0.3
+
 </pre>
 		<p>The above example would give you 2 IP addresses available for virtual hosts: 127.0.0.2 and 127.0.0.3.</p>
-		<p><div class="messagebox " style="background-color: #f9f6b7; border: 1px solid #c4c295; color: black; padding: 5px; margin: 1ex 0; min-height: 35px; padding-left: {{#expr:35+10}}px; ">
-<div style="float: left; margin-left: -{{#expr:35+5}}px;">
-			<img width="35" border="0" src="images/Idea.png"/></div>
-<div>			{{#if:Running on Mac OS X:</div>
-</div>			{{#if:In OS X, the above example will not work out-of-the-box. First you'll have to manually create the aliases by running these commands in Terminal.app:
-		</p>
-		<pre>$ sudo ifconfig lo0 alias 127.0.0.2 up
-$ sudo ifconfig lo0 alias 127.0.0.3 up
-</pre>
-		<p>Also ensure that your orion.conf file is located properly inside the orion.app.  You will want to "Show Package Contents" in the Finder and then place the file in Contents/MacOS.  Then try the example. Note that if you restart your machine, you'll have to execute the sudo commands again.
-			|In OS X, the above example will not work out-of-the-box. First you'll have to manually create the aliases by running these commands in Terminal.app:</p>
-		<pre>$ sudo ifconfig lo0 alias 127.0.0.2 up
-$ sudo ifconfig lo0 alias 127.0.0.3 up
-</pre>
-		<p>Also ensure that your orion.conf file is located properly inside the orion.app.  You will want to "Show Package Contents" in the Finder and then place the file in Contents/MacOS.  Then try the example. Note that if you restart your machine, you'll have to execute the sudo commands again.
-			}}|image=Note.png|bgcolor=#def3fe|bdcolor=#c5d7e0}}</p>
 		<p>To use a more readable hostname instead of an IP address, you can edit the 
 			<a href="http://en.wikipedia.org/wiki/Hosts_file" target="orion_external">hosts file</a> on your local machine and create an entry that maps <code>friendlyHostname</code> to <code>127.0.0.1</code>. Then include the same hostname in the server configuration property, and Orion will use it:
 		</p>
-		<pre>orion.site.virtualHosts=friendlyHostname
-</pre><hr/>
+		<pre class="source-properties">orion.site.virtualHosts=friendlyHostname
+
+</pre>
+		<h5 id="Running_on_Mac_OS_X">Running on Mac OS X</h5>
+		<p>You'll have to manually create the aliases by running these commands in Terminal.app:</p>
+		<pre class="source-bash">$ sudo ifconfig lo0 alias 127.0.0.2 up
+$ sudo ifconfig lo0 alias 127.0.0.3 up
+
+</pre>
+		<p>Also ensure that your orion.conf file is located properly inside the orion.app.  You will want to "Show Package Contents" in the Finder and then place the file in Contents/MacOS. Then try the example. If you restart your machine, you'll have to execute the sudo commands again.</p>
+		<h2 id="Changing_the_backend_metadata_format">Changing the backend metadata format</h2>
+		<p>Orion 4.0 introduced a new &lt;dfn&gt;simple&lt;/dfn&gt; format for backend storage of metadata (users, workspaces, and projects) on the server, intended to provide better scalability and easier administration. To use the new format, set the <code>orion.core.metastore</code> property to <code>simple</code>:</p>
+		<pre class="source-properties">orion.core.metastore=simple
+
+</pre>
+		<p>To use the old metadata format from Orion 3.0 and earlier, specify <code>legacy</code>:</p>
+		<pre class="source-properties">orion.core.metastore=legacy
+
+</pre>
+		<p>If this property is not provided, the <code>legacy</code> format is used by default.</p>
+		<dl>
+			<dd>
+				<img alt="Warning" border="0" src="images/Warning2.png"/> 
+				<b>WARNING:</b> Running the server with <code>orion.core.metastore=simple</code> against an existing 3.0 server workspace will migrate the workspace to the simple format. The migration is irreversible, so you should create a backup copy of the server workspace before attempting this. Consult the 
+				<a href="http://wiki.eclipse.org/Orion/Metadata_migration" title="Orion/Metadata migration" target="orion_external">Metadata migration</a> page for more details.
+			</dd>
+		</dl><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
 				<td style="width: 20%" align="left">

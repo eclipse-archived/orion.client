@@ -60,12 +60,11 @@
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Validation_Properties" title="Orion/Documentation/Developer Guide/Plugging into Orion pages#Validation Properties">Validation Properties</a> used to determine if the selected object should offer this command.
 			</dd>
 			<dt>showGlobally</dt>
-			<dd>A boolean attribute specifying if this command should be shown on pages other than the navigator.  Optional.</dd>
+			<dd>Optional, defaults to <code>false</code>. A boolean attribute specifying whether this command should be shown in file contexts other than the navigator. (For example, the editor toolbar is one such context. If a command specifies both <code>showGlobally</code> and <code>forceSingleItem</code>, it will be shown on the editor toolbar.)</dd>
 		</dl>
 		<h2 id="Example">Example</h2>
 		<p>Here is a sample plug-in that contributes a link to a Google search for the selected file's name:</p>
-		<pre>
- var provider = new eclipse.PluginProvider({postInstallUrl:"/plugin/list.html"});
+		<pre class="source-javascript"> var provider = new orion.PluginProvider({postInstallUrl:"/plugin/list.html"});
  provider.registerServiceProvider("orion.navigate.command", {}, {
    image: "http://www.google.com/favicon.ico",
    name: "Google Search",
@@ -75,6 +74,7 @@
    tooltip: "Link to google search for this file name"
  });
  provider.connect();
+
 </pre>
 		<p>When this plug-in is installed, the user will see the google search command in the Navigator menu as follows:</p>
 		<p>

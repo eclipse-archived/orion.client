@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <toc topic="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/Plugging-into-the-navigator.html" label="Plugging into the navigator">
-	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/Plugging-into-the-navigator.html" label="Overview of contributing services to the Navigator"></topic>
+	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/Plugging-into-the-navigator.html" label="Overview of contributing services to the navigator"></topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-navigate-command.html" label="orion.navigate.command">
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-navigate-command.html#Service_methods" label="Service methods"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-navigate-command.html#Service_attributes" label="Service attributes"></topic>
@@ -12,7 +12,9 @@
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-navigate-openWith.html#Example_2" label="Example"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html" label="orion.core.contenttype">
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#Service_attributes_3" label="Service attributes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#Service_attributes_3" label="Service attributes">
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#The_ContentType_object" label="The ContentType object"></topic>
+		</topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#Service_methods_3" label="Service methods"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#Example_3" label="Example"></topic>
 	</topic>

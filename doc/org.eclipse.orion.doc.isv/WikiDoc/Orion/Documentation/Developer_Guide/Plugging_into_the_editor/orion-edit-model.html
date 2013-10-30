@@ -18,7 +18,7 @@
 				</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right">
-					<a href="orion-edit-outliner.html" title="orion.edit.outliner">
+					<a href="orion-edit-occurrences.html" title="orion.edit.occurrences">
 						<img alt="Next" border="0" src="../../../../images/next.gif"/>
 					</a>
 				</td>
@@ -26,30 +26,50 @@
 			<tr>
 				<td style="width: 20%" align="left" valign="top">orion.edit.highlighter</td>
 				<td style="width: 60%" align="center"></td>
-				<td style="width: 20%" align="right" valign="top">orion.edit.outliner</td>
+				<td style="width: 20%" align="right" valign="top">orion.edit.occurrences</td>
 			</tr>
 		</table><hr/>
 		<h1 id="orion.edit.model">orion.edit.model</h1>
-		<p>An <tt>orion.edit.model</tt> service provides listeners on changes made to the <tt>orion.textview.TextView</tt> that powers the Orion editor.</p>
+		<p>An <code>orion.edit.model</code> service provides listeners on changes made to the <code>orion.textview.TextView</code> that powers the Orion editor.</p>
 		<p>
 			<b>NOTE:</b> This section is experimental and may change in future versions.
 		</p>
-		<h2 id="Service_methods_5">Service methods</h2>
-		<p>An implementation of <tt>orion.edit.model</tt> may define zero or more functions depending on what event types it gives in its 
+		<h2 id="Service_methods_4">Service methods</h2>
+		<p>An implementation of <code>orion.edit.model</code> may define zero or more functions depending on what event types it gives in its 
 			<b>types</b> attribute. For every event type in 
-			<b>types</b>, the function with the name <tt>"on" + eventType</tt> will be invoked. For example, a "ModelChanged" event type causes the the provider's 
-			<b>onModelChanged</b> function to be invoked.
+			<b>types</b>, the function with the name <code>"on" + eventType</code> will be invoked. For example, a "ModelChanged" event type causes the the provider's "onModelChanged()" function to be invoked.
 		</p>
-		<p>The functions are always invoked with a single parameter, <tt>event</tt>, containing the event data that was dispatched by the TextView.</p>
-		<h2 id="Service_attributes_5">Service attributes</h2>
-		<p>Implementations of <tt>orion.edit.model</tt> must define the following attributes:</p>
+		<p>The functions are always invoked with a single parameter, <code>event</code>, containing the event data that was dispatched by the TextView. The current list of supported onXXXX methods is as follows:</p>
+		<ul>
+			<li>onContextMenu(event)</li>
+			<li>onDragStart(event)</li>
+			<li>onDragEnd(event)</li>
+			<li>onDragEnter(event)</li>
+			<li>onDragOver(event)</li>
+			<li>onDragLeave(event)</li>
+			<li>onDragStop(event)</li>
+			<li>onModelChanging(event)</li>
+			<li>onModelChanged(event)</li>
+			<li>onModify(event)</li>
+			<li>onMouseDown(event)</li>
+			<li>onMouseUp(event)</li>
+			<li>onMouseMove(event)</li>
+			<li>onMouseOver(event)</li>
+			<li>onMouseOut(event)</li>
+			<li>onScroll(event)</li>
+			<li>onVerify(event)</li>
+			<li>onFocus(event)</li>
+			<li>onBlur(event)</li>
+		</ul>
+		<h2 id="Service_attributes_6">Service attributes</h2>
+		<p>Implementations of <code>orion.edit.model</code> must define the following attributes:</p>
 		<dl>
 			<dt>types</dt>
-			<dd><tt>Array</tt> An array of TextView event types that this provider is interested in. When an event of one of these types is dispatched by the TextView, this provider's corresponding function will be invoked. For example, a provider with "ModelChanged" in its types array will have its 
-				<b>onModelChanged</b> function invoked whenever the TextView dispatches a <tt>ModelChanged</tt> event.
+			<dd><code>Array</code> An array of TextView event types that this provider is interested in. When an event of one of these types is dispatched by the TextView, this provider's corresponding function will be invoked. For example, a provider with "ModelChanged" in its types array will have its 
+				<b>onModelChanged</b> function invoked whenever the TextView dispatches a <code>ModelChanged</code> event.
 			</dd>
 			<dt>contentType</dt>
-			<dd><tt>Array</tt> An array of 
+			<dd><code>Array</code> An array of 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> that this provider is interested in listening to changes for. The provider will only be notified of events that occur when a file matching one of these content types is being edited.
 			</dd>
 		</dl>
@@ -70,7 +90,7 @@
 					</a>
 				</td>
 				<td style="width: 20%" align="right">
-					<a href="orion-edit-outliner.html" title="orion.edit.outliner">
+					<a href="orion-edit-occurrences.html" title="orion.edit.occurrences">
 						<img alt="Next" border="0" src="../../../../images/next.gif"/>
 					</a>
 				</td>
@@ -78,7 +98,7 @@
 			<tr>
 				<td style="width: 20%" align="left" valign="top">orion.edit.highlighter</td>
 				<td style="width: 60%" align="center"></td>
-				<td style="width: 20%" align="right" valign="top">orion.edit.outliner</td>
+				<td style="width: 20%" align="right" valign="top">orion.edit.occurrences</td>
 			</tr>
 		</table>
 	</body>

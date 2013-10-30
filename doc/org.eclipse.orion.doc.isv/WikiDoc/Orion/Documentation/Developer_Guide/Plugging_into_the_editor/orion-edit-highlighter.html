@@ -39,18 +39,21 @@
 		<p>
 			<b>NOTE:</b> The "highlighter" API is experimental and subject to change in future versions.
 		</p>
-		<h2 id="Service_methods_4">Service methods</h2>
+		<h2 id="Service_methods_3">Service methods</h2>
 		<p>Implementations of <code>orion.edit.highlighter</code> whose 
 			<b>type</b> attribute is "highlighter", must define the following method:
 		</p>
 		<dl>
 			<dt>setContentType(contentTypeId)</dt>
-			<dd>Orion invokes this method to inform the provider what kind of file it must provide  highlighting for. This allows the provider that to register itself with several content types, but implement different logic for each type.</dd>
+			<dd>
+				<b>contentTypeId</b> <code>String</code> The Content Type ID of the file that is being edited.
+			</dd>
 		</dl>
+		<p>Orion invokes this method to inform the provider what kind of file it must provide highlighting for. This allows the provider that to register itself with several content types, but implement different logic for each type.</p>
 		<p>When this provider's 
-			<b>type</b> is "grammar", no service methods are defined. In other words, the provider is purely declarative.
+			<b>type</b> is "grammar", no service methods are defined: a grammar provider is purely declarative.
 		</p>
-		<h2 id="Service_attributes_4">Service attributes</h2>
+		<h2 id="Service_attributes_5">Service attributes</h2>
 		<p>Implementations of <code>orion.edit.highlighter</code> must define the following attributes:</p>
 		<dl>
 			<dt>type</dt>
@@ -78,24 +81,25 @@
 			<b>type</b> of the provider is "grammar", the provider dispatches no service events.
 		</p>
 		<h2 id="Example_of_a_.27grammar.27_provider">Example of a 'grammar' provider</h2>
-		<pre>var provider = new eclipse.PluginProvider();
-provider.registerServiceProvider("orion.edit.highlighter",
-  {
-    // "grammar" provider is purely declarative. No service methods.
-  }, {
-    type : "grammar",
-    contentType: <a href="&quot;text/html&quot;">"text/html"</a>,
-    grammar: {
-      patterns: [
-          {  begin: "&lt;!--", 
-             end: "--&gt;",
-             captures: { "0": "punctuation.definition.comment.html" },
-             contentName: "comment.block.html"
-          }
-      ]
-    }
-  });
-provider.connect();
+		<pre class="source-javascript"> var provider = new eclipse.PluginProvider();
+ provider.registerServiceProvider("orion.edit.highlighter",
+   {
+     // "grammar" provider is purely declarative. No service methods.
+   }, {
+     type : "grammar",
+     contentType: ["text/html"],
+     grammar: {
+       patterns: [
+           {  begin: "&lt;!--", 
+              end: "--&gt;",
+              captures: { "0": "punctuation.definition.comment.html" },
+              contentName: "comment.block.html"
+           }
+       ]
+     }
+   });
+ provider.connect();
+
 </pre>
 		<p>The above example provides a grammar to be used for HTML files. It will assign the CSS class <code>punctuation-definition-comment-html</code> to the <code>&lt;!--</code> and <code>--&gt;</code> delimiters, and assign the CSS class <code>comment-block-html</code> to the text inside the delimiters. Consult 
 			<a href="http://manual.macromates.com/en/language_grammars.html" target="orion_external">this reference</a> for a full description of the grammar format.

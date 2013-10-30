@@ -56,10 +56,16 @@
 			<dt>OrionHome</dt>
 			<dd>Specifies the hostname for the Orion server instance.  This variable can be used by a plugin that is installed in another domain to reference a page location in Orion.</dd>
 		</dl>
-		<p>For example, the URI template <tt>{OrionHome}/content/content.html#{Location}</tt> links to a particular page (content.html) in the running Orion instance, and includes the value of the <tt>Location</tt> property in the originating page's object metadata after the hash.</p>
+		<p>For example, the URI template <tt>{+OrionHome}/content/content.html#{+Location}</tt> links to a particular page (content.html) in the running Orion instance, and includes the value of the <tt>Location</tt> property in the originating page's object metadata after the hash. Note that we prefix variables with <code>+</code> in the template to indicate that their value should 
+			<i>not</i> be 
+			<a href="http://en.wikipedia.org/wiki/Percent-encoding" target="orion_external">percent-encoded</a> when the template is expanded. This is required for any variables that we expect to contain raw URL characters like <code>'/'</code>, which would otherwise be encoded to <code>%2F</code> by the template engine.
+		</p>
+		<p>The URI Template syntax is specified by 
+			<a href="http://tools.ietf.org/html/rfc6570" target="orion_external">RFC 6570</a>.
+		</p>
 		<h2 id="Content_Types">Content Types</h2>
 		<p>Content types may be used to further validate file-based metadata.  For example, if a page link should only be visible when the page is showing HTML or CSS, a content type of <tt>
-			<a href="text/html,">text/css</a></tt>can be used to express this.
+			<a href="&quot;text/html&quot;,">"text/css"</a></tt> can be used to express this.
 		</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>

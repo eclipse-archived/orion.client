@@ -77,8 +77,8 @@
 			<li>Create a new clean serverworkspace directory</li>
 			<li>Copy the following two directories from the old server workspace to the new one:</li>
 		</ul>
-		<pre> .metadata\.plugins\org.eclipse.core.runtime (contains server configuration file)
- .metadata\.plugins\org.eclipse.orion.server.user.securestore (contains user account information)
+		<pre>.metadata\.plugins\org.eclipse.core.runtime (contains server configuration file)
+.metadata\.plugins\org.eclipse.orion.server.user.securestore (contains user account information)
 </pre>
 		<ul>
 			<li>Start the server again</li>
@@ -124,8 +124,6 @@ $CURL -b curl_cookies.txt    \ # Use this cookies file
       -d 'login=someaccount' \ # POST value: create account called someaccount
       -d 'password=abc123'   \ # POST value: password is abc123
       http://$SERVER/users
-
-
 
 </pre>
 		<p>

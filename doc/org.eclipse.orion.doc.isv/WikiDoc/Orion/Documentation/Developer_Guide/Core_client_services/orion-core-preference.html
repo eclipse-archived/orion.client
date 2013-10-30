@@ -32,25 +32,27 @@
 		<h1 id="orion.core.preference">orion.core.preference</h1>
 		<p>The preferences service manages a hierarchical set of preference nodes. Nodes are identified by a path string, where segments are delimited by the slash character ('/'). Each node is a JSON object with string keys and values that are String, Boolean, or Number.</p>
 		<p>Here is an example of retrieving a preference storing the list of recently used projects:</p>
-		<pre> prefService.getPreferences("/window/recent").then(function(prefs) {
-   var projects =  prefs.get("projects");
-   if (typeof projects === "string") {
-     projects = JSON.parse(projects);
-   }
-   if (projects &amp;&amp; projects.length &amp;&amp; projects.length &gt; 0) {
-     //do something with the projects
-   }
- });
+		<pre class="source-javascript">prefService.getPreferences("/window/recent").then(function(prefs) {
+    var projects =  prefs.get("projects");
+    if (typeof projects === "string") {
+      projects = JSON.parse(projects);
+    }
+    if (projects &amp;&amp; projects.length &amp;&amp; projects.length &gt; 0) {
+      //do something with the projects
+    }
+});
+
 </pre>
 		<p>And here is an example of adding a new project to the list, and storing the result back in the preference service:</p>
-		<pre> prefService.getPreferences("/window/recent").then(function(prefs) {
-   var projects = prefs.get("projects");
-   if (typeof projects === "string") {
-     projects = JSON.parse(projects);
-   }
-   projects.push({name: "My Proj", location: "<a href="http://example.com/myproj" target="orion_external">http://example.com/myproj</a>"});
-   prefs.put("projects", projects);
- });
+		<pre class="source-javascript">prefService.getPreferences("/window/recent").then(function(prefs) {
+    var projects = prefs.get("projects");
+    if (typeof projects === "string") {
+      projects = JSON.parse(projects);
+    }
+    projects.push({name: "My Proj", location: "http://example.com/myproj"});
+    prefs.put("projects", projects);
+});
+
 </pre><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>

@@ -32,11 +32,15 @@
 		<h1 id="orion.core.textlink">orion.core.textlink</h1>
 		<p>The text link service scans text for segments that could be interpreted as hyperlinks, and inserts appropriate anchor elements representing each link. For example the service could scan for email addresses in a piece of text and convert them to mailto: links.</p>
 		<p>Here is an example of using the text link service:</p>
-		<pre>var divWithLinks = linkService.addLinks(someText);
+		<pre class="source-javascript">var divWithLinks = linkService.addLinks(someText);
 dojo.place(divWithLinks, body, "first");
+
 </pre>
 		<p>The text link service makes use of 
 			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/orion-core-linkScanner.html#orion.core.linkScanner" title="Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages#orion.core.linkScanner">link scanners</a> contributed by plugins to perform the analysis and replacement of text with links. If no link scanners are available, the text link service simply returns a DOM element containing the entire input text.
+		</p>
+		<p>
+			<a href="http://wiki.eclipse.org/Category:Orion" title="Category:Orion" target="orion_external">O</a>
 		</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>

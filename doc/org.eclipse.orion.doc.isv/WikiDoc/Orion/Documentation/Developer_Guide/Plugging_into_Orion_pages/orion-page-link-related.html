@@ -57,19 +57,20 @@
 		</dl>
 		<h2 id="Examples_3">Examples</h2>
 		<p>The following related page link will determine if the current page's target has a <tt>GitUrl</tt> that conforms to the URL of git repositories hosted at github.com.  If so, then parts of the URL are assigned to variables that are used to build the associated github URL.</p>
-		<pre>provider.registerServiceProvider("orion.page.link.related", null, {
-   id: "orion.git.gotoGithub",
-   name: "Show in GitHub",
-   tooltip: "Show this repository at GitHub",
-   validationProperties: [{
-      source: "GitUrl", 
-      match: "github\.com.*\.git", 
-      variableName: "GitHubLocation", 
-      variableMatchPosition: "only",
-      replacements: <a href="{pattern:">":", replacement: "/"}, {pattern: ".git$", replacement: ""}</a>
-   }],
-   uriTemplate: "https://{GitHubLocation}"
-});
+		<pre class="source-javascript"> provider.registerServiceProvider("orion.page.link.related", null, {
+    id: "orion.git.gotoGithub",
+    name: "Show in GitHub",
+    tooltip: "Show this repository at GitHub",
+    validationProperties: [{
+       source: "GitUrl", 
+       match: "github\.com.*\.git", 
+       variableName: "GitHubLocation", 
+       variableMatchPosition: "only",
+       replacements: [{pattern: ":", replacement: "/"}, {pattern: ".git$", replacement: ""}]
+    }],
+    uriTemplate: "https://{GitHubLocation}"
+ });
+
 </pre>
 		<p>If the service extension does not describe a name, tooltip, and uriTemplate, the implementation will look for a command extension of the same id.  In this way, commands added to the navigator that link to other pages may be considered for the Related pages menu.</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">

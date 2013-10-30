@@ -12,7 +12,7 @@
 			</tr>
 			<tr>
 				<td style="width: 20%" align="left">
-					<a href="orion-edit-model.html" title="orion.edit.model">
+					<a href="orion-edit-occurrences.html" title="orion.edit.occurrences">
 						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
 					</a>
 				</td>
@@ -24,78 +24,104 @@
 				</td>
 			</tr>
 			<tr>
-				<td style="width: 20%" align="left" valign="top">orion.edit.model</td>
+				<td style="width: 20%" align="left" valign="top">orion.edit.occurrences</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right" valign="top">orion.edit.validator</td>
 			</tr>
 		</table><hr/>
 		<h1 id="orion.edit.outliner">orion.edit.outliner</h1>
-		<p>An <tt>orion.edit.outliner</tt> service provides an overview of a file being edited. The overview is given as a tree, which the Orion UI renders in the left-hand pane alongside the file you are editing. Items in the tree can be links that take you to the appropriate position in the file, or to another URL entirely.</p>
-		<h2 id="Service_methods_6">Service methods</h2>
-		<p>Implementations of <tt>orion.edit.outliner</tt> must have a <code>getOutline</code> method that will be called to generate the outline for a resource. Its signature is as follows:</p>
+		<p>An <code>orion.edit.outliner</code> service provides an overview of a file being edited. The overview is given as a tree, which the Orion UI renders in the left-hand pane alongside the file you are editing. Items in the tree can be links that take you to the appropriate position in the file, or to another URL entirely.</p>
+		<h2 id="Service_methods_.28Orion_4.0.29_3">Service methods (Orion 4.0)</h2>
+		<p>A provider implements the <code>computeOutline</code> method, whose signature is as follows:</p>
+		<dl>
+			<dt>computeOutline(editorContext, options)</dt>
+			<dd>
+				<b>editorContext</b> <code>ObjectReference</code> The 
+				<a href="The-Editor-Context-object.html#The_Editor_Context_object">Editor Context object</a>.
+			</dd>
+			<dd>
+				<b>options </b> <code>Object</code>
+				<dl>
+					<dd>
+						<b>options.contentType</b> <code>String</code> The 
+						<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type ID</a> of the file being edited.
+					</dd>
+				</dl>
+			</dd>
+		</dl>
+		<p>The return value (or fulfillment value) is an Array of top-level 
+			<a href="#The_OutlineElement_object">OutlineElement objects</a>, which will be displayed in the outline pane.
+		</p>
+		<h2 id="Service_methods_.28Orion_3.0.29_3">Service methods (Orion 3.0)</h2>
+		<p>A provider implements the <code>getOutline</code> method, whose signature is as follows:</p>
 		<dl>
 			<dt>getOutline(contents, title)</dt>
 			<dd>
-				<b>contents</b> <tt>String</tt> The contents of the file being edited.
+				<b>contents</b> <code>String</code> The contents of the file being edited.
 			</dd>
 			<dd>
-				<b>title</b> <tt>String</tt> The path and filename of the file being edited.
+				<b>title</b> <code>String</code> The path and filename of the file being edited.
 			</dd>
 		</dl>
-		<p>Returns an <tt>Array</tt> giving the top-level elements to be shown in the outline. Each element of the returned array must have the properties:</p>
+		<p>Returns an Array of top-level 
+			<a href="#The_OutlineElement_object">OutlineElement objects</a>, which will be displayed in the outline pane.
+		</p>
+		<h2 id="The_OutlineElement_object">The OutlineElement object</h2>
+		<p>Each OutlineElement has these properties:</p>
 		<dl>
-			<dd><b>label</b> <tt>String</tt> Text to be shown in the UI for this element.</dd>
-			<dd><b>className</b> <tt>String</tt> <i>Optional</i> A space-separated list of CSS class names to be applied to this element in the UI.</dd>
-			<dd><b>children</b> <tt>Array</tt> <i>Optional</i> Array of child elements of this element. Children may be nested to an arbitrary depth.</dd>
-			<dd><b>line</b> <tt>Number</tt> <i>Optional</i> The line number within the file to use as the link for this element in the UI. Line numbers begin counting from 1.
+			<dd><b>label</b> <code>String</code> Text to be shown in the UI for this element.</dd>
+			<dd><b>className</b> <code>String</code> <i>Optional</i> A space-separated list of CSS class names to be applied to this element in the UI.</dd>
+			<dd><b>children</b> <code>Array</code> <i>Optional</i> Array of child OutlineElements of this element. Children may be nested to an arbitrary depth.</dd>
+			<dd><b>line</b> <code>Number</code> <i>Optional</i> The line number within the file to use as the link for this element in the UI. Line numbers begin counting from 1.
 				<dl>
-					<dd>The optional properties <b>column</b>, <b>start</b>, <b>end</b>, <b>text</b> may be used for finer-grained control. (Consult the <tt>orion.util.hashFromPosition()</tt> documentation in the Client API reference for details about these parameters.)</dd>
+					<dd>The optional properties <b>column</b>, <b>start</b>, <b>end</b>, <b>text</b> may be provided for finer-grained control. (Consult the <code>orion.util.hashFromPosition()</code> documentation in the Client API reference for details about these parameters.)</dd>
 				</dl>
 			</dd>
-			<dd><b>href</b> <tt>String</tt> <i>Optional</i> When <b>line</b> is omitted, the <b>href</b> property provides a URL to use as the link.</dd>
+			<dd><b>href</b> <code>String</code> <i>Optional</i> When <b>line</b> is omitted, the <b>href</b> property provides a URL to use as the link.</dd>
 		</dl>
-		<h2 id="Service_attributes_6">Service attributes</h2>
-		<p>Implementations of <tt>orion.edit.outliner</tt> must define the following attributes:</p>
+		<h2 id="Service_attributes_8">Service attributes</h2>
+		<p>Implementations of <code>orion.edit.outliner</code> must define the following attributes:</p>
 		<dl>
 			<dt>contentType</dt>
-			<dd><tt>Array</tt> An array of 
+			<dd><code>Array</code> An array of 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer_Guide/Plugging_into_the_navigator#orion.core.contenttype">Content Type IDs</a> giving the types of files that this outliner can provide an outline for.
 			</dd>
 			<dt>id</dt>
-			<dd><tt>String</tt> A unique identifier for this outline provider.</dd>
+			<dd><code>String</code> A unique identifier for this outline provider.</dd>
 			<dt>name</dt>
-			<dd><tt>String</tt> A user-readable name for this outline provider.</dd>
+			<dd><code>String</code> A user-readable name for this outline provider.</dd>
 		</dl>
-		<h2 id="Examples_4">Examples</h2>
-		<p>This example shows an outline provider that runs on .txt files. It finds Mediawiki-style <tt>=Section Headings=</tt> and generates a flat outline from them. (A more elaborate implementation might also find subsections and include them as children of the top-level sections.)</p>
-		<pre>var provider = new eclipse.PluginProvider();
-provider.registerServiceProvider("orion.edit.outliner", {
-  getOutline: function(contents, title) {
-    var outline = [];
-    var lines = contents.split(/\r?\n/);
-    for (var i=0; i &lt; lines.length; i++) {
-      var line = lines<a href="i">i</a>;
-      var match = /^=\s*(.+?)\s*=$/.exec(line);
-      if (match) {
-        outline.push({
-           label: match<a href="1">1</a>,
-           line: i+1  // lines are numbered from 1
-        });
-      }
-    }
-    return outline;
-  }
-}, {
-  contentType: <a href="&quot;text/plain&quot;">"text/plain"</a>,
-  name: "Headings",
-  id: "orion.outliner.example.headings"
-});
-provider.connect();
+		<h2 id="Examples_6">Examples</h2>
+		<p>This example shows an outline provider that runs on .txt files. It finds Mediawiki-style <code>=Section Headings=</code> and generates a flat outline from them. (A more elaborate implementation might also find subsections and include them as children of the top-level sections.)</p>
+		<pre class="source-javascript"> var provider = new eclipse.PluginProvider();
+ provider.registerServiceProvider("orion.edit.outliner", {
+   getOutline: function(contents, title) {
+     var outline = [];
+     var lines = contents.split(/\r?\n/);
+     for (var i=0; i &lt; lines.length; i++) {
+       var line = lines[i];
+       var match = /^=\s*(.+?)\s*=$/.exec(line);
+       if (match) {
+         outline.push({
+            label: match[1],
+            line: i+1  // lines are numbered from 1
+         });
+       }
+     }
+     return outline;
+   }
+ }, {
+   contentType: ["text/plain"],
+   name: "Headings",
+   id: "orion.outliner.example.headings"
+ });
+ provider.connect();
+
 </pre><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
 				<td style="width: 20%" align="left">
-					<a href="orion-edit-model.html" title="orion.edit.model">
+					<a href="orion-edit-occurrences.html" title="orion.edit.occurrences">
 						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
 					</a>
 				</td>
@@ -111,7 +137,7 @@ provider.connect();
 				</td>
 			</tr>
 			<tr>
-				<td style="width: 20%" align="left" valign="top">orion.edit.model</td>
+				<td style="width: 20%" align="left" valign="top">orion.edit.occurrences</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right" valign="top">orion.edit.validator</td>
 			</tr>

@@ -89,16 +89,16 @@
 			</tr>
 		</table>
 		<p>Example:</p>
-		<pre> { "Severity":"Error", 
-   "Code":0, 
-   "Message":"This is the error message", 
-   "DetailedMessage":"This is the exception message", 
-   "HttpCode":500
- }
+		<pre class="source-javascript">  { "Severity":"Error", 
+    "Code":0, 
+    "Message":"This is the error message", 
+    "DetailedMessage":"This is the exception message", 
+    "HttpCode":500
+  }
+
 </pre>
 		<h2 id="Progress_reporting">Progress reporting</h2>
-		<p><div id="progress"></div>
-			Long running operations that cannot complete within a single request will instead return the location of a resource for tracking progress on that operation. The typical client work flow is:</p>
+		<p><span id="progress"></span>Long-running operations that cannot complete within a single request will instead return the location of a resource for tracking progress on that operation. The typical client work flow is:</p>
 		<ol>
 			<li>Client sends request to start operation. The <tt>Location</tt> header in the response indicates the location of a progress resource. The response code is 202 Accepted, which helps the client distinguish long running operations from operations that complete within a single method invocation.</li>
 			<li>Client periodically checks state of progress resource. The response code will be 200 ok, but the Result (see below) will be undefined.</li>
@@ -143,8 +143,7 @@
 			</tr>
 		</table>
 		<h2 id="Resource_locations">Resource locations</h2>
-		<p><div id="location"></div>
-			All server API resources have a "Location" attribute. This attribute has the following properties:</p>
+		<p><span id="location"></span>All server API resources have a "Location" attribute. This attribute has the following properties:</p>
 		<ul>
 			<li>When a resource is created, the POST operation that created it will return the location property both as an HTTP header, and in the response representation (attribute "Location" in JSON representations).</li>
 			<li>Invoking GET on the resource location will return a representation of the resource.</li>

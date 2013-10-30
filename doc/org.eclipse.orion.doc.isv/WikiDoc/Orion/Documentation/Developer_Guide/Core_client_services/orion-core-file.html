@@ -12,7 +12,7 @@
 			</tr>
 			<tr>
 				<td style="width: 20%" align="left">
-					<a href="orion-core-favorite.html" title="orion.core.favorite">
+					<a href="orion-core-contentTypeRegistry.html" title="orion.core.contentTypeRegistry">
 						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
 					</a>
 				</td>
@@ -24,7 +24,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td style="width: 20%" align="left" valign="top">orion.core.favorite</td>
+				<td style="width: 20%" align="left" valign="top">orion.core.contentTypeRegistry</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right" valign="top">orion.core.marker</td>
 			</tr>
@@ -32,8 +32,8 @@
 		<h1 id="orion.core.file">orion.core.file</h1>
 		<p>The <tt>orion.core.file</tt> service is used to provide file system contents for the Orion workspace. For example a plug-in can use this service to include content from one server into a workspace on another server. Each file service is displayed as a root element in the Orion <b>Navigator</b> page.</p>
 		<p>The code snippet below demonstrates a use of this service:</p>
-		<pre>
- provider.registerServiceProvider("orion.core.file", service, {Name: 'Sample File System'});
+		<pre class="source-javascript">provider.registerServiceProvider("orion.core.file", service, {Name: 'Sample File System'});
+
 </pre>
 		<p>The above code will contribute a top level node to the Navigator named "Sample File System". The parameter "service" in the API above must provide the functions specified by the Orion file client API. Refer to <tt>orion.fileClient.FileClient</tt> in the client API reference for further details. For more information on client-server interaction, see Orion 
 			<a href="http://wiki.eclipse.org/Orion/Server_API/File_API" target="orion_external">File Server API</a>. For an complete file system example, see the 
@@ -99,7 +99,7 @@
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
 				<td style="width: 20%" align="left">
-					<a href="orion-core-favorite.html" title="orion.core.favorite">
+					<a href="orion-core-contentTypeRegistry.html" title="orion.core.contentTypeRegistry">
 						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
 					</a>
 				</td>
@@ -115,7 +115,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td style="width: 20%" align="left" valign="top">orion.core.favorite</td>
+				<td style="width: 20%" align="left" valign="top">orion.core.contentTypeRegistry</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right" valign="top">orion.core.marker</td>
 			</tr>

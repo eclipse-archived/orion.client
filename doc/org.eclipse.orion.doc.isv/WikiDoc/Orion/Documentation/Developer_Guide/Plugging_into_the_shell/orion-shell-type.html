@@ -37,44 +37,69 @@
 			<dt>parse(arg, typeSpec, context)</dt>
 			<dd>Takes the currently-typed user string and returns an object with completion suggestions.  The arguments to this method are:
 				<dl>
-					<dt>arg</dt>
+					<dd>
+						<b>arg</b>
+					</dd>
 					<dd>An object with properties {prefix: string, suffix: string, text: string}, contains the user's currently-typed string for an instance of this parameter</dd>
-					<dt>typeSpec</dt>
+					<dd>
+						<b>typeSpec</b>
+					</dd>
 					<dd>This parameter's typeSpec as defined by the command that is using it</dd>
-					<dt>context</dt>
+					<dd>
+						<b>context</b>
+					</dd>
 					<dd>An object with property {lastParseTimestamp: number}, which can aid in determining when the completion suggestions being returned should be recomputed</dd>
 				</dl>
 			</dd>
 		</dl>
 		<p>The return value for this method must be either an <tt>orion.Deferred</tt> (if computation of the result object has to be done asynchronously), or an object with the following properties:</p>
 		<dl>
-			<dt>
+			<dd>
+				<b>status</b>
+			</dd>
+			<dd>One of the following numbers:
 				<dl>
-					<dt>status</dt>
-					<dd>One of the following numbers:
-						<dl>
-							<dd>0: (MATCH) the currently-typed string matches a valid value (ie.- the typing of this parameter value can now be considered complete)</dd>
-							<dd>1: (PARTIAL) the currently-typed string partially matches a valid value (ie.- the typing of a valid value in progress)</dd>
-							<dd>2: (ERROR) the currently-typed string does not match a subset of the initial characters of any valid values</dd>
-						</dl>
-					</dd>
-					<dt>message</dt>
+					<dd><code>0</code>: (MATCH) the currently-typed string matches a valid value (ie.- the typing of this parameter value can now be considered complete)</dd>
+					<dd><code>1</code>: (PARTIAL) the currently-typed string partially matches a valid value (ie.- the typing of a valid value in progress)</dd>
+					<dd><code>2</code>: (ERROR) the currently-typed string does not match a subset of the initial characters of any valid values</dd>
+				</dl>
+			</dd>
+			<dd>
+				<b>message</b>
+				<dl>
 					<dd>(Optional) An error message to display in the Shell page</dd>
-					<dt>predictions</dt>
+				</dl>
+			</dd>
+			<dd>
+				<b>predictions</b>
+				<dl>
 					<dd>An array of {name: string, value: object} objects that are valid completions for the currently-typed string (name is the string to display in the suggestions list)</dd>
-					<dt>value</dt>
+				</dl>
+			</dd>
+			<dd>
+				<b>value</b>
+				<dl>
 					<dd>If the currently-typed string is a match for a valid value then set this property to that {name: string, value: object} value, otherwise set its value to undefined</dd>
 				</dl>
-			</dt>
+			</dd>
 		</dl>
 		<dl>
 			<dt>stringify(object, typeSpec)</dt>
-			<dd>(Optional) Returns an object's string representation that is appropriate for display in the Shell page's output area.  An example case where this string may not be the same as the "name" that was provided for it by the parse service is if a typed relative path should be resolved to an absolute path.  If this service is not implemented then the object's "name" that was provided for it by the parse service implementation is used as its display string.  The arguments to this method are:
+			<dd>(Optional) Returns an object's string representation that is appropriate for display in the Shell page's output area.  An example case where this string may not be the same as the "name" that was provided for it by the parse service is if a typed relative path should be resolved to an absolute path.  If this service is not implemented then the object's "name" that was provided for it by the parse service implementation is used as its display string.
+				<br/>The arguments to this method are:
 				<dl>
-					<dt>object</dt>
-					<dd>The object to stringify</dd>
-					<dt>typeSpec</dt>
-					<dd>This parameter's typeSpec as defined by the command that is using it</dd>
+					<dd>
+						<b>object</b>
+						<dl>
+							<dd>The object to stringify</dd>
+						</dl>
+					</dd>
+					<dd>
+						<b>typeSpec</b>
+						<dl>
+							<dd>This parameter's typeSpec as defined by the command that is using it</dd>
+						</dl>
+					</dd>
 				</dl>
 			</dd>
 		</dl>

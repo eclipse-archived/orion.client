@@ -31,38 +31,40 @@
 		</table><hr/>
 		<h1 id="orion.page.command">orion.page.command</h1>
 		<p>The command service is responsible for managing and rendering commands such as tool bar and menu items. A command represents a single clickable action for a user, such as a toolbar button or menu item. Commands can typically be defined in common code, independent of any particular UI presentation of the commands or associated items. Here is an example of a simple command definition:</p>
-		<pre> define(<a href="'orion/commands'">'orion/commands'</a>, function(mCommands) {
-   var editCommand = new mCommands.Command({
-     name: "Make Favorite",
-     imageClass: "core-sprite-favorite",
-     id: "my.command.id",
-     visibleWhen: function(item) {
-       //return true if this command should be visible for 'item'
-     },
-     callback: function(commandInvocation) {
-       //get the items, etc. from the commandInvocation and execute the command
-     })
-   });
- });
+		<pre class="source-javascript">  define(['orion/commands'], function(mCommands) {
+    var editCommand = new mCommands.Command({
+      name: "Make Favorite",
+      imageClass: "core-sprite-favorite",
+      id: "my.command.id",
+      visibleWhen: function(item) {
+        //return true if this command should be visible for 'item'
+      },
+      callback: function(commandInvocation) {
+        //get the items, etc. from the commandInvocation and execute the command
+      })
+    });
+  });
+
 </pre>
 		<p>The image associated with a command can be defined as a single downloadable image, or as a CSS class to be used as the background for the image (so that CSS data URI's and image sprites can be used.)</p>
 		<p>The command's callback is executed when the user clicks on the command.  The callback implementation may do the work directly, or it may need to collect some parameters from the user first.  If the latter, it is useful to determine which parameters are required in order for the command to accomplish its work, and which are optional.  Required parameters may be specified in the command.  If they are specified, then the command service will generate a UI for collecting the parameters before the callback is ever called.  For example, the following command specifies that a "name" parameter should be collected before calling the callback:</p>
-		<pre> var newArtifactCommand = new mCommands.Command({
-   name: "New Artifact",
-   tooltip: "Create a new artifact",
-   imageClass: "sprite-new_artifact",
-   id: "my.newArtifact",
-   parameters: new mCommands.ParametersDescription[
-     new mCommands.CommandParameter('name', 'text', 'Name:', 'New Artifact'], false);
-   callback: function(data) {
-     var name = data.parameters.valueFor('name');
-     if (name) {
-       // do some work
-     }
-   },
-   visibleWhen: function(item) {
-     return item.artifactHolder;
-   }});
+		<pre class="source-javascript">  var newArtifactCommand = new mCommands.Command({
+    name: "New Artifact",
+    tooltip: "Create a new artifact",
+    imageClass: "sprite-new_artifact",
+    id: "my.newArtifact",
+    parameters: new mCommands.ParametersDescription[
+      new mCommands.CommandParameter('name', 'text', 'Name:', 'New Artifact'], false);
+    callback: function(data) {
+      var name = data.parameters.valueFor('name');
+      if (name) {
+        // do some work
+      }
+    },
+    visibleWhen: function(item) {
+      return item.artifactHolder;
+    }});
+
 </pre>
 		<p>At this point, we've defined a generic edit command and its behavior.  Nothing will appear in the UI until we decide to show it on a particular page.  To add a command to a page, the page must register a 
 			<b>command contribution</b> in the UI. The contributions are made separately so that, for example, an application could define all the commands that apply to its objects in common code, leaving the individual pages to decide how those commands might be shown.
@@ -71,20 +73,22 @@
 			<b>scope id</b> for the command.  This id describes when the command is shown.  When the page code renders commands in a toolbar or list, the corresponding scope id is specified, so that the command service can determine which commands should be shown.  The id can be any arbitrary String value, but by convention the DOM ids of some well known, common DOM elements, such as the main toolbar, are used for contribution ids.  Commands that are intended to be shown for individual objects (items) that appear in tables, lists, or trees are typically contributed with a descriptive scope id, such as "fileLevelCommands". 
 		</p>
 		<p>The snippet below registers a command for items that appear in a list on the page.</p>
-		<pre>serviceRegistry.getService("orion.page.command").registerCommandContribution("itemLevelCommands", "my.command.id", 1);
+		<pre class="source-javascript">serviceRegistry.getService("orion.page.command").registerCommandContribution("itemLevelCommands", "my.command.id", 1);
+
 </pre>
 		<p>In its simplest form, a command contribution describes the id of the scope in which the command appears, the command id itself, and a number that positions the command relative to other commands in that scope.  Additional parameters allow the page to specify any nested groups it should be grouped with, and any key bindings or url bindings that should be registered in order to trigger the command.  </p>
 		<p>After all commands and UI contributions are defined, some code must tell the command service to render the commands. For most Orion pages, the rendering is handled by the various page components. For example, any "global" commands are rendered by the banner code. The toolbar renders commands that are scoped with the "pageActions" or "pageNavigationActions" scope ids.  The rendering code also determines which items should be passed to the handler, using the selection service or page-specific code.  </p>
-		<p>Pages can define their own dom elements for rendering commands in order to control precise layout, or to handle commands that are scoped to different items on different parts of the page. In this case, the page must not only contribute the commands, but must also render the commands into some DOM element.  The code that is rendering commands is responsible for determining which object is used as "this" for the command callbacks (the handler) and what item or items are passed into the callback.</p>
+		<p>Pages can define their own DOM elements for rendering commands in order to control precise layout, or to handle commands that are scoped to different items on different parts of the page. In this case, the page must not only contribute the commands, but must also render the commands into some DOM element.  The code that is rendering commands is responsible for determining which object is used as <code>this</code> for the command callbacks (the handler) and what item or items are passed into the callback.</p>
 		<p>For example, in the navigator, there are actions that apply to each item in the navigator list.  The navigator renders them in a column for each item in the list.  As it renders the command, it specifies the handler (the explorer code) and the individual item to which that rendering applies.</p>
 		<p>In some cases, a page organizes commands according to visual "panes" that appear inside the page.  For example, a side by side compare editor might want to render different commands for the left and right compare panes. It must define dom elements where these command contributions are shown, and it must render commands into this dom element. The following snippet shows an example of custom dom-based contributions, including a key binding for the "copyToLeft" command:</p>
-		<pre>var commandService = serviceRegistry.getService("orion.page.command");
-commandService.registerCommandContribution("rightContainerCommands", "orion.compare.copyToLeft", 1, 
-/* no parent path */ null, new mKeyBinding.KeyBinding("A", true, true));
-commandService.registerCommandContribution("rightContainerCommands", "orion.compare.nextDiff", 2);
-commandService.registerCommandContribution("rightContainerCommands", "orion.compare.prevDiff", 3);
-// now render the commands into the dom node using "tool" style.  There are no items to pass to the handler.
-commandService.renderCommands("rightContainerCommands", rightContainerDOMNode, /* no items */ null, myCompareHandler, "tool");
+		<pre class="source-javascript"> var commandService = serviceRegistry.getService("orion.page.command");
+ commandService.registerCommandContribution("rightContainerCommands", "orion.compare.copyToLeft", 1, 
+ /* no parent path */ null, new mKeyBinding.KeyBinding("A", true, true));
+ commandService.registerCommandContribution("rightContainerCommands", "orion.compare.nextDiff", 2);
+ commandService.registerCommandContribution("rightContainerCommands", "orion.compare.prevDiff", 3);
+ // now render the commands into the dom node using "tool" style.  There are no items to pass to the handler.
+ commandService.renderCommands("rightContainerCommands", rightContainerDOMNode, /* no items */ null, myCompareHandler, "tool");
+
 </pre>
 		<p>See orion.commands.CommandService in the client API reference for documentation about commands, parameters, URL bindings, contributions, and rendering.</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">

@@ -30,9 +30,9 @@
 			</tr>
 		</table><hr/>
 		<h1 id="orion.navigate.openWith">orion.navigate.openWith</h1>
-		<p>The <tt>orion.navigate.openWith</tt> service is used to associate a registered editor (see 
-			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html#orion.edit.editor" title="Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.editor">orion.edit.editor</a>) with a registered content type (see 
-			<a href="orion-core-contenttype.html#orion.core.contenttype">orion.core.contenttype</a>). Once this association has been made, the editor will be presented as a choice in the "Open With" menu beside files of that content type. 
+		<p>The <tt>orion.navigate.openWith</tt> service is used to associate a 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html#orion.edit.editor" title="Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.editor">registered editor</a> with a 
+			<a href="orion-core-contenttype.html#orion.core.contenttype">registered content type</a>. Once this association has been made, the editor will be presented as a choice in the actions menu (gear menu) beside files of that content type. (If it's the only available editor for that file, it will be used to generate the link when the file is clicked).
 		</p>
 		<p>By default, the Orion client UI provides an editor with ID <code>orion.editor</code>, to be used for editing source code. You can refer to this editor ID when you want to associate a new content type with the Orion Editor.</p>
 		<h2 id="Service_methods_2">Service methods</h2>
@@ -48,17 +48,18 @@
 			<dd><code>String[]</code> An array of one or more content type IDs that will be associated with the editor.</dd>
 		</dl>
 		<h2 id="Example_2">Example</h2>
-		<p>Here is a sample plug-in that associates the Orion Editor with the <code>"text/markdown"</code> content type. This example assumes that the <code>"text/markdown"</code> type has been previously registered with the 
+		<p>Here is a sample plug-in that associates the Orion Editor with the <code>"text/x-php"</code> content type. This example assumes that the <code>"text/x-php"</code> type has been previously registered with the 
 			<a href="orion-core-contenttype.html#orion.core.contenttype">orion.core.contenttype</a> service.
 		</p>
-		<pre> var provider = new eclipse.PluginProvider();
- provider.registerServiceProvider("orion.navigate.openWith", {},
-   {  id: "orion.editor",
-      contentType: <a href="&quot;text/markdown&quot;">"text/markdown"</a>
-   });
- provider.connect();
+		<pre class="source-javascript">  var provider = new orion.PluginProvider();
+  provider.registerServiceProvider("orion.navigate.openWith", {},
+    {  id: "orion.editor",
+       contentType: ["text/x-php"]
+    });
+  provider.connect();
+
 </pre>
-		<p>When this plug-in is installed, the user will see the Orion Editor as an available target in the <b>Open With</b> Navigator menu beside  files of the Markdown content type:</p>
+		<p>When this plug-in is installed, the user will see the Orion Editor as an available target in the actions menu beside files of the PHP content type:</p>
 		<p>
 			<img border="0" src="images/Orion-file-openWith-example.png"/>
 		</p><hr/>

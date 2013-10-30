@@ -31,10 +31,11 @@
 		</table><hr/>
 		<h1 id="orion.core.marker">orion.core.marker</h1>
 		<p>The marker service is used to store problems found by a builder or syntax validator. A client can register with this service for notification when markers are changed. Here is an example of a component that is registering for notification of marker changes:</p>
-		<pre> serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", 
-     function(problems) {
-       //do something with the new problems
-     });
+		<pre class="source-javascript">  serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", 
+      function(problems) {
+        //do something with the new problems
+      });
+
 </pre>
 		<p>Each marker is a simple JSON object with the following properties:</p>
 		<dl>

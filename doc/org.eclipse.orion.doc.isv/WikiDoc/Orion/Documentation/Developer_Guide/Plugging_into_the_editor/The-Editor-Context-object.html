@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Plugging into the editor - The Editor Context object</title>
+		<link type="text/css" rel="stylesheet" href="../../../../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">The Editor Context object</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Plugging-into-the-editor.html" title="Plugging into the editor">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-astprovider.html" title="orion.core.astprovider">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Plugging into the editor</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.astprovider</td>
+			</tr>
+		</table><hr/>
+		<h1 id="The_Editor_Context_object">The Editor Context object</h1>
+		<p>Orion 4.0 introduces &lt;dfn&gt;Object References&lt;/dfn&gt;, which allow two-way communication between a service provider and the host Orion page. An Object Reference exposes functions that a service provider can call to help it fulfill a service contract. Like everything in Orion's service framework, Object References work asynchronously: all functions return Promises and the caller must wait for them to fulfill to an actual value. An Object Reference is valid only during the lifetime of its parent service call. Once the provider has fulfilled the service call, any Object References created for that call are unregistered by the framework, and cannot be used thereafter.</p>
+		<p>Many of the service APIs documented on this page now provide a special Object Reference, called the &lt;dfn&gt;Editor Context object&lt;/dfn&gt;, as the first parameter in their function signatures. The Editor Context object contains various functions to query the state of the Orion editor, and to cause side effects. For example, if a provider needs the text from the editor buffer to fulfill its service contract, it can invoke the Editor Context's getText() method:</p>
+		<pre class="source-javascript">editorContextObject.getText().then(function(text) {
+    // Use text to fulfill the provider's service contract
+});
+
+</pre>
+		<h2 id="API_versions">API versions</h2>
+		<p>The older API signatures are labelled as "Orion 3.0" in the documentation. These are still supported, but date from Orion releases when Object References were not available. It is preferable to use the "Orion 4.0" version of an API whenever available, as these provide greater consistency, are somewhat more efficient, and can be more easily evolved in future releases without changing method signatures.</p>
+		<h2 id="Editor_Context_methods">Editor Context methods</h2>
+		<p>The Editor Context object provides the following methods:</p>
+		<dl>
+			<dd>
+				<b>getAST(options)</b>
+				<dl>
+					<dd>Resolves to <code>Object</code>. Returns an AST for the file being edited, if an 
+						<a href="orion-core-astprovider.html#orion.core.astprovider">AST provider</a> is available. Orion ships with an 
+						<a href="http://esprima.org/" target="orion_external">Esprima</a> AST provider for JavaScript files. Additional providers can be contributed by plugins.
+					</dd>
+				</dl>
+			</dd>
+			<dd>
+				<b>getCaretOffset()</b>
+				<dl>
+					<dd> Resolves to <code>Number</code>. Returns the offset of the editing caret.</dd>
+				</dl>
+			</dd>
+			<dd>
+				<b>getSelection()</b>
+				<dl>
+					<dd>Resolves to <code>Selection</code>. Returns the editor's current selection.</dd>
+				</dl>
+			</dd>
+			<dd>
+				<b>getText(start?, end?)</b>
+				<dl>
+					<dd>Resolves to <code>String</code>. Returns the text in the given range. </dd>
+				</dl>
+			</dd>
+			<dd>
+				<b>setCaretOffset(offset, show?)</b>
+				<dl>
+					<dd>Resolves to <code>undefined</code>. Sets the caret offset. If <code>show</code> is true, the editor will scroll to the new caret position.</dd>
+				</dl>
+			</dd>
+			<dd>
+				<b>setSelection(selection)</b>
+				<dl>
+					<dd>Resolves to <code>undefined</code>. Sets the editor's selection.</dd>
+				</dl>
+			</dd>
+			<dd>
+				<b>setText(text, start?, end?)</b>
+				<dl>
+					<dd>Resolves to <code>undefined</code>. Sets the text in the given range.</dd>
+				</dl>
+			</dd>
+		</dl><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Plugging-into-the-editor.html" title="Plugging into the editor">
+						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Plugging-into-the-editor.html" title="Plugging into the editor">
+						<img alt="Plugging into the editor" border="0" src="../../../../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="orion-core-astprovider.html" title="orion.core.astprovider">
+						<img alt="Next" border="0" src="../../../../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Plugging into the editor</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">orion.core.astprovider</td>
+			</tr>
+		</table>
+	</body>
+</html>

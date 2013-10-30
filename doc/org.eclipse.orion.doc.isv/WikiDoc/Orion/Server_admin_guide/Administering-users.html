@@ -33,8 +33,8 @@
 		<h2 id="Creating_and_deleting_users">Creating and deleting users</h2>
 		<p>Users can be created and deleted by logging in as admin, and visiting the user management page at "/profile/user-list.html". For example a server on your own machine can be managed from 
 			<a href="http://localhost:8080/profile/user-list.html" target="orion_external">http://localhost:8080/profile/user-list.html</a>. Click the button 
-			<img border="0" src="images/Orion-new-user.gif"/> to create a new user. To delete a user, click the 
-			<img border="0" src="images/Orion-delete-png.png"/> button in the "Action" column next to the user to be deleted.
+			<img alt="New User" border="0" src="images/Orion-new-user.gif"/> to create a new user. To delete a user, click the 
+			<img alt="Delete user" border="0" src="images/Orion-delete-png.png"/> button in the "Action" column next to the user to be deleted.
 		</p>
 		<p>You can also create a user via the Orion server API. Use curl or another utility to send a POST request to "/users". The form requires the following parameters: "login" (user login id), "password" (initial password) and "passwordConf" (confirm password).</p>
 		<h2 id="Changing_passwords">Changing passwords</h2>
@@ -43,7 +43,8 @@
 		<p>By default, any user is allowed to create an account. To disallow anonymous account creation, you can specify what user ids are allowed to create accounts via the <tt>orion.auth.user.creation</tt> property in the 
 			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>.
 		</p>
-		<pre> orion.auth.user.creation=admin
+		<pre class="source-properties">orion.auth.user.creation=admin
+
 </pre>
 		<p>When this property is specified, account creation can only be performed on the user management page. This page is currently only accessible for the 
 			<a href="#Creating_an_admin_user">admin user</a>.
@@ -52,7 +53,8 @@
 		<p>By default, user email is optional, however this may be changed via the <tt>orion.auth.user.creation.force.email</tt> property in the 
 			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a>.
 		</p>
-		<pre> orion.auth.user.creation.force.email=true
+		<pre class="source-properties">orion.auth.user.creation.force.email=true
+
 </pre>
 		<p>When this property is specified as 
 			<b>true</b>, users are required to provide an email address while creating the Orion account. Immediately after creating the user account an email will be sent to the provided address requesting confirmation. The account is confirmed by clicking on the generated link provided in the email. The user will be able to log in only after the given email address is confirmed. This option will only work correctly when email configuration is correctly set. See 
@@ -62,7 +64,8 @@
 		<p>No accounts are built into the Orion server by default. This avoids a vulnerability caused by well-known users and passwords that administrators neglect to change. While a small-scale server might not require an admin user at all, it is useful to create an admin account for larger-scale user management (seeing list of all users, adding/deleting users, etc). To create an admin account, add following line to the 
 			<a href="Configuring-the-server.html#Server_configuration_file">server configuration file</a> (but please use a more creative password):
 		</p>
-		<pre>orion.auth.admin.default.password=abracadabra
+		<pre class="source-properties">orion.auth.admin.default.password=abracadabra
+
 </pre>
 		<p>This will cause an administrator account to be created as the server starts up. The admin user name is "admin" and the password will be the value specified by the configuration property. Once the admin account has been created, the configuration property is no longer required on startup (the admin password can be changed later by logging in as the administrator and going to the profile management page).</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">

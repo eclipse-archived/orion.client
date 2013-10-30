@@ -44,19 +44,20 @@
 		</dl>
 		<p>Refer to <code>orion.cm.ConfigurationAdmin</code> in the client API reference for a full description of this service's API methods.</p>
 		<p>Here is an example of how to use the ConfigurationAdmin service to print out all existing configurations and their property values:</p>
-		<pre>var configurations = serviceRegistry.getService("orion.cm.configadmin").listConfigurations().then(function(configurations) {
-        configurations.forEach(function(configuration) {
-            var properties = configuration.getProperties();
-            var propertyInfo = Object.keys(properties).map(function(propertyName) {
-                if (propertyName !== "pid") {
-                    return "\n        " + propertyName + ": " + JSON.stringify(properties<a href="propertyName">propertyName</a>) + "\n";
-                }
-            }).join("");
-            console.log("Configuration pid: " + configuration.getPid() + "\n"
-                      + "  properties: {" + propertyInfo + "\n"
-                      + "  }");
-        });
-});
+		<pre class="source-javascript"> var configurations = serviceRegistry.getService("orion.cm.configadmin").listConfigurations().then(function(configurations) {
+         configurations.forEach(function(configuration) {
+             var properties = configuration.getProperties();
+             var propertyInfo = Object.keys(properties).map(function(propertyName) {
+                 if (propertyName !== "pid") {
+                     return "\n        " + propertyName + ": " + JSON.stringify(properties[propertyName]) + "\n";
+                 }
+             }).join("");
+             console.log("Configuration pid: " + configuration.getPid() + "\n"
+                       + "  properties: {" + propertyInfo + "\n"
+                       + "  }");
+         });
+ });
+
 </pre>
 		<p>The result might look something like this:</p>
 		<pre>Configuration pid: nonnls.config

@@ -47,22 +47,23 @@
 		</dl>
 		<h2 id="Examples_2">Examples</h2>
 		<p>The following snippet defines the some of the main links that are shown in a default Orion installation.</p>
-		<pre>  var serviceImpl = {};//no service methods required
-  provider.registerServiceProvider("orion.page.link", serviceImpl, {
-     name: "Navigator",
-     id: "orion.navigator",
-     uriTemplate: "{OrionHome}/navigate/table.html#"
-  });
-  provider.registerServiceProvider("orion.page.link", serviceImpl, {
-     name: "Sites",
-     id: "orion.sites",
-     uriTemplate: "{OrionHome}/sites/sites.html"
-  });
-  provider.registerServiceProvider("orion.page.link", serviceImpl, {
-     name: "Repositories",
-     id: "orion.repositories",
-     uriTemplate: "{OrionHome}/git/git-repository.html#"
-  });
+		<pre class="source-javascript">   var serviceImpl = {};//no service methods required
+   provider.registerServiceProvider("orion.page.link", serviceImpl, {
+      name: "Navigator",
+      id: "orion.navigator",
+      uriTemplate: "{OrionHome}/navigate/table.html#"
+   });
+   provider.registerServiceProvider("orion.page.link", serviceImpl, {
+      name: "Sites",
+      id: "orion.sites",
+      uriTemplate: "{OrionHome}/sites/sites.html"
+   });
+   provider.registerServiceProvider("orion.page.link", serviceImpl, {
+      name: "Repositories",
+      id: "orion.repositories",
+      uriTemplate: "{OrionHome}/git/git-repository.html#"
+   });
+
 </pre><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
