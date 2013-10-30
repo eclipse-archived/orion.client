@@ -208,12 +208,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	function SidebarNavInputManager() {
 		EventTarget.attach(this);
 	}
-	SidebarNavInputManager.prototype.processHash = function() {
-		var navigate = PageUtil.matchResourceParameters().navigate;
-		if (typeof navigate === "string" && this.setInput) { //$NON-NLS-0$
-			this.setInput(navigate);
-		}
-	};
 
 	var sidebarNavInputManager = new SidebarNavInputManager();
 	var sidebar = new Sidebar({
@@ -229,6 +223,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		sidebarNavInputManager: sidebarNavInputManager,
 		toolbar: sidebarToolbar
 	});
+	SidebarNavInputManager.prototype.processHash = function() {
+		var navigate = PageUtil.matchResourceParameters().navigate;
+		if (typeof navigate === "string" && this.setInput && sidebar.getActiveViewModeId() === "nav") { //$NON-NLS-1$ //$NON-NLS-0$
+			this.setInput(navigate);
+		}
+	};
 	sidebar.show();
 	sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
 		lastRoot = evt.root;

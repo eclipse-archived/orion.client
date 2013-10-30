@@ -27,7 +27,6 @@ define(function(){
 			var text = optURIText.substring(hashIndex + 1);
 			if (text.length !== 0) {
 				var params = text.split(","); //$NON-NLS-0$
-				Object.defineProperty(result, "resourceRaw", {value: params[0]});
 				result.resource = decodeURIComponent(params[0]);
 				for (var i = 1; i < params.length; i++) {
 					//We can not use params[i].split("=") here because a param's value may contain "=", which is not encoded.
