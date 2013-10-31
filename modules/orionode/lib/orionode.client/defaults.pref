@@ -9,7 +9,8 @@
 		"plugins/esprima/esprimaJsContentAssistPlugin.html":true,
 		"shell/plugins/shellPagePlugin.html":true,
 		"plugins/nodePlugin.html":true,
-		"search/plugins/searchPagePlugin.html":true
+		"search/plugins/searchPagePlugin.html":true,
+		"plugins/projectsPlugin.html" :true
 	},
 	"/settingsContainer":{
 		"categories":{
