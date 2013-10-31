@@ -230,6 +230,12 @@ define([
 				this._node = document.createElement("div"); //$NON-NLS-0$
 			}
 			this._parent.appendChild(this._node);
+			
+			if (readmeMd) {
+				div = document.createElement("div"); //$NON-NLS-0$
+				this.markdownView.displayInFrame(div, readmeMd);
+				this._node.appendChild(div);
+			}
 				
 			if(projectJson && this.showProjectView){
 				div = document.createElement("div"); //$NON-NLS-0$
@@ -252,12 +258,6 @@ define([
 				foldersSection.embedExplorer(this.folderNavExplorer);
 				this.folderNavExplorer.setCommandsVisible(mGlobalCommands.getMainSplitter().splitter.isClosed());
 				this.folderNavExplorer.loadRoot(this._metadata);
-			}
-			
-			if (readmeMd) {
-				div = document.createElement("div"); //$NON-NLS-0$
-				this.markdownView.displayInFrame(div, readmeMd);
-				this._node.appendChild(div);
 			}
 		},
 		create: function() {
