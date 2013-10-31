@@ -1,4 +1,4 @@
-# Orionode
+# Orion (4.0)
 A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orion/). Orion provides an extensible IDE that runs in your browser. It's particularly good for writing Javascript.
 
 ## Features
