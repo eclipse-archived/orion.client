@@ -146,19 +146,33 @@ define([
 				return {Source: item.source, Target: target};
 			});
 		};
-		this._matchesSelfHostingTemplate = function(basePath, site) {
-			// Given a site and a base workspace path, can we substitute the path into each FILE mapping, and
-			// localhost:anyport into every API mapping, such that the site matches the self-hosting template?
+		/**
+		 * Performs a rough check to see if the given folderPath and site can generate all rules in the template.
+		 * @returns {Boolean}
+		 */
+		this._matchesSelfHostingTemplate = function(projectPath, site) {
+			// Given a site, can we substitute the projectPath (+ optional suffix) into each FILE mapping, and localhost:anyport into
+			// every API mapping, such that the site satisfies the self-hosting template?
+			var variableRegex = /(\$\{[^}]+?\})/;
+			var hostsub = regex.escape("http://localhost") + "(:\\d+)?" + regex.escape(makeHostRelative(getContext())); //$NON-NLS-1$ //$NON-NLS-0$
 			return SELF_HOSTING_TEMPLATE.every(function(item) {
 				return site.Mappings.some(function(mapping) {
 					if (mapping.Source === item.source) {
+						var sub;
 						if (item.type === TYPE_FILE) {
-							return mapping.Target === (basePath + item.targetPattern);
+							sub = regex.escape(projectPath) + ".*?"; //$NON-NLS-0$
 						} else if (item.type === TYPE_API) {
-							return new RegExp(
-								regex.escape("http://localhost") + "(:\\d+)?" + regex.escape(makeHostRelative(getContext())) + regex.escape(item.targetPattern)
-							).test(mapping.Target);
+							sub = hostsub;
 						}
+						var result = [];
+						item.targetPattern.split(variableRegex).forEach(function(element) {
+							if (variableRegex.test(element)) {
+								result.push(sub);
+							} else {
+								result.push(regex.escape(element));
+							}
+						});
+						return new RegExp(result.join("")).test(mapping.Target); //$NON-NLS-0$
 					}
 					return false;
 				});
@@ -359,10 +373,11 @@ define([
 		isSelfHostingSite: function(site) {
 			var self = this;
 			return this.cache.getProjects(site.Workspace).then(function(projects) {
-				// There must be a project for which all self hosting mappings can be generated using the project's Id
+				// This is just a rough check, not rigorous. We don't verify that a consistent assignments of
+				// paths exists that satisfies the template, nor that any mentioned subfolders exist.
 				return projects.some(function(project) {
 					var internalPath = self.toInternalForm(project.Location);
-					return this._matchesSelfHostingTemplate(internalPath, site);
+					return self._matchesSelfHostingTemplate(internalPath, site);
 				});
 			});
 		},
