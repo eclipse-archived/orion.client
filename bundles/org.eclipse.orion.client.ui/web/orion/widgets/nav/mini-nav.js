@@ -87,6 +87,9 @@ define([
 		this.selection = new Selection.Selection(this.registry, "miniNavFileSelection"); //$NON-NLS-0$
 		this._selectionListener = function(event) { //$NON-NLS-0$
 			_self.updateCommands(event.selections);
+			if (sidebarNavInputManager) {
+				_self.sidebarNavInputManager.dispatchEvent(event);
+			}
 		};
 		this.selection.addEventListener("selectionChanged", this._selectionListener);
 		this.commandsRegistered = this.registerCommands();
@@ -359,7 +362,9 @@ define([
 					
 					ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, projectClient, dependencyTypes).then(dependencyTypesDef.resolve, dependencyTypesDef.resolve);
 				}.bind(this), dependencyTypesDef.resolve);
-				
+
+				commandRegistry.registerCommandContribution(selectionActionsScope, "orion.project.initProject", 0, "orion.miniNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+
 				return Deferred.all([fileCommandsRegistered, dependencyTypesDef]);
 			} else {
 				return fileCommandsRegistered;

@@ -8,8 +8,6 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		'i18n!orion/edit/nls/messages'],
 		function(Deferred, objects, mCommands, mOutliner, lib, URITemplate, PageUtil, MiniNavViewMode, ProjectNavViewMode, messages) {
 
-	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
-
 	/**
 	 * @name orion.sidebar.Sidebar
 	 * @class Sidebar that appears alongside an {@link orion.editor.Editor} in the Orion IDE.
@@ -101,9 +99,18 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				toolbarNode: modeContributionToolbar
 			}));
 			
-			var _self = this;
-			
-			if(this.serviceRegistry.getServiceReferences("orion.projects").length>0){
+			if(this.serviceRegistry.getServiceReferences("orion.projects").length>0){ //$NON-NLS-0$
+				var _self = this;
+				var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+				var scopeUp = function() {
+					var input = PageUtil.matchResourceParameters();
+					var resource = input.resource;
+					delete input.navigate;
+					delete input.resource;
+					window.location.href = uriTemplate.expand({resource: resource, params: input});
+					_self.setViewMode("nav"); //$NON-NLS-0$
+				};
+				var id = "project"; //$NON-NLS-0$
 				var projectViewMode = new ProjectNavViewMode({ //$NON-NLS-0$
 					commandRegistry: commandRegistry,
 					contentTypeRegistry: contentTypeRegistry,
@@ -113,58 +120,67 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 					sidebarNavInputManager: this.sidebarNavInputManager,
 					serviceRegistry: serviceRegistry,
 					toolbarNode: modeContributionToolbar,
-					scopeUp: function(){
-						var input = PageUtil.matchResourceParameters();
-						var resource = input.resource;
-						delete input.navigate;
-						delete input.resource;
-						window.location.href = uriTemplate.expand({resource: resource, params: input});
-						_self.setViewMode("nav");
-					}
+					scopeUp: scopeUp
 				});
-				if(this.editorInputManager.getFileMetadata()){
-					this.addViewMode("project", projectViewMode);
-					this.renderViewModeMenu();
-				}
-				this.editorInputManager.addEventListener("InputChanged", function(event){
-					if(event.input){
-						_self.addViewMode("project", projectViewMode);
-						_self.renderViewModeMenu();
-						if(event.metadata && event.metadata.Directory){
-							if(event.metadata.Children){
-								for(var i=0; i<event.metadata.Children.length; i++){
-									if(event.metadata.Children[i].Name === "project.json"){
-										_self.setViewMode("project");
-										return;
-									}
-								}
-							} else if(event.metadata.ChildrenLocation){
-								_self.fileClient.fetchChildren(event.metadata.ChildrenLocation).then(function(children){
-									for(var i=0; i<children.length; i++){
-										if(children[i].Name === "project.json"){
-											_self.setViewMode("project");
-											return;											
-										}
-									}
-								});
+				var getProjectJson = function(metadata) {
+					function getJson(children) {
+						for(var i=0; i<children.length; i++){
+							if(!children[i].Directory && children[i].Name === "project.json"){ //$NON-NLS-0$
+								return children[i];
 							}
 						}
-					} else {
-						_self.removeViewMode("project");
+						return null;
+					}
+					var deferred = new Deferred();
+					if (metadata.Children){
+						deferred.resolve(getJson(metadata.Children));
+					} else if(metadata.ChildrenLocation){
+						_self.fileClient.fetchChildren(metadata.ChildrenLocation).then(function(children){
+							deferred.resolve(getJson(children));
+						});
+					}
+					return deferred;
+				};
+				var showMode = function(show) {
+					var showing = !!_self.getViewMode(id);
+					if (showing === show) { return; }
+					if (show) {
+						_self.addViewMode(id, projectViewMode);
 						_self.renderViewModeMenu();
+					} else {
+						_self.removeViewMode(id);
+						_self.renderViewModeMenu();
+					}
+				};
+				// Switch to project view mode if a project is opened
+				this.editorInputManager.addEventListener("InputChanged", function(event){ //$NON-NLS-0$
+					if(event.metadata && event.metadata.Directory){
+						if(!event.metadata.Parents) {
+							if (_self.getActiveViewModeId() === id) {
+								scopeUp();
+							}
+						} else {
+							getProjectJson(event.metadata).then(function(json) {
+								if (json) {
+									showMode(true);
+									_self.setViewMode(id);
+								}
+							});
+						}
 					}
 				});
-				this.sidebarNavInputManager.addEventListener("InputChanged", function(event){
-					if(_self.editorInputManager.getFileMetadata()){
-						//if there is a file opened we display its project
-						return;
-					}
-					if(event.input){
-						_self.addViewMode("project", projectViewMode);
-						_self.renderViewModeMenu();
+				// Only show project view mode if selection is in a project
+				this.sidebarNavInputManager.addEventListener("selectionChanged", function(event){ //$NON-NLS-0$
+					var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
+					if (item) {
+						while (item.parent && item.parent.parent) {
+							item = item.parent;
+						}
+						getProjectJson(item).then(function(json) {
+							showMode(!!json);
+						});
 					} else {
-						_self.removeViewMode("project");
-						_self.renderViewModeMenu();
+						showMode(false);
 					}
 				});
 			}
@@ -204,10 +220,10 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		 */
 		addViewMode: function(id, mode) {
 			if (!id) {
-				throw new Error("Invalid id: " + id);
+				throw new Error("Invalid id: " + id); //$NON-NLS-0$
 			}
 			if (!mode || typeof mode !== "object") { //$NON-NLS-0$
-				throw new Error("Invalid mode: "  + mode);
+				throw new Error("Invalid mode: "  + mode); //$NON-NLS-0$
 			}
 			if (!Object.prototype.hasOwnProperty.call(this.viewModes, id)) {
 				this.viewModes[id] = mode;
