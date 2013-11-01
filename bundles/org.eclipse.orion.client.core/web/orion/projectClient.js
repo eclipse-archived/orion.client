@@ -283,7 +283,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 							}
 							for(var j=projectJson.Dependencies.length-1; j>=0; j--){
 								if(projectJson.Dependencies[j].Location === dependency.Location && projectJson.Dependencies[j].Type === dependency.Type){
-									projectJson.Dependencies.splice(j);
+									projectJson.Dependencies.splice(j,1);
 								}
 							}
 							this.fileClient.write(children[i].Location, JSON.stringify(projectJson)).then(

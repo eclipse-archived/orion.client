@@ -570,17 +570,23 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				projectData.type = "Project";
 				projectData.Directory = true;
 				
-				if(projectData.Dependencies){
-					for(var i=0; i<projectData.Dependencies.length; i++){
-						(function(dependency_no){
-							this.projectClient.getDependencyFileMetadata(projectData.Dependencies[i], projectData.WorkspaceLocation).then(function(dependencyMetadata){
-								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[dependency_no], FileMetadata: dependencyMetadata, Location: dependencyMetadata.Location, ChildrenLocation: dependencyMetadata.ChildrenLocation}, true);
-								return;
-							}.bind(this), function(error){
-								this.fileExplorer.changedItem({Dependency: projectData.Dependencies[dependency_no], disconnected: true});
-							}.bind(this));
-						}.bind(this))(i);
-					}
+				if (projectData.Dependencies) {
+					projectData.Dependencies.forEach(function(dependency) {
+						this.projectClient.getDependencyFileMetadata(dependency, projectData.WorkspaceLocation).then(function(dependencyMetadata) {
+							this.fileExplorer.changedItem({
+								Dependency: dependency,
+								FileMetadata: dependencyMetadata,
+								Location: dependencyMetadata.Location,
+								ChildrenLocation: dependencyMetadata.ChildrenLocation
+							}, true);
+							return;
+						}.bind(this), function(error) {
+							this.fileExplorer.changedItem({
+								Dependency: dependency,
+								disconnected: true
+							});
+						}.bind(this));
+					}.bind(this));
 				}
 				this.renderer.render(projectData);
 				this.fileExplorer.loadRoot(projectData, redisplay).then(function(){
