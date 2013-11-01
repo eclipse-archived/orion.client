@@ -131,8 +131,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	
 	/**	@private */
 	function getHeight(node) {
-		var rect = node.getBoundingClientRect();
-		return rect.bottom - rect.top;
+		return node.clientHeight;
 	}
 	
 	/**
