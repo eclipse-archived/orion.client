@@ -14,9 +14,8 @@ define([
 	'require',
 	'orion/i18nUtil',
 	'orion/xhr',
-	'orion/regex',
-	'plugins/site/selfHostingRules'
-], function(require, i18nUtil, xhr, regex, mSelfHostingRules) {
+	'orion/regex'
+], function(require, i18nUtil, xhr, regex) {
 
 	var temp = document.createElement('a');
 	
@@ -121,49 +120,50 @@ define([
 		};
 	}
 
-	// TODO move this onto the orion site client side?
-	var SELF_HOSTING_TEMPLATE = mSelfHostingRules.Rules;
-	var TYPE_FILE = mSelfHostingRules.Types.File;
-	var TYPE_API = mSelfHostingRules.Types.API;
-	/**
-	 * @param {String[]} folderPaths
-	 */
-	function generateSelfHostingMappings(folderPaths, port) {
-		var hostPrefix = "http://localhost" + ":" + port + makeHostRelative(getContext()); //$NON-NLS-0$
-		return SELF_HOSTING_TEMPLATE.map(function(item) {
-			var target;
-			if (item.type === TYPE_FILE) {
-				// Replace occurrence of ${n} in targetPattern with the n'th folderPath
-				target = i18nUtil.formatMessage.apply(i18nUtil, [item.targetPattern].concat(folderPaths));
-			} else { // TYPE_API
-				target = i18nUtil.formatMessage(item.targetPattern, hostPrefix);
-			}
-			return {Source: item.source, Target: target};
-		});
-	}
-	function matchesSelfHostingTemplate(basePath, site) {
-		// Given a site and a base workspace path, can we substitute the path into each FILE mapping, and
-		// localhost:anyport into every API mapping, such that the site matches the self-hosting template?
-		return SELF_HOSTING_TEMPLATE.every(function(item) {
-			return site.Mappings.some(function(mapping) {
-				if (mapping.Source === item.source) {
-					if (item.type === TYPE_FILE) {
-						return mapping.Target === (basePath + item.targetPattern);
-					} else if (item.type === TYPE_API) {
-						return new RegExp(
-							regex.escape("http://localhost") + "(:\\d+)?" + regex.escape(makeHostRelative(getContext())) + regex.escape(item.targetPattern)
-						).test(mapping.Target);
-					}
-				}
-				return false;
-			});
-		});
-	}
-
-	function SiteImpl(filePrefix, workspacePrefix) {
+	function SiteImpl(filePrefix, workspacePrefix, selfHostingRules) {
 		this.filePrefix = filePrefix;
 		this.cache = new Cache(workspacePrefix);
 		this.makeAbsolute = workspacePrefix && workspacePrefix.indexOf("://") !== -1;
+		this.selfHostingRules = selfHostingRules;
+
+		// TODO move this onto the orion site client side?
+		var SELF_HOSTING_TEMPLATE = selfHostingRules.Rules;
+		var TYPE_FILE = selfHostingRules.Types.File;
+		var TYPE_API = selfHostingRules.Types.API;
+		/**
+		 * @param {String[]} folderPaths
+		 */
+		this._generateSelfHostingMappings = function(folderPaths, port) {
+			var hostPrefix = "http://localhost" + ":" + port + makeHostRelative(getContext()); //$NON-NLS-0$
+			return SELF_HOSTING_TEMPLATE.map(function(item) {
+				var target;
+				if (item.type === TYPE_FILE) {
+					// Replace occurrence of ${n} in targetPattern with the n'th folderPath
+					target = i18nUtil.formatMessage.apply(i18nUtil, [item.targetPattern].concat(folderPaths));
+				} else { // TYPE_API
+					target = i18nUtil.formatMessage(item.targetPattern, hostPrefix);
+				}
+				return {Source: item.source, Target: target};
+			});
+		};
+		this._matchesSelfHostingTemplate = function(basePath, site) {
+			// Given a site and a base workspace path, can we substitute the path into each FILE mapping, and
+			// localhost:anyport into every API mapping, such that the site matches the self-hosting template?
+			return SELF_HOSTING_TEMPLATE.every(function(item) {
+				return site.Mappings.some(function(mapping) {
+					if (mapping.Source === item.source) {
+						if (item.type === TYPE_FILE) {
+							return mapping.Target === (basePath + item.targetPattern);
+						} else if (item.type === TYPE_API) {
+							return new RegExp(
+								regex.escape("http://localhost") + "(:\\d+)?" + regex.escape(makeHostRelative(getContext())) + regex.escape(item.targetPattern)
+							).test(mapping.Target);
+						}
+					}
+					return false;
+				});
+			});
+		};
 	}
 	
 	SiteImpl.prototype = {
@@ -362,7 +362,7 @@ define([
 				// There must be a project for which all self hosting mappings can be generated using the project's Id
 				return projects.some(function(project) {
 					var internalPath = self.toInternalForm(project.Location);
-					return matchesSelfHostingTemplate(internalPath, site);
+					return this._matchesSelfHostingTemplate(internalPath, site);
 				});
 			});
 		},
@@ -371,7 +371,7 @@ define([
 		 */
 		convertToSelfHosting: function(site, folderLocations, port) {
 			var internalPaths = folderLocations.map(this.toInternalForm.bind(this));
-			var mappings = generateSelfHostingMappings(internalPaths, port);
+			var mappings = this._generateSelfHostingMappings(internalPaths, port);
 			site.Mappings = mappings;
 			return site;
 		},

@@ -9,7 +9,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document eclipse parent window*/
-define(['orion/plugin', 'plugins/site/siteServiceImpl'], function(PluginProvider, siteImpl) {
+define([
+	'orion/plugin',
+	'plugins/site/siteServiceImpl',
+	'plugins/site/selfHostingRules'
+], function(PluginProvider, siteImpl, mSelfHostingRules) {
 	function qualify(url) {
 		var a = document.createElement('a');
 		a.href = url;
@@ -74,7 +78,7 @@ define(['orion/plugin', 'plugins/site/siteServiceImpl'], function(PluginProvider
 	});
 
 	provider.registerService('orion.site',
-		new siteImpl.SiteImpl(fileBase, workspaceBase),
+		new siteImpl.SiteImpl(fileBase, workspaceBase, mSelfHostingRules),
 		{
 			id: 'orion.site.' + host.hostname,
 			name: 'Orion Sites at ' + host.hostname,
