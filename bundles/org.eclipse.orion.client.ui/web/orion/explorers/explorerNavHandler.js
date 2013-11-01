@@ -194,7 +194,7 @@ exports.ExplorerNavHandler = (function() {
 					if(that._selections.length > 0){
 						that.cursorOn(that._selections[0], true, false, noScroll);
 					} else {//If there is no selection, we should just the first item as the cursored items.  
-						that.cursorOn();
+						that.cursorOn(null, false, false, noScroll);
 					}
 					//If shift selection anchor exists and in the refreshed selection range, we just keep it otherwise clear the anchor
 					//See https://bugs.eclipse.org/bugs/show_bug.cgi?id=419170
