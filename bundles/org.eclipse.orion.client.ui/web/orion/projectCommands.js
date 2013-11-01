@@ -302,28 +302,47 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		commandService.addCommand(addFolderCommand);
 		
 		var initProjectCommand = new mCommands.Command({
-			name: "Init Basic Project",
+			name: "Convert to project",
 			tooltip: "Convert this folder into a project",
 			id: "orion.project.initProject", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
-				var parentProject;
-				if (item.Parents && item.Parents.length===0){
-					parentProject = item;
-				} else if(item.Parents){
-					parentProject = item.Parents[item.Parents.length-1];
-				}
-				if(parentProject){
-					projectClient.initProject(parentProject.Location).then(function(){
-						fileClient.read(item.Location, true).then(function(fileMetadata){
-							explorer.changedItem(fileMetadata);
+				if(item){
+					var init = function() {
+						projectClient.initProject(item.Location).then(function(){
+							fileClient.read(item.Location, true).then(function(fileMetadata){
+								explorer.changedItem(item, true);
+							}, errorHandler);
 						}, errorHandler);
-					}, errorHandler);
+					};
+					projectClient.readProject(item).then(function(project) {
+						if (project) {
+							progress.setProgressResult({
+								Message: "This folder is a project already.",
+								Severity: "Warning" //$NON-NLS-0$
+							});
+							explorer.changedItem(item, true);
+						} else {
+							init();
+						}
+					}, init);
 				}
 				
 			},
-			visibleWhen: function(item) {
-				return item.type==="Folder";
+			visibleWhen: function(items) {
+				var item = forceSingleItem(items);
+				if (item && ((item.parent && item.parent.Projects) || (item.Parents && item.Parents.length === 0))) {
+					//TODO only works if children has been cached
+					if (item.children) {
+						for(var i=0; i<item.children.length; i++){
+							if(item.children[i].Name && !item.children[i].Directory && item.children[i].Name.toLowerCase() === "project.json"){ //$NON-NLS-0$
+								return false;
+							}
+						}
+					}
+					return true;
+				}
+				return false;
 			}
 		});
 		commandService.addCommand(initProjectCommand);

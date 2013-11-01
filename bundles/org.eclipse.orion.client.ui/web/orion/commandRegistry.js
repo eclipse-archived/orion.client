@@ -732,37 +732,39 @@ define([
 							}
 
 							// render the children asynchronously
-							window.setTimeout(function() {
-								self._render(contribution.children, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
-								// special post-processing when we've created a menu in an image bar.  We want to get rid 
-								// of a trailing separator in the menu first, and then decide if our menu is necessary
-								self._checkForTrailingSeparator(created.menu, "menu", true);  //$NON-NLS-0$
-								// now determine if we actually needed the menu or not
-								if (created.menu.childNodes.length === 0) {
-									if (contribution.emptyGroupMessage) {
-										if (!created.menuButton.emptyGroupTooltip) {
-											created.menuButton.emptyGroupTooltip = new mTooltip.Tooltip({
-												node: created.menuButton,
-												text: contribution.emptyGroupMessage,
-												trigger: "click", //$NON-NLS-0$
-												position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-											});
+							if (created) {
+								window.setTimeout(function() {
+									self._render(contribution.children, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
+									// special post-processing when we've created a menu in an image bar.  We want to get rid 
+									// of a trailing separator in the menu first, and then decide if our menu is necessary
+									self._checkForTrailingSeparator(created.menu, "menu", true);  //$NON-NLS-0$
+									// now determine if we actually needed the menu or not
+									if (created.menu.childNodes.length === 0) {
+										if (contribution.emptyGroupMessage) {
+											if (!created.menuButton.emptyGroupTooltip) {
+												created.menuButton.emptyGroupTooltip = new mTooltip.Tooltip({
+													node: created.menuButton,
+													text: contribution.emptyGroupMessage,
+													trigger: "click", //$NON-NLS-0$
+													position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+												});
+											}
+										} else {
+											if(domNodeWrapperList){
+												mNavUtils.removeNavGrid(domNodeWrapperList, created.menuButton);
+											}
+											if (created.menu.parentNode) {
+												created.menu.parentNode.removeChild(created.menu);
+											}
+											if (created.destroyButton && created.destroyButton.parentNode) {
+												created.destroyButton.parentNode.removeChild(created.destroyButton);
+											}
 										}
 									} else {
-										if(domNodeWrapperList){
-											mNavUtils.removeNavGrid(domNodeWrapperList, created.menuButton);
-										}
-										if (created.menu.parentNode) {
-											created.menu.parentNode.removeChild(created.menu);
-										}
-										if (created.destroyButton && created.destroyButton.parentNode) {
-											created.destroyButton.parentNode.removeChild(created.destroyButton);
-										}
+										created.menuButton.style.visibility = "visible";  //$NON-NLS-0$
 									}
-								} else {
-									created.menuButton.style.visibility = "visible";  //$NON-NLS-0$
-								}
-							}, 0);
+								}, 0);
+							}
 						} else {  
 							// rendering a group using a separator on each end. We do it synchronously because order matters with
 							// non grouped items.
