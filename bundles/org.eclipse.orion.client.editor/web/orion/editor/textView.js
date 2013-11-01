@@ -3062,10 +3062,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			* execute the actions from the keypress handler.
 			* Note: This only happens on the Mac and Linux (Firefox 3.6).
 			*
-			* Feature in Opera.  Opera sends keypress events even for non-printable
+			* Feature in Opera < 12.16.  Opera sends keypress events even for non-printable
 			* keys.  The fix is to handle actions in keypress instead of keydown.
 			*/
-			if (((util.isMac || util.isLinux) && util.isFirefox < 4) || util.isOpera) {
+			if (((util.isMac || util.isLinux) && util.isFirefox < 4) || util.isOpera < 12.16) {
 				this._keyDownEvent = e;
 				return true;
 			}
@@ -3108,7 +3108,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					return false;
 				}
 			}
-			if (((util.isMac || util.isLinux) && util.isFirefox < 4) || util.isOpera) {
+			if (((util.isMac || util.isLinux) && util.isFirefox < 4) || util.isOpera < 12.16) {
 				if (this._doAction(this._keyDownEvent)) {
 					if (e.preventDefault) { e.preventDefault(); }
 					return false;
@@ -3215,7 +3215,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}, 0);
 			}
 			if (this._clickCount === 1) {
-				result = this._setSelectionTo(e.clientX, e.clientY, e.shiftKey, !util.isOpera && this._hasFocus && this.isListening("DragStart")); //$NON-NLS-0$
+				result = this._setSelectionTo(e.clientX, e.clientY, e.shiftKey, (!util.isOpera || util.isOpera >= 12.16) && this._hasFocus && this.isListening("DragStart")); //$NON-NLS-0$
 				if (result) { this._setGrab(target); }
 			} else {
 				/*
