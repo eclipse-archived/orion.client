@@ -99,6 +99,8 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 			}
 			var response = {numFound: results.length, docs: results };
 			this.onSearchNameComplete({response: response});
+		} else {
+			this.onSearchNameComplete({response: {numFound: 0, docs: []}});
 		}
 	};
 	
