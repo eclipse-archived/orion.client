@@ -7,26 +7,71 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- 
-/*global define document*/
-define(['marked/marked', 'orion/webui/littlelib'], function(marked, lib) { //$NON-NLS-0$
-	function MarkdownView(options){
+
+/*global define document window URL console*/
+define(['marked/marked', 'orion/webui/littlelib', 'orion/URITemplate', 'orion/PageUtil', 'orion/URL-shim'], function(marked, lib, URITemplate, PageUtil) { //$NON-NLS-0$
+
+	var uriTemplate = new URITemplate("#{,resource,params*}");
+
+	function filterOutputLink(outputLink, resourceURL, isRelative) {
+		return function(cap, link) {
+			if (link.href.indexOf(":") === -1) {
+				
+				try {
+					var linkURL;
+					if (resourceURL.protocol === "filesystem:") {
+						linkURL = {
+							href: "filesystem:" + (new URL(link.href, resourceURL.pathname)).href
+						};
+					} else {
+						linkURL = new URL(link.href, resourceURL);
+						if (isRelative) {
+							linkURL.protocol = "";
+							linkURL.host = "";
+						}
+					}
+					if (cap[0][0] !== '!') {
+						link.href = uriTemplate.expand({
+							resource: linkURL.href
+						});
+					} else {
+						link.href = linkURL.href;
+					}
+				} catch(e) {
+					console.log(e); // best effort
+				}				
+			}
+			return outputLink.call(this, cap, link);
+		};
+	}
+
+
+	function MarkdownView(options) {
 		this.fileClient = options.fileClient;
 		this.progress = options.progress;
 		this._node = null;
 	}
 	MarkdownView.prototype = {
-		display: function(node, markdown){
-			node.className = "orionMarkdown";				
-			node.innerHTML = marked(markdown, {sanitize: true});
+		display: function(node, markdown) {
+			node.className = "orionMarkdown";
+
+			// relativizing marked's outputLink
+			var outputLink = marked.InlineLexer.prototype.outputLink;
+			var resource = PageUtil.matchResourceParameters().resource;
+			var resourceURL = new URL(resource, window.location.href);
+			marked.InlineLexer.prototype.outputLink = filterOutputLink(outputLink, resourceURL, resource.indexOf(":") === -1);
+			node.innerHTML = marked(markdown, {
+				sanitize: true
+			});
+			marked.InlineLexer.prototype.outputLink = outputLink;
 		},
-		displayContents: function(node, file){
+		displayContents: function(node, file) {
 			var location = file.Location || file;
-			this.progress.progress(this.fileClient.read(location), "Reading file " + (file.Name || location)).then(function(markdown){
+			this.progress.progress(this.fileClient.read(location), "Reading file " + (file.Name || location)).then(function(markdown) {
 				this.display.bind(this)(node, markdown);
 			}.bind(this));
 		},
-		displayInFrame: function(node, file){
+		displayInFrame: function(node, file) {
 			node.className = "orionMarkdown";
 			var table = document.createElement("table");
 			var tr = document.createElement("tr");
@@ -46,6 +91,8 @@ define(['marked/marked', 'orion/webui/littlelib'], function(marked, lib) { //$NO
 			node.appendChild(table);
 		}
 	};
-	
-	return {MarkdownView: MarkdownView};
+
+	return {
+		MarkdownView: MarkdownView
+	};
 });

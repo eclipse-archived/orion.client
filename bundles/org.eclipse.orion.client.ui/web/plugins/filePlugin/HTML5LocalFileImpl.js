@@ -33,6 +33,7 @@ function createFile(entry) {
 		result.LocalTimeStamp = metadata.modificationTime.getTime();
 		result.Directory = entry.isDirectory;
 		if (result.Directory) {
+			result.Location = result.Location.slice(-1) === "/" ? result.Location : result.Location + "/";
 			result.ChildrenLocation = result.Location;
 		}
 		deferred.resolve(result);
