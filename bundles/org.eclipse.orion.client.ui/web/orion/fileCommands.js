@@ -475,6 +475,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			// Check selection first, then use the provided item
 			var canCreateFile = function(item) {
 				item = forceSingleItem(item);
+				if (!item.Directory && item.parent) {
+					item = item.parent;
+				}
 				return item.Directory && !mFileUtils.isAtRoot(item.Location);
 			};
 			return canCreateFile(explorer.selection.getSelections()) || canCreateFile(item);
@@ -991,9 +994,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					// Check selection service first.  If a single folder is selected, that is the target.  Otherwise the root is the target.
 					explorer.selection.getSelections(function(selections) {
 						var item;
-						if (selections.length === 1 && selections[0].Directory) {
-							item = selections[0];
-						} else {
+						if (selections.length === 1) {
+							if (selections[0].Directory) {
+								item = selections[0];
+							} else {
+								item = selections[0].parent;
+							}
+						} 
+						if (!item) {
 							item = forceSingleItem(data.items);
 						}
 						if (bufferedSelection.length > 0) {
@@ -1008,7 +1016,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 								var location = selectedItem.Location;
 								var name = selectedItem.Name || null;
 								if (location) {
-									if (selectedItem.parent && selectedItem.parent.Location === item.Location) {
+									var itemLocation = item.Location || item.ContentLocation;
+									if (selectedItem.parent && selectedItem.parent.Location === itemLocation) {
 										name = window.prompt(i18nUtil.formatMessage(messages['Enter a new name for \'${0}\''], selectedItem.Name), i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name));
 										// user cancelled?  don't copy this one
 										if (!name) {
@@ -1016,7 +1025,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 										}
 									}
 									if (location) {
-										var deferred = fileClient.copyFile(location, item.Location, name);
+										var deferred = fileClient.copyFile(location, itemLocation, name);
 										deferreds.push(progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Pasting ${0}"], location)).then(
 											function(result) {
 												summary.push({
