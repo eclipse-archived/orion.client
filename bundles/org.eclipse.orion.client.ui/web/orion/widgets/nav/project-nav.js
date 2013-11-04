@@ -28,7 +28,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	}
 	
 	ProjectNavModel.prototype = Object.create(FileModel.prototype);
-	objects.mixin(ProjectNavModel.prototype, /** @lends orion.sidebar.FilesNavExplorer.prototype */ {
+	objects.mixin(ProjectNavModel.prototype, /** @lends orion.sidebar.ProjectNavModel.prototype */ {
 		processParent: function(item, children){
 			var res = FileModel.prototype.processParent.call(this, item, children);
 			if(!item.Project){
@@ -88,7 +88,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	 * @class orion.sidebar.ProjectNavExplorer
 	 * @extends orion.explorers.FileExplorer
 	 */
-	function FilesNavExplorer(params, projectExplorer) {
+	function ProjectNavExplorer(params) {
 		params.setFocus = false;   // do not steal focus on load
 		params.cachePrefix = null; // do not persist table state
 		params.modelEventDispatcher = FileCommands.getModelEventDispatcher();
@@ -100,13 +100,12 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 		this.scopeUp = params.scopeUp;
-		this.projectExplorer = projectExplorer;
+		this.parentNode = params.parentNode;
 
-		this.newActionsScope = params.newActionsScope;
-		this.selectionActionsScope = params.selectionActionsScope;
+		this.newActionsScope = this.toolbarNode.id + "Add"; //$NON-NLS-0$
+		this.selectionActionsScope = "filesSectionSelectionArea"; //$NON-NLS-0$
 		this.goUpActionsScope = "GoUpActions"; //$NON-NLS-0$
 
-		this.followEditor = true;
 		var initialRoot = { };
 		this.treeRoot = initialRoot; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
@@ -128,8 +127,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		this.editorInputManager.addEventListener("InputChanged", this._editorInputListener); //$NON-NLS-0$
 		this.commandsRegistered = this.registerCommands();
 	}
-	FilesNavExplorer.prototype = Object.create(FileExplorer.prototype);
-	objects.mixin(FilesNavExplorer.prototype, /** @lends orion.sidebar.FilesNavExplorer.prototype */ {
+	ProjectNavExplorer.prototype = Object.create(FileExplorer.prototype);
+	objects.mixin(ProjectNavExplorer.prototype, /** @lends orion.sidebar.ProjectNavExplorer.prototype */ {
 		onEditorInputChanged : function(event){
 			this.expandToItem(event.metadata, function(){
 				this.reveal(event.metadata, true);
@@ -182,6 +181,62 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			this.editorInputManager.removeEventListener("InputChanged", this._editorInputListener); //$NON-NLS-0$
 			this.selection.removeEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
 			FileExplorer.prototype.destroy.call(this);
+		},
+		display: function(fileMetadata, redisplay){
+			if(!fileMetadata){
+				return;
+			}
+			
+			this.fileMetadata = fileMetadata;
+			var that = this;
+			
+			var parentProject;
+			if (fileMetadata && fileMetadata.Parents && fileMetadata.Parents.length===0){
+				parentProject = fileMetadata;
+			} else if(fileMetadata && fileMetadata.Parents){
+				parentProject = fileMetadata.Parents[fileMetadata.Parents.length-1];
+			}
+			
+			if(!redisplay &&  parentProject && parentProject.Location === this.projectLocation){
+				return;
+			}
+			this.fileClient.loadWorkspace().then(function(workspaceMetadata){
+			this.projectClient.readProject(fileMetadata, workspaceMetadata).then(function(projectData){
+				if(projectData) {
+					projectData.Workspace = workspaceMetadata;
+					lib.empty(this.parentNode);
+					this.projectLocation = parentProject ? parentProject.Location : null;
+					projectData.type = "Project"; //$NON-NLS-0$
+					projectData.Directory = true;
+					fileMetadata.type = "ProjectRoot"; //$NON-NLS-0$
+					projectData.children = [fileMetadata];
+					if (projectData.Dependencies) {
+						projectData.Dependencies.forEach(function(dependency) {
+							var item = {Dependency: dependency, Project: projectData};
+							projectData.children.push(item);
+							this.projectClient.getDependencyFileMetadata(dependency, projectData.WorkspaceLocation).then(function(dependencyMetadata) {
+								objects.mixin(item, {
+									FileMetadata: dependencyMetadata,
+									Location: dependencyMetadata.Location,
+									ChildrenLocation: dependencyMetadata.ChildrenLocation
+								});
+								that.renderer.updateRow(item, lib.node(that.model.getId(item)));
+								that.expandToItem(item);
+							}.bind(this), function(error) {
+								item.disconnected = true;
+								that.renderer.updateRow(item, lib.node(that.model.getId(item)));
+								that.expandToItem(item);
+							}.bind(this));
+						}.bind(this));
+					}
+					that.loadRoot(projectData, redisplay).then(function(){
+						that.expandToItem(fileMetadata,function(){
+							that.reveal(fileMetadata);
+						});
+					});
+				}
+			}.bind(this));
+			}.bind(this));
 		},
 		/**
 		 * Loads the given children location as the root.
@@ -335,7 +390,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		},
 		changedItem: function(item, forceExpand){
 			if(!item || !this.model){
-				this.projectExplorer.changedItem.call(this.projectExplorer, item, true);
+				this.display(this.fileMetadata, true);
 				return;
 			}
 			if(item.Projects){
@@ -346,11 +401,11 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 	});
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
-	function FilesNavRenderer() {
+	function ProjectNavRenderer() {
 		NavigatorRenderer.apply(this, arguments);
 	}
-	FilesNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
-	objects.mixin(FilesNavRenderer.prototype, {
+	ProjectNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
+	objects.mixin(ProjectNavRenderer.prototype, {
 		showFolderLinks: true,
 		oneColumn: true,
 		createFolderNode: function(folder) {
@@ -440,120 +495,6 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		}
 	});
 	
-		
-	function ProjectNavRenderer(options){
-		this.parentNode = options.parentNode;
-		this.serviceRegistry = options.serviceRegistry;
-	}
-	
-	ProjectNavRenderer.prototype = {
-		render: function(projectData){
-			var projectInfoNode = document.createElement("div"); //$NON-NLS-0$
-			projectInfoNode.id = "projectInfoNode"; //$NON-NLS-0$
-			this.parentNode.appendChild(projectInfoNode);
-		},
-		constructor: ProjectNavRenderer
-	};
-	
-	function ProjectNavExplorer(params){
-		this.commandRegistry = params.commandRegistry;
-		this.contentTypeRegistry = params.contentTypeRegistry;
-		this.fileClient = params.fileClient;
-		this.parentId = params.parentId;
-		this.parentNode = params.parentNode;
-		this.toolbarNode = params.toolbarNode;
-		this.serviceRegistry = params.serviceRegistry;
-		this.projectClient = params.projectClient;
-		this.renderer = new ProjectNavRenderer({
-												parentNode:this.parentNode,
-												serviceRegistry: this.serviceRegistry
-											});
-		this.rendererFactory = params.rendererFactory;
-		params.parentId = "projectInfoNode"; //$NON-NLS-0$
-		this.addActionsScope = this.toolbarNode.id + "Add"; //$NON-NLS-0$
-		params.newActionsScope = this.addActionsScope;
-		this.selectionActionsScope = params.selectionActionsScope = "filesSectionSelectionArea"; //$NON-NLS-0$
-		this.fileExplorer = new FilesNavExplorer(params, this);
-		this.explorer = null;
-	}
-	
-	ProjectNavExplorer.prototype = {
-		display: function(fileMetadata, redisplay){
-		
-		if(!fileMetadata){
-			return;
-		}
-		
-		this.fileMetadata = fileMetadata;
-		var that = this;
-		
-		var parentProject;
-		if (fileMetadata && fileMetadata.Parents && fileMetadata.Parents.length===0){
-			parentProject = fileMetadata;
-		} else if(fileMetadata && fileMetadata.Parents){
-			parentProject = fileMetadata.Parents[fileMetadata.Parents.length-1];
-		}
-		
-		if(!redisplay &&  parentProject && parentProject.Location === this.projectLocation){
-			return;
-		}
-		this.fileClient.loadWorkspace().then(function(workspaceMetadata){
-		this.projectClient.readProject(fileMetadata, workspaceMetadata).then(function(projectData){
-			if(projectData && this.fileExplorer) {
-				projectData.Workspace = workspaceMetadata;
-				lib.empty(this.parentNode);
-				this.projectLocation = parentProject ? parentProject.Location : null;
-				projectData.type = "Project"; //$NON-NLS-0$
-				projectData.Directory = true;
-				fileMetadata.type = "ProjectRoot"; //$NON-NLS-0$
-				projectData.children = [fileMetadata];
-				if (projectData.Dependencies) {
-					projectData.Dependencies.forEach(function(dependency) {
-						var item = {Dependency: dependency, Project: projectData};
-						projectData.children.push(item);
-						this.projectClient.getDependencyFileMetadata(dependency, projectData.WorkspaceLocation).then(function(dependencyMetadata) {
-							objects.mixin(item, {
-								FileMetadata: dependencyMetadata,
-								Location: dependencyMetadata.Location,
-								ChildrenLocation: dependencyMetadata.ChildrenLocation
-							});
-							this.fileExplorer.renderer.updateRow(item, lib.node(this.fileExplorer.model.getId(item)));
-							this.fileExplorer.expandToItem(item);
-						}.bind(this), function(error) {
-							item.disconnected = true;
-							this.fileExplorer.renderer.updateRow(item, lib.node(this.fileExplorer.model.getId(item)));
-							this.fileExplorer.expandToItem(item);
-						}.bind(this));
-					}.bind(this));
-				}
-				this.renderer.render(projectData);
-				this.fileExplorer.loadRoot(projectData, redisplay).then(function(){
-					that.fileExplorer.expandToItem(fileMetadata,function(){
-						that.fileExplorer.reveal(fileMetadata);
-					});
-				});
-			}
-		}.bind(this));
-		}.bind(this));
-		},
-		changedItem: function(fileMetadata){
-			if(fileMetadata){
-				this.display(fileMetadata);
-				return;
-			}
-			this.display(this.fileMetadata, true);
-		},
-		destroy : function(){
-			if (this.fileExplorer) {
-				this.fileExplorer.destroy();
-				this.fileExplorer = null;
-			}
-		},
-		constructor: ProjectNavExplorer
-	};
-
-	
-
 	/**
 	 * @name orion.sidebar.ProjectNavViewMode
 	 * @class
@@ -592,7 +533,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				parentNode: this.parentNode,
 				projectClient: this.projectClient,
 				rendererFactory: function(explorer) {
-					var renderer = new FilesNavRenderer({
+					var renderer = new ProjectNavRenderer({
 						checkbox: false,
 						cachePrefix: "ProjectNav"}, explorer, _self.commandRegistry, _self.contentTypeRegistry); //$NON-NLS-0$
 					return renderer;
