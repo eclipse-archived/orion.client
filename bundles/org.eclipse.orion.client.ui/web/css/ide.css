@@ -916,6 +916,14 @@ input {
 	width: 90%;
 }
 
+.orionMarkdown table {
+	table-layout: fixed;
+}
+
+td .orionMarkdown {
+	overflow-x: auto;
+}
+
 .folderNav tr {
 	border-bottom: 1px solid #e6f3f6;
 	border-right: 1px solid #D6EBF0;
