@@ -19,12 +19,16 @@ define([
 	'orion/objects',
 	'orion/serviceregistry'
 ], function(MockEditor, assert, ASTManager, Deferred, EventTarget, mInputManager, objects, mServiceRegistry) {
-	var InputManager = mInputManager.InputManager,
-	    ServiceRegistry = mServiceRegistry.ServiceRegistry;
 
+	/**
+	 * @name setup
+	 * @description Sets the test up prior to running
+	 * @function
+	 * @public
+	 */
 	function setup() {
-		var serviceRegistry = new ServiceRegistry();
-		var inputManager = new InputManager({
+		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
+		var inputManager = new mInputManager.InputManager({
 			serviceRegistry: serviceRegistry,
 			editor: new MockEditor()
 		});
@@ -39,10 +43,18 @@ define([
 	}
 
 	var tests = {};
+	/**
+	 * @name test_getAST
+	 * @descripion tests asking the manager for an AST of a test content type <code>text/foo</code>
+	 * @function
+	 * @public
+	 * @returns {orion.Deferred}
+	 */
 	tests.test_getAST = function() {
 		var result = setup(),
 		    serviceRegistry = result.serviceRegistry,
-		    inputManager = result.inputManager;
+		    inputManager = result.inputManager,
+		    astManager = result.astManager;
 
 		serviceRegistry.registerService("orion.core.astprovider", {
 				computeAST: function(context) {
@@ -51,14 +63,22 @@ define([
 			}, { contentType: ["text/foo"] });
 
 		inputManager.setContentType({ id: "text/foo" });
-		return serviceRegistry.getService("orion.core.astmanager").getAST().then(function(ast) {
+		return astManager.getAST().then(function(ast) {
 			assert.equal(ast.ast, "this is the AST");
 		});
 	};
+	/**
+	 * @name test_getAST_options
+	 * @descripion tests asking the manager for options used to create an AST for a test content type <code>text/foo</code>
+	 * @function
+	 * @public
+	 * @returns {orion.Deferred}
+	 */
 	tests.test_getAST_options = function() {
 		var result = setup(),
 		    serviceRegistry = result.serviceRegistry,
-		    inputManager = result.inputManager;
+		    inputManager = result.inputManager,
+		    astManager = result.astManager;
 
 		var promise = new Deferred();
 		serviceRegistry.registerService("orion.core.astprovider", {
@@ -71,13 +91,21 @@ define([
 
 		inputManager.setContentType({ id: "text/foo" });
 		inputManager.getEditor().setText("the text");
-		serviceRegistry.getService("orion.core.astmanager").getAST({ foo: "bar" });
+		astManager.getAST({ foo: "bar" });
 		return promise;
 	};
+	/**
+	 * @name test_AST_cache_is_used
+	 * @descripion tests that the AST re-asked for is the cached copy
+	 * @function
+	 * @public
+	 * @returns {orion.Deferred}
+	 */
 	tests.test_AST_cache_is_used = function() {
 		var result = setup(),
 		    serviceRegistry = result.serviceRegistry,
-		    inputManager = result.inputManager;
+		    inputManager = result.inputManager,
+		    astManager = result.astManager;
 
 		var i = 0;
 		serviceRegistry.registerService("orion.core.astprovider", {
@@ -88,7 +116,6 @@ define([
 
 		inputManager.setContentType({ id: "text/foo" });
 
-		var astManager = serviceRegistry.getService("orion.core.astmanager");
 		return astManager.getAST().then(function(ast) {
 			assert.equal(ast, "AST 0");
 		}).then(function() {
@@ -97,10 +124,18 @@ define([
 			});
 		});
 	};
+	/**
+	 * @name test_AST_cache_is_invalidated
+	 * @description tests that the cache of ASTs is properly cleaned on changed events and input loads
+	 * @function
+	 * @public
+	 * @returns {orion.Deferred}
+	 */
 	tests.test_AST_cache_is_invalidated = function() {
 		var result = setup(),
 		    serviceRegistry = result.serviceRegistry,
-		    inputManager = result.inputManager;
+		    inputManager = result.inputManager,
+		    astManager = result.astManager;
 
 		var i = 0;
 		serviceRegistry.registerService("orion.core.astprovider", {
@@ -111,7 +146,6 @@ define([
 
 		inputManager.setContentType({ id: "text/foo" });
 
-		var astManager = serviceRegistry.getService("orion.core.astmanager");
 		return astManager.getAST().then(function(ast) {
 			assert.equal(ast, "AST 0");
 			// Ensure we do not receive the cached "AST 0" after a model change

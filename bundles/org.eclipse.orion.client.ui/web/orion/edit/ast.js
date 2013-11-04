@@ -31,6 +31,7 @@ define([
 		this.serviceRegistry = serviceRegistry;
 		this.inputManager = inputManager;
 		this.start();
+		this.cache = null;
 	}
 	objects.mixin(ASTManager.prototype, /** @lends orion.edit.ASTManager.prototype */ {
 		/**
@@ -39,12 +40,12 @@ define([
 		 * @function
 		 * @public
 		 * @memberof orion.edit.ASTManager.prototype
+		 * @throws Error if the manager has already been started
 		 */
 		start: function() {
 			if (this.registration) {
-				throw new Error("Already started");
+				throw new Error("The AST manager has already been started");
 			}
-
 			this.tracker = new ServiceTracker(this.serviceRegistry, "orion.core.astprovider"); //$NON-NLS-0$
 			this.tracker.open();
 
@@ -59,35 +60,40 @@ define([
 		 * @function
 		 * @public
 		 * @memberof orion.edit.ASTManager.prototype
+		 * @throws Error if the manager has already been stopped
 		 */
 		stop: function() {
-			if(!this.registration) {
-				throw new Error("Manager not running");
+			if(this.registration) {
+				this.registration.unregister();
+				this.contextRegistration.unregister();
+				this.tracker.close();
+				this.listener = null;
+				this.registration = null;
+				this.cache = null;
 			}
-			this.registration.unregister();
-			this.contextRegistration.unregister();
-			this.tracker.close();
-			this.listener = this.cachedAST = null;
+			else {
+				throw new Error("The AST manager has laready been stopped");
+			}
 		},
 		/**
 		 * @name updated
-		 * @description Notifies the AST manager of a change to the model
+		 * @description Notifies the AST manager of a change to the model.
 		 * @function
 		 * @public
 		 * @memberof orion.edit.ASTManager.prototype
 		 * @param {Object} event
 		 */
 		updated: function(event) {
-			this.cachedAST = null;
+			this.cache = null;
 		},
 		/**
 		 * @name _getASTProvider
-		 * @description Returns the AST provider for the given content type identifier
+		 * @description Returns the AST provider for the given content type or <code>null</code> if it could not be computed
 		 * @function
 		 * @private
 		 * @memberof orion.edit.ASTManager.prototype
-		 * @param {String} contentTypeId
-		 * @returns {Object} An AST provider capable of providing an AST for the given contentType.
+		 * @param {String} contentTypeId the content type identifier
+		 * @returns {Object|orion.Promise} An AST provider capable of providing an AST for the given contentType.
 		 */
 		_getASTProvider: function(contentTypeId) {
 			var providers = this.tracker.getServiceReferences().filter(function(serviceRef) {
@@ -102,18 +108,21 @@ define([
 		 * @function
 		 * @private
 		 * @memberof orion.edit.ASTManager.prototype
-		 * @param {String} contentTypeId the identifier of the content type to compute the AST for
-		 * @param {Object} astContext the context in which to compute the AST
-		 * @returns {Object|orion.Promise} or <code>null</code> if there are no providers for an AST of the given content type
+		 * @param {Object} options The object of options to pass to the AST provider.
+		 * @returns {Object|orion.Promise}
 		 */
-		_getAST: function(contentTypeId, astContext) {
-			if (this.cachedAST) {
-				return this.cachedAST;
+		_getAST: function(options) {
+			if (this.cache) {
+				return this.cache;
 			}
-			var provider = this._getASTProvider(contentTypeId);
-			if (provider) {
-				astContext.text = this.inputManager.getEditor().getText();
-				return provider.computeAST(astContext);
+			var contentType = this.inputManager.getContentType();
+			if(contentType && contentType.id) {
+				var provider = this._getASTProvider(contentType.id);
+				if (provider) {
+					options = options || {};
+					options.text = this.inputManager.getEditor().getText();
+					return provider.computeAST(options);
+				}
 			}
 			return null;
 		},
@@ -124,17 +133,14 @@ define([
 		 * @public
 		 * @memberof orion.edit.ASTManager.prototype
 		 * @param {Object} [options={}] Options to be passed to the AST provider.
-		 * @returns {Object|orion.Promise} A promise that resolves to the AST. Resolves to <code>null</code> if no capable provider was found.
+		 * @returns {orion.Promise} A promise that resolves to the AST. Resolves to <code>null</code> if no capable provider was found.
 		 */
 		getAST: function(options) {
-			options = options || {};
-			var _self = this;
-			var contentType = this.inputManager.getContentType(),
-			    contentTypeId = contentType && contentType.id;
-			return Deferred.when(this._getAST(contentTypeId, options), function(ast) {
-				_self.cachedAST = ast;
-				return ast;
-			});
+			var that = this;
+			return Deferred.when(that._getAST(options), function(ast) {
+					that.cache = ast;
+					return ast;
+				});
 		}
 	});
 	return ASTManager;
