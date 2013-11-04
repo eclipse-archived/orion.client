@@ -472,6 +472,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			node.addEventListener("drop", drop, false); //$NON-NLS-0$
 		}
 	};
+	
+	/**
+	 * @name orion.explorer.FileExplorer#createModel
+	 * @function Creates the explorer model.
+	 * @returns {orion.explorer.FileModel}
+	 */
+	FileExplorer.prototype.createModel = function() {
+		return new FileModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders);
+	};
 
 	/**
 	 * @name orion.explorer.FileExplorer#changedItem
@@ -611,8 +620,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 				for (var property in root) {
 					self.treeRoot[property] = root[property];
 				}
-				self.model = new FileModel(self.registry, self.treeRoot, self.fileClient, self.parentId, self.excludeFiles, self.excludeFolders);
-				self.model.processParent(self.treeRoot, root.Children);	
+				self.model = self.createModel();
 				if (self.dragAndDrop) {
 					if (self._hookedDrag) {
 						// rehook on the parent to indicate the new root location
@@ -636,7 +644,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 				
 				self.createTree(self.parentId, self.model, {
 					navHandlerFactory: self.navHandlerFactory,
-					setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), 
+					setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), //$NON-NLS-0$
 					selectionPolicy: self.renderer.selectionPolicy, 
 					onCollapse: function(model) {
 						if(self.getNavHandler()){

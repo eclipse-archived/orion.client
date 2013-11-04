@@ -198,44 +198,8 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 				}
 			});
 		},
-		load: function(root){
-			var self = this;
-				self.treeRoot = root;
-				self.model = new ProjectNavModel(self.registry, self.treeRoot, self.fileClient, self.parentId, self.excludeFiles, self.excludeFolders);
-				var deferred = new Deferred();
-				if (self.dragAndDrop) {
-					if (self._hookedDrag) {
-						// rehook on the parent to indicate the new root location
-						self._makeDropTarget(self.treeRoot, parent, true);
-					} else {
-						// uses two different techniques from Modernizr
-						// first ascertain that drag and drop in general is supported
-						var supportsDragAndDrop = parent && (('draggable' in parent) || ('ondragstart' in parent && 'ondrop' in parent));  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$ 
-						// then check that file transfer is actually supported, since this is what we will be doing.
-						// For example IE9 has drag and drop but not file transfer
-						supportsDragAndDrop = supportsDragAndDrop && !!(window.File && window.FileList && window.FileReader);
-						self._hookedDrag = true;
-						if (supportsDragAndDrop) {
-							self._makeDropTarget(self.treeRoot, parent, true);
-						} else {
-							self.dragAndDrop = null;
-							window.console.log("Local file drag and drop is not supported in this browser."); //$NON-NLS-0$
-						}
-					}
-				}
-				
-				self.createTree(self.parentId, self.model, {
-					navHandlerFactory: self.navHandlerFactory,
-					setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), //$NON-NLS-0$
-					selectionPolicy: self.renderer.selectionPolicy, 
-					onCollapse: function(model) {
-						if(self.getNavHandler()){
-							self.getNavHandler().onCollapse(model);
-						}
-					}
-				});
-				deferred.resolve();
-				return deferred;
+		createModel: function() {
+			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders);
 		},
 		reveal: function(fileMetadata, expand) {
 			if (!fileMetadata) {
@@ -377,13 +341,7 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 			if(item.Projects){
 				return;
 			}
-			var res;
-			if(item.Location && forceExpand){
-				res =  FileExplorer.prototype.changedItem.call(this, item, forceExpand);
-			}
-			this.model.processParent(item, item.children ? item.children : []);
-			this.renderer.updateRow(item, lib.node(this.model.getId(item)));
-			return res;
+			return FileExplorer.prototype.changedItem.call(this, item, forceExpand);
 		}
 	});
 
@@ -541,38 +499,38 @@ define(['require', 'i18n!orion/edit/nls/messages', 'orion/objects', 'orion/webui
 		}
 		this.fileClient.loadWorkspace().then(function(workspaceMetadata){
 		this.projectClient.readProject(fileMetadata, workspaceMetadata).then(function(projectData){
-			if(projectData) {
+			if(projectData && this.fileExplorer) {
 				projectData.Workspace = workspaceMetadata;
 				lib.empty(this.parentNode);
 				this.projectLocation = parentProject ? parentProject.Location : null;
 				projectData.type = "Project"; //$NON-NLS-0$
 				projectData.Directory = true;
-				
+				fileMetadata.type = "ProjectRoot"; //$NON-NLS-0$
+				projectData.children = [fileMetadata];
 				if (projectData.Dependencies) {
 					projectData.Dependencies.forEach(function(dependency) {
+						var item = {Dependency: dependency, Project: projectData};
+						projectData.children.push(item);
 						this.projectClient.getDependencyFileMetadata(dependency, projectData.WorkspaceLocation).then(function(dependencyMetadata) {
-							this.fileExplorer.changedItem({
-								Dependency: dependency,
+							objects.mixin(item, {
 								FileMetadata: dependencyMetadata,
 								Location: dependencyMetadata.Location,
 								ChildrenLocation: dependencyMetadata.ChildrenLocation
-							}, true);
-							return;
-						}.bind(this), function(error) {
-							this.fileExplorer.changedItem({
-								Dependency: dependency,
-								disconnected: true
 							});
+							this.fileExplorer.renderer.updateRow(item, lib.node(this.fileExplorer.model.getId(item)));
+							this.fileExplorer.expandToItem(item);
+						}.bind(this), function(error) {
+							item.disconnected = true;
+							this.fileExplorer.renderer.updateRow(item, lib.node(this.fileExplorer.model.getId(item)));
+							this.fileExplorer.expandToItem(item);
 						}.bind(this));
 					}.bind(this));
 				}
 				this.renderer.render(projectData);
 				this.fileExplorer.loadRoot(projectData, redisplay).then(function(){
-					setTimeout(function(){ //The root might not have been loaded yet
-						that.fileExplorer.expandToItem.bind(that.fileExplorer)(fileMetadata,function(){
-								that.fileExplorer.reveal.bind(that.fileExplorer)(fileMetadata);
-							});
-					}, 500);
+					that.fileExplorer.expandToItem(fileMetadata,function(){
+						that.fileExplorer.reveal(fileMetadata);
+					});
 				});
 			}
 		}.bind(this));
