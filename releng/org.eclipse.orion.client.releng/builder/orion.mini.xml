@@ -153,6 +153,7 @@
 			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web" includes="**"/>
 			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.editor/web" includes="**"/>
 			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.git/web" includes="**"/>
+			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.javascript/web" includes="**"/>
 			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.users/web" includes="**"/>
 		</copy>
 

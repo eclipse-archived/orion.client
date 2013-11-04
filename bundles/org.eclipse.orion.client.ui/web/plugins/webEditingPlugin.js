@@ -47,12 +47,6 @@ define([
 				extension: ["css"],
 				image: "../images/css.png"
 			},
-			{	id: "application/javascript",
-				"extends": "text/plain",
-				name: "JavaScript",
-				extension: ["js"],
-				image: "../images/javascript.png"
-			},
 			{	id: "application/json",
 				"extends": "text/plain",
 				name: "JSON",
