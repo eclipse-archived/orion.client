@@ -924,6 +924,18 @@ td .orionMarkdown {
 	overflow-x: auto;
 }
 
+.orionMarkdown img {
+	max-width: 100%;
+}
+
+.orionMarkdown pre {
+	background-color: #fafafa;
+	border: 1px solid #ddd;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	overflow: auto;
+}
+
 .folderNav tr {
 	border-bottom: 1px solid #e6f3f6;
 	border-right: 1px solid #D6EBF0;
