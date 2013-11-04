@@ -149,15 +149,6 @@ a.currentLocation:hover {
 	background: white;
 }
 
-/* Set a min-width on a treetable if it's the main attraction */
-.mainpane .treetable {
-	min-width: 600px;
-}
-
-.folderNav .treetable {
-	min-width: 150px;
-}
-
 .mainToolbar {
  	background: #ffffff;
 	border-bottom: 1px solid #ebebeb;
