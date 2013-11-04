@@ -32,6 +32,7 @@ define([], function() {
 		{ type: API, source: "/useremailconfirmation", targetPattern: "${0}useremailconfirmation" },
 		{ type: API, source: "/site", targetPattern: "${0}site" },
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.git/web" },
+		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.javascript/web" },
 		{ type: API, source: "/gitapi", targetPattern: "${0}gitapi" },
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.users/web" },
 		{ type: API, source: "/xfer", targetPattern: "${0}xfer" },
