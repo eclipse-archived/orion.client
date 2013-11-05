@@ -362,10 +362,26 @@ exports.GitRepositoryExplorer = (function() {
 		return deferred;
 	};
 	
+	/**
+	 * @name _repositorySorter
+	 * @description Simple function to sort repositories by name
+	 * @function
+	 * @private
+	 * @memberof GitRepositoryExplorer.prototype
+	 * @param {Object} The repository to compare to
+	 * @param {Object} The repository to compare
+	 * @since 5.0
+	 */
+	GitRepositoryExplorer.prototype._repositorySorter = function(repo1, repo2) {
+		return repo1.Name.localeCompare(repo2.Name);
+	};
+	
 	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, mode, links){
 		var that = this;
 		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-		
+		if(repositories) {
+			repositories.sort(that._repositorySorter);
+		}
 		var dynamicContentModel = new mDynamicContent.DynamicContentModel(repositories,
 			function(i){
 				return that.decorateRepository.bind(that)(repositories[i]);
