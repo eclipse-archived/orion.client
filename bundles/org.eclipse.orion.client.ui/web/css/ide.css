@@ -928,12 +928,21 @@ td .orionMarkdown {
 	max-width: 100%;
 }
 
-.orionMarkdown pre {
+.orionMarkdown pre, .orionMarkdown code {
 	background-color: #fafafa;
 	border: 1px solid #ddd;
+	border-radius: 3px;
+}
+
+.orionMarkdown pre {
 	padding-top: 10px;
 	padding-bottom: 10px;
 	overflow: auto;
+}
+
+.orionMarkdown pre code {
+	background-color: transparent;
+	border: 0;
 }
 
 .folderNav tr {
