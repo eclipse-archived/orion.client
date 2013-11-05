@@ -471,16 +471,41 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			});
 		}
 		
-		function checkFolderSelection(item) {
-			// Check selection first, then use the provided item
-			var canCreateFile = function(item) {
-				item = forceSingleItem(item);
-				if (!item.Directory && item.parent) {
-					item = item.parent;
+		/*
+		* Iterate over an array of items and return the target folder. The target
+		* folder of an item is either itself (if it is a dir) or its parent. If there
+		* are multiple target folders, return null.
+		*/
+		function getTargetFolder(items) {
+			var folder;
+			if (!Array.isArray(items)) {
+				items = [items];
+			}
+			items.some(function(currentItem) {
+				var testFolder;
+				if (currentItem.Directory) {
+					testFolder = currentItem;
+				} else {
+					testFolder = currentItem.parent;
 				}
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);
-			};
-			return canCreateFile(explorer.selection.getSelections()) || canCreateFile(item);
+				if (!folder) {
+					folder = testFolder;
+				} else {
+					if (folder.Location !== testFolder.Location) {
+						folder = null;
+						return true;
+					}
+				}
+				return false;
+			});
+			if (folder && mFileUtils.isAtRoot(folder.Location)) {
+				return null;
+			}
+			return folder;
+		}
+		
+		function checkFolderSelection(item) {
+			return getTargetFolder(explorer.selection.getSelections()) || getTargetFolder(item);
 		}
 
 		var renameCommand = new mCommands.Command({
@@ -690,12 +715,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			callback: function(data) {
 				// Check selection service first, then use the provided item
 				explorer.selection.getSelections(function(selections) {
-					var item;
-					if (selections.length === 1 && selections[0].Directory) {
-						item = selections[0];
-					} else {
-						item = forceSingleItem(data.items);
-					}
+					var item = getTargetFolder(selections) || getTargetFolder(data.items);
 					var createFunction = function(name) {
 						if (name) {
 							var deferred = fileClient.createFile(item.Location, name);
@@ -728,12 +748,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			callback: function(data) {
 				// Check selection service first, then use the provided item
 				explorer.selection.getSelections(function(selections) {
-					var item;
-					if (selections.length === 1 && selections[0].Directory) {
-						item = selections[0];
-					} else {
-						item = forceSingleItem(data.items);
-					}
+					var item = getTargetFolder(selections) || getTargetFolder(data.items);
 					var createFunction = function(name) {
 						if (name) {
 							var deferred = fileClient.createFolder(item.Location, name);
@@ -795,7 +810,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				// Check selection service first, then use the provided item
 				explorer.selection.getSelections(function(selections) {
 					var item;
-					if (selections.length === 1 && selections[0].Directory) {
+					if (getTargetFolder(selections)) {
 						newFolderCommand.callback(data);
 					} else {
 						item = forceSingleItem(data.items);
@@ -993,18 +1008,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				callback: function(data) {
 					// Check selection service first.  If a single folder is selected, that is the target.  Otherwise the root is the target.
 					explorer.selection.getSelections(function(selections) {
-						var item;
-						if (selections.length === 1) {
-							if (selections[0].Directory) {
-								item = selections[0];
-							} else {
-								item = selections[0].parent;
-							}
-						} 
-						if (!item) {
-							item = forceSingleItem(data.items);
-						}
-						if (bufferedSelection.length > 0) {
+						var item = getTargetFolder(selections) || getTargetFolder(data.items);
+						if (bufferedSelection.length > 0 && item) {
 							// Do not allow pasting into the Root of the Workspace
 							if (mFileUtils.isAtRoot(item.Location)) {
 								errorHandler(messages["Cannot paste into the root"]);
@@ -1017,7 +1022,19 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 								var name = selectedItem.Name || null;
 								if (location) {
 									var itemLocation = item.Location || item.ContentLocation;
+									var prompt = false;
 									if (selectedItem.parent && selectedItem.parent.Location === itemLocation) {
+										prompt = true;
+									} else {
+										//TODO: if tree is not expanded, the children must be fetched from the server.
+										var children = item.Children || item.children;
+										if (children) {
+											prompt = children.some(function(child) {
+												return child.Name === selectedItem.Name;
+											});
+										}
+									}
+									if (prompt) {
 										name = window.prompt(i18nUtil.formatMessage(messages['Enter a new name for \'${0}\''], selectedItem.Name), i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name));
 										// user cancelled?  don't copy this one
 										if (!name) {
