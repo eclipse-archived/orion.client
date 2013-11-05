@@ -217,7 +217,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'per
 
 	function confirmLogin(login, password) {
 		if (!login) {
-			login = document.getElementById('login').value;
+			login = document.getElementById('login').value.trim();
 			password = document.getElementById('password').value;
 		}
 		
