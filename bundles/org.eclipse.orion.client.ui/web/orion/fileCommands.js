@@ -567,7 +567,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						if (!refNode) {
 							refNode = data.domParent || data.domNode;
 						}
-						var id = refNode.id+"EditBox";
+						var id = refNode.id+"EditBox"; //$NON-NLS-0$
 						if (lib.node(id)) {
 							return;
 						}
@@ -781,10 +781,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			id: "orion.importZipURL" + idSuffix, //$NON-NLS-0$
 			parameters: zipURLParameters,
 			callback: function(data) {
-				var targetFolder = forceSingleItem(data.items);
+				var targetFolder = getTargetFolder(data.items);
 				var sourceURL = data.parameters && data.parameters.valueFor("url"); //$NON-NLS-0$
 				if (targetFolder && sourceURL) {
-					var importURL = targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")=== -1 ? "?":"&") + "source="+sourceURL; //$NON-NLS-0$
+					var importURL = targetFolder.ImportLocation + (targetFolder.ImportLocation.indexOf("?")=== -1 ? "?":"&") + "source="+sourceURL; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					var expandZip = data.parameters && data.parameters.valueFor("unzip") && (sourceURL.indexOf(".zip") === sourceURL.length-4); //$NON-NLS-1$ //$NON-NLS-0$
 					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$
 					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}); //$NON-NLS-0$
@@ -840,7 +840,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					if (name && url) {
 						var deferred = fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, true);
 						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Linking to ${0}"], url)).then(function(newFolder) {
-							dispatchModelEventOn(explorer, {type: "create", parent: explorer.treeRoot, newValue: newFolder });
+							dispatchModelEventOn(explorer, {type: "create", parent: explorer.treeRoot, newValue: newFolder }); //$NON-NLS-0$
 						}, errorHandler);
 					}
 				};
@@ -897,7 +897,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-importzip", //$NON-NLS-0$
 			id: "orion.import" + idSuffix, //$NON-NLS-0$
 			callback : function(data) {
-				var item = forceSingleItem(data.items);
+				var item = getTargetFolder(data.items);
 				var dialog = new ImportDialog.ImportDialog({
 					importLocation: item.ImportLocation,
 					func: function() {
@@ -916,7 +916,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-transferin", //$NON-NLS-0$
 			id: "orion.importSFTP" + idSuffix, //$NON-NLS-0$
 			callback : function(data) {
-				var item = forceSingleItem(data.items);
+				var item = getTargetFolder(data.items);
 				var dialog = new SFTPDialog.SFTPConnectionDialog({
 					func:  function(host,port,path,user,password, overwriteOptions){
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -943,7 +943,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-transferout", //$NON-NLS-0$
 			id: "eclipse.exportSFTPCommand" + idSuffix, //$NON-NLS-0$
 			callback : function(data) {
-				var item = forceSingleItem(data.items);
+				var item = getTargetFolder(data.items);
 				var dialog = new SFTPDialog.SFTPConnectionDialog({
 					func: function(host, port, path, user, password, overwriteOptions){
 						var optionHeader = overwriteOptions ? ("sftp," + overwriteOptions) : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
