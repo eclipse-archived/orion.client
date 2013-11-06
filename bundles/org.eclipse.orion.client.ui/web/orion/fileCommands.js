@@ -943,7 +943,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-transferout", //$NON-NLS-0$
 			id: "eclipse.exportSFTPCommand" + idSuffix, //$NON-NLS-0$
 			callback : function(data) {
-				var item = getTargetFolder(data.items);
+				var item = forceSingleItem(data.items);
 				var dialog = new SFTPDialog.SFTPConnectionDialog({
 					func: function(host, port, path, user, password, overwriteOptions){
 						var optionHeader = overwriteOptions ? ("sftp," + overwriteOptions) : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -962,7 +962,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				});
 				dialog.show();
 			},
-			visibleWhen: checkFolderSelection
+			visibleWhen: function(item) {
+				item = forceSingleItem(item);
+				return item.ExportLocation && item.Directory;
+			},
 		});
 		commandService.addCommand(exportSFTPCommand);
 		
