@@ -644,7 +644,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 				
 				var deferred = new Deferred();
 				self.createTree(self.parentId, self.model, {
-					completed: deferred,
+					onComplete: function(tree) {
+						deferred.resolve(tree);
+					},
 					navHandlerFactory: self.navHandlerFactory,
 					setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), //$NON-NLS-0$
 					selectionPolicy: self.renderer.selectionPolicy, 

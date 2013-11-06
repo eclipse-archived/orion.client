@@ -182,7 +182,7 @@ exports.Explorer = (function() {
 				id: treeId,
 				model: model,
 				parent: parentId,
-				completed: options ? options.completed : undefined,
+				onComplete: options ? options.onComplete : undefined,
 				labelColumnIndex: this.renderer.getLabelColumnIndex(),
 				renderer: this.renderer,
 				showRoot: options ? !!options.showRoot : false,  
