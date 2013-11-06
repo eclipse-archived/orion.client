@@ -642,7 +642,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 					}
 				}
 				
+				var deferred = new Deferred();
 				self.createTree(self.parentId, self.model, {
+					completed: deferred,
 					navHandlerFactory: self.navHandlerFactory,
 					setFocus: (typeof self.setFocus === "undefined" ? true : self.setFocus), //$NON-NLS-0$
 					selectionPolicy: self.renderer.selectionPolicy, 
@@ -653,19 +655,21 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 					}
 				});
 				
-				if (typeof postLoad === "function") { //$NON-NLS-0$
-					try {
-						postLoad();
-					} catch(e){
-						if (self.registry) {
-							self.registry.getService("orion.page.message").setErrorMessage(e);	 //$NON-NLS-0$
+				return deferred.then(function() {
+					if (typeof postLoad === "function") { //$NON-NLS-0$
+						try {
+							postLoad();
+						} catch(e){
+							if (self.registry) {
+								self.registry.getService("orion.page.message").setErrorMessage(e);	 //$NON-NLS-0$
+							}
 						}
+					}				
+					if (typeof self.onchange === "function") { //$NON-NLS-0$
+						self.onchange(self.treeRoot);
 					}
-				}				
-				if (typeof self.onchange === "function") { //$NON-NLS-0$
-					self.onchange(self.treeRoot);
-				}
-				return new Deferred().resolve(self.treeRoot);
+					return self.treeRoot;
+				});
 			},
 			function(error) {
 				clearTimeout(progressTimeout);

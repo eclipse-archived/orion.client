@@ -65,6 +65,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			if (!options.renderer) { throw messages["no renderer"]; }
 			this._parent = parent;
 			this._treeModel = options.model;
+			this._completed = options.completed;
 			this._renderer = options.renderer;
 			this._showRoot = options.showRoot === undefined ? false : options.showRoot;
 			this._indent = options.indent === undefined ? 16 : options.indent;
@@ -126,6 +127,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			wrapper.appendChild(table);
 			this._parent.appendChild(wrapper);
 			this._rowsChanged();
+			if (this._completed) {
+				this._completed.resolve(this);
+			}
 		},
 		
 		_generateChildren: function(children, indentLevel, referenceNode) {
