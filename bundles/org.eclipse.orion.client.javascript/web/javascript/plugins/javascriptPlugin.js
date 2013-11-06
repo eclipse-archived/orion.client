@@ -11,13 +11,13 @@
  *******************************************************************************/
 /*global define esprima*/
 define([
-"orion/plugin", 
-"javascript/outliner",
-"javascript/occurrences",
-"esprima/esprima",
-"orion/serialize",
-"orion/i18nUtil", 
-"domReady!"], function(PluginProvider, Outliner, Occurrences, _, Serialize, i18nUtil, domReady) {
+	"orion/plugin", 
+	"javascript/outliner",
+	"javascript/occurrences",
+	"esprima/esprima",
+	"orion/serialize",
+	"orion/i18nUtil"
+], function(PluginProvider, Outliner, Occurrences, _, Serialize, i18nUtil) {
 
 	/**
 	 * Plug-in headers
