@@ -354,6 +354,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		var service = this.serviceRegistry.getService(serviceReference);
 		service.id = serviceReference.getProperty("id");
 		service.addParamethers =  serviceReference.getProperty("addParamethers");
+		service.optionalParamethers = serviceReference.getProperty("optionalParamethers");
 		service.addDependencyName =  serviceReference.getProperty("addDependencyName");
 		service.addDependencyTooltip = serviceReference.getProperty("addDependencyTooltip");
 		service.type = serviceReference.getProperty("type");

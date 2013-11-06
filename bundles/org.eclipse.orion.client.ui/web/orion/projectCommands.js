@@ -12,8 +12,8 @@
 /*global window define orion XMLHttpRequest confirm*/
 /*jslint sub:true*/
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
- 'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/ImportDialog'],
-	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog){
+ 'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/ImportDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog'],
+	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog, ProjectOptionalParametersDialog){
 		var projectCommandUtils = {};
 		
 		var selectionListenerAdded = false;
@@ -103,7 +103,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			});
 		}
 	};
-	
 			
 	function initDependency(projectClient, explorer, commandService, errorHandler, handler, dependency, project, data, params){
 			var actionComment;
@@ -128,8 +127,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					for(var i=0; i<error.addParamethers.length; i++){
 						paramDescps.push(new mCommandRegistry.CommandParameter(error.addParamethers[i].id, error.addParamethers[i].type, error.addParamethers[i].name));
 					}
-					data.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
+					data.parameters = new mCommandRegistry.ParametersDescription(paramDescps, {hasOptionalParameters: !!error.optionalParamethers});
 					data.oldParams = params;
+					data.optionalParams = error.optionalParamethers;
 					commandService.collectParameters(data);
 				}
 				errorHandler(error);
@@ -153,11 +153,27 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			id: "orion.project.dependency.connect", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
+				
+				var func = arguments.callee;
+				if(data.parameters && data.parameters.optionsRequested){
+					var dialog = new ProjectOptionalParametersDialog.ProjectOptionalParametersDialog({title: "Fetch content of " + item.Dependency.Name, data: data, func: function(){
+						data.parameters.optionsRequested = false;
+						func(data);
+					}.bind(this)});
+					dialog.show();
+					return;
+				}
+				
 				var params = data.oldParams || {};
 				if(data.parameters){
 					for (var param in data.parameters.parameterTable) {
 						params[param] = data.parameters.valueFor(param);
 					}
+				}
+				if(data.optionalParams)
+				for(var i=0; i<data.optionalParams.length; i++){
+					var param = data.optionalParams[i];
+					params[param.id] = param.value;
 				}
 				var projectHandler = projectClient.getProjectHandler(item.Dependency.Type);
 				if(projectHandler.then){
@@ -380,11 +396,30 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					callback: function(data){
 						var def = new Deferred();
 						var item = forceSingleItem(data.items);
+						
+						var func = arguments.callee;
+						if(data.parameters && data.parameters.optionsRequested){
+							if(!data.optionalParams){
+								data.optionalParams = handler.optionalParamethers;
+							}
+							var dialog = new ProjectOptionalParametersDialog.ProjectOptionalParametersDialog({title: handler.addDependencyTooltip, data: data, func: function(){
+								data.parameters.optionsRequested = false;
+								func(data);
+							}.bind(this)});
+							dialog.show();
+							return;
+						}
+						
 						var params = data.oldParams || {};
 						if(data.parameters){
 							for (var param in data.parameters.parameterTable) {
 								params[param] = data.parameters.valueFor(param);
 							}
+						}
+						if(data.optionalParams)
+						for(var i=0; i<data.optionalParams.length; i++){
+							var param = data.optionalParams[i];
+							params[param.id] = param.value;
 						}
 						
 						var searchLocallyDeferred = new Deferred();
@@ -440,7 +475,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					for(var i=0; i<handler.addParamethers.length; i++){
 						paramDescps.push(new mCommandRegistry.CommandParameter(handler.addParamethers[i].id, handler.addParamethers[i].type, handler.addParamethers[i].name));
 					}
-					commandParams.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
+					commandParams.parameters = new mCommandRegistry.ParametersDescription(paramDescps, {hasOptionalParameters: !!handler.optionalParamethers});
 				}
 				
 				
@@ -461,12 +496,30 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					id: "orion.project.createproject." + type,
 					tooltip: handler.addProjectTooltip,
 					callback: function(data){
+						var func = arguments.callee;
+						if(data.parameters && data.parameters.optionsRequested){
+							if(!data.optionalParams){
+								data.optionalParams = handler.optionalParamethers;
+							}
+							var dialog = new ProjectOptionalParametersDialog.ProjectOptionalParametersDialog({title: handler.addProjectTooltip, data: data, func: function(){
+								data.parameters.optionsRequested = false;
+								func(data);
+							}.bind(this)});
+							dialog.show();
+							return;
+						}
+						
 						var def = new Deferred();
 						var item = forceSingleItem(data.items);
 						var params = data.oldParams || {};
 						if(data.parameters)
 						for (var param in data.parameters.parameterTable) {
 							params[param] = data.parameters.valueFor(param);
+						}
+						if(data.optionalParams)
+						for(var i=0; i<data.optionalParams.length; i++){
+							var param = data.optionalParams[i];
+							params[param.id] = param.value;
 						}
 	
 						var actionComment;
@@ -489,8 +542,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 								for(var i=0; i<error.addParamethers.length; i++){
 									paramDescps.push(new mCommandRegistry.CommandParameter(error.addParamethers[i].id, error.addParamethers[i].type, error.addParamethers[i].name));
 								}
-								data.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
+								data.parameters = new mCommandRegistry.ParametersDescription(paramDescps, {hasOptionalParameters: !!error.optionalParamethers});
 								data.oldParams = params;
+								data.optionalParams = error.optionalParamethers;
 								commandService.collectParameters(data);
 							}
 							errorHandler(error);
@@ -507,7 +561,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					for(var i=0; i<handler.addParamethers.length; i++){
 						paramDescps.push(new mCommandRegistry.CommandParameter(handler.addParamethers[i].id, handler.addParamethers[i].type, handler.addParamethers[i].name));
 					}
-					commandParams.parameters = new mCommandRegistry.ParametersDescription(paramDescps);
+					commandParams.parameters = new mCommandRegistry.ParametersDescription(paramDescps, {hasOptionalParameters: !!handler.optionalParamethers});
 				}
 				
 				
