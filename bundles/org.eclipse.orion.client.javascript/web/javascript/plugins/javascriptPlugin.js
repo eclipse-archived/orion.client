@@ -17,7 +17,7 @@ define([
 "esprima/esprima",
 "orion/serialize",
 "orion/i18nUtil", 
-"domReady!"], function(PluginProvider, Outliner, Occurrences, Serialize, i18nUtil, domReady) {
+"domReady!"], function(PluginProvider, Outliner, Occurrences, _, Serialize, i18nUtil, domReady) {
 
 	/**
 	 * Plug-in headers
