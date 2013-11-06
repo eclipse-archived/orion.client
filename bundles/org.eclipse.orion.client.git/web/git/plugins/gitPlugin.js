@@ -268,7 +268,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		_cloneRepository: function(gitUrl, params, workspaceLocation, isProject){
 			var deferred = new Deferred();
 			var knownHosts = sshService.getKnownHosts();
-				gitClient.cloneGitRepository(null, gitUrl, null, workspaceLocation, params.sshuser, params.sshpassword, knownHosts, null, null, null, isProject).then(function(cloneResp){
+				gitClient.cloneGitRepository(null, gitUrl, null, workspaceLocation, params.sshuser, params.sshpassword, knownHosts, params.sshprivateKey, params.sshpassphrase, null, isProject).then(function(cloneResp){
 					gitClient.getGitClone(cloneResp.Location).then(function(clone){
 						if(clone.Children){
 							clone = clone.Children[0];
@@ -309,6 +309,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 						if(error.JsonData.Host){
 							error.retry = true;
 							error.addParamethers = [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"}];
+							error.optionalParamethers = [{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}];
 							deferred.reject(error);
 							return;
 						}
@@ -377,6 +378,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 		id: "orion.git.projecthandler",
 		type: "git",
 		addParamethers: [{id: "url", type: "url", name: "Url:"}],
+		optionalParamethers: [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"},{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}],
 		addDependencyName: "Add Git Repository",
 		addDependencyTooltip: "Clone git repository and add it to this project",
 		addProjectName: "Create a project from a Git Repository",
