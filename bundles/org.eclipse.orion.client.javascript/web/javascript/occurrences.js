@@ -11,9 +11,8 @@
  *******************************************************************************/
 /*global define console*/
 define([
-"esprima/esprima",
 "orion/Deferred"
-], function(Esprima, Deferred) {
+], function(Deferred) {
 	
 	/**
 	 * @name javascript.JavaScriptOccurrences
@@ -111,7 +110,7 @@ define([
 		 * @returns {Boolean} <code>true</code> if we should continue traversing the given node and its children, <code>false</code> otherwise
 		 */
 		traverse: function(node, context, func) {
-			if (func(node, context)) {
+			if (func(node, context, this)) {
 				return false;	// stop traversal
 			}
 			for (var key in node) {
@@ -218,8 +217,9 @@ define([
 		 * @memberof javascript.JavaScriptOccurrences.prototype
 		 * @param {Object} node The current AST node to check
 		 * @param {Object} context The occurrence context
+		 * @param {Object} that The 'this' context to use when traversing
 		 */
-		findOccurrence: function(node, context) {
+		findOccurrence: function(node, context, that) {
 			if (!node || !node.type) {
 				return;
 			}
@@ -234,15 +234,15 @@ define([
 				context.scope.push(curScope);
 				break;
 			case 'VariableDeclarator': //$NON-NLS-0$
-				if (this.checkIdentifier(node.id, context)) {
+				if (that.checkIdentifier(node.id, context)) {
 					varScope = context.scope.pop();
 					varScope.decl = true;
 					context.scope.push(varScope);
-					this.addOccurrence(node.id, context, false);
+					that.addOccurrence(node.id, context, false);
 				}
 				if (node.init) {
-					if (this.checkIdentifier(node.init, context)) {
-						this.addOccurrence(node.init, context);
+					if (that.checkIdentifier(node.init, context)) {
+						that.addOccurrence(node.init, context);
 						break;
 					}
 					if (node.init.type === 'ObjectExpression') { //$NON-NLS-0$
@@ -254,8 +254,8 @@ define([
 							//	scope.push(varScope);
 							//	addOccurrence (scope, properties[i].key, context, occurrences, false);
 							//}
-							if (this.checkIdentifier(properties[i].value, context)) {
-								this.addOccurrence(properties[i].value, context);
+							if (that.checkIdentifier(properties[i].value, context)) {
+								that.addOccurrence(properties[i].value, context);
 							}
 						}
 					}
@@ -264,74 +264,74 @@ define([
 			case 'ArrayExpression': //$NON-NLS-0$
 				if (node.elements) {
 					for (i = 0; i < node.elements.length; i++) {
-						if (this.checkIdentifier(node.elements[i], context)) {
-							this.addOccurrence(node.elements[i], context);
+						if (that.checkIdentifier(node.elements[i], context)) {
+							that.addOccurrence(node.elements[i], context);
 						}
 					}
 				}
 				break;
 			case 'AssignmentExpression': //$NON-NLS-0$
 				var leftNode = node.left;
-				if (this.checkIdentifier(leftNode, context)) {
-					this.addOccurrence(leftNode, context, false);
+				if (that.checkIdentifier(leftNode, context)) {
+					that.addOccurrence(leftNode, context, false);
 				}
 				if (leftNode.type === 'MemberExpression') { //$NON-NLS-0$
-					if (this.checkIdentifier(leftNode.object, context)) {
-						this.addOccurrence(leftNode.object, context, false);
+					if (that.checkIdentifier(leftNode.object, context)) {
+						that.addOccurrence(leftNode.object, context, false);
 					}
 				}
 				var rightNode = node.right;
-				if (this.checkIdentifier(rightNode, context)) {
-					this.addOccurrence(rightNode, context);
+				if (that.checkIdentifier(rightNode, context)) {
+					that.addOccurrence(rightNode, context);
 				}
 				break;
 			case 'MemberExpression': //$NON-NLS-0$
-				if (this.checkIdentifier(node.object, context)) {
-					this.addOccurrence(node.object, context);
+				if (that.checkIdentifier(node.object, context)) {
+					that.addOccurrence(node.object, context);
 				}
 				if (node.computed) { //computed = true for [], false for . notation
-					if (this.checkIdentifier(node.property, context)) {
-						this.addOccurrence(node.property, context);
+					if (that.checkIdentifier(node.property, context)) {
+						that.addOccurrence(node.property, context);
 					}
 				}
 				break;
 			case 'BinaryExpression': //$NON-NLS-0$
-				if (this.checkIdentifier(node.left, context)) {
-					this.addOccurrence(node.left, context);
+				if (that.checkIdentifier(node.left, context)) {
+					that.addOccurrence(node.left, context);
 				}
-				if (this.checkIdentifier(node.right, context)) {
-					this.addOccurrence(node.right, context);
+				if (that.checkIdentifier(node.right, context)) {
+					that.addOccurrence(node.right, context);
 				}
 				break;
 			case 'UnaryExpression': //$NON-NLS-0$
-				if (this.checkIdentifier(node.argument, context)) {
-					this.addOccurrence(node.argument, context, node.operator === 'delete' ? false : true); //$NON-NLS-0$
+				if (that.checkIdentifier(node.argument, context)) {
+					that.addOccurrence(node.argument, context, node.operator === 'delete' ? false : true); //$NON-NLS-0$
 				}
 				break;
 			case 'IfStatement': //$NON-NLS-0$
-				if (this.checkIdentifier(node.test, context)) {
-					this.addOccurrence(node.test, context);
+				if (that.checkIdentifier(node.test, context)) {
+					that.addOccurrence(node.test, context);
 				}
 				break;
 			case 'SwitchStatement': //$NON-NLS-0$
-				if (this.checkIdentifier(node.discriminant, context)) {
-					this.addOccurrence(node.discriminant, context, false);
+				if (that.checkIdentifier(node.discriminant, context)) {
+					that.addOccurrence(node.discriminant, context, false);
 				}
 				break;
 			case 'UpdateExpression': //$NON-NLS-0$
-				if (this.checkIdentifier(node.argument, context)) {
-					this.addOccurrence(node.argument, context, false);
+				if (that.checkIdentifier(node.argument, context)) {
+					that.addOccurrence(node.argument, context, false);
 				}
 				break;
 			case 'ConditionalExpression': //$NON-NLS-0$
-				if (this.checkIdentifier(node.test, context)) {
-					this.addOccurrence(node.test, context);
+				if (that.checkIdentifier(node.test, context)) {
+					that.addOccurrence(node.test, context);
 				}
-				if (this.checkIdentifier(node.consequent, context)) {
-					this.addOccurrence(node.consequent, context);
+				if (that.checkIdentifier(node.consequent, context)) {
+					that.addOccurrence(node.consequent, context);
 				}
-				if (this.checkIdentifier(node.alternate, context)) {
-					this.addOccurrence(node.alternate, context);
+				if (that.checkIdentifier(node.alternate, context)) {
+					that.addOccurrence(node.alternate, context);
 				}
 				break;
 			case 'FunctionDeclaration': //$NON-NLS-0$
@@ -344,11 +344,11 @@ define([
 				context.scope.push(curScope);
 				if (node.params) {
 					for (i = 0; i < node.params.length; i++) {
-						if (this.checkIdentifier(node.params[i], context)) {
+						if (that.checkIdentifier(node.params[i], context)) {
 							varScope = context.scope.pop();
 							varScope.decl = true;
 							context.scope.push(varScope);
-							this.addOccurrence(node.params[i], context, false);
+							that.addOccurrence(node.params[i], context, false);
 						}
 					}
 				}
@@ -365,11 +365,11 @@ define([
 					break;
 				}
 				for (i = 0; i < node.params.length; i++) {
-					if (this.checkIdentifier(node.params[i], context)) {
+					if (that.checkIdentifier(node.params[i], context)) {
 						varScope = context.scope.pop();
 						varScope.decl = true;
 						context.scope.push(varScope);
-						this.addOccurrence(node.params[i], context, false);
+						that.addOccurrence(node.params[i], context, false);
 					}
 				}
 				break;
@@ -378,14 +378,14 @@ define([
 					break;
 				}
 				for (var j = 0; j < node.arguments.length; j++) {
-					if (this.checkIdentifier(node.arguments[j], context)) {
-						this.addOccurrence(node.arguments[j], context);
+					if (that.checkIdentifier(node.arguments[j], context)) {
+						that.addOccurrence(node.arguments[j], context);
 					}
 				}
 				break;
 			case 'ReturnStatement': //$NON-NLS-0$
-				if (this.checkIdentifier(node.argument, context)) {
-					this.addOccurrence(node.argument, context);
+				if (that.checkIdentifier(node.argument, context)) {
+					that.addOccurrence(node.argument, context);
 				}
 			}
 		},
