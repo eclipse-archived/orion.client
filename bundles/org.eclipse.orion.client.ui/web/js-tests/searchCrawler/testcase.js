@@ -37,6 +37,7 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 						"HTML is fun\n" + 
 						 "Partial search\n" + 
 						 "Case sensitive\n"; 
+	var ContentsNameSearchOnly = "N*A*M*E\n"; //for name search only
 	var mockData = {
 		Location: "root",
 		Directory: true,
@@ -80,6 +81,13 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 								Name: "f1_2_3.png",
 								Directory: false,
 								LocalTimeStamp: 0
+							},
+							{
+								Location: "f1_2_4",
+								Name: "f1_2_4.txt",
+								Directory: false,
+								LocalTimeStamp: 0,
+								Contents: ContentsNameSearchOnly
 							},
 							{
 								Location: "d1_2_3",
@@ -126,6 +134,13 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 							Directory: false,
 							LocalTimeStamp: 0,
 							Contents: f3_2_Contents
+						},
+						{
+							Location: "f3_3",
+							Name: "f3_3.conf",
+							Directory: false,
+							LocalTimeStamp: 0,
+							Contents: ContentsNameSearchOnly
 						}
 					]
 			},
@@ -254,6 +269,8 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 	
 /******  Start the real tests  ******/
 	var tests = {};
+	
+	//Testing file contents search
 	tests.test_NormalAll = function() {
 		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, {
 			resource: "root",
@@ -666,6 +683,308 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 					}
 					d.resolve();
 				}
+			});
+		return d;
+	};
+
+
+	//Testing file name search
+	tests.testName_All = function() {
+		var searchParam = {
+			resource: "root",
+			keyword: "f"
+		};
+		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
+		var d  = new Deferred();
+		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
+			function(){
+				crawler.searchName(searchParam, function(searchResult){
+					try {
+						assertSearchReresultEqual({
+							response: {
+								numFound: 10,
+								docs: [
+									{
+										Location: "f1_1",
+										Name: "f1_1.js"
+									},
+									{
+										Location: "f1_2_1",
+										Name: "f1_2_1.css"
+									},
+									{
+										Location: "f1_2_2",
+										Name: "f1_2_2.html"
+									},
+									{
+										Location: "f1_2_3",
+										Name: "f1_2_3.png"
+									},
+									{
+										Location: "f1_2_4",
+										Name: "f1_2_4.txt"
+									},
+									{
+										Location: "f1_3",
+										Name: "f1_3.js"
+									},
+									{
+										Location: "f2",
+										Name: "f2.js"
+									},
+									{
+										Location: "f3_1",
+										Name: "f3_1.css"
+									},
+									{
+										Location: "f3_2",
+										Name: "f3_2.html"
+									},
+									{
+										Location: "f3_3",
+										Name: "f3_3.conf"
+									}
+								]
+							}
+						},
+						searchResult);
+					} catch (e){
+						d.reject(e);
+					}
+					d.resolve();
+				});
+			});
+		return d;
+	};
+
+	tests.testName_F1_2 = function() {
+		var searchParam = {
+			resource: "root",
+			keyword: "f1_2*"
+		};
+		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
+		var d  = new Deferred();
+		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
+			function(){
+				crawler.searchName(searchParam, function(searchResult){
+					try {
+						assertSearchReresultEqual({
+							response: {
+								numFound: 4,
+								docs: [
+									{
+										Location: "f1_2_1",
+										Name: "f1_2_1.css"
+									},
+									{
+										Location: "f1_2_2",
+										Name: "f1_2_2.html"
+									},
+									{
+										Location: "f1_2_3",
+										Name: "f1_2_3.png"
+									},
+									{
+										Location: "f1_2_4",
+										Name: "f1_2_4.txt"
+									}
+								]
+							}
+						},
+						searchResult);
+					} catch (e){
+						d.reject(e);
+					}
+					d.resolve();
+				});
+			});
+		return d;
+	};
+
+	tests.testName_LeadingWildCard = function() {
+		var searchParam = {
+			resource: "root",
+			keyword: "*_2"
+		};
+		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
+		var d  = new Deferred();
+		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
+			function(){
+				crawler.searchName(searchParam, function(searchResult){
+					try {
+						assertSearchReresultEqual({
+							response: {
+								numFound: 5,
+								docs: [
+									{
+										Location: "f1_2_1",
+										Name: "f1_2_1.css"
+									},
+									{
+										Location: "f1_2_2",
+										Name: "f1_2_2.html"
+									},
+									{
+										Location: "f1_2_3",
+										Name: "f1_2_3.png"
+									},
+									{
+										Location: "f1_2_4",
+										Name: "f1_2_4.txt"
+									},
+									{
+										Location: "f3_2",
+										Name: "f3_2.html"
+									}
+								]
+							}
+						},
+						searchResult);
+					} catch (e){
+						d.reject(e);
+					}
+					d.resolve();
+				});
+			});
+		return d;
+	};
+
+	tests.testName_LeadingWildCardHTML = function() {
+		var searchParam = {
+			resource: "root",
+			keyword: "*_2*.HtMl"
+		};
+		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
+		var d  = new Deferred();
+		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
+			function(){
+				crawler.searchName(searchParam, function(searchResult){
+					try {
+						assertSearchReresultEqual({
+							response: {
+								numFound: 2,
+								docs: [
+									{
+										Location: "f1_2_2",
+										Name: "f1_2_2.html"
+									},
+									{
+										Location: "f3_2",
+										Name: "f3_2.html"
+									}
+								]
+							}
+						},
+						searchResult);
+					} catch (e){
+						d.reject(e);
+					}
+					d.resolve();
+				});
+			});
+		return d;
+	};
+
+	tests.testName_AllJS = function() {
+		var searchParam = {
+			resource: "root",
+			keyword: "*.js"
+		};
+		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
+		var d  = new Deferred();
+		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
+			function(){
+				crawler.searchName(searchParam, function(searchResult){
+					try {
+						assertSearchReresultEqual({
+							response: {
+								numFound: 3,
+								docs: [
+									{
+										Location: "f1_1",
+										Name: "f1_1.js"
+									},
+									{
+										Location: "f1_3",
+										Name: "f1_3.js"
+									},
+									{
+										Location: "f2",
+										Name: "f2.js"
+									}
+								]
+							}
+						},
+						searchResult);
+					} catch (e){
+						d.reject(e);
+					}
+					d.resolve();
+				});
+			});
+		return d;
+	};
+
+	tests.testName_AllIncluding2AndS = function() {
+		var searchParam = {
+			resource: "root",
+			keyword: "*2*.*s*"
+		};
+		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
+		var d  = new Deferred();
+		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
+			function(){
+				crawler.searchName(searchParam, function(searchResult){
+					try {
+						assertSearchReresultEqual({
+							response: {
+								numFound: 2,
+								docs: [
+									{
+										Location: "f1_2_1",
+										Name: "f1_2_1.css"
+									},
+									{
+										Location: "f2",
+										Name: "f2.js"
+									}
+								]
+							}
+						},
+						searchResult);
+					} catch (e){
+						d.reject(e);
+					}
+					d.resolve();
+				});
+			});
+		return d;
+	};
+
+	tests.testName_NoHit = function() {
+		var searchParam = {
+			resource: "root",
+			keyword: "*.nothing"
+		};
+		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
+		var d  = new Deferred();
+		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
+			function(){
+				crawler.searchName(searchParam, function(searchResult){
+					try {
+						assertSearchReresultEqual({
+							response: {
+								numFound: 0,
+								docs: [
+								]
+							}
+						},
+						searchResult);
+					} catch (e){
+						d.reject(e);
+					}
+					d.resolve();
+				});
 			});
 		return d;
 	};
