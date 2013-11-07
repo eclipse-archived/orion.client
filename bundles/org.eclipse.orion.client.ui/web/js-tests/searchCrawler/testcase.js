@@ -254,8 +254,8 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 	var fileClient = new mMockFileClient.MockFileClient(mockData);
 
 /******  comapre searchResult  ******/
-	function assertSearchReresultEqual(actual, expected){ 
-		var a = expected, b = actual;
+	function assertSearchReresultEqual(expected, actual){ 
+		var a = actual, b = expected;
 		if (!a || !b) {
 			return assert.equal(a, b);
 		}
@@ -266,6 +266,57 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			assert.equal(a.response.docs[i].Name, b.response.docs[i].Name, "Doc name match " + i);
 		}
 	}
+	
+	function _searchAndCompare(crawler, expected) {
+		var d  = new Deferred();
+		crawler.search(function(searchResult, incremental){
+				if(!incremental){
+					try {
+						assertSearchReresultEqual(expected,	searchResult);
+						d.resolve();
+					} catch (e){
+						d.reject(e);
+					}
+				}
+			});
+		return d;
+	}
+
+	function _cancellAndCompare(crawler, cancelNumber, expected) {
+		var d  = new Deferred();
+		crawler.search(function(searchResult, incremental){
+				if(!incremental){
+					try {
+						assertSearchReresultEqual(expected,	searchResult);
+						d.resolve();
+					} catch (e){
+						d.reject(e);
+					}
+				} else {
+					if(crawler._hitCounter === cancelNumber){
+						crawler._cancelFileContentsSearch();
+					}
+				}
+			});
+		return d;
+	}
+
+	function _searchNameAndCompare(crawler, searchParam, expected) {
+		var d  = new Deferred();
+		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
+			function(){
+				crawler.searchName(searchParam, function(searchResult){
+					try {
+						assertSearchReresultEqual(expected,	searchResult);
+						d.resolve();
+					} catch (e){
+						d.reject(e);
+					}
+				});
+			});
+		return d;
+	}
+
 	
 /******  Start the real tests  ******/
 	var tests = {};
@@ -283,53 +334,74 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "EveryWhere"
 		},
 		{location: "root"});
-		var d  = new Deferred();
-		crawler.search(function(searchResult, incremental){
-				if(!incremental){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 7,
-								docs: [
-									{
-										Location: "f1_1",
-										Name: "f1_1.js"
-									},
-									{
-										Location: "f1_2_1",
-										Name: "f1_2_1.css"
-									},
-									{
-										Location: "f1_2_2",
-										Name: "f1_2_2.html"
-									},
-									{
-										Location: "f1_3",
-										Name: "f1_3.js"
-									},
-									{
-										Location: "f2",
-										Name: "f2.js"
-									},
-									{
-										Location: "f3_1",
-										Name: "f3_1.css"
-									},
-									{
-										Location: "f3_2",
-										Name: "f3_2.html"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 7,
+				docs: [
+					{
+						Location: "f1_1",
+						Name: "f1_1.js"
+					},
+					{
+						Location: "f1_2_1",
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "f1_2_2",
+						Name: "f1_2_2.html"
+					},
+					{
+						Location: "f1_3",
+						Name: "f1_3.js"
+					},
+					{
+						Location: "f2",
+						Name: "f2.js"
+					},
+					{
+						Location: "f3_1",
+						Name: "f3_1.css"
+					},
+					{
+						Location: "f3_2",
+						Name: "f3_2.html"
 					}
-					d.resolve();
-				}
-			});
-		return d;
+				]
+			}
+		});
+	};
+
+	tests.test_NormalCancel = function() {
+		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, {
+			resource: "root",
+			sort: "Path asc", //$NON-NLS-0$
+			rows: 40,
+			start: 0,
+			caseSensitive: false,
+			regEx: false,
+			fileType: "*.*",
+			keyword: "EveryWhere"
+		},
+		{location: "root"});
+		return _cancellAndCompare(crawler, 3, {
+			response: {
+				numFound: 3,
+				docs: [
+					{
+						Location: "f1_1",
+						Name: "f1_1.js"
+					},
+					{
+						Location: "f1_3",
+						Name: "f1_3.js"
+					},
+					{
+						Location: "f2",
+						Name: "f2.js"
+					}
+				]
+			}
+		});
 	};
 
 	tests.test_NormalAllCss = function() {
@@ -344,33 +416,21 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "EveryWhere"
 		},
 		{location: "root"});
-		var d  = new Deferred();
-		crawler.search(function(searchResult, incremental){
-				if(!incremental){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 2,
-								docs: [
-									{
-										Location: "f1_2_1",
-										Name: "f1_2_1.css"
-									},
-									{
-										Location: "f3_1",
-										Name: "f3_1.css"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 2,
+				docs: [
+					{
+						Location: "f1_2_1",
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "f3_1",
+						Name: "f3_1.css"
 					}
-					d.resolve();
-				}
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.test_NormalCaseSensitive = function() {
@@ -385,45 +445,33 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "Case Sensitive"
 		},
 		{location: "root"});
-		var d  = new Deferred();
-		crawler.search(function(searchResult, incremental){
-				if(!incremental){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 5,
-								docs: [
-									{
-										Location: "f1_1",
-										Name: "f1_1.js"
-									},
-									{
-										Location: "f1_2_1",
-										Name: "f1_2_1.css"
-									},
-									{
-										Location: "f1_2_2",
-										Name: "f1_2_2.html"
-									},
-									{
-										Location: "f2",
-										Name: "f2.js"
-									},
-									{
-										Location: "f3_1",
-										Name: "f3_1.css"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 5,
+				docs: [
+					{
+						Location: "f1_1",
+						Name: "f1_1.js"
+					},
+					{
+						Location: "f1_2_1",
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "f1_2_2",
+						Name: "f1_2_2.html"
+					},
+					{
+						Location: "f2",
+						Name: "f2.js"
+					},
+					{
+						Location: "f3_1",
+						Name: "f3_1.css"
 					}
-					d.resolve();
-				}
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.test_NormalSubTree = function() {
@@ -438,41 +486,29 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "EveryWhere"
 		},
 		{location: "d1"});
-		var d  = new Deferred();
-		crawler.search(function(searchResult, incremental){
-				if(!incremental){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 4,
-								docs: [
-									{
-										Location: "f1_1",
-										Name: "f1_1.js"
-									},
-									{
-										Location: "f1_2_1",
-										Name: "f1_2_1.css"
-									},
-									{
-										Location: "f1_2_2",
-										Name: "f1_2_2.html"
-									},
-									{
-										Location: "f1_3",
-										Name: "f1_3.js"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 4,
+				docs: [
+					{
+						Location: "f1_1",
+						Name: "f1_1.js"
+					},
+					{
+						Location: "f1_2_1",
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "f1_2_2",
+						Name: "f1_2_2.html"
+					},
+					{
+						Location: "f1_3",
+						Name: "f1_3.js"
 					}
-					d.resolve();
-				}
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.test_NormalSubTree_1 = function() {
@@ -487,32 +523,20 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "EveryWhere"
 		},
 		{location: "d1_2"});
-		var d  = new Deferred();
-		crawler.search(function(searchResult, incremental){
-				if(!incremental){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 2,
-								docs: [
-									{
-										Location: "f1_2_1",
-										Name: "f1_2_1.css"
-									},
-									{
-										Location: "f1_2_2",
-										Name: "f1_2_2.html"
-									}								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
-					}
-					d.resolve();
-				}
-			});
-		return d;
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 2,
+				docs: [
+					{
+						Location: "f1_2_1",
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "f1_2_2",
+						Name: "f1_2_2.html"
+					}								]
+			}
+		});
 	};
 
 	tests.test_RegExAllJS = function() {
@@ -527,37 +551,25 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "Ev.*here"
 		},
 		{location: "root"});
-		var d  = new Deferred();
-		crawler.search(function(searchResult, incremental){
-				if(!incremental){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 3,
-								docs: [
-									{
-										Location: "f1_1",
-										Name: "f1_1.js"
-									},
-									{
-										Location: "f1_3",
-										Name: "f1_3.js"
-									},
-									{
-										Location: "f2",
-										Name: "f2.js"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 3,
+				docs: [
+					{
+						Location: "f1_1",
+						Name: "f1_1.js"
+					},
+					{
+						Location: "f1_3",
+						Name: "f1_3.js"
+					},
+					{
+						Location: "f2",
+						Name: "f2.js"
 					}
-					d.resolve();
-				}
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.test_RegAllCaseSensitive = function() {
@@ -572,41 +584,29 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "Ev.*Where"
 		},
 		{location: "root"});
-		var d  = new Deferred();
-		crawler.search(function(searchResult, incremental){
-				if(!incremental){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 4,
-								docs: [
-									{
-										Location: "f1_1",
-										Name: "f1_1.js"
-									},
-									{
-										Location: "f1_2_2",
-										Name: "f1_2_2.html"
-									},
-									{
-										Location: "f2",
-										Name: "f2.js"
-									},
-									{
-										Location: "f3_2",
-										Name: "f3_2.html"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 4,
+				docs: [
+					{
+						Location: "f1_1",
+						Name: "f1_1.js"
+					},
+					{
+						Location: "f1_2_2",
+						Name: "f1_2_2.html"
+					},
+					{
+						Location: "f2",
+						Name: "f2.js"
+					},
+					{
+						Location: "f3_2",
+						Name: "f3_2.html"
 					}
-					d.resolve();
-				}
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.test_NormalPartial = function() {
@@ -621,37 +621,25 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "artia"
 		},
 		{location: "root"});
-		var d  = new Deferred();
-		crawler.search(function(searchResult, incremental){
-				if(!incremental){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 3,
-								docs: [
-									{
-										Location: "f1_1",
-										Name: "f1_1.js"
-									},
-									{
-										Location: "f3_1",
-										Name: "f3_1.css"
-									},
-									{
-										Location: "f3_2",
-										Name: "f3_2.html"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 3,
+				docs: [
+					{
+						Location: "f1_1",
+						Name: "f1_1.js"
+					},
+					{
+						Location: "f3_1",
+						Name: "f3_1.css"
+					},
+					{
+						Location: "f3_2",
+						Name: "f3_2.html"
 					}
-					d.resolve();
-				}
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.test_NormalnoHit = function() {
@@ -666,25 +654,13 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "NothingAtAll"
 		},
 		{location: "root"});
-		var d  = new Deferred();
-		crawler.search(function(searchResult, incremental){
-				if(!incremental){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 0,
-								docs: [
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
-					}
-					d.resolve();
-				}
-			});
-		return d;
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 0,
+				docs: [
+				]
+			}
+		});
 	};
 
 
@@ -695,66 +671,53 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "f"
 		};
 		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
-		var d  = new Deferred();
-		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
-			function(){
-				crawler.searchName(searchParam, function(searchResult){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 10,
-								docs: [
-									{
-										Location: "f1_1",
-										Name: "f1_1.js"
-									},
-									{
-										Location: "f1_2_1",
-										Name: "f1_2_1.css"
-									},
-									{
-										Location: "f1_2_2",
-										Name: "f1_2_2.html"
-									},
-									{
-										Location: "f1_2_3",
-										Name: "f1_2_3.png"
-									},
-									{
-										Location: "f1_2_4",
-										Name: "f1_2_4.txt"
-									},
-									{
-										Location: "f1_3",
-										Name: "f1_3.js"
-									},
-									{
-										Location: "f2",
-										Name: "f2.js"
-									},
-									{
-										Location: "f3_1",
-										Name: "f3_1.css"
-									},
-									{
-										Location: "f3_2",
-										Name: "f3_2.html"
-									},
-									{
-										Location: "f3_3",
-										Name: "f3_3.conf"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchNameAndCompare(crawler, searchParam, {
+			response: {
+				numFound: 10,
+				docs: [
+					{
+						Location: "f1_1",
+						Name: "f1_1.js"
+					},
+					{
+						Location: "f1_2_1",
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "f1_2_2",
+						Name: "f1_2_2.html"
+					},
+					{
+						Location: "f1_2_3",
+						Name: "f1_2_3.png"
+					},
+					{
+						Location: "f1_2_4",
+						Name: "f1_2_4.txt"
+					},
+					{
+						Location: "f1_3",
+						Name: "f1_3.js"
+					},
+					{
+						Location: "f2",
+						Name: "f2.js"
+					},
+					{
+						Location: "f3_1",
+						Name: "f3_1.css"
+					},
+					{
+						Location: "f3_2",
+						Name: "f3_2.html"
+					},
+					{
+						Location: "f3_3",
+						Name: "f3_3.conf"
 					}
-					d.resolve();
-				});
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.testName_F1_2 = function() {
@@ -763,42 +726,29 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "f1_2*"
 		};
 		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
-		var d  = new Deferred();
-		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
-			function(){
-				crawler.searchName(searchParam, function(searchResult){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 4,
-								docs: [
-									{
-										Location: "f1_2_1",
-										Name: "f1_2_1.css"
-									},
-									{
-										Location: "f1_2_2",
-										Name: "f1_2_2.html"
-									},
-									{
-										Location: "f1_2_3",
-										Name: "f1_2_3.png"
-									},
-									{
-										Location: "f1_2_4",
-										Name: "f1_2_4.txt"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchNameAndCompare(crawler, searchParam, {
+			response: {
+				numFound: 4,
+				docs: [
+					{
+						Location: "f1_2_1",
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "f1_2_2",
+						Name: "f1_2_2.html"
+					},
+					{
+						Location: "f1_2_3",
+						Name: "f1_2_3.png"
+					},
+					{
+						Location: "f1_2_4",
+						Name: "f1_2_4.txt"
 					}
-					d.resolve();
-				});
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.testName_LeadingWildCard = function() {
@@ -807,46 +757,33 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "*_2"
 		};
 		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
-		var d  = new Deferred();
-		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
-			function(){
-				crawler.searchName(searchParam, function(searchResult){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 5,
-								docs: [
-									{
-										Location: "f1_2_1",
-										Name: "f1_2_1.css"
-									},
-									{
-										Location: "f1_2_2",
-										Name: "f1_2_2.html"
-									},
-									{
-										Location: "f1_2_3",
-										Name: "f1_2_3.png"
-									},
-									{
-										Location: "f1_2_4",
-										Name: "f1_2_4.txt"
-									},
-									{
-										Location: "f3_2",
-										Name: "f3_2.html"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchNameAndCompare(crawler, searchParam, {
+			response: {
+				numFound: 5,
+				docs: [
+					{
+						Location: "f1_2_1",
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "f1_2_2",
+						Name: "f1_2_2.html"
+					},
+					{
+						Location: "f1_2_3",
+						Name: "f1_2_3.png"
+					},
+					{
+						Location: "f1_2_4",
+						Name: "f1_2_4.txt"
+					},
+					{
+						Location: "f3_2",
+						Name: "f3_2.html"
 					}
-					d.resolve();
-				});
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.testName_LeadingWildCardHTML = function() {
@@ -855,34 +792,21 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "*_2*.HtMl"
 		};
 		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
-		var d  = new Deferred();
-		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
-			function(){
-				crawler.searchName(searchParam, function(searchResult){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 2,
-								docs: [
-									{
-										Location: "f1_2_2",
-										Name: "f1_2_2.html"
-									},
-									{
-										Location: "f3_2",
-										Name: "f3_2.html"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchNameAndCompare(crawler, searchParam, {
+			response: {
+				numFound: 2,
+				docs: [
+					{
+						Location: "f1_2_2",
+						Name: "f1_2_2.html"
+					},
+					{
+						Location: "f3_2",
+						Name: "f3_2.html"
 					}
-					d.resolve();
-				});
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.testName_AllJS = function() {
@@ -891,38 +815,25 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "*.js"
 		};
 		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
-		var d  = new Deferred();
-		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
-			function(){
-				crawler.searchName(searchParam, function(searchResult){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 3,
-								docs: [
-									{
-										Location: "f1_1",
-										Name: "f1_1.js"
-									},
-									{
-										Location: "f1_3",
-										Name: "f1_3.js"
-									},
-									{
-										Location: "f2",
-										Name: "f2.js"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchNameAndCompare(crawler, searchParam, {
+			response: {
+				numFound: 3,
+				docs: [
+					{
+						Location: "f1_1",
+						Name: "f1_1.js"
+					},
+					{
+						Location: "f1_3",
+						Name: "f1_3.js"
+					},
+					{
+						Location: "f2",
+						Name: "f2.js"
 					}
-					d.resolve();
-				});
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.testName_AllIncluding2AndS = function() {
@@ -931,34 +842,21 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "*2*.*s*"
 		};
 		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
-		var d  = new Deferred();
-		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
-			function(){
-				crawler.searchName(searchParam, function(searchResult){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 2,
-								docs: [
-									{
-										Location: "f1_2_1",
-										Name: "f1_2_1.css"
-									},
-									{
-										Location: "f2",
-										Name: "f2.js"
-									}
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
+		return _searchNameAndCompare(crawler, searchParam, {
+			response: {
+				numFound: 2,
+				docs: [
+					{
+						Location: "f1_2_1",
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "f2",
+						Name: "f2.js"
 					}
-					d.resolve();
-				});
-			});
-		return d;
+				]
+			}
+		});
 	};
 
 	tests.testName_NoHit = function() {
@@ -967,26 +865,13 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 			keyword: "*.nothing"
 		};
 		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, searchParam, {location: "root", buildSkeletonOnly: true});
-		var d  = new Deferred();
-		crawler.buildSkeleton(function() {}, //Doing nothing for onBegin
-			function(){
-				crawler.searchName(searchParam, function(searchResult){
-					try {
-						assertSearchReresultEqual({
-							response: {
-								numFound: 0,
-								docs: [
-								]
-							}
-						},
-						searchResult);
-					} catch (e){
-						d.reject(e);
-					}
-					d.resolve();
-				});
-			});
-		return d;
+		return _searchNameAndCompare(crawler, searchParam, {
+			response: {
+				numFound: 0,
+				docs: [
+				]
+			}
+		});
 	};
 
 	return tests;

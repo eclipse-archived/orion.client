@@ -60,9 +60,11 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 			this.contentTypesCache = ct;
 			var crawler = this;
 			this._visitRecursively(this._childrenLocation).then(function(){
-				this._sort(this.fileLocations);
-				var response = {numFound: this.fileLocations.length, docs: this.fileLocations };
-				this._onSearchComplete({response: response});
+				if(!crawler._cancelled) {
+					crawler._sort(crawler.fileLocations);
+					var response = {numFound: crawler.fileLocations.length, docs: crawler.fileLocations };
+					crawler._onSearchComplete({response: response});
+				}
 			}.bind(crawler));
 		}.bind(this));
 	};
