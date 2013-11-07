@@ -23,6 +23,7 @@ define([
 	'orion/commandRegistry',
 	'orion/contentTypes',
 	'orion/fileClient',
+	'orion/fileCommands',
 	'orion/selection',
 	'orion/status',
 	'orion/progress',
@@ -42,7 +43,7 @@ define([
 ], function(
 	messages, Sidebar, mInputManager, mGlobalCommands,
 	mFolderView, mEditorView,
-	mCommandRegistry, mContentTypes, mFileClient, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, mSearchClient,
+	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
 	EventTarget, URITemplate, i18nUtil, PageUtil, lib, mProjectClient
 ) {
@@ -123,6 +124,13 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		var resource = folder ? folder.Location : fileClient.fileServiceRootURL(folderLocation);
 		segment.href = uriTemplate.expand({resource: resource});
 	};
+	
+		
+	mFileCommands.getModelEventDispatcher().addEventListener("create", function(event) { //$NON-NLS-0$
+		if (event.newValue !== null) {
+			window.location = uriTemplate.expand({resource: event.newValue.Location});
+		}
+	});
 
 	inputManager = new mInputManager.InputManager({
 		serviceRegistry: serviceRegistry,

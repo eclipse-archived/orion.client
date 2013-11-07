@@ -196,6 +196,7 @@ define([
 			if (!expand) {
 				var navHandler = this.getNavHandler();
 				if (navHandler) {
+					fileMetadata = this.getRow(fileMetadata)._item;
 					navHandler.cursorOn(fileMetadata, true);
 					navHandler.setSelection(fileMetadata);
 				}
