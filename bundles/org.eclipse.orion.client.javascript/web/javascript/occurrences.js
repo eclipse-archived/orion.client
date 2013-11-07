@@ -416,7 +416,7 @@ define([
 				}
 				context.scope = [];
 				context.occurrences = [];
-				this.traverse(ast, context, this.findOccurrence);
+				this.traverse(ast, context, this.findOccurrence.bind(this));
 				return this.filterOccurrences(context);
 			}
 			console.error("AST is null");	//$NON-NLS-0$
