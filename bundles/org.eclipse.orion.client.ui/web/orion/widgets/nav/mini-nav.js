@@ -36,6 +36,8 @@ define([
 	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
 
+	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+
 	/**
 	 * @class orion.sidebar.MiniNavExplorer
 	 * @extends orion.explorers.FileExplorer
@@ -72,6 +74,10 @@ define([
 				if (_self.treeRoot && _self.treeRoot.ChildrenLocation !== input) {
 					_self.loadRoot(input).then(function() {
 						_self.updateCommands();
+						var fileMetadata = _self.editorInputManager.getFileMetadata();
+						if (_self.fileInCurrentTree(fileMetadata)) {
+							_self.reveal(fileMetadata, true);
+						}
 					});
 				}
 			};
@@ -91,7 +97,7 @@ define([
 				_self.sidebarNavInputManager.dispatchEvent(event);
 			}
 		};
-		this.selection.addEventListener("selectionChanged", this._selectionListener);
+		this.selection.addEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
 		this.commandsRegistered = this.registerCommands();
 	}
 	MiniNavExplorer.prototype = Object.create(FileExplorer.prototype);
@@ -154,29 +160,7 @@ define([
 			});
 			this.sidebarNavInputManager.removeEventListener("InputChanged", this.navInputListener); //$NON-NLS-0$
 			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
-			this.selection.removeEventListener("selectionChanged", this._selectionListener);
-		},
-		/**
-		 * Roots this explorer at the parent directory of the given file (or, at the top of the filesystem, if <code>top</code> is passed).
-		 * Then reveals the given file.
-		 * @param {Object} fileMetadata The file we want to reveal.
-		 * @param {Boolean} [top=false] <code>true</code> roots this explorer at the top of the filesystem.
-		 * <code>false</code> roots the explorer at the the direct parent of <code>fileMetadata</code>.
-		 */
-		loadParentOf: function(fileMetadata, top) {
-			if (fileMetadata) {
-				var parent = fileMetadata.Parents && fileMetadata.Parents[0];
-				if (!top && parent) {
-					if (this.treeRoot && this.treeRoot.ChildrenLocation === parent.ChildrenLocation) {
-						// Do we still need to handle this case?
-						this.reveal(fileMetadata);
-						return;
-					}
-				} else {
-					parent = this.fileClient.fileServiceRootURL(fileMetadata.Location); //$NON-NLS-0$
-				}
-				return this.loadRoot(parent);
-			}
+			this.selection.removeEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
 		},
 		/**
 		 * Loads the given children location as the root.
@@ -239,7 +223,7 @@ define([
 					func();
 				}
 			} else if (!PageUtil.matchResourceParameters().navigate) {
-				this.loadParentOf(fileMetadata, true /* reveal from the top */).then(func);
+				this.loadRoot(this.fileClient.fileServiceRootURL(fileMetadata.Location)).then(func);
 			}
 		},
 		outOfSync: function(fileMetadata) {
@@ -277,12 +261,27 @@ define([
 			}
 			return null;
 		},
+		scope: function(childrenLocation) {
+			childrenLocation = (childrenLocation && childrenLocation.ChildrenLocation) || childrenLocation || ""; //$NON-NLS-0$
+			var params = PageUtil.matchResourceParameters();
+			var resource = params.resource;
+			params.navigate = childrenLocation;
+			delete params.resource;
+			window.location.href = uriTemplate.expand({resource: resource, params: params});
+		},
 		scopeUp: function() {
+			var navigate;
 			var root = this.treeRoot;
-			this.loadParentOf(root).then(this.reveal.bind(this, root));
+			var parent = root.Parents && root.Parents[0];
+			if (parent) {
+				navigate = parent.ChildrenLocation;
+			} else {
+				navigate = this.fileClient.fileServiceRootURL(root.Location);
+			}
+			this.scope(navigate);
 		},
 		scopeDown: function(item) {
-			this.loadRoot(item).then();
+			this.scope(item.ChildrenLocation);
 		},
 		fileInCurrentTree: function(fileMetadata) {
 			var fileClient = this.fileClient, treeRoot = this.treeRoot;
@@ -348,13 +347,13 @@ define([
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
 			var fileCommandsRegistered = ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.miniNavSelectionGroup", true); //$NON-NLS-0$
 			
-			if(serviceRegistry.getServiceReferences("orion.projects").length>0){
+			if(serviceRegistry.getServiceReferences("orion.projects").length>0){ //$NON-NLS-0$
 				commandRegistry.addCommandGroup(newActionsScope, "orion.projectsNewGroup", 100, "New Project", "orion.miniNavNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				
 				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.basic", 1, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.fromfile", 2, "orion.miniNavNewGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				
-				var projectClient = serviceRegistry.getService("orion.project.client");
+				var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
 				var dependencyTypesDef = new Deferred();
 				projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
 					for(var i=0; i<dependencyTypes.length; i++){
@@ -381,7 +380,6 @@ define([
 		}
 	});
 
-	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	function MiniNavRenderer() {
 		NavigatorRenderer.apply(this, arguments);
 	}
@@ -478,7 +476,7 @@ define([
 				rendererFactory: function(explorer) {
 					var renderer = new MiniNavRenderer({
 						checkbox: false,
-						cachePrefix: "MiniNav"
+						cachePrefix: "MiniNav" //$NON-NLS-0$
 					}, explorer, _self.commandRegistry, _self.contentTypeRegistry); //$NON-NLS-0$
 					return renderer;
 				},
@@ -498,7 +496,7 @@ define([
 
 			var params = PageUtil.matchResourceParameters();
 			var navigate = params.navigate, resource = params.resource;
-			var root = params.navigate || this.lastRoot || this.fileClient.fileServiceRootURL(resource || ""); //$NON-NLS-0$
+			var root = navigate || this.lastRoot || this.fileClient.fileServiceRootURL(resource || ""); //$NON-NLS-0$
 			this.explorer.loadRoot(root).then(function(){
 				if (!_self.explorer) { return; }
 				_self.explorer.updateCommands();
