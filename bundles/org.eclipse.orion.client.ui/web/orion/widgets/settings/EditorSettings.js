@@ -184,6 +184,11 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 					create: createBooleanProperty
 				}
 			},
+			languageTools: {
+				showOccurrences: {
+					create: createBooleanProperty
+				}
+			},
 			sourceControl: {
 				showBlame: {
 					create: createBooleanProperty

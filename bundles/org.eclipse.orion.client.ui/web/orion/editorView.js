@@ -152,6 +152,7 @@ define([
 			if (this.renderToolbars) {
 				this.renderToolbars(inputManager.getFileMetadata());
 			}
+			this.markOccurrences.setOccurrencesVisible(prefs.showOccurrences);
 		},
 		updateStyler: function(prefs) {
 			var styler = this.syntaxHighlighter.getStyler();
@@ -319,7 +320,8 @@ define([
 			serviceRegistry.getService("orion.core.blame").addEventListener("blameChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 				editor.showBlame(event.blameInfo);
 			});
-			var markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
+			var markOccurrences = this.markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
+			markOccurrences.setOccurrencesVisible(this.settings.occurrencesVisible);
 			editor.addEventListener("TextViewInstalled", function(event) { //$NON-NLS-0$
 				event.textView.getModel().addEventListener("Changed", self.astManager.updated.bind(self.astManager)); //$NON-NLS-0$
 				markOccurrences.findOccurrences();

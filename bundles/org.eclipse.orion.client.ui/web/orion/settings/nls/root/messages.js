@@ -168,6 +168,8 @@ define({
 	"smartIndentation": "Smart Indentation",
 	"sourceControl": "Source Control",
 	"showBlame": "Show Blame",
+	"languageTools": "Language Tools",
+	"showOccurrences": "Show Occurrences",
 	"Editor preferences updated": "Editor preferences updated",
 	"Editor defaults restored": "Editor defaults restored",
 	"Theme": "Theme",
