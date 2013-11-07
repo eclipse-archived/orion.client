@@ -9,8 +9,8 @@
  ******************************************************************************/
  
 /*global define document setTimeout*/
-define(['orion/markdownView', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', 'orion/commandRegistry', 'orion/PageLinks'],
-	function(mMarkdownView, URITemplate, lib, mProjectCommands, mCommandRegistry, PageLinks) {
+define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', 'orion/commandRegistry', 'orion/PageLinks'],
+	function(URITemplate, lib, mProjectCommands, mCommandRegistry, PageLinks) {
 	
 	var editTemplate = new URITemplate("./edit.html#{,resource,params*}"); //$NON-NLS-0$
 	
@@ -21,10 +21,6 @@ define(['orion/markdownView', 'orion/URITemplate', 'orion/webui/littlelib', 'ori
 		this.projectClient = this.serviceRegistry.getService("orion.project.client");
 		this.commandService = options.commandService;
 		this._node = null;
-		this.markdownView = new mMarkdownView.MarkdownView({
-			fileClient : this.fileClient,
-			progress : this.progress
-		});
 		this.dependencyActions = "dependencyActions";
 		this.createCommands();
 	}
