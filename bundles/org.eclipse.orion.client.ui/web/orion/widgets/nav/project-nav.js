@@ -160,9 +160,7 @@ define([
 						}.bind(this));
 					}
 					that.loadRoot(projectData, redisplay).then(function(){
-						that.expandToItem(fileMetadata,function(){
-							that.reveal(fileMetadata);
-						});
+						that.reveal(fileMetadata, true);
 					});
 				}
 			}.bind(this));
@@ -170,28 +168,6 @@ define([
 		},
 		createModel: function() {
 			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders);
-		},
-		reveal: function(fileMetadata, expand) {
-			if (!fileMetadata) {
-				return;
-			}
-
-			if (!expand) {
-				var navHandler = this.getNavHandler();
-				if (navHandler) {
-					if(fileMetadata.Location === this.treeRoot.Location && fileMetadata.Children && fileMetadata.Children.length){
-						navHandler.cursorOn(fileMetadata.Children[0], true, false, false);
-						navHandler.setSelection(fileMetadata.Children[0]);
-					} else {
-						navHandler.cursorOn(fileMetadata, true, false, false);
-						navHandler.setSelection(fileMetadata);
-					}
-				}
-				return;
-			}
-			this.expandToItem(fileMetadata, function(){
-				this.reveal(fileMetadata);
-			}.bind(this));
 		},
 		registerCommands: function() {
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
@@ -211,24 +187,9 @@ define([
 				return projectCommandsDef;
 			}.bind(this));
 		},
-		expandToItem: function(item, afterExpand){
-			if(!item || !this.model){
-				return;
-			}
-			var itemId = this.model.getId(item);
-			var itemNode = lib.node(itemId);
-			if(itemNode){
-				if(this.myTree.isExpanded(item)){
-					afterExpand();
-				} else {
-					this.myTree.expand(itemId, afterExpand);
-				}
-			} else if(item.Parents && item.Parents.length>0) {
-				item.Parents[0].Parents = item.Parents.slice(1);
-				this.expandToItem(item.Parents[0], function(){
-					this.myTree.expand(itemId, afterExpand);					
-				}.bind(this));
-			}
+		outOfSync: function(fileMetadata) {
+			//TODO - detect that the model is stale
+			return false;
 		},
 		changedItem: function(item, forceExpand){
 			if(!item || !this.model){

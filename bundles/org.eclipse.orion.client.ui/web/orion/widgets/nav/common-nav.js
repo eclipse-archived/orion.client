@@ -13,6 +13,7 @@
 define([
 	'i18n!orion/edit/nls/messages',
 	'orion/objects',
+	'orion/webui/littlelib',
 	'orion/explorers/explorer-table',
 	'orion/explorers/navigatorRenderer',
 	'orion/explorers/explorerNavHandler',
@@ -24,7 +25,7 @@ define([
 	'orion/PageUtil',
 	'orion/Deferred'
 ], function(
-	messages, objects, mExplorer, mNavigatorRenderer, mExplorerNavHandler, mKeyBinding,
+	messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, mKeyBinding,
 	FileCommands, ExtensionCommands, Selection, URITemplate, PageUtil, Deferred
 ) {
 	var FileExplorer = mExplorer.FileExplorer;
@@ -134,6 +135,25 @@ define([
 			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 			this.selection.removeEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
 		},
+		expandToItem: function(item, afterExpand) {
+			if(!item || !this.model) {
+				return;
+			}
+			var itemId = this.model.getId(item);
+			var itemNode = lib.node(itemId);
+			if(itemNode){
+				if(this.myTree.isExpanded(item)) {
+					afterExpand();
+				} else {
+					this.myTree.expand(itemId, afterExpand);
+				}
+			} else if(item.Parents && item.Parents.length>0) {
+				item.Parents[0].Parents = item.Parents.slice(1);
+				this.expandToItem(item.Parents[0], function(){
+					this.myTree.expand(itemId, afterExpand);					
+				}.bind(this));
+			}
+		},
 		/**
 		 * Loads the given children location as the root.
 		 * @param {String|Object} The childrenLocation or an object with a ChildrenLocation field.
@@ -148,7 +168,7 @@ define([
 				}
 			}.bind(this));
 		},
-		reveal: function(fileMetadata, expand){
+		reveal: function(fileMetadata, expand) {
 			if (!fileMetadata) {
 				return;
 			}
@@ -159,58 +179,37 @@ define([
 					if (row) {
 						fileMetadata = row._item;
 					}
+					if (fileMetadata.Location === this.treeRoot.Location && fileMetadata.Children && fileMetadata.Children.length) {
+						fileMetadata = fileMetadata.Children[0];
+					}
 					navHandler.cursorOn(fileMetadata, true);
 					navHandler.setSelection(fileMetadata);
 				}
 				return;
 			}
-			
-			var _self = this;
-			var func = function () {
-				var tree = _self.myTree;
-				if (!tree) { return; }
-				if (!fileMetadata.Parents) {
-					return;
-				}
-				var startIndex = -1;
-				for (var i=0; i<fileMetadata.Parents.length; i++) {
-					var parent = fileMetadata.Parents[i];
-					if (parent.Location === _self.treeRoot.Location || tree.isExpanded(parent)) {
-						startIndex = i;
-						break;
-					}
-				}
-				if (startIndex === -1) {
-					startIndex = fileMetadata.Parents.length;
-				}
-				var postExpand = function (startIndex) {
-					if (startIndex < 0) {
-						_self.reveal(fileMetadata);
-						return;
-					}
-					tree.expand(fileMetadata.Parents[startIndex], postExpand, [startIndex-1]);
-				};
-				postExpand(startIndex-1);
-			};
-			
+			var expandFunc = function() {
+				this.expandToItem(fileMetadata, function(){
+					this.reveal(fileMetadata);
+				}.bind(this));
+			}.bind(this);
 			if (this.fileInCurrentTree(fileMetadata)) {
 				var outOfSync = this.outOfSync(fileMetadata);
 				if (outOfSync) {
-					this.changedItem(outOfSync, true).then(func);
+					this.changedItem(outOfSync, true).then(expandFunc);
 				} else {
-					func();
+					expandFunc();
 				}
 			} else if (!PageUtil.matchResourceParameters().navigate) {
-				this.loadRoot(this.fileClient.fileServiceRootURL(fileMetadata.Location)).then(func);
+				this.loadRoot(this.fileClient.fileServiceRootURL(fileMetadata.Location)).then(expandFunc);
 			}
 		},
 		outOfSync: function(fileMetadata) {
 			// Determines whether the cached children is out of date since it does not contain the specified file/folder.
 			var treeRoot = this.treeRoot;
 			var metadatas = [];
-			if (fileMetadata && fileMetadata.Parents && treeRoot && treeRoot.ChildrenLocation) {
+			if (fileMetadata && fileMetadata.Parents && treeRoot && treeRoot.Location) {
 				for (var i=0; i<fileMetadata.Parents.length; i++) {
-					if (fileMetadata.Parents[i].ChildrenLocation === treeRoot.ChildrenLocation) {
+					if (fileMetadata.Parents[i].Location === treeRoot.Location) {
 						break;
 					}
 					metadatas.push(fileMetadata.Parents[i]);
@@ -268,9 +267,9 @@ define([
 			}
 			// Already at the workspace root?
 			if (!treeRoot.Parents) { return true; }
-			if (fileMetadata && fileMetadata.Parents && treeRoot && treeRoot.ChildrenLocation) {
+			if (fileMetadata && fileMetadata.Parents && treeRoot && treeRoot.Location) {
 				for (var i=0; i<fileMetadata.Parents.length; i++) {
-					if (fileMetadata.Parents[i].ChildrenLocation === treeRoot.ChildrenLocation) {
+					if (fileMetadata.Parents[i].Location === treeRoot.Location) {
 						return true;
 					}
 				}
