@@ -154,7 +154,7 @@ define(function(){
 					} else {
 						throw new Error("bad param type: " + name + " : " + valueType); //$NON-NLS-1$ //$NON-NLS-0$
 					}
-					if (resultText !== sep) {
+					if (resultText !== sep || i < this._varSpecList.length - 1) {
 						result.push(resultText);
 					}
 				}
