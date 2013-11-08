@@ -354,7 +354,7 @@ objects.mixin(SiteEditor.prototype, {
 		selfHostingConfig.folders.forEach(function(folderInfo) {
 			if (folderInfo.nls) {
 				i18nLoaded.push(i18nUtil.getMessageBundle(folderInfo.nls).then(function(bundle) {
-					folderInfo.label = bundle[folderInfo.labelKey] || folderInfo.labelKey;
+					folderInfo.label = bundle[folderInfo.labelKey] || folderInfo.label || folderInfo.labelKey;
 				}));
 			}
 		});
