@@ -4763,7 +4763,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-0$
 			parent.appendChild(rootDiv);
 			
-			var leftDiv = this._leftDiv = this._createRulerParent("textviewLeftRuler"); //$NON-NLS-0$
+			var leftDiv = this._createRulerParent("textviewLeftRuler"); //$NON-NLS-0$
+			this._leftDiv = leftDiv;
 
 			var viewDiv = util.createElement(document, "div"); //$NON-NLS-0$
 			viewDiv.className = "textviewScroll"; //$NON-NLS-0$
@@ -4782,7 +4783,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			rootDiv.appendChild(viewDiv);
 			
-			var rightDiv = this._rightDiv = this._createRulerParent("textviewRightRuler"); //$NON-NLS-0$
+			var rightDiv = this._createRulerParent("textviewRightRuler"); //$NON-NLS-0$
+			this._rightDiv = rightDiv;
 			rightDiv.style.right = "0px"; //$NON-NLS-0$
 				
 			var scrollDiv = util.createElement(document, "div"); //$NON-NLS-0$
