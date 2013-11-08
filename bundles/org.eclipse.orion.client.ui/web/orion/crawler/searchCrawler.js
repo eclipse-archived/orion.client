@@ -76,6 +76,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 	 */
 	SearchCrawler.prototype.searchName = function(searchParams, onComplete){
 		if(searchParams){
+			this._searchParams = searchParams;
 			this.searchHelper = mSearchUtils.generateSearchHelper(searchParams, true);
 		}
 		if(onComplete){
@@ -147,14 +148,32 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 		
 	SearchCrawler.prototype._sort = function(fileArray){
 		fileArray.sort(function(a, b) {
-			var n1 = a.Name && a.Name.toLowerCase();
-			var n2 = b.Name && b.Name.toLowerCase();
-			if (n1 < n2) { return -1; }
-			if (n1 > n2) { return 1; }
-			return 0;
-		}); 
+			var n1, n2;
+			if(this._searchParams.sort === "Path asc"){
+				//Folder equals to Location's substring after tailing out the file name
+				//We can not purely sort on Location because "Location" includes the file name at the tail.
+				//E.g. "DDD/f1_2_1.css" will be lined up after "DDD/AAA/f1_2_2.html" if we do so.
+				var location1 = a.Location && a.Location.toLowerCase();
+				n1 = mSearchUtils.path2FolderName(location1, a.Name && a.Name.toLowerCase(), true);
+				var location2 = b.Location && b.Location.toLowerCase();
+				n2 = mSearchUtils.path2FolderName(location2, b.Name && b.Name.toLowerCase(), true);
+				if (n1 < n2) { return -1; }
+				if (n1 > n2) { return 1; }
+				//If the same folder appears to two files, then we sort on file name
+				return this._sortOnNameSingle(a, b);
+			}
+			return this._sortOnNameSingle(a, b);
+		}.bind(this)); 
 	};
 		
+	SearchCrawler.prototype._sortOnNameSingle = function(a, b){
+		var	n1 = a.Name && a.Name.toLowerCase();
+		var	n2 = b.Name && b.Name.toLowerCase();
+		if (n1 < n2) { return -1; }
+		if (n1 > n2) { return 1; }
+		return 0;
+	};
+	
 	SearchCrawler.prototype._onFileType = function(contentType){
 		if(this.searchHelper.params.fileType){
 			if(this.searchHelper.params.fileType === mSearchUtils.ALL_FILE_TYPE){
