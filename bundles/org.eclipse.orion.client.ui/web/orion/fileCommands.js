@@ -867,7 +867,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Parents;
+				return item.Parents || item.parent;
 			}
 		});
 		commandService.addCommand(goUpCommand);
