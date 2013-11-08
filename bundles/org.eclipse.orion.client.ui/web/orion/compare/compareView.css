@@ -37,6 +37,10 @@
 	border: 0;
 }
 
+.inlineRulerLeft {
+	border-right: 1px solid #EAEAEA;
+}
+
 .compareEditorParent {
 	clear: both;
 	overflow: hidden;
