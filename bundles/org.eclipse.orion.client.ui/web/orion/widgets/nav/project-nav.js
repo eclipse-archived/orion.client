@@ -119,7 +119,6 @@ define([
 			}
 			
 			this.fileMetadata = fileMetadata;
-			var that = this;
 			
 			var parentProject;
 			if (fileMetadata && fileMetadata.Parents && fileMetadata.Parents.length===0){
@@ -150,18 +149,16 @@ define([
 									Location: dependencyMetadata.Location,
 									ChildrenLocation: dependencyMetadata.ChildrenLocation
 								});
-								that.renderer.updateRow(item, lib.node(that.model.getId(item)));
-								that.expandToItem(item);
+								this.renderer.updateRow(item, lib.node(this.model.getId(item)));
+								this.expandToItem(item);
 							}.bind(this), function(error) {
 								item.disconnected = true;
-								that.renderer.updateRow(item, lib.node(that.model.getId(item)));
-								that.expandToItem(item);
+								this.renderer.updateRow(item, lib.node(this.model.getId(item)));
+								this.expandToItem(item);
 							}.bind(this));
 						}.bind(this));
 					}
-					that.loadRoot(projectData, redisplay).then(function(){
-						that.reveal(fileMetadata, true);
-					});
+					CommonNavExplorer.prototype.display.call(this, projectData, redisplay);
 				}
 			}.bind(this));
 			}.bind(this));

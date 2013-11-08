@@ -135,6 +135,12 @@ define([
 			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 			this.selection.removeEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
 		},
+		display: function(root, force) {
+			this.loadRoot(root, force).then(function(){
+				this.updateCommands();
+				this.reveal(this.editorInputManager.getFileMetadata(), true);
+			}.bind(this));	
+		},
 		expandToItem: function(item, afterExpand) {
 			if(!item || !this.model) {
 				return;

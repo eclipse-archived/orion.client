@@ -154,11 +154,7 @@ define([
 			var params = PageUtil.matchResourceParameters();
 			var navigate = params.navigate, resource = params.resource;
 			var root = navigate || this.lastRoot || this.fileClient.fileServiceRootURL(resource || ""); //$NON-NLS-0$
-			this.explorer.loadRoot(root).then(function(){
-				if (!_self.explorer) { return; }
-				_self.explorer.updateCommands();
-				_self.explorer.reveal(_self.editorInputManager.getFileMetadata(), true);
-			});
+			this.explorer.display(root);
 		},
 		destroy: function() {
 			if (this.explorer) {
