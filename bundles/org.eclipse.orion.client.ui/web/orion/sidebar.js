@@ -171,6 +171,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				});
 				// Only show project view mode if selection is in a project
 				this.sidebarNavInputManager.addEventListener("selectionChanged", function(event){ //$NON-NLS-0$
+					if (_self.getActiveViewModeId() === id) { return; }
 					var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
 					if (item) {
 						while (item.parent && item.parent.parent) {
