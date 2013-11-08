@@ -10,8 +10,11 @@
  ******************************************************************************/
 
 /*global define*/
-define(['examples/editor/textStyler', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler', 'orion/Deferred'], 
-		function(mTextStyler, mTextMateStyler, AsyncStyler, Deferred) {
+define(['examples/editor/textStyler', 'examples/editor/textStyler2', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler', 'orion/Deferred'], 
+		function(mTextStyler, mTextStyler2, mTextMateStyler, AsyncStyler, Deferred) {
+
+	var NEW = 0;
+
 	/**
 	 * Returns a promise that will provide a styler for the given content type.
 	 * @static
@@ -62,7 +65,7 @@ define(['examples/editor/textStyler', 'orion/editor/textMateStyler', 'orion/edit
 		}
 		// Check default styler
 		var styler = createDefaultStyler(contentType);
-		if (styler) {
+		if (!NEW && styler) {
 			var result = new Deferred();
 			result.resolve(styler);
 			return result;
@@ -94,13 +97,20 @@ define(['examples/editor/textStyler', 'orion/editor/textMateStyler', 'orion/edit
 			}
 			var styler;
 			if (provider) {
-				var type = provider.getProperty("type"); //$NON-NLS-0$
-				if (type === "highlighter") { //$NON-NLS-0$
-					styler = new AsyncStyler(textView, serviceRegistry, annotationModel);
-					styler.setContentType(contentType);
-				} else if (type === "grammar" || typeof type === "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
-					var grammar = provider.getProperty("grammar"); //$NON-NLS-0$
-					styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
+				if (NEW) {
+					var rules = provider.getProperty("rules"); //$NON-NLS-0$
+					var delimiters = provider.getProperty("delimiters"); //$NON-NLS-0$
+					var keywords = provider.getProperty("keywords"); //$NON-NLS-0$
+					styler = new mTextStyler2.TextStyler(textView, annotationModel, rules, delimiters, keywords); //$NON-NLS-0$
+				} else {
+					var type = provider.getProperty("type"); //$NON-NLS-0$
+					if (type === "highlighter") { //$NON-NLS-0$
+						styler = new AsyncStyler(textView, serviceRegistry, annotationModel);
+						styler.setContentType(contentType);
+					} else if (type === "grammar" || typeof type === "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+						var grammar = provider.getProperty("grammar"); //$NON-NLS-0$
+						styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
+					}
 				}
 			}
 			return styler;
