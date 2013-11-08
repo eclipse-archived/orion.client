@@ -76,6 +76,11 @@ define([
 	}
 	CommonNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(CommonNavExplorer.prototype, /** @lends orion.sidebar.CommonNavExplorer.prototype */ {
+		onCreate: function(event) {
+			return FileExplorer.prototype.onCreate.call(this, event).then(function () {
+				this.sidebarNavInputManager.dispatchEvent(event);
+			}.bind(this));
+		},
 		onFileModelChange: function(event) {
 			var oldValue = event.oldValue, newValue = event.newValue;
 			// Detect if we moved/renamed/deleted the current file being edited, or an ancestor thereof.

@@ -124,13 +124,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		var resource = folder ? folder.Location : fileClient.fileServiceRootURL(folderLocation);
 		segment.href = uriTemplate.expand({resource: resource});
 	};
-	
-		
-	mFileCommands.getModelEventDispatcher().addEventListener("create", function(event) { //$NON-NLS-0$
-		if (event.newValue !== null) {
-			window.location = uriTemplate.expand({resource: event.newValue.Location});
-		}
-	});
 
 	inputManager = new mInputManager.InputManager({
 		serviceRegistry: serviceRegistry,
@@ -247,7 +240,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	};
 	sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
 	sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
-
+	sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
+		if (evt.newValue !== null) {
+			window.location = uriTemplate.expand({resource: evt.newValue.Location});
+		}
+	});
 	editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
 		mGlobalCommands.setDirtyIndicator(editor.isDirty());
 	});

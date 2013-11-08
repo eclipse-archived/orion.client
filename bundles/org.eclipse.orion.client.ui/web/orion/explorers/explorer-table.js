@@ -197,6 +197,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		mExplorer.Explorer.prototype.destroy.call(this);
 	};
 
+	FileExplorer.prototype.onCreate = function(modelEvent) {
+		return this.changedItem(modelEvent.parent, true, modelEvent.newValue);
+	};
+	
 	/**
 	 * Handles model changes. Subclasses can override these methods to control how the FileExplorer reacts to various types of model changes.
 	 * The default implementations generally just refresh the affected row(s) in the explorer.
@@ -221,7 +225,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		},
 		create: function(modelEvent) {
 			// refresh the node
-			this.changedItem(modelEvent.parent, true, modelEvent.newValue);
+			this.onCreate(modelEvent);
 		},
 		"delete": function(modelEvent) { //$NON-NLS-0$
 			// Handled by deleteMultiple
