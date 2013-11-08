@@ -9,8 +9,13 @@
  ******************************************************************************/
 
 /*globals define window document*/
-define(['orion/Deferred', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/explorers/explorer'],
-		function(Deferred, URITemplate, lib, mExplorer){
+define([
+	'i18n!orion/edit/nls/messages',
+	'orion/Deferred',
+	'orion/URITemplate',
+	'orion/webui/littlelib',
+	'orion/explorers/explorer'
+], function(messages, Deferred, URITemplate, lib, mExplorer){
 	
 	var editTemplate = new URITemplate("../edit/edit.html#{,resource,params*}"); //$NON-NLS-0$
 			
@@ -30,7 +35,7 @@ define(['orion/Deferred', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/e
 		cell.appendChild(document.createTextNode("Projects"));
 		row.appendChild(cell);
 		
-		var cell = document.createElement("th");
+		cell = document.createElement("th");
 		cell.colSpan = 2;
 		
 		this.explorer.newActionsSpan = document.createElement("ul"); //$NON-NLS-0$
@@ -52,7 +57,7 @@ define(['orion/Deferred', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/e
 		td.colSpan = this.oneColumn ? 1 : 3;
 		var noProjects = document.createElement("div"); //$NON-NLS-0$
 		noProjects.classList.add("noFile"); //$NON-NLS-0$
-		noProjects.textContent = "There are no projects in your workspace, use ${0} to add projects";
+		noProjects.textContent = messages.NoProjects;
 		var plusIcon = document.createElement("span"); //$NON-NLS-0$
 		plusIcon.classList.add("core-sprite-addcontent"); //$NON-NLS-0$
 		plusIcon.classList.add("icon-inline"); //$NON-NLS-0$
@@ -62,7 +67,7 @@ define(['orion/Deferred', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/e
 		tr.appendChild(td);
 		bodyElement.appendChild(tr);
 	};
-	
+
 	ProjectsRenderer.prototype.renderRow = function(item, tableRow) {
 		
 		var navDict = this.explorer.getNavDict();
