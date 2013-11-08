@@ -482,6 +482,7 @@ define([
 						if (!parentTable[segment]) {
 							// empty slot with children
 							parentTable[segment] = {position: 0, children: {}};
+							parentTable.sortedContributions = null;
 						} 
 						parentTable = parentTable[segment].children;
 					}

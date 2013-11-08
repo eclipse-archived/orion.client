@@ -173,11 +173,11 @@ define([
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.disconnect", 2); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.readme", 5, "orion.commonNavNewGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.addFolder", 6, "orion.commonNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.addFolder", 1, "orion.commonNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
 				var projectCommandsDef = new Deferred();
 				this.projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
 					for(var i=0; i<dependencyTypes.length; i++){
-						commandRegistry.registerCommandContribution(newActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+7, "orion.commonNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(newActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.commonNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient, dependencyTypes).then(projectCommandsDef.resolve, projectCommandsDef.resolve);
 				}.bind(this), projectCommandsDef.resolve);
