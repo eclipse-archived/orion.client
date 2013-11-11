@@ -1,11 +1,11 @@
 #!/bin/sh
 # This script transforms the Orion client repo into a form suitable for publishing Orionode to npm.
 #
-# Usage: ./make-publish repo_dir publish_dir
+# Usage: ./make-publish publish_dir
 #
-# Where 'repo_dir' is the folder where your orion.client repository lives and 'publish_dir' is 
-# the target folder for the publishable Orionode. If the script completes with no errors, you 
-# should be able to run `npm publish` from publish_dir to update Orionode.
+# Where 'publish_dir' is the target folder for the publishable Orionode. If the script
+# completes with no errors, you should be able to run `npm publish` from publish_dir
+# to update Orionode.
 #
 # Requirements:
 #  Node in your PATH, for running the build
@@ -19,18 +19,29 @@ die() {
 ensure_dir() {
 	if [ ! -d "$1" ]; then
 		echo mkdir $1
-		mkdir "$1"
+		mkdir "$1" || die "Failed to create folder: $1"
 	fi
 }
 
-USAGE="Usage: publish [repo dir] [publish dir]"
-[ "$#" -eq 2 ] || die "$USAGE"
-[ "$1" != "$2" ] || die "repo dir and publish dir must be different."
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+USAGE=$(printf "Usage: publish [dir]\n\nWhere [dir] is the temporary directory to use for publishing.\nThe contents of [dir] will be cleared first, so don't use an important folder.")
 
-REPO=$1
-STAGING=$2
+# Set args
+REPO=${SCRIPT_DIR}/../../../
+STAGING=$1
 
+# Validate args
+[ "$#" -eq 1 ] || die "$USAGE"
+! [ -d "$STAGING"/.git ] || die "publish dir appears to contain a Git repo -- refusing to overwrite."
+# This is unnecessary
+#! [ "$STAGING" -ef "$REPO" ] || die "publish dir appears to be your repo directory -- refusing to overwrite."
+
+# Start the build
 ensure_dir "$STAGING"
+
+# TODO -- Purge publish dir -- this often hangs on Windows
+#echo Clearing "$STAGING"...
+#rm -rf "$STAGING"/*
 
 # Copy bundles to staging
 echo Copying $REPO/bundles to $STAGING
@@ -92,4 +103,6 @@ else
 	$MOCHA "$STAGING"/test/test-server
 fi
 
+echo "^^^^^ if the sanity tests finished without errors, run this command to publish to npm:"
+echo "cd ${STAGING} && npm publish"
 echo Done.
