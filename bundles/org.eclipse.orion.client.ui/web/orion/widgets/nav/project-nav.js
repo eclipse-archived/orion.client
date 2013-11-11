@@ -130,37 +130,39 @@ define([
 			if(!redisplay &&  parentProject && parentProject.Location === this.projectLocation){
 				return;
 			}
-			this.fileClient.loadWorkspace().then(function(workspaceMetadata){
-			this.projectClient.readProject(fileMetadata, workspaceMetadata).then(function(projectData){
-				if(projectData) {
-					projectData.Workspace = workspaceMetadata;
-					this.projectLocation = parentProject ? parentProject.Location : null;
-					projectData.type = "Project"; //$NON-NLS-0$
-					projectData.Directory = true;
-					fileMetadata.type = "ProjectRoot"; //$NON-NLS-0$
-					projectData.children = [fileMetadata];
-					if (projectData.Dependencies) {
-						projectData.Dependencies.forEach(function(dependency) {
-							var item = {Dependency: dependency, Project: projectData};
-							projectData.children.push(item);
-							this.projectClient.getDependencyFileMetadata(dependency, projectData.WorkspaceLocation).then(function(dependencyMetadata) {
-								objects.mixin(item, {
-									FileMetadata: dependencyMetadata,
-									Location: dependencyMetadata.Location,
-									ChildrenLocation: dependencyMetadata.ChildrenLocation
-								});
-								this.renderer.updateRow(item, lib.node(this.model.getId(item)));
-								this.expandToItem(item);
-							}.bind(this), function(error) {
-								item.disconnected = true;
-								this.renderer.updateRow(item, lib.node(this.model.getId(item)));
-								this.expandToItem(item);
+			return this.fileClient.loadWorkspace().then(function(workspaceMetadata){
+				return this.projectClient.readProject(fileMetadata, workspaceMetadata).then(function(projectData){
+					if(projectData) {
+						projectData.Workspace = workspaceMetadata;
+						this.projectLocation = parentProject ? parentProject.Location : null;
+						projectData.type = "Project"; //$NON-NLS-0$
+						projectData.Directory = true;
+						fileMetadata.type = "ProjectRoot"; //$NON-NLS-0$
+						projectData.children = [fileMetadata];
+						if (projectData.Dependencies) {
+							projectData.Dependencies.forEach(function(dependency) {
+								var item = {Dependency: dependency, Project: projectData};
+								projectData.children.push(item);
+								this.projectClient.getDependencyFileMetadata(dependency, projectData.WorkspaceLocation).then(function(dependencyMetadata) {
+									objects.mixin(item, {
+										FileMetadata: dependencyMetadata,
+										Location: dependencyMetadata.Location,
+										ChildrenLocation: dependencyMetadata.ChildrenLocation
+									});
+									this.renderer.updateRow(item, lib.node(this.model.getId(item)));
+									this.expandItem(item);
+								}.bind(this), function(error) {
+									item.disconnected = true;
+									this.renderer.updateRow(item, lib.node(this.model.getId(item)));
+									this.expandItem(item);
+								}.bind(this));
 							}.bind(this));
+						}
+						return CommonNavExplorer.prototype.display.call(this, projectData, redisplay).then(function() {
+							this.expandItem(fileMetadata);
 						}.bind(this));
 					}
-					CommonNavExplorer.prototype.display.call(this, projectData, redisplay);
-				}
-			}.bind(this));
+				}.bind(this));
 			}.bind(this));
 		},
 		createModel: function() {
@@ -173,11 +175,11 @@ define([
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.disconnect", 2); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.readme", 5, "orion.commonNavNewGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.addFolder", 1, "orion.commonNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.addFolder", 1, "orion.commonNavNewGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
 				var projectCommandsDef = new Deferred();
 				this.projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
 					for(var i=0; i<dependencyTypes.length; i++){
-						commandRegistry.registerCommandContribution(newActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.commonNavNewGroup/orion.projectDepenencies"); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(newActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.commonNavNewGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient, dependencyTypes).then(projectCommandsDef.resolve, projectCommandsDef.resolve);
 				}.bind(this), projectCommandsDef.resolve);

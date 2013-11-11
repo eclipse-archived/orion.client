@@ -141,29 +141,32 @@ define([
 			this.selection.removeEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
 		},
 		display: function(root, force) {
-			this.loadRoot(root, force).then(function(){
+			return this.loadRoot(root, force).then(function(){
 				this.updateCommands();
 				this.reveal(this.editorInputManager.getFileMetadata(), true);
 			}.bind(this));	
 		},
-		expandToItem: function(item, afterExpand) {
+		showItem: function(item, afterShow) {
 			if(!item || !this.model) {
 				return;
 			}
 			var itemId = this.model.getId(item);
 			var itemNode = lib.node(itemId);
-			if(itemNode){
-				if(this.myTree.isExpanded(item)) {
-					afterExpand();
-				} else {
-					this.myTree.expand(itemId, afterExpand);
-				}
+			if (itemNode) {
+				afterShow();
 			} else if(item.Parents && item.Parents.length>0) {
 				item.Parents[0].Parents = item.Parents.slice(1);
-				this.expandToItem(item.Parents[0], function(){
-					this.myTree.expand(itemId, afterExpand);					
-				}.bind(this));
+				this.expandItem(item.Parents[0], afterShow);
 			}
+		},
+		expandItem: function(item, afterExpand) {
+			this.showItem(item, function() {
+				if (this.myTree.isExpanded(item)) {
+					afterExpand();
+				} else {
+					this.myTree.expand(this.model.getId(item), afterExpand);
+				}
+			}.bind(this));
 		},
 		/**
 		 * Loads the given children location as the root.
@@ -199,7 +202,7 @@ define([
 				return;
 			}
 			var expandFunc = function() {
-				this.expandToItem(fileMetadata, function(){
+				this.showItem(fileMetadata, function(){
 					this.reveal(fileMetadata);
 				}.bind(this));
 			}.bind(this);
