@@ -150,6 +150,9 @@ define([
 			if(!item || !this.model) {
 				return;
 			}
+			if (!this.myTree.showRoot && item.Location === this.treeRoot.Location) {
+				return;
+			}
 			var itemId = this.model.getId(item);
 			var itemNode = lib.node(itemId);
 			if (itemNode) {
@@ -190,7 +193,7 @@ define([
 				var navHandler = this.getNavHandler();
 				if (navHandler) {
 					var row = this.getRow(fileMetadata);
-					if (row) {
+					if (row && row._item) {
 						fileMetadata = row._item;
 					}
 					if (fileMetadata.Location === this.treeRoot.Location && fileMetadata.Children && fileMetadata.Children.length) {
