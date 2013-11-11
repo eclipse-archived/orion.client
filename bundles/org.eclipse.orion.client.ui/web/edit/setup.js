@@ -87,7 +87,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		sidebarToolbar = lib.node("sidebarToolbar"), //$NON-NLS-0$
 		editorDomNode = lib.node("editor"); //$NON-NLS-0$
 
-	var editor, inputManager, folderView, editorView, lastRoot;
+	var editor, inputManager, sidebarNavInputManager, folderView, editorView, lastRoot;
 	function renderToolbars(metadata) {
 		var deferred;
 		var toolbar = lib.node("pageActions"); //$NON-NLS-0$
@@ -123,6 +123,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
 		var resource = folder ? folder.Location : fileClient.fileServiceRootURL(folderLocation);
 		segment.href = uriTemplate.expand({resource: resource});
+		if (folder) {
+			var metadata = inputManager.getFileMetadata();
+			if (metadata && metadata.Location === folder.Location) {
+				segment.addEventListener("click", function() { //$NON-NLS-0$
+					sidebarNavInputManager.reveal(folder);
+				});
+			}
+		}
 	};
 
 	inputManager = new mInputManager.InputManager({
@@ -173,6 +181,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 				}
 			},
 			makeBreadcrumbLink: sidebarNavBreadcrumb,
+			makeBreadcrumFinalLink: true,
 			serviceRegistry: serviceRegistry,
 			commandService: commandRegistry,
 			searchService: searcher,
@@ -210,7 +219,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		EventTarget.attach(this);
 	}
 
-	var sidebarNavInputManager = new SidebarNavInputManager();
+	sidebarNavInputManager = new SidebarNavInputManager();
 	var sidebar = new Sidebar({
 		commandRegistry: commandRegistry,
 		contentTypeRegistry: contentTypeRegistry,

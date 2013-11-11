@@ -44,6 +44,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
             this._workspaceRootSegmentName = options.workspaceRootSegmentName;
 			this._workspaceRootURL = options.workspaceRootURL;
             this._makeHref = options.makeHref;
+            this._makeFinalHref = options.makeFinalHref;
             this.path = "";
             this.measure();
             this.render();
@@ -177,12 +178,18 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         },
 
         finalSegment: function (seg, firstSegmentName) {
-            seg = document.createElement('span'); //$NON-NLS-0$
+            var name;
             if (firstSegmentName) {
-                seg.appendChild(document.createTextNode(firstSegmentName));
-                firstSegmentName = null;
+                name = firstSegmentName;
             } else {
-				seg.appendChild(document.createTextNode(this._resource.Name));             
+				name = this._resource.Name;
+            }
+            if (this._makeFinalHref) {
+               seg = this.buildSegment(name); //$NON-NLS-0$
+               this.addSegmentHref(seg, this._resource);
+            } else {
+                seg = document.createElement('span'); //$NON-NLS-0$
+                seg.appendChild(document.createTextNode( name ));
             }
             seg.classList.add("currentLocation"); //$NON-NLS-0$
             this.path += this._resource.Name;

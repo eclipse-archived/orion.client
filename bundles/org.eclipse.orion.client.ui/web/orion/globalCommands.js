@@ -454,6 +454,7 @@ define([
 				rootSegmentName: breadcrumbRootName,
 				workspaceRootSegmentName: fileSystemRootName,
 				workspaceRootURL: workspaceRootURL,
+				makeFinalHref: options.makeBreadcrumFinalLink,
 				makeHref: options.makeBreadcrumbLink
 			});
 		}

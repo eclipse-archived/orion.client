@@ -59,6 +59,11 @@ define([
 			_self.reveal(event.metadata, true);
 		};
 		this.editorInputManager.addEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
+		if (sidebarNavInputManager) {
+			sidebarNavInputManager.reveal = function(metadata) {
+				_self.reveal(metadata, true);
+			};
+		}
 		var dispatcher = this.modelEventDispatcher;
 		var onChange = this._modelListener = this.onFileModelChange.bind(this);
 		["move", "delete"].forEach(function(type) { //$NON-NLS-1$ //$NON-NLS-0$

@@ -131,11 +131,11 @@ a.breadcrumb:hover {
 
 a.currentLocation:hover {
 	font-weight: bold;
-	font-size: 10pt;
-	color: #666666;
-	text-decoration: none;
-	border-bottom: 0;
-}
+	font-size: 8pt;
+	color: #F58B0F;
+ 	text-decoration: none;
+	border-bottom: 1px dotted;
+ }
 
 .auxpane {
 	border: 0;
