@@ -571,7 +571,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						if (lib.node(id)) {
 							return;
 						}
-						mUIUtils.getUserText(id, refNode, true, item.Name, doMove, null, null, ".");  //$NON-NLS-1$ //$NON-NLS-0$
+						mUIUtils.getUserText(id, refNode, true, item.Name, doMove, null, null, item.Directory ? "" : ".");  //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				}
 			});
