@@ -195,9 +195,10 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 		 * @return {Object} JSON representation of the created folder
 		 */
 		createFolder: function(parentLocation, folderName) {
+			var that = this;
 			return this._getEntry(parentLocation).then(function(dirEntry) {
 				var d = new orion.Deferred();
-				dirEntry.getDirectory(folderName, {create:true}, function() {d.resolve();}, d.reject);
+				dirEntry.getDirectory(folderName, {create:true}, function() {d.resolve(that.read(parentLocation + "/" + folderName, true));}, d.reject);
 				return d;
 			});
 		},
@@ -209,9 +210,10 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 		 * @return {Object} A deferred that will provide the new file object
 		 */
 		createFile: function(parentLocation, fileName) {
+			var that = this;
 			return this._getEntry(parentLocation).then(function(dirEntry) {
 				var d = new orion.Deferred();
-				dirEntry.getFile(fileName, {create:true}, function() {d.resolve();}, d.reject);
+				dirEntry.getFile(fileName, {create:true}, function() {d.resolve(that.read(parentLocation + "/" + fileName, true));}, d.reject);
 				return d;
 			});
 		},
