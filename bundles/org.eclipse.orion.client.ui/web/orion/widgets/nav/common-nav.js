@@ -283,6 +283,9 @@ define([
 			this.scope(item.ChildrenLocation);
 		},
 		fileInCurrentTree: function(fileMetadata) {
+			if (!fileMetadata) {
+				return false;
+			}
 			var fileClient = this.fileClient, treeRoot = this.treeRoot;
 			if (treeRoot && fileClient.fileServiceRootURL(fileMetadata.Location) !== fileClient.fileServiceRootURL(treeRoot.Location)) {
 				return false;
