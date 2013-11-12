@@ -250,7 +250,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
 	sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
 	sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
-		if (evt.newValue !== null) {
+		if (evt.newValue) {
 			window.location = uriTemplate.expand({resource: evt.newValue.Location});
 		}
 	});
