@@ -129,6 +129,17 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		return options;
 	}
 	
+	function getParents(document, className) {
+		if (document.getElementsByClassName) {
+			return document.getElementsByClassName(className);
+		}
+		className = className.replace(/ *$/, '');
+		if (document.querySelectorAll) {
+			return document.querySelectorAll((' ' + className).replace(/ +/g, '.')); //$NON-NLS-1$ //$NON-NLS-0$
+		}
+		return null;
+	}
+	
 	/**	@private */
 	function getHeight(node) {
 		return node.clientHeight;
@@ -163,14 +174,15 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	 * @param {orion.editor.EditOptions} options the editor options.
 	 */
 	function edit(options) {
+		var doc = options.document || document;
 		var parent = options.parent;
 		if (!parent) { parent = "editor"; } //$NON-NLS-0$
 		if (typeof(parent) === "string") { //$NON-NLS-0$
-			parent = (options.document || document).getElementById(parent);
+			parent = doc.getElementById(parent);
 		}
 		if (!parent) {
 			if (options.className) {
-				var parents = (options.document || document).getElementsByClassName(options.className);
+				var parents = getParents(doc, options.className);
 				if (parents) {
 					options.className = undefined;
 					var editors = [];
