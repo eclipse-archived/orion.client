@@ -1006,8 +1006,9 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @param {String} message
 		 * @param {String} contents
 		 * @param {Boolean} contentsSaved
+		 * @param {Boolean} noFocus
 		 */
-		setInput: function(title, message, contents, contentsSaved) {
+		setInput: function(title, message, contents, contentsSaved, noFocus) {
 			if (this._textView) {
 				if (!contentsSaved) {
 					if (message) {
@@ -1020,7 +1021,9 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						}
 					}
 					this._undoStack.reset();
-					this._textView.focus();
+					if (!noFocus) {
+						this._textView.focus();
+					}
 				}
 				this.checkDirty();
 			}
