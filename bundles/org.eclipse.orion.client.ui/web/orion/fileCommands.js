@@ -965,7 +965,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
 				return item.ExportLocation && item.Directory;
-			},
+			}
 		});
 		commandService.addCommand(exportSFTPCommand);
 		
