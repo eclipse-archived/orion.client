@@ -418,6 +418,7 @@ exports.ExplorerRenderer = (function() {
 		this._init(options);
 		this._expandImageClass = "core-sprite-openarrow"; //$NON-NLS-0$
 		this._collapseImageClass = "core-sprite-closedarrow"; //$NON-NLS-0$
+		this._progressImageClass = "core-sprite-progress"; //$NON-NLS-0$
 		this._twistieSpriteClass = "modelDecorationSprite"; //$NON-NLS-0$
 	}
 	ExplorerRenderer.prototype = {
@@ -631,8 +632,10 @@ exports.ExplorerRenderer = (function() {
 		updateExpandVisuals: function(tableRow, isExpanded) {
 			var expandImage = lib.node(this.expandCollapseImageId(tableRow.id));
 			if (expandImage) {
-				expandImage.classList.add(isExpanded ? this._expandImageClass : this._collapseImageClass);
-				expandImage.classList.remove(isExpanded ? this._collapseImageClass : this._expandImageClass);
+				expandImage.classList.remove(this._expandImageClass);
+				expandImage.classList.remove(this._collapseImageClass);
+				expandImage.classList.remove(this._progressImageClass);
+				expandImage.classList.add(isExpanded === "progress" ? this._progressImageClass : isExpanded ? this._expandImageClass : this._collapseImageClass); //$NON-NLS-0$
 			}
 		},
 		

@@ -185,15 +185,17 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 					// If the row should be expanded
 					if (row && (forceExpand || row._expanded)) {
 						this._removeChildRows(parentId);
-						this._renderer.updateExpandVisuals(row, true);
 						if(children){
 							row._expanded = true;
+							this._renderer.updateExpandVisuals(row, true);
 							this._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
 							this._rowsChanged();
 						} else {
 							tree = this;
+							this._renderer.updateExpandVisuals(row, "progress"); //$NON-NLS-0$
 							children = this._treeModel.getChildren(row._item, function(children) {
 								if (tree.destroyed) { return; }
+								tree._renderer.updateExpandVisuals(row, true);
 								if (!row._expanded) {
 									row._expanded = true;
 									tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
@@ -225,11 +227,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			if (row) {
 				if (row._expanded) {
 					this.collapse(id);
-					this._renderer.updateExpandVisuals(row, false);
 				}
 				else {
 					this.expand(id);
-					this._renderer.updateExpandVisuals(row, true);
 				}
 			}
 		},
@@ -251,9 +251,10 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 					return;
 				}
 				var tree = this;
-				this._renderer.updateExpandVisuals(row, true);
+				this._renderer.updateExpandVisuals(row, "progress"); //$NON-NLS-0$
 				this._treeModel.getChildren(row._item, function(children) {
 					if (tree.destroyed) { return; }
+					tree._renderer.updateExpandVisuals(row, true);
 					if (!row._expanded) {
 						row._expanded = true;
 						tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
