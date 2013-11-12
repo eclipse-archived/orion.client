@@ -52,6 +52,10 @@
 	margin-bottom: 30px;  /* $Editor line number div height */   
 }
 
+.compareEditorParentImageMode {
+	overflow: auto !important;
+}
+
 .compareEditorParentWithCanvas {
 	clear: both;
 	overflow: hidden;

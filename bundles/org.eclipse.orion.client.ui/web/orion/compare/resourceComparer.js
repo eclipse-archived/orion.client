@@ -300,6 +300,19 @@ exports.ResourceComparer = (function() {
 			}.bind(this));
 			return Deferred.all(promises, function(error) { return {_error: error}; });
 	    },
+		/* Internal */
+		_isImage: function(contentType) {
+			switch (contentType && contentType.id) {
+				case "image/jpeg": //$NON-NLS-0$
+				case "image/png": //$NON-NLS-0$
+				case "image/gif": //$NON-NLS-0$
+				case "image/ico": //$NON-NLS-0$
+				case "image/tiff": //$NON-NLS-0$
+				case "image/svg": //$NON-NLS-0$
+					return true;
+			}
+			return false;
+		},
 	    _loadSingleFile: function(file) {
 	        return this._registry.getService("orion.page.progress").progress(this._fileClient.read(file.URL), "Getting contents of " + file.URL).then( //$NON-NLS-1$ //$NON-NLS-0$
 		        function(contents) {
@@ -325,20 +338,28 @@ exports.ResourceComparer = (function() {
 				var that = this;
 				return that.options.diffProvider.resolveDiff(that.options.resource, that.options.compareTo, that.options.hasConflicts).then( function(diffParam){
 					that._compareView.getWidget().setOptions(diffParam);
+					var isImage = that._isImage(diffParam.newFile.Type);
 					var viewOptions = that._compareView.getWidget().options;
 					viewOptions.oldFile.readonly = true;
-					if(that.options.readonly) {
+					if(that.options.readonly || isImage) {
 						viewOptions.newFile.readonly = true;
 					}
-					var filesToLoad = ( viewOptions.diffContent ? [viewOptions.oldFile/*, viewOptions.newFile*/] : [viewOptions.oldFile, viewOptions.newFile]); 
-					return that._getFilesContents(filesToLoad).then( function(){
-						var viewHeight = that._compareView.getWidget().refresh(true);
-						if(!that.options.readonly && !that.options.toggleable && that._compareView.getWidget().type === "twoWay") { //$NON-NLS-0$
-							this._inputManager.filePath = that._compareView.getWidget().options.newFile.URL;
-							that._inputManager.setInput(viewOptions.newFile.URL , that._compareView.getWidget().getEditors()[1]);
-						}
-						return new Deferred().resolve(viewHeight);
-					}.bind(that));
+					if(isImage){
+						that._compareView.initImageMode();
+						return that._compareView.getWidget().refresh().then(function(height){
+							return new Deferred().resolve(height + 5);
+						});
+					} else {
+						var filesToLoad = ( viewOptions.diffContent ? [viewOptions.oldFile/*, viewOptions.newFile*/] : [viewOptions.oldFile, viewOptions.newFile]); 
+						return that._getFilesContents(filesToLoad).then( function(){
+							var viewHeight = that._compareView.getWidget().refresh(true);
+							if(!that.options.readonly && !that.options.toggleable && that._compareView.getWidget().type === "twoWay") { //$NON-NLS-0$
+								this._inputManager.filePath = that._compareView.getWidget().options.newFile.URL;
+								that._inputManager.setInput(viewOptions.newFile.URL , that._compareView.getWidget().getEditors()[1]);
+							}
+							return new Deferred().resolve(viewHeight);
+						}.bind(that));
+					}
 				});
 			}
 		}

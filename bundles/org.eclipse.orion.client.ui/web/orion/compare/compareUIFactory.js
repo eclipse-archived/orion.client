@@ -55,16 +55,10 @@ orion.TwoWayCompareUIFactory = (function() {
 			this._splitterId = prefix+"orion_splitter"; //$NON-NLS-0$
 			
 			if(!this._showTitle){
-				this._leftEditorParentDiv.style.top = "0px"; //$NON-NLS-0$
-				this._rightEditorWrapperDiv.style.top = "0px"; //$NON-NLS-0$
-				this._leftTitleDiv.style.height = "0px"; //$NON-NLS-0$
-				this._rightTitleDiv.style.height = "0px"; //$NON-NLS-0$
+				this.disableTitle();
 			}
 			if(!this._showLineStatus){
-				this._leftEditorParentDiv.style.marginBottom = "0px"; //$NON-NLS-0$
-				this._rightEditorWrapperDiv.style.marginBottom = "0px"; //$NON-NLS-0$
-				this._leftStatusDiv.style.height = "0px"; //$NON-NLS-0$
-				this._rightStatusDiv.style.height = "0px"; //$NON-NLS-0$
+				this.disableLineStatus();
 			}
 		},
 		
@@ -114,8 +108,21 @@ orion.TwoWayCompareUIFactory = (function() {
 		
 		getDiffCanvasDiv: function(){
 			return this._diffCanvasDiv;
-		}
+		},
+		
+		disableTitle: function() {
+			this._leftEditorParentDiv.style.top = "0px"; //$NON-NLS-0$
+			this._rightEditorWrapperDiv.style.top = "0px"; //$NON-NLS-0$
+			this._leftTitleDiv.style.height = "0px"; //$NON-NLS-0$
+			this._rightTitleDiv.style.height = "0px"; //$NON-NLS-0$
+		},
 
+		disableLineStatus: function() {
+			this._leftEditorParentDiv.style.marginBottom = "0px"; //$NON-NLS-0$
+			this._rightEditorWrapperDiv.style.marginBottom = "0px"; //$NON-NLS-0$
+			this._leftStatusDiv.style.height = "0px"; //$NON-NLS-0$
+			this._rightStatusDiv.style.height = "0px"; //$NON-NLS-0$
+		}
 	};
 	return TwoWayCompareUIFactory;
 }());

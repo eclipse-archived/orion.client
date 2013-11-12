@@ -81,6 +81,24 @@ exports.CompareView = (function() {
 			}
 		},
 		/** @private */
+		_loadImageFile: function(imageURL, parentDiv, createSeparator){
+			var image = document.createElement("img"); //$NON-NLS-0$
+			image.src = imageURL;
+			var deferred = new Deferred();
+			image.onload = function(){
+				parentDiv.appendChild(image);
+				if(createSeparator) {
+					var hr = document.createElement("hr"); //$NON-NLS-0$
+					parentDiv.appendChild(hr);
+				}
+				deferred.resolve(image.height);
+			};
+			image.onerror = function(){
+				deferred.resolve(0);
+			};
+			return deferred;
+		},
+		/** @private */
 		_initSyntaxHighlighter: function(targetArray){
 			this._syntaxHighlighters = null;
 			if(this.options.highlighters && this.options.highlighters.length > 0){
@@ -242,11 +260,20 @@ exports.CompareView = (function() {
 		/**
 		 * An abstract function that should be overridden by a subclass.
 		 * <p>
-		 * The subclass implementation, inline or twoWay, should create the editor instances with an initial string or just leave it empty.
+		 * The subclass implementation, inline or twoWay, should create the text editor instances with an initial string or just leave it empty.
 		 * </p>
 		 * @param {String} initString the initial string that will dispaly when the editors are created. Optional.
 		 */
 		initEditors: function(initString){
+		},
+		/**
+		 * An abstract function that should be overridden by a subclass.
+		 * <p>
+		 * The subclass implementation, inline or twoWay, should destroy the text editor instances.
+		 * </p>
+		 * @param {String} initString the initial string that will dispaly when the editors are created. Optional.
+		 */
+		initImageMode: function(){
 		}
 	};
 	return CompareView;
@@ -306,6 +333,24 @@ exports.TwoWayCompareView = (function() {
 				}
 			}
 		}.bind(this);
+	};
+	
+	TwoWayCompareView.prototype.initImageMode = function(){
+		if(this._editors){
+			this._editors.forEach(function(editor) {
+				editor.destroy();
+			});
+			this._editors = null;
+		}
+		this._uiFactory.getEditorParentDiv(true).classList.add("compareEditorParentImageMode"); //$NON-NLS-0$
+		this._uiFactory.getEditorParentDiv().classList.add("compareEditorParentImageMode"); //$NON-NLS-0$
+		this._uiFactory.disableTitle();
+		this._uiFactory.disableLineStatus();
+		this._imageMode = true;
+	};
+	
+	TwoWayCompareView.prototype.getImageMode = function(){
+		return this._imageMode;
 	};
 	
 	TwoWayCompareView.prototype.getEditors = function(){
@@ -476,6 +521,17 @@ exports.TwoWayCompareView = (function() {
 	};
 	
 	TwoWayCompareView.prototype.refresh = function(refreshEditors){	
+		if(this._imageMode){
+			if(this.options.commandProvider){
+				this.options.commandProvider.renderCommands(this);
+			}
+			var that = this;
+			return this._loadImageFile(this.options.newFile.URL, this._uiFactory.getEditorParentDiv(true)).then(function(height){
+				return that._loadImageFile(that.options.oldFile.URL, that._uiFactory.getEditorParentDiv()).then(function(height1){
+					return new Deferred().resolve(height > height1 ? height : height1);
+				});
+			});
+		}
 		var input = this.options.oldFile.Content;
 		var output = this.options.newFile.Content;
 		var diff = this.options.diffContent;
@@ -619,6 +675,19 @@ exports.InlineCompareView = (function() {
 		}.bind(this)); 
 	};
 
+	InlineCompareView.prototype.initImageMode = function(){
+		if(this._editor) {
+			this._editor.destroy();
+			this._editor = null;
+		}
+		lib.node(this._editorDiv).classList.add("compareEditorParentImageMode"); //$NON-NLS-0$
+		this._imageMode = true;
+	};
+	
+	InlineCompareView.prototype.getImageMode = function(){
+		return this._imageMode;
+	};
+	
 	InlineCompareView.prototype._initDiffPosition = function(textView){
 		var model = textView.getModel();
 		if(model && model.getAnnotations){
@@ -634,6 +703,17 @@ exports.InlineCompareView = (function() {
 	};
 	
 	InlineCompareView.prototype.refresh = function(){
+		if(this._imageMode){
+			if(this.options.commandProvider){
+				this.options.commandProvider.renderCommands(this);
+			}
+			var that = this;
+			return this._loadImageFile(this.options.newFile.URL, lib.node(this._editorDiv), true).then(function(height){
+				return that._loadImageFile(that.options.oldFile.URL, lib.node(that._editorDiv)).then(function(height1){
+					return new Deferred().resolve(height +  height1 + 20);
+				});
+			});
+		}
 		var input = this.options.oldFile.Content;
 		var output = this.options.newFile.Content;
 		var diff = this.options.diffContent;
@@ -697,11 +777,18 @@ exports.toggleableCompareView = (function() {
 			this._widget.startup();
 		},
 		
+		initImageMode: function(){
+			this._imageMode = true;
+			this._widget.initImageMode();
+		},
+	
 		toggle: function(){
 			var options = this._widget.options;
-			var diffPos = this._widget.getCurrentDiffPos();
-			options.blockNumber = diffPos.block;
-			options.changeNumber = diffPos.change;
+			if(!this._imageMode){
+				var diffPos = this._widget.getCurrentDiffPos();
+				options.blockNumber = diffPos.block;
+				options.changeNumber = diffPos.change;
+			}
 			this._widget.destroy();
 			lib.empty(lib.node(options.parentDivId));
 			if(this._widget.type === "inline"){ //$NON-NLS-0$
@@ -709,7 +796,11 @@ exports.toggleableCompareView = (function() {
 			} else {
 				this._widget = new exports.InlineCompareView(options);
 			}
-			this._widget.initEditors();
+			if(this._imageMode){
+				this._widget.initImageMode();
+			} else {
+				this._widget.initEditors();
+			}
 			this._widget.refresh(true);
 		},
 		
