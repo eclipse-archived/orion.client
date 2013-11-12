@@ -417,12 +417,20 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 			var drop = function(evt) {
 				node.classList.remove("dragOver"); //$NON-NLS-0$
-				
 				if (dragStartTarget) {
 					var fileClient = explorer.fileClient;
-					var location = dragStartTarget.href;
-					var index = location.indexOf("#"); //$NON-NLS-0$
-					location = location.substring(index + 1);
+					var tmp = dragStartTarget;
+					var location;
+					while (tmp) {
+						if (tmp._item) {
+							location = tmp._item.Location;
+							break;
+						}
+						tmp = tmp.parentNode;
+					}
+					if (!location) {
+						return;
+					}
 					var progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
 					progress.showWhile(fileClient.copyFile(location, item.Location), i18nUtil.formatMessage(messages["Copying ${0}"], location)).then(function(result) {
 						explorer.changedItem(item, true);
