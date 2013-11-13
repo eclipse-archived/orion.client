@@ -32,7 +32,6 @@ define([
 	'orion/edit/dispatcher',
 	'orion/edit/editorContext',
 	'orion/highlight',
-	'orion/markOccurrences',
 	'orion/syntaxchecker',
 	'orion/objects'
 ], function(
@@ -41,7 +40,7 @@ define([
 	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands,
 	ASTManager, mDispatcher, EditorContext, Highlight,
-	mMarkOccurrences, mSyntaxchecker,
+	mSyntaxchecker,
 	objects
 ) {
 
@@ -152,7 +151,6 @@ define([
 			if (this.renderToolbars) {
 				this.renderToolbars(inputManager.getFileMetadata());
 			}
-			this.markOccurrences.setOccurrencesVisible(prefs.showOccurrences);
 		},
 		updateStyler: function(prefs) {
 			var styler = this.syntaxHighlighter.getStyler();
@@ -320,11 +318,8 @@ define([
 			serviceRegistry.getService("orion.core.blame").addEventListener("blameChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 				editor.showBlame(event.blameInfo);
 			});
-			var markOccurrences = this.markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
-			markOccurrences.setOccurrencesVisible(this.settings.occurrencesVisible);
 			editor.addEventListener("TextViewInstalled", function(event) { //$NON-NLS-0$
 				event.textView.getModel().addEventListener("Changed", self.astManager.updated.bind(self.astManager)); //$NON-NLS-0$
-				markOccurrences.findOccurrences();
 			});
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$

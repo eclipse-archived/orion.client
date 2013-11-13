@@ -13,103 +13,73 @@
 
 define([
 	'orion/edit/editorContext',
-	'orion/Deferred'
-], function(EditorContext, Deferred) {
+	'orion/Deferred',
+	'orion/objects',
+	'orion/serviceTracker'
+], function(EditorContext, Deferred, Objects, ServiceTracker) {
 
-	function MarkOccurrences(serviceRegistry, inputManager, editor) {
+	/**
+	 * @name orion.MarkOccurrences.protoype
+	 * @description Helper class to compute occurrences for a given content type. This class delegates
+	 * to providers of the <code>orion.edit.occurrences</code> service
+	 * @constructor
+	 * @public
+	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
+	 * @param {orion.editor.InputManager} inputManager
+	 */
+	function MarkOccurrences(serviceRegistry, inputManager) {
 		this.registry = serviceRegistry;
 		this.inputManager = inputManager;
-		this.editor = editor;
+		this.tracker = new ServiceTracker(serviceRegistry, "orion.edit.occurrences"); //$NON-NLS-0$
+		this.tracker.open();
 	}
-	MarkOccurrences.prototype = {
+	
+	Objects.mixin(MarkOccurrences.prototype, /** @lends orion.MarkOccurrences.prototype */ {
 		/**
-		 * Sets whether mark occurrences are shown.
-		 * 
-		 * @param visible whether mark occurrences are shown
+		 * @name _getOccurrenceProvider
+		 * @description Returns the occurrence provider for the given content type or <code>null</code> if it could not be computed
+		 * @function
+		 * @private
+		 * @memberof orion.MarkOccurrences.prototype
+		 * @param {String} contentTypeId the content type identifier
+		 * @returns {Object|orion.Promise} An occurrence provider capable of computing occurrences for the given content type
+		 * @since 5.0
 		 */
-		setOccurrencesVisible: function(visible) {
-			if (this.occurrencesVisible === visible) {
-				return;
-			}
-			this.occurrencesVisible = visible;
-			if (!visible) {
-				this.editor.showOccurrences([]);
-			}
+		_getOccurrenceProvider: function(contentTypeId) {
+			var providers = this.tracker.getServiceReferences().filter(function(serviceRef) {
+				var type = serviceRef.getProperty("contentType");
+				if(Array.isArray(type)) {
+					return type.indexOf(contentTypeId) !== -1;
+				}
+				return type === contentTypeId;
+			});
+			var serviceRef = providers[0];
+			return serviceRef ? this.registry.getService(serviceRef) : null;
 		},
-		/* Looks up applicable references of occurrence service, calls references, calls the editor to show the occurrences. */
-		findOccurrences: function() {
-			function getServiceRefs(registry, contentType, title) {
-				var contentTypeService = registry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
-				function getFilteredServiceRef(registry, sReference, contentType) {
-					var contentTypeIds = sReference.getProperty("contentType"); //$NON-NLS-0$
-					return contentTypeService.isSomeExtensionOf(contentType, contentTypeIds).then(function(result) {
-						return result ? sReference : null;
-					});
-				}
-				var serviceRefs = registry.getServiceReferences("orion.edit.occurrences"); //$NON-NLS-0$
-				var filteredServiceRefs = [];
-				for (var i=0; i < serviceRefs.length; i++) {
-					var serviceRef = serviceRefs[i];
-					var pattern = serviceRef.getProperty("pattern"); // backwards compatibility //$NON-NLS-0$
-					if (serviceRef.getProperty("contentType")) { //$NON-NLS-0$
-						filteredServiceRefs.push(getFilteredServiceRef(registry, serviceRef, contentType));
-					} else if (pattern && new RegExp(pattern).test(title)) {
-						var d = new Deferred();
-						d.resolve(serviceRef);
-						filteredServiceRefs.push(d);
-					}
-				}
-				
-				// Return a promise that gives the service references that aren't null
-				return Deferred.all(filteredServiceRefs, function(error) {return {_error: error}; }).then(
-					function(serviceRefs) {
-						var capableServiceRefs = [];
-						for (var i=0; i < serviceRefs.length; i++) {
-							var serviceRef = serviceRefs[i];
-							if (serviceRef && !serviceRef._error) {
-								capableServiceRefs.push(serviceRef);
-							}
-						}
-						return capableServiceRefs;
-					});
-			}
-			
-			var occurrenceTimer;
-			var self = this;
-			var occurrencesService = self.registry.getService("orion.edit.occurrences"); //$NON-NLS-0$
-			var selectionListener = function(e) {
-				if (occurrenceTimer) {
-					window.clearTimeout(occurrenceTimer);
-				}
-				if (!self.occurrencesVisible) { return; }
-				occurrenceTimer = window.setTimeout(function() {
-					occurrenceTimer = null;
-					var editor = self.editor;
+		/**
+		 * @name showOccurrences
+		 * @description Shows occurences of the current context from the given editor
+		 * @function
+		 * @public
+		 * @memberof orion.MarkOccurrences.prototype
+		 * @param {Ojbect} editor The editor to show occurrences in
+		 * @since 5.0
+		 */
+		showOccurrences: function(editor) {
+			var contentType = this.inputManager.getContentType();
+			if(contentType && contentType.id) {
+				var provider = this._getOccurrenceProvider(contentType.id);
+				if(provider) {
 					var context = {
 						selection: editor.getSelection()	
 					};
-					occurrencesService.computeOccurrences(EditorContext.getEditorContext(self.registry), context).then(function (occurrences) {
-						self.editor.showOccurrences(occurrences);
+					var that = this;
+					provider.computeOccurrences(EditorContext.getEditorContext(that.registry), context).then(function (occurrences) {
+						editor.showOccurrences(occurrences);
 					});	
-				}, 500);
-			};
-						
-			self.inputManager.addEventListener("InputChanged", function(event) {//$NON-NLS-0$
-				var textView = self.editor.getTextView();
-				if (textView) {
-					textView.removeEventListener("Selection", selectionListener); //$NON-NLS-0$
-					getServiceRefs(self.registry, event.contentType, event.title).then(function(serviceRefs) {
-						if (!serviceRefs || serviceRefs.length === 0) {
-							if (occurrenceTimer) {
-								window.clearTimeout(occurrenceTimer);
-							}
-						} else {
-							textView.addEventListener("Selection", selectionListener); //$NON-NLS-0$
-						}
-					});
 				}
-			});
+			}
 		}
-	};
-	return {MarkOccurrences: MarkOccurrences};
+	});
+	return {MarkOccurrences : MarkOccurrences};
 });

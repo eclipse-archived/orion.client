@@ -31,8 +31,9 @@ define([
 	'orion/blamer',
 	'orion/regex',
 	'orion/util',
-	'orion/edit/editorContext'
-], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, blamer, regex, util, EditorContext) {
+	'orion/edit/editorContext',
+	'orion/markOccurrences'
+], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, blamer, regex, util, EditorContext, mMarkOccurrences) {
 
 	var exports = {};
 	
@@ -112,6 +113,7 @@ define([
 		this._searcher = searcher;
 		this.editorSettings = editorSettings;
 		this.localSettings = localSettings;
+		this._occurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager);
 	}
 	EditorCommandFactory.prototype = {
 		/**
@@ -131,6 +133,7 @@ define([
 			if (!this.isReadOnly) {
 				this._generateEditCommands(editor);
 			}
+			this._generateMarkOccurrencesCommands(editor);
 		},
 		_generateSettingsCommand: function(editor) {
 			var self = this;
@@ -163,6 +166,35 @@ define([
 			this.commandService.addCommand(settingsCommand);
 			this.commandService.registerCommandContribution("settingsActions", "orion.edit.settings", 1, null, false, new mKeyBinding.KeyBinding("s", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
+		
+		/**
+		 * @name _generateMarkOccurrencesCommands
+		 * @description creates all of the commands for the editor to do with marking occurrences
+		 * @function
+		 * @private 
+		 * @memberof orion.EditorCommandFactory.prototype
+		 * @param {Object} editor The editor to add the commands to
+		 * @since 5.0
+		 */
+		_generateMarkOccurrencesCommands: function(editor) {
+			var that = this;
+			var markCommand = new mCommands.Command({
+				name: messages.markOccurrencesName,
+				tooltip: messages.markOccurrencesTooltip,
+				id: "orion.mark.occurrences", //$NON-NLS-0$
+				visibleWhen: function() {
+					return !!editor.getTextView();
+				},
+				callback: function(data) {
+					editor.getTextView().invokeAction("markOccurrences"); //$NON-NLS-0$
+				}
+			});
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", false, true, false, true), "markOccurrences"); //$NON-NLS-1$ //$NON-NLS-0$
+			editor.getTextView().setAction("markOccurrences", function() { //$NON-NLS-0$
+					that._occurrences.showOccurrences(editor);
+			}, markCommand);
+		},
+		
 		_generateUndoStackCommands: function(editor) {
 			var undoCommand = new mCommands.Command({
 				name: messages.Undo,
