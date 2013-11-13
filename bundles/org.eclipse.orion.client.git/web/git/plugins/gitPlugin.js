@@ -300,7 +300,7 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 							if(confirm(i18nUtil.formatMessage('Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.',
 								error.JsonData.KeyType, error.JsonData.Host, error.JsonData.HostFingerprint))){
 									sshService.addKnownHosts(error.JsonData.Host + " " + error.JsonData.KeyType + " " + error.JsonData.HostKey);
-									this._cloneRepository(gitUrl, params, workspaceLocation);
+									this._cloneRepository(gitUrl, params, workspaceLocation).then(deferred.resolve, deferred.reject, deferred.progress);
 							} else {
 								deferred.reject(error);
 							}
