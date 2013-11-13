@@ -97,10 +97,12 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 			
 			function handleParent(parent) {
 				if (parent.fullPath !== rootFullPath) {
+					var location = parent.toURL();
+					location = location.slice(-1) === "/" ? location : location + "/";
 					result.push({
 						Name: parent.name,
-						Location: parent.toURL(),
-						ChildrenLocation: parent.toURL()
+						Location: location,
+						ChildrenLocation: location
 					});
 					parent.getParent(handleParent, deferred.reject);
 				} else {
