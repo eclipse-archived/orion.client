@@ -345,7 +345,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 					});
 				} else {
 					progress.progress(fileClient.createFolder(target.Location, entry.name), "Creating folder " + entry.name).then(function(subFolder) {
-						explorer.changedItem(target, true);
+						var dispatcher = explorer.modelEventDispatcher;
+						dispatcher.dispatchEvent({ type: "create", parent: item, newValue: subFolder }); //$NON-NLS-0$
 						traverseChildren(subFolder);
 					});
 				}
