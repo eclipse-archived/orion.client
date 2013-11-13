@@ -188,7 +188,12 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
 		 */
 		createProject: function(url, projectName, serverPath, create) {
-			return this.createFolder(url, projectName);
+			var d = new orion.Deferred();
+			this.createFolder(url, projectName).then(function(project) {
+				project.ContentLocation = project.Location;
+				d.resolve(project);
+			}, d.reject);
+			return d;
 		},
 		/**
 		 * Creates a folder.
