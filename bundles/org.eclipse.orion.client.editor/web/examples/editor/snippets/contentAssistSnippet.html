@@ -1,25 +1,14 @@
 <!DOCTYPE html>
-<!--
- Sample that shows how to use the edit.js file to create an editor.  For a complete list
- of editor configuration options, see orion.editor#edit.
--->
 <html>
 <head>
-<title>Orion Editor Sample</title>
-<link rel="stylesheet" type="text/css" href="../../../orion/editor/themes/default.css"/>
+<title>Orion Editor Snippet</title>
+
 <style>
 #editor {
-	border: 1px solid teal;
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	bottom: 0px;
-	right: 0px;
-	margin: 20px;
-}
-
-pre {
-	margin: 0px;
+	border: 1px solid #ddd;
+	position: relative;
+	width: 100%;
+	height: 400px;
 }
 </style>
 
@@ -33,15 +22,18 @@ pre {
 		var editor = edit({
 			lang: "sql"
 		});
-		var contentAssist = editor.getContentAssist ? editor.getContentAssist() : editor._contentAssist;
+		var contentAssist = editor.getContentAssist();
 		contentAssist.setProviders([new snippet.ContentAssistProvider()]);
 	});
 </script>
 </head>
 <body spellcheck="false">
-<pre id="editor">
+<h2>SQL Content Assist</h2>
+This snippet shows how to use templates to add SQL content assist to the Orion stand alone editor.
+<br>
+<br>
+<div id="editor">
 SELECT id FROM myTable;
-
-</pre>
+</div>
 </body>
 </html>
