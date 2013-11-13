@@ -312,7 +312,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		}
 	};
 
-	var dragStartTarget;
+	var dragStartTarget, dropEffect;
 	FileExplorer.prototype._makeDropTarget = function(item, node, persistAndReplace) {
 		function dropFileEntry(entry, path, target, explorer, performDrop, fileClient) {
 			path = path || "";
@@ -394,12 +394,17 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			node.addEventListener("dragleave", dragLeave, false); //$NON-NLS-0$
 
 			var dragEnter = function (evt) {
-				/* accessing dataTransfer.effectAllowed here throws an error on IE */
-				if (!util.isIE && (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
-					evt.dataTransfer.effectAllowed === "uninitialized" ||  //$NON-NLS-0$
-					evt.dataTransfer.effectAllowed.indexOf("copy") >= 0)) {   //$NON-NLS-0$
-						evt.dataTransfer.dropEffect = "copy";  //$NON-NLS-0$
-				}   
+				if (dragStartTarget) {
+					var copy = util.isMac ? evt.altKey : evt.ctrlKey;
+					dropEffect = evt.dataTransfer.dropEffect = copy ? "copy" : "move"; //$NON-NLS-1$ //$NON-NLS-0$
+				} else {
+					/* accessing dataTransfer.effectAllowed here throws an error on IE */
+					if (!util.isIE && (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
+						evt.dataTransfer.effectAllowed === "uninitialized" ||  //$NON-NLS-0$
+						evt.dataTransfer.effectAllowed.indexOf("copy") >= 0)) {   //$NON-NLS-0$
+							evt.dataTransfer.dropEffect = "copy";  //$NON-NLS-0$
+					}
+				}
 				node.classList.add("dragOver"); //$NON-NLS-0$
 				lib.stop(evt);
 			};
@@ -413,15 +418,20 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 			// this listener is the same for any time, so we don't need to remove/rehook.
 			var dragOver = function (evt) {
-				// default behavior is to not trigger a drop, so we override the default
-				// behavior in order to enable drop.  
-				// we have to specify "copy" again here, even though we did in dragEnter
-				/* accessing dataTransfer.effectAllowed here throws an error on IE */
-				if (!util.isIE && (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
-					evt.dataTransfer.effectAllowed === "uninitialized" ||  //$NON-NLS-0$
-					evt.dataTransfer.effectAllowed.indexOf("copy") >= 0)) {   //$NON-NLS-0$
-						evt.dataTransfer.dropEffect = "copy";  //$NON-NLS-0$
-				}   
+				if (dragStartTarget) {
+					var copy = util.isMac ? evt.altKey : evt.ctrlKey;
+					dropEffect = evt.dataTransfer.dropEffect = copy ? "copy" : "move"; //$NON-NLS-1$ //$NON-NLS-0$
+				} else {
+					// default behavior is to not trigger a drop, so we override the default
+					// behavior in order to enable drop.  
+					// we have to specify "copy" again here, even though we did in dragEnter
+					/* accessing dataTransfer.effectAllowed here throws an error on IE */
+					if (!util.isIE && (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
+						evt.dataTransfer.effectAllowed === "uninitialized" ||  //$NON-NLS-0$
+						evt.dataTransfer.effectAllowed.indexOf("copy") >= 0)) {   //$NON-NLS-0$
+							evt.dataTransfer.dropEffect = "copy";  //$NON-NLS-0$
+					}   
+				}
 				lib.stop(evt);
 			};
 			if (persistAndReplace && !this._oldDragOver) {
@@ -434,20 +444,27 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 				if (dragStartTarget) {
 					var fileClient = explorer.fileClient;
 					var tmp = dragStartTarget;
-					var location;
+					var source;
 					while (tmp) {
 						if (tmp._item) {
-							location = tmp._item.Location;
+							source = tmp._item;
 							break;
 						}
 						tmp = tmp.parentNode;
 					}
-					if (!location) {
+					if (!source) {
 						return;
 					}
 					var progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
-					progress.showWhile(fileClient.copyFile(location, item.Location), i18nUtil.formatMessage(messages["Copying ${0}"], location)).then(function(result) {
-						explorer.changedItem(item, true);
+					var isCopy = dropEffect === "copy"; //$NON-NLS-0$
+					var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
+					progress.showWhile(func.apply(fileClient, [source.Location, item.Location]), i18nUtil.formatMessage(messages[isCopy ? "Copying ${0}" : "Moving ${0}"], source.Location)).then(function(result) {
+						var dispatcher = explorer.modelEventDispatcher;
+						dispatcher.dispatchEvent({type: isCopy ? "copy" : "move", oldValue: source, newValue: result, parent: item}); //$NON-NLS-1$ //$NON-NLS-0$
+						dispatcher.dispatchEvent({
+							type: isCopy ? "copyMultiple" : "moveMultiple", //$NON-NLS-1$ //$NON-NLS-0$
+							items: [{oldValue: source, newValue: result, parent: item}]
+						});
 					}, function(error) {
 						if (progress) {
 							progress.setProgressResult(error);
