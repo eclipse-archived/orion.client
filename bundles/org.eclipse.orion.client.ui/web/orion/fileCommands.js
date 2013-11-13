@@ -230,7 +230,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			if (mFileUtils.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
 				loadedWorkspace = explorer.treeRoot;
 			} else {
-				loadedWorkspace = progressService.progress(fileClient.loadWorkspace(""), "Loading workspace"); //$NON-NLS-0$
+				loadedWorkspace = progressService.progress(fileClient.loadWorkspace(explorer.treeRoot.Location), "Loading workspace"); //$NON-NLS-0$
 			}
 			Deferred.when(loadedWorkspace, function(workspace) {
 				var deferred = fileClient.createProject(workspace.ChildrenLocation, name);
