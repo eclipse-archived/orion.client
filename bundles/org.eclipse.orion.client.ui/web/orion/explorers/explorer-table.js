@@ -214,10 +214,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		copyMultiple: function(modelEvent) {
 			var _self = this, changedLocations = {};
 			modelEvent.items.forEach(function(item) {
-				var itemParent = item.oldValue;
-				// if !itemParent we refresh the treeRoot (TODO this makes no sense when using Copy To > top-level folder in other filesystem)
-				var parent = itemParent || _self.treeRoot;
-				changedLocations[parent.Location] = parent;
+				var itemParent = item.parent;
+				itemParent = itemParent || _self.treeRoot;
+				changedLocations[itemParent.Location] = itemParent;
 			});
 			Object.keys(changedLocations).forEach(function(loc) {
 				_self.changedItem(changedLocations[loc], true);
@@ -294,7 +293,22 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			}
 		},
 		moveMultiple: function(modelEvent) {
-			this.changedItem(this.treeRoot, true);
+			var _self = this, changedLocations = {};
+			modelEvent.items.forEach(function(item) {
+				var itemParent = null;
+				if (item.oldValue) {
+					itemParent = item.oldValue.parent;
+				}
+				itemParent = itemParent || _self.treeRoot;
+				changedLocations[itemParent.Location] = itemParent;
+				
+				itemParent = item.parent;
+				itemParent = itemParent || _self.treeRoot;
+				changedLocations[itemParent.Location] = itemParent;
+			});
+			Object.keys(changedLocations).forEach(function(loc) {
+				_self.changedItem(changedLocations[loc], true);
+			});
 		}
 	};
 

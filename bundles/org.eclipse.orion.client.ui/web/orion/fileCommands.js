@@ -303,10 +303,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						function(newItem) {
 							summary.push({
 								oldValue: item,
-								newValue: newItem
-								// parent?
+								newValue: newItem,
+								parent: choice.item
 							});
-							dispatchModelEvent({type: isCopy ? "copy" : "move", oldValue: item, newValue: newItem, parent: item.parent}); //$NON-NLS-1$ //$NON-NLS-0$
+							dispatchModelEvent({type: isCopy ? "copy" : "move", oldValue: item, newValue: newItem, parent: choice.item}); //$NON-NLS-1$ //$NON-NLS-0$
 						},
 						errorHandler
 					));
@@ -349,10 +349,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 										function(newItem) {
 											summary.push({
 												oldValue: item,
-												newValue: newItem
-												//parent?
+												newValue: newItem,
+												parent: targetFolder
 											});
-											dispatchModelEvent({ type: isCopy ? "copy" : "move", oldValue: item, newValue: newItem, parent: item.parent }); //$NON-NLS-1$ //$NON-NLS-0$
+											dispatchModelEvent({ type: isCopy ? "copy" : "move", oldValue: item, newValue: newItem, parent: targetFolder }); //$NON-NLS-1$ //$NON-NLS-0$
 										},
 										errorHandler
 									));
@@ -419,7 +419,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				for (var j=0; j<slashes-2; j++) {
 					displayPath = "  " + displayPath; //$NON-NLS-0$
 				}
-				choices.push({name: displayPath, path: item.stripped, callback: callback});
+				choices.push({name: displayPath, path: item.stripped, item: item, callback: callback});
 			}
 			if (proposedPaths.length > 0) {
 				choices.push({});  //separator
@@ -1049,10 +1049,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 										deferreds.push(progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Pasting ${0}"], location)).then(
 											function(result) {
 												summary.push({
-													oldValue: item,
-													newValue: result
+													oldValue: selectedItem,
+													newValue: result,
+													parent: item
 												});
-												dispatchModelEvent({ type: "copy", oldValue: item, newValue: result }); //$NON-NLS-0$
+												dispatchModelEvent({ type: "copy", oldValue: selectedItem, newValue: result, parent: item }); //$NON-NLS-0$
 											},
 											errorHandler));
 									}
