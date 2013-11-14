@@ -38,7 +38,6 @@ var ConvertToSelfHostingDialog = function(options) {
 };
 ConvertToSelfHostingDialog.prototype = new Dialog();
 objects.mixin(ConvertToSelfHostingDialog.prototype, {
-	DEFAULT_PORT: 8080,
 	TEMPLATE: ConvertToSelfHostingDialogTemplate,
 	_init: function(options) {
 		this.title = options.title || messages['Convert to Self-Hosting']; //$NON-NLS-1$
@@ -49,7 +48,6 @@ objects.mixin(ConvertToSelfHostingDialog.prototype, {
 		this.messages = {};
 		objects.mixin(this.messages, messages);
 		this.messages['LabelSelectRequired'] = (this.folders.length === 1) ? messages['SelectRequiredFoldersSingle'] : messages['SelectRequiredFolders'];  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-		this.messages['EnterPortNumber'] = i18nUtil.formatMessage(messages['EnterPortNumber'], this.DEFAULT_PORT); //$NON-NLS-2$ //$NON-NLS-1$
 
 		this._initialize();
 	},
@@ -62,11 +60,6 @@ objects.mixin(ConvertToSelfHostingDialog.prototype, {
 
 		this.appendFolderElements();
 
-		this.$port.addEventListener('change', function() { //$NON-NLS-0$
-			this.portNumber = parseInt(this.$port.value, 10);
-			this.updateValidity();
-		}.bind(this));
-		this.portNumber = this.$port.value = this.DEFAULT_PORT;
 		this.updateValidity();
 	},
 	appendFolderElements: function() {
@@ -107,7 +100,7 @@ objects.mixin(ConvertToSelfHostingDialog.prototype, {
 
 			button.addEventListener('click', self.showChooseFolderDialog.bind(self, folderIndex)); //$NON-NLS-0$
 		});
-		self.$portPrompt.parentNode.insertBefore(folderFragment, self.$portPrompt);
+		self.$selectRequired.parentNode.appendChild(folderFragment, null);
 	},
 	showChooseFolderDialog: function(folderIndex) {
 		var folderInfo = this.folders[folderIndex];
@@ -132,7 +125,7 @@ objects.mixin(ConvertToSelfHostingDialog.prototype, {
 		var allFoldersChosen = this.folders.every(function(folderInfo) {
 			return folderInfo.folder;
 		});
-		return (allFoldersChosen && !isNaN(this.portNumber) && this.portNumber > 0);
+		return allFoldersChosen;
 	},
 	updateValidity: function() {
 		if (!this.isValid()) {
@@ -145,7 +138,7 @@ objects.mixin(ConvertToSelfHostingDialog.prototype, {
 		if (this.isValid()) {
 			this.hide();
 			if (typeof this.options.func === 'function') { //$NON-NLS-1$
-				this.options.func(this.folders, this.portNumber);
+				this.options.func(this.folders);
 			}
 		}
 	}
@@ -366,11 +359,11 @@ objects.mixin(SiteEditor.prototype, {
 				fileClient: this.fileClient,
 				siteClient: this._siteClient,
 				selfHostingConfig: selfHostingConfig,
-				func: function(folderInfos, port) {
+				func: function(folderInfos) {
 					var folderLocations = folderInfos.map(function(folderInfo) {
 						return folderInfo.folder.Location;
 					});
-					self._siteClient.convertToSelfHosting(self.getSiteConfiguration(), folderLocations, port).then(
+					self._siteClient.convertToSelfHosting(self.getSiteConfiguration(), folderLocations).then(
 						function(updatedSite) {
 							self.mappings.deleteAllMappings();
 							self.mappings.addMappings(updatedSite.Mappings);

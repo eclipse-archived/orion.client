@@ -133,8 +133,8 @@ define([
 		/**
 		 * @param {String[]} folderPaths
 		 */
-		this._generateSelfHostingMappings = function(folderPaths, port) {
-			var hostPrefix = "http://localhost" + ":" + port + makeHostRelative(getContext()); //$NON-NLS-0$
+		this._generateSelfHostingMappings = function(folderPaths) {
+			var hostPrefix = "http://localhost" + makeHostRelative(getContext()); //$NON-NLS-0$
 			return SELF_HOSTING_TEMPLATE.map(function(item) {
 				var target;
 				if (item.type === TYPE_FILE) {
@@ -384,9 +384,9 @@ define([
 		/**
 		 * @parram {String[]} folderLocations
 		 */
-		convertToSelfHosting: function(site, folderLocations, port) {
+		convertToSelfHosting: function(site, folderLocations) {
 			var internalPaths = folderLocations.map(this.toInternalForm.bind(this));
-			var mappings = this._generateSelfHostingMappings(internalPaths, port);
+			var mappings = this._generateSelfHostingMappings(internalPaths);
 			site.Mappings = mappings;
 			return site;
 		},
