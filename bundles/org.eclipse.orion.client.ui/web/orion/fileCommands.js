@@ -306,7 +306,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 								newValue: newItem,
 								parent: choice.item
 							});
-							dispatchModelEvent({type: isCopy ? "copy" : "move", oldValue: item, newValue: newItem, parent: choice.item}); //$NON-NLS-1$ //$NON-NLS-0$
+							dispatchModelEvent({type: isCopy ? "copy" : "move", oldValue: item, newValue: newItem, parent: choice.item, count: selectedItems.length}); //$NON-NLS-1$ //$NON-NLS-0$
 						},
 						errorHandler
 					));
@@ -352,7 +352,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 												newValue: newItem,
 												parent: targetFolder
 											});
-											dispatchModelEvent({ type: isCopy ? "copy" : "move", oldValue: item, newValue: newItem, parent: targetFolder }); //$NON-NLS-1$ //$NON-NLS-0$
+											dispatchModelEvent({ type: isCopy ? "copy" : "move", oldValue: item, newValue: newItem, parent: targetFolder, count: selectedItems.length }); //$NON-NLS-1$ //$NON-NLS-0$
 										},
 										errorHandler
 									));
@@ -677,7 +677,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 											newValue: null,
 											parent: parent
 										});
-										dispatchModelEvent({ type: "delete", oldValue: item, newValue: null, parent: parent }); //$NON-NLS-0$
+										dispatchModelEvent({ type: "delete", oldValue: item, newValue: null, parent: parent, count: items.length }); //$NON-NLS-0$
 									}, errorHandler);
 							});
 						});
@@ -1053,7 +1053,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 													newValue: result,
 													parent: item
 												});
-												dispatchModelEvent({ type: "copy", oldValue: selectedItem, newValue: result, parent: item }); //$NON-NLS-0$
+												dispatchModelEvent({ type: "copy", oldValue: selectedItem, newValue: result, parent: item, count: bufferedSelection.length }); //$NON-NLS-0$
 											},
 											errorHandler));
 									}

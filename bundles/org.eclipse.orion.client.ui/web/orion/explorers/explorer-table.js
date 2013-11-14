@@ -197,8 +197,77 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		mExplorer.Explorer.prototype.destroy.call(this);
 	};
 
-	FileExplorer.prototype.onCreate = function(modelEvent) {
-		return this.changedItem(modelEvent.parent, true, modelEvent.newValue);
+	FileExplorer.prototype.onModelCreate = function(modelEvent) {
+		return this.changedItem(modelEvent.parent, true);
+	};
+	
+	FileExplorer.prototype.onModelCopy = function(modelEvent) {
+		var ex = this, changedLocations = {};
+		(modelEvent.items || [modelEvent]).forEach(function(item) {
+			var itemParent = item.parent;
+			itemParent = itemParent || ex.treeRoot;
+			changedLocations[itemParent.Location] = itemParent;
+		});
+		return Deferred.all(Object.keys(changedLocations).map(function(loc) {
+			return ex.changedItem(changedLocations[loc], true);
+		}));
+	};
+	
+	FileExplorer.prototype.onModelMove = function(modelEvent) {
+		var ex = this, changedLocations = {};
+		(modelEvent.items || [modelEvent]).forEach(function(item) {
+			if (ex.treeRoot.Location === item.Location) {
+				// the treeRoot was moved
+				var oldRoot = ex.treeRoot;
+				var newItem = item.newValue;
+				var realNewItem = newItem.ChildrenLocation ? newItem : this.fileClient.read(newItem.ContentLocation, true);
+				return Deferred.when(realNewItem, function(newItem) {
+					ex.dispatchEvent({ type: "rootMoved", oldValue: oldRoot, newValue: newItem }); //$NON-NLS-0$
+					ex.loadResourceList(newItem);
+				});
+			}
+			var itemParent = item.oldValue.parent;
+			itemParent = itemParent || ex.treeRoot;
+			changedLocations[itemParent.Location] = itemParent;
+			
+			itemParent = item.parent;
+			itemParent = itemParent || ex.treeRoot;
+			changedLocations[itemParent.Location] = itemParent;
+			
+			// If the renamed item was an expanded directory, force an expand.
+			if (item.oldValue.Directory && item.newValue && ex.isExpanded(item.oldValue)) {
+				changedLocations[item.newValue.Location] = item.newValue;
+			}
+		});
+		return Deferred.all(Object.keys(changedLocations).map(function(loc) {
+			return ex.changedItem(changedLocations[loc], true);
+		}));
+	};
+	
+	FileExplorer.prototype.onModelDelete = function(modelEvent) {
+		var items = modelEvent.items || [modelEvent];
+		var ex = this;
+		var newRoot;
+		var treeRootDeleted = items.some(function(item) {
+			if (item.oldValue.Location === ex.treeRoot.Location) {
+				newRoot = item.parent;
+				return true;
+			}
+			return false;
+		});
+		if (treeRootDeleted) {
+			return this.loadResourceList(newRoot);
+		} else {
+			// Refresh every parent folder
+			var changedLocations = {};
+			items.forEach(function(item) {
+				var parent = item.parent;
+				changedLocations[parent.Location] = parent;
+			});
+			return Deferred.all(Object.keys(changedLocations).map(function(loc) {
+				return ex.changedItem(changedLocations[loc], true);
+			}));
+		}
 	};
 	
 	/**
@@ -209,106 +278,39 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 */
 	FileExplorer.prototype.modelHandler = /** @lends orion.explorer.FileExplorer.ModelHandler.prototype */ {
 		copy: function(modelEvent) {
-			// handled by copyMultiple
+			if (modelEvent.count) {
+				return; // Handled in copyMultiple
+			}
+			return this.onModelCopy(modelEvent);
 		},
 		copyMultiple: function(modelEvent) {
-			var _self = this, changedLocations = {};
-			modelEvent.items.forEach(function(item) {
-				var itemParent = item.parent;
-				itemParent = itemParent || _self.treeRoot;
-				changedLocations[itemParent.Location] = itemParent;
-			});
-			Object.keys(changedLocations).forEach(function(loc) {
-				_self.changedItem(changedLocations[loc], true);
-			});
+			return this.onModelCopy(modelEvent);
 		},
 		create: function(modelEvent) {
 			// refresh the node
-			this.onCreate(modelEvent);
+			return this.onModelCreate(modelEvent);
 		},
 		"delete": function(modelEvent) { //$NON-NLS-0$
-			// Handled by deleteMultiple
-		},
-		deleteMultiple: function(modelEvent) { //$NON-NLS-0$
-			var items = modelEvent.items;
-			var _self = this;
-			var newRoot;
-			var treeRootDeleted = items.some(function(item) {
-				if (item.oldValue.Location === _self.treeRoot.Location) {
-					newRoot = item.parent;
-					return true;
-				}
-				return false;
-			});
-			if (treeRootDeleted) {
-				this.loadResourceList(newRoot);
-			} else {
-				// Refresh every parent folder
-				var changedLocations = {};
-				items.forEach(function(item) {
-					var parent = item.parent;
-					changedLocations[parent.Location] = parent;
-				});
-				Object.keys(changedLocations).forEach(function(loc) {
-					_self.changedItem(changedLocations[loc], true);
-				});
+			if (modelEvent.count) {
+				return; //Handled in deleteMultiple
 			}
+			return this.onModelDelete(modelEvent);
+		},
+		deleteMultiple: function(modelEvent) {
+			return this.onModelDelete(modelEvent);
 		},
 		"import": function(modelEvent) { //$NON-NLS-0$
 			var target = modelEvent.target;
-			this.changedItem(target, true);
+			return this.changedItem(target, true);
 		},
 		move: function(modelEvent) {
-			var item = modelEvent.oldValue, newItem = modelEvent.newValue, parent = modelEvent.parent;
-			var ex = this;
-			var refreshItem;
-			var forceExpand = null;
-			if (parent.Projects) {
-				if (ex.treeRoot.Location === item.Location) {
-					// the treeRoot was moved
-					var oldRoot = ex.treeRoot;
-					var realNewItem = newItem.ChildrenLocation ? newItem : this.fileClient.read(newItem.ContentLocation, true);
-					Deferred.when(realNewItem, function(newItem) {
-						ex.dispatchEvent({ type: "rootMoved", oldValue: oldRoot, newValue: newItem }); //$NON-NLS-0$
-						ex.loadResourceList(newItem);
-					});
-				} else {
-					//special case for renaming a project. Use the treeRoot as the refresh item.
-					refreshItem = ex.treeRoot;
-					forceExpand = ex.isExpanded(item) && item;
-				}
-			} else {
-				// refresh the parent, which will update the child paths. 
-				// refreshing the newItem would cause "not found" in the tree since a rename has occurred.
-				refreshItem = parent;
-				if (item.Directory) {
-					forceExpand = ex.isExpanded(item) && newItem;
-				}
+			if (modelEvent.count) {
+				return; //Handled in moveMultiple
 			}
-			// Update the parent
-			ex.changedItem(parent, true);
-			// If the renamed item was an expanded directory, force an expand.
-			if (forceExpand) {
-				ex.changedItem(forceExpand, true);
-			}
+			return this.onModelMove(modelEvent);
 		},
 		moveMultiple: function(modelEvent) {
-			var _self = this, changedLocations = {};
-			modelEvent.items.forEach(function(item) {
-				var itemParent = null;
-				if (item.oldValue) {
-					itemParent = item.oldValue.parent;
-				}
-				itemParent = itemParent || _self.treeRoot;
-				changedLocations[itemParent.Location] = itemParent;
-				
-				itemParent = item.parent;
-				itemParent = itemParent || _self.treeRoot;
-				changedLocations[itemParent.Location] = itemParent;
-			});
-			Object.keys(changedLocations).forEach(function(loc) {
-				_self.changedItem(changedLocations[loc], true);
-			});
+			return this.onModelMove(modelEvent);
 		}
 	};
 
@@ -462,10 +464,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 					progress.showWhile(func.apply(fileClient, [source.Location, item.Location]), i18nUtil.formatMessage(messages[isCopy ? "Copying ${0}" : "Moving ${0}"], source.Location)).then(function(result) {
 						var dispatcher = explorer.modelEventDispatcher;
 						dispatcher.dispatchEvent({type: isCopy ? "copy" : "move", oldValue: source, newValue: result, parent: item}); //$NON-NLS-1$ //$NON-NLS-0$
-						dispatcher.dispatchEvent({
-							type: isCopy ? "copyMultiple" : "moveMultiple", //$NON-NLS-1$ //$NON-NLS-0$
-							items: [{oldValue: source, newValue: result, parent: item}]
-						});
 					}, function(error) {
 						if (progress) {
 							progress.setProgressResult(error);

@@ -81,8 +81,8 @@ define([
 	}
 	CommonNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(CommonNavExplorer.prototype, /** @lends orion.sidebar.CommonNavExplorer.prototype */ {
-		onCreate: function(event) {
-			return FileExplorer.prototype.onCreate.call(this, event).then(function () {
+		onModelCreate: function(event) {
+			return FileExplorer.prototype.onModelCreate.call(this, event).then(function () {
 				this.sidebarNavInputManager.dispatchEvent(event);
 			}.bind(this));
 		},
