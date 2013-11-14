@@ -165,10 +165,6 @@ define([
 				}.bind(this));
 			}.bind(this));
 		},
-		reroot: function() {
-			// Do not allow rerooting
-			return new Deferred().reject();
-		},
 		createModel: function() {
 			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders);
 		},
@@ -192,11 +188,10 @@ define([
 		},
 		changedItem: function(item, forceExpand){
 			if(!item || !this.model){
-				this.display(this.fileMetadata, true);
-				return;
+				return this.display(this.fileMetadata, true);
 			}
 			if(item.Projects){
-				return;
+				return new Deferred().resolve();
 			}
 			return CommonNavExplorer.prototype.changedItem.call(this, item, forceExpand);
 		}

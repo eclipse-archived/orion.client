@@ -89,6 +89,7 @@ define({
 	"Move files and folders to a new location": "Move files and folders to a new location",
 	"Copy Items": "Copy Items",
 	"Copy the selected items to the copy/paste buffer": "Copy the selected items to the copy/paste buffer",
+	"Fetching children of ": "Fetching children of ",
 	"Paste Items": "Paste Items",
 	"Paste items from the copy/paste buffer": "Paste items from the copy/paste buffer",
 	"Cannot paste into the Workspace root": "Cannot paste into the Workspace root",

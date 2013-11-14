@@ -52,6 +52,17 @@ define([
 	}
 	MiniNavExplorer.prototype = Object.create(CommonNavExplorer.prototype);
 	objects.mixin(MiniNavExplorer.prototype, /** @lends orion.sidebar.MiniNavExplorer.prototype */ {
+		/**
+		 * Re-roots the tree so that the given item is displayable.
+		 * @param {Object} The item to be expanded.
+		 * @returns {orion.Promise}
+		 */
+		reroot: function(item) {
+			this.scope("");
+			return this.loadRoot(this.fileClient.fileServiceRootURL(item.Location)).then(function() {
+				return this.showItem(item, false); // call with reroot=false to avoid recursion
+			}.bind(this));
+		},
 		registerCommands: function() {
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
 				var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
