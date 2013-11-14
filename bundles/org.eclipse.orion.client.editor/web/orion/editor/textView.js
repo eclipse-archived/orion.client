@@ -1791,6 +1791,20 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return offset;
 		},
 		/**
+		 * @name getLineAtOffset
+		 * @description Compute the editor line number for the given offset
+		 * @function
+		 * @public
+		 * @memberof orion.editor.TextView
+		 * @param {Number} offset The offset into the editor
+		 * @returns {Number} Returns the line number in the editor corresponding to the given offset or <code>-1</code> if the offset is 
+		 * out of range
+		 * @since 5.0
+		 */
+		getLineAtOffset: function(offset) {
+			this.getModel().getLineAtOffset(offset);
+		},
+		/**
 		 * Get the view rulers.
 		 *
 		 * @returns {orion.editor.Ruler[]} the view rulers
