@@ -337,7 +337,8 @@ define([
 			var contextImpl = {};
 			[	"getCaretOffset", "setCaretOffset",
 				"getSelection", "setSelection",
-				"getText", "setText"
+				"getText", "setText",
+				"getLineAtOffset"
 			].forEach(function(method) {
 				contextImpl[method] = editor[method].bind(editor);
 			});
