@@ -565,11 +565,8 @@ define([
 		 */
 		showItem: function(item, reroot) {
 			var deferred = new Deferred();
-			if (!item || !this.model || !this.myTree) {
+			if (!item || !this.model || !this.myTree || (!this.myTree.showRoot && item.Location === this.treeRoot.Location)) {
 				return deferred.reject();
-			}
-			if (!this.myTree.showRoot && item.Location === this.treeRoot.Location) {
-				return deferred.resolve(item);
 			}
 			var row = this.getRow(item);
 			if (row) {
