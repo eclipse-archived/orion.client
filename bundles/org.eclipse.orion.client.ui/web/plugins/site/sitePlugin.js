@@ -88,7 +88,7 @@ define([
 			selfHostingConfig: {
 				folders: [
 					{
-						name: "orion.client",
+						name: "org.eclipse.orion.client",
 						labelKey: "orionClientLabel",
 						nls: "orion/sites/nls/messages"
 					}
