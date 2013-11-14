@@ -22,7 +22,7 @@ define([
 	'orion/EventTarget',
 	'orion/objects',
 	'orion/util'
-], function(messages, require, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget, objects, util){
+], function(messages, Deferred, lib, i18nUtil, mFileUtils, mExplorer, EventTarget, objects, util){
 
 	/**
 	 * Tree model used by the FileExplorer
