@@ -165,6 +165,10 @@ define([
 				}.bind(this));
 			}.bind(this));
 		},
+		reroot: function() {
+			// Do not allow rerooting
+			return new Deferred().reject();
+		},
 		createModel: function() {
 			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders);
 		},
@@ -185,10 +189,6 @@ define([
 				}.bind(this), projectCommandsDef.resolve);
 				return projectCommandsDef;
 			}.bind(this));
-		},
-		outOfSync: function(fileMetadata) {
-			//TODO - detect that the model is stale
-			return false;
 		},
 		changedItem: function(item, forceExpand){
 			if(!item || !this.model){

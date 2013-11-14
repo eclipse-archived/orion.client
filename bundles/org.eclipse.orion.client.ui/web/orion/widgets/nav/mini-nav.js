@@ -44,9 +44,7 @@ define([
 					_self.loadRoot(input).then(function() {
 						_self.updateCommands();
 						var fileMetadata = _self.editorInputManager.getFileMetadata();
-						if (_self.fileInCurrentTree(fileMetadata)) {
-							_self.reveal(fileMetadata, true);
-						}
+						_self.reveal(fileMetadata, false);
 					});
 				}
 			};

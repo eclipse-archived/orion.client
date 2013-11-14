@@ -56,12 +56,12 @@ define([
 		this.treeRoot = {}; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
 		this.editorInputListener = function(event) {
-			_self.reveal(event.metadata, true);
+			_self.reveal(event.metadata);
 		};
 		this.editorInputManager.addEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 		if (sidebarNavInputManager) {
 			sidebarNavInputManager.reveal = function(metadata) {
-				_self.reveal(metadata, true);
+				_self.reveal(metadata);
 			};
 		}
 		var dispatcher = this.modelEventDispatcher;
@@ -148,37 +148,98 @@ define([
 		display: function(root, force) {
 			return this.loadRoot(root, force).then(function(){
 				this.updateCommands();
-				this.reveal(this.editorInputManager.getFileMetadata(), true);
+				return this.reveal(this.editorInputManager.getFileMetadata());
 			}.bind(this));	
 		},
-		showItem: function(item, afterShow) {
-			if(!item || !this.model) {
-				return;
+		/**
+		 * Shows the given item.
+		 * @param {Object} The item to be shown.
+		 * @param {Booelan} [reroot=true] whether the receiver should re-root the tree if the item is not displayable.
+		 * @returns {orion.Promise}
+		 */
+		showItem: function(item, reroot) {
+			var deferred = new Deferred();
+			if (!item || !this.model || !this.myTree) {
+				return deferred.reject();
 			}
 			if (!this.myTree.showRoot && item.Location === this.treeRoot.Location) {
-				return;
+				return deferred.resolve(item);
 			}
-			var itemId = this.model.getId(item);
-			var itemNode = lib.node(itemId);
-			if (itemNode) {
-				if (afterShow) { afterShow(); }
-			} else if(item.Parents && item.Parents.length>0) {
+			var row = this.getRow(item);
+			if (row) {
+				deferred.resolve(row._item || item);
+			} else if (item.Parents && item.Parents.length>0) {
 				item.Parents[0].Parents = item.Parents.slice(1);
-				this.expandItem(item.Parents[0], afterShow);
-			}
-		},
-		expandItem: function(item, afterExpand) {
-			this.showItem(item, function() {
-				if (this.myTree.isExpanded(item)) {
-					if (afterExpand) { afterExpand(); }
-				} else {
-					this.myTree.expand(this.model.getId(item), afterExpand);
+				return this.expandItem(item.Parents[0], reroot).then(function(parent) {
+					// Handles model out of sync
+					var row = this.getRow(item);
+					if (!row) {
+						return this.changedItem(parent, true).then(function() {
+							var row = this.getRow(item);
+							return row ? row._item : new Deferred().reject();
+						}.bind(this));
+					}
+					return row._item || item;
+				}.bind(this));
+			} else {
+				// Handles file not in current tree
+				if (reroot === undefined || reroot) {
+					return this.reroot(item);
 				}
+				return deferred.reject();
+			}
+			return deferred;
+		},
+		/**
+		 * Expands the given item.
+		 * @param {Object} The item to be expanded.
+		 * @param {Booelan} [reroot=true] whether the receiver should re-root the tree if the item is not displayable.
+		 * @returns {orion.Promise}
+		 */
+		expandItem: function(item, reroot) {
+			var deferred = new Deferred();
+			this.showItem(item, reroot).then(function(result) {
+				if (this.myTree.isExpanded(result)) {
+					deferred.resolve(result);
+				} else {
+					this.myTree.expand(this.model.getId(result), function() {
+						deferred.resolve(result);
+					});
+				}
+			}.bind(this), deferred.reject);
+			return deferred;
+		},
+		/**
+		 * Re-roots the tree so that the given item is displayable.
+		 * @param {Object} The item to be expanded.
+		 * @returns {orion.Promise}
+		 */
+		reroot: function(item) {
+			this.scope("");
+			return this.loadRoot(this.fileClient.fileServiceRootURL(item.Location)).then(function() {
+				return this.showItem(item, false); // call with reroot=false to avoid recursion
+			}.bind(this));
+		},
+		/**
+		 * Shows and selects the given item.
+		 * @param {Object} The item to be revealed.
+		 * @param {Booelan} [reroot=true] whether the receiver should re-root the tree if the item is not displayable.
+		 * @returns {orion.Promise}
+		 */
+		reveal: function(item, reroot) {
+			return this.showItem(item, reroot).then(function(result) {
+				var navHandler = this.getNavHandler();
+				if (navHandler) {
+					navHandler.cursorOn(result, true);
+					navHandler.setSelection(result);
+				}
+				return result;
 			}.bind(this));
 		},
 		/**
 		 * Loads the given children location as the root.
-		 * @param {String|Object} The childrenLocation or an object with a ChildrenLocation field.
+		 * @param {String|Object} childrentLocation The childrenLocation or an object with a ChildrenLocation field.
+		 * @returns {orion.Promise}
 		 */
 		loadRoot: function(childrenLocation, force) {
 			childrenLocation = (childrenLocation && childrenLocation.ChildrenLocation) || childrenLocation || ""; //$NON-NLS-0$
@@ -190,82 +251,16 @@ define([
 				}
 			}.bind(this));
 		},
-		reveal: function(fileMetadata, expand) {
-			if (!fileMetadata) {
-				return;
-			}
-			if (!expand) {
-				var navHandler = this.getNavHandler();
-				if (navHandler) {
-					var row = this.getRow(fileMetadata);
-					if (row && row._item) {
-						fileMetadata = row._item;
-					}
-					if (fileMetadata.Location === this.treeRoot.Location && fileMetadata.Children && fileMetadata.Children.length) {
-						fileMetadata = fileMetadata.Children[0];
-					}
-					navHandler.cursorOn(fileMetadata, true);
-					navHandler.setSelection(fileMetadata);
-				}
-				return;
-			}
-			var expandFunc = function() {
-				this.showItem(fileMetadata, function(){
-					this.reveal(fileMetadata);
-				}.bind(this));
-			}.bind(this);
-			if (this.fileInCurrentTree(fileMetadata)) {
-				var outOfSync = this.outOfSync(fileMetadata);
-				if (outOfSync) {
-					this.changedItem(outOfSync, true).then(expandFunc);
-				} else {
-					expandFunc();
-				}
-			} else if (!PageUtil.matchResourceParameters().navigate) {
-				this.loadRoot(this.fileClient.fileServiceRootURL(fileMetadata.Location)).then(expandFunc);
-			}
-		},
-		outOfSync: function(fileMetadata) {
-			// Determines whether the cached children is out of date since it does not contain the specified file/folder.
-			var treeRoot = this.treeRoot;
-			var metadatas = [];
-			if (fileMetadata && fileMetadata.Parents && treeRoot && treeRoot.Location) {
-				for (var i=0; i<fileMetadata.Parents.length; i++) {
-					if (fileMetadata.Parents[i].Location === treeRoot.Location) {
-						break;
-					}
-					metadatas.push(fileMetadata.Parents[i]);
-				}
-			}
-			metadatas.reverse();
-			metadatas.push(fileMetadata);
-			var temp = treeRoot;
-			for (var j=0; j<metadatas.length && temp; j++) {
-				var children = temp.children;
-				if (children) {
-					var found = false;
-					for (var k=0; k<children.length; k++) {
-						if (children[k].Location === metadatas[j].Location) {
-							temp = children[k];
-							found = true;
-							break;
-						}
-					}
-					if (!found) {
-						return temp;
-					}
-				} else {
-					break;
-				}
-			}
-			return null;
-		},
 		scope: function(childrenLocation) {
 			childrenLocation = (childrenLocation && childrenLocation.ChildrenLocation) || childrenLocation || ""; //$NON-NLS-0$
 			var params = PageUtil.matchResourceParameters();
 			var resource = params.resource;
-			params.navigate = childrenLocation;
 			delete params.resource;
+			if (childrenLocation) {
+				params.navigate = childrenLocation;
+			} else {
+				delete params.navigate;
+			}
 			window.location.href = uriTemplate.expand({resource: resource, params: params});
 		},
 		scopeUp: function() {
@@ -281,25 +276,6 @@ define([
 		},
 		scopeDown: function(item) {
 			this.scope(item.ChildrenLocation);
-		},
-		fileInCurrentTree: function(fileMetadata) {
-			if (!fileMetadata) {
-				return false;
-			}
-			var fileClient = this.fileClient, treeRoot = this.treeRoot;
-			if (treeRoot && fileClient.fileServiceRootURL(fileMetadata.Location) !== fileClient.fileServiceRootURL(treeRoot.Location)) {
-				return false;
-			}
-			// Already at the workspace root?
-			if (!treeRoot.Parents) { return true; }
-			if (fileMetadata && fileMetadata.Parents && treeRoot && treeRoot.Location) {
-				for (var i=0; i<fileMetadata.Parents.length; i++) {
-					if (fileMetadata.Parents[i].Location === treeRoot.Location) {
-						return true;
-					}
-				}
-			}
-			return false;
 		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
