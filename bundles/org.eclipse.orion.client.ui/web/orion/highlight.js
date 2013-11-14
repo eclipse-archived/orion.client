@@ -64,11 +64,13 @@ define(['examples/editor/textStyler', 'examples/editor/textStyler2', 'orion/edit
 			return styler;
 		}
 		// Check default styler
-		var styler = createDefaultStyler(contentType);
-		if (!NEW && styler) {
-			var result = new Deferred();
-			result.resolve(styler);
-			return result;
+		if (!NEW) {
+			var styler = createDefaultStyler(contentType);
+			if (styler) {
+				var result = new Deferred();
+				result.resolve(styler);
+				return result;
+			}
 		}
 
 		// Check services
@@ -98,10 +100,10 @@ define(['examples/editor/textStyler', 'examples/editor/textStyler2', 'orion/edit
 			var styler;
 			if (provider) {
 				if (NEW) {
-					var rules = provider.getProperty("rules"); //$NON-NLS-0$
+					var patterns = provider.getProperty("patterns"); //$NON-NLS-0$
 					var delimiters = provider.getProperty("delimiters"); //$NON-NLS-0$
 					var keywords = provider.getProperty("keywords"); //$NON-NLS-0$
-					styler = new mTextStyler2.TextStyler(textView, annotationModel, rules, delimiters, keywords); //$NON-NLS-0$
+					styler = new mTextStyler2.TextStyler(textView, annotationModel, patterns, delimiters, keywords); //$NON-NLS-0$
 				} else {
 					var type = provider.getProperty("type"); //$NON-NLS-0$
 					if (type === "highlighter") { //$NON-NLS-0$

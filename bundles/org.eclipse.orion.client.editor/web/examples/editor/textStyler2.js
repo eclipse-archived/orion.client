@@ -60,343 +60,365 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 		"KEYWORD": keywordStyle,
 		"NUMBER": numberStyle,
 		"STRING": stringStyle,
-		"MULTILINE_STRING": null,
+		"MULTILINE_STRING": stringStyle,
 		"SINGLELINE_COMMENT": singleCommentStyle,
-		"MULTILINE_COMMENT": null,
-		"DOC_COMMENT": null,
+		"MULTILINE_COMMENT": multiCommentStyle,
+		"DOC_COMMENT": docCommentStyle,
 		"WHITE": spaceStyle,
 		"WHITE_TAB": tabStyle,
 		"WHITE_SPACE": spaceStyle,
 		"HTML_MARKUP": htmlMarkupStyle,
-		"DOC_TAG": null,
-		"TASK_TAG": null
+		"DOC_TAG": doctagStyle,
+		"TASK_TAG": tasktagStyle
 	};
 
-	function Scanner (keywords, whitespacesVisible) {
-		this.keywords = keywords;
-		this.whitespacesVisible = whitespacesVisible;
-		this.setText("");
-	}
+//	function Scanner (keywords, whitespacesVisible) {
+//		this.keywords = keywords;
+//		this.whitespacesVisible = whitespacesVisible;
+//		this.setText("");
+//	}
+//
+//	Scanner.prototype = {
+//		getOffset: function() {
+//			return this.offset;
+//		},
+//		getStartOffset: function() {
+//			return this.startOffset;
+//		},
+//		getData: function() {
+//			return this.text.substring(this.startOffset, this.offset);
+//		},
+//		getDataLength: function() {
+//			return this.offset - this.startOffset;
+//		},
+//		_default: function(c) {
+//			switch (c) {
+//				case 32: // SPACE
+//				case 9: // TAB
+//					if (this.whitespacesVisible) {
+//						return c === 32 ? WHITE_SPACE : WHITE_TAB;
+//					}
+//					do {
+//						c = this._read();
+//					} while(c === 32 || c === 9);
+//					this._unread(c);
+//					return WHITE;
+//				case 123: // {
+//				case 125: // }
+//				case 40: // (
+//				case 41: // )
+//				case 91: // [
+//				case 93: // ]
+//				case 60: // <
+//				case 62: // >
+//					// BRACKETS
+//					return c;
+//				default:
+//					var isCSS = this.isCSS;
+//					var off = this.offset - 1;
+//					if (!isCSS && 48 <= c && c <= 57) {
+//						var floating = false, exponential = false, hex = false, firstC = c;
+//						do {
+//							c = this._read();
+//							if (c === 46 /* dot */ && !floating) {
+//								floating = true;
+//							} else if (c === 101 /* e */ && !exponential) {
+//								floating = exponential = true;
+//								c = this._read();
+//								if (c !== 45 /* MINUS */) {
+//									this._unread(c);
+//								}
+//							} else if (c === 120 /* x */ && firstC === 48 && (this.offset - off === 2)) {
+//								floating = exponential = hex = true;
+//							} else if (!(48 <= c && c <= 57 || (hex && ((65 <= c && c <= 70) || (97 <= c && c <= 102))))) { //NUMBER DIGIT or HEX
+//								break;
+//							}
+//						} while(true);
+//						this._unread(c);
+//						return NUMBER;
+//					}
+//					if ((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (45 /* DASH */ === c && isCSS)) { //LETTER OR UNDERSCORE OR NUMBER
+//						do {
+//							c = this._read();
+//						} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (45 /* DASH */ === c && isCSS));  //LETTER OR UNDERSCORE OR NUMBER
+//						this._unread(c);
+//						var keywords = this.keywords;
+//						if (keywords.length > 0) {
+//							var word = this.text.substring(off, this.offset);
+//							//TODO slow
+//							for (var i=0; i<keywords.length; i++) {
+//								if (this.keywords[i] === word) { return KEYWORD; }
+//							}
+//						}
+//					}
+//					return UNKOWN;
+//			}
+//		},
+//		_read: function() {
+//			if (this.offset < this.text.length) {
+//				return this.text.charCodeAt(this.offset++);
+//			}
+//			return -1;
+//		},
+//		_unread: function(c) {
+//			if (c !== -1) { this.offset--; }
+//		},
+//		nextToken: function() {
+//			this.startOffset = this.offset;
+//			while (true) {
+//				var c = this._read(), result;
+//				switch (c) {
+//					case -1: return null;
+//					case 47:	// SLASH -> comment
+//						c = this._read();
+//						if (!this.isCSS) {
+//							if (c === 47) { // SLASH -> single line
+//								while (true) {
+//									c = this._read();
+//									if ((c === -1) || (c === 10) || (c === 13)) {
+//										this._unread(c);
+//										return SINGLELINE_COMMENT;
+//									}
+//								}
+//							}
+//						}
+//						if (c === 42) { // STAR -> multi line
+//							c = this._read();
+//							var token = MULTILINE_COMMENT;
+//							if (c === 42) {
+//								token = DOC_COMMENT;
+//							}
+//							while (true) {
+//								while (c === 42) {
+//									c = this._read();
+//									if (c === 47) {
+//										return token;
+//									}
+//								}
+//								if (c === -1) {
+//									this._unread(c);
+//									return token;
+//								}
+//								c = this._read();
+//							}
+//						}
+//						this._unread(c);
+//						return UNKOWN;
+//					case 39:	// SINGLE QUOTE -> char const
+//						result = STRING;
+//						while(true) {
+//							c = this._read();
+//							switch (c) {
+//								case 39:
+//									return result;
+//								case 13:
+//								case 10:
+//								case -1:
+//									this._unread(c);
+//									return result;
+//								case 92: // BACKSLASH
+//									c = this._read();
+//									switch (c) {
+//										case 10: result = MULTILINE_STRING; break;
+//										case 13:
+//											result = MULTILINE_STRING;
+//											c = this._read();
+//											if (c !== 10) {
+//												this._unread(c);
+//											}
+//											break;
+//									}
+//									break;
+//							}
+//						}
+//						break;
+//					case 34:	// DOUBLE QUOTE -> string
+//						result = STRING;
+//						while(true) {
+//							c = this._read();
+//							switch (c) {
+//								case 34: // DOUBLE QUOTE
+//									return result;
+//								case 13:
+//								case 10:
+//								case -1:
+//									this._unread(c);
+//									return result;
+//								case 92: // BACKSLASH
+//									c = this._read();
+//									switch (c) {
+//										case 10: result = MULTILINE_STRING; break;
+//										case 13:
+//											result = MULTILINE_STRING;
+//											c = this._read();
+//											if (c !== 10) {
+//												this._unread(c);
+//											}
+//											break;
+//									}
+//									break;
+//							}
+//						}
+//						break;
+//					default:
+//						return this._default(c);
+//				}
+//			}
+//		},
+//		setText: function(text) {
+//			this.text = text;
+//			this.offset = 0;
+//			this.startOffset = 0;
+//		}
+//	};
+//
+//	function WhitespaceScanner () {
+//		Scanner.call(this, null, true);
+//	}
+//	WhitespaceScanner.prototype = new Scanner(null);
+//	WhitespaceScanner.prototype.nextToken = function() {
+//		this.startOffset = this.offset;
+//		while (true) {
+//			var c = this._read();
+//			switch (c) {
+//				case -1: return null;
+//				case 32: // SPACE
+//					return WHITE_SPACE;
+//				case 9: // TAB
+//					return WHITE_TAB;
+//				default:
+//					do {
+//						c = this._read();
+//					} while(!(c === 32 || c === 9 || c === -1));
+//					this._unread(c);
+//					return UNKOWN;
+//			}
+//		}
+//	};
+//
+//	function CommentScanner (whitespacesVisible) {
+//		Scanner.call(this, null, whitespacesVisible);
+//	}
+//	CommentScanner.prototype = new Scanner(null);
+//	CommentScanner.prototype.setType = function(type) {
+//		this._type = type;
+//	};
+//	CommentScanner.prototype.nextToken = function() {
+//		this.startOffset = this.offset;
+//		while (true) {
+//			var c = this._read();
+//			switch (c) {
+//				case -1: return null;
+//				case 32: // SPACE
+//				case 9: // TAB
+//					if (this.whitespacesVisible) {
+//						return c === 32 ? WHITE_SPACE : WHITE_TAB;
+//					}
+//					do {
+//						c = this._read();
+//					} while(c === 32 || c === 9);
+//					this._unread(c);
+//					return WHITE;
+//				case 60: // <
+//					if (this._type === DOC_COMMENT) {
+//						do {
+//							c = this._read();
+//						} while(!(c === 62 || c === -1)); // >
+//						if (c === 62) {
+//							return HTML_MARKUP;
+//						}
+//					}
+//					return UNKOWN;
+//				case 64: // @
+//					if (this._type === DOC_COMMENT) {
+//						do {
+//							c = this._read();
+//						} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57));  //LETTER OR UNDERSCORE OR NUMBER
+//						this._unread(c);
+//						return DOC_TAG;
+//					}
+//					return UNKOWN;
+//				case 84: // T
+//					if ((c = this._read()) === 79) { // O
+//						if ((c = this._read()) === 68) { // D
+//							if ((c = this._read()) === 79) { // O
+//								c = this._read();
+//								if (!((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) {
+//									this._unread(c);
+//									return TASK_TAG;
+//								}
+//								this._unread(c);
+//							} else {
+//								this._unread(c);
+//							}
+//						} else {
+//							this._unread(c);
+//						}
+//					} else {
+//						this._unread(c);
+//					}
+//					//FALL THROUGH
+//				default:
+//					do {
+//						c = this._read();
+//					} while(!(c === 32 || c === 9 || c === -1 || c === 60 || c === 64 || c === 84));
+//					this._unread(c);
+//					return UNKOWN;
+//			}
+//		}
+//	};
+//
+//	function FirstScanner () {
+//		Scanner.call(this, null, false);
+//	}
+//	FirstScanner.prototype = new Scanner(null);
+//	FirstScanner.prototype._default = function(c) {
+//		while(true) {
+//			c = this._read();
+//			switch (c) {
+//				case 47: // SLASH
+//				case 34: // DOUBLE QUOTE
+//				case 39: // SINGLE QUOTE
+//				case -1:
+//					this._unread(c);
+//					return UNKOWN;
+//			}
+//		}
+//	};
 
-	Scanner.prototype = {
-		getOffset: function() {
-			return this.offset;
-		},
-		getStartOffset: function() {
-			return this.startOffset;
-		},
-		getData: function() {
-			return this.text.substring(this.startOffset, this.offset);
-		},
-		getDataLength: function() {
-			return this.offset - this.startOffset;
-		},
-		_default: function(c) {
-			switch (c) {
-				case 32: // SPACE
-				case 9: // TAB
-					if (this.whitespacesVisible) {
-						return c === 32 ? WHITE_SPACE : WHITE_TAB;
-					}
-					do {
-						c = this._read();
-					} while(c === 32 || c === 9);
-					this._unread(c);
-					return WHITE;
-				case 123: // {
-				case 125: // }
-				case 40: // (
-				case 41: // )
-				case 91: // [
-				case 93: // ]
-				case 60: // <
-				case 62: // >
-					// BRACKETS
-					return c;
-				default:
-					var isCSS = this.isCSS;
-					var off = this.offset - 1;
-					if (!isCSS && 48 <= c && c <= 57) {
-						var floating = false, exponential = false, hex = false, firstC = c;
-						do {
-							c = this._read();
-							if (c === 46 /* dot */ && !floating) {
-								floating = true;
-							} else if (c === 101 /* e */ && !exponential) {
-								floating = exponential = true;
-								c = this._read();
-								if (c !== 45 /* MINUS */) {
-									this._unread(c);
-								}
-							} else if (c === 120 /* x */ && firstC === 48 && (this.offset - off === 2)) {
-								floating = exponential = hex = true;
-							} else if (!(48 <= c && c <= 57 || (hex && ((65 <= c && c <= 70) || (97 <= c && c <= 102))))) { //NUMBER DIGIT or HEX
-								break;
-							}
-						} while(true);
-						this._unread(c);
-						return NUMBER;
-					}
-					if ((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (45 /* DASH */ === c && isCSS)) { //LETTER OR UNDERSCORE OR NUMBER
-						do {
-							c = this._read();
-						} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (45 /* DASH */ === c && isCSS));  //LETTER OR UNDERSCORE OR NUMBER
-						this._unread(c);
-						var keywords = this.keywords;
-						if (keywords.length > 0) {
-							var word = this.text.substring(off, this.offset);
-							//TODO slow
-							for (var i=0; i<keywords.length; i++) {
-								if (this.keywords[i] === word) { return KEYWORD; }
-							}
-						}
-					}
-					return UNKOWN;
-			}
-		},
-		_read: function() {
-			if (this.offset < this.text.length) {
-				return this.text.charCodeAt(this.offset++);
-			}
-			return -1;
-		},
-		_unread: function(c) {
-			if (c !== -1) { this.offset--; }
-		},
-		nextToken: function() {
-			this.startOffset = this.offset;
-			while (true) {
-				var c = this._read(), result;
-				switch (c) {
-					case -1: return null;
-					case 47:	// SLASH -> comment
-						c = this._read();
-						if (!this.isCSS) {
-							if (c === 47) { // SLASH -> single line
-								while (true) {
-									c = this._read();
-									if ((c === -1) || (c === 10) || (c === 13)) {
-										this._unread(c);
-										return SINGLELINE_COMMENT;
-									}
-								}
-							}
-						}
-						if (c === 42) { // STAR -> multi line
-							c = this._read();
-							var token = MULTILINE_COMMENT;
-							if (c === 42) {
-								token = DOC_COMMENT;
-							}
-							while (true) {
-								while (c === 42) {
-									c = this._read();
-									if (c === 47) {
-										return token;
-									}
-								}
-								if (c === -1) {
-									this._unread(c);
-									return token;
-								}
-								c = this._read();
-							}
-						}
-						this._unread(c);
-						return UNKOWN;
-					case 39:	// SINGLE QUOTE -> char const
-						result = STRING;
-						while(true) {
-							c = this._read();
-							switch (c) {
-								case 39:
-									return result;
-								case 13:
-								case 10:
-								case -1:
-									this._unread(c);
-									return result;
-								case 92: // BACKSLASH
-									c = this._read();
-									switch (c) {
-										case 10: result = MULTILINE_STRING; break;
-										case 13:
-											result = MULTILINE_STRING;
-											c = this._read();
-											if (c !== 10) {
-												this._unread(c);
-											}
-											break;
-									}
-									break;
-							}
-						}
-						break;
-					case 34:	// DOUBLE QUOTE -> string
-						result = STRING;
-						while(true) {
-							c = this._read();
-							switch (c) {
-								case 34: // DOUBLE QUOTE
-									return result;
-								case 13:
-								case 10:
-								case -1:
-									this._unread(c);
-									return result;
-								case 92: // BACKSLASH
-									c = this._read();
-									switch (c) {
-										case 10: result = MULTILINE_STRING; break;
-										case 13:
-											result = MULTILINE_STRING;
-											c = this._read();
-											if (c !== 10) {
-												this._unread(c);
-											}
-											break;
-									}
-									break;
-							}
-						}
-						break;
-					default:
-						return this._default(c);
-				}
-			}
-		},
-		setText: function(text) {
-			this.text = text;
-			this.offset = 0;
-			this.startOffset = 0;
-		}
-	};
-
-	function WhitespaceScanner () {
-		Scanner.call(this, null, true);
-	}
-	WhitespaceScanner.prototype = new Scanner(null);
-	WhitespaceScanner.prototype.nextToken = function() {
-		this.startOffset = this.offset;
-		while (true) {
-			var c = this._read();
-			switch (c) {
-				case -1: return null;
-				case 32: // SPACE
-					return WHITE_SPACE;
-				case 9: // TAB
-					return WHITE_TAB;
-				default:
-					do {
-						c = this._read();
-					} while(!(c === 32 || c === 9 || c === -1));
-					this._unread(c);
-					return UNKOWN;
-			}
-		}
-	};
-
-	function CommentScanner (whitespacesVisible) {
-		Scanner.call(this, null, whitespacesVisible);
-	}
-	CommentScanner.prototype = new Scanner(null);
-	CommentScanner.prototype.setType = function(type) {
-		this._type = type;
-	};
-	CommentScanner.prototype.nextToken = function() {
-		this.startOffset = this.offset;
-		while (true) {
-			var c = this._read();
-			switch (c) {
-				case -1: return null;
-				case 32: // SPACE
-				case 9: // TAB
-					if (this.whitespacesVisible) {
-						return c === 32 ? WHITE_SPACE : WHITE_TAB;
-					}
-					do {
-						c = this._read();
-					} while(c === 32 || c === 9);
-					this._unread(c);
-					return WHITE;
-				case 60: // <
-					if (this._type === DOC_COMMENT) {
-						do {
-							c = this._read();
-						} while(!(c === 62 || c === -1)); // >
-						if (c === 62) {
-							return HTML_MARKUP;
-						}
-					}
-					return UNKOWN;
-				case 64: // @
-					if (this._type === DOC_COMMENT) {
-						do {
-							c = this._read();
-						} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57));  //LETTER OR UNDERSCORE OR NUMBER
-						this._unread(c);
-						return DOC_TAG;
-					}
-					return UNKOWN;
-				case 84: // T
-					if ((c = this._read()) === 79) { // O
-						if ((c = this._read()) === 68) { // D
-							if ((c = this._read()) === 79) { // O
-								c = this._read();
-								if (!((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) {
-									this._unread(c);
-									return TASK_TAG;
-								}
-								this._unread(c);
-							} else {
-								this._unread(c);
-							}
-						} else {
-							this._unread(c);
-						}
-					} else {
-						this._unread(c);
-					}
-					//FALL THROUGH
-				default:
-					do {
-						c = this._read();
-					} while(!(c === 32 || c === 9 || c === -1 || c === 60 || c === 64 || c === 84));
-					this._unread(c);
-					return UNKOWN;
-			}
-		}
-	};
-
-	function FirstScanner () {
-		Scanner.call(this, null, false);
-	}
-	FirstScanner.prototype = new Scanner(null);
-	FirstScanner.prototype._default = function(c) {
-		while(true) {
-			c = this._read();
-			switch (c) {
-				case 47: // SLASH
-				case 34: // DOUBLE QUOTE
-				case 39: // SINGLE QUOTE
-				case -1:
-					this._unread(c);
-					return UNKOWN;
-			}
-		}
-	};
-
-	function TextStyler (view, annotationModel, rules, delimiters, keywords) {
+	function TextStyler (view, annotationModel, patterns, delimiters, keywords) {
 		this.commentStart = "/*"; //$NON-NLS-0$
 		this.commentEnd = "*/"; //$NON-NLS-0$
 
-		this.fsm = {};
-		rules.forEach(function(current) {
-			if (current.id && current.transitions) {
-				this.fsm[current.id] = current.transitions.slice(0);
-				current.transitions.forEach(function(transition) {
-					transition.regex = new RegExp(transition.match, "g"); //$NON-NLS-0$
-				});
+		function createPattern(element) {
+			var result = {};
+			if (element.match && !element.begin && !element.end && element.name) {
+				result.line = {regex: new RegExp(element.match, "g"), name: element.name};
+			} else if (!element.match && element.begin && element.end && element.name) {
+				result.line = ({regex: new RegExp(element.begin + ".*(" + element.end + "|$)", "g"), name: element.name});
+				result.document = ({regexBegin: new RegExp(element.begin, "g"), regexEnd: new RegExp(element.end, "g"), name: element.name});
+				if (element.patterns) {
+					result.document.patterns = [];
+					element.patterns.forEach(function(current) {
+						var subPattern = createPattern(current).line;
+						if (subPattern) {
+							result.document.patterns.push(subPattern);
+						}
+					});
+				}
+			}
+			return result;
+		}
+
+		this.linePatterns = [];
+		this.documentPatterns = [];
+		patterns.forEach(function(current) {
+			var pattern = createPattern(current);
+			if (pattern && pattern.line) {
+				this.linePatterns.push(pattern.line);
+			}
+			if (pattern && pattern.document) {
+				this.documentPatterns.push(pattern.document);
 			}
 		}.bind(this));
 		var keywordsString = "";
@@ -404,7 +426,7 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 			keywordsString += current + "|";
 		});
 		var matchString = keywordsString.substring(0, keywordsString.length - 1);
-		this.fsm.start.push({token: "KEYWORD", regex: new RegExp(matchString, "g")});
+		this.linePatterns.push({regex: new RegExp(matchString, "g"), name: "KEYWORD"});
 
 		this.delimiterRegex = new RegExp(delimiters, "g"); //$NON-NLS-0$
 
@@ -413,10 +435,10 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 		this.highlightCaretLine = false;
 		this.foldingEnabled = true;
 		this.detectTasks = true;
-		this._scanner = new Scanner(keywords, this.whitespacesVisible);
-		this._firstScanner = new FirstScanner();
-		this._commentScanner = new CommentScanner(this.whitespacesVisible);
-		this._whitespaceScanner = new WhitespaceScanner();
+//		this._scanner = new Scanner(keywords, this.whitespacesVisible);
+//		this._firstScanner = new FirstScanner();
+//		this._commentScanner = new CommentScanner(this.whitespacesVisible);
+//		this._whitespaceScanner = new WhitespaceScanner();
 		//TODO these scanners are not the best/correct way to parse CSS
 //		if (lang === "css") { //$NON-NLS-0$
 //			this._scanner.isCSS = true;
@@ -480,8 +502,8 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 		setWhitespacesVisible: function(visible, redraw) {
 			if (this.whitespacesVisible === visible) { return; }
 			this.whitespacesVisible = visible;
-			this._scanner.whitespacesVisible = visible;
-			this._commentScanner.whitespacesVisible = visible;
+//			this._scanner.whitespacesVisible = visible;
+//			this._commentScanner.whitespacesVisible = visible;
 			if (redraw) {
 				this.view.redraw();
 			}
@@ -527,7 +549,7 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 		_computeComments: function() {
 			var model = this.view.getModel();
 			if (model.getBaseModel) { model = model.getBaseModel(); }
-			this.comments = this._findComments(model.getText());
+			this.comments = this._findComments(model.getText(), model);
 		},
 		_computeFolding: function() {
 			if (!this.foldingEnabled) { return; }
@@ -574,19 +596,21 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 				}
 			}
 			var add = [];
-			var scanner = this._commentScanner;
-			scanner.setText(baseModel.getText(commentStart, commentEnd));
-			var token;
-			while ((token = scanner.nextToken())) {
-				var tokenStart = scanner.getStartOffset() + commentStart;
-				if (token === TASK_TAG) {
-					var end = baseModel.getLineEnd(baseModel.getLineAtOffset(tokenStart));
-					if (type !== SINGLELINE_COMMENT) {
-						end = Math.min(end, commentEnd - this.commentEnd.length);
-					}
-					add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, tokenStart, end, baseModel.getText(tokenStart, end)));
-				}
-			}
+			
+			// TODO
+//			var scanner = this._commentScanner;
+//			scanner.setText(baseModel.getText(commentStart, commentEnd));
+//			var token;
+//			while ((token = scanner.nextToken())) {
+//				var tokenStart = scanner.getStartOffset() + commentStart;
+//				if (token === TASK_TAG) {
+//					var end = baseModel.getLineEnd(baseModel.getLineAtOffset(tokenStart));
+//					if (type !== SINGLELINE_COMMENT) {
+//						end = Math.min(end, commentEnd - this.commentEnd.length);
+//					}
+//					add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, tokenStart, end, baseModel.getText(tokenStart, end)));
+//				}
+//			}
 			annotationModel.replaceAnnotations(remove, add);
 		},
 		_getLineStyle: function(lineIndex) {
@@ -616,27 +640,41 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 				var commentStart = comments[i].start;
 				var commentEnd = comments[i].end;
 				if (offset < commentStart) {
-					this._parse(text.substring(offset - start, commentStart - start), offset, styles);
+					this._parse(text.substring(offset - start, commentStart - start), offset, this.linePatterns, styles);
 				}
-				var type = comments[i].type, style;
-				switch (type) {
-					case DOC_COMMENT: style = docCommentStyle; break;
-					case MULTILINE_COMMENT: style = multiCommentStyle; break;
-					case MULTILINE_STRING: style = stringStyle; break;
-				}
+				var type = comments[i].type;
+				var style = styleMappings[type];
+//				switch (type) {
+//					case DOC_COMMENT: style = docCommentStyle; break;
+//					case MULTILINE_COMMENT: style = multiCommentStyle; break;
+//					case MULTILINE_STRING: style = stringStyle; break;
+//				}
 				var s = Math.max(offset, commentStart);
 				var e = Math.min(end, commentEnd);
-				if ((type === DOC_COMMENT || type === MULTILINE_COMMENT) && (this.whitespacesVisible || this.detectHyperlinks)) {
-					this._parseComment(text.substring(s - start, e - start), s, styles, style, type);
-				} else if (type === MULTILINE_STRING && this.whitespacesVisible) {
-					this._parseString(text.substring(s - start, e - start), s, styles, stringStyle);
-				} else {
-					styles.push({start: s, end: e, style: style});
+		//			styles.push({start: s, end: e, style: style});
+//				if ((type === DOC_COMMENT || type === MULTILINE_COMMENT) && (this.whitespacesVisible || this.detectHyperlinks)) {
+				var commentStyles = [];
+					this._parseComment(text.substring(s - start, e - start), s, comments[i].patterns, commentStyles, style, type);
+				var index = s;
+				commentStyles.forEach(function(current) {
+					if (current.start - index) {
+						styles.push({start: index, end: current.start, style: style});
+					}
+					styles.push(current);
+					index = current.end;
+				});
+				if (e - index) {
+					styles.push({start: index, end: e, style: style});
 				}
+//				styles = styles.concat(commentStyles);
+//				} else if (type === MULTILINE_STRING && this.whitespacesVisible) {
+//					this._parseString(text.substring(s - start, e - start), s, styles, stringStyle);
+//				} else {
+//				}
 				offset = commentEnd;
 			}
 			if (offset < end) {
-				this._parse(text.substring(offset - start, end - start), offset, styles);
+				this._parse(text.substring(offset - start, end - start), offset, this.linePatterns, styles);
 			}
 			if (model.getBaseModel) {
 				for (var j = 0; j < styles.length; j++) {
@@ -647,7 +685,28 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 			}
 			return styles;
 		},
-		_parse: function(text, offset, styles) {
+		_updateMatch: function(match, text, matches, minimumIndex) {
+			var regEx = match.pattern.regex ? match.pattern.regex : match.pattern.regexBegin;
+			if (minimumIndex) {
+				regEx.lastIndex = minimumIndex;
+			}
+			var result = regEx.exec(text);
+			if (result) {
+				match.result = result;
+				for (var i = 0; i < matches.length; i++) {
+					if (result.index <= matches[i].result.index) {
+						matches.splice(i, 0, match);
+						return;
+					}
+				}
+				matches.push(match);
+			}
+		},
+		_parse: function(text, offset, linePatterns, styles) {
+			if (!linePatterns) {
+				return;
+			}
+
 			var delimiterMatches = [];
 			this.delimiterRegex.lastIndex = 0;
 			var result = this.delimiterRegex.exec(text);
@@ -656,143 +715,125 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 				result = this.delimiterRegex.exec(text);
 			}
 
-			function updateMatch(match, matches, minimumIndex) {
-				var result = match.regEx.exec(text);
-				while (result) {
-					if (minimumIndex <= result.index) {
-						match.result = result;
-						for (var i = 0; i < matches.length; i++) {
-							if (result.index <= matches[i].result.index) {
-								matches.splice(i, 0, match);
-								return;
-							}
-						}
-						matches.push(match);
-						return;
-					}
-					result = match.regEx.exec(text);
+			var matches = [];
+			linePatterns.forEach(function(current) {
+				current.regex.lastIndex = 0;
+				var result = current.regex.exec(text);
+				if (result) {
+					matches.push({result: result, pattern: current});
 				}
+			}.bind(this));
+			matches.sort(function(a,b) {
+				if (a.result.index < b.result.index) {
+					return -1;
+				}
+				if (a.result.index > b.result.index) {
+					return 1;
+				}
+				return 0;
+			});
+
+			if (!matches.length) {
+				return;
 			}
 
-			var state = "start";
-			var matches, transitions;
 			var index = 0;
-			while (true) {
-				if (!transitions) {
-					transitions = this.fsm[state];
-					matches = [];
-					transitions.forEach(function(current) {
-						current.regex.lastIndex = 0;
-						var result = current.regex.exec(text);
-						while (result) {
-							if (index <= result.index) {
-								matches.push({regEx: current.regex, result: result, transition: current});
+			while (matches.length > 0) {
+				var current = matches[0];
+				matches.splice(0,1);
+
+				if (current.result.index < index) {
+					/* processing of another match has moved index beyond this match */
+					this._updateMatch(current, text, matches, index);
+					continue;
+				}
+
+				/* determine whether the delimiter requirements are met by this match */
+				var beginningDelim = false, endDelim = false;
+
+				this.delimiterRegex.lastIndex = 0;
+				var result = this.delimiterRegex.exec(current.result[0]);
+				if (result && result.index === 0 && result[0].length === current.result[0].length) {
+					/* match is whitespace, so don't need to check for surrounding whitespace */
+					beginningDelim = endDelim = true;
+				} else {
+					if (current.result.index === 0 || delimiterMatches[current.result.index]) {
+						beginningDelim = true;
+					} else {
+						for (var i = current.result.index - 1; i >= 0; i--) {
+							if (delimiterMatches[i]) {
+								beginningDelim = delimiterMatches[i].index + (delimiterMatches[i])[0].length === current.result.index;
 								break;
 							}
-							result = current.regex.exec(text);
-						}
-					}.bind(this));
-					matches.sort(function(a,b) {
-						if (a.result.index < b.result.index) {
-							return -1;
-						}
-						if (a.result.index > b.result.index) {
-							return 1;
-						}
-						return 0;
-					});
-				}
-
-				if (!matches.length) {
-					return;
-				}
-
-				while (matches.length > 0) {
-					var current = matches[0];
-					matches.splice(0,1);
-
-					if (current.result.index < index) {
-						/* processing of another match has moved index beyond this match */
-						updateMatch(current, matches, index);
-						continue;
-					}
-
-					/* determine whether the delimiter requirements are met by this match */
-					var beginningDelim = false, endDelim = false;
-					
-					this.delimiterRegex.lastIndex = 0;
-					var result = this.delimiterRegex.exec(current.result[0]);
-					if (result && result.index === 0 && result[0].length === current.result[0].length) {
-						/* match is whitespace, so don't need to check for surrounding whitespace */
-						beginningDelim = endDelim = true;
-					} else {
-						if (current.result.index === 0 || delimiterMatches[current.result.index]) {
-							beginningDelim = true;
-						} else {
-							for (var i = current.result.index - 1; i >= 0; i--) {
-								if (delimiterMatches[i]) {
-									beginningDelim = delimiterMatches[i].index + (delimiterMatches[i])[0].length === current.result.index;
-									break;
-								}
-							}
-						}
-						if (beginningDelim) {
-							var nextIndex = current.result.index + current.result[0].length;
-							endDelim = nextIndex === text.length || !!delimiterMatches[nextIndex - 1] || !!delimiterMatches[nextIndex];
 						}
 					}
-					if (beginningDelim && endDelim) {
-						/* apply the style */
-						var start = offset + current.result.index;
-						var end = start + current.result[0].length;
-						styles.push({start: start, end: end, style: styleMappings[current.transition.token || "UNKOWN"]});
-						index = current.result.index + current.result[0].length;
-						if (current.transition.next && current.transition.next !== state) {
-							state = current.transition.next;
-							transitions = matches = null;
-							break;
-						}
+					if (beginningDelim) {
+						var nextIndex = current.result.index + current.result[0].length;
+						endDelim = nextIndex === text.length || !!delimiterMatches[nextIndex - 1] || !!delimiterMatches[nextIndex];
 					}
-					updateMatch(current, matches, index);
 				}
-
-				if (matches) {
-					/* not transitioning states */
-					return;
+				if (beginningDelim && endDelim) {
+					/* apply the style */
+					var start = offset + current.result.index;
+					var end = start + current.result[0].length;
+					styles.push({start: start, end: end, style: styleMappings[current.pattern.name || "UNKOWN"]});
+					index = current.result.index + current.result[0].length;
 				}
+				this._updateMatch(current, text, matches);
 			}
-
-//			while (index < text.length) {
-//				text.match
+		},
+		_parseComment: function(text, offset, subPatterns, styles, s, type) {
+			// TODO support multi-line sub-patterns
+			var lines = text.split('\n');
+			lines.forEach(function(current) {
+				this._parse(current, offset, subPatterns, styles);
+				offset += current.length;
+			}.bind(this));
+//			var scanner = this._commentScanner;
+//			scanner.setText(text);
+//			scanner.setType(type);
+//			var token;
+//			while ((token = scanner.nextToken())) {
+//				var tokenStart = scanner.getStartOffset() + offset;
+//				var style = s;
+//				switch (token) {
+//					case WHITE_TAB:
+//						if (this.whitespacesVisible && this.tabsVisible) {
+//							style = tabStyle;
+//						}
+//						break;
+//					case WHITE_SPACE:
+//						if (this.whitespacesVisible && this.spacesVisible) {
+//							style = spaceStyle;
+//						}
+//						break;
+//					case HTML_MARKUP:
+//						style = htmlMarkupStyle;
+//						break;
+//					case DOC_TAG:
+//						style = doctagStyle;
+//						break;
+//					case TASK_TAG:
+//						style = tasktagStyle;
+//						break;
+//					default:
+//						if (this.detectHyperlinks) {
+//							style = this._detectHyperlinks(scanner.getData(), tokenStart, styles, style);
+//						}
+//				}
+//				if (style) {
+//					styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
+//				}
 //			}
-
-//			var scanner = this._scanner;
+		},
+//		_parseString: function(text, offset, styles, s) {
+//			var scanner = this._whitespaceScanner;
 //			scanner.setText(text);
 //			var token;
 //			while ((token = scanner.nextToken())) {
 //				var tokenStart = scanner.getStartOffset() + offset;
-//				var style = null;
+//				var style = s;
 //				switch (token) {
-//					case KEYWORD: style = keywordStyle; break;
-//					case NUMBER: style = numberStyle; break;
-//					case MULTILINE_STRING:
-//					case STRING:
-//						if (this.whitespacesVisible) {
-//							this._parseString(scanner.getData(), tokenStart, styles, stringStyle);
-//							continue;
-//						} else {
-//							style = stringStyle;
-//						}
-//						break;
-//					case DOC_COMMENT:
-//						this._parseComment(scanner.getData(), tokenStart, styles, docCommentStyle, token);
-//						continue;
-//					case SINGLELINE_COMMENT:
-//						this._parseComment(scanner.getData(), tokenStart, styles, singleCommentStyle, token);
-//						continue;
-//					case MULTILINE_COMMENT:
-//						this._parseComment(scanner.getData(), tokenStart, styles, multiCommentStyle, token);
-//						continue;
 //					case WHITE_TAB:
 //						if (this.whitespacesVisible && this.tabsVisible) {
 //							style = tabStyle;
@@ -804,71 +845,11 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 //						}
 //						break;
 //				}
-//				styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
+//				if (style) {
+//					styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
+//				}
 //			}
-		},
-		_parseComment: function(text, offset, styles, s, type) {
-			var scanner = this._commentScanner;
-			scanner.setText(text);
-			scanner.setType(type);
-			var token;
-			while ((token = scanner.nextToken())) {
-				var tokenStart = scanner.getStartOffset() + offset;
-				var style = s;
-				switch (token) {
-					case WHITE_TAB:
-						if (this.whitespacesVisible && this.tabsVisible) {
-							style = tabStyle;
-						}
-						break;
-					case WHITE_SPACE:
-						if (this.whitespacesVisible && this.spacesVisible) {
-							style = spaceStyle;
-						}
-						break;
-					case HTML_MARKUP:
-						style = htmlMarkupStyle;
-						break;
-					case DOC_TAG:
-						style = doctagStyle;
-						break;
-					case TASK_TAG:
-						style = tasktagStyle;
-						break;
-					default:
-						if (this.detectHyperlinks) {
-							style = this._detectHyperlinks(scanner.getData(), tokenStart, styles, style);
-						}
-				}
-				if (style) {
-					styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
-				}
-			}
-		},
-		_parseString: function(text, offset, styles, s) {
-			var scanner = this._whitespaceScanner;
-			scanner.setText(text);
-			var token;
-			while ((token = scanner.nextToken())) {
-				var tokenStart = scanner.getStartOffset() + offset;
-				var style = s;
-				switch (token) {
-					case WHITE_TAB:
-						if (this.whitespacesVisible && this.tabsVisible) {
-							style = tabStyle;
-						}
-						break;
-					case WHITE_SPACE:
-						if (this.whitespacesVisible && this.spacesVisible) {
-							style = spaceStyle;
-						}
-						break;
-				}
-				if (style) {
-					styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
-				}
-			}
-		},
+//		},
 		_detectHyperlinks: function(text, offset, styles, s) {
 			var href = null, index, linkStyle;
 			if ((index = text.indexOf("://")) > 0) { //$NON-NLS-0$
@@ -917,25 +898,86 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 			}
 			return newObj;
 		},
-		_findComments: function(text, offset) {
+		_findComments: function(text, model, offset) {
 			offset = offset || 0;
-			var scanner = this._firstScanner, token;
-			scanner.setText(text);
-			var result = [];
-			while ((token = scanner.nextToken())) {
-				if (token === MULTILINE_COMMENT || token === DOC_COMMENT || token === MULTILINE_STRING) {
-					result.push({
-						start: scanner.getStartOffset() + offset,
-						end: scanner.getOffset() + offset,
-						type: token
-					});
+//			var scanner = this._firstScanner, token;
+//			scanner.setText(text);
+//			var result = [];
+//			while ((token = scanner.nextToken())) {
+//				if (token === MULTILINE_COMMENT || token === DOC_COMMENT || token === MULTILINE_STRING) {
+//					result.push({
+//						start: scanner.getStartOffset() + offset,
+//						end: scanner.getOffset() + offset,
+//						type: token
+//					});
+//				}
+//				if (token === SINGLELINE_COMMENT || token === MULTILINE_COMMENT || token === DOC_COMMENT) {
+//					//TODO can we avoid this work if edition does not overlap comment?
+//					this._computeTasks(token, scanner.getStartOffset() + offset, scanner.getOffset() + offset);
+//				}
+//			}
+//			return result;
+
+			var matches = [];
+			this.documentPatterns.forEach(function(current) {
+				current.regexBegin.lastIndex = current.regexEnd.lastIndex = 0;
+				var result = current.regexBegin.exec(text);
+				if (result) {
+					matches.push({result: result, pattern: current});
 				}
-				if (token === SINGLELINE_COMMENT || token === MULTILINE_COMMENT || token === DOC_COMMENT) {
-					//TODO can we avoid this work if edition does not overlap comment?
-					this._computeTasks(token, scanner.getStartOffset() + offset, scanner.getOffset() + offset);
+			}.bind(this));
+			matches.sort(function(a,b) {
+				if (a.result.index < b.result.index) {
+					return -1;
 				}
+				if (a.result.index > b.result.index) {
+					return 1;
+				}
+				return 0;
+			});
+			
+			if (!matches.length) {
+				return matches;
 			}
-			return result;
+
+			var index = 0;
+			var results = [];
+			while (matches.length > 0) {
+				var current = matches[0];
+				matches.splice(0,1);
+
+				if (current.result.index < index) {
+					/* processing of another match has moved index beyond this match */
+					this._updateMatch(current, text, matches, index);
+					continue;
+				}
+
+				 /* verify that the begin match is valid (eg.- is not within a string, etc.) */
+				var lineIndex = model.getLineAtOffset(offset + current.result.index);
+				var lineText = model.getLine(lineIndex);
+				var styles = [];
+				this._parse(lineText, model.getLineStart(lineIndex), this.linePatterns, styles);
+				var targetOffset = offset + current.result.index;
+				for (var i = 0; i < styles.length; i++) {
+					if (styles[i].start === targetOffset) {
+						/* found it, now determine the end */
+						current.pattern.regexEnd.lastIndex = current.result.index + current.result[0].length;
+						var resultEnd = current.pattern.regexEnd.exec(text);
+						if (resultEnd) {
+							results.push({
+								start: targetOffset,
+								end: offset + resultEnd.index + resultEnd[0].length,
+								type: current.pattern.name,
+								patterns: current.pattern.patterns
+							});
+							index = resultEnd.index + resultEnd[0].length;
+						}
+						break;
+					}
+				}
+				this._updateMatch(current, text, matches);
+			}
+			return results;
 		},
 		_findMatchingBracket: function(model, offset) {
 			var brackets = BRACKETS;
@@ -1014,37 +1056,38 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 		},
 		_findBrackets: function(bracket, closingBracket, text, textOffset, start, end) {
 			var result = [];
-			var bracketToken = bracket.charCodeAt(0);
-			var closingBracketToken = closingBracket.charCodeAt(0);
-			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
-			var offset = start, scanner = this._scanner, token, comments = this.comments;
-			var startIndex = this._binarySearch(comments, start, true);
-			for (var i = startIndex; i < comments.length; i++) {
-				if (comments[i].start >= end) { break; }
-				var commentStart = comments[i].start;
-				var commentEnd = comments[i].end;
-				if (offset < commentStart) {
-					scanner.setText(text.substring(offset - start, commentStart - start));
-					while ((token = scanner.nextToken())) {
-						if (token === bracketToken) {
-							result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
-						} else if (token === closingBracketToken) {
-							result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
-						}
-					}
-				}
-				offset = commentEnd;
-			}
-			if (offset < end) {
-				scanner.setText(text.substring(offset - start, end - start));
-				while ((token = scanner.nextToken())) {
-					if (token === bracketToken) {
-						result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
-					} else if (token === closingBracketToken) {
-						result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
-					}
-				}
-			}
+			// TODO
+//			var bracketToken = bracket.charCodeAt(0);
+//			var closingBracketToken = closingBracket.charCodeAt(0);
+//			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
+//			var offset = start, scanner = this._scanner, token, comments = this.comments;
+//			var startIndex = this._binarySearch(comments, start, true);
+//			for (var i = startIndex; i < comments.length; i++) {
+//				if (comments[i].start >= end) { break; }
+//				var commentStart = comments[i].start;
+//				var commentEnd = comments[i].end;
+//				if (offset < commentStart) {
+//					scanner.setText(text.substring(offset - start, commentStart - start));
+//					while ((token = scanner.nextToken())) {
+//						if (token === bracketToken) {
+//							result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
+//						} else if (token === closingBracketToken) {
+//							result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
+//						}
+//					}
+//				}
+//				offset = commentEnd;
+//			}
+//			if (offset < end) {
+//				scanner.setText(text.substring(offset - start, end - start));
+//				while ((token = scanner.nextToken())) {
+//					if (token === bracketToken) {
+//						result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
+//					} else if (token === closingBracketToken) {
+//						result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
+//					}
+//				}
+//			}
 			return result;
 		},
 		_onDestroy: function(e) {
@@ -1158,7 +1201,7 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 				te = charCount;//TODO could it be smaller?
 			}
 			var text = baseModel.getText(ts, te), comment;
-			var newComments = this._findComments(text, ts), i;
+			var newComments = this._findComments(text, baseModel, ts), i;
 			for (i = commentStart; i < this.comments.length; i++) {
 				comment = this.comments[i];
 				if (comment.start > start) { comment.start += changeCount; }
