@@ -43,12 +43,10 @@ define([
 		] 
 	});
 	
-	var outliner = new Outliner.JavaScriptOutliner();
-	
 	/**
 	 * Register the jsdoc-based outline
 	 */
-	provider.registerServiceProvider("orion.edit.outliner", outliner,
+	provider.registerServiceProvider("orion.edit.outliner", new Outliner.JSDocOutliner(),
 		{ contentType: ["application/javascript"],
 		  name: "JSDoc outline",
 		  id: "orion.javascript.outliner.jsdoc"
@@ -57,7 +55,7 @@ define([
 	/**
 	 * Register the raw source-based outline
 	 */
-	provider.registerServiceProvider("orion.edit.outliner", outliner, 
+	provider.registerServiceProvider("orion.edit.outliner", new Outliner.JsOutliner(), 
 		{ contentType: ["application/javascript"],
 		  name: "Source outline",
 		  id: "orion.javascript.outliner.source"

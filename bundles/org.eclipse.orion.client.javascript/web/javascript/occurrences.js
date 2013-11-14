@@ -9,11 +9,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define console*/
+/*global define console escope*/
 define([
-"esprima/esprima",
 "orion/Deferred"
-], function(Esprima, Deferred) {
+], function(Deferred) {
 	
 	/**
 	 * @name javascript.JavaScriptOccurrences
@@ -211,7 +210,7 @@ define([
 		},
 
 		/**
-		 * @name  findOccurrence
+		 * @name findOccurrence
 		 * @description Finds the occurrence from the given context in the given AST node
 		 * @function
 		 * @private
