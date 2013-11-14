@@ -161,7 +161,7 @@ define([
 			var itemId = this.model.getId(item);
 			var itemNode = lib.node(itemId);
 			if (itemNode) {
-				afterShow();
+				if (afterShow) { afterShow(); }
 			} else if(item.Parents && item.Parents.length>0) {
 				item.Parents[0].Parents = item.Parents.slice(1);
 				this.expandItem(item.Parents[0], afterShow);
@@ -170,7 +170,7 @@ define([
 		expandItem: function(item, afterExpand) {
 			this.showItem(item, function() {
 				if (this.myTree.isExpanded(item)) {
-					afterExpand();
+					if (afterExpand) { afterExpand(); }
 				} else {
 					this.myTree.expand(this.model.getId(item), afterExpand);
 				}
