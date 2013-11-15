@@ -119,17 +119,20 @@ define([
 			return item.outlinerId;
 		}
 		// Generate an id.  Since these id's are used in the DOM, we strip out characters that shouldn't be in a DOM id.
-		var id = item.label.replace(/[\\\/\.\:\-\_]/g, "");
+		var originalId = item.label.replace(/[\\\/\.\:\-\_]/g, "");
+		var id = originalId;
+		var number = 0;
 		// We might have duplicate id's if the outline items are duplicated, or if we happen to have another dom id using
 		// this name.  Check for this case and use a timestamp in lieu of the generated id.
-		if ((this.idItemMap[id] && this.idItemMap[id]!== item) ||
+		while ((this.idItemMap[id] && this.idItemMap[id]!== item) ||
 			lib.node(id)) {// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=389760
-			id = new Date().getTime().toString();
-			this.idItemMap[id] = item;
-			item.outlinerId = id;
-		} else {
-			this.idItemMap[id] = item;
+			id = originalId + "[" + number + "]";
+			number = number + 1;
 		}
+		
+		this.idItemMap[id] = item; //store the item
+		item.outlinerId = id;		// cache the id
+			
 		return id;
 	};
 		
