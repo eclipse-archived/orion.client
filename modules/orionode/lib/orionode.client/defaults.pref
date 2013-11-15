@@ -6,7 +6,6 @@
 		"plugins/pageLinksPlugin.html":true,
 		"plugins/csslintPlugin.html": true,
 		"javascript/plugins/javascriptPlugin.html":true,
-		"plugins/esprima/esprimaJsContentAssistPlugin.html":true,
 		"shell/plugins/shellPagePlugin.html":true,
 		"plugins/nodePlugin.html":true,
 		"search/plugins/searchPagePlugin.html":true,

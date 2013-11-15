@@ -1,13 +1,10 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- * Copyright (c) 2013 IBM Corporation.
- *
- * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
- * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
- * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
- * You can obtain a current copy of the Eclipse Public License from
- * http://www.opensource.org/licenses/eclipse-1.0.php
+ * Copyright (c) 2012, 2013 VMware, Inc. and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *	 Andy Clement (VMware) - initial API and implementation
@@ -16,7 +13,11 @@
  ******************************************************************************/
 
 /*global define inferencerPostOp */
-define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeUtils", "plugins/esprima/proposalUtils"], function (mVisitor, typeUtils, proposalUtils) {
+define([
+'javascript/esprima/esprimaVisitor',
+'javascript/esprima/typeUtils',
+'javascript/esprima/proposalUtils'
+], function (mVisitor, typeUtils, proposalUtils) {
 
 	var RESERVED_WORDS = {
 		"break" : true, "case" : true, "catch" : true, "continue" : true, "debugger" : true, "default" : true, "delete" : true, "do" : true, "else" : true, "finally" : true,
@@ -26,8 +27,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeUtils", "plugins/
 	function isReservedWord(name) {
 		return RESERVED_WORDS[name] === true;
 	}
-
-
 
 	/**
 	 * TODO move this to a central location
@@ -39,7 +38,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeUtils", "plugins/
 			return Object.prototype.toString.call(ary) === '[object Array]';
 		};
 	}
-
 
 	/**
 	 * @param {String} char a string of at least one char14acter
@@ -55,7 +53,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeUtils", "plugins/
 		}
 		return charCode >= 65 && charCode <= 90;
 	}
-
 
 	/**
 	 * finds the right-most segment of a dotted MemberExpression
@@ -108,6 +105,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeUtils", "plugins/
 			return "";
 		}
 	}
+	
 	/**
 	 * add variable names from inside a lint global directive
 	 */
@@ -222,8 +220,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeUtils", "plugins/
 		}
 		return null;
 	}
-	
-	
+		
 	/**
 	 * Finds the closest doc comment to this node
 	 * @param {{range:Array.<Number>}} node
@@ -299,7 +296,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeUtils", "plugins/
 		}
 		return paramTypes;
 	}
-
 
 	/**
 	 * This function takes the current AST node and does the first inferencing step for it (the top-down pass).
@@ -1206,7 +1202,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeUtils", "plugins/
 			node.extras.inferredTypeObj = typeUtils.OBJECT_TYPE;
 		}
 	}
-
 
 	/**
 	 * infers types for an AST root, storing them in an environment object.  

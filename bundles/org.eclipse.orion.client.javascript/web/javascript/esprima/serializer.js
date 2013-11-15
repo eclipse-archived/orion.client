@@ -1,17 +1,14 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation.
- *
- * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
- * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
- * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
- * You can obtain a current copy of the Eclipse Public License from
- * http://www.opensource.org/licenses/eclipse-1.0.php
+ * Copyright (c) 2013 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     Manu Sridharan (IBM) - Initial API and implementation
  ******************************************************************************/
- 
  
 /**
  * This module was used to create index file versions of the type specifications
@@ -20,7 +17,9 @@
  */
 
 /*global define console */
-define("plugins/esprima/serializer", ["plugins/esprima/typeUtils"], function (typeUtils) {
+define('javascript/esprima/serializer', [
+'javascript/esprima/typeUtils' 
+], function (typeUtils) {
 
 	/**
 	 * note all the named types referenced by typeObj in the referencedTypes object

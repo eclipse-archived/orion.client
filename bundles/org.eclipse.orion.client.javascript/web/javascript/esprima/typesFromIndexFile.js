@@ -1,27 +1,25 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation.
- *
- * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
- * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
- * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
- * You can obtain a current copy of the Eclipse Public License from
- * http://www.opensource.org/licenses/eclipse-1.0.php
+ * Copyright (c) 2013 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     Manu Sridharan (IBM) - Initial API and implementation
  ******************************************************************************/
-
-
 /**
  * This module contains the code for parsing index files and converting them
  * to the type structure expected by esprimaJsContentAssist.js
  */
 
 /*global define require definitionForType doctrine*/
-define("plugins/esprima/typesFromIndexFile", ["orion/Deferred", "plugins/esprima/typeUtils", "doctrine/doctrine"], 
-       function (Deferred, typeUtils) {
-
+define('javascript/esprima/typesFromIndexFile', [
+'orion/Deferred',
+'javascript/esprima/typeUtils',
+'doctrine/doctrine'
+], function (Deferred, typeUtils, _doctrine) {
 
 	/**
 	 * for case where an object has its own hasOwnProperty property 
@@ -45,7 +43,6 @@ define("plugins/esprima/typesFromIndexFile", ["orion/Deferred", "plugins/esprima
 		return charCode >= 65 && charCode <= 90;
 	}
 
-
 	/**
 	 * Global is the type of the global variable.  This can 
 	 * vary based on what libraries are being used
@@ -61,7 +58,6 @@ define("plugins/esprima/typesFromIndexFile", ["orion/Deferred", "plugins/esprima
 
 		this.Global = new Global();
 	};
-
 
 	var typesPrototype = {};
 
@@ -357,7 +353,6 @@ define("plugins/esprima/typesFromIndexFile", ["orion/Deferred", "plugins/esprima
 		}
 	}
 
-
 	/**
 	 * for unit testing.  given a type object with properties as in an index file,
 	 * and a name for the type, returns an object { def: d, typeInfo: t }, where d
@@ -416,7 +411,7 @@ define("plugins/esprima/typesFromIndexFile", ["orion/Deferred", "plugins/esprima
 	function init() {
 		if (!initResult) { 
 			var d = new Deferred();
-			require(["plugins/esprima/indexFiles/ecma5Index"], function (ecma5) {
+			require(["javascript/esprima/indexFiles/ecma5Index"], function (ecma5) {
 				// add information for core libraries directly to Global.prototype
 				// and Types.prototype
 				addIndexInfo(ecma5, globalPrototype, typesPrototype);
@@ -487,9 +482,9 @@ define("plugins/esprima/typesFromIndexFile", ["orion/Deferred", "plugins/esprima
 			globalsAndTypes = { globals: {}, types: {} };
 			var indexFile;
 			if (libName === "browser") {
-				indexFile = "plugins/esprima/indexFiles/browserIndex";
+				indexFile = "javascript/esprima/indexFiles/browserIndex";
 			} else if (libName === "node") {
-				indexFile = "plugins/esprima/indexFiles/nodeIndex";
+				indexFile = "javascript/esprima/indexFiles/nodeIndex";
 			} else {
 				throw "unknown library name " + libName;				
 			}

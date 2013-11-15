@@ -10,7 +10,8 @@
  *     Manu Sridharan (IBM) - Initial API and implementation
  ******************************************************************************/
  /*global define */
-define("plugins/esprima/indexFiles/nodeIndex", [], function () {
+define('javascript/esprima/indexFiles/nodeIndex', [
+], function () {
 	return {
 		"console": "Console",
 		"process": "Process",

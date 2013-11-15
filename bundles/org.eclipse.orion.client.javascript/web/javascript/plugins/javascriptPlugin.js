@@ -11,13 +11,14 @@
  *******************************************************************************/
 /*global define esprima*/
 define([
-	"orion/plugin", 
-	"javascript/outliner",
-	"javascript/occurrences",
-	"esprima/esprima",
-	"orion/serialize",
-	"orion/i18nUtil"
-], function(PluginProvider, Outliner, Occurrences, _, Serialize, i18nUtil) {
+	'orion/plugin', 
+	'javascript/outliner',
+	'javascript/occurrences',
+	'javascript/esprima/esprimaJsContentAssist',
+	'esprima/esprima',
+	'orion/serialize',
+	'orion/i18nUtil'
+], function(PluginProvider, Outliner, Occurrences, EsprimaAssist, _, Serialize, i18nUtil) {
 
 	/**
 	 * Plug-in headers
@@ -51,15 +52,15 @@ define([
 		  name: "JSDoc outline",
 		  id: "orion.javascript.outliner.jsdoc"
 	});
-	
+
 	/**
 	 * Register the raw source-based outline
 	 */
-	provider.registerServiceProvider("orion.edit.outliner", new Outliner.JsOutliner(), 
+	/**provider.registerServiceProvider("orion.edit.outliner", new Outliner.JsOutliner(), 
 		{ contentType: ["application/javascript"],
 		  name: "Source outline",
 		  id: "orion.javascript.outliner.source"
-	});
+	});*/
 	
 	/**
 	 * Register the AST provider
@@ -81,20 +82,25 @@ define([
 			}
 		}, {
 			contentType: ["application/javascript"]
-		});
-	
-	var occurrences = new Occurrences.JavaScriptOccurrences();
+	});
 	
 	/**
 	 * Register the mark occurrences support
 	 */
-	provider.registerService("orion.edit.occurrences", occurrences,
+	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(),
 		{
-			name: "Mark JavaScript Occurrences",	//$NON-NLS-0$
-			id: "markoccurrences.editor",	//$NON-NLS-0$
-			tooltip: "Mark JavaScript Occurrences",	//$NON-NLS-0$
-			key: ["M", true, true], // Ctrl+Shift+M	//$NON-NLS-0$
 			contentType: ["application/javascript"]	//$NON-NLS-0$
-		});
+	});
+	
+	/**
+	 * Register the content assist support
+	 */
+	provider.registerServiceProvider("orion.edit.contentassist", new EsprimaAssist.EsprimaJavaScriptContentAssistProvider(), 
+		{
+			contentType: ["application/javascript"],
+			name: "Esprima based JavaScript content assist",
+			id: "orion.edit.contentassist.esprima"
+	});	
+		
 	provider.connect();
 });
