@@ -85,7 +85,26 @@ define([
 		return link;
 	};
 	
-
+	OutlineRenderer.prototype.getCellHeaderElement = function(col_no){
+		var th = null;
+		var input;
+		
+		if (0 === col_no) {
+			th = document.createElement("th"); //$NON-NLS-0$
+			input = document.createElement("input"); //$NON-NLS-0$
+			input.className = "outlineFilter"; //$NON-NLS-0$
+			input.placeholder = messages["Filter"]; //$NON-NLS-0$
+			input.type="text"; //$NON-NLS-0$
+			input.addEventListener("input", function (e) { //$NON-NLS-0$
+				this.explorer.filterChanged(input.value);
+			}.bind(this));
+			th.appendChild(input);
+		}
+		
+		return th;
+	};
+	
+	
 	function OutlineExplorer(serviceRegistry, selection, title) {
 		/*	we intentionally do not do this:
 				this.selection = selection;
@@ -97,6 +116,24 @@ define([
 	}
 	OutlineExplorer.prototype = new mExplorer.Explorer();	
 	OutlineExplorer.prototype.constructor = OutlineExplorer;
+	
+	
+	OutlineExplorer.prototype.filterChanged = function (filter) {
+		var navDict = this.getNavDict();
+		var itemMap = this.model.getIdItemMap();
+		
+		for (var id in itemMap) {
+			if (itemMap.hasOwnProperty(id)) {
+				if (-1 === id.indexOf(filter)) {
+					//hide
+					navDict.getValue(id).rowDomNode.classList.add("hiddenRow");	//$NON-NLS-0$
+				} else {
+					//id matches filter, show row
+					navDict.getValue(id).rowDomNode.classList.remove("hiddenRow"); //$NON-NLS-0$
+				}
+			}
+		}		
+	};
 	
 	function OutlineModel(items, rootId) {
 		this.items = items;
@@ -134,6 +171,10 @@ define([
 		item.outlinerId = id;		// cache the id
 			
 		return id;
+	};
+	
+	OutlineModel.prototype.getIdItemMap = function(){
+		return this.idItemMap;
 	};
 		
 	OutlineModel.prototype.getChildren = function(parentItem, /* function(items) */ onComplete){

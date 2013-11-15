@@ -85,5 +85,6 @@ define({
 	"Open the raw file or folder in the browser": "Open the raw file or folder in the browser",
 	"OutlineProgress": "Getting outline for ${0} from ${1}",
 	"UnknownError": "An unknown error occurred.",
-	"UnknownWarning": "An unknown warning occurred."
+	"UnknownWarning": "An unknown warning occurred.",
+	"Filter": "Filter"
 });
