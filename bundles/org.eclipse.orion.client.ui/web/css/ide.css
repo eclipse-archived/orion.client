@@ -978,6 +978,21 @@ td .orionMarkdown {
 	border: 1px solid lightgrey;
 }
 
+.orionProject .discreetInput, .orionProject .discreetInput {
+	border: none;
+	color: grey;
+	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
+	width: 70%;
+	margin-left: 0;
+	position: absolute;
+	min-height: 15px;
+}
+
+.orionProject .discreetInput:hover, .orionProject .discreetInput:focus {
+	border: 1px solid lightgrey;
+	color: black;
+}
+
 .folderNav th, .orionMarkdown th, .orionProject th, .sectionWrapper{
 	border-color:#D6EBF0;
 	border-bottom: 1px solid #D6EBF0;

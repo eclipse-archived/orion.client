@@ -57,59 +57,53 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', '
 				this.display.bind(this)(node, projectData);
 			}.bind(this));
 		},
-		_renderEditableFields: function(td, span, input, property){
-			
-			function showInput(event){
-				input.value = span.innerText || span.textContent;
-				span.style.visibility = "hidden";
-				input.style.visibility = "";
-				input.focus();
-				td.onclick = null;
-			}
-			
-			span.appendChild(document.createTextNode(this.projectData[property] || " "));
-			td.title = "Click to edit";
-			span.style.position = "absolute";
-			td.onclick = showInput.bind(this);
+		_renderEditableFields: function(input, property, tabIndex, urlElement /*optional*/){	
+			var saveInput = function(event) {
+				var properties = {};
+				properties[property] = event.target.value;
+				this.progress.progress(this.projectClient.changeProjectProperties(this.projectData, properties), "Saving project " + this.projectData.Name).then(
+					function(newProjectData){
+						if(newProjectData){
+							this.projectData = newProjectData;
+							input.value = event.target.value;
+							
+							//behave differently for inputs associated with urls
+							//hide the <input> element and show the <a> urlElement
+							if(urlElement){
+								lib.empty(urlElement);
+								urlElement.appendChild(document.createTextNode(event.target.value) || "");
+								urlElement.href = event.target.value;
+								urlElement.style.visibility = "";
+								if(urlElement.urlSelector){
+									urlElement.urlSelector.style.visibility = "";
+								}
+								
+								input.style.visibility = "hidden";
+							}
+						}
+					}.bind(this)
+				);
+			}.bind(this);
 			
 			input.value = this.projectData[property] || "";
-			input.style.position = "absolute";
-			input.style.visibility = "hidden";
-			input.title = "Press Enter to save";
-			input.style.width = "70%";
-			input.style.marginLeft = "0";
+			input.title = "Click to edit";
+			input.className = "discreetInput";
+			input.tabIndex = String(tabIndex);
+						
 			input.onkeyup = function(event){
-				if(event.keyCode === 13){
-					var properties = {};
-					properties[property] = event.target.value;
-					this.progress.progress(this.projectClient.changeProjectProperties(this.projectData, properties), "Saving project " + this.projectData.Name).then(
-						function(newProjectData){
-							if(newProjectData){
-								this.projectData = newProjectData;
-								lib.empty(span);
-								span.appendChild(document.createTextNode(event.target.value));
-								if(span.href){
-									span.href = event.target.value;
-								}
-								span.style.visibility = "";
-								event.target.style.visibility = "hidden";
-								td.onclick = showInput.bind(this);
-							}
-						}.bind(this)
-					);
-				} else if(event.keyCode === 27) {
-					span.style.visibility = "";
-					event.target.style.visibility = "hidden";
-					td.onclick = showInput.bind(this);
+				if(event.keyCode === lib.KEY.ENTER){
+					// Excluding <textarea> because it is a multi-line input
+					// which allows the user to press Enter for a new line
+					if (input.tagName.toUpperCase() !== 'TEXTAREA') {
+						input.blur();
+					}
+				}else if(event.keyCode === lib.KEY.ESCAPE){
+					input.value = this.projectData[property] || ""; //restore previous value
+					input.blur();
 				}
 			}.bind(this);
 			input.onblur = function(event){
-				span.style.visibility = "";
-				event.target.style.visibility = "hidden";
-				setTimeout(function(){
-					//don't add onclick too soon, to avoid catching the event that triggered blur
-					td.onclick = showInput.bind(this);
-				}.bind(this), 100);
+				saveInput(event);
 			};
 		},
 		renderProjectInfo: function(parent){
@@ -121,6 +115,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', '
 			td.appendChild(document.createTextNode("Project Information"));
 			tr.appendChild(td);
 
+			// NAME
 			tr = document.createElement("tr");
 			table.appendChild(tr);
 			td = document.createElement("td");
@@ -131,17 +126,14 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', '
 			tr.appendChild(td);
 			td = document.createElement("td");
 			td.style.verticalAlign = "top";
-			var nameSpan = document.createElement("span");
 			var nameInput = document.createElement("input");
-			
-			this._renderEditableFields(td, nameSpan, nameInput, "Name");
-			
-			td.appendChild(nameSpan);
+			this._renderEditableFields(nameInput, "Name", 1, null);
+
 			td.appendChild(nameInput);
-			
 			tr.appendChild(td);
 			table.appendChild(tr);
 			
+			// DESCRIPTION
 			tr = document.createElement("tr");
 			table.appendChild(tr);
 			td = document.createElement("td");
@@ -153,20 +145,15 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', '
 			td = document.createElement("td");
 			td.style.verticalAlign = "top";
 			td.style.height = "40px";
-			var descriptionSpan = document.createElement("span");
-			descriptionSpan.style.height = "40px";
-			descriptionSpan.style.verticalAlign = "middle";
-			descriptionSpan.style.overflow = "auto";
-			descriptionSpan.style.width = "70%";
 			var descriptionInput = document.createElement("textarea");
 			descriptionInput.style.height = "40px";
-			this._renderEditableFields(td, descriptionSpan, descriptionInput, "Description");
-			
-			td.appendChild(descriptionSpan);
+			this._renderEditableFields(descriptionInput, "Description", 2, null);
+
 			td.appendChild(descriptionInput);
 			tr.appendChild(td);
 			table.appendChild(tr);
 			
+			// SITE
 			tr = document.createElement("tr");
 			table.appendChild(tr);
 			td = document.createElement("td");
@@ -177,13 +164,46 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', '
 			tr.appendChild(td);
 			td = document.createElement("td");
 			td.style.verticalAlign = "top";
-			var a = document.createElement("a");
-			a.href = this.projectData.Url;
+			
 			var urlInput = document.createElement("input");
+			urlInput.style.visibility = "hidden";
 			
-			this._renderEditableFields(td, a, urlInput, "Url");
+			var urlSelector = document.createElement("div");
+			urlSelector.title = "Click to edit";
+			urlSelector.className = "discreetInput";
+			urlSelector.tabIndex = 3;	//this is the same as the urlInput's tab index but they will never be visible at the same time
 			
-			td.appendChild(a);
+			var urlLink = document.createElement("a");
+			urlLink.href = this.projectData.Url || "";
+			urlLink.appendChild(document.createTextNode(this.projectData.Url || ""));
+			urlLink.tabIndex = 4;
+						
+			urlSelector.appendChild(urlLink);
+			urlSelector.title = "Click to edit";
+	
+			//show url input, hide selector
+			urlSelector.onclick = function (event){
+				urlSelector.style.visibility = "hidden";
+				urlLink.style.visibility = "hidden";
+				urlInput.style.visibility = "";
+				urlInput.focus();
+			}.bind(this);
+			
+			//make the url editable when the selector gains focus
+			urlSelector.onfocus = urlSelector.onclick;
+			
+			//Make pressing "Enter" on the selector do the same think as clicking it
+			urlSelector.onkeyup = function(event){
+				if(event.keyCode === lib.KEY.ENTER){
+					urlSelector.onclick(event);
+				}
+			}.bind(this);
+			
+			urlLink.urlSelector = urlSelector; //refer to selector to be able to make it visible from within _renderEditableFields
+			
+			this._renderEditableFields(urlInput, "Url", 3, urlLink);
+			
+			td.appendChild(urlSelector);
 			td.appendChild(urlInput);
 			tr.appendChild(td);
 			table.appendChild(tr);
