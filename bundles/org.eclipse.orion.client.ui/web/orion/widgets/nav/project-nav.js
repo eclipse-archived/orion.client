@@ -28,9 +28,11 @@ define([
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;
 	var FileModel = mExplorer.FileModel;
 
-	function ProjectNavModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders){
-		FileModel.apply(this, arguments);
+	function ProjectNavModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, projectClient, fileMetadata){
+		this.projectClient = projectClient;
 		this.project = root;
+		this.fileMetadata = fileMetadata;
+		FileModel.apply(this, arguments);
 	}
 	
 	ProjectNavModel.prototype = Object.create(FileModel.prototype);
@@ -51,35 +53,31 @@ define([
 				return;
 			}
 			if(parentItem.type==="Project"){ //$NON-NLS-0$
-				this.fileClient.loadWorkspace(parentItem.ContentLocation).then(function(content){
-					var children = [];
-					content.type = "ProjectRoot"; //$NON-NLS-0$
-					children.push(content);
-					if(parentItem.Dependencies){
-						for(var i=0; i<parentItem.Dependencies.length; i++){
-							children.push({Dependency: parentItem.Dependencies[i]});
-						}
-					}
+				var children = [];
+				this.fileMetadata.type = "ProjectRoot"; //$NON-NLS-0$
+				children.push(this.fileMetadata);
+				Deferred.all((parentItem.Dependencies || []).map(function(dependency) {
+					var item = {Dependency: dependency, Project: parentItem};
+					children.push(item);
+					return this.projectClient.getDependencyFileMetadata(dependency, parentItem.WorkspaceLocation).then(function(dependencyMetadata) {
+						objects.mixin(item, dependencyMetadata);
+					}, function(error) {
+						item.disconnected = true;
+					});
+				}.bind(this))).then(function() {
 					this.processParent(parentItem, children);
+					children.splice(children.indexOf(this.fileMetadata), 1);
+					children.splice(0, 0, this.fileMetadata);
 					onComplete(children);
 				}.bind(this));
-			} else if(parentItem.Dependency){
-				if(parentItem.FileMetadata){
-					FileModel.prototype.getChildren.call(this, parentItem.FileMetadata, function(children){
-						this.processParent(parentItem, children);
-						onComplete(children);
-					}.bind(this));
-				} else {
-					onComplete([]);
-					return;
-				}
+				return;
 			}
 			return FileModel.prototype.getChildren.call(this, parentItem, /* function(items) */ onComplete);
 		},
 		getId: function(item){
 			if(item.type==="Project") { //$NON-NLS-0$
 				item = {Location: item.ContentLocation};
-			} else if (item.Dependency) {
+			} else if (item.Dependency && item.disconnected) {
 				item = item.Dependency;
 			}
 			return FileModel.prototype.getId.call(this, item);
@@ -130,43 +128,17 @@ define([
 			if(!redisplay &&  parentProject && parentProject.Location === this.projectLocation){
 				return;
 			}
-			return this.fileClient.loadWorkspace().then(function(workspaceMetadata){
-				return this.projectClient.readProject(fileMetadata, workspaceMetadata).then(function(projectData){
-					if(projectData) {
-						projectData.Workspace = workspaceMetadata;
-						this.projectLocation = parentProject ? parentProject.Location : null;
-						projectData.type = "Project"; //$NON-NLS-0$
-						projectData.Directory = true;
-						fileMetadata.type = "ProjectRoot"; //$NON-NLS-0$
-						projectData.children = [fileMetadata];
-						if (projectData.Dependencies) {
-							projectData.Dependencies.forEach(function(dependency) {
-								var item = {Dependency: dependency, Project: projectData};
-								projectData.children.push(item);
-								this.projectClient.getDependencyFileMetadata(dependency, projectData.WorkspaceLocation).then(function(dependencyMetadata) {
-									objects.mixin(item, {
-										FileMetadata: dependencyMetadata,
-										Location: dependencyMetadata.Location,
-										ChildrenLocation: dependencyMetadata.ChildrenLocation
-									});
-									this.renderer.updateRow(item, lib.node(this.model.getId(item)));
-									this.expandItem(item);
-								}.bind(this), function(error) {
-									item.disconnected = true;
-									this.renderer.updateRow(item, lib.node(this.model.getId(item)));
-									this.expandItem(item);
-								}.bind(this));
-							}.bind(this));
-						}
-						return CommonNavExplorer.prototype.display.call(this, projectData, redisplay).then(function() {
-							this.expandItem(fileMetadata);
-						}.bind(this));
-					}
+			return this.projectClient.readProject(fileMetadata).then(function(projectData){
+				this.projectLocation = parentProject ? parentProject.Location : null;
+				projectData.type = "Project"; //$NON-NLS-0$
+				projectData.Directory = true;
+				return CommonNavExplorer.prototype.display.call(this, projectData, redisplay).then(function() {
+					return this.expandItem(fileMetadata);
 				}.bind(this));
 			}.bind(this));
 		},
 		createModel: function() {
-			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders);
+			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.projectClient, this.fileMetadata);
 		},
 		registerCommands: function() {
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
@@ -203,31 +175,6 @@ define([
 	}
 	ProjectNavRenderer.prototype = Object.create(CommonNavRenderer.prototype);
 	objects.mixin(ProjectNavRenderer.prototype, {
-		updateRow: function(item, tableRow){
-			if(!tableRow){
-				return;
-			}
-			lib.empty(tableRow);
-			var i = 0;
-			var cell = this.getCellElement(i, item, tableRow);
-			while(cell){
-				tableRow.appendChild(cell);
-				if (i===0) {
-					if(this.getPrimColumnStyle){
-						cell.classList.add(this.getPrimColumnStyle()); //$NON-NLS-0$
-					} else {
-						cell.classList.add("navColumn"); //$NON-NLS-0$
-					}
-				} else {
-					if(this.getSecondaryColumnStyle){
-						cell.classList.add(this.getSecondaryColumnStyle()); //$NON-NLS-0$
-					} else {
-						cell.classList.add("secondaryColumn"); //$NON-NLS-0$
-					}
-				}
-				cell = this.getCellElement(++i, item, tableRow);
-			}
-		},
 		getCellElement: function(col_no, item, tableRow){
 			if((item.Dependency || item.type==="ProjectRoot") && col_no===0){ //$NON-NLS-0$
 				var col = document.createElement('td'); //$NON-NLS-0$
