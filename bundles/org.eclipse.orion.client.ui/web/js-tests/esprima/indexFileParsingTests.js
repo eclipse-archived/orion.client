@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 /*global define esprima console setTimeout doctrine*/
-define(["plugins/esprima/typesFromIndexFile", "plugins/esprima/typeEnvironment", "orion/assert"], function(mTypes, typeEnv, assert) {
+define(["javascript/esprima/typesFromIndexFile", "javascript/esprima/typeEnvironment", "orion/assert"], function(mTypes, typeEnv, assert) {
 
 	//////////////////////////////////////////////////////////
 	// helpers

@@ -1,13 +1,10 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
- * Copyright (c) 2013 IBM Corporation.
- *
- * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
- * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
- * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
- * You can obtain a current copy of the Eclipse Public License from
- * http://www.opensource.org/licenses/eclipse-1.0.php
+ * Copyright (c) 2012 VMware, Inc. and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *	 Andy Clement (VMware) - initial API and implementation
@@ -16,9 +13,16 @@
  ******************************************************************************/
 
 /*global define esprima doctrine inferencerPostOp*/
-define(["plugins/esprima/esprimaVisitor", "plugins/esprima/typeEnvironment", "plugins/esprima/typeInference", "plugins/esprima/typeUtils", "plugins/esprima/proposalUtils", "plugins/esprima/scriptedLogger", "orion/Deferred", "esprima/esprima"],
-		function(mVisitor, typeEnv, typeInf, typeUtils, proposalUtils, scriptedLogger, Deferred) {
-
+define([
+'javascript/esprima/esprimaVisitor', 
+'javascript/esprima/typeEnvironment', 
+'javascript/esprima/typeInference', 
+'javascript/esprima/typeUtils', 
+'javascript/esprima/proposalUtils', 
+'javascript/esprima/scriptedLogger', 
+'orion/Deferred', 
+'esprima/esprima'
+], function(mVisitor, typeEnv, typeInf, typeUtils, proposalUtils, scriptedLogger, Deferred, _) {
 
 	/**
 	 * Convert an array of parameters into a string and also compute linked editing positions

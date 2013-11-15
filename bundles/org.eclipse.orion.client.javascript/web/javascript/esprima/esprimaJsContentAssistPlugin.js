@@ -11,8 +11,8 @@
  *******************************************************************************/
 /*global define*/
 define([
-	'orion/plugin',
-	'plugins/esprima/esprimaJsContentAssist'
+'orion/plugin',
+'javascript/esprima/esprimaJsContentAssist'
 ], function(PluginProvider, esprimaContentAssistPlugin) {
 
 	var headers = {

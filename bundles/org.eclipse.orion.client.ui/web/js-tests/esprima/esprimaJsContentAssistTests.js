@@ -16,8 +16,8 @@
 
 /*global define esprima console setTimeout doctrine*/
 define([
-	"plugins/esprima/esprimaJsContentAssist",
-	"plugins/esprima/esprimaVisitor",
+	"javascript/esprima/esprimaJsContentAssist",
+	"javascript/esprima/esprimaVisitor",
 	"orion/assert",
 	"esprima/esprima",
 	"doctrine/doctrine",
