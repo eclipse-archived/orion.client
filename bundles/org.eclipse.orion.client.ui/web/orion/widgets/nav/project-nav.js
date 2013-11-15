@@ -62,7 +62,7 @@ define([
 					return this.projectClient.getDependencyFileMetadata(dependency, parentItem.WorkspaceLocation).then(function(dependencyMetadata) {
 						objects.mixin(item, dependencyMetadata);
 					}, function(error) {
-						item.disconnected = true;
+						item.Directory = item.disconnected = true;
 					});
 				}.bind(this))).then(function() {
 					this.processParent(parentItem, children);
@@ -176,34 +176,20 @@ define([
 	ProjectNavRenderer.prototype = Object.create(CommonNavRenderer.prototype);
 	objects.mixin(ProjectNavRenderer.prototype, {
 		getCellElement: function(col_no, item, tableRow){
+			var col = CommonNavRenderer.prototype.getCellElement.call(this, col_no, item, tableRow);
 			if((item.Dependency || item.type==="ProjectRoot") && col_no===0){ //$NON-NLS-0$
-				var col = document.createElement('td'); //$NON-NLS-0$
 				col.className = item.type==="ProjectRoot" ? "projectNavColumn projectPrimaryNavColumn" : "projectNavColumn"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				var span = document.createElement("span"); //$NON-NLS-0$
-				span.id = tableRow.id+"MainCol"; //$NON-NLS-0$
-				span.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
-				col.appendChild(span);
-				col.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
-				span.className = "mainNavColumn projectInformationNode"; //$NON-NLS-0$
-					// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, span);
+				var span = lib.$(".mainNavColumn", col); //$NON-NLS-0$
+				span.classList.add("projectInformationNode"); //$NON-NLS-0$
 				var nameText = item.Dependency ? item.Dependency.Name : (item.Project ? item.Project.Name : item.Name);
-				var itemNode = document.createElement("a"); //$NON-NLS-0$
+				var itemNode = lib.$("a", col); //$NON-NLS-0$
 				if(item.disconnected){
 					nameText += " " + messages.disconnected; //$NON-NLS-0$
-				} else {
-					if(item.Dependency && item.FileMetadata){
-						itemNode.href = uriTemplate.expand({ //$NON-NLS-0$
-							resource: item.FileMetadata.Location
-						});
-					} else if(item.Location){
-						itemNode.href = uriTemplate.expand({ //$NON-NLS-0$
-							resource: item.Location
-						});
-					}
+					itemNode.removeAttribute("href"); //$NON-NLS-0$
 				}
+				lib.empty(itemNode);
 				itemNode.appendChild(document.createTextNode(nameText));
-				
+
 				if(item.Dependency){
 					var actions = document.createElement("span"); //$NON-NLS-0$
 					actions.className = "mainNavColumn"; //$NON-NLS-0$
@@ -211,17 +197,9 @@ define([
 					this.explorer.commandRegistry.renderCommands("dependencyCommands", actions, item, this, "tool"); //$NON-NLS-1$ //$NON-NLS-0$
 					col.appendChild(actions);
 				}
-	
-				span.appendChild(itemNode);
-				this.explorer._makeDropTarget(item, itemNode);
-				this.explorer._makeDropTarget(item, tableRow);
-
-				// orion.explorers.FileExplorer#getNameNode
-				itemNode.id = tableRow.id + "NameLink"; //$NON-NLS-0$
-
 				return col;
 			}
-			return CommonNavRenderer.prototype.getCellElement.call(this, col_no, item, tableRow);
+			return col;
 		}
 	});
 	
