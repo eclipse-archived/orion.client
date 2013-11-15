@@ -30,6 +30,7 @@
 	padding-top:2px;
 	border:2px solid rgba(1,1,1,0.7);
 	border-top:0px solid rgba(1,1,1,0);
+	outline: none;
 }
 
 @-webkit-keyframes progressAnimation {
