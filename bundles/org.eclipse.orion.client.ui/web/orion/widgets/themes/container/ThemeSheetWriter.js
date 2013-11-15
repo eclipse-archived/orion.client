@@ -194,13 +194,12 @@ define(['orion/widgets/themes/ThemeClass'],
 			
 			styles.push( navlinkonpage );
 			
-			var progressIndicator = new ThemeClass.ThemeClass( 'progressPane_running' );
-			progressIndicator.style.background = 'url(../images/progress_running_dark.gif) no-repeat center';
-			progressIndicator.style.width = '16px';
-			progressIndicator.style.height = '16px';
+			if (this.bannerProgress) {
+				var progressIndicator = new ThemeClass.ThemeClass( 'topRowBanner .progressPane_running' );
+				progressIndicator.style.borderColor = this.bannerProgress;
+				styles.push( progressIndicator );
+			}	
 			
-			styles.push( progressIndicator );
-						
 			for( var s in styles ){
 				styleBlock = styleBlock + styles[s].toString();
 			}
@@ -371,6 +370,7 @@ define(['orion/widgets/themes/ThemeClass'],
 				this.search = settings.search.value;
 				this.content = settings.content.value;
 				this.toolpanel = settings.toolpanel.value;
+				this.bannerProgress = settings.bannerProgress.value;
 			}else{
 				this.navbar = settings.navbar;
 				this.button = settings.button;
@@ -382,6 +382,7 @@ define(['orion/widgets/themes/ThemeClass'],
 				this.search = settings.search;
 				this.content = settings.content;
 				this.toolpanel = settings.toolpanel;
+				this.bannerProgress = settings.bannerProgress;
 			}
 			
 			var sheet = this.writeNavigationStyle() + this.writeLocationStyle() + this.writeMainStyle() + this.writeButtonStyle();

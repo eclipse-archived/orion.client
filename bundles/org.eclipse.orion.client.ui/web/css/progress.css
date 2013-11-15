@@ -51,10 +51,8 @@
 	visibility: hidden;  /* accessibility.  don't tab here when invisible */
 }
 
-/* we don't sprite an animated gif */
 .progressPane_running {
-	background: url(../images/progress_running.gif) no-repeat center;  
-	width: 16px; height: 16px;
+	/* defined in images.css */
 }
 
 .progressPane_running_dialog {
