@@ -916,6 +916,10 @@ input {
 	width: 90%;
 }
 
+.orionMarkdown table th, .orionProject table th, .folderNav table th {
+	text-align: left;
+}
+
 .orionMarkdown table {
 	table-layout: fixed;
 }
