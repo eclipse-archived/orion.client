@@ -544,6 +544,117 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 		});
 	};
 
+	tests.test_NormalD1SortByPath = function() {
+		var crawler = new mSearchCrawler.SearchCrawler(reg, new mMockFileClient.MockFileClient(mockDataForPathSort), {
+			resource: "d1",
+			sort: "Path asc", //$NON-NLS-0$
+			rows: 40,
+			start: 0,
+			caseSensitive: false,
+			regEx: false,
+			fileType: "*.*",
+			keyword: "EveryWhere"
+		},
+		{location: "d1"});
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 5,
+				docs: [
+					{
+						Location: "CCC/f1_3.js",
+						Name: "f1_3.js"
+					},
+					{
+						Location: "DDD/f1_2_1.css",//The full location is bigger in order but the parent path(DDD) is smaller comapring to (DDD/AAA)
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "DDD/AAA/f1_2_2.html",//Same folder but different files
+						Name: "f1_2_2.html"
+					},
+					{
+						Location: "DDD/AAA/f1_2_4.txt",//Same folder but different files
+						Name: "f1_2_4.txt"
+					},
+					{
+						Location: "EEE/f1_1.js",
+						Name: "f1_1.js"
+					}
+				]
+			}
+		});
+	};
+
+	tests.test_NormalD1SortByName = function() {
+		var crawler = new mSearchCrawler.SearchCrawler(reg, new mMockFileClient.MockFileClient(mockDataForPathSort), {
+			resource: "d1",
+			sort: "NameLower asc", //$NON-NLS-0$
+			rows: 40,
+			start: 0,
+			caseSensitive: false,
+			regEx: false,
+			fileType: "*.*",
+			keyword: "EveryWhere"
+		},
+		{location: "d1"});
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 5,
+				docs: [
+					{
+						Location: "EEE/f1_1.js",
+						Name: "f1_1.js"
+					},
+					{
+						Location: "DDD/f1_2_1.css",//The full location is bigger in order but the parent path(DDD) is smaller comapring to (DDD/AAA)
+						Name: "f1_2_1.css"
+					},
+					{
+						Location: "DDD/AAA/f1_2_2.html",//Same folder but different files
+						Name: "f1_2_2.html"
+					},
+					{
+						Location: "DDD/AAA/f1_2_4.txt",//Same folder but different files
+						Name: "f1_2_4.txt"
+					},
+					{
+						Location: "CCC/f1_3.js",
+						Name: "f1_3.js"
+					}
+				]
+			}
+		});
+	};
+
+	tests.test_NormalD3SortByPath = function() {
+		var crawler = new mSearchCrawler.SearchCrawler(reg, new mMockFileClient.MockFileClient(mockDataForPathSort), {
+			resource: "d3",
+			sort: "Path asc", //$NON-NLS-0$
+			rows: 40,
+			start: 0,
+			caseSensitive: false,
+			regEx: false,
+			fileType: "*.*",
+			keyword: "EveryWhere"
+		},
+		{location: "d3"});
+		return _searchAndCompare(crawler, {
+			response: {
+				numFound: 2,
+				docs: [
+					{
+						Location: "AAA/f3_1.css",//Same folder but different files
+						Name: "f3_1.css"
+					},
+					{
+						Location: "AAA/f3_2.html",//Same folder but different files
+						Name: "f3_2.html"
+					}
+				]
+			}
+		});
+	};
+
 	tests.test_NormalCancel = function() {
 		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, {
 			resource: "root",
@@ -745,7 +856,7 @@ define(['orion/assert', 'mockFileClient.js', 'orion/crawler/searchCrawler', 'ori
 		});
 	};
 
-	tests.test_RegAllCaseSensitive = function() {
+	tests.test_RegExAllCaseSensitive = function() {
 		var crawler = new mSearchCrawler.SearchCrawler(reg, fileClient, {
 			resource: "root",
 			sort: "NameLower asc", //$NON-NLS-0$
