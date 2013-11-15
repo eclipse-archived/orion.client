@@ -55,6 +55,18 @@
 	/* defined in images.css */
 }
 
+.progressWarning .progressPane_running, .progressWarning .core-sprite-progress {
+	border-color: #c09853; 
+}
+
+.progressError .progressPane_running, .progressError .core-sprite-progress {
+	border-color: #b94a48; 
+}
+
+.progressNormal .progressPane_running, .progressNormal .core-sprite-progress {
+	border-color: #468847; 
+}
+
 .progressPane_running_dialog {
 	vertical-align: middle;
 	margin: 2px 8px 2px 2px;	
