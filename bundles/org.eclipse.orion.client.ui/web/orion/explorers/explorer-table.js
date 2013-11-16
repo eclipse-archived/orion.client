@@ -94,6 +94,9 @@ define([
 					function(children) {
 						if (self.destroyed) { return; }
 						onComplete(self.processParent(parentItem, children));
+					},
+					function() {
+						onComplete([]);
 					}
 				);
 			} else {

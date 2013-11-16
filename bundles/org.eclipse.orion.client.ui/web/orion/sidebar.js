@@ -161,8 +161,9 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 							}
 						} else {
 							getProjectJson(event.metadata).then(function(json) {
-								if (json) {
+								if (json && _self.getActiveViewModeId() !== id) {
 									showMode(true);
+									projectViewMode.project = event.metadata;
 									_self.setViewMode(id);
 								}
 							});

@@ -140,6 +140,10 @@ define([
 		createModel: function() {
 			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.projectClient, this.fileMetadata);
 		},
+		reroot: function(item) {
+			this.scopeUp(item.Location);
+			return new Deferred().reject();
+		},
 		registerCommands: function() {
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
 				var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
@@ -248,13 +252,14 @@ define([
 				toolbarNode: this.toolbarNode,
 				scopeUp: this.scopeUp
 			});
-			if (this.navigatorSelection && this.navigatorSelection.length > 0) {
-				var project = this.navigatorSelection[0];
+			if (this.project || (this.navigatorSelection && this.navigatorSelection.length > 0)) {
+				var project = this.project || this.navigatorSelection[0];
 				while (project.parent && project.parent.parent) {
 					project = project.parent;
 				}
 				this.explorer.display(project);
 				window.location.href = uriTemplate.expand({resource: project.Location});
+				this.project = null;
 			} else {
 				var resource = this.editorInputManager.getFileMetadata();
 				if (resource){

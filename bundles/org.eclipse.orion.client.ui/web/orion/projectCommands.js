@@ -189,9 +189,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				if(!(item.Dependency && item.Project && item.disconnected)){
 					return false;	
 				}
-				for(var i=0; i<dependencyTypes.length; i++){
-					if(dependencyTypes[i]===item.Dependency.Type){
-						return true;	
+				if (dependencyTypes) {
+					for(var i=0; i<dependencyTypes.length; i++){
+						if(dependencyTypes[i]===item.Dependency.Type){
+							return true;	
+						}
 					}
 				}
 				return false;
