@@ -40,6 +40,9 @@ exports.Explorer = (function() {
 	Explorer.prototype = /** @lends orion.explorer.Explorer.prototype */ {
 	
 		destroy: function() {
+			if (this._navHandler) {
+				this._navHandler.destroy();
+			}
 			if (this.model) {
 				this.model.destroy();
 			}
