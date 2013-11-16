@@ -121,14 +121,16 @@ define([
 	OutlineExplorer.prototype.filterChanged = function (filter) {
 		var navDict = this.getNavDict();
 		var itemMap = this.model.getIdItemMap();
+		var item;
 		
 		for (var id in itemMap) {
 			if (itemMap.hasOwnProperty(id)) {
-				if (-1 === id.indexOf(filter)) {
+				item = itemMap[id];
+				if (-1 === item.label.indexOf(filter)) {
 					//hide
 					navDict.getValue(id).rowDomNode.classList.add("hiddenRow");	//$NON-NLS-0$
 				} else {
-					//id matches filter, show row
+					//label matches filter, show row
 					navDict.getValue(id).rowDomNode.classList.remove("hiddenRow"); //$NON-NLS-0$
 				}
 			}
