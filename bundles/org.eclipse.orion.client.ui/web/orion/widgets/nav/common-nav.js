@@ -172,6 +172,9 @@ define([
 			var resource = params.resource;
 			delete params.resource;
 			if (childrenLocation) {
+				if (params.navigate === childrenLocation) {
+					return;
+				}
 				params.navigate = childrenLocation;
 			} else {
 				delete params.navigate;
