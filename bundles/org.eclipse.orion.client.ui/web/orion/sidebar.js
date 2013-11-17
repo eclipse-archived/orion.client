@@ -1,12 +1,11 @@
 /*global console define*/
 /*jslint browser:true sub:true*/
 define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', 'orion/webui/littlelib',
-		'orion/URITemplate',
 		'orion/PageUtil',
 		'orion/widgets/nav/mini-nav',
 		'orion/widgets/nav/project-nav',
 		'i18n!orion/edit/nls/messages'],
-		function(Deferred, objects, mCommands, mOutliner, lib, URITemplate, PageUtil, MiniNavViewMode, ProjectNavViewMode, messages) {
+		function(Deferred, objects, mCommands, mOutliner, lib, PageUtil, MiniNavViewMode, ProjectNavViewMode, messages) {
 
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -99,19 +98,8 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				toolbarNode: modeContributionToolbar
 			}));
 			
-			if(this.serviceRegistry.getServiceReferences("orion.projects").length>0){ //$NON-NLS-0$
-				var _self = this;
-				var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
-				var scopeUp = function() {
-					var input = PageUtil.matchResourceParameters();
-					var resource = input.resource;
-					delete input.navigate;
-					delete input.resource;
-					window.location.href = uriTemplate.expand({resource: resource, params: input});
-					_self.setViewMode("nav"); //$NON-NLS-0$
-				};
-				var id = "project"; //$NON-NLS-0$
-				var projectViewMode = new ProjectNavViewMode({ //$NON-NLS-0$
+			if (this.serviceRegistry.getServiceReferences("orion.projects").length > 0) { //$NON-NLS-0$
+				this.projectViewMode = new ProjectNavViewMode({
 					commandRegistry: commandRegistry,
 					contentTypeRegistry: contentTypeRegistry,
 					fileClient: fileClient,
@@ -120,70 +108,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 					sidebarNavInputManager: this.sidebarNavInputManager,
 					serviceRegistry: serviceRegistry,
 					toolbarNode: modeContributionToolbar,
-					scopeUp: scopeUp
-				});
-				var getProjectJson = function(metadata) {
-					function getJson(children) {
-						for(var i=0; i<children.length; i++){
-							if(!children[i].Directory && children[i].Name === "project.json"){ //$NON-NLS-0$
-								return children[i];
-							}
-						}
-						return null;
-					}
-					var deferred = new Deferred();
-					if (metadata.Children){
-						deferred.resolve(getJson(metadata.Children));
-					} else if(metadata.ChildrenLocation){
-						_self.fileClient.fetchChildren(metadata.ChildrenLocation).then(function(children){
-							deferred.resolve(getJson(children));
-						});
-					}
-					return deferred;
-				};
-				var showMode = function(show) {
-					var showing = !!_self.getViewMode(id);
-					if (showing === show) { return; }
-					if (show) {
-						_self.addViewMode(id, projectViewMode);
-						_self.renderViewModeMenu();
-					} else {
-						_self.removeViewMode(id);
-						_self.renderViewModeMenu();
-					}
-				};
-				// Switch to project view mode if a project is opened
-				this.editorInputManager.addEventListener("InputChanged", function(event){ //$NON-NLS-0$
-					if(event.metadata && event.metadata.Directory){
-						if(!event.metadata.Parents) {
-							if (_self.getActiveViewModeId() === id) {
-								scopeUp();
-							}
-						} else {
-							getProjectJson(event.metadata).then(function(json) {
-								if (json && _self.getActiveViewModeId() !== id) {
-									showMode(true);
-									projectViewMode.project = event.metadata;
-									_self.setViewMode(id);
-								}
-							});
-						}
-					}
-				});
-				// Only show project view mode if selection is in a project
-				this.sidebarNavInputManager.addEventListener("selectionChanged", function(event){ //$NON-NLS-0$
-					if (_self.getActiveViewModeId() === id) { return; }
-					var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
-					if (item) {
-						while (item.parent && item.parent.parent) {
-							item = item.parent;
-						}
-						getProjectJson(item).then(function(json) {
-							showMode(!!json);
-						});
-					} else {
-						showMode(false);
-					}
+					sidebar: this
 				});
 			}
 

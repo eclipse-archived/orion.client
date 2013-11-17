@@ -17,16 +17,18 @@ define([
 	'orion/explorers/explorer-table',
 	'orion/widgets/nav/common-nav',
 	'orion/projectCommands',
+	'orion/PageUtil',
 	'orion/URITemplate',
 	'orion/Deferred',
 	'orion/projectClient'
 ], function(
 	messages, objects, lib, mExplorer, mCommonNav, ProjectCommands,
-	URITemplate, Deferred, mProjectClient
+	PageUtil, URITemplate, Deferred, mProjectClient
 ) {
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;
 	var FileModel = mExplorer.FileModel;
+	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 
 	function ProjectNavModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders, projectClient, fileMetadata){
 		this.projectClient = projectClient;
@@ -93,7 +95,7 @@ define([
 	 */
 	function ProjectNavExplorer(params) {
 		this.projectClient = params.projectClient;
-		this.scopeUp = params.scopeUp;
+		this.sidebar = params.sidebar;
 		CommonNavExplorer.apply(this, arguments);
 	}
 	ProjectNavExplorer.prototype = Object.create(CommonNavExplorer.prototype);
@@ -162,6 +164,14 @@ define([
 				return projectCommandsDef;
 			}.bind(this));
 		},
+		scopeUp: function() {
+			var input = PageUtil.matchResourceParameters();
+			var resource = input.resource;
+			delete input.navigate;
+			delete input.resource;
+			window.location.href = uriTemplate.expand({resource: resource, params: input});
+			this.sidebar.setViewMode("nav"); //$NON-NLS-0$
+		},
 		changedItem: function(item, forceExpand){
 			if(!item || !this.model){
 				return this.display(this.fileMetadata, true);
@@ -173,7 +183,6 @@ define([
 		}
 	});
 
-	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	function ProjectNavRenderer() {
 		CommonNavRenderer.apply(this, arguments);
 	}
@@ -221,18 +230,43 @@ define([
 		this.toolbarNode = params.toolbarNode;
 		this.serviceRegistry = params.serviceRegistry;
 		this.projectClient = this.serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
-		this.scopeUp = params.scopeUp;
+		this.sidebar = params.sidebar;
 		this.explorer = null;
 		var _self = this;
-		if(this.sidebarNavInputManager){
-			this.navSelectionListener = function(event) {
-				_self.navigatorSelection = event.selections;
-			};
-			this.sidebarNavInputManager.addEventListener("selectionChanged", this.navSelectionListener); //$NON-NLS-0$
-		}
+		var sidebar = this.sidebar;
+		// Switch to project view mode if a project is opened
+		this.editorInputManager.addEventListener("InputChanged", function(event){ //$NON-NLS-0$
+			if (event.metadata && event.metadata.Directory && sidebar.getActiveViewModeId() !== _self.id) {
+				_self.getProjectJson(event.metadata).then(function(json) {
+					if (json) {
+						_self.project = event.metadata;
+						_self.showViewMode(true);
+						sidebar.setViewMode(_self.id);
+					}
+				});
+			}
+		});
+		// Only show project view mode if selection is in a project
+		this.sidebarNavInputManager.addEventListener("selectionChanged", function(event){ //$NON-NLS-0$
+			if (sidebar.getActiveViewModeId() === _self.id) { return; }
+			_self.project = null;
+			var item = event.selections && event.selections.length > 0 ? event.selections[0] : null;
+			if (item) {
+				while (item.parent && item.parent.parent) {
+					item = item.parent;
+				}
+				_self.getProjectJson(item).then(function(json) {
+					_self.project = item;
+					_self.showViewMode(!!json);
+				});
+			} else {
+				_self.showViewMode(false);
+			}
+		});
 	}
 	objects.mixin(ProjectNavViewMode.prototype, {
 		label: messages["Project"],
+		id: "project", //$NON-NLS-0$
 		create: function() {
 			var _self = this;
 			this.explorer = new ProjectNavExplorer({
@@ -250,28 +284,47 @@ define([
 				},
 				serviceRegistry: this.serviceRegistry,
 				toolbarNode: this.toolbarNode,
-				scopeUp: this.scopeUp
+				sidebar: this.sidebar
 			});
-			if (this.project || (this.navigatorSelection && this.navigatorSelection.length > 0)) {
-				var project = this.project || this.navigatorSelection[0];
-				while (project.parent && project.parent.parent) {
-					project = project.parent;
-				}
-				this.explorer.display(project);
-				window.location.href = uriTemplate.expand({resource: project.Location});
-				this.project = null;
-			} else {
-				var resource = this.editorInputManager.getFileMetadata();
-				if (resource){
-					this.explorer.display(resource);
-				}
-			}
+			this.explorer.display(this.project);
+			window.location.href = uriTemplate.expand({resource: this.project.Location});
 		},
 		destroy: function() {
 			if (this.explorer) {
 				this.explorer.destroy();
 			}
 			this.explorer = null;
+		},
+		getProjectJson: function(metadata) {
+			function getJson(children) {
+				for(var i=0; i<children.length; i++){
+					if(!children[i].Directory && children[i].Name === "project.json"){ //$NON-NLS-0$
+						return children[i];
+					}
+				}
+				return null;
+			}
+			var deferred = new Deferred();
+			if (metadata.Children){
+				deferred.resolve(getJson(metadata.Children));
+			} else if(metadata.ChildrenLocation){
+				this.fileClient.fetchChildren(metadata.ChildrenLocation).then(function(children){
+					deferred.resolve(getJson(children));
+				});
+			}
+			return deferred;
+		},
+		showViewMode: function(show) {
+			var sidebar = this.sidebar;
+			var showing = !!sidebar.getViewMode(this.id);
+			if (showing === show) { return; }
+			if (show) {
+				sidebar.addViewMode(this.id, this);
+				sidebar.renderViewModeMenu();
+			} else {
+				sidebar.removeViewMode(this.id);
+				sidebar.renderViewModeMenu();
+			}
 		}
 	});
 
