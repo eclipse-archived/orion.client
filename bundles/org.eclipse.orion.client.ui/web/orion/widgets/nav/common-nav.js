@@ -81,6 +81,27 @@ define([
 	}
 	CommonNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(CommonNavExplorer.prototype, /** @lends orion.sidebar.CommonNavExplorer.prototype */ {
+		onLinkClick: function(event) {
+			FileExplorer.prototype.onLinkClick.call(this, event);
+			//Redispatch to nav input manager
+			this.sidebarNavInputManager.dispatchEvent(event);
+			var navHandler = this.getNavHandler();
+			if (!navHandler || !event.item.Directory) {
+				return;
+			}
+			var folder = event.item;
+			navHandler.cursorOn(folder);
+			navHandler.setSelection(folder, false);
+			// now toggle its expand/collapse state
+			var curModel = navHandler._modelIterator.cursor();
+			if (navHandler.isExpandable(curModel)){
+				if (!navHandler.isExpanded(curModel)){
+					this.myTree.expand(curModel);
+				} else {
+					this.myTree.collapse(curModel);
+				}
+			}
+		},
 		onModelCreate: function(event) {
 			return FileExplorer.prototype.onModelCreate.call(this, event).then(function () {
 				this.sidebarNavInputManager.dispatchEvent(event);
@@ -264,40 +285,12 @@ define([
 			if (this.showFolderLinks && folderNode.tagName === "A") { //$NON-NLS-0$
 				folderNode.href = uriTemplate.expand({resource: folder.Location});
 				folderNode.classList.add("commonNavFolder"); //$NON-NLS-0$
-				// TODO wasteful. Should attach 1 listener to parent element, then get folder model item from nav handler
-				folderNode.addEventListener("click", this.toggleFolderExpansionState.bind(this, folder, false)); //$NON-NLS-0$
 			} else {
 				folderNode.classList.add("nav_fakelink"); //$NON-NLS-0$
 			}
 			return folderNode;
 		},
 		emptyCallback: function() {
-		},
-		/**
-		 * @param {Object} folder
-		 * @param {Boolean} preventDefault
-		 * @param {Event} evt
-		 */
-		toggleFolderExpansionState: function(folder, preventDefault, evt) {
-			var navHandler = this.explorer.getNavHandler();
-			if (!navHandler) {
-				return;
-			}
-			navHandler.cursorOn(folder);
-			navHandler.setSelection(folder, false);
-			// now toggle its expand/collapse state
-			var curModel = navHandler._modelIterator.cursor();
-			if (navHandler.isExpandable(curModel)){
-				if (!navHandler.isExpanded(curModel)){
-						this.explorer.myTree.expand(curModel);
-				} else {
-						this.explorer.myTree.collapse(curModel);
-				}
-				if (preventDefault) {
-					evt.preventDefault();
-				}
-				return false;
-			}
 		}
 	});
 	return {

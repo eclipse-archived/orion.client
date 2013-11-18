@@ -235,16 +235,22 @@ define([
 		var _self = this;
 		var sidebar = this.sidebar;
 		// Switch to project view mode if a project is opened
-		this.editorInputManager.addEventListener("InputChanged", function(event){ //$NON-NLS-0$
-			if (event.metadata && event.metadata.Directory && sidebar.getActiveViewModeId() !== _self.id) {
-				_self.getProjectJson(event.metadata).then(function(json) {
+		function openProject(metadata){
+			if (metadata && metadata.Directory && sidebar.getActiveViewModeId() !== _self.id) {
+				_self.getProjectJson(metadata).then(function(json) {
 					if (json) {
-						_self.project = event.metadata;
+						_self.project = metadata;
 						_self.showViewMode(true);
 						sidebar.setViewMode(_self.id);
 					}
 				});
 			}
+		}
+		this.editorInputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
+			openProject(event.metadata);
+		});
+		this.sidebarNavInputManager.addEventListener("linkClick", function(event){ //$NON-NLS-0$
+			openProject(event.item);
 		});
 		// Only show project view mode if selection is in a project
 		this.sidebarNavInputManager.addEventListener("selectionChanged", function(event){ //$NON-NLS-0$

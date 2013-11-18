@@ -179,6 +179,25 @@ define([
 		 "move", "moveMultiple"].forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
 				modelEventDispatcher.addEventListener(eventType, _self._modelListeners[eventType] = _self.modelHandler[eventType].bind(_self));
 			});
+			
+		this._clickListener = function(evt) {
+			if (evt.target.tagName === "A") { //$NON-NLS-0$
+				var temp = evt.target;
+				while (temp) {
+					if (temp._item) {
+						break;
+					}
+					temp = temp.parentNode;
+				}
+				if (temp && temp._item) {
+					_self.onLinkClick({type: "linkClick", item: temp._item}); //$NON-NLS-0$
+				}
+			}
+		};
+		var parent = lib.node(this.parentId);
+		if (parent) {
+			parent.addEventListener("click", this._clickListener); //$NON-NLS-0$
+		}
 
 		// Same tab/new tab setting
 		var renderer = this.renderer;
@@ -208,7 +227,14 @@ define([
 			Object.keys(this._modelListeners).forEach(function(eventType) {
 				_self.modelEventDispatcher.removeEventListener(eventType, _self._modelListeners[eventType]);
 			});
+			var parent = lib.node(this.parentId);
+			if (parent) {
+				parent.removeEventListener("click", this._clickListener); //$NON-NLS-0$
+			}
 			mExplorer.Explorer.prototype.destroy.call(this);
+		},
+		onLinkClick: function(clickEvent) {
+			this.dispatchEvent(clickEvent);
 		},
 		onModelCreate: function(modelEvent) {
 			return this.changedItem(modelEvent.parent, true);
