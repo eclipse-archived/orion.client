@@ -159,6 +159,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	 * @property {Number} [tabSize=4] The number of spaces in a tab.
 	 * @property {Boolean} [singleMode=false] whether or not the editor is in single line mode.
 	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
+	 * @property {Boolean} [wrapable=false] whether or not the view is wrappable.
 	 * @property {Function} [statusReporter] a status reporter.
 	 * @property {String} [title=""] the editor title.
 	 * @property {String} [contents=""] the editor contents.
@@ -227,7 +228,8 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 				singleMode: options.singleMode,
 				themeClass: options.themeClass,
 				theme: options.theme,
-				wrapMode: options.wrapMode
+				wrapMode: options.wrapMode,
+				wrappable: options.wrappable
 			});
 		};
 
