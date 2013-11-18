@@ -269,8 +269,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		dependencyTypes =  dependencyTypes || [];
 		
 		var addFolderCommand = new mCommands.Command({
-			name: "Add External Folder",
-			tooltip: "Add an external folder from workspace",
+			name: "Add Associated Folder",
+			tooltip: "Add an associated folder from workspace",
 			id: "orion.project.addFolder", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
