@@ -31,7 +31,6 @@ eclipse.GitService = (function() {
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
 					"orion.git.provider", this); //$NON-NLS-0$
-			this._sshService = serviceRegistry.getService("orion.net.ssh"); //$NON-NLS-0$
 		}
 	}
 

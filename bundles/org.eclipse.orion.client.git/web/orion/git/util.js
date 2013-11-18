@@ -8,19 +8,18 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window document navigator*/
+/*global define window document navigator URL*/
 
 /**
  * This class contains static utility methods. It is not intended to be instantiated.
  * @class This class contains static utility methods.
  * @name orion.util
  */
-define(['i18n!git/nls/gitmessages', 'orion/compare/compareCommands', 'orion/compare/resourceComparer', 'orion/webui/littlelib'], function(messages, mCompareCommands, mResourceComparer, lib) {
+define(['i18n!git/nls/gitmessages', 'orion/compare/compareCommands', 'orion/compare/resourceComparer', 'orion/webui/littlelib', 'orion/URL-shim'], 
+function(messages, mCompareCommands, mResourceComparer, lib) {
                 
 	var interestedUnstagedGroup = ["Missing", "Modified", "Untracked", "Conflicting"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var interestedStagedGroup = ["Added", "Changed", "Removed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var conflictPatterns = [["Both", "Modified", "Added", "Changed", "Missing"], ["RemoteDelete", "Untracked", "Removed"], ["LocalDelete", "Modified", "Added", "Missing"]]; //$NON-NLS-11$ //$NON-NLS-10$ //$NON-NLS-9$ //$NON-NLS-8$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var conflictType = "Conflicting"; //$NON-NLS-0$
 	
 	var statusUILocation = "git/git-status.html"; //$NON-NLS-0$
 	
@@ -104,6 +103,38 @@ define(['i18n!git/nls/gitmessages', 'orion/compare/compareCommands', 'orion/comp
 		});
 	}
 	
+	/* parses ssh gitUrl to get hostname and port */
+	function parseSshGitUrl(gitUrl){
+		try {
+			/* try ssh:// protocol */
+			var url = new URL(gitUrl);
+			return {
+				host : url.hostname,
+				port : url.port
+			};
+					
+		} catch(e){
+			/* try scp-like uri */
+			try {
+				/* [user@]host.xz:path/to/repo.git/ */
+				var scp = gitUrl.split(":");
+				var hostPart = scp[0].split("@");
+				var host = hostPart.length > 1 ? hostPart[1] : hostPart[0];
+				return {
+					host : host,
+					port : 22
+				};
+				
+			} catch(ex){
+				/* admit failure */
+				return {
+					host : "",
+					port : ""
+				};
+			}
+		}
+	}
+	
 	//return module exports
 	return {
 		statusUILocation: statusUILocation,
@@ -112,6 +143,7 @@ define(['i18n!git/nls/gitmessages', 'orion/compare/compareCommands', 'orion/comp
 		isChange: isChange,
 		hasStagedChanges: hasStagedChanges,
 		hasUnstagedChanges: hasUnstagedChanges,
-		createCompareWidget: createCompareWidget
+		createCompareWidget: createCompareWidget,
+		parseSshGitUrl: parseSshGitUrl
 	};
 });
