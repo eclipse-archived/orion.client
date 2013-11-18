@@ -2220,7 +2220,7 @@ var exports = {};
 										function(repoJson){
 											if (repoJson.Children[0].GitUrl === item.url){
 												window.location = require.toUrl(editTemplate.expand({
-													resource: repoJson.Children[0].ContentLocation + "?depth=1" //$NON-NLS-0$
+													resource: repoJson.Children[0].ContentLocation
 												}));
 											} else {
 												console.info("Folder project is used");
