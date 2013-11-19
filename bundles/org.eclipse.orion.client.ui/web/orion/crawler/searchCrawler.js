@@ -40,8 +40,8 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 		this._location = options && options.location;
 		this._childrenLocation = options && options.childrenLocation ? options.childrenLocation : this._location;   
 		this._cancelled = false;
-		this._statusService = this.registry.getService("orion.page.message");
-		this._progressService = this.registry.getService("orion.page.progress");
+		this._statusService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+		this._progressService = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
 		if(this._statusService) {
 			this._statusService.setCancelFunction(function() {this._cancelFileContentsSearch();}.bind(this));
 		}
@@ -61,9 +61,14 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 			var crawler = this;
 			this._visitRecursively(this._childrenLocation).then(function(){
 				if(!crawler._cancelled) {
-					crawler._sort(crawler.fileLocations);
-					var response = {numFound: crawler.fileLocations.length, docs: crawler.fileLocations };
-					crawler._onSearchComplete({response: response});
+					crawler._reportResult();
+				}
+			}.bind(crawler),
+			function(error){
+				crawler._reportResult();
+				if(crawler._statusService && error.name === "Cancel") { //$NON-NLS-0$
+					console.log("Crawling search cancelled. Deferred array length : " + crawler._deferredArray.length); //$NON-NLS-0$
+					crawler._statusService.setProgressResult({Message: messages["Search cancelled by user"], Severity: "Warning"}); //$NON-NLS-0$
 				}
 			}.bind(crawler));
 		}.bind(this));
@@ -122,7 +127,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 		onBegin();
 		contentTypeService.getContentTypes().then(function(ct) {
 			that.contentTypesCache = ct;
-			var result = that._visitRecursively(that._childrenLocation).then(function(){ //$NON-NLS-0$
+			that._visitRecursively(that._childrenLocation).then(function(){ //$NON-NLS-0$
 					that._buildingSkeleton = false;
 					onComplete();
 					if(that.searchHelper && !that._buildSkeletonOnly){
@@ -132,24 +137,10 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 		});
 	};
 	
-	SearchCrawler.prototype._searchCompleted = function(){
-		console.log("Search Completed.");//$NON-NLS-0$
-	};
-	
-	SearchCrawler.prototype._searchFiles = function(){
-		var results = [];
-		if(this.fileLocations.length > 0){
-			for (var i = 0; i < this.fileLocations.length ; i++){
-				results.push(this._sniffSearch(this.fileLocations[i]));
-			}
-		}
-		return Deferred.all(results);
-	};
-		
 	SearchCrawler.prototype._sort = function(fileArray){
 		fileArray.sort(function(a, b) {
 			var n1, n2;
-			if(this._searchParams.sort === "Path asc"){
+			if(this._searchParams.sort === "Path asc"){ //$NON-NLS-0$
 				//Folder equals to Location's substring after tailing out the file name
 				//We can not purely sort on Location because "Location" includes the file name at the tail.
 				//E.g. "DDD/f1_2_1.css" will be lined up after "DDD/AAA/f1_2_2.html" if we do so.
@@ -164,6 +155,12 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 			}
 			return this._sortOnNameSingle(a, b);
 		}.bind(this)); 
+	};
+		
+	SearchCrawler.prototype._reportResult = function(){
+		this._sort(this.fileLocations);
+		var response = {numFound: this.fileLocations.length, docs: this.fileLocations };
+		this._onSearchComplete({response: response});
 	};
 		
 	SearchCrawler.prototype._sortOnNameSingle = function(a, b){
@@ -199,7 +196,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 						results.push(_this._buildSingleSkeleton(children[i]));
 					}else if(!_this._cancelled) {
 						var contentType = mContentTypes.getFilenameContentType(children[i].Name, _this.contentTypesCache);
-						if(contentType && (contentType['extends'] === "text/plain" || contentType.id === "text/plain") && _this._onFileType(contentType)){ //$NON-NLS-0$ //$NON-NLS-0$ //$NON-NLS-0$
+						if(contentType && (contentType['extends'] === "text/plain" || contentType.id === "text/plain") && _this._onFileType(contentType)){ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							var fileDeferred = _this._sniffSearch(children[i]);
 							results.push(fileDeferred);
 							_this._deferredArray.push(fileDeferred);
@@ -231,6 +228,9 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 	};
 
 	SearchCrawler.prototype._reportSingleHit = function(fileObj){
+		if(this._cancelled){
+			return;
+		}
 		fileObj.LastModified = fileObj.LocalTimeStamp;
 		this.fileLocations.push(fileObj);
 		this._hitCounter++;
@@ -245,13 +245,6 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 			this._deferredArray.forEach(function(result) {
 				result.cancel();
 			});
-		}
-		this._sort(this.fileLocations);
-		var response = {numFound: this.fileLocations.length, docs: this.fileLocations };
-		this._onSearchComplete({response: response});
-		console.log("Crawling search cancelled. Deferred array length : " + this._deferredArray.length); //$NON-NLS-0$
-		if(this._statusService) {
-			this._statusService.setProgressResult({Message: messages["Search cancelled by user"], Severity: "Warning"});
 		}
 	};
 	

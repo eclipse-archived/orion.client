@@ -47,7 +47,8 @@ define(['orion/Deferred'], function(Deferred) {
 		fetchChildren: function(location) {
 			var result = this._findObjByLocation(location, this._root);
 			var df = new Deferred();
-			df.resolve(result && result.Children? result.Children : []);
+			window.setTimeout(function() {df.resolve(result && result.Children? result.Children : []);}, 2);
+			//df.resolve(result && result.Children? result.Children : []);
 			return df;
 		},
 		/**
@@ -61,7 +62,8 @@ define(['orion/Deferred'], function(Deferred) {
 		read: function(location, isMetadata, acceptPatch) {
 			var result = this._findObjByLocation(location, this._root);
 			var df = new Deferred();
-			df.resolve(result && result.Contents ? result.Contents : "");
+			window.setTimeout(function() {df.resolve(result && result.Contents ? result.Contents : "");}, 2);
+			//df.resolve(result && result.Contents ? result.Contents : "");
 			return df;
 		}
 	};
