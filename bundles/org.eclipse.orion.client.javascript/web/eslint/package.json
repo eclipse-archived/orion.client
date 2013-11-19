@@ -24,7 +24,9 @@
         "escope": "0.0.14"
     },
     "devDependencies": {
-        "vows": "~0.7.0",
+        "mocha": "~1.14.0"
+    },
+    "removedDevDependencies": {
         "istanbul": "~0.1.10",
         "sinon": "*",
         "jshint": "~2.1.4"
