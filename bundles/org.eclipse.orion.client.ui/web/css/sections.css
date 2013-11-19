@@ -81,16 +81,3 @@ sectionAnchor {
     font-weight: bold;
     font-size: 1.2em;
 }
-
-.outlineFilter {
-	border: 1px solid black;
-	border-radius: 4px;
-	box-shadow: 0 2px 1px #888888;
-	float: left;
-	text-align: left;
-	width: 99%;
-}
-
-.hiddenRow {
-	display: none;
-}

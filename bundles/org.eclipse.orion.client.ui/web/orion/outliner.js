@@ -128,10 +128,10 @@ define([
 				item = itemMap[id];
 				if (-1 === item.label.indexOf(filter)) {
 					//hide
-					navDict.getValue(id).rowDomNode.classList.add("hiddenRow");	//$NON-NLS-0$
+					navDict.getValue(id).rowDomNode.classList.add("outlineRowHidden");	//$NON-NLS-0$
 				} else {
 					//label matches filter, show row
-					navDict.getValue(id).rowDomNode.classList.remove("hiddenRow"); //$NON-NLS-0$
+					navDict.getValue(id).rowDomNode.classList.remove("outlineRowHidden"); //$NON-NLS-0$
 				}
 			}
 		}		
