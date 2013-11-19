@@ -485,20 +485,37 @@ exports.ExplorerNavHandler = (function() {
 			return value && value.rowDomNode ? value.rowDomNode :  lib.node(modelId);
 		},
 		
-		iterate: function(forward, forceExpand, selecting)	{
+		iterate: function(forward, forceExpand, selecting, visibleOnly)	{
+			var currentItem = null;
+			
 			if(this.topIterationNodes.length === 0){
 				return;
 			}
-			if(this._modelIterator.iterate(forward, forceExpand)){
-				this.cursorOn(null, false, forward);
-				if(selecting){
-					var previousModelInSelection = this._inSelection(this._modelIterator.prevCursor());
-					var currentModelInselection = this._inSelection(this._modelIterator.cursor());
-					if(previousModelInSelection >= 0 && currentModelInselection >= 0) {
-						this.setSelection(this._modelIterator.prevCursor(), true);
-					} else {
-						this.setSelection(this.currentModel(), true);
+			
+			currentItem = this._modelIterator.iterate(forward, forceExpand);
+			if(currentItem){
+				this._setCursorOnItem(forward, selecting);
+			}
+				
+			if (visibleOnly && currentItem) {
+				while (currentItem && currentItem.isHidden) {
+					currentItem = this._modelIterator.iterate(forward, forceExpand);
+					if(currentItem){
+						this._setCursorOnItem(forward, selecting);
 					}
+				}
+			}
+		},
+		
+		_setCursorOnItem: function(forward, selecting) {
+			this.cursorOn(null, false, forward);
+			if(selecting){
+				var previousModelInSelection = this._inSelection(this._modelIterator.prevCursor());
+				var currentModelInselection = this._inSelection(this._modelIterator.cursor());
+				if(previousModelInSelection >= 0 && currentModelInselection >= 0) {
+					this.setSelection(this._modelIterator.prevCursor(), true);
+				} else {
+					this.setSelection(this.currentModel(), true);
 				}
 			}
 		},
@@ -580,7 +597,7 @@ exports.ExplorerNavHandler = (function() {
 		//Up arrow key iterates the current row backward. If control key is on, browser's scroll up behavior takes over.
 		//If shift key is on, it toggles the check box and iterates backward.
 		onUpArrow: function(e) {
-			this.iterate(false, false, e.shiftKey);
+			this.iterate(false, false, e.shiftKey, true);
 			if(!this._ctrlKeyOn(e) && !e.shiftKey){
 				this.setSelection(this.currentModel(), false, true);
 			}
@@ -591,7 +608,7 @@ exports.ExplorerNavHandler = (function() {
 		//Down arrow key iterates the current row forward. If control key is on, browser's scroll down behavior takes over.
 		//If shift key is on, it toggles the check box and iterates forward.
 		onDownArrow: function(e) {
-			this.iterate(true, false, e.shiftKey);
+			this.iterate(true, false, e.shiftKey, true);
 			if(!this._ctrlKeyOn(e) && !e.shiftKey){
 				this.setSelection(this.currentModel(), false, true);
 			}
@@ -701,6 +718,15 @@ exports.ExplorerNavHandler = (function() {
 						window.location.href = div.href;
 					}
 				}
+			}
+			if(this.explorer.renderer.performRowAction){
+				var curModel = this._modelIterator.cursor();
+				if(!curModel){
+					return;
+				}
+				this.explorer.renderer.performRowAction(e, curModel);
+				e.preventDefault();
+				return false;
 			}
 		}
 	};

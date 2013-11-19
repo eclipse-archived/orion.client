@@ -53,6 +53,7 @@ define([
 		} else if (item.line || item.column || item.start) {
 			var href = new URITemplate("#{,resource,params*}").expand({resource: this.title, params: item}); //$NON-NLS-0$
 			this._createLink(item.label, href, elementNode);
+			item.outlineLink = href;
 		} else if (item.label) {
 			elementNode.appendChild(document.createTextNode(item.label)); //$NON-NLS-0$
 		}
@@ -61,27 +62,22 @@ define([
 	OutlineRenderer.prototype._createLink = function(text, href, parentNode) {
 		var link = document.createElement("a"); //$NON-NLS-0$
 		parentNode.appendChild(link);
-		// if there is no selection service, we rely on normal link following
-		if (!this.selectionService) {
-			link.href = href;
-		} else {
-			link.style.cursor = "pointer"; //$NON-NLS-0$
-		}
+		
 		link.classList.add("navlinkonpage"); //$NON-NLS-0$
 		link.appendChild(document.createTextNode(text));
+		
 		// if a selection service has been specified, we will use it for link selection.
 		// Otherwise we assume following the href in the anchor tag is enough.
 		if (this.selectionService) {
-			var selectionService = this.selectionService;
-			var url = href;
+			link.style.cursor = "pointer"; //$NON-NLS-0$
 			link.addEventListener("click", function(event) { //$NON-NLS-0$
-				if (mUIUtils.openInNewWindow(event)) {
-					mUIUtils.followLink(url, event);
-				} else {
-					selectionService.setSelections(url);
-				}
-			}, false);
+				this._followLink(event, href);
+			}.bind(this), false);
+		} else {
+			// if there is no selection service, we rely on normal link following
+			link.href = href;	
 		}
+		
 		return link;
 	};
 	
@@ -91,6 +87,8 @@ define([
 		
 		if (0 === col_no) {
 			th = document.createElement("th"); //$NON-NLS-0$
+			th.classList.add("outlineFilterCell");
+			
 			input = document.createElement("input"); //$NON-NLS-0$
 			input.className = "outlineFilter"; //$NON-NLS-0$
 			input.placeholder = messages["Filter"]; //$NON-NLS-0$
@@ -98,11 +96,46 @@ define([
 			input.addEventListener("input", function (e) { //$NON-NLS-0$
 				this.explorer.filterChanged(input.value);
 			}.bind(this));
+			
+			input.addEventListener("keydown", function (e) { //$NON-NLS-0$
+				var navHandler = null;
+				var firstNode = null;
+				if (e.keyCode === lib.KEY.DOWN)	{
+					input.blur();
+					navHandler = this.explorer.getNavHandler();
+					navHandler.focus();
+					if (navHandler.getTopLevelNodes()) {
+						firstNode = navHandler.getTopLevelNodes()[0];
+						navHandler.cursorOn(firstNode, false, true);
+						if (firstNode.isHidden) {
+							navHandler.iterate(true, false, false, true);
+						}
+					}
+				}
+			}.bind(this), false);
+			
 			th.appendChild(input);
 		}
 		
 		return th;
 	};
+	
+	//This is an optional function for explorerNavHandler. It performs an action when Enter is pressed on a table row.
+    //The explorerNavHandler hooked up by the explorer will check if this function exists and call it on Enter key press.
+    OutlineRenderer.prototype.performRowAction = function(event, item) {
+		this._followLink(event, item.outlineLink);
+    };
+    
+    OutlineRenderer.prototype._followLink = function(event, url) {
+		var selectionService = this.selectionService;
+		if (selectionService) {
+			if (mUIUtils.openInNewWindow(event)) {
+				mUIUtils.followLink(url, event);
+			} else {
+				selectionService.setSelections(url);
+			}
+		}
+    };
 	
 	
 	function OutlineExplorer(serviceRegistry, selection, title) {
@@ -119,7 +152,7 @@ define([
 	
 	
 	OutlineExplorer.prototype.filterChanged = function (filter) {
-		var navDict = this.getNavDict();
+		var navHandler = this.getNavHandler();
 		var itemMap = this.model.getIdItemMap();
 		var item;
 		
@@ -128,10 +161,12 @@ define([
 				item = itemMap[id];
 				if (-1 === item.label.indexOf(filter)) {
 					//hide
-					navDict.getValue(id).rowDomNode.classList.add("outlineRowHidden");	//$NON-NLS-0$
+					navHandler.getRowDiv(item).classList.add("outlineRowHidden"); //$NON-NLS-0$
+					item.isHidden = true;
 				} else {
 					//label matches filter, show row
-					navDict.getValue(id).rowDomNode.classList.remove("outlineRowHidden"); //$NON-NLS-0$
+					navHandler.getRowDiv(item).classList.remove("outlineRowHidden"); //$NON-NLS-0$
+					item.isHidden = false;
 				}
 			}
 		}		

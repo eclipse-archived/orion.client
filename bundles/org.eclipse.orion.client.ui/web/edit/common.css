@@ -18,7 +18,15 @@
 	border: 1px solid lightgrey;
 	margin-left: 0;
 	text-align: left;
-	width: 99%;
+	position: fixed;
+	top: 75px;
+	left: 2px;
+	width: 250px;
+}
+
+.outlineFilterCell {
+	min-height: 25px;
+	height: 25px;
 }
 
 .outlineRowHidden {
