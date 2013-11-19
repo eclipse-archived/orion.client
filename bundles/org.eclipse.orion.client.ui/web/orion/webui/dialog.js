@@ -287,6 +287,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		 * Internal.  Cleanup and remove dom nodes.
 		 */
 		destroy: function() {
+			if (!this.$frame) {
+				return;
+			}
 			if (this._addedBackdrop && this._addedBackdrop.length > 0) {
 				this._addedBackdrop.forEach(function(node) { //$NON-NLS-0$
 					node.classList.remove("modalBackdrop"); //$NON-NLS-0$
