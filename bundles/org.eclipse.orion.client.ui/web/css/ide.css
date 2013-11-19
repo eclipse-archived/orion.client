@@ -296,8 +296,8 @@ textarea.parameterInput {
 	margin-left: 8px; 
 	padding-right: 8px;
 	margin-right: 8px;
-	max-height: 24px;
-	max-width: 48px;
+	height: 16px;
+	width: 16px;
 }
 
 /* less hit-area since we aren't worried about touch */
