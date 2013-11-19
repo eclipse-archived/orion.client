@@ -99,8 +99,8 @@ define(["orion/util"], function(util) {
 	function bounds(node) {
 		var clientRect = node.getBoundingClientRect();
 		return { 
-			left: clientRect.left + document.body.scrollLeft,
-			top: clientRect.top + document.body.scrollTop,
+			left: clientRect.left + document.documentElement.scrollLeft,
+			top: clientRect.top + document.documentElement.scrollTop,
 			width: clientRect.width,
 			height: clientRect.height
 		};
