@@ -119,7 +119,7 @@ define([
 			return item.outlinerId;
 		}
 		// Generate an id.  Since these id's are used in the DOM, we strip out characters that shouldn't be in a DOM id.
-		var originalId = item.label.replace(/[\\\/\.\:\-\_]/g, "");
+		var originalId = item.label.replace(/[\\\/\.\:\-\_\s]/g, "");
 		var id = originalId;
 		var number = 0;
 		// We might have duplicate id's if the outline items are duplicated, or if we happen to have another dom id using
