@@ -81,45 +81,6 @@ define([
 		return link;
 	};
 	
-	OutlineRenderer.prototype.getCellHeaderElement = function(col_no){
-		var th = null;
-		var input;
-		
-		if (0 === col_no) {
-			th = document.createElement("th"); //$NON-NLS-0$
-			th.classList.add("outlineFilterCell");
-			
-			input = document.createElement("input"); //$NON-NLS-0$
-			input.className = "outlineFilter"; //$NON-NLS-0$
-			input.placeholder = messages["Filter"]; //$NON-NLS-0$
-			input.type="text"; //$NON-NLS-0$
-			input.addEventListener("input", function (e) { //$NON-NLS-0$
-				this.explorer.filterChanged(input.value);
-			}.bind(this));
-			
-			input.addEventListener("keydown", function (e) { //$NON-NLS-0$
-				var navHandler = null;
-				var firstNode = null;
-				if (e.keyCode === lib.KEY.DOWN)	{
-					input.blur();
-					navHandler = this.explorer.getNavHandler();
-					navHandler.focus();
-					if (navHandler.getTopLevelNodes()) {
-						firstNode = navHandler.getTopLevelNodes()[0];
-						navHandler.cursorOn(firstNode, false, true);
-						if (firstNode.isHidden) {
-							navHandler.iterate(true, false, false, true);
-						}
-					}
-				}
-			}.bind(this), false);
-			
-			th.appendChild(input);
-		}
-		
-		return th;
-	};
-	
 	//This is an optional function for explorerNavHandler. It performs an action when Enter is pressed on a table row.
     //The explorerNavHandler hooked up by the explorer will check if this function exists and call it on Enter key press.
     OutlineRenderer.prototype.performRowAction = function(event, item) {
@@ -154,12 +115,17 @@ define([
 	OutlineExplorer.prototype.filterChanged = function (filter) {
 		var navHandler = this.getNavHandler();
 		var itemMap = this.model.getIdItemMap();
-		var item;
+		var item = null;
+		
+		//Create a filter which matches all input literally except for the * and the ? characters
+		//As is the case for the file search dialog: (* = any string) and (? = any character)
+		var modifiedFilter = "^" + filter.replace(/([.+^=!:${}()|\[\]\/\\])/g, "\\$1"); //add start of line character and escape all special characters except * and ?
+		modifiedFilter = modifiedFilter.replace(/([*?])/g, ".$1");	//convert user input * and ? to .* and .?
 		
 		for (var id in itemMap) {
 			if (itemMap.hasOwnProperty(id)) {
 				item = itemMap[id];
-				if (-1 === item.label.indexOf(filter)) {
+				if (-1 === item.label.search(modifiedFilter)) {
 					//hide
 					navHandler.getRowDiv(item).classList.add("outlineRowHidden"); //$NON-NLS-0$
 					item.isHidden = true;
@@ -374,6 +340,7 @@ define([
 		},
 		createViewMode: function(provider) {
 			this.setSelectedProvider(provider);
+			this._createFilterInput();
 			this.generateOutline();
 		},
 		destroyViewMode: function(provider) {
@@ -382,6 +349,37 @@ define([
 				this.explorer = null;
 			}
 		},
+		
+		_createFilterInput: function() {
+			var input = document.createElement("input"); //$NON-NLS-0$
+		
+			input.classList.add("outlineFilter"); //$NON-NLS-0$
+			input.placeholder = messages["Filter"]; //$NON-NLS-0$
+			input.type="text"; //$NON-NLS-0$
+			input.addEventListener("input", function (e) { //$NON-NLS-0$
+				this.explorer.filterChanged(input.value);
+			}.bind(this));
+		
+			input.addEventListener("keydown", function (e) { //$NON-NLS-0$
+				var navHandler = null;
+				var firstNode = null;
+				if (e.keyCode === lib.KEY.DOWN)	{
+					input.blur();
+					navHandler = this.explorer.getNavHandler();
+					navHandler.focus();
+					if (navHandler.getTopLevelNodes()) {
+						firstNode = navHandler.getTopLevelNodes()[0];
+						navHandler.cursorOn(firstNode, false, true);
+						if (firstNode.isHidden) {
+							navHandler.iterate(true, false, false, true);
+						}
+					}
+				}
+			}.bind(this), false);
+		
+			this._toolbar.appendChild(input);
+		},
+		
 		/**
 		 * Called when the inputManager's contentType has changed, so we need to look up the capable outline providers.
 		 * @param {String} fileContentType

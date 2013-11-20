@@ -86,5 +86,5 @@ define({
 	"OutlineProgress": "Getting outline for ${0} from ${1}",
 	"UnknownError": "An unknown error occurred.",
 	"UnknownWarning": "An unknown warning occurred.",
-	"Filter": "Filter"
+	"Filter": "Filter (* = any string, ? = any character)"
 });
