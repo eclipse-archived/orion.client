@@ -54,89 +54,93 @@ describe('File API', function() {
 	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Actions_on_files
 	 */
 	describe('files', function() {
-		it('get file contents', function(done) {
-			app.request()
-			.get(PREFIX + '/project/fizz.txt')
-			.expect(200, 'hello world', done);
-		});
-		it('file contents has ETag header', function(done) {
-			app.request()
-			.get(PREFIX + '/project/fizz.txt')
-			.end(function(err, res) {
-				assert.ifError(err);
-				assert.notEqual(res.headers.etag, null);
-				done();
-			});
-		});
-		it('get file metadata', function(done) {
-			app.request()
-			.get(PREFIX + '/project/fizz.txt')
-			.query({ parts: 'meta' })
-			.expect(200)
-			.end(function(err, res) {
-				assert.ifError(err);
-				var body = res.body;
-				assert.deepEqual(body.Attributes, {ReadOnly: false, Executable: false});
-				assert.equal(body.Directory, false);
-				assert.notEqual(body.ETag, null);
-				assert.equal(typeof body.LocalTimeStamp, 'number');
-				assert.equal(body.Location, PREFIX + '/project/fizz.txt');
-				assert.equal(body.Name, 'fizz.txt');
-				assert.equal(body.Parents.length, 1);
-				assert.deepEqual(body.Parents[0], {
-					ChildrenLocation: '/file/project?depth=1',
-					Location: '/file/project',
-					Name: 'project'
-				});
-				done();
-			});
-		});
-		it('file metadata has ETag header', function(done) {
-			app.request()
-			.get(PREFIX + '/project/fizz.txt')
-			.query({ parts: 'meta' })
-			.end(function(err, res) {
-				assert.ifError(err);
-				assert.notEqual(res.headers.etag, null);
-				done();
-			});
-		});
-		it('set file contents', function(done) {
-			var newContents = 'The time is now ' + new Date().getTime();
-			app.request()
-			.put(PREFIX + '/project/fizz.txt')
-			.send(newContents)
-			.expect(200)
-			.end(function(err, res) {
-				assert.ifError(err);
-				var body = res.body;
-				assert.equal(body.Directory, false);
-				assert.ok(body.ETag, 'has an ETag');
-				assert.equal(body.Location, PREFIX + '/project/fizz.txt');
-				assert.equal(body.Name, 'fizz.txt');
-				done();
-			});
-		});
-		it('conditionally overwrite using If-Match', function(done) {
-			var url = PREFIX + '/project/fizz.txt';
-			app.request()
-			.get(url)
-			.query({ parts: 'meta' })
-			.end(function(err, res) {
-				assert.ifError(err);
-				var etag = res.body.ETag;
-				assert.notEqual(res.body.ETag, null);
+		describe('contents', function() {
+			it('get file contents', function(done) {
 				app.request()
-				.put(url)
-				.set('If-Match', etag + '_blort')
-				.expect(412)
+				.get(PREFIX + '/project/fizz.txt')
+				.expect(200, 'hello world', done);
+			});
+			it('file contents has ETag header', function(done) {
+				app.request()
+				.get(PREFIX + '/project/fizz.txt')
 				.end(function(err, res) {
 					assert.ifError(err);
-					app.request(url)
+					assert.notEqual(res.headers.etag, null);
+					done();
+				});
+			});
+			it('put file contents', function(done) {
+				var newContents = 'The time is now ' + new Date().getTime();
+				app.request()
+				.put(PREFIX + '/project/fizz.txt')
+				.send(newContents)
+				.expect(200)
+				.end(function(err, res) {
+					assert.ifError(err);
+					var body = res.body;
+					assert.equal(body.Directory, false);
+					assert.ok(body.ETag, 'has an ETag');
+					assert.equal(body.Location, PREFIX + '/project/fizz.txt');
+					assert.equal(body.Name, 'fizz.txt');
+					done();
+				});
+			});
+			it('conditionally overwrite contents using If-Match', function(done) {
+				var url = PREFIX + '/project/fizz.txt';
+				app.request()
+				.get(url)
+				.query({ parts: 'meta' })
+				.end(function(err, res) {
+					assert.ifError(err);
+					var etag = res.body.ETag;
+					assert.notEqual(res.body.ETag, null);
+					app.request()
 					.put(url)
-					.set('If-Match', etag)
-					.expect(200)
-					.end(done);
+					.set('If-Match', etag + '_blort')
+					.expect(412)
+					.end(function(err, res) {
+						assert.ifError(err);
+						app.request(url)
+						.put(url)
+						.set('If-Match', etag)
+						.expect(200)
+						.end(done);
+					});
+				});
+			});
+		});
+		describe('metadata', function() {
+			it('get file metadata', function(done) {
+				app.request()
+				.get(PREFIX + '/project/fizz.txt')
+				.query({ parts: 'meta' })
+				.expect(200)
+				.end(function(err, res) {
+					assert.ifError(err);
+					var body = res.body;
+					assert.deepEqual(body.Attributes, {ReadOnly: false, Executable: false});
+					assert.equal(body.Directory, false);
+					assert.notEqual(body.ETag, null);
+					assert.equal(typeof body.LocalTimeStamp, 'number');
+					assert.equal(body.Location, PREFIX + '/project/fizz.txt');
+					assert.equal(body.Name, 'fizz.txt');
+					assert.equal(body.Parents.length, 1);
+					assert.deepEqual(body.Parents[0], {
+						ChildrenLocation: '/file/project?depth=1',
+						Location: '/file/project',
+						Name: 'project'
+					});
+					done();
+				});
+			});
+			it('file metadata has ETag header', function(done) {
+				app.request()
+				.get(PREFIX + '/project/fizz.txt')
+				.query({ parts: 'meta' })
+				.end(function(err, res) {
+					assert.ifError(err);
+					assert.notEqual(res.headers.etag, null);
+					done();
 				});
 			});
 		});
@@ -157,6 +161,35 @@ describe('File API', function() {
 				done();
 			});
 		});
+		/**
+		 * http://wiki.eclipse.org/Orion/Server_API/File_API#Creating_files_and_directories
+		 */
+		describe('creating', function() {
+			it('works with Slug header', function(done) {
+				app.request()
+				.post(PREFIX + '/project')
+				.set('Slug', 'newfile.txt')
+				.expect(201)
+				.end(function(err, res) {
+					assert.ifError(err);
+					assert.equal(res.body.Name, 'newfile.txt');
+					assert.equal(res.body.Directory, false);
+					done();
+				});
+			});
+			it('works with "Name" field', function(done) {
+				app.request()
+				.post(PREFIX + '/project')
+				.send({ Name: 'newfile.txt' })
+				.expect(201)
+				.end(function(err, res) {
+					assert.ifError(err);
+					assert.equal(res.body.Name, 'newfile.txt');
+					assert.equal(res.body.Directory, false);
+					done();
+				});
+			});
+		});
 		// Unimplemented features:
 		// 'should implement GET file metadata and contents'
 		// 'should implement PUT file contents with different HTTP input'
@@ -167,152 +200,130 @@ describe('File API', function() {
 	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Actions_on_directories
 	 */
 	describe('directories', function() {
-		it('get directory metadata', function(done) {
-			app.request()
-			.get(PREFIX + '/project/my%20folder')
-			.expect(200)
-			.end(function(err, res) {
-				assert.ifError(err);
-				var body = res.body;
-				assert.equal(body.Children, null, 'Children should be absent');
-				assert.equal(body.ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
-				assert.equal(body.Directory, true);
-				assert.equal(body.Name, 'my folder');
-				assert.equal(body.Location, '/file/project/my%20folder/');
-				done();
+		describe('metadata', function() {
+			it('get directory metadata', function(done) {
+				app.request()
+				.get(PREFIX + '/project/my%20folder')
+				.expect(200)
+				.end(function(err, res) {
+					assert.ifError(err);
+					var body = res.body;
+					assert.equal(body.Children, null, 'Children should be absent');
+					assert.equal(body.ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
+					assert.equal(body.Directory, true);
+					assert.equal(body.Name, 'my folder');
+					assert.equal(body.Location, '/file/project/my%20folder/');
+					done();
+				});
+			});
+			it('has a correct "Parents" field', function(done) {
+				app.request()
+				.get(PREFIX + '/project/my%20folder/my%20subfolder')
+				.expect(200)
+				.end(function(err, res) {
+					assert.ifError(err);
+					assert.ok(res.body.Parents);
+					assert.equal(res.body.Parents.length, 2);
+					assert.equal(res.body.Parents[0].ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
+					assert.equal(res.body.Parents[0].Location, PREFIX + '/project/my%20folder');
+					assert.equal(res.body.Parents[0].Name, 'my folder');
+					assert.equal(res.body.Parents[1].Name, 'project');
+					done();
+				});
 			});
 		});
-		it('has a correct "Parents" field', function(done) {
-			app.request()
-			.get(PREFIX + '/project/my%20folder/my%20subfolder')
-			.expect(200)
-			.end(function(err, res) {
-				assert.ifError(err);
-				assert.ok(res.body.Parents);
-				assert.equal(res.body.Parents.length, 2);
-				assert.equal(res.body.Parents[0].ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
-				assert.equal(res.body.Parents[0].Location, PREFIX + '/project/my%20folder');
-				assert.equal(res.body.Parents[0].Name, 'my folder');
-				assert.equal(res.body.Parents[1].Name, 'project');
-				done();
+
+		describe('contents', function() {
+			it('get directory contents', function(done) {
+				app.request()
+				.get(PREFIX + '/project/my%20folder')
+				.query({ depth: 1 })
+				.expect(200)
+				.end(function(err, res) {
+					assert.ifError(err);
+					var body = res.body;
+					assert.equal(body.ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
+					assert.equal(Array.isArray(body.Children), true);
+					body.Children.sort(byName);
+					assert.equal(body.Children.length, 2);
+					assert.equal(body.Children[0].Name, 'buzz.txt');
+					assert.equal(body.Children[0].Directory, false);
+					assert.equal(body.Children[0].Location, PREFIX + '/project/my%20folder/buzz.txt');
+					assert.equal(body.Children[1].Name, 'my subfolder');
+					assert.equal(body.Children[1].Directory, true);
+					assert.equal(body.Children[1].Location, PREFIX + '/project/my%20folder/my%20subfolder/');
+					done();
+				});
 			});
 		});
-		it('get directory contents', function(done) {
-			app.request()
-			.get(PREFIX + '/project/my%20folder')
-			.query({ depth: 1 })
-			.expect(200)
-			.end(function(err, res) {
-				assert.ifError(err);
-				var body = res.body;
-				assert.equal(body.ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
-				assert.equal(Array.isArray(body.Children), true);
-				body.Children.sort(byName);
-				assert.equal(body.Children.length, 2);
-				assert.equal(body.Children[0].Name, 'buzz.txt');
-				assert.equal(body.Children[0].Directory, false);
-				assert.equal(body.Children[0].Location, PREFIX + '/project/my%20folder/buzz.txt');
-				assert.equal(body.Children[1].Name, 'my subfolder');
-				assert.equal(body.Children[1].Directory, true);
-				assert.equal(body.Children[1].Location, PREFIX + '/project/my%20folder/my%20subfolder/');
-				done();
+
+		/**
+		 * http://wiki.eclipse.org/Orion/Server_API/File_API#Creating_files_and_directories
+		 */
+		describe('creating', function() {
+			it('works with Slug header', function(done) {
+				app.request()
+				.post(PREFIX + '/project')
+				.type('json')
+				.set('Slug', 'new directory')
+				.send({ Directory: true })
+				.expect(201)
+				.end(function(err, res) {
+					assert.ifError(err);
+					assert.equal(res.body.Directory, true);
+					assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); //FIXME
+					assert.equal(res.body.Name, 'new directory');
+					done();
+				});
+			});
+			it('works with "Name" field', function(done) {
+				app.request()
+				.post(PREFIX + '/project')
+				.type('json')
+				.send({ Name: 'new directory', Directory: true })
+				.expect(201)
+				.end(function(err, res) {
+					assert.ifError(err);
+					assert.equal(res.body.Directory, true);
+					assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); // FIXME
+					assert.equal(res.body.Name, 'new directory');
+					done();
+				});
+			});
+			it('works when a string-typed Directory "true" is provided', function(done) {
+				app.request()
+				.post(PREFIX + '/project')
+				.type('json')
+				.send({ Name: 'new directory', Directory: 'true' })
+				.expect(201)
+				.end(function(err, res) {
+					assert.ifError(err);
+					assert.equal(res.body.Directory, true);
+					assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); // FIXME
+					assert.equal(res.body.Name, 'new directory');
+					done();
+				});
+			});
+			it('works when a string-typed Directory "false" is provided', function(done) {
+				app.request()
+				.post(PREFIX + '/project')
+				.type('json')
+				.set('Slug', 'Not a directory')
+				.send({ Directory: "false" })
+				.expect(201)
+				.end(function(err, res) {
+					assert.ifError(err);
+					assert.equal(res.body.Directory, false);
+					assert.equal(res.body.Location, PREFIX + '/project/Not%20a%20directory'); //FIXME
+					assert.equal(res.body.Name, 'Not a directory');
+					done();
+				});
 			});
 		});
 		// Unimplemented features:
 		// 'should implement PUT directory metadata'
 	});
-	/**
-	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Creating_files_and_directories
-	 */
-	describe('creating directories', function() {
-		it('works with Slug header', function(done) {
-			app.request()
-			.post(PREFIX + '/project')
-			.type('json')
-			.set('Slug', 'new directory')
-			.send({ Directory: true })
-			.expect(201)
-			.end(function(err, res) {
-				assert.ifError(err);
-				assert.equal(res.body.Directory, true);
-				assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); //FIXME
-				assert.equal(res.body.Name, 'new directory');
-				done();
-			});
-		});
-		it('works with "Name" field', function(done) {
-			app.request()
-			.post(PREFIX + '/project')
-			.type('json')
-			.send({ Name: 'new directory', Directory: true })
-			.expect(201)
-			.end(function(err, res) {
-				assert.ifError(err);
-				assert.equal(res.body.Directory, true);
-				assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); // FIXME
-				assert.equal(res.body.Name, 'new directory');
-				done();
-			});
-		});
-		it('works when a string-typed Directory "true" is provided', function(done) {
-			app.request()
-			.post(PREFIX + '/project')
-			.type('json')
-			.send({ Name: 'new directory', Directory: 'true' })
-			.expect(201)
-			.end(function(err, res) {
-				assert.ifError(err);
-				assert.equal(res.body.Directory, true);
-				assert.equal(res.body.Location, PREFIX + '/project/new%20directory/'); // FIXME
-				assert.equal(res.body.Name, 'new directory');
-				done();
-			});
-		});
-		it('works when a string-typed Directory "false" is provided', function(done) {
-			app.request()
-			.post(PREFIX + '/project')
-			.type('json')
-			.set('Slug', 'Not a directory')
-			.send({ Directory: "false" })
-			.expect(201)
-			.end(function(err, res) {
-				assert.ifError(err);
-				assert.equal(res.body.Directory, false);
-				assert.equal(res.body.Location, PREFIX + '/project/Not%20a%20directory'); //FIXME
-				assert.equal(res.body.Name, 'Not a directory');
-				done();
-			});
-		});
-	});
-	/**
-	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Creating_files_and_directories
-	 */
-	describe('creating files', function() {
-		it('works with Slug header', function(done) {
-			app.request()
-			.post(PREFIX + '/project')
-			.set('Slug', 'newfile.txt')
-			.expect(201)
-			.end(function(err, res) {
-				assert.ifError(err);
-				assert.equal(res.body.Name, 'newfile.txt');
-				assert.equal(res.body.Directory, false);
-				done();
-			});
-		});
-		it('works with "Name" field', function(done) {
-			app.request()
-			.post(PREFIX + '/project')
-			.send({ Name: 'newfile.txt' })
-			.expect(201)
-			.end(function(err, res) {
-				assert.ifError(err);
-				assert.equal(res.body.Name, 'newfile.txt');
-				assert.equal(res.body.Directory, false);
-				done();
-			});
-		});
-	});
+
 	/**
 	 * http://wiki.eclipse.org/Orion/Server_API/File_API#Copy.2C_move.2C_and_delete
 	 */
@@ -392,7 +403,7 @@ describe('File API', function() {
 				done();
 			});
 		});
-		it('copy a file overwrites when no-overwrite is not set', function(done) {
+		it('copy a file overwrites when "no-overwrite" is not set', function(done) {
 			// cp project/fizz.txt "project/my folder/buzz.txt"
 			app.request()
 			.post(PREFIX + '/project/my%20folder')
