@@ -31,7 +31,7 @@ define([
 		this.selectionService = selectionService;
 	}
 	
-	OutlineRenderer.prototype = mExplorer.SelectionRenderer.prototype;
+	OutlineRenderer.prototype = new mExplorer.SelectionRenderer();
 	OutlineRenderer.prototype.constructor = OutlineRenderer;
 	OutlineRenderer.prototype.getLabelColumnIndex = function() {
 		return 0;
@@ -95,7 +95,7 @@ define([
 		this.registry = serviceRegistry;
 		this.renderer = new OutlineRenderer({checkbox: false, treeTableClass: "outlineExplorer"}, this, title, selection);  //$NON-NLS-0$ 
 	}
-	OutlineExplorer.prototype = mExplorer.Explorer.prototype;	
+	OutlineExplorer.prototype = new mExplorer.Explorer();	
 	OutlineExplorer.prototype.constructor = OutlineExplorer;
 	
 	function OutlineModel(items, rootId) {
