@@ -342,6 +342,10 @@ define([
 			this.generateOutline();
 		},
 		destroyViewMode: function(provider) {
+			if (this.explorer) {
+				this.explorer.destroy();
+				this.explorer = null;
+			}
 		},
 		/**
 		 * Called when the inputManager's contentType has changed, so we need to look up the capable outline providers.
