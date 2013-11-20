@@ -130,11 +130,16 @@ define([
 				this._closed = this._closeByDefault;
 			}
 
+			var parentRect = lib.bounds(this.$node.parentNode);
+			var rect = lib.bounds(this.$node);
 			var pos;
 			if (this._vertical) {
 				pos = localStorage.getItem(this._prefix+"/yPosition"); //$NON-NLS-0$
 				if (pos) {
 					this._splitTop = parseInt(pos, 10);
+					if(this._splitTop > (parentRect.top + parentRect.height - rect.height)){
+						this._splitTop = parentRect.top + parentRect.height / 2.0;
+					}
 				} else if (this._closeByDefault) {
 					this._initialSplit = this._getSplitPosition();
 					this._splitTop = 0;
@@ -143,6 +148,9 @@ define([
 				pos = localStorage.getItem(this._prefix+"/xPosition"); //$NON-NLS-0$
 				if (pos) {
 					this._splitLeft = parseInt(pos, 10);
+					if(this._splitLeft > (parentRect.left + parentRect.width - rect.width)){
+						this._splitLeft = parentRect.left + parentRect.width / 2.0;
+					}
 				} else if (this._closeByDefault) {
 					this._initialSplit = this._getSplitPosition();
 					this._splitLeft = 0;

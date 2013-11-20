@@ -61,7 +61,7 @@
 	z-index: 50;
 	height: 4px;
 	cursor: n-resize;
-	background: #efefef;
+	background: #dedede !important;
 	overflow: hidden;
 	visibility: visible; 
 }
