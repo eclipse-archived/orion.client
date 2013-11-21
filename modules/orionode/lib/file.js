@@ -69,95 +69,116 @@ module.exports = function(options) {
 			});
 		}
 	}
-	
-	function writeDiffContents(req, res, next, rest) {
+
+	function handleDiff(req, res, rest, body) {
 		var requestBodyETag = new ETag(req);
-		var requestBody = new Buffer(0);
-				req.on('data', function(data) {
-					requestBody = Buffer.concat([requestBody,data]);
-				});
-				req.on('error', function(e) {
-					writeError(500, res, e.toString());
-				});
-				req.on('end', function(e) {
-				var diffs = JSON.parse(requestBody).diff;
-				var contents = JSON.parse(requestBody).contents;
-				var patchPath = getSafeFilePath(rest);
-				fs.exists(patchPath, function(destExists) {
-					if (destExists) {
-						fs.readFile(patchPath,function (error, data) {
-							if (error) {
+		try {
+			body = typeof body === "string" ? JSON.parse(body) : body;
+		} catch (e) {
+			writeError(500, res, e.toString());
+		}
+		var diffs = body.diff || [];
+		var contents = body.contents;
+		var patchPath = getSafeFilePath(rest);
+		fs.exists(patchPath, function(destExists) {
+			if (destExists) {
+				fs.readFile(patchPath,function (error, data) {
+					if (error) {
+						writeError(500, res, error);
+						return;
+					}
+				
+					var newContents = data.toString();
+					var buffer = {
+						_text: [newContents], 
+						replaceText: function (text, start, end) {
+							var offset = 0, chunk = 0, length;
+							while (chunk<this._text.length) {
+								length = this._text[chunk].length; 
+								if (start <= offset + length) { break; }
+								offset += length;
+								chunk++;
+							}
+							var firstOffset = offset;
+							var firstChunk = chunk;
+							while (chunk<this._text.length) {
+								length = this._text[chunk].length; 
+								if (end <= offset + length) { break; }
+								offset += length;
+								chunk++;
+							}
+							var lastOffset = offset;
+							var lastChunk = chunk;
+							var firstText = this._text[firstChunk];
+							var lastText = this._text[lastChunk];
+							var beforeText = firstText.substring(0, start - firstOffset);
+							var afterText = lastText.substring(end - lastOffset);
+							var params = [firstChunk, lastChunk - firstChunk + 1];
+							if (beforeText) { params.push(beforeText); }
+							if (text) { params.push(text); }
+							if (afterText) { params.push(afterText); }
+							Array.prototype.splice.apply(this._text, params);
+							if (this._text.length === 0) { this._text = [""]; }
+						},
+						getText: function() {
+							return this._text.join("");									
+						}
+					};
+					for (var i=0; i<diffs.length; i++) {
+						var change = diffs[i];
+						buffer.replaceText(change.text, change.start, change.end);
+					}
+					newContents = buffer.getText();
+
+					var failed = false;
+					if (contents) {
+						if (newContents !== contents) {
+							failed = true;
+							newContents = contents;
+						}
+					}
+					fs.writeFile(patchPath, newContents, function(err) {
+						if (err) {
+							writeError(500, res, error);
+							return;
+						}
+						if (failed) {
+							write(406, res, 'Bad file diffs. Please paste this content in a bug report: \u00A0\u00A0 \t' + JSON.stringify(body));
+							return;
+						}
+						fs.stat(patchPath, function(error, stats) {
+							if (err) {
 								writeError(500, res, error);
 								return;
 							}
-						
-							var newContents = data.toString();
-							var buffer = {
-								_text: [newContents], 
-								replaceText: function (text, start, end) {
-									var offset = 0, chunk = 0, length;
-									while (chunk<this._text.length) {
-										length = this._text[chunk].length; 
-										if (start <= offset + length) { break; }
-										offset += length;
-										chunk++;
-									}
-									var firstOffset = offset;
-									var firstChunk = chunk;
-									while (chunk<this._text.length) {
-										length = this._text[chunk].length; 
-										if (end <= offset + length) { break; }
-										offset += length;
-										chunk++;
-									}
-									var lastOffset = offset;
-									var lastChunk = chunk;
-									var firstText = this._text[firstChunk];
-									var lastText = this._text[lastChunk];
-									var beforeText = firstText.substring(0, start - firstOffset);
-									var afterText = lastText.substring(end - lastOffset);
-									var params = [firstChunk, lastChunk - firstChunk + 1];
-									if (beforeText) { params.push(beforeText); }
-									if (text) { params.push(text); }
-									if (afterText) { params.push(afterText); }
-									Array.prototype.splice.apply(this._text, params);
-									if (this._text.length === 0) { this._text = [""]; }
-								},
-								getText: function() {
-									return this._text.join("");									
-								}
-							};
-							for (var i=0; i<diffs.length; i++) {
-								var change = diffs[i];
-								buffer.replaceText(change.text, change.start, change.end);
-							}
-							newContents = buffer.getText();
-	
-							if (contents) {
-								if (newContents !== contents) {
-									write(400, res, 'Contents not the same. Using full contents.');
-									newContents = contents;
-								}
-							}
-							
-							fs.writeFile(patchPath, newContents, function(err) {
-								if (err) {
-									writeError(500, res, error);
-									return;
-								} else {
-									fs.stat(patchPath, function(error, stats) {
-										writeFileMetadata(res, rest, patchPath, stats, requestBodyETag.getValue() /*the new ETag*/);
-									});											
-								}
-							});
-							
-							
-						});
-					} else {
-						writeError(500, res, 'Destination does not exist.');
-					}
+							writeFileMetadata(res, rest, patchPath, stats, requestBodyETag.getValue() /*the new ETag*/);
+						});											
+					});
+					
 				});
-				});
+			} else {
+				writeError(500, res, 'Destination does not exist.');
+			}
+		});
+	}
+
+	function writeDiffContents(req, res, next, rest) {
+		var requestBody = new Buffer(0);
+		req.on('error', function(e) {
+			writeError(500, res, e.toString());
+		});
+		// Tolerate both json and text/plain here for compatibility with Java server and client code
+		if (req.headers['content-type'] === "application/json" && req.body) {
+			handleDiff(req, res, rest, req.body);
+			return;
+		}
+		// Buffer it
+		req.on('data', function(data) {
+			requestBody = Buffer.concat([requestBody,data]);
+		});
+		req.on('end', function(event) {
+			handleDiff(req, res, rest, requestBody.toString());
+		});
 	}
 
 	/*
