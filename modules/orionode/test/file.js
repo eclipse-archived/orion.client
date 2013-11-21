@@ -148,6 +148,35 @@ describe('File API', function() {
 						done();
 					});
 				});
+				it('gives consistent ETag between POST and GET', function(done) {
+					var url = PREFIX + '/project/fizz.txt';
+					app.request()
+					.post(url)
+					.set('X-HTTP-Method-Override', 'PATCH')
+					.type('text')
+					.send(JSON.stringify({
+						// Change "hello world" to "hello worf"
+						diff: [{
+							start: 9,
+							end: 11,
+							text: "f"
+						}]
+					}))
+					.expect(200)
+					.end(function(err, res) {
+						assert.ifError(err);
+						var etag = res.headers.etag;
+						app.request()
+						.get(url)
+						.query({ parts: 'meta' })
+						.expect(200)
+						.end(function(err, res) {
+							assert.ifError(err);
+							assert.equal(etag, res.headers.etag, "Expect same ETag we got from the POST");
+							done();
+						});
+					});
+				});
 			});
 		});
 		describe('metadata', function() {

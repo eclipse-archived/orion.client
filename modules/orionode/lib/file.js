@@ -71,7 +71,6 @@ module.exports = function(options) {
 	}
 
 	function handleDiff(req, res, rest, body) {
-		var requestBodyETag = new ETag(req);
 		try {
 			body = typeof body === "string" ? JSON.parse(body) : body;
 		} catch (e) {
@@ -151,8 +150,9 @@ module.exports = function(options) {
 								writeError(500, res, error);
 								return;
 							}
-							writeFileMetadata(res, rest, patchPath, stats, requestBodyETag.getValue() /*the new ETag*/);
-						});											
+							var etag = new ETag(newContents);
+							writeFileMetadata(res, rest, patchPath, stats, etag.getValue() /*the new ETag*/);
+						});
 					});
 					
 				});

@@ -260,16 +260,24 @@ var withStats = exports.withStats = function(filepath, callback) {
 /**
  * @name orion.node.ETag
  * @class Represents an ETag for a stream.
+ * @param input A stream or a string.
  */
-function ETag(stream) {
-	var hash = crypto.createHash('sha1');
-	var _this = this;
-	stream.on('data', function(d) {
-		hash.update(d);
-	});
-	stream.on('end', function() {
+function ETag(input) {
+	var hash = crypto.createHash('sha1'), _this = this;
+	var update = function(data) {
+		hash.update(data);
+	};
+	var end = function() {
 		_this.value = hash.digest('base64');
-	});
+	};
+
+	if (typeof input === "string") {
+		update(input);
+		end();
+		return;
+	}
+	input.on('data', update);
+	input.on('end', end);
 }
 ETag.prototype = /** @lends orion.node.ETag.prototype */ {
 	getValue: function() {
