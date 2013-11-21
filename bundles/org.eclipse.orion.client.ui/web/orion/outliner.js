@@ -354,6 +354,7 @@ define([
 			var input = document.createElement("input"); //$NON-NLS-0$
 		
 			input.classList.add("outlineFilter"); //$NON-NLS-0$
+			input.classList.add("layoutLeft"); //$NON-NLS-0$
 			input.placeholder = messages["Filter"]; //$NON-NLS-0$
 			input.type="text"; //$NON-NLS-0$
 			input.addEventListener("input", function (e) { //$NON-NLS-0$

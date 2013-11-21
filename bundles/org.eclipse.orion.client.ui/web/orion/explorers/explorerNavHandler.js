@@ -705,11 +705,13 @@ exports.ExplorerNavHandler = (function() {
 				}
 				return;
 			}
+			
+			var curModel = this._modelIterator.cursor();
+			if(!curModel){
+				return;
+			}
+			
 			if(this.explorer.renderer.getRowActionElement){
-				var curModel = this._modelIterator.cursor();
-				if(!curModel){
-					return;
-				}
 				var div = this.explorer.renderer.getRowActionElement(this.model.getId(curModel));
 				if(div.href){
 					if(this._ctrlKeyOn(e)){
@@ -720,10 +722,6 @@ exports.ExplorerNavHandler = (function() {
 				}
 			}
 			if(this.explorer.renderer.performRowAction){
-				var curModel = this._modelIterator.cursor();
-				if(!curModel){
-					return;
-				}
 				this.explorer.renderer.performRowAction(e, curModel);
 				e.preventDefault();
 				return false;

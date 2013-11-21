@@ -16,10 +16,8 @@
 
 .outlineFilter {
 	border: 1px solid lightgrey;
-	text-align: left;
+	margin: 4px;
 	width: 250px;
-	position: absolute;
-	top: 5px;
 }
 
 .outlineRowHidden {
