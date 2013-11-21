@@ -1,17 +1,16 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <toc topic="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html" label="Repositories page">
 	<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html" label="Repositories page">
-		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Repository_detailed_view" label="Repository detailed view"></topic>
-		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Repository_configuration" label="Repository configuration"></topic>
 		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Adding_repositories" label="Adding repositories"></topic>
-		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Actions_on_a_repository" label="Actions on a repository"></topic>
-		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Working_with_branches" label="Working with branches">
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Repository_detailed_view" label="Repository detailed view"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Branches" label="Branches">
 			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Adding_branches" label="Adding branches"></topic>
 			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Actions_on_a_local_branch" label="Actions on a local branch">
-				<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Deleting_a_local_branch" label="Deleting a local branch"></topic>
 				<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Navigating_to_log_page" label="Navigating to log page"></topic>
+				<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Setting_the_active_branch_using_checkout" label="Setting the active branch using checkout"></topic>
 				<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Merging_branches" label="Merging branches"></topic>
-				<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Setting_the_active_branch" label="Setting the active branch"></topic>
+				<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Rebasing_commits" label="Rebasing commits"></topic>
+				<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Deleting_a_local_branch" label="Deleting a local branch"></topic>
 				<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Pushing_a_local_branch" label="Pushing a local branch"></topic>
 			</topic>
 			<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Viewing_remote_branches" label="Viewing remote branches"></topic>
@@ -22,6 +21,9 @@
 				<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Resetting_local_index_from_a_remote_branch" label="Resetting local index from a remote branch"></topic>
 			</topic>
 		</topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Tags" label="Tags"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Remotes" label="Remotes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Configuration" label="Configuration"></topic>
 		<topic href="WikiDoc/Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html#Updating_this_document" label="Updating this document"></topic>
 	</topic>
 </toc>

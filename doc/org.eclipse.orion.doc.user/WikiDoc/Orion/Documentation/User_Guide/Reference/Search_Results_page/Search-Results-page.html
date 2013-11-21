@@ -27,6 +27,11 @@
 		</p>
 		<h2 id="Search_scopes">Search scopes</h2>
 		<p>When you launch the search page, the bread crumb shows the current scope. But once the result pane shows some results, you can scope up and down for the same keyword from there.</p>
+		<h3 id="Switching_file_systems">Switching file systems</h3>
+		<p>If there are other file systems installed, you can switch to them in the search page. The search will then start from the selected file system.</p>
+		<p>
+			<img title="File system switch" alt="File system switch" border="0" src="images/SearchPage-switch-filesys.png"/>
+		</p>
 		<h3 id="Scoping_down">Scoping down</h3>
 		<p>Let's assume that you've just searched for "function" on a folder and you got 265 files but you want to see the results on a folder you are interested in. You can now click on the location column where the interesting folder is presented. The result will be scoped down to that folder by the same keyword.</p>
 		<p>
@@ -76,14 +81,14 @@
 		<p>When you choose to open the editor for more details, the editor will be opened with the find&amp;replace feature for you.
 			If you click on a file, the editor will open with the first match highlighted. If you click on a match, that match will be highlighted in the editor. You can then continue to work on this single file without bothering to bring the find&amp;replace up again.</p>
 		<p>
-			<img title="View search result in editor" alt="View search result in editor" border="0" src="images/search_view_details_in_editor_new1.png"/>
+			<img title="View search result in editor" alt="View search result in editor" border="0" src="images/Search_view_details_in_editor_new1.png"/>
 		</p>
 		<h2 id="Navigating_pages">Navigating pages</h2>
 		<p>If the number of matching files exceeds the page size, which is 40 by default, the <b>Next page</b> and <b>Previous page</b> actions will appear in the tool bar.</p>
 		<h2 id="Stale_files">Stale files</h2>
 		<p>Orion search is based on the file indexer on the server side. There may be some rare cases that your updated files are not synced up into indexer yet when you invoke the search. For example, if you search on <b>foo</b> and replace all the matches with <b>bar</b> in a file and then search on <b>foo</b> again right away. Depending on how many files on the server, the indexer may still hit the file but the file does not contain <b>foo</b> any more. In this case the file is greyed out in the result list but if you search again later it will disappear from the list completely.</p>
 		<p>
-			<img title="Stale files in the results" alt="Stale files in the results" border="0" src="images/search_stale_files_new.png"/> 
+			<img title="Stale files in the results" alt="Stale files in the results" border="0" src="images/Search_stale_files_new.png"/> 
 		</p>
 		<h2 id="Search_and_replace">Search and replace</h2>
 		<h3 id="Preview_changes">Preview changes</h3>
@@ -99,6 +104,7 @@
 		<h2 id="Current_limitations">Current limitations</h2>
 		<p>There are several limitations that will be addressed in the future releases.</p>
 		<ul>
+			<li>Tailing wild card search is done automatically but if you want to do a <b>leading</b> wild search you have to type "*" explicitly. For example, "Search" will hit "SearchExplorer" but "explorer" will hit it. You have to type "*explorer".</li>
 			<li>If you enter multiple words in the search box, it will search for that exact phrase. Phrase search does not support wildcards, and will ignore punctuation between words. For example, if you search for <b>foo bar</b>, it will find matches such as <b>foo. (bar)</b></li>
 			<li>Filter box in the replace preview is not available.</li>
 			<li>Case sensitive and regular expression search is not indexed.</li>
@@ -106,7 +112,7 @@
 		<h2 id="Related_Tasks">Related Tasks</h2>
 		<ul>
 			<li>
-				<a href="../../../../../Orion/Documentation/User_Guide/Tasks/Navigating_and_searching/Navigating-and-searching.html" title="Orion/Documentation/User_Guide/Tasks/Navigating_and_searching">Navigating and searching</a>
+				<a href="../../../../../Orion/Documentation/User_Guide/Tasks/Navigating_and_searching/Navigating-and-searching.html" title="Orion/Documentation/User_Guide/Tasks/Navigating_and_searching">Searching</a>
 			</li>
 		</ul>
 		<h2 id="Updating_this_document">Updating this document</h2>

@@ -8,14 +8,20 @@
 	<body>
 		<h1 id="Git_Log_page">Git Log page</h1>
 		<p>The <b>Git Log</b> page allows you to browse the commit history of a Git repository branch. The page can show all the commits on a given branch, or focus on only the commits that involve changes to a particular file or directory. You can browse both local and remote branches using this page.  What you see in this page depends on how you navigated to it.</p>
+		<p>The breadcrumb in the title area allows you to navigate to the 
+			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Repositories_page/Repositories-page.html" title="Orion/Documentation/User_Guide/Reference/Repositories_page">Repository page</a> either on <b>where the log lives</b> or just showing <b>all the repositories</b> list.
+		</p>
+		<p>For help with common Git tasks see 
+			<a href="../../../../../Orion/Documentation/User_Guide/Tasks/Working_with_Git/Working-with-Git.html" title="Orion/Documentation/User_Guide/Tasks/Working_with_Git">Working with Git</a>.
+		</p>
 		<h2 id="Opening_the_Git_Log_page">Opening the Git Log page</h2>
 		<p>There are many ways to open the Git Log page:</p>
 		<ul>
 			<li>Select a file or directory in the 
-				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Navigator_page/Navigator-page.html" title="Orion/Documentation/User Guide/Reference/Navigator page">Navigator page</a>, and choose <b>Git Log</b> in the <b>Actions</b> menu. This will show all commits in your current local branch that involve changes to the chosen file or directory.
+				<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Editing_page" title="Orion/Documentation/User_Guide/Reference/Editing_page" target="orion_external">Editing page</a>, and choose <b>Git Log</b> in the <b>Actions</b> menu. This will show all commits in your current local branch that involve changes to the chosen file or directory.
 			</li>
 			<li>Select a file or directory in the 
-				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Navigator_page/Navigator-page.html" title="Orion/Documentation/User Guide/Reference/Navigator page">Navigator page</a>, and choose <b>Git Remote</b> in the <b>Actions</b> menu. This will show all commits in the current remote tracking branch that involve changes to the chosen file or directory.
+				<a href="http://wiki.eclipse.org/Orion/Documentation/User_Guide/Reference/Editing_page" title="Orion/Documentation/User_Guide/Reference/Editing_page" target="orion_external">Editing page</a>, and choose <b>Git Remote</b> in the <b>Actions</b> menu. This will show all commits in the current remote tracking branch that involve changes to the chosen file or directory.
 			</li>
 			<li>From the 
 				<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Git Status page</a>, click the <b>View Full Log</b> link in the commits section.
@@ -26,12 +32,12 @@
 			<li>From the <b>Git Log</b> page itself, the <b>Related</b> menu can be used to switch between the local and remote tracking branches.</li>
 		</ul>
 		<h2 id="Operations_from_the_Git_Log_page">Operations from the Git Log page</h2>
-		<p>Once on the Git Log page, you will see a list of commits in chronological order. The title area lets you know what branch and file or directory the page is focused on. In the example below, we are viewing the local branch called <b>master</b> in the repository called <b>orion.client</b>.</p>
+		<p>Once on the Git Log page, you will see a list of commits in chronological order. The title area lets you know what branch and file or directory the page is focused on. In the example below, we are viewing the local branch called <b>master</b> in the repository called <b>OrionClient</b>.</p>
 		<p>
 			<img title="Git log overview" alt="Git log overview" border="0" src="images/GitLogOnMaster.png"/>
 		</p>
 		<p>If you are viewing a local branch that is not up to date with its remote tracking branch, a <b>Push All</b> command is available in the toolbar to push your unreleased changes. When viewing a remote branch, <b>Fetch</b> and <b>Merge</b> commands are available in the toolbar to bring remote changes into your local repository and working copy.</p>
-		<p>Further to the right, there are actions for tagging and cherry-picking individual commits.</p>
+		<p>Further to the right, there are actions for tagging, cherry-picking and revert individual commits.</p>
 		<p>You can click on a commit link to open the 
 			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Commit_page/Git-Commit-page.html" title="Orion/Documentation/User Guide/Reference/Git Commit page">Git Commit page</a>. Hover on any commit in the list to see a tooltip dialog with detailed information about the commit. 
 		</p>
@@ -39,7 +45,9 @@
 			<img title="Git log commit details" alt="Git log commit details" border="0" src="images/Orion-git-log-commit-details.png"/>
 		</p>
 		<h2 id="Git_Log_for_single_files">Git Log for single files</h2>
-		<p>When viewing the Git log for a single file, some additional capabilities are available. First, the breadcrumb in the title area allows you to navigate to a scoped Git log list for any folder in the hierarchy. Additional commands are also available next to each commit. The <b>Open</b> link will open the revision of the file as it appeared in that commit. You can also compare the contents of that commit to the current contents of that file in your working tree. Finally, if you select any two files, a menu containing a <b>Compare With Each Other</b> command appears in the toolbar, to compare the differences in that file between the selected commits.</p>
+		<p>When viewing the Git log for a single file, some additional capabilities are available. Additional commands are available next to each commit. The <b>Open</b> link will open the revision of the file as it appeared in that commit. You can also compare the contents of that commit to the current contents of that file in your working tree. Finally, if you select any two files, a menu containing a <b>Compare With Each Other</b> command appears in the toolbar, to 
+			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Compare_page/Compare-page.html" title="Orion/Documentation/User_Guide/Reference/Compare_page">compare</a> the differences in that file between the selected commits.
+		</p>
 		<p>
 			<img title="Git log for a single file" alt="Git log for a single file" border="0" src="images/Orion-git-log-single-file.png"/>
 		</p>

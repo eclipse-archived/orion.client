@@ -7,32 +7,38 @@
 	</head>
 	<body>
 		<h1 id="Repositories_page">Repositories page</h1>
-		<p>The <b>Repositories</b> page allows you to view and manage the Git repositories associated with your Orion account. When you visit this page you will see a list of all Git repositories you currently have cloned. </p>
+		<p>The <b>Repositories</b> page allows you to view and manage the Git repositories associated with your Orion account. When you visit this page you will see a list of all Git repositories you currently have cloned along with some basic information on staged files and commits.  To see 
+			<a href="#Repository_detailed_view">detailed information</a> about a repository, click its name. 
+		</p>
 		<p>
 			<img title="Repositories page" alt="Repositories page" border="0" src="images/Orion-repository-page.png"/>
 		</p>
-		<p>To see detailed information about a repository, click its name. </p>
+		<p>Beside each repository are buttons to <b>Pull from the repository</b>, <b>Apply a patch</b> and <b>Delete the repository</b>.</p>
+		<p>
+			<img title="Pull a repository" alt="Pull a repository" border="0" src="images/Orion-tasks-pull.png"/>
+		</p>
+		<h2 id="Adding_repositories">Adding repositories</h2>
+		<p>Create a new empty repository by clicking <b>Init Repository</b> on the tool bar. Enter the folder where the repository should be created.
+
+			<img title="Creating a new empty repository" alt="Creating a new empty repository" border="0" src="images/Orion-repository-page-init.png"/>
+		</p>
+		<p>Click <b>Clone Repository</b> and enter a url to clone an existing Git repository. If the repository requires credentials to access or modify the repository a dialog will open where they can be entered.
+
+			<img title="Cloning an existing repository" alt="Cloning an existing repository" border="0" src="images/Orion-repository-page-clone.png"/>
+		</p>
 		<h2 id="Repository_detailed_view">Repository detailed view</h2>
-		<p>The detailed view includes all the usual Git repository details such as name and url. Additional sections on the page enumerate things like index state, incoming and outgoing commits, branches, and tags.  You can open and close most sections on the page using the twistie icon adjacent to the section name.  The branches and tags sections show you the most recently used items, but you can click the associated <b>View All</b> links to see full lists of anything.</p>
+		<p>The detailed view displays all the usual Git repository details such as name and url. Additional sections on the page enumerate things like index state, incoming and outgoing commits, branches, and tags.  You can open and close most sections on the page using the twistie icon adjacent to the section name.  The branches and tags sections show you the most recently used items, but you can click the associated <b>View All</b> links to see full lists of anything.</p>
 		<p>
 			<img title="Repository details" alt="Repository details" border="0" src="images/Orion-repository-page_details.png"/>
 		</p>
-		<h2 id="Repository_configuration">Repository configuration</h2>
-		<p>The bottom of the repository page shows the configuration of the repository. On the main page you will see just <b>user.*</b>. To see the full list, click <b>View All</b>. From here you can add additional configuration properties to the repository, and change or delete properties.</p>
-		<p>
-			<img title="Repository configuration" alt="Repository configuration" border="0" src="images/Orion-repository-page-config.png"/>
-		</p>
-		<h2 id="Adding_repositories">Adding repositories</h2>
-		<p>Create a new empty repository by clicking <b>Init Repository</b> on the tool bar, or click <b>Clone Repository</b> to clone an existing Git repository. Cloning will produce a dialog where you enter the Git repository URL, and optionally any credentials required to access or modify the repository.</p>
-		<h2 id="Actions_on_a_repository">Actions on a repository</h2>
 		<p>You can pull the latest content, apply a patch, or delete an existing repository from the main toolbar on the page.  The <b>Related Links</b> menu allows you to navigate to other views on the repository, such as viewing the repository content on the 
-			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Navigator_page/Navigator-page.html" title="Orion/Documentation/User Guide/Reference/Navigator page">Navigator page</a> or working with the repository changes on the 
+			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Editor_page/Editor-page.html" title="Orion/Documentation/User Guide/Reference/Editor page">Editor page</a> or working with the repository changes on the 
 			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Git Status page</a>.
 		</p>
 		<p>
 			<img title="Repository actions" alt="Repository actions" border="0" src="images/Orion-repository-repo-actions.png"/>
 		</p>
-		<h2 id="Working_with_branches">Working with branches</h2>
+		<h2 id="Branches">Branches</h2>
 		<p>You can use the <b>Branches</b> section of the page to work with different branches.</p>
 		<h3 id="Adding_branches">Adding branches</h3>
 		<p>Once a repository is created or cloned, the <b>master</b> branch is set as the current branch. You can create your own branch, work on it and merge it back to master. To create a new branch, click the <b>New Branch</b> button, type in the new branch name, and press the 'Enter' key or click the <b>Submit</b> button. </p>
@@ -44,24 +50,11 @@
 		<p>
 			<img title="Action buttons" alt="Action buttons" border="0" src="images/Orion-repository-page-branch-actions-not-current.png"/>
 		</p>
-		<h4 id="Deleting_a_local_branch">Deleting a local branch</h4>
-		<p>From the branch actions, click the delete icon to delete a local branch. A confirmation dialog will pop up, providing you a chance to confirm your decision.</p>
-		<p>
-			<img title="Delete button" alt="Delete button" border="0" src="images/Orion-repository-page-branch-actions-delete.png"/>
-		</p>
 		<h4 id="Navigating_to_log_page">Navigating to log page</h4>
 		<p>You can navigate to the 
 			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Log_page/Git-Log-page.html" title="Orion/Documentation/User Guide/Reference/Git Log page">Log page</a> to see details on the branch. From the actions next to the branch, the link <b>Git Log</b> will take you to the Git log page.
 		</p>
-		<h4 id="Merging_branches">Merging branches</h4>
-		<p>Merging branches involves two branches:  the branch whose actions you are working with, and your active branch.  For example, clicking the <b>Merge</b> icon for your newly created branch will merge its content to your active branch.  You can also merge from remote branches.   </p>
-		<p>
-			<img title="Merge button" alt="Merge button" border="0" src="images/Orion-repository-page-branch-actions-merge-local.png"/>
-			You can also merge branches in the 
-			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Log_page/Git-Log-page.html" title="Orion/Documentation/User Guide/Reference/Git Log page">Log page</a> or 
-			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Status page</a>.
-		</p>
-		<h4 id="Setting_the_active_branch">Setting the active branch</h4>
+		<h4 id="Setting_the_active_branch_using_checkout">Setting the active branch using checkout</h4>
 		<p>The active branch is the branch that contains your working copy.  When you create a new branch, it is not automatically set as the active branch.  Suppose you created this branch to start work on a new feature.  From the actions next to the branch, click on the checkout icon to make the branch active.</p>
 		<p>
 			<img title="Checkout button" alt="Checkout button" border="0" src="images/Orion-repository-page-branch-actions-checkout.png"/>
@@ -73,16 +66,35 @@
 		<p>The active branch represents your working directory, and therefore the 
 			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Git Status page</a> will always reflect the status of the active branch.
 		</p>
-		<h4 id="Pushing_a_local_branch">Pushing a local branch</h4>
-		<p>Once a branch is checked out, a list of the commits for that branch will appear.  Arrows next to the commits will indicate if the commits are incoming or outgoing. Clicking on the <b>Push All</b> action will push all the commits to a remote tracking branch. </p>
+		<h4 id="Merging_branches">Merging branches</h4>
+		<p>Merging branches involves two branches:  the branch whose actions you are working with, and your active branch.  For example, clicking the <b>Merge</b> icon for your newly created branch will merge its content to your active branch.  You can also merge from remote branches.   </p>
 		<p>
-			<img title="Push All button" alt="Push All button" border="0" src="images/Orion-repository-page-branch-actions-push.png"/>
+			<img title="Merge button" alt="Merge button" border="0" src="images/Orion-repository-page-branch-actions-merge-local.png"/>
 		</p>
-		<p>For a newly created branch, you can choose an existing remote branch, or more likely, create a new remote tracking branch for your work.</p>
+		<p>You can also merge branches in the 
+			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Log_page/Git-Log-page.html" title="Orion/Documentation/User Guide/Reference/Git Log page">Log page</a> or 
+			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Status page</a>.
+		</p>
+		<h4 id="Rebasing_commits">Rebasing commits</h4>
+		<p>When you have been making commits in a topic branch, with the intention of pushing the code into a different branch, it is often useful to rebase those commits on another branch.  Rebasing will make your commits appear as if the changes were made based on the code in another branch.  Before rebasing, ensure all of your changes are committed to your topic branch and the branch you wish to rebase on is up to date.</p>
+		<p>
+			<img title="Rebasing a branch" alt="Rebasing a branch" border="0" src="images/Orion-tasks-rebase.png"/>
+		</p>
+		<h4 id="Deleting_a_local_branch">Deleting a local branch</h4>
+		<p>From the branch actions, click the delete icon to delete a local branch. A confirmation dialog will pop up, providing you a chance to confirm your decision.</p>
+		<p>
+			<img title="Delete button" alt="Delete button" border="0" src="images/Orion-repository-page-branch-actions-delete.png"/>
+		</p>
+		<h4 id="Pushing_a_local_branch">Pushing a local branch</h4>
+		<p>Once a branch is checked out, a list of recent commits for that branch will appear. Arrows next to the commits will indicate if the commits are incoming or outgoing. Click the <b>See Full Log</b> to open a full list of the commits to that branch.  There are a variety of actions you can click to perform Git operations on the branch.</p>
+		<p>
+			<img title="Displaying commits on a branch" alt="Displaying commits on a branch" border="0" src="images/Orion-repository-page-branch-actions-push.png"/>
+		</p>
+		<p>Clicking <b>Push All</b> will push all outgoing commits to the remote repository. For a newly created branch, you can choose an existing remote branch to push to, or more likely, create a new remote tracking branch for your work.</p>
 		<p>
 			<img title="Remote branch selection" alt="Remote branch selection" border="0" src="images/Orion-branchselection.png"/>
 		</p>
-		<p>You can also push changes and create remote branchs from the 
+		<p>You can also push changes and create remote branches from the 
 			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Log_page/Git-Log-page.html" title="Orion/Documentation/User Guide/Reference/Git Log page">Log page</a> or 
 			<a href="../../../../../Orion/Documentation/User_Guide/Reference/Git_Status_page/Git-Status-page.html" title="Orion/Documentation/User Guide/Reference/Git Status page">Status page</a>.
 		</p>
@@ -105,9 +117,6 @@
 			<img title="Checkout button" alt="Checkout button" border="0" src="images/Orion-repository-branch-actions-remote-checkout.png"/>
 		</p>
 		<p>This will create a local branch if you don't already have one, and make that your active branch.  </p>
-		<p>
-			<img title="Branches view (updated after remote branch checkout)" alt="Branches view (updated after remote branch checkout)" border="0" src="images/Orion-repository-branch-actions-remote-checkout-result.png"/>
-		</p>
 		<p>If you try to check out a remote branch that already has a local branch in your repository, you will get a warning message : "the local branch already exists".  In this case, you should check out the local branch and fetch the remote, rather than check out the remote branch.</p>
 		<h4 id="Working_with_a_remote_branch">Working with a remote branch</h4>
 		<p>When working with a remote branch, you can ensure you have the most current content by <b>fetching</b> the branch in the remote branches list.  (You can also <b>pull</b> the repository from the main toolbar which will fetch all branch content.)</p>
@@ -130,6 +139,25 @@
 		<p>A dialog will pop up asking for confirmation.</p>
 		<p>
 			<img title="Confirm dialog" alt="Confirm dialog" border="0" src="images/Orion-repository-branch-actions-remote-reset-confirm.png"/>
+		</p>
+		<h2 id="Tags">Tags</h2>
+		<p>The <b>Tags</b> section will the list the most recent tags added to the repository. Clicking the <b>View All</b> link will open a list with all tags. Buttons beside each tag will <b>Checkout</b> the tag, creating a local branch and <b>Delete</b> the tag.</p>
+		<p>
+			<img title="Tags section" alt="Tags section" border="0" src="images/Orion-repository-page-tags.png"/>
+		</p>
+		<h2 id="Remotes">Remotes</h2>
+		<p>The <b>Remotes</b> section of the repository page lists all the remotes you have set up for your repository. Actions beside each remote can <b>Fetch</b> from the remote or <b>Delete</b> it.</p>
+		<p>
+			<img title="Repository remotes" alt="Repository remotes" border="0" src="images/Orion-repository-page-remotes.png"/>
+		</p>
+		<p>Clicking on <b>New Remote</b> will open a dialog where you can enter a name and url for the new remote.</p>
+		<p>
+			<img title="Create a new remote" alt="Create a new remote" border="0" src="images/Orion-repository-page-remotes-actions-new.png"/>
+		</p>
+		<h2 id="Configuration">Configuration</h2>
+		<p>The <b>Configuration</b> section at the bottom of the repository page shows the configuration of the repository. On the main page you will see just <b>user.*</b>. To see the full list, click <b>View All</b>. From here you can add additional configuration properties to the repository and change or delete existing properties.</p>
+		<p>
+			<img title="Repository configuration" alt="Repository configuration" border="0" src="images/Orion-repository-page-config.png"/>
 		</p>
 		<h2 id="Updating_this_document">Updating this document</h2>
 		<p>This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
