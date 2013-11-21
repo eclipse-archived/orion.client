@@ -434,11 +434,13 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				/*
 				* Feature in WekKit. Adding a regular white space to the line will
 				* cause the longest line in the view to wrap even though "pre" is set.
-				* The fix is to use the zero-width non-joiner character (\u200C) instead.
+				* The fix is to use the zero-width space character (\u200B) instead.
+				* Note: Do not use \u200C because it causes br elements to be inserted on
+				* blank lines while typing chinese or dictation on Mac.
 				* Note: Do not use \uFEFF because in old version of Chrome this character 
 				* shows a glyph;
 				*/
-				c = "\u200C"; //$NON-NLS-0$
+				c = "\u200B"; //$NON-NLS-0$
 			}
 			var range = {text: c, style: view._metrics.largestFontStyle, ignoreChars: 1};
 			if (ranges.length === 0 || !ranges[ranges.length - 1].style || ranges[ranges.length - 1].style.tagName !== "div") { //$NON-NLS-0$
@@ -3766,8 +3768,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		_handleTextInput: function (e) {
 			if (this._ignoreEvent(e)) { return; }
 			this._imeOffset = -1;
-			if (util.isAndroid) {
-				var selection = this._getWindow().getSelection();
+			var selection = this._getWindow().getSelection();
+			if (
+				selection.anchorNode !== this._anchorNode || selection.focusNode !== this._focusNode ||
+				selection.anchorOffset !== this._anchorOffset || selection.focusOffset !== this._focusOffset
+			) {
 				var temp = selection.anchorNode;
 				while (temp) {
 					if (temp.lineIndex !== undefined) {
@@ -5153,12 +5158,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					var ignored = 0, childText = [], childOffset = -1;
 					while (textNode) {
 						var data = textNode.data;
-						for (var i = data.length - 1; i >= 0; i--) {
-							var ch = data.substring(i, i + 1);
-							if (ignored < lineChild.ignoreChars && (ch === " " || ch === "\u200C" || ch === "\uFEFF")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-								ignored++;
-							} else {
-								childText.push(ch === "\u00A0" ? "\t" : ch); //$NON-NLS-1$ //$NON-NLS-0$
+						if (data) {
+							for (var i = data.length - 1; i >= 0; i--) {
+								var ch = data.substring(i, i + 1);
+								if (ignored < lineChild.ignoreChars && (ch === " " || ch === "\u200B" || ch === "\uFEFF")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									ignored++;
+								} else {
+									childText.push(ch === "\u00A0" ? "\t" : ch); //$NON-NLS-1$ //$NON-NLS-0$
+								}
 							}
 						}
 						if (offsetNode === textNode) {
@@ -5860,6 +5867,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					sel.anchorNode !== endLineNode || sel.anchorOffset !== endLineOffset ||
 					sel.focusNode !== startLineNode || sel.focusOffset !== startLineOffset))
 				{
+					this._anchorNode = startLineNode;
+					this._anchorOffset = startLineOffset;
+					this._focusNode = endLineNode;
+					this._focusOffset = endLineOffset;
 					this._ignoreSelect = false;
 					if (sel.rangeCount > 0) { sel.removeAllRanges(); }
 					sel.addRange(range);
