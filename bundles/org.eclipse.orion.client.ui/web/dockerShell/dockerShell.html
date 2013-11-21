@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2013." >
+	<meta charset="UTF-8">
+	<title>Docker Shell</title>
+	<link rel="stylesheet" type="text/css" href="dockerShell.css" />
+	<script src="../requirejs/require.js"></script>
+	<script>
+		/*global require*/
+		require({
+			baseUrl: "..",
+			paths: {
+				text: "requirejs/text",
+				i18n: "requirejs/i18n",
+				domReady: "requirejs/domReady"
+			}
+		});
+		require(["dockerShell.js"]);
+	</script>
+</head>
+	<body id="orion-dockerShell" class="orionPage">
+		<div class="content-fixedHeight">
+			<div class="dockerShell-output" id="dockerShell-output"></div>
+			<div class="dockerShell-input">
+				<input type="text" class="dockerCmd" id="dockerCmd">
+			</div>
+		</div>
+		<div class="footer-fixed-bottom footer" id="footer"></div>
+	</body>
+</html>

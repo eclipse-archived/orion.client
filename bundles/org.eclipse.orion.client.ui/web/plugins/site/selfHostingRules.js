@@ -44,7 +44,8 @@ define([], function() {
 		{ type: API, source: "/mixlogin/manageopenids", targetPattern: "${0}mixlogin/manageopenids" },
 		{ type: API, source: "/openids", targetPattern: "${0}openids" },
 		{ type: API, source: "/task", targetPattern: "${0}task" },
-		{ type: API, source: "/help", targetPattern: "${0}help" }
+		{ type: API, source: "/help", targetPattern: "${0}help" },
+		{ type: API, source: "/docker", targetPattern: "${0}docker" }
 	];
 
 	return {
