@@ -11,7 +11,7 @@
 /*global define localStorage*/
 /** @namespace The global container for eclipse APIs. */
 
-define(['orion/Deferred'], function(Deferred){
+define(['orion/Deferred', 'orion/xhr'], function(Deferred, xhr){
 
 	var eclipse = eclipse || {};
 	eclipse.SshService = (function() {
@@ -20,6 +20,38 @@ define(['orion/Deferred'], function(Deferred){
 				this._serviceRegistry = serviceRegistry;
 				this._authService = serviceRegistry.getService("orion.core.auth"); //$NON-NLS-0$
 				this._serviceRegistration = serviceRegistry.registerService("orion.net.ssh", this); //$NON-NLS-0$
+				
+				/* plugins may require ssh service thus auth service may be absent at this point */
+				if(!this._authService){
+					
+					/* Nolite iudicare et non iudicabimini. */
+					var loginData;
+					this._authService = {
+						getUser : function(){
+							if(loginData){
+								var d = new Deferred();
+								d.resolve(loginData);
+								return d;
+							}
+							
+							return xhr("POST", "../../login", {
+								headers: {
+									"Orion-Version": "1" //$NON-NLS-0$
+								},
+								timeout: 15000
+							}).then(function(result) {
+								loginData = result.response ? JSON.parse(result.response) : null;
+								return loginData;
+							}, function(error) {
+								loginData = null;
+								if (error instanceof Error && error.name === "Cancel") {
+									return "_cancel";
+								} 
+								return error.response ? JSON.parse(error.response) : null;
+							});
+						}	
+					};
+				}
 			}
 		}
 		

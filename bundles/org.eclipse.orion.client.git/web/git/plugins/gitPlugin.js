@@ -1,5 +1,18 @@
+/******************************************************************************* 
+ * @license
+ * Copyright (c) 2013 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
 /*global define document URL window confirm*/
-define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClient", "orion/ssh/sshTools", "orion/i18nUtil", "orion/Deferred", "orion/URL-shim", "domReady!"], function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred) {
+
+define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClient", "orion/ssh/sshTools",
+ "orion/i18nUtil", "orion/Deferred", "orion/git/util", "orion/URL-shim", "domReady!"], 
+function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil, Deferred, mGitUtil) {
 	var temp = document.createElement('a');
 	temp.href = "../mixloginstatic/LoginWindow.html";
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
@@ -266,8 +279,12 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 			return {Type: "git", Location: removeUserInformation(params.url)};
 		},
 		_cloneRepository: function(gitUrl, params, workspaceLocation, isProject){
+			var self = this;
 			var deferred = new Deferred();
-			var knownHosts = sshService.getKnownHosts();
+			
+			/* parse gitURL */
+			var repositoryURL = mGitUtil.parseSshGitUrl(gitUrl);
+			sshService.getKnownHostCredentials(repositoryURL.host, repositoryURL.port).then(function(knownHosts){
 				gitClient.cloneGitRepository(null, gitUrl, null, workspaceLocation, params.sshuser, params.sshpassword, knownHosts, params.sshprivateKey, params.sshpassphrase, null, isProject).then(function(cloneResp){
 					gitClient.getGitClone(cloneResp.Location).then(function(clone){
 						if(clone.Children){
@@ -299,8 +316,19 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 						if(error.JsonData.HostKey){
 							if(confirm(i18nUtil.formatMessage('Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.',
 								error.JsonData.KeyType, error.JsonData.Host, error.JsonData.HostFingerprint))){
-									sshService.addKnownHosts(error.JsonData.Host + " " + error.JsonData.KeyType + " " + error.JsonData.HostKey);
-									this._cloneRepository(gitUrl, params, workspaceLocation).then(deferred.resolve, deferred.reject, deferred.progress);
+									
+									var hostURL = mGitUtil.parseSshGitUrl(error.JsonData.Url);
+									var hostCredentials = {
+											host : error.JsonData.Host,
+											keyType : error.JsonData.KeyType,
+											hostKey : error.JsonData.HostKey,
+											port : hostURL.port
+										};
+									
+									sshService.addKnownHost(hostCredentials).then(function(){
+										self._cloneRepository(gitUrl, params, workspaceLocation).then(deferred.resolve, deferred.reject, deferred.progress);
+									});
+									
 							} else {
 								deferred.reject(error);
 							}
@@ -315,7 +343,9 @@ define(["orion/plugin", "orion/xhr", "orion/serviceregistry", "orion/git/gitClie
 						}
 					}
 					deferred.reject(error);
-				}.bind(this), deferred.progress);
+				}.bind(this), deferred.progress);	
+			});
+			
 			return deferred;
 		},
 		initDependency: function(dependency, params, projectMetadata){
