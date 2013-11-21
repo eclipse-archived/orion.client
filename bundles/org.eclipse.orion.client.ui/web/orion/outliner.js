@@ -375,6 +375,12 @@ define([
 							navHandler.iterate(true, false, false, true);
 						}
 					}
+					
+					//prevent the browser's default behavior of automatically scrolling 
+					//the outline view down because the DOWN key was pressed
+					if (e.preventDefault) {
+						e.preventDefault();	
+					}
 				}
 			}.bind(this), false);
 		
