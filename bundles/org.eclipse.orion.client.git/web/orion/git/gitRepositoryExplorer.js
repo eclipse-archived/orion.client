@@ -410,7 +410,6 @@ exports.GitRepositoryExplorer = (function() {
 				}
 				
 				var contentParent = document.createElement("div");
-				contentParent.className = "sectionTable";
 				tableNode.appendChild(contentParent);
 				
 				contentParent.innerHTML = '<div id="repositoryNode" class="mainPadding"></div>'; //$NON-NLS-0$
@@ -421,21 +420,19 @@ exports.GitRepositoryExplorer = (function() {
 			},
 			
 			renderBeforeItemPopulation : function(i){
-				var sectionItem = document.createElement("div");
-				sectionItem.className = "sectionTableItem " + ((repositories.length === 1) ? "" : "lightTreeTableRow");
-				lib.node("repositoryNode").appendChild(sectionItem);
-
-				var horizontalBox = document.createElement("div");
-				horizontalBox.style.overflow = "hidden";
-				sectionItem.appendChild(horizontalBox);
+				// Title area
+				var repoSection = document.createElement("div");
+				repoSection.className = "sectionWrapper toolComposite";
+				repoSection.style = "margin-top: 15px;";
+				lib.node("repositoryNode").appendChild(repoSection);
 				
-				var detailsView = document.createElement("div");
-				detailsView.className = "stretch";
-				horizontalBox.appendChild(detailsView);
+				var sectionAnchor = document.createElement("div");
+				sectionAnchor.className = "sectionAnchor sectionTitle layoutLeft";
+				repoSection.appendChild(sectionAnchor);
 				
 				var title = document.createElement("span");
-				detailsView.appendChild(title);
-
+				sectionAnchor.appendChild(title);
+				
 				if (links){
 					var link = document.createElement("a");
 					link.href = require.toUrl(repoTemplate.expand({resource: repositories[i].Location}));
@@ -447,6 +444,23 @@ exports.GitRepositoryExplorer = (function() {
 				
 				//create indicator
 				this.explorer.progressIndicators[i] = new this.explorer.progressIndicator(i, title);
+					
+				if (mode === "full"){
+					var actionsArea = document.createElement("div");
+					actionsArea.className = "layoutRight sectionActions";
+					actionsArea.id = "repositoryActionsArea";
+					repoSection.appendChild(actionsArea);
+					that.commandService.renderCommands(that.actionScopeId, actionsArea, repositories[i], that, "tool"); //$NON-NLS-0$
+				}
+				
+				// Content area
+				var repoSectionContent = document.createElement("div");
+				repoSectionContent.className = "sectionTable sectionTableItem";
+				lib.node("repositoryNode").appendChild(repoSectionContent);
+										
+				var detailsView = document.createElement("div");
+				detailsView.className = "stretch";
+				repoSectionContent.appendChild(detailsView);
 				
 				var div = document.createElement("div");
 				detailsView.appendChild(div);
@@ -481,13 +495,6 @@ exports.GitRepositoryExplorer = (function() {
 					span.id = "commitsState"+i;
 					span.style.paddingLeft = "10px";
 					detailsView.appendChild(span);
-					
-					var actionsArea = document.createElement("div");
-					actionsArea.className = "sectionTableItemActions";
-					actionsArea.id = "repositoryActionsArea";
-					horizontalBox.appendChild(actionsArea);
-					
-					that.commandService.renderCommands(that.actionScopeId, actionsArea, repositories[i], that, "tool"); //$NON-NLS-0$
 				}
 			},
 			
