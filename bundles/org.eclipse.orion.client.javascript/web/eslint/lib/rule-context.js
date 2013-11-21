@@ -1,3 +1,18 @@
+
+(function(root, factory) {
+    if(typeof exports === 'object') {
+        module.exports = factory(require, exports, module);
+    }
+    else if(typeof define === 'function' && define.amd) {
+        define(['require', 'exports', 'module'], factory);
+    }
+    else {
+        var req = function(id) {return root[id];},
+            exp = root,
+            mod = {exports: exp};
+        root.ruleContext = factory(req, exp, mod);
+    }
+}(this, function(require, exports, module) {
 /**
  * @fileoverview RuleContext utility for rules
  * @author Nicholas C. Zakas
@@ -99,3 +114,6 @@ RuleContext.prototype = {
 };
 
 module.exports = RuleContext;
+
+    return module.exports;
+}));

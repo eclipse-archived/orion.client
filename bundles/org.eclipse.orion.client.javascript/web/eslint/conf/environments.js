@@ -1,3 +1,18 @@
+
+(function(root, factory) {
+    if(typeof exports === 'object') {
+        module.exports = factory(require, exports, module);
+    }
+    else if(typeof define === 'function' && define.amd) {
+        define(['require', 'exports', 'module'], factory);
+    }
+    else {
+        var req = function(id) {return root[id];},
+            exp = root,
+            mod = {exports: exp};
+        root.conf.environments = factory(req, exp, mod);
+    }
+}(this, function(require, exports, module) {
 module.exports = {
     "builtin": {
         "NaN"                : false,
@@ -353,3 +368,5 @@ module.exports = {
         "clearImmediate": false
     }
 };
+    return module.exports;
+}));
