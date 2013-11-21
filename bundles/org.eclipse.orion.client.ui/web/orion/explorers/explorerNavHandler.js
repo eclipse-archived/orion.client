@@ -435,8 +435,8 @@ exports.ExplorerNavHandler = (function() {
 				while (offsetParent) {
 					var style = window.getComputedStyle(offsetParent, null);
 					if (!style) { break; }
-					var overflow = style.getPropertyValue("overflow-y");
-					if (overflow === "hidden" || overflow === "auto" || overflow === "scroll") { break; }
+					var overflow = style.getPropertyValue("overflow-y"); //$NON-NLS-0$
+					if (overflow === "auto" || overflow === "scroll") { break; } //$NON-NLS-1$ //$NON-NLS-0$
 					offsetParent = offsetParent.parentNode;
 				}
 				if (!offsetParent) {
