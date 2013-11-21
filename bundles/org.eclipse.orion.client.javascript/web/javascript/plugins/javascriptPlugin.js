@@ -39,7 +39,7 @@ define([
 				"extends": "text/plain",
 				name: "JavaScript",
 				extension: ["js"],
-				image: "../images/javascript.png"
+				image: "/javascript/images/javascript.png"
 			}
 		] 
 	});
