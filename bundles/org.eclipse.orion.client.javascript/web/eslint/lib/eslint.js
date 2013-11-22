@@ -10,7 +10,7 @@
 var esprima = require("esprima"),
     estraverse = require("estraverse"),
     escope = require("escope"),
-    environments = require("../conf/environments.json"),
+    environments = require("../conf/environments.js"),
     rules = require("./rules"),
     util = require("./util"),
     RuleContext = require("./rule-context"),

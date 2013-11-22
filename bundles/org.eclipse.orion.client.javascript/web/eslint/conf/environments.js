@@ -1,4 +1,4 @@
-{
+module.exports = {
     "builtin": {
         "NaN"                : false,
         "Infinity"           : false,
@@ -352,4 +352,4 @@
         "setImmediate"  : false,
         "clearImmediate": false
     }
-}
+};
