@@ -216,14 +216,15 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 	OpenResourceDialog.prototype.decorateResult = function(resultsDiv) {
 		var self = this;
 		var links = lib.$$array("a", resultsDiv); //$NON-NLS-0$
+		function clicked(evt) { //$NON-NLS-0$
+			if (evt.button === 0 && !evt.ctrlKey && !evt.metaKey) {
+				self.hide();
+			}
+		}
 		for (var i=0; i<links.length; i++) {
 			var link = links[i];
-			link.addEventListener("click", function(evt) { //$NON-NLS-0$
-				if (!evt.ctrlKey && !evt.metaKey) {
-					self.hide();
-				}
-			}, false);
-		};
+			link.addEventListener("click", clicked, false);
+		}
 	};
 	
 	/** @private */
