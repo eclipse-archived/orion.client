@@ -18,7 +18,7 @@ define([
 	'esprima/esprima',
 	'orion/serialize',
 	'orion/i18nUtil'
-], function(PluginProvider, Outliner, Occurrences, EsprimaAssist, _, Serialize, i18nUtil) {
+], function(PluginProvider, Outliner, Occurrences, EsprimaAssist, Esprima, Serialize, i18nUtil) {
 
 	/**
 	 * Plug-in headers
@@ -47,33 +47,24 @@ define([
 	/**
 	 * Register the jsdoc-based outline
 	 */
-	provider.registerServiceProvider("orion.edit.outliner", new Outliner.JSDocOutliner(),
-		{ contentType: ["application/javascript"],
-		  name: "JSDoc outline",
-		  id: "orion.javascript.outliner.jsdoc"
-	});
-
-	/**
-	 * Register the raw source-based outline
-	 */
-	/**provider.registerServiceProvider("orion.edit.outliner", new Outliner.JsOutliner(), 
+	provider.registerServiceProvider("orion.edit.outliner", new Outliner.JSOutliner(),
 		{ contentType: ["application/javascript"],
 		  name: "Source outline",
+		  title: "JavaScript source outline",
 		  id: "orion.javascript.outliner.source"
-	});*/
-	
+	});
+
 	/**
 	 * Register the AST provider
 	 */
 	provider.registerService("orion.core.astprovider",
 		{ computeAST: function(context) {
 				var ast = esprima.parse(context.text, {
-					loc: true,
 					range: true,
-					raw: true,
-					tokens: true,
+					tolerant: true,
 					comment: true,
-					tolerant: true
+					loc: true,
+					tokens: true
 				});
 				if (ast.errors) {
 					ast.errors = ast.errors.map(Serialize.serializeError);
