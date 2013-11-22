@@ -3595,14 +3595,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 		},
 		_handleResize: function (e) {
-			var newWidth = this._parent.clientWidth;
-			var newHeight = this._parent.clientHeight;
-			if (this._parentWidth !== newWidth || this._parentHeight !== newHeight) {
-				if (this._parentWidth !== newWidth && this._wrapMode) {
+			var newWidth = this._rootDiv.clientWidth;
+			var newHeight = this._rootDiv.clientHeight;
+			if (this._rootWidth !== newWidth || this._rootHeight !== newHeight) {
+				if (this._rootWidth !== newWidth && this._wrapMode) {
 					this._resetLineHeight();
 				}
-				this._parentWidth = newWidth;
-				this._parentHeight = newHeight;
+				this._rootWidth = newWidth;
+				this._rootHeight = newHeight;
 				/*
 				* Feature in IE7. For some reason, sometimes Internet Explorer 7 
 				* returns incorrect values for element.getBoundingClientRect() when 
@@ -6541,9 +6541,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				scrollHeight = lineCount * lineHeight;
 			}
 			this._topIndexY = topIndexY;
-			var parent = this._parent;
-			var parentWidth = parent.clientWidth;
-			var parentHeight = parent.clientHeight;
+			var rootDiv = this._rootDiv;
+			var rootWidth = rootDiv.clientWidth;
+			var rootHeight = rootDiv.clientHeight;
 			if (hScrollOnly) {
 				leftWidth = 0;
 				if (this._leftDiv) {
@@ -6680,9 +6680,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				scrollHeight = totalHeight;
 	
 				// Update rulers
-				this._updateRuler(this._leftDiv, topIndex, lineEnd, parentHeight);
-				this._updateRuler(this._rightDiv, topIndex, lineEnd, parentHeight);
-				this._updateRuler(this._marginDiv, topIndex, lineEnd, parentHeight);
+				this._updateRuler(this._leftDiv, topIndex, lineEnd, rootHeight);
+				this._updateRuler(this._rightDiv, topIndex, lineEnd, rootHeight);
+				this._updateRuler(this._marginDiv, topIndex, lineEnd, rootHeight);
 				
 				leftWidth = 0;
 				if (this._leftDiv) {
@@ -6810,8 +6810,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				}
 				clipDiv.style.left = clipLeft + "px"; //$NON-NLS-0$
 				clipDiv.style.top = clipTop + "px"; //$NON-NLS-0$
-				clipDiv.style.right = (parentWidth - clipWidth - clipLeft) + "px"; //$NON-NLS-0$
-				clipDiv.style.bottom = (parentHeight - clipHeight - clipTop) + "px"; //$NON-NLS-0$
+				clipDiv.style.right = (rootWidth - clipWidth - clipLeft) + "px"; //$NON-NLS-0$
+				clipDiv.style.bottom = (rootHeight - clipHeight - clipTop) + "px"; //$NON-NLS-0$
 				clientDiv.style.left = clientLeft + "px"; //$NON-NLS-0$
 				clientDiv.style.top = clientTop + "px"; //$NON-NLS-0$
 				clientDiv.style.width = scrollWidth + "px"; //$NON-NLS-0$
@@ -6868,7 +6868,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				viewDiv.style.overflow = "hidden"; //$NON-NLS-0$
 			}
 		},
-		_updateRuler: function (divRuler, topIndex, bottomIndex, parentHeight) {
+		_updateRuler: function (divRuler, topIndex, bottomIndex, rootHeight) {
 			if (!divRuler) { return; }
 			var document = this._parent.ownerDocument;
 			var lineHeight = this._getLineHeight();
@@ -6880,7 +6880,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				var overview = ruler.getOverview();
 				if (overview === "page") { offset += this._topIndexY; } //$NON-NLS-0$
 				div.style.top = -offset + "px"; //$NON-NLS-0$
-				div.style.height = (parentHeight + offset) + "px"; //$NON-NLS-0$
+				div.style.height = (rootHeight + offset) + "px"; //$NON-NLS-0$
 				
 				if (div.rulerChanged) {
 					applyStyle(ruler.getRulerStyle(), div);
