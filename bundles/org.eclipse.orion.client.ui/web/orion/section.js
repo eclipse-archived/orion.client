@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  /*global define window document*/
-define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'orion/commonHTMLFragments'], function(lib, mSelection, mCommands, mHTMLFragments){
+define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'orion/commonHTMLFragments', 'orion/objects', 	'orion/selection'], function(lib, mSelection, mCommands, mHTMLFragments, objects, Selection){
 	
 	/**
 	 * Generates a section
@@ -216,6 +216,91 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		 */
 		getContentElement: function() {
 			return this._contentParent;
+		},
+		
+		embedExplorer: function(explorer, parent){
+			this._contentParent.innerHTML = ""; //NON-NLS-0$
+			if(!explorer.parent){
+				explorer.parent = parent;
+			}
+			this._contentParent.appendChild(explorer.parent);
+			explorer.section = this;
+			objects.mixin(explorer, {
+				createActionSections: function(){
+					if(this.actionsSections)
+					this.actionsSections.forEach(function(id) {
+						if (!lib.node(id)) {
+							var elem = document.createElement("ul"); //$NON-NLS-0$
+							elem.id = id;
+							elem.classList.add("commandList"); //$NON-NLS-0$
+							elem.classList.add("layoutRight"); //$NON-NLS-0$
+							this.section.actionsNode.appendChild(elem);
+						}
+					}.bind(this));
+				},
+				getCommandsVisible: function() {
+					return this.section.actionsNode.style.visibility!=="hidden";
+				},
+				setCommandsVisible: function(visible) {
+					this.section.actionsNode.style.visibility = visible ? "" : "hidden";
+					var selectionPolicy = visible ? null : "cursorOnly"; //$NON-NLS-0$
+					this.renderer.selectionPolicy = selectionPolicy;
+					var navHandler = this.getNavHandler();
+					if (navHandler) {
+						navHandler.setSelectionPolicy(selectionPolicy);
+					}
+					if (visible) {
+						this.updateCommands();
+					} else {
+						if(this.actionsSections)
+						this.actionsSections.forEach(function(id) {
+							if(lib.node(id)) this.commandRegistry.destroy(id);
+						}.bind(this));
+					}
+				},
+				destroy: function(){
+					Object.getPrototypeOf(this).destroy.call(this);
+					var _self = this;
+					if(!this.actionsSections){
+						return;
+					}
+					this.actionsSections.forEach(function(id) {
+						delete _self[id];
+					});
+					delete this.actionsSections;
+				},
+				updateCommands: function(selections){
+					if (!this.section.actionsNode || !this.getCommandsVisible()) {
+						return;
+					}
+					this.createActionSections();
+					Object.getPrototypeOf(this).updateCommands.call(this, selections);
+				},
+				loaded: function(){
+					var self = this;
+					if(!this.selection){
+						this.selection = new Selection.Selection(this.serviceRegistry, this.parent.id + "Selection"); //$NON-NLS-0$
+						this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+							self.updateCommands(event.selections);
+						});
+					}
+					this.registerCommands().then(function() {
+						self.updateCommands();
+					});
+				}
+			});
+			if(explorer.renderer){
+				explorer.renderer.section = this;
+				objects.mixin(explorer.renderer, {
+					getCellHeaderElement: function(col_no){
+						var firstHeader = Object.getPrototypeOf(this).getCellHeaderElement.call(this, col_no);
+						if(firstHeader){
+							this.section.setTitle(firstHeader.innerHTML);
+						}
+						return null;
+					}
+				});
+			}
 		},
 
 		createProgressMonitor: function(){

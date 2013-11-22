@@ -9,10 +9,280 @@
  ******************************************************************************/
  
 /*global define document setTimeout*/
-define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', 'orion/commandRegistry', 'orion/PageLinks'],
-	function(URITemplate, lib, mProjectCommands, mCommandRegistry, PageLinks) {
+define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/objects',  'orion/projectCommands', 'orion/commandRegistry', 'orion/PageLinks', 'orion/explorers/explorer', 'orion/section'],
+	function(URITemplate, lib, Deferred, objects, mProjectCommands, mCommandRegistry, PageLinks, mExplorer, mSection) {
 	
 	var editTemplate = new URITemplate("./edit.html#{,resource,params*}"); //$NON-NLS-0$
+	
+	function ProjectInfoModel(project){
+		this.root = project;
+	}
+	
+	ProjectInfoModel.prototype = new mExplorer.ExplorerModel();
+	ProjectInfoModel.prototype.constructor = ProjectInfoModel;
+	
+	ProjectInfoModel.prototype.getRoot = function(onItem){
+		return onItem(this.root);
+	};
+	
+	ProjectInfoModel.prototype.getChildren = function(parent, onComplete){
+		if(parent === this.root){
+			onComplete([
+				{id: "Name", displayName: "Name", value: parent.Name, no: 1},
+				{id: "Description", displayName: "Description", value: parent.Description, no: 2},
+				{id: "Url", displayName: "Site", value: parent.Url, href: parent.Url, no: 3}
+				]);
+		} else {
+			onComplete([]);
+		}
+	};
+	
+	ProjectInfoModel.prototype.getId = function(item){
+		return "ProjectInfo" + item.id;
+	};
+	
+	function ProjectInfoRenderer(options, projectEditor, explorer){
+		this._init(options);
+		this.projectEditor = projectEditor;
+		this.explorer = explorer;
+	}
+	
+	ProjectInfoRenderer.prototype = new mExplorer.SelectionRenderer();
+	ProjectInfoRenderer.prototype.constructor = ProjectInfoRenderer;
+	
+	ProjectInfoRenderer.prototype.getCellHeaderElement = function(col_no){
+		if(col_no===0){
+			var td = document.createElement("td");
+			td.colSpan = 2;
+			td.appendChild(document.createTextNode("Project Information"));
+			return td;
+		}
+	};
+	
+	ProjectInfoRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		if(col_no===0) {
+			var td = document.createElement("td");
+			var b = document.createElement("span");
+			b.className = "discreetInputLabel";
+			b.appendChild(document.createTextNode(item.displayName));
+			td.classList.add("discreetInputLabel");
+			td.appendChild(b);
+			td.width = "20%";
+			return td;
+		}
+		if(col_no===1){
+			var td;
+			if(item.href){
+				td = document.createElement("td");
+				td.style.verticalAlign = "top";
+				
+				var urlInput = document.createElement("input");
+				urlInput.style.visibility = "hidden";
+				
+				var urlSelector = document.createElement("div");
+				urlSelector.style.marginBottom = "-15px";
+				urlSelector.title = "Click to edit";
+				urlSelector.className = "discreetInput";
+				urlSelector.tabIndex = item.no;	//this is the same as the urlInput's tab index but they will never be visible at the same time
+				
+				var urlLink = document.createElement("a");
+				urlLink.href = item.value || "";
+				urlLink.appendChild(document.createTextNode(item.value || ""));
+				urlLink.tabIndex = item.no+1;
+							
+				urlSelector.appendChild(urlLink);
+				urlSelector.title = "Click to edit";
+		
+				//show url input, hide selector
+				urlSelector.onclick = function (event){
+					urlSelector.style.visibility = "hidden";
+					urlLink.style.visibility = "hidden";
+					urlInput.style.visibility = "";
+					urlInput.focus();
+				}.bind(this.projectEditor);
+				
+				//make the url editable when the selector gains focus
+				urlSelector.onfocus = urlSelector.onclick;
+				
+				//Make pressing "Enter" on the selector do the same think as clicking it
+				urlSelector.onkeyup = function(event){
+					if(event.keyCode === lib.KEY.ENTER){
+						urlSelector.onclick(event);
+					}
+				}.bind(this.projectEditor);
+				
+				urlLink.urlSelector = urlSelector; //refer to selector to be able to make it visible from within _renderEditableFields
+				
+				this.projectEditor._renderEditableFields(urlInput, item.id, item.no, urlLink);
+				td.appendChild(urlSelector);
+				td.appendChild(urlInput);
+				return td;
+			}
+			td = document.createElement("td");
+			td.style.verticalAlign = "top";
+			var input = item.id==="Description" ? document.createElement("textArea") : document.createElement("input");
+			this.projectEditor._renderEditableFields(input, item.id, item.no, null);
+			td.appendChild(input);
+			return td;
+		}
+
+	};
+	
+	
+	function AdditionalInfoModel(project){
+		this.root = project;
+	}
+	
+	AdditionalInfoModel.prototype = new mExplorer.ExplorerModel();
+	AdditionalInfoModel.prototype.constructor = AdditionalInfoModel;
+	
+	AdditionalInfoModel.prototype.getRoot = function(onItem){
+		return onItem(this.root);
+	};
+	
+	AdditionalInfoModel.prototype.getChildren = function(parent, onComplete){
+		if(parent === this.root){
+			for(var i=0; i<parent.children.length; i++){
+				parent.children[i].parent = parent;
+			}
+			onComplete(parent.children);
+		} else {
+			onComplete([]);
+		}
+	};
+	
+	AdditionalInfoModel.prototype.getId = function(item){
+		return "AdditionalInfo" + mExplorer.ExplorerModel.prototype.getId.call(this, {Location: item.parent.name + item.name});
+	};
+	
+	function AdditionalInfoRenderer(options, projectEditor, explorer){
+		this._init(options);
+		this.projectEditor = projectEditor;
+		this.explorer = explorer;
+	}
+	
+	AdditionalInfoRenderer.prototype = new mExplorer.SelectionRenderer();
+	AdditionalInfoRenderer.prototype.constructor = AdditionalInfoRenderer;
+	
+	AdditionalInfoRenderer.prototype.getCellHeaderElement = function(col_no){
+		if(col_no===0){
+			var td = document.createElement("td");
+			td.colSpan = 2;
+			td.appendChild(document.createTextNode(this.explorer.model.root.name));
+			return td;
+		}
+	};
+	
+	AdditionalInfoRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		if(col_no===0) {
+			var td = document.createElement("td");
+			var b = document.createElement("span");
+			b.className = "discreetInputLabel";
+			b.appendChild(document.createTextNode(item.name));
+			td.classList.add("discreetInputLabel");
+			td.appendChild(b);
+			td.width = "20%";
+			return td;
+		}
+		if(col_no===1){
+			var td = document.createElement("td");
+			if(item.href){
+				var a = document.createElement("a");
+				var uriTemplate = new URITemplate(item.href);
+				a.href = uriTemplate.expand({OrionHome : PageLinks.getOrionHome()});
+				a.appendChild(document.createTextNode(item.value || " "));
+				td.appendChild(a);
+			} else {
+				td.appendChild(document.createTextNode(item.value || " "));
+			}
+			return td;
+		}
+
+	};	
+	
+	function DependenciesModel(project, projectClient){
+		this.root = project;
+		this.projectClient = projectClient;
+	}
+	
+	DependenciesModel.prototype = new mExplorer.ExplorerModel();
+	DependenciesModel.prototype.constructor = DependenciesModel;
+	
+	DependenciesModel.prototype.getRoot = function(onItem){
+		return onItem(this.root);
+	};
+	
+	DependenciesModel.prototype.getChildren = function(parentItem, onComplete){
+		if(parentItem === this.root){
+			var children = [];
+			Deferred.all((parentItem.Dependencies || []).map(function(dependency) {
+				var item = {Dependency: dependency, Project: parentItem};
+				children.push(item);
+				return this.projectClient.getDependencyFileMetadata(dependency, parentItem.WorkspaceLocation).then(function(dependencyMetadata) {
+					objects.mixin(item, dependencyMetadata);
+				}, function(error) {
+					item.Directory = item.disconnected = true;
+				});
+			}.bind(this))).then(function() {
+				onComplete(children);
+			}.bind(this));
+			
+		} else {
+			onComplete([]);
+		}
+	};
+	
+	DependenciesModel.prototype.getId = function(item){
+		return mExplorer.ExplorerModel.prototype.getId.call(this, item.Dependency);
+	};
+	
+	function DependenciesRenderer(options, projectEditor, explorer){
+		this._init(options);
+		this.projectEditor = projectEditor;
+		this.explorer = explorer;
+		this.commandService = options.commandService;
+		this.actionScopeId = options.actionScopeId;
+	}
+	
+	DependenciesRenderer.prototype = new mExplorer.SelectionRenderer();
+	DependenciesRenderer.prototype.constructor = DependenciesRenderer;
+	
+	DependenciesRenderer.prototype.getCellHeaderElement = function(col_no){
+		if(col_no===0){
+			var td = document.createElement("td");
+			td.colSpan = 2;
+			td.appendChild(document.createTextNode("Associated Content"));
+			return td;
+		}
+	};
+	
+	DependenciesRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		if(col_no===0) {
+			var td = document.createElement("td");
+			
+			if(item.Location){
+				td.className = "navColumnNoIcon";
+				var a = document.createElement("a");
+				a.href = editTemplate.expand({resource: item.Location}); //$NON-NLS-0$
+				a.appendChild(document.createTextNode(item.Dependency.Name));
+				td.appendChild(a);
+			} else {
+				var name = item.Dependency.Name;
+				if(item.disconnected){
+					name += " (disconnected)";
+				}
+				td.appendChild(document.createTextNode(name));
+			}
+
+			return td;
+		}
+		if(col_no===1){
+			var actionsColumn = this.getActionsColumn(item, tableRow, null, null, true);
+			actionsColumn.style.textAlign = "right";
+			return actionsColumn;
+		}
+
+	};
 	
 	function ProjectEditor(options){
 		this.serviceRegistry = options.serviceRegistry;
@@ -26,8 +296,8 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', '
 	}
 	ProjectEditor.prototype = {
 		createCommands: function(){
-			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandService, this, this.fileClient, this.projectClient);
-			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
+//			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandService, this, this.fileClient, this.projectClient);
+//			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
 			this.commandService.registerCommandContribution(this.dependencyActions, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.registerCommandContribution(this.dependencyActions, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
 		},
@@ -107,108 +377,18 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', '
 			};
 		},
 		renderProjectInfo: function(parent){
-			var table = document.createElement("table");
-			var tr = document.createElement("tr");
-			table.appendChild(tr);
-			var td = document.createElement("th");
-			td.colSpan = 2;
-			td.appendChild(document.createTextNode("Project Information"));
-			tr.appendChild(td);
-
-			// NAME
-			tr = document.createElement("tr");
-			table.appendChild(tr);
-			td = document.createElement("td");
-			var b = document.createElement("b");
-			b.appendChild(document.createTextNode("Name"));
-			td.appendChild(b);
-			td.width = "20%";
-			tr.appendChild(td);
-			td = document.createElement("td");
-			td.style.verticalAlign = "top";
-			var nameInput = document.createElement("input");
-			this._renderEditableFields(nameInput, "Name", 1, null);
-
-			td.appendChild(nameInput);
-			tr.appendChild(td);
-			table.appendChild(tr);
 			
-			// DESCRIPTION
-			tr = document.createElement("tr");
-			table.appendChild(tr);
-			td = document.createElement("td");
-			b = document.createElement("b");
-			b.appendChild(document.createTextNode("Description"));
-			td.appendChild(b);
-			td.width = "20%";
-			tr.appendChild(td);
-			td = document.createElement("td");
-			td.style.verticalAlign = "top";
-			td.style.height = "40px";
-			var descriptionInput = document.createElement("textarea");
-			descriptionInput.style.height = "40px";
-			this._renderEditableFields(descriptionInput, "Description", 2, null);
-
-			td.appendChild(descriptionInput);
-			tr.appendChild(td);
-			table.appendChild(tr);
-			
-			// SITE
-			tr = document.createElement("tr");
-			table.appendChild(tr);
-			td = document.createElement("td");
-			b = document.createElement("b");
-			b.appendChild(document.createTextNode("Site"));
-			td.appendChild(b);
-			td.width = "20%";
-			tr.appendChild(td);
-			td = document.createElement("td");
-			td.style.verticalAlign = "top";
-			
-			var urlInput = document.createElement("input");
-			urlInput.style.visibility = "hidden";
-			
-			var urlSelector = document.createElement("div");
-			urlSelector.title = "Click to edit";
-			urlSelector.className = "discreetInput";
-			urlSelector.tabIndex = 3;	//this is the same as the urlInput's tab index but they will never be visible at the same time
-			
-			var urlLink = document.createElement("a");
-			urlLink.href = this.projectData.Url || "";
-			urlLink.appendChild(document.createTextNode(this.projectData.Url || ""));
-			urlLink.tabIndex = 4;
-						
-			urlSelector.appendChild(urlLink);
-			urlSelector.title = "Click to edit";
-	
-			//show url input, hide selector
-			urlSelector.onclick = function (event){
-				urlSelector.style.visibility = "hidden";
-				urlLink.style.visibility = "hidden";
-				urlInput.style.visibility = "";
-				urlInput.focus();
-			}.bind(this);
-			
-			//make the url editable when the selector gains focus
-			urlSelector.onfocus = urlSelector.onclick;
-			
-			//Make pressing "Enter" on the selector do the same think as clicking it
-			urlSelector.onkeyup = function(event){
-				if(event.keyCode === lib.KEY.ENTER){
-					urlSelector.onclick(event);
-				}
-			}.bind(this);
-			
-			urlLink.urlSelector = urlSelector; //refer to selector to be able to make it visible from within _renderEditableFields
-			
-			this._renderEditableFields(urlInput, "Url", 3, urlLink);
-			
-			td.appendChild(urlSelector);
-			td.appendChild(urlInput);
-			tr.appendChild(td);
-			table.appendChild(tr);
-			
-			parent.appendChild(table);
+			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection", title: "Project Information"});
+			var explorerParent = document.createElement("div");
+			explorerParent.id = "projectInformationNode";
+			var projectInfoRenderer = new ProjectInfoRenderer({
+				checkbox: false,
+				cachePrefix: "ProjectInfoExplorer" //$NON-NLS-0$
+			}, this);
+			var projectInfoExplorer = new mExplorer.Explorer(this.serviceRegistry, null, projectInfoRenderer, this.commandService);
+			projectInfoSection.embedExplorer(projectInfoExplorer, explorerParent);
+			projectInfoExplorer.createTree(explorerParent, new ProjectInfoModel(this.projectData), {noSelection: true});
+			return;
 		},
 		renderAdditionalProjectProperties: function(parent){
 			this.projectClient.getMatchingProjectHandlers(this.parentFolder).then(function(matchingProjectHandlers){
@@ -227,44 +407,14 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', '
 						if(!cat.name){
 							continue;
 						}
-						var table = document.createElement("table");
-						var tr = document.createElement("tr");
-						table.appendChild(tr);
-						var td = document.createElement("th");
-						td.colSpan = 2;
-						td.appendChild(document.createTextNode(cat.name));
-						var actionsSpan = document.createElement("span");
-						td.appendChild(actionsSpan);
-						tr.appendChild(td);
-						
-						if(cat.children){
-							for(var j=0; j<cat.children.length; j++){
-								var child = cat.children[j];
-								tr = document.createElement("tr");
-								table.appendChild(tr);
-								td = document.createElement("td");
-								var b = document.createElement("b");
-								b.appendChild(document.createTextNode(child.name));
-								td.appendChild(b);
-								td.width = "20%";
-								tr.appendChild(td);
-								
-								td = document.createElement("td");
-								if(child.href){
-									var a = document.createElement("a");
-									var uriTemplate = new URITemplate(child.href);
-									a.href = uriTemplate.expand({OrionHome : PageLinks.getOrionHome()});
-									a.appendChild(document.createTextNode(child.value || " "));
-									td.appendChild(a);
-								} else {
-									td.appendChild(document.createTextNode(child.value || " "));
-								}
-								
-								tr.appendChild(td);
-							}
-						}
-						
-						parent.appendChild(table);
+						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.name + "Section", title: cat.name});
+						var explorerParent = document.createElement("div");
+						var additionalInfoRenderer = new AdditionalInfoRenderer({
+							checkbox: false
+						}, this);
+						var additionalInfoExplorer = new mExplorer.Explorer(this.serviceRegistry, null, additionalInfoRenderer, this.commandService);
+						addotopnalInfoSection.embedExplorer(additionalInfoExplorer, explorerParent);
+						additionalInfoExplorer.createTree(explorerParent, new AdditionalInfoModel(cat),  {noSelection: true});
 					}
 				}.bind(this));
 			}
@@ -276,51 +426,19 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/projectCommands', '
 				return;
 			}
 			
-			var table = document.createElement("table");
-			var tr = document.createElement("tr");
-			table.appendChild(tr);
-			var td = document.createElement("th");
-			td.appendChild(document.createTextNode("Associated Content"));
-			tr.appendChild(td);
-			td = document.createElement("th");
-			tr.appendChild(td);
+			var dependenciesSection = new mSection.Section(parent, {id: "projectDependenciesSection", title: "Associated Content"});
+			var dependenciesParent = document.createElement("div");
+			dependenciesParent.id = "ependenciesNode";
+			var dependenciesRenderer = new DependenciesRenderer({
+				checkbox: false,
+				commandService: this.commandService,
+				actionScopeId:  this.dependencyActions
+			}, this);
+			var dependenciesExplorer = new mExplorer.Explorer(this.serviceRegistry, null, dependenciesRenderer, this.commandService);
+			dependenciesExplorer.actionScopeId = this.dependencyActions;
+			dependenciesSection.embedExplorer(dependenciesExplorer, dependenciesParent);
+			dependenciesExplorer.createTree(dependenciesParent, new DependenciesModel(this.projectData, this.projectClient),  {indent: '8px', noSelection: true});
 			
-			for(var i=0; i<this.projectData.Dependencies.length; i++){
-				var dependency = this.projectData.Dependencies[i];
-				tr = document.createElement("tr");
-				table.appendChild(tr);
-				td = document.createElement("td");
-				td.appendChild(document.createTextNode(dependency.Name));
-				var span = document.createElement("span");
-				
-				(function(td, span, dependency){
-					this.projectClient.getDependencyFileMetadata(dependency, this.projectData.WorkspaceLocation).then(function(dependencyMetadata){
-						if(dependencyMetadata){
-							lib.empty(td);
-							var a = document.createElement("a");
-							a.href = editTemplate.expand({resource: dependencyMetadata.Location}); //$NON-NLS-0$
-							a.appendChild(document.createTextNode(dependency.Name));
-							td.appendChild(a);
-						}
-					}, function(){
-						lib.empty(td);
-						td.appendChild(document.createTextNode(dependency.Name + " (disconnected)"));
-						lib.empty(span);
-						this.commandService.renderCommands(this.dependencyActions, span, {Dependency: dependency,  disconnected: true, Project: this.projectData}, this, "tool");
-					}.bind(this));
-				}).bind(this)(td, span, dependency);
-				
-				tr.appendChild(td);
-				
-				td = document.createElement("td");
-				span.style.cssFloat = "right";
-				td.appendChild(span);
-				this.commandService.renderCommands(this.dependencyActions, span, {Dependency: dependency, Project: this.projectData}, this, "tool");
-				tr.appendChild(td);
-			}
-				
-			parent.appendChild(table);
-			this.projectData.type = "Project";
 		}
 	};
 	

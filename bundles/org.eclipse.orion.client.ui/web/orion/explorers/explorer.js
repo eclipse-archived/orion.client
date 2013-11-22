@@ -34,6 +34,9 @@ exports.Explorer = (function() {
 		this.renderer = renderer;
 		this.selection = selection;
 		this.commandService = commandRegistry;
+		if(this.renderer){
+			this.renderer.explorer = this;
+		}
 		
 		this.myTree = null;
 	}

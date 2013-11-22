@@ -237,6 +237,10 @@ textarea.parameterInput {
 	vertical-align: baseline;
 }
 
+.navColumnNoIcon {
+	padding: 6px;
+}
+
 .navRow {
 	vertical-align: baseline;
 	border-spacing: 8px;
@@ -898,11 +902,7 @@ input {
 	margin-top:3px;
 }
 
-.orionMarkdown h1 {
-	position: relative;
-}
-
-.orionMarkdown table, .orionProject table, .folderNav table, .sectionWrapper, .sectionTable{
+.sectionWrapper, .sectionTable{
 	text-align: left;
 	border-collapse: collapse;
 	border-spacing: 0;
@@ -916,16 +916,16 @@ input {
 	width: 90%;
 }
 
-.orionMarkdown table th, .orionProject table th, .folderNav table th {
-	text-align: left;
+.sectionTable td {
+	border-bottom: 1px solid #e6f3f6;
+	vertical-align: middle;
+	color: grey;
 }
 
-.orionMarkdown table {
-	table-layout: fixed;
-}
-
-td .orionMarkdown {
+.orionMarkdown {
+	padding: 8px;
 	overflow-x: auto;
+	color: grey;
 }
 
 .orionMarkdown img {
@@ -955,45 +955,32 @@ td .orionMarkdown {
 	margin: 0;
 }
 
-.folderNav tr {
-	border-bottom: 1px solid #e6f3f6;
-	border-right: 1px solid #D6EBF0;
-	border-left: 1px solid #D6EBF0;
-	padding-left: 8px;
-	padding-right: 8px;
-	color: grey;
-}
-.folderNav tr:last-child {
-	border-bottom: 1px solid #D6EBF0;
-}
-
-.orionMarkdown td, .orionProject td {
-	border-bottom: 1px solid #D6EBF0;
-	border: 1px solid #D6EBF0;
-	padding: 8px;
-	color: grey;
-}
-
 .orionProject input, .orionProject textarea{
 	border: 1px solid lightgrey;
 }
 
-.orionProject .discreetInput, .orionProject .discreetInput {
+.orionProject .discreetInput {
 	border: none;
 	color: grey;
 	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
-	width: 70%;
+	width: 90%;
 	margin-left: 0;
-	position: absolute;
 	min-height: 15px;
+	background-color: inherit;
 }
 
 .orionProject .discreetInput:hover, .orionProject .discreetInput:focus {
 	border: 1px solid lightgrey;
 	color: black;
+	background-color: white;
 }
 
-.folderNav th, .orionMarkdown th, .orionProject th, .sectionWrapper{
+.discreetInputLabel {
+	font-weight: bold;
+	padding: 8px;
+}
+
+.sectionWrapper{
 	border-color:#D6EBF0;
 	border-bottom: 1px solid #D6EBF0;
 	border-top: 1px solid #D6EBF0;
@@ -1003,9 +990,9 @@ td .orionMarkdown {
 	padding: 6px;
 	color: gray;
 }
-.folderNav th:first-child, .orionMarkdown th:first-child, .orionProject th:first-child {
-	padding-top: 9px;
-	padding-bottom: 9px;
+
+.orionMarkdown h1 {
+	position: relative;
 }
 
 .sectionWrapper{

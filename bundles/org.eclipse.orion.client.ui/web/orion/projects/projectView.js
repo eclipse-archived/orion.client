@@ -35,8 +35,13 @@ define(['orion/projects/projectExplorer',
 		ProjectView.prototype = {
 			display: function(workspace, parent){
 				parent.classList.add("orionProject"); //$NON-NLS-0$
-				this.projectExplorer = new mProjectExplorer.ProjectExplorer(parent, this.serviceRegistry, new Selection.Selection(this.serviceRegistry), this.commandServic);
+				this.projectExplorer = new mProjectExplorer.ProjectExplorer(parent, this.serviceRegistry, new Selection.Selection(this.serviceRegistry), this.commandService);
 				this.changedItem(workspace);
+			},
+			setCommandsVisible: function(visible){
+				if(this.projectExplorer){
+					this.projectExplorer.setCommandsVisible.call(this.projectExplorer, visible);
+				}
 			},
 			changedItemEvent: function(event){
 				if(!event.parent || !this.workspace || event.parent.Location!==this.workspace.Location || !this.projects){
@@ -105,8 +110,6 @@ define(['orion/projects/projectExplorer',
 						_self.workspace = parent;
 						_self.projects = projects;
 						_self.projectExplorer.loadProjects(projects);
-						lib.empty(_self.projectExplorer.newActionsSpan);
-						_self.commandService.renderCommands(mProjectExplorer.newActionsScope, _self.projectExplorer.newActionsSpan, parent, _self.projectExplorer, "tool"); //$NON-NLS-0$
 					});
 				} else {
 					_self.progress.progress(_self.fileClient.loadWorkspace(), "Getting workspace information").then(function(workspace){
@@ -114,8 +117,6 @@ define(['orion/projects/projectExplorer',
 							_self.workspace = workspace;
 							_self.projects = projects;
 							_self.projectExplorer.loadProjects(projects);
-							lib.empty(_self.projectExplorer.newActionsSpan);
-							_self.commandService.renderCommands(mProjectExplorer.newActionsScope, _self.projectExplorer.newActionsSpan, parent, _self.projectExplorer, "tool"); //$NON-NLS-0$
 						});
 					});
 				}

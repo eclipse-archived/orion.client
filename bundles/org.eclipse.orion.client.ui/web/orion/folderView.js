@@ -24,8 +24,9 @@ define([
 	'orion/URITemplate',
 	'orion/webui/littlelib',
 	'orion/objects',
-	'orion/projects/projectView'
-], function(messages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, Selection, FileCommands, ExtensionCommands, mKeyBinding, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, mProjectView) {
+	'orion/projects/projectView',
+	'orion/section'
+], function(messages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, Selection, FileCommands, ExtensionCommands, mKeyBinding, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, mProjectView, mSection) {
 	
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
@@ -34,7 +35,6 @@ define([
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	function FolderNavRenderer() {
 		NavigatorRenderer.apply(this, arguments);
-		this.selectionPolicy = this.explorer.getCommandsVisible() ? null : "cursorOnly"; //$NON-NLS-0$
 	}
 	FolderNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
 	objects.mixin(FolderNavRenderer.prototype, {
@@ -57,16 +57,6 @@ define([
 				td.colSpan = 1;
 				var root = this.explorer.treeRoot;
 				td.appendChild(document.createTextNode(root.Parents ? root.Name : this.explorer.fileClient.fileServiceName(root.Location)));
-				return td;
-			} else if (col_no === 1) {
-				td = document.createElement("th"); //$NON-NLS-0$
-				td.colSpan = 2;
-				var span = document.createElement("span"); //$NON-NLS-0$
-				span.id = this.explorer.toolbarId;
-				td.appendChild(span);
-				window.setTimeout(function() {
-					this.explorer.updateCommands();
-				}.bind(this), 0);
 				return td;
 			}
 			return null;
@@ -95,48 +85,20 @@ define([
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.treeRoot = {};
-		var parent = lib.node(this.parentId);	
-		this.toolbarId = parent.id + "Tool"; //$NON-NLS-0$
-		this.newActionsScope = parent.id + "New"; //$NON-NLS-0$
-		this.selectionActionsScope = parent.id + "Selection"; //$NON-NLS-0$
-		this.selection = new Selection.Selection(this.serviceRegistry, "folderNavFileSelection"); //$NON-NLS-0$
-		this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-			self.updateCommands(event.selections);
-		});
+		this.parent = lib.node(options.parentId);	
+		this.toolbarId = this.parent.id + "Tool"; //$NON-NLS-0$
+		this.newActionsScope = this.parent.id + "NewScope"; //$NON-NLS-0$
+		this.selectionActionsScope = this.parent.id + "SelectionScope"; //$NON-NLS-0$
+		this.actionsSections = [this.newActionsScope, this.selectionActionsScope];
 	}
 	FolderNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(FolderNavExplorer.prototype, /** @lends orion.FolderNavExplorer.prototype */ {
 		loadRoot: function(root) {
-			var self = this;
-			function loaded() {
-				self.registerCommands().then(function() {
-					self.updateCommands();
-				});
-			}
 			if (root) {
-				this.load(root, "Loading " + root.Name).then(loaded);
+				this.load(root, "Loading " + root.Name).then(this.loaded.bind(this));
 			} else {
-				this.loadResourceList(PageUtil.matchResourceParameters().resource + "?depth=1", false).then(loaded); //$NON-NLS-0$
+				this.loadResourceList(PageUtil.matchResourceParameters().resource + "?depth=1", false).then(this.loaded.bind(this)); //$NON-NLS-0$
 			}
-		},
-		destroy: function() {
-			FileExplorer.prototype.destroy.call(this);
-			var _self = this;
-			[this.newActionsScope, this.selectionActionsScope].forEach(function(id) {
-				delete _self[id];
-			});
-		},
-		createActionSections: function(toolbar) {
-			[this.newActionsScope, this.selectionActionsScope].forEach(function(id) {
-				if (!lib.node(id)) {
-					var elem = document.createElement("ul"); //$NON-NLS-0$
-					elem.id = id;
-					elem.classList.add("commandList"); //$NON-NLS-0$
-					elem.classList.add("layoutRight"); //$NON-NLS-0$
-//					elem.classList.add("pageActions"); //$NON-NLS-0$
-					toolbar.appendChild(elem);
-				}
-			});
 		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
@@ -180,29 +142,7 @@ define([
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
 			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.folderNavSelectionGroup", true, this.commandsVisibleWhen, this.commandsId);
 		},
-		getCommandsVisible: function() {
-			return mGlobalCommands.getMainSplitter().splitter.isClosed();
-		},
-		setCommandsVisible: function(visible) {
-			if (visible) {
-				this.updateCommands();
-			} else {
-				this.commandRegistry.destroy(this.newActionsScope);
-				this.commandRegistry.destroy(this.selectionActionsScope);
-			}
-			var selectionPolicy = visible ? null : "cursorOnly"; //$NON-NLS-0$
-			this.renderer.selectionPolicy = selectionPolicy;
-			var navHandler = this.getNavHandler();
-			if (navHandler) {
-				navHandler.setSelectionPolicy(selectionPolicy);
-			}
-		},
 		updateCommands: function(selections) {
-			var toolbar = lib.node(this.toolbarId);
-			if (!toolbar || !this.getCommandsVisible()) {
-				return;
-			}
-			this.createActionSections(toolbar);
 			FileCommands.updateNavTools(this.registry, this.commandRegistry, this, this.newActionsScope, this.selectionActionsScope, this.treeRoot, true);
 		}
 	});
@@ -268,6 +208,7 @@ define([
 				var div = document.createElement("div"); //$NON-NLS-0$
 				_self._node.appendChild(div);
 				this.projectView.display(this._metadata, div);
+				this.projectView.setCommandsVisible(mGlobalCommands.getMainSplitter().splitter.isClosed());
 			}
 		},
 		displayFolderView: function(root){
@@ -298,8 +239,9 @@ define([
 			
 			if (this.showFolderNav) {
 				var navNode = document.createElement("div"); //$NON-NLS-0$
-				navNode.className = "folderNav"; //$NON-NLS-0$
 				navNode.id = "folderNavNode"; //$NON-NLS-0$
+				var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files"});
+				
 				this.folderNavExplorer = new FolderNavExplorer({
 					parentId: navNode,
 					serviceRegistry: this.serviceRegistry,
@@ -307,8 +249,9 @@ define([
 					commandRegistry: this.commandService,
 					contentTypeRegistry: this.contentTypeRegistry
 				});
+				foldersSection.embedExplorer(this.folderNavExplorer);
+				this.folderNavExplorer.setCommandsVisible(mGlobalCommands.getMainSplitter().splitter.isClosed());
 				this.folderNavExplorer.loadRoot(this._metadata);
-				this._node.appendChild(navNode);
 			}
 			
 			if (readmeMd) {
