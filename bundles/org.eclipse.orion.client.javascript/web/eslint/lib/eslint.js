@@ -174,13 +174,13 @@ module.exports = (function() {
 
     /**
      * Verifies the text against the rules specified by the second argument.
-     * @param {string} text The JavaScript text to verify.
+     * @param {string|ASTNode} textOrAST The JavaScript text to verify, or an already-parsed AST.
      * @param {Object} config An object whose keys specify the rules to use.
      * @returns {Object[]} The results as an array of messages or null if no messages.
      */
     api.verify = function(text, config, saveState) {
 
-        var ast,
+        var ast = (text && typeof text === "object") ? text : null,
             parseError = false;
 
         if (!saveState) {
@@ -230,7 +230,7 @@ module.exports = (function() {
          * problem that ESLint identified just like any other.
          */
         try {
-            ast = esprima.parse(text, { loc: true, range: true, raw: true, tokens: true, comment: true });
+            ast = ast || esprima.parse(text, { loc: true, range: true, raw: true, tokens: true, comment: true });
         } catch (ex) {
 
             parseError = true;
