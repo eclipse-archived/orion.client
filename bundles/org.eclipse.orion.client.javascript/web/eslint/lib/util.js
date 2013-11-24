@@ -1,4 +1,4 @@
-
+/*global define module require exports */
 (function(root, factory) {
     if(typeof exports === 'object') {
         module.exports = factory(require, exports, module);

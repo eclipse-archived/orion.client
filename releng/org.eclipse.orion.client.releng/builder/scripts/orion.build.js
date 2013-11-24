@@ -14,7 +14,10 @@
 
     closure: {
         CompilerOptions: {
-            languageIn: Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf(Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode, "ECMASCRIPT5")
+            // Avoids a TypeError when running r.js in Node
+            languageIn: (typeof Packages === "object" && Packages) ?
+                Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf(Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode, "ECMASCRIPT5") 
+                : "ECMASCRIPT5"
         },
         CompilationLevel: 'SIMPLE_OPTIMIZATIONS',
         loggingLevel: 'WARNING'
@@ -32,6 +35,18 @@
         i18n: 'requirejs/i18n',
         domReady: 'requirejs/domReady',
         gcli: 'gcli/gcli',
-        util: 'gcli/util'
-    }
+        util: 'gcli/util',
+        estraverse: 'estraverse/estraverse',
+        escope: 'escope/escope'
+    },
+    packages: [
+        {
+            name: "eslint",
+            location: "eslint/lib",
+            main: "eslint"
+        },
+        {
+            name: "eslint/conf",
+            main: "eslint/conf"
+        }]
 })

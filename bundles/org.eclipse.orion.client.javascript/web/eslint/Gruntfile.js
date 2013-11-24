@@ -22,9 +22,9 @@ module.exports = function(grunt) {
         // ********************************************************
         'conf/environments.js': {
             src: src + '/conf/environments.js',
-            dest: dest + '/conf/environments.js', // note .js
+            dest: dest + '/conf/environments.js',
             globalAlias: 'conf.environments',
-            objectToExport: 'module.exports', // not used
+            objectToExport: 'module.exports',
             template: 'unit'
         },
         // ********************************************************
@@ -34,7 +34,9 @@ module.exports = function(grunt) {
             src: src + 'lib/eslint.js',
             dest: dest + '/lib/eslint.js',
             deps: {
-                amd: 'esprima/esprima estraverse/estraverse escope/escope eslint/conf/environments ./rules ./util ./rule-context ./events'.split(/\s+/)
+                amd: 'esprima/esprima estraverse escope eslint/conf/environments ./rules ./util ./rule-context ./events'.split(' '),
+                cjs: 'esprima estraverse escope ../conf/environments ./rules ./util ./rule-context ./events'.split(' '),
+                'default': '_esprima _estraverse _escope _environments _rules _util _ruleContext _events'.split(' ')
             },
             globalAlias: 'eslint',
             objectToExport: 'module.exports',
@@ -48,12 +50,11 @@ module.exports = function(grunt) {
             objectToExport: 'module.exports',
             template: 'unit'
         },
-        // We will have to repliment this
         'lib/load-rules.js': {
-            src: src + 'lib/rules.js',
-            dest: dest + 'lib/rules.js',
+            src: src + 'lib/load-rules.js',
+            dest: dest + 'lib/load-rules.js',
             deps: {},
-            globalAlias: 'Rules',
+            globalAlias: 'loadRules',
             objectToExport: 'module.exports',
             template: 'unit'
         },
@@ -61,10 +62,12 @@ module.exports = function(grunt) {
             src: src + 'lib/rules.js',
             dest: dest + 'lib/rules.js',
             deps: {
-                amd: './load-rules'
+                amd: ['./load-rules-async'],
+                cjs: ['./load-rules'],
+                'default': ['_loadRules']
             },
-            globalAlias: 'Rules',
-            objectToExport: 'module.exports',
+            globalAlias: 'rules',
+            objectToExport: 'exports',
             template: 'unit'
         },
         'lib/util.js': {

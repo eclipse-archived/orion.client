@@ -9,12 +9,24 @@
 	<script type="text/javascript">
 		/*global require*/
 		require({
-		  baseUrl: '../../',
-		  paths: {
-			  text: 'requirejs/text',
-			  i18n: 'requirejs/i18n',
-			  domReady: 'requirejs/domReady'	    
-		  }
+			baseUrl: '../../',
+			paths: {
+				text: 'requirejs/text',
+				i18n: 'requirejs/i18n',
+				domReady: 'requirejs/domReady',
+				estraverse: 'estraverse/estraverse',
+				escope: 'escope/escope'
+			},
+			packages: [
+				{
+					name: "eslint",
+					location: "eslint/lib",
+					main: "eslint"
+				},
+				{
+					name: "eslint/conf",
+					main: "eslint/conf"
+			}]
 		});
 		require(["javascriptPlugin.js"]);
 	</script>
@@ -24,13 +36,13 @@
 	<h2>JavaScript Tools Support</h2>
 	<p>
 		This plugin provides a variety of JavaScript tooling, including:
-		<ul>
-			<li><em>Editing</em> - an editor with syntax highlighting, navigation, code completion, etc.</li>
-			<li><em>Navigation</em> - source navigation from the editor as well as a variety of outines.</li>
-			<li><em>Content Assist</em> - smart content assist while editing.</li>
-			<li><em>Search</em> - named item searching, editor occurrences, etc.</li>
-		</ul>
 	</p>
+	<ul>
+		<li><em>Editing</em> - an editor with syntax highlighting, navigation, code completion, etc.</li>
+		<li><em>Navigation</em> - source navigation from the editor as well as a variety of outines.</li>
+		<li><em>Content Assist</em> - smart content assist while editing.</li>
+		<li><em>Search</em> - named item searching, editor occurrences, etc.</li>
+	</ul>
 	<p>October 16, 2013</p>	
 	
 	<div class="split-selection-table">
