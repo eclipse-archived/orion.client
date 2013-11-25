@@ -33,8 +33,8 @@ var pathToNode = process.execPath;
 var pathToRjs = require.resolve('requirejs');
 
 var pathToOrionClientBundlesFolder = path.resolve(__dirname, process.argv[2] || '../../../bundles/');
-var pathToBuildFile = path.resolve(__dirname, process.argv[3] || './nodebuild.js');
-var pathToOrionodeClient = path.resolve(path.dirname(pathToBuildFile), '../lib/orionode.client/');
+var pathToBuildFile = path.resolve(__dirname, process.argv[3] || '../../../releng/org.eclipse.orion.client.releng/builder/scripts/orion.build.js');
+var pathToOrionodeClient = path.resolve(__dirname, '../lib/orionode.client/');
 var pathToTempDir = path.resolve(__dirname, '.temp');
 
 /**
@@ -214,7 +214,7 @@ function build(optimizeElements) {
 					"name=" + pageDir + '/' + name,
 					"out=" + '.temp/' + pageDir + '/built-' + name + '.js',
 					"baseUrl=.temp"
-				], { cwd: path.dirname(pathToBuildFile) });
+				], { cwd: __dirname });
 			};
 		}));
 	}).then(function() {
