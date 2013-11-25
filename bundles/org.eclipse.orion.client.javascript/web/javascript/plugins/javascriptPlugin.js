@@ -11,14 +11,16 @@
  *******************************************************************************/
 /*global define esprima*/
 define([
-	'orion/plugin', 
-	'javascript/outliner',
-	'javascript/occurrences',
-	'javascript/esprima/esprimaJsContentAssist',
 	'esprima/esprima',
-	'orion/serialize',
-	'orion/i18nUtil'
-], function(PluginProvider, Outliner, Occurrences, EsprimaAssist, Esprima, Serialize, i18nUtil) {
+	'javascript/eslint/validator',
+	'javascript/esprima/esprimaJsContentAssist',
+	'javascript/occurrences',
+	'javascript/outliner',
+	'orion/Deferred',
+	'orion/i18nUtil',
+	'orion/plugin',
+	'orion/serialize'
+], function(Esprima, EslintValidator, EsprimaAssist, Occurrences, Outliner, Deferred, i18nUtil, PluginProvider, Serialize) {
 
 	/**
 	 * Plug-in headers
@@ -26,7 +28,7 @@ define([
 	var headers = {
 		name: "Orion JavaScript Tool Support",
 		version: "1.0",
-		description: "This plugin provides JavaScript tools support for Orion, like editing, search, navigation and code completion"
+		description: "This plugin provides JavaScript tools support for Orion, like editing, search, navigation, validation, and code completion."
 	};
 	var provider = new PluginProvider(headers);
 	
@@ -92,6 +94,36 @@ define([
 			name: "Esprima based JavaScript content assist",
 			id: "orion.edit.contentassist.esprima"
 	});	
-		
+
+	/**
+	 * Register the ESLint validator
+	 */
+	provider.registerServiceProvider(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(),
+		{
+			contentType: ["application/javascript"],
+			pid: 'eslint.config'
+		});
+
+	/**
+	 * ESLint settings
+	 */
+	provider.registerService("orion.core.setting",
+		{},
+		{	settings: [
+				{	pid: "eslint.config",
+					name: "ESLint Validator",
+					tags: "validation javascript js eslint".split(" "),
+					category: "validation",
+					properties: [
+						{	id: "active",
+							name: "Use ESLint to validate JavaScript files",
+							type: "boolean",
+							defaultValue: true
+						}
+					]
+				}
+			]
+		});
+
 	provider.connect();
 });
