@@ -49,37 +49,23 @@ define([
 				}
 			}
 			else if(node.type === 'FunctionExpression') {
-				if(!node.seen) {
-					item = this.addElement(Signatures.computeSignature(node));
-					if(item) {
-						this.scope.push(item);
-					}
+				item = this.addElement(Signatures.computeSignature(node));
+				if(item) {
+					this.scope.push(item);
 				}
-				else {
-					//scrub the flag from the AST node
-					delete node.seen;
-				}
+				delete node.sig;
 			}
 			else if(node.type === 'ObjectExpression') {
-				if(!node.seen) {
-					item = this.addElement(Signatures.computeSignature(node));
-					if(item) {
-						this.scope.push(item);
-					}
+				item = this.addElement(Signatures.computeSignature(node));
+				if(item) {
+					this.scope.push(item);
 				}
-				else {
-					//scrub the flag from the AST node
-					delete node.seen;
-				}
+				delete node.sig;
 				if(node.properties) {
 					node.properties.forEach(function(property) {
 						if(property.value) {
 							if(property.value.type === 'FunctionExpression' || property.value.type === 'ObjectExpression') {
-								item = that.addElement(Signatures.computeSignature(property));
-								if(item) {
-									that.scope.push(item);
-								}
-								property.value.seen = 1;
+								property.value.sig = Signatures.computeSignature(property);
 							}
 							else {
 								that.addElement(Signatures.computeSignature(property));
@@ -93,11 +79,7 @@ define([
 					node.declarations.forEach(function(declaration) {
 						if(declaration.init) {
 							if(declaration.init.type === 'ObjectExpression') {
-								item = that.addElement(Signatures.computeSignature(declaration));
-								if(item) {
-									that.scope.push(item);
-								}
-								declaration.init.seen = 1;
+								declaration.init.sig = Signatures.computeSignature(declaration);
 							}
 						}
 					});
@@ -126,6 +108,7 @@ define([
 		 * @private
 		 * @memberof javascript.Visitor.prototype
 		 * @param {Object} sig The signature object
+		 * @param {Boolean}  seen If the element has been seen before, if so do not add it to the outline
 		 */
 		addElement: function(sig) {
 			if(sig) {

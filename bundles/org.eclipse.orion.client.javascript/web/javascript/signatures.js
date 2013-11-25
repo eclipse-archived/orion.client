@@ -27,6 +27,9 @@ define([
 		 */
 		computeSignature: function(astnode) {
 			if(astnode) {
+				if(astnode.sig) {
+					return astnode.sig;
+				}
 				var val = this.getNameFrom(astnode);
 				return {
 					sig: val,
