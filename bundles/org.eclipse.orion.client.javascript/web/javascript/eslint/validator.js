@@ -11,13 +11,16 @@
  *******************************************************************************/
 /*global define*/
 define([
-	'eslint',
-	'orion/objects'
+	"eslint",
+	"orion/objects"
 ], function(eslint, objects) {
+	// Should have a better way of keeping this up-to-date with ./load-rules-async.js
 	var config = {
 		// 0:off, 1:warning, 2:error
 		rules: {
-			"no-undef": 2
+			"eqeqeq": 1,
+			"no-undef": 2,
+			"semi": 1
 		}
 	};
 
