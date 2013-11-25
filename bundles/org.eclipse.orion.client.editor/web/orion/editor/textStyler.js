@@ -17,13 +17,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	'orion/editor/keywords' //$NON-NLS-0$
 ], function(mAnnotations, mKeywords) {
 
-	var JS_KEYWORDS = mKeywords.JSKeywords;
-
-	var JAVA_KEYWORDS = mKeywords.JAVAKeywords;
-
-	var CSS_KEYWORDS = mKeywords.CSSKeywords;
-
-	// Scanner constants
 	var UNKOWN = 1;
 	var KEYWORD = 2;
 	var NUMBER = 3;
@@ -73,9 +66,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	};
 
 	function TextStyler (view, annotationModel, patterns, delimiters, keywords) {
-		this.commentStart = "/*"; //$NON-NLS-0$
-		this.commentEnd = "*/"; //$NON-NLS-0$
-
 		function createPattern(element) {
 			var result = {};
 			if (element.match && !element.begin && !element.end && element.name) {

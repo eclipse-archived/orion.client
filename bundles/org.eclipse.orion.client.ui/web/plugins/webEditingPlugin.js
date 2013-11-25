@@ -234,6 +234,64 @@ define([
 	provider.registerServiceProvider("orion.edit.highlighter", {
 		// purely declarative, no service methods
     }, {
+        id: "orion.java",
+        keywords: keywords.JAVAKeywords,
+//        extends: "orion.text",
+		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
+		contentType: ["text/x-java-source"],
+		patterns: [
+			{
+//				match: " ",
+//				name: "WHITE_SPACE"
+//			}, {
+				match: "{",
+				name: "NESTER"
+			}, {
+				match: "}",
+				name: "UNNESTER"
+			}, {
+//				match: "\t",
+//				name: "WHITE_TAB"		
+//			}, {
+				match: "//.*",
+				name: "SINGLELINE_COMMENT"		
+			}, {
+				match: "\".*?(\"|$)",
+				name: "STRING"		
+			}, {
+				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
+				name: "NUMBER"
+			}, {
+				match: "0x[0-9A-Fa-f]+",
+				name: "NUMBER"	
+			}, {
+				begin: "/\\*",
+				end: "(\\*/|$)",
+				name: "MULTILINE_COMMENT",
+				patterns: [
+					{
+						match: "@\\S*",
+						name: "DOC_TAG"
+					}, {
+						match: "\\<\\S*\\>?",
+						name: "DOC_COMMENT"
+					}, {
+						match: "TODO",
+						name: "TASK_TAG"
+					}
+				]
+			// TODO
+//			}, {
+//				begin: "\"[^\"\\n]*\\\\\n",
+//				end: "([^\"\\n]*\\\\\\n)*[^\"\\n]*\"?",
+//				name: "MULTILINE_STRING"
+			}
+		]
+	});
+
+	provider.registerServiceProvider("orion.edit.highlighter", {
+		// purely declarative, no service methods
+    }, {
         id: "orion.json",
 //        extends: "orion.text",
 		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
