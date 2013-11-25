@@ -10,10 +10,10 @@
  ******************************************************************************/
 
 /*global define*/
-define(['examples/editor/textStyler', 'examples/editor/textStyler2', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler', 'orion/Deferred'], 
+define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler', 'orion/Deferred'], 
 		function(mTextStyler, mTextStyler2, mTextMateStyler, AsyncStyler, Deferred) {
 
-	var NEW = 0;
+	var NEW = 1;
 
 	/**
 	 * Returns a promise that will provide a styler for the given content type.
@@ -99,19 +99,19 @@ define(['examples/editor/textStyler', 'examples/editor/textStyler2', 'orion/edit
 			}
 			var styler;
 			if (provider) {
-				if (NEW) {
-					var patterns = provider.getProperty("patterns"); //$NON-NLS-0$
-					var delimiters = provider.getProperty("delimiters"); //$NON-NLS-0$
-					var keywords = provider.getProperty("keywords"); //$NON-NLS-0$
-					styler = new mTextStyler2.TextStyler(textView, annotationModel, patterns, delimiters, keywords); //$NON-NLS-0$
+				var type = provider.getProperty("type"); //$NON-NLS-0$
+				if (type === "highlighter") { //$NON-NLS-0$
+					styler = new AsyncStyler(textView, serviceRegistry, annotationModel);
+					styler.setContentType(contentType);
+				} else if (type === "grammar" || (!NEW && typeof type === "undefined")) { //$NON-NLS-1$ //$NON-NLS-0$
+					var grammar = provider.getProperty("grammar"); //$NON-NLS-0$
+					styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
 				} else {
-					var type = provider.getProperty("type"); //$NON-NLS-0$
-					if (type === "highlighter") { //$NON-NLS-0$
-						styler = new AsyncStyler(textView, serviceRegistry, annotationModel);
-						styler.setContentType(contentType);
-					} else if (type === "grammar" || typeof type === "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
-						var grammar = provider.getProperty("grammar"); //$NON-NLS-0$
-						styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
+					if (NEW) {
+						var patterns = provider.getProperty("patterns"); //$NON-NLS-0$
+						var delimiters = provider.getProperty("delimiters"); //$NON-NLS-0$
+						var keywords = provider.getProperty("keywords"); //$NON-NLS-0$
+						styler = new mTextStyler2.TextStyler(textView, annotationModel, patterns, delimiters, keywords); //$NON-NLS-0$
 					}
 				}
 			}

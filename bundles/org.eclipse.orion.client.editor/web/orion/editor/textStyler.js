@@ -12,7 +12,7 @@
 
 /*global define */
 
-define("examples/editor/textStyler2", [ //$NON-NLS-0$
+define("orion/editor/textStyler", [ //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
 	'orion/editor/keywords' //$NON-NLS-0$
 ], function(mAnnotations, mKeywords) {
@@ -72,320 +72,6 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 		"TASK_TAG": tasktagStyle
 	};
 
-//	function Scanner (keywords, whitespacesVisible) {
-//		this.keywords = keywords;
-//		this.whitespacesVisible = whitespacesVisible;
-//		this.setText("");
-//	}
-//
-//	Scanner.prototype = {
-//		getOffset: function() {
-//			return this.offset;
-//		},
-//		getStartOffset: function() {
-//			return this.startOffset;
-//		},
-//		getData: function() {
-//			return this.text.substring(this.startOffset, this.offset);
-//		},
-//		getDataLength: function() {
-//			return this.offset - this.startOffset;
-//		},
-//		_default: function(c) {
-//			switch (c) {
-//				case 32: // SPACE
-//				case 9: // TAB
-//					if (this.whitespacesVisible) {
-//						return c === 32 ? WHITE_SPACE : WHITE_TAB;
-//					}
-//					do {
-//						c = this._read();
-//					} while(c === 32 || c === 9);
-//					this._unread(c);
-//					return WHITE;
-//				case 123: // {
-//				case 125: // }
-//				case 40: // (
-//				case 41: // )
-//				case 91: // [
-//				case 93: // ]
-//				case 60: // <
-//				case 62: // >
-//					// BRACKETS
-//					return c;
-//				default:
-//					var isCSS = this.isCSS;
-//					var off = this.offset - 1;
-//					if (!isCSS && 48 <= c && c <= 57) {
-//						var floating = false, exponential = false, hex = false, firstC = c;
-//						do {
-//							c = this._read();
-//							if (c === 46 /* dot */ && !floating) {
-//								floating = true;
-//							} else if (c === 101 /* e */ && !exponential) {
-//								floating = exponential = true;
-//								c = this._read();
-//								if (c !== 45 /* MINUS */) {
-//									this._unread(c);
-//								}
-//							} else if (c === 120 /* x */ && firstC === 48 && (this.offset - off === 2)) {
-//								floating = exponential = hex = true;
-//							} else if (!(48 <= c && c <= 57 || (hex && ((65 <= c && c <= 70) || (97 <= c && c <= 102))))) { //NUMBER DIGIT or HEX
-//								break;
-//							}
-//						} while(true);
-//						this._unread(c);
-//						return NUMBER;
-//					}
-//					if ((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (45 /* DASH */ === c && isCSS)) { //LETTER OR UNDERSCORE OR NUMBER
-//						do {
-//							c = this._read();
-//						} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (45 /* DASH */ === c && isCSS));  //LETTER OR UNDERSCORE OR NUMBER
-//						this._unread(c);
-//						var keywords = this.keywords;
-//						if (keywords.length > 0) {
-//							var word = this.text.substring(off, this.offset);
-//							//TODO slow
-//							for (var i=0; i<keywords.length; i++) {
-//								if (this.keywords[i] === word) { return KEYWORD; }
-//							}
-//						}
-//					}
-//					return UNKOWN;
-//			}
-//		},
-//		_read: function() {
-//			if (this.offset < this.text.length) {
-//				return this.text.charCodeAt(this.offset++);
-//			}
-//			return -1;
-//		},
-//		_unread: function(c) {
-//			if (c !== -1) { this.offset--; }
-//		},
-//		nextToken: function() {
-//			this.startOffset = this.offset;
-//			while (true) {
-//				var c = this._read(), result;
-//				switch (c) {
-//					case -1: return null;
-//					case 47:	// SLASH -> comment
-//						c = this._read();
-//						if (!this.isCSS) {
-//							if (c === 47) { // SLASH -> single line
-//								while (true) {
-//									c = this._read();
-//									if ((c === -1) || (c === 10) || (c === 13)) {
-//										this._unread(c);
-//										return SINGLELINE_COMMENT;
-//									}
-//								}
-//							}
-//						}
-//						if (c === 42) { // STAR -> multi line
-//							c = this._read();
-//							var token = MULTILINE_COMMENT;
-//							if (c === 42) {
-//								token = DOC_COMMENT;
-//							}
-//							while (true) {
-//								while (c === 42) {
-//									c = this._read();
-//									if (c === 47) {
-//										return token;
-//									}
-//								}
-//								if (c === -1) {
-//									this._unread(c);
-//									return token;
-//								}
-//								c = this._read();
-//							}
-//						}
-//						this._unread(c);
-//						return UNKOWN;
-//					case 39:	// SINGLE QUOTE -> char const
-//						result = STRING;
-//						while(true) {
-//							c = this._read();
-//							switch (c) {
-//								case 39:
-//									return result;
-//								case 13:
-//								case 10:
-//								case -1:
-//									this._unread(c);
-//									return result;
-//								case 92: // BACKSLASH
-//									c = this._read();
-//									switch (c) {
-//										case 10: result = MULTILINE_STRING; break;
-//										case 13:
-//											result = MULTILINE_STRING;
-//											c = this._read();
-//											if (c !== 10) {
-//												this._unread(c);
-//											}
-//											break;
-//									}
-//									break;
-//							}
-//						}
-//						break;
-//					case 34:	// DOUBLE QUOTE -> string
-//						result = STRING;
-//						while(true) {
-//							c = this._read();
-//							switch (c) {
-//								case 34: // DOUBLE QUOTE
-//									return result;
-//								case 13:
-//								case 10:
-//								case -1:
-//									this._unread(c);
-//									return result;
-//								case 92: // BACKSLASH
-//									c = this._read();
-//									switch (c) {
-//										case 10: result = MULTILINE_STRING; break;
-//										case 13:
-//											result = MULTILINE_STRING;
-//											c = this._read();
-//											if (c !== 10) {
-//												this._unread(c);
-//											}
-//											break;
-//									}
-//									break;
-//							}
-//						}
-//						break;
-//					default:
-//						return this._default(c);
-//				}
-//			}
-//		},
-//		setText: function(text) {
-//			this.text = text;
-//			this.offset = 0;
-//			this.startOffset = 0;
-//		}
-//	};
-//
-//	function WhitespaceScanner () {
-//		Scanner.call(this, null, true);
-//	}
-//	WhitespaceScanner.prototype = new Scanner(null);
-//	WhitespaceScanner.prototype.nextToken = function() {
-//		this.startOffset = this.offset;
-//		while (true) {
-//			var c = this._read();
-//			switch (c) {
-//				case -1: return null;
-//				case 32: // SPACE
-//					return WHITE_SPACE;
-//				case 9: // TAB
-//					return WHITE_TAB;
-//				default:
-//					do {
-//						c = this._read();
-//					} while(!(c === 32 || c === 9 || c === -1));
-//					this._unread(c);
-//					return UNKOWN;
-//			}
-//		}
-//	};
-//
-//	function CommentScanner (whitespacesVisible) {
-//		Scanner.call(this, null, whitespacesVisible);
-//	}
-//	CommentScanner.prototype = new Scanner(null);
-//	CommentScanner.prototype.setType = function(type) {
-//		this._type = type;
-//	};
-//	CommentScanner.prototype.nextToken = function() {
-//		this.startOffset = this.offset;
-//		while (true) {
-//			var c = this._read();
-//			switch (c) {
-//				case -1: return null;
-//				case 32: // SPACE
-//				case 9: // TAB
-//					if (this.whitespacesVisible) {
-//						return c === 32 ? WHITE_SPACE : WHITE_TAB;
-//					}
-//					do {
-//						c = this._read();
-//					} while(c === 32 || c === 9);
-//					this._unread(c);
-//					return WHITE;
-//				case 60: // <
-//					if (this._type === DOC_COMMENT) {
-//						do {
-//							c = this._read();
-//						} while(!(c === 62 || c === -1)); // >
-//						if (c === 62) {
-//							return HTML_MARKUP;
-//						}
-//					}
-//					return UNKOWN;
-//				case 64: // @
-//					if (this._type === DOC_COMMENT) {
-//						do {
-//							c = this._read();
-//						} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57));  //LETTER OR UNDERSCORE OR NUMBER
-//						this._unread(c);
-//						return DOC_TAG;
-//					}
-//					return UNKOWN;
-//				case 84: // T
-//					if ((c = this._read()) === 79) { // O
-//						if ((c = this._read()) === 68) { // D
-//							if ((c = this._read()) === 79) { // O
-//								c = this._read();
-//								if (!((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) {
-//									this._unread(c);
-//									return TASK_TAG;
-//								}
-//								this._unread(c);
-//							} else {
-//								this._unread(c);
-//							}
-//						} else {
-//							this._unread(c);
-//						}
-//					} else {
-//						this._unread(c);
-//					}
-//					//FALL THROUGH
-//				default:
-//					do {
-//						c = this._read();
-//					} while(!(c === 32 || c === 9 || c === -1 || c === 60 || c === 64 || c === 84));
-//					this._unread(c);
-//					return UNKOWN;
-//			}
-//		}
-//	};
-//
-//	function FirstScanner () {
-//		Scanner.call(this, null, false);
-//	}
-//	FirstScanner.prototype = new Scanner(null);
-//	FirstScanner.prototype._default = function(c) {
-//		while(true) {
-//			c = this._read();
-//			switch (c) {
-//				case 47: // SLASH
-//				case 34: // DOUBLE QUOTE
-//				case 39: // SINGLE QUOTE
-//				case -1:
-//					this._unread(c);
-//					return UNKOWN;
-//			}
-//		}
-//	};
-
 	function TextStyler (view, annotationModel, patterns, delimiters, keywords) {
 		this.commentStart = "/*"; //$NON-NLS-0$
 		this.commentEnd = "*/"; //$NON-NLS-0$
@@ -421,12 +107,14 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 				this.documentPatterns.push(pattern.document);
 			}
 		}.bind(this));
-		var keywordsString = "";
-		keywords.forEach(function(current) {
-			keywordsString += current + "|";
-		});
-		var matchString = keywordsString.substring(0, keywordsString.length - 1);
-		this.linePatterns.push({regex: new RegExp(matchString, "g"), name: "KEYWORD"});
+		if (keywords && keywords.length) {
+			var keywordsString = "";
+			keywords.forEach(function(current) {
+				keywordsString += current + "|";
+			});
+			var matchString = keywordsString.substring(0, keywordsString.length - 1);
+			this.linePatterns.push({regex: new RegExp(matchString, "g"), name: "KEYWORD"});
+		}
 
 		this.delimiterRegex = new RegExp(delimiters, "g"); //$NON-NLS-0$
 
@@ -435,15 +123,6 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 		this.highlightCaretLine = false;
 		this.foldingEnabled = true;
 		this.detectTasks = true;
-//		this._scanner = new Scanner(keywords, this.whitespacesVisible);
-//		this._firstScanner = new FirstScanner();
-//		this._commentScanner = new CommentScanner(this.whitespacesVisible);
-//		this._whitespaceScanner = new WhitespaceScanner();
-		//TODO these scanners are not the best/correct way to parse CSS
-//		if (lang === "css") { //$NON-NLS-0$
-//			this._scanner.isCSS = true;
-//			this._firstScanner.isCSS = true;
-//		}
 		this.view = view;
 		this.annotationModel = annotationModel;
 		this._bracketAnnotations = undefined;
@@ -502,8 +181,6 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 		setWhitespacesVisible: function(visible, redraw) {
 			if (this.whitespacesVisible === visible) { return; }
 			this.whitespacesVisible = visible;
-//			this._scanner.whitespacesVisible = visible;
-//			this._commentScanner.whitespacesVisible = visible;
 			if (redraw) {
 				this.view.redraw();
 			}
@@ -789,67 +466,7 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 				this._parse(current, offset, subPatterns, styles);
 				offset += current.length;
 			}.bind(this));
-//			var scanner = this._commentScanner;
-//			scanner.setText(text);
-//			scanner.setType(type);
-//			var token;
-//			while ((token = scanner.nextToken())) {
-//				var tokenStart = scanner.getStartOffset() + offset;
-//				var style = s;
-//				switch (token) {
-//					case WHITE_TAB:
-//						if (this.whitespacesVisible && this.tabsVisible) {
-//							style = tabStyle;
-//						}
-//						break;
-//					case WHITE_SPACE:
-//						if (this.whitespacesVisible && this.spacesVisible) {
-//							style = spaceStyle;
-//						}
-//						break;
-//					case HTML_MARKUP:
-//						style = htmlMarkupStyle;
-//						break;
-//					case DOC_TAG:
-//						style = doctagStyle;
-//						break;
-//					case TASK_TAG:
-//						style = tasktagStyle;
-//						break;
-//					default:
-//						if (this.detectHyperlinks) {
-//							style = this._detectHyperlinks(scanner.getData(), tokenStart, styles, style);
-//						}
-//				}
-//				if (style) {
-//					styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
-//				}
-//			}
 		},
-//		_parseString: function(text, offset, styles, s) {
-//			var scanner = this._whitespaceScanner;
-//			scanner.setText(text);
-//			var token;
-//			while ((token = scanner.nextToken())) {
-//				var tokenStart = scanner.getStartOffset() + offset;
-//				var style = s;
-//				switch (token) {
-//					case WHITE_TAB:
-//						if (this.whitespacesVisible && this.tabsVisible) {
-//							style = tabStyle;
-//						}
-//						break;
-//					case WHITE_SPACE:
-//						if (this.whitespacesVisible && this.spacesVisible) {
-//							style = spaceStyle;
-//						}
-//						break;
-//				}
-//				if (style) {
-//					styles.push({start: tokenStart, end: scanner.getOffset() + offset, style: style});
-//				}
-//			}
-//		},
 		_detectHyperlinks: function(text, offset, styles, s) {
 			var href = null, index, linkStyle;
 			if ((index = text.indexOf("://")) > 0) { //$NON-NLS-0$
@@ -900,23 +517,6 @@ define("examples/editor/textStyler2", [ //$NON-NLS-0$
 		},
 		_findComments: function(text, model, offset) {
 			offset = offset || 0;
-//			var scanner = this._firstScanner, token;
-//			scanner.setText(text);
-//			var result = [];
-//			while ((token = scanner.nextToken())) {
-//				if (token === MULTILINE_COMMENT || token === DOC_COMMENT || token === MULTILINE_STRING) {
-//					result.push({
-//						start: scanner.getStartOffset() + offset,
-//						end: scanner.getOffset() + offset,
-//						type: token
-//					});
-//				}
-//				if (token === SINGLELINE_COMMENT || token === MULTILINE_COMMENT || token === DOC_COMMENT) {
-//					//TODO can we avoid this work if edition does not overlap comment?
-//					this._computeTasks(token, scanner.getStartOffset() + offset, scanner.getOffset() + offset);
-//				}
-//			}
-//			return result;
 
 			var matches = [];
 			this.documentPatterns.forEach(function(current) {

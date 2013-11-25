@@ -160,12 +160,195 @@ define([
 			contentType: ["text/html"]
 		});
 
-	// Register syntax highlighting
+	// Register syntax highlighting (TextMate-based)
 	provider.registerService("orion.edit.highlighter", {},
 		{	type: "grammar",
 			contentType: ["text/html"],
 			grammar: new htmlGrammar.HtmlGrammar()
 		});
 
+	// Register syntax highlighting (Orion)
+	provider.registerServiceProvider("orion.edit.highlighter", {
+		// purely declarative, no service methods
+    }, {
+        id: "orion.js",
+        keywords: keywords.JSKeywords,
+//        extends: "orion.text",
+		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
+		contentType: ["application/javascript" /*, "text/x-java-source"*/],
+		patterns: [
+			{
+//				match: " ",
+//				name: "WHITE_SPACE"
+//			}, {
+				match: "{",
+				name: "NESTER"
+			}, {
+				match: "}",
+				name: "UNNESTER"
+			}, {
+//				match: "\t",
+//				name: "WHITE_TAB"		
+//			}, {
+				match: "//.*",
+				name: "SINGLELINE_COMMENT"		
+			}, {
+				match: "'.*?('|$)",
+				name: "STRING"		
+			}, {
+				match: "\".*?(\"|$)",
+				name: "STRING"		
+			}, {
+				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
+				name: "NUMBER"
+			}, {
+				match: "0x[0-9A-Fa-f]+",
+				name: "NUMBER"	
+			}, {
+				begin: "/\\*",
+				end: "(\\*/|$)",
+				name: "MULTILINE_COMMENT",
+				patterns: [
+					{
+						match: "@\\S*",
+						name: "DOC_TAG"
+					}, {
+						match: "\\<\\S*\\>?",
+						name: "DOC_COMMENT"
+					}, {
+						match: "TODO",
+						name: "TASK_TAG"
+					}
+				]
+			}, {
+				begin: "\"[^\"\\n]*\\\\\n",
+				end: "([^\"\\n]*\\\\\\n)*[^\"\\n]*\"?",
+				name: "MULTILINE_STRING"
+			}, {
+				begin: "'[^'\\n]*\\\\\n",
+				end: "([^'\\n]*\\\\\\n)*[^'\\n]*'?",
+				name: "MULTILINE_STRING"
+			}
+		]
+	});
+	provider.registerServiceProvider("orion.edit.highlighter", {
+		// purely declarative, no service methods
+    }, {
+        id: "orion.json",
+//        extends: "orion.text",
+		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
+		contentType: ["application/json"],
+		patterns: [
+			{
+//				match: " ",
+//				name: "WHITE_SPACE"
+//			}, {
+				match: "{",
+				name: "NESTER"
+			}, {
+				match: "}",
+				name: "UNNESTER"
+			}, {
+//				match: "\t",
+//				name: "WHITE_TAB"		
+//			}, {
+				match: "'.*?('|$)",
+				name: "STRING"		
+			}, {
+				match: "\".*?(\"|$)",
+				name: "STRING"		
+			}, {
+				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
+				name: "NUMBER"
+			}, {
+				match: "0x[0-9A-Fa-f]+",
+				name: "NUMBER"	
+			}
+		]
+	});
+	provider.registerServiceProvider("orion.edit.highlighter", {
+		// purely declarative, no service methods
+    }, {
+        id: "orion.schema.json",
+        keywords: ["$schema", "id", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum",
+            "maxLength", "minLength", "pattern", "additionalItems", "maxItems", "minItems", "uniqueItems",
+            "maxProperties", "minProperties", "required", "additionalProperties", "properties", "patternProperties",
+            "dependencies", "enum", "type", "allOf", "anyOf", "oneOf", "not", "definitions", "title", "description",
+            "default", "format"],
+//        extends: "orion.json",
+		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
+		contentType: ["application/schema+json"],
+		patterns: [
+			{
+//				match: " ",
+//				name: "WHITE_SPACE"
+//			}, {
+				match: "{",
+				name: "NESTER"
+			}, {
+				match: "}",
+				name: "UNNESTER"
+			}, {
+//				match: "\t",
+//				name: "WHITE_TAB"		
+//			}, {
+				match: "'.*?('|$)",
+				name: "STRING"		
+			}, {
+				match: "\".*?(\"|$)",
+				name: "STRING"		
+			}, {
+				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
+				name: "NUMBER"
+			}, {
+				match: "0x[0-9A-Fa-f]+",
+				name: "NUMBER"	
+			}
+		]
+	});
+	
+	provider.registerServiceProvider("orion.edit.highlighter", {
+		// purely declarative, no service methods
+    }, {
+        id: "orion.css",
+        keywords: keywords.CSSKeywords,
+//        extends: "orion.text",
+		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
+		contentType: ["text/css"],
+		patterns: [
+			{
+//				match: " ",
+//				name: "WHITE_SPACE"
+//			}, {
+				match: "{",
+				name: "NESTER"
+			}, {
+				match: "}",
+				name: "UNNESTER"
+			}, {
+//				match: "\t",
+//				name: "WHITE_TAB"		
+//			}, {
+				match: "'.*?'",
+				name: "STRING"		
+			}, {
+				match: "\".*?\"",
+				name: "STRING"		
+			}, {
+				match: "-?(\\.\\d+|\\d+\\.?\\d*)(%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?",
+				name: "NUMBER"
+			}, {
+				match: "#[0-9A-Fa-f]+",
+				name: "NUMBER"	
+			}, {
+				begin: "/\\*",
+				end: "(\\*/|$)",
+				name: "MULTILINE_COMMENT"
+			}
+		]
+	});
+
+	
+	
 	provider.connect();
 });
