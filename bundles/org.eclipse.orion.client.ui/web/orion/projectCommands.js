@@ -12,8 +12,8 @@
 /*global window define orion XMLHttpRequest confirm*/
 /*jslint sub:true*/
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
- 'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/ImportDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog'],
-	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog, ProjectOptionalParametersDialog){
+ 'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/ImportDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog', 'orion/editorCommands'],
+	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog, ProjectOptionalParametersDialog, mEditorCommands){
 		var projectCommandUtils = {};
 		
 		var selectionListenerAdded = false;
@@ -236,7 +236,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	 * @name orion.fileCommands#createFileCommands
 	 * @function
 	 */
-	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, explorer, fileClient, projectClient, dependencyTypes) {
+	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, explorer, fileClient, projectClient, dependencyTypes, deploymentTypes) {
 		progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		var that = this;
 		function errorHandler(error) {
@@ -666,6 +666,60 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			commandService.addCommand(createZipProjectCommand);
 			
 			projectCommandUtils.createDependencyCommands(serviceRegistry, commandService, explorer, fileClient, projectClient, dependencyTypes);
+			
+			function createDeployProjectCommand(deployService){
+				var commandParams = {
+					name: deployService.name,
+					tootlip: deployService.tooltip,
+					id: "orion.project.deploy." + deployService.id,
+					callback: function(data){
+						var project = forceSingleItem(data.items);
+						var item = project.children[0];
+						
+						function localHandleStatus(status, allowHTML) {
+							if (!allowHTML && status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
+								delete status.HTML;
+							}
+
+							progress.setProgressResult(status);
+						};
+
+						progress.showWhile(deployService.deploy(item, project), deployService.name + " in progress.").then(function(result){
+							if (result && result.uriTemplate) {
+								    var options = {};
+									options.uriTemplate = result.uriTemplate;
+									options.width = result.width;
+									options.height = result.height;
+									options.id = "orion.project.deploy." + deployService.id + ".deploy"; 
+									options.params = item;
+									options.done = localHandleStatus;
+									options.status = localHandleStatus;
+									mEditorCommands.createDelegatedUI(options);
+								} 
+						});
+					},
+					visibleWhen: function(item) {
+						if(item.type!=="Project" || !item.children || item.children.length === 0){
+							return false;
+						}
+						return projectClient.matchesDeployService(item.children[0], deployService);
+					}
+				};
+				var command = new mCommands.Command(commandParams);
+				commandService.addCommand(command);
+			}
+			
+			if(deploymentTypes){
+				for(var i=0; i<deploymentTypes.length; i++){
+					var type = deploymentTypes[i];
+					var deferred = new Deferred();
+					allContributedCommandsDeferreds.push(deferred);
+					projectClient.getProjectDelpoyService(type).then(function(deployService){
+						createDeployProjectCommand(deployService);
+						deferred.resolve();
+					});
+				}
+			}
 			
 			return Deferred.all(allContributedCommandsDeferreds);
 		};

@@ -21,6 +21,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		this.serviceRegistry = serviceRegistry;
 		this.fileClient = fileClient;
 		this.allProjectHandlersReferences = serviceRegistry.getServiceReferences("orion.project.handler"); //$NON-NLS-0$
+		this.allProjectDeployReferences = serviceRegistry.getServiceReferences("orion.project.deploy"); //$NON-NLS-0$
 		this._serviceRegistration = serviceRegistry.registerService("orion.project.client", this); //$NON-NLS-0$ 
 	}
 
@@ -348,6 +349,36 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 			types.push(this.allProjectHandlersReferences[i].getProperty("type"));
 		}
 		return types;
+	},
+	
+	_getProjectDeployService: function(serviceReference){
+		var service = this.serviceRegistry.getService(serviceReference);
+		service.id = serviceReference.getProperty("id");
+		service.name = serviceReference.getProperty("name");
+		service.tooltip = serviceReference.getProperty("tooltip");
+		service.validationProperties = serviceReference.getProperty("validationProperties");
+		return service;
+	},
+	
+	matchesDeployService: function(item, service){
+		var validator = mExtensionCommands._makeValidator(service, this.serviceRegistry, []);
+		return validator.validationFunction(item);
+	},
+	
+	getProjectDeployTypes: function(){
+		var types = [];
+		for(var i=0; i<this.allProjectDeployReferences.length; i++){
+			types.push(this.allProjectDeployReferences[i].getProperty("id"));
+		}
+		return types;
+	},
+	
+	getProjectDelpoyService: function(type){
+		for(var i=0; i<this.allProjectDeployReferences.length; i++){
+			if(this.allProjectDeployReferences[i].getProperty("id") === type){
+				return this._getProjectDeployService(this.allProjectDeployReferences[i]);
+			}
+		}
 	},
 	
 	_getProjectHandlerService: function(serviceReference){

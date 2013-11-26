@@ -52,6 +52,7 @@ define([
 		this.newActionsScope = this.toolbarNode.id + "New"; //$NON-NLS-0$
 		this.selectionActionsScope = this.toolbarNode.id + "Selection"; //$NON-NLS-0$
 		this.folderNavActionsScope = this.toolbarNode.id + "Folder"; //$NON-NLS-0$
+		this.additionalNavActionsScope = this.toolbarNode.id + "Extra"; //$NON-NLS-0$
 
 		this.treeRoot = {}; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
@@ -141,7 +142,7 @@ define([
 			var _self = this;
 			// Create some elements that we can hang actions on. Ideally we'd have just 1, but the
 			// CommandRegistry seems to require dropdowns to have their own element.
-			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope].forEach(function(id) {
+			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope, this.additionalNavActionsScope].forEach(function(id) {
 				if (!_self[id]) {
 					var elem = document.createElement("ul"); //$NON-NLS-0$
 					elem.id = id;
@@ -160,7 +161,7 @@ define([
 				dispatcher.removeEventListener(type, _self._modelListener);
 			});
 			FileExplorer.prototype.destroy.call(this);
-			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope].forEach(function(id) {
+			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope, this.additionalNavActionsScope].forEach(function(id) {
 				delete _self[id];
 			});
 			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
@@ -269,7 +270,9 @@ define([
 			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
 			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot, true);
 			commandRegistry.destroy(this.folderNavActionsScope);
+			commandRegistry.destroy(this.additionalNavActionsScope);
 			commandRegistry.renderCommands(this.folderNavActionsScope, this.folderNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
+			commandRegistry.renderCommands(this.additionalNavActionsScope, this.additionalNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
 		}
 	});
 

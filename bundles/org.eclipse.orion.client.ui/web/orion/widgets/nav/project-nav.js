@@ -150,6 +150,7 @@ define([
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
 				var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
 				var newActionsScope = this.newActionsScope;
+				var additionalNavActionsScope = this.additionalNavActionsScope;
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.disconnect", 2); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.readme", 5, "orion.commonNavNewGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -159,7 +160,19 @@ define([
 					for(var i=0; i<dependencyTypes.length; i++){
 						commandRegistry.registerCommandContribution(newActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.commonNavNewGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
-					ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient, dependencyTypes).then(projectCommandsDef.resolve, projectCommandsDef.resolve);
+					this.projectClient.getProjectDeployTypes().then(function(deployTypes){
+						if(deployTypes && deployTypes.length>0){
+							commandRegistry.addCommandGroup(additionalNavActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-sharecontent", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+						}
+						for(var i=0; i<deployTypes.length; i++){
+							commandRegistry.registerCommandContribution(additionalNavActionsScope, "orion.project.deploy." + deployTypes[i], i+1, "orion.deployNavGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+						}
+						ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient, dependencyTypes, deployTypes).then(projectCommandsDef.resolve, projectCommandsDef.resolve);
+					}.bind(this), function(error){
+						console.error(error);
+						ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient, dependencyTypes).then(projectCommandsDef.resolve, projectCommandsDef.resolve);
+						projectCommandsDef.resolve();
+					});
 				}.bind(this), projectCommandsDef.resolve);
 				return projectCommandsDef;
 			}.bind(this));

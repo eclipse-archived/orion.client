@@ -53,5 +53,6 @@ define({
 	"disconnected": "(disconnected)", //$NON-NLS-1$ //$NON-NLS-0$
 	"ChooseFS": "Choose Filesystem", //$NON-NLS-1$ //$NON-NLS-0$
 	"ChooseFSTooltip": "Choose the filesystem you want to view.", //$NON-NLS-1$ //$NON-NLS-0$
-	"FSTitle": "${0} (${1})" //$NON-NLS-1$ //$NON-NLS-0$
+	"FSTitle": "${0} (${1})", //$NON-NLS-1$ //$NON-NLS-0$
+	"Deploy": "Deploy" //$NON-NLS-1$ //$NON-NLS-0$
 });
