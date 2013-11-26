@@ -906,20 +906,45 @@ input {
 	text-align: left;
 	border-collapse: collapse;
 	border-spacing: 0;
-	border: 1px solid lightgrey;
 	padding: 0;
 	margin-left: 5%;
 	margin-right: 5%;
 	margin-top: 30px;
-	margin-bottom: 0;
+	width: inherit;
+}
+
+.sectionTable {
+	margin-top: 0;
+	border: 1px solid;
 	border-color:#D6EBF0;
-	width: 90%;
+}
+
+
+.sectionWrapper{
+	border-top: 1px solid;
+	border-left: 1px solid;
+	border-right: 1px solid;
+	background: none repeat scroll 0 0 #EAF5F7;
+	vertical-align: middle;
+	font-weight: bold;
+	padding: 6px;
+	color: gray;
+	margin-bottom: 0;
+	border-color: #D6EBF0;
 }
 
 .sectionTable td {
-	border-bottom: 1px solid #e6f3f6;
+	border-bottom: 1px solid #D6EBF0;
 	vertical-align: middle;
 	color: grey;
+}
+
+.sectionTable tr:last-child td{
+	border-bottom: 0;
+}
+
+.sectionTable div.lightTreeTableRow:last-child, .sectionTable div.lightTreeTableRow:last-child{
+	border-bottom: 0;
 }
 
 .orionMarkdown {
@@ -980,29 +1005,8 @@ input {
 	padding: 8px;
 }
 
-.sectionWrapper{
-	border-color:#D6EBF0;
-	border-bottom: 1px solid #D6EBF0;
-	border-top: 1px solid #D6EBF0;
-	background: none repeat scroll 0 0 #EAF5F7;
-	vertical-align: middle;
-	font-weight: bold;
-	padding: 6px;
-	color: gray;
-}
-
 .orionMarkdown h1 {
 	position: relative;
-}
-
-.sectionWrapper{
-	margin-bottom: 0;
-	width: inherit;
-}
-
-.sectionTable{
-	margin-top: 0;
-	width: inherit;
 }
 
 .lightTreeTableRow, .darkTreeTableRow {
