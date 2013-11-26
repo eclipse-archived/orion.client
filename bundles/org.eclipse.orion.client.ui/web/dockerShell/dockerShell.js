@@ -49,6 +49,21 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 				handleAs: "json" //$NON-NLS-0$
 			});
 		}
+		
+		function processLine(line) {
+			return xhr("POST", "/docker", {  //$NON-NLS-1$ //$NON-NLS-0$
+				headers: {
+					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
+					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				data: JSON.stringify({
+					"dockerCmd": "process",
+					"line": line
+				}),
+				timeout: 15000,
+				handleAs: "json" //$NON-NLS-0$
+			});
+		}
 
 		var output = document.getElementById("dockerPage-output"); //$NON-NLS-0$
 		var input = document.getElementById("dockerCmd"); //$NON-NLS-0$
@@ -61,7 +76,7 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 					window.console.log(result);
 					input.addEventListener("keydown", function (e) { //$NON-NLS-0$
 						if (e.keyCode === 13) {
-							window.console.log("send cmd to docker servlet: \"" + input.value + "\"");
+							processLine(input.value + "\n");
 							input.value = "";
 							e.preventDefault();
 						}
