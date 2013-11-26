@@ -368,21 +368,27 @@ module.exports = (function() {
      */
     api.getScope = function() {
         var parents = controller.parents().reverse(),
+            node = controller.current(),
             innerScope = null;
 
         // Don't do this for Program nodes - they have no parents
         if (parents.length) {
 
-            // Ascend the current node's parents
-            for (var i = 0; i < parents.length; i++) {
-
-                // The first node that requires a scope is the node that will be
-                // our current node's innermost scope.
-                if (escope.Scope.isScopeRequired(parents[i])) {
-                    innerScope = parents[i];
-                    break;
+            if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression") {
+                innerScope = node;
+            } else {
+                // Ascend the current node's parents
+                for (var i = 0; i < parents.length; i++) {
+    
+                    // The first node that requires a scope is the node that will be
+                    // our current node's innermost scope.
+                    if (escope.Scope.isScopeRequired(parents[i])) {
+                        innerScope = parents[i];
+                        break;
+                    }
                 }
             }
+
 
             // Loop through the scopes returned by escope to find the innermost
             // scope and return that scope.
