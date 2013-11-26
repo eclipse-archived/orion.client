@@ -589,7 +589,12 @@ define([
 							// add it to the editor as a keybinding
 							var textView = editor.getTextView();
 							textView.setKeyBinding(createKeyBinding(info.key), command.id);
-							textView.setAction(command.id, command.callback, command);
+							textView.setAction(command.id, function() {
+								if (!command.visibleWhen || command.visibleWhen(inputManager.getFileMetadata())) {
+									return command.callback();
+								}
+								return false;
+							}, command);
 						}				
 					});
 					position++;
