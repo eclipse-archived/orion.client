@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -73,5 +73,7 @@ define({
 	"Stopped" : "Stopped",
 	"Started at " : "Started at ",
 	"Sites": "Sites",
-	"Mappings": "Mappings"
+	"Mappings": "Mappings",
+	// The create button will be inserted into the following text
+	"SitesExplorer.NoSitesText" : "You have no sites. Click ${0} to create a site."
 });
