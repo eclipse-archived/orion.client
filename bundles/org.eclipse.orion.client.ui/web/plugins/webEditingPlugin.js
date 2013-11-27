@@ -175,7 +175,7 @@ define([
         keywords: keywords.JSKeywords,
 //        extends: "orion.text",
 		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
-		contentType: ["application/javascript" /*, "text/x-java-source"*/],
+		contentType: ["application/javascript"],
 		patterns: [
 			{
 //				match: " ",
@@ -208,7 +208,7 @@ define([
 				match: "'.*?('|$)",
 				name: "STRING"
 			}, {
-				match: "\".*?(\"|$)",
+				match: "\"(\\\\.|[^\"])*(\"|$)",
 				name: "STRING"
 			}, {
 				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
@@ -280,7 +280,7 @@ define([
 				match: "//.*",
 				name: "SINGLELINE_COMMENT"
 			}, {
-				match: "\".*?(\"|$)",
+				match: "\"(\\\\.|[^\"])*(\"|$)",
 				name: "STRING"
 			}, {
 				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
@@ -349,7 +349,7 @@ define([
 				match: "'.*?('|$)",
 				name: "STRING"
 			}, {
-				match: "\".*?(\"|$)",
+				match: "\"(\\\\.|[^\"])*(\"|$)",
 				name: "STRING"
 			}, {
 				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
@@ -401,7 +401,7 @@ define([
 				match: "'.*?('|$)",
 				name: "STRING"		
 			}, {
-				match: "\".*?(\"|$)",
+				match: "\"(\\\\.|[^\"])*(\"|$)",
 				name: "STRING"		
 			}, {
 				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
@@ -450,7 +450,7 @@ define([
 				match: "'.*?'",
 				name: "STRING"		
 			}, {
-				match: "\".*?\"",
+				match: "\"(\\\\.|[^\"])*(\"|$)",
 				name: "STRING"		
 			}, {
 				match: "-?(\\.\\d+|\\d+\\.?\\d*)(%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?",
