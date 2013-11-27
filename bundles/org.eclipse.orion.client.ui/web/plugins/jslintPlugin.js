@@ -21,7 +21,7 @@ define([
 			onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false
 	};
 	var validationOptions = DEFAULT_VALIDATION_OPTIONS;
-	var isEnabled = true;
+	var isEnabled = false; // disabled by default
 
 	function jslint(contents) {
 		JSLINT(contents, validationOptions);

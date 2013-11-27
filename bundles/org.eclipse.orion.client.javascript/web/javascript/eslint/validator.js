@@ -26,7 +26,7 @@ define([
 	};
 
 	function ESLintValidator() {
-		this.active = true;
+		this.active = true; // enabled by default
 	}
 
 	function getSeverity(prob) {
