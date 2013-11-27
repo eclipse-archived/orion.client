@@ -1,10 +1,10 @@
-
+/*global define module require exports */
 (function(root, factory) {
     if(typeof exports === 'object') {
-        module.exports = factory(require, exports, module);
+        module.exports = factory(require('./load-rules'), require, exports, module);
     }
     else if(typeof define === 'function' && define.amd) {
-        define(['require', 'exports', 'module'], factory);
+        define(['./load-rules-async', 'require', 'exports', 'module'], factory);
     }
     else {
         var req = function(id) {return root[id];},
@@ -12,7 +12,7 @@
             mod = {exports: exp};
         root.Rules = factory(req, exp, mod);
     }
-}(this, function(require, exports, module) {
+}(this, function(loadRules, require, exports, module) {
 /**
  * @fileoverview Main CLI object.
  * @author Nicholas C. Zakas
@@ -22,7 +22,7 @@
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
-var loadRules = require("./load-rules");
+//var loadRules = require("./load-rules");
 
 //------------------------------------------------------------------------------
 // Privates
@@ -53,5 +53,6 @@ exports.get = function(ruleId) {
 // Initialization
 //------------------------------------------------------------------------------
 load();
-    return module.exports;
+
+    return exports;
 }));

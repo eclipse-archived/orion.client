@@ -1,10 +1,14 @@
-
+/*global define module require exports*/
 (function(root, factory) {
     if(typeof exports === 'object') {
-        module.exports = factory(require, exports, module);
+        module.exports = factory(require('esprima'), require('estraverse'), require('escope'),
+            require('../conf/environments.js'), require('./rules'), require('./util'), require('./rule-context'), require('events'),
+            require, exports, module);
     }
     else if(typeof define === 'function' && define.amd) {
-        define(['esprima', 'estraverse', 'escope', 'conf/environments', 'rules', 'util', 'rule-context', 'events', 'require', 'exports', 'module'], factory);
+        define(['esprima/esprima', 'estraverse', 'escope',
+                'eslint/conf/environments', './rules', './util', './rule-context', './events',
+                'require', 'exports', 'module'], factory);
     }
     else {
         var req = function(id) {return root[id];},
@@ -12,7 +16,7 @@
             mod = {exports: exp};
         root.eslint = factory(req, exp, mod);
     }
-}(this, function(require, exports, module) {
+}(this, function(esprima, estraverse, escope, environments, rules, util, RuleContext, events, require, exports, module) {
 /**
  * @fileoverview Main ESLint object.
  * @author Nicholas C. Zakas
@@ -22,14 +26,15 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-var esprima = require("esprima"),
-    estraverse = require("estraverse"),
-    escope = require("escope"),
-    environments = require("../conf/environments.js"),
-    rules = require("./rules"),
-    util = require("./util"),
-    RuleContext = require("./rule-context"),
-    EventEmitter = require("events").EventEmitter;
+//var esprima = require("esprima"),
+//    estraverse = require("estraverse"),
+//    escope = require("escope"),
+//    environments = require("../conf/environments.js"),
+//    rules = require("./rules"),
+//    util = require("./util"),
+//    RuleContext = require("./rule-context"),
+//    EventEmitter = require("events").EventEmitter;
+var EventEmitter = events.EventEmitter;
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -174,13 +179,13 @@ module.exports = (function() {
 
     /**
      * Verifies the text against the rules specified by the second argument.
-     * @param {string} text The JavaScript text to verify.
+     * @param {string|ASTNode} textOrAST The JavaScript text to verify, or an already-parsed AST.
      * @param {Object} config An object whose keys specify the rules to use.
      * @returns {Object[]} The results as an array of messages or null if no messages.
      */
     api.verify = function(text, config, saveState) {
 
-        var ast,
+        var ast = (text && typeof text === "object") ? text : null,
             parseError = false;
 
         if (!saveState) {
@@ -230,7 +235,7 @@ module.exports = (function() {
          * problem that ESLint identified just like any other.
          */
         try {
-            ast = esprima.parse(text, { loc: true, range: true, raw: true, tokens: true, comment: true });
+            ast = ast || esprima.parse(text, { loc: true, range: true, raw: true, tokens: true, comment: true });
         } catch (ex) {
 
             parseError = true;
@@ -363,21 +368,27 @@ module.exports = (function() {
      */
     api.getScope = function() {
         var parents = controller.parents().reverse(),
+            node = controller.current(),
             innerScope = null;
 
         // Don't do this for Program nodes - they have no parents
         if (parents.length) {
 
-            // Ascend the current node's parents
-            for (var i = 0; i < parents.length; i++) {
-
-                // The first node that requires a scope is the node that will be
-                // our current node's innermost scope.
-                if (escope.Scope.isScopeRequired(parents[i])) {
-                    innerScope = parents[i];
-                    break;
+            if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression") {
+                innerScope = node;
+            } else {
+                // Ascend the current node's parents
+                for (var i = 0; i < parents.length; i++) {
+    
+                    // The first node that requires a scope is the node that will be
+                    // our current node's innermost scope.
+                    if (escope.Scope.isScopeRequired(parents[i])) {
+                        innerScope = parents[i];
+                        break;
+                    }
                 }
             }
+
 
             // Loop through the scopes returned by escope to find the innermost
             // scope and return that scope.

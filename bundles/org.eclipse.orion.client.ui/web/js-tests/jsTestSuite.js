@@ -108,6 +108,7 @@ OrionTestCase("index-file-parsing", "/js-tests/esprima/indexFileParsingTests.htm
 OrionTestCase("asyncStyler", "/js-tests/asyncStyler/test.html");
 //OrionTestCase("ast", "/js-tests/ast/astManagerTests.html");
 OrionTestCase("commands", "/js-tests/commands/test.html");
+OrionTestCase("nodeJsEvents", "/js-tests/events/test.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
 //OrionUITestCase("textviewPerformance", "/js-tests/editor/test-performance.html");

@@ -13,7 +13,7 @@
 define([
 'orion/objects',
 'javascript/signatures',
-'estraverse/estraverse'
+'estraverse'
 ], function(Objects, Signatures, Estraverse) {
 	
 	/**
