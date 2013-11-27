@@ -21,7 +21,10 @@ define([
 			onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false
 	};
 	var validationOptions = DEFAULT_VALIDATION_OPTIONS;
-	var isEnabled = false; // disabled by default
+	var isEnabledFor = {
+		'application/javascript': false,
+		'text/html': true
+	};
 
 	function jslint(contents) {
 		JSLINT(contents, validationOptions);
@@ -72,8 +75,12 @@ define([
 		return isBogus(error) ? null : error;
 	}
 
-	function _computeProblems(contents) {
-		if (!isEnabled) {
+	/**
+	 * @param {Object} options
+	 * @param {String} contents Text of file.
+	 */
+	function _computeProblems(options, contents) {
+		if (isEnabledFor[options.contentType] === false) {
 			return {problems: []};
 		}
 		var result = jslint(contents);
@@ -141,7 +148,8 @@ define([
 		updated: function(properties) {
 			if (properties) {
 				if (typeof properties.enabled === "boolean") {
-					isEnabled = !!properties.enabled;
+					// At the moment this setting only controls .js files
+					isEnabledFor['application/javascript'] = !!properties.enabled;
 				}
 				if (typeof properties.options === "string") {
 					var options = properties.options;
@@ -170,7 +178,7 @@ define([
 		},
 		// orion.edit.validator
 		computeProblems: function(editorContext, context) {
-			return editorContext.getText().then(_computeProblems);
+			return editorContext.getText().then(_computeProblems.bind(null, context));
 		}
 	};
 	
