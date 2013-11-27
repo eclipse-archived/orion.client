@@ -182,28 +182,40 @@ define([
 //				name: "WHITE_SPACE"
 //			}, {
 				match: "{",
-				name: "NESTER"
+				name: "orion.enclosure.brace.start"
 			}, {
 				match: "}",
-				name: "UNNESTER"
+				name: "orion.enclosure.brace.end"
+			}, {
+				match: "\\[",
+				name: "orion.enclosure.bracket.start"
+			}, {
+				match: "\\]",
+				name: "orion.enclosure.bracket.end"
+			}, {
+				match: "\\(",
+				name: "orion.enclosure.parenthesis.start"
+			}, {
+				match: "\\)",
+				name: "orion.enclosure.parenthesis.end"
 			}, {
 //				match: "\t",
 //				name: "WHITE_TAB"		
 //			}, {
 				match: "//.*",
-				name: "SINGLELINE_COMMENT"		
+				name: "SINGLELINE_COMMENT"
 			}, {
 				match: "'.*?('|$)",
-				name: "STRING"		
+				name: "STRING"
 			}, {
 				match: "\".*?(\"|$)",
-				name: "STRING"		
+				name: "STRING"
 			}, {
 				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
 				name: "NUMBER"
 			}, {
 				match: "0x[0-9A-Fa-f]+",
-				name: "NUMBER"	
+				name: "NUMBER"
 			}, {
 				begin: "/\\*",
 				end: "(\\*/|$)",
@@ -245,25 +257,37 @@ define([
 //				name: "WHITE_SPACE"
 //			}, {
 				match: "{",
-				name: "NESTER"
+				name: "orion.enclosure.brace.start"
 			}, {
 				match: "}",
-				name: "UNNESTER"
+				name: "orion.enclosure.brace.end"
+			}, {
+				match: "\\[",
+				name: "orion.enclosure.bracket.start"
+			}, {
+				match: "\\]",
+				name: "orion.enclosure.bracket.end"
+			}, {
+				match: "\\(",
+				name: "orion.enclosure.parenthesis.start"
+			}, {
+				match: "\\)",
+				name: "orion.enclosure.parenthesis.end"
 			}, {
 //				match: "\t",
 //				name: "WHITE_TAB"		
 //			}, {
 				match: "//.*",
-				name: "SINGLELINE_COMMENT"		
+				name: "SINGLELINE_COMMENT"
 			}, {
 				match: "\".*?(\"|$)",
-				name: "STRING"		
+				name: "STRING"
 			}, {
 				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
 				name: "NUMBER"
 			}, {
 				match: "0x[0-9A-Fa-f]+",
-				name: "NUMBER"	
+				name: "NUMBER"
 			}, {
 				begin: "/\\*",
 				end: "(\\*/|$)",
@@ -302,25 +326,37 @@ define([
 //				name: "WHITE_SPACE"
 //			}, {
 				match: "{",
-				name: "NESTER"
+				name: "orion.enclosure.brace.start"
 			}, {
 				match: "}",
-				name: "UNNESTER"
+				name: "orion.enclosure.brace.end"
+			}, {
+				match: "\\[",
+				name: "orion.enclosure.bracket.start"
+			}, {
+				match: "\\]",
+				name: "orion.enclosure.bracket.end"
+			}, {
+				match: "\\(",
+				name: "orion.enclosure.parenthesis.start"
+			}, {
+				match: "\\)",
+				name: "orion.enclosure.parenthesis.end"
 			}, {
 //				match: "\t",
-//				name: "WHITE_TAB"		
+//				name: "WHITE_TAB"
 //			}, {
 				match: "'.*?('|$)",
-				name: "STRING"		
+				name: "STRING"
 			}, {
 				match: "\".*?(\"|$)",
-				name: "STRING"		
+				name: "STRING"
 			}, {
 				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
 				name: "NUMBER"
 			}, {
 				match: "0x[0-9A-Fa-f]+",
-				name: "NUMBER"	
+				name: "NUMBER"
 			}
 		]
 	});
@@ -342,10 +378,22 @@ define([
 //				name: "WHITE_SPACE"
 //			}, {
 				match: "{",
-				name: "NESTER"
+				name: "orion.enclosure.brace.start"
 			}, {
 				match: "}",
-				name: "UNNESTER"
+				name: "orion.enclosure.brace.end"
+			}, {
+				match: "\\[",
+				name: "orion.enclosure.bracket.start"
+			}, {
+				match: "\\]",
+				name: "orion.enclosure.bracket.end"
+			}, {
+				match: "\\(",
+				name: "orion.enclosure.parenthesis.start"
+			}, {
+				match: "\\)",
+				name: "orion.enclosure.parenthesis.end"
 			}, {
 //				match: "\t",
 //				name: "WHITE_TAB"		
@@ -379,10 +427,22 @@ define([
 //				name: "WHITE_SPACE"
 //			}, {
 				match: "{",
-				name: "NESTER"
+				name: "orion.enclosure.brace.start"
 			}, {
 				match: "}",
-				name: "UNNESTER"
+				name: "orion.enclosure.brace.end"
+			}, {
+				match: "\\[",
+				name: "orion.enclosure.bracket.start"
+			}, {
+				match: "\\]",
+				name: "orion.enclosure.bracket.end"
+			}, {
+				match: "\\(",
+				name: "orion.enclosure.parenthesis.start"
+			}, {
+				match: "\\)",
+				name: "orion.enclosure.parenthesis.end"
 			}, {
 //				match: "\t",
 //				name: "WHITE_TAB"		

@@ -32,8 +32,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var DOC_TAG = 13;
 	var TASK_TAG = 14;
 
-	var BRACKETS = "{}()[]<>"; //$NON-NLS-0$
-
 	// Styles
 	var singleCommentStyle = {styleClass: "token_singleline_comment"}; //$NON-NLS-0$
 	var multiCommentStyle = {styleClass: "token_multiline_comment"}; //$NON-NLS-0$
@@ -62,7 +60,13 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		"WHITE_SPACE": spaceStyle,
 		"HTML_MARKUP": htmlMarkupStyle,
 		"DOC_TAG": doctagStyle,
-		"TASK_TAG": tasktagStyle
+		"TASK_TAG": tasktagStyle,
+		"orion.enclosure.brace.start": {styleClass: "orion.enclosure.brace.start"},
+		"orion.enclosure.brace.end": {styleClass: "orion.enclosure.brace.end"},
+		"orion.enclosure.bracket.start": {styleClass: "orion.enclosure.bracket.start"},
+		"orion.enclosure.bracket.end": {styleClass: "orion.enclosure.bracket.end"},
+		"orion.enclosure.parenthesis.start": {styleClass: "orion.enclosure.parenthesis.start"},
+		"orion.enclosure.parenthesis.end": {styleClass: "orion.enclosure.parenthesis.end"}
 	};
 
 	function TextStyler (view, annotationModel, patterns, delimiters, keywords) {
@@ -71,8 +75,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			if (element.match && !element.begin && !element.end && element.name) {
 				result.line = {regex: new RegExp(element.match, "g"), name: element.name};
 			} else if (!element.match && element.begin && element.end && element.name) {
-				result.line = ({regex: new RegExp(element.begin + ".*(" + element.end + "|$)", "g"), name: element.name});
-				result.document = ({regexBegin: new RegExp(element.begin, "g"), regexEnd: new RegExp(element.end, "g"), name: element.name});
+				result.line = {regex: new RegExp(element.begin + ".*(" + element.end + "|$)", "g"), name: element.name};
+				result.document = {regexBegin: new RegExp(element.begin, "g"), regexEnd: new RegExp(element.end, "g"), name: element.name};
 				if (element.patterns) {
 					result.document.patterns = [];
 					element.patterns.forEach(function(current) {
@@ -88,13 +92,19 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 		this.linePatterns = [];
 		this.documentPatterns = [];
+		this.enclosurePatterns = {};
 		patterns.forEach(function(current) {
 			var pattern = createPattern(current);
-			if (pattern && pattern.line) {
-				this.linePatterns.push(pattern.line);
-			}
-			if (pattern && pattern.document) {
-				this.documentPatterns.push(pattern.document);
+			if (pattern) {
+				if (pattern.line) {
+					this.linePatterns.push(pattern.line);
+					if (pattern.line.name.indexOf("orion.enclosure") === 0 && (pattern.line.name.indexOf(".start") !== -1 || pattern.line.name.indexOf(".end") !== -1)) {
+						this.enclosurePatterns[pattern.line.name] = pattern.line;
+					}
+				}
+				if (pattern.document) {
+					this.documentPatterns.push(pattern.document);
+				}
 			}
 		}.bind(this));
 		if (keywords && keywords.length) {
@@ -570,26 +580,42 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			return results;
 		},
 		_findMatchingBracket: function(model, offset) {
-			var brackets = BRACKETS;
-			var bracket = model.getText(offset, offset + 1);
-			var bracketIndex = brackets.indexOf(bracket, 0);
-			if (bracketIndex === -1) { return -1; }
-			var closingBracket;
-			if (bracketIndex & 1) {
-				closingBracket = brackets.substring(bracketIndex - 1, bracketIndex);
-			} else {
-				closingBracket = brackets.substring(bracketIndex + 1, bracketIndex + 2);
-			}
 			var lineIndex = model.getLineAtOffset(offset);
+			var lineEnd = model.getLineEnd(lineIndex);
+			var text = model.getText(offset, lineEnd);
+
+			var match;
+			var keys = Object.keys(this.enclosurePatterns);
+			for (var i = 0; i < keys.length; i++) {
+				var current = this.enclosurePatterns[keys[i]];
+				current.regex.lastIndex = 0;
+				var result = current.regex.exec(text);
+				if (result && result.index === 0) {
+					match = current;
+					break;
+				}
+			}
+			if (!match) { return -1; }
+
+			var closingName;
+			var onEnclosureStart = false;
+			if (match.name.indexOf(".start") !== -1) {
+				onEnclosureStart = true;
+				closingName = match.name.replace(".start", ".end");
+			} else {
+				closingName = match.name.replace(".end", ".start");
+			}
+			var closingBracket = this.enclosurePatterns[closingName];
+			if (!closingBracket) { return -1; }
+
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
-			var lineEnd = model.getLineEnd(lineIndex);
-			brackets = this._findBrackets(bracket, closingBracket, lineText, lineStart, lineStart, lineEnd);
-			for (var i=0; i<brackets.length; i++) {
+			var brackets = this._findBrackets(match, closingBracket, lineText, lineStart, lineEnd);
+			for (i = 0; i < brackets.length; i++) {
 				var sign = brackets[i] >= 0 ? 1 : -1;
 				if (brackets[i] * sign - 1 === offset) {
 					var level = 1;
-					if (bracketIndex & 1) {
+					if (!onEnclosureStart) {
 						i--;
 						for (; i>=0; i--) {
 							sign = brackets[i] >= 0 ? 1 : -1;
@@ -603,8 +629,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 							lineText = model.getLine(lineIndex);
 							lineStart = model.getLineStart(lineIndex);
 							lineEnd = model.getLineEnd(lineIndex);
-							brackets = this._findBrackets(bracket, closingBracket, lineText, lineStart, lineStart, lineEnd);
-							for (var j=brackets.length - 1; j>=0; j--) {
+							brackets = this._findBrackets(match, closingBracket, lineText, lineStart, lineEnd);
+							for (var j = brackets.length - 1; j >= 0; j--) {
 								sign = brackets[j] >= 0 ? 1 : -1;
 								level += sign;
 								if (level === 0) {
@@ -628,7 +654,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 							lineText = model.getLine(lineIndex);
 							lineStart = model.getLineStart(lineIndex);
 							lineEnd = model.getLineEnd(lineIndex);
-							brackets = this._findBrackets(bracket, closingBracket, lineText, lineStart, lineStart, lineEnd);
+							brackets = this._findBrackets(match, closingBracket, lineText, lineStart, lineEnd);
 							for (var k=0; k<brackets.length; k++) {
 								sign = brackets[k] >= 0 ? 1 : -1;
 								level += sign;
@@ -644,40 +670,37 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			return -1;
 		},
-		_findBrackets: function(bracket, closingBracket, text, textOffset, start, end) {
-			var result = [];
-			// TODO
-//			var bracketToken = bracket.charCodeAt(0);
-//			var closingBracketToken = closingBracket.charCodeAt(0);
-//			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
-//			var offset = start, scanner = this._scanner, token, comments = this.comments;
-//			var startIndex = this._binarySearch(comments, start, true);
-//			for (var i = startIndex; i < comments.length; i++) {
-//				if (comments[i].start >= end) { break; }
-//				var commentStart = comments[i].start;
-//				var commentEnd = comments[i].end;
-//				if (offset < commentStart) {
-//					scanner.setText(text.substring(offset - start, commentStart - start));
-//					while ((token = scanner.nextToken())) {
-//						if (token === bracketToken) {
-//							result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
-//						} else if (token === closingBracketToken) {
-//							result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
-//						}
-//					}
-//				}
-//				offset = commentEnd;
-//			}
-//			if (offset < end) {
-//				scanner.setText(text.substring(offset - start, end - start));
-//				while ((token = scanner.nextToken())) {
-//					if (token === bracketToken) {
-//						result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
-//					} else if (token === closingBracketToken) {
-//						result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
-//					}
-//				}
-//			}
+		_findBrackets: function(bracket, closingBracket, text, start, end) {
+			var result = [], styles = [];
+			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
+			var offset = start, comments = this.comments;
+			var startIndex = this._binarySearch(comments, start, true);
+			for (var i = startIndex; i < comments.length; i++) {
+				if (comments[i].start >= end) { break; }
+				var commentStart = comments[i].start;
+				var commentEnd = comments[i].end;
+				if (offset < commentStart) {
+					this._parse(text.substring(offset - start, commentStart - start), offset, this.linePatterns, styles);
+					styles.forEach(function(current) {
+						if (current.style.styleClass.indexOf(bracket.name) === 0) {
+							result.push(current.start + 1);
+						} else if (current.style.styleClass.indexOf(closingBracket.name) === 0) {
+							result.push(-(current.start + 1));
+						}
+					});
+				}
+				offset = commentEnd;
+			}
+			if (offset < end) {
+				this._parse(text.substring(offset - start, end - start), offset, this.linePatterns, styles);
+				styles.forEach(function(current) {
+					if (current.style.styleClass.indexOf(bracket.name) === 0) {
+						result.push(current.start + 1);
+					} else if (current.style.styleClass.indexOf(closingBracket.name) === 0) {
+						result.push(-(current.start + 1));
+					}
+				});
+			}
 			return result;
 		},
 		_onDestroy: function(e) {
