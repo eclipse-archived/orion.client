@@ -142,13 +142,80 @@ define([
 								name = 'var '+astnode.id.name+ ' = {...}';
 							}
 						}
-						else if(astnode.init.type === 'FunctionDeclaration') {
+						else if(astnode.init.type === 'FunctionExpression') {
 							if(astnode.id && astnode.id.name) {
+								name = astnode.id.name + '(';
+								var vparams = this.getParamsFrom(astnode.init);
+								if(vparams) {
+									name += vparams;
+								}
+								name += ')';
+							}
+							else {
 								name = this.getNameFrom(astnode.init);
 							}
 						}
 					}
 				}
+				else if(astnode.type === 'AssignmentExpression') {
+					if(astnode.left && astnode.right) {
+						var isobject = astnode.right.type === 'ObjectExpression';
+						if(isobject || astnode.right.type === 'FunctionExpression') {
+							if(astnode.left.name) {
+								name = astnode.left.name;
+							}
+							else if(astnode.left.type === 'MemberExpression') {
+								name = this.expandMemberExpression(astnode.left, '');
+							}
+							if(name) {
+								//append the right stuff
+								if(isobject) {
+									name += ' {...}';
+								}
+								else {
+									name += '(';
+									var aparams = this.getParamsFrom(astnode.right);
+									if(aparams) {
+										name += aparams;
+									}
+									name += ')';
+								}
+							}
+							else {
+								name = this.getNameFrom(astnode.right);
+							}
+						}
+					}
+				}
+			}
+			return name;
+		},
+		
+		/**
+		 * @name expandMemberExpression
+		 * @description Given a MemberExpression node this function will recursively compute the complete name from the node
+		 * by visiting all of the child MemberExpressions, if any
+		 * @function
+		 * @private
+		 * @memberof javascript.Signatures.prototype
+		 * @param {Object} astnode The MemberExpression AST node
+		 * @returns {String} The name to use for the node
+		 */
+		expandMemberExpression: function(astnode, name) {
+			if(astnode.type === 'MemberExpression') {
+				if(astnode.property && astnode.property.name) {
+					if(name && name.length > 0) {
+						name = astnode.property.name+'.' + name;
+					}
+					else {
+						name = astnode.property.name;
+					}
+				}
+				if(astnode.object && astnode.object.name) {
+					name = astnode.object.name +'.'+ name;
+				}
+				//TODO recursion
+				return this.expandMemberExpression(astnode.object, name);
 			}
 			return name;
 		},
@@ -166,7 +233,12 @@ define([
 		getSignatureSourceRangeFrom: function(astnode) {
 			var range = [0, 0];
 			if(astnode) {
-				if(astnode.type === 'Property') {
+				if(astnode.type === 'AssignmentExpression') {
+					if(astnode.left && astnode.left.range) {
+						range = astnode.left.range;
+					}
+				}
+				else if(astnode.type === 'Property') {
 					if(astnode.key && astnode.key.range) {
 						range = astnode.key.range;
 					}

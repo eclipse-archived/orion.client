@@ -85,6 +85,13 @@ define([
 					});
 				}
 			}
+			else if(node.type === 'AssignmentExpression') {
+				if(node.left && node.right) {
+					if(node.right.type === 'ObjectExpression' || node.right.type === 'FunctionExpression') {
+						node.right.sig = Signatures.computeSignature(node);
+					}
+ 				}
+ 			}
 		},
 		
 		/**
