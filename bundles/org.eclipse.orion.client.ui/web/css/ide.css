@@ -936,7 +936,7 @@ input {
 .sectionTable td {
 	border-bottom: 1px solid #D6EBF0;
 	vertical-align: middle;
-	color: grey;
+	color: gray;
 }
 
 .sectionTable tr:last-child td{
@@ -949,8 +949,7 @@ input {
 
 .orionMarkdown {
 	padding: 8px;
-	overflow-x: auto;
-	color: grey;
+	color: gray;
 }
 
 .orionMarkdown img {
@@ -986,7 +985,7 @@ input {
 
 .orionProject .discreetInput {
 	border: none;
-	color: grey;
+	color: gray;
 	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 	width: 90%;
 	margin-left: 0;
