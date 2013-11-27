@@ -16,6 +16,8 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 	
 	eclipse.CFService = (function(){
 		
+		var contentType = "application/json; charset=UTF-8";
+		
 		/**
 		 * Creates a new CF service.
 		 * 
@@ -60,15 +62,16 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				deferred.reject(error);
 			},
 
-			_xhr : function(method, url) {
+			_xhrV1 : function(method, url, data) {
 				var self = this;
 				var clientDeferred = new Deferred();
 
-				xhr(method, url, { headers : { "Orion-Version" : "1",
+				xhr(method, url, { headers : { "CF-Version" : "1",
 				"Content-Type" : contentType
 				},
 				timeout : 15000,
-				handleAs : "json"
+				handleAs : "json",
+				data : JSON.stringify(data)
 				}).then(function(result) {
 					self._getServiceResponse(clientDeferred, result);
 				}, function(error) {
@@ -79,8 +82,8 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			},
 		
 			getTarget: function(targetName) {
-				var targetLocation = require.toUrl("jazz/Project");
-				return this._xhrV2("GET", targetLocation + (targetName ? "/" + targetName : ""));
+				var targetLocation = require.toUrl("cfapi/Target");
+				return this._xhrV1("GET", targetLocation + (targetName ? "/" + targetName : ""));
 			},
 			
 //			setTarget: function(url, token) {
