@@ -47,14 +47,14 @@ define([
 				return false;
 		     }
 
-		var excluded = getExcluded(new RegExp("/\\x2a((\\x2a[^/]*)|[^*/]|[^*]/)*\\x2a/", "gm"), contents);
+		       if (!validatorEnabled) {
+		           return {problems: []};
+		       }
+
+		var excluded = getExcluded(new RegExp("/\\x2a[^\\x2a]*\\x2a+(?:[^\\x2a/][^\\x2a]*\\x2a+)*/", "gm"), contents);
 		excluded = excluded.concat(getExcluded(new RegExp("//.*\\r?\\n*", "gm")), contents);
 		excluded = excluded.concat(getExcluded(new RegExp("define\\(\\[[^\\]]*\\]", "gm")), contents);
 		excluded = excluded.concat(getExcluded(new RegExp("messages\\[[^\\]]*\\]", "gmi")), contents);
-
-	       if (!validatorEnabled) {
-	           return {problems: []};
-	       }
 
 	       var problems = [];
 	       var stringRegExp = /("(\\"|[^"])+")|('(\\'|[^'])+')/g;
