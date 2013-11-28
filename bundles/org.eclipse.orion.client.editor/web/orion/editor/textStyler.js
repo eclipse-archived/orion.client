@@ -119,6 +119,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		this.delimiterRegex = new RegExp(delimiters, "g"); //$NON-NLS-0$
 
 		this.whitespacesVisible = this.spacesVisible = this.tabsVisible = false;
+		this.spacePattern = {regex: new RegExp(" ", "g"), name: "WHITE_SPACE"};
+		this.tabPattern = {regex: new RegExp("\t", "g"), name: "WHITE_TAB"};
+
 		this.detectHyperlinks = true;
 		this.highlightCaretLine = false;
 		this.foldingEnabled = true;
@@ -382,6 +385,17 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		_parse: function(text, offset, linePatterns, styles) {
 			if (!linePatterns) {
 				return;
+			}
+
+			if (this.whitespacesVisible && (this.tabsVisible || this.spacesVisible)) {
+				var temp = linePatterns.slice(0);
+				if (this.tabsVisible) {
+					temp.push(this.tabPattern);
+				}
+				if (this.spacesVisible) {
+					temp.push(this.spacePattern);
+				}
+				linePatterns = temp;
 			}
 
 			var delimiterMatches = [];
