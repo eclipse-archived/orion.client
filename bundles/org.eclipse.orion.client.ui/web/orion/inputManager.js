@@ -204,6 +204,7 @@ define([
 								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
 							}.bind(this), errorHandler);
 						} else {
+							clearTimeout();
 							this._setInputContents(this._parsedLocation, fileURI, null, metadata);
 						}
 					}
