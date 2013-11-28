@@ -239,9 +239,16 @@ define([
 
 			this._inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				_self.setContentType(event.contentType, event.location);
+				if (_self._editor !== event.editor) {
+					if (_self._editor) {
+						_self._editor.removeEventListener("InputChanged", _self._editorListener); //$NON-NLS-0$
+					}
+					_self._editor = event.editor;
+					if (_self._editor) {
+						_self._editor.addEventListener("InputChanged", _self._editorListener = _self.generateOutline.bind(_self)); //$NON-NLS-0$
+					}
+				}
 			});
-
-			this._inputManager.getEditor().addEventListener("InputChanged", this.generateOutline.bind(this)); //$NON-NLS-0$
 
 			Deferred.when(_self._outlineService, function(service) {
 				service.addEventListener("outline", function(event) { //$NON-NLS-0$
@@ -428,6 +435,7 @@ define([
 				_self._providerLookup = false;
 				_self._outlineService.setOutlineProviders(filteredProviders);
 				_self.setOutlineProviders(filteredProviders);
+				_self.generateOutline();
 			});
 		}
 	};

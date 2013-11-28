@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+    <head>
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>Image Viewer</title>
+		<style>
+			body {
+				margin: 0;
+			}
+			img {
+				margin: 10px;
+			}
+		</style>
+		<script src="../../requirejs/require.js"></script>
+		<script type="text/javascript">
+			/*global define require*/		
+			require({
+				baseUrl: '../..',
+				paths: {
+					text: 'requirejs/text',
+					i18n: 'requirejs/i18n',
+					domReady: 'requirejs/domReady'    
+				}
+			});
+			require(['imageViewer.js']);
+		</script>
+    </head>
+	<body>
+	</body>
+</html>

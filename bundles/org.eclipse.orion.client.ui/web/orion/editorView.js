@@ -28,21 +28,25 @@ define([
 	'orion/widgets/settings/EditorSettings',
 	'orion/searchAndReplace/textSearcher',
 	'orion/editorCommands',
+	'orion/globalCommands',
 	'orion/edit/ast',
 	'orion/edit/dispatcher',
 	'orion/edit/editorContext',
 	'orion/highlight',
 	'orion/markOccurrences',
 	'orion/syntaxchecker',
+	'orion/keyBinding',
+	'orion/uiUtils',
+	'orion/util',
 	'orion/objects'
 ], function(
 	messages,
 	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist, mEmacs, mVI,
 	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
-	mSearcher, mEditorCommands,
+	mSearcher, mEditorCommands, mGlobalCommands,
 	ASTManager, mDispatcher, EditorContext, Highlight,
 	mMarkOccurrences, mSyntaxchecker,
-	objects
+	mKeyBinding, mUIUtils, util, objects
 ) {
 
 	function parseNumericParams(input, params) {
@@ -73,8 +77,21 @@ define([
 		this.preferences = options.preferences;
 		this.readonly = options.readonly;
 		this.searcher = options.searcher;
+		this.statusReporter = options.statusReporter;
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
 		this.astManager = new ASTManager(this.serviceRegistry, this.inputManager);
+		mGlobalCommands.getKeyAssist().addProvider(this);
+		var mainSplitter = mGlobalCommands.getMainSplitter();
+		mainSplitter.splitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
+			if (this.editor && evt.node === mainSplitter.main) {
+				this.editor.resize();
+			}
+		}.bind(this));
+		mGlobalCommands.getGlobalEventTarget().addEventListener("toggleTrim", function(evt) { //$NON-NLS-0$
+			if (this.editor) {
+				this.editor.resize();
+			}
+		}.bind(this));
 		this.settings = {};
 		this._init();
 	}
@@ -93,7 +110,7 @@ define([
 				textView.addKeyMode(this.emacs);
 			} else if (prefs.keyBindings === "vi") { //$NON-NLS-0$
 				if (!this.vi) {
-					this.vi = new mVI.VIMode(textView, this.statusReporter.bind(this));
+					this.vi = new mVI.VIMode(textView, this.statusReporter);
 				}
 				textView.addKeyMode(this.vi);
 			}
@@ -165,13 +182,52 @@ define([
 				}
 			}
 		},
-		statusReporter: function(message, type, isAccessible) {
-			if (type === "progress") { //$NON-NLS-0$
-				this.statusService.setProgressMessage(message);
-			} else if (type === "error") { //$NON-NLS-0$
-				this.statusService.setErrorMessage(message);
-			} else {
-				this.statusService.setMessage(message, null, isAccessible);
+		showKeyBindings: function(keyAssist) {
+			var editor = this.editor;
+			if (editor && editor.getTextView && editor.getTextView()) {
+				var textView = editor.getTextView();
+				// Remove actions without descriptions
+				var editorActions = textView.getActions(true).filter(function (element) {
+					var desc = textView.getActionDescription(element);
+					return desc && desc.name;
+				});
+				editorActions.sort(function (a, b) {
+					return textView.getActionDescription(a).name.localeCompare(textView.getActionDescription(b).name);
+				});
+				keyAssist.createHeader(messages["Editor"]);
+				var execute = function (actionID) {
+					return function () {
+						textView.focus();
+						return textView.invokeAction(actionID);
+					};
+				};
+				var scopes = {}, binding;
+				for (var i = 0; i < editorActions.length; i++) {
+					var actionID = editorActions[i];
+					var actionDescription = textView.getActionDescription(actionID);
+					var bindings = textView.getKeyBindings(actionID);
+					for (var j = 0; j < bindings.length; j++) {
+						binding = bindings[j];
+						var bindingString = mUIUtils.getUserKeyString(binding);
+						if (binding.scopeName) {
+							if (!scopes[binding.scopeName]) {
+								scopes[binding.scopeName] = [];
+							}
+							scopes[binding.scopeName].push({bindingString: bindingString, name: actionDescription.name, execute: execute(actionID)});
+						} else {
+							keyAssist.createItem(bindingString, actionDescription.name, execute(actionID));
+						}
+					}
+				}
+				for (var scopedBinding in scopes) {
+					if (scopes[scopedBinding].length) {
+						keyAssist.createHeader(scopedBinding);
+						for (var k = 0; k < scopes[scopedBinding].length; k++) {
+							binding = scopes[scopedBinding][k];
+							keyAssist.createItem(binding.bindingString, binding.name, binding.execute);
+						}
+					}	
+				}
 			}
 		},
 		_init: function() {
@@ -234,6 +290,11 @@ define([
 				commandGenerator.generateEditorCommands(editor);
 
 				var textView = editor.getTextView();
+				var keyAssistCommand = commandRegistry.findCommand("orion.keyAssist"); //$NON-NLS-0$
+				if (keyAssistCommand) {
+					textView.setKeyBinding(new mKeyBinding.KeyStroke(191, false, true, !util.isMac, util.isMac), keyAssistCommand.id);
+					textView.setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
+				}
 				textView.setAction("toggleWrapMode", function() { //$NON-NLS-0$
 					textView.invokeAction("toggleWrapMode", true); //$NON-NLS-0$
 					var wordWrap = textView.getOptions("wrapMode"); //$NON-NLS-0$
@@ -288,7 +349,7 @@ define([
 				lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
 				contentAssistFactory: contentAssistFactory,
 				keyBindingFactory: keyBindingFactory,
-				statusReporter: this.statusReporter.bind(this),
+				statusReporter: this.statusReporter,
 				domNode: editorDomNode
 			});
 			editor.processParameters = function(params) {
@@ -308,7 +369,7 @@ define([
 					this.updateStyler(this.settings);
 				}.bind(this));
 			}.bind(this));
-			inputManager.addEventListener("Saving", function(event) {
+			inputManager.addEventListener("Saving", function(event) { //$NON-NLS-0$
 				if (self.settings.trimTrailingWhiteSpace) {
 					editor.getTextView().invokeAction("trimTrailingWhitespaces"); //$NON-NLS-0$
 				}
@@ -335,10 +396,11 @@ define([
 			});
 
 			var contextImpl = {};
-			[	"getCaretOffset", "setCaretOffset",
-				"getSelection", "setSelection",
-				"getText", "setText",
-				"getLineAtOffset"
+			[	
+				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$
+				"getSelection", "setSelection", //$NON-NLS-1$ //$NON-NLS-0$
+				"getText", "setText", //$NON-NLS-1$ //$NON-NLS-0$
+				"getLineAtOffset" //$NON-NLS-0$
 			].forEach(function(method) {
 				contextImpl[method] = editor[method].bind(editor);
 			});

@@ -19,6 +19,8 @@ define({
 	"Editor": "Editor",
 	"Filter bindings": "Filter bindings",
 	"Orion Editor": "Orion Editor",
+	"Orion Image Viewer": "Orion Image Viewer",
+	"Orion Markdown Viewer": "Orion Markdown Viewer",
 	"View on Site": "View on Site",
 	"View this file or folder on a web site hosted by Orion": "View this file or folder on a web site hosted by Orion",
 	"Show a list of all the keybindings on this page": "Show a list of all the keybindings on this page",

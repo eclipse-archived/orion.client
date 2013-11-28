@@ -20,6 +20,8 @@ define([
 	'orion/globalCommands',
 	'orion/folderView',
 	'orion/editorView',
+	'orion/editorDelegatedView',
+	'orion/markdownView',
 	'orion/commandRegistry',
 	'orion/contentTypes',
 	'orion/fileClient',
@@ -42,7 +44,7 @@ define([
 	'orion/projectClient'
 ], function(
 	messages, Sidebar, mInputManager, mGlobalCommands,
-	mFolderView, mEditorView,
+	mFolderView, mEditorView, mDelegatedView , mMarkdownView,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
 	EventTarget, URITemplate, i18nUtil, PageUtil, lib, mProjectClient
@@ -53,7 +55,7 @@ var exports = {};
 exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	var selection;
 	var commandRegistry;
-	var statusReportingService;
+	var statusService;
 	var problemService;
 	var blameService;
 	var outlineService;
@@ -68,7 +70,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	(function() {
 		selection = new mSelection.Selection(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		dialogService = new mDialogs.DialogService(serviceRegistry);
 		commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 		progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
@@ -87,7 +89,23 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		sidebarToolbar = lib.node("sidebarToolbar"), //$NON-NLS-0$
 		editorDomNode = lib.node("editor"); //$NON-NLS-0$
 
-	var editor, inputManager, sidebarNavInputManager, folderView, editorView, lastRoot;
+	//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
+	// Do not collapse sidebar, https://bugs.eclipse.org/bugs/show_bug.cgi?id=418558
+	var collapseSidebar = false; //PageUtil.hash() !== ""
+	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, null, null, collapseSidebar); //$NON-NLS-0$
+
+	var editor, editorDirtyListener, inputManager, sidebarNavInputManager, editorView, lastRoot;
+	function setEditor(newEditor) {
+		if (editor) {
+			editor.addEventListener("DirtyChanged", editorDirtyListener); //$NON-NLS-0$
+		}
+		editor = newEditor;
+		if (editor) {
+			editor.addEventListener("DirtyChanged", editorDirtyListener = function(evt) { //$NON-NLS-0$
+				mGlobalCommands.setDirtyIndicator(editor.isDirty());
+			});
+		}
+	}
 	function renderToolbars(metadata) {
 		var deferred;
 		var toolbar = lib.node("pageActions"); //$NON-NLS-0$
@@ -118,6 +136,16 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		}
 		return deferred;
 	}
+	
+	function statusReporter(message, type, isAccessible) {
+		if (type === "progress") { //$NON-NLS-0$
+			statusService.setProgressMessage(message);
+		} else if (type === "error") { //$NON-NLS-0$
+			statusService.setErrorMessage(message);
+		} else {
+			statusService.setMessage(message, null, isAccessible);
+		}
+	}
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
@@ -132,38 +160,73 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 			}
 		}
 	};
+	
+	var currentEditorView;
+	function getEditorView(input, metadata) {
+		var view = null;
+		if (metadata && input) {
+			var options = {
+				parent: editorDomNode,
+				input: input,
+				metadata: metadata,
+				serviceRegistry: serviceRegistry,
+				commandService: commandRegistry,
+				contentTypeRegistry: contentTypeRegistry,
+				selection: selection,
+				fileService: fileClient,
+				progressService: progressService
+			};
+			if (metadata.Directory) {
+				view = new mFolderView.FolderView(options);
+			} else {
+				if (input.contentProvider) {
+					var contentProviders = serviceRegistry.getServiceReferences("orion.edit.content"); //$NON-NLS-0$
+					for (var i=0; i<contentProviders.length; i++) {
+						var id = contentProviders[i].getProperty("id"); //$NON-NLS-0$
+						if (id === input.contentProvider) {
+							options.contentProvider = contentProviders[i];
+							view = new mDelegatedView.DelegatedEditorView(options);
+							break;
+						}
+					}
+				}
+				if (!view) {
+					if (input.contentProvider === "orion.edit.markdownContent") { //$NON-NLS-0$
+						view = new mMarkdownView.MarkdownEditorView(options);
+					} else {
+						view = editorView;
+					}
+				}
+			}
+		}
+		if (currentEditorView !== view) {
+			commandRegistry.closeParameterCollector();
+			if (currentEditorView) {
+				currentEditorView.destroy();
+			}
+			currentEditorView = view;
+			if (currentEditorView) {
+				currentEditorView.create();
+			}
+		}
+		return currentEditorView;
+	}
 
 	inputManager = new mInputManager.InputManager({
 		serviceRegistry: serviceRegistry,
 		fileClient: fileClient,
 		progressService: progressService,
+		statusReporter: statusReporter,
 		selection: selection,
 		contentTypeRegistry: contentTypeRegistry
 	});
-	editorView = new mEditorView.EditorView({
-		parent: editorDomNode,
-		renderToolbars: renderToolbars,
-		fileService: fileClient,
-		progressService: progressService,
-		serviceRegistry: serviceRegistry,
-		statusService: statusReportingService,
-		inputManager: inputManager,
-		preferences: preferences,
-		readonly: isReadOnly,
-		searcher: searcher,
-		commandRegistry: commandRegistry,
-		contentTypeRegistry: contentTypeRegistry
-	});
-	editor = editorView.editor;
-	inputManager.editor = editor;
-
 	inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-		if (folderView) {
-			commandRegistry.closeParameterCollector();
-			folderView.destroy();
-			folderView = null;
-		}
 		var metadata = evt.metadata;
+		
+		var view = getEditorView(evt.input, metadata);
+		setEditor(view ? view.editor : null);
+		evt.editor = editor;
+	
 		var deferred = renderToolbars(metadata);
 		var name = evt.name, target = metadata;
 		if (evt.input === null || evt.input === undefined) {
@@ -196,22 +259,22 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		} else {
 			processURL();
 		}
-
-		if (metadata && metadata.Directory) {
-			commandRegistry.closeParameterCollector();
-			folderView = new mFolderView.FolderView({
-				parent: editorDomNode,
-				input: evt.input,
-				metadata: metadata,
-				serviceRegistry: serviceRegistry,
-				commandService: commandRegistry,
-				contentTypeRegistry: contentTypeRegistry,
-				selection: selection,
-				fileService: fileClient,
-				progress: progressService
-			});
-			folderView.create();
-		}
+	});
+	
+	editorView = new mEditorView.EditorView({
+		parent: editorDomNode,
+		renderToolbars: renderToolbars,
+		fileService: fileClient,
+		progressService: progressService,
+		serviceRegistry: serviceRegistry,
+		statusService: statusService,
+		statusReporter: statusReporter,
+		inputManager: inputManager,
+		preferences: preferences,
+		readonly: isReadOnly,
+		searcher: searcher,
+		commandRegistry: commandRegistry,
+		contentTypeRegistry: contentTypeRegistry
 	});
 
 	// Sidebar
@@ -254,9 +317,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 			window.location = uriTemplate.expand({resource: evt.newValue.Location});
 		}
 	});
-	editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
-		mGlobalCommands.setDirtyIndicator(editor.isDirty());
-	});
 
 	selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 		inputManager.setInput(event.selection);
@@ -268,13 +328,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	inputManager.setInput(PageUtil.hash());
 	sidebarNavInputManager.processHash(PageUtil.hash());
 
-	//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
-	// Do not collapse sidebar, https://bugs.eclipse.org/bugs/show_bug.cgi?id=418558
-	var collapseSidebar = false; //PageUtil.hash() !== ""
-	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, editor, editor, collapseSidebar); //$NON-NLS-0$
-
 	window.onbeforeunload = function() {
-		if (editor.isDirty()) {
+		if (editor && editor.isDirty()) {
 			 return messages.unsavedChanges;
 		}
 	};

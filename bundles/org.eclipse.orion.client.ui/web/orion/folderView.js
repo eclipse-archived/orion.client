@@ -158,7 +158,7 @@ define([
 		this._input = options.input;
 		this._metadata = options.metadata;
 		this.fileClient = options.fileService;
-		this.progress = options.progress;
+		this.progress = options.progressService;
 		this.serviceRegistry = options.serviceRegistry;
 		this.commandService = options.commandService;
 		this.contentTypeRegistry = options.contentTypeRegistry;
