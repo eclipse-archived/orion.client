@@ -81,15 +81,17 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return clientDeferred;
 			},
 		
-			getTarget: function(targetName) {
-				var targetLocation = require.toUrl("cfapi/Target");
-				return this._xhrV1("GET", targetLocation + (targetName ? "/" + targetName : ""));
+			getTarget: function() {
+				return this._xhrV1("GET", require.toUrl("cfapi/Target"));
 			},
 			
-//			setTarget: function(url, token) {
-//				var self = this;
-//				return self._xhr("POST", require.toUrl("cf/target"), {URL: url, 'token': token}, 240000);
-//			}
+			setTarget: function(url) {
+				return this._xhrV1("POST", require.toUrl("cfapi/Target"), {Url: url});
+			},
+
+			getInfo: function() {
+				return this._xhrV1("GET", require.toUrl("cfapi/Info"));
+			}
 		};
 		
 		return CFService;

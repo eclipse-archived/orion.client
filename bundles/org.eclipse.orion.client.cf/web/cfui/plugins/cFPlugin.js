@@ -68,14 +68,14 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 			if (args.url) {
 				return cFService.setTarget(args.url).then(function(result) {
 					if (result) {
-						return "target: " + result.target;
+						return "target: " + result.Url;
 					} else {
 						return "Target not set";
 					}
 				});
 			} else {
 				return cFService.getTarget().then(function(result) {
-					return "target: " + result.target;
+					return "target: " + result.Url;
 				});
 			}
 		}
@@ -102,6 +102,31 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 				description: "Space",
 				defaultValue: null
 			}]
+		}
+	);
+	
+	/** Add cf info command **/
+	var infoImpl = {
+		callback: function(args) {
+			return cFService.getInfo().then(function(result) {
+				var value = result.description + 
+					"\nversion: " + result.version +
+					"\nsupport: " + result.support;
+				
+				if (result.user) {
+					value += "\n\nuser: " + result.user;
+				}
+				
+				return value;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		infoImpl, {
+			name: "cfo info",
+			description: "Display information on the current target, user, etc."
 		}
 	);
 
