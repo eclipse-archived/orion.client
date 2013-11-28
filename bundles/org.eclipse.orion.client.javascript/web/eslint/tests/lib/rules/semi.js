@@ -115,7 +115,7 @@ describe(RULE_ID, function() {
 		assert.equal(messages.length, 0);
 	});
 	it("should not flag 1-liner function call", function() {
-		var topic = "foo(function() { x = 1; });"
+		var topic = "foo(function() { x = 1; });";
 
 		var config = { rules: {} };
 		config.rules[RULE_ID] = 1;
@@ -125,6 +125,24 @@ describe(RULE_ID, function() {
 	});
 	it("should not flag 'for' with no BlockStatement", function() {
 		var topic = "for (;;)x;";
+
+		var config = { rules: {} };
+		config.rules[RULE_ID] = 1;
+
+		var messages = eslint.verify(topic, config);
+		assert.equal(messages.length, 0);
+	});
+	it("should not flag 'for in' with VariableDeclaration", function() {
+		var topic = "for (var x in ({}));";
+
+		var config = { rules: {} };
+		config.rules[RULE_ID] = 1;
+
+		var messages = eslint.verify(topic, config);
+		assert.equal(messages.length, 0);
+	});
+	it("should not flag 'for in'", function() {
+		var topic = "for (x in ({}));";
 
 		var config = { rules: {} };
 		config.rules[RULE_ID] = 1;
