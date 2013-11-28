@@ -202,9 +202,6 @@ define([
 		contentType: ["application/javascript"],
 		patterns: [
 			{
-//				match: " ",
-//				name: "WHITE_SPACE"
-//			}, {
 				match: "{",
 				name: "orion.enclosure.brace.start"
 			}, {
@@ -223,9 +220,6 @@ define([
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
-//				match: "\t",
-//				name: "WHITE_TAB"		
-//			}, {
 				match: "//.*",
 				name: "SINGLELINE_COMMENT"
 			}, {
@@ -277,9 +271,6 @@ define([
 		contentType: ["text/x-java-source"],
 		patterns: [
 			{
-//				match: " ",
-//				name: "WHITE_SPACE"
-//			}, {
 				match: "{",
 				name: "orion.enclosure.brace.start"
 			}, {
@@ -298,9 +289,6 @@ define([
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
-//				match: "\t",
-//				name: "WHITE_TAB"		
-//			}, {
 				match: "//.*",
 				name: "SINGLELINE_COMMENT"
 			}, {
@@ -346,9 +334,6 @@ define([
 		contentType: ["application/json"],
 		patterns: [
 			{
-//				match: " ",
-//				name: "WHITE_SPACE"
-//			}, {
 				match: "{",
 				name: "orion.enclosure.brace.start"
 			}, {
@@ -367,9 +352,6 @@ define([
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
-//				match: "\t",
-//				name: "WHITE_TAB"
-//			}, {
 				match: "'.*?('|$)",
 				name: "STRING"
 			}, {
@@ -398,9 +380,6 @@ define([
 		contentType: ["application/schema+json"],
 		patterns: [
 			{
-//				match: " ",
-//				name: "WHITE_SPACE"
-//			}, {
 				match: "{",
 				name: "orion.enclosure.brace.start"
 			}, {
@@ -419,9 +398,6 @@ define([
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
-//				match: "\t",
-//				name: "WHITE_TAB"		
-//			}, {
 				match: "'.*?('|$)",
 				name: "STRING"		
 			}, {
@@ -447,9 +423,6 @@ define([
 		contentType: ["text/css"],
 		patterns: [
 			{
-//				match: " ",
-//				name: "WHITE_SPACE"
-//			}, {
 				match: "{",
 				name: "orion.enclosure.brace.start"
 			}, {
@@ -468,9 +441,6 @@ define([
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
-//				match: "\t",
-//				name: "WHITE_TAB"		
-//			}, {
 				match: "'.*?'",
 				name: "STRING"		
 			}, {
@@ -490,7 +460,5 @@ define([
 		]
 	});
 
-	
-	
 	provider.connect();
 });
