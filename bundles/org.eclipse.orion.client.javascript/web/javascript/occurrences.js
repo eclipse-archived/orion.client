@@ -11,8 +11,216 @@
  *******************************************************************************/
 /*global define console escope*/
 define([
-"orion/Deferred"
-], function(Deferred) {
+'orion/Deferred',
+'orion/objects',
+'estraverse',
+'javascript/wordfinder'
+], function(Deferred, Objects, Estraverse, WordFinder) {
+	
+	/**
+	 * @name javascript.Visitor
+	 * @description The AST visitor passed into estraverse
+	 * @constrcutor
+	 * @private
+	 * @since 5.0
+	 */
+	function Visitor() {
+	}
+	
+	Objects.mixin(Visitor.prototype, /** @lends javascript.Visitor.prototype */ {
+		occurrences: [],
+		defscope: null,
+		defnode: null,
+		scopes: [],
+		GENERAL: 1,
+		FUNCTION: 2,
+		
+		/**
+		 * @name enter
+		 * @description Callback from estraverse when a node is starting to be visited
+		 * @function
+		 * @private
+		 * @memberof javascript.Visitor.prototype
+		 * @param {Object} node The AST node currently being visited
+		 * @returns The status if we should continue visiting
+		 */
+		enter: function(node) {
+			switch(node.type) {
+				case 'Program':
+					this.occurrences = [];
+					this.defscope = null;
+					this.defnode = null;
+					
+					this.scopes.push({range: node.range});
+					break;
+				case 'FunctionDeclaration':
+					this.checkId(node.id, this.FUNCTION, true);
+					//we want the parent scope for a declaration, otherwise we leave it right away
+					this.scopes.push({range: node.range});
+					if (node.params) {
+						for (var i = 0; i < node.params.length; i++) {
+							if(this.checkId(node.params[i], this.GENERAL, true)) {
+								return Estraverse.VisitorOption.Skip;
+							}
+						}
+					}
+					break;
+				case 'FunctionExpression':
+					if (node.params) {
+						this.scopes.push({range: node.range});
+						for (var j = 0; j < node.params.length; j++) {
+							if(this.checkId(node.params[j], this.GENERAL, true)) {
+								return Estraverse.VisitorOption.Skip;
+							}
+						}
+					}
+					break;
+				case 'AssignmentExpression':
+					var leftNode = node.left;
+					this.checkId(leftNode);
+					if (leftNode.type === 'MemberExpression') { //$NON-NLS-0$
+						this.checkId(leftNode.object);
+					}
+					this.checkId(node.right);
+					break;
+				case 'ArrayExpression': 
+					if (node.elements) {
+						for (var k = 0; k < node.elements.length; k++) {
+							this.checkId(node.elements[k]);
+						}
+					}
+					break;
+				case 'MemberExpression':
+					this.checkId(node.object);
+					if (node.computed) { //computed = true for [], false for . notation
+						this.checkId(node.property);
+					}
+					break;
+				case 'BinaryExpression':
+					this.checkId(node.left);
+					this.checkId(node.right);
+					break;
+				case 'UnaryExpression':
+					this.checkId(node.argument);
+					break;
+				case 'IfStatement':
+					this.checkId(node.test);
+					break;
+				case 'SwitchStatement':
+					this.checkId(node.discriminant);
+					break;
+				case 'UpdateExpression':
+					this.checkId(node.argument);
+					break;
+				case 'ConditionalExpression':
+					this.checkId(node.test);
+					this.checkId(node.consequent);
+					this.checkId(node.alternate);
+					break;
+				case 'CallExpression':
+					this.checkId(node.callee, this.FUNCTION, false);
+					if (node.arguments) {
+						for (var l = 0; l < node.arguments.length; l++) {
+							this.checkId(node.arguments[l]);
+						}
+					}
+					break;
+				case 'ReturnStatement':
+					this.checkId(node.argument);
+					break;
+				case 'ObjectExpression':
+					if(node.properties) {
+						var len = node.properties.length;
+						for (var m = 0; m < len; m++) {
+							this.checkId(node.properties[m].value);
+						}
+					}
+					break;
+				case 'VariableDeclarator': //$NON-NLS-0$
+					this.checkId(node.id, this.GENERAL, true);
+					break;
+				case 'NewExpression':
+					this.checkId(node.callee, this.FUNCTION, false);
+					break;
+			}
+		},
+		
+		/**
+		 * @name leave
+		 * @description Callback from estraverse when visitation of a node has completed
+		 * @function
+		 * @private
+		 * @memberof javascript.Visitor.prototype
+		 * @param {Object} node The AST node that ended its visitation
+		 */
+		leave: function(node) {
+			if(node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') {
+				//if we leave the defining scope
+				var scope = this.scopes.pop();
+				if(this.defscope) {
+					if(this.defscope.range[0] === scope.range[0] && this.defscope.range[1] === scope.range[1]) {
+						//we just popped out of the scope the word was defined in, we can quit
+						return Estraverse.VisitorOption.Break;
+					}
+				}
+			}
+		},
+		
+		/**
+		 * @name setContext
+		 * @description Sets the current context for the visitor to match for occurrences
+		 * @function
+		 * @private
+		 * @memberof javascript.Visitor.prototype
+		 * @param {Object} ctxt The context to match for occurrences
+		 */
+		setContext: function(ctxt) {
+			this.context = ctxt;
+		},
+		
+		/**
+		 * @name checkId
+		 * @description Checks if the given identifier matches the occurrence we are looking for
+		 * @function
+		 * @private
+		 * @memberof javascript.JavaScriptOccurrences.prototype
+		 * @param {Object} node The AST node we are inspecting
+		 * @param {Number} kind The kind of occurrence to consider
+		 * @param {Boolean} candefine If the given node can define the word we are looking for
+		 * @returns {Boolean} <code>true</code> if we should skip the next nodes, <code>false</code> otherwise
+		 */
+		checkId: function(node, kind, candefine) {
+			if (node && node.type === 'Identifier') { //$NON-NLS-0$
+				if (node.name === this.context.word) {
+					if(candefine) {
+						if(this.defscope && this.defnode) {
+							//trying to re-define, we can break since any matches past here would not be the original definition
+							return true;
+						}
+						var len = this.scopes.length;
+						var scope = len > 0 ? this.scopes[len-1] : null;
+						//does the scope enclose it?
+						if(scope && (scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
+							this.defscope = scope;
+						}
+						if(node.range[0] <= this.context.start) {
+							this.defnode = node.range;
+							this.defnode.kind = !kind ? this.GENERAL : kind;
+						}
+					}
+					if(this.defscope && this.defnode && this.defnode.kind === (!kind ? this.GENERAL : kind)) {
+						this.occurrences.push({
+							start: node.range[0],
+							end: node.range[1]
+						});
+					}
+				}
+			}
+			return false;
+		}
+	});
+	
+	Visitor.prototype.constructor = Visitor;
 	
 	/**
 	 * @name javascript.JavaScriptOccurrences
@@ -23,403 +231,28 @@ define([
 	function JavaScriptOccurrences() {
 	}
 	
-	JavaScriptOccurrences.prototype = /** @lends javascript.JavaScriptOccurrences.prototype*/ {
-		/**
-		 * @name isOccurrenceInSelScope
-		 * @description Computes if the occurrence scope is covered by the other scope
-		 * @function
-		 * @private
-		 * @memberof javascript.JavaScriptOccurrences.prototype
-		 * @param {Object} oScope The current occurrence scope
-		 * @param {Object} wScope The scope to check
-		 * @returns {Boolean} <code>true</code> if the given scope encloses the occurrence scope, <code>false</code> otherwise
-		 */
-		isOccurrenceInSelScope: function(oScope, wScope) {
-			if (oScope.global && wScope.global) {
-				return true;
-			}
-			if (!oScope.global && !wScope.global && (oScope.name === wScope.name) && (oScope.loc.start.line === wScope.loc.start.line) &&
-				(oScope.loc.start.column === wScope.loc.start.column)) {
-				return true;
-			}
-			return false;
-		},
+	Objects.mixin(JavaScriptOccurrences.prototype, /** @lends javascript.JavaScriptOccurrences.prototype*/ {
+		
+		visitor: null,
 		
 		/**
-		 * @name filterOccurrences
-		 * @description Filters the computed occurrences given the context
+		 * @name getVisitor
+		 * @description Delegate function to get the visitor
 		 * @function
 		 * @private
-		 * @memberof javascript.JavaScriptOccurrences.prototype
-		 * @param {Object} context The current context
-		 * @returns {Array|null} Returns the array of matches or <code>null</code>
+		 * @memberof javascript.JSOutliner.prototype
+		 * @param {Object} context The context (item) to find occurrrences for
+		 * @returns The instance of {Visitor} to use
 		 */
-		filterOccurrences: function(context) {
-			if (!context.mScope) {
-				return null;
-			}
-			var matches = [];
-			for (var i = 0; i < context.occurrences.length; i++) {
-				if (this.isOccurrenceInSelScope(context.occurrences[i].scope, context.mScope)) {
-					matches.push({
-						readAccess: context.occurrences[i].readAccess,
-						line: context.occurrences[i].node.loc.start.line,
-						start: context.occurrences[i].node.loc.start.column + 1,
-						end: context.occurrences[i].node.loc.end.column,
-						description: (context.occurrences[i].readAccess ? 'Occurrence of "' : 'Write occurrence of "') + context.word + '"'	//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
-					});
-				}
-			}
-			return matches;
-		},
-		
-		/**
-		 * @name updateScope
-		 * @description Update the given scope when leaving the given node. This function removes scope elements
-		 * when done processing <code>FunctionDeclaration</code> and <code>FunctionExpression</code> nodes.
-		 * @function
-		 * @private
-		 * @memberof javascript.JavaScriptOccurrences.prototype
-		 * @param {Object} node The AST node we are currently inspecting
-		 * @param {Object} scope The current scope we are in
-		 */
-		updateScope: function(node, scope) {
-			if (!node || !node.type || !scope) {
-				return;
-			}
-			switch (node.type) {
-				case 'FunctionDeclaration': //$NON-NLS-0$
-					scope.pop();
-					break;
-				case 'FunctionExpression':	//$NON-NLS-0$
-					scope.pop();
-					break;
-			}
-		},
-
-		/**
-		 * @name traverse
-		 * @description Walks the given node and context to find occurrences, returns if the traversal
-		 * should continue to child nodes
-		 * @function
-		 * @private
-		 * @memberof javascript.JavaScriptOccurrences.prototype
-		 * @param {Object} node the AST node we are currently visiting
-		 * @param {Object} context the current context
-		 * @param {Function} func A function to call on the node and context to process the node in the given context
-		 * @returns {Boolean} <code>true</code> if we should continue traversing the given node and its children, <code>false</code> otherwise
-		 */
-		traverse: function(node, context, func) {
-			if (func(node, context)) {
-				return false;	// stop traversal
-			}
-			for (var key in node) {
-				if (node.hasOwnProperty(key)) {
-					var child = node[key];
-					if (child && typeof child === 'object' && child !== null) { //$NON-NLS-0$
-						if (Array.isArray(child)) {
-							for (var i=0; i<child.length; i++) {
-								if (!this.traverse(child[i], context, func)) {
-									return false;
-								}
-							}
-						} else {
-							if (!this.traverse(child, context, func)) {
-								return false;
-							}
-						}
-					}
-				}
-			}
-			this.updateScope(node, context.scope);
-			return true;
-		},
-		
-		/**
-		 * @name checkIdentifier
-		 * @description Checks if the given identifier matches the occurrence we are looking for
-		 * @function
-		 * @private
-		 * @memberof javascript.JavaScriptOccurrences.prototype
-		 * @param {Object} node The AST node we are inspecting
-		 * @param {Object} context the current occurrence context
-		 * @returns {Boolean} <code>true</code> if we should continue traversing the given node and its children, <code>false</code> otherwise
-		 */
-		checkIdentifier: function(node, context) {
-			if (node && node.type === 'Identifier') { //$NON-NLS-0$
-				if (node.name === context.word) {
-					return true;
-				}
-			}
-			return false;
-		},
-
-		/**
-		 * @name findMatchingDeclaration
-		 * @description Finds the first scope in the array that has a declaration
-		 * @function
-		 * @private
-		 * @memberof javascript.JavaScriptOccurrences.prototype
-		 * @param {Array} scope the array of scopes
-		 * @returns {Object} Returns the scope with the declaration or <code>null</code>
-		 */
-		findMatchingDeclarationScope: function(scope) {
-			for (var i = scope.length - 1; i >= 0; i--) {
-				if (scope[i].decl) {
-					return scope[i];
-				}
-			}
-			return null;
-		},
-
-		/**
-		 * @name addOccurrence
-		 * @description Adds an occurrence for the given node and context to the collection
-		 * @function
-		 * @private
-		 * @memberof javascript.JavaScriptOccurrences.prototype
-		 * @param {Object} node The AST we found the occurrence in
-		 * @param {Object} context The occurrence context
-		 * @param {Boolean} readAccess if there is read access to the given occurrence
-		 */
-		addOccurrence: function(node, context, readAccess) {
-			if (node) {
-				if (readAccess === undefined) {
-					readAccess = true;
-				}
-	
-				var mScope = this.findMatchingDeclarationScope(context.scope);
-				if (!mScope) {
-					return;
-				}
-	
-				if ((node.range[0] <= context.start) && (context.end <= node.range[1])) {
-					if (mScope) {
-						context.mScope = mScope;
-					} else {
-						console.error("matching declaration scope for selected type not found " + context.word); //$NON-NLS-0$
-					}
-				}
-	
-				context.occurrences.push({
-					readAccess: readAccess,
-					node: node,
-					scope: mScope
-				});
-			}
-		},
-
-		/**
-		 * @name findOccurrence
-		 * @description Finds the occurrence from the given context in the given AST node
-		 * @function
-		 * @private
-		 * @memberof javascript.JavaScriptOccurrences.prototype
-		 * @param {Object} node The current AST node to check
-		 * @param {Object} context The occurrence context
-		 */
-		findOccurrence: function(node, context) {
-			if (!node || !node.type) {
-				return;
-			}
-			var varScope, curScope, i;
-			switch (node.type) {
-			case 'Program': //$NON-NLS-0$
-				curScope = {
-					global: true,
-					name: null,
-					decl: false
-				};
-				context.scope.push(curScope);
-				break;
-			case 'VariableDeclarator': //$NON-NLS-0$
-				if (this.checkIdentifier(node.id, context)) {
-					varScope = context.scope.pop();
-					varScope.decl = true;
-					context.scope.push(varScope);
-					this.addOccurrence(node.id, context, false);
-				}
-				if (node.init) {
-					if (this.checkIdentifier(node.init, context)) {
-						this.addOccurrence(node.init, context);
-						break;
-					}
-					if (node.init.type === 'ObjectExpression') { //$NON-NLS-0$
-						var properties = node.init.properties;
-						for (i = 0; i < properties.length; i++) {
-							//if (checkIdentifier (properties[i].key, context)) {
-							//	var varScope = scope.pop();
-							//	varScope.decl = true;
-							//	scope.push(varScope);
-							//	addOccurrence (scope, properties[i].key, context, occurrences, false);
-							//}
-							if (this.checkIdentifier(properties[i].value, context)) {
-								this.addOccurrence(properties[i].value, context);
-							}
-						}
-					}
-				}
-				break;
-			case 'ArrayExpression': //$NON-NLS-0$
-				if (node.elements) {
-					for (i = 0; i < node.elements.length; i++) {
-						if (this.checkIdentifier(node.elements[i], context)) {
-							this.addOccurrence(node.elements[i], context);
-						}
-					}
-				}
-				break;
-			case 'AssignmentExpression': //$NON-NLS-0$
-				var leftNode = node.left;
-				if (this.checkIdentifier(leftNode, context)) {
-					this.addOccurrence(leftNode, context, false);
-				}
-				if (leftNode.type === 'MemberExpression') { //$NON-NLS-0$
-					if (this.checkIdentifier(leftNode.object, context)) {
-						this.addOccurrence(leftNode.object, context, false);
-					}
-				}
-				var rightNode = node.right;
-				if (this.checkIdentifier(rightNode, context)) {
-					this.addOccurrence(rightNode, context);
-				}
-				break;
-			case 'MemberExpression': //$NON-NLS-0$
-				if (this.checkIdentifier(node.object, context)) {
-					this.addOccurrence(node.object, context);
-				}
-				if (node.computed) { //computed = true for [], false for . notation
-					if (this.checkIdentifier(node.property, context)) {
-						this.addOccurrence(node.property, context);
-					}
-				}
-				break;
-			case 'BinaryExpression': //$NON-NLS-0$
-				if (this.checkIdentifier(node.left, context)) {
-					this.addOccurrence(node.left, context);
-				}
-				if (this.checkIdentifier(node.right, context)) {
-					this.addOccurrence(node.right, context);
-				}
-				break;
-			case 'UnaryExpression': //$NON-NLS-0$
-				if (this.checkIdentifier(node.argument, context)) {
-					this.addOccurrence(node.argument, context, node.operator === 'delete' ? false : true); //$NON-NLS-0$
-				}
-				break;
-			case 'IfStatement': //$NON-NLS-0$
-				if (this.checkIdentifier(node.test, context)) {
-					this.addOccurrence(node.test, context);
-				}
-				break;
-			case 'SwitchStatement': //$NON-NLS-0$
-				if (this.checkIdentifier(node.discriminant, context)) {
-					this.addOccurrence(node.discriminant, context, false);
-				}
-				break;
-			case 'UpdateExpression': //$NON-NLS-0$
-				if (this.checkIdentifier(node.argument, context)) {
-					this.addOccurrence(node.argument, context, false);
-				}
-				break;
-			case 'ConditionalExpression': //$NON-NLS-0$
-				if (this.checkIdentifier(node.test, context)) {
-					this.addOccurrence(node.test, context);
-				}
-				if (this.checkIdentifier(node.consequent, context)) {
-					this.addOccurrence(node.consequent, context);
-				}
-				if (this.checkIdentifier(node.alternate, context)) {
-					this.addOccurrence(node.alternate, context);
-				}
-				break;
-			case 'FunctionDeclaration': //$NON-NLS-0$
-				curScope = {
-					global: false,
-					name: node.id.name,
-					loc: node.loc,
-					decl: false
-				};
-				context.scope.push(curScope);
-				if (node.params) {
-					for (i = 0; i < node.params.length; i++) {
-						if (this.checkIdentifier(node.params[i], context)) {
-							varScope = context.scope.pop();
-							varScope.decl = true;
-							context.scope.push(varScope);
-							this.addOccurrence(node.params[i], context, false);
-						}
-					}
-				}
-				break;
-			case 'FunctionExpression': //$NON-NLS-0$
-				curScope = {
-					global: false,
-					name: null,
-					loc: node.loc,
-					decl: false
-				};
-				context.scope.push(curScope);
-				if (!node.params) {
-					break;
-				}
-				for (i = 0; i < node.params.length; i++) {
-					if (this.checkIdentifier(node.params[i], context)) {
-						varScope = context.scope.pop();
-						varScope.decl = true;
-						context.scope.push(varScope);
-						this.addOccurrence(node.params[i], context, false);
-					}
-				}
-				break;
-			case 'CallExpression': //$NON-NLS-0$
-				if (!node.arguments) {
-					break;
-				}
-				for (var j = 0; j < node.arguments.length; j++) {
-					if (this.checkIdentifier(node.arguments[j], context)) {
-						this.addOccurrence(node.arguments[j], context);
-					}
-				}
-				break;
-			case 'ReturnStatement': //$NON-NLS-0$
-				if (this.checkIdentifier(node.argument, context)) {
-					this.addOccurrence(node.argument, context);
-				}
-			}
-		},
-
-		/**
-		 * @name getOccurrences
-		 * @description Computes the occurrences from the given AST and context
-		 * @function
-		 * @private
-		 * @memberof javascript.JavaScriptOccurrences.prototype
-		 * @param {Object} ast the AST to find occurrences in
-		 * @param {Object} context the current occurrence context
-		 * @returns {Array|null} Returns the found array of occurrences or <code>null</code>
-		 */
-		getOccurrences: function(ast, context) {
-			if (ast) {
-				this.traverse(ast, context, function(node, context) {
-					var found = false;
-					if (node.range && node.name && (node.range[0] <= context.start) && (context.end <= node.range[1])) {
-						context.word = node.name;
-						found = true;
-					}
-					return found;
-				});
-	
-				if (!context || !context.word) {
-					return null;
-				}
-				context.scope = [];
-				context.occurrences = [];
-				this.traverse(ast, context, this.findOccurrence.bind(this));
-				return this.filterOccurrences(context);
-			}
-			console.error("AST is null");	//$NON-NLS-0$
-			return null;
+		getVisitor: function(context) {
+			if(!this.visitor) {
+				this.visitor = new Visitor();
+				this.visitor.enter = this.visitor.enter.bind(this.visitor);
+				this.visitor.leave = this.visitor.leave.bind(this.visitor);
+				this.visitor.setContext = this.visitor.setContext.bind(this.visitor);
+			} 
+			this.visitor.setContext(context);
+			return this.visitor;			
 		},
 		
 		/**
@@ -429,23 +262,32 @@ define([
 		 * @public 
 		 * @memberof javascript.JavaScriptOccurrences.prototype
 		 * @param {Object} editorContext The current editor context
-		 * @param {Object} ctx The current selection context
+		 * @param {Object} ctxt The current selection context
 		 */
-		computeOccurrences: function(editorContext, ctx) {
-			var d = new Deferred();
+		computeOccurrences: function(editorContext, ctxt) {
 			var that = this;
-			editorContext.getAST().then(function(ast) {
-				var context = {
-					start: ctx.selection.start,
-					end: ctx.selection.end,
-					mScope: null
-				};
-				d.resolve(that.getOccurrences(ast, context));
+			var word;
+			return editorContext.getText().then(function(text) {
+				word = WordFinder.findWord(text, ctxt.selection.start);
+				if(word) {
+					return editorContext.getAST();
+				}
+			}).then(function(ast) {
+				if(ast) {
+					var context = {
+						start: ctxt.selection.start,
+						end: ctxt.selection.end,
+						word: word,
+						mScope: null
+					};
+					var visitor = that.getVisitor(context);
+					Estraverse.traverse(ast, visitor);
+					return visitor.occurrences;
+				}
+				return [];
 			});
-			return d;
 		}
-		
-	};
+	});
 	
 	JavaScriptOccurrences.prototype.contructor = JavaScriptOccurrences;
 	
