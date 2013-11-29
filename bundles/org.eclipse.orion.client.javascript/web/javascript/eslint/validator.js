@@ -18,10 +18,10 @@ define([
 	var config = {
 		// 0:off, 1:warning, 2:error
 		rules: {
-			"eqeqeq": 1,
-			"no-redeclare": 1,
-			"no-undef": 2,
-			"semi": 1
+			"eqeqeq": 1, //$NON-NLS-0$
+			"no-redeclare": 1, //$NON-NLS-0$
+			"no-undef": 2, //$NON-NLS-0$
+			"semi": 1 //$NON-NLS-0$
 		}
 	};
 
@@ -31,13 +31,15 @@ define([
 
 	function getSeverity(prob) {
 		switch (config.rules[prob.ruleId]) {
-			case 1: return "warning";
-			case 2: return "error";
+			case 1: return "warning"; //$NON-NLS-0$
+			case 2: return "error"; //$NON-NLS-0$
 		}
-		return "error";
+		return "error"; //$NON-NLS-0$
 	}
 	/**
-	 * @param {Object} p { ruleId, node, message, line, col }
+	 * @param {Object} p Either an ESLint problem: { ruleId, node, message, line, col }
+	 * or an Esprima parse error.
+	 * @returns {Object} Orion Problem object
 	 */
 	function toProblem(p) {
 		var start, end;
@@ -45,7 +47,7 @@ define([
 			// Problem produced by eslint
 			start = p.node.range[0];
 			end = p.node.range[1];
-		} else if (typeof p.index === "number") {
+		} else if (typeof p.index === "number") { //$NON-NLS-0$
 			// Esprima parse error
 			start = p.index;
 		}
@@ -85,17 +87,21 @@ define([
 				return {};
 			}
 			return editorContext.getAST().then(function(ast) {
-				var problems;
+				var problems = [], error;
 				try {
-					problems = eslint.verify(ast, config);
-					problems = problems.concat(extractParseErrors(ast));
-					problems = problems.map(toProblem);
+					problems = problems.concat(eslint.verify(ast, config));
 				} catch (e) {
-					problems = [{
+					error = e;
+				}
+				problems = problems.concat(extractParseErrors(ast));
+				problems = problems.map(toProblem);
+				if (error) {
+					// Warn about ESLint failure
+					problems.push({
 						start: 0,
-						description: "Error validating file: " + e.toString(),
-						severity: "error"
-					}];
+						description: "ESLint could not validate this file because an error occurred: " + error.toString(),
+						severity: "error" //$NON-NLS-0$
+					});
 				}
 				return { problems: problems };
 			});
@@ -105,7 +111,7 @@ define([
 			if (!properties) {
 				return;
 			}
-			if (typeof properties.active === "boolean") {
+			if (typeof properties.active === "boolean") { //$NON-NLS-0$
 				this.active = properties.active;
 			}
 		}
