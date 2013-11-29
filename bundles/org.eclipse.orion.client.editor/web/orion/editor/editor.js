@@ -879,7 +879,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 							var lineIndex = annotation.line - 1;
 							var lineStart = model.getLineStart(lineIndex);
 							start = lineStart + annotation.start - 1;
-							end = lineStart + annotation.end;
+							end = lineStart + annotation.end - 1;
 						} else {
 							// document offsets
 							start = annotation.start;

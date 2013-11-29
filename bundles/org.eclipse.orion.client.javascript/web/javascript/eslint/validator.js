@@ -92,8 +92,7 @@ define([
 					problems = problems.map(toProblem);
 				} catch (e) {
 					problems = [{
-						start: 1,
-						end: 2,
+						start: 0,
 						description: "Error validating file: " + e.toString(),
 						severity: "error"
 					}];
