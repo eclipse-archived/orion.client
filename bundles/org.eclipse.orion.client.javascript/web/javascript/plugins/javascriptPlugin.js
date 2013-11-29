@@ -91,7 +91,7 @@ define([
 	provider.registerServiceProvider("orion.edit.contentassist", new EsprimaAssist.EsprimaJavaScriptContentAssistProvider(), 
 		{
 			contentType: ["application/javascript"],
-			name: "Esprima based JavaScript content assist",
+			name: "JavaScript content assist",
 			id: "orion.edit.contentassist.esprima"
 	});	
 
