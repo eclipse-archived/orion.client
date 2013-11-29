@@ -18,14 +18,16 @@ define([
 	"eslint/rules/no-redeclare",
 	"eslint/rules/no-undef",
 	"eslint/rules/no-unused-vars",
+	"eslint/rules/no-use-before-define",
 	"eslint/rules/semi"
-], function(eqeqeq, no_redeclare, no_undef, no_unused_vars, semi) {
+], function(eqeqeq, no_redeclare, no_undef, no_unused_vars, no_use_before_define, semi) {
 	return function() {
 		return {
 			"eqeqeq": eqeqeq,
 			"no-redeclare": no_redeclare,
 			"no-undef": no_undef,
 			"no-unused-vars": no_unused_vars,
+			"no-use-before-define": no_use_before_define,
 			"semi": semi
 		};
 	};
