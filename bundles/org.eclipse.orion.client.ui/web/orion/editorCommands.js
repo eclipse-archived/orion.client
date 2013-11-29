@@ -144,7 +144,7 @@ define([
 				callback: function(data) {
 					var dropDown = settingsCommand.settingsDropDown;
 					if (!dropDown || dropDown.isDestroyed()) {
-						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domParent, data.domNode, { 
+						dropDown = settingsCommand.settingsDropDown = new DropDownMenu(data.domNode.parentNode, data.domNode, { 
 							noClick: true,
 							selectionClass: 'dropdownSelection', //$NON-NLS-0$
 							onShow: function() {
@@ -155,7 +155,8 @@ define([
 							}
 						});
 						dropDown.updateContent = self.localSettings.show.bind(self.localSettings);
-						dropDown.getContentNode().tabIndex = 0;
+						var menu = dropDown.getContentNode();
+						menu.tabIndex = menu.style.marginTop = 0;
 					}
 					dropDown.click();
 				}

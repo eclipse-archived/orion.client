@@ -14,6 +14,7 @@
 
 define({
 	"Editor": "Editor", //$NON-NLS-1$ //$NON-NLS-0$
+	"switchEditor": "Switch Editor", //$NON-NLS-1$ //$NON-NLS-0$
 	"Fetching": "Fetching: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"confirmUnsavedChanges": "There are unsaved changes.  Do you still want to navigate away?", //$NON-NLS-1$ //$NON-NLS-0$
 	"searchFiles": "Search Files", //$NON-NLS-1$ //$NON-NLS-0$

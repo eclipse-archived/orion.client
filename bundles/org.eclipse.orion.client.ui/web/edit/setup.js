@@ -36,6 +36,7 @@ define([
 	'orion/searchClient',
 	'orion/problems',
 	'orion/blameAnnotations',
+	'orion/Deferred',
 	'orion/EventTarget',
 	'orion/URITemplate',
 	'orion/i18nUtil',
@@ -47,7 +48,7 @@ define([
 	mFolderView, mEditorView, mDelegatedView , mMarkdownView,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
-	EventTarget, URITemplate, i18nUtil, PageUtil, lib, mProjectClient
+	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, lib, mProjectClient
 ) {
 
 var exports = {};
@@ -211,6 +212,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		}
 		return currentEditorView;
 	}
+	
+	var switchScope = "settingsActions"; //$NON-NLS-0$
+	commandRegistry.addCommandGroup(switchScope, "orion.edit.switch", 1000, messages.switchEditor, null, null, "core-sprite-outline", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	Deferred.when(contentTypeRegistry.getContentTypes(), function(contentTypes) {
+		mExtensionCommands._getOpenWithNavCommandExtensions(serviceRegistry, contentTypes).forEach(function(command) {
+			var id = command.properties.id;
+			commandRegistry.registerCommandContribution(switchScope, id, 1, "orion.edit.switch/" + id); //$NON-NLS-0$
+		});
+	});
 
 	inputManager = new mInputManager.InputManager({
 		serviceRegistry: serviceRegistry,
@@ -281,7 +291,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	function SidebarNavInputManager() {
 		EventTarget.attach(this);
 	}
-
 	sidebarNavInputManager = new SidebarNavInputManager();
 	var sidebar = new Sidebar({
 		commandRegistry: commandRegistry,
