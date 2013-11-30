@@ -1071,7 +1071,6 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 								if (startLine !== endLine) {
 									if (!annotation.expanded) {
 										annotation.expand();
-										annotationModel.modifyAnnotation(annotation);
 									}
 								} else {
 									annotationModel.removeAnnotation(annotation);

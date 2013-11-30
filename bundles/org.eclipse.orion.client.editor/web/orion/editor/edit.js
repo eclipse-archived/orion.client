@@ -219,7 +219,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		var textViewFactory = function() {
 			return new mTextView.TextView({
 				parent: parent,
-				model: new mProjModel.ProjectionTextModel(new mTextModel.TextModel("")),
+				model: new mProjModel.ProjectionTextModel(options.model ? options.model : new mTextModel.TextModel("")),
 				tabSize: options.tabSize ? options.tabSize : 4,
 				readonly: options.readonly,
 				fullSelection: options.fullSelection,

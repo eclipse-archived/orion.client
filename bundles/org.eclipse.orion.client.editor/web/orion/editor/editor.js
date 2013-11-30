@@ -476,7 +476,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (annotation.type === AT.ANNOTATION_FOLDING) {
 					if (annotation.expand) {
 						annotation.expand();
-						annotationModel.modifyAnnotation(annotation);
 					}
 				}
 			}
@@ -543,7 +542,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		
 		/** @private */
 		checkDirty : function() {
-			this.setDirty(!this._undoStack.isClean());
+			this.setDirty(this._undoStack && !this._undoStack.isClean());
 		},
 		
 		/** @private */
@@ -747,13 +746,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 					}
 				}
 				
-				/*
-				* TODO - UndoStack relies on this line to ensure that collapsed regions are expanded 
-				* when the undo operation happens to those regions. This line needs to be remove when the
-				* UndoStack is fixed.
-				*/
-				textView.annotationModel = this._annotationModel;
-					
 				var rulers = this._annotationFactory.createAnnotationRulers(this._annotationModel);
 				var ruler = this._annotationRuler = rulers.annotationRuler;
 				if (ruler) {
@@ -1032,7 +1024,9 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 							this._highlightCurrentLine(this._textView.getSelection());
 						}
 					}
-					this._undoStack.reset();
+					if (this._undoStack) {
+						this._undoStack.reset();
+					}
 					if (!noFocus) {
 						this._textView.focus();
 					}

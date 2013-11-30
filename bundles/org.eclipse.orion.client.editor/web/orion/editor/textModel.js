@@ -45,6 +45,11 @@ define("orion/editor/textModel", ['orion/editor/eventTarget', 'orion/regex', 'or
 
 	TextModel.prototype = /** @lends orion.editor.TextModel.prototype */ {
 		/**
+		 * Destroys this text model.
+		 */
+		destroy: function() {
+		},
+		/**
 		 * @class This object describes the options to use while finding occurrences of a string in a text model.
 		 * @name orion.editor.FindOptions
 		 *

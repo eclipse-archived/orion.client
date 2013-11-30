@@ -62,31 +62,15 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			return false;
 		},
 		_doUndoRedo: function(offset, text, previousText, view, select) {
-			var model = view.getModel();
-			/* 
-			* TODO UndoStack should be changing the text in the base model.
-			* This is code needs to change when modifications in the base
-			* model are supported properly by the projection model.
-			*/
-			if (model.mapOffset && view.annotationModel) {
-				var mapOffset = model.mapOffset(offset, true);
-				if (mapOffset < 0) {
-					var annotationModel = view.annotationModel;
-					var iter = annotationModel.getAnnotations(offset, offset + 1);
-					while (iter.hasNext()) {
-						var annotation = iter.next();
-						if (annotation.type === "orion.annotation.folding") { //$NON-NLS-0$
-							annotation.expand();
-							mapOffset = model.mapOffset(offset, true);
-							break;
-						}
-					}
-				}
-				if (mapOffset < 0) { return; }
-				offset = mapOffset;
+			var model = view.getModel(), baseModel = model;
+			if (model.getBaseModel) {
+				baseModel = model.getBaseModel();
 			}
-			model.setText(text, offset, offset + previousText.length);
+			baseModel.setText(text, offset, offset + previousText.length);
 			if (select) {
+				if (model !== baseModel) {
+					offset = model.mapOffset(offset, true);
+				}
 				view.setSelection(offset, offset + text.length);
 			}
 		}

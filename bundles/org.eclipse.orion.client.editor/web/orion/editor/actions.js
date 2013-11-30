@@ -289,7 +289,6 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 						editor.setCaretOffset(annotation.start);
 						annotation.collapse();
 					}
-					annotationModel.modifyAnnotation(annotation);
 				}
 			}
 			return true;
@@ -311,7 +310,6 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					} else {
 						annotation.collapse();
 					}
-					annotationModel.modifyAnnotation(annotation);
 				}
 			}
 			textView.setRedraw(true);
