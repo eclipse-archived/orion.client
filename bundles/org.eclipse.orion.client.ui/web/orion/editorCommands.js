@@ -205,67 +205,38 @@ define([
 						return !!editor.getTextView();
 					},
 					callback: function(data) {
-						editor.getTextView().invokeAction("searchFiles"); //$NON-NLS-0$
+						if (showingSearchDialog) {
+							return;
+						}
+						var selection = editor.getSelection();
+						var searchTerm = editor.getText(selection.start, selection.end);
+						var serviceRegistry = self.serviceRegistry;
+						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+						var dialog = new openResource.OpenResourceDialog({
+							searcher: self._searcher,
+							progress: progress,
+							searchRenderer: self._searcher.defaultRenderer,
+							nameSearch: false,
+							title: messages.searchFiles,
+							message: messages.searchTerm,
+							initialText: searchTerm,
+							onHide: function () {
+								showingSearchDialog = false;
+								editor.focus();
+							}
+						});
+						window.setTimeout(function () {
+							showingSearchDialog = true;
+							dialog.show(lib.node(self.toolbarId));
+						}, 0);
 					}
 				});
 				this.commandService.addCommand(searchCommand);
 				this.commandService.registerCommandContribution(this.pageNavId, "orion.searchFiles", 1, null, true, new mKeyBinding.KeyBinding("h", true)); //$NON-NLS-1$ //$NON-NLS-0$
-
-				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
-				editor.getTextView().setAction("searchFiles", function() { //$NON-NLS-0$
-					if (showingSearchDialog) {
-						return;
-					}
-					var selection = editor.getSelection();
-					var searchTerm = editor.getText(selection.start, selection.end);
-					var serviceRegistry = self.serviceRegistry;
-					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					var dialog = new openResource.OpenResourceDialog({
-						searcher: self._searcher,
-						progress: progress,
-						searchRenderer: self._searcher.defaultRenderer,
-						nameSearch: false,
-						title: messages.searchFiles,
-						message: messages.searchTerm,
-						initialText: searchTerm,
-						onHide: function () {
-							showingSearchDialog = false;
-							editor.focus();
-						}
-					});
-					window.setTimeout(function () {
-						showingSearchDialog = true;
-						dialog.show(lib.node(self.toolbarId));
-					}, 0);
-					return true;
-				}, searchCommand);
 			}
 		},
 		_generateSaveCommand: function(editor) {
 			var self = this;
-			
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
-			//If we are introducing other file system to provide save action, we need to define an onSave function in the input manager
-			//That way the file system knows how to implement their save mechanism
-			editor.getTextView().setAction("save", function () { //$NON-NLS-0$
-				if (self.inputManager.save) {
-					self.inputManager.save();
-				} else if (self.inputManager.onSave) {
-					var contents = editor.getText();
-					self.inputManager.onSave(self.inputManager.getInput(), contents,
-						function(result) {
-							editor.setInput(self.inputManager.getInput(), null, contents, true);
-							if(self.inputManager.afterSave){
-								self.inputManager.afterSave();
-							}
-						},
-						function(error) {
-							error.log = true;
-						}
-					);
-				}
-				return true;
-			}, {name: messages.Save});
 			
 			var saveCommand = new mCommands.Command({
 				name: messages.Save,
@@ -278,7 +249,7 @@ define([
 					return !self.editorSettings || !self.editorSettings().autoSave;
 				},
 				callback: function(data) {
-					editor.getTextView().invokeAction("save"); //$NON-NLS-0$
+					self.inputManager.save();
 				}
 			});
 			this.commandService.addCommand(saveCommand);
