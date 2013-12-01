@@ -160,7 +160,7 @@ define([
 		this.fileClient = options.fileService;
 		this.progress = options.progressService;
 		this.serviceRegistry = options.serviceRegistry;
-		this.commandService = options.commandService;
+		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.showProjectView = true;
 		this.showFolderNav = true;
@@ -180,13 +180,13 @@ define([
 					fileClient : this.fileClient,
 					progress : this.progress,
 					serviceRegistry: this.serviceRegistry,
-					commandService: this.commandService
+					commandRegistry: this.commandRegistry
 				});
 				this.projectView = new mProjectView.ProjectView({
 					fileClient : this.fileClient,
 					progress : this.progress,
 					serviceRegistry: this.serviceRegistry,
-					commandService: this.commandService
+					commandRegistry: this.commandRegistry
 				});
 			}
 			mGlobalCommands.getMainSplitter().splitter.addEventListener("toggle", this._splitterToggleListener = function(e) { //$NON-NLS-0$
@@ -246,7 +246,7 @@ define([
 					parentId: navNode,
 					serviceRegistry: this.serviceRegistry,
 					fileClient: this.fileClient,
-					commandRegistry: this.commandService,
+					commandRegistry: this.commandRegistry,
 					contentTypeRegistry: this.contentTypeRegistry
 				});
 				foldersSection.embedExplorer(this.folderNavExplorer);

@@ -21,7 +21,7 @@ define(['orion/projects/projectExplorer',
 			this.progress = options.progress;
 			this.fileClient = options.fileClient;
 			this.serviceRegistry = options.serviceRegistry;
-			this.commandService = options.commandService;
+			this.commandRegistry = options.commandRegistry;
 			this.projectClient = this.serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
 			this.modelEventDispatcher = FileCommands.getModelEventDispatcher();
 			var _self = this;
@@ -35,7 +35,7 @@ define(['orion/projects/projectExplorer',
 		ProjectView.prototype = {
 			display: function(workspace, parent){
 				parent.classList.add("orionProject"); //$NON-NLS-0$
-				this.projectExplorer = new mProjectExplorer.ProjectExplorer(parent, this.serviceRegistry, new Selection.Selection(this.serviceRegistry), this.commandService);
+				this.projectExplorer = new mProjectExplorer.ProjectExplorer(parent, this.serviceRegistry, new Selection.Selection(this.serviceRegistry), this.commandRegistry);
 				this.changedItem(workspace);
 			},
 			setCommandsVisible: function(visible){

@@ -180,7 +180,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 				input: input,
 				metadata: metadata,
 				serviceRegistry: serviceRegistry,
-				commandService: commandRegistry,
+				commandRegistry: commandRegistry,
 				contentTypeRegistry: contentTypeRegistry,
 				selection: selection,
 				fileService: fileClient,

@@ -240,7 +240,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		this._init(options);
 		this.projectEditor = projectEditor;
 		this.explorer = explorer;
-		this.commandService = options.commandService;
+		this.commandRegistry = options.commandRegistry;
 		this.actionScopeId = options.actionScopeId;
 	}
 	
@@ -289,17 +289,17 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		this.fileClient = options.fileClient;
 		this.progress = options.progress;
 		this.projectClient = this.serviceRegistry.getService("orion.project.client");
-		this.commandService = options.commandService;
+		this.commandRegistry = options.commandRegistry;
 		this._node = null;
 		this.dependencyActions = "dependencyActions";
 		this.createCommands();
 	}
 	ProjectEditor.prototype = {
 		createCommands: function(){
-//			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandService, this, this.fileClient, this.projectClient);
+//			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandRegistry, this, this.fileClient, this.projectClient);
 //			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
-			this.commandService.registerCommandContribution(this.dependencyActions, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.registerCommandContribution(this.dependencyActions, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
+			this.commandRegistry.registerCommandContribution(this.dependencyActions, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandRegistry.registerCommandContribution(this.dependencyActions, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
 		},
 		changedItem: function(){
 			this.fileClient.read(this.parentFolder.Location, true).then(function(metadata){
@@ -385,7 +385,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				checkbox: false,
 				cachePrefix: "ProjectInfoExplorer" //$NON-NLS-0$
 			}, this);
-			var projectInfoExplorer = new mExplorer.Explorer(this.serviceRegistry, null, projectInfoRenderer, this.commandService);
+			var projectInfoExplorer = new mExplorer.Explorer(this.serviceRegistry, null, projectInfoRenderer, this.commandRegistry);
 			projectInfoSection.embedExplorer(projectInfoExplorer, explorerParent);
 			projectInfoExplorer.createTree(explorerParent, new ProjectInfoModel(this.projectData), {noSelection: true});
 			return;
@@ -412,7 +412,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 						var additionalInfoRenderer = new AdditionalInfoRenderer({
 							checkbox: false
 						}, this);
-						var additionalInfoExplorer = new mExplorer.Explorer(this.serviceRegistry, null, additionalInfoRenderer, this.commandService);
+						var additionalInfoExplorer = new mExplorer.Explorer(this.serviceRegistry, null, additionalInfoRenderer, this.commandRegistry);
 						addotopnalInfoSection.embedExplorer(additionalInfoExplorer, explorerParent);
 						additionalInfoExplorer.createTree(explorerParent, new AdditionalInfoModel(cat),  {noSelection: true});
 					}
@@ -431,10 +431,10 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			dependenciesParent.id = "ependenciesNode";
 			var dependenciesRenderer = new DependenciesRenderer({
 				checkbox: false,
-				commandService: this.commandService,
+				commandRegistry: this.commandRegistry,
 				actionScopeId:  this.dependencyActions
 			}, this);
-			var dependenciesExplorer = new mExplorer.Explorer(this.serviceRegistry, null, dependenciesRenderer, this.commandService);
+			var dependenciesExplorer = new mExplorer.Explorer(this.serviceRegistry, null, dependenciesRenderer, this.commandRegistry);
 			dependenciesExplorer.actionScopeId = this.dependencyActions;
 			dependenciesSection.embedExplorer(dependenciesExplorer, dependenciesParent);
 			dependenciesExplorer.createTree(dependenciesParent, new DependenciesModel(this.projectData, this.projectClient),  {indent: '8px', noSelection: true});
