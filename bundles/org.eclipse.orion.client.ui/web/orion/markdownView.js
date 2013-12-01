@@ -12,14 +12,13 @@
 define([
 	'marked/marked',
 	'orion/editor/editor',
-	'orion/editor/textModel',
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/URITemplate',
 	'orion/PageUtil',
 	'orion/section', 
 	'orion/URL-shim'
-], function(marked, mEditor, mTextModel, objects, lib, URITemplate, PageUtil, mSection) {
+], function(marked, mEditor, objects, lib, URITemplate, PageUtil, mSection) {
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 
@@ -110,11 +109,9 @@ define([
 			root.appendChild(div);
 			var parent = lib.node(this._domNode);
 			parent.appendChild(root);
+			this._contentDiv.innerHTML = createMarked(this.getModel().getText());
 		},
 		setInput: function(title, message, contents, contentsSaved) {
-			if (!message && !contentsSaved) {
-				this._model = new mTextModel.TextModel(contents);
-			}
 			this._contentDiv.innerHTML = createMarked(contents);
 			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
 		},
@@ -129,11 +126,15 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.commandRegistry = options.commandRegistry;
 		this.progress = options.progressService;
+		this.model = options.model;
+		this.undoStack = options.undoStack;
 	}
 	MarkdownEditorView.prototype = {
 		create: function() {
 			this.editor = new MarkdownEditor({
-				domNode: this._parent
+				domNode: this._parent,
+				model: this.model,
+				undoStack: this.undoStack
 			});
 			this.editor.install();
 		},

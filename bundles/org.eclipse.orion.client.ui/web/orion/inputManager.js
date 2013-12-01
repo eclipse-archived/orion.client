@@ -191,9 +191,7 @@ define([
 						}.bind(this), errorHandler);
 					} else {
 						// Read contents if this is a text file
-						var contentType = this.contentTypeRegistry.getFileContentType(metadata);
-						var textPlain = this.contentTypeRegistry.getContentType("text/plain"); //$NON-NLS-0$
-						if (this.contentTypeRegistry.isExtensionOf(contentType, textPlain)) {
+						if (this._isText(metadata)) {
 							// Read contents
 							progress(fileClient.read(resource, false, true), messages.Reading, fileURI).then(function(contents) {
 								clearTimeout();
@@ -428,7 +426,7 @@ define([
 				if (fileURI === this._input) {
 					if (editorChanged) {
 						this.reportStatus("");
-						this._setInputContents(input, fileURI, editor.getText(), this._fileMetadata);
+						this._setInputContents(input, fileURI, null, this._fileMetadata, this._isText(this._fileMetadata));
 					} else {
 						this.processParameters(input);
 					}
@@ -456,6 +454,11 @@ define([
 		_getSaveDiffsEnabled: function() {
 			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
 		},
+		_isText: function(metadata) {
+			var contentType = this.contentTypeRegistry.getFileContentType(metadata);
+			var textPlain = this.contentTypeRegistry.getContentType("text/plain"); //$NON-NLS-0$
+			return this.contentTypeRegistry.isExtensionOf(contentType, textPlain);
+		},
 		_setNoInput: function(loadRoot) {
 			if (loadRoot) {
 				this.fileClient.loadWorkspace("").then(function(root) {
@@ -469,7 +472,7 @@ define([
 			this.setContentType(null);
 			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
 		},
-		_setInputContents: function(input, title, contents, metadata) {
+		_setInputContents: function(input, title, contents, metadata, noSetInput) {
 			var name, isDir = false;
 			if (metadata) {
 				this._fileMetadata = metadata;
@@ -516,7 +519,9 @@ define([
 				if (editor && editor.getModel && editor.getModel()) {
 					editor.getModel().addEventListener("Changing", this._changingListener = this.onChanging.bind(this)); //$NON-NLS-0$
 				}
-				editor.setInput(title, null, contents);
+				if (!noSetInput) {
+					editor.setInput(title, null, contents);
+				}
 				this._unsavedChanges = [];
 				this.processParameters(input);
 			}

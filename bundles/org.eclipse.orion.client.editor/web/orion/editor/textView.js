@@ -1398,15 +1398,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this.rulers = null;
 			
 			this._destroyView();
-			
-			if (this._model && this._model.destroy) {
-				this._model.destroy();
-			}
 
 			var e = {type: "Destroy"}; //$NON-NLS-0$
 			this.onDestroy(e);
 
 			this._parent = null;
+			if (this._model && this._model.destroy) {
+				this._model.destroy();
+			}
 			this._model = null;
 			this._theme = null;
 			this._selection = null;

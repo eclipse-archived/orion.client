@@ -40,9 +40,11 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 	function BaseEditor(options) {
 		options = options || {};
 		this._domNode = options.domNode;
+		this._model = options.model;
+		this._undoStack = options.undoStack;
 		this._statusReporter = options.statusReporter;
-		this._dirty = false;
 		this._title = null;
+		this.checkDirty();
 	}
 	BaseEditor.prototype = /** @lends orion.editor.BaseEditor.prototype */ {
 		/**
@@ -51,6 +53,11 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		destroy: function() {
 			this.uninstall();
 			this._statusReporter = this._domNode = null;
+		},
+		
+		/** @private */
+		checkDirty : function() {
+			this.setDirty(this._undoStack && !this._undoStack.isClean());
 		},
 		/**
 		 * Focus the the editor view. The default implementation does nothing.
@@ -88,6 +95,14 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._title;
 		},
 		/**
+		 * Returns the editor undo stack. 
+		 *
+		 * @returns {orion.editor.UndoStack} the editor undo stack.
+		 */
+		getUndoStack: function() {
+			return this._undoStack;
+		},
+		/**
 		 * Creates the DOM hierarchy of the editor and add it to the document.
 		 */
 		install: function() {
@@ -103,7 +118,8 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * Marks the current state of the editor as clean. Meaning there are no unsaved modifications.
 		 */
 		markClean: function() {
-			this.setDirty(false);	
+			this.getUndoStack().markClean();
+			this.setDirty(false);
 		},
 		/**
 		 * Called when the dirty state of the editor changes.
@@ -157,6 +173,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 */
 		setInput: function(title, message, contents, contentsSaved) {
 			this._title = title;
+			this.checkDirty();
 			this.onInputChanged({
 				type: "InputChanged", //$NON-NLS-0$
 				title: title,
@@ -306,14 +323,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			return this._textView;
 		},
 		/**
-		 * Returns the editor undo stack. 
-		 *
-		 * @returns {orion.editor.UndoStack} the editor undo stack.
-		 */
-		getUndoStack: function() {
-			return this._undoStack;
-		},
-		/**
 		 * Returns the editor's key modes.
 		 *
 		 * @returns {Array} the editor key modes.
@@ -352,9 +361,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			if (this._textView) {
 				this._textView.focus();
 			}
-		},
-		markClean: function() {
-			this.getUndoStack().markClean();
 		},
 		/**
 		 * Resizes the text view.
@@ -541,11 +547,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		},
 		
 		/** @private */
-		checkDirty : function() {
-			this.setDirty(this._undoStack && !this._undoStack.isClean());
-		},
-		
-		/** @private */
 		_getTooltipInfo: function(x, y) {
 			var textView = this._textView;			
 			var annotationModel = this.getAnnotationModel();
@@ -619,6 +620,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			this._textView = this._textViewFactory();
 			if (this._undoStackFactory) {
 				this._undoStack = this._undoStackFactory.createUndoStack(this);
+				this.checkDirty();
 			}
 			if (this._textDNDFactory) {
 				this._textDND = this._textDNDFactory.createTextDND(this, this._undoStack);
@@ -1031,7 +1033,6 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 						this._textView.focus();
 					}
 				}
-				this.checkDirty();
 			}
 			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
 		},

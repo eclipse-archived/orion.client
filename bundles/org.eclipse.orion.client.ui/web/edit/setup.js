@@ -18,6 +18,8 @@ define([
 	'orion/sidebar',
 	'orion/inputManager',
 	'orion/globalCommands',
+	'orion/editor/textModel',
+	'orion/editor/undoStack',
 	'orion/folderView',
 	'orion/editorView',
 	'orion/editorDelegatedView',
@@ -45,6 +47,7 @@ define([
 	'orion/projectClient'
 ], function(
 	messages, Sidebar, mInputManager, mGlobalCommands,
+	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mDelegatedView , mMarkdownView,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
@@ -97,6 +100,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 
 	var editor, editorDirtyListener, inputManager, sidebarNavInputManager, editorView, lastRoot;
 	function setEditor(newEditor) {
+		if (editor === newEditor) { return; }
 		if (editor) {
 			editor.addEventListener("DirtyChanged", editorDirtyListener); //$NON-NLS-0$
 		}
@@ -163,11 +167,16 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	};
 	
 	var currentEditorView;
+	// Shared text model and undo stack
+	var model = new mTextModel.TextModel();
+	var undoStack = new mUndoStack.UndoStack(model, 500);
 	function getEditorView(input, metadata) {
 		var view = null;
 		if (metadata && input) {
 			var options = {
 				parent: editorDomNode,
+				model: model,
+				undoStack: undoStack,
 				input: input,
 				metadata: metadata,
 				serviceRegistry: serviceRegistry,
@@ -214,7 +223,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	}
 	
 	var switchScope = "settingsActions"; //$NON-NLS-0$
-	commandRegistry.addCommandGroup(switchScope, "orion.edit.switch", 1000, messages.switchEditor, null, null, "core-sprite-outline", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	commandRegistry.addCommandGroup(switchScope, "orion.edit.switch", 1000, messages.switchEditor, null, null, "core-sprite-outline", null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	Deferred.when(contentTypeRegistry.getContentTypes(), function(contentTypes) {
 		mExtensionCommands._getOpenWithNavCommandExtensions(serviceRegistry, contentTypes).forEach(function(command) {
 			var id = command.properties.id;
@@ -260,6 +269,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 			searchService: searcher,
 			fileService: fileClient
 		});
+		if (editor) {
+			mGlobalCommands.setDirtyIndicator(editor.isDirty());
+		}
 
 		function processURL() {
 			commandRegistry.processURL(window.location.href);
@@ -273,6 +285,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 	
 	editorView = new mEditorView.EditorView({
 		parent: editorDomNode,
+		model: model,
+		undoStack: undoStack,
 		renderToolbars: renderToolbars,
 		fileService: fileClient,
 		progressService: progressService,

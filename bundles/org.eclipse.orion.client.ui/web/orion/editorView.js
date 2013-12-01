@@ -78,6 +78,8 @@ define([
 		this.readonly = options.readonly;
 		this.searcher = options.searcher;
 		this.statusReporter = options.statusReporter;
+		this.model = options.model;
+		this.undoStack = options.undoStack;
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
 		this.astManager = new ASTManager(this.serviceRegistry, this.inputManager);
 		mGlobalCommands.getKeyAssist().addProvider(this);
@@ -258,7 +260,7 @@ define([
 				var options = self.updateViewOptions(self.settings);
 				objects.mixin(options, {
 					parent: editorDomNode,
-					model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
+					model: new mProjectionTextModel.ProjectionTextModel(self.model || new mTextModel.TextModel()),
 					wrappable: true
 				});
 				var textView = new mTextView.TextView(options);
@@ -342,7 +344,11 @@ define([
 
 			var editor = this.editor = new mEditor.Editor({
 				textViewFactory: textViewFactory,
-				undoStackFactory: new mEditorFeatures.UndoFactory(),
+				undoStackFactory: self.undoStack ? {createUndoStack: function(editor) {
+					//TODO need a better way to attach the view to the undo stack
+					self.undoStack.view = editor.getTextView();
+					return self.undoStack;
+				}}: new mEditorFeatures.UndoFactory(),
 				textDNDFactory: new mEditorFeatures.TextDNDFactory(),
 				annotationFactory: new mEditorFeatures.AnnotationFactory(),
 				foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
