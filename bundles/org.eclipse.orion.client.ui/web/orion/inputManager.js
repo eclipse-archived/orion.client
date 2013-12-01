@@ -456,6 +456,8 @@ define([
 		},
 		_isText: function(metadata) {
 			var contentType = this.contentTypeRegistry.getFileContentType(metadata);
+			// Allow unkownn content types to be loaded as text files
+			if (!contentType) { return true; }
 			var textPlain = this.contentTypeRegistry.getContentType("text/plain"); //$NON-NLS-0$
 			return this.contentTypeRegistry.isExtensionOf(contentType, textPlain);
 		},
