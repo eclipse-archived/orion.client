@@ -11,16 +11,15 @@
  *******************************************************************************/
 /*global define console escope*/
 define([
-'orion/Deferred',
 'orion/objects',
 'estraverse',
 'javascript/wordfinder'
-], function(Deferred, Objects, Estraverse, WordFinder) {
+], function(Objects, Estraverse, WordFinder) {
 	
 	/**
 	 * @name javascript.Visitor
 	 * @description The AST visitor passed into estraverse
-	 * @constrcutor
+	 * @constructor
 	 * @private
 	 * @since 5.0
 	 */
@@ -224,7 +223,7 @@ define([
 	
 	/**
 	 * @name javascript.JavaScriptOccurrences
-	 * @description creates a new instance of the outliner
+	 * @description Creates a new instance of the occurrences support
 	 * @constructor
 	 * @public
 	 */
@@ -240,8 +239,8 @@ define([
 		 * @description Delegate function to get the visitor
 		 * @function
 		 * @private
-		 * @memberof javascript.JSOutliner.prototype
-		 * @param {Object} context The context (item) to find occurrrences for
+		 * @memberof javascript.JavaScriptOccurrences.prototype
+		 * @param {Object} context The context (item) to find occurrences for
 		 * @returns The instance of {Visitor} to use
 		 */
 		getVisitor: function(context) {

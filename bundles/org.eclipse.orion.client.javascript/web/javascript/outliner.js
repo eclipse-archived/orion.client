@@ -19,7 +19,7 @@ define([
 	/**
 	 * @name javascript.Visitor
 	 * @description The AST visitor passed into estraverse
-	 * @constrcutor
+	 * @constructor
 	 * @private
 	 * @since 5.0
 	 */
