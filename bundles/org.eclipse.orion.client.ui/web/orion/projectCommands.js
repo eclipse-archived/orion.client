@@ -634,6 +634,34 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			
 			commandService.addCommand(createBasicProjectCommand);
 			
+			var createSftpProjectCommand = new mCommands.Command({
+				name: "Create a project from a sftp site",
+				tooltip: "Create a project from a sftp site",
+				id: "orion.project.create.sftp",
+				parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		                                                               		new mCommandRegistry.CommandParameter('url', 'url', 'Url:')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				callback: function(data){
+						var name = data.parameters.valueFor("name");
+						if(!name){
+							return;
+						}
+						var url = data.parameters.valueFor("url");
+						if(!url){
+							return;
+						}
+						var item = forceSingleItem(data.items);
+						progress.progress(projectClient.createProject(item.Location, {Name: name, ContentLocation: url}), "Creating project " + name).then(function(project){
+							dispatchNewProject(item, project);
+						});
+					},
+				visibleWhen: function(item) {
+						return(!!item.Location);
+					}
+				}
+				);
+				
+				commandService.addCommand(createSftpProjectCommand);
+				
 			var createZipProjectCommand = new mCommands.Command({
 			name: "Create a project from a zipped folder",
 			tooltip: "Create project and fill it with data from local file",
