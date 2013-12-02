@@ -88,7 +88,7 @@ define([
 				}
 			}
 			if (alreadyFound) {
-				this._registry.getService("orion.page.message").setMessage(theName + " is already saved.", 2000); //$NON-NLS-1$ //$NON-NLS-0$
+				this._registry.getService("orion.page.message").setProgressResult({Message: i18nUtil.formatMessage(messages["${0} is already saved"], theName), Severity: "Warning"}); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
 				this._searches.push({ "name": theName, "query": theQuery}); //$NON-NLS-1$ //$NON-NLS-0$
 			}

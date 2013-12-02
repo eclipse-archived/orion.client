@@ -77,6 +77,7 @@ define({
 	"All types": "All types",
 	"File type": "File type",
 	"All ${0} files": "All ${0} files",
+	"${0} is already saved": "${0} is already saved",
 	"Type a search term": "Type a search term",
 	"Type a replace term": "Type a replace term",
 	"Case sensitive": "Case sensitive",
