@@ -125,8 +125,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		this.delimiterRegex = new RegExp(delimiters, "g"); //$NON-NLS-0$
 
 		this.whitespacesVisible = this.spacesVisible = this.tabsVisible = false;
-		this.spacePattern = {regex: new RegExp(" ", "g"), name: "WHITE_SPACE"};
-		this.tabPattern = {regex: new RegExp("\t", "g"), name: "WHITE_TAB"};
+		this.spacePattern = {regex: new RegExp(" ", "g"), name: "WHITE_SPACE", isWhitespace: true};
+		this.tabPattern = {regex: new RegExp("\t", "g"), name: "WHITE_TAB", isWhitespace: true};
 
 		this.detectHyperlinks = true;
 		this.highlightCaretLine = false;
@@ -286,11 +286,24 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 
 			var add = [];
-			styles.forEach(function(current) {
+			for (var i = 0; i < styles.length; i++) {
+				var current = styles[i];
 				if (current.style.styleClass === "token_task_tag") {
-					add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, current.start, current.end, baseModel.getText(current.start, current.end)));
+					/*
+					 * If the content belonging to the task tag has been broken up by whitespace tokens
+					 * then look at the subsequent tokens for consecutive whitespace+tag tokens, which
+					 * should also be grouped with the current task token.
+					 */
+					var end = current.end;
+					if (this._isRenderingWhitespace()) {
+						while (i + 1 < styles.length && (styles[i + 1].isWhitespace || styles[i + 1].style.styleClass === "token_task_tag")) {
+							end = styles[i + 1].end;
+							i += 1;
+						}
+					}
+					add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, current.start, end, baseModel.getText(current.start, end)));
 				}
-			});
+			};
 			annotationModel.replaceAnnotations(remove, add);
 		},
 		_getLineStyle: function(lineIndex) {
@@ -365,6 +378,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			return styles;
 		},
+		_isRenderingWhitespace: function() {
+			return this.whitespacesVisible && (this.tabsVisible || this.spacesVisible);
+		},
 		_mergeStyles: function(fullStyle, substyles, resultStyles) {
 			var i = fullStyle.start;
 			substyles.forEach(function(current) {
@@ -389,7 +405,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				return;
 			}
 
-			if (isForRendering && this.whitespacesVisible && (this.tabsVisible || this.spacesVisible)) {
+			if (isForRendering && this._isRenderingWhitespace()) {
 				var temp = linePatterns.slice(0);
 				if (this.tabsVisible) {
 					temp.push(this.tabPattern);
@@ -465,14 +481,20 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					/* apply the style */
 					var start = offset + current.result.index;
 					var end = start + current.result[0].length;
-					var tokenStyle = {start: start, end: end, style: styleMappings[current.pattern.name || "UNKOWN"]};
+					var tokenStyle = {start: start, end: end, style: styleMappings[current.pattern.name || "UNKOWN"], isWhitespace: current.pattern.isWhitespace};
 					if (isForRendering) {
+						var substyles = [];
 						if (current.pattern.patterns) {
-							var substyles = [];
 							this._parse(current.result[0], start, current.pattern.patterns, true, substyles, current);
 							this._mergeStyles(tokenStyle, substyles, styles);
 						} else {
-							styles.push(tokenStyle);
+							/* if whitespaces are being shown then invoke _parse on leaf values in order to mark whitespace within them */
+							if (this._isRenderingWhitespace() && !current.pattern.isWhitespace) {
+								this._parse(current.result[0], start, [], true, substyles, current);
+								this._mergeStyles(tokenStyle, substyles, styles);
+							} else {
+								styles.push(tokenStyle);
+							}
 						}
 					} else {
 						styles.push(tokenStyle);
