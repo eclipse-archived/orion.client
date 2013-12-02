@@ -6,7 +6,7 @@
             require, exports, module);
     }
     else if(typeof define === 'function' && define.amd) {
-        define(['esprima/esprima', 'estraverse', 'escope',
+        define(['esprima', 'estraverse', 'escope',
                 'eslint/conf/environments', './rules', './util', './rule-context', './events',
                 'require', 'exports', 'module'], factory);
     }

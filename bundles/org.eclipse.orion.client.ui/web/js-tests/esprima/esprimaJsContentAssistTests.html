@@ -7,13 +7,14 @@
 	<script>
 		/*global window require */
 		require({
-		  baseUrl: '../..',
-		  paths: {
-    "scriptedLogger": "javascript/esprima/scriptedLogger",
-			  text: 'requirejs/text',
-			  i18n: 'requirejs/i18n',
-			  domReady: 'requirejs/domReady'	    
-		  }
+			baseUrl: '../..',
+			paths: {
+				esprima: "esprima/esprima",
+				"scriptedLogger": "javascript/esprima/scriptedLogger",
+				text: 'requirejs/text',
+				i18n: 'requirejs/i18n',
+				domReady: 'requirejs/domReady'
+			}
 		});
 		window.onload = function() {
 			require(["orion/test","js-tests/esprima/esprimaJsContentAssistTests"], 

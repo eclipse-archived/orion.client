@@ -21,7 +21,7 @@ define([
 'javascript/esprima/proposalUtils', 
 'javascript/esprima/scriptedLogger', 
 'orion/Deferred', 
-'esprima/esprima'
+'esprima'
 ], function(mVisitor, typeEnv, typeInf, typeUtils, proposalUtils, scriptedLogger, Deferred, _) {
 
 	/**

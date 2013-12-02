@@ -19,7 +19,7 @@ define([
 	"javascript/esprima/esprimaJsContentAssist",
 	"javascript/esprima/esprimaVisitor",
 	"orion/assert",
-	"esprima/esprima",
+	"esprima",
 	"doctrine/doctrine",
 	"orion/Deferred"
 ], function(mEsprimaPlugin, mVisitor, assert, _, __, Deferred) {

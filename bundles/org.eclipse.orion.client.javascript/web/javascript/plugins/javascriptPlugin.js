@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define esprima*/
 define([
-	'esprima/esprima',
+	'esprima',
 	'javascript/eslint/validator',
 	'javascript/esprima/esprimaJsContentAssist',
 	'javascript/occurrences',
