@@ -103,8 +103,6 @@ OrionTestCase("xhr", "/js-tests/xhr/test.html");
 OrionTestCase("config", "/js-tests/config/test.html");
 OrionTestCase("metatype", "/js-tests/metatype/test.html");
 OrionTestCase("setting", "/js-tests/settings/test.html");
-OrionTestCase("esprima-content-assist", "/js-tests/esprima/esprimaJsContentAssistTests.html");
-OrionTestCase("index-file-parsing", "/js-tests/esprima/indexFileParsingTests.html");
 OrionTestCase("asyncStyler", "/js-tests/asyncStyler/test.html");
 //OrionTestCase("ast", "/js-tests/ast/astManagerTests.html");
 OrionTestCase("commands", "/js-tests/commands/test.html");

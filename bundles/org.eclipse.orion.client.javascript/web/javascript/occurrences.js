@@ -11,11 +11,10 @@
  *******************************************************************************/
 /*global define console escope*/
 define([
-'orion/Deferred',
 'orion/objects',
 'estraverse',
 'javascript/wordfinder'
-], function(Deferred, Objects, Estraverse, WordFinder) {
+], function(Objects, Estraverse, WordFinder) {
 	
 	/**
 	 * @name javascript.Visitor

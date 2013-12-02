@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global console:true define*/
 define([
-	"eslint/events",
-	"orion/assert"
+	'eslint/events',
+	'orion/assert'
 ], function(events, assert) {
 	var EventEmitter = events.EventEmitter;
 
