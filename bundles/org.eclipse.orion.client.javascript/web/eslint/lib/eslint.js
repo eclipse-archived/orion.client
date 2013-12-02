@@ -223,13 +223,13 @@ module.exports = (function() {
 
     /**
      * Verifies the text against the rules specified by the second argument.
-     * @param {string} text The JavaScript text to verify.
+     * @param {string|ASTNode} textOrAST The JavaScript text to verify, or an already-parsed AST.
      * @param {Object} config An object whose keys specify the rules to use.
      * @returns {Object[]} The results as an array of messages or null if no messages.
      */
     api.verify = function(text, config, saveState) {
 
-        var ast,
+        var ast = (text && typeof text === "object") ? text : null,
             parseError = false;
 
         if (!saveState) {
@@ -243,7 +243,7 @@ module.exports = (function() {
          * problem that ESLint identified just like any other.
          */
         try {
-            ast = esprima.parse(text, { loc: true, range: true, raw: true, tokens: true, comment: true });
+            ast = ast || esprima.parse(text, { loc: true, range: true, raw: true, tokens: true, comment: true });
         } catch (ex) {
 
             parseError = true;
@@ -297,7 +297,7 @@ module.exports = (function() {
 
             // save config so rules can access as necessary
             currentConfig = config;
-            currentText = text;
+            currentText = text && typeof text === "string" ? text : null;
             controller = new estraverse.Controller();
 
             // gather data that may be needed by the rules
@@ -368,7 +368,7 @@ module.exports = (function() {
      * @returns {string} The text representing the AST node.
      */
     api.getSource = function(node, beforeCount, afterCount) {
-        if (node) {
+        if (node && typeof currentText === "string") {
             return currentText ? currentText.slice(node.range[0] - (beforeCount || 0),
                 node.range[1] + (afterCount || 0)) : null;
         } else {
