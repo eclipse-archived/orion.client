@@ -164,6 +164,14 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			this.onDirtyChanged({type: "DirtyChanged"}); //$NON-NLS-0$
 		},
 		/**
+		 * @private
+		 */
+		_setModelText: function(contents) {
+			if (this._model) {
+				this._model.setText(contents);
+			}
+		},
+		/**
 		 * Sets the editor's contents.
 		 *
 		 * @param {String} title the editor title
@@ -173,6 +181,18 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 */
 		setInput: function(title, message, contents, contentsSaved) {
 			this._title = title;
+			if (!contentsSaved) {
+				if (message) {
+					this.reportStatus(message, "error"); //$NON-NLS-0$
+				} else {
+					if (contents !== null && contents !== undefined) {
+						this._setModelText(contents);
+					}
+				}
+				if (this._undoStack) {
+					this._undoStack.reset();
+				}
+			}
 			this.checkDirty();
 			this.onInputChanged({
 				type: "InputChanged", //$NON-NLS-0$
@@ -1006,6 +1026,17 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		},
 		
 		/**
+		 * @private
+		 */
+		_setModelText: function(contents) {
+			if (this._textView) {
+				this._textView.setText(contents);
+				this._textView.getModel().setLineDelimiter("auto"); //$NON-NLS-0$
+				this._highlightCurrentLine(this._textView.getSelection());
+			}
+		},
+		
+		/**
 		 * Sets the editor's contents.
 		 *
 		 * @param {String} title
@@ -1015,26 +1046,10 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @param {Boolean} noFocus
 		 */
 		setInput: function(title, message, contents, contentsSaved, noFocus) {
-			if (this._textView) {
-				if (!contentsSaved) {
-					if (message) {
-						this._textView.setText(message);
-					} else {
-						if (contents !== null && contents !== undefined) {
-							this._textView.setText(contents);
-							this._textView.getModel().setLineDelimiter("auto"); //$NON-NLS-0$
-							this._highlightCurrentLine(this._textView.getSelection());
-						}
-					}
-					if (this._undoStack) {
-						this._undoStack.reset();
-					}
-					if (!noFocus) {
-						this._textView.focus();
-					}
-				}
-			}
 			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
+			if (this._textView && !contentsSaved && !noFocus) {
+				this._textView.focus();
+			}
 		},
 		/**
 		 * Reveals a line in the editor, and optionally selects a portion of the line.

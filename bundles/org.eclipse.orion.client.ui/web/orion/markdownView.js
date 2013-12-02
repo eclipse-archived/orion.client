@@ -112,11 +112,10 @@ define([
 			this._contentDiv.innerHTML = createMarked(this.getModel().getText());
 		},
 		setInput: function(title, message, contents, contentsSaved) {
-			if (!message && !contentsSaved) {
-				this._model.setText(contents);
-			}
-			this._contentDiv.innerHTML = createMarked(contents);
 			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
+			if (!message && !contentsSaved) {
+				this._contentDiv.innerHTML = createMarked(contents);
+			}
 		},
 		uninstall: function() {
 			lib.empty(this._domNode);
