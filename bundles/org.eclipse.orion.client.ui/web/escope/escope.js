@@ -61,7 +61,7 @@
         currentScope,
         globalScope,
         scopes,
-        directive;
+        options;
 
     Syntax = estraverse.Syntax;
 
@@ -103,7 +103,38 @@
         }
     }
 
-    function Reference(ident, scope, flag, writeExpr) {
+    function defaultOptions() {
+        return {
+            optimistic: false,
+            directive: false
+        };
+    }
+
+    function updateDeeply(target, override) {
+        var key, val;
+
+        function isHashObject(target) {
+            return typeof target === 'object' && target instanceof Object && !(target instanceof RegExp);
+        }
+
+        for (key in override) {
+            if (override.hasOwnProperty(key)) {
+                val = override[key];
+                if (isHashObject(val)) {
+                    if (isHashObject(target[key])) {
+                        updateDeeply(target[key], val);
+                    } else {
+                        target[key] = updateDeeply({}, val);
+                    }
+                } else {
+                    target[key] = val;
+                }
+            }
+        }
+        return target;
+    }
+
+    function Reference(ident, scope, flag, writeExpr, maybeImplicitGlobal) {
         this.identifier = ident;
         this.from = scope;
         this.tainted = false;
@@ -112,6 +143,7 @@
         if (this.isWrite()) {
             this.writeExpr = writeExpr;
         }
+        this.__maybeImplicitGlobal = maybeImplicitGlobal;
     }
 
     Reference.READ = 0x1;
@@ -176,7 +208,7 @@
             return false;
         }
 
-        if (directive) {
+        if (options.directive) {
             for (i = 0, iz = body.body.length; i < iz; ++i) {
                 stmt = body.body[i];
                 if (stmt.type !== 'DirectiveStatement') {
@@ -254,19 +286,29 @@
         this.upper = currentScope;
         this.isStrict = isStrictScope(this, block);
 
+        this.childScopes = [];
+        if (currentScope) {
+            currentScope.childScopes.push(this);
+        }
+
+
         // RAII
         currentScope = this;
         if (this.type === 'global') {
             globalScope = this;
+            globalScope.implicit = {
+                set: new Map(),
+                variables: []
+            };
         }
         scopes.push(this);
     }
 
     Scope.prototype.__close = function __close() {
-        var i, iz, ref, current;
+        var i, iz, ref, current, node, implicit;
 
         // Because if this is global environment, upper is null
-        if (!this.dynamic) {
+        if (!this.dynamic || options.optimistic) {
             // static resolve
             for (i = 0, iz = this.left.length; i < iz; ++i) {
                 ref = this.left[i];
@@ -275,7 +317,7 @@
                 }
             }
         } else {
-            // this is global / with / function with eval environment
+            // this is "global" / "with" / "function with eval" environment
             if (this.type === 'with') {
                 for (i = 0, iz = this.left.length; i < iz; ++i) {
                     ref = this.left[i];
@@ -294,6 +336,27 @@
                 }
             }
         }
+
+        if (this.type === 'global') {
+            implicit = [];
+            for (i = 0, iz = this.left.length; i < iz; ++i) {
+                ref = this.left[i];
+                if (ref.__maybeImplicitGlobal && !this.set.has(ref.identifier.name)) {
+                    implicit.push(ref.__maybeImplicitGlobal);
+                }
+            }
+
+            // create an implicit global variable from assignment expression
+            for (i = 0, iz = implicit.length; i < iz; ++i) {
+                node = implicit[i];
+                this.__defineImplicit(node.left, {
+                    type: Variable.ImplicitGlobalVariable,
+                    name: node.left,
+                    node: node
+                });
+            }
+        }
+
         this.left = null;
         currentScope = this.upper;
     };
@@ -316,9 +379,28 @@
     };
 
     Scope.prototype.__delegateToUpperScope = function __delegateToUpperScope(ref) {
-        assert(this.upper, 'upper should be here');
-        this.upper.left.push(ref);
+        if (this.upper) {
+            this.upper.left.push(ref);
+        }
         this.through.push(ref);
+    };
+
+    Scope.prototype.__defineImplicit = function __defineImplicit(node, info) {
+        var name, variable;
+        if (node && node.type === Syntax.Identifier) {
+            name = node.name;
+            if (!this.implicit.set.has(name)) {
+                variable = new Variable(name, this);
+                variable.identifiers.push(node);
+                variable.defs.push(info);
+                this.implicit.set.set(name, variable);
+                this.implicit.variables.push(variable);
+            } else {
+                variable = this.implicit.set.get(name);
+                variable.identifiers.push(node);
+                variable.defs.push(info);
+            }
+        }
     };
 
     Scope.prototype.__define = function __define(node, info) {
@@ -339,11 +421,11 @@
         }
     };
 
-    Scope.prototype.__referencing = function __referencing(node, assign, writeExpr) {
+    Scope.prototype.__referencing = function __referencing(node, assign, writeExpr, maybeImplicitGlobal) {
         var ref;
         // because Array element may be null
         if (node && node.type === Syntax.Identifier) {
-            ref = new Reference(node, this, assign || Reference.READ, writeExpr);
+            ref = new Reference(node, this, assign || Reference.READ, writeExpr, maybeImplicitGlobal);
             this.references.push(ref);
             this.left.push(ref);
         }
@@ -520,13 +602,13 @@
         return node.type === Syntax.Program || node.type === Syntax.FunctionExpression || node.type === Syntax.FunctionDeclaration;
     };
 
-    function analyze(tree, options) {
+    function analyze(tree, providedOptions) {
         var resultScopes;
 
+        options = updateDeeply(defaultOptions(), providedOptions);
         resultScopes = scopes = [];
-        currentScope = null,
+        currentScope = null;
         globalScope = null;
-        directive = options && options.directive;
 
         // attach scope and collect / resolve names
         estraverse.traverse(tree, {
@@ -538,17 +620,8 @@
 
                 switch (node.type) {
                 case Syntax.AssignmentExpression:
-                    //check for implicit global variable declaration
-                    if (!currentScope.isStrict && node.left.name && !currentScope.isUsedName(node.left.name) && node.operator === '=') {
-                        //create an implicit global variable from assignment expression
-                        globalScope.__define(node.left, {
-                            type: Variable.ImplicitGlobalVariable,
-                            name: node.left,
-                            node: node
-                        });
-                    }
                     if (node.operator === '=') {
-                        currentScope.__referencing(node.left, Reference.WRITE, node.right);
+                        currentScope.__referencing(node.left, Reference.WRITE, node.right, (!currentScope.isStrict && node.left.name != null) && node);
                     } else {
                         currentScope.__referencing(node.left, Reference.RW, node.right);
                     }
@@ -579,7 +652,7 @@
                     }
 
                     // check this is direct call to eval
-                    if (node.callee.type === Syntax.Identifier && node.callee.name === 'eval') {
+                    if (!options.ignoreEval && node.callee.type === Syntax.Identifier && node.callee.name === 'eval') {
                         currentScope.variableScope.__detectEval();
                     }
                     break;
@@ -626,9 +699,9 @@
 
                 case Syntax.ForInStatement:
                     if (node.left.type === Syntax.VariableDeclaration) {
-                        currentScope.__referencing(node.left.declarations[0].id, Reference.WRITE, null);
+                        currentScope.__referencing(node.left.declarations[0].id, Reference.WRITE, null, false);
                     } else {
-                        currentScope.__referencing(node.left, Reference.WRITE, null);
+                        currentScope.__referencing(node.left, Reference.WRITE, null, (!currentScope.isStrict && node.left.name != null) && node);
                     }
                     currentScope.__referencing(node.right);
                     break;
@@ -753,7 +826,7 @@
                         });
                         if (decl.init) {
                             // initializer is found
-                            currentScope.__referencing(decl.id, Reference.WRITE, decl.init);
+                            currentScope.__referencing(decl.id, Reference.WRITE, decl.init, false);
                             currentScope.__referencing(decl.init);
                         }
                     }
@@ -779,14 +852,16 @@
                 }
             }
         });
+
         assert(currentScope === null);
         globalScope = null;
         scopes = null;
+        options = null;
 
         return new ScopeManager(resultScopes);
     }
 
-    exports.version = '0.0.14';
+    exports.version = '1.0.0';
     exports.Reference = Reference;
     exports.Variable = Variable;
     exports.Scope = Scope;
