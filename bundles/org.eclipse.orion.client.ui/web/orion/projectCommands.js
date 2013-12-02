@@ -635,8 +635,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			commandService.addCommand(createBasicProjectCommand);
 			
 			var createSftpProjectCommand = new mCommands.Command({
-				name: "Create a project from a sftp site",
-				tooltip: "Create a project from a sftp site",
+				name: "Create a project from an SFTP site",
+				tooltip: "Create a project from an SFTP site",
 				id: "orion.project.create.sftp",
 				parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		                                                               		new mCommandRegistry.CommandParameter('url', 'url', 'Url:')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
