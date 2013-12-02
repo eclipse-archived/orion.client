@@ -81,16 +81,81 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return clientDeferred;
 			},
 		
-			getTarget: function() {
-				return this._xhrV1("GET", require.toUrl("cfapi/Target"));
+			// Target CF v2 operations
+			
+			setTarget: function(url, org, space) {
+				return this._xhrV1("POST", require.toUrl("cfapi/target"), {
+					'Url': url,
+					'Org': org, 
+					'Space': space
+				});
 			},
 			
-			setTarget: function(url) {
-				return this._xhrV1("POST", require.toUrl("cfapi/Target"), {Url: url});
+			login: function(url, username, password, org, space) {
+				return this._xhrV1("POST", require.toUrl("cfapi/target"), {
+					'Url': url, 
+					'Username': username, 
+					'Password': password, 
+					'Org': org, 
+					'Space': space
+				});
+			},
+			
+			logout: function() {
+				return this._xhrV1("DELETE", require.toUrl("cfapi/target"));
+			},
+			
+			getTarget: function() {
+				return this._xhrV1("GET", require.toUrl("cfapi/target"));
 			},
 
 			getInfo: function() {
-				return this._xhrV1("GET", require.toUrl("cfapi/Info"));
+				return this._xhrV1("GET", require.toUrl("cfapi/info"));
+			},
+			
+			// Apps CF v2 operations
+			
+			pushApp: function(appName, dir) {
+				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
+					App: appName, 
+					Location: dir
+				});
+			},
+			
+			getApp: function(appName, dir) {
+				var url = require.toUrl("cfapi/apps/");
+				if (appName) {
+					url += "/" + appName;
+				}
+				if (dir) {
+					url += "?location=" + dir;
+				}
+				return this._xhrV1("GET", url);
+			},
+			
+			getApps: function() {
+				return this._xhrV1("GET", require.toUrl("cfapi/apps"));
+			},
+			
+			startApp: function(appName, dir) {
+				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
+					App: appName, 
+					Location: dir
+				});
+			},
+			
+			stopApp: function(appName, dir) {
+				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
+					App: appName, 
+					Location: dir
+				});
+			},
+			
+			deleteApp: function(appName, dir) {
+				return this._xhrV1("DELETE", require.toUrl("cfapi/apps"), {
+					App: appName, 
+					Location: dir
+				});
 			}
 		};
 		

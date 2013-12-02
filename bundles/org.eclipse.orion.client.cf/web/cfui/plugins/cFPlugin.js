@@ -52,6 +52,28 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	});
 	
 	/////////////////////////////////////////////////////
+	// add CF project deploy action
+	/////////////////////////////////////////////////////
+	
+	provider.registerServiceProvider("orion.project.deploy", {
+		deploy: function(item, projectMetadata, props) {
+			var i = resource.lastIndexOf('/');
+			var location = resource.substring(0, i);
+			return {
+				uriTemplate: "{+OrionHome}/cloudoe/applications/appRun.html#" +
+					",location=" + encodeURIComponent(location),
+				width: "350px",
+				height: "175px"
+			};
+		}
+	}, {
+		name: "Deploy to Cloud Foundry",
+		id: "org.eclipse.orion.client.cf.deploy",
+		tooltip: "Deploy application in cloud.",
+		validationProperties: [{source: "NoShow" }]
+	});
+	
+	/////////////////////////////////////////////////////
 	// add CF shell commands
 	/////////////////////////////////////////////////////
 
@@ -127,6 +149,239 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 		infoImpl, {
 			name: "cfo info",
 			description: "Display information on the current target, user, etc."
+		}
+	);
+	
+	/** Add cf login command **/
+	var loginImpl = {
+		callback: function(args) {
+			return cFService.login(args.username, args.password,
+				args.org, args.space).then(function(result) {
+					return "Logged in";
+				}
+			);
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		loginImpl, {
+			name: "cfo login",
+			description: "Log user in",
+			parameters: [{
+				name: "username",
+				type: "string",
+				description: "Username",
+				defaultValue: null
+			}, {
+				name: "password",
+				type: "string",
+				description: "Password",
+				defaultValue: null
+			}, {
+				name: "org",
+				type: "string",
+				description: "Organization",
+				defaultValue: null
+			}, {
+				name: "space",
+				type: "string",
+				description: "Space",
+				defaultValue: null
+			}]
+		}
+	);
+
+	/** Add cf logout command **/
+	var logoutImpl = {
+		callback: function(args) {
+			return cFService.logout().then(function(result) {
+				return "Logged out";
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		logoutImpl, {
+			name: "cfo logout",
+			description: "Log user out"
+		}
+	);
+	
+	/** Add cf apps command **/
+	var appsImpl = {
+		callback: function(args) {
+			return cFService.getApps().then(function(result) {
+				if (!result || result.length === 0) {
+					return "No applications.";
+				}
+				var strResult = "\nname\tstatus\tusage\truntime\turl\n";
+				result.forEach(function(app) {
+					strResult += describeApp(app);
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		appsImpl, {
+			name: "cfo apps",
+			description: "List all apps in the target space"
+		}
+	);
+
+	/** Add cf app command **/
+	var appImpl = {
+		callback: function(args, context) {
+			return cFService.getApplication(args.application, context.cwd).then(function(result) {
+				if (!result || result.length === 0) {
+					return "No applications found";
+				}
+				var strResult = "";
+				result.forEach(function(app) {
+					strResult += describeAppVerbose(app);
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		appImpl, {
+			name: "cfo app",
+			description: "Display health and status for app",
+			parameters: [{
+				name: "app",
+				type: "string",
+				description: "Application to show information for",
+				defaultValue: null
+			}]
+		}
+	);
+	
+	/** Add cf push command **/
+	var pushImpl = {
+		callback: function(args, context) {
+			return cFService.pushApplication(args.app, context.cwd).then(function(result) {
+				if (!result || !result.applications) {
+					return "No applications found";
+				}
+				var strResult = "";
+				result.applications.forEach(function(item) {
+					var uri = item.uris[0];
+					strResult += "\nApplication " + item.name + " ready at: [" + uri + "](http://" + uri + ")";
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		pushImpl, {
+			name: "cfo push",
+			description: "Push an application, syncing changes if it exists",
+			parameters: [{
+				name: "app",
+				type: "string",
+				description: "Application to push",
+				defaultValue: null
+			}]
+		}
+	);
+	
+	/** Add cf start command **/
+	var startImpl = {
+		callback: function(args, context) {
+			return cFService.startApplication(args.app, context.cwd).then(function(result) {
+				if (!result || !result.applications) {
+					return "No applications found";
+				}
+				var strResult = "";
+				result.applications.forEach(function(item) {
+					var uri = item.uris[0];
+					strResult += "\nApplication " + item.name + " ready at: [" + uri + "](http://" + uri + ")";
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		startImpl, {
+			name: "cfo start",
+			description: "Start an application",
+			parameters: [{
+				name: "app",
+				type: "string",
+				description: "Application to start",
+				defaultValue: null
+			}]
+		}
+	);
+
+	/** Add cf stop command **/
+	var stopImpl = {
+		callback: function(args, context) {
+			return cFService.stopApplication(args.app, context.cwd).then(function(result) {
+				if (!result || !result.applications) {
+					return "No applications found";
+				}
+				var strResult = "";
+				result.applications.forEach(function(item) {
+					strResult += "Application " + item.name + " stopped";
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		stopImpl, {
+			name: "cfo stop",
+			description: "Stop an application",
+			parameters: [{
+				name: "app",
+				type: "string",
+				description: "Application to stop",
+				defaultValue: null
+			}]
+		}
+	);
+	
+	/** Add cf delete command **/
+	var deleteImpl = {
+		callback: function(args, context) {
+			return cFService.deleteApplication(args.app, context.cwd).then(function(result) {
+				if (!result || !result.applications) {
+					return "No applications found";
+				}
+				var strResult = "";
+				result.applications.forEach(function(item) {
+					strResult += "\nDeleted " + item.name;
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		deleteImpl, {
+			name: "cfo delete",
+			description: "Delete an application",
+			parameters: [{
+				name: "app",
+				type: "string",
+				description: "Application to delete",
+				defaultValue: null
+			}]
 		}
 	);
 
