@@ -1,18 +1,3 @@
-/*global define module require exports */
-(function(root, factory) {
-    if(typeof exports === 'object') {
-        module.exports = factory(require, exports, module);
-    }
-    else if(typeof define === 'function' && define.amd) {
-        define(['require', 'exports', 'module'], factory);
-    }
-    else {
-        var req = function(id) {return root[id];},
-            exp = root,
-            mod = {exports: exp};
-        root.ruleContext = factory(req, exp, mod);
-    }
-}(this, function(require, exports, module) {
 /**
  * @fileoverview RuleContext utility for rules
  * @author Nicholas C. Zakas
@@ -25,7 +10,8 @@
 var PASSTHROUGHS = [
         "getSource",
         "getTokens",
-        "isNodeJS",
+        "getComments",
+        "getAllComments",
         "getAncestors",
         "getScope"
     ];
@@ -79,41 +65,7 @@ function RuleContext(ruleId, eslint, options) {
 }
 
 RuleContext.prototype = {
-
-    constructor: RuleContext,
-
-    /**
-     * Determines if an AST node matches a specific pattern. The pattern is simply
-     * a space-separated list of node types indicating the ancestry of the given node.
-     * @param {ASTNode} node The node to test.
-     * @param {string} pattern The pattern to test against.
-     * @returns {boolean} True if the pattern matches, false if not.
-     */
-    match: function(node, pattern) {
-
-        var patternParts = pattern.split(/\s/g),
-            current = node;
-
-        /*
-         * The pattern is evaluated from right to left, so popping off the last item
-         * and comparing it to the current node repeats until there aren't any more
-         * parts to test. If the node doesn't match at any point, the operation
-         * is aborted.
-         */
-        while (patternParts && current) {
-            if (current.type === patternParts.pop()) {
-                current = current.parent;
-            } else {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
+    constructor: RuleContext
 };
 
 module.exports = RuleContext;
-
-    return module.exports;
-}));
