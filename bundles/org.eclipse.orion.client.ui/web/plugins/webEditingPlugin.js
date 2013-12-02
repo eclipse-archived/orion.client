@@ -221,7 +221,13 @@ define([
 				name: "orion.enclosure.parenthesis.end"
 			}, {
 				match: "//.*",
-				name: "SINGLELINE_COMMENT"
+				name: "SINGLELINE_COMMENT",
+				patterns: [
+					{
+						match: "TODO.*",
+						name: "TASK_TAG"
+					}
+				]
 			}, {
 				match: "'.*?('|$)",
 				name: "STRING"
@@ -246,7 +252,7 @@ define([
 						match: "\\<\\S*\\>?",
 						name: "DOC_COMMENT"
 					}, {
-						match: "TODO",
+						match: "TODO(\\s(\\*[^/]|[^*])*|$)",
 						name: "TASK_TAG"
 					}
 				]
@@ -290,7 +296,13 @@ define([
 				name: "orion.enclosure.parenthesis.end"
 			}, {
 				match: "//.*",
-				name: "SINGLELINE_COMMENT"
+				name: "SINGLELINE_COMMENT",
+				patterns: [
+					{
+						match: "TODO.*",
+						name: "TASK_TAG"
+					}
+				]
 			}, {
 				match: "\"(\\\\.|[^\"])*(\"|$)",
 				name: "STRING"
@@ -312,7 +324,7 @@ define([
 						match: "\\<\\S*\\>?",
 						name: "DOC_COMMENT"
 					}, {
-						match: "TODO",
+						match: "TODO(\\s(\\*[^/]|[^*])*|$)",
 						name: "TASK_TAG"
 					}
 				]

@@ -71,20 +71,26 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 	function TextStyler (view, annotationModel, patterns, delimiters, keywords) {
 		function createPattern(element) {
+			var subPatterns = [];
+			if (element.patterns) {
+				element.patterns.forEach(function(current) {
+					var subPattern = createPattern(current).line;
+					if (subPattern) {
+						subPatterns.push(subPattern);
+					}
+				});
+			}
 			var result = {};
 			if (element.match && !element.begin && !element.end && element.name) {
 				result.line = {regex: new RegExp(element.match, "g"), name: element.name};
+				if (subPatterns.length) {
+					result.line.patterns = subPatterns;
+				}
 			} else if (!element.match && element.begin && element.end && element.name) {
 				result.line = {regex: new RegExp(element.begin + ".*(" + element.end + "|$)", "g"), name: element.name};
 				result.document = {regexBegin: new RegExp(element.begin, "g"), regexEnd: new RegExp(element.end, "g"), name: element.name};
-				if (element.patterns) {
-					result.document.patterns = [];
-					element.patterns.forEach(function(current) {
-						var subPattern = createPattern(current).line;
-						if (subPattern) {
-							result.document.patterns.push(subPattern);
-						}
-					});
+				if (subPatterns.length) {
+					result.document.patterns = subPatterns;
 				}
 			}
 			return result;
@@ -259,38 +265,32 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			return new (mAnnotations.AnnotationType.getType(mAnnotations.AnnotationType.ANNOTATION_FOLDING))(start, end, viewModel);
 		},
-		_computeTasks: function(type, commentStart, commentEnd) {
+		_computeTasks: function(offset, styles) {
 			if (!this.detectTasks) { return; }
 			var annotationModel = this.annotationModel;
 			if (!annotationModel) { return; }
+
 			var view = this.view;
 			var viewModel = view.getModel(), baseModel = viewModel;
 			if (viewModel.getBaseModel) { baseModel = viewModel.getBaseModel(); }
-			var annotations = annotationModel.getAnnotations(commentStart, commentEnd);
-			var remove = [];
 			var annotationType = mAnnotations.AnnotationType.ANNOTATION_TASK;
+			var lineIndex = baseModel.getLineAtOffset(offset);
+			var lineEnd = baseModel.getLineEnd(lineIndex);
+			var annotations = annotationModel.getAnnotations(offset, lineEnd);
+			var remove = [];
 			while (annotations.hasNext()) {
 				var annotation = annotations.next();
 				if (annotation.type === annotationType) {
 					remove.push(annotation);
 				}
 			}
+
 			var add = [];
-			
-			// TODO
-//			var scanner = this._commentScanner;
-//			scanner.setText(baseModel.getText(commentStart, commentEnd));
-//			var token;
-//			while ((token = scanner.nextToken())) {
-//				var tokenStart = scanner.getStartOffset() + commentStart;
-//				if (token === TASK_TAG) {
-//					var end = baseModel.getLineEnd(baseModel.getLineAtOffset(tokenStart));
-//					if (type !== SINGLELINE_COMMENT) {
-//						end = Math.min(end, commentEnd - this.commentEnd.length);
-//					}
-//					add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, tokenStart, end, baseModel.getText(tokenStart, end)));
-//				}
-//			}
+			styles.forEach(function(current) {
+				if (current.style.styleClass === "token_task_tag") {
+					add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, current.start, current.end, baseModel.getText(current.start, current.end)));
+				}
+			});
 			annotationModel.replaceAnnotations(remove, add);
 		},
 		_getLineStyle: function(lineIndex) {
@@ -320,7 +320,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				var commentStart = comments[i].start;
 				var commentEnd = comments[i].end;
 				if (offset < commentStart) {
-					this._parse(text.substring(offset - start, commentStart - start), offset, this.linePatterns, styles);
+					this._parse(text.substring(offset - start, commentStart - start), offset, this.linePatterns, true, styles);
 				}
 				var type = comments[i].type;
 				var style = styleMappings[type];
@@ -354,7 +354,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				offset = commentEnd;
 			}
 			if (offset < end) {
-				this._parse(text.substring(offset - start, end - start), offset, this.linePatterns, styles);
+				this._parse(text.substring(offset - start, end - start), offset, this.linePatterns, true, styles);
 			}
 			if (model.getBaseModel) {
 				for (var j = 0; j < styles.length; j++) {
@@ -365,29 +365,31 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			return styles;
 		},
-		_updateMatch: function(match, text, matches, minimumIndex) {
-			var regEx = match.pattern.regex ? match.pattern.regex : match.pattern.regexBegin;
-			if (minimumIndex) {
-				regEx.lastIndex = minimumIndex;
-			}
-			var result = regEx.exec(text);
-			if (result) {
-				match.result = result;
-				for (var i = 0; i < matches.length; i++) {
-					if (result.index <= matches[i].result.index) {
-						matches.splice(i, 0, match);
-						return;
-					}
+		_mergeStyles: function(fullStyle, substyles, resultStyles) {
+			var i = fullStyle.start;
+			substyles.forEach(function(current) {
+				if (i < current.start) {
+					resultStyles.push({start: i, end: current.start, style: fullStyle.style});
 				}
-				matches.push(match);
+				resultStyles.push(current);
+				i = current.end;
+			});
+			if (i < fullStyle.end) {
+				resultStyles.push({start: i, end: fullStyle.end, style: fullStyle.style});
 			}
 		},
-		_parse: function(text, offset, linePatterns, styles) {
+		_parse: function(text, offset, linePatterns, isForRendering, styles, parentMatch) {
+			/*
+			 * If _parse() is being invoked for some purpose other than the creation of styles to be
+			 * rendered then passing false for isForRendering can be used as a performance optimization,
+			 * which skips the consideration of whitespace patterns and pattern subpatterns.
+			 */
+
 			if (!linePatterns) {
 				return;
 			}
 
-			if (this.whitespacesVisible && (this.tabsVisible || this.spacesVisible)) {
+			if (isForRendering && this.whitespacesVisible && (this.tabsVisible || this.spacesVisible)) {
 				var temp = linePatterns.slice(0);
 				if (this.tabsVisible) {
 					temp.push(this.tabPattern);
@@ -423,10 +425,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 				return 0;
 			});
-
-			if (!matches.length) {
-				return;
-			}
 
 			var index = 0;
 			while (matches.length > 0) {
@@ -467,19 +465,50 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					/* apply the style */
 					var start = offset + current.result.index;
 					var end = start + current.result[0].length;
-					styles.push({start: start, end: end, style: styleMappings[current.pattern.name || "UNKOWN"]});
+					var tokenStyle = {start: start, end: end, style: styleMappings[current.pattern.name || "UNKOWN"]};
+					if (isForRendering) {
+						if (current.pattern.patterns) {
+							var substyles = [];
+							this._parse(current.result[0], start, current.pattern.patterns, true, substyles, current);
+							this._mergeStyles(tokenStyle, substyles, styles);
+						} else {
+							styles.push(tokenStyle);
+						}
+					} else {
+						styles.push(tokenStyle);
+					}
 					index = current.result.index + current.result[0].length;
 				}
 				this._updateMatch(current, text, matches);
+			}
+			if (isForRendering && !parentMatch) {
+				this._computeTasks(offset, styles);
 			}
 		},
 		_parseComment: function(text, offset, subPatterns, styles, s, type) {
 			// TODO support multi-line sub-patterns
 			var lines = text.split('\n');
 			lines.forEach(function(current) {
-				this._parse(current, offset, subPatterns, styles);
+				this._parse(current, offset, subPatterns, true, styles);
 				offset += current.length;
 			}.bind(this));
+		},
+		_updateMatch: function(match, text, matches, minimumIndex) {
+			var regEx = match.pattern.regex ? match.pattern.regex : match.pattern.regexBegin;
+			if (minimumIndex) {
+				regEx.lastIndex = minimumIndex;
+			}
+			var result = regEx.exec(text);
+			if (result) {
+				match.result = result;
+				for (var i = 0; i < matches.length; i++) {
+					if (result.index <= matches[i].result.index) {
+						matches.splice(i, 0, match);
+						return;
+					}
+				}
+				matches.push(match);
+			}
 		},
 		_detectHyperlinks: function(text, offset, styles, s) {
 			var href = null, index, linkStyle;
@@ -570,7 +599,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				var lineIndex = model.getLineAtOffset(offset + current.result.index);
 				var lineText = model.getLine(lineIndex);
 				var styles = [];
-				this._parse(lineText, model.getLineStart(lineIndex), this.linePatterns, styles);
+				this._parse(lineText, model.getLineStart(lineIndex), this.linePatterns, false, styles);
 				var targetOffset = offset + current.result.index;
 				for (var i = 0; i < styles.length; i++) {
 					if (styles[i].start === targetOffset) {
@@ -694,7 +723,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				var commentStart = comments[i].start;
 				var commentEnd = comments[i].end;
 				if (offset < commentStart) {
-					this._parse(text.substring(offset - start, commentStart - start), offset, this.linePatterns, styles);
+					this._parse(text.substring(offset - start, commentStart - start), offset, this.linePatterns, false, styles);
 					styles.forEach(function(current) {
 						if (current.style.styleClass.indexOf(bracket.name) === 0) {
 							result.push(current.start + 1);
@@ -706,7 +735,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				offset = commentEnd;
 			}
 			if (offset < end) {
-				this._parse(text.substring(offset - start, end - start), offset, this.linePatterns, styles);
+				this._parse(text.substring(offset - start, end - start), offset, this.linePatterns, false, styles);
 				styles.forEach(function(current) {
 					if (current.style.styleClass.indexOf(bracket.name) === 0) {
 						result.push(current.start + 1);
