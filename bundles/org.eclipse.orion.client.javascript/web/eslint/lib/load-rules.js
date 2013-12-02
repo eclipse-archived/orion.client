@@ -1,3 +1,18 @@
+
+(function(root, factory) {
+    if(typeof exports === 'object') {
+        module.exports = factory(require, exports, module);
+    }
+    else if(typeof define === 'function' && define.amd) {
+        define(['require', 'exports', 'module'], factory);
+    }
+    else {
+        var req = function(id) {return root[id];},
+            exp = root,
+            mod = {exports: exp};
+        root.loadRules = factory(req, exp, mod);
+    }
+}(this, function(require, exports, module) {
 var fs = require("fs"),
     path = require("path");
 
@@ -15,3 +30,6 @@ module.exports = function(rulesDir) {
     });
     return rules;
 };
+
+    return module.exports;
+}));

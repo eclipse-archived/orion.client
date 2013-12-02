@@ -1,3 +1,18 @@
+
+(function(root, factory) {
+    if(typeof exports === 'object') {
+        module.exports = factory(require('./load-rules'), require, exports, module);
+    }
+    else if(typeof define === 'function' && define.amd) {
+        define(['./load-rules-async', 'require', 'exports', 'module'], factory);
+    }
+    else {
+        var req = function(id) {return root[id];},
+            exp = root,
+            mod = {exports: exp};
+        root.rules = factory(root.loadRules, req, exp, mod);
+    }
+}(this, function(loadRules, require, exports, module) {
 /**
  * @fileoverview Main CLI object.
  * @author Nicholas C. Zakas
@@ -8,7 +23,7 @@
 //------------------------------------------------------------------------------
 
 var rules = Object.create(null),
-    loadRules = require("./load-rules");
+    _ = null;
 
 //------------------------------------------------------------------------------
 // Public Interface
@@ -37,3 +52,6 @@ exports.define = define;
 
 // loads built-in rules
 load();
+
+    return exports;
+}));
