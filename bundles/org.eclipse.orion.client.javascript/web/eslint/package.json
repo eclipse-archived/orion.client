@@ -24,19 +24,28 @@
     "type": "git",
     "url": "https://github.com/nzakas/eslint"
   },
-  "dependencies": {
-    "optimist": "*",
-    "estraverse": "~1.3.0",
+"dependencies": {
+    "estraverse": "~1.2.0",
     "esprima": "*",
     "escope": "1.0.0"
-  },
-  "devDependencies": {
+},
+"devDependencies": {
+    "mocha": "~1.14.0",
+    "grunt": "~0.4.1",
+    "grunt-umd": "~1.3.0",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-string-replace": "~0.2.7"
+},
+"removedDependencies": {
+    "optimist": "*"
+},
+"removedDevDependencies": {
     "vows": "~0.7.0",
     "istanbul": "~0.1.10",
     "sinon": "*",
     "jshint": "~2.1.4",
     "commonjs-everywhere": "~0.9.0"
-  },
+},
   "keywords": [
     "ast",
     "lint",
