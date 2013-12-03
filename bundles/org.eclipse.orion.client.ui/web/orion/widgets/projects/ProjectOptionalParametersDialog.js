@@ -72,9 +72,10 @@ function(lib, dialog){
 				isFirst = false;			
 			}
 		}
-		if(this._data.optionalParams)
-		for(var i=0; i<this._data.optionalParams.length; i++){
-			var param = this._data.optionalParams[i];
+		
+		if(this._data.parameters._options.optionalParams)
+		for(var i=0; i<this._data.parameters._options.optionalParams.length; i++){
+			var param = this._data.parameters._options.optionalParams[i];
 			var tr = document.createElement("tr");
 			var td = document.createElement("td");
 			var label = document.createElement("label");
@@ -107,9 +108,9 @@ function(lib, dialog){
 		for (var paramId in this._data.parameters.parameterTable) {
 			this._data.parameters.setValue(paramId, lib.node(this._idPrefix + paramId).value);
 		}
-		if(this._data.optionalParams)
-		for(var i=0; i<this._data.optionalParams.length; i++){
-			var param = this._data.optionalParams[i];
+		if(this._data.parameters._options.optionalParams)
+		for(var i=0; i<this._data.parameters._options.optionalParams.length; i++){
+			var param = this._data.parameters._options.optionalParams[i];
 			param.value = lib.node(this._idPrefix + param.id).value;
 		}
 		this.hide();

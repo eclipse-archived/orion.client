@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define */
+/*global define window console*/
 define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCommands'], function(messages, Deferred, mExtensionCommands){
 
 	/**
@@ -23,6 +23,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		this.allProjectHandlersReferences = serviceRegistry.getServiceReferences("orion.project.handler"); //$NON-NLS-0$
 		this.allProjectDeployReferences = serviceRegistry.getServiceReferences("orion.project.deploy"); //$NON-NLS-0$
 		this._serviceRegistration = serviceRegistry.registerService("orion.project.client", this); //$NON-NLS-0$ 
+		this._launchConfigurationsDir = "launchConfigurations"; //$NON-NLS-0$ 
 	}
 
 	ProjectClient.prototype = /**@lends orion.ProjectClient.ProjectClient.prototype */ {
@@ -356,6 +357,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		service.id = serviceReference.getProperty("id");
 		service.name = serviceReference.getProperty("name");
 		service.tooltip = serviceReference.getProperty("tooltip");
+		service.parameters = serviceReference.getProperty("parameters");
+		service.optionalParameters = serviceReference.getProperty("optionalParameters");
 		service.validationProperties = serviceReference.getProperty("validationProperties");
 		return service;
 	},
@@ -414,6 +417,135 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 			}
 		}
 		return handlers;
+	},
+	
+	_getLaunchConfigurationsDir: function(projectMetadata, create){
+		var deferred = new Deferred();
+		
+		if(projectMetadata.children && projectMetadata.children.length>0 && projectMetadata.children[0].Children && projectMetadata.children[0].Children.length>0){
+			for(var i=0; i<projectMetadata.children[0].Children.length; i++){
+				if(projectMetadata.children[0].Children[i].Name && projectMetadata.children[0].Children[i].Name===this._launchConfigurationsDir){
+					deferred.resolve(projectMetadata.children[0].Children[i]);
+					return deferred;
+				}
+			}
+			if(create){
+				this.fileClient.createFolder(projectMetadata.ContentLocation, this._launchConfigurationsDir).then(deferred.resolve, deferred.reject);
+			} else {
+				deferred.resolve(null);
+			}
+		} else if(projectMetadata.ContentLocation) {
+			this.fileClient.fetchChildren(projectMetadata.ContentLocation).then(function(children){
+				for(var i=0; i<children.length; i++){
+					if(children[i].Name && children[i].Name===this._launchConfigurationsDir){
+						deferred.resolve(children[i]);
+						return deferred;
+					}
+				}
+				if(create){
+					this.fileClient.createFolder(projectMetadata.ContentLocation, this._launchConfigurationsDir).then(deferred.resolve, deferred.reject);
+				} else {
+					deferred.resolve(null);
+				}
+			}.bind(this), deferred.reject);
+		} else {
+			deferred.reject();
+		}
+		return deferred;
+	},
+	
+	getProjectLaunchConfigurations: function(projectMetadata){
+		var deferred = new Deferred();
+		this._getLaunchConfigurationsDir(projectMetadata).then(function(launchConfMeta){
+			if(!launchConfMeta){
+				deferred.resolve([]);
+				return deferred;
+			}
+			if(launchConfMeta.Children){
+				var readConfigurationDeferreds = [];
+				for(var i=0; i<launchConfMeta.Children.length; i++){
+					var def = new Deferred();
+					readConfigurationDeferreds.push(def);
+					(function(def){
+					this.fileClient.read(launchConfMeta.Children[i].Location).then(function(launchConf){
+						try{
+							launchConf = JSON.parse(launchConf);
+							launchConf.Name = launchConf.Name || launchConfMeta.Name.replace(".launch", "");
+							def.resolve(launchConf);
+						} catch(e){
+							console.error(e);
+							def.resolve();
+						}
+					}.bind(this), function(e){
+						console.error(e);
+						def.resolve();
+					});
+					}).bind(this)(def);
+				}
+				Deferred.all(readConfigurationDeferreds).then(function(result){
+					if(!result || !result.length){
+						deferred.resolve([]);
+						return;
+					}
+					
+					for(var i=result.length-1; i>=0; i--){
+						if(!result[i]){
+							result.splice(i, 1);
+						}
+					}
+					deferred.resolve(result);
+				}, deferred.reject);
+			} else {
+				var func = arguments.callee.bind(this);
+				this.fileClient.fetchChildren(launchConfMeta.ChildrenLocation).then(function(children){
+					launchConfMeta.Children = children;
+					func(launchConfMeta);
+				}.bind(this), deferred.reject);
+			}	
+		}.bind(this), deferred.reject);
+
+		return deferred;
+	},
+	
+	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, pluginId, params, url){
+		var deferred = new Deferred();
+		var configurationFile = configurationName;
+		configurationFile = configurationFile.replace(/\ /g,' ');
+		configurationFile = configurationFile.replace(/[^\w\d\s]/g, '');
+		if(configurationFile.indexOf(".launch")<0){
+			configurationFile+=".launch";
+		}
+		var launchConfigurationEnry = {
+			name: configurationName,
+			plugin: pluginId,
+			params: params,
+			url: url
+		};
+		this._getLaunchConfigurationsDir(projectMetadata, true).then(function(launchConfDir){
+			if(launchConfDir.Children){
+				for(var i=0; i<launchConfDir.Children.length; i++){
+					if(launchConfDir.Children[i].Name === configurationFile){
+						if(window.confirm("Launch configuration " + configurationFile + " already exists, do you want to replace it?")){
+							this.fileClient.write(launchConfDir.Children[i].Location, JSON.stringify(launchConfigurationEnry)).then(deferred.resolve, deferred.reject);
+							return;
+						} else {
+							deferred.reject("Launch configuration already exists");
+							return;
+						}
+					}
+				}
+				this.fileClient.createFile(launchConfDir.Location, configurationFile).then(function(result){
+					this.fileClient.write(result.Location, JSON.stringify(launchConfigurationEnry)).then(deferred.resolve, deferred.reject);
+				}.bind(this), deferred.reject);
+			} else {
+				var func = arguments.callee.bind(this);
+				this.fileClient.fetchChildren(launchConfDir.ChildrenLocation).then(function(children){
+					launchConfDir.Children = children;
+					func(launchConfDir);
+				}.bind(this), deferred.reject);	
+			}
+		}.bind(this));
+		return deferred;
 	}
 		
 	};//end ProjectClient prototype
