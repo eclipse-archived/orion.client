@@ -24,6 +24,8 @@ define({
 	"Options": "Options",
 	"Find next match": "Find next match",
 	"Find previous match": "Find previous match",
+	"Next": "Next",
+	"Previous": "Previous",
 	"Replace": "Replace",
 	"Replace All": "Replace All",
 	"Search ${0}": "Search ${0}",

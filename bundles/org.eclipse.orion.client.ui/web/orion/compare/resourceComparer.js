@@ -200,7 +200,7 @@ exports.ResourceComparer = (function() {
 		});
 		if(!options.readonly && !options.toggleable && this._compareView.getWidget().type === "twoWay") { //$NON-NLS-0$
 			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
-				var localSearcher = new mSearcher.TextSearcher(editor, that._commandService, undoStack);
+				var localSearcher = new mSearcher.TextSearcher(editor, that._registry, that._commandService, undoStack);
 				var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
 				var commandGenerator = new mEditorCommands.EditorCommandFactory(that._registry, that._commandService,that._fileClient , that._inputManager, "pageActions", false, "pageNavigationActions", localSearcher); //$NON-NLS-1$ //$NON-NLS-0$
 				commandGenerator.generateEditorCommands(editor);

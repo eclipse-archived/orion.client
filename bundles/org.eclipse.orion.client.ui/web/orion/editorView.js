@@ -269,7 +269,7 @@ define([
 
 			var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 
-				var localSearcher = new mSearcher.TextSearcher(editor, commandRegistry, undoStack);
+				var localSearcher = new mSearcher.TextSearcher(editor, serviceRegistry, commandRegistry, undoStack);
 
 				var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
 				self.updateSourceCodeActions(self.settings, keyBindings.sourceCodeActions);

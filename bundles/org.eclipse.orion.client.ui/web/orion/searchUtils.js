@@ -64,13 +64,7 @@ searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions
 			}
 			var searchParams = searcher.createSearchParams(newSearchStr, false, false, advOptions);
 			var href = searchUtils.generateSearchHref(searchParams);
-			searchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
-				if(openInNewTab){
-					window.open(href);
-				} else {
-					window.location = href;
-				}
-			});
+			window.location = href;
 		}
 	} else {
 		window.alert(messages["Can't search: no search service is available"]);
@@ -517,7 +511,7 @@ searchUtils._storeRecentSearch = function(serviceRegistry, searches, eventTarget
 		prefs.put("recentSearch", searches); //$NON-NLS-0$
 		if(eventTarget) {
 			window.setTimeout(function() {
-				eventTarget.dispatchEvent({type:"recentSearchesChanged"}); //$NON-NLS-0$
+				eventTarget.dispatchEvent({type:"inputDataListChanged"}); //$NON-NLS-0$
 			}.bind(this), 20);
 		}
 	});
