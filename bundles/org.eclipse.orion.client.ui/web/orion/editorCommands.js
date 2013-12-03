@@ -250,10 +250,15 @@ define([
 				},
 				callback: function(data) {
 					self.inputManager.save();
+					return true;
 				}
 			});
 			this.commandService.addCommand(saveCommand);
 			this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			// Add key binding to editor so that the user agent save dialog does not show when auto save is enabled
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
+			editor.getTextView().setAction("save", saveCommand.callback, saveCommand); //$NON-NLS-0$
 		},
 		_generateGotoLineCommnand: function(editor) {
 			var self = this;
