@@ -42,20 +42,20 @@ define([
 		enter: function(node) {
 			var item;
 			var that = this;
-			if(node.type === 'FunctionDeclaration') {
+			if(node.type === Estraverse.Syntax.FunctionDeclaration) {
 				item = this.addElement(Signatures.computeSignature(node));
 				if(item) {
 					this.scope.push(item);
 				}
 			}
-			else if(node.type === 'FunctionExpression') {
+			else if(node.type === Estraverse.Syntax.FunctionExpression) {
 				item = this.addElement(Signatures.computeSignature(node));
 				if(item) {
 					this.scope.push(item);
 				}
 				delete node.sig;
 			}
-			else if(node.type === 'ObjectExpression') {
+			else if(node.type === Estraverse.Syntax.ObjectExpression) {
 				item = this.addElement(Signatures.computeSignature(node));
 				if(item) {
 					this.scope.push(item);
@@ -64,7 +64,8 @@ define([
 				if(node.properties) {
 					node.properties.forEach(function(property) {
 						if(property.value) {
-							if(property.value.type === 'FunctionExpression' || property.value.type === 'ObjectExpression') {
+							if(property.value.type === Estraverse.Syntax.FunctionExpression || 
+								property.value.type === Estraverse.Syntax.ObjectExpression) {
 								property.value.sig = Signatures.computeSignature(property);
 							}
 							else {
@@ -74,20 +75,21 @@ define([
 					});
 				}
 			}
-			else if(node.type === 'VariableDeclaration') {
+			else if(node.type === Estraverse.Syntax.VariableDeclaration) {
 				if(node.declarations) {
 					node.declarations.forEach(function(declaration) {
 						if(declaration.init) {
-							if(declaration.init.type === 'ObjectExpression') {
+							if(declaration.init.type === Estraverse.Syntax.ObjectExpression) {
 								declaration.init.sig = Signatures.computeSignature(declaration);
 							}
 						}
 					});
 				}
 			}
-			else if(node.type === 'AssignmentExpression') {
+			else if(node.type === Estraverse.Syntax.AssignmentExpression) {
 				if(node.left && node.right) {
-					if(node.right.type === 'ObjectExpression' || node.right.type === 'FunctionExpression') {
+					if(node.right.type === Estraverse.Syntax.ObjectExpression || 
+						node.right.type === Estraverse.Syntax.FunctionExpression) {
 						node.right.sig = Signatures.computeSignature(node);
 					}
  				}
@@ -103,7 +105,9 @@ define([
 		 * @param {Object} node The AST node that ended its visitation
 		 */
 		leave: function(node) {
-			if(node.type === 'ObjectExpression' || node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') {
+			if(node.type === Estraverse.Syntax.ObjectExpression || 
+				node.type === Estraverse.Syntax.FunctionDeclaration || 
+				node.type === Estraverse.Syntax.FunctionExpression) {
 				this.scope.pop();
 			}
 		},

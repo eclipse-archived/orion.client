@@ -45,14 +45,14 @@ define([
 		 */
 		enter: function(node) {
 			switch(node.type) {
-				case 'Program':
+				case Estraverse.Syntax.Program:
 					this.occurrences = [];
 					this.defscope = null;
 					this.defnode = null;
 					
 					this.scopes.push({range: node.range});
 					break;
-				case 'FunctionDeclaration':
+				case Estraverse.Syntax.FunctionDeclaration:
 					this.checkId(node.id, this.FUNCTION, true);
 					//we want the parent scope for a declaration, otherwise we leave it right away
 					this.scopes.push({range: node.range});
@@ -64,7 +64,7 @@ define([
 						}
 					}
 					break;
-				case 'FunctionExpression':
+				case Estraverse.Syntax.FunctionExpression:
 					if (node.params) {
 						this.scopes.push({range: node.range});
 						for (var j = 0; j < node.params.length; j++) {
@@ -74,49 +74,49 @@ define([
 						}
 					}
 					break;
-				case 'AssignmentExpression':
+				case Estraverse.Syntax.AssignmentExpression:
 					var leftNode = node.left;
 					this.checkId(leftNode);
-					if (leftNode.type === 'MemberExpression') { //$NON-NLS-0$
+					if (leftNode.type === Estraverse.Syntax.MemberExpression) {
 						this.checkId(leftNode.object);
 					}
 					this.checkId(node.right);
 					break;
-				case 'ArrayExpression': 
+				case Estraverse.Syntax.ArrayExpression: 
 					if (node.elements) {
 						for (var k = 0; k < node.elements.length; k++) {
 							this.checkId(node.elements[k]);
 						}
 					}
 					break;
-				case 'MemberExpression':
+				case Estraverse.Syntax.MemberExpression:
 					this.checkId(node.object);
 					if (node.computed) { //computed = true for [], false for . notation
 						this.checkId(node.property);
 					}
 					break;
-				case 'BinaryExpression':
+				case Estraverse.Syntax.BinaryExpression:
 					this.checkId(node.left);
 					this.checkId(node.right);
 					break;
-				case 'UnaryExpression':
+				case Estraverse.Syntax.UnaryExpression:
 					this.checkId(node.argument);
 					break;
-				case 'IfStatement':
+				case Estraverse.Syntax.IfStatement:
 					this.checkId(node.test);
 					break;
-				case 'SwitchStatement':
+				case Estraverse.Syntax.SwitchStatement:
 					this.checkId(node.discriminant);
 					break;
-				case 'UpdateExpression':
+				case Estraverse.Syntax.UpdateExpression:
 					this.checkId(node.argument);
 					break;
-				case 'ConditionalExpression':
+				case Estraverse.Syntax.ConditionalExpression:
 					this.checkId(node.test);
 					this.checkId(node.consequent);
 					this.checkId(node.alternate);
 					break;
-				case 'CallExpression':
+				case Estraverse.Syntax.CallExpression:
 					this.checkId(node.callee, this.FUNCTION, false);
 					if (node.arguments) {
 						for (var l = 0; l < node.arguments.length; l++) {
@@ -124,10 +124,10 @@ define([
 						}
 					}
 					break;
-				case 'ReturnStatement':
+				case Estraverse.Syntax.ReturnStatement:
 					this.checkId(node.argument);
 					break;
-				case 'ObjectExpression':
+				case Estraverse.Syntax.ObjectExpression:
 					if(node.properties) {
 						var len = node.properties.length;
 						for (var m = 0; m < len; m++) {
@@ -135,10 +135,10 @@ define([
 						}
 					}
 					break;
-				case 'VariableDeclarator': //$NON-NLS-0$
+				case Estraverse.Syntax.VariableDeclarator:
 					this.checkId(node.id, this.GENERAL, true);
 					break;
-				case 'NewExpression':
+				case Estraverse.Syntax.NewExpression:
 					this.checkId(node.callee, this.FUNCTION, false);
 					break;
 			}
@@ -153,7 +153,8 @@ define([
 		 * @param {Object} node The AST node that ended its visitation
 		 */
 		leave: function(node) {
-			if(node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') {
+			if(node.type === Estraverse.Syntax.FunctionDeclaration || 
+				node.type === Estraverse.Syntax.FunctionExpression) {
 				//if we leave the defining scope
 				var scope = this.scopes.pop();
 				if(this.defscope) {
@@ -189,7 +190,7 @@ define([
 		 * @returns {Boolean} <code>true</code> if we should skip the next nodes, <code>false</code> otherwise
 		 */
 		checkId: function(node, kind, candefine) {
-			if (node && node.type === 'Identifier') { //$NON-NLS-0$
+			if (node && node.type === Estraverse.Syntax.Identifier) {
 				if (node.name === this.context.word) {
 					if(candefine) {
 						if(this.defscope && this.defnode) {
