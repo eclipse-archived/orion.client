@@ -52,7 +52,8 @@ define({
 	"Add the file to this site": "Add the file to this site",
 	"View": "View",
 	"View the file on the site": "View the file on the site",
-	"Started": "Started at",
+	// The url of the site will be inserted as a link
+	"Started" : "Started at ${0}",
 	"Unknown": "Unknown",
 	"Name": "Name",
 	"Actions": "Actions",
@@ -71,7 +72,6 @@ define({
 	"Optional; used to determine the URL where a started site can be accessed." : "Optional; used to determine the URL where a started site can be accessed.",
 	"Changes you make here won't affect the running site." : "Changes you make here won't affect the running site.",
 	"Stopped" : "Stopped",
-	"Started at " : "Started at ",
 	"Sites": "Sites",
 	"Mappings": "Mappings",
 	// The create button will be inserted into the following text

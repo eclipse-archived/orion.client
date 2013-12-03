@@ -224,7 +224,6 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/expl
 			
 			noSites.appendChild(textNode);
 			parentElement.appendChild(noSites);
-			// document.getElementById(that.parentId)
 		};
 		
 		return SiteServicesExplorer;
@@ -294,16 +293,17 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/expl
 			var status = item.HostingStatus;
 			if (typeof status === "object") { //$NON-NLS-0$
 				if (status.Status === "started") { //$NON-NLS-0$
-					statusField.appendChild(document.createTextNode("(" + messages["Started"] + " ")); //TODO NLS fragment (
-						
 					var link = document.createElement("a"); //$NON-NLS-0$
 					link.textContent = status.URL;
 					link.href = status.URL;
 					statusField.appendChild(link);
-					statusField.appendChild(document.createTextNode(")")); //TODO NLS fragment )						
-							
+					
+					var startedNode = document.createElement("span"); //$NON-NLS-0$
+					startedNode.textContent = messages["Started"];
+					lib.processDOMNodes(startedNode, [link]);
+					statusField.appendChild(startedNode);
 				} else {
-					var statusString = "(" + status.Status.substring(0,1).toUpperCase() + status.Status.substring(1) + ")";
+					var statusString = status.Status.substring(0,1).toUpperCase() + status.Status.substring(1);
 					statusField.appendChild(document.createTextNode(statusString));
 				}
 			} else {
