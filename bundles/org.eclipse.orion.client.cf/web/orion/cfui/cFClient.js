@@ -92,13 +92,15 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			},
 			
 			login: function(url, username, password, org, space) {
-				return this._xhrV1("POST", require.toUrl("cfapi/target"), {
-					'Url': url, 
-					'Username': username, 
-					'Password': password, 
-					'Org': org, 
-					'Space': space
-				});
+				var loginData = {};
+				
+				if (url) loginData.Url = url;
+				if (username) {
+					loginData.Username = username;
+					loginData.Password = password
+				}
+				
+				return this._xhrV1("POST", require.toUrl("cfapi/target"), loginData);
 			},
 			
 			logout: function() {
@@ -122,13 +124,12 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				});
 			},
 			
-			getApp: function(appName, dir) {
-				var url = require.toUrl("cfapi/apps/");
-				if (appName) {
-					url += "/" + appName;
-				}
-				if (dir) {
-					url += "?location=" + dir;
+			getApp: function(name, location) {
+				var url = require.toUrl("cfapi/apps");
+				if (name) {
+					url += "?name=" + name;
+				} else if (location) {
+					url += "?location=" + location;
 				}
 				return this._xhrV1("GET", url);
 			},
@@ -137,24 +138,19 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("GET", require.toUrl("cfapi/apps"));
 			},
 			
-			startApp: function(appName, dir) {
+			startApp: function(name, location) {
 				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
-					App: appName, 
-					Location: dir
+					Name: name, 
+					Location: location,
+					State: "Started"
 				});
 			},
 			
-			stopApp: function(appName, dir) {
+			stopApp: function(name, location) {
 				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
-					App: appName, 
-					Location: dir
-				});
-			},
-			
-			deleteApp: function(appName, dir) {
-				return this._xhrV1("DELETE", require.toUrl("cfapi/apps"), {
-					App: appName, 
-					Location: dir
+					Name: name, 
+					Location: location,
+					State: "Stopped"
 				});
 			}
 		};

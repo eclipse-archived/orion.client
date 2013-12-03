@@ -65,6 +65,18 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 				width: "350px",
 				height: "175px"
 			};
+		},
+		
+		getState:  function(props) {
+			return {running: true};
+		},
+		
+		start: function(props) {
+			
+		},
+		
+		stop: function (props) {
+			
 		}
 	}, {
 		name: "Deploy to Cloud Foundry",
@@ -155,7 +167,7 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	/** Add cf login command **/
 	var loginImpl = {
 		callback: function(args) {
-			return cFService.login(args.username, args.password,
+			return cFService.login(null, args.username, args.password,
 				args.org, args.space).then(function(result) {
 					return "Logged in";
 				}
@@ -210,13 +222,33 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	);
 	
 	/** Add cf apps command **/
+	function describeApp(app) {
+		var name = app.name;
+		var strResult = "\n" + name + "\t";
+		if (name.length <= 4) {
+			strResult += "\t";
+		}
+		strResult += app.state + "\t";
+		var runningInstances = app.runningInstances;
+		if (!runningInstances) {
+			runningInstances = 0;
+		}
+		var mem = app.memory;
+		strResult += runningInstances + " x " + mem + "M\t";
+		var url = app.urls[0];
+		strResult += "\t[" + url + "](http://" + url + ")";
+		return strResult;
+	}
+	
 	var appsImpl = {
 		callback: function(args) {
 			return cFService.getApps().then(function(result) {
+				result = result.apps;
+				
 				if (!result || result.length === 0) {
 					return "No applications.";
 				}
-				var strResult = "\nname\tstatus\tusage\truntime\turl\n";
+				var strResult = "\nname\tstate\tinstances\tmemory\tdisk\turls\n";
 				result.forEach(function(app) {
 					strResult += describeApp(app);
 				});
@@ -234,17 +266,40 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	);
 
 	/** Add cf app command **/
+	function describeAppVerbose(app) {
+		var name = app.name;
+		var strResult = "\n" + name + ": ";
+		var runningInstances = app.runningInstances;
+		var instances = app.instances;
+		if (!runningInstances) {
+			runningInstances = 0;
+		}
+		var percentage = runningInstances / instances * 100;
+		strResult += percentage + "%\n\tplatform: ";
+		strResult += "\n\tusage: " + app.memory + "M x ";
+		strResult += runningInstances + " instance(s)";
+		strResult += "\n\turls:";
+		
+		if (app.urls)
+			app.urls.forEach(function(url) {
+				strResult += "\n\t\t[" + url + "](http://" + url + ")";
+			});
+		/**if (app.services && app.services.length > 0) {
+			strResult += "\n\tservices:";
+			app.services.forEach(function(service) {
+				strResult += "\n\t\t" + service;
+			});
+		}**/
+		return strResult;
+	}
+	
 	var appImpl = {
 		callback: function(args, context) {
-			return cFService.getApplication(args.application, context.cwd).then(function(result) {
-				if (!result || result.length === 0) {
-					return "No applications found";
+			return cFService.getApp(args.app, context.cwd).then(function(result) {
+				if (!result) {
+					return "Application not found";
 				}
-				var strResult = "";
-				result.forEach(function(app) {
-					strResult += describeAppVerbose(app);
-				});
-				return strResult;
+				return describeAppVerbose(result);
 			});
 		}
 	};
@@ -266,9 +321,9 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	/** Add cf push command **/
 	var pushImpl = {
 		callback: function(args, context) {
-			return cFService.pushApplication(args.app, context.cwd).then(function(result) {
+			return cFService.pushApp(args.app, context.cwd).then(function(result) {
 				if (!result || !result.applications) {
-					return "No applications found";
+					return "Application not found";
 				}
 				var strResult = "";
 				result.applications.forEach(function(item) {
@@ -284,7 +339,7 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 		"orion.shell.command",
 		pushImpl, {
 			name: "cfo push",
-			description: "Push an application, syncing changes if it exists",
+			description: "Push a new app or sync changes to an existing app",
 			parameters: [{
 				name: "app",
 				type: "string",
@@ -297,9 +352,9 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	/** Add cf start command **/
 	var startImpl = {
 		callback: function(args, context) {
-			return cFService.startApplication(args.app, context.cwd).then(function(result) {
+			return cFService.startApp(args.app, context.cwd).then(function(result) {
 				if (!result || !result.applications) {
-					return "No applications found";
+					return "Application not found";
 				}
 				var strResult = "";
 				result.applications.forEach(function(item) {
@@ -328,9 +383,9 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	/** Add cf stop command **/
 	var stopImpl = {
 		callback: function(args, context) {
-			return cFService.stopApplication(args.app, context.cwd).then(function(result) {
+			return cFService.stopApp(args.app, context.cwd).then(function(result) {
 				if (!result || !result.applications) {
-					return "No applications found";
+					return "Application not found";
 				}
 				var strResult = "";
 				result.applications.forEach(function(item) {
@@ -356,9 +411,9 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	);
 	
 	/** Add cf delete command **/
-	var deleteImpl = {
+	/** var deleteImpl = {
 		callback: function(args, context) {
-			return cFService.deleteApplication(args.app, context.cwd).then(function(result) {
+			return cFService.deleteApp(args.app, context.cwd).then(function(result) {
 				if (!result || !result.applications) {
 					return "No applications found";
 				}
@@ -383,7 +438,7 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 				defaultValue: null
 			}]
 		}
-	);
+	); **/
 
 	provider.connect();
 });
