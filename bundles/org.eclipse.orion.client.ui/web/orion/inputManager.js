@@ -284,7 +284,7 @@ define([
 		save: function() {
 			if (this._saving) { return; }
 			var editor = this.getEditor();
-			if (!editor.isDirty() || this.getReadOnly()) { return; }
+			if (!editor || !editor.isDirty() || this.getReadOnly()) { return; }
 			var failedSaving = this._errorSaving;
 			this._saving = true;
 			var input = this.getInput();
