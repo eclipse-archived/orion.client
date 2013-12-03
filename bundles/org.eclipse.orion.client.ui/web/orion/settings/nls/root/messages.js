@@ -9,6 +9,7 @@
  ******************************************************************************/
 
 //NLS_CHARSET=UTF-8
+/*global define */
 
 define({
 	"Plugin Description": "Plugin Description",
@@ -126,6 +127,10 @@ define({
 	"EditorThemes": "Themes",
 	"Import": "Import",
 	"Import a theme": "Import a theme",
+	"Export": "Export",
+	"Export a theme": "Export a theme",
+	"Theme name:": "Theme name:",
+	"yourTheme": "yourTheme",
 	"fileManagement" : "File Management",
 	"typing": "Typing",
 	"autoSave": "Auto Save",
