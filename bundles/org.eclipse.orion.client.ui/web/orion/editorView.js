@@ -387,9 +387,7 @@ define([
 			});
 			var markOccurrences = this.markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
 			markOccurrences.setOccurrencesVisible(this.settings.occurrencesVisible);
-			editor.addEventListener("TextViewInstalled", function(event) { //$NON-NLS-0$
-				markOccurrences.findOccurrences();
-			});
+			markOccurrences.findOccurrences();
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 			editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
