@@ -685,12 +685,16 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			for (i = startIndex; i < annotations.length; i++) {
 				var annotation = annotations[i];
 				if (annotation.start >= end) {
+					annotation._oldStart = annotation.start;
+					annotation._oldEnd = annotation.end;
 					annotation.start += changeCount;
 					annotation.end += changeCount;
 					e.changed.push(annotation);
 				} else if (annotation.end <= start) {
 					//nothing
 				} else if (annotation.start < start && end < annotation.end) {
+					annotation._oldStart = annotation.start;
+					annotation._oldEnd = annotation.end;
 					annotation.end += changeCount;
 					e.changed.push(annotation);
 				} else {
@@ -833,30 +837,32 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			return ranges;
 		},
 		_onAnnotationModelChanged: function(e) {
-			if (e.textModelChangedEvent) {
-				return;
-			}
 			var view = this._view;
 			if (!view) { return; }
 			var self = this;
 			var model = view.getModel();
-			function redraw(changes) {
+			function redrawRange(start, end) {
+				if (model.getBaseModel) {
+					start = model.mapOffset(start, true);
+					end = model.mapOffset(end, true);
+				}
+				if (start !== -1 && end !== -1) {
+					view.redrawRange(start, end);
+				}
+			}
+			function redraw(changes, changed) {
 				for (var i = 0; i < changes.length; i++) {
 					if (!self.isAnnotationTypeVisible(changes[i].type)) { continue; }
-					var start = changes[i].start;
-					var end = changes[i].end;
-					if (model.getBaseModel) {
-						start = model.mapOffset(start, true);
-						end = model.mapOffset(end, true);
-					}
-					if (start !== -1 && end !== -1) {
-						view.redrawRange(start, end);
+					var change = changes[i];
+					redrawRange(change.start, change.end);
+					if (changed && change._oldStart !== undefined && change._oldEnd) {
+						redrawRange(change._oldStart, change._oldEnd);
 					}
 				}
 			}
 			redraw(e.added);
 			redraw(e.removed);
-			redraw(e.changed);
+			redraw(e.changed, true);
 		},
 		_onDestroy: function(e) {
 			this.destroy();
