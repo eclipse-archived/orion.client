@@ -150,8 +150,10 @@ define([
 	 * @description creates a new instance of the outliner
 	 * @constructor
 	 * @public
+	 * @param {javascript.ASTManager} astManager
 	 */
-	function JSOutliner() {
+	function JSOutliner(astManager) {
+		this.astManager = astManager;
 	}
 	
 	Objects.mixin(JSOutliner.prototype, /** @lends javascript.JSOutliner.prototype*/ {
@@ -189,8 +191,8 @@ define([
 		 */
 		computeOutline: function(editorContext, options) {
 			var that = this;
-			var astoptions = {loc:true, comment:true, tolerant:true, tokens:false, range:false, raw:false};
-			return editorContext.getAST(astoptions).then(function(ast) {
+//			var astoptions = {loc:true, comment:true, tolerant:true, tokens:false, range:false, raw:false};
+			return this.astManager.getAST(editorContext).then(function(ast) {
 				if(ast) {
 					var visitor = that.getVisitor();
 					Estraverse.traverse(ast, visitor);

@@ -11,16 +11,14 @@
  *******************************************************************************/
 /*global define esprima*/
 define([
-	'esprima',
+	'javascript/astManager',
 	'javascript/eslint/validator',
 	'javascript/esprima/esprimaJsContentAssist',
 	'javascript/occurrences',
 	'javascript/outliner',
-	'orion/Deferred',
 	'orion/i18nUtil',
-	'orion/plugin',
-	'orion/serialize'
-], function(Esprima, EslintValidator, EsprimaAssist, Occurrences, Outliner, Deferred, i18nUtil, PluginProvider, Serialize) {
+	'orion/plugin'
+], function(ASTManager, EslintValidator, EsprimaAssist, Occurrences, Outliner, i18nUtil, PluginProvider) {
 
 	/**
 	 * Plug-in headers
@@ -45,11 +43,27 @@ define([
 			}
 		] 
 	});
-	
+
+	/**
+	 * Create the AST manager
+	 */
+	var astManager = new ASTManager();
+
+	/**
+	 * Register AST manager as Model Change listener
+	 */
+	provider.registerServiceProvider("orion.edit.model", {
+			onModelChanging: astManager.updated.bind(astManager)
+		},
+		{
+			contentType: ["application/javascript"],
+			types: ["ModelChanging"]
+	});
+
 	/**
 	 * Register the jsdoc-based outline
 	 */
-	provider.registerServiceProvider("orion.edit.outliner", new Outliner.JSOutliner(),
+	provider.registerServiceProvider("orion.edit.outliner", new Outliner.JSOutliner(astManager),
 		{ contentType: ["application/javascript"],
 		  name: "Source outline",
 		  title: "JavaScript source outline",
@@ -57,30 +71,9 @@ define([
 	});
 
 	/**
-	 * Register the AST provider
-	 */
-	provider.registerService("orion.core.astprovider",
-		{ computeAST: function(context) {
-				var ast = esprima.parse(context.text, {
-					range: true,
-					tolerant: true,
-					comment: true,
-					loc: true,
-					tokens: true
-				});
-				if (ast.errors) {
-					ast.errors = ast.errors.map(Serialize.serializeError);
-				}
-				return ast;
-			}
-		}, {
-			contentType: ["application/javascript"]
-	});
-	
-	/**
 	 * Register the mark occurrences support
 	 */
-	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(),
+	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager),
 		{
 			contentType: ["application/javascript"]	//$NON-NLS-0$
 	});
@@ -88,7 +81,7 @@ define([
 	/**
 	 * Register the content assist support
 	 */
-	provider.registerServiceProvider("orion.edit.contentassist", new EsprimaAssist.EsprimaJavaScriptContentAssistProvider(), 
+	provider.registerServiceProvider("orion.edit.contentassist", new EsprimaAssist.EsprimaJavaScriptContentAssistProvider(astManager), 
 		{
 			contentType: ["application/javascript"],
 			name: "JavaScript content assist",
@@ -98,7 +91,7 @@ define([
 	/**
 	 * Register the ESLint validator
 	 */
-	provider.registerServiceProvider(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(),
+	provider.registerServiceProvider(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager),
 		{
 			contentType: ["application/javascript"],
 			pid: 'eslint.config'

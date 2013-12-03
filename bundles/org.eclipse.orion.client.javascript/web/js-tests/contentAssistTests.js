@@ -47,11 +47,13 @@ define([
 				offset = buffer.length;
 			}
 		}
-		var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider(null, lintOptions);
-		var mockContext = {
+		var mockASTManager = {
 			getAST: function() {
 				return new Deferred().resolve(parseFull(buffer));
-			},
+			}
+		};
+		var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider(mockASTManager, null, lintOptions);
+		var mockContext = {
 			getText: function() {
 				return new Deferred().resolve(buffer);
 			}

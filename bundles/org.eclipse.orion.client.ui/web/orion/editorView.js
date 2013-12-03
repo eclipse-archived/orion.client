@@ -29,7 +29,6 @@ define([
 	'orion/searchAndReplace/textSearcher',
 	'orion/editorCommands',
 	'orion/globalCommands',
-	'orion/edit/ast',
 	'orion/edit/dispatcher',
 	'orion/edit/editorContext',
 	'orion/highlight',
@@ -44,7 +43,7 @@ define([
 	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist, mEmacs, mVI,
 	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
-	ASTManager, mDispatcher, EditorContext, Highlight,
+	mDispatcher, EditorContext, Highlight,
 	mMarkOccurrences, mSyntaxchecker,
 	mKeyBinding, mUIUtils, util, objects
 ) {
@@ -81,7 +80,6 @@ define([
 		this.model = options.model;
 		this.undoStack = options.undoStack;
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
-		this.astManager = new ASTManager(this.serviceRegistry, this.inputManager);
 		mGlobalCommands.getKeyAssist().addProvider(this);
 		var mainSplitter = mGlobalCommands.getMainSplitter();
 		mainSplitter.splitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
@@ -390,7 +388,6 @@ define([
 			var markOccurrences = this.markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
 			markOccurrences.setOccurrencesVisible(this.settings.occurrencesVisible);
 			editor.addEventListener("TextViewInstalled", function(event) { //$NON-NLS-0$
-				event.textView.getModel().addEventListener("Changed", self.astManager.updated.bind(self.astManager)); //$NON-NLS-0$
 				markOccurrences.findOccurrences();
 			});
 			var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);

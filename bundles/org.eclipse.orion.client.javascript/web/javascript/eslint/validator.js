@@ -25,10 +25,10 @@ define([
 		}
 	};
 
-	function ESLintValidator() {
+	function ESLintValidator(astManager) {
 		this.active = true; // enabled by default
+		this.astManager = astManager;
 	}
-
 	function getSeverity(prob) {
 		switch (config.rules[prob.ruleId]) {
 			case 1: return "warning"; //$NON-NLS-0$
@@ -86,7 +86,7 @@ define([
 			if (!this.active) {
 				return {};
 			}
-			return editorContext.getAST().then(function(ast) {
+			return this.astManager.getAST(editorContext).then(function(ast) {
 				var problems = [], error;
 				try {
 					problems = problems.concat(eslint.verify(ast, config));

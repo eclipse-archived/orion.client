@@ -227,8 +227,10 @@ define([
 	 * @description creates a new instance of the outliner
 	 * @constructor
 	 * @public
+	 * @param {javascript.ASTManager} astManager
 	 */
-	function JavaScriptOccurrences() {
+	function JavaScriptOccurrences(astManager) {
+		this.astManager = astManager;
 	}
 	
 	Objects.mixin(JavaScriptOccurrences.prototype, /** @lends javascript.JavaScriptOccurrences.prototype*/ {
@@ -270,7 +272,7 @@ define([
 			return editorContext.getText().then(function(text) {
 				word = WordFinder.findWord(text, ctxt.selection.start);
 				if(word) {
-					return editorContext.getAST();
+					return that.astManager.getAST(editorContext);
 				}
 			}).then(function(ast) {
 				if(ast) {

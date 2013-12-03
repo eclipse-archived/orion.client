@@ -727,10 +727,12 @@ define([
 	/**
 	 * indexer is optional.  When there is no indexer passed in
 	 * the indexes will not be consulted for extra references
+	 * @param {javascript.ASTManager} astManager
 	 * @param {{hasDependency,performIndex,retrieveSummary,retrieveGlobalSummaries}} indexer
 	 * @param {{global:[],options:{browser:Boolean}}=} lintOptions optional set of extra lint options that can be overridden in the source (jslint or jshint)
 	 */
-	function EsprimaJavaScriptContentAssistProvider(indexer, lintOptions) {
+	function EsprimaJavaScriptContentAssistProvider(astManager, indexer, lintOptions) {
+		this.astManager = astManager;
 		this.indexer = indexer;
 		this.lintOptions = lintOptions;
 	}
@@ -746,7 +748,7 @@ define([
 		computeContentAssist: function(editorContext, context) {
 			var self = this;
 			// TODO Can we avoid getText() here? The AST should have all we need.
-			return Deferred.all([editorContext.getAST(), editorContext.getText()]).then(function(results) {
+			return Deferred.all([this.astManager.getAST(editorContext), editorContext.getText()]).then(function(results) {
 				var ast = results[0], buffer = results[1];
 				return self._computeProposalsFromAST(ast, buffer, context);
 			});
