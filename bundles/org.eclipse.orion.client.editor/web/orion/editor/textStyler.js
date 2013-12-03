@@ -69,7 +69,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		"orion.enclosure.parenthesis.end": {styleClass: "orion.enclosure.parenthesis.end"}
 	};
 
-	function TextStyler (view, annotationModel, patterns, delimiters, keywords) {
+	function TextStyler (view, annotationModel, patterns) {
 		function createPattern(element) {
 			var subPatterns = [];
 			if (element.patterns) {
@@ -113,16 +113,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 			}
 		}.bind(this));
-		if (keywords && keywords.length) {
-			var keywordsString = "";
-			keywords.forEach(function(current) {
-				keywordsString += current + "|";
-			});
-			var matchString = keywordsString.substring(0, keywordsString.length - 1);
-			this.linePatterns.push({regex: new RegExp(matchString, "g"), name: "KEYWORD"});
-		}
-
-		this.delimiterRegex = new RegExp(delimiters, "g"); //$NON-NLS-0$
 
 		this.whitespacesVisible = this.spacesVisible = this.tabsVisible = false;
 		this.spacePattern = {regex: new RegExp(" ", "g"), name: "WHITE_SPACE", isWhitespace: true};
@@ -416,14 +406,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				linePatterns = temp;
 			}
 
-			var delimiterMatches = [];
-			this.delimiterRegex.lastIndex = 0;
-			var result = this.delimiterRegex.exec(text);
-			while (result) {
-				delimiterMatches[result.index] = result;
-				result = this.delimiterRegex.exec(text);
-			}
-
 			var matches = [];
 			linePatterns.forEach(function(current) {
 				current.regex.lastIndex = 0;
@@ -453,54 +435,28 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					continue;
 				}
 
-				/* determine whether the delimiter requirements are met by this match */
-				var beginningDelim = false, endDelim = false;
-
-				this.delimiterRegex.lastIndex = 0;
-				var result = this.delimiterRegex.exec(current.result[0]);
-				if (result && result.index === 0 && result[0].length === current.result[0].length) {
-					/* match is whitespace, so don't need to check for surrounding whitespace */
-					beginningDelim = endDelim = true;
-				} else {
-					if (current.result.index === 0 || delimiterMatches[current.result.index]) {
-						beginningDelim = true;
+				/* apply the style */
+				var start = offset + current.result.index;
+				var end = start + current.result[0].length;
+				var tokenStyle = {start: start, end: end, style: styleMappings[current.pattern.name || "UNKOWN"], isWhitespace: current.pattern.isWhitespace};
+				if (isForRendering) {
+					var substyles = [];
+					if (current.pattern.patterns) {
+						this._parse(current.result[0], start, current.pattern.patterns, true, substyles, current);
+						this._mergeStyles(tokenStyle, substyles, styles);
 					} else {
-						for (var i = current.result.index - 1; i >= 0; i--) {
-							if (delimiterMatches[i]) {
-								beginningDelim = delimiterMatches[i].index + (delimiterMatches[i])[0].length === current.result.index;
-								break;
-							}
-						}
-					}
-					if (beginningDelim) {
-						var nextIndex = current.result.index + current.result[0].length;
-						endDelim = nextIndex === text.length || !!delimiterMatches[nextIndex - 1] || !!delimiterMatches[nextIndex];
-					}
-				}
-				if (beginningDelim && endDelim) {
-					/* apply the style */
-					var start = offset + current.result.index;
-					var end = start + current.result[0].length;
-					var tokenStyle = {start: start, end: end, style: styleMappings[current.pattern.name || "UNKOWN"], isWhitespace: current.pattern.isWhitespace};
-					if (isForRendering) {
-						var substyles = [];
-						if (current.pattern.patterns) {
-							this._parse(current.result[0], start, current.pattern.patterns, true, substyles, current);
+						/* if whitespaces are being shown then invoke _parse on leaf values in order to mark whitespace within them */
+						if (this._isRenderingWhitespace() && !current.pattern.isWhitespace) {
+							this._parse(current.result[0], start, [], true, substyles, current);
 							this._mergeStyles(tokenStyle, substyles, styles);
 						} else {
-							/* if whitespaces are being shown then invoke _parse on leaf values in order to mark whitespace within them */
-							if (this._isRenderingWhitespace() && !current.pattern.isWhitespace) {
-								this._parse(current.result[0], start, [], true, substyles, current);
-								this._mergeStyles(tokenStyle, substyles, styles);
-							} else {
-								styles.push(tokenStyle);
-							}
+							styles.push(tokenStyle);
 						}
-					} else {
-						styles.push(tokenStyle);
 					}
-					index = current.result.index + current.result[0].length;
+				} else {
+					styles.push(tokenStyle);
 				}
+				index = current.result.index + current.result[0].length;
 				this._updateMatch(current, text, matches);
 			}
 			if (isForRendering && !parentMatch) {

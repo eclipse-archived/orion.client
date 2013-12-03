@@ -196,10 +196,7 @@ define([
 		// purely declarative, no service methods
     }, {
         id: "orion.js",
-        keywords: keywords.JSKeywords,
-//        extends: "orion.text",
-		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
-		contentType: ["application/javascript"],
+		contentTypes: ["application/javascript"],
 		patterns: [
 			{
 				match: "{",
@@ -220,6 +217,9 @@ define([
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
+				match: "\\b(" + keywords.JSKeywords.join("|") + ")\\b",
+				name: "KEYWORD"
+			}, {
 				match: "//.*",
 				name: "SINGLELINE_COMMENT",
 				patterns: [
@@ -235,10 +235,10 @@ define([
 				match: "\"(\\\\.|[^\"])*(\"|$)",
 				name: "STRING"
 			}, {
-				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
+				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?\\b",
 				name: "NUMBER"
 			}, {
-				match: "0x[0-9A-Fa-f]+",
+				match: "\\b0x[0-9A-Fa-f]+\\b",
 				name: "NUMBER"
 			}, {
 				begin: "/\\*",
@@ -271,10 +271,7 @@ define([
 		// purely declarative, no service methods
     }, {
         id: "orion.java",
-        keywords: keywords.JAVAKeywords,
-//        extends: "orion.text",
-		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
-		contentType: ["text/x-java-source"],
+		contentTypes: ["text/x-java-source"],
 		patterns: [
 			{
 				match: "{",
@@ -295,6 +292,9 @@ define([
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
+				match: "\\b(" + keywords.JAVAKeywords.join("|") + ")\\b",
+				name: "KEYWORD"
+			}, {
 				match: "//.*",
 				name: "SINGLELINE_COMMENT",
 				patterns: [
@@ -307,10 +307,10 @@ define([
 				match: "\"(\\\\.|[^\"])*(\"|$)",
 				name: "STRING"
 			}, {
-				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
+				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?\\b",
 				name: "NUMBER"
 			}, {
-				match: "0x[0-9A-Fa-f]+",
+				match: "\\b0x[0-9A-Fa-f]+\\b",
 				name: "NUMBER"
 			}, {
 				begin: "/\\*",
@@ -341,9 +341,7 @@ define([
 		// purely declarative, no service methods
     }, {
         id: "orion.json",
-//        extends: "orion.text",
-		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
-		contentType: ["application/json"],
+		contentTypes: ["application/json"],
 		patterns: [
 			{
 				match: "{",
@@ -370,10 +368,10 @@ define([
 				match: "\"(\\\\.|[^\"])*(\"|$)",
 				name: "STRING"
 			}, {
-				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
+				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?\\b",
 				name: "NUMBER"
 			}, {
-				match: "0x[0-9A-Fa-f]+",
+				match: "\\b0x[0-9A-Fa-f]+\\b",
 				name: "NUMBER"
 			}
 		]
@@ -382,14 +380,7 @@ define([
 		// purely declarative, no service methods
     }, {
         id: "orion.schema.json",
-        keywords: ["$schema", "id", "multipleOf", "maximum", "exclusiveMaximum", "minimum", "exclusiveMinimum",
-            "maxLength", "minLength", "pattern", "additionalItems", "maxItems", "minItems", "uniqueItems",
-            "maxProperties", "minProperties", "required", "additionalProperties", "properties", "patternProperties",
-            "dependencies", "enum", "type", "allOf", "anyOf", "oneOf", "not", "definitions", "title", "description",
-            "default", "format"],
-//        extends: "orion.json",
-		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
-		contentType: ["application/schema+json"],
+		contentTypes: ["application/schema+json"],
 		patterns: [
 			{
 				match: "{",
@@ -410,17 +401,23 @@ define([
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
+				match: "(\\$schema|(\\b(id|multipleOf|maximum|exclusiveMaximum|minimum|exclusiveMinimum|\
+					maxLength|minLength|pattern|additionalItems|maxItems|minItems|uniqueItems|\
+					maxProperties|minProperties|required|additionalProperties|properties|patternProperties|\
+					dependencies|enum|type|allOf|anyOf|oneOf|not|definitions|title|description|default|format)))\\b",
+				name: "KEYWORD"
+			}, {
 				match: "'.*?('|$)",
-				name: "STRING"		
+				name: "STRING"
 			}, {
 				match: "\"(\\\\.|[^\"])*(\"|$)",
-				name: "STRING"		
+				name: "STRING"
 			}, {
-				match: "-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?",
+				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?\\b",
 				name: "NUMBER"
 			}, {
-				match: "0x[0-9A-Fa-f]+",
-				name: "NUMBER"	
+				match: "\\b0x[0-9A-Fa-f]+\\b",
+				name: "NUMBER"
 			}
 		]
 	});
@@ -429,10 +426,7 @@ define([
 		// purely declarative, no service methods
     }, {
         id: "orion.css",
-        keywords: keywords.CSSKeywords,
-//        extends: "orion.text",
-		delimiters: "[-`~!@#%^&*()=+[\\]{}|;:'\",.<>/?\\s]",
-		contentType: ["text/css"],
+		contentTypes: ["text/css"],
 		patterns: [
 			{
 				match: "{",
@@ -453,17 +447,20 @@ define([
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
+				match: "\\b(" + keywords.CSSKeywords.join("|") + ")\\b",
+				name: "KEYWORD"
+			}, {
 				match: "'.*?'",
-				name: "STRING"		
+				name: "STRING"
 			}, {
 				match: "\"(\\\\.|[^\"])*(\"|$)",
-				name: "STRING"		
+				name: "STRING"
 			}, {
-				match: "-?(\\.\\d+|\\d+\\.?\\d*)(%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?",
+				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
 				name: "NUMBER"
 			}, {
-				match: "#[0-9A-Fa-f]+",
-				name: "NUMBER"	
+				match: "#[0-9A-Fa-f]+\\b",
+				name: "NUMBER"
 			}, {
 				begin: "/\\*",
 				end: "(\\*/|$)",
