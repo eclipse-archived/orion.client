@@ -199,27 +199,34 @@ define([
 		contentTypes: ["application/javascript"],
 		patterns: [
 			{
+				id: "brace_open",
 				match: "{",
 				name: "orion.enclosure.brace.start"
 			}, {
+				id: "brace_close",
 				match: "}",
 				name: "orion.enclosure.brace.end"
 			}, {
+				id: "backet_open",
 				match: "\\[",
 				name: "orion.enclosure.bracket.start"
 			}, {
+				id: "bracket_close",
 				match: "\\]",
 				name: "orion.enclosure.bracket.end"
 			}, {
+				id: "parenthesis_open",
 				match: "\\(",
 				name: "orion.enclosure.parenthesis.start"
 			}, {
+				id: "parenthesis_close",
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
 				match: "\\b(" + keywords.JSKeywords.join("|") + ")\\b",
 				name: "KEYWORD"
 			}, {
+				id: "comment_single",
 				match: "//.*",
 				name: "SINGLELINE_COMMENT",
 				patterns: [
@@ -232,15 +239,19 @@ define([
 				match: "'.*?('|$)",
 				name: "STRING"
 			}, {
+				id: "string",
 				match: "\"(\\\\.|[^\"])*(\"|$)",
 				name: "STRING"
 			}, {
+				id: "number",
 				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?\\b",
 				name: "NUMBER"
 			}, {
+				id: "number_hex",
 				match: "\\b0x[0-9A-Fa-f]+\\b",
 				name: "NUMBER"
 			}, {
+				id: "comment_multi",
 				begin: "/\\*",
 				end: "(\\*/|$)",
 				name: "MULTILINE_COMMENT",
