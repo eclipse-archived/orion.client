@@ -65,7 +65,7 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 				self._onChanging(e);
 			}
 		};
-		baseModel.addEventListener("postChanged", this._listener.onChanged); //$NON-NLS-0$
+		baseModel.addEventListener("preChanged", this._listener.onChanged); //$NON-NLS-0$
 		baseModel.addEventListener("preChanging", this._listener.onChanging); //$NON-NLS-0$
 	}
 
@@ -75,7 +75,7 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 		 */
 		destroy: function() {
 			if (this._model) {
-				this._model.removeEventListener("postChanged", this._listener.onChanged); //$NON-NLS-0$
+				this._model.removeEventListener("preChanged", this._listener.onChanged); //$NON-NLS-0$
 				this._model.removeEventListener("preChanging", this._listener.onChanging); //$NON-NLS-0$
 				this._model = null;
 			}
