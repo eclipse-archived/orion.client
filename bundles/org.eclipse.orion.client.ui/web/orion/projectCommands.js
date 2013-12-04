@@ -64,7 +64,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				params[param] = data.parameters.valueFor(param);
 			}
 		}
-		if(data.parameters._options.optionalParams)
+		if(data.parameters && data.parameters._options.optionalParams)
 		for(var i=0; i<data.parameters._options.optionalParams.length; i++){
 			var param = data.parameters._options.optionalParams[i];
 			params[param.id] = param.value;
@@ -157,8 +157,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						explorer.changedItem();
 					}, errorHandler);
 			}, function(error){
-				if(error.retry && error.addParamethers){
-					data.parameters = getCommandParameters(error.addParamethers, error.optionalParamethers);
+				if(error.Retry && error.Retry.addParameters){
+					data.parameters = getCommandParameters(error.Retry.addParameters, error.Retry.optionalParameters);
 					data.oldParams = params;
 					commandService.collectParameters(data);
 				}
@@ -468,7 +468,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					}
 				};
 				
-				commandParams.parameters = getCommandParameters(handler.addParamethers, handler.optionalParamethers);				
+				commandParams.parameters = getCommandParameters(handler.addParameters, handler.optionalParameters);				
 				
 				var command = new mCommands.Command(commandParams);
 				commandService.addCommand(command);
@@ -510,8 +510,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						progress.showWhile(handler.initProject(params, {WorkspaceLocation: item.Location}), actionComment).then(function(project){
 							dispatchNewProject(item, project);
 						}, function(error){
-							if(error.retry && error.addParamethers){
-								data.parameters = getCommandParameters(error.addParamethers, error.optionalParamethers);
+							if(error.Retry && error.Retry.addParameters){
+								data.parameters = getCommandParameters(error.Retry.addParameters, error.Retry.optionalParameters);
 								data.oldParams = params;
 								commandService.collectParameters(data);
 							}
@@ -524,7 +524,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					}
 				};
 				
-				commandParams.parameters = getCommandParameters(handler.addParamethers, handler.optionalParamethers);
+				commandParams.parameters = getCommandParameters(handler.addParameters, handler.optionalParameters);
 
 				var command = new mCommands.Command(commandParams);
 				commandService.addCommand(command);
@@ -675,8 +675,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 							}
 							progress.setProgressResult(status);
 							
-							if(status.toSave){
-								progress.showWhile(projectClient.saveProjectLaunchConfiguration(project, status.toSave.configurationName, deployService.id, status.toSave.parameters, status.toSave.url), "Saving configuration");
+							if(status.ToSave){
+								progress.showWhile(projectClient.saveProjectLaunchConfiguration(project, status.ToSave.ConfigurationName, deployService.id, status.ToSave.Parameters, status.ToSave.Url), "Saving configuration");
 							}
 
 						};
@@ -687,24 +687,24 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 								if(!result){
 									return;
 								}
-								if (result.uriTemplate) {
+								if (result.UriTemplate) {
 									    var options = {};
-										options.uriTemplate = result.uriTemplate;
-										options.width = result.width;
-										options.height = result.height;
+										options.uriTemplate = result.UriTemplate;
+										options.width = result.Width;
+										options.height = result.Height;
 										options.id = "orion.project.deploy." + deployService.id + ".deploy"; 
 										options.params = item;
 										options.done = localHandleStatus;
 										options.status = localHandleStatus;
 										mEditorCommands.createDelegatedUI(options);
 								}
-								if(result.toSave){
-									progress.showWhile(projectClient.saveProjectLaunchConfiguration(project, result.toSave.configurationName, deployService.id, result.toSave.parameters, result.toSave.url), "Saving configuration");
+								if(result.ToSave){
+									progress.showWhile(projectClient.saveProjectLaunchConfiguration(project, result.ToSave.ConfigurationName, deployService.id, result.ToSave.Parameters, result.ToSave.Url), "Saving configuration");
 								}
 								
 							}, function(error){
-								if(error.retry && error.addParamethers){
-									data.parameters = getCommandParameters(error.parameters, error.optionalParameters);
+								if(error.Retry && error.Retry.addParameters){
+									data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
 									data.oldParams = params;
 									commandService.collectParameters(data);
 								}

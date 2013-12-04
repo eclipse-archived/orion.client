@@ -335,9 +335,10 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 							return;
 						} 
 						if(error.JsonData.Host){
-							error.retry = true;
-							error.addParamethers = [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"}];
-							error.optionalParamethers = [{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}];
+							error.Retry = {
+								addParameters : [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"}],
+								optionalParameters: [{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}]
+							};
 							deferred.reject(error);
 							return;
 						}
@@ -386,16 +387,16 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 				}
 				deferred.resolve([
 					{
-						name: "Git",
-						children: [
+						Name: "Git",
+						Children: [
 							{
-								name: "Git Url",
-								value: clone.GitUrl
+								Name: "Git Url",
+								Value: clone.GitUrl
 							},
 							{
-								name: "Git Status",
-								value: "Git Status",
-								href: "{+OrionHome}/git/git-status.html#" + item.Git.StatusLocation
+								Name: "Git Status",
+								Value: "Git Status",
+								Href: "{+OrionHome}/git/git-status.html#" + item.Git.StatusLocation
 							}
 						]
 					}
@@ -407,8 +408,8 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 	}, {
 		id: "orion.git.projecthandler",
 		type: "git",
-		addParamethers: [{id: "url", type: "url", name: "Url:"}],
-		optionalParamethers: [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"},{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}],
+		addParameters: [{id: "url", type: "url", name: "Url:"}],
+		optionalParameters: [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"},{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}],
 		addDependencyName: "Add Git Repository",
 		addDependencyTooltip: "Clone git repository and add it to this project",
 		addProjectName: "Create a project from a Git Repository",

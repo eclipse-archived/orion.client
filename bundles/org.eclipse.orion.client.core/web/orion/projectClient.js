@@ -387,8 +387,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 	_getProjectHandlerService: function(serviceReference){
 		var service = this.serviceRegistry.getService(serviceReference);
 		service.id = serviceReference.getProperty("id");
-		service.addParamethers =  serviceReference.getProperty("addParamethers");
-		service.optionalParamethers = serviceReference.getProperty("optionalParamethers");
+		service.addParameters =  serviceReference.getProperty("addParameters") || serviceReference.getProperty("addParamethers");
+		service.optionalParameters = serviceReference.getProperty("optionalParameters") || serviceReference.getProperty("optionalParamethers");
 		service.addDependencyName =  serviceReference.getProperty("addDependencyName");
 		service.addDependencyTooltip = serviceReference.getProperty("addDependencyTooltip");
 		service.type = serviceReference.getProperty("type");
@@ -507,7 +507,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		return deferred;
 	},
 	
-	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, pluginId, params, url){
+	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, serviceId, params, url){
 		var deferred = new Deferred();
 		var configurationFile = configurationName;
 		configurationFile = configurationFile.replace(/\ /g,' ');
@@ -516,10 +516,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 			configurationFile+=".launch";
 		}
 		var launchConfigurationEnry = {
-			name: configurationName,
-			plugin: pluginId,
-			params: params,
-			url: url
+			Name: configurationName,
+			ServiceId: serviceId,
+			Params: params,
+			Url: url
 		};
 		this._getLaunchConfigurationsDir(projectMetadata, true).then(function(launchConfDir){
 			if(launchConfDir.Children){

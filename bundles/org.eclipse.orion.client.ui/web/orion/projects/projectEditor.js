@@ -142,17 +142,17 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	
 	AdditionalInfoModel.prototype.getChildren = function(parent, onComplete){
 		if(parent === this.root){
-			for(var i=0; i<parent.children.length; i++){
-				parent.children[i].parent = parent;
+			for(var i=0; i<parent.Children.length; i++){
+				parent.Children[i].parent = parent;
 			}
-			onComplete(parent.children);
+			onComplete(parent.Children);
 		} else {
 			onComplete([]);
 		}
 	};
 	
 	AdditionalInfoModel.prototype.getId = function(item){
-		return "AdditionalInfo" + mExplorer.ExplorerModel.prototype.getId.call(this, {Location: item.parent.name + item.name});
+		return "AdditionalInfo" + mExplorer.ExplorerModel.prototype.getId.call(this, {Location: item.parent.Name + item.Name});
 	};
 	
 	function AdditionalInfoRenderer(options, projectEditor, explorer){
@@ -168,7 +168,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		if(col_no===0){
 			var td = document.createElement("td");
 			td.colSpan = 2;
-			td.appendChild(document.createTextNode(this.explorer.model.root.name));
+			td.appendChild(document.createTextNode(this.explorer.model.root.Name));
 			return td;
 		}
 	};
@@ -178,7 +178,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			var td = document.createElement("td");
 			var b = document.createElement("span");
 			b.className = "discreetInputLabel";
-			b.appendChild(document.createTextNode(item.name));
+			b.appendChild(document.createTextNode(item.Name));
 			td.classList.add("discreetInputLabel");
 			td.appendChild(b);
 			td.width = "20%";
@@ -186,14 +186,14 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		}
 		if(col_no===1){
 			var td = document.createElement("td");
-			if(item.href){
+			if(item.Href){
 				var a = document.createElement("a");
-				var uriTemplate = new URITemplate(item.href);
+				var uriTemplate = new URITemplate(item.Href);
 				a.href = uriTemplate.expand({OrionHome : PageLinks.getOrionHome()});
-				a.appendChild(document.createTextNode(item.value || " "));
+				a.appendChild(document.createTextNode(item.Value || " "));
 				td.appendChild(a);
 			} else {
-				td.appendChild(document.createTextNode(item.value || " "));
+				td.appendChild(document.createTextNode(item.Value || " "));
 			}
 			return td;
 		}
@@ -313,7 +313,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	};
 	
 	LaunchConfigurationModel.prototype.getId = function(item){
-		return "LaunchConfiguration" + mExplorer.ExplorerModel.prototype.getId.call(this, {Location: item.name});
+		return "LaunchConfiguration" + mExplorer.ExplorerModel.prototype.getId.call(this, {Location: item.Name});
 	};
 
 	function LaunchConfigurationRenderer(options, projectEditor, explorer){
@@ -341,29 +341,29 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		if(col_no===0) {
 			var td = document.createElement("td");
 			
-			if(item.name){
+			if(item.Name){
 				td.className = "navColumnNoIcon";
-				td.appendChild(document.createTextNode(item.name));
+				td.appendChild(document.createTextNode(item.Name));
 			}
 			return td;
 		}
 		if(col_no===1){
 			var td = document.createElement("td");
-			if(item.url){
+			if(item.Url){
 				var a = document.createElement("a");
-				a.href = item.url;
-				a.appendChild(document.createTextNode(item.url));
+				a.href = item.Url;
+				a.appendChild(document.createTextNode(item.Url));
 				td.appendChild(a);
 			}
 			return td;
 		}
 		if(col_no===2){
 			var td = document.createElement("td");
-			if(item.plugin){
-				this.projectClient.getProjectDelpoyService(item.plugin).then(function(service){
+			if(item.ServiceId){
+				this.projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
 					if(service && service.getState){
-						service.getState(item.params).then(function(result){
-							if(result && result.running === true){
+						service.getState(item.Params).then(function(result){
+							if(result && result.Running === true){
 								td.appendChild(document.createTextNode("Running"));
 							} else {
 								td.appendChild(document.createTextNode("Stopped"));
@@ -503,10 +503,10 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 					}
 					for(var i=0; i<additionalProperties.length; i++){
 						var cat = additionalProperties[i];
-						if(!cat.name){
+						if(!cat.Name){
 							continue;
 						}
-						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.name + "Section", title: cat.name});
+						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.Name + "Section", title: cat.Name});
 						var explorerParent = document.createElement("div");
 						var additionalInfoRenderer = new AdditionalInfoRenderer({
 							checkbox: false
