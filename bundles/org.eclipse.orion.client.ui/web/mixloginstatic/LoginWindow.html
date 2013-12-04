@@ -44,7 +44,7 @@ require(["LoginWindow.js"]);
 			</div>
 
 			<div class="orion-welcome-area"></div>
-			<div class="orion-login" id="orionLoginForm" role="form" aria-labelledby="orion-login-header" style="visibility: hidden;">
+			<div class="orion-login" id="orionLoginForm" style="visibility: hidden;">
 				<div id="orion-login-header" class="orion-form-header">Log in</div>
 				<form>
 					<div class="orion-input-holder">
@@ -66,7 +66,7 @@ require(["LoginWindow.js"]);
 				</form>
 			</div>
 
-			<div class="orion-signup" id="newUserHeaderShown" role="form" aria-labelledby="orion-signup-header" style="visibility: hidden;">
+			<div class="orion-signup" id="newUserHeaderShown" style="visibility: hidden;">
 				<div id="orion-signup-header" class="orion-form-header">Create an account</div>
 				<form>
 					<div class="orion-register-input-holder">
@@ -92,7 +92,7 @@ require(["LoginWindow.js"]);
 				</form>
 			</div>
 
-			<div class="orion-reset" id="orionReset" role="form" aria-labelledby="orion-reset-header" style="visibility: hidden;">
+			<div class="orion-reset" id="orionReset" style="visibility: hidden;">
 				<div id="orion-reset-header" class="orion-form-header">Reset Orion account</div>
 				<div class="orion-reset-note">Provide your username or email to reset your password.</div>
 				<form>
@@ -114,7 +114,7 @@ require(["LoginWindow.js"]);
 			<div class="orion-open" id="orionOpen" style="visibility: visible;" tabindex="-1">
 				<div id="existingAccountLogin" class="orion-sheet-header" tabindex="-1">Have an account? Sign in:</div>
 				<div class="orion-open-images" tabindex="-1">
-					<a id="orionLogin" class="loginIcon orionLoginIcon" tabindex="0">
+					<a id="orionLogin" href="#orionLoginForm" class="loginIcon orionLoginIcon" tabindex="0">
 						Sign in with existing Orion account
 					</a>
 					<a id="googleLogin" class="loginIcon googleIcon" tabindex="0">
@@ -126,7 +126,7 @@ require(["LoginWindow.js"]);
 				</div>
 			</div>
 
-			<div class="orion-register" id="orionRegister" role="form" aria-labelledby="orion-register-header">
+			<div class="orion-register" id="orionRegister">
 				<div id="orion-register-header" class="orion-sheet-header">Need an account?</div>
 				<form>
 					<input id="registerButton" type="button" class="orion-register-button" value="Create a new account" tabindex="0">
