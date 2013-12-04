@@ -68,6 +68,23 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 		},
 		
 		getState:  function(props) {
+			if (props.TargetUrl && props.AppName){
+				var deferred = new Deferred();
+				cFService.getApp(props.TargetUrl, props.AppName).then(
+					function(result){
+						
+					}, function(error){
+						var error = {};
+						error.Retry = true;
+						error.Parameters = [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"}];
+						deferred.reject(error);
+					}
+				)
+				return deferred;
+			}
+				
+			
+			
 			return {running: true};
 		},
 		
@@ -295,7 +312,7 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	
 	var appImpl = {
 		callback: function(args, context) {
-			return cFService.getApp(args.app, context.cwd).then(function(result) {
+			return cFService.getApp(null, args.app, context.cwd).then(function(result) {
 				if (!result) {
 					return "Application not found";
 				}

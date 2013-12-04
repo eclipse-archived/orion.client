@@ -117,19 +117,19 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			
 			// Apps CF v2 operations
 			
-			pushApp: function(appName, dir) {
+			pushApp: function(appName, contentLocation) {
 				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
 					App: appName, 
-					Location: dir
+					ContentLocation: contentLocation
 				});
 			},
 			
-			getApp: function(name, location) {
+			getApp: function(targetUrl, name, contentLocation) {
 				var url = require.toUrl("cfapi/apps");
 				if (name) {
 					url += "?name=" + name;
 				} else if (location) {
-					url += "?location=" + location;
+					url += "?location=" + contentLocation;
 				}
 				return this._xhrV1("GET", url);
 			},
@@ -138,18 +138,18 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("GET", require.toUrl("cfapi/apps"));
 			},
 			
-			startApp: function(name, location) {
+			startApp: function(name, contentLocation) {
 				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
 					Name: name, 
-					Location: location,
+					ContentLocation: contentLocation,
 					State: "Started"
 				});
 			},
 			
-			stopApp: function(name, location) {
+			stopApp: function(name, contentLocation) {
 				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
 					Name: name, 
-					Location: location,
+					ContentLocation: contentLocation,
 					State: "Stopped"
 				});
 			}
