@@ -111,6 +111,7 @@ define([
 	OutlineExplorer.prototype = new mExplorer.Explorer();	
 	OutlineExplorer.prototype.constructor = OutlineExplorer;
 	
+	var previousFilter = null;
 	
 	OutlineExplorer.prototype.filterChanged = function (filter) {
 		var navHandler = this.getNavHandler();
@@ -122,6 +123,16 @@ define([
 		var modifiedFilter = "^" + filter.replace(/([.+^=!:${}()|\[\]\/\\])/g, "\\$1"); //add start of line character and escape all special characters except * and ?
 		modifiedFilter = modifiedFilter.replace(/([*?])/g, ".$1");	//convert user input * and ? to .* and .?
 		
+		if (previousFilter) {
+			if (0 !== filter.indexOf(previousFilter)) {
+				//this is not a more specific version of the previous filter, expand again
+				this.expandAll();
+			}
+		} else {
+			//previous filter not defined, expand all
+			this.expandAll();
+		}
+		
 		for (var id in itemMap) {
 			if (itemMap.hasOwnProperty(id)) {
 				item = itemMap[id];
@@ -131,11 +142,14 @@ define([
 					item.isHidden = true;
 				} else {
 					//label matches filter, show row
+					//TODO show parent rows also
 					navHandler.getRowDiv(item).classList.remove("outlineRowHidden"); //$NON-NLS-0$
 					item.isHidden = false;
 				}
 			}
-		}		
+		}
+		
+		previousFilter = filter;
 	};
 	
 	function OutlineModel(items, rootId) {
