@@ -263,7 +263,7 @@ define([
 						match: "\\<\\S*\\>?",
 						name: "DOC_COMMENT"
 					}, {
-						match: "TODO(\\s(\\*[^/]|[^*])*|$)",
+						match: "TODO(\\s(\\*[^/]|[^*\\n])*|$)",
 						name: "TASK_TAG"
 					}
 				]
@@ -335,7 +335,7 @@ define([
 						match: "\\<\\S*\\>?",
 						name: "DOC_COMMENT"
 					}, {
-						match: "TODO(\\s(\\*[^/]|[^*])*|$)",
+						match: "TODO(\\s(\\*[^/]|[^*\\n])*|$)",
 						name: "TASK_TAG"
 					}
 				]

@@ -263,36 +263,39 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			var viewModel = view.getModel(), baseModel = viewModel;
 			if (viewModel.getBaseModel) { baseModel = viewModel.getBaseModel(); }
 			var annotationType = mAnnotations.AnnotationType.ANNOTATION_TASK;
-			var lineIndex = baseModel.getLineAtOffset(offset);
-			var lineEnd = baseModel.getLineEnd(lineIndex);
-			var annotations = annotationModel.getAnnotations(offset, lineEnd);
-			var remove = [];
-			while (annotations.hasNext()) {
-				var annotation = annotations.next();
-				if (annotation.type === annotationType) {
-					remove.push(annotation);
-				}
-			}
+			var add = [], remove = [];
 
-			var add = [];
-			for (var i = 0; i < styles.length; i++) {
-				var current = styles[i];
-				if (current.style.styleClass === "token_task_tag") {
-					/*
-					 * If the content belonging to the task tag has been broken up by whitespace tokens
-					 * then look at the subsequent tokens for consecutive whitespace+tag tokens, which
-					 * should also be grouped with the current task token.
-					 */
-					var end = current.end;
-					if (this._isRenderingWhitespace()) {
-						while (i + 1 < styles.length && (styles[i + 1].isWhitespace || styles[i + 1].style.styleClass === "token_task_tag")) {
-							end = styles[i + 1].end;
-							i += 1;
+			styles.forEach(function(current) {
+				var annotations = annotationModel.getAnnotations(current.start, current.end);
+				while (annotations.hasNext()) {
+					var annotation = annotations.next();
+					if (annotation.type === annotationType) {
+						remove.push(annotation);
+					}
+				}
+
+				if (current.patterns && current.type === "MULTILINE_COMMENT") {
+					var substyles = [];
+					this._parse(baseModel.getText(current.start, current.end), offset + current.start, current.patterns, true, substyles);
+					for (var i = 0; i < substyles.length; i++) {
+						if (substyles[i].style.styleClass === "token_task_tag") {
+							/*
+							 * If the content belonging to the task tag has been broken up by whitespace tokens
+							 * then look at the subsequent tokens for consecutive whitespace+tag tokens, which
+							 * should also be grouped with the current task token.
+							 */
+							var end = substyles[i].end;
+							if (this._isRenderingWhitespace()) {
+								while (i + 1 < substyles.length && (substyles[i + 1].isWhitespace || substyles[i + 1].style.styleClass === "token_task_tag")) {
+									end = substyles[i + 1].end;
+									i += 1;
+								}
+							}
+							add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, substyles[i].start, end, baseModel.getText(substyles[i].start, end)));
 						}
 					}
-					add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, current.start, end, baseModel.getText(current.start, end)));
 				}
-			};
+			}.bind(this));
 			annotationModel.replaceAnnotations(remove, add);
 		},
 		_getLineStyle: function(lineIndex) {
@@ -383,7 +386,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				resultStyles.push({start: i, end: fullStyle.end, style: fullStyle.style});
 			}
 		},
-		_parse: function(text, offset, patterns, isForRendering, styles, parentMatch) {
+		_parse: function(text, offset, patterns, isForRendering, styles) {
 			/*
 			 * If _parse() is being invoked for some purpose other than the creation of styles to be
 			 * rendered then passing false for isForRendering can be used as a performance optimization,
@@ -437,7 +440,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 
 				/* apply the style */
-				var start = offset + current.result.index;
+				var start = current.result.index;
 				var end, result;
 				if (current.pattern.regex) {
 					/* regex defined by a "match" */
@@ -450,18 +453,18 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					if (!result) {
 						result = new RegExp("$").exec(text);
 					}
-					end = offset + result.index + result[0].length;
+					end = result.index + result[0].length;
 				}
-				var tokenStyle = {start: start, end: end, style: styleMappings[current.pattern.name || "UNKOWN"], isWhitespace: current.pattern.isWhitespace};
+				var tokenStyle = {start: offset + start, end: offset + end, style: styleMappings[current.pattern.name || "UNKOWN"], isWhitespace: current.pattern.isWhitespace};
 				if (isForRendering) {
 					var substyles = [];
 					if (current.pattern.patterns) {
-						this._parse(text.substring(start, end), start, current.pattern.patterns, true, substyles, current);
+						this._parse(text.substring(start, end), offset + start, current.pattern.patterns, true, substyles);
 						this._mergeStyles(tokenStyle, substyles, styles);
 					} else {
 						/* if whitespaces are being shown then invoke _parse on leaf values in order to mark whitespace within them */
 						if (this._isRenderingWhitespace() && !current.pattern.isWhitespace) {
-							this._parse(text.substring(start, end), start, [], true, substyles, current);
+							this._parse(text.substring(start, end), offset + start, [], true, substyles);
 							this._mergeStyles(tokenStyle, substyles, styles);
 						} else {
 							styles.push(tokenStyle);
@@ -472,9 +475,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 				index = result.index + result[0].length;
 				this._updateMatch(current, text, matches);
-			}
-			if (isForRendering && !parentMatch) {
-				this._computeTasks(offset, styles);
 			}
 			patterns.forEach(function(current) {
 				var regex = current.regex || current.regexBegin;
@@ -616,6 +616,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 				this._updateMatch(current, text, matches);
 			}
+			this._computeTasks(offset, results);
 			return results;
 		},
 		_findMatchingBracket: function(model, offset) {
