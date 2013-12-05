@@ -228,11 +228,11 @@ define([
 			}, {
 				id: "comment_single",
 				begin: "//",
-				end: "\\n",
+				end: "[^\\n]*",
 				name: "SINGLELINE_COMMENT",
 				patterns: [
 					{
-						match: "TODO.*",
+						match: "\\bTODO(\\s|$).*",
 						name: "TASK_TAG"
 					}
 				]
@@ -264,7 +264,7 @@ define([
 						match: "\\<\\S*\\>?",
 						name: "DOC_COMMENT"
 					}, {
-						match: "TODO(\\s(\\*[^/]|[^*\\n])*|$)",
+						match: "\\bTODO(\\s(\\*[^/]|[^*\\n])*|$)",
 						name: "TASK_TAG"
 					}
 				]
@@ -308,11 +308,11 @@ define([
 				name: "KEYWORD"
 			}, {
 				begin: "//",
-				end: "\\n",
+				end: "[^\\n]*",
 				name: "SINGLELINE_COMMENT",
 				patterns: [
 					{
-						match: "TODO.*",
+						match: "\\bTODO(\\s|$).*",
 						name: "TASK_TAG"
 					}
 				]
@@ -337,7 +337,7 @@ define([
 						match: "\\<\\S*\\>?",
 						name: "DOC_COMMENT"
 					}, {
-						match: "TODO(\\s(\\*[^/]|[^*\\n])*|$)",
+						match: "\\bTODO(\\s(\\*[^/]|[^*\\n])*|$)",
 						name: "TASK_TAG"
 					}
 				]
