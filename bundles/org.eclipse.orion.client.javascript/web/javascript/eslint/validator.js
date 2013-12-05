@@ -93,9 +93,10 @@ define([
 				} catch (e) {
 					error = e;
 				}
-				problems = problems.concat(extractParseErrors(ast));
+				var parseErrors = extractParseErrors(ast);
+				problems = problems.concat(parseErrors);
 				problems = problems.map(toProblem);
-				if (error) {
+				if (error && !parseErrors.length) {
 					// Warn about ESLint failure
 					problems.push({
 						start: 0,
