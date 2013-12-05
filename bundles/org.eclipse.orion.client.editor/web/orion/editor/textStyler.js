@@ -276,7 +276,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 				if (current.patterns && (current.type === "MULTILINE_COMMENT" || current.type === "SINGLELINE_COMMENT")) {
 					var substyles = [];
-					this._parse(baseModel.getText(current.start, current.end), offset + current.start, current.patterns, true, substyles);
+					this._parse(baseModel.getText(current.start, current.end), current.start, current.patterns, true, substyles);
 					for (var i = 0; i < substyles.length; i++) {
 						if (substyles[i].style.styleClass === "token_task_tag") {
 							/*
