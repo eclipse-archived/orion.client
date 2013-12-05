@@ -103,3 +103,19 @@
 	width: 16px;
 	height: 16px; 
 }
+
+.core-sprite-applicationrunning {
+	background: url(../images/applicationRunning.png);
+	background-repeat: no-repeat;
+	background-position: left top;
+	width: 16px;
+	height: 16px; 
+}
+
+.core-sprite-applicationstopped {
+	background: url(../images/applicationStopped.png);
+	background-repeat: no-repeat;
+	background-position: left top;
+	width: 16px;
+	height: 16px; 
+}

@@ -283,6 +283,9 @@ define([
 				this._node.parentNode.removeChild(this._node);
 			}
 			this.projectView.destroy();
+			if(this.projectEditor){
+				this.projectEditor.destroy();
+			}
 			this._node = null;
 		}
 	};

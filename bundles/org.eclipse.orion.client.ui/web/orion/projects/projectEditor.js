@@ -240,7 +240,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		this._init(options);
 		this.projectEditor = projectEditor;
 		this.explorer = explorer;
-		this.commandRegistry = options.commandRegistry;
+		this.commandService = options.commandRegistry;
 		this.actionScopeId = options.actionScopeId;
 	}
 	
@@ -320,7 +320,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		this._init(options);
 		this.projectEditor = projectEditor;
 		this.explorer = explorer;
-		this.commandRegistry = options.commandRegistry;
+		this.commandService = options.commandRegistry;
 		this.actionScopeId = options.actionScopeId;
 		this.projectClient = options.projectClient;
 	}
@@ -359,20 +359,54 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		}
 		if(col_no===2){
 			var td = document.createElement("td");
+			td.classList.add("actionsColumn");
+			if(item.status){
+				if(item.status.error && item.status.error.Retry){
+					item.parametersRequested = item.status.error.Retry.parameters;
+					item.optionalParameters = item.status.error.Retry.optionalParameters;
+					return this.getActionsColumn(item, tableRow, null, "actionsColumn", true);
+				} else if(item.status.error){
+					var span = document.createElement("span");
+					span.appendChild(document.createTextNode("Error"));
+					span.title = item.status.error.Message;
+					td.appendChild(span);
+					return td;
+				} else if(item.status.Running){
+					var span = document.createElement("span");
+					span.className = "imageSprite core-sprite-applicationrunning";
+					span.title = item.status.Message;
+					td.appendChild(span);
+					return td;
+				} else if(item.status.Running===false){
+					var span = document.createElement("span");
+					span.className = "imageSprite core-sprite-applicationstopped";
+					span.title = item.status.Message;
+					td.appendChild(span);
+					return td;
+				} else {
+					var span = document.createElement("span");
+					span.appendChild(document.createTextNode("State unknown"));
+					span.title = item.status.Message;
+					td.appendChild(span);
+					return td;
+				}
+			}
 			if(item.ServiceId){
 				this.projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
 					if(service && service.getState){
 						service.getState(item.Params).then(function(result){
-							if(result && result.Running === true){
-								td.appendChild(document.createTextNode("Running"));
-							} else {
-								td.appendChild(document.createTextNode("Stopped"));
-							}
-						});
+							item.status = result;
+							tableRow.replaceChild(this.getCellElement(col_no, item, tableRow), td);
+							return;
+						}.bind(this), function(error){
+							item.status = {error: error};
+							tableRow.replaceChild(this.getCellElement(col_no, item, tableRow), td);
+							return;
+						}.bind(this));
 					} else {
 						td.appendChild(document.createTextNode("State unknown"));
 					}
-				});
+				}.bind(this));
 			}
 			return td;
 		}
@@ -392,12 +426,23 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	}
 	ProjectEditor.prototype = {
 		createCommands: function(){
+			this.launchConfigurationDispatcher = mProjectCommands.getLaunchConfigurationDispatcher();
+			var _self = this;
+			this.launchConfigurationListener = function(event){_self.launchConfigurationChanged.call(_self, event);};
+			this._launchConfigurationEventTypes = ["create", "delete", "changeState"];
+			this._launchConfigurationEventTypes.forEach(function(eventType) {
+				_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
+			});
+			
 //			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandRegistry, this, this.fileClient, this.projectClient);
 //			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
 			this.commandRegistry.registerCommandContribution(this.dependencyActions, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandRegistry.registerCommandContribution(this.dependencyActions, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$
+			this.commandRegistry.registerCommandContribution(this.launchConfigurationActions, "orion.launchConfiguration.checkStatus", 1);
+			
+			
 		},
-		changedItem: function(){
+		changedItem: function(item){
 			this.fileClient.read(this.parentFolder.Location, true).then(function(metadata){
 				lib.empty(this.node);
 				this.displayContents(this.node, metadata);
@@ -539,25 +584,58 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			dependenciesExplorer.createTree(dependenciesParent, new DependenciesModel(this.projectData, this.projectClient),  {indent: '8px', noSelection: true});
 			
 		},
-		renderLaunchConfigurations: function(parent){
-			this.projectClient.getProjectLaunchConfigurations(this.projectData).then(function(configurations){
-				if(!configurations || configurations.length === 0){
+		renderLaunchConfigurations: function(parent, configurations){
+			this.configurationsParent = parent;
+			if(!configurations){
+				this.projectClient.getProjectLaunchConfigurations(this.projectData).then(function(configurations){
+					this.configurations = configurations;
+					if(!configurations || configurations.length === 0){
+						return;
+					}
+					this.renderLaunchConfigurations(parent, configurations);
+				}.bind(this));
+				return;
+			}
+			lib.empty(this.configurationsParent);
+			var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", title: "Deployment Information"});
+			var launchConfigurationParent = document.createElement("div");
+			launchConfigurationParent.id = "launchConfigurationsNode";
+			var launchConfigurationRenderer = new LaunchConfigurationRenderer({
+				checkbox: false,
+				commandRegistry: this.commandRegistry,
+				actionScopeId:  this.launchConfigurationActions,
+				projectClient: this.projectClient
+			}, this);
+			var launchConfigurationExplorer = new mExplorer.Explorer(this.serviceRegistry, null, launchConfigurationRenderer, this.commandRegistry);
+			launchConfigurationExplorer.actionScopeId = this.launchConfigurationActions;
+			launchConfigurationSection.embedExplorer(launchConfigurationExplorer, launchConfigurationParent);
+			launchConfigurationExplorer.createTree(launchConfigurationParent, new LaunchConfigurationModel(this.projectData, configurations, this.projectClient),  {indent: '8px'});
+		},
+		launchConfigurationChanged: function(event){
+			if(!this.configurations){
+				return;
+			}
+			if((event.type === "create" || event.type === "changeState") && event.newValue){
+				for(var i=0; i<this.configurations.length; i++){
+					var configuration = this.configurations[i];
+					if(configuration.Name === event.newValue.Name && configuration.ServiceId === event.newValue.ServiceId){
+						this.configurations[i] = event.newValue;
+						this.renderLaunchConfigurations(this.configurationsParent, this.configurations);
+						return;
+					}
+				}
+				if(event.type === "create"){
+					this.configurations.push(event.newValue);
+					this.renderLaunchConfigurations(this.configurationsParent, this.configurations);
 					return;
 				}
-				var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", title: "Deployment Information"});
-				var launchConfigurationParent = document.createElement("div");
-				launchConfigurationParent.id = "launchConfigurationsNode";
-				var launchConfigurationRenderer = new LaunchConfigurationRenderer({
-					checkbox: false,
-					commandRegistry: this.commandRegistry,
-					actionScopeId:  this.launchConfigurationActions,
-					projectClient: this.projectClient
-				}, this);
-				var launchConfigurationExplorer = new mExplorer.Explorer(this.serviceRegistry, null, launchConfigurationRenderer, this.commandRegistry);
-				launchConfigurationExplorer.actionScopeId = this.launchConfigurationActions;
-				launchConfigurationSection.embedExplorer(launchConfigurationExplorer, launchConfigurationParent);
-				launchConfigurationExplorer.createTree(launchConfigurationParent, new LaunchConfigurationModel(this.projectData, configurations, this.projectClient),  {indent: '8px'});
-			}.bind(this));
+			}
+		},
+		destroy: function(){
+			var _self = this;
+			this._launchConfigurationEventTypes.forEach(function(eventType) {
+					_self.launchConfigurationDispatcher.removeEventListener(eventType, _self.launchConfigurationListener);
+				});
 		}
 	};
 	
