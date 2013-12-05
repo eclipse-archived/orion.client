@@ -430,18 +430,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				*/
 				c = "\uFEFF"; //$NON-NLS-0$
 			}
-			if (util.isWebkit) {
-				/*
-				* Feature in WekKit. Adding a regular white space to the line will
-				* cause the longest line in the view to wrap even though "pre" is set.
-				* The fix is to use the zero-width space character (\u200B) instead.
-				* Note: Do not use \u200C because it causes br elements to be inserted on
-				* blank lines while typing chinese or dictation on Mac.
-				* Note: Do not use \uFEFF because in old version of Chrome this character 
-				* shows a glyph;
-				*/
-				c = "\u200B"; //$NON-NLS-0$
-			}
 			var range = {text: c, style: view._metrics.largestFontStyle, ignoreChars: 1};
 			if (ranges.length === 0 || !ranges[ranges.length - 1].style || ranges[ranges.length - 1].style.tagName !== "div") { //$NON-NLS-0$
 				ranges.push(range);
