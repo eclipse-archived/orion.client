@@ -73,13 +73,14 @@ define([
 					
 					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.basic", 1, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.fromfile", 2, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.sftp", 3, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					// TODO: comment out create project from an SFTP site for 5.0 M1
+					//commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.sftp", 3, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					
 					var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
 					var dependencyTypesDef = new Deferred();
 					projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
 						for(var i=0; i<dependencyTypes.length; i++){
-							commandRegistry.registerCommandContribution(newActionsScope, "orion.project.createproject." + dependencyTypes[i], i+4, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+							commandRegistry.registerCommandContribution(newActionsScope, "orion.project.createproject." + dependencyTypes[i], i+3, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 						}
 						
 						ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, projectClient, dependencyTypes).then(dependencyTypesDef.resolve, dependencyTypesDef.resolve);
