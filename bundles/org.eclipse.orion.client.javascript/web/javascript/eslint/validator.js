@@ -57,7 +57,6 @@ define([
 			start: start,
 			end: end
 		};
-		console.log(prob);
 		return prob;
 	}
 	/**
