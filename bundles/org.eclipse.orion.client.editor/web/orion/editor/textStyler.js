@@ -727,6 +727,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 							result.push(-(current.start + 1));
 						}
 					});
+					styles = [];
 				}
 				offset = commentEnd;
 			}
