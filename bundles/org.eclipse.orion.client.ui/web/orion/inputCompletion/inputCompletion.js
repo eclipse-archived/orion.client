@@ -70,8 +70,8 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 				var completion = this;
 				this._binderFunc(function(dataList){
 					this._bind(dataList);
-					this._proposeOn(this._inputField.value);
-					this._selectProposal(this._proposalIndex, true);
+					//this._proposeOn(this._inputField.value);
+					//this._selectProposal(this._proposalIndex, true);
 				}.bind(completion));
 			}
 		}.bind(this);
@@ -105,6 +105,16 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 	InputCompletion.prototype.destroy = function(){
 		this._removeListeners(this._inputFieldListeners);
 		this._removeListeners(this.listeners);
+	};
+	
+	/**
+	 * Check is the data list already has an item whose value is the given value.
+	 * @param {String} value The given value.
+	 */
+	InputCompletion.prototype.hasValueOf = function(value){
+		return this._dataList.some(function(item){
+			return item.value === value;
+		});
 	};
 	
 	/**

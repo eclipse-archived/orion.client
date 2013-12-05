@@ -537,7 +537,7 @@ exports.TwoWayCompareView = (function() {
 		var diff = this.options.diffContent;
 		
 		var result;
-		if(typeof output === "string") {
+		if(typeof output === "string") { //$NON-NLS-0$
 			result = this._generateMapper(input , output, diff , this.options.hasConflicts);
 		} else {
 			result = this._generateMapper(input , output, diff , this.options.hasConflicts);

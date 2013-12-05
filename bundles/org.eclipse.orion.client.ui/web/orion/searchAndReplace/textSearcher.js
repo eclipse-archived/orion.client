@@ -10,7 +10,7 @@
  *	IBM Corporation - initial API and implementation
  *	Adrian Aichner - regular expression capture group support in replace
  ******************************************************************************/
-/*global define window document navigator*/
+/*global console define window document navigator*/
 /*jslint sub:true*/
 
 define([
@@ -205,6 +205,10 @@ define([
 			if(typeof findString !== "string" || !findString ){ //$NON-NLS-0$
 				return;
 			}
+			//If the string is already in the input completion list, do not bother asking preference service.
+			if(this._completion && this._completion.hasValueOf(findString)){
+				return;
+			}
 			this._serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 				var i;
 				var searches = prefs.get("recentFind"); //$NON-NLS-0$
@@ -225,7 +229,7 @@ define([
 					searches = [];
 				}
 				searches.splice(0,0,{ "name": findString});//$NON-NLS-0$
-				this._storeRecentFind(searches/*, this._completion*/);
+				this._storeRecentFind(searches, this._completion);
 			}.bind(this));
 		},
 		_removeRecentSearch: function( searchName, eventTarget){
