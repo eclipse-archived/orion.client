@@ -1457,6 +1457,9 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     SearchResultExplorer.prototype._startUp = function() {
 		var filterBox = _empty("filterBox");
 		var pagingParams = this.model.getPagingParams();
+		if(this.model._provideSearchHelper){
+			window.document.title = this.model._provideSearchHelper().displayedSearchTerm + " - " +  i18nUtil.formatMessage(messages["${0} matches"], pagingParams.totalNumber);//$NON-NLS-0$
+		}
 		if (pagingParams.numberOnPage === 0) {
 	        if(filterBox){
 				filterBox.style.visibility = "hidden"; //$NON-NLS-0$
