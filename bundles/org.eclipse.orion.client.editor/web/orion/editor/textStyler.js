@@ -87,8 +87,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					result.line.patterns = subPatterns;
 				}
 			} else if (!element.match && element.begin && element.end && element.name) {
-				result.line = {regex: new RegExp(element.begin + ".*(" + element.end + "|$)", "g"), name: element.name};
-				result.document = {regexBegin: new RegExp(element.begin, "g"), regexEnd: new RegExp(element.end, "g"), name: element.name};
+				result.document = result.line = {regexBegin: new RegExp(element.begin, "g"), regexEnd: new RegExp(element.end, "g"), name: element.name};
 				if (subPatterns.length) {
 					result.document.patterns = subPatterns;
 				}
@@ -384,32 +383,34 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				resultStyles.push({start: i, end: fullStyle.end, style: fullStyle.style});
 			}
 		},
-		_parse: function(text, offset, linePatterns, isForRendering, styles, parentMatch) {
+		_parse: function(text, offset, patterns, isForRendering, styles, parentMatch) {
 			/*
 			 * If _parse() is being invoked for some purpose other than the creation of styles to be
 			 * rendered then passing false for isForRendering can be used as a performance optimization,
 			 * which skips the consideration of whitespace patterns and pattern subpatterns.
 			 */
 
-			if (!linePatterns) {
+			if (!patterns) {
 				return;
 			}
 
 			if (isForRendering && this._isRenderingWhitespace()) {
-				var temp = linePatterns.slice(0);
+				var temp = patterns.slice(0);
 				if (this.tabsVisible) {
 					temp.push(this.tabPattern);
 				}
 				if (this.spacesVisible) {
 					temp.push(this.spacePattern);
 				}
-				linePatterns = temp;
+				patterns = temp;
 			}
 
 			var matches = [];
-			linePatterns.forEach(function(current) {
-				current.regex.lastIndex = 0;
-				var result = current.regex.exec(text);
+			patterns.forEach(function(current) {
+				var regex = current.regex || current.regexBegin;
+				regex.oldLastIndex = regex.lastIndex;
+				regex.lastIndex = 0;
+				var result = regex.exec(text);
 				if (result) {
 					matches.push({result: result, pattern: current});
 				}
@@ -437,17 +438,30 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 				/* apply the style */
 				var start = offset + current.result.index;
-				var end = start + current.result[0].length;
+				var end, result;
+				if (current.pattern.regex) {
+					/* regex defined by a "match" */
+					result = current.result;
+					end = start + result[0].length;
+				} else {
+					/* regex defined by a "begin/end" pair */
+					current.pattern.regexEnd.lastIndex = current.result.index + current.result[0].length;
+					result = current.pattern.regexEnd.exec(text);
+					if (!result) {
+						result = new RegExp("$").exec(text);
+					}
+					end = offset + result.index + result[0].length;
+				}
 				var tokenStyle = {start: start, end: end, style: styleMappings[current.pattern.name || "UNKOWN"], isWhitespace: current.pattern.isWhitespace};
 				if (isForRendering) {
 					var substyles = [];
 					if (current.pattern.patterns) {
-						this._parse(current.result[0], start, current.pattern.patterns, true, substyles, current);
+						this._parse(text.substring(start, end), start, current.pattern.patterns, true, substyles, current);
 						this._mergeStyles(tokenStyle, substyles, styles);
 					} else {
 						/* if whitespaces are being shown then invoke _parse on leaf values in order to mark whitespace within them */
 						if (this._isRenderingWhitespace() && !current.pattern.isWhitespace) {
-							this._parse(current.result[0], start, [], true, substyles, current);
+							this._parse(text.substring(start, end), start, [], true, substyles, current);
 							this._mergeStyles(tokenStyle, substyles, styles);
 						} else {
 							styles.push(tokenStyle);
@@ -456,12 +470,16 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				} else {
 					styles.push(tokenStyle);
 				}
-				index = current.result.index + current.result[0].length;
+				index = result.index + result[0].length;
 				this._updateMatch(current, text, matches);
 			}
 			if (isForRendering && !parentMatch) {
 				this._computeTasks(offset, styles);
 			}
+			patterns.forEach(function(current) {
+				var regex = current.regex || current.regexBegin;
+				regex.lastIndex = regex.oldLastIndex;
+			}.bind(this));
 		},
 		_parseComment: function(text, offset, subPatterns, styles, s, type) {
 			// TODO support multi-line sub-patterns
