@@ -483,12 +483,12 @@ objects.mixin(SiteEditor.prototype, {
 		var hostStatus = this._siteConfiguration.HostingStatus;
 		if (hostStatus && hostStatus.Status === "started") { //$NON-NLS-0$
 			this.siteStartedWarning.style.display = "block"; //$NON-NLS-0$
-			this.hostingStatus.textContent = messages["Started at "];
+			this.hostingStatus.textContent = messages["Started"];
 			var a = document.createElement("a"); //$NON-NLS-0$
 			a.href = hostStatus.URL;
 			a.target = "_new"; //$NON-NLS-0$
-			this.hostingStatus.appendChild(a);
 			a.textContent = hostStatus.URL;
+			lib.processDOMNodes(this.hostingStatus, [a]);
 		} else if (hostStatus && hostStatus.Status === "stopped") {//$NON-NLS-0$
 			this.siteStartedWarning.style.display = "none"; //$NON-NLS-0$
 			this.hostingStatus.textContent = messages["Stopped"];
