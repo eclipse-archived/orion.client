@@ -574,7 +574,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 
 			var index = 0;
-			var results = [];
+			var results = [], all = [];
 			while (matches.length > 0) {
 				var current = matches[0];
 				matches.splice(0,1);
@@ -597,12 +597,22 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 						current.pattern.regexEnd.lastIndex = current.result.index + current.result[0].length;
 						var resultEnd = current.pattern.regexEnd.exec(text);
 						if (resultEnd) {
-							results.push({
+							all.push({
 								start: targetOffset,
 								end: offset + resultEnd.index + resultEnd[0].length,
 								type: current.pattern.name,
 								patterns: current.pattern.patterns
 							});
+/*
+ * TODO GWG
+ * Having separate "all" and "results" arrays that are differentiated solely by
+ * the presence/absense of single-line comments is a temporary hack for the 5.0M1
+ * release.  It enables TODOs in single-line comments to be detected here, but to
+ * then treat the comments as single-line tokens for computing highlight blocks.
+ */
+if (current.pattern.name !== "SINGLELINE_COMMENT") {
+	results.push(all[all.length - 1]);
+}
 							index = resultEnd.index + resultEnd[0].length;
 						}
 						break;
@@ -610,7 +620,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 				this._updateMatch(current, text, matches);
 			}
-			this._computeTasks(offset, results);
+			this._computeTasks(offset, /* results */ all);
 			return results;
 		},
 		_findMatchingBracket: function(model, offset) {
