@@ -51,11 +51,19 @@ define([
 				image.classList.add("thumbnail"); //$NON-NLS-0$
 				break;
 			default:
-				if (contentType && contentType.image) {
-					image = document.createElement("img"); //$NON-NLS-0$
-					image.src = contentType.image;
-					// to minimize the height/width in case of a large one
-					image.classList.add("thumbnail"); //$NON-NLS-0$
+				// imageClass takes priority over image
+				if (contentType) {
+					var imageClass = contentType.imageClass, imageURL = contentType.image;
+					if (imageClass) {
+						image = document.createElement("span"); //$NON-NLS-0$
+						image.className += imageClass; // may be several classes in here
+						image.classList.add("thumbnail"); //$NON-NLS-0$
+					} else if (imageURL) {
+						image = document.createElement("img"); //$NON-NLS-0$
+						image.src = imageURL;
+						// to minimize the height/width in case of a large one
+						image.classList.add("thumbnail"); //$NON-NLS-0$
+					}
 				}
 				break;
 		}

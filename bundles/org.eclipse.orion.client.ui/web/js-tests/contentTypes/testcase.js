@@ -91,6 +91,11 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 				id: 'orion/test3',
 				name: 'Basic 3',
 				filename: ['build.xml']
+			}, {
+				id: 'orion/test4',
+				name: 'Basic 4',
+				image: 'http://example.org/foo.png',
+				imageClass: 'imageFoo'
 			} ];
 		mockRegistry = new MockServiceRegistry();
 		mockRegistry._registerServiceProvider("orion.core.contenttype", {}, {
@@ -240,6 +245,20 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 			var type3 = contentTypeService.getFilenameContentType('test.TxT');
 			assertContentTypesEqual(type1, type2);
 			assertContentTypesEqual(type2, type3);
+		});
+	};
+
+	tests.testImage = function() {
+		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+			var type4;
+			contentTypeService.getContentTypes().some(function(ct) {
+				if (ct.id === 'orion/test4') {
+					type4 = ct;
+					return true;
+				}
+			});
+			assert.equal(type4.image, 'http://example.org/foo.png');
+			assert.equal(type4.imageClass, 'imageFoo');
 		});
 	};
 

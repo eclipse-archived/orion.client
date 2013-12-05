@@ -84,6 +84,7 @@ define([], function() {
 							id: type.id,
 							name: type.name,
 							image: type.image,
+							imageClass: type.imageClass,
 							"extends": type["extends"], //$NON-NLS-1$ //$NON-NLS-0$
 							extension: arrayLowerCase(type.extension),
 							filename: array(type.filename)
