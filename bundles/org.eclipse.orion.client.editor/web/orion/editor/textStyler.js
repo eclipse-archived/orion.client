@@ -17,6 +17,12 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	'orion/editor/keywords' //$NON-NLS-0$
 ], function(mAnnotations, mKeywords) {
 
+	/*
+	 * Throughout textStyler "block" refers to a potentially multi-line token (ie.- a pattern
+	 * defined in the service with begin/end expressions rather than a single match expression).
+	 * Typical examples are multi-line comments and multi-line strings.
+	 */
+
 	var UNKOWN = 1;
 	var KEYWORD = 2;
 	var NUMBER = 3;
@@ -152,7 +158,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		view.addEventListener("Selection", this._listener.onSelection); //$NON-NLS-0$
 		view.addEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
 		view.addEventListener("LineStyle", this._listener.onLineStyle); //$NON-NLS-0$
-		this._computeComments ();
+		this._computeBlocks ();
 		this._computeFolding();
 		view.redrawLines();
 	}
@@ -221,10 +227,10 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			return high;
 		},
-		_computeComments: function() {
+		_computeBlocks: function() {
 			var model = this.view.getModel();
 			if (model.getBaseModel) { model = model.getBaseModel(); }
-			this.comments = this._findComments(model.getText(), model);
+			this.blocks = this._findBlocks(model.getText(), model);
 		},
 		_computeFolding: function() {
 			if (!this.foldingEnabled) { return; }
@@ -236,10 +242,10 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_FOLDING);
 			var add = [];
 			var baseModel = viewModel.getBaseModel();
-			var comments = this.comments;
-			for (var i=0; i<comments.length; i++) {
-				var comment = comments[i];
-				var annotation = this._createFoldingAnnotation(viewModel, baseModel, comment.start, comment.end);
+			var blocks = this.blocks;
+			for (var i = 0; i < blocks.length; i++) {
+				var block = blocks[i];
+				var annotation = this._createFoldingAnnotation(viewModel, baseModel, block.start, block.end);
 				if (annotation) {
 					add.push(annotation);
 				}
@@ -318,30 +324,23 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			var styles = [];
 
 			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
-			var offset = start, comments = this.comments;
-			var startIndex = this._binarySearch(comments, start, true);
-			for (var i = startIndex; i < comments.length; i++) {
-				if (comments[i].start >= end) { break; }
-				var commentStart = comments[i].start;
-				var commentEnd = comments[i].end;
-				if (offset < commentStart) {
-					this._parse(text.substring(offset - start, commentStart - start), offset, this.linePatterns, true, styles);
+			var offset = start, blocks = this.blocks;
+			var startIndex = this._binarySearch(blocks, start, true);
+			for (var i = startIndex; i < blocks.length; i++) {
+				if (blocks[i].start >= end) { break; }
+				var blockStart = blocks[i].start;
+				var blockEnd = blocks[i].end;
+				if (offset < blockStart) {
+					this._parse(text.substring(offset - start, blockStart - start), offset, this.linePatterns, true, styles);
 				}
-				var type = comments[i].type;
+				var type = blocks[i].type;
 				var style = styleMappings[type];
-//				switch (type) {
-//					case DOC_COMMENT: style = docCommentStyle; break;
-//					case MULTILINE_COMMENT: style = multiCommentStyle; break;
-//					case MULTILINE_STRING: style = stringStyle; break;
-//				}
-				var s = Math.max(offset, commentStart);
-				var e = Math.min(end, commentEnd);
-		//			styles.push({start: s, end: e, style: style});
-//				if ((type === DOC_COMMENT || type === MULTILINE_COMMENT) && (this.whitespacesVisible || this.detectHyperlinks)) {
-				var commentStyles = [];
-					this._parseComment(text.substring(s - start, e - start), s, comments[i].patterns, commentStyles, style, type);
+				var s = Math.max(offset, blockStart);
+				var e = Math.min(end, blockEnd);
+				var blockStyles = [];
+				this._parseBlock(text.substring(s - start, e - start), s, blocks[i].patterns, blockStyles, style, type);
 				var index = s;
-				commentStyles.forEach(function(current) {
+				blockStyles.forEach(function(current) {
 					if (current.start - index) {
 						styles.push({start: index, end: current.start, style: style});
 					}
@@ -351,12 +350,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				if (e - index) {
 					styles.push({start: index, end: e, style: style});
 				}
-//				styles = styles.concat(commentStyles);
-//				} else if (type === MULTILINE_STRING && this.whitespacesVisible) {
-//					this._parseString(text.substring(s - start, e - start), s, styles, stringStyle);
-//				} else {
-//				}
-				offset = commentEnd;
+				offset = blockEnd;
 			}
 			if (offset < end) {
 				this._parse(text.substring(offset - start, end - start), offset, this.linePatterns, true, styles);
@@ -481,7 +475,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				regex.lastIndex = regex.oldLastIndex;
 			}.bind(this));
 		},
-		_parseComment: function(text, offset, subPatterns, styles, s, type) {
+		_parseBlock: function(text, offset, subPatterns, styles, s, type) {
 			// TODO support multi-line sub-patterns
 			var lines = text.split('\n');
 			lines.forEach(function(current) {
@@ -554,7 +548,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			return newObj;
 		},
-		_findComments: function(text, model, offset) {
+		_findBlocks: function(text, model, offset) {
 			offset = offset || 0;
 
 			var matches = [];
@@ -713,14 +707,14 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		_findBrackets: function(bracket, closingBracket, text, start, end) {
 			var result = [], styles = [];
 			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
-			var offset = start, comments = this.comments;
-			var startIndex = this._binarySearch(comments, start, true);
-			for (var i = startIndex; i < comments.length; i++) {
-				if (comments[i].start >= end) { break; }
-				var commentStart = comments[i].start;
-				var commentEnd = comments[i].end;
-				if (offset < commentStart) {
-					this._parse(text.substring(offset - start, commentStart - start), offset, this.linePatterns, false, styles);
+			var offset = start, blocks = this.blocks;
+			var startIndex = this._binarySearch(blocks, start, true);
+			for (var i = startIndex; i < blocks.length; i++) {
+				if (blocks[i].start >= end) { break; }
+				var blockStart = blocks[i].start;
+				var blockEnd = blocks[i].end;
+				if (offset < blockStart) {
+					this._parse(text.substring(offset - start, blockStart - start), offset, this.linePatterns, false, styles);
 					styles.forEach(function(current) {
 						if (current.style.styleClass.indexOf(bracket.name) === 0) {
 							result.push(current.start + 1);
@@ -730,7 +724,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					});
 					styles = [];
 				}
-				offset = commentEnd;
+				offset = blockEnd;
 			}
 			if (offset < end) {
 				this._parse(text.substring(offset - start, end - start), offset, this.linePatterns, false, styles);
@@ -829,51 +823,51 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			var baseModel = viewModel.getBaseModel ? viewModel.getBaseModel() : viewModel;
 			var end = start + removedCharCount;
 			var charCount = baseModel.getCharCount();
-			var commentCount = this.comments.length;
+			var blockCount = this.blocks.length;
 			var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(start));
-			var commentStart = this._binarySearch(this.comments, lineStart, true);
-			var commentEnd = this._binarySearch(this.comments, end, false, commentStart - 1, commentCount);
+			var blockStart = this._binarySearch(this.blocks, lineStart, true);
+			var blockEnd = this._binarySearch(this.blocks, end, false, blockStart - 1, blockCount);
 
 			var ts;
-			if (commentStart < commentCount && this.comments[commentStart].start <= lineStart && lineStart < this.comments[commentStart].end) {
-				ts = this.comments[commentStart].start;
+			if (blockStart < blockCount && this.blocks[blockStart].start <= lineStart && lineStart < this.blocks[blockStart].end) {
+				ts = this.blocks[blockStart].start;
 				if (ts > start) { ts += changeCount; }
 			} else {
-				if (commentStart === commentCount && commentCount > 0 && charCount - changeCount === this.comments[commentCount - 1].end) {
-					ts = this.comments[commentCount - 1].start;
+				if (blockStart === blockCount && blockCount > 0 && charCount - changeCount === this.blocks[blockCount - 1].end) {
+					ts = this.blocks[blockCount - 1].start;
 				} else {
 					ts = lineStart;
 				}
 			}
 			var te;
-			if (commentEnd < commentCount) {
-				te = this.comments[commentEnd].end;
+			if (blockEnd < blockCount) {
+				te = this.blocks[blockEnd].end;
 				if (te > start) { te += changeCount; }
-				commentEnd += 1;
+				blockEnd += 1;
 			} else {
-				commentEnd = commentCount;
-				te = charCount;//TODO could it be smaller?
+				blockEnd = blockCount;
+				te = charCount;	//TODO could it be smaller?
 			}
-			var text = baseModel.getText(ts, te), comment;
-			var newComments = this._findComments(text, baseModel, ts), i;
-			for (i = commentStart; i < this.comments.length; i++) {
-				comment = this.comments[i];
-				if (comment.start > start) { comment.start += changeCount; }
-				if (comment.start > start) { comment.end += changeCount; }
+			var text = baseModel.getText(ts, te), block;
+			var newBlocks = this._findBlocks(text, baseModel, ts), i;
+			for (i = blockStart; i < this.blocks.length; i++) {
+				block = this.blocks[i];
+				if (block.start > start) { block.start += changeCount; }
+				if (block.start > start) { block.end += changeCount; }
 			}
-			var redraw = (commentEnd - commentStart) !== newComments.length;
+			var redraw = (blockEnd - blockStart) !== newBlocks.length;
 			if (!redraw) {
-				for (i=0; i<newComments.length; i++) {
-					comment = this.comments[commentStart + i];
-					var newComment = newComments[i];
-					if (comment.start !== newComment.start || comment.end !== newComment.end || comment.type !== newComment.type) {
+				for (i = 0; i < newBlocks.length; i++) {
+					block = this.blocks[blockStart + i];
+					var newBlock = newBlocks[i];
+					if (block.start !== newBlock.start || block.end !== newBlock.end || block.type !== newBlock.type) {
 						redraw = true;
 						break;
 					}
 				}
 			}
-			var args = [commentStart, commentEnd - commentStart].concat(newComments);
-			Array.prototype.splice.apply(this.comments, args);
+			var args = [blockStart, blockEnd - blockStart].concat(newBlocks);
+			Array.prototype.splice.apply(this.blocks, args);
 			if (redraw) {
 				var redrawStart = ts;
 				var redrawEnd = te;
@@ -893,12 +887,12 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					annotation = iter.next();
 					if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_FOLDING) {
 						all.push(annotation);
-						for (i = 0; i < newComments.length; i++) {
-							if (annotation.start === newComments[i].start && annotation.end === newComments[i].end) {
+						for (i = 0; i < newBlocks.length; i++) {
+							if (annotation.start === newBlocks[i].start && annotation.end === newBlocks[i].end) {
 								break;
 							}
 						}
-						if (i === newComments.length) {
+						if (i === newBlocks.length) {
 							remove.push(annotation);
 							annotation.expand();
 						} else {
@@ -925,15 +919,15 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					}
 				}
 				var add = [];
-				for (i = 0; i < newComments.length; i++) {
-					comment = newComments[i];
+				for (i = 0; i < newBlocks.length; i++) {
+					block = newBlocks[i];
 					for (var j = 0; j < all.length; j++) {
-						if (all[j].start === comment.start && all[j].end === comment.end) {
+						if (all[j].start === block.start && all[j].end === block.end) {
 							break;
 						}
 					}
 					if (j === all.length) {
-						annotation = this._createFoldingAnnotation(viewModel, baseModel, comment.start, comment.end);
+						annotation = this._createFoldingAnnotation(viewModel, baseModel, block.start, block.end);
 						if (annotation) {
 							add.push(annotation);
 						}
