@@ -25,6 +25,16 @@ define([
 	function ASTManager() {
 		this.cache = null;
 	}
+	function emptyAST(text) {
+		var charCount = (text && typeof text.length === "number") ? text.length : 0;
+		return {
+			type: "Program", //$NON-NLS-0$
+			body: [],
+			comments: [],
+			tokens: [],
+			range: [0, charCount]
+		};
+	}
 	objects.mixin(ASTManager.prototype, /** @lends javascript.ASTManager.prototype */ {
 		/**
 		 * @param {Object} editorContext
@@ -47,14 +57,20 @@ define([
 		 * @returns {Object} The AST.
 		 */
 		parse: function(text) {
-			// TODO wrap in try..catch to recover from parse errors in initial statements of code
-			var ast = esprima.parse(text, {
-				range: true,
-				tolerant: true,
-				comment: true,
-				loc: true,
-				tokens: true
-			});
+			try {
+				var ast = esprima.parse(text, {
+					range: true,
+					tolerant: true,
+					comment: true,
+					loc: true,
+					tokens: true
+				});
+			} catch (e) {
+				// The "tolerant" esprima sometimes blows up from parse errors in initial statements of code.
+				// Just return an empty AST with the parse error.
+				ast = emptyAST(text);
+				ast.errors = [e];
+			}
 			if (ast.errors) {
 				ast.errors = ast.errors.map(Serialize.serializeError);
 			}

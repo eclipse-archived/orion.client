@@ -23,9 +23,12 @@ define([
 	 */
 	function setup() {
 		var mockEditorContext = {
+			_setText: function(text) {
+				this.text = text;
+			},
 			getText: function() {
 				// doesn't matter since mockEsprima ignores the text param
-				return new Deferred().resolve();
+				return new Deferred().resolve(this.text);
 			}
 		};
 		var mockEsprima = {
@@ -134,6 +137,27 @@ define([
 				return astManager.getAST(editorContext).then(function(ast) {
 					assert.equal(ast, "AST callcount 1");
 				});
+			});
+		});
+	};
+	/**
+	 * Tests that getAST() still produces an AST even if the parser blows up.
+	 */
+	tests.test_getAST_with_throwy_parser = function() {
+		var result = setup(),
+		    astManager = result.astManager,
+		    editorContext = result.editorContext,
+		    mockEsprima = result.mockEsprima;
+
+		return withMockEsprima(mockEsprima, function() {
+			var error = new Error("Game over man");
+			mockEsprima.parse = function() {
+				throw error;
+			};
+			return astManager.getAST(editorContext).then(function(ast) {
+				assert.ok(ast);
+				assert.equal(ast.type, "Program");
+				assert.equal(ast.errors[0].message, error.message);
 			});
 		});
 	};
