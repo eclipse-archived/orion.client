@@ -227,7 +227,8 @@ define([
 				name: "KEYWORD"
 			}, {
 				id: "comment_single",
-				match: "//.*",
+				begin: "//",
+				end: "\\n",
 				name: "SINGLELINE_COMMENT",
 				patterns: [
 					{
@@ -306,7 +307,8 @@ define([
 				match: "\\b(" + keywords.JAVAKeywords.join("|") + ")\\b",
 				name: "KEYWORD"
 			}, {
-				match: "//.*",
+				begin: "//",
+				end: "\\n",
 				name: "SINGLELINE_COMMENT",
 				patterns: [
 					{
