@@ -21,8 +21,9 @@ define([
 	'orion/URITemplate',
 	'orion/EventTarget',
 	'orion/i18nUtil',
-	'orion/edit/editorContext'
-], function(messages, Deferred, lib, mUIUtils, mSection, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, EditorContext) {
+	'orion/edit/editorContext',
+	'orion/webui/tooltip'
+], function(messages, Deferred, lib, mUIUtils, mSection, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, EditorContext, Tooltip) {
 
 	function OutlineRenderer (options, explorer, title, selectionService) {
 		this.explorer = explorer;
@@ -414,13 +415,16 @@ define([
 				this.explorer.destroy();
 				this.explorer = null;
 			}
+			
+			//reset the sidebar switcher node's layout state
+			this._sidebar.switcherNode.classList.remove("layoutLeft");
+			this._sidebar.switcherNode.classList.add("layoutRight");
 		},
 		
 		_createFilterInput: function() {
 			var input = document.createElement("input"); //$NON-NLS-0$
 		
 			input.classList.add("outlineFilter"); //$NON-NLS-0$
-			input.classList.add("layoutLeft"); //$NON-NLS-0$
 			input.placeholder = messages["Filter"]; //$NON-NLS-0$
 			input.type="text"; //$NON-NLS-0$
 			input.addEventListener("input", function (e) { //$NON-NLS-0$
@@ -449,8 +453,34 @@ define([
 					}
 				}
 			}.bind(this), false);
+			
+			input.commandTooltip = new Tooltip.Tooltip({
+				node: input,
+				text: messages["Filter"], //$NON-NLS-0$
+				position: ["right", "above", "left"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				trigger: "none" //$NON-NLS-0$
+			});
+			
+			// add handlers to show/hide tooltip
+			var showTooltip = function(e){
+				input.commandTooltip.show();
+			};
+			var hideTooltip = function(e){
+				input.commandTooltip.hide(0);
+			};
+			input.addEventListener("mouseover", showTooltip, false);
+			input.addEventListener("mouseout", function(e) {
+				if (input !== document.activeElement) {
+					hideTooltip();	
+				}
+			}, false);
+			input.addEventListener("focus", showTooltip, false);
+			input.addEventListener("blur", hideTooltip, false);
 		
 			this._toolbar.appendChild(input);
+			//move the sidebar's switcher node to the left
+			this._sidebar.switcherNode.classList.remove("layoutRight");
+			this._sidebar.switcherNode.classList.add("layoutLeft");
 		},
 		
 		/**

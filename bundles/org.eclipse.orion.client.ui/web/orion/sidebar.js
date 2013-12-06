@@ -63,16 +63,20 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			var toolbarNode = this.toolbarNode;
 
 			// Create toolbar contribution area for use by viewmodes
-			var modeContributionToolbar = this.modeContributionToolbar = document.createElement("div"); //$NON-NLS-0$
-			modeContributionToolbar.id = toolbarNode.id + "childModes"; //$NON-NLS-0$
-			toolbarNode.appendChild(modeContributionToolbar);
 			var switcherNode = this.switcherNode = document.createElement("ul"); //$NON-NLS-0$
 			switcherNode.id = toolbarNode.id + "viewmodeSwitch"; //$NON-NLS-0$
 			switcherNode.classList.add("layoutRight"); //$NON-NLS-0$
 			switcherNode.classList.add("commandList"); //$NON-NLS-0$
 			switcherNode.classList.add("pageActions"); //$NON-NLS-0$
 			toolbarNode.appendChild(switcherNode);
-
+			
+			// switcher node is more essential for navigation it should therefore
+			// be inserted first to prevent it from being considered as part of the
+			// overflow before the modeContributionToolbar
+			var modeContributionToolbar = this.modeContributionToolbar = document.createElement("div"); //$NON-NLS-0$
+			modeContributionToolbar.id = toolbarNode.id + "childModes"; //$NON-NLS-0$
+			toolbarNode.appendChild(modeContributionToolbar);
+			
 			var changeViewModeCommand = new mCommands.Command({
 				name: messages["View"],
 				imageClass: "core-sprite-outline", //$NON-NLS-0$
