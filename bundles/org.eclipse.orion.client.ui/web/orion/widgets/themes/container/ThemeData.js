@@ -58,7 +58,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme', 'orion/wid
 			orion.search = '#444';
 			orion.breadcrumb = '#3087B3';
 			orion.separator = '#333';
-			orion.bannerProgress = "#F79327";
+			orion.bannerProgress = "whitesmoke";
 
 			this.styles.push( orion );			
 
