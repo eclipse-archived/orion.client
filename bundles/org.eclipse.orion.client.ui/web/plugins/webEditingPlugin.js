@@ -33,25 +33,25 @@ define([
 			[{	id: "text/plain",
 				name: "Text",
 				extension: ["txt"],
-				imageClass: "file-sprite-text"
+				imageClass: "file-sprite-text modelDecorationSprite"
 			},
 			{	id: "text/html",
 				"extends": "text/plain",
 				name: "HTML",
 				extension: ["html", "htm"],
-				imageClass: "file-sprite-html"
+				imageClass: "file-sprite-html modelDecorationSprite"
 			},
 			{	id: "text/css",
 				"extends": "text/plain",
 				name: "CSS",
 				extension: ["css"],
-				imageClass: "file-sprite-css"
+				imageClass: "file-sprite-css modelDecorationSprite"
 			},
 			{	id: "application/json",
 				"extends": "text/plain",
 				name: "JSON",
 				extension: ["json"],
-				imageClass: "file-sprite-text"
+				imageClass: "file-sprite-text modelDecorationSprite"
 			},
 			{	id: "application/xml",
 				"extends": "text/plain",

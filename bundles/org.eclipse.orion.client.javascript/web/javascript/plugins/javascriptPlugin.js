@@ -39,7 +39,7 @@ define([
 				"extends": "text/plain",
 				name: "JavaScript",
 				extension: ["js"],
-				imageClass: "file-sprite-javascript"
+				imageClass: "file-sprite-javascript modelDecorationSprite"
 			}
 		] 
 	});
