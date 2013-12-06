@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global window define require document*/
-define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtils'], function(messages, EventTarget, mSearchUtils){
+define(['orion/EventTarget'], function( EventTarget){
 
 	/**
 	 * InputCompletion is an alternative to datalist support in html5.
@@ -143,19 +143,19 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 			}
 		}.bind(this);
 		this._inputField.addEventListener("blur", blurHanlder); //$NON-NLS-0$
-		this._inputFieldListeners.push({evtTarget: this._inputField, type: "blur", handler: blurHanlder}); 
+		this._inputFieldListeners.push({evtTarget: this._inputField, type: "blur", handler: blurHanlder}); //$NON-NLS-0$
 		
 		var keyDownHandler = function(e) {
 			this.onKeyDown(e);
 		}.bind(this);
 		this._inputField.addEventListener("keydown", keyDownHandler); //$NON-NLS-0$
-		this._inputFieldListeners.push({evtTarget: this._inputField, type: "keydown", handler: keyDownHandler}); 
+		this._inputFieldListeners.push({evtTarget: this._inputField, type: "keydown", handler: keyDownHandler}); //$NON-NLS-0$
 
 		var inputChangeHandler = function(e) {
 			this._proposeOn(this._inputField.value);
 		}.bind(this);
 		this._inputField.addEventListener("input", inputChangeHandler); //$NON-NLS-0$
-		this._inputFieldListeners.push({evtTarget: this._inputField, type: "input", handler: inputChangeHandler}); 
+		this._inputFieldListeners.push({evtTarget: this._inputField, type: "input", handler: inputChangeHandler}); //$NON-NLS-0$
 		
 		var focusHandler = function(e) {
 			if(!this._dismissed || !this._binderFunc){
@@ -175,8 +175,8 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 				}.bind(completion));
 			}
 		}.bind(this);
-		this._inputField.addEventListener("focus", focusHandler);
-		this._inputFieldListeners.push({evtTarget: this._inputField, type: "focus", handler: focusHandler}); 
+		this._inputField.addEventListener("focus", focusHandler); //$NON-NLS-0$
+		this._inputFieldListeners.push({evtTarget: this._inputField, type: "focus", handler: focusHandler}); //$NON-NLS-0$
 	};
 
 	/**
@@ -232,23 +232,23 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 	};
 	
 	InputCompletion.prototype._getUIContainerID = function(){
-		return this._completionIdPrefix + "UIContainer";
+		return this._completionIdPrefix + "UIContainer"; //$NON-NLS-0$
 	};
 
 	InputCompletion.prototype._getUIProposalListId = function(){
-		return this._completionIdPrefix + "UIProposalList";
+		return this._completionIdPrefix + "UIProposalList"; //$NON-NLS-0$
 	};
 	
 	InputCompletion.prototype._initUI = function(){
 		this._completionUIContainer = document.getElementById(this._getUIContainerID());
 		if(!this._completionUIContainer){
-			this._completionUIContainer = document.createElement('div');
+			this._completionUIContainer = document.createElement('div'); //$NON-NLS-0$
 			this._completionUIContainer.id = this._getUIContainerID();
 			this._completionUIContainer.style.display = "none"; //$NON-NLS-0$
 			this._completionUIContainer.className = "inputCompletionContainer"; //$NON-NLS-0$
-			this._completionUIContainer.setAttribute("role", "list");
-			this._completionUIContainer.setAttribute("aria-atomic", "true");
-			this._completionUIContainer.setAttribute("aria-live", "assertive");
+			this._completionUIContainer.setAttribute("role", "list"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._completionUIContainer.setAttribute("aria-atomic", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._completionUIContainer.setAttribute("aria-live", "assertive"); //$NON-NLS-1$ //$NON-NLS-0$
 			document.body.appendChild(this._completionUIContainer);
 		}
 		this._completionUIContainer.textContent = "";
@@ -285,7 +285,7 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 		textNode = document.createTextNode(text.substring(boldIndex, boldIndex+boldLength));
 		matchSegBold.appendChild(textNode);
 		
-		if((boldIndex + boldLength) < (text.length - 1)){
+		if((boldIndex + boldLength) < text.length){
 			textNode = document.createTextNode(text.substring(boldIndex + boldLength));
 			parentSpan.appendChild(textNode);
 		}
@@ -298,7 +298,7 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 		}
 		var listEle;
 		if(categoryName){
-			listEle = document.createElement('li');
+			listEle = document.createElement('li'); //$NON-NLS-0$
 			listEle.className = "inputCompletionLICategory"; //$NON-NLS-0$
 			var liText = document.createTextNode(categoryName);
 			listEle.appendChild(liText);
@@ -306,7 +306,7 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 		}
 		
 		categoryList.forEach(function(category) {
-			listEle = document.createElement('li');
+			listEle = document.createElement('li'); //$NON-NLS-0$
 			listEle.onmouseover = function(e){
 				this._selectProposal(e.currentTarget);
 			}.bind(this);
@@ -316,12 +316,12 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 			listEle.className = "inputCompletionLINormal"; //$NON-NLS-0$
 			listEle.completionItem = category.item;
 			var deleteBtn;
-			if(typeof category.item.value === "string"){
+			if(typeof category.item.value === "string"){ //$NON-NLS-0$
 				var tbl = document.createElement('table'); //$NON-NLS-0$
 				tbl.style.width = "100%"; //$NON-NLS-0$
 				tbl.style.tableLayout = 'fixed'; //$NON-NLS-0$
 				tbl.style.borderSpacing = "0"; //$NON-NLS-0$
-				var tr = document.createElement('tr');
+				var tr = document.createElement('tr'); //$NON-NLS-0$
 				tr.style.width = this._inputField.offsetWidth + "px"; //$NON-NLS-0$
 				tbl.appendChild(tr);
 				var td1 = document.createElement('td'); //$NON-NLS-0$
@@ -331,7 +331,7 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 				tr.appendChild(td1);
 				
 				if(this._onDelete) {
-					deleteBtn = document.createElement('button');
+					deleteBtn = document.createElement('button'); //$NON-NLS-0$
 					deleteBtn.classList.add("dismissButton"); //$NON-NLS-0$
 					deleteBtn.classList.add("layoutRight"); //$NON-NLS-0$
 					deleteBtn.classList.add("core-sprite-close"); //$NON-NLS-0$
@@ -418,11 +418,11 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 		this._proposalList = null;
 		this._proposalIndex = -1;
 		
-		if(typeof valueToInputField === "string"){
+		if(typeof valueToInputField === "string"){ //$NON-NLS-0$
 			this._inputField.value = valueToInputField;
 			this._dismissing = true;
 			this._inputField.focus();
-		} else if(valueToInputField && valueToInputField.name && valueToInputField.type === "link"){
+		} else if(valueToInputField && valueToInputField.name && valueToInputField.type === "link"){ //$NON-NLS-0$
 			if(ctrlKey){
 				window.open(valueToInputField.value);
 			} else {
@@ -467,15 +467,6 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 		this._selectProposal(index);
 	};
 	
-	InputCompletion.prototype._delete = function(){
-		if(this._proposalIndex > -1) {
-			mSearchUtils.removeRecentSearch(this._serviceRegistry, this._proposalList[this._proposalIndex].item.value, this);
-			this._proposalIndex = -1;
-			return true;
-		}
-		return false;
-	};
-	
 	InputCompletion.prototype._proposeOnList = function(datalist, searchTerm, filterForMe){
 		var categoryName = "";
 		var categoryList = [];
@@ -491,7 +482,7 @@ define(['i18n!orion/search/nls/messages', 'orion/EventTarget', 'orion/searchUtil
 				var pIndex = -1;
 				if(searchTerm && filterForMe){
 					var searchOn;
-					if(typeof data.value === "string"){
+					if(typeof data.value === "string"){ //$NON-NLS-0$
 						searchOn = data.value.toLowerCase();
 					} else if(data.value.name){
 						searchOn = data.value.name.toLowerCase();
