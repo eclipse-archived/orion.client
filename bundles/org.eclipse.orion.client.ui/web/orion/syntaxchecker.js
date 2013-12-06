@@ -132,12 +132,27 @@ var SyntaxChecker = (function () {
 					problem.start = clamp(problem.start, 1, lineLength - 1); // leave room for end
 					problem.end = (typeof problem.end === "number") ? problem.end : -1; //$NON-NLS-0$
 					problem.end = clamp(problem.end, problem.start + 1, lineLength);
+
+					// TODO probably need similar workaround for bug 423482 here
 				} else {
 					// start, end are document offsets (0-based)
 					var charCount = model.getCharCount();
-					problem.start = clamp(problem.start, 0, charCount - 1); // leave room for end
+					problem.start = clamp(problem.start, 0, charCount); // leave room for end
 					problem.end = (typeof problem.end === "number") ? problem.end : -1; //$NON-NLS-0$
-					problem.end = clamp(problem.end, problem.start + 1, charCount);
+					problem.end = clamp(problem.end, problem.start, charCount);
+
+					// Workaround: if problem falls on the empty, last line in the buffer, move it to a valid line.
+					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=423482
+					if (problem.end === charCount && model.getLineCount() > 1 && charCount === model.getLineStart(model.getLineCount() - 1)) {
+						var prevLine = model.getLineCount() - 2, prevLineStart = model.getLineStart(prevLine), prevLineEnd = model.getLineEnd(prevLine);
+						if (prevLineStart === prevLineEnd) {
+							// Empty range on an empty line seems to be OK, if not at EOF
+							problem.start = problem.end = prevLineEnd;
+						} else {
+							problem.start = prevLineEnd - 1;
+							problem.end = prevLineEnd;
+						}
+					}
 				}
 			}
 		}
