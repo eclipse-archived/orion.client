@@ -298,7 +298,53 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 		});
 		commandService.addCommand(checkStateCommand);
-
+		
+		function createStartStopCommand(start){
+			var stopApplicationCommand = new mCommands.Command({
+				name: start ? "Start" :"Stop",
+				tooltip: start ? "Start application" : "Stop application",
+				id: start ? "orion.launchConfiguration.startApp" : "orion.launchConfiguration.stopApp", //$NON-NLS-0$
+				imageClass: start ? "core-sprite-start" : "core-sprite-stop",
+				callback: function(data) {
+					var item = forceSingleItem(data.items);
+					
+					data.oldParams = item.params;
+	
+					var func = arguments.callee;
+					var params = handleParamsInCommand(func, data, start? "Start application" : "Stop application");
+					if(!params){
+						return;
+					}
+					
+					projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
+						if(service && (start ? service.start : service.stop)){
+							(start ? service.start : service.stop)(params).then(function(result){
+								item.status = result;
+								if(sharedLaunchConfigurationDispatcher){
+									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
+								}
+							}, function(error){
+								if(error.Retry){
+									data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
+									data.oldParams = params;
+									commandService.collectParameters(data);
+								} else {
+									errorHandler(error);
+								}
+							});
+						}
+					});
+				},
+				visibleWhen: function(items) {
+					var item = forceSingleItem(items);
+					return item.ServiceId && item.Name && item.status && (start ? item.status.Running===false : item.status.Running===true);
+				}
+			});
+			commandService.addCommand(stopApplicationCommand);
+		}
+		
+		createStartStopCommand(true);
+		createStartStopCommand(false);
 	};
 		
 	/**

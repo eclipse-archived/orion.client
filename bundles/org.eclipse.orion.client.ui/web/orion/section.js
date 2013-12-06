@@ -279,14 +279,19 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 				loaded: function(){
 					var self = this;
 					if(!this.selection){
-						this.selection = new Selection.Selection(this.serviceRegistry, this.parent.id + "Selection"); //$NON-NLS-0$
+						this.selection = new Selection.Selection(this.serviceRegistry || this.registry, this.parent.id + "Selection"); //$NON-NLS-0$
 						this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 							self.updateCommands(event.selections);
 						});
 					}
-					this.registerCommands().then(function() {
+					var commandsRegistered = this.registerCommands();
+					if(!commandsRegistered || !commandsRegistered.then){
 						self.updateCommands();
-					});
+					} else {
+						commandsRegistered.then(function() {
+							self.updateCommands();
+						});
+					}
 				}
 			});
 			if(explorer.renderer){

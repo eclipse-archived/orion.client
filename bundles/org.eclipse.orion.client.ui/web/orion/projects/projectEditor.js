@@ -413,6 +413,32 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 
 	};
 	
+	function LaunchConfigurationExplorer(serviceRegistry, selection, renderer, commandRegistry, launchConfigurationActions){
+		mExplorer.Explorer.apply(this, arguments);
+		this.actionScopeId = launchConfigurationActions;
+		this.selectionActions = "LaunchConfigurationExplorerSelectionActions";
+		this.actionsSections = [this.selectionActions];
+	}
+	
+	LaunchConfigurationExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
+	
+	objects.mixin(LaunchConfigurationExplorer.prototype, /** @lends orion.Explorer.prototype */ {
+		registerCommands: function(){
+			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.startApp", 1);
+			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.stopApp", 2);
+		},
+		updateCommands: function(selections){
+			this.selectionActionsNode = lib.node(this.selectionActions);
+			lib.empty(this.selectionActionsNode);
+			this.commandService.renderCommands(this.selectionActions, this.selectionActionsNode, selections, this, "tool");
+		},
+		load: function(parent, project, configurations, projectClient){
+			this.createTree(parent, new LaunchConfigurationModel(project, configurations, projectClient),  {indent: '8px'});
+			this.loaded();
+		},
+		constructor: LaunchConfigurationExplorer
+	});
+	
 	function ProjectEditor(options){
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
@@ -606,10 +632,9 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				actionScopeId:  this.launchConfigurationActions,
 				projectClient: this.projectClient
 			}, this);
-			var launchConfigurationExplorer = new mExplorer.Explorer(this.serviceRegistry, null, launchConfigurationRenderer, this.commandRegistry);
-			launchConfigurationExplorer.actionScopeId = this.launchConfigurationActions;
+			var launchConfigurationExplorer = new LaunchConfigurationExplorer(this.serviceRegistry, null, launchConfigurationRenderer, this.commandRegistry, this.launchConfigurationActions);
 			launchConfigurationSection.embedExplorer(launchConfigurationExplorer, launchConfigurationParent);
-			launchConfigurationExplorer.createTree(launchConfigurationParent, new LaunchConfigurationModel(this.projectData, configurations, this.projectClient),  {indent: '8px'});
+			launchConfigurationExplorer.load(launchConfigurationParent, this.projectData, configurations, this.projectClient);
 		},
 		launchConfigurationChanged: function(event){
 			if(!this.configurations){
