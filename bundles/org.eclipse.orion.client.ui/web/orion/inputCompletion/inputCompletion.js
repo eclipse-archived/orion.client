@@ -70,8 +70,10 @@ define(['orion/EventTarget'], function( EventTarget){
 				var completion = this;
 				this._binderFunc(function(dataList){
 					this._bind(dataList);
-					//this._proposeOn(this._inputField.value);
-					//this._selectProposal(this._proposalIndex, true);
+					if(event.deleting){
+						this._proposeOn(this._inputField.value);
+						this._selectProposal(this._proposalIndex, true);
+					}
 				}.bind(completion));
 			}
 		}.bind(this);

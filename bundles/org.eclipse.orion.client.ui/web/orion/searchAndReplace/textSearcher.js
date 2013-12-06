@@ -191,12 +191,12 @@ define([
 			},
 			function(){that.hide();});
 		},
-		_storeRecentFind: function(recentFinds, eventTarget){
+		_storeRecentFind: function(recentFinds, eventTarget, deleting){
 			this._serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 				prefs.put("recentFind", recentFinds); //$NON-NLS-0$
 				if(eventTarget) {
 					window.setTimeout(function() {
-						eventTarget.dispatchEvent({type:"inputDataListChanged"}); //$NON-NLS-0$
+						eventTarget.dispatchEvent({type:"inputDataListChanged", deleting: deleting}); //$NON-NLS-0$
 					}.bind(this), 20);
 				}
 			});
@@ -246,7 +246,7 @@ define([
 					for (i in searches) {
 						if (searches[i].name === searchName) {
 							searches.splice(i, 1);
-							this._storeRecentFind(searches, eventTarget);
+							this._storeRecentFind(searches, eventTarget, true);
 							break;
 						}
 					}
