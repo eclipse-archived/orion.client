@@ -101,6 +101,18 @@ describe(RULE_ID, function() {
 		assert.equal(messages[0].message, "Missing semicolon.");
 		assert.equal(messages[0].node.type, "ExpressionStatement");
 	});
+	it("should indicate the problematic token in 'related' field", function() {
+		var topic = "f(1)";
+
+		var config = { rules: {} };
+		config.rules[RULE_ID] = 1;
+
+		var messages = eslint.verify(topic, config);
+		assert.equal(messages.length, 1);
+		assert.equal(messages[0].ruleId, RULE_ID);
+		assert.equal(messages[0].related.type, "Punctuator");
+		assert.equal(messages[0].related.value, ")");
+	});
 
 	//------------------------------------------------------------------------------
 	// Should nots

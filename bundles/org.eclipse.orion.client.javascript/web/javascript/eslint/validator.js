@@ -37,64 +37,75 @@ define([
 		return "error"; //$NON-NLS-0$
 	}
 	/**
-	 * @param {Object} p Either an ESLint problem: { ruleId, node, message, line, col }
-	 * or an Esprima parse error.
+	 * @param {eslint.Error|esprima.Error} e Either an eslint error or an esprima parse error.
 	 * @returns {Object} Orion Problem object
 	 */
-	function toProblem(p) {
+	function toProblem(e) {
 		var start, end;
-		if (p.node) {
-			// Problem produced by eslint
-			start = p.node.range[0];
-			end = p.node.range[1];
-		} else if (typeof p.index === "number") { //$NON-NLS-0$
+		if (e.node) {
+			// Error produced by eslint
+			start = e.node.range[0];
+			end = e.node.range[1];
+			if (e.ruleId === "semi" && e.related) { //$NON-NLS-0$
+				// Flagging the entire node is distracting. Just flag the bad token.
+				var relatedToken = e.related;
+				start = relatedToken.range[0];
+				end = relatedToken.range[1];
+			}
+		} else if (typeof e.index === "number") { //$NON-NLS-0$
 			// Esprima parse error
-			start = p.index;
+			start = e.index;
 		}
 		var prob = {
-			description: p.message,
-			severity: getSeverity(p),
+			description: e.message,
+			severity: getSeverity(e),
 			start: start,
 			end: end
 		};
 		return prob;
 	}
-	/**
-	 * Extracts any errors captured by the tolerant esprima parser
-	 */
-	function extractParseErrors(ast) {
-		var errors = [], errorMap = Object.create(null);
-		(ast.errors || []).forEach(function(error) {
-			var msg = error.message, match;
-			// Errors come as 'Line nn: Unexpected foo'. Strip off the first part
-			if ((match = /^Line \d+: /.exec(msg))) {
-				error.message = msg = "Parse error: " + msg.substring(match.index + match[0].length) + ".";
-			}
-			// Hack to filter out duplicate error produced by our esprima, having same index and message as previous error.
-			if (errorMap[error.index] === msg) {
-				return;
-			}
-			errorMap[error.index] = msg;
-			errors.push(error);
-		});
-		return errors;
-	}
+
 	objects.mixin(ESLintValidator.prototype, {
+		/**
+		 * Extracts any errors captured by the tolerant esprima parser and returns them
+		 * @param {esprima.ASTNode} ast
+		 * @returns {esprima.Error[]}
+		 */
+		_extractParseErrors: function(ast) {
+			var errors = [], errorMap = Object.create(null);
+			(ast.errors || []).forEach(function(error) {
+				var msg = error.message, match;
+				// Errors come as 'Line nn: Unexpected foo'. Strip off the first part
+				if ((match = /^Line \d+: /.exec(msg))) {
+					error.message = msg = "Parse error: " + msg.substring(match.index + match[0].length) + ".";
+				}
+				// Hack to filter out duplicate error produced by our esprima, having same index and message as previous error.
+				if (errorMap[error.index] === msg) {
+					return;
+				}
+				errorMap[error.index] = msg;
+				errors.push(error);
+			});
+			return errors;
+		},
 		// orion.edit.validator
 		computeProblems: function(editorContext, context) {
 			if (!this.active) {
 				return {};
 			}
+			var _self = this;
 			return this.astManager.getAST(editorContext).then(function(ast) {
-				var problems = [], error;
+				var eslintErrors = [], error;
 				try {
-					problems = problems.concat(eslint.verify(ast, config));
+					eslintErrors = eslint.verify(ast, config);
 				} catch (e) {
 					error = e;
 				}
-				var parseErrors = extractParseErrors(ast);
-				problems = problems.concat(parseErrors);
-				problems = problems.map(toProblem);
+				var parseErrors = _self._extractParseErrors(ast);
+				var problems = []
+					.concat(eslintErrors)
+					.concat(parseErrors)
+					.map(toProblem);
 				if (error && !parseErrors.length) {
 					// Warn about ESLint failure
 					problems.push({
@@ -116,5 +127,19 @@ define([
 			}
 		}
 	});
+	/**
+	 * @name eslint.Error
+	 * @class
+	 * @property {String} ruleId
+	 * @property {esprima.ASTNode} node
+	 * @property {String} message
+	 * @property {Number} line
+	 * @property {Number} col
+	 */
+	/**
+	 * @name esprima.Error
+	 * @property {Number} index
+	 * @property {String} message
+	 */
 	return ESLintValidator;
 });

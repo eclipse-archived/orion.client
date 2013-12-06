@@ -341,9 +341,10 @@ module.exports = (function() {
      * @param {string} message The actual message.
      * @param {Object} opts Optional template data which produces a formatted message
      *     with symbols being replaced by this object's values.
+     * @param {Object} related Optional related token or node that the rule wishes to point out.
      * @returns {void}
      */
-    api.report = function(ruleId, node, message, opts) {
+    api.report = function(ruleId, node, message, opts, related) {
 
         Object.keys(opts || {}).forEach(function (key) {
             var rx = new RegExp("{{" + escapeRegExp(key) + "}}", "g");
@@ -356,7 +357,8 @@ module.exports = (function() {
             message: message,
             line: node.loc.start.line,
             column: node.loc.start.column,
-            source: api.getSource(node)
+            source: api.getSource(node),
+            related: typeof related !== "undefined" ? related : null
         });
     };
 

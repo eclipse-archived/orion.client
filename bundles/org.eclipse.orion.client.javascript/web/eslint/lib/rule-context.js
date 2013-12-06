@@ -71,10 +71,11 @@ function RuleContext(ruleId, eslint, options) {
      * @param {string} message The message to display to the user.
      * @param {Object} opts Optional template data which produces a formatted message
      *     with symbols being replaced by this object's values.
+     * @param {Object} related Optional related token or node.
      * @returns {void}
      */
-    this.report = function(node, message, opts) {
-        eslint.report(ruleId, node, message, opts);
+    this.report = function(node, message, opts, related) {
+        eslint.report(ruleId, node, message, opts, related);
     };
 
 }
