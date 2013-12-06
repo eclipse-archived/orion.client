@@ -247,6 +247,12 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId); //$NON-NLS-0$
 			var row = lib.node(id);
 			if (row) {
+				if (row._expanded) {
+					if (postExpandFunc) {
+						postExpandFunc.apply(tree, args);
+					}
+					return;
+				}
 				var tree = this;
 				this._renderer.updateExpandVisuals(row, "progress"); //$NON-NLS-0$
 				this._treeModel.getChildren(row._item, function(children) {
