@@ -176,6 +176,12 @@ exports.CompareView = (function() {
 					this.options[option] = options[option];
 				}.bind(this));
 			}
+			//TODO : improve this the twoway comapre API
+			if(options.newFileOnRight){
+				var optNewFile = this.options.newFile;
+				this.options.newFile = this.options.oldFile;
+				this.options.oldFile = optNewFile;
+			}
 		},
 		getOptions: function() {
 			return this.options;
@@ -544,8 +550,8 @@ exports.TwoWayCompareView = (function() {
 			output = result.output;
 		}
 		
-		var rFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._editors[0].getTextView().getModel(), result.mapper, 1);
-		var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._editors[1].getTextView().getModel(), result.mapper, 0);
+		var rFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._editors[0].getTextView().getModel(), result.mapper, 1, this.options.newFileOnRight);
+		var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._editors[1].getTextView().getModel(), result.mapper, 0, this.options.newFileOnRight);
 		this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editors[0], this._editors[1], rFeeder, lFeeder, this._overviewRuler, this._curveRuler); //$NON-NLS-1$ //$NON-NLS-0$
 		this._curveRuler.init(result.mapper ,this._editors[1], this._editors[0], this._diffNavigator);
 		if(refreshEditors) {

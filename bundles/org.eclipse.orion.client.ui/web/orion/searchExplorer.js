@@ -1149,12 +1149,13 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             var options = {
                 readonly: true,
                 hasConflicts: false,
-                newFile: {
+                newFileOnRight: true,
+                oldFile: {
                     Name: fileItem.location,
                     Type: fType,
                     Content: that.model.getFileContents(fileItem)
                 },
-                oldFile: {
+                newFile: {
                     Name: fileItem.location,
                     Type: fType,
                     Content: replacedContents
