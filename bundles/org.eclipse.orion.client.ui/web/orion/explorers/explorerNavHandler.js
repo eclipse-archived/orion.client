@@ -485,7 +485,7 @@ exports.ExplorerNavHandler = (function() {
 			return value && value.rowDomNode ? value.rowDomNode :  lib.node(modelId);
 		},
 		
-		iterate: function(forward, forceExpand, selecting, visibleOnly)	{
+		iterate: function(forward, forceExpand, selecting, selectableOnly /* optional */)	{
 			var currentItem = null;
 			
 			if(this.topIterationNodes.length === 0){
@@ -497,8 +497,8 @@ exports.ExplorerNavHandler = (function() {
 				this._setCursorOnItem(forward, selecting);
 			}
 				
-			if (visibleOnly && currentItem) {
-				while (currentItem && currentItem.isHidden) {
+			if (selectableOnly && currentItem) {
+				while (currentItem && currentItem.isNotSelectable) {
 					currentItem = this._modelIterator.iterate(forward, forceExpand);
 					if(currentItem){
 						this._setCursorOnItem(forward, selecting);

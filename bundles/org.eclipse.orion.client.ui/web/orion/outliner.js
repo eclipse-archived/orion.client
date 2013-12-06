@@ -117,39 +117,84 @@ define([
 		var navHandler = this.getNavHandler();
 		var itemMap = this.model.getIdItemMap();
 		var item = null;
+		var modifiedFilter = null;
 		
-		//Create a filter which matches all input literally except for the * and the ? characters
-		//As is the case for the file search dialog: (* = any string) and (? = any character)
-		var modifiedFilter = "^" + filter.replace(/([.+^=!:${}()|\[\]\/\\])/g, "\\$1"); //add start of line character and escape all special characters except * and ?
-		modifiedFilter = modifiedFilter.replace(/([*?])/g, ".$1");	//convert user input * and ? to .* and .?
+		if (filter) {
+			//Create a filter which matches all input literally except for the * and the ? characters
+			//As is the case for the file search dialog: (* = any string) and (? = any character)
+			modifiedFilter = "^" + filter.replace(/([.+^=!:${}()|\[\]\/\\])/g, "\\$1"); //add start of line character and escape all special characters except * and ?
+			modifiedFilter = modifiedFilter.replace(/([*?])/g, ".$1");	//convert user input * and ? to .* and .?
 		
-		if (previousFilter) {
-			if (0 !== filter.indexOf(previousFilter)) {
-				//this is not a more specific version of the previous filter, expand again
+			//figure out if we need to expand
+			if (previousFilter) {
+				if (0 !== filter.indexOf(previousFilter)) {
+					//this is not a more specific version of the previous filter, expand again
+					this.expandAll();
+				}
+			} else {
+				//there was no previous filter, expand all
 				this.expandAll();
 			}
 		} else {
-			//previous filter not defined, expand all
+			//filter was emptied, expand all
 			this.expandAll();
 		}
 		
-		for (var id in itemMap) {
-			if (itemMap.hasOwnProperty(id)) {
-				item = itemMap[id];
-				if (-1 === item.label.search(modifiedFilter)) {
-					//hide
-					navHandler.getRowDiv(item).classList.add("outlineRowHidden"); //$NON-NLS-0$
-					item.isHidden = true;
-				} else {
-					//label matches filter, show row
-					//TODO show parent rows also
-					navHandler.getRowDiv(item).classList.remove("outlineRowHidden"); //$NON-NLS-0$
-					item.isHidden = false;
-				}
-			}
+		// filter the tree nodes recursively
+		// this should also be done if the passed in filter is empty
+		// because it will traverse all the nodes and reset their states
+		var topLevelNodes = navHandler.getTopLevelNodes();
+		for (var i = 0; i < topLevelNodes.length ; i++){
+			this._filterRecursively(topLevelNodes[i], modifiedFilter);
 		}
 		
 		previousFilter = filter;
+	};
+	
+	OutlineExplorer.prototype._filterRecursively = function (node, filter) {
+		var navHandler = this.getNavHandler();
+		var self = this;
+		var rowDiv = navHandler.getRowDiv(node);
+		// true if the filter is null or if the node's label matches it
+		var nodeMatchesFilter = !filter || (-1 !== node.label.search(filter));
+		
+		if (node.children) {
+			// if this node has children ensure it is expanded otherwise we've already filtered it out
+			if (navHandler.isExpanded(node)) {
+				var hasVisibleChildren = false;
+				node.children.forEach(function(childNode){
+					if (self._filterRecursively(childNode, filter)) {
+						hasVisibleChildren = true;
+					}	
+				});
+			}
+			
+			if (!hasVisibleChildren) {
+				this.myTree.collapse(node);
+			}
+		}
+		
+		// set row visibility
+		var visible = hasVisibleChildren || nodeMatchesFilter;
+		if (visible) {
+			//show row
+			rowDiv.classList.remove("outlineRowHidden"); //$NON-NLS-0$
+		} else {
+			//hide
+			rowDiv.classList.add("outlineRowHidden"); //$NON-NLS-0$
+		};
+		
+		// set visual indicator for matching rows
+		if (filter && nodeMatchesFilter) {
+			rowDiv.classList.add("outlineRowMatchesFilter"); //$NON-NLS-0$
+		} else {
+			rowDiv.classList.remove("outlineRowMatchesFilter"); //$NON-NLS-0$
+		}
+		
+		// set node's keyboard traversal selectability
+		node.isNotSelectable = !nodeMatchesFilter;
+		
+		return visible;
 	};
 	
 	function OutlineModel(items, rootId) {
@@ -392,7 +437,7 @@ define([
 					if (navHandler.getTopLevelNodes()) {
 						firstNode = navHandler.getTopLevelNodes()[0];
 						navHandler.cursorOn(firstNode, false, true);
-						if (firstNode.isHidden) {
+						if (firstNode.isNotSelectable) {
 							navHandler.iterate(true, false, false, true);
 						}
 					}

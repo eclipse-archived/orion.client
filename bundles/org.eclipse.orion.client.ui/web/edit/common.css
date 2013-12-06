@@ -20,6 +20,10 @@
 	width: 250px;
 }
 
+.outlineRowMatchesFilter {
+	font-weight:bold;
+}
+
 .outlineRowHidden {
 	display: none;
 }
@@ -36,4 +40,3 @@
 	margin-bottom: -3px;
 	cursor: pointer;
 }
-
