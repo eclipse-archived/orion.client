@@ -17,8 +17,8 @@
 .outlineFilter {
 	border: 1px solid lightgrey;
 	margin: 4px;
-	width: 210px;
-	position: absolute;
+	width: 65%;
+	float: left;
 }
 
 .outlineRowMatchesFilter {
