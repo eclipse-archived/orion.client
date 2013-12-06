@@ -4,6 +4,7 @@
 
 @import "./progress.css";
 @import "./assistance.css";
+@import "../font/font.css";
 
 html {
   cursor: default;
@@ -884,7 +885,7 @@ input {
 }
 
 .projectPrimaryNavColumn {
-	background: none repeat scroll 0 0 #d6ebf0;
+	background: none repeat scroll 0 0 #bbcad2;
 	color: #000;
 }
 
@@ -916,7 +917,7 @@ input {
 .sectionTable {
 	margin-top: 0;
 	border: 1px solid;
-	border-color:#D6EBF0;
+	border-color:#dadada;
 }
 
 
@@ -924,17 +925,17 @@ input {
 	border-top: 1px solid;
 	border-left: 1px solid;
 	border-right: 1px solid;
-	background: none repeat scroll 0 0 #EAF5F7;
+	background: none repeat scroll 0 0 #f4f4f4;
 	vertical-align: middle;
 	font-weight: bold;
 	padding: 6px;
 	color: gray;
 	margin-bottom: 0;
-	border-color: #D6EBF0;
+	border-color: #dadada;
 }
 
 .sectionTable td {
-	border-bottom: 1px solid #D6EBF0;
+	border-bottom: 1px solid #dadada;
 	vertical-align: middle;
 	color: gray;
 }
@@ -1009,5 +1010,5 @@ input {
 }
 
 .lightTreeTableRow, .darkTreeTableRow {
-	border-bottom: 1px solid #D6EBF0;
+	border-bottom: 1px solid #dadada;
 }

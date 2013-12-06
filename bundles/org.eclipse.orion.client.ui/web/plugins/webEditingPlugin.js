@@ -33,31 +33,31 @@ define([
 			[{	id: "text/plain",
 				name: "Text",
 				extension: ["txt"],
-				image: "../images/file.png"
+				imageClass: "file-sprite-text"
 			},
 			{	id: "text/html",
 				"extends": "text/plain",
 				name: "HTML",
 				extension: ["html", "htm"],
-				image: "../images/html.png"
+				imageClass: "file-sprite-html"
 			},
 			{	id: "text/css",
 				"extends": "text/plain",
 				name: "CSS",
 				extension: ["css"],
-				image: "../images/css.png"
+				imageClass: "file-sprite-css"
 			},
 			{	id: "application/json",
 				"extends": "text/plain",
 				name: "JSON",
 				extension: ["json"],
-				image: "../images/file.png"
+				imageClass: "file-sprite-text"
 			},
 			{	id: "application/xml",
 				"extends": "text/plain",
 				name: "XML",
 				extension: ["xml"],
-				image: "../images/xmlfile.png"
+				imageClass: "file-sprite-xml"
 			},
 			{	id: "text/x-java-source",
 				"extends": "text/plain",

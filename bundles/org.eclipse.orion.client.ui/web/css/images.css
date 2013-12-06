@@ -119,3 +119,347 @@
 	width: 16px;
 	height: 16px; 
 }
+
+
+.core-sprite-hamburger{
+	font-size: 16px;
+	line-height: 16px;
+	color: #eeeeee;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+
+.core-sprite-silhouette{
+	font-size: 16px;
+	line-height: 16px;
+	color: #eeeeee;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-addcontent{
+	font-size: 16px;
+	line-height: 16px;
+	color: #f89427;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-gear{
+	font-size: 16px;
+	line-height: 16px;
+	color: #555555;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-wrench{
+	font-size: 16px;
+	line-height: 16px;
+	color: #555555;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-go-up{ font-size: 16px;
+	color: #555555;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+} 
+
+.core-sprite-outline{
+	font-size: 16px;
+	line-height: 16px;
+	color: #555555;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-move-down{
+	font-size: 16px;
+	line-height: 16px;
+	color: #777;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	padding-left:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-move-up{
+	font-size: 16px;
+	line-height: 16px;
+	color: #777;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	padding-left:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-openarrow{
+	font-size: 16px;
+	line-height: 16px;
+	color: #777;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	padding-left:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-closedarrow{
+	font-size: 16px;
+	color: #777;
+	line-height: 16px;
+	font-family: 'Orion Icon Font'; 
+	padding: 0;
+	padding-left:5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-delete{
+	font-size: 16px;
+	color: #777;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-refresh{
+	font-size: 16px;
+	color: #777;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-expandAll{
+	font-size: 16px;
+	color: #777;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-collapseAll{
+	font-size: 16px;
+	color: #777;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding: 0;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-folder{
+	font-size: 16px;
+	color: #555;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-file{
+	font-size: 16px;
+	color: #555;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-edit{
+	font-size: 16px;
+	color: #777;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.file-sprite-css{
+	font-size: 16px;
+	color: #555;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.file-sprite-html{
+	font-size: 16px;
+	color: #555;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+ .file-sprite-javascript{
+	font-size: 16px;
+	color: #555;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.file-sprite-xml{
+	font-size: 16px;
+	color: #555;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.file-sprite-text{
+	font-size: 16px;
+	color: #555;
+	line-height: 16px;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-openarrow{ background-position: 0 -527px; width: 16px; height: 16px; }
+.core-sprite-hamburger:before{ content:'\0041'; }
+.core-sprite-gear:before{ content:'\0042'; }
+.core-sprite-silhouette:before{ content:'\0043'; float: right;}
+.core-sprite-wrench:before{ content:'\0044'; }
+.core-sprite-addcontent:before{ content:'\0045'; }
+.core-sprite-go-up:before{ content:'\0049'; }
+.core-sprite-outline:before{ content:'\006B'; }
+.core-sprite-openarrow:before{ content:'\006D'; }
+.core-sprite-closedarrow:before{ content:'\006C'; }
+.core-sprite-delete:before{ content:'\006F'; }
+.core-sprite-refresh:before{ content:'\006A'; }
+.core-sprite-expandAll:before{ content:'\0051'; }
+.core-sprite-collapseAll:before{ content:'\0052'; }
+.core-sprite-folder:before{ content:'\0050'; }
+.core-sprite-file:before{ content:'\004A'; }
+.core-sprite-edit:before{ content:'\0048'; }
+.core-sprite-move-down:before{ content:'\0054'; }
+.core-sprite-move-up:before{ content:'\0053'; }
+
+/* icons for file types - possibly more to come - at least one for images */ 
+
+.file-sprite-javascript:before{ content:'\004D'; }
+.file-sprite-css:before{ content:'\004C'; }
+.file-sprite-xml:before{ content:'\004E'; }
+.file-sprite-html:before{ content:'\004F'; }
+.file-sprite-text:before{ content:'\004B'; }
+
+/* unicode alternatives
+
+.core-sprite-openarrow:before{ content:'\25BE'; }
+.core-sprite-closedarrow:before{ content:'\25B8'; } */
+
+
+
+
+
+
+

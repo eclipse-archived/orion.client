@@ -18,7 +18,7 @@ define(['orion/widgets/themes/ThemeClass'],
 		var button = '#777777';
 		var location = '#EFEFEF';
 		var selection = 'FEC';
-		var sidepanel = '#FBFBFB';
+		var sidepanel = '#F7F7F7';
 		var mainpanel = 'white';
 		var navtext = '#bfbfbf';
 		var content = '#3087B3';

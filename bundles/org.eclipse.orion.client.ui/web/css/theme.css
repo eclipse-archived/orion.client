@@ -139,9 +139,7 @@ a.currentLocation:hover {
 
 .auxpane {
 	border: 0;
-	background: #fbfbfb;
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fbfbfb), color-stop(100%,#fbfbfb));
-	background: -moz-linear-gradient(top, #fbfbfb 0%, #fbfbfb 100%);
+	background: #f7f7f7;;
 }
 
 .mainpane {
@@ -328,14 +326,12 @@ a.currentLocation:hover {
 }
 
 .dropdownArrowDown {
-	background-image: url(../images/core_sprites.png);
 	display: inline-block; 
 	margin: 4px 4px 0;
 	vertical-align: top; 
 }
 
 .dropdownArrowRight {
-	background-image: url(../images/core_sprites.png);
 	position: absolute;
 	right: 0;
 }
