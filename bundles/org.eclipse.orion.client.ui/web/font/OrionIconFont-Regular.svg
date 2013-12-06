@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg">
 <metadata>
-Created by FontPrep 20130207 at Thu Dec  5 14:35:57 2013
+Created by FontPrep 20130207 at Thu Dec  5 19:41:38 2013
  By Anton McConville
 copyright missing
 </metadata>
@@ -68,7 +68,7 @@ d="M596 856h108l164 -282l168 282h108l-224 -350l240 -396h-108l-184 322l-198 -322h
     <glyph glyph-name="O" unicode="O" 
 d="M898 678l-310 -246l310 -242v-140l-384 320v126l384 322v-140zM1026 818l384 -322v-126l-384 -320v140l308 242l-308 246v140zM1664 -128v1024h-512v512h-768v-1536h1280zM1792 -256h-1536v1792h898l128 -104l382 -358l128 -128v-1202z" />
     <glyph glyph-name="P" unicode="P" 
-d="M1792 64v896h-1536v-896h1536zM1920 1088v-1152h-1792v1408h916l256 -256h620z" />
+d="M1808 0v896h-1568v-896h1568zM1920 1152v-1280h-1792v1536h914l244 -256h634z" />
     <glyph glyph-name="Q" unicode="Q" 
 d="M896 128v384h-384v256h384v384h256v-384h384v-256h-384v-384h-256zM1792 -128v1536h-1536v-1536h1536zM128 1536h1792v-1792h-1792v1792z" />
     <glyph glyph-name="R" unicode="R" 
