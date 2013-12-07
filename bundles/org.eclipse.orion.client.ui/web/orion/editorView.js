@@ -368,10 +368,10 @@ define([
 				var textView = editor.getTextView();
 				if (textView) {
 					textView.setOptions(this.updateViewOptions(this.settings));
+					this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {
+						this.updateStyler(this.settings);
+					}.bind(this));
 				}
-				this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {
-					this.updateStyler(this.settings);
-				}.bind(this));
 			}.bind(this));
 			inputManager.addEventListener("Saving", function(event) { //$NON-NLS-0$
 				if (self.settings.trimTrailingWhiteSpace) {
