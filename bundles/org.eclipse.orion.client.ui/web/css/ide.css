@@ -303,6 +303,7 @@ textarea.parameterInput {
 	margin-right: 8px;
 	height: 16px;
 	width: 16px;
+	vertical-align:bottom;
 }
 
 /* less hit-area since we aren't worried about touch */
@@ -321,6 +322,7 @@ textarea.parameterInput {
 		margin-right: 2px;
 		max-height: 24px;
 		max-width: 48px;
+		vertical-align:bottom;
 	}
 	
 	.selectionCheckmarkSprite { 	

@@ -233,6 +233,7 @@ a.currentLocation:hover {
 	border: 1px solid #dedede;
 	background-color: #ddd;
 	border-radius: 2px;
+	vertical-align:middle;
 }
 
 .commandButton:hover, .commandButton:focus {
@@ -272,7 +273,7 @@ a.currentLocation:hover {
 
 .commandLink {
 	display: inline-block;
-	vertical-align: baseline;
+	vertical-align: middle;
 	padding: 2px;  /* other commands have 1px plus a border, so we need 2 */
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;

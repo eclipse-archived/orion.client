@@ -73,6 +73,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			navlink.style.display = 'inline-block';
 			navlink.style.padding = '2px';
 			navlink.style.color = this.content;
+			navlink.style.verticalAlign = 'bottom';
 			
 			styles.push( navlink );
 
@@ -191,6 +192,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			
 			var navlinkonpage = new ThemeClass.ThemeClass( 'navlinkonpage' );
 			navlinkonpage.style.color = this.content;
+			navlinkonpage.style.verticalAlign = 'middle';
 			
 			styles.push( navlinkonpage );
 			
@@ -223,7 +225,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			commandButton.style.border = '1px solid #dedede'; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386702#c2 
 			commandButton.style.backgroundColor = '#ddd';//this.button;
 			commandButton.style.textAlign = 'center';
-			commandButton.style.verticalAlign = 'baseline';
+			commandButton.style.verticalAlign = 'middle';
 			commandButton.style.cursor = 'pointer';
 		    commandButton.style.display = 'inline-block';
 		    commandButton.style.padding = '4px 6px';
