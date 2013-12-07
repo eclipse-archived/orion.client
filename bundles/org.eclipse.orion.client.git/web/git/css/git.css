@@ -66,12 +66,10 @@
 
 /* sprites */
 .gitCommandSprite {
-	background: url(../images/git_sprites.png) no-repeat top left;
 	display: inline-block;
 }
 
 .gitImageSprite {
-	background: url(../images/git_sprites.png) no-repeat top left;
 	display: inline-block;
 	padding-right: 10px;
 	margin: 1px;
@@ -109,26 +107,24 @@
 
 .git-sprite-apply-patch{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555555;
 	font-family: 'Orion Icon Font';
-	padding: 0;
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-repository{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -136,102 +132,96 @@
 
 .git-sprite-pull{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-remote{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-checkout{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-fetch{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-tag{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-branch{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-stage{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-addition{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -239,153 +229,156 @@
 
 .git-sprite-file{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
 	font-family: 'Orion Icon Font';
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-removal{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-merge{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-merge-squash{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-rebase{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-cherry-pick{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-compare{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-reset{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-open{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-unstage{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #555;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-incoming-commit{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #333;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
 	padding-right:5px;
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 .git-sprite-outgoing-commit{
 	font-size: 16px;
-	line-height: 16px;
+	line-height: normal;
+	vertical-align:middle;
 	color: #333;
-	font-family: 'Orion Icon Font';
-	padding: 0;
+	font-family: 'Orion Icon Font';	
+	padding-right:5px;
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.git-sprite-branch-active{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #333;
+	font-family: 'Orion Icon Font';	
 	padding-right:5px;
 	background: none;
 	border: none;
@@ -396,9 +389,9 @@
 
 .git-sprite-conflict-file{
 	font-size: 24px;
-	line-height: 16px;
-	color:#df484c;
-	padding: 0;
+	line-height: normal;
+	vertical-align:middle;
+	color:#df484c;	
 	padding-right:5px;
 	background: none;
 	border: none;
@@ -428,3 +421,4 @@
 .git-sprite-incoming-commit:before{ content:'\0055'; }
 .git-sprite-outgoing-commit:before{ content:'\0056'; }
 .git-sprite-conflict-file:before{ content: '\2B0C'; } 
+.git-sprite-branch-active:before{ content: '\0059'; }
