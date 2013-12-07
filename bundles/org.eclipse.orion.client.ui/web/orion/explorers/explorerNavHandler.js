@@ -13,11 +13,10 @@
 /*jslint regexp:false browser:true forin:true*/
 
 define([
-	'i18n!orion/nls/messages',
 	'orion/webui/littlelib',
 	'orion/treeModelIterator',
 	'orion/uiUtils'
-], function(messages, lib, mTreeModelIterator, UiUtils){
+], function(lib, mTreeModelIterator, UiUtils){
 
 var exports = {};
 var userAgent = navigator.userAgent;
@@ -431,16 +430,13 @@ exports.ExplorerNavHandler = (function() {
 			this.toggleCursor(currentModel, true);
 			var currentRowDiv = this.getRowDiv();
 			if(currentRowDiv && !noScroll) {
-				var offsetParent = currentRowDiv.parentNode;
-				while (offsetParent) {
+				var offsetParent = currentRowDiv.parentNode, documentElement = document.documentElement;
+				while (offsetParent && offsetParent !== documentElement) {
 					var style = window.getComputedStyle(offsetParent, null);
 					if (!style) { break; }
 					var overflow = style.getPropertyValue("overflow-y"); //$NON-NLS-0$
 					if (overflow === "auto" || overflow === "scroll") { break; } //$NON-NLS-1$ //$NON-NLS-0$
 					offsetParent = offsetParent.parentNode;
-				}
-				if (!offsetParent) {
-					offsetParent = document.body;
 				}
 				var visible = true;
 				if(currentRowDiv.offsetTop <= offsetParent.scrollTop){
