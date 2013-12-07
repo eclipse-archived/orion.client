@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*global define window document navigator*/
 
-define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, lib) {
+define(['orion/webui/littlelib'], function(lib) {
                 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
