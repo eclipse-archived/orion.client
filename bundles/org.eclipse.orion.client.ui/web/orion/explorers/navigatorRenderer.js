@@ -38,36 +38,18 @@ define([
 	
 	/* Internal */
 	function addImageToLink(contentType, link, location, replace) {
-		var image;
-		switch (contentType && contentType.id) {
-			case "image/jpeg": //$NON-NLS-0$
-			case "image/png": //$NON-NLS-0$
-			case "image/gif": //$NON-NLS-0$
-			case "image/ico": //$NON-NLS-0$
-			case "image/tiff": //$NON-NLS-0$
-			case "image/svg": //$NON-NLS-0$
-				image = document.createElement("img"); //$NON-NLS-0$
-				image.src = location;
+		if (contentType) {
+			var image, imageClass = contentType.imageClass, imageURL = contentType.image;
+			if (imageClass) {
+				image = document.createElement("span"); //$NON-NLS-0$
+				image.className += imageClass; // may be several classes in here
 				image.classList.add("thumbnail"); //$NON-NLS-0$
-				break;
-			default:
-				// imageClass takes priority over image
-				if (contentType) {
-					var imageClass = contentType.imageClass, imageURL = contentType.image;
-					if (imageClass) {
-						image = document.createElement("span"); //$NON-NLS-0$
-						image.className += imageClass; // may be several classes in here
-						image.classList.add("thumbnail"); //$NON-NLS-0$
-					} else if (imageURL) {
-						image = document.createElement("img"); //$NON-NLS-0$
-						image.src = imageURL;
-						// to minimize the height/width in case of a large one
-						image.classList.add("thumbnail"); //$NON-NLS-0$
-					}
-				}
-				break;
-		}
-		if (image) {
+			} else if (imageURL) {
+				image = document.createElement("img"); //$NON-NLS-0$
+				image.src = imageURL;
+				// to minimize the height/width in case of a large one
+				image.classList.add("thumbnail"); //$NON-NLS-0$
+			}
 			link.replaceChild(image, replace);
 		}
 	}
@@ -133,7 +115,7 @@ define([
 			}
 			if(imageHolderDom) {
 				image = document.createElement("span"); //$NON-NLS-0$
-				image.className = "core-sprite-file modelDecorationSprite"; //$NON-NLS-0$
+				image.className = "core-sprite-file modelDecorationSprite thumbnail"; //$NON-NLS-0$
 				imageHolderDom.appendChild(image);
 			}
 			if(item.Name){
