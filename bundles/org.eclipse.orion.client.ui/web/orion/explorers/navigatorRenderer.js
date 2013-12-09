@@ -50,7 +50,9 @@ define([
 				// to minimize the height/width in case of a large one
 				image.classList.add("thumbnail"); //$NON-NLS-0$
 			}
-			link.replaceChild(image, replace);
+			if (image) {
+				link.replaceChild(image, replace);
+			}
 		}
 	}
 	
