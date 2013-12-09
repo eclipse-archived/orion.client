@@ -78,7 +78,7 @@ define(['orion/EventTarget'], function( EventTarget){
 			}
 		}.bind(this);
 		this.addEventListener("inputDataListChanged", dataListHandler);//$NON-NLS-0$
-		this._listeners.push({evtTarget: this, type: "blur", handler: dataListHandler});//$NON-NLS-0$
+		this._listeners.push({evtTarget: this, type: "inputDataListChanged", handler: dataListHandler});//$NON-NLS-0$
 		
 		var mouseDownHandler = function(e) {
 			this._mouseDown = true;
@@ -327,6 +327,7 @@ define(['orion/EventTarget'], function( EventTarget){
 				tr.style.width = this._inputField.offsetWidth + "px"; //$NON-NLS-0$
 				tbl.appendChild(tr);
 				var td1 = document.createElement('td'); //$NON-NLS-0$
+				td1.classList.add("inputCompletionLILeftTD"); //$NON-NLS-0$
 				var liTextEle = this._createBoldText(category.item.value, category.boldIndex, category.boldLength);
 				td1.appendChild(liTextEle);
 				td1.style.overflow = 'hidden'; //$NON-NLS-0$
@@ -334,7 +335,7 @@ define(['orion/EventTarget'], function( EventTarget){
 				
 				if(this._onDelete) {
 					deleteBtn = document.createElement('button'); //$NON-NLS-0$
-					deleteBtn.classList.add("dismissButton"); //$NON-NLS-0$
+					deleteBtn.classList.add("inputCompletionDismissButton"); //$NON-NLS-0$
 					deleteBtn.classList.add("layoutRight"); //$NON-NLS-0$
 					deleteBtn.classList.add("core-sprite-close"); //$NON-NLS-0$
 					deleteBtn.classList.add("imageSprite"); //$NON-NLS-0$
@@ -347,8 +348,7 @@ define(['orion/EventTarget'], function( EventTarget){
 						this._resetIndexAfterDeletion();
 					}.bind(this);
 					var td2 = document.createElement('td'); //$NON-NLS-0$
-					td2.style.width = "16px"; //$NON-NLS-0$
-					td2.style.height = "16px"; //$NON-NLS-0$
+					td2.classList.add("inputCompletionLIRightTD"); //$NON-NLS-0$
 					td2.appendChild(deleteBtn);
 					tr.appendChild(td2);
 				}

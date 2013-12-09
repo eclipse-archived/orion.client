@@ -527,6 +527,26 @@ textarea.parameterInput {
 	z-index:200;
 }
 
+.inputCompletionDismissButton {
+	background: transparent;
+	color: silver;
+    border-radius: 1px;
+	padding: 0;
+	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
+	vertical-align: middle;
+	min-height: 16px;
+	min-width: 16px;
+}
+
+.inputCompletionLILeftTD {
+	height: 19px;
+}
+
+.inputCompletionLIRightTD {
+	width: 19px;
+	height: 19px;
+}
+
 .inputCompletionUL {
 	list-style : none;
 	margin: 0;
