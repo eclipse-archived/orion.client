@@ -788,7 +788,7 @@ exports.SelectionRenderer = (function(){
 			tableRow.appendChild(cell);
 			if (i===0) {
 				if(this.getPrimColumnStyle){
-					cell.classList.add(this.getPrimColumnStyle()); //$NON-NLS-0$
+					cell.classList.add(this.getPrimColumnStyle(item)); //$NON-NLS-0$
 				} else {
 					cell.classList.add("navColumn"); //$NON-NLS-0$
 				}
