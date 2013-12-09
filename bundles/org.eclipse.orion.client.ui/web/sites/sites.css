@@ -17,7 +17,7 @@ html,body {
 }
 
 .sitesPanel {
-	min-width: 600px;
+	/*min-width: 600px; No minimum - Bug 423617*/
 	/*max-width: 900px;*/
 	/*padding-left: 20px;
 	padding-right: 40px;*/
