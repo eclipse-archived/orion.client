@@ -17,8 +17,10 @@
 .outlineFilter {
 	border: 1px solid lightgrey;
 	margin: 4px;
-	width: 65%;
 	float: left;
+	width: 65%; /* for older browsers */
+	width: -webkit-calc(100% - 42px);
+	width: calc(100% - 42px);
 }
 
 .outlineRowMatchesFilter {
