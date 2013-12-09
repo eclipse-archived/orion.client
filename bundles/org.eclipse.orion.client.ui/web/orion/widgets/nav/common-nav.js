@@ -34,7 +34,6 @@ define([
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
-	var enableContextMenu = false;
 	
 	/**
 	 * @class orion.sidebar.CommonNavExplorer
@@ -83,9 +82,7 @@ define([
 		this.commandsRegistered = this.registerCommands();
 		this._parentNode = lib.node(this.parentId);
 		
-		if (enableContextMenu) {
-			this._createContextMenu();
-		}
+		this._createContextMenu();
 	}
 	CommonNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(CommonNavExplorer.prototype, /** @lends orion.sidebar.CommonNavExplorer.prototype */ {

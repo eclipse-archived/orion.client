@@ -54,19 +54,13 @@ define([
 			//add context menu event handlers
 			this._boundcontextmenuEventHandler = this._contextmenuEventHandler.bind(this);
 			this._boundContextMenuCloser = this._contextMenuCloser.bind(this);
-			this._triggerNode.addEventListener("contextmenu", this._boundcontextmenuEventHandler, true);
-			window.addEventListener("contextmenu", this._boundContextMenuCloser, false);
+			this._triggerNode.addEventListener("contextmenu", this._boundcontextmenuEventHandler, true); //$NON-NLS-0$
+			window.addEventListener("contextmenu", this._boundContextMenuCloser, false); //$NON-NLS-0$
 			
 			//clicking on the trigger node should close the context menu
-			this._triggerNode.addEventListener("click", function(event) { //$NON-NLS-0$
-				if (self.isVisible())  {
-					if (self.close()) {
-						lib.stop(event);
-					}
-				}
-			}, false);
+			this._triggerNode.addEventListener("click",  this._boundContextMenuCloser, false);//$NON-NLS-0$
 			
-			this.addEventListener("postpopulate", this._addBrowserContextMenuArrow.bind(this));
+			this.addEventListener("postpopulate", this._addBrowserContextMenuArrow.bind(this)); //$NON-NLS-0$
 		},
 		
 		_positionContextMenu: function(event) {
@@ -94,7 +88,8 @@ define([
 			//ensure menu fits on page vertically
 			var overflowY = (bounds.top + bounds.height) - (bodyBounds.top + bodyBounds.height);
 			if (0 < overflowY) {
-				this._dropdownNode.style.top = (bounds.top - overflowY) + "px";	//TODO improve bottom padding estimate
+				//TODO improve bottom padding estimate
+				this._dropdownNode.style.top = (bounds.top - overflowY) + "px";	//$NON-NLS-0$
 			}
 		},
 		
@@ -143,12 +138,12 @@ define([
 				});
 				
 				// add handler to show tooltip
-				this._browserContextNode.addEventListener("click", function(e){
+				this._browserContextNode.addEventListener("click", function(e){ //$NON-NLS-0$
 					browserContextSpan.commandTooltip.show();
 				}, false);
 				
 				// add handler to close submenu
-				this._browserContextNode.addEventListener("mouseover", function(e){
+				this._browserContextNode.addEventListener("mouseover", function(e){ //$NON-NLS-0$
 					self._closeSelectedSubmenu();
 				}, false);
 				
@@ -156,8 +151,8 @@ define([
 				var hideTooltip = function(e){
 					browserContextSpan.commandTooltip.hide(0);
 				};
-				this.addEventListener("dropdownclosed", hideTooltip, true);
-				this.addEventListener("submenuopen", hideTooltip, true);
+				this.addEventListener("dropdownclosed", hideTooltip, true); //$NON-NLS-0$
+				this.addEventListener("submenuopen", hideTooltip, true); //$NON-NLS-0$
 				
 				this._browserContextTooltip = browserContextSpan.commandTooltip;
 			}
@@ -179,8 +174,9 @@ define([
 	
 	// overrides Dropdown.protoype.destroy
 	ContextMenu.prototype.destroy = function() {
-		this._triggerNode.removeEventListener("contextmenu", this._boundcontextmenuEventHandler, true);
-		window.removeEventListener("contextmenu", this._boundContextMenuCloser, false);
+		this._triggerNode.removeEventListener("contextmenu", this._boundcontextmenuEventHandler, true); //$NON-NLS-0$
+		this._triggerNode.removeEventListener("click",  this._boundContextMenuCloser, false); //$NON-NLS-0$
+		window.removeEventListener("contextmenu", this._boundContextMenuCloser, false); //$NON-NLS-0$
 		this._dropdownNode.dropdown = null;
 		if (this._browserContextNode) {
 			this._dropdownNode.removeChild(this._browserContextNode);
