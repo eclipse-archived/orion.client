@@ -88,32 +88,32 @@ define([
 			{	id: "image/gif",
 				name: "GIF",
 				extension: ["gif"],
-				image: "../images/wtp/image.gif"
+				imageClass: "file-sprite-image modelDecorationSprite"
 			},
 			{	id: "image/jpeg",
 				name: "JPG",
 				extension: ["jpg", "jpeg", "jpe"],
-				image: "../images/wtp/image.gif"
+				imageClass: "file-sprite-image modelDecorationSprite"
 			},
 			{	id: "image/ico",
 				name: "ICO",
 				extension: ["ico"],
-				image: "../images/wtp/image.gif"
+				imageClass: "file-sprite-image modelDecorationSprite"
 			},
 			{	id: "image/png",
 				name: "PNG",
 				extension: ["png"],
-				image: "../images/wtp/image.gif"
+				imageClass: "file-sprite-image modelDecorationSprite"
 			},
 			{	id: "image/tiff",
 				name: "TIFF",
 				extension: ["tif", "tiff"],
-				image: "../images/wtp/image.gif"
+				imageClass: "file-sprite-image modelDecorationSprite"
 			},
 			{	id: "image/svg",
 				name: "SVG",
 				extension: ["svg"],
-				image: "../images/wtp/image.gif"
+				imageClass: "file-sprite-image modelDecorationSprite"
 			}]
 		});
 
