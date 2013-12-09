@@ -328,9 +328,9 @@ a.currentLocation:hover {
 }
 
 .dropdownArrowDown {
-	display: inline-block; 
-	margin: 4px 4px 0;
-	vertical-align: top; 
+	display: inline-block;
+	vertical-align: top;
+	line-height: 12px;
 }
 
 .dropdownArrowRight {

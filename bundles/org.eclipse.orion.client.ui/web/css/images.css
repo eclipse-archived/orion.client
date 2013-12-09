@@ -54,11 +54,10 @@
 /* .core-sprite-addcontent{ background-position: 0 0; width: 16px; height: 16px; } */
 .core-sprite-check{ background-position: 0 -18px; width: 16px; height: 16px; } 
 .core-sprite-check_on{ background-position: 0 -36px; width: 16px; height: 16px; } 
-.core-sprite-close{ background-position: 0 -54px; width: 16px; height: 16px; } 
+/* .core-sprite-close{ background-position: 0 -54px; width: 16px; height: 16px; } */
 .core-sprite-compare-addition{ background-position: 0 -108px; width: 16px; height: 16px; } 
 .core-sprite-compare-removal{ background-position: 0 -126px; width: 16px; height: 16px; } 
 .core-sprite-copy-folder{ background-position: 0 -144px; width: 16px; height: 16px; } 
-.core-sprite-downarrow{ background-position: 0 -180px; width: 5px; height: 3px; } 
 .core-sprite-error{ background-position: 0 -203px; width: 16px; height: 16px; } 
 .core-sprite-file_model{ background-position: 0 -257px; width: 16px; height: 16px; } 
 .core-sprite-go-down{ background-position: 0 -311px; width: 16px; height: 16px; } 
@@ -333,7 +332,21 @@
 
 .core-sprite-file{
 	font-size: 16px;
-	color: #555;
+	color: silver;
+	line-height: normal;
+	vertical-align:middle;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-close{
+	font-size: 16px;
+	color: silver;
 	line-height: normal;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
@@ -346,6 +359,34 @@
 }
 
 .core-sprite-edit{
+	font-size: 16px;
+	color: #555;
+	line-height: normal;
+	vertical-align:middle;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-leftarrow{
+	font-size: 16px;
+	color: #555;
+	line-height: normal;
+	vertical-align:middle;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-rightarrow{
 	font-size: 16px;
 	color: #555;
 	line-height: normal;
@@ -429,6 +470,20 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.file-sprite-image{
+	font-size: 16px;
+	color: #555;
+	line-height: normal;
+	vertical-align:middle;
+	font-family: 'Orion Icon Font';
+	padding-right: 5px;
+	background: none;
+	border: none;
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .core-sprite-hamburger:before{ content:'\0041'; }
 .core-sprite-gear:before{ content:'\0042'; }
 .core-sprite-silhouette:before{ content:'\0043'; float: right;}
@@ -447,6 +502,10 @@
 .core-sprite-edit:before{ content:'\0048'; }
 .core-sprite-move-down:before{ content:'\0054'; }
 .core-sprite-move-up:before{ content:'\0053'; }
+.core-sprite-close:before{ content:'\006F'; }
+.core-sprite-leftarrow:before{content:'\0055';}
+.core-sprite-rightarrow:before{content:'\0056';}
+
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
@@ -455,6 +514,7 @@
 .file-sprite-xml:before{ content:'\004E'; }
 .file-sprite-html:before{ content:'\004F'; }
 .file-sprite-text:before{ content:'\004B'; }
+.file-sprite-image:before{ content:'\0076'; }
 
 .file-sprite-javascript:hover{
 	text-decoration:none;

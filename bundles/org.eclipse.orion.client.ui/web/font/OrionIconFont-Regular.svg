@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg">
 <metadata>
-Created by FontPrep 20130207 at Fri Dec  6 13:30:36 2013
+Created by FontPrep 20130207 at Mon Dec  9 10:14:29 2013
  By Anton McConville
 copyright missing
 </metadata>
@@ -144,7 +144,7 @@ d="M688 810l272 -272l272 272l90 -90l-272 -272l272 -272l-90 -90l-272 272l-272 -27
     <glyph glyph-name="u" unicode="u" 
 d="M1792 -128v1536h-1536v-1536h1536zM128 1536h1792v-1792h-1792v1792zM1664 1280v-1024l-440 440l-690 -690l-144 144l690 690l-440 440h1024z" />
     <glyph glyph-name="v" unicode="v" 
- />
+d="M724 1280q80 0 136 -56t56 -136t-56 -136t-136 -56t-136 56t-56 136t56 136t136 56zM1664 896h-512v512h-768v-1030l200 192l248 -240l394 398l438 -448v616zM1792 -256h-1536v1792h916l502 -512l118 -128v-1152z" />
     <glyph glyph-name="w" unicode="w" horiz-adv-x="1200" 
  />
     <glyph glyph-name="y" unicode="y" horiz-adv-x="1200" 
