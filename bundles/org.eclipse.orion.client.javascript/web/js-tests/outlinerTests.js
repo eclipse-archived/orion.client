@@ -10,24 +10,120 @@
  ******************************************************************************/
 /*global console:true define*/
 define([
-	"orion/assert"
-], function(assert) {
+	'orion/assert',
+	'javascript/astManager',
+	'orion/Deferred',
+	'javascript/outliner'
+], function(Assert, ASTManager, Deferred, Outliner) {
 	
-	var Tests = {
-		
-		test_funcDeclaration1: function() {
-			
-		},
-		
-		test_funcExpression1: function() {
-			
-		},
-		
-		test_objExpression1: function() {
-			
+	var astManager = new ASTManager();
+	var outliner = new Outliner.JSOutliner(astManager);
+	var context = {
+		text: "",
+		getText: function() {
+			return new Deferred().resolve(this.text);
 		}
+	};
 		
+	/**
+	 * @name tearDown
+	 * @description Resets the test state between runs, must explicitly be called per-test
+	 * @function
+	 * @public
+	 */
+	function tearDown() {
+		context.text = "";
+		astManager.updated();
 	};
 	
+	/**
+	 * @name assertElement
+	 * @description Checks the given element against the expected name, start and end to make sure it is outlined correctly
+	 * @function
+	 * @public
+	 * @param {Object} element The computed outline element to check
+	 * @param {String} label The expected outline label
+	 * @param {Number} start The expected start offset of the element
+	 * @param {Number} end The expected end offset of the element
+	 */
+	function assertElement(element, label, start, end) {
+		if(!element) {
+			Assert.fail("The tested element cannot be null");
+		}
+		if(!element.label) {
+			Assert.fail("The outlined element must have a label");
+		}
+		if(!element.start) {
+			Assert.fail("The outlined element must have a start range");
+		}
+		if(!element.end) {
+			Assert.fail("The outlied element must have an end range");
+		}
+		Assert.equal(element.label, label, "The label is not the same");
+		Assert.equal(element.start, start, "The start range is not the same");
+		Assert.equal(element.end, end, "The end range is not the same");
+	};
+	
+	var Tests = {};
+		
+	/**
+	 * Tests a function declaration
+	 */
+	Tests.test_funcDeclaration1 = function() {
+			context.text = "function F1(p1, p2) {};";
+			return outliner.computeOutline(context).then(function(outline) {
+				try {
+					if(!outline || outline.length < 1) {
+						Assert.fail("There should be one outline element");
+					}
+					assertElement(outline[0], "F1(p1, p2)", 9, 11);
+				}
+				finally {
+					tearDown();
+				}
+			});
+	};
+	
+	/**
+	 * Tests a function expression
+	 */
+	Tests.test_funcExpression1 = function() {
+		context.text = "var obj = {\n"+
+			"\titem: function(p1, p2) {}\n"+
+			"};";
+		return outliner.computeOutline(context).then(function(outline) {
+			try {
+				if(!outline || outline.length < 1) {
+					Assert.fail("There should be one outline element");
+				}
+				if(!outline[0].children || outline[0].children.length < 1) {
+					Assert.fail("There should be one child outline element");
+				}
+				assertElement(outline[0].children[0], "item(p1, p2)", 13, 17);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests an object expression
+	 */
+	Tests.test_objExpression1 = function() {
+		context.text = "var object = {};";
+		return outliner.computeOutline(context).then(function(outline) {
+			try {
+				if(!outline || outline.length < 1) {
+					Assert.fail("There should be one outline element");
+				}
+				assertElement(outline[0], "var object = {...}", 4, 10);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+		
 	return Tests;
 });
