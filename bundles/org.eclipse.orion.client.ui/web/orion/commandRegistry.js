@@ -553,6 +553,33 @@ define([
 			// get rid of sort cache because we have a new contribution
 			parentTable.sortedContributions = null;
 		},
+		
+		unregisterCommandContribution: function(scopeId, commandId, parentPath){
+			if (!this._contributionsByScopeId[scopeId]) {
+				// scope does not exist
+				return;
+			}
+			delete this._commandList[commandId];
+			delete this._activeBindings[commandId];
+			delete this._urlBindings[commandId];
+			delete this._pendingBindings[commandId];
+			var parentTable = this._contributionsByScopeId[scopeId];
+			if(parentPath){
+				var segments = parentPath.split("/"); //$NON-NLS-0$
+				segments.forEach(function(segment) {
+					if (segment.length > 1) {
+						if (!parentTable[segment]) {
+							// command does not exist in given path
+							return;
+						} 
+						parentTable = parentTable[segment].children;
+					}
+				});
+			}
+			delete parentTable[commandId];
+			
+			parentTable.sortedContributions = null;
+		},
 
 		/**
 		 * @param {String} type One of <code>"key"</code>, <code>"url"</code>.
