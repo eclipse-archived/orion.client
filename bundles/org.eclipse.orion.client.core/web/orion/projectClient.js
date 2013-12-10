@@ -471,6 +471,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 						try{
 							launchConf = JSON.parse(launchConf);
 							launchConf.Name = launchConf.Name || launchConfMeta.Name.replace(".launch", "");
+							launchConf.project = projectMetadata;
 							def.resolve(launchConf);
 						} catch(e){
 							console.error(e);

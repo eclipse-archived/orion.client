@@ -299,9 +299,15 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	LaunchConfigurationModel.prototype.getChildren = function(parent, onComplete){
 		if(parent === this.root){
 			if(this.launchConfigurations){
+				for(var i=0; i<this.launchConfigurations.length; i++){
+					this.launchConfigurations[i].project = parent;
+				}
 				onComplete(this.launchConfigurations);
 			} else {
 				this.projectClient.getProjectLaunchConfigurations(parent).then(function(launchConfs){
+						for(var i=0; i<launchConfs.length; i++){
+							launchConfs[i].project = parent;
+						}
 						onComplete(launchConfs);
 					}
 				);
@@ -396,11 +402,19 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 					if(service && service.getState){
 						service.getState(item.Params).then(function(result){
 							item.status = result;
-							tableRow.replaceChild(this.getCellElement(col_no, item, tableRow), td);
+							var newTd = this.getCellElement(col_no, item, tableRow);
+							for(var i=0; i<td.classList.length; i++){
+								newTd.classList.toggle(td.classList[i], true);
+							}
+							tableRow.replaceChild(newTd, td);
 							return;
 						}.bind(this), function(error){
 							item.status = {error: error};
-							tableRow.replaceChild(this.getCellElement(col_no, item, tableRow), td);
+							var newTd = this.getCellElement(col_no, item, tableRow);
+							for(var i=0; i<td.classList.length; i++){
+								newTd.classList.toggle(td.classList[i], true);
+							}
+							tableRow.replaceChild(newTd, td);
 							return;
 						}.bind(this));
 					} else {
@@ -424,8 +438,9 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	
 	objects.mixin(LaunchConfigurationExplorer.prototype, /** @lends orion.Explorer.prototype */ {
 		registerCommands: function(){
-			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.startApp", 1);
-			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.stopApp", 2);
+			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.deploy", 1);
+			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.startApp", 2);
+			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.stopApp", 3);
 		},
 		updateCommands: function(selections){
 			this.selectionActionsNode = lib.node(this.selectionActions);
