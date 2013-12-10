@@ -137,6 +137,16 @@ describe(RULE_ID, function() {
             assert.equal(messages.length, 0);
         });
 
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=422715
+        it("should not flag declared variables as undeclared when 'eval' is used in scope", function() {
+            var topic = "(function() { var a = 1; eval(); })();";
+
+            var config = { rules: {} };
+            config.rules[RULE_ID] = 1;
+
+            var messages = eslint.verify(topic, config);
+            assert.equal(messages.length, 0);
+        });
     });
 
     //------------------------------------------------------------------------------
