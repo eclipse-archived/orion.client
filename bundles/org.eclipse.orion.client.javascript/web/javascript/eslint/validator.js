@@ -21,6 +21,7 @@ define([
 			"eqeqeq": 1, //$NON-NLS-0$
 			"no-redeclare": 1, //$NON-NLS-0$
 			"no-undef": 2, //$NON-NLS-0$
+			"no-unused-vars": 1, //$NON-NLS-0$
 			"semi": 1 //$NON-NLS-0$
 		}
 	};
