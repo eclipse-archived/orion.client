@@ -12,8 +12,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/treetable', 'orion/explorers/explorerNavHandler', 'orion/commands', 'orion/commandRegistry'], 
-function(messages, require, lib, mTreeTable, mNavHandler, mCommands, mCommandRegistry){
+define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/treetable', 'orion/explorers/explorerNavHandler', 'orion/commands'], 
+function(messages, require, lib, mTreeTable, mNavHandler, mCommands){
 
 var exports = {};
 
