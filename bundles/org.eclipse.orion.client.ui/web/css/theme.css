@@ -331,6 +331,7 @@ a.currentLocation:hover {
 	display: inline-block;
 	vertical-align: top;
 	line-height: 12px;
+	color: silver;
 }
 
 .dropdownArrowRight {
