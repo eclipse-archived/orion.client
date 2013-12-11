@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window define */
+/*global window define prompt */
 /*jslint browser:true devel:true*/
 
 define([
@@ -119,18 +119,22 @@ define([
 		 * contribute editor actions.  
 		 */
 		generateEditorCommands: function(editor) {
-			this._generateSettingsCommand(editor);
-			this._generateSearchFilesCommand(editor);
+			this.generateBaseEditorCommands(editor);
+			this.generateExtraEditorCommands(editor);
+		},
+		generateBaseEditorCommands: function(editor) {
 			if (!this.isReadOnly) {
 				this._generateUndoStackCommands(editor);
 				this._generateSaveCommand(editor);
+				this._generateEditCommands(editor);
 			}
+		},
+		generateExtraEditorCommands: function(editor) {
+			this._generateSettingsCommand(editor);
+			this._generateSearchFilesCommand(editor);
 			this._generateGotoLineCommnand(editor);
 			this._generateFindCommnand(editor);
 			this._generateBlame(editor);
-			if (!this.isReadOnly) {
-				this._generateEditCommands(editor);
-			}
 		},
 		_generateSettingsCommand: function(editor) {
 			var self = this;
@@ -139,7 +143,7 @@ define([
 				tooltip: messages.LocalEditorSettings,
 				id: "orion.edit.settings", //$NON-NLS-0$
 				visibleWhen: function() {
-					return !!editor.getTextView();
+					return editor.installed;
 				},
 				callback: function(data) {
 					var dropDown = settingsCommand.settingsDropDown;
@@ -169,27 +173,27 @@ define([
 				name: messages.Undo,
 				id: "orion.undo", //$NON-NLS-0$
 				visibleWhen: function() {
-					return !!editor.getTextView();
+					return editor.installed;
 				},
 				callback: function(data) {
-					editor.getTextView().invokeAction("undo"); //$NON-NLS-0$
+					editor.getUndoStack().undo();
 				}
 			});
 			this.commandService.addCommand(undoCommand);
-			this.commandService.registerCommandContribution(this.toolbarId, "orion.undo", 400, null, true, editor.getTextView().getKeyBindings("undo")[0]); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.toolbarId, "orion.undo", 400, null, true, new mKeyBinding.KeyBinding('z', true)); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			var redoCommand = new mCommands.Command({
 				name: messages.Redo,
 				id: "orion.redo", //$NON-NLS-0$
 				visibleWhen: function() {
-					return !!editor.getTextView();
+					return editor.installed;
 				},
 				callback: function(data) {
-					editor.getTextView().invokeAction("redo"); //$NON-NLS-0$
+					editor.getUndoStack().redo();
 				}
 			});
 			this.commandService.addCommand(redoCommand);
-			this.commandService.registerCommandContribution(this.toolbarId, "orion.redo", 401, null, true, editor.getTextView().getKeyBindings("redo")[0]); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.toolbarId, "orion.redo", 401, null, true, util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		_generateSearchFilesCommand: function(editor) {
 			var self = this;
@@ -202,7 +206,7 @@ define([
 					tooltip: messages.searchFiles,
 					id: "orion.searchFiles", //$NON-NLS-0$
 					visibleWhen: function() {
-						return !!editor.getTextView();
+						return editor.installed;
 					},
 					callback: function(data) {
 						if (showingSearchDialog) {
@@ -243,7 +247,7 @@ define([
 				tooltip: messages.saveFile,
 				id: "orion.save", //$NON-NLS-0$
 				visibleWhen: function() {
-					if (!editor.getTextView() || self.inputManager.getReadOnly()) {
+					if (!editor.installed || self.inputManager.getReadOnly()) {
 						return false;
 					}
 					return !self.editorSettings || !self.editorSettings().autoSave;
@@ -257,8 +261,10 @@ define([
 			this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// Add key binding to editor so that the user agent save dialog does not show when auto save is enabled
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
-			editor.getTextView().setAction("save", saveCommand.callback, saveCommand); //$NON-NLS-0$
+			if (editor.getTextView && editor.getTextView()) {
+				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
+				editor.getTextView().setAction("save", saveCommand.callback, saveCommand); //$NON-NLS-0$
+			}
 		},
 		_generateGotoLineCommnand: function(editor) {
 			var self = this;
@@ -278,7 +284,7 @@ define([
 				tooltip: messages.gotoLineTooltip,
 				id: "orion.gotoLine", //$NON-NLS-0$
 				visibleWhen: function() {
-					return !!editor.getTextView();
+					return editor.installed;
 				},
 				parameters: lineParameter,
 				callback: function(data) {
@@ -301,14 +307,16 @@ define([
 			this.commandService.addCommand(gotoLineCommand);
 			this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mKeyBinding.KeyBinding('l', !util.isMac, false, false, util.isMac), new mCommandRegistry.URLBinding("gotoLine", "line")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// override the editor binding
-			editor.getTextView().setAction("gotoLine", function (data) { //$NON-NLS-0$
-				if (data) {
-					editor.onGotoLine(data.line - 1, 0, undefined, data.callback);
+			if (editor.getTextView && editor.getTextView()) {
+				editor.getTextView().setAction("gotoLine", function (data) { //$NON-NLS-0$
+					if (data) {
+						editor.onGotoLine(data.line - 1, 0, undefined, data.callback);
+						return true;
+					} 
+					self.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
 					return true;
-				} 
-				self.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
-				return true;
-			}, gotoLineCommand);
+				}, gotoLineCommand);
+			}
 		},
 		_generateFindCommnand: function(editor) {
 			var self = this;
@@ -335,7 +343,7 @@ define([
 				tooltip: messages.Find,
 				id: "orion.editor.find", //$NON-NLS-0$
 				visibleWhen: function() {
-					return !!editor.getTextView();
+					return editor.installed;
 				},
 				parameters: findParameter,
 				callback: function(data) {
@@ -375,16 +383,18 @@ define([
 			this.commandService.addCommand(findCommand);
 			this.commandService.registerCommandContribution(this.pageNavId, "orion.editor.find", 2, null, true, new mKeyBinding.KeyBinding('f', true), new mCommandRegistry.URLBinding("find", "find")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// override the editor binding 
-			editor.getTextView().setAction("find", function (data) { //$NON-NLS-0$
-				if (data) {
-					self._localSearcher.show(data);
+			if (editor.getTextView && editor.getTextView()) {
+				editor.getTextView().setAction("find", function (data) { //$NON-NLS-0$
+					if (data) {
+						self._localSearcher.show(data);
+						return true;
+					}
+					self.commandService.runCommand("orion.editor.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
+						[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 
+						{clientCollect: true}));
 					return true;
-				}
-				self.commandService.runCommand("orion.editor.find", null, null, new mCommandRegistry.ParametersDescription( //$NON-NLS-0$
-					[new mCommandRegistry.CommandParameter('useEditorSelection', 'text', '', "true")], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 
-					{clientCollect: true}));
-				return true;
-			}, findCommand);
+				}, findCommand);
+			}
 		},
 		
 		_generateBlame: function(editor){
@@ -395,7 +405,7 @@ define([
 				id: "orion.edit.blame", //$NON-NLS-0$
 				parameters: new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('blame', 'boolean')], {clientCollect: true}), //$NON-NLS-1$ //$NON-NLS-0$
 				visibleWhen: function() {
-					if (!editor.getTextView()) {
+					if (!editor.installed) {
 						return false;
 					}
 					if (self.editorSettings && !self.editorSettings().showBlame) {
@@ -440,6 +450,7 @@ define([
 
 			// KB exists so that we can pass an array (from info.key) rather than actual arguments
 			function createKeyBinding(args) {
+				if (!args) { return null; }
 				var keyBinding = new mKeyBinding.KeyBinding();
 				mKeyBinding.KeyBinding.apply(keyBinding, args);
 				return keyBinding;
@@ -471,7 +482,7 @@ define([
 			var makeCommand = function(info, service, options) {
 				var commandVisibleWhen = options.visibleWhen;
 				options.visibleWhen = function(item) {
-					if (!editor.getTextView() || self.inputManager.getReadOnly()) {
+					if (!editor.installed || self.inputManager.getReadOnly()) {
 						return false;
 					}
 					return !commandVisibleWhen || commandVisibleWhen(item);
@@ -479,7 +490,8 @@ define([
 				options.callback = function(data) {
 					// command service will provide editor parameter but editor widget callback will not
 					editor = this;
-					var selection = editor.getSelection();
+					//TODO should all text editors have selection?
+					var selection = editor.getSelection ? editor.getSelection() : {start: 0, end: 0};
 					var model = editor.getModel();
 
 					/*
@@ -492,12 +504,16 @@ define([
 								editor.setText(result.text);
 							}
 							if (result.selection) {
-								editor.setSelection(result.selection.start, result.selection.end, true /*scroll to*/);
+								if (editor.setSelection) {
+									editor.setSelection(result.selection.start, result.selection.end, true /*scroll to*/);
+								}
 								editor.focus();
 							}
 						} else if (typeof result === 'string') { //$NON-NLS-0$
 							editor.setText(result, selection.start, selection.end, true /*scroll to*/);
-							editor.setSelection(selection.start, selection.start + result.length);
+							if (editor.setSelection) {
+								editor.setSelection(selection.start, selection.start + result.length);
+							}
 							editor.focus();
 						}
 					};
@@ -528,7 +544,7 @@ define([
 								options.done = processEditorResult;
 								options.status = handleStatus;
 							    createDelegatedUI(options);
-							} else if (result.Status || result.status) {
+							} else if (result && (result.Status || result.status)) {
 								handleStatus(result.Status || result.status);
 							} else {
 								processEditorResult(result);
@@ -545,6 +561,11 @@ define([
 				var deferreds = [];
 				var position = 100;
 				actionReferences.forEach(function(serviceReference) {
+					var id = serviceReference.getProperty("editor"); //$NON-NLS-0$
+					//TODO should this filtering be done in extension commands
+					if (id && editor.id && id !== editor.id) {
+						return;
+					}
 					var service = self.serviceRegistry.getService(serviceReference);
 					var info = {};
 					var propertyNames = serviceReference.getPropertyKeys();
@@ -561,18 +582,7 @@ define([
 					deferred.then(function(commandOptions){
 						var command = makeCommand(info, service, commandOptions);
 						self.commandService.addCommand(command);
-						self.commandService.registerCommandContribution(self.toolbarId, command.id, position);
-						if (info.key) {
-							// add it to the editor as a keybinding
-							var textView = editor.getTextView();
-							textView.setKeyBinding(createKeyBinding(info.key), command.id);
-							textView.setAction(command.id, function() {
-								if (!command.visibleWhen || command.visibleWhen(inputManager.getFileMetadata())) {
-									return command.callback();
-								}
-								return false;
-							}, command);
-						}				
+						self.commandService.registerCommandContribution(self.toolbarId, command.id, position, null, false, createKeyBinding(info.key));
 					});
 					position++;
 				});

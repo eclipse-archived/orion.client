@@ -91,8 +91,34 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 				}
 			}
 		}
-
-		window.document.addEventListener("keydown", function (evt){ //$NON-NLS-0$
+		
+		function getKeyBindings() {
+			var allBindings = {};
+			
+			if (getBindings) {
+				var i, keys, objectKey;
+				keys = Object.keys(localKeyBindings);
+				for (i=0; i<keys.length; i++) {
+					objectKey = keys[i];
+					allBindings[objectKey] = localKeyBindings[objectKey];
+				}
+				var otherBindings = getBindings();
+				keys = Object.keys(otherBindings);
+				for (i=0; i<keys.length; i++) {
+					objectKey = keys[i];
+					allBindings[objectKey] = otherBindings[objectKey];
+				}
+			} else {
+				allBindings = localKeyBindings;
+			}
+			return allBindings;
+		}
+		
+		function processKey(evt) {
+			_processKey(evt, getKeyBindings());
+		}
+		
+		function handleKeyEvent(evt, processKeyFunc) {
 			function isContentKey(e) {
 				// adapted from handleKey in http://git.eclipse.org/c/platform/eclipse.platform.swt.git/plain/bundles/org.eclipse.swt/Eclipse%20SWT%20Custom%20Widgets/common/org/eclipse/swt/custom/StyledText.java
 				if (util.isMac) {
@@ -176,27 +202,51 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 					return;
 				}
 			}
-			var allBindings = {};
-			
-			if (getBindings) {
-				var i, keys, objectKey;
-				keys = Object.keys(localKeyBindings);
-				for (i=0; i<keys.length; i++) {
-					objectKey = keys[i];
-					allBindings[objectKey] = localKeyBindings[objectKey];
-				}
-				var otherBindings = getBindings();
-				keys = Object.keys(otherBindings);
-				for (i=0; i<keys.length; i++) {
-					objectKey = keys[i];
-					allBindings[objectKey] = otherBindings[objectKey];
-				}
+			if (processKeyFunc) {
+				processKeyFunc(evt);
 			} else {
-				allBindings = localKeyBindings;
+				processKey(evt);
 			}
-			
-			_processKey(evt, allBindings);
-		}, false);
+		};
+		
+		function CommandsProxy() {
+			this._init();
+		}
+		CommandsProxy.prototype = {
+			setProxy: function(proxy) {
+				this.proxy = proxy;
+			},
+			setKeyBindings: function(bindings) {
+				this.bindings = bindings;
+			},
+			_init: function() {
+				var self = this;
+				document.addEventListener("keydown", function(evt) { //$NON-NLS-0$
+					return handleKeyEvent(evt, function(evt) {
+						var proxy = self.proxy;
+						var bindings = self.bindings;
+						if (!bindings || !proxy) {
+							return;
+						}
+						for (var i=0; i<bindings.length; i++) {
+							if (bindings[i].match(evt)) {
+								proxy.processKey({
+									type: evt.type,
+									keyCode: evt.keyCode,
+									altKey: evt.altKey,
+									ctrlKey: evt.ctrlKey,
+									metaKey: evt.metaKey,
+									shiftKey: evt.shiftKey
+								});
+								lib.stop(evt);
+							}
+						}
+					});
+				});
+			}
+		};
+
+		window.document.addEventListener("keydown", handleKeyEvent, false); //$NON-NLS-0$
 
 	function _addImageToElement(command, element, name) {
 		element.classList.add("commandImage"); //$NON-NLS-0$
@@ -636,6 +686,9 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		executeBinding: executeBinding,
 		setKeyBindingProvider: setKeyBindingProvider,
 		localKeyBindings: localKeyBindings,
+		CommandsProxy: CommandsProxy,
+		getKeyBindings: getKeyBindings,
+		processKey: processKey,
 		_testMethodProcessKey: _processKey  // only exported for test cases
 	};
 });

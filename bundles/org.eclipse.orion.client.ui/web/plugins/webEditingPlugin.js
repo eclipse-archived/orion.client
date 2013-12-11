@@ -147,7 +147,7 @@ define([
 		id: "orion.markdownViewer",
 		nameKey: "Orion Markdown Viewer",
 		nls: "orion/nls/messages",
-		uriTemplate: "../edit/edit.html#{,Location,params*},contentProvider=orion.edit.markdownContent"});
+		uriTemplate: "../edit/edit.html#{,Location,params*},editor=orion.markdownViewer"});
 		
 	provider.registerService("orion.navigate.openWith", {}, {
 			editor: "orion.markdownViewer",
@@ -157,12 +157,9 @@ define([
 		id: "orion.imageViewer",
 		nameKey: "Orion Image Viewer",
 		nls: "orion/nls/messages",
-		uriTemplate: "../edit/edit.html#{,Location,params*},contentProvider=orion.edit.imageContent"});
+		contentUriTemplate: "../edit/content/imageViewer.html#{,OrionHome}{,Location,params*}",
+		uriTemplate: "../edit/edit.html#{,Location,params*},editor=orion.imageViewer"});
 
-	provider.registerService("orion.edit.content", {}, {
-		id: "orion.edit.imageContent",
-		uriTemplate: "../edit/content/imageViewer.html#{,OrionHome}{,Location,params*}"});
-		
 	provider.registerService("orion.navigate.openWith", {}, {
 			editor: "orion.imageViewer",
 			contentType: ["image/gif", "image/jpeg", "image/ico", "image/png", "image/tiff", "image/svg"]});

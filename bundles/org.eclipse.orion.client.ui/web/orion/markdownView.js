@@ -95,6 +95,7 @@ define([
 
 	var BaseEditor = mEditor.BaseEditor;
 	function MarkdownEditor(options) {
+		this.id = "orion.markdownViewer"; //$NON-NLS-0$
 		BaseEditor.apply(this, arguments);
 	}
 		
@@ -110,6 +111,7 @@ define([
 			var parent = lib.node(this._domNode);
 			parent.appendChild(root);
 			this._contentDiv.innerHTML = createMarked(this.getModel().getText());
+			BaseEditor.prototype.install.call(this);
 		},
 		setInput: function(title, message, contents, contentsSaved) {
 			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
@@ -119,6 +121,7 @@ define([
 		},
 		uninstall: function() {
 			lib.empty(this._domNode);
+			BaseEditor.prototype.uninstall.call(this);
 		}
 	});
 

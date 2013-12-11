@@ -201,16 +201,6 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 	function UndoStack (view, size) {
 		this.size = size !== undefined ? size : 100;
 		this.reset();
-		if (view.getModel) {
-			this.view = view;
-			var model = view.getModel();
-			if (model.getBaseModel) {
-				model = model.getBaseModel();
-			}
-			this.model = model;
-		} else {
-			this.model = view;
-		}
 		var self = this;
 		this._listener = {
 			onChanging: function(e) {
@@ -220,10 +210,18 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 				self._onDestroy(e);
 			}
 		};
-		this.model.addEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
-		if (this.view) {
-			view.addEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
+		if (view.getModel) {
+			var model = view.getModel();
+			if (model.getBaseModel) {
+				model = model.getBaseModel();
+			}
+			this.model = model;
+			this.setView(view);
+		} else {
+			this.shared = true;
+			this.model = view;
 		}
+		this.model.addEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
 	}
 	UndoStack.prototype = /** @lends orion.editor.UndoStack.prototype */ {
 		/**
@@ -432,6 +430,16 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			this._ignoreUndo = false;
 			this._compoundChange = undefined;
 		},
+		setView: function(view) {
+			if (this.view === view) { return; }
+			if (this.view) {
+				view.removeEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
+			}
+			this.view = view;
+			if (this.view) {
+				view.addEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
+			}
+		},
 		/**
 		 * Starts a compound change. 
 		 * <p>
@@ -458,9 +466,12 @@ define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 			this.endCompoundChange();
 		},
 		_onDestroy: function(evt) {
-			this.model.removeEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
+			if (!evt /* undo stack destroyed */ || !this.shared) {
+				this.model.removeEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
+			}
 			if (this.view) {
 				this.view.removeEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
+				this.view = null;
 			}
 		},
 		_onChanging: function(e) {

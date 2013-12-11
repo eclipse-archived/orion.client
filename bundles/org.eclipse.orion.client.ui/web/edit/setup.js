@@ -22,7 +22,7 @@ define([
 	'orion/editor/undoStack',
 	'orion/folderView',
 	'orion/editorView',
-	'orion/editorDelegatedView',
+	'orion/editorPluginView',
 	'orion/markdownView',
 	'orion/commandRegistry',
 	'orion/contentTypes',
@@ -43,20 +43,21 @@ define([
 	'orion/URITemplate',
 	'orion/i18nUtil',
 	'orion/PageUtil',
+	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/projectClient'
 ], function(
 	messages, Sidebar, mInputManager, mGlobalCommands,
 	mTextModel, mUndoStack,
-	mFolderView, mEditorView, mDelegatedView , mMarkdownView,
+	mFolderView, mEditorView, mPluginEditorView , mMarkdownView,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
-	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, lib, mProjectClient
+	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, mProjectClient
 ) {
 
 var exports = {};
 
-exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
+exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isReadOnly) {
 	var selection;
 	var commandRegistry;
 	var statusService;
@@ -166,46 +167,42 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		}
 	};
 	
-	var currentEditorView;
+	var currentEditorView, defaultOptions;
 	// Shared text model and undo stack
 	var model = new mTextModel.TextModel();
 	var undoStack = new mUndoStack.UndoStack(model, 500);
+	var contextImpl = {};
+	[	
+		"getText", //$NON-NLS-0$
+		"setText" //$NON-NLS-0$
+	].forEach(function(method) {
+		contextImpl[method] = model[method].bind(model);
+	});
+	serviceRegistry.registerService("orion.edit.model.context", contextImpl, null); //$NON-NLS-0$
 	function getEditorView(input, metadata) {
 		var view = null;
 		if (metadata && input) {
-			var options = {
-				parent: editorDomNode,
-				model: model,
-				undoStack: undoStack,
+			var options = objects.mixin({
 				input: input,
 				metadata: metadata,
-				serviceRegistry: serviceRegistry,
-				commandRegistry: commandRegistry,
-				contentTypeRegistry: contentTypeRegistry,
-				selection: selection,
-				fileService: fileClient,
-				progressService: progressService,
-				preferences: preferences
-			};
+			}, defaultOptions);
+			//TODO better way of registering built-in editors
 			if (metadata.Directory) {
 				view = new mFolderView.FolderView(options);
 			} else {
-				if (input.contentProvider) {
-					var contentProviders = serviceRegistry.getServiceReferences("orion.edit.content"); //$NON-NLS-0$
-					for (var i=0; i<contentProviders.length; i++) {
-						var id = contentProviders[i].getProperty("id"); //$NON-NLS-0$
-						if (id === input.contentProvider) {
-							options.contentProvider = contentProviders[i];
-							view = new mDelegatedView.DelegatedEditorView(options);
+				var id = input.editor;
+				if (!id) {
+					view = editorView;
+				} else if (id === "orion.markdownViewer") { //$NON-NLS-0$
+					view = new mMarkdownView.MarkdownEditorView(options);
+				} else {
+					var editors = serviceRegistry.getServiceReferences("orion.edit.editor"); //$NON-NLS-0$
+					for (var i=0; i<editors.length; i++) {
+						if (editors[i].getProperty("id") === id) { //$NON-NLS-0$
+							options.editorService = editors[i];
+							view = new mPluginEditorView.PluginEditorView(options);
 							break;
 						}
-					}
-				}
-				if (!view) {
-					if (input.contentProvider === "orion.edit.markdownContent") { //$NON-NLS-0$
-						view = new mMarkdownView.MarkdownEditorView(options);
-					} else {
-						view = editorView;
 					}
 				}
 			}
@@ -284,23 +281,26 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 		}
 	});
 	
-	editorView = new mEditorView.EditorView({
+	defaultOptions = {
 		parent: editorDomNode,
 		model: model,
 		undoStack: undoStack,
-		renderToolbars: renderToolbars,
-		fileService: fileClient,
-		progressService: progressService,
 		serviceRegistry: serviceRegistry,
-		statusService: statusService,
-		statusReporter: statusReporter,
-		inputManager: inputManager,
-		preferences: preferences,
-		readonly: isReadOnly,
-		searcher: searcher,
+		pluginRegistry: pluginRegistry,
 		commandRegistry: commandRegistry,
-		contentTypeRegistry: contentTypeRegistry
-	});
+		contentTypeRegistry: contentTypeRegistry,
+		renderToolbars: renderToolbars,
+		inputManager: inputManager,
+		readonly: isReadOnly,
+		preferences: preferences,
+		searcher: searcher,
+		selection: selection,
+		fileService: fileClient,
+		statusReporter: statusReporter,
+		statusService: statusService,
+		progressService: progressService
+	};
+	editorView = new mEditorView.EditorView(defaultOptions);
 
 	// Sidebar
 	function SidebarNavInputManager() {

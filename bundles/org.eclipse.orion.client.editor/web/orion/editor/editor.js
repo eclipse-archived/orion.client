@@ -44,6 +44,15 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		this._undoStack = options.undoStack;
 		this._statusReporter = options.statusReporter;
 		this._title = null;
+		var self = this;
+		this._listener = {
+			onChanged: function(e) {
+				self.onChanged(e);
+			}
+		};
+		if (this._model) {
+			this._model.addEventListener("Changed", this._listener.onChanged); //$NON-NLS-0$
+		}
 		this.checkDirty();
 	}
 	BaseEditor.prototype = /** @lends orion.editor.BaseEditor.prototype */ {
@@ -53,6 +62,9 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		destroy: function() {
 			this.uninstall();
 			this._statusReporter = this._domNode = null;
+			if (this._model) {
+				this._model.removeEventListener("Changed", this._listener.onChanged); //$NON-NLS-0$
+			}
 		},
 		
 		/** @private */
@@ -106,6 +118,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * Creates the DOM hierarchy of the editor and add it to the document.
 		 */
 		install: function() {
+			this.installed = true;
 		},
 		/**
 		 * Returns <code>true</code> if the editor is dirty; <code>false</code> otherwise.
@@ -134,6 +147,13 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 */
 		onInputChanged: function (inputChangedEvent) {
 			return this.dispatchEvent(inputChangedEvent);
+		},
+		/**
+		 * Called when the editor's text model has been changed.
+		 * @param {Event} inputChangedEvent
+		 */
+		onChanged: function (modelChangedEvent) {
+			this.checkDirty();
 		},
 		/**
 		 * Report the message to the user.
@@ -203,9 +223,23 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			});
 		},
 		/**
+		 * Replaces the text in the given range with the given text.
+		 * <p>
+		 * The character at the end offset is not replaced.
+		 * </p>
+		 *
+		 * @param {String} text the new text.
+		 * @param {Number} [start=0] the start offset of text range.
+		 * @param {Number} [end=char count] the end offset of text range.
+		 */
+		setText: function(text, start, end) {
+			this.getModel().setText(text, start, end);
+		},
+		/**
 		 * Removes the DOM hierarchy of the editor from the document.
 		 */
 		uninstall: function() {
+			this.installed = false;
 		}
 	};
 	mEventTarget.EventTarget.addMixin(BaseEditor.prototype);
@@ -626,14 +660,14 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			annotationModel.replaceAnnotations(remove, add);
 		},
 		
-		install: function() {
-			this.installTextView();
-		},
-		
 		/**
 		 * Creates the underlying TextView and installs the editor's features.
 		 */
-		installTextView : function() {
+		installTextView: function() {
+			this.install();
+		},
+		
+		install : function() {
 			if (this._textView) { return; }
 			
 			// Create textView and install optional features
@@ -817,16 +851,17 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				textView: textView
 			};
 			this.dispatchEvent(textViewInstalledEvent);
+			BaseEditor.prototype.install.call(this);
 		},
 
-		uninstall: function() {
-			this.uninstallTextView();
-		},
-		
 		/**
 		 * Destroys the underlying TextView.
 		 */
 		uninstallTextView: function() {
+			this.uninstall();
+		},
+		
+		uninstall: function() {
 			var textView = this._textView;
 			if (!textView) { return; }
 			
@@ -845,6 +880,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				textView: textView
 			};
 			this.dispatchEvent(textViewUninstalledEvent);
+			BaseEditor.prototype.uninstall.call(this);
 		},
 		
 		_updateCursorStatus: function() {

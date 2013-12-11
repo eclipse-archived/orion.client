@@ -415,7 +415,7 @@ define([
 					}
 				}
 			}
-			var editorChanged = editor && oldInput.contentProvider !== input.contentProvider;
+			var editorChanged = editor && oldInput.editor !== input.editor;
 			this._location = location;
 			this._parsedLocation = input;
 			this._ignoreInput = true;
