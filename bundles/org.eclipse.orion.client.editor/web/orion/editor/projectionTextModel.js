@@ -446,7 +446,9 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 			}
 			var removed = projections.splice(rangeStart, rangeEnd - rangeStart);
 			for (i = 0; i < removed.length; i++) {
-				removed[i].annotation._expand();
+				if (removed[i].annotation) {
+					removed[i].annotation._expand();
+				}
 			}
 			var modelChangedEvent1 = {
 				type: "Changed", //$NON-NLS-0$
