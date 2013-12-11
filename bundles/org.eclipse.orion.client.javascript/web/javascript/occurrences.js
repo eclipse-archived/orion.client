@@ -137,6 +137,7 @@ define([
 					break;
 				case Estraverse.Syntax.VariableDeclarator:
 					this.checkId(node.id, this.GENERAL, true);
+					this.checkId(node.init);
 					break;
 				case Estraverse.Syntax.NewExpression:
 					this.checkId(node.callee, this.FUNCTION, false);
