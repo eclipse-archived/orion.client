@@ -105,6 +105,9 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 						}
 						return false;
 					}
+					if (e.ctrlKey) {
+						return false;
+					}
 				} else {
 					// CTRL or ALT combinations are not characters, however both of them together (CTRL+ALT)
 					// are the Alt Gr key on some keyboards.  See Eclipse bug 20953. If together, they might
