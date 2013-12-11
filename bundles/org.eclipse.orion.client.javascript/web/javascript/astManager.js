@@ -62,7 +62,6 @@ define([
 					range: true,
 					tolerant: true,
 					comment: true,
-					loc: true,
 					tokens: true
 				});
 			} catch (e) {
