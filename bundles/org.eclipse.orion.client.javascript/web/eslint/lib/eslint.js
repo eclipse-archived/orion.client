@@ -355,8 +355,8 @@ module.exports = (function() {
             ruleId: ruleId,
             node: node,
             message: message,
-            line: node.loc.start.line,
-            column: node.loc.start.column,
+            //line: node.loc.start.line,
+            //column: node.loc.start.column,
             source: api.getSource(node),
             related: typeof related !== "undefined" ? related : null
         });
