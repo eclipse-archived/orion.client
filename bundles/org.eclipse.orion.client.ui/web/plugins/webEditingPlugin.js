@@ -157,7 +157,7 @@ define([
 		id: "orion.imageViewer",
 		nameKey: "Orion Image Viewer",
 		nls: "orion/nls/messages",
-		contentUriTemplate: "../edit/content/imageViewer.html#{,OrionHome}{,Location,params*}",
+		contentUriTemplate: "../edit/content/imageViewer.html#{,Location,params*}",
 		uriTemplate: "../edit/edit.html#{,Location,params*},editor=orion.imageViewer"});
 
 	provider.registerService("orion.navigate.openWith", {}, {
