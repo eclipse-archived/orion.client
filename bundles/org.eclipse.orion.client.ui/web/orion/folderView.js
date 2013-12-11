@@ -162,6 +162,7 @@ define([
 		this.serviceRegistry = options.serviceRegistry;
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
+		this.preferences = options.preferences,
 		this.showProjectView = true;
 		this.showFolderNav = true;
 		this._init();
@@ -180,7 +181,8 @@ define([
 					fileClient : this.fileClient,
 					progress : this.progress,
 					serviceRegistry: this.serviceRegistry,
-					commandRegistry: this.commandRegistry
+					commandRegistry: this.commandRegistry,
+					preferences: this.preferences
 				});
 				this.projectView = new mProjectView.ProjectView({
 					fileClient : this.fileClient,
@@ -231,34 +233,49 @@ define([
 			}
 			this._parent.appendChild(this._node);
 			
-			if (readmeMd) {
-				div = document.createElement("div"); //$NON-NLS-0$
-				this.markdownView.displayInFrame(div, readmeMd);
-				this._node.appendChild(div);
-			}
-				
-			if(projectJson && this.showProjectView){
-				div = document.createElement("div"); //$NON-NLS-0$
-				this.projectEditor.displayContents(div, this._metadata);
-				this._node.appendChild(div);
+			function renderSections(sectionsOrder){
+				sectionsOrder.forEach(function(sectionName){
+					if(sectionName === "project"){
+						if(projectJson && this.showProjectView){
+							div = document.createElement("div"); //$NON-NLS-0$
+							this.projectEditor.displayContents(div, this._metadata);
+							this._node.appendChild(div);
+						}
+					} else if(sectionName === "folderNav") {
+						if (this.showFolderNav) {
+							var navNode = document.createElement("div"); //$NON-NLS-0$
+							navNode.id = "folderNavNode"; //$NON-NLS-0$
+							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files"});
+							
+							this.folderNavExplorer = new FolderNavExplorer({
+								parentId: navNode,
+								serviceRegistry: this.serviceRegistry,
+								fileClient: this.fileClient,
+								commandRegistry: this.commandRegistry,
+								contentTypeRegistry: this.contentTypeRegistry
+							});
+							foldersSection.embedExplorer(this.folderNavExplorer);
+							this.folderNavExplorer.setCommandsVisible(mGlobalCommands.getMainSplitter().splitter.isClosed());
+							this.folderNavExplorer.loadRoot(this._metadata);
+						}
+					} else if(sectionName === "readme"){
+						if (readmeMd) {
+							div = document.createElement("div"); //$NON-NLS-0$
+							this.markdownView.displayInFrame(div, readmeMd);
+							this._node.appendChild(div);
+						}
+					}
+				}.bind(this));
 			}
 			
-			if (this.showFolderNav) {
-				var navNode = document.createElement("div"); //$NON-NLS-0$
-				navNode.id = "folderNavNode"; //$NON-NLS-0$
-				var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files"});
-				
-				this.folderNavExplorer = new FolderNavExplorer({
-					parentId: navNode,
-					serviceRegistry: this.serviceRegistry,
-					fileClient: this.fileClient,
-					commandRegistry: this.commandRegistry,
-					contentTypeRegistry: this.contentTypeRegistry
-				});
-				foldersSection.embedExplorer(this.folderNavExplorer);
-				this.folderNavExplorer.setCommandsVisible(mGlobalCommands.getMainSplitter().splitter.isClosed());
-				this.folderNavExplorer.loadRoot(this._metadata);
-			}
+			var sectionsOrder = ["project", "folderNav", "readme"];
+			this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
+				sectionsOrder = sectionsOrderPrefs.get("folderView") || sectionsOrder;
+				renderSections.apply(this, [sectionsOrder]);
+			}.bind(this), function(error){
+				renderSections.apply(this, [sectionsOrder]);
+				window.console.error(error);
+			}.bind(this));
 		},
 		create: function() {
 			if(this._metadata.Projects){ //this is a workspace root

@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global define document setTimeout*/
+/*global define document setTimeout window*/
 define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/objects',  'orion/projectCommands', 'orion/commandRegistry', 'orion/PageLinks', 'orion/explorers/explorer', 'orion/section'],
 	function(URITemplate, lib, Deferred, objects, mProjectCommands, mCommandRegistry, PageLinks, mExplorer, mSection) {
 	
@@ -458,6 +458,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
 		this.progress = options.progress;
+		this.preferences = options.preferences;
 		this.projectClient = this.serviceRegistry.getService("orion.project.client");
 		this.commandRegistry = options.commandRegistry;
 		this._node = null;
@@ -493,18 +494,44 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			this.node = node;
 			this.node.className = "orionProject";				
 			this.projectData = projectData;
-			var span = document.createElement("span");
-			this.node.appendChild(span);
-			this.renderProjectInfo(span);
-			span = document.createElement("span");
-			this.node.appendChild(span);
-			this.renderAdditionalProjectProperties(span);
-			span = document.createElement("span");
-			this.node.appendChild(span);
-			this.renderLaunchConfigurations(span);
-			span = document.createElement("span");
-			this.node.appendChild(span);
-			this.renderDependencies(span);
+			
+			function renderSections(sectionsOrder){
+				sectionsOrder.forEach(function(sectionName){
+					var span;
+					switch (sectionName) {
+						case "projectInfo":
+							span = document.createElement("span");
+							this.node.appendChild(span);
+							this.renderProjectInfo(span);
+							break;
+						case "additionalInfo":
+							span = document.createElement("span");
+							this.node.appendChild(span);
+							this.renderAdditionalProjectProperties(span);
+							break;
+						case "deployment":
+							span = document.createElement("span");
+							this.node.appendChild(span);
+							this.renderLaunchConfigurations(span);
+							break;
+						case "dependencies":
+							span = document.createElement("span");
+							this.node.appendChild(span);
+							this.renderDependencies(span);
+							break;
+					}
+				}.bind(this));
+		}
+			
+			var sectionsOrder = ["projectInfo", "additionalInfo", "deployment", "dependencies"];
+			this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
+				sectionsOrder = sectionsOrderPrefs.get("projectView") || sectionsOrder;
+				renderSections.apply(this, [sectionsOrder]);
+			}.bind(this), function(error){
+				renderSections.apply(this, [sectionsOrder]);
+				window.console.error(error);
+			}.bind(this));
+			
 		},
 		displayContents: function(node, parentFolder){
 			this.parentFolder = parentFolder;

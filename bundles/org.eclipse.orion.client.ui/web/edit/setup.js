@@ -184,7 +184,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly) {
 				contentTypeRegistry: contentTypeRegistry,
 				selection: selection,
 				fileService: fileClient,
-				progressService: progressService
+				progressService: progressService,
+				preferences: preferences
 			};
 			if (metadata.Directory) {
 				view = new mFolderView.FolderView(options);
