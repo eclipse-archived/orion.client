@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -47,7 +47,7 @@ define([
 			// Error produced by eslint
 			start = e.node.range[0];
 			end = e.node.range[1];
-			if (e.ruleId === "semi" && e.related) { //$NON-NLS-0$
+			if (e.related) {
 				// Flagging the entire node is distracting. Just flag the bad token.
 				var relatedToken = e.related;
 				start = relatedToken.range[0];
