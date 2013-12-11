@@ -513,10 +513,11 @@ textarea.parameterInput {
 }
 
 .inputCompletionContainer {
+	border-radius:1px;
 	color: black;
 	display: block;
-	border:  1px solid #666;
-	background: white;
+	border:  1px solid #DDD;
+	background: #fefefe;
 	max-height: 300px;
 	max-width: 300px;
 	min-width: 150px;
@@ -524,6 +525,7 @@ textarea.parameterInput {
 	overflow-y: auto;
 	overflow-x: hidden;
 	padding: 2px;
+	box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
 	z-index:200;
 }
 
