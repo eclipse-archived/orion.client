@@ -168,12 +168,12 @@ define([
 							} catch (e) {}
 						}
 						item.parent.value[item.key] = newValue;
-						self.update();
+						self.update(item);
 					} else {
 						if (!item.parent.value[name]) {
 							item.parent.value[name] = item.value;
 							delete item.parent.value[item.key];
-							self.update();
+							self.update({key: name, value: item.value, id: item.parent.id + "-" + name, parent: item.parent}); //$NON-NLS-0$
 						}
 					}
 				}
@@ -190,6 +190,44 @@ define([
 			this.createTree(this.parentId, new JSONModel(json || {}), {
 				selectionPolicy: "cursorOnly", //$NON-NLS-0$
 			});
+		},
+		expandItem: function(item) {
+			var deferred = new Deferred();
+			this.showItem(item).then(function(result) {
+				if (this.myTree.isExpanded(result)) {
+					deferred.resolve(result);
+				} else {
+					this.myTree.expand(this.model.getId(result), function() {
+						deferred.resolve(result);
+					});
+				}
+			}.bind(this), deferred.reject);
+			return deferred;
+		},
+		reveal: function(item) {
+			return this.showItem(item).then(function(result) {
+				var navHandler = this.getNavHandler();
+				if (navHandler) {
+					navHandler.cursorOn(result, true);
+				}
+				return result;
+			}.bind(this));
+		},
+		showItem: function(item) {
+			var deferred = new Deferred();
+			var row = this.getRow(item);
+			if (row) {
+				deferred.resolve(row._item || item);
+			} else if (item.parent) {
+				return this.expandItem(item.parent).then(function(parent) {
+					var row = this.getRow(item);
+					if (!row) {
+						return new Deferred().reject();
+					}
+					return row._item || item;
+				}.bind(this));
+			}
+			return deferred;
 		}
 	});
 	

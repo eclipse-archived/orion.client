@@ -19,12 +19,13 @@ define([
 	'orion/webui/littlelib'
 ], function(PluginProvider, mJSONExplorer, Deferred, mCommands, mKeyBinding, lib) {
 	
-	var json, model, explorer, commandsProxy = new mCommands.CommandsProxy();
+	var json, showItem, model, explorer, commandsProxy = new mCommands.CommandsProxy();
 	
 	var EDITOR_ID = "orion.jsonEditor"; //$NON-NLS-0$
 	
-	function updateModel() {
+	function updateModel(item) {
 		if (model) {
+			showItem = item;
 			return model.setText(JSON.stringify(json, null, "\t")); //$NON-NLS-0$
 		}
 		return new Deferred().reject();
@@ -43,6 +44,9 @@ define([
 					explorer = new mJSONExplorer.JSONExplorer({parentId: document.body, update: updateModel});
 				}
 				explorer.display(json);
+				if (showItem) {
+					explorer.reveal(showItem);
+				}
 			});
 		}
 	}
@@ -97,13 +101,14 @@ define([
 				value = item.value;
 			}
 			var key = "NewKey";
+			var newValue = "NewValue";
 			if (Array.isArray(value)) {
 				key = value.length + "";
-				value.push("NewValue");
+				value.push(newValue);
 			} else {
-				value[key] = "NewValue";
+				value[key] = newValue;
 			}
-			updateModel();
+			updateModel({key: key, value: newValue, id: item.id + "-" + key, parent: item}); //$NON-NLS-0$
 			return null;
 		}
 	}, {
@@ -123,7 +128,7 @@ define([
 				} else {
 					delete value[item.key];
 				}
-				updateModel();
+				updateModel(item.parent);
 			}
 			return null;
 		}
@@ -131,7 +136,7 @@ define([
 		name : "Delete",
 		contentTypes: ["application/json"], //$NON-NLS-0$
 		editor: EDITOR_ID,
-		key : [ "d", true ] //$NON-NLS-0$
+		key : [ 46 ] //$NON-NLS-0$
 	});
 
 	provider.connect();
