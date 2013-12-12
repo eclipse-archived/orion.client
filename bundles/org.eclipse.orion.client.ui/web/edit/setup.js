@@ -191,7 +191,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 				view = new mFolderView.FolderView(options);
 			} else {
 				var id = input.editor;
-				if (!id) {
+				if (!id || id === "orion.editor") { //$NON-NLS-0$
 					view = editorView;
 				} else if (id === "orion.markdownViewer") { //$NON-NLS-0$
 					view = new mMarkdownView.MarkdownEditorView(options);
