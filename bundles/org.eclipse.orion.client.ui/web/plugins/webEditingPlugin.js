@@ -282,7 +282,8 @@ define([
 				match: "\\b(?:" + keywords.JSKeywords.join("|") + ")\\b",
 				name: "KEYWORD"
 			}, {
-				match: "'.*?(?:'|$)",
+				id: "string_singleQuote",
+				match: "'(?:\\\\.|[^'])*(?:'|$)",
 				name: "STRING"
 			}, {
 				begin: "'[^'\\n]*\\\\\n",
@@ -320,12 +321,11 @@ define([
 			{
 				include: "orion.c-like"
 			}, {
+				include: "orion.js#string_singleQuote"
+			}, {
 				id: keywords,
 				match: "\\b(?:true|false|null)\\b",
 				name: "KEYWORD"
-			}, {
-				match: "'.*?(?:'|$)",
-				name: "STRING"
 			}, {
 				/* override c-like#comment_singleline */
 				id: "comment_singleline"
