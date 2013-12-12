@@ -21,6 +21,7 @@ define({
 	"Orion Editor": "Orion Editor",
 	"Orion Image Viewer": "Orion Image Viewer",
 	"Orion Markdown Viewer": "Orion Markdown Viewer",
+	"Orion JSON Editor": "Orion JSON Editor",
 	"View on Site": "View on Site",
 	"View this file or folder on a web site hosted by Orion": "View this file or folder on a web site hosted by Orion",
 	"Show a list of all the keybindings on this page": "Show a list of all the keybindings on this page",
