@@ -19,13 +19,14 @@ define([
 	'orion/webui/littlelib'
 ], function(PluginProvider, mJSONExplorer, Deferred, mCommands, mKeyBinding, lib) {
 	
-	var json, showItem, model, explorer, commandsProxy = new mCommands.CommandsProxy();
+	var json, showItem, expandItem, model, explorer, commandsProxy = new mCommands.CommandsProxy();
 	
 	var EDITOR_ID = "orion.jsonEditor"; //$NON-NLS-0$
 	
-	function updateModel(item) {
+	function updateModel(item, expand) {
 		if (model) {
 			showItem = item;
+			expandItem = expand;
 			return model.setText(JSON.stringify(json, null, "\t")); //$NON-NLS-0$
 		}
 		return new Deferred().reject();
@@ -45,7 +46,13 @@ define([
 				}
 				explorer.display(json);
 				if (showItem) {
-					explorer.reveal(showItem);
+					if (expandItem) {
+						explorer.expandItem(showItem).then(function() {
+							explorer.reveal(showItem);
+						});
+					} else {
+						explorer.reveal(showItem);
+					}
 				}
 			});
 		}
@@ -128,7 +135,7 @@ define([
 				} else {
 					delete value[item.key];
 				}
-				updateModel(item.parent);
+				updateModel(item.parent, true);
 			}
 			return null;
 		}
