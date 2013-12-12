@@ -62,16 +62,12 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 				//if a parentDropdown isn't specified move up in dom tree looking for one
 				var parentNode = this._dropdownNode.parentNode;
 				while(parentNode && (document !== parentNode)) {
-					if (parentNode.classList && parentNode.classList.contains("dropdownMenu")) {
+					if (parentNode.classList && parentNode.classList.contains("dropdownMenu")) { //$NON-NLS-0$
 						this._parentDropdown = parentNode.dropdown;
 						break;
 					}
 					parentNode = parentNode.parentNode;
 				}
-			}
-			
-			if (this._parentDropdown) {
-				this._parentDropdownNode = this._parentDropdown._dropdownNode;
 			}
 
 			if (options.triggerNode) {
@@ -103,11 +99,6 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 						
 			// keys
 			this._dropdownNode.addEventListener("keydown", this._dropdownKeyDown.bind(this), false); //$NON-NLS-0$
-			
-			//submenu open handler
-			var boundSubmenuHandler = this._submenuOpenHandler.bind(this);
-			this.addEventListener("submenuopen", boundSubmenuHandler); //$NON-NLS-0$
-			this._boundSubmenuOpenHandler = boundSubmenuHandler;
 		},
 		
 		/**
@@ -137,9 +128,9 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 				lib.setFramesEnabled(false);
 				if (this._populate) {
 					this.empty();
-					this.dispatchEvent({type: "prepopulate", dropdown: this, event: event});
+					this.dispatchEvent({type: "prepopulate", dropdown: this, event: event}); //$NON-NLS-0$
 					this._populate(this._dropdownNode);
-					this.dispatchEvent({type: "postpopulate", dropdown: this, event: event});
+					this.dispatchEvent({type: "postpopulate", dropdown: this, event: event}); //$NON-NLS-0$
 				}
 				var items = this.getItems();
 				if (items.length > 0) {
@@ -166,7 +157,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 					actionTaken = true;
 					
 					if (this._parentDropdown) {
-						this._parentDropdown.dispatchEvent({type: "submenuopen", dropdown: this, event: event});
+						this._parentDropdown.submenuOpen(this);
 					}
 				}
 			}
@@ -208,7 +199,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 			var overflowY = (bounds.top + bounds.height) - (bodyBounds.top + bodyBounds.height);
 			if (0 < overflowY) {
 				//TODO (minor) figure out proper bottom padding amount
-				this._dropdownNode.style.top = Math.ceil(this._dropdownNode.style.top - overflowY) + "px";
+				this._dropdownNode.style.top = Math.ceil(this._dropdownNode.style.top - overflowY) + "px"; //$NON-NLS-0$
 			}
 		},
 		
@@ -243,8 +234,6 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 				
 				this._isVisible = false;
 				actionTaken = true;
-				
-				this.dispatchEvent({type: "dropdownclosed", dropdown: this});
 			}
 			return actionTaken;
 		},
@@ -267,7 +256,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 			//add handler to close open submenu when other items in the parent menu are hovered
 			filtered.forEach(function(item){
 				if (!item._hasDropdownMouseover) {
-					item.addEventListener("mouseover", function(e){
+					item.addEventListener("mouseover", function(e){ //$NON-NLS-0$
 						if (item.dropdown) {
 							item.dropdown.open(e);
 						} else {
@@ -339,8 +328,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 		  * Sets the this._selectedSubmenu to the one that's passed in.
 		  * @param submenu The submenu that was opened and should be set as the next this._selectedSubmenu
 		  */
-		_submenuOpenHandler: function(event) {
-			var submenu = event.dropdown;
+		submenuOpen: function(submenu) {
 			if (submenu !== this._selectedSubmenu) {
 				//close the current menu and all its children
 				this._closeSelectedSubmenu();
@@ -360,10 +348,6 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 			this.empty();
 			if (this._boundAutoDismiss) {
 				lib.removeAutoDismiss(this._boundAutoDismiss);
-			}
-			if (this._boundSubmenuOpenHandler) {
-				this.removeEventListener("submenuopen", this._boundSubmenuOpenHandler);
-				this._boundSubmenuOpenHandler = null;
 			}
 		 }
 	};

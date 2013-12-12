@@ -433,11 +433,16 @@ a.currentLocation:hover {
 	border: 1px solid #ccc !important;
 }
 
-span.browserContextButton { /* specifying span element to override .core-sprite-openarrow */
-	background-repeat: no-repeat;
-	background-position: center -527px;
+button.browserContextButton { /* specifying <button> element to increase specificity and override .dropdownMenuItem's padding */
+	border: none;
+	width: 100%;
 	text-align: center;
 	padding: 0;
+	background: none;
+}
+
+span.browserContextButton {
+	line-height: 0; /* remove the extra padding from the open arrow icon */
 }
 
 .checkedMenuItem {

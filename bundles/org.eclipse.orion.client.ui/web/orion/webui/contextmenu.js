@@ -128,33 +128,40 @@ define([
 				
 				this._browserContextNode = this._dropdownNode.lastChild;
 				
-				var browserContextSpan = this._browserContextNode.firstElementChild;
+				var browserContextButtonNode = this._browserContextNode.firstElementChild;
 				
-				browserContextSpan.commandTooltip = new Tooltip.Tooltip({
-					node: browserContextSpan,
+				this._browserContextTooltip = new Tooltip.Tooltip({
+					node: browserContextButtonNode,
 					text: messages["To view the browser's context menu, trigger the context menu again."], //$NON-NLS-0$
 					position: ["below", "right", "left", "above"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					trigger: "none" //$NON-NLS-0$
 				});
 				
 				// add handler to show tooltip
-				this._browserContextNode.addEventListener("click", function(e){ //$NON-NLS-0$
-					browserContextSpan.commandTooltip.show();
+				browserContextButtonNode.addEventListener("click", function(e){ //$NON-NLS-0$
+					self._browserContextTooltip.show();
 				}, false);
 				
+				browserContextButtonNode.addEventListener("keyup", function(e){ //$NON-NLS-0$
+					if (e.which || e.keyCode) {
+					  if ((e.which === lib.KEY.ENTER) || (e.keyCode === lib.KEY.ENTER)) {
+					    self._browserContextTooltip.show();
+					    return false;
+					  }
+					}
+				});
+				
 				// add handler to close submenu
-				this._browserContextNode.addEventListener("mouseover", function(e){ //$NON-NLS-0$
+				browserContextButtonNode.addEventListener("mouseover", function(e){ //$NON-NLS-0$
 					self._closeSelectedSubmenu();
 				}, false);
 				
-				// add handlers to hide tooltip
-				var hideTooltip = function(e){
-					browserContextSpan.commandTooltip.hide(0);
-				};
-				this.addEventListener("dropdownclosed", hideTooltip, true); //$NON-NLS-0$
-				this.addEventListener("submenuopen", hideTooltip, true); //$NON-NLS-0$
-				
-				this._browserContextTooltip = browserContextSpan.commandTooltip;
+			}
+		},
+		
+		_hideBrowserContextTooltip: function() {
+			if (this._browserContextTooltip) {
+				this._browserContextTooltip.hide(0);
 			}
 		}
 	});
@@ -170,6 +177,18 @@ define([
 			}
 		}
 		return actionTaken;
+	};
+	
+	// overrides Dropdown.protoype.submenuOpen
+	ContextMenu.prototype.submenuOpen = function(submenu) {
+		Dropdown.prototype.submenuOpen.call(this, submenu); //call function in super class
+		this._hideBrowserContextTooltip();
+	};
+	
+	// overrides Dropdown.protoype.submenuOpen
+	ContextMenu.prototype.close = function(restoreFocus) {
+		Dropdown.prototype.close.call(this, restoreFocus); //call function in super class
+		this._hideBrowserContextTooltip();
 	};
 	
 	// overrides Dropdown.protoype.destroy
