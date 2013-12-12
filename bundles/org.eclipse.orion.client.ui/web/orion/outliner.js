@@ -41,30 +41,62 @@ define([
 			return;
 		}
 		var elementNode = document.createElement("span"); //$NON-NLS-0$
-		tableRow.appendChild(elementNode);
-		if (item.className) {
-			elementNode.classList.add(item.className);
-		}
-		if (item.children) {
-			this.getExpandImage(tableRow, elementNode);
-		}
-		if (item.href) {
-			this._createLink(item.label, item.href, elementNode);
-		} else if (item.line || item.column || item.start) {
-			var href = new URITemplate("#{,resource,params*}").expand({resource: this.title, params: item}); //$NON-NLS-0$
-			this._createLink(item.label, href, elementNode);
-			item.outlineLink = href;
-		} else if (item.label) {
-			elementNode.appendChild(document.createTextNode(item.label)); //$NON-NLS-0$
-		}
-	};
-	
-	OutlineRenderer.prototype._createLink = function(text, href, parentNode) {
+		var expandNode = document.createElement("span"); //$NON-NLS-0$
+		var imageNode = document.createElement("span"); //$NON-NLS-0$
+		var contentsNode = document.createElement("span"); //$NON-NLS-0$
+ 		tableRow.appendChild(elementNode);
+		elementNode.appendChild(expandNode);
+		elementNode.appendChild(imageNode);
+		elementNode.appendChild(contentsNode);
+		
+ 		if (item.className) {
+			contentsNode.classList.add(item.className);
+ 		}
+ 		if (item.imageClassName) {
+ 			imageNode.classList.add(item.imageClassName);
+ 		}
+ 		
+ 		if (item.children) {
+			this.getExpandImage(tableRow, expandNode);
+		} else {
+			expandNode.classList.add("outlineLeafIndent"); //$NON-NLS-0$
+ 		}
+ 		
+ 		var textNode = document.createElement("span"); //$NON-NLS-0$
+ 		textNode.appendChild(document.createTextNode(item.label));
+ 		if (item.details){
+ 			var detailsNode = document.createElement("span"); //$NON-NLS-0$
+ 			detailsNode.appendChild(document.createTextNode(item.details));
+ 			if (item.detailsClassName){
+ 				detailsNode.classList.add(item.detailsClassName);
+ 			}
+ 			textNode.appendChild(detailsNode)
+ 		}
+ 		
+ 		if (item.href) {
+			this._createLink(textNode, item.href, contentsNode);
+ 		} else if (item.line || item.column || item.start) {
+ 			var href = new URITemplate("#{,resource,params*}").expand({resource: this.title, params: item}); //$NON-NLS-0$
+			this._createLink(textNode, href, contentsNode, item.details);
+ 			item.outlineLink = href;
+ 		} else if (item.label) {
+			contentsNode.appendChild(textNode); //$NON-NLS-0$
+ 		}
+ 	};
+	/**
+	 * @name _createLink
+	 * @description Creates a link node in the parent containing the given contents
+	 * @private
+	 * @param contents DOM node to place inside the link
+	 * @param href The link activate on click
+	 * @param parentNode DOM node to add the link to
+	 */
+	OutlineRenderer.prototype._createLink = function(contents, href, parentNode) {
 		var link = document.createElement("a"); //$NON-NLS-0$
 		parentNode.appendChild(link);
 		
 		link.classList.add("navlinkonpage"); //$NON-NLS-0$
-		link.appendChild(document.createTextNode(text));
+		link.appendChild(contents);
 		
 		// if a selection service has been specified, we will use it for link selection.
 		// Otherwise we assume following the href in the anchor tag is enough.
