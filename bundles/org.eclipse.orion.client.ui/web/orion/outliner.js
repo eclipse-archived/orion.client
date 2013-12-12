@@ -41,23 +41,29 @@ define([
 			return;
 		}
 		var elementNode = document.createElement("span"); //$NON-NLS-0$
-		tableRow.appendChild(elementNode);
-		if (item.className) {
-			elementNode.classList.add(item.className);
-		}
-		if (item.children) {
-			this.getExpandImage(tableRow, elementNode);
-		}
-		if (item.href) {
-			this._createLink(item.label, item.href, elementNode);
-		} else if (item.line || item.column || item.start) {
-			var href = new URITemplate("#{,resource,params*}").expand({resource: this.title, params: item}); //$NON-NLS-0$
-			this._createLink(item.label, href, elementNode);
-			item.outlineLink = href;
-		} else if (item.label) {
-			elementNode.appendChild(document.createTextNode(item.label)); //$NON-NLS-0$
-		}
-	};
+		var expandNode = document.createElement("span");
+		var contentsNode = document.createElement("span");
+ 		tableRow.appendChild(elementNode);
+		elementNode.appendChild(expandNode);
+		elementNode.appendChild(contentsNode);
+ 		if (item.className) {
+			contentsNode.classList.add(item.className);
+ 		}
+ 		if (item.children) {
+			this.getExpandImage(tableRow, expandNode);
+		} else {
+			expandNode.classList.add("outlineLeafIndent");
+ 		}
+ 		if (item.href) {
+			this._createLink(item.label, item.href, contentsNode);
+ 		} else if (item.line || item.column || item.start) {
+ 			var href = new URITemplate("#{,resource,params*}").expand({resource: this.title, params: item}); //$NON-NLS-0$
+			this._createLink(item.label, href, contentsNode);
+ 			item.outlineLink = href;
+ 		} else if (item.label) {
+			contentsNode.appendChild(document.createTextNode(item.label)); //$NON-NLS-0$
+ 		}
+ 	};
 	
 	OutlineRenderer.prototype._createLink = function(text, href, parentNode) {
 		var link = document.createElement("a"); //$NON-NLS-0$
