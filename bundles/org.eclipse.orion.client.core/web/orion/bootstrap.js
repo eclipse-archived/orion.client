@@ -12,7 +12,8 @@
 /*global define document window eclipse orion serviceRegistry:true widgets alert console localStorage setTimeout*/
 /*browser:true*/
 
-define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/config'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry, mConfig) {
+define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/config', 'orion/tokenUtils'], 
+function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry, mConfig, mTokenUtils) {
 
 	var once; // Deferred
 
@@ -34,59 +35,68 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 				var url = require.toUrl(key);
 				configuration.plugins[url] = pluginsPreference[key];
 			});
-			var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, configuration);	
-			return pluginRegistry.start().then(function() {
-				if (serviceRegistry.getServiceReferences("orion.core.preference.provider").length > 0) { //$NON-NLS-0$
-					return preferences.getPreferences("/plugins", preferences.USER_SCOPE).then(function(pluginsPreference) { //$NON-NLS-0$
-						var installs = [];
-						pluginsPreference.keys().forEach(function(key) {
-							var url = require.toUrl(key);
-							if (!pluginRegistry.getPlugin(url)) {
-								installs.push(pluginRegistry.installPlugin(url,{autostart: "lazy"}).then(function(plugin) {
-									return plugin.update().then(function() {
-										return plugin.start({lazy:true});
-									});
-								}));
-							}
-						});	
-						return Deferred.all(installs, function(e){
-							console.log(e);
-						});
-					});
-				}
-			}).then(function() {
-				return new mConfig.ConfigurationAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(
-					serviceRegistry.registerService.bind(serviceRegistry, "orion.cm.configadmin") //$NON-NLS-0$
-				);
-			}).then(function() {
-				var auth = serviceRegistry.getService("orion.core.auth"); //$NON-NLS-0$
-				if (auth) {
-					var authPromise = auth.getUser().then(function(user) {
-						if (!user) {
-							return auth.getAuthForm(window.location.href).then(function(formURL) {
-								setTimeout(function() {
-									window.location = formURL;
-								}, 0);
+			
+			/* ensure a CSRF token is present before initializing the plugin service */
+			return mTokenUtils.getCSRFToken(preferences).then(function(token){
+				
+				/* pass the token to the plugin service */
+				configuration.csrfToken = token;
+				
+				var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, configuration);	
+				return pluginRegistry.start().then(function() {
+					if (serviceRegistry.getServiceReferences("orion.core.preference.provider").length > 0) { //$NON-NLS-0$
+						return preferences.getPreferences("/plugins", preferences.USER_SCOPE).then(function(pluginsPreference) { //$NON-NLS-0$
+							var installs = [];
+							pluginsPreference.keys().forEach(function(key) {
+								var url = require.toUrl(key);
+								if (!pluginRegistry.getPlugin(url)) {
+									installs.push(pluginRegistry.installPlugin(url,{autostart: "lazy"}).then(function(plugin) {
+										return plugin.update().then(function() {
+											return plugin.start({lazy:true});
+										});
+									}));
+								}
+							});	
+							return Deferred.all(installs, function(e){
+								console.log(e);
 							});
-						} else {
-							localStorage.setItem("lastLogin", new Date().getTime()); //$NON-NLS-0$
-						}
-					});
-					var lastLogin = localStorage.getItem("lastLogin");
-					if (!lastLogin || lastLogin < (new Date().getTime() - (15 * 60 * 1000))) { // 15 minutes
-						return authPromise; // if returned waits for auth check before continuing
+						});
 					}
-				}
-			}).then(function() {
-				var result = {
-					serviceRegistry: serviceRegistry,
-					preferences: preferences,
-					pluginRegistry: pluginRegistry
-				};
-				once.resolve(result);
-				return result;
+				}).then(function() {
+					return new mConfig.ConfigurationAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(
+						serviceRegistry.registerService.bind(serviceRegistry, "orion.cm.configadmin") //$NON-NLS-0$
+					);
+				}).then(function() {
+					var auth = serviceRegistry.getService("orion.core.auth"); //$NON-NLS-0$
+					if (auth) {
+						var authPromise = auth.getUser().then(function(user) {
+							if (!user) {
+								return auth.getAuthForm(window.location.href).then(function(formURL) {
+									setTimeout(function() {
+										window.location = formURL;
+									}, 0);
+								});
+							} else {
+								localStorage.setItem("lastLogin", new Date().getTime()); //$NON-NLS-0$
+							}
+						});
+						var lastLogin = localStorage.getItem("lastLogin");
+						if (!lastLogin || lastLogin < (new Date().getTime() - (15 * 60 * 1000))) { // 15 minutes
+							return authPromise; // if returned waits for auth check before continuing
+						}
+					}
+				}).then(function() {
+					var result = {
+						serviceRegistry: serviceRegistry,
+						preferences: preferences,
+						pluginRegistry: pluginRegistry
+					};
+					once.resolve(result);
+					return result;
+				});
 			});
 		});
 	}
+	
 	return {startup: startup};
 });

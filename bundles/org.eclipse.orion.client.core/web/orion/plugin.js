@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global window ArrayBuffer addEventListener removeEventListener self XMLHttpRequest define exports module require console*/ (function(root, factory) { // UMD
+/*global window ArrayBuffer localStorage addEventListener removeEventListener self XMLHttpRequest define exports module require console*/ (function(root, factory) { // UMD
     if (typeof define === "function" && define.amd) { //$NON-NLS-0$
         define(["orion/Deferred"], factory);
     } else if (typeof exports === "object") { //$NON-NLS-0$
@@ -307,6 +307,17 @@
         };
         this.registerServiceProvider = this.registerService;
 
+		function _authenticateConnection(token){
+			var csrfToken = localStorage.getItem('/orion/plugins/csrf');
+			if(csrfToken === null) {
+				localStorage.setItem('/orion/plugins/csrf', token);
+				return true;
+			}
+			
+			var authenticated = (csrfToken === token);
+			return authenticated;
+		};
+
         this.connect = function(callback, errback) {
             if (_connected) {
                 if (callback) {
@@ -327,6 +338,17 @@
                 }
                 return;
             }
+            
+            if(typeof(window) !== undefined){
+            	/* authenticate plugin connection */
+            	if(!_authenticateConnection(window.location.hash)){
+            		var errorMessage = "Forbidden access. Cannot connect to untrusted Orion instance.";
+            		_throwError(null, errorMessage);
+            		if (errback) { errback(errorMessage); }
+	                return;
+            	}
+            }
+            
             addEventListener("message", _handleMessage, false); //$NON-NLS-0$
             var message = {
                 method: "plugin", //$NON-NLS-0$

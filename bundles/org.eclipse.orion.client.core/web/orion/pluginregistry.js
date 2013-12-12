@@ -913,6 +913,10 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                     });
                 }
 
+				/* open the plugin iframe using csrfToken as hash */  
+				var csrfToken = configuration.csrfToken;
+				url = (csrfToken) ? url + '#' + csrfToken : url;
+				
                 var loadTimeout = setTimeout(sendTimeout.bind(null, "Load timeout for: " + url), timeout || 15000);
                 var iframe = document.createElement("iframe"); //$NON-NLS-0$
                 iframe.name = url + "_" + new Date().getTime();
