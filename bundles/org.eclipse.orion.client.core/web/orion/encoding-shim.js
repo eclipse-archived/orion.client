@@ -31,10 +31,10 @@
 	}
 
 	function verify(valid, nothrow) {
-		if (!valid && !nothrow) {
-			throw new EncodingError();
+		if (valid || nothrow) {
+			return valid;
 		}
-		return valid;
+		throw new EncodingError();
 	}
 
 	function TextDecoder(label, options) {
@@ -191,32 +191,28 @@
 		var inputlen = input.length;
 
 		while (offset < inputlen) {
-			try {
-				if (this._saved === null) {
-					first = input.charCodeAt(offset++);
+			if (this._saved === null) {
+				first = input.charCodeAt(offset++);
+			} else {
+				first = this._saved;
+				this._saved = null;
+			}
+			if (first < 0x80) {
+				utf8.push(first);
+			} else if (first < 0x800) {
+				utf8.push(0xC0 | (first >> 6), 0x80 | (first & 0x3F));
+			} else if (first < 0xD800 || first > 0xDBFF) {
+				utf8.push(0xE0 | (first >> 12), 0x80 | ((first >> 6) & 0x3F), 0x80 | (first & 0x3F));
+			} else {
+				if (verify(offset < inputlen, stream)) {
+					second = input.charCodeAt(offset++);
 				} else {
-					first = this._saved;
-					this._saved = null;
+					this._saved = first;
+					break;
 				}
-				if (first < 0x80) {
-					utf8.push(first);
-				} else if (first < 0x800) {
-					utf8.push(0xC0 | (first >> 6), 0x80 | (first & 0x3F));
-				} else if (first < 0xD800 || first > 0xDBFF) {
-					utf8.push(0xE0 | (first >> 12), 0x80 | ((first >> 6) & 0x3F), 0x80 | (first & 0x3F));
-				} else {
-					if (verify(offset < inputlen, stream)) {
-						second = input.charCodeAt(offset++);
-					} else {
-						this._saved = first;
-						break;
-					}
-					verifybetween(second, 0xDC00, 0xDFFF);
-					point = 0x10000 + ((first - 0xD800) << 10) + (second - 0xDC00);
-					utf8.push(0xF0 | (point >> 18), 0x80 | ((point >> 12) & 0x3F), 0x80 | ((point >> 6) & 0x3F), 0x80 | (point & 0x3F));
-				}
-			} catch (e) {
-				throw e;
+				verifybetween(second, 0xDC00, 0xDFFF);
+				point = 0x10000 + ((first - 0xD800) << 10) + (second - 0xDC00);
+				utf8.push(0xF0 | (point >> 18), 0x80 | ((point >> 12) & 0x3F), 0x80 | ((point >> 6) & 0x3F), 0x80 | (point & 0x3F));
 			}
 		}
 		return new Uint8Array(utf8)
