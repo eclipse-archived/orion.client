@@ -225,6 +225,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			}
 
 			this.$frame.classList.remove("dialogShowing"); //$NON-NLS-0$
+			lib.setFramesEnabled(true);
 			if (typeof this._afterHiding === "function") { //$NON-NLS-0$
 				this._afterHiding();
 			}
@@ -243,6 +244,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			if (typeof this._beforeShowing === "function") { //$NON-NLS-0$
 				this._beforeShowing();
 			}
+			lib.setFramesEnabled(false);
 			var rect = lib.bounds(this.$frame);
 			var totalRect = lib.bounds(document.documentElement);
 			var left, top;
@@ -290,6 +292,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			if (!this.$frame) {
 				return;
 			}
+			lib.setFramesEnabled(true);
 			if (this._addedBackdrop && this._addedBackdrop.length > 0) {
 				this._addedBackdrop.forEach(function(node) { //$NON-NLS-0$
 					node.classList.remove("modalBackdrop"); //$NON-NLS-0$

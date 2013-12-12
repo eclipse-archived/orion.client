@@ -99,6 +99,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			if (this.isVisible()) {
 				return;
 			}
+			lib.setFramesEnabled(false);
 			if (this._populate) {
 				this.empty();
 				this._populate(this._dropdownNode);
@@ -175,6 +176,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 				this._triggerNode.classList.remove(this._selectionClass);
 			}
 			this._dropdownNode.classList.remove("dropdownMenuOpen"); //$NON-NLS-0$
+			lib.setFramesEnabled(true);
 			if (restoreFocus) {
 				this._triggerNode.focus();
 			}

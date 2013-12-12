@@ -286,6 +286,13 @@ define(["orion/util"], function(util) {
 			event.stopPropagation();
 		}
 	}
+	
+	function setFramesEnabled(enable) {
+		var frames = document.getElementsByTagName("iframe"); //$NON-NLS-0$
+		for (var i = 0; i<frames.length; i++) {
+			frames[i].parentNode.style.pointerEvents = enable ? "" : "none"; //$NON-NLS-0$
+		}
+	}
 
 	/**
 	 * Holds useful <code>keyCode</code> values.
@@ -325,6 +332,7 @@ define(["orion/util"], function(util) {
 		processTextNodes: processTextNodes,
 		processDOMNodes: processDOMNodes,
 		addAutoDismiss: addAutoDismiss,
+		setFramesEnabled: setFramesEnabled,
 		KEY: KEY
 	};
 });

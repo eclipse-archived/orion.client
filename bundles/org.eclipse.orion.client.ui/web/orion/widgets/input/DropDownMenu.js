@@ -71,6 +71,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		click: function() {
 			if( this._dropdownMenu.style.display === 'none' ){ //$NON-NLS-0$
 				this.updateContent ( this.getContentNode() , function () {
+					lib.setFramesEnabled(false);
 					this._dropdownMenu.style.display = '';
 					this._positionDropdown();
 					if (this.selectionClass) {
@@ -89,6 +90,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 		clearPanel: function(){
 			if (!this.isVisible()) { return; }
 			this._dropdownMenu.style.display = 'none'; //$NON-NLS-0$
+			lib.setFramesEnabled(true);
 			if (this.selectionClass) {
 				this._triggerNode.classList.remove(this.selectionClass);
 			}
@@ -149,6 +151,7 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 
 		destroy: function() {
 			if (this._parent) {
+				lib.setFramesEnabled(true);
 				lib.empty(this._parent);
 				this._parent = this.select = null;
 			}

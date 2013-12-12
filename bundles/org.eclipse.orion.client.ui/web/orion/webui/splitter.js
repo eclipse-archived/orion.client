@@ -315,6 +315,7 @@ define([
 			this.$sideNode.classList.add("panelTracking"); //$NON-NLS-0$
 			this._tracking = this._mouseMove.bind(this);
 			window.addEventListener("mousemove", this._tracking); //$NON-NLS-0$
+			lib.setFramesEnabled(false);
 			lib.stop(event);
 		},
 
@@ -353,6 +354,7 @@ define([
 
 		_mouseUp: function(event) {
 			if (this._tracking) {
+				lib.setFramesEnabled(true);
 				window.removeEventListener("mousemove", this._tracking); //$NON-NLS-0$
 				this._tracking = null;
 				this.$node.classList.remove("splitTracking"); //$NON-NLS-0$
