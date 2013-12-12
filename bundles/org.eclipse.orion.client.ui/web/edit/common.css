@@ -12,6 +12,7 @@
 
 .outlineExplorer {
 	overflow-y: hidden;
+	white-space:nowrap;
 }
 
 .outlineFilter {
@@ -29,6 +30,11 @@
 
 .outlineRowHidden {
 	display: none;
+}
+
+.outlineLeafIndent {
+	display: inline-block;
+	width: 16px; /*16px standard indent*/
 }
 
 .findOptionsDiv {
