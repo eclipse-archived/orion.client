@@ -102,20 +102,23 @@ define([
 	
 	provider.registerService("orion.edit.command", { //$NON-NLS-0$
 		run : function(text) {
-			var value = json;
-			var item = explorer.getNavHandler().currentModel();
-			if (item) {
-				value = item.value;
-			}
 			var key = "NewKey";
-			var newValue = "NewValue";
-			if (Array.isArray(value)) {
-				key = value.length + "";
-				value.push(newValue);
-			} else {
-				value[key] = newValue;
+			var newValue = "NewValue", value;
+			var item = explorer.getNavHandler().currentModel() || explorer.model._root;
+			while (item) {
+				value = item.value;
+				if (Array.isArray(value)) {
+					key = value.length + "";
+					value.push(newValue);
+				} else if (typeof value === "object") { //$NON-NLS-0$
+					value[key] = newValue;
+				} else {
+					item = item.parent;
+					continue;
+				}
+				updateModel({key: key, value: newValue, id: item.id + "-" + key, parent: item}); //$NON-NLS-0$
+				break;
 			}
-			updateModel({key: key, value: newValue, id: item.id + "-" + key, parent: item}); //$NON-NLS-0$
 			return null;
 		}
 	}, {
