@@ -106,6 +106,7 @@ OrionTestCase("setting", "/js-tests/settings/test.html");
 OrionTestCase("asyncStyler", "/js-tests/asyncStyler/test.html");
 OrionTestCase("ast", "/js-tests/astManager/astManagerTests.html");
 OrionTestCase("commands", "/js-tests/commands/test.html");
+OrionTestCase("editDispatcher", "/js-tests/dispatcher/editDispatcherTests.html");
 OrionTestCase("nodeJsEvents", "/js-tests/events/test.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
