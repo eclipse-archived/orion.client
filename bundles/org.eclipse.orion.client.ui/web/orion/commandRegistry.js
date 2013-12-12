@@ -941,7 +941,7 @@ define([
 				destroyButton = parent.lastChild;
 				newMenu = destroyButton.lastChild;
 				menuButton = newMenu.previousSibling;
-				menuButton.dropdown = new mDropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
+				menuButton.dropdown = new mDropdown.Dropdown({dropdown: newMenu, populate: populateFunction, parentDropdown: parent.dropdown});
 				newMenu.dropdown = menuButton.dropdown;
 			} else {
 				if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$

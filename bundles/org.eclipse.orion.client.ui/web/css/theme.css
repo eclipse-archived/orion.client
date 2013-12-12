@@ -360,9 +360,8 @@ a.currentLocation:hover {
 	list-style-type: none;
 	border-radius: 1px;
 	border: 1px solid #DDD;
-	padding: 0;
+	padding: 2px;
 	background-color: white;
-	padding: 10px;
 	box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
 	display: none; /* don't take part in layout until open */
 	line-height: normal; /* don't want to inherit strange line-heights from ancestor elements */
@@ -371,6 +370,7 @@ a.currentLocation:hover {
 .dropdownMenuOpen {
 	min-width: 120px;
 	display: block;
+	visibility: visible;
 }
 
 .dropdownSubMenu {
@@ -397,7 +397,6 @@ a.currentLocation:hover {
 .dropdownMenu > li > *:focus {
 	outline: 1px dotted #ddd;
 	background: #f3f6fe;
-	padding-right: 0;
 }
 
 .dropdownMenu > li:hover {
@@ -405,9 +404,6 @@ a.currentLocation:hover {
 	background: #ffeecc;
 }
 
-.dropdownMenuOpen {
-	visibility: visible;
-}
 
 .dropdownSeparator {
 	height: 1px;
@@ -421,7 +417,7 @@ a.currentLocation:hover {
 	display: inline-block;
 	vertical-align: baseline;
 	color: #222 !important;
-	padding: 5px;
+	padding: 5px 0; /* top and bottom 5px, left and right 0 */
 	cursor: pointer;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -435,6 +431,13 @@ a.currentLocation:hover {
 .dropdownSelection {
 	background-color: #e6e6e6 !important;
 	border: 1px solid #ccc !important;
+}
+
+span.browserContextButton { /* specifying span element to override .core-sprite-openarrow */
+	background-repeat: no-repeat;
+	background-position: center -527px;
+	text-align: center;
+	padding: 0;
 }
 
 .checkedMenuItem {

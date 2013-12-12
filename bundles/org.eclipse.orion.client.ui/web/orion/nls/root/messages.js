@@ -89,5 +89,6 @@ define({
 	"OutlineProgress": "Getting outline for ${0} from ${1}",
 	"UnknownError": "An unknown error occurred.",
 	"UnknownWarning": "An unknown warning occurred.",
-	"Filter": "Filter (* = any string, ? = any character)"
+	"Filter": "Filter (* = any string, ? = any character)",
+	"To view the browser's context menu, trigger the context menu again.": "To view the browser's context menu, trigger the context menu again."
 });

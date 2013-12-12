@@ -235,7 +235,7 @@ define(["orion/util"], function(util) {
 				});
 				if (excludeNodeInDocument && !excluded) {
 					try {
-						autoDismissNode.dismiss();
+						autoDismissNode.dismiss(event);
 					} catch (e) {
 						if (typeof console !== "undefined" && console) { //$NON-NLS-0$
 							console.error(e && e.message);
@@ -267,7 +267,22 @@ define(["orion/util"], function(util) {
 				}, false);
 			}
 		}
+		
 		autoDismissNodes.push({excludeNodes: excludeNodes, dismiss: dismissFunction});
+	}
+	
+	/**
+	 * Removes all auto-dismiss nodes which trigger the specified dismiss function.
+	 * 
+	 * @name orion.webui.littlelib.removeAutoDismiss
+	 * @function
+	 * @static
+	 * @param {Function} dismissFunction The dismiss function to look for.
+	 */
+	function removeAutoDismiss(dismissFunction) {
+		autoDismissNodes = autoDismissNodes.filter(function(autoDismissNode) {
+			return dismissFunction !== autoDismissNode.dismiss;
+		});
 	}
 	
 	/**
@@ -333,6 +348,7 @@ define(["orion/util"], function(util) {
 		processDOMNodes: processDOMNodes,
 		addAutoDismiss: addAutoDismiss,
 		setFramesEnabled: setFramesEnabled,
+		removeAutoDismiss: removeAutoDismiss,
 		KEY: KEY
 	};
 });

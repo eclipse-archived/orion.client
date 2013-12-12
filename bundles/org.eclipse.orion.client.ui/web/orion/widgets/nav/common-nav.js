@@ -23,17 +23,19 @@ define([
 	'orion/selection',
 	'orion/URITemplate',
 	'orion/PageUtil',
-	'orion/Deferred'
+	'orion/Deferred',
+	'orion/webui/contextmenu'
 ], function(
 	messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, mKeyBinding,
-	FileCommands, ExtensionCommands, Selection, URITemplate, PageUtil, Deferred
+	FileCommands, ExtensionCommands, Selection, URITemplate, PageUtil, Deferred, mContextMenu
 ) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
-
+	var enableContextMenu = false;
+	
 	/**
 	 * @class orion.sidebar.CommonNavExplorer
 	 * @extends orion.explorers.FileExplorer
@@ -79,6 +81,11 @@ define([
 		};
 		this.selection.addEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
 		this.commandsRegistered = this.registerCommands();
+		this._parentNode = lib.node(this.parentId);
+		
+		if (enableContextMenu) {
+			this._createContextMenu();
+		}
 	}
 	CommonNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(CommonNavExplorer.prototype, /** @lends orion.sidebar.CommonNavExplorer.prototype */ {
@@ -166,6 +173,11 @@ define([
 			});
 			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 			this.selection.removeEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
+			
+			if (this._contextMenu) {
+				this._contextMenu.destroy();
+				this._contextMenu = null;
+			}
 		},
 		display: function(root, force) {
 			return this.loadRoot(root, force).then(function(){
@@ -273,6 +285,53 @@ define([
 			commandRegistry.destroy(this.additionalNavActionsScope);
 			commandRegistry.renderCommands(this.folderNavActionsScope, this.folderNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
 			commandRegistry.renderCommands(this.additionalNavActionsScope, this.additionalNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
+		},
+		_createContextMenu: function() {
+			//create context menu
+			//function called before populating the context menu to set the nav selection properly
+			var prePopulateContextMenu = function(eventWrapper) {
+				var navHandler = this.getNavHandler();
+				var navDict = this.getNavDict();
+				var event = eventWrapper.event;
+				if (event.target) {
+					var node = event.target;
+					while (this._parentNode.contains(node)) {
+						if ("TR" === node.nodeName) {	//TODO this is brittle, see if a better way exists
+							var rowId = node.id;
+							var item = navDict.getValue(rowId);
+							navHandler.setSelection(item.model, false, true);
+							break;
+						}
+						node = node.parentNode;
+					}
+				}
+			}.bind(this);
+			
+			//function called to populate the context menu before every time it is shown
+			var populateContextMenu = function(contextMenu) {
+				var selectionService = this.selection;
+				var selections = selectionService.getSelections();
+				
+				this.commandRegistry.renderCommands(this.newActionsScope, contextMenu, this.treeRoot, this, "menu");  //$NON-NLS-0$
+				
+				if (!selections || (Array.isArray(selections) && !selections.length)) {
+					//no selections, use this.treeRoot to determine commands
+					this.commandRegistry.renderCommands(this.selectionActionsScope, contextMenu, this.treeRoot, this, "menu");  //$NON-NLS-0$
+				} else {
+					//there are selections, use default selection service to determine commands
+					this.commandRegistry.renderCommands(this.selectionActionsScope, contextMenu, null, this, "menu");  //$NON-NLS-0$	
+				}
+			}.bind(this);
+			
+			var contextMenu = new mContextMenu.ContextMenu({
+				dropdown: lib.node("sidebarContextMenu"),
+				triggerNode: this._parentNode,
+				populate: populateContextMenu
+			});
+			
+			contextMenu.addEventListener("prepopulate", prePopulateContextMenu);
+			
+			this._contextMenu = contextMenu;
 		}
 	});
 
