@@ -50,6 +50,20 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 			});
 		}
 		
+		function attachContainer() {
+			return xhr("POST", "/docker", {  //$NON-NLS-1$ //$NON-NLS-0$
+				headers: {
+					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
+					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				data: JSON.stringify({
+					"dockerCmd": "attach"
+				}),
+				timeout: 15000,
+				handleAs: "json" //$NON-NLS-0$
+			});
+		}
+		
 		function processLine(line) {
 			return xhr("POST", "/docker", {  //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
@@ -61,6 +75,7 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 					"line": line
 				}),
 				timeout: 15000,
+				responseType: "text",
 				handleAs: "json" //$NON-NLS-0$
 			});
 		}
@@ -74,16 +89,23 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 				//connect
 				startContainer().then(function(result) {
 					window.console.log(result);
-					input.addEventListener("keydown", function (e) { //$NON-NLS-0$
-						if (e.keyCode === 13) {
-							processLine(input.value + "\n");
-							input.value = "";
-							e.preventDefault();
-						}
+					attachContainer().then(function(result) {
+						input.addEventListener("keypress", function (e) { //$NON-NLS-0$
+							if (e.keyCode === 13) {
+								processLine("\n");
+								input.value = "";
+								e.preventDefault();
+							} else {
+								processLine(String.fromCharCode(e.keyCode));
+							}
+						});
+						button.textContent="Disconnect";
+						connected = !connected;
+						input.disabled = !connected;
+						processLine("\n");
+						}, function(error){
+						window.console.log(error);
 					});
-					button.textContent="Disconnect";
-					connected = !connected;
-					input.disabled = !connected;
 				}, function(error){
 					window.console.log(error);
 				});
