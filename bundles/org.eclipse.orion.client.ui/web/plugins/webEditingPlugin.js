@@ -192,8 +192,7 @@ define([
 	provider.registerServiceProvider("orion.edit.highlighter", {
 		// purely declarative, no service methods
     }, {
-        id: "orion.js",
-		contentTypes: ["application/javascript"],
+        id: "orion.c-like",
 		patterns: [
 			{
 				id: "brace_open",
@@ -204,7 +203,7 @@ define([
 				match: "}",
 				name: "orion.enclosure.brace.end"
 			}, {
-				id: "backet_open",
+				id: "bracket_open",
 				match: "\\[",
 				name: "orion.enclosure.bracket.start"
 			}, {
@@ -220,38 +219,24 @@ define([
 				match: "\\)",
 				name: "orion.enclosure.parenthesis.end"
 			}, {
-				match: "\\b(" + keywords.JSKeywords.join("|") + ")\\b",
-				name: "KEYWORD"
-			}, {
-				id: "comment_single",
+				id: "comment_singleline",
 				begin: "//",
-				end: "[^\\n]*",
+				end: "\\n",
 				name: "SINGLELINE_COMMENT",
 				patterns: [
 					{
-						match: "\\bTODO(\\s|$).*",
-						name: "TASK_TAG"
+						match: "(\\b)(TODO)(\\s|$)(.*)",
+						name: "orion.annotation.todo",
+						captures: {
+							2: {name: "DOC_TAG"},
+							4: {name: "SINGLELINE_COMMENT"}
+						}
 					}
 				]
 			}, {
-				match: "'.*?('|$)",
-				name: "STRING"
-			}, {
-				id: "string",
-				match: "\"(\\\\.|[^\"])*(\"|$)",
-				name: "STRING"
-			}, {
-				id: "number",
-				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?\\b",
-				name: "NUMBER"
-			}, {
-				id: "number_hex",
-				match: "\\b0x[0-9A-Fa-f]+\\b",
-				name: "NUMBER"
-			}, {
-				id: "comment_multi",
+				id: "comment_multiline",
 				begin: "/\\*",
-				end: "(\\*/|$)",
+				end: "(?:\\*/|$)",
 				name: "MULTILINE_COMMENT",
 				patterns: [
 					{
@@ -261,17 +246,51 @@ define([
 						match: "\\<\\S*\\>?",
 						name: "DOC_COMMENT"
 					}, {
-						match: "\\bTODO(\\s(\\*[^/]|[^*\\n])*|$)",
-						name: "TASK_TAG"
+						match: "(\\b)(TODO)(\\s|$)(.*)",
+						name: "orion.annotation.todo",
+						captures: {
+							2: {name: "DOC_TAG"},
+							4: {name: "MULTILINE_COMMENT"}
+						}
 					}
 				]
 			}, {
-				begin: "\"[^\"\\n]*\\\\\n",
-				end: "([^\"\\n]*\\\\\\n)*[^\"\\n]*\"?",
-				name: "MULTILINE_STRING"
+				id: "string_singleline",
+				match: "\"(?:\\\\.|[^\"])*(?:\"|$)",
+				name: "STRING"
+			}, {
+				id: "number",
+				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:e[+-]?\\d+)?\\b",
+				name: "NUMBER"
+			}, {
+				id: "number_hex",
+				match: "\\b0x[0-9A-Fa-f]+\\b",
+				name: "NUMBER"
+			}
+		]
+	});
+
+	provider.registerServiceProvider("orion.edit.highlighter", {
+		// purely declarative, no service methods
+    }, {
+        id: "orion.js",
+		contentTypes: ["application/javascript"],
+		patterns: [
+			{
+				include: "orion.c-like"
+			}, {
+				match: "\\b(?:" + keywords.JSKeywords.join("|") + ")\\b",
+				name: "KEYWORD"
+			}, {
+				match: "'.*?(?:'|$)",
+				name: "STRING"
 			}, {
 				begin: "'[^'\\n]*\\\\\n",
-				end: "([^'\\n]*\\\\\\n)*[^'\\n]*'?",
+				end: "(?:[^'\\n]*\\\\\\n)*[^'\\n]*'?",
+				name: "MULTILINE_STRING"
+			}, {
+				begin: "\"[^\"\\n]*\\\\\n",
+				end: "(?:[^\"\\n]*\\\\\\n)*[^\"\\n]*\"?",
 				name: "MULTILINE_STRING"
 			}
 		]
@@ -283,66 +302,11 @@ define([
 		contentTypes: ["text/x-java-source"],
 		patterns: [
 			{
-				match: "{",
-				name: "orion.enclosure.brace.start"
+				include: "orion.c-like"
 			}, {
-				match: "}",
-				name: "orion.enclosure.brace.end"
-			}, {
-				match: "\\[",
-				name: "orion.enclosure.bracket.start"
-			}, {
-				match: "\\]",
-				name: "orion.enclosure.bracket.end"
-			}, {
-				match: "\\(",
-				name: "orion.enclosure.parenthesis.start"
-			}, {
-				match: "\\)",
-				name: "orion.enclosure.parenthesis.end"
-			}, {
-				match: "\\b(" + keywords.JAVAKeywords.join("|") + ")\\b",
+				id: keywords,
+				match: "\\b(?:" + keywords.JAVAKeywords.join("|") + ")\\b",
 				name: "KEYWORD"
-			}, {
-				begin: "//",
-				end: "[^\\n]*",
-				name: "SINGLELINE_COMMENT",
-				patterns: [
-					{
-						match: "\\bTODO(\\s|$).*",
-						name: "TASK_TAG"
-					}
-				]
-			}, {
-				match: "\"(\\\\.|[^\"])*(\"|$)",
-				name: "STRING"
-			}, {
-				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?\\b",
-				name: "NUMBER"
-			}, {
-				match: "\\b0x[0-9A-Fa-f]+\\b",
-				name: "NUMBER"
-			}, {
-				begin: "/\\*",
-				end: "(\\*/|$)",
-				name: "MULTILINE_COMMENT",
-				patterns: [
-					{
-						match: "@\\S*",
-						name: "DOC_TAG"
-					}, {
-						match: "\\<\\S*\\>?",
-						name: "DOC_COMMENT"
-					}, {
-						match: "\\bTODO(\\s(\\*[^/]|[^*\\n])*|$)",
-						name: "TASK_TAG"
-					}
-				]
-			// TODO
-//			}, {
-//				begin: "\"[^\"\\n]*\\\\\n",
-//				end: "([^\"\\n]*\\\\\\n)*[^\"\\n]*\"?",
-//				name: "MULTILINE_STRING"
 			}
 		]
 	});
@@ -354,84 +318,42 @@ define([
 		contentTypes: ["application/json"],
 		patterns: [
 			{
-				match: "{",
-				name: "orion.enclosure.brace.start"
+				include: "orion.c-like"
 			}, {
-				match: "}",
-				name: "orion.enclosure.brace.end"
+				id: keywords,
+				match: "\\b(?:true|false|null)\\b",
+				name: "KEYWORD"
 			}, {
-				match: "\\[",
-				name: "orion.enclosure.bracket.start"
-			}, {
-				match: "\\]",
-				name: "orion.enclosure.bracket.end"
-			}, {
-				match: "\\(",
-				name: "orion.enclosure.parenthesis.start"
-			}, {
-				match: "\\)",
-				name: "orion.enclosure.parenthesis.end"
-			}, {
-				match: "'.*?('|$)",
+				match: "'.*?(?:'|$)",
 				name: "STRING"
 			}, {
-				match: "\"(\\\\.|[^\"])*(\"|$)",
-				name: "STRING"
+				/* override c-like#comment_singleline */
+				id: "comment_singleline"
 			}, {
-				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?\\b",
-				name: "NUMBER"
-			}, {
-				match: "\\b0x[0-9A-Fa-f]+\\b",
-				name: "NUMBER"
+				/* override c-like#comment_multiline */
+				id: "comment_multiline"
 			}
 		]
 	});
 	provider.registerServiceProvider("orion.edit.highlighter", {
 		// purely declarative, no service methods
     }, {
-        id: "orion.schema.json",
+        id: "orion.json.schema",
 		contentTypes: ["application/schema+json"],
 		patterns: [
 			{
-				match: "{",
-				name: "orion.enclosure.brace.start"
+				include: "orion.json"
 			}, {
-				match: "}",
-				name: "orion.enclosure.brace.end"
-			}, {
-				match: "\\[",
-				name: "orion.enclosure.bracket.start"
-			}, {
-				match: "\\]",
-				name: "orion.enclosure.bracket.end"
-			}, {
-				match: "\\(",
-				name: "orion.enclosure.parenthesis.start"
-			}, {
-				match: "\\)",
-				name: "orion.enclosure.parenthesis.end"
-			}, {
-				match: "(\\$schema|(\\b(id|multipleOf|maximum|exclusiveMaximum|minimum|exclusiveMinimum|\
+				id: keywords,
+				match: "(?:\\$schema|(?:\\b(?:id|multipleOf|maximum|exclusiveMaximum|minimum|exclusiveMinimum|\
 					maxLength|minLength|pattern|additionalItems|maxItems|minItems|uniqueItems|\
 					maxProperties|minProperties|required|additionalProperties|properties|patternProperties|\
 					dependencies|enum|type|allOf|anyOf|oneOf|not|definitions|title|description|default|format)))\\b",
 				name: "KEYWORD"
-			}, {
-				match: "'.*?('|$)",
-				name: "STRING"
-			}, {
-				match: "\"(\\\\.|[^\"])*(\"|$)",
-				name: "STRING"
-			}, {
-				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(e[+-]?\\d+)?\\b",
-				name: "NUMBER"
-			}, {
-				match: "\\b0x[0-9A-Fa-f]+\\b",
-				name: "NUMBER"
 			}
 		]
 	});
-	
+
 	provider.registerServiceProvider("orion.edit.highlighter", {
 		// purely declarative, no service methods
     }, {
@@ -439,42 +361,22 @@ define([
 		contentTypes: ["text/css"],
 		patterns: [
 			{
-				match: "{",
-				name: "orion.enclosure.brace.start"
+				include: "orion.c-like"
 			}, {
-				match: "}",
-				name: "orion.enclosure.brace.end"
-			}, {
-				match: "\\[",
-				name: "orion.enclosure.bracket.start"
-			}, {
-				match: "\\]",
-				name: "orion.enclosure.bracket.end"
-			}, {
-				match: "\\(",
-				name: "orion.enclosure.parenthesis.start"
-			}, {
-				match: "\\)",
-				name: "orion.enclosure.parenthesis.end"
-			}, {
-				match: "\\b(" + keywords.CSSKeywords.join("|") + ")\\b",
+				match: "(?:-webkit-|-moz-|-ms-|\\b)(?:" + keywords.CSSKeywords.join("|") + ")\\b",
 				name: "KEYWORD"
 			}, {
-				match: "'.*?'",
+				match: "'.*?(?:'|$)",
 				name: "STRING"
 			}, {
-				match: "\"(\\\\.|[^\"])*(\"|$)",
-				name: "STRING"
-			}, {
-				match: "\\b-?(\\.\\d+|\\d+\\.?\\d*)(%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
+				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
 				name: "NUMBER"
 			}, {
 				match: "#[0-9A-Fa-f]+\\b",
 				name: "NUMBER"
 			}, {
-				begin: "/\\*",
-				end: "(\\*/|$)",
-				name: "MULTILINE_COMMENT"
+				/* override c-like#comment_singleline */
+				id: "comment_singleline"
 			}
 		]
 	});

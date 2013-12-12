@@ -72,23 +72,27 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		"orion.enclosure.bracket.start": {styleClass: "orion.enclosure.bracket.start"},
 		"orion.enclosure.bracket.end": {styleClass: "orion.enclosure.bracket.end"},
 		"orion.enclosure.parenthesis.start": {styleClass: "orion.enclosure.parenthesis.start"},
-		"orion.enclosure.parenthesis.end": {styleClass: "orion.enclosure.parenthesis.end"}
+		"orion.enclosure.parenthesis.end": {styleClass: "orion.enclosure.parenthesis.end"},
+		"orion.annotation.todo": {styleClass: "orion.annotation.todo"}
 	};
 
-	function TextStyler (view, annotationModel, patterns) {
+	function TextStyler (view, annotationModel, patternManager) {
+		this._patternManager = patternManager;
+		var self = this;
 		function createPattern(element) {
 			var subPatterns = [];
-			if (element.patterns) {
-				element.patterns.forEach(function(current) {
+			var subPatternElements = self._patternManager.getPatterns(element);
+			if (subPatternElements) {
+				subPatternElements.forEach(function(current) {
 					var subPattern = createPattern(current).line;
 					if (subPattern) {
 						subPatterns.push(subPattern);
 					}
-				});
+				}.bind(this));
 			}
 			var result = {};
 			if (element.match && !element.begin && !element.end && element.name) {
-				result.line = {regex: new RegExp(element.match, "g"), name: element.name};
+				result.line = {regex: new RegExp(element.match, "g"), name: element.name, captures: element.captures};
 				if (subPatterns.length) {
 					result.line.patterns = subPatterns;
 				}
@@ -104,6 +108,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		this.linePatterns = [];
 		this.documentPatterns = [];
 		this.enclosurePatterns = {};
+		var patterns = patternManager.getPatterns();
 		patterns.forEach(function(current) {
 			var pattern = createPattern(current);
 			if (pattern) {
@@ -131,7 +136,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		this.annotationModel = annotationModel;
 		this._bracketAnnotations = undefined;
 
-		var self = this;
 		this._listener = {
 			onChanged: function(e) {
 				self._onModelChanged(e);
@@ -282,9 +286,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 				if (current.patterns && (current.type === "MULTILINE_COMMENT" || current.type === "SINGLELINE_COMMENT")) {
 					var substyles = [];
-					this._parse(baseModel.getText(current.start, current.end), current.start, current.patterns, true, substyles);
+					this._parse(baseModel.getText(current.contentStart, current.end), current.contentStart, current.patterns, false, substyles);
 					for (var i = 0; i < substyles.length; i++) {
-						if (substyles[i].style.styleClass === "token_task_tag") {
+						if (substyles[i].style.styleClass === "orion.annotation.todo") {
 							/*
 							 * If the content belonging to the task tag has been broken up by whitespace tokens
 							 * then look at the subsequent tokens for consecutive whitespace+tag tokens, which
@@ -292,7 +296,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 							 */
 							var end = substyles[i].end;
 							if (this._isRenderingWhitespace()) {
-								while (i + 1 < substyles.length && (substyles[i + 1].isWhitespace || substyles[i + 1].style.styleClass === "token_task_tag")) {
+								while (i + 1 < substyles.length && (substyles[i + 1].isWhitespace || substyles[i + 1].style.styleClass === "orion.annotation.todo")) {
 									end = substyles[i + 1].end;
 									i += 1;
 								}
@@ -452,16 +456,46 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				var tokenStyle = {start: offset + start, end: offset + end, style: styleMappings[current.pattern.name || "UNKOWN"], isWhitespace: current.pattern.isWhitespace};
 				if (isForRendering) {
 					var substyles = [];
-					if (current.pattern.patterns) {
-						this._parse(text.substring(start, end), offset + start, current.pattern.patterns, true, substyles);
-						this._mergeStyles(tokenStyle, substyles, styles);
-					} else {
-						/* if whitespaces are being shown then invoke _parse on leaf values in order to mark whitespace within them */
+					if (current.pattern.regex) {
+						/* single-line pattern, uses captures to provide substyles */
+						if (current.pattern.captures) {
+							var stringIndex = 0;
+							for (var i = 1; i < result.length; i++) {
+								var capture = current.pattern.captures[i];
+								if (capture) {
+									var substyleStart = offset + start + stringIndex;
+									substyles.push({start: substyleStart, end: substyleStart + result[i].length, style: styleMappings[capture.name || "UNKOWN"]});
+								}
+								stringIndex += result[i].length;
+							}
+						}
+						/* if whitespaces are being shown then invoke _parse on leaf patterns in order to mark whitespace within them */
 						if (this._isRenderingWhitespace() && !current.pattern.isWhitespace) {
 							this._parse(text.substring(start, end), offset + start, [], true, substyles);
+						}
+						substyles.sort(function(a,b) {
+							if (a.start < b.start) {
+								return -1;
+							}
+							if (a.start > b.start) {
+								return 1;
+							}
+							return 0;
+						});
+						for (var j = 0; j < substyles.length - 1; j++) {
+							if (substyles[j + 1].start < substyles[j].end) {
+								var newStyle = {start: substyles[j + 1].end, end: substyles[j].end, style: substyles[j].style};
+								substyles[j].end = substyles[j + 1].start;
+								substyles.splice(j + 2, 0, newStyle);
+							}
+						}
+						this._mergeStyles(tokenStyle, substyles, styles);
+					} else {
+						/* begin/end pattern, uses sub-patterns to provide substyles */
+						if (current.pattern.patterns) {
+							var substring = text.substring(start + current.result[0].length, result.index);
+							this._parse(substring, offset + start + current.result[0].length, current.pattern.patterns, true, substyles);
 							this._mergeStyles(tokenStyle, substyles, styles);
-						} else {
-							styles.push(tokenStyle);
 						}
 					}
 				} else {
@@ -585,11 +619,11 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					continue;
 				}
 
-				 /* verify that the begin match is valid (eg.- is not within a string, etc.) */
+				/* verify that the begin match is valid (eg.- is not within a string, etc.) */
 				var lineIndex = model.getLineAtOffset(offset + current.result.index);
 				var lineText = model.getLine(lineIndex);
 				var styles = [];
-				this._parse(lineText, model.getLineStart(lineIndex), this.linePatterns, false, styles);
+				this._parse(lineText, model.getLineStart(lineIndex), this.linePatterns, true, styles);
 				var targetOffset = offset + current.result.index;
 				for (var i = 0; i < styles.length; i++) {
 					if (styles[i].start === targetOffset) {
@@ -599,7 +633,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 						if (resultEnd) {
 							all.push({
 								start: targetOffset,
+								contentStart: targetOffset + current.result[0].length,
 								end: offset + resultEnd.index + resultEnd[0].length,
+								contentEnd: offset + resultEnd.index,
 								type: current.pattern.name,
 								patterns: current.pattern.patterns
 							});

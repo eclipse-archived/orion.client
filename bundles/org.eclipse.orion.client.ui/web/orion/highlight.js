@@ -89,13 +89,11 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 			} else if (type !== "highlighter") {
 				var id = serviceRef.getProperty("id");
 				if (id && !this.orionGrammars[id]) {
-					var orionGrammar = {
+					this.orionGrammars[id] = {
+						id: id,
 						contentTypes: serviceRef.getProperty("contentTypes"),
 						patterns: serviceRef.getProperty("patterns")
 					};
-					if (orionGrammar.contentTypes && orionGrammar.patterns) {
-						this.orionGrammars[id] = orionGrammar;
-					}
 				}
 			}
 			var promise = getPromise(serviceRef, extension);
@@ -124,14 +122,119 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 					styler = new mTextMateStyler.TextMateStyler(textView, textmateGrammar, textmateGrammars);
 				} else {
 					if (NEW) {
-						var patterns = provider.getProperty("patterns"); //$NON-NLS-0$
-						styler = new mTextStyler2.TextStyler(textView, annotationModel, patterns);
+						var manager = new OrionPatternManager(this.orionGrammars, provider.getProperty("id"));
+						styler = new mTextStyler2.TextStyler(textView, annotationModel, manager);
 					}
 				}
 			}
 			return styler;
 		});
 	}
+	
+	function OrionPatternManager(grammars, rootId) {
+		this._unnamedCounter = 0;
+		this._patterns = [];
+		this._rootId = rootId;
+		var grammarIds = Object.keys(grammars);
+		grammarIds.forEach(function(grammarId) {
+			var grammar = grammars[grammarId];
+			if (grammar.patterns) {
+				this._addPatterns(grammar.patterns, grammar.id);
+			}
+		}.bind(this));
+	}
+	OrionPatternManager.prototype = {
+		getPatterns: function(pattern) {
+			var parentId;
+			if (!pattern) {
+				parentId = this._rootId;
+			} else {
+				if (typeof(pattern) === "string") { //$NON-NLS-0$
+					parentId = pattern;
+				} else {
+					parentId = pattern.qualifiedId;
+				}
+			}
+			var resultObject = {};
+			var regEx = new RegExp(parentId + "#[^#]+$"); //$NON-NLS-0$
+			this._patterns.forEach(function(current) {
+				if (regEx.test(current.qualifiedId)) {
+					if (current.include) {
+						this._processInclude(current, resultObject);
+					} else {
+						/*
+						 * Don't need to check for conflict, a locally-defined pattern
+						 * should always override an imported one with the same id.
+						 */
+						resultObject[current.id] = current;
+					}
+				}
+			}.bind(this));
+
+			var result = [];
+			var keys = Object.keys(resultObject);
+			keys.forEach(function(current) {
+				result.push(resultObject[current]);
+			});
+			return result;
+		},
+		_addPatterns: function(patterns, parentId) {
+			var haveEncounteredNonIncludePattern = false;
+			for (var i = 0; i < patterns.length; i++) {
+				var current = patterns[i];
+				if (!current.include) {
+					haveEncounteredNonIncludePattern = true;
+				} else {
+					if (haveEncounteredNonIncludePattern) {
+						continue;
+					}
+				}
+				current.parentId = parentId;
+				if (!current.id) {
+					current.id = this._UNNAMED + this._unnamedCounter++;
+				}
+				current.qualifiedId = current.parentId + "#" + current.id;
+				this._patterns.push(current);
+				if (current.patterns && !current.include) {
+					this._addPatterns(current.patterns, current.qualifiedId);
+				}
+			};
+		},
+		_processInclude: function(pattern, resultObject) {
+			var searchExp;
+			var index = pattern.include.indexOf("#");
+			if (index === 0) {
+				/* inclusion of pattern from same grammar */
+				searchExp = new RegExp(pattern.parentId.substring(0, pattern.parentId.indexOf("#")) + pattern.include + "$");
+			} else if (index === -1) {
+				/* inclusion of whole grammar */
+				searchExp = new RegExp(pattern.include + "#[^#]+$");				
+			} else {
+				/* inclusion of specific pattern from another grammar */
+				searchExp = new RegExp(pattern.include);
+			}
+			this._patterns.forEach(function(current) {
+				if (searchExp.test(current.qualifiedId)) {
+					if (!resultObject[current.id]) {
+						resultObject[current.id] = current;
+					} else {
+						/*
+						 * Another pattern with the same id is already known, so must
+						 * determine whether this one overrides it or not.
+						 */
+						var parentGrammarId = pattern.parentId.substring(0, pattern.parentId.indexOf("#"));
+						var currentPatternGrammarId = current.parentId.substring(0, current.parentId.indexOf("#"));
+						if (parentGrammarId === currentPatternGrammarId) {
+							/* pattern is from the same grammar, so take it */
+							resultObject[current.id] = current;
+						}
+					}
+				}
+			}.bind(this));
+		},
+		_UNNAMED: "noId"	//$NON-NLS-0$
+	};
+
 	/**
 	 * @name orion.highlight.SyntaxHighlighter
 	 * @class
