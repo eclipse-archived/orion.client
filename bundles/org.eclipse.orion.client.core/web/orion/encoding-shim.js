@@ -9,9 +9,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window Uint8Array*/
+/*global global self Uint8Array*/
 // Encoding Shim -- see http://encoding.spec.whatwg.org/
-(function() {
+(function(global) {
 	function EncodingError() {
 		Error.apply(this, arguments);
 	}
@@ -80,7 +80,7 @@
 					offset = 0;
 					saved.length = savedlen;
 				} else {
-					savedlen = saved.length;
+					savedlen = saved.length -= 3;
 				}
 				this._checkBOM = false;
 			} else if (stream) {
@@ -135,8 +135,8 @@
 						fourth = input[offset++];
 					} else break;
 					verifybetween(fourth, 0x80, 0xBF);
-					point = (((first & 0x07) << 18) | ((second & 0x3F) << 12) | ((third & 0x3F) << 6) | (fourth & 0x3F)) - 0x10000;
-					charCodes.push((point >> 10) + 0xD800, (point % 0x400) + 0xDC00);
+					point = (((first & 0x07) << 18) | ((second & 0x3F) << 12) | ((third & 0x3F) << 6) | (fourth & 0x3F)) & 0xFFFF;
+					charCodes.push((point >> 10) | 0xD800, (point & 0x3FF) | 0xDC00);
 				} else {
 					throw new EncodingError();
 				}
@@ -211,13 +211,13 @@
 					break;
 				}
 				verifybetween(second, 0xDC00, 0xDFFF);
-				point = 0x10000 + ((first - 0xD800) << 10) + (second - 0xDC00);
+				point = 0x10000 | ((first & 0x03FF) << 10) + (second & 0x03FF);
 				utf8.push(0xF0 | (point >> 18), 0x80 | ((point >> 12) & 0x3F), 0x80 | ((point >> 6) & 0x3F), 0x80 | (point & 0x3F));
 			}
 		}
 		return new Uint8Array(utf8)
 	};
 
-	window.TextDecoder = window.TextDecoder || TextDecoder;
-	window.TextEncoder = window.TextEncoder || TextEncoder;
-}());
+	global.TextDecoder = global.TextDecoder || TextDecoder;
+	global.TextEncoder = global.TextEncoder || TextEncoder;
+}((typeof global === "undefined") ? this || self : global));
