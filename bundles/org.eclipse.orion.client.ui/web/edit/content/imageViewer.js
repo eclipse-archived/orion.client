@@ -15,5 +15,5 @@ define(['orion/PageUtil'], function(PageUtil) {
 	var resource = input.resource;
 	var img = document.createElement("img"); //$NON-NLS-0$
 	img.src = resource;
-	document.body.appendChild(img);
+	document.getElementById("imagecontent").appendChild(img);
 });
