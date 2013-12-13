@@ -64,8 +64,7 @@
 		input = (input instanceof Uint8Array) ? input : new Uint8Array(input);
 		var first, second, third, fourth, point;
 		var stream = options && options.stream;
-		var saved = this._saved;
-		var savedlen = saved.length;
+		var savedlen = this._saved.length;
 		var inputlen = input.length;
 		var charCodes = [];
 		var offset = 0;
@@ -74,35 +73,35 @@
 		if (this._checkBOM && inputlen) {
 			if ((savedlen + inputlen) > 2) {
 				for (var i = savedlen; i < 3; i++) {
-					saved.push(input[offset++]);
+					this._saved.push(input[offset++]);
 				}
-				if (saved[0] !== 0xEF || saved[1] !== 0xBB || saved[2] !== 0xBF) {
+				if (this._saved[0] !== 0xEF || this._saved[1] !== 0xBB || this._saved[2] !== 0xBF) {
 					offset = 0;
-					saved.length = savedlen;
+					this._saved.length = savedlen;
 				} else {
-					savedlen = saved.length -= 3;
+					savedlen = this._saved.length -= 3;
 				}
 				this._checkBOM = false;
 			} else if (stream) {
 				while (offset < inputlen) {
-					saved.push(input[offset++]);
+					this._saved.push(input[offset++]);
 				}
 			}
 		}
 		while (offset < inputlen) {
 			try {
-				first = savedlen > 0 ? saved[0] : input[offset++];
+				first = savedlen > 0 ? this._saved[0] : input[offset++];
 				if (first < 0x80) {
 					charCodes.push(first);
 				} else if (between(first, 0xC2, 0xDF)) {
 					if (verify(offset < inputlen, stream)) {
-						second = savedlen > 1 ? saved[1] : input[offset++];
+						second = savedlen > 1 ? this._saved[1] : input[offset++];
 					} else break;
 					verifybetween(second, 0x80, 0xBF);
 					charCodes.push(((first & 0x1F) << 6) | (second & 0x3F));
 				} else if (between(first, 0xE0, 0xEF)) {
 					if (verify(offset < inputlen, stream)) {
-						second = savedlen > 1 ? saved[1] : input[offset++];
+						second = savedlen > 1 ? this._saved[1] : input[offset++];
 					} else break;
 					if (first === 0xE0) {
 						verifybetween(second, 0xA0, 0xBF);
@@ -112,13 +111,13 @@
 						verifybetween(second, 0x80, 0xBF);
 					}
 					if (verify(offset < inputlen, stream)) {
-						third = savedlen > 2 ? saved[2] : input[offset++];
+						third = savedlen > 2 ? this._saved[2] : input[offset++];
 					} else break;
 					verifybetween(third, 0x80, 0xBF);
 					charCodes.push(((first & 0x0F) << 12) | ((second & 0x3F) << 6) | (third & 0x3F));
 				} else if (between(first, 0xF0, 0xF4)) {
 					if (verify(offset < inputlen, stream)) {
-						second = savedlen > 1 ? saved[1] : input[offset++];
+						second = savedlen > 1 ? this._saved[1] : input[offset++];
 					} else break;
 					if (first === 0xF0) {
 						verifybetween(second, 0x90, 0xBF);
@@ -128,7 +127,7 @@
 						verifybetween(second, 0x80, 0xBF);
 					}
 					if (verify(offset < inputlen, stream)) {
-						third = savedlen > 2 ? saved[2] : input[offset++];
+						third = savedlen > 2 ? this._saved[2] : input[offset++];
 					} else break;
 					verifybetween(third, 0x80, 0xBF);
 					if (verify(offset < inputlen, stream)) {
@@ -142,7 +141,7 @@
 				}
 			} catch (e) {
 				if (this._fatal) {
-					saved.length = savedlen = 0;
+					this._saved.length = savedlen = 0;
 					used = offset;
 					this._checkBOM = this._checkBOM || !stream;
 					throw e;
@@ -151,14 +150,16 @@
 			}
 			used = offset;
 			if (savedlen) {
-				saved.length = savedlen = 0;
+				this._saved.length = savedlen = 0;
 			}
 		}
 		while (used !== offset) {
-			saved.push(input[used++]);
+			this._saved.push(input[used++]);
 		}
-
 		this._checkBOM = this._checkBOM || !stream;
+		if (!stream && this._saved.length !== 0) {
+			throw new EncodingError();
+		}
 		var result = [];
 		for (var begin = 0, len = charCodes.length; begin < len; begin += 0x10000) {
 			result.push(String.fromCharCode.apply(null, charCodes.slice(begin, Math.min(len, begin + 0x10000))));
@@ -183,13 +184,13 @@
 		});
 	}
 	TextEncoder.prototype.encode = function(input, options) {
-		input = input || "";
+		input = String(input !== undefined ? input : "");
 		var first, second, point;
 		var stream = options && options.stream;
 		var utf8 = [];
 		var offset = 0;
 		var inputlen = input.length;
-
+		
 		while (offset < inputlen) {
 			if (this._saved === null) {
 				first = input.charCodeAt(offset++);
@@ -214,6 +215,9 @@
 				point = 0x10000 | ((first & 0x03FF) << 10) + (second & 0x03FF);
 				utf8.push(0xF0 | (point >> 18), 0x80 | ((point >> 12) & 0x3F), 0x80 | ((point >> 6) & 0x3F), 0x80 | (point & 0x3F));
 			}
+		}
+		if (!stream && this._saved !== null) {
+			throw new EncodingError();
 		}
 		return new Uint8Array(utf8)
 	};
