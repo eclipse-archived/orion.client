@@ -2,10 +2,10 @@
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
  * Copyright (c) 2012 VMware, Inc.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -107,6 +107,10 @@ OrionTestCase("asyncStyler", "/js-tests/asyncStyler/test.html");
 OrionTestCase("ast", "/js-tests/astManager/astManagerTests.html");
 OrionTestCase("commands", "/js-tests/commands/test.html");
 OrionTestCase("editDispatcher", "/js-tests/dispatcher/editDispatcherTests.html");
+
+// These live in the javascript bundle
+OrionTestCase("esprima-content-assist", "/js-tests/contentAssistTests.html");
+OrionTestCase("index-file-parsing", "/js-tests/indexFileParsingTests.html");
 OrionTestCase("nodeJsEvents", "/js-tests/events/test.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");

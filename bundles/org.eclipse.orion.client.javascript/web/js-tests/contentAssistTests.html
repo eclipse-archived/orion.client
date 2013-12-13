@@ -7,16 +7,17 @@
 	<script>
 		/*global window require */
 		require({
-		  baseUrl: '../..',
+		  baseUrl: '../',
 		  paths: {
 				"scriptedLogger": 'javascript/esprima/scriptedLogger',
 				text: 'requirejs/text',
 				i18n: 'requirejs/i18n',
-				domReady: 'requirejs/domReady'	    
+				domReady: 'requirejs/domReady',
+				esprima: 'esprima/esprima'
 		  }
 		});
 		window.onload = function() {
-			require(['orion/test','js-tests/contentAssistTests'], 
+			require(['orion/test','js-tests/contentAssistTests'],
 				function(test, jsTests) {
 					test.run(jsTests);
 				});
