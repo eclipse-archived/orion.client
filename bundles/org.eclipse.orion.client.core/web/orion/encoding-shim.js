@@ -66,9 +66,9 @@
 		var stream = options && options.stream;
 		var savedlen = this._saved.length;
 		var inputlen = input.length;
-		var charCodes = [];
 		var offset = 0;
 		var used = 0;
+		var charCodes = [];
 
 		if (this._checkBOM && inputlen) {
 			if ((savedlen + inputlen) > 2) {
@@ -187,10 +187,11 @@
 		input = String(input !== undefined ? input : "");
 		var first, second, point;
 		var stream = options && options.stream;
-		var utf8 = [];
-		var offset = 0;
 		var inputlen = input.length;
-		
+		var offset = 0;
+		var utf8 = new Uint8Array(3 * (inputlen + (this._saved === null ? 0 : 1)));
+		var written = 0;
+
 		while (offset < inputlen) {
 			if (this._saved === null) {
 				first = input.charCodeAt(offset++);
@@ -199,11 +200,14 @@
 				this._saved = null;
 			}
 			if (first < 0x80) {
-				utf8.push(first);
+				utf8[written++] = first;
 			} else if (first < 0x800) {
-				utf8.push(0xC0 | (first >> 6), 0x80 | (first & 0x3F));
+				utf8[written++] = 0xC0 | (first >> 6);
+				utf8[written++] = 0x80 | (first & 0x3F);
 			} else if (first < 0xD800 || first > 0xDBFF) {
-				utf8.push(0xE0 | (first >> 12), 0x80 | ((first >> 6) & 0x3F), 0x80 | (first & 0x3F));
+				utf8[written++] = 0xE0 | (first >> 12);
+				utf8[written++] = 0x80 | ((first >> 6) & 0x3F);
+				utf8[written++] = 0x80 | (first & 0x3F);
 			} else {
 				if (verify(offset < inputlen, stream)) {
 					second = input.charCodeAt(offset++);
@@ -212,14 +216,17 @@
 					break;
 				}
 				verifybetween(second, 0xDC00, 0xDFFF);
-				point = 0x10000 | ((first & 0x03FF) << 10) + (second & 0x03FF);
-				utf8.push(0xF0 | (point >> 18), 0x80 | ((point >> 12) & 0x3F), 0x80 | ((point >> 6) & 0x3F), 0x80 | (point & 0x3F));
+				point = 0x10000 | ((first & 0x03FF) << 10) | (second & 0x03FF);
+				utf8[written++] = 0xF0 | (point >> 18);
+				utf8[written++] = 0x80 | ((point >> 12) & 0x3F);
+				utf8[written++] = 0x80 | ((point >> 6) & 0x3F);
+				utf8[written++] = 0x80 | (point & 0x3F);
 			}
 		}
 		if (!stream && this._saved !== null) {
 			throw new EncodingError();
 		}
-		return new Uint8Array(utf8)
+		return utf8.buffer.slice ? new Uint8Array(utf8.buffer.slice(0, written)) : utf8.subarray(0, written);
 	};
 
 	global.TextDecoder = global.TextDecoder || TextDecoder;
