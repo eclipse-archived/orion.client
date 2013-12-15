@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global global self Uint8Array*/
+/*global global self Uint8Array Uint16Array*/
 // Encoding Shim -- see http://encoding.spec.whatwg.org/
 (function(global) {
 	function EncodingError() {
@@ -68,7 +68,8 @@
 		var inputlen = input.length;
 		var offset = 0;
 		var used = 0;
-		var charCodes = [];
+		var charCodes = new Uint16Array(inputlen + savedlen);
+		var written = 0;
 
 		if (this._checkBOM && inputlen) {
 			if ((savedlen + inputlen) > 2) {
@@ -92,13 +93,13 @@
 			try {
 				first = savedlen > 0 ? this._saved[0] : input[offset++];
 				if (first < 0x80) {
-					charCodes.push(first);
+					charCodes[written++] = first;
 				} else if (between(first, 0xC2, 0xDF)) {
 					if (verify(offset < inputlen, stream)) {
 						second = savedlen > 1 ? this._saved[1] : input[offset++];
 					} else break;
 					verifybetween(second, 0x80, 0xBF);
-					charCodes.push(((first & 0x1F) << 6) | (second & 0x3F));
+					charCodes[written++] = ((first & 0x1F) << 6) | (second & 0x3F);
 				} else if (between(first, 0xE0, 0xEF)) {
 					if (verify(offset < inputlen, stream)) {
 						second = savedlen > 1 ? this._saved[1] : input[offset++];
@@ -114,7 +115,7 @@
 						third = savedlen > 2 ? this._saved[2] : input[offset++];
 					} else break;
 					verifybetween(third, 0x80, 0xBF);
-					charCodes.push(((first & 0x0F) << 12) | ((second & 0x3F) << 6) | (third & 0x3F));
+					charCodes[written++] = ((first & 0x0F) << 12) | ((second & 0x3F) << 6) | (third & 0x3F);
 				} else if (between(first, 0xF0, 0xF4)) {
 					if (verify(offset < inputlen, stream)) {
 						second = savedlen > 1 ? this._saved[1] : input[offset++];
@@ -135,7 +136,8 @@
 					} else break;
 					verifybetween(fourth, 0x80, 0xBF);
 					point = (((first & 0x07) << 18) | ((second & 0x3F) << 12) | ((third & 0x3F) << 6) | (fourth & 0x3F)) & 0xFFFF;
-					charCodes.push((point >> 10) | 0xD800, (point & 0x3FF) | 0xDC00);
+					charCodes[written++] = (point >> 10) | 0xD800;
+					charCodes[written++] = (point & 0x3FF) | 0xDC00;
 				} else {
 					throw new EncodingError();
 				}
@@ -146,7 +148,7 @@
 					this._checkBOM = this._checkBOM || !stream;
 					throw e;
 				}
-				charCodes.push(0xFFFD);
+				charCodes[written++] = (0xFFFD);
 			}
 			used = offset;
 			if (savedlen) {
@@ -161,8 +163,8 @@
 			throw new EncodingError();
 		}
 		var result = [];
-		for (var begin = 0, len = charCodes.length; begin < len; begin += 0x10000) {
-			result.push(String.fromCharCode.apply(null, charCodes.slice(begin, Math.min(len, begin + 0x10000))));
+		for (var begin = 0; begin < written; begin += 0x10000) {
+			result.push(String.fromCharCode.apply(null, charCodes.subarray(begin, Math.min(written, begin + 0x10000))));
 		}
 		return result.join("");
 	};
