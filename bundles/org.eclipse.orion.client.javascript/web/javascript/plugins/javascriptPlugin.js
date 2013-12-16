@@ -13,12 +13,12 @@
 define([
 	'javascript/astManager',
 	'javascript/eslint/validator',
-	'javascript/esprima/esprimaJsContentAssist',
+	'javascript/contentAssist/contentAssist',
 	'javascript/occurrences',
 	'javascript/outliner',
 	'orion/i18nUtil',
 	'orion/plugin'
-], function(ASTManager, EslintValidator, EsprimaAssist, Occurrences, Outliner, i18nUtil, PluginProvider) {
+], function(ASTManager, EslintValidator, ContentAssist, Occurrences, Outliner, i18nUtil, PluginProvider) {
 
 	/**
 	 * Plug-in headers
@@ -81,11 +81,11 @@ define([
 	/**
 	 * Register the content assist support
 	 */
-	provider.registerServiceProvider("orion.edit.contentassist", new EsprimaAssist.EsprimaJavaScriptContentAssistProvider(astManager), 
+	provider.registerServiceProvider("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager), 
 		{
 			contentType: ["application/javascript"],
 			name: "JavaScript content assist",
-			id: "orion.edit.contentassist.esprima"
+			id: "orion.edit.contentassist.javascript"
 	});	
 
 	/**
@@ -104,7 +104,7 @@ define([
 		{},
 		{	settings: [
 				{	pid: "eslint.config",
-					name: "ESLint Validator",
+					name: "ESLint",
 					tags: "validation javascript js eslint".split(" "),
 					category: "validation",
 					properties: [
@@ -112,6 +112,26 @@ define([
 							name: "Use ESLint to validate JavaScript files",
 							type: "boolean",
 							defaultValue: true
+						},
+						{	id: "validate_func_decl",
+							name: "Report missing function declaration documentation",
+							type: "number",
+							defaultValue: 0,
+							options: [
+							    {label: "Ignore", value:0},
+				                {label: "Warning", value:1},
+				                {label: "Error", value:2}
+				            ]
+						},
+						{	id: "validate_func_expr",
+							name: "Report missing function expression documentation",
+							type: "number",
+							defaultValue: 0,
+							options: [
+							    {label: "Ignore", value:0},
+							    {label: "Warning", value:1},
+							    {label: "Error", value:2}
+							]
 						}
 					]
 				}
