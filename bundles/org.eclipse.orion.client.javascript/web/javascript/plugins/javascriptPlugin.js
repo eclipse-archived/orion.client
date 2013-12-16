@@ -112,6 +112,18 @@ define([
 							name: "Use ESLint to validate JavaScript files",
 							type: "boolean",
 							defaultValue: true
+						},
+						{
+							id: "validate_func_decl",
+							name: "Report missing documentation for function declarations",
+							type: "boolean",
+							defaultValue: false
+						},
+						{
+							id: "validate_func_expr",
+							name: "Report missing documentation for function expressions",
+							type: "boolean",
+							defaltValue: false
 						}
 					]
 				}

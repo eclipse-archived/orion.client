@@ -22,7 +22,11 @@ define([
 			"no-redeclare": 1, //$NON-NLS-0$
 			"no-undef": 2, //$NON-NLS-0$
 			"no-unused-vars": 1, //$NON-NLS-0$
-			"semi": 1 //$NON-NLS-0$
+			"semi": 1, //$NON-NLS-0$
+			"missing-doc": [1, //default of warning
+							true, //default to report function declarations
+							false //default to not report function expressions
+							]
 		}
 	};
 
@@ -30,8 +34,22 @@ define([
 		this.active = true; // enabled by default
 		this.astManager = astManager;
 	}
+	/**
+	 * @name getSeverity
+	 * @description Conputes the severity string from the given problem
+	 * @private
+	 * @param {eslint.Error} prob The ESLint problem to compute the severity from
+	 * @returns {String} The severity string. One of <code>warning</code> or <code>error</code>
+	 */
 	function getSeverity(prob) {
-		switch (config.rules[prob.ruleId]) {
+		var val = 2;
+		if(Array.isArray(config.rules[prob.ruleId])) {
+			val = config.rules[prob.ruleId][0];
+		}
+		else {
+			val = config.rules[prob.ruleId];
+		}
+		switch (val) {
 			case 1: return "warning"; //$NON-NLS-0$
 			case 2: return "error"; //$NON-NLS-0$
 		}
@@ -125,6 +143,12 @@ define([
 			}
 			if (typeof properties.active === "boolean") { //$NON-NLS-0$
 				this.active = properties.active;
+			}
+			if(typeof properties.validate_func_decl === "boolean") {
+				config.rules["missing-doc"].splice(1, 1, properties.validate_func_decl);
+			}
+			if(typeof properties.validate_func_expr === "boolean") {
+				config.rules["missing-doc"].splice(2, 1, properties.validate_func_expr);
 			}
 		}
 	});
