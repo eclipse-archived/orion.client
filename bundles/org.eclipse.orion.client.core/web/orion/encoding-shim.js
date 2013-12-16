@@ -23,20 +23,6 @@
 		return value >= min && value <= max;
 	}
 
-	function verifybetween(value, min, max) {
-		if (value >= min && value <= max) {
-			return true;
-		}
-		throw new EncodingError();
-	}
-
-	function verify(valid, nothrow) {
-		if (valid || nothrow) {
-			return valid;
-		}
-		throw new EncodingError();
-	}
-
 	function TextDecoder(label, options) {
 		var encoding = label || "utf-8";
 		if (encoding !== "utf-8" && encoding !== "utf8" && encoding !== "unicode-1-1-utf-8") {
@@ -61,6 +47,15 @@
 		});
 	}
 	TextDecoder.prototype.decode = function(input, options) {
+		function onError() {
+			if (this._fatal) {
+				this._saved.length = savedlen = 0;
+				used = offset;
+				this._checkBOM = this._checkBOM || !stream;
+				throw new EncodingError();
+			}
+			charCodes[written++] = (0xFFFD);
+		}
 		input = (input instanceof Uint8Array) ? input : new Uint8Array(input);
 		var first, second, third, fourth, point;
 		var stream = options && options.stream;
@@ -90,66 +85,54 @@
 			}
 		}
 		while (offset < inputlen) {
-			try {
-				first = savedlen > 0 ? this._saved[0] : input[offset++];
-				if (first < 0x80) {
-					charCodes[written++] = first;
-				} else if (between(first, 0xC2, 0xDF)) {
-					if (verify(offset < inputlen, stream)) {
-						second = savedlen > 1 ? this._saved[1] : input[offset++];
-					} else break;
-					verifybetween(second, 0x80, 0xBF);
-					charCodes[written++] = ((first & 0x1F) << 6) | (second & 0x3F);
-				} else if (between(first, 0xE0, 0xEF)) {
-					if (verify(offset < inputlen, stream)) {
-						second = savedlen > 1 ? this._saved[1] : input[offset++];
-					} else break;
-					if (first === 0xE0) {
-						verifybetween(second, 0xA0, 0xBF);
-					} else if (first === 0xED) {
-						verifybetween(second, 0x80, 0x9F);
-					} else {
-						verifybetween(second, 0x80, 0xBF);
-					}
-					if (verify(offset < inputlen, stream)) {
-						third = savedlen > 2 ? this._saved[2] : input[offset++];
-					} else break;
-					verifybetween(third, 0x80, 0xBF);
-					charCodes[written++] = ((first & 0x0F) << 12) | ((second & 0x3F) << 6) | (third & 0x3F);
-				} else if (between(first, 0xF0, 0xF4)) {
-					if (verify(offset < inputlen, stream)) {
-						second = savedlen > 1 ? this._saved[1] : input[offset++];
-					} else break;
-					if (first === 0xF0) {
-						verifybetween(second, 0x90, 0xBF);
-					} else if (first === 0xF4) {
-						verifybetween(second, 0x80, 0x8F);
-					} else {
-						verifybetween(second, 0x80, 0xBF);
-					}
-					if (verify(offset < inputlen, stream)) {
-						third = savedlen > 2 ? this._saved[2] : input[offset++];
-					} else break;
-					verifybetween(third, 0x80, 0xBF);
-					if (verify(offset < inputlen, stream)) {
-						fourth = input[offset++];
-					} else break;
-					verifybetween(fourth, 0x80, 0xBF);
-					point = (((first & 0x07) << 18) | ((second & 0x3F) << 12) | ((third & 0x3F) << 6) | (fourth & 0x3F)) & 0xFFFF;
-					charCodes[written++] = (point >> 10) | 0xD800;
-					charCodes[written++] = (point & 0x3FF) | 0xDC00;
-				} else {
-					throw new EncodingError();
+			first = savedlen > 0 ? this._saved[0] : input[offset++];
+			if (first < 0x80) {
+				charCodes[written++] = first;
+			} else if (between(first, 0xC2, 0xDF)) {
+				if (offset === inputlen) break;
+				second = savedlen > 1 ? this._saved[1] : input[offset++];
+				if (!between(second, 0x80, 0xBF)) {
+					onError();
+					continue;
 				}
-			} catch (e) {
-				if (this._fatal) {
-					this._saved.length = savedlen = 0;
-					used = offset;
-					this._checkBOM = this._checkBOM || !stream;
-					throw e;
+				charCodes[written++] = ((first & 0x1F) << 6) | (second & 0x3F);
+			} else if (between(first, 0xE0, 0xEF)) {
+				if (offset === inputlen) break;
+				second = savedlen > 1 ? this._saved[1] : input[offset++];
+				if ((first === 0xE0 && !between(second, 0xA0, 0xBF)) || (first === 0xED && !between(second, 0x80, 0x9F)) || !between(second, 0x80, 0xBF)) {
+					onError();
+					continue;
 				}
-				charCodes[written++] = (0xFFFD);
-			}
+				if (offset === inputlen) break;
+				third = savedlen > 2 ? this._saved[2] : input[offset++];
+				if (!between(third, 0x80, 0xBF)) {
+					onError();
+					continue;
+				}
+				charCodes[written++] = ((first & 0x0F) << 12) | ((second & 0x3F) << 6) | (third & 0x3F);
+			} else if (between(first, 0xF0, 0xF4)) {
+				if (offset === inputlen) break;
+				second = savedlen > 1 ? this._saved[1] : input[offset++];
+				if ((first === 0xF0 && !between(second, 0x90, 0xBF)) || (first === 0xF4 && !between(second, 0x80, 0x8F)) || !between(second, 0x80, 0xBF)) {
+					onError();
+					continue;
+				}
+				if (offset === inputlen) break;
+				third = savedlen > 2 ? this._saved[2] : input[offset++];
+				if (!between(third, 0x80, 0xBF)) {
+					onError();
+					continue;
+				}
+				if (offset === inputlen) break;
+				fourth = input[offset++];
+				if (!between(fourth, 0x80, 0xBF)) {
+					onError();
+					continue;
+				}
+				point = (((first & 0x07) << 18) | ((second & 0x3F) << 12) | ((third & 0x3F) << 6) | (fourth & 0x3F)) & 0xFFFF;
+				charCodes[written++] = (point >> 10) | 0xD800;
+				charCodes[written++] = (point & 0x3FF) | 0xDC00;
+			} else onError();
 			used = offset;
 			if (savedlen) {
 				this._saved.length = savedlen = 0;
@@ -211,13 +194,15 @@
 				utf8[written++] = 0x80 | ((first >> 6) & 0x3F);
 				utf8[written++] = 0x80 | (first & 0x3F);
 			} else {
-				if (verify(offset < inputlen, stream)) {
+				if (offset < inputlen) {
 					second = input.charCodeAt(offset++);
-				} else {
+				} else if (stream) {
 					this._saved = first;
 					break;
+				} else throw new EncodingError();
+				if (!between(second, 0xDC00, 0xDFFF)) {
+					throw new EncodingError();
 				}
-				verifybetween(second, 0xDC00, 0xDFFF);
 				point = 0x10000 | ((first & 0x03FF) << 10) | (second & 0x03FF);
 				utf8[written++] = 0xF0 | (point >> 18);
 				utf8[written++] = 0x80 | ((point >> 12) & 0x3F);
