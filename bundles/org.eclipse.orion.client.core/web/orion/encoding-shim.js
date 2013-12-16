@@ -17,7 +17,7 @@
 	}
 	EncodingError.prototype = new Error();
 	EncodingError.prototype.constructor = EncodingError;
-	EncodingError.prototype.name = 'EncodingError';
+	EncodingError.prototype.name = "EncodingError";
 
 	function between(value, min, max) {
 		return value >= min && value <= max;
@@ -47,15 +47,6 @@
 		});
 	}
 	TextDecoder.prototype.decode = function(input, options) {
-		function onError() {
-			if (this._fatal) {
-				this._saved.length = savedlen = 0;
-				used = offset;
-				this._checkBOM = this._checkBOM || !stream;
-				throw new EncodingError();
-			}
-			charCodes[written++] = (0xFFFD);
-		}
 		input = (input instanceof Uint8Array) ? input : new Uint8Array(input);
 		var first, second, third, fourth, point;
 		var stream = options && options.stream;
@@ -66,6 +57,16 @@
 		var charCodes = new Uint16Array(inputlen + savedlen);
 		var written = 0;
 
+		function onError() {
+			if (this._fatal) {
+				this._saved.length = savedlen = 0;
+				used = offset;
+				this._checkBOM = this._checkBOM || !stream;
+				throw new EncodingError();
+			}
+			charCodes[written++] = 0xFFFD;
+		}
+		
 		if (this._checkBOM && inputlen) {
 			if ((savedlen + inputlen) > 2) {
 				for (var i = savedlen; i < 3; i++) {
