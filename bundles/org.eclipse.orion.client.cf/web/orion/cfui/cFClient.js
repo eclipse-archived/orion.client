@@ -59,7 +59,20 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			},
 				
 			_handleServiceResponseError: function(deferred, error){
-				deferred.reject(error);
+				deferred.reject(this._translateResponseToStatus(error));
+			},
+			
+			_translateResponseToStatus: function(response) {
+				var json;
+				try {
+					json = JSON.parse(response.responseText);
+				} catch (e) {
+					json = { 
+						Message : messages["Problem while performing the action"]
+					};
+				}
+				json.HttpCode = response.status;
+				return json;
 			},
 
 			_xhrV1 : function(method, url, data) {
@@ -136,12 +149,14 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				});
 			},
 			
-			getApp: function(targetUrl, name, contentLocation) {
+			getApp: function(target, name, contentLocation) {
 				var url = require.toUrl("cfapi/apps");
+				
+				url += "?Target=" + JSON.stringify(target);
 				if (name) {
-					url += "?name=" + name;
+					url += "&Name=" + name;
 				} else if (location) {
-					url += "?location=" + contentLocation;
+					url += "&ContentLocation=" + contentLocation;
 				}
 				return this._xhrV1("GET", url);
 			},

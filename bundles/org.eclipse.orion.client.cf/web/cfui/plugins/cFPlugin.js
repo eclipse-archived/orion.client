@@ -56,36 +56,83 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	/////////////////////////////////////////////////////
 	
 	provider.registerServiceProvider("orion.project.deploy", {
-		deploy: function(item, projectMetadata, props) {
-			var i = resource.lastIndexOf('/');
-			var location = resource.substring(0, i);
+		deploy: function(item, projectMetadata, props){
+			alert("Project shared!");
 			return {
-				uriTemplate: "{+OrionHome}/cloudoe/applications/appRun.html#" +
-					",location=" + encodeURIComponent(location),
-				width: "350px",
-				height: "175px"
+				Message: "OK",
+				ToSave: {
+					ConfigurationName: props.Name,
+					Parameters: props,
+					Url: props.url
+				}
 			};
 		},
 		
-		getState:  function(props) {
-			if (props.TargetUrl && props.AppName){
-				var deferred = new Deferred();
-				cFService.getApp(props.TargetUrl, props.AppName).then(
+//		deploy: function(item, projectMetadata, props) {
+//			var i = resource.lastIndexOf('/');
+//			var location = resource.substring(0, i);
+//			return {
+//				uriTemplate: "{+OrionHome}/cloudoe/applications/appRun.html#" +
+//					",location=" + encodeURIComponent(location),
+//				width: "350px",
+//				height: "175px"
+//			};
+//		},
+
+		getState: function(props) {
+			var that = this;
+			var deferred = new Deferred();
+			
+			if(props.user && props.password){
+				cFService.login(props.Target.Url, props.user, props.password).then(
 					function(result){
-						
+						that._getState(props, deferred);
 					}, function(error){
-						var error = {};
-						error.Retry = true;
-						error.Parameters = [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"}];
+						error.Retry = {
+							parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
+							optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+						};
 						deferred.reject(error);
 					}
-				)
+				);
+			} else {
+				that._getState(props, deferred);
+			}
+			
+			return deferred;
+		},
+		
+		_getState: function(props, deferred) {
+			if (props.Target && props.Name){
+				cFService.getApp(props.Target, props.Name).then(
+					function(result){
+						var app = result;
+						deferred.resolve({
+							Running: app.running_instances > 0,
+							Message: app.running_instances + " of " + app.instances + " instance(s) running"
+						});
+					}, function(error){
+						if (error.HttpCode === 404){
+							deferred.resolve({
+								Running: false,
+								Message: error.Message
+							});
+						} else if (error.JsonData && error.JsonData.error_code) {
+							var err = error.JsonData;
+							if (err.error_code === "CF-InvalidAuthToken"){
+								error.Retry = {
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
+									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+								};
+							}
+							deferred.reject(error);
+						} else {
+							deferred.reject(error);
+						}
+					}
+				);
 				return deferred;
 			}
-				
-			
-			
-			return {running: true};
 		},
 		
 		start: function(props) {
