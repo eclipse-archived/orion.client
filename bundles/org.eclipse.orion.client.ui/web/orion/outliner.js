@@ -40,37 +40,69 @@ define([
 		if (!item) {
 			return;
 		}
+		
+		// ExpandNode | ContentsNode { Link { LinkContentsNode {PreNode <labelPre> | <label> | PostNode <labelPost>} } }
+		// className applies to all of ContentsNode, classNamePre applies to PreNode, classNamePost applies to PostNode
+		
 		var elementNode = document.createElement("span"); //$NON-NLS-0$
-		var expandNode = document.createElement("span");
-		var contentsNode = document.createElement("span");
+		var expandNode = document.createElement("span"); //$NON-NLS-0$
+		var contentsNode = document.createElement("span"); //$NON-NLS-0$
  		tableRow.appendChild(elementNode);
 		elementNode.appendChild(expandNode);
 		elementNode.appendChild(contentsNode);
+		
  		if (item.className) {
 			contentsNode.classList.add(item.className);
  		}
  		if (item.children) {
 			this.getExpandImage(tableRow, expandNode);
 		} else {
-			expandNode.classList.add("outlineLeafIndent");
+			expandNode.classList.add("outlineLeafIndent"); //$NON-NLS-0$
  		}
+ 		
+ 		// Create the link content (labelPre + label + labelPost)
+ 		var linkContents = document.createElement("span"); //$NON-NLS-0$
+ 		if (item.labelPre || item.classNamePre){
+ 			var preNode = document.createElement("span"); //$NON-NLS-0$
+ 			linkContents.appendChild(preNode);
+ 			if (item.labelPre) {
+ 				preNode.appendChild(document.createTextNode(item.labelPre));
+ 			}
+	 		if (item.classNamePre) {
+	 			preNode.classList.add(item.classNamePre);
+	 		}
+ 		}
+ 		if (item.label){
+ 			linkContents.appendChild(document.createTextNode(item.label));
+ 		}
+ 		if (item.labelPost || item.classNamePost){
+ 			var postNode = document.createElement("span"); //$NON-NLS-0$
+ 			linkContents.appendChild(postNode);
+ 			if (item.labelPost) {
+ 				postNode.appendChild(document.createTextNode(item.labelPost));
+ 			}
+	 		if (item.classNamePost) {
+	 			postNode.classList.add(item.classNamePost);
+	 		}
+ 		}
+ 		
  		if (item.href) {
-			this._createLink(item.label, item.href, contentsNode);
+			this._createLink(linkContents, item.href, contentsNode);
  		} else if (item.line || item.column || item.start) {
  			var href = new URITemplate("#{,resource,params*}").expand({resource: this.title, params: item}); //$NON-NLS-0$
-			this._createLink(item.label, href, contentsNode);
+			this._createLink(linkContents, href, contentsNode);
  			item.outlineLink = href;
- 		} else if (item.label) {
-			contentsNode.appendChild(document.createTextNode(item.label)); //$NON-NLS-0$
+ 		} else {
+			contentsNode.appendChild(linkContents); //$NON-NLS-0$
  		}
  	};
 	
-	OutlineRenderer.prototype._createLink = function(text, href, parentNode) {
+	OutlineRenderer.prototype._createLink = function(contentsNode, href, parentNode) {
 		var link = document.createElement("a"); //$NON-NLS-0$
 		parentNode.appendChild(link);
 		
 		link.classList.add("navlinkonpage"); //$NON-NLS-0$
-		link.appendChild(document.createTextNode(text));
+		link.appendChild(contentsNode);
 		
 		// if a selection service has been specified, we will use it for link selection.
 		// Otherwise we assume following the href in the anchor tag is enough.
