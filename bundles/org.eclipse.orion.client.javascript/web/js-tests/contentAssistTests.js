@@ -13,13 +13,13 @@
 
 /*global define esprima console setTimeout doctrine*/
 define([
-	'javascript/esprima/esprimaJsContentAssist',
-	'javascript/esprima/esprimaVisitor',
+	'javascript/contentAssist/contentAssist',
+	'javascript/contentAssist/esprimaVisitor',
 	'orion/assert',
 	'esprima',
 	'doctrine/doctrine',
 	'orion/Deferred'
-], function(mEsprimaPlugin, mVisitor, assert, _, __, Deferred) {
+], function(ContentAssist, mVisitor, assert, _, __, Deferred) {
 
 	//////////////////////////////////////////////////////////
 	// helpers
@@ -52,13 +52,13 @@ define([
 				return new Deferred().resolve(parseFull(buffer));
 			}
 		};
-		var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider(mockASTManager, null, lintOptions);
+		var assist = new ContentAssist.JSContentAssist(mockASTManager, null, lintOptions);
 		var mockContext = {
 			getText: function() {
 				return new Deferred().resolve(buffer);
 			}
 		};
-		return esprimaContentAssistant.computeContentAssist(mockContext, {offset: offset, prefix : prefix, inferredOnly : true });
+		return assist.computeContentAssist(mockContext, {offset: offset, prefix : prefix, inferredOnly : true });
 	}
 
 	function testProposal(proposal, text, description) {

@@ -9,14 +9,14 @@
  * Contributors:
  *	 Andy Clement (VMware) - initial API and implementation
  *	 Andrew Eisenberg (VMware) - implemented visitor pattern
- *       Manu Sridharan (IBM) - Various improvements
+ *   IBM Corporation - Various improvements
  ******************************************************************************/
 
 /*global define inferencerPostOp */
 define([
-'javascript/esprima/esprimaVisitor',
-'javascript/esprima/typeUtils',
-'javascript/esprima/proposalUtils'
+'javascript/contentAssist/esprimaVisitor',
+'javascript/contentAssist/typeUtils',
+'javascript/contentAssist/proposalUtils'
 ], function (mVisitor, typeUtils, proposalUtils) {
 
 	var RESERVED_WORDS = {

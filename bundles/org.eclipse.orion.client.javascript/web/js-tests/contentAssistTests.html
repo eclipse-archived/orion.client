@@ -9,11 +9,11 @@
 		require({
 		  baseUrl: '../',
 		  paths: {
-				"scriptedLogger": 'javascript/esprima/scriptedLogger',
 				text: 'requirejs/text',
 				i18n: 'requirejs/i18n',
 				domReady: 'requirejs/domReady',
-				esprima: 'esprima/esprima'
+				esprima: 'esprima/esprima',
+				estraverse: 'estraverse/estraverse'
 		  }
 		});
 		window.onload = function() {
@@ -27,12 +27,7 @@
 <body>
 	<h2>JavaScript Content Assist Tests</h2>
 	<p>
-		This suite tests computing conntent assist proposals for the JavaScript tooling
-		<br>
-		Currently this support is used in:
-		<ul>
-			<li><b>Content Assist</b> - The Espima-based content assist used in the JavaScript editor</li>
-		</ul>
+		This suite tests computing content assist proposals for the JavaScript tooling
 	</p>
 </body>
 </html>

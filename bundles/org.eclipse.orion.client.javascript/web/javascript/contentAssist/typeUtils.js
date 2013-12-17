@@ -8,7 +8,7 @@
  *
  * Contributors:
  *     Andrew Eisenberg (VMware) - initial API and implementation
- *     Manu Sridharan (IBM) - Various improvements
+ *     IBM Corporation - Various improvements
  ******************************************************************************/
 
 /*
@@ -18,10 +18,9 @@ other utility functions related to types.
 /*jslint es5:true browser:true*/
 /*global define doctrine console */
 define([
-'javascript/esprima/proposalUtils',
-'javascript/esprima/scriptedLogger',
+'javascript/contentAssist/proposalUtils',
 'doctrine/doctrine'
-], function(proposalUtils, scriptedLogger, _doctrine) {
+], function(proposalUtils, _doctrine) {
 	/**
 	 * Doctrine closure compiler style type objects
 	 */
@@ -312,10 +311,7 @@ define([
 						}
 					}
 				} catch (e) {
-					scriptedLogger.error(e.message, "CONTENT_ASSIST");
-					scriptedLogger.error(e.stack, "CONTENT_ASSIST");
-					scriptedLogger.error("Error parsing doc comment:\n" + (docComment && docComment.value),
-							"CONTENT_ASSIST");
+					//TODO continue on
 				}
 			}
 			return result;

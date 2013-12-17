@@ -9,13 +9,13 @@
  * Contributors:
  *	 Andy Clement (VMware) - initial API and implementation
  *	 Andrew Eisenberg (VMware) - implemented visitor pattern
- *       Manu Sridharan (IBM) - Various improvements
+ *   IBM Corporation - Various improvements
  ******************************************************************************/
 
 /*global define*/
-define('javascript/esprima/typeEnvironment',[
-'javascript/esprima/typeUtils',
-'javascript/esprima/typesFromIndexFile',
+define([
+'javascript/contentAssist/typeUtils',
+'javascript/contentAssist/typesFromIndexFile',
 'orion/Deferred'
 ], function(typeUtils, mTypes, Deferred) {
 

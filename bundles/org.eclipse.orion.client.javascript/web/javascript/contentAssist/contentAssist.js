@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 VMware, Inc. and others.
+ * Copyright (c) 2012, 2013 VMware, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,20 +9,20 @@
  * Contributors:
  *	 Andy Clement (VMware) - initial API and implementation
  *	 Andrew Eisenberg (VMware) - implemented visitor pattern
- *       Manu Sridharan (IBM) - Various improvements
+ *   IBM Corporation - Various improvements
  ******************************************************************************/
 
 /*global define esprima doctrine inferencerPostOp*/
 define([
-'javascript/esprima/esprimaVisitor', 
-'javascript/esprima/typeEnvironment', 
-'javascript/esprima/typeInference', 
-'javascript/esprima/typeUtils', 
-'javascript/esprima/proposalUtils', 
-'javascript/esprima/scriptedLogger', 
+'javascript/contentAssist/esprimaVisitor', 
+'javascript/contentAssist/typeEnvironment', 
+'javascript/contentAssist/typeInference', 
+'javascript/contentAssist/typeUtils', 
+'javascript/contentAssist/proposalUtils', 
 'orion/Deferred', 
-'esprima'
-], function(mVisitor, typeEnv, typeInf, typeUtils, proposalUtils, scriptedLogger, Deferred, _) {
+'esprima',
+'estraverse'
+], function(mVisitor, typeEnv, typeInf, typeUtils, proposalUtils, Deferred, Esprima, Estraverse) {
 
 	/**
 	 * Convert an array of parameters into a string and also compute linked editing positions
@@ -70,16 +70,12 @@ define([
 		return {completion: completion, positions: positions.length === 0 ? null : positions};
 	}
 
-
-
-
-
 	/**
 	 * @return "top" if we are at a start of a new expression fragment (eg- at an empty line,
 	 * or a new parameter).  "member" if we are after a dot in a member expression.  false otherwise
 	 * @return {Boolean|String}
 	 */
-	function shouldVisit(root, offset, prefix, contents) {
+	function shouldVisit(ast, offset, prefix, contents) {
 		/**
 		 * A visitor that finds the parent stack at the given location
 		 * @param node the AST node being visited
@@ -129,7 +125,7 @@ define([
 		};
 		var parents = [];
 		try {
-			mVisitor.visit(root, parents, findParent, findParent);
+			mVisitor.visit(ast, parents, findParent, findParent);
 		} catch (done) {
 			if (done !== "done") {
 				// a real error
@@ -731,7 +727,7 @@ define([
 	 * @param {{hasDependency,performIndex,retrieveSummary,retrieveGlobalSummaries}} indexer
 	 * @param {{global:[],options:{browser:Boolean}}=} lintOptions optional set of extra lint options that can be overridden in the source (jslint or jshint)
 	 */
-	function EsprimaJavaScriptContentAssistProvider(astManager, indexer, lintOptions) {
+	function JSContentAssist(astManager, indexer, lintOptions) {
 		this.astManager = astManager;
 		this.indexer = indexer;
 		this.lintOptions = lintOptions;
@@ -740,7 +736,7 @@ define([
 	/**
 	 * Main entry point to provider
 	 */
-	EsprimaJavaScriptContentAssistProvider.prototype = {
+	JSContentAssist.prototype = {
 
 		/**
 		 * Implements the Orion content assist API v4.0
@@ -764,249 +760,42 @@ define([
 				return emptyArrayPromise();
 			}
 
-			try {
-				var root = ast;
-				if (!root) {
-					// assume a bad parse
-					return emptyArrayPromise();
-				}
-
-				var offset = context.offset;
-				// note that if selection has length > 0, then just ignore everything past the start
-				var completionKind = shouldVisit(root, offset, context.prefix, buffer);
-				if (completionKind) {
-					var environmentPromise = typeEnv.createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
-					var self = this;
-					var result = environmentPromise.then(function (environment) {
-						// must defer inferring the containing function block until the end
-						environment.defer = completionKind.toDefer;
-						if (environment.defer) {
-							// remove these comments from consideration until we are inferring the deferred
-							environment.deferredComments = extractDocComments(environment.comments, environment.defer.range);
-						}
-						try {
-							var target = typeInf.inferTypes(root, environment, self.lintOptions);
-							var proposalsObj = { };
-							createInferredProposals(target, environment, completionKind.kind, context.prefix, offset - context.prefix.length, proposalsObj);
-							if (!context.inferredOnly) {
-								// include the entire universe as potential proposals
-								createNoninferredProposals(environment, context.prefix, offset - context.prefix.length, proposalsObj);
-							}
-							return filterAndSortProposals(proposalsObj);
-						} catch (e) {
-							if (typeof scriptedLogger !== "undefined") {
-								scriptedLogger.error(e.message, "CONTENT_ASSIST");
-								scriptedLogger.error(e.stack, "CONTENT_ASSIST");
-							}
-							throw (e);
-						}
-					});
-					return result;
-				} else {
-					// invalid completion location
-					return emptyArrayPromise();
-				}
-			} catch (e) {
-				if (typeof scriptedLogger !== "undefined") {
-					scriptedLogger.error(e.message, "CONTENT_ASSIST");
-					scriptedLogger.error(e.stack, "CONTENT_ASSIST");
-				}
-				throw (e);
-			}
-		},
-
-
-		_internalFindDefinition : function(buffer, offset, findName) {
-			var toLookFor;
-			var root = mVisitor.parse(buffer);
+			var root = ast;
 			if (!root) {
 				// assume a bad parse
-				return null;
+				return emptyArrayPromise();
 			}
-			var funcList = [];
-			var environment = typeEnv.createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
-			var findIdentifier = function(node) {
-				if ((node.type === "Identifier" || node.type === "ThisExpression") && proposalUtils.inRange(offset, node.range, true)) {
-					toLookFor = node;
-					// cut visit short
-					throw "done";
-				}
-				// FIXADE esprima bug...some call expressions have incorrect slocs.
-				// This is fixed in trunk of esprima.
-				// after next upgrade of esprima if the following has correct slocs, then
-				// can remove the second part of the &&
-				// mUsers.getUser().name
-				if (node.range[0] > offset &&
-						(node.type === "ExpressionStatement" ||
-						 node.type === "ReturnStatement" ||
-						 node.type === "ifStatement" ||
-						 node.type === "WhileStatement" ||
-						 node.type === "Program")) {
-					// not at a valid hover location
-					throw "no hover";
-				}
 
-				// the last function pushed on is the one that we need to defer
-				if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression") {
-					funcList.push(node);
-				}
-				return true;
-			};
-
-			try {
-				mVisitor.visit(root, {}, findIdentifier, function(node) {
-					if (node === funcList[funcList.length-1]) {
-						funcList.pop();
+			var offset = context.offset;
+			// note that if selection has length > 0, then just ignore everything past the start
+			var completionKind = shouldVisit(root, offset, context.prefix, buffer);
+			if (completionKind) {
+				var environmentPromise = typeEnv.createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
+				var self = this;
+				var result = environmentPromise.then(function (environment) {
+					// must defer inferring the containing function block until the end
+					environment.defer = completionKind.toDefer;
+					if (environment.defer) {
+						// remove these comments from consideration until we are inferring the deferred
+						environment.deferredComments = extractDocComments(environment.comments, environment.defer.range);
 					}
+					var target = typeInf.inferTypes(root, environment, self.lintOptions);
+					var proposalsObj = { };
+					createInferredProposals(target, environment, completionKind.kind, context.prefix, offset - context.prefix.length, proposalsObj);
+					if (!context.inferredOnly) {
+						// include the entire universe as potential proposals
+						createNoninferredProposals(environment, context.prefix, offset - context.prefix.length, proposalsObj);
+					}
+					return filterAndSortProposals(proposalsObj);
 				});
-			} catch (e) {
-				if (e === "no hover") {
-					// not at a valid hover location
-					return null;
-				} else if (e === "done") {
-					// valid hover...continue
-				} else {
-					// a real exception
-					throw e;
-				}
-			}
-			if (!toLookFor) {
-				// no hover target found
-				return null;
-			}
-			// must defer inferring the containing function block until the end
-			environment.defer = funcList.pop();
-			if (environment.defer && toLookFor === environment.defer.id) {
-				// don't defer if target is name of function
-				delete environment.defer;
-			}
-
-			if (environment.defer) {
-				// remove these comments from consideration until we are inferring the deferred
-				environment.deferredComments = extractDocComments(environment.comments, environment.defer.range);
-			}
-
-			var target = typeInf.inferTypes(root, environment, this.lintOptions);
-			var lookupName = toLookFor.type === "Identifier" ? toLookFor.name : 'this';
-			var maybeType = environment.lookupTypeObj(lookupName, toLookFor.extras.target || target, true);
-			if (maybeType) {
-				// if it's a reference to a function type, suck out $$fntype
-				var allTypes = environment.getAllTypes();
-				if (fnTypeRef(maybeType.typeObj,allTypes)) {
-					inlineFunctionTypes(allTypes[maybeType.typeObj.name].$$fntype,allTypes);
-					maybeType.typeObj = allTypes[maybeType.typeObj.name].$$fntype;
-				}
-				var hover = typeUtils.styleAsProperty(lookupName, findName) + " : " + typeUtils.createReadableType(maybeType.typeObj, environment, true, 0, findName);
-				maybeType.hoverText = hover;
-				return maybeType;
+				return result;
 			} else {
-				return null;
+				// invalid completion location
+				return emptyArrayPromise();
 			}
-
-		},
-		/**
-		 * Computes the hover information for the provided offset
-		 */
-		computeHover: function(buffer, offset) {
-			return this._internalFindDefinition(buffer, offset, true);
-		},
-
-		findDefinition : function(buffer, offset) {
-			return this._internalFindDefinition(buffer, offset, false);
-		},
-
-		/**
-		 * Computes a summary of the file that is suitable to be stored locally and used as a dependency
-		 * in another file
-		 * @param {String} buffer
-		 * @param {String} fileName
-		 */
-		computeSummary: function(buffer, fileName) {
-			var root = mVisitor.parse(buffer);
-			if (!root) {
-				// assume a bad parse
-				return null;
-			}
-			var environment = typeEnv.createEnvironment({ buffer: buffer, uid : fileName, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments, indexer : this.indexer });
-			try {
-				typeInf.inferTypes(root, environment, this.lintOptions);
-			} catch (e) {
-				if (typeof scriptedLogger !== "undefined") {
-					scriptedLogger.error("Problem inferring in: " + fileName, "CONTENT_ASSIST");
-					scriptedLogger.error(e.message, "CONTENT_ASSIST");
-					scriptedLogger.error(e.stack, "CONTENT_ASSIST");
-				}
-				throw (e);
-			}
-			var providedType;
-			var kind;
-			var modTypeObj;
-			if (environment.amdModule) {
-				// provide the exports of the AMD module
-				// the exports is the return value of the final argument
-				var args = environment.amdModule["arguments"];
-				if (args && args.length > 0) {
-					modTypeObj = typeUtils.extractReturnType(environment.getFnType(args[args.length-1]));
-				} else {
-					modTypeObj = typeUtils.OBJECT_TYPE;
-				}
-				kind = "AMD";
-			} else if (environment.commonjsModule) {
-				// a wrapped commonjs module
-				// we have already checked the correctness of this function
-				var exportsParam = environment.commonjsModule["arguments"][0].params[1];
-				modTypeObj = exportsParam.extras.inferredTypeObj;
-				providedType = environment.findType(modTypeObj);
-
-			} else {
-				// assume a non-module
-				providedType = environment.globalScope();
-
-				// if there is an exports global or a module.exports global, then assume commonjs
-				var maybeExports = providedType.exports ||
-						(providedType.module && environment.getAllTypes()[providedType.module.typeObj.name] &&
-						environment.getAllTypes()[providedType.module.typeObj.name].exports);
-
-				if (maybeExports) {
-					// actually, commonjs
-					kind = "commonjs";
-					modTypeObj = maybeExports.typeObj;
-				} else {
-					kind = "global";
-					modTypeObj = providedType['this'].typeObj;
-				}
-			}
-
-			// simplify the exported type
-			if (!typeUtils.isFunctionOrConstructor(modTypeObj) &&
-				!environment.findType(modTypeObj).$$isBuiltin) {
-
-				// this module provides a composite type
-				providedType = environment.findType(modTypeObj);
-			}
-
-			var allTypes = environment.getAllTypes();
-
-			// now filter the builtins since they are always available
-			filterTypes(environment, kind, modTypeObj, providedType);
-
-			// Cases when provided type is not a record type.  store as a string
-			// warning...not all cases handled here...eg- union types
-			if (typeUtils.isFunctionOrConstructor(modTypeObj) ||
-				(environment.findType(modTypeObj) && environment.findType(modTypeObj).$$isBuiltin)) {
-				providedType = doctrine.type.stringify(modTypeObj, {compact: true});
-			} else if (providedType.$$fntype) {
-				providedType = doctrine.type.stringify(providedType.$$fntype, {compact: true});
-			}
-
-			return {
-				provided : providedType,
-				types : allTypes,
-				kind : kind
-			};
 		}
 	};
 	return {
-		EsprimaJavaScriptContentAssistProvider : EsprimaJavaScriptContentAssistProvider
+		JSContentAssist : JSContentAssist
 	};
 });
