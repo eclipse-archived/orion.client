@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -181,33 +181,6 @@ define([
 			return editorContext.getText().then(_computeProblems.bind(null, context));
 		}
 	};
-	
-	/**
-	 * Converts jslint's output to a flat outline model
-	 * @param {Object} jslintResult Result of calling JSLINT() on the file
-	 * @returns {Object[]} Outline model
-	 */
-	function jsOutline(jslintResult) {
-		var outline = [],
-		    functions = jslintResult.functions;
-		for (var i=0; i < functions.length; i++) {
-			var f = functions[i],
-			    name = f.name,
-			    isAnonymousFunction = (name[0]==='"');
-			if (isAnonymousFunction) {
-				f.name = name = name.substring(1, name.length-1);
-			}
-			name += "(" + (f.param ? f.param.join(",") : "") + ")";
-			var element = {
-				label: name,
-				children: null,
-				line: f.line,
-				text: f.name
-			};
-			outline.push(element);
-		}
-		return outline;
-	}
 
 	/**
 	 * Generates outline for an HTML document.
@@ -246,10 +219,7 @@ define([
 		computeOutline: function(editorContext, context) {
 			return editorContext.getText().then(function(contents) {
 				var contentType = context.contentType;
-				if (contentType === "application/javascript") {
-					var jslintResult = jslint(contents);
-					return jsOutline(jslintResult);
-				} else if (contentType === "text/html") {
+				if (contentType === "text/html") {
 					return htmlOutline(contents);
 				}
 			});
@@ -268,7 +238,7 @@ define([
 		pid: "jslint.config"
 	});
 	provider.registerService("orion.edit.outliner", outlineService, {
-		contentType: ["application/javascript", "text/html"],	// TODO separate out HTML outline
+		contentType: ["text/html"],	// TODO separate out HTML outline
 		nameKey: "Flat outline",
 		nls: "orion/editor/nls/messages",
 		id: "orion.edit.outliner.jslint"
