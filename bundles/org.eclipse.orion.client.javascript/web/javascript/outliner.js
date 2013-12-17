@@ -94,6 +94,14 @@ define([
 					}
  				}
  			}
+ 			else if(node.type === Estraverse.Syntax.ReturnStatement) {
+ 				if(node.argument) {
+ 					if(node.argument.type === Estraverse.Syntax.ObjectExpression ||
+ 						node.argument.type === Estraverse.Syntax.FunctionExpression) {
+ 						node.argument.sig = Signatures.computeSignature(node);
+ 					}
+ 				}
+ 			}
 		},
 		
 		/**

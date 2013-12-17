@@ -196,6 +196,190 @@ define([
 			}
 		});
 	};
+	
+	/**
+	 * Tests an object property that is a literal wwhose value is a function
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424149
+	 */
+	Tests.test_objproperty_literal1 = function() {
+		context.text = "var obj = {\n"+
+			"\t\"item\": function(p1, p2) {}\n"+
+			"};";
+		return outliner.computeOutline(context).then(function(outline) {
+			try {
+				if(!outline || outline.length < 1) {
+					Assert.fail("There should be one outline element");
+				}
+				if(!outline[0].children || outline[0].children.length < 1) {
+					Assert.fail("There should be one child outline element");
+				}
+				assertElement(outline[0].children[0], "item(p1, p2)", 13, 19);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests an object property that is a literal whose value has not been set
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424149
+	 */
+	Tests.test_objproperty_literal2 = function() {
+		context.text = "var obj = {\n"+
+			"\t\"item\": null\n"+
+			"};";
+		return outliner.computeOutline(context).then(function(outline) {
+			try {
+				if(!outline || outline.length < 1) {
+					Assert.fail("There should be one outline element");
+				}
+				if(!outline[0].children || outline[0].children.length < 1) {
+					Assert.fail("There should be one child outline element");
+				}
+				assertElement(outline[0].children[0], "item", 13, 19);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests an object property that is a literal whose value is another object expression
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424149
+	 */
+	Tests.test_objproperty_literal3 = function() {
+		context.text = "var obj = {\n"+
+			"\t\"item\": {}\n"+
+			"};";
+		return outliner.computeOutline(context).then(function(outline) {
+			try {
+				if(!outline || outline.length < 1) {
+					Assert.fail("There should be one outline element");
+				}
+				if(!outline[0].children || outline[0].children.length < 1) {
+					Assert.fail("There should be one child outline element");
+				}
+				assertElement(outline[0].children[0], "item {...}", 13, 19);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests a return statement that is an object expression
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
+	 */
+	Tests.test_returnobj1 = function() {
+		context.text = "function f1() {\n"+
+			"\t return {};\n"+
+			"};";
+		return outliner.computeOutline(context).then(function(outline) {
+			try {
+				if(!outline || outline.length < 1) {
+					Assert.fail("There should be one outline element");
+				}
+				if(!outline[0].children || outline[0].children.length < 1) {
+					Assert.fail("There should be one child outline element");
+				}
+				assertElement(outline[0].children[0], "return {...}", 18, 24);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests a return statement that is an function expression
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
+	 */
+	Tests.test_returnobj2 = function() {
+		context.text = "function f1() {\n"+
+			"\t return function() {};\n"+
+			"};";
+		return outliner.computeOutline(context).then(function(outline) {
+			try {
+				if(!outline || outline.length < 1) {
+					Assert.fail("There should be one outline element");
+				}
+				if(!outline[0].children || outline[0].children.length < 1) {
+					Assert.fail("There should be one child outline element");
+				}
+				assertElement(outline[0].children[0], "return {...}", 18, 24);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests a return statement that is an object expression
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
+	 */
+	Tests.test_returnobj3 = function() {
+		context.text = "function f1() {\n"+
+			"\t return {\n"+
+			"\t\tf1: function() {return {};}"+
+			"\t};"+
+			"};";
+		return outliner.computeOutline(context).then(function(outline) {
+			try {
+				if(!outline || outline.length < 1) {
+					Assert.fail("There should be one outline element");
+				}
+				if(!outline[0].children || outline[0].children.length < 1) {
+					Assert.fail("There should be one level one child outline element");
+				}
+				if(!outline[0].children[0].children || outline[0].children[0].children.length < 1) {
+					Assert.fail("There should be one level two child outline element");
+				}
+				if(!outline[0].children[0].children[0].children || outline[0].children[0].children[0].children.length < 1) {
+					Assert.fail("There should be one level three child outline element");
+				}
+				assertElement(outline[0].children[0].children[0].children[0], "return {...}", 45, 51);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests a return statement that is an object expression
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424202
+	 */
+	Tests.test_returnobj4 = function() {
+		context.text = "function f1() {\n"+
+			"\t return {\n"+
+			"\t\tf1: function() {return function() {};}"+
+			"\t};"+
+			"};";
+		return outliner.computeOutline(context).then(function(outline) {
+			try {
+				if(!outline || outline.length < 1) {
+					Assert.fail("There should be one outline element");
+				}
+				if(!outline[0].children || outline[0].children.length < 1) {
+					Assert.fail("There should be one level one child outline element");
+				}
+				if(!outline[0].children[0].children || outline[0].children[0].children.length < 1) {
+					Assert.fail("There should be one level two child outline element");
+				}
+				if(!outline[0].children[0].children[0].children || outline[0].children[0].children[0].children.length < 1) {
+					Assert.fail("There should be one level three child outline element");
+				}
+				assertElement(outline[0].children[0].children[0].children[0], "return {...}", 45, 51);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
 		
 	return Tests;
 });
