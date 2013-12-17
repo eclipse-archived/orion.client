@@ -16,9 +16,8 @@ define([
 	'orion/objects',
 	'orion/webui/tooltip',
 	'i18n!orion/nls/messages',
-	'text!orion/webui/dropdownseparator.html',
-	'text!orion/webui/browsercontextmenubutton.html'
-], function(lib, mDropdown, objects, Tooltip, messages, DropdownSeparatorFragment, BrowserContextMenuFragment) {
+	'text!orion/webui/dropdownseparator.html'
+], function(lib, mDropdown, objects, Tooltip, messages, DropdownSeparatorFragment) {
 
 	var Dropdown = mDropdown.Dropdown;
 	
@@ -59,8 +58,6 @@ define([
 			
 			//clicking on the trigger node should close the context menu
 			this._triggerNode.addEventListener("click",  this._boundContextMenuCloser, false);//$NON-NLS-0$
-			
-			this.addEventListener("postpopulate", this._addBrowserContextMenuArrow.bind(this)); //$NON-NLS-0$
 		},
 		
 		_positionContextMenu: function(event) {
@@ -103,67 +100,7 @@ define([
 			} else {
 				this.close();
 			}
-		},
-		
-		_addBrowserContextMenuArrow: function(eventWrapper) {
-			var self = this;
-			
-			if (this._separatorElement) {
-				this._dropdownNode.appendChild(this._separatorElement);
-			} else {
-				var separatorRange = document.createRange();
-				separatorRange.selectNode(this._dropdownNode);
-				var separatorFragment = separatorRange.createContextualFragment(DropdownSeparatorFragment);
-				this._dropdownNode.appendChild(separatorFragment);
-				this._separatorElement = this._dropdownNode.lastChild;
-			}
-			
-			if (this._browserContextNode) {
-				this._dropdownNode.appendChild(this._browserContextNode);	
-			} else {
-				var browserContextRange = document.createRange();
-				browserContextRange.selectNode(this._dropdownNode);
-				var browserContextMenuFragment = browserContextRange.createContextualFragment(BrowserContextMenuFragment);
-				this._dropdownNode.appendChild(browserContextMenuFragment);
-				
-				this._browserContextNode = this._dropdownNode.lastChild;
-				
-				var browserContextButtonNode = this._browserContextNode.firstElementChild;
-				
-				this._browserContextTooltip = new Tooltip.Tooltip({
-					node: browserContextButtonNode,
-					text: messages["To view the browser's context menu, trigger the context menu again."], //$NON-NLS-0$
-					position: ["below", "right", "left", "above"], //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					trigger: "none" //$NON-NLS-0$
-				});
-				
-				// add handler to show tooltip
-				browserContextButtonNode.addEventListener("click", function(e){ //$NON-NLS-0$
-					self._browserContextTooltip.show();
-				}, false);
-				
-				browserContextButtonNode.addEventListener("keyup", function(e){ //$NON-NLS-0$
-					if (e.which || e.keyCode) {
-					  if ((e.which === lib.KEY.ENTER) || (e.keyCode === lib.KEY.ENTER)) {
-					    self._browserContextTooltip.show();
-					    return false;
-					  }
-					}
-				});
-				
-				// add handler to close submenu
-				browserContextButtonNode.addEventListener("mouseover", function(e){ //$NON-NLS-0$
-					self._closeSelectedSubmenu();
-				}, false);
-				
-			}
-		},
-		
-		_hideBrowserContextTooltip: function() {
-			if (this._browserContextTooltip) {
-				this._browserContextTooltip.hide(0);
-			}
-		}
+		},		
 	});
 	
 	ContextMenu.prototype.constructor = ContextMenu;
@@ -179,32 +116,12 @@ define([
 		return actionTaken;
 	};
 	
-	// overrides Dropdown.protoype.submenuOpen
-	ContextMenu.prototype.submenuOpen = function(submenu) {
-		Dropdown.prototype.submenuOpen.call(this, submenu); //call function in super class
-		this._hideBrowserContextTooltip();
-	};
-	
-	// overrides Dropdown.protoype.submenuOpen
-	ContextMenu.prototype.close = function(restoreFocus) {
-		Dropdown.prototype.close.call(this, restoreFocus); //call function in super class
-		this._hideBrowserContextTooltip();
-	};
-	
 	// overrides Dropdown.protoype.destroy
 	ContextMenu.prototype.destroy = function() {
 		this._triggerNode.removeEventListener("contextmenu", this._boundcontextmenuEventHandler, true); //$NON-NLS-0$
 		this._triggerNode.removeEventListener("click",  this._boundContextMenuCloser, false); //$NON-NLS-0$
 		window.removeEventListener("contextmenu", this._boundContextMenuCloser, false); //$NON-NLS-0$
 		this._dropdownNode.dropdown = null;
-		if (this._browserContextNode) {
-			this._dropdownNode.removeChild(this._browserContextNode);
-			this._browserContextNode = null;
-		}
-		if (this._browserContextTooltip) {
-			this._browserContextTooltip.destroy();
-			this._browserContextTooltip = null;
-		}
 		Dropdown.prototype.destroy.call(this); //call function in super class
 	};
 	
