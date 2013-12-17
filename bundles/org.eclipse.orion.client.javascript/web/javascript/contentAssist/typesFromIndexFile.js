@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
- *     Manu Sridharan (IBM) - Initial API and implementation
+ *     IBM Coporation - Initial API and implementation
  ******************************************************************************/
 /**
  * This module contains the code for parsing index files and converting them
@@ -15,11 +15,11 @@
  */
 
 /*global define require definitionForType doctrine*/
-define('javascript/esprima/typesFromIndexFile', [
+define([
 'orion/Deferred',
-'javascript/esprima/typeUtils',
+'javascript/contentAssist/typeUtils',
 'doctrine/doctrine'
-], function (Deferred, typeUtils, _doctrine) {
+], function (Deferred, typeUtils, Doctrine) {
 
 	/**
 	 * for case where an object has its own hasOwnProperty property 
@@ -411,7 +411,7 @@ define('javascript/esprima/typesFromIndexFile', [
 	function init() {
 		if (!initResult) { 
 			var d = new Deferred();
-			require(["javascript/esprima/indexFiles/ecma5Index"], function (ecma5) {
+			require(["javascript/contentAssist/indexFiles/ecma5Index"], function (ecma5) {
 				// add information for core libraries directly to Global.prototype
 				// and Types.prototype
 				addIndexInfo(ecma5, globalPrototype, typesPrototype);
@@ -482,9 +482,9 @@ define('javascript/esprima/typesFromIndexFile', [
 			globalsAndTypes = { globals: {}, types: {} };
 			var indexFile;
 			if (libName === "browser") {
-				indexFile = "javascript/esprima/indexFiles/browserIndex";
+				indexFile = "javascript/contentAssist/indexFiles/browserIndex";
 			} else if (libName === "node") {
-				indexFile = "javascript/esprima/indexFiles/nodeIndex";
+				indexFile = "javascript/contentAssist/indexFiles/nodeIndex";
 			} else {
 				throw "unknown library name " + libName;				
 			}

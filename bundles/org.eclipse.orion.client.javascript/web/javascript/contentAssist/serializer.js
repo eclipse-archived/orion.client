@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
- *     Manu Sridharan (IBM) - Initial API and implementation
+ *     IBM Corporation - Initial API and implementation
  ******************************************************************************/
  
 /**
@@ -17,8 +17,8 @@
  */
 
 /*global define console */
-define('javascript/esprima/serializer', [
-'javascript/esprima/typeUtils' 
+define([
+'javascript/contentAssist/typeUtils' 
 ], function (typeUtils) {
 
 	/**

@@ -7,10 +7,10 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
- *     Manu Sridharan (IBM) - Initial API and implementation
+ *     IBM Corporation - Initial API and implementation
  ******************************************************************************/
  /*global define */
-define('javascript/esprima/indexFiles/nodeIndex', [
+define('javascript/contentAssist/indexFiles/nodeIndex', [
 ], function () {
 	return {
 		"console": "Console",
