@@ -113,8 +113,13 @@ define([
 				else if(astnode.type === 'Property') {
 					if(astnode.value) {
 						if(astnode.value.type === 'FunctionExpression') {
-							if(astnode.key && astnode.key.name) {
-								name = astnode.key.name + '(';
+							if(astnode.key) {
+								if(astnode.key.name) {
+									name = astnode.key.name + '(';
+								}
+								else if(astnode.key.value) {
+									name = astnode.key.value + '(';
+								}
 							}
 							else {
 								name = 'function(';
@@ -126,12 +131,22 @@ define([
 							name += ')';
 						}
 						else if(astnode.value.type === 'ObjectExpression') {
-							if(astnode.key && astnode.key.name) {
-								name = astnode.key.name + ' {...}';
+							if(astnode.key) {
+								if(astnode.key.name) {
+									name = astnode.key.name + ' {...}';
+								}
+								else if(astnode.key.value) {
+									name = astnode.key.value + ' {...}';
+								}
 							}
 						}
-						else if(astnode.key && astnode.key.name) {
-							name = astnode.key.name;
+						else if(astnode.key) {
+							if(astnode.key.name) {
+								name = astnode.key.name;
+							}
+							else if(astnode.key.value) {
+								name = astnode.key.value;
+							}
 						}
 					}
 				}
