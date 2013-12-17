@@ -12,8 +12,7 @@
 
 /*global define esprima */
 define([
-'javascript/esprima/scriptedLogger'
-], function(scriptedLogger) {
+], function() {
 
 	return {
 		/**
@@ -36,11 +35,6 @@ define([
 				var parsedProgram = esprima.parse(contents, extraOptions);
 				return parsedProgram;
 			} catch (e) {
-				if (typeof scriptedLogger !== "undefined") {
-					scriptedLogger.warn("Problem parsing file", "CONTENT_ASSIST");
-					scriptedLogger.warn(e.message, "CONTENT_ASSIST");
-					scriptedLogger.warn(e.stack, "CONTENT_ASSIST");
-				}
 				return null;
 			}
 		},
