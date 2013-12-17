@@ -202,6 +202,14 @@ define([
 						}
 					}
 				}
+				else if(astnode.type === 'ReturnStatement') {
+					if(astnode.argument) {
+						if(astnode.argument.type === 'ObjectExpression' ||
+							astnode.argument.type === 'FunctionExpression') {
+								name = 'return {...}';
+						}
+					}
+				}
 			}
 			return name;
 		},
@@ -257,6 +265,10 @@ define([
 					if(astnode.key && astnode.key.range) {
 						range = astnode.key.range;
 					}
+				}
+				else if(astnode.type === 'ReturnStatement') {
+					range[0] = astnode.range[0];
+					range[1] = range[0] + 6;
 				}
 				else if(astnode.id && astnode.id.range) {
 					range = astnode.id.range;
