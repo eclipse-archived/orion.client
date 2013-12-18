@@ -56,5 +56,8 @@ define({
 	"ChooseFS": "Choose Filesystem", //$NON-NLS-1$ //$NON-NLS-0$
 	"ChooseFSTooltip": "Choose the filesystem you want to view.", //$NON-NLS-1$ //$NON-NLS-0$
 	"FSTitle": "${0} (${1})", //$NON-NLS-1$ //$NON-NLS-0$
-	"Deploy": "Deploy" //$NON-NLS-1$ //$NON-NLS-0$
+	"Deploy": "Deploy", //$NON-NLS-1$ //$NON-NLS-0$
+	"ImportExport": "Import/Export", //$NON-NLS-1$ //$NON-NLS-0$
+	"OpenWith": "Open with...", //$NON-NLS-1$ //$NON-NLS-0$
+	"Extensions": "Extensions" //$NON-NLS-1$ //$NON-NLS-0$
 });

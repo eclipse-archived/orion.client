@@ -599,7 +599,8 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 			this.selectionClass = options.selectionClass;
 			this.spriteClass = options.spriteClass || "commandSprite"; // defines the background image containing sprites //$NON-NLS-0$
 			this.visibleWhen = options.visibleWhen;
-			this.parameters = options.parameters;  // only used when a command is used in the command registry.  
+			this.parameters = options.parameters;  // only used when a command is used in the command registry. 
+			this.isEditor = options.isEditor;
 		},
 		
 		/**
