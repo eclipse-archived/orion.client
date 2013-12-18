@@ -192,7 +192,7 @@ define([
 	provider.registerServiceProvider("orion.edit.highlighter", {
 		// purely declarative, no service methods
     }, {
-        id: "orion.c-like",
+        id: "orion.patterns",
 		patterns: [
 			{
 				id: "brace_open",
@@ -259,7 +259,11 @@ define([
 				match: "\"(?:\\\\.|[^\"])*(?:\"|$)",
 				name: "STRING"
 			}, {
-				id: "number",
+				id: "string_singleQuote",
+				match: "'(?:\\\\.|[^'])*(?:'|$)",
+				name: "STRING"
+			}, {
+				id: "number_decimal",
 				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:e[+-]?\\d+)?\\b",
 				name: "NUMBER"
 			}, {
@@ -277,14 +281,10 @@ define([
 		contentTypes: ["application/javascript"],
 		patterns: [
 			{
-				include: "orion.c-like"
+				include: "orion.patterns"
 			}, {
 				match: "\\b(?:" + keywords.JSKeywords.join("|") + ")\\b",
 				name: "KEYWORD"
-			}, {
-				id: "string_singleQuote",
-				match: "'(?:\\\\.|[^'])*(?:'|$)",
-				name: "STRING"
 			}, {
 				begin: "'[^'\\n]*\\\\\n",
 				end: "(?:[^'\\n]*\\\\\\n)*[^'\\n]*'?",
@@ -303,11 +303,14 @@ define([
 		contentTypes: ["text/x-java-source"],
 		patterns: [
 			{
-				include: "orion.c-like"
+				include: "orion.patterns"
 			}, {
 				id: keywords,
 				match: "\\b(?:" + keywords.JAVAKeywords.join("|") + ")\\b",
 				name: "KEYWORD"
+			}, {
+				/* override orion.patterns#string_singleQuote */
+				id: "string_singleQuote"
 			}
 		]
 	});
@@ -319,18 +322,16 @@ define([
 		contentTypes: ["application/json"],
 		patterns: [
 			{
-				include: "orion.c-like"
-			}, {
-				include: "orion.js#string_singleQuote"
+				include: "orion.patterns"
 			}, {
 				id: keywords,
 				match: "\\b(?:true|false|null)\\b",
 				name: "KEYWORD"
 			}, {
-				/* override c-like#comment_singleline */
+				/* override orion.patterns#comment_singleline */
 				id: "comment_singleline"
 			}, {
-				/* override c-like#comment_multiline */
+				/* override orion.patterns#comment_multiline */
 				id: "comment_multiline"
 			}
 		]
@@ -361,7 +362,7 @@ define([
 		contentTypes: ["text/css"],
 		patterns: [
 			{
-				include: "orion.c-like"
+				include: "orion.patterns"
 			}, {
 				match: "(?:-webkit-|-moz-|-ms-|\\b)(?:" + keywords.CSSKeywords.join("|") + ")\\b",
 				name: "KEYWORD"
@@ -375,8 +376,11 @@ define([
 				match: "#[0-9A-Fa-f]+\\b",
 				name: "NUMBER"
 			}, {
-				/* override c-like#comment_singleline */
+				/* override orion.patterns#comment_singleline */
 				id: "comment_singleline"
+			}, {
+				/* override orion.patterns#string_singleQuote */
+				id: "string_singleQuote"
 			}
 		]
 	});
@@ -431,9 +435,9 @@ define([
 					{
 						include: "#comment"
 					}, {
-						include: "orion.c-like#string"
+						include: "orion.patterns#string"
 					}, {
-						include: "orion.js#string_singleQuote"
+						include: "orion.patterns#string_singleQuote"
 					}
 				]
 			}
