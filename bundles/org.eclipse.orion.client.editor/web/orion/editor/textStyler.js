@@ -122,8 +122,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		}.bind(this));
 
 		this.whitespacesVisible = this.spacesVisible = this.tabsVisible = false;
-		this.spacePattern = {regex: new RegExp(" ", "g"), name: "WHITE_SPACE", isWhitespace: true};
-		this.tabPattern = {regex: new RegExp("\t", "g"), name: "WHITE_TAB", isWhitespace: true};
+		this.spacePattern = {regex: new RegExp(" ", "g"), pattern: {name: "WHITE_SPACE"}, isWhitespace: true};
+		this.tabPattern = {regex: new RegExp("\t", "g"), pattern: {name: "WHITE_TAB"}, isWhitespace: true};
 
 		this.detectHyperlinks = true;
 		this.highlightCaretLine = false;
