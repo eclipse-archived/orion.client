@@ -155,20 +155,27 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 					parentId = pattern.qualifiedId;
 				}
 			}
+			/* indexes on patterns are used to break ties when multiple patterns match the same start text */
+			var indexCounter = [0];
 			var resultObject = {};
 			var regEx = new RegExp(parentId + "#[^#]+$"); //$NON-NLS-0$
+			var includes = [];
 			this._patterns.forEach(function(current) {
 				if (regEx.test(current.qualifiedId)) {
 					if (current.include) {
-						this._processInclude(current, resultObject);
+						includes.push(current);
 					} else {
-						/*
-						 * Don't need to check for conflict, a locally-defined pattern
-						 * should always override an imported one with the same id.
-						 */
+						current.index = indexCounter[0]++;
 						resultObject[current.id] = current;
 					}
 				}
+			}.bind(this));
+			/*
+			 * The includes get processed last to ensure that locally-defined patterns are given
+			 * precedence over included ones with respect to pattern identifiers and indexes.
+			 */
+			includes.forEach(function(current) {
+				this._processInclude(current, indexCounter, resultObject);
 			}.bind(this));
 
 			var result = [];
@@ -200,7 +207,7 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 				}
 			};
 		},
-		_processInclude: function(pattern, resultObject) {
+		_processInclude: function(pattern, indexCounter, resultObject) {
 			var searchExp;
 			var index = pattern.include.indexOf("#");
 			if (index === 0) {
@@ -213,23 +220,23 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 				/* inclusion of specific pattern from another grammar */
 				searchExp = new RegExp(pattern.include);
 			}
+			var includes = [];
 			this._patterns.forEach(function(current) {
 				if (searchExp.test(current.qualifiedId)) {
-					if (!resultObject[current.id]) {
+					if (current.include) {
+						includes.push(current);
+					} else if (!resultObject[current.id]) {
+						current.index = indexCounter[0]++;
 						resultObject[current.id] = current;
-					} else {
-						/*
-						 * Another pattern with the same id is already known, so must
-						 * determine whether this one overrides it or not.
-						 */
-						var parentGrammarId = pattern.parentId.substring(0, pattern.parentId.indexOf("#"));
-						var currentPatternGrammarId = current.parentId.substring(0, current.parentId.indexOf("#"));
-						if (parentGrammarId === currentPatternGrammarId) {
-							/* pattern is from the same grammar, so take it */
-							resultObject[current.id] = current;
-						}
 					}
 				}
+			}.bind(this));
+			/*
+			 * The includes get processed last to ensure that locally-defined patterns are given
+			 * precedence over included ones with respect to pattern identifiers and indexes.
+			 */
+			includes.forEach(function(current) {
+				this._processInclude(current, indexCounter, resultObject);
 			}.bind(this));
 		},
 		_UNNAMED: "noId"	//$NON-NLS-0$
