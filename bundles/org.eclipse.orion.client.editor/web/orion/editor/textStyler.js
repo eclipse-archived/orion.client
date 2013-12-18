@@ -111,8 +111,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			if (pattern) {
 				if (pattern.line) {
 					this.linePatterns.push(pattern.line);
-					if (pattern.line.name && pattern.line.name.indexOf("orion.enclosure") === 0 && (pattern.line.name.indexOf(".start") !== -1 || pattern.line.name.indexOf(".end") !== -1)) {
-						this.enclosurePatterns[pattern.line.name] = pattern.line;
+					if (pattern.line.pattern.name && pattern.line.pattern.name.indexOf("orion.enclosure") === 0 && (pattern.line.pattern.name.indexOf(".start") !== -1 || pattern.line.pattern.name.indexOf(".end") !== -1)) {
+						this.enclosurePatterns[pattern.line.pattern.name] = pattern.line;
 					}
 				}
 				if (pattern.document) {
@@ -765,11 +765,11 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 			var closingName;
 			var onEnclosureStart = false;
-			if (match.name.indexOf(".start") !== -1) {
+			if (match.pattern.name.indexOf(".start") !== -1) {
 				onEnclosureStart = true;
-				closingName = match.name.replace(".start", ".end");
+				closingName = match.pattern.name.replace(".start", ".end");
 			} else {
-				closingName = match.name.replace(".end", ".start");
+				closingName = match.pattern.name.replace(".end", ".start");
 			}
 			var closingBracket = this.enclosurePatterns[closingName];
 			if (!closingBracket) { return -1; }
@@ -838,7 +838,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		},
 		_findBrackets: function(bracket, closingBracket, text, start, end) {
 			var result = [], styles = [];
-			// for any sub range that is not a comment, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
+			// for any sub range that is not a block, parse code generating tokens (keywords, numbers, brackets, line comments, etc)
 			var offset = start, blocks = this.blocks;
 			var startIndex = this._binarySearch(blocks, start, true);
 			for (var i = startIndex; i < blocks.length; i++) {
@@ -848,9 +848,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				if (offset < blockStart) {
 					this._parse(text.substring(offset - start, blockStart - start), offset, this.linePatterns, false, styles);
 					styles.forEach(function(current) {
-						if (current.style.styleClass.indexOf(bracket.name) === 0) {
+						if (current.style.styleClass.indexOf(bracket.pattern.name) === 0) {
 							result.push(current.start + 1);
-						} else if (current.style.styleClass.indexOf(closingBracket.name) === 0) {
+						} else if (current.style.styleClass.indexOf(closingBracket.pattern.name) === 0) {
 							result.push(-(current.start + 1));
 						}
 					});
@@ -861,9 +861,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			if (offset < end) {
 				this._parse(text.substring(offset - start, end - start), offset, this.linePatterns, false, styles);
 				styles.forEach(function(current) {
-					if (current.style.styleClass.indexOf(bracket.name) === 0) {
+					if (current.style.styleClass.indexOf(bracket.pattern.name) === 0) {
 						result.push(current.start + 1);
-					} else if (current.style.styleClass.indexOf(closingBracket.name) === 0) {
+					} else if (current.style.styleClass.indexOf(closingBracket.pattern.name) === 0) {
 						result.push(-(current.start + 1));
 					}
 				});
