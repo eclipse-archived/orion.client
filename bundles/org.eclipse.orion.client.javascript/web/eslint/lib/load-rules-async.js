@@ -19,8 +19,9 @@ define([
 	"eslint/rules/no-undef",
 	"eslint/rules/no-unused-vars",
 	"eslint/rules/no-use-before-define",
-	"eslint/rules/semi"
-], function(eqeqeq, no_redeclare, no_undef, no_unused_vars, no_use_before_define, semi) {
+	"eslint/rules/semi",
+	"eslint/rules/missing-doc"
+], function(eqeqeq, no_redeclare, no_undef, no_unused_vars, no_use_before_define, semi, missing_doc) {
 	return function() {
 		return {
 			"eqeqeq": eqeqeq,
@@ -28,7 +29,9 @@ define([
 			"no-undef": no_undef,
 			"no-unused-vars": no_unused_vars,
 			"no-use-before-define": no_use_before_define,
-			"semi": semi
+			"semi": semi,
+			"missing-func-decl-doc" : missing_doc,
+			"missing-func-expr-doc" : missing_doc
 		};
 	};
 });
