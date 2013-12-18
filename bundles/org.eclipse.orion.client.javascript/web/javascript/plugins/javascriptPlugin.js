@@ -112,6 +112,66 @@ define([
 							name: "Use ESLint to validate JavaScript files",
 							type: "boolean",
 							defaultValue: true
+						},
+						{	id: "validate_eqeqeq",
+							name: "Discouraged '==' use",
+							type: "number",
+							defaultValue: 1,
+							options: [
+								{label: "Ignore", value:0},
+								{label: "Warning", value:1},
+								{label: "Error", value:2}
+							]
+						},
+						{	id: "validate_use_before_define",
+							name: "Member used before definition",
+							type: "number",
+							defaultValue: 1,
+							options: [
+								{label: "Ignore", value:0},
+								{label: "Warning", value:1},
+								{label: "Error", value:2}
+							]
+						},
+						{	id: "validate_missing_semi",
+							name: "Missing semicolons",
+							type: "number",
+							defaultValue: 1,
+							options: [
+								{label: "Ignore", value:0},
+								{label: "Warning", value:1},
+								{label: "Error", value:2}
+							]
+						},
+						{	id: "validate_no_undef",
+							name: "Undefined member use",
+							type: "number",
+							defaultValue: 2,
+							options: [
+								{label: "Ignore", value:0},
+								{label: "Warning", value:1},
+								{label: "Error", value:2}
+							]
+						},
+						{	id: "validate_no_unused_vars",
+							name: "Unused variables",
+							type: "number",
+							defaultValue: 1,
+							options: [
+								{label: "Ignore", value:0},
+								{label: "Warning", value:1},
+								{label: "Error", value:2}
+							]
+						},
+						{	id: "validate_no_redeclare",
+							name: "Variable re-declarations",
+							type: "number",
+							defaultValue: 1,
+							options: [
+								{label: "Ignore", value:0},
+								{label: "Warning", value:1},
+								{label: "Error", value:2}
+							]
 						}
 					]
 				}

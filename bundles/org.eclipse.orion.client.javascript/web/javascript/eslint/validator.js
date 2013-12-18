@@ -127,6 +127,24 @@ define([
 			if (typeof properties.active === "boolean") { //$NON-NLS-0$
 				this.active = properties.active;
 			}
+			if(typeof properties.validate_eqeqeq === "number") {
+				config.rules["eqeqeq"] = properties.validate_eqeqeq;
+			}
+			if(typeof properties.validate_no_redeclare === "number") {
+				config.rules["no-redeclare"] = properties.validate_no_redeclare;
+			}
+			if(typeof properties.validate_no_undef === "number") {
+				config.rules["no-undef"] = properties.validate_no_undef;
+			}
+			if(typeof properties.validate_no_unused_vars === "number") {
+				config.rules["no-unused-vars"] = properties.validate_no_unused_vars;
+			}
+			if(typeof properties.validate_missing_semi === "number") {
+				config.rules["semi"] = properties.validate_missing_semi;
+			}
+			if(typeof properties.validate_use_before_define === "number") {
+				config.rules["semi"] = properties.validate_use_before_define;
+			}
 		}
 	});
 	/**
