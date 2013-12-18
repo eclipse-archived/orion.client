@@ -139,11 +139,11 @@ define([
 			if(typeof properties.validate_no_unused_vars === "number") {
 				config.rules["no-unused-vars"] = properties.validate_no_unused_vars;
 			}
+			if(typeof properties.validate_use_before_define === "number") {
+				config.rules["no-use-before-define"] = properties.validate_use_before_define;
+			}
 			if(typeof properties.validate_missing_semi === "number") {
 				config.rules["semi"] = properties.validate_missing_semi;
-			}
-			if(typeof properties.validate_use_before_define === "number") {
-				config.rules["semi"] = properties.validate_use_before_define;
 			}
 		}
 	});
