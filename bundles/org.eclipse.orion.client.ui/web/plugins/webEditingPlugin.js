@@ -182,11 +182,11 @@ define([
 		});
 
 	// Register syntax highlighting (TextMate-based)
-	provider.registerService("orion.edit.highlighter", {},
-		{	type: "grammar",
-			contentType: ["text/html"],
-			grammar: new htmlGrammar.HtmlGrammar()
-		});
+//	provider.registerService("orion.edit.highlighter", {},
+//		{	type: "grammar",
+//			contentType: ["text/html"],
+//			grammar: new htmlGrammar.HtmlGrammar()
+//		});
 
 	// Register syntax highlighting (Orion)
 	provider.registerServiceProvider("orion.edit.highlighter", {
@@ -377,6 +377,65 @@ define([
 			}, {
 				/* override c-like#comment_singleline */
 				id: "comment_singleline"
+			}
+		]
+	});
+	
+	provider.registerServiceProvider("orion.edit.highlighter", {
+		// purely declarative, no service methods
+    }, {
+        id: "orion.html",
+        contentTypes: ["text/html"],
+		patterns: [
+			{
+				begin: "(<!(?:doctype|DOCTYPE))",
+				end: "(>)",
+				captures: {
+					1: {name: "HTML_MARKUP"},
+				}
+			}, {
+				begin: "(<script)([^>]*)(>)",
+				end: "(</script>|$)",
+				captures: {
+					1: {name: "HTML_MARKUP"},
+					3: {name: "HTML_MARKUP"}
+				},
+				patterns: [
+					{
+						include: "orion.js"
+					}
+				]
+			}, {
+				begin: "(<style)([^>]*)(>)",
+				end: "(</style>|$)",
+				captures: {
+					1: {name: "HTML_MARKUP"},
+					3: {name: "HTML_MARKUP"}
+				},
+				patterns: [
+					{
+						include: "orion.css"
+					}
+				]
+			}, {
+				begin: "<!--",
+				end: "-->|$",
+				name: "MULTILINE_COMMENT"
+			}, {
+				begin: "(</?[A-Za-z0-9]+)",
+				end: "(/?>)",
+				captures: {
+					1: {name: "HTML_MARKUP"},
+				},
+				patterns: [
+					{
+						include: "#comment"
+					}, {
+						include: "orion.c-like#string"
+					}, {
+						include: "orion.js#string_singleQuote"
+					}
+				]
 			}
 		]
 	});
