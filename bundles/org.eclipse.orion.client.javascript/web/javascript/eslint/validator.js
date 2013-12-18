@@ -24,6 +24,11 @@ define([
 			"no-unused-vars": 1, //$NON-NLS-0$
 			"no-use-before-define": 1, //$NON-NLS-0$
 			"semi": 1 //$NON-NLS-0$
+		},
+		setOption: function(ruleId, value) {
+			if (typeof value === "number") {
+				this.rules[ruleId] = value;
+			}
 		}
 	};
 
@@ -127,26 +132,15 @@ define([
 			if (typeof properties.active === "boolean") { //$NON-NLS-0$
 				this.active = properties.active;
 			}
-			if(typeof properties.validate_eqeqeq === "number") {
-				config.rules["eqeqeq"] = properties.validate_eqeqeq;
-			}
-			if(typeof properties.validate_no_redeclare === "number") {
-				config.rules["no-redeclare"] = properties.validate_no_redeclare;
-			}
-			if(typeof properties.validate_no_undef === "number") {
-				config.rules["no-undef"] = properties.validate_no_undef;
-			}
-			if(typeof properties.validate_no_unused_vars === "number") {
-				config.rules["no-unused-vars"] = properties.validate_no_unused_vars;
-			}
-			if(typeof properties.validate_use_before_define === "number") {
-				config.rules["no-use-before-define"] = properties.validate_use_before_define;
-			}
-			if(typeof properties.validate_missing_semi === "number") {
-				config.rules["semi"] = properties.validate_missing_semi;
-			}
+			config.setOption("eqeqeq", properties.validate_eqeqeq); //$NON-NLS-0$
+			config.setOption("no-redeclare", properties.validate_no_redeclare); //$NON-NLS-0$
+			config.setOption("no-undef", properties.validate_no_undef); //$NON-NLS-0$
+			config.setOption("no-unused-vars", properties.validate_no_unused_vars); //$NON-NLS-0$
+			config.setOption("no-use-before-define", properties.validate_use_before_define); //$NON-NLS-0$
+			config.setOption("semi", properties.validate_missing_semi); //$NON-NLS-0$
 		}
 	});
+
 	/**
 	 * @name eslint.Error
 	 * @class
