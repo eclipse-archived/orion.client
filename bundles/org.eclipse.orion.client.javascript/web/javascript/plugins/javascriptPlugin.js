@@ -123,6 +123,26 @@ define([
 								{label: "Error", value:2}
 							]
 						},
+						{	id: "validate_func_decl",
+							name: "No JSDoc on function declarations",
+							type: "number",
+							defaultValue: 0,
+							options: [
+							    {label: "Ignore", value:0},
+							    {label: "Warning", value:1},
+							    {label: "Error", value:2}
+							]
+						},
+						{	id: "validate_func_expr",
+							name: "No JSDoc on function expressions",
+							type: "number",
+							defaultValue: 0,
+							options: [
+							    {label: "Ignore", value:0},
+							    {label: "Warning", value:1},
+							    {label: "Error", value:2}
+							]
+						},
 						{	id: "validate_use_before_define",
 							name: "Member used before definition",
 							type: "number",

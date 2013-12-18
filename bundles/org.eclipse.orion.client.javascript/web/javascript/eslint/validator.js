@@ -23,11 +23,18 @@ define([
 			"no-undef": 2, //$NON-NLS-0$
 			"no-unused-vars": 1, //$NON-NLS-0$
 			"no-use-before-define": 1, //$NON-NLS-0$
-			"semi": 1 //$NON-NLS-0$
+			"semi": 1, //$NON-NLS-0$
+			"missing-func-decl-doc": [0, 'decl'], //$NON-NLS-0$ //$NON-NLS-1$
+			"missing-func-expr-doc": [0, 'expr'] //$NON-NLS-0$ //$NON-NLS-1$
 		},
 		setOption: function(ruleId, value) {
 			if (typeof value === "number") {
-				this.rules[ruleId] = value;
+				if(Array.isArray(this.rules[ruleId])) {
+					this.rules[ruleId][0] = value;
+				}
+				else {
+					this.rules[ruleId] = value;
+				}
 			}
 		}
 	};
@@ -36,12 +43,26 @@ define([
 		this.active = true; // enabled by default
 		this.astManager = astManager;
 	}
+	/**
+	 * @name getSeverity
+	 * @description Computes the severity string from the given problem
+	 * @private
+	 * @param {eslint.Error} prob The ESLint problem to compute the severity from
+	 * @returns {String} The severity string. One of <code>warning</code> or <code>error</code>
+	 */
 	function getSeverity(prob) {
-		switch (config.rules[prob.ruleId]) {
+		var val = 2;
+		if(Array.isArray(config.rules[prob.ruleId])) {
+			val = config.rules[prob.ruleId][0];
+		}
+		else {
+			val = config.rules[prob.ruleId];
+		}
+		switch (val) {
 			case 1: return "warning"; //$NON-NLS-0$
 			case 2: return "error"; //$NON-NLS-0$
 		}
-		return "error"; //$NON-NLS-0$
+		return "ignore"; //$NON-NLS-0$
 	}
 	/**
 	 * @param {eslint.Error|esprima.Error} e Either an eslint error or an esprima parse error.
@@ -132,6 +153,8 @@ define([
 			if (typeof properties.active === "boolean") { //$NON-NLS-0$
 				this.active = properties.active;
 			}
+			config.setOption("missing-func-decl-doc", properties.validate_func_decl); //$NON-NLS-0$
+			config.setOption("missing-func-expr-doc", properties.validate_func_expr); //$NON-NLS-0$
 			config.setOption("eqeqeq", properties.validate_eqeqeq); //$NON-NLS-0$
 			config.setOption("no-redeclare", properties.validate_no_redeclare); //$NON-NLS-0$
 			config.setOption("no-undef", properties.validate_no_undef); //$NON-NLS-0$
