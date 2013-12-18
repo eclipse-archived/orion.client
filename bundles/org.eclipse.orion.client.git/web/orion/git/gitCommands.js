@@ -2848,7 +2848,9 @@ var exports = {};
 		commandService.addCommand(unstageCommand);
 		
 		var commitMessageParameters = new mCommandRegistry.ParametersDescription(
-			[new mCommandRegistry.CommandParameter('name', 'text', messages['Commit message:'], "", 4), new mCommandRegistry.CommandParameter('amend', 'boolean', messages['Amend:'], false)], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+			[new mCommandRegistry.CommandParameter('name', 'text', messages['Commit message:'], "", 4), 
+			 new mCommandRegistry.CommandParameter('amend', 'boolean', messages['Amend:'], false),
+			 new mCommandRegistry.CommandParameter('changeId', 'boolean', messages['ChangeId:'], false)],
 			 {hasOptionalParameters: true});
 		
 		var commitCommand = new mCommands.Command({
@@ -2899,6 +2901,7 @@ var exports = {};
 				var body = {};
 				body.Message = data.parameters.valueFor("name"); //$NON-NLS-0$
 				body.Amend = data.parameters.valueFor("amend"); //$NON-NLS-0$
+				body.ChangeId = data.parameters.valueFor("changeId"); //$NON-NLS-0$
 				
 				var config = item.Clone.Config;
 				if(body.Amend && !body.Message){

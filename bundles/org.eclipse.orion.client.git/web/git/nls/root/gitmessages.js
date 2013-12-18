@@ -188,6 +188,7 @@ define({
 	"Commit Changes": "Commit Changes",
 	"Message:": "Message:",
 	"Amend:": "Amend:",
+	"ChangeId:": "ChangeId:",
 	"Committer Name:": "Committer Name:",
 	"Committer Email:": "Committer Email:",
 	"Author Name:": "Author Name:",
