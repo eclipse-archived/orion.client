@@ -125,12 +125,11 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 		open: function(event /* optional */) {
 			var actionTaken = false;
 			if (!this.isVisible()) {
+				this.dispatchEvent({type: "triggered", dropdown: this, event: event}); //$NON-NLS-0$
 				lib.setFramesEnabled(false);
 				if (this._populate) {
 					this.empty();
-					this.dispatchEvent({type: "prepopulate", dropdown: this, event: event}); //$NON-NLS-0$
 					this._populate(this._dropdownNode);
-					this.dispatchEvent({type: "postpopulate", dropdown: this, event: event}); //$NON-NLS-0$
 				}
 				var items = this.getItems();
 				if (items.length > 0) {

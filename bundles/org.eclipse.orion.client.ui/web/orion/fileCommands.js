@@ -637,7 +637,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		
 		var deleteCommand = new mCommands.Command({
 			name: messages["Delete"],
-			tooltip: messages["Delete the selected files or folders"],
 			imageClass: "core-sprite-delete", //$NON-NLS-0$
 			id: "eclipse.deleteFile" + idSuffix, //$NON-NLS-0$
 			visibleWhen: oneOrMoreFilesOrFolders,
@@ -676,6 +675,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 											oldValue: item,
 											newValue: null,
 											parent: parent
+										});
+										// Remove deleted item from copy/paste buffer
+										bufferedSelection = bufferedSelection.filter(function(element){
+											return element.Location !== item.Location;
 										});
 										dispatchModelEvent({ type: "delete", oldValue: item, newValue: null, parent: parent, count: items.length }); //$NON-NLS-0$
 									}, errorHandler);
@@ -992,22 +995,25 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		commandService.addCommand(moveCommand);
 		
 		var copyToBufferCommand = new mCommands.Command({
-			name: messages["Copy Items"],
-			tooltip: messages["Copy the selected items to the copy/paste buffer"],
+			name: messages["Copy"],
 			id: "eclipse.copySelections" + idSuffix, //$NON-NLS-0$
 			callback: function() {
 				explorer.selection.getSelections(function(selections) {
 					bufferedSelection = selections;
 				});
-			}
+			},
+			visibleWhen: oneOrMoreFilesOrFolders
 		});
 		commandService.addCommand(copyToBufferCommand);
-			
+		
+		var canPaste = function(items){
+			return (bufferedSelection.length > 0) && checkFolderSelection(items);
+		};
+		
 		var pasteFromBufferCommand = new mCommands.Command({
-				name: messages["Paste Items"],
-				tooltip: messages["Paste items from the copy/paste buffer"],
+				name: messages["Paste"],
 				id: "eclipse.pasteSelections" + idSuffix, //$NON-NLS-0$
-				visibleWhen: checkFolderSelection,
+				visibleWhen: canPaste,
 				callback: function(data) {
 					// Check selection service first.  If a single folder is selected, that is the target.  Otherwise the root is the target.
 					explorer.selection.getSelections(function(selections) {

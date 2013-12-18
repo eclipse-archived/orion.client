@@ -182,11 +182,11 @@ exports.ExplorerNavHandler = (function() {
 			return this.explorer.myTree.isExpanded(this.model.getId(model));
 		},
 		
-		refreshSelection: function(noScroll){
+		refreshSelection: function(noScroll, visually){
 			var that = this;
 			if(this.explorer.selection){
 				this.explorer.selection.getSelections(function(selections) {
-					that._clearSelection();
+					that._clearSelection(visually);
 					for (var i = 0; i < selections.length; i++){
 						that._selections.push(selections[i]);
 					}
@@ -245,7 +245,6 @@ exports.ExplorerNavHandler = (function() {
 				}
 			}
 			this._selections = [];
-			//this._selections.splice(0, this._selections.length);
 		},
 		
 		getSelectionPolicy: function() {

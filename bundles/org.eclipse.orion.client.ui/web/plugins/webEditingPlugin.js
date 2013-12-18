@@ -117,18 +117,6 @@ define([
 			}]
 		});
 
-	provider.registerService("orion.navigate.command", {}, {
-		id: "orion.view.raw",
-		nameKey: "Raw",
-		nls: "orion/nls/messages",
-		tooltipKey: "Open the raw file or folder in the browser",
-		uriTemplate:  "{+Location}",
-		forceSingleItem: true,
-		validationProperties: [{
-			source: "!Projects" // Filter out workspace; Raw only applies to regular files and folders.
-		}]
-	});
-
 	provider.registerService("orion.edit.editor", {}, {
 		id: "orion.editor",
 		nameKey: "Orion Editor",
@@ -136,10 +124,14 @@ define([
 		uriTemplate: "../edit/edit.html#{,Location,params*}",
 		orionTemplate: "../edit/edit.html#{,Location,params*}"});
 
+	// only providing excludedContentTypes for orion.editor because we want 
+	// to attempt to open files with unknown content types with it for now
+	// e.g. A text file with no extension is currently of an unknown content
+	// type, we want to use the orion.editor to open it
 	provider.registerService("orion.navigate.openWith", {}, {
-			editor: "orion.editor",
-			contentType: ["text/plain", "text/html", "text/css", "application/javascript", "application/json", "application/xml", "text/x-java-source", "text/x-markdown"]});
-
+		editor: "orion.editor",
+		excludedContentTypes: ["image/*"]});
+			
 	provider.registerService("orion.navigate.openWith.default", {}, {
 			editor: "orion.editor"});
 
@@ -164,6 +156,17 @@ define([
 			editor: "orion.imageViewer",
 			contentType: ["image/gif", "image/jpeg", "image/ico", "image/png", "image/tiff", "image/svg"]});
 
+	// open file with browser, no associated orion.navigate.openWith command means that any content type is valid
+	provider.registerService("orion.edit.editor", {}, {
+		id: "orion.view.raw",
+		nameKey: "Browser",
+		nls: "orion/nls/messages",
+		uriTemplate:  "{+Location}",
+		validationProperties: [{
+			source: "!Projects" // Filter out workspace; Raw only applies to regular files and folders.
+		}]
+	});
+	
 	// Register content assist providers
 	provider.registerService("orion.edit.contentassist",
 		new cssContentAssist.CssContentAssistProvider(),

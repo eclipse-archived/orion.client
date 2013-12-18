@@ -54,6 +54,16 @@ define([
 		this.selectionActionsScope = this.toolbarNode.id + "Selection"; //$NON-NLS-0$
 		this.folderNavActionsScope = this.toolbarNode.id + "Folder"; //$NON-NLS-0$
 		this.additionalNavActionsScope = this.toolbarNode.id + "Extra"; //$NON-NLS-0$
+		
+		this._parentNode = lib.node(this.parentId);
+		this._sidebarContextMenuNode = document.createElement("ul"); //$NON-NLS-0$
+		this._sidebarContextMenuNode.className = "dropdownMenu"; //$NON-NLS-0$
+		this._sidebarContextMenuNode.setAttribute("role", "menu"); //$NON-NLS-1$ //$NON-NLS-0$
+		this._sidebarContextMenuNode.id = this.parentId + "ContextMenu"; //$NON-NLS-0$
+		
+		this._parentNode.parentNode.insertBefore(this._sidebarContextMenuNode, this._parentNode);
+		
+		this.contextMenuActionsScope = this._sidebarContextMenuNode.id + "commonNavContextMenu"; //$NON-NLS-0$
 
 		this.treeRoot = {}; // Needed by FileExplorer.prototype.loadResourceList
 		var _self = this;
@@ -80,7 +90,6 @@ define([
 		};
 		this.selection.addEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
 		this.commandsRegistered = this.registerCommands();
-		this._parentNode = lib.node(this.parentId);
 		
 		this._createContextMenu();
 	}
@@ -175,6 +184,10 @@ define([
 				this._contextMenu.destroy();
 				this._contextMenu = null;
 			}
+			if (this._sidebarContextMenuNode) {
+				this._parentNode.parentNode.removeChild(this._sidebarContextMenuNode);
+				this._sidebarContextMenuNode = null;
+			}
 		},
 		display: function(root, force) {
 			return this.loadRoot(root, force).then(function(){
@@ -232,9 +245,53 @@ define([
 			var newActionsScope = this.newActionsScope;
 			var selectionActionsScope = this.selectionActionsScope;
 			var folderNavActionsScope = this.folderNavActionsScope;
+			var contextMenuActionsScope = this.contextMenuActionsScope;
 			commandRegistry.addCommandGroup(newActionsScope, "orion.commonNavNewGroup", 1000, messages["New"], null, null, "core-sprite-addcontent", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			// action gear groups
 			commandRegistry.addCommandGroup(selectionActionsScope, "orion.commonNavSelectionGroup", 100, messages["Actions"], null, null, "core-sprite-gear", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(selectionActionsScope, 
+				"orion.importExportGroup", //$NON-NLS-0$
+				1000, 
+				messages["ImportExport"], //$NON-NLS-0$
+				"orion.commonNavSelectionGroup", //$NON-NLS-0$
+				null, 
+				null, 
+				null, 
+				"dropdownSelection"); //$NON-NLS-0$
+				
+			// context menu groups
+			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.commonNavContextMenuSelectionGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(contextMenuActionsScope, 
+				"orion.OpenWith", //$NON-NLS-0$
+				1000, 
+				messages["OpenWith"], //$NON-NLS-0$
+				"orion.commonNavContextMenuSelectionGroup", //$NON-NLS-0$
+				null, 
+				null, 
+				null, 
+				"dropdownSelection"); //$NON-NLS-0$
+			commandRegistry.addCommandGroup(contextMenuActionsScope, 
+				"orion.ImportExportGroup", //$NON-NLS-0$
+				1000, 
+				messages["ImportExport"], //$NON-NLS-0$
+				"orion.commonNavContextMenuSelectionGroup", //$NON-NLS-0$
+				null, 
+				null, 
+				null, 
+				"dropdownSelection"); //$NON-NLS-0$			
+			commandRegistry.addCommandGroup(contextMenuActionsScope, 
+				"orion.Extensions", //$NON-NLS-0$
+				1000, 
+				messages["Extensions"], //$NON-NLS-0$
+				"orion.commonNavContextMenuSelectionGroup", //$NON-NLS-0$
+				null, 
+				null, 
+				null, 
+				"dropdownSelection"); //$NON-NLS-0$
+			
 			commandRegistry.registerSelectionService(selectionActionsScope, this.selection);
+			commandRegistry.registerSelectionService(contextMenuActionsScope, this.selection);
 
 			var renameBinding = new KeyBinding(113); // F2
 			var delBinding = new KeyBinding(46); // Delete
@@ -244,10 +301,6 @@ define([
 			var downFolder = new KeyBinding(40, false, false, true); /* Alt+DownArrow */
 			downFolder.domScope = upFolder.domScope = pasteSelections.domScope = copySelections.domScope = delBinding.domScope = renameBinding.domScope = "sidebar"; //$NON-NLS-0$
 			downFolder.scopeName = upFolder.scopeName = pasteSelections.scopeName = copySelections.scopeName = delBinding.scopeName = renameBinding.scopeName = messages.Navigator; //$NON-NLS-0$
-
-			// commands that don't appear but have keybindings
-			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.copySelections", 1, null, true, copySelections); //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.pasteSelections", 1, null, true, pasteSelections); //$NON-NLS-0$
 
 			// New file and new folder (in a group)
 			commandRegistry.registerCommandContribution(newActionsScope, "eclipse.newFile", 1, "orion.commonNavNewGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -270,8 +323,38 @@ define([
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downloadFile", 3, "orion.commonNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importSFTP", 4, "orion.commonNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.exportSFTPCommand", 5, "orion.commonNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			// Context menu actions
+			//TODO add cut command		
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.copySelections", 1, "orion.commonNavContextMenuSelectionGroup", false, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.pasteSelections", 2, "orion.commonNavContextMenuSelectionGroup", false, pasteSelections); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.deleteFile", 3, "orion.commonNavContextMenuSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.renameResource", 4, "orion.commonNavContextMenuSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.compareWith", 5, "orion.commonNavContextMenuSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.compareWithEachOther", 6, "orion.commonNavContextMenuSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
-			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.commonNavSelectionGroup", true); //$NON-NLS-0$
+			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.commonNavSelectionGroup", true).then(function() { //$NON-NLS-0$
+				
+				// OpenWith group
+				var openWithCommands = ExtensionCommands.getOpenWithCommands(commandRegistry);
+				openWithCommands.forEach(function(command){
+					commandRegistry.registerCommandContribution(contextMenuActionsScope, command.id, 1, "orion.commonNavContextMenuSelectionGroup/orion.OpenWith"); //$NON-NLS-0$
+				});
+				
+				// ImportExportGroup group
+				commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.importZipURL", 1, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.import", 2, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.downloadFile", 3, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.importSFTP", 4, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.exportSFTPCommand", 5, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+				
+				// Extensions group
+				var fileCommandIds = ExtensionCommands.getFileCommandIds();
+				fileCommandIds.forEach(function(commandId){
+					commandRegistry.registerCommandContribution(contextMenuActionsScope, commandId, 1, "orion.commonNavContextMenuSelectionGroup/orion.Extensions"); //$NON-NLS-0$
+				});
+			}); //$NON-NLS-0$
 		},
 		updateCommands: function(selections) {
 			this.createActionSections();
@@ -282,51 +365,69 @@ define([
 			commandRegistry.destroy(this.additionalNavActionsScope);
 			commandRegistry.renderCommands(this.folderNavActionsScope, this.folderNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
 			commandRegistry.renderCommands(this.additionalNavActionsScope, this.additionalNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
+			if (this._sidebarContextMenuNode) {
+				this._populateContextMenu(this._sidebarContextMenuNode);
+			}
 		},
+		
+		_populateContextMenu: function(contextMenuNode) {
+			var selectionService = this.selection;
+			var selections = selectionService.getSelections();
+			var items = null;
+			
+			this.commandRegistry.destroy(contextMenuNode); // remove previous content
+			
+			this.commandRegistry.renderCommands(this.newActionsScope, contextMenuNode, this.treeRoot, this, "menu");  //$NON-NLS-0$
+				
+			if (!selections || (Array.isArray(selections) && !selections.length)) {
+				//no selections, use this.treeRoot to determine commands
+				items = this.treeRoot;
+			}
+			this.commandRegistry.renderCommands(this.contextMenuActionsScope, contextMenuNode, items, this, "menu");  //$NON-NLS-0$	
+		},
+			
 		_createContextMenu: function() {
-			//create context menu
-			//function called before populating the context menu to set the nav selection properly
-			var prePopulateContextMenu = function(eventWrapper) {
+			//function called when the context menu is triggered to set the nav selection properly
+			var contextMenuTriggered = function(eventWrapper) {
 				var navHandler = this.getNavHandler();
 				var navDict = this.getNavDict();
 				var event = eventWrapper.event;
+				var item = null;
+				
 				if (event.target) {
 					var node = event.target;
 					while (this._parentNode.contains(node)) {
-						if ("TR" === node.nodeName) {	//TODO this is brittle, see if a better way exists
+						if ("TR" === node.nodeName) {	//$NON-NLS-0$ //TODO this is brittle, see if a better way exists
 							var rowId = node.id;
-							var item = navDict.getValue(rowId);
-							navHandler.setSelection(item.model, false, true);
+							item = navDict.getValue(rowId);
 							break;
 						}
 						node = node.parentNode;
 					}
-				}
-			}.bind(this);
-			
-			//function called to populate the context menu before every time it is shown
-			var populateContextMenu = function(contextMenu) {
-				var selectionService = this.selection;
-				var selections = selectionService.getSelections();
-				
-				this.commandRegistry.renderCommands(this.newActionsScope, contextMenu, this.treeRoot, this, "menu");  //$NON-NLS-0$
-				
-				if (!selections || (Array.isArray(selections) && !selections.length)) {
-					//no selections, use this.treeRoot to determine commands
-					this.commandRegistry.renderCommands(this.selectionActionsScope, contextMenu, this.treeRoot, this, "menu");  //$NON-NLS-0$
-				} else {
-					//there are selections, use default selection service to determine commands
-					this.commandRegistry.renderCommands(this.selectionActionsScope, contextMenu, null, this, "menu");  //$NON-NLS-0$	
+					
+					if (item) {
+						// only modify the selection if the item that the context menu
+						// was triggered on isn't already part of the selection
+						var existingSels = navHandler.getSelection();
+						if (-1 === existingSels.indexOf(item.model)) {
+							navHandler.cursorOn(item.model, true, false, true);
+							navHandler.setSelection(item.model, false, true);
+						}
+					} else {
+						// context menu was triggered on sidebar itself,
+						// clear previous selections
+						this.selection.setSelections(null);
+						navHandler.refreshSelection(true, true);
+					}
 				}
 			}.bind(this);
 			
 			var contextMenu = new mContextMenu.ContextMenu({
-				dropdown: lib.node("sidebarContextMenu"),
-				triggerNode: this._parentNode,
-				populate: populateContextMenu
+				dropdown: this._sidebarContextMenuNode,
+				triggerNode: this._parentNode
 			});
 			
-			contextMenu.addEventListener("prepopulate", prePopulateContextMenu);
+			contextMenu.addEventListener("triggered", contextMenuTriggered); //$NON-NLS-0$
 			
 			this._contextMenu = contextMenu;
 		}
