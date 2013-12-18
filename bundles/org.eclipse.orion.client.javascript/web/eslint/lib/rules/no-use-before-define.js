@@ -36,11 +36,11 @@
 	module.exports = function(context) {
 		"use strict";
 
-		// By default, we flag both vars (but not funcs) that precede their declarations.
 		var options = context.options,
-		    flag_vars = booleanOption(options[0], true),
-		    flag_funcs = booleanOption(options[1], false);
+		    flag_vars = booleanOption(options[0], true),   // by default, flag vars
+		    flag_funcs = booleanOption(options[1], false); // ... but not funcs
 
+		// TODO extract this helper to util.js and see if it can be used to clean up 'no-redeclare' rule
 		function getDeclaration(ref, scope) {
 			for (var curScope = scope; true; ) {
 				if (!curScope) {
