@@ -23,21 +23,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	 * Typical examples are multi-line comments and multi-line strings.
 	 */
 
-	var UNKOWN = 1;
-	var KEYWORD = 2;
-	var NUMBER = 3;
-	var STRING = 4;
-	var MULTILINE_STRING = 5;
-	var SINGLELINE_COMMENT = 6;
-	var MULTILINE_COMMENT = 7;
-	var DOC_COMMENT = 8;
-	var WHITE = 9;
-	var WHITE_TAB = 10;
-	var WHITE_SPACE = 11;
-	var HTML_MARKUP = 12;
-	var DOC_TAG = 13;
-	var TASK_TAG = 14;
-
 	// Styles
 	var singleCommentStyle = {styleClass: "token_singleline_comment"}; //$NON-NLS-0$
 	var multiCommentStyle = {styleClass: "token_multiline_comment"}; //$NON-NLS-0$
@@ -388,7 +373,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				var blockSubstyles = [];
 				this._parseBlock(text.substring(s - start, e - start), s, blocks[i].pattern.subPatterns, blockSubstyles);
 				var blockStyle;
-				var name = blocks[i].pattern.pattern.name;
+				var name = blocks[i].pattern.pattern.contentName || blocks[i].pattern.pattern.name;
 				if (name) {
 					blockStyle = styleMappings[name];
 				}
