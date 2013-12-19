@@ -122,7 +122,10 @@ define([
 		nameKey: "Orion Editor",
 		nls: "orion/nls/messages",
 		uriTemplate: "../edit/edit.html#{,Location,params*}",
-		orionTemplate: "../edit/edit.html#{,Location,params*}"});
+		orionTemplate: "../edit/edit.html#{,Location,params*}",
+		validationProperties: [{
+			source: "!Projects" // Filter out workspace;
+		}]});
 
 	// only providing excludedContentTypes for orion.editor because we want 
 	// to attempt to open files with unknown content types with it for now
