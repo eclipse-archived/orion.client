@@ -245,7 +245,7 @@ define([
 						if (this.showFolderNav) {
 							var navNode = document.createElement("div"); //$NON-NLS-0$
 							navNode.id = "folderNavNode"; //$NON-NLS-0$
-							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files"});
+							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: true});
 							
 							this.folderNavExplorer = new FolderNavExplorer({
 								parentId: navNode,

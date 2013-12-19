@@ -88,7 +88,7 @@ define([
 			node.appendChild(div);
 		},
 		displayInFrame: function(node, file) {
-			var markdownSection = new mSection.Section(node, {id: "markdownSection", title: file.Name || "readme"}); //$NON-NLS-0$
+			var markdownSection = new mSection.Section(node, {id: "markdownSection", title: file.Name || "readme", canHide: true}); //$NON-NLS-0$
 			this.displayContents.call(this, markdownSection.getContentElement(), file);
 		}
 	};

@@ -103,7 +103,7 @@ define([
 	ProjectExplorer.prototype = Object.create(mExplorer.Explorer.prototype);
 	
 	ProjectExplorer.prototype._init = function(){
-		var projectsSection = new mSection.Section(lib.node(this.parentId), {id: "projectsSection", title: "Projects"});
+		var projectsSection = new mSection.Section(lib.node(this.parentId), {id: "projectsSection", title: "Projects", canHide: true});
 		var div = document.createElement("div");
 		div.id = "projectsExplorer";
 		projectsSection.embedExplorer(this, div);

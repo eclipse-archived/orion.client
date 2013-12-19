@@ -590,7 +590,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		},
 		renderProjectInfo: function(parent){
 			
-			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection", title: "Project Information"});
+			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection", title: "Project Information", canHide: true});
 			var explorerParent = document.createElement("div");
 			explorerParent.id = "projectInformationNode";
 			var projectInfoRenderer = new ProjectInfoRenderer({
@@ -619,7 +619,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 						if(!cat.Name){
 							continue;
 						}
-						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.Name + "Section", title: cat.Name});
+						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.Name + "Section", title: cat.Name, canHide: true});
 						var explorerParent = document.createElement("div");
 						var additionalInfoRenderer = new AdditionalInfoRenderer({
 							checkbox: false
@@ -638,7 +638,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				return;
 			}
 			
-			var dependenciesSection = new mSection.Section(parent, {id: "projectDependenciesSection", title: "Associated Content"});
+			var dependenciesSection = new mSection.Section(parent, {id: "projectDependenciesSection", title: "Associated Content", canHide: true});
 			var dependenciesParent = document.createElement("div");
 			dependenciesParent.id = "dependenciesNode";
 			var dependenciesRenderer = new DependenciesRenderer({
@@ -665,7 +665,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				return;
 			}
 			lib.empty(this.configurationsParent);
-			var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", title: "Deployment Information"});
+			var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", title: "Deployment Information", canHide: true});
 			var launchConfigurationParent = document.createElement("div");
 			launchConfigurationParent.id = "launchConfigurationsNode";
 			var launchConfigurationRenderer = new LaunchConfigurationRenderer({
