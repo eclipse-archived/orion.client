@@ -186,16 +186,8 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 			return result;
 		},
 		_addPatterns: function(patterns, parentId) {
-			var haveEncounteredNonIncludePattern = false;
 			for (var i = 0; i < patterns.length; i++) {
 				var current = patterns[i];
-				if (!current.include) {
-					haveEncounteredNonIncludePattern = true;
-				} else {
-					if (haveEncounteredNonIncludePattern) {
-						continue;
-					}
-				}
 				current.parentId = parentId;
 				if (!current.id) {
 					current.id = this._UNNAMED + this._unnamedCounter++;
