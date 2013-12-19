@@ -436,13 +436,6 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 				}, false);
 			}
 		}
-		if (command.tooltip) {
-			element.commandTooltip = new Tooltip.Tooltip({
-				node: element,
-				text: command.tooltip,
-				position: ["right", "left", "above", "below"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			});
-		}
 		element.className = "dropdownMenuItem"; //$NON-NLS-0$
 		element.role = "menuitem";  //$NON-NLS-0$
 		var li = document.createElement("li"); //$NON-NLS-0$
@@ -587,7 +580,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		_init: function(options) {
 			this.id = options.id;  // unique id
 			this.name = options.name;
-			this.tooltip = options.tooltip || options.name;
+			this.tooltip = options.tooltip;
 			this.callback = options.callback; // optional callback that should be called when command is activated (clicked)
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
