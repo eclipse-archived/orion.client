@@ -80,7 +80,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				urlInput.style.visibility = "hidden";
 				
 				var urlSelector = document.createElement("div");
-				urlSelector.style.marginBottom = "-15px";
+				urlSelector.style.marginTop = "-15px";
 				urlSelector.title = "Click to edit";
 				urlSelector.className = "discreetInput";
 				urlSelector.tabIndex = item.no;	//this is the same as the urlInput's tab index but they will never be visible at the same time
@@ -114,8 +114,8 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				urlLink.urlSelector = urlSelector; //refer to selector to be able to make it visible from within _renderEditableFields
 				
 				this.projectEditor._renderEditableFields(urlInput, item.id, item.no, urlLink);
-				td.appendChild(urlSelector);
 				td.appendChild(urlInput);
+				td.appendChild(urlSelector);
 				return td;
 			}
 			td = document.createElement("td");
