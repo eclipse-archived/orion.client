@@ -60,36 +60,6 @@ define([
 			this._triggerNode.addEventListener("click",  this._boundContextMenuCloser, false);//$NON-NLS-0$
 		},
 		
-		_positionContextMenu: function(event) {
-			var mouseLeft = event.clientX;
-			var mouseTop = event.clientY;
-			
-			this._dropdownNode.style.left = mouseLeft + "px"; //$NON-NLS-0$
-			this._dropdownNode.style.top = mouseTop + "px"; //$NON-NLS-0$
-			this._dropdownNode.style.position = "fixed"; //$NON-NLS-0$		//TODO convert to absolute position
-			
-			var totalBounds = lib.bounds(this._boundingNode(this._triggerNode));
-			var bounds = lib.bounds(this._dropdownNode);
-			var bodyBounds = lib.bounds(document.body);
-			var triggerBounds = lib.bounds(this._triggerNode);
-			
-			//ensure menu fits on page horizontally
-			if ((bounds.left + bounds.width) > (bodyBounds.left + bodyBounds.width)) {
-				if (this._triggerNode.classList.contains("dropdownMenuItem")) { //$NON-NLS-0$
-					this._dropdownNode.style.left = -bounds.width + "px"; //$NON-NLS-0$
-				} else {
-					this._dropdownNode.style.left = (triggerBounds.left  - totalBounds.left - bounds.width + triggerBounds.width) + "px"; //$NON-NLS-0$	
-				}
-			}
-			
-			//ensure menu fits on page vertically
-			var overflowY = (bounds.top + bounds.height) - (bodyBounds.top + bodyBounds.height);
-			if (0 < overflowY) {
-				//TODO improve bottom padding estimate
-				this._dropdownNode.style.top = (bounds.top - overflowY) + "px";	//$NON-NLS-0$
-			}
-		},
-		
 		 _contextMenuCloser: function(event){
 			this.close(event);
 		},
@@ -105,15 +75,39 @@ define([
 	
 	ContextMenu.prototype.constructor = ContextMenu;
 	
-	// overrides Dropdown.protoype.open
-	ContextMenu.prototype.open = function(event /* optional */) {
-		var actionTaken = Dropdown.prototype.open.call(this, event); //call function in super class
-		if (actionTaken) {
-			if (event) {
-				this._positionContextMenu(event);
+	// overrides Dropdown.protoype._positionDropdown
+	ContextMenu.prototype._positionDropdown = function(mouseEvent) {
+		if (mouseEvent) {
+			var mouseLeft = mouseEvent.clientX;
+			var mouseTop = mouseEvent.clientY;
+			
+			// we want the position to be relative to the mouse event
+			this._dropdownNode.style.position = "fixed"; //$NON-NLS-0$
+			
+			// set the initial position
+			this._dropdownNode.style.left = mouseLeft + "px"; //$NON-NLS-0$
+			this._dropdownNode.style.top = mouseTop +  "px"; //$NON-NLS-0$
+					
+			// ensure that the menu fits on the page...
+			var bounds = lib.bounds(this._dropdownNode);
+			var width = bounds.width;
+			var height = bounds.height;
+			var bodyBounds = lib.bounds(document.body);
+			
+			//ensure menu fits on page horizontally
+			var overflowX = (mouseLeft + width) - (bodyBounds.left + bodyBounds.width);
+			if (0 < overflowX) {
+				this._dropdownNode.style.left = Math.floor(mouseLeft - overflowX) + "px"; //$NON-NLS-0$	
 			}
+			
+			//ensure menu fits on page vertically
+			var overflowY = (mouseTop + height) - (bodyBounds.top + bodyBounds.height);
+			if (0 < overflowY) {
+				this._dropdownNode.style.top = Math.floor(mouseTop - overflowY) + "px";	//$NON-NLS-0$
+			}
+		} else {
+			Dropdown.prototype._positionDropdown.call(this); //call function in super class
 		}
-		return actionTaken;
 	};
 	
 	// overrides Dropdown.protoype.destroy

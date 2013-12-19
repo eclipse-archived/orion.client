@@ -81,7 +81,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 				var self = this;
 				// click on trigger opens.
 				this._triggerNode.addEventListener("click", function(event) { //$NON-NLS-0$
-					if (self.toggle())  {
+					if (self.toggle(event))  {
 						lib.stop(event);
 					}
 				}, false);
@@ -104,11 +104,11 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 		/**
 		 * Toggle the open/closed state of the dropdown.  Return a boolean that indicates whether action was taken.
 		 */			
-		toggle: function(event) {
+		toggle: function(mouseEvent /* optional */) {
 			if (this.isVisible()) {
 				return this.close();
 			} else {
-				return this.open();
+				return this.open(mouseEvent);
 			}
 		},
 		
@@ -122,10 +122,10 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 		/**
 		 * Open the dropdown.
 		 */			
-		open: function(event /* optional */) {
+		open: function(mouseEvent /* optional */) {
 			var actionTaken = false;
 			if (!this.isVisible()) {
-				this.dispatchEvent({type: "triggered", dropdown: this, event: event}); //$NON-NLS-0$
+				this.dispatchEvent({type: "triggered", dropdown: this, event: mouseEvent}); //$NON-NLS-0$
 				lib.setFramesEnabled(false);
 				if (this._populate) {
 					this.empty();
@@ -151,7 +151,8 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 					this._dropdownNode.classList.add("dropdownMenuOpen"); //$NON-NLS-0$
 					this._isVisible = true;
 					
-					this._positionDropdown();
+					this._positionDropdown(mouseEvent);
+					
 					items[0].focus();
 					actionTaken = true;
 					
@@ -178,7 +179,15 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 			}
 		},
 		
-		_positionDropdown: function() {
+		/**
+		 * This method positions the dropdown menu.
+		 * The specified mouseEvent is ignored. However, subclasses 
+		 * can override this method if they wish to take the mouse 
+		 * position contained in the mouse event into account.
+		 * 
+		 * @param {MouseEvent} mouseEvent
+		 */
+		_positionDropdown: function(mouseEvent) {
 			this._dropdownNode.style.left = "";
 			this._dropdownNode.style.top = "";
 			
@@ -197,8 +206,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 			//ensure menu fits on page vertically
 			var overflowY = (bounds.top + bounds.height) - (bodyBounds.top + bodyBounds.height);
 			if (0 < overflowY) {
-				//TODO (minor) figure out proper bottom padding amount
-				this._dropdownNode.style.top = Math.ceil(this._dropdownNode.style.top - overflowY) + "px"; //$NON-NLS-0$
+				this._dropdownNode.style.top = Math.floor(this._dropdownNode.style.top - overflowY) + "px"; //$NON-NLS-0$
 			}
 		},
 		

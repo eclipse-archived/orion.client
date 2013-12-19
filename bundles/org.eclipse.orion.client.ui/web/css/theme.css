@@ -365,6 +365,7 @@ a.currentLocation:hover {
 	box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
 	display: none; /* don't take part in layout until open */
 	line-height: normal; /* don't want to inherit strange line-heights from ancestor elements */
+	margin: 0; /* needed for context menu positioning to work properly */
 }
 
 .dropdownMenuOpen {
