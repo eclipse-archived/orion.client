@@ -313,8 +313,8 @@ define([
 			
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downFolder", 1, "orion.commonNavSelectionGroup", false, downFolder); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.renameResource", 2, "orion.commonNavSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.copyFile", 3, "orion.commonNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.moveFile", 4, "orion.commonNavSelectionGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.copySelections", 3, "orion.commonNavSelectionGroup", false, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.pasteSelections", 4, "orion.commonNavSelectionGroup", false, pasteSelections); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.deleteFile", 5, "orion.commonNavSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWithEachOther", 6, "orion.commonNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWith", 7, "orion.commonNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
@@ -333,23 +333,22 @@ define([
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.compareWith", 5, "orion.commonNavContextMenuSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.compareWithEachOther", 6, "orion.commonNavContextMenuSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
 			
+			// Context menu ImportExportGroup group
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.importZipURL", 1, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.import", 2, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.downloadFile", 3, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.importSFTP", 4, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.exportSFTPCommand", 5, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			
 			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
 			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.commonNavSelectionGroup", true).then(function() { //$NON-NLS-0$
-				
-				// OpenWith group
+				// Context menu OpenWith group
 				var openWithCommands = ExtensionCommands.getOpenWithCommands(commandRegistry);
 				openWithCommands.forEach(function(command){
 					commandRegistry.registerCommandContribution(contextMenuActionsScope, command.id, 1, "orion.commonNavContextMenuSelectionGroup/orion.OpenWith"); //$NON-NLS-0$
 				});
-				
-				// ImportExportGroup group
-				commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.importZipURL", 1, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.import", 2, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.downloadFile", 3, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.importSFTP", 4, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.exportSFTPCommand", 5, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				
-				// Extensions group
+								
+				// Context menu Extensions group
 				var fileCommandIds = ExtensionCommands.getFileCommandIds();
 				fileCommandIds.forEach(function(commandId){
 					commandRegistry.registerCommandContribution(contextMenuActionsScope, commandId, 1, "orion.commonNavContextMenuSelectionGroup/orion.Extensions"); //$NON-NLS-0$
