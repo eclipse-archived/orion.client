@@ -160,6 +160,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		this._preferenceService = options.preferenceService;
 		// initially style as hidden until we determine what needs to happen
 		this._contentParent.style.display = "none"; //$NON-NLS-0$
+		this.domNode.classList.add("sectionWrapperClosed");
 		// should we consult a preference?
 		if (this._preferenceService) {
 			var self = this;
@@ -173,6 +174,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 
 				if (!self.hidden) {
 					self._contentParent.style.display = "block"; //$NON-NLS-0$
+					self.domNode.classList.remove("sectionWrapperClosed");
 				}
 				
 				self._updateExpandedState(!self.hidden, false);
@@ -180,6 +182,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		} else {
 			if (!this.hidden) {
 				this._contentParent.style.display = "block"; //$NON-NLS-0$
+				this.domNode.classList.remove("sectionWrapperClosed");
 			}
 			this._updateExpandedState(!this.hidden, false);
 		}
@@ -344,9 +347,11 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 			// TODO we could use classes with CSS transitions to animate				
 			if (!this.hidden){
 				this._contentParent.style.display = "none"; //$NON-NLS-0$
+				this.domNode.classList.add("sectionWrapperClosed");
 				this.hidden = true;
 			} else {
 				this._contentParent.style.display = "block"; //$NON-NLS-0$
+				this.domNode.classList.remove("sectionWrapperClosed");
 				this.hidden = false;
 			}
 			

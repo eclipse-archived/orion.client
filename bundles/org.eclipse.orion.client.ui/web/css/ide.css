@@ -944,6 +944,9 @@ input {
 	border-color:#dadada;
 }
 
+.sectionWrapperClosed{
+	border-bottom: 1px solid;
+}
 
 .sectionWrapper{
 	border-top: 1px solid;
