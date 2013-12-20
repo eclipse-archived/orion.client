@@ -21,53 +21,37 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 
 	var dockerContainer = {
 		startContainer: function() {
-			return xhr("POST", "/docker", { //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", "/docker/start", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
-					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
 				},
-				data: JSON.stringify({
-					"dockerCmd": "start"
-				}),
-				timeout: 15000,
-				handleAs: "json" //$NON-NLS-0$
+				timeout: 15000
 			});
 		},
 		stopContainer: function() {
-			return xhr("POST", "/docker", { //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", "/docker/stop", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
-					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
 				},
-				data: JSON.stringify({
-					"dockerCmd": "stop"
-				}),
-				timeout: 15000,
-				handleAs: "json" //$NON-NLS-0$
+				timeout: 15000
 			});
 		},
 		attachContainer: function() {
-			return xhr("POST", "/docker", { //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", "/docker/attach", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
-					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
 				},
-				data: JSON.stringify({
-					"dockerCmd": "attach"
-				}),
-				timeout: 15000,
-				handleAs: "json" //$NON-NLS-0$
+				timeout: 15000
 			});
 		},
-		processLine: function(line) {
-			return xhr("POST", "/docker", { //$NON-NLS-1$ //$NON-NLS-0$
+		sendText: function(text) {
+			return xhr("POST", "/docker/send", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				data: JSON.stringify({
-					"dockerCmd": "process",
-						"line": line
+					"text": text
 				}),
 				timeout: 15000,
 				responseType: "text",
@@ -84,10 +68,10 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 		var yyyy = today.getFullYear();
 		if (dd < 10) {
 			dd = '0' + dd;
-		}
+		};
 		if (mm < 10) {
 			mm = '0' + mm;
-		}
+		};
 		term.writeln(mm + '/' + dd + '/' + yyyy);
 		/*
 		term.writeln(" #######  ########  ####  #######  ##    ##");
@@ -142,7 +126,7 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 		term.open(document.getElementById("terminal"));
 		startScreen(term);
 		term.on('data', function(data) {
-			dockerContainer.processLine(data).then(function(result) {
+			dockerContainer.sendText(data).then(function(result) {
 				output = JSON.parse(result.responseText);
 				term.write(output.result);
 			});
@@ -159,7 +143,7 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 						button.textContent = "Disconnect";
 						connected = !connected;
 						term.reset();
-						dockerContainer.processLine("\n").then(function(result) {
+						dockerContainer.sendText("\n").then(function(result) {
 							output = JSON.parse(result.responseText);
 							term.write(output.result);
 						});
@@ -181,7 +165,5 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 			}
 
 		});
-
-
 	});
 });
