@@ -72,11 +72,25 @@
 	overflow: hidden;
 }
 
-.titleContainer {
+.compareActionContainer {
+	float: left;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	overflow: hidden;
+	background: #FFFFFF;
+}
+
+.titleActionContainer {
 	width:100%;
 	height:30px;
 	overflow: hidden;
-	background: #EEEEEE;
+	background: #EEEEEE
+}
+
+.titleContainer {
+	padding-left: 5px;
+	padding-top: 3px;
+	overflow: hidden;
 }
 
 .statusContainer {

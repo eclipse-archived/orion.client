@@ -569,18 +569,27 @@ exports.TwoWayCompareView = (function() {
 		if(this._viewLoadedCounter === 2){
 			this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 		}
-		
-		var newFileTitleNode = this._uiFactory.getTitleDiv(true);
-		var oldFileTitleNode = this._uiFactory.getTitleDiv(false);
-		if(oldFileTitleNode && newFileTitleNode){
-			lib.empty(oldFileTitleNode);
-			lib.empty(newFileTitleNode);
-			oldFileTitleNode.appendChild(document.createTextNode(this.options.oldFile.Name));
-			newFileTitleNode.appendChild(document.createTextNode(this.options.newFile.Name));
-		}
+		this.refreshTitle(0);
+		this.refreshTitle(1);
 		var leftViewHeight = this._editors[1].getTextView().getModel().getLineCount() * this._editors[1].getTextView().getLineHeight() + 5;
 		var rightViewHeight = this._editors[0].getTextView().getModel().getLineCount() * this._editors[0].getTextView().getLineHeight() +5;
 		return leftViewHeight > rightViewHeight ? leftViewHeight : rightViewHeight;
+	};
+	
+	TwoWayCompareView.prototype.refreshTitle = function(editorIndex, dirty){	
+		if(editorIndex === 1){
+			var newFileTitleNode = this._uiFactory.getTitleDiv(true);
+			if(newFileTitleNode){
+				lib.empty(newFileTitleNode);
+				newFileTitleNode.appendChild(document.createTextNode(dirty || this._editors[editorIndex].isDirty() ? this.options.newFile.Name + "*" : this.options.newFile.Name)); //$NON-NLS-0$
+			}
+		} else {
+			var oldFileTitleNode = this._uiFactory.getTitleDiv(false);
+			if(oldFileTitleNode){
+				lib.empty(oldFileTitleNode);
+				oldFileTitleNode.appendChild(document.createTextNode(dirty || this._editors[editorIndex].isDirty() ? this.options.oldFile.Name + "*" : this.options.oldFile.Name)); //$NON-NLS-0$
+			}
+		}
 	};
 	return TwoWayCompareView;
 }());

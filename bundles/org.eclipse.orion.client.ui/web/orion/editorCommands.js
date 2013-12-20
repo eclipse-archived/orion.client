@@ -118,6 +118,15 @@ define([
 		 * Creates the common text editing commands.  Also generates commands for any installed plug-ins that
 		 * contribute editor actions.  
 		 */
+		generateSimpleEditorCommands: function(editor, saveCmdId) {
+			if (!this.isReadOnly) {
+				this._generateUndoStackCommands(editor);
+				this._generateSaveCommand(editor, saveCmdId);
+			}
+			this._generateSearchFilesCommand(editor);
+			this._generateGotoLineCommnand(editor);
+			this._generateFindCommnand(editor);
+		},
 		generateEditorCommands: function(editor) {
 			this.generateBaseEditorCommands(editor);
 			this.generateExtraEditorCommands(editor);
@@ -239,13 +248,13 @@ define([
 				this.commandService.registerCommandContribution(this.pageNavId, "orion.searchFiles", 1, null, true, new mKeyBinding.KeyBinding("h", true)); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
-		_generateSaveCommand: function(editor) {
+		_generateSaveCommand: function(editor, saveCmdId) {
 			var self = this;
-			
+			var cmdId = saveCmdId ? saveCmdId : "orion.save"; //$NON-NLS-0$
 			var saveCommand = new mCommands.Command({
 				name: messages.Save,
 				tooltip: messages.saveFile,
-				id: "orion.save", //$NON-NLS-0$
+				id: cmdId,
 				visibleWhen: function() {
 					if (!editor.installed || self.inputManager.getReadOnly()) {
 						return false;
@@ -258,7 +267,7 @@ define([
 				}
 			});
 			this.commandService.addCommand(saveCommand);
-			this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.toolbarId, cmdId, 1, null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-0$
 			
 			// Add key binding to editor so that the user agent save dialog does not show when auto save is enabled
 			if (editor.getTextView && editor.getTextView()) {

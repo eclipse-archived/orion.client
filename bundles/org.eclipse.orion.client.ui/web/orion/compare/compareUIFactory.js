@@ -39,6 +39,11 @@ orion.TwoWayCompareUIFactory = (function() {
 			this._rightEditorWrapperDiv = lib.node("right_editor_wrapper_id"); //$NON-NLS-0$
 			this._rightEditorWrapperDiv.id = prefix + "right_editor_wrapper_id"; //$NON-NLS-0$
 			
+			this._leftActionDiv = lib.node("left_action_id"); //$NON-NLS-0$
+			this._leftActionDiv.id = prefix + "left_action_id"; //$NON-NLS-0$
+			this._rightActionDiv = lib.node("right_action_id"); //$NON-NLS-0$
+			this._rightActionDiv.id = prefix + "right_action_id"; //$NON-NLS-0$
+			
 			this._leftTitleDiv = lib.node("left_title_id"); //$NON-NLS-0$
 			this._leftTitleDiv.id = prefix + "left_title_id"; //$NON-NLS-0$
 			this._rightTitleDiv = lib.node("right_title_id"); //$NON-NLS-0$
@@ -96,6 +101,10 @@ orion.TwoWayCompareUIFactory = (function() {
 		
 		getTitleDiv: function(left){
 			return (left ? this._leftTitleDiv : this._rightTitleDiv);
+		},
+		
+		getActionDivId: function(left){
+			return (left ? this._leftActionDiv.id : this._rightActionDiv.id);
 		},
 		
 		getStatusDiv: function(left){
