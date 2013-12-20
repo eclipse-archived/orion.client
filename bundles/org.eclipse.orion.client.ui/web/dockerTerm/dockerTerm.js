@@ -10,17 +10,18 @@
  * 	IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define window*/
+/*global define window document*/
 
 define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr", "orion/Deferred", "dockerTerm/term"],
-	function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
+
+function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 	var pluginRegistry, serviceRegistry, preferences;
 
 	var connected = false;
-	
+
 	var dockerContainer = {
-	startContainer: function() {
-			return xhr("POST", "/docker", {  //$NON-NLS-1$ //$NON-NLS-0$
+		startContainer: function() {
+			return xhr("POST", "/docker", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
@@ -33,7 +34,7 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 			});
 		},
 		stopContainer: function() {
-			return xhr("POST", "/docker", {  //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", "/docker", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
@@ -46,7 +47,7 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 			});
 		},
 		attachContainer: function() {
-			return xhr("POST", "/docker", {  //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", "/docker", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
@@ -59,14 +60,14 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 			});
 		},
 		processLine: function(line) {
-			return xhr("POST", "/docker", {  //$NON-NLS-1$ //$NON-NLS-0$
+			return xhr("POST", "/docker", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				data: JSON.stringify({
 					"dockerCmd": "process",
-					"line": line
+						"line": line
 				}),
 				timeout: 15000,
 				responseType: "text",
@@ -74,16 +75,20 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 			});
 		}
 	};
-	
+
 	function startScreen(term) {
 		term.writeln("Orion Docker Shell version 0.01");
 		var today = new Date();
 		var dd = today.getDate();
-		var mm = today.getMonth()+1; //January is 0!
+		var mm = today.getMonth() + 1; //January is 0!
 		var yyyy = today.getFullYear();
-		if(dd<10){dd='0'+dd} 
-		if(mm<10){mm='0'+mm} 
-		term.writeln(mm+'/'+dd+'/'+yyyy);
+		if (dd < 10) {
+			dd = '0' + dd;
+		}
+		if (mm < 10) {
+			mm = '0' + mm;
+		}
+		term.writeln(mm + '/' + dd + '/' + yyyy);
 		/*
 		term.writeln(" #######  ########  ####  #######  ##    ##");
 		term.writeln("##     ## ##     ##  ##  ##     ## ###   ##");
@@ -94,40 +99,41 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 		term.writeln(" #######  ##     ## ####  #######  ##    ##"); 
 	    term.writeln("");
 	    */
-		term.writeln("                                      ,,,,");                  
-		term.writeln("                                     ,,,,,,");                 
-		term.writeln("                                    .,,,,,,,");                
-		term.writeln("                                    ,,,,,,,,");               
-		term.writeln("                                    ,,,,,,,,");                
-		term.writeln("                                    .,,,,,,:");                
-		term.writeln("             iitii                   ,,,,,,");                 
-		term.writeln("           ii:   ti;                  .,,:");                  
-		term.writeln("           i      ;i");                                        
-		term.writeln("          ii       ii iii   it   ,,,    ii   ii");             
-		term.writeln("          ii       ii i ;i  it  ,,,,,,  ii   ii");             
-		term.writeln("          ii       ii i  i  it ,,,,,,,  iti  ii");             
-		term.writeln("          ti       it i ti  it ,,,,,,,, iiii ii");             
-		term.writeln("          .i       i  iii   it ,,,,,,,, ii tiii");             
-		term.writeln("           it     tt  i ii  it ,,,,,,,  ii  iii");             
-		term.writeln("            ti   it   i ii  it  ,,,,,,  ii  ,ii");             
-		term.writeln("             tiiit    i  it it   ,,,,   ii   ii");             
-		term.writeln("                                                  ");          
-		term.writeln("                            ,,,");                             
-		term.writeln("                          ,,,,,,");                            
-		term.writeln("                          ,,,,,,,");                           
-		term.writeln("                         ,,,,,,,,");                           
-		term.writeln("                         ,,,,,,,,");                           
-		term.writeln("                          ,,,,,,,");                           
-		term.writeln("                          ,,,,,,");                            
-		term.writeln("                           :,,,");                       
+		term.writeln("                                      ,,,,");
+		term.writeln("                                     ,,,,,,");
+		term.writeln("                                    .,,,,,,,");
+		term.writeln("                                    ,,,,,,,,");
+		term.writeln("                                    ,,,,,,,,");
+		term.writeln("                                    .,,,,,,:");
+		term.writeln("             iitii                   ,,,,,,");
+		term.writeln("           ii:   ti;                  .,,:");
+		term.writeln("           i      ;i");
+		term.writeln("          ii       ii iii   it   ,,,    ii   ii");
+		term.writeln("          ii       ii i ;i  it  ,,,,,,  ii   ii");
+		term.writeln("          ii       ii i  i  it ,,,,,,,  iti  ii");
+		term.writeln("          ti       it i ti  it ,,,,,,,, iiii ii");
+		term.writeln("          .i       i  iii   it ,,,,,,,, ii tiii");
+		term.writeln("           it     tt  i ii  it ,,,,,,,  ii  iii");
+		term.writeln("            ti   it   i ii  it  ,,,,,,  ii  ,ii");
+		term.writeln("             tiiit    i  it it   ,,,,   ii   ii");
+		term.writeln("                                                  ");
+		term.writeln("                            ,,,");
+		term.writeln("                          ,,,,,,");
+		term.writeln("                          ,,,,,,,");
+		term.writeln("                         ,,,,,,,,");
+		term.writeln("                         ,,,,,,,,");
+		term.writeln("                          ,,,,,,,");
+		term.writeln("                          ,,,,,,");
+		term.writeln("                           :,,,");
 		term.writeln("Hit Connect to start");
 	}
-	
+
 	mBootstrap.startup().then(function(core) {
 		pluginRegistry = core.pluginRegistry;
 		serviceRegistry = core.serviceRegistry;
 		preferences = core.preferences;
-		
+		var output;
+
 		var term = new Terminal({
 			cols: 80,
 			rows: 30,
@@ -136,46 +142,46 @@ define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr",
 		term.open(document.getElementById("terminal"));
 		startScreen(term);
 		term.on('data', function(data) {
-			dockerContainer.processLine(data).then(function (result) {
+			dockerContainer.processLine(data).then(function(result) {
 				output = JSON.parse(result.responseText);
 				term.write(output.result);
-			});	
+			});
 		});
-		
+
 		var button = document.getElementById("dockerConnect"); //$NON-NLS-0$
-		button.textContent="Connect";
+		button.textContent = "Connect";
 		button.addEventListener("click", function(e) {
 			if (!connected) {
 				//connect
 				dockerContainer.startContainer().then(function(result) {
 					window.console.log(result);
 					dockerContainer.attachContainer().then(function(result) {
-						button.textContent="Disconnect";
+						button.textContent = "Disconnect";
 						connected = !connected;
 						term.reset();
-						dockerContainer.processLine("\n").then(function (result) {
+						dockerContainer.processLine("\n").then(function(result) {
 							output = JSON.parse(result.responseText);
 							term.write(output.result);
 						});
-						}, function(error){
+					}, function(error) {
 						window.console.log(error);
 					});
-				}, function(error){
+				}, function(error) {
 					window.console.log(error);
 				});
 			} else {
 				dockerContainer.stopContainer().then(function(result) {
-					button.textContent="Connect";
+					button.textContent = "Connect";
 					connected = !connected;
 					term.reset();
 					startScreen(term);
-				}, function(error){
+				}, function(error) {
 					window.console.log(error);
 				});
 			}
-			
+
 		});
-		
-		
+
+
 	});
 });
