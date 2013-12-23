@@ -97,6 +97,18 @@ define([
 		this.projectClient = params.projectClient;
 		this.sidebar = params.sidebar;
 		CommonNavExplorer.apply(this, arguments);
+		
+		var _self = this;
+		
+		this.dependenciesDisplatcher = ProjectCommands.getDependencyDispatcher();
+		this.dependneciesListener = function(event){
+			_self.changedItem.call(_self);
+		};
+		this._dependenciesEventTypes = ["create", "delete"];
+		this._dependenciesEventTypes.forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
+			_self.dependenciesDisplatcher.addEventListener(eventType, _self.dependneciesListener);
+		});
+		
 	}
 	ProjectNavExplorer.prototype = Object.create(CommonNavExplorer.prototype);
 	objects.mixin(ProjectNavExplorer.prototype, /** @lends orion.sidebar.ProjectNavExplorer.prototype */ {
@@ -227,6 +239,10 @@ define([
 					this.commandRegistry.unregisterCommandContribution(this.additionalNavActionsScope, this.launchCommands[i], "orion.deployNavGroup/orion.deployLaunchConfigurationGroup");
 				}
 			}
+			var _self = this;
+			this._dependenciesEventTypes.forEach(function(eventType) {
+				_self.dependenciesDisplatcher.removeEventListener(eventType, _self.dependneciesListener);
+			});
 			CommonNavExplorer.prototype.destroy.call(this);
 		}
 	});

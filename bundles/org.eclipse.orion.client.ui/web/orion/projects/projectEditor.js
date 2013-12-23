@@ -469,12 +469,20 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	ProjectEditor.prototype = {
 		createCommands: function(){
 			this.launchConfigurationDispatcher = mProjectCommands.getLaunchConfigurationDispatcher();
+			this.dependenciesDisplatcher = mProjectCommands.getDependencyDispatcher();
 			var _self = this;
 			this.launchConfigurationListener = function(event){_self.launchConfigurationChanged.call(_self, event);};
 			this._launchConfigurationEventTypes = ["create", "delete", "changeState"];
 			this._launchConfigurationEventTypes.forEach(function(eventType) {
 				_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
 			});
+			
+			this.dependneciesListener = function(event){_self.dependenciesChanged.call(_self, event);};
+			this._dependenciesEventTypes = ["create", "delete"];
+			this._dependenciesEventTypes.forEach(function(eventType) { //$NON-NLS-1$//$NON-NLS-0$
+				_self.dependenciesDisplatcher.addEventListener(eventType, _self.dependneciesListener);
+			});
+
 			
 //			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandRegistry, this, this.fileClient, this.projectClient);
 //			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
@@ -516,6 +524,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 							break;
 						case "dependencies":
 							span = document.createElement("span");
+							span.id = "projectDependenciesNode";
 							this.node.appendChild(span);
 							this.renderDependencies(span);
 							break;
@@ -538,6 +547,29 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			this.projectClient.readProject(parentFolder).then(function(projectData){
 				this.display.bind(this)(node, projectData);
 			}.bind(this));
+		},
+		dependenciesChanged: function(event){
+			var dependenciesNode = lib.node("projectDependenciesNode");
+			if(!dependenciesNode){
+				return;
+			}
+			if(event.project.ContentLocation === this.projectData.ContentLocation){
+				if(event.type==="delete"){
+					if(this.projectData.Dependencies && event.oldValue){
+						for(var i=0; i<this.projectData.Dependencies.length; i++){
+							if(this.projectData.Dependencies[i].Location === event.oldValue.Location){
+								 this.projectData.Dependencies.splice(i, 1);
+							}
+						}
+					}
+				} else if(event.type === "create"){
+					if(this.projectData.Dependencies && event.newValue){
+						this.projectData.Dependencies.push(event.newValue);
+					}
+				}
+			}
+			lib.empty(dependenciesNode);
+			this.renderDependencies(dependenciesNode);
 		},
 		_renderEditableFields: function(input, property, tabIndex, urlElement /*optional*/){	
 			var saveInput = function(event) {
@@ -702,6 +734,9 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			var _self = this;
 			this._launchConfigurationEventTypes.forEach(function(eventType) {
 					_self.launchConfigurationDispatcher.removeEventListener(eventType, _self.launchConfigurationListener);
+				});
+			this._dependenciesEventTypes.forEach(function(eventType) {
+					_self.dependenciesDisplatcher.removeEventListener(eventType, _self.dependneciesListener);
 				});
 		}
 	};

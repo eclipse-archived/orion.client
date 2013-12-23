@@ -146,6 +146,15 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		}
 		return sharedLaunchConfigurationDispatcher;
 	};
+	
+	var sharedDependencyDispatcher;
+	
+	projectCommandUtils.getDependencyDispatcher = function(){
+		if(!sharedDependencyDispatcher){
+			sharedDependencyDispatcher = new EventTarget();
+		}
+		return sharedDependencyDispatcher;
+	};
 			
 	function initDependency(projectClient, explorer, commandService, errorHandler, handler, dependency, project, data, params){
 			var actionComment;
@@ -162,7 +171,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 			progress.showWhile(handler.initDependency(dependency, params, project), actionComment).then(function(dependency){
 				projectClient.addProjectDependency(project, dependency).then(function(){
-						explorer.changedItem();
+						if(sharedDependencyDispatcher){
+							sharedDependencyDispatcher.dispatchEvent({type: "create", newValue: dependency, project: project });
+						}
 					}, errorHandler);
 			}, function(error){
 				if(error.Retry && error.Retry.addParameters){
@@ -277,7 +288,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				var item = forceSingleItem(data.items);
 				progress.progress(projectClient.removeProjectDependency(item.Project, item.Dependency),
 					i18nUtil.formatMessage("Removing ${0} from project ${1}", item.Dependency.Name, item.Project.Name)).then(function(resp){
-						explorer.changedItem();
+						if(sharedDependencyDispatcher){
+							sharedDependencyDispatcher.dispatchEvent({type: "delete", oldValue: item.Dependency, project: item.Project });
+						}
 					});
 			},
 			visibleWhen: function(item) {
@@ -488,8 +501,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 									name += " (" + fileMetadata.Parents[fileMetadata.Parents.length-1].Name + ")";
 								}
 								fileLocation+=fileMetadata.Name;
+								var dependency = {Name: name, Type: "file", Location: fileLocation};
 								projectClient.addProjectDependency(item, {Name: name, Type: "file", Location: fileLocation}).then(function(){
-									explorer.changedItem();
+									if(sharedDependencyDispatcher){
+										sharedDependencyDispatcher.dispatchEvent({type: "create", newValue: dependency , project: item});
+									}
 								}, errorHandler);
 							}
 						
@@ -508,7 +524,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 										if(dependency){
 											isOtherDependency = true;
 											projectClient.addProjectDependency(item, dependency).then(function(){
-												explorer.changedItem();
+												if(sharedDependencyDispatcher){
+													sharedDependencyDispatcher.dispatchEvent({type: "create", newValue: dependency, project: item});
+												}
 											}, errorHandler);
 										}
 									});
@@ -636,7 +654,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						progress.showWhile(searchLocallyDeferred, "Searching your workspace for matching content").then(function(resp){
 							if(resp) {
 								projectClient.addProjectDependency(item, resp).then(function(){
-									explorer.changedItem();
+									if(sharedDependencyDispatcher){
+										sharedDependencyDispatcher.dispatchEvent({type: "create", newValue: resp, project: item });
+									}
 								}, errorHandler);
 							} else {
 								initDependency(projectClient, explorer, commandService, errorHandler,handler, {}, item, data, params);
