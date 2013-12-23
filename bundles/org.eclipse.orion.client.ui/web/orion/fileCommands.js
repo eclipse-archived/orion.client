@@ -253,7 +253,42 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 
 	// Shared for the whole page
 	var bufferedSelection = [];
+	
+	var isCutInProgress = false;
+	
+	/**
+	 * Returns the buffer containing the cut selections or null if a 
+	 * cut operation is not in progress.
+	 * @name orion.fileCommands#getCutBuffer
+	 * @function
+	 * @returns {Array} bufferedSelection or null
+	 */
+	fileCommandUtils.getCutBuffer = function() {
+		return isCutInProgress ? bufferedSelection : null;	
+	};
+	
+	/**
+	 * Tests whether or not the specified model is equal to
+	 * or a child of the specified bufferedModel.
+	 * 
+	 * @returns true if the test passes, false otherwise
+	 */
+	fileCommandUtils.isEqualToOrChildOf = function(model, bufferedModel) {
+		if (model.Location === bufferedModel.Location) {
+			return true;
+		} else if (-1 !== model.Location.indexOf(bufferedModel.Location)) {
+			// model may be a child of bufferedModel
+			if (model.parent === bufferedModel.parent) {
+				// model is not a child but rather a file in the same 
+				// directory with a name that starts with bufferedModel's name
+				return false;
+			}
+			return true;
+		}
 		
+		return false;
+	};
+	
 	/**
 	 * Creates the commands related to file management.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use when creating commands
@@ -678,7 +713,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 										});
 										// Remove deleted item from copy/paste buffer
 										bufferedSelection = bufferedSelection.filter(function(element){
-											return element.Location !== item.Location;
+											// deleted item is neither equivalent nor a parent of the array element
+											return !fileCommandUtils.isEqualToOrChildOf(element, item);
 										});
 										dispatchModelEvent({ type: "delete", oldValue: item, newValue: null, parent: parent, count: items.length }); //$NON-NLS-0$
 									}, errorHandler);
@@ -994,14 +1030,42 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		});
 		commandService.addCommand(moveCommand);
 		
+		var copyToBuffer = function() {
+			var navHandler = explorer.getNavHandler();
+			// re-enable items that were previously cut and not yet pasted, if any
+			if (isCutInProgress) {
+				bufferedSelection.forEach(function(previouslyCutItem){
+					navHandler.enableItem(previouslyCutItem);
+				});
+			}
+			isCutInProgress = false; // reset the state, caller should set to true if necessary
+			bufferedSelection = explorer.selection.getSelections();
+		};
+		
+		var cutCommand = new mCommands.Command({
+			name: messages["Cut"],
+			id: "eclipse.cut" + idSuffix, //$NON-NLS-0$
+			callback: function() {
+				var navHandler = explorer.getNavHandler();
+				
+				copyToBuffer();
+				
+				if (bufferedSelection.length) {
+					isCutInProgress = true;
+					// disable cut items in explorer
+					bufferedSelection.forEach(function(cutItem){
+						navHandler.disableItem(cutItem);
+					});
+				}
+			},
+			visibleWhen: oneOrMoreFilesOrFolders
+		});
+		commandService.addCommand(cutCommand);
+		
 		var copyToBufferCommand = new mCommands.Command({
 			name: messages["Copy"],
 			id: "eclipse.copySelections" + idSuffix, //$NON-NLS-0$
-			callback: function() {
-				explorer.selection.getSelections(function(selections) {
-					bufferedSelection = selections;
-				});
-			},
+			callback: copyToBuffer,
 			visibleWhen: oneOrMoreFilesOrFolders
 		});
 		commandService.addCommand(copyToBufferCommand);
@@ -1024,6 +1088,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 								errorHandler(messages["Cannot paste into the root"]);
 								return;
 							}
+							var fileOperation = isCutInProgress ? fileClient.moveFile : fileClient.copyFile;
 							var summary = [];
 							var deferreds = [];
 							bufferedSelection.forEach(function(selectedItem) {
@@ -1051,15 +1116,17 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 										}
 									}
 									if (location) {
-										var deferred = fileClient.copyFile(location, itemLocation, name);
-										deferreds.push(progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Pasting ${0}"], location)).then(
+										var deferred = fileOperation.apply(fileClient, [location, itemLocation, name]);
+										var messageKey = isCutInProgress ? "Moving ${0}": "Pasting ${0}"; //$NON-NLS-1$ //$NON-NLS-0$
+										var eventType = isCutInProgress ? "move": "copy"; //$NON-NLS-1$ //$NON-NLS-0$
+										deferreds.push(progressService.showWhile(deferred, i18nUtil.formatMessage(messages[messageKey], location)).then(
 											function(result) {
 												summary.push({
 													oldValue: selectedItem,
 													newValue: result,
 													parent: item
 												});
-												dispatchModelEvent({ type: "copy", oldValue: selectedItem, newValue: result, parent: item, count: bufferedSelection.length }); //$NON-NLS-0$
+												dispatchModelEvent({ type: eventType, oldValue: selectedItem, newValue: result, parent: item, count: bufferedSelection.length });
 											},
 											errorHandler));
 									}
@@ -1067,9 +1134,18 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							});
 							Deferred.all(deferreds).then(function() {
 								dispatchModelEvent({
-									type: "copyMultiple", //$NON-NLS-0$
+									type: isCutInProgress ? "moveMultiple" : "copyMultiple", //$NON-NLS-1$ //$NON-NLS-0$
 									items: summary
 								});
+								
+								if (isCutInProgress) {
+									var navHandler = explorer.getNavHandler();
+									bufferedSelection.forEach(function(pastedItem){
+										navHandler.enableItem(pastedItem);
+									});
+									bufferedSelection = [];
+									isCutInProgress = false;
+								}
 							});
 						}
 					});

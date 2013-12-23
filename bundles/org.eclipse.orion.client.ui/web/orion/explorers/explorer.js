@@ -659,21 +659,23 @@ exports.ExplorerRenderer = (function() {
 			}
 			var self = this;
 			expandImage.onclick = function(evt) {
-				self.tableTree.toggle(tableRow.id);
-				var expanded = self.tableTree.isExpanded(tableRow.id);
-				if (expanded) {
-					self._expanded.push(tableRow.id);
-				} else {
-					for (var i in self._expanded) {
-						if (self._expanded[i] === tableRow.id) {
-							self._expanded.splice(i, 1);
-							break;
+				if (!self.explorer.getNavHandler().isDisabled(tableRow)) {
+					self.tableTree.toggle(tableRow.id);
+					var expanded = self.tableTree.isExpanded(tableRow.id);
+					if (expanded) {
+						self._expanded.push(tableRow.id);
+					} else {
+						for (var i in self._expanded) {
+							if (self._expanded[i] === tableRow.id) {
+								self._expanded.splice(i, 1);
+								break;
+							}
 						}
 					}
-				}
-				var prefPath = self._getUIStatePreferencePath();
-				if (prefPath && window.sessionStorage) {
-					self._storeExpansions(prefPath);
+					var prefPath = self._getUIStatePreferencePath();
+					if (prefPath && window.sessionStorage) {
+						self._storeExpansions(prefPath);
+					}
 				}
 			};
 			return expandImage;

@@ -183,7 +183,7 @@ define([
 	/**
 	 * @param {Element} rowElement
 	 */
-	NavigatorRenderer.prototype.rowCallback = function(rowElement) {
+	NavigatorRenderer.prototype.rowCallback = function(rowElement, model) {
 		rowElement.setAttribute("role", "treeitem"); //$NON-NLS-1$ //$NON-NLS-0$
 	};
 	

@@ -558,28 +558,32 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		onClick: function(model, mouseEvt)	{
-			var twistieSpan = lib.node(this.explorer.renderer.expandCollapseImageId(this.model.getId(model)));
-			if(mouseEvt.target === twistieSpan){
-				return;
-			}
-			if(this.gridClickSelectionPolicy === "none" && this._onModelGrid(model, mouseEvt)){ //$NON-NLS-0$
-				return;
-			}
-			this.cursorOn(model, true, false, true);
-			if(isPad){
-				this.setSelection(model, true);
-			} else if(this._ctrlKeyOn(mouseEvt)){
-				this.setSelection(model, true, true);
-			} else if(mouseEvt.shiftKey && this._shiftSelectionAnchor){
-				var scannedSel = this._modelIterator.scan(this._shiftSelectionAnchor, model);
-				if(scannedSel){
-					this._clearSelection(true);
-					for(var i = 0; i < scannedSel.length; i++){
-						this.setSelection(scannedSel[i], true);
-					}
-				}
+			if (this.isDisabled(this.getRowDiv(model))) {
+				lib.stop(mouseEvt);
 			} else {
-				this.setSelection(model, false, true);
+				var twistieSpan = lib.node(this.explorer.renderer.expandCollapseImageId(this.model.getId(model)));
+				if(mouseEvt.target === twistieSpan){
+					return;
+				}
+				if(this.gridClickSelectionPolicy === "none" && this._onModelGrid(model, mouseEvt)){ //$NON-NLS-0$
+					return;
+				}
+				this.cursorOn(model, true, false, true);
+				if(isPad){
+					this.setSelection(model, true);
+				} else if(this._ctrlKeyOn(mouseEvt)){
+					this.setSelection(model, true, true);
+				} else if(mouseEvt.shiftKey && this._shiftSelectionAnchor){
+					var scannedSel = this._modelIterator.scan(this._shiftSelectionAnchor, model);
+					if(scannedSel){
+						this._clearSelection(true);
+						for(var i = 0; i < scannedSel.length; i++){
+							this.setSelection(scannedSel[i], true);
+						}
+					}
+				} else {
+					this.setSelection(model, false, true);
+				}
 			}
 		},
 		
@@ -721,7 +725,57 @@ exports.ExplorerNavHandler = (function() {
 				e.preventDefault();
 				return false;
 			}
-		}
+		},
+		
+		/**
+		 * Sets the isNotSelectable attribute on the specified model.
+		 * @param {Object} model
+		 * @param {Boolean} isNotSelectable true makes the this.iterate() with selectableOnly specified skip the item
+		 */
+		setIsNotSelectable: function(model, isNotSelectable) {
+			model.isNotSelectable = isNotSelectable;
+		},
+		
+		/**
+		 * Disables the specified model making it no longer respond 
+		 * to user input such as mouse click or key presses. The
+		 * CSS style of corresponding row node is also modified to
+		 * reflect its disabled state.
+		 * 
+		 * @param {Object} model
+		 */
+		disableItem: function(model) {
+			var rowDiv = this.getRowDiv(model);
+			if (this.isExpandable(model) && this.isExpanded(model)) {
+				this._modelIterator.collapse(model);
+				this.explorer.myTree.toggle(rowDiv.id); // collapse tree visually
+			}
+			rowDiv.classList.remove("checkedRow"); //$NON-NLS-0$
+			rowDiv.classList.add("disabledNavRow"); //$NON-NLS-0$
+			this.setIsNotSelectable(model, true);
+		},
+		
+		/**
+		 * Checks if the specified html row node is disabled.
+		 * @return true if the specified node's classList contains the 
+		 * 			"disabledNavRow" class, false otherwise
+		 */
+		isDisabled: function(rowDiv) {
+			return rowDiv.classList.contains("disabledNavRow"); //$NON-NLS-0$
+		},
+		
+		/**
+		 * Enables the specified model.
+		 * 
+		 * @param {Object} model
+		 */
+		enableItem: function(model) {
+			var rowDiv = this.getRowDiv(model);
+			if (rowDiv) {
+				rowDiv.classList.remove("disabledNavRow"); //$NON-NLS-0$
+				this.setIsNotSelectable(model, false);
+			}
+		},
 	};
 	return ExplorerNavHandler;
 }());

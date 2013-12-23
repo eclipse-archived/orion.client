@@ -86,6 +86,7 @@ define({
 	"Creating ${0}": "Creating ${0}",
 	"Linking to ${0}": "Linking to ${0}",
 	"Move files and folders to a new location": "Move files and folders to a new location",
+	"Cut": "Cut",
 	"Copy": "Copy",
 	"Fetching children of ": "Fetching children of ",
 	"Paste": "Paste",

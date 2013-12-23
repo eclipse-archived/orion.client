@@ -295,6 +295,7 @@ define([
 
 			var renameBinding = new KeyBinding(113); // F2
 			var delBinding = new KeyBinding(46); // Delete
+			var cutBinding = new KeyBinding('x', true); /* Ctrl+X */ //$NON-NLS-0$
 			var copySelections = new KeyBinding('c', true); /* Ctrl+C */ //$NON-NLS-0$
 			var pasteSelections = new KeyBinding('v', true); /* Ctrl+V */ //$NON-NLS-0$
 			var upFolder = new KeyBinding(38, false, false, true); /* Alt+UpArrow */
@@ -311,13 +312,15 @@ define([
 			// Folder nav actions
 			commandRegistry.registerCommandContribution(folderNavActionsScope, "eclipse.upFolder", 1, null, false, upFolder); //$NON-NLS-0$
 			
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downFolder", 1, "orion.commonNavSelectionGroup", false, downFolder); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.renameResource", 2, "orion.commonNavSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.copySelections", 3, "orion.commonNavSelectionGroup", false, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.pasteSelections", 4, "orion.commonNavSelectionGroup", false, pasteSelections); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.deleteFile", 5, "orion.commonNavSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWithEachOther", 6, "orion.commonNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWith", 7, "orion.commonNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.cut", 1, "orion.commonNavSelectionGroup", false, cutBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.copySelections", 2, "orion.commonNavSelectionGroup", false, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.pasteSelections", 3, "orion.commonNavSelectionGroup", false, pasteSelections); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.deleteFile", 4, "orion.commonNavSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.renameResource", 5, "orion.commonNavSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downFolder", 6, "orion.commonNavSelectionGroup", false, downFolder); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWithEachOther", 7, "orion.commonNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.compareWith", 8, "orion.commonNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			
 			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importZipURL", 1, "orion.commonNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.import", 2, "orion.commonNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downloadFile", 3, "orion.commonNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -325,13 +328,13 @@ define([
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.exportSFTPCommand", 5, "orion.commonNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// Context menu actions
-			//TODO add cut command		
-			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.copySelections", 1, "orion.commonNavContextMenuSelectionGroup", false, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.pasteSelections", 2, "orion.commonNavContextMenuSelectionGroup", false, pasteSelections); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.deleteFile", 3, "orion.commonNavContextMenuSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.renameResource", 4, "orion.commonNavContextMenuSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.compareWith", 5, "orion.commonNavContextMenuSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.compareWithEachOther", 6, "orion.commonNavContextMenuSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.cut", 1, "orion.commonNavContextMenuSelectionGroup", false, cutBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.copySelections", 2, "orion.commonNavContextMenuSelectionGroup", false, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.pasteSelections", 3, "orion.commonNavContextMenuSelectionGroup", false, pasteSelections); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.deleteFile", 4, "orion.commonNavContextMenuSelectionGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.renameResource", 5, "orion.commonNavContextMenuSelectionGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.compareWith", 6, "orion.commonNavContextMenuSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.compareWithEachOther", 7, "orion.commonNavContextMenuSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// Context menu ImportExportGroup group
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.importZipURL", 1, "orion.commonNavContextMenuSelectionGroup/orion.ImportExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -404,7 +407,7 @@ define([
 						node = node.parentNode;
 					}
 					
-					if (item) {
+					if (item && !navHandler.isDisabled(item.rowDomNode)) {
 						// only modify the selection if the item that the context menu
 						// was triggered on isn't already part of the selection
 						var existingSels = navHandler.getSelection();
@@ -452,6 +455,28 @@ define([
 		emptyCallback: function() {
 		}
 	});
+	
+	/**
+	 * Overrides NavigatorRenderer.prototype.rowCallback
+	 * @param {Element} rowElement
+	 */
+	CommonNavRenderer.prototype.rowCallback = function(rowElement, model) {
+		NavigatorRenderer.prototype.rowCallback.call(this, rowElement, model);
+		
+		// Search for the model in the Cut buffer and disable it if it is found
+		var cutBuffer = FileCommands.getCutBuffer();
+		if (cutBuffer) {
+			var matchFound = cutBuffer.some(function(cutModel) {
+				return FileCommands.isEqualToOrChildOf(model, cutModel);
+			});
+			
+			if (matchFound) {
+				var navHandler = this.explorer.getNavHandler();
+				navHandler.disableItem(model);
+			}
+		}
+	};
+	
 	return {
 		CommonNavExplorer: CommonNavExplorer,
 		CommonNavRenderer: CommonNavRenderer

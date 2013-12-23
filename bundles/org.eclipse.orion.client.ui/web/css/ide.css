@@ -247,6 +247,19 @@ textarea.parameterInput {
 	border-spacing: 8px;
 }
 
+.disabledNavRow > .navColumn > .mainNavColumn {
+	outline: 1px dashed lightgray;
+}
+
+.disabledNavRow > .navColumn > .mainNavColumn > * {
+	color: gray;
+	cursor: default;
+}
+
+.disabledNavRow > .navColumn > .mainNavColumn > *:hover {
+	border: none;
+}
+
 .mainNavColumn {
 	display: inline-block;
 	padding: 2px;

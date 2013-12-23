@@ -136,9 +136,6 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			for (var i=0; i<children.length; i++) {
 				var row = document.createElement(this._tableRowElement); //$NON-NLS-0$
 				row.id = this._treeModel.getId(children[i]);
-				if (this._renderer.rowCallback) {
-					this._renderer.rowCallback(row);
-				}
 				row._depth = indentLevel;
 				// This is a perf problem and potential leak because we're bashing a dom node with
 				// a javascript object.  (Whereas above we are using simple numbers/strings). 
@@ -148,6 +145,11 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 				// generate an indent
 				var indent = this._indent * indentLevel;
 				row.childNodes[this._labelColumnIndex].style.paddingLeft = indent +"px";  //$NON-NLS-0$
+				
+				if (this._renderer.rowCallback) {
+					this._renderer.rowCallback(row, children[i]);
+				}
+				
 				if (referenceNode) {
 					this._bodyElement.insertBefore(row, referenceNode.nextSibling);
 					if (referenceNode) { //$NON-NLS-0$

@@ -230,7 +230,7 @@ define([
 		}
 		
 		// set node's keyboard traversal selectability
-		node.isNotSelectable = !nodeMatchesFilter;
+		navHandler.setIsNotSelectable(node, !nodeMatchesFilter);
 		
 		return visible;
 	};
