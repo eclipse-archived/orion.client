@@ -428,12 +428,13 @@ define([
 					}
 				]
 			}, {
+				id: "comment",
 				begin: "<!--",
 				end: "-->|$",
 				name: "MULTILINE_COMMENT"
 			}, {
 				begin: "(</?[A-Za-z0-9]+)",
-				end: "(/?>)",
+				end: "(/?>|$)",
 				captures: {
 					1: {name: "HTML_MARKUP"},
 				},
