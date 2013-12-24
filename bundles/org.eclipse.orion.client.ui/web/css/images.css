@@ -73,15 +73,6 @@
 .core-sprite-stop{ background-position: 0 -698px; width: 16px; height: 16px; } 
 .core-sprite-thumbnail{ background-position: 0 -716px; width: 16px; height: 16px; } 
 
-
-.core-sprite-sharecontent {
-	background: url(../images/share.png);
-	background-repeat: no-repeat;
-	background-position: left top;
-	width: 16px;
-	height: 16px; 
-}
-
 .core-sprite-applicationrunning {
 	background: url(../images/applicationRunning.png);
 	background-repeat: no-repeat;

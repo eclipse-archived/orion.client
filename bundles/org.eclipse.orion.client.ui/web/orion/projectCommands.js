@@ -201,7 +201,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				name: launchConfiguration.Name,
 				tooltip: launchConfiguration.Name,
 				id: "orion.launchConfiguration.deploy." + launchConfiguration.ServiceId + launchConfiguration.Name,
-				imageClass: "core-sprite-sharecontent",
+				imageClass: "core-sprite-deploy",
 				callback: function(data) {
 					var item = forceSingleItem(data.items);
 					
@@ -405,7 +405,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			name: "Deploy",
 			tooltip: "Deploy this application again",
 			id: "orion.launchConfiguration.deploy",
-			imageClass: "core-sprite-sharecontent",
+			imageClass: "core-sprite-deploy",
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				
