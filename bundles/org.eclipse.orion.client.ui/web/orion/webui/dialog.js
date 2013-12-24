@@ -197,6 +197,13 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			this.$$modalExclusions.push(dialog.$frame || dialog.$parent);
 		},
 		
+		_inModalExclusion: function(dialog) {
+			// Allow the child dialog to take focus.
+			return this.$$modalExclusions.some(function(item) {
+				return dialog.$frame === item || dialog.$parent === item;
+			});
+		},
+		
 		/*
 		 * Internal.  Binds any child nodes with id's to the matching field variables.
 		 */
@@ -215,7 +222,10 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		 * hooks (_beforeHiding, _afterHiding) to do any work related to hiding the dialog, such
 		 * as destroying resources.
 		 */
-		hide: function() {
+		hide: function(keepCurrentModal) {
+			if(!keepCurrentModal && lib.currentModalDialog.dialog === this) {
+				lib.currentModalDialog.dialog = null;
+			}
 			if (typeof this._beforeHiding === "function") { //$NON-NLS-0$
 				this._beforeHiding();
 			}
@@ -241,6 +251,16 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		 * such as setting initial focus.
 		 */
 		show: function(near) {
+			if(this.modal){//Modal dialog should only appear once unless they are chain dialog
+				if(lib.currentModalDialog.dialog) {//There is already modal dialog opened
+					if(!lib.currentModalDialog.dialog._inModalExclusion(this)) {//The dialog is NOT a child dialog of the exisitng dialog
+						this.hide(true);
+						return;
+					}
+				} else {
+					lib.currentModalDialog.dialog = this;
+				}
+			}
 			if (typeof this._beforeShowing === "function") { //$NON-NLS-0$
 				this._beforeShowing();
 			}
