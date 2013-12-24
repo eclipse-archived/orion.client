@@ -479,7 +479,7 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.file-sprite-warning{
+.core-sprite-warning{
 	font-size: 16px;
 	color: #555;
 	line-height: normal;
@@ -493,7 +493,7 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.file-sprite-error{
+.core-sprite-error{
 	font-size: 16px;
 	color: #555;
 	line-height: normal;
@@ -507,7 +507,7 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.file-sprite-deploy{
+.core-sprite-deploy{
 	font-size: 16px;
 	color: #555;
 	line-height: normal;
