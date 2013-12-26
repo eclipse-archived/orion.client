@@ -28,11 +28,12 @@ define([
 	'orion/searchUtils',
 	'orion/PageUtil',
 	'orion/PageLinks',
+	'orion/editor/annotations',
 	'orion/blamer',
 	'orion/regex',
 	'orion/util',
 	'orion/edit/editorContext'
-], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, blamer, regex, util, EditorContext) {
+], function(messages, i18nUtil, lib, openResource, DropDownMenu, Deferred, URITemplate, mCommands, mKeyBinding, mCommandRegistry, mExtensionCommands, mContentTypes, mSearchUtils, mPageUtil, PageLinks, mAnnotations, blamer, regex, util, EditorContext) {
 
 	var exports = {};
 	
@@ -423,11 +424,20 @@ define([
 					return blamer.isVisible(self.serviceRegistry, self.inputManager);
 				},
 				callback: function(data) {
-					blameCommand.visible = !blameCommand.visible;
-					if (data.parameters && data.parameters.valueFor('blame')) { //$NON-NLS-0$
-						blameCommand.visible = data.parameters.valueFor('blame') === "true"; //$NON-NLS-1$ //$NON-NLS-0$
+					var visible = false;
+					var annotations = editor.getAnnotationModel().getAnnotations(0, editor.getModel().getCharCount());
+					while (annotations.hasNext()) {
+						var annotation = annotations.next();
+						if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_BLAME) {
+							visible = true;
+							break;
+						}
 					}
-					if (blameCommand.visible) {
+					visible = !visible;
+					if (data.parameters && data.parameters.valueFor('blame')) { //$NON-NLS-0$
+						visible = data.parameters.valueFor('blame') === "true"; //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					if (visible) {
 						blamer.getBlame(self.serviceRegistry, self.inputManager);
 					} else{
 						editor.showBlame([]);
