@@ -486,18 +486,31 @@ exports.ExplorerNavHandler = (function() {
 			if(this.topIterationNodes.length === 0){
 				return;
 			}
-			
-			currentItem = this._modelIterator.iterate(forward, forceExpand);
-			if(currentItem){
-				this._setCursorOnItem(forward, selecting);
-			}
 				
-			if (selectableOnly && currentItem) {
+			if (selectableOnly) {
+				var previousItem = this.currentModel();
+				
+				currentItem = this._modelIterator.iterate(forward, forceExpand);
+				if(currentItem){
+					this._setCursorOnItem(forward, selecting);
+				}
+				
 				while (currentItem && currentItem.isNotSelectable) {
 					currentItem = this._modelIterator.iterate(forward, forceExpand);
 					if(currentItem){
 						this._setCursorOnItem(forward, selecting);
 					}
+				}
+				
+				if (!currentItem) {
+					// got to the end of the list and didn't find anything selectable, iterate back
+					this.cursorOn(previousItem, true, false, true);
+					this._setCursorOnItem(forward, selecting);
+				}
+			} else {
+				currentItem = this._modelIterator.iterate(forward, forceExpand);
+				if(currentItem){
+					this._setCursorOnItem(forward, selecting);
 				}
 			}
 		},
