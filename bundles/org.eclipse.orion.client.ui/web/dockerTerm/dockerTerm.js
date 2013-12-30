@@ -19,32 +19,24 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 
 	var connected = false;
 
-	var dockerContainer = {
-		startContainer: function() {
-			return xhr("POST", "/docker/start", { //$NON-NLS-1$ //$NON-NLS-0$
+	var docker = {
+		connect: function() {
+			return xhr("POST", "/docker/connect", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout: 15000
 			});
 		},
-		stopContainer: function() {
-			return xhr("POST", "/docker/stop", { //$NON-NLS-1$ //$NON-NLS-0$
+		disconnect: function() {
+			return xhr("POST", "/docker/disconnect", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout: 15000
 			});
 		},
-		attachContainer: function() {
-			return xhr("POST", "/docker/attach", { //$NON-NLS-1$ //$NON-NLS-0$
-				headers: {
-					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				timeout: 15000
-			});
-		},
-		sendText: function(text) {
+		send: function(text) {
 			return xhr("POST", "/docker/send", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
@@ -61,7 +53,7 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 	};
 
 	function startScreen(term) {
-		term.writeln("Orion Docker Shell version 0.01");
+		term.writeln("Orion Terminal");
 		var today = new Date();
 		var dd = today.getDate();
 		var mm = today.getMonth() + 1; //January is 0!
@@ -73,16 +65,6 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 			mm = '0' + mm;
 		};
 		term.writeln(mm + '/' + dd + '/' + yyyy);
-		/*
-		term.writeln(" #######  ########  ####  #######  ##    ##");
-		term.writeln("##     ## ##     ##  ##  ##     ## ###   ##");
-		term.writeln("##     ## ##     ##  ##  ##     ## ####  ##"); 
-		term.writeln("##     ## ########   ##  ##     ## ## ## ##"); 
-		term.writeln("##     ## ##   ##    ##  ##     ## ##  ####"); 
-		term.writeln("##     ## ##    ##   ##  ##     ## ##   ###"); 
-		term.writeln(" #######  ##     ## ####  #######  ##    ##"); 
-	    term.writeln("");
-	    */
 		term.writeln("                                      ,,,,");
 		term.writeln("                                     ,,,,,,");
 		term.writeln("                                    .,,,,,,,");
@@ -109,7 +91,7 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 		term.writeln("                          ,,,,,,,");
 		term.writeln("                          ,,,,,,");
 		term.writeln("                           :,,,");
-		term.writeln("Hit Connect to start");
+		term.writeln("Hit Connect to begin");
 	}
 
 	mBootstrap.startup().then(function(core) {
@@ -126,7 +108,7 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 		term.open(document.getElementById("terminal"));
 		startScreen(term);
 		term.on('data', function(data) {
-			dockerContainer.sendText(data).then(function(result) {
+			docker.send(data).then(function(result) {
 				output = JSON.parse(result.responseText);
 				term.write(output.result);
 			});
@@ -137,24 +119,19 @@ function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
 		button.addEventListener("click", function(e) {
 			if (!connected) {
 				//connect
-				dockerContainer.startContainer().then(function(result) {
-					window.console.log(result);
-					dockerContainer.attachContainer().then(function(result) {
-						button.textContent = "Disconnect";
-						connected = !connected;
-						term.reset();
-						dockerContainer.sendText("\n").then(function(result) {
-							output = JSON.parse(result.responseText);
-							term.write(output.result);
-						});
-					}, function(error) {
-						window.console.log(error);
+				docker.connect().then(function(result) {
+					button.textContent = "Disconnect";
+					connected = !connected;
+					term.reset();
+					docker.send("\n").then(function(result) {
+						output = JSON.parse(result.responseText);
+						term.write(output.result);
 					});
 				}, function(error) {
 					window.console.log(error);
 				});
 			} else {
-				dockerContainer.stopContainer().then(function(result) {
+				docker.disconnect().then(function(result) {
 					button.textContent = "Connect";
 					connected = !connected;
 					term.reset();
