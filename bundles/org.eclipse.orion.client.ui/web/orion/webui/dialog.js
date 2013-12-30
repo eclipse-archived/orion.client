@@ -15,6 +15,13 @@
 define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', 'orion/uiUtils'], 
 		function(messages, require, lib, uiUtil) {
 	/**
+	 * Holds the current opened modal dialog.
+	 */
+	var modalDialogManager = {
+		dialog: null
+	};
+		
+	/**
 	 * Dialog is used to implement common dialog behavior in Orion.
 	 * Clients use the Dialog prototype and implement the following behavior:
 	 *    1.  Ensure that the HTML template for the dialog content is defined in the prototype TEMPLATE variable
@@ -223,8 +230,8 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		 * as destroying resources.
 		 */
 		hide: function(keepCurrentModal) {
-			if(!keepCurrentModal && lib.currentModalDialog.dialog === this) {
-				lib.currentModalDialog.dialog = null;
+			if(!keepCurrentModal && modalDialogManager.dialog === this) {
+				modalDialogManager.dialog = null;
 			}
 			if (typeof this._beforeHiding === "function") { //$NON-NLS-0$
 				this._beforeHiding();
@@ -252,13 +259,13 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		 */
 		show: function(near) {
 			if(this.modal){//Modal dialog should only appear once unless they are chain dialog
-				if(lib.currentModalDialog.dialog) {//There is already modal dialog opened
-					if(!lib.currentModalDialog.dialog._inModalExclusion(this)) {//The dialog is NOT a child dialog of the exisitng dialog
+				if(modalDialogManager.dialog) {//There is already modal dialog opened
+					if(!modalDialogManager.dialog._inModalExclusion(this)) {//The dialog is NOT a child dialog of the exisitng dialog
 						this.hide(true);
 						return;
 					}
 				} else {
-					lib.currentModalDialog.dialog = this;
+					modalDialogManager.dialog = this;
 				}
 			}
 			if (typeof this._beforeShowing === "function") { //$NON-NLS-0$

@@ -332,15 +332,6 @@ define(["orion/util"], function(util) {
 		DEL: 46
 	};
 		
-	/**
-	 * Holds the current opened modal dialog.
-	 * @name orion.webui.littlelib.currentModalDialog
-	 * @static
-	 */
-	var currentModalDialog = {
-		dialog: null
-	};
-		
 	//return module exports
 	return {
 		$: $,
@@ -358,7 +349,6 @@ define(["orion/util"], function(util) {
 		addAutoDismiss: addAutoDismiss,
 		setFramesEnabled: setFramesEnabled,
 		removeAutoDismiss: removeAutoDismiss,
-		KEY: KEY,
-		currentModalDialog: currentModalDialog
+		KEY: KEY
 	};
 });
