@@ -11,9 +11,10 @@
  *******************************************************************************/
 /*global define*/
 define([
-], function() {
+'estraverse'
+], function(Estraverse) {
 
-	var WordFinder = {
+	var Finder = {
 		
 		punc: '\n\t\r (){}[]:;,.+=-*^&@!%~`\'\"\/\\',
 		
@@ -56,9 +57,39 @@ define([
 				}
 			}
 			return null;
+		},
+		
+		/**
+		 * @name findNode
+		 * @description Finds the AST node for the given offset
+		 * @function
+		 * @public
+		 * @memberof javascript.WordFinder
+		 * @param {Number} offset The offset into the source file
+		 * @param {Object} ast The AST to search
+		 * @returns The AST node at the given offset or <code>null</code> if it could not be computed.
+		 */
+		findNode: function(offset, ast) {
+			var found = null;
+			if(ast) {
+				Estraverse.traverse(ast, {
+					enter: function(node) {
+						if(node.type && node.range) {
+							//only check nodes that are typed, we don't care about any others
+							if(node.range[0] <= offset) {
+								found = node;
+							}
+							else {
+								return Estraverse.VisitorOption.Break;
+							}
+						}
+					}					
+				});
+			}
+			return found;
 		}
 	};
 
-	return WordFinder;
+	return Finder;
 });
 		

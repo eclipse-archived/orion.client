@@ -9,22 +9,24 @@
 		paths: {
 			text: 'requirejs/text',
 			i18n: 'requirejs/i18n',
-			domReady: 'requirejs/domReady'
+			domReady: 'requirejs/domReady',
+			estraverse: 'estraverse/estraverse',
+			esprima: 'esprima/esprima'
 		},
 		isTest: true
 	});
 
 	window.onload = function() {
-		require(["orion/test","js-tests/wordFinderTests.js"], function(test, testcase) {
+		require(["orion/test","js-tests/finderTests.js"], function(test, testcase) {
 			test.run(testcase);
 		});
 	};
 	</script>
 </head>
 <body>
-<h2>JavaScript Word Finder Tests</h2>
+<h2>JavaScript Finder Tests</h2>
 <p>
-This suite tests finding words in JavaScript source. 
+This suite tests finding words in JavaScript source and finding specific nodes in an AST. 
 <br><br>
 The WordFinder class is currently used by:
 <ul>

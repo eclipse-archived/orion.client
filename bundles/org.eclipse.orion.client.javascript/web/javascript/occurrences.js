@@ -1,4 +1,4 @@
-/*******************************************************************************
+ /*******************************************************************************
  * @license
  * Copyright (c) 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
@@ -13,8 +13,8 @@
 define([
 'orion/objects',
 'estraverse',
-'javascript/wordfinder'
-], function(Objects, Estraverse, WordFinder) {
+'javascript/finder'
+], function(Objects, Estraverse, Finder) {
 	
 	/**
 	 * @name javascript.Visitor
@@ -28,9 +28,8 @@ define([
 	
 	Objects.mixin(Visitor.prototype, /** @lends javascript.Visitor.prototype */ {
 		occurrences: [],
-		defscope: null,
-		defnode: null,
 		scopes: [],
+		context: null,
 		GENERAL: 1,
 		FUNCTION: 2,
 		
@@ -47,15 +46,12 @@ define([
 			switch(node.type) {
 				case Estraverse.Syntax.Program:
 					this.occurrences = [];
-					this.defscope = null;
-					this.defnode = null;
-					
-					this.scopes.push({range: node.range});
+					this.scopes = [{range: node.range, occurrences: []}];
 					break;
 				case Estraverse.Syntax.FunctionDeclaration:
 					this.checkId(node.id, this.FUNCTION, true);
 					//we want the parent scope for a declaration, otherwise we leave it right away
-					this.scopes.push({range: node.range});
+					this.scopes.push({range: node.range, occurrences: []});
 					if (node.params) {
 						for (var i = 0; i < node.params.length; i++) {
 							if(this.checkId(node.params[i], this.GENERAL, true)) {
@@ -66,7 +62,7 @@ define([
 					break;
 				case Estraverse.Syntax.FunctionExpression:
 					if (node.params) {
-						this.scopes.push({range: node.range});
+						this.scopes.push({range: node.range, occurrences: []});
 						for (var j = 0; j < node.params.length; j++) {
 							if(this.checkId(node.params[j], this.GENERAL, true)) {
 								return Estraverse.VisitorOption.Skip;
@@ -155,9 +151,14 @@ define([
 		 */
 		leave: function(node) {
 			if(node.type === Estraverse.Syntax.FunctionDeclaration || 
-				node.type === Estraverse.Syntax.FunctionExpression) {
+				node.type === Estraverse.Syntax.FunctionExpression ||
+				node.type === Estraverse.Syntax.Program) {
 				//if we leave the defining scope
 				var scope = this.scopes.pop();
+				var len = scope.occurrences.length;
+				for(var i = 0; i < len; i++) {
+					this.occurrences.push(scope.occurrences[i]);
+				}
 				if(this.defscope) {
 					if(this.defscope.range[0] === scope.range[0] && this.defscope.range[1] === scope.range[1]) {
 						//we just popped out of the scope the word was defined in, we can quit
@@ -165,18 +166,6 @@ define([
 					}
 				}
 			}
-		},
-		
-		/**
-		 * @name setContext
-		 * @description Sets the current context for the visitor to match for occurrences
-		 * @function
-		 * @private
-		 * @memberof javascript.Visitor.prototype
-		 * @param {Object} ctxt The context to match for occurrences
-		 */
-		setContext: function(ctxt) {
-			this.context = ctxt;
 		},
 		
 		/**
@@ -193,28 +182,29 @@ define([
 		checkId: function(node, kind, candefine) {
 			if (node && node.type === Estraverse.Syntax.Identifier) {
 				if (node.name === this.context.word) {
+					var len = this.scopes.length;
+					var scope = len > 0 ? this.scopes[len-1] : null;
 					if(candefine) {
 						if(this.defscope && this.defnode) {
 							//trying to re-define, we can break since any matches past here would not be the original definition
-							return true;
+							//redefinition is OK if we are still descending to the offset, but not once we are in position
+							if(node.range[0] >= this.context.start) {
+								return true;
+							}
 						}
-						var len = this.scopes.length;
-						var scope = len > 0 ? this.scopes[len-1] : null;
 						//does the scope enclose it?
 						if(scope && (scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
-							this.defscope = scope;
+							this.defscope = {range: scope.range};
 						}
-						if(node.range[0] <= this.context.start) {
+						if(node.range[0] <= this.context.start && node.range[1] >= this.context.start) {
 							this.defnode = node.range;
 							this.defnode.kind = !kind ? this.GENERAL : kind;
 						}
 					}
-					if(this.defscope && this.defnode && this.defnode.kind === (!kind ? this.GENERAL : kind)) {
-						this.occurrences.push({
-							start: node.range[0],
-							end: node.range[1]
-						});
-					}
+					scope.occurrences.push({
+						start: node.range[0],
+						end: node.range[1]
+					});
 				}
 			}
 			return false;
@@ -252,9 +242,8 @@ define([
 				this.visitor = new Visitor();
 				this.visitor.enter = this.visitor.enter.bind(this.visitor);
 				this.visitor.leave = this.visitor.leave.bind(this.visitor);
-				this.visitor.setContext = this.visitor.setContext.bind(this.visitor);
 			} 
-			this.visitor.setContext(context);
+			this.visitor.context = context;
 			return this.visitor;			
 		},
 		
@@ -271,7 +260,7 @@ define([
 			var that = this;
 			var word;
 			return editorContext.getText().then(function(text) {
-				word = WordFinder.findWord(text, ctxt.selection.start);
+				word = Finder.findWord(text, ctxt.selection.start);
 				if(word) {
 					return that.astManager.getAST(editorContext);
 				}
