@@ -146,5 +146,196 @@ define([
 		});
 	};
 		
+	/**
+	 * Tests nested function declarations
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncDecl1 = function() {
+		editorContext.text = "function f(p1) { function b(p1) { var p2 = p1; };};";
+		return occurrences.computeOccurrences(editorContext, setContext(12, 12)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:11, end:13}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function declarations
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncDecl2 = function() {
+		editorContext.text = "function f(p1) { function b(p1) { var p2 = p1; };};";
+		return occurrences.computeOccurrences(editorContext, setContext(29, 29)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:28, end:30}, {start:43, end:45}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function declarations
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncDecl3 = function() {
+		editorContext.text = "function f(p1) { function b(p1) { var p2 = p1; };};";
+		return occurrences.computeOccurrences(editorContext, setContext(44, 44)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:28, end:30}, {start:43, end:45}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncExpr1 = function() {
+		editorContext.text = "var object = {one: function(p1) { function b(p1) { var p2 = p1; }; }};";
+		return occurrences.computeOccurrences(editorContext, setContext(30, 30)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:28, end:30}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncExpr2 = function() {
+		editorContext.text = "var object = {one: function(p1) { function b(p1) { var p2 = p1; }; }};";
+		return occurrences.computeOccurrences(editorContext, setContext(47, 47)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:45, end:47}, {start:60, end:62}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncExpr3 = function() {
+		editorContext.text = "var object = {one: function(p1) { function b(p1) { var p2 = p1; }; }};";
+		return occurrences.computeOccurrences(editorContext, setContext(62, 62)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:60, end:62}, {start:45, end:47}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncExpr4 = function() {
+		editorContext.text = "function b(p1) { var object = {one: function(p1) {var p2 = p1; } };};";
+		return occurrences.computeOccurrences(editorContext, setContext(13, 13)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:11, end:13}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncExpr5 = function() {
+		editorContext.text = "function b(p1) { var object = {one: function(p1) {var p2 = p1; } };};";
+		return occurrences.computeOccurrences(editorContext, setContext(47, 47)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:45, end:47}, {start:59, end:61}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncExpr6 = function() {
+		editorContext.text = "function b(p1) { var object = {one: function(p1) {var p2 = p1; } };};";
+		return occurrences.computeOccurrences(editorContext, setContext(61, 61)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:45, end:47}, {start:59, end:61}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncExpr7 = function() {
+		editorContext.text = "var out = function(p1) {var inner = {object : {one: function(p1) {var p2 = p1;}}};};";
+		return occurrences.computeOccurrences(editorContext, setContext(21, 21)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:19, end:21}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncExpr8 = function() {
+		editorContext.text = "var out = function(p1) {var inner = {object : {one: function(p1) {var p2 = p1;}}};};";
+		return occurrences.computeOccurrences(editorContext, setContext(63, 63)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:61, end:63}, {start:75, end:77}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests nested function expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=423835
+	 */
+	Tests.test_nestedFuncExpr9 = function() {
+		editorContext.text = "var out = function(p1) {var inner = {object : {one: function(p1) {var p2 = p1;}}};};";
+		return occurrences.computeOccurrences(editorContext, setContext(77, 77)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:61, end:63}, {start:75, end:77}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
 	return Tests;
 });
