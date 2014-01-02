@@ -21,8 +21,10 @@ define([
 	'orion/URITemplate',
 	'orion/EventTarget',
 	'orion/i18nUtil',
-	'orion/edit/editorContext'
-], function(messages, Deferred, lib, mUIUtils, mSection, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, EditorContext) {
+	'orion/edit/editorContext',
+	'orion/keyBinding',
+	'orion/globalCommands'
+], function(messages, Deferred, lib, mUIUtils, mSection, mExplorer, mCommands, URITemplate, EventTarget, i18nUtil, EditorContext, KeyBinding, mGlobalCommands) {
 
 	function OutlineRenderer (options, explorer, title, selectionService) {
 		this.explorer = explorer;
@@ -458,7 +460,33 @@ define([
 					destroy: _self.destroyViewMode.bind(_self, provider)
 				});
 			});
+			
 			var sidebar = _self._sidebar;
+			this._commandService.unregisterCommandContribution(this._toolbar.id, "orion.openOutline", null); //$NON-NLS-0$
+			
+			if (newProviders && newProviders[0]) {
+				var defaultOutlinerId = _self._viewModeId(newProviders[0]);
+				var openOutlineCommand = new mCommands.Command({
+					name: "Open Outliner", //$NON-NLS-0$
+					id: "orion.openOutline", //$NON-NLS-0$
+					callback: function () {
+						var mainSplitter = mGlobalCommands.getMainSplitter();
+						if (mainSplitter.splitter.isClosed()) {
+							mainSplitter.splitter.toggleSidePanel();
+						}
+						if (sidebar.getActiveViewModeId() !== defaultOutlinerId) {
+							sidebar.setViewMode(defaultOutlinerId);
+						}
+						if (_self._filterInput) {
+							_self._filterInput.select();
+						}
+					}
+				});
+				this._commandService.addCommand(openOutlineCommand);
+				this._commandService.registerCommandContribution(this._toolbar.id, "orion.openOutline", 1, null, true, new KeyBinding.KeyBinding("o", true)); //$NON-NLS-1$ //$NON-NLS-0$
+				this._commandService.renderCommands(this._toolbar.id, this._toolbar, {}, {}, "tool"); //$NON-NLS-0$
+			}
+
 			sidebar.renderViewModeMenu();
 		},
 		_isActive: function() {
