@@ -683,6 +683,9 @@ exports.ExplorerNavHandler = (function() {
 			if(this.isExpandable(curModel)){
 				if(!this.isExpanded(curModel)){
 					this.explorer.myTree.expand(curModel);
+					if (this.explorer.postUserExpand) {
+						this.explorer.postUserExpand(this.model.getId(curModel));
+					}
 					e.preventDefault();
 					return false;
 				}

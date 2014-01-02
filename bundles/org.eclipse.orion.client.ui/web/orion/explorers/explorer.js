@@ -664,6 +664,9 @@ exports.ExplorerRenderer = (function() {
 					var expanded = self.tableTree.isExpanded(tableRow.id);
 					if (expanded) {
 						self._expanded.push(tableRow.id);
+						if (self.explorer.postUserExpand) {
+							self.explorer.postUserExpand(tableRow.id);
+						}
 					} else {
 						for (var i in self._expanded) {
 							if (self._expanded[i] === tableRow.id) {

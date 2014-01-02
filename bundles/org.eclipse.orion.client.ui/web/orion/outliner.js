@@ -149,23 +149,27 @@ define([
 	OutlineExplorer.prototype = new mExplorer.Explorer();	
 	OutlineExplorer.prototype.constructor = OutlineExplorer;
 	
-	var previousFilter = null;
-	
 	OutlineExplorer.prototype.filterChanged = function (filter) {
 		var navHandler = this.getNavHandler();
-		var itemMap = this.model.getIdItemMap();
-		var item = null;
 		var modifiedFilter = null;
 		
 		if (filter) {
-			//Create a filter which matches all input literally except for the * and the ? characters
-			//As is the case for the file search dialog: (* = any string) and (? = any character)
-			modifiedFilter = "^" + filter.replace(/([.+^=!:${}()|\[\]\/\\])/g, "\\$1"); //add start of line character and escape all special characters except * and ?
-			modifiedFilter = modifiedFilter.replace(/([*?])/g, ".$1");	//convert user input * and ? to .* and .?
+			var filterFlags = "i"; // case insensitive by default //$NON-NLS-0$
+			modifiedFilter = filter.replace(/([.+^=!:${}()|\[\]\/\\])/g, "\\$1"); //add start of line character and escape all special characters except * and ? //$NON-NLS-1$ //$NON-NLS-0$
+			modifiedFilter = modifiedFilter.replace(/([*?])/g, ".$1");	//convert user input * and ? to .* and .? //$NON-NLS-0$
+			
+			if (/[A-Z]/.test(modifiedFilter)) {
+				//filter contains uppercase letters, perform case sensitive search
+				filterFlags = "";	
+			}
+			
+			modifiedFilter = new RegExp(modifiedFilter, filterFlags);
+			this._currentModifiedFilter = modifiedFilter;
+
 		
 			//figure out if we need to expand
-			if (previousFilter) {
-				if (0 !== filter.indexOf(previousFilter)) {
+			if (this._previousUnmodifiedFilter) {
+				if (0 !== filter.indexOf(this._previousUnmodifiedFilter)) {
 					//this is not a more specific version of the previous filter, expand again
 					this.expandAll();
 				}
@@ -176,6 +180,7 @@ define([
 		} else {
 			//filter was emptied, expand all
 			this.expandAll();
+			this._currentModifiedFilter = null;
 		}
 		
 		// filter the tree nodes recursively
@@ -186,7 +191,7 @@ define([
 			this._filterRecursively(topLevelNodes[i], modifiedFilter);
 		}
 		
-		previousFilter = filter;
+		this._previousUnmodifiedFilter = filter;
 	};
 	
 	OutlineExplorer.prototype._filterRecursively = function (node, filter) {
@@ -194,7 +199,7 @@ define([
 		var self = this;
 		var rowDiv = navHandler.getRowDiv(node);
 		// true if the filter is null or if the node's label matches it
-		var nodeMatchesFilter = !filter || (-1 !== node.label.search(filter));
+		var nodeMatchesFilter = (-1 !== node.label.search(filter));
 		
 		if (node.children) {
 			// if this node has children ensure it is expanded otherwise we've already filtered it out
@@ -203,38 +208,62 @@ define([
 				node.children.forEach(function(childNode){
 					if (self._filterRecursively(childNode, filter)) {
 						hasVisibleChildren = true;
-					}	
+					}
 				});
+				
+				if (!hasVisibleChildren) {
+					this.myTree.collapse(node);
+				}
 			}
+		}
+		
+		// node is visible if one of the following is true: 
+		// 1) filter === null
+		// 2) the node has visible children
+		// 3) the node matches the filter
+		var visible = !filter || hasVisibleChildren || nodeMatchesFilter;
+		
+		if (filter) {
+			// set row visibility
+			if (visible) {
+				//show row
+				rowDiv.classList.remove("outlineRowHidden"); //$NON-NLS-0$
+			} else {
+				//hide
+				rowDiv.classList.add("outlineRowHidden"); //$NON-NLS-0$
+			};
+			// set visual indicator for matching rows
+			if (nodeMatchesFilter) {
+				rowDiv.classList.add("outlineRowMatchesFilter"); //$NON-NLS-0$
+			} else {
+				rowDiv.classList.remove("outlineRowMatchesFilter"); //$NON-NLS-0$
+			}	
 			
-			if (!hasVisibleChildren) {
-				this.myTree.collapse(node);
-			}
-		}
-		
-		// set row visibility
-		var visible = hasVisibleChildren || nodeMatchesFilter;
-		if (visible) {
-			//show row
-			rowDiv.classList.remove("outlineRowHidden"); //$NON-NLS-0$
+			// set node's keyboard traversal selectability
+			navHandler.setIsNotSelectable(node, !nodeMatchesFilter);
 		} else {
-			//hide
-			rowDiv.classList.add("outlineRowHidden"); //$NON-NLS-0$
-		};
-		
-		// set visual indicator for matching rows
-		if (filter && nodeMatchesFilter) {
-			rowDiv.classList.add("outlineRowMatchesFilter"); //$NON-NLS-0$
-		} else {
-			rowDiv.classList.remove("outlineRowMatchesFilter"); //$NON-NLS-0$
-		}
-		
-		// set node's keyboard traversal selectability
-		navHandler.setIsNotSelectable(node, !nodeMatchesFilter);
-		
+			rowDiv.classList.remove("outlineRowHidden"); //$NON-NLS-0$ //show row
+			rowDiv.classList.remove("outlineRowMatchesFilter"); //$NON-NLS-0$ //remove filter match decoration
+			navHandler.setIsNotSelectable(node, false); // make node keyboard traversable
+		}	
+	
 		return visible;
 	};
 	
+	/**
+	 * This function should be called after the user triggers an outline
+	 * node expansion in order to filter the node's children.
+	 * 
+	 * @param {String} nodeId The id of the node that was expanded
+	 */
+	OutlineExplorer.prototype.postUserExpand = function (nodeId) {
+		if (this._currentModifiedFilter) {
+			var node = this.getNavDict().getValue(nodeId).model;
+			this._expandRecursively(node);
+			this._filterRecursively(node, this._currentModifiedFilter);
+		}
+ 	};
+ 	
 	function OutlineModel(items, rootId) {
 		this.items = items;
 		this.root = {children: items};
@@ -461,7 +490,14 @@ define([
 			input.placeholder = messages["Filter"]; //$NON-NLS-0$
 			input.type="text"; //$NON-NLS-0$
 			input.addEventListener("input", function (e) { //$NON-NLS-0$
-				this.explorer.filterChanged(input.value);
+				if (this._filterInputTimeout) {
+					window.clearTimeout(this._filterInputTimeout);
+				}
+				var that = this;
+				this._filterInputTimeout = window.setTimeout(function(){
+					that.explorer.filterChanged(input.value);
+					that._filterInputTimeout = null;
+				}, 200);
 			}.bind(this));
 		
 			input.addEventListener("keydown", function (e) { //$NON-NLS-0$
@@ -488,6 +524,7 @@ define([
 			}.bind(this), false);
 			
 			this._toolbar.appendChild(input);
+			this._filterInput = input;
 		},
 		
 		/**
