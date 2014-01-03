@@ -13,9 +13,8 @@
 /*global define */
 
 define("orion/editor/textStyler", [ //$NON-NLS-0$
-	'orion/editor/annotations', //$NON-NLS-0$
-	'orion/editor/keywords' //$NON-NLS-0$
-], function(mAnnotations, mKeywords) {
+	'orion/editor/annotations' //$NON-NLS-0$
+], function(mAnnotations) {
 
 	/*
 	 * Throughout textStyler "block" refers to a potentially multi-line token (ie.- a pattern

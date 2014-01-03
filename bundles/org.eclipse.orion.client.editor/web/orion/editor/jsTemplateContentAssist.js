@@ -15,8 +15,8 @@
 
 define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 	'orion/editor/templates', //$NON-NLS-0$
-	'orion/editor/keywords' //$NON-NLS-0$
-], function(mTemplates, mKeywords) {
+	'orion/editor/stylers/js/js' //$NON-NLS-0$
+], function(mTemplates, mJS) {
 
 	function findPreviousChar(buffer, offset) {
 		var c = "";
@@ -173,7 +173,7 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 	 */
 	function JSTemplateContentAssistProvider() {
 	}
-	JSTemplateContentAssistProvider.prototype = new mTemplates.TemplateContentAssist(mKeywords.JSKeywords, templates);
+	JSTemplateContentAssistProvider.prototype = new mTemplates.TemplateContentAssist(mJS.keywords, templates);
 
 	/** 
 	 * Determines if the invocation location is a valid place to use

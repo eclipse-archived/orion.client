@@ -14,14 +14,16 @@
 
 define("examples/editor/textStyler", [ //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
-	'orion/editor/keywords' //$NON-NLS-0$
-], function(mAnnotations, mKeywords) {
+	'orion/editor/stylers/js/js', //$NON-NLS-0$
+	'orion/editor/stylers/java/java', //$NON-NLS-0$
+	'orion/editor/stylers/css/css' //$NON-NLS-0$
+], function(mAnnotations, mJS, mJava, mCSS) {
 
-	var JS_KEYWORDS = mKeywords.JSKeywords;
+	var JS_KEYWORDS = mJS.keywords;
 
-	var JAVA_KEYWORDS = mKeywords.JAVAKeywords;
+	var JAVA_KEYWORDS = mJava.keywords;
 
-	var CSS_KEYWORDS = mKeywords.CSSKeywords;
+	var CSS_KEYWORDS = mCSS.keywords;
 
 	// Scanner constants
 	var UNKOWN = 1;

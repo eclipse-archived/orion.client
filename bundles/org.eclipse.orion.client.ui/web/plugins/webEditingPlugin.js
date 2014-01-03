@@ -16,9 +16,10 @@ define([
 	'orion/editor/htmlContentAssist',
 	'orion/editor/htmlGrammar',
 	'orion/editor/jsTemplateContentAssist',
-	'orion/editor/keywords',
+	'orion/editor/stylers/java/java',
+	'orion/editor/stylers/css/css',
 	'orion/editor/templates'
-], function(PluginProvider, cssContentAssist, htmlContentAssist, htmlGrammar, jsTemplateContentAssist, keywords, templates) {
+], function(PluginProvider, cssContentAssist, htmlContentAssist, htmlGrammar, jsTemplateContentAssist, mJava, mCSS, templates) {
 	var headers = {
 		name: "Orion Web Editing Plugin",
 		version: "1.0",
@@ -187,14 +188,7 @@ define([
 			contentType: ["text/html"]
 		});
 
-	// Register syntax highlighting (TextMate-based)
-//	provider.registerService("orion.edit.highlighter", {},
-//		{	type: "grammar",
-//			contentType: ["text/html"],
-//			grammar: new htmlGrammar.HtmlGrammar()
-//		});
-
-	// Register syntax highlighting (Orion)
+	// Register syntax highlighting
 	provider.registerServiceProvider("orion.edit.highlighter", {
 		// purely declarative, no service methods
     }, {
@@ -283,80 +277,17 @@ define([
 	provider.registerServiceProvider("orion.edit.highlighter", {
 		// purely declarative, no service methods
     }, {
-        id: "orion.js",
-		contentTypes: ["application/javascript"],
-		patterns: [
-			{
-				include: "orion.patterns"
-			}, {
-				match: "\\b(?:" + keywords.JSKeywords.join("|") + ")\\b",
-				name: "KEYWORD"
-			}, {
-				begin: "'[^'\\n]*\\\\\n",
-				end: "(?:[^'\\n]*\\\\\\n)*[^'\\n]*'?",
-				name: "MULTILINE_STRING"
-			}, {
-				begin: "\"[^\"\\n]*\\\\\n",
-				end: "(?:[^\"\\n]*\\\\\\n)*[^\"\\n]*\"?",
-				name: "MULTILINE_STRING"
-			}
-		]
-	});
-	provider.registerServiceProvider("orion.edit.highlighter", {
-		// purely declarative, no service methods
-    }, {
         id: "orion.java",
 		contentTypes: ["text/x-java-source"],
 		patterns: [
 			{
 				include: "orion.patterns"
 			}, {
-				id: keywords,
-				match: "\\b(?:" + keywords.JAVAKeywords.join("|") + ")\\b",
+				match: "\\b(?:" + mJava.keywords.join("|") + ")\\b",
 				name: "KEYWORD"
 			}, {
 				/* override orion.patterns#string_singleQuote */
 				id: "string_singleQuote"
-			}
-		]
-	});
-
-	provider.registerServiceProvider("orion.edit.highlighter", {
-		// purely declarative, no service methods
-    }, {
-        id: "orion.json",
-		contentTypes: ["application/json"],
-		patterns: [
-			{
-				include: "orion.patterns"
-			}, {
-				id: keywords,
-				match: "\\b(?:true|false|null)\\b",
-				name: "KEYWORD"
-			}, {
-				/* override orion.patterns#comment_singleline */
-				id: "comment_singleline"
-			}, {
-				/* override orion.patterns#comment_multiline */
-				id: "comment_multiline"
-			}
-		]
-	});
-	provider.registerServiceProvider("orion.edit.highlighter", {
-		// purely declarative, no service methods
-    }, {
-        id: "orion.json.schema",
-		contentTypes: ["application/schema+json"],
-		patterns: [
-			{
-				include: "orion.json"
-			}, {
-				id: keywords,
-				match: "(?:\\$schema|(?:\\b(?:id|multipleOf|maximum|exclusiveMaximum|minimum|exclusiveMinimum|\
-					maxLength|minLength|pattern|additionalItems|maxItems|minItems|uniqueItems|\
-					maxProperties|minProperties|required|additionalProperties|properties|patternProperties|\
-					dependencies|enum|type|allOf|anyOf|oneOf|not|definitions|title|description|default|format)))\\b",
-				name: "KEYWORD"
 			}
 		]
 	});
@@ -370,7 +301,7 @@ define([
 			{
 				include: "orion.patterns"
 			}, {
-				match: "(?:-webkit-|-moz-|-ms-|\\b)(?:" + keywords.CSSKeywords.join("|") + ")\\b",
+				match: "(?:-webkit-|-moz-|-ms-|\\b)(?:" + mCSS.keywords.join("|") + ")\\b",
 				name: "KEYWORD"
 			}, {
 				match: "'.*?(?:'|$)",
