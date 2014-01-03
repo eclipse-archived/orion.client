@@ -67,7 +67,6 @@ define([
 	});
 	
 	function FolderNavExplorer(options) {
-		var self = this;
 		options.setFocus = false;   // do not steal focus on load
 		options.cachePrefix = null; // do not persist table state
 		options.dragAndDrop = FileCommands.uploadFile;
@@ -162,8 +161,9 @@ define([
 		this.serviceRegistry = options.serviceRegistry;
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
-		this.preferences = options.preferences,
-		this.showProjectView = true;
+		this.preferences = options.preferences;
+		this.readonly = typeof options.readonly === 'undefined' ? false : options.readonly;
+		this.showProjectView = typeof options.showProjectView === 'undefined' ? true : options.showProjectView;
 		this.showFolderNav = true;
 		this._init();
 	}
@@ -191,13 +191,23 @@ define([
 					commandRegistry: this.commandRegistry
 				});
 			}
-			mGlobalCommands.getMainSplitter().splitter.addEventListener("toggle", this._splitterToggleListener = function(e) { //$NON-NLS-0$
-				[this.markdownView, this.projectEditor, this.projectView, this.folderNavExplorer].forEach(function(view) {
-					if (view && view.setCommandsVisible) {
-						view.setCommandsVisible(e.closed);
-					}
-				});
-			}.bind(this));
+			var mainSplitter = mGlobalCommands.getMainSplitter();
+			if(mainSplitter) {
+				mGlobalCommands.getMainSplitter().splitter.addEventListener("toggle", this._splitterToggleListener = function(e) { //$NON-NLS-0$
+					[this.markdownView, this.projectEditor, this.projectView, this.folderNavExplorer].forEach(function(view) {
+						if (view && view.setCommandsVisible) {
+							view.setCommandsVisible(e.closed);
+						}
+					});
+				}.bind(this));
+			}
+		},
+		_isCommandsVisible: function() {
+			var mainSplitter = mGlobalCommands.getMainSplitter();
+			if(mainSplitter) {
+				return mainSplitter.splitter.isClosed();
+			}
+			return !this.readonly;
 		},
 		displayWorkspaceView: function(){
 			var _self = this;
@@ -210,7 +220,7 @@ define([
 				var div = document.createElement("div"); //$NON-NLS-0$
 				_self._node.appendChild(div);
 				this.projectView.display(this._metadata, div);
-				this.projectView.setCommandsVisible(mGlobalCommands.getMainSplitter().splitter.isClosed());
+				this.projectView.setCommandsVisible(this._isCommandsVisible());
 			}
 		},
 		displayFolderView: function(root){
@@ -255,7 +265,7 @@ define([
 								contentTypeRegistry: this.contentTypeRegistry
 							});
 							foldersSection.embedExplorer(this.folderNavExplorer);
-							this.folderNavExplorer.setCommandsVisible(mGlobalCommands.getMainSplitter().splitter.isClosed());
+							this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
 							this.folderNavExplorer.loadRoot(this._metadata);
 						}
 					} else if(sectionName === "readme"){
@@ -291,7 +301,10 @@ define([
 			}
 		},
 		destroy: function() {
-			mGlobalCommands.getMainSplitter().splitter.removeEventListener("toggle", this._splitterToggleListener); //$NON-NLS-0$
+			var mainSplitter = mGlobalCommands.getMainSplitter();
+			if(mainSplitter) {
+				mainSplitter.splitter.removeEventListener("toggle", this._splitterToggleListener); //$NON-NLS-0$
+			}
 			if (this.folderNavExplorer) {
 				this.folderNavExplorer.destroy();
 			}
@@ -299,7 +312,9 @@ define([
 			if (this._node && this._node.parentNode) {
 				this._node.parentNode.removeChild(this._node);
 			}
-			this.projectView.destroy();
+			if(this.projectView) {
+				this.projectView.destroy();
+			}
 			if(this.projectEditor){
 				this.projectEditor.destroy();
 			}

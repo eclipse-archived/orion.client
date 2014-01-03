@@ -57,7 +57,7 @@ define([
 
 var exports = {};
 
-exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isReadOnly) {
+exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isReadOnly, showProjectView/*default is TRUE*/) {
 	var selection;
 	var commandRegistry;
 	var statusService;
@@ -99,7 +99,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	var collapseSidebar = false; //PageUtil.hash() !== ""
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, null, null, collapseSidebar); //$NON-NLS-0$
 
-	var editor, editorDirtyListener, inputManager, sidebarNavInputManager, editorView, lastRoot;
+	var editor, editorDirtyListener, inputManager, sidebarNavInputManager = null, editorView, lastRoot;
 	function setEditor(newEditor) {
 		if (editor === newEditor) { return; }
 		if (editor) {
@@ -184,6 +184,8 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		if (metadata && input) {
 			var options = objects.mixin({
 				input: input,
+				readonly: isReadOnly,
+				showProjectView: showProjectView,
 				metadata: metadata,
 			}, defaultOptions);
 			//TODO better way of registering built-in editors
@@ -303,54 +305,60 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	editorView = new mEditorView.EditorView(defaultOptions);
 
 	// Sidebar
-	function SidebarNavInputManager() {
-		EventTarget.attach(this);
+	if(sidebarDomNode && sidebarToolbar){
+		function SidebarNavInputManager() {
+			EventTarget.attach(this);
+		}
+		sidebarNavInputManager = new SidebarNavInputManager();
+		var sidebar = new Sidebar({
+			commandRegistry: commandRegistry,
+			contentTypeRegistry: contentTypeRegistry,
+			editorInputManager: inputManager,
+			fileClient: fileClient,
+			outlineService: outlineService,
+			parent: sidebarDomNode,
+			progressService: progressService,
+			selection: selection,
+			serviceRegistry: serviceRegistry,
+			sidebarNavInputManager: sidebarNavInputManager,
+			toolbar: sidebarToolbar
+		});
+		SidebarNavInputManager.prototype.processHash = function() {
+			var navigate = PageUtil.matchResourceParameters().navigate;
+			if (typeof navigate === "string" && this.setInput && sidebar.getActiveViewModeId() === "nav") { //$NON-NLS-1$ //$NON-NLS-0$
+				this.setInput(navigate);
+			}
+		};
+		sidebar.show();
+		sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
+			lastRoot = evt.root;
+		});
+		var gotoInput = function(evt) { //$NON-NLS-0$
+			var newInput = evt.newInput || ""; //$NON-NLS-0$
+			window.location = uriTemplate.expand({resource: newInput}); //$NON-NLS-0$
+		};
+		sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
+		sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
+		sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
+			if (evt.newValue) {
+				window.location = uriTemplate.expand({resource: evt.newValue.Location});
+			}
+		});
 	}
-	sidebarNavInputManager = new SidebarNavInputManager();
-	var sidebar = new Sidebar({
-		commandRegistry: commandRegistry,
-		contentTypeRegistry: contentTypeRegistry,
-		editorInputManager: inputManager,
-		fileClient: fileClient,
-		outlineService: outlineService,
-		parent: sidebarDomNode,
-		progressService: progressService,
-		selection: selection,
-		serviceRegistry: serviceRegistry,
-		sidebarNavInputManager: sidebarNavInputManager,
-		toolbar: sidebarToolbar
-	});
-	SidebarNavInputManager.prototype.processHash = function() {
-		var navigate = PageUtil.matchResourceParameters().navigate;
-		if (typeof navigate === "string" && this.setInput && sidebar.getActiveViewModeId() === "nav") { //$NON-NLS-1$ //$NON-NLS-0$
-			this.setInput(navigate);
-		}
-	};
-	sidebar.show();
-	sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
-		lastRoot = evt.root;
-	});
-	var gotoInput = function(evt) { //$NON-NLS-0$
-		var newInput = evt.newInput || ""; //$NON-NLS-0$
-		window.location = uriTemplate.expand({resource: newInput}); //$NON-NLS-0$
-	};
-	sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
-	sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
-	sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
-		if (evt.newValue) {
-			window.location = uriTemplate.expand({resource: evt.newValue.Location});
-		}
-	});
 
 	selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 		inputManager.setInput(event.selection);
 	});
 	window.addEventListener("hashchange", function() { //$NON-NLS-0$
 		inputManager.setInput(PageUtil.hash());
-		sidebarNavInputManager.processHash(PageUtil.hash());
+		if(sidebarNavInputManager) {
+			sidebarNavInputManager.processHash(PageUtil.hash());
+		}
 	});
 	inputManager.setInput(PageUtil.hash());
-	sidebarNavInputManager.processHash(PageUtil.hash());
+	if(sidebarNavInputManager) {
+		sidebarNavInputManager.processHash(PageUtil.hash());
+	}
 
 	window.onbeforeunload = function() {
 		if (editor && editor.isDirty()) {

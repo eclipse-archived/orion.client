@@ -82,11 +82,13 @@ define([
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
 		mGlobalCommands.getKeyAssist().addProvider(this);
 		var mainSplitter = mGlobalCommands.getMainSplitter();
-		mainSplitter.splitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
-			if (this.editor && evt.node === mainSplitter.main) {
-				this.editor.resize();
-			}
-		}.bind(this));
+		if(mainSplitter) {
+			mainSplitter.splitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
+				if (this.editor && evt.node === mainSplitter.main) {
+					this.editor.resize();
+				}
+			}.bind(this));
+		}
 		mGlobalCommands.getGlobalEventTarget().addEventListener("toggleTrim", function(evt) { //$NON-NLS-0$
 			if (this.editor) {
 				this.editor.resize();
