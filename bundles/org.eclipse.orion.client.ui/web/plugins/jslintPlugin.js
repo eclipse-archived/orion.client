@@ -23,6 +23,7 @@ define([
 	var validationOptions = DEFAULT_VALIDATION_OPTIONS;
 	var isEnabledFor = {
 		'application/javascript': false,
+		'application/json': true,
 		'text/html': true
 	};
 
@@ -234,7 +235,7 @@ define([
 
 	var provider = new PluginProvider(headers);
 	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], validationService, {
-		contentType: ["application/javascript", "text/html"],
+		contentType: ["application/javascript", "application/json", "text/html"],
 		pid: "jslint.config"
 	});
 	provider.registerService("orion.edit.outliner", outlineService, {
