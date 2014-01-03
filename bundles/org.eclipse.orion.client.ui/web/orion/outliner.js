@@ -54,7 +54,7 @@ define([
 		elementNode.appendChild(contentsNode);
 		
  		if (item.className) {
-			contentsNode.classList.add(item.className);
+			contentsNode.className += item.className;
  		}
  		if (item.children) {
 			this.getExpandImage(tableRow, expandNode);
@@ -71,7 +71,7 @@ define([
  				preNode.appendChild(document.createTextNode(item.labelPre));
  			}
 	 		if (item.classNamePre) {
-	 			preNode.classList.add(item.classNamePre);
+				preNode.className += item.classNamePre;
 	 		}
  		}
  		if (item.label){
@@ -84,7 +84,7 @@ define([
  				postNode.appendChild(document.createTextNode(item.labelPost));
  			}
 	 		if (item.classNamePost) {
-	 			postNode.classList.add(item.classNamePost);
+				postNode.className += item.classNamePost;
 	 		}
  		}
  		
