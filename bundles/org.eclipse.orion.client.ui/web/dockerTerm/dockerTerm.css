@@ -8,28 +8,15 @@ html,body {
 }
 
 .terminal {
-  height: 90%;
-  width: 100%;
-  font-size: 11pt;
-  font-family: monospace;
-color: #ff0000;
-background: #00ff00;
+ 	height: 100%;
+	width: 100%;
+	font-size: 11pt;
+	font-family: monospace;
+	color: #ff0000;
+	background: #383734
 }
 
 .terminal-cursor {
-color: #000;
-background: #f0f0f0;
+	color: #000;
+	background: #f0f0f0;
 }
-
-.dockerShell-output {
-  position: absolute; top: 0; bottom: 30px; left: 0; right: 0;
-  font-size: 10pt;
-}
-
-
-.dockerCmd {
-  width: 90%;
-  font-size: 10pt;
-  margin: 0;
-}
-
