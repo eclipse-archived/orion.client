@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -12,135 +12,124 @@
 
 /*global define window document*/
 
-define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr", "orion/Deferred", "dockerTerm/term"],
+define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr", "orion/Deferred",
+    "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
+    "orion/status", "orion/progress", "orion/operationsClient", "dockerTerm/term"],
 
-function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, terminal) {
-	var pluginRegistry, serviceRegistry, preferences;
+function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, mCommandRegistry, mFileClient,
+mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal) {
 
-	var connected = false;
+    var dockerTerminal = {
+        connect: function() {
+            return xhr("POST", "/docker/connect", { //$NON-NLS-1$ //$NON-NLS-0$
+                headers: {
+                    "Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
+                },
+                timeout: 15000,
+                responseType: "text",
+                handleAs: "json" //$NON-NLS-0$
+            });
+        },
+        disconnect: function() {
+            return xhr("POST", "/docker/disconnect", { //$NON-NLS-1$ //$NON-NLS-0$
+                headers: {
+                    "Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
+                },
+                timeout: 15000
+            });
+        }
+    };
 
-	var docker = {
-		connect: function() {
-			return xhr("POST", "/docker/connect", { //$NON-NLS-1$ //$NON-NLS-0$
-				headers: {
-					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				timeout: 15000
-			});
-		},
-		disconnect: function() {
-			return xhr("POST", "/docker/disconnect", { //$NON-NLS-1$ //$NON-NLS-0$
-				headers: {
-					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				timeout: 15000
-			});
-		},
-		send: function(text) {
-			return xhr("POST", "/docker/send", { //$NON-NLS-1$ //$NON-NLS-0$
-				headers: {
-					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
-					"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				data: JSON.stringify({
-					"text": text
-				}),
-				timeout: 15000,
-				responseType: "text",
-				handleAs: "json" //$NON-NLS-0$
-			});
-		}
-	};
+    mBootstrap.startup().then(function(core) {
+        var serviceRegistry = core.serviceRegistry;
+        var preferences = core.preferences;
 
-	function startScreen(term) {
-		term.writeln("Orion Terminal");
-		var today = new Date();
-		var dd = today.getDate();
-		var mm = today.getMonth() + 1; //January is 0!
-		var yyyy = today.getFullYear();
-		if (dd < 10) {
-			dd = '0' + dd;
-		};
-		if (mm < 10) {
-			mm = '0' + mm;
-		};
-		term.writeln(mm + '/' + dd + '/' + yyyy);
-		term.writeln("                                      ,,,,");
-		term.writeln("                                     ,,,,,,");
-		term.writeln("                                    .,,,,,,,");
-		term.writeln("                                    ,,,,,,,,");
-		term.writeln("                                    ,,,,,,,,");
-		term.writeln("                                    .,,,,,,:");
-		term.writeln("             iitii                   ,,,,,,");
-		term.writeln("           ii:   ti;                  .,,:");
-		term.writeln("           i      ;i");
-		term.writeln("          ii       ii iii   it   ,,,    ii   ii");
-		term.writeln("          ii       ii i ;i  it  ,,,,,,  ii   ii");
-		term.writeln("          ii       ii i  i  it ,,,,,,,  iti  ii");
-		term.writeln("          ti       it i ti  it ,,,,,,,, iiii ii");
-		term.writeln("          .i       i  iii   it ,,,,,,,, ii tiii");
-		term.writeln("           it     tt  i ii  it ,,,,,,,  ii  iii");
-		term.writeln("            ti   it   i ii  it  ,,,,,,  ii  ,ii");
-		term.writeln("             tiiit    i  it it   ,,,,   ii   ii");
-		term.writeln("                                                  ");
-		term.writeln("                            ,,,");
-		term.writeln("                          ,,,,,,");
-		term.writeln("                          ,,,,,,,");
-		term.writeln("                         ,,,,,,,,");
-		term.writeln("                         ,,,,,,,,");
-		term.writeln("                          ,,,,,,,");
-		term.writeln("                          ,,,,,,");
-		term.writeln("                           :,,,");
-		term.writeln("Hit Connect to begin");
-	}
+        var commandRegistry = new mCommandRegistry.CommandRegistry({});
+        var fileClient = new mFileClient.FileClient(serviceRegistry);
+        var searcher = new mSearchClient.Searcher({
+            serviceRegistry: serviceRegistry,
+            commandService: commandRegistry,
+            fileService: fileClient
+        });
+        var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+        new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
+        mGlobalCommands.generateBanner("orion-dockerTerminalPage", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
+        mGlobalCommands.setPageTarget({
+            task: "Docker Terminal",
+            serviceRegistry: serviceRegistry,
+            commandService: commandRegistry
+        });
 
-	mBootstrap.startup().then(function(core) {
-		pluginRegistry = core.pluginRegistry;
-		serviceRegistry = core.serviceRegistry;
-		preferences = core.preferences;
-		var output;
+        var term;
+        var websocket;
 
-		var term = new Terminal({
-			cols: 80,
-			rows: 30,
-			screenKeys: false
-		});
-		term.open(document.getElementById("terminal"));
-		startScreen(term);
-		term.on('data', function(data) {
-			docker.send(data).then(function(result) {
-				output = JSON.parse(result.responseText);
-				term.write(output.result);
-			});
-		});
+        var connect = function() {
+            dockerTerminal.connect().then(function(result) {
+                var jsonObject = JSON.parse(result.responseText);
+                var attachWsURI = jsonObject.attachWsURI;
+                term.reset();
+                websocket = new WebSocket(attachWsURI);
+                websocket.onopen = function(evt) {
+                    onOpen(evt);
+                };
+                websocket.onclose = function(evt) {
+                    onClose(evt);
+                };
+                websocket.onmessage = function(evt) {
+                    onMessage(evt);
+                };
+                websocket.onerror = function(evt) {
+                    onError(evt);
+                };
+                term.on('data', function(data) {
+                    websocket.send(data);
+                });
 
-		var button = document.getElementById("dockerConnect"); //$NON-NLS-0$
-		button.textContent = "Connect";
-		button.addEventListener("click", function(e) {
-			if (!connected) {
-				//connect
-				docker.connect().then(function(result) {
-					button.textContent = "Disconnect";
-					connected = !connected;
-					term.reset();
-					docker.send("\n").then(function(result) {
-						output = JSON.parse(result.responseText);
-						term.write(output.result);
-					});
-				}, function(error) {
-					window.console.log(error);
-				});
-			} else {
-				docker.disconnect().then(function(result) {
-					button.textContent = "Connect";
-					connected = !connected;
-					term.reset();
-					startScreen(term);
-				}, function(error) {
-					window.console.log(error);
-				});
-			}
+                function onOpen(evt) {
+                    websocket.send("\r");
+                }
 
-		});
-	});
+                function onClose(evt) {}
+
+                function onMessage(evt) {
+                    term.write(evt.data);
+                }
+
+                function onError(evt) {
+                    window.console.log(evt.data);
+                }
+                term.focus();
+            }, function(error) {
+                window.console.log(error);
+            });
+        };
+
+        var disconnect = function() {
+            dockerTerminal.disconnect().then(function(result) {
+                websocket.close();
+                term.reset();
+            }, function(error) {
+                window.console.log(error);
+            });
+        };
+
+        var onHashChange = function() {
+            connect();
+        };
+        window.addEventListener("hashchange", onHashChange);
+
+        window.onbeforeunload = function() {
+            disconnect();
+        };
+
+        // Initialize
+        (function() {
+            term = new Terminal();
+            term.open(document.getElementById("terminal"));
+
+            onHashChange();
+        }());
+
+    });
 });
