@@ -57,7 +57,7 @@ define([
 
 var exports = {};
 
-exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isReadOnly, showProjectView/*default is TRUE*/) {
+exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isReadOnly/*default: FALSE*/, showProjectView/*default: TRUE*/, showEditorInsection/*default: FALSE*/) {
 	var selection;
 	var commandRegistry;
 	var statusService;

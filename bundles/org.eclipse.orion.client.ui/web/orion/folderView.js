@@ -50,6 +50,16 @@ define([
 			folderNode.classList.remove("navlinkonpage"); //$NON-NLS-0$
 			return folderNode;
 		},
+		updateFileNode: function(file, fileNode, isImage) {
+			mNavigatorRenderer.NavigatorRenderer.prototype.updateFileNode.call(this, file, fileNode, isImage);
+			if (this.explorer.readonly && fileNode.tagName === "A") { //$NON-NLS-0$
+				if(isImage){
+					fileNode.href = uriTemplate.expand({resource: file.Location, params: {editor: 'orion.imageViewer'}});  //$NON-NLS-0$
+				} else {
+					fileNode.href = uriTemplate.expand({resource: file.Location});
+				}
+			}
+		},
 		getCellHeaderElement: function(col_no) {
 			var td;
 			if (col_no === 0) {
@@ -83,6 +93,7 @@ define([
 		this.fileClient = options.fileClient;
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
+		this.readonly = options.readonly;
 		this.treeRoot = {};
 		this.parent = lib.node(options.parentId);	
 		this.toolbarId = this.parent.id + "Tool"; //$NON-NLS-0$
@@ -259,6 +270,7 @@ define([
 							
 							this.folderNavExplorer = new FolderNavExplorer({
 								parentId: navNode,
+								readonly: this.readonly,
 								serviceRegistry: this.serviceRegistry,
 								fileClient: this.fileClient,
 								commandRegistry: this.commandRegistry,
