@@ -184,36 +184,36 @@ define([
 	 * Register syntax styling for js, json and json schema content
 	 */
 	provider.registerServiceProvider("orion.edit.highlighter", { //$NON-NLS-0$
-    }, {
-        id: "orion.js", //$NON-NLS-0$
+	}, {
+		id: "orion.js", //$NON-NLS-0$
 		contentTypes: ["application/javascript"], //$NON-NLS-0$
 		patterns: [
 			{
 				include: "orion.patterns" //$NON-NLS-0$
 			}, {
 				match: "\\b(?:" + mJS.keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "KEYWORD" //$NON-NLS-0$
+				name: "keyword.control" //$NON-NLS-0$
 			}, {
 				begin: "'[^'\\n]*\\\\\n", //$NON-NLS-0$
 				end: "(?:[^'\\n]*\\\\\\n)*[^'\\n]*'?", //$NON-NLS-0$
-				name: "MULTILINE_STRING" //$NON-NLS-0$
+				name: "string.quoted.single" //$NON-NLS-0$
 			}, {
 				begin: "\"[^\"\\n]*\\\\\n", //$NON-NLS-0$
 				end: "(?:[^\"\\n]*\\\\\\n)*[^\"\\n]*\"?", //$NON-NLS-0$
-				name: "MULTILINE_STRING" //$NON-NLS-0$
+				name: "string.quoted.double" //$NON-NLS-0$
 			}
 		]
 	});
 	provider.registerServiceProvider("orion.edit.highlighter", { //$NON-NLS-0$
-    }, {
-        id: "orion.json", //$NON-NLS-0$
+	}, {
+		id: "orion.json", //$NON-NLS-0$
 		contentTypes: ["application/json"], //$NON-NLS-0$
 		patterns: [
 			{
 				include: "orion.patterns" //$NON-NLS-0$
 			}, {
 				match: "\\b(?:true|false|null)\\b", //$NON-NLS-0$
-				name: "KEYWORD" //$NON-NLS-0$
+				name: "keyword.control" //$NON-NLS-0$
 			}, {
 				/* override orion.patterns#comment_singleline */
 				id: "comment_singleline" //$NON-NLS-0$
@@ -224,15 +224,15 @@ define([
 		]
 	});
 	provider.registerServiceProvider("orion.edit.highlighter", { //$NON-NLS-0$
-    }, {
-        id: "orion.json.schema", //$NON-NLS-0$
+	}, {
+		id: "orion.json.schema", //$NON-NLS-0$
 		contentTypes: ["application/schema+json"], //$NON-NLS-0$
 		patterns: [
 			{
 				include: "orion.json" //$NON-NLS-0$
 			}, {
 				match: "(?:\\$schema|(?:\\b(?:" + mJSONSchema.keywords.join("|") + ")))\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "KEYWORD" //$NON-NLS-0$
+				name: "keyword.control" //$NON-NLS-0$
 			}
 		]
 	});

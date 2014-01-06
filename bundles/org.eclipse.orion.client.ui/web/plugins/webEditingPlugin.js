@@ -188,48 +188,50 @@ define([
 			contentType: ["text/html"]
 		});
 
-	// Register syntax highlighting
+	/**
+	 * Register syntax styling
+	 */
+
 	provider.registerServiceProvider("orion.edit.highlighter", {
-		// purely declarative, no service methods
-    }, {
-        id: "orion.patterns",
+	}, {
+		id: "orion.patterns",
 		patterns: [
 			{
 				id: "brace_open",
 				match: "{",
-				name: "orion.enclosure.brace.start"
+				name: "punctuation.section.block.begin"
 			}, {
 				id: "brace_close",
 				match: "}",
-				name: "orion.enclosure.brace.end"
+				name: "punctuation.section.block.end"
 			}, {
 				id: "bracket_open",
 				match: "\\[",
-				name: "orion.enclosure.bracket.start"
+				name: "punctuation.section.bracket.begin"
 			}, {
 				id: "bracket_close",
 				match: "\\]",
-				name: "orion.enclosure.bracket.end"
+				name: "punctuation.section.bracket.end"
 			}, {
 				id: "parenthesis_open",
 				match: "\\(",
-				name: "orion.enclosure.parenthesis.start"
+				name: "punctuation.section.parens.begin"
 			}, {
 				id: "parenthesis_close",
 				match: "\\)",
-				name: "orion.enclosure.parenthesis.end"
+				name: "punctuation.section.parens.end"
 			}, {
 				id: "comment_singleline",
 				begin: "//",
 				end: "\\n",
-				name: "SINGLELINE_COMMENT",
+				name: "comment.line",
 				patterns: [
 					{
 						match: "(\\b)(TODO)(\\s|$)(.*)",
-						name: "orion.annotation.todo",
+						name: "meta.annotation.task.todo",
 						captures: {
-							2: {name: "DOC_TAG"},
-							4: {name: "SINGLELINE_COMMENT"}
+							2: {name: "keyword.other.documentation.tag"},
+							4: {name: "comment.line"}
 						}
 					}
 				]
@@ -237,54 +239,53 @@ define([
 				id: "comment_multiline",
 				begin: "/\\*",
 				end: "(?:\\*/|$)",
-				name: "MULTILINE_COMMENT",
+				name: "comment.block",
 				patterns: [
 					{
 						match: "@\\S*",
-						name: "DOC_TAG"
+						name: "keyword.other.documentation.tag"
 					}, {
 						match: "\\<\\S*\\>?",
-						name: "DOC_COMMENT"
+						name: "keyword.other.documentation.tag"
 					}, {
 						match: "(\\b)(TODO)(\\s|$)(.*)",
-						name: "orion.annotation.todo",
+						name: "meta.annotation.task.todo",
 						captures: {
-							2: {name: "DOC_TAG"},
-							4: {name: "MULTILINE_COMMENT"}
+							2: {name: "keyword.other.documentation.tag"},
+							4: {name: "comment.block"}
 						}
 					}
 				]
 			}, {
 				id: "string_singleline",
 				match: "\"(?:\\\\.|[^\"])*(?:\"|$)",
-				name: "STRING"
+				name: "string.quoted.double"
 			}, {
 				id: "string_singleQuote",
 				match: "'(?:\\\\.|[^'])*(?:'|$)",
-				name: "STRING"
+				name: "string.quoted.single"
 			}, {
 				id: "number_decimal",
-				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:e[+-]?\\d+)?\\b",
-				name: "NUMBER"
+				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
+				name: "constant.numeric"
 			}, {
 				id: "number_hex",
 				match: "\\b0x[0-9A-Fa-f]+\\b",
-				name: "NUMBER"
+				name: "constant.numeric"
 			}
 		]
 	});
 
 	provider.registerServiceProvider("orion.edit.highlighter", {
-		// purely declarative, no service methods
-    }, {
-        id: "orion.java",
+	}, {
+		id: "orion.java",
 		contentTypes: ["text/x-java-source"],
 		patterns: [
 			{
 				include: "orion.patterns"
 			}, {
 				match: "\\b(?:" + mJava.keywords.join("|") + ")\\b",
-				name: "KEYWORD"
+				name: "keyword.control"
 			}, {
 				/* override orion.patterns#string_singleQuote */
 				id: "string_singleQuote"
@@ -293,54 +294,56 @@ define([
 	});
 
 	provider.registerServiceProvider("orion.edit.highlighter", {
-		// purely declarative, no service methods
-    }, {
-        id: "orion.css",
+	}, {
+		id: "orion.css",
 		contentTypes: ["text/css"],
 		patterns: [
 			{
 				include: "orion.patterns"
 			}, {
 				match: "(?:-webkit-|-moz-|-ms-|\\b)(?:" + mCSS.keywords.join("|") + ")\\b",
-				name: "KEYWORD"
-			}, {
-				match: "'.*?(?:'|$)",
-				name: "STRING"
+				name: "keyword.control"
 			}, {
 				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
-				name: "NUMBER"
+				name: "constant.numeric"
 			}, {
 				match: "#[0-9A-Fa-f]+\\b",
-				name: "NUMBER"
+				name: "constant.numeric"
+			}, {
+				begin: "'[^'\\n]*\\\\\n", //$NON-NLS-0$
+				end: "(?:[^'\\n]*\\\\\\n)*[^'\\n]*'?", //$NON-NLS-0$
+				name: "string.quoted.single" //$NON-NLS-0$
+			}, {
+				begin: "\"[^\"\\n]*\\\\\n", //$NON-NLS-0$
+				end: "(?:[^\"\\n]*\\\\\\n)*[^\"\\n]*\"?", //$NON-NLS-0$
+				name: "string.quoted.double" //$NON-NLS-0$
 			}, {
 				/* override orion.patterns#comment_singleline */
 				id: "comment_singleline"
-			}, {
-				/* override orion.patterns#string_singleQuote */
-				id: "string_singleQuote"
 			}
 		]
 	});
-	
+
 	provider.registerServiceProvider("orion.edit.highlighter", {
 		// purely declarative, no service methods
-    }, {
-        id: "orion.html",
-        contentTypes: ["text/html"],
+	}, {
+		id: "orion.html",
+		contentTypes: ["text/html"],
 		patterns: [
 			{
 				begin: "(<!(?:doctype|DOCTYPE))",
 				end: "(>)",
 				captures: {
-					1: {name: "HTML_MARKUP"},
+					1: {name: "entity.name.tag"},
 				}
 			}, {
 				begin: "(<script)([^>]*)(>)",
 				end: "(</script>|$)",
 				captures: {
-					1: {name: "HTML_MARKUP"},
-					3: {name: "HTML_MARKUP"}
+					1: {name: "entity.name.tag"},
+					3: {name: "entity.name.tag"}
 				},
+				contentName: "source.js.embedded.html",
 				patterns: [
 					{
 						include: "orion.js"
@@ -350,9 +353,10 @@ define([
 				begin: "(<style)([^>]*)(>)",
 				end: "(</style>|$)",
 				captures: {
-					1: {name: "HTML_MARKUP"},
-					3: {name: "HTML_MARKUP"}
+					1: {name: "entity.name.tag"},
+					3: {name: "entity.name.tag"}
 				},
+				contentName: "source.css.embedded.html",
 				patterns: [
 					{
 						include: "orion.css"
@@ -362,12 +366,12 @@ define([
 				id: "comment",
 				begin: "<!--",
 				end: "-->|$",
-				name: "MULTILINE_COMMENT"
+				name: "comment.block"
 			}, {
 				begin: "(</?[A-Za-z0-9]+)",
 				end: "(/?>|$)",
 				captures: {
-					1: {name: "HTML_MARKUP"},
+					1: {name: "entity.name.tag"},
 				},
 				patterns: [
 					{

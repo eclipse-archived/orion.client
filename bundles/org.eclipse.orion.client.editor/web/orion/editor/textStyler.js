@@ -38,30 +38,31 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	
 	var styleMappings = {
 		"UNKOWN": null,
-		"KEYWORD": keywordStyle,
-		"NUMBER": numberStyle,
-		"STRING": stringStyle,
-		"MULTILINE_STRING": stringStyle,
-		"SINGLELINE_COMMENT": singleCommentStyle,
-		"MULTILINE_COMMENT": multiCommentStyle,
-		"DOC_COMMENT": docCommentStyle,
+		"keyword.control": keywordStyle,
+		"constant.numeric": numberStyle,
+		"string.quoted.single": stringStyle,
+		"string.quoted.double": stringStyle,
+		"comment.line": singleCommentStyle,
+		"comment.block": multiCommentStyle,
 		"WHITE": spaceStyle,
 		"WHITE_TAB": tabStyle,
 		"WHITE_SPACE": spaceStyle,
-		"HTML_MARKUP": htmlMarkupStyle,
-		"DOC_TAG": doctagStyle,
-		"TASK_TAG": tasktagStyle,
-		"orion.enclosure.brace.start": {styleClass: "orion.enclosure.brace.start"},
-		"orion.enclosure.brace.end": {styleClass: "orion.enclosure.brace.end"},
-		"orion.enclosure.bracket.start": {styleClass: "orion.enclosure.bracket.start"},
-		"orion.enclosure.bracket.end": {styleClass: "orion.enclosure.bracket.end"},
-		"orion.enclosure.parenthesis.start": {styleClass: "orion.enclosure.parenthesis.start"},
-		"orion.enclosure.parenthesis.end": {styleClass: "orion.enclosure.parenthesis.end"},
-		"orion.annotation.todo": {styleClass: "orion.annotation.todo"}
+		"entity.name.tag": htmlMarkupStyle,
+		"keyword.other.documentation.tag": doctagStyle,
+		"punctuation.section.block.begin": {styleClass: "punctuation.section.block.begin"},
+		"punctuation.section.block.end": {styleClass: "punctuation.section.block.end"},
+		"punctuation.section.bracket.begin": {styleClass: "punctuation.section.bracket.begin"},
+		"punctuation.section.bracket.end": {styleClass: "punctuation.section.bracket.end"},
+		"punctuation.section.parens.begin": {styleClass: "punctuation.section.parens.begin"},
+		"punctuation.section.parens.end": {styleClass: "punctuation.section.parens.end"},
+		"meta.annotation.task.todo": {styleClass: "meta.annotation.task.todo"}
 	};
 
+	var PUNCTUATION_SECTION_BEGIN = ".begin"; //$NON-NLS-0$
+	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
+	
 	var spacePattern = {regex: new RegExp(" ", "g"), pattern: {name: "WHITE_SPACE"}, isWhitespace: true}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var tabPattern = {regex: new RegExp("\t", "g"), pattern: {name: "WHITE_TAB"}, isWhitespace: true};
+	var tabPattern = {regex: new RegExp("\t", "g"), pattern: {name: "WHITE_TAB"}, isWhitespace: true}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	var updateMatch = function(match, text, matches, minimumIndex) {
 		var regEx = match.pattern.regex ? match.pattern.regex : match.pattern.regexBegin;
@@ -236,11 +237,11 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 
 			var subPatterns = current.getLinePatterns();
-			if (subPatterns.length && (current.pattern.pattern.name === "MULTILINE_COMMENT" || current.pattern.pattern.name === "SINGLELINE_COMMENT")) {
+			if (subPatterns.length && (current.pattern.pattern.name === "comment.block" || current.pattern.pattern.name === "comment.line")) {
 				var substyles = [];
 				parse(baseModel.getText(current.contentStart, current.end), current.contentStart, current, false, substyles);
 				for (var i = 0; i < substyles.length; i++) {
-					if (substyles[i].style.styleClass === "orion.annotation.todo") {
+					if (substyles[i].style.styleClass === "meta.annotation.task.todo") {
 						/*
 						 * If the content belonging to the task tag has been broken up by whitespace tokens
 						 * then look at the subsequent tokens for consecutive whitespace+tag tokens, which
@@ -248,7 +249,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 						 */
 						var end = substyles[i].end;
 						if (block.isRenderingWhitespace()) {
-							while (i + 1 < substyles.length && (substyles[i + 1].isWhitespace || substyles[i + 1].style.styleClass === "orion.annotation.todo")) {
+							while (i + 1 < substyles.length && (substyles[i + 1].isWhitespace || substyles[i + 1].style.styleClass === "meta.annotation.task.todo")) {
 								end = substyles[i + 1].end;
 								i += 1;
 							}
@@ -411,7 +412,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				if (current.match && !current.begin && !current.end) {
 					pattern = {regex: new RegExp(current.match, "g"), pattern: current}; //$NON-NLS-0$
 					this._linePatterns.push(pattern);
-					if (current.name && current.name.indexOf("orion.enclosure") === 0 && (current.name.indexOf(".start") !== -1 || current.name.indexOf(".end") !== -1)) { //$NON-NLS-0$ //$NON-NLS-0$ //$NON-NLS-0$
+					if (current.name && current.name.indexOf("punctuation.section") === 0 && (current.name.indexOf(PUNCTUATION_SECTION_BEGIN) !== -1 || current.name.indexOf(PUNCTUATION_SECTION_END) !== -1)) { //$NON-NLS-0$ //$NON-NLS-0$ //$NON-NLS-0$
 						this._enclosurePatterns[current.name] = pattern;
 					}
 				} else if (!current.match && current.begin && current.end) {
@@ -626,11 +627,11 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 			var closingName;
 			var onEnclosureStart = false;
-			if (match.pattern.name.indexOf(".start") !== -1) {
+			if (match.pattern.name.indexOf(PUNCTUATION_SECTION_BEGIN) !== -1) {
 				onEnclosureStart = true;
-				closingName = match.pattern.name.replace(".start", ".end");
+				closingName = match.pattern.name.replace(PUNCTUATION_SECTION_BEGIN, PUNCTUATION_SECTION_END);
 			} else {
-				closingName = match.pattern.name.replace(".end", ".start");
+				closingName = match.pattern.name.replace(PUNCTUATION_SECTION_END, PUNCTUATION_SECTION_BEGIN);
 			}
 			var closingBracket = enclosurePatterns[closingName];
 			if (!closingBracket) { return -1; }
