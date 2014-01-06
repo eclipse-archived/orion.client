@@ -47,6 +47,8 @@ define([
 				case Estraverse.Syntax.Program:
 					this.occurrences = [];
 					this.scopes = [{range: node.range, occurrences: []}];
+					this.defnode = null;
+					this.defscope = null;
 					break;
 				case Estraverse.Syntax.FunctionDeclaration:
 					this.checkId(node.id, this.FUNCTION, true);
@@ -73,9 +75,6 @@ define([
 				case Estraverse.Syntax.AssignmentExpression:
 					var leftNode = node.left;
 					this.checkId(leftNode);
-					if (leftNode.type === Estraverse.Syntax.MemberExpression) {
-						this.checkId(leftNode.object);
-					}
 					this.checkId(node.right);
 					break;
 				case Estraverse.Syntax.ArrayExpression: 
@@ -154,12 +153,12 @@ define([
 				node.type === Estraverse.Syntax.FunctionExpression ||
 				node.type === Estraverse.Syntax.Program) {
 				//if we leave the defining scope
-				var scope = this.scopes.pop();
-				var len = scope.occurrences.length;
-				for(var i = 0; i < len; i++) {
-					this.occurrences.push(scope.occurrences[i]);
-				}
 				if(this.defscope) {
+					var scope = this.scopes.pop();
+					var len = scope.occurrences.length;
+					for(var i = 0; i < len; i++) {
+						this.occurrences.push(scope.occurrences[i]);
+					}
 					if(this.defscope.range[0] === scope.range[0] && this.defscope.range[1] === scope.range[1]) {
 						//we just popped out of the scope the word was defined in, we can quit
 						return Estraverse.VisitorOption.Break;

@@ -337,5 +337,117 @@ define([
 			}
 		});
 	};
+
+	/**
+	 * Tests function decls with same named params / vars in same scope
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=424951
+	 */
+	Tests.test_functionDeclUse1 = function() {
+		editorContext.text = "var foo = function() {function f(prob) {} function f2() {var prob = {};	prob.foo = null;return prob;}};";
+		return occurrences.computeOccurrences(editorContext, setContext(36, 36)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:33, end:37}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests function decls with same named params / vars in same scope
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=424951
+	 */
+	Tests.test_functionDeclUse2 = function() {
+		editorContext.text = "var foo = function() {function f(prob) {} function f2() {var prob = {};	prob.foo = null;return prob;}};";
+		return occurrences.computeOccurrences(editorContext, setContext(64, 64)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:61, end:65}, {start:72, end:76}, {start:95, end:99}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests function decls with same named params / vars in same scope
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=424951
+	 */
+	Tests.test_functionDeclUse3 = function() {
+		editorContext.text = "var foo = function() {function f(prob) {} function f2() {var prob = {};	prob.foo = null;return prob;}};";
+		return occurrences.computeOccurrences(editorContext, setContext(75, 75)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:61, end:65}, {start:72, end:76}, {start:95, end:99}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests function decls with same named params / vars in same scope
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=424951
+	 */
+	Tests.test_functionDeclUse4 = function() {
+		editorContext.text = "var foo = function() {function f(prob) {} function f2() {var prob = {};	prob.foo = null;return prob;}};";
+		return occurrences.computeOccurrences(editorContext, setContext(98, 98)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:61, end:65}, {start:72, end:76}, {start:95, end:99}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests function decls with same named params / vars in same scope
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=424951
+	 */
+	Tests.test_functionDeclUse5 = function() {
+		editorContext.text = "var bar = function() {function MyObject() {}; var o = {i: function() {return new MyObject().foo;}};return MyObject;};";
+		return occurrences.computeOccurrences(editorContext, setContext(36, 36)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:31, end:39}, {start:81, end:89}, {start:106, end:114}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests function decls with same named params / vars in same scope
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=424951
+	 */
+	Tests.test_functionDeclUse6 = function() {
+		editorContext.text = "var bar = function() {function MyObject() {}; var o = {i: function() {return new MyObject().foo;}};return MyObject;};";
+		return occurrences.computeOccurrences(editorContext, setContext(86, 86)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:31, end:39}, {start:81, end:89}, {start:106, end:114}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests function decls with same named params / vars in same scope
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=424951
+	 */
+	Tests.test_functionDeclUse7 = function() {
+		editorContext.text = "var bar = function() {function MyObject() {}; var o = {i: function() {return new MyObject().foo;}};return MyObject;};";
+		return occurrences.computeOccurrences(editorContext, setContext(111, 111)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:31, end:39}, {start:81, end:89}, {start:106, end:114}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
 	return Tests;
 });
