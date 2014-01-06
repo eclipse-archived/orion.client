@@ -1,1 +1,18 @@
 @import "../edit/common.css";
+
+.localBreadCrumb{
+	border: 1px solid;
+	vertical-align: middle;
+	font-weight: bold;
+	padding: 3px;
+	color: gray;
+	height: 24px;
+	margin-bottom: -20px;
+	border-color: #dadada;
+	overflow: hidden;
+	background-color: gray;
+	text-align: left;
+	margin-left: 5%;
+	margin-right: 5%;
+	margin-top: 12px;
+}

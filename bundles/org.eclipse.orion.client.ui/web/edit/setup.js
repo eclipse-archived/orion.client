@@ -261,6 +261,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			task: "Editor", //$NON-NLS-0$
 			name: name,
 			target: target,
+			breadCrumbContainer: showEditorInsection ? "localBreadCrumb" : null,
 			makeAlternate: function() {
 				if (metadata && metadata.Parents && metadata.Parents.length > 0) {
 					// The mini-nav in sidebar wants to do the same work, can we share it?

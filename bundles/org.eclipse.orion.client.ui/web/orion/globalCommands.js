@@ -385,6 +385,8 @@ define([
 	 * @param {Object} options The target options object.
 	 * @param {String} options.task the name of the user task that the page represents.
 	 * @param {Object} options.target the metadata describing the page resource target. Optional.
+	 * @param {String|DomNode} options.breadCrumbContainer the dom node or id of the bread crumb container. Optional. If not defined, 'location' is used as 
+	 * the bread crumb container id, which is always in the page banner.
 	 * @param {String} options.name the name of the resource that is showing on the page. Optional. If a target parameter is supplied, the
 	 * target metadata name will be used if a name is not specified in the options.
 	 * @param {String} options.title the title to be used for the page. Optional. If not specified, a title will be constructed using the task
@@ -442,7 +444,7 @@ define([
 		}
 		window.document.title = title;
 		customGlobalCommands.afterSetPageTarget.apply(this, arguments);
-		var locationNode = lib.node("location"); //$NON-NLS-0$
+		var locationNode = options.breadCrumbContainer ? lib.node(options.breadCrumbContainer) : lib.node("location"); //$NON-NLS-0$
 		if (locationNode) {
 			lib.empty(locationNode);
 			var fileClient = serviceRegistry && new mFileClient.FileClient(serviceRegistry);
