@@ -24,35 +24,6 @@ define([
 		"for" : true, "function" : true, "if" : true, "in" : true, "instanceof" : true, "new" : true, "return" : true, "switch" : true, "this" : true, "throw" : true, "try" : true, "typeof" : true,
 		"var" : true, "void" : true, "while" : true, "with" : true
 	};
-	function isReservedWord(name) {
-		return RESERVED_WORDS[name] === true;
-	}
-
-	/**
-	 * TODO move this to a central location
-	 * @type {function(obj):Boolean} a safe way of checking for arrays
-	 */
-	var isArray = Array.isArray;
-	if (!isArray) {
-		isArray = function isArray(ary) {
-			return Object.prototype.toString.call(ary) === '[object Array]';
-		};
-	}
-
-	/**
-	 * @param {String} char a string of at least one char14acter
-	 * @return {boolean} true iff uppercase ascii character
-	 */
-	function isUpperCaseChar(c) {
-		if (c.length < 1) {
-			return false;
-		}
-		var charCode = c.charCodeAt(0);
-		if (isNaN(charCode)) {
-			return false;
-		}
-		return charCode >= 65 && charCode <= 90;
-	}
 
 	/**
 	 * finds the right-most segment of a dotted MemberExpression
@@ -111,7 +82,7 @@ define([
 	 */
 	function addLintGlobals(env, lintOptions) {
 		var i, globName;
-		if (lintOptions && isArray(lintOptions.global)) {
+		if (lintOptions && Array.isArray(lintOptions.global)) {
 			for (i = 0; i < lintOptions.global.length; i++) {
 				globName = lintOptions.global[i];
 				if (!env.lookupTypeObj(globName)) {
@@ -414,7 +385,7 @@ define([
 			// assume that function name that starts with capital is
 			// a constructor
 			var isConstructor;
-			if (name && node.body && isUpperCaseChar(name)) {
+			if (name && node.body && typeUtils.isUpperCaseChar(name)) {
 				if (node.extras.cname) {
 					// RHS of assignment
 					name = node.extras.cname;
@@ -1131,7 +1102,7 @@ define([
 				}
 
 			} else if (!node.extras.isLHS) {
-				if (!proposalUtils.inRange(env.offset, node.range, true) && !isReservedWord(name)) {
+				if (!proposalUtils.inRange(env.offset, node.range, true) && RESERVED_WORDS[name] !== true) {
 					// we have encountered a read of a variable/property that we have never seen before
 
 					if (node.extras.target) {

@@ -39,6 +39,23 @@ define([
 		}
 	}
 
+	/**
+	 * @param {String} char a string of at least one char14acter
+	 * @return {boolean} true iff uppercase ascii character
+	 */
+	function isUpperCaseChar(c) {
+		if (c.length < 1) {
+			return false;
+		}
+		var charCode = c.charCodeAt(0);
+		if (isNaN(charCode)) {
+			return false;
+		}
+		var char = c.charAt(0);
+		return c.toLocaleUpperCase().charAt(0) === char;
+	}
+
+
 	function createNameType(name) {
 	    if (typeof name !== 'string') {
 	        throw new Error('Expected string, but found: ' + JSON.parse(name));
@@ -728,6 +745,7 @@ define([
 		leftTypeIsMoreGeneral: leftTypeIsMoreGeneral,
 		isEmpty: isEmpty,
 		ensureTypeObject: ensureTypeObject,
+		isUpperCaseChar: isUpperCaseChar,
 		OBJECT_TYPE: THE_UNKNOWN_TYPE,
 		UNDEFINED_TYPE: createNameType("undefined"),
 		NUMBER_TYPE: createNameType("Number"),

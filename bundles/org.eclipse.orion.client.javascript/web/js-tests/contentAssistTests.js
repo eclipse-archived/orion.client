@@ -19,7 +19,7 @@ define([
 	'esprima',
 	'doctrine/doctrine',
 	'orion/Deferred'
-], function(ContentAssist, mVisitor, assert, _, __, Deferred) {
+], function(ContentAssist, mVisitor, assert, Esprima, Doctrine, Deferred) {
 
 	//////////////////////////////////////////////////////////
 	// helpers
@@ -34,7 +34,12 @@ define([
 	}
 
 	function parseFull(contents) {
-		return mVisitor.parse(contents);
+		return esprima.parse(contents, {
+					range: true,
+					tolerant: true,
+					comment: true,
+					tokens: true
+				});
 	}
 
 	function computeContentAssist(buffer, prefix, offset, lintOptions) {
@@ -4225,7 +4230,7 @@ define([
 			"	_init: function() { }\n" +
 			"};", "_init");
 		return testProposals(results, [
-			["_init()", "_init() : undefined"]
+			["_init()", "_init() : TextView.prototype._init"]
 		]);
 	};
 	tests['test proto ref in this2']  = function() {
@@ -4235,7 +4240,7 @@ define([
 			"}\n" +
 			"TextView.prototype._init = function() { };", "_init");
 		return testProposals(results, [
-			["_init()", "_init() : undefined"]
+			["_init()", "_init() : TextView.prototype._init"]
 		]);
 	};
 	tests['test proto ref in this3']  = function() {
@@ -4244,14 +4249,9 @@ define([
 			"TextView.prototype._init = function() { };\n" +
 			"new TextView()._init/**/", "_init");
 		return testProposals(results, [
-			["_init()", "_init() : undefined"]
+			["_init()", "_init() : TextView.prototype._init"]
 		]);
 	};
-
-
-
-
-
 
 	// See https://github.com/scripted-editor/scripted/issues/258
 	tests['test invalid array type param in jsdoc']  = function() {

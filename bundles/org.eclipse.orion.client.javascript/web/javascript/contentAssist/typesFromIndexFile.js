@@ -29,21 +29,6 @@ define([
 	}
 
 	/**
-	 * @param {String} char a string of at least one char14acter
-	 * @return {boolean} true iff uppercase ascii character
-	 */
-	function isUpperCaseChar(c) {
-		if (c.length < 1) {
-			return false;
-		}
-		var charCode = c.charCodeAt(0);
-		if (isNaN(charCode)) {
-			return false;
-		}
-		return charCode >= 65 && charCode <= 90;
-	}
-
-	/**
 	 * Global is the type of the global variable.  This can 
 	 * vary based on what libraries are being used
 	 */
@@ -190,7 +175,7 @@ define([
 			retString = returnTypeName;
 		}
 		// use convention of upper-case names being constructors
-		var isConstructor = !remaining && retString && isUpperCaseChar(retString);
+		var isConstructor = !remaining && retString && typeUtils.isUpperCaseChar(retString);
 		var defName = "function(";
 		if (isConstructor) {
 			defName += "new:" + retString;
