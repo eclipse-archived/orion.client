@@ -15,6 +15,6 @@ define(['orion/bootstrap', 'edit/setup'], function(mBootstrap, mSetup) {
 		var serviceRegistry = core.serviceRegistry;
 		var pluginRegistry = core.pluginRegistry;
 		var preferences = core.preferences;
-		mSetup.setUpEditor(serviceRegistry, pluginRegistry, preferences, true, false); 
+		mSetup.setUpEditor(serviceRegistry, pluginRegistry, preferences, true, false, true); 
 	});
 });

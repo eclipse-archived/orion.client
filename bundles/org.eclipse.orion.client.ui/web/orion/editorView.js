@@ -117,6 +117,9 @@ define([
 				textView.addKeyMode(this.vi);
 			}
 		},
+		getParent: function() {
+			return this._parent;
+		},
 		updateSourceCodeActions: function(prefs, sourceCodeActions) {
 			if (sourceCodeActions) {
 				sourceCodeActions.setAutoPairParentheses(prefs.autoPairParentheses);

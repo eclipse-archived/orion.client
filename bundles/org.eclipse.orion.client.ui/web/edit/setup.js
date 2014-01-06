@@ -194,7 +194,12 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			} else {
 				var id = input.editor;
 				if (!id || id === "orion.editor") { //$NON-NLS-0$
-					view = editorView;
+					if(showEditorInsection){
+						options.editorView = editorView;
+						view = new mFolderView.FolderView(options);
+					} else {
+						view = editorView;
+					}
 				} else if (id === "orion.markdownViewer") { //$NON-NLS-0$
 					view = new mMarkdownView.MarkdownEditorView(options);
 				} else {
@@ -302,7 +307,14 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		statusService: statusService,
 		progressService: progressService
 	};
-	editorView = new mEditorView.EditorView(defaultOptions);
+	if(showEditorInsection) {
+		var editorContainer = document.createElement("div"); //$NON-NLS-0$
+		var sectionalEditorOptions = objects.clone(defaultOptions);
+		sectionalEditorOptions.parent = editorContainer;
+		editorView = new mEditorView.EditorView(sectionalEditorOptions);
+	} else {
+		editorView = new mEditorView.EditorView(defaultOptions);
+	}
 
 	// Sidebar
 	if(sidebarDomNode && sidebarToolbar){
