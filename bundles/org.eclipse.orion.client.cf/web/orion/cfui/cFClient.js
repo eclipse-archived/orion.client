@@ -107,6 +107,18 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("DELETE", require.toUrl("cfapi/target"));
 			},
 			
+			getLogs: function(applicationName, logFileName){
+				if(!applicationName){
+					var deferred = new Deferred();
+					deferred.reject("Application name not set");
+				}
+				var location = require.toUrl("cfapi/target/" + applicationName);
+				if(logFileName){
+					location+=("/" + logFileName);
+				}
+				return this._xhrV1("GET", location);
+			},
+			
 			getTarget: function() {
 				return this._xhrV1("GET", require.toUrl("cfapi/target"));
 			},
