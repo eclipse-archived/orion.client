@@ -153,8 +153,8 @@ define([
 				node.type === Estraverse.Syntax.FunctionExpression ||
 				node.type === Estraverse.Syntax.Program) {
 				//if we leave the defining scope
+				var scope = this.scopes.pop();
 				if(this.defscope) {
-					var scope = this.scopes.pop();
 					var len = scope.occurrences.length;
 					for(var i = 0; i < len; i++) {
 						this.occurrences.push(scope.occurrences[i]);

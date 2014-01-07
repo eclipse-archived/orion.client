@@ -449,5 +449,117 @@ define([
 			}
 		});
 	};
+	
+	/**
+	 * Tests multiple function decls marked in use and returns
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425036
+	 */
+	Tests.test_functionDeclScopes1 = function() {
+		editorContext.text = "var foo = function() {function c2() {};	c2.prototype.constructor = c2;function c() {};c.prototype.constructor = c;return {c: c}};";
+		return occurrences.computeOccurrences(editorContext, setContext(33, 33)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:31, end:33}, {start:40, end:42}, {start:67, end:69}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests multiple function decls marked in use and returns
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425036
+	 */
+	Tests.test_functionDeclScopes2 = function() {
+		editorContext.text = "var foo = function() {function c2() {};	c2.prototype.constructor = c2;function c() {};c.prototype.constructor = c;return {c: c}};";
+		return occurrences.computeOccurrences(editorContext, setContext(41, 41)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:31, end:33}, {start:40, end:42}, {start:67, end:69}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests multiple function decls marked in use and returns
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425036
+	 */
+	Tests.test_functionDeclScopes3 = function() {
+		editorContext.text = "var foo = function() {function c2() {};	c2.prototype.constructor = c2;function c() {};c.prototype.constructor = c;return {c: c}};";
+		return occurrences.computeOccurrences(editorContext, setContext(68, 68)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:31, end:33}, {start:40, end:42}, {start:67, end:69}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests multiple function decls marked in use and returns
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425036
+	 */
+	Tests.test_functionDeclScopes4 = function() {
+		editorContext.text = "var foo = function() {function c2() {};	c2.prototype.constructor = c2;function c() {};c.prototype.constructor = c;return {c: c}};";
+		return occurrences.computeOccurrences(editorContext, setContext(80, 80)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:79, end:80}, {start:86, end:87}, {start:112, end:113}, {start:125, end:126}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests multiple function decls marked in use and returns
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425036
+	 */
+	Tests.test_functionDeclScopes5 = function() {
+		editorContext.text = "var foo = function() {function c2() {};	c2.prototype.constructor = c2;function c() {};c.prototype.constructor = c;return {c: c}};";
+		return occurrences.computeOccurrences(editorContext, setContext(87, 87)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:79, end:80}, {start:86, end:87}, {start:112, end:113}, {start:125, end:126}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests multiple function decls marked in use and returns
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425036
+	 */
+	Tests.test_functionDeclScopes6 = function() {
+		editorContext.text = "var foo = function() {function c2() {};	c2.prototype.constructor = c2;function c() {};c.prototype.constructor = c;return {c: c}};";
+		return occurrences.computeOccurrences(editorContext, setContext(113, 113)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:79, end:80}, {start:86, end:87}, {start:112, end:113}, {start:125, end:126}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests multiple function decls marked in use and returns
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425036
+	 */
+	Tests.test_functionDeclScopes7 = function() {
+		editorContext.text = "var foo = function() {function c2() {};	c2.prototype.constructor = c2;function c() {};c.prototype.constructor = c;return {c: c}};";
+		return occurrences.computeOccurrences(editorContext, setContext(126, 126)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:79, end:80}, {start:86, end:87}, {start:112, end:113}, {start:125, end:126}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
 	return Tests;
 });
