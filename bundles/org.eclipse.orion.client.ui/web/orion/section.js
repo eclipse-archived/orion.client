@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -62,7 +62,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 			this.twistie = document.createElement("span"); //$NON-NLS-0$
 			this.twistie.classList.add("modelDecorationSprite"); //$NON-NLS-0$
 			this.twistie.classList.add("layoutLeft"); //$NON-NLS-0$
-			this.twistie.classList.add("sectionTitle"); //$NON-NLS-0$
+			this.twistie.classList.add("sectionTitleTwistie"); //$NON-NLS-0$
 			this.domNode.style.cursor = "pointer"; //$NON-NLS-0$
 			this.domNode.appendChild(this.twistie);
 			this.domNode.tabIndex = 0; //$NON-NLS-0$
