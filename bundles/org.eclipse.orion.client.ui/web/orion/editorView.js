@@ -80,7 +80,10 @@ define([
 		this.model = options.model;
 		this.undoStack = options.undoStack;
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
-		mGlobalCommands.getKeyAssist().addProvider(this);
+		var keyAssist = mGlobalCommands.getKeyAssist();
+		if(keyAssist) {
+			keyAssist.addProvider(this);
+		}
 		var mainSplitter = mGlobalCommands.getMainSplitter();
 		if(mainSplitter) {
 			mainSplitter.splitter.addEventListener("resize", function (evt) { //$NON-NLS-0$
@@ -383,13 +386,19 @@ define([
 					editor.getTextView().invokeAction("trimTrailingWhitespaces"); //$NON-NLS-0$
 				}
 			});
-
-			serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
-				editor.showProblems(event.problems);
-			});
-			serviceRegistry.getService("orion.core.blame").addEventListener("blameChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
-				editor.showBlame(event.blameInfo);
-			});
+			
+			var markerService = serviceRegistry.getService("orion.core.marker"); //$NON-NLS-0$
+			if(markerService) {
+				markerService.addEventListener("problemsChanged", function(event) { //$NON-NLS-0$
+					editor.showProblems(event.problems);
+				});
+			}
+			var blameService = serviceRegistry.getService("orion.core.blame"); //$NON-NLS-0$
+			if(blameService) {
+				blameService.addEventListener("blameChanged", function(event) { //$NON-NLS-0$
+					editor.showBlame(event.blameInfo);
+				});
+			}
 			var markOccurrences = this.markOccurrences = new mMarkOccurrences.MarkOccurrences(serviceRegistry, inputManager, editor);
 			markOccurrences.setOccurrencesVisible(this.settings.occurrencesVisible);
 			markOccurrences.findOccurrences();

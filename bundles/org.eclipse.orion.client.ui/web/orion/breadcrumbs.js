@@ -247,7 +247,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
 
         measure: function () {
         
-        	var middleWidth = document.getElementById( 'location' );
+        	var middleWidth = this._container;
 
 			middleWidth.style.width = 'auto';
         

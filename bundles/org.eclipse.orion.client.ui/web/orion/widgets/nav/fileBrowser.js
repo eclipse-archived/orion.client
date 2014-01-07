@@ -15,7 +15,6 @@
 
 define([
 	'i18n!orion/edit/nls/messages',
-	'orion/sidebar',
 	'orion/inputManager',
 	'orion/globalCommands',
 	'orion/editor/textModel',
@@ -29,77 +28,54 @@ define([
 	'orion/fileClient',
 	'orion/fileCommands',
 	'orion/selection',
-	'orion/status',
 	'orion/progress',
 	'orion/operationsClient',
-	'orion/outliner',
-	'orion/dialogs',
 	'orion/extensionCommands',
 	'orion/searchClient',
 	'orion/problems',
-	'orion/blameAnnotations',
 	'orion/Deferred',
 	'orion/EventTarget',
 	'orion/URITemplate',
 	'orion/i18nUtil',
 	'orion/PageUtil',
 	'orion/objects',
-	'orion/webui/littlelib',
-	'orion/projectClient'
+	'orion/webui/littlelib'
 ], function(
-	messages, Sidebar, mInputManager, mGlobalCommands,
+	messages, mInputManager, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView,
-	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, mSearchClient,
-	mProblems, mBlameAnnotation,
-	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, mProjectClient
+	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mProgress, mOperationsClient, mExtensionCommands, mSearchClient,
+	mProblems,
+	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib
 ) {
 
 var exports = {};
 
-exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isReadOnly) {
+exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isReadOnly/*default: FALSE*/, showProjectView/*default: TRUE*/, showEditorInsection/*default: FALSE*/) {
 	var selection;
 	var commandRegistry;
-	var statusService;
 	var problemService;
-	var blameService;
-	var outlineService;
 	var contentTypeRegistry;
 	var progressService;
-	var dialogService;
 	var fileClient;
-	var projectClient;
 	var searcher;
 
 	// Initialize the plugin registry
 	(function() {
 		selection = new mSelection.Selection(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-		statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		dialogService = new mDialogs.DialogService(serviceRegistry);
 		commandRegistry = new mCommandRegistry.CommandRegistry({selection: selection});
 		progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
 
 		// Editor needs additional services
 		problemService = new mProblems.ProblemService(serviceRegistry);
-		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
 		contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 		fileClient = new mFileClient.FileClient(serviceRegistry);
-		projectClient = new mProjectClient.ProjectClient(serviceRegistry, fileClient);
 		searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
-		blameService = new mBlameAnnotation.BlameService(serviceRegistry);
 	}());
+	var	editorDomNode = lib.node("editor"); //$NON-NLS-0$
 
-	var sidebarDomNode = lib.node("sidebar"), //$NON-NLS-0$
-		sidebarToolbar = lib.node("sidebarToolbar"), //$NON-NLS-0$
-		editorDomNode = lib.node("editor"); //$NON-NLS-0$
-
-	//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
-	// Do not collapse sidebar, https://bugs.eclipse.org/bugs/show_bug.cgi?id=418558
-	var collapseSidebar = false; //PageUtil.hash() !== ""
-	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, null, null, collapseSidebar); //$NON-NLS-0$
-
-	var editor, editorDirtyListener, inputManager, sidebarNavInputManager, editorView, lastRoot;
+	var editor, editorDirtyListener, inputManager, editorView, lastRoot;
 	function setEditor(newEditor) {
 		if (editor === newEditor) { return; }
 		if (editor) {
@@ -145,26 +121,15 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	
 	function statusReporter(message, type, isAccessible) {
 		if (type === "progress") { //$NON-NLS-0$
-			statusService.setProgressMessage(message);
 		} else if (type === "error") { //$NON-NLS-0$
-			statusService.setErrorMessage(message);
 		} else {
-			statusService.setMessage(message, null, isAccessible);
 		}
 	}
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
-	var sidebarNavBreadcrumb = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
+	var makeBreadCrumbLink = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
 		var resource = folder ? folder.Location : fileClient.fileServiceRootURL(folderLocation);
 		segment.href = uriTemplate.expand({resource: resource});
-		if (folder) {
-			var metadata = inputManager.getFileMetadata();
-			if (metadata && metadata.Location === folder.Location) {
-				segment.addEventListener("click", function() { //$NON-NLS-0$
-					sidebarNavInputManager.reveal(folder);
-				});
-			}
-		}
 	};
 	
 	var currentEditorView, defaultOptions;
@@ -184,6 +149,8 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		if (metadata && input) {
 			var options = objects.mixin({
 				input: input,
+				readonly: isReadOnly,
+				showProjectView: showProjectView,
 				metadata: metadata,
 			}, defaultOptions);
 			//TODO better way of registering built-in editors
@@ -192,7 +159,12 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			} else {
 				var id = input.editor;
 				if (!id || id === "orion.editor") { //$NON-NLS-0$
-					view = editorView;
+					if(showEditorInsection){
+						options.editorView = editorView;
+						view = new mFolderView.FolderView(options);
+					} else {
+						view = editorView;
+					}
 				} else if (id === "orion.markdownViewer") { //$NON-NLS-0$
 					view = new mMarkdownView.MarkdownEditorView(options);
 				} else {
@@ -251,16 +223,11 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			target = lastRoot;
 		}
 		mGlobalCommands.setPageTarget({
-			task: "Editor", //$NON-NLS-0$
+			task: "Browse", //$NON-NLS-0$
 			name: name,
 			target: target,
-			makeAlternate: function() {
-				if (metadata && metadata.Parents && metadata.Parents.length > 0) {
-					// The mini-nav in sidebar wants to do the same work, can we share it?
-					return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages.ReadingMetadata, metadata.Parents[0].Location));
-				}
-			},
-			makeBreadcrumbLink: sidebarNavBreadcrumb,
+			breadCrumbContainer: showEditorInsection ? "localBreadCrumb" : null,
+			makeBreadcrumbLink: makeBreadCrumbLink,
 			makeBreadcrumFinalLink: true,
 			serviceRegistry: serviceRegistry,
 			commandService: commandRegistry,
@@ -297,60 +264,25 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		selection: selection,
 		fileService: fileClient,
 		statusReporter: statusReporter,
-		statusService: statusService,
 		progressService: progressService
 	};
-	editorView = new mEditorView.EditorView(defaultOptions);
-
-	// Sidebar
-	function SidebarNavInputManager() {
-		EventTarget.attach(this);
+	if(showEditorInsection) {
+		var editorContainer = document.createElement("div"); //$NON-NLS-0$
+		var sectionalEditorOptions = objects.clone(defaultOptions);
+		sectionalEditorOptions.parent = editorContainer;
+		editorView = new mEditorView.EditorView(sectionalEditorOptions);
+	} else {
+		editorView = new mEditorView.EditorView(defaultOptions);
 	}
-	sidebarNavInputManager = new SidebarNavInputManager();
-	var sidebar = new Sidebar({
-		commandRegistry: commandRegistry,
-		contentTypeRegistry: contentTypeRegistry,
-		editorInputManager: inputManager,
-		fileClient: fileClient,
-		outlineService: outlineService,
-		parent: sidebarDomNode,
-		progressService: progressService,
-		selection: selection,
-		serviceRegistry: serviceRegistry,
-		sidebarNavInputManager: sidebarNavInputManager,
-		toolbar: sidebarToolbar
-	});
-	SidebarNavInputManager.prototype.processHash = function() {
-		var navigate = PageUtil.matchResourceParameters().navigate;
-		if (typeof navigate === "string" && this.setInput && sidebar.getActiveViewModeId() === "nav") { //$NON-NLS-1$ //$NON-NLS-0$
-			this.setInput(navigate);
-		}
-	};
-	sidebar.show();
-	sidebarNavInputManager.addEventListener("rootChanged", function(evt) { //$NON-NLS-0$
-		lastRoot = evt.root;
-	});
-	var gotoInput = function(evt) { //$NON-NLS-0$
-		var newInput = evt.newInput || ""; //$NON-NLS-0$
-		window.location = uriTemplate.expand({resource: newInput}); //$NON-NLS-0$
-	};
-	sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$
-	sidebarNavInputManager.addEventListener("editorInputMoved", gotoInput); //$NON-NLS-0$
-	sidebarNavInputManager.addEventListener("create", function(evt) { //$NON-NLS-0$
-		if (evt.newValue) {
-			window.location = uriTemplate.expand({resource: evt.newValue.Location});
-		}
-	});
+
 
 	selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 		inputManager.setInput(event.selection);
 	});
 	window.addEventListener("hashchange", function() { //$NON-NLS-0$
 		inputManager.setInput(PageUtil.hash());
-		sidebarNavInputManager.processHash(PageUtil.hash());
 	});
 	inputManager.setInput(PageUtil.hash());
-	sidebarNavInputManager.processHash(PageUtil.hash());
 
 	window.onbeforeunload = function() {
 		if (editor && editor.isDirty()) {
@@ -358,5 +290,77 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		}
 	};
 };
+
+
+//////////////////////////////////////////////// File browser
+	/** 
+	 * Constructs a new file browser object.
+	 * 
+	 * @class 
+	 * @name orion.FileBrowser
+	 */
+	/*
+	function FileBrowser(options) {
+		this._parent = options.parent;
+		this._input = options.input;
+		this._metadata = options.metadata;
+		this.fileClient = options.fileService;
+		this.progress = options.progressService;
+		this.serviceRegistry = options.serviceRegistry;
+		this.commandRegistry = options.commandRegistry;
+		this.contentTypeRegistry = options.contentTypeRegistry;
+		this.preferences = options.preferences;
+		this.readonly = typeof options.readonly === 'undefined' ? false : options.readonly;
+		this.showProjectView = typeof options.showProjectView === 'undefined' ? true : options.showProjectView;
+		this.showFolderNav = true;
+		this.editorView = options.editorView;
+		this._init();
+	}
+	objects.mixin(FileBrowser.prototype, {
+		_init: function(){
+		},
+		create: function() {
+			if(this._metadata.Projects){ //this is a workspace root
+				this.displayWorkspaceView();
+			}
+			if(this.editorView) {
+				this.displayFolderView(this._metadata);
+			} else if(this._metadata.Children){
+				this.displayFolderView(this._metadata);
+			} else if(this._metadata.ChildrenLocation){
+				this.progress.progress(this.fileClient.fetchChildren(this._metadata.ChildrenLocation), "Fetching children of " + this._metadata.Name).then(function(children) {
+					this._metadata.Children = children;
+					this.displayFolderView(this._metadata);
+				}.bind(this));
+			}
+		},
+		destroy: function() {
+			if(this.editorView) {
+				this.editorView. editor.getTextView().getModel().removeEventListener("Changed", this._editorViewModelChangedListener); //$NON-NLS-0$
+				this.editorView.destroy();
+				this.editor = null;
+			}
+			var mainSplitter = mGlobalCommands.getMainSplitter();
+			if(mainSplitter) {
+				mainSplitter.splitter.removeEventListener("toggle", this._splitterToggleListener); //$NON-NLS-0$
+			}
+			if (this.folderNavExplorer) {
+				this.folderNavExplorer.destroy();
+			}
+			this.folderNavExplorer = null;
+			if (this._node && this._node.parentNode) {
+				this._node.parentNode.removeChild(this._node);
+			}
+			if(this.projectView) {
+				this.projectView.destroy();
+			}
+			if(this.projectEditor){
+				this.projectEditor.destroy();
+			}
+			this._node = null;
+		}
+	});
+	return {FileBrowser: FileBrowser};
+	*/
 return exports;
 });

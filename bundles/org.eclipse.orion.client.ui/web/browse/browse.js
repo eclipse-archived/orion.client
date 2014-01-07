@@ -10,11 +10,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define */
-define(['orion/bootstrap', 'edit/setup'], function(mBootstrap, mSetup) {
+define(['orion/bootstrap', 'orion/widgets/nav/fileBrowser'], function(mBootstrap, mFileBrowser) {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var pluginRegistry = core.pluginRegistry;
 		var preferences = core.preferences;
-		mSetup.setUpEditor(serviceRegistry, pluginRegistry, preferences, true, false, true); 
+		mFileBrowser.setUpEditor(serviceRegistry, pluginRegistry, preferences, true, false, true); 
 	});
 });

@@ -10,9 +10,22 @@
 	margin-bottom: -20px;
 	border-color: #dadada;
 	overflow: hidden;
-	background-color: gray;
+	background-color: white;
 	text-align: left;
 	margin-left: 5%;
 	margin-right: 5%;
 	margin-top: 12px;
 }
+
+.fileBrowserParent{
+	border: 1px solid;
+	vertical-align: middle;
+	border-color: #dadada;
+	overflow: hidden;
+	text-align: left;
+	margin-left: 15%;
+	margin-right: 15%;
+	margin-top: 5px;
+	padding-bottom: 5px;
+}
+
