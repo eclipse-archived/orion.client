@@ -419,7 +419,9 @@ define([
 			this._location = location;
 			this._parsedLocation = input;
 			this._ignoreInput = true;
-			this.selection.setSelections(location);
+			if(this.selection) {
+				this.selection.setSelections(location);
+			}
 			this._ignoreInput = false;
 			var fileURI = input.resource;
 			if (fileURI) {

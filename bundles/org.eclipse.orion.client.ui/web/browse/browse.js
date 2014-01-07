@@ -15,6 +15,6 @@ define(['orion/bootstrap', 'orion/widgets/nav/fileBrowser'], function(mBootstrap
 		var serviceRegistry = core.serviceRegistry;
 		var pluginRegistry = core.pluginRegistry;
 		var preferences = core.preferences;
-		mFileBrowser.setUpEditor(serviceRegistry, pluginRegistry, preferences, true, false, true); 
+		mFileBrowser.startup(serviceRegistry, pluginRegistry, preferences); 
 	});
 });
