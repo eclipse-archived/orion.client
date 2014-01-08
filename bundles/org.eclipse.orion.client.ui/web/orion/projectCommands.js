@@ -311,7 +311,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				
 				if(!data.parameters){
 					data.parameters = getCommandParameters(item.parametersRequested, item.optionalParameters);
-					data.oldParams = item.params;
+					data.oldParams = item.Params;
 					commandService.collectParameters(data);
 					return;
 				}
