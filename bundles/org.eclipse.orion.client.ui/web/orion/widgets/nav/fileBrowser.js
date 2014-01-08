@@ -44,305 +44,194 @@ define([
 	//mProblems,
 	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib
 ) {
-
-var exports = {};
-
-exports.startup = function(serviceRegistry, pluginRegistry, preferences) {
-	var commandRegistry;
-	//var problemService;
-	var contentTypeRegistry;
-	var progressService;
-	var fileClient;
-	var searcher;
-
-	// Initialize the plugin registry
-	(function() {
-		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-		commandRegistry = new mCommandRegistry.CommandRegistry({});
-		progressService = new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
-
-		// Editor needs additional services
-		//problemService = new mProblems.ProblemService(serviceRegistry);
-		contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
-		fileClient = new mFileClient.FileClient(serviceRegistry);
-		searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandRegistry, fileService: fileClient});
-	}());
-	var	editorDomNode = lib.node("editor"); //$NON-NLS-0$
-
-	var editor, inputManager, editorView, lastRoot;
-	function setEditor(newEditor) {
-		if (editor === newEditor) { return; }
-		editor = newEditor;
-	}
-	function statusReporter(message, type, isAccessible) {
-		if (type === "progress") { //$NON-NLS-0$
-		} else if (type === "error") { //$NON-NLS-0$
-		} else {
-		}
-	}
-
-	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
-	var makeBreadCrumbLink = function(/**HTMLAnchorElement*/ segment, folderLocation, folder) {
-		var resource = folder ? folder.Location : fileClient.fileServiceRootURL(folderLocation);
-		segment.href = uriTemplate.expand({resource: resource});
-	};
-	
-	var currentEditorView, defaultOptions;
-	// Shared text model and undo stack
-	var model = new mTextModel.TextModel();
-	var contextImpl = {};
-	[	
-		"getText", //$NON-NLS-0$
-		"setText" //$NON-NLS-0$
-	].forEach(function(method) {
-		contextImpl[method] = model[method].bind(model);
-	});
-	serviceRegistry.registerService("orion.edit.model.context", contextImpl, null); //$NON-NLS-0$
-	function getEditorView(input, metadata) {
-		var view = null;
-		if (metadata && input) {
-			var options = objects.mixin({
-				input: input,
-				readonly: true,
-				showProjectView: false,
-				metadata: metadata,
-			}, defaultOptions);
-			//TODO better way of registering built-in editors
-			if (metadata.Directory) {
-				view = new mFolderView.FolderView(options);
-			} else {
-				var id = input.editor;
-				if (!id || id === "orion.editor") { //$NON-NLS-0$
-					options.editorView = editorView;
-					view = new mFolderView.FolderView(options);
-				} else if (id === "orion.markdownViewer") { //$NON-NLS-0$
-					view = new mMarkdownView.MarkdownEditorView(options);
-				} else {
-					var editors = serviceRegistry.getServiceReferences("orion.edit.editor"); //$NON-NLS-0$
-					for (var i=0; i<editors.length; i++) {
-						if (editors[i].getProperty("id") === id) { //$NON-NLS-0$
-							options.editorService = editors[i];
-							view = new mPluginEditorView.PluginEditorView(options);
-							break;
-						}
-					}
-				}
-			}
-		}
-		if (currentEditorView !== view) {
-			commandRegistry.closeParameterCollector();
-			if (currentEditorView) {
-				currentEditorView.destroy();
-			}
-			currentEditorView = view;
-			if (currentEditorView) {
-				currentEditorView.create();
-			}
-		}
-		return currentEditorView;
-	}
-	inputManager = new mInputManager.InputManager({
-		serviceRegistry: serviceRegistry,
-		fileClient: fileClient,
-		progressService: progressService,
-		statusReporter: statusReporter,
-		contentTypeRegistry: contentTypeRegistry
-	});
-	
-	function renderBreadCrumb(options) {
-		var fileSystemRootName;
-		var breadcrumbRootName = options.breadcrumbRootName;
-		var serviceRegistry = options.serviceRegistry;
-		if (options.target) { // we have metadata
-			if (options.searchService) {
-				options.searchService.setLocationByMetaData(options.target);
-			}
-			if (options.fileService && !options.breadcrumbTarget) {
-				fileSystemRootName = breadcrumbRootName ? breadcrumbRootName + " " : ""; //$NON-NLS-1$ //$NON-NLS-0$
-				fileSystemRootName = fileSystemRootName + options.fileService.fileServiceName(options.target.Location);
-				breadcrumbRootName = null;
-			}
-		} else {
-			if (!options.breadcrumbTarget) {
-				breadcrumbRootName = breadcrumbRootName || options.task || options.name;
-			}
-		}
-		var locationNode = lib.node(options.breadCrumbContainer);
-		if (locationNode) {
-			lib.empty(locationNode);
-			var fileClient = serviceRegistry && new mFileClient.FileClient(serviceRegistry);
-			var resource = options.breadcrumbTarget || options.target;
-			var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
-			new mBreadcrumbs.BreadCrumbs({
-				container: locationNode,
-				resource: resource,
-				rootSegmentName: breadcrumbRootName,
-				workspaceRootSegmentName: fileSystemRootName,
-				workspaceRootURL: workspaceRootURL,
-				makeFinalHref: options.makeBreadcrumFinalLink,
-				makeHref: options.makeBreadcrumbLink
-			});
-		}
-	}
-	
-	inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
-		var metadata = evt.metadata;
-		var view = getEditorView(evt.input, metadata);
-		setEditor(view ? view.editor : null);
-		evt.editor = editor;
-		var deferred = null;//renderToolbars(metadata);
-		var name = evt.name, target = metadata;
-		if (evt.input === null || evt.input === undefined) {
-			name = lastRoot ? lastRoot.Name : "";
-			target = lastRoot;
-		}
-		renderBreadCrumb({
-			task: "Browse", //$NON-NLS-0$
-			name: name,
-			target: target,
-			breadCrumbContainer: "localBreadCrumb",
-			makeBreadcrumbLink: makeBreadCrumbLink,
-			makeBreadcrumFinalLink: true,
-			serviceRegistry: serviceRegistry,
-			commandService: commandRegistry,
-			searchService: searcher,
-			fileService: fileClient
-		});
-		function processURL() {
-			commandRegistry.processURL(window.location.href);
-		}
-		if (deferred) {
-			deferred.then(processURL);
-		} else {
-			processURL();
-		}
-	});
-	
-	defaultOptions = {
-		parent: editorDomNode,
-		model: model,
-		serviceRegistry: serviceRegistry,
-		pluginRegistry: pluginRegistry,
-		commandRegistry: commandRegistry,
-		contentTypeRegistry: contentTypeRegistry,
-		inputManager: inputManager,
-		readonly: true,
-		preferences: preferences,
-		searcher: searcher,
-		fileService: fileClient,
-		statusReporter: statusReporter,
-		progressService: progressService
-	};
-	var editorContainer = document.createElement("div"); //$NON-NLS-0$
-	var sectionalEditorOptions = objects.clone(defaultOptions);
-	sectionalEditorOptions.parent = editorContainer;
-	editorView = new mEditorView.EditorView(sectionalEditorOptions);
-	window.addEventListener("hashchange", function() { //$NON-NLS-0$
-		inputManager.setInput(PageUtil.hash());
-	});
-	inputManager.setInput(PageUtil.hash());
-};
-
-
-//////////////////////////////////////////////// File browser widget
 	/** 
 	 * Constructs a new file browser object.
 	 * 
 	 * @class 
 	 * @name orion.FileBrowser
 	 */
-	/*
-	function FileBrowser(options) {
-		this._parent = options.parent;
-		this._input = options.input;
-		this._metadata = options.metadata;
-		this.fileClient = options.fileService;
-		this.progress = options.progressService;
-		this.serviceRegistry = options.serviceRegistry;
-		this.commandRegistry = options.commandRegistry;
-		this.contentTypeRegistry = options.contentTypeRegistry;
-		this.preferences = options.preferences;
-		this.readonly = typeof options.readonly === 'undefined' ? false : options.readonly;
-		this.showProjectView = typeof options.showProjectView === 'undefined' ? true : options.showProjectView;
-		this.showFolderNav = true;
-		this.editorView = options.editorView;
+	
+	function FileBrowser(parent, serviceRegistry, preferences) {
+		this._parent = parent;
+		this._serviceRegistry = serviceRegistry;
+		this._preferences = preferences;
+		var operationsClient = new mOperationsClient.OperationsClient(this._serviceRegistry);
+		this._commandRegistry = new mCommandRegistry.CommandRegistry({});
+		this._progressService = new mProgress.ProgressService(this._serviceRegistry, operationsClient, this._commandRegistry);
+
+		//this._problemService = new mProblems.ProblemService(this._serviceRegistry);
+		this._contentTypeRegistry = new mContentTypes.ContentTypeRegistry(this._serviceRegistry);
+		this._fileClient = new mFileClient.FileClient(this._serviceRegistry);
+		this._searcher = new mSearchClient.Searcher({serviceRegistry: this._serviceRegistry, commandService: this._commandRegistry, fileService: this._fileClient});
 		this._init();
 	}
 	objects.mixin(FileBrowser.prototype, {
 		_init: function(){
-		},
-		renderToolbars: function(metadata) {
-			var deferred;
-			var toolbar = lib.node("pageActions"); //$NON-NLS-0$
-			if (toolbar) {
-				if (metadata) {
-					// now add any "orion.navigate.command" commands that should be shown in non-nav pages.
-					deferred = mExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, toolbar.id, 500).then(function() {
-						commandRegistry.destroy(toolbar);
-						commandRegistry.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
-					});
+			this._inputManager = new mInputManager.InputManager({
+				serviceRegistry: this._serviceRegistry,
+				fileClient: this._fileClient,
+				progressService: this._progressService,
+				statusReporter: this._statusReport,
+				contentTypeRegistry: this._contentTypeRegistry
+			});
+			this._uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+			var	fBrowserDomNode = lib.node(this._parent);
+			
+			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+				var metadata = evt.metadata;
+				var view = this._getEditorView(evt.input, metadata);
+				this._setEditor(view ? view.editor : null);
+				evt.editor = this._editor;
+				var deferred = null;//renderToolbars(metadata);
+				var name = evt.name, target = metadata;
+				if (evt.input === null || evt.input === undefined) {
+					name = this._lastRoot ? this._lastRoot.Name : "";
+					target = this._lastRoot;
+				}
+				this._renderBreadCrumb({
+					task: "Browse", //$NON-NLS-0$
+					name: name,
+					target: target,
+					breadCrumbContainer: "localBreadCrumb",
+					makeBreadcrumbLink: function(segment, folderLocation, folder) {this._makeBreadCrumbLink(segment, folderLocation, folder);}.bind(this),
+					makeBreadcrumFinalLink: true,
+					serviceRegistry: this._serviceRegistry,
+					commandService: this._commandRegistry,
+					searchService: this._searcher,
+					fileService: this._fileClient
+				});
+				function processURL() {
+					this._commandRegistry.processURL(window.location.href);
+				}
+				if (deferred) {
+					deferred.then(processURL);
 				} else {
-					commandRegistry.destroy(toolbar);
+					processURL();
+				}
+			}.bind(this));
+			var model = new mTextModel.TextModel();
+			this._defaultOptions = {
+				parent: fBrowserDomNode,
+				model: model,
+				serviceRegistry: this._serviceRegistry,
+				//pluginRegistry: pluginRegistry,
+				commandRegistry: this._commandRegistry,
+				contentTypeRegistry: this._contentTypeRegistry,
+				inputManager: this._inputManager,
+				readonly: true,
+				preferences: this._preferences,
+				searcher: this._searcher,
+				fileService: this._fileClient,
+				statusReporter: this.statusReport,
+				progressService: this._progressService
+			};
+			var editorContainer = document.createElement("div"); //$NON-NLS-0$
+			var sectionalEditorOptions = objects.clone(this._defaultOptions);
+			sectionalEditorOptions.parent = editorContainer;
+			this._editorView = new mEditorView.EditorView(sectionalEditorOptions);
+		},
+		_setEditor: function(newEditor) {
+			if (this._editor === newEditor) { return; }
+			this._editor = newEditor;
+		},
+		_statusReport: function(message, type, isAccessible) {
+			if (type === "progress") { //$NON-NLS-0$
+				//TODO: Render message in the section header?
+			} else if (type === "error") { //$NON-NLS-0$
+				//TODO: Render message in the section header?
+			} else {
+				//TODO: Render message in the section header?
+			}
+		},
+		_makeBreadCrumbLink: function(segment, folderLocation, folder) {
+			var resource = folder ? folder.Location : this._fileClient.fileServiceRootURL(folderLocation);
+			segment.href = this._uriTemplate.expand({resource: resource});
+		},
+		_renderBreadCrumb: function(options) {
+			var fileSystemRootName;
+			var breadcrumbRootName = options.breadcrumbRootName;
+			var serviceRegistry = options.serviceRegistry;
+			if (options.target) { // we have metadata
+				if (options.searchService) {
+					options.searchService.setLocationByMetaData(options.target);
+				}
+				if (options.fileService && !options.breadcrumbTarget) {
+					fileSystemRootName = breadcrumbRootName ? breadcrumbRootName + " " : ""; //$NON-NLS-1$ //$NON-NLS-0$
+					fileSystemRootName = fileSystemRootName + options.fileService.fileServiceName(options.target.Location);
+					breadcrumbRootName = null;
+				}
+			} else {
+				if (!options.breadcrumbTarget) {
+					breadcrumbRootName = breadcrumbRootName || options.task || options.name;
 				}
 			}
-			var rightToolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
-			if (rightToolbar) {
-				commandRegistry.destroy(rightToolbar);
-				if (metadata) {
-					commandRegistry.renderCommands(rightToolbar.id, rightToolbar, metadata, editor, "button"); //$NON-NLS-0$
+			var locationNode = lib.node(options.breadCrumbContainer);
+			if (locationNode) {
+				lib.empty(locationNode);
+				var fileClient = serviceRegistry && new mFileClient.FileClient(serviceRegistry);
+				var resource = options.breadcrumbTarget || options.target;
+				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
+				new mBreadcrumbs.BreadCrumbs({
+					container: locationNode,
+					resource: resource,
+					rootSegmentName: breadcrumbRootName,
+					workspaceRootSegmentName: fileSystemRootName,
+					workspaceRootURL: workspaceRootURL,
+					makeFinalHref: options.makeBreadcrumFinalLink,
+					makeHref: options.makeBreadcrumbLink
+				});
+			}
+		},
+		_getEditorView: function(input, metadata) {
+			var view = null;
+			if (metadata && input) {
+				var options = objects.mixin({
+					input: input,
+					readonly: true,
+					showProjectView: false,
+					metadata: metadata,
+				}, this._defaultOptions);
+				//TODO better way of registering built-in editors
+				if (metadata.Directory) {
+					view = new mFolderView.FolderView(options);
+				} else {
+					var id = input.editor;
+					if (!id || id === "orion.editor") { //$NON-NLS-0$
+						options.editorView = this._editorView;
+						view = new mFolderView.FolderView(options);
+					} else if (id === "orion.markdownViewer") { //$NON-NLS-0$
+						view = new mMarkdownView.MarkdownEditorView(options);
+					} else {
+						var editors = this._serviceRegistry.getServiceReferences("orion.edit.editor"); //$NON-NLS-0$
+						for (var i=0; i<editors.length; i++) {
+							if (editors[i].getProperty("id") === id) { //$NON-NLS-0$
+								options.editorService = editors[i];
+								view = new mPluginEditorView.PluginEditorView(options);
+								break;
+							}
+						}
+					}
 				}
 			}
-			var settingsToolbar = lib.node("settingsActions"); //$NON-NLS-0$
-			if (settingsToolbar) {
-				commandRegistry.destroy(settingsToolbar);
-				if (metadata) {
-					commandRegistry.renderCommands(settingsToolbar.id, settingsToolbar, metadata, editor, "button"); //$NON-NLS-0$
+			if (this._currentEditorView !== view) {
+				this._commandRegistry.closeParameterCollector();
+				if (this._currentEditorView) {
+					this._currentEditorView.destroy();
+				}
+				this._currentEditorView = view;
+				if (this._currentEditorView) {
+					this._currentEditorView.create();
 				}
 			}
-			return deferred;
+			return this._currentEditorView;
+		},
+		refresh: function(fileURI) {
+			this._inputManager.setInput(fileURI);
 		},
 		create: function() {
-			if(this._metadata.Projects){ //this is a workspace root
-				this.displayWorkspaceView();
-			}
-			if(this.editorView) {
-				this.displayFolderView(this._metadata);
-			} else if(this._metadata.Children){
-				this.displayFolderView(this._metadata);
-			} else if(this._metadata.ChildrenLocation){
-				this.progress.progress(this.fileClient.fetchChildren(this._metadata.ChildrenLocation), "Fetching children of " + this._metadata.Name).then(function(children) {
-					this._metadata.Children = children;
-					this.displayFolderView(this._metadata);
-				}.bind(this));
-			}
 		},
 		destroy: function() {
-			if(this.editorView) {
-				this.editorView. editor.getTextView().getModel().removeEventListener("Changed", this._editorViewModelChangedListener); //$NON-NLS-0$
-				this.editorView.destroy();
-				this.editor = null;
-			}
-			var mainSplitter = mGlobalCommands.getMainSplitter();
-			if(mainSplitter) {
-				mainSplitter.splitter.removeEventListener("toggle", this._splitterToggleListener); //$NON-NLS-0$
-			}
-			if (this.folderNavExplorer) {
-				this.folderNavExplorer.destroy();
-			}
-			this.folderNavExplorer = null;
-			if (this._node && this._node.parentNode) {
-				this._node.parentNode.removeChild(this._node);
-			}
-			if(this.projectView) {
-				this.projectView.destroy();
-			}
-			if(this.projectEditor){
-				this.projectEditor.destroy();
-			}
-			this._node = null;
 		}
 	});
 	return {FileBrowser: FileBrowser};
-	*/
-return exports;
 });

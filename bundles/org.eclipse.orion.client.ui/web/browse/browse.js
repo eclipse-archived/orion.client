@@ -9,12 +9,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define */
-define(['orion/bootstrap', 'orion/widgets/nav/fileBrowser'], function(mBootstrap, mFileBrowser) {
+/*global define window*/
+define(['orion/bootstrap', 'orion/PageUtil', 'orion/widgets/nav/fileBrowser'], function(mBootstrap, PageUtil, mFileBrowser) {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
-		var pluginRegistry = core.pluginRegistry;
+		//var pluginRegistry = core.pluginRegistry;
 		var preferences = core.preferences;
-		mFileBrowser.startup(serviceRegistry, pluginRegistry, preferences); 
+		
+		var fBrowser = new mFileBrowser.FileBrowser("fileBrowser", serviceRegistry, preferences); 
+		window.addEventListener("hashchange", function() { //$NON-NLS-0$
+			fBrowser.refresh(PageUtil.hash());
+		});
+		fBrowser.refresh(PageUtil.hash());
 	});
 });
