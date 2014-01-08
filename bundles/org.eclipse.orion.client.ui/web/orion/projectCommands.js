@@ -363,7 +363,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				callback: function(data) {
 					var item = forceSingleItem(data.items);
 					
-					data.oldParams = item.params;
+					data.oldParams = item.Params;
 	
 					var func = arguments.callee;
 					var params = handleParamsInCommand(func, data, start? "Start application" : "Stop application");
