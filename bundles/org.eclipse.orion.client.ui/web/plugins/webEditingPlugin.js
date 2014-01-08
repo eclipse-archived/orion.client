@@ -230,7 +230,7 @@ define([
 						match: "(\\b)(TODO)(\\s|$)(.*)",
 						name: "meta.annotation.task.todo",
 						captures: {
-							2: {name: "keyword.other.documentation.tag"},
+							2: {name: "keyword.other.documentation.task"},
 							4: {name: "comment.line"}
 						}
 					}
@@ -246,12 +246,12 @@ define([
 						name: "keyword.other.documentation.tag"
 					}, {
 						match: "\\<\\S*\\>?",
-						name: "keyword.other.documentation.tag"
+						name: "keyword.other.documentation.markup"
 					}, {
 						match: "(\\b)(TODO)(\\s|$)(.*)",
 						name: "meta.annotation.task.todo",
 						captures: {
-							2: {name: "keyword.other.documentation.tag"},
+							2: {name: "keyword.other.documentation.task"},
 							4: {name: "comment.block"}
 						}
 					}

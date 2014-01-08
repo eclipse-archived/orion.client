@@ -1,52 +1,44 @@
-.token_singleline_comment {
+.comment {
 	color: #3C802C;
 }
 
-.token_multiline_comment {
-	color: #3C802C;
-}
-
-.token_doc_comment {
+.comment.block.documentation {
 	color: #00008F;
 }
 
-a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
+a.comment {
 	text-decoration: underline;
 }
 
-.token_doc_html_markup {
+.keyword.other.documentation.markup {
 	color: #7F7F9F;
 }
 
-.token_doc_tag {
+.keyword.other.documentation {
 	color: #7F9FBF;
 }
 
-.token_task_tag {
-	color: #7F9FBF;
-}
-
-.token_string {
+.string {
 	color: #446fbd;
 }
 
-.token_number {
+.constant.numeric {
 	color: blue;
 }
 
-.token_keyword {
+.keyword {
 	color: #CC4C07;
 	font-weight: bold;
 }
 
-.token_space {
+.punctuation.separator.space {
 	/* images/white_space.png */
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAAXNSR0IArs4c6QAAABVJREFUCNdj3L17938GBgYGJgYoAAAxOAM004kASgAAAABJRU5ErkJggg==");
 	background-repeat: no-repeat;
 	background-position: center center;
 }
 
-.token_tab {
+.punctuation.separator.tab {
 	/* images/white_tab.png */
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAFCAYAAABmWJ3mAAAAAXNSR0IArs4c6QAAABtJREFUCNdj2L17938GKEBmYwgQJ0m8IAMDAwDemh/hgxuOkwAAAABJRU5ErkJggg==");
 	background-repeat: no-repeat;
