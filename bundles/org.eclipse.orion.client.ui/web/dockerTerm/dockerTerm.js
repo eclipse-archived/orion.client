@@ -52,7 +52,7 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
             fileService: fileClient
         });
         var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-        new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
         mGlobalCommands.generateBanner("orion-dockerTerminalPage", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
         mGlobalCommands.setPageTarget({
@@ -101,7 +101,16 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
                 }
                 term.focus();
             }, function(error) {
-                window.console.log(error);
+				var display = {};
+				display.Severity = "Error"; //$NON-NLS-0$
+				display.HTML = false;
+				try {
+					var resp = JSON.parse(error.responseText);
+					display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+				} catch (Exception) {
+					display.Message = error.message;
+				}
+				statusService.setProgressResult(display); //$NON-NLS-0$
             });
         };
 
