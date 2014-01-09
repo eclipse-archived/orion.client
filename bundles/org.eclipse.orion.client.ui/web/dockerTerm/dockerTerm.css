@@ -8,15 +8,12 @@ html,body {
 }
 
 .terminal {
- 	height: 100%;
-	width: 100%;
 	font-size: 11pt;
-	font-family: monospace;
-	color: #ff0000;
-	background: #383734
+	margin-left: 5px;
+	margin-top: 3px;
 }
 
 .terminal-cursor {
-	color: #000;
+	color: #000000;
 	background: #f0f0f0;
 }
