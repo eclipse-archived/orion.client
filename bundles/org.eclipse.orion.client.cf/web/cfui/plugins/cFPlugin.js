@@ -132,15 +132,13 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 			return this._retryWithLogin(props, this._start);
 		},
 		
-		_start: function(props) {
+		_start: function(props, deferred) {
 			if (props.Target && props.Name){
-				var that = this;
-				var deferred = new Deferred();
 				cFService.startApp(props.Target, props.Name).then(
 					function(result){
 						var app = result.entity;
 						deferred.resolve({
-							Running: (app.state === "STARTED" ? true : false),
+							Running: (app.state === "STARTED" ? true : false)
 						});
 					}, function(error){
 						if (error.HttpCode === 404){
@@ -170,10 +168,8 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 			return this._retryWithLogin(props, this._stop);
 		},
 		
-		_stop: function (props) {
+		_stop: function (props, deferred) {
 			if (props.Target && props.Name){
-				var that = this;
-				var deferred = new Deferred();
 				cFService.stopApp(props.Target, props.Name).then(
 					function(result){
 						var app = result.entity;
