@@ -334,8 +334,9 @@ define([
 				begin: "(<!(?:doctype|DOCTYPE))",
 				end: "(>)",
 				captures: {
-					1: {name: "entity.name.tag"},
-				}
+					1: {name: "entity.name.tag.doctype.html"},
+				},
+				name: "meta.tag.doctype.html",
 			}, {
 				begin: "(<script)([^>]*)(>)",
 				end: "(</script>|$)",
@@ -373,6 +374,7 @@ define([
 				captures: {
 					1: {name: "entity.name.tag"},
 				},
+				name: "meta.tag.html",
 				patterns: [
 					{
 						include: "#comment"

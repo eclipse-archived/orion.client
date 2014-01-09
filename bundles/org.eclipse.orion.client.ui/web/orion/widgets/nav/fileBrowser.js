@@ -79,27 +79,17 @@ define([
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				var metadata = evt.metadata;
+				this._breadCrumbName = evt.name;
+				this._breadCrumbTarget = metadata;
+				if (evt.input === null || evt.input === undefined) {
+					this._breadCrumbName = this._lastRoot ? this._lastRoot.Name : "";
+					this._breadCrumbTarget = this._lastRoot;
+				}
+				//this._breadCrumbMaker("localBreadCrumb");
 				var view = this._getEditorView(evt.input, metadata);
 				this._setEditor(view ? view.editor : null);
 				evt.editor = this._editor;
 				var deferred = null;//renderToolbars(metadata);
-				var name = evt.name, target = metadata;
-				if (evt.input === null || evt.input === undefined) {
-					name = this._lastRoot ? this._lastRoot.Name : "";
-					target = this._lastRoot;
-				}
-				this._renderBreadCrumb({
-					task: "Browse", //$NON-NLS-0$
-					name: name,
-					target: target,
-					breadCrumbContainer: "localBreadCrumb",
-					makeBreadcrumbLink: function(segment, folderLocation, folder) {this._makeBreadCrumbLink(segment, folderLocation, folder);}.bind(this),
-					makeBreadcrumFinalLink: true,
-					serviceRegistry: this._serviceRegistry,
-					commandService: this._commandRegistry,
-					searchService: this._searcher,
-					fileService: this._fileClient
-				});
 				function processURL() {
 					this._commandRegistry.processURL(window.location.href);
 				}
@@ -130,6 +120,22 @@ define([
 			sectionalEditorOptions.parent = editorContainer;
 			this._editorView = new mEditorView.EditorView(sectionalEditorOptions);
 		},
+		_breadCrumbMaker: function(bcContainer, maxLength){
+			this._renderBreadCrumb({
+				task: "Browse", //$NON-NLS-0$
+				name: this._breadCrumbName,
+				target: this._breadCrumbTarget,
+				breadCrumbContainer: bcContainer,
+				makeBreadcrumbLink: function(segment, folderLocation, folder) {this._makeBreadCrumbLink(segment, folderLocation, folder);}.bind(this),
+				makeBreadcrumFinalLink: true,
+				serviceRegistry: this._serviceRegistry,
+				commandService: this._commandRegistry,
+				searchService: this._searcher,
+				maxLength: maxLength,
+				fileService: this._fileClient
+			});
+		},
+		
 		_setEditor: function(newEditor) {
 			if (this._editor === newEditor) { return; }
 			this._editor = newEditor;
@@ -173,6 +179,7 @@ define([
 				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
 				new mBreadcrumbs.BreadCrumbs({
 					container: locationNode,
+					maxLength: options.maxLength,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
 					workspaceRootSegmentName: fileSystemRootName,
@@ -193,11 +200,13 @@ define([
 				}, this._defaultOptions);
 				//TODO better way of registering built-in editors
 				if (metadata.Directory) {
+					options.breadCrumbMaker = function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this);
 					view = new mFolderView.FolderView(options);
 				} else {
 					var id = input.editor;
 					if (!id || id === "orion.editor") { //$NON-NLS-0$
 						options.editorView = this._editorView;
+						options.breadCrumbMaker = function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this);
 						view = new mFolderView.FolderView(options);
 					} else if (id === "orion.markdownViewer") { //$NON-NLS-0$
 						view = new mMarkdownView.MarkdownEditorView(options);

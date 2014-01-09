@@ -45,6 +45,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
 			this._workspaceRootURL = options.workspaceRootURL;
             this._makeHref = options.makeHref;
             this._makeFinalHref = options.makeFinalHref;
+            this._maxLength = options.maxLength;
             this.path = "";
             this.measure();
             this.render();
@@ -250,8 +251,12 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         	var middleWidth = this._container;
 
 			middleWidth.style.width = 'auto';
-        
-        	this.MAX_LENGTH = middleWidth.offsetWidth;
+			
+			if(this._maxLength) {
+        		this.MAX_LENGTH = this._maxLength;
+			} else {
+        		this.MAX_LENGTH = middleWidth.offsetWidth;
+        	}
 
             this.refresh();
             

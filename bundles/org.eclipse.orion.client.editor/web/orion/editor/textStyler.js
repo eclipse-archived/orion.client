@@ -290,7 +290,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 							},
 							current.pattern,
 							block.getStyler(),
-							model);
+							model,
+							block);
 						parse(text.substring(contentStart, result.index + 1), contentStart, testBlock, false, styles2);
 						if (!styles2.length || styles2[styles2.length - 1].end <= result.index) {
 							resultEnd = testBlock;
@@ -309,13 +310,14 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		return results;
 	};
 
-	function Block(bounds, pattern, styler, model) {
+	function Block(bounds, pattern, styler, model, parent) {
 		this.start = bounds.start;
 		this.end = bounds.end;
 		this.contentStart = bounds.contentStart;
 		this.contentEnd = bounds.contentEnd;
 		this.pattern = pattern;
 		this._styler = styler;
+		this._parent = parent;
 		this._linePatterns = [];
 		this._blockPatterns = [];
 		this._enclosurePatterns = {};
@@ -339,6 +341,59 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				current.adjustStart(value);
 			});
 		},
+		computeStyle: function(model, offset) {
+			if (!(this.pattern && this.start <= offset && offset < this.end)) {
+				return null;
+			}
+
+			var fullBlock = {
+				start: this.start,
+				end: this.end,
+				style: this.pattern.pattern.name
+			};
+			if (this.contentStart <= offset && offset < this.contentEnd) {
+				if (this.pattern.pattern.contentName) {
+					return {
+						start: this.contentStart,
+						end: this.contentEnd,
+						style: this.pattern.pattern.contentName
+					};
+				}
+				return fullBlock;
+			}
+
+			var regex, captures, testString, index;
+			if (offset < this.contentStart) {
+				captures = this.pattern.pattern.beginCaptures || this.pattern.pattern.captures;
+				if (!captures) {
+					return fullBlock;
+				}
+				regex = this.pattern.regexBegin;
+				testString = model.getText(this.start, this.contentStart);
+				index = this.start;
+			} else {
+				captures = this.pattern.pattern.endCaptures || this.pattern.pattern.captures;
+				if (!captures) {
+					return fullBlock;
+				}
+				regex = this.pattern.regexEnd;
+				testString = model.getText(this.contentEnd, this.end);
+				index = this.contentEnd;
+			}
+			
+			regex.lastIndex = 0;
+			var result = regex.exec(testString);
+			if (result) {
+				var styles = [];
+				getCaptureStyles(result, captures, index, styles);
+				for (var i = 0; i < styles.length; i++) {
+					if (styles[i].start <= offset && offset < styles[i].end) {
+						return styles[i];
+					}
+				}
+			}
+			return fullBlock;
+		},
 		detectTasks: function() {
 			return this._styler._getDetectTasks();
 		},
@@ -356,6 +411,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		},
 		getLinePatterns: function() {
 			return this._linePatterns;
+		},
+		getParent: function() {
+			return this._parent;
 		},
 		getPatternManager: function() {
 			return this._styler._getPatternManager();
@@ -391,6 +449,15 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		}
 	};
 
+	function TextStylerAccessor(styler) {
+		this._styler = styler;
+	}
+	TextStylerAccessor.prototype = {
+		getStyles: function(offset) {
+			return this._styler.getStyles(offset);
+		}
+	};
+
 	function TextStyler (view, annotationModel, patternManager) {
 		this.whitespacesVisible = this.spacesVisible = this.tabsVisible = false;
 		this.detectHyperlinks = true;
@@ -400,6 +467,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		this.view = view;
 		this.annotationModel = annotationModel;
 		this.patternManager = patternManager;
+		this._accessor = new TextStylerAccessor(this);
 		this._bracketAnnotations = undefined;
 
 		var self = this;
@@ -452,6 +520,38 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				view.removeEventListener("LineStyle", this._listener.onLineStyle); //$NON-NLS-0$
 				this.view = null;
 			}
+		},
+		getStyleAccessor: function() {
+			return this._accessor;
+		},
+		getStyles: function(offset) {
+			var result = [];
+			var model = this.view.getModel();
+			if (model.getBaseModel) {
+				model = model.getBaseModel();
+			}
+			var block = this._findBlock(this._rootBlock, offset);
+			var lineIndex = model.getLineAtOffset(offset);
+			var lineText = model.getLine(lineIndex);
+			var styles = [];
+			parse(lineText, model.getLineStart(lineIndex), block, false, styles);
+			for (var i = 0; i < styles.length; i++) {
+				if (offset < styles[i].start) {
+					break;
+				}
+				if (styles[i].start <= offset && offset < styles[i].end) {
+					result.push(styles[i]);
+					break;
+				}
+			}
+			while (block) {
+				var style = block.computeStyle(model, offset);
+				if (style) {
+					result.splice(0, 0, style);
+				}
+				block = block.getParent();
+			}
+			return result;
 		},
 		setHighlightCaretLine: function(highlight) {
 			this.highlightCaretLine = highlight;
