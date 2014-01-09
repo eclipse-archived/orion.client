@@ -68,25 +68,14 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 			};
 		},
 		
-//		deploy: function(item, projectMetadata, props) {
-//			var i = resource.lastIndexOf('/');
-//			var location = resource.substring(0, i);
-//			return {
-//				uriTemplate: "{+OrionHome}/cloudoe/applications/appRun.html#" +
-//					",location=" + encodeURIComponent(location),
-//				width: "350px",
-//				height: "175px"
-//			};
-//		},
-
-		getState: function(props) {
+		_retryWithLogin: function(props, func) {
 			var that = this;
 			var deferred = new Deferred();
 			
 			if(props.user && props.password){
 				cFService.login(props.Target.Url, props.user, props.password).then(
 					function(result){
-						that._getState(props, deferred);
+						func(props, deferred);
 					}, function(error){
 						error.Retry = {
 							parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
@@ -96,10 +85,14 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 					}
 				);
 			} else {
-				that._getState(props, deferred);
+				func(props, deferred);
 			}
 			
 			return deferred;
+		},
+
+		getState: function(props) {
+			return this._retryWithLogin(props, this._getState);
 		},
 		
 		_getState: function(props, deferred) {
@@ -136,11 +129,79 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 		},
 		
 		start: function(props) {
-			
+			return this._retryWithLogin(props, this._start);
 		},
 		
-		stop: function (props) {
-			
+		_start: function(props) {
+			if (props.Target && props.Name){
+				var that = this;
+				var deferred = new Deferred();
+				cFService.startApp(props.Target, props.Name).then(
+					function(result){
+						var app = result.entity;
+						deferred.resolve({
+							Running: (app.state === "STARTED" ? true : false),
+						});
+					}, function(error){
+						if (error.HttpCode === 404){
+							deferred.resolve({
+								Running: false,
+								Message: error.Message
+							});
+						} else if (error.JsonData && error.JsonData.error_code) {
+							var err = error.JsonData;
+							if (err.error_code === "CF-InvalidAuthToken"){
+								error.Retry = {
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
+									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+								};
+							}
+							deferred.reject(error);
+						} else {
+							deferred.reject(error);
+						}
+					}
+				);
+				return deferred;
+			}
+		},
+		
+		stop: function(props) {
+			return this._retryWithLogin(props, this._stop);
+		},
+		
+		_stop: function (props) {
+			if (props.Target && props.Name){
+				var that = this;
+				var deferred = new Deferred();
+				cFService.stopApp(props.Target, props.Name).then(
+					function(result){
+						var app = result.entity;
+						deferred.resolve({
+							Running: (app.state === "STOPPED" ? false : true),
+						});
+					}, function(error){
+						if (error.HttpCode === 404){
+							deferred.resolve({
+								Running: false,
+								Message: error.Message
+							});
+						} else if (error.JsonData && error.JsonData.error_code) {
+							var err = error.JsonData;
+							if (err.error_code === "CF-InvalidAuthToken"){
+								error.Retry = {
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
+									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+								};
+							}
+							deferred.reject(error);
+						} else {
+							deferred.reject(error);
+						}
+					}
+				);
+				return deferred;
+			}
 		}
 	}, {
 		name: "Deploy to Cloud Foundry",
@@ -416,16 +477,16 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	/** Add cf start command **/
 	var startImpl = {
 		callback: function(args, context) {
-			return cFService.startApp(args.app, context.cwd).then(function(result) {
-				if (!result || !result.applications) {
+			return cFService.startApp(null, args.app, context.cwd).then(function(result) {
+				if (!result || !result.entity) {
 					return "Application not found";
 				}
-				var strResult = "";
-				result.applications.forEach(function(item) {
-					var uri = item.uris[0];
-					strResult += "\nApplication " + item.name + " ready at: [" + uri + "](http://" + uri + ")";
-				});
-				return strResult;
+				var app = result.entity;
+				if (app.state === "STARTED"){
+					return "Application " + app.name + " started";
+				} else {
+					return "Problems while starting application " + app.name;
+				}
 			});
 		}
 	};
@@ -447,15 +508,16 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	/** Add cf stop command **/
 	var stopImpl = {
 		callback: function(args, context) {
-			return cFService.stopApp(args.app, context.cwd).then(function(result) {
-				if (!result || !result.applications) {
+			return cFService.stopApp(null, args.app, context.cwd).then(function(result) {
+				if (!result || !result.entity) {
 					return "Application not found";
 				}
-				var strResult = "";
-				result.applications.forEach(function(item) {
-					strResult += "Application " + item.name + " stopped";
-				});
-				return strResult;
+				var app = result.entity;
+				if (app.state === "STOPPED"){
+					return "Application " + app.name + " stopped";
+				} else {
+					return "Problems while stopping application " + app.name;
+				}
 			});
 		}
 	};

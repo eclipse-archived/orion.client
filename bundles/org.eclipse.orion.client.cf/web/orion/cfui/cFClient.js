@@ -165,20 +165,30 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("GET", require.toUrl("cfapi/apps"));
 			},
 			
-			startApp: function(name, contentLocation) {
-				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
+			startApp: function(target, name, contentLocation) {
+				var startReq = {
 					Name: name, 
 					ContentLocation: contentLocation,
 					State: "Started"
-				});
+				};
+				
+				if (target)
+					startReq.Target = target;
+				
+				return this._xhrV1("PUT", require.toUrl("cfapi/apps"), startReq);
 			},
 			
-			stopApp: function(name, contentLocation) {
-				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
+			stopApp: function(target, name, contentLocation) {
+				var stopReq = {
 					Name: name, 
 					ContentLocation: contentLocation,
 					State: "Stopped"
-				});
+				};
+				
+				if (target)
+					stopReq.Target = target;
+				
+				return this._xhrV1("PUT", require.toUrl("cfapi/apps"), stopReq);
 			}
 		};
 		
