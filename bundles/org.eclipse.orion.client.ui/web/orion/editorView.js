@@ -239,15 +239,21 @@ define([
 			}
 		},
 		_init: function() {
-			var editorPreferences = this.editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences, function (prefs) {
-				if (!prefs) {
-					editorPreferences.getPrefs(this.updateSettings.bind(this));
-				} else {
-					this.updateSettings(prefs);
-				}
-			}.bind(this));
-			var themePreferences = new mThemePreferences.ThemePreferences(this.preferences, new mThemeData.ThemeData());
-			themePreferences.apply();
+			var editorPreferences = null;
+			if(this.preferences) {
+				editorPreferences = this.editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences, function (prefs) {
+					if (!prefs) {
+						editorPreferences.getPrefs(this.updateSettings.bind(this));
+					} else {
+						this.updateSettings(prefs);
+					}
+				}.bind(this));
+			}
+			var themePreferences = null;
+			if(this.preferences) {
+				themePreferences = new mThemePreferences.ThemePreferences(this.preferences, new mThemeData.ThemeData());
+				themePreferences.apply();
+			}
 			var localSettings;
 
 			var self = this;
@@ -307,7 +313,9 @@ define([
 					textView.invokeAction("toggleWrapMode", true); //$NON-NLS-0$
 					var wordWrap = textView.getOptions("wrapMode"); //$NON-NLS-0$
 					self.settings.wordWrap = wordWrap;
-					editorPreferences.setPrefs(self.settings);
+					if(editorPreferences) {
+						editorPreferences.setPrefs(self.settings);
+					}
 					return true;
 				});
 				
@@ -370,7 +378,9 @@ define([
 			};
 
 			this.dispatcher = new mDispatcher.Dispatcher(this.serviceRegistry, editor, inputManager);
-			localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
+			if(themePreferences && editorPreferences){
+				localSettings = new EditorSettings({local: true, editor: editor, themePreferences: themePreferences, preferences: editorPreferences});
+			}
 
 			inputManager.addEventListener("InputChanged", function(event) { //$NON-NLS-0$
 				var textView = editor.getTextView();
@@ -420,8 +430,9 @@ define([
 				contextImpl[method] = editor[method].bind(editor);
 			});
 			serviceRegistry.registerService("orion.edit.context", contextImpl, null); //$NON-NLS-0$
-
-			this.editorPreferences.getPrefs(this.updateSettings.bind(this));
+			if(this.editorPreferences) {
+				this.editorPreferences.getPrefs(this.updateSettings.bind(this));
+			}
 		},
 		create: function() {
 			this.editor.install();

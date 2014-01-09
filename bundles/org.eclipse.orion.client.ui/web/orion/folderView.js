@@ -62,6 +62,9 @@ define([
 			}
 		},
 		getCellHeaderElement: function(col_no) {
+			if(this.explorer.breadCrumbMaker) {
+				return null;
+			}
 			var td;
 			if (col_no === 0) {
 				td = document.createElement("th"); //$NON-NLS-0$
@@ -95,6 +98,7 @@ define([
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.readonly = options.readonly;
+		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.treeRoot = {};
 		this.parent = lib.node(options.parentId);	
 		this.toolbarId = this.parent.id + "Tool"; //$NON-NLS-0$
@@ -178,6 +182,7 @@ define([
 		this.showProjectView = typeof options.showProjectView === 'undefined' ? true : options.showProjectView;
 		this.showFolderNav = true;
 		this.editorView = options.editorView;
+		this.breadCrumbMaker = options.breadCrumbMaker;
 		this._init();
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
@@ -187,6 +192,7 @@ define([
 			}
 			this.markdownView = new mMarkdownView.MarkdownView({
 				fileClient : this.fileClient,
+				canHide: !this.readonly,
 				progress : this.progress
 			});
 			if(this.showProjectView){
@@ -270,7 +276,7 @@ define([
 						if (this.showFolderNav) {
 							var navNode = document.createElement("div"); //$NON-NLS-0$
 							navNode.id = "folderNavNode"; //$NON-NLS-0$
-							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: true});
+							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: !this.readonly});
 							if(this.editorView) {//To embed an orion editor in the section
 								foldersSection.setContent(this.editorView.getParent());
 								this.editorView.create();
@@ -287,6 +293,7 @@ define([
 								this.folderNavExplorer = new FolderNavExplorer({
 									parentId: navNode,
 									readonly: this.readonly,
+									breadCrumbMaker: this.breadCrumbMaker,
 									serviceRegistry: this.serviceRegistry,
 									fileClient: this.fileClient,
 									commandRegistry: this.commandRegistry,
@@ -295,6 +302,15 @@ define([
 								foldersSection.embedExplorer(this.folderNavExplorer);
 								this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
 								this.folderNavExplorer.loadRoot(this._metadata);
+							}
+							if(this.breadCrumbMaker) {
+								var tileNode = foldersSection.getTitleElement();
+								if(tileNode) {
+									lib.empty(tileNode);
+									var bcNode = document.createElement("div"); //$NON-NLS-0$
+									tileNode.appendChild(bcNode);
+									this.breadCrumbMaker(bcNode, foldersSection.getHeaderElement().offsetWidth - 24);
+								}
 							}
 						}
 					} else if(sectionName === "readme"){

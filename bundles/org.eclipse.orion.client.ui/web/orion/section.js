@@ -202,6 +202,22 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		},
 		
 		/**
+		 * Get the header DOM node
+		 * @returns {DomNode} The dom node that holds the section header.
+		 */
+		getHeaderElement: function(title){
+			return this.domNode;
+		},
+		
+		/**
+		 * Get the title DOM node
+		 * @returns {DomNode} The dom node that holds the section title.
+		 */
+		getTitleElement: function(title){
+			return this.titleNode;
+		},
+		
+		/**
 		 * Changes the contents of the section.
 		 * @param {String|DomNode} content
 		 */
