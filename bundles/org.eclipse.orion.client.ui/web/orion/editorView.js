@@ -321,7 +321,8 @@ define([
 			var contentAssistFactory = readonly ? null : {
 				createContentAssistMode: function(editor) {
 					var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
-					contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
+					
+					var setContentAssistProviders = function() {
 						// Content assist is about to be activated; set its providers.
 						var fileContentType = inputManager.getContentType();
 						var fileName = editor.getTitle();
@@ -340,10 +341,18 @@ define([
 						contentAssist.setEditorContextFactory(EditorContext.getEditorContext.bind(null, serviceRegistry));
 						contentAssist.setProviders(providers);
 						contentAssist.setProgress(progress);
-					});
+					}
+					
+					contentAssist.addEventListener("Activating", setContentAssistProviders); //$NON-NLS-0$
 					var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
 					var result = new mContentAssist.ContentAssistMode(contentAssist, widget);
 					contentAssist.setMode(result);
+					
+					// preload content assist plugins to reduce the delay 
+					// that happens when a user first triggers content assist
+					setContentAssistProviders();
+					contentAssist.computeProposals();
+					
 					return result;
 				}
 			};
