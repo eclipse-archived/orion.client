@@ -178,14 +178,6 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 		getTemplateProposals: function(prefix, offset, context) {
 			var proposals = [];
 			var templates = this.getTemplates();
-			if (0 < templates.length) {
-				proposals[0] = {
-					proposal: '',
-					description: 'Templates',
-					style: 'noemphasis_title',
-					unselectable: true
-				};
-			}
 			for (var t = 0; t < templates.length; t++) {
 				var template = templates[t];
 				if (template.match(prefix)) {
@@ -194,6 +186,18 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 					proposals.push(proposal);
 				}
 			}
+			
+			if (0 < proposals.length) {
+				// if any templates were added to the list of 
+				// proposals, add a title as the first element
+				proposals.splice(0, 0, {
+					proposal: '',
+					description: 'Templates', //$NON-NLS-0$
+					style: 'noemphasis_title', //$NON-NLS-0$
+					unselectable: true
+				});
+			}
+			
 			return proposals;
 		},
 		removePrefix: function(prefix, proposal) {
