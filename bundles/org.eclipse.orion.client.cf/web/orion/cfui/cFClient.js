@@ -143,8 +143,8 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			// Apps CF v2 operations
 			
 			pushApp: function(appName, contentLocation) {
-				return this._xhrV1("POST", require.toUrl("cfapi/apps"), {
-					App: appName, 
+				return this._xhrV1("PUT", require.toUrl("cfapi/apps"), {
+					Name: appName, 
 					ContentLocation: contentLocation
 				});
 			},
