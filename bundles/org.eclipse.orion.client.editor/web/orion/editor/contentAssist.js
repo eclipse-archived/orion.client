@@ -20,8 +20,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	'orion/Deferred', //$NON-NLS-0$
 	'orion/objects', //$NON-NLS-0$
 	'orion/editor/util', //$NON-NLS-0$
-	'orion/util' //$NON-NLS-0$
-], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, textUtil, util) {
+	'orion/util', //$NON-NLS-0$
+	'orion/webui/littlelib' //$NON-NLS-0$
+], function(messages, mKeyBinding, mKeyModes, mEventTarget, Deferred, objects, textUtil, util, lib) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -102,10 +103,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 	};
 	
 	var STYLES = {
-		selected : " selected", //$NON-NLS-0$
+		selected : "selected", //$NON-NLS-0$
 		hr : "proposal-hr", //$NON-NLS-0$
 		emphasis : "proposal-emphasis", //$NON-NLS-0$
 		noemphasis : "proposal-noemphasis", //$NON-NLS-0$
+		noemphasis_title : "proposal-noemphasis-title", //$NON-NLS-0$
 		dfault : "proposal-default" //$NON-NLS-0$
 	};
 	
@@ -374,7 +376,21 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				self.selectedIndex = -1;
 				self.cancel();
 			} else {
-				self.selectedIndex = 0;	
+				self.selectedIndex = 0;
+				while(self.proposals[self.selectedIndex] && self.proposals[self.selectedIndex].unselectable) {
+					self.selectedIndex++;
+				}
+				if (self.proposals[self.selectedIndex]) {
+					if (self.selectedIndex === (self.proposals.length - 1)) {
+						// if there is only one selectable proposal apply it automatically
+						self.contentAssist.apply(self.proposals[self.selectedIndex]);
+					} else if (self.widget) {
+						self.widget.show();
+						self.widget.selectNode(self.selectedIndex);
+					}	
+				} else {
+					self.selectedIndex = -1; // didn't find any selectable items
+				}
 			}
 		});
 		textView.setAction("contentAssistApply", function() { //$NON-NLS-0$
@@ -395,9 +411,22 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		textView.setAction("contentAssistPreviousPage", function() { //$NON-NLS-0$
 			return this.pageUp();
 		}.bind(this));
+		textView.setAction("contentAssistHome", function() { //$NON-NLS-0$
+			if (this.widget) {
+				this.widget.scrollIndex(0, true);
+			}
+			return this.lineDown(0); // select first selectable element starting at the top and moving downwards
+		}.bind(this));
+		textView.setAction("contentAssistEnd", function() { //$NON-NLS-0$
+			return this.lineUp(this.proposals.length - 1); // select first selectable element starting at the bottom and moving up
+		}.bind(this));
 		textView.setAction("contentAssistTab", function() { //$NON-NLS-0$
 			return this.tab();
 		}.bind(this));
+		
+		if (this.widget) {
+			this.widget.setContentAssistMode(this);
+		}
 	}
 	ContentAssistMode.prototype = new mKeyModes.KeyMode();
 	objects.mixin(ContentAssistMode.prototype, {
@@ -410,6 +439,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			bindings.push({actionID: "contentAssistPreviousProposal", keyBinding: new KeyBinding(38)}); //$NON-NLS-0$
 			bindings.push({actionID: "contentAssistNextPage", keyBinding: new KeyBinding(34)}); //$NON-NLS-0$
 			bindings.push({actionID: "contentAssistPreviousPage", keyBinding: new KeyBinding(33)}); //$NON-NLS-0$
+			bindings.push({actionID: "contentAssistHome", keyBinding: new KeyBinding(lib.KEY.HOME)}); //$NON-NLS-0$
+			bindings.push({actionID: "contentAssistEnd", keyBinding: new KeyBinding(lib.KEY.END)}); //$NON-NLS-0$
 			bindings.push({actionID: "contentAssistTab", keyBinding: new KeyBinding(9)}); //$NON-NLS-0$
 			return bindings;
 		},
@@ -419,6 +450,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		/** @private */
 		getContentAssist: function() {
 			return this.contentAssist;
+		},
+		getProposals: function() {
+			return this.proposals;	
 		},
 		isActive: function() {
 			return this.getContentAssist().isActive();
@@ -430,34 +464,90 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				this.contentAssist.textView.removeKeyMode(this);
 			}
 		},
-		lineUp: function() {
-			var newSelected = (this.selectedIndex === 0) ? this.proposals.length - 1 : this.selectedIndex - 1;
-			return this._lineUp(newSelected);
+		/**
+		 * Selects a selectable item in the content assist widget
+		 * iterating backwards for .
+		 * 
+		 * @param index {number} Optional. The index of the item to try and select. 
+		 */
+		lineUp: function(index, noWrap) {
+			return this.selectNew(index, noWrap, false);
 		},
-		_lineUp: function(newSelected) {
-			while (this.proposals[newSelected].unselectable && newSelected > 0) {
-				newSelected--;
+		/**
+		 * Selects the item at the specified index or the next
+		 * selectable item
+		 */
+		lineDown: function(index, noWrap) {
+			return this.selectNew(index, noWrap, true);
+		},
+		selectNew: function(index, noWrap, forward) {
+			var newIndex = index;
+			
+			if (forward) {
+				if (undefined === newIndex) {
+					newIndex = this.selectedIndex + 1;
+				}
+				// handle wrap around
+				if (newIndex >= this.proposals.length) {
+					if (noWrap) {
+						return true; // do nothing
+					} else {
+						newIndex = 0;	
+					}
+				}
+			} else {
+				if (undefined === newIndex) {
+					newIndex = this.selectedIndex - 1;
+				}
+				// handle wrap around
+				if (0 > newIndex) {
+					if (noWrap) {
+						return true; // do nothing
+					} else {
+						newIndex = this.proposals.length - 1;	
+					}
+				}
 			}
-			this.selectedIndex = newSelected;
+			
+			var startIndex = newIndex;
+			while (this.proposals[newIndex] && this.proposals[newIndex].unselectable) {
+				if (forward) {
+					newIndex++;
+					// handle wrap around
+					if (newIndex >= this.proposals.length) {
+						if (noWrap) {
+							return true; // do nothing
+						} else {
+							newIndex = 0;	
+						}
+					}
+				} else {
+					newIndex--;
+					// handle wrap around
+					if (0 > newIndex) {
+						if (noWrap) {
+							return true; // do nothing
+						} else {
+							newIndex = this.proposals.length - 1;	
+						}
+					}
+				}
+				
+				if (newIndex === startIndex) {
+					// looped through all nodes and didn't find any that were selectable
+					newIndex = -1;
+					break;
+				}
+			}
+			
+			this.selectedIndex = newIndex;
+			
 			if (this.widget) {
-				this.widget.setSelectedIndex(this.selectedIndex);
+				this.widget.selectNode(newIndex);
 			}
 			return true;
 		},
-		lineDown: function() {
-			var newSelected = (this.selectedIndex === this.proposals.length - 1) ? 0 : this.selectedIndex + 1;
-			return this._lineDown(newSelected);
-		},
-		_lineDown: function(newSelected) {
-			while (this.proposals[newSelected].unselectable && newSelected < this.proposals.length-1) {
-				newSelected++;
-			}
-			this.selectedIndex = newSelected;
-			if (this.widget) {
-				this.widget.setSelectedIndex(this.selectedIndex);
-			}
-			return true;
-		},
+		
 		pageUp: function() {
 			if (this.widget) {
 				var newSelected = this.widget.getTopIndex();
@@ -465,7 +555,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					this.widget.scrollIndex(newSelected, false);
 					newSelected = this.widget.getTopIndex();
 				}
-				return this._lineUp(newSelected);
+				if (0 === newSelected) {
+					// if we're attempting to select the first item in the list
+					// move down to the next one if it is not selectable
+					return this.lineDown(newSelected, true);	
+				}
+				return this.lineUp(newSelected, true);
 			} else {
 				return this.lineUp();
 			}
@@ -477,7 +572,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					this.widget.scrollIndex(newSelected, true);
 					newSelected = this.widget.getBottomIndex();
 				}
-				return this._lineDown(newSelected);
+				return this.lineDown(newSelected, true);
 			} else {
 				return this.lineDown();
 			}
@@ -534,22 +629,8 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				// the click is handled by the onClick() function
 			}
 		};
-		this.contentAssist.addEventListener("ProposalsComputed", function(event) { //$NON-NLS-0$
-			self.setProposals(event.data.proposals);
-			self.show();
-			if (!self.textViewListenerAdded) {
-				self.textView.addEventListener("MouseDown", self.textViewListener.onMouseDown); //$NON-NLS-0$
-				self.textViewListenerAdded = true;
-			}
-		});
 		this.contentAssist.addEventListener("Deactivating", function(event) { //$NON-NLS-0$
-			self.setProposals([]);
 			self.hide();
-			if (self.textViewListenerAdded) {
-				self.textView.removeEventListener("MouseDown", self.textViewListener.onMouseDown); //$NON-NLS-0$
-				self.textViewListenerAdded = false;
-			}
-			self.textViewListenerAdded = false;
 		});
 		this.scrollListener = function(e) {
 			if (self.isShowing) {
@@ -566,7 +647,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this.textView.focus();
 		},
 		/** @private */
-		createDiv: function(proposal, isSelected, parent, itemIndex) {
+		createDiv: function(proposal, parent, itemIndex) {
 			var document = parent.ownerDocument;
 			var div = util.createElement(document, "div"); //$NON-NLS-0$
 			div.id = "contentoption" + itemIndex; //$NON-NLS-0$
@@ -575,13 +656,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			if (proposal.style === "hr") { //$NON-NLS-0$
 				node = util.createElement(document, "hr"); //$NON-NLS-0$
 			} else {
-				div.className = this.calculateClasses(proposal.style, isSelected);
-				node = document.createTextNode(this.getDisplayString(proposal));
-				if (isSelected) {
-					this.parentNode.setAttribute("aria-activedescendant", div.id); //$NON-NLS-0$
-				}
+				div.className = STYLES[proposal.style] ? STYLES[proposal.style] : STYLES.dfault;
+				node = this._createDisplayNode(div, proposal, itemIndex);
+				div.contentAssistProposalIndex = itemIndex; // make div clickable
 			}
-			div.appendChild(node, div);
+			div.appendChild(node);
 			parent.appendChild(div);
 		},
 		/** @private */
@@ -606,39 +685,62 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this._isAccessible = true;
 		},
 		/** @private */
-		calculateClasses : function(style, isSelected) {
-			var cssClass = STYLES[style];
-			if (!cssClass) {
-				cssClass = STYLES.dfault;
+		_createDisplayNode: function(div, proposal, index) {
+			var node = null;
+			var plainString = null;
+			
+			if (typeof proposal === "string") { //$NON-NLS-0$
+				//for simple string content assist, the display string is just the proposal
+				plainString = proposal;
+			} else if (proposal.description && typeof proposal.description === "string") { //$NON-NLS-0$
+				if (proposal.name && typeof proposal.name === "string") { //$NON-NLS-0$
+					var nameNode = this._createNameNode(proposal.name);
+					nameNode.contentAssistProposalIndex = index;
+					
+					node = document.createElement("span"); //$NON-NLS-0$
+					node.appendChild(nameNode);
+					
+					var descriptionNode = document.createTextNode(proposal.description);
+					node.appendChild(descriptionNode);
+					div.setAttribute("title", proposal.name + proposal.description); //$NON-NLS-0$
+				} else {
+					plainString = proposal.description;
+				}
+			} else {
+				//by default return the straight proposal text
+				plainString = proposal.proposal;
 			}
-			return isSelected ? cssClass + STYLES.selected : cssClass;
+			
+			if (plainString) {
+				node = this._createNameNode(plainString);
+				div.setAttribute("title", plainString); //$NON-NLS-0$
+			}
+			
+			node.contentAssistProposalIndex = index;
+			
+			return node;
 		},
 		/** @private */
-		getDisplayString: function(proposal) {
-			//for simple string content assist, the display string is just the proposal
-			if (typeof proposal === "string") { //$NON-NLS-0$
-				return proposal;
-			}
-			//return the description if applicable
-			if (proposal.description && typeof proposal.description === "string") { //$NON-NLS-0$
-				return proposal.description;
-			}
-			//by default return the straight proposal text
-			return proposal.proposal;
+		_createNameNode: function(name) {
+			var node = document.createElement("span"); //$NON-NLS-0$
+			node.classList.add("proposal-name"); //$NON-NLS-0$
+			node.appendChild(document.createTextNode(name));
+			return node;
 		},
 		/**
 		 * @private
 		 * @returns {Object} The proposal represented by the given node.
 		 */
 		getProposal: function(/**DOMNode*/ node) {
-			var nodeIndex = 0;
-			for (var child = this.parentNode.firstChild; child !== null; child = child.nextSibling) {
-				if (child === node) {
-					return this.proposals[nodeIndex] || null;
-				}
-				nodeIndex++;
+			var proposal = null;
+			
+			var nodeIndex = node.contentAssistProposalIndex;
+			
+			if (nodeIndex) {
+				proposal = this._contentAssistMode.getProposals()[nodeIndex] || null;
 			}
-			return null;
+			
+			return proposal;
 		},
 		/** @private */
 		getTopIndex: function() {
@@ -666,48 +768,54 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		scrollIndex: function(index, top) {
 			this.parentNode.childNodes[index].scrollIntoView(top);
 		},
-		/** Sets the index of the currently selected proposal. */
-		setSelectedIndex: function(/**Number*/ index) {
-			this.selectedIndex = index;
-			this.selectNode(this.parentNode.childNodes[this.selectedIndex]);
-		},
-		/** @private */
-		selectNode: function(/**DOMNode*/ node) {
-			var nodes = this.parentNode.childNodes;
-			for (var i=0; i < nodes.length; i++) {
-				var child = nodes[i];
-				var selIndex = child.className.indexOf(STYLES.selected);
-				if (selIndex >= 0) {
-					child.className = child.className.substring(0, selIndex) + 
-							child.className.substring(selIndex + STYLES.selected.length);
-				}
-				if (child === node) {
-					child.className = child.className + STYLES.selected;
-					this.parentNode.setAttribute("aria-activedescendant", child.id); //$NON-NLS-0$
-					child.focus();
-					if (child.offsetTop < this.parentNode.scrollTop) {
-						child.scrollIntoView(true);
-					} else if ((child.offsetTop + child.offsetHeight) > (this.parentNode.scrollTop + this.parentNode.clientHeight)) {
-						child.scrollIntoView(false);
-					}
+		/**
+		 * Visually selects the node at the specified nodeIndex
+		 * by updating its CSS class and scrolling it into view
+		 * if necessary.
+		 * @param{Number} nodeIndex The index of the node to select
+		 */
+		selectNode: function(nodeIndex) {
+			var node = null;
+			
+			if (this.previousSelectedNode) {
+				this.previousSelectedNode.classList.remove(STYLES.selected);
+			}
+			
+			if (-1 !== nodeIndex) {
+				node = this.parentNode.childNodes[nodeIndex];
+				node.classList.add(STYLES.selected);
+				this.parentNode.setAttribute("aria-activedescendant", node.id); //$NON-NLS-0$
+				node.focus();
+				if (node.offsetTop < this.parentNode.scrollTop) {
+					node.scrollIntoView(true);
+				} else if ((node.offsetTop + node.offsetHeight) > (this.parentNode.scrollTop + this.parentNode.clientHeight)) {
+					node.scrollIntoView(false);
 				}
 			}
+			
+			this.previousSelectedNode = node;
 		},
-		setProposals: function(/**Object[]*/ proposals) {
-			this.proposals = proposals;
+		setContentAssistMode: function(mode) {
+			this._contentAssistMode = mode;
 		},
 		show: function() {
-			if (this.proposals.length === 0) {
+			var proposals = this._contentAssistMode.getProposals();
+			if (proposals.length === 0) {
 				this.hide();
-				return;
+			} else {
+				this.parentNode.innerHTML = "";
+				for (var i = 0; i < proposals.length; i++) {
+					this.createDiv(proposals[i], this.parentNode, i);
+				}
+				this.position();
+				this.parentNode.onclick = this.onClick.bind(this);
+				this.isShowing = true;
+				
+				if (!this.textViewListenerAdded) {
+					this.textView.addEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
+					this.textViewListenerAdded = true;
+				}
 			}
-			this.parentNode.innerHTML = "";
-			for (var i = 0; i < this.proposals.length; i++) {
-				this.createDiv(this.proposals[i], i===0, this.parentNode, i);
-			}
-			this.position();
-			this.parentNode.onclick = this.onClick.bind(this);
-			this.isShowing = true;
 		},
 		hide: function() {
 			if(this.parentNode.ownerDocument.activeElement === this.parentNode) {
@@ -716,6 +824,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this.parentNode.style.display = "none"; //$NON-NLS-0$
 			this.parentNode.onclick = null;
 			this.isShowing = false;
+			
+			if (this.textViewListenerAdded) {
+				this.textView.removeEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
+				this.textViewListenerAdded = false;
+			}
 		},
 		position: function() {
 			var contentAssist = this.contentAssist;
