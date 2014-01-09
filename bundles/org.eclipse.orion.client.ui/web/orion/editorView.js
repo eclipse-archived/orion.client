@@ -439,6 +439,9 @@ define([
 		},
 		destroy: function() {
 			this.editor.uninstall();
+		},
+		getStyleAccessor: function() {
+			this.syntaxHighlighter.getStyler().getStyleAccessor();
 		}
 	};
 	return {EditorView: EditorView};
