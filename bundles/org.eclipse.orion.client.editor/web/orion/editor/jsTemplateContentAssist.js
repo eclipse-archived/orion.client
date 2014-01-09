@@ -57,112 +57,104 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 	var templates = [
 		{
 			prefix: "if", //$NON-NLS-0$
-			description: "if - if statement",
+			name: "if",  //$NON-NLS-0$
+			description: " - if statement", //$NON-NLS-0$
 			template: "if (${condition}) {\n\t${cursor}\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "if", //$NON-NLS-0$
-			description: "if - if else statement",
+			name: "if", //$NON-NLS-0$
+			description: " - if else statement", //$NON-NLS-0$
 			template: "if (${condition}) {\n\t${cursor}\n} else {\n\t\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "for", //$NON-NLS-0$
-			description: "for - iterate over array",
+			name: "for", //$NON-NLS-0$
+			description: " - iterate over array", //$NON-NLS-0$
 			template: "for (var ${i}=0; ${i}<${array}.length; ${i}++) {\n\t${cursor}\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "for", //$NON-NLS-0$
-			description: "for - iterate over array with local var",
+			name: "for", //$NON-NLS-0$
+			description: " - iterate over array with local var", //$NON-NLS-0$
 			template: "for (var ${i}=0; ${i}<${array}.length; ${i}++) {\n\tvar ${value} = ${array}[${i}];\n\t${cursor}\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "for", //$NON-NLS-0$
-			description: "for..in - iterate over properties of an object",
+			name: "for..in", //$NON-NLS-0$
+			description: " - iterate over properties of an object", //$NON-NLS-0$
 			template: "for (var ${property} in ${object}) {\n\tif (${object}.hasOwnProperty(${property})) {\n\t\t${cursor}\n\t}\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "while", //$NON-NLS-0$
-			description: "while - while loop with condition",
+			name: "while", //$NON-NLS-0$
+			description: " - while loop with condition", //$NON-NLS-0$
 			template: "while (${condition}) {\n\t${cursor}\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "do", //$NON-NLS-0$
-			description: "do - do while loop with condition",
+			name: "do", //$NON-NLS-0$
+			description: " - do while loop with condition", //$NON-NLS-0$
 			template: "do {\n\t${cursor}\n} while (${condition});" //$NON-NLS-0$
 		},
 		{
 			prefix: "switch", //$NON-NLS-0$
-			description: "switch - switch case statement",
+			name: "switch", //$NON-NLS-0$
+			description: " - switch case statement", //$NON-NLS-0$
 			template: "switch (${expression}) {\n\tcase ${value1}:\n\t\t${cursor}\n\t\tbreak;\n\tdefault:\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "case", //$NON-NLS-0$
-			description: "case - case statement",
+			name: "case", //$NON-NLS-0$
+			description: " - case statement", //$NON-NLS-0$
 			template: "case ${value}:\n\t${cursor}\n\tbreak;" //$NON-NLS-0$
 		},
 		{
 			prefix: "try", //$NON-NLS-0$
-			description: "try - try..catch statement",
+			name: "try", //$NON-NLS-0$
+			description: " - try..catch statement", //$NON-NLS-0$
 			template: "try {\n\t${cursor}\n} catch (${err}) {\n}" //$NON-NLS-0$
 			},
 		{
 			prefix: "try", //$NON-NLS-0$
-			description: "try - try..catch statement with finally block",
+			name: "try", //$NON-NLS-0$
+			description: " - try..catch statement with finally block", //$NON-NLS-0$
 			template: "try {\n\t${cursor}\n} catch (${err}) {\n} finally {\n}" //$NON-NLS-0$
 		},
 		{
-			prefix: "var", //$NON-NLS-0$
-			description: "var - variable declaration",
-			template: "var ${name};" //$NON-NLS-0$
-		},
-		{
-			prefix: "var", //$NON-NLS-0$
-			description: "var - variable declaration with value",
-			template: "var ${name} = ${value};" //$NON-NLS-0$
-		},
-		{
-			prefix: "let", //$NON-NLS-0$
-			description: "let - local scope variable declaration",
-			template: "let ${name};" //$NON-NLS-0$
-		},
-		{
-			prefix: "let", //$NON-NLS-0$
-			description: "let - local scope variable declaration with value",
-			template: "let ${name} = ${value};" //$NON-NLS-0$
-		},
-		{
-			prefix: "return", //$NON-NLS-0$
-			description: "return - return result",
-			template: "return ${result};" //$NON-NLS-0$
-		},
-		{
 			prefix: "typeof", //$NON-NLS-0$
-			description: "typeof - typeof statement",
+			name: "typeof", //$NON-NLS-0$
+			description: " - typeof statement", //$NON-NLS-0$
 			template: "typeof ${object} === \"${type:" + fromJSON(typeofValues) + "}\"" //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		{
 			prefix: "instanceof", //$NON-NLS-0$
-			description: "instanceof - instanceof statement",
+			name: "instanceof", //$NON-NLS-0$
+			description: " - instanceof statement", //$NON-NLS-0$
 			template: "${object} instanceof ${type}" //$NON-NLS-0$
 		},
 		{
 			prefix: "with", //$NON-NLS-0$
-			description: "with - with statement",
+			name: "with", //$NON-NLS-0$
+			description: " - with statement", //$NON-NLS-0$
 			template: "with (${object}) {\n\t${cursor}\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "function", //$NON-NLS-0$
-			description: "function - function declaration",
+			name: "function", //$NON-NLS-0$
+			description: " - function declaration",  //$NON-NLS-0$
 			template: "function ${name} (${parameter}) {\n\t${cursor}\n}" //$NON-NLS-0$
 		},
 		{
 			prefix: "nls", //$NON-NLS-0$
-			description: "string - non NLS",
+			name: "nls", //$NON-NLS-0$
+			description: " - non NLS string", //$NON-NLS-0$
 			template: "${cursor} //$NON-NLS-${0}$" //$NON-NLS-0$
 		},
 		{
 			prefix: "log", //$NON-NLS-0$
-			description: "log - console log",
+			name: "log", //$NON-NLS-0$
+			description: " - console log", //$NON-NLS-0$
 			template: "console.log(${object});" //$NON-NLS-0$
 		}
 	];

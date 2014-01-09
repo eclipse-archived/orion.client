@@ -214,8 +214,8 @@ define([
 		return string.substring(prefix.length);
 	}
 
-	function createProposalDescription(propName, propType, env) {
-		return propName + " : " + typeUtils.createReadableType(propType, env);
+	function createProposalDescription(propType, env) {
+		return " : " + typeUtils.createReadableType(propType, env);
 	}
 
 	function createInferredProposals(targetTypeName, env, completionKind, prefix, replaceStart, proposals, relevance) {
@@ -231,6 +231,7 @@ define([
 		// add a separator proposal
 		proposals['---dummy' + relevance] = {
 			proposal: '',
+			name: '',
 			description: '---------------------------------',
 			relevance: relevance -1,
 			style: 'hr',
@@ -273,9 +274,10 @@ define([
 					if (propTypeObj.type === 'FunctionType') {
 						res = calculateFunctionProposal(propName,
 								propTypeObj, replaceStart - 1);
-						var funcDesc = res.completion + " : " + typeUtils.createReadableType(propTypeObj, env);
+						var funcDesc = " : " + typeUtils.createReadableType(propTypeObj, env);
 						proposals["$"+propName] = {
 							proposal: res.completion,
+							name: res.completion,
 							description: funcDesc,
 							positions: res.positions,
 							escapePosition: replaceStart + res.completion.length,
@@ -288,7 +290,8 @@ define([
 						proposals["$"+propName] = {
 							proposal: propName,
 							relevance: relevance,
-							description: createProposalDescription(propName, propTypeObj, env),
+							name: propName,
+							description: createProposalDescription(propTypeObj, env),
 							style: 'emphasis',
 							overwrite: true
 						};
@@ -317,7 +320,8 @@ define([
 						var res = calculateFunctionProposal(prop, propType, replaceStart - 1);
 						proposals[prop] = {
 							proposal: removePrefix(prefix, res.completion),
-							description: createProposalDescription(prop, propType, environment),
+							name: prop,
+							description: createProposalDescription(propType, environment),
 							positions: res.positions,
 							escapePosition: replaceStart + res.completion.length,
 							// prioritize methods over fields
@@ -328,7 +332,8 @@ define([
 					} else {
 						proposals[prop] = {
 							proposal: removePrefix(prefix, prop),
-							description: createProposalDescription(prop, propType, environment),
+							name: prop,
+							description: createProposalDescription(propType, environment),
 							relevance: -100,
 							style: 'noemphasis'
 						};
@@ -348,6 +353,7 @@ define([
 		if (proposalAdded) {
 			proposals['---dummy'] = {
 				proposal: '',
+				name: '',
 				description: 'Non-inferred proposals',
 				relevance: -98,
 				style: 'noemphasis',
@@ -677,8 +683,8 @@ define([
 				return 1;
 			}
 
-			var ldesc = l.description.toLowerCase();
-			var rdesc = r.description.toLowerCase();
+			var ldesc = l.name.toLowerCase();
+			var rdesc = r.name.toLowerCase();
 			if (ldesc < rdesc) {
 				return -1;
 			} else if (rdesc < ldesc) {
@@ -782,7 +788,7 @@ define([
 					var target = typeInf.inferTypes(root, environment, self.lintOptions);
 					var proposalsObj = { };
 					createInferredProposals(target, environment, completionKind.kind, context.prefix, offset - context.prefix.length, proposalsObj);
-					if (!context.inferredOnly) {
+					if (context.includeNonInferred) {
 						// include the entire universe as potential proposals
 						createNoninferredProposals(environment, context.prefix, offset - context.prefix.length, proposalsObj);
 					}

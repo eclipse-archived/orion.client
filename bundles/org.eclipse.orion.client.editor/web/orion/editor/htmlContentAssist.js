@@ -31,32 +31,38 @@ define("orion/editor/htmlContentAssist", ['orion/editor/templates'], function(mT
 	var templates = [
 		{
 			prefix: "<img", //$NON-NLS-0$
-			description: "<img> - HTML image element",
+			name: "<img>", //$NON-NLS-0$
+			description: " - HTML image element", //$NON-NLS-0$
 			template: "<img src=\"${cursor}\" alt=\"${Image}\"/>" //$NON-NLS-0$
 		},
 		{
 			prefix: "<a", //$NON-NLS-0$
-			description: "<a> - HTML anchor element",
+			name: "<a>", //$NON-NLS-0$
+			description: " - HTML anchor element", //$NON-NLS-0$
 			template: "<a href=\"${cursor}\"></a>" //$NON-NLS-0$
 		},
 		{
 			prefix: "<ul", //$NON-NLS-0$
-			description: "<ul> - HTML unordered list",
+			name: "<ul>", //$NON-NLS-0$
+			description: " - HTML unordered list",  //$NON-NLS-0$
 			template: "<ul>\n\t<li>${cursor}</li>\n</ul>" //$NON-NLS-0$
 		},
 		{
 			prefix: "<ol", //$NON-NLS-0$
-			description: "<ol> - HTML ordered list",
+			name: "<ol>", //$NON-NLS-0$
+			description: " - HTML ordered list", //$NON-NLS-0$
 			template: "<ol>\n\t<li>${cursor}</li>\n</ol>" //$NON-NLS-0$
 		},
 		{
 			prefix: "<dl", //$NON-NLS-0$
-			description: "<dl> - HTML definition list",
+			name: "<dl>", //$NON-NLS-0$
+			description: " - HTML definition list", //$NON-NLS-0$
 			template: "<dl>\n\t<dt>${cursor}</dt>\n\t<dd></dd>\n</dl>" //$NON-NLS-0$
 		},
 		{
 			prefix: "<table", //$NON-NLS-0$
-			description: "<table> - basic HTML table",
+			name: "<table>", //$NON-NLS-0$
+			description: " - basic HTML table", //$NON-NLS-0$
 			template: "<table>\n\t<tr>\n\t\t<td>${cursor}</td>\n\t</tr>\n</table>" //$NON-NLS-0$
 		}
 	];

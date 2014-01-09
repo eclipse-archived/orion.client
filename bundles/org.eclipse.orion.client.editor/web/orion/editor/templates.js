@@ -26,10 +26,11 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 	var delimiterVar = "${delimiter}"; //$NON-NLS-0$
 	var cursorVar = "${cursor}"; //$NON-NLS-0$
 	
-	function Template (prefix, description, template) {
+	function Template (prefix, description, template, name) {
 		this.prefix = prefix;
 		this.description = description;
 		this.template = template;
+		this.name = name;
 		this._parse();
 	}
 	Template.prototype = /** @lends orion.editor.Template.prototype */ {
@@ -89,9 +90,11 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 			}
 			return {
 				proposal: proposal,
+				name: this.name,
 				description: this.description,
 				groups: newGroups,
-				escapePosition: startOffset + escapePosition
+				escapePosition: startOffset + escapePosition,
+				style: 'noemphasis'
 			};
 		},
 		match: function(prefix) {
@@ -139,17 +142,16 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 		addTemplates: function(json) {
 			var templates = this.getTemplates();
 			for (var j = 0; j < json.length; j++) {
-				templates.push(new Template(json[j].prefix, json[j].description, json[j].template));
+				templates.push(new Template(json[j].prefix, json[j].description, json[j].template, json[j].name));
 			}
 		},
 		computeProposals: function(buffer, offset, context) {
 			var prefix = this.getPrefix(buffer, offset, context);
 			var proposals = [];
-			if (!this.isValid(prefix, buffer, offset, context)) {
-				return proposals;
+			if (this.isValid(prefix, buffer, offset, context)) {
+				proposals = proposals.concat(this.getTemplateProposals(prefix, offset, context));
+				proposals = proposals.concat(this.getKeywordProposals(prefix));
 			}
-			proposals = proposals.concat(this.getTemplateProposals(prefix, offset, context));
-			proposals = proposals.concat(this.getKeywordProposals(prefix));
 			return proposals;
 		},
 		getKeywords: function() {
@@ -176,6 +178,14 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 		getTemplateProposals: function(prefix, offset, context) {
 			var proposals = [];
 			var templates = this.getTemplates();
+			if (0 < templates.length) {
+				proposals[0] = {
+					proposal: '',
+					description: 'Templates',
+					style: 'noemphasis_title',
+					unselectable: true
+				};
+			}
 			for (var t = 0; t < templates.length; t++) {
 				var template = templates[t];
 				if (template.match(prefix)) {

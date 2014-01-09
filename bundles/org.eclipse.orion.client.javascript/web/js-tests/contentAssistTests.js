@@ -63,7 +63,7 @@ define([
 				return new Deferred().resolve(buffer);
 			}
 		};
-		return assist.computeContentAssist(mockContext, {offset: offset, prefix : prefix, inferredOnly : true });
+		return assist.computeContentAssist(mockContext, {offset: offset, prefix : prefix, includeNonInferred: true });
 	}
 
 	function testProposal(proposal, text, description) {
