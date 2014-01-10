@@ -432,16 +432,38 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		},
 		_initPatterns: function() {
 			var patterns = this.getPatternManager().getPatterns(this.pattern ? this.pattern.pattern : null);
+			var processIgnore = function(matchString) {
+				var result = /^\(\?i\)\s*/.exec(matchString);
+				if (result) {
+					matchString = matchString.substring(result[0].length);
+				}
+				return matchString;
+			};
 			patterns.forEach(function(current) {
 				var pattern;
 				if (current.match && !current.begin && !current.end) {
-					pattern = {regex: new RegExp(current.match, "g"), pattern: current}; //$NON-NLS-0$
+					var flags = "g";	//$NON-NLS-0$
+					var match = processIgnore(current.match);
+					if (match !== current.match) {
+						flags += "i";	//$NON-NLS-0$
+					}
+					pattern = {regex: new RegExp(match, flags), pattern: current};
 					this._linePatterns.push(pattern);
-					if (current.name && current.name.indexOf("punctuation.section") === 0 && (current.name.indexOf(PUNCTUATION_SECTION_BEGIN) !== -1 || current.name.indexOf(PUNCTUATION_SECTION_END) !== -1)) { //$NON-NLS-0$ //$NON-NLS-0$ //$NON-NLS-0$
+					if (current.name && current.name.indexOf("punctuation.section") === 0 && (current.name.indexOf(PUNCTUATION_SECTION_BEGIN) !== -1 || current.name.indexOf(PUNCTUATION_SECTION_END) !== -1)) { //$NON-NLS-0$
 						this._enclosurePatterns[current.name] = pattern;
 					}
 				} else if (!current.match && current.begin && current.end) {
-					pattern = {regexBegin: new RegExp(current.begin, "g"), regexEnd: new RegExp(current.end, "g"), pattern: current}; //$NON-NLS-0$ //$NON-NLS-0$
+					var beginFlags = "g";	//$NON-NLS-0$
+					var begin = processIgnore(current.begin);
+					if (begin !== current.begin) {
+						beginFlags += "i";	//$NON-NLS-0$
+					}
+					var endFlags = "g";	//$NON-NLS-0$
+					var end = processIgnore(current.end);
+					if (end !== current.end) {
+						endFlags += "i";	//$NON-NLS-0$
+					}
+					pattern = {regexBegin: new RegExp(begin, beginFlags), regexEnd: new RegExp(end, endFlags), pattern: current};
 					this._linePatterns.push(pattern);
 					this._blockPatterns.push(pattern);
 				}

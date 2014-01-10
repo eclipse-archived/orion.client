@@ -304,7 +304,7 @@ define([
 				match: "(?:-webkit-|-moz-|-ms-|\\b)(?:" + mCSS.keywords.join("|") + ")\\b",
 				name: "keyword.control"
 			}, {
-				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
+				match: "(?i)\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
 				name: "constant.numeric"
 			}, {
 				match: "#[0-9A-Fa-f]+\\b",
