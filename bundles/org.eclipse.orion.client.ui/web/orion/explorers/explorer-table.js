@@ -89,8 +89,11 @@ define([
 			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 				onComplete([]);
 			} else if (parentItem.Location) {
-				var progress = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
-				progress.progress(this.fileClient.fetchChildren(parentItem.ChildrenLocation), messages["Fetching children of "] + parentItem.Name).then( 
+				var progress = null;
+				if(this.registry) {
+					progress = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
+				}
+				(progress ? progress.progress(this.fileClient.fetchChildren(parentItem.ChildrenLocation), messages["Fetching children of "] + parentItem.Name) : this.fileClient.fetchChildren(parentItem.ChildrenLocation)).then( //$NON-NLS-0$
 					function(children) {
 						if (self.destroyed) { return; }
 						onComplete(self.processParent(parentItem, children));
@@ -356,8 +359,10 @@ define([
 				if (entry.isFile) {
 					// can't drop files directly into workspace.
 					if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
-						explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
-							Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
+						if(explorer.registry) {
+							explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
+								Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
+						}
 					} else {
 						entry.file(function(file) {
 							performDrop(target, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name))); //$NON-NLS-1$ //$NON-NLS-0$ 
@@ -372,16 +377,22 @@ define([
 							}
 						});
 					};
-					var progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
+					var progress = null;
+					if(explorer.registry) {
+						progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
+					}
 					if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
-						progress.progress(fileClient.createProject(target.ChildrenLocation, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)).then(function(project) {
-						explorer.loadResourceList(explorer.treeRoot.Path, true);					
-						progress.progress(fileClient.read(project.ContentLocation, true), messages["Loading "] + project.name).then(function(folder) {
-								traverseChildren(folder);
-							});
+						(progress ? progress.progress(fileClient.createProject(target.ChildrenLocation, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) : 
+									fileClient.createProject(target.ChildrenLocation, entry.name)).then(function(project) {
+							explorer.loadResourceList(explorer.treeRoot.Path, true);					
+							(progress ? progress.progress(fileClient.read(project.ContentLocation, true), messages["Loading "] + project.name) :
+										fileClient.read(project.ContentLocation, true)).then(function(folder) {
+									traverseChildren(folder);
+								});
 						});
 					} else {
-						progress.progress(fileClient.createFolder(target.Location, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)).then(function(subFolder) {
+						(progress ? progress.progress(fileClient.createFolder(target.Location, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) :
+									fileClient.createFolder(target.Location, entry.name)).then(function(subFolder) {
 							var dispatcher = explorer.modelEventDispatcher;
 							dispatcher.dispatchEvent({ type: "create", parent: item, newValue: subFolder }); //$NON-NLS-0$
 							traverseChildren(subFolder);
@@ -494,10 +505,14 @@ define([
 						if (!source) {
 							return;
 						}
-						var progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
+						var progress = null;
+						if(explorer.registry) {
+							progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
+						}
 						var isCopy = dropEffect === "copy"; //$NON-NLS-0$
 						var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
-						progress.showWhile(func.apply(fileClient, [source.Location, item.Location]), i18nUtil.formatMessage(messages[isCopy ? "Copying ${0}" : "Moving ${0}"], source.Location)).then(function(result) {
+						(progress ? progress.showWhile(func.apply(fileClient, [source.Location, item.Location]), i18nUtil.formatMessage(messages[isCopy ? "Copying ${0}" : "Moving ${0}"], source.Location)) : 
+									func.apply(fileClient, [source.Location, item.Location])).then(function(result) {
 							var dispatcher = explorer.modelEventDispatcher;
 							dispatcher.dispatchEvent({type: isCopy ? "copy" : "move", oldValue: source, newValue: result, parent: item}); //$NON-NLS-1$ //$NON-NLS-0$
 						}, function(error) {
@@ -529,11 +544,15 @@ define([
 							// The File API in HTML5 doesn't specify a way to check explicitly (when this code was written).
 							// see http://www.w3.org/TR/FileAPI/#file
 							if (!file.length && (!file.type || file.type === "")) {
-								explorer.registry.getService("orion.page.message").setProgressResult( //$NON-NLS-0$
-									{Severity: "Error", Message: i18nUtil.formatMessage(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], file.name)}); //$NON-NLS-1$ //$NON-NLS-0$ 
+								if(explorer.registry) {
+									explorer.registry.getService("orion.page.message").setProgressResult( //$NON-NLS-0$
+										{Severity: "Error", Message: i18nUtil.formatMessage(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], file.name)}); //$NON-NLS-1$ //$NON-NLS-0$ 
+								}
 							} else if (mFileUtils.isAtRoot(item.Location)){ //$NON-NLS-0$
-								explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
-									Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
+								if(explorer.registry) {
+									explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
+										Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
+								}
 							} else {
 								performDrop(item, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name))); //$NON-NLS-1$ //$NON-NLS-0$ 
 							}
@@ -843,7 +862,9 @@ define([
 				function(error) {
 					clearTimeout(progressTimeout);
 					// Show an error message when a problem happens during getting the workspace
-					self.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
+					if (self.registry) {
+						self.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
+					}
 					return new Deferred().reject(error);
 				}
 			);

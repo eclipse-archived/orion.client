@@ -10,13 +10,23 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define window*/
-define(['orion/bootstrap', 'orion/PageUtil', 'orion/widgets/nav/fileBrowser'], function(mBootstrap, PageUtil, mFileBrowser) {
+
+define([
+	'orion/bootstrap', 
+	'orion/PageUtil', 
+	'orion/contentTypes',
+	'orion/fileClient',
+	'orion/widgets/nav/fileBrowser'
+], function(mBootstrap, PageUtil, mContentTypes, mFileClient, mFileBrowser) {
 	mBootstrap.startup().then(function(core) {
-		var serviceRegistry = core.serviceRegistry;
-		//var pluginRegistry = core.pluginRegistry;
-		var preferences = core.preferences;
-		
-		var fBrowser = new mFileBrowser.FileBrowser("fileBrowser", serviceRegistry, preferences); 
+		var fBrowser = new mFileBrowser.FileBrowser({
+			parent: "fileBrowser", 
+			serviceRegistry: core.serviceRegistry, //Remove later
+			preferences: core.preferences, //Remove later
+			contentTypeService: new mContentTypes.ContentTypeRegistry(core.serviceRegistry),//Will be an individual service not depending on service registry
+			//TODO: add highlighting service here
+			fileClient: new mFileClient.FileClient(core.serviceRegistry)//Will be an individual service not depending on service registry
+		}); 
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			fBrowser.refresh(PageUtil.hash());
 		});

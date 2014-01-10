@@ -83,7 +83,7 @@ define([
 			var location = file.Location || file;
 			lib.empty(node);
 			var div = document.createElement("div"); //$NON-NLS-0$
-			this.progress.progress(this.fileClient.read(location), "Reading file " + (file.Name || location)).then(function(markdown) {
+			(this.progress ? this.progress.progress(this.fileClient.read(location), "Reading file " + (file.Name || location)) : this.fileClient.read(location)).then(function(markdown) {
 				this.display.bind(this)(div, markdown);
 			}.bind(this));
 			node.appendChild(div);

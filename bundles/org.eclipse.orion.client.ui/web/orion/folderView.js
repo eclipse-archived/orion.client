@@ -24,14 +24,15 @@ define([
 	'orion/URITemplate',
 	'orion/webui/littlelib',
 	'orion/objects',
+	'orion/Deferred',
 	'orion/projects/projectView',
 	'orion/section'
-], function(messages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, Selection, FileCommands, ExtensionCommands, mKeyBinding, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, mProjectView, mSection) {
+], function(messages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, Selection, FileCommands, ExtensionCommands, mKeyBinding, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, Deferred, mProjectView, mSection) {
 	
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
-	var MAX_EDITOR_HEIGHT = 700;
+	//var MAX_EDITOR_HEIGHT = 700;
 	
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	function FolderNavRenderer() {
@@ -154,11 +155,15 @@ define([
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.downloadFile" + this.commandsId, 3, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "orion.importSFTP" + this.commandsId, 4, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(selectionActionsScope, "eclipse.exportSFTPCommand" + this.commandsId, 5, "orion.folderNavSelectionGroup/orion.importExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
-			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.folderNavSelectionGroup", true, this.commandsVisibleWhen, this.commandsId);
+			if(serviceRegistry) {
+				FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
+			}
+			return serviceRegistry ? ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, selectionActionsScope, 0, "orion.folderNavSelectionGroup", true, this.commandsVisibleWhen, this.commandsId) : new Deferred().resolve();
 		},
 		updateCommands: function(selections) {
-			FileCommands.updateNavTools(this.registry, this.commandRegistry, this, this.newActionsScope, this.selectionActionsScope, this.treeRoot, true);
+			if(this.serviceRegistry) {
+				FileCommands.updateNavTools(this.serviceRegistry, this.commandRegistry, this, this.newActionsScope, this.selectionActionsScope, this.treeRoot, true);
+			}
 		}
 	});
 	
@@ -187,7 +192,7 @@ define([
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
 		_init: function(){
-			if(this.serviceRegistry.getServiceReferences("orion.projects").length===0){
+			if(this.serviceRegistry && this.serviceRegistry.getServiceReferences("orion.projects").length===0){
 				this.showProjectView = false;
 			}
 			this.markdownView = new mMarkdownView.MarkdownView({
@@ -282,10 +287,11 @@ define([
 								this.editorView.create();
 								var textView = this.editorView. editor.getTextView();
 								textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
-									var textViewheight = textView.getLineHeight() * textView.getModel().getLineCount() + 5;
+									var textViewheight = textView.getLineHeight() * textView.getModel().getLineCount() + 20;
+									/*
 									if(textViewheight > MAX_EDITOR_HEIGHT){
 										textViewheight = MAX_EDITOR_HEIGHT;
-									}
+									}*/
 									this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
 								}.bind(this));
 								this.editor = this.editorView.editor;

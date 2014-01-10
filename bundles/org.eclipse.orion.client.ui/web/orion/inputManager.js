@@ -175,7 +175,10 @@ define([
 				}.bind(this);
 				var errorHandler = function(error) {
 					clearTimeout();
-					var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+					var statusService = null;
+					if(this.serviceRegistry) {
+						statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+					}
 					handleError(statusService, error);
 					this._setNoInput();
 				}.bind(this);
@@ -315,7 +318,10 @@ define([
 			var resource = this._parsedLocation.resource;
 			var def = this.fileClient.write(resource, data, args);
 			var progress = this.progressService;
-			var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+			var statusService = null;
+			if(this.serviceRegistry){
+				statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+			}
 			if (progress) {
 				def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
 			}
@@ -326,7 +332,7 @@ define([
 					editor.setInput(input, null, contents, true);
 				}
 				self.reportStatus("");
-				if (failedSaving) {
+				if (failedSaving && statusService) {
 					statusService.setProgressResult({Message:messages.Saved, Severity:"Normal"}); //$NON-NLS-0$
 				}
 				if (self.afterSave) {
