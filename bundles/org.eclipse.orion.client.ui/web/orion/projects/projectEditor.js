@@ -366,7 +366,9 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		if(col_no===2){
 			var td = document.createElement("td");
 			td.classList.add("actionsColumn");
-			if(item.status){
+			if(item.status && item.status.CheckState === true){
+				delete item.status;
+			} else if(item.status){
 				if(item.status.error && item.status.error.Retry){
 					item.parametersRequested = item.status.error.Retry.parameters;
 					item.optionalParameters = item.status.error.Retry.optionalParameters;
@@ -377,13 +379,13 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 					span.title = item.status.error.Message;
 					td.appendChild(span);
 					return td;
-				} else if(item.status.Running){
+				} else if(item.status.State === "STARTED"){
 					var span = document.createElement("span");
 					span.className = "imageSprite core-sprite-applicationrunning";
 					span.title = item.status.Message;
 					td.appendChild(span);
 					return td;
-				} else if(item.status.Running===false){
+				} else if(item.status.State==="STOPPED" || item.status.State==="NOT_DEPLOYED"){ //TODO create not deployed class
 					var span = document.createElement("span");
 					span.className = "imageSprite core-sprite-applicationstopped";
 					span.title = item.status.Message;

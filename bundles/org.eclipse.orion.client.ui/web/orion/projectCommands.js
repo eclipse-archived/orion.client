@@ -118,6 +118,12 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					options.status = localHandleStatus;
 					mEditorCommands.createDelegatedUI(options);
 			}
+			if(context.launchConfiguration && (result.State || result.CheckState)){
+				context.launchConfiguration.status = result;
+				if(sharedLaunchConfigurationDispatcher){
+					sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
+				}
+			}
 			if(result.ToSave){
 				progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url), "Saving configuration").then(
 						function(configuration){
@@ -216,7 +222,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					projectClient.getProjectDelpoyService(launchConfiguration.ServiceId).then(function(service){
 						if(service && service.deploy){
 							projectClient.fileClient.loadWorkspace(item.project.ContentLocation).then(function(projectFolder){
-								runDeploy(params, projectFolder, {project: treeRoot.Project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService});
+								runDeploy(params, projectFolder, {project: treeRoot.Project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: launchConfiguration});
 							});
 						}
 					});
@@ -378,6 +384,15 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 								if(sharedLaunchConfigurationDispatcher){
 									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 								}
+								if(result.ToSave){
+									progress.showWhile(projectClient.saveProjectLaunchConfiguration(item.project, result.ToSave.ConfigurationName, service.id, result.ToSave.Parameters, result.ToSave.Url), "Saving configuration").then(
+										function(configuration){
+											if(sharedLaunchConfigurationDispatcher){
+												sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
+											}
+										}, errorHandler
+									);
+								}
 							}, function(error){
 								if(error.Retry){
 									data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
@@ -392,7 +407,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				},
 				visibleWhen: function(items) {
 					var item = forceSingleItem(items);
-					return item.ServiceId && item.Name && item.status && (start ? item.status.Running===false : item.status.Running===true);
+					return item.ServiceId && item.Name && item.status && (start ? item.status.State==="STOPPED" : item.status.State==="STARTED");
 				}
 			});
 			commandService.addCommand(stopApplicationCommand);
@@ -420,7 +435,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
 					if(service && service.deploy){
 						fileClient.loadWorkspace(item.project.ContentLocation).then(function(projectFolder){
-							runDeploy(params, projectFolder, {project: item.project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService});
+							runDeploy(params, projectFolder, {project: item.project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: item});
 						});
 					}
 				});
