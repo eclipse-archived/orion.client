@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -112,7 +112,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					options.uriTemplate = result.UriTemplate;
 					options.width = result.Width;
 					options.height = result.Height;
-					options.id = "orion.project.deploy." + context.deployService.id + ".deploy"; 
+					options.id = context.deployService.id; 
 					options.params = item;
 					options.done = localHandleStatus;
 					options.status = localHandleStatus;
