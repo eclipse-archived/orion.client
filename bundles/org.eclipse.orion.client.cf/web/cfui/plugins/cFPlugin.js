@@ -56,16 +56,74 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	/////////////////////////////////////////////////////
 	
 	provider.registerServiceProvider("orion.project.deploy", {
-		deploy: function(item, projectMetadata, props){
-			alert("Project shared!");
-			return {
-				Message: "OK",
-				ToSave: {
-					ConfigurationName: props.Name,
-					Parameters: props,
-					Url: props.url
-				}
-			};
+//		deploy: function(item, projectMetadata, props){
+//			alert("Project shared!");
+//			return {
+//				Message: "OK",
+//				ToSave: {
+//					ConfigurationName: props.Name,
+//					Parameters: props,
+//					Url: props.url
+//				}
+//			};
+//		},
+		
+		_retryDeployWithLogin: function(item, projectMetadata, props, func) {
+			var that = this;
+			var deferred = new Deferred();
+			
+			if(props.user && props.password){
+				cFService.login(props.Target.Url, props.user, props.password).then(
+					function(result){
+						func(item, projectMetadata, props, deferred);
+					}, function(error){
+						error.Retry = {
+							parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
+							optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+						};
+						deferred.reject(error);
+					}
+				);
+			} else {
+				func(item, projectMetadata, props, deferred);
+			}
+			
+			return deferred;
+		},
+		
+		deploy: function(item, projectMetadata, props) {
+			return this._retryDeployWithLogin(item, projectMetadata, props, this._deploy);
+		},
+		
+		_deploy: function(item, projectMetadata, props, deferred) {
+			if (props.Target && props.Name){
+				cFService.pushApp(props.Target, props.Name, decodeURIComponent(item.Location)).then(
+					function(result){
+						deferred.resolve({
+							CheckState: true
+						});
+					}, function(error){
+						if (error.HttpCode === 404){
+							deferred.resolve({
+								State: "NOT_DEPLOYED",
+								Message: error.Message
+							});
+						} else if (error.JsonData && error.JsonData.error_code) {
+							var err = error.JsonData;
+							if (err.error_code === "CF-InvalidAuthToken"){
+								error.Retry = {
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
+									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+								};
+							}
+							deferred.reject(error);
+						} else {
+							deferred.reject(error);
+						}
+					}
+				);
+				return deferred;
+			}
 		},
 		
 		_retryWithLogin: function(props, func) {
@@ -101,13 +159,13 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 					function(result){
 						var app = result;
 						deferred.resolve({
-							Running: app.running_instances > 0,
+							State: (app.running_instances > 0 ? "STARTED": "STOPPED"),
 							Message: app.running_instances + " of " + app.instances + " instance(s) running"
 						});
 					}, function(error){
 						if (error.HttpCode === 404){
 							deferred.resolve({
-								Running: false,
+								State: "NOT_DEPLOYED",
 								Message: error.Message
 							});
 						} else if (error.JsonData && error.JsonData.error_code) {
@@ -138,12 +196,13 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 					function(result){
 						var app = result.entity;
 						deferred.resolve({
-							Running: (app.state === "STARTED" ? true : false)
+							State: (app.state === "STARTED" ? "STARTED" : "STOPPED"),
+							Message: "Application is running"
 						});
 					}, function(error){
 						if (error.HttpCode === 404){
 							deferred.resolve({
-								Running: false,
+								State: "NOT_DEPLOYED",
 								Message: error.Message
 							});
 						} else if (error.JsonData && error.JsonData.error_code) {
@@ -174,12 +233,13 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 					function(result){
 						var app = result.entity;
 						deferred.resolve({
-							Running: (app.state === "STOPPED" ? false : true),
+							State: (app.state === "STARTED" ? "STARTED" : "STOPPED"),
+							Message: "Application is not running"
 						});
 					}, function(error){
 						if (error.HttpCode === 404){
 							deferred.resolve({
-								Running: false,
+								State: "NOT_DEPLOYED",
 								Message: error.Message
 							});
 						} else if (error.JsonData && error.JsonData.error_code) {
@@ -442,7 +502,7 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	/** Add cf push command **/
 	var pushImpl = {
 		callback: function(args, context) {
-			return cFService.pushApp(args.app, context.cwd).then(function(result) {
+			return cFService.pushApp(null, args.app, decodeURIComponent(context.cwd)).then(function(result) {
 				if (!result || !result.applications) {
 					return "Application not found";
 				}
