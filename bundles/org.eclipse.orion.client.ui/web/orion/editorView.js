@@ -31,6 +31,7 @@ define([
 	'orion/globalCommands',
 	'orion/edit/dispatcher',
 	'orion/edit/editorContext',
+	'orion/edit/typedefs',
 	'orion/highlight',
 	'orion/markOccurrences',
 	'orion/syntaxchecker',
@@ -43,7 +44,7 @@ define([
 	mEditor, mTextView, mTextModel, mProjectionTextModel, mEditorFeatures, mContentAssist, mEmacs, mVI,
 	mEditorPreferences, mThemePreferences, mThemeData, EditorSettings,
 	mSearcher, mEditorCommands, mGlobalCommands,
-	mDispatcher, EditorContext, Highlight,
+	mDispatcher, EditorContext, TypeDefRegistry, Highlight,
 	mMarkOccurrences, mSyntaxchecker,
 	mKeyBinding, mUIUtils, util, objects
 ) {
@@ -80,6 +81,7 @@ define([
 		this.model = options.model;
 		this.undoStack = options.undoStack;
 		this.syntaxHighlighter = new Highlight.SyntaxHighlighter(this.serviceRegistry);
+		this.typeDefRegistry = new TypeDefRegistry(this.serviceRegistry);
 		var keyAssist = mGlobalCommands.getKeyAssist();
 		if(keyAssist) {
 			keyAssist.addProvider(this);
@@ -346,10 +348,17 @@ define([
 						}).filter(function(provider) {
 							return !!provider;
 						});
-						contentAssist.setEditorContextFactory(EditorContext.getEditorContext.bind(null, serviceRegistry));
+						// Produce a bound EditorContext that contentAssist can invoke with no knowledge of ServiceRegistry.
+						var boundEditorContext = {};
+						Object.keys(EditorContext).forEach(function(key) {
+							if (typeof EditorContext[key] === "function") {
+								boundEditorContext[key] = EditorContext[key].bind(null, serviceRegistry);
+							}
+						});
+						contentAssist.setEditorContextProvider(boundEditorContext);
 						contentAssist.setProviders(providers);
 						contentAssist.setProgress(progress);
-					}
+					};
 					
 					contentAssist.addEventListener("Activating", setContentAssistProviders); //$NON-NLS-0$
 					var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
@@ -455,5 +464,3 @@ define([
 	};
 	return {EditorView: EditorView};
 });
-
-

@@ -108,6 +108,7 @@ define([
 					assert.equal(context.prefix, expectedPrefix);
 					assert.equal(context.selection.start, expectedOffset);
 					assert.equal(context.selection.end, expectedOffset);
+					assert.equal(context.__contributed, "blort");
 					deferred.resolve();
 				} catch (e) {
 					deferred.reject(e);
@@ -118,8 +119,15 @@ define([
 			var mockEditorContext = {
 				foo: function() {}
 			};
-			contentAssist.setEditorContextFactory(function() {
-				return mockEditorContext;
+			contentAssist.setEditorContextProvider({
+				getEditorContext: function() {
+					return mockEditorContext;
+				},
+				getOptions: function() {
+					return {
+						__contributed: "blort"
+					};
+				}
 			});
 			contentAssist.setProviders([ provider ]);
 			contentAssist.activate();

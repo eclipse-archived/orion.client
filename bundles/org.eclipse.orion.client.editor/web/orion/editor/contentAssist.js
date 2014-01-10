@@ -297,7 +297,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var indentation = line.substring(0, index);
 			var options = textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
 			var tab = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
-			var context = {
+			var params = {
 				line: line,
 				offset: mapOffset,
 				prefix: model.getText(this.getPrefixStart(model, mapOffset), mapOffset),
@@ -312,11 +312,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				try {
 					var func, promise;
 					if ((func = provider.computeContentAssist)) {
-						var editorContext = self.editorContextProvider && self.editorContextProvider();
-						promise = func.apply(provider, [editorContext, context]);
+						var ecProvider = self.editorContextProvider, editorContext = ecProvider.getEditorContext();
+						params = objects.mixin(params, ecProvider.getOptions());
+						promise = func.apply(provider, [editorContext, params]);
 					} else if ((func = provider.getProposals || provider.computeProposals)) {
 						// old API
-						promise = func.apply(provider, [model.getText(), mapOffset, context]);
+						promise = func.apply(provider, [model.getText(), mapOffset, params]);
 					}
 					proposals = self.progress ? self.progress.progress(promise, "Generating content assist proposal") : promise; //$NON-NLS-0$
 				} catch (e) {
@@ -328,12 +329,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		},
 
 		/**
-		 * Sets the editor context factory that this ContentAssist will invoke to generate an <code>{@link orion.edit.EditorContext}</code>.
-		 * The EditorContext is passed to providers that implement the v4.0 content assist API.
-		 * @param {Function} editorContextProvider A function that returns an {@link orion.edit.EditorContext}.
+		 * Sets the provider that will be invoked to generate the Editor Context service and options to any
+		 * content assist providers that implement the v4.0 content assist API.
+		 * @param {Object} editorContextProvider
 		 */
-		setEditorContextFactory: function(editorContextFactory) {
-			this.editorContextProvider = editorContextFactory;
+		setEditorContextProvider: function(editorContextProvider) {
+			this.editorContextProvider = editorContextProvider;
 		},
 
 		/**
