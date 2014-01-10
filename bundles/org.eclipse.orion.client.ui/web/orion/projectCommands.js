@@ -211,7 +211,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				callback: function(data) {
 					var item = forceSingleItem(data.items);
 					
-					data.oldParams = item.Params;
+					data.oldParams = launchConfiguration.Params;
 	
 					var func = arguments.callee;
 					var params = handleParamsInCommand(func, data, "Deploy " + item.Name);
