@@ -125,7 +125,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 					var deferred = new Deferred();
 					deferred.reject("Application name not set");
 				}
-				var location = require.toUrl("cfapi/target/" + applicationName);
+				var location = require.toUrl("cfapi/logs/" + applicationName);
 				if(logFileName){
 					location+=("/" + logFileName);
 				}
