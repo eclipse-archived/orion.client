@@ -16,10 +16,13 @@
 
 /*global define require definitionForType doctrine*/
 define([
-'orion/Deferred',
-'javascript/contentAssist/typeUtils',
-'doctrine/doctrine'
-], function (Deferred, typeUtils, Doctrine) {
+	'doctrine/doctrine',
+	'javascript/contentAssist/indexFiles/browserIndex',
+	'javascript/contentAssist/indexFiles/ecma5Index',
+	'javascript/contentAssist/indexFiles/nodeIndex',
+	'javascript/contentAssist/typeUtils',
+	'orion/Deferred'
+], function (Doctrine, BrowserIndex, Ecma5Index, NodeIndex, typeUtils, Deferred) {
 
 	/**
 	 * for case where an object has its own hasOwnProperty property 
@@ -396,12 +399,10 @@ define([
 	function init() {
 		if (!initResult) { 
 			var d = new Deferred();
-			require(["javascript/contentAssist/indexFiles/ecma5Index"], function (ecma5) {
-				// add information for core libraries directly to Global.prototype
-				// and Types.prototype
-				addIndexInfo(ecma5, globalPrototype, typesPrototype);
-				d.resolve();
-			});
+			// add information for core libraries directly to Global.prototype
+			// and Types.prototype
+			addIndexInfo(Ecma5Index, globalPrototype, typesPrototype);
+			d.resolve();
 			initResult = d.promise;		
 		}
 		return initResult;
@@ -459,30 +460,37 @@ define([
 	 * asynchronously.  The promise is resolved with the knownTypes object.
 	 */
 	function addLibrary(knownTypes, libName) {
-		// first, get the global and types info
-		// check the cache
-		var d = new Deferred();
-		var globalsAndTypes = parsedIndexFileCache[libName];
-		if (!globalsAndTypes) {
-			globalsAndTypes = { globals: {}, types: {} };
-			var indexFile;
-			if (libName === "browser") {
-				indexFile = "javascript/contentAssist/indexFiles/browserIndex";
-			} else if (libName === "node") {
-				indexFile = "javascript/contentAssist/indexFiles/nodeIndex";
+		function getGlobalsAndTypes() {
+			// check the cache
+			var globalsAndTypes = parsedIndexFileCache[libName];
+			var indexDataOrPromise;
+			if (!globalsAndTypes) {
+				globalsAndTypes = { globals: {}, types: {} };
+				if (libName === "browser") {
+					indexDataOrPromise = BrowserIndex;
+				} else if (libName === "node") {
+					indexDataOrPromise = NodeIndex;
+				} else {
+					throw "unknown library name " + libName;				
+//					// TODO load external index
+//					indexDataOrPromise = new Deferred();
+//					require([libName], function(indexData) {
+//						indexData.resolve(indexData);
+//					});
+				}
+				return Deferred.when(indexDataOrPromise, function(indexData) {
+					addIndexInfo(indexData, globalsAndTypes.globals, globalsAndTypes.types);
+					parsedIndexFileCache[libName] = globalsAndTypes;
+					return globalsAndTypes;
+				});
 			} else {
-				throw "unknown library name " + libName;				
+				// already have the info
+				return new Deferred().resolve(globalsAndTypes);
 			}
-			require([indexFile], function (indexData) {
-				addIndexInfo(indexData, globalsAndTypes.globals, globalsAndTypes.types);
-				parsedIndexFileCache[libName] = globalsAndTypes;
-				d.resolve(globalsAndTypes);
-			});
-		} else {
-			// already have the info
-			d.resolve(globalsAndTypes);
 		}
-		var result = d.then(function (globalsAndTypes) {
+
+		// first, get the global and types info
+		var result = getGlobalsAndTypes().then(function (globalsAndTypes) {
 			return updateKnownTypes(knownTypes, globalsAndTypes);
 		});
 		return result;
