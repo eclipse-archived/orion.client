@@ -13,7 +13,7 @@
 define('javascript/contentAssist/indexFiles/mysqlIndex', [], 
 function () {
 	return {
-		"!name": "node-mysql",
+		"!name": "mysql",
   		"!define": {
     		"!node": {
 		  		"Connection" : {
