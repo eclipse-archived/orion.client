@@ -201,7 +201,7 @@ define([
 					}
 					this.treeRoot.Project.launchConfigurations = launchConfigurations;
 					this.launchCommands = [];
-					ProjectCommands.updateProjectNavCommands(this.treeRoot, launchConfigurations, this.commandRegistry, this.projectClient);
+					ProjectCommands.updateProjectNavCommands(this.treeRoot, launchConfigurations, this.commandRegistry, this.projectClient, this.fileClient);
 					for(var i=0; i<launchConfigurations.length; i++){
 						var launchCommand = "orion.launchConfiguration.deploy." + launchConfigurations[i].ServiceId + launchConfigurations[i].Name;
 						this.launchCommands.push(launchCommand);

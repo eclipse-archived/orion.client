@@ -221,7 +221,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					
 					projectClient.getProjectDelpoyService(launchConfiguration.ServiceId).then(function(service){
 						if(service && service.deploy){
-							projectClient.fileClient.loadWorkspace(item.project.ContentLocation).then(function(projectFolder){
+							fileClient.loadWorkspace(item.Project.ContentLocation).then(function(projectFolder){
 								runDeploy(params, projectFolder, {project: treeRoot.Project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: launchConfiguration});
 							});
 						}
