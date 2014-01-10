@@ -12,6 +12,9 @@
 /*global define esprima*/
 define([
 	'javascript/astManager',
+	'javascript/contentAssist/indexFiles/mysqlIndex',
+	'javascript/contentAssist/indexFiles/postgresIndex',
+	'javascript/contentAssist/indexFiles/redisIndex',
 	'javascript/eslint/validator',
 	'javascript/contentAssist/contentAssist',
 	'javascript/occurrences',
@@ -20,7 +23,8 @@ define([
 	'orion/plugin',
 	'orion/editor/stylers/js/js',
 	'orion/editor/stylers/jsonSchema/jsonSchema'
-], function(ASTManager, EslintValidator, ContentAssist, Occurrences, Outliner, i18nUtil, PluginProvider, mJS, mJSONSchema) {
+], function(ASTManager, MysqlIndex, PostgresIndex, RedisIndex, EslintValidator, ContentAssist, Occurrences, Outliner,
+		i18nUtil, PluginProvider, mJS, mJSONSchema) {
 
 	/**
 	 * Plug-in headers
@@ -235,6 +239,28 @@ define([
 				name: "keyword.control" //$NON-NLS-0$
 			}
 		]
+	});
+
+	/**
+	 * Register type definitions for known JS libraries
+	 */
+	provider.registerServiceProvider("orion.core.typedef", {}, {
+		id: "node.redis",
+		type: "tern",
+		"package": "redis",
+		defs: RedisIndex
+	});
+	provider.registerServiceProvider("orion.core.typedef", {}, {
+		id: "node.mysql",
+		type: "tern",
+		"package": "mysql",
+		defs: MysqlIndex
+	});
+	provider.registerServiceProvider("orion.core.typedef", {}, {
+		id: "node.postgres",
+		type: "tern",
+		"package": "postgres",
+		defs: PostgresIndex
 	});
 
 	provider.connect();
