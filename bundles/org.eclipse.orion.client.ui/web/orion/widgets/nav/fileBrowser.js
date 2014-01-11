@@ -16,9 +16,8 @@
 define([
 	'orion/inputManager',
 	'orion/breadcrumbs',
-	'orion/editor/textModel',
 	'orion/folderView',
-	'orion/editorView',
+	'orion/widgets/nav/readonlyEditorView',
 	'orion/markdownView',
 	'orion/commandRegistry',
 	'orion/Deferred',
@@ -26,33 +25,48 @@ define([
 	'orion/objects',
 	'orion/webui/littlelib'
 ], function(
-	mInputManager, mBreadcrumbs, mTextModel, mFolderView, mEditorView, mMarkdownView,
+	mInputManager, mBreadcrumbs, mFolderView, mReadonlyEditorView, mMarkdownView,
 	mCommandRegistry, Deferred, URITemplate, objects, lib
 ) {
-	/** 
-	 * Constructs a new file browser object.
+	/**
+	 * @class This object describes the options for the readonly file system browser.
+	 * <p>
+	 * <b>See:</b><br/>
+	 * {@link orion.browse.FileBrowser}<br/>
+	 * </p>		 
+	 * @name orion.browse.FileBrowserOptions
+	 *
+	 * @property {String|DOMElement} parent the parent element for the file browser, it can be either a DOM element or an ID for a DOM element.
+	 * @property {orion.fileClient.FileClient} fileClient the file client implementation that has all the interfaces from orion.fileClient.FileClient.
+	 * @property {orion.highlight.SyntaxHighlighter} syntaxHighlighter the syntax highlighter that hihglights  a supported language file.
+	 * @property {orion.core.ContentType} contentTypeService the content type service that knows a file's content type.
+	 * @property {orion.preferences.PreferencesService} [preferences=null] the editor preferences. If not defined the default editor preferences is used.
+	 */
+	/**
+	 * Constructs a new readonly file system browser.
 	 * 
-	 * @class 
-	 * @name orion.FileBrowser
+	 * @param {orion.browse.FileBrowserOptions} options the browser options.
+	 * 
+	 * @class A FileBrowser is a user interface for browsing a readonly file system.
+	 * @name orion.browse.FileBrowser
 	 */
 	function FileBrowser(options) {
-		this._parent = options.parent;
-		this._serviceRegistry = options.serviceRegistry;
-		this._preferences = options.preferences;
-		this._contentTypeService = options.contentTypeService;
-		this._fileClient = options.fileClient;
-		this._commandRegistry = new mCommandRegistry.CommandRegistry({});
-		this._init();
+		this._parentDomNode = lib.node(options.parent);//Required
+		this._fileClient = options.fileClient;//Required
+		this._syntaxHighlighter = options.syntaxHighlighter;//Required
+		this._contentTypeService = options.contentTypeService;//Required
+		this._preferences = options.preferences;//Optional
+		this._init(options);
 	}
 	objects.mixin(FileBrowser.prototype, {
-		_init: function(){
+		_init: function(options){
+			this._commandRegistry = new mCommandRegistry.CommandRegistry({});
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
 				contentTypeRegistry: this._contentTypeService
 			});
 			this._uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
-			var	fBrowserDomNode = lib.node(this._parent);
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				var metadata = evt.metadata;
@@ -66,33 +80,17 @@ define([
 				var view = this._getEditorView(evt.input, metadata);
 				this._setEditor(view ? view.editor : null);
 				evt.editor = this._editor;
-				var deferred = null;//renderToolbars(metadata);
-				function processURL() {
-					this._commandRegistry.processURL(window.location.href);
-				}
-				if (deferred) {
-					deferred.then(processURL);
-				} else {
-					processURL();
-				}
 			}.bind(this));
-			var model = new mTextModel.TextModel();
-			this._defaultOptions = {
-				parent: fBrowserDomNode,
-				model: model,
-				serviceRegistry: this._serviceRegistry,
-				commandRegistry: this._commandRegistry,
-				contentTypeRegistry: this._contentTypeService,
-				inputManager: this._inputManager,
-				readonly: true,
-				preferences: this._preferences,
-				fileService: this._fileClient,
-				statusReporter: this.statusReport
-			};
+
 			var editorContainer = document.createElement("div"); //$NON-NLS-0$
-			var sectionalEditorOptions = objects.clone(this._defaultOptions);
-			sectionalEditorOptions.parent = editorContainer;
-			this._editorView = new mEditorView.EditorView(sectionalEditorOptions);
+			var editorOptions = {
+				parent: editorContainer,
+				syntaxHighlighter: this._syntaxHighlighter,
+				inputManager: this._inputManager,
+				preferences: this._preferences,
+				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
+			};
+			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
 		},
 		_breadCrumbMaker: function(bcContainer, maxLength){
 			this._renderBreadCrumb({
@@ -159,24 +157,24 @@ define([
 		_getEditorView: function(input, metadata) {
 			var view = null;
 			if (metadata && input) {
-				var options = objects.mixin({
-					input: input,
+				var folderViewOptons = {
+					parent: this._parentDomNode,
 					readonly: true,
 					showProjectView: false,
 					metadata: metadata,
-				}, this._defaultOptions);
-				//TODO better way of registering built-in editors
+					commandRegistry: this._commandRegistry,
+					contentTypeRegistry: this._contentTypeService,
+					inputManager: this._inputManager,
+					fileService: this._fileClient,
+					breadCrumbMaker: function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this)
+				};
 				if (metadata.Directory) {
-					options.serviceRegistry = null;
-					options.breadCrumbMaker = function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this);
-					view = new mFolderView.FolderView(options);
+					view = new mFolderView.FolderView(folderViewOptons);
 				} else {
 					var id = input.editor;
 					if (!id || id === "orion.editor") { //$NON-NLS-0$
-						options.editorView = this._editorView;
-						options.serviceRegistry = null;
-						options.breadCrumbMaker = function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this);
-						view = new mFolderView.FolderView(options);
+						folderViewOptons.editorView = this._editorView;
+						view = new mFolderView.FolderView(folderViewOptons);
 					} else if (id === "orion.markdownViewer") { //$NON-NLS-0$
 						// TODO : not sure about this yetview = new mMarkdownView.MarkdownEditorView(options);
 					} else {
@@ -185,7 +183,6 @@ define([
 				}
 			}
 			if (this._currentEditorView !== view) {
-				this._commandRegistry.closeParameterCollector();
 				if (this._currentEditorView) {
 					this._currentEditorView.destroy();
 				}

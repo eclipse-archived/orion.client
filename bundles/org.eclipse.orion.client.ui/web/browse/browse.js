@@ -16,16 +16,16 @@ define([
 	'orion/PageUtil', 
 	'orion/contentTypes',
 	'orion/fileClient',
+	'orion/highlight',
 	'orion/widgets/nav/fileBrowser'
-], function(mBootstrap, PageUtil, mContentTypes, mFileClient, mFileBrowser) {
+], function(mBootstrap, PageUtil, mContentTypes, mFileClient, Highlight, mFileBrowser) {
 	mBootstrap.startup().then(function(core) {
 		var fBrowser = new mFileBrowser.FileBrowser({
-			parent: "fileBrowser", 
-			serviceRegistry: core.serviceRegistry, //Remove later
-			preferences: core.preferences, //Remove later
-			contentTypeService: new mContentTypes.ContentTypeRegistry(core.serviceRegistry),//Will be an individual service not depending on service registry
-			//TODO: add highlighting service here
-			fileClient: new mFileClient.FileClient(core.serviceRegistry)//Will be an individual service not depending on service registry
+			parent: "fileBrowser",//Required 
+			fileClient: new mFileClient.FileClient(core.serviceRegistry), //Required. But will be different implementation that does not require service registration
+			syntaxHighlighter: new Highlight.SyntaxHighlighter(core.serviceRegistry), //Required. But will be different implementation that does not require service registration
+			contentTypeService: new mContentTypes.ContentTypeRegistry(core.serviceRegistry),  //Required. But will be different implementation that does not require service registration
+			preferences: core.preferences //Optional. If defined, should not depend on bootstrap
 		}); 
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			fBrowser.refresh(PageUtil.hash());

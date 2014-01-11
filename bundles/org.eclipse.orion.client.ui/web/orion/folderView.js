@@ -175,7 +175,6 @@ define([
 	 */
 	function FolderView(options) {
 		this._parent = options.parent;
-		this._input = options.input;
 		this._metadata = options.metadata;
 		this.fileClient = options.fileService;
 		this.progress = options.progressService;
@@ -333,13 +332,17 @@ define([
 			if(this.editorView) {
 				renderSections.apply(this, [sectionsOrder]);
 			} else {
-				this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
-					sectionsOrder = sectionsOrderPrefs.get("folderView") || sectionsOrder;
+				if(this.preferences) {
+					this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
+						sectionsOrder = sectionsOrderPrefs.get("folderView") || sectionsOrder;
+						renderSections.apply(this, [sectionsOrder]);
+					}.bind(this), function(error){
+						renderSections.apply(this, [sectionsOrder]);
+						window.console.error(error);
+					}.bind(this));
+				} else {
 					renderSections.apply(this, [sectionsOrder]);
-				}.bind(this), function(error){
-					renderSections.apply(this, [sectionsOrder]);
-					window.console.error(error);
-				}.bind(this));
+				}
 			}
 		},
 		create: function() {
