@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,51 +9,12 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define window*/
-define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function(assert, contentTypesModule, serviceRegistry) {
-	// Helper to avoid having to deal with the asynchronousness of a real serviceregistry
-	var MockServiceRegistry = (function() {
-		function mixinMethods(target, source) {
-			Object.keys(source).forEach(function(prop) {
-				var method = source[prop];
-				if (typeof method === "function") {
-					this[prop] = method.bind(source);
-				}
-			});
-		}
-
-		function MockServiceReference(implementation, properties) {
-			this.implementation = implementation;
-			this.properties = properties;
-			mixinMethods(this, implementation);
-		}
-		MockServiceReference.prototype = {
-			getProperty: function(name) {
-				return this.properties[name];
-			}
-		};
-
-		function MockServiceRegistry() {
-			this.services = {};
-			this.serviceReferences = {};
-		}
-		MockServiceRegistry.prototype = {
-			_registerServiceProvider: function(name, implementation, properties) {
-				this.serviceReferences[name] = this.serviceReferences[name] || [];
-				this.serviceReferences[name].push(new MockServiceReference(implementation, properties));
-			},
-			getServiceReferences: function(name) {
-				return this.serviceReferences[name] || [];
-			},
-			registerService: function(id, implementation) {
-				this.services[id] = {};
-				mixinMethods(this.services[id], implementation);
-			},
-			getService: function(id) {
-				return this.services[id];
-			}
-		};
-		return MockServiceRegistry;
-	}());
+define([
+	'orion/assert',
+	'orion/contentTypes',
+	'orion/serviceregistry'
+], function(assert, mContentTypes, mServiceRegistry) {
+	var ServiceRegistry = mServiceRegistry.ServiceRegistry;
 
 	function assertContentTypesEqual(expected, actual){ 
 		var a = expected, b = actual;
@@ -97,11 +58,11 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 				image: 'http://example.org/foo.png',
 				imageClass: 'imageFoo'
 			} ];
-		mockRegistry = new MockServiceRegistry();
-		mockRegistry._registerServiceProvider("orion.core.contenttype", {}, {
+		mockRegistry = new ServiceRegistry();
+		mockRegistry.registerService("orion.core.contenttype", {}, {
 				contentTypes: basicTypes
 			});
-		contentTypeService = new contentTypesModule.ContentTypeRegistry(mockRegistry);
+		contentTypeService = new mContentTypes.ContentTypeRegistry(mockRegistry);
 		testbody(mockRegistry, contentTypeService, basicTypes);
 	}
 
@@ -204,11 +165,11 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 			name: 'Bad',
 			'extends': 'orion/test4'
 		};
-		var mockRegistry = new MockServiceRegistry();
-		mockRegistry._registerServiceProvider("orion.core.contenttype", {}, {
+		var mockRegistry = new ServiceRegistry();
+		mockRegistry.registerService("orion.core.contenttype", {}, {
 			contentTypes: [ bad ]
 		});
-		var contentTypeService = new contentTypesModule.ContentTypeRegistry(mockRegistry);
+		var contentTypeService = new mContentTypes.ContentTypeRegistry(mockRegistry);
 		assert.throws(function() {
 				contentTypeService.isExtensionOf(bad, bad);
 			}, Error, "Cycle detected");
