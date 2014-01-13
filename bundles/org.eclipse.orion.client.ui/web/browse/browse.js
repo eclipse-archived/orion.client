@@ -17,15 +17,17 @@ define([
 	'orion/contentTypes',
 	'orion/fileClient',
 	'orion/highlight',
+	'orion/widgets/nav/staticContentTypes',
 	'orion/widgets/nav/fileBrowser'
-], function(mBootstrap, PageUtil, mContentTypes, mFileClient, Highlight, mFileBrowser) {
+], function(mBootstrap, PageUtil, mContentTypes, mFileClient, Highlight, mStaticContentTypes, mFileBrowser) {
 	mBootstrap.startup().then(function(core) {
+		var cTypeService = new mContentTypes.ContentTypeRegistry(mStaticContentTypes.ContentTypes);
 		var fBrowser = new mFileBrowser.FileBrowser({
 			parent: "fileBrowser",//Required 
 			fileClient: new mFileClient.FileClient(core.serviceRegistry), //Required. But will be different implementation that does not require service registration
-			syntaxHighlighter: new Highlight.SyntaxHighlighter(core.serviceRegistry), //Required. But will be different implementation that does not require service registration
-			contentTypeService: new mContentTypes.ContentTypeRegistry(core.serviceRegistry),  //Required. But will be different implementation that does not require service registration
-			preferences: core.preferences //Optional. If defined, should not depend on bootstrap
+			syntaxHighlighter: new Highlight.SyntaxHighlighter(core.serviceRegistry, cTypeService), //Required. But will be different implementation that does not require service registration
+			contentTypeService: cTypeService, //new mContentTypes.ContentTypeRegistry(core.serviceRegistry),  //Required. But will be different implementation that does not require service registration
+			preferences: null//core.preferences //Optional. If defined, should not depend on bootstrap
 		}); 
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			fBrowser.refresh(PageUtil.hash());

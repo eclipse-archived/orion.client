@@ -41,6 +41,9 @@ define([
 	FolderNavRenderer.prototype = Object.create(NavigatorRenderer.prototype);
 	objects.mixin(FolderNavRenderer.prototype, {
 		showFolderImage: true,
+		/**
+		 * override NavigatorRenderer's prototype
+		 */
 		createFolderNode: function(folder) {
 			var folderNode = mNavigatorRenderer.NavigatorRenderer.prototype.createFolderNode.call(this, folder);
 			if (this.showFolderLinks && folderNode.tagName === "A") { //$NON-NLS-0$
@@ -52,16 +55,22 @@ define([
 			folderNode.classList.remove("navlinkonpage"); //$NON-NLS-0$
 			return folderNode;
 		},
+		/**
+		 * override NavigatorRenderer's prototype
+		 */
 		updateFileNode: function(file, fileNode, isImage) {
 			mNavigatorRenderer.NavigatorRenderer.prototype.updateFileNode.call(this, file, fileNode, isImage);
 			if (this.explorer.readonly && fileNode.tagName === "A") { //$NON-NLS-0$
 				if(isImage){
-					fileNode.href = uriTemplate.expand({resource: file.Location, params: {editor: 'orion.imageViewer'}});  //$NON-NLS-0$
+					fileNode.href = uriTemplate.expand({resource: file.Location/*, params: {editor: 'orion.imageViewer'}*/});  //$NON-NLS-0$
 				} else {
 					fileNode.href = uriTemplate.expand({resource: file.Location});
 				}
 			}
 		},
+		/**
+		 * override NavigatorRenderer's prototype
+		 */
 		getCellHeaderElement: function(col_no) {
 			if(this.explorer.breadCrumbMaker) {
 				return null;
@@ -76,6 +85,18 @@ define([
 			}
 			return null;
 		},
+		/**
+		 * override NavigatorRenderer's prototype
+		 */
+		emptyCallback: function(bodyElement) {
+			if (this.explorer.readonly) {
+				return;
+			}
+			mNavigatorRenderer.NavigatorRenderer.prototype.emptyCallback.call(this, bodyElement);
+		},
+		/**
+		 * override NavigatorRenderer's prototype
+		 */
 		getExpandImage: function() {
 			return null;
 		}

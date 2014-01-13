@@ -20,13 +20,15 @@ define([
 	'orion/widgets/nav/readonlyEditorView',
 	'orion/markdownView',
 	'orion/commandRegistry',
+	'orion/contentTypes',
+	'orion/widgets/nav/staticContentTypes',
 	'orion/Deferred',
 	'orion/URITemplate',
 	'orion/objects',
 	'orion/webui/littlelib'
 ], function(
 	mInputManager, mBreadcrumbs, mFolderView, mReadonlyEditorView, mMarkdownView,
-	mCommandRegistry, Deferred, URITemplate, objects, lib
+	mCommandRegistry, mContentTypes, mStaticContentTypes, Deferred, URITemplate, objects, lib
 ) {
 	/**
 	 * @class This object describes the options for the readonly file system browser.
@@ -55,6 +57,9 @@ define([
 		this._fileClient = options.fileClient;//Required
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		this._contentTypeService = options.contentTypeService;//Required
+		if(!this._contentTypeService) {
+			this._contentTypeService =  new mContentTypes.ContentTypeRegistry(mStaticContentTypes.ContentTypes);
+		}
 		this._preferences = options.preferences;//Optional
 		this._init(options);
 	}

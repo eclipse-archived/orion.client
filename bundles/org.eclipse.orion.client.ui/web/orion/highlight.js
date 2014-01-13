@@ -33,7 +33,7 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 			var contentTypeIds = provider.getProperty("contentType") || provider.getProperty("contentTypes"), //$NON-NLS-1$ //$NON-NLS-0$
 			    fileTypes = provider.getProperty("fileTypes"); // backwards compatibility //$NON-NLS-0$
 			if (contentTypeIds) {
-				return contentTypeService.isSomeExtensionOf(contentType, contentTypeIds).then(
+				return Deferred.when(contentTypeService.isSomeExtensionOf(contentType, contentTypeIds)).then(
 					function (isMatch) {
 						return isMatch ? provider : null;
 					});
@@ -240,9 +240,12 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 	 * @description 
 	 * <p>Requires service {@link orion.core.ContentTypeRegistry}</p>
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry Registry to look up highlight providers from.
+	 * @param {orion.core.ContentType} [contentTypeService=null] A stand alone content type service that is not registered in theservice registry.
+	 
 	 */
-	function SyntaxHighlighter(serviceRegistry) {
+	function SyntaxHighlighter(serviceRegistry, contentTypeService) {
 		this.serviceRegistry = serviceRegistry;
+		this.contentTypeService = contentTypeService;
 		this.styler = null;
 	}
 	SyntaxHighlighter.prototype = /** @lends orion.highlight.SyntaxHighlighter.prototype */ {
@@ -265,7 +268,7 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 				this.styler = null;
 			}
 			var self = this;
-			return createStyler(this.serviceRegistry, this.serviceRegistry.getService("orion.core.contentTypeRegistry"), //$NON-NLS-0$
+			return createStyler(this.serviceRegistry, this.contentTypeService ? this.contentTypeService : this.serviceRegistry.getService("orion.core.contentTypeRegistry"), //$NON-NLS-0$
 				fileContentType, textView, annotationModel, fileName, allowAsync).then(
 					function(styler) {
 						self.styler = styler;
