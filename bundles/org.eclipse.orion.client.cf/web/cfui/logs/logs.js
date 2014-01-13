@@ -11,7 +11,7 @@
 
 define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links',
-	'orion/cfui/cFClient', 'orion/PageUtil', 'orion/cfui/logs/logsExplorer', 'orion/cfui/logs/logView', 'orion/section',  'orion/cfui/widgets/CfLoginDialog'], 
+	'orion/cfui/cFClient', 'orion/PageUtil', 'cfui/logs/logsExplorer', 'cfui/logs/logView', 'orion/section',  'orion/cfui/widgets/CfLoginDialog'], 
 	function(lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
 	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mLinks,
 	mCFClient, PageUtil, mLogsExplorer, mLogView, mSection, CfLoginDialog) {
@@ -86,10 +86,38 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 				logsInlineExplorer.load(logs);
 			}
 			
+				function handleError(error) {
+					if (!statusService) {
+						window.console.log(error);
+						return;
+					}
+					if (error.status === 0) {
+						error = {
+							Severity: "Error", //$NON-NLS-0$
+							Message: "No response"
+						};
+					} else {
+						var responseText = error.responseText;
+						if (responseText) {
+							try {
+								error = JSON.parse(responseText);
+							} catch(e) {
+								error = {
+									//HTML: true,
+									Severity: "Error", //$NON-NLS-0$
+									Message: responseText
+								};
+							}
+						}
+					}
+					statusService.setProgressResult(error);
+				}
+			
 			function loadLogs(logParams){
 				var target;
-				if(logParams.target){
-					target = JSON.parse(logParams.target);
+				if(logParams.Url || logParams.Org || logParams.Space){
+					target = {Url: logParams.Url, Org: logParams.Org, Space:logParams.Space}
+					logParams.target = target;
 				}
 
 				if(logParams.log){
@@ -125,7 +153,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 								func: function(login, password){
 									progressService.showWhile(cFClient.login(target.Url, login, password, target.Org, target.Space), "Logging in to " + target.Url).then(function(){
 										loadLogs(logParams);
-									}, console.error);
+									}, handleError);
 								}});
 								dialog.show();
 								return;
@@ -133,13 +161,13 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 						}
 						if(e.HttpCode === 404 && e.Message === "Target not set"){
 							preferences.getPreferences("/settingsCF").then(function(cfSettings){
-								logParams.target = JSON.stringify({Url: cfSettings.get("targetUrl")});
+								logParams.Url = cfSettings.get("targetUrl");
 								loadLogs(logParams);
 							});
 							return;
 						}
 
-						console.error(e);
+						handleError(e);
 					});
 					return;
 				}

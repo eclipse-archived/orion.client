@@ -360,6 +360,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		service.parameters = serviceReference.getProperty("parameters");
 		service.optionalParameters = serviceReference.getProperty("optionalParameters");
 		service.validationProperties = serviceReference.getProperty("validationProperties");
+		service.logLocationTemplate = serviceReference.getProperty("logLocationTemplate");
 		return service;
 	},
 	

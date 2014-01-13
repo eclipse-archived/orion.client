@@ -302,12 +302,14 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				for(var i=0; i<this.launchConfigurations.length; i++){
 					this.launchConfigurations[i].project = parent;
 				}
+				this.root.children = this.launchConfigurations;
 				onComplete(this.launchConfigurations);
 			} else {
 				this.projectClient.getProjectLaunchConfigurations(parent).then(function(launchConfs){
 						for(var i=0; i<launchConfs.length; i++){
 							launchConfs[i].project = parent;
 						}
+						parent.children = launchConfs;
 						onComplete(launchConfs);
 					}
 				);
@@ -364,6 +366,23 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			return td;
 		}
 		if(col_no===2){
+			var td = document.createElement("td");
+			if(item.ServiceId){
+				this.projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
+					if(service && service.logLocationTemplate){
+						var a = document.createElement("a");
+						var uriTemplate = new URITemplate(service.logLocationTemplate);
+						var params = objects.clone(item.Params);
+						objects.mixin(params, {OrionHome : PageLinks.getOrionHome()});
+						a.href = uriTemplate.expand(params);
+						a.appendChild(document.createTextNode("Logs"));
+						td.appendChild(a);						
+					}
+				});
+			}
+			return td;
+		}
+		if(col_no===3){
 			var td = document.createElement("td");
 			td.classList.add("actionsColumn");
 			if(item.status && item.status.CheckState === true){

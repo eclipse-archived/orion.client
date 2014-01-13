@@ -94,7 +94,9 @@ function(lib, mExplorer, objects,URITemplate){
 			if(item.Type === "Log"){
 				var a = document.createElement("a");
 				a.appendChild(document.createTextNode(item.Name));
-				a.href = new URITemplate("#{,resource,params*}").expand({resource: item.Application, params: {log: item.Name, target: JSON.stringify(item.Target), instance: item.Instance}});
+				var params = item.Target ? objects.clone(item.Target) : {};
+				objects.mixin(params, {instance: item.Instance, log: item.Name});
+				a.href = new URITemplate("#{,resource,params*}").expand({resource: item.Application, params: params});
 				span.appendChild(a);
 			} else if(item.Type === "Instance"){
 				this.getExpandImage(tableRow, span);

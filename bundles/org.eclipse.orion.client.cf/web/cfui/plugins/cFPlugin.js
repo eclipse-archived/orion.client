@@ -263,7 +263,8 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 		name: "Deploy to Cloud Foundry",
 		id: "org.eclipse.orion.client.cf.deploy",
 		tooltip: "Deploy application in cloud.",
-		validationProperties: [{source: "NoShow" }]
+		validationProperties: [{source: "NoShow" }],
+		logLocationTemplate: "{+OrionHome}/cfui/logs/logs.html#{Name,Target*}"
 	});
 	
 	/////////////////////////////////////////////////////
