@@ -111,7 +111,7 @@ OrionTestCase("editDispatcher", "/js-tests/dispatcher/editDispatcherTests.html")
 // These live in the javascript bundle
 OrionTestCase("esprima-content-assist", "/js-tests/contentAssistTests.html");
 OrionTestCase("index-file-parsing", "/js-tests/indexFileParsingTests.html");
-OrionTestCase("nodeJsEvents", "/js-tests/events/test.html");
+OrionTestCase("nodeJsEvents", "/js-tests/events/eslintEventTests.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
 //OrionUITestCase("textviewPerformance", "/js-tests/editor/test-performance.html");
