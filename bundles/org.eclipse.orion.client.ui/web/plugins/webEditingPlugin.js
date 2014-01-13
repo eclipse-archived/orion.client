@@ -223,7 +223,7 @@ define([
 			}, {
 				id: "comment_singleline",
 				begin: "//",
-				end: "\\n",
+				end: ".*",
 				name: "comment.line",
 				patterns: [
 					{
