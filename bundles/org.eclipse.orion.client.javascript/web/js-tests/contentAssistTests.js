@@ -63,13 +63,17 @@ define([
 				return new Deferred().resolve(buffer);
 			}
 		};
-		return assist.computeContentAssist(mockContext, {offset: offset, prefix : prefix, includeNonInferred: true });
+		return assist.computeContentAssist(mockContext, {offset: offset, prefix : prefix, includeNonInferred: false });
 	}
 
 	function testProposal(proposal, text, description) {
-		assert.equal(proposal.proposal, text, "Invalid proposal text");
+		assert.equal(proposal.proposal, text, "Invalid proposal text"); //$NON-NLS-0$
 		if (description) {
-			assert.equal(proposal.description, description, "Invalid proposal description");
+			if (proposal.name) {
+				assert.equal(proposal.name + proposal.description, description, "Invalid proposal description"); //$NON-NLS-0$
+			} else {
+				assert.equal(proposal.description, description, "Invalid proposal description"); //$NON-NLS-0$
+			}
 		}
 	}
 
@@ -84,7 +88,11 @@ define([
 	function stringifyActual(actualProposals) {
 		var text = "";
 		for (var i = 0; i < actualProposals.length; i++) {
-			text += actualProposals[i].proposal + " : " + actualProposals[i].description + "\n";
+			if (actualProposals[i].name) {
+				text += actualProposals[i].proposal + " : " + actualProposals[i].name + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
+			} else {
+				text += actualProposals[i].proposal + " : " + actualProposals[i].description + "\n"; //$NON-NLS-1$ //$NON-NLS-0$
+			}
 		}
 		return text;
 	}
