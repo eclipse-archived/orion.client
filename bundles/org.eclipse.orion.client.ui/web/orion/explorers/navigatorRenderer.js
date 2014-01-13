@@ -22,7 +22,6 @@ define([
 	'orion/webui/littlelib'
 ], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, lib) {
 		
-	/* Internal */
 	function isImage(contentType) {
 		switch (contentType && contentType.id) {
 			case "image/jpeg": //$NON-NLS-0$
@@ -401,6 +400,7 @@ define([
 	//return module exports
 	return {
 		NavigatorRenderer: NavigatorRenderer,
+		isImage : isImage,
 		createLink: createLink
 	};
 });

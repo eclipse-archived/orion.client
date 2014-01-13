@@ -17,6 +17,7 @@ define([
 	'orion/inputManager',
 	'orion/breadcrumbs',
 	'orion/folderView',
+	'orion/explorers/navigatorRenderer',
 	'orion/widgets/nav/readonlyEditorView',
 	'orion/markdownView',
 	'orion/commandRegistry',
@@ -27,7 +28,7 @@ define([
 	'orion/objects',
 	'orion/webui/littlelib'
 ], function(
-	mInputManager, mBreadcrumbs, mFolderView, mReadonlyEditorView, mMarkdownView,
+	mInputManager, mBreadcrumbs, mFolderView, mNavigatorRenderer, mReadonlyEditorView, mMarkdownView,
 	mCommandRegistry, mContentTypes, mStaticContentTypes, Deferred, URITemplate, objects, lib
 ) {
 	/**
@@ -178,7 +179,15 @@ define([
 				} else {
 					var id = input.editor;
 					if (!id || id === "orion.editor") { //$NON-NLS-0$
-						folderViewOptons.editorView = this._editorView;
+						var cType = this._contentTypeService.getFileContentType(metadata);
+						if(!mNavigatorRenderer.isImage(cType)) {
+							folderViewOptons.editorView = this._editorView;
+						} else {
+							var image = document.createElement("img"); //$NON-NLS-0$
+							image.src = metadata.Location;
+							image.classList.add("readonlyImage"); //$NON-NLS-0$
+							folderViewOptons.imageView = {image: image};
+						}
 						view = new mFolderView.FolderView(folderViewOptons);
 					} else if (id === "orion.markdownViewer") { //$NON-NLS-0$
 						// TODO : not sure about this yetview = new mMarkdownView.MarkdownEditorView(options);

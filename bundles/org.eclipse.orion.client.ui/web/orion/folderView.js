@@ -207,6 +207,7 @@ define([
 		this.showProjectView = typeof options.showProjectView === 'undefined' ? true : options.showProjectView;
 		this.showFolderNav = true;
 		this.editorView = options.editorView;
+		this.imageView = options.imageView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this._init();
 	}
@@ -315,6 +316,8 @@ define([
 									this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
 								}.bind(this));
 								this.editor = this.editorView.editor;
+							} else if(this.imageView) {
+								foldersSection.setContent(this.imageView.image);
 							} else {
 								this.folderNavExplorer = new FolderNavExplorer({
 									parentId: navNode,
@@ -370,7 +373,7 @@ define([
 			if(this._metadata.Projects){ //this is a workspace root
 				this.displayWorkspaceView();
 			}
-			if(this.editorView) {
+			if(this.editorView || this.imageView) {
 				this.displayFolderView(this._metadata);
 			} else if(this._metadata.Children){
 				this.displayFolderView(this._metadata);

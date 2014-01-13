@@ -17,6 +17,12 @@
 	margin-top: 12px;
 }
 
+.readonlyImage {
+	padding-left: 10px;
+	padding-top: 10px;
+	padding-bottom: 5px;
+}
+
 .fileBrowserParent{
 	border: 1px solid;
 	vertical-align: middle;
