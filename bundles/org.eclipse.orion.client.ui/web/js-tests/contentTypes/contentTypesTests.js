@@ -15,6 +15,7 @@ define([
 	'orion/serviceregistry'
 ], function(assert, mContentTypes, mServiceRegistry) {
 	var ServiceRegistry = mServiceRegistry.ServiceRegistry;
+	var ContentTypeRegistry = mContentTypes.ContentTypeRegistry;
 
 	function assertContentTypesEqual(expected, actual){ 
 		var a = expected, b = actual;
@@ -34,8 +35,14 @@ define([
 		}
 	}
 
-	function withTestData(testbody) {
-		var mockRegistry, contentTypeService, basicTypes;
+	/**
+	 * @param {Boolean} [useServiceRegistry=true] true: use Service Registry to construct the ContentTypeRegistry. false:
+	 * use array of content type data.
+	 * @param {Function} testbody
+	 */
+	function _withTestData(useServiceRegistry, testbody) {
+		useServiceRegistry = typeof useServiceRegistry === "undefined" ? true : useServiceRegistry;
+		var serviceRegistry, contentTypeService, basicTypes, dataSource;
 		basicTypes = [
 			{
 				id: 'orion/test0',
@@ -58,25 +65,52 @@ define([
 				image: 'http://example.org/foo.png',
 				imageClass: 'imageFoo'
 			} ];
-		mockRegistry = new ServiceRegistry();
-		mockRegistry.registerService("orion.core.contenttype", {}, {
+		if (useServiceRegistry) {
+			dataSource = serviceRegistry = new ServiceRegistry();
+			serviceRegistry.registerService("orion.core.contenttype", {}, {
 				contentTypes: basicTypes
 			});
-		contentTypeService = new mContentTypes.ContentTypeRegistry(mockRegistry);
-		testbody(mockRegistry, contentTypeService, basicTypes);
+		} else {
+			dataSource = basicTypes;
+		}
+		contentTypeService = new ContentTypeRegistry(dataSource);
+		testbody(serviceRegistry, contentTypeService, basicTypes);
+	}
+
+	/**
+	 * Constructs a "with serviceRegistry" and "without serviceRegistry" test.
+	 * @param {Function} testBody should call `this.withTestData` to perform its setup, or check `this.useServiceRegistry`
+	 * to see what kind of test it should be running.
+	 */
+	function makeTests(tests, basename, testBody) {
+		tests["test_" + basename] = testBody.bind({
+			useServiceRegistry: true,
+			withTestData: _withTestData.bind(null, true)
+		});
+		tests["test_" + basename + "_no_serviceRegistry"] = testBody.bind({
+			useServiceRegistry: false,
+			withTestData: _withTestData.bind(null, false)
+		});
 	}
 
 	var tests = {};
-	tests.test_getContentTypes = function() {
-		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+
+	tests.test_new_ContentTypeRegistry = function() {
+		assert.throws(function() { new ContentTypeRegistry(); });
+		assert.throws(function() { new ContentTypeRegistry(null); });
+		assert.throws(function() { new ContentTypeRegistry("zzzz"); });
+	};
+
+	makeTests(tests, "getContentTypes", function() {
+		this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 			contentTypeService.getContentTypes().every(function(type, i) {
 				assertContentTypesEqual(basicTypes[i], type);
 			});
 		});
-	};
+	});
 
-	tests.test_getContentTypesMap = function() {
-		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+	makeTests(tests, "getContentTypesMap", function() {
+		this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 			var map = contentTypeService.getContentTypesMap();
 			Object.keys(map).forEach(function(contentTypeId) {
 				var type = null;
@@ -90,18 +124,18 @@ define([
 				assertContentTypesEqual(type, map[contentTypeId]);
 			});
 		});
-	};
+	});
 
-	tests.test_getContentType = function() {
-		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+	makeTests(tests, "getContentType", function() {
+		this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 			basicTypes.forEach(function(contentType) {
 				assertContentTypesEqual(contentType, contentTypeService.getContentType(contentType.id));
 			});
 		});
-	};
+	});
 
-	tests.test_getFileContentType = function() {
-		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+	makeTests(tests, "getFileContentType", function() {
+		this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 			var fileMetadata1 = {
 				Name: "aaaaaaaaaaa"
 			},
@@ -119,19 +153,19 @@ define([
 			assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata3), basicTypes[2]);
 			assertContentTypesEqual(contentTypeService.getFileContentType(fileMetadata4), basicTypes[3], "filename match beats extension match");
 		});
-	};
+	});
 
-	tests.test_getFilenameContentType = function() {
-		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+	makeTests(tests, "getFilenameContentType", function() {
+		this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 			assertContentTypesEqual(contentTypeService.getFilenameContentType("aaaaaaa"), null, "No content type for unrecognized file");
 			assertContentTypesEqual(contentTypeService.getFilenameContentType("test.file.xml"), basicTypes[2]);
 			assertContentTypesEqual(contentTypeService.getFilenameContentType("test.file.txt"), basicTypes[2]);
 			assertContentTypesEqual(contentTypeService.getFilenameContentType("build.xml"), basicTypes[3], "filename match beats extension match");
 		});
-	};
+	});
 
-	tests.test_isExtensionOf = function() {
-		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+	makeTests(tests, "isExtensionOf", function() {
+		this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 			function assertIsExtensionOf(typeA, typeB, expected, msg) {
 				// Test calling both by ContentType object and by String ID:
 				assert.equal(contentTypeService.isExtensionOf(typeA, typeB), expected, msg);
@@ -157,26 +191,32 @@ define([
 			assertIsExtensionOf(basicTypes[2], basicTypes[3], false);
 			assertIsExtensionOf(basicTypes[3], basicTypes[3], true);
 		});
-	};
+	});
 
-	tests.test_isExtensionOf2 = function() {
+	// Note this one does not call `withTestData`
+	tests.test_isExtensionOf_bad = function() {
 		var bad = {
 			id: 'orion/test4',
 			name: 'Bad',
 			'extends': 'orion/test4'
 		};
-		var mockRegistry = new ServiceRegistry();
-		mockRegistry.registerService("orion.core.contenttype", {}, {
-			contentTypes: [ bad ]
-		});
-		var contentTypeService = new mContentTypes.ContentTypeRegistry(mockRegistry);
+		var contentTypeService;
+		if (this.useServiceRegistry) {
+			var serviceRegistry = new ServiceRegistry();
+			serviceRegistry.registerService("orion.core.contenttype", {}, {
+				contentTypes: [ bad ]
+			});
+			contentTypeService = new ContentTypeRegistry(serviceRegistry);
+		} else {
+			contentTypeService = new ContentTypeRegistry([ bad ]);
+		}
 		assert.throws(function() {
-				contentTypeService.isExtensionOf(bad, bad);
-			}, Error, "Cycle detected");
+			contentTypeService.isExtensionOf(bad, bad);
+		}, Error, "Cycle detected");
 	};
 
-	tests.test_isSomeExtensionOf = function() {
-		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+	makeTests(tests, "isSomeExtensionOf", function() {
+		this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 			function assertIsSomeExtensionOf(type, types, expected, msg) {
 				assert.equal(contentTypeService.isSomeExtensionOf(type, types), expected, msg);
 				var typeIds = types.map(function(type) { return type.id; });
@@ -197,20 +237,20 @@ define([
 
 			assertIsSomeExtensionOf(basicTypes[3], [], false);
 		});
-	};
+	});
 
-	tests.testExtensionsCaseMismatch = function() {
-		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+	makeTests(tests, "extensionsCaseMismatch", function() {
+		this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 			var type1 = contentTypeService.getFilenameContentType('test.TXT');
 			var type2 = contentTypeService.getFilenameContentType('test.txt');
 			var type3 = contentTypeService.getFilenameContentType('test.TxT');
 			assertContentTypesEqual(type1, type2);
 			assertContentTypesEqual(type2, type3);
 		});
-	};
+	});
 
-	tests.testImage = function() {
-		withTestData(function(mockRegistry, contentTypeService, basicTypes) {
+	makeTests(tests, "image", function() {
+		this.withTestData(function(serviceRegistry, contentTypeService, basicTypes) {
 			var type4;
 			contentTypeService.getContentTypes().some(function(ct) {
 				if (ct.id === 'orion/test4') {
@@ -221,7 +261,7 @@ define([
 			assert.equal(type4.image, 'http://example.org/foo.png');
 			assert.equal(type4.imageClass, 'imageFoo');
 		});
-	};
+	});
 
 	return tests;
 });

@@ -97,7 +97,7 @@ OrionTestCase("textMateStyler", "/js-tests/editor/textMateStyler/test.html");
 OrionTestCase("textview", "/js-tests/editor/test-models.html");
 OrionTestCase("contentAssist", "/js-tests/editor/contentAssist/test.html");
 OrionTestCase("jsTemplateContentAssist", "/js-tests/jsTemplateContentAssist/test.html");
-OrionTestCase("contentTypes", "/js-tests/contentTypes/test.html");
+OrionTestCase("contentTypes", "js-tests/contentTypes/contentTypesTests.html");
 OrionTestCase("extensionParsing", "/js-tests/extensionParsing/test.html");
 OrionTestCase("xhr", "/js-tests/xhr/test.html");
 OrionTestCase("config", "/js-tests/config/test.html");

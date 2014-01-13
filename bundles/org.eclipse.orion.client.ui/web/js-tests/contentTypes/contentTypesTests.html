@@ -5,17 +5,17 @@
 	<script type="text/javascript">
 	/*global require window*/
 	require({
-		  baseUrl: '../..',
-		  paths: {
-			  text: 'requirejs/text',
-			  i18n: 'requirejs/i18n',
-			  domReady: 'requirejs/domReady'
-		  },
-		  isTest: true
-		});
+		baseUrl: '../..',
+		paths: {
+			text: 'requirejs/text',
+			i18n: 'requirejs/i18n',
+			domReady: 'requirejs/domReady'
+		},
+		isTest: true
+	});
 
 	window.onload = function() {
-		require(["orion/test","testcase.js"], function(test, testcase) {
+		require(["orion/test", "contentTypesTests.js"], function(test, testcase) {
 			test.run(testcase);
 		});
 	};
