@@ -336,11 +336,8 @@ define(['orion/widgets/themes/ThemeClass'],
 			mainToolbar.style.background = this.toolpanel;
 			mainToolbar.style.height = '32px';
 			mainToolbar.style.borderBottom = '1px solid #ebebeb';
-			mainToolbar.style.paddingTop = '3px';
-			
 			styles.push( mainToolbar );
-		
-
+	
 			for( var s in styles ){
 				styleBlock = styleBlock + styles[s].toString();
 			}

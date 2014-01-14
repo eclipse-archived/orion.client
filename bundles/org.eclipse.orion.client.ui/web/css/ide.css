@@ -14,7 +14,7 @@ html {
 html, body {
 	margin: 0;
 	padding: 0;
-	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
+	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	min-width:700px;
 } 
 

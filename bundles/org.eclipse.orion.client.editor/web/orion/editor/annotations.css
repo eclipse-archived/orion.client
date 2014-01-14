@@ -157,16 +157,16 @@
 	border: 1px solid red;
 }
 .annotationOverview.matchingBracket {
-	background-color: lightgray;
-	border: 1px solid red;
+	background-color: #ff7f7f;
+	border: 1px solid #ff3232;
 }
 .annotationOverview.currentLine {
 	background-color: #f8a852;
 	border: 1px solid #f79327;
 }
 .annotationOverview.matchingSearch {
-	background-color: #C3E1FF;
-	border: 1px solid black;
+background-color: #C3E1FF;
+border: 1px solid #afcae5;
 }
 .annotationOverview.currentSearch {
 	background-color: #53D1FF;
