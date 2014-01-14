@@ -298,10 +298,14 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 				loaded: function(){
 					var self = this;
 					if(!this.selection){
-						this.selection = new Selection.Selection(this.serviceRegistry || this.registry, this.parent.id + "Selection"); //$NON-NLS-0$
-						this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
-							self.updateCommands(event.selections);
-						});
+						if(this.serviceRegistry || this.registry){
+							this.selection = new Selection.Selection(this.serviceRegistry || this.registry, this.parent.id + "Selection"); //$NON-NLS-0$
+							this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
+								self.updateCommands(event.selections);
+							});
+						} else {
+							window.console.error("Could not create a Selection for the explorer because of lack of serviceRegistry");
+						}
 					}
 					var commandsRegistered = this.registerCommands();
 					if(!commandsRegistered || !commandsRegistered.then){
