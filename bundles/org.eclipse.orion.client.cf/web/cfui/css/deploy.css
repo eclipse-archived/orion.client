@@ -1,0 +1,17 @@
+@import "../../css/layout.css";
+
+@import "../../css/ide.css";
+
+@import "../../css/theme.css";
+
+@import "../../css/images.css";
+
+@import "../../css/customide.css";
+
+html, body {
+    min-width: 350px;
+}
+
+.dialogFrame {
+	background-color: #fdfdfd;
+}

@@ -56,26 +56,15 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	/////////////////////////////////////////////////////
 	
 	provider.registerServiceProvider("orion.project.deploy", {
-//		deploy: function(item, projectMetadata, props){
-//			alert("Project shared!");
-//			return {
-//				Message: "OK",
-//				ToSave: {
-//					ConfigurationName: props.Name,
-//					Parameters: props,
-//					Url: props.url
-//				}
-//			};
-//		},
 		
-		_retryDeployWithLogin: function(item, projectMetadata, props, func) {
+		deploy: function(item, projectMetadata, props) {
 			var that = this;
 			var deferred = new Deferred();
 			
 			if(props.user && props.password){
 				cFService.login(props.Target.Url, props.user, props.password).then(
 					function(result){
-						func(item, projectMetadata, props, deferred);
+						that._deploy(item, projectMetadata, props, deferred);
 					}, function(error){
 						error.Retry = {
 							parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
@@ -85,19 +74,15 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 					}
 				);
 			} else {
-				func(item, projectMetadata, props, deferred);
+				that._deploy(item, projectMetadata, props, deferred);
 			}
 			
 			return deferred;
 		},
 		
-		deploy: function(item, projectMetadata, props) {
-			return this._retryDeployWithLogin(item, projectMetadata, props, this._deploy);
-		},
-		
 		_deploy: function(item, projectMetadata, props, deferred) {
-			if (props.Target && props.Name){
-				cFService.pushApp(props.Target, props.Name, decodeURIComponent(item.Location)).then(
+			if (props.Target){
+				cFService.pushApp(props.Target, null, decodeURIComponent(item.Location)).then(
 					function(result){
 						deferred.resolve({
 							CheckState: true
@@ -122,7 +107,33 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 						}
 					}
 				);
-				return deferred;
+			} else {
+//				deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deploy.html#{+Location}", Width: "600px", Height: "400px"});
+				cFService.pushApp(null, null, decodeURIComponent(item.Location)).then(
+					function(result){
+						deferred.resolve({
+							CheckState: true
+						});
+					}, function(error){
+						if (error.HttpCode === 404){
+							deferred.resolve({
+								State: "NOT_DEPLOYED",
+								Message: error.Message
+							});
+						} else if (error.JsonData && error.JsonData.error_code) {
+							var err = error.JsonData;
+							if (err.error_code === "CF-InvalidAuthToken"){
+								error.Retry = {
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
+									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+								};
+							}
+							deferred.reject(error);
+						} else {
+							deferred.reject(error);
+						}
+					}
+				);
 			}
 		},
 		
