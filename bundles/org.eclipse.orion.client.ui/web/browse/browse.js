@@ -17,17 +17,19 @@ define([
 	'orion/contentTypes',
 	'orion/fileClient',
 	'orion/highlight',
-	'orion/widgets/nav/staticContentTypes',
-	'orion/widgets/nav/fileBrowser'
-], function(mBootstrap, PageUtil, mContentTypes, mFileClient, Highlight, mStaticContentTypes, mFileBrowser) {
+	'orion/widgets/browse/staticDataSource',
+	'orion/widgets/browse/fileBrowser'
+], function(mBootstrap, PageUtil, mContentTypes, mFileClient, Highlight, mStaticDataSource, mFileBrowser) {
 	mBootstrap.startup().then(function(core) {
-		var cTypeService = new mContentTypes.ContentTypeRegistry(mStaticContentTypes.ContentTypes);
+		//var cTypeService = new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
 		var fBrowser = new mFileBrowser.FileBrowser({
 			parent: "fileBrowser",//Required 
 			fileClient: new mFileClient.FileClient(core.serviceRegistry), //Required. But will be different implementation that does not require service registration
-			syntaxHighlighter: new Highlight.SyntaxHighlighter(core.serviceRegistry, cTypeService), //Required. But will be different implementation that does not require service registration
-			contentTypeService: cTypeService, //new mContentTypes.ContentTypeRegistry(core.serviceRegistry),  //Required. But will be different implementation that does not require service registration
-			preferences: null//core.preferences //Optional. If defined, should not depend on bootstrap
+			//syntaxHighlighter: new mStaticDataSource.SyntaxHighlighter(), //Optional. If not defined the deafult one is used.
+			//syntaxHighlighter: new Highlight.SyntaxHighlighter(core.serviceRegistry, cTypeService), //Required. But will be different implementation that does not require service registration
+			//contentTypeService: cTypeService,//Optional. If not defined the deafult one is used.
+			//contentTypeService: new mContentTypes.ContentTypeRegistry(core.serviceRegistry),
+			//preferences: null//core.preferences //Optional. If defined, should not depend on bootstrap
 		}); 
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			fBrowser.refresh(PageUtil.hash());

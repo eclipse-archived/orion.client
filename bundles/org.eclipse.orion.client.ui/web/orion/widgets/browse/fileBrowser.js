@@ -18,18 +18,18 @@ define([
 	'orion/breadcrumbs',
 	'orion/folderView',
 	'orion/explorers/navigatorRenderer',
-	'orion/widgets/nav/readonlyEditorView',
+	'orion/widgets/browse/readonlyEditorView',
 	'orion/markdownView',
 	'orion/commandRegistry',
 	'orion/contentTypes',
-	'orion/widgets/nav/staticContentTypes',
+	'orion/widgets/browse/staticDataSource',
 	'orion/Deferred',
 	'orion/URITemplate',
 	'orion/objects',
 	'orion/webui/littlelib'
 ], function(
 	mInputManager, mBreadcrumbs, mFolderView, mNavigatorRenderer, mReadonlyEditorView, mMarkdownView,
-	mCommandRegistry, mContentTypes, mStaticContentTypes, Deferred, URITemplate, objects, lib
+	mCommandRegistry, mContentTypes, mStaticDataSource, Deferred, URITemplate, objects, lib
 ) {
 	/**
 	 * @class This object describes the options for the readonly file system browser.
@@ -41,8 +41,8 @@ define([
 	 *
 	 * @property {String|DOMElement} parent the parent element for the file browser, it can be either a DOM element or an ID for a DOM element.
 	 * @property {orion.fileClient.FileClient} fileClient the file client implementation that has all the interfaces from orion.fileClient.FileClient.
-	 * @property {orion.highlight.SyntaxHighlighter} syntaxHighlighter the syntax highlighter that hihglights  a supported language file.
-	 * @property {orion.core.ContentType} contentTypeService the content type service that knows a file's content type.
+	 * @property {orion.highlight.SyntaxHighlighter} optional syntaxHighlighter the syntax highlighter that hihglights  a supported language file. If not defined a static default one is used.
+	 * @property {orion.core.ContentType} contentTypeService optional the content type service that knows a file's content type. If not defined a static default one is used.
 	 * @property {orion.preferences.PreferencesService} [preferences=null] the editor preferences. If not defined the default editor preferences is used.
 	 */
 	/**
@@ -57,9 +57,12 @@ define([
 		this._parentDomNode = lib.node(options.parent);//Required
 		this._fileClient = options.fileClient;//Required
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
+		if(!this._syntaxHighlighter) {
+			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
+		}
 		this._contentTypeService = options.contentTypeService;//Required
 		if(!this._contentTypeService) {
-			this._contentTypeService =  new mContentTypes.ContentTypeRegistry(mStaticContentTypes.ContentTypes);
+			this._contentTypeService =  new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
 		}
 		this._preferences = options.preferences;//Optional
 		this._init(options);
@@ -153,7 +156,7 @@ define([
 					maxLength: options.maxLength,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
-					workspaceRootSegmentName: fileSystemRootName,
+					workspaceRootSegmentName: "John Smith | Example Project",//fileSystemRootName,
 					workspaceRootURL: workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink

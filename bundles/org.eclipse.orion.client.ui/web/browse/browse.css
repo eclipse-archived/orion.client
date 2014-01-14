@@ -1,27 +1,5 @@
 @import "../edit/common.css";
-
-.localBreadCrumb{
-	border: 1px solid;
-	vertical-align: middle;
-	font-weight: bold;
-	padding: 3px;
-	color: gray;
-	height: 24px;
-	margin-bottom: -20px;
-	border-color: #dadada;
-	overflow: hidden;
-	background-color: white;
-	text-align: left;
-	margin-left: 5%;
-	margin-right: 5%;
-	margin-top: 12px;
-}
-
-.readonlyImage {
-	padding-left: 10px;
-	padding-top: 10px;
-	padding-bottom: 5px;
-}
+@import "../orion/widgets/browse/fileBrowser.css";
 
 .fileBrowserParent{
 	border: 1px solid;
@@ -31,15 +9,6 @@
 	text-align: left;
 	margin-left: 15%;
 	margin-right: 15%;
-	/*
-	margin-top: 15px;
-	*/
 	padding-bottom: 5px;
 }
 
-.breadcrumb {
-	font-size: 8pt;
-	text-decoration: none;
-	color: #CCC;
-	padding-top: 2px;
-}

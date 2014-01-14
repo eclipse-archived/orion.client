@@ -14,7 +14,11 @@
 /*global define eclipse:true orion:true window*/
 
 define([
-], function() {
+	'orion/Deferred', //$NON-NLS-0$
+	"orion/editor/textMateStyler", //$NON-NLS-0$
+	"orion/editor/htmlGrammar", //$NON-NLS-0$
+	"examples/editor/textStyler" //$NON-NLS-0$
+], function(Deferred, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 	var ContentTypes = [{	id: "text/plain",
 			name: "Text",
 			extension: ["txt"],
@@ -106,5 +110,48 @@ define([
 			extension: ["svg"],
 			imageClass: "file-sprite-image modelDecorationSprite"
 	}];
-	return {ContentTypes: ContentTypes};
+	
+	function SyntaxHighlighter() {
+		this.styler = null;
+	}
+	SyntaxHighlighter.prototype = /** @lends orion.highlight.SyntaxHighlighter.prototype */ {
+		setup: function(fileContentType, textView, annotationModel, fileName, allowAsync) {
+			if (this.styler) {
+				if (this.styler.destroy) {
+					this.styler.destroy();
+				}
+				this.styler = null;
+			}
+			return this.highlight(fileContentType, textView, annotationModel);
+		},
+		highlight: function(fileContentType, textView, annotationModel) {
+			if (this.styler) {
+				this.styler.destroy();
+				this.styler = null;
+			}
+			if (fileContentType) {
+				switch(fileContentType.name) {
+					case "JavaScript": //$NON-NLS-0$
+						this.styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
+						break;
+					case "Java": //$NON-NLS-0$
+						this.styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
+						break;
+					case "CSS": //$NON-NLS-0$
+						this.styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
+						break;
+					case "HTML": //$NON-NLS-0$
+						this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
+						break;
+				}
+			}
+			return new Deferred().resolve();
+		},
+		getStyler: function() {
+			return this.styler;
+		}
+	};
+	
+	return {ContentTypes: ContentTypes,
+			SyntaxHighlighter: SyntaxHighlighter};
 });
