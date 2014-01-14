@@ -16,29 +16,73 @@ function () {
 		"!name": "mysql",
   		"!define": {
 	  		"Connection" : {
-	    		"createQuery": "fn(sql: String, values: Object, cb: fn()) -> Query",
+	    		"createQuery": {
+	  				"!type": "fn(sql: String, values: Object, cb: fn()) -> Query"
+	  			},
 	    		"prototype": {
-	      			"connect": "fn(cb: fn())",
-			      	"changeUser": "fn(options: Object, cb: fn())",
-			      	"beginTransaction": "fn(cb: fn()) -> String",
-			      	"commit": "fn(cb: fn()) -> String",
-			      	"rollback": "fn(cb: fn()) -> String",
-			      	"query": "fn(sql: Object, values: ?, cb: ?)",
-			      	"ping": "fn(cb: fn())",
-			      	"statistics": "fn(cb: fn())",
-			      	"end": "fn(cb: fn())",
-			      	"destroy": "fn()",
-			      	"pause": "fn()",
-			      	"resume": "fn()",
-			      	"escape": "fn(value: String) -> String",
-			      	"format": "fn(sql: Object, values: [String])",
-			      	"_handleNetworkError": "fn(err: Error)",
-			      	"_handleProtocolError": "fn(err: Error)",
-			      	"_handleProtocolDrain": "fn()",
-			      	"_handleProtocolConnect": "fn()",
-			      	"_handleProtocolHandshake": "fn()",
-			      	"_handleProtocolEnd": "fn(err: Error)",
-			      	"_implyConnect": "fn()"
+	      			"connect": {
+	  					"!type": "fn(cb: fn())"
+	  				},
+			      	"changeUser": {
+	  					"!type": "fn(options: Object, cb: fn())"
+	  				},
+			      	"beginTransaction": {
+	  					"!type": "fn(cb: fn()) -> String"
+	  				},
+			      	"commit": {
+	  					"!type": "fn(cb: fn()) -> String"
+	  				},
+			      	"rollback": {
+	  					"!type": "fn(cb: fn()) -> String"
+	  				},
+			      	"query": {
+	  					"!type": "fn(sql: Object, values: ?, cb: ?)"
+	  				},
+			      	"ping": {
+	  					"!type": "fn(cb: fn())"
+	  				},
+			      	"statistics": {
+	  					"!type": "fn(cb: fn())"
+	  				},
+			      	"end": {
+	  					"!type": "fn(cb: fn())"
+	  				},
+			      	"destroy": {
+	  					"!type": "fn()"
+	  				},
+			      	"pause": {
+	  					"!type": "fn()"
+	  				},
+			      	"resume": {
+	  					"!type": "fn()"
+	  				},
+			      	"escape": {
+	  					"!type": "fn(value: String) -> String"
+	  				},
+			      	"format": {
+	  					"!type": "fn(sql: Object, values: [String])"
+	  				},
+			      	"_handleNetworkError": {
+	  					"!type": "fn(err: Error)"
+	  				},
+			      	"_handleProtocolError": {
+	  					"!type": "fn(err: Error)"
+	  				},
+			      	"_handleProtocolDrain": {
+	  					"!type": "fn()"
+	  				},
+			      	"_handleProtocolConnect": {
+	  					"!type": "fn()"
+	  				},
+			      	"_handleProtocolHandshake": {
+	  					"!type": "fn()"
+	  				},
+			      	"_handleProtocolEnd": {
+	  					"!type": "fn(err: Error)"
+	  				},
+			      	"_implyConnect": {
+	  					"!type": "fn()"
+	  				}
 	    		},
 	  		},
 	  		"Connection_obj" : {
@@ -46,14 +90,24 @@ function () {
 	  		},
   			"Pool": {
     			"prototype": {
-      				"getConnection": "fn(cb: fn(err: Error, conn: Connection))",
-      				"releaseConnection": "fn(connection: Connection)",
-      				"end": "fn(cb: fn(err: Error)) -> Object",
-      				"query": "fn(sql: String, values: Object, cb: fn())",
+      				"getConnection": {
+	  					"!type": "fn(cb: fn(err: Error, conn: Connection))"
+	  				},
+      				"releaseConnection": {
+	  					"!type": "fn(connection: Connection)"
+	  				},
+      				"end": {
+	  					"!type": "fn(cb: fn(err: Error)) -> Object"
+	  				},
+      				"query": {
+	  					"!type": "fn(sql: String, values: Object, cb: fn())"
+	  				},
       				"_removeConnection": {
         				"!type": "fn(connection: Connection)",
       				},
-      				"escape": "fn(value: String) -> String"
+      				"escape": {
+	  					"!type": "fn(value: String) -> String"
+	  				}
     			}
  			},
  			"Pool_obj" : {
@@ -63,17 +117,23 @@ function () {
   				"!type" : "fn(options: Object)"
   			},
   			"ConnectionConfig": {
-    			"mergeFlags": "fn(default_flags: Object, user_flags: [String]) -> Number",
+    			"mergeFlags": {
+	  				"!type": "fn(default_flags: Object, user_flags: [String]) -> Number"
+	  			},
     			"getDefaultFlags": {
       				"!type": "fn(options: Object) -> [String]",
     			},
-    			"getCharsetNumber": "fn(charset: String)",
+    			"getCharsetNumber": {
+	  				"!type": "fn(charset: String)"
+	  			},
     			"parseUrl": {
 	          		"!type": "fn(url: String) -> Object",
     			}
   			},
   			"ConnectionConfig_obj" : {
-  				"!type": "fn(options: Object)",
+  				"!type": {
+	  				"!type": "fn(options: Object)"
+	  			},
   				"host": "String",
 			    "port": "String",
 			    "database": "String",
@@ -85,9 +145,15 @@ function () {
 	          		"of": {
 		            	"!type": "fn(pattern: String, selector: String) -> Object",
 		        	},
-	          		"add": "fn(id: String, config: String)",
-	          		"getConnection": "fn(pattern: String, selector: String, cb: String)",
-	          		"end": "fn()",
+	          		"add": {
+	  					"!type": "fn(id: String, config: String)"
+	  				},
+	          		"getConnection": {
+	  					"!type": "fn(pattern: String, selector: String, cb: String)"
+	  				},
+	          		"end": {
+	  					"!type": "fn()"
+	  				},
 	          		"_findNodeIds": {
 	            		"!type": "fn(pattern: String) -> Object",
 	          		},
@@ -103,7 +169,9 @@ function () {
 	          		"_getConnection": {
 	            		"!type": "fn(node: Object, cb: fn(err: +Error, connection: String))",
 	          		},
-	          		"_clearFindCaches": "fn()"
+	          		"_clearFindCaches": {
+	  					"!type": "fn()"
+	  				}
 	        	},
 	        	"_canRetry": "Boolean",
 	        	"_removeNodeErrorCount": "Number",
@@ -120,28 +188,50 @@ function () {
 	      	},
   			"PoolConnection": {
 		    	"prototype": {
-		        	"release": "fn()",
+		        	"release": {
+	  					"!type": "fn()"
+	  				},
 		          	"_realEnd": {
 		            	"!type": "fn(cb: fn(err: Error))",
 		            	"!doc": "TODO: Remove this when we are removing PoolConnection#end"
 		          	},
-		          	"end": "fn()",
-		          	"destroy": "fn()",
-		          	"_removeFromPool": "fn(connection:PoolConnection)"
+		          	"end": {
+	  					"!type": "fn()"
+	  				},
+		          	"destroy": {
+	  					"!type": "fn()"
+	  				},
+		          	"_removeFromPool": {
+	  					"!type": "fn(connection:PoolConnection)"
+	  				}
 		        }
 		    },
 		    "PoolConnection_obj" : {
 		    	"!type": "fn(pool: Pool, options: Object)"
 		    },
   			"MySQL_obj": {
-    			"createConnection": "fn(config: Object) -> Connection",
-    			"createPool": "fn(config: Object) -> Pool",
-    			"createPoolCluster": "fn(config: Object) -> PoolCluster",
-    			"createQuery": "fn(sql: String, values: Object, cb: Object) -> !0",
+    			"createConnection": {
+	  				"!type": "fn(config: Object) -> Connection"
+	  			},
+    			"createPool": {
+	  				"!type": "fn(config: Object) -> Pool"
+	  			},
+    			"createPoolCluster": {
+	  				"!type": "fn(config: Object) -> PoolCluster"
+	  			},
+    			"createQuery": {
+	  				"!type": "fn(sql: String, values: Object, cb: Object) -> Object"
+	  			},
     			"Types": "Types",
-    			"escape": "fn(val: String, stringifyObjects: Boolean, timeZone: String) -> String",
-    			"escapeId": "fn(val: String, forbidQualified: Boolean) -> String",
-    			"format": "fn(sql: String, values: [String], stringifyObjects: Boolean, timeZone: String)"
+    			"escape": {
+	  				"!type": "fn(val: String, stringifyObjects: Boolean, timeZone: String) -> String"
+	  			},
+    			"escapeId": {
+	  				"!type": "fn(val: String, forbidQualified: Boolean) -> String"
+	  			},
+    			"format": {
+	  				"!type": "fn(sql: String, values: [String], stringifyObjects: Boolean, timeZone: String)"
+	  			}
   			},
   			"Types": {
 		        "DECIMAL": "Number",
@@ -174,30 +264,66 @@ function () {
 		    },
 		    "Query": {
     			"prototype": {
-      				"start": "fn()",
-      				"determinePacket": "fn(firstByte: Number, parser: Object)",
-      				"OkPacket": "fn(packet: Object)",
-      				"ErrorPacket": "fn(packet: Object)",
-      				"ResultSetHeaderPacket": "fn(packet: Object)",
-      				"FieldPacket": "fn(packet: Object)",
-      				"EofPacket": "fn(packet: Object)",
-      				"_handleFinalResultPacket": "fn(packet: Object)",
-      				"RowDataPacket": "fn(packet: Object, parser: ?, connection: Connection)",
-      				"_sendLocalDataFile": "fn(path: String)",
-      				"stream": "fn(options: Object) -> Object"
+      				"start": {
+	  					"!type": "fn()"
+	  				},
+      				"determinePacket": {
+	  					"!type": "fn(firstByte: Number, parser: Object)"
+	  				},
+      				"OkPacket": {
+	  					"!type": "fn(packet: Object)"
+	  				},
+      				"ErrorPacket": {
+	  					"!type": "fn(packet: Object)"
+	  				},
+      				"ResultSetHeaderPacket": {
+	  					"!type": "fn(packet: Object)"
+	  				},
+      				"FieldPacket": {
+	  					"!type": "fn(packet: Object)"
+	  				},
+      				"EofPacket": {
+	  					"!type": "fn(packet: Object)"
+	  				},
+      				"_handleFinalResultPacket": {
+	  					"!type": "fn(packet: Object)"
+	  				},
+      				"RowDataPacket": {
+	  					"!type": "fn(packet: Object, parser: Parser, connection: Connection)"
+	  				},
+      				"_sendLocalDataFile": {
+	  					"!type": "fn(path: String)"
+	  				},
+      				"stream": {
+	  					"!type": "fn(options: Object) -> Object"
+	  				}
     			}
     		},
     		"Query_obj" : {
     			"!type": "fn(options: Object, callback: fn())"
     		},
 		    "SqlString": {
-		      	"escapeId": "fn(val: Object, forbidQualified: Boolean) -> String",
-		      	"escape": "fn(val: String, stringifyObjects: Boolean, timeZone: String) -> String",
-		      	"arrayToList": "fn(array: String, timeZone: String)",
-		      	"format": "fn(sql: String, values: [Object], stringifyObjects: Object, timeZone: String)",
-		      	"dateToString": "fn(date: String, timeZone: String) -> String",
-		      	"bufferToString": "fn(buffer: String) -> String",
-		      	"objectToValues": "fn(object: String, timeZone: String) -> String"
+		      	"escapeId": {
+	  				"!type": "fn(val: Object, forbidQualified: Boolean) -> String"
+	  			},
+		      	"escape": {
+	  				"!type": "fn(val: String, stringifyObjects: Boolean, timeZone: String) -> String"
+	  			},
+		      	"arrayToList": {
+	  				"!type": "fn(array: String, timeZone: String)"
+	  			},
+		      	"format": {
+	  				"!type": "fn(sql: String, values: [Object], stringifyObjects: Object, timeZone: String)"
+	  			},
+		      	"dateToString": {
+	  				"!type": "fn(date: String, timeZone: String) -> String"
+	  			},
+		      	"bufferToString": {
+	  				"!type": "fn(buffer: String) -> String"
+	  			},
+		      	"objectToValues": {
+	  				"!type": "fn(object: String, timeZone: String) -> String"
+	  			}
 		    }
 		}
 }});

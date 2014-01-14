@@ -17,9 +17,15 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
   		"!define": {
     		"PG" : {
     			"prototype" : {
-    				"end" : "fn()",
-    				"connect" : "fn(config: Object, callback: fun())",
-    				"cancel" : "fn(config: Object, client: Client, query: Query)"
+    				"end" : {
+    					"!type" : "fn()"
+    				},
+    				"connect" : {
+    					"!type" : "fn(config: Object, callback: fun())"
+    				},
+    				"cancel" : {
+    					"!type" : "fn(config: Object, client: Client, query: Query)"
+    				}
     			}
     		},
     		"PG_obj" : {
@@ -27,9 +33,15 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
     		},
       		"Client": {
         		"prototype": {
-	          		"connect": "fn(callback: fn())",
-	          		"getStartupConf": "fn() -> Object",
-	          		"cancel": "fn(client: Client, query: Query)",
+	          		"connect": {
+    					"!type" : "fn(callback: fn())"
+    				},
+	          		"getStartupConf": {
+    					"!type" : "fn() -> Object"
+    				},
+	          		"cancel": {
+    					"!type" : "fn(client: Client, query: Query)"
+    				},
 	          		"escapeIdentifier": {
 	            		"!type": "fn(str: String) -> String",
 	            		"!doc": "Ported from PostgreSQL 9.2.4 source code in src/interfaces/libpq/fe-exec.c"
@@ -38,12 +50,24 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 	            		"!type": "fn(str: String) -> String",
 	            		"!doc": "Ported from PostgreSQL 9.2.4 source code in src/interfaces/libpq/fe-exec.c"
 	          		},
-	          		"_pulseQueryQueue": "fn()",
-	         		"_copy": "fn(text: String, stream: Object) -> Object",
-	          		"copyFrom": "fn(text: String)",
-	          		"copyTo": "fn(text: String)",
-	          		"query": "fn(config: Object, values: Object, callback: fn()) -> Object",
-	          		"end": "fn()"
+	          		"_pulseQueryQueue": {
+    					"!type" : "fn()"
+    				},
+	         		"_copy": {
+    					"!type" : "fn(text: String, stream: Object) -> Object"
+    				},
+	          		"copyFrom": {
+    					"!type" : "fn(text: String)"
+    				},
+	          		"copyTo": {
+    					"!type" : "fn(text: String)"
+    				},
+	          		"query": {
+    					"!type" : "fn(config: Object, values: Object, callback: fn()) -> Object"
+    				},
+	          		"end": {
+    					"!type" : "fn()"
+    				}
 	        	},
 	        },
         	"Client_obj" : {
@@ -52,7 +76,9 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
         	},
         	"ConnectionParameters": {
 		        "prototype": {
-		          "getLibpqConnectionString": "fn(cb: fn())"
+		          	"getLibpqConnectionString": {
+    					"!type" : "fn(cb: fn())"
+    				}
 		        },
 		    },
 		    "ConnectionParameters_obj" : {
@@ -60,14 +86,30 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		    },
 		    "Connection": {
 		        "prototype": {
-		        	"connect": "fn(port: Number, host: String)",
-		          	"attachListeners": "fn(stream: Object)",
-		          	"requestSsl": "fn(config: Object)",
-		          	"startup": "fn(config: Object)",
-		          	"cancel": "fn(processID: Number, secretKey: String)",
-		          	"password": "fn(password: String)",
-		          	"_send": "fn(code: Number, more: Object) -> Boolean",
-		          	"query": "fn(text: String)",
+		        	"connect": {
+    					"!type" : "fn(port: Number, host: String)"
+    				},
+		          	"attachListeners": {
+    					"!type" : "fn(stream: Object)"
+    				},
+		          	"requestSsl": {
+    					"!type" : "fn(config: Object)"
+    				},
+		          	"startup": {
+    					"!type" : "fn(config: Object)"
+    				},
+		          	"cancel": {
+    					"!type" : "fn(processID: Number, secretKey: String)"
+    				},
+		          	"password": {
+    					"!type" : "fn(password: String)"
+    				},
+		          	"_send": {
+    					"!type" : "fn(code: Number, more: Object) -> Boolean"
+    				},
+		          	"query": {
+    					"!type" : "fn(text: String)"
+    				},
 		          	"parse": {
 		            	"!type": "fn(query: Query, more: Object)",
 		            	"!doc": "send parse message \"more\" === true to buffer the message until flush() is called"
@@ -80,19 +122,37 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		            	"!type": "fn(config: Object, more: Object)",
 		            	"!doc": "send execute message \"more\" === true to buffer the message until flush() is called"
 		         	 },
-		          	"flush": "fn()",
-		          	"sync": "fn()",
-		          	"end": "fn()",
-		          	"describe": "fn(msg: Message, more: Object)",
-		          	"sendCopyFromChunk": "fn(chunk: Object)",
-		          	"endCopyFrom": "fn()",
-		          	"sendCopyFail": "fn(msg: Message)",
+		          	"flush": {
+    					"!type" : "fn()"
+    				},
+		          	"sync": {
+    					"!type" : "fn()"
+    				},
+		          	"end": {
+    					"!type" : "fn()"
+    				},
+		          	"describe": {
+    					"!type" : "fn(msg: Message, more: Object)"
+    				},
+		          	"sendCopyFromChunk": {
+    					"!type" : "fn(chunk: Object)"
+    				},
+		          	"endCopyFrom": {
+    					"!type" : "fn()"
+    				},
+		          	"sendCopyFail": {
+    					"!type" : "fn(msg: Message)"
+    				},
 		          	"setBuffer": {
 		            	"!type": "fn(buffer: Buffer)",
 		            	"!doc": "parsing methods",
 		          	},
-		          	"readSslResponse": "fn()",
-		          	"parseMessage": "fn() -> Boolean",
+		          	"readSslResponse": {
+    					"!type" : "fn()"
+    				},
+		          	"parseMessage": {
+    					"!type" : "fn() -> Boolean"
+    				},
 		          	"parseR": {
 		            	"!type": "fn(buffer: Buffer, length: Number) -> Message",
 		          	},
@@ -186,60 +246,120 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 			    "chunk": "Buffer"
 		  	},
 	        "CopyFromStream": {
-	          "prototype": {
-	            "_writable": "fn() -> Boolean",
-	            "startStreamingToConnection": "fn(connection: Connection)",
-	            "_handleChunk": "fn(string: String, encoding: String) -> Boolean",
-	            "_sendIfConnectionReady": "fn() -> Boolean",
-	            "_endIfNeedAndPossible": "fn()",
-	            "write": "fn(string: String, encoding: String) -> Boolean",
-	            "end": "fn(string: String, encondig: String) -> Boolean",
-	            "error": "fn(error: Error) -> Boolean",
-	            "close": "fn() -> Boolean"
-	          }
+	          	"prototype": {
+		            "_writable": {
+	    				"!type" : "fn() -> Boolean"
+	    			},
+		            "startStreamingToConnection": {
+	    				"!type" : "fn(connection: Connection)"
+	    			},
+		            "_handleChunk": {
+	    				"!type" : "fn(string: String, encoding: String) -> Boolean"
+	    			},
+		            "_sendIfConnectionReady": {
+	    				"!type" : "fn() -> Boolean"
+	    			},
+		            "_endIfNeedAndPossible": {
+	    				"!type" : "fn()"
+	    			},
+		            "write": {
+	    				"!type" : "fn(string: String, encoding: String) -> Boolean"
+	    			},
+		            "end": {
+	    				"!type" : "fn(string: String, encondig: String) -> Boolean"
+	    			},
+		            "error": {
+	    				"!type" : "fn(error: Error) -> Boolean"
+	    			},
+		            "close": {
+	    				"!type" : "fn() -> Boolean"
+	    			}
+	          	}
 	        },
 	        "CopyFromStream_obj" : {
 	        	"!type": "fn()"
 	        },
 	        "CopyToStream": {
-	          "prototype": {
-	            "_outputDataChunk": "fn()",
-	            "_readable": "fn() -> Boolean",
-	            "error": "fn(error: Error) -> Boolean",
-	            "close": "fn() -> Boolean",
-	            "handleChunk": "fn(chunk: Object)",
-	            "pause": "fn() -> Boolean",
-	            "resume": "fn() -> Boolean",
-	            "setEncoding": "fn(encoding: String)"
-	          }
+	          	"prototype": {
+	            	"_outputDataChunk": {
+    					"!type" : "fn()"
+    				},
+		            "_readable": {
+    					"!type" : "fn() -> Boolean"
+    				},
+		            "error": {
+    					"!type" : "fn(error: Error) -> Boolean"
+    				},
+		            "close": {
+    					"!type" : "fn() -> Boolean"
+    				},
+		            "handleChunk": {
+    					"!type" : "fn(chunk: Object)"
+    				},
+		            "pause": {
+    					"!type" : "fn() -> Boolean"
+    				},
+		            "resume": {
+    					"!type" : "fn() -> Boolean"
+    				},
+		            "setEncoding": {
+    					"!type" : "fn(encoding: String)"
+    				}
+	          	}
 	        },
 	        "CopyToStream_obj" : {
 	        	"!type": "fn()"
 	        },
 	        "Query": {
 		        "prototype": {
-		          	"requiresPreparation": "fn() -> Boolean",
+		          	"requiresPreparation": {
+    					"!type" : "fn() -> Boolean"
+    				},
 		          	"handleRowDescription": {
 		            	"!type": "fn(msg: Message)",
 		            	"!doc": "associates row metadata from the supplied message with this query object metadata used when parsing row results"
 		          	},
-		          	"handleDataRow": "fn(msg: Message)",
-		          	"handleCommandComplete": "fn(msg: Message, con: Connection)",
-		          	"handleReadyForQuery": "fn()",
-		          	"handleError": "fn(err: Boolean, connection: Connection)",
-		          	"submit": "fn(connection: Connection)",
-		          	"hasBeenParsed": "fn(connection: Connection) -> String",
-		          	"handlePortalSuspended": "fn(connection: Connection)",
-		          	"_getRows": "fn(connection: Connection, rows: Object)",
-		          	"prepare": "fn(connection: Connection)",
-		          	"handleCopyInResponse": "fn(connection: Connection)",
-		          	"handleCopyData": "fn(msg: Message, connection: Connection)"
+		          	"handleDataRow": {
+    					"!type" : "fn(msg: Message)"
+    				},
+		          	"handleCommandComplete": {
+    					"!type" : "fn(msg: Message, con: Connection)"
+    				},
+		          	"handleReadyForQuery": {
+    					"!type" : "fn()"
+    				},
+		          	"handleError": {
+    					"!type" : "fn(err: Boolean, connection: Connection)"
+    				},
+		          	"submit": {
+    					"!type" : "fn(connection: Connection)"
+    				},
+		          	"hasBeenParsed": {
+    					"!type" : "fn(connection: Connection) -> String"
+    				},
+		          	"handlePortalSuspended": {
+    					"!type" : "fn(connection: Connection)"
+    				},
+		          	"_getRows": {
+    					"!type" : "fn(connection: Connection, rows: Object)"
+    				},
+		          	"prepare": {
+    					"!type" : "fn(connection: Connection)"
+    				},
+		          	"handleCopyInResponse": {
+    					"!type" : "fn(connection: Connection)"
+    				},
+		          	"handleCopyData": {
+    					"!type" : "fn(msg: Message, connection: Connection)"
+    				}
 		        },
 		        "portal": {
-		          "!type": "String",
-		          "!doc": "use unique portal name each time"
+		          	"!type": "String",
+		          	"!doc": "use unique portal name each time"
 		        },
-		        "_fieldNames": "[String]",
+		        "_fieldNames": {
+    				"!type" : "[String]"
+    			},
 		        "_fieldConverters": "[Object]",
 		        "isPreparedStatement": {
 		          "!type": "Boolean",
@@ -256,13 +376,19 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		            	"!type": "fn(msg: Message)",
 		            	"!doc": "adds a command complete message"
 		          	},
-		          	"_parseRowAsArray": "fn(rowData: Object) -> [Object]",
+		          	"_parseRowAsArray": {
+		            	"!type": "fn(rowData: Object) -> [Object]"
+		            },
 		          	"parseRow": {
 		            	"!type": "fn(rowData: Object) -> Object",
 		            	"!doc": "rowData is an array of text or binary values this turns the row into a JavaScript object"
 		          	},
-		          	"addRow": "fn(row: Object)",
-		          	"addFields": "fn(fieldDescriptions: Object)"
+		          	"addRow": {
+		            	"!type": "fn(row: Object)"
+		            },
+		          	"addFields": {
+		            	"!type": "fn(fieldDescriptions: Object)"
+		            }
 		        },
 		    },
 		    "Result_obj" : {
