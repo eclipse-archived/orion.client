@@ -401,13 +401,19 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				} else if(item.status.State === "STARTED"){
 					var span = document.createElement("span");
 					span.className = "imageSprite core-sprite-applicationrunning";
-					span.title = item.status.Message;
+					span.title = item.status.Message || "Started";
 					td.appendChild(span);
 					return td;
-				} else if(item.status.State==="STOPPED" || item.status.State==="NOT_DEPLOYED"){ //TODO create not deployed class
+				} else if(item.status.State==="STOPPED"){
 					var span = document.createElement("span");
 					span.className = "imageSprite core-sprite-applicationstopped";
-					span.title = item.status.Message;
+					span.title = item.status.Message || "Stopped";
+					td.appendChild(span);
+					return td;
+				} else if(item.status.State==="NOT_DEPLOYED"){
+					var span = document.createElement("span");
+					span.className = "imageSprite core-sprite-applicationnotdeployed";
+					span.title = item.status.Message || "Not deployed";
 					td.appendChild(span);
 					return td;
 				} else if(item.status.State==="PROGRESS"){

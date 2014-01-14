@@ -74,21 +74,26 @@
 .core-sprite-thumbnail{ background-position: 0 -716px; width: 16px; height: 16px; } 
 
 .core-sprite-applicationrunning {
-	background: url(../images/applicationRunning.png);
-	background-repeat: no-repeat;
-	background-position: left top;
+	border-radius: 50%;
+	background-color: green;
 	width: 16px;
 	height: 16px; 
 }
 
 .core-sprite-applicationstopped {
-	background: url(../images/applicationStopped.png);
-	background-repeat: no-repeat;
-	background-position: left top;
+	border-radius: 50%;
+	background-color: red;
 	width: 16px;
 	height: 16px; 
 }
 
+.core-sprite-applicationnotdeployed {
+	border-radius: 50%;
+	background-color: white;
+	border: 1px solid grey;
+	width: 14px;
+	height: 14px; 
+}
 
 .core-sprite-hamburger{
 	font-size: 16px;
