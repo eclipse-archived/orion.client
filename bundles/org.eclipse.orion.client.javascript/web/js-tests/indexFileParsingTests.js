@@ -82,6 +82,15 @@ define([
 				"function(cb:function(x:Object):function(z:Object):Object,cb2:function(p:Object):String):function(y:Object):Object");
 	};
 
+	tests["test callback 4"] = function() {
+		testSig("fn(callback: fn())", "function(callback:function():undefined):undefined");
+	};
+
+	tests["test callback 5"] = function() {
+		testSig("fn(callback: fn()) -> fn(err: +Error, replies: Object)", 
+				"function(callback:function():undefined):function(err:Error,replies:Object):undefined");
+	};
+
 	tests["test type 1"] = function() {
 		var type = {
 			fizz: "String",
