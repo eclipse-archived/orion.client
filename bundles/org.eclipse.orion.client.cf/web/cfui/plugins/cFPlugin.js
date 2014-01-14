@@ -123,7 +123,7 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 									},
 									Name: result.App.entity.name
 								},
-								Url: result.Route.entity.host + "." + result.Domain,
+								Url: "http://" + result.Route.entity.host + "." + result.Domain,
 								ManageUrl: result.ManageUrl
 							}
 						});
