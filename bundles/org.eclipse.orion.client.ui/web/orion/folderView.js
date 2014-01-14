@@ -206,6 +206,7 @@ define([
 		this.readonly = typeof options.readonly === 'undefined' ? false : options.readonly;
 		this.showProjectView = typeof options.showProjectView === 'undefined' ? true : options.showProjectView;
 		this.showFolderNav = true;
+		this.readmeHeaderClass = options.readmeHeaderClass;
 		this.editorView = options.editorView;
 		this.imageView = options.imageView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
@@ -309,10 +310,6 @@ define([
 								var textView = this.editorView. editor.getTextView();
 								textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
 									var textViewheight = textView.getLineHeight() * textView.getModel().getLineCount() + 20;
-									/*
-									if(textViewheight > MAX_EDITOR_HEIGHT){
-										textViewheight = MAX_EDITOR_HEIGHT;
-									}*/
 									this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
 								}.bind(this));
 								this.editor = this.editorView.editor;
@@ -345,7 +342,7 @@ define([
 					} else if(sectionName === "readme"){
 						if (readmeMd) {
 							div = document.createElement("div"); //$NON-NLS-0$
-							this.markdownView.displayInFrame(div, readmeMd);
+							this.markdownView.displayInFrame(div, readmeMd, this.readmeHeaderClass);
 							this._node.appendChild(div);
 						}
 					}

@@ -4,7 +4,17 @@
 .fileBrowserParent{
 	border: 1px solid;
 	vertical-align: middle;
-	border-color: #dadada;
+	border-color: blue;
+	overflow: hidden;
+	text-align: left;
+	margin-left: 15%;
+	margin-right: 15%;
+	padding-bottom: 5px;
+}
+
+.fileBrowserDemoTextParent{
+	border: none;
+	vertical-align: middle;
 	overflow: hidden;
 	text-align: left;
 	margin-left: 15%;

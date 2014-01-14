@@ -170,6 +170,7 @@ define([
 					parent: this._parentDomNode,
 					readonly: true,
 					showProjectView: false,
+					readmeHeaderClass: "readmeHeader",
 					metadata: metadata,
 					commandRegistry: this._commandRegistry,
 					contentTypeRegistry: this._contentTypeService,

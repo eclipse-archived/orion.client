@@ -20,6 +20,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 	 * @param {String} options.id id of the section header
 	 * @param {String} options.title title (in HTML) of the section
 	 * @param {orion.preferences.PreferencesService} [options.preferenceService] used to store the hidden/shown state of the section if specified
+	 * @param {String|Array} [options.headerClass] a class or array of classes to use in the section header, in addition to the default header classes
 	 * @param {String|Array} [options.iconClass] a class or array of classes to use in the icon decorating section, no icon displayed if not provided
 	 * @param {Function} [options.getItemCount] function to return the count of items in the section. If not provided, no count is shown.
 	 * @param {String|DomNode} [options.content] HTML or DOM node giving the Section's initial contents. May be set later using {@link #setContent()}
@@ -77,15 +78,22 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 				}
 			}, false);
 		}
-
+		var classes;
 		if(options.iconClass){
 			var icon = document.createElement("span"); //$NON-NLS-0$
 			icon.classList.add("sectionIcon"); //$NON-NLS-0$
 			this.domNode.appendChild(icon);
-			var classes = Array.isArray(options.iconClass) ? options.iconClass : [options.iconClass];
+			classes = Array.isArray(options.iconClass) ? options.iconClass : [options.iconClass];
 			classes.forEach(function(aClass) {
 				icon.classList.add(aClass);
 			});
+		}
+		
+		if(options.headerClass){
+			classes = Array.isArray(options.headerClass) ? options.headerClass : [options.headerClass];
+			classes.forEach(function(aClass) {
+				this.domNode.classList.add(aClass);
+			}.bind(this));
 		}
 		
 		this.titleNode = document.createElement("div"); //$NON-NLS-0$
