@@ -112,7 +112,20 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 				cFService.pushApp(null, null, decodeURIComponent(item.Location)).then(
 					function(result){
 						deferred.resolve({
-							CheckState: true
+							CheckState: true,
+							ToSave: {
+								ConfigurationName: result.Target.Space.Name + "_" + result.Target.Org.Name + "_" + result.App.entity.name,
+								Parameters: {
+									Target: {
+										Url: result.Target.Url,
+										Org: result.Target.Org.Name,
+										Space: result.Target.Space.Name
+									},
+									Name: result.App.entity.name
+								},
+								Url: result.Route.entity.host + "." + result.Domain,
+								ManageUrl: result.ManageUrl
+							}
 						});
 					}, function(error){
 						if (error.HttpCode === 404){
