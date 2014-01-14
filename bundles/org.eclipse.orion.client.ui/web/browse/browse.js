@@ -24,6 +24,7 @@ define([
 		//var cTypeService = new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
 		var fBrowser = new mFileBrowser.FileBrowser({
 			parent: "fileBrowser",//Required 
+			//maxEditorHeight: 800,
 			fileClient: new mFileClient.FileClient(core.serviceRegistry), //Required. But will be different implementation that does not require service registration
 			//syntaxHighlighter: new mStaticDataSource.SyntaxHighlighter(), //Optional. If not defined the deafult one is used.
 			//syntaxHighlighter: new Highlight.SyntaxHighlighter(core.serviceRegistry, cTypeService), //Required. But will be different implementation that does not require service registration

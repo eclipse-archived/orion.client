@@ -150,6 +150,8 @@ define([
 			}.bind(this));
 			if(this.editorPreferences) {
 				this.editorPreferences.getPrefs(this.updateSettings.bind(this));
+			} else {
+				editor.setAnnotationRulerVisible(false);
 			}
 		},
 		create: function() {

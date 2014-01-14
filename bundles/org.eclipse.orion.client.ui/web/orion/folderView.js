@@ -32,7 +32,6 @@ define([
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
-	//var MAX_EDITOR_HEIGHT = 700;
 	
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 	function FolderNavRenderer() {
@@ -208,6 +207,7 @@ define([
 		this.showFolderNav = true;
 		this.readmeHeaderClass = options.readmeHeaderClass;
 		this.editorView = options.editorView;
+		this._maxEditorHeight = options.maxEditorHeight;
 		this.imageView = options.imageView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this._init();
@@ -310,6 +310,9 @@ define([
 								var textView = this.editorView. editor.getTextView();
 								textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
 									var textViewheight = textView.getLineHeight() * textView.getModel().getLineCount() + 20;
+									if(this._maxEditorHeight && this._maxEditorHeight > 0 && textViewheight >this._maxEditorHeight) {
+										textViewheight = this._maxEditorHeight;
+									}
 									this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
 								}.bind(this));
 								this.editor = this.editorView.editor;

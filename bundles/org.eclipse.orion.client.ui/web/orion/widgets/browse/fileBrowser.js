@@ -40,6 +40,7 @@ define([
 	 * @name orion.browse.FileBrowserOptions
 	 *
 	 * @property {String|DOMElement} parent the parent element for the file browser, it can be either a DOM element or an ID for a DOM element.
+	 * @property {Number} maxEditorHeight the max height of the editor when displaying a file, if not defined 0 is used to represent that editor will use the full contents height.
 	 * @property {orion.fileClient.FileClient} fileClient the file client implementation that has all the interfaces from orion.fileClient.FileClient.
 	 * @property {orion.highlight.SyntaxHighlighter} optional syntaxHighlighter the syntax highlighter that hihglights  a supported language file. If not defined a static default one is used.
 	 * @property {orion.core.ContentType} contentTypeService optional the content type service that knows a file's content type. If not defined a static default one is used.
@@ -70,6 +71,7 @@ define([
 	objects.mixin(FileBrowser.prototype, {
 		_init: function(options){
 			this._commandRegistry = new mCommandRegistry.CommandRegistry({});
+			this._maxEditorHeight = options.maxEditorHeight;
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
@@ -170,6 +172,7 @@ define([
 					parent: this._parentDomNode,
 					readonly: true,
 					showProjectView: false,
+					maxEditorHeight: this._maxEditorHeight,
 					readmeHeaderClass: "readmeHeader",
 					metadata: metadata,
 					commandRegistry: this._commandRegistry,
