@@ -329,6 +329,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				}
 				
 				projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
+					if(sharedLaunchConfigurationDispatcher){
+						item.status = {State: "PROGRESS"};
+						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
+					}
 					if(service && service.getState){
 						service.getState(params).then(function(result){
 							item.status = result;

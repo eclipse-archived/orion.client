@@ -410,6 +410,12 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 					span.title = item.status.Message;
 					td.appendChild(span);
 					return td;
+				} else if(item.status.State==="PROGRESS"){
+					var span = document.createElement("span");
+					span.className = "imageSprite core-sprite-progress";
+					span.title = "Checking application state";
+					td.appendChild(span);
+					return td;
 				} else {
 					var span = document.createElement("span");
 					span.appendChild(document.createTextNode("State unknown"));
@@ -421,6 +427,9 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			if(item.ServiceId){
 				this.projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
 					if(service && service.getState){
+						item.status = {State: "PROGRESS"};
+						td.innerHTML = this.getCellElement(col_no, item, tableRow).innerHTML;
+					
 						service.getState(item.Params).then(function(result){
 							item.status = result;
 							var newTd = this.getCellElement(col_no, item, tableRow);
