@@ -474,9 +474,10 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	
 	objects.mixin(LaunchConfigurationExplorer.prototype, /** @lends orion.Explorer.prototype */ {
 		registerCommands: function(){
-			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.deploy", 1);
-			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.startApp", 2);
-			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.stopApp", 3);
+			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.manage", 1);
+			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.deploy", 2);
+			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.startApp", 3);
+			this.commandService.registerCommandContribution(this.selectionActions, "orion.launchConfiguration.stopApp", 4);
 		},
 		updateCommands: function(selections){
 			this.selectionActionsNode = lib.node(this.selectionActions);

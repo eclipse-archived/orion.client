@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/java/java", [], function() { //$NON-NLS-0$
+define("orion/editor/stylers/java/java", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"abstract", //$NON-NLS-0$
 		"boolean", "break", "byte", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -30,7 +30,24 @@ define("orion/editor/stylers/java/java", [], function() { //$NON-NLS-0$
 		"while" //$NON-NLS-0$
 	];
 
+	var grammars = mShared.grammars;
+	grammars.push({
+		id: "orion.java",
+		contentTypes: ["text/x-java-source"],
+		patterns: [
+			{
+				include: "orion.patterns"
+			}, {
+				match: "\\b(?:" + keywords.join("|") + ")\\b",
+				name: "keyword.control"
+			}, {
+				/* override orion.patterns#string_singleQuote */
+				id: "string_singleQuote"
+			}
+		]
+	});
 	return {
+		grammars: grammars,
 		keywords: keywords
 	};
 });

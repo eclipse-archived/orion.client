@@ -32,16 +32,19 @@ pre {
 			i18n: 'requirejs/i18n'
 		}
 	});
-	require(["orion/editor/edit"], function(edit) {
+	require(["orion/editor/edit", "orion/editor/textStyler", "orion/editor/stylers/js/js"], function(edit, mStyler, mJS) {
 		edit({
-			lang: "js"
+			lang: "json",
+			stylerFactory: function(textView, lang, annotationModel) {
+				return new mStyler.TextStyler(textView, annotationModel, mJS.grammars, "orion.js");
+			}
 		});
 	});
 </script>
 </head>
 <body spellcheck="false">
 <pre id="editor">/*
- * This is a orion editor sample.
+ * This is an Orion editor sample.
  */
 function () {
 	var a = 'hi there!';

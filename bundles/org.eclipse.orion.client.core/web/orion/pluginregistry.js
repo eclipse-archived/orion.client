@@ -1103,6 +1103,17 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
             _plugins.sort(function(a, b) {
                 return a._getCreated() < b._getCreated() ? -1 : 1;
             });
+            
+            if (configuration.parent) {
+            	_parent = configuration.parent;
+            } else {
+	            _parent = document.createElement("div"); //$NON-NLS-0$
+	            if (!configuration.visible) {
+                    _parent.style.display = "none"; //$NON-NLS-0$
+                    _parent.style.visibility = "hidden"; //$NON-NLS-0$
+                }
+	            document.body.appendChild(_parent);
+            }
 
             if (configuration.plugins) {
                 Object.keys(configuration.plugins).forEach(function(url) {
@@ -1136,18 +1147,6 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
             if (_state !== "starting") {
                 return new Deferred().reject("Cannot start framework. Framework is already " + _state + ".");
             }
-            
-            if (configuration.parent) {
-            	_parent = configuration.parent;
-            } else {
-	            _parent = document.createElement("div"); //$NON-NLS-0$
-	            if (!configuration.visible) {
-                    _parent.style.display = "none"; //$NON-NLS-0$
-                    _parent.style.visibility = "hidden"; //$NON-NLS-0$
-                }
-	            document.body.appendChild(_parent);
-            }
-
             var deferreds = [];
             var now = new Date().getTime();
             _plugins.forEach(function(plugin) {

@@ -909,6 +909,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 			var selection = editor.getSelection();
+			if (selection.start !== selection.end) { return false; }
 			var model = editor.getModel();
 			var caretOffset = editor.getCaretOffset();
 			var prevChar = (caretOffset === 0) ? "" : model.getText(selection.start - 1, selection.start); //$NON-NLS-0$
