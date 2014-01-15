@@ -122,8 +122,11 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 					styler = new mTextMateStyler.TextMateStyler(textView, textmateGrammar, textmateGrammars);
 				} else {
 					if (NEW) {
-						var manager = new OrionPatternManager(this.orionGrammars, provider.getProperty("id"));
-						styler = new mTextStyler2.TextStyler(textView, annotationModel, manager);
+						var grammars = [];
+						for(var key in this.orionGrammars) {
+						    grammars.push(this.orionGrammars[key]);
+						}
+						styler = new mTextStyler2.TextStyler(textView, annotationModel, grammars, provider.getProperty("id"));
 					}
 				}
 			}
@@ -131,109 +134,6 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 		});
 	}
 	
-	function OrionPatternManager(grammars, rootId) {
-		this._unnamedCounter = 0;
-		this._patterns = [];
-		this._rootId = rootId;
-		var grammarIds = Object.keys(grammars);
-		grammarIds.forEach(function(grammarId) {
-			var grammar = grammars[grammarId];
-			if (grammar.patterns) {
-				this._addPatterns(grammar.patterns, grammar.id);
-			}
-		}.bind(this));
-	}
-	OrionPatternManager.prototype = {
-		getPatterns: function(pattern) {
-			var parentId;
-			if (!pattern) {
-				parentId = this._rootId;
-			} else {
-				if (typeof(pattern) === "string") { //$NON-NLS-0$
-					parentId = pattern;
-				} else {
-					parentId = pattern.qualifiedId;
-				}
-			}
-			/* indexes on patterns are used to break ties when multiple patterns match the same start text */
-			var indexCounter = [0];
-			var resultObject = {};
-			var regEx = new RegExp(parentId + "#[^#]+$"); //$NON-NLS-0$
-			var includes = [];
-			this._patterns.forEach(function(current) {
-				if (regEx.test(current.qualifiedId)) {
-					if (current.include) {
-						includes.push(current);
-					} else {
-						current.index = indexCounter[0]++;
-						resultObject[current.id] = current;
-					}
-				}
-			}.bind(this));
-			/*
-			 * The includes get processed last to ensure that locally-defined patterns are given
-			 * precedence over included ones with respect to pattern identifiers and indexes.
-			 */
-			includes.forEach(function(current) {
-				this._processInclude(current, indexCounter, resultObject);
-			}.bind(this));
-
-			var result = [];
-			var keys = Object.keys(resultObject);
-			keys.forEach(function(current) {
-				result.push(resultObject[current]);
-			});
-			return result;
-		},
-		_addPatterns: function(patterns, parentId) {
-			for (var i = 0; i < patterns.length; i++) {
-				var current = patterns[i];
-				current.parentId = parentId;
-				if (!current.id) {
-					current.id = this._UNNAMED + this._unnamedCounter++;
-				}
-				current.qualifiedId = current.parentId + "#" + current.id;
-				this._patterns.push(current);
-				if (current.patterns && !current.include) {
-					this._addPatterns(current.patterns, current.qualifiedId);
-				}
-			};
-		},
-		_processInclude: function(pattern, indexCounter, resultObject) {
-			var searchExp;
-			var index = pattern.include.indexOf("#");
-			if (index === 0) {
-				/* inclusion of pattern from same grammar */
-				searchExp = new RegExp(pattern.parentId.substring(0, pattern.parentId.indexOf("#")) + pattern.include + "$");
-			} else if (index === -1) {
-				/* inclusion of whole grammar */
-				searchExp = new RegExp(pattern.include + "#[^#]+$");				
-			} else {
-				/* inclusion of specific pattern from another grammar */
-				searchExp = new RegExp(pattern.include);
-			}
-			var includes = [];
-			this._patterns.forEach(function(current) {
-				if (searchExp.test(current.qualifiedId)) {
-					if (current.include) {
-						includes.push(current);
-					} else if (!resultObject[current.id]) {
-						current.index = indexCounter[0]++;
-						resultObject[current.id] = current;
-					}
-				}
-			}.bind(this));
-			/*
-			 * The includes get processed last to ensure that locally-defined patterns are given
-			 * precedence over included ones with respect to pattern identifiers and indexes.
-			 */
-			includes.forEach(function(current) {
-				this._processInclude(current, indexCounter, resultObject);
-			}.bind(this));
-		},
-		_UNNAMED: "noId"	//$NON-NLS-0$
-	};
-
 	/**
 	 * @name orion.highlight.SyntaxHighlighter
 	 * @class

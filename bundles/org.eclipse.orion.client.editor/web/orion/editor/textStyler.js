@@ -310,6 +310,107 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		return results;
 	};
 
+	function PatternManager(grammars, rootId) {
+		this._unnamedCounter = 0;
+		this._patterns = [];
+		this._rootId = rootId;
+		grammars.forEach(function(current) {
+			if (current.patterns) {
+				this._addPatterns(current.patterns, current.id);
+			}
+		}.bind(this));
+	}
+	PatternManager.prototype = {
+		getPatterns: function(pattern) {
+			var parentId;
+			if (!pattern) {
+				parentId = this._rootId;
+			} else {
+				if (typeof(pattern) === "string") { //$NON-NLS-0$
+					parentId = pattern;
+				} else {
+					parentId = pattern.qualifiedId;
+				}
+			}
+			/* indexes on patterns are used to break ties when multiple patterns match the same start text */
+			var indexCounter = [0];
+			var resultObject = {};
+			var regEx = new RegExp(parentId + "#[^#]+$"); //$NON-NLS-0$
+			var includes = [];
+			this._patterns.forEach(function(current) {
+				if (regEx.test(current.qualifiedId)) {
+					if (current.include) {
+						includes.push(current);
+					} else {
+						current.index = indexCounter[0]++;
+						resultObject[current.id] = current;
+					}
+				}
+			}.bind(this));
+			/*
+			 * The includes get processed last to ensure that locally-defined patterns are given
+			 * precedence over included ones with respect to pattern identifiers and indexes.
+			 */
+			includes.forEach(function(current) {
+				this._processInclude(current, indexCounter, resultObject);
+			}.bind(this));
+
+			var result = [];
+			var keys = Object.keys(resultObject);
+			keys.forEach(function(current) {
+				result.push(resultObject[current]);
+			});
+			return result;
+		},
+		_addPatterns: function(patterns, parentId) {
+			for (var i = 0; i < patterns.length; i++) {
+				var current = patterns[i];
+				current.parentId = parentId;
+				if (!current.id) {
+					current.id = this._UNNAMED + this._unnamedCounter++;
+				}
+				current.qualifiedId = current.parentId + "#" + current.id;
+				this._patterns.push(current);
+				if (current.patterns && !current.include) {
+					this._addPatterns(current.patterns, current.qualifiedId);
+				}
+			};
+		},
+		_processInclude: function(pattern, indexCounter, resultObject) {
+			var searchExp;
+			var index = pattern.include.indexOf("#");
+			if (index === 0) {
+				/* inclusion of pattern from same grammar */
+				searchExp = new RegExp(pattern.parentId.substring(0, pattern.parentId.indexOf("#")) + pattern.include + "$");
+			} else if (index === -1) {
+				/* inclusion of whole grammar */
+				searchExp = new RegExp(pattern.include + "#[^#]+$");				
+			} else {
+				/* inclusion of specific pattern from another grammar */
+				searchExp = new RegExp(pattern.include);
+			}
+			var includes = [];
+			this._patterns.forEach(function(current) {
+				if (searchExp.test(current.qualifiedId)) {
+					if (current.include) {
+						includes.push(current);
+					} else if (!resultObject[current.id]) {
+						current.index = indexCounter[0]++;
+						resultObject[current.id] = current;
+					}
+				}
+			}.bind(this));
+			/*
+			 * The includes get processed last to ensure that locally-defined patterns are given
+			 * precedence over included ones with respect to pattern identifiers and indexes.
+			 */
+			includes.forEach(function(current) {
+				this._processInclude(current, indexCounter, resultObject);
+			}.bind(this));
+		},
+		_UNNAMED: "noId"	//$NON-NLS-0$
+	};
+
 	function Block(bounds, pattern, styler, model, parent) {
 		this.start = bounds.start;
 		this.end = bounds.end;
@@ -480,7 +581,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		}
 	};
 
-	function TextStyler (view, annotationModel, patternManager) {
+	function TextStyler (view, annotationModel, grammars, rootGrammarId) {
 		this.whitespacesVisible = this.spacesVisible = this.tabsVisible = false;
 		this.detectHyperlinks = true;
 		this.highlightCaretLine = false;
@@ -488,7 +589,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		this.detectTasks = true;
 		this.view = view;
 		this.annotationModel = annotationModel;
-		this.patternManager = patternManager;
+		this.patternManager = new PatternManager(grammars, rootGrammarId);
 		this._accessor = new TextStylerAccessor(this);
 		this._bracketAnnotations = undefined;
 

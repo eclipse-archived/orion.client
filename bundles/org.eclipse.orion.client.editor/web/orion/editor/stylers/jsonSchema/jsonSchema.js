@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/jsonSchema/jsonSchema", [], function() { //$NON-NLS-0$
+define("orion/editor/stylers/jsonSchema/jsonSchema", ["orion/editor/stylers/json/json"], function(mJSON) { //$NON-NLS-0$
 	var keywords = [
 		"additionalItems", "additionalProperties", "allOf", "anyOf", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"default", "definitions", "dependencies", "description", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -28,7 +28,21 @@ define("orion/editor/stylers/jsonSchema/jsonSchema", [], function() { //$NON-NLS
 		"uniqueItems" //$NON-NLS-0$
 	];
 
+	var grammars = mJSON.grammars;
+	grammars.push({
+		id: "orion.json.schema", //$NON-NLS-0$
+		contentTypes: ["application/schema+json"], //$NON-NLS-0$
+		patterns: [
+			{
+				include: "orion.json" //$NON-NLS-0$
+			}, {
+				match: "(?:\\$schema|(?:\\b(?:" + keywords.join("|") + ")))\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				name: "keyword.control" //$NON-NLS-0$
+			}
+		]
+	});
 	return {
+		grammars: grammars,
 		keywords: keywords
 	};
 });

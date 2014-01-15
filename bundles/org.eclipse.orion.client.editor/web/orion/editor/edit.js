@@ -170,6 +170,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	 * @property {Boolean} [showFoldingRuler=true] whether or not the folding ruler is shown.
 	 * @property {Boolean} [noFocus=false] whether or not to focus the editor on creation.
 	 * @property {Number} [firstLineIndex=1] the line index displayed for the first line of text.
+	 * @property {Function} [stylerFactory] function for creating a text styler
 	 */
 	/**
 	 * Creates an editor instance configured with the given options.
@@ -246,29 +247,35 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 			};
 		}
 	
-		// Canned highlighters for js, java, and css. Grammar-based highlighter for html
 		var syntaxHighlighter = {
 			styler: null, 
 			
-			highlight: function(lang, editor) {
-				if (this.styler) {
+			highlight: function(lang, stylerFactory, editor) {
+				if (this.styler && this.styler.destroy) {
 					this.styler.destroy();
-					this.styler = null;
 				}
-				if (lang) {
-					var textView = editor.getTextView();
-					var annotationModel = editor.getAnnotationModel();
-					switch(lang) {
-						case "js": //$NON-NLS-0$
-						case "java": //$NON-NLS-0$
-						case "css": //$NON-NLS-0$
-							this.styler = new mTextStyler.TextStyler(textView, lang, annotationModel);
-							editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
-							break;
-						case "html": //$NON-NLS-0$
-							this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
-							break;
+				this.styler = null;
+				var textView = editor.getTextView();
+				var annotationModel = editor.getAnnotationModel();
+				if (stylerFactory) {
+					this.styler = stylerFactory(textView, lang, annotationModel);
+				} else {
+					if (lang) {
+						// Canned highlighters for js, java, and css. Grammar-based highlighter for html
+						switch(lang) {
+							case "js": //$NON-NLS-0$
+							case "java": //$NON-NLS-0$
+							case "css": //$NON-NLS-0$
+								this.styler = new mTextStyler.TextStyler(textView, lang, annotationModel);
+								break;
+							case "html": //$NON-NLS-0$
+								this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
+								break;
+						}
 					}
+				}
+				if (lang === "css") { //$NON-NLS-0$
+					editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 				}
 			}
 		};
@@ -315,7 +322,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 		editor.setInput(options.title, null, contents, false, options.noFocus);
 		
-		syntaxHighlighter.highlight(options.lang, editor);
+		syntaxHighlighter.highlight(options.lang, options.stylerFactory, editor);
 		if (contentAssist) {
 			var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
 			var htmlContentAssistProvider = new mHtmlContentAssist.HTMLContentAssistProvider();
