@@ -42,7 +42,8 @@ define([
 				
 				var fBrowser = new mFileBrowser.FileBrowser({
 					parent: "fileBrowser",//Required 
-					fileClient: new mFileClient.FileClient([serviceRef]),
+					serviceRefs: [serviceRef],
+					//fileClient: new mFileClient.FileClient([serviceRef]),
 				}); 
 				window.addEventListener("hashchange", function() { //$NON-NLS-0$
 					fBrowser.refresh(PageUtil.hash());
@@ -52,24 +53,23 @@ define([
 				console.log(error);
 			});
 		} 
-	/*
+/*
 	mBootstrap.startup().then(function(core) {
 		//var cTypeService = new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
-		
 		var fBrowser = new mFileBrowser.FileBrowser({
 			parent: "fileBrowser",//Required 
 			//maxEditorHeight: 800,
-			fileClient: new mFileClient.FileClient(core.serviceRegistry) //Required. But will be different implementation that does not require service registration
-			//syntaxHighlighter: new mStaticDataSource.SyntaxHighlighter(), //Optional. If not defined the deafult one is used.
-			//syntaxHighlighter: new Highlight.SyntaxHighlighter(core.serviceRegistry, cTypeService), //Required. But will be different implementation that does not require service registration
-			//contentTypeService: cTypeService,//Optional. If not defined the deafult one is used.
+			fileClient: new mFileClient.FileClient(core.serviceRegistry)
+			//syntaxHighlighter: new mStaticDataSource.SyntaxHighlighter(),
+			//syntaxHighlighter: new Highlight.SyntaxHighlighter(core.serviceRegistry, cTypeService),
+			//contentTypeService: cTypeService,
 			//contentTypeService: new mContentTypes.ContentTypeRegistry(core.serviceRegistry),
-			//preferences: null//core.preferences //Optional. If defined, should not depend on bootstrap
+			//preferences: core.preferences
 		}); 
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			fBrowser.refresh(PageUtil.hash());
 		});
 		fBrowser.refresh(PageUtil.hash());
-		
-	});*/
+	});
+*/
 });
