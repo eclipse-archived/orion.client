@@ -951,6 +951,10 @@ input {
 	width: inherit;
 }
 
+.mainpane .sectionTable .treetable, .mainpane .sectionWrapper .treetable, .mainpane .sectionTable .treetable .actionsColumn{
+	min-width: inherit;
+}
+
 .sectionTable {
 	margin-top: 0;
 	border: 1px solid;
