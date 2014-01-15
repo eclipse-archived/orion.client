@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,14 +9,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define esprima*/
+/*global esprima*/
+/*jslint amd:true*/
 define([
 	'javascript/astManager',
 	'javascript/contentAssist/indexFiles/mysqlIndex',
 	'javascript/contentAssist/indexFiles/postgresIndex',
 	'javascript/contentAssist/indexFiles/redisIndex',
-	'javascript/eslint/validator',
 	'javascript/contentAssist/contentAssist',
+	'javascript/eslint/validator',
 	'javascript/occurrences',
 	'javascript/outliner',
 	'orion/i18nUtil',
@@ -24,7 +25,7 @@ define([
 	'orion/editor/stylers/js/js',
 	'orion/editor/stylers/json/json',
 	'orion/editor/stylers/jsonSchema/jsonSchema'
-], function(ASTManager, MysqlIndex, PostgresIndex, RedisIndex, EslintValidator, ContentAssist, Occurrences, Outliner,
+], function(ASTManager, MysqlIndex, PostgresIndex, RedisIndex, ContentAssist, EslintValidator, Occurrences, Outliner,
 		i18nUtil, PluginProvider, mJS, mJSON, mJSONSchema) {
 
 	/**
@@ -199,19 +200,16 @@ define([
 	provider.registerServiceProvider("orion.core.typedef", {}, {
 		id: "node.redis",
 		type: "tern",
-		"package": "redis",
 		defs: RedisIndex
 	});
 	provider.registerServiceProvider("orion.core.typedef", {}, {
 		id: "node.mysql",
 		type: "tern",
-		"package": "mysql",
 		defs: MysqlIndex
 	});
 	provider.registerServiceProvider("orion.core.typedef", {}, {
 		id: "node.postgres",
 		type: "tern",
-		"package": "postgres",
 		defs: PostgresIndex
 	});
 

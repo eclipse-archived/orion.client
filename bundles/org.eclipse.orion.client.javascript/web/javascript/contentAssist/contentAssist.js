@@ -12,17 +12,19 @@
  *   IBM Corporation - Various improvements
  ******************************************************************************/
 
-/*global define esprima doctrine inferencerPostOp*/
+/*global esprima doctrine*/
+/*jslint amd:true*/
 define([
-'javascript/contentAssist/esprimaVisitor', 
-'javascript/contentAssist/typeEnvironment', 
-'javascript/contentAssist/typeInference', 
-'javascript/contentAssist/typeUtils', 
-'javascript/contentAssist/proposalUtils', 
-'orion/Deferred', 
-'esprima',
-'estraverse'
-], function(mVisitor, typeEnv, typeInf, typeUtils, proposalUtils, Deferred, Esprima, Estraverse) {
+	'javascript/contentAssist/esprimaVisitor', 
+	'javascript/contentAssist/typeEnvironment', 
+	'javascript/contentAssist/typeInference', 
+	'javascript/contentAssist/typeUtils', 
+	'javascript/contentAssist/proposalUtils', 
+	'orion/Deferred',
+	'orion/objects',
+	'esprima',
+	'estraverse'
+], function(mVisitor, typeEnv, typeInf, typeUtils, proposalUtils, Deferred, objects, Esprima, Estraverse) {
 
 	/**
 	 * Convert an array of parameters into a string and also compute linked editing positions
@@ -727,10 +729,7 @@ define([
 
 
 	/**
-	 * indexer is optional.  When there is no indexer passed in
-	 * the indexes will not be consulted for extra references
 	 * @param {javascript.ASTManager} astManager
-	 * @param {{hasDependency,performIndex,retrieveSummary,retrieveGlobalSummaries}} indexer
 	 * @param {{global:[],options:{browser:Boolean}}=} lintOptions optional set of extra lint options that can be overridden in the source (jslint or jshint)
 	 */
 	function JSContentAssist(astManager, indexer, lintOptions) {
@@ -747,13 +746,50 @@ define([
 		/**
 		 * Implements the Orion content assist API v4.0
 		 */
-		computeContentAssist: function(editorContext, context) {
+		computeContentAssist: function(editorContext, params) {
 			var self = this;
-			// TODO Can we avoid getText() here? The AST should have all we need.
-			return Deferred.all([this.astManager.getAST(editorContext), editorContext.getText()]).then(function(results) {
+			return Deferred.all([
+				this.astManager.getAST(editorContext),
+				editorContext.getText(), // TODO Can we avoid getText() here? The AST should have all we need.
+				this.createIndexData(editorContext, params)
+			]).then(function(results) {
 				var ast = results[0], buffer = results[1];
-				return self._computeProposalsFromAST(ast, buffer, context);
+				return self._computeProposalsFromAST(ast, buffer, params);
 			});
+		},
+		/**
+		 * Reshapes typedefs into the expected format, sets up indexData
+		 * @returns {orion.Promise}
+		 */
+		createIndexData: function(editorContext, context) {
+			function toIndexData(ternIndex) {
+				var data = objects.clone(ternIndex); //shallow clone
+				var name = data["!name"], define = data["!define"];
+				if (!name || !define) {
+					return null; // bad or weird typeDef
+				}
+				if (!data["!define"][name]) {
+					// Orion's indexData expect the definitions to be wrapped in a top-level element having the library name
+					data["!define"] = {};
+					data["!define"][name] = define;
+				}
+				return data;
+			}
+			if (!this.indexDataPromise) {
+				var self = this;
+				var defs = context.typeDefs || {}, promises = [];
+				Object.keys(defs).forEach(function(id) {
+					var props = defs[id];
+					if (props.type === "tern") {
+						promises.push(editorContext.getTypeDef(id));
+					}
+				});
+				this.indexDataPromise = Deferred.all(promises).then(function(typeDefs) {
+					self.indexData = typeDefs.map(toIndexData).filter(function(d) { return !!d; });
+					return self.indexData;
+				});
+			}
+			return this.indexDataPromise;
 		},
 		_computeProposalsFromAST: function(ast, buffer, context) {
 			function emptyArrayPromise() {
@@ -776,9 +812,16 @@ define([
 			// note that if selection has length > 0, then just ignore everything past the start
 			var completionKind = shouldVisit(root, offset, context.prefix, buffer);
 			if (completionKind) {
-				var environmentPromise = typeEnv.createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
 				var self = this;
-				var result = environmentPromise.then(function (environment) {
+				return typeEnv.createEnvironment({
+					buffer: buffer,
+					uid : "local",
+					offset : offset,
+					indexer: self.indexer,
+					indexData: self.indexData, // created in createIndexData()
+					globalObjName : findGlobalObject(root.comments, self.lintOptions),
+					comments : root.comments
+				}).then(function(environment) {
 					// must defer inferring the containing function block until the end
 					environment.defer = completionKind.toDefer;
 					if (environment.defer) {
@@ -794,7 +837,6 @@ define([
 					}
 					return filterAndSortProposals(proposalsObj);
 				});
-				return result;
 			} else {
 				// invalid completion location
 				return emptyArrayPromise();

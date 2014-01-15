@@ -16,10 +16,11 @@ define([
 	'javascript/contentAssist/contentAssist',
 	'javascript/contentAssist/esprimaVisitor',
 	'orion/assert',
+	'orion/objects',
 	'esprima',
 	'doctrine/doctrine',
 	'orion/Deferred'
-], function(ContentAssist, mVisitor, assert, Esprima, Doctrine, Deferred) {
+], function(ContentAssist, mVisitor, assert, objects, Esprima, Doctrine, Deferred) {
 
 	//////////////////////////////////////////////////////////
 	// helpers
@@ -42,29 +43,66 @@ define([
 				});
 	}
 
-	function computeContentAssist(buffer, prefix, offset, lintOptions) {
+	function setup(options) {
+		var buffer = options.buffer,
+		    prefix = options.prefix,
+		    offset = options.offset,
+		    lintOptions = options.lintOptions,
+		    editorContextMixin = options.editorContextMixin || {},
+		    paramsMixin = options.paramsMixin || {};
 		if (!prefix) {
 			prefix = "";
 		}
 		if (!offset) {
+			if (typeof buffer !== "string")
+				throw new Error("invalid buffer");
 			offset = buffer.indexOf("/**/");
 			if (offset < 0) {
 				offset = buffer.length;
 			}
 		}
-		var mockASTManager = {
+
+		var astManager = {
 			getAST: function() {
 				return new Deferred().resolve(parseFull(buffer));
 			}
 		};
-		var assist = new ContentAssist.JSContentAssist(mockASTManager, null, lintOptions);
-		var mockContext = {
+		var contentAssist = new ContentAssist.JSContentAssist(astManager, null, lintOptions);
+		var editorContext = {
 			getText: function() {
 				return new Deferred().resolve(buffer);
 			}
 		};
-		return assist.computeContentAssist(mockContext, {offset: offset, prefix : prefix, includeNonInferred: false });
+		var params = {offset: offset, prefix : prefix, includeNonInferred: false };
+		objects.mixin(editorContext, editorContextMixin);
+		objects.mixin(params, paramsMixin);
+		return {
+			astManager: astManager,
+			contentAssist: contentAssist,
+			editorContext: editorContext,
+			params: params
+		}
 	}
+
+	// Also accepts a single object containing a map of arguments
+	function computeContentAssist(buffer, prefix, offset, lintOptions, editorContextMixin, paramsMixin) {
+		var result;
+		if (arguments.length === 1 && typeof arguments[0] === "object") {
+			result = setup.apply(this, Array.prototype.slice.call(arguments));
+		} else {
+			result = setup({
+				buffer: buffer,
+				prefix: prefix,
+				offset: offset,
+				lintOptions: lintOptions,
+				editorContextMixin: editorContextMixin,
+				paramsMixin: paramsMixin
+			});
+		}
+		var contentAssist = result.contentAssist, editorContext = result.editorContext, params = result.params;
+		return contentAssist.computeContentAssist(editorContext, params);
+	}
+
 
 	function testProposal(proposal, text, description) {
 		assert.equal(proposal.proposal, text, "Invalid proposal text"); //$NON-NLS-0$
@@ -4400,6 +4438,46 @@ define([
 			["yyyy", "yyyy : Number"]
 		]);
 	};
-	
+
+	// TODO !
+//	var tests = {};
+
+	var tif = tests.testIndexFiles = {};
+	tif["test Node proposal from Tern index"] = function() {
+		var index = {
+			"!name": "mylib",
+			"!define": {
+				mylib: {
+					whatever: {
+						"!type": "Number"
+					}
+				}
+			}
+		};
+		var results = computeContentAssist({
+			buffer: "var lib = require(\"mylib\");\n" +
+					"lib.w",
+			prefix: "w",
+			lintOptions: {
+				options: { "node": true } // This, or /*jslint node:true*/, is mandatory for the time being
+			},
+			editorContextMixin: {
+				getTypeDef: function() {
+					return new Deferred().resolve(index);
+				}
+			},
+			paramsMixin: {
+				typeDefs: {
+					mylib: {
+						type: "tern"
+					}
+				}
+			}
+		});
+		return testProposals(results, [
+			["whatever", "whatever : Number"]
+		]);
+	};
+
 	return tests;
 });

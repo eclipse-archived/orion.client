@@ -650,8 +650,9 @@ define([
 			var arg = call["arguments"][0];
 			if (arg.type === "Literal" && typeof arg.value === "string") {
 				// we're in business
-				if (env.nodeJSModule) {
-					return findBuiltInNodeModuleType(arg.value, env);
+				var builtin;
+				if (env.nodeJSModule && (builtin = findBuiltInNodeModuleType(arg.value, env))) {
+					return builtin;
 				} else {
 					var summary = env.indexer.retrieveSummary(arg.value);
 					if (summary) {
