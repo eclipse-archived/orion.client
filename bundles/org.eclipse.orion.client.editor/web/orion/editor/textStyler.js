@@ -51,12 +51,14 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var getCaptureStyles = function(result, captures, offset, styles) {
 		var stringIndex = 0;
 		for (var i = 1; i < result.length; i++) {
-			var capture = captures[i];
-			if (capture) {
-				var styleStart = offset + stringIndex;
-				styles.push({start: styleStart, end: styleStart + result[i].length, style: capture.name});
+			if (result[i]) {
+				var capture = captures[i];
+				if (capture) {
+					var styleStart = offset + stringIndex;
+					styles.push({start: styleStart, end: styleStart + result[i].length, style: capture.name});
+				}
+				stringIndex += result[i].length;
 			}
-			stringIndex += result[i].length;
 		}
 	};
 	var mergeStyles = function(fullStyle, substyles, resultStyles) {
@@ -135,15 +137,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				var tokenStyle = {start: offset + start, end: offset + end, style: current.pattern.pattern.name, isWhitespace: current.pattern.isWhitespace};
 				if (isForRendering) {
 					if (current.pattern.pattern.captures) {
-						var stringIndex = 0;
-						for (var i = 1; i < result.length; i++) {
-							var capture = current.pattern.pattern.captures[i];
-							if (capture) {
-								var substyleStart = offset + start + stringIndex;
-								substyles.push({start: substyleStart, end: substyleStart + result[i].length, style: capture.name});
-							}
-							stringIndex += result[i].length;
-						}
+						getCaptureStyles(result, current.pattern.pattern.captures, offset + start, substyles);
 					}
 					if (block.isRenderingWhitespace() && !current.pattern.isWhitespace) {
 						var nullBlock = new Block({}, null, block.getStyler(), null);
