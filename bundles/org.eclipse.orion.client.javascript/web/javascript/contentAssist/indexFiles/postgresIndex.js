@@ -16,7 +16,7 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		"!name": "postgres",
   		"!define": {
     		"PG" : {
-    			"!proto": "Object",
+    			"!proto": "EventEmitter",
     			"!type": "fn(config: Object)",
     			"prototype" : {
     				"end" : {
@@ -31,7 +31,7 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
     			}
     		},
       		"Client": {
-      			"!proto": "Object",
+      			"!proto": "EventEmitter",
       			"!type": "fn(config: Object)",
         		"prototype": {
 	          		"connect": {
@@ -45,18 +45,10 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
     				},
 	          		"escapeIdentifier": {
 	            		"!type": "fn(str: String) -> String",
-	            		"!doc": "Ported from PostgreSQL 9.2.4 source code in src/interfaces/libpq/fe-exec.c"
 	          		},
 	          		"escapeLiteral": {
 	            		"!type": "fn(str: String) -> String",
-	            		"!doc": "Ported from PostgreSQL 9.2.4 source code in src/interfaces/libpq/fe-exec.c"
 	          		},
-	          		"_pulseQueryQueue": {
-    					"!type" : "fn()"
-    				},
-	         		"_copy": {
-    					"!type" : "fn(text: String, stream: Object) -> Object"
-    				},
 	          		"copyFrom": {
     					"!type" : "fn(text: String)"
     				},
@@ -82,7 +74,7 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		        },
 		    },
 		    "Connection": {
-		    	"!proto": "Object",
+		    	"!proto": "EventEmitter",
 		    	"!type": "fn(config: Object)",
 		        "prototype": {
 		        	"connect": {
@@ -103,23 +95,17 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		          	"password": {
     					"!type" : "fn(password: String)"
     				},
-		          	"_send": {
-    					"!type" : "fn(code: Number, more: Object) -> Boolean"
-    				},
 		          	"query": {
     					"!type" : "fn(text: String)"
     				},
 		          	"parse": {
 		            	"!type": "fn(query: Query, more: Object)",
-		            	"!doc": "send parse message \"more\" === true to buffer the message until flush() is called"
 		          	},
 		          	"bind": {
 		            	"!type": "fn(config: Object, more: Object)",
-		            	"!doc": "send bind message \"more\" === true to buffer the message until flush() is called"
 		          	},
 		          	"execute": {
 		            	"!type": "fn(config: Object, more: Object)",
-		            	"!doc": "send execute message \"more\" === true to buffer the message until flush() is called"
 		         	 },
 		          	"flush": {
     					"!type" : "fn()"
@@ -144,7 +130,6 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
     				},
 		          	"setBuffer": {
 		            	"!type": "fn(buffer: Buffer)",
-		            	"!doc": "parsing methods",
 		          	},
 		          	"readSslResponse": {
     					"!type" : "fn()"
@@ -175,20 +160,12 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		          	},
 		          	"parseD": {
 		            	"!type": "fn(buffer: Buffer, length: Number) -> Message",
-		            	"!doc": "extremely hot-path code",
-		          	},
-		          	"_readValue": {
-		            	"!type": "fn(buffer: Buffer)",
-		            	"!doc": "extremely hot-path code",
 		          	},
 		          	"parseE": {
 		            	"!type": "fn(buffer: Buffer, length: Number) -> Message",
-		            	"!doc": "parses error",
-		            	"!ret": "?"
 		          	},
 		          	"parseN": {
 		            	"!type": "fn(buffer: Buffer, length: Number) -> Message",
-		            	"!doc": "same thing, different name",
 		          	},
 		          	"parseA": {
 		            	"!type": "fn(buffer: Buffer, length: Number) -> Message",
@@ -243,23 +220,11 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 			    "chunk": "Buffer"
 		  	},
 	        "CopyFromStream": {
-	        	"!proto": "Object",
+	        	"!proto": "Stream",
 	        	"!type": "fn()",
 	          	"prototype": {
-		            "_writable": {
-	    				"!type" : "fn() -> Boolean"
-	    			},
 		            "startStreamingToConnection": {
 	    				"!type" : "fn(connection: Connection)"
-	    			},
-		            "_handleChunk": {
-	    				"!type" : "fn(string: String, encoding: String) -> Boolean"
-	    			},
-		            "_sendIfConnectionReady": {
-	    				"!type" : "fn() -> Boolean"
-	    			},
-		            "_endIfNeedAndPossible": {
-	    				"!type" : "fn()"
 	    			},
 		            "write": {
 	    				"!type" : "fn(string: String, encoding: String) -> Boolean"
@@ -276,15 +241,9 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 	          	}
 	        },
 	        "CopyToStream": {
-	        	"!proto": "Object",
+	        	"!proto": "Stream",
 	        	"!type": "fn()",
 	          	"prototype": {
-	            	"_outputDataChunk": {
-    					"!type" : "fn()"
-    				},
-		            "_readable": {
-    					"!type" : "fn() -> Boolean"
-    				},
 		            "error": {
     					"!type" : "fn(error: Error) -> Boolean"
     				},
@@ -306,7 +265,7 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 	          	}
 	        },
 	        "Query": {
-	        	"!proto": "Object",
+	        	"!proto": "EventEmitter",
 	        	"!type": "fn(config: Object, values: Object, callback: fn()) -> Query",
 		        "prototype": {
 		          	"requiresPreparation": {
@@ -314,7 +273,6 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
     				},
 		          	"handleRowDescription": {
 		            	"!type": "fn(msg: Message)",
-		            	"!doc": "associates row metadata from the supplied message with this query object metadata used when parsing row results"
 		          	},
 		          	"handleDataRow": {
     					"!type" : "fn(msg: Message)"
@@ -337,9 +295,6 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		          	"handlePortalSuspended": {
     					"!type" : "fn(connection: Connection)"
     				},
-		          	"_getRows": {
-    					"!type" : "fn(connection: Connection, rows: Object)"
-    				},
 		          	"prepare": {
     					"!type" : "fn(connection: Connection)"
     				},
@@ -352,17 +307,10 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		        },
 		        "portal": {
 		          	"!type": "String",
-		          	"!doc": "use unique portal name each time"
 		        },
-		        "_fieldNames": {
-    				"!type" : "[String]"
-    			},
-		        "_fieldConverters": "[Object]",
 		        "isPreparedStatement": {
 		          "!type": "Boolean",
-		          "!doc": "prepared statements need sync to be called after each command complete or when an error is encountered"
 		        },
-		        "_canceledDueToError": "Boolean"
 		    },
 		    "Result": {
 		    	"!proto": "Object",
@@ -370,14 +318,9 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		        "prototype": {
 		          	"addCommandComplete": {
 		            	"!type": "fn(msg: Message)",
-		            	"!doc": "adds a command complete message"
 		          	},
-		          	"_parseRowAsArray": {
-		            	"!type": "fn(rowData: Object) -> [Object]"
-		            },
 		          	"parseRow": {
 		            	"!type": "fn(rowData: Object) -> Object",
-		            	"!doc": "rowData is an array of text or binary values this turns the row into a JavaScript object"
 		          	},
 		          	"addRow": {
 		            	"!type": "fn(row: Object)"

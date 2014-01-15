@@ -38,7 +38,7 @@ function () {
 	  					"!type": "fn(cb: fn()) -> String"
 	  				},
 			      	"query": {
-	  					"!type": "fn(sql: Object, values: ?, cb: ?)"
+	  					"!type": "fn(sql: Object, values: Object, cb: fn())"
 	  				},
 			      	"ping": {
 	  					"!type": "fn(cb: fn())"
@@ -62,33 +62,12 @@ function () {
 	  					"!type": "fn(value: String) -> String"
 	  				},
 			      	"format": {
-	  					"!type": "fn(sql: Object, values: [String])"
+	  					"!type": "fn(sql: Object, values: [String]) -> String"
 	  				},
-			      	"_handleNetworkError": {
-	  					"!type": "fn(err: Error)"
-	  				},
-			      	"_handleProtocolError": {
-	  					"!type": "fn(err: Error)"
-	  				},
-			      	"_handleProtocolDrain": {
-	  					"!type": "fn()"
-	  				},
-			      	"_handleProtocolConnect": {
-	  					"!type": "fn()"
-	  				},
-			      	"_handleProtocolHandshake": {
-	  					"!type": "fn()"
-	  				},
-			      	"_handleProtocolEnd": {
-	  					"!type": "fn(err: Error)"
-	  				},
-			      	"_implyConnect": {
-	  					"!type": "fn()"
-	  				}
 	    		},
 	  		},
   			"Pool": {
-  				"!proto": "Object",
+  				"!proto": "EventEmitter",
   				"!type": "fn(options: Object)",
     			"prototype": {
       				"getConnection": {
@@ -103,9 +82,6 @@ function () {
       				"query": {
 	  					"!type": "fn(sql: String, values: Object, cb: fn())"
 	  				},
-      				"_removeConnection": {
-        				"!type": "fn(connection: Connection)",
-      				},
       				"escape": {
 	  					"!type": "fn(value: String) -> String"
 	  				}
@@ -147,59 +123,25 @@ function () {
 	  					"!type": "fn(id: String, config: String)"
 	  				},
 	          		"getConnection": {
-	  					"!type": "fn(pattern: String, selector: String, cb: String)"
+	  					"!type": "fn(pattern: String, selector: String, cb: fn())"
 	  				},
 	          		"end": {
 	  					"!type": "fn()"
 	  				},
-	          		"_findNodeIds": {
-	            		"!type": "fn(pattern: String) -> Object",
-	          		},
-	          		"_getNode": {
-	            		"!type": "fn(id: String) -> Object",
-	          		},
-	          		"_increaseErrorCount": {
-	            		"!type": "fn(node: Object)",
-	          		},
-	          		"_decreaseErrorCount": {
-	            		"!type": "fn(node: Object)",
-	          		},
-	          		"_getConnection": {
-	            		"!type": "fn(node: Object, cb: fn(err: +Error, connection: String))",
-	          		},
-	          		"_clearFindCaches": {
-	  					"!type": "fn()"
-	  				}
 	        	},
-	        	"_canRetry": "Boolean",
-	        	"_removeNodeErrorCount": "Number",
-	        	"_defaultSelector": "String",
-	        	"_closed": "Boolean",
-	        	"_lastId": "Number",
-	        	"_nodes": "Object",
-	        	"_serviceableNodeIds": "[String]",
-	        	"_namespaces": "Object",
-	        	"_findCaches": "Object"
 	      	},
   			"PoolConnection": {
-  				"!proto": "Object",
+  				"!proto": "Connection",
   				"!type": "fn(pool: Pool, options: Object)",
 		    	"prototype": {
 		        	"release": {
 	  					"!type": "fn()"
 	  				},
-		          	"_realEnd": {
-		            	"!type": "fn(cb: fn(err: Error))",
-		            	"!doc": "TODO: Remove this when we are removing PoolConnection#end"
-		          	},
 		          	"end": {
 	  					"!type": "fn()"
 	  				},
 		          	"destroy": {
 	  					"!type": "fn()"
-	  				},
-		          	"_removeFromPool": {
-	  					"!type": "fn(connection:PoolConnection)"
 	  				}
 		        }
 		    },
@@ -215,7 +157,7 @@ function () {
 	  				"!type": "fn(config: Object) -> PoolCluster"
 	  			},
     			"createQuery": {
-	  				"!type": "fn(sql: String, values: Object, cb: Object) -> Object"
+	  				"!type": "fn(sql: String, values: Object, cb: fn()) -> Query"
 	  			},
     			"Types": "Types",
     			"escape": {
@@ -225,7 +167,7 @@ function () {
 	  				"!type": "fn(val: String, forbidQualified: Boolean) -> String"
 	  			},
     			"format": {
-	  				"!type": "fn(sql: String, values: [String], stringifyObjects: Boolean, timeZone: String)"
+	  				"!type": "fn(sql: String, values: [String], stringifyObjects: Boolean, timeZone: String) -> String"
 	  			}
   			},
   			"Types": {
@@ -259,7 +201,7 @@ function () {
 		        "GEOMETRY": "Number"
 		    },
 		    "Query": {
-		    	"!proto": "Object",
+		    	"!proto": "Sequence",
 		    	"!type": "fn(options: Object, callback: fn())",
     			"prototype": {
       				"start": {
@@ -283,14 +225,8 @@ function () {
       				"EofPacket": {
 	  					"!type": "fn(packet: Object)"
 	  				},
-      				"_handleFinalResultPacket": {
-	  					"!type": "fn(packet: Object)"
-	  				},
       				"RowDataPacket": {
 	  					"!type": "fn(packet: Object, parser: Parser, connection: Connection)"
-	  				},
-      				"_sendLocalDataFile": {
-	  					"!type": "fn(path: String)"
 	  				},
       				"stream": {
 	  					"!type": "fn(options: Object) -> Object"
@@ -306,10 +242,10 @@ function () {
 	  				"!type": "fn(val: String, stringifyObjects: Boolean, timeZone: String) -> String"
 	  			},
 		      	"arrayToList": {
-	  				"!type": "fn(array: String, timeZone: String)"
+	  				"!type": "fn(array: String, timeZone: String) -> String"
 	  			},
 		      	"format": {
-	  				"!type": "fn(sql: String, values: [Object], stringifyObjects: Object, timeZone: String)"
+	  				"!type": "fn(sql: String, values: [Object], stringifyObjects: Object, timeZone: String) -> String"
 	  			},
 		      	"dateToString": {
 	  				"!type": "fn(date: String, timeZone: String) -> String"
@@ -320,6 +256,30 @@ function () {
 		      	"objectToValues": {
 	  				"!type": "fn(object: String, timeZone: String) -> String"
 	  			}
-		    }
+		    },
+		    "Sequence": {
+		    	"!proto" : "Object",
+		    	"!type": "fn(callback: fn())",
+        		"determinePacket": {
+	  				"!type": "fn(byte: Number)"
+	  			},
+		        "prototype": {
+		          	"hasErrorHandler": {
+	  					"!type": "fn() -> Boolean"
+	  				},
+		          	"end": {
+		            	"!type": "fn(err: Error)",
+		          	},
+		          	"OkPacket": {
+	  					"!type": "fn(packet: Object)"
+	  				},
+		          	"ErrorPacket": {
+	  					"!type": "fn(packet: Object)"
+	  				},
+		          	"start": {
+		            	"!type": "fn()",
+		          	}
+        		}
+      		}
 		}
 }});

@@ -19,7 +19,6 @@ function () {
 			"redis": {
         		"debug_mode": {
           			"!type": "Boolean",
-          			"!doc": "can set this to true to enable for all connections"
       			},
         		"createClient": {
 		        	"!type": "fn(port_arg: Number, host_arg: String, options: Object) -> RedisClient",
@@ -39,7 +38,6 @@ function () {
   						},
             			"flush_and_error": {
               				"!type": "fn(message: String)",
-              				"!doc": "flush offline_queue and command_queue, erroring any items with a callback first"
             			},
 	            		"on_error": {
   							"!type" : "fn(msg: String)"
@@ -88,11 +86,9 @@ function () {
   						},
 			            "select": {
 			            	"!type": "fn(db: Object, callback: fn())",
-			            	"!doc": "store db in this.select_db to restore it on reconnect"
 			            },
 			            "auth": {
 			            	"!type": "fn()",
-			            	"!doc": "Stash auth for connect and reconnect."
 			            },
 			            "hmget": {
   							"!type" : "fn(arg1: Object, arg2: Object, arg3: Object)"
@@ -124,52 +120,7 @@ function () {
 			            "eval": {
   							"!type" : "fn()"
   						}
-          			},
-			        "stream": "Object",
-			        "options": {
-			        	"socket_nodelay": "Boolean"
-			        },
-			        "connection_id": "Number",
-			        "connected": "Boolean",
-			        "ready": "Boolean",
-			        "connections": "Number",
-			        "should_buffer": "Boolean",
-			        "command_queue_high_water": "Number",
-			        "command_queue_low_water": "Number",
-			        "max_attempts": "Number",
-			        "command_queue": "Queue",
-			        "commands_sent": "Number",
-			        "enable_offline_queue": "Boolean",
-			        "pub_sub_mode": "Boolean",
-			        "subscription_set": "Object",
-			        "monitoring": "Boolean",
-			        "closing": "Boolean",
-			        "server_info": {
-			        	"versions": "[Number]",
-			            "!doc": "expose info key/vals to users"
-			        },
-	        		"auth_pass": "Number",
-	        		"parser_module": {
-	          			"debug_mode": "Boolean"
-	        		},
-			        "old_state": {
-			        	"monitoring": "Boolean",
-			            "pub_sub_mode": "Boolean"
-			        },
-			        "retry_timer": "Object",
-			        "retry_totaltime": "Number",
-			        "retry_delay": "Number",
-			        "retry_backoff": "Number",
-			        "attempts": "Number",
-			        "send_anyway": "Boolean",
-			        "auth_callback": "Number",
-			        "emitted_end": "Boolean",
-			        "reply_parser": {
-			        	"!doc": "return_buffers sends back Buffers from parser to callback."
-			        },
-			        "port": "Number",
-			        "host": "String",
-			       	"offline_queue": "Queue"
+          			}
 		      	},
 			    "Multi": {
 			    	"!proto" : "Object",
@@ -179,7 +130,7 @@ function () {
 			              "!type": "fn() -> Multi",
 			            },
 		            	"exec": {
-  							"!type" : "fn(callback: fn()) -> fn(err: Error, replies: Object)"
+  							"!type" : "fn(callback: fn()) -> Boolean"
   						},
 		            	"HMSET": {
   							"!type" : "fn()"
@@ -188,28 +139,9 @@ function () {
   							"!type" : "fn()"
   						}
 		        	},
-          			"_client": "RedisClient",
           			"queue": "[[MULTI]]",
         		},
       		},
-	      	"Queue": {
-	      		"!proto" : "Object",
-	      		"!type": "fn()",
-	        	"prototype": {
-		        	"shift": {
-  						"!type" : "fn() -> Object"
-  					},
-		        	"push": {
-  						"!type" : "fn(item: Object) -> Number"
-  					},
-		        	"forEach": {
-  						"!type" : "fn(fn: fn(), thisv: Object)"
-  					},
-		        	"getLength": {
-  						"!type" : "fn() -> Number"
-  					}
-		        }
-	      	},
 	      	"Commands": {
 	      		"!proto" : "Object",
 			    "append" : "String",
@@ -364,47 +296,7 @@ function () {
 			    "sscan" : "String",
 			    "hscan" : "String",
 			    "zscan" : "String"
-	      	},
-	      	"HiredisReplyParser": {
-	      		"!proto" : "Object",
-	        	"debug_mode": "Boolean",
-	        	"name": "String",
-          		"prototype": {
-            		"reset": {
-  						"!type" : "fn()"
-  					},
-            		"execute": {
-  						"!type" : "fn(data: Object)"
-  					}
-            	}
-	        }
-	    },
-        "Parser": {
-        	"!proto" : "Object",
-        	"!type": "fn(options: Object)",
-        	"name": "String",
-        	"debug_mode": "Boolean",
-      		"prototype": {
-        		"execute": {
-  					"!type" : "fn(buffer: String)"
-  				},
-	            "append": {
-  					"!type" : "fn(newBuffer: String)"
-  				},
-	            "parseHeader": {
-  					"!type" : "fn() -> String"
-  				},
-	            "parser_error": {
-  					"!type" : "fn(message: String)"
-  				},
-	            "send_error": {
-  					"!type" : "fn(reply: Object)"
-  				},
-	            "send_reply": {
-  					"!type" : "fn(reply: Object)"
-  				}
-      		},
-      		
-        }
+	      	}
+	    }
   	}
 });

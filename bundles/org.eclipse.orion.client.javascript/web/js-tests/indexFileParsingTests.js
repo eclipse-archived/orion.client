@@ -130,6 +130,66 @@ define([
 		testSig("fn(callback: fn()->Function, parm:Boolean)->Function", "function(callback:function():Function,parm:Boolean):Function");
 	};
 	
+	/**
+	 * From the mongoDB index
+	 */
+	tests["test callback 16"] = function() {
+		testSig("fn(collectionName: String, callback: fn())", "function(collectionName:String,callback:function():undefined):undefined");
+	};
+	
+	/**
+	 * From the mongoDB index
+	 */
+	tests["test callback 17"] = function() {
+		testSig("fn(code: Code, parameters: Object, options: Object, callback: fn())", 
+					"function(code:Code,parameters:Object,options:Object,callback:function():undefined):undefined");
+	};
+	
+	/**
+	 * From the mongoDB index
+	 */
+	tests["test callback 18"] = function() {
+		testSig("fn(dbName: String) -> Db", "function(dbName:String):Db");
+	};
+	
+	/**
+	 * From the mySQL index
+	 */
+	tests["test callback 19"] = function() {
+		testSig("fn(sql: String, values: Object, cb: fn()) -> Query", "function(sql:String,values:Object,cb:function():undefined):Query");
+	};
+	
+	/**
+	 * From the mySQL index
+	 */
+	tests["test callback 20"] = function() {
+		testSig("fn(cb: fn(err: Error))", "function(cb:function(err:Error):undefined):undefined");
+	};
+	
+	/**
+	 * From the mySQL index
+	 */
+	tests["test callback 21"] = function() {
+		testSig("fn(default_flags: Object, user_flags:[String]) -> Number", 
+					"function(default_flags:Object,user_flags:Array):Number");
+	};
+	
+	/**
+	 * From the postgres index
+	 */
+	tests["test callback 22"] = function() {
+		testSig("fn(buffer: Buffer, length: Number) -> Message", 
+					"function(buffer:Buffer,length:Number):Message");
+	};
+	
+	/**
+	 * From the postgres index
+	 */
+	tests["test callback 23"] = function() {
+		testSig("fn(default_flags: Object, user_flags:[String]) -> Number", 
+					"function(default_flags:Object,user_flags:Array):Number");
+	};
+	
 	tests["test type 1"] = function() {
 		var type = {
 			fizz: "String",

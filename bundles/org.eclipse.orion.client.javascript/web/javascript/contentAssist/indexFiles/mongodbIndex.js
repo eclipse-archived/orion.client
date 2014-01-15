@@ -17,6 +17,7 @@ function () {
   		"!define": {
   			"MongoClient" : {
   				"!proto": "Object",
+  				"!type" : "fn(serverConfig: Object, options: Object)",
   				"prototype" : {
   					"connect" : {
   						"!type" : "fn(url: String, options: Object, callback: fn())"
@@ -35,12 +36,9 @@ function () {
   					"!type" : "fn(url: String, options: Object, callback: fn())"
   				}
   			},
-  			"MongoClient_obj" : {
-  				"!type" : "fn(serverConfig: Object, options: Object)",
-  				"prototype" : "MongoClient"
-  			},
   			"Db" : {
   				"!proto": "Object",
+  				"!type" : "fn(databaseName: String, serverConfig: Object, options: Object)",
   				"prototype" : {
   					"addUser" : {
   						"!type" : "fn(username: String, password: String, options: Object, callback: fn())"
@@ -85,7 +83,7 @@ function () {
   						"!type" : "fn(dbRef: DBRef, callback: fn())"
   					},
   					"dropCollection" : {
-  						"!type" : "fn(collectionName; String, callback: fn())"
+  						"!type" : "fn(collectionName: String, callback: fn())"
   					},
   					"dropDatabase" : {
   						"!type" : "fn(callback: fn())"
@@ -137,10 +135,6 @@ function () {
   				"wrap" : {
   					"!type" : "fn()"
   				}
-  			},
-  			"Db_obj" : {
-  				"!type" : "fn(databaseName: String, serverConfig: Object, options: Object)",
-  				"prototype" : "Db"
   			}
   		}
   	}
