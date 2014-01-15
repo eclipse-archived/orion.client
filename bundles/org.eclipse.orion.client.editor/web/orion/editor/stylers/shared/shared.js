@@ -47,7 +47,7 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 					name: "comment.line",
 					patterns: [
 						{
-							match: "(\\b)(TODO)(\\s|$)(.*)",
+							match: "(\\b)(TODO)(\\b)(.*)",
 							name: "meta.annotation.task.todo",
 							captures: {
 								2: {name: "keyword.other.documentation.task"},
@@ -68,7 +68,7 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 							match: "\\<\\S*\\>?",
 							name: "keyword.other.documentation.markup"
 						}, {
-							match: "(\\b)(TODO)(\\s|$)(.*)",
+							match: "(\\b)(TODO)(\\b)(.*)",
 							name: "meta.annotation.task.todo",
 							captures: {
 								2: {name: "keyword.other.documentation.task"},
