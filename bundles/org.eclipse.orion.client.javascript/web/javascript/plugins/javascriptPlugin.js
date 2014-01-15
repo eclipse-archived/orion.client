@@ -13,6 +13,7 @@
 /*jslint amd:true*/
 define([
 	'javascript/astManager',
+	'javascript/contentAssist/indexFiles/mongodbIndex',
 	'javascript/contentAssist/indexFiles/mysqlIndex',
 	'javascript/contentAssist/indexFiles/postgresIndex',
 	'javascript/contentAssist/indexFiles/redisIndex',
@@ -25,7 +26,7 @@ define([
 	'orion/editor/stylers/js/js',
 	'orion/editor/stylers/json/json',
 	'orion/editor/stylers/jsonSchema/jsonSchema'
-], function(ASTManager, MysqlIndex, PostgresIndex, RedisIndex, ContentAssist, EslintValidator, Occurrences, Outliner,
+], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ContentAssist, EslintValidator, Occurrences, Outliner,
 		i18nUtil, PluginProvider, mJS, mJSON, mJSONSchema) {
 
 	/**
@@ -211,6 +212,11 @@ define([
 		id: "node.postgres",
 		type: "tern",
 		defs: PostgresIndex
+	});
+	provider.registerServiceProvider("orion.core.typedef", {}, {
+		id: "node.mongodb",
+		type: "tern",
+		defs: MongodbIndex
 	});
 
 	provider.connect();

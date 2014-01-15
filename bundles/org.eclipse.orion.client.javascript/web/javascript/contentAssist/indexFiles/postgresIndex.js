@@ -23,7 +23,7 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
     					"!type" : "fn()"
     				},
     				"connect" : {
-    					"!type" : "fn(config: Object, callback: fun())"
+    					"!type" : "fn(config: Object, callback: fn())"
     				},
     				"cancel" : {
     					"!type" : "fn(config: Object, client: Client, query: Query)"
