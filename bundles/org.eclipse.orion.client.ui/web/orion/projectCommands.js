@@ -72,6 +72,17 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		return params
 	}
 	
+	
+	var sharedLaunchConfigurationDispatcher;
+	
+	projectCommandUtils.getLaunchConfigurationDispatcher = function(){
+		if(!sharedLaunchConfigurationDispatcher){
+			sharedLaunchConfigurationDispatcher = new EventTarget();
+		}
+		return sharedLaunchConfigurationDispatcher;
+	};
+
+	
 	function localHandleStatus(status, allowHTML, context) {
 		if (!allowHTML && status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
 			delete status.HTML;
@@ -103,6 +114,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	 */
 	function runDeploy(params, item, context){
 		
+		if(sharedLaunchConfigurationDispatcher && context.launchConfiguration){
+			context.launchConfiguration.status = {State: "PROGRESS"};
+			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration });
+		}
+		
 		progress.showWhile(context.deployService.deploy(item, context.project, params), context.deployService.name + " in progress.").then(function(result){
 			if(!result){
 				return;
@@ -118,6 +134,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					options.status = localHandleStatus;
 					mEditorCommands.createDelegatedUI(options);
 			}
+
 			if(context.launchConfiguration && (result.State || result.CheckState)){
 				context.launchConfiguration.status = result;
 				if(sharedLaunchConfigurationDispatcher){
@@ -142,15 +159,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 			context.errorHandler(error);
 		});
-	};
-
-	var sharedLaunchConfigurationDispatcher;
-	
-	projectCommandUtils.getLaunchConfigurationDispatcher = function(){
-		if(!sharedLaunchConfigurationDispatcher){
-			sharedLaunchConfigurationDispatcher = new EventTarget();
-		}
-		return sharedLaunchConfigurationDispatcher;
 	};
 	
 	var sharedDependencyDispatcher;
@@ -383,6 +391,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					
 					projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
 						if(service && (start ? service.start : service.stop)){
+							if(sharedLaunchConfigurationDispatcher){
+								item.status = {State: "PROGRESS"};
+								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
+							}
 							(start ? service.start : service.stop)(params).then(function(result){
 								item.status = result;
 								if(sharedLaunchConfigurationDispatcher){
