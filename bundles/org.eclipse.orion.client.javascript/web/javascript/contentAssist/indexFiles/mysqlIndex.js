@@ -16,6 +16,8 @@ function () {
 		"!name": "mysql",
   		"!define": {
 	  		"Connection" : {
+	  			"!proto": "Object",
+	  			"!type": "fn(options: Object)",
 	    		"createQuery": {
 	  				"!type": "fn(sql: String, values: Object, cb: fn()) -> Query"
 	  			},
@@ -85,10 +87,9 @@ function () {
 	  				}
 	    		},
 	  		},
-	  		"Connection_obj" : {
-	  			"!type": "fn(options: Object)",
-	  		},
   			"Pool": {
+  				"!proto": "Object",
+  				"!type": "fn(options: Object)",
     			"prototype": {
       				"getConnection": {
 	  					"!type": "fn(cb: fn(err: Error, conn: Connection))"
@@ -110,13 +111,18 @@ function () {
 	  				}
     			}
  			},
- 			"Pool_obj" : {
- 				"!type": "fn(options: Object)"
- 			},
   			"PoolConfig": {
+  				"!proto": "Object",
   				"!type" : "fn(options: Object)"
   			},
   			"ConnectionConfig": {
+  				"!proto": "Object",
+  				"!type": "fn(options: Object)",
+  				"host": "String",
+			    "port": "String",
+			    "database": "String",
+			    "user": "String",
+			    "password": "String",
     			"mergeFlags": {
 	  				"!type": "fn(default_flags: Object, user_flags: [String]) -> Number"
 	  			},
@@ -130,17 +136,9 @@ function () {
 	          		"!type": "fn(url: String) -> Object",
     			}
   			},
-  			"ConnectionConfig_obj" : {
-  				"!type": {
-	  				"!type": "fn(options: Object)"
-	  			},
-  				"host": "String",
-			    "port": "String",
-			    "database": "String",
-			    "user": "String",
-			    "password": "String"
-  			},
   			"PoolCluster": {
+  				"!proto": "Object",
+  				"!type": "fn(config: Object)",
     			"prototype": {
 	          		"of": {
 		            	"!type": "fn(pattern: String, selector: String) -> Object",
@@ -183,10 +181,9 @@ function () {
 	        	"_namespaces": "Object",
 	        	"_findCaches": "Object"
 	      	},
-	      	"PoolCluster_obj" : {
-	      		"!type": "fn(config: Object)"
-	      	},
   			"PoolConnection": {
+  				"!proto": "Object",
+  				"!type": "fn(pool: Pool, options: Object)",
 		    	"prototype": {
 		        	"release": {
 	  					"!type": "fn()"
@@ -206,10 +203,8 @@ function () {
 	  				}
 		        }
 		    },
-		    "PoolConnection_obj" : {
-		    	"!type": "fn(pool: Pool, options: Object)"
-		    },
-  			"MySQL_obj": {
+  			"MySQL": {
+  				"!proto": "Object",
     			"createConnection": {
 	  				"!type": "fn(config: Object) -> Connection"
 	  			},
@@ -234,6 +229,7 @@ function () {
 	  			}
   			},
   			"Types": {
+  				"!proto": "Object",
 		        "DECIMAL": "Number",
 		        "TINY": "Number",
 		        "SHORT": "Number",
@@ -263,6 +259,8 @@ function () {
 		        "GEOMETRY": "Number"
 		    },
 		    "Query": {
+		    	"!proto": "Object",
+		    	"!type": "fn(options: Object, callback: fn())",
     			"prototype": {
       				"start": {
 	  					"!type": "fn()"
@@ -299,10 +297,8 @@ function () {
 	  				}
     			}
     		},
-    		"Query_obj" : {
-    			"!type": "fn(options: Object, callback: fn())"
-    		},
 		    "SqlString": {
+		    	"!proto": "Object",
 		      	"escapeId": {
 	  				"!type": "fn(val: Object, forbidQualified: Boolean) -> String"
 	  			},

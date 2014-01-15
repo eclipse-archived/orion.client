@@ -16,6 +16,8 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		"!name": "postgres",
   		"!define": {
     		"PG" : {
+    			"!proto": "Object",
+    			"!type": "fn(config: Object)",
     			"prototype" : {
     				"end" : {
     					"!type" : "fn()"
@@ -28,10 +30,9 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
     				}
     			}
     		},
-    		"PG_obj" : {
-    			"!type": "fn(config: Object)"
-    		},
       		"Client": {
+      			"!proto": "Object",
+      			"!type": "fn(config: Object)",
         		"prototype": {
 	          		"connect": {
     					"!type" : "fn(callback: fn())"
@@ -69,22 +70,20 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
     					"!type" : "fn()"
     				}
 	        	},
+	        	"md5": "fn(string: String)"
 	        },
-        	"Client_obj" : {
-        		"md5": "fn(string: String)",
-        		"!type": "fn(config: Object)"
-        	},
         	"ConnectionParameters": {
+        		"!proto": "Object",
+        		"!type": "fn(config: Object)",
 		        "prototype": {
 		          	"getLibpqConnectionString": {
     					"!type" : "fn(cb: fn())"
     				}
 		        },
 		    },
-		    "ConnectionParameters_obj" : {
-		    	"!type": "fn(config: Object)"
-		    },
 		    "Connection": {
+		    	"!proto": "Object",
+		    	"!type": "fn(config: Object)",
 		        "prototype": {
 		        	"connect": {
     					"!type" : "fn(port: Number, host: String)"
@@ -223,10 +222,8 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		          	}
 		        },
 		    },
-		    "Connection_obj" : {
-		    	"!type": "fn(config: Object)"
-		    },
 		  	"Error": {
+		  		"!proto": "Object",
 		    	"name": "String",
 		    	"length": "Number",
 			    "salt": "Buffer",
@@ -246,6 +243,8 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 			    "chunk": "Buffer"
 		  	},
 	        "CopyFromStream": {
+	        	"!proto": "Object",
+	        	"!type": "fn()",
 	          	"prototype": {
 		            "_writable": {
 	    				"!type" : "fn() -> Boolean"
@@ -276,10 +275,9 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 	    			}
 	          	}
 	        },
-	        "CopyFromStream_obj" : {
-	        	"!type": "fn()"
-	        },
 	        "CopyToStream": {
+	        	"!proto": "Object",
+	        	"!type": "fn()",
 	          	"prototype": {
 	            	"_outputDataChunk": {
     					"!type" : "fn()"
@@ -307,10 +305,9 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
     				}
 	          	}
 	        },
-	        "CopyToStream_obj" : {
-	        	"!type": "fn()"
-	        },
 	        "Query": {
+	        	"!proto": "Object",
+	        	"!type": "fn(config: Object, values: Object, callback: fn()) -> Query",
 		        "prototype": {
 		          	"requiresPreparation": {
     					"!type" : "fn() -> Boolean"
@@ -367,10 +364,9 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		        },
 		        "_canceledDueToError": "Boolean"
 		    },
-		    "Query_obj" : {
-		    	"!type": "fn(config: Object, values: Object, callback: fn()) -> Query",
-		    },
 		    "Result": {
+		    	"!proto": "Object",
+		    	"!type": "fn(rowMode: Object)",
 		        "prototype": {
 		          	"addCommandComplete": {
 		            	"!type": "fn(msg: Message)",
@@ -390,9 +386,6 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		            	"!type": "fn(fieldDescriptions: Object)"
 		            }
 		        },
-		    },
-		    "Result_obj" : {
-		    	"!type": "fn(rowMode: Object)"
 		    }
 	    }
 	}

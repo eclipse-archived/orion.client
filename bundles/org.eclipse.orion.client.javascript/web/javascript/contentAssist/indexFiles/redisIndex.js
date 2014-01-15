@@ -28,6 +28,8 @@ function () {
   					"!type" : "fn(err: Error, reply: Object)"
   				},
         		"RedisClient": {
+        			"!proto" : "Object",
+        			"!type": "fn(stream: Object, options: Object)",
           			"prototype": {
             			"initialize_retry_vars": {
   							"!type" : "fn()"
@@ -169,10 +171,9 @@ function () {
 			        "host": "String",
 			       	"offline_queue": "Queue"
 		      	},
-		      	"RedisClient_obj" : {
-		      		"!type": "fn(stream: Object, options: Object)",	
-		      	},
 			    "Multi": {
+			    	"!proto" : "Object",
+			    	"!type" : "fn(client: RedisClient, args: Object)",
 			    	"prototype": {
 			            "hmset": {
 			              "!type": "fn() -> Multi",
@@ -190,11 +191,10 @@ function () {
           			"_client": "RedisClient",
           			"queue": "[[MULTI]]",
         		},
-        		"Multi_obj" : {
-        			"!type" : "fn(client: RedisClient, args: Object)"
-        		},
       		},
 	      	"Queue": {
+	      		"!proto" : "Object",
+	      		"!type": "fn()",
 	        	"prototype": {
 		        	"shift": {
   						"!type" : "fn() -> Object"
@@ -210,10 +210,8 @@ function () {
   					}
 		        }
 	      	},
-	      	"Queue_obj" : {
-	      		"!type": "fn()"	
-	      	},
 	      	"Commands": {
+	      		"!proto" : "Object",
 			    "append" : "String",
 			    "auth" : "String",
 			    "bgrewriteaof" : "String",
@@ -368,6 +366,7 @@ function () {
 			    "zscan" : "String"
 	      	},
 	      	"HiredisReplyParser": {
+	      		"!proto" : "Object",
 	        	"debug_mode": "Boolean",
 	        	"name": "String",
           		"prototype": {
@@ -381,6 +380,8 @@ function () {
 	        }
 	    },
         "Parser": {
+        	"!proto" : "Object",
+        	"!type": "fn(options: Object)",
         	"name": "String",
         	"debug_mode": "Boolean",
       		"prototype": {
@@ -404,9 +405,6 @@ function () {
   				}
       		},
       		
-        },
-        "Parser_obj" : {
-        	"!type": "fn(options: Object)"
         }
   	}
 });

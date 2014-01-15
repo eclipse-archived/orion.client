@@ -16,6 +16,7 @@ function () {
 		"!name": "mongodb",
   		"!define": {
   			"MongoClient" : {
+  				"!proto": "Object",
   				"prototype" : {
   					"connect" : {
   						"!type" : "fn(url: String, options: Object, callback: fn())"
@@ -35,9 +36,11 @@ function () {
   				}
   			},
   			"MongoClient_obj" : {
-  				"!type" : "fn(serverConfig: Object, options: Object)"
+  				"!type" : "fn(serverConfig: Object, options: Object)",
+  				"prototype" : "MongoClient"
   			},
   			"Db" : {
+  				"!proto": "Object",
   				"prototype" : {
   					"addUser" : {
   						"!type" : "fn(username: String, password: String, options: Object, callback: fn())"
@@ -136,7 +139,8 @@ function () {
   				}
   			},
   			"Db_obj" : {
-  				"!type" : "fn(databaseName: String, serverConfig: Object, options: Object)"
+  				"!type" : "fn(databaseName: String, serverConfig: Object, options: Object)",
+  				"prototype" : "Db"
   			}
   		}
   	}
