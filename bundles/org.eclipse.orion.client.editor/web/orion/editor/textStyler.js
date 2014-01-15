@@ -28,8 +28,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var PUNCTUATION_SECTION_BEGIN = ".begin"; //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
 	
-	var spacePattern = {regex: new RegExp(" ", "g"), pattern: {name: "punctuation.separator.space"}, isWhitespace: true}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var tabPattern = {regex: new RegExp("\t", "g"), pattern: {name: "punctuation.separator.tab"}, isWhitespace: true}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var spacePattern = {regex: new RegExp(" ", "g"), style: {styleClass: "punctuation separator space", unmergeable: true}}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var tabPattern = {regex: new RegExp("\t", "g"), style: {styleClass: "punctuation separator tab", unmergeable: true}}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	var updateMatch = function(match, text, matches, minimumIndex) {
 		var regEx = match.pattern.regex ? match.pattern.regex : match.pattern.regexBegin;
@@ -74,26 +74,10 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			resultStyles.push({start: i, end: fullStyle.end, style: fullStyle.style});
 		}
 	};
-	var parse = function(text, offset, block, isForRendering, styles) {
+	var parse = function(text, offset, block, styles) {
 		var patterns = block.getLinePatterns();
 		if (!patterns) {
 			return;
-		}
-
-		/*
-		 * If parse() is being invoked for some purpose other than the creation of styles to be
-		 * rendered then passing false for isForRendering can be used as a performance optimization
-		 * that skips the consideration of whitespace patterns and pattern subpatterns.
-		 */
-		if (isForRendering && block.isRenderingWhitespace()) {
-			var temp = patterns.slice(0);
-			if (block.getTabsVisible()) {
-				temp.push(tabPattern);
-			}
-			if (block.getSpacesVisible()) {
-				temp.push(spacePattern);
-			}
-			patterns = temp;
 		}
 
 		var matches = [];
@@ -135,34 +119,26 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				result = current.result;
 				end = start + result[0].length;
 				var tokenStyle = {start: offset + start, end: offset + end, style: current.pattern.pattern.name, isWhitespace: current.pattern.isWhitespace};
-				if (isForRendering) {
-					if (current.pattern.pattern.captures) {
-						getCaptureStyles(result, current.pattern.pattern.captures, offset + start, substyles);
-					}
-					if (block.isRenderingWhitespace() && !current.pattern.isWhitespace) {
-						var nullBlock = new Block({}, null, block.getStyler(), null);
-						parse(text.substring(start, end), offset + start, nullBlock, true, substyles);
-					}
-					substyles.sort(function(a,b) {
-						if (a.start < b.start) {
-							return -1;
-						}
-						if (a.start > b.start) {
-							return 1;
-						}
-						return 0;
-					});
-					for (var j = 0; j < substyles.length - 1; j++) {
-						if (substyles[j + 1].start < substyles[j].end) {
-							var newStyle = {start: substyles[j + 1].end, end: substyles[j].end, style: substyles[j].style};
-							substyles[j].end = substyles[j + 1].start;
-							substyles.splice(j + 2, 0, newStyle);
-						}
-					}
-					mergeStyles(tokenStyle, substyles, styles);
-				} else {
-					styles.push(tokenStyle);	
+				if (current.pattern.pattern.captures) {
+					getCaptureStyles(result, current.pattern.pattern.captures, offset + start, substyles);
 				}
+				substyles.sort(function(a,b) {
+					if (a.start < b.start) {
+						return -1;
+					}
+					if (a.start > b.start) {
+						return 1;
+					}
+					return 0;
+				});
+				for (var j = 0; j < substyles.length - 1; j++) {
+					if (substyles[j + 1].start < substyles[j].end) {
+						var newStyle = {start: substyles[j + 1].end, end: substyles[j].end, style: substyles[j].style};
+						substyles[j].end = substyles[j + 1].start;
+						substyles.splice(j + 2, 0, newStyle);
+					}
+				}
+				mergeStyles(tokenStyle, substyles, styles);
 			} else {	/* pattern defined by a "begin/end" pair */
 				current.pattern.regexEnd.lastIndex = current.result.index + current.result[0].length;
 				result = current.pattern.regexEnd.exec(text);
@@ -200,7 +176,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			var subPatterns = current.getLinePatterns();
 			if (subPatterns.length && (current.pattern.pattern.name === "comment.block" || current.pattern.pattern.name === "comment.line")) {
 				var substyles = [];
-				parse(baseModel.getText(current.contentStart, current.end), current.contentStart, current, false, substyles);
+				parse(baseModel.getText(current.contentStart, current.end), current.contentStart, current, substyles);
 				for (var i = 0; i < substyles.length; i++) {
 					if (substyles[i].style === "meta.annotation.task.todo") {
 						/*
@@ -261,7 +237,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			var lineIndex = model.getLineAtOffset(offset + current.result.index);
 			var lineText = model.getLine(lineIndex);
 			var styles = [];
-			parse(lineText, model.getLineStart(lineIndex), block, false, styles);
+			parse(lineText, model.getLineStart(lineIndex), block, styles);
 			var start = offset + current.result.index;
 			for (var i = 0; i < styles.length; i++) {
 				if (styles[i].start === start) {
@@ -286,7 +262,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 							block.getStyler(),
 							model,
 							block);
-						parse(text.substring(contentStart, result.index + result[0].length), contentStart, testBlock, false, styles2);
+						parse(text.substring(contentStart, result.index + result[0].length), contentStart, testBlock, styles2);
 						if (!styles2.length || styles2[styles2.length - 1].end <= result.index) {
 							resultEnd = testBlock;
 						}
@@ -651,7 +627,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			var lineIndex = model.getLineAtOffset(offset);
 			var lineText = model.getLine(lineIndex);
 			var styles = [];
-			parse(lineText, model.getLineStart(lineIndex), block, false, styles);
+			parse(lineText, model.getLineStart(lineIndex), block, styles);
 			for (var i = 0; i < styles.length; i++) {
 				if (offset < styles[i].start) {
 					break;
@@ -766,7 +742,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				var blockStart = blocks[i].start;
 				var blockEnd = blocks[i].end;
 				if (offset < blockStart) {
-					parse(text.substring(offset - start, blockStart - start), offset, block, false, styles);
+					parse(text.substring(offset - start, blockStart - start), offset, block, styles);
 					styles.forEach(function(current) {
 						if (current.style.indexOf(bracket.pattern.name) === 0) {
 							result.push(current.start + 1);
@@ -779,7 +755,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				offset = blockEnd;
 			}
 			if (offset < end) {
-				parse(text.substring(offset - start, end - start), offset, block, false, styles);
+				parse(text.substring(offset - start, end - start), offset, block, styles);
 				styles.forEach(function(current) {
 					if (current.style.indexOf(bracket.pattern.name) === 0) {
 						result.push(current.start + 1);
@@ -920,7 +896,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				var blockEnd = blocks[i].end;
 				if (offset < blockStart) {
 					/* content on that line that preceeds the start of the block */
-					parse(text.substring(offset - start, blockStart - start), offset, block, true, styles);
+					parse(text.substring(offset - start, blockStart - start), offset, block, styles);
 				}
 				var s = Math.max(offset, blockStart);
 				if (s === blockStart) {
@@ -988,7 +964,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			if (offset < end) {
 				/* content on that line that follows the end of the block */
-				parse(text.substring(offset - start, end - start), offset, block, true, styles);
+				parse(text.substring(offset - start, end - start), offset, block, styles);
 			}
 			if (model.getBaseModel) {
 				for (var j = 0; j < styles.length; j++) {
@@ -1056,20 +1032,24 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		_onDestroy: function(e) {
 			this.destroy();
 		},
-		_onLineStyle: function (e) {
+		_onLineStyle: function(e) {
 			if (e.textView === this.view) {
 				e.style = this._getLineStyle(e.lineIndex);
 			}
 			e.ranges = this._getStyles(this._rootBlock, e.textView.getModel(), e.lineText, e.lineStart);
 			e.ranges.forEach(function(current) {
 				if (current.style) {
-					var unmergeable = current.style === "punctuation.separator.space" || current.style === "punctuation.separator.tab"; //$NON-NLS-1$ //$NON-NLS-0$
 					current.style = {styleClass: current.style.replace(/\./g, " ")};
-					if (unmergeable) {
-						current.style.unmergeable = true;
-					}
 				}
 			});
+			if (this._isRenderingWhitespace) {
+				if (this.spacesVisible) {
+					this._spliceStyles(spacePattern, e.ranges, e.lineText, e.lineStart);
+				}
+				if (this.tabsVisible) {
+					this._spliceStyles(tabPattern, e.ranges, e.lineText, e.lineStart);
+				}
+			}
 		},
 		_onSelection: function(e) {
 			var oldSelection = e.oldValue;
@@ -1271,6 +1251,37 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					}
 				}
 				annotationModel.replaceAnnotations(remove, add);
+			}
+		},
+		_spliceStyles: function(whitespacePattern, ranges, text, offset) {
+			var regex = whitespacePattern.regex;
+			regex.lastIndex = 0;
+			var rangeIndex = 0;
+			var result = regex.exec(text);
+			while (result) {
+				var charIndex = offset + result.index;
+				while (rangeIndex < ranges.length) {
+					if (charIndex < ranges[rangeIndex].end) {
+						break;
+					}
+					rangeIndex++;
+				};
+				var newStyle = {
+					start: charIndex,
+					end: charIndex + 1,
+					style: whitespacePattern.style
+				};
+				if (rangeIndex < ranges.length && ranges[rangeIndex].start <= charIndex) {
+					var endStyle = {start: charIndex + 1, end: ranges[rangeIndex].end, style: ranges[rangeIndex].style};
+					ranges[rangeIndex].end = charIndex;
+					ranges.splice(rangeIndex + 1, 0, endStyle);
+					ranges.splice(rangeIndex + 1, 0, newStyle);
+					rangeIndex += 2;
+				} else {
+					ranges.splice(rangeIndex, 0, newStyle);
+					rangeIndex++;
+				}
+				result = regex.exec(text);
 			}
 		}
 	};
