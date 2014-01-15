@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -43,7 +43,6 @@ define([
 	 * A prototype that contains the common built-in types
 	 */
 	var Types = function (globalObjName) {
-
 		this.Global = new Global();
 	};
 
@@ -68,112 +67,116 @@ define([
 	var idRegexp = /^[_$a-zA-Z\xA0-\uFFFF]([_$a-zA-Z0-9\.\xA0-\uFFFF])*$/;
 	
 	/**
-	 * checks if str is a name for which we wouldn't have discovered any properties.
-	 * Currently, a JS identifier or a string starting with '[' (array) or '+' 
-	 * (user-defined type)
-	 * @param {String} str
+	 * @description Checks if str is a name for which we wouldn't have discovered any properties.
+	 * Currently, a JS identifier or a string starting with '[' (array) or '+' (user-defined type)
+	 * @private
+	 * @param {String} str The name to check
+	 * @returns {Boolean} If the type name is considered empty
 	 */
-	function emptyTypeName(str) {
+	function _emptyTypeName(str) {
 		return str && (idRegexp.test(str) || str.slice(0,1) === "[" || str.slice(0,1) === "+");
 	}
 	
-	function convertArgTypeToClosureType(argType) {
-		var closureArgStr = null;
+	/**
+	 * @description Converts the argument type from Tern-style to Closure-style
+	 * @private
+	 * @param {Object} argType The argument type object
+	 * @returns {String} The string name of the argument type
+	 */
+	function _convertArgTypeToClosureType(argType) {
 		if (argType.typeObj.type === "FunctionType") {					
-			closureArgStr = doctrine.type.stringify(argType.typeObj, {compact:true});
-		} else {
-			closureArgStr = argType.typeObj.name;
-		}
-		return closureArgStr;
+			return doctrine.type.stringify(argType.typeObj, {compact:true});
+		} 
+		return argType.typeObj.name;
 	}	
 	
 	/**
-	 * @param {String} ternSig
-	 * @param {String} returnTypeName
+	 * @description Parse the arguments for a Tern function signature into Closure
+	 * format
+	 * @private
+	 * @param {String} signature The signature to parse
+	 * @param {Object} typeInfo The currently computed type information
 	 */
-	function ternSig2ClosureSigInternal(ternSig, returnTypeName, typeInfo) {
-		/**
-		 * @param {String} str
-		 */
-		function parseArgs(str) {
-			// get rid of "fn(" and strip all spaces
-			str = str.substring(3, str.length);
-			var leftToParse = str.replace(/\s+/g, '');
-			var result = "";
-			// need to be a bit smart here to handle 
-			// arguments with function types
-			while (leftToParse.slice(0,1) !== ")") {
-				var colonInd = leftToParse.indexOf(":");
-				var argName = leftToParse.slice(0, colonInd);
-				var optional = argName[argName.length - 1] === '?';
-				if (optional) {
-					argName = argName.slice(0, argName.length - 1);
-				}
-				leftToParse = leftToParse.slice(colonInd + 1, leftToParse.length);
-				var commaInd = null, closeParenInd = null;
-				if (leftToParse.slice(0, 2) === "fn") {
-					// find the close paren.  end of argument is next comma after
-					// that (or the end of the string)
-					closeParenInd = leftToParse.indexOf(")");
-					commaInd = leftToParse.indexOf(",", closeParenInd);
+	function _parseFunctionArgs(signature, typeInfo) {
+		// get rid of "fn(" and strip all spaces
+		var substring = signature.substring(3, signature.length);
+		var leftToParse = substring.replace(/\s+/g, '');
+		var result = "";
+		// need to be a bit smart here to handle 
+		// arguments with function types
+		while (leftToParse.charAt(0) !== ")") {
+			var colonInd = leftToParse.indexOf(":");
+			var argName = leftToParse.slice(0, colonInd);
+			var optional = argName[argName.length - 1] === '?';
+			if (optional) {
+				argName = argName.slice(0, argName.length - 1);
+			}
+			leftToParse = leftToParse.slice(colonInd + 1, leftToParse.length);
+			var commaInd = null, closeParenInd = null;
+			if (leftToParse.charAt(0) === "f" && leftToParse.charAt(1) === "n") {
+				// find the close paren.  end of argument is next comma after
+				// that (or the end of the string)
+				closeParenInd = leftToParse.indexOf(")");
+				commaInd = leftToParse.indexOf(",", closeParenInd);
+			} else {
+				commaInd = leftToParse.indexOf(",");
+			}
+			var argTypeEndInd = null;
+			if (commaInd !== -1) {
+				argTypeEndInd = commaInd;
+			} else {
+				// depends on whether we have a return type
+				var returnArrowInd = null;
+				if (closeParenInd) {
+					// last argument type was a function type.
+					// to handle case where that function type has a return type,
+					// search from *next* close paren							
+					returnArrowInd = leftToParse.indexOf("->", leftToParse.indexOf(")", closeParenInd+1));
 				} else {
-					commaInd = leftToParse.indexOf(",");
+					returnArrowInd = leftToParse.indexOf("->");
 				}
-				var argTypeEndInd = null;
-				if (commaInd !== -1) {
-					argTypeEndInd = commaInd;
+				if (returnArrowInd !== -1) {
+					argTypeEndInd = returnArrowInd - 1;
 				} else {
-					// depends on whether we have a return type
-					var returnArrowInd = null;
-					if (closeParenInd) {
-						// last argument type was a function type.
-						// to handle case where that function type has a return type,
-						// search from *next* close paren							
-						returnArrowInd = leftToParse.indexOf("->", leftToParse.indexOf(")", closeParenInd+1));
-					} else {
-						returnArrowInd = leftToParse.indexOf("->");
-					}
-					if (returnArrowInd !== -1) {
-						argTypeEndInd = returnArrowInd - 1;
-					} else {
-						// just the end of the string, without the close paren
-						argTypeEndInd = leftToParse.length-1;
-					}
-				}
-				var argTypeStr = leftToParse.slice(0, argTypeEndInd);
-				// TODO for a function type we get undefined here as the type name; is that what we want 
-				var argType = definitionForType(typeInfo, argTypeStr);
-				result += argName + ":" + convertArgTypeToClosureType(argType);
-				if (optional) {
-					result += "=";
-				}
-				if (commaInd !== -1) {
-					result += ",";
-					// use argTypeEndInd+1 to remove the comma
-					leftToParse = leftToParse.slice(argTypeEndInd+1, leftToParse.length);
-				} else {
-					leftToParse = leftToParse.slice(argTypeEndInd, leftToParse.length);
+					// just the end of the string, without the close paren
+					argTypeEndInd = leftToParse.length-1;
 				}
 			}
-			return { args: result, remaining: leftToParse.slice(1,leftToParse.length) };
+			var argTypeStr = leftToParse.slice(0, argTypeEndInd);
+			// TODO for a function type we get undefined here as the type name; is that what we want 
+			var argType = _definitionForType(typeInfo, argTypeStr);
+			result += argName + ":" + _convertArgTypeToClosureType(argType);
+			if (optional) {
+				result += "=";
+			}
+			if (commaInd !== -1) {
+				result += ",";
+				// use argTypeEndInd+1 to remove the comma
+				leftToParse = leftToParse.slice(argTypeEndInd+1, leftToParse.length);
+			} else {
+				leftToParse = leftToParse.slice(argTypeEndInd, leftToParse.length);
+			}
 		}
-
-		/**
-		 * @param {String} str
-		 */
-		function parseRet(str) {
-			// get rid of "->"
-			str = str.substring(2, str.length);
-			return convertArgTypeToClosureType(definitionForType(typeInfo, str));
-		}
-		var argsAndRemaining = parseArgs(ternSig);
+		return { args: result, remaining: leftToParse.slice(1,leftToParse.length) };
+	};
+	
+	/**
+	 * @descripton Converts the Tern-formatted signature to a Closure-formatted one
+	 * @public
+	 * @param {String} ternSig
+	 * @param {String} returnTypeName
+	 * @param {Object} typerInfo The currently computed type information
+	 * @returns The Closure-formatted signature
+	 */
+	function ternSig2ClosureSig(ternSig, returnTypeName, typeInfo) {
+		var argsAndRemaining = _parseFunctionArgs(ternSig, typeInfo);
 		var remaining = argsAndRemaining.remaining;
 		var retString;
 		// HACK: if there is no return type in fnType,
 		// use name as the return type, if it is defined.  
 		// Otherwise, use undefined
 		if (remaining !== "") {
-			retString = parseRet(remaining);
+			retString = _convertArgTypeToClosureType(_definitionForType(typeInfo, remaining.substring(2, remaining.length)));
 		} else if (returnTypeName) {
 			retString = returnTypeName;
 		}
@@ -191,85 +194,81 @@ define([
 	}
 	
 	/**
-	 * converts a function signature in the Tern index file format
-	 * to a signature in the Closure format used internally by the
-	 * JS content assist engine
-	 */
-	function ternSig2ClosureSig(ternSig, constructorName) {
-		return ternSig2ClosureSigInternal(ternSig, constructorName, {});
+	 * @description Parse the properties from type, with special handling
+	 * of the "!type" property
+	 * @private
+	 * @param {Object} type The type object
+	 * @param {String} name The name of the type
+	 * @param {Object} typeInfo The computed type information
+ 	 */
+	function _parseObjType(type, name, typeInfo) {
+		var propInfo = {}, def;
+		for (var p in type) {
+			if (hop(type, p)) {
+				if (p === "!type") {
+					def = _definitionForType(typeInfo, type[p], name);
+					if (typeUtils.isFunctionOrConstructor(def.typeObj)) {
+						propInfo.$$fntype = def.typeObj;
+						if (name) {
+							def = new typeUtils.Definition(name);
+						} else {
+							def = new typeUtils.Definition(genObjName());
+						}
+					}
+				} else if (p === "!proto") {
+					// prototype chain
+					propInfo.$$proto = _definitionForType(typeInfo, type[p]);
+				} else if (p === "!url" || p === "!stdProto" || p === "!effects" || p === "!doc") {
+					// do nothing for now
+				} else if (p[0] === '!') {
+					throw "didn't handle special property " + p;
+				} else if (p === "prototype") {
+					propInfo.$$prototype = _definitionForType(typeInfo, type[p]);
+					// we set the $$newtype to be the same as the $$prototype.
+					// we need $$newtype in order to be consistent with the rest of
+					// the type system.  we don't need it to be a fresh object, since
+					// we won't add properties to it while analyzing the constructor.
+					// setting $$newtype and $$prototype to be the same avoids some
+					// issues with naming of types (since we don't need to generate some
+					// different name for $$newtype)
+					propInfo.$$newtype = propInfo.$$prototype;
+				} else {
+					propInfo[p] = _definitionForType(typeInfo, type[p]);
+				}
+			}
+		}
+		if (propInfo.$$prototype && propInfo.$$fntype && typeof type.prototype === "string") {
+			// if we have a named prototype, use that name as the return type
+			// in $$fntype
+			var protoName = propInfo.$$prototype.typeObj.name;
+			var funType = propInfo.$$fntype;
+			//          if (!funType.new) { throw "something broken"; }
+			funType.result.name = protoName;
+		}
+		if (!def) {
+			if (name) {
+				def = new typeUtils.Definition(name);
+			} else {
+				// this occurs with nested object types, e.g.,
+				// Element.prototype.style in the DOM model
+				def = new typeUtils.Definition(genObjName());
+			}
+		}
+		return {
+			propInfo: propInfo,
+			def: def
+		};
 	}
 	
 	/**
-	 * creates a Definition object for the given type and name.
-	 * As a side-effect, adds information about the type (e.g.,
-	 * the types of its properties) to typeInfo
+	 * @description Creates a Definition object for the given type and name.
+	 * As a side-effect, adds information about the type (e.g., the types of its properties) to typeInfo
+	 * @param {Object} typeInfo The computed type information
+	 * @param {Object} type The type object
+	 * @param {String} name The name of the type
+	 * @return {Definition} Returns the computed definition
 	 */
-	function definitionForType(typeInfo, type, name) {
-	
-		/**
-		 * parse the properties from type, with special handling
-		 * of the "!type" property
-		 */
-		function parseObjType(type, name) {
-			var propInfo = {}, def;
-
-			for (var p in type) {
-				if (hop(type, p)) {
-					if (p === "!type") {
-						def = definitionForType(typeInfo, type[p], name);
-						if (typeUtils.isFunctionOrConstructor(def.typeObj)) {
-							propInfo.$$fntype = def.typeObj;
-							if (name) {
-								def = new typeUtils.Definition(name);
-							} else {
-								def = new typeUtils.Definition(genObjName());
-							}
-						}
-					} else if (p === "!proto") {
-						// prototype chain
-						propInfo.$$proto = definitionForType(typeInfo, type[p]);
-					} else if (p === "!url" || p === "!stdProto" || p === "!effects" || p === "!doc") {
-						// do nothing for now
-					} else if (p[0] === '!') {
-						throw "didn't handle special property " + p;
-					} else if (p === "prototype") {
-						propInfo.$$prototype = definitionForType(typeInfo, type[p]);
-						// we set the $$newtype to be the same as the $$prototype.
-						// we need $$newtype in order to be consistent with the rest of
-						// the type system.  we don't need it to be a fresh object, since
-						// we won't add properties to it while analyzing the constructor.
-						// setting $$newtype and $$prototype to be the same avoids some
-						// issues with naming of types (since we don't need to generate some
-						// different name for $$newtype)
-						propInfo.$$newtype = propInfo.$$prototype;
-					} else {
-						propInfo[p] = definitionForType(typeInfo, type[p]);
-					}
-				}
-			}
-			if (propInfo.$$prototype && propInfo.$$fntype && typeof type.prototype === "string") {
-				// if we have a named prototype, use that name as the return type
-				// in $$fntype
-				var protoName = propInfo.$$prototype.typeObj.name;
-				var funType = propInfo.$$fntype;
-				//          if (!funType.new) { throw "something broken"; }
-				funType.result.name = protoName;
-			}
-			if (!def) {
-				if (name) {
-					def = new typeUtils.Definition(name);
-				} else {
-					// this occurs with nested object types, e.g.,
-					// Element.prototype.style in the DOM model
-					def = new typeUtils.Definition(genObjName());
-				}
-			}
-			return {
-				propInfo: propInfo,
-				def: def
-			};
-		}
-
+	function _definitionForType(typeInfo, type, name) {
 		if (typeof type === "string") {
 			if (primitiveTypeMap[type]) {
 				return new typeUtils.Definition(primitiveTypeMap[type]);
@@ -290,7 +289,7 @@ define([
 				// TODO handle these properly
 				return new typeUtils.Definition(name);
 			} else if (type.slice(0, 2) === "fn") {
-				return new typeUtils.Definition(ternSig2ClosureSigInternal(type, name, typeInfo));
+				return new typeUtils.Definition(ternSig2ClosureSig(type, name, typeInfo));
 			} else if (type[0] === "[") {
 				return new typeUtils.Definition("Array");
 			} else if (type.slice(0, 7) === "!custom" || type.slice(0, 5) === "!this" || type.slice(0, 2) === "!0") {
@@ -309,12 +308,12 @@ define([
 			}
 			return new typeUtils.Definition(type);
 		} else { // an object type
-			var parsed = parseObjType(type, name);
+			var parsed = _parseObjType(type, name, typeInfo);
 			var newTypeName = parsed.def.typeObj.name;
 			// here we check if type["!type"] is a plain type name.  if so,
 			// we just have an empty type description for it (with no
 			// properties), and there is no need to update the type object
-			if (newTypeName && newTypeName !== "Global" && !emptyTypeName(type["!type"])) {
+			if (newTypeName && newTypeName !== "Global" && !_emptyTypeName(type["!type"])) {
 				if (newTypeName === "Object") {
 					// need to mangle the property names as in original types.js
 					var mangled = {};
@@ -342,22 +341,30 @@ define([
 	}
 
 	/**
-	 * for unit testing.  given a type object with properties as in an index file,
-	 * and a name for the type, returns an object { def: d, typeInfo: t }, where d
+	 * @description For unit testing only.  Given a type object with properties as in an index file,
+	 * and a name for the type.
+	 * @private
+	 * @param {Object} type An object describing a type
+	 * @param {String} name A name for the type
+	 * @returns {Object} Returns an object { def: d, typeInfo: t }, where d
 	 * is a Definition for the type and t contains auxiliary type information (e.g.,
-	 * types of properties.
+	 * types of properties).
 	 */
 	function parseType(type, name) {
 		var typeInfo = {};
-		var def = definitionForType(typeInfo, type, name);
+		var def = _definitionForType(typeInfo, type, name);
 		return { def: def, typeInfo: typeInfo };
 	}
 	
 	/**
-	 * adds the info from the given json index file.  global variables are added to globals,
+	 * @description Adds the info from the given json index file.  global variables are added to globals,
 	 * and type information to typeInfo
+	 * @private
+	 * @param {Object} json The JSON object to add info from
+	 * @param {Object} globals The object of defined globals
+	 * @param {Object} typeInfo The object of computed type information
 	 */
-	function addIndexInfo(json, globals, typeInfo) {
+	function _addIndexInfo(json, globals, typeInfo) {
 		var p;
 		for (p in json) {
 			if (hop(json, p)) {
@@ -372,17 +379,17 @@ define([
 							// invoking definitionForType will have
 							// the side effect of adding the type
 							// information
-							definitionForType(typeInfo, anonTypes[n], n);
+							_definitionForType(typeInfo, anonTypes[n], n);
 						}
 					}
 				} else if (typeof json[p] === "string") {
 					var typeStr = json[p];
 					var typeObj = { "!type": typeStr };
-					globals[p] = definitionForType(typeInfo, typeObj, p);
+					globals[p] = _definitionForType(typeInfo, typeObj, p);
 				} else {
 					// new global
 					var type = json[p];
-					globals[p] = definitionForType(typeInfo, type, p);
+					globals[p] = _definitionForType(typeInfo, type, p);
 				}
 			}
 		}
@@ -393,20 +400,23 @@ define([
 
 	var initResult = null;
 	/**
-	 * adds type information for core ecma5 libraries.  
+	 * @description Adds type information for core ecma5 libraries.  
 	 * returns a promise that is resolved when the info is loaded.
+	 * @public
+	 * @returns {orion.Promise} Returns a promise to initialize and load the standard ECMA index information
 	 */
 	function init() {
 		if (!initResult) { 
 			var d = new Deferred();
 			// add information for core libraries directly to Global.prototype
 			// and Types.prototype
-			addIndexInfo(Ecma5Index, globalPrototype, typesPrototype);
+			_addIndexInfo(Ecma5Index, globalPrototype, typesPrototype);
 			d.resolve();
 			initResult = d.promise;		
 		}
 		return initResult;
 	}
+	
 	/////////////////////////
 	// code for adding other index files
 	//
@@ -422,10 +432,14 @@ define([
 	var parsedIndexFileCache = {};
 
 	/**
-	 * update knownTypes with type and global information
+	 * @description Update knownTypes with type and global information
 	 * from globalsAndTypes
+	 * @private
+	 * @param {Object} knownTypes The object of known types
+	 * @param {Object} globalsAndTypes
+	 * @returns {Object} Returns the object of known types
 	 */
-	function updateKnownTypes(knownTypes, globalsAndTypes) {
+	function _updateKnownTypes(knownTypes, globalsAndTypes) {
 		// now, add the globals and types for the index file to knownTypes
 		// we want globals on the *prototype* of knownTypes.Global.  (We
 		// need them on the prototype so their types cannot be overwritten
@@ -451,59 +465,62 @@ define([
 			}
 		});	
 		return knownTypes;
-	
 	}
+	
 	/**
-	 * Add information for library libName to the knownTypes object.
-	 *
-	 * Returns a promise, as the library index file may need to be loaded
+	 * @description Loads the global and known types
+	 * @private
+	 * @param {String} the name of the library to load
+	 * @returns {orion.Promise} Returns a promise to resolve the types
+	 */
+	function _getGlobalsAndTypes(libName) {
+		// check the cache
+		var globalsAndTypes = parsedIndexFileCache[libName];
+		var indexDataOrPromise;
+		if (!globalsAndTypes) {
+			globalsAndTypes = { globals: {}, types: {} };
+			if (libName === "browser") {
+				indexDataOrPromise = BrowserIndex;
+			} else if (libName === "node") {
+				indexDataOrPromise = NodeIndex;
+			} else {
+				throw "unknown library name " + libName;				
+			}
+			return Deferred.when(indexDataOrPromise, function(indexData) {
+				_addIndexInfo(indexData, globalsAndTypes.globals, globalsAndTypes.types);
+				parsedIndexFileCache[libName] = globalsAndTypes;
+				return globalsAndTypes;
+			});
+		} else {
+			// already have the info
+			return new Deferred().resolve(globalsAndTypes);
+		}
+	}
+	
+	/**
+	 * @description Add information for library libName to the knownTypes object.
+	 * @public
+	 * @param {Object} knownTypes The collection of currently known types
+	 * @param {String} libName The name of the library to add
+	 * @returns Returns a promise, as the library index file may need to be loaded
 	 * asynchronously.  The promise is resolved with the knownTypes object.
 	 */
 	function addLibrary(knownTypes, libName) {
-		function getGlobalsAndTypes() {
-			// check the cache
-			var globalsAndTypes = parsedIndexFileCache[libName];
-			var indexDataOrPromise;
-			if (!globalsAndTypes) {
-				globalsAndTypes = { globals: {}, types: {} };
-				if (libName === "browser") {
-					indexDataOrPromise = BrowserIndex;
-				} else if (libName === "node") {
-					indexDataOrPromise = NodeIndex;
-				} else {
-					throw "unknown library name " + libName;				
-//					// TODO load external index
-//					indexDataOrPromise = new Deferred();
-//					require([libName], function(indexData) {
-//						indexData.resolve(indexData);
-//					});
-				}
-				return Deferred.when(indexDataOrPromise, function(indexData) {
-					addIndexInfo(indexData, globalsAndTypes.globals, globalsAndTypes.types);
-					parsedIndexFileCache[libName] = globalsAndTypes;
-					return globalsAndTypes;
-				});
-			} else {
-				// already have the info
-				return new Deferred().resolve(globalsAndTypes);
-			}
-		}
-
-		// first, get the global and types info
-		var result = getGlobalsAndTypes().then(function (globalsAndTypes) {
-			return updateKnownTypes(knownTypes, globalsAndTypes);
+		return _getGlobalsAndTypes(libName).then(function (globalsAndTypes) {
+			return _updateKnownTypes(knownTypes, globalsAndTypes);
 		});
-		return result;
 	}
 
 	/**
-	 * add some index file data to the knownTypes object.
-	 * Mutates knownTypes.
+	 * @description Add some index file data to the knownTypes object
+	 * @public
+	 * @param {Object} indexData The new JSON index data to add
+	 * @param {Object} knownTypes The current collection of known types
 	 */
 	function addIndexData(indexData, knownTypes) {
 		var globalsAndTypes = { globals: {}, types: {} };
-		addIndexInfo(indexData, globalsAndTypes.globals, globalsAndTypes.types);
-		updateKnownTypes(knownTypes, globalsAndTypes);
+		_addIndexInfo(indexData, globalsAndTypes.globals, globalsAndTypes.types);
+		_updateKnownTypes(knownTypes, globalsAndTypes);
 	}
 	
 	return {

@@ -23,7 +23,7 @@ define([
 	//////////////////////////////////////////////////////////
 
 	function testSig(ternSig, closureSig, constructorName) {
-		assert.equal(mTypes.ternSig2ClosureSig(ternSig, constructorName), closureSig, "Bad conversion");
+		assert.equal(mTypes.ternSig2ClosureSig(ternSig, constructorName, {}), closureSig, "Bad conversion");
 	}
 	
 	function testType(type, name, expectedTypeInfo) {
@@ -87,10 +87,49 @@ define([
 	};
 
 	tests["test callback 5"] = function() {
-		testSig("fn(callback: fn()) -> fn(err: +Error, replies: Object)", 
-				"function(callback:function():undefined):function(err:Error,replies:Object):undefined");
+		testSig("fn(callback: fn()) -> Function", "function(callback:function():undefined):Function");
+	};
+	
+	tests["test callback 6"] = function() {
+		testSig("fn(callback: fn()->Object)", "function(callback:function():Object):undefined");
 	};
 
+	tests["test callback 7"] = function() {
+		testSig("fn(callback: fn())->Object", "function(callback:function():undefined):Object");
+	};
+	
+	tests["test callback 8"] = function() {
+		testSig("fn(callback: fn(), parm:Boolean)->Object", "function(callback:function():undefined,parm:Boolean):Object");
+	};
+
+	tests["test callback 9"] = function() {
+		testSig("fn(parm:Boolean, callback: fn())->Object", "function(parm:Boolean,callback:function():undefined):Object");
+	};
+	
+	tests["test callback 10"] = function() {
+		testSig("fn(parm:Boolean, callback: fn()->Number)->Object", "function(parm:Boolean,callback:function():Number):Object");
+	};
+	
+	tests["test callback 11"] = function() {
+		testSig("fn(parm:Boolean, callback: fn()->Number)", "function(parm:Boolean,callback:function():Number):undefined");
+	};
+	
+	tests["test callback 12"] = function() {
+		testSig("fn(callback: fn()->Object, parm:Boolean)", "function(callback:function():Object,parm:Boolean):undefined");
+	};
+	
+	tests["test callback 13"] = function() {
+		testSig("fn(callback: fn()->Number, parm:Boolean)->Object", "function(callback:function():Number,parm:Boolean):Object");
+	};
+	
+	tests["test callback 14"] = function() {
+		testSig("fn(callback: fn()->Function, parm:Boolean)->Object", "function(callback:function():Function,parm:Boolean):Object");
+	};
+	
+	tests["test callback 15"] = function() {
+		testSig("fn(callback: fn()->Function, parm:Boolean)->Function", "function(callback:function():Function,parm:Boolean):Function");
+	};
+	
 	tests["test type 1"] = function() {
 		var type = {
 			fizz: "String",
