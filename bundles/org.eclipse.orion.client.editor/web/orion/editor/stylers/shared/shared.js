@@ -62,13 +62,13 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 					name: "comment.block",
 					patterns: [
 						{
-							match: "@\\S*",
+							match: "@(?:(?!\\*/)\\S)*",
 							name: "keyword.other.documentation.tag"
 						}, {
-							match: "\\<\\S*\\>?",
+							match: "\\<\\S*\\>",
 							name: "keyword.other.documentation.markup"
 						}, {
-							match: "(\\b)(TODO)(\\b)(.*)",
+							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",
 							name: "meta.annotation.task.todo",
 							captures: {
 								2: {name: "keyword.other.documentation.task"},

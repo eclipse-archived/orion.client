@@ -286,7 +286,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 							block.getStyler(),
 							model,
 							block);
-						parse(text.substring(contentStart, result.index + 1), contentStart, testBlock, false, styles2);
+						parse(text.substring(contentStart, result.index + result[0].length), contentStart, testBlock, false, styles2);
 						if (!styles2.length || styles2[styles2.length - 1].end <= result.index) {
 							resultEnd = testBlock;
 						}
