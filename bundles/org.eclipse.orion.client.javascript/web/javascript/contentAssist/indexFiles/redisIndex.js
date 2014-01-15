@@ -24,30 +24,66 @@ function () {
         		"createClient": {
 		        	"!type": "fn(port_arg: Number, host_arg: String, options: Object) -> RedisClient",
 		        },
-        		"print": "fn(err: Error, reply: Object)",
+        		"print": {
+  					"!type" : "fn(err: Error, reply: Object)"
+  				},
         		"RedisClient": {
           			"prototype": {
-            			"initialize_retry_vars": "fn()",
-            			"unref": "fn()",
+            			"initialize_retry_vars": {
+  							"!type" : "fn()"
+  						},
+            			"unref": {
+  							"!type" : "fn()"
+  						},
             			"flush_and_error": {
               				"!type": "fn(message: String)",
               				"!doc": "flush offline_queue and command_queue, erroring any items with a callback first"
             			},
-	            		"on_error": "fn(msg: String)",
-	            		"do_auth": "fn()",
-			            "on_connect": "fn()",
-			            "init_parser": "fn()",
-			            "on_ready": "fn()",
-			            "on_info_cmd": "fn(err: Error, res: Object)",
-			            "ready_check": "fn()",
-			            "send_offline_queue": "fn()",
-			            "connection_gone": "fn(why: String)",
-			            "on_data": "fn(data: Object)",
-			            "return_error": "fn(err: Error)",
-			            "return_reply": "fn(reply: Object)",
-			            "send_command": "fn(command: String, args: Object, callback: fn()) -> Object",
-			            "pub_sub_command": "fn(command_obj: Object)",
-			            "end": "fn()",
+	            		"on_error": {
+  							"!type" : "fn(msg: String)"
+  						},
+	            		"do_auth": {
+  							"!type" : "fn()"
+  						},
+			            "on_connect": {
+  							"!type" : "fn()"
+  						},
+			            "init_parser": {
+  							"!type" : "fn()"
+  						},
+			            "on_ready": {
+  							"!type" : "fn()"
+  						},
+			            "on_info_cmd": {
+  							"!type" : "fn(err: Error, res: Object)"
+  						},
+			            "ready_check": {
+  							"!type" : "fn()"
+  						},
+			            "send_offline_queue": {
+  							"!type" : "fn()"
+  						},
+			            "connection_gone": {
+  							"!type" : "fn(why: String)"
+  						},
+			            "on_data": {
+  							"!type" : "fn(data: Object)"
+  						},
+			            "return_error": {
+  							"!type" : "fn(err: Error)"
+  						},
+			            "return_reply": {
+  							"!type" : "fn(reply: Object)"
+  						},
+			            "send_command": {
+  							"!type" : "fn(command: String, args: Object, callback: fn()) -> Object"
+  						},
+			            "pub_sub_command": {
+  							"!type" : "fn(command_obj: Object)"
+  						},
+			            "end": {
+  							"!type" : "fn()"
+  						},
 			            "select": {
 			            	"!type": "fn(db: Object, callback: fn())",
 			            	"!doc": "store db in this.select_db to restore it on reconnect"
@@ -56,18 +92,36 @@ function () {
 			            	"!type": "fn()",
 			            	"!doc": "Stash auth for connect and reconnect."
 			            },
-			            "hmget": "fn(arg1: Object, arg2: Object, arg3: Object)",
-			            "hmset": "fn(args: Object, callback: fn())",
-			            "multi": "fn(args: Object) -> Multi",
+			            "hmget": {
+  							"!type" : "fn(arg1: Object, arg2: Object, arg3: Object)"
+  						},
+			            "hmset": {
+  							"!type" : "fn(args: Object, callback: fn())"
+  						},
+			            "multi": {
+  							"!type" : "fn(args: Object) -> Multi"
+  						},
 			            "MULTI": {
 			              "!type": "fn(args: Object) -> Multi",
 			            },
-			            "EVAL": "fn()",
-			            "SELECT": "fn()",
-			            "AUTH": "fn()",
-			            "HMGET": "fn()",
-			            "HMSET": "fn()",
-			            "eval": "fn()"
+			            "EVAL": {
+  							"!type" : "fn()"
+  						},
+			            "SELECT": {
+  							"!type" : "fn()"
+  						},
+			            "AUTH": {
+  							"!type" : "fn()"
+  						},
+			            "HMGET": {
+  							"!type" : "fn()"
+  						},
+			            "HMSET": {
+  							"!type" : "fn()"
+  						},
+			            "eval": {
+  							"!type" : "fn()"
+  						}
           			},
 			        "stream": "Object",
 			        "options": {
@@ -123,9 +177,15 @@ function () {
 			            "hmset": {
 			              "!type": "fn() -> Multi",
 			            },
-		            	"exec": "fn(callback: fn()) -> fn(err: Error, replies: Object)",
-		            	"HMSET": "fn()",
-		            	"EXEC": "fn()"
+		            	"exec": {
+  							"!type" : "fn(callback: fn()) -> fn(err: Error, replies: Object)"
+  						},
+		            	"HMSET": {
+  							"!type" : "fn()"
+  						},
+		            	"EXEC": {
+  							"!type" : "fn()"
+  						}
 		        	},
           			"_client": "RedisClient",
           			"queue": "[[MULTI]]",
@@ -136,10 +196,18 @@ function () {
       		},
 	      	"Queue": {
 	        	"prototype": {
-		        	"shift": "fn() -> Object",
-		        	"push": "fn(item: Object) -> Number",
-		        	"forEach": "fn(fn: fn(), thisv: Object)",
-		        	"getLength": "fn() -> Number"
+		        	"shift": {
+  						"!type" : "fn() -> Object"
+  					},
+		        	"push": {
+  						"!type" : "fn(item: Object) -> Number"
+  					},
+		        	"forEach": {
+  						"!type" : "fn(fn: fn(), thisv: Object)"
+  					},
+		        	"getLength": {
+  						"!type" : "fn() -> Number"
+  					}
 		        }
 	      	},
 	      	"Queue_obj" : {
@@ -303,8 +371,12 @@ function () {
 	        	"debug_mode": "Boolean",
 	        	"name": "String",
           		"prototype": {
-            		"reset": "fn()",
-            		"execute": "fn(data: Object)"
+            		"reset": {
+  						"!type" : "fn()"
+  					},
+            		"execute": {
+  						"!type" : "fn(data: Object)"
+  					}
             	}
 	        }
 	    },
@@ -312,17 +384,29 @@ function () {
         	"name": "String",
         	"debug_mode": "Boolean",
       		"prototype": {
-        		"_parseResult": "fn(type: String)",
-        		"execute": "fn(buffer: String)",
-	            "append": "fn(newBuffer: String)",
-	            "parseHeader": "fn() -> String",
-	            "_packetEndOffset": "fn() -> Number",
-	            "_bytesRemaining": "fn() -> Number",
-	            "parser_error": "fn(message: String)",
-	            "send_error": "fn(reply: Object)",
-	            "send_reply": "fn(reply: Object)"
+        		"execute": {
+  					"!type" : "fn(buffer: String)"
+  				},
+	            "append": {
+  					"!type" : "fn(newBuffer: String)"
+  				},
+	            "parseHeader": {
+  					"!type" : "fn() -> String"
+  				},
+	            "parser_error": {
+  					"!type" : "fn(message: String)"
+  				},
+	            "send_error": {
+  					"!type" : "fn(reply: Object)"
+  				},
+	            "send_reply": {
+  					"!type" : "fn(reply: Object)"
+  				}
       		},
-      		"!type": "fn(options: Object)"
+      		
+        },
+        "Parser_obj" : {
+        	"!type": "fn(options: Object)"
         }
   	}
 });
