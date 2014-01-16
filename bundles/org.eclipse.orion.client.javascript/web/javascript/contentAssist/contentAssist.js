@@ -216,7 +216,21 @@ define([
 		return string.substring(prefix.length);
 	}
 
+	/**
+	 * @description Create the description portion of the proposal
+	 * @private
+	 * @param {Object} propType The type description
+	 * @param {Object} env The currently computed type environment
+	 * @returns {String} the description for the proposal
+	 */
 	function createProposalDescription(propType, env) {
+		switch(propType.type) {
+			case 'FunctionType':
+				if(propType.result && propType.result.type === "UndefinedLiteral") {
+					return "";
+				}
+				break;
+		}
 		return " : " + typeUtils.createReadableType(propType, env);
 	}
 
@@ -276,11 +290,10 @@ define([
 					if (propTypeObj.type === 'FunctionType') {
 						res = calculateFunctionProposal(propName,
 								propTypeObj, replaceStart - 1);
-						var funcDesc = " : " + typeUtils.createReadableType(propTypeObj, env);
 						proposals["$"+propName] = {
 							proposal: res.completion,
 							name: res.completion,
-							description: funcDesc,
+							description: createProposalDescription(propTypeObj, env),
 							positions: res.positions,
 							escapePosition: replaceStart + res.completion.length,
 							// prioritize methods over fields
