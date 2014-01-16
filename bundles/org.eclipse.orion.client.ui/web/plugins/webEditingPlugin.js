@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -17,10 +17,13 @@ define([
 	'orion/editor/htmlGrammar',
 	'orion/editor/jsTemplateContentAssist',
 	'orion/editor/stylers/java/java',
+	'orion/editor/stylers/python/python',
+	'orion/editor/stylers/ruby/ruby',
+	'orion/editor/stylers/php/php',
 	'orion/editor/stylers/css/css',
 	'orion/editor/stylers/html/html',
 	'orion/editor/templates'
-], function(PluginProvider, cssContentAssist, htmlContentAssist, htmlGrammar, jsTemplateContentAssist, mJava, mCSS, mHTML, templates) {
+], function(PluginProvider, cssContentAssist, htmlContentAssist, htmlGrammar, jsTemplateContentAssist, mJava, mPython, mRuby, mPhp, mCSS, mHTML, templates) {
 	var headers = {
 		name: "Orion Web Editing Plugin",
 		version: "1.0",
@@ -65,6 +68,21 @@ define([
 				"extends": "text/plain",
 				name: "Java",
 				extension: ["java"]
+			},
+			{	id: "text/x-python",
+				"extends": "text/plain",
+				name: "Python",
+				extension: ["py", "rpy", "pyw", "cpy", "SConstruct", "Sconstruct", "sconstruct", "SConscript", "gyp", "gypi"]
+			},
+			{	id: "text/x-ruby",
+				"extends": "text/plain",
+				name: "Ruby",
+				extension: ["rb", "rbx", "rjs", "Rakefile", "rake", "cgi", "fcgi", "gemspec", "irbrc", "capfile", "ru", "prawn", "Gemfile", "Guardfile", "Vagrantfile", "Appraisals", "Rantfile"]
+			},
+			{	id: "text/x-php",
+				"extends": "text/plain",
+				name: "PHP",
+				extension: ["php", "php3", "php4", "php5", "phpt", "phtml", "aw", "ctp"]
 			},
 			{	id: "text/x-markdown",
 				"extends": "text/plain",
@@ -129,14 +147,14 @@ define([
 			source: "!Projects" // Filter out workspace;
 		}]});
 
-	// only providing excludedContentTypes for orion.editor because we want 
+	// only providing excludedContentTypes for orion.editor because we want
 	// to attempt to open files with unknown content types with it for now
 	// e.g. A text file with no extension is currently of an unknown content
 	// type, we want to use the orion.editor to open it
 	provider.registerService("orion.navigate.openWith", {}, {
 		editor: "orion.editor",
 		excludedContentTypes: ["image/*"]});
-			
+
 	provider.registerService("orion.navigate.openWith.default", {}, {
 			editor: "orion.editor"});
 
@@ -145,11 +163,11 @@ define([
 		nameKey: "Orion Markdown Viewer",
 		nls: "orion/nls/messages",
 		uriTemplate: "../edit/edit.html#{,Location,params*},editor=orion.markdownViewer"});
-		
+
 	provider.registerService("orion.navigate.openWith", {}, {
 			editor: "orion.markdownViewer",
 			contentType: ["text/x-markdown"]});
-		
+
 	provider.registerService("orion.edit.editor", {}, {
 		id: "orion.imageViewer",
 		nameKey: "Orion Image Viewer",
@@ -171,7 +189,7 @@ define([
 			source: "!Projects" // Filter out workspace; Raw only applies to regular files and folders.
 		}]
 	});
-	
+
 	// Register content assist providers
 	provider.registerService("orion.edit.contentassist",
 		new cssContentAssist.CssContentAssistProvider(),
