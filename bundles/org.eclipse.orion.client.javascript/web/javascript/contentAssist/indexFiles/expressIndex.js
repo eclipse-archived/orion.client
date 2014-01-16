@@ -16,12 +16,15 @@ function () {
   		"!name": "express",
   			"!define": {
       		"express": {
-        		"createServer": "fn() -> Application",
-		        "application": "Object",
-		        "request": "Object",
-		        "response": "Object",
-		        "Route": "fn(method: String, path: String, callbacks: [fn()], options: Object)",
-		        "Router": "fn(options: Object)",
+        		"createServer": {
+        			"!type" : "fn() -> application"
+        		},
+		        "application": "application",
+		        "request": "request",
+		        "response": "response",
+		        "Route": "Route",
+		        "Router": "Router",
+		        "!proto" : "Object",
 		        "!type": "fn()"
       		},
       		"Route": {
@@ -39,10 +42,10 @@ function () {
 				     	"!type": "fn(name: String, fn: fn()) -> Object"
 					},
 				    "matchRequest": {
-				      "!type": "fn(req: IncomingMessage, i: number, head: String) -> Route"
+				      "!type": "fn(req: IncomingMessage, i: Number, head: String) -> Route"
 				    },
 				    "match": {
-				      "!type": "fn(method: String, url: String, i: number, head: String) -> Route"
+				      "!type": "fn(method: String, url: String, i: Number, head: String) -> Route"
 				    },
 				    "route": {
 				      "!type": "fn(method: String, path: String, callbacks: fn()) -> Router"
@@ -120,7 +123,7 @@ function () {
 		          "!type": "fn(lang: String) -> Boolean"
 		        },
 		        "range": {
-		          "!type": "fn(size: number)"
+		          "!type": "fn(size: Number)"
 		        },
 		        "param": {
 		          "!type": "fn(name: String, defaultValue: Object) -> String"
@@ -135,19 +138,19 @@ function () {
       		"response": {
       			"!proto" : "Object",
         		"status": {
-		          "!type": "fn(code: number) -> ServerResponse"
+		          "!type": "fn(code: Number) -> response"
 		        },
 		        "links": {
-		          "!type": "fn(links: Object) -> ServerResponse"
+		          "!type": "fn(links: Object) -> response"
 		        },
 		        "send": {
-		          "!type": "fn(body: String) -> ServerResponse"
+		          "!type": "fn(body: String) -> response"
 		        },
 		        "json": {
-		          "!type": "fn(obj: Object) -> ServerResponse"
+		          "!type": "fn(obj: Object) -> response"
 		        },
 		        "jsonp": {
-		          "!type": "fn(obj: Object) -> ServerResponse"
+		          "!type": "fn(obj: Object) -> response"
 		        },
 		        "sendfile": {
 		          "!type": "fn(path: String, options: Object, fn: fn())"
@@ -159,31 +162,31 @@ function () {
 		        	"!type" : "fn(type: String)"
 		        },
 		        "format": {
-		          "!type": "fn(obj: Object) -> ServerResponse"
+		          "!type": "fn(obj: Object) -> response"
 		        },
 		        "attachment": {
-		          "!type": "fn(filename: String) -> ServerResponse"
+		          "!type": "fn(filename: String) -> response"
 		        },
 		        "header": {
-		        	"!type" : "fn(field: Object, val: String) -> ServerResponse"
+		        	"!type" : "fn(field: Object, val: String) -> response"
 		        },
 		        "get": {
 		          "!type": "fn(field: String) -> String"
 		        },
 		        "clearCookie": {
-		          "!type": "fn(name: String, options: Object) -> ServerResponse"
+		          "!type": "fn(name: String, options: Object) -> response"
 		        },
 		        "cookie": {
-		          "!type": "fn(name: String, val: Object, options: Object) -> ServerResponse"
+		          "!type": "fn(name: String, val: Object, options: Object) -> response"
 		        },
 		        "location": {
-		          "!type": "fn(url: String) -> ServerResponse"
+		          "!type": "fn(url: String) -> response"
 		        },
 		        "redirect": {
-		          "!type": "fn(url: String)",
+		          "!type": "fn(url: String)"
 		        },
 		        "vary": {
-		          "!type": "fn(field: Object) -> ServerResponse"
+		          "!type": "fn(field: Object) -> response"
 		        },
 		        "render": {
 		          "!type": "fn(view: String, options: Object, fn: fn())"
@@ -192,7 +195,7 @@ function () {
 		        	"!type" : "fn(type: String)"
 		        },
 		        "set":  {
-		        	"!type" : "fn(field: Object, val: String) -> ServerResponse"
+		        	"!type" : "fn(field: Object, val: String) -> response"
 		        }
       		},
       		"middleware": {
