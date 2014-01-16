@@ -137,6 +137,21 @@ define([
 				case Estraverse.Syntax.NewExpression:
 					this.checkId(node.callee, this.FUNCTION, false);
 					break;
+				case Estraverse.Syntax.ThisExpression:
+					if (this.context.word === "this") {
+						var scope = this.scopes[this.scopes.length-1];
+						scope.occurrences.push({
+							start: node.range[0],
+							end: node.range[1]
+						});
+						// Scope the occurences to the object where 'this' is selected
+						if (this.context.start >= node.range[0] && this.context.start <= node.range[1]){
+							if ( this.context.end >= node.range[0] && this.context.start <= node.range[1]){
+								this.defscope = {range: scope.range};
+							}
+						}
+					}
+					break;
 			}
 		},
 		
@@ -181,8 +196,7 @@ define([
 		checkId: function(node, kind, candefine) {
 			if (node && node.type === Estraverse.Syntax.Identifier) {
 				if (node.name === this.context.word) {
-					var len = this.scopes.length;
-					var scope = len > 0 ? this.scopes[len-1] : null;
+					var scope = this.scopes[this.scopes.length-1]; // Always will have at least the program scope
 					if(candefine) {
 						if(this.defscope && this.defnode) {
 							//trying to re-define, we can break since any matches past here would not be the original definition
