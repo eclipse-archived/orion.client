@@ -25,7 +25,6 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 		//login: login
 	};
 
-
 	var provider = new PluginProvider(headers);
 	var cFService = new CFClient.CFService();
 
@@ -36,7 +35,7 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 		settings: [{
 			pid: "org.eclipse.orion.client.cf.settings",
 			name: "Settings",
-			category: 'Cloud Foundry',
+			category: 'Cloud',
 			properties: [{
 				id: "org.eclipse.orion.client.cf.settings.apiurl",
 				name: "API Url",
@@ -44,7 +43,7 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 				defaultValue: apiUrl
 			}, {
 				id: "org.eclipse.orion.client.cf.settings.manageurl",
-				name: "ACE / Manage Url",
+				name: "Manage Url",
 				type: "string",
 				defaultValue: manageUrl
 			}]

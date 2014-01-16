@@ -163,12 +163,15 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			getApp: function(target, name, contentLocation) {
 				var url = require.toUrl("cfapi/apps");
 				
-				url += "?Target=" + JSON.stringify(target);
 				if (name) {
-					url += "&Name=" + name;
+					url += "?Name=" + name;
 				} else if (location) {
-					url += "&ContentLocation=" + contentLocation;
+					url += "?ContentLocation=" + contentLocation;
 				}
+				
+				if (target)
+					url += "&Target=" + JSON.stringify(target);
+				
 				return this._xhrV1("GET", url);
 			},
 			
