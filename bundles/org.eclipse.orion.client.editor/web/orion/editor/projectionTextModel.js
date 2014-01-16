@@ -433,7 +433,7 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 			var rangeStart = i;
 			for (i = 0; i < projections.length; i++) {
 				projection = projections[i];
-				if (projection.start > end) { break; }
+				if (projection.start >= end) { break; }
 			}
 			var rangeEnd = i;
 			var model = this._model;
@@ -536,9 +536,52 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 				start: start || 0,
 				end: end === undefined ? this.getCharCount() : end
 			};
-			var mapStart = this.mapOffset(this._change.start);
-			var mapEnd = this._change.start === this._change.end ? mapStart : this.mapOffset(this._change.end);
-			this._model.setText(this._change.text, mapStart, mapEnd);
+			var projections = this._projections, delta, i, projection;
+			function mapOffset(offset) {
+				for (i = 0, delta = 0; i < projections.length; i++) {
+					projection = projections[i];
+					if (projection.start > offset - delta) { break; }
+					var charCount = projection._model.getCharCount();
+					if (projection.start + charCount > offset - delta) {
+						return -1;
+					}
+					delta += charCount - (projection.end - projection.start);
+				}
+				return offset - delta;
+			}
+			var startProjection, endProjection;
+			var mapStart = mapOffset(this._change.start);
+			if (mapStart === -1) {
+				startProjection = {
+					projection: projection,
+					start: this._change.start - (projection.start + delta)
+				};
+				mapStart = projection.end;
+			}
+			var mapEnd = mapOffset(this._change.end);
+			if (mapEnd === -1) {
+				endProjection = {
+					projection: projection,
+					end: this._change.end - (projection.start + delta)
+				};
+				mapEnd = projection.start;
+			}
+			if (startProjection && endProjection && startProjection.projection === endProjection.projection) {
+				//TODO events - special case - change is completely inside of a projection
+				projection._model.setText(this._change.text, startProjection.start, endProjection.end);
+			} else {
+				this._model.setText(this._change.text, mapStart, mapEnd);
+				if (startProjection) {
+					projection = startProjection.projection;
+					projection._model.setText("", startProjection.start);
+				}		
+				if (endProjection) {
+					projection = endProjection.projection;
+					projection._model.setText("", 0, endProjection.end);
+					projection.start = projection.end;
+					projection._lineCount = 0;
+				}
+			}
 			this._change = undefined;
 		}
 	};
