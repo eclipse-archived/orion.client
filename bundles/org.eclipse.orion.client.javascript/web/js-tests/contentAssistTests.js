@@ -2493,7 +2493,7 @@ define([
 			"x.o", "o"
 		);
 		return testProposals(results, [
-			["open(path, flags, mode, callback)", "open(path, flags, mode, callback) : undefined"],
+			["open(path, flags, mode, callback)", "open(path, flags, mode, callback)"],
 			["openSync(path, flags, [mode])", "openSync(path, flags, [mode]) : Number"]	
 		]);
 	};
@@ -2525,7 +2525,7 @@ define([
 			"x.c", "c"
 		);
 		return testProposals(results, [
-			["copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd])", "copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd]) : undefined"]
+			["copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd])", "copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd])"]
 		]);
 	};
 
@@ -2536,7 +2536,7 @@ define([
 			"x.c", "c"
 		);
 		return testProposals(results, [
-			["copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd])", "copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd]) : undefined"]
+			["copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd])", "copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd])"]
 		]);
 	};
 
@@ -2547,8 +2547,8 @@ define([
 			"Buffer.is", "is"
 		);
 		return testProposals(results, [
-			["isBuffer(obj)", "isBuffer(obj) : undefined"],
-			["isEncoding(encoding)", "isEncoding(encoding) : undefined"]
+			["isBuffer(obj)", "isBuffer(obj)"],
+			["isEncoding(encoding)", "isEncoding(encoding)"]
 		]);
 	};
 
