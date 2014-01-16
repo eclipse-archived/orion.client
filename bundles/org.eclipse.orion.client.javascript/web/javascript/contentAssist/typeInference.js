@@ -653,7 +653,7 @@ define([
 				var builtin;
 				if (env.nodeJSModule && (builtin = findBuiltInNodeModuleType(arg.value, env))) {
 					return builtin;
-				} else {
+				} else if (env.indexer) {
 					var summary = env.indexer.retrieveSummary(arg.value);
 					if (summary) {
 						var typeName;
