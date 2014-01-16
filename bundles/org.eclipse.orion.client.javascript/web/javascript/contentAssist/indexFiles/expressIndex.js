@@ -14,7 +14,7 @@ define('javascript/contentAssist/indexFiles/expressIndex', [],
 function () {
 	return {
   		"!name": "express",
-  			"!define": {
+  		"!define": {
       		"express": {
         		"createServer": {
         			"!type" : "fn() -> application"
@@ -72,7 +72,7 @@ function () {
 		          "!type": "fn(ext: String, fn: fn()) -> Object"
 		        },
 		        "param": {
-		          "!type": "fn(name: String, fn: fn() -> Object"
+		          "!type": "fn(name: String, fn: fn()) -> Object"
 		        },
 		        "set": {
 		          "!type": "fn(setting: String, val: String) -> Object"
@@ -205,4 +205,5 @@ function () {
   				}
 			}
         }
-}});
+	}
+});

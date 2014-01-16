@@ -190,6 +190,14 @@ define([
 					"function(default_flags:Object,user_flags:Array):Number");
 	};
 	
+	/**
+	 * From the express index
+	 */
+	tests["test callback 24"] = function() {
+		testSig("fn(method: String, path: String, callbacks: [fn()], options: Object)", 
+					"function(method:String,path:String,callbacks:Array,options:Object):undefined");
+	};
+	
 	tests["test type 1"] = function() {
 		var type = {
 			fizz: "String",
