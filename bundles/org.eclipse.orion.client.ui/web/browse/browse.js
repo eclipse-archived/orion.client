@@ -14,62 +14,19 @@
 define([
 	'orion/bootstrap', 
 	'orion/PageUtil', 
-	'orion/contentTypes',
-	//'orion/fileClient',
-	'orion/widgets/browse/readonlyFileClient',
-	'orion/highlight',
-	'orion/widgets/browse/staticDataSource',
+	'orion/fileClient',
 	'orion/widgets/browse/fileBrowser',
-	'orion/Deferred',
-	'plugins/filePlugin/HTML5LocalFileImpl'
-], function(mBootstrap, PageUtil, mContentTypes, mFileClient, Highlight, mStaticDataSource, mFileBrowser, mDeferred) {
-		orion = {Deferred: mDeferred};
-		window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
-		if (window.requestFileSystem) {
-			window.requestFileSystem(window.TEMPORARY, 10*1024*1024 , function(fs) {
-				var service = new eclipse.HTML5LocalFileServiceImpl(fs);
-				var serviceProperties = {
-					Name: "HTML5 Local File contents",
-					pattern: service._rootLocation,//"filesystem:http://libingw.orion.eclipse.org:8080/temporary/",
-					serviceId: 1,
-					top: service._rootLocation
-				};
-				var serviceRef = {
-					id: 123,
-					serviceProperties: serviceProperties,
-					impl: service
-				};
-				
-				var fBrowser = new mFileBrowser.FileBrowser({
-					parent: "fileBrowser",//Required 
-					serviceRefs: [serviceRef],
-					//fileClient: new mFileClient.FileClient([serviceRef]),
-				}); 
-				window.addEventListener("hashchange", function() { //$NON-NLS-0$
-					fBrowser.refresh(PageUtil.hash());
-				});
-				fBrowser.refresh(PageUtil.hash());
-			}, function(error) {
-				console.log(error);
-			});
-		} 
-/*
+	'orion/Deferred'
+], function(mBootstrap, PageUtil, mFileClient, mFileBrowser, mDeferred) {
 	mBootstrap.startup().then(function(core) {
-		//var cTypeService = new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
 		var fBrowser = new mFileBrowser.FileBrowser({
-			parent: "fileBrowser",//Required 
+			parent: "fileBrowser", 
 			//maxEditorHeight: 800,
 			fileClient: new mFileClient.FileClient(core.serviceRegistry)
-			//syntaxHighlighter: new mStaticDataSource.SyntaxHighlighter(),
-			//syntaxHighlighter: new Highlight.SyntaxHighlighter(core.serviceRegistry, cTypeService),
-			//contentTypeService: cTypeService,
-			//contentTypeService: new mContentTypes.ContentTypeRegistry(core.serviceRegistry),
-			//preferences: core.preferences
 		}); 
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			fBrowser.refresh(PageUtil.hash());
 		});
 		fBrowser.refresh(PageUtil.hash());
 	});
-*/
 });

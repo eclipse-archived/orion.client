@@ -14,11 +14,17 @@
 /*global define eclipse:true orion:true window*/
 
 define([
-	'orion/Deferred', //$NON-NLS-0$
-	"orion/editor/textMateStyler", //$NON-NLS-0$
-	"orion/editor/htmlGrammar", //$NON-NLS-0$
-	"examples/editor/textStyler" //$NON-NLS-0$
-], function(Deferred, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+	'orion/Deferred',
+	"orion/editor/textStyler", 
+	"orion/editor/stylers/js/js",
+	"orion/editor/stylers/css/css",
+	"orion/editor/stylers/html/html",
+	"orion/editor/stylers/java/java",
+	"orion/editor/stylers/json/json",
+	"orion/editor/stylers/php/php",
+	"orion/editor/stylers/python/python",
+	"orion/editor/stylers/ruby/ruby"
+], function(Deferred, mStyler, mJS, mCss, mHtml, mJava, mJson, mPhp, mPython, mRuby) {
 	var ContentTypes = [{	id: "text/plain",
 			name: "Text",
 			extension: ["txt"],
@@ -58,6 +64,21 @@ define([
 			"extends": "text/plain",
 			name: "Java",
 			extension: ["java"]
+		},
+		{	id: "text/x-python",
+			"extends": "text/plain",
+			name: "Python",
+			extension: ["py", "rpy", "pyw", "cpy", "SConstruct", "Sconstruct", "sconstruct", "SConscript", "gyp", "gypi"]
+		},
+		{	id: "text/x-ruby",
+			"extends": "text/plain",
+			name: "Ruby",
+			extension: ["rb", "rbx", "rjs", "Rakefile", "rake", "cgi", "fcgi", "gemspec", "irbrc", "capfile", "ru", "prawn", "Gemfile", "Guardfile", "Vagrantfile", "Appraisals", "Rantfile"]
+		},
+		{	id: "text/x-php",
+			"extends": "text/plain",
+			name: "PHP",
+			extension: ["php", "php3", "php4", "php5", "phpt", "phtml", "aw", "ctp"]
 		},
 		{	id: "text/x-markdown",
 			"extends": "text/plain",
@@ -114,7 +135,8 @@ define([
 	function SyntaxHighlighter() {
 		this.styler = null;
 	}
-	SyntaxHighlighter.prototype = /** @lends orion.highlight.SyntaxHighlighter.prototype */ {
+	
+	SyntaxHighlighter.prototype = {
 		setup: function(fileContentType, textView, annotationModel, fileName, allowAsync) {
 			if (this.styler) {
 				if (this.styler.destroy) {
@@ -130,18 +152,30 @@ define([
 				this.styler = null;
 			}
 			if (fileContentType) {
-				switch(fileContentType.name) {
-					case "JavaScript": //$NON-NLS-0$
-						this.styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
+				switch(fileContentType.id) {
+					case "application/javascript": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mJS.grammars, "orion.js"); //$NON-NLS-0$
 						break;
-					case "Java": //$NON-NLS-0$
-						this.styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
+					case "text/css": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mCss.grammars, "orion.css"); //$NON-NLS-0$
 						break;
-					case "CSS": //$NON-NLS-0$
-						this.styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
+					case "text/html": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mHtml.grammars, "orion.html"); //$NON-NLS-0$
 						break;
-					case "HTML": //$NON-NLS-0$
-						this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
+					case "text/x-java-source": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mJS.grammars, "orion.js"); //$NON-NLS-0$
+						break;
+					case "application/json": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mJson.grammars, "orion.json"); //$NON-NLS-0$
+						break;
+					case "text/x-python": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mPython.grammars, "orion.py"); //$NON-NLS-0$
+						break;
+					case "text/x-ruby": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mRuby.grammars, "orion.rb"); //$NON-NLS-0$
+						break;
+					case "text/x-php": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mPhp.grammars, "orion.php"); //$NON-NLS-0$
 						break;
 				}
 			}
