@@ -127,15 +127,15 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 					logEditorView.destroy();
 				}
 				
-				if(this.lastResource !== logParams.resource){
+				if(this.lastLogsInfo.Application !== logParams.resource){
 					progressService.showWhile(cFClient.getLogs(target, logParams.resource), "Getting logs").then(function(logs){
-						this.lastResource = logParams.resource;
 						var logsInfo = {
 							Target: target,
 							Application: logParams.resource,
 							instance: logParams.instance,
 							logs: logs
 						}
+						this.lastLogsInfo = logsInfo;
 						logEditorView.inputManager.setApplicationInfo(logsInfo);
 						logsNavExplorer.load(logsInfo);
 						if(logParams.log){
@@ -171,6 +171,13 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 					});
 					return;
 				}
+				if(this.lastLogsInfo.instance !== logParams.instance){
+					this.lastLogsInfo.instance = logParams.instance;
+					logEditorView.inputManager.setApplicationInfo(this.lastLogsInfo);
+					if(logParams.log && logEditorView.inputManager.getInput() === logParams.log){
+						logEditorView.inputManager.load();
+					}
+				}
 				if(logParams.log){
 					mainLogView.classList.add("toolbarTarget");
 					logEditorView.inputManager.setInput(logParams.log);
@@ -179,6 +186,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 				}
 			}
 			
+			this.lastLogsInfo = {};
 			loadLogs(PageUtil.matchResourceParameters());
 			
 			window.addEventListener("hashchange", function() {

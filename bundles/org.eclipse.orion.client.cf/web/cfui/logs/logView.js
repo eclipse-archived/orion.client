@@ -63,6 +63,7 @@ define([
 			var currentInstance = this.applicationInfo.instance || Object.keys(this.applicationInfo.logs)[0];
 			this.cFClient.getLogs(this.applicationInfo.Target, this.applicationInfo.Application, location, this.applicationInfo.instance).then(function(logInfo){
 				var log = logInfo[currentInstance];
+				log.Instance = currentInstance;
 				deferred.resolve(log);
 				
 				mGlobalCommands.setPageTarget({
@@ -75,7 +76,7 @@ define([
 			return deferred;
 		},
 		setApplicationInfo: function(appInfo){
-			this.applicationInfo = appInfo;	
+			this.applicationInfo = appInfo;
 		},
 		getApplicationInfo: function(){
 			return this.applicationInfo;	
@@ -84,6 +85,7 @@ define([
 			var logName = this.getInput();
 			if(!logName){
 				this.lastLogLoaded = null;
+				this.lastLogInstance = null;
 				return;
 			}
 			var progressTimeout = window.setTimeout(function() {
@@ -104,11 +106,12 @@ define([
 			}.bind(this);
 			this._acceptPatch = null;
 			
-			if(!this.lastLogLoaded || this.lastLogLoaded!==logName){
+			if((!this.lastLogLoaded || this.lastLogLoaded!==logName) || (this.applicationInfo.instance !== null && this.lastLogInstance !== this.applicationInfo.instance)){
 				// Read the log
 				this.progressService.showWhile(this._read(logName, true), "Loading " + logName).then(function(metadata) {
 					this._setInputContents(this._parsedLocation, logName, metadata.Contents, metadata);
 					this.lastLogLoaded = logName;
+					this.lastLogInstance = metadata.Instance;
 				}.bind(this), errorHandler);
 			} else {
 			progressTimeout = window.setTimeout(function() {
@@ -190,6 +193,7 @@ define([
 				
 				this.inputManager.addEventListener("InputChanged", this.inputListener);
 				this.inputManager.lastLogLoaded = null;
+				this.inputManager.lastLogInstance = null;
 			}
 
 		},

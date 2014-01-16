@@ -19,9 +19,10 @@ define([
 function(lib, mExplorer, objects,URITemplate){
 	
 	
-	function LogsModel(application){
+	function LogsModel(application, prefix){
 		this.root = application;
 		this.numberOfInstances = Object.keys(this.root.logs).length;
+		this.prefix = prefix;
 	}
 	
 	LogsModel.prototype = new mExplorer.ExplorerModel();
@@ -37,6 +38,7 @@ function(lib, mExplorer, objects,URITemplate){
 					var instance = Object.keys(this.root.logs)[0];
 					this.root.children = this.root.logs[instance];
 					this.root.children.forEach(function(child){
+						child.parent = this.root;
 						child.Target = this.root.Target;
 						child.Instance = instance;
 					}.bind(this));
@@ -44,7 +46,7 @@ function(lib, mExplorer, objects,URITemplate){
 				} else {
 					var children = [];
 					for(var instanceVal in this.root.logs){
-						children.push({Instance: instanceVal, Children: this.root.logs[instanceVal], Type: "Instance"});
+						children.push({Instance: instanceVal, Children: this.root.logs[instanceVal], Type: "Instance", parent: parentItem});
 					}
 					this.root.children = children;
 					onComplete(children);
@@ -53,17 +55,21 @@ function(lib, mExplorer, objects,URITemplate){
 			} else if(parentItem.Instance){
 				var children = parentItem.Children;
 				children.forEach(function(child){
+					child.parent = parentItem;
 					child.Instance = parentItem.Instance;
-				});
+					child.Target = this.root.Target;
+				}.bind(this));
+				parentItem.children = children;
+				onComplete(children);
 			}else{
 				onComplete([]);
 			}
 		},
 		getId: function(item){
-			if(item === this.root) return this.root.Application;
-			if(item.Instance && item.Children) return this.root.Application + "_" + item.Instance;
-			if(item.Instance && item.Name) this.root.Application + "_" + item.Instance + "_" + item.Name;
-			return this.root.Application + "_" + item.Name;
+			if(item === this.root) return this.prefix + this.root.Application;
+			if(item.Instance && item.Children) return this.prefix + this.root.Application + "_" + item.Instance;
+			if(item.Instance && item.Name) return this.prefix + this.root.Application + "_" + item.Instance + "_" + item.Name;
+			return this.prefix + this.root.Application + "_" + item.Name;
 		},
 		constructor: LogsModel
 	});
@@ -92,6 +98,10 @@ function(lib, mExplorer, objects,URITemplate){
 			span.className = "mainNavColumn"; //$NON-NLS-0$
 
 			if(item.Type === "Log"){
+				var image = document.createElement("span");
+				image.className = "coreImageSprite core-sprite-file";
+				image.style.paddingLeft = "16px";
+				span.appendChild(image);
 				var a = document.createElement("a");
 				a.appendChild(document.createTextNode(item.Name));
 				var params = item.Target ? objects.clone(item.Target) : {};
@@ -100,7 +110,7 @@ function(lib, mExplorer, objects,URITemplate){
 				span.appendChild(a);
 			} else if(item.Type === "Instance"){
 				this.getExpandImage(tableRow, span);
-				span.appendChild(document.createTextNode(item.Instance));
+				span.appendChild(document.createTextNode("Instance: " + item.Instance));
 			}
 			col.appendChild(span);
 			return col;
@@ -112,6 +122,7 @@ function(lib, mExplorer, objects,URITemplate){
 	function LogsExplorer(serviceRegistry, selection, commandRegistry, parent) {
 		this.parent = parent;
 		mExplorer.Explorer.apply(this, [serviceRegistry, selection, new LogsRenderer({
+			singleSelection: true,
 			checkbox: false,
 			commandRegistry: commandRegistry
 		}, this), commandRegistry]);
@@ -122,7 +133,7 @@ function(lib, mExplorer, objects,URITemplate){
 	objects.mixin(LogsExplorer.prototype, {
 		load: function(logs){
 			this.logs = logs;
-			var model = new LogsModel(logs);
+			var model = new LogsModel(logs, this.parent.id);
 			this.createTree(this.parent, model,  {indent: '8px'});
 			this.initNavHandler();
 		},
