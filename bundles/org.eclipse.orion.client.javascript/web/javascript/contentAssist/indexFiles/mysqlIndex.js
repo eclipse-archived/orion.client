@@ -15,12 +15,68 @@ function () {
 	return {
 		"!name": "mysql",
   		"!define": {
+  			"mysql": {
+    			"createConnection": {
+	  				"!type": "fn(config: Object) -> +Connection"
+	  			},
+    			"createPool": {
+	  				"!type": "fn(config: Object) -> +Pool"
+	  			},
+    			"createPoolCluster": {
+	  				"!type": "fn(config: Object) -> +PoolCluster"
+	  			},
+    			"createQuery": {
+	  				"!type": "fn(sql: String, values: Object, cb: fn()) -> +Query"
+	  			},
+    			"Types": "Types",
+    			"escape": {
+	  				"!type": "fn(val: String, stringifyObjects: Boolean, timeZone: String) -> String"
+	  			},
+    			"escapeId": {
+	  				"!type": "fn(val: String, forbidQualified: Boolean) -> String"
+	  			},
+    			"format": {
+	  				"!type": "fn(sql: String, values: [String], stringifyObjects: Boolean, timeZone: String) -> String"
+	  			},
+
+	  			"Types": {
+	  				"!proto": "Object",
+			        "DECIMAL": "Number",
+			        "TINY": "Number",
+			        "SHORT": "Number",
+			        "LONG": "Number",
+			        "FLOAT": "Number",
+			        "DOUBLE": "Number",
+			        "NULL": "Number",
+			        "TIMESTAMP": "Number",
+			        "LONGLONG": "Number",
+			        "INT24": "Number",
+			        "DATE": "Number",
+			        "TIME": "Number",
+			        "DATETIME": "Number",
+			        "YEAR": "Number",
+			        "NEWDATE": "Number",
+			        "VARCHAR": "Number",
+			        "BIT": "Number",
+			        "NEWDECIMAL": "Number",
+			        "ENUM": "Number",
+			        "SET": "Number",
+			        "TINY_BLOB": "Number",
+			        "MEDIUM_BLOB": "Number",
+			        "LONG_BLOB": "Number",
+			        "BLOB": "Number",
+			        "VAR_STRING": "Number",
+			        "STRING": "Number",
+			        "GEOMETRY": "Number"
+			    },
+  			},
+
 	  		"Connection" : {
 	  			"!proto": "Object",
 	  			"!type": "fn(options: Object)",
-	    		"createQuery": {
-	  				"!type": "fn(sql: String, values: Object, cb: fn()) -> Query"
-	  			},
+//	    		"createQuery": {
+//	  				"!type": "fn(sql: String, values: Object, cb: fn()) -> +Query"
+//	  			},
 	    		"prototype": {
 	      			"connect": {
 	  					"!type": "fn(cb: fn())"
@@ -145,61 +201,7 @@ function () {
 	  				}
 		        }
 		    },
-  			"MySQL": {
-  				"!proto": "Object",
-    			"createConnection": {
-	  				"!type": "fn(config: Object) -> Connection"
-	  			},
-    			"createPool": {
-	  				"!type": "fn(config: Object) -> Pool"
-	  			},
-    			"createPoolCluster": {
-	  				"!type": "fn(config: Object) -> PoolCluster"
-	  			},
-    			"createQuery": {
-	  				"!type": "fn(sql: String, values: Object, cb: fn()) -> Query"
-	  			},
-    			"Types": "Types",
-    			"escape": {
-	  				"!type": "fn(val: String, stringifyObjects: Boolean, timeZone: String) -> String"
-	  			},
-    			"escapeId": {
-	  				"!type": "fn(val: String, forbidQualified: Boolean) -> String"
-	  			},
-    			"format": {
-	  				"!type": "fn(sql: String, values: [String], stringifyObjects: Boolean, timeZone: String) -> String"
-	  			}
-  			},
-  			"Types": {
-  				"!proto": "Object",
-		        "DECIMAL": "Number",
-		        "TINY": "Number",
-		        "SHORT": "Number",
-		        "LONG": "Number",
-		        "FLOAT": "Number",
-		        "DOUBLE": "Number",
-		        "NULL": "Number",
-		        "TIMESTAMP": "Number",
-		        "LONGLONG": "Number",
-		        "INT24": "Number",
-		        "DATE": "Number",
-		        "TIME": "Number",
-		        "DATETIME": "Number",
-		        "YEAR": "Number",
-		        "NEWDATE": "Number",
-		        "VARCHAR": "Number",
-		        "BIT": "Number",
-		        "NEWDECIMAL": "Number",
-		        "ENUM": "Number",
-		        "SET": "Number",
-		        "TINY_BLOB": "Number",
-		        "MEDIUM_BLOB": "Number",
-		        "LONG_BLOB": "Number",
-		        "BLOB": "Number",
-		        "VAR_STRING": "Number",
-		        "STRING": "Number",
-		        "GEOMETRY": "Number"
-		    },
+
 		    "Query": {
 		    	"!proto": "Sequence",
 		    	"!type": "fn(options: Object, callback: fn())",

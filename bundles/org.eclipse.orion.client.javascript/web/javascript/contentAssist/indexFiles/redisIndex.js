@@ -21,13 +21,12 @@ function () {
           			"!type": "Boolean",
       			},
         		"createClient": {
-		        	"!type": "fn(port_arg: Number, host_arg: String, options: Object) -> RedisClient",
+		        	"!type": "fn(port_arg: Number, host_arg: String, options: Object) -> +redis.RedisClient",
 		        },
         		"print": {
   					"!type" : "fn(err: Error, reply: Object)"
   				},
         		"RedisClient": {
-        			"!proto" : "Object",
         			"!type": "fn(stream: Object, options: Object)",
           			"prototype": {
             			"initialize_retry_vars": {
@@ -97,10 +96,10 @@ function () {
   							"!type" : "fn(args: Object, callback: fn())"
   						},
 			            "multi": {
-  							"!type" : "fn(args: Object) -> Multi"
+  							"!type" : "fn(args: Object) -> +redis.Multi"
   						},
 			            "MULTI": {
-			              "!type": "fn(args: Object) -> Multi",
+			              "!type": "fn(args: Object) -> +redis.Multi",
 			            },
 			            "EVAL": {
   							"!type" : "fn()"
@@ -112,10 +111,10 @@ function () {
   							"!type" : "fn()"
   						},
 			            "HMGET": {
-  							"!type" : "fn()"
+  							"!type" : "fn(arg1: Object, arg2: Object, arg3: Object)"
   						},
 			            "HMSET": {
-  							"!type" : "fn()"
+  							"!type" : "fn(args: Object, callback: fn())"
   						},
 			            "eval": {
   							"!type" : "fn()"
@@ -127,7 +126,7 @@ function () {
 			    	"!type" : "fn(client: RedisClient, args: Object)",
 			    	"prototype": {
 			            "hmset": {
-			              "!type": "fn() -> Multi",
+			              "!type": "fn() -> +redis.Multi",
 			            },
 		            	"exec": {
   							"!type" : "fn(callback: fn()) -> Boolean"

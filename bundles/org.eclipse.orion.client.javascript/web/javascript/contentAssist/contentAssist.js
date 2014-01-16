@@ -775,19 +775,6 @@ define([
 		 * @returns {orion.Promise}
 		 */
 		createIndexData: function(editorContext, context) {
-			function toIndexData(ternIndex) {
-				var data = objects.clone(ternIndex); //shallow clone
-				var name = data["!name"], define = data["!define"];
-				if (!name || !define) {
-					return null; // bad or weird typeDef
-				}
-				if (!data["!define"][name]) {
-					// Orion's indexData expect the definitions to be wrapped in a top-level element having the library name
-					data["!define"] = {};
-					data["!define"][name] = define;
-				}
-				return data;
-			}
 			if (!this.indexDataPromise) {
 				var self = this;
 				var defs = context.typeDefs || {}, promises = [];
@@ -798,7 +785,7 @@ define([
 					}
 				});
 				this.indexDataPromise = Deferred.all(promises).then(function(typeDefs) {
-					self.indexData = typeDefs.map(toIndexData).filter(function(d) { return !!d; });
+					self.indexData = typeDefs;
 					return self.indexData;
 				});
 			}
