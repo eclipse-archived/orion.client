@@ -119,8 +119,9 @@ function(lib, mExplorer, objects,URITemplate){
 	});
 	
 	
-	function LogsExplorer(serviceRegistry, selection, commandRegistry, parent) {
+	function LogsExplorer(serviceRegistry, selection, commandRegistry, parent, titleNode) {
 		this.parent = parent;
+		this.titleNode = titleNode;
 		mExplorer.Explorer.apply(this, [serviceRegistry, selection, new LogsRenderer({
 			singleSelection: true,
 			checkbox: false,
@@ -133,6 +134,13 @@ function(lib, mExplorer, objects,URITemplate){
 	objects.mixin(LogsExplorer.prototype, {
 		load: function(logs){
 			this.logs = logs;
+			if(logs.Application && this.titleNode){
+				lib.empty(this.titleNode);
+				var span = document.createElement("span");
+				span.id = "LogsNavigationTitle";
+				span.appendChild(document.createTextNode(logs.Application));
+				this.titleNode.appendChild(span);
+			}
 			var model = new LogsModel(logs, this.parent.id);
 			this.createTree(this.parent, model,  {indent: '8px'});
 			this.initNavHandler();

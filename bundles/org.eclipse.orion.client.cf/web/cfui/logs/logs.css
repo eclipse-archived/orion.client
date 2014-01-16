@@ -3,3 +3,15 @@
 @import "../../css/sections.css";
 @import "../../css/images.css";
 @import "../../css/theme.css";
+
+#LogsNavigationTitle {
+	-moz-user-select: none;
+    font-weight: bold;
+    margin-left: 4px;
+    margin-top: 8px;
+    max-width: calc(100% - 6px - 4px - 24px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    position: absolute;
+}

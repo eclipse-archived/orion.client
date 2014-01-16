@@ -35,6 +35,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 			var cFClient = new mCFClient.CFService(serviceRegistry);
 			var contentTypeRegistry = new mContentTypes.ContentTypeRegistry(serviceRegistry);
 			var sidebar = lib.node("sidebar");
+			var sidebarToolbar = lib.node("sidebarToolbar");
 			var mainLogView = lib.node("log");
 			var logsExplorerParent = document.createElement("div");
 			
@@ -48,7 +49,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 				}
 			}
 			
-			var logsNavExplorer = new mLogsExplorer.LogsExplorer(serviceRegistry, selection, commandRegistry, sidebar);
+			var logsNavExplorer = new mLogsExplorer.LogsExplorer(serviceRegistry, selection, commandRegistry, sidebar, sidebarToolbar);
 			var logsInlineExplorer = new mLogsExplorer.LogsExplorer(serviceRegistry, selection, commandRegistry, logsExplorerParent);
 			var logEditorView = new mLogView.LogEditorView({
 					parent: mainLogView,
@@ -72,7 +73,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 			function displayInlineLogsExplorer(logs){
 				
 				mGlobalCommands.setPageTarget({
-						task: "Cloud Foundry Logs",
+						task: logs.Application ? "Cloud Foundry Logs" : logs.Application + " - Cloud Foundry Logs",
 						target: logs,
 						breadcrumbTarget: logs,
 						serviceRegistry: serviceRegistry,
