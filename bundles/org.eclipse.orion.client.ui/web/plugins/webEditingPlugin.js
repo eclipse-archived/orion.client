@@ -23,7 +23,7 @@ define([
 	'orion/editor/stylers/css/css',
 	'orion/editor/stylers/html/html',
 	'orion/editor/templates'
-], function(PluginProvider, cssContentAssist, htmlContentAssist, htmlGrammar, jsTemplateContentAssist, mJava, mPython, mRuby, mPhp, mCSS, mHTML, templates) {
+], function(PluginProvider, cssContentAssist, htmlContentAssist, htmlGrammar, jsTemplateContentAssist, mJava, mPython, mRuby, mPHP, mCSS, mHTML, templates) {
 	var headers = {
 		name: "Orion Web Editing Plugin",
 		version: "1.0",
@@ -210,7 +210,7 @@ define([
 	/**
 	 * Register syntax styling
 	 */
-	var grammars = mJava.grammars.concat(mCSS.grammars).concat(mHTML.grammars);
+	var grammars = mJava.grammars.concat(mCSS.grammars).concat(mHTML.grammars).concat(mPython.grammars).concat(mRuby.grammars).concat(mPHP.grammars);
 	grammars.forEach(function(current) {
 		provider.registerServiceProvider("orion.edit.highlighter", {}, current);
 	}.bind(this));
