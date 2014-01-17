@@ -955,6 +955,13 @@ input {
 	min-width: inherit;
 }
 
+.fixedMinWidthText {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
+	max-width: 300px;
+}
+
 .sectionTable {
 	margin-top: 0;
 	border: 1px solid;

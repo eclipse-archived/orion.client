@@ -359,7 +359,13 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			var td = document.createElement("td");
 			if(item.Url){
 				var a = document.createElement("a");
-				a.href = item.Url;
+				a.classList.add("fixedMinWidthText");
+				try{
+					a.style.maxWidth = this.explorer.parent.offsetWidth/3 + "px";
+				} catch(e){
+				}
+				a.href = item.Url.indexOf("://")<0 ? "http://" + item.Url : item.Url;
+				a.title = item.Url;
 				a.appendChild(document.createTextNode(item.Url));
 				td.appendChild(a);
 			}
