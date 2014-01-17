@@ -78,11 +78,11 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 					]
 				}, {
 					id: "string_singleline",
-					match: "\"(?:\\\\.|[^\"])*(?:\"|$)",
+					match: '"(?:\\\\.|[^"])*"?',
 					name: "string.quoted.double"
 				}, {
 					id: "string_singleQuote",
-					match: "'(?:\\\\.|[^'])*(?:'|$)",
+					match: "'(?:\\\\.|[^'])*'?",
 					name: "string.quoted.single"
 				}, {
 					id: "number_decimal",

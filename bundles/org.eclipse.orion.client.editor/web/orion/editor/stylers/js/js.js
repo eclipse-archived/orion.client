@@ -43,11 +43,11 @@ define("orion/editor/stylers/js/js", ["orion/editor/stylers/shared/shared"], fun
 				name: "keyword.control" //$NON-NLS-0$
 			}, {
 				begin: "'(?:\\\\.|[^'\\n])*\\\\\\n", //$NON-NLS-0$
-				end: "(?:(?:\\\\.|[^'\\n])*\\\\\\n)*(?:\\\\.|[^'\\n])*'?", //$NON-NLS-0$
+				end: "(?:(?:\\\\.|[^'\\n])*\\\\\\n)*(?:\\n|(?:\\\\.|[^'\\n])*'?)", //$NON-NLS-0$
 				name: "string.quoted.single" //$NON-NLS-0$
 			}, {
 				begin: '"(?:\\\\.|[^"\\n])*\\\\\\n', //$NON-NLS-0$
-				end: '(?:(?:\\\\.|[^"\\n])*\\\\\\n)*(?:\\\\.|[^"\\n])*"?', //$NON-NLS-0$
+				end: '(?:(?:\\\\.|[^"\\n])*\\\\\\n)*(?:\\n|(?:\\\\.|[^"\\n])*"?)', //$NON-NLS-0$
 				name: "string.quoted.double" //$NON-NLS-0$
 			}
 		]
