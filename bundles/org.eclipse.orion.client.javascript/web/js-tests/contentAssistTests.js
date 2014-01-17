@@ -2512,7 +2512,7 @@ define([
 	tests["test node15"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
-			"buffer.IN", "IN"
+			"require('buffer').IN", "IN"
 		);
 		return testProposals(results, [
 			["INSPECT_MAX_BYTES", "INSPECT_MAX_BYTES : Number"]
@@ -2533,7 +2533,7 @@ define([
 	tests["test node17"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:true*/\n" +
-			"var x = new buffer.Buffer(10);\n" +
+			"var x = new Buffer(10);\n" +
 			"x.c", "c"
 		);
 		return testProposals(results, [
