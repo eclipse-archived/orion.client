@@ -489,14 +489,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		getPatternManager: function() {
 			return this._styler._getPatternManager();
 		},
-		getSpacesVisible: function() {
-			return this._styler._getSpacesVisible();
-		},
 		getStyler: function() {
 			return this._styler;
-		},
-		getTabsVisible: function() {
-			return this._styler._getTabsVisible();
 		},
 		isRenderingWhitespace: function() {
 			return this._styler._isRenderingWhitespace();
@@ -878,9 +872,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		_getPatternManager: function() {
 			return this.patternManager;
 		},
-		_getSpacesVisible: function() {
-			return this.spacesVisible;
-		},
 		_getStyles: function(block, model, text, start) {
 			if (model.getBaseModel) {
 				start = model.mapOffset(start);
@@ -975,9 +966,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			return styles;
 		},
-		_getTabsVisible: function() {
-			return this.tabsVisible;
-		},
 		_isRenderingWhitespace: function() {
 			return this.whitespacesVisible && (this.tabsVisible || this.spacesVisible);
 		},
@@ -1042,7 +1030,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					current.style = {styleClass: current.style.replace(/\./g, " ")};
 				}
 			});
-			if (this._isRenderingWhitespace) {
+			if (this._isRenderingWhitespace()) {
 				if (this.spacesVisible) {
 					this._spliceStyles(spacePattern, e.ranges, e.lineText, e.lineStart);
 				}
