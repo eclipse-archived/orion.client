@@ -135,7 +135,7 @@ define([
 	var getPluginsTemplate = "http://orion-plugins.googlecode.com/git/index.html#?target={InstallTarget}&version={Version}&OrionHome={OrionHome}";
 	provider.registerService("orion.core.getplugins", null, {
 		uri: decodeURIComponent(new URITemplate(getPluginsTemplate).expand({
-			Version: "4.0",
+			Version: "5.0",
 			InstallTarget: PageLinks.getOrionHome() + "/settings/settings.html",
 			OrionHome: PageLinks.getOrionHome()
 		}))
