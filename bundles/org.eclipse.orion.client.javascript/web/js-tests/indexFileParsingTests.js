@@ -279,5 +279,23 @@ define([
 			assert.equal("foo..bazz", env.lookupTypeObj("Fizz").name, "bad environment");
 		});
 	};
+	
+	/**
+	 * Tests simple function declarations
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425813
+	 */
+	tests["test function decl1"] = function() {
+		var index = {
+			Fizz: {
+				"!type": "fn(p:String)",
+				f1 : "fn()"
+			}
+		};
+		return checkEnvironment(index, function (env) {
+			var ret = env.lookupTypeObj("f1", "Fizz");
+			assert.equal(ret.type, "FunctionType", "failed to find function decl");
+		});
+	};
+	
 	return tests;
 });

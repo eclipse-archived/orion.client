@@ -14,6 +14,20 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 ], function () {
 	return {
 		"!name": "pg",
+		"this": "<top>",
+		"global": "<top>",
+		"pg" : "pg",
+		"PG" : "pg.PG",
+		"Client" : "pg.Client",
+		"ConnectionParameters" : "pg.ConnectionParameters",
+		"Connection" : "pg.Connection",
+		"Error" : "pg.Error",
+		"CopyToStream" : "pg.CopyToStream",
+		"CopyFromStream" : "pg.CopyFromStream",
+		"Query" : "pg.Query",
+		"Result" : "pg.Result",
+		"Types" : "pg.Types",
+		"Defaults" : "pg.Defaults",
   		"!define": {
   			"pg": {
 	    		"PG" : {
@@ -29,7 +43,13 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 	    				"cancel" : {
 	    					"!type" : "fn(config: Object, client: Client, query: Query)"
 	    				}
-	    			}
+	    			},
+	    			"Client" : "Client",
+	    			"Query" : "Query",
+	    			"pools" : "Pool",
+	    			"types" : "Types",
+	    			"Connection" : "Connection",
+	    			"defaults" : "Defaults",
 	    		},
 	      		"Client": {
 	      			"!proto": "EventEmitter",
@@ -330,7 +350,50 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 			            	"!type": "fn(fieldDescriptions: Object)"
 			            }
 			        },
-			    }
+			    },
+		      	"Types": {
+		      		"!proto": "Object",
+		      		"getTypeParser": {
+		            	"!type": "fn(oid: String, format: Object) -> Object"
+		            },
+		        	"setTypeParser": {
+		            	"!type": "fn(oid: String, format: String, parseFn: fn())"
+		            }
+		      	},
+		      	"Pool": {
+		      		"!proto": "Object",
+			        "all": "Object",
+			        "getOrCreate": "fn(clientConfig: Object)"
+			    },
+			    "Defaults": {
+			    	"!proto": "Object",
+			        "host": {
+			          "!type": "String",
+			        },
+			        "port": {
+			          "!type": "Number",
+			        },
+			        "rows": {
+			          "!type": "Number",
+			        },
+			        "binary": {
+			          "!type": "Boolean",
+			        },
+			        "poolSize": {
+			          "!type": "Number",
+			        },
+			        "poolIdleTimeout": {
+			          "!type": "Number",
+			        },
+			        "reapIntervalMillis": {
+			          "!type": "Number",
+			        },
+			        "poolLog": {
+			          "!type": "Boolean",
+			        },
+			        "client_encoding": "String",
+			        "ssl": "Boolean"
+      			}
   			}
 	    }
 	}

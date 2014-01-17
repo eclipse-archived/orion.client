@@ -14,7 +14,12 @@ define('javascript/contentAssist/indexFiles/redisIndex', [],
 function () {
 	return {
 		"!name": "redis",
+		"this": "<top>",
+		"global": "<top>",
+		"redis": "redis",
 		"RedisClient" : "redis.RedisClient",
+		"Multi" : "redis.Multi",
+		"commands" : "Commands",
 		"!define": {
 			"redis": {
         		"debug_mode": {
