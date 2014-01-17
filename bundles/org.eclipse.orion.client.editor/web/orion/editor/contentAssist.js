@@ -129,8 +129,6 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			}).bind(this)
 		};
 		
-		this._boundTriggerListener = this._triggerListener.bind(this);
-		
 		textView.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "contentAssist"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		textView.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding(' ', false, false, true, true) : new mKeyBinding.KeyBinding(' ', true, false, true), "contentAssist"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		textView.setAction("contentAssist", function() { //$NON-NLS-0$
@@ -492,10 +490,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		 */
 		setAutoTriggerEnabled: function(enableAutoTrigger) {
 			this._autoTriggerEnabled = enableAutoTrigger;
-			if (enableAutoTrigger && this._charTriggersInstalled && !this._triggerListenerInstalled) {
-				this.textView.addEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
-				this._triggerListenerInstalled = true;
-			}
+			this._updateAutoTriggerListenerState();
 		},
 		
 		/**
@@ -530,18 +525,13 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this._charTriggersInstalled = providerInfoArray.some(function(info){
 				return info.charTriggers;
 			});
-			if (this._charTriggersInstalled && this._autoTriggerEnabled && !this._triggerListenerInstalled) {
-				this.textView.addEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
-				this._triggerListenerInstalled = true;
-			}
+			this._updateAutoTriggerListenerState();
 		},
 		
 		resetProviderInfoArray: function() {
 			this._providerInfoArray = [];
-			if (this._triggerListenerInstalled) {
-				this.textView.removeEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
-				this._triggerListenerInstalled = false;
-			}
+			this._charTriggersInstalled = false;
+			this._updateAutoTriggerListenerState();
 		},
 
 		
@@ -638,6 +628,28 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 						this.activate(providerInfosToActivate);
 					}
 				}
+			}
+		},
+		
+		/**
+		 * Private helper to install/uninstall the automatic trigger
+		 * listener based on the state of the relevant booleans
+		 */
+		_updateAutoTriggerListenerState: function() {
+			if (!this._boundTriggerListener) {
+				this._boundTriggerListener = this._triggerListener.bind(this);
+			}
+			
+			if (this._triggerListenerInstalled) {
+				// uninstall the listener if necessary
+				if (!this._autoTriggerEnabled || !this._charTriggersInstalled) {
+					this.textView.removeEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
+					this._triggerListenerInstalled = false;
+				}
+			} else if (this._autoTriggerEnabled && this._charTriggersInstalled){
+				// install the listener if necessary
+				this.textView.addEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
+				this._triggerListenerInstalled = true;
 			}
 		}
 	};

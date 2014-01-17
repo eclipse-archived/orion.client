@@ -180,6 +180,9 @@ define([
 				this.renderToolbars(inputManager.getFileMetadata());
 			}
 			this.markOccurrences.setOccurrencesVisible(prefs.showOccurrences);
+			if (editor.getContentAssist()) {
+				editor.getContentAssist().setAutoTriggerEnabled(prefs.contentAssistAutoTrigger);	
+			}
 		},
 		updateStyler: function(prefs) {
 			var styler = this.syntaxHighlighter.getStyler();
