@@ -187,6 +187,9 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 			languageTools: {
 				showOccurrences: {
 					create: createBooleanProperty
+				},
+				contentAssistAutoTrigger: {
+					create: createBooleanProperty
 				}
 			},
 			sourceControl: {

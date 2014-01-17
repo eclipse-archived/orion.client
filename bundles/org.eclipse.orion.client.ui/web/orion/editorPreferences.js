@@ -31,6 +31,8 @@ define([], function() {
 		saveDiffsVisible: true,
 		showBlame: false,
 		showBlameVisible: true,
+		contentAssistAutoTrigger: true,
+		contentAssistAutoTriggerVisible: true,
 		showOccurrences: false,
 		showOccurrencesVisible: true,
 		autoPairParentheses: true,

@@ -487,6 +487,18 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		},
 		
 		/**
+		 * Sets whether or not automatic content assist triggering is enabled.
+		 * @param {Boolean} enableAutoTrigger
+		 */
+		setAutoTriggerEnabled: function(enableAutoTrigger) {
+			this._autoTriggerEnabled = enableAutoTrigger;
+			if (enableAutoTrigger && this._charTriggersInstalled && !this._triggerListenerInstalled) {
+				this.textView.addEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
+				this._triggerListenerInstalled = true;
+			}
+		},
+		
+		/**
 		 * Sets the content assist providers that this ContentAssist will consult to obtain proposals.
 		 * @param {orion.editor.ContentAssistProvider[]} providers The providers.
 		 */
@@ -518,14 +530,18 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this._charTriggersInstalled = providerInfoArray.some(function(info){
 				return info.charTriggers;
 			});
-			if (this._charTriggersInstalled) {
+			if (this._charTriggersInstalled && this._autoTriggerEnabled && !this._triggerListenerInstalled) {
 				this.textView.addEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
+				this._triggerListenerInstalled = true;
 			}
 		},
 		
 		resetProviderInfoArray: function() {
 			this._providerInfoArray = [];
-			this.textView.removeEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
+			if (this._triggerListenerInstalled) {
+				this.textView.removeEventListener("Modify", this._boundTriggerListener); //$NON-NLS-0$
+				this._triggerListenerInstalled = false;
+			}
 		},
 
 		
@@ -587,7 +603,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		_triggerListener: function(event) {
 			if (this._styleAccessor) {
 				var caretOffset = this.textView.getCaretOffset();
-				var stylesAtOffset = this._styleAccessor.getStyles(caretOffset);
+				var stylesAtOffset = null;
 				var providerInfosToActivate = [];
 				
 				if (this._charTriggersInstalled) {
@@ -602,6 +618,11 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 							var isExcluded = false;
 							var excludedStyles = info.excludedStyles;
 							if (excludedStyles) {
+								if (!stylesAtOffset) {
+									// lazily initialize this variable to avoid getting the styles
+									// for every model modification, only ones that may trigger
+									stylesAtOffset = this._styleAccessor.getStyles(caretOffset);
+								}
 								// check if any of the styles match the excludedStyles RegExp
 								isExcluded = stylesAtOffset.some(function (element) {
 									return excludedStyles.test(element.style);
@@ -611,7 +632,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 								providerInfosToActivate.push(info);
 							}
 						}
-					});
+					}, this);
 					
 					if (providerInfosToActivate.length > 0) {
 						this.activate(providerInfosToActivate);

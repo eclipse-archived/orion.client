@@ -370,6 +370,7 @@ define([
 				});
 				contentAssist.setEditorContextProvider(boundEditorContext);
 				contentAssist.setProviderInfoArray(providerInfoArray);
+				contentAssist.setAutoTriggerEnabled(self.settings.contentAssistAutoTrigger);
 				contentAssist.setProgress(progress);
 				contentAssist.setStyleAccessor(self.getStyleAccessor());
 			};
