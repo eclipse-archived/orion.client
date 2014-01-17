@@ -165,7 +165,7 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 					if (keywords[i].indexOf(prefix) === 0) {
 						proposals.push({proposal: chop(prefix, keywords[i]), 
 							description: keywords[i], 
-							style: 'noemphasis'//$NON-NLS-0$
+							style: 'noemphasis_keyword'//$NON-NLS-0$
 						});
 					}
 				}
@@ -174,7 +174,7 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 					proposals.splice(0, 0,{
 						proposal: '',
 						description: 'Keywords', //$NON-NLS-0$
-						style: 'noemphasis_title', //$NON-NLS-0$
+						style: 'noemphasis_title_keywords', //$NON-NLS-0$
 						unselectable: true
 					});	
 				}

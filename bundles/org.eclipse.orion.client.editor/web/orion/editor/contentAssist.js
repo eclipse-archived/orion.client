@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -96,7 +96,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		hr : "proposal-hr", //$NON-NLS-0$
 		emphasis : "proposal-emphasis", //$NON-NLS-0$
 		noemphasis : "proposal-noemphasis", //$NON-NLS-0$
+		noemphasis_keyword : "proposal-noemphasis-keyword", //$NON-NLS-0$
 		noemphasis_title : "proposal-noemphasis-title", //$NON-NLS-0$
+		noemphasis_title_keywords : "proposal-noemphasis-title-keywords", //$NON-NLS-0$
 		dfault : "proposal-default" //$NON-NLS-0$
 	};
 	
