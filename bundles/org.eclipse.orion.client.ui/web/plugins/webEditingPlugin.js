@@ -204,7 +204,9 @@ define([
 	provider.registerService("orion.edit.contentassist",
 		new htmlContentAssist.HTMLContentAssistProvider(),
 		{	name: "HTML content assist",
-			contentType: ["text/html"]
+			contentType: ["text/html"],
+			charTriggers: "<",
+			excludedStyles: "(comment.*|string.*)"
 		});
 
 	/**

@@ -73,6 +73,7 @@ define([
 				return new Deferred().resolve(buffer);
 			}
 		};
+		
 		var params = {offset: offset, prefix : prefix, includeNonInferred: false };
 		objects.mixin(editorContext, editorContextMixin);
 		objects.mixin(params, paramsMixin);

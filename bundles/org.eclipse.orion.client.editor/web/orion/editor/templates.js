@@ -163,8 +163,20 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 			if (keywords) {
 				for (var i = 0; i < keywords.length; i++) {
 					if (keywords[i].indexOf(prefix) === 0) {
-						proposals.push({proposal: chop(prefix, keywords[i]), description: keywords[i]});
+						proposals.push({proposal: chop(prefix, keywords[i]), 
+							description: keywords[i], 
+							style: 'noemphasis'//$NON-NLS-0$
+						});
 					}
+				}
+				
+				if (0 < proposals.length) {
+					proposals.splice(0, 0,{
+						proposal: '',
+						description: 'Keywords', //$NON-NLS-0$
+						style: 'noemphasis_title', //$NON-NLS-0$
+						unselectable: true
+					});	
 				}
 			}
 			return proposals;

@@ -95,7 +95,9 @@ define([
 		{
 			contentType: ["application/javascript"],
 			name: "JavaScript content assist",
-			id: "orion.edit.contentassist.javascript"
+			id: "orion.edit.contentassist.javascript",
+			charTriggers: "[.]",
+			excludedStyles: "(comment.*|string.*)"
 	});	
 
 	/**

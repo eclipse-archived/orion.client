@@ -64,6 +64,12 @@ define("orion/editor/htmlContentAssist", ['orion/editor/templates'], function(mT
 			name: "<table>", //$NON-NLS-0$
 			description: " - basic HTML table", //$NON-NLS-0$
 			template: "<table>\n\t<tr>\n\t\t<td>${cursor}</td>\n\t</tr>\n</table>" //$NON-NLS-0$
+		},
+		{
+			prefix: "<!--", //$NON-NLS-0$
+			name: "<!-- -->", //$NON-NLS-0$
+			description: " - HTML comment", //$NON-NLS-0$
+			template: "<!-- ${cursor} -->" //$NON-NLS-0$
 		}
 	];
 
@@ -128,7 +134,7 @@ define("orion/editor/htmlContentAssist", ['orion/editor/templates'], function(mT
 
 	HTMLContentAssistProvider.prototype.getPrefix = function(buffer, offset, context) {
 		var index = offset;
-		while (index && /[A-Za-z0-9<]/.test(buffer.charAt(index - 1))) {
+		while (index && /[A-Za-z0-9<!-]/.test(buffer.charAt(index - 1))) {
 			index--;
 			if (buffer.charAt(index) === "<") { //$NON-NLS-0$
 				break;

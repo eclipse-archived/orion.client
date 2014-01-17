@@ -328,48 +328,65 @@ define([
 			};
 
 			// Content Assist
+			var setContentAssistProviders = function(editor, contentAssist, event) {
+				// Content assist is about to be activated; set its providers.
+				var fileContentType = inputManager.getContentType();
+				var fileName = editor.getTitle();
+				var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.contentAssist").concat(serviceRegistry.getServiceReferences("orion.edit.contentassist")); //$NON-NLS-1$ //$NON-NLS-0$
+				var providerInfoArray = event && event.providerInfoArray;				
+				if (!providerInfoArray) {
+					providerInfoArray = serviceRefs.map(function(serviceRef) {
+						var contentTypeIds = serviceRef.getProperty("contentType"), //$NON-NLS-0$
+						    pattern = serviceRef.getProperty("pattern"); // backwards compatibility //$NON-NLS-0$
+						if ((contentTypeIds && contentTypeRegistry.isSomeExtensionOf(fileContentType, contentTypeIds)) ||
+								(pattern && new RegExp(pattern).test(fileName))) {
+							var service = serviceRegistry.getService(serviceRef);
+							var id = serviceRef.getProperty("service.id").toString();  //$NON-NLS-0$
+							var charTriggers = serviceRef.getProperty("charTriggers"); //$NON-NLS-0$
+							var excludedStyles = serviceRef.getProperty("excludedStyles");  //$NON-NLS-0$
+							
+							if (charTriggers) {
+								charTriggers = new RegExp(charTriggers);
+							}
+							
+							if (excludedStyles) {
+								excludedStyles = new RegExp(excludedStyles);
+							}
+							
+							return {provider: service, id: id, charTriggers: charTriggers, excludedStyles: excludedStyles};
+						}
+						return null;
+					}).filter(function(providerInfo) {
+						return !!providerInfo;
+					});
+				}
+				
+				// Produce a bound EditorContext that contentAssist can invoke with no knowledge of ServiceRegistry.
+				var boundEditorContext = {};
+				Object.keys(EditorContext).forEach(function(key) {
+					if (typeof EditorContext[key] === "function") {
+						boundEditorContext[key] = EditorContext[key].bind(null, serviceRegistry);
+					}
+				});
+				contentAssist.setEditorContextProvider(boundEditorContext);
+				contentAssist.setProviderInfoArray(providerInfoArray);
+				contentAssist.setProgress(progress);
+				contentAssist.setStyleAccessor(self.getStyleAccessor());
+			};
+			
 			var contentAssistFactory = readonly ? null : {
 				createContentAssistMode: function(editor) {
 					var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
 					
-					var setContentAssistProviders = function() {
-						// Content assist is about to be activated; set its providers.
-						var fileContentType = inputManager.getContentType();
-						var fileName = editor.getTitle();
-						var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.contentAssist").concat(serviceRegistry.getServiceReferences("orion.edit.contentassist")); //$NON-NLS-1$ //$NON-NLS-0$
-						var providers = serviceRefs.map(function(serviceRef) {
-							var contentTypeIds = serviceRef.getProperty("contentType"), //$NON-NLS-0$
-							    pattern = serviceRef.getProperty("pattern"); // backwards compatibility //$NON-NLS-0$
-							if ((contentTypeIds && contentTypeRegistry.isSomeExtensionOf(fileContentType, contentTypeIds)) ||
-									(pattern && new RegExp(pattern).test(fileName))) {
-								return serviceRegistry.getService(serviceRef);
-							}
-							return null;
-						}).filter(function(provider) {
-							return !!provider;
-						});
-						// Produce a bound EditorContext that contentAssist can invoke with no knowledge of ServiceRegistry.
-						var boundEditorContext = {};
-						Object.keys(EditorContext).forEach(function(key) {
-							if (typeof EditorContext[key] === "function") {
-								boundEditorContext[key] = EditorContext[key].bind(null, serviceRegistry);
-							}
-						});
-						contentAssist.setEditorContextProvider(boundEditorContext);
-						contentAssist.setProviders(providers);
-						contentAssist.setProgress(progress);
-					};
-					
-					contentAssist.addEventListener("Activating", setContentAssistProviders); //$NON-NLS-0$
+					contentAssist.addEventListener("Activating", setContentAssistProviders.bind(null, editor, contentAssist)); //$NON-NLS-0$
 					var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
 					var result = new mContentAssist.ContentAssistMode(contentAssist, widget);
 					contentAssist.setMode(result);
 					
 					// preload content assist plugins to reduce the delay 
 					// that happens when a user first triggers content assist
-					setContentAssistProviders();
+					setContentAssistProviders(editor, contentAssist);
 					contentAssist.computeProposals();
-					
 					return result;
 				}
 			};
@@ -406,6 +423,10 @@ define([
 					textView.setOptions(this.updateViewOptions(this.settings));
 					this.syntaxHighlighter.setup(event.contentType, editor.getTextView(), editor.getAnnotationModel(), event.title, true).then(function() {
 						this.updateStyler(this.settings);
+						if (editor.getContentAssist()) {
+							// the file changed, we need to figure out the correct auto triggers to use
+							setContentAssistProviders(editor, editor.getContentAssist());
+						}
 					}.bind(this));
 				}
 			}.bind(this));
@@ -459,7 +480,12 @@ define([
 			this.editor.uninstall();
 		},
 		getStyleAccessor: function() {
-			this.syntaxHighlighter.getStyler().getStyleAccessor();
+			var styleAccessor = null;
+			var styler = this.syntaxHighlighter.getStyler();
+			if (styler) {
+				styleAccessor = styler.getStyleAccessor();
+			}
+			return styleAccessor;
 		}
 	};
 	return {EditorView: EditorView};
