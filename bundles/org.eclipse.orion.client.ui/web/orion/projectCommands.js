@@ -349,6 +349,21 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 							if(sharedLaunchConfigurationDispatcher){
 								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 							}
+							//try to refresh other launchConfigurations from this service,
+							//because maybe adding properties to one changed the status of others
+							if(item.project && item.project.children){
+								item.project.children.forEach(function(otherLaunch){
+									if(item.ServiceId && item.Name && item.parametersRequested){
+										if(otherLaunch.ServiceId === item.ServiceId && otherLaunch.Name !== item.Name){
+											if(sharedLaunchConfigurationDispatcher){
+												otherLaunch.status = {CheckState: true};
+												sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: otherLaunch });
+											}
+										}
+									}
+								});
+							}
+							
 						}, function(error){
 							if(error.Retry){
 								data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
