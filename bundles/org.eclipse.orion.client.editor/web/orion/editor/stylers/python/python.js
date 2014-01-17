@@ -42,9 +42,6 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control"
-			}, {
-				/* override orion.patterns#string_singleQuote */
-				id: "string_singleQuote"
 			}
 		]
 	});

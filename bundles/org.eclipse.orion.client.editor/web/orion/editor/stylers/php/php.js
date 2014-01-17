@@ -46,9 +46,6 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control"
-			}, {
-				/* override orion.patterns#string_singleQuote */
-				id: "string_singleQuote"
 			}
 		]
 	});

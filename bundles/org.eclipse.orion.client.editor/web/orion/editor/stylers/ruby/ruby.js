@@ -45,9 +45,6 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control"
-			}, {
-				/* override orion.patterns#string_singleQuote */
-				id: "string_singleQuote"
 			}
 		]
 	});
