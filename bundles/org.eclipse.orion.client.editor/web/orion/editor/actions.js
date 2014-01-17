@@ -426,6 +426,12 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			if (!annotationModel) { return true; }
 			var list = editor.getOverviewRuler() || editor.getAnnotationStyler();
 			if (!list) { return true; }
+			function ignore(annotation) {
+				return !!annotation.lineStyle ||
+					annotation.type === AT.ANNOTATION_MATCHING_BRACKET ||
+					annotation.type === AT.ANNOTATION_CURRENT_BRACKET ||
+					!list.isAnnotationTypeVisible(annotation.type);
+			}
 			var model = editor.getModel();
 			var currentOffset = editor.getCaretOffset();
 			var annotations = annotationModel.getAnnotations(forward ? currentOffset : 0, forward ? model.getCharCount() : currentOffset);
@@ -437,12 +443,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				} else {
 					if (annotation.start >= currentOffset) { continue; }
 				}
-				if (
-					annotation.lineStyle ||
-					annotation.type === AT.ANNOTATION_MATCHING_BRACKET ||
-					annotation.type === AT.ANNOTATION_CURRENT_BRACKET ||
-					!list.isAnnotationTypeVisible(annotation.type)
-				) {
+				if (ignore(annotation)) {
 					continue;
 				}
 				foundAnnotation = annotation;
@@ -451,6 +452,14 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 				}
 			}
 			if (foundAnnotation) {
+				var foundAnnotations = [foundAnnotation];
+				annotations = annotationModel.getAnnotations(foundAnnotation.start, foundAnnotation.start);
+				while (annotations.hasNext()) {
+					annotation = annotations.next();
+					if (annotation !== foundAnnotation && !ignore(annotation)) {
+						foundAnnotations.push(annotation);
+					}
+				}
 				var view = editor.getTextView();
 				var nextLine = model.getLineAtOffset(foundAnnotation.start);
 				var tooltip = mTooltip.Tooltip.getTooltip(view);
@@ -466,7 +475,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 								y: view.getLocationAtOffset(model.getLineStart(nextLine)).y
 							}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
 							return {
-								contents: [foundAnnotation],
+								contents: foundAnnotations,
 								x: tooltipCoords.x,
 								y: tooltipCoords.y + Math.floor(view.getLineHeight(nextLine) * 1.33)
 							};
