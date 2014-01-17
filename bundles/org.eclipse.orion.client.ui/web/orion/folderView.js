@@ -52,6 +52,11 @@ define([
 			folderNode.classList.add("navlink"); //$NON-NLS-0$
 			folderNode.classList.add("targetSelector"); //$NON-NLS-0$
 			folderNode.classList.remove("navlinkonpage"); //$NON-NLS-0$
+			if (this.explorer.readonly && this.explorer.clickHandler) { //$NON-NLS-0$
+				folderNode.href = "javascript:void(0)";
+				folderNode.addEventListener("click", function(){this.explorer.clickHandler(folder.Location);}.bind(this)
+				, false);
+			}
 			return folderNode;
 		},
 		/**
@@ -60,8 +65,10 @@ define([
 		updateFileNode: function(file, fileNode, isImage) {
 			mNavigatorRenderer.NavigatorRenderer.prototype.updateFileNode.call(this, file, fileNode, isImage);
 			if (this.explorer.readonly && fileNode.tagName === "A") { //$NON-NLS-0$
-				if(isImage){
-					fileNode.href = uriTemplate.expand({resource: file.Location/*, params: {editor: 'orion.imageViewer'}*/});  //$NON-NLS-0$
+				if(this.explorer.clickHandler){
+					fileNode.href = "javascript:void(0)";
+					fileNode.addEventListener("click", function(){this.explorer.clickHandler(file.Location);}.bind(this)
+					, false);
 				} else {
 					fileNode.href = uriTemplate.expand({resource: file.Location});
 				}
@@ -120,6 +127,7 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.readonly = options.readonly;
 		this.breadCrumbMaker = options.breadCrumbMaker;
+		this.clickHandler = options.clickHandler;
 		this.treeRoot = {};
 		this.parent = lib.node(options.parentId);	
 		this.toolbarId = this.parent.id + "Tool"; //$NON-NLS-0$
@@ -210,6 +218,7 @@ define([
 		this._maxEditorHeight = options.maxEditorHeight;
 		this.imageView = options.imageView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
+		this.clickHandler = options.clickHandler;
 		this._init();
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
@@ -323,6 +332,7 @@ define([
 									parentId: navNode,
 									readonly: this.readonly,
 									breadCrumbMaker: this.breadCrumbMaker,
+									clickHandler: this.clickHandler,
 									serviceRegistry: this.serviceRegistry,
 									fileClient: this.fileClient,
 									commandRegistry: this.commandRegistry,

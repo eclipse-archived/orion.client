@@ -14,6 +14,7 @@
 /*global define eclipse:true orion:true window*/
 
 define([
+	'orion/PageUtil', 
 	'orion/inputManager',
 	'orion/breadcrumbs',
 	'orion/folderView',
@@ -24,13 +25,14 @@ define([
 	'orion/contentTypes',
 	'orion/widgets/browse/staticDataSource',
 	'orion/widgets/browse/readonlyFileClient',
+	'orion/widgets/browse/emptyFileClient',
 	'orion/Deferred',
 	'orion/URITemplate',
 	'orion/objects',
 	'orion/webui/littlelib'
 ], function(
-	mInputManager, mBreadcrumbs, mFolderView, mNavigatorRenderer, mReadonlyEditorView, mMarkdownView,
-	mCommandRegistry, mContentTypes, mStaticDataSource, mReadonlyFileClient, Deferred, URITemplate, objects, lib
+	PageUtil, mInputManager, mBreadcrumbs, mFolderView, mNavigatorRenderer, mReadonlyEditorView, mMarkdownView,
+	mCommandRegistry, mContentTypes, mStaticDataSource, mReadonlyFileClient, mEmptyFileClient, Deferred, URITemplate, objects, lib
 ) {
 	/**
 	 * @class This object describes the options for the readonly file system browser.
@@ -58,9 +60,14 @@ define([
 	function FileBrowser(options) {
 		this._parentDomNode = lib.node(options.parent);//Required
 		this._fileClient = options.fileClient;//Required
+		this._repoURL = options.repoURL;
 		if(!this._fileClient && options.serviceRefs) {
 			this._fileClient = new mReadonlyFileClient.FileClient(options.serviceRefs);		
 		}
+		if(!this._fileClient){
+			this._fileClient = new mEmptyFileClient.FileClient();		
+		}
+		
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		if(!this._syntaxHighlighter) {
 			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
@@ -106,6 +113,10 @@ define([
 				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
 			};
 			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
+			window.addEventListener("hashchange", function() { //$NON-NLS-0$
+				this.refresh(PageUtil.hash());
+			}.bind(this));
+			this.refresh(PageUtil.hash());
 		},
 		_breadCrumbMaker: function(bcContainer, maxLength){
 			this._renderBreadCrumb({
@@ -183,6 +194,7 @@ define([
 					contentTypeRegistry: this._contentTypeService,
 					inputManager: this._inputManager,
 					fileService: this._fileClient,
+					//clickHandler: function(location) {this.refresh(location);}.bind(this),
 					breadCrumbMaker: function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this)
 				};
 				if (metadata.Directory) {

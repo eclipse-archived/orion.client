@@ -12,11 +12,11 @@
 /*global define window console eclipse orion*/
 
 define([
-	'orion/PageUtil', 
 	'orion/widgets/browse/fileBrowser',
 	'orion/Deferred',
 	'plugins/filePlugin/HTML5LocalFileImpl'
-], function(PageUtil, mFileBrowser, mDeferred) {
+], function(mFileBrowser, mDeferred) {
+	/*
 		orion = {Deferred: mDeferred};
 		window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
 		if (window.requestFileSystem) {
@@ -33,17 +33,18 @@ define([
 					serviceProperties: serviceProperties,
 					impl: service
 				};
-				
 				var fBrowser = new mFileBrowser.FileBrowser({
 					parent: "fileBrowser",//Required 
 					serviceRefs: [serviceRef],
 				}); 
-				window.addEventListener("hashchange", function() { //$NON-NLS-0$
-					fBrowser.refresh(PageUtil.hash());
-				});
-				fBrowser.refresh(PageUtil.hash());
 			}, function(error) {
 				console.log(error);
 		});
 	} 
+	*/
+	var fBrowser = new mFileBrowser.FileBrowser({
+		parent: "fileBrowser",//Required 
+		repoUrl: "nothing"
+	}); 
+	
 });

@@ -13,20 +13,14 @@
 
 define([
 	'orion/bootstrap', 
-	'orion/PageUtil', 
 	'orion/fileClient',
-	'orion/widgets/browse/fileBrowser',
-	'orion/Deferred'
-], function(mBootstrap, PageUtil, mFileClient, mFileBrowser, mDeferred) {
+	'orion/widgets/browse/fileBrowser'
+], function(mBootstrap, mFileClient, mFileBrowser) {
 	mBootstrap.startup().then(function(core) {
 		var fBrowser = new mFileBrowser.FileBrowser({
 			parent: "fileBrowser", 
 			//maxEditorHeight: 800,
 			fileClient: new mFileClient.FileClient(core.serviceRegistry)
 		}); 
-		window.addEventListener("hashchange", function() { //$NON-NLS-0$
-			fBrowser.refresh(PageUtil.hash());
-		});
-		fBrowser.refresh(PageUtil.hash());
 	});
 });
