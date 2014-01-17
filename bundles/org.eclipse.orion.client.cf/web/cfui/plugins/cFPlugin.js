@@ -11,9 +11,8 @@
 
 /*global window document define setTimeout*/
 
-define(["orion/xhr", "orion/Deferred", "orion/plugin", "orion/cfui/cFClient", "domReady!"],
-
-function(xhr, Deferred, PluginProvider, CFClient) {
+define(["orion/xhr", "orion/Deferred", "orion/plugin", "orion/cfui/cFClient", "orion/serviceregistry", "orion/preferences", "domReady!"],
+		function(xhr, Deferred, PluginProvider, CFClient, ServiceRegistry, Preferences) {
 
 	var temp = document.createElement('a');
 	var login = temp.href;
@@ -27,6 +26,60 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 
 	var provider = new PluginProvider(headers);
 	var cFService = new CFClient.CFService();
+	
+	// initialize service registry and EAS services
+	var serviceRegistry = new ServiceRegistry.ServiceRegistry();
+
+	// This is code to ensure the first visit to orion works
+	// we read settings and wait for the plugin registry to fully startup before continuing
+	var preferences = new Preferences.PreferencesService(serviceRegistry);
+	
+	temp.href = "../../prefs/user";
+	var location = temp.href;
+	
+	function PreferencesProvider(location) {
+		this.location = location;
+	}
+
+	PreferencesProvider.prototype = {
+		get: function(name) {
+			return xhr("GET", this.location + name, {
+				headers: {
+					"Orion-Version": "1"
+				},
+				timeout: 15000,
+				log: false
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
+			});
+		},
+		put: function(name, data) {
+			return xhr("PUT", this.location + name, {
+				data: JSON.stringify(data),
+				headers: {
+					"Orion-Version": "1"
+				},
+				contentType: "application/json;charset=UTF-8",
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
+			});
+		},
+		remove: function(name, key){
+			return xhr("DELETE", this.location + name +"?key=" + key, {
+				headers: {
+					"Orion-Version": "1"
+				},
+				contentType: "application/json;charset=UTF-8",
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
+			});
+		}
+	};
+	
+	var service = new PreferencesProvider(location);
+	serviceRegistry.registerService("orion.core.preference.provider", service, {});
 
 	// cf settings
 	var apiUrl = "";
@@ -37,12 +90,12 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 			name: "Settings",
 			category: 'Cloud',
 			properties: [{
-				id: "org.eclipse.orion.client.cf.settings.apiurl",
+				id: "targetUrl",
 				name: "API Url",
 				type: "string",
 				defaultValue: apiUrl
 			}, {
-				id: "org.eclipse.orion.client.cf.settings.manageurl",
+				id: "manageUrl",
 				name: "Manage Url",
 				type: "string",
 				defaultValue: manageUrl
@@ -56,10 +109,51 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 	
 	provider.registerServiceProvider("orion.project.deploy", {
 		
+		_getDefaultTarget: function(){
+			var deferred = new Deferred();
+			preferences.getPreferences('/cm/configurations').then(
+				function(settings){
+					var cloud = settings.get("org.eclipse.orion.client.cf.settings");
+					if (cloud && cloud.targetUrl){
+						var target = {};
+						target.Url = cloud.targetUrl;
+						if (cloud.manageUrl)
+							target.ManageUrl = cloud.manageUrl;
+						if (cloud.org)
+							target.Org = cloud.org;
+						if (cloud.space)
+							target.Space = cloud.space;
+						deferred.resolve(target);
+						return;
+					}
+					
+					preferences.getPreferences('/settingsCF', 1).then(
+						function(settings){
+							var cloud = settings;
+							if (cloud && cloud.get("targetUrl")){
+								
+								var target = {};
+								target.Url = cloud.get("targetUrl");
+								if (cloud.get("manageUrl"))
+									target.ManageUrl = cloud.get("manageUrl");
+								deferred.resolve(target);
+								return;
+							}
+						}, function(error){
+							deferred.resolve(null);
+						}
+					);
+				}, function(error){
+					deferred.resolve(null);
+				}
+			);
+			return deferred;
+		},
+		
 		deploy: function(item, projectMetadata, props) {
 			var that = this;
 			var deferred = new Deferred();
-			
+
 			if(props.user && props.password){
 				cFService.login(props.Target.Url, props.user, props.password).then(
 					function(result){
@@ -108,42 +202,47 @@ function(xhr, Deferred, PluginProvider, CFClient) {
 				);
 			} else {
 //				deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deploy.html#{+Location}", Width: "600px", Height: "400px"});
-				cFService.pushApp(null, null, decodeURIComponent(item.Location)).then(
-					function(result){
-						deferred.resolve({
-							CheckState: true,
-							ToSave: {
-								ConfigurationName: result.Target.Space.Name + "_" + result.Target.Org.Name + "_" + result.App.entity.name,
-								Parameters: {
-									Target: {
-										Url: result.Target.Url,
-										Org: result.Target.Org.Name,
-										Space: result.Target.Space.Name
-									},
-									Name: result.App.entity.name
-								},
-								Url: "http://" + result.Route.entity.host + "." + result.Domain,
-								ManageUrl: result.ManageUrl
+				
+				this._getDefaultTarget().then(
+					function(target){
+						cFService.pushApp(target, null, decodeURIComponent(item.Location)).then(
+							function(result){
+								deferred.resolve({
+									CheckState: true,
+									ToSave: {
+										ConfigurationName: result.Target.Space.Name + "_" + result.Target.Org.Name + "_" + result.App.entity.name,
+										Parameters: {
+											Target: {
+												Url: result.Target.Url,
+												Org: result.Target.Org.Name,
+												Space: result.Target.Space.Name
+											},
+											Name: result.App.entity.name
+										},
+										Url: "http://" + result.Route.entity.host + "." + result.Domain,
+										ManageUrl: result.ManageUrl
+									}
+								});
+							}, function(error){
+								if (error.HttpCode === 404){
+									deferred.resolve({
+										State: "NOT_DEPLOYED",
+										Message: error.Message
+									});
+								} else if (error.JsonData && error.JsonData.error_code) {
+									var err = error.JsonData;
+									if (err.error_code === "CF-InvalidAuthToken"){
+										error.Retry = {
+											parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
+											optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+										};
+									}
+									deferred.reject(error);
+								} else {
+									deferred.reject(error);
+								}
 							}
-						});
-					}, function(error){
-						if (error.HttpCode === 404){
-							deferred.resolve({
-								State: "NOT_DEPLOYED",
-								Message: error.Message
-							});
-						} else if (error.JsonData && error.JsonData.error_code) {
-							var err = error.JsonData;
-							if (err.error_code === "CF-InvalidAuthToken"){
-								error.Retry = {
-									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
-									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
-								};
-							}
-							deferred.reject(error);
-						} else {
-							deferred.reject(error);
-						}
+						);
 					}
 				);
 			}
