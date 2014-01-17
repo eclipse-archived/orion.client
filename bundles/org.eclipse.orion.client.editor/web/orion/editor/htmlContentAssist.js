@@ -133,14 +133,16 @@ define("orion/editor/htmlContentAssist", ['orion/editor/templates'], function(mT
 	HTMLContentAssistProvider.prototype = new mTemplates.TemplateContentAssist([], templates);
 
 	HTMLContentAssistProvider.prototype.getPrefix = function(buffer, offset, context) {
+		var prefix = "";
 		var index = offset;
 		while (index && /[A-Za-z0-9<!-]/.test(buffer.charAt(index - 1))) {
 			index--;
 			if (buffer.charAt(index) === "<") { //$NON-NLS-0$
+				prefix = buffer.substring(index, offset);
 				break;
 			}
 		}
-		return index ? buffer.substring(index, offset) : "";
+		return prefix;
 	};
 	
 	HTMLContentAssistProvider.prototype.computeProposals = function(buffer, offset, context) {
