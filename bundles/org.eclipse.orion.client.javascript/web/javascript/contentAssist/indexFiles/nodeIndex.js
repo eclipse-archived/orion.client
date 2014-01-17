@@ -163,11 +163,11 @@ define('javascript/contentAssist/indexFiles/nodeIndex', [
 						"fill": {
 							"!type": "fn(value: Object, offset?: Object, end?: Object)"
 						},
-						"[index]": {
-							"!type": "Object"
-						},
+//						"[index]": {
+//							"!type": "Object"
+//						},
 						"length": {
-							"!type": "Object"
+							"!type": "Number"
 						}
 					},
 					"isEncoding": {
@@ -190,41 +190,45 @@ define('javascript/contentAssist/indexFiles/nodeIndex', [
 			},
 			"child_process": {
 				"spawn": {
-					"!type": "fn(command: Object, args?: Object, options?: Object) -> ChildProcessobject"
+					"!type": "fn(command: Object, args?: Object, options?: Object) -> +ChildProcess"
 				},
 				"exec": {
-					"!type": "fn(command: Object, options: Object, callback: Object)"
+					"!type": "fn(command: Object, options: Object, callback: Object) -> +ChildProcess"
 				},
 				"execFile": {
-					"!type": "fn(file: Object, args: Object, options: Object, callback: Object)"
+					"!type": "fn(file: Object, args: Object, options: Object, callback: Object) -> +ChildProcess"
 				},
 				"fork": {
-					"!type": "fn(modulePath: Object, args?: Object, options?: Object)"
+					"!type": "fn(modulePath: Object, args?: Object, options?: Object) -> +ChildProcess"
 				},
-				"ChildProcess": {
-					"!type": "fn()",
-					"prototype": {
-						"kill": {
-							"!type": "fn(signal?: Object)"
-						},
-						"send": {
-							"!type": "fn(message: Object, sendHandle?: Object)"
-						},
-						"disconnect": {
-							"!type": "fn()"
-						},
-						"stdin": {
-							"!type": "Object"
-						},
-						"stdout": {
-							"!type": "Object"
-						},
-						"stderr": {
-							"!type": "Object"
-						},
-						"pid": {
-							"!type": "Object"
-						}
+			},
+			// Note this is outside the child_process module, as it is not exported.
+			"ChildProcess": {
+				"!type": "fn()",
+				"prototype": {
+					"kill": {
+						"!type": "fn(signal?: String)"
+					},
+					"unref": {
+						"!type": "fn()"
+					},
+					"send": {
+						"!type": "fn(message: Object, sendHandle?: Object)"
+					},
+					"disconnect": {
+						"!type": "fn()"
+					},
+					"stdin": {
+						"!type": "Object" // Stream
+					},
+					"stdout": {
+						"!type": "Object" // Stream
+					},
+					"stderr": {
+						"!type": "Object" // Stream
+					},
+					"pid": {
+						"!type": "Number"
 					}
 				}
 			},
@@ -543,7 +547,10 @@ define('javascript/contentAssist/indexFiles/nodeIndex', [
 			},
 			"domain": {
 				"create": {
-					"!type": "fn() -> Domain"
+					"!type": "fn() -> +domain.Domain"
+				},
+				"createDomain": {
+					"!type": "fn() -> +domain.Domain"
 				},
 				"Domain": {
 					"!type": "fn()",
@@ -1699,31 +1706,41 @@ define('javascript/contentAssist/indexFiles/nodeIndex', [
 					"!type": "fn()",
 					"prototype": {}
 				}
+			},
+			"TimeoutID": {
+			},
+			"IntervalID": {
 			}
 		},
 		"!name": "node",
 		"this": "<top>",
 		"global": "<top>",
-		"buffer": "buffer",
 		"Buffer": "buffer.Buffer",
 		"require": {
-			"!type": "fn(name: String) -> Object"
+			"!type": "fn(name: String)"
 		},
 		"__filename": "String",
 		"__dirname": "String",
-		"module": "Object",
+		"module": {
+			"exports": "Object",
+			"id": "String",
+			"filename": "String",
+			"loaded": "String",
+			"parent": "Object",
+			"children": "[Object]"
+		},
 		"exports": "Object",
 		"setTimeout": {
-			"!type": "fn(cb: Object, ms: Number) -> Object"
+			"!type": "fn(cb: Object, ms: Number) -> TimeoutID"
 		},
 		"clearTimeout": {
-			"!type": "fn(t: Object)"
+			"!type": "fn(t: TimeoutID)"
 		},
 		"setInterval": {
-			"!type": "fn(cb: Object, ms: Number) -> Object"
+			"!type": "fn(cb: Object, ms: Number) -> IntervalID"
 		},
 		"clearInterval": {
-			"!type": "fn(t: Object)"
+			"!type": "fn(t: IntervalID)"
 		}
 	};
 });
