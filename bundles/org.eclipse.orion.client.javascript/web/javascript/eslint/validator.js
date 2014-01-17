@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -32,18 +32,32 @@ define([
 		}
 	};
 
+	/**
+	 * @description Creates a new ESLintValidator
+	 * @constructor
+	 * @public
+	 * @returns {ESLintValidator} Returns a new validator
+	 */
 	function ESLintValidator(astManager) {
-		this.active = true; // enabled by default
 		this.astManager = astManager;
 	}
+	
+	/**
+	 * @description Coverts the configuration rule value to an eslint string. One of 'warning', 'error', 'ignore'
+	 * @public
+	 * @param {Object} prob The problem object
+	 * @returns {String} the severity string
+	 */
 	function getSeverity(prob) {
-		switch (config.rules[prob.ruleId]) {
-			case 1: return "warning"; //$NON-NLS-0$
-			case 2: return "error"; //$NON-NLS-0$
+		if(config.rules[prob.ruleId] === 1) {
+			return "warning";
 		}
 		return "error"; //$NON-NLS-0$
 	}
+	
 	/**
+	 * @description Converts an eslint / esprima problem object to an Orion problem object
+	 * @public
 	 * @param {eslint.Error|esprima.Error} e Either an eslint error or an esprima parse error.
 	 * @returns {Object} Orion Problem object
 	 */
@@ -74,9 +88,11 @@ define([
 
 	objects.mixin(ESLintValidator.prototype, {
 		/**
-		 * Extracts any errors captured by the tolerant esprima parser and returns them
-		 * @param {esprima.ASTNode} ast
-		 * @returns {esprima.Error[]}
+		 * @descritpion Extracts any errors captured by the tolerant esprima parser and returns them
+		 * @function
+		 * @private
+		 * @param {esprima.ASTNode} ast The AST
+		 * @returns {esprima.Error[]} The array of AST errors (if any)
 		 */
 		_extractParseErrors: function(ast) {
 			var errors = [], errorMap = Object.create(null);
@@ -95,11 +111,15 @@ define([
 			});
 			return errors;
 		},
-		// orion.edit.validator
+		/**
+		 * @descripion Callback to create problems from orion.edit.validator
+		 * @function
+		 * @public
+		 * @param {orion.edit.EditorContext} editorContext The editor context
+		 * @param {Object} context The in-editor context (selection, offset, etc)
+		 * @returns {orion.Promise} A promise to compute some problems
+		 */
 		computeProblems: function(editorContext, context) {
-			if (!this.active) {
-				return {};
-			}
 			var _self = this;
 			return this.astManager.getAST(editorContext).then(function(ast) {
 				var eslintErrors = [], error;
@@ -124,13 +144,15 @@ define([
 				return { problems: problems };
 			});
 		},
-		// orion.cm.managedservice
+		/**
+		 * @description Callback from orion.cm.managedservice
+		 * @function
+		 * @public
+		 * @param {Object} properties The properties that have been changed
+		 */
 		updated: function(properties) {
 			if (!properties) {
 				return;
-			}
-			if (typeof properties.active === "boolean") { //$NON-NLS-0$
-				this.active = properties.active;
 			}
 			config.setOption("eqeqeq", properties.validate_eqeqeq); //$NON-NLS-0$
 			config.setOption("no-redeclare", properties.validate_no_redeclare); //$NON-NLS-0$

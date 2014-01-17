@@ -120,11 +120,6 @@ define([
 					tags: "validation javascript js eslint".split(" "),
 					category: "validation",
 					properties: [
-						{	id: "active",
-							name: "Use ESLint to validate JavaScript files",
-							type: "boolean",
-							defaultValue: true
-						},
 						{	id: "validate_eqeqeq",
 							name: "Discouraged '==' use",
 							type: "number",
