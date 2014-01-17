@@ -19,13 +19,9 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		"pg" : "pg",
 		"PG" : "pg.PG",
 		"Client" : "pg.Client",
-		"ConnectionParameters" : "pg.ConnectionParameters",
 		"Connection" : "pg.Connection",
 		"Error" : "pg.Error",
-		"CopyToStream" : "pg.CopyToStream",
-		"CopyFromStream" : "pg.CopyFromStream",
 		"Query" : "pg.Query",
-		"Result" : "pg.Result",
 		"Types" : "pg.Types",
 		"Defaults" : "pg.Defaults",
   		"!define": {
@@ -85,15 +81,6 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 		        	},
 		        	"md5": "fn(string: String)"
 		        },
-	        	"ConnectionParameters": {
-	        		"!proto": "Object",
-	        		"!type": "fn(config: Object)",
-			        "prototype": {
-			          	"getLibpqConnectionString": {
-	    					"!type" : "fn(cb: fn())"
-	    				}
-			        },
-			    },
 			    "Connection": {
 			    	"!proto": "EventEmitter",
 			    	"!type": "fn(config: Object)",
@@ -240,51 +227,6 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 				    "columnTypes": "[Number]",
 				    "chunk": "Buffer"
 			  	},
-		        "CopyFromStream": {
-		        	"!proto": "Stream",
-		        	"!type": "fn()",
-		          	"prototype": {
-			            "startStreamingToConnection": {
-		    				"!type" : "fn(connection: Connection)"
-		    			},
-			            "write": {
-		    				"!type" : "fn(string: String, encoding: String) -> Boolean"
-		    			},
-			            "end": {
-		    				"!type" : "fn(string: String, encondig: String) -> Boolean"
-		    			},
-			            "error": {
-		    				"!type" : "fn(error: Error) -> Boolean"
-		    			},
-			            "close": {
-		    				"!type" : "fn() -> Boolean"
-		    			}
-		          	}
-		        },
-		        "CopyToStream": {
-		        	"!proto": "Stream",
-		        	"!type": "fn()",
-		          	"prototype": {
-			            "error": {
-	    					"!type" : "fn(error: Error) -> Boolean"
-	    				},
-			            "close": {
-	    					"!type" : "fn() -> Boolean"
-	    				},
-			            "handleChunk": {
-	    					"!type" : "fn(chunk: Object)"
-	    				},
-			            "pause": {
-	    					"!type" : "fn() -> Boolean"
-	    				},
-			            "resume": {
-	    					"!type" : "fn() -> Boolean"
-	    				},
-			            "setEncoding": {
-	    					"!type" : "fn(encoding: String)"
-	    				}
-		          	}
-		        },
 		        "Query": {
 		        	"!proto": "EventEmitter",
 		        	"!type": "fn(config: Object, values: Object, callback: fn()) -> Query",
@@ -331,24 +273,6 @@ define('javascript/contentAssist/indexFiles/postgresIndex', [
 			        },
 			        "isPreparedStatement": {
 			          "!type": "Boolean",
-			        },
-			    },
-			    "Result": {
-			    	"!proto": "Object",
-			    	"!type": "fn(rowMode: Object)",
-			        "prototype": {
-			          	"addCommandComplete": {
-			            	"!type": "fn(msg: Message)",
-			          	},
-			          	"parseRow": {
-			            	"!type": "fn(rowData: Object) -> Object",
-			          	},
-			          	"addRow": {
-			            	"!type": "fn(row: Object)"
-			            },
-			          	"addFields": {
-			            	"!type": "fn(fieldDescriptions: Object)"
-			            }
 			        },
 			    },
 		      	"Types": {

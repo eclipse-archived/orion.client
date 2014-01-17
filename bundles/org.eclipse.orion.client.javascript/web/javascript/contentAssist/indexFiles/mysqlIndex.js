@@ -14,6 +14,14 @@ define('javascript/contentAssist/indexFiles/mysqlIndex', [],
 function () {
 	return {
 		"!name": "mysql",
+		"this": "<top>",
+		"global": "<top>",
+		"mysql" : "mysql",
+		"Types" : "mysql.Types",
+		"Connection" : "Connection",
+		"Pool" : "Pool",
+		"PoolCluster" : "PoolCluster",
+		"Query" : "Query",
   		"!define": {
   			"mysql": {
     			"createConnection": {
@@ -38,7 +46,6 @@ function () {
     			"format": {
 	  				"!type": "fn(sql: String, values: [String], stringifyObjects: Boolean, timeZone: String) -> String"
 	  			},
-
 	  			"Types": {
 	  				"!proto": "Object",
 			        "DECIMAL": "Number",
@@ -70,31 +77,30 @@ function () {
 			        "GEOMETRY": "Number"
 			    },
   			},
-
 	  		"Connection" : {
-	  			"!proto": "Object",
+	  			"!proto": "EventEmitter",
 	  			"!type": "fn(options: Object)",
-//	    		"createQuery": {
-//	  				"!type": "fn(sql: String, values: Object, cb: fn()) -> +Query"
-//	  			},
+	    		"createQuery": {
+	  				"!type": "fn(sql: String, values: Object, cb: fn()) -> +Query"
+	  			},
 	    		"prototype": {
 	      			"connect": {
 	  					"!type": "fn(cb: fn())"
 	  				},
 			      	"changeUser": {
-	  					"!type": "fn(options: Object, cb: fn())"
+	  					"!type": "fn(options: Object, cb: fn()) -> Object"
 	  				},
 			      	"beginTransaction": {
-	  					"!type": "fn(cb: fn()) -> String"
+	  					"!type": "fn(cb: fn()) -> Object"
 	  				},
 			      	"commit": {
-	  					"!type": "fn(cb: fn()) -> String"
+	  					"!type": "fn(cb: fn()) -> Object"
 	  				},
 			      	"rollback": {
-	  					"!type": "fn(cb: fn()) -> String"
+	  					"!type": "fn(cb: fn()) -> Object"
 	  				},
 			      	"query": {
-	  					"!type": "fn(sql: Object, values: Object, cb: fn())"
+	  					"!type": "fn(sql: Object, values: Object, cb: fn()) -> Object"
 	  				},
 			      	"ping": {
 	  					"!type": "fn(cb: fn())"
@@ -143,31 +149,6 @@ function () {
 	  				}
     			}
  			},
-  			"PoolConfig": {
-  				"!proto": "Object",
-  				"!type" : "fn(options: Object)"
-  			},
-  			"ConnectionConfig": {
-  				"!proto": "Object",
-  				"!type": "fn(options: Object)",
-  				"host": "String",
-			    "port": "String",
-			    "database": "String",
-			    "user": "String",
-			    "password": "String",
-    			"mergeFlags": {
-	  				"!type": "fn(default_flags: Object, user_flags: [String]) -> Number"
-	  			},
-    			"getDefaultFlags": {
-      				"!type": "fn(options: Object) -> [String]",
-    			},
-    			"getCharsetNumber": {
-	  				"!type": "fn(charset: String)"
-	  			},
-    			"parseUrl": {
-	          		"!type": "fn(url: String) -> Object",
-    			}
-  			},
   			"PoolCluster": {
   				"!proto": "Object",
   				"!type": "fn(config: Object)",
@@ -186,22 +167,6 @@ function () {
 	  				},
 	        	},
 	      	},
-  			"PoolConnection": {
-  				"!proto": "Connection",
-  				"!type": "fn(pool: Pool, options: Object)",
-		    	"prototype": {
-		        	"release": {
-	  					"!type": "fn()"
-	  				},
-		          	"end": {
-	  					"!type": "fn()"
-	  				},
-		          	"destroy": {
-	  					"!type": "fn()"
-	  				}
-		        }
-		    },
-
 		    "Query": {
 		    	"!proto": "Sequence",
 		    	"!type": "fn(options: Object, callback: fn())",
@@ -235,30 +200,6 @@ function () {
 	  				}
     			}
     		},
-		    "SqlString": {
-		    	"!proto": "Object",
-		      	"escapeId": {
-	  				"!type": "fn(val: Object, forbidQualified: Boolean) -> String"
-	  			},
-		      	"escape": {
-	  				"!type": "fn(val: String, stringifyObjects: Boolean, timeZone: String) -> String"
-	  			},
-		      	"arrayToList": {
-	  				"!type": "fn(array: String, timeZone: String) -> String"
-	  			},
-		      	"format": {
-	  				"!type": "fn(sql: String, values: [Object], stringifyObjects: Object, timeZone: String) -> String"
-	  			},
-		      	"dateToString": {
-	  				"!type": "fn(date: String, timeZone: String) -> String"
-	  			},
-		      	"bufferToString": {
-	  				"!type": "fn(buffer: String) -> String"
-	  			},
-		      	"objectToValues": {
-	  				"!type": "fn(object: String, timeZone: String) -> String"
-	  			}
-		    },
 		    "Sequence": {
 		    	"!proto" : "Object",
 		    	"!type": "fn(callback: fn())",
