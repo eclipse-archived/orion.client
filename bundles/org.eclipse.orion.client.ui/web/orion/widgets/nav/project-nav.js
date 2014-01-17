@@ -193,7 +193,8 @@ define([
 		updateCommands: function(selections){
 			if(this.treeRoot && this.treeRoot.Project && typeof this.treeRoot.Project.launchConfigurations === "undefined"){
 				this.treeRoot.Project.launchConfigurations = [];
-				this.projectClient.getProjectLaunchConfigurations(this.treeRoot.Project).then(function(launchConfigurations){
+				
+				function doUpdateForLaunchConfigurations(launchConfigurations, selections){
 					if(this.launchCommands){
 						for(var i=0; i<this.launchCommands.length; i++){
 							this.commandRegistry.unregisterCommandContribution(this.additionalNavActionsScope, this.launchCommands[i]);
@@ -207,7 +208,42 @@ define([
 						this.launchCommands.push(launchCommand);
 						this.commandRegistry.registerCommandContribution(this.additionalNavActionsScope, launchCommand, i+1, "orion.deployNavGroup/orion.deployLaunchConfigurationGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
-					CommonNavExplorer.prototype.updateCommands.apply(this, selections);
+					CommonNavExplorer.prototype.updateCommands.apply(this, selections);					
+				}
+				
+				this.projectClient.getProjectLaunchConfigurations(this.treeRoot.Project).then(function(launchConfigurations){
+					doUpdateForLaunchConfigurations.apply(this, [launchConfigurations, selections]);
+					if(!this.launchConfigurationListener){
+						var _self = this;
+						this.launchConfigurationDispatcher = ProjectCommands.getLaunchConfigurationDispatcher();
+						this.launchConfigurationListener = function(event){
+							_self.selection.getSelections(function(selections){
+								if(event.oldValue){
+									for(var i=0; i<_self.treeRoot.Project.launchConfigurations.length; i++){
+										var lConf = _self.treeRoot.Project.launchConfigurations[i];
+										if(lConf.Name === event.oldValue.Name && lConf.ServiceId === event.oldValue.ServiceId){
+											if(event.newValue){
+												_self.treeRoot.Project.launchConfigurations[i] = event.newValue;
+												doUpdateForLaunchConfigurations.apply(_self, [_self.treeRoot.Project.launchConfigurations, selections]);
+												return;
+											}
+											_self.treeRoot.Project.launchConfigurations[i].splice(i, 1);
+											break;
+										}
+									}
+								}
+								if(event.newValue){
+									_self.treeRoot.Project.launchConfigurations.push(event.newValue);
+								}
+								doUpdateForLaunchConfigurations.apply(_self, [_self.treeRoot.Project.launchConfigurations]);
+							});
+						};
+						this._launchConfigurationEventTypes = ["create", "delete"];
+						this._launchConfigurationEventTypes.forEach(function(eventType) {
+							_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
+						});
+					}
+					
 				}.bind(this), function(error){
 					console.error(error);
 					CommonNavExplorer.prototype.updateCommands.apply(this, selections);
@@ -243,6 +279,11 @@ define([
 			this._dependenciesEventTypes.forEach(function(eventType) {
 				_self.dependenciesDisplatcher.removeEventListener(eventType, _self.dependneciesListener);
 			});
+			if(_self.launchConfigurationListener){
+				this._launchConfigurationEventTypes.forEach(function(eventType) {
+					_self.launchConfigurationDispatcher.removeEventListener(eventType, _self.launchConfigurationListener);
+				});
+			}
 			CommonNavExplorer.prototype.destroy.call(this);
 		}
 	});
