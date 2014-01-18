@@ -174,8 +174,8 @@ define(["orion/xhr", "orion/Deferred", "orion/plugin", "orion/cfui/cFClient", "o
 		},
 		
 		_deploy: function(item, projectMetadata, props, deferred) {
-			if (props.Target){
-				cFService.pushApp(props.Target, null, decodeURIComponent(item.Location)).then(
+			if (props.Target && props.Name){
+				cFService.pushApp(props.Target, props.Name, decodeURIComponent(item.Location)).then(
 					function(result){
 						deferred.resolve({
 							CheckState: true
