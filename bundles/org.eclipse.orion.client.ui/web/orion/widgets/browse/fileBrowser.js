@@ -17,7 +17,7 @@ define([
 	'orion/PageUtil', 
 	'orion/inputManager',
 	'orion/breadcrumbs',
-	'orion/folderView',
+	'orion/widgets/browse/browseView',
 	'orion/explorers/navigatorRenderer',
 	'orion/widgets/browse/readonlyEditorView',
 	'orion/markdownView',
@@ -31,7 +31,7 @@ define([
 	'orion/objects',
 	'orion/webui/littlelib'
 ], function(
-	PageUtil, mInputManager, mBreadcrumbs, mFolderView, mNavigatorRenderer, mReadonlyEditorView, mMarkdownView,
+	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mMarkdownView,
 	mCommandRegistry, mContentTypes, mStaticDataSource, mReadonlyFileClient, mEmptyFileClient, Deferred, URITemplate, objects, lib
 ) {
 	/**
@@ -183,7 +183,7 @@ define([
 		_getEditorView: function(input, metadata) {
 			var view = null;
 			if (metadata && input) {
-				var folderViewOptons = {
+				var browseViewOptons = {
 					parent: this._parentDomNode,
 					readonly: true,
 					showProjectView: false,
@@ -198,20 +198,20 @@ define([
 					breadCrumbMaker: function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this)
 				};
 				if (metadata.Directory) {
-					view = new mFolderView.FolderView(folderViewOptons);
+					view = new mBrowseView.BrowseView(browseViewOptons);
 				} else {
 					var id = input.editor;
 					if (!id || id === "orion.editor") { //$NON-NLS-0$
 						var cType = this._contentTypeService.getFileContentType(metadata);
 						if(!mNavigatorRenderer.isImage(cType)) {
-							folderViewOptons.editorView = this._editorView;
+							browseViewOptons.editorView = this._editorView;
 						} else {
 							var image = document.createElement("img"); //$NON-NLS-0$
 							image.src = metadata.Location;
 							image.classList.add("readonlyImage"); //$NON-NLS-0$
-							folderViewOptons.imageView = {image: image};
+							browseViewOptons.imageView = {image: image};
 						}
-						view = new mFolderView.FolderView(folderViewOptons);
+						view = new mBrowseView.BrowseView(browseViewOptons);
 					} else if (id === "orion.markdownViewer") { //$NON-NLS-0$
 						// TODO : not sure about this yetview = new mMarkdownView.MarkdownEditorView(options);
 					} else {
