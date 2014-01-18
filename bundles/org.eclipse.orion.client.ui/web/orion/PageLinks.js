@@ -17,7 +17,11 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "ori
 	 * @returns {String} The value of the <code>{OrionHome}</code> variable.
 	 */
 	function getOrionHome() {
-		return new URL(require.toUrl("orion/../"), window.location.href).href.slice(0, -1); //$NON-NLS-0$
+		if(!require.toUrl){
+			return new URL("/", window.location.href).href.slice(0, -1);
+		} else {
+			return new URL(require.toUrl("orion/../"), window.location.href).href.slice(0, -1); //$NON-NLS-0$
+		}
 	}
 
 	/**
