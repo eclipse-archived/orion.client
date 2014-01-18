@@ -84,6 +84,13 @@ define([
 	 * @returns {String} The string name of the argument type
 	 */
 	function _convertArgTypeToClosureType(argType) {
+		if (typeUtils.isArrayType(argType)) {
+			// already a closure array type.
+			return doctrine.type.stringify(argType, {compact: true});
+		}
+		if (!argType.typeObj) {
+			throw new Error("No typeObj in " + argType);
+		}
 		if (argType.typeObj.type === "FunctionType") {					
 			return doctrine.type.stringify(argType.typeObj, {compact:true});
 		} 
@@ -266,7 +273,7 @@ define([
 	 * @param {Object} typeInfo The computed type information
 	 * @param {Object} type The type object
 	 * @param {String} name The name of the type
-	 * @return {Definition} Returns the computed definition
+	 * @return {Definition|ClosureType} Returns the computed definition, or the closure type (if a TypeApplications)
 	 */
 	function _definitionForType(typeInfo, type, name) {
 		if (typeof type === "string") {
@@ -291,7 +298,14 @@ define([
 			} else if (type.slice(0, 2) === "fn") {
 				return new typeUtils.Definition(ternSig2ClosureSig(type, name, typeInfo));
 			} else if (type[0] === "[") {
-				return new typeUtils.Definition("Array");
+				// Recurse to find definition for parameterized type of array
+				var paramType = _definitionForType(typeInfo, type.slice(1, type.length - 1));
+				if (paramType.typeObj && paramType.typeObj.name === "Object") {
+					// Temporarily use "Array" instead of Array.<Object>
+					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=425821
+					return new typeUtils.Definition("Array");
+				}
+				return typeUtils.createAppliedArray(paramType.typeObj);
 			} else if (type.slice(0, 7) === "!custom" || type.slice(0, 5) === "!this" || type.slice(0, 2) === "!0") {
 				// don't understand this; treat it as Object for now
 				return new typeUtils.Definition("Object");

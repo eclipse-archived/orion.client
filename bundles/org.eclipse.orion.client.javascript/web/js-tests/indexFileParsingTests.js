@@ -66,8 +66,25 @@ define([
 	};
 	
 	tests["test array of functions"] = function() {
-		testSig("fn() -> [fn()]", "function():Array");
+		testSig("fn() -> [fn()]", "function():Array.<function():undefined>");
 	};
+
+	tests["test array of Strings"] = function() {
+		testSig("fn() -> [String]", "function():Array.<String>");
+	};
+
+	tests["test array of custom type"] = function() {
+		testSig("fn() -> [Fizzle]", "function():Array.<Fizzle>");
+	};
+
+	tests["test array of undefined type"] = function() {
+		testSig("fn() -> [?]", "function():Array"); // Someday this  should be Array.<Object> not Array
+	};
+
+	tests["test array of Object type"] = function() {
+		testSig("fn() -> [Object]", "function():Array"); // Someday this should be Array.<Object> not Array
+	};
+
 	tests["test callback"] = function() {
 		testSig("fn(cb: fn(x: Object) -> Object) -> Number", "function(cb:function(x:Object):Object):Number");
 	};
@@ -129,7 +146,7 @@ define([
 	tests["test callback 15"] = function() {
 		testSig("fn(callback: fn()->Function, parm:Boolean)->Function", "function(callback:function():Function,parm:Boolean):Function");
 	};
-	
+
 	/**
 	 * From the mongoDB index
 	 */
@@ -171,7 +188,7 @@ define([
 	 */
 	tests["test callback 21"] = function() {
 		testSig("fn(default_flags: Object, user_flags:[String]) -> Number", 
-					"function(default_flags:Object,user_flags:Array):Number");
+					"function(default_flags:Object,user_flags:Array.<String>):Number");
 	};
 	
 	/**
@@ -187,7 +204,7 @@ define([
 	 */
 	tests["test callback 23"] = function() {
 		testSig("fn(default_flags: Object, user_flags:[String]) -> Number", 
-					"function(default_flags:Object,user_flags:Array):Number");
+					"function(default_flags:Object,user_flags:Array.<String>):Number");
 	};
 	
 	/**
@@ -195,7 +212,7 @@ define([
 	 */
 	tests["test callback 24"] = function() {
 		testSig("fn(method: String, path: String, callbacks: [fn()], options: Object)", 
-					"function(method:String,path:String,callbacks:Array,options:Object):undefined");
+					"function(method:String,path:String,callbacks:Array.<function():undefined>,options:Object):undefined");
 	};
 	
 	tests["test type 1"] = function() {

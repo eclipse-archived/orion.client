@@ -243,6 +243,22 @@ define([
 			};
 		},
 
+		/**
+		 * return a TypeApplication of Array
+		 */
+		createAppliedArray: function(applicationTypeObj) {
+			return {
+				type: 'TypeApplication',
+				applications: [
+					applicationTypeObj
+				],
+				expression: {
+					name: 'Array',
+					type: 'NameExpression'
+				}
+			};
+		},
+
 		createFunctionType : function(params, result, isConstructor) {
 			var functionTypeObj = {
 				type: 'FunctionType',
