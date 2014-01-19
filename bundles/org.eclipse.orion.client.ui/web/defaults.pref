@@ -16,6 +16,7 @@
 		"shell/plugins/shellPagePlugin.html":true,
 		"search/plugins/searchPagePlugin.html":true,
 		"plugins/projectsPlugin.html" :true,
-		"plugins/gitBlamePlugin.html" :true
+		"plugins/gitBlamePlugin.html" :true,
+		"cfui/plugins/cFPlugin.html":true
 	}
 }
