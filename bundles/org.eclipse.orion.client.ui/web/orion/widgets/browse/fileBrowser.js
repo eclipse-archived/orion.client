@@ -22,6 +22,7 @@ define([
 	'orion/widgets/browse/readonlyEditorView',
 	'orion/markdownView',
 	'orion/commandRegistry',
+	'orion/fileClient',
 	'orion/contentTypes',
 	'orion/widgets/browse/staticDataSource',
 	'orion/widgets/browse/readonlyFileClient',
@@ -32,7 +33,7 @@ define([
 	'orion/webui/littlelib'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mMarkdownView,
-	mCommandRegistry, mContentTypes, mStaticDataSource, mReadonlyFileClient, mEmptyFileClient, Deferred, URITemplate, objects, lib
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mReadonlyFileClient, mEmptyFileClient, Deferred, URITemplate, objects, lib
 ) {
 	/**
 	 * @class This object describes the options for the readonly file system browser.
@@ -61,7 +62,9 @@ define([
 		this._parentDomNode = lib.node(options.parent);//Required
 		this._fileClient = options.fileClient;//Required
 		this._repoURL = options.repoURL;
-		if(!this._fileClient && options.serviceRefs) {
+		if(options.serviceRegistry) {
+			this._fileClient = new mFileClient.FileClient(options.serviceRegistry);
+		} else if(!this._fileClient && options.serviceRefs) {
 			this._fileClient = new mReadonlyFileClient.FileClient(options.serviceRefs);		
 		}
 		if(!this._fileClient){
@@ -230,8 +233,12 @@ define([
 			}
 			return this._currentEditorView;
 		},
-		refresh: function(fileURI) {
-			this._inputManager.setInput(fileURI);
+		refresh: function(uri) {
+			var fileUri = uri;
+			if(!fileUri) {
+				fileUri = this._fileClient.fileServiceRootURL("");
+			}
+			this._inputManager.setInput(fileUri);
 		},
 		create: function() {
 		},
