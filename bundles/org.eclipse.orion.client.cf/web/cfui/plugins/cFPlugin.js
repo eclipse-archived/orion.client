@@ -156,29 +156,36 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 		deploy: function(item, projectMetadata, props) {
 			var that = this;
 			var deferred = new Deferred();
-
-			if(props.user && props.password){
-				cFService.login(props.Target.Url, props.user, props.password).then(
-					function(result){
-						that._deploy(item, projectMetadata, props, deferred);
-					}, function(error){
-						error.Retry = {
-							parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
-							optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
-						};
-						deferred.reject(error);
-					}
-				);
-			} else {
-				that._deploy(item, projectMetadata, props, deferred);
-			}
 			
+			this._getDefaultTarget().then(
+				function(defaultTarget){
+					var target = props.Target || defaultTarget;
+					var appName = props.Name;
+					
+					if(props.user && props.password){
+						cFService.login(target.Url, props.user, props.password).then(
+							function(result){
+								that._deploy(item, projectMetadata, target, appName, deferred);
+							}, function(error){
+								error.Retry = {
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
+									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+								};
+								deferred.reject(error);
+							}
+						);
+					} else {
+						that._deploy(item, projectMetadata, target, appName, deferred);
+					}
+				}
+			);
+
 			return deferred;
 		},
 		
-		_deploy: function(item, projectMetadata, props, deferred) {
-			if (props.Target && props.Name){
-				cFService.pushApp(props.Target, props.Name, decodeURIComponent(item.Location)).then(
+		_deploy: function(item, projectMetadata, target, appName, deferred) {
+			if (target && appName){
+				cFService.pushApp(target, appName, decodeURIComponent(item.Location)).then(
 					function(result){
 						deferred.resolve({
 							CheckState: true
@@ -205,50 +212,46 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 				);
 			} else {
 //				deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deploy.html#{+Location}", Width: "600px", Height: "400px"});
-				
-				this._getDefaultTarget().then(
-					function(target){
-						cFService.pushApp(target, null, decodeURIComponent(item.Location)).then(
-							function(result){
-								deferred.resolve({
-									CheckState: true,
-									ToSave: {
-										ConfigurationName: result.Target.Space.Name + "_" + result.Target.Org.Name + "_" + result.App.entity.name,
-										Parameters: {
-											Target: {
-												Url: result.Target.Url,
-												Org: result.Target.Org.Name,
-												Space: result.Target.Space.Name
-											},
-											Name: result.App.entity.name
-										},
-										Url: "http://" + result.Route.entity.host + "." + result.Domain,
-										ManageUrl: result.ManageUrl
-									}
-								});
-							}, function(error){
-								if (error.HttpCode === 404){
-									deferred.resolve({
-										State: "NOT_DEPLOYED",
-										Message: error.Message
-									});
-								} else if (error.JsonData && error.JsonData.error_code) {
-									var err = error.JsonData;
-									if (err.error_code === "CF-InvalidAuthToken"){
-										error.Retry = {
-											parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
-											optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
-										};
-									} else if (err.error_code === "CF-TargetNotSet"){
-										var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
-										error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
-									}
-									deferred.reject(error);
-								} else {
-									deferred.reject(error);
-								}
+				cFService.pushApp(target, null, decodeURIComponent(item.Location)).then(
+					function(result){
+						deferred.resolve({
+							CheckState: true,
+							ToSave: {
+								ConfigurationName: result.Target.Space.Name + "_" + result.Target.Org.Name + "_" + result.App.entity.name,
+								Parameters: {
+									Target: {
+										Url: result.Target.Url,
+										Org: result.Target.Org.Name,
+										Space: result.Target.Space.Name
+									},
+									Name: result.App.entity.name
+								},
+								Url: "http://" + result.Route.entity.host + "." + result.Domain,
+								ManageUrl: result.ManageUrl
 							}
-						);
+						});
+					}, function(error){
+						if (error.HttpCode === 404){
+							deferred.resolve({
+								State: "NOT_DEPLOYED",
+								Message: error.Message
+							});
+						} else if (error.JsonData && error.JsonData.error_code) {
+							var err = error.JsonData;
+							if (err.error_code === "CF-InvalidAuthToken"){
+								error.Retry = {
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
+									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+								};
+							} else if (err.error_code === "CF-TargetNotSet"){
+								var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+								error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+								deferred.reject(error);
+							}
+							deferred.reject(error);
+						} else {
+							deferred.reject(error);
+						}
 					}
 				);
 			}

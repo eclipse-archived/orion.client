@@ -121,7 +121,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration });
 		}
 		
-		progress.showWhile(context.deployService.deploy(item, context.project, params), context.deployService.name + " in progress.", true).then(function(result){
+		progress.showWhile(context.deployService.deploy(item, context.project, params), context.deployService.name + " in progress", true).then(function(result){
 			if(!result){
 				return;
 			}
