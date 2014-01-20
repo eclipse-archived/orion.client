@@ -11,8 +11,10 @@
 
 /*global window document define setTimeout*/
 
-define(["orion/xhr", "orion/Deferred", "orion/plugin", "orion/cfui/cFClient", "orion/serviceregistry", "orion/preferences", "domReady!"],
-		function(xhr, Deferred, PluginProvider, CFClient, ServiceRegistry, Preferences) {
+define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cFClient', 'orion/serviceregistry', 
+        'orion/preferences', 'orion/URITemplate', 'orion/PageLinks', 'domReady!'],
+		function(require, xhr, Deferred, PluginProvider, CFClient, ServiceRegistry, Preferences, URITemplate,
+			PageLinks) {
 
 	var temp = document.createElement('a');
 	var login = temp.href;
@@ -237,6 +239,10 @@ define(["orion/xhr", "orion/Deferred", "orion/plugin", "orion/cfui/cFClient", "o
 											parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
 											optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
 										};
+									} else if (err.error_code === "CF-TargetNotSet"){
+										var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+										error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+										deferred.reject(error);
 									}
 									deferred.reject(error);
 								} else {
