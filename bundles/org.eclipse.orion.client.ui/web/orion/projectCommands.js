@@ -154,12 +154,13 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 			
 		}, function(error){
-			if(error.Retry && error.Retry.addParameters){
+			if(error.Retry && error.Retry.parameters){
 				context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
 				context.data.oldParams = params;
 				context.commandService.collectParameters(context.data);
+			} else {
+				context.errorHandler(error);
 			}
-			context.errorHandler(error);
 		});
 	};
 	
