@@ -179,8 +179,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			this.dispatchEvent({type: "ProposalApplied", data: data}); //$NON-NLS-0$
 			return true;
 		},
-		activate: function(providerInfoArray) {
+		activate: function(providerInfoArray, autoTriggered) {
 			if (this.state === State.INACTIVE) {
+				this._autoTriggered = autoTriggered ? true : false;
 				this.setState(State.ACTIVE, providerInfoArray);
 			}
 		},
@@ -269,7 +270,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				self._computedProposals = proposals;
 				if (!self.isActive()) { return; }
 				var displayProposals = self._flatten(proposals);
-				self.dispatchEvent({type: "ProposalsComputed", data: {proposals: displayProposals}, autoApply: true}); //$NON-NLS-0$
+				self.dispatchEvent({type: "ProposalsComputed", data: {proposals: displayProposals}, autoApply: !self._autoTriggered}); //$NON-NLS-0$
 			});
 		},
 		/** @private */
@@ -625,7 +626,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					}, this);
 					
 					if (providerInfosToActivate.length > 0) {
-						this.activate(providerInfosToActivate);
+						this.activate(providerInfosToActivate, true);
 					}
 				}
 			}
