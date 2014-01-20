@@ -150,7 +150,22 @@ define("orion/editor/htmlContentAssist", ['orion/editor/templates'], function(mT
 		if (buffer.length === 0) {
 			return [simpleDocTemplate.getProposal("", offset, context)];
 		}
-		return mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, buffer, offset, context);
+		var proposals = mTemplates.TemplateContentAssist.prototype.computeProposals.call(this, buffer, offset, context);
+		
+		// sort and then return proposals
+		return proposals.sort(function(l,r) {
+			var leftString = l.prefix || l.proposal;
+			var rightString = r.prefix || r.proposal;
+			
+			// handle titles
+			if (!leftString) {
+				return -1;
+			} else if (!rightString) {
+				return 1;
+			}
+			
+			return leftString.toLowerCase().localeCompare(rightString.toLowerCase());
+		});
 	};
 
 	return {
