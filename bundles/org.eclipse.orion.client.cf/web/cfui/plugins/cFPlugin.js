@@ -131,13 +131,14 @@ define(["orion/xhr", "orion/Deferred", "orion/plugin", "orion/cfui/cFClient", "o
 						function(settings){
 							var cloud = settings;
 							if (cloud && cloud.get("targetUrl")){
-								
 								var target = {};
 								target.Url = cloud.get("targetUrl");
 								if (cloud.get("manageUrl"))
 									target.ManageUrl = cloud.get("manageUrl");
 								deferred.resolve(target);
 								return;
+							} else {
+								deferred.resolve(null);
 							}
 						}, function(error){
 							deferred.resolve(null);
