@@ -19,6 +19,7 @@ define([
 	'javascript/contentAssist/indexFiles/redisIndex',
 	'javascript/contentAssist/indexFiles/expressIndex',
 	'javascript/contentAssist/contentAssist',
+	'javascript/contentAssist/indexer',
 	'javascript/eslint/validator',
 	'javascript/occurrences',
 	'javascript/outliner',
@@ -28,7 +29,7 @@ define([
 	'orion/editor/stylers/js/js',
 	'orion/editor/stylers/json/json',
 	'orion/editor/stylers/jsonSchema/jsonSchema'
-], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, ContentAssist, EslintValidator, Occurrences, Outliner,
+], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, ContentAssist, Indexer, EslintValidator, Occurrences, Outliner,
 		i18nUtil, PluginProvider, jsTemplateContentAssist, mJS, mJSON, mJSONSchema) {
 
 	/**
@@ -97,7 +98,7 @@ define([
 		{	name: "JavaScript content assist",
 			contentType: ["application/javascript"]
 		});
-	provider.registerServiceProvider("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager), 
+	provider.registerServiceProvider("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager, new Indexer()), 
 		{
 			contentType: ["application/javascript"],
 			name: "JavaScript content assist",

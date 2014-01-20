@@ -483,46 +483,48 @@ define([
 	
 	/**
 	 * @description Loads the global and known types
-	 * @private
-	 * @param {String} the name of the library to load
-	 * @returns {orion.Promise} Returns a promise to resolve the types
+	 * @param {String} the name of the library
+	 * @param {Object} the index data
+	 * @returns The types.
 	 */
-	function _getGlobalsAndTypes(libName) {
+	function getGlobalsAndTypes(libName, indexData) {
+		if (!libName || !indexData)
+			throw new Error("Missing parameter");
 		// check the cache
 		var globalsAndTypes = parsedIndexFileCache[libName];
-		var indexDataOrPromise;
 		if (!globalsAndTypes) {
 			globalsAndTypes = { globals: {}, types: {} };
-			if (libName === "browser") {
-				indexDataOrPromise = BrowserIndex;
-			} else if (libName === "node") {
-				indexDataOrPromise = NodeIndex;
-			} else {
-				throw "unknown library name " + libName;				
-			}
-			return Deferred.when(indexDataOrPromise, function(indexData) {
-				_addIndexInfo(indexData, globalsAndTypes.globals, globalsAndTypes.types);
-				parsedIndexFileCache[libName] = globalsAndTypes;
-				return globalsAndTypes;
-			});
+			_addIndexInfo(indexData, globalsAndTypes.globals, globalsAndTypes.types);
+			parsedIndexFileCache[libName] = globalsAndTypes;
+			return globalsAndTypes;
 		} else {
 			// already have the info
-			return new Deferred().resolve(globalsAndTypes);
+			return globalsAndTypes;
 		}
+	}
+
+	function _getGlobalsAndTypesBuiltin(libName) {
+		var indexData;
+		if (libName === "browser") {
+			indexData = BrowserIndex;
+		} else if (libName === "node") {
+			indexData = NodeIndex;
+		} else {
+			throw new Error("unknown built-in library name: " + libName);
+		}
+		return getGlobalsAndTypes(libName, indexData);
 	}
 	
 	/**
-	 * @description Add information for library libName to the knownTypes object.
+	 * @description Add information for built-in library libName to the knownTypes object.
 	 * @public
 	 * @param {Object} knownTypes The collection of currently known types
 	 * @param {String} libName The name of the library to add
-	 * @returns Returns a promise, as the library index file may need to be loaded
-	 * asynchronously.  The promise is resolved with the knownTypes object.
+	 * @returns The knownTypes object.
 	 */
 	function addLibrary(knownTypes, libName) {
-		return _getGlobalsAndTypes(libName).then(function (globalsAndTypes) {
-			return _updateKnownTypes(knownTypes, globalsAndTypes);
-		});
+		var globalsAndTypes = _getGlobalsAndTypesBuiltin(libName);
+		return _updateKnownTypes(knownTypes, globalsAndTypes);
 	}
 
 	/**
@@ -539,6 +541,7 @@ define([
 	
 	return {
 		Types: Types,
+		getGlobalsAndTypes: getGlobalsAndTypes,
 		addLibrary: addLibrary,
 		ternSig2ClosureSig: ternSig2ClosureSig,
 		init: init,

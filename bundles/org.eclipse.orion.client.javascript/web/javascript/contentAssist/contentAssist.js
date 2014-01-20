@@ -727,7 +727,7 @@ define([
 	 * @constructor
 	 * @public
 	 * @param {javascript.ASTManager} astManager An AST manager to create ASTs with
-	 * @param {Object} indexer An indexer to load / work with supplied indexes
+	 * @param {Object} [indexer] An indexer to load / work with supplied indexes
 	 * @param {Object} lintOptions the given jslint options from the source
 	 */
 	function JSContentAssist(astManager, indexer, lintOptions) {
@@ -749,7 +749,7 @@ define([
 			return Deferred.all([
 				this.astManager.getAST(editorContext),
 				editorContext.getText(), // TODO Can we avoid getText() here? The AST should have all we need.
-				this.createIndexData(editorContext, params)
+				this._createIndexData(editorContext, params)
 			]).then(function(results) {
 				var ast = results[0], buffer = results[1];
 				return self._computeProposalsFromAST(ast, buffer, params);
@@ -759,7 +759,11 @@ define([
 		 * Reshapes typedefs into the expected format, sets up indexData
 		 * @returns {orion.Promise}
 		 */
-		createIndexData: function(editorContext, context) {
+		_createIndexData: function(editorContext, context) {
+			if (!this.indexer) {
+				// No need to load indexes
+				return new Deferred().resolve();
+			}
 			if (!this.indexDataPromise) {
 				var self = this;
 				var defs = context.typeDefs || {}, promises = [];
@@ -770,7 +774,7 @@ define([
 					}
 				});
 				this.indexDataPromise = Deferred.all(promises).then(function(typeDefs) {
-					self.indexData = typeDefs;
+					self.indexer.setIndexData(typeDefs);
 					return self.indexData;
 				});
 			}
@@ -803,7 +807,6 @@ define([
 					uid : "local",
 					offset : offset,
 					indexer: self.indexer,
-					indexData: self.indexData, // created in createIndexData()
 					globalObjName : findGlobalObject(root.comments, self.lintOptions),
 					comments : root.comments
 				}).then(function(environment) {

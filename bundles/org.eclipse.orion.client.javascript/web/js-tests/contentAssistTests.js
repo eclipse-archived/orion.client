@@ -14,13 +14,14 @@
 /*global define esprima console setTimeout doctrine*/
 define([
 	'javascript/contentAssist/contentAssist',
+	'javascript/contentAssist/indexer',
 	'orion/assert',
 	'orion/objects',
 	'esprima',
 	'doctrine/doctrine',
 	'orion/Deferred',
 	'orion/editor/jsTemplateContentAssist' //TODO remove this once we merge the code
-], function(ContentAssist, assert, objects, Esprima, Doctrine, Deferred, JSTemplateProposals) {
+], function(ContentAssist, Indexer, assert, objects, Esprima, Doctrine, Deferred, JSTemplateProposals) {
 
 	//////////////////////////////////////////////////////////
 	// helpers
@@ -48,6 +49,7 @@ define([
 		    prefix = options.prefix,
 		    offset = options.offset,
 		    lintOptions = options.lintOptions,
+		    indexer = options.indexer || null,
 		    editorContextMixin = options.editorContextMixin || {},
 		    paramsMixin = options.paramsMixin || {};
 		if (!prefix) {
@@ -67,7 +69,7 @@ define([
 				return new Deferred().resolve(parseFull(buffer));
 			}
 		};
-		var contentAssist = new ContentAssist.JSContentAssist(astManager, null, lintOptions);
+		var contentAssist = new ContentAssist.JSContentAssist(astManager, indexer, lintOptions);
 		var editorContext = {
 			getText: function() {
 				return new Deferred().resolve(buffer);
@@ -85,10 +87,10 @@ define([
 		}
 	}
 
-	// Also accepts a single object containing a map of arguments
-	function computeContentAssist(buffer, prefix, offset, lintOptions, editorContextMixin, paramsMixin) {
+	function computeContentAssist(/**vargs..*/ buffer, prefix, offset, lintOptions, editorContextMixin, paramsMixin) {
 		var result;
 		if (arguments.length === 1 && typeof arguments[0] === "object") {
+			// Single param containing a map of arguments for setup()
 			result = setup.apply(this, Array.prototype.slice.call(arguments));
 		} else {
 			result = setup({
@@ -4525,7 +4527,7 @@ define([
 				]);
 	};
 
-
+//	var tests = {};
 	var tif = tests.testIndexFiles = {};
 	tif["test Node proposal from Tern index"] = function() {
 		var index = {
@@ -4545,6 +4547,7 @@ define([
 			lintOptions: {
 				options: { "node": true } // This, or /*jslint node:true*/, is mandatory for the time being
 			},
+			indexer: new Indexer(), // indexer resolves the require() call
 			editorContextMixin: {
 				getTypeDef: function() {
 					return new Deferred().resolve(index);
