@@ -24,11 +24,12 @@ define([
 	'javascript/outliner',
 	'orion/i18nUtil',
 	'orion/plugin',
+	'orion/editor/jsTemplateContentAssist',
 	'orion/editor/stylers/js/js',
 	'orion/editor/stylers/json/json',
 	'orion/editor/stylers/jsonSchema/jsonSchema'
 ], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, ContentAssist, EslintValidator, Occurrences, Outliner,
-		i18nUtil, PluginProvider, mJS, mJSON, mJSONSchema) {
+		i18nUtil, PluginProvider, jsTemplateContentAssist, mJS, mJSON, mJSONSchema) {
 
 	/**
 	 * Plug-in headers
@@ -91,6 +92,11 @@ define([
 	/**
 	 * Register the content assist support
 	 */
+	provider.registerService("orion.edit.contentassist",
+		new jsTemplateContentAssist.JSTemplateContentAssistProvider(),
+		{	name: "JavaScript content assist",
+			contentType: ["application/javascript"]
+		});
 	provider.registerServiceProvider("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager), 
 		{
 			contentType: ["application/javascript"],

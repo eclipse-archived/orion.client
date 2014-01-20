@@ -15,7 +15,6 @@ define([
 	'orion/editor/cssContentAssist',
 	'orion/editor/htmlContentAssist',
 	'orion/editor/htmlGrammar',
-	'orion/editor/jsTemplateContentAssist',
 	'orion/editor/stylers/java/java',
 	'orion/editor/stylers/python/python',
 	'orion/editor/stylers/ruby/ruby',
@@ -23,7 +22,7 @@ define([
 	'orion/editor/stylers/css/css',
 	'orion/editor/stylers/html/html',
 	'orion/editor/templates'
-], function(PluginProvider, cssContentAssist, htmlContentAssist, htmlGrammar, jsTemplateContentAssist, mJava, mPython, mRuby, mPHP, mCSS, mHTML, templates) {
+], function(PluginProvider, cssContentAssist, htmlContentAssist, htmlGrammar, mJava, mPython, mRuby, mPHP, mCSS, mHTML, templates) {
 	var headers = {
 		name: "Orion Web Editing Plugin",
 		version: "1.0",
@@ -195,11 +194,6 @@ define([
 		new cssContentAssist.CssContentAssistProvider(),
 		{	name: "CSS content assist",
 			contentType: ["text/css"]
-		});
-	provider.registerService("orion.edit.contentassist",
-		new jsTemplateContentAssist.JSTemplateContentAssistProvider(),
-		{	name: "JavaScript content assist",
-			contentType: ["application/javascript"]
 		});
 	provider.registerService("orion.edit.contentassist",
 		new htmlContentAssist.HTMLContentAssistProvider(),
