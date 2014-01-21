@@ -623,14 +623,15 @@
         }
     });
 
-    if (window.URL && window.URL.createObjectURL) {
+	var _URL = window.URL || window.webkitURL;
+    if (_URL && _URL.createObjectURL) {
         Object.defineProperty(URL, "createObjectURL", {
-            value: window.URL.createObjectURL.bind(window.URL),
+            value: _URL.createObjectURL.bind(_URL),
             enumerable: false
         });
 
         Object.defineProperty(URL, "revokeObjectURL", {
-            value: window.URL.revokeObjectURL.bind(window.URL),
+            value: _URL.revokeObjectURL.bind(_URL),
             enumerable: false
         });
     }
