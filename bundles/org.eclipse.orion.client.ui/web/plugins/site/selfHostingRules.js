@@ -22,6 +22,7 @@ define([], function() {
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.ui/web" },
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.core/web" },
 		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.editor/web" },
+		{ type: FILE, source: "/", targetPattern: "${0}/bundles/org.eclipse.orion.client.cf/web" },
 		{ type: API, source: "/file", targetPattern: "${0}file" },
 		{ type: API, source: "/prefs", targetPattern: "${0}prefs" },
 		{ type: API, source: "/workspace", targetPattern: "${0}workspace" },
