@@ -78,11 +78,11 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 					}
 				]
 			}, {
-				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
-			}, {
 				match: "\\b0[bB][01]+\\b",
 				name: "constant.numeric"
+			}, {
+				match: "\\b(?:" + keywords.join("|") + ")\\b",
+				name: "keyword.control"
 			}
 		]
 	});

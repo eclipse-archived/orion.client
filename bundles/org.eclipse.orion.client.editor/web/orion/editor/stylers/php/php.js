@@ -15,7 +15,7 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 	var keywords = [
 		"abstract", "and", "array", "as", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"break", //$NON-NLS-0$
-		"case", "catch", "class", "clone", "const", "continue", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"callable", "case", "catch", "class", "clone", "const", "continue", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"declare", "default", "die", "do", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"echo", "else", "elseif", "empty", "enddeclare", "endfor", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"endforeach", "endif", "endswitch", "endwhile", "eval", "exit", "extends", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -33,7 +33,9 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 		"var", //$NON-NLS-0$
 		"while", //$NON-NLS-0$
 		"xor", //$NON-NLS-0$
-		"yield" //$NON-NLS-0$
+		"yield", //$NON-NLS-0$
+		"__halt_compiler", "__CLASS__", "__DIR__", "__FILE__", "__FUNCTION__",  //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"__LINE__", "__METHOD__", "__NAMESPACE__", "__TRAIT__"  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
 	var grammars = mShared.grammars;
@@ -43,6 +45,23 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 		patterns: [
 			{
 				include: "orion.patterns"
+			}, {
+				begin: "#",
+				end: ".*",
+				name: "comment.line",
+				patterns: [
+					{
+						match: "(\\b)(TODO)(\\b)(.*)",
+						name: "meta.annotation.task.todo",
+						captures: {
+							2: {name: "keyword.other.documentation.task"},
+							4: {name: "comment.line"}
+						}
+					}
+				]
+			}, {
+				match: "\\b0[bB][01]+\\b",
+				name: "constant.numeric"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control"

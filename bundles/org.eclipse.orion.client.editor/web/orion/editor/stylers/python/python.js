@@ -39,6 +39,39 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 			{
 				include: "orion.patterns"
 			}, {
+				/* override from orion.patterns */
+				id: "comment_singleline",
+			}, {
+				/* override from orion.patterns */
+				id: "comment_multiline",
+			}, {
+				/* override from orion.patterns */
+				id: "number_decimal",
+				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)[lL]?\\b",
+				name: "constant.numeric"
+			}, {
+				begin: "#",
+				end: ".*",
+				name: "comment.line",
+				patterns: [
+					{
+						match: "(\\b)(TODO)(\\b)(.*)",
+						name: "meta.annotation.task.todo",
+						captures: {
+							2: {name: "keyword.other.documentation.task"},
+							4: {name: "comment.line"}
+						}
+					}
+				]
+			}, {
+				begin: "'''",
+				end: "'''",
+				name: "string.quoted.triple"
+			}, {
+				begin: '"""',
+				end: '"""',
+				name: "string.quoted.triple"
+			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control"
 			}

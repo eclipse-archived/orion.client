@@ -11,8 +11,10 @@
 
 /*global define*/
 
-define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", "orion/editor/stylers/js/js", "orion/editor/stylers/css/css"], function(mShared, mJS, mCSS) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var grammars = mShared.grammars.concat(mJS.grammars).concat(mCSS.grammars);
+define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", "orion/editor/stylers/js/js", "orion/editor/stylers/css/css", "orion/editor/stylers/php/php"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	function(mShared, mJS, mCSS, mPHP) {
+	
+	var grammars = mShared.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mPHP.grammars);
 	grammars.push({
 		id: "orion.html",
 		contentTypes: ["text/html"],
@@ -48,6 +50,18 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				patterns: [
 					{
 						include: "orion.css"
+					}
+				]
+			}, {
+				begin: "(<\\?php\\b)",
+				end: "(\\?>|%>)",
+				captures: {
+					1: {name: "entity.name.tag"}
+				},
+				contentName: "source.php.embedded.html",
+				patterns: [
+					{
+						include: "orion.php"
 					}
 				]
 			}, {
