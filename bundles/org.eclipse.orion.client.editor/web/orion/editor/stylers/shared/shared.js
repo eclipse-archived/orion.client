@@ -90,7 +90,7 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 					name: "constant.numeric"
 				}, {
 					id: "number_hex",
-					match: "\\b0x[0-9A-Fa-f]+\\b",
+					match: "\\b0[xX][0-9A-Fa-f]+\\b",
 					name: "constant.numeric"
 				}
 			]

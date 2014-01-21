@@ -32,7 +32,7 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 		"undef", "unless", "until", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"when", "while", //$NON-NLS-1$ //$NON-NLS-0$
 		"yield", //$NON-NLS-0$
-		"__END__" //$NON-NLS-0$
+		"__ENCODING__", "__END__", "__FILE__", "__LINE__" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
 	var grammars = mShared.grammars;
@@ -80,6 +80,9 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control"
+			}, {
+				match: "\\b0[bB][01]+\\b",
+				name: "constant.numeric"
 			}
 		]
 	});
