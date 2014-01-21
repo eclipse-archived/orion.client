@@ -258,7 +258,7 @@ define({
 	"Fetch": "Fetch",
 	"Fetch from the remote": "Fetch from the remote",
 	"SSH Password:": "Password:",
-	"SSH User Name:": "SSH User Name:",
+	"SSH User Name:": "User Name:",
 	"Fetching remote: ": "Fetching remote: ",
 	"Force Fetch": "Force Fetch",
 	"Fetch from the remote branch into your remote tracking branch overriding its current content": "Fetch from the remote branch into your remote tracking branch overriding its current content",
