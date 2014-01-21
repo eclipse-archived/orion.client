@@ -177,7 +177,6 @@ define([
 			return !this.readonly;
 		},
 		displayWorkspaceView: function(){
-			var _self = this;
 			if(!this._node){
 				this._node = document.createElement("div"); //$NON-NLS-0$
 			}
@@ -232,7 +231,7 @@ define([
 									commandRegistry: this.commandRegistry,
 									contentTypeRegistry: this.contentTypeRegistry
 								});
-								foldersSection.embedExplorer(this.folderNavExplorer);
+								foldersSection.embedExplorer(this.folderNavExplorer, null, true);
 								this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
 								this.folderNavExplorer.loadRoot(this._metadata);
 							}

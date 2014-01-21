@@ -245,7 +245,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 			return this._contentParent;
 		},
 		
-		embedExplorer: function(explorer, parent){
+		embedExplorer: function(explorer, parent, noSelection){
 			this._contentParent.innerHTML = ""; //NON-NLS-0$
 			if(!explorer.parent){
 				explorer.parent = parent;
@@ -305,7 +305,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 				},
 				loaded: function(){
 					var self = this;
-					if(!this.selection){
+					if(!this.selection && !noSelection){
 						if(this.serviceRegistry || this.registry){
 							this.selection = new Selection.Selection(this.serviceRegistry || this.registry, this.parent.id + "Selection"); //$NON-NLS-0$
 							this.selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$

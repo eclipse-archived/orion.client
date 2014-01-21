@@ -9,23 +9,37 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define require URL document console prompt XMLHttpRequest window*/
-
-var _browser_script_source = null;
+var _browser_script_source = null;//We need to know where the browser script lives
 var _all_script = document.getElementsByTagName ('script');
-_all_script.some(function(script){
-	if(script.id && script.id.indexOf("orion.browse.browser")) {
-		_browser_script_source = script.src;
-		return true;
+if(_all_script && _all_script.length && _all_script.length > 0) {
+	for(var j = 0; j < 2; j++) {// try twice in all the script tags
+		for (var i = 0; i < _all_script.length; i++) {
+			if(j === 0) {//First try: if the script id is ""orion.browse.browser""
+			    if(_all_script[i].id === "orion.browse.browser") {
+			    	_browser_script_source = _all_script[i].src;
+			    	break;
+			    }
+			} else {
+				var regex = /.*built-browse.*.js/;
+			    if(_all_script[i].src && regex.exec(_all_script[i].src)) {
+			    	_browser_script_source = _all_script[i].src;
+			    	break;
+			    }
+			}
+		}
+		if(_browser_script_source) {
+			break;
+		}
 	}
-});
+	if(!_browser_script_source) {
+		_browser_script_source = _all_script[_all_script.length - 1].src;
+	}
+}
 
-define(['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'],
+define('orion/widgets/browse/builder/browse',['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'],
 function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 	function Browser(parentId, repoURL) {
-		
-		var pluginURL = "plugins/GitHubFilePlugin.html?repo=" + repoURL; //"https://github.com/eclipse/orion.client.git"
-		pluginURL = new URL(pluginURL, _browser_script_source);
-		//var pluginURL = "http://libingw.orion.eclipse.org:8080/plugins/GitHubFilePlugin.html?repo=https://github.com/eclipse/orion.client.git";
+		var pluginURL = new URL("plugins/GitHubFilePlugin.html?repo=" + repoURL, _browser_script_source).href;
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		var plugins = {};
 		plugins[pluginURL] = true;
@@ -34,21 +48,18 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 			plugins: plugins
 		});
 		pluginRegistry.start().then(function() {
-			var fileBrowser = new mFileBrowser.FileBrowser({
+			this._fileBrowser = new mFileBrowser.FileBrowser({
 				parent: parentId,//"fileBrowser", 
 				//maxEditorHeight: 800,
 				serviceRegistry: serviceRegistry
 			});
-		});
+		}.bind(this));
 	}
 	
-//    function Browser(parent, serviceRefs){
-//		this.fileBrowser = new mFileBrowser.FileBrowser(parent, serviceRefs);
-//    }
-//	Browser.prototype = {
-//		getFileBrowser: function(){
-//			return this.fileBrowser;
-//		}	
-//	};
+	Browser.prototype = {
+		getFileBrowser: function(){
+			return this._fileBrowser;
+		}
+	};
     return Browser;
 });

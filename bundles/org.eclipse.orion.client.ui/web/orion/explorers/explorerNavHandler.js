@@ -483,7 +483,7 @@ exports.ExplorerNavHandler = (function() {
 		iterate: function(forward, forceExpand, selecting, selectableOnly /* optional */)	{
 			var currentItem = null;
 			
-			if(this.topIterationNodes.length === 0){
+			if(!this.topIterationNodes || this.topIterationNodes.length === 0){
 				return;
 			}
 				
