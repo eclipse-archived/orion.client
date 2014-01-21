@@ -36,13 +36,16 @@ define(["orion/assert", "orion/Base64", "domReady!"], function(assert, Base64) {
 	testData += testData;
 	testData += testData;
 	testData += testData;
-	console.log(testData.length);
 
 	tests.testDecodeEncode = function() {
 		var decoded = Base64.decode(testData);
 		var result = Base64.encode(decoded);
 
 		assert.equal(result, testData);
+	};
+	
+	tests.testWhitespace = function() {
+		Base64.decode(" ");
 	};
 
 	return tests;
