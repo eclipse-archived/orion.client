@@ -48,7 +48,7 @@ define([
 		var buffer = options.buffer,
 		    prefix = options.prefix,
 		    offset = options.offset,
-		    indexer = options.indexer || null,
+		    indexer = options.indexer || new Indexer(), // need for resolving require() calls
 		    lintOptions = options.lintOptions,
 		    editorContextMixin = options.editorContextMixin || {},
 		    paramsMixin = options.paramsMixin || {};
@@ -2635,6 +2635,30 @@ define([
 		]);
 	};
 
+	tests["test node19 - proposals shown for Node core module when no lint option"] = function() {
+		var results = computeContentAssist(
+			"\n" +
+			"require(\"fs\").mk", "mk"
+		);
+		return testProposals(results, [
+			["mkdir(path, mode, callback)", "mkdir(path, mode, callback)"],
+			["mkdirSync(path, [mode])", "mkdirSync(path, [mode])"]
+		]);
+	};
+	tests["test node20 - proposals NOT shown for Node core module when `amd:true`"] = function() {
+		var results = computeContentAssist(
+			"/*jslint amd:true*/\n" +
+			"require(\"fs\").mk", "mk"
+		);
+		return testProposals(results, []);
+	};
+	tests["test node21 - proposals NOT shown for Node core module when `browser:true`"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:true*/\n" +
+			"require(\"fs\").mk", "mk"
+		);
+		return testProposals(results, []);
+	};
 
 	////////////////////////////////////////
 	// jsdoc tests
@@ -4712,29 +4736,54 @@ define([
 		assertProposal("do", result);
 	};
 
+	////////////////////////////////////////
+	// tests for contributed Tern index files
+	////////////////////////////////////////
 	var tif = tests.testIndexFiles = {};
-	tif["test Node proposal from Tern index"] = function() {
-		var index = {
-			"!name": "mylib",
-			"!define": {
-				mylib: {
-					whatever: {
-						"!type": "Number"
-					}
+	var testTernIndex = {
+		"!name": "mylib",
+		"!define": {
+			mylib: {
+				whatever: {
+					"!type": "Number"
 				}
 			}
-		};
+		}
+	};
+	tif["test proposals shown for contributed module when `node:true`"] = function() {
 		var results = computeContentAssist({
 			buffer: "var lib = require(\"mylib\");\n" +
 					"lib.w",
 			prefix: "w",
 			lintOptions: {
-				options: { "node": true } // This, or /*jslint node:true*/, is mandatory for the time being
+				options: { "node": true }
 			},
-			indexer: new Indexer(), // indexer resolves the require() call
 			editorContextMixin: {
 				getTypeDef: function() {
-					return new Deferred().resolve(index);
+					return new Deferred().resolve(testTernIndex);
+				}
+			},
+			paramsMixin: {
+				typeDefs: {
+					mylib: {
+						type: "tern"
+					}
+				}
+			}
+		});
+		return testProposals(results, [
+			["whatever", "whatever : Number"]
+		]);
+	};
+	tif["test proposals shown for contributed module when no lint option"] = function() {
+		var results = computeContentAssist({
+			buffer: "var lib = require(\"mylib\");\n" +
+					"lib.w",
+			prefix: "w",
+			lintOptions: {},
+			editorContextMixin: {
+				getTypeDef: function() {
+					return new Deferred().resolve(testTernIndex);
 				}
 			},
 			paramsMixin: {

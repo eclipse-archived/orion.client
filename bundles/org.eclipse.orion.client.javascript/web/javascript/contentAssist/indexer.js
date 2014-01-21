@@ -11,9 +11,11 @@
  *******************************************************************************/
 /*jslint amd:true*/
 define([
+	'javascript/contentAssist/indexFiles/nodeIndex',
 	'javascript/contentAssist/typesFromIndexFile',
+	'javascript/contentAssist/typeUtils',
 	'orion/objects'
-], function(mTypes, objects) {
+], function(nodeIndex, mTypes, typeUtils, objects) {
 	/**
 	 * @name javascript.Indexer
 	 * @class
@@ -44,9 +46,19 @@ define([
 		},
 		/**
 		 * @param {String} moduleName
+		 * @param {Object} env The type environment
 		 * @returns {javascript.Summary}
 		 */
-		retrieveSummary: function(moduleName) {
+		retrieveSummary: function(moduleName, env) {
+			// Generous check for Node builtins, in case user forgot to set the /*.. node:true*/ flag
+			var maybeNodeJS = !env.amdModule && (env.nodeJSModule || env.commonjsModule || env.globalObjName !== "Window");
+			if (maybeNodeJS) {
+				var nodeGlobalsAndTypes = mTypes.getGlobalsAndTypes("node", nodeIndex); // Note this is cached by mTypes, so fast
+				if (isNodeBuiltin(moduleName, nodeGlobalsAndTypes)) {
+					return toSummary(moduleName, nodeGlobalsAndTypes);
+				}
+			}
+
 			if (Object.prototype.hasOwnProperty.call(this.catalog, moduleName)) {
 				// TODO mTypes is implicit static global. Should be parameter to Indexer and ContentAssist, and have better defined life cycle.
 				var indexData = this.catalog[moduleName];
@@ -62,6 +74,18 @@ define([
 			provided: moduleName,
 			types: globalsAndTypes.types
 		}
+	}
+
+	/**
+	 * @param {String moduleName}
+	 * @param {Object} nodeGlobalsAndTypes
+	 */
+	function isNodeBuiltin(moduleName, nodeGlobalsAndTypes) {
+		if (moduleName.indexOf(".") !== -1 || moduleName.indexOf("/") !== -1) {
+			return null;
+		}
+		var typeName = typeUtils.convertToSimpleTypeName(typeUtils.ensureTypeObject(moduleName));
+		return nodeGlobalsAndTypes.types[typeName] ? true : false;
 	}
 
 	/**

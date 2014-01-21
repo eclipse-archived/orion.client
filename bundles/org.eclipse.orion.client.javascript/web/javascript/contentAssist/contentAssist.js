@@ -637,6 +637,7 @@ define([
 
 	var browserRegExp = /browser\s*:\s*true/;
 	var nodeRegExp = /node\s*:\s*true/;
+	var amdRegExp = /amd\s*:\s*true/;
 	function findGlobalObject(comments, lintOptions) {
 
 		for (var i = 0; i < comments.length; i++) {
@@ -644,7 +645,7 @@ define([
 			if (comment.type === "Block" && (comment.value.substring(0, "jslint".length) === "jslint" ||
 											  comment.value.substring(0,"jshint".length) === "jshint")) {
 				// the lint options section.  now look for the browser or node
-				if (comment.value.match(browserRegExp)) {
+				if (comment.value.match(browserRegExp) || comment.value.match(amdRegExp)) {
 					return "Window";
 				} else if (comment.value.match(nodeRegExp)) {
 					return "Module";

@@ -235,7 +235,7 @@ define([
 						for (i = 0; i < params.length; i++) {
 							if (i < moduleNames.length && moduleNames[i].type === "Literal") {
 								// resolve the module name from the indexer
-								var summary = env.indexer.retrieveSummary(moduleNames[i].value);
+								var summary = env.indexer.retrieveSummary(moduleNames[i].value, env);
 								if (summary) {
 									var typeName;
 									var mergeTypeName;
@@ -625,17 +625,6 @@ define([
 	}
 
 	/**
-	 * @param {String} name
-	 */
-	function findBuiltInNodeModuleType(name, env) {
-		if (name.indexOf(".") !== -1 || name.indexOf("/") !== -1) {
-			return null;
-		}
-		var typeObj = typeUtils.ensureTypeObject(name);
-		return env.findType(typeObj) ? typeObj : null;
-	}
-	
-	/**
 	 * if this method call ast node is a call to require with a single string constant
 	 * argument, then look that constant up in the indexer to get a summary
 	 * if a summary is found, then apply it to the current scope
@@ -650,11 +639,8 @@ define([
 			var arg = call["arguments"][0];
 			if (arg.type === "Literal" && typeof arg.value === "string") {
 				// we're in business
-				var builtin;
-				if (env.nodeJSModule && (builtin = findBuiltInNodeModuleType(arg.value, env))) {
-					return builtin;
-				} else if (env.indexer) {
-					var summary = env.indexer.retrieveSummary(arg.value);
+				if (env.indexer) {
+					var summary = env.indexer.retrieveSummary(arg.value, env);
 					if (summary) {
 						var typeName;
 						var mergeTypeName;

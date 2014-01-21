@@ -183,6 +183,8 @@ define([
 				commonjsModule : null,
 				/** is this a node.js module? */
 				nodeJSModule: globalObjName === "Module",
+				/** Window | Module */
+				globalObjName: globalObjName,
 				/** the indexer for thie content assist invocation.  Used to track down dependencies */
 				indexer: indexer,
 				/** the offset of content assist invocation */
