@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 VMware, Inc. and others.
+ * Copyright (c) 2012, 2014 VMware, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -15,7 +15,6 @@
 /*global esprima doctrine*/
 /*jslint amd:true*/
 define([
-	'javascript/contentAssist/esprimaVisitor', 
 	'javascript/contentAssist/typeEnvironment', 
 	'javascript/contentAssist/typeInference', 
 	'javascript/contentAssist/typeUtils', 
@@ -24,18 +23,17 @@ define([
 	'orion/objects',
 	'esprima',
 	'estraverse'
-], function(mVisitor, typeEnv, typeInf, typeUtils, proposalUtils, Deferred, objects, Esprima, Estraverse) {
+], function(typeEnv, typeInf, typeUtils, proposalUtils, Deferred, Objects, Esprima, Estraverse) {
 
 	/**
-	 * Convert an array of parameters into a string and also compute linked editing positions
-	 * @param {String} name name of the function
-	 * @param {{}} typeObj the type object of the function
-	 * @param {Number} offset offset
-	 * @return {{ completion:String, positions:[Number] }}
+	 * @description Convert an array of parameters into a string and also compute linked editing positions
+	 * @param {String} name The name of the function
+	 * @param {Object} typeObj The type object of the function
+	 * @param {Number} offset The offset into the source
+	 * @return {Object} The function proposal object
 	 */
 	function calculateFunctionProposal(name, typeObj, offset) {
 		var params = typeObj.params || [];
-
 		var positions = [];
 		var completion = name + '(';
 		var plen = params.length;
@@ -73,108 +71,105 @@ define([
 	}
 
 	/**
-	 * @return "top" if we are at a start of a new expression fragment (eg- at an empty line,
-	 * or a new parameter).  "member" if we are after a dot in a member expression.  false otherwise
-	 * @return {Boolean|String}
+	 * @description Determines if we should bother visiting the AST to compute proposals
+	 * @param {Object} ast The backing AST to visit
+	 * @param {Number} offset The offset into the source
+	 * @param {String} prefix The text prefix to complete on
+	 * @param {String} contents The text of the file
+	 * @return {Object} Returns the deferred node and the completion kind 
 	 */
 	function shouldVisit(ast, offset, prefix, contents) {
-		/**
-		 * A visitor that finds the parent stack at the given location
-		 * @param node the AST node being visited
-		 * @param parents stack of parent nodes for the current node
-		 * @param isInitialVisit true iff this is the first visit of the node, false if this is
-		 *   the end visit of the node
-		 */
-		var findParent = function(node, parents, isInitialVisit) {
-			// extras prop is where we stuff everything that we have added
-			if (!node.extras) {
-				node.extras = {};
-			}
-
-			if (!isInitialVisit) {
-
-				// if we have reached the end of an inRange block expression then
-				// this means we are completing on an empty expression
-				if (node.type === "Program" || (node.type === "BlockStatement") &&
-						proposalUtils.inRange(offset, node.range)) {
-					throw "done";
-				}
-
-				parents.pop();
-				// return value is ignored
-				return false;
-			}
-
-			// the program node is always in range even if the range numbers do not line up
-			if ((node.range && proposalUtils.inRange(offset-1, node.range)) || node.type === "Program") {
-				if (node.type === "Identifier") {
-					throw "done";
-				}
-				parents.push(node);
-				if ((node.type === "FunctionDeclaration" || node.type === "FunctionExpression") &&
-						node.nody && proposalUtils.isBefore(offset, node.body.range)) {
-					// completion occurs on the word "function"
-					throw "done";
-				}
-				// special case where we are completing immediately after a '.'
-				if (node.type === "MemberExpression" && !node.property && proposalUtils.afterDot(offset, node, contents)) {
-					throw "done";
-				}
-				return true;
-			} else {
-				return false;
-			}
-		};
 		var parents = [];
-		try {
-			mVisitor.visit(ast, parents, findParent, findParent);
-		} catch (done) {
-			if (done !== "done") {
-				// a real error
-				throw(done);
+		Estraverse.traverse(ast, {
+			skipped: false,
+			enter: function(node) {
+				this.skipped = false;
+				// extras prop is where we stuff everything that we have added
+				if (!node.extras) {
+					node.extras = {};
+				}
+				// the program node is always in range even if the range numbers do not line up
+				if ((node.range && proposalUtils.inRange(offset-1, node.range)) || 
+					node.type === Estraverse.Syntax.Program) {
+					if (node.type === Estraverse.Syntax.Identifier) {
+						return Estraverse.VisitorOption.Break;
+					}
+					parents.push(node);
+					if ((node.type === Estraverse.Syntax.FunctionDeclaration || 
+							node.type === Estraverse.Syntax.FunctionExpression) &&
+							node.nody && proposalUtils.isBefore(offset, node.body.range)) {
+						// completion occurs on the word "function"
+						return Estraverse.VisitorOption.Break;
+					}
+					// special case where we are completing immediately after a '.'
+					if (node.type === Estraverse.Syntax.MemberExpression && 
+							!node.property && proposalUtils.afterDot(offset, node, contents)) {
+						return Estraverse.VisitorOption.Break;
+					}
+				} else {
+					this.skipped = true;
+					return Estraverse.VisitorOption.Skip;
+				}
+			},
+			leave: function(node) {
+				if(!this.skipped) {
+					// if we have reached the end of an inRange block expression then
+					// this means we are completing on an empty expression
+					if (node.type === Estraverse.Syntax.Program || (node.type === Estraverse.Syntax.BlockStatement) &&
+							proposalUtils.inRange(offset, node.range)) {
+								return Estraverse.VisitorOption.Break;
+					}
+					parents.pop();
+				}
 			}
-		}
+		});
 
 		// determine if we need to defer infering the enclosing function block
 		var toDefer;
 		if (parents && parents.length) {
 			var parent = parents.pop();
 			for (var i = 0; i < parents.length; i++) {
-				if ((parents[i].type === "FunctionDeclaration" || parents[i].type === "FunctionExpression") &&
-						// don't defer if offset is over the function name
+				if ((parents[i].type === Estraverse.Syntax.FunctionDeclaration || 
+						parents[i].type === Estraverse.Syntax.FunctionExpression) &&
 						!(parents[i].id && proposalUtils.inRange(offset, parents[i].id.range, true))) {
 					toDefer = parents[i];
 					break;
 				}
-
 			}
-
-			if (parent.type === "MemberExpression") {
-				if (parent.property && proposalUtils.inRange(offset-1, parent.property.range)) {
-					// on the right hand side of a property, eg: foo.b^
-					return { kind : "member", toDefer : toDefer };
-				} else if (proposalUtils.inRange(offset-1, parent.range) && proposalUtils.afterDot(offset, parent, contents)) {
-					// on the right hand side of a dot with no text after, eg: foo.^
-					return { kind : "member", toDefer : toDefer };
-				}
-			} else if (parent.type === "Program" || parent.type === "BlockStatement") {
-				// completion at a new expression
-				if (!prefix) {
-				}
-			} else if (parent.type === "VariableDeclarator" && (!parent.init || proposalUtils.isBefore(offset, parent.init.range))) {
-				// the name of a variable declaration
-				return false;
-			} else if ((parent.type === "FunctionDeclaration" || parent.type === "FunctionExpression") &&
-					proposalUtils.isBefore(offset, parent.body.range)) {
-				// a function declaration
-				return false;
+			switch(parent.type) {
+				case Estraverse.Syntax.MemberExpression: 
+					if (parent.property && proposalUtils.inRange(offset-1, parent.property.range)) {
+						// on the right hand side of a property, eg: foo.b^
+						return { kind : "member", toDefer : toDefer };
+					} else if (proposalUtils.inRange(offset-1, parent.range) && proposalUtils.afterDot(offset, parent, contents)) {
+						// on the right hand side of a dot with no text after, eg: foo.^
+						return { kind : "member", toDefer : toDefer };
+					}
+					break
+				case Estraverse.Syntax.Program:
+				case Estraverse.Syntax.BlockStatement:
+					// completion at a new expression
+					if (!prefix) {
+					}
+					break;
+				case Estraverse.Syntax.VariableDeclarator:
+					if(!parent.init || proposalUtils.isBefore(offset, parent.init.range)) {
+						return null;
+					}
+					break;
+				case Estraverse.Syntax.FunctionDeclaration:
+				case Estraverse.Syntax.FunctionExpression:
+					if(proposalUtils.isBefore(offset, parent.body.range)) {
+						return true;						
+					}
+					break;
 			}
 		}
 		return { kind : "top", toDefer : toDefer };
 	}
 
 	/**
-	 * Extracts all doccomments that fall inside the given range.
+	 * @description Extracts all doccomments that fall inside the given range.
 	 * Side effect is to remove the array elements
 	 * @param Array.<{range:Array.<Number}>> doccomments
 	 * @param Array.<Number> range
@@ -189,7 +184,6 @@ define([
 				break;
 			}
 		}
-
 		if (i < doccomments.length) {
 			start = i;
 			for (i = i; i < doccomments.length; i++) {
@@ -201,19 +195,7 @@ define([
 			}
 			end = i;
 		}
-
 		return doccomments.splice(start, end-start);
-	}
-
-
-
-
-	/**
-	 * the prefix of a completion should not be included in the completion itself
-	 * must explicitly remove it
-	 */
-	function removePrefix(prefix, string) {
-		return string.substring(prefix.length);
 	}
 
 	/**
@@ -234,6 +216,16 @@ define([
 		return " : " + typeUtils.createReadableType(propType, env);
 	}
 
+	/**
+	 * @description Create the array of inferred proposals
+	 * @param {String} targetTypeName The name of the type to find
+	 * @param {Object} env The backing type environment
+	 * @param {String} completionKind The kind of the completion
+	 * @param {String} prefix The start of the expression to complete
+	 * @param {Number} replaceStart The offset into the source where to start the completion
+	 * @param {Object} proposals The object that attach computed proposals to
+	 * @param {Number} relevance The ordering relevance of the proposals
+	 */
 	function createInferredProposals(targetTypeName, env, completionKind, prefix, replaceStart, proposals, relevance) {
 		var prop, propTypeObj, propName, res, type = env.lookupQualifiedType(targetTypeName), proto = type.$$proto;
 		if (!relevance) {
@@ -334,7 +326,7 @@ define([
 					if (propType.type === 'FunctionType') {
 						var res = calculateFunctionProposal(prop, propType, replaceStart - 1);
 						proposals[prop] = {
-							proposal: removePrefix(prefix, res.completion),
+							proposal: res.completion.substring(prefix.length),
 							name: prop,
 							description: createProposalDescription(propType, environment),
 							positions: res.positions,
@@ -346,7 +338,7 @@ define([
 						proposalAdded = true;
 					} else {
 						proposals[prop] = {
-							proposal: removePrefix(prefix, prop),
+							proposal: prop.substring(prefix.length),
 							name: prop,
 							description: createProposalDescription(propType, environment),
 							relevance: -100,
@@ -389,11 +381,9 @@ define([
 			case 'VoidLiteral':
 				// leaf nodes
 				return;
-
 			case 'NameExpression':
 				operation(typeObj, operation);
 				return;
-
 			case 'ArrayType':
 				visitTypeStructure(typeObj.expression, operation);
 				// fall-through
@@ -402,17 +392,14 @@ define([
 					typeObj.elements.forEach(function(elt) { visitTypeStructure(elt, operation); });
 				}
 				return;
-
 			case 'RecordType':
 				if (typeObj.fields) {
 					typeObj.fields.forEach(function(elt) { visitTypeStructure(elt, operation); });
 				}
 				return;
-
 			case 'FieldType':
 				visitTypeStructure(typeObj.expression, operation);
 				return;
-
 			case 'FunctionType':
 				// do we need to check for serialized functions???
 				if (typeObj.params) {
@@ -422,7 +409,6 @@ define([
 					visitTypeStructure(typeObj.result, operation);
 				}
 				return;
-
 			case 'ParameterType':
 				// TODO FIXADE uncomment to make the size of summaries smaller
 				// by not including parameter types in summary.
@@ -434,7 +420,6 @@ define([
 				if (typeObj.applications) {
 					typeObj.applications.forEach(function(elt) { visitTypeStructure(elt, operation); });
 				}
-
 				// fall-through
 			case 'RestType':
 			case 'NonNullableType':
@@ -442,8 +427,6 @@ define([
 			case 'NullableType':
 				visitTypeStructure(typeObj.expression, operation);
 				return;
-
-
 		}
 	}
 
@@ -456,11 +439,9 @@ define([
 				// prevent infinite recursion for circular refs
 				return;
 			}
-
 			alreadySeen[typeObj.name] = true;
 			findUnreachable(typeObj.name, allTypes, alreadySeen);
 		};
-
 		if (currentType) {
 			for(var prop in currentType) {
 				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
@@ -742,8 +723,12 @@ define([
 
 
 	/**
-	 * @param {javascript.ASTManager} astManager
-	 * @param {{global:[],options:{browser:Boolean}}=} lintOptions optional set of extra lint options that can be overridden in the source (jslint or jshint)
+	 * @description Creates a new JSContentAssist object
+	 * @constructor
+	 * @public
+	 * @param {javascript.ASTManager} astManager An AST manager to create ASTs with
+	 * @param {Object} indexer An indexer to load / work with supplied indexes
+	 * @param {Object} lintOptions the given jslint options from the source
 	 */
 	function JSContentAssist(astManager, indexer, lintOptions) {
 		this.astManager = astManager;
@@ -754,10 +739,10 @@ define([
 	/**
 	 * Main entry point to provider
 	 */
-	JSContentAssist.prototype = {
+	Objects.mixin(JSContentAssist.prototype, {
 
 		/**
-		 * Implements the Orion content assist API v4.0
+		 * @description Implements the Orion content assist API v4.0
 		 */
 		computeContentAssist: function(editorContext, params) {
 			var self = this;
@@ -842,7 +827,8 @@ define([
 				return emptyArrayPromise();
 			}
 		}
-	};
+	});
+	
 	return {
 		JSContentAssist : JSContentAssist
 	};

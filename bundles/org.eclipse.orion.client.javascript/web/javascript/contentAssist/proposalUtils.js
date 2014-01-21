@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 VMware, Inc. and others.
+ * Copyright (c) 2012, 2014 VMware, Inc. and others.
  * All Rights Reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,19 +14,6 @@
 /*global define */
 define(function() {
 
-	/**
-	 * checks that offset overlaps with the given range
-	 * Since esprima ranges are zero-based, inclusive of
-	 * the first char and exclusive of the last char, must
-	 * use a +1 at the end.
-	 * eg- (^ is the line start)
-	 *	   ^x	---> range[0,0]
-	 *	   ^  xx ---> range[2,3]
-	 */
-	function inRange(offset, range, includeEdge) {
-		return range[0] <= offset && (includeEdge ? range[1] >= offset : range[1] > offset);
-	}
-	
 	return {
 		/**
 		 * Match ignoring case and checking camel case.
@@ -116,7 +103,24 @@ define(function() {
 			return str;
 		},
 		
-		inRange : inRange,
+		/**
+		 * @description Checks that offset overlaps with the given range
+		 * Since esprima ranges are zero-based, inclusive of
+		 * the first char and exclusive of the last char, must
+		 * use a +1 at the end.
+		 * eg- (^ is the line start)
+		 *	   ^x	---> range[0,0]
+		 *	   ^  xx ---> range[2,3]
+		 * @function
+		 * @public
+		 * @param {Number} offset The offset into the source
+		 * @param {Array.<Number>} range The start and end range of the editor selection
+		 * @param {Boolean} includeEdge if we should include the trailing edge of the range
+		 * @returns {Boolean} If the given offset is within the given range
+		 */
+		inRange : function(offset, range, includeEdge) {
+			return range[0] <= offset && (includeEdge ? range[1] >= offset : range[1] > offset);
+		},
 		
 		/**
 		 * checks that offset is before the range
@@ -155,8 +159,8 @@ define(function() {
 			// we are not considered "after" the dot if the offset
 			// overlaps with the property expression or if the offset is
 			// after the end of the member expression
-			if (!inRange(offset-1, memberExpr.range) ||
-				inRange(offset-1, memberExpr.object.range) ||
+			if (!this.inRange(offset-1, memberExpr.range) ||
+				this.inRange(offset-1, memberExpr.object.range) ||
 				offset > end) {
 				return false;
 			}

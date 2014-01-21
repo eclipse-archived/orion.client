@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 VMware, Inc. and others.
+ * Copyright (c) 2012, 2014 VMware, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,13 +14,12 @@
 /*global define esprima console setTimeout doctrine*/
 define([
 	'javascript/contentAssist/contentAssist',
-	'javascript/contentAssist/esprimaVisitor',
 	'orion/assert',
 	'orion/objects',
 	'esprima',
 	'doctrine/doctrine',
 	'orion/Deferred'
-], function(ContentAssist, mVisitor, assert, objects, Esprima, Doctrine, Deferred) {
+], function(ContentAssist, assert, objects, Esprima, Doctrine, Deferred) {
 
 	//////////////////////////////////////////////////////////
 	// helpers
