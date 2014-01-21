@@ -18,8 +18,9 @@ define([
 	'orion/objects',
 	'esprima',
 	'doctrine/doctrine',
-	'orion/Deferred'
-], function(ContentAssist, assert, objects, Esprima, Doctrine, Deferred) {
+	'orion/Deferred',
+	'orion/editor/jsTemplateContentAssist' //TODO remove this once we merge the code
+], function(ContentAssist, assert, objects, Esprima, Doctrine, Deferred, JSTemplateProposals) {
 
 	//////////////////////////////////////////////////////////
 	// helpers
@@ -103,6 +104,16 @@ define([
 		return contentAssist.computeContentAssist(editorContext, params);
 	}
 
+	/**
+	 * @description Computes the content assist proposals for templates and keywords
+	 * @returns {Object} Array of proposal objects
+	 * TODO remove this once we merge the proposal computers
+	 * @since 5.0
+	 */
+	function computeTemplateContentAssist(buffer, offset, context) {
+		var templateAssist = new JSTemplateProposals.JSTemplateContentAssistProvider();
+		return new Deferred().resolve(templateAssist.computeProposals(buffer, offset, context));
+	}
 
 	function testProposal(proposal, text, description) {
 		assert.equal(proposal.proposal, text, "Invalid proposal text"); //$NON-NLS-0$
@@ -4439,8 +4450,81 @@ define([
 		]);
 	};
 
-	// TODO !
-//	var tests = {};
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
+	 * @since 5.0
+	 */
+	tests["test completions for Function1"] = function() {
+		var results = computeTemplateContentAssist("var foo; foo !== null ? fun : function(f2) {};", 27, { prefix: "fun"});
+		return testProposals(results, [
+				//proposal, description
+				["", "Templates"], 
+				["ction name (parameter) {\n\t\n}", "function - function declaration"],
+				["", "Keywords"], 
+				["ction", "function"], 
+				]);
+	};
+
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
+	 * @since 5.0
+	 */
+	tests["test completions for Function2"] = function() {
+		var results = computeTemplateContentAssist("var foo; foo !== null ? function(f2) {} : fun;", 45, { prefix: "fun"});
+		return testProposals(results, [
+				//proposal, description
+				["", "Templates"], 
+				["ction name (parameter) {\n\t\n}", "function - function declaration"],
+				["", "Keywords"], 
+				["ction", "function"], 
+				]);
+	};
+	
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
+	 * @since 5.0
+	 */
+	tests["test completions for Function3"] = function() {
+		var results = computeTemplateContentAssist("var foo = {f: fun};", 17, { prefix: "fun"});
+		return testProposals(results, [
+				//proposal, description
+				["", "Templates"], 
+				["ction name (parameter) {\n\t\n}", "function - function declaration"],
+				["", "Keywords"], 
+				["ction", "function"], 
+				]);
+	};
+	
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
+	 * @since 5.0
+	 */
+	tests["test completions for Function4"] = function() {
+		var results = computeTemplateContentAssist("var foo = {f: fun};", 17, { prefix: "fun"});
+		return testProposals(results, [
+				//proposal, description
+				["", "Templates"], 
+				["ction name (parameter) {\n\t\n}", "function - function declaration"],
+				["", "Keywords"], 
+				["ction", "function"], 
+				]);
+	};
+	
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
+	 * @since 5.0
+	 */
+	tests["test completions for Function5"] = function() {
+		var results = computeTemplateContentAssist("fun", 3, { prefix: "fun"});
+		return testProposals(results, [
+				//proposal, description
+				["", "Templates"], 
+				["ction name (parameter) {\n\t\n}", "function - function declaration"],
+				["", "Keywords"], 
+				["ction", "function"], 
+				]);
+	};
+
 
 	var tif = tests.testIndexFiles = {};
 	tif["test Node proposal from Tern index"] = function() {
