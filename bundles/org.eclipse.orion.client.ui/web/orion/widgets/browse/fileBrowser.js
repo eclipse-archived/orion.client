@@ -11,7 +11,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint browser:true devel:true sub:true*/
-/*global define eclipse:true orion:true window*/
+/*global define eclipse:true orion:true window URL*/
 
 define([
 	'orion/PageUtil', 
@@ -209,10 +209,15 @@ define([
 						if(!mNavigatorRenderer.isImage(cType)) {
 							browseViewOptons.editorView = this._editorView;
 						} else {
-							var image = document.createElement("img"); //$NON-NLS-0$
-							image.src = metadata.Location;
-							image.classList.add("readonlyImage"); //$NON-NLS-0$
-							browseViewOptons.imageView = {image: image};
+							browseViewOptons.imageView = {};
+							this._fileClient.readBlob(metadata.Location).then(function(buffer){
+								var objectURL = URL.createObjectURL(new Blob(new Uint8Array(buffer)));
+								var image = document.createElement("img"); //$NON-NLS-0$
+								image.src = objectURL;
+								//URL.revokeObjectURL(objectURL);
+								image.classList.add("readonlyImage"); //$NON-NLS-0$
+								this._currentEditorView.updateImage(image);
+							}.bind(this));							
 						}
 						view = new mBrowseView.BrowseView(browseViewOptons);
 					} else if (id === "orion.markdownViewer") { //$NON-NLS-0$

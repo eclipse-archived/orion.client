@@ -394,6 +394,16 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		},
 
 		/**
+		 * Returns the blob contents of the file at the given location.
+		 *
+		 * @param {String} location The location of the file to get contents for
+		 * @return A deferred that will be provided with the blob contents when available
+		 */
+		readBlob: function(location) {
+			return _doServiceCall(this._getService(location), "readBlob", arguments); //$NON-NLS-0$
+		},
+
+		/**
 		 * Writes the contents or metadata of the file at the given location.
 		 *
 		 * @param {String} location The location of the file to set contents for

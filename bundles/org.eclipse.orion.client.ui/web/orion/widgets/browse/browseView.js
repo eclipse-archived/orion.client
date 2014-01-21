@@ -179,6 +179,7 @@ define([
 		displayWorkspaceView: function(){
 			if(!this._node){
 				this._node = document.createElement("div"); //$NON-NLS-0$
+				this._node.classList.add("browse_inner_container"); //$NON-NLS-0$
 			}
 			this._parent.appendChild(this._node);
 		},
@@ -197,6 +198,7 @@ define([
 			var div;
 			if(!this._node){
 				this._node = document.createElement("div"); //$NON-NLS-0$
+				this._node.classList.add("browse_inner_container"); //$NON-NLS-0$
 			}
 			this._parent.appendChild(this._node);
 			
@@ -206,9 +208,9 @@ define([
 						if (this.showFolderNav) {
 							var navNode = document.createElement("div"); //$NON-NLS-0$
 							navNode.id = "folderNavNode"; //$NON-NLS-0$
-							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: !this.readonly});
+							this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: !this.readonly});
 							if(this.editorView) {//To embed an orion editor in the section
-								foldersSection.setContent(this.editorView.getParent());
+								this._foldersSection.setContent(this.editorView.getParent());
 								this.editorView.create();
 								var textView = this.editorView. editor.getTextView();
 								textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
@@ -220,7 +222,7 @@ define([
 								}.bind(this));
 								this.editor = this.editorView.editor;
 							} else if(this.imageView) {
-								foldersSection.setContent(this.imageView.image);
+								//this._foldersSection.setContent(this.imageView.image);
 							} else {
 								this.folderNavExplorer = new FolderNavExplorer({
 									parentId: navNode,
@@ -231,17 +233,17 @@ define([
 									commandRegistry: this.commandRegistry,
 									contentTypeRegistry: this.contentTypeRegistry
 								});
-								foldersSection.embedExplorer(this.folderNavExplorer, null, true);
+								this._foldersSection.embedExplorer(this.folderNavExplorer, null, true);
 								this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
 								this.folderNavExplorer.loadRoot(this._metadata);
 							}
 							if(this.breadCrumbMaker) {
-								var tileNode = foldersSection.getTitleElement();
+								var tileNode = this._foldersSection.getTitleElement();
 								if(tileNode) {
 									lib.empty(tileNode);
 									var bcNode = document.createElement("div"); //$NON-NLS-0$
 									tileNode.appendChild(bcNode);
-									this.breadCrumbMaker(bcNode, foldersSection.getHeaderElement().offsetWidth - 24);
+									this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 24);
 								}
 							}
 						}
@@ -257,6 +259,10 @@ define([
 			
 			var sectionsOrder = ["folderNav", "readme"];
 			renderSections.apply(this, [sectionsOrder]);
+		},
+		
+		updateImage: function(image) {
+			this._foldersSection.setContent(image);
 		},
 		create: function() {
 			if(this._metadata.Projects){ //this is a workspace root

@@ -29,6 +29,7 @@ define(['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/plug
 function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 		// figure out plugin to install from repoURL
 	var pluginURL = "http://libingw.orion.eclipse.org:8080/plugins/GitHubFilePlugin.html?repo=https://github.com/eclipse/orion.client.git";
+	//var pluginURL = "http://www.harvardproductions.com/webdav/webav-plugin/webdavFilePlugin.html";
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 	var plugins = {};
 	plugins[pluginURL] = true;
@@ -45,4 +46,5 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 		});
 	})
 });
+
 
