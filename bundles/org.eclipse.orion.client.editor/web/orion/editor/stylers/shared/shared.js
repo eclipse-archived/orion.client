@@ -58,7 +58,7 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 				}, {
 					id: "comment_multiline",
 					begin: "/\\*",
-					end: "(?:\\*/|$)",
+					end: "\\*/",
 					name: "comment.block",
 					patterns: [
 						{

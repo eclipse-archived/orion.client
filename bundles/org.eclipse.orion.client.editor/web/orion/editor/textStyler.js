@@ -28,15 +28,33 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var PUNCTUATION_SECTION_BEGIN = ".begin"; //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
 	
-	var spacePattern = {regex: new RegExp(" ", "g"), style: {styleClass: "punctuation separator space", unmergeable: true}}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	var tabPattern = {regex: new RegExp("\t", "g"), style: {styleClass: "punctuation separator tab", unmergeable: true}}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var eolRegex = /$/;
+	var linebreakRegex = /.*(?:\n|$)/g;
+	var spacePattern = {regex: / /g, style: {styleClass: "punctuation separator space", unmergeable: true}}; //$NON-NLS-0$
+	var tabPattern = {regex: /\t/g, style: {styleClass: "punctuation separator tab", unmergeable: true}}; //$NON-NLS-0$
 
+	var _findMatch = function(regex, text, startIndex) {
+		var index = startIndex;
+		var initialLastIndex = regex.lastIndex;
+		linebreakRegex.lastIndex = startIndex;
+		var currentLine = linebreakRegex.exec(text);
+		while (currentLine && currentLine.index < text.length) {
+			regex.lastIndex = 0;
+			var result = regex.exec(currentLine[0]);
+			if (result) {
+				result.index += index;
+				regex.lastIndex = initialLastIndex;
+				return result;
+			}
+			index += currentLine[0].length;
+			currentLine = linebreakRegex.exec(text);
+		}
+		regex.lastIndex = initialLastIndex;
+		return null;
+	};
 	var updateMatch = function(match, text, matches, minimumIndex) {
 		var regEx = match.pattern.regex ? match.pattern.regex : match.pattern.regexBegin;
-		if (minimumIndex) {
-			regEx.lastIndex = minimumIndex;
-		}
-		var result = regEx.exec(text);
+		var result = _findMatch(regEx, text, minimumIndex);
 		if (result) {
 			match.result = result;
 			for (var i = 0; i < matches.length; i++) {
@@ -143,13 +161,14 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				current.pattern.regexEnd.lastIndex = current.result.index + current.result[0].length;
 				result = current.pattern.regexEnd.exec(text);
 				if (!result) {
-					result = new RegExp("$").exec(text);
+					eolRegex.lastIndex = 0;
+					result = eolRegex.exec(text);
 				}
 				end = result.index + result[0].length;
 				styles.push({start: offset + start, end: offset + end, style: current.pattern.pattern.name, isWhitespace: current.pattern.isWhitespace});
 			}
 			index = result.index + result[0].length;
-			updateMatch(current, text, matches);
+			updateMatch(current, text, matches, index);
 		}
 		patterns.forEach(function(current) {
 			var regex = current.regex || current.regexBegin;
@@ -201,8 +220,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var computeBlocks = function(model, text, block, offset) {
 		var matches = [];
 		block.getBlockPatterns().forEach(function(current) {
-			current.regexBegin.lastIndex = current.regexEnd.lastIndex = 0;
-			var result = current.regexBegin.exec(text);
+			var result = _findMatch(current.regexBegin, text, 0);
 			if (result) {
 				matches.push({result: result, pattern: current});
 			}
@@ -216,7 +234,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			return a.pattern.pattern.index < b.pattern.pattern.index ? -1 : 1;
 		});
-
 		if (!matches.length) {
 			return matches;
 		}
@@ -239,16 +256,19 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			var styles = [];
 			parse(lineText, model.getLineStart(lineIndex), block, styles);
 			var start = offset + current.result.index;
-			for (var i = 0; i < styles.length; i++) {
+			var i = 0;
+			for (; i < styles.length; i++) {
 				if (styles[i].start === start) {
 					/* found it, now determine the end (and ensure that it is valid) */
 					var contentStart = current.result.index + current.result[0].length;
 					var resultEnd = null;
-					current.pattern.regexEnd.lastIndex = contentStart;
+
+					var lastIndex = contentStart;
 					while (!resultEnd) {
-						var result = current.pattern.regexEnd.exec(text);
+						var result = _findMatch(current.pattern.regexEnd, text, lastIndex);
 						if (!result) {
-							break;
+							eolRegex.lastIndex = 0;
+							result = eolRegex.exec(text);
 						}
 						var styles2 = [];
 						var testBlock = new Block(
@@ -266,15 +286,17 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 						if (!styles2.length || styles2[styles2.length - 1].end <= result.index) {
 							resultEnd = testBlock;
 						}
+						lastIndex = result.index + result[0].length;
 					}
-					if (resultEnd) {
-						results.push(resultEnd);
-						index = resultEnd.end - offset;
-					}
+					results.push(resultEnd);
+					index = resultEnd.end - offset;
 					break;
 				}
 			}
-			updateMatch(current, text, matches);
+			if (i === styles.length) {
+				index = current.result.index + 1;
+			}
+			updateMatch(current, text, matches, index);
 		}
 		computeTasks(offset, block, model, results);
 		return results;
@@ -451,7 +473,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				testString = model.getText(this.contentEnd, this.end);
 				index = this.contentEnd;
 			}
-			
+
 			regex.lastIndex = 0;
 			var result = regex.exec(testString);
 			if (result) {
@@ -770,8 +792,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			var keys = Object.keys(enclosurePatterns);
 			for (var i = 0; i < keys.length; i++) {
 				var current = enclosurePatterns[keys[i]];
-				current.regex.lastIndex = 0;
-				var result = current.regex.exec(text);
+				var result = _findMatch(current.regex, text, 0)
 				if (result && result.index === 0) {
 					match = current;
 					break;
@@ -892,8 +913,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				var s = Math.max(offset, blockStart);
 				if (s === blockStart) {
 					/* currently at the block's "start" match, which specifies its style by either a capture or name */
-					blocks[i].pattern.regexBegin.lastIndex = 0;
-					var result = blocks[i].pattern.regexBegin.exec(text.substring(s - start));
+					var result = _findMatch(blocks[i].pattern.regexBegin, text.substring(s - start), 0);
 					if (result) {
 						/* the begin match is still valid */
 						var captures = blocks[i].pattern.pattern.beginCaptures || blocks[i].pattern.pattern.captures;
@@ -914,9 +934,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				var endStyles = [];
 				if (e === blockEnd) {
 					/* currently at the block's "end" match, which specifies its style by either a capture or name */
-					blocks[i].pattern.regexEnd.lastIndex = 0;
 					var testString = text.substring(e - offset - (blocks[i].end - blocks[i].contentEnd));
-					var result = blocks[i].pattern.regexEnd.exec(testString);
+					var result = _findMatch(blocks[i].pattern.regexEnd, testString, 0);
 					if (result) {
 						/* the end match is still valid */
 						var captures = blocks[i].pattern.pattern.endCaptures || blocks[i].pattern.pattern.captures;

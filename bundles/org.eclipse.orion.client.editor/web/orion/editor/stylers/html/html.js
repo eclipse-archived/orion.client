@@ -26,7 +26,7 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				name: "meta.tag.doctype.html",
 			}, {
 				begin: "(<script)([^>]*)(>)",
-				end: "(</script>|$)",
+				end: "(</script>)",
 				captures: {
 					1: {name: "entity.name.tag"},
 					3: {name: "entity.name.tag"}
@@ -39,7 +39,7 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				]
 			}, {
 				begin: "(<style)([^>]*)(>)",
-				end: "(</style>|$)",
+				end: "(</style>)",
 				captures: {
 					1: {name: "entity.name.tag"},
 					3: {name: "entity.name.tag"}
@@ -53,11 +53,11 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 			}, {
 				id: "comment",
 				begin: "<!--",
-				end: "-->|$",
+				end: "-->",
 				name: "comment.block"
 			}, {
 				begin: "(</?[A-Za-z0-9]+)",
-				end: "(/?>|$)",
+				end: "(/?>)",
 				captures: {
 					1: {name: "entity.name.tag"},
 				},
