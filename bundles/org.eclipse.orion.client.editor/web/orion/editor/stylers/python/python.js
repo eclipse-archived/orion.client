@@ -29,7 +29,6 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 		"try", "True", //$NON-NLS-1$ //$NON-NLS-0$
 		"while", "with", //$NON-NLS-1$ //$NON-NLS-0$
 		"yield" //$NON-NLS-0$
-
 	];
 
 	var grammars = mShared.grammars;

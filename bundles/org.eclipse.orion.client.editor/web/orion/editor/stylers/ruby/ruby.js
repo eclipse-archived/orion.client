@@ -43,6 +43,41 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 			{
 				include: "orion.patterns"
 			}, {
+				/* override from orion.patterns */
+				id: "comment_singleline",
+			}, {
+				/* override from orion.patterns */
+				id: "comment_multiline",
+			}, {
+				begin: "#",
+				end: ".*",
+				name: "comment.line",
+				patterns: [
+					{
+						match: "(\\b)(TODO)(\\b)(.*)",
+						name: "meta.annotation.task.todo",
+						captures: {
+							2: {name: "keyword.other.documentation.task"},
+							4: {name: "comment.line"}
+						}
+					}
+				]
+			}, {
+				id: "comment_multiline",
+				begin: "^=begin",
+				end: "^=end",
+				name: "comment.block",
+				patterns: [
+					{
+						match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",
+						name: "meta.annotation.task.todo",
+						captures: {
+							2: {name: "keyword.other.documentation.task"},
+							4: {name: "comment.block"}
+						}
+					}
+				]
+			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control"
 			}
