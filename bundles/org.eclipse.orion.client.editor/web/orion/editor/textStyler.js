@@ -29,7 +29,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
 	
 	var eolRegex = /$/;
-	var linebreakRegex = /.*(?:\n|$)/g;
+	var linebreakRegex = /.*(?:[\r\n]|$)/g;
 	var spacePattern = {regex: / /g, style: {styleClass: "punctuation separator space", unmergeable: true}}; //$NON-NLS-0$
 	var tabPattern = {regex: /\t/g, style: {styleClass: "punctuation separator tab", unmergeable: true}}; //$NON-NLS-0$
 
