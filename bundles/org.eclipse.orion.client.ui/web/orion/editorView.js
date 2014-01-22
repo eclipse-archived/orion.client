@@ -468,7 +468,8 @@ define([
 				"getCaretOffset", "setCaretOffset", //$NON-NLS-1$ //$NON-NLS-0$
 				"getSelection", "setSelection", //$NON-NLS-1$ //$NON-NLS-0$
 				"getText", "setText", //$NON-NLS-1$ //$NON-NLS-0$
-				"getLineAtOffset" //$NON-NLS-0$
+				"getLineAtOffset", //$NON-NLS-0$
+				"getLineStart" //$NON-NLS-0$
 			].forEach(function(method) {
 				contextImpl[method] = editor[method].bind(editor);
 			});

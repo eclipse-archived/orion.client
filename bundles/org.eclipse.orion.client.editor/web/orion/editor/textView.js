@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -1796,6 +1796,19 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 */
 		getLineAtOffset: function(offset) {
 			this.getModel().getLineAtOffset(offset);
+		},
+		/**
+		 * @name getLineStart
+		 * @description Compute the editor start offset of the given line number
+		 * @function
+		 * @public
+		 * @memberof orion.editor.TextView
+		 * @param {Number} line The line number in the editor
+		 * @returns {Number} Returns the start offset of the given line number in the editor.
+		 * @since 5.0
+		 */
+		getLineStart: function(line) {
+			this.getModel().getLineStart(line);
 		},
 		/**
 		 * Get the view rulers.
