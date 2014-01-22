@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define window console eclipse orion*/
-
+/*
 define([
 	'orion/bootstrap', 
 	'orion/fileClient',
@@ -23,6 +23,26 @@ define([
 			fileClient: new mFileClient.FileClient(core.serviceRegistry)
 		}); 
 	});
+});
+*/
+define(['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry'],
+function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
+		// figure out plugin to install from repoURL
+	var pluginURL = "http://libingw.orion.eclipse.org:8080/plugins/GitHubFilePlugin.html?repo=https://github.com/eclipse/orion.client.git";
+	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
+	var plugins = {};
+	plugins[pluginURL] = true;
+	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
+		storage: {},
+		plugins: plugins
+	});
+	pluginRegistry.start().then(function() {
+		var fileBrowser = new mFileBrowser.FileBrowser({
+			parent: "fileBrowser", 
+			//maxEditorHeight: 800,
+			serviceRegistry: serviceRegistry
+		});
+	})
 });
 
 

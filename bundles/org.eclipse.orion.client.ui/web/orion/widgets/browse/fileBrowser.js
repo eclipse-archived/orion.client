@@ -211,7 +211,8 @@ define([
 						} else {
 							browseViewOptons.imageView = {};
 							this._fileClient.readBlob(metadata.Location).then(function(buffer){
-								var objectURL = URL.createObjectURL(new Blob(new Uint8Array(buffer)));
+								//var objectURL = URL.createObjectURL(new Blob(new Uint8Array(buffer),{type: cType.id}));
+								var objectURL = URL.createObjectURL(new Blob([buffer],{type: cType.id}));
 								var image = document.createElement("img"); //$NON-NLS-0$
 								image.src = objectURL;
 								//URL.revokeObjectURL(objectURL);

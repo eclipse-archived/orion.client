@@ -48,6 +48,24 @@
 	margin-top: 20px;
 }
 
+.browserBranchName {
+	font-weight: bold;
+	margin-left: 4px;
+	margin-top: 8px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	/* 100% - filesystemName_margin - filesystemName_margin - filesystemSwitcher_width */
+	max-width: calc(100% - 6px - 4px - 24px);
+	max-width: -webkit-calc(100% - 6px - 4px - 24px);
+	-moz-user-select: -moz-none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	color:#444;
+}
+
+
 /*
 .breadcrumb {
 	font-size: 8pt;

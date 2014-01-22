@@ -11,13 +11,11 @@
 /*global define URL*/
 /*jslint browser:true sub:true*/
 define([
-	'i18n!orion/edit/nls/messages',
 	'orion/objects',
 	'orion/webui/littlelib',
-	'orion/i18nUtil',
 	'orion/commands',
 	'orion/URL-shim'
-], function(messages, objects, lib, i18nUtil, Commands, _) {
+], function(objects, lib, Commands, _) {
 
 	/**
 	 * @name orion.widgets.Filesystem.BranchSelector
@@ -26,82 +24,71 @@ define([
 	 * and provides a menu for changing the filesystem being viewed in the explorer.
 	 * @param {orion.commands.CommandRegistry} params.commandRegistry
 	 * @param {orion.fileClient.FileClient} params.fileClient
-	 * @param {EventTarget} params.rootChangeListener the rootChange event listener that hadles the root change
+	 * @param {EventTarget} params.branchChangeListener the branchChange event listener that hadles the root change
 	 * @param {EventTarget} params.filesystemChangeDispatcher the "filesystemChanged" event dispatcher
 	 * @param {Element} params.node
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 */
 	function BranchSelector(params) {
 		this.commandRegistry = params.commandRegistry;
-		this.rootChangeListener = params.rootChangeListener;
+		this.branchChangeListener = params.branchChangeListener;
 		this.filesystemChangeDispatcher = params.filesystemChangeDispatcher;
 		this.fileClient = params.fileClient;
 		this.node = params.node;
 		this.serviceRegistry = params.serviceRegistry;
-		var _self = this;
 		this.listener = function(event) {
-			_self.refresh(event.root);
-		};
-		if(this.rootChangeListener){
-			this.rootChangeListener.addEventListener("rootChanged", this.listener); //$NON-NLS-0$
+			this.refresh(event.root);
+		}.bind(this);
+		if(this.branchChangeListener){
+			this.branchChangeListener.addEventListener("branchChanged", this.listener); //$NON-NLS-0$
 		}
 		this.render();
 	}
 	objects.mixin(BranchSelector.prototype, /** @lends orion.widgets.Filesystem.BranchSelector */ {
 		destroy: function() {
-			if(this.rootChangeListener) {
-				this.rootChangeListener.removeEventListener("rootChanged", this.listener); //$NON-NLS-0$
+			if(this.branchChangeListener) {
+				this.branchChangeListener.removeEventListener("branchChanged", this.listener); //$NON-NLS-0$
 			}
 			this.commandRegistry.destroy(this.node);
 			lib.empty(this.node);
-			this.rootChangeListener = this.filesystemChangeDispatcher = this.listener = this.node = null;
+			this.branchChangeListener = this.filesystemChangeDispatcher = this.listener = this.node = null;
 		},
 		registerCommands: function() {
 			if (!this.commandsRegistered) {
 				this.commandsRegistered = true;
-				var commandRegistry = this.commandRegistry, serviceRegistry = this.serviceRegistry;
-				var switchFsCommand = new Commands.Command({
-					name: messages["ChooseFS"],
+				var commandRegistry = this.commandRegistry;
+				var switchBrCommand = new Commands.Command({
+					name: "Choose Branch",
 					imageClass: "core-sprite-openarrow", //$NON-NLS-0$
-					selectionClass: "dropdownSelection", //$NON-NLS-0$
-					tooltip: messages["ChooseFSTooltip"], //$NON-NLS-0$
-					id: "orion.nav.switchfs", //$NON-NLS-0$
+					tooltip: "Select a branch",
+					id: "orion.browse.switchbr", //$NON-NLS-0$
 					visibleWhen: function(item) {
-						return serviceRegistry.getServiceReferences("orion.core.file").length > 1; //$NON-NLS-0$
+						return true;
 					},
-					choiceCallback: this._switchFsMenuCallback.bind(this)
+					callback: this._switchBrMenuCallback.bind(this)
 				});
-				commandRegistry.addCommand(switchFsCommand);
-				commandRegistry.registerCommandContribution("orion.mininav", "orion.nav.switchfs", 1); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.addCommand(switchBrCommand);
+				commandRegistry.registerCommandContribution("orion.browse", "orion.browse.switchbr", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
-		_switchFsMenuCallback: function(items) {
-			var serviceRegistry = this.serviceRegistry;
-			var _self = this;
-			return serviceRegistry.getServiceReferences("orion.core.file").map(function(fileServiceRef) { //$NON-NLS-0$
-				var top = fileServiceRef.getProperty("top"); //$NON-NLS-0$
-				return {
-					// TODO indicate which FS is currently active with bullet, etc
-					name: _self._fileServiceLabel(top, true),
-					callback: _self.setActiveFilesystem.bind(_self, top)
-				};
-			});
+		_switchBrMenuCallback: function(items) {
+			
 		},
 		render: function() {
-			this.fsName = document.createElement("div"); //$NON-NLS-0$
-			this.fsName.classList.add("filesystemName"); //$NON-NLS-0$
-			this.fsName.classList.add("layoutLeft"); //$NON-NLS-0$
+			this.brName = document.createElement("div"); //$NON-NLS-0$
+			this.brName.classList.add("filesystemName"); //$NON-NLS-0$
+			this.brName.classList.add("layoutLeft"); //$NON-NLS-0$
 			this.menu = document.createElement("ul"); //$NON-NLS-0$
 			this.menu.classList.add("BranchSelector"); //$NON-NLS-0$
 			this.menu.classList.add("commandList"); //$NON-NLS-0$
 			this.menu.classList.add("layoutRight"); //$NON-NLS-0$
 			this.menu.classList.add("pageActions"); //$NON-NLS-0$
-			this.node.appendChild(this.fsName);
+			this.node.appendChild(this.brName);
 			this.node.appendChild(this.menu);
 
 			this.registerCommands();
 
-			this.fsName.addEventListener("click", this._openMenu.bind(this)); //$NON-NLS-0$
+			this.brName.addEventListener("click", this._openMenu.bind(this)); //$NON-NLS-0$
 		},
 		_openMenu: function(event) {
 			var menu = lib.$(".dropdownTrigger", this.menu); //$NON-NLS-0$
@@ -125,25 +112,17 @@ define([
 		/**
 		 * @returns {String|DocumentFragment}
 		 */
-		_fileServiceLabel: function(location, plainText) {
-			// Assume this fileClient was not created with a service filter so it knows about every fileservice in the registry.
-			var name = this.fileClient.fileServiceName(location);
-			var hostname = this._fileServiceHostname(location);
-			if (plainText) {
-				return i18nUtil.formatMessage(messages["FSTitle"], name, hostname);
-			}
-			var fragment = document.createDocumentFragment();
-			fragment.textContent = messages["FSTitle"]; //$NON-NLS-0$
-			lib.processDOMNodes(fragment, [document.createTextNode(name), document.createTextNode(hostname)]);
-			return fragment;
+		_branchLabel: function(meta) {
+			//TOTO figure out the branch name from any meta (e.g. sub folder)
+			return "master";
 		},
 		refresh: function(location) {
 			var target = location;
 			if (location.ChildrenLocation) {
 				target = location.ChildrenLocation;
 			}
-			lib.empty(this.fsName);
-			this.fsName.appendChild(this._fileServiceLabel(target));
+			lib.empty(this.brName);
+			this.brName.appendChild(this._branchLabel(target));
 
 			this.commandRegistry.destroy(this.menu);
 			this.commandRegistry.renderCommands("orion.mininav", this.menu, {}, "menu"); //$NON-NLS-1$ //$NON-NLS-0$
