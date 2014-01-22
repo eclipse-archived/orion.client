@@ -27,21 +27,8 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				},
 				name: "meta.tag.doctype.html",
 			}, {
-				begin: "(<script)([^>]*)(>)",
-				end: "(</script>)",
-				captures: {
-					1: {name: "entity.name.tag.html"},
-					3: {name: "entity.name.tag.html"}
-				},
-				contentName: "source.js.embedded.html",
-				patterns: [
-					{
-						include: "orion.js"
-					}
-				]
-			}, {
-				begin: "(<style)([^>]*)(>)",
-				end: "(</style>)",
+				begin: "(?i)(<style)([^>]*)(>)",
+				end: "(?i)(</style>)",
 				captures: {
 					1: {name: "entity.name.tag.html"},
 					3: {name: "entity.name.tag.html"}
@@ -53,8 +40,44 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 					}
 				]
 			}, {
-				begin: "(<\\?php\\b)",
-				end: "(\\?>|%>)",
+				begin: "(?i)(<script(?:\\s+language\\s*=\\s*(?:'javascript'|\"javascript\"))?\\s*>)",
+				end: "(?i)(</script>)",
+				captures: {
+					1: {name: "entity.name.tag.html"}
+				},
+				contentName: "source.js.embedded.html",
+				patterns: [
+					{
+						include: "orion.js"
+					}
+				]
+			}, {
+				begin: "(?i)(<script(?:\\s+language\\s*=\\s*(?:'php'|\"php\"))?\\s*>)",
+				end: "(?i)(</script>)",
+				captures: {
+					1: {name: "entity.name.tag.html"}
+				},
+				contentName: "source.php.embedded.html",
+				patterns: [
+					{
+						include: "orion.php"
+					}
+				]
+			}, {
+				begin: "(?i)(<\\?(?:=|php)?(?:\\s|$))",
+				end: "(\\?>)",
+				captures: {
+					1: {name: "entity.name.tag.html"}
+				},
+				contentName: "source.php.embedded.html",
+				patterns: [
+					{
+						include: "orion.php"
+					}
+				]
+			}, {
+				begin: "(<%=?(?:\\s|$))",
+				end: "(%>)",
 				captures: {
 					1: {name: "entity.name.tag.html"}
 				},
