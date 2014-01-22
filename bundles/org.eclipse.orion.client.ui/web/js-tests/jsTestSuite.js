@@ -1,7 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
- * Copyright (c) 2012 VMware, Inc.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -9,7 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Andrew Eisenberg (VMware) - added entry for esprima tests
+ *     Andrew Eisenberg (VMware) - added entry for Esprima tests
  *******************************************************************************/
 /*global console TestCase require jstestdriver*/
 var requireJSConfig = {
@@ -96,7 +95,6 @@ OrionTestCase("editor", "/js-tests/editor/test.html");
 OrionTestCase("textMateStyler", "/js-tests/editor/textMateStyler/test.html");
 OrionTestCase("textview", "/js-tests/editor/test-models.html");
 OrionTestCase("contentAssist", "/js-tests/editor/contentAssist/test.html");
-OrionTestCase("jsTemplateContentAssist", "/js-tests/jsTemplateContentAssist/test.html");
 OrionTestCase("contentTypes", "/js-tests/contentTypes/contentTypesTests.html");
 OrionTestCase("extensionParsing", "/js-tests/extensionParsing/test.html");
 OrionTestCase("xhr", "/js-tests/xhr/test.html");
@@ -104,14 +102,17 @@ OrionTestCase("config", "/js-tests/config/test.html");
 OrionTestCase("metatype", "/js-tests/metatype/test.html");
 OrionTestCase("setting", "/js-tests/settings/test.html");
 OrionTestCase("asyncStyler", "/js-tests/asyncStyler/test.html");
-OrionTestCase("ast", "/js-tests/astManager/astManagerTests.html");
 OrionTestCase("commands", "/js-tests/commands/test.html");
 OrionTestCase("editDispatcher", "/js-tests/dispatcher/editDispatcherTests.html");
 
 // These live in the javascript bundle
-OrionTestCase("esprima-content-assist", "/js-tests/contentAssistTests.html");
-OrionTestCase("index-file-parsing", "/js-tests/indexFileParsingTests.html");
-OrionTestCase("nodeJsEvents", "/js-tests/events/eslintEventTests.html");
+OrionTestCase("javascript-ast-manager", "/js-tests/javascript/astManagerTests.html");
+OrionTestCase("javascript-content-assist", "/js-tests/javascript/contentAssistTests.html");
+OrionTestCase("javascript-eslint-events", "/js-tests/javascript/eslintEventTests.html");
+OrionTestCase("javascript-finder", "/js-tests/javascript/finderTests.html");
+OrionTestCase("javascript-index-file-parsing", "/js-tests/javascript/indexFileParsingTests.html");
+OrionTestCase("javascript-occurrences", "/js-tests/javascript/occurrencesTests.html");
+OrionTestCase("javascript-outline", "/js-tests/javascript/outlinerTests.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
 //OrionUITestCase("textviewPerformance", "/js-tests/editor/test-performance.html");

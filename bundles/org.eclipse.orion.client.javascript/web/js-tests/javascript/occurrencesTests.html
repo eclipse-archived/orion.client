@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<script src="../../requirejs/require.js"></script>
+	<script src="../../../requirejs/require.js"></script>
 	<script>
 	/*global require window*/
 	require({
@@ -17,7 +17,7 @@
 	});
 
 	window.onload = function() {
-		require(["orion/test","js-tests/occurrencesTests.js"], function(test, testcase) {
+		require(["orion/test","js-tests/javascript/occurrencesTests.js"], function(test, testcase) {
 			test.run(testcase);
 		});
 	};

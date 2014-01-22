@@ -2,12 +2,12 @@
                     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-	<script src="../../orion/plugin.js"></script>
-	<script src="../../requirejs/require.js"></script>
+	<script src="../../../orion/plugin.js"></script>
+	<script src="../../../requirejs/require.js"></script>
 	<script>
 		/*global window require */
 		require({
-		  baseUrl: '../',
+		  baseUrl: '../../',
 		  paths: {
 				text: 'requirejs/text',
 				i18n: 'requirejs/i18n',
@@ -15,7 +15,7 @@
 		  }
 		});
 		window.onload = function() {
-			require(['orion/test','js-tests/indexFileParsingTests'],
+			require(['orion/test','js-tests/javascript/indexFileParsingTests'],
 				function(test, jsTests) {
 					test.run(jsTests);
 				});

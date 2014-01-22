@@ -14,14 +14,13 @@
 /*global define esprima console setTimeout doctrine*/
 define([
 	'javascript/contentAssist/contentAssist',
-	'javascript/contentAssist/indexer',
 	'orion/assert',
 	'orion/objects',
 	'esprima',
 	'doctrine/doctrine',
 	'orion/Deferred',
 	'orion/editor/jsTemplateContentAssist' //TODO remove this once we merge the code
-], function(ContentAssist, Indexer, assert, objects, Esprima, Doctrine, Deferred, JSTemplateProposals) {
+], function(ContentAssist, assert, objects, Esprima, Doctrine, Deferred, JSTemplateProposals) {
 
 	//////////////////////////////////////////////////////////
 	// helpers
@@ -49,7 +48,6 @@ define([
 		    prefix = options.prefix,
 		    offset = options.offset,
 		    lintOptions = options.lintOptions,
-		    indexer = options.indexer || null,
 		    editorContextMixin = options.editorContextMixin || {},
 		    paramsMixin = options.paramsMixin || {};
 		if (!prefix) {
@@ -69,7 +67,7 @@ define([
 				return new Deferred().resolve(parseFull(buffer));
 			}
 		};
-		var contentAssist = new ContentAssist.JSContentAssist(astManager, indexer, lintOptions);
+		var contentAssist = new ContentAssist.JSContentAssist(astManager, null, lintOptions);
 		var editorContext = {
 			getText: function() {
 				return new Deferred().resolve(buffer);
@@ -87,10 +85,10 @@ define([
 		}
 	}
 
-	function computeContentAssist(/**vargs..*/ buffer, prefix, offset, lintOptions, editorContextMixin, paramsMixin) {
+	// Also accepts a single object containing a map of arguments
+	function computeContentAssist(buffer, prefix, offset, lintOptions, editorContextMixin, paramsMixin) {
 		var result;
 		if (arguments.length === 1 && typeof arguments[0] === "object") {
-			// Single param containing a map of arguments for setup()
 			result = setup.apply(this, Array.prototype.slice.call(arguments));
 		} else {
 			result = setup({
@@ -161,6 +159,76 @@ define([
 		});
 	}
 
+	/**
+	 * Asserts that a given proposal is NOT present in a list of actual proposals.
+	 */
+	function assertNoProposal(expectedProposal, actualProposalsPromise) {
+		return actualProposalsPromise.then(function(actualProposals) {
+			for (var i = 0; i < actualProposals.length; i++) {
+				if (typeof(actualProposals[i]) === "string" && actualProposals[i].indexOf(expectedProposal) === 0) {
+					assert.fail("Did not expect to find proposal \'" + expectedProposal + "\' in: " + print(actualProposals));
+				}
+				if (typeof(actualProposals[i].proposal) === "string" && actualProposals[i].proposal.indexOf(expectedProposal) === 0) {
+					assert.fail("Did not expect to find proposal \'" + expectedProposal + "\' in: " + print(actualProposals));
+				}
+			}
+		});
+		//we didn't find it, so pass
+	}
+
+	/**
+	 * Asserts that a proposal is present in a list of actual proposals. The test ensures that some actual proposal contains
+	 * all the required words and none of the prohibited words.
+	 * @since 5.0
+	 */
+	function assertProposalMatching(/*String[]*/ required, /*String[]*/ prohibited, actualProposalsPromise) {
+		return actualProposalsPromise.then(function(actualProposals) {
+			function matches(text, word) {
+				return text.indexOf(word) !== -1;
+			}
+			for (var i = 0; i < actualProposals.length; i++) {
+				var proposal = actualProposals[i];
+				if (typeof proposal.proposal !== "string") {
+					continue;
+				}
+				var matchesProposal = matches.bind(null, proposal.proposal);
+				if (required.every(matchesProposal) && !prohibited.some(matchesProposal)) {
+					return;
+				}
+			}
+			assert.fail("Expected to find proposal matching all of '" + required.join("','") + "' and none of '" + prohibited.join("','") + "' in: " + print(actualProposals));
+		});
+	}
+
+	/**
+	 * Asserts that a given proposal is present in a list of actual proposals. The test just ensures that an actual
+	 * proposal starts with the expected value.
+	 * @param expectedProposal {String} The expected proposal string
+	 * @param actualProposalsPromise {orion.Promise} Promise to return the actual proposals
+	 * @since 5.0
+	 */
+	function assertProposal(expectedProposal, actualProposalsPromise) {
+		return actualProposalsPromise.then(function(actualProposals) {
+			for (var i = 0; i < actualProposals.length; i++) {
+				if (typeof(actualProposals[i].proposal) === "string" && actualProposals[i].proposal.indexOf(expectedProposal) === 0) {
+					return;
+				}
+			}
+			//we didn't find it, so fail
+			assert.fail("Expected to find proposal \'" + expectedProposal + "\' in: " + print(actualProposals));
+		});
+	}
+	
+	/**
+	 * @dscription Prints out the list of proposals
+	 * @since 5.0
+	 */
+	function print(proposals) {
+		return proposals.map(function(proposal) {
+			return proposal.proposal.replace(/\n/g, "\\n").replace(/\t/g, "\\t");
+		});
+	}
+
 	function assertNoErrors(ast) {
 		assert.ok(ast.errors===null || ast.errors.length===0,
 			'errors: '+ast.errors.length+'\n'+ast.errors);
@@ -180,7 +248,6 @@ define([
 			}
 		}
 	}
-
 
 	function stringify(parsedProgram) {
 		var body = parsedProgram.body;
@@ -4527,7 +4594,121 @@ define([
 				]);
 	};
 
-//	var tests = {};
+	/**
+	 * Test that keyword suggestions are not made when looking for a member function or property.
+	 * @since 5.0
+	 */
+	tests.testKeywordCompletionInVariableMember = function() {
+		var result = computeTemplateContentAssist("var x; x.to", 11, {prefix:"to"});
+		return testProposals(result, []);
+	};
+
+	/**
+	 * Test completion of control structure templates in the body of a function.
+	 * @since 5.0
+	 */
+	tests.testTemplateInFunctionBody= function() {
+		var result = computeTemplateContentAssist("function x(a) {\n ", 18, {prefix: " "});
+		assertNoProposal("toString", result);
+		assertProposal("for", result);
+		assertProposal("while", result);
+		assertProposalMatching(["while", "(condition)"], ["do"], result); // while (condition) with no 'do'
+		assertProposal("switch", result);
+		assertProposalMatching(["switch", "case"], [], result); // switch..case
+		assertProposal("try", result);
+		assertProposal("if", result);
+		assertProposalMatching(["if", "(condition)"], [], result); // if (condition)
+		assertProposal("do", result);
+		assertProposalMatching(["do", "while"], [], result); // do..while
+	};
+
+	/**
+	 * Test completion of control structure templates in the body of a function.
+	 */
+	tests.testKeywordsInFunctionBodyWithPrefix= function() {
+		var result = computeTemplateContentAssist("function x(a) {\n t", 19, {prefix: "t"});
+		assertNoProposal("toString".substr(1), result);
+		assertProposal("this".substr(1), result);
+		assertProposal("throw".substr(1), result);
+		assertProposal("try".substr(1), result);
+		assertProposal("typeof".substr(1), result);
+		assertProposalMatching(["try {".substr(1), "catch ("], ["finally"], result); // try..catch with no finally
+		assertProposalMatching(["try {".substr(1), "catch (", "finally"], [], result); // try..catch..finally
+	};
+
+	/**
+	 * Test completion of control structure templates in the body of a function.
+	 */
+	tests.testTemplateInFunctionBodyWithPrefix= function() {
+		var result = computeTemplateContentAssist("function x(a) {\n f", 19, {prefix: "f"});
+		assertNoProposal("toString", result);
+		assertProposal("for".substr(1), result);
+		assertProposalMatching(["for".substr(1), "in"], [], result);
+		assertProposalMatching(["for".substr(1), "array"], [], result);
+		assertNoProposal("while", result);
+		assertNoProposal("switch", result);
+		assertNoProposal("try", result);
+		assertNoProposal("if", result);
+		assertNoProposal("do", result);
+	};
+
+	/**
+	 * Test completion after non-whitespace chars and there should be no template content assist
+	 */
+	tests.testTemplateAfterNonWhitespace1= function() {
+		var result = computeTemplateContentAssist("x.", 2, {prefix: "."});
+		assertNoProposal("toString", result);
+		assertNoProposal("for".substr(1), result);
+		assertNoProposal("while", result);
+		assertNoProposal("switch", result);
+		assertNoProposal("try", result);
+		assertNoProposal("if", result);
+		assertNoProposal("do", result);
+	};
+
+	/**
+	 * Test completion after non-whitespace chars and there should be no template content assist
+	 */
+	tests.testTemplateAfterNonWhitespace2= function() {
+		var result = computeTemplateContentAssist("x.  ", 2, {prefix: " "});
+		assertNoProposal("toString", result);
+		assertProposal("for".substr(1), result);
+		assertProposal("while", result);
+		assertProposal("switch", result);
+		assertProposal("try", result);
+		assertProposal("if", result);
+		assertProposal("do", result);
+	};
+
+	/**
+	 * Test completion after non-whitespace chars and there should be no template content assist
+	 */
+	tests.testTemplateAfterNonWhitespace3= function() {
+		var result = computeTemplateContentAssist("$  ", 1, {prefix: " "});
+		assertNoProposal("toString", result);
+		assertProposal("for".substr(1), result);
+		assertProposal("while", result);
+		assertProposal("switch", result);
+		assertProposal("try", result);
+		assertProposal("if", result);
+		assertProposal("do", result);
+	};
+
+	/**
+	 * Test completion after non-whitespace chars.  should be templates because 
+	 * there is a newline
+	 */
+	tests.testTemplateAfterNonWhitespace4= function() {
+		var result = computeTemplateContentAssist("x.\n  ", 5, {prefix: " "});
+		assertNoProposal("toString", result);
+		assertProposal("for", result);
+		assertProposal("while", result);
+		assertProposal("switch", result);
+		assertProposal("try", result);
+		assertProposal("if", result);
+		assertProposal("do", result);
+	};
+
 	var tif = tests.testIndexFiles = {};
 	tif["test Node proposal from Tern index"] = function() {
 		var index = {
@@ -4547,7 +4728,6 @@ define([
 			lintOptions: {
 				options: { "node": true } // This, or /*jslint node:true*/, is mandatory for the time being
 			},
-			indexer: new Indexer(), // indexer resolves the require() call
 			editorContextMixin: {
 				getTypeDef: function() {
 					return new Deferred().resolve(index);
