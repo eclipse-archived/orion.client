@@ -388,7 +388,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 		id: "org.eclipse.orion.client.cf.deploy",
 		tooltip: "Deploy application in cloud.",
 		validationProperties: [{source: "NoShow" }],
-		logLocationTemplate: "{+OrionHome}/cfui/logs/logs.html#{Name,Target*}"
+		logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}"
 	});
 	
 	/////////////////////////////////////////////////////

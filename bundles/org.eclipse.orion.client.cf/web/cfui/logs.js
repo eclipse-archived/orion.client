@@ -11,7 +11,7 @@
 
 define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commandRegistry',  'orion/keyBinding', 'orion/dialogs', 'orion/selection',
 	'orion/contentTypes','orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/links',
-	'orion/cfui/cFClient', 'orion/PageUtil', 'cfui/logs/logsExplorer', 'cfui/logs/logView', 'orion/section',  'orion/cfui/widgets/CfLoginDialog'], 
+	'orion/cfui/cFClient', 'orion/PageUtil', 'orion/cfui/logsExplorer', 'orion/cfui/logView', 'orion/section',  'orion/cfui/widgets/CfLoginDialog'], 
 	function(lib, mBootstrap, mStatus, mProgress, CommandRegistry, KeyBinding, mDialogs, mSelection,
 	mContentTypes, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mLinks,
 	mCFClient, PageUtil, mLogsExplorer, mLogView, mSection, CfLoginDialog) {
