@@ -49,6 +49,7 @@ define([
 		this.serviceRegistry = options.serviceRegistry;
 		this.pluginRegistry = options.pluginRegistry;
 		this.statusService = options.statusService;
+		this.inputManager = options.inputManager;
 	}
 		
 	PluginEditor.prototype = Object.create(BaseEditor.prototype);
@@ -67,6 +68,9 @@ define([
 				}
 			}
 			var service = serviceRegistry.getService(this.editorService);
+			if (service.setBuffer) {
+				service.setBuffer(this._contents, this.inputManager.getContentType());
+			}
 			if (service.setTextModel) {
 
 				//HACK
@@ -93,25 +97,13 @@ define([
 			root.style.width = "100%"; //$NON-NLS-0$
 			root.style.height = "100%"; //$NON-NLS-0$
 			root.style.overflow = "hidden"; //$NON-NLS-0$
-			var editorService = this.editorService;
-			//TODO eventually the contentUriTemplate will be removed in favor of UI plugins. Need to fix image viewer for this to happen
-			if (editorService.getProperty("contentUriTemplate")) { //$NON-NLS-0$
-				var content = this._contentDiv = document.createElement("iframe"); //$NON-NLS-0$
-				content.id = this.editorService.getProperty("id"); //$NON-NLS-0$
-				content.type = "text/html"; //$NON-NLS-0$
-				content.style.width = "100%"; //$NON-NLS-0$
-				content.style.height = "100%"; //$NON-NLS-0$
-				content.frameBorder = 0; //$NON-NLS-0$
-				root.appendChild(content);
-			} else {
-				var self = this;
-				var plugin = this._getPlugin();
-				plugin.setParent(root).then(function() {
-					self._load();
-				}, function(e) {
-					handleError(self.statusService, e);
-				});
-			}
+			var self = this;
+			var plugin = this._getPlugin();
+			plugin.setParent(root).then(function() {
+				self._load();
+			}, function(e) {
+				handleError(self.statusService, e);
+			});
 			parent.appendChild(root); 
 			BaseEditor.prototype.install.call(this);
 		},
@@ -124,27 +116,14 @@ define([
 			}
 		},
 		setInput: function(title, message, contents, contentsSaved) {
-			var editorService = this.editorService;
-			if (editorService.getProperty("contentUriTemplate")) { //$NON-NLS-0$
-				var info = {};
-				info.Location = this.metadata.Location;
-				info.OrionHome = PageLinks.getOrionHome();
-				var propertyNames = editorService.getPropertyKeys();
-				for (var j = 0; j < propertyNames.length; j++) {
-					info[propertyNames[j]] = editorService.getProperty(propertyNames[j]);
-				}
-				var uriTemplate = new URITemplate(info.contentUriTemplate);
-				this._contentDiv.src = uriTemplate.expand(info);
-			} else {
-			}					
+			if (typeof contents !== "string") {//HACK
+				this._contents = contents;
+			}
 			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
 		},
 		uninstall: function() {
-			var editorService = this.editorService;
-			if (!editorService.getProperty("contentUriTemplate")) { //$NON-NLS-0$
-				var plugin = this._getPlugin();
-				plugin.setParent(null);
-			}
+			var plugin = this._getPlugin();
+			plugin.setParent(null);
 			lib.empty(this._domNode);
 			BaseEditor.prototype.uninstall.call(this);
 		}
@@ -175,6 +154,7 @@ define([
 				pluginRegistry: this.pluginRegistry,
 				editorService: this.editorService,
 				statusService: this.statusService,
+				inputManager: this.inputManager,
 				metadata: this.metadata
 			});
 			this.editor.install();

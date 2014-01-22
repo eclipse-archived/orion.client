@@ -195,7 +195,7 @@ define([
 					} else {
 						// Read contents if this is a text file
 						if (this._isText(metadata)) {
-							// Read contents
+							// Read text contents
 							progress(fileClient.read(resource, false, true), messages.Reading, fileURI).then(function(contents) {
 								clearTimeout();
 								if (typeof contents !== "string") { //$NON-NLS-0$
@@ -205,8 +205,10 @@ define([
 								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
 							}.bind(this), errorHandler);
 						} else {
-							clearTimeout();
-							this._setInputContents(this._parsedLocation, fileURI, null, metadata);
+							progress(fileClient._getService(resource).readBlob(resource), messages.Reading, fileURI).then(function(contents) {
+								clearTimeout();
+								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
+							}.bind(this), errorHandler);
 						}
 					}
 				}.bind(this), errorHandler);

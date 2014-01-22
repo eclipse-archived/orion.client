@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010." >
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2014." >
 		<meta http-equiv="Content-Language" content="en-us">
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 		<title>Image Viewer</title>
@@ -29,12 +29,14 @@
 					domReady: 'requirejs/domReady'    
 				}
 			});
-			require(['imageViewer.js']);
+			require(['imageViewerPlugin.js']);
 		</script>
     </head>
 	<body>
 		<table><tr><td> 
-		<div id="imagecontent"></div>
+		<div id="imagecontent">
+		Loading...
+		</div>
 		</td></tr></table>
 	</body>
 </html>

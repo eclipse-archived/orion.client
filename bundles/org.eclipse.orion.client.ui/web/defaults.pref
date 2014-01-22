@@ -6,6 +6,8 @@
 		"git/plugins/gitPlugin.html":true,
 		"javascript/plugins/javascriptPlugin.html":true,
 		"profile/userservicePlugin.html":true,
+		"edit/content/imageViewerPlugin.html":true,
+		"edit/content/jsonEditorPlugin.html":true,
 		"plugins/webEditingPlugin.html":true,
 		"plugins/pageLinksPlugin.html":true,
 		"plugins/preferencesPlugin.html":true,

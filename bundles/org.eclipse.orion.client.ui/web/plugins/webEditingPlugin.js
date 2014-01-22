@@ -167,17 +167,6 @@ define([
 			editor: "orion.markdownViewer",
 			contentType: ["text/x-markdown"]});
 
-	provider.registerService("orion.edit.editor", {}, {
-		id: "orion.imageViewer",
-		nameKey: "Orion Image Viewer",
-		nls: "orion/nls/messages",
-		contentUriTemplate: "../edit/content/imageViewer.html#{,Location,params*}",
-		uriTemplate: "../edit/edit.html#{,Location,params*},editor=orion.imageViewer"});
-
-	provider.registerService("orion.navigate.openWith", {}, {
-			editor: "orion.imageViewer",
-			contentType: ["image/gif", "image/jpeg", "image/ico", "image/png", "image/tiff", "image/svg"]});
-
 	// open file with browser, no associated orion.navigate.openWith command means that any content type is valid
 	provider.registerService("orion.edit.editor", {}, {
 		id: "orion.view.raw",
