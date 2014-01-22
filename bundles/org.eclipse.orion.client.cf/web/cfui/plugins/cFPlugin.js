@@ -168,8 +168,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 								that._deploy(item, projectMetadata, target, appName, deferred);
 							}, function(error){
 								error.Retry = {
-									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
-									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 								};
 								deferred.reject(error);
 							}
@@ -200,8 +199,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 							var err = error.JsonData;
 							if (err.error_code === "CF-InvalidAuthToken"){
 								error.Retry = {
-									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
-									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 								};
 							}
 							deferred.reject(error);
@@ -240,8 +238,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 							var err = error.JsonData;
 							if (err.error_code === "CF-InvalidAuthToken"){
 								error.Retry = {
-									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
-									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 								};
 							} else if (err.error_code === "CF-TargetNotSet"){
 								var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
@@ -267,8 +264,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 						func(props, deferred);
 					}, function(error){
 						error.Retry = {
-							parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
-							optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+							parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 						};
 						deferred.reject(error);
 					}
@@ -303,8 +299,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 							var err = error.JsonData;
 							if (err.error_code === "CF-InvalidAuthToken"){
 								error.Retry = {
-									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
-									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 								};
 							}
 							deferred.reject(error);
@@ -340,8 +335,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 							var err = error.JsonData;
 							if (err.error_code === "CF-InvalidAuthToken"){
 								error.Retry = {
-									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
-									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 								};
 							}
 							deferred.reject(error);
@@ -377,8 +371,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 							var err = error.JsonData;
 							if (err.error_code === "CF-InvalidAuthToken"){
 								error.Retry = {
-									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}],
-									optionalParameters: [{id: "privateKey", type: "test", name: "Private Key:"}]
+									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
 								};
 							}
 							deferred.reject(error);
