@@ -68,7 +68,17 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				id: "comment",
 				begin: "<!--",
 				end: "-->",
-				name: "comment.block.html"
+				name: "comment.block.html",
+				patterns: [
+					{
+						match: "(\\b)(TODO)(\\b)(.*)",
+						name: "meta.annotation.task.todo",
+						captures: {
+							2: {name: "keyword.other.documentation.task"},
+							4: {name: "comment.line"}
+						}
+					}
+				]
 			}, {
 				begin: "(</?[A-Za-z0-9]+)",
 				end: "(/?>)",
