@@ -60,6 +60,14 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 					}
 				]
 			}, {
+				begin: "<<<(\\w+)$",
+				end: "^\\1;$",
+				name: "string.unquoted.here-doc"
+			}, {
+				begin: "<<<'(\\w+)'$",
+				end: "^\\1;$",
+				name: "string.unquoted.now-doc"
+			}, {
 				match: "\\b0[bB][01]+\\b",
 				name: "constant.numeric"
 			}, {

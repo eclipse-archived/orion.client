@@ -29,7 +29,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
 	
 	var eolRegex = /$/;
-	var linebreakRegex = /.*(?:[\r\n]|$)/g;
+	var captureReferenceRegex = /\\(\d)/g;
+	var linebreakRegex = /(.*)(?:[\r\n]|$)/g;
 	var spacePattern = {regex: / /g, style: {styleClass: "punctuation separator space", unmergeable: true}}; //$NON-NLS-0$
 	var tabPattern = {regex: /\t/g, style: {styleClass: "punctuation separator tab", unmergeable: true}}; //$NON-NLS-0$
 
@@ -40,7 +41,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		var currentLine = linebreakRegex.exec(text);
 		while (currentLine && currentLine.index < text.length) {
 			regex.lastIndex = 0;
-			var result = regex.exec(currentLine[0]);
+			var result = regex.exec(currentLine[1]);
 			if (result) {
 				result.index += index;
 				regex.lastIndex = initialLastIndex;
@@ -263,9 +264,27 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					var contentStart = current.result.index + current.result[0].length;
 					var resultEnd = null;
 
+					/* 
+					 * If the end match contains a capture reference (eg.- "\1") then update
+					 * its regex with the resolved capture values from the begin match.
+					 */
+					var endRegex = current.pattern.regexEnd;
+					var regexString = endRegex.toString();
+					captureReferenceRegex.lastIndex = 0;
+					if (captureReferenceRegex.test(regexString)) {
+						captureReferenceRegex.lastIndex = 0;
+						var result = captureReferenceRegex.exec(regexString);
+						while (result) {
+							regexString = regexString.replace(result[0], current.result[result[1]] || "");
+							result = captureReferenceRegex.exec(regexString);
+						}
+						/* create the updated regex, remove the leading '/' and trailing /g */
+						endRegex = new RegExp(regexString.substring(1, regexString.length - 2), "g");
+					}
+
 					var lastIndex = contentStart;
 					while (!resultEnd) {
-						var result = _findMatch(current.pattern.regexEnd, text, lastIndex);
+						var result = _findMatch(endRegex, text, lastIndex);
 						if (!result) {
 							eolRegex.lastIndex = 0;
 							result = eolRegex.exec(text);
