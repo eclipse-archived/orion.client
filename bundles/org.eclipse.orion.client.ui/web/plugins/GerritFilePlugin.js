@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -19,7 +19,7 @@ require.config({
 	}
 });
 
-define(["orion/plugin", "orion/Deferred", "plugins/filePlugin/GitHubFileImpl", "orion/URL-shim"], function(PluginProvider, Deferred, GitHubFileImpl) {
+define(["orion/plugin", "orion/Deferred", "plugins/filePlugin/GerritFileImpl", "orion/URL-shim"], function(PluginProvider, Deferred, GerritFileImpl) {
 
 	function trace(implementation) {
 		var method;
@@ -46,19 +46,21 @@ define(["orion/plugin", "orion/Deferred", "plugins/filePlugin/GitHubFileImpl", "
 	}
 
 	var headers = {
-		name: "GitHub File Plugin",
+		name: "Gerrit File Plugin",
 		version: "1.0",
-		description: "GitHub File Plugin"
+		description: "Gerrit File Plugin"
 	};
 	var provider = new PluginProvider(headers);
 	var url = new URL(window.location.href);
-	var service = new GitHubFileImpl(url.query.get("repo"), url.query.get("token"));
-	var base = service._repoURL.href;
+	var project = url.query.get("project");
+	var baseURL = new URL("../..", url);
+	baseURL.search = "";
+	var service = new GerritFileImpl(baseURL.href, project);
 
 	provider.registerService("orion.core.file", service, {
-		Name: 'GitHub File contents',
-		top: base,
-		pattern: base.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1")
+		Name: 'Gerrit File contents',
+		top: service._repoURL,
+		pattern: baseURL.href.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1")
 	});
 	provider.connect();
 });
