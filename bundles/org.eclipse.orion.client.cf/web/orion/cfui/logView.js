@@ -88,36 +88,38 @@ define([
 				this.lastLogInstance = null;
 				return;
 			}
-			var progressTimeout = window.setTimeout(function() {
-					progressTimeout = null;
-					this.reportStatus("Fetching " + logName);
-				}.bind(this), 800);
+
+			var progressTimeout = null;
+			
 			var clearTimeout = function() {
 				this.reportStatus("");
 				if (progressTimeout) {
 					window.clearTimeout(progressTimeout);
 				}
 			}.bind(this);
+			
 			var errorHandler = function(error) {
 				clearTimeout();
 				var statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 				handleError(statusService, error);
 				this._setNoInput();
 			}.bind(this);
+			
 			this._acceptPatch = null;
 			
 			if((!this.lastLogLoaded || this.lastLogLoaded!==logName) || (this.applicationInfo.instance !== null && this.lastLogInstance !== this.applicationInfo.instance)){
 				// Read the log
 				this.progressService.showWhile(this._read(logName, true), "Loading " + logName).then(function(metadata) {
-					this._setInputContents(this._parsedLocation, logName, metadata.Contents, metadata);
 					this.lastLogLoaded = logName;
 					this.lastLogInstance = metadata.Instance;
+					this._setInputContents(this._parsedLocation, logName, metadata.Contents, metadata);
 				}.bind(this), errorHandler);
 			} else {
-			progressTimeout = window.setTimeout(function() {
-								progressTimeout = null;
-								this.reportStatus("Fetching " + logName);
-							}.bind(this), 800);
+				progressTimeout = window.setTimeout(function() {
+					progressTimeout = null;
+					this.reportStatus("Fetching " + logName);
+				}.bind(this), 800);
+				
 				var found = false;
 				var currentInstance = this.applicationInfo.instance || Object.keys(this.applicationInfo.logs)[0];
 				this.cFClient.getLogs(this.applicationInfo.Target, this.applicationInfo.Application).then(function(logs){
@@ -128,15 +130,16 @@ define([
 									if(log.Size!==log2.Size){
 										found = true;
 										this._read(logName, true).then(function(metadata) {
-											clearTimeout();
 											this._setInputContents(this._parsedLocation, logName, metadata.Contents, metadata);
 											this.lastLogLoaded = logName;
 										}.bind(this), errorHandler);
 									}
+									clearTimeout();
 								}
 							}.bind(this));
 						}
 					}.bind(this));
+					
 					if(!found){
 						clearTimeout();
 					}
