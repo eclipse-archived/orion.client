@@ -40,15 +40,15 @@ define("orion/editor/stylers/js/js", ["orion/editor/stylers/shared/shared"], fun
 				include: "orion.patterns" //$NON-NLS-0$
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control" //$NON-NLS-0$
+				name: "keyword.control.js" //$NON-NLS-0$
 			}, {
 				begin: "'(?:\\\\.|[^'\\n])*\\\\\\n", //$NON-NLS-0$
 				end: "(?:(?:\\\\.|[^'\\n])*\\\\\\n)*(?:\\n|(?:\\\\.|[^'\\n])*'?)", //$NON-NLS-0$
-				name: "string.quoted.single" //$NON-NLS-0$
+				name: "string.quoted.single.js" //$NON-NLS-0$
 			}, {
 				begin: '"(?:\\\\.|[^"\\n])*\\\\\\n', //$NON-NLS-0$
 				end: '(?:(?:\\\\.|[^"\\n])*\\\\\\n)*(?:\\n|(?:\\\\.|[^"\\n])*"?)', //$NON-NLS-0$
-				name: "string.quoted.double" //$NON-NLS-0$
+				name: "string.quoted.double.js" //$NON-NLS-0$
 			}
 		]
 	});

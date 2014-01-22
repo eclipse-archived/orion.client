@@ -39,7 +39,7 @@ define("orion/editor/stylers/java/java", ["orion/editor/stylers/shared/shared"],
 				include: "orion.patterns"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
+				name: "keyword.control.java"
 			}, {
 				/* override orion.patterns#string_singleQuote */
 				id: "string_singleQuote"

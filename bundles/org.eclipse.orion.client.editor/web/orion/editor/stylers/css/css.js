@@ -61,21 +61,21 @@ define("orion/editor/stylers/css/css", ["orion/editor/stylers/shared/shared"], f
 				include: "orion.patterns"
 			}, {
 				match: "(?:-webkit-|-moz-|-ms-|\\b)(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
+				name: "keyword.control.css"
 			}, {
 				match: "(?i)\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
-				name: "constant.numeric"
+				name: "constant.numeric.value.css"
 			}, {
 				match: "#[0-9A-Fa-f]+\\b",
-				name: "constant.numeric"
+				name: "constant.numeric.hex.css"
 			}, {
 				begin: "'[^'\\n]*\\\\\n", //$NON-NLS-0$
 				end: "(?:[^'\\n]*\\\\\\n)*[^'\\n]*'?", //$NON-NLS-0$
-				name: "string.quoted.single" //$NON-NLS-0$
+				name: "string.quoted.single.css" //$NON-NLS-0$
 			}, {
 				begin: "\"[^\"\\n]*\\\\\n", //$NON-NLS-0$
 				end: "(?:[^\"\\n]*\\\\\\n)*[^\"\\n]*\"?", //$NON-NLS-0$
-				name: "string.quoted.double" //$NON-NLS-0$
+				name: "string.quoted.double.css" //$NON-NLS-0$
 			}, {
 				/* override orion.patterns#comment_singleline */
 				id: "comment_singleline"

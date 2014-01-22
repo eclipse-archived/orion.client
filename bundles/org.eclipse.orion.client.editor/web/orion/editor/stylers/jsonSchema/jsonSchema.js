@@ -37,7 +37,7 @@ define("orion/editor/stylers/jsonSchema/jsonSchema", ["orion/editor/stylers/json
 				include: "orion.json" //$NON-NLS-0$
 			}, {
 				match: "(?:\\$schema|(?:\\b(?:" + keywords.join("|") + ")))\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control" //$NON-NLS-0$
+				name: "keyword.control.schema.json" //$NON-NLS-0$
 			}
 		]
 	});

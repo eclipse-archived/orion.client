@@ -44,7 +44,7 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 					id: "comment_singleline",
 					begin: "//",
 					end: ".*",
-					name: "comment.line",
+					name: "comment.line.double-slash",
 					patterns: [
 						{
 							match: "(\\b)(TODO)(\\b)(.*)",
@@ -87,11 +87,11 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 				}, {
 					id: "number_decimal",
 					match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
-					name: "constant.numeric"
+					name: "constant.numeric.number"
 				}, {
 					id: "number_hex",
 					match: "\\b0[xX][0-9A-Fa-f]+\\b",
-					name: "constant.numeric"
+					name: "constant.numeric.hex"
 				}
 			]
 		}],

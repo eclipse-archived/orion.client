@@ -21,7 +21,7 @@ define("orion/editor/stylers/json/json", ["orion/editor/stylers/shared/shared"],
 				include: "orion.patterns" //$NON-NLS-0$
 			}, {
 				match: "\\b(?:true|false|null)\\b", //$NON-NLS-0$
-				name: "keyword.control" //$NON-NLS-0$
+				name: "keyword.control.json" //$NON-NLS-0$
 			}, {
 				/* override orion.patterns#comment_singleline */
 				id: "comment_singleline" //$NON-NLS-0$

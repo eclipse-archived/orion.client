@@ -48,11 +48,11 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 				/* override from orion.patterns */
 				id: "number_decimal",
 				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)[lL]?\\b",
-				name: "constant.numeric"
+				name: "constant.numeric.number.python"
 			}, {
 				begin: "#",
 				end: ".*",
-				name: "comment.line",
+				name: "comment.line.number-sign.python",
 				patterns: [
 					{
 						match: "(\\b)(TODO)(\\b)(.*)",
@@ -66,14 +66,14 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 			}, {
 				begin: "'''",
 				end: "'''",
-				name: "string.quoted.triple"
+				name: "string.quoted.triple.python"
 			}, {
 				begin: '"""',
 				end: '"""',
-				name: "string.quoted.triple"
+				name: "string.quoted.triple.python"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
+				name: "keyword.control.python"
 			}
 		]
 	});

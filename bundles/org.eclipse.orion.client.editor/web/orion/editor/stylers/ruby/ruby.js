@@ -51,7 +51,7 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 			}, {
 				begin: "#",
 				end: ".*",
-				name: "comment.line",
+				name: "comment.line.number-sign.ruby",
 				patterns: [
 					{
 						match: "(\\b)(TODO)(\\b)(.*)",
@@ -66,7 +66,7 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 				id: "comment_multiline",
 				begin: "^=begin",
 				end: "^=end",
-				name: "comment.block",
+				name: "comment.block.ruby",
 				patterns: [
 					{
 						match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",
@@ -79,10 +79,10 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 				]
 			}, {
 				match: "\\b0[bB][01]+\\b",
-				name: "constant.numeric"
+				name: "constant.numeric.binary.ruby"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
+				name: "keyword.control.ruby"
 			}
 		]
 	});

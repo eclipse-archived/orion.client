@@ -48,7 +48,7 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 			}, {
 				begin: "#",
 				end: ".*",
-				name: "comment.line",
+				name: "comment.line.number-sign.php",
 				patterns: [
 					{
 						match: "(\\b)(TODO)(\\b)(.*)",
@@ -62,17 +62,17 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 			}, {
 				begin: "<<<(\\w+)$",
 				end: "^\\1;$",
-				name: "string.unquoted.here-doc"
+				name: "string.unquoted.heredoc.php"
 			}, {
 				begin: "<<<'(\\w+)'$",
 				end: "^\\1;$",
-				name: "string.unquoted.now-doc"
+				name: "string.unquoted.heredoc.nowdoc.php"
 			}, {
 				match: "\\b0[bB][01]+\\b",
-				name: "constant.numeric"
+				name: "constant.numeric.binary.php"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
+				name: "keyword.control.php"
 			}
 		]
 	});

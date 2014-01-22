@@ -30,8 +30,8 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				begin: "(<script)([^>]*)(>)",
 				end: "(</script>)",
 				captures: {
-					1: {name: "entity.name.tag"},
-					3: {name: "entity.name.tag"}
+					1: {name: "entity.name.tag.html"},
+					3: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.js.embedded.html",
 				patterns: [
@@ -43,8 +43,8 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				begin: "(<style)([^>]*)(>)",
 				end: "(</style>)",
 				captures: {
-					1: {name: "entity.name.tag"},
-					3: {name: "entity.name.tag"}
+					1: {name: "entity.name.tag.html"},
+					3: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.css.embedded.html",
 				patterns: [
@@ -56,7 +56,7 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				begin: "(<\\?php\\b)",
 				end: "(\\?>|%>)",
 				captures: {
-					1: {name: "entity.name.tag"}
+					1: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -68,12 +68,12 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				id: "comment",
 				begin: "<!--",
 				end: "-->",
-				name: "comment.block"
+				name: "comment.block.html"
 			}, {
 				begin: "(</?[A-Za-z0-9]+)",
 				end: "(/?>)",
 				captures: {
-					1: {name: "entity.name.tag"},
+					1: {name: "entity.name.tag.html"},
 				},
 				name: "meta.tag.html",
 				patterns: [
