@@ -18,6 +18,7 @@ define([
 	'javascript/contentAssist/indexFiles/postgresIndex',
 	'javascript/contentAssist/indexFiles/redisIndex',
 	'javascript/contentAssist/indexFiles/expressIndex',
+	'javascript/contentAssist/indexFiles/amqpIndex',
 	'javascript/contentAssist/contentAssist',
 	'javascript/contentAssist/indexer',
 	'javascript/eslint/validator',
@@ -29,7 +30,7 @@ define([
 	'orion/editor/stylers/js/js',
 	'orion/editor/stylers/json/json',
 	'orion/editor/stylers/jsonSchema/jsonSchema'
-], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, ContentAssist, Indexer, EslintValidator, Occurrences, Outliner,
+], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, Indexer, EslintValidator, Occurrences, Outliner,
 		i18nUtil, PluginProvider, jsTemplateContentAssist, mJS, mJSON, mJSONSchema) {
 
 	/**
@@ -227,6 +228,11 @@ define([
 		id: "node.express",
 		type: "tern",
 		defs: ExpressIndex
+	});
+	provider.registerServiceProvider("orion.core.typedef", {}, {
+		id: "node.amqp",
+		type: "tern",
+		defs: AMQPIndex
 	});
 
 	provider.connect();
