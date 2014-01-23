@@ -1613,7 +1613,7 @@ define('orion/inputManager',[
 					} else {
 						// Read contents if this is a text file
 						if (this._isText(metadata)) {
-							// Read contents
+							// Read text contents
 							progress(fileClient.read(resource, false, true), messages.Reading, fileURI).then(function(contents) {
 								clearTimeout();
 								if (typeof contents !== "string") { //$NON-NLS-0$
@@ -1623,8 +1623,10 @@ define('orion/inputManager',[
 								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
 							}.bind(this), errorHandler);
 						} else {
-							clearTimeout();
-							this._setInputContents(this._parsedLocation, fileURI, null, metadata);
+							progress(fileClient._getService(resource).readBlob(resource), messages.Reading, fileURI).then(function(contents) {
+								clearTimeout();
+								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
+							}.bind(this), errorHandler);
 						}
 					}
 				}.bind(this), errorHandler);
@@ -7052,7 +7054,7 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
-			this.image = options.image || require.toUrl("images/none.png"); //$NON-NLS-0$
+			this.image = options.image || (require.toUrl && require.toUrl("images/none.png")); //$NON-NLS-0$
 			this.imageClass = options.imageClass;   // points to the location in a sprite
 			this.addImageClassToElement = options.addImageClassToElement; // optional boolean if true will add the image class to the 
 																		// element's class list
@@ -13709,7 +13711,7 @@ define("orion/editor/util", [], function() { //$NON-NLS-0$
 
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -15505,6 +15507,19 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		 */
 		getLineAtOffset: function(offset) {
 			this.getModel().getLineAtOffset(offset);
+		},
+		/**
+		 * @name getLineStart
+		 * @description Compute the editor start offset of the given line number
+		 * @function
+		 * @public
+		 * @memberof orion.editor.TextView
+		 * @param {Number} line The line number in the editor
+		 * @returns {Number} Returns the start offset of the given line number in the editor.
+		 * @since 5.0
+		 */
+		getLineStart: function(line) {
+			this.getModel().getLineStart(line);
 		},
 		/**
 		 * Get the view rulers.
@@ -22638,7 +22653,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2013 IBM Corporation and others.
+ * Copyright (c) 2009, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -23148,6 +23163,19 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 */
 		getLineAtOffset: function(offset) {
 			return this.getModel().getLineAtOffset(this.mapOffset(offset));	
+		},
+		/**
+		 * @name getLineStart
+		 * @description Compute the editor start offset of the given line number
+		 * @function
+		 * @public
+		 * @memberof orion.editor.TextView
+		 * @param {Number} line The line number in the editor
+		 * @returns {Number} Returns the start offset of the given line number in the editor.
+		 * @since 5.0
+		 */
+		getLineStart: function(line) {
+			return this.getModel().getLineStart(line);
 		},
 		getCaretOffset: function() {
 			return this.mapOffset(this._textView.getCaretOffset());
@@ -25911,6 +25939,7 @@ define('orion/widgets/browse/browseView',[
 		this._maxEditorHeight = options.maxEditorHeight;
 		this.imageView = options.imageView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
+		this.branchSelector = options.branchSelector;
 		this.clickHandler = options.clickHandler;
 		this._init();
 	}
@@ -25990,9 +26019,19 @@ define('orion/widgets/browse/browseView',[
 								var tileNode = this._foldersSection.getTitleElement();
 								if(tileNode) {
 									lib.empty(tileNode);
+									var bcNodeContainer = document.createElement("div"); //$NON-NLS-0$
+									bcNodeContainer.classList.add("breadCrumbContainer"); 
 									var bcNode = document.createElement("div"); //$NON-NLS-0$
-									tileNode.appendChild(bcNode);
-									this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 24);
+									if(this.branchSelector) {
+										tileNode.appendChild(this.branchSelector.node);
+									}
+									bcNodeContainer.appendChild(bcNode);
+									tileNode.appendChild(bcNodeContainer);
+									this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 150/*branch selector width*/ - 50);
+									if(this.branchSelector) {
+										this.branchSelector.refresh();
+									}
+									
 								}
 							}
 						}
@@ -31462,6 +31501,147 @@ define('orion/widgets/browse/readonlyEditorView',[
 
 /*******************************************************************************
  * @license
+ * Copyright (c) 2013 IBM Corporation and others. 
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
+/*global define URL*/
+/*jslint browser:true sub:true*/
+define('orion/widgets/browse/branchSelector',[
+	'orion/objects',
+	'orion/webui/littlelib',
+	'orion/commands',
+	'orion/URITemplate',
+	'orion/URL-shim'
+], function(objects, lib, Commands, URITemplate, _) {
+	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+
+	/**
+	 * @name orion.widgets.Filesystem.BranchSelector
+	 * @class Filesystem switcher.
+	 * @description Renders a toolbar that displays the filesystem a MiniNavExplorer is currently viewing,
+	 * and provides a menu for changing the filesystem being viewed in the explorer.
+	 * @param {orion.commands.CommandRegistry} params.commandRegistry
+	 * @param {orion.fileClient.FileClient} params.fileClient
+	 * @param {EventTarget} params.branchChangeListener the branchChange event listener that hadles the root change
+	 * @param {EventTarget} params.branchChangeDispatcher the "filesystemChanged" event dispatcher
+	 * @param {Element} params.node
+	 */
+	function BranchSelector(params) {
+		this.commandRegistry = params.commandRegistry;
+		this.branchChangeListener = params.branchChangeListener;
+		this.branchChangeDispatcher = params.branchChangeDispatcher;
+		this.fileClient = params.fileClient;
+		this.branches = params.branches;
+		this.fileBrowser = params.fileBrowser;
+		this.activeBranchName = params.activeBranchName;
+		this.node = params.node;
+		this.listener = function(event) {
+			this.refresh(event.root);
+		}.bind(this);
+		if(this.branchChangeListener){
+			this.branchChangeListener.addEventListener("branchChanged", this.listener); //$NON-NLS-0$
+		}
+		this.render();
+	}
+	objects.mixin(BranchSelector.prototype, /** @lends orion.widgets.Filesystem.BranchSelector */ {
+		destroy: function() {
+			if(this.branchChangeListener) {
+				this.branchChangeListener.removeEventListener("branchChanged", this.listener); //$NON-NLS-0$
+			}
+			this.commandRegistry.destroy(this.node);
+			lib.empty(this.node);
+			this.branchChangeListener = this.branchChangeDispatcher = this.listener = this.node = null;
+		},
+		registerCommands: function() {
+			if (!this.commandsRegistered) {
+				this.commandsRegistered = true;
+				var commandRegistry = this.commandRegistry;
+				var switchBrCommand = new Commands.Command({
+					name: "Choose Branch",
+					imageClass: "core-sprite-openarrow", //$NON-NLS-0$
+					selectionClass: "dropdownSelection", //$NON-NLS-0$
+					tooltip: "Select a branch",
+					id: "orion.browse.switchbr", //$NON-NLS-0$
+					visibleWhen: function(item) {
+						return true;
+					},
+					choiceCallback: this._switchBrMenuCallback.bind(this)
+				});
+				commandRegistry.addCommand(switchBrCommand);
+				commandRegistry.registerCommandContribution("orion.browse", "orion.browse.switchbr", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+		},
+		_switchBrMenuCallback: function(items) {
+			var _self = this;
+			return this.branches.map(function(branch) { //$NON-NLS-0$
+				return {
+					name: branch.Name,
+					callback: _self.setActiveBranch.bind(_self, branch.Name, branch.Location)
+				};
+			});
+		},
+		render: function() {
+			this.brName = document.createElement("div"); //$NON-NLS-0$
+			this.brName.classList.add("browserBranchName"); //$NON-NLS-0$
+			this.brName.classList.add("layoutLeft"); //$NON-NLS-0$
+			this.menu = document.createElement("ul"); //$NON-NLS-0$
+			this.menu.classList.add("BranchSelector"); //$NON-NLS-0$
+			this.menu.classList.add("commandList"); //$NON-NLS-0$
+			this.menu.classList.add("layoutRight"); //$NON-NLS-0$
+			this.menu.classList.add("pageActions"); //$NON-NLS-0$
+			this.node.appendChild(this.brName);
+			this.node.appendChild(this.menu);
+
+			this.registerCommands();
+
+			this.brName.addEventListener("click", this._openMenu.bind(this)); //$NON-NLS-0$
+		},
+		_openMenu: function(event) {
+			var menu = lib.$(".dropdownTrigger", this.menu); //$NON-NLS-0$
+			if (menu) {
+				var click = document.createEvent("MouseEvents"); //$NON-NLS-0$
+				click.initEvent("click", true, true); //$NON-NLS-0$
+				menu.dispatchEvent(click);
+			}
+		},
+		/**
+		 * @returns {String|DocumentFragment}
+		 */
+		_branchLabel: function(meta) {
+			//TOTO figure out the branch name from any meta (e.g. sub folder)
+			var fragment = document.createDocumentFragment();
+			fragment.textContent = this.activeBranchName; //$NON-NLS-0$
+			//lib.processDOMNodes(fragment, [document.createTextNode(name), document.createTextNode(hostname)]);
+			return fragment;
+		},
+		refresh: function(location) {
+			lib.empty(this.brName);
+			this.brName.appendChild(this._branchLabel(location));
+			this.commandRegistry.destroy(this.menu);
+			this.commandRegistry.renderCommands("orion.browse", this.menu, {}, "menu"); //$NON-NLS-1$ //$NON-NLS-0$
+		},
+		/**
+		 * @param {Object|String} location The ChildrenLocation, or an object with a ChildrenLocation field.
+		 */
+		setActiveBranch: function(name, location) {
+			this.activeBranchName = name;
+			window.location = uriTemplate.expand({resource: location}); //$NON-NLS-0$
+			if(this.branchChangeDispatcher) {
+				this.branchChangeDispatcher.dispatchEvent({ type: "branchChanged", newInput: location }); //$NON-NLS-0$
+			}
+		}
+	});
+
+	return {BranchSelector: BranchSelector};
+});
+
+/*******************************************************************************
+ * @license
  * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
@@ -31618,7 +31798,7 @@ define('orion/fileClient',['i18n!orion/navigate/nls/messages', "orion/Deferred",
 				Name: _references[j].getProperty("Name")		 //$NON-NLS-0$
 			};
 
-			var patternString = _references[j].getProperty("pattern") || ".*"; //$NON-NLS-1$ //$NON-NLS-0$
+			var patternString = _references[j].getProperty("pattern") || _references[j].getProperty("top").replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1"); //$NON-NLS-1$ //$NON-NLS-0$
 			if (patternString[0] !== "^") { //$NON-NLS-0$
 				patternString = "^" + patternString; //$NON-NLS-0$
 			}
@@ -31952,7 +32132,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
 	
 	var eolRegex = /$/;
-	var linebreakRegex = /.*(?:\n|$)/g;
+	var captureReferenceRegex = /\\(\d)/g;
+	var linebreakRegex = /(.*)(?:[\r\n]|$)/g;
 	var spacePattern = {regex: / /g, style: {styleClass: "punctuation separator space", unmergeable: true}}; //$NON-NLS-0$
 	var tabPattern = {regex: /\t/g, style: {styleClass: "punctuation separator tab", unmergeable: true}}; //$NON-NLS-0$
 
@@ -31963,7 +32144,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		var currentLine = linebreakRegex.exec(text);
 		while (currentLine && currentLine.index < text.length) {
 			regex.lastIndex = 0;
-			var result = regex.exec(currentLine[0]);
+			var result = regex.exec(currentLine[1]);
 			if (result) {
 				result.index += index;
 				regex.lastIndex = initialLastIndex;
@@ -32005,7 +32186,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var mergeStyles = function(fullStyle, substyles, resultStyles) {
 		var i = fullStyle.start;
 		substyles.forEach(function(current) {
-			if (i < current.start) {
+			if (i <= current.start) {
 				resultStyles.push({start: i, end: current.start, style: fullStyle.style});
 			}
 			resultStyles.push(current);
@@ -32015,7 +32196,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			resultStyles.push({start: i, end: fullStyle.end, style: fullStyle.style});
 		}
 	};
-	var parse = function(text, offset, block, styles) {
+	var parse = function(text, offset, block, styles, ignoreCaptures) {
 		var patterns = block.getLinePatterns();
 		if (!patterns) {
 			return;
@@ -32060,23 +32241,25 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				result = current.result;
 				end = start + result[0].length;
 				var tokenStyle = {start: offset + start, end: offset + end, style: current.pattern.pattern.name, isWhitespace: current.pattern.isWhitespace};
-				if (current.pattern.pattern.captures) {
-					getCaptureStyles(result, current.pattern.pattern.captures, offset + start, substyles);
-				}
-				substyles.sort(function(a,b) {
-					if (a.start < b.start) {
-						return -1;
+				if (!ignoreCaptures) {
+					if (current.pattern.pattern.captures) {
+						getCaptureStyles(result, current.pattern.pattern.captures, offset + start, substyles);
 					}
-					if (a.start > b.start) {
-						return 1;
-					}
-					return 0;
-				});
-				for (var j = 0; j < substyles.length - 1; j++) {
-					if (substyles[j + 1].start < substyles[j].end) {
-						var newStyle = {start: substyles[j + 1].end, end: substyles[j].end, style: substyles[j].style};
-						substyles[j].end = substyles[j + 1].start;
-						substyles.splice(j + 2, 0, newStyle);
+					substyles.sort(function(a,b) {
+						if (a.start < b.start) {
+							return -1;
+						}
+						if (a.start > b.start) {
+							return 1;
+						}
+						return 0;
+					});
+					for (var j = 0; j < substyles.length - 1; j++) {
+						if (substyles[j + 1].start < substyles[j].end) {
+							var newStyle = {start: substyles[j + 1].end, end: substyles[j].end, style: substyles[j].style};
+							substyles[j].end = substyles[j + 1].start;
+							substyles.splice(j + 2, 0, newStyle);
+						}
 					}
 				}
 				mergeStyles(tokenStyle, substyles, styles);
@@ -32116,24 +32299,12 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 
 			var subPatterns = current.getLinePatterns();
-			if (subPatterns.length && (current.pattern.pattern.name === "comment.block" || current.pattern.pattern.name === "comment.line")) {
+			if (subPatterns.length && current.pattern.pattern.name && current.pattern.pattern.name.indexOf("comment") === 0) {
 				var substyles = [];
-				parse(baseModel.getText(current.contentStart, current.end), current.contentStart, current, substyles);
+				parse(baseModel.getText(current.contentStart, current.end), current.contentStart, current, substyles, true);
 				for (var i = 0; i < substyles.length; i++) {
 					if (substyles[i].style === "meta.annotation.task.todo") {
-						/*
-						 * If the content belonging to the task tag has been broken up by whitespace tokens
-						 * then look at the subsequent tokens for consecutive whitespace+tag tokens, which
-						 * should also be grouped with the current task token.
-						 */
-						var end = substyles[i].end;
-						if (block.isRenderingWhitespace()) {
-							while (i + 1 < substyles.length && (substyles[i + 1].isWhitespace || substyles[i + 1].style === "meta.annotation.task.todo")) {
-								end = substyles[i + 1].end;
-								i += 1;
-							}
-						}
-						add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, substyles[i].start, end, baseModel.getText(substyles[i].start, end)));
+						add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, substyles[i].start, substyles[i].end, baseModel.getText(substyles[i].start, substyles[i].end)));
 					}
 				}
 			}
@@ -32186,9 +32357,27 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					var contentStart = current.result.index + current.result[0].length;
 					var resultEnd = null;
 
+					/* 
+					 * If the end match contains a capture reference (eg.- "\1") then update
+					 * its regex with the resolved capture values from the begin match.
+					 */
+					var endRegex = current.pattern.regexEnd;
+					var regexString = endRegex.toString();
+					captureReferenceRegex.lastIndex = 0;
+					if (captureReferenceRegex.test(regexString)) {
+						captureReferenceRegex.lastIndex = 0;
+						var result = captureReferenceRegex.exec(regexString);
+						while (result) {
+							regexString = regexString.replace(result[0], current.result[result[1]] || "");
+							result = captureReferenceRegex.exec(regexString);
+						}
+						/* create the updated regex, remove the leading '/' and trailing /g */
+						endRegex = new RegExp(regexString.substring(1, regexString.length - 2), "g");
+					}
+
 					var lastIndex = contentStart;
 					while (!resultEnd) {
-						var result = _findMatch(current.pattern.regexEnd, text, lastIndex);
+						var result = _findMatch(endRegex, text, lastIndex);
 						if (!result) {
 							eolRegex.lastIndex = 0;
 							result = eolRegex.exec(text);
@@ -33265,7 +33454,7 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 					id: "comment_singleline",
 					begin: "//",
 					end: ".*",
-					name: "comment.line",
+					name: "comment.line.double-slash",
 					patterns: [
 						{
 							match: "(\\b)(TODO)(\\b)(.*)",
@@ -33308,11 +33497,11 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 				}, {
 					id: "number_decimal",
 					match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
-					name: "constant.numeric"
+					name: "constant.numeric.number"
 				}, {
 					id: "number_hex",
 					match: "\\b0[xX][0-9A-Fa-f]+\\b",
-					name: "constant.numeric"
+					name: "constant.numeric.hex"
 				}
 			]
 		}],
@@ -33362,15 +33551,15 @@ define("orion/editor/stylers/js/js", ["orion/editor/stylers/shared/shared"], fun
 				include: "orion.patterns" //$NON-NLS-0$
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				name: "keyword.control" //$NON-NLS-0$
+				name: "keyword.control.js" //$NON-NLS-0$
 			}, {
 				begin: "'(?:\\\\.|[^'\\n])*\\\\\\n", //$NON-NLS-0$
 				end: "(?:(?:\\\\.|[^'\\n])*\\\\\\n)*(?:\\n|(?:\\\\.|[^'\\n])*'?)", //$NON-NLS-0$
-				name: "string.quoted.single" //$NON-NLS-0$
+				name: "string.quoted.single.js" //$NON-NLS-0$
 			}, {
 				begin: '"(?:\\\\.|[^"\\n])*\\\\\\n', //$NON-NLS-0$
 				end: '(?:(?:\\\\.|[^"\\n])*\\\\\\n)*(?:\\n|(?:\\\\.|[^"\\n])*"?)', //$NON-NLS-0$
-				name: "string.quoted.double" //$NON-NLS-0$
+				name: "string.quoted.double.js" //$NON-NLS-0$
 			}
 		]
 	});
@@ -33443,21 +33632,21 @@ define("orion/editor/stylers/css/css", ["orion/editor/stylers/shared/shared"], f
 				include: "orion.patterns"
 			}, {
 				match: "(?:-webkit-|-moz-|-ms-|\\b)(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
+				name: "keyword.control.css"
 			}, {
 				match: "(?i)\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
-				name: "constant.numeric"
+				name: "constant.numeric.value.css"
 			}, {
 				match: "#[0-9A-Fa-f]+\\b",
-				name: "constant.numeric"
+				name: "constant.numeric.hex.css"
 			}, {
 				begin: "'[^'\\n]*\\\\\n", //$NON-NLS-0$
 				end: "(?:[^'\\n]*\\\\\\n)*[^'\\n]*'?", //$NON-NLS-0$
-				name: "string.quoted.single" //$NON-NLS-0$
+				name: "string.quoted.single.css" //$NON-NLS-0$
 			}, {
 				begin: "\"[^\"\\n]*\\\\\n", //$NON-NLS-0$
 				end: "(?:[^\"\\n]*\\\\\\n)*[^\"\\n]*\"?", //$NON-NLS-0$
-				name: "string.quoted.double" //$NON-NLS-0$
+				name: "string.quoted.double.css" //$NON-NLS-0$
 			}, {
 				/* override orion.patterns#comment_singleline */
 				id: "comment_singleline"
@@ -33520,7 +33709,7 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 			}, {
 				begin: "#",
 				end: ".*",
-				name: "comment.line",
+				name: "comment.line.number-sign.php",
 				patterns: [
 					{
 						match: "(\\b)(TODO)(\\b)(.*)",
@@ -33532,11 +33721,19 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 					}
 				]
 			}, {
+				begin: "<<<(\\w+)$",
+				end: "^\\1;$",
+				name: "string.unquoted.heredoc.php"
+			}, {
+				begin: "<<<'(\\w+)'$",
+				end: "^\\1;$",
+				name: "string.unquoted.heredoc.nowdoc.php"
+			}, {
 				match: "\\b0[bB][01]+\\b",
-				name: "constant.numeric"
+				name: "constant.numeric.binary.php"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
+				name: "keyword.control.php"
 			}
 		]
 	});
@@ -33576,24 +33773,11 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				},
 				name: "meta.tag.doctype.html",
 			}, {
-				begin: "(<script)([^>]*)(>)",
-				end: "(</script>)",
+				begin: "(?i)(<style)([^>]*)(>)",
+				end: "(?i)(</style>)",
 				captures: {
-					1: {name: "entity.name.tag"},
-					3: {name: "entity.name.tag"}
-				},
-				contentName: "source.js.embedded.html",
-				patterns: [
-					{
-						include: "orion.js"
-					}
-				]
-			}, {
-				begin: "(<style)([^>]*)(>)",
-				end: "(</style>)",
-				captures: {
-					1: {name: "entity.name.tag"},
-					3: {name: "entity.name.tag"}
+					1: {name: "entity.name.tag.html"},
+					3: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.css.embedded.html",
 				patterns: [
@@ -33602,10 +33786,46 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 					}
 				]
 			}, {
-				begin: "(<\\?php\\b)",
-				end: "(\\?>|%>)",
+				begin: "(?i)(<script(?:\\s+language\\s*=\\s*(?:'javascript'|\"javascript\"))?\\s*>)",
+				end: "(?i)(</script>)",
 				captures: {
-					1: {name: "entity.name.tag"}
+					1: {name: "entity.name.tag.html"}
+				},
+				contentName: "source.js.embedded.html",
+				patterns: [
+					{
+						include: "orion.js"
+					}
+				]
+			}, {
+				begin: "(?i)(<script(?:\\s+language\\s*=\\s*(?:'php'|\"php\"))?\\s*>)",
+				end: "(?i)(</script>)",
+				captures: {
+					1: {name: "entity.name.tag.html"}
+				},
+				contentName: "source.php.embedded.html",
+				patterns: [
+					{
+						include: "orion.php"
+					}
+				]
+			}, {
+				begin: "(?i)(<\\?(?:=|php)?(?:\\s|$))",
+				end: "(\\?>)",
+				captures: {
+					1: {name: "entity.name.tag.html"}
+				},
+				contentName: "source.php.embedded.html",
+				patterns: [
+					{
+						include: "orion.php"
+					}
+				]
+			}, {
+				begin: "(<%=?(?:\\s|$))",
+				end: "(%>)",
+				captures: {
+					1: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -33617,12 +33837,22 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 				id: "comment",
 				begin: "<!--",
 				end: "-->",
-				name: "comment.block"
+				name: "comment.block.html",
+				patterns: [
+					{
+						match: "(\\b)(TODO)(\\b)(.*)",
+						name: "meta.annotation.task.todo",
+						captures: {
+							2: {name: "keyword.other.documentation.task"},
+							4: {name: "comment.line"}
+						}
+					}
+				]
 			}, {
 				begin: "(</?[A-Za-z0-9]+)",
 				end: "(/?>)",
 				captures: {
-					1: {name: "entity.name.tag"},
+					1: {name: "entity.name.tag.html"},
 				},
 				name: "meta.tag.html",
 				patterns: [
@@ -33684,7 +33914,7 @@ define("orion/editor/stylers/java/java", ["orion/editor/stylers/shared/shared"],
 				include: "orion.patterns"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
+				name: "keyword.control.java"
 			}, {
 				/* override orion.patterns#string_singleQuote */
 				id: "string_singleQuote"
@@ -33720,7 +33950,7 @@ define("orion/editor/stylers/json/json", ["orion/editor/stylers/shared/shared"],
 				include: "orion.patterns" //$NON-NLS-0$
 			}, {
 				match: "\\b(?:true|false|null)\\b", //$NON-NLS-0$
-				name: "keyword.control" //$NON-NLS-0$
+				name: "keyword.control.json" //$NON-NLS-0$
 			}, {
 				/* override orion.patterns#comment_singleline */
 				id: "comment_singleline" //$NON-NLS-0$
@@ -33786,11 +34016,11 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 				/* override from orion.patterns */
 				id: "number_decimal",
 				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)[lL]?\\b",
-				name: "constant.numeric"
+				name: "constant.numeric.number.python"
 			}, {
 				begin: "#",
 				end: ".*",
-				name: "comment.line",
+				name: "comment.line.number-sign.python",
 				patterns: [
 					{
 						match: "(\\b)(TODO)(\\b)(.*)",
@@ -33804,14 +34034,14 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 			}, {
 				begin: "'''",
 				end: "'''",
-				name: "string.quoted.triple"
+				name: "string.quoted.triple.python"
 			}, {
 				begin: '"""',
 				end: '"""',
-				name: "string.quoted.triple"
+				name: "string.quoted.triple.python"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
+				name: "keyword.control.python"
 			}
 		]
 	});
@@ -33874,7 +34104,7 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 			}, {
 				begin: "#",
 				end: ".*",
-				name: "comment.line",
+				name: "comment.line.number-sign.ruby",
 				patterns: [
 					{
 						match: "(\\b)(TODO)(\\b)(.*)",
@@ -33889,7 +34119,7 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 				id: "comment_multiline",
 				begin: "^=begin",
 				end: "^=end",
-				name: "comment.block",
+				name: "comment.block.ruby",
 				patterns: [
 					{
 						match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",
@@ -33902,10 +34132,10 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 				]
 			}, {
 				match: "\\b0[bB][01]+\\b",
-				name: "constant.numeric"
+				name: "constant.numeric.binary.ruby"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control"
+				name: "keyword.control.ruby"
 			}
 		]
 	});
@@ -34591,6 +34821,7 @@ define('orion/widgets/browse/fileBrowser',[
 	'orion/widgets/browse/browseView',
 	'orion/explorers/navigatorRenderer',
 	'orion/widgets/browse/readonlyEditorView',
+	'orion/widgets/browse/branchSelector',
 	'orion/markdownView',
 	'orion/commandRegistry',
 	'orion/fileClient',
@@ -34603,7 +34834,7 @@ define('orion/widgets/browse/fileBrowser',[
 	'orion/objects',
 	'orion/webui/littlelib'
 ], function(
-	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mMarkdownView,
+	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mBranchSelector, mMarkdownView,
 	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mReadonlyFileClient, mEmptyFileClient, Deferred, URITemplate, objects, lib
 ) {
 	/**
@@ -34651,6 +34882,7 @@ define('orion/widgets/browse/fileBrowser',[
 			this._contentTypeService =  new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
 		}
 		this._preferences = options.preferences;//Optional
+		this._showBranch = options.showBranch;
 		this._init(options);
 	}
 	objects.mixin(FileBrowser.prototype, {
@@ -34666,6 +34898,30 @@ define('orion/widgets/browse/fileBrowser',[
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				var metadata = evt.metadata;
+				if(this.branches && this._branchSelector){
+					var activeBranchName = this.branches[0].Name;
+					var newLocation = null;
+					if(metadata.Parents) {
+						if(metadata.Parents.length > 0) {
+							activeBranchName = metadata.Parents[metadata.Parents.length-1].Name;
+						} else {
+							activeBranchName = metadata.Name;
+						}
+					} else {
+						this.branches.some(function(branch){
+							if(branch.Name.toLowerCase() === "master") {
+								activeBranchName = branch.Name;
+								newLocation = branch.Location;
+								return true;
+							}
+						});
+					}
+					this._branchSelector.activeBranchName = activeBranchName;
+					if(newLocation){
+						this.refresh(newLocation);
+						return;
+					}
+				}
 				this._breadCrumbName = evt.name;
 				this._breadCrumbTarget = metadata;
 				if (evt.input === null || evt.input === undefined) {
@@ -34687,10 +34943,31 @@ define('orion/widgets/browse/fileBrowser',[
 				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
 			};
 			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
+			
 			window.addEventListener("hashchange", function() { //$NON-NLS-0$
 				this.refresh(PageUtil.hash());
 			}.bind(this));
-			this.refresh(PageUtil.hash());
+			if(this._showBranch) {
+				var branchSelectorContainer = document.createElement("div"); //$NON-NLS-0$
+				branchSelectorContainer.classList.add("brSelectorContainer"); //$NON-NLS-0$
+				var rootURL = this._fileClient.fileServiceRootURL("");
+				this._fileClient.fetchChildren(rootURL).then(function(contents){
+					if(contents && contents.length > 0) {
+						//var uriToShow = contents[0].Location;
+						this.branches = contents;
+						this._branchSelector = new mBranchSelector.BranchSelector({
+							commandRegistry: this._commandRegistry,
+							fileClient: this._fileClient,
+							node: branchSelectorContainer,
+							activeBranchName: "default",
+							branches: contents
+						});
+					}
+					this.refresh(PageUtil.hash());
+				}.bind(this));
+			} else {
+				this.refresh(PageUtil.hash());
+			}
 		},
 		_breadCrumbMaker: function(bcContainer, maxLength){
 			this._renderBreadCrumb({
@@ -34747,7 +35024,7 @@ define('orion/widgets/browse/fileBrowser',[
 					maxLength: options.maxLength,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
-					workspaceRootSegmentName: workspaceRootURL,//fileSystemRootName,
+					workspaceRootSegmentName: workspaceRootURL,
 					workspaceRootURL: workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink
@@ -34764,6 +35041,7 @@ define('orion/widgets/browse/fileBrowser',[
 					maxEditorHeight: this._maxEditorHeight,
 					readmeHeaderClass: "readmeHeader",
 					metadata: metadata,
+					branchSelector: this._branchSelector,
 					commandRegistry: this._commandRegistry,
 					contentTypeRegistry: this._contentTypeService,
 					inputManager: this._inputManager,
@@ -34782,7 +35060,8 @@ define('orion/widgets/browse/fileBrowser',[
 						} else {
 							browseViewOptons.imageView = {};
 							this._fileClient.readBlob(metadata.Location).then(function(buffer){
-								var objectURL = URL.createObjectURL(new Blob(new Uint8Array(buffer)));
+								//var objectURL = URL.createObjectURL(new Blob(new Uint8Array(buffer),{type: cType.id}));
+								var objectURL = URL.createObjectURL(new Blob([buffer],{type: cType.id}));
 								var image = document.createElement("img"); //$NON-NLS-0$
 								image.src = objectURL;
 								//URL.revokeObjectURL(objectURL);
@@ -36623,6 +36902,7 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 		pluginRegistry.start().then(function() {
 			this._fileBrowser = new mFileBrowser.FileBrowser({
 				parent: parentId,//"fileBrowser", 
+				showBranch: true,
 				//maxEditorHeight: 800,
 				serviceRegistry: serviceRegistry
 			});

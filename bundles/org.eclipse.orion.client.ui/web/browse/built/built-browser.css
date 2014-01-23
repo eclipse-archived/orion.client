@@ -1917,6 +1917,7 @@ a.currentLocation:hover {
   font-style:   normal;
   font-weight:  400;
 }
+
 .navlink {
 	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	display: inline-block;
@@ -2050,10 +2051,6 @@ a.currentLocation:hover {
 	font-family: sans-serif;
 	padding-bottom:5px;
 }
-.currentLocation{
-	margin-left:auto;
-	margin-right:auto;
-}
 .noFile {
 	padding: 10px;
 	vertical-align: middle;
@@ -2087,7 +2084,7 @@ a.currentLocation:hover {
 	background: none repeat scroll 0 0 #f4f4f4;
 	vertical-align: middle;
 	font-weight: bold;
-	padding: 6px;
+	padding: 2px;
 	color: gray;
 	margin-bottom: 0;
 	border-color: #dadada;
@@ -2199,6 +2196,55 @@ a.currentLocation:hover {
 .readmeHeader{
 	margin-top: 20px;
 }
+.browserBranchName {
+	font-weight: bold;
+	margin-left: 4px;
+	margin-top: 5px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: calc(100% - 6px - 4px - 24px);
+	max-width: -webkit-calc(100% - 6px - 4px - 24px);
+	-moz-user-select: -moz-none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	color:#444;
+}
+.brSelectorContainer {
+	height: 26px; 
+	width: 150px; 
+	background-color: white;
+	display: inline-block;
+}
+.breadCrumbContainer {
+	vertical-align: top;
+	margin-top: 6px;
+	display: inline-block;
+	padding-left: 8px;
+}
+.dropdownMenuOpen {
+	max-height: 300px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.currentLocation {
+	vertical-align: top;
+	padding-top:1px;
+	font-weight: bold;
+	font-size: 8pt;
+	color: #444;
+	text-decoration: none;
+	line-height: 10pt;
+	white-space:nowrap;
+}
+a.currentLocation:hover {
+	font-weight: bold;
+	font-size: 8pt;
+	color: #F58B0F;
+ 	text-decoration: none;
+	border-bottom: 1px dotted;
+}
 .fileBrowserParent{
 	border: 1px solid;
 	vertical-align: middle;
@@ -2208,6 +2254,7 @@ a.currentLocation:hover {
 	margin-left: 15%;
 	margin-right: 15%;
 	padding-bottom: 5px;
+	min-height: 320px;
 }
 .fileBrowserDemoTextParent{
 	border: none;
