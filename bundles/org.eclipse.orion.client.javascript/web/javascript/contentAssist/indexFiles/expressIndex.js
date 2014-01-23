@@ -25,7 +25,7 @@ function () {
 		        "Route": "Route",
 		        "Router": "Router",
 		        "!proto" : "Object",
-		        "!type": "fn()"
+		        "!type": "fn() -> application"
       		},
       		"Route": {
   				"prototype": {
