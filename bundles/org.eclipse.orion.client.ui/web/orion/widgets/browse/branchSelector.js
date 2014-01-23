@@ -69,7 +69,8 @@ define([
 					visibleWhen: function(item) {
 						return true;
 					},
-					choiceCallback: this._switchBrMenuCallback.bind(this)
+					choiceCallback: this._switchBrMenuCallback.bind(this),
+					positioningNode: this.node
 				});
 				commandRegistry.addCommand(switchBrCommand);
 				commandRegistry.registerCommandContribution("orion.browse", "orion.browse.switchbr", 1); //$NON-NLS-1$ //$NON-NLS-0$

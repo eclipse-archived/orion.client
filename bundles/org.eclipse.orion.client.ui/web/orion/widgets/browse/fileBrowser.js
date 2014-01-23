@@ -81,6 +81,7 @@ define([
 			this._contentTypeService =  new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
 		}
 		this._preferences = options.preferences;//Optional
+		this.rootName = options.rootName;
 		this._showBranch = options.showBranch;
 		this._init(options);
 	}
@@ -224,7 +225,7 @@ define([
 					maxLength: options.maxLength,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
-					workspaceRootSegmentName: workspaceRootURL,
+					workspaceRootSegmentName: this.rootName ? this.rootName : workspaceRootURL,
 					workspaceRootURL: workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink

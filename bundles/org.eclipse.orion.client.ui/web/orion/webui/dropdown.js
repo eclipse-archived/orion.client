@@ -39,6 +39,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 	 * opening of this drop down. If it is not specified the parent of the dropdown node will be searched
 	 * for a node containing the dropdownTrigger class. Optional.
 	 * @param options.parentDropdown The Dropdown that is the parent of this one if this is a sub-dropdown. Optional.
+	 * @param options.positioningNode The Node that the dropdown uses so that it always renders under the positioningNode's left bottom corner. Optional.
 	 * @param options.skipTriggerEventListeners A boolean indicating whether or not to skip adding event
 	 * listeners to the triggerNode. Optional.
 	 * 
@@ -57,6 +58,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 			this._populate = options.populate;
 			this._selectionClass = options.selectionClass;
 			this._parentDropdown = options.parentDropdown;
+			this._positioningNode = options.positioningNode;
 			
 			if (!this._parentDropdown) {
 				//if a parentDropdown isn't specified move up in dom tree looking for one
@@ -190,6 +192,13 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 		_positionDropdown: function(mouseEvent) {
 			this._dropdownNode.style.left = "";
 			this._dropdownNode.style.top = "";
+			
+			if(this._positioningNode) {
+				var positioningNodeBound = lib.bounds(this._positioningNode);
+				this._dropdownNode.style.left = positioningNodeBound.left + "px";
+				this._dropdownNode.style.top = positioningNodeBound.top + positioningNodeBound.height + 1 +"px";
+				return;
+			}
 			
 			var bounds = lib.bounds(this._dropdownNode);
 			var bodyBounds = lib.bounds(document.body);

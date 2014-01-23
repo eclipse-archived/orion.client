@@ -271,9 +271,17 @@ define([
 			var sectionsOrder = ["folderNav", "readme"];
 			renderSections.apply(this, [sectionsOrder]);
 		},
-		
 		updateImage: function(image) {
-			this._foldersSection.setContent(image);
+			var imageTable = document.createElement("table");
+			imageTable.classList.add("imageViewTable");
+			var tr = document.createElement("tr");
+			var td = document.createElement("td"); 
+			var imageContent = document.createElement("div");
+			imageContent.appendChild(image);
+			td.appendChild(imageContent);
+			tr.appendChild(td);
+			imageTable.appendChild(tr);
+			this._foldersSection.setContent(imageTable);
 		},
 		create: function() {
 			if(this._metadata.Projects){ //this is a workspace root

@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window console eclipse orion*/
+/*global document define window console eclipse orion*/
 /*
 define([
 	'orion/bootstrap', 
@@ -28,23 +28,31 @@ define([
 define(['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry'],
 function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 		// figure out plugin to install from repoURL
-	var pluginURL = "http://libingw.orion.eclipse.org:8080/plugins/GitHubFilePlugin.html?repo=https://github.com/eclipse/orion.client.git";
-	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
-	var plugins = {};
-	plugins[pluginURL] = true;
-	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
-		storage: {},
-		plugins: plugins
-	});
-	pluginRegistry.start().then(function() {
-		var fileBrowser = new mFileBrowser.FileBrowser({
-			parent: "fileBrowser", 
-			showBranch: true,
-			//rootName: "RootName",
-			//maxEditorHeight: 800,
-			serviceRegistry: serviceRegistry
-		});
-	})
+	var urlInput = document.getElementById("fileSystemURLInput");
+	var fileBrowser = null;
+	urlInput.addEventListener("keydown", function (e) { //$NON-NLS-0$
+		if (e.keyCode === 13){
+			if(fileBrowser) {
+				fileBrowser.destroy();
+			}
+			var pluginURL = urlInput.value;
+			var serviceRegistry = new mServiceRegistry.ServiceRegistry();
+			var plugins = {};
+			plugins[pluginURL] = true;
+			var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
+				storage: {},
+				plugins: plugins
+			});
+			pluginRegistry.start().then(function() {
+				fileBrowser = new mFileBrowser.FileBrowser({
+					parent: "fileBrowser", 
+					showBranch: true,
+					//maxEditorHeight: 800,
+					serviceRegistry: serviceRegistry
+				});
+			});
+		}
+	}, false);
 });
 
 

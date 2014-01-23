@@ -271,7 +271,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		return node;
 	}
 
-	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass) {
+	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
@@ -301,7 +301,8 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		menuButton.dropdown = new Dropdown.Dropdown({
 			dropdown: newMenu, 
 			populate: populateFunction,
-			selectionClass: selectionClass
+			selectionClass: selectionClass,
+			positioningNode: positioningNode
 		});
 		newMenu.dropdown = menuButton.dropdown;
 		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown};
@@ -585,6 +586,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
+			this.positioningNode = options.positioningNode; // optional positioning node choice command.
 			this.image = options.image || (require.toUrl && require.toUrl("images/none.png")); //$NON-NLS-0$
 			this.imageClass = options.imageClass;   // points to the location in a sprite
 			this.addImageClassToElement = options.addImageClassToElement; // optional boolean if true will add the image class to the 
