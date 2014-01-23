@@ -34915,6 +34915,7 @@ define('orion/widgets/browse/fileBrowser',[
 								return true;
 							}
 						});
+						newLocation = newLocation || this.branches[0].Location;
 					}
 					this._branchSelector.activeBranchName = activeBranchName;
 					if(newLocation){
