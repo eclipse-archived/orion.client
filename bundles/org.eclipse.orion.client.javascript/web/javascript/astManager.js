@@ -37,6 +37,15 @@ define([
 	}
 	objects.mixin(ASTManager.prototype, /** @lends javascript.ASTManager.prototype */ {
 		/**
+		 * @description Object of error types
+		 */
+		ErrorTypes: {
+			/**
+			 * @description Something unexpected has been found while parsing, most commonly a syntax error
+			 */
+			Unexpected: "unexp"	
+		},
+		/**
 		 * @param {Object} editorContext
 		 * @returns {orion.Promise} A promise resolving to the AST.
 		 */
@@ -71,9 +80,31 @@ define([
 				ast.errors = [e];
 			}
 			if (ast.errors) {
+				this._computeErrorTypes(ast.errors);
 				ast.errors = ast.errors.map(Serialize.serializeError);
 			}
 			return ast;
+		},
+		/**
+		 * @description Computes the problem type from the error and sets a 'type' property
+		 * on the error object
+		 * @function
+		 * @private
+		 * @param {Array} errors The error array from Esprima
+		 */
+		_computeErrorTypes: function(errors) {
+			if(errors && Array.isArray(errors)) {
+				errors.forEach(function(error) {
+					var msg = error.message;
+					if(msg) {
+						if(msg.indexOf('token') > -1 ||	msg.indexOf('identifier') > -1 || 
+							msg.indexOf('string') > -1 || msg.indexOf('number') > -1) {
+							error.type = 'unexp';
+							return;
+						}
+					}
+				});
+			}
 		},
 		/**
 		 * Notifies the AST manager of a change to the model.
