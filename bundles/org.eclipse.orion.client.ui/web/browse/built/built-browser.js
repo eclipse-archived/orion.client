@@ -34747,7 +34747,7 @@ define('orion/widgets/browse/fileBrowser',[
 					maxLength: options.maxLength,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
-					workspaceRootSegmentName: "John Smith | Example Project",//fileSystemRootName,
+					workspaceRootSegmentName: workspaceRootURL,//fileSystemRootName,
 					workspaceRootURL: workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink
@@ -36597,11 +36597,25 @@ if(_all_script && _all_script.length && _all_script.length > 0) {
 
 define('orion/widgets/browse/builder/browse',['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'],
 function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
-	function Browser(parentId, repoURL) {
-		var pluginURL = new URL("plugins/GitHubFilePlugin.html?repo=" + repoURL, _browser_script_source).href;
+	function Browser(parentId, repoURL, base) {
+		var pluginURL;
+		var url = new URL(repoURL || window.location.href);	
+		if (url.host==="github.com") {
+			pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=" + repoURL, _browser_script_source);
+		} else if (url.pathname.indexOf("/git/") === 0) {
+			pluginURL = new URL("/gerrit/plugins/gerritFilesystem/static/plugins/GerritFilePlugin.html", repoURL);
+			pluginURL.query.set("project", url.pathname.substring(5));
+		} else if (url.pathname.indexOf("/project/") === 0) {
+			if (!base) {
+				base = new URL("/ccm01", repoURL).href;
+			}
+			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repoURL);
+		} else {
+			throw "Bad Repo URL - " + repoURL;
+		}
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		var plugins = {};
-		plugins[pluginURL] = true;
+		plugins[pluginURL.href] = true;
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
 			storage: {},
 			plugins: plugins
