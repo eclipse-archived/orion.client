@@ -34,9 +34,10 @@ define([
 	provider.registerService("orion.edit.editor", { //$NON-NLS-0$
 		setBuffer: function(buffer, contentType) {	
 			var img = document.createElement("img"); //$NON-NLS-0$
-			img.src = URL.createObjectURL(new Blob([buffer], {type: contentType}));
+			var url = URL.createObjectURL(new Blob([buffer], {type: contentType.id}));
+			img.src = url;
 			img.onload = function() {
-				URL.revokeObjectURL(img.src);
+				URL.revokeObjectURL(url);
 			};
 			var imageContent = document.getElementById("imagecontent"); //$NON-NLS-0$
 			lib.empty(imageContent);
@@ -61,7 +62,7 @@ define([
 		}
 	}, {
 		id: EDITOR_ID,
-		nameKey: "Orion Image Viewer",
+		nameKey: "Orion Image Viewer", //$NON-NLS-0$
 		nls: "orion/nls/messages", //$NON-NLS-0$
 		uriTemplate: "../edit/edit.html#{,Location,params*},editor=" + EDITOR_ID //$NON-NLS-0$
 	});
