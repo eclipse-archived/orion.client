@@ -8,7 +8,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document window URL console*/
+/*global define document window Blob console */
 define([
 	'orion/editor/editor',
 	'orion/commands',
@@ -68,8 +68,8 @@ define([
 				}
 			}
 			var service = serviceRegistry.getService(this.editorService);
-			if (service.setBuffer) {
-				service.setBuffer(this._contents, this.inputManager.getContentType());
+			if (service.setBlob) {
+				service.setBlob(new Blob([this._contents], {type: this.inputManager.getContentType().id}));
 			}
 			if (service.setTextModel) {
 

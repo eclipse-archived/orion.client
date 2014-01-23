@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document URL Blob */
+/*global define document URL */
 define([
 	'orion/plugin',
 	'orion/Deferred',
@@ -32,9 +32,9 @@ define([
 	var provider = new PluginProvider(headers);
 
 	provider.registerService("orion.edit.editor", { //$NON-NLS-0$
-		setBuffer: function(buffer, contentType) {	
+		setBlob: function(blob) {	
 			var img = document.createElement("img"); //$NON-NLS-0$
-			var url = URL.createObjectURL(new Blob([buffer], {type: contentType.id}));
+			var url = URL.createObjectURL(blob);
 			img.src = url;
 			img.onload = function() {
 				URL.revokeObjectURL(url);
