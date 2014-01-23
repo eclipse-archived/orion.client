@@ -319,6 +319,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			if (!this.$frame) {
 				return;
 			}
+			if(modalDialogManager.dialog === this) {
+				modalDialogManager.dialog = null;
+			}
 			lib.setFramesEnabled(true);
 			if (this._addedBackdrop && this._addedBackdrop.length > 0) {
 				this._addedBackdrop.forEach(function(node) { //$NON-NLS-0$
