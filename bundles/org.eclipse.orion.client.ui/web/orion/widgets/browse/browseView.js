@@ -250,7 +250,7 @@ define([
 									}
 									bcNodeContainer.appendChild(bcNode);
 									tileNode.appendChild(bcNodeContainer);
-									this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 24);
+									this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 150/*branch selector width*/ - 50);
 									if(this.branchSelector) {
 										this.branchSelector.refresh();
 									}
