@@ -2245,6 +2245,15 @@ a.currentLocation:hover {
  	text-decoration: none;
 	border-bottom: 1px dotted;
 }
+.imageViewTable {
+    width:100%;
+    height:100%;
+    text-align:center; 
+    vertical-align:middle;
+}
+.tooltip {
+	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
+}
 .fileBrowserParent{
 	border: 1px solid;
 	vertical-align: middle;

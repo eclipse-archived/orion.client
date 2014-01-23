@@ -5491,6 +5491,7 @@ define('orion/webui/dropdown',['require', 'orion/webui/littlelib', 'orion/EventT
 	 * opening of this drop down. If it is not specified the parent of the dropdown node will be searched
 	 * for a node containing the dropdownTrigger class. Optional.
 	 * @param options.parentDropdown The Dropdown that is the parent of this one if this is a sub-dropdown. Optional.
+	 * @param options.positioningNode The Node that the dropdown uses so that it always renders under the positioningNode's left bottom corner. Optional.
 	 * @param options.skipTriggerEventListeners A boolean indicating whether or not to skip adding event
 	 * listeners to the triggerNode. Optional.
 	 * 
@@ -5509,6 +5510,7 @@ define('orion/webui/dropdown',['require', 'orion/webui/littlelib', 'orion/EventT
 			this._populate = options.populate;
 			this._selectionClass = options.selectionClass;
 			this._parentDropdown = options.parentDropdown;
+			this._positioningNode = options.positioningNode;
 			
 			if (!this._parentDropdown) {
 				//if a parentDropdown isn't specified move up in dom tree looking for one
@@ -5642,6 +5644,13 @@ define('orion/webui/dropdown',['require', 'orion/webui/littlelib', 'orion/EventT
 		_positionDropdown: function(mouseEvent) {
 			this._dropdownNode.style.left = "";
 			this._dropdownNode.style.top = "";
+			
+			if(this._positioningNode) {
+				var positioningNodeBound = lib.bounds(this._positioningNode);
+				this._dropdownNode.style.left = positioningNodeBound.left + "px";
+				this._dropdownNode.style.top = positioningNodeBound.top + positioningNodeBound.height + 1 +"px";
+				return;
+			}
 			
 			var bounds = lib.bounds(this._dropdownNode);
 			var bodyBounds = lib.bounds(document.body);
@@ -6740,7 +6749,7 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 		return node;
 	}
 
-	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass) {
+	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
@@ -6770,7 +6779,8 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 		menuButton.dropdown = new Dropdown.Dropdown({
 			dropdown: newMenu, 
 			populate: populateFunction,
-			selectionClass: selectionClass
+			selectionClass: selectionClass,
+			positioningNode: positioningNode
 		});
 		newMenu.dropdown = menuButton.dropdown;
 		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown};
@@ -7054,6 +7064,7 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
+			this.positioningNode = options.positioningNode; // optional positioning node choice command.
 			this.image = options.image || (require.toUrl && require.toUrl("images/none.png")); //$NON-NLS-0$
 			this.imageClass = options.imageClass;   // points to the location in a sprite
 			this.addImageClassToElement = options.addImageClassToElement; // optional boolean if true will add the image class to the 
@@ -24793,7 +24804,7 @@ define('orion/commandRegistry',[
 							var populateFunction = function(menu) {
 								command.populateChoicesMenu(menu, items, handler, userData, self);
 							};
-							self._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command), command.imageClass, command.tooltip || command.title, command.selectionClass);
+							self._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command), command.imageClass, command.tooltip || command.title, command.selectionClass, command.positioningNode);
 						} else {
 							// Rendering atomic commands as buttons or menus
 							invocation.handler = invocation.handler || this;
@@ -24820,7 +24831,7 @@ define('orion/commandRegistry',[
 		/*
 		 * private.  Parent must exist in the DOM.
 		 */
-		_createDropdownMenu: function(parent, name, nested, populateFunction, icon, tooltip, selectionClass) {
+		_createDropdownMenu: function(parent, name, nested, populateFunction, icon, tooltip, selectionClass, positioningNode) {
 			parent = lib.node(parent);
 			// We create dropdowns asynchronously so it's possible that the parent has been removed from the document 
 			// by the time we are called.  If so, don't bother building a submenu for an orphaned menu.
@@ -24853,7 +24864,7 @@ define('orion/commandRegistry',[
 					tooltip = tooltip || name; // No text and no tooltip => fallback to name
 				}
 				tooltip = icon ? (tooltip || name) : tooltip;
-				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon, false, selectionClass);
+				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon, false, selectionClass, positioningNode);
 				menuButton = created.menuButton;
 				newMenu = created.menu;
 				if (tooltip) {
@@ -26048,9 +26059,17 @@ define('orion/widgets/browse/browseView',[
 			var sectionsOrder = ["folderNav", "readme"];
 			renderSections.apply(this, [sectionsOrder]);
 		},
-		
 		updateImage: function(image) {
-			this._foldersSection.setContent(image);
+			var imageTable = document.createElement("table");
+			imageTable.classList.add("imageViewTable");
+			var tr = document.createElement("tr");
+			var td = document.createElement("td"); 
+			var imageContent = document.createElement("div");
+			imageContent.appendChild(image);
+			td.appendChild(imageContent);
+			tr.appendChild(td);
+			imageTable.appendChild(tr);
+			this._foldersSection.setContent(imageTable);
 		},
 		create: function() {
 			if(this._metadata.Projects){ //this is a workspace root
@@ -31570,7 +31589,8 @@ define('orion/widgets/browse/branchSelector',[
 					visibleWhen: function(item) {
 						return true;
 					},
-					choiceCallback: this._switchBrMenuCallback.bind(this)
+					choiceCallback: this._switchBrMenuCallback.bind(this),
+					positioningNode: this.node
 				});
 				commandRegistry.addCommand(switchBrCommand);
 				commandRegistry.registerCommandContribution("orion.browse", "orion.browse.switchbr", 1); //$NON-NLS-1$ //$NON-NLS-0$
@@ -34882,6 +34902,7 @@ define('orion/widgets/browse/fileBrowser',[
 			this._contentTypeService =  new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
 		}
 		this._preferences = options.preferences;//Optional
+		this.rootName = options.rootName;
 		this._showBranch = options.showBranch;
 		this._init(options);
 	}
@@ -35025,7 +35046,7 @@ define('orion/widgets/browse/fileBrowser',[
 					maxLength: options.maxLength,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
-					workspaceRootSegmentName: workspaceRootURL,
+					workspaceRootSegmentName: this.rootName ? this.rootName : workspaceRootURL,
 					workspaceRootURL: workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink
