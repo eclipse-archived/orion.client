@@ -60,6 +60,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			topRowBanner.style.padding = '10px';
 			topRowBanner.style.paddingLeft = '6px';
 			topRowBanner.style.paddingRight = '2px';
+			topRowBanner.style.borderBottom = '1px solid #dddddd';
 			
 			styles.push( topRowBanner );
 			
@@ -166,7 +167,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			var breadcrumbSeparator = new ThemeClass.ThemeClass( 'breadcrumbSeparator' );
 			breadcrumbSeparator.style.fontSize = '8pt';
 			breadcrumbSeparator.style.textDecoration = 'none';
-			breadcrumbSeparator.style.color = '#f1f1f2'; // this.navbar;
+			breadcrumbSeparator.style.color = this.separator;
 			breadcrumbSeparator.style.fontWeight = 'bold';
 			
 			styles.push( breadcrumbSeparator );
@@ -174,7 +175,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			var currentLocation = new ThemeClass.ThemeClass( 'currentLocation' );
 			currentLocation.style.fontWeight = 'bold';
 			currentLocation.style.fontSize = '8pt';
-			currentLocation.style.color = '#f1f1f2'; //this.navbar; // should be a separate themeable item but hard coded for now.
+			currentLocation.style.color = this.breadcrumb; //this.navbar; // should be a separate themeable item but hard coded for now.
 			currentLocation.style.textDecoration = 'none';
 			currentLocation.style.textWrap = 'normal';
 			currentLocation.style.lineHeight = '10pt';
@@ -319,9 +320,9 @@ define(['orion/widgets/themes/ThemeClass'],
 			
 			var auxpane = new ThemeClass.ThemeClass( 'auxpane' );
 			auxpane.style.border = '0';
-			auxpane.style.background = this.sidepanel;
+	/*		auxpane.style.background = this.sidepanel;
 			auxpane.style.background = '-webkit-gradient(linear, left top, left bottom, color-stop(0%,' + this.sidepanel + '), color-stop(100%,' + this.sidepanel + '))';
-			auxpane.style.background ='-moz-linear-gradient(top, ' + this.sidepanel + ' 0%, ' + this.sidepanel + ' 100%)';
+			auxpane.style.background ='-moz-linear-gradient(top, ' + this.sidepanel + ' 0%, ' + this.sidepanel + ' 100%)'; */
 			/*auxpane.style.paddingTop = '16px';*/
 			
 			styles.push( auxpane );
@@ -334,8 +335,10 @@ define(['orion/widgets/themes/ThemeClass'],
 			
 			var mainToolbar = new ThemeClass.ThemeClass( 'mainToolbar' );
 			mainToolbar.style.background = this.toolpanel;
-			mainToolbar.style.height = '32px';
-			mainToolbar.style.borderBottom = '1px solid #ebebeb';
+			/* mainToolbar.style.boxShadow = "inset 0 1px 0 0 #fff"; */
+			mainToolbar.style.backgroundImage = "-webkit-linear-gradient(top,#f5f5f5,#eee)";
+			/* mainToolbar.style.height = '32px'; */
+			/* mainToolbar.style.borderBottom = '1px solid #ebebeb'; */
 			styles.push( mainToolbar );
 	
 			for( var s in styles ){

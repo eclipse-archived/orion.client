@@ -53,6 +53,7 @@ button::-moz-focus-inner {
 .navlink {
 	display: inline-block;
 	padding: 2px;
+	color: #333333;
 }
 
 .nav_fakelink:hover {
@@ -62,6 +63,7 @@ button::-moz-focus-inner {
 .navlinkonpage, .nav_fakelink {
 	text-decoration: none;
 	padding: 2px;
+	color: #333333;
 }
 
 .navlinkonpage:active {
@@ -147,7 +149,7 @@ button::-moz-focus-inner {
 .dismissButton {
 	border: 1px solid transparent;
 	background: transparent;
-	color: silver;
+	color: #666;
     border-radius: 1px;
 	padding: 2px;
 	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
@@ -393,18 +395,34 @@ textarea.parameterInput {
 	clear: both;
 	float: left;
 	margin: 2px;
-	margin-top: 3px;
+	margin-top: 0;
 	margin-left: 4px;
 	display: none;
 	vertical-align: middle;
 	font-size: 11px;
 	z-index: 50;
 	color: #999;
+	-webkit-transition-property: all;
+	-webkit-transition-duration: .5s;
+	-webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+	-moz-transition-property: all;
+	-moz-transition-duration: .5s;
+	-moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+	-ms-transition-property: all;
+	-ms-transition-duration: .5s;
+	-ms-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+	transition-property: all;
+	transition-duration: .5s;
+	transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 }
 
 .slideParameters {
 	border: 1px solid #666;
 	background-color: #666;
+	border: 1px solid #bbb;
+	background-color: lightgrey;
+	border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 5px;
 }
 
 .slideContainerActive {
@@ -664,7 +682,7 @@ input {
 	-moz-user-select: text;
 	text-indent: 0;
 	text-shadow: none;
-	border: solid 1px #666;
+	border: solid 1px #bbb;
 	color: #333;
 	font-size: 9pt;
 	padding: 2px;
@@ -922,7 +940,7 @@ input {
 }
 
 .projectPrimaryNavColumn {
-	background: none repeat scroll 0 0 #bbcad2;
+	background: none repeat scroll 0 0 #EEEEEE;
 	color: #000;
 }
 
@@ -1062,4 +1080,8 @@ input {
 
 .lightTreeTableRow, .darkTreeTableRow {
 	border-bottom: 1px solid #dadada;
+}
+
+.commonToolbar{
+	height:30px;
 }

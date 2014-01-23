@@ -91,7 +91,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 	}());
 
 	var sidebarDomNode = lib.node("sidebar"), //$NON-NLS-0$
-		sidebarToolbar = lib.node("sidebarToolbar"), //$NON-NLS-0$
+		sidebarToolbar = lib.node("pageToolbar"), //$NON-NLS-0$
 		editorDomNode = lib.node("editor"); //$NON-NLS-0$
 
 	//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$

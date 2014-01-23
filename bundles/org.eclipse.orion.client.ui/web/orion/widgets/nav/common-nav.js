@@ -54,6 +54,8 @@ define([
 		this.selectionActionsScope = this.toolbarNode.id + "Selection"; //$NON-NLS-0$
 		this.folderNavActionsScope = this.toolbarNode.id + "Folder"; //$NON-NLS-0$
 		this.additionalNavActionsScope = this.toolbarNode.id + "Extra"; //$NON-NLS-0$
+		this.viewActionsScope = this.toolbarNode.id + "View"; //$NON-NLS-0$
+		this.toolsActionsScope = this.toolbarNode.id + "Tools"; //$NON-NLS-0$
 		
 		this._parentNode = lib.node(this.parentId);
 		this._sidebarContextMenuNode = document.createElement("ul"); //$NON-NLS-0$
@@ -155,7 +157,7 @@ define([
 			var _self = this;
 			// Create some elements that we can hang actions on. Ideally we'd have just 1, but the
 			// CommandRegistry seems to require dropdowns to have their own element.
-			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope, this.additionalNavActionsScope].forEach(function(id) {
+			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope, this.viewActionsScope, this.additionalNavActionsScope ].forEach(function(id) {
 				if (!_self[id]) {
 					var elem = document.createElement("ul"); //$NON-NLS-0$
 					elem.id = id;
@@ -167,6 +169,7 @@ define([
 				}
 			});
 		},
+		
 		destroy: function() {
 			var _self = this;
 			var dispatcher = this.modelEventDispatcher;
@@ -174,7 +177,7 @@ define([
 				dispatcher.removeEventListener(type, _self._modelListener);
 			});
 			FileExplorer.prototype.destroy.call(this);
-			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope, this.additionalNavActionsScope].forEach(function(id) {
+			[this.newActionsScope, this.selectionActionsScope, this.folderNavActionsScope, this.additionalNavActionsScope, this.viewActionsScope].forEach(function(id) {
 				delete _self[id];
 			});
 			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
@@ -246,10 +249,12 @@ define([
 			var selectionActionsScope = this.selectionActionsScope;
 			var folderNavActionsScope = this.folderNavActionsScope;
 			var contextMenuActionsScope = this.contextMenuActionsScope;
-			commandRegistry.addCommandGroup(newActionsScope, "orion.commonNavNewGroup", 1000, messages["New"], null, null, "core-sprite-addcontent", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var viewActionsScope = this.viewActionsScope;
+			
+			commandRegistry.addCommandGroup(newActionsScope, "orion.commonNavNewGroup", 1000, messages["New"], null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// action gear groups
-			commandRegistry.addCommandGroup(selectionActionsScope, "orion.commonNavSelectionGroup", 100, messages["Actions"], null, null, "core-sprite-gear", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(selectionActionsScope, "orion.commonNavSelectionGroup", 100, messages["Actions"], null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(selectionActionsScope, 
 				"orion.importExportGroup", //$NON-NLS-0$
 				1000, 
@@ -260,6 +265,8 @@ define([
 				null, 
 				"dropdownSelection"); //$NON-NLS-0$
 				
+			commandRegistry.addCommandGroup(viewActionsScope, "orion.commonNavSelectionGroup", 100, "View", null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$	
+		
 			// context menu groups
 			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.commonNavContextMenuSelectionGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(contextMenuActionsScope, 
@@ -290,8 +297,11 @@ define([
 				null, 
 				"dropdownSelection"); //$NON-NLS-0$
 			
+
+			
 			commandRegistry.registerSelectionService(selectionActionsScope, this.selection);
 			commandRegistry.registerSelectionService(contextMenuActionsScope, this.selection);
+			commandRegistry.registerSelectionService(viewActionsScope, this.selection);
 
 			var renameBinding = new KeyBinding(113); // F2
 			var delBinding = new KeyBinding(46); // Delete
@@ -361,6 +371,7 @@ define([
 		updateCommands: function(selections) {
 			this.createActionSections();
 			var selectionTools = this.selectionActionsScope;
+			var viewTools = this.viewActionsScope;
 			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
 			FileCommands.updateNavTools(this.registry, commandRegistry, this, this.newActionsScope, selectionTools, treeRoot, true);
 			commandRegistry.destroy(this.folderNavActionsScope);

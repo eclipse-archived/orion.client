@@ -42,11 +42,11 @@ define({
 	"Saving..." : "Saving...", //$NON-NLS-1$ //$NON-NLS-0$
 	"View": "View", //$NON-NLS-1$ //$NON-NLS-0$
 	"ViewTooltip": "View", //$NON-NLS-1$ //$NON-NLS-0$
-	"Actions": "Actions", //$NON-NLS-1$ //$NON-NLS-0$
+	"Actions": "Edit", //$NON-NLS-1$ //$NON-NLS-0$
 	"Navigator": "Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"FolderNavigator": "Folder Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"Project": "Project", //$NON-NLS-1$ //$NON-NLS-0$
-	"New": "New", //$NON-NLS-1$ //$NON-NLS-0$
+	"New": "File", //$NON-NLS-1$ //$NON-NLS-0$
 	"Add": "Add", //$NON-NLS-1$ //$NON-NLS-0$
 	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding.", //$NON-NLS-1$ //$NON-NLS-0$
 	"LocalEditorSettings": "Local Editor Settings", //$NON-NLS-1$ //$NON-NLS-0$

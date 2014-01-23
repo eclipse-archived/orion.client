@@ -35,7 +35,7 @@ hard-coded numbers elsewhere.
 
 /* $ToolbarHeight */
 .toolbarLayout {
-	height: 34px;
+	height: 36px;
 }
 
 /*
@@ -118,8 +118,9 @@ hard-coded numbers elsewhere.
 	clear: both;
 	overflow: hidden;
     position: absolute;
-    top: 37px;
-	bottom: 36px; /* $FooterHeight + footer border (1px) */
+    top: 73px;
+	/* bottom: 36px; $FooterHeight + footer border (1px) */    
+    bottom: 0;
     left: 0;
     width: 100%;
 	/*margin-bottom: 29px;*/
@@ -139,7 +140,8 @@ hard-coded numbers elsewhere.
 	z-index: 50;
 	right: 0;
 	left: 0;
-	height: 36px; /* It has to be this */
+	/* height: 36px;  It has to be this */
+	height: 0;
 	background:#ededed;
 }
 
@@ -276,10 +278,24 @@ hard-coded numbers elsewhere.
 
 .toolbarTarget, .miniNavToolbarTarget {
 	position: absolute;
-	top: 36px;  /* $ToolbarHeight + 2 */
+	top: 2px;  /* $ToolbarHeight + 2 */
  	width: 100%;
  	bottom: 0;
  	overflow-y: auto;
+}
+
+.workingTarget{
+	position: absolute;
+	top: 4px;  /* $ToolbarHeight + 2 */
+ 	width: 100%;
+ 	bottom: 0;
+ 	overflow-y: auto;
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33); /* 0 0 0 1px #d1d1d1,0 0 4px 1px #ccc; */
+	margin-left: 2px;
+	/* margin-top: 2px; */
+	/* padding-top: 10px; */
+	margin-right: 2px;
+	background: white;
 }
 
 /* Positions the main panel of the LHS navigator below the filesystem switcher toolbar. */
@@ -287,7 +303,7 @@ hard-coded numbers elsewhere.
 	/* $ToolbarHeight + 2 + $FSToolbarHeight + $FSToolbarPadding
 	 = 34px + 2px + 30px + 4px
 	*/
-	top: 70px; 
+	top: 40px; 
 }
 
 .hasSplit {
