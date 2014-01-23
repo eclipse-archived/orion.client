@@ -23,11 +23,18 @@ define([
 			"no-undef": 2, //$NON-NLS-0$
 			"no-unused-vars": 1, //$NON-NLS-0$
 			"no-use-before-define": 1, //$NON-NLS-0$
-			"semi": 1 //$NON-NLS-0$
+			"semi": 1, //$NON-NLS-0$
+			"missing-func-decl-doc": [0, 'decl'], //$NON-NLS-0$ //$NON-NLS-1$
+			"missing-func-expr-doc": [0, 'expr'] //$NON-NLS-0$ //$NON-NLS-1$
 		},
 		setOption: function(ruleId, value) {
 			if (typeof value === "number") {
-				this.rules[ruleId] = value;
+				if(Array.isArray(this.rules[ruleId])) {
+					this.rules[ruleId][0] = value;
+				}
+				else {
+					this.rules[ruleId] = value;
+				}
 			}
 		}
 	};
@@ -43,14 +50,22 @@ define([
 	}
 	
 	/**
-	 * @description Coverts the configuration rule value to an eslint string. One of 'warning', 'error', 'ignore'
+	 * @description Converts the configuration rule value to an eslint string. One of 'warning', 'error', 'ignore'
 	 * @public
 	 * @param {Object} prob The problem object
 	 * @returns {String} the severity string
 	 */
 	function getSeverity(prob) {
-		if(config.rules[prob.ruleId] === 1) {
-			return "warning";
+		var val = 2;
+		if(Array.isArray(config.rules[prob.ruleId])) {
+			val = config.rules[prob.ruleId][0];
+		}
+		else {
+			val = config.rules[prob.ruleId];
+		}
+		switch (val) {
+			case 1: return "warning"; //$NON-NLS-0$
+			case 2: return "error"; //$NON-NLS-0$
 		}
 		return "error"; //$NON-NLS-0$
 	}
@@ -154,6 +169,8 @@ define([
 			if (!properties) {
 				return;
 			}
+			config.setOption("missing-func-decl-doc", properties.validate_func_decl); //$NON-NLS-0$
+			config.setOption("missing-func-expr-doc", properties.validate_func_expr); //$NON-NLS-0$
 			config.setOption("eqeqeq", properties.validate_eqeqeq); //$NON-NLS-0$
 			config.setOption("no-redeclare", properties.validate_no_redeclare); //$NON-NLS-0$
 			config.setOption("no-undef", properties.validate_no_undef); //$NON-NLS-0$
