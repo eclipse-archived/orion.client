@@ -585,7 +585,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
-			this.image = options.image || require.toUrl("images/none.png"); //$NON-NLS-0$
+			this.image = options.image || (require.toUrl && require.toUrl("images/none.png")); //$NON-NLS-0$
 			this.imageClass = options.imageClass;   // points to the location in a sprite
 			this.addImageClassToElement = options.addImageClassToElement; // optional boolean if true will add the image class to the 
 																		// element's class list
