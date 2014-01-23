@@ -20,6 +20,7 @@ define([
 	'orion/widgets/browse/browseView',
 	'orion/explorers/navigatorRenderer',
 	'orion/widgets/browse/readonlyEditorView',
+	'orion/widgets/browse/branchSelector',
 	'orion/markdownView',
 	'orion/commandRegistry',
 	'orion/fileClient',
@@ -32,7 +33,7 @@ define([
 	'orion/objects',
 	'orion/webui/littlelib'
 ], function(
-	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mMarkdownView,
+	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mBranchSelector, mMarkdownView,
 	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mReadonlyFileClient, mEmptyFileClient, Deferred, URITemplate, objects, lib
 ) {
 	/**
@@ -80,6 +81,7 @@ define([
 			this._contentTypeService =  new mContentTypes.ContentTypeRegistry(mStaticDataSource.ContentTypes);
 		}
 		this._preferences = options.preferences;//Optional
+		this._showBranch = options.showBranch;
 		this._init(options);
 	}
 	objects.mixin(FileBrowser.prototype, {
@@ -95,6 +97,30 @@ define([
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				var metadata = evt.metadata;
+				if(this.branches && this._branchSelector){
+					var activeBranchName = this.branches[0].Name;
+					var newLocation = null;
+					if(metadata.Parents) {
+						if(metadata.Parents.length > 0) {
+							activeBranchName = metadata.Parents[metadata.Parents.length-1].Name;
+						} else {
+							activeBranchName = metadata.Name;
+						}
+					} else {
+						this.branches.some(function(branch){
+							if(branch.Name.toLowerCase() === "master") {
+								activeBranchName = branch.Name;
+								newLocation = branch.Location;
+								return true;
+							}
+						});
+					}
+					this._branchSelector.activeBranchName = activeBranchName;
+					if(newLocation){
+						this.refresh(newLocation);
+						return;
+					}
+				}
 				this._breadCrumbName = evt.name;
 				this._breadCrumbTarget = metadata;
 				if (evt.input === null || evt.input === undefined) {
@@ -116,10 +142,31 @@ define([
 				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
 			};
 			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
+			
 			window.addEventListener("hashchange", function() { //$NON-NLS-0$
 				this.refresh(PageUtil.hash());
 			}.bind(this));
-			this.refresh(PageUtil.hash());
+			if(this._showBranch) {
+				var branchSelectorContainer = document.createElement("div"); //$NON-NLS-0$
+				branchSelectorContainer.classList.add("brSelectorContainer"); //$NON-NLS-0$
+				var rootURL = this._fileClient.fileServiceRootURL("");
+				this._fileClient.fetchChildren(rootURL).then(function(contents){
+					if(contents && contents.length > 0) {
+						//var uriToShow = contents[0].Location;
+						this.branches = contents;
+						this._branchSelector = new mBranchSelector.BranchSelector({
+							commandRegistry: this._commandRegistry,
+							fileClient: this._fileClient,
+							node: branchSelectorContainer,
+							activeBranchName: "default",
+							branches: contents
+						});
+					}
+					this.refresh(PageUtil.hash());
+				}.bind(this));
+			} else {
+				this.refresh(PageUtil.hash());
+			}
 		},
 		_breadCrumbMaker: function(bcContainer, maxLength){
 			this._renderBreadCrumb({
@@ -176,7 +223,7 @@ define([
 					maxLength: options.maxLength,
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
-					workspaceRootSegmentName: "John Smith | Example Project",//fileSystemRootName,
+					workspaceRootSegmentName: workspaceRootURL,
 					workspaceRootURL: workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink
@@ -193,6 +240,7 @@ define([
 					maxEditorHeight: this._maxEditorHeight,
 					readmeHeaderClass: "readmeHeader",
 					metadata: metadata,
+					branchSelector: this._branchSelector,
 					commandRegistry: this._commandRegistry,
 					contentTypeRegistry: this._contentTypeService,
 					inputManager: this._inputManager,

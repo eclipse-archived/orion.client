@@ -14,8 +14,10 @@ define([
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/commands',
+	'orion/URITemplate',
 	'orion/URL-shim'
-], function(objects, lib, Commands, _) {
+], function(objects, lib, Commands, URITemplate, _) {
+	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
 
 	/**
 	 * @name orion.widgets.Filesystem.BranchSelector
@@ -25,17 +27,18 @@ define([
 	 * @param {orion.commands.CommandRegistry} params.commandRegistry
 	 * @param {orion.fileClient.FileClient} params.fileClient
 	 * @param {EventTarget} params.branchChangeListener the branchChange event listener that hadles the root change
-	 * @param {EventTarget} params.filesystemChangeDispatcher the "filesystemChanged" event dispatcher
+	 * @param {EventTarget} params.branchChangeDispatcher the "filesystemChanged" event dispatcher
 	 * @param {Element} params.node
-	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 */
 	function BranchSelector(params) {
 		this.commandRegistry = params.commandRegistry;
 		this.branchChangeListener = params.branchChangeListener;
-		this.filesystemChangeDispatcher = params.filesystemChangeDispatcher;
+		this.branchChangeDispatcher = params.branchChangeDispatcher;
 		this.fileClient = params.fileClient;
+		this.branches = params.branches;
+		this.fileBrowser = params.fileBrowser;
+		this.activeBranchName = params.activeBranchName;
 		this.node = params.node;
-		this.serviceRegistry = params.serviceRegistry;
 		this.listener = function(event) {
 			this.refresh(event.root);
 		}.bind(this);
@@ -51,7 +54,7 @@ define([
 			}
 			this.commandRegistry.destroy(this.node);
 			lib.empty(this.node);
-			this.branchChangeListener = this.filesystemChangeDispatcher = this.listener = this.node = null;
+			this.branchChangeListener = this.branchChangeDispatcher = this.listener = this.node = null;
 		},
 		registerCommands: function() {
 			if (!this.commandsRegistered) {
@@ -60,23 +63,30 @@ define([
 				var switchBrCommand = new Commands.Command({
 					name: "Choose Branch",
 					imageClass: "core-sprite-openarrow", //$NON-NLS-0$
+					selectionClass: "dropdownSelection", //$NON-NLS-0$
 					tooltip: "Select a branch",
 					id: "orion.browse.switchbr", //$NON-NLS-0$
 					visibleWhen: function(item) {
 						return true;
 					},
-					callback: this._switchBrMenuCallback.bind(this)
+					choiceCallback: this._switchBrMenuCallback.bind(this)
 				});
 				commandRegistry.addCommand(switchBrCommand);
 				commandRegistry.registerCommandContribution("orion.browse", "orion.browse.switchbr", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
 		_switchBrMenuCallback: function(items) {
-			
+			var _self = this;
+			return this.branches.map(function(branch) { //$NON-NLS-0$
+				return {
+					name: branch.Name,
+					callback: _self.setActiveBranch.bind(_self, branch.Name, branch.Location)
+				};
+			});
 		},
 		render: function() {
 			this.brName = document.createElement("div"); //$NON-NLS-0$
-			this.brName.classList.add("filesystemName"); //$NON-NLS-0$
+			this.brName.classList.add("browserBranchName"); //$NON-NLS-0$
 			this.brName.classList.add("layoutLeft"); //$NON-NLS-0$
 			this.menu = document.createElement("ul"); //$NON-NLS-0$
 			this.menu.classList.add("BranchSelector"); //$NON-NLS-0$
@@ -98,46 +108,30 @@ define([
 				menu.dispatchEvent(click);
 			}
 		},
-		_fileServiceHostname: function(location) {
-			var rootURL = this.fileClient.fileServiceRootURL(location);
-			if (rootURL.indexOf("filesystem:") === 0) { //$NON-NLS-0$
-				rootURL = rootURL.substr("filesystem:".length); //$NON-NLS-0$
-			}
-			var hostname = rootURL;
-			try {
-				hostname = new URL(rootURL, window.location.href).hostname;
-			} catch (e) {}
-			return hostname;
-		},
 		/**
 		 * @returns {String|DocumentFragment}
 		 */
 		_branchLabel: function(meta) {
 			//TOTO figure out the branch name from any meta (e.g. sub folder)
-			return "master";
+			var fragment = document.createDocumentFragment();
+			fragment.textContent = this.activeBranchName; //$NON-NLS-0$
+			//lib.processDOMNodes(fragment, [document.createTextNode(name), document.createTextNode(hostname)]);
+			return fragment;
 		},
 		refresh: function(location) {
-			var target = location;
-			if (location.ChildrenLocation) {
-				target = location.ChildrenLocation;
-			}
 			lib.empty(this.brName);
-			this.brName.appendChild(this._branchLabel(target));
-
+			this.brName.appendChild(this._branchLabel(location));
 			this.commandRegistry.destroy(this.menu);
-			this.commandRegistry.renderCommands("orion.mininav", this.menu, {}, "menu"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandRegistry.renderCommands("orion.browse", this.menu, {}, "menu"); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		/**
 		 * @param {Object|String} location The ChildrenLocation, or an object with a ChildrenLocation field.
 		 */
-		setActiveFilesystem: function(location) {
-			var target = location;
-			if (location.ChildrenLocation) {
-				target = location.ChildrenLocation;
-			}
-			var rootURL = this.fileClient.fileServiceRootURL(target);
-			if(this.filesystemChangeDispatcher) {
-				this.filesystemChangeDispatcher.dispatchEvent({ type: "filesystemChanged", newInput: rootURL }); //$NON-NLS-0$
+		setActiveBranch: function(name, location) {
+			this.activeBranchName = name;
+			window.location = uriTemplate.expand({resource: location}); //$NON-NLS-0$
+			if(this.branchChangeDispatcher) {
+				this.branchChangeDispatcher.dispatchEvent({ type: "branchChanged", newInput: location }); //$NON-NLS-0$
 			}
 		}
 	});

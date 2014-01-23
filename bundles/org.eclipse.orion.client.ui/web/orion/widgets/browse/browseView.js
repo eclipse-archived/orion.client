@@ -162,6 +162,7 @@ define([
 		this._maxEditorHeight = options.maxEditorHeight;
 		this.imageView = options.imageView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
+		this.branchSelector = options.branchSelector;
 		this.clickHandler = options.clickHandler;
 		this._init();
 	}
@@ -241,9 +242,19 @@ define([
 								var tileNode = this._foldersSection.getTitleElement();
 								if(tileNode) {
 									lib.empty(tileNode);
+									var bcNodeContainer = document.createElement("div"); //$NON-NLS-0$
+									bcNodeContainer.classList.add("breadCrumbContainer"); 
 									var bcNode = document.createElement("div"); //$NON-NLS-0$
-									tileNode.appendChild(bcNode);
+									if(this.branchSelector) {
+										tileNode.appendChild(this.branchSelector.node);
+									}
+									bcNodeContainer.appendChild(bcNode);
+									tileNode.appendChild(bcNodeContainer);
 									this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 24);
+									if(this.branchSelector) {
+										this.branchSelector.refresh();
+									}
+									
 								}
 							}
 						}
