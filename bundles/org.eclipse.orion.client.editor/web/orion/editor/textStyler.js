@@ -28,6 +28,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var PUNCTUATION_SECTION_BEGIN = ".begin"; //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
 	
+	var MAX_CHAR_COUNT = 170;
+	
 	var eolRegex = /$/;
 	var captureReferenceRegex = /\\(\d)/g;
 	var linebreakRegex = /(.*)(?:[\r\n]|$)/g;
@@ -41,11 +43,14 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		var currentLine = linebreakRegex.exec(text);
 		while (currentLine && currentLine.index < text.length) {
 			regex.lastIndex = 0;
-			var result = regex.exec(currentLine[1]);
-			if (result) {
-				result.index += index;
-				regex.lastIndex = initialLastIndex;
-				return result;
+			/* skip excessively long lines that will be too slow to evaluate with regex */
+			if (currentLine[1].length < MAX_CHAR_COUNT) {
+				var result = regex.exec(currentLine[1]);
+				if (result) {
+					result.index += index;
+					regex.lastIndex = initialLastIndex;
+					return result;
+				}
 			}
 			index += currentLine[0].length;
 			currentLine = linebreakRegex.exec(text);
