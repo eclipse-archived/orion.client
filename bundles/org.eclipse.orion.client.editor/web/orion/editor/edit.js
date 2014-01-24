@@ -13,6 +13,7 @@
 /*globals define Node */
 
 define('orion/editor/edit', [ //$NON-NLS-0$
+	"require", //$NON-NLS-0$
 	"orion/editor/shim", //$NON-NLS-0$
 	
 	"orion/editor/textView", //$NON-NLS-0$
@@ -39,8 +40,14 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	"orion/editor/mirror", //$NON-NLS-0$
 	"orion/editor/textMateStyler", //$NON-NLS-0$
 	"orion/editor/htmlGrammar", //$NON-NLS-0$
-	"examples/editor/textStyler" //$NON-NLS-0$
-], function(shim, mTextView, mTextModel, mTextTheme, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations, mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist, mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+	"orion/editor/textStyler", //$NON-NLS-0$
+	"orion/editor/stylers/application_javascript/syntax", //$NON-NLS-0$
+	"orion/editor/stylers/text_css/syntax", //$NON-NLS-0$
+	"orion/editor/stylers/text_html/syntax" //$NON-NLS-0$
+
+], function(require, shim, mTextView, mTextModel, mTextTheme, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations,
+			mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist,
+			mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler, mJS, mCSS, mHTML) {
 
 	/**	@private */
 	function getDisplay(window, document, element) {
@@ -163,14 +170,14 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	 * @property {Function} [statusReporter] a status reporter.
 	 * @property {String} [title=""] the editor title.
 	 * @property {String} [contents=""] the editor contents.
-	 * @property {String} [lang] the styler language. Plain text by default.
+	 * @property {String} [lang] @deprecated use contentType instead
+	 * @property {String} [contentType] the type of the content (eg.- application/javascript, text/html, etc.)
 	 * @property {Boolean} [showLinesRuler=true] whether or not the lines ruler is shown.
 	 * @property {Boolean} [showAnnotationRuler=true] whether or not the annotation ruler is shown.
 	 * @property {Boolean} [showOverviewRuler=true] whether or not the overview ruler is shown.
 	 * @property {Boolean} [showFoldingRuler=true] whether or not the folding ruler is shown.
 	 * @property {Boolean} [noFocus=false] whether or not to focus the editor on creation.
 	 * @property {Number} [firstLineIndex=1] the line index displayed for the first line of text.
-	 * @property {Function} [stylerFactory] function for creating a text styler
 	 */
 	/**
 	 * Creates an editor instance configured with the given options.
@@ -250,31 +257,32 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		var syntaxHighlighter = {
 			styler: null, 
 			
-			highlight: function(lang, stylerFactory, editor) {
+			highlight: function(contentType, editor) {
 				if (this.styler && this.styler.destroy) {
 					this.styler.destroy();
 				}
 				this.styler = null;
+
+				/* to maintain backwards-compatibility convert previously-supported lang values to types */
+				if (contentType === "js") { //$NON-NLS-0$
+					contentType = "application/javascript"; //$NON-NLS-0$
+				} else if (contentType === "css") { //$NON-NLS-0$
+					contentType = "text/css"; //$NON-NLS-0$
+				} else if (contentType === "html") { //$NON-NLS-0$
+					contentType = "text/html"; //$NON-NLS-0$
+				} else if (contentType === "java") { //$NON-NLS-0$
+					contentType = "text/x-java-source"; //$NON-NLS-0$
+				}
+
 				var textView = editor.getTextView();
 				var annotationModel = editor.getAnnotationModel();
-				if (stylerFactory) {
-					this.styler = stylerFactory(textView, lang, annotationModel);
-				} else {
-					if (lang) {
-						// Canned highlighters for js, java, and css. Grammar-based highlighter for html
-						switch(lang) {
-							case "js": //$NON-NLS-0$
-							case "java": //$NON-NLS-0$
-							case "css": //$NON-NLS-0$
-								this.styler = new mTextStyler.TextStyler(textView, lang, annotationModel);
-								break;
-							case "html": //$NON-NLS-0$
-								this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
-								break;
-						}
-					}
+				if (contentType) {
+					contentType = contentType.replace(/[*|:/".<>?]/g, '_');
+					require(["./stylers/" + contentType + "/syntax"], function(grammar) { //$NON-NLS-1$ //$NON-NLS-0$
+						this.styler = new mTextStyler.TextStyler(textView, annotationModel, grammar.grammars, grammar.id);
+					});
 				}
-				if (lang === "css") { //$NON-NLS-0$
+				if (contentType === "text/css") { //$NON-NLS-0$
 					editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 				}
 			}
@@ -322,7 +330,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 		editor.setInput(options.title, null, contents, false, options.noFocus);
 		
-		syntaxHighlighter.highlight(options.lang, options.stylerFactory, editor);
+		syntaxHighlighter.highlight(options.contentType || options.lang, editor);
 		if (contentAssist) {
 			var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
 			var htmlContentAssistProvider = new mHtmlContentAssist.HTMLContentAssistProvider();

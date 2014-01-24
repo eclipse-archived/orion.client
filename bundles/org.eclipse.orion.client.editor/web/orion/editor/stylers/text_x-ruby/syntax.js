@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"alias", "alias_method", "and", "attr_reader", "attr_writer", "attr_accessor", "attr", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"BEGIN", "begin", "break", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -37,7 +37,7 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 
 	var grammars = mShared.grammars;
 	grammars.push({
-		id: "orion.rb",
+		id: "orion.ruby",
 		contentTypes: ["text/x-ruby"],
 		patterns: [
 			{
@@ -87,6 +87,7 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: keywords
 	};

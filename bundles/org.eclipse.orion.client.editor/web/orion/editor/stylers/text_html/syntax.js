@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", "orion/editor/stylers/js/js", "orion/editor/stylers/css/css", "orion/editor/stylers/php/php"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/text_css/syntax", "orion/editor/stylers/text_x-php/syntax"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	function(mShared, mJS, mCSS, mPHP) {
 	
 	var grammars = mShared.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mPHP.grammars);
@@ -122,6 +122,7 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: []
 	};

@@ -15,7 +15,7 @@
 
 define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 	'orion/editor/templates', //$NON-NLS-0$
-	'orion/editor/stylers/js/js' //$NON-NLS-0$
+	'orion/editor/stylers/application_javascript/syntax' //$NON-NLS-0$
 ], function(mTemplates, mJS) {
 
 	var typeofValues = {

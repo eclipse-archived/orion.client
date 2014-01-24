@@ -14,9 +14,9 @@
 
 define("examples/editor/textStyler", [ //$NON-NLS-0$
 	'orion/editor/annotations', //$NON-NLS-0$
-	'orion/editor/stylers/js/js', //$NON-NLS-0$
-	'orion/editor/stylers/java/java', //$NON-NLS-0$
-	'orion/editor/stylers/css/css' //$NON-NLS-0$
+	'orion/editor/stylers/application_javascript/syntax', //$NON-NLS-0$
+	'orion/editor/stylers/text_x-java-source/syntax', //$NON-NLS-0$
+	'orion/editor/stylers/text_css/syntax' //$NON-NLS-0$
 ], function(mAnnotations, mJS, mJava, mCSS) {
 
 	var JS_KEYWORDS = mJS.keywords;

@@ -32,12 +32,9 @@ pre {
 			i18n: 'requirejs/i18n'
 		}
 	});
-	require(["orion/editor/edit", "orion/editor/textStyler", "orion/editor/stylers/js/js"], function(edit, mStyler, mJS) {
+	require(["orion/editor/edit"], function(edit) {
 		edit({
-			lang: "json",
-			stylerFactory: function(textView, lang, annotationModel) {
-				return new mStyler.TextStyler(textView, annotationModel, mJS.grammars, "orion.js");
-			}
+			contentType: "application/javascript"
 		});
 	});
 </script>

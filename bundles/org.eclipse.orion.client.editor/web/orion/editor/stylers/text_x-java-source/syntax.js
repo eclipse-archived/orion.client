@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/java/java", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"abstract", //$NON-NLS-0$
 		"boolean", "break", "byte", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -47,6 +47,7 @@ define("orion/editor/stylers/java/java", ["orion/editor/stylers/shared/shared"],
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: keywords
 	};

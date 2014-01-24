@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/css/css", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"alignment-adjust", "alignment-baseline", "animation-delay", "animation-direction", "animation-duration", "animation-iteration-count", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"animation-name", "animation-play-state", "animation-timing-function", "animation", "appearance", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -83,6 +83,7 @@ define("orion/editor/stylers/css/css", ["orion/editor/stylers/shared/shared"], f
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: keywords
 	};

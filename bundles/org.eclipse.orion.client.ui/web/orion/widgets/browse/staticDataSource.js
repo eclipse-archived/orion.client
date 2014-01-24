@@ -16,14 +16,14 @@
 define([
 	'orion/Deferred',
 	"orion/editor/textStyler", 
-	"orion/editor/stylers/js/js",
-	"orion/editor/stylers/css/css",
-	"orion/editor/stylers/html/html",
-	"orion/editor/stylers/java/java",
-	"orion/editor/stylers/json/json",
-	"orion/editor/stylers/php/php",
-	"orion/editor/stylers/python/python",
-	"orion/editor/stylers/ruby/ruby"
+	"orion/editor/stylers/application_javascript/syntax",
+	"orion/editor/stylers/text_css/syntax",
+	"orion/editor/stylers/text_html/syntax",
+	"orion/editor/stylers/text_x-java-source/syntax",
+	"orion/editor/stylers/application_json/syntax",
+	"orion/editor/stylers/text_x-php/syntax",
+	"orion/editor/stylers/text_x-python/syntax",
+	"orion/editor/stylers/text_x-ruby/syntax"
 ], function(Deferred, mStyler, mJS, mCss, mHtml, mJava, mJson, mPhp, mPython, mRuby) {
 	var ContentTypes = [{	id: "text/plain",
 			name: "Text",

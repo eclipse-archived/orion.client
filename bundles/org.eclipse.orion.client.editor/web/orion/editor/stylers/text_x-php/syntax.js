@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"abstract", "and", "array", "as", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"break", //$NON-NLS-0$
@@ -78,6 +78,7 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 	});
 
 	return {
+		id: "orion.php",
 		grammars: grammars,
 		keywords: keywords
 	};

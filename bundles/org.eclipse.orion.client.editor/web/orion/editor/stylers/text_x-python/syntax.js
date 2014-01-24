@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"and", "as", "assert", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"break", //$NON-NLS-0$
@@ -33,7 +33,7 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 
 	var grammars = mShared.grammars;
 	grammars.push({
-		id: "orion.py",
+		id: "orion.python",
 		contentTypes: ["text/x-python"],
 		patterns: [
 			{
@@ -78,6 +78,7 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: keywords
 	};

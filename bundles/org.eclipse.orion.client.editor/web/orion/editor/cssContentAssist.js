@@ -13,7 +13,7 @@
 
 define("orion/editor/cssContentAssist", [ //$NON-NLS-0$
 	'orion/editor/templates', //$NON-NLS-0$
-	'orion/editor/stylers/css/css' //$NON-NLS-0$
+	'orion/editor/stylers/text_css/syntax' //$NON-NLS-0$
 ], function(mTemplates, mCSS) {
 
 	var overflowValues = {

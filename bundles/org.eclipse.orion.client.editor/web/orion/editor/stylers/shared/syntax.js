@@ -11,10 +11,12 @@
 
 /*global define*/
 
-define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
+define("orion/editor/stylers/shared/syntax", [], function() { //$NON-NLS-0$
+	var id = "orion.patterns";
 	return {
+		id: id,
 		grammars: [{
-			id: "orion.patterns",
+			id: id,
 			patterns: [
 				{
 					id: "brace_open",

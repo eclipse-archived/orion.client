@@ -15,12 +15,12 @@ define([
 	'orion/editor/cssContentAssist',
 	'orion/editor/htmlContentAssist',
 	'orion/editor/htmlGrammar',
-	'orion/editor/stylers/java/java',
-	'orion/editor/stylers/python/python',
-	'orion/editor/stylers/ruby/ruby',
-	'orion/editor/stylers/php/php',
-	'orion/editor/stylers/css/css',
-	'orion/editor/stylers/html/html',
+	'orion/editor/stylers/text_x-java-source/syntax',
+	'orion/editor/stylers/text_x-python/syntax',
+	'orion/editor/stylers/text_x-ruby/syntax',
+	'orion/editor/stylers/text_x-php/syntax',
+	'orion/editor/stylers/text_css/syntax',
+	'orion/editor/stylers/text_html/syntax',
 	'orion/editor/templates'
 ], function(PluginProvider, cssContentAssist, htmlContentAssist, htmlGrammar, mJava, mPython, mRuby, mPHP, mCSS, mHTML, templates) {
 	var headers = {

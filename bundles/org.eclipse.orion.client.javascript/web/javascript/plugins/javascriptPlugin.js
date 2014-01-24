@@ -27,9 +27,9 @@ define([
 	'orion/i18nUtil',
 	'orion/plugin',
 	'orion/editor/jsTemplateContentAssist',
-	'orion/editor/stylers/js/js',
-	'orion/editor/stylers/json/json',
-	'orion/editor/stylers/jsonSchema/jsonSchema'
+	'orion/editor/stylers/application_javascript/syntax',
+	'orion/editor/stylers/application_json/syntax',
+	'orion/editor/stylers/application_schema+json/syntax'
 ], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, Indexer, EslintValidator, Occurrences, Outliner,
 		i18nUtil, PluginProvider, jsTemplateContentAssist, mJS, mJSON, mJSONSchema) {
 

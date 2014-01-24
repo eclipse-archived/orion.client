@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/json/json", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var grammars = mShared.grammars;
 	grammars.push({
 		id: "orion.json", //$NON-NLS-0$
@@ -32,6 +32,7 @@ define("orion/editor/stylers/json/json", ["orion/editor/stylers/shared/shared"],
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: []
 	};
