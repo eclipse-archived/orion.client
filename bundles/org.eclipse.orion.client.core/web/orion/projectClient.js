@@ -509,7 +509,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		return deferred;
 	},
 	
-	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, serviceId, params, url, manageUrl){
+	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, serviceId, params, url, manageUrl, path){
 		var deferred = new Deferred();
 		var configurationFile = configurationName;
 		configurationFile = configurationFile.replace(/\ /g,' ');
@@ -522,7 +522,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 			ServiceId: serviceId,
 			Params: params,
 			Url: url,
-			ManageUrl: manageUrl
+			ManageUrl: manageUrl,
+			Path: path
 		};
 		this._getLaunchConfigurationsDir(projectMetadata, true).then(function(launchConfDir){
 			if(launchConfDir.Children){

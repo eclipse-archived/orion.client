@@ -153,19 +153,22 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 			return deferred;
 		},
 		
-		deploy: function(item, projectMetadata, props) {
+		deploy: function(project, launchConf) {
 			var that = this;
 			var deferred = new Deferred();
 			
 			this._getDefaultTarget().then(
 				function(defaultTarget){
-					var target = props.Target || defaultTarget;
-					var appName = props.Name;
+					var params = launchConf.Params;
 					
-					if(props.user && props.password){
-						cFService.login(target.Url, props.user, props.password).then(
+					var target = (params ? params.Target || defaultTarget : defaultTarget);
+					var appName = (params ? params.Name : null);
+					var appPath = launchConf.Path;
+					
+					if(launchConf.user && launchConf.password){
+						cFService.login(target.Url, launchConf.user, launchConf.password).then(
 							function(result){
-								that._deploy(item, projectMetadata, target, appName, deferred);
+								that._deploy(project, target, appName, appPath, deferred);
 							}, function(error){
 								error.Retry = {
 									parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
@@ -174,7 +177,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 							}
 						);
 					} else {
-						that._deploy(item, projectMetadata, target, appName, deferred);
+						that._deploy(project, target, appName, appPath, deferred);
 					}
 				}
 			);
@@ -182,9 +185,9 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 			return deferred;
 		},
 		
-		_deploy: function(item, projectMetadata, target, appName, deferred) {
+		_deploy: function(project, target, appName, appPath, deferred) {
 			if (target && appName){
-				cFService.pushApp(target, appName, decodeURIComponent(item.Location)).then(
+				cFService.pushApp(target, appName, decodeURIComponent(project.ContentLocation + appPath)).then(
 					function(result){
 						deferred.resolve({
 							CheckState: true
@@ -210,7 +213,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 				);
 			} else {
 //				deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deploy.html#{+Location}", Width: "600px", Height: "400px"});
-				cFService.pushApp(target, null, decodeURIComponent(item.Location)).then(
+				cFService.pushApp(target, null, decodeURIComponent(project.ContentLocation + appPath)).then(
 					function(result){
 						deferred.resolve({
 							CheckState: true,
@@ -225,7 +228,8 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 									Name: result.App.entity.name
 								},
 								Url: "http://" + result.Route.entity.host + "." + result.Domain,
-								ManageUrl: result.ManageUrl
+								ManageUrl: result.ManageUrl,
+								Path: appPath
 							}
 						});
 					}, function(error){

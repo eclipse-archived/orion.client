@@ -366,7 +366,7 @@ define([
 			commandRegistry.destroy(this.folderNavActionsScope);
 			commandRegistry.destroy(this.additionalNavActionsScope);
 			commandRegistry.renderCommands(this.folderNavActionsScope, this.folderNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
-			commandRegistry.renderCommands(this.additionalNavActionsScope, this.additionalNavActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
+			commandRegistry.renderCommands(this.additionalNavActionsScope, this.additionalNavActionsScope, selections, this, "tool"); //$NON-NLS-0$
 			if (this._sidebarContextMenuNode) {
 				this._populateContextMenu(this._sidebarContextMenuNode);
 			}

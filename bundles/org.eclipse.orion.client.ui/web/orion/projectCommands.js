@@ -71,7 +71,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			var param = data.parameters._options.optionalParams[i];
 			params[param.id] = param.value;
 		}
-		return params
+		return params;
 	}
 	
 	
@@ -92,7 +92,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		progress.setProgressResult(status);
 		
 		if(status.ToSave){
-			progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl), "Saving configuration").then(
+			progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl, status.ToSave.Path), "Saving configuration").then(
 				function(configuration){
 					if(sharedLaunchConfigurationDispatcher){
 						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
@@ -105,8 +105,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	/**
 	 * @param params
 	 * 			Params passed to deploy service
-	 * @param item
-	 * 			Project folder passed to deploy service
 	 * @param context.project
 	 * @param context.deployService
 	 * @param context.data
@@ -114,27 +112,26 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	 * @param context.projectClient
 	 * @param context.commandService
 	 */
-	function runDeploy(params, item, context){
-		
+	function runDeploy(params, context){
 		if(sharedLaunchConfigurationDispatcher && context.launchConfiguration){
 			context.launchConfiguration.status = {State: "PROGRESS"};
 			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration });
 		}
 		
-		progress.showWhile(context.deployService.deploy(item, context.project, params), context.deployService.name + " in progress", true).then(function(result){
+		progress.showWhile(context.deployService.deploy(context.project, params), context.deployService.name + " in progress", true).then(function(result){
 			if(!result){
 				return;
 			}
+			
 			if (result.UriTemplate) {
-				    var options = {};
-					options.uriTemplate = result.UriTemplate;
-					options.width = result.Width;
-					options.height = result.Height;
-					options.id = context.deployService.id; 
-					options.params = item;
-					options.done = localHandleStatus;
-					options.status = localHandleStatus;
-					mEditorCommands.createDelegatedUI(options);
+			    var options = {};
+				options.uriTemplate = result.UriTemplate;
+				options.width = result.Width;
+				options.height = result.Height;
+				options.id = context.deployService.id; 
+				options.done = localHandleStatus;
+				options.status = localHandleStatus;
+				mEditorCommands.createDelegatedUI(options);
 			}
 
 			if(context.launchConfiguration && (result.State || result.CheckState)){
@@ -143,13 +140,14 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration});
 				}
 			}
+			
 			if(result.ToSave){
-				progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl), "Saving configuration").then(
-						function(configuration){
-							if(sharedLaunchConfigurationDispatcher){
-								sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration});
-							}
-						}, context.errorHandler
+				progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path), "Saving configuration").then(
+					function(configuration){
+						if(sharedLaunchConfigurationDispatcher){
+							sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration});
+						}
+					}, context.errorHandler
 				);
 			}
 			
@@ -222,7 +220,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				callback: function(data) {
 					var item = forceSingleItem(data.items);
 					
-					data.oldParams = launchConfiguration.Params;
+					data.oldParams = launchConfiguration;
 	
 					var func = arguments.callee;
 					var params = handleParamsInCommand(func, data, "Deploy " + item.Name);
@@ -233,14 +231,14 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					projectClient.getProjectDelpoyService(launchConfiguration.ServiceId).then(function(service){
 						if(service && service.deploy){
 							fileClient.loadWorkspace(item.Project.ContentLocation).then(function(projectFolder){
-								runDeploy(params, projectFolder, {project: treeRoot.Project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: launchConfiguration});
+								runDeploy(params, {project: treeRoot.Project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: launchConfiguration});
 							});
 						}
 					});
 				},
 				visibleWhen: function(items) {
 					var item = forceSingleItem(items);
-					return(item === treeRoot);
+					return(item.Project === treeRoot.Project);
 				}
 			});
 			commandService.addCommand(deployLaunchConfigurationCommands);
@@ -419,7 +417,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 								}
 								if(result.ToSave){
-									progress.showWhile(projectClient.saveProjectLaunchConfiguration(item.project, result.ToSave.ConfigurationName, service.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl), "Saving configuration").then(
+									progress.showWhile(projectClient.saveProjectLaunchConfiguration(item.project, result.ToSave.ConfigurationName, service.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path), "Saving configuration").then(
 										function(configuration){
 											if(sharedLaunchConfigurationDispatcher){
 												sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
@@ -482,7 +480,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				
-				data.oldParams = item.Params;
+				data.oldParams = item;
 
 				var func = arguments.callee;
 				var params = handleParamsInCommand(func, data, "Deploy " + item.Name);
@@ -493,7 +491,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
 					if(service && service.deploy){
 						fileClient.loadWorkspace(item.project.ContentLocation).then(function(projectFolder){
-							runDeploy(params, projectFolder, {project: item.project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: item});
+							runDeploy(params, {project: item.project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: item});
 						});
 					}
 				});
@@ -934,8 +932,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					tootlip: deployService.tooltip,
 					id: "orion.project.deploy." + deployService.id,
 					callback: function(data){
-						var project = forceSingleItem(data.items);
-						var item = project.children[0];
+						var item = forceSingleItem(data.items);
+						var project = item.Project;
+						
+						var appPath = item.Location.replace(project.ContentLocation, "");
 						
 						var func = arguments.callee;
 						var params = handleParamsInCommand(func, data, deployService.tooltip);
@@ -943,18 +943,20 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 							return;
 						}
 						
-						runDeploy(params, item, {
-													project: project,
-													deployService: deployService,
-													data: data,
-													errorHandler: errorHandler,
-													projectClient: projectClient,
-													commandService: commandService
-												});
+						params.Path = appPath;
+						
+						runDeploy(params, {
+							project: project,
+							deployService: deployService,
+							data: data,
+							errorHandler: errorHandler,
+							projectClient: projectClient,
+							commandService: commandService
+						});
 
 					},
 					visibleWhen: function(item) {
-						if(item.type!=="Project" || !item.children || item.children.length === 0){
+						if(!item.Project || !item.children || item.children.length === 0){
 							return false;
 						}
 						return projectClient.matchesDeployService(item.children[0], deployService);
