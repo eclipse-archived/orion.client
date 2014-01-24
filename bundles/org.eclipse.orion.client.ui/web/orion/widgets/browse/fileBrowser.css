@@ -110,6 +110,9 @@ a.currentLocation:hover {
     vertical-align:middle;
 }
 
+.browserParentDome {
+	min-height: 350px;
+}
 .tooltip {
 	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 }

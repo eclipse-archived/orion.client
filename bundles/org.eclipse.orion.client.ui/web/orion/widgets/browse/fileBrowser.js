@@ -61,6 +61,7 @@ define([
 	 */
 	function FileBrowser(options) {
 		this._parentDomNode = lib.node(options.parent);//Required
+		this._parentDomNode.classList.add("browserParentDome");
 		this._fileClient = options.fileClient;//Required
 		this._repoURL = options.repoURL;
 		if(options.serviceRegistry) {

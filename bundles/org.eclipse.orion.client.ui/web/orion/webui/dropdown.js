@@ -194,9 +194,7 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 			this._dropdownNode.style.top = "";
 			
 			if(this._positioningNode) {
-				var positioningNodeBound = lib.bounds(this._positioningNode);
-				this._dropdownNode.style.left = positioningNodeBound.left + "px";
-				this._dropdownNode.style.top = positioningNodeBound.top + positioningNodeBound.height + 1 +"px";
+				this._dropdownNode.style.left = this._positioningNode.offsetLeft + "px";
 				return;
 			}
 			
