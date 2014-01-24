@@ -36898,21 +36898,52 @@ if(_all_script && _all_script.length && _all_script.length > 0) {
 
 define('orion/widgets/browse/builder/browse',['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'],
 function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
-	function Browser(parentId, repoURL, base) {
+	function Browser(params) { // parentId, repo, base
+		if (typeof params === "string") {
+			params = {
+				parentId: arguments[0],
+				repo: arguments[1],
+			};
+			if(arguments.length > 2) {
+				params.base = arguments[2];				
+			}
+		} else {
+			params = params || {};			
+		}
 		var pluginURL;
-		var url = new URL(repoURL || window.location.href);	
+		var url = new URL(params.repo || window.location.href);
+		var repo = url.href;
+		var base = params.base;
+		
+
+		if (!params.rootName) {
+			var found = repo.match(/\/([^/]+)\/([^/]+)$/);
+			if (found) {
+				params.rootName = decodeURIComponent(found[1]) + " / " + decodeURIComponent(found[2]);
+				if (params.rootName.match(/\.git$/)) {
+					params.rootName = params.rootName.substring(0, params.rootName.length-4);
+				}
+			}
+		}
+		
 		if (url.host==="github.com") {
-			pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=" + repoURL, _browser_script_source);
+			pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=" + url.href, _browser_script_source);
 		} else if (url.pathname.indexOf("/git/") === 0) {
-			pluginURL = new URL("/gerrit/plugins/gerritFilesystem/static/plugins/GerritFilePlugin.html", repoURL);
+			pluginURL = new URL("/gerrit/plugins/gerritFilesystem/static/plugins/GerritFilePlugin.html", url);
 			pluginURL.query.set("project", url.pathname.substring(5));
+		} else if (url.pathname.indexOf("/ccm") === 0) {
+			if (!base) {
+				var ccmPath = url.pathname.match(/^\/ccm[^/]*/);
+				base = new URL(ccmPath, repo).href;
+			}
+			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
 		} else if (url.pathname.indexOf("/project/") === 0) {
 			if (!base) {
-				base = new URL("/ccm01", repoURL).href;
+				base = new URL("/ccm01", repo).href;
 			}
-			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repoURL);
+			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
 		} else {
-			throw "Bad Repo URL - " + repoURL;
+			throw "Bad Repo URL - " + repo;
 		}
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		var plugins = {};
@@ -36923,8 +36954,9 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 		});
 		pluginRegistry.start().then(function() {
 			this._fileBrowser = new mFileBrowser.FileBrowser({
-				parent: parentId,//"fileBrowser", 
+				parent: params.parentId,//"fileBrowser", 
 				showBranch: true,
+				rootName: params.rootName,
 				//maxEditorHeight: 800,
 				serviceRegistry: serviceRegistry
 			});
