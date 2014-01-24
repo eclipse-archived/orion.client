@@ -2251,6 +2251,9 @@ a.currentLocation:hover {
     text-align:center; 
     vertical-align:middle;
 }
+.browserParentDome {
+	min-height: 350px;
+}
 .tooltip {
 	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 }
@@ -2263,7 +2266,7 @@ a.currentLocation:hover {
 	margin-left: 15%;
 	margin-right: 15%;
 	padding-bottom: 5px;
-	min-height: 320px;
+	position: relative;
 }
 .fileBrowserDemoTextParent{
 	border: none;
@@ -2273,4 +2276,5 @@ a.currentLocation:hover {
 	margin-left: 15%;
 	margin-right: 15%;
 	padding-bottom: 5px;
+	position: relative;
 }

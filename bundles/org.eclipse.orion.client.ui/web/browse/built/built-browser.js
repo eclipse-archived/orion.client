@@ -5646,9 +5646,7 @@ define('orion/webui/dropdown',['require', 'orion/webui/littlelib', 'orion/EventT
 			this._dropdownNode.style.top = "";
 			
 			if(this._positioningNode) {
-				var positioningNodeBound = lib.bounds(this._positioningNode);
-				this._dropdownNode.style.left = positioningNodeBound.left + "px";
-				this._dropdownNode.style.top = positioningNodeBound.top + positioningNodeBound.height + 1 +"px";
+				this._dropdownNode.style.left = this._positioningNode.offsetLeft + "px";
 				return;
 			}
 			
@@ -31583,7 +31581,7 @@ define('orion/widgets/browse/branchSelector',[
 				var switchBrCommand = new Commands.Command({
 					name: "Choose Branch",
 					imageClass: "core-sprite-openarrow", //$NON-NLS-0$
-					selectionClass: "dropdownSelection", //$NON-NLS-0$
+					//selectionClass: "dropdownSelection", //$NON-NLS-0$
 					tooltip: "Select a branch",
 					id: "orion.browse.switchbr", //$NON-NLS-0$
 					visibleWhen: function(item) {
@@ -32151,6 +32149,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var PUNCTUATION_SECTION_BEGIN = ".begin"; //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
 	
+	var MAX_CHAR_COUNT = 170;
+	
 	var eolRegex = /$/;
 	var captureReferenceRegex = /\\(\d)/g;
 	var linebreakRegex = /(.*)(?:[\r\n]|$)/g;
@@ -32164,11 +32164,14 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		var currentLine = linebreakRegex.exec(text);
 		while (currentLine && currentLine.index < text.length) {
 			regex.lastIndex = 0;
-			var result = regex.exec(currentLine[1]);
-			if (result) {
-				result.index += index;
-				regex.lastIndex = initialLastIndex;
-				return result;
+			/* skip excessively long lines that will be too slow to evaluate with regex */
+			if (currentLine[1].length < MAX_CHAR_COUNT) {
+				var result = regex.exec(currentLine[1]);
+				if (result) {
+					result.index += index;
+					regex.lastIndex = initialLastIndex;
+					return result;
+				}
 			}
 			index += currentLine[0].length;
 			currentLine = linebreakRegex.exec(text);
@@ -33441,10 +33444,12 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 /*global define*/
 
-define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
+define("orion/editor/stylers/shared/syntax", [], function() { //$NON-NLS-0$
+	var id = "orion.patterns";
 	return {
+		id: id,
 		grammars: [{
-			id: "orion.patterns",
+			id: id,
 			patterns: [
 				{
 					id: "brace_open",
@@ -33542,7 +33547,7 @@ define("orion/editor/stylers/shared/shared", [], function() { //$NON-NLS-0$
 
 /*global define*/
 
-define("orion/editor/stylers/js/js", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"break", //$NON-NLS-0$
 		"case", "class", "catch", "continue", "const", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -33584,6 +33589,7 @@ define("orion/editor/stylers/js/js", ["orion/editor/stylers/shared/shared"], fun
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: keywords
 	};
@@ -33602,7 +33608,7 @@ define("orion/editor/stylers/js/js", ["orion/editor/stylers/shared/shared"], fun
 
 /*global define*/
 
-define("orion/editor/stylers/css/css", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"alignment-adjust", "alignment-baseline", "animation-delay", "animation-direction", "animation-duration", "animation-iteration-count", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"animation-name", "animation-play-state", "animation-timing-function", "animation", "appearance", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -33674,6 +33680,7 @@ define("orion/editor/stylers/css/css", ["orion/editor/stylers/shared/shared"], f
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: keywords
 	};
@@ -33692,7 +33699,7 @@ define("orion/editor/stylers/css/css", ["orion/editor/stylers/shared/shared"], f
 
 /*global define*/
 
-define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"abstract", "and", "array", "as", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"break", //$NON-NLS-0$
@@ -33759,6 +33766,7 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 	});
 
 	return {
+		id: "orion.php",
 		grammars: grammars,
 		keywords: keywords
 	};
@@ -33777,7 +33785,7 @@ define("orion/editor/stylers/php/php", ["orion/editor/stylers/shared/shared"], f
 
 /*global define*/
 
-define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", "orion/editor/stylers/js/js", "orion/editor/stylers/css/css", "orion/editor/stylers/php/php"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/text_css/syntax", "orion/editor/stylers/text_x-php/syntax"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	function(mShared, mJS, mCSS, mPHP) {
 	
 	var grammars = mShared.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mPHP.grammars);
@@ -33888,6 +33896,7 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: []
 	};
@@ -33906,7 +33915,7 @@ define("orion/editor/stylers/html/html", ["orion/editor/stylers/shared/shared", 
 
 /*global define*/
 
-define("orion/editor/stylers/java/java", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"abstract", //$NON-NLS-0$
 		"boolean", "break", "byte", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -33942,6 +33951,7 @@ define("orion/editor/stylers/java/java", ["orion/editor/stylers/shared/shared"],
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: keywords
 	};
@@ -33960,7 +33970,7 @@ define("orion/editor/stylers/java/java", ["orion/editor/stylers/shared/shared"],
 
 /*global define*/
 
-define("orion/editor/stylers/json/json", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var grammars = mShared.grammars;
 	grammars.push({
 		id: "orion.json", //$NON-NLS-0$
@@ -33981,6 +33991,7 @@ define("orion/editor/stylers/json/json", ["orion/editor/stylers/shared/shared"],
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: []
 	};
@@ -33999,7 +34010,7 @@ define("orion/editor/stylers/json/json", ["orion/editor/stylers/shared/shared"],
 
 /*global define*/
 
-define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"and", "as", "assert", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"break", //$NON-NLS-0$
@@ -34021,7 +34032,7 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 
 	var grammars = mShared.grammars;
 	grammars.push({
-		id: "orion.py",
+		id: "orion.python",
 		contentTypes: ["text/x-python"],
 		patterns: [
 			{
@@ -34066,6 +34077,7 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: keywords
 	};
@@ -34084,7 +34096,7 @@ define("orion/editor/stylers/python/python", ["orion/editor/stylers/shared/share
 
 /*global define*/
 
-define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
 	var keywords = [
 		"alias", "alias_method", "and", "attr_reader", "attr_writer", "attr_accessor", "attr", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"BEGIN", "begin", "break", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -34110,7 +34122,7 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 
 	var grammars = mShared.grammars;
 	grammars.push({
-		id: "orion.rb",
+		id: "orion.ruby",
 		contentTypes: ["text/x-ruby"],
 		patterns: [
 			{
@@ -34160,6 +34172,7 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 		]
 	});
 	return {
+		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: keywords
 	};
@@ -34183,14 +34196,14 @@ define("orion/editor/stylers/ruby/ruby", ["orion/editor/stylers/shared/shared"],
 define('orion/widgets/browse/staticDataSource',[
 	'orion/Deferred',
 	"orion/editor/textStyler", 
-	"orion/editor/stylers/js/js",
-	"orion/editor/stylers/css/css",
-	"orion/editor/stylers/html/html",
-	"orion/editor/stylers/java/java",
-	"orion/editor/stylers/json/json",
-	"orion/editor/stylers/php/php",
-	"orion/editor/stylers/python/python",
-	"orion/editor/stylers/ruby/ruby"
+	"orion/editor/stylers/application_javascript/syntax",
+	"orion/editor/stylers/text_css/syntax",
+	"orion/editor/stylers/text_html/syntax",
+	"orion/editor/stylers/text_x-java-source/syntax",
+	"orion/editor/stylers/application_json/syntax",
+	"orion/editor/stylers/text_x-php/syntax",
+	"orion/editor/stylers/text_x-python/syntax",
+	"orion/editor/stylers/text_x-ruby/syntax"
 ], function(Deferred, mStyler, mJS, mCss, mHtml, mJava, mJson, mPhp, mPython, mRuby) {
 	var ContentTypes = [{	id: "text/plain",
 			name: "Text",
@@ -34882,6 +34895,7 @@ define('orion/widgets/browse/fileBrowser',[
 	 */
 	function FileBrowser(options) {
 		this._parentDomNode = lib.node(options.parent);//Required
+		this._parentDomNode.classList.add("browserParentDome");
 		this._fileClient = options.fileClient;//Required
 		this._repoURL = options.repoURL;
 		if(options.serviceRegistry) {
@@ -36869,64 +36883,63 @@ define('orion/pluginregistry',["orion/Deferred", "orion/EventTarget", "orion/URL
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define require URL document console prompt XMLHttpRequest window*/
-var _browser_script_source = null;//We need to know where the browser script lives
-var _all_script = document.getElementsByTagName ('script');
-if(_all_script && _all_script.length && _all_script.length > 0) {
-	for(var j = 0; j < 2; j++) {// try twice in all the script tags
+var _browser_script_source = null; //We need to know where the browser script lives
+var _all_script = document.getElementsByTagName('script');
+if (_all_script && _all_script.length && _all_script.length > 0) {
+	for (var j = 0; j < 2; j++) { // try twice in all the script tags
 		for (var i = 0; i < _all_script.length; i++) {
-			if(j === 0) {//First try: if the script id is ""orion.browse.browser""
-			    if(_all_script[i].id === "orion.browse.browser") {
-			    	_browser_script_source = _all_script[i].src;
-			    	break;
-			    }
+			if (j === 0) { //First try: if the script id is ""orion.browse.browser""
+				if (_all_script[i].id === "orion.browse.browser") {
+					_browser_script_source = _all_script[i].src;
+					break;
+				}
 			} else {
 				var regex = /.*built-browse.*.js/;
-			    if(_all_script[i].src && regex.exec(_all_script[i].src)) {
-			    	_browser_script_source = _all_script[i].src;
-			    	break;
-			    }
+				if (_all_script[i].src && regex.exec(_all_script[i].src)) {
+					_browser_script_source = _all_script[i].src;
+					break;
+				}
 			}
 		}
-		if(_browser_script_source) {
+		if (_browser_script_source) {
 			break;
 		}
 	}
-	if(!_browser_script_source) {
+	if (!_browser_script_source) {
 		_browser_script_source = _all_script[_all_script.length - 1].src;
 	}
 }
 
-define('orion/widgets/browse/builder/browse',['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'],
-function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
+define('orion/widgets/browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'], function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 	function Browser(params) { // parentId, repo, base
 		if (typeof params === "string") {
 			params = {
 				parentId: arguments[0],
 				repo: arguments[1],
 			};
-			if(arguments.length > 2) {
-				params.base = arguments[2];				
+			if (arguments.length > 2) {
+				params.base = arguments[2];
 			}
 		} else {
-			params = params || {};			
+			params = params || {};
 		}
 		var pluginURL;
 		var url = new URL(params.repo || window.location.href);
 		var repo = url.href;
 		var base = params.base;
-		
+
 
 		if (!params.rootName) {
 			var found = repo.match(/\/([^/]+)\/([^/]+)$/);
 			if (found) {
 				params.rootName = decodeURIComponent(found[1]) + " / " + decodeURIComponent(found[2]);
 				if (params.rootName.match(/\.git$/)) {
-					params.rootName = params.rootName.substring(0, params.rootName.length-4);
+					params.rootName = params.rootName.substring(0, params.rootName.length - 4);
 				}
 			}
 		}
-		
-		if (url.host==="github.com") {
+
+		if (url.host === "github.com") {
 			pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=" + url.href, _browser_script_source);
 		} else if (url.pathname.indexOf("/git/") === 0) {
 			pluginURL = new URL("/gerrit/plugins/gerritFilesystem/static/plugins/GerritFilePlugin.html", url);
@@ -36954,7 +36967,7 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 		});
 		pluginRegistry.start().then(function() {
 			this._fileBrowser = new mFileBrowser.FileBrowser({
-				parent: params.parentId,//"fileBrowser", 
+				parent: params.parentId, //"fileBrowser", 
 				showBranch: true,
 				rootName: params.rootName,
 				//maxEditorHeight: 800,
@@ -36962,13 +36975,13 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 			});
 		}.bind(this));
 	}
-	
+
 	Browser.prototype = {
-		getFileBrowser: function(){
+		getFileBrowser: function() {
 			return this._fileBrowser;
 		}
 	};
-    return Browser;
+	return Browser;
 });
 		orion = this.orion || (this.orion = {});
 		var browse = orion.browse || (orion.browse = {});
