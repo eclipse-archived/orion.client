@@ -25998,6 +25998,7 @@ define('orion/widgets/browse/browseView',[
 							this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: !this.readonly});
 							if(this.editorView) {//To embed an orion editor in the section
 								this._foldersSection.setContent(this.editorView.getParent());
+								this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
 								this.editorView.create();
 								var textView = this.editorView. editor.getTextView();
 								textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
@@ -31579,10 +31580,10 @@ define('orion/widgets/browse/branchSelector',[
 				this.commandsRegistered = true;
 				var commandRegistry = this.commandRegistry;
 				var switchBrCommand = new Commands.Command({
-					name: "Choose Branch",
+					//name: "Choose Branch",
 					imageClass: "core-sprite-openarrow", //$NON-NLS-0$
 					//selectionClass: "dropdownSelection", //$NON-NLS-0$
-					tooltip: "Select a branch",
+					//tooltip: "Select a branch",
 					id: "orion.browse.switchbr", //$NON-NLS-0$
 					visibleWhen: function(item) {
 						return true;

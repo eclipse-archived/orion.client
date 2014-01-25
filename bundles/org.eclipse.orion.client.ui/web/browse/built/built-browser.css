@@ -1919,7 +1919,6 @@ a.currentLocation:hover {
 }
 
 .navlink {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	display: inline-block;
 	padding: 2px;
 }
@@ -1963,7 +1962,6 @@ a.currentLocation:hover {
 	border: none;
 }
 .mainNavColumn {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	display: inline-block;
 	padding: 2px;
 	vertical-align: baseline;
@@ -1984,7 +1982,6 @@ a.currentLocation:hover {
 	width:100%;
 }
 .secondaryColumn {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	color: #666666;	
 	padding-right: 8px;
 	padding-top: 8px;
@@ -2077,7 +2074,6 @@ a.currentLocation:hover {
 	border-bottom: 1px solid;
 }
 .sectionWrapper{
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	border-top: 1px solid;
 	border-left: 1px solid;
 	border-right: 1px solid;
@@ -2090,21 +2086,17 @@ a.currentLocation:hover {
 	border-color: #dadada;
 }
 .sectionTable td {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	border-bottom: 1px solid #dadada;
 	vertical-align: middle;
 	color: gray;
 }
 .sectionTable tr:last-child td{
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	border-bottom: 0;
 }
 .sectionTable div.lightTreeTableRow:last-child, .sectionTable div.lightTreeTableRow:last-child{
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	border-bottom: 0;
 }
 .orionMarkdown {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	padding: 8px;
 	color: gray;
 }
@@ -2112,23 +2104,19 @@ a.currentLocation:hover {
 	max-width: 100%;
 }
 .orionMarkdown pre, .orionMarkdown code {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	background-color: #fafafa;
 	border: 1px solid #ddd;
 	border-radius: 3px;
 }
 .orionMarkdown pre {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	padding: 6px 10px;
 	overflow: auto;
 }
 .orionMarkdown code {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	padding: 0 5px;
 	margin: 0 2px;
 }
 .orionMarkdown pre code {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	background-color: transparent;
     padding: 0;
 	border: 0;
@@ -2224,7 +2212,7 @@ a.currentLocation:hover {
 	padding-left: 8px;
 }
 .dropdownMenuOpen {
-	max-height: 300px;
+	max-height: 175px;
 	overflow-y: auto;
 	overflow-x: hidden;
 }
@@ -2252,29 +2240,11 @@ a.currentLocation:hover {
     vertical-align:middle;
 }
 .browserParentDome {
-	min-height: 350px;
+	min-height: 215px !important;
 }
 .tooltip {
 	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 }
-.fileBrowserParent{
-	border: 1px solid;
-	vertical-align: middle;
-	border-color: blue;
-	overflow: hidden;
-	text-align: left;
-	margin-left: 15%;
-	margin-right: 15%;
-	padding-bottom: 5px;
-	position: relative;
-}
-.fileBrowserDemoTextParent{
-	border: none;
-	vertical-align: middle;
-	overflow: hidden;
-	text-align: left;
-	margin-left: 15%;
-	margin-right: 15%;
-	padding-bottom: 5px;
-	position: relative;
+.browse_inner_container {
+	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 }

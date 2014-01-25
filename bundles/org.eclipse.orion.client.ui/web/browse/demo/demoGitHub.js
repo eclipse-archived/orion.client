@@ -41,7 +41,7 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 			parent: "fileBrowser", 
 			showBranch: true,
 			//rootName: "RootName",
-			//maxEditorHeight: 800,
+			//maxEditorHeight: 1800,
 			serviceRegistry: serviceRegistry
 		});
 	})
