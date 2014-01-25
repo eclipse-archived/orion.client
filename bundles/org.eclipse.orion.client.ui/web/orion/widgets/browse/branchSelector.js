@@ -61,10 +61,10 @@ define([
 				this.commandsRegistered = true;
 				var commandRegistry = this.commandRegistry;
 				var switchBrCommand = new Commands.Command({
-					name: "Choose Branch",
+					//name: "Choose Branch",
 					imageClass: "core-sprite-openarrow", //$NON-NLS-0$
 					//selectionClass: "dropdownSelection", //$NON-NLS-0$
-					tooltip: "Select a branch",
+					//tooltip: "Select a branch",
 					id: "orion.browse.switchbr", //$NON-NLS-0$
 					visibleWhen: function(item) {
 						return true;

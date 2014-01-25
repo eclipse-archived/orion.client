@@ -212,6 +212,7 @@ define([
 							this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: !this.readonly});
 							if(this.editorView) {//To embed an orion editor in the section
 								this._foldersSection.setContent(this.editorView.getParent());
+								this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
 								this.editorView.create();
 								var textView = this.editorView. editor.getTextView();
 								textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$

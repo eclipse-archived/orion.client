@@ -2,7 +2,7 @@
 
 @import "../orion/widgets/browse/fileBrowser.css";
 
-.fileBrowserParent{
+.fileBrowserParentOuter{
 	border: 1px solid;
 	vertical-align: middle;
 	border-color: blue;
@@ -11,7 +11,18 @@
 	margin-left: 15%;
 	margin-right: 15%;
 	padding-bottom: 5px;
-	position: relative;
+}
+
+.fileBrowserParent{
+	border: 1px solid;
+	vertical-align: middle;
+	border-color: blue;
+	overflow: hidden;
+	text-align: left;
+	margin-left: 15%;
+	margin-right: 15%;
+	min-height: 50px;
+	padding-bottom: 5px;
 }
 
 .fileBrowserDemoTextParent{

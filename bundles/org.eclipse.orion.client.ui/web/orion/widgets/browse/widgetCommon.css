@@ -5,7 +5,6 @@ body {
 } 
 */
 .navlink {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	display: inline-block;
 	padding: 2px;
 }
@@ -61,7 +60,6 @@ body {
 }
 
 .mainNavColumn {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	display: inline-block;
 	padding: 2px;
 	vertical-align: baseline;
@@ -85,7 +83,6 @@ body {
 }
 
 .secondaryColumn {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	color: #666666;	
 	padding-right: 8px;
 	padding-top: 8px;
@@ -197,7 +194,6 @@ body {
 }
 
 .sectionWrapper{
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	border-top: 1px solid;
 	border-left: 1px solid;
 	border-right: 1px solid;
@@ -211,24 +207,20 @@ body {
 }
 
 .sectionTable td {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	border-bottom: 1px solid #dadada;
 	vertical-align: middle;
 	color: gray;
 }
 
 .sectionTable tr:last-child td{
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	border-bottom: 0;
 }
 
 .sectionTable div.lightTreeTableRow:last-child, .sectionTable div.lightTreeTableRow:last-child{
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	border-bottom: 0;
 }
 
 .orionMarkdown {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	padding: 8px;
 	color: gray;
 }
@@ -238,26 +230,22 @@ body {
 }
 
 .orionMarkdown pre, .orionMarkdown code {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	background-color: #fafafa;
 	border: 1px solid #ddd;
 	border-radius: 3px;
 }
 
 .orionMarkdown pre {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	padding: 6px 10px;
 	overflow: auto;
 }
 
 .orionMarkdown code {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	padding: 0 5px;
 	margin: 0 2px;
 }
 
 .orionMarkdown pre code {
-	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 	background-color: transparent;
     padding: 0;
 	border: 0;

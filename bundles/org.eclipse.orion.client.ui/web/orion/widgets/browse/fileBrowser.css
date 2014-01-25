@@ -79,7 +79,7 @@
 }
 
 .dropdownMenuOpen {
-	max-height: 300px;
+	max-height: 175px;/*holds 8 drop down items*/
 	overflow-y: auto;
 	overflow-x: hidden;
 }
@@ -111,17 +111,11 @@ a.currentLocation:hover {
 }
 
 .browserParentDome {
-	min-height: 350px;
+	min-height: 215px !important;
 }
 .tooltip {
 	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 }
-
-/*
-.breadcrumb {
-	font-size: 8pt;
-	text-decoration: none;
-	color: #CCC;
-	padding-top: 2px;
+.browse_inner_container {
+	font: 9pt Arial,Helvetica,Myriad,Tahoma,clean,sans-serif, Lucida Sans Unicode,Lucida Grande,Verdana; 
 }
-*/
