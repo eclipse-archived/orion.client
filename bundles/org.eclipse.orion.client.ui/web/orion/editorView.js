@@ -487,7 +487,7 @@ define([
 		getStyleAccessor: function() {
 			var styleAccessor = null;
 			var styler = this.syntaxHighlighter.getStyler();
-			if (styler) {
+			if (styler && styler.getStyleAccessor) {
 				styleAccessor = styler.getStyleAccessor();
 			}
 			return styleAccessor;
