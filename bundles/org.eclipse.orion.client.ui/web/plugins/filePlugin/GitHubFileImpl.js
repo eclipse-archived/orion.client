@@ -21,7 +21,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		this._repoURL = new URL("https://api.github.com/repos/" + found[1] + "/" + found[2]);
 		this._headers = {
 			"Accept": "application/vnd.github.v3+json"
-		}
+		};
 		if (token) {
 			this._headers.Authorization = "token " + token;
 		}
@@ -221,12 +221,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 					return result;
 				});
 			}
-			return xhr("GET", location, {
-				headers: this._headers,
-				timeout: 15000
-			}).then(function(result) {
-				var content = JSON.parse(result.response);
-				var bytes = Base64.decode(content.content);
+			return this.readBlob(location).then(function(bytes) {
 				var decoder = new TextDecoder();
 				return decoder.decode(bytes);
 			});
@@ -246,8 +241,16 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 				timeout: 15000
 			}).then(function(result) {
 				var content = JSON.parse(result.response);
-				var bytes = Base64.decode(content.content);
-				return bytes;
+				if (content.content && content.size) {
+					return Base64.decode(content.content);
+				}
+				return xhr("GET", content.git_url, {
+					headers: this._headers,
+					timeout: 15000
+				}).then(function(result) {
+					var content = JSON.parse(result.response);
+					return Base64.decode(content.content);
+				});
 			});
 		},
 		writeBlob: function(location, contents, args) {
