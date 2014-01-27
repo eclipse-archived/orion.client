@@ -792,6 +792,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	
 					},
 					visibleWhen: function(item) {
+						item = forceSingleItem(item);
 						return item.Location;
 					}
 				};
@@ -858,6 +859,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					});
 				},
 			visibleWhen: function(item) {
+					item = forceSingleItem(item);
 					return(!!item.Location);
 				}
 			}
@@ -886,6 +888,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						});
 					},
 				visibleWhen: function(item) {
+						item = forceSingleItem(item);
 						return(!!item.Location);
 					}
 				}
@@ -917,6 +920,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					});
 				},
 			visibleWhen: function(item) {
+					item = forceSingleItem(item);
 					return(!!item.Location);
 				}
 			}

@@ -527,27 +527,6 @@ define([
 				slideContainer.style.top = "0"; //$NON-NLS-0$
 			}
 		}
-//		if (elements.toolbarTarget && elements.toolbarTargetY) {
-//			var heightExtras = 0;
-//			var bounds;
-//			if (elements.notifications && elements.notifications.classList.contains("slideContainerActive")) { //$NON-NLS-0$
-//				bounds = lib.bounds(elements.notifications);
-//				heightExtras += bounds.height;
-//			}
-//			if (elements.slideContainer && elements.slideContainer.classList.contains("slideContainerActive")) { //$NON-NLS-0$
-//				bounds = lib.bounds(elements.slideContainer);
-//				heightExtras += bounds.height;
-//			}
-//			if (heightExtras > 0) {
-//				heightExtras += 8; // padding
-//			}
-//			if (heightExtras) {
-//				elements.toolbarTarget.style.top = elements.toolbarTargetY + heightExtras + "px"; //$NON-NLS-0$
-//				elements.toolbar.style.paddingBottom = heightExtras + "px"; //$NON-NLS-0$ 
-//			} else {
-//				elements.toolbarTarget.style.top = elements.toolbar.style.paddingBottom = "";
-//			}
-//		}
 	}
 
 	var mainSplitter = null;
