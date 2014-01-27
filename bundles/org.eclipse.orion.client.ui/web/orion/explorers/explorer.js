@@ -68,7 +68,7 @@ exports.Explorer = (function() {
 			}
 		},
 		
-		makeNewItemPlaceHolder: function(item, domId, column_no) {
+		makeNewItemPlaceHolder: function(item, domId, column_no, insertAfter) {
 			// we want to popup the name prompt underneath the parent item.
 			var refNode = this.getRow(item);
 			var tempNode;
@@ -88,7 +88,17 @@ exports.Explorer = (function() {
 				var td = document.createElement("td"); //$NON-NLS-0$
 				td.id = domId+"placeHolderCol"; //$NON-NLS-0$
 				tr.appendChild(td);
-				refNode.appendChild(tr);
+				if (insertAfter) {
+					// insert tr after refNode, i.e. right before refNode's nextSibling in the parent
+					var parentNode = refNode.parentNode;
+					var nextSibling = refNode.nextSibling;
+					parentNode.insertBefore(tr, nextSibling);
+					
+					var parentIndentation = parseInt(refNode.firstChild.style.paddingLeft); //refNode is a <tr>, we want the indentation of its <td>
+					td.style.paddingLeft = (this.myTree.getIndent() + parentIndentation) + "px";
+				} else {
+					refNode.appendChild(tr);
+				}
 				tempNode = lib.node(domId+"placeHolderRow"); //$NON-NLS-0$
 				refNode = lib.node(domId+"placeHolderCol"); //$NON-NLS-0$
 				if (tempNode && refNode) {

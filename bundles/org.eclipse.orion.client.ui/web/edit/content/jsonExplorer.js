@@ -177,7 +177,14 @@ define([
 						}
 					}
 				}
-				mUIUtils.getUserText(id, target, true, text, doChange, null, null, ""); //$NON-NLS-0$
+
+				mUIUtils.getUserText({
+					id: id,
+					refNode: target, 
+					shouldHideRefNode: true, 
+					initialText: text, 
+					onComplete: doChange
+				});
 			}
 		});
 	}
