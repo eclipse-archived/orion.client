@@ -292,7 +292,7 @@
 	margin-right: 4px !important;
 }
 .commandSprite {
-   background: url(../orion/widgets/../../images/core_sprites.png) no-repeat top left;
+   background: url(../../images/core_sprites.png) no-repeat top left;
    vertical-align: middle;
    display: inline-block;
    border: none;
@@ -1529,7 +1529,7 @@ a.currentLocation:hover {
 	padding-right: 4px;
 }
 .searchbox {
-    background-image: url(../orion/widgets/../../images/core_sprites.png);
+    background-image: url(../../images/core_sprites.png);
     background-repeat: no-repeat; 
     background-position: 4px -297px; 
     width: 12px; height: 12px;
@@ -1908,16 +1908,15 @@ a.currentLocation:hover {
 }
 @font-face {
   font-family: 'Orion Icon Font';
-  src: url('OrionIconFont-Regular.eot'); /* IE9 Compat Modes */
-  src: url('OrionIconFont-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('OrionIconFont-Regular.woff') format('woff'), /* Modern Browsers */
-       url('OrionIconFont-Regular.ttf')  format('truetype'), /* Safari, Android, iOS */
-       url('OrionIconFont-Regular.svg#04b530a8db6e0f4a0fdb83697b7ace5f') format('svg'); /* Legacy iOS */
+  src: url(../../font/OrionIconFont-Regular.eot); 
+  src: url(../../font/OrionIconFont-Regular.eot?#iefix) format('embedded-opentype'), 
+       url(../../font/OrionIconFont-Regular.woff) format('woff'), 
+       url(../../font/OrionIconFont-Regular.ttf)  format('truetype'), 
+       url(../../font/OrionIconFont-Regular.svg#04b530a8db6e0f4a0fdb83697b7ace5f) format('svg'); 
        
   font-style:   normal;
   font-weight:  400;
 }
-
 .navlink {
 	display: inline-block;
 	padding: 2px;

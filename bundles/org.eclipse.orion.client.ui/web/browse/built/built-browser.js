@@ -24119,6 +24119,7 @@ define('orion/commandRegistry',[
 						var label = document.createElement("span"); //$NON-NLS-0$
 						label.classList.add("parameterPrompt"); //$NON-NLS-0$
 						label.textContent = message;
+						
 						parent.appendChild(label);
 						var yesButton = document.createElement("button"); //$NON-NLS-0$
 						yesButton.addEventListener("click", function(event) { //$NON-NLS-0$
@@ -24946,6 +24947,21 @@ define('orion/commandRegistry',[
 	};
 	URLBinding.prototype.constructor = URLBinding;
 	
+	/**
+	 * A CommandEventListener defines an (optional) UI event listener.
+	 * 
+	 * @param {String} name the name of the event
+	 * @param {Function} handler the event handler function. The handler is provided two parameters on invocation, i. e.
+	 * 			the DOM event and the undergoing commandInvocation objects.
+	 * @param {Boolean} [capture] the (optional) flag used to determine whether to caputre the event or not
+	 */
+	function CommandEventListener (event, handler, capture) {
+		this.event = event;
+		this.handler = handler;
+		this.capture = capture || false;
+	}
+	CommandEventListener.prototype.constructor = CommandEventListener;
+	
 	
 	/**
 	 * A CommandParameter defines a parameter that is required by a command.
@@ -24955,16 +24971,20 @@ define('orion/commandRegistry',[
 	 * @param {String} [label] the (optional) label that should be used when showing the parameter
 	 * @param {String} [value] the (optional) default value for the parameter
 	 * @param {Number} [lines] the (optional) number of lines that should be shown when collecting the value.  Valid for type "text" only.
+	 * @param {Object|Array} [eventListeners] the (optional) array or single command event listener
 	 * 
 	 * @name orion.commands.CommandParameter
 	 * @class
 	 */
-	function CommandParameter (name, type, label, value, lines) {
+	function CommandParameter (name, type, label, value, lines, eventListeners) {
 		this.name = name;
 		this.type = type;
 		this.label = label;
 		this.value = value;
 		this.lines = lines || 1;
+		
+		this.eventListeners = (Array.isArray(eventListeners)) ?
+			eventListeners : (eventListeners ? [eventListeners] : []);
 	}
 	CommandParameter.prototype = /** @lends orion.commands.CommandParameter.prototype */ {
 		/**
@@ -25113,7 +25133,7 @@ define('orion/commandRegistry',[
 		 makeCopy: function() {
 			var parameters = [];
 			this.forEach(function(parm) {
-				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value, parm.lines);
+				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value, parm.lines, parm.eventListeners);
 				parameters.push(newParm);
 			});
 			var copy = new ParametersDescription(parameters, this._options, this.getParameters);
@@ -25136,7 +25156,8 @@ define('orion/commandRegistry',[
 		CommandRegistry: CommandRegistry,
 		URLBinding: URLBinding,
 		ParametersDescription: ParametersDescription,
-		CommandParameter: CommandParameter
+		CommandParameter: CommandParameter,
+		CommandEventListener: CommandEventListener
 	};
 });
 
@@ -36911,7 +36932,7 @@ if (_all_script && _all_script.length && _all_script.length > 0) {
 	}
 }
 
-define('orion/widgets/browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'], function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
+define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'], function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 	function Browser(params) { // parentId, repo, base
 		if (typeof params === "string") {
 			params = {
@@ -36986,4 +37007,4 @@ define('orion/widgets/browse/builder/browse', ['orion/widgets/browse/fileBrowser
 });
 		orion = this.orion || (this.orion = {});
 		var browse = orion.browse || (orion.browse = {});
-		browse.browser = require('orion/widgets/browse/builder/browse');
+		browse.browser = require('browse/builder/browse');
