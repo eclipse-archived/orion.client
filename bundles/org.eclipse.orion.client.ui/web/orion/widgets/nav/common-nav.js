@@ -19,6 +19,7 @@ define([
 	'orion/explorers/explorerNavHandler',
 	'orion/keyBinding',
 	'orion/fileCommands',
+	'orion/projectCommands',
 	'orion/extensionCommands',
 	'orion/selection',
 	'orion/URITemplate',
@@ -27,7 +28,7 @@ define([
 	'orion/webui/contextmenu'
 ], function(
 	messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, mKeyBinding,
-	FileCommands, ExtensionCommands, Selection, URITemplate, PageUtil, Deferred, mContextMenu
+	FileCommands, ProjectCommands, ExtensionCommands, Selection, URITemplate, PageUtil, Deferred, mContextMenu
 ) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
@@ -301,8 +302,6 @@ define([
 			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.ImportGroup", 1003, messages["Import"], "orion.commonNavContextMenuEditGroup", null, null, null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$			
 			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.ExportGroup", 1004, messages["Export"], "orion.commonNavContextMenuEditGroup", null, null, null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$			
 
-
-			//TODO other new contributions
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.newFile", 1, "orion.commonNavContextMenuEditGroup/orion.New"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.newFolder", 2, "orion.commonNavContextMenuEditGroup/orion.New", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.new.project", 3, "orion.commonNavContextMenuEditGroup/orion.New"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -338,6 +337,34 @@ define([
 				fileCommandIds.forEach(function(commandId){
 					commandRegistry.registerCommandContribution(contextMenuActionsScope, commandId, 1, "orion.commonNavContextMenuEditGroup/orion.Extensions"); //$NON-NLS-0$
 				});
+	
+				if (serviceRegistry.getServiceReferences("orion.projects").length > 0) { //$NON-NLS-0$
+					commandRegistry.addCommandGroup(fileActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.commonNavContextMenuEditGroup/orion.New"); //$NON-NLS-1$ //$NON-NLS-0$
+
+					commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.basic", 1, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.project.create.basic", 1, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.fromfile", 2, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.project.create.fromfile", 2, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					// TODO: comment out create project from an SFTP site for 5.0 M1
+					commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.sftp", 3, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.project.create.sftp", 3, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					
+					var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
+					var dependencyTypesDef = new Deferred();
+					projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
+						for(var i=0; i<dependencyTypes.length; i++){
+							commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.createproject." + dependencyTypes[i], i+4, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+							commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.project.createproject." + dependencyTypes[i], i+4, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+						}
+						
+						ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, projectClient, dependencyTypes).then(dependencyTypesDef.resolve, dependencyTypesDef.resolve);
+					}.bind(this), dependencyTypesDef.resolve);
+	
+					commandRegistry.registerCommandContribution(editActionsScope, "orion.project.initProject", 0, "orion.menuBarEditGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+	
+					return dependencyTypesDef;
+				}
 			}); //$NON-NLS-0$
 		},
 		updateCommands: function(selections) {
