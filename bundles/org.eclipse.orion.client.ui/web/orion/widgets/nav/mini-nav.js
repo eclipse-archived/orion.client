@@ -125,16 +125,6 @@ define([
 	objects.mixin(MiniNavViewMode.prototype, {
 		label: messages["Navigator"],
 		create: function() {
-			// Create Filesystem switcher toolbar before the sidebar content element
-			var modeToolbarNode = this.toolbarNode;
-			if (!this.fsToolbar) {
-				var fsToolbar = this.fsToolbar = document.createElement("div"); //$NON-NLS-0$
-				fsToolbar.classList.add("fsToolbarLayout"); //$NON-NLS-0$
-				fsToolbar.classList.add("fsToolbar"); //$NON-NLS-0$
-				this.parentNode.parentNode.insertBefore(fsToolbar, this.parentNode);
-				this.parentNode.classList.add("miniNavToolbarTarget"); //$NON-NLS-0$
-			}
-
 			var _self = this;
 			this.explorer = new MiniNavExplorer({
 				commandRegistry: this.commandRegistry,
@@ -149,7 +139,7 @@ define([
 					}, explorer, _self.commandRegistry, _self.contentTypeRegistry); //$NON-NLS-0$
 				},
 				serviceRegistry: this.serviceRegistry,
-				toolbarNode: modeToolbarNode
+				toolbarNode: this.toolbarNode
 			});
 
 			// Create switcher here
@@ -158,7 +148,7 @@ define([
 				rootChangeListener: this.explorer,
 				filesystemChangeDispatcher: this.explorer.sidebarNavInputManager,
 				fileClient: this.fileClient,
-				node: this.fsToolbar,
+				node: this.toolbarNode,
 				serviceRegistry: this.serviceRegistry
 			});
 
@@ -175,9 +165,6 @@ define([
 			if (this.fsSwitcher) {
 				// Cleanup the FS switcher elements, as we are leaving this view mode.
 				this.fsSwitcher.destroy();
-				this.fsToolbar.parentNode.removeChild(this.fsToolbar);
-				this.fsToolbar = null;
-				this.parentNode.classList.remove("miniNavToolbarTarget"); //$NON-NLS-0$
 			}
 		}
 	});

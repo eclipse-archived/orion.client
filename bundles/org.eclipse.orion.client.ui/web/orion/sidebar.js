@@ -37,7 +37,6 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.viewModes = {};
 		this.activeViewMode = null;
-		this.modeContributionToolbar = null;
 		this.switcherScope = params.switcherScope;
 		this.switcherNode = null;
 	}
@@ -63,26 +62,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			var serviceRegistry = this.serviceRegistry;
 			var toolbarNode = this.toolbarNode;
 
-			var switcherNode, modeContributionToolbar = toolbarNode;
-			if (this.switcherScope) {
-				switcherNode = this.switcherNode = lib.node(this.switcherScope);
-			} else {
-				// Create toolbar contribution area for use by viewmodes
-				switcherNode = this.switcherNode = document.createElement("ul"); //$NON-NLS-0$
-				switcherNode.id = toolbarNode.id + "viewmodeSwitch"; //$NON-NLS-0$
-				switcherNode.classList.add("layoutRight"); //$NON-NLS-0$
-				switcherNode.classList.add("commandList"); //$NON-NLS-0$
-				switcherNode.classList.add("pageActions"); //$NON-NLS-0$
-				toolbarNode.appendChild(switcherNode);
-
-				// switcher node is more essential for navigation it should therefore
-				// be inserted first to prevent it from being considered as part of the
-				// overflow before the modeContributionToolbar
-				modeContributionToolbar = this.modeContributionToolbar = document.createElement("div"); //$NON-NLS-0$
-				modeContributionToolbar.id = toolbarNode.id + "childModes"; //$NON-NLS-0$
-				toolbarNode.appendChild(modeContributionToolbar);
-			}
-			
+			var switcherNode = this.switcherNode = lib.node(this.switcherScope);
 			
 			var changeViewModeCommand = new mCommands.Command({
 				name: messages["Show"],
@@ -106,7 +86,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				parentNode: parentNode,
 				sidebarNavInputManager: this.sidebarNavInputManager,
 				serviceRegistry: serviceRegistry,
-				toolbarNode: modeContributionToolbar
+				toolbarNode: toolbarNode
 			}));
 			
 			if (this.serviceRegistry.getServiceReferences("orion.projects").length > 0) { //$NON-NLS-0$
@@ -118,7 +98,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 					parentNode: parentNode,
 					sidebarNavInputManager: this.sidebarNavInputManager,
 					serviceRegistry: serviceRegistry,
-					toolbarNode: modeContributionToolbar,
+					toolbarNode: toolbarNode,
 					sidebar: this
 				});
 			}
@@ -126,7 +106,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			// Outliner is responsible for adding its view mode(s) to this sidebar
 			this.outliner = new mOutliner.Outliner({
 				parent: parentNode,
-				toolbar: modeContributionToolbar,
+				toolbar: toolbarNode,
 				serviceRegistry: serviceRegistry,
 				contentTypeRegistry: contentTypeRegistry,
 				outlineService: outlineService,
@@ -137,6 +117,14 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				sidebar: this
 			});
 			this.setViewMode(this.defaultViewMode);
+		},
+		showToolbar: function() {
+			this.toolbarNode.style.display = "block"; //$NON-NLS-0$
+			this.parentNode.classList.remove("toolbarTarget-toolbarHidden"); //$NON-NLS-0$
+		},
+		hideToolbar: function() {
+			this.toolbarNode.style.display = "none"; //$NON-NLS-0$
+			this.parentNode.classList.add("toolbarTarget-toolbarHidden"); //$NON-NLS-0$
 		},
 		/** @private */
 		viewModeMenuCallback: function() {
@@ -195,8 +183,8 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				mode.destroy();
 			}
 			// clean out any toolbar contributions
-			if (this.modeContributionToolbar) {
-				this.commandRegistry.destroy(this.modeContributionToolbar);
+			if (this.toolbarNode) {
+				this.commandRegistry.destroy(this.toolbarNode);
 			}
 			lib.empty(this.parentNode);
 			mode = this.activeViewMode = this.getViewMode(id);

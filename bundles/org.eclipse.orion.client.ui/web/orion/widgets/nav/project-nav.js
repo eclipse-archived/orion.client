@@ -399,12 +399,14 @@ define([
 			});
 			this.explorer.display(this.project);
 			window.location.href = uriTemplate.expand({resource: this.project.Location});
+			this.sidebar.hideToolbar();
 		},
 		destroy: function() {
 			if (this.explorer) {
 				this.explorer.destroy();
 			}
 			this.explorer = null;
+			this.sidebar.showToolbar();
 		},
 		getProjectJson: function(metadata) {
 			function getJson(children) {

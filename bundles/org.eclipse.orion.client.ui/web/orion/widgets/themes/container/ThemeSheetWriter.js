@@ -320,11 +320,7 @@ define(['orion/widgets/themes/ThemeClass'],
 			
 			var auxpane = new ThemeClass.ThemeClass( 'auxpane' );
 			auxpane.style.border = '0';
-	/*		auxpane.style.background = this.sidepanel;
-			auxpane.style.background = '-webkit-gradient(linear, left top, left bottom, color-stop(0%,' + this.sidepanel + '), color-stop(100%,' + this.sidepanel + '))';
-			auxpane.style.background ='-moz-linear-gradient(top, ' + this.sidepanel + ' 0%, ' + this.sidepanel + ' 100%)'; */
-			/*auxpane.style.paddingTop = '16px';*/
-			
+			auxpane.style.background = this.sidepanel;
 			styles.push( auxpane );
 			
 			var mainpane = new ThemeClass.ThemeClass( 'mainpane' );
@@ -335,10 +331,6 @@ define(['orion/widgets/themes/ThemeClass'],
 			
 			var mainToolbar = new ThemeClass.ThemeClass( 'mainToolbar' );
 			mainToolbar.style.background = this.toolpanel;
-			/* mainToolbar.style.boxShadow = "inset 0 1px 0 0 #fff"; */
-			mainToolbar.style.backgroundImage = "-webkit-linear-gradient(top,#f5f5f5,#eee)";
-			/* mainToolbar.style.height = '32px'; */
-			/* mainToolbar.style.borderBottom = '1px solid #ebebeb'; */
 			styles.push( mainToolbar );
 	
 			for( var s in styles ){

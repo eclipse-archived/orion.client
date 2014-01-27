@@ -19,9 +19,9 @@
 	border: 1px solid lightgrey;
 	margin: 4px;
 	float: left;
-	width: 65%; /* for older browsers */
-	width: -webkit-calc(100% - 42px);
-	width: calc(100% - 42px);
+	width: 95%; /* for older browsers */
+	width: -webkit-calc(100% - 8px);
+	width: calc(100% - 8px);
 }
 
 .outlineRowMatchesFilter {

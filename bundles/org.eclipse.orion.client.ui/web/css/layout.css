@@ -276,12 +276,16 @@ hard-coded numbers elsewhere.
 
 }
 
-.toolbarTarget, .miniNavToolbarTarget {
+.toolbarTarget {
 	position: absolute;
 	top: 36px;  /* $ToolbarHeight + 2 */
  	width: 100%;
  	bottom: 0;
  	overflow-y: auto;
+}
+
+.toolbarTarget-toolbarHidden {
+	top: 2px;  /* 2 */
 }
 
 .workingTarget {
@@ -298,14 +302,6 @@ hard-coded numbers elsewhere.
 	padding-top: 10px;
 	padding-bottom: 5px;
 	background: white;
-}
-
-/* Positions the main panel of the LHS navigator below the filesystem switcher toolbar. */
-.miniNavToolbarTarget {
-	/* $ToolbarHeight + 2 + $FSToolbarHeight + $FSToolbarPadding
-	 = 34px + 2px + 30px + 4px
-	*/
-	top: 40px; 
 }
 
 .hasSplit {
