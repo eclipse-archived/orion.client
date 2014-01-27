@@ -844,7 +844,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		commandService.addCommand(addReadmeCommand);
 		
 		var createBasicProjectCommand = new mCommands.Command({
-			name: "Create a basic project",
+			name: "Basic Project",
 			tooltip: "Create an empty project",
 			id: "orion.project.create.basic",
 			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
@@ -868,7 +868,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			commandService.addCommand(createBasicProjectCommand);
 			
 			var createSftpProjectCommand = new mCommands.Command({
-				name: "Create a project from an SFTP site",
+				name: "Project from an SFTP Site",
 				tooltip: "Create a project from an SFTP site",
 				id: "orion.project.create.sftp",
 				parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -897,7 +897,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				commandService.addCommand(createSftpProjectCommand);
 				
 			var createZipProjectCommand = new mCommands.Command({
-			name: "Create a project from a zipped folder",
+			name: "Project from a Zipped Folder",
 			tooltip: "Create project and fill it with data from local file",
 			id: "orion.project.create.fromfile",
 			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),

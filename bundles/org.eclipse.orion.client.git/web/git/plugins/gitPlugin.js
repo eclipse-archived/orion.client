@@ -412,7 +412,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		optionalParameters: [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"},{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}],
 		addDependencyName: "Git Repository",
 		addDependencyTooltip: "Clone git repository and add it to this project",
-		addProjectName: "Create a project from a Git Repository",
+		addProjectName: "Project from a Git Repository",
 		addProjectTooltip: "Clone a Git Repository and add it as a project",
 		actionComment: "Cloning ${url}",
 		validationProperties: [
