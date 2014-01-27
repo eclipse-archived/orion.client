@@ -398,17 +398,21 @@ textarea.parameterInput {
 	display: none;
 	vertical-align: middle;
 	font-size: 11px;
-	z-index: 50;
+	z-index: 51;
 	color: #999;
 }
 
 .slideParameters {
-	border: 1px solid #666;
-	background-color: #666;
 	border: 1px solid #bbb;
 	background-color: lightgrey;
-	border-bottom-right-radius: 5px;
-	border-bottom-left-radius: 5px;
+	border-radius: 5px;
+}
+
+ .mainToolbar .slideParameters {
+	border-top: 0;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	position: absolute;
 }
 
 .slideContainerActive {
