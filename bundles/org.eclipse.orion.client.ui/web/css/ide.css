@@ -391,8 +391,6 @@ textarea.parameterInput {
 
 .slideContainer {
 	height: auto;
-	XXXwidth: 99%;
-	XXXclear: both;
 	float: left;
 	margin: 2px;
 	margin-top: 0;
@@ -402,18 +400,6 @@ textarea.parameterInput {
 	font-size: 11px;
 	z-index: 50;
 	color: #999;
-	-webkit-transition-property: all;
-	-webkit-transition-duration: .5s;
-	-webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-	-moz-transition-property: all;
-	-moz-transition-duration: .5s;
-	-moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-	-ms-transition-property: all;
-	-ms-transition-duration: .5s;
-	-ms-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-	transition-property: all;
-	transition-duration: .5s;
-	transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 }
 
 .slideParameters {
@@ -1080,8 +1066,4 @@ input {
 
 .lightTreeTableRow, .darkTreeTableRow {
 	border-bottom: 1px solid #dadada;
-}
-
-.commonToolbar{
-	height:30px;
 }

@@ -88,7 +88,7 @@ define([
 		},
 		_createActionTable: function() {
 			var that = this;
-			this._commandService.openParameterCollector("searchTools", function(parentDiv) { //$NON-NLS-0$
+			this._commandService.openParameterCollector("pageNavigationActions", function(parentDiv) { //$NON-NLS-0$
 	
 				// create the input box for searchTerm
 				var searchStringInput = document.createElement('input'); //$NON-NLS-0$
