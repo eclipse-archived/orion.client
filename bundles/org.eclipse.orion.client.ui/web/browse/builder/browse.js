@@ -36,7 +36,7 @@ if (_all_script && _all_script.length && _all_script.length > 0) {
 	}
 }
 
-define('orion/widgets/browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'], function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
+define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'], function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 	function Browser(params) { // parentId, repo, base
 		if (typeof params === "string") {
 			params = {
