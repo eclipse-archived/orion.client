@@ -12,7 +12,7 @@
 // optimization script to concat/minify the Orion editor javascript code
  
 ({
-    baseUrl: '../temp/',
+    baseUrl: '../../',
 	closure: {
 		CompilerOptions: {
 			languageIn: Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode.valueOf(Packages.com.google.javascript.jscomp.CompilerOptions.LanguageMode, "ECMASCRIPT5")
@@ -23,11 +23,10 @@
 	paths: {
         almond: 'requirejs/almond',
         i18n: 'requirejs/i18n',
-        text: 'requirejs/text',
-        'orion/i18n': 'browse/builder/118n'
+        text: 'requirejs/text'
 	},
 	name: "almond",
-	include: "orion/widgets/browse/builder/browse",
+	include: "browse/builder/browse",
 	preserveLicenseComments: false,
 	uglify: {
 		ascii_only: true
@@ -37,6 +36,6 @@
 		end: "\
 		orion = this.orion || (this.orion = {});\n\
 		var browse = orion.browse || (orion.browse = {});\n\
-		browse.browser = require('orion/widgets/browse/builder/browse');"
+		browse.browser = require('browse/builder/browse');"
 	}
 })
