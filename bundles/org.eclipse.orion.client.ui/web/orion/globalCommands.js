@@ -519,10 +519,12 @@ define([
 		var slideContainer = elements.slideContainer;
 		if (slideContainer) {
 			slideContainer.style.left = "";
+			slideContainer.style.top = "";
 			if (slideContainer.classList.contains("slideContainerActive")) { //$NON-NLS-0$
 				var bounds = lib.bounds(slideContainer);
 				var parentBounds = lib.bounds(slideContainer.parentNode);
 				slideContainer.style.left = ((parentBounds.width - bounds.width) / 2) + "px"; //$NON-NLS-0$
+				slideContainer.style.top = "0"; //$NON-NLS-0$
 			}
 		}
 //		if (elements.toolbarTarget && elements.toolbarTargetY) {

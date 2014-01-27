@@ -391,7 +391,7 @@ textarea.parameterInput {
 
 .slideContainer {
 	height: auto;
-	float: left;
+	float: right;
 	margin: 2px;
 	margin-top: 0;
 	margin-left: 4px;
@@ -408,7 +408,19 @@ textarea.parameterInput {
 	border-radius: 5px;
 }
 
- .mainToolbar .slideParameters {
+.mainToolbar .slideContainer {
+	border-top: 0;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	position: absolute;
+	top: -36px;
+	-webkit-transition: top 0.3s ease;
+	-moz-transition: top 0.3s ease;
+	-o-transition: top 0.3s ease;
+	transition: top 0.3s ease;
+}
+
+.mainToolbar .slideParameters {
 	border-top: 0;
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
