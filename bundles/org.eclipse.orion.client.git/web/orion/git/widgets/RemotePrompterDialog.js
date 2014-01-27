@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2011, 2012 IBM Corporation and others. All rights
+ * @license Copyright (c) 2011, 2014 IBM Corporation and others. All rights
  *          reserved. This program and the accompanying materials are made
  *          available under the terms of the Eclipse Public License v1.0
  *          (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse
@@ -169,6 +169,8 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 		this.$newBranch.addEventListener("input", function(evt) { //$NON-NLS-0$
 			that._validate();
 		});
+		
+		this.$newBranch.placeholder = messages["No remote selected"];
 
 		if (this.hideNewBranch) {
 			this.$newBranchPane.style.display = "none"; //$NON-NLS-0$
@@ -206,8 +208,10 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 			if (event.selection && event.selection.Type === "Remote") { //$NON-NLS-0$
 				that.$newBranch.disabled = false;
+				that.$newBranch.placeholder = messages["Enter a name..."];
 			} else {
 				that.$newBranch.disabled = true;
+				that.$newBranch.placeholder = messages["No remote selected"];
 			}
 			that._validate(event.selection);
 		});
