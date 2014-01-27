@@ -762,7 +762,7 @@ define([
 
 							// render the children asynchronously
 							if (created) {
-								window.setTimeout(function() {
+//								window.setTimeout(function() {
 									self._render(contribution.children, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 									// special post-processing when we've created a menu in an image bar.  We want to get rid 
 									// of a trailing separator in the menu first, and then decide if our menu is necessary
@@ -792,7 +792,7 @@ define([
 									} else {
 										created.menuButton.style.visibility = "visible";  //$NON-NLS-0$
 									}
-								}, 0);
+//								}, 0);
 							}
 						} else {  
 							// rendering a group using a separator on each end. We do it synchronously because order matters with

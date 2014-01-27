@@ -161,16 +161,16 @@ define([
 		registerCommands: function() {
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
 				var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
-				var newActionsScope = this.newActionsScope;
+				var fileActionsScope = this.fileActionsScope;
 				var additionalNavActionsScope = this.additionalNavActionsScope;
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.disconnect", 2); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.readme", 5, "orion.commonNavNewGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.addFolder", 1, "orion.commonNavNewGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.readme", 5, "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.addFolder", 6, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
 				var projectCommandsDef = new Deferred();
 				this.projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
 					for(var i=0; i<dependencyTypes.length; i++){
-						commandRegistry.registerCommandContribution(newActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.commonNavNewGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+7, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					this.projectClient.getProjectDeployTypes().then(function(deployTypes){
 						if(deployTypes && deployTypes.length>0){

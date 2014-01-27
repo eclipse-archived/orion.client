@@ -66,27 +66,27 @@ define([
 		registerCommands: function() {
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
 				var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
-				var newActionsScope = this.newActionsScope;
-				var selectionActionsScope = this.selectionActionsScope;
+				var fileActionsScope = this.fileActionsScope;
+				var editActionsScope = this.editActionsScope;
 				if (serviceRegistry.getServiceReferences("orion.projects").length > 0) { //$NON-NLS-0$
-					commandRegistry.addCommandGroup(newActionsScope, "orion.projectsNewGroup", 100, "New Project", "orion.commonNavNewGroup/orion.newContentGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.addCommandGroup(fileActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 					
-					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.basic", 1, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.fromfile", 2, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.basic", 1, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.fromfile", 2, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					// TODO: comment out create project from an SFTP site for 5.0 M1
-					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.sftp", 3, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.sftp", 3, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					
 					var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
 					var dependencyTypesDef = new Deferred();
 					projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
 						for(var i=0; i<dependencyTypes.length; i++){
-							commandRegistry.registerCommandContribution(newActionsScope, "orion.project.createproject." + dependencyTypes[i], i+4, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+							commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.createproject." + dependencyTypes[i], i+4, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 						}
 						
 						ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, projectClient, dependencyTypes).then(dependencyTypesDef.resolve, dependencyTypesDef.resolve);
 					}.bind(this), dependencyTypesDef.resolve);
 	
-					commandRegistry.registerCommandContribution(selectionActionsScope, "orion.project.initProject", 0, "orion.commonNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(editActionsScope, "orion.project.initProject", 0, "orion.menuBarEditGroup");  //$NON-NLS-1$ //$NON-NLS-0$
 	
 					return dependencyTypesDef;
 				}

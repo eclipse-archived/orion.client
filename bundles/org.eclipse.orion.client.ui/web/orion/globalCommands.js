@@ -1,6 +1,7 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
@@ -515,27 +516,27 @@ define([
 	}
 
 	function layoutToolbarElements(elements) {
-		if (elements.toolbarTarget && elements.toolbarTargetY) {
-			var heightExtras = 0;
-			var bounds;
-			if (elements.notifications && elements.notifications.classList.contains("slideContainerActive")) { //$NON-NLS-0$
-				bounds = lib.bounds(elements.notifications);
-				heightExtras += bounds.height;
-			}
-			if (elements.slideContainer && elements.slideContainer.classList.contains("slideContainerActive")) { //$NON-NLS-0$
-				bounds = lib.bounds(elements.slideContainer);
-				heightExtras += bounds.height;
-			}
-			if (heightExtras > 0) {
-				heightExtras += 8; // padding
-			}
-			if (heightExtras) {
-				elements.toolbarTarget.style.top = elements.toolbarTargetY + heightExtras + "px"; //$NON-NLS-0$
-				elements.toolbar.style.paddingBottom = heightExtras + "px"; //$NON-NLS-0$ 
-			} else {
-				elements.toolbarTarget.style.top = elements.toolbar.style.paddingBottom = "";
-			}
-		}
+//		if (elements.toolbarTarget && elements.toolbarTargetY) {
+//			var heightExtras = 0;
+//			var bounds;
+//			if (elements.notifications && elements.notifications.classList.contains("slideContainerActive")) { //$NON-NLS-0$
+//				bounds = lib.bounds(elements.notifications);
+//				heightExtras += bounds.height;
+//			}
+//			if (elements.slideContainer && elements.slideContainer.classList.contains("slideContainerActive")) { //$NON-NLS-0$
+//				bounds = lib.bounds(elements.slideContainer);
+//				heightExtras += bounds.height;
+//			}
+//			if (heightExtras > 0) {
+//				heightExtras += 8; // padding
+//			}
+//			if (heightExtras) {
+//				elements.toolbarTarget.style.top = elements.toolbarTargetY + heightExtras + "px"; //$NON-NLS-0$
+//				elements.toolbar.style.paddingBottom = heightExtras + "px"; //$NON-NLS-0$ 
+//			} else {
+//				elements.toolbarTarget.style.top = elements.toolbar.style.paddingBottom = "";
+//			}
+//		}
 	}
 
 	var mainSplitter = null;
@@ -598,22 +599,14 @@ define([
 		var progressPane = lib.node("progressPane"); //$NON-NLS-0$
 		progressPane.src = require.toUrl("images/none.png"); //$NON-NLS-0$
 
-		
-
 		var toolbar = lib.node("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {
 			toolbar.classList.add("toolbarLayout"); //$NON-NLS-0$
-			toolbar.innerHTML = ToolbarTemplate; //$NON-NLS-0$
+			toolbar.innerHTML = ToolbarTemplate + commonHTML.slideoutHTMLFragment("mainToolbar"); //$NON-NLS-0$
 		}
 		var closeNotification = lib.node("closeNotifications"); //$NON-NLS-0$
 		if (closeNotification) {
 			closeNotification.setAttribute("aria-label", messages['Close notification']); //$NON-NLS-1$ //$NON-NLS-0$
-		}
-		
-		var searchTools = lib.node("searchTools");
-		
-		if( searchTools ){
-			searchTools.innerHTML = commonHTML.slideoutHTMLFragment("searchTools");
 		}
 
 		//Hack for FF17 Bug#415176

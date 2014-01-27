@@ -57,6 +57,50 @@ define([
 
 var exports = {};
 
+	function MenuBar(options) {
+		this.parentNode = options.parentNode;
+		this.commandRegistry = options.commandRegistry;
+		this.serviceRegistry = options.serviceRegistry;
+		this.fileClient = options.parentNode;
+		this.fileActionsScope = "fileActions"; //$NON-NLS-0$
+		this.editActionsScope = "editActions"; //$NON-NLS-0$
+		this.viewActionsScope = "viewActions"; //$NON-NLS-0$
+		this.toolsActionsScope = "toolsActions"; //$NON-NLS-0$
+		this.createActionSections();
+	}
+	MenuBar.prototype = {};
+	objects.mixin(MenuBar.prototype, {
+		createActionSections: function() {
+			var _self = this;
+			[this.fileActionsScope, this.editActionsScope, this.viewActionsScope, this.toolsActionsScope].reverse().forEach(function(id) {
+				if (!_self[id]) {
+					var elem = document.createElement("ul"); //$NON-NLS-0$
+					elem.id = id;
+					elem.classList.add("commandList"); //$NON-NLS-0$
+					elem.classList.add("layoutLeft"); //$NON-NLS-0$
+					elem.classList.add("pageActions"); //$NON-NLS-0$
+					_self.parentNode.insertBefore(elem, _self.parentNode.firstChild);
+					_self[id] = elem;
+				}
+			});
+
+			var commandRegistry = this.commandRegistry;
+			var fileActionsScope = this.fileActionsScope;
+			var editActionsScope = this.editActionsScope;
+			var viewActionsScope = this.viewActionsScope;
+			var toolsActionsScope = this.toolsActionsScope;
+			
+			commandRegistry.addCommandGroup(fileActionsScope, "orion.menuBarFileGroup", 1000, messages["File"], null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(editActionsScope, "orion.menuBarEditGroup", 100, messages["Edit"], null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$	
+			commandRegistry.addCommandGroup(toolsActionsScope, "orion.menuBarToolsGroup", 100, messages["Tools"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			commandRegistry.addCommandGroup(fileActionsScope, "orion.newContentGroup", 0, messages["New"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(fileActionsScope, "orion.importGroup", 100, messages["Import"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(fileActionsScope, "orion.exportGroup", 1001, messages["Export"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		}
+	});
+
 exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isReadOnly) {
 	var selection;
 	var commandRegistry;
@@ -220,14 +264,14 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		return currentEditorView;
 	}
 	
-	var switchScope = "settingsActions"; //$NON-NLS-0$
-	commandRegistry.addCommandGroup(switchScope, "orion.edit.switch", 1000, messages.switchEditor, null, null, "core-sprite-outline", null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	Deferred.when(contentTypeRegistry.getContentTypes(), function(contentTypes) {
-		mExtensionCommands._getOpenWithNavCommandExtensions(serviceRegistry, contentTypes).forEach(function(command) {
-			var id = command.properties.id;
-			commandRegistry.registerCommandContribution(switchScope, id, 1, "orion.edit.switch/" + id); //$NON-NLS-0$
-		});
-	});
+//	var switchScope = "settingsActions"; //$NON-NLS-0$
+//	commandRegistry.addCommandGroup(switchScope, "orion.edit.switch", 1000, messages.switchEditor, null, null, "core-sprite-outline", null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+//	Deferred.when(contentTypeRegistry.getContentTypes(), function(contentTypes) {
+//		mExtensionCommands._getOpenWithNavCommandExtensions(serviceRegistry, contentTypes).forEach(function(command) {
+//			var id = command.properties.id;
+//			commandRegistry.registerCommandContribution(switchScope, id, 1, "orion.edit.switch/" + id); //$NON-NLS-0$
+//		});
+//	});
 
 	inputManager = new mInputManager.InputManager({
 		serviceRegistry: serviceRegistry,
@@ -301,6 +345,13 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		progressService: progressService
 	};
 	editorView = new mEditorView.EditorView(defaultOptions);
+	
+	var menuBar = new MenuBar({
+		parentNode: sidebarToolbar,
+		fileClient: fileClient,
+		commandRegistry: commandRegistry,
+		serviceRegistry: serviceRegistry
+	});
 
 	// Sidebar
 	function SidebarNavInputManager() {
@@ -318,6 +369,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		selection: selection,
 		serviceRegistry: serviceRegistry,
 		sidebarNavInputManager: sidebarNavInputManager,
+		switcherScope: "viewActions",
 		toolbar: sidebarToolbar
 	});
 	SidebarNavInputManager.prototype.processHash = function() {

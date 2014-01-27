@@ -118,7 +118,7 @@ hard-coded numbers elsewhere.
 	clear: both;
 	overflow: hidden;
     position: absolute;
-    top: 73px;
+    top: 37px;
 	/* bottom: 36px; $FooterHeight + footer border (1px) */    
     bottom: 0;
     left: 0;
@@ -278,13 +278,13 @@ hard-coded numbers elsewhere.
 
 .toolbarTarget, .miniNavToolbarTarget {
 	position: absolute;
-	top: 2px;  /* $ToolbarHeight + 2 */
+	top: 36px;  /* $ToolbarHeight + 2 */
  	width: 100%;
  	bottom: 0;
  	overflow-y: auto;
 }
 
-.workingTarget{
+.workingTarget {
 	position: absolute;
 	top: 4px;  /* $ToolbarHeight + 2 */
  	width: 100%;
@@ -295,6 +295,8 @@ hard-coded numbers elsewhere.
 	/* margin-top: 2px; */
 	/* padding-top: 10px; */
 	margin-right: 2px;
+	padding-top: 10px;
+	padding-bottom: 5px;
 	background: white;
 }
 

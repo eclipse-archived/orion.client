@@ -41,12 +41,17 @@ define({
 	"running": "Running ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"Saving..." : "Saving...", //$NON-NLS-1$ //$NON-NLS-0$
 	"View": "View", //$NON-NLS-1$ //$NON-NLS-0$
-	"ViewTooltip": "View", //$NON-NLS-1$ //$NON-NLS-0$
-	"Actions": "Edit", //$NON-NLS-1$ //$NON-NLS-0$
+	"Show": "Show", //$NON-NLS-1$ //$NON-NLS-0$
+	"ShowTooltip": "Show", //$NON-NLS-1$ //$NON-NLS-0$
+	"Actions": "Actions", //$NON-NLS-1$ //$NON-NLS-0$
 	"Navigator": "Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"FolderNavigator": "Folder Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"Project": "Project", //$NON-NLS-1$ //$NON-NLS-0$
-	"New": "File", //$NON-NLS-1$ //$NON-NLS-0$
+	"New": "New", //$NON-NLS-1$ //$NON-NLS-0$
+	"File": "File", //$NON-NLS-1$ //$NON-NLS-0$
+	"Project": "Project", //$NON-NLS-1$ //$NON-NLS-0$
+	"Edit": "Edit", //$NON-NLS-1$ //$NON-NLS-0$
+	"Tools": "Tools", //$NON-NLS-1$ //$NON-NLS-0$
 	"Add": "Add", //$NON-NLS-1$ //$NON-NLS-0$
 	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding.", //$NON-NLS-1$ //$NON-NLS-0$
 	"LocalEditorSettings": "Local Editor Settings", //$NON-NLS-1$ //$NON-NLS-0$
@@ -57,7 +62,8 @@ define({
 	"ChooseFSTooltip": "Choose the filesystem you want to view.", //$NON-NLS-1$ //$NON-NLS-0$
 	"FSTitle": "${0} (${1})", //$NON-NLS-1$ //$NON-NLS-0$
 	"Deploy": "Deploy", //$NON-NLS-1$ //$NON-NLS-0$
-	"ImportExport": "Import/Export", //$NON-NLS-1$ //$NON-NLS-0$
-	"OpenWith": "Open with...", //$NON-NLS-1$ //$NON-NLS-0$
+	"Import": "Import", //$NON-NLS-1$ //$NON-NLS-0$
+	"Export": "Export", //$NON-NLS-1$ //$NON-NLS-0$
+	"OpenWith": "Open With", //$NON-NLS-1$ //$NON-NLS-0$
 	"Extensions": "Extensions" //$NON-NLS-1$ //$NON-NLS-0$
 });

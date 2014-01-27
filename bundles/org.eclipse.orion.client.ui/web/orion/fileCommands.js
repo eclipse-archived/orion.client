@@ -117,38 +117,43 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 */
 	fileCommandUtils.updateNavTools = function(registry, commandRegistry, explorer, toolbarId, selectionToolbarId, toolbarItem, rootSelection) {
 		function updateSelectionTools(selectionService, item) {
-			var selectionTools = lib.node(selectionToolbarId);
-			if (selectionTools) {
-				// Hacky: check for a local selection service of the selectionToolbarId, or the one associated with the commandRegistry
-				var contributions = commandRegistry._contributionsByScopeId[selectionToolbarId];
-				selectionService = selectionService || (contributions && contributions.localSelectionService) || commandRegistry.getSelectionService(); //$NON-NLS-0$
-				if (contributions && selectionService) {
-					Deferred.when(selectionService.getSelections(), function(selections) {
-						commandRegistry.destroy(selectionTools);
-						var isNoSelection = !selections || (Array.isArray(selections) && !selections.length);
-						if (rootSelection && isNoSelection) {
-							commandRegistry.renderCommands(selectionTools.id, selectionTools, item, explorer, "button");  //$NON-NLS-0$
-						} else {
-							commandRegistry.renderCommands(selectionTools.id, selectionTools, null, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
-						}
-					});
+			var ids = Array.isArray(selectionToolbarId) ? selectionToolbarId : [selectionToolbarId];
+			ids.forEach(function(id) {
+				var selectionTools = lib.node(id);
+				if (selectionTools) {
+					// Hacky: check for a local selection service of the selectionToolbarId, or the one associated with the commandRegistry
+					var contributions = commandRegistry._contributionsByScopeId[id];
+					selectionService = selectionService || (contributions && contributions.localSelectionService) || commandRegistry.getSelectionService(); //$NON-NLS-0$
+					if (contributions && selectionService) {
+						Deferred.when(selectionService.getSelections(), function(selections) {
+							commandRegistry.destroy(selectionTools);
+							var isNoSelection = !selections || (Array.isArray(selections) && !selections.length);
+							if (rootSelection && isNoSelection) {
+								commandRegistry.renderCommands(selectionTools.id, selectionTools, item, explorer, "button");  //$NON-NLS-0$
+							} else {
+								commandRegistry.renderCommands(selectionTools.id, selectionTools, null, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+							}
+						});
+					}
 				}
+			});
+		}
+
+		if (toolbarId) {
+			var toolbar = lib.node(toolbarId);
+			if (toolbar) {
+				commandRegistry.destroy(toolbar);
+			} else {
+				throw new Error("could not find toolbar " + toolbarId); //$NON-NLS-0$
 			}
+			// close any open slideouts because if we are retargeting the command
+			if (lastItemLoaded.Location && toolbarItem.Location !== lastItemLoaded.Location) {
+				commandRegistry.closeParameterCollector();
+				lastItemLoaded.Location = toolbarItem.Location;
+			}
+			commandRegistry.renderCommands(toolbar.id, toolbar, toolbarItem, explorer, "button"); //$NON-NLS-0$
 		}
-
-		var toolbar = lib.node(toolbarId);
-		if (toolbar) {
-			commandRegistry.destroy(toolbar);
-		} else {
-			throw new Error("could not find toolbar " + toolbarId); //$NON-NLS-0$
-		}
-		// close any open slideouts because if we are retargeting the command
-		if (lastItemLoaded.Location && toolbarItem.Location !== lastItemLoaded.Location) {
-			commandRegistry.closeParameterCollector();
-			lastItemLoaded.Location = toolbarItem.Location;
-		}
-
-		commandRegistry.renderCommands(toolbar.id, toolbar, toolbarItem, explorer, "button"); //$NON-NLS-0$
+		
 		if (selectionToolbarId) {
 			updateSelectionTools(null, explorer.treeRoot);
 		}
@@ -806,8 +811,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				});
 			},
 			visibleWhen: function(item) {
-				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);
+				return checkFolderSelection(item) && !mFileUtils.isAtRoot(item.Location);
 			}
 		});
 		commandService.addCommand(newFolderCommand);
@@ -905,7 +909,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				}
 			},
 			visibleWhen: function(item) {
-				item = forceSingleItem(item);
+				item = explorer.treeRoot;
 				return item.Parents || item.type === "Project"; //$NON-NLS-0$
 			}
 		});

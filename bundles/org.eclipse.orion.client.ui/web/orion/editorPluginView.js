@@ -159,15 +159,15 @@ define([
 			});
 			this.editor.install();
 			
-			var commandGenerator = new mEditorCommands.EditorCommandFactory(
-				this.serviceRegistry,
-				this.commandRegistry,
-				this.readonly,
-				this.inputManager,
-				"pageActions", //$NON-NLS-0$
-				false,
-				"pageNavigationActions" //$NON-NLS-0$
-			);
+			var commandGenerator = new mEditorCommands.EditorCommandFactory({
+				serviceRegistry: this.serviceRegistry,
+				commandRegistry: this.commandRegistry,
+				inputManager: this.inputManager,
+				readonly: this.readonly,
+				toolbarId: "toolsActions", //$NON-NLS-0$
+				saveToolbarId: "fileActions", //$NON-NLS-0$
+				navToolbarId: "pageNavigationActions" //$NON-NLS-0$
+			});
 			commandGenerator.generateBaseEditorCommands(this.editor);
 		},
 		destroy: function() {

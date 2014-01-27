@@ -549,7 +549,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		dependencyTypes =  dependencyTypes || [];
 		
 		var addFolderCommand = new mCommands.Command({
-			name: "Add Associated Folder",
+			name: "Associated Folder",
 			tooltip: "Add an associated folder from workspace",
 			id: "orion.project.addFolder", //$NON-NLS-0$
 			callback: function(data) {
@@ -618,7 +618,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				
 			},
 			visibleWhen: function(item) {
-				return item.type==="Project";
+				return item.type==="Project" || explorer.treeRoot.type==="Project";
 			}
 		});
 		commandService.addCommand(addFolderCommand);
@@ -736,7 +736,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	
 					},
 					visibleWhen: function(item) {
-						return item.type==="Project";
+						return item.type==="Project" || explorer.treeRoot.type==="Project";
 					}
 				};
 				
@@ -812,7 +812,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 		
 		var addReadmeCommand = new mCommands.Command({
-			name: "Create Readme",
+			name: "Readme File",
 			tooltip: "Create README.md file in this project",
 			id: "orion.project.create.readme",
 			callback: function(data){
