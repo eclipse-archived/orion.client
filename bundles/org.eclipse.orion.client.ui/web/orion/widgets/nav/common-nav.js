@@ -55,8 +55,7 @@ define([
 		this.editActionsScope = "editActions"; //$NON-NLS-0$
 		this.viewActionsScope = "viewActions"; //$NON-NLS-0$
 		this.toolsActionsScope = "toolsActions"; //$NON-NLS-0$
-
-		this.additionalNavActionsScope = this.toolbarNode.id + "Extra"; //$NON-NLS-0$
+		this.additionalActionsScope = "extraActions"; //$NON-NLS-0$
 		
 		this._parentNode = lib.node(this.parentId);
 		this._sidebarContextMenuNode = document.createElement("ul"); //$NON-NLS-0$
@@ -158,7 +157,7 @@ define([
 			var _self = this;
 			// Create some elements that we can hang actions on. Ideally we'd have just 1, but the
 			// CommandRegistry seems to require dropdowns to have their own element.
-			[this.additionalNavActionsScope].forEach(function(id) {
+			[].forEach(function(id) {
 				if (!_self[id]) {
 					var elem = document.createElement("ul"); //$NON-NLS-0$
 					elem.id = id;
@@ -178,7 +177,7 @@ define([
 				dispatcher.removeEventListener(type, _self._modelListener);
 			});
 			FileExplorer.prototype.destroy.call(this);
-			[this.additionalNavActionsScope].forEach(function(id) {
+			[].forEach(function(id) {
 				delete _self[id];
 			});
 			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
@@ -347,8 +346,8 @@ define([
 			FileCommands.updateNavTools(this.registry, commandRegistry, this, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], treeRoot, true);
 			commandRegistry.destroy(this.toolsActionsScope);
 			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
-			commandRegistry.destroy(this.additionalNavActionsScope);
-			commandRegistry.renderCommands(this.additionalNavActionsScope, this.additionalNavActionsScope, this.selections, this, "tool"); //$NON-NLS-0$
+			commandRegistry.destroy(this.additionalActionsScope);
+			commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, this.selections, this, "tool"); //$NON-NLS-0$
 			if (this._sidebarContextMenuNode) {
 				this._populateContextMenu(this._sidebarContextMenuNode);
 			}

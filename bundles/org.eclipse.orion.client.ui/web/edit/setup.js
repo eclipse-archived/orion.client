@@ -66,13 +66,14 @@ var exports = {};
 		this.editActionsScope = "editActions"; //$NON-NLS-0$
 		this.viewActionsScope = "viewActions"; //$NON-NLS-0$
 		this.toolsActionsScope = "toolsActions"; //$NON-NLS-0$
+		this.additionalActionsScope = "extraActions"; //$NON-NLS-0$
 		this.createActionSections();
 	}
 	MenuBar.prototype = {};
 	objects.mixin(MenuBar.prototype, {
 		createActionSections: function() {
 			var _self = this;
-			[this.fileActionsScope, this.editActionsScope, this.viewActionsScope, this.toolsActionsScope].reverse().forEach(function(id) {
+			[this.fileActionsScope, this.editActionsScope, this.viewActionsScope, this.toolsActionsScope, this.additionalActionsScope].reverse().forEach(function(id) {
 				if (!_self[id]) {
 					var elem = document.createElement("ul"); //$NON-NLS-0$
 					elem.id = id;
