@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -212,6 +212,8 @@ define({
 	"Searching...": "Searching...",
 	"Looking for the commit": "Looking for the commit",
 	"New Branch:": "New Branch:",
+	"No remote selected": "No remote selected",
+	"Enter a name...": "Enter a name...",
 	"OK": "OK",
 	" [New branch]": " [New branch]",
 	"Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.": "Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}.",
