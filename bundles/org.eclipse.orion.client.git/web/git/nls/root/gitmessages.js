@@ -334,6 +334,7 @@ define({
 	"Staging changes": "Staging changes",
 	"Commit message:": "Commit message:",
 	"Committing changes": "Committing changes",
+	"Fetching previous commit message": "Fetching previous commit message",
 	"Resetting local changes": "Resetting local changes",
 	"Checkout files, discarding all changes": "Checkout files, discarding all changes",
 	"Show Patch": "Show Patch",

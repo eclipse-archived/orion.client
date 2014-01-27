@@ -2847,9 +2847,32 @@ var exports = {};
 		
 		commandService.addCommand(unstageCommand);
 		
+		/* Fetches the appropriate commit message when the 'amend' flag is used */
+		var amendEventListener = new mCommandRegistry.CommandEventListener('change', function(event, commandInvocation){ //$NON-NLS-0$
+			var target = event.target;
+			var item = commandInvocation.items.status;
+			var commitMessageBox = document.getElementById("name" + "parameterCollector"); //$NON-NLS-0$//$NON-NLS-1$
+				
+			if(target.checked){
+				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doGitLog(item.CommitLocation + "?page=1&pageSize=1"), messages["Fetching previous commit message"]); //$NON-NLS-0$ 
+					
+				progressService.createProgressMonitor(deferred, messages["Fetching previous commit message"], deferred.then(function(resp){
+					// use the last commit message
+					var message = resp.Children[0].Message;
+					commitMessageBox.value = message;
+				}), function(error){
+					commitMessageBox.value = ""; //$NON-NLS-0$
+				});
+			} else {
+				commitMessageBox.value = ""; //$NON-NLS-0$
+			}
+		});
+		
 		var commitMessageParameters = new mCommandRegistry.ParametersDescription(
 			[new mCommandRegistry.CommandParameter('name', 'text', messages['Commit message:'], "", 4), //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-3$
-			 new mCommandRegistry.CommandParameter('amend', 'boolean', messages['Amend:'], false), //$NON-NLS-0$  //$NON-NLS-1$
+			 new mCommandRegistry.CommandParameter('amend', 'boolean', messages['Amend:'], false, null, amendEventListener), //$NON-NLS-0$  //$NON-NLS-1$
 			 new mCommandRegistry.CommandParameter('changeId', 'boolean', messages['ChangeId:'], false)], //$NON-NLS-0$  //$NON-NLS-1$
 			 {hasOptionalParameters: true});
 		
