@@ -181,7 +181,7 @@ define([
 				mUIUtils.getUserText({
 					id: id,
 					refNode: target, 
-					shouldHideRefNode: true, 
+					hideRefNode: true, 
 					initialText: text, 
 					onComplete: doChange
 				});

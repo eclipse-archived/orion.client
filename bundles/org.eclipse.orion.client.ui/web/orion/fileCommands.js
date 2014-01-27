@@ -174,14 +174,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	
 	function getNewItemName(explorer, item, domId, defaultName, onDone) {
 		var refNode, name, tempNode;
-		var shouldHideRefNode = true;
+		var hideRefNode = true;
 		var insertAsChild = false;
 		
 		var nodes = explorer.makeNewItemPlaceHolder(item, domId, null, true);
 		if (nodes) {
 			refNode = nodes.refNode;
 			tempNode = nodes.tempNode;
-			shouldHideRefNode = false;
+			hideRefNode = false;
 			insertAsChild = true;
 		} else {
 			refNode = lib.node(domId);
@@ -206,7 +206,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			mUIUtils.getUserText({
 				id: domId+"EditBox", //$NON-NLS-0$
 				refNode: refNode,
-				shouldHideRefNode: shouldHideRefNode,
+				hideRefNode: hideRefNode,
 				initialText: defaultName,
 				onComplete: done,
 				onEditDestroy: destroy,
@@ -607,7 +607,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			mUIUtils.getUserText({
 				id: id, 
 				refNode: refNode, 
-				shouldHideRefNode: true, 
+				hideRefNode: true, 
 				initialText: item.Name,
 				onComplete: doMove.bind(null, item), 
 				selectTo: item.Directory ? "" : "." //$NON-NLS-1$ //$NON-NLS-0$
@@ -784,28 +784,39 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		function createUniqueNameArtifact(parentItem, prefix, createFunction) {
 			// get the list of files that already exists in the selected directory and ensure 
 			// that the new file's initial name is unique within that directory
-			var location = parentItem.ChildrenLocation;
-			progressService.progress(fileClient.fetchChildren(location), messages["Fetching children of "] + parentItem.Name).then( //$NON-NLS-0$
-				function(children) {
-					var attempt = 0;
-					var uniqueName = prefix;
-					
-					// find a unique name for the new artifact
-					var possiblyCollidingNames = children.filter(function(child){
-						return 0 === child.Name.indexOf(prefix);
-					}).map(function(child){
-						return child.Name;
-					});
-					
-					while (-1 !== possiblyCollidingNames.indexOf(uniqueName)){
-						attempt++;
-						uniqueName = prefix.concat(" (").concat(attempt).concat(")");  //$NON-NLS-1$ //$NON-NLS-0$
-					}
-					
-					// create the artifact
-					createFunction(uniqueName);
-				},
-				errorHandler);
+						
+			var findUniqueName = function(children) {
+				var attempt = 0;
+				var uniqueName = prefix;
+				
+				// find a unique name for the new artifact
+				var possiblyCollidingNames = children.filter(function(child){
+					return 0 === child.Name.indexOf(prefix);
+				}).map(function(child){
+					return child.Name;
+				});
+				
+				while (-1 !== possiblyCollidingNames.indexOf(uniqueName)){
+					attempt++;
+					uniqueName = prefix.concat(" (").concat(attempt).concat(")");  //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				
+				return uniqueName;
+			};
+			
+			if (parentItem.children) {
+				var uniqueName = findUniqueName(parentItem.children);
+				createFunction(uniqueName); // create the artifact
+			} else {
+				// children have not already been fetched, get them
+				var location = parentItem.ChildrenLocation;
+				progressService.progress(fileClient.fetchChildren(location), messages["Fetching children of "] + parentItem.Name).then( //$NON-NLS-0$
+					function(children){
+						var uniqueName = findUniqueName(children);
+						createFunction(uniqueName); // create the artifact
+					},
+					errorHandler);	
+			}
 		}		
 		
 		/**

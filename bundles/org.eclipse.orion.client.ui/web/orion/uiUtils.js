@@ -111,7 +111,7 @@ define(['orion/webui/littlelib'], function(lib) {
 	 * @param {Object} options The options object
 	 * @param {String} options.id
 	 * @param {Element} options.refNode
-	 * @param {Boolean} options.shouldHideRefNode
+	 * @param {Boolean} options.hideRefNode
 	 * @param {String} options.initialText
 	 * @param {Function} options.onComplete
 	 * @param {Function} options.onEditDestroy
@@ -122,7 +122,7 @@ define(['orion/webui/littlelib'], function(lib) {
 	function getUserText(options) {
 		var id = options.id;
 		var refNode = options.refNode;
-		var shouldHideRefNode = options.shouldHideRefNode;
+		var hideRefNode = options.hideRefNode;
 		var initialText = options.initialText;
 		var onComplete = options.onComplete;
 		var onEditDestroy = options.onEditDestroy;
@@ -142,7 +142,7 @@ define(['orion/webui/littlelib'], function(lib) {
 					return;
 				}
 				if (isKeyEvent && event.keyCode === lib.KEY.ESCAPE) {
-					if (shouldHideRefNode) {
+					if (hideRefNode) {
 						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
 					done = true;
@@ -155,13 +155,13 @@ define(['orion/webui/littlelib'], function(lib) {
 				if (isKeyEvent && event.keyCode !== lib.KEY.ENTER) {
 					return;
 				} else if (newValue.length === 0 || (!isInitialValid && newValue === initialText)) {
-					if (shouldHideRefNode) {
+					if (hideRefNode) {
 						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
 					done = true;
 				} else {
 					onComplete(newValue);
-					if (shouldHideRefNode && refNode.parentNode) {
+					if (hideRefNode && refNode.parentNode) {
 						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
 					done = true;
@@ -186,7 +186,7 @@ define(['orion/webui/littlelib'], function(lib) {
 			refNode.parentNode.insertBefore(editBox, refNode.nextSibling);
 		}
 		editBox.classList.add("userEditBoxPrompt"); //$NON-NLS-0$
-		if (shouldHideRefNode) {
+		if (hideRefNode) {
 			refNode.style.display = "none"; //$NON-NLS-0$
 		}				
 		editBox.addEventListener("keydown", handler(true), false); //$NON-NLS-0$
