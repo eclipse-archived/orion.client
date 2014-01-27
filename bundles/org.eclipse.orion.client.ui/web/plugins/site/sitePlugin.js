@@ -58,12 +58,21 @@ define([
 	var host = document.createElement('a');
 	host.href = '/';
 
+	provider.registerService("orion.page.link", null, {
+		nameKey: "Sites",
+		id: "orion.sites",
+		nls: "orion/nls/messages",
+		category: "sites",
+		uriTemplate: "{+OrionHome}/sites/sites.html"
+	});
+
 	provider.registerService('orion.navigate.command', null, {
 		id: 'orion.site.' + host.hostname + '.viewon',
 		nameKey: 'View on Site',
 		tooltipKey: 'View this file or folder on a web site hosted by Orion',
 		nls: 'orion/nls/messages',
 		forceSingleItem: true,
+		category: 'sites',
 		validationProperties: filesAndFoldersOnService(fileBase),
 		uriTemplate: '{+OrionHome}/sites/view.html#,file={,Location}'
 	});
@@ -73,6 +82,7 @@ define([
 		nameKey: 'View on Site',
 		tooltipKey: 'View this file or folder on a web site hosted by Orion',
 		nls: 'orion/nls/messages',
+		category: 'sites',
 		validationProperties: filesAndFoldersOnService(fileBase),
 		uriTemplate: '{+OrionHome}/sites/view.html#,file={,Location}'
 	});

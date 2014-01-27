@@ -27,11 +27,20 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 	};
 
 	var provider = new PluginProvider(headers);
-	
+
+	// Git category for contributed links
+	provider.registerService("orion.page.link.category", null, {
+		id: "git",
+		nameKey: "Git",
+		nls: "git/nls/gitmessages",
+		imageClass: "core-sprite-cat-git"
+	});
+
 	provider.registerService("orion.page.link", {}, {
 		nameKey: "Repositories",
 		id: "orion.git.repositories",
 		nls: "git/nls/gitmessages",
+		category: "git",
 		uriTemplate: "{+OrionHome}/git/git-repository.html#"
 	});
 	
@@ -90,6 +99,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		id: "eclipse.git.status2",
 		tooltipKey: "Go to Git Status",
 		nls: "git/nls/gitmessages",
+		category: "git",
 		validationProperties: [{
 			source: "StatusLocation|Clone:StatusLocation", 
 			variableName: "GitStatusLocation"
@@ -110,6 +120,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		id: "eclipse.orion.git.switchToCurrentLocal",
 		tooltipKey: "Show the log for the active local branch",
 		nls: "git/nls/gitmessages",
+		category: "git",
 		validationProperties: [
 			{source: "Clone:ActiveBranch", variableName: "GitBranchLocation"},
 			{source: "toRef:Type", match: "RemoteTrackingBranch"}
@@ -123,6 +134,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		id: "eclipse.orion.git.switchToRemote2",
 		tooltipKey: "Show the log for the corresponding remote tracking branch",
 		nls: "git/nls/gitmessages",
+		category: "git",
 		validationProperties: [
 			{source: "toRef:RemoteLocation:0:Children:0:CommitLocation", variableName: "GitRemoteLocation"}
 		],
@@ -135,6 +147,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		id: "eclipse.git.repository2",
 		tooltipKey: "Go to the git repository",
 		nls: "git/nls/gitmessages",
+		category: "git",
 		validationProperties: [
 			{source: "CloneLocation", variableName: "GitCloneLocation"},
 			{source: "Type", match: "Commit"}
@@ -147,6 +160,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		nameKey: "Git Repository",
 		tooltipKey: "Go to the git repository",
 		nls: "git/nls/gitmessages",
+		category: "git",
 		validationProperties: [{
 			source: "Git:CloneLocation",
 			variableName: "GitRepoLocation"
@@ -159,6 +173,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		nameKey: "Show Repository in eclipse.org",
 		tooltipKey: "Show this repository in eclipse.org",
 		nls: "git/nls/gitmessages",
+		category: "git",
 		validationProperties: [{
 			source: "GitUrl|Clone:GitUrl", 
 			match: "git.eclipse.org/gitroot", 
@@ -173,6 +188,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		nameKey: "Show Repository in GitHub",
 		nls: "git/nls/gitmessages",
 		tooltipKey: "Show this repository in GitHub",
+		category: "git",
 		validationProperties: [{
 			source: "GitUrl|Clone:GitUrl", 
 			match: "github\.com.*\.git", 
@@ -188,6 +204,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		nameKey: "Show Commit in GitHub",
 		nls: "git/nls/gitmessages",
 		tooltipKey: "Show this commit in GitHub",
+		category: "git",
 		validationProperties: [{
 			source: "GitUrl", 
 			match: "github\.com.*\.git", 
@@ -206,6 +223,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		nameKey: "Show Commit in eclipse.org",
 		nls: "git/nls/gitmessages",
 		tooltipKey: "Show this commit in eclipse.org",
+		category: "git",
 		validationProperties: [{
 			source: "GitUrl", 
 			match: "git.eclipse.org/gitroot", 
