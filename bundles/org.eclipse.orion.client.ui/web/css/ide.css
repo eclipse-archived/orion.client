@@ -63,7 +63,7 @@ button::-moz-focus-inner {
 .navlinkonpage, .nav_fakelink {
 	text-decoration: none;
 	padding: 2px;
-	color: #333333;
+	color: #555;
 }
 
 .navlinkonpage:active {
@@ -100,12 +100,12 @@ button::-moz-focus-inner {
 
 .pageActions {
 	min-height: 28px;
-	margin-top: 4px;
+	margin-top: 8px;
 }
 
 /* 4px margin used by toolbar, plus 4px of border/padding */
 .status {
-	padding-top: 8px;
+	padding-top: 10px;
 	color:#555;
 	vertical-align: baseline;
 }
@@ -947,12 +947,12 @@ input {
 }
 
 .projectNavColumn a{
-	color: #444;
+	color: #555;
     font-weight: bold;
 }
 
 .projectPrimaryNavColumn a{
-	color: #444;
+	color: #555;
     font-weight: bold;
 }
 

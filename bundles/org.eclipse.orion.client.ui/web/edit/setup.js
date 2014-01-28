@@ -45,14 +45,15 @@ define([
 	'orion/PageUtil',
 	'orion/objects',
 	'orion/webui/littlelib',
-	'orion/projectClient'
+	'orion/projectClient',
+	'orion/webui/SideMenu'
 ], function(
 	messages, Sidebar, mInputManager, mGlobalCommands,
 	mTextModel, mUndoStack,
 	mFolderView, mEditorView, mPluginEditorView , mMarkdownView,
 	mCommandRegistry, mContentTypes, mFileClient, mFileCommands, mSelection, mStatus, mProgress, mOperationsClient, mOutliner, mDialogs, mExtensionCommands, mSearchClient,
 	mProblems, mBlameAnnotation,
-	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, mProjectClient
+	Deferred, EventTarget, URITemplate, i18nUtil, PageUtil, objects, lib, mProjectClient, SideMenu
 ) {
 
 var exports = {};
@@ -186,6 +187,15 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 				commandRegistry.renderCommands(settingsToolbar.id, settingsToolbar, metadata, editor, "button"); //$NON-NLS-0$
 			}
 		}
+
+		var sideMenu = new SideMenu();
+		sideMenu.setSideMenu();
+		
+		sideMenu.addMenuItem( "core-sprite-edit", "http://www.google.com" );
+		sideMenu.addMenuItem( "core-sprite-deploy", "http://www.bbc.co.uk" );
+		
+		sideMenu.setActiveMenuItem( "http://www.bbc.co.uk" );
+		
 		return deferred;
 	}
 	

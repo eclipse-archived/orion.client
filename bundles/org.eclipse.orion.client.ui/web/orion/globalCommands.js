@@ -545,6 +545,64 @@ define([
 		return globalEventTarget;
 	}
 	
+	function setSideMenu(){
+		
+		var sideMenuNavigation = localStorage.getItem('sideMenuNavigation');
+		
+		if( sideMenuNavigation ){
+			
+			if( sideMenuNavigation === "closed" ){
+				setSideMenuWidth( "0" );
+			}
+			
+			if( sideMenuNavigation === "open" ){
+				setSideMenuWidth( "50px" );
+			}
+		}
+	}
+	
+	function setSideMenuWidth( sideMenuWidth ){
+		
+		var sideToolBar = lib.node( "sideMenu" );
+		var auxpane = lib.node( "auxpane" );
+		var mainToolBar = lib.node( "pageToolbar");
+		
+		if( sideToolBar ){
+			sideToolBar.style.width = sideMenuWidth;
+		}
+		
+		if( auxpane ){
+			auxpane.style.left = sideMenuWidth;
+		}
+		
+		if( mainToolBar ){
+			mainToolBar.style.paddingLeft = sideMenuWidth;
+		}
+	}
+	
+	function toggleSideMenu(){
+		
+		var sideMenuWidth = "50px";
+		
+		var newState = "open";
+		
+		var sideMenuNavigation = localStorage.getItem('sideMenuNavigation');
+		
+		if( sideMenuNavigation ){
+			
+			/* if this is true, a person has pinned the menu sometime before */
+			
+			if( sideMenuNavigation === "open" ){
+				newState = "closed";	
+				sideMenuWidth = "0";
+			}	
+		}
+		
+		localStorage.setItem('sideMenuNavigation', newState);
+		
+		setSideMenuWidth( sideMenuWidth );
+	}
+	
 
 	/**
 	 * Generates the banner at the top of a page.
@@ -833,6 +891,8 @@ define([
 		setPageTarget: setPageTarget,
 		setDirtyIndicator: setDirtyIndicator,
 		setPageCommandExclusions: setPageCommandExclusions,
+		toggleSideMenu: toggleSideMenu,
+		setSideMenu: setSideMenu,
 		notifyAuthenticationSite: notifyAuthenticationSite
 	};
 });

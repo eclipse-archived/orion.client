@@ -60,7 +60,10 @@ define(['orion/widgets/themes/ThemeClass'],
 			topRowBanner.style.padding = '10px';
 			topRowBanner.style.paddingLeft = '6px';
 			topRowBanner.style.paddingRight = '2px';
-			topRowBanner.style.borderBottom = '1px solid #dddddd';
+			/* topRowBanner.style.borderBottom = '1px solid #dddddd'; */
+			topRowBanner.style.borderBottom = "none";
+			topRowBanner.style.boxShadow = "0 2px 2px 0 rgba(0, 0, 0, 0.1),0 1px 0 0 rgba(0, 0, 0, 0.1)";
+			topRowBanner.style.zIndex = "100";
 			
 			styles.push( topRowBanner );
 			
@@ -232,7 +235,7 @@ define(['orion/widgets/themes/ThemeClass'],
 		    commandButton.style.padding = '4px 6px';
 		    commandButton.style.borderRadius = '3px';
 		    commandButton.style.lineHeight = '12px';
-			commandButton.style.fontSize = '8pt';
+			commandButton.style.fontSize = '9pt';
 			commandButton.style.userSelect = 'none';
 			//	-webkit-touch-callout: none;
 			//	-webkit-user-select: none;

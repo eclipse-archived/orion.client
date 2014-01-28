@@ -313,7 +313,7 @@ hard-coded numbers elsewhere.
 	left: 33%;  /* override this value if you want a different proportion of the two split panes */
 	height: 100%;
 	z-index: 50;
-	width: 4px;
+	width: 5px;
 	margin-right: 3px;
 	cursor: e-resize;
 	overflow: hidden;
@@ -335,9 +335,11 @@ hard-coded numbers elsewhere.
 .splitThumbLayout {
 	position: relative;
 	left: 0;
-	height: 2em;
+	height: 3em;
 	top: 49%;
 	cursor: pointer;
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;	
 }
 
 .splitVerticalThumbLayout {
@@ -394,4 +396,56 @@ hard-coded numbers elsewhere.
 .commandMargins {
 	margin-left: 4px !important;
 	margin-right: 4px !important;
+}
+
+.sideMenu{
+    height: calc( 100% - 36px );
+    width: 0;
+    background: #2f313a;
+    float: left;
+    position: absolute;
+    top: 36px;
+    -webkit-animation: slide 0.5s forwards;
+    -webkit-animation-delay: 2s;
+    animation: slide 0.5s forwards;
+    animation-delay: 2s;
+}
+
+.sideMenuList{
+	padding:15px;
+}
+
+.sideMenuItem{
+	list-style-type: none;
+	padding: 0;
+	padding-bottom:15px;
+}
+
+.sideMenuItem.hover{
+	text-decoration:none;
+}
+
+.active{
+	color:whitesmoke !important;
+	font-size:20px !important;
+	text-decoration:none !important;
+}
+
+.inactive{
+	color:#999 !important;
+	font-size:20px !important;
+	text-decoration:none !important;
+}
+
+@-webkit-keyframes slide {
+    100% { left: 0; }
+}
+
+@keyframes slide {
+    100% { left: 0; }
+}
+
+.mainContent{
+	position:absolute;
+	left:50px;
 }
