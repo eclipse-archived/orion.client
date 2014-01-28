@@ -115,9 +115,6 @@ define([
 				return token;
 			}
 			token = tokens[max];
-			if(offset > token.range[1]) {
-				return null;
-			}
 			if(offset >= token.range[0] && offset < token.range[1]) {
 				return token;
 			}

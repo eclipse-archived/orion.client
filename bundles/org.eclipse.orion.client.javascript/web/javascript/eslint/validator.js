@@ -98,10 +98,6 @@ define([
 				start = relatedToken.range[0];
 				end = relatedToken.range[1];
 			}
-		} else if (typeof e.index === "number") { //$NON-NLS-0$
-			// Esprima parse error
-			start = e.index;
-			end = e.end ? e.end : start;
 		}
 		var prob = {
 			description: e.message,
@@ -127,26 +123,26 @@ define([
 				var len = asterrors.length;
 				for(var i = 0; i < len; i++) {
 					var error = asterrors[i];
+					var token = Finder.findToken(error.index, ast.tokens);
+					if(!token) {
+						continue;
+					}
 					var msg = error.message;
 					if(errorMap[error.index] === msg) {
 						continue;
 					}
 					errorMap[error.index] = msg;
 					if(error.type) {
-						var token;
 						switch(error.type) {
 							case ASTManager.ErrorTypes.Unexpected:
-								token = Finder.findToken(error.index, ast.tokens);
 								error.message = msg = "Syntax error on token '"+token.value+"', delete this token.";
-								error.related = error.node = token;
 								break;
 							case ASTManager.ErrorTypes.EndOfInput:
-								token = Finder.findToken(error.index, ast.tokens);
 								error.message = "Syntax error, incomplete statement.";
-								error.related = error.node = token;
 								break;
 						}
 					}
+					error.node = token;
 					errors.push(error);
 				}
 			}

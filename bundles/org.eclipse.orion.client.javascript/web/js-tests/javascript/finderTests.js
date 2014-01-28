@@ -285,7 +285,13 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(21, ast.tokens);
-					Assert.equal(token, null, "Should not have found a token for out of range");
+					if(!token) {
+						Assert.fail("Should have found a token");
+					}
+					else {
+						Assert.equal(token.type, 'Punctuator', 'Should have found a Punctuator token');
+						Assert.equal(token.value, '}', 'Should have found a } token');
+					}
 				}
 				finally {
 					astManager.updated();
@@ -394,7 +400,13 @@ define([
 			return astManager.getAST(setUp(text)).then(function(ast) {
 				try {
 					var token = Finder.findToken(18, ast.tokens);
-					Assert.equal(token, null, "Should not have found a token");
+					if(!token) {
+						Assert.fail("Should have found a token");
+					}
+					else {
+						Assert.equal(token.type, 'Keyword', 'Should have found a Keyword token');
+						Assert.equal(token.value, 'function', 'Should have found a function token');
+					}
 				}
 				finally {
 					astManager.updated();
