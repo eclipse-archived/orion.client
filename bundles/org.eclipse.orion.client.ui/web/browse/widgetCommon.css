@@ -44,6 +44,12 @@
 	outline: 1px dashed lightgray;
 }
 
+.commandList > li {
+	float: left;
+	margin-left: 2px;
+	margin-right: 1px;
+}
+
 .disabledNavRow > .navColumn > .mainNavColumn > * {
 	color: gray;
 	cursor: default;
@@ -194,7 +200,7 @@
 	background: none repeat scroll 0 0 #f4f4f4;
 	vertical-align: middle;
 	font-weight: bold;
-	padding: 2px;
+	padding: 1px;
 	color: gray;
 	margin-bottom: 0;
 	border-color: #dadada;
@@ -244,6 +250,7 @@
     padding: 0;
 	border: 0;
 	margin: 0;
+	font-size: 100%;
 }
 
 .orionMarkdown h1 {
@@ -255,14 +262,6 @@
 	bottom:0;
 	margin:auto;
 	position: relative;
-}
-
-.orionMarkdown h2 {
-	font-size: 1.1em;
-	font-weight: bold;
-	color: #6d6d6d;
-	margin-top: 4px;
-	margin-bottom: 4px;
 }
 
 .orionMarkdown h2 {
