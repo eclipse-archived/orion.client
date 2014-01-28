@@ -465,7 +465,8 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * @property {Function} next Returns the next annotation in the iterator.
 		 */		
 		/**
-		 * Returns an iterator of annotations for the given range of text.
+		 * Returns an iterator of annotations for the given range of text. If called with no parameters,
+		 * returns all annotations in the model.
 		 *
 		 * @param {Number} start the start offset of the range.
 		 * @param {Number} end the end offset of the range.
@@ -473,20 +474,26 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 */
 		getAnnotations: function(start, end) {
 			var annotations = this._annotations, current;
-			//TODO binary search does not work for range intersection when there are overlaping ranges, need interval search tree for this
-			var i = 0;
-			var skip = function() {
-				while (i < annotations.length) {
-					var a =  annotations[i++];
-					if ((start === a.start) || (start > a.start ? start < a.end : a.start < end)) {
-						return a;
+			var i = 0, skip;
+			if (start === undefined && end === undefined) {
+				skip = function() {
+					return (i < annotations.length) ? annotations[i++] : null;
+				};
+			} else {
+				//TODO binary search does not work for range intersection when there are overlaping ranges, need interval search tree for this
+				skip = function() {
+					while (i < annotations.length) {
+						var a =  annotations[i++];
+						if ((start === a.start) || (start > a.start ? start < a.end : a.start < end)) {
+							return a;
+						}
+						if (a.start >= end) {
+							break;
+						}
 					}
-					if (a.start >= end) {
-						break;
-					}
-				}
-				return null;
-			};
+					return null;
+				};
+			}
 			current = skip();
 			return {
 				next: function() {

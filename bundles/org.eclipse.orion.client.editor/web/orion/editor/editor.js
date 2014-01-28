@@ -920,7 +920,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			var remove = [], add = [];
 			var model = annotationModel.getTextModel();
-			var iter = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
+			var iter = annotationModel.getAnnotations(), annotation;
 			while (iter.hasNext()) {
 				annotation = iter.next();
 				if (types.indexOf(annotation.type) !== -1) {

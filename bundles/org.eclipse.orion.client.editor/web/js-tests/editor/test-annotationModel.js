@@ -376,7 +376,26 @@ define(["orion/assert", 'orion/editor/textModel', 'orion/editor/annotations'], f
 		assert.equal(iter.hasNext(), false, "f1");
 		assert.equal(iter.next(), null, "f2");
 	};
-	
+
+	//test getAnnotation() with no parameters returns everything
+	tests.testAnnotationModel14 = function () {
+//		                      1         2         3         4         5         6         7	
+		var text = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
+		var textModel = new mTextModel.TextModel(text, "\n");
+		var annotationModel = new mAnnotations.AnnotationModel(textModel);
+		annotationModel.addAnnotation({start: Number.NEGATIVE_INFINITY, end: Number.NEGATIVE_INFINITY});
+		annotationModel.addAnnotation({start: Number.POSITIVE_INFINITY, end: Number.POSITIVE_INFINITY});
+
+		var iter = annotationModel.getAnnotations();
+		assert.equal(iter.hasNext(), true);
+		var a1 = iter.next();
+		assert.equal(iter.hasNext(), true);
+		var a2 = iter.next();
+		assert.equal(iter.hasNext(), false);
+		assert.equal(a1.start, Number.NEGATIVE_INFINITY);
+		assert.equal(a2.start, Number.POSITIVE_INFINITY);
+	};
+
 	return tests;
 
 });
