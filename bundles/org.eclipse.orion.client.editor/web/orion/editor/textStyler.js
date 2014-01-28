@@ -37,7 +37,14 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var spacePattern = {regex: / /g, style: {styleClass: "punctuation separator space", unmergeable: true}}; //$NON-NLS-0$
 	var tabPattern = {regex: /\t/g, style: {styleClass: "punctuation separator tab", unmergeable: true}}; //$NON-NLS-0$
 
-	var _findMatch = function(regex, text, startIndex) {
+	var _findMatch = function(regex, text, startIndex, testBeforeMatch) {
+		/*
+		 * testBeforeMatch provides a potential optimization for callers that do not strongly expect to find
+		 * a match.  If this argument is defined then test() is initially called on the regex, which executes
+		 * significantly faster than exec().  If a match is found then the regex's lastIndex is reverted to
+		 * its pre-test() value, and exec() is then invoked on it in order to get the match details.
+		 */
+
 		var index = startIndex;
 		var initialLastIndex = regex.lastIndex;
 		linebreakRegex.lastIndex = startIndex;
@@ -62,7 +69,16 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			regex.lastIndex = indexAdjustment = currentLine.index - lineStart - 1;
 		}
 		while (currentLine && currentLine.index < text.length) {
-			var result = regex.exec(lineString);
+			var result;
+			if (testBeforeMatch) {
+				var revertIndex = regex.lastIndex;
+				if (regex.test(lineString)) {
+					regex.lastIndex = revertIndex;
+					result = regex.exec(lineString);
+				}
+			} else {
+				result = regex.exec(lineString);
+			}
 			if (result) {
 				result.index += index;
 				result.index -= indexAdjustment;
@@ -82,7 +98,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	};
 	var updateMatch = function(match, text, matches, minimumIndex) {
 		var regEx = match.pattern.regex ? match.pattern.regex : match.pattern.regexBegin;
-		var result = _findMatch(regEx, text, minimumIndex);
+		var result = _findMatch(regEx, text, minimumIndex, true);
 		if (result) {
 			match.result = result;
 			for (var i = 0; i < matches.length; i++) {
@@ -828,7 +844,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			var keys = Object.keys(enclosurePatterns);
 			for (var i = 0; i < keys.length; i++) {
 				var current = enclosurePatterns[keys[i]];
-				var result = _findMatch(current.regex, text, 0)
+				var result = _findMatch(current.regex, text, 0);
 				if (result && result.index === 0) {
 					match = current;
 					break;
