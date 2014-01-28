@@ -4421,7 +4421,7 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 	 * @param {Object} options The options object
 	 * @param {String} options.id
 	 * @param {Element} options.refNode
-	 * @param {Boolean} options.shouldHideRefNode
+	 * @param {Boolean} options.hideRefNode
 	 * @param {String} options.initialText
 	 * @param {Function} options.onComplete
 	 * @param {Function} options.onEditDestroy
@@ -4432,7 +4432,7 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 	function getUserText(options) {
 		var id = options.id;
 		var refNode = options.refNode;
-		var shouldHideRefNode = options.shouldHideRefNode;
+		var hideRefNode = options.hideRefNode;
 		var initialText = options.initialText;
 		var onComplete = options.onComplete;
 		var onEditDestroy = options.onEditDestroy;
@@ -4452,7 +4452,7 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 					return;
 				}
 				if (isKeyEvent && event.keyCode === lib.KEY.ESCAPE) {
-					if (shouldHideRefNode) {
+					if (hideRefNode) {
 						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
 					done = true;
@@ -4465,13 +4465,13 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 				if (isKeyEvent && event.keyCode !== lib.KEY.ENTER) {
 					return;
 				} else if (newValue.length === 0 || (!isInitialValid && newValue === initialText)) {
-					if (shouldHideRefNode) {
+					if (hideRefNode) {
 						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
 					done = true;
 				} else {
 					onComplete(newValue);
-					if (shouldHideRefNode && refNode.parentNode) {
+					if (hideRefNode && refNode.parentNode) {
 						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
 					done = true;
@@ -4496,7 +4496,7 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 			refNode.parentNode.insertBefore(editBox, refNode.nextSibling);
 		}
 		editBox.classList.add("userEditBoxPrompt"); //$NON-NLS-0$
-		if (shouldHideRefNode) {
+		if (hideRefNode) {
 			refNode.style.display = "none"; //$NON-NLS-0$
 		}				
 		editBox.addEventListener("keydown", handler(true), false); //$NON-NLS-0$
@@ -9058,280 +9058,12 @@ define('orion/explorers/navigationUtils',[], function() {
 	};
 });
 
-/*******************************************************************************
- * @license
- * Copyright (c) 2011, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-/*global define */
-/*jslint browser:true regexp:false*/
-/**
- * @name orion.regex
- * @class Utilities for dealing with regular expressions.
- * @description Utilities for dealing with regular expressions.
- */
-define("orion/regex", [], function() { //$NON-NLS-0$
-	/**
-	 * @memberOf orion.regex
-	 * @function
-	 * @static
-	 * @description Escapes regex special characters in the input string.
-	 * @param {String} str The string to escape.
-	 * @returns {String} A copy of <code>str</code> with regex special characters escaped.
-	 */
-	function escape(str) {
-		return str.replace(/([\\$\^*\/+?\.\(\)|{}\[\]])/g, "\\$&"); //$NON-NLS-0$
-	}
-
-	/**
-	 * @memberOf orion.regex
-	 * @function
-	 * @static
-	 * @description Parses a pattern and flags out of a regex literal string.
-	 * @param {String} str The string to parse. Should look something like <code>"/ab+c/"</code> or <code>"/ab+c/i"</code>.
-	 * @returns {Object} If <code>str</code> looks like a regex literal, returns an object with properties
-	 * <code><dl>
-	 * <dt>pattern</dt><dd>{String}</dd>
-	 * <dt>flags</dt><dd>{String}</dd>
-	 * </dl></code> otherwise returns <code>null</code>.
-	 */
-	function parse(str) {
-		var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
-		if (regexp) {
-			return {
-				pattern : regexp[1],
-				flags : regexp[2]
-			};
-		}
-		return null;
-	}
-
+/* global define */
+define('orion/extensionCommands',[], function() {
 	return {
-		escape: escape,
-		parse: parse
-	};
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2011, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-/*jslint amd:true*/
-define('orion/contentTypes',[], function() {
-	var SERVICE_ID = "orion.core.contentTypeRegistry"; //$NON-NLS-0$
-	var EXTENSION_ID = "orion.core.contenttype"; //$NON-NLS-0$
-	var OLD_EXTENSION_ID = "orion.file.contenttype"; // backwards compatibility //$NON-NLS-0$
-
-	/**
-	 * @name orion.core.ContentType
-	 * @class Represents a content type known to Orion.
-	 * @property {String} id Unique identifier of this ContentType.
-	 * @property {String} name User-readable name of this ContentType.
-	 * @property {String} extends Optional; Gives the ID of another ContentType that is this one's parent.
-	 * @property {String[]} extension Optional; List of file extensions characterizing this ContentType. Extensions are not case-sensitive.
-	 * @property {String[]} filename Optional; List of filenames characterizing this ContentType.
-	 */
-
-	function contains(array, item) {
-		return array.indexOf(item) !== -1;
-	}
-
-	function getFilenameContentType(/**String*/ filename, contentTypes) {
-		function winner(best, other, filename, extension) {
-			var nameMatch = other.filename.indexOf(filename) >= 0;
-			var extMatch = contains(other.extension, extension.toLowerCase());
-			if (nameMatch || extMatch) {
-				if (!best || (nameMatch && contains(best.extension, extension.toLowerCase()))) {
-					return other;
-				}
-			}
-			return best;
+		getOpenWithCommands: function() {
+			return [];
 		}
-		if (typeof filename !== "string") { //$NON-NLS-0$
-			return null;
-		}
-		var extension = filename && filename.split(".").pop(); //$NON-NLS-0$
-		var best = null;
-		for (var i=0; i < contentTypes.length; i++) {
-			var type = contentTypes[i];
-			if (winner(best, type, filename, extension) === type) {
-				best = type;
-			}
-		}
-		return best;
-	}
-
-	function array(obj) {
-		if (obj === null || typeof obj === "undefined") { return []; } //$NON-NLS-0$
-			return (Array.isArray(obj)) ? obj : [obj];
-		}
-
-	function arrayLowerCase(obj) {
-		return array(obj).map(function(str) { return String.prototype.toLowerCase.call(str); });
-	}
-
-	function process(contentTypeData) {
-		return {
-			id: contentTypeData.id,
-			name: contentTypeData.name,
-			image: contentTypeData.image,
-			imageClass: contentTypeData.imageClass,
-			"extends": contentTypeData["extends"], //$NON-NLS-1$ //$NON-NLS-0$
-			extension: arrayLowerCase(contentTypeData.extension),
-			filename: array(contentTypeData.filename)
-		};
-	}
-
-	function buildMap(contentTypeDatas) {
-		var map = Object.create(null);
-		contentTypeDatas.map(process).forEach(function(contentType) {
-			if (!Object.prototype.hasOwnProperty.call(map, contentType.id)) {
-				map[contentType.id] = contentType;
-			}
-		});
-		return map;
-	}
-
-	function buildMapFromServiceRegistry(serviceRegistry) {
-		var serviceReferences = serviceRegistry.getServiceReferences(EXTENSION_ID).concat(
-				serviceRegistry.getServiceReferences(OLD_EXTENSION_ID));
-		var contentTypeDatas = [];
-		for (var i=0; i < serviceReferences.length; i++) {
-			var serviceRef = serviceReferences[i], types = array(serviceRef.getProperty("contentTypes")); //$NON-NLS-0$
-			for (var j=0; j < types.length; j++) {
-				contentTypeDatas.push(types[j]);
-			}
-		}
-		return buildMap(contentTypeDatas);
-	}
-
-	/**
-	 * @name orion.core.ContentTypeRegistry
-	 * @class A service for querying {@link orion.core.ContentType}s.
-	 * @description A registry that provides information about {@link orion.core.ContentType}s.
-	 *
-	 * <p>If a {@link orion.serviceregistry.ServiceRegistry} is available, clients should request the service with
-	 * objectClass <code>"orion.core.contentTypeRegistry"</code> from the registry rather than instantiate this 
-	 * class directly. This constructor is intended for use only by page initialization code.</p>
-	 *
-	 * @param {orion.serviceregistry.ServiceRegistry|orion.core.ContentType[]} dataSource The service registry
-	 * to use for looking up available content types and for registering this ContentTypeRegistry.
-	 * 
-	 * <p>Alternatively, an array of ContentType data may be passed instead, which allows clients to use this
-	 * ContentTypeRegistry without a service registry.</p>
-	 */
-	function ContentTypeRegistry(dataSource) {
-		if (dataSource && dataSource.registerService) {
-			this.serviceRegistry = dataSource;
-			this.map = buildMapFromServiceRegistry(dataSource);
-			dataSource.registerService(SERVICE_ID, this);
-		} else if (Array.isArray(dataSource)) {
-			this.serviceRegistry = null;
-			this.map = buildMap(dataSource);
-		} else {
-			throw new Error("Invalid parameter"); //$NON-NLS-0$
-		}
-	}
-	ContentTypeRegistry.prototype = /** @lends orion.core.ContentTypeRegistry.prototype */ {
-		/**
-		 * Gets all the ContentTypes in the registry.
-		 * @returns {orion.core.ContentType[]} An array of all registered ContentTypes.
-		 */
-		getContentTypes: function() {
-			var map = this.getContentTypesMap();
-			var types = [];
-			for (var type in map) {
-				if (Object.prototype.hasOwnProperty.call(map, type)) {
-					types.push(map[type]);
-				}
-			}
-			return types;
-		},
-		/**
-		 * Gets a map of all ContentTypes.
-		 * @return {Object} A map whose keys are ContentType IDs and values are the {@link orion.core.ContentType} having that ID.
-		 */
-		getContentTypesMap: function() {
-			return this.map;
-		},
-		/**
-		 * Looks up the ContentType for a file or search result, given the metadata.
-		 * @param {Object} fileMetadata Metadata for a file or search result.
-		 * @returns {orion.core.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
-		 */
-		getFileContentType: function(fileMetadata) {
-			return getFilenameContentType(fileMetadata.Name, this.getContentTypes());
-		},
-		/**
-		 * Looks up the ContentType, given a filename.
-		 * @param {String} filename The filename.
-		 * @returns {orion.core.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
-		 */
-		getFilenameContentType: function(filename) {
-			return getFilenameContentType(filename, this.getContentTypes());
-		},
-		/**
-		 * Gets a ContentType by ID.
-		 * @param {String} id The ContentType ID.
-		 * @returns {orion.core.ContentType} The ContentType having the given ID, or <code>null</code>.
-		 */
-		getContentType: function(id) {
-			return this.map[id] || null;
-		},
-		/**
-		 * Determines whether a ContentType is an extension of another.
-		 * @param {orion.core.ContentType|String} contentTypeA ContentType or ContentType ID.
-		 * @param {orion.core.ContentType|String} contentTypeB ContentType or ContentType ID.
-		 * @returns {Boolean} Returns <code>true</code> if <code>contentTypeA</code> equals <code>contentTypeB</code>,
-		 *  or <code>contentTypeA</code> descends from <code>contentTypeB</code>.
-		 */
-		isExtensionOf: function(contentTypeA, contentTypeB) {
-			contentTypeA = (typeof contentTypeA === "string") ? this.getContentType(contentTypeA) : contentTypeA; //$NON-NLS-0$
-			contentTypeB = (typeof contentTypeB === "string") ? this.getContentType(contentTypeB) : contentTypeB; //$NON-NLS-0$
-			if (!contentTypeA || !contentTypeB) { return false; }
-			if (contentTypeA.id === contentTypeB.id) { return true; }
-			else {
-				var parent = contentTypeA, seen = {};
-				while (parent && (parent = this.getContentType(parent['extends']))) { //$NON-NLS-0$
-					if (parent.id === contentTypeB.id) { return true; }
-					if (seen[parent.id]) { throw new Error("Cycle: " + parent.id); } //$NON-NLS-0$
-					seen[parent.id] = true;
-				}
-			}
-			return false;
-		},
-		/**
-		 * Similar to {@link #isExtensionOf}, but works on an array of contentTypes.
-		 * @param {orion.core.ContentType|String} contentType ContentType or ContentType ID.
-		 * @param {orion.core.ContentType[]|String[]} contentTypes Array of ContentTypes or ContentType IDs.
-		 * @returns {Boolean} <code>true</code> if <code>contentType</code> equals or descends from any of the
-		 * ContentTypes in <code>contentTypes</code>.
-		 */
-		isSomeExtensionOf: function(contentType, contentTypes) {
-			for (var i=0; i < contentTypes.length; i++) {
-				if (this.isExtensionOf(contentType, contentTypes[i])) {
-					return true;
-				}
-			}
-			return false;
-		}
-	};
-	return {
-		ContentTypeRegistry: ContentTypeRegistry,
-		getFilenameContentType: getFilenameContentType
 	};
 });
 
@@ -9555,932 +9287,6 @@ define('orion/URITemplate',[],function(){
 	};
 
 	return URITemplate;
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2012, 2014 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- ******************************************************************************/
-/*global define document window URL*/
-define('orion/PageLinks',[
-	"require",
-	"orion/Deferred",
-	"orion/PageUtil",
-	"orion/URITemplate",
-	"orion/i18nUtil",
-	"orion/objects",
-	"orion/URL-shim"
-], function(require, Deferred, PageUtil, URITemplate, i18nUtil, objects, _) {
-
-	/**
-	 * Returns the value of the <code>{OrionHome}</code> variable.
-	 * @memberOf orion.PageLinks
-	 * @function
-	 * @returns {String} The value of the <code>{OrionHome}</code> variable.
-	 */
-	function getOrionHome() {
-		if(!require.toUrl){
-			return new URL("/", window.location.href).href.slice(0, -1);
-		} else {
-			return new URL(require.toUrl("orion/../"), window.location.href).href.slice(0, -1); //$NON-NLS-0$
-		}
-	}
-
-	/**
-	 * Reads metadata from an <code>orion.page.xxxxx</code> service extension.
-	 * @memberOf orion.PageLinks
-	 * @function
-	 * @param {orion.ServiceRegistry} serviceRegistry The service registry.
-	 * @param {String} [serviceName="orion.page.link"] Service name to read extensions from.
-	 * @return {orion.Promise} A promise that resolves to an {@link orion.PageLinks.PageLinksInfo} object.
-	 */
-	function getPageLinksInfo(serviceRegistry, serviceName) {
-		return _readPageLinksMetadata(serviceRegistry, serviceName).then(function(metadata) {
-			return new _PageLinksInfo(metadata.categories, metadata.linkInfo);
-		});
-	}
-
-	function _getPropertiesMap(serviceRef) {
-		var props = {};
-		serviceRef.getPropertyKeys().forEach(function(key) {
-			if (key !== "objectClass" && key !== "service.names" && key !== "service.id" && key !== "__plugin__") //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				props[key] = serviceRef.getProperty(key);
-		});
-		return props;
-	}
-
-	/**
-	 * Loads translated name if possible.
-	 * @returns {orion.Promise} The info, with info.textContent set
-	 */
-	function _loadTranslatedName(info) {
-		return i18nUtil.getMessageBundle(info.nls).then(function(messages) {
-			info.textContent = info.nameKey ? messages[info.nameKey] : info.name;
-			return info;
-		});
-	}
-
-	/*
-	 * Categories apply to all orion.page.link* serviceNames, so cache them.
-	 */
-	var _cachedCategoryInfos;
-
-	function _readPageLinksMetadata(serviceRegistry, serviceName) {
-		serviceName = serviceName || "orion.page.link"; //$NON-NLS-0$
-
-		// Read categories.
-		var categoryInfos;
-		if (!_cachedCategoryInfos) {
-			categoryInfos = [];
-			var navLinkCategories = serviceRegistry.getServiceReferences("orion.page.link.category"); //$NON-NLS-0$
-			navLinkCategories.forEach(function(serviceRef) {
-				var info = _getPropertiesMap(serviceRef);
-				if (!info.id || (!info.name && !info.nameKey)) {
-					return;
-				}
-				if (info.nls) {
-					categoryInfos.push(_loadTranslatedName(info));
-				} else {
-					info.textContent = info.name;
-					categoryInfos.push(new Deferred().resolve(info));
-				}
-			});
-			_cachedCategoryInfos = categoryInfos;
-		} else {
-			categoryInfos = _cachedCategoryInfos;
-		}
-		var categoriesPromise = Deferred.all(categoryInfos);
-
-		// Read page links.
-		// https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages
-		var navLinks= serviceRegistry.getServiceReferences(serviceName);
-		var params = PageUtil.matchResourceParameters(window.location.href);
-		// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-		var orionHome = getOrionHome();
-		var locationObject = {OrionHome: orionHome, Location: params.resource};
-		var navLinkInfos = [];
-		navLinks.forEach(function(navLink) {
-			var info = _getPropertiesMap(navLink);
-			if (!info.uriTemplate || (!info.nls && !info.name)) {
-				return; // missing data, skip
-			}
-
-			var uriTemplate = new URITemplate(info.uriTemplate);
-			var expandedHref = uriTemplate.expand(locationObject);
-			expandedHref = PageUtil.validateURLScheme(expandedHref);
-			info.href = expandedHref;
-
-			if(info.nls){
-				navLinkInfos.push(_loadTranslatedName(info));
-			} else {
-				info.textContent = info.name;
-				navLinkInfos.push(new Deferred().resolve(info));
-			}
-		});
-		var navLinksPromise = Deferred.all(navLinkInfos);
-
-		return Deferred.all([categoriesPromise, navLinksPromise]).then(function(results) {
-			return {
-				categories: results[0],
-				linkInfo: results[1]
-			}
-		});
-	}
-
-	/**
-	 * @name orion.PageLinks.PageLinksInfo
-	 * @class
-	 * @description Provides access to info about page links read from an extension point.
-	 */
-	function _PageLinksInfo(categoriesArray, allPageLinks) {
-		this.allPageLinks = allPageLinks;
-		var categories = this.categories = Object.create(null); // Maps category id {String} to category {Object}
-		var links = this.links = Object.create(null); // Maps category id {String} to page links {Object[]}
-
-		categoriesArray.forEach(function(category) {
-			categories[category.id] = category;
-		});
-		allPageLinks.forEach(function(link) {
-			var category = link.category ? categories[link.category] : null;
-			if (category) {
-				links[category.id] = links[category.id] || [];
-				links[category.id].push(link);
-			} else {
-				// TODO default category for this link?
-			}
-		});
-
-		// Sort within category by name
-		Object.keys(links).forEach(function(key) {
-			links[key].sort(_comparePageLinks);
-		});
-		// Sort all by name
-		this.allPageLinks.sort(_comparePageLinks);
-	}
-	objects.mixin(_PageLinksInfo.prototype, /** @lends orion.PageLinks.PageLinksInfo.prototype */ {
-		/**
-		 * Builds DOM elements for links from all categories.
-		 * @returns {Element[]} The links.
-		 */
-		createLinkElements: function() {
-			return this.allPageLinks.map(function(info) {
-				return _createLink(info.href, "_self", info.textContent); //$NON-NLS-0$
-			});
-		},
-		/**
-		 * Returns the category IDs.
-		 * @returns {String[]} The category IDs.
-		 */
-		getCategoryIDs: function() {
-			return Object.keys(this.categories);
-		},
-		/**
-		 * Returns the data for a given category.
-		 * @param {String} id The category ID.
-		 * @returns {Object} The category data.
-		 */
-		getCategory: function(id) {
-			return this.categories[id] || null;
-		},
-		/**
-		 * Returns links from all categories, sorted by name.
-		 * @returns {Object[]} The links.
-		 */
-		getAllLinks: function() {
-			return this.allPageLinks;
-		},
-		/**
-		 * Returns the links belonging to the given category.
-		 * @param {String} id The category ID.
-		 * @returns {Object[]} The links.
-		 */
-		getLinks: function(id) {
-			return this.links[id] || [];
-		}
-	});
-
-	function _comparePageLinks(a, b) {
-		var n1 = a.textContent && a.textContent.toLowerCase();
-		var n2 = b.textContent && b.textContent.toLowerCase();
-		if (n1 < n2) { return -1; }
-		if (n1 > n2) { return 1; }
-		return 0;
-	}
-
-	function _createLink(href, target, textContent) {
-		var a = document.createElement("a");
-		a.href = href;
-		a.target = target;
-		a.classList.add("targetSelector");
-		a.textContent = textContent;
-		return a;
-	}
-
-	/**
-	 * @name orion.PageLinks
-	 * @class Utilities for reading <code>orion.page.link</code> services.
-	 * @description Utilities for reading <code>orion.page.link</code> services.
-	 */
-	return {
-		getPageLinksInfo: getPageLinksInfo,
-		getOrionHome: getOrionHome
-	};
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2011,2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-/*global window define orion URL*/
-/*browser:true*/
-
-define('orion/extensionCommands',["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/URL-shim", "orion/PageLinks", "i18n!orion/edit/nls/messages"],
-	function(require, Deferred, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil, _, PageLinks, messages){
-
-	/**
-	 * Utility methods
-	 * @class This class contains static utility methods for creating and managing commands from extension points
-	 * related to file management.
-	 * @name orion.extensionCommands
-	 */
-	var extensionCommandUtils  = {};
-	
-	// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-	var orionHome = PageLinks.getOrionHome();
-	
-	extensionCommandUtils._cloneItemWithoutChildren = function clone(item){
-	    if (item === null || typeof(item) !== 'object') { //$NON-NLS-0$
-	        return item;
-	      }
-	
-	    var temp = item.constructor(); // changed
-	
-	    for(var key in item){
-			if(key!=="children" && key!=="Children") { //$NON-NLS-1$ //$NON-NLS-0$
-				temp[key] = clone(item[key]);
-			}
-	    }
-	    return temp;
-	};
-	
-	/*
-	 * Helper function which returns an object containing all of the specified 
-	 * serviceReference's properties.
-	 * @name _getServiceProperties
-	 * @param {orion.serviceregistry.ServiceReference} serviceReference
-	 * @returns {Object} All the properties of the given <code>serviceReference</code>.
-	 */
-	function _getServiceProperties(serviceReference){
-		var info = {};
-		var propertyNames = serviceReference.getPropertyKeys();
-		propertyNames.forEach(function(propertyName) {
-			info[propertyName] = serviceReference.getProperty(propertyName);
-		});
-		return info;
-	}
-	
-	/**
-	 * Reads <code>"orion.navigate.openWith"</code> service contributions and returns corresponding <code>orion.navigate.command<code> extensions.
-	 * @name orion.extensionCommands._getOpenWithNavCommandExtensions
-	 * @function
-	 * @returns {Object[]} The nav command extensions.
-	 */
-	extensionCommandUtils._getOpenWithNavCommandExtensions = function(serviceRegistry, contentTypes) {
-		function getEditors() {
-			var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.editor"); //$NON-NLS-0$
-			var editors = [];
-			for (var i=0; i < serviceReferences.length; i++) {
-				var serviceRef = serviceReferences[i], id = serviceRef.getProperty("id"); //$NON-NLS-0$
-				editors.push({
-					id: id,
-					name: serviceRef.getProperty("name"), //$NON-NLS-0$
-					nameKey: serviceRef.getProperty("nameKey"), //$NON-NLS-0$
-					nls: serviceRef.getProperty("nls"), //$NON-NLS-0$
-					uriTemplate: serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate"), //$NON-NLS-1$ //$NON-NLS-0$
-					validationProperties: serviceRef.getProperty("validationProperties") || [] //$NON-NLS-0$
-				});
-			}
-			return editors;
-		}
-
-		function getEditorOpenWith(serviceRegistry, editor) {
-			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith"); //$NON-NLS-0$
-			var types = [];
-			var excludedTypes = [];
-			for (var i=0; i < openWithReferences.length; i++) {
-				var ref = openWithReferences[i];
-				if (ref.getProperty("editor") === editor.id) { //$NON-NLS-0$
-					var ct = ref.getProperty("contentType"); //$NON-NLS-0$
-					if (ct instanceof Array) {
-						types = types.concat(ct);
-					} else if (ct !== null && typeof ct !== "undefined") { //$NON-NLS-0$
-						types.push(ct);
-					}
-					
-					var excludes = ref.getProperty("excludedContentTypes"); //$NON-NLS-0$
-					if (excludes instanceof Array) {
-						excludedTypes = excludedTypes.concat(excludes);
-					} else if ((excludes !== null) && (typeof excludes !== "undefined")) { //$NON-NLS-0$
-						excludedTypes.push(excludes);
-					}
-				}
-			}
-			if (0 === types.length) {
-				types = null;
-			}
-			if (0 === excludedTypes.length) {
-				excludedTypes = null;
-			}
-			return {contentTypes: types, excludedContentTypes: excludedTypes};
-		}
-		function getDefaultEditor(serviceRegistry) {
-			var defaultEditor = null;
-			var defaultOpenWithRefs = serviceRegistry.getServiceReferences("orion.navigate.openWith.default"); //$NON-NLS-0$
-			if (0 < defaultOpenWithRefs.length) {
-				defaultEditor = _getServiceProperties(defaultOpenWithRefs[0]);
-			}
-			return defaultEditor;
-		}
-		
-		var editors = getEditors(), defaultEditor = getDefaultEditor(serviceRegistry);
-		var fileCommands = [];
-
-		for (var i=0; i < editors.length; i++) {
-			var editor = editors[i];
-			var isDefaultEditor = (defaultEditor && defaultEditor.editor === editor.id);
-			var editorContentTypeInfo = getEditorOpenWith(serviceRegistry, editor);
-			var editorContentTypes = editorContentTypeInfo.contentTypes;
-			var excludedContentTypes = editorContentTypeInfo.excludedContentTypes;
-			var properties = {
-				name: editor.name || editor.id,
-				nameKey: editor.nameKey,
-				id: "eclipse.openWithCommand." + editor.id, //$NON-NLS-0$
-				contentType: editorContentTypes,
-				excludedContentTypes: excludedContentTypes,
-				uriTemplate: editor.uriTemplate,
-				nls: editor.nls,
-				forceSingleItem: true,
-				isEditor: (isDefaultEditor ? "default": "editor"), // Distinguishes from a normal fileCommand //$NON-NLS-1$ //$NON-NLS-0$
-				validationProperties: editor.validationProperties
-			};
-			fileCommands.push({properties: properties, service: {}});
-		}
-		return fileCommands;
-	};
-	
-	/**
-	 * Create a validator for a given set of service properties.  The validator should be able to 
-	 * validate a given item using the "contentType" and "validationProperties" service properties.
-	 * @name orion.extensionCommands._makeValidator
-	 * @function
-	 */
-	extensionCommandUtils._makeValidator = function(info, serviceRegistry, contentTypes, validationItemConverter) {
-		function checkItem(item, key, match, validationProperty, validator) {
-			var valid = false;
-			var value;
-			// Match missing property
-			if (key.charAt(0) === "!") { //$NON-NLS-0$
-				return (typeof item[key.substring(1)] === "undefined"); //$NON-NLS-0$
-			}
-			// item has the specified property
-			if (typeof(item[key]) !== "undefined") { //$NON-NLS-0$
-				if (typeof(match) === "undefined") {  //$NON-NLS-0$ // value doesn't matter, just the presence of the property is enough				if (!match) {  // value doesn't matter, just the presence of the property is enough
-					value = item[key];
-					valid = true;
-				} else if (typeof(match) === 'string') {  // the value is a regular expression that should match some string //$NON-NLS-0$
-					if (!typeof(item[key] === 'string')) { //$NON-NLS-0$
-						// can't pattern match on a non-string
-						return false;
-					}
-					if (validationProperty.variableName) {
-						var patternMatch = new RegExp(match).exec(item[key]);
-						if (patternMatch) {
-							var firstMatch = patternMatch[0];
-							if (validationProperty.variableMatchPosition === "before") { //$NON-NLS-0$
-								value = item[key].substring(0, patternMatch.index);
-							} else if (validationProperty.variableMatchPosition === "after") { //$NON-NLS-0$
-								value = item[key].substring(patternMatch.index + firstMatch.length);
-							} else if (validationProperty.variableMatchPosition === "only") { //$NON-NLS-0$
-								value = firstMatch;
-							} else {  // "all"
-								value = item[key];
-							}
-							valid = true;
-						}
-					} else {
-						return new RegExp(match).test(item[key]);
-					}
-				} else {
-					if (item[key] === match) {
-						value = item[key];
-						valid = true;
-					}
-				}
-				// now store any variable values and look for replacements
-				if (valid && validationProperty.variableName) {
-					// store the variable values in the validator, keyed by variable name.  Also remember which item this value applies to.
-					validator[validationProperty.variableName] = value;
-					validator.itemCached = item;
-					if (validationProperty.replacements) {
-						for (var i=0; i<validationProperty.replacements.length; i++) {
-							var invalid = false;
-							if (validationProperty.replacements[i].pattern) {	
-								var from = validationProperty.replacements[i].pattern;
-								var to = validationProperty.replacements[i].replacement || "";
-								validator[validationProperty.variableName] = validator[validationProperty.variableName].replace(new RegExp(from), to);
-							} else {
-								invalid = true;
-							}
-							if (invalid) {
-								window.console.log("Invalid replacements specified in validation property.  " + validationProperty.replacements[i]); //$NON-NLS-0$
-							}
-						}
-					}
-				}
-				return valid;
-			}
-			return false;
-		}
-		
-		function matchSinglePattern(item, propertyName, validationProperty, validator){
-			var value = validationProperty.match;
-			var key, keyLastSegments;
-			if (propertyName.indexOf("[") === 0) { //$NON-NLS-0$
-				if(propertyName.indexOf("]")<0){
-					return false;
-				}
-				if(!Array.isArray(item)){
-					return false;
-				}
-				key = propertyName.replace("[", "").replace("]", "");
-				for(var i=0; i<item.length; i++){
-					if (matchSinglePattern(item[i], key, validationProperty, validator)) {
-						return true;
-					}
-				}
-				
-			} else if (propertyName.indexOf("|") >= 0) { //$NON-NLS-0$
-				// the pipe means that any one of the piped properties can match
-				key = propertyName.substring(0, propertyName.indexOf("|")); //$NON-NLS-0$
-				keyLastSegments = propertyName.substring(propertyName.indexOf("|")+1); //$NON-NLS-0$
-				// if key matches, we can stop.  No match is not a failure, look in the next segments.
-				if (matchSinglePattern(item, key, validationProperty, validator)) {
-					return true;
-				} else {
-					return matchSinglePattern(item, keyLastSegments, validationProperty, validator);
-				}
-			} else if (propertyName.indexOf(":") >= 0) { //$NON-NLS-0$
-				// the colon is used to drill into a property
-				key = propertyName.substring(0, propertyName.indexOf(":")); //$NON-NLS-0$
-				keyLastSegments = propertyName.substring(propertyName.indexOf(":")+1); //$NON-NLS-0$
-				// must have key and then check the next value
-				if (item[key]) {
-					return matchSinglePattern(item[key], keyLastSegments, validationProperty, validator);
-				} else {
-					return false;
-				}
-			} else {
-				// we are checking a single property
-				return checkItem(item, propertyName, value, validationProperty, validator);
-			}
-		}
-		
-		function validateSingleItem(item, contentTypes, validator){
-			// first validation properties
-			if (validator.info.validationProperties) {
-				for (var i=0; i<validator.info.validationProperties.length; i++) {
-					var validationProperty = validator.info.validationProperties[i];
-					if (typeof(validationProperty.source) !== "undefined") { //$NON-NLS-0$
-						var matchFound = matchSinglePattern(item, validationProperty.source, validationProperty, validator);
-						if (!matchFound){
-							return false;
-						} 
-					} else {
-						window.console.log("Invalid validationProperties in " + info.id + ".  No source property specified."); //$NON-NLS-1$ //$NON-NLS-0$
-						return false;
-					}
-				}
-			}
-			// now content types
-			var showCommand = true;
-			var contentType = null;
-			if (validator.info.excludedContentTypes && contentTypes) {
-				contentType = mContentTypes.getFilenameContentType(item.Name, contentTypes);
-				if (contentType) {
-					showCommand = validator.info.excludedContentTypes.every(function(excludedContentType){
-						var filter = excludedContentType.replace(/([*?])/g, ".$1");	//$NON-NLS-0$ //convert user input * and ? to .* and .?
-						if (-1 !== contentType.id.search(filter)) {
-							// found a match, return false thereby hiding this command
-							return false;
-						}
-						return true;
-					});
-				}
-			}
-			
-			if (showCommand && validator.info.contentType && contentTypes) {
-				// the presence of validator.info.contentType means that we only 
-				// want to show the command if the contentType matches
-				showCommand = false;
-				contentType = mContentTypes.getFilenameContentType(item.Name, contentTypes);
-				if (contentType) {
-					for (var i=0; i<validator.info.contentType.length; i++) {
-						if (contentType.id === validator.info.contentType[i]) {
-							showCommand = true;
-							break;
-						}
-					}
-				}
-			}
-			
-			return showCommand;
-		}
-	
-		var validator = {info: info};
-		validator.validationFunction =  function(items){
-			if (typeof validationItemConverter === "function") { //$NON-NLS-0$
-				items = validationItemConverter.call(this, items);
-			}
-			if (items) {
-				if (Array.isArray(items)){
-					if ((this.info.forceSingleItem || this.info.uriTemplate) && items.length !== 1) {
-						return false;
-					}
-					if (items.length < 1){
-						return false;
-					}
-				} else {
-					items = [items];
-				}
-				
-				for (var i=0; i<items.length; i++){
-					if(!validateSingleItem(items[i], contentTypes, this)){
-						return false;
-					}
-				}
-				return true;
-			}
-			return false;
-		};
-		validator.generatesURI = function() {
-			return !!this.info.uriTemplate;
-		};
-		
-		validator.getURI = function(item) {
-			if (this.info.uriTemplate) {
-				var variableExpansions = {};
-				// we need the properties of the item
-				for (var property in item){
-					if(Object.prototype.hasOwnProperty.call(item, property)){
-						variableExpansions[property] = item[property];
-					}
-				}
-				// now we need the variable expansions collected during validation.  
-				if (this.info.validationProperties) {
-					for (var i=0; i<this.info.validationProperties.length; i++) {
-						var validationProperty = this.info.validationProperties[i];
-						if (validationProperty.source && validationProperty.variableName) {
-							// we may have just validated this item.  If so, we don't need to recompute the variable value.
-							var alreadyCached = this.itemCached === item && this[validationProperty.variableName];
-							if (!alreadyCached) {
-								matchSinglePattern(item, validationProperty.source, validationProperty, this);
-							}
-							if (!item[validationProperty.variableName]) {
-								variableExpansions[validationProperty.variableName] = this[validationProperty.variableName];
-							} else {
-								window.console.log("Variable name " + validationProperty.variableName + " in the extension " + this.info.id + " conflicts with an existing property in the item metadata."); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							}
-						}
-					}
-				}
-				// special properties.  Should already be in metadata.  See bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-				variableExpansions.OrionHome = orionHome;
-				var uriTemplate = new URITemplate(this.info.uriTemplate);
-				return uriTemplate.expand(variableExpansions);
-			} 
-			return null;
-		};
-		return validator;
-	};
-	
-	/**
-	 * Helper function which returns the id from an info object.
-	 */
-	function getIdFromInfo(info) {
-		return info.id || info.name
-	}
-	
-	// Turns an info object containing the service properties and the service (or reference) into Command options.
-	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry, contentTypesMap, /**boolean*/ createNavigateCommandCallback, /**optional function**/ validationItemConverter) {
-		
-		var deferred = new Deferred();
-		
-		function enhanceCommandOptions(commandOptions, deferred){
-			var validator = extensionCommandUtils._makeValidator(info, serviceRegistry, contentTypesMap, validationItemConverter);
-			commandOptions.visibleWhen = validator.validationFunction.bind(validator);
-			
-			if (createNavigateCommandCallback) {
-				if (validator.generatesURI.bind(validator)()) {
-					commandOptions.hrefCallback = function(data){
-						var item = Array.isArray(data.items) ? data.items[0] : data.items;
-						return validator.getURI.bind(validator)(item);
-					};
-				} else {
-					var inf = info;
-					commandOptions.callback = function(data){
-						var shallowItemsClone;
-						if (inf.forceSingleItem) {
-							var item = Array.isArray(data.items) ? data.items[0] : data.items;
-							shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(item);
-						} else {
-							if (Array.isArray(data.items)) {
-								shallowItemsClone = [];
-								for (var j = 0; j<data.items.length; j++) {
-									shallowItemsClone.push(extensionCommandUtils._cloneItemWithoutChildren(data.items[j]));
-								}
-							} else {
-								shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(data.items);
-							}
-						}
-						if(serviceRegistry){
-							var progress = serviceRegistry.getService("orion.page.progress");
-						}
-						if(serviceOrReference.run) {
-							if(progress){
-								progress.progress(serviceOrReference.run(shallowItemsClone), "Running command: " + commandOptions.name);
-							}else {
-								serviceOrReference.run(shallowItemsClone);
-							}
-						} else if (serviceRegistry) {
-							if(progress){
-								progress.progress(serviceRegistry.getService(serviceOrReference).run(shallowItemsClone), "Running command: " + commandOptions.name);
-							} else {
-								serviceRegistry.getService(serviceOrReference).run(shallowItemsClone);
-							}
-						}
-					};
-				}  // otherwise the caller will make an appropriate callback for the extension
-			}
-			deferred.resolve(commandOptions);
-		}
-		
-		if(info.nls){
-			i18nUtil.getMessageBundle(info.nls).then(function(commandMessages){
-				var commandOptions = {
-						name: info.nameKey ? commandMessages[info.nameKey] : info.name,
-						image: info.image,
-						id: getIdFromInfo(info),
-						tooltip: info.tooltipKey ? commandMessages[info.tooltipKey] : info.tooltip,
-						isEditor: info.isEditor,
-						showGlobally: info.showGlobally
-					};
-				enhanceCommandOptions(commandOptions, deferred);
-			});
-		} else {
-			var commandOptions = {
-					name: info.name,
-					image: info.image,
-					id: getIdFromInfo(info),
-					tooltip: info.tooltip,
-					isEditor: info.isEditor,
-					showGlobally: info.showGlobally
-			};
-			enhanceCommandOptions(commandOptions, deferred);
-		}
-		
-		return deferred;
-	};
-
-	/**
-	 * Gets any "open with" commands in the given <code>commandRegistry</code>. If {@link #createAndPlaceFileCommandsExtension}, has not been called,
-	 * this returns an empty array.
-	 * @name orion.extensionCommands.getOpenWithCommands
-	 * @function
-	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to consult.
-	 * @returns {orion.commands.Command[]} All the "open with" commands added to the given <code>commandRegistry</code>.
-	 */
-	extensionCommandUtils.getOpenWithCommands = function(commandRegistry) {
-		var openWithCommands = [];
-		for (var commandId in commandRegistry._commandList) {
-			var command = commandRegistry._commandList[commandId];
-			if (command.isEditor) {
-				openWithCommands.push(command);
-			}
-		}
-		return openWithCommands;
-	};
-	
-	var contentTypesCache;
-
-	/**
-	 * Collects file commands from extensions, turns them into {@link orion.commands.Command}s, and adds the commands with the given <code>commandRegistry</code>.
-	 * @name orion.extensionCommands.createAndPlaceFileCommandsExtension
-	 * @function
-	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
-	 * @param {orion.commandregistry.CommandRegistry} commandRegistry
-	 * @param {String} toolbarId
-	 * @param {Number} position
-	 * @param {String} commandGroup
-	 * @param {Boolean} isNavigator
-	 * @param {Function} visibleWhen
-	 * @returns {orion.Promise}
-	 */
-	extensionCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandRegistry, toolbarId, position, commandGroup, isNavigator) {
-		var navCommands = (isNavigator ? "all" : undefined); //$NON-NLS-0$
-		var openWithCommands = !!isNavigator;
-		return extensionCommandUtils.createFileCommands(serviceRegistry, null, navCommands, openWithCommands, commandRegistry).then(function(fileCommands) {
-			if (commandGroup && (0 < fileCommands.length)) {
-				commandRegistry.addCommandGroup(toolbarId, "eclipse.openWith", 1000, messages["OpenWith"], commandGroup, null, null, null, "dropdownSelection"); ///$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.addCommandGroup(toolbarId, "eclipse.fileCommandExtensions", 1000, messages["Extensions"], commandGroup); //$NON-NLS-0$
-			}
-			fileCommands.forEach(function(command) {
-				var group = null;	
-				if (commandGroup) {
-					if (command.isEditor) {
-						group = commandGroup + "/eclipse.openWith"; //$NON-NLS-0$
-					} else {
-						group = commandGroup + "/eclipse.fileCommandExtensions"; //$NON-NLS-0$
-					}
-				}
-				
-				commandRegistry.registerCommandContribution(toolbarId, command.id, position, group); //$NON-NLS-0$
-			});
-			return {};
-		});
-	};
-		
-	/**
-	 * Reads file commands from extensions (<code>"orion.navigate.command"</code> and <code>"orion.navigate.openWith"</code>), and converts them into
-	 * instances of {@link orion.commands.Command}.
-	 * @name orion.extensionCommands.createFileCommands
-	 * @function
-	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
-	 * @param {orion.core.ContentTypeRegistry} [contentTypeRegistry] If not provided, will be obtained from the serviceRegistry.
-	 * @param {String} [includeNavCommands="global"] What kinds of <code>orion.navigate.command</code> contributions to include in the list of returned file commands.
-	 * Allowed values are:
-	 * <dl>
-	 * <dt><code>"all"</code></dt> <dd>Include all nav commands.</dd>
-	 * <dt><code>"global"</code></dt> <dd>Include only nav commands having the <code>forceSingleItem</code> and <code>showGlobally</code> flags.</dd>
-	 * <dt><code>"none"</code></dt> <dd>Include no nav commands.</dd>
-	 * </dl>
-	 * @param {Boolean} [includeOpenWithCommands=true] Whether to include commands derived from <code>orion.navigate.openWith</code> in the list of returned file commands.
-	 * @param {orion.commandregistry.CommandRegistry} commandRegistry
-	 * @returns {orion.Promise} A promise resolving to an {@link orion.commands.Command[]} giving an array of file commands.
-	 */
-	extensionCommandUtils.createFileCommands = function(serviceRegistry, contentTypeRegistry, includeFileCommands, includeOpenWithCommands, commandRegistry) {
-		includeFileCommands = (includeFileCommands === undefined) ? "global" : includeFileCommands;
-		includeOpenWithCommands = (includeOpenWithCommands === undefined) ? true : includeOpenWithCommands;
-
-		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
-		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
-		//
-		// The shape of the contributed commands is (for now):
-		// info - information about the command (object).
-		//		required attribute: name - the name of the command
-		//		required attribute: id - the id of the command
-		//		optional attribute: tooltip - the tooltip to use for the command
-		//      optional attribute: image - a URL to an image for the command
-		//      optional attribute: uriTemplate - a URI template that can be expanded to generate a URI appropriate for the item.
-		//      optional attribute: forceSingleItem - if true, then the service is only invoked when a single item is selected
-		//			and the item parameter to the run method is guaranteed to be a single item vs. an array.  When this is not true, 
-		//			the item parameter to the run method may be an array of items.
-		//      optional attribute: contentType - an array of content types for which this command is valid
-		//      optional attribute: validationProperties - an array of validation properties used to read the resource
-		//          metadata to determine whether the command is valid for the given resource.  Regular expression patterns are
-		//          supported as values in addition to specific values.
-		//          For example the validation property
-		//				[{source: "Git"}, {source: "Directory", match:"true"}]
-		//              specifies that the property "Git" must be present, and that the property "Directory" must be true.
-		// run - the implementation of the command (function).
-		//        arguments passed to run: (itemOrItems)
-		//          itemOrItems (object or array) - an array of items to which the item applies, or a single item if the info.forceSingleItem is true
-		//        the run function is assumed to perform all necessary action and the return is not used.
-		var fileCommands = [];
-		
-		if (!extensionCommandUtils._cachedFileCommands) {
-			extensionCommandUtils._createCachedFileCommands(serviceRegistry);
-		}
-		
-		//we have already created the file commands, only select applicable ones based on function parameters	
-		if (includeFileCommands === "all" || includeFileCommands === "global") { //$NON-NLS-1$ //$NON-NLS-0$
-			extensionCommandUtils._cachedFileCommands.forEach(function(fileCommand) {
-				var properties = fileCommand.properties;
-				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=402447
-				if ((includeFileCommands === "all") || (properties.forceSingleItem && properties.showGlobally)) { //$NON-NLS-0$
-					fileCommands.push(fileCommand);
-				}
-			});
-		}
-				
-		function getContentTypes() {
-			var contentTypes = serviceRegistry.getService("orion.core.contentTypeRegistry") || contentTypeRegistry;
-			return contentTypesCache || Deferred.when(contentTypes.getContentTypes(), function(ct) { //$NON-NLS-0$
-				contentTypesCache = ct;
-				return contentTypesCache;
-			});
-		}
-				
-		return Deferred.when(getContentTypes(), function() {
-			// If we are processing commands for the navigator, also include the open with command.  If we are not in the navigator, we only want the
-			// commands we processed before.
-			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=402447
-			if (includeOpenWithCommands) {
-				if (!extensionCommandUtils._cachedOpenWithExtensions) {
-					extensionCommandUtils._cachedOpenWithExtensions = extensionCommandUtils._getOpenWithNavCommandExtensions(serviceRegistry, contentTypesCache);
-				}
-				//add _cachedOpenWithExtensions to fileCommands
-				fileCommands = fileCommands.concat(extensionCommandUtils._cachedOpenWithExtensions);
-				commandRegistry._addedOpenWithCommands = includeOpenWithCommands;
-			}
-						
-			var commandDeferreds = fileCommands.map(function(fileCommand) {
-				var commandInfo = fileCommand.properties;
-				var service = fileCommand.service;
-				var cachedCommand = commandRegistry.findCommand(getIdFromInfo(commandInfo));
-				if (cachedCommand) {
-					return new Deferred().resolve(cachedCommand);
-				} else {
-					return extensionCommandUtils._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true).then(function(commandOptions) {
-						var command = new mCommands.Command(commandOptions);
-						commandRegistry.addCommand(command);
-						return command;
-					});
-				}
-			});
-			return Deferred.all(commandDeferreds, function(error) {
-				return {_error: error};
-			}).then(function(errorOrResultArray) {
-				return errorOrResultArray;
-			});
-		});
-	};
-
-	extensionCommandUtils._createCachedFileCommands = function(serviceRegistry) {
-		var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
-		extensionCommandUtils._cachedFileCommands = [];
-
-		for (var i=0; i<commandsReferences.length; i++) {
-			// Exclude any navigation commands themselves, since we are the navigator.
-			var id = commandsReferences[i].getProperty("id"); //$NON-NLS-0$
-			if (id !== "orion.navigateFromMetadata") { //$NON-NLS-0$
-				var service = serviceRegistry.getService(commandsReferences[i]);
-				var properties = _getServiceProperties(commandsReferences[i]);
-				extensionCommandUtils._cachedFileCommands.push({properties: properties, service: service});
-			}
-		}
-	};
-	
-	/**
-	 * Reads the cached non-openWith file commands from extensions, and 
-	 * returns an array containing their ids. If the cached commands haven't
-	 * been created an exception will be thrown.
-	 * 
-	 * @name orion.extensionCommands.getFileCommandIds
-	 * @function
-	 * @returns {Array} An array containing the {String} ids of the cached non-openWith file commands
-	 */
-	extensionCommandUtils.getFileCommandIds = function() {
-		var ids = [];
-		if (!extensionCommandUtils._cachedFileCommands) {
-			throw "extensionCommandUtils._cachedFileCommands is not initialized"; //$NON-NLS-0$
-		} else if (extensionCommandUtils._cachedFileCommands.length) {
-			ids = extensionCommandUtils._cachedFileCommands.map(function(command){
-				return command.properties.id;
-			});
-		}
-		return ids;
-	};
-	
-	/**
-	 * Reads <code>"orion.navigate.openWith"</code> extensions, and converts them into instances of {@link orion.commands.Command}.
-	 * @name orion.extensionCommands.createOpenWithCommands
-	 * @function
-	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
-	 * @param {orion.commandregistry.CommandRegistry} [commandRegistry]
-	 * @param {orion.core.ContentTypeRegistry} [contentTypeRegistry] If not provided, will be obtained from the serviceRegistry.
-	 * @returns {orion.Promise} A promise resolving to an {@link orion.commands.Command[]} giving an array of file commands.
-	 */
-	extensionCommandUtils.createOpenWithCommands = function(serviceRegistry, contentTypeService, commandRegistry) {
-		if (commandRegistry && commandRegistry._addedOpenWithCommands) {
-			// already processed by #createAndPlaceFileCommandsExtension
-			return new Deferred().resolve(extensionCommandUtils.getOpenWithCommands(commandRegistry));
-		}
-		return extensionCommandUtils.createFileCommands(serviceRegistry, contentTypeService, "none", true, commandRegistry);
-	};
-
-	return extensionCommandUtils;
 });
 
 /*******************************************************************************
@@ -12437,6 +11243,66 @@ define("orion/editor/eventTarget", [], function() { //$NON-NLS-0$
 		}
 	};
 	return {EventTarget: EventTarget};
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+/*global define */
+/*jslint browser:true regexp:false*/
+/**
+ * @name orion.regex
+ * @class Utilities for dealing with regular expressions.
+ * @description Utilities for dealing with regular expressions.
+ */
+define("orion/regex", [], function() { //$NON-NLS-0$
+	/**
+	 * @memberOf orion.regex
+	 * @function
+	 * @static
+	 * @description Escapes regex special characters in the input string.
+	 * @param {String} str The string to escape.
+	 * @returns {String} A copy of <code>str</code> with regex special characters escaped.
+	 */
+	function escape(str) {
+		return str.replace(/([\\$\^*\/+?\.\(\)|{}\[\]])/g, "\\$&"); //$NON-NLS-0$
+	}
+
+	/**
+	 * @memberOf orion.regex
+	 * @function
+	 * @static
+	 * @description Parses a pattern and flags out of a regex literal string.
+	 * @param {String} str The string to parse. Should look something like <code>"/ab+c/"</code> or <code>"/ab+c/i"</code>.
+	 * @returns {Object} If <code>str</code> looks like a regex literal, returns an object with properties
+	 * <code><dl>
+	 * <dt>pattern</dt><dd>{String}</dd>
+	 * <dt>flags</dt><dd>{String}</dd>
+	 * </dl></code> otherwise returns <code>null</code>.
+	 */
+	function parse(str) {
+		var regexp = /^\s*\/(.+)\/([gim]{0,3})\s*$/.exec(str);
+		if (regexp) {
+			return {
+				pattern : regexp[1],
+				flags : regexp[2]
+			};
+		}
+		return null;
+	}
+
+	return {
+		escape: escape,
+		parse: parse
+	};
 });
 
 /*******************************************************************************
@@ -32293,6 +31159,223 @@ define('orion/fileClient',['i18n!orion/navigate/nls/messages', "orion/Deferred",
 
 /*******************************************************************************
  * @license
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+/*jslint amd:true*/
+define('orion/contentTypes',[], function() {
+	var SERVICE_ID = "orion.core.contentTypeRegistry"; //$NON-NLS-0$
+	var EXTENSION_ID = "orion.core.contenttype"; //$NON-NLS-0$
+	var OLD_EXTENSION_ID = "orion.file.contenttype"; // backwards compatibility //$NON-NLS-0$
+
+	/**
+	 * @name orion.core.ContentType
+	 * @class Represents a content type known to Orion.
+	 * @property {String} id Unique identifier of this ContentType.
+	 * @property {String} name User-readable name of this ContentType.
+	 * @property {String} extends Optional; Gives the ID of another ContentType that is this one's parent.
+	 * @property {String[]} extension Optional; List of file extensions characterizing this ContentType. Extensions are not case-sensitive.
+	 * @property {String[]} filename Optional; List of filenames characterizing this ContentType.
+	 */
+
+	function contains(array, item) {
+		return array.indexOf(item) !== -1;
+	}
+
+	function getFilenameContentType(/**String*/ filename, contentTypes) {
+		function winner(best, other, filename, extension) {
+			var nameMatch = other.filename.indexOf(filename) >= 0;
+			var extMatch = contains(other.extension, extension.toLowerCase());
+			if (nameMatch || extMatch) {
+				if (!best || (nameMatch && contains(best.extension, extension.toLowerCase()))) {
+					return other;
+				}
+			}
+			return best;
+		}
+		if (typeof filename !== "string") { //$NON-NLS-0$
+			return null;
+		}
+		var extension = filename && filename.split(".").pop(); //$NON-NLS-0$
+		var best = null;
+		for (var i=0; i < contentTypes.length; i++) {
+			var type = contentTypes[i];
+			if (winner(best, type, filename, extension) === type) {
+				best = type;
+			}
+		}
+		return best;
+	}
+
+	function array(obj) {
+		if (obj === null || typeof obj === "undefined") { return []; } //$NON-NLS-0$
+			return (Array.isArray(obj)) ? obj : [obj];
+		}
+
+	function arrayLowerCase(obj) {
+		return array(obj).map(function(str) { return String.prototype.toLowerCase.call(str); });
+	}
+
+	function process(contentTypeData) {
+		return {
+			id: contentTypeData.id,
+			name: contentTypeData.name,
+			image: contentTypeData.image,
+			imageClass: contentTypeData.imageClass,
+			"extends": contentTypeData["extends"], //$NON-NLS-1$ //$NON-NLS-0$
+			extension: arrayLowerCase(contentTypeData.extension),
+			filename: array(contentTypeData.filename)
+		};
+	}
+
+	function buildMap(contentTypeDatas) {
+		var map = Object.create(null);
+		contentTypeDatas.map(process).forEach(function(contentType) {
+			if (!Object.prototype.hasOwnProperty.call(map, contentType.id)) {
+				map[contentType.id] = contentType;
+			}
+		});
+		return map;
+	}
+
+	function buildMapFromServiceRegistry(serviceRegistry) {
+		var serviceReferences = serviceRegistry.getServiceReferences(EXTENSION_ID).concat(
+				serviceRegistry.getServiceReferences(OLD_EXTENSION_ID));
+		var contentTypeDatas = [];
+		for (var i=0; i < serviceReferences.length; i++) {
+			var serviceRef = serviceReferences[i], types = array(serviceRef.getProperty("contentTypes")); //$NON-NLS-0$
+			for (var j=0; j < types.length; j++) {
+				contentTypeDatas.push(types[j]);
+			}
+		}
+		return buildMap(contentTypeDatas);
+	}
+
+	/**
+	 * @name orion.core.ContentTypeRegistry
+	 * @class A service for querying {@link orion.core.ContentType}s.
+	 * @description A registry that provides information about {@link orion.core.ContentType}s.
+	 *
+	 * <p>If a {@link orion.serviceregistry.ServiceRegistry} is available, clients should request the service with
+	 * objectClass <code>"orion.core.contentTypeRegistry"</code> from the registry rather than instantiate this 
+	 * class directly. This constructor is intended for use only by page initialization code.</p>
+	 *
+	 * @param {orion.serviceregistry.ServiceRegistry|orion.core.ContentType[]} dataSource The service registry
+	 * to use for looking up available content types and for registering this ContentTypeRegistry.
+	 * 
+	 * <p>Alternatively, an array of ContentType data may be passed instead, which allows clients to use this
+	 * ContentTypeRegistry without a service registry.</p>
+	 */
+	function ContentTypeRegistry(dataSource) {
+		if (dataSource && dataSource.registerService) {
+			this.serviceRegistry = dataSource;
+			this.map = buildMapFromServiceRegistry(dataSource);
+			dataSource.registerService(SERVICE_ID, this);
+		} else if (Array.isArray(dataSource)) {
+			this.serviceRegistry = null;
+			this.map = buildMap(dataSource);
+		} else {
+			throw new Error("Invalid parameter"); //$NON-NLS-0$
+		}
+	}
+	ContentTypeRegistry.prototype = /** @lends orion.core.ContentTypeRegistry.prototype */ {
+		/**
+		 * Gets all the ContentTypes in the registry.
+		 * @returns {orion.core.ContentType[]} An array of all registered ContentTypes.
+		 */
+		getContentTypes: function() {
+			var map = this.getContentTypesMap();
+			var types = [];
+			for (var type in map) {
+				if (Object.prototype.hasOwnProperty.call(map, type)) {
+					types.push(map[type]);
+				}
+			}
+			return types;
+		},
+		/**
+		 * Gets a map of all ContentTypes.
+		 * @return {Object} A map whose keys are ContentType IDs and values are the {@link orion.core.ContentType} having that ID.
+		 */
+		getContentTypesMap: function() {
+			return this.map;
+		},
+		/**
+		 * Looks up the ContentType for a file or search result, given the metadata.
+		 * @param {Object} fileMetadata Metadata for a file or search result.
+		 * @returns {orion.core.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
+		 */
+		getFileContentType: function(fileMetadata) {
+			return getFilenameContentType(fileMetadata.Name, this.getContentTypes());
+		},
+		/**
+		 * Looks up the ContentType, given a filename.
+		 * @param {String} filename The filename.
+		 * @returns {orion.core.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
+		 */
+		getFilenameContentType: function(filename) {
+			return getFilenameContentType(filename, this.getContentTypes());
+		},
+		/**
+		 * Gets a ContentType by ID.
+		 * @param {String} id The ContentType ID.
+		 * @returns {orion.core.ContentType} The ContentType having the given ID, or <code>null</code>.
+		 */
+		getContentType: function(id) {
+			return this.map[id] || null;
+		},
+		/**
+		 * Determines whether a ContentType is an extension of another.
+		 * @param {orion.core.ContentType|String} contentTypeA ContentType or ContentType ID.
+		 * @param {orion.core.ContentType|String} contentTypeB ContentType or ContentType ID.
+		 * @returns {Boolean} Returns <code>true</code> if <code>contentTypeA</code> equals <code>contentTypeB</code>,
+		 *  or <code>contentTypeA</code> descends from <code>contentTypeB</code>.
+		 */
+		isExtensionOf: function(contentTypeA, contentTypeB) {
+			contentTypeA = (typeof contentTypeA === "string") ? this.getContentType(contentTypeA) : contentTypeA; //$NON-NLS-0$
+			contentTypeB = (typeof contentTypeB === "string") ? this.getContentType(contentTypeB) : contentTypeB; //$NON-NLS-0$
+			if (!contentTypeA || !contentTypeB) { return false; }
+			if (contentTypeA.id === contentTypeB.id) { return true; }
+			else {
+				var parent = contentTypeA, seen = {};
+				while (parent && (parent = this.getContentType(parent['extends']))) { //$NON-NLS-0$
+					if (parent.id === contentTypeB.id) { return true; }
+					if (seen[parent.id]) { throw new Error("Cycle: " + parent.id); } //$NON-NLS-0$
+					seen[parent.id] = true;
+				}
+			}
+			return false;
+		},
+		/**
+		 * Similar to {@link #isExtensionOf}, but works on an array of contentTypes.
+		 * @param {orion.core.ContentType|String} contentType ContentType or ContentType ID.
+		 * @param {orion.core.ContentType[]|String[]} contentTypes Array of ContentTypes or ContentType IDs.
+		 * @returns {Boolean} <code>true</code> if <code>contentType</code> equals or descends from any of the
+		 * ContentTypes in <code>contentTypes</code>.
+		 */
+		isSomeExtensionOf: function(contentType, contentTypes) {
+			for (var i=0; i < contentTypes.length; i++) {
+				if (this.isExtensionOf(contentType, contentTypes[i])) {
+					return true;
+				}
+			}
+			return false;
+		}
+	};
+	return {
+		ContentTypeRegistry: ContentTypeRegistry,
+		getFilenameContentType: getFilenameContentType
+	};
+});
+
+/*******************************************************************************
+ * @license
  * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
@@ -32320,9 +31403,10 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 	var PUNCTUATION_SECTION_BEGIN = ".begin"; //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
-	
-	var MAX_CHAR_COUNT = 170;
-	
+
+	var CR = "\r"; //$NON-NLS-0$
+	var NEWLINE = "\n"; //$NON-NLS-0$
+
 	var eolRegex = /$/;
 	var captureReferenceRegex = /\\(\d)/g;
 	var linebreakRegex = /(.*)(?:[\r\n]|$)/g;
@@ -32333,20 +31417,41 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		var index = startIndex;
 		var initialLastIndex = regex.lastIndex;
 		linebreakRegex.lastIndex = startIndex;
+
 		var currentLine = linebreakRegex.exec(text);
-		while (currentLine && currentLine.index < text.length) {
-			regex.lastIndex = 0;
-			/* skip excessively long lines that will be too slow to evaluate with regex */
-			if (currentLine[1].length < MAX_CHAR_COUNT) {
-				var result = regex.exec(currentLine[1]);
-				if (result) {
-					result.index += index;
-					regex.lastIndex = initialLastIndex;
-					return result;
-				}
+		/*
+		 * Processing of the first line is treated specially, as it may not start at the beginning of a logical line, but
+		 * regex's may be dependent on matching '^'.  To resolve this, compute the full line corresponding to the start
+		 * of the text, even if it begins prior to startIndex, and adjust the regex's lastIndex accordingly to begin searching
+		 * for matches at the correct location.
+		 */
+		var lineString, indexAdjustment;
+		regex.lastIndex = 0;
+		if (currentLine) {
+			var lineStart = currentLine.index;
+			var char = text.charAt(lineStart);
+			while (0 <= lineStart && char !== NEWLINE && char !== CR) {
+				lineStart--;
+				char = text.charAt(lineStart);
 			}
+			lineString = text.substring(lineStart + 1, currentLine.index + currentLine[1].length);
+			regex.lastIndex = indexAdjustment = currentLine.index - lineStart - 1;
+		}
+		while (currentLine && currentLine.index < text.length) {
+			var result = regex.exec(lineString);
+			if (result) {
+				result.index += index;
+				result.index -= indexAdjustment;
+				regex.lastIndex = initialLastIndex;
+				return result;
+			}
+			indexAdjustment = 0;
 			index += currentLine[0].length;
 			currentLine = linebreakRegex.exec(text);
+			if (currentLine) {
+				lineString = currentLine[1];
+				regex.lastIndex = 0;
+			}
 		}
 		regex.lastIndex = initialLastIndex;
 		return null;
@@ -33750,12 +32855,12 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "keyword.control.js" //$NON-NLS-0$
 			}, {
-				begin: "'(?:\\\\.|[^'\\n])*\\\\\\n", //$NON-NLS-0$
-				end: "(?:(?:\\\\.|[^'\\n])*\\\\\\n)*(?:\\n|(?:\\\\.|[^'\\n])*'?)", //$NON-NLS-0$
+				begin: "'(?:\\\\.|[^\\\\'])*\\\\$", //$NON-NLS-0$
+				end: "^(?:$|(?:\\\\.|[^\\\\'])*('|[^\\\\]$))", //$NON-NLS-0$
 				name: "string.quoted.single.js" //$NON-NLS-0$
 			}, {
-				begin: '"(?:\\\\.|[^"\\n])*\\\\\\n', //$NON-NLS-0$
-				end: '(?:(?:\\\\.|[^"\\n])*\\\\\\n)*(?:\\n|(?:\\\\.|[^"\\n])*"?)', //$NON-NLS-0$
+				begin: '"(?:\\\\.|[^\\\\"])*\\\\$', //$NON-NLS-0$
+				end: '^(?:$|(?:\\\\.|[^\\\\"])*("|[^\\\\]$))', //$NON-NLS-0$
 				name: "string.quoted.double.js" //$NON-NLS-0$
 			}
 		]
