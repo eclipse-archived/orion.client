@@ -18,11 +18,11 @@ define([
 		'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
 		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html',
 		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 'orion/widgets/input/GroupedContent',
-		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient'
+		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu'
 	],
 	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding,
 		mBreadcrumbs, lib, mSplitter, mDropdown, mTooltip, mContentTypes, URITemplate, mKeyAssist, PageUtil, mThemePreferences, mThemeData, Deferred,
-		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent, util, mCustomGlobalCommands, mFileClient) {
+		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent, util, mCustomGlobalCommands, mFileClient, SideMenu) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 *
@@ -112,6 +112,14 @@ define([
 			var navDropDown = new DropDownMenu('primaryNav', 'centralNavigation');
 			var groupedContent = new GroupedContent();
 			navDropDown.addContent(groupedContent.getContentPane());
+
+			var sideMenu = new SideMenu();
+			sideMenu.setSideMenu();
+
+			sideMenu.addMenuItem( "core-sprite-edit", "http://www.google.com" );
+			sideMenu.addMenuItem( "core-sprite-deploy", "http://www.bbc.co.uk" );
+
+			sideMenu.setActiveMenuItem( "http://www.bbc.co.uk" );
 		},
 		afterGenerateBanner: mCustomGlobalCommands.afterGenerateBanner || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {}
 	};
