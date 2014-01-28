@@ -2496,7 +2496,9 @@ define('orion/breadcrumbs',['require', 'orion/webui/littlelib'], function (requi
 		            }
 		
 		            collection.forEach(function (parent) {
-		
+						if(parent.skip) {
+							return;
+						}
 		                if (firstSegmentName) {
 		                    segmentName = firstSegmentName;
 		                    firstSegmentName = null;
@@ -2567,6 +2569,9 @@ define('orion/breadcrumbs',['require', 'orion/webui/littlelib'], function (requi
         },
 
         finalSegment: function (seg, firstSegmentName) {
+        	if(this._resource.skip) {
+        		return;
+        	}
             var name;
             if (firstSegmentName) {
                 name = firstSegmentName;
@@ -2589,11 +2594,13 @@ define('orion/breadcrumbs',['require', 'orion/webui/littlelib'], function (requi
             if (segment) {
                 this.append(segment);
 
-                if (this._resource && this._resource.Parents) {
+                if (this._resource && this._resource.Parents && !this._resource.skip) {
                     segment.classList.add("breadcrumb"); //$NON-NLS-0$
                     this.addDivider();
                 } else { // we are at the root.  Get rid of any href since we are already here
-                    segment.href = "";
+                    if(!this._resource.skip) {
+                    	segment.href = "";
+                    }
                     segment.classList.add("currentLocation"); //$NON-NLS-0$
                     return;
                 }
@@ -3970,6 +3977,13 @@ define('orion/webui/treetable',['i18n!orion/nls/messages', 'orion/webui/littleli
 			if(this._onCollapse){
 				this._onCollapse(row._item);
 			}
+		},
+		
+		/**
+		 * Returns this tree's indentation increment
+		 */
+		getIndent: function() {
+			return this._indent;
 		}
 	};  // end prototype
 	TableTree.prototype.constructor = TableTree;
@@ -4403,18 +4417,28 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 	/**
 	 * @name orion.uiUtils.getUserText
 	 * @function
-	 * @param {String} id
-	 * @param {Element} refNode
-	 * @param {Boolean} shouldHideRefNode
-	 * @param {String} initialText
-	 * @param {Function} onComplete
-	 * @param {Function} onEditDestroy
-	 * @param {String} promptMessage
-	 * @param {String} selectTo
-	 * @param {Boolean} isInitialValid
+	 * @param {Object} options The options object
+	 * @param {String} options.id
+	 * @param {Element} options.refNode
+	 * @param {Boolean} options.shouldHideRefNode
+	 * @param {String} options.initialText
+	 * @param {Function} options.onComplete
+	 * @param {Function} options.onEditDestroy
+	 * @param {String} options.selectTo
+	 * @param {Boolean} options.isInitialValid
+	 * @param {Boolean} options.insertAsChild
 	 */
-	function getUserText(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy, promptMessage, selectTo, isInitialValid) {
-		/** @return {Function} function(event) */
+	function getUserText(options) {
+		var id = options.id;
+		var refNode = options.refNode;
+		var shouldHideRefNode = options.shouldHideRefNode;
+		var initialText = options.initialText;
+		var onComplete = options.onComplete;
+		var onEditDestroy = options.onEditDestroy;
+		var selectTo = options.selectTo;
+		var isInitialValid = options.isInitialValid;
+		var insertAsChild = options.insertAsChild;
+		
 		var done = false;
 		var handler = function(isKeyEvent) {
 			return function(event) {
@@ -4465,7 +4489,11 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 		var editBox = document.createElement("input"); //$NON-NLS-0$
 		editBox.id = id;
 		editBox.value = initialText || "";
-		refNode.parentNode.insertBefore(editBox, refNode.nextSibling);
+		if (insertAsChild) {
+			refNode.appendChild(editBox);
+		} else {
+			refNode.parentNode.insertBefore(editBox, refNode.nextSibling);
+		}
 		editBox.classList.add("userEditBoxPrompt"); //$NON-NLS-0$
 		if (shouldHideRefNode) {
 			refNode.style.display = "none"; //$NON-NLS-0$
@@ -7235,7 +7263,7 @@ exports.Explorer = (function() {
 			}
 		},
 		
-		makeNewItemPlaceHolder: function(item, domId, column_no) {
+		makeNewItemPlaceHolder: function(item, domId, column_no, insertAfter) {
 			// we want to popup the name prompt underneath the parent item.
 			var refNode = this.getRow(item);
 			var tempNode;
@@ -7255,7 +7283,17 @@ exports.Explorer = (function() {
 				var td = document.createElement("td"); //$NON-NLS-0$
 				td.id = domId+"placeHolderCol"; //$NON-NLS-0$
 				tr.appendChild(td);
-				refNode.appendChild(tr);
+				if (insertAfter) {
+					// insert tr after refNode, i.e. right before refNode's nextSibling in the parent
+					var parentNode = refNode.parentNode;
+					var nextSibling = refNode.nextSibling;
+					parentNode.insertBefore(tr, nextSibling);
+					
+					var parentIndentation = parseInt(refNode.firstChild.style.paddingLeft); //refNode is a <tr>, we want the indentation of its <td>
+					td.style.paddingLeft = (this.myTree.getIndent() + parentIndentation) + "px";
+				} else {
+					refNode.appendChild(tr);
+				}
 				tempNode = lib.node(domId+"placeHolderRow"); //$NON-NLS-0$
 				refNode = lib.node(domId+"placeHolderCol"); //$NON-NLS-0$
 				if (tempNode && refNode) {
@@ -32024,7 +32062,7 @@ define('orion/fileClient',['i18n!orion/navigate/nls/messages', "orion/Deferred",
 			});
 			
 		},
-		 
+				
 		/**
 		 * Copies a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to copy.
@@ -34940,6 +34978,7 @@ define('orion/widgets/browse/fileBrowser',[
 		this._preferences = options.preferences;//Optional
 		this.rootName = options.rootName;
 		this._showBranch = options.showBranch;
+		this._showComponent = options.showComponent;
 		this._init(options);
 	}
 	objects.mixin(FileBrowser.prototype, {
@@ -34955,26 +34994,50 @@ define('orion/widgets/browse/fileBrowser',[
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				var metadata = evt.metadata;
-				if(this.branches && this._branchSelector){
-					var activeBranchName = this.branches[0].Name;
+				if(this._branches && this._branchSelector){
+					var activeBranchName = this._branches[0].Name;
+					this._activeBranchLocation = this._branches[0].Location;
 					var newLocation = null;
+					var secondLevelChildren = false;
 					if(metadata.Parents) {
 						if(metadata.Parents.length > 0) {
 							activeBranchName = metadata.Parents[metadata.Parents.length-1].Name;
+							this._activeBranchLocation = metadata.Parents[metadata.Parents.length-1].Location;
+							secondLevelChildren = true;
 						} else {
 							activeBranchName = metadata.Name;
+							this._activeBranchLocation = metadata.Location;
+							secondLevelChildren = true;
 						}
 					} else {
-						this.branches.some(function(branch){
+						this._branches.some(function(branch){
 							if(branch.Name.toLowerCase() === "master") {
 								activeBranchName = branch.Name;
+								this._activeBranchLocation = branch.Location;
 								newLocation = branch.Location;
 								return true;
 							}
-						});
-						newLocation = newLocation || this.branches[0].Location;
+						}.bind(this));
+						newLocation = newLocation || this._branches[0].Location;
+						this._activeBranchLocation = this._activeBranchLocation || this._branches[0].Location;
 					}
 					this._branchSelector.activeBranchName = activeBranchName;
+					
+					if(this._showComponent && !secondLevelChildren) {
+						this._fileClient.fetchChildren(this._activeBranchLocation).then(function(contents){
+							if(contents && contents.length > 0) {
+								var currentComponent = null;
+								contents.some(function(component){
+									if(component.Directory) {
+										currentComponent = component;
+										return true;
+									}
+								}.bind(this));
+								this.refresh(currentComponent.Location);
+							}
+						}.bind(this));
+						return;
+					}
 					if(newLocation){
 						this.refresh(newLocation);
 						return;
@@ -35012,7 +35075,7 @@ define('orion/widgets/browse/fileBrowser',[
 				this._fileClient.fetchChildren(rootURL).then(function(contents){
 					if(contents && contents.length > 0) {
 						//var uriToShow = contents[0].Location;
-						this.branches = contents;
+						this._branches = contents;
 						this._branchSelector = new mBranchSelector.BranchSelector({
 							commandRegistry: this._commandRegistry,
 							fileClient: this._fileClient,
@@ -35054,7 +35117,10 @@ define('orion/widgets/browse/fileBrowser',[
 			}
 		},
 		_makeBreadCrumbLink: function(segment, folderLocation, folder) {
-			var resource = folder ? folder.Location : this._fileClient.fileServiceRootURL(folderLocation);
+			var resource = folder ? folder.Location : null;
+			if(!resource) {
+				resource = folderLocation ? folderLocation : this._fileClient.fileServiceRootURL(folderLocation);
+			}
 			segment.href = this._uriTemplate.expand({resource: resource});
 		},
 		_renderBreadCrumb: function(options) {
@@ -35076,6 +35142,13 @@ define('orion/widgets/browse/fileBrowser',[
 			if (locationNode) {
 				lib.empty(locationNode);
 				var resource = options.breadcrumbTarget || options.target;
+				if(this._branches && resource.Parents) {
+					if(resource.Parents.length > 0) {
+						resource.Parents[resource.Parents.length -1].skip = true;				
+					} else {
+						resource.skip = true;
+					}
+				}
 				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
 				new mBreadcrumbs.BreadCrumbs({
 					container: locationNode,
@@ -35083,7 +35156,7 @@ define('orion/widgets/browse/fileBrowser',[
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
 					workspaceRootSegmentName: this.rootName ? this.rootName : workspaceRootURL,
-					workspaceRootURL: workspaceRootURL,
+					workspaceRootURL: this._activeBranchLocation,//workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink
 				});
@@ -36949,7 +37022,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		var url = new URL(params.repo || window.location.href);
 		var repo = url.href;
 		var base = params.base;
-
+		var showComponent = false;
 
 		if (!params.rootName) {
 			var found = repo.match(/\/([^/]+)\/([^/]+)$/);
@@ -36972,11 +37045,13 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 				base = new URL(ccmPath, repo).href;
 			}
 			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
+			showComponent = true;
 		} else if (url.pathname.indexOf("/project/") === 0) {
 			if (!base) {
 				base = new URL("/ccm01", repo).href;
 			}
 			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
+			showComponent = true;
 		} else {
 			throw "Bad Repo URL - " + repo;
 		}
@@ -36991,6 +37066,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			this._fileBrowser = new mFileBrowser.FileBrowser({
 				parent: params.parentId, //"fileBrowser", 
 				showBranch: true,
+				showComponent: showComponent,
 				rootName: params.rootName,
 				//maxEditorHeight: 800,
 				serviceRegistry: serviceRegistry
