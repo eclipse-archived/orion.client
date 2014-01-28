@@ -263,8 +263,8 @@ define([
 			var pasteSelections = new KeyBinding('v', true); /* Ctrl+V */ //$NON-NLS-0$
 			var upFolder = new KeyBinding(38, false, false, true); /* Alt+UpArrow */
 			var downFolder = new KeyBinding(40, false, false, true); /* Alt+DownArrow */
-			downFolder.domScope = upFolder.domScope = pasteSelections.domScope = copySelections.domScope = delBinding.domScope = renameBinding.domScope = "sidebar"; //$NON-NLS-0$
-			downFolder.scopeName = upFolder.scopeName = pasteSelections.scopeName = copySelections.scopeName = delBinding.scopeName = renameBinding.scopeName = messages.Navigator; //$NON-NLS-0$
+			downFolder.domScope = upFolder.domScope = pasteSelections.domScope = copySelections.domScope = cutBinding.domScope  = delBinding.domScope = renameBinding.domScope = "sidebar"; //$NON-NLS-0$
+			downFolder.scopeName = upFolder.scopeName = pasteSelections.scopeName = copySelections.scopeName = cutBinding.scopeName  = delBinding.scopeName = renameBinding.scopeName = messages.Navigator; //$NON-NLS-0$
 
 			// New actions
 			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.newFile", 1, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-1$ //$NON-NLS-0$

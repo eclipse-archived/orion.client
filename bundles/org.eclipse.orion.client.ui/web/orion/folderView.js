@@ -170,8 +170,8 @@ define([
 			var cutBinding = new KeyBinding('x', true); /* Ctrl+X */ //$NON-NLS-0$
 			var copySelections = new KeyBinding('c', true); /* Ctrl+C */ //$NON-NLS-0$
 			var pasteSelections = new KeyBinding('v', true); /* Ctrl+V */ //$NON-NLS-0$
-			pasteSelections.domScope = copySelections.domScope = delBinding.domScope = renameBinding.domScope = parent.id; //$NON-NLS-0$
-			pasteSelections.scopeName = copySelections.scopeName = delBinding.scopeName = renameBinding.scopeName = messages.FolderNavigator; //$NON-NLS-0$
+			pasteSelections.domScope = copySelections.domScope = cutBinding.domScope = delBinding.domScope = renameBinding.domScope = parent.id; //$NON-NLS-0$
+			pasteSelections.scopeName = copySelections.scopeName = cutBinding.scopeName = delBinding.scopeName = renameBinding.scopeName = messages.FolderNavigator; //$NON-NLS-0$
 
 			// New actions
 			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.newFile" + this.commandsId, 1, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-1$ //$NON-NLS-0$
