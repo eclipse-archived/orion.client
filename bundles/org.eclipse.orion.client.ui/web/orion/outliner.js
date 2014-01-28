@@ -478,6 +478,7 @@ define([
 							sidebar.setViewMode(defaultOutlinerId);
 						}
 						if (_self._filterInput) {
+							_self._previousActiveElement = document.activeElement;
 							_self._filterInput.select();
 						}
 					}
@@ -547,6 +548,10 @@ define([
 					//the outline view down because the DOWN key was pressed
 					if (e.preventDefault) {
 						e.preventDefault();	
+					}
+				} else if (e.keyCode === lib.KEY.ESCAPE) {
+					if (this._previousActiveElement) {
+						this._previousActiveElement.focus();
 					}
 				}
 			}.bind(this), false);
