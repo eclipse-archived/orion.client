@@ -690,8 +690,8 @@ define([
 		// generate primary nav links.
 		var primaryNav = lib.node("navigationlinks"); //$NON-NLS-0$
 		if (primaryNav) {
-			PageLinks.createPageLinks(serviceRegistry, "orion.page.link").then(function (links) { //$NON-NLS-0$
-				links.forEach(function (link) {
+			PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link").then(function(pageLinksInfo) {
+				pageLinksInfo.createLinkElements().forEach(function (link) {
 					var li = document.createElement('li'); //$NON-NLS-0$
 					li.appendChild(link);
 					primaryNav.appendChild(li);

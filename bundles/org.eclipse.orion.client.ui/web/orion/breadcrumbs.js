@@ -108,7 +108,9 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
 		            }
 		
 		            collection.forEach(function (parent) {
-		
+						if(parent.skip) {
+							return;
+						}
 		                if (firstSegmentName) {
 		                    segmentName = firstSegmentName;
 		                    firstSegmentName = null;
@@ -179,6 +181,9 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         },
 
         finalSegment: function (seg, firstSegmentName) {
+        	if(this._resource.skip) {
+        		return;
+        	}
             var name;
             if (firstSegmentName) {
                 name = firstSegmentName;
@@ -201,11 +206,13 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
             if (segment) {
                 this.append(segment);
 
-                if (this._resource && this._resource.Parents) {
+                if (this._resource && this._resource.Parents && !this._resource.skip) {
                     segment.classList.add("breadcrumb"); //$NON-NLS-0$
                     this.addDivider();
                 } else { // we are at the root.  Get rid of any href since we are already here
-                    segment.href = "";
+                    if(!this._resource.skip) {
+                    	segment.href = "";
+                    }
                     segment.classList.add("currentLocation"); //$NON-NLS-0$
                     return;
                 }

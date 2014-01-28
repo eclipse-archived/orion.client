@@ -35,18 +35,6 @@ define([
 		tooltip: "Edit code",
 		uriTemplate: "{+OrionHome}/edit/edit.html"
 	});
-//		provider.registerService("orion.page.link", serviceImpl, {
-//			nameKey: "Sites",
-//			id: "orion.sites",
-//			nls: "orion/nls/messages",
-//			uriTemplate: "{+OrionHome}/sites/sites.html"
-//		});
-//		provider.registerService("orion.page.link", serviceImpl, {
-//			nameKey: "Repositories",
-//			id: "orion.repositories",
-//			nls: "orion/nls/messages",
-//			uriTemplate: "{+OrionHome}/git/git-repository.html#"
-//		});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Shell",
 		id: "orion.shell",

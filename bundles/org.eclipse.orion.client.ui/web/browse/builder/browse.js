@@ -53,7 +53,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		var url = new URL(params.repo || window.location.href);
 		var repo = url.href;
 		var base = params.base;
-
+		var showComponent = false;
 
 		if (!params.rootName) {
 			var found = repo.match(/\/([^/]+)\/([^/]+)$/);
@@ -76,11 +76,13 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 				base = new URL(ccmPath, repo).href;
 			}
 			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
+			showComponent = true;
 		} else if (url.pathname.indexOf("/project/") === 0) {
 			if (!base) {
 				base = new URL("/ccm01", repo).href;
 			}
 			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
+			showComponent = true;
 		} else {
 			throw "Bad Repo URL - " + repo;
 		}
@@ -93,10 +95,11 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		});
 		pluginRegistry.start().then(function() {
 			this._fileBrowser = new mFileBrowser.FileBrowser({
-				parent: params.parentId, //"fileBrowser", 
+				parent: params.parentId,
 				showBranch: true,
+				showComponent: showComponent,
 				rootName: params.rootName,
-				//maxEditorHeight: 800,
+				maxEditorLines: 100,
 				serviceRegistry: serviceRegistry
 			});
 		}.bind(this));

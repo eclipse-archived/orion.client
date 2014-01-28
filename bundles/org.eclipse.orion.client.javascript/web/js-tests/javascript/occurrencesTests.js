@@ -20,6 +20,9 @@ define([
 	var occurrences = new Occurrences.JavaScriptOccurrences(astManager);
 	var editorContext = {
 		text: "",
+		/**
+		 * get the text
+		 */
 		getText: function() {
 			return new Deferred().resolve(this.text);
 		}
@@ -561,5 +564,118 @@ define([
 			}
 		});
 	};
+	
+		/**
+	 * Tests this usage in global
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424756
+	 */
+	Tests.test_thisUsageGlobal = function() {
+		editorContext.text = "this.v1 = 1; var v2 = this.v1 + 1;";
+		return occurrences.computeOccurrences(editorContext, setContext(2, 2)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:0, end:4}, {start:22, end:26}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage from 2 functions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424756
+	 */
+	Tests.test_thisUsageFunctions = function() {
+		editorContext.text = "function f1(p1) {this.p1=p1;}; function f2(p2) {this.p2=p2;};";
+		return occurrences.computeOccurrences(editorContext, setContext(19, 19)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:17, end:21}, {start:48, end:52}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage in 2 objects
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424756
+	 */
+	Tests.test_thisUsageObjects = function() {
+		editorContext.text = "var o1={v1: 'a', f1: function(){ if (this.v1){ this.v1++; }}}; var o2={v1: 'a', f1: function(){ if (this.v1){ this.v1++; }}};";
+		return occurrences.computeOccurrences(editorContext, setContext(39, 39)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:37, end:41}, {start:47, end:51}, {start:100, end:104}, {start:110, end:114}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage when function expressions are nested inside call expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424756
+	 */
+	Tests.test_thisUsageCallExpressions1 = function() {
+		editorContext.text = "function f1(p1) {this.a1=p1; this.f2(function(p2) {this.a2=p2; this.f3(function(p3) {this.a3=p3;});}, function(p4) {this.a4=p4;});};";
+		return occurrences.computeOccurrences(editorContext, setContext(19, 19)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:17, end:21}, {start:29, end:33}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage when function expressions are nested inside call expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424756
+	 */
+	Tests.test_thisUsageCallExpressions2 = function() {
+		editorContext.text = "function f1(p1) {this.a1=p1; this.f2(function(p2) {this.a2=p2; this.f3(function(p3) {this.a3=p3;});}, function(p4) {this.a4=p4;});};";
+		return occurrences.computeOccurrences(editorContext, setContext(52, 52)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:51, end:55}, {start:63, end:67}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage when function expressions are nested inside call expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424756
+	 */
+	Tests.test_thisUsageCallExpressions3 = function() {
+		editorContext.text = "function f1(p1) {this.a1=p1; this.f2(function(p2) {this.a2=p2; this.f3(function(p3) {this.a3=p3;});}, function(p4) {this.a4=p4;});};";
+		return occurrences.computeOccurrences(editorContext, setContext(87, 87)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:85, end:89}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+		/**
+	 * Tests this usage when function expressions are nested inside call expressions
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424756
+	 */
+	Tests.test_thisUsageCallExpressions4 = function() {
+		editorContext.text = "function f1(p1) {this.a1=p1; this.f2(function(p2) {this.a2=p2; this.f3(function(p3) {this.a3=p3;});}, function(p4) {this.a4=p4;});};";
+		return occurrences.computeOccurrences(editorContext, setContext(116, 116)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:116, end:120}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
 	return Tests;
 });

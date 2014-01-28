@@ -45,7 +45,7 @@ define([
 	 * @name orion.browse.FileBrowserOptions
 	 *
 	 * @property {String|DOMElement} parent the parent element for the file browser, it can be either a DOM element or an ID for a DOM element.
-	 * @property {Number} maxEditorHeight the max height of the editor when displaying a file, if not defined 0 is used to represent that editor will use the full contents height.
+	 * @property {Number} maxEditorLines the max number of lines that are allowed in the editor DIV. When displaying a file, if not defined 0 is used to represent that editor will use the full contents height.
 	 * @property {orion.fileClient.FileClient} fileClient the file client implementation that has all the interfaces from orion.fileClient.FileClient.
 	 * @property {orion.highlight.SyntaxHighlighter} optional syntaxHighlighter the syntax highlighter that hihglights  a supported language file. If not defined a static default one is used.
 	 * @property {orion.core.ContentType} contentTypeService optional the content type service that knows a file's content type. If not defined a static default one is used.
@@ -84,12 +84,13 @@ define([
 		this._preferences = options.preferences;//Optional
 		this.rootName = options.rootName;
 		this._showBranch = options.showBranch;
+		this._showComponent = options.showComponent;
 		this._init(options);
 	}
 	objects.mixin(FileBrowser.prototype, {
 		_init: function(options){
 			this._commandRegistry = new mCommandRegistry.CommandRegistry({});
-			this._maxEditorHeight = options.maxEditorHeight;
+			this._maxEditorLines = options.maxEditorLines;
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
@@ -99,26 +100,50 @@ define([
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				var metadata = evt.metadata;
-				if(this.branches && this._branchSelector){
-					var activeBranchName = this.branches[0].Name;
+				if(this._branches && this._branchSelector){
+					var activeBranchName = this._branches[0].Name;
+					this._activeBranchLocation = this._branches[0].Location;
 					var newLocation = null;
+					var secondLevelChildren = false;
 					if(metadata.Parents) {
 						if(metadata.Parents.length > 0) {
 							activeBranchName = metadata.Parents[metadata.Parents.length-1].Name;
+							this._activeBranchLocation = metadata.Parents[metadata.Parents.length-1].Location;
+							secondLevelChildren = true;
 						} else {
 							activeBranchName = metadata.Name;
+							this._activeBranchLocation = metadata.Location;
+							secondLevelChildren = true;
 						}
 					} else {
-						this.branches.some(function(branch){
+						this._branches.some(function(branch){
 							if(branch.Name.toLowerCase() === "master") {
 								activeBranchName = branch.Name;
+								this._activeBranchLocation = branch.Location;
 								newLocation = branch.Location;
 								return true;
 							}
-						});
-						newLocation = newLocation || this.branches[0].Location;
+						}.bind(this));
+						newLocation = newLocation || this._branches[0].Location;
+						this._activeBranchLocation = this._activeBranchLocation || this._branches[0].Location;
 					}
 					this._branchSelector.activeBranchName = activeBranchName;
+					
+					if(this._showComponent && !secondLevelChildren) {
+						this._fileClient.fetchChildren(this._activeBranchLocation).then(function(contents){
+							if(contents && contents.length > 0) {
+								var currentComponent = null;
+								contents.some(function(component){
+									if(component.Directory) {
+										currentComponent = component;
+										return true;
+									}
+								}.bind(this));
+								this.refresh(currentComponent.Location);
+							}
+						}.bind(this));
+						return;
+					}
 					if(newLocation){
 						this.refresh(newLocation);
 						return;
@@ -156,7 +181,7 @@ define([
 				this._fileClient.fetchChildren(rootURL).then(function(contents){
 					if(contents && contents.length > 0) {
 						//var uriToShow = contents[0].Location;
-						this.branches = contents;
+						this._branches = contents;
 						this._branchSelector = new mBranchSelector.BranchSelector({
 							commandRegistry: this._commandRegistry,
 							fileClient: this._fileClient,
@@ -198,7 +223,10 @@ define([
 			}
 		},
 		_makeBreadCrumbLink: function(segment, folderLocation, folder) {
-			var resource = folder ? folder.Location : this._fileClient.fileServiceRootURL(folderLocation);
+			var resource = folder ? folder.Location : null;
+			if(!resource) {
+				resource = folderLocation ? folderLocation : this._fileClient.fileServiceRootURL(folderLocation);
+			}
 			segment.href = this._uriTemplate.expand({resource: resource});
 		},
 		_renderBreadCrumb: function(options) {
@@ -220,6 +248,13 @@ define([
 			if (locationNode) {
 				lib.empty(locationNode);
 				var resource = options.breadcrumbTarget || options.target;
+				if(this._branches && resource.Parents) {
+					if(resource.Parents.length > 0) {
+						resource.Parents[resource.Parents.length -1].skip = true;				
+					} else {
+						resource.skip = true;
+					}
+				}
 				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
 				new mBreadcrumbs.BreadCrumbs({
 					container: locationNode,
@@ -227,7 +262,7 @@ define([
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
 					workspaceRootSegmentName: this.rootName ? this.rootName : workspaceRootURL,
-					workspaceRootURL: workspaceRootURL,
+					workspaceRootURL: this._activeBranchLocation,//workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink
 				});
@@ -240,7 +275,7 @@ define([
 					parent: this._parentDomNode,
 					readonly: true,
 					showProjectView: false,
-					maxEditorHeight: this._maxEditorHeight,
+					maxEditorLines: this._maxEditorLines,
 					readmeHeaderClass: "readmeHeader",
 					metadata: metadata,
 					branchSelector: this._branchSelector,

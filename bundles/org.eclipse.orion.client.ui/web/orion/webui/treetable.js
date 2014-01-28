@@ -319,6 +319,13 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			if(this._onCollapse){
 				this._onCollapse(row._item);
 			}
+		},
+		
+		/**
+		 * Returns this tree's indentation increment
+		 */
+		getIndent: function() {
+			return this._indent;
 		}
 	};  // end prototype
 	TableTree.prototype.constructor = TableTree;

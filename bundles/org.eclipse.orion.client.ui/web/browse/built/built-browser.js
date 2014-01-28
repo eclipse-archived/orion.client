@@ -2496,7 +2496,9 @@ define('orion/breadcrumbs',['require', 'orion/webui/littlelib'], function (requi
 		            }
 		
 		            collection.forEach(function (parent) {
-		
+						if(parent.skip) {
+							return;
+						}
 		                if (firstSegmentName) {
 		                    segmentName = firstSegmentName;
 		                    firstSegmentName = null;
@@ -2567,6 +2569,9 @@ define('orion/breadcrumbs',['require', 'orion/webui/littlelib'], function (requi
         },
 
         finalSegment: function (seg, firstSegmentName) {
+        	if(this._resource.skip) {
+        		return;
+        	}
             var name;
             if (firstSegmentName) {
                 name = firstSegmentName;
@@ -2589,11 +2594,13 @@ define('orion/breadcrumbs',['require', 'orion/webui/littlelib'], function (requi
             if (segment) {
                 this.append(segment);
 
-                if (this._resource && this._resource.Parents) {
+                if (this._resource && this._resource.Parents && !this._resource.skip) {
                     segment.classList.add("breadcrumb"); //$NON-NLS-0$
                     this.addDivider();
                 } else { // we are at the root.  Get rid of any href since we are already here
-                    segment.href = "";
+                    if(!this._resource.skip) {
+                    	segment.href = "";
+                    }
                     segment.classList.add("currentLocation"); //$NON-NLS-0$
                     return;
                 }
@@ -2928,7 +2935,8 @@ define('orion/nls/root/messages',{
 	"UnknownError": "An unknown error occurred.",
 	"UnknownWarning": "An unknown warning occurred.",
 	"Filter": "Filter (* = any string, ? = any character)",
-	"To view the browser's context menu, trigger the context menu again.": "To view the browser's context menu, trigger the context menu again."
+	"To view the browser's context menu, trigger the context menu again.": "To view the browser's context menu, trigger the context menu again.",
+	"Edit": "Edit"
 });
 
 /*******************************************************************************
@@ -3970,6 +3978,13 @@ define('orion/webui/treetable',['i18n!orion/nls/messages', 'orion/webui/littleli
 			if(this._onCollapse){
 				this._onCollapse(row._item);
 			}
+		},
+		
+		/**
+		 * Returns this tree's indentation increment
+		 */
+		getIndent: function() {
+			return this._indent;
 		}
 	};  // end prototype
 	TableTree.prototype.constructor = TableTree;
@@ -4403,18 +4418,28 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 	/**
 	 * @name orion.uiUtils.getUserText
 	 * @function
-	 * @param {String} id
-	 * @param {Element} refNode
-	 * @param {Boolean} shouldHideRefNode
-	 * @param {String} initialText
-	 * @param {Function} onComplete
-	 * @param {Function} onEditDestroy
-	 * @param {String} promptMessage
-	 * @param {String} selectTo
-	 * @param {Boolean} isInitialValid
+	 * @param {Object} options The options object
+	 * @param {String} options.id
+	 * @param {Element} options.refNode
+	 * @param {Boolean} options.shouldHideRefNode
+	 * @param {String} options.initialText
+	 * @param {Function} options.onComplete
+	 * @param {Function} options.onEditDestroy
+	 * @param {String} options.selectTo
+	 * @param {Boolean} options.isInitialValid
+	 * @param {Boolean} options.insertAsChild
 	 */
-	function getUserText(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy, promptMessage, selectTo, isInitialValid) {
-		/** @return {Function} function(event) */
+	function getUserText(options) {
+		var id = options.id;
+		var refNode = options.refNode;
+		var shouldHideRefNode = options.shouldHideRefNode;
+		var initialText = options.initialText;
+		var onComplete = options.onComplete;
+		var onEditDestroy = options.onEditDestroy;
+		var selectTo = options.selectTo;
+		var isInitialValid = options.isInitialValid;
+		var insertAsChild = options.insertAsChild;
+		
 		var done = false;
 		var handler = function(isKeyEvent) {
 			return function(event) {
@@ -4465,7 +4490,11 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 		var editBox = document.createElement("input"); //$NON-NLS-0$
 		editBox.id = id;
 		editBox.value = initialText || "";
-		refNode.parentNode.insertBefore(editBox, refNode.nextSibling);
+		if (insertAsChild) {
+			refNode.appendChild(editBox);
+		} else {
+			refNode.parentNode.insertBefore(editBox, refNode.nextSibling);
+		}
 		editBox.classList.add("userEditBoxPrompt"); //$NON-NLS-0$
 		if (shouldHideRefNode) {
 			refNode.style.display = "none"; //$NON-NLS-0$
@@ -7235,7 +7264,7 @@ exports.Explorer = (function() {
 			}
 		},
 		
-		makeNewItemPlaceHolder: function(item, domId, column_no) {
+		makeNewItemPlaceHolder: function(item, domId, column_no, insertAfter) {
 			// we want to popup the name prompt underneath the parent item.
 			var refNode = this.getRow(item);
 			var tempNode;
@@ -7255,7 +7284,17 @@ exports.Explorer = (function() {
 				var td = document.createElement("td"); //$NON-NLS-0$
 				td.id = domId+"placeHolderCol"; //$NON-NLS-0$
 				tr.appendChild(td);
-				refNode.appendChild(tr);
+				if (insertAfter) {
+					// insert tr after refNode, i.e. right before refNode's nextSibling in the parent
+					var parentNode = refNode.parentNode;
+					var nextSibling = refNode.nextSibling;
+					parentNode.insertBefore(tr, nextSibling);
+					
+					var parentIndentation = parseInt(refNode.firstChild.style.paddingLeft); //refNode is a <tr>, we want the indentation of its <td>
+					td.style.paddingLeft = (this.myTree.getIndent() + parentIndentation) + "px";
+				} else {
+					refNode.appendChild(tr);
+				}
 				tempNode = lib.node(domId+"placeHolderRow"); //$NON-NLS-0$
 				refNode = lib.node(domId+"placeHolderCol"); //$NON-NLS-0$
 				if (tempNode && refNode) {
@@ -9520,7 +9559,7 @@ define('orion/URITemplate',[],function(){
 
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9528,7 +9567,15 @@ define('orion/URITemplate',[],function(){
  * 
  ******************************************************************************/
 /*global define document window URL*/
-define('orion/PageLinks',["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "orion/i18nUtil", "orion/URL-shim"], function(require, Deferred, PageUtil, URITemplate, i18nUtil) {
+define('orion/PageLinks',[
+	"require",
+	"orion/Deferred",
+	"orion/PageUtil",
+	"orion/URITemplate",
+	"orion/i18nUtil",
+	"orion/objects",
+	"orion/URL-shim"
+], function(require, Deferred, PageUtil, URITemplate, i18nUtil, objects, _) {
 
 	/**
 	 * Returns the value of the <code>{OrionHome}</code> variable.
@@ -9545,61 +9592,187 @@ define('orion/PageLinks',["require", "orion/Deferred", "orion/PageUtil", "orion/
 	}
 
 	/**
-	 * Read info from an <code>orion.page.*</code> service extension.
+	 * Reads metadata from an <code>orion.page.xxxxx</code> service extension.
 	 * @memberOf orion.PageLinks
 	 * @function
 	 * @param {orion.ServiceRegistry} serviceRegistry The service registry.
-	 * @param {String} serviceName Service name to read extensions from.
-	 * @return {orion.Promise} A promise that resolves to an Array of info objects.
+	 * @param {String} [serviceName="orion.page.link"] Service name to read extensions from.
+	 * @return {orion.Promise} A promise that resolves to an {@link orion.PageLinks.PageLinksInfo} object.
 	 */
 	function getPageLinksInfo(serviceRegistry, serviceName) {
-		serviceName = serviceName || "orion.page.link"; //$NON-NLS-0$
-		// Note that the shape of the "orion.page.link" extension is not in any shape or form that could be considered final.
-		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
+		return _readPageLinksMetadata(serviceRegistry, serviceName).then(function(metadata) {
+			return new _PageLinksInfo(metadata.categories, metadata.linkInfo);
+		});
+	}
 
-		// The shape of a contributed navigation link is (for now):
-		// info - information about the navigation link (object).
-		//     required attribute: name - the name of the navigation link
-		//     required attribute: id - the id of the navigation link
-		//     required attribute: uriTemplate - the URL for the navigation link
-		//     optional attribute: image - a URL to an icon representing the link (currently not used, may use in future)
-		var navLinks= serviceRegistry.getServiceReferences(serviceName); //$NON-NLS-0$
+	function _getPropertiesMap(serviceRef) {
+		var props = {};
+		serviceRef.getPropertyKeys().forEach(function(key) {
+			if (key !== "objectClass" && key !== "service.names" && key !== "service.id" && key !== "__plugin__") //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				props[key] = serviceRef.getProperty(key);
+		});
+		return props;
+	}
+
+	/**
+	 * Loads translated name if possible.
+	 * @returns {orion.Promise} The info, with info.textContent set
+	 */
+	function _loadTranslatedName(info) {
+		return i18nUtil.getMessageBundle(info.nls).then(function(messages) {
+			info.textContent = info.nameKey ? messages[info.nameKey] : info.name;
+			return info;
+		});
+	}
+
+	/*
+	 * Categories apply to all orion.page.link* serviceNames, so cache them.
+	 */
+	var _cachedCategoryInfos;
+
+	function _readPageLinksMetadata(serviceRegistry, serviceName) {
+		serviceName = serviceName || "orion.page.link"; //$NON-NLS-0$
+
+		// Read categories.
+		var categoryInfos;
+		if (!_cachedCategoryInfos) {
+			categoryInfos = [];
+			var navLinkCategories = serviceRegistry.getServiceReferences("orion.page.link.category"); //$NON-NLS-0$
+			navLinkCategories.forEach(function(serviceRef) {
+				var info = _getPropertiesMap(serviceRef);
+				if (!info.id || (!info.name && !info.nameKey)) {
+					return;
+				}
+				if (info.nls) {
+					categoryInfos.push(_loadTranslatedName(info));
+				} else {
+					info.textContent = info.name;
+					categoryInfos.push(new Deferred().resolve(info));
+				}
+			});
+			_cachedCategoryInfos = categoryInfos;
+		} else {
+			categoryInfos = _cachedCategoryInfos;
+		}
+		var categoriesPromise = Deferred.all(categoryInfos);
+
+		// Read page links.
+		// https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages
+		var navLinks= serviceRegistry.getServiceReferences(serviceName);
 		var params = PageUtil.matchResourceParameters(window.location.href);
 		// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
 		var orionHome = getOrionHome();
 		var locationObject = {OrionHome: orionHome, Location: params.resource};
-		var infos = [];
+		var navLinkInfos = [];
 		navLinks.forEach(function(navLink) {
-			var info = {};
-			navLink.getPropertyKeys().forEach(function(key) {
-				info[key] = navLink.getProperty(key);
-			});
-			if(info.uriTemplate && info.nls && (info.name || info.nameKey)){
-				var d = new Deferred();
-				i18nUtil.getMessageBundle(info.nls).then(function(commandMessages) {
-					var uriTemplate = new URITemplate(info.uriTemplate);
-					var expandedHref = uriTemplate.expand(locationObject);
-					expandedHref = PageUtil.validateURLScheme(expandedHref);
+			var info = _getPropertiesMap(navLink);
+			if (!info.uriTemplate || (!info.nls && !info.name)) {
+				return; // missing data, skip
+			}
 
-					info.href = expandedHref;
-					info.textContent = (info.nameKey? commandMessages[info.nameKey]: info.name);
-					d.resolve(info);
-				});
-				infos.push(d);
-			} else if (info.uriTemplate && info.name) {
-				var uriTemplate = new URITemplate(info.uriTemplate);
-				var expandedHref = uriTemplate.expand(locationObject);
-				expandedHref = PageUtil.validateURLScheme(expandedHref);
+			var uriTemplate = new URITemplate(info.uriTemplate);
+			var expandedHref = uriTemplate.expand(locationObject);
+			expandedHref = PageUtil.validateURLScheme(expandedHref);
+			info.href = expandedHref;
 
-				info.href = expandedHref;
+			if(info.nls){
+				navLinkInfos.push(_loadTranslatedName(info));
+			} else {
 				info.textContent = info.name;
-				infos.push(new Deferred().resolve(info));
+				navLinkInfos.push(new Deferred().resolve(info));
 			}
 		});
-		return Deferred.all(infos);
+		var navLinksPromise = Deferred.all(navLinkInfos);
+
+		return Deferred.all([categoriesPromise, navLinksPromise]).then(function(results) {
+			return {
+				categories: results[0],
+				linkInfo: results[1]
+			}
+		});
 	}
 
-	function createLink(href, target, textContent) {
+	/**
+	 * @name orion.PageLinks.PageLinksInfo
+	 * @class
+	 * @description Provides access to info about page links read from an extension point.
+	 */
+	function _PageLinksInfo(categoriesArray, allPageLinks) {
+		this.allPageLinks = allPageLinks;
+		var categories = this.categories = Object.create(null); // Maps category id {String} to category {Object}
+		var links = this.links = Object.create(null); // Maps category id {String} to page links {Object[]}
+
+		categoriesArray.forEach(function(category) {
+			categories[category.id] = category;
+		});
+		allPageLinks.forEach(function(link) {
+			var category = link.category ? categories[link.category] : null;
+			if (category) {
+				links[category.id] = links[category.id] || [];
+				links[category.id].push(link);
+			} else {
+				// TODO default category for this link?
+			}
+		});
+
+		// Sort within category by name
+		Object.keys(links).forEach(function(key) {
+			links[key].sort(_comparePageLinks);
+		});
+		// Sort all by name
+		this.allPageLinks.sort(_comparePageLinks);
+	}
+	objects.mixin(_PageLinksInfo.prototype, /** @lends orion.PageLinks.PageLinksInfo.prototype */ {
+		/**
+		 * Builds DOM elements for links from all categories.
+		 * @returns {Element[]} The links.
+		 */
+		createLinkElements: function() {
+			return this.allPageLinks.map(function(info) {
+				return _createLink(info.href, "_self", info.textContent); //$NON-NLS-0$
+			});
+		},
+		/**
+		 * Returns the category IDs.
+		 * @returns {String[]} The category IDs.
+		 */
+		getCategoryIDs: function() {
+			return Object.keys(this.categories);
+		},
+		/**
+		 * Returns the data for a given category.
+		 * @param {String} id The category ID.
+		 * @returns {Object} The category data.
+		 */
+		getCategory: function(id) {
+			return this.categories[id] || null;
+		},
+		/**
+		 * Returns links from all categories, sorted by name.
+		 * @returns {Object[]} The links.
+		 */
+		getAllLinks: function() {
+			return this.allPageLinks;
+		},
+		/**
+		 * Returns the links belonging to the given category.
+		 * @param {String} id The category ID.
+		 * @returns {Object[]} The links.
+		 */
+		getLinks: function(id) {
+			return this.links[id] || [];
+		}
+	});
+
+	function _comparePageLinks(a, b) {
+		var n1 = a.textContent && a.textContent.toLowerCase();
+		var n2 = b.textContent && b.textContent.toLowerCase();
+		if (n1 < n2) { return -1; }
+		if (n1 > n2) { return 1; }
+		return 0;
+	}
+
+	function _createLink(href, target, textContent) {
 		var a = document.createElement("a");
 		a.href = href;
 		a.target = target;
@@ -9609,35 +9782,11 @@ define('orion/PageLinks',["require", "orion/Deferred", "orion/PageUtil", "orion/
 	}
 
 	/**
-	 * Build links from an <code>orion.page.link</code> service extension.
-	 * @memberOf orion.PageLinks
-	 * @function
-	 * @param {orion.ServiceRegistry} serviceRegistry The service registry.
-	 * @param {String} serviceName Service name to read extensions from.
-	 * @return {orion.Promise} A promise that resolves to an Array of DOM elements which are the links.
-	 */
-	function createPageLinks(serviceRegistry, serviceName) {
-		return getPageLinksInfo(serviceRegistry, serviceName).then(function(links) {
-			links.sort(function(a, b) {
-				var n1 = a.textContent && a.textContent.toLowerCase();
-				var n2 = b.textContent && b.textContent.toLowerCase();
-				if (n1 < n2) { return -1; }
-				if (n1 > n2) { return 1; }
-				return 0;
-			}); 
-			return links.map(function(info) {
-				return createLink(info.href, "_self", info.textContent); //$NON-NLS-0$
-			});
-		});
-	}
-
-	/**
 	 * @name orion.PageLinks
-	 * @class Utilities for reading <code>orion.page.links</code> services.
-	 * @description Utilities for reading <code>orion.page.links</code> services.
+	 * @class Utilities for reading <code>orion.page.link</code> services.
+	 * @description Utilities for reading <code>orion.page.link</code> services.
 	 */
 	return {
-		createPageLinks: createPageLinks,
 		getPageLinksInfo: getPageLinksInfo,
 		getOrionHome: getOrionHome
 	};
@@ -25966,7 +26115,7 @@ define('orion/widgets/browse/browseView',[
 		this.showFolderNav = true;
 		this.readmeHeaderClass = options.readmeHeaderClass;
 		this.editorView = options.editorView;
-		this._maxEditorHeight = options.maxEditorHeight;
+		this._maxEditorLines = options.maxEditorLines;
 		this.imageView = options.imageView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
@@ -26023,10 +26172,11 @@ define('orion/widgets/browse/browseView',[
 								this.editorView.create();
 								var textView = this.editorView. editor.getTextView();
 								textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
-									var textViewheight = textView.getLineHeight() * textView.getModel().getLineCount() + 20;
-									if(this._maxEditorHeight && this._maxEditorHeight > 0 && textViewheight >this._maxEditorHeight) {
-										textViewheight = this._maxEditorHeight;
+									var linesToRender = textView.getModel().getLineCount();
+									if(this._maxEditorLines && this._maxEditorLines > 0 && linesToRender >this._maxEditorLines) {
+										linesToRender = this._maxEditorLines;
 									}
+									var textViewheight = textView.getLineHeight() * linesToRender + 20;
 									this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
 								}.bind(this));
 								this.editor = this.editorView.editor;
@@ -32024,7 +32174,7 @@ define('orion/fileClient',['i18n!orion/navigate/nls/messages', "orion/Deferred",
 			});
 			
 		},
-		 
+				
 		/**
 		 * Copies a file or directory.
 		 * @param {String} sourceLocation The location of the file or directory to copy.
@@ -34901,7 +35051,7 @@ define('orion/widgets/browse/fileBrowser',[
 	 * @name orion.browse.FileBrowserOptions
 	 *
 	 * @property {String|DOMElement} parent the parent element for the file browser, it can be either a DOM element or an ID for a DOM element.
-	 * @property {Number} maxEditorHeight the max height of the editor when displaying a file, if not defined 0 is used to represent that editor will use the full contents height.
+	 * @property {Number} maxEditorLines the max number of lines that are allowed in the editor DIV. When displaying a file, if not defined 0 is used to represent that editor will use the full contents height.
 	 * @property {orion.fileClient.FileClient} fileClient the file client implementation that has all the interfaces from orion.fileClient.FileClient.
 	 * @property {orion.highlight.SyntaxHighlighter} optional syntaxHighlighter the syntax highlighter that hihglights  a supported language file. If not defined a static default one is used.
 	 * @property {orion.core.ContentType} contentTypeService optional the content type service that knows a file's content type. If not defined a static default one is used.
@@ -34940,12 +35090,13 @@ define('orion/widgets/browse/fileBrowser',[
 		this._preferences = options.preferences;//Optional
 		this.rootName = options.rootName;
 		this._showBranch = options.showBranch;
+		this._showComponent = options.showComponent;
 		this._init(options);
 	}
 	objects.mixin(FileBrowser.prototype, {
 		_init: function(options){
 			this._commandRegistry = new mCommandRegistry.CommandRegistry({});
-			this._maxEditorHeight = options.maxEditorHeight;
+			this._maxEditorLines = options.maxEditorLines;
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
@@ -34955,26 +35106,50 @@ define('orion/widgets/browse/fileBrowser',[
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				var metadata = evt.metadata;
-				if(this.branches && this._branchSelector){
-					var activeBranchName = this.branches[0].Name;
+				if(this._branches && this._branchSelector){
+					var activeBranchName = this._branches[0].Name;
+					this._activeBranchLocation = this._branches[0].Location;
 					var newLocation = null;
+					var secondLevelChildren = false;
 					if(metadata.Parents) {
 						if(metadata.Parents.length > 0) {
 							activeBranchName = metadata.Parents[metadata.Parents.length-1].Name;
+							this._activeBranchLocation = metadata.Parents[metadata.Parents.length-1].Location;
+							secondLevelChildren = true;
 						} else {
 							activeBranchName = metadata.Name;
+							this._activeBranchLocation = metadata.Location;
+							secondLevelChildren = true;
 						}
 					} else {
-						this.branches.some(function(branch){
+						this._branches.some(function(branch){
 							if(branch.Name.toLowerCase() === "master") {
 								activeBranchName = branch.Name;
+								this._activeBranchLocation = branch.Location;
 								newLocation = branch.Location;
 								return true;
 							}
-						});
-						newLocation = newLocation || this.branches[0].Location;
+						}.bind(this));
+						newLocation = newLocation || this._branches[0].Location;
+						this._activeBranchLocation = this._activeBranchLocation || this._branches[0].Location;
 					}
 					this._branchSelector.activeBranchName = activeBranchName;
+					
+					if(this._showComponent && !secondLevelChildren) {
+						this._fileClient.fetchChildren(this._activeBranchLocation).then(function(contents){
+							if(contents && contents.length > 0) {
+								var currentComponent = null;
+								contents.some(function(component){
+									if(component.Directory) {
+										currentComponent = component;
+										return true;
+									}
+								}.bind(this));
+								this.refresh(currentComponent.Location);
+							}
+						}.bind(this));
+						return;
+					}
 					if(newLocation){
 						this.refresh(newLocation);
 						return;
@@ -35012,7 +35187,7 @@ define('orion/widgets/browse/fileBrowser',[
 				this._fileClient.fetchChildren(rootURL).then(function(contents){
 					if(contents && contents.length > 0) {
 						//var uriToShow = contents[0].Location;
-						this.branches = contents;
+						this._branches = contents;
 						this._branchSelector = new mBranchSelector.BranchSelector({
 							commandRegistry: this._commandRegistry,
 							fileClient: this._fileClient,
@@ -35054,7 +35229,10 @@ define('orion/widgets/browse/fileBrowser',[
 			}
 		},
 		_makeBreadCrumbLink: function(segment, folderLocation, folder) {
-			var resource = folder ? folder.Location : this._fileClient.fileServiceRootURL(folderLocation);
+			var resource = folder ? folder.Location : null;
+			if(!resource) {
+				resource = folderLocation ? folderLocation : this._fileClient.fileServiceRootURL(folderLocation);
+			}
 			segment.href = this._uriTemplate.expand({resource: resource});
 		},
 		_renderBreadCrumb: function(options) {
@@ -35076,6 +35254,13 @@ define('orion/widgets/browse/fileBrowser',[
 			if (locationNode) {
 				lib.empty(locationNode);
 				var resource = options.breadcrumbTarget || options.target;
+				if(this._branches && resource.Parents) {
+					if(resource.Parents.length > 0) {
+						resource.Parents[resource.Parents.length -1].skip = true;				
+					} else {
+						resource.skip = true;
+					}
+				}
 				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
 				new mBreadcrumbs.BreadCrumbs({
 					container: locationNode,
@@ -35083,7 +35268,7 @@ define('orion/widgets/browse/fileBrowser',[
 					resource: resource,
 					rootSegmentName: breadcrumbRootName,
 					workspaceRootSegmentName: this.rootName ? this.rootName : workspaceRootURL,
-					workspaceRootURL: workspaceRootURL,
+					workspaceRootURL: this._activeBranchLocation,//workspaceRootURL,
 					makeFinalHref: options.makeBreadcrumFinalLink,
 					makeHref: options.makeBreadcrumbLink
 				});
@@ -35096,7 +35281,7 @@ define('orion/widgets/browse/fileBrowser',[
 					parent: this._parentDomNode,
 					readonly: true,
 					showProjectView: false,
-					maxEditorHeight: this._maxEditorHeight,
+					maxEditorLines: this._maxEditorLines,
 					readmeHeaderClass: "readmeHeader",
 					metadata: metadata,
 					branchSelector: this._branchSelector,
@@ -36949,7 +37134,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		var url = new URL(params.repo || window.location.href);
 		var repo = url.href;
 		var base = params.base;
-
+		var showComponent = false;
 
 		if (!params.rootName) {
 			var found = repo.match(/\/([^/]+)\/([^/]+)$/);
@@ -36972,11 +37157,13 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 				base = new URL(ccmPath, repo).href;
 			}
 			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
+			showComponent = true;
 		} else if (url.pathname.indexOf("/project/") === 0) {
 			if (!base) {
 				base = new URL("/ccm01", repo).href;
 			}
 			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
+			showComponent = true;
 		} else {
 			throw "Bad Repo URL - " + repo;
 		}
@@ -36989,10 +37176,11 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		});
 		pluginRegistry.start().then(function() {
 			this._fileBrowser = new mFileBrowser.FileBrowser({
-				parent: params.parentId, //"fileBrowser", 
+				parent: params.parentId,
 				showBranch: true,
+				showComponent: showComponent,
 				rootName: params.rootName,
-				//maxEditorHeight: 800,
+				maxEditorLines: 100,
 				serviceRegistry: serviceRegistry
 			});
 		}.bind(this));

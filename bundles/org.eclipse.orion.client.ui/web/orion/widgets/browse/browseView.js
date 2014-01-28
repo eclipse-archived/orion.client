@@ -159,7 +159,7 @@ define([
 		this.showFolderNav = true;
 		this.readmeHeaderClass = options.readmeHeaderClass;
 		this.editorView = options.editorView;
-		this._maxEditorHeight = options.maxEditorHeight;
+		this._maxEditorLines = options.maxEditorLines;
 		this.imageView = options.imageView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
@@ -216,10 +216,11 @@ define([
 								this.editorView.create();
 								var textView = this.editorView. editor.getTextView();
 								textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
-									var textViewheight = textView.getLineHeight() * textView.getModel().getLineCount() + 20;
-									if(this._maxEditorHeight && this._maxEditorHeight > 0 && textViewheight >this._maxEditorHeight) {
-										textViewheight = this._maxEditorHeight;
+									var linesToRender = textView.getModel().getLineCount();
+									if(this._maxEditorLines && this._maxEditorLines > 0 && linesToRender >this._maxEditorLines) {
+										linesToRender = this._maxEditorLines;
 									}
+									var textViewheight = textView.getLineHeight() * linesToRender + 20;
 									this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
 								}.bind(this));
 								this.editor = this.editorView.editor;
