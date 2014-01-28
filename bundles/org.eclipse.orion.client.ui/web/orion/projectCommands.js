@@ -553,7 +553,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			tooltip: "Add an associated folder from workspace",
 			id: "orion.project.addFolder", //$NON-NLS-0$
 			callback: function(data) {
-				var item = forceSingleItem(data.items);
+				var item = forceSingleItem(data.items).Project;
 				
 				var dialog = new DirectoryPrompterDialog.DirectoryPrompterDialog({ title : messages["Choose a Folder"],
 					serviceRegistry : serviceRegistry,
@@ -682,7 +682,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					tooltip: handler.addDependencyTooltip,
 					callback: function(data){
 						var def = new Deferred();
-						var item = forceSingleItem(data.items);
+						var item = forceSingleItem(data.items).Project;
 						
 						var func = arguments.callee;
 						var params = handleParamsInCommand(func, data, handler.addDependencyTooltip);
