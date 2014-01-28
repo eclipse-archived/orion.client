@@ -16,10 +16,13 @@ define([
 	'javascript/outliner'
 ], function(Assert, ASTManager, Deferred, Outliner) {
 	
-	var astManager = new ASTManager();
+	var astManager = new ASTManager.ASTManager();
 	var outliner = new Outliner.JSOutliner(astManager);
 	var context = {
 		text: "",
+		/**
+		 * gets the text
+		 */
 		getText: function() {
 			return new Deferred().resolve(this.text);
 		}
