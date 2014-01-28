@@ -131,10 +131,10 @@ define([
 		this.treeRoot = {};
 		this.parent = lib.node(options.parentId);	
 		this.toolbarId = this.parent.id + "Tool"; //$NON-NLS-0$
-		this.fileActionsScope = "fileActions"; //$NON-NLS-0$
-		this.editActionsScope = "editActions"; //$NON-NLS-0$
-		this.viewActionsScope = "viewActions"; //$NON-NLS-0$
-//		this.actionsSections = [this.fileActionsScope, this.editActionsScope, this.viewActionsScope];
+		this.fileActionsScope = "folderNavfileActions"; //$NON-NLS-0$
+		this.editActionsScope = "folderNaveditActions"; //$NON-NLS-0$
+		this.viewActionsScope = "folderNavviewActions"; //$NON-NLS-0$
+		this.actionsSections = [this.fileActionsScope, this.editActionsScope, this.viewActionsScope];
 	}
 	FolderNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(FolderNavExplorer.prototype, /** @lends orion.FolderNavExplorer.prototype */ {
@@ -147,59 +147,67 @@ define([
 		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
-//			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.serviceRegistry;
-//			var fileActionsScope = this.fileActionsScope;
-//			var editActionsScope = this.editActionsScope;
-//			var viewActionsScope = this.viewActionsScope;
-//			
-//			commandRegistry.registerSelectionService(fileActionsScope, this.selection);
-//			commandRegistry.registerSelectionService(editActionsScope, this.selection);
-//			commandRegistry.registerSelectionService(viewActionsScope, this.selection);
-//
-//			var parent = lib.node(this.parentId);
-//			var renameBinding = new KeyBinding(113); // F2
-//			var delBinding = new KeyBinding(46); // Delete
-//			var cutBinding = new KeyBinding('x', true); /* Ctrl+X */ //$NON-NLS-0$
-//			var copySelections = new KeyBinding('c', true); /* Ctrl+C */ //$NON-NLS-0$
-//			var pasteSelections = new KeyBinding('v', true); /* Ctrl+V */ //$NON-NLS-0$
-//			pasteSelections.domScope = copySelections.domScope = delBinding.domScope = renameBinding.domScope = parent.id; //$NON-NLS-0$
-//			pasteSelections.scopeName = copySelections.scopeName = delBinding.scopeName = renameBinding.scopeName = messages.FolderNavigator; //$NON-NLS-0$
-//
-//			// New actions
-//			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.newFile" + this.commandsId, 1, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.newFolder" + this.commandsId, 2, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(fileActionsScope, "orion.new.project" + this.commandsId, 3, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(fileActionsScope, "orion.new.linkProject" + this.commandsId, 4, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-//
-//			// Import actions
-//			commandRegistry.registerCommandContribution(fileActionsScope, "orion.import" + this.commandsId, 1, "orion.menuBarFileGroup/orion.importGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(fileActionsScope, "orion.importZipURL" + this.commandsId, 2, "orion.menuBarFileGroup/orion.importGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(fileActionsScope, "orion.importSFTP" + this.commandsId, 3, "orion.menuBarFileGroup/orion.importGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-//
-//			// Export actions
-//			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.downloadFile" + this.commandsId, 1, "orion.menuBarFileGroup/orion.exportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.exportSFTPCommand" + this.commandsId, 2, "orion.menuBarFileGroup/orion.exportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-//
-//			// Edit actions
-//			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.renameResource" + this.commandsId, 1, "orion.menuBarEditGroup/orion.renameGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.cut" + this.commandsId, 2, "orion.menuBarEditGroup/orion.clipboardGroup", false, cutBinding); //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.copySelections" + this.commandsId, 3, "orion.menuBarEditGroup/orion.clipboardGroup", false, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.pasteSelections" + this.commandsId, 4, "orion.menuBarEditGroup/orion.clipboardGroup", false, pasteSelections); //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.deleteFile" + this.commandsId, 5, "orion.menuBarEditGroup/orion.deleteGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWith" + this.commandsId, 6, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-//			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWithEachOther" + this.commandsId, 7, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-//
-//			if(serviceRegistry) {
-//				FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
-//			}
-//			if (serviceRegistry) {
-//				return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, viewActionsScope, 3, "orion.menuBarViewGroup", true); //$NON-NLS-0$
-//			}
+			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.serviceRegistry;
+			var fileActionsScope = this.fileActionsScope;
+			var editActionsScope = this.editActionsScope;
+			var viewActionsScope = this.viewActionsScope;
+			
+			commandRegistry.addCommandGroup(fileActionsScope, "orion.menuBarFileGroup", 1000, messages["File"], null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(editActionsScope, "orion.menuBarEditGroup", 100, messages["Edit"], null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$	
+			
+			commandRegistry.addCommandGroup(fileActionsScope, "orion.newContentGroup", 0, messages["New"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(fileActionsScope, "orion.importGroup", 100, messages["Import"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(fileActionsScope, "orion.exportGroup", 1001, messages["Export"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			commandRegistry.registerSelectionService(fileActionsScope, this.selection);
+			commandRegistry.registerSelectionService(editActionsScope, this.selection);
+			commandRegistry.registerSelectionService(viewActionsScope, this.selection);
+
+			var parent = lib.node(this.parentId);
+			var renameBinding = new KeyBinding(113); // F2
+			var delBinding = new KeyBinding(46); // Delete
+			var cutBinding = new KeyBinding('x', true); /* Ctrl+X */ //$NON-NLS-0$
+			var copySelections = new KeyBinding('c', true); /* Ctrl+C */ //$NON-NLS-0$
+			var pasteSelections = new KeyBinding('v', true); /* Ctrl+V */ //$NON-NLS-0$
+			pasteSelections.domScope = copySelections.domScope = delBinding.domScope = renameBinding.domScope = parent.id; //$NON-NLS-0$
+			pasteSelections.scopeName = copySelections.scopeName = delBinding.scopeName = renameBinding.scopeName = messages.FolderNavigator; //$NON-NLS-0$
+
+			// New actions
+			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.newFile" + this.commandsId, 1, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.newFolder" + this.commandsId, 2, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(fileActionsScope, "orion.new.project" + this.commandsId, 3, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(fileActionsScope, "orion.new.linkProject" + this.commandsId, 4, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+			// Import actions
+			commandRegistry.registerCommandContribution(fileActionsScope, "orion.import" + this.commandsId, 1, "orion.menuBarFileGroup/orion.importGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(fileActionsScope, "orion.importZipURL" + this.commandsId, 2, "orion.menuBarFileGroup/orion.importGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(fileActionsScope, "orion.importSFTP" + this.commandsId, 3, "orion.menuBarFileGroup/orion.importGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+
+			// Export actions
+			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.downloadFile" + this.commandsId, 1, "orion.menuBarFileGroup/orion.exportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.exportSFTPCommand" + this.commandsId, 2, "orion.menuBarFileGroup/orion.exportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+
+			// Edit actions
+			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.renameResource" + this.commandsId, 1, "orion.menuBarEditGroup/orion.renameGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.cut" + this.commandsId, 2, "orion.menuBarEditGroup/orion.clipboardGroup", false, cutBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.copySelections" + this.commandsId, 3, "orion.menuBarEditGroup/orion.clipboardGroup", false, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.pasteSelections" + this.commandsId, 4, "orion.menuBarEditGroup/orion.clipboardGroup", false, pasteSelections); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.deleteFile" + this.commandsId, 5, "orion.menuBarEditGroup/orion.deleteGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWith" + this.commandsId, 6, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWithEachOther" + this.commandsId, 7, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+
+			if(serviceRegistry) {
+				FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
+			}
+			if (serviceRegistry) {
+				return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, viewActionsScope, 3, "orion.menuBarViewGroup", true); //$NON-NLS-0$
+			}
 			return new Deferred().resolve();
 		},
 		updateCommands: function(selections) {
 			if(this.serviceRegistry) {
-				FileCommands.updateNavTools(this.serviceRegistry, this.commandRegistry, this, this.fileActionsScope, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], this.treeRoot, true);
+				FileCommands.updateNavTools(this.serviceRegistry, this.commandRegistry, this, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], this.treeRoot, true);
 			}
 		}
 	});
