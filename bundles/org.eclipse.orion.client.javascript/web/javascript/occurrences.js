@@ -1,6 +1,6 @@
  /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -30,6 +30,8 @@ define([
 		occurrences: [],
 		scopes: [],
 		context: null,
+		thisCheck: false,
+		callExpressions: [],
 		GENERAL: 1,
 		FUNCTION: 2,
 		
@@ -49,7 +51,7 @@ define([
 				this.scopes = [{range: node.range, occurrences: []}];
 				this.defnode = null;
 				this.defscope = null;
-			} else if (this.context.node.type === Estraverse.Syntax.ThisExpression) {
+			} else if (this.thisCheck) {
 				return this.enterThis(node);
 			} else {
 				switch(node.type) {
@@ -310,9 +312,24 @@ define([
 				this.visitor = new Visitor();
 				this.visitor.enter = this.visitor.enter.bind(this.visitor);
 				this.visitor.leave = this.visitor.leave.bind(this.visitor);
-			} 
+			}
+			this.visitor.thisCheck = context.node && context.node.type === Estraverse.Syntax.ThisExpression;
 			this.visitor.context = context;
 			return this.visitor;			
+		},
+		
+		/**
+		 * @description Computes the node name to use while searching
+		 * @function
+		 * @private
+		 * @param {Object} node The AST node
+		 * @returns {String} The node name to use while seraching
+		 */
+		_nameFromNode: function(node) {
+			switch(node.type) {
+				case Estraverse.Syntax.Identifier: return node.name;
+				case Estraverse.Syntax.ThisExpression: return 'this';
+			}
 		},
 		
 		/**
@@ -326,25 +343,20 @@ define([
 		 */
 		computeOccurrences: function(editorContext, ctxt) {
 			var that = this;
-			var word;
-			return editorContext.getText().then(function(text) {
-				word = Finder.findWord(text, ctxt.selection.start);
-				if(word) {
-					return that.astManager.getAST(editorContext);
-				}
-			}).then(function(ast) {
+			return this.astManager.getAST(editorContext).then(function(ast) {
 				if(ast) {
 					var node = Finder.findNode(ctxt.selection.start, ast);
-					var context = {
-						start: ctxt.selection.start,
-						end: ctxt.selection.end,
-						word: word,
-						node: node,
-						mScope: null
-					};
-					var visitor = that.getVisitor(context);
-					Estraverse.traverse(ast, visitor);
-					return visitor.occurrences;
+					if(node) {
+						var context = {
+							start: ctxt.selection.start,
+							end: ctxt.selection.end,
+							word: that._nameFromNode(node),
+							node: node,
+						};
+						var visitor = that.getVisitor(context);
+						Estraverse.traverse(ast, visitor);
+						return visitor.occurrences;
+					}
 				}
 				return [];
 			});

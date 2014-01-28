@@ -20,6 +20,9 @@ define([
 	var occurrences = new Occurrences.JavaScriptOccurrences(astManager);
 	var editorContext = {
 		text: "",
+		/**
+		 * get the text
+		 */
 		getText: function() {
 			return new Deferred().resolve(this.text);
 		}
