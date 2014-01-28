@@ -854,8 +854,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						return;
 					}
 					var item = forceSingleItem(data.items);
-					progress.progress(projectClient.createProject(item.Location, {Name: name}), "Creating project " + name).then(function(project){
-						dispatchNewProject(item, project);
+					fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+						progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}), "Creating project " + name).then(function(project){
+							dispatchNewProject(workspace, project);
+						});
 					});
 				},
 			visibleWhen: function(item) {
@@ -883,8 +885,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 							return;
 						}
 						var item = forceSingleItem(data.items);
-						progress.progress(projectClient.createProject(item.Location, {Name: name, ContentLocation: url}), "Creating project " + name).then(function(project){
-							dispatchNewProject(item, project);
+						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name, ContentLocation: url}), "Creating project " + name).then(function(project){
+								dispatchNewProject(workspace, project);
+							});
 						});
 					},
 				visibleWhen: function(item) {
@@ -907,15 +911,18 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						return;
 					}
 					var item = forceSingleItem(data.items);
-					progress.progress(projectClient.createProject(item.Location, {Name: name}), "Creating project " + name).then(function(projectInfo){
-						progress.progress(fileClient.read(projectInfo.ContentLocation, true)).then(function(projectMetadata){
-							var dialog = new ImportDialog.ImportDialog({
-								importLocation: projectMetadata.ImportLocation,
-								func: function() {
-									dispatchNewProject(item, projectInfo);
-								}
+					
+					fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+						progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}), "Creating project " + name).then(function(projectInfo){
+							progress.progress(fileClient.read(projectInfo.ContentLocation, true)).then(function(projectMetadata){
+								var dialog = new ImportDialog.ImportDialog({
+									importLocation: projectMetadata.ImportLocation,
+									func: function() {
+										dispatchNewProject(workspace, projectInfo);
+									}
+								});
+								dialog.show();
 							});
-							dialog.show();
 						});
 					});
 				},

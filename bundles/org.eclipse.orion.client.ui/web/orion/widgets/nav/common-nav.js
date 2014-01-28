@@ -365,7 +365,7 @@ define([
 	
 					return dependencyTypesDef;
 				}
-			}); //$NON-NLS-0$
+			}.bind(this)); //$NON-NLS-0$
 		},
 		updateCommands: function(selections) {
 			this.createActionSections();
