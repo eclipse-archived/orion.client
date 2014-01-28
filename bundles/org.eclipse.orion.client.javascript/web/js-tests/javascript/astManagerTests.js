@@ -39,7 +39,7 @@ define([
 				return this.ast;
 			}
 		};
-		var astManager = new ASTManager();
+		var astManager = new ASTManager.ASTManager();
 		return {
 			astManager: astManager,
 			editorContext: mockEditorContext,

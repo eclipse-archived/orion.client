@@ -60,7 +60,7 @@ define([
 	/**
 	 * Create the AST manager
 	 */
-	var astManager = new ASTManager();
+	var astManager = new ASTManager.ASTManager();
 
 	/**
 	 * Register AST manager as Model Change listener

@@ -12,8 +12,10 @@
 /*global define*/
 define([
 	"eslint",
-	"orion/objects"
-], function(eslint, objects) {
+	"orion/objects",
+	"javascript/astManager",
+	"javascript/finder"
+], function(eslint, Objects, ASTManager, Finder) {
 	// Should have a better way of keeping this up-to-date with ./load-rules-async.js
 	var config = {
 		// 0:off, 1:warning, 2:error
@@ -27,6 +29,13 @@ define([
 			"missing-func-decl-doc": [0, 'decl'], //$NON-NLS-0$ //$NON-NLS-1$
 			"missing-func-expr-doc": [0, 'expr'] //$NON-NLS-0$ //$NON-NLS-1$
 		},
+		/**
+		 * @description Sets the given rule to the given enabled value
+		 * @function
+		 * @private
+		 * @param {String} ruleId The id of the rule to change
+		 * @param {Number} value The vlaue to set the rule to
+		 */
 		setOption: function(ruleId, value) {
 			if (typeof value === "number") {
 				if(Array.isArray(this.rules[ruleId])) {
@@ -43,6 +52,7 @@ define([
 	 * @description Creates a new ESLintValidator
 	 * @constructor
 	 * @public
+	 * @param {javascript.ASTManager} astManager The AST manager backing this validator
 	 * @returns {ESLintValidator} Returns a new validator
 	 */
 	function ESLintValidator(astManager) {
@@ -91,6 +101,7 @@ define([
 		} else if (typeof e.index === "number") { //$NON-NLS-0$
 			// Esprima parse error
 			start = e.index;
+			end = e.end ? e.end : start;
 		}
 		var prob = {
 			description: e.message,
@@ -101,29 +112,44 @@ define([
 		return prob;
 	}
 
-	objects.mixin(ESLintValidator.prototype, {
+	Objects.mixin(ESLintValidator.prototype, {
 		/**
-		 * @descritpion Extracts any errors captured by the tolerant esprima parser and returns them
+		 * @descritpion Extracts any errors captured by the tolerant Esprima parser and returns them
 		 * @function
 		 * @private
-		 * @param {esprima.ASTNode} ast The AST
+		 * @param {esprima.AST} ast The AST
 		 * @returns {esprima.Error[]} The array of AST errors (if any)
 		 */
 		_extractParseErrors: function(ast) {
 			var errors = [], errorMap = Object.create(null);
-			(ast.errors || []).forEach(function(error) {
-				var msg = error.message, match;
-				// Errors come as 'Line nn: Unexpected foo'. Strip off the first part
-				if ((match = /^Line \d+: /.exec(msg))) {
-					error.message = msg = "Parse error: " + msg.substring(match.index + match[0].length) + ".";
+			var asterrors = ast.errors;
+			if(asterrors) {
+				var len = asterrors.length;
+				for(var i = 0; i < len; i++) {
+					var error = asterrors[i];
+					var msg = error.message;
+					if(errorMap[error.index] === msg) {
+						continue;
+					}
+					errorMap[error.index] = msg;
+					if(error.type) {
+						var token;
+						switch(error.type) {
+							case ASTManager.ErrorTypes.Unexpected:
+								token = Finder.findToken(error.index, ast.tokens);
+								error.message = msg = "Syntax error on token '"+token.value+"', delete this token.";
+								error.related = error.node = token;
+								break;
+							case ASTManager.ErrorTypes.EndOfInput:
+								token = Finder.findToken(error.index, ast.tokens);
+								error.message = "Syntax error, incomplete statement.";
+								error.related = error.node = token;
+								break;
+						}
+					}
+					errors.push(error);
 				}
-				// Hack to filter out duplicate error produced by our esprima, having same index and message as previous error.
-				if (errorMap[error.index] === msg) {
-					return;
-				}
-				errorMap[error.index] = msg;
-				errors.push(error);
-			});
+			}
 			return errors;
 		},
 		/**

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -23,7 +23,7 @@ define([
 		 * @description Finds the word from the start position
 		 * @function
 		 * @public
-		 * @memberof javascript.Wordfinder
+		 * @memberof javascript.Finder
 		 * @param {String} text The text of the source to find the word in
 		 * @param {Number} start The current start position of the carat
 		 * @returns {String} Returns the computed word from the given string and offset or <code>null</code>
@@ -64,7 +64,7 @@ define([
 		 * @description Finds the AST node for the given offset
 		 * @function
 		 * @public
-		 * @memberof javascript.WordFinder
+		 * @memberof javascript.Finder
 		 * @param {Number} offset The offset into the source file
 		 * @param {Object} ast The AST to search
 		 * @returns The AST node at the given offset or <code>null</code> if it could not be computed.
@@ -73,6 +73,9 @@ define([
 			var found = null;
 			if(ast) {
 				Estraverse.traverse(ast, {
+					/**
+					 * start visiting an AST node
+					 */
 					enter: function(node) {
 						if(node.type && node.range) {
 							//only check nodes that are typed, we don't care about any others
@@ -87,6 +90,55 @@ define([
 				});
 			}
 			return found;
+		},
+		
+		/**
+		 * @name findToken
+		 * @description Finds the token in the given token stream for the given start offset
+		 * @function
+		 * @public
+		 * @memberof javascript.Finder
+		 * @param {Number} offset The offset intot the source
+		 * @param {Array|Object} tokens The array of tokens to search
+		 * @returns {Object} The AST token that starts at the given start offset
+		 */
+		findToken: function(offset, tokens) {
+			if(offset < 0) {
+				return null;
+			}
+			var min = 0,
+				max = tokens.length-1,
+				token, 
+				idx = 0;
+				token = tokens[0];
+			if(offset >= token.range[0] && offset < token.range[1]) {
+				return token;
+			}
+			token = tokens[max];
+			if(offset > token.range[1]) {
+				return null;
+			}
+			if(offset >= token.range[0] && offset < token.range[1]) {
+				return token;
+			}
+			token = null;
+			while(min <= max) {
+				idx = Math.floor((min + max) / 2);
+				token = tokens[idx];
+				if(offset < token.range[0]) {
+					max = idx-1;
+				}
+				else if(offset >= token.range[1]) {
+					min = idx+1;
+				}
+				else if(offset >= token.range[0] && offset < token.range[1]) {
+					return token;
+				}
+				if(min === max) {
+					return tokens[min];
+				}
+			}
+			return null;
 		}
 	};
 

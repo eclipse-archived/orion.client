@@ -16,7 +16,7 @@ define([
 	'javascript/occurrences'
 ], function(Assert, ASTManager, Deferred, Occurrences) {
 	
-	var astManager = new ASTManager();
+	var astManager = new ASTManager.ASTManager();
 	var occurrences = new Occurrences.JavaScriptOccurrences(astManager);
 	var editorContext = {
 		text: "",

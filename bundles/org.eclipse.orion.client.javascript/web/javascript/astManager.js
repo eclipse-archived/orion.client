@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -15,7 +15,21 @@ define([
 	'orion/Deferred',
 	'orion/objects',
 	'orion/serialize'
-], function(_, Deferred, objects, Serialize) {
+], function(Esprima, Deferred, Objects, Serialize) {
+	/**
+	 * @description Object of error types
+	 * @since 5.0
+	 */
+	var ErrorTypes = {
+		/**
+		 * @description Something unexpected has been found while parsing, most commonly a syntax error
+		 */
+		Unexpected: 1,
+		/**
+		 * @description A Syntax problem that reports the last entered token as the problem
+		 */
+		EndOfInput: 2
+	};
 
 	/**
 	 * Provides a shared AST.
@@ -25,26 +39,8 @@ define([
 	function ASTManager() {
 		this.cache = null;
 	}
-	function emptyAST(text) {
-		var charCount = (text && typeof text.length === "number") ? text.length : 0;
-		return {
-			type: "Program", //$NON-NLS-0$
-			body: [],
-			comments: [],
-			tokens: [],
-			range: [0, charCount]
-		};
-	}
-	objects.mixin(ASTManager.prototype, /** @lends javascript.ASTManager.prototype */ {
-		/**
-		 * @description Object of error types
-		 */
-		ErrorTypes: {
-			/**
-			 * @description Something unexpected has been found while parsing, most commonly a syntax error
-			 */
-			Unexpected: "unexp"	
-		},
+	
+	Objects.mixin(ASTManager.prototype, /** @lends javascript.ASTManager.prototype */ {
 		/**
 		 * @param {Object} editorContext
 		 * @returns {orion.Promise} A promise resolving to the AST.
@@ -74,9 +70,9 @@ define([
 					tokens: true
 				});
 			} catch (e) {
-				// The "tolerant" esprima sometimes blows up from parse errors in initial statements of code.
+				// The "tolerant" Esprima sometimes blows up from parse errors in initial statements of code.
 				// Just return an empty AST with the parse error.
-				ast = emptyAST(text);
+				ast = this._emptyAST(text);
 				ast.errors = [e];
 			}
 			if (ast.errors) {
@@ -84,6 +80,23 @@ define([
 				ast.errors = ast.errors.map(Serialize.serializeError);
 			}
 			return ast;
+		},
+		/**
+		 * @description Returns an empty AST in the event a parse failed with a thrown exception
+		 * @function
+		 * @private
+		 * @param {String} text The text that failed to parse
+		 * @returns {Object} A new, empty AST object
+		 */
+		_emptyAST: function(text) {
+			var charCount = (text && typeof text.length === "number") ? text.length : 0;
+			return {
+				type: "Program", //$NON-NLS-0$
+				body: [],
+				comments: [],
+				tokens: [],
+				range: [0, charCount]
+			};
 		},
 		/**
 		 * @description Computes the problem type from the error and sets a 'type' property
@@ -96,11 +109,12 @@ define([
 			if(errors && Array.isArray(errors)) {
 				errors.forEach(function(error) {
 					var msg = error.message;
-					if(msg) {
-						if(msg.indexOf('token') > -1 ||	msg.indexOf('identifier') > -1 || 
-							msg.indexOf('string') > -1 || msg.indexOf('number') > -1) {
-							error.type = 'unexp';
-							return;
+					//first sanitize it
+					error.message = msg = msg.replace(/^Line \d+: /, '');
+					if(/^Unexpected/.test(msg)) {
+						error.type = ErrorTypes.Unexpected;
+						if(/end of input$/.test(msg)) {
+							error.type = ErrorTypes.EndOfInput;
 						}
 					}
 				});
@@ -114,5 +128,7 @@ define([
 			this.cache = null;
 		}
 	});
-	return ASTManager;
+	return {
+			ASTManager : ASTManager,
+			ErrorTypes : ErrorTypes};
 });
