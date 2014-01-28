@@ -346,21 +346,48 @@ define([
 			return this.astManager.getAST(editorContext).then(function(ast) {
 				if(ast) {
 					var node = Finder.findNode(ctxt.selection.start, ast);
-					if(node) {
-						var context = {
-							start: ctxt.selection.start,
-							end: ctxt.selection.end,
-							word: that._nameFromNode(node),
-							node: node,
-						};
-						var visitor = that.getVisitor(context);
-						Estraverse.traverse(ast, visitor);
-						return visitor.occurrences;
+					
+					// Determine if the selected node is valid, currently we exclude literals and comments
+					if (!node) {
+						return [];
 					}
+					// Skip finding occurrences when we are in literals
+					if (node.type === Estraverse.Syntax.Literal){
+						return [];
+					}
+					// Skip finding occurrences when we are in comments
+					if (ast.comments){
+						for (var i=0; i<ast.comments.length; i++) {
+							// Selection starts in a comment
+							if (ctxt.selection.start >= ast.comments[i].range[0] && ctxt.selection.start < ast.comments[i].range[1]){
+								return [];
+							// Selection ends in a comment
+							} else if (ctxt.selection.end > ast.comments[i].range[0] && ctxt.selection.end <= ast.comments[i].range[1]){
+								return [];
+							// Selection contains a comment
+							} else if (ast.comments[i].range[0] >= ctxt.selection.start && ast.comments[i].range[1] <= ctxt.selection.end){
+								return [];
+							// Comment nodes are assumed to be ordered, so break out early if selection has been passed
+							} else if (ast.comments[i].range[0] > ctxt.selection.end){
+								break;
+							}
+						}
+					}
+
+					var context = {
+						start: ctxt.selection.start,
+						end: ctxt.selection.end,
+						word: that._nameFromNode(node),
+						node: node,
+					};
+					var visitor = that.getVisitor(context);
+					Estraverse.traverse(ast, visitor);
+					return visitor.occurrences;
 				}
 				return [];
 			});
 		}
+		
 	});
 	
 	JavaScriptOccurrences.prototype.contructor = JavaScriptOccurrences;
