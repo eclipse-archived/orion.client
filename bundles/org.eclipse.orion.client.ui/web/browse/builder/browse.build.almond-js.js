@@ -23,7 +23,8 @@
 	paths: {
         almond: 'requirejs/almond',
         i18n: 'requirejs/i18n',
-        text: 'requirejs/text'
+        text: 'requirejs/text',
+        "orion/extensionCommands": "browse/builder/buildFrom/emptyExtensionCommands"
 	},
 	name: "almond",
 	include: "browse/builder/browse",
