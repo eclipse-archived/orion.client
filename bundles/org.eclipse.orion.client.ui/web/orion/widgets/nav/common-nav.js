@@ -93,6 +93,9 @@ define([
 			}
 		};
 		this.selection.addEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
+		mGlobalCommands.getMainSplitter().splitter.addEventListener("toggle", this._splitterToggleListener = function(e) { //$NON-NLS-0$
+			this.updateCommands();
+		}.bind(this));
 		this.commandsRegistered = this.registerCommands();
 		
 		this._createContextMenu();
@@ -184,7 +187,10 @@ define([
 			});
 			this.editorInputManager.removeEventListener("InputChanged", this.editorInputListener); //$NON-NLS-0$
 			this.selection.removeEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
-			
+			var mainSplitter = mGlobalCommands.getMainSplitter();
+			if(mainSplitter) {
+				mainSplitter.splitter.removeEventListener("toggle", this._splitterToggleListener); //$NON-NLS-0$
+			}
 			if (this._contextMenu) {
 				this._contextMenu.destroy();
 				this._contextMenu = null;
@@ -371,12 +377,13 @@ define([
 			}.bind(this)); //$NON-NLS-0$
 		},
 		updateCommands: function(selections) {
+			var visible = this.isCommandsVisible();
 			this.createActionSections();
 			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
-			commandRegistry.registerSelectionService(this.fileActionsScope, this.selection);
-			commandRegistry.registerSelectionService(this.editActionsScope, this.selection);
-			commandRegistry.registerSelectionService(this.viewActionsScope, this.selection);
-			commandRegistry.registerSelectionService(this.contextMenuActionsScope, this.selection);
+			commandRegistry.registerSelectionService(this.fileActionsScope, visible ? this.selection : null);
+			commandRegistry.registerSelectionService(this.editActionsScope, visible ? this.selection : null);
+			commandRegistry.registerSelectionService(this.viewActionsScope, visible ? this.selection : null);
+			commandRegistry.registerSelectionService(this.contextMenuActionsScope, visible ? this.selection : null);
 			FileCommands.updateNavTools(this.registry, commandRegistry, this, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], treeRoot, true);
 			commandRegistry.destroy(this.toolsActionsScope);
 			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
