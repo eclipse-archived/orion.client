@@ -618,6 +618,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				
 			},
 			visibleWhen: function(item) {
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
 				return item.type==="Project" || explorer.treeRoot.type==="Project";
 			}
 		});
@@ -627,6 +630,12 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			name: "Convert to project",
 			tooltip: "Convert this folder into a project",
 			id: "orion.project.initProject", //$NON-NLS-0$
+			visibleWhen: function(item) {
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
+				return true;
+			},
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				if(item){
@@ -736,6 +745,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	
 					},
 					visibleWhen: function(item) {
+						if (!explorer.isCommandsVisible()) {
+							return false;
+						}
 						return item.type==="Project" || explorer.treeRoot.type==="Project";
 					}
 				};
@@ -792,6 +804,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	
 					},
 					visibleWhen: function(item) {
+						if (!explorer.isCommandsVisible()) {
+							return false;
+						}
 						item = forceSingleItem(item);
 						return item.Location;
 					}
@@ -829,6 +844,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				});
 			},
 			visibleWhen: function(item) {
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
 				if(!item.Project || !item.Project.children || !item.Project.ContentLocation){
 					return false;
 				}
@@ -861,6 +879,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					});
 				},
 			visibleWhen: function(item) {
+					if (!explorer.isCommandsVisible()) {
+						return false;
+					}
 					item = forceSingleItem(item);
 					return(!!item.Location);
 				}
@@ -892,6 +913,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						});
 					},
 				visibleWhen: function(item) {
+						if (!explorer.isCommandsVisible()) {
+							return false;
+						}
 						item = forceSingleItem(item);
 						return(!!item.Location);
 					}
@@ -927,6 +951,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					});
 				},
 			visibleWhen: function(item) {
+					if (!explorer.isCommandsVisible()) {
+						return false;
+					}
 					item = forceSingleItem(item);
 					return(!!item.Location);
 				}
