@@ -291,8 +291,8 @@ define([
 			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWithEachOther", 7, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// View actions
-			commandRegistry.registerCommandContribution(viewActionsScope, "eclipse.downFolder", 0, "orion.menuBarViewGroup", false, downFolder); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(viewActionsScope, "eclipse.upFolder", 1, "orion.menuBarViewGroup", false, upFolder); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(viewActionsScope, "eclipse.downFolder", 1, "orion.menuBarViewGroup", false, downFolder); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(viewActionsScope, "eclipse.upFolder", 0, "orion.menuBarViewGroup", false, upFolder); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// context menu groups
 			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.commonNavContextMenuEditGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$
