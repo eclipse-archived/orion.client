@@ -176,7 +176,7 @@ define({
 	"showBlame": "Show Blame",
 	"languageTools": "Language Tools",
 	"showOccurrences": "Show Occurrences",
-	"contentAssistAutoTrigger": "Automatically Trigger Content Assist",
+	"contentAssistAutoTrigger": "Show Content Assist automatically",
 	"Editor preferences updated": "Editor preferences updated",
 	"Editor defaults restored": "Editor defaults restored",
 	"Theme": "Theme",
