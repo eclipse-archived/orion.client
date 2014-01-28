@@ -95,11 +95,11 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		});
 		pluginRegistry.start().then(function() {
 			this._fileBrowser = new mFileBrowser.FileBrowser({
-				parent: params.parentId, //"fileBrowser", 
+				parent: params.parentId,
 				showBranch: true,
 				showComponent: showComponent,
 				rootName: params.rootName,
-				//maxEditorHeight: 800,
+				maxEditorLines: 100,
 				serviceRegistry: serviceRegistry
 			});
 		}.bind(this));
