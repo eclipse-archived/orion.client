@@ -27,9 +27,10 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 	var PUNCTUATION_SECTION_BEGIN = ".begin"; //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
-	
-	var MAX_CHAR_COUNT = 170;
-	
+
+	var CR = "\r"; //$NON-NLS-0$
+	var NEWLINE = "\n"; //$NON-NLS-0$
+
 	var eolRegex = /$/;
 	var captureReferenceRegex = /\\(\d)/g;
 	var linebreakRegex = /(.*)(?:[\r\n]|$)/g;
@@ -40,20 +41,41 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		var index = startIndex;
 		var initialLastIndex = regex.lastIndex;
 		linebreakRegex.lastIndex = startIndex;
+
 		var currentLine = linebreakRegex.exec(text);
-		while (currentLine && currentLine.index < text.length) {
-			regex.lastIndex = 0;
-			/* skip excessively long lines that will be too slow to evaluate with regex */
-			if (currentLine[1].length < MAX_CHAR_COUNT) {
-				var result = regex.exec(currentLine[1]);
-				if (result) {
-					result.index += index;
-					regex.lastIndex = initialLastIndex;
-					return result;
-				}
+		/*
+		 * Processing of the first line is treated specially, as it may not start at the beginning of a logical line, but
+		 * regex's may be dependent on matching '^'.  To resolve this, compute the full line corresponding to the start
+		 * of the text, even if it begins prior to startIndex, and adjust the regex's lastIndex accordingly to begin searching
+		 * for matches at the correct location.
+		 */
+		var lineString, indexAdjustment;
+		regex.lastIndex = 0;
+		if (currentLine) {
+			var lineStart = currentLine.index;
+			var char = text.charAt(lineStart);
+			while (0 <= lineStart && char !== NEWLINE && char !== CR) {
+				lineStart--;
+				char = text.charAt(lineStart);
 			}
+			lineString = text.substring(lineStart + 1, currentLine.index + currentLine[1].length);
+			regex.lastIndex = indexAdjustment = currentLine.index - lineStart - 1;
+		}
+		while (currentLine && currentLine.index < text.length) {
+			var result = regex.exec(lineString);
+			if (result) {
+				result.index += index;
+				result.index -= indexAdjustment;
+				regex.lastIndex = initialLastIndex;
+				return result;
+			}
+			indexAdjustment = 0;
 			index += currentLine[0].length;
 			currentLine = linebreakRegex.exec(text);
+			if (currentLine) {
+				lineString = currentLine[1];
+				regex.lastIndex = 0;
+			}
 		}
 		regex.lastIndex = initialLastIndex;
 		return null;
