@@ -21,7 +21,7 @@ define(['orion/webui/littlelib'], function(lib) {
 	SideMenu.prototype.LOCAL_STORAGE_NAME = "sideMenuNavigation";
 	SideMenu.prototype.OPEN_STATE = "open";
 	SideMenu.prototype.CLOSED_STATE = "closed";
-	SideMenu.prototype.SIDE_MENU_OPEN_WIDTH = "50px";
+	SideMenu.prototype.SIDE_MENU_OPEN_WIDTH = "40px";
 	SideMenu.prototype.SIDE_MENU_CLOSED_WIDTH = "0";
 	
 	SideMenu.prototype.menuitems = [];
@@ -66,14 +66,18 @@ define(['orion/webui/littlelib'], function(lib) {
 			
 		var sideMenuNavigation = localStorage.getItem(this.LOCAL_STORAGE_NAME);
 		
+		var listAnchor = document.getElementById( this.LIST_ANCHOR_ID );
+		
 		if( sideMenuNavigation ){
 			
 			if( sideMenuNavigation === this.CLOSED_STATE ){
 				this.setSideMenuWidth( this.SIDE_MENU_CLOSED_WIDTH );
+				listAnchor.style.display = 'none';
 			}
 			
 			if( sideMenuNavigation === this.OPEN_STATE ){
 				this.setSideMenuWidth( this.SIDE_MENU_OPEN_WIDTH );
+				listAnchor.style.display = 'list-item';
 			}
 		}
 	}
@@ -111,13 +115,12 @@ define(['orion/webui/littlelib'], function(lib) {
 			
 			if( sideMenuNavigation === this.OPEN_STATE ){
 				newState = this.CLOSED_STATE;	
-				sideMenuWidth = this.SIDE_MENU_CLOSED_WIDTH;
 			}	
 		}
 		
 		localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
 		
-		this.setSideMenuWidth( sideMenuWidth );
+		this.setSideMenu();
 	};
 			
 	SideMenu.prototype.addMenuItem = addMenuItem;	

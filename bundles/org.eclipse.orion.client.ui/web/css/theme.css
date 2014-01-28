@@ -151,6 +151,8 @@ a.currentLocation:hover {
 
 .mainToolbar {
  	background: #eeeeee;
+ 	padding-left: 5px;
+ 	padding-right: 5px;
 	/* border-bottom: 1px solid #ebebeb; */
 	/* padding-left:50px; */
 }
