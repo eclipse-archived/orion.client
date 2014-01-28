@@ -131,10 +131,10 @@ define([
 		this.treeRoot = {};
 		this.parent = lib.node(options.parentId);	
 		this.toolbarId = this.parent.id + "Tool"; //$NON-NLS-0$
-		this.fileActionsScope = "folderNavfileActions"; //$NON-NLS-0$
-		this.editActionsScope = "folderNaveditActions"; //$NON-NLS-0$
-		this.viewActionsScope = "folderNavviewActions"; //$NON-NLS-0$
-		this.actionsSections = [this.fileActionsScope, this.editActionsScope, this.viewActionsScope];
+		this.fileActionsScope = "fileActions"; //$NON-NLS-0$
+		this.editActionsScope = "editActions"; //$NON-NLS-0$
+		this.viewActionsScope = "viewActions"; //$NON-NLS-0$
+//		this.actionsSections = [this.fileActionsScope, this.editActionsScope, this.viewActionsScope];
 	}
 	FolderNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(FolderNavExplorer.prototype, /** @lends orion.FolderNavExplorer.prototype */ {
@@ -144,6 +144,13 @@ define([
 			} else {
 				this.loadResourceList(PageUtil.matchResourceParameters().resource + "?depth=1", false).then(this.loaded.bind(this)); //$NON-NLS-0$
 			}
+		},
+		isCommandsVisible: function() {
+			var mainSplitter = mGlobalCommands.getMainSplitter();
+			if (mainSplitter) {
+				return mainSplitter.splitter.isClosed();
+			}
+			return !this.readonly;
 		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
@@ -160,10 +167,6 @@ define([
 			commandRegistry.addCommandGroup(fileActionsScope, "orion.importGroup", 100, messages["Import"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(fileActionsScope, "orion.exportGroup", 1001, messages["Export"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
-			commandRegistry.registerSelectionService(fileActionsScope, this.selection);
-			commandRegistry.registerSelectionService(editActionsScope, this.selection);
-			commandRegistry.registerSelectionService(viewActionsScope, this.selection);
-
 			var parent = lib.node(this.parentId);
 			var renameBinding = new KeyBinding(113); // F2
 			var delBinding = new KeyBinding(46); // Delete
@@ -206,6 +209,11 @@ define([
 			return new Deferred().resolve();
 		},
 		updateCommands: function(selections) {
+			var commandRegistry = this.commandRegistry;
+			commandRegistry.registerSelectionService(this.fileActionsScope, this.selection);
+			commandRegistry.registerSelectionService(this.editActionsScope, this.selection);
+			commandRegistry.registerSelectionService(this.viewActionsScope, this.selection);
+
 			if(this.serviceRegistry) {
 				FileCommands.updateNavTools(this.serviceRegistry, this.commandRegistry, this, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], this.treeRoot, true);
 			}

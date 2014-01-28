@@ -21,6 +21,7 @@ define([
 	'orion/fileCommands',
 	'orion/projectCommands',
 	'orion/extensionCommands',
+	'orion/globalCommands',
 	'orion/selection',
 	'orion/URITemplate',
 	'orion/PageUtil',
@@ -28,7 +29,7 @@ define([
 	'orion/webui/contextmenu'
 ], function(
 	messages, objects, lib, mExplorer, mNavigatorRenderer, mExplorerNavHandler, mKeyBinding,
-	FileCommands, ProjectCommands, ExtensionCommands, Selection, URITemplate, PageUtil, Deferred, mContextMenu
+	FileCommands, ProjectCommands, ExtensionCommands, mGlobalCommands, Selection, URITemplate, PageUtil, Deferred, mContextMenu
 ) {
 	var FileExplorer = mExplorer.FileExplorer;
 	var KeyBinding = mKeyBinding.KeyBinding;
@@ -243,6 +244,13 @@ define([
 		scopeDown: function(item) {
 			this.scope(item.ChildrenLocation);
 		},
+		isCommandsVisible: function() {
+			var mainSplitter = mGlobalCommands.getMainSplitter();
+			if (mainSplitter) {
+				return !mainSplitter.splitter.isClosed();
+			}
+			return !this.destroyed;
+		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
 			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
@@ -250,11 +258,6 @@ define([
 			var editActionsScope = this.editActionsScope;
 			var viewActionsScope = this.viewActionsScope;
 			var contextMenuActionsScope = this.contextMenuActionsScope;
-			
-			commandRegistry.registerSelectionService(fileActionsScope, this.selection);
-			commandRegistry.registerSelectionService(editActionsScope, this.selection);
-			commandRegistry.registerSelectionService(viewActionsScope, this.selection);
-			commandRegistry.registerSelectionService(contextMenuActionsScope, this.selection);
 		
 			var renameBinding = new KeyBinding(113); // F2
 			var delBinding = new KeyBinding(46); // Delete
@@ -370,6 +373,10 @@ define([
 		updateCommands: function(selections) {
 			this.createActionSections();
 			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
+			commandRegistry.registerSelectionService(this.fileActionsScope, this.selection);
+			commandRegistry.registerSelectionService(this.editActionsScope, this.selection);
+			commandRegistry.registerSelectionService(this.viewActionsScope, this.selection);
+			commandRegistry.registerSelectionService(this.contextMenuActionsScope, this.selection);
 			FileCommands.updateNavTools(this.registry, commandRegistry, this, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], treeRoot, true);
 			commandRegistry.destroy(this.toolsActionsScope);
 			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$

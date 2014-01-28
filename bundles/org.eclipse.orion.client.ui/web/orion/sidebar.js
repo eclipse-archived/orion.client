@@ -4,8 +4,9 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		'orion/PageUtil',
 		'orion/widgets/nav/mini-nav',
 		'orion/widgets/nav/project-nav',
+		'orion/globalCommands',
 		'i18n!orion/edit/nls/messages'],
-		function(Deferred, objects, mCommands, mOutliner, lib, PageUtil, MiniNavViewMode, ProjectNavViewMode, messages) {
+		function(Deferred, objects, mCommands, mOutliner, lib, PageUtil, MiniNavViewMode, ProjectNavViewMode, mGlobalCommands, messages) {
 
 	/**
 	 * @name orion.sidebar.Sidebar
@@ -71,6 +72,10 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				tooltip: messages["ShowTooltip"],
 				id: "orion.sidebar.viewmode", //$NON-NLS-0$
 				visibleWhen: function(item) {
+					var mainSplitter = mGlobalCommands.getMainSplitter();
+					if (mainSplitter) {
+						return !mainSplitter.splitter.isClosed();
+					}
 					return true;
 				},
 				choiceCallback: this.viewModeMenuCallback.bind(this)
