@@ -998,6 +998,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			var self = this;
 			this.parentNode.addEventListener("keydown", function(evt) { //$NON-NLS-0$
 				if (!evt) { evt = window.event; }
+				if (evt.preventDefault) {
+					evt.preventDefault();
+				}
 				if(evt.keyCode === lib.KEY.ESCAPE) {
 					return mode.cancel(); 
 				} else if(evt.keyCode === lib.KEY.UP) {
@@ -1015,13 +1018,6 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 					return mode.lineDown(0); // select first selectable element starting at the top and moving downwards
 				} else if(evt.keyCode === lib.KEY.END) {
 					return mode.lineUp(mode.getProposals().length - 1); // select first selectable element starting at the bottom and moving up
-				} 
-				if (evt.preventDefault) {
-					evt.preventDefault();
-				} else {
-					evt.cancelBubble = true;
-					evt.returnValue = false;
-					evt.keyCode = 0;
 				}
 				return false;
 			});
