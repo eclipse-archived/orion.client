@@ -565,7 +565,7 @@ define([
 		});
 	};
 	
-		/**
+	/**
 	 * Tests this usage in global
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424756
 	 */
@@ -677,5 +677,100 @@ define([
 		});
 	};
 	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426933
+	 */
+	Tests.test_logicExpression1 = function() {
+		editorContext.text = "function f(p1) { var v = (p1 && p1.foo)};";
+		return occurrences.computeOccurrences(editorContext, setContext(12, 12)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:11, end:13}, {start:26, end:28}, {start:32, end:34}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426933
+	 */
+	Tests.test_logicExpression2 = function() {
+		editorContext.text = "function f(p1) { var v = (p1 && p1.foo)};";
+		return occurrences.computeOccurrences(editorContext, setContext(27, 27)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:11, end:13}, {start:26, end:28}, {start:32, end:34}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426933
+	 */
+	Tests.test_logicExpression3 = function() {
+		editorContext.text = "function f(p1) { var v = (p1 && p1.foo)};";
+		return occurrences.computeOccurrences(editorContext, setContext(33, 33)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:11, end:13}, {start:26, end:28}, {start:32, end:34}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426933
+	 */
+	Tests.test_logicExpression4 = function() {
+		editorContext.text = "var o = { p: function() {function f(p1) { var v = (p1 && p1.foo)}}};";
+		return occurrences.computeOccurrences(editorContext, setContext(37, 37)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:36, end:38}, {start:51, end:53}, {start:57, end:59}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426933
+	 */
+	Tests.test_logicExpression5 = function() {
+		editorContext.text = "var o = { p: function() {function f(p1) { var v = (p1 && p1.foo)}}};";
+		return occurrences.computeOccurrences(editorContext, setContext(52, 52)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:36, end:38}, {start:51, end:53}, {start:57, end:59}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426933
+	 */
+	Tests.test_logicExpression6 = function() {
+		editorContext.text = "var o = { p: function() {function f(p1) { var v = (p1 && p1.foo)}}};";
+		return occurrences.computeOccurrences(editorContext, setContext(58, 58)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:36, end:38}, {start:51, end:53}, {start:57, end:59}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
 	return Tests;
 });

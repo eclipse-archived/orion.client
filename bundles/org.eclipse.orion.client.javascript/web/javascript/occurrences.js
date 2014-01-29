@@ -78,8 +78,7 @@ define([
 						}
 						break;
 					case Estraverse.Syntax.AssignmentExpression:
-						var leftNode = node.left;
-						this.checkId(leftNode);
+						this.checkId(node.left);
 						this.checkId(node.right);
 						break;
 					case Estraverse.Syntax.ArrayExpression: 
@@ -141,6 +140,10 @@ define([
 						break;
 					case Estraverse.Syntax.NewExpression:
 						this.checkId(node.callee, this.FUNCTION, false);
+						break;
+					case Estraverse.Syntax.LogicalExpression:
+						this.checkId(node.left);
+						this.checkId(node.right);
 						break;
 				}
 			}
