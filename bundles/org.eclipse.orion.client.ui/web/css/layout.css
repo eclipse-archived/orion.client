@@ -418,18 +418,24 @@ hard-coded numbers elsewhere.
 /* ----- side menu begin ----- */
 
 .sideMenu{
-    height: calc( 100% - 36px );
     width: 0;
     background: #2f313a;
     float: left;
     position: absolute;
     top: 36px;
+	/* bottom: 36px; $FooterHeight + footer border (1px) */   
+    bottom: 0;
     -webkit-animation: slide 0.5s forwards;
     -webkit-animation-delay: 2s;
     animation: slide 0.5s forwards;
     animation-delay: 2s;
     display:block;
     margin:0;
+}
+
+.sideMenu-maximized {
+	top: 0;
+	bottom: 0;
 }
 
 .sideMenuList{

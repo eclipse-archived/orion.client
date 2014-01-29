@@ -793,16 +793,23 @@ define([
 			callback: function () {
 				var header = lib.node("banner"); //$NON-NLS-0$
 				var footer = lib.node("footer"); //$NON-NLS-0$
+				var sideMenu = lib.node("sideMenu"); //$NON-NLS-0$
 				var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
 				var maximized = header.style.visibility === "hidden"; //$NON-NLS-0$
 				if (maximized) {
 					header.style.visibility = "visible"; //$NON-NLS-0$
 					footer.style.visibility = "visible"; //$NON-NLS-0$
 					content.classList.remove("content-fixedHeight-maximized"); //$NON-NLS-0$
+					if (sideMenu) {
+						sideMenu.classList.remove("sideMenu-maximized"); //$NON-NLS-0$
+					}
 				} else {
 					header.style.visibility = "hidden"; //$NON-NLS-0$
 					footer.style.visibility = "hidden"; //$NON-NLS-0$
 					content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
+					if (sideMenu) {
+						sideMenu.classList.add("sideMenu-maximized"); //$NON-NLS-0$
+					}
 				}
 				getGlobalEventTarget().dispatchEvent({type: "toggleTrim", maximized: !maximized}); //$NON-NLS-0$
 				return true;
