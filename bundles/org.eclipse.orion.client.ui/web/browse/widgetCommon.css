@@ -233,6 +233,7 @@
 	background-color: #fafafa;
 	border: 1px solid #ddd;
 	border-radius: 3px;
+	font-size: 100%;
 }
 
 .orionMarkdown pre {
@@ -245,6 +246,11 @@
 	margin: 0 2px;
 }
 
+.orionMarkdown p {
+	font-size: 1em;
+	padding: 0 2px;
+}
+
 .orionMarkdown pre code {
 	background-color: transparent;
     padding: 0;
@@ -254,7 +260,7 @@
 }
 
 .orionMarkdown h1 {
-	font-size:1.5em;
+	font-size:1.3em;
 	font-weight: bold;
 	color: #6d6d6d;
 	line-height: 36px;
@@ -265,7 +271,15 @@
 }
 
 .orionMarkdown h2 {
-	font-size: 1.1em;
+	font-size: 1.17em;
+	font-weight: bold;
+	color: #6d6d6d;
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+
+.orionMarkdown h3, .orionMarkdown h4, .orionMarkdown h5, .orionMarkdown h6 {
+	font-size: 1.17em;
 	font-weight: bold;
 	color: #6d6d6d;
 	margin-top: 4px;
