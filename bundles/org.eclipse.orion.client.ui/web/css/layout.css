@@ -279,21 +279,9 @@ hard-coded numbers elsewhere.
 
 }
 
-.toolbarTarget {
-	position: absolute;
-	top: 36px;  /* $ToolbarHeight + 2 */
- 	width: 100%;
- 	bottom: 0;
- 	overflow-y: auto;
-}
-
-.toolbarTarget-toolbarHidden {
-	top: 2px;  /* 2 */
-}
-
 .workingTarget {
 	position: absolute;
-	top: 4px;  /* $ToolbarHeight + 2 */
+	top: 2px;  /* $ToolbarHeight + 2 */
  	width: 100%;
  	bottom: 0;
  	overflow-y: auto;
@@ -305,6 +293,18 @@ hard-coded numbers elsewhere.
 	padding-top: 10px;
 	padding-bottom: 5px;
 	background: white;
+}
+
+.toolbarTarget {
+	position: absolute;
+	top: 36px;  /* $ToolbarHeight + 2 */
+ 	width: 100%;
+ 	bottom: 0;
+ 	overflow-y: auto;
+}
+
+.toolbarTarget-toolbarHidden {
+	top: 2px;  /* 2 */
 }
 
 .pageLayoutTarget {
