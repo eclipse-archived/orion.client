@@ -65,7 +65,7 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 				self._onChanging(e);
 			}
 		};
-		baseModel.addEventListener("preChanged", this._listener.onChanged); //$NON-NLS-0$
+		baseModel.addEventListener("postChanged", this._listener.onChanged); //$NON-NLS-0$
 		baseModel.addEventListener("preChanging", this._listener.onChanging); //$NON-NLS-0$
 	}
 
