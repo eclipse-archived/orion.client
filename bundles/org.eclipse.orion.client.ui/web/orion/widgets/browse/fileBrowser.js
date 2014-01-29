@@ -203,7 +203,7 @@ define([
 				target: this._breadCrumbTarget,
 				breadCrumbContainer: bcContainer,
 				makeBreadcrumbLink: function(segment, folderLocation, folder) {this._makeBreadCrumbLink(segment, folderLocation, folder);}.bind(this),
-				makeBreadcrumFinalLink: true,
+				makeBreadcrumFinalLink: false,
 				fileClient: this._fileClient,
 				maxLength: maxLength
 			});

@@ -93,7 +93,7 @@
 	vertical-align: top;
 	padding-top:1px;
 	font-weight: bold;
-	font-size: 8pt;
+	font-size: 1.05em;
 	color: #444;
 	text-decoration: none;
 	line-height: 10pt;
@@ -102,7 +102,6 @@
 
 a.currentLocation:hover {
 	font-weight: bold;
-	font-size: 8pt;
 	color: #F58B0F;
  	text-decoration: none;
 	border-bottom: 1px dotted;
@@ -115,6 +114,12 @@ a.currentLocation:hover {
     vertical-align:middle;
 }
 
+.breadcrumb {
+	font-size: 1.05em;
+	text-decoration: none;
+	color: #3087B3;
+	padding-top: 2px;
+}
 .browserParentDome {
 	min-height: 215px !important;
 }

@@ -54,7 +54,7 @@ define(['require', 'orion/webui/littlelib'], function (require, lib) {
         getNavigatorWorkspaceRootSegment: function () {
             if (this._workspaceRootSegmentName) {
                 var seg;
-                if (this._resource && this._resource.Parents) {
+                if (this._resource && this._resource.Parents && !this._resource.skip) {
                     seg = document.createElement('a'); //$NON-NLS-0$
 					var param = this._workspaceRootURL ? this._workspaceRootURL : "";
                     if (this._makeHref) {
