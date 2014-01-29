@@ -33,7 +33,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		id: "git",
 		nameKey: "Git",
 		nls: "git/nls/gitmessages",
-		imageClass: "core-sprite-cat-git"
+		imageClass: "core-sprite-repository"
 	});
 
 	provider.registerService("orion.page.link", {}, {

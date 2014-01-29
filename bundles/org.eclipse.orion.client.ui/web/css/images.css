@@ -510,6 +510,19 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+/* This is needed for the Git category in SideMenu */
+.core-sprite-repository{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .core-sprite-hamburger:before{ content:'\0041'; }
 .core-sprite-gear:before{ content:'\0042'; }
 .core-sprite-silhouette:before{ content:'\0043'; float: right;}
@@ -534,6 +547,7 @@
 .core-sprite-deploy:before{content:'\0077';}
 .core-sprite-warning:before{content:'\0079';}
 .core-sprite-error:before{content:'\007A';}
+.core-sprite-repository:before{ content:'\0065'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
