@@ -12,6 +12,8 @@
 /*global define*/
 
 define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
+	var keywords = ["false", "null", "true"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
 	var grammars = mShared.grammars;
 	grammars.push({
 		id: "orion.json", //$NON-NLS-0$
@@ -20,7 +22,7 @@ define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/sh
 			{
 				include: "orion.patterns" //$NON-NLS-0$
 			}, {
-				match: "\\b(?:true|false|null)\\b", //$NON-NLS-0$
+				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-0$
 				name: "keyword.control.json" //$NON-NLS-0$
 			}, {
 				/* override orion.patterns#comment_singleline */
@@ -34,6 +36,6 @@ define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/sh
 	return {
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: []
+		keywords: keywords
 	};
 });
