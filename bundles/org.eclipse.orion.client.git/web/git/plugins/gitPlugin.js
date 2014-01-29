@@ -92,7 +92,8 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 	});
 
 	provider.registerService("orion.page.link.related", null, {
-		id: "eclipse.git.status"
+		id: "eclipse.git.status",
+		category: "git"
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
