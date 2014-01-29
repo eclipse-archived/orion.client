@@ -516,7 +516,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 			
 			if (lineIndex === -1) { return; }
 			this._currentGroupAnnotation = groupAnnotation;
-			annotations = annotationModel.getAnnotations(0, model.getCharCount());
+			annotations = annotationModel.getAnnotations();
 			var add = [];
 			while (annotations.hasNext()) {
 				annotation = annotations.next();

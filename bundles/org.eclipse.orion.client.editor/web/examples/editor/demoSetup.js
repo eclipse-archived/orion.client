@@ -124,7 +124,7 @@ define(["require",
 		view.setKeyBinding(new mKeyBinding.KeyBinding('h', true), "collapseAll"); //$NON-NLS-1$ //$NON-NLS-0$
 		view.setAction("collapseAll", function() { //$NON-NLS-0$
 			log("*****************COLLAPSE"); //$NON-NLS-0$
-			var iter = annotationModel.getAnnotations(0, baseModel.getCharCount());
+			var iter = annotationModel.getAnnotations();
 			view.setRedraw(false);
 			while (iter.hasNext()) {
 				var a = iter.next();
@@ -139,7 +139,7 @@ define(["require",
 		view.setKeyBinding(new mKeyBinding.KeyBinding('j', true), "expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
 		view.setAction("expandAll", function() { //$NON-NLS-0$
 			log("*****************EXPAND"); //$NON-NLS-0$
-			var iter = annotationModel.getAnnotations(0, baseModel.getCharCount());
+			var iter = annotationModel.getAnnotations();
 			view.setRedraw(false);
 			while (iter.hasNext()) {
 				var a = iter.next();

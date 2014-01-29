@@ -425,7 +425,7 @@ define([
 				},
 				callback: function(data) {
 					var visible = false;
-					var annotations = editor.getAnnotationModel().getAnnotations(0, editor.getModel().getCharCount());
+					var annotations = editor.getAnnotationModel().getAnnotations();
 					while (annotations.hasNext()) {
 						var annotation = annotations.next();
 						if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_BLAME) {

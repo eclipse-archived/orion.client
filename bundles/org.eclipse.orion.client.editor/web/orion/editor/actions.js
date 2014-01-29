@@ -299,7 +299,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var annotationModel = editor.getAnnotationModel();
 			if(!annotationModel) { return true; }
 			var model = editor.getModel();
-			var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
+			var annotation, iter = annotationModel.getAnnotations();
 			textView.setRedraw(false);
 			while (iter.hasNext()) {
 				annotation = iter.next();

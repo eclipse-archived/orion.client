@@ -431,7 +431,7 @@ exports.DiffTreeNavigator = (function() {
 			if(!annotationModel){
 				return;
 			}
-			var iter = annotationModel.getAnnotations(0, annotationModel.getTextModel().getCharCount());
+			var iter = annotationModel.getAnnotations();
 			var remove = [];
 			while (removeExisting && iter.hasNext()) {
 				var annotation = iter.next();

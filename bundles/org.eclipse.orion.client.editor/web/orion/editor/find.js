@@ -561,7 +561,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				return;
 			}
 			var type = mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH;
-			var iter = annotationModel.getAnnotations(0, annotationModel.getTextModel().getCharCount());
+			var iter = annotationModel.getAnnotations();
 			var remove = [], add;
 			while (iter.hasNext()) {
 				var annotation = iter.next();
