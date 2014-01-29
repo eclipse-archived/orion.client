@@ -136,6 +136,32 @@ define([
 				}
 			}
 			return null;
+		},
+		
+		/**
+		 * @description Finds the doc comment at the given offset. Returns null if there
+		 * is no comment at the given offset
+		 * @function
+		 * @public
+		 * @param {Number} offset The offset into the source
+		 * @param {Object} ast The AST to search
+		 * @returns {Object} Returns the comment node for the given offset or null
+		 */
+		findComment: function(offset, ast) {
+			if(ast.comments) {
+				var comments = ast.comments;
+				var len = comments.length;
+				for(var i = 0; i < len; i++) {
+					var comment = comments[i];
+					if(comment.range[0] <= offset && comment.range[1] > offset) {
+						return comment;
+					} else if(comment.range[0] > offset) {
+						//we've passed the node
+						return null;
+					}
+				}
+				return null;
+			}
 		}
 	};
 

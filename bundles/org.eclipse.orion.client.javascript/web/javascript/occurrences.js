@@ -333,6 +333,26 @@ define([
 		},
 		
 		/**
+		 * @description If we should skip marking occurrences
+		 * @function
+		 * @private
+		 * @param {Object} context The selection context from the editor
+		 * @param {Object} node The AST node
+		 * @param {Object} ast The AST
+		 * @returns {Boolean} True if we shoud skip computing occurrences
+		 */
+		_skip: function(context, node, ast) {
+			if(!node || node.type === Estraverse.Syntax.Literal) {
+				return true;
+			}	
+			var comment = Finder.findComment(context.selection.start, ast);
+			if(comment) {
+				return true;
+			}
+			return false;
+		},
+		
+		/**
 		 * @name computeOccurrences
 		 * @description Callback from the editor to compute the occurrences
 		 * @function
@@ -346,7 +366,7 @@ define([
 			return this.astManager.getAST(editorContext).then(function(ast) {
 				if(ast) {
 					var node = Finder.findNode(ctxt.selection.start, ast);
-					if(node) {
+					if(!that._skip(ctxt, node, ast)) {
 						var context = {
 							start: ctxt.selection.start,
 							end: ctxt.selection.end,

@@ -568,6 +568,120 @@ define([
 				}
 			});
 		},
+		
+		/**
+		 * Find a comment
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
+		 */
+		test_findComment1: function() {
+			var text = "/***/var foo = {f: function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var comment = Finder.findComment(0, ast);
+					if(!comment) {
+						Assert.fail("Should have found a comment");
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a comment
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
+		 */
+		test_findComment2: function() {
+			var text = "/***/var foo = {f: function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var comment = Finder.findComment(4, ast);
+					if(!comment) {
+						Assert.fail("Should have found a comment");
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a comment
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
+		 */
+		test_findComment3: function() {
+			var text = "var foo = {/***/f: function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var comment = Finder.findComment(11, ast);
+					if(!comment) {
+						Assert.fail("Should have found a comment");
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a comment
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
+		 */
+		test_findComment4: function() {
+			var text = "var foo = {/***/f: function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var comment = Finder.findComment(14, ast);
+					if(!comment) {
+						Assert.fail("Should have found a comment");
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a comment
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
+		 */
+		test_findComment5: function() {
+			var text = "/***/function f() {/***/};";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var comment = Finder.findComment(19, ast);
+					if(!comment) {
+						Assert.fail("Should have found a comment");
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a comment
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
+		 */
+		test_findComment6: function() {
+			var text = "/***/function f() {/***/};/***/";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var comment = Finder.findComment(26, ast);
+					if(!comment) {
+						Assert.fail("Should have found a comment");
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
 	};
 	
 	return Tests;
