@@ -292,7 +292,9 @@ define([
 					var id = input.editor;
 					if (!id || id === "orion.editor") { //$NON-NLS-0$
 						var cType = this._contentTypeService.getFileContentType(metadata);
-						if(!mNavigatorRenderer.isImage(cType)) {
+						if(cType.id === "text/x-markdown") {
+							browseViewOptons.isMarkdownView = true;
+						} else if(!mNavigatorRenderer.isImage(cType)) {
 							browseViewOptons.editorView = this._editorView;
 						} else {
 							browseViewOptons.imageView = {};

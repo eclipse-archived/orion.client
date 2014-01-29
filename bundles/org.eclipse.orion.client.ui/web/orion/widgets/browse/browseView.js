@@ -161,6 +161,7 @@ define([
 		this.editorView = options.editorView;
 		this._maxEditorLines = options.maxEditorLines;
 		this.imageView = options.imageView;
+		this.isMarkdownView = options.isMarkdownView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
 		this.clickHandler = options.clickHandler;
@@ -224,8 +225,12 @@ define([
 									this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
 								}.bind(this));
 								this.editor = this.editorView.editor;
+							} else if(this.isMarkdownView) {
+								div = document.createElement("div"); //$NON-NLS-0$
+								this.markdownView.displayContents(div, this._metadata);
+								this._foldersSection.setContent(div);
 							} else if(this.imageView) {
-								//this._foldersSection.setContent(this.imageView.image);
+								//Do nothing, updateImage will be called.
 							} else {
 								this.folderNavExplorer = new FolderNavExplorer({
 									parentId: navNode,
@@ -289,7 +294,7 @@ define([
 			if(this._metadata.Projects){ //this is a workspace root
 				this.displayWorkspaceView();
 			}
-			if(this.editorView || this.imageView) {
+			if(this.editorView || this.imageView || this.isMarkdownView) {
 				this.displayBrowseView(this._metadata);
 			} else if(this._metadata.Children){
 				this.displayBrowseView(this._metadata);
