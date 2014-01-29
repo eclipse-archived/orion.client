@@ -612,7 +612,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 								if (!stylesAtOffset) {
 									// lazily initialize this variable to avoid getting the styles
 									// for every model modification, only ones that may trigger
-									stylesAtOffset = this._styleAccessor.getStyles(caretOffset);
+									stylesAtOffset = this._styleAccessor.getStyles(caretOffset - 1);
 								}
 								// check if any of the styles match the excludedStyles RegExp
 								isExcluded = stylesAtOffset.some(function (element) {
