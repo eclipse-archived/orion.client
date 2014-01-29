@@ -744,7 +744,6 @@
 	line-height: normal;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
-	padding-right: 5px;
 	background: none;
 	border: none;
 	margin: 0;
@@ -997,17 +996,31 @@
 	font-weight: bold;
 }
 .contentassist > div:hover {
-	background-color: #fab467;
+	background-color: #fab467; 
+	background: linear-gradient(#fabb76, #e1a25c);
+	border-radius: 3px;
 }
 .contentassist>div.proposal-hr:hover {
-	background-color: white;
+	background-color: white; 
+	background: none;
 }
 .contentassist .selected {
-	 background-color: rgb(48, 135, 179);
-	 color: white;
+	background-color: rgb(48, 135, 179); 
+	background: linear-gradient(rgb(60, 150, 190), rgb(30, 120, 160));
+	border-radius: 3px;
+	color: white;
+}
+.contentassist .cloneProposal {
+	box-shadow: rgba(0, 0, 0, 0.9) 2px 2px 8px;
+	position: fixed;
+	z-index: 1000; 
 }
 .contentassist>div {
-	padding: 1px 3px 0 5px;
+	padding: 1px 3px 1px 5px;
+}
+.cloneWrapper {
+	display: block;
+	z-index: 1000; 
 }
 .comment {
 	color: #3C802C;
@@ -1569,6 +1582,16 @@ a.currentLocation:hover {
 	border-radius: 2px;
 	vertical-align:middle;
 }
+.commandHalfButton_left, .commandHalfButton_left:hover, .commandHalfButton_left:focus {
+    border-top-right-radius:0 !important;
+	border-bottom-right-radius:0 !important;
+	margin-right: 0 !important;
+}
+.commandHalfButton_right, .commandHalfButton_right:hover, .commandHalfButton_right:focus {
+    border-top-left-radius:0 !important;
+	border-bottom-left-radius:0 !important;
+	margin-left: 0 !important;
+}
 .commandButton:hover, .commandButton:focus {
 	background-color: #eee;
 }
@@ -1591,6 +1614,22 @@ a.currentLocation:hover {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+}
+.commandHalfImage_left, .commandHalfImage_left:hover, .commandHalfImage_left:focus{
+	border-right: 0;
+    border-top-right-radius:0;
+	border-bottom-right-radius:0;
+	padding-right: 0;
+	margin-right: 0;
+}
+.commandHalfImage_right, .commandHalfImage_right:hover, .commandHalfImage_right:focus{
+	border-left: 0;
+    border-top-left-radius:0;
+	border-bottom-left-radius:0;
+	line-height: inherit;
+	padding-left: 0;
+	margin-left 0;
+	vertical-align: top;"
 }
 .commandImage:hover, .commandImage:focus {
 	background-color: #e6e6e6;
@@ -2233,7 +2272,7 @@ a.currentLocation:hover {
 	vertical-align: top;
 	padding-top:1px;
 	font-weight: bold;
-	font-size: 8pt;
+	font-size: 1.05em;
 	color: #444;
 	text-decoration: none;
 	line-height: 10pt;
@@ -2241,7 +2280,6 @@ a.currentLocation:hover {
 }
 a.currentLocation:hover {
 	font-weight: bold;
-	font-size: 8pt;
 	color: #F58B0F;
  	text-decoration: none;
 	border-bottom: 1px dotted;
@@ -2251,6 +2289,12 @@ a.currentLocation:hover {
     height:100%;
     text-align:center; 
     vertical-align:middle;
+}
+.breadcrumb {
+	font-size: 1.05em;
+	text-decoration: none;
+	color: #3087B3;
+	padding-top: 2px;
 }
 .browserParentDome {
 	min-height: 215px !important;

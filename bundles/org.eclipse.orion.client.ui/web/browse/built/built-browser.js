@@ -2442,7 +2442,7 @@ define('orion/breadcrumbs',['require', 'orion/webui/littlelib'], function (requi
         getNavigatorWorkspaceRootSegment: function () {
             if (this._workspaceRootSegmentName) {
                 var seg;
-                if (this._resource && this._resource.Parents) {
+                if (this._resource && this._resource.Parents && !this._resource.skip) {
                     seg = document.createElement('a'); //$NON-NLS-0$
 					var param = this._workspaceRootURL ? this._workspaceRootURL : "";
                     if (this._makeHref) {
@@ -5584,6 +5584,15 @@ define('orion/webui/dropdown',['require', 'orion/webui/littlelib', 'orion/EventT
 			this._dropdownNode.addEventListener("keydown", this._dropdownKeyDown.bind(this), false); //$NON-NLS-0$
 		},
 		
+		addTriggerNode: function(node){
+			var self = this;
+			node.addEventListener("click", function(event) { //$NON-NLS-0$
+				if (self.toggle(event))  {
+					lib.stop(event);
+				}
+			}, false);			
+		},
+		
 		/**
 		 * Toggle the open/closed state of the dropdown.  Return a boolean that indicates whether action was taken.
 		 */			
@@ -6186,6 +6195,8 @@ define('text',['module'], function (module) {
 
 define('text!orion/webui/dropdowntriggerbutton.html',[],function () { return '<button class="dropdownTrigger">${ButtonText}<span class="dropdownArrowDown core-sprite-openarrow"></span></button><ul class="dropdownMenu"></ul>';});
 
+define('text!orion/webui/dropdowntriggerbuttonwitharrow.html',[],function () { return '<button>${ButtonText}</button><button class="dropdownTrigger"><span class="dropdownArrowDown core-sprite-openarrow"></span></button><ul class="dropdownMenu"></ul>';});
+
 define('text!orion/webui/submenutriggerbutton.html',[],function () { return '<li class="dropdownSubMenu"><span class="dropdownTrigger dropdownMenuItem" role="menuitem" tabindex="0">${ButtonText}<span class="dropdownArrowRight core-sprite-closedarrow"></span></span><ul class="dropdownMenu"></ul></li>';});
 
 define('text!orion/webui/checkedmenuitem.html',[],function () { return '<li><label class="dropdownMenuItem"><input class="checkedMenuItem" role="menuitem" type="checkbox" />${ItemText}</label></li>';});
@@ -6516,9 +6527,9 @@ define('orion/webui/tooltip',['require', 'orion/webui/littlelib'], function(requ
 /*jslint sub:true*/
  /*global define document window Image */
  
-define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown', 'text!orion/webui/dropdowntriggerbutton.html', 'text!orion/webui/submenutriggerbutton.html', 
+define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown', 'text!orion/webui/dropdowntriggerbutton.html', 'text!orion/webui/dropdowntriggerbuttonwitharrow.html', 'text!orion/webui/submenutriggerbutton.html', 
 	'text!orion/webui/checkedmenuitem.html', 'orion/webui/tooltip'], 
-	function(require, util, lib, Dropdown, DropdownButtonFragment, SubMenuButtonFragment, CheckedMenuItemFragment, Tooltip) {
+	function(require, util, lib, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, SubMenuButtonFragment, CheckedMenuItemFragment, Tooltip) {
 	
 		/* a function that can be set for retrieving bindings stored elsewhere, such as a command registry */
 		var getBindings = null;
@@ -6776,24 +6787,38 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 		return node;
 	}
 
-	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode) {
+	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode, displayExtraDropdown) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
 		}
 		var range = document.createRange();
 		range.selectNode(parent);
-		var buttonFragment = range.createContextualFragment(DropdownButtonFragment);
+		var buttonFragment = displayExtraDropdown ? range.createContextualFragment(DropdownButtonWithArrowFragment) : range.createContextualFragment(DropdownButtonFragment);
 		// bind name to fragment variable
 		lib.processTextNodes(buttonFragment, {ButtonText: name});
 		parent.appendChild(buttonFragment);
 		var newMenu = parent.lastChild;
-		var menuButton = newMenu.previousSibling;
+		var menuButton;
+		var extraDropdownButton;
+		if(displayExtraDropdown){
+			extraDropdownButton = newMenu.previousSibling;
+			menuButton = extraDropdownButton.previousSibling;
+		} else {
+			menuButton = newMenu.previousSibling;
+		}
 		if (buttonClass) {
 			menuButton.classList.add(buttonClass); //$NON-NLS-0$
+			if(extraDropdownButton) extraDropdownButton.classList.add(buttonClass); //$NON-NLS-0$
 		} else {
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 			menuButton.classList.add("commandButton"); //$NON-NLS-0$
+			if(extraDropdownButton) {
+				extraDropdownButton.classList.add("orionButton"); //$NON-NLS-0$
+				extraDropdownButton.classList.add("commandButton"); //$NON-NLS-0$
+				extraDropdownButton.classList.add("commandHalfButton_right"); //$NON-NLS-0$
+				menuButton.classList.add("commandHalfButton_left"); //$NON-NLS-0$
+			}
 		}
 		if (buttonIconClass) {
 			if(!showName) {
@@ -6801,6 +6826,11 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 				menuButton.setAttribute("aria-label", name); //$NON-NLS-0$
 			}
 			_addImageToElement({ spriteClass: "commandSprite", imageClass: buttonIconClass }, menuButton, name); //$NON-NLS-0$
+			if(extraDropdownButton) {
+				extraDropdownButton.classList.add("commandImage"); //$NON-NLS-0$
+				extraDropdownButton.classList.add("commandHalfImage_right"); //$NON-NLS-0$
+				menuButton.classList.add("commandHalfImage_left"); //$NON-NLS-0$
+			}
 			menuButton.classList.add("orionButton"); // $NON-NLS-0$
 		}
 		menuButton.dropdown = new Dropdown.Dropdown({
@@ -6810,7 +6840,7 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 			positioningNode: positioningNode
 		});
 		newMenu.dropdown = menuButton.dropdown;
-		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown};
+		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, extraDropdownButton: extraDropdownButton};
 	}
 	
 	function createCheckedMenuItem(parent, name, checked, onChange) {
@@ -19849,7 +19879,7 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 				self._onChanging(e);
 			}
 		};
-		baseModel.addEventListener("preChanged", this._listener.onChanged); //$NON-NLS-0$
+		baseModel.addEventListener("postChanged", this._listener.onChanged); //$NON-NLS-0$
 		baseModel.addEventListener("preChanging", this._listener.onChanging); //$NON-NLS-0$
 	}
 
@@ -21232,7 +21262,8 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 * @property {Function} next Returns the next annotation in the iterator.
 		 */		
 		/**
-		 * Returns an iterator of annotations for the given range of text.
+		 * Returns an iterator of annotations for the given range of text. If called with no parameters,
+		 * returns all annotations in the model.
 		 *
 		 * @param {Number} start the start offset of the range.
 		 * @param {Number} end the end offset of the range.
@@ -21240,20 +21271,26 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		 */
 		getAnnotations: function(start, end) {
 			var annotations = this._annotations, current;
-			//TODO binary search does not work for range intersection when there are overlaping ranges, need interval search tree for this
-			var i = 0;
-			var skip = function() {
-				while (i < annotations.length) {
-					var a =  annotations[i++];
-					if ((start === a.start) || (start > a.start ? start < a.end : a.start < end)) {
-						return a;
+			var i = 0, skip;
+			if (start === undefined && end === undefined) {
+				skip = function() {
+					return (i < annotations.length) ? annotations[i++] : null;
+				};
+			} else {
+				//TODO binary search does not work for range intersection when there are overlaping ranges, need interval search tree for this
+				skip = function() {
+					while (i < annotations.length) {
+						var a =  annotations[i++];
+						if ((start === a.start) || (start > a.start ? start < a.end : a.start < end)) {
+							return a;
+						}
+						if (a.start >= end) {
+							break;
+						}
 					}
-					if (a.start >= end) {
-						break;
-					}
-				}
-				return null;
-			};
+					return null;
+				};
+			}
 			current = skip();
 			return {
 				next: function() {
@@ -22597,7 +22634,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 			}
 			var remove = [], add = [];
 			var model = annotationModel.getTextModel();
-			var iter = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
+			var iter = annotationModel.getAnnotations(), annotation;
 			while (iter.hasNext()) {
 				annotation = iter.next();
 				if (types.indexOf(annotation.type) !== -1) {
@@ -23356,8 +23393,12 @@ define('orion/commandRegistry',[
 		 * @param {String} [tooltip] Tooltip to show on this group. If not provided, and the group uses an <code>imageClass</code>,
 		 * the <code>title</code> will be used as the tooltip.
 		 * @param {String} [selectionClass] CSS class to be appended when the command button is selected. Optional.
+		 * @param {String} or {boolean} [defaultActionId] Id of an action from this group that should be invoked when the group is selected. This will add an
+		 * arrow to the grup that will open the dropdown. Optionally this can be set to <code>true</code> instead of adding a particular action.
+		 * If set to <code>true</code> the group will be renderer as if there was a default action, but instead of invoking the default action it will
+		 * open the dropdown. Optional.
 		 */	
-		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, imageClass, tooltip, selectionClass) {
+		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, imageClass, tooltip, selectionClass, defaultActionId) {
 			if (!this._contributionsByScopeId[scopeId]) {
 				this._contributionsByScopeId[scopeId] = {};
 			}
@@ -23382,6 +23423,13 @@ define('orion/commandRegistry',[
 				if (selectionClass) {
 					parentTable[groupId].selectionClass = selectionClass;
 				}
+				
+				if(defaultActionId === true){
+					parentTable[groupId].pretendDefaultActionId = true;
+				} else {
+					parentTable[groupId].defaultActionId = defaultActionId;
+				}
+				
 
 				parentTable[groupId].emptyGroupMessage = emptyGroupMessage;
 			} else {
@@ -23392,6 +23440,8 @@ define('orion/commandRegistry',[
 										imageClass: imageClass,
 										tooltip: tooltip,
 										selectionClass: selectionClass,
+										defaultActionId: defaultActionId === true ? null : defaultActionId,
+										pretendDefaultActionId: defaultActionId === true,
 										children: {}};
 				parentTable.sortedContributions = null;
 			}
@@ -23676,8 +23726,18 @@ define('orion/commandRegistry',[
 							// If we wait until the end of asynch processing to add the menu button, the layout will have 
 							// to be redone. The down side to always adding the menu button is that we may find out we didn't
 							// need it after all, which could cause layout to change.
-
-							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass, contribution.tooltip, contribution.selectionClass);
+							var defaultInvocation;
+							if(contribution.defaultActionId){
+								var defaultChild = self._commandList[contribution.defaultActionId];
+								if(defaultChild && (defaultChild.visibleWhen ? defaultChild.visibleWhen(items) : true)){
+									defaultInvocation = new Commands.CommandInvocation(handler, items, userData, defaultChild, self);
+									defaultInvocation.domParent = parent;
+								} else {
+									contribution.pretendDefaultActionId = true;
+								}
+							}
+						
+							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass, contribution.tooltip, contribution.selectionClass, null, defaultInvocation, contribution.pretendDefaultActionId);
 							if(domNodeWrapperList){
 								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
@@ -23845,7 +23905,7 @@ define('orion/commandRegistry',[
 		/*
 		 * private.  Parent must exist in the DOM.
 		 */
-		_createDropdownMenu: function(parent, name, nested, populateFunction, icon, tooltip, selectionClass, positioningNode) {
+		_createDropdownMenu: function(parent, name, nested, populateFunction, icon, tooltip, selectionClass, positioningNode, defaultInvocation, pretendDefaultActionId) {
 			parent = lib.node(parent);
 			// We create dropdowns asynchronously so it's possible that the parent has been removed from the document 
 			// by the time we are called.  If so, don't bother building a submenu for an orphaned menu.
@@ -23878,15 +23938,31 @@ define('orion/commandRegistry',[
 					tooltip = tooltip || name; // No text and no tooltip => fallback to name
 				}
 				tooltip = icon ? (tooltip || name) : tooltip;
-				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon, false, selectionClass, positioningNode);
+				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon, false, selectionClass, positioningNode, defaultInvocation || pretendDefaultActionId);
+				if(defaultInvocation){
+					defaultInvocation.domNode = created.menuButton;
+					var self = this;
+					created.menuButton.onclick = function(){
+						self._invoke(defaultInvocation);
+					};
+				} else if(pretendDefaultActionId && created.dropdown){
+					created.dropdown.addTriggerNode(created.menuButton);
+				}
 				menuButton = created.menuButton;
 				newMenu = created.menu;
 				if (tooltip) {
 					menuButton.commandTooltip = new mTooltip.Tooltip({
 						node: menuButton,
-						text: tooltip,
+						text: defaultInvocation && defaultInvocation.command && defaultInvocation.command.name ? tooltip + ": " + defaultInvocation.command.name: tooltip,
 						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
+					if(created.extraDropdownButton){
+						menuButton.commandTooltip = new mTooltip.Tooltip({
+							node: created.extraDropdownButton,
+							text: tooltip,
+							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						});						
+					}
 				}
 			}
 			
@@ -24983,6 +25059,7 @@ define('orion/widgets/browse/browseView',[
 		this.editorView = options.editorView;
 		this._maxEditorLines = options.maxEditorLines;
 		this.imageView = options.imageView;
+		this.isMarkdownView = options.isMarkdownView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
 		this.clickHandler = options.clickHandler;
@@ -25046,8 +25123,12 @@ define('orion/widgets/browse/browseView',[
 									this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
 								}.bind(this));
 								this.editor = this.editorView.editor;
+							} else if(this.isMarkdownView) {
+								div = document.createElement("div"); //$NON-NLS-0$
+								this.markdownView.displayContents(div, this._metadata);
+								this._foldersSection.setContent(div);
 							} else if(this.imageView) {
-								//this._foldersSection.setContent(this.imageView.image);
+								//Do nothing, updateImage will be called.
 							} else {
 								this.folderNavExplorer = new FolderNavExplorer({
 									parentId: navNode,
@@ -25111,7 +25192,7 @@ define('orion/widgets/browse/browseView',[
 			if(this._metadata.Projects){ //this is a workspace root
 				this.displayWorkspaceView();
 			}
-			if(this.editorView || this.imageView) {
+			if(this.editorView || this.imageView || this.isMarkdownView) {
 				this.displayBrowseView(this._metadata);
 			} else if(this._metadata.Children){
 				this.displayBrowseView(this._metadata);
@@ -25704,7 +25785,7 @@ define("orion/editor/find", [ //$NON-NLS-0$
 				return;
 			}
 			var type = mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH;
-			var iter = annotationModel.getAnnotations(0, annotationModel.getTextModel().getCharCount());
+			var iter = annotationModel.getAnnotations();
 			var remove = [], add;
 			while (iter.hasNext()) {
 				var annotation = iter.next();
@@ -26048,7 +26129,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var annotationModel = editor.getAnnotationModel();
 			if(!annotationModel) { return true; }
 			var model = editor.getModel();
-			var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
+			var annotation, iter = annotationModel.getAnnotations();
 			textView.setRedraw(false);
 			while (iter.hasNext()) {
 				annotation = iter.next();
@@ -27948,7 +28029,7 @@ define("orion/editor/rulers", ['i18n!orion/editor/nls/messages', 'orion/editor/a
 			
 			if (lineIndex === -1) { return; }
 			this._currentGroupAnnotation = groupAnnotation;
-			annotations = annotationModel.getAnnotations(0, model.getCharCount());
+			annotations = annotationModel.getAnnotations();
 			var add = [];
 			while (annotations.hasNext()) {
 				annotation = annotations.next();
@@ -29025,7 +29106,7 @@ define("orion/editor/linkedMode", [ //$NON-NLS-0$
 			if (!annotationModel) { return; }
 			var remove = [], add = [];
 			var textModel = annotationModel.getTextModel();
-			var annotations = annotationModel.getAnnotations(0, textModel.getCharCount()), annotation;
+			var annotations = annotationModel.getAnnotations(), annotation;
 			while (annotations.hasNext()) {
 				annotation = annotations.next();
 				switch (annotation.type) {
@@ -33264,6 +33345,8 @@ define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/
 /*global define*/
 
 define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
+	var keywords = ["false", "null", "true"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
 	var grammars = mShared.grammars;
 	grammars.push({
 		id: "orion.json", //$NON-NLS-0$
@@ -33272,7 +33355,7 @@ define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/sh
 			{
 				include: "orion.patterns" //$NON-NLS-0$
 			}, {
-				match: "\\b(?:true|false|null)\\b", //$NON-NLS-0$
+				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-0$
 				name: "keyword.control.json" //$NON-NLS-0$
 			}, {
 				/* override orion.patterns#comment_singleline */
@@ -33286,7 +33369,7 @@ define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/sh
 	return {
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
-		keywords: []
+		keywords: keywords
 	};
 });
 
@@ -34330,7 +34413,7 @@ define('orion/widgets/browse/fileBrowser',[
 				target: this._breadCrumbTarget,
 				breadCrumbContainer: bcContainer,
 				makeBreadcrumbLink: function(segment, folderLocation, folder) {this._makeBreadCrumbLink(segment, folderLocation, folder);}.bind(this),
-				makeBreadcrumFinalLink: true,
+				makeBreadcrumFinalLink: false,
 				fileClient: this._fileClient,
 				maxLength: maxLength
 			});
@@ -34419,7 +34502,9 @@ define('orion/widgets/browse/fileBrowser',[
 					var id = input.editor;
 					if (!id || id === "orion.editor") { //$NON-NLS-0$
 						var cType = this._contentTypeService.getFileContentType(metadata);
-						if(!mNavigatorRenderer.isImage(cType)) {
+						if(cType.id === "text/x-markdown") {
+							browseViewOptons.isMarkdownView = true;
+						} else if(!mNavigatorRenderer.isImage(cType)) {
 							browseViewOptons.editorView = this._editorView;
 						} else {
 							browseViewOptons.imageView = {};
