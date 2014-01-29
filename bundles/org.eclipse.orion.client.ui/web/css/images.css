@@ -333,13 +333,13 @@
 .core-sprite-close{
 	font-size: 16px;
 	color: #666;
-	line-height: normal;
-	vertical-align:middle;
+	line-height: 14px;
+	vertical-align:top;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
 	border: none;
-	margin: 0;
+	margin-top: -3px;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -473,13 +473,12 @@
 .core-sprite-warning{
 	font-size: 16px;
 	color: #555;
-	line-height: normal;
-	vertical-align:middle;
+	line-height: 14px;
+	vertical-align:top;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -487,13 +486,12 @@
 .core-sprite-error{
 	font-size: 16px;
 	color: #b94a48;
-	line-height: normal;
-	vertical-align:middle;
+	line-height: 14px;
+	vertical-align:top;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
