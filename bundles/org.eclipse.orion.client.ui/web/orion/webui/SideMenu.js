@@ -38,34 +38,9 @@ define([
 		listItem.className = imageClassName + " sideMenuItem active";
 		listItem.categoryId = categoryId;
 		
-//		listItem.appendChild( pageLink );
 		anchor.appendChild( listItem );
-		
-//		this.menuitems.push( pageLink );
+	
 		this.menuitems.push( listItem );
-	}
-	
-	
-	function addSubMenu(){
-		
-		/* <ul class="sideMenuSubMenu">
-						<li class="sideMenuSubMenuItem">
-							<a class="sideMenuSubMenuItemLink" href="#">
-								<span class="sideMenuSubMenuItemSpan">Product 1</span>
-							</a>
-						</li>
-						<li class="sideMenuSubMenuItem">
-							<a class="sideMenuSubMenuItemLink" href="#">
-								<span class="sideMenuSubMenuItemSpan">Product 2</span>
-							</a>
-						</li>
-					</ul> */
-				
-				
-		var subMenu = document.createElement( 'ul' );
-		subMenu.className = "sideMenuSubMenu";
-		
-		
 	}
 
 	function setAllMenuItemsInactive(){
@@ -251,8 +226,12 @@ define([
 					return;
 				var bin = _self._getLinksBin(catId);
 				if (bin.length === 1) {
-					// just insert the link directly into menu item
-					menuitem.appenChild(bin[0]);
+					var classlist = menuitem.className;
+					var icon = classlist.split( ' ' );
+					menuitem.className = icon[1] + ' ' + icon[2];
+					bin[0].innerHTML = '<span class="' + icon[0] + ' active"></span>';
+					bin[0].className = 'active';
+					menuitem.appendChild(bin[0]);
 				} else {
 					// need hover
 					menuitem.onmouseover = function( e ){

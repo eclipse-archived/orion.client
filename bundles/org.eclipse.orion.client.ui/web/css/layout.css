@@ -431,6 +431,9 @@ hard-coded numbers elsewhere.
     animation-delay: 2s;
     display:block;
     margin:0;
+    font-family: sans-serif;
+	font-size:10px;
+	text-decoration:none !important;
 }
 
 .sideMenu-maximized {
