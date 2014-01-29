@@ -31,25 +31,25 @@ define([
 		id: "edit",
 		nameKey: "Edit",
 		nls: "orion/nls/messages",
-		imageClass: "core-sprite-cat-edit"
+		imageClass: "core-sprite-edit"
 	});
 	provider.registerService("orion.page.link.category", null, {
 		id: "search",
 		nameKey: "Search",
 		nls: "orion/nls/messages",
-		imageClass: "core-sprite-cat-search"
+		imageClass: "core-sprite-search"
 	});
 	provider.registerService("orion.page.link.category", null, {
 		id: "sites",
 		nameKey: "Sites",
 		nls: "orion/nls/messages",
-		imageClass: "core-sprite-cat-sites"
+		imageClass: "core-sprite-sites"
 	});
 	provider.registerService("orion.page.link.category", null, {
 		id: "deploy",
 		nameKey: "Deploy",
 		nls: "orion/edit/nls/messages",
-		imageClass: "core-sprite-cat-deploy"
+		imageClass: "core-sprite-deploy"
 	});
 
 	// Primary navigation links

@@ -12,9 +12,10 @@
 /*jslint browser:true*/
 
 define([
+	'orion/commands',
 	'orion/objects',
 	'orion/webui/littlelib'
-], function(objects, lib) {
+], function(mCommands, objects, lib) {
 
 	function SideMenu(){
 		this.menuitems = new Array();
@@ -134,19 +135,79 @@ define([
 	SideMenu.prototype.toggleSideMenu = toggleSideMenu;
 
 	objects.mixin(SideMenu.prototype, {
-		setCategories: function(categoriesInfo) {
-			this.categories = categoriesInfo;
-			console.log("SideMenu got categories: "); console.log(categoriesInfo);
+		// Only expected to be called once
+		setCategories: function(categories) {
+			console.log("SideMenu got categories: "); console.log(categories);
+			this.categories = categories;
+			this.links = Object.create(null); // Maps category ID {String} to link DOM elements {Element[]}
+			this._renderCategories();
 		},
-		setPageLinks: function(pagelinksInfo) {
-			this.pageLinks = pagelinksInfo;
-			console.log("SideMenu got pagelinks: "); console.log(pagelinksInfo);
+		// Only expected to be called once
+		setPageLinks: function(pagelinks) {
+			console.log("SideMenu got pagelinks: "); console.log(pagelinks);
+			this.pageLinks = pagelinks;
+
+			var _self = this;
+			var elements = pagelinks.createLinkElements();
+			pagelinks.getAllLinks().forEach(function(pagelink, i) {
+				var linkElement = elements[i];
+				var array = _self._getLinksBin(pagelink.category);
+				array.push(linkElement);
+			});
+			this._renderLinks();
 		},
+		// Expected to be called whenever the page target changes
 		setRelatedLinks: function(relatedLinks) {
-			this.relatedLinks = relatedLinks;
 			console.log("SideMenu got relatedLinks: "); console.log(relatedLinks);
+			this.relatedLinks = relatedLinks;
+
+			var _self = this;
+			var linkHolder = document.createDocumentFragment();
+			relatedLinks.forEach(function(commandItem) {
+				var array = _self._getLinksBin(commandItem.relatedLink.category);
+				var relatedLinkElement = mCommands.createCommandMenuItem(linkHolder, commandItem.command, commandItem.invocation);
+				relatedLinkElement.classList.remove('dropdownMenuItem');
+				array.push(relatedLinkElement);
+			});
+			this._renderLinks();
+		},
+		/** @returns Array where link elements should be pushed for the given category */
+		_getLinksBin: function(catId) {
+			if (catId) {
+				var links = this.links;
+				links[catId] = links[catId] || [];
+				return links[catId];
+			} else {
+				// TODO create a default "misc" category instead of ignoring 
+				return [];
+			}
+		},
+		_sort: function() {
+			// Sort by name within each category
+			var links = this.links;
+			Object.keys(links).forEach(function(key) {
+				links[key].sort(compareLinks);
+			});
+		},
+		_renderCategories: function() {
+			var categories = this.categories, _self = this;
+			categories.getCategoryIDs().forEach(function(catId) {
+				var cat = categories.getCategory(catId);
+				_self.addMenuItem(cat.imageClass, "#" + catId);
+			});
+		},
+		_renderLinks: function() {
+			this._sort();
 		}
 	});
+
+	function compareLinks(a, b) {
+		return 0;
+	}
+
+//			sideMenu.addMenuItem( "core-sprite-edit", "http://www.google.com" );
+//			sideMenu.addMenuItem( "core-sprite-deploy", "http://www.bbc.co.uk" );
+//			sideMenu.setActiveMenuItem( "http://www.bbc.co.uk" );
 
 	return SideMenu;
 });

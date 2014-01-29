@@ -120,12 +120,7 @@ define([
 			navDropDown.addContent(groupedContent.getContentPane());
 
 			sideMenu = new SideMenu();
-			sideMenu.setSideMenu();
-
-			sideMenu.addMenuItem( "core-sprite-edit", "http://www.google.com" );
-			sideMenu.addMenuItem( "core-sprite-deploy", "http://www.bbc.co.uk" );
-
-			sideMenu.setActiveMenuItem( "http://www.bbc.co.uk" );
+			sideMenu.setSideMenu(); // TODO defer this till #generateBanner() when primaryNav links are ready
 		},
 		afterGenerateBanner: mCustomGlobalCommands.afterGenerateBanner || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {}
 	};
