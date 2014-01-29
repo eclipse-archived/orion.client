@@ -415,6 +415,8 @@ hard-coded numbers elsewhere.
 	margin-right: 4px !important;
 }
 
+/* ----- side menu begin ----- */
+
 .sideMenu{
     height: calc( 100% - 36px );
     width: 0;
@@ -426,6 +428,8 @@ hard-coded numbers elsewhere.
     -webkit-animation-delay: 2s;
     animation: slide 0.5s forwards;
     animation-delay: 2s;
+    display:block;
+    margin:0;
 }
 
 .sideMenuList{
@@ -455,13 +459,35 @@ hard-coded numbers elsewhere.
 	text-decoration:none !important;
 }
 
-@-webkit-keyframes slide {
-    100% { left: 0; }
+.sideMenuSubMenu{
+	display: inline-block;
+	list-style-type:none;
+	position:absolute;
+	left:0;
+	font-family:sans-serif;
 }
 
-@keyframes slide {
-    100% { left: 0; }
+.sideMenuSubMenuItem{
+	display: inline-block;
+	width: 100px;
+	height: 12px;
+	font-size: 12px;
+	background: #2f313a;
+	padding: 10px;
+	border-bottom: 1px solid #555;
+	opacity:0.9;
 }
+
+.sideMenuSubMenuItemLink{
+	display: inline-block;
+	color:#999;
+}
+
+.sideMenuSubMenuItemSpan{
+	display: inline-block;
+}
+
+/* ----- side menu end ----- */
 
 .mainContent{
 	position:absolute;

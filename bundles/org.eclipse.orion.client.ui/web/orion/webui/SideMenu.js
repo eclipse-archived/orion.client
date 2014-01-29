@@ -30,22 +30,42 @@ define([
 	
 	SideMenu.prototype.menuitems = [];
 	
-	function addMenuItem( className, link ){
+	function addMenuItem( imageClassName, categoryId /*, link*/ ){
 		
 		var anchor = lib.node( this.LIST_ANCHOR_ID );		
 		
 		var listItem = document.createElement( 'li' );
-		listItem.className = 'sideMenuItem';
+		listItem.className = imageClassName + " sideMenuItem active";
+		listItem.categoryId = categoryId;
 		
-		var pageLink = document.createElement( 'a' );
-		pageLink.href = link;
-		pageLink.className = className + ' inactive'; 
-		pageLink.iconClass = className;
-		
-		listItem.appendChild( pageLink );
+//		listItem.appendChild( pageLink );
 		anchor.appendChild( listItem );
 		
-		this.menuitems.push( pageLink );
+//		this.menuitems.push( pageLink );
+		this.menuitems.push( listItem );
+	}
+	
+	
+	function addSubMenu(){
+		
+		/* <ul class="sideMenuSubMenu">
+						<li class="sideMenuSubMenuItem">
+							<a class="sideMenuSubMenuItemLink" href="#">
+								<span class="sideMenuSubMenuItemSpan">Product 1</span>
+							</a>
+						</li>
+						<li class="sideMenuSubMenuItem">
+							<a class="sideMenuSubMenuItemLink" href="#">
+								<span class="sideMenuSubMenuItemSpan">Product 2</span>
+							</a>
+						</li>
+					</ul> */
+				
+				
+		var subMenu = document.createElement( 'ul' );
+		subMenu.className = "sideMenuSubMenu";
+		
+		
 	}
 
 	function setAllMenuItemsInactive(){
@@ -212,18 +232,96 @@ define([
 			var categories = this.categories, _self = this;
 			categories.getCategoryIDs().forEach(function(catId) {
 				var cat = categories.getCategory(catId);
-				_self.addMenuItem(cat.imageClass, "#" + catId);
+				_self.addMenuItem(cat.imageClass, catId);
 			});
 		},
 		_renderLinks: function() {
 			this._sort();
-			// debug
 			var _self = this;
+			
+			// debug
 			console.log(" ------- ");
 			Object.keys(this.links).forEach(function(catId) {
 				console.log(catId + " -> [" + _self.links[catId].map(function(l) { 
 					return l.textContent + " (" + l.href + ")";
 				}).join(",") + "]");
+			});
+			
+			// Set up category hovers
+			Object.keys(this.links).forEach(function(catId) {
+				var menuitem;
+				_self.menuitems.forEach(function(m) {
+					if (m.categoryId === catId) {
+						menuitem = m;
+						return true;
+					}
+				});
+				if (!menuitem)
+					return;
+				var bin = _self._getLinksBin(catId);
+				if (bin.length === 1) {
+					// just insert the link directly into menu item
+					menuitem.appenChild(bin[0]);
+				} else {
+					// need hover
+					menuitem.onmouseover = function( e ){
+						// create a popup
+						
+						if( !menuitem.subMenu ){
+						
+							var sideMenuSubMenu = document.createElement('ul');
+							sideMenuSubMenu.className="sideMenuSubMenu";
+							
+							bin.forEach( function( item ){
+							
+								var sideMenuSubMenuItem = document.createElement('li');	
+								sideMenuSubMenuItem.className="sideMenuSubMenuItem";
+								
+								var sideMenuSubMenuItemLink = document.createElement('a');
+								sideMenuSubMenuItemLink.href = item;
+								sideMenuSubMenuItemLink.className="sideMenuSubMenuItemLink"
+								
+								var sideMenuSubMenuItemSpan = document.createElement('span');
+								sideMenuSubMenuItemSpan.innerHTML = item.innerHTML;
+								sideMenuSubMenuItemSpan.className="sideMenuSubMenuItemSpan";
+								
+								sideMenuSubMenuItemLink.appendChild( sideMenuSubMenuItemSpan );
+								
+								sideMenuSubMenuItem.appendChild(sideMenuSubMenuItemLink);
+								
+								sideMenuSubMenu.appendChild(sideMenuSubMenuItem);
+										
+								sideMenuSubMenu.onmouseout = function( e ){
+							
+									if( menuitem.subMenu ){
+										sideMenuSubMenu.parentNode.removeChild( sideMenuSubMenu );
+									}
+									
+								};		
+										
+							})
+							
+							menuitem.appendChild(sideMenuSubMenu);
+							
+							menuitem.subMenu = sideMenuSubMenu;
+							
+//							sideMenuSubMenu.onmouseout = function( e ){
+//								if( menuitem.subMenu ){
+//									sideMenuSubMenu.parentNode.removeChild( sideMenuSubMenu );
+//								}
+//							};		
+						}
+					
+					};
+					
+					menuitem.onmouseout = function( e ){
+						
+						if( menuitem.subMenu ){
+//							menuitem.subMenu.parentNode.removeChild( menuitem.subMenu);
+						}
+						
+					};
+				}
 			});
 		}
 	});
