@@ -38,6 +38,7 @@ define([
 
 	var notifyAuthenticationSite = qualifyURL(require.toUrl('auth/NotifyAuthentication.html')); //$NON-NLS-0$
 	var authRendered = {};
+	var sideMenu = null;
 
 	function getLabel(authService, serviceReference) {
 		if (authService.getLabel) {
@@ -93,10 +94,15 @@ define([
 			lib.empty(relatedLinksNode);
 			return true;
 		},
-		addRelatedLinkCommand: mCustomGlobalCommands.addRelatedLinkCommand || function (command, invocation) {
+		// each relatedLink is { relatedLink: Object, command: Command, invocation: CommandInvocation }
+		addRelatedLinkCommands: mCustomGlobalCommands.addRelatedLinkCommands || function (relatedLinks) {
+			sideMenu.setRelatedLinks(relatedLinks);
+
 			var relatedLinksNode = lib.node('relatedLinks');
-			var newRelatedLinkItem = mCommands.createCommandMenuItem(relatedLinksNode, command, invocation);
-			newRelatedLinkItem.classList.remove('dropdownMenuItem');
+			relatedLinks.forEach(function(info) {
+				var newRelatedLinkItem = mCommands.createCommandMenuItem(relatedLinksNode, info.command, info.invocation);
+				newRelatedLinkItem.classList.remove('dropdownMenuItem');
+			});
 		},
 		afterGenerateRelatedLinks: mCustomGlobalCommands.afterGenerateRelatedLinks || function (serviceRegistry, item, exclusions, commandRegistry, alternateItem) {},
 		afterSetPageTarget: mCustomGlobalCommands.afterSetPageTarget || function (options) {},
@@ -113,7 +119,7 @@ define([
 			var groupedContent = new GroupedContent();
 			navDropDown.addContent(groupedContent.getContentPane());
 
-			var sideMenu = new SideMenu();
+			sideMenu = new SideMenu();
 			sideMenu.setSideMenu();
 
 			sideMenu.addMenuItem( "core-sprite-edit", "http://www.google.com" );
@@ -223,6 +229,7 @@ define([
 	 * @function
 	 */
 	function generateRelatedLinks(serviceRegistry, item, exclusions, commandRegistry, alternateItem) {
+//		console.log("setPageTarget()"); console.log(" -> generateRelatedLinks()");
 		var globalArguments = arguments;
 		var contentTypesCache;
 
@@ -241,33 +248,51 @@ define([
 				return contentTypesCache;
 			});
 		}
+		function getServiceProperties(serviceReference) {
+			var info = {}, keys = serviceReference.getPropertyKeys(), key;
+			for (var i=0; i < keys.length; i++) {
+				key = keys[i];
+				info[key] = serviceReference.getProperty(key);
+			}
+			return info;
+		}
 
 		var alternateItemDeferred;
 		/**
-		 * Calculates the CommandInvocation for a given Command.
-		 * @returns {orion.Promise} A promise resolving to a 2-element array: [Command, CommandInvocation]
+		 * Creates a CommandInvocation for given commandItem.
+		 * @returns {orion.Promise} A promise resolving to: commandItem with its "invocation" field set, or undefined if we failed
 		 */
-		function enhanceCommand(command) {
-			if (command) {
-				if (!command.visibleWhen || command.visibleWhen(item)) {
-					var invocation = new mCommands.CommandInvocation(item, item, null, command, commandRegistry);
-					return new Deferred().resolve([command, invocation]);
-				} else if (typeof alternateItem === "function") { //$NON-NLS-0$
-					if (!alternateItemDeferred) {
-						alternateItemDeferred = alternateItem();
-					}
-					return Deferred.when(alternateItemDeferred, function (newItem) {
-						if (newItem && (item === pageItem)) {
-							// there is an alternate, and it still applies to the current page target
-							if (!command.visibleWhen || command.visibleWhen(newItem)) {
-								var invocation = new mCommands.CommandInvocation(newItem, newItem, null, command, commandRegistry);
-								return [command, invocation];
-							}
-						}
-					});
+		function setInvocation(commandItem) {
+			var command = commandItem.command;
+			if (!command.visibleWhen || command.visibleWhen(item)) {
+				commandItem.invocation = new mCommands.CommandInvocation(item, item, null, command, commandRegistry);
+				return new Deferred().resolve(commandItem);
+			} else if (typeof alternateItem === "function") { //$NON-NLS-0$
+				if (!alternateItemDeferred) {
+					alternateItemDeferred = alternateItem();
 				}
+				return Deferred.when(alternateItemDeferred, function (newItem) {
+					if (newItem && (item === pageItem)) {
+						// there is an alternate, and it still applies to the current page target
+						if (!command.visibleWhen || command.visibleWhen(newItem)) {
+							commandItem.invocation = new mCommands.CommandInvocation(newItem, newItem, null, command, commandRegistry);
+							return commandItem;
+						}
+					}
+				});
 			}
 			return new Deferred().resolve();
+		}
+		/**
+		 * @returns {orion.Promise} resolving to a commandItem { relatedLink: Object, command: Command}
+		*/
+		function commandItem(relatedLink, commandOptionsPromise, command) {
+			if (command) {
+				return new Deferred().resolve({ relatedLink: relatedLink, command: command});
+			}
+			return commandOptionsPromise.then(function(commandOptions) {
+				return { relatedLink: relatedLink, command: new mCommands.Command(commandOptions) };
+			});
 		}
 
 		var contributedLinks = serviceRegistry && serviceRegistry.getServiceReferences("orion.page.link.related"); //$NON-NLS-0$
@@ -280,65 +305,50 @@ define([
 				return;
 			}
 
-			// Array of promises, each resolving to either a Command, or a commandOptions object.
+			// assemble the related links.
 			var deferredCommandItems = [];
-
-			// assemble the related links
-			for (var i = 0; i < contributedLinks.length; i++) {
-				var info = {};
-				var j;
-				var propertyNames = contributedLinks[i].getPropertyKeys();
-				for (j = 0; j < propertyNames.length; j++) {
-					info[propertyNames[j]] = contributedLinks[i].getProperty(propertyNames[j]);
+			contributedLinks.forEach(function(contribution) {
+				var info = getServiceProperties(contribution);
+				// exclude anything in the list of exclusions
+				if (!info.id || exclusions.indexOf(info.id) !== -1) {
+					return; // skip
 				}
-				if (info.id) {
-					var command = null;
-					var deferred = null;
-					// exclude anything in the list of exclusions
-					var position = exclusions.indexOf(info.id);
-					if (position < 0) {
-						// First see if we have a uriTemplate and name, which is enough to build a command internally.
-						if (((info.nls && info.nameKey) || info.name) && info.uriTemplate) {
-							deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true);
-							deferredCommandItems.push(deferred);
-							continue;
-						}
-						// We couldn't compose one, so see if one is already registered.
-						if ((command = commandRegistry.findCommand(info.id))) {
-							deferredCommandItems.push(new Deferred().resolve(command));
-							continue;
-						}
-						// It's not registered, so look for it in orion.navigate.command and create it
-						var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
-						for (j = 0; j < commandsReferences.length; j++) {
-							var id = commandsReferences[j].getProperty("id"); //$NON-NLS-0$
-							if (id === info.id) {
-								var navInfo = {};
-								propertyNames = commandsReferences[j].getPropertyKeys();
-								for (var k = 0; k < propertyNames.length; k++) {
-									navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
-								}
-								deferred = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry,
-									contentTypesCache, true);
-								deferredCommandItems.push(deferred);
-								break;
-							}
-						}
+				// First see if we have a uriTemplate and name, which is enough to build a command internally.
+				if (((info.nls && info.nameKey) || info.name) && info.uriTemplate) {
+					var commandOptionsPromise = mExtensionCommands._createCommandOptions(info, contribution, serviceRegistry, contentTypesCache, true);
+					deferredCommandItems.push(commandItem(info, commandOptionsPromise, null));
+					return;
+				}
+				// We couldn't compose one, so see if one is already registered.
+				var command;
+				if ((command = commandRegistry.findCommand(info.id))) {
+					deferredCommandItems.push(commandItem(info, null, command));
+					return;
+				}
+				// It's not registered, so look for it in orion.navigate.command and create it
+				var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
+				commandsReferences.some(function(commandReference) {
+					var id = commandReference.getProperty("id"); //$NON-NLS-0$
+					if (id !== info.id) {
+						return false; // continue
 					}
-				}
-			}
-			Deferred.all(deferredCommandItems, continueOnError).then(function(items) {
-				var commands = items.map(function(item) {
-					return (item instanceof mCommands.Command) ? item : new mCommands.Command(item);
-				}).sort(function(a, b) {
-					return a.name.localeCompare(b.name);
+					var navInfo = getServiceProperties(commandReference);
+					var commandOptionsPromise = mExtensionCommands._createCommandOptions(navInfo, commandReference, serviceRegistry, contentTypesCache, true);
+					deferredCommandItems.push(commandItem(info, commandOptionsPromise, null));
+					return true; // stop
 				});
-				return Deferred.all(commands.map(enhanceCommand), continueOnError).then(function(enhanced) {
-					enhanced.forEach(function(array) {
-						if (array) {
-							customGlobalCommands.addRelatedLinkCommand(array[0], array[1]);
-						}
+			});
+			Deferred.all(deferredCommandItems, continueOnError).then(function(commandItems) {
+				commandItems.sort(function(a, b) {
+					return a.command.name.localeCompare(b.command.name);
+				});
+				return Deferred.all(commandItems.map(setInvocation), continueOnError).then(function(commandItems) {
+					// Filter out any holes caused by setInvocation() failing
+					commandItems = commandItems.filter(function(item) {
+						return item;
 					});
+					// Finally pass the relatedLinks data to customGlobalCommands
+					customGlobalCommands.addRelatedLinkCommands(commandItems);
 					customGlobalCommands.afterGenerateRelatedLinks.apply(this, globalArguments);
 				});
 			});
@@ -698,7 +708,15 @@ define([
 		// generate primary nav links.
 		var primaryNav = lib.node("navigationlinks"); //$NON-NLS-0$
 		if (primaryNav) {
-			PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link").then(function(pageLinksInfo) {
+
+			var categoriesPromise = PageLinks.getCategoriesInfo(serviceRegistry);
+			var pageLinksPromise = PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link");
+			Deferred.all([ categoriesPromise, pageLinksPromise ]).then(function(results) {
+				var categoriesInfo = results[0], pageLinksInfo = results[1];
+				sideMenu.setCategories(categoriesInfo);
+				sideMenu.setPageLinks(pageLinksInfo);
+
+				// TODO once SideMenu is operational, remove navlink creation below 
 				pageLinksInfo.createLinkElements().forEach(function (link) {
 					var li = document.createElement('li'); //$NON-NLS-0$
 					li.appendChild(link);

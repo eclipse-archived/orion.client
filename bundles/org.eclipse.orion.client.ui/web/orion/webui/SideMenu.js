@@ -11,7 +11,10 @@
 /*global window console define localStorage*/
 /*jslint browser:true*/
 
-define(['orion/webui/littlelib'], function(lib) {
+define([
+	'orion/objects',
+	'orion/webui/littlelib'
+], function(objects, lib) {
 
 	function SideMenu(){
 		this.menuitems = new Array();
@@ -129,7 +132,22 @@ define(['orion/webui/littlelib'], function(lib) {
 	SideMenu.prototype.setSideMenu = setSideMenu;		
 	SideMenu.prototype.setSideMenuWidth = setSideMenuWidth;
 	SideMenu.prototype.toggleSideMenu = toggleSideMenu;
-	
+
+	objects.mixin(SideMenu.prototype, {
+		setCategories: function(categoriesInfo) {
+			this.categories = categoriesInfo;
+			console.log("SideMenu got categories: "); console.log(categoriesInfo);
+		},
+		setPageLinks: function(pagelinksInfo) {
+			this.pageLinks = pagelinksInfo;
+			console.log("SideMenu got pagelinks: "); console.log(pagelinksInfo);
+		},
+		setRelatedLinks: function(relatedLinks) {
+			this.relatedLinks = relatedLinks;
+			console.log("SideMenu got relatedLinks: "); console.log(relatedLinks);
+		}
+	});
+
 	return SideMenu;
 });
 

@@ -108,7 +108,8 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
-		id: "eclipse.git.log"
+		id: "eclipse.git.log",
+		category: "git"
 	});
 	/*
 	provider.registerService("orion.page.link.related", null, {

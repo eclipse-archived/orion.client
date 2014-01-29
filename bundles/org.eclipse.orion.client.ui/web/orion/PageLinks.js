@@ -42,7 +42,7 @@ define([
 	 */
 	function getPageLinksInfo(serviceRegistry, serviceName) {
 		return _readPageLinksMetadata(serviceRegistry, serviceName).then(function(metadata) {
-			return new _PageLinksInfo(metadata.categories, metadata.linkInfo);
+			return new PageLinksInfo(metadata);
 		});
 	}
 
@@ -66,36 +66,8 @@ define([
 		});
 	}
 
-	/*
-	 * Categories apply to all orion.page.link* serviceNames, so cache them.
-	 */
-	var _cachedCategoryInfos;
-
 	function _readPageLinksMetadata(serviceRegistry, serviceName) {
 		serviceName = serviceName || "orion.page.link"; //$NON-NLS-0$
-
-		// Read categories.
-		var categoryInfos;
-		if (!_cachedCategoryInfos) {
-			categoryInfos = [];
-			var navLinkCategories = serviceRegistry.getServiceReferences("orion.page.link.category"); //$NON-NLS-0$
-			navLinkCategories.forEach(function(serviceRef) {
-				var info = _getPropertiesMap(serviceRef);
-				if (!info.id || (!info.name && !info.nameKey)) {
-					return;
-				}
-				if (info.nls) {
-					categoryInfos.push(_loadTranslatedName(info));
-				} else {
-					info.textContent = info.name;
-					categoryInfos.push(new Deferred().resolve(info));
-				}
-			});
-			_cachedCategoryInfos = categoryInfos;
-		} else {
-			categoryInfos = _cachedCategoryInfos;
-		}
-		var categoriesPromise = Deferred.all(categoryInfos);
 
 		// Read page links.
 		// https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages
@@ -123,56 +95,49 @@ define([
 				navLinkInfos.push(new Deferred().resolve(info));
 			}
 		});
-		var navLinksPromise = Deferred.all(navLinkInfos);
-
-		return Deferred.all([categoriesPromise, navLinksPromise]).then(function(results) {
-			return {
-				categories: results[0],
-				linkInfo: results[1]
-			}
-		});
+		return Deferred.all(navLinkInfos);
 	}
 
+	// Categories apply to all orion.page.link* serviceNames, so cache them.
+	var _cachedCategories;
 	/**
-	 * @name orion.PageLinks.PageLinksInfo
-	 * @class
-	 * @description Provides access to info about page links read from an extension point.
+	 * Reads info about page link categories.
+	 * @returns {orion.Promise} Resolving to {@link orion.PageLinks.CategoriesInfo}
 	 */
-	function _PageLinksInfo(categoriesArray, allPageLinks) {
-		this.allPageLinks = allPageLinks;
+	function getCategoriesInfo(serviceRegistry) {
+		// Read categories.
+		var categoryInfos;
+		if (!_cachedCategories) {
+			categoryInfos = [];
+			var navLinkCategories = serviceRegistry.getServiceReferences("orion.page.link.category"); //$NON-NLS-0$
+			navLinkCategories.forEach(function(serviceRef) {
+				var info = _getPropertiesMap(serviceRef);
+				if (!info.id || (!info.name && !info.nameKey)) {
+					return;
+				}
+				if (info.nls) {
+					categoryInfos.push(_loadTranslatedName(info));
+				} else {
+					info.textContent = info.name;
+					categoryInfos.push(new Deferred().resolve(info));
+				}
+			});
+			return Deferred.all(categoryInfos).then(function(infos) {
+				_cachedCategories = new CategoriesInfo(infos);
+				return _cachedCategories;
+			});
+		}
+		return new Deferred().resolve(_cachedCategories);
+	}
+
+	function CategoriesInfo(categoriesArray) {
 		var categories = this.categories = Object.create(null); // Maps category id {String} to category {Object}
-		var links = this.links = Object.create(null); // Maps category id {String} to page links {Object[]}
 
 		categoriesArray.forEach(function(category) {
 			categories[category.id] = category;
 		});
-		allPageLinks.forEach(function(link) {
-			var category = link.category ? categories[link.category] : null;
-			if (category) {
-				links[category.id] = links[category.id] || [];
-				links[category.id].push(link);
-			} else {
-				// TODO default category for this link?
-			}
-		});
-
-		// Sort within category by name
-		Object.keys(links).forEach(function(key) {
-			links[key].sort(_comparePageLinks);
-		});
-		// Sort all by name
-		this.allPageLinks.sort(_comparePageLinks);
 	}
-	objects.mixin(_PageLinksInfo.prototype, /** @lends orion.PageLinks.PageLinksInfo.prototype */ {
-		/**
-		 * Builds DOM elements for links from all categories.
-		 * @returns {Element[]} The links.
-		 */
-		createLinkElements: function() {
-			return this.allPageLinks.map(function(info) {
-				return _createLink(info.href, "_self", info.textContent); //$NON-NLS-0$
-			});
-		},
+	objects.mixin(CategoriesInfo.prototype, /** @lends orion.CategoriesInfo.CategoriesInfo.prototype */ {
 		/**
 		 * Returns the category IDs.
 		 * @returns {String[]} The category IDs.
@@ -187,21 +152,33 @@ define([
 		 */
 		getCategory: function(id) {
 			return this.categories[id] || null;
+		}
+	});
+
+	/**
+	 * @name orion.PageLinks.PageLinksInfo
+	 * @class
+	 * @description Provides access to info about page links read from an extension point.
+	 */
+	function PageLinksInfo(allPageLinks) {
+		this.allPageLinks = allPageLinks;
+		this.allPageLinks.sort(_comparePageLinks);
+	}
+	objects.mixin(PageLinksInfo.prototype, /** @lends orion.PageLinks.PageLinksInfo.prototype */ {
+		/**
+		 * Builds DOM elements for links
+		 * @returns {Element[]} The links.
+		 */
+		createLinkElements: function() {
+			return this.allPageLinks.map(function(info) {
+				return _createLink(info.href, "_self", info.textContent); //$NON-NLS-0$
+			});
 		},
 		/**
-		 * Returns links from all categories, sorted by name.
 		 * @returns {Object[]} The links.
 		 */
 		getAllLinks: function() {
 			return this.allPageLinks;
-		},
-		/**
-		 * Returns the links belonging to the given category.
-		 * @param {String} id The category ID.
-		 * @returns {Object[]} The links.
-		 */
-		getLinks: function(id) {
-			return this.links[id] || [];
 		}
 	});
 
@@ -228,6 +205,7 @@ define([
 	 * @description Utilities for reading <code>orion.page.link</code> services.
 	 */
 	return {
+		getCategoriesInfo: getCategoriesInfo,
 		getPageLinksInfo: getPageLinksInfo,
 		getOrionHome: getOrionHome
 	};
