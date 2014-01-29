@@ -434,8 +434,12 @@ define([
 		 * @param {String} [tooltip] Tooltip to show on this group. If not provided, and the group uses an <code>imageClass</code>,
 		 * the <code>title</code> will be used as the tooltip.
 		 * @param {String} [selectionClass] CSS class to be appended when the command button is selected. Optional.
+		 * @param {String} or {boolean} [defaultActionId] Id of an action from this group that should be invoked when the group is selected. This will add an
+		 * arrow to the grup that will open the dropdown. Optionally this can be set to <code>true</code> instead of adding a particular action.
+		 * If set to <code>true</code> the group will be renderer as if there was a default action, but instead of invoking the default action it will
+		 * open the dropdown. Optional.
 		 */	
-		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, imageClass, tooltip, selectionClass) {
+		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage, imageClass, tooltip, selectionClass, defaultActionId) {
 			if (!this._contributionsByScopeId[scopeId]) {
 				this._contributionsByScopeId[scopeId] = {};
 			}
@@ -460,6 +464,13 @@ define([
 				if (selectionClass) {
 					parentTable[groupId].selectionClass = selectionClass;
 				}
+				
+				if(defaultActionId === true){
+					parentTable[groupId].pretendDefaultActionId = true;
+				} else {
+					parentTable[groupId].defaultActionId = defaultActionId;
+				}
+				
 
 				parentTable[groupId].emptyGroupMessage = emptyGroupMessage;
 			} else {
@@ -470,6 +481,8 @@ define([
 										imageClass: imageClass,
 										tooltip: tooltip,
 										selectionClass: selectionClass,
+										defaultActionId: defaultActionId === true ? null : defaultActionId,
+										pretendDefaultActionId: defaultActionId === true,
 										children: {}};
 				parentTable.sortedContributions = null;
 			}
@@ -754,8 +767,18 @@ define([
 							// If we wait until the end of asynch processing to add the menu button, the layout will have 
 							// to be redone. The down side to always adding the menu button is that we may find out we didn't
 							// need it after all, which could cause layout to change.
-
-							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass, contribution.tooltip, contribution.selectionClass);
+							var defaultInvocation;
+							if(contribution.defaultActionId){
+								var defaultChild = self._commandList[contribution.defaultActionId];
+								if(defaultChild && (defaultChild.visibleWhen ? defaultChild.visibleWhen(items) : true)){
+									defaultInvocation = new Commands.CommandInvocation(handler, items, userData, defaultChild, self);
+									defaultInvocation.domParent = parent;
+								} else {
+									contribution.pretendDefaultActionId = true;
+								}
+							}
+						
+							created = self._createDropdownMenu(parent, contribution.title, null /*nested*/, null /*populateFunc*/, contribution.imageClass, contribution.tooltip, contribution.selectionClass, null, defaultInvocation, contribution.pretendDefaultActionId);
 							if(domNodeWrapperList){
 								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
@@ -923,7 +946,7 @@ define([
 		/*
 		 * private.  Parent must exist in the DOM.
 		 */
-		_createDropdownMenu: function(parent, name, nested, populateFunction, icon, tooltip, selectionClass, positioningNode) {
+		_createDropdownMenu: function(parent, name, nested, populateFunction, icon, tooltip, selectionClass, positioningNode, defaultInvocation, pretendDefaultActionId) {
 			parent = lib.node(parent);
 			// We create dropdowns asynchronously so it's possible that the parent has been removed from the document 
 			// by the time we are called.  If so, don't bother building a submenu for an orphaned menu.
@@ -956,15 +979,31 @@ define([
 					tooltip = tooltip || name; // No text and no tooltip => fallback to name
 				}
 				tooltip = icon ? (tooltip || name) : tooltip;
-				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon, false, selectionClass, positioningNode);
+				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon, false, selectionClass, positioningNode, defaultInvocation || pretendDefaultActionId);
+				if(defaultInvocation){
+					defaultInvocation.domNode = created.menuButton;
+					var self = this;
+					created.menuButton.onclick = function(){
+						self._invoke(defaultInvocation);
+					};
+				} else if(pretendDefaultActionId && created.dropdown){
+					created.dropdown.addTriggerNode(created.menuButton);
+				}
 				menuButton = created.menuButton;
 				newMenu = created.menu;
 				if (tooltip) {
 					menuButton.commandTooltip = new mTooltip.Tooltip({
 						node: menuButton,
-						text: tooltip,
+						text: defaultInvocation && defaultInvocation.command && defaultInvocation.command.name ? tooltip + ": " + defaultInvocation.command.name: tooltip,
 						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
+					if(created.extraDropdownButton){
+						menuButton.commandTooltip = new mTooltip.Tooltip({
+							node: created.extraDropdownButton,
+							text: tooltip,
+							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						});						
+					}
 				}
 			}
 			

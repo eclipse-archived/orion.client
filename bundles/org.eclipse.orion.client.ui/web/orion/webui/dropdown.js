@@ -103,6 +103,15 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 			this._dropdownNode.addEventListener("keydown", this._dropdownKeyDown.bind(this), false); //$NON-NLS-0$
 		},
 		
+		addTriggerNode: function(node){
+			var self = this;
+			node.addEventListener("click", function(event) { //$NON-NLS-0$
+				if (self.toggle(event))  {
+					lib.stop(event);
+				}
+			}, false);			
+		},
+		
 		/**
 		 * Toggle the open/closed state of the dropdown.  Return a boolean that indicates whether action was taken.
 		 */			

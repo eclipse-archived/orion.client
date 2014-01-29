@@ -11,9 +11,9 @@
 /*jslint sub:true*/
  /*global define document window Image */
  
-define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown', 'text!orion/webui/dropdowntriggerbutton.html', 'text!orion/webui/submenutriggerbutton.html', 
+define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown', 'text!orion/webui/dropdowntriggerbutton.html', 'text!orion/webui/dropdowntriggerbuttonwitharrow.html', 'text!orion/webui/submenutriggerbutton.html', 
 	'text!orion/webui/checkedmenuitem.html', 'orion/webui/tooltip'], 
-	function(require, util, lib, Dropdown, DropdownButtonFragment, SubMenuButtonFragment, CheckedMenuItemFragment, Tooltip) {
+	function(require, util, lib, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, SubMenuButtonFragment, CheckedMenuItemFragment, Tooltip) {
 	
 		/* a function that can be set for retrieving bindings stored elsewhere, such as a command registry */
 		var getBindings = null;
@@ -271,24 +271,38 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		return node;
 	}
 
-	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode) {
+	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode, displayExtraDropdown) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
 		}
 		var range = document.createRange();
 		range.selectNode(parent);
-		var buttonFragment = range.createContextualFragment(DropdownButtonFragment);
+		var buttonFragment = displayExtraDropdown ? range.createContextualFragment(DropdownButtonWithArrowFragment) : range.createContextualFragment(DropdownButtonFragment);
 		// bind name to fragment variable
 		lib.processTextNodes(buttonFragment, {ButtonText: name});
 		parent.appendChild(buttonFragment);
 		var newMenu = parent.lastChild;
-		var menuButton = newMenu.previousSibling;
+		var menuButton;
+		var extraDropdownButton;
+		if(displayExtraDropdown){
+			extraDropdownButton = newMenu.previousSibling;
+			menuButton = extraDropdownButton.previousSibling;
+		} else {
+			menuButton = newMenu.previousSibling;
+		}
 		if (buttonClass) {
 			menuButton.classList.add(buttonClass); //$NON-NLS-0$
+			if(extraDropdownButton) extraDropdownButton.classList.add(buttonClass); //$NON-NLS-0$
 		} else {
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 			menuButton.classList.add("commandButton"); //$NON-NLS-0$
+			if(extraDropdownButton) {
+				extraDropdownButton.classList.add("orionButton"); //$NON-NLS-0$
+				extraDropdownButton.classList.add("commandButton"); //$NON-NLS-0$
+				extraDropdownButton.classList.add("commandHalfButton_right"); //$NON-NLS-0$
+				menuButton.classList.add("commandHalfButton_left"); //$NON-NLS-0$
+			}
 		}
 		if (buttonIconClass) {
 			if(!showName) {
@@ -296,6 +310,11 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 				menuButton.setAttribute("aria-label", name); //$NON-NLS-0$
 			}
 			_addImageToElement({ spriteClass: "commandSprite", imageClass: buttonIconClass }, menuButton, name); //$NON-NLS-0$
+			if(extraDropdownButton) {
+				extraDropdownButton.classList.add("commandImage"); //$NON-NLS-0$
+				extraDropdownButton.classList.add("commandHalfImage_right"); //$NON-NLS-0$
+				menuButton.classList.add("commandHalfImage_left"); //$NON-NLS-0$
+			}
 			menuButton.classList.add("orionButton"); // $NON-NLS-0$
 		}
 		menuButton.dropdown = new Dropdown.Dropdown({
@@ -305,7 +324,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 			positioningNode: positioningNode
 		});
 		newMenu.dropdown = menuButton.dropdown;
-		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown};
+		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, extraDropdownButton: extraDropdownButton};
 	}
 	
 	function createCheckedMenuItem(parent, name, checked, onChange) {
