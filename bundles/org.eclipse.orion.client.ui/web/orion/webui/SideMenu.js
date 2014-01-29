@@ -92,7 +92,7 @@ define([
 		
 		var listAnchor = document.getElementById( this.LIST_ANCHOR_ID );
 		
-		if( sideMenuNavigation ){
+		if( sideMenuNavigation && listAnchor ){
 			
 			if( sideMenuNavigation === this.CLOSED_STATE ){
 				this.setSideMenuWidth( this.SIDE_MENU_CLOSED_WIDTH );
@@ -107,28 +107,18 @@ define([
 	}
 		
 	function setSideMenuWidth( sideMenuWidth ){
-			
+		var pageContent = lib.node( "pageContent" );
+		if (pageContent) {
+			pageContent.style.left = sideMenuWidth;
+		}
 		var sideToolBar = lib.node( "sideMenu" );
-		var auxpane = lib.node( "auxpane" );
-		var mainToolBar = lib.node( "pageToolbar");
-		
 		if( sideToolBar ){
 			sideToolBar.style.width = sideMenuWidth;
-		}
-		
-		if( auxpane ){
-			auxpane.style.left = sideMenuWidth;
-		}
-		
-		if( mainToolBar ){
-			mainToolBar.style.paddingLeft = sideMenuWidth;
 		}
 	};	
 		
 	function toggleSideMenu(){
 			
-		var sideMenuWidth = this.SIDE_MENU_OPEN_WIDTH;
-		
 		var newState = this.OPEN_STATE;
 		
 		var sideMenuNavigation = localStorage.getItem(this.LOCAL_STORAGE_NAME);

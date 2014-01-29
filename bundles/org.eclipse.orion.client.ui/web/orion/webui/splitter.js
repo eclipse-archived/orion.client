@@ -209,19 +209,13 @@ define([
 			var rect = lib.bounds(this.$node);
 			if (this._vertical) {
 				if (top === undefined) {
-					top = rect.top;
-					if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$
-						top -= parentRect.top;
-					}
+					top = rect.top - parentRect.top;
 				}
 				top += rect.height;
 				this.$mainNode.style.top = top + "px"; //$NON-NLS-0$
 			} else {
 				if (left === undefined) {
-					left = rect.left;
-					if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$
-						left -= parentRect.left;
-					}
+					left = rect.left - parentRect.left;
 				}
 				left += rect.width;
 				this.$mainNode.style.left = left + "px"; //$NON-NLS-0$
@@ -330,9 +324,7 @@ define([
 						this._splitTop = parentRect.top + parentRect.height - MIN_SIDE_NODE_WIDTH;
 					}
 					var top = this._splitTop;
-					if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$
-						top = this._splitTop - parentRect.top;
-					}
+					top = this._splitTop - parentRect.top;
 					this.$node.style.top = top + "px"; //$NON-NLS-0$
 				} else {
 					this._splitLeft = event.clientX;
@@ -342,9 +334,8 @@ define([
 						this._splitLeft = parentRect.left + parentRect.width - MIN_SIDE_NODE_WIDTH;
 					}
 					var left = this._splitLeft;
-					if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$
-						left = this._splitLeft - parentRect.left;
-					}
+					//TODO why multiple by 2?
+					left = this._splitLeft - 2 * parentRect.left;
 					this.$node.style.left = left + "px"; //$NON-NLS-0$
 				}
 				this._adjustToSplitPosition(true);
