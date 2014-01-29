@@ -135,16 +135,16 @@ define([
 	SideMenu.prototype.toggleSideMenu = toggleSideMenu;
 
 	objects.mixin(SideMenu.prototype, {
-		// Only expected to be called once
+		// Should only be called once
 		setCategories: function(categories) {
-			console.log("SideMenu got categories: "); console.log(categories);
+//			console.log("SideMenu got categories: "); console.log(categories);
 			this.categories = categories;
 			this.links = Object.create(null); // Maps category ID {String} to link DOM elements {Element[]}
 			this._renderCategories();
 		},
-		// Only expected to be called once
+		// Should only be called once
 		setPageLinks: function(pagelinks) {
-			console.log("SideMenu got pagelinks: "); console.log(pagelinks);
+//			console.log("SideMenu got pagelinks: "); console.log(pagelinks);
 			this.pageLinks = pagelinks;
 
 			var _self = this;
@@ -156,18 +156,26 @@ define([
 			});
 			this._renderLinks();
 		},
-		// Expected to be called whenever the page target changes
+		// Called whenever the page target changes
 		setRelatedLinks: function(relatedLinks) {
-			console.log("SideMenu got relatedLinks: "); console.log(relatedLinks);
+//			console.log("SideMenu got relatedLinks: "); console.log(relatedLinks);
 			this.relatedLinks = relatedLinks;
 
 			var _self = this;
+			// clean out existing related links
+			Object.keys(this.links).forEach(function(catId) {
+				var linkBin = _self._getLinksBin(catId);
+				_self.links[catId] = linkBin.filter(isNotRelatedLink);
+			});
+
+			// add new ones
 			var linkHolder = document.createDocumentFragment();
 			relatedLinks.forEach(function(commandItem) {
-				var array = _self._getLinksBin(commandItem.relatedLink.category);
+				var linkBin = _self._getLinksBin(commandItem.relatedLink.category);
 				var relatedLinkElement = mCommands.createCommandMenuItem(linkHolder, commandItem.command, commandItem.invocation);
-				relatedLinkElement.classList.remove('dropdownMenuItem');
-				array.push(relatedLinkElement);
+				relatedLinkElement.classList.remove("dropdownMenuItem");
+				relatedLinkElement.isRelatedLink = true;
+				linkBin.push(relatedLinkElement);
 			});
 			this._renderLinks();
 		},
@@ -185,8 +193,19 @@ define([
 		_sort: function() {
 			// Sort by name within each category
 			var links = this.links;
-			Object.keys(links).forEach(function(key) {
+			var catIds = Object.keys(links);
+			catIds.forEach(function(key) {
 				links[key].sort(compareLinks);
+			});
+			// Remove duplicate links (mutates bin)
+			catIds.forEach(function(catId) {
+				var bin = links[catId];
+				for (var i = bin.length-1; i > 0; i--) {
+					var a = bin[i], b = bin[i-1];
+					if (a.href === b.href && a.textContent === b.textContent) {
+						bin.splice(i, 1);
+					}
+				}
 			});
 		},
 		_renderCategories: function() {
@@ -198,11 +217,23 @@ define([
 		},
 		_renderLinks: function() {
 			this._sort();
+			// debug
+			var _self = this;
+			console.log(" ------- ");
+			Object.keys(this.links).forEach(function(catId) {
+				console.log(catId + " -> [" + _self.links[catId].map(function(l) { 
+					return l.textContent + " (" + l.href + ")";
+				}).join(",") + "]");
+			});
 		}
 	});
 
-	function compareLinks(a, b) {
-		return 0;
+	function isNotRelatedLink(elem) {
+		return !elem.isRelatedLink;
+	}
+
+	function compareLinks(element1, element2) {
+		return element1.textContent.localeCompare(element2.textContent);
 	}
 
 //			sideMenu.addMenuItem( "core-sprite-edit", "http://www.google.com" );
