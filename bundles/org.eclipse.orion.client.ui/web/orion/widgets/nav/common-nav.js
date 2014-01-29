@@ -388,7 +388,7 @@ define([
 			commandRegistry.destroy(this.toolsActionsScope);
 			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
 			commandRegistry.destroy(this.additionalActionsScope);
-			commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, this.selections, this, "tool"); //$NON-NLS-0$
+			commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
 			if (this._sidebarContextMenuNode) {
 				this._populateContextMenu(this._sidebarContextMenuNode);
 			}
