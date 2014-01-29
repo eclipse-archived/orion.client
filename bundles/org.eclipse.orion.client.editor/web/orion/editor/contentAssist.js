@@ -743,6 +743,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		
 		if (this.widget) {
 			this.widget.setContentAssistMode(this);
+			this.widget.createAccessible();
 		}
 	}
 	ContentAssistMode.prototype = new mKeyModes.KeyMode();
@@ -901,7 +902,6 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		},
 		tab: function() {
 			if (this.widget) {
-				this.widget.createAccessible(this);
 				this.widget.parentNode.focus();
 				return true;
 			} else {
@@ -993,25 +993,38 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			parent.appendChild(div);
 		},
 		/** @private */
-		createAccessible: function(mode) {
-			if(!this._isAccessible) {
-				textUtil.addEventListener(this.parentNode, "keydown", function(evt) { //$NON-NLS-0$
-					if (!evt) { evt = window.event; }
-					if(evt.keyCode === 27) {return mode.cancel(); }
-					else if(evt.keyCode === 38) { return mode.lineUp(); }
-					else if(evt.keyCode === 40) { return mode.lineDown(); }
-					else if(evt.keyCode === 13) { return mode.enter(); }
-					if (evt.preventDefault) {
-						evt.preventDefault();
-					} else {
-						evt.cancelBubble = true;
-						evt.returnValue = false;
-						evt.keyCode = 0;
-					}
-					return false;
-				});
-			}
-			this._isAccessible = true;
+		createAccessible: function() {
+			var mode = this._contentAssistMode;
+			var self = this;
+			this.parentNode.addEventListener("keydown", function(evt) { //$NON-NLS-0$
+				if (!evt) { evt = window.event; }
+				if(evt.keyCode === lib.KEY.ESCAPE) {
+					return mode.cancel(); 
+				} else if(evt.keyCode === lib.KEY.UP) {
+					return mode.lineUp();
+				} else if(evt.keyCode === lib.KEY.DOWN) {
+					return mode.lineDown();
+				} else if(evt.keyCode === lib.KEY.ENTER) {
+					return mode.enter(); 
+				} else if(evt.keyCode === lib.KEY.PAGEDOWN) {
+					return mode.pageDown();
+				} else if(evt.keyCode === lib.KEY.PAGEUP) {
+					return mode.pageUp();
+				} else if(evt.keyCode === lib.KEY.HOME) {
+					self.scrollIndex(0, true);
+					return mode.lineDown(0); // select first selectable element starting at the top and moving downwards
+				} else if(evt.keyCode === lib.KEY.END) {
+					return mode.lineUp(mode.getProposals().length - 1); // select first selectable element starting at the bottom and moving up
+				} 
+				if (evt.preventDefault) {
+					evt.preventDefault();
+				} else {
+					evt.cancelBubble = true;
+					evt.returnValue = false;
+					evt.keyCode = 0;
+				}
+				return false;
+			});
 		},
 		/** @private */
 		_createDisplayNode: function(div, proposal, index) {
