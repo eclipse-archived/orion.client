@@ -27,24 +27,50 @@ define([
 	};
 
 	var provider = new PluginProvider(headers);
-	
+
+	// Categories for primary nav and related links
+	provider.registerService("orion.page.link.category", null, {
+		id: "edit",
+		nameKey: "Edit",
+		nls: "orion/nls/messages",
+		imageClass: "core-sprite-edit",
+		order: 10
+	});
+	provider.registerService("orion.page.link.category", null, {
+		id: "search",
+		nameKey: "Search",
+		nls: "orion/nls/messages",
+		imageClass: "core-sprite-search",
+		order: 30
+	});
+	provider.registerService("orion.page.link.category", null, {
+		id: "shell",
+		nameKey: "Shell",
+		nls: "orion/nls/messages",
+		imageClass: "core-sprite-shell",
+		order: 40
+	});
+
 	// Primary navigation links
 	provider.registerService("orion.page.link", null, {
 		nameKey: "Editor",
 		nls: "orion/nls/messages",
 		tooltip: "Edit code",
+		category: "edit",
 		uriTemplate: "{+OrionHome}/edit/edit.html"
 	});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Shell",
 		id: "orion.shell",
 		nls: "orion/nls/messages",
+		category: "shell",
 		uriTemplate: "{+OrionHome}/shell/shellPage.html"
 	});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Search",
 		id: "orion.Search",
 		nls: "orion/nls/messages",
+		category: "search",
 		uriTemplate: "{+OrionHome}/search/search.html"
 	});
 	
@@ -67,14 +93,14 @@ define([
 		nameKey: "Help",
 		nls: "orion/widgets/nls/messages",
 		uriTemplate: 'http://wiki.eclipse.org/Orion/Getting_Started_with_Orion_node',
-		category: 0
+		category: "user.0"
 	});
 	provider.registerService("orion.page.link.user", null, {
 		id: "orion.settings",
 		nameKey: "Settings",
 		nls: "orion/widgets/nls/messages",
 		uriTemplate: "{+OrionHome}/settings/settings.html",
-		category: 1
+		category: "user.1"
 	});
 
 	var htmlHelloWorld = document.createElement('a');

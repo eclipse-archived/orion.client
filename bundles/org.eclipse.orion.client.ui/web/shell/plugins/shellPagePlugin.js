@@ -31,19 +31,19 @@ define([
 			variableName: "ShellLocation",
 			replacements: [{pattern: "\\?depth=1$", replacement: ""}] 
 		}],
-		category: "edit",
 		uriTemplate: "{+OrionHome}/shell/shellPage.html#{,ShellLocation}",
 		forceSingleItem: true
 	});
 	provider.registerService("orion.page.link.related", null, {
-		id: "eclipse.shell.open"
+		id: "eclipse.shell.open",
+		category: "shell"
 	});
 	provider.registerService("orion.page.link.related", null, {
 		nameKey: "Shell",
 		id: "eclipse.shell.open",
 		tooltipKey: "Open Shell page",
 		nls: "orion/shell/nls/messages",
-		category: "edit",
+		category: "shell",
 		validationProperties: [{
 			source: "NoTarget"
 		}],

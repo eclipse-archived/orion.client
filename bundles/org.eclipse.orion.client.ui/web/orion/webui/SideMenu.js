@@ -205,7 +205,7 @@ define([
 			var links = this.links;
 			var catIds = Object.keys(links);
 			catIds.forEach(function(key) {
-				links[key].sort(compareLinks);
+				links[key].sort(compareTextContent);
 			});
 			// Remove duplicate links (mutates bin)
 			catIds.forEach(function(catId) {
@@ -220,9 +220,10 @@ define([
 		},
 		_renderCategories: function() {
 			var categories = this.categories, _self = this;
-			categories.getCategoryIDs().forEach(function(catId) {
-				var cat = categories.getCategory(catId);
-				_self.addMenuItem(cat.imageClass, catId);
+			categories.getCategoryIDs().map(function(catId) {
+				return categories.getCategory(catId);
+			}).sort(compareCategories).forEach(function(cat) {
+				_self.addMenuItem(cat.imageClass, cat.id);
 			});
 		},
 		_renderLinks: function() {
@@ -320,13 +321,18 @@ define([
 		return !elem.isRelatedLink;
 	}
 
-	function compareLinks(element1, element2) {
-		return element1.textContent.localeCompare(element2.textContent);
+	function compareCategories(c1, c2) {
+		var o1 = c1.order, o2 = c2.order;
+		if (o1 < o2)
+			return -1;
+		else if (o2 < o1)
+			return 1;
+		return 0;
 	}
 
-//			sideMenu.addMenuItem( "core-sprite-edit", "http://www.google.com" );
-//			sideMenu.addMenuItem( "core-sprite-deploy", "http://www.bbc.co.uk" );
-//			sideMenu.setActiveMenuItem( "http://www.bbc.co.uk" );
+	function compareTextContent(element1, element2) {
+		return element1.textContent.localeCompare(element2.textContent);
+	}
 
 	return SideMenu;
 });

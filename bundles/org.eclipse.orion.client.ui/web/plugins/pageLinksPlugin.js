@@ -26,30 +26,41 @@ define([
 
 	var provider = new PluginProvider(headers);
 
-	// Categories for primary nav links
+	// Categories for primary nav and related links
 	provider.registerService("orion.page.link.category", null, {
 		id: "edit",
 		nameKey: "Edit",
 		nls: "orion/nls/messages",
-		imageClass: "core-sprite-edit"
+		imageClass: "core-sprite-edit",
+		order: 10
 	});
 	provider.registerService("orion.page.link.category", null, {
 		id: "search",
 		nameKey: "Search",
 		nls: "orion/nls/messages",
-		imageClass: "core-sprite-search"
+		imageClass: "core-sprite-search",
+		order: 30
+	});
+	provider.registerService("orion.page.link.category", null, {
+		id: "shell",
+		nameKey: "Shell",
+		nls: "orion/nls/messages",
+		imageClass: "core-sprite-shell",
+		order: 40
 	});
 	provider.registerService("orion.page.link.category", null, {
 		id: "sites",
 		nameKey: "Sites",
 		nls: "orion/nls/messages",
-		imageClass: "core-sprite-sites"
+		imageClass: "core-sprite-sites",
+		order: 50
 	});
 	provider.registerService("orion.page.link.category", null, {
 		id: "deploy",
 		nameKey: "Deploy",
 		nls: "orion/edit/nls/messages",
-		imageClass: "core-sprite-deploy"
+		imageClass: "core-sprite-deploy",
+		order: 60
 	});
 
 	// Primary navigation links
