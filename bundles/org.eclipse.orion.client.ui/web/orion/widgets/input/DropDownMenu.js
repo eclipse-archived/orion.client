@@ -46,7 +46,7 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/webui/SideMenu'], funct
 		this._parent.appendChild(dropDownContainer);
 		this._dropdownMenu = dropDownContainer;
 		this._dropdownMenu.pinSection = false;
-		this._dropdownMenu.sideMenuController = new SideMenu();
+//		this._dropdownMenu.sideMenuController = new SideMenu();
 		
 		var pinSection = document.createElement( "div" );	
 		pinSection.innerHTML = "pin";

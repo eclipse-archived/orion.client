@@ -17,22 +17,28 @@ define([
 	'orion/webui/littlelib'
 ], function(mCommands, objects, lib) {
 
-	function SideMenu(){
-		this.menuitems = new Array();
+	function SideMenu(parentNode){
+		if (!parentNode)
+			throw new Error("Missing parentNode");
+		this.parentNode = lib.node(parentNode);
+		this.menuitems = [];
+
+		this.anchor = document.createElement("ul");
+		this.anchor.classList.add("sideMenuList");
+		this.parentNode.appendChild(this.anchor);
 	}
 	
-	SideMenu.prototype.LIST_ANCHOR_ID = "sideMenuAnchor";
 	SideMenu.prototype.LOCAL_STORAGE_NAME = "sideMenuNavigation";
 	SideMenu.prototype.OPEN_STATE = "open";
 	SideMenu.prototype.CLOSED_STATE = "closed";
+	SideMenu.prototype.DEFAULT_STATE = SideMenu.prototype.OPEN_STATE;
 	SideMenu.prototype.SIDE_MENU_OPEN_WIDTH = "40px";
 	SideMenu.prototype.SIDE_MENU_CLOSED_WIDTH = "0";
 	
 	SideMenu.prototype.menuitems = [];
 	
 	function addMenuItem( imageClassName, categoryId /*, link*/ ){
-		
-		var anchor = lib.node( this.LIST_ANCHOR_ID );		
+		var anchor = this.anchor;
 		
 		var listItem = document.createElement( 'li' );
 		listItem.className = imageClassName + " sideMenuItem active";
@@ -63,11 +69,11 @@ define([
 	
 	function setSideMenu(){
 			
-		var sideMenuNavigation = localStorage.getItem(this.LOCAL_STORAGE_NAME);
+		var sideMenuNavigation = this.getDisplayState();
 		
-		var listAnchor = document.getElementById( this.LIST_ANCHOR_ID );
+		var listAnchor = this.anchor;
 		
-		if( sideMenuNavigation && listAnchor ){
+		if( listAnchor ){
 			
 			if( sideMenuNavigation === this.CLOSED_STATE ){
 				this.setSideMenuWidth( this.SIDE_MENU_CLOSED_WIDTH );
@@ -96,18 +102,16 @@ define([
 			
 		var newState = this.OPEN_STATE;
 		
-		var sideMenuNavigation = localStorage.getItem(this.LOCAL_STORAGE_NAME);
+		var sideMenuNavigation = this.getDisplayState();
 		
-		if( sideMenuNavigation ){
-			
-			/* if this is true, a person has pinned the menu sometime before */
-			
-			if( sideMenuNavigation === this.OPEN_STATE ){
-				newState = this.CLOSED_STATE;	
-			}	
+		/* if this is true, a person has pinned the menu sometime before */
+		
+		if( sideMenuNavigation === this.OPEN_STATE ){
+			newState = this.CLOSED_STATE;
+			localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
+		} else if (sideMenuNavigation === this.DEFAULT_STATE) {
+			localStorage.removeItem(this.LOCAL_STORAGE_NAME);
 		}
-		
-		localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
 		
 		this.setSideMenu();
 	};
@@ -120,6 +124,13 @@ define([
 	SideMenu.prototype.toggleSideMenu = toggleSideMenu;
 
 	objects.mixin(SideMenu.prototype, {
+		getDisplayState: function() {
+			var state = localStorage.getItem(this.LOCAL_STORAGE_NAME);
+			if (!state) {
+				state = this.DEFAULT_STATE;
+			}
+			return state;
+		},
 		// Should only be called once
 		setCategories: function(categories) {
 //			console.log("SideMenu got categories: "); console.log(categories);
@@ -210,7 +221,7 @@ define([
 			Object.keys(this.links).forEach(function(catId) {
 				console.log(catId + " -> [" + _self.links[catId].map(function(l) { 
 					return l.textContent + " (" + l.href + ")";
-				}).join(",") + "]");
+				}).join(", ") + "]");
 			});
 			
 			// Set up category hovers
