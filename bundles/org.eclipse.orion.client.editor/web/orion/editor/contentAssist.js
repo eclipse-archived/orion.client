@@ -936,6 +936,9 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				throw new Error("parentNode is required"); //$NON-NLS-0$
 			}
 		}
+		
+		this.parentNode.addEventListener("scroll", this.onScroll.bind(this)); //$NON-NLS-0$
+		
 		var self = this;
 		this.textViewListener = {
 			onMouseDown: function(event) {
@@ -963,6 +966,14 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			if (!e) { e = window.event; }
 			this.contentAssist.apply(this.getProposal(e.target || e.srcElement));
 			this.textView.focus();
+		},
+		/** @private */
+		onScroll: function(e) {
+			if (this.previousCloneNode && !this.preserveCloneThroughScroll) {
+				this._removeCloneNode();
+				this.previousSelectedNode.classList.add(STYLES.selected);
+			}
+			this.preserveCloneThroughScroll = false;
 		},
 		/** @private */
 		createDiv: function(proposal, parent, itemIndex) {
@@ -1097,6 +1108,10 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			
 			if (this.previousSelectedNode) {
 				this.previousSelectedNode.classList.remove(STYLES.selected);
+				this.previousSelectedNode = null;
+				if (this.previousCloneNode) {
+					this._removeCloneNode();
+				}
 			}
 			
 			if (-1 !== nodeIndex) {
@@ -1106,8 +1121,62 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				node.focus();
 				if (node.offsetTop < this.parentNode.scrollTop) {
 					node.scrollIntoView(true);
+					this.preserveCloneThroughScroll = true;
 				} else if ((node.offsetTop + node.offsetHeight) > (this.parentNode.scrollTop + this.parentNode.clientHeight)) {
 					node.scrollIntoView(false);
+					this.preserveCloneThroughScroll = true;
+				}
+				
+				var textNode = node.firstChild || node;  
+				var textBounds = lib.bounds(textNode);
+				var parentBounds = lib.bounds(this.parentNode);
+				var parentStyle = window.getComputedStyle(this.parentNode);
+				var nodeStyle = window.getComputedStyle(node);
+				var allPadding = parseInt(parentStyle.paddingLeft) + parseInt(parentStyle.paddingRight) + parseInt(nodeStyle.paddingLeft) + parseInt(nodeStyle.paddingRight);
+				if (textBounds.width >= (parentBounds.width - allPadding)) {
+					var parentTop = parseInt(parentStyle.top);
+					
+					// create clone node
+					var clone = node.cloneNode(true); // deep clone
+					clone.classList.add("cloneProposal"); //$NON-NLS-0$
+					clone.style.top = parentTop + node.offsetTop - this.parentNode.scrollTop + "px"; //$NON-NLS-0$
+					clone.style.left = parentStyle.left;
+					clone.setAttribute("id", clone.id + "_clone"); //$NON-NLS-1$ //$NON-NLS-0$
+					
+					// try to fit clone node on page horizontally
+					var viewportWidth = document.documentElement.clientWidth;
+					var horizontalOffset = (textBounds.left + textBounds.width) - parseInt(viewportWidth);
+					if (horizontalOffset > 0) {
+						var cloneLeft = parseInt(parentStyle.left) - horizontalOffset;
+						if (0 > cloneLeft) {
+							cloneLeft = 0;
+						}
+						clone.style.left = cloneLeft + "px";
+					}
+
+					// create wrapper parent node (to replicate css class hierarchy)
+					var parentClone = document.createElement("div");
+					parentClone.id = "clone_contentassist";  //$NON-NLS-0$
+					parentClone.classList.add("contentassist"); //$NON-NLS-0$
+					parentClone.classList.add("cloneWrapper"); //$NON-NLS-0$
+					parentClone.appendChild(clone);
+					parentClone.onclick = this.parentNode.onclick;
+					this.parentNode.parentNode.insertBefore(parentClone, this.parentNode);
+					
+					// make all the cloned nodes clickable by setting their contentAssistProposalIndex
+					var recursiveSetIndex = function(cloneNode){
+						cloneNode.contentAssistProposalIndex = node.contentAssistProposalIndex;
+						if (cloneNode.hasChildNodes()) {
+							for (var i = 0 ; i < cloneNode.childNodes.length ; i++){
+								recursiveSetIndex(cloneNode.childNodes[i]);
+							}
+						}
+					};
+					recursiveSetIndex(parentClone);
+					
+					node.classList.remove(STYLES.selected);
+					
+					this.previousCloneNode = parentClone;				
 				}
 			}
 			
@@ -1147,6 +1216,13 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 				this.textView.removeEventListener("MouseDown", this.textViewListener.onMouseDown); //$NON-NLS-0$
 				this.textViewListenerAdded = false;
 			}
+			
+			if (this.previousSelectedNode) {
+				this.previousSelectedNode = null;
+				if (this.previousCloneNode) {
+					this._removeCloneNode();
+				}
+			}
 		},
 		position: function() {
 			var contentAssist = this.contentAssist;
@@ -1180,6 +1256,12 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 			if (caretLocation.x + this.parentNode.offsetWidth > viewportWidth) {
 				this.parentNode.style.left = (viewportWidth - this.parentNode.offsetWidth) + "px"; //$NON-NLS-0$
 			}
+		},
+		_removeCloneNode: function(){
+			if (this.parentNode.parentNode.contains(this.previousCloneNode)) {
+				this.parentNode.parentNode.removeChild(this.previousCloneNode);	
+			}
+			this.previousCloneNode = null;
 		}
 	};
 	return {

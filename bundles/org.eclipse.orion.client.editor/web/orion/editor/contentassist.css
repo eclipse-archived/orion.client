@@ -77,19 +77,34 @@
 
 
 .contentassist > div:hover {
-	background-color: #fab467;
+	background-color: #fab467; /* for browsers that don't support linear-gradient */
+	background: linear-gradient(#fabb76, #e1a25c);
+	border-radius: 3px;
 }
 
 .contentassist>div.proposal-hr:hover {
-	background-color: white;
+	background-color: white; /* for browsers that don't support linear-gradient */
+	background: none;
 }
 
 .contentassist .selected {
-	 background-color: rgb(48, 135, 179);
-	 color: white;
+	background-color: rgb(48, 135, 179); /* for browsers that don't support linear-gradient */
+	background: linear-gradient(rgb(60, 150, 190), rgb(30, 120, 160));
+	border-radius: 3px;
+	color: white;
 }
 
+.contentassist .cloneProposal {
+	box-shadow: rgba(0, 0, 0, 0.9) 2px 2px 8px;
+	position: fixed;
+	z-index: 1000; /* must be greater than .contentassist z-index */
+}
 
 .contentassist>div {
-	padding: 1px 3px 0 5px;
+	padding: 1px 3px 1px 5px;
+}
+
+.cloneWrapper {
+	display: block;
+	z-index: 1000; /* must be greater than .contentassist z-index */
 }
