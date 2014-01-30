@@ -130,6 +130,9 @@ define([
 				sideMenu.setOverlaySideMenu(over);
 			});
 		},
+		afterGenerateNavigationMenu: mCustomGlobalCommands.afterGenerateNavigationMenu || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
+			// No-op
+		},
 		afterGenerateBanner: mCustomGlobalCommands.afterGenerateBanner || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {}
 	};
 
@@ -707,6 +710,7 @@ define([
 		}, false);
 
 		customGlobalCommands.generateNavigationMenu.apply(this, arguments);
+		customGlobalCommands.afterGenerateNavigationMenu.apply(this, arguments);
 
 		// generate primary nav links.
 		var categoriesPromise = PageLinks.getCategoriesInfo(serviceRegistry);
