@@ -34,9 +34,7 @@ define([
 		
 		var anchor = lib.node( this.LIST_ANCHOR_ID );		
 		
-		var listItem = document.createElement( 'li' );
-		listItem.className = imageClassName + " sideMenuItem active";
-		listItem.categoryId = categoryId;
+		var listItem = this.createListItem(imageClassName, categoryId);
 		
 		anchor.appendChild( listItem );
 	
@@ -120,6 +118,12 @@ define([
 	SideMenu.prototype.toggleSideMenu = toggleSideMenu;
 
 	objects.mixin(SideMenu.prototype, {
+		createListItem: function(imageClassName, categoryId) {
+			var listItem = document.createElement( 'li' );
+			listItem.className = imageClassName + " sideMenuItem active";
+			listItem.categoryId = categoryId;
+			return listItem;
+		},
 		// Should only be called once
 		setCategories: function(categories) {
 //			console.log("SideMenu got categories: "); console.log(categories);
@@ -215,8 +219,8 @@ define([
 			
 			// Set up category hovers
 			Object.keys(this.links).forEach(function(catId) {
-				var menuitem;
-				_self.menuitems.forEach(function(m) {
+				var menuitem, index;
+				_self.menuitems.forEach(function(m, index) {
 					if (m.categoryId === catId) {
 						menuitem = m;
 						return true;
@@ -224,6 +228,8 @@ define([
 				});
 				if (!menuitem)
 					return;
+				// TODO we should recreate menuitems here
+				var category = _self.categories.getCategory(catId);
 				var bin = _self._getLinksBin(catId);
 				if (bin.length === 1) {
 					var classlist = menuitem.className;
@@ -233,64 +239,37 @@ define([
 					bin[0].className = 'active';
 					menuitem.appendChild(bin[0]);
 				} else {
+					var newMenuitem = _self.createListItem(category.imageClass, catId);
+					_self.menuitems[index] = newMenuitem;
+					document.getElementById( _self.LIST_ANCHOR_ID ).replaceChild(newMenuitem, menuitem);
+					menuitem = newMenuitem;
 					// need hover
-					menuitem.onmouseover = function( e ){
-						// create a popup
 						
-						if( !menuitem.subMenu ){
+					var sideMenuSubMenu = document.createElement('ul');
+					sideMenuSubMenu.className="sideMenuSubMenu";
+							
+					bin.forEach( function( item ){
 						
-							var sideMenuSubMenu = document.createElement('ul');
-							sideMenuSubMenu.className="sideMenuSubMenu";
+							var sideMenuSubMenuItem = document.createElement('li');	
+							sideMenuSubMenuItem.className="sideMenuSubMenuItem";
 							
-							bin.forEach( function( item ){
+							var sideMenuSubMenuItemLink = document.createElement('a');
+							sideMenuSubMenuItemLink.href = item;
+							sideMenuSubMenuItemLink.className="sideMenuSubMenuItemLink"
 							
-								var sideMenuSubMenuItem = document.createElement('li');	
-								sideMenuSubMenuItem.className="sideMenuSubMenuItem";
-								
-								var sideMenuSubMenuItemLink = document.createElement('a');
-								sideMenuSubMenuItemLink.href = item;
-								sideMenuSubMenuItemLink.className="sideMenuSubMenuItemLink"
-								
-								var sideMenuSubMenuItemSpan = document.createElement('span');
-								sideMenuSubMenuItemSpan.innerHTML = item.innerHTML;
-								sideMenuSubMenuItemSpan.className="sideMenuSubMenuItemSpan";
-								
-								sideMenuSubMenuItemLink.appendChild( sideMenuSubMenuItemSpan );
-								
-								sideMenuSubMenuItem.appendChild(sideMenuSubMenuItemLink);
-								
-								sideMenuSubMenu.appendChild(sideMenuSubMenuItem);
-										
-								sideMenuSubMenu.onmouseout = function( e ){
+							var sideMenuSubMenuItemSpan = document.createElement('span');
+							sideMenuSubMenuItemSpan.innerHTML = item.innerHTML;
+							sideMenuSubMenuItemSpan.className="sideMenuSubMenuItemSpan";
 							
-									if( menuitem.subMenu ){
-										sideMenuSubMenu.parentNode.removeChild( sideMenuSubMenu );
-									}
-									
-								};		
-										
-							})
+							sideMenuSubMenuItemLink.appendChild( sideMenuSubMenuItemSpan );
 							
-							menuitem.appendChild(sideMenuSubMenu);
+							sideMenuSubMenuItem.appendChild(sideMenuSubMenuItemLink);
 							
-							menuitem.subMenu = sideMenuSubMenu;
-							
-//							sideMenuSubMenu.onmouseout = function( e ){
-//								if( menuitem.subMenu ){
-//									sideMenuSubMenu.parentNode.removeChild( sideMenuSubMenu );
-//								}
-//							};		
-						}
-					
-					};
-					
-					menuitem.onmouseout = function( e ){
+							sideMenuSubMenu.appendChild(sideMenuSubMenuItem);
+	
+					})
 						
-						if( menuitem.subMenu ){
-//							menuitem.subMenu.parentNode.removeChild( menuitem.subMenu);
-						}
-						
-					};
+					menuitem.appendChild(sideMenuSubMenu);
 				}
 			});
 		}
