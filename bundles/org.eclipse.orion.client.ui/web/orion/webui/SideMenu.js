@@ -100,17 +100,19 @@ define([
 		
 	function toggleSideMenu(){
 			
-		var newState = this.OPEN_STATE;
-		
 		var sideMenuNavigation = this.getDisplayState();
 		
-		/* if this is true, a person has pinned the menu sometime before */
-		
+		var newState;
 		if( sideMenuNavigation === this.OPEN_STATE ){
 			newState = this.CLOSED_STATE;
-			localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
-		} else if (sideMenuNavigation === this.DEFAULT_STATE) {
+		} else {
+			newState = this.OPEN_STATE;
+		}
+
+		if (newState === this.DEFAULT_STATE) {
 			localStorage.removeItem(this.LOCAL_STORAGE_NAME);
+		} else {
+			localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
 		}
 		
 		this.setSideMenu();

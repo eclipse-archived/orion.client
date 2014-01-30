@@ -111,7 +111,7 @@ define([
 
 			new mTooltip.Tooltip({
 				node: nav,
-				text: 'Navigation Menu',
+				text: messages["CentralNavTooltip"],
 				position: ["right"] //$NON-NLS-0$
 			});
 
@@ -120,6 +120,7 @@ define([
 			navDropDown.addContent(groupedContent.getContentPane());
 
 			sideMenu = new SideMenu("sideMenu");
+			nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu));
 		},
 		afterGenerateBanner: mCustomGlobalCommands.afterGenerateBanner || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {}
 	};
