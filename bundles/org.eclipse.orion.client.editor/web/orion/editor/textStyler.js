@@ -111,6 +111,12 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		}
 	};
 	var getCaptureStyles = function(result, captures, offset, styles) {
+		if (captures[0]) {
+			/* capture index 0 is the full result */
+			styles.push({start: offset, end: offset + result[0].length, style: captures[0].name});
+			return;
+		}
+
 		var stringIndex = 0;
 		for (var i = 1; i < result.length; i++) {
 			if (result[i]) {

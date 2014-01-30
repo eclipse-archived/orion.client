@@ -20,10 +20,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 		contentTypes: ["text/html"],
 		patterns: [
 			{
-				begin: "(<!(?:doctype|DOCTYPE))",
-				end: "(>)",
+				begin: "<!(?:doctype|DOCTYPE)",
+				end: ">",
 				captures: {
-					1: {name: "entity.name.tag.doctype.html"},
+					0: {name: "entity.name.tag.doctype.html"},
 				},
 				name: "meta.tag.doctype.html",
 			}, {
@@ -40,10 +40,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(?i)(<script(?:\\s+language\\s*=\\s*(?:'javascript'|\"javascript\"))?\\s*>)",
-				end: "(?i)(</script>)",
+				begin: "(?i)<script(?:\\s+language\\s*=\\s*(?:'javascript'|\"javascript\"))?\\s*>",
+				end: "(?i)</script>",
 				captures: {
-					1: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.js.embedded.html",
 				patterns: [
@@ -52,10 +52,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(?i)(<script(?:\\s+language\\s*=\\s*(?:'php'|\"php\"))?\\s*>)",
-				end: "(?i)(</script>)",
+				begin: "(?i)<script(?:\\s+language\\s*=\\s*(?:'php'|\"php\"))?\\s*>",
+				end: "(?i)</script>",
 				captures: {
-					1: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -64,10 +64,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(?i)(<\\?(?:=|php)?(?:\\s|$))",
-				end: "(\\?>)",
+				begin: "(?i)<\\?(?:=|php)?(?:\\s|$)",
+				end: "\\?>",
 				captures: {
-					1: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -76,10 +76,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(<%=?(?:\\s|$))",
-				end: "(%>)",
+				begin: "<%=?(?:\\s|$)",
+				end: "%>",
 				captures: {
-					1: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -103,10 +103,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(</?[A-Za-z0-9]+)",
-				end: "(/?>)",
+				begin: "</?[A-Za-z0-9]+",
+				end: "/?>",
 				captures: {
-					1: {name: "entity.name.tag.html"},
+					0: {name: "entity.name.tag.html"},
 				},
 				name: "meta.tag.html",
 				patterns: [
