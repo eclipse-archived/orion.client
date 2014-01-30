@@ -11,7 +11,7 @@
 /*global window console define localStorage*/
 /*jslint browser:true*/
 
-define(['orion/objects', 'orion/webui/littlelib', 'orion/webui/SideMenu'], function(objects, lib, SideMenu) {
+define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 
 	/**
 	 * Creates a dropdown menu for a node and its associated trigger node (button)
@@ -45,15 +45,6 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/webui/SideMenu'], funct
 		dropDownContainer.style.display = 'none'; //$NON-NLS-0$
 		this._parent.appendChild(dropDownContainer);
 		this._dropdownMenu = dropDownContainer;
-		this._dropdownMenu.pinSection = false;
-//		this._dropdownMenu.sideMenuController = new SideMenu();
-		
-		var pinSection = document.createElement( "div" );	
-		pinSection.innerHTML = "pin";
-		pinSection.id = "hamburgerPin;"
-		pinSection.style.float="left";
-		
-		this._pin = pinSection;
 		
 		// Display trigger node and bind on click event
 		triggerNode = lib.node(triggerNode);
@@ -86,25 +77,11 @@ define(['orion/objects', 'orion/webui/littlelib', 'orion/webui/SideMenu'], funct
 					if (this.selectionClass) {
 						this._triggerNode.classList.add(this.selectionClass);
 					}
-					this.handle = lib.addAutoDismiss( [ this._triggerNode, this._dropdownMenu, this._pin], this.clearPanel.bind(this) );
+					this.handle = lib.addAutoDismiss( [ this._triggerNode, this._dropdownMenu], this.clearPanel.bind(this) );
 					if (this.options.onShow) {
 						this.options.onShow();
 					}
 				}.bind(this));
-				
-				if( this._dropdownMenu.pinSection === false ){
-				
-					
-					var dropDownMenu = this._dropdownMenu;
-					
-					this._pin.onclick = function(){
-						dropDownMenu.sideMenuController.toggleSideMenu();
-					}
-					this._dropdownMenu.appendChild( this._pin );
-					
-					this._dropdownMenu.pinSection = true;
-				}
-				
 			}else{
 				this.clearPanel();
 			}

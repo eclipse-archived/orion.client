@@ -17,12 +17,12 @@ define([
 		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/URITemplate', 'orion/keyAssist',
 		'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
 		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html',
-		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 'orion/widgets/input/GroupedContent',
+		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 
 		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu'
 	],
 	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding,
 		mBreadcrumbs, lib, mSplitter, mDropdown, mTooltip, mContentTypes, URITemplate, mKeyAssist, PageUtil, mThemePreferences, mThemeData, Deferred,
-		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent, util, mCustomGlobalCommands, mFileClient, SideMenu) {
+		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, util, mCustomGlobalCommands, mFileClient, SideMenu) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 *
@@ -90,19 +90,20 @@ define([
 			return menuGenerator;
 		},
 		beforeGenerateRelatedLinks: mCustomGlobalCommands.beforeGenerateRelatedLinks || function (serviceRegistry, item, exclusions, commandRegistry, alternateItem) {
-			var relatedLinksNode = lib.node('relatedLinks');
-			lib.empty(relatedLinksNode);
+//			var relatedLinksNode = lib.node('relatedLinks');
+//			lib.empty(relatedLinksNode);
 			return true;
 		},
 		// each relatedLink is { relatedLink: Object, command: Command, invocation: CommandInvocation }
 		addRelatedLinkCommands: mCustomGlobalCommands.addRelatedLinkCommands || function (relatedLinks) {
 			sideMenu.setRelatedLinks(relatedLinks);
 
-			var relatedLinksNode = lib.node('relatedLinks');
-			relatedLinks.forEach(function(info) {
-				var newRelatedLinkItem = mCommands.createCommandMenuItem(relatedLinksNode, info.command, info.invocation);
-				newRelatedLinkItem.classList.remove('dropdownMenuItem');
-			});
+			// TODO remove once SideMenu is operational
+//			var relatedLinksNode = lib.node('relatedLinks');
+//			relatedLinks.forEach(function(info) {
+//				var newRelatedLinkItem = mCommands.createCommandMenuItem(relatedLinksNode, info.command, info.invocation);
+//				newRelatedLinkItem.classList.remove('dropdownMenuItem');
+//			});
 		},
 		afterGenerateRelatedLinks: mCustomGlobalCommands.afterGenerateRelatedLinks || function (serviceRegistry, item, exclusions, commandRegistry, alternateItem) {},
 		afterSetPageTarget: mCustomGlobalCommands.afterSetPageTarget || function (options) {},
@@ -114,10 +115,6 @@ define([
 				text: messages["CentralNavTooltip"],
 				position: ["right"] //$NON-NLS-0$
 			});
-
-			var navDropDown = new DropDownMenu('primaryNav', 'centralNavigation');
-			var groupedContent = new GroupedContent();
-			navDropDown.addContent(groupedContent.getContentPane());
 
 			sideMenu = new SideMenu("sideMenu");
 			nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu));
@@ -701,27 +698,17 @@ define([
 		customGlobalCommands.generateNavigationMenu.apply(this, arguments);
 
 		// generate primary nav links.
-		var primaryNav = lib.node("navigationlinks"); //$NON-NLS-0$
-		if (primaryNav) {
+		var categoriesPromise = PageLinks.getCategoriesInfo(serviceRegistry);
+		var pageLinksPromise = PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link");
+		Deferred.all([ categoriesPromise, pageLinksPromise ]).then(function(results) {
+			var categoriesInfo = results[0], pageLinksInfo = results[1];
+			sideMenu.setCategories(categoriesInfo);
+			sideMenu.setPageLinks(pageLinksInfo);
 
-			var categoriesPromise = PageLinks.getCategoriesInfo(serviceRegistry);
-			var pageLinksPromise = PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link");
-			Deferred.all([ categoriesPromise, pageLinksPromise ]).then(function(results) {
-				var categoriesInfo = results[0], pageLinksInfo = results[1];
-				sideMenu.setCategories(categoriesInfo);
-				sideMenu.setPageLinks(pageLinksInfo);
+			// Now we have enough to show the sidemenu with its close-to-final layout
+			sideMenu.setSideMenu();
 
-				// Now we have enough to show the sidemenu with its close-to-final layout
-				sideMenu.setSideMenu();
-
-				// TODO once SideMenu is operational, remove navlink creation below 
-				pageLinksInfo.createLinkElements().forEach(function (link) {
-					var li = document.createElement('li'); //$NON-NLS-0$
-					li.appendChild(link);
-					primaryNav.appendChild(li);
-				});
-			});
-		}
+		});
 
 		// hook up split behavior - the splitter widget and the associated global command/key bindings.
 		var splitNode = lib.$(".split"); //$NON-NLS-0$
