@@ -174,7 +174,11 @@ define([
 					}
 					this.projectClient.getProjectDeployTypes().then(function(deployTypes){
 						if(deployTypes && deployTypes.length>0){
-							commandRegistry.addCommandGroup(additionalNavActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+							if((!this.launchCommands || this.launchCommands.length ===0) && deployTypes.length === 1){
+								commandRegistry.addCommandGroup(additionalNavActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", "orion.project.deploy." + deployTypes[0]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+							} else {
+								commandRegistry.addCommandGroup(additionalNavActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+							}
 						}
 						for(var i=0; i<deployTypes.length; i++){
 							commandRegistry.registerCommandContribution(additionalNavActionsScope, "orion.project.deploy." + deployTypes[i], i+100, "orion.deployNavGroup"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -203,10 +207,18 @@ define([
 					this.treeRoot.Project.launchConfigurations = launchConfigurations;
 					this.launchCommands = [];
 					ProjectCommands.updateProjectNavCommands(this.treeRoot, launchConfigurations, this.commandRegistry, this.projectClient, this.fileClient);
+					var launchCommand;
 					for(var i=0; i<launchConfigurations.length; i++){
-						var launchCommand = "orion.launchConfiguration.deploy." + launchConfigurations[i].ServiceId + launchConfigurations[i].Name;
+						launchCommand = "orion.launchConfiguration.deploy." + launchConfigurations[i].ServiceId + launchConfigurations[i].Name;
 						this.launchCommands.push(launchCommand);
 						this.commandRegistry.registerCommandContribution(this.additionalNavActionsScope, launchCommand, i+1, "orion.deployNavGroup/orion.deployLaunchConfigurationGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					var defaultCommand = ProjectCommands.getDefaultLaunchCommand(this.treeRoot.Project.Name);
+					
+					if(defaultCommand){
+						this.commandRegistry.addCommandGroup(this.additionalNavActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", defaultCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+					} else if(launchConfigurations.length === 1){
+						this.commandRegistry.addCommandGroup(this.additionalNavActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", launchCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 					}
 					CommonNavExplorer.prototype.updateCommands.apply(this, selections);					
 				}
@@ -217,6 +229,14 @@ define([
 						var _self = this;
 						this.launchConfigurationDispatcher = ProjectCommands.getLaunchConfigurationDispatcher();
 						this.launchConfigurationListener = function(event){
+							if(event.type === "changedDefault"){
+								var defaultCommand = ProjectCommands.getDefaultLaunchCommand(_self.treeRoot.Project.Name);
+								if(defaultCommand){
+									_self.commandRegistry.addCommandGroup(_self.additionalNavActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", defaultCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+								}
+								_self.updateCommands(_self.selection.getSelections());
+								return;
+							}
 							_self.selection.getSelections(function(selections){
 								if(event.oldValue){
 									for(var i=0; i<_self.treeRoot.Project.launchConfigurations.length; i++){
@@ -238,7 +258,7 @@ define([
 								doUpdateForLaunchConfigurations.apply(_self, [_self.treeRoot.Project.launchConfigurations]);
 							});
 						};
-						this._launchConfigurationEventTypes = ["create", "delete"];
+						this._launchConfigurationEventTypes = ["create", "delete", "changedDefault"];
 						this._launchConfigurationEventTypes.forEach(function(eventType) {
 							_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
 						});

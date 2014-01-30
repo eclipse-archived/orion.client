@@ -94,12 +94,34 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		if(status.ToSave){
 			progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl, status.ToSave.Path), "Saving configuration").then(
 				function(configuration){
+					storeLastDeployment(context.project, context.deployService, configuration);
 					if(sharedLaunchConfigurationDispatcher){
 						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
 					}
 				}, context.errorHandler
 			);
 		}
+	};
+	
+	var defaultLaunchCommandPrefix = "lastProjectDeploy_";
+	
+	function storeLastDeployment(projectName, deployService, launchConfiguration){
+		var action;
+		if(window.sessionStorage){
+			if(launchConfiguration){
+				action = "orion.launchConfiguration.deploy." + launchConfiguration.ServiceId + launchConfiguration.Name;
+			} else {
+				action = "orion.project.deploy." + deployService.id;
+			}
+			window.sessionStorage[defaultLaunchCommandPrefix + projectName] = action;
+		}
+		if(sharedLaunchConfigurationDispatcher){
+			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changedDefault", newValue: action });
+		}
+	}
+	
+	projectCommandUtils.getDefaultLaunchCommand = function(projectName){
+		return window.sessionStorage[defaultLaunchCommandPrefix + projectName];
 	};
 	
 	/**
@@ -117,7 +139,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			context.launchConfiguration.status = {State: "PROGRESS"};
 			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration });
 		}
-		
+		storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
 		progress.showWhile(context.deployService.deploy(context.project, enhansedLaunchConf), context.deployService.name + " in progress", true).then(function(result){
 			if(!result){
 				return;
@@ -144,6 +166,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			if(result.ToSave){
 				progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path), "Saving configuration").then(
 					function(configuration){
+						storeLastDeployment(context.project.Name, context.deployService, configuration);
 						if(sharedLaunchConfigurationDispatcher){
 							sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration});
 						}
@@ -211,7 +234,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		}
 		
 		for(var i=0; i<launchConfigurations.length; i++){
-			var launchConfiguration = launchConfigurations[i];
+			(function(launchConfiguration){
 			var deployLaunchConfigurationCommands = new mCommands.Command({
 				name: launchConfiguration.Name,
 				tooltip: launchConfiguration.Name,
@@ -246,6 +269,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				}
 			});
 			commandService.addCommand(deployLaunchConfigurationCommands);
+		})(launchConfigurations[i]);
 		}
 	},
 	projectCommandUtils.createDependencyCommands = function(serviceRegistry, commandService, explorer, fileClient, projectClient, dependencyTypes) {
@@ -423,6 +447,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 								if(result.ToSave){
 									progress.showWhile(projectClient.saveProjectLaunchConfiguration(item.project, result.ToSave.ConfigurationName, service.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path), "Saving configuration").then(
 										function(configuration){
+											storeLastDeployment(item.project.Name, service, configuration);
 											if(sharedLaunchConfigurationDispatcher){
 												sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
 											}
