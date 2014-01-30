@@ -1105,6 +1105,7 @@ define("orion/editor/contentAssist", [ //$NON-NLS-0$
 		/** @private */
 		scrollIndex: function(index, top) {
 			this.parentNode.childNodes[index].scrollIntoView(top);
+			this.preserveCloneThroughScroll = true;
 		},
 		/**
 		 * Visually selects the node at the specified nodeIndex
