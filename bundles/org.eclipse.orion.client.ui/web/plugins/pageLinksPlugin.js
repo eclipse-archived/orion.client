@@ -55,13 +55,6 @@ define([
 		imageClass: "core-sprite-sites",
 		order: 50
 	});
-	provider.registerService("orion.page.link.category", null, {
-		id: "deploy",
-		nameKey: "Deploy",
-		nls: "orion/edit/nls/messages",
-		imageClass: "core-sprite-deploy",
-		order: 60
-	});
 
 	// Primary navigation links
 	provider.registerService("orion.page.link", null, {

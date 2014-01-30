@@ -28,7 +28,16 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 
 	var provider = new PluginProvider(headers);
 	var cFService = new CFClient.CFService();
-	
+
+	// Add "Deploy" category to hamburger
+//	provider.registerService("orion.page.link.category", null, {
+//		id: "deploy",
+//		nameKey: "Deploy",
+//		nls: "orion/edit/nls/messages",
+//		imageClass: "core-sprite-deploy",
+//		order: 60
+//	});
+
 	// initialize service registry and EAS services
 	var serviceRegistry = new ServiceRegistry.ServiceRegistry();
 
