@@ -103,7 +103,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	};
 	
 	/**
-	 * @param params
+	 * @param enhansedLaunchConf
 	 * 			Params passed to deploy service
 	 * @param context.project
 	 * @param context.deployService
@@ -112,13 +112,13 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	 * @param context.projectClient
 	 * @param context.commandService
 	 */
-	function runDeploy(params, context){
+	function runDeploy(enhansedLaunchConf, context){
 		if(sharedLaunchConfigurationDispatcher && context.launchConfiguration){
 			context.launchConfiguration.status = {State: "PROGRESS"};
 			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration });
 		}
 		
-		progress.showWhile(context.deployService.deploy(context.project, params), context.deployService.name + " in progress", true).then(function(result){
+		progress.showWhile(context.deployService.deploy(context.project, enhansedLaunchConf), context.deployService.name + " in progress", true).then(function(result){
 			if(!result){
 				return;
 			}
@@ -154,7 +154,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		}, function(error){
 			if(error.Retry && error.Retry.parameters){
 				context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
-				context.data.oldParams = params;
+				context.data.oldParams = enhansedLaunchConf.Params;
 				context.commandService.collectParameters(context.data);
 			} else {
 				context.errorHandler(error);
@@ -220,18 +220,22 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				callback: function(data) {
 					var item = forceSingleItem(data.items);
 					
-					data.oldParams = launchConfiguration;
+					if(!data.oldParams){
+						data.oldParams = launchConfiguration.Params;
+					}
 	
 					var func = arguments.callee;
 					var params = handleParamsInCommand(func, data, "Deploy " + item.Name);
 					if(!params){
 						return;
 					}
+					var launchConfToPass = objects.clone(launchConfiguration);
+					launchConfToPass.Params = params;
 					
 					projectClient.getProjectDelpoyService(launchConfiguration.ServiceId).then(function(service){
 						if(service && service.deploy){
 							fileClient.loadWorkspace(item.Project.ContentLocation).then(function(projectFolder){
-								runDeploy(params, {project: treeRoot.Project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: launchConfiguration});
+								runDeploy(launchConfToPass, {project: treeRoot.Project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: launchConfiguration});
 							});
 						}
 					});
@@ -480,18 +484,22 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				
-				data.oldParams = item;
+				if(!data.oldParams){
+					data.oldParams = item.Params;
+				}
 
 				var func = arguments.callee;
 				var params = handleParamsInCommand(func, data, "Deploy " + item.Name);
 				if(!params){
 					return;
 				}
+				var launchConfToPass = objects.clone(item);
+				launchConfToPass.Params = params;
 				
 				projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
 					if(service && service.deploy){
 						fileClient.loadWorkspace(item.project.ContentLocation).then(function(projectFolder){
-							runDeploy(params, {project: item.project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: item});
+							runDeploy(launchConfToPass, {project: item.project, deployService: service, data: data, errorHandler: errorHandler, projectClient: projectClient, commandService: commandService, launchConfiguration: item});
 						});
 					}
 				});
@@ -950,9 +958,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 							return;
 						}
 						
-						params.Path = appPath;
-						
-						runDeploy(params, {
+						runDeploy({Params: params, Path: appPath}, {
 							project: project,
 							deployService: deployService,
 							data: data,
