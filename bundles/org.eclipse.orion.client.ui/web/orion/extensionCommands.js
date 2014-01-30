@@ -443,17 +443,27 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 		}
 		
 		if(info.nls){
-			i18nUtil.getMessageBundle(info.nls).then(function(commandMessages){
+			var callback = function(commandMessages) {
+				var name, tooltip;
+				if (commandMessages) {
+					name = (info.nameKey && commandMessages[info.nameKey]) || info.name;
+					tooltip = (info.tooltipKey && commandMessages[info.tooltipKey]) || info.tooltip;
+				} else {
+					// Failed to load nls bundle -- fallback to untranslated name or Key in worst case
+					name = info.name || info.nameKey;
+					tooltip = info.tooltip || info.tooltipKey;
+				}
 				var commandOptions = {
-						name: info.nameKey ? commandMessages[info.nameKey] : info.name,
-						image: info.image,
-						id: getIdFromInfo(info),
-						tooltip: info.tooltipKey ? commandMessages[info.tooltipKey] : info.tooltip,
-						isEditor: info.isEditor,
-						showGlobally: info.showGlobally
-					};
+					name: name,
+					image: info.image,
+					id: getIdFromInfo(info),
+					tooltip: tooltip,
+					isEditor: info.isEditor,
+					showGlobally: info.showGlobally
+				};
 				enhanceCommandOptions(commandOptions, deferred);
-			});
+			};
+			i18nUtil.getMessageBundle(info.nls).then(callback, callback.bind(this, null));
 		} else {
 			var commandOptions = {
 					name: info.name,

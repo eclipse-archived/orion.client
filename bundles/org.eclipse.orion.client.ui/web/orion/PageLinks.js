@@ -63,6 +63,10 @@ define([
 		return i18nUtil.getMessageBundle(info.nls).then(function(messages) {
 			info.textContent = info.nameKey ? messages[info.nameKey] : info.name;
 			return info;
+		}, function(error) {
+			// Bundle failed to load. Fallback to untranslated name
+			info.textContent = info.nameKey || info.name;
+			return info;
 		});
 	}
 

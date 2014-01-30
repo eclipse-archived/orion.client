@@ -185,14 +185,14 @@ define([
 		},
 		// Should only be called once
 		setCategories: function(categories) {
-//			console.log("SideMenu got categories: "); console.log(categories);
+//			console.log("setCategories()"); //console.log(categories);
 			this.categories = categories;
 			this.links = Object.create(null); // Maps category ID {String} to link DOM elements {Element[]}
 			this._renderCategories();
 		},
 		// Should only be called once
 		setPageLinks: function(pagelinks) {
-//			console.log("SideMenu got pagelinks: "); console.log(pagelinks);
+//			console.log("setPagelinks())"); //console.log(pagelinks);
 			this.pageLinks = pagelinks;
 
 			var _self = this;
@@ -206,7 +206,7 @@ define([
 		},
 		// Called whenever the page target changes
 		setRelatedLinks: function(relatedLinks) {
-//			console.log("SideMenu got relatedLinks: "); console.log(relatedLinks);
+//			console.log("setRelatedLinks())"); //console.log(relatedLinks);
 			this.relatedLinks = relatedLinks;
 
 			var _self = this;
