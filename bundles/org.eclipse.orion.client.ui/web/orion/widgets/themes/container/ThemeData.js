@@ -24,7 +24,6 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme', 'orion/wid
 			return resultString + result;
 		}
 		
-		
 		StyleSet.prototype.name = 'Orion';
 		StyleSet.prototype.navbar = '#404648';
 		StyleSet.prototype.button = '#EFEFEF';
@@ -60,7 +59,25 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme', 'orion/wid
 			orion.separator = '#333';
 			orion.bannerProgress = "whitesmoke";
 
-			this.styles.push( orion );			
+			this.styles.push( orion );		
+			
+			var orion2014 = new StyleSet();
+			orion2014.name = 'Orion2014';
+			orion2014.navbar = 'white';
+			orion2014.button = '#EFEFEF';
+			orion2014.location = '#EFEFEF';
+			orion2014.selection = 'FEC';
+			orion2014.sidepanel = '#EEEEEE';
+			orion2014.mainpanel = '#EEEEEE';
+			orion2014.toolpanel = '#EEEEEE';
+			orion2014.navtext = '#BFBFBF';
+			orion2014.content = '#333333';
+			orion2014.search = '#444444';
+			orion2014.breadcrumb = '#333333';
+			orion2014.separator = '#333333';
+			orion2014.bannerProgress = "orange";
+
+			this.styles.push( orion2014 );		
 
 			var eire = new StyleSet();
 			
@@ -186,7 +203,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme', 'orion/wid
 		
 		
 		function getThemeStorageInfo(){
-			var themeInfo = { storage:'/themes', styleset:'styles', defaultTheme:'Orion', selectedKey: 'selected'  }; 
+			var themeInfo = { storage:'/themes', styleset:'styles', defaultTheme:'Orion2014', selectedKey: 'selected'  }; 
 			return themeInfo;
 		}
 

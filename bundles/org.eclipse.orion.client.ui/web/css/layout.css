@@ -35,7 +35,7 @@ hard-coded numbers elsewhere.
 
 /* $ToolbarHeight */
 .toolbarLayout {
-	height: 34px;
+	height: 36px;
 }
 
 /*
@@ -60,7 +60,9 @@ hard-coded numbers elsewhere.
 	-webkit-box-flex:1;
 	-webkit-box-ordinal-group: 1;
     
-    width: 20%; 
+    width: 20%;
+    
+    padding-left:5px;
 }
 
 .bannerMiddleArea{
@@ -112,6 +114,7 @@ hard-coded numbers elsewhere.
 	-webkit-box-ordinal-group: 3;
 
     width: 20%; 
+    padding-right:5px;
 }
 
 .content-fixedHeight {
@@ -119,9 +122,10 @@ hard-coded numbers elsewhere.
 	overflow: hidden;
     position: absolute;
     top: 37px;
-	bottom: 36px; /* $FooterHeight + footer border (1px) */
+	/* bottom: 36px; $FooterHeight + footer border (1px) */    
+    bottom: 0;
     left: 0;
-    width: 100%;
+    right: 0;
 	/*margin-bottom: 29px;*/
 }
 
@@ -139,7 +143,8 @@ hard-coded numbers elsewhere.
 	z-index: 50;
 	right: 0;
 	left: 0;
-	height: 36px; /* It has to be this */
+	/* height: 36px;  It has to be this */
+	height: 0;
 	background:#ededed;
 }
 
@@ -274,7 +279,23 @@ hard-coded numbers elsewhere.
 
 }
 
-.toolbarTarget, .miniNavToolbarTarget {
+.workingTarget {
+	position: absolute;
+	top: 2px;  /* $ToolbarHeight + 2 */
+ 	width: 100%;
+ 	bottom: 0;
+ 	overflow-y: auto;
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33); /* 0 0 0 1px #d1d1d1,0 0 4px 1px #ccc; */
+	margin-left: 2px;
+	/* margin-top: 2px; */
+	/* padding-top: 10px; */
+	margin-right: 2px;
+	padding-top: 10px;
+	padding-bottom: 5px;
+	background: white;
+}
+
+.toolbarTarget {
 	position: absolute;
 	top: 36px;  /* $ToolbarHeight + 2 */
  	width: 100%;
@@ -282,12 +303,22 @@ hard-coded numbers elsewhere.
  	overflow-y: auto;
 }
 
-/* Positions the main panel of the LHS navigator below the filesystem switcher toolbar. */
-.miniNavToolbarTarget {
-	/* $ToolbarHeight + 2 + $FSToolbarHeight + $FSToolbarPadding
-	 = 34px + 2px + 30px + 4px
-	*/
-	top: 70px; 
+.toolbarTarget-toolbarHidden {
+	top: 2px;  /* 2 */
+}
+
+.pageLayoutTarget {
+	position: absolute;
+ 	width: calc( 100% - 35px );
+ 	bottom: 0;
+ 	overflow-y: auto;
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33); /* 0 0 0 1px #d1d1d1,0 0 4px 1px #ccc; */
+	margin-left: 2px;
+	margin-right: 10px;
+	margin-left:10px;
+	padding-top: 10px;
+	padding-bottom: 5px;
+	background: white;
 }
 
 .hasSplit {
@@ -299,7 +330,7 @@ hard-coded numbers elsewhere.
 	left: 33%;  /* override this value if you want a different proportion of the two split panes */
 	height: 100%;
 	z-index: 50;
-	width: 4px;
+	width: 10px;
 	margin-right: 3px;
 	cursor: e-resize;
 	overflow: hidden;
@@ -311,7 +342,7 @@ hard-coded numbers elsewhere.
 	top: 33%;  /* override this value if you want a different proportion of the two split panes */
 	width: 100%;
 	z-index: 50;
-	height: 4px;
+	height: 10px;
 	margin-bottom: 3px;
 	cursor: n-resize;
 	overflow: hidden;
@@ -319,20 +350,25 @@ hard-coded numbers elsewhere.
 }
 
 .splitThumbLayout {
-	position: relative;
-	left: 0;
-	height: 2em;
+	position: absolute;
+	right: 0;
+	height: 3em;
+	width: 5px;
 	top: 49%;
 	cursor: pointer;
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;	
 }
 
 .splitVerticalThumbLayout {
-	position: relative;
-	top: 0;
-	width: 2em;
-	height: 4px;
+	position: absolute;
+	bottom: 0;
+	width: 3em;
+	height: 5px;
 	left: 49%;
 	cursor: pointer;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;	
 }
 
 .splitLayoutAnimation {
@@ -380,4 +416,122 @@ hard-coded numbers elsewhere.
 .commandMargins {
 	margin-left: 4px !important;
 	margin-right: 4px !important;
+}
+
+/* ----- side menu begin ----- */
+
+.sideMenu{
+    width: 0;
+    background: rgba(47, 49, 58, 0.9);
+    float: left;
+    position: absolute;
+    top: 36px;
+	/* bottom: 36px; $FooterHeight + footer border (1px) */   
+    bottom: 0;
+    z-index: 100;
+    -webkit-animation: slide 0.5s forwards;
+    -webkit-animation-delay: 2s;
+    animation: slide 0.5s forwards;
+    animation-delay: 2s;
+    display:block;
+    margin:0;
+    font-family: sans-serif;
+	font-size:10px;
+	text-decoration:none !important;
+}
+
+.sideMenu-openOverlay {
+    background: rgba(47, 49, 58, 0.9);
+	border-bottom-right-radius: 20px;
+	bottom: auto;
+}
+
+.sideMenu-maximized {
+	top: 0;
+	bottom: 0;
+}
+
+.sideMenuList{
+	padding:10px;
+	display:inline-block !important;
+}
+
+.sideMenuItem{
+	list-style-type: none;
+	padding: 0;
+	padding-bottom:15px;
+}
+
+.sideMenuItem:hover{
+	text-decoration:none;
+	color:#78c4d8 !important;
+}
+
+.sideMenuItem a:hover{
+	text-decoration:none;
+	color:#78c4d8 !important;
+}
+
+.active{
+	color:whitesmoke !important;
+	font-size:20px !important;
+	text-decoration:none !important;
+}
+
+.inactive{
+	color:#999 !important;
+	font-size:20px !important;
+	text-decoration:none !important;
+}
+
+.sideMenuSubMenu{
+	display: none;
+	list-style-type:none;
+	position:absolute;
+	font-family:sans-serif;
+	padding-left: 10px;
+	z-index:100;
+}
+
+.sideMenuSubMenuItem{
+	display: inline-block;
+	width: 100px;
+	font-size: 12px;
+    background: rgba(47, 49, 58, 0.9);
+	padding: 10px;
+	border-bottom: 1px solid #555;
+}
+
+.sideMenuSubMenuItem:first-child{
+	border-top-right-radius: 4px;
+}
+
+.sideMenuSubMenuItem:last-child{
+	border-bottom-right-radius: 4px;
+}
+
+.sideMenuSubMenuItemLink{
+	display: inline-block;
+	color:#78c4d8;
+}
+
+.sideMenuSubMenuItemSpan{
+	display: inline-block;
+}
+
+.sideMenuItem:hover ul { 
+    display:inline-block;
+}
+
+/* .sideMenuitem:hover > li:hover ul {
+    display: block;
+    position: absolute;
+    border-top: 1px solid #f39cbd;
+    border-left: 1px solid #f39cbd;
+} */
+/* ----- side menu end ----- */
+
+.mainContent{
+	position:absolute;
+	left:50px;
 }

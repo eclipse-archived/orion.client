@@ -90,5 +90,6 @@ define({
 	"UnknownWarning": "An unknown warning occurred.",
 	"Filter": "Filter (* = any string, ? = any character)",
 	"To view the browser's context menu, trigger the context menu again.": "To view the browser's context menu, trigger the context menu again.",
-	"Edit": "Edit"
+	"Edit": "Edit",
+	"CentralNavTooltip": "Toggle Side Menu"
 });

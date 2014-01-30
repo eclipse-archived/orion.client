@@ -180,7 +180,16 @@ exports.ResourceComparer = (function() {
 					var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 						var localSearcher = new mSearcher.TextSearcher(editor, that._registry, that._commandService, undoStack);
 						var keyBindings = new mEditorFeatures.KeyBindingsFactory().createKeyBindings(editor, undoStack, contentAssist, localSearcher);
-						var commandGenerator = new mEditorCommands.EditorCommandFactory(that._registry, that._commandService, that._fileClient , inputManager.manager, inputManager.manager._actionBarId, false, "pageNavigationActions", localSearcher); //$NON-NLS-0$
+						var commandGenerator = new mEditorCommands.EditorCommandFactory({
+							serviceRegistry: that._registry,
+							commandRegistry: that._commandService,
+							fileClient: that._fileClient,
+							inputManager: inputManager.manager,
+							toolbarId: inputManager.manager._actionBarId,
+							readonly: false,
+							navToolbarId: "pageNavigationActions", //$NON-NLS-0$
+							textSearch: localSearcher
+						});
 						var saveCmdId = inputManager.manager._editorIndex === 1 ? "orion.compare.save.left" : "orion.compare.save.right"; //$NON-NLS-1$ //$NON-NLS-0$
 						commandGenerator.generateSimpleEditorCommands(editor, saveCmdId);
 						return keyBindings;

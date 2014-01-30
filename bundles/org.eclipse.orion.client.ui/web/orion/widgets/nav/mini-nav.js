@@ -16,12 +16,11 @@ define([
 	'orion/webui/littlelib',
 	'orion/widgets/nav/common-nav',
 	'orion/fileCommands',
-	'orion/projectCommands',
 	'orion/PageUtil',
 	'orion/Deferred',
 	'orion/widgets/filesystem/filesystemSwitcher',
 	'orion/URL-shim'
-], function(messages, objects, lib, mCommonNav, FileCommands, ProjectCommands, PageUtil, Deferred, mFilesystemSwitcher, _) {
+], function(messages, objects, lib, mCommonNav, FileCommands, PageUtil, Deferred, mFilesystemSwitcher, _) {
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
 	var CommonNavRenderer = mCommonNav.CommonNavRenderer;
 
@@ -62,35 +61,6 @@ define([
 			return this.loadRoot(this.fileClient.fileServiceRootURL(item.Location)).then(function() {
 				return this.showItem(item, false); // call with reroot=false to avoid recursion
 			}.bind(this));
-		},
-		registerCommands: function() {
-			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
-				var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
-				var newActionsScope = this.newActionsScope;
-				var selectionActionsScope = this.selectionActionsScope;
-				if (serviceRegistry.getServiceReferences("orion.projects").length > 0) { //$NON-NLS-0$
-					commandRegistry.addCommandGroup(newActionsScope, "orion.projectsNewGroup", 100, "New Project", "orion.commonNavNewGroup/orion.newContentGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					
-					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.basic", 1, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.fromfile", 2, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					// TODO: comment out create project from an SFTP site for 5.0 M1
-					//commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.sftp", 3, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					
-					var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
-					var dependencyTypesDef = new Deferred();
-					projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
-						for(var i=0; i<dependencyTypes.length; i++){
-							commandRegistry.registerCommandContribution(newActionsScope, "orion.project.createproject." + dependencyTypes[i], i+3, "orion.commonNavNewGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-						}
-						
-						ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, projectClient, dependencyTypes).then(dependencyTypesDef.resolve, dependencyTypesDef.resolve);
-					}.bind(this), dependencyTypesDef.resolve);
-	
-					commandRegistry.registerCommandContribution(selectionActionsScope, "orion.project.initProject", 0, "orion.commonNavSelectionGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-	
-					return dependencyTypesDef;
-				}
-			}.bind(this));
 		}
 	});
 
@@ -125,16 +95,6 @@ define([
 	objects.mixin(MiniNavViewMode.prototype, {
 		label: messages["Navigator"],
 		create: function() {
-			// Create Filesystem switcher toolbar before the sidebar content element
-			var modeToolbarNode = this.toolbarNode;
-			if (!this.fsToolbar) {
-				var fsToolbar = this.fsToolbar = document.createElement("div"); //$NON-NLS-0$
-				fsToolbar.classList.add("fsToolbarLayout"); //$NON-NLS-0$
-				fsToolbar.classList.add("fsToolbar"); //$NON-NLS-0$
-				this.parentNode.parentNode.insertBefore(fsToolbar, this.parentNode);
-				this.parentNode.classList.add("miniNavToolbarTarget"); //$NON-NLS-0$
-			}
-
 			var _self = this;
 			this.explorer = new MiniNavExplorer({
 				commandRegistry: this.commandRegistry,
@@ -149,7 +109,7 @@ define([
 					}, explorer, _self.commandRegistry, _self.contentTypeRegistry); //$NON-NLS-0$
 				},
 				serviceRegistry: this.serviceRegistry,
-				toolbarNode: modeToolbarNode
+				toolbarNode: this.toolbarNode
 			});
 
 			// Create switcher here
@@ -158,7 +118,7 @@ define([
 				rootChangeListener: this.explorer,
 				filesystemChangeDispatcher: this.explorer.sidebarNavInputManager,
 				fileClient: this.fileClient,
-				node: this.fsToolbar,
+				node: this.toolbarNode,
 				serviceRegistry: this.serviceRegistry
 			});
 
@@ -175,9 +135,6 @@ define([
 			if (this.fsSwitcher) {
 				// Cleanup the FS switcher elements, as we are leaving this view mode.
 				this.fsSwitcher.destroy();
-				this.fsToolbar.parentNode.removeChild(this.fsToolbar);
-				this.fsToolbar = null;
-				this.parentNode.classList.remove("miniNavToolbarTarget"); //$NON-NLS-0$
 			}
 		}
 	});

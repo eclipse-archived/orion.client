@@ -170,7 +170,7 @@ border: 1px solid #afcae5;
 }
 .annotationOverview.currentSearch {
 	background-color: #53D1FF;
-	border: 1px solid black;
+	border: 1px solid #42a7cc;
 }
 .annotationOverview.readOccurrence {
 	background-color: lightgray;

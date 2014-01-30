@@ -98,7 +98,7 @@
 .core-sprite-hamburger{
 	font-size: 16px;
 	vertical-align:top;
-	color: #eeeeee;
+	color: #333333;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
@@ -114,7 +114,7 @@
 	font-size: 16px;
 	line-height: 14px;
 	vertical-align:middle;
-	color: #eeeeee;
+	color: #333333;
 	font-family: 'Orion Icon Font';
 	padding: 0;
 	background: none;
@@ -151,6 +151,7 @@
 
 .core-sprite-wrench{
 	font-size: 16px;
+	line-height:16px;
 	vertical-align:middle;
 	color: #555555;
 	font-family: 'Orion Icon Font';
@@ -304,7 +305,7 @@
 .core-sprite-folder{
 	font-size: 16px;
 	color: #555;
-	line-height: normal;
+	line-height: 16px;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
@@ -318,7 +319,7 @@
 .core-sprite-file{
 	font-size: 16px;
 	color: #555555;
-	line-height: normal;
+	line-height: 16px;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
@@ -331,14 +332,14 @@
 
 .core-sprite-close{
 	font-size: 16px;
-	color: silver;
-	line-height: normal;
-	vertical-align:middle;
+	color: #666;
+	line-height: 14px;
+	vertical-align:top;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
 	border: none;
-	margin: 0;
+	margin-top: -3px;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -402,7 +403,7 @@
 .file-sprite-html{
 	font-size: 16px;
 	color: #555;
-	line-height: normal;
+	line-height: 16px;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
@@ -416,7 +417,7 @@
  .file-sprite-javascript{
 	font-size: 16px;
 	color: #555;
-	line-height: normal;
+	line-height: 16px;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
@@ -430,7 +431,7 @@
 .file-sprite-xml{
 	font-size: 16px;
 	color: #555;
-	line-height: normal;
+	line-height: 16px;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
@@ -444,7 +445,7 @@
 .file-sprite-text{
 	font-size: 16px;
 	color: #555;
-	line-height: normal;
+	line-height: 16px;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
@@ -458,7 +459,7 @@
 .file-sprite-image{
 	font-size: 16px;
 	color: #555;
-	line-height: normal;
+	line-height: 16px;
 	vertical-align:middle;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
@@ -472,13 +473,12 @@
 .core-sprite-warning{
 	font-size: 16px;
 	color: #555;
-	line-height: normal;
-	vertical-align:middle;
+	line-height: 14px;
+	vertical-align:top;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -486,13 +486,12 @@
 .core-sprite-error{
 	font-size: 16px;
 	color: #b94a48;
-	line-height: normal;
-	vertical-align:middle;
+	line-height: 14px;
+	vertical-align:top;
 	font-family: 'Orion Icon Font';
 	padding-right: 5px;
 	background: none;
 	border: none;
-	margin: 0;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -506,6 +505,55 @@
 	background: none;
 	border: none;
 	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* This is needed for the Git category in SideMenu */
+.core-sprite-repository{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-sites{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-shell{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-search{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -534,6 +582,10 @@
 .core-sprite-deploy:before{content:'\0077';}
 .core-sprite-warning:before{content:'\0079';}
 .core-sprite-error:before{content:'\007A';}
+.core-sprite-repository:before{ content:'\0065'; }
+.core-sprite-sites:before{ content:'\0033'; }
+.core-sprite-shell:before{ content:'\0073'; }
+.core-sprite-search:before{ content:'\0032'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 

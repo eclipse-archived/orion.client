@@ -582,11 +582,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		dependencyTypes =  dependencyTypes || [];
 		
 		var addFolderCommand = new mCommands.Command({
-			name: "Add Associated Folder",
+			name: "Associated Folder",
 			tooltip: "Add an associated folder from workspace",
 			id: "orion.project.addFolder", //$NON-NLS-0$
 			callback: function(data) {
-				var item = forceSingleItem(data.items);
+				var item = forceSingleItem(data.items).Project;
 				
 				var dialog = new DirectoryPrompterDialog.DirectoryPrompterDialog({ title : messages["Choose a Folder"],
 					serviceRegistry : serviceRegistry,
@@ -651,7 +651,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				
 			},
 			visibleWhen: function(item) {
-				return item.type==="Project";
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
+				return item.type==="Project" || explorer.treeRoot.type==="Project";
 			}
 		});
 		commandService.addCommand(addFolderCommand);
@@ -660,6 +663,12 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			name: "Convert to project",
 			tooltip: "Convert this folder into a project",
 			id: "orion.project.initProject", //$NON-NLS-0$
+			visibleWhen: function(item) {
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
+				return true;
+			},
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				if(item){
@@ -715,7 +724,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					tooltip: handler.addDependencyTooltip,
 					callback: function(data){
 						var def = new Deferred();
-						var item = forceSingleItem(data.items);
+						var item = forceSingleItem(data.items).Project;
 						
 						var func = arguments.callee;
 						var params = handleParamsInCommand(func, data, handler.addDependencyTooltip);
@@ -769,7 +778,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	
 					},
 					visibleWhen: function(item) {
-						return item.type==="Project";
+						if (!explorer.isCommandsVisible()) {
+							return false;
+						}
+						return item.type==="Project" || explorer.treeRoot.type==="Project";
 					}
 				};
 				
@@ -825,6 +837,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	
 					},
 					visibleWhen: function(item) {
+						if (!explorer.isCommandsVisible()) {
+							return false;
+						}
+						item = forceSingleItem(item);
 						return item.Location;
 					}
 				};
@@ -845,7 +861,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 		
 		var addReadmeCommand = new mCommands.Command({
-			name: "Create Readme",
+			name: "Readme File",
 			tooltip: "Create README.md file in this project",
 			id: "orion.project.create.readme",
 			callback: function(data){
@@ -861,6 +877,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				});
 			},
 			visibleWhen: function(item) {
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
 				if(!item.Project || !item.Project.children || !item.Project.ContentLocation){
 					return false;
 				}
@@ -876,7 +895,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		commandService.addCommand(addReadmeCommand);
 		
 		var createBasicProjectCommand = new mCommands.Command({
-			name: "Create a basic project",
+			name: "Basic Project",
 			tooltip: "Create an empty project",
 			id: "orion.project.create.basic",
 			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
@@ -886,11 +905,17 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						return;
 					}
 					var item = forceSingleItem(data.items);
-					progress.progress(projectClient.createProject(item.Location, {Name: name}), "Creating project " + name).then(function(project){
-						dispatchNewProject(item, project);
+					fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+						progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}), "Creating project " + name).then(function(project){
+							dispatchNewProject(workspace, project);
+						});
 					});
 				},
 			visibleWhen: function(item) {
+					if (!explorer.isCommandsVisible()) {
+						return false;
+					}
+					item = forceSingleItem(item);
 					return(!!item.Location);
 				}
 			}
@@ -899,7 +924,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			commandService.addCommand(createBasicProjectCommand);
 			
 			var createSftpProjectCommand = new mCommands.Command({
-				name: "Create a project from an SFTP site",
+				name: "Project from an SFTP Site",
 				tooltip: "Create a project from an SFTP site",
 				id: "orion.project.create.sftp",
 				parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -914,11 +939,17 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 							return;
 						}
 						var item = forceSingleItem(data.items);
-						progress.progress(projectClient.createProject(item.Location, {Name: name, ContentLocation: url}), "Creating project " + name).then(function(project){
-							dispatchNewProject(item, project);
+						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name, ContentLocation: url}), "Creating project " + name).then(function(project){
+								dispatchNewProject(workspace, project);
+							});
 						});
 					},
 				visibleWhen: function(item) {
+						if (!explorer.isCommandsVisible()) {
+							return false;
+						}
+						item = forceSingleItem(item);
 						return(!!item.Location);
 					}
 				}
@@ -927,7 +958,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				commandService.addCommand(createSftpProjectCommand);
 				
 			var createZipProjectCommand = new mCommands.Command({
-			name: "Create a project from a zipped folder",
+			name: "Project from a Zipped Folder",
 			tooltip: "Create project and fill it with data from local file",
 			id: "orion.project.create.fromfile",
 			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
@@ -937,19 +968,26 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						return;
 					}
 					var item = forceSingleItem(data.items);
-					progress.progress(projectClient.createProject(item.Location, {Name: name}), "Creating project " + name).then(function(projectInfo){
-						progress.progress(fileClient.read(projectInfo.ContentLocation, true)).then(function(projectMetadata){
-							var dialog = new ImportDialog.ImportDialog({
-								importLocation: projectMetadata.ImportLocation,
-								func: function() {
-									dispatchNewProject(item, projectInfo);
-								}
+					
+					fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+						progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name}), "Creating project " + name).then(function(projectInfo){
+							progress.progress(fileClient.read(projectInfo.ContentLocation, true)).then(function(projectMetadata){
+								var dialog = new ImportDialog.ImportDialog({
+									importLocation: projectMetadata.ImportLocation,
+									func: function() {
+										dispatchNewProject(workspace, projectInfo);
+									}
+								});
+								dialog.show();
 							});
-							dialog.show();
 						});
 					});
 				},
 			visibleWhen: function(item) {
+					if (!explorer.isCommandsVisible()) {
+						return false;
+					}
+					item = forceSingleItem(item);
 					return(!!item.Location);
 				}
 			}

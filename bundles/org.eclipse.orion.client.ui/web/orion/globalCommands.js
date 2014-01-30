@@ -17,12 +17,12 @@ define([
 		'orion/webui/splitter', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/contentTypes', 'orion/URITemplate', 'orion/keyAssist',
 		'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
 		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html',
-		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 'orion/widgets/input/GroupedContent',
-		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient'
+		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 
+		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu'
 	],
 	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding,
 		mBreadcrumbs, lib, mSplitter, mDropdown, mTooltip, mContentTypes, URITemplate, mKeyAssist, PageUtil, mThemePreferences, mThemeData, Deferred,
-		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, GroupedContent, util, mCustomGlobalCommands, mFileClient) {
+		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, util, mCustomGlobalCommands, mFileClient, SideMenu) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 *
@@ -38,6 +38,7 @@ define([
 
 	var notifyAuthenticationSite = qualifyURL(require.toUrl('auth/NotifyAuthentication.html')); //$NON-NLS-0$
 	var authRendered = {};
+	var sideMenu = null;
 
 	function getLabel(authService, serviceReference) {
 		if (authService.getLabel) {
@@ -89,29 +90,39 @@ define([
 			return menuGenerator;
 		},
 		beforeGenerateRelatedLinks: mCustomGlobalCommands.beforeGenerateRelatedLinks || function (serviceRegistry, item, exclusions, commandRegistry, alternateItem) {
-			var relatedLinksNode = lib.node('relatedLinks');
-			lib.empty(relatedLinksNode);
 			return true;
 		},
-		addRelatedLinkCommand: mCustomGlobalCommands.addRelatedLinkCommand || function (command, invocation) {
-			var relatedLinksNode = lib.node('relatedLinks');
-			var newRelatedLinkItem = mCommands.createCommandMenuItem(relatedLinksNode, command, invocation);
-			newRelatedLinkItem.classList.remove('dropdownMenuItem');
+		// each relatedLink is { relatedLink: Object, command: Command, invocation: CommandInvocation }
+		addRelatedLinkCommands: mCustomGlobalCommands.addRelatedLinkCommands || function (relatedLinks) {
+			sideMenu.setRelatedLinks(relatedLinks);
 		},
 		afterGenerateRelatedLinks: mCustomGlobalCommands.afterGenerateRelatedLinks || function (serviceRegistry, item, exclusions, commandRegistry, alternateItem) {},
 		afterSetPageTarget: mCustomGlobalCommands.afterSetPageTarget || function (options) {},
 		generateNavigationMenu: mCustomGlobalCommands.generateNavigationMenu || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
-			var nav = document.getElementById('centralNavigation');
+			var nav = document.getElementById('centralNavigation'); //$NON-NLS-0$
 
 			new mTooltip.Tooltip({
 				node: nav,
-				text: 'Navigation Menu',
+				text: messages["CentralNavTooltip"],
 				position: ["right"] //$NON-NLS-0$
 			});
 
-			var navDropDown = new DropDownMenu('primaryNav', 'centralNavigation');
-			var groupedContent = new GroupedContent();
-			navDropDown.addContent(groupedContent.getContentPane());
+			sideMenu = new SideMenu("sideMenu"); //$NON-NLS-0$
+			nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
+			//TODO write the hovering behavior without a mouse move listener on the document
+			document.addEventListener("mousemove", function(evt) { //$NON-NLS-0$
+				var sideMenuNode = sideMenu.parentNode;
+				var over = sideMenuNode.contains(evt.target);
+				var centralNavigationArea = lib.node("centralNavigationArea"); //$NON-NLS-0$
+				var staticBanner = lib.node("staticBanner"); //$NON-NLS-0$
+				if (!over && centralNavigationArea && staticBanner) {
+					over = staticBanner.contains(evt.target) && evt.clientX < lib.bounds(centralNavigationArea).width;
+				}
+				sideMenu.setOverlaySideMenu(over);
+			});
+		},
+		afterGenerateNavigationMenu: mCustomGlobalCommands.afterGenerateNavigationMenu || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
+			// No-op
 		},
 		afterGenerateBanner: mCustomGlobalCommands.afterGenerateBanner || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {}
 	};
@@ -233,33 +244,51 @@ define([
 				return contentTypesCache;
 			});
 		}
+		function getServiceProperties(serviceReference) {
+			var info = {}, keys = serviceReference.getPropertyKeys(), key;
+			for (var i=0; i < keys.length; i++) {
+				key = keys[i];
+				info[key] = serviceReference.getProperty(key);
+			}
+			return info;
+		}
 
 		var alternateItemDeferred;
 		/**
-		 * Calculates the CommandInvocation for a given Command.
-		 * @returns {orion.Promise} A promise resolving to a 2-element array: [Command, CommandInvocation]
+		 * Creates a CommandInvocation for given commandItem.
+		 * @returns {orion.Promise} A promise resolving to: commandItem with its "invocation" field set, or undefined if we failed
 		 */
-		function enhanceCommand(command) {
-			if (command) {
-				if (!command.visibleWhen || command.visibleWhen(item)) {
-					var invocation = new mCommands.CommandInvocation(item, item, null, command, commandRegistry);
-					return new Deferred().resolve([command, invocation]);
-				} else if (typeof alternateItem === "function") { //$NON-NLS-0$
-					if (!alternateItemDeferred) {
-						alternateItemDeferred = alternateItem();
-					}
-					return Deferred.when(alternateItemDeferred, function (newItem) {
-						if (newItem && (item === pageItem)) {
-							// there is an alternate, and it still applies to the current page target
-							if (!command.visibleWhen || command.visibleWhen(newItem)) {
-								var invocation = new mCommands.CommandInvocation(newItem, newItem, null, command, commandRegistry);
-								return [command, invocation];
-							}
-						}
-					});
+		function setInvocation(commandItem) {
+			var command = commandItem.command;
+			if (!command.visibleWhen || command.visibleWhen(item)) {
+				commandItem.invocation = new mCommands.CommandInvocation(item, item, null, command, commandRegistry);
+				return new Deferred().resolve(commandItem);
+			} else if (typeof alternateItem === "function") { //$NON-NLS-0$
+				if (!alternateItemDeferred) {
+					alternateItemDeferred = alternateItem();
 				}
+				return Deferred.when(alternateItemDeferred, function (newItem) {
+					if (newItem && (item === pageItem)) {
+						// there is an alternate, and it still applies to the current page target
+						if (!command.visibleWhen || command.visibleWhen(newItem)) {
+							commandItem.invocation = new mCommands.CommandInvocation(newItem, newItem, null, command, commandRegistry);
+							return commandItem;
+						}
+					}
+				});
 			}
 			return new Deferred().resolve();
+		}
+		/**
+		 * @returns {orion.Promise} resolving to a commandItem { relatedLink: Object, command: Command}
+		*/
+		function commandItem(relatedLink, commandOptionsPromise, command) {
+			if (command) {
+				return new Deferred().resolve({ relatedLink: relatedLink, command: command});
+			}
+			return commandOptionsPromise.then(function(commandOptions) {
+				return { relatedLink: relatedLink, command: new mCommands.Command(commandOptions) };
+			});
 		}
 
 		var contributedLinks = serviceRegistry && serviceRegistry.getServiceReferences("orion.page.link.related"); //$NON-NLS-0$
@@ -272,65 +301,50 @@ define([
 				return;
 			}
 
-			// Array of promises, each resolving to either a Command, or a commandOptions object.
+			// assemble the related links.
 			var deferredCommandItems = [];
-
-			// assemble the related links
-			for (var i = 0; i < contributedLinks.length; i++) {
-				var info = {};
-				var j;
-				var propertyNames = contributedLinks[i].getPropertyKeys();
-				for (j = 0; j < propertyNames.length; j++) {
-					info[propertyNames[j]] = contributedLinks[i].getProperty(propertyNames[j]);
+			contributedLinks.forEach(function(contribution) {
+				var info = getServiceProperties(contribution);
+				// exclude anything in the list of exclusions
+				if (!info.id || exclusions.indexOf(info.id) !== -1) {
+					return; // skip
 				}
-				if (info.id) {
-					var command = null;
-					var deferred = null;
-					// exclude anything in the list of exclusions
-					var position = exclusions.indexOf(info.id);
-					if (position < 0) {
-						// First see if we have a uriTemplate and name, which is enough to build a command internally.
-						if (((info.nls && info.nameKey) || info.name) && info.uriTemplate) {
-							deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true);
-							deferredCommandItems.push(deferred);
-							continue;
-						}
-						// We couldn't compose one, so see if one is already registered.
-						if ((command = commandRegistry.findCommand(info.id))) {
-							deferredCommandItems.push(new Deferred().resolve(command));
-							continue;
-						}
-						// It's not registered, so look for it in orion.navigate.command and create it
-						var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
-						for (j = 0; j < commandsReferences.length; j++) {
-							var id = commandsReferences[j].getProperty("id"); //$NON-NLS-0$
-							if (id === info.id) {
-								var navInfo = {};
-								propertyNames = commandsReferences[j].getPropertyKeys();
-								for (var k = 0; k < propertyNames.length; k++) {
-									navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
-								}
-								deferred = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry,
-									contentTypesCache, true);
-								deferredCommandItems.push(deferred);
-								break;
-							}
-						}
+				// First see if we have a uriTemplate and name, which is enough to build a command internally.
+				if (((info.nls && info.nameKey) || info.name) && info.uriTemplate) {
+					var commandOptionsPromise = mExtensionCommands._createCommandOptions(info, contribution, serviceRegistry, contentTypesCache, true);
+					deferredCommandItems.push(commandItem(info, commandOptionsPromise, null));
+					return;
+				}
+				// We couldn't compose one, so see if one is already registered.
+				var command;
+				if ((command = commandRegistry.findCommand(info.id))) {
+					deferredCommandItems.push(commandItem(info, null, command));
+					return;
+				}
+				// It's not registered, so look for it in orion.navigate.command and create it
+				var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
+				commandsReferences.some(function(commandReference) {
+					var id = commandReference.getProperty("id"); //$NON-NLS-0$
+					if (id !== info.id) {
+						return false; // continue
 					}
-				}
-			}
-			Deferred.all(deferredCommandItems, continueOnError).then(function(items) {
-				var commands = items.map(function(item) {
-					return (item instanceof mCommands.Command) ? item : new mCommands.Command(item);
-				}).sort(function(a, b) {
-					return a.name.localeCompare(b.name);
+					var navInfo = getServiceProperties(commandReference);
+					var commandOptionsPromise = mExtensionCommands._createCommandOptions(navInfo, commandReference, serviceRegistry, contentTypesCache, true);
+					deferredCommandItems.push(commandItem(info, commandOptionsPromise, null));
+					return true; // stop
 				});
-				return Deferred.all(commands.map(enhanceCommand), continueOnError).then(function(enhanced) {
-					enhanced.forEach(function(array) {
-						if (array) {
-							customGlobalCommands.addRelatedLinkCommand(array[0], array[1]);
-						}
+			});
+			Deferred.all(deferredCommandItems, continueOnError).then(function(commandItems) {
+				commandItems.sort(function(a, b) {
+					return a.command.name.localeCompare(b.command.name);
+				});
+				return Deferred.all(commandItems.map(setInvocation), continueOnError).then(function(commandItems) {
+					// Filter out any holes caused by setInvocation() failing
+					commandItems = commandItems.filter(function(item) {
+						return item;
 					});
+					// Finally pass the relatedLinks data to customGlobalCommands
+					customGlobalCommands.addRelatedLinkCommands(commandItems);
 					customGlobalCommands.afterGenerateRelatedLinks.apply(this, globalArguments);
 				});
 			});
@@ -516,25 +530,15 @@ define([
 	}
 
 	function layoutToolbarElements(elements) {
-		if (elements.toolbarTarget && elements.toolbarTargetY) {
-			var heightExtras = 0;
-			var bounds;
-			if (elements.notifications && elements.notifications.classList.contains("slideContainerActive")) { //$NON-NLS-0$
-				bounds = lib.bounds(elements.notifications);
-				heightExtras += bounds.height;
-			}
-			if (elements.slideContainer && elements.slideContainer.classList.contains("slideContainerActive")) { //$NON-NLS-0$
-				bounds = lib.bounds(elements.slideContainer);
-				heightExtras += bounds.height;
-			}
-			if (heightExtras > 0) {
-				heightExtras += 8; // padding
-			}
-			if (heightExtras) {
-				elements.toolbarTarget.style.top = elements.toolbarTargetY + heightExtras + "px"; //$NON-NLS-0$
-				elements.toolbar.style.paddingBottom = heightExtras + "px"; //$NON-NLS-0$ 
-			} else {
-				elements.toolbarTarget.style.top = elements.toolbar.style.paddingBottom = "";
+		var slideContainer = elements.slideContainer;
+		if (slideContainer) {
+			slideContainer.style.left = "";
+			slideContainer.style.top = "";
+			if (slideContainer.classList.contains("slideContainerActive")) { //$NON-NLS-0$
+				var bounds = lib.bounds(slideContainer);
+				var parentBounds = lib.bounds(slideContainer.parentNode);
+				slideContainer.style.left = ((parentBounds.width - bounds.width) / 2) + "px"; //$NON-NLS-0$
+				slideContainer.style.top = "0"; //$NON-NLS-0$
 			}
 		}
 	}
@@ -555,7 +559,6 @@ define([
 		return globalEventTarget;
 	}
 	
-
 	/**
 	 * Generates the banner at the top of a page.
 	 *
@@ -638,18 +641,20 @@ define([
 		}, false);
 
 		customGlobalCommands.generateNavigationMenu.apply(this, arguments);
+		customGlobalCommands.afterGenerateNavigationMenu.apply(this, arguments);
 
 		// generate primary nav links.
-		var primaryNav = lib.node("navigationlinks"); //$NON-NLS-0$
-		if (primaryNav) {
-			PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link").then(function(pageLinksInfo) {
-				pageLinksInfo.createLinkElements().forEach(function (link) {
-					var li = document.createElement('li'); //$NON-NLS-0$
-					li.appendChild(link);
-					primaryNav.appendChild(li);
-				});
-			});
-		}
+		var categoriesPromise = PageLinks.getCategoriesInfo(serviceRegistry);
+		var pageLinksPromise = PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link");
+		Deferred.all([ categoriesPromise, pageLinksPromise ]).then(function(results) {
+			var categoriesInfo = results[0], pageLinksInfo = results[1];
+			sideMenu.setCategories(categoriesInfo);
+			sideMenu.setPageLinks(pageLinksInfo);
+
+			// Now we have enough to show the sidemenu with its close-to-final layout
+			sideMenu.setSideMenu();
+
+		});
 
 		// hook up split behavior - the splitter widget and the associated global command/key bindings.
 		var splitNode = lib.$(".split"); //$NON-NLS-0$
@@ -724,16 +729,23 @@ define([
 			callback: function () {
 				var header = lib.node("banner"); //$NON-NLS-0$
 				var footer = lib.node("footer"); //$NON-NLS-0$
+				var sideMenu = lib.node("sideMenu"); //$NON-NLS-0$
 				var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
 				var maximized = header.style.visibility === "hidden"; //$NON-NLS-0$
 				if (maximized) {
 					header.style.visibility = "visible"; //$NON-NLS-0$
 					footer.style.visibility = "visible"; //$NON-NLS-0$
 					content.classList.remove("content-fixedHeight-maximized"); //$NON-NLS-0$
+					if (sideMenu) {
+						sideMenu.classList.remove("sideMenu-maximized"); //$NON-NLS-0$
+					}
 				} else {
 					header.style.visibility = "hidden"; //$NON-NLS-0$
 					footer.style.visibility = "hidden"; //$NON-NLS-0$
 					content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
+					if (sideMenu) {
+						sideMenu.classList.add("sideMenu-maximized"); //$NON-NLS-0$
+					}
 				}
 				getGlobalEventTarget().dispatchEvent({type: "toggleTrim", maximized: !maximized}); //$NON-NLS-0$
 				return true;

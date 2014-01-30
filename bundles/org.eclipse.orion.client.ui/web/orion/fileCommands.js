@@ -117,38 +117,43 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 */
 	fileCommandUtils.updateNavTools = function(registry, commandRegistry, explorer, toolbarId, selectionToolbarId, toolbarItem, rootSelection) {
 		function updateSelectionTools(selectionService, item) {
-			var selectionTools = lib.node(selectionToolbarId);
-			if (selectionTools) {
-				// Hacky: check for a local selection service of the selectionToolbarId, or the one associated with the commandRegistry
-				var contributions = commandRegistry._contributionsByScopeId[selectionToolbarId];
-				selectionService = selectionService || (contributions && contributions.localSelectionService) || commandRegistry.getSelectionService(); //$NON-NLS-0$
-				if (contributions && selectionService) {
-					Deferred.when(selectionService.getSelections(), function(selections) {
-						commandRegistry.destroy(selectionTools);
-						var isNoSelection = !selections || (Array.isArray(selections) && !selections.length);
-						if (rootSelection && isNoSelection) {
-							commandRegistry.renderCommands(selectionTools.id, selectionTools, item, explorer, "button");  //$NON-NLS-0$
-						} else {
-							commandRegistry.renderCommands(selectionTools.id, selectionTools, null, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
-						}
-					});
+			var ids = Array.isArray(selectionToolbarId) ? selectionToolbarId : [selectionToolbarId];
+			ids.forEach(function(id) {
+				var selectionTools = lib.node(id);
+				if (selectionTools) {
+					// Hacky: check for a local selection service of the selectionToolbarId, or the one associated with the commandRegistry
+					var contributions = commandRegistry._contributionsByScopeId[id];
+					selectionService = selectionService || (contributions && contributions.localSelectionService) || commandRegistry.getSelectionService(); //$NON-NLS-0$
+					if (contributions && selectionService) {
+						Deferred.when(selectionService.getSelections(), function(selections) {
+							commandRegistry.destroy(selectionTools);
+							var isNoSelection = !selections || (Array.isArray(selections) && !selections.length);
+							if (rootSelection && isNoSelection) {
+								commandRegistry.renderCommands(selectionTools.id, selectionTools, item, explorer, "button");  //$NON-NLS-0$
+							} else {
+								commandRegistry.renderCommands(selectionTools.id, selectionTools, null, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+							}
+						});
+					}
 				}
+			});
+		}
+
+		if (toolbarId) {
+			var toolbar = lib.node(toolbarId);
+			if (toolbar) {
+				commandRegistry.destroy(toolbar);
+			} else {
+				throw new Error("could not find toolbar " + toolbarId); //$NON-NLS-0$
 			}
+			// close any open slideouts because if we are retargeting the command
+			if (lastItemLoaded.Location && toolbarItem.Location !== lastItemLoaded.Location) {
+				commandRegistry.closeParameterCollector();
+				lastItemLoaded.Location = toolbarItem.Location;
+			}
+			commandRegistry.renderCommands(toolbar.id, toolbar, toolbarItem, explorer, "button"); //$NON-NLS-0$
 		}
-
-		var toolbar = lib.node(toolbarId);
-		if (toolbar) {
-			commandRegistry.destroy(toolbar);
-		} else {
-			throw new Error("could not find toolbar " + toolbarId); //$NON-NLS-0$
-		}
-		// close any open slideouts because if we are retargeting the command
-		if (lastItemLoaded.Location && toolbarItem.Location !== lastItemLoaded.Location) {
-			commandRegistry.closeParameterCollector();
-			lastItemLoaded.Location = toolbarItem.Location;
-		}
-
-		commandRegistry.renderCommands(toolbar.id, toolbar, toolbarItem, explorer, "button"); //$NON-NLS-0$
+		
 		if (selectionToolbarId) {
 			updateSelectionTools(null, explorer.treeRoot);
 		}
@@ -233,11 +238,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			}
 		}
 		return item;
-	}
-		
-	function canCreateProject(item) {
-		item = forceSingleItem(item);
-		return item.Location && mFileUtils.isAtRoot(item.Location);
 	}
 
 	function createProject(explorer, fileClient, progress, name, populateFunction, progressMessage) {
@@ -339,6 +339,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				path = path.substring(0, qIndex+1);
 			}
 			return path;
+		}
+		
+		function canCreateProject(item) {
+			if (!explorer.isCommandsVisible()) {
+				return false;
+			}
+			item = forceSingleItem(item);
+			return item.Location && mFileUtils.isAtRoot(item.Location);
 		}
 		
 		function makeMoveCopyTargetChoices(items, userData, isCopy) {
@@ -482,6 +490,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		}
 
 		var oneOrMoreFilesOrFolders = function(item) {
+			if (!explorer.isCommandsVisible()) {
+				return false;
+			}
 			var items = Array.isArray(item) ? item : [item];
 			if (items.length === 0) {
 				return false;
@@ -558,6 +569,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		}
 		
 		function checkFolderSelection(item) {
+			if (!explorer.isCommandsVisible()) {
+				return false;
+			}
 			return getTargetFolder(explorer.selection.getSelections()) || getTargetFolder(item);
 		}
 		
@@ -620,6 +634,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				imageClass: "core-sprite-rename", //$NON-NLS-0$
 				id: "eclipse.renameResource" + idSuffix, //$NON-NLS-0$
 				visibleWhen: function(item) {
+					if (!explorer.isCommandsVisible()) {
+						return false;
+					}
 					if (Array.isArray(item)) {
 						return item.length === 1 && item[0].Name;
 					}
@@ -656,6 +673,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				tooltip: messages["Compare the selected 2 files with each other"],
 				id: "eclipse.compareWithEachOther" + idSuffix, //$NON-NLS-0$
 				visibleWhen: function(item) {
+					if (!explorer.isCommandsVisible()) {
+						return false;
+					}
 					if (Array.isArray(item)) {
 						if(item.length === 2 && !item[0].Directory && !item[1].Directory){
 							var contentType1 = contentTypeService.getFilenameContentType(item[0].Name);
@@ -684,6 +704,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			tooltip: messages["Compare the selected folder with a specified folder"], 
 			id: "eclipse.compareWith" + idSuffix, //$NON-NLS-0$
 			visibleWhen: function(item) {
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
 				if (Array.isArray(item)) {
 					if(item.length === 1 && item[0].Directory){
 						return true;
@@ -772,6 +795,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-exportzip", //$NON-NLS-0$
 			id: "eclipse.downloadFile" + idSuffix, //$NON-NLS-0$
 			visibleWhen: function(item) {
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
 				item = forceSingleItem(item);
 				return item.ExportLocation && item.Directory;
 			},
@@ -883,8 +909,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				});
 			},
 			visibleWhen: function(item) {
-				item = forceSingleItem(item);
-				return item.Directory && !mFileUtils.isAtRoot(item.Location);
+				return checkFolderSelection(item) && !mFileUtils.isAtRoot(item.Location);
 			}
 		});
 		commandService.addCommand(newFolderCommand);
@@ -980,7 +1005,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				}
 			},
 			visibleWhen: function(item) {
-				item = forceSingleItem(item);
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
+				item = explorer.treeRoot;
 				return item.Parents || item.type === "Project"; //$NON-NLS-0$
 			}
 		});
@@ -999,6 +1027,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				}
 			},
 			visibleWhen: function(item) {
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
 				var selections = explorer.selection.getSelections();
 				return selections.length === 1 && selections[0].Directory;
 			}
@@ -1077,6 +1108,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				dialog.show();
 			},
 			visibleWhen: function(item) {
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
 				item = forceSingleItem(item);
 				return item.ExportLocation && item.Directory;
 			}
@@ -1146,6 +1180,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		commandService.addCommand(copyToBufferCommand);
 		
 		var canPaste = function(items){
+			if (!explorer.isCommandsVisible()) {
+				return false;
+			}
 			return (bufferedSelection.length > 0) && checkFolderSelection(items);
 		};
 		
@@ -1265,7 +1302,13 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					}
 				}
 			},
-			visibleWhen: canCreateProject
+			visibleWhen: function(item) {
+				if (!explorer.isCommandsVisible()) {
+					return false;
+				}
+				item = forceSingleItem(item);
+				return item.Location && mFileUtils.isAtRoot(item.Location);
+			}
 		});
 		return newContentCommand;
 	};

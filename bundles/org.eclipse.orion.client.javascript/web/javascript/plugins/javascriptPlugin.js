@@ -78,7 +78,7 @@ define([
 	 */
 	provider.registerServiceProvider("orion.edit.outliner", new Outliner.JSOutliner(astManager),
 		{ contentType: ["application/javascript"],
-		  name: "Source outline",
+		  name: "Source Outline",
 		  title: "JavaScript source outline",
 		  id: "orion.javascript.outliner.source"
 	});

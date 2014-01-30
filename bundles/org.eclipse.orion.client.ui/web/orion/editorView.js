@@ -293,19 +293,20 @@ define([
 
 				// Register commands that depend on external services, the registry, etc.  Do this after
 				// the generic keybindings so that we can override some of them.
-				var commandGenerator = new mEditorCommands.EditorCommandFactory(
-					serviceRegistry,
-					commandRegistry,
-					fileClient,
-					inputManager,
-					"pageActions", //$NON-NLS-0$
-					readonly,
-					"pageNavigationActions", //$NON-NLS-0$
-					localSearcher,
-					searcher,
-					function() { return self.settings; },
-					localSettings
-				);
+				var commandGenerator = new mEditorCommands.EditorCommandFactory({
+					serviceRegistry: serviceRegistry,
+					commandRegistry: commandRegistry,
+					fileClient: fileClient,
+					inputManager: inputManager,
+					toolbarId: "toolsActions", //$NON-NLS-0$
+					saveToolbarId: "fileActions", //$NON-NLS-0$
+					readonly: readonly,
+					navToolbarId: "pageNavigationActions", //$NON-NLS-0$
+					textSearcher: localSearcher,
+					searcher: searcher,
+					editorSettings: function() { return self.settings; },
+					localSettings: localSettings
+				});
 				commandGenerator.generateEditorCommands(editor);
 
 				var textView = editor.getTextView();

@@ -33,7 +33,8 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		id: "git",
 		nameKey: "Git",
 		nls: "git/nls/gitmessages",
-		imageClass: "core-sprite-cat-git"
+		imageClass: "core-sprite-repository",
+		order: 20
 	});
 
 	provider.registerService("orion.page.link", {}, {
@@ -91,7 +92,8 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 	});
 
 	provider.registerService("orion.page.link.related", null, {
-		id: "eclipse.git.status"
+		id: "eclipse.git.status",
+		category: "git"
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
@@ -108,7 +110,8 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
-		id: "eclipse.git.log"
+		id: "eclipse.git.log",
+		category: "git"
 	});
 	/*
 	provider.registerService("orion.page.link.related", null, {
@@ -428,9 +431,9 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		type: "git",
 		addParameters: [{id: "url", type: "url", name: "Url:"}],
 		optionalParameters: [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"},{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}],
-		addDependencyName: "Add Git Repository",
+		addDependencyName: "Git Repository",
 		addDependencyTooltip: "Clone git repository and add it to this project",
-		addProjectName: "Create a project from a Git Repository",
+		addProjectName: "Project from a Git Repository",
 		addProjectTooltip: "Clone a Git Repository and add it as a project",
 		actionComment: "Cloning ${url}",
 		validationProperties: [

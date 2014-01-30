@@ -62,6 +62,8 @@
 
 .gitPanel {
 	min-width: 800px;
+	background:white;
+	height:100%;
 }
 
 /* sprites */

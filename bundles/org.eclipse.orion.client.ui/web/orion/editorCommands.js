@@ -101,18 +101,19 @@ define([
 	}
 	exports.createDelegatedUI = createDelegatedUI;
 			
-	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId, localSearcher, searcher, editorSettings, localSettings) {
-		this.serviceRegistry = serviceRegistry;
-		this.commandService = commandService;
-		this.fileClient = fileClient;
-		this.inputManager = inputManager;
-		this.toolbarId = toolbarId;
-		this.pageNavId = navToolbarId;
-		this.isReadOnly = isReadOnly;
-		this._localSearcher = localSearcher;
-		this._searcher = searcher;
-		this.editorSettings = editorSettings;
-		this.localSettings = localSettings;
+	function EditorCommandFactory (options) {
+		this.serviceRegistry = options.serviceRegistry;
+		this.commandService = options.commandRegistry;
+		this.fileClient = options.fileClient;
+		this.inputManager = options.inputManager;
+		this.toolbarId = options.toolbarId;
+		this.saveToolbarId = options.saveToolbarId;
+		this.pageNavId = options.navToolbarId;
+		this.isReadOnly = options.readonly;
+		this._localSearcher = options.textSearcher;
+		this._searcher = options.searcher;
+		this.editorSettings = options.editorSettings;
+		this.localSettings = options.localSettings;
 	}
 	EditorCommandFactory.prototype = {
 		/**
@@ -268,7 +269,7 @@ define([
 				}
 			});
 			this.commandService.addCommand(saveCommand);
-			this.commandService.registerCommandContribution(this.toolbarId, cmdId, 1, null, false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.saveToolbarId || this.toolbarId, cmdId, 1, "orion.menuBarFileGroup/orion.saveGroup", false, new mKeyBinding.KeyBinding('s', true)); //$NON-NLS-0$
 			
 			// Add key binding to editor so that the user agent save dialog does not show when auto save is enabled
 			if (editor.getTextView && editor.getTextView()) {
@@ -445,7 +446,7 @@ define([
 				}
 			});
 			this.commandService.addCommand(blameCommand);
-			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, null, false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.toolbarId , "orion.edit.blame", 1, "orion.menuBarToolsGroup", false, new mKeyBinding.KeyBinding('b', true, true), new mCommandRegistry.URLBinding("blame", "blame")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
 		_generateEditCommands: function(editor) {
@@ -601,7 +602,7 @@ define([
 					deferred.then(function(commandOptions){
 						var command = makeCommand(info, service, commandOptions);
 						self.commandService.addCommand(command);
-						self.commandService.registerCommandContribution(self.toolbarId, command.id, position, null, false, createKeyBinding(info.key));
+						self.commandService.registerCommandContribution(self.toolbarId, command.id, position, "orion.menuBarToolsGroup", false, createKeyBinding(info.key));
 					});
 					position++;
 				});

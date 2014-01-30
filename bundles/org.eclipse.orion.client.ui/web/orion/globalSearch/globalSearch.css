@@ -73,15 +73,6 @@
 }
 
 .outlinerSplitLayout {
-	position: absolute;
-	top: 50%;  
-	width: 100%;
-	z-index: 50;
-	height: 4px;
-	cursor: n-resize;
-	background: #efefef;
-	overflow: hidden;
-	visibility: visible; 
 }
 
 .advSearchOptContainer {

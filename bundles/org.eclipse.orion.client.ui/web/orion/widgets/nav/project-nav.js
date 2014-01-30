@@ -161,16 +161,16 @@ define([
 		registerCommands: function() {
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
 				var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
-				var newActionsScope = this.newActionsScope;
-				var additionalNavActionsScope = this.additionalNavActionsScope;
+				var fileActionsScope = this.fileActionsScope;
+				var additionalActionsScope = this.additionalActionsScope;
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.disconnect", 2); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.create.readme", 5, "orion.commonNavNewGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(newActionsScope, "orion.project.addFolder", 1, "orion.commonNavNewGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.readme", 5, "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.addFolder", 6, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
 				var projectCommandsDef = new Deferred();
 				this.projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
 					for(var i=0; i<dependencyTypes.length; i++){
-						commandRegistry.registerCommandContribution(newActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+1, "orion.commonNavNewGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+7, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					this.projectClient.getProjectDeployTypes().then(function(deployTypes){
 						if(deployTypes && deployTypes.length>0){
@@ -181,7 +181,7 @@ define([
 							}
 						}
 						for(var i=0; i<deployTypes.length; i++){
-							commandRegistry.registerCommandContribution(additionalNavActionsScope, "orion.project.deploy." + deployTypes[i], i+100, "orion.deployNavGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+							commandRegistry.registerCommandContribution(additionalActionsScope, "orion.project.deploy." + deployTypes[i], i+100, "orion.deployNavGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 						}
 						
 						ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient, dependencyTypes, deployTypes).then(projectCommandsDef.resolve, projectCommandsDef.resolve);
@@ -201,7 +201,7 @@ define([
 				function doUpdateForLaunchConfigurations(launchConfigurations, selections){
 					if(this.launchCommands){
 						for(var i=0; i<this.launchCommands.length; i++){
-							this.commandRegistry.unregisterCommandContribution(this.additionalNavActionsScope, this.launchCommands[i]);
+							this.commandRegistry.unregisterCommandContribution(this.additionalActionsScope, this.launchCommands[i]);
 						}
 					}
 					this.treeRoot.Project.launchConfigurations = launchConfigurations;
@@ -211,7 +211,7 @@ define([
 					for(var i=0; i<launchConfigurations.length; i++){
 						launchCommand = "orion.launchConfiguration.deploy." + launchConfigurations[i].ServiceId + launchConfigurations[i].Name;
 						this.launchCommands.push(launchCommand);
-						this.commandRegistry.registerCommandContribution(this.additionalNavActionsScope, launchCommand, i+1, "orion.deployNavGroup/orion.deployLaunchConfigurationGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+						this.commandRegistry.registerCommandContribution(this.additionalActionsScope, launchCommand, i+1, "orion.deployNavGroup/orion.deployLaunchConfigurationGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					var defaultCommand = ProjectCommands.getDefaultLaunchCommand(this.treeRoot.Project.Name);
 					
@@ -292,7 +292,7 @@ define([
 		destroy: function(){
 			if(this.launchCommands){
 				for(var i=0; i<this.launchCommands.length; i++){
-					this.commandRegistry.unregisterCommandContribution(this.additionalNavActionsScope, this.launchCommands[i], "orion.deployNavGroup/orion.deployLaunchConfigurationGroup");
+					this.commandRegistry.unregisterCommandContribution(this.additionalActionsScope, this.launchCommands[i], "orion.deployNavGroup/orion.deployLaunchConfigurationGroup");
 				}
 			}
 			var _self = this;
@@ -419,12 +419,14 @@ define([
 			});
 			this.explorer.display(this.project);
 			window.location.href = uriTemplate.expand({resource: this.project.Location});
+			this.sidebar.hideToolbar();
 		},
 		destroy: function() {
 			if (this.explorer) {
 				this.explorer.destroy();
 			}
 			this.explorer = null;
+			this.sidebar.showToolbar();
 		},
 		getProjectJson: function(metadata) {
 			function getJson(children) {

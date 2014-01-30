@@ -40,9 +40,7 @@ define([
 		noProjects.classList.add("noFile"); //$NON-NLS-0$
 		noProjects.textContent = messages.NoProjects;
 		var plusIcon = document.createElement("span"); //$NON-NLS-0$
-		plusIcon.classList.add("core-sprite-addcontent"); //$NON-NLS-0$
-		plusIcon.classList.add("icon-inline"); //$NON-NLS-0$
-		plusIcon.classList.add("imageSprite"); //$NON-NLS-0$
+		plusIcon.appendChild(document.createTextNode(messages["File"]));
 		lib.processDOMNodes(noProjects, [plusIcon]);
 		td.appendChild(noProjects);
 		tr.appendChild(td);

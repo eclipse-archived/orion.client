@@ -14,12 +14,12 @@
 	background-color: rgb(51, 51, 51);
 	height: 16px;
 	padding: 10px 3px 6px 2px;
-	display: -webkit-box;
 	display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
 	display: -ms-flexbox;     /* TWEENER - IE 10 */
 	display: -webkit-flex;     /* NEW - Chrome */
 	display: flex; 
 	white-space: nowrap;
+	border-bottom: 1px solid #ddd;
 }
 
 
@@ -84,7 +84,7 @@ a:hover {
 /* Row selection */
 
 .checkedRow {
-	background-color: #ffeecc !important; /* was e3e3e3 */
+	background-color: lightblue !important; /* was e3e3e3 */
 }
 
 .navbar-item-selected {
@@ -97,7 +97,7 @@ a:hover {
 .breadcrumb {
 	font-size: 8pt;
 	text-decoration: none;
-	color: #CCC;
+	color: #333;
 	padding-top: 2px;
 }
 
@@ -123,7 +123,7 @@ a.breadcrumb:hover {
 	padding-top:1px;
 	font-weight: bold;
 	font-size: 8pt;
-	color: #444;
+	color: #333;
 	text-decoration: none;
 	line-height: 10pt;
 	white-space:nowrap;
@@ -139,25 +139,28 @@ a.currentLocation:hover {
 
 .auxpane {
 	border: 0;
-	background: #f7f7f7;
+	background: #eeeeee;
 }
 
 .mainpane {
 	border: 0;
-	background: white;
-	
+	background: #eee !important;
+	padding-right:15px;
 }
 
 .mainToolbar {
- 	background: #ffffff;
-	border-bottom: 1px solid #ebebeb;
+ 	background: #eeeeee;
+ 	padding-left: 5px;
+ 	padding-right: 5px;
+	/* border-bottom: 1px solid #ebebeb; */
+	/* padding-left:50px; */
 }
 
 /* Filesystem switcher toolbar */
 .fsToolbar {
 	padding: 2px 4px 2px 4px; /*$FSToolbarPadding*/
-	background-color: white;
-	border-bottom: 1px solid rgb(235, 235, 235);
+	background-color: #EEEEEE;
+	/* border-bottom: 1px solid rgb(235, 235, 235); */
 	
 }
 
@@ -175,7 +178,7 @@ a.currentLocation:hover {
 	-webkit-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	color:#444;
+	color:#555;
 }
 
 .filesystemSwitcher {
@@ -345,7 +348,7 @@ a.currentLocation:hover {
 }
 
 .splitThumb {
-	background: #cdcdcd;
+	background: #ccc;
 }
 
 /* dropdowns */
@@ -364,7 +367,7 @@ a.currentLocation:hover {
 	display: inline-block;
 	vertical-align: top;
 	line-height: 12px;
-	color: silver;
+	color: #555;
 }
 
 .dropdownArrowRight {
@@ -374,6 +377,8 @@ a.currentLocation:hover {
 
 .dropdownTrigger {
 	font-weight: normal;
+	background: none !important;
+	border: none !important;
 }
 
 .dropdownTrigger a {

@@ -23,19 +23,20 @@
     </head>
 
 	<body id="orion-editor" spellcheck="false" class="orionPage">
-		<div class="content-fixedHeight">
-			<div id="innerPanels"> <!--  style="height:100%;width:100%;" -->
-				<div class="auxpane sidePanelLayout hasSplit">
+		<div id="sideMenu" class="sideMenu"></div>
+		<div id="pageContent" class="content-fixedHeight">
+			<div id="pageToolbar" class="mainToolbar toolComposite toolbarLayout"></div>
+			<div id="innerPanels" style="position:absolute;width:100%;top:32px;bottom:0;">
+				<div id="auxpane" class="auxpane sidePanelLayout hasSplit">
 					<div class="fixedToolbarHolder">
 						<div id="sidebarToolbar" class="sidebarToolbar mainToolbar toolComposite toolbarLayout"></div>
-						<div id="sidebar" class="toolbarTarget"></div>
+						<div id="sidebar" class="dropdownTrigger toolbarTarget"></div>
 					</div>
 				</div>
-				<div class="split splitLayout" style="left: 25%;"></div> <!-- 1:3 -->
+				<div class="split splitLayout" style="left: 25%;"></div>
 				<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
 					<div class="fixedToolbarHolder">
-						<div class="mainToolbar toolComposite" id="pageToolbar"></div>
-						<div id="editor" class="toolbarTarget"></div>
+						<div id="editor" class="workingTarget"></div>
 					</div>
 				</div>
 			</div>
