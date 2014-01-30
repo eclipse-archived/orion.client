@@ -446,7 +446,7 @@ hard-coded numbers elsewhere.
 
 .sideMenuList{
 	padding:10px;
-	display:none;
+	display:inline-block !important;
 }
 
 .sideMenuItem{
@@ -455,8 +455,9 @@ hard-coded numbers elsewhere.
 	padding-bottom:15px;
 }
 
-.sideMenuItem.hover{
+.sideMenuItem:hover{
 	text-decoration:none;
+	color:#78c4d8 !important;
 }
 
 .active{
@@ -472,11 +473,12 @@ hard-coded numbers elsewhere.
 }
 
 .sideMenuSubMenu{
-	display: inline-block;
+	display: none;
 	list-style-type:none;
 	position:absolute;
 	left:0;
 	font-family:sans-serif;
+	z-index:100;
 }
 
 .sideMenuSubMenuItem{
@@ -492,13 +494,23 @@ hard-coded numbers elsewhere.
 
 .sideMenuSubMenuItemLink{
 	display: inline-block;
-	color:#999;
+	color:#78c4d8;
 }
 
 .sideMenuSubMenuItemSpan{
 	display: inline-block;
 }
 
+.sideMenuItem:hover ul { 
+    display:inline-block;
+}
+
+/* .sideMenuitem:hover > li:hover ul {
+    display: block;
+    position: absolute;
+    border-top: 1px solid #f39cbd;
+    border-left: 1px solid #f39cbd;
+} */
 /* ----- side menu end ----- */
 
 .mainContent{
