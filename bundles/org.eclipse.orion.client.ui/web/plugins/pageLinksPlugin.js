@@ -48,13 +48,6 @@ define([
 		imageClass: "core-sprite-shell",
 		order: 40
 	});
-	provider.registerService("orion.page.link.category", null, {
-		id: "sites",
-		nameKey: "Sites",
-		nls: "orion/nls/messages",
-		imageClass: "core-sprite-sites",
-		order: 50
-	});
 
 	// Primary navigation links
 	provider.registerService("orion.page.link", null, {
