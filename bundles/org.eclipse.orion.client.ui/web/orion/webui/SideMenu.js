@@ -21,7 +21,9 @@ define([
 		if (!parentNode)
 			throw new Error("Missing parentNode");
 		this.parentNode = lib.node(parentNode);
-		this.menuitems = [];
+		this.menuitems = Object.create(null); // Maps category id {String} to menuitem
+		this.links = null;
+		this.categories = null;
 
 		this.anchor = document.createElement("ul");
 		this.anchor.classList.add("sideMenuList");
@@ -35,8 +37,6 @@ define([
 	SideMenu.prototype.SIDE_MENU_OPEN_WIDTH = "40px";
 	SideMenu.prototype.SIDE_MENU_CLOSED_WIDTH = "0";
 	
-	SideMenu.prototype.menuitems = [];
-	
 	function addMenuItem( imageClassName, categoryId /*, link*/ ){
 		var anchor = this.anchor;
 		
@@ -44,12 +44,12 @@ define([
 		
 		anchor.appendChild( listItem );
 	
-		this.menuitems.push( listItem );
+		this.menuitems[categoryId] = listItem;
 	}
 
 	function setAllMenuItemsInactive(){
 		
-		this.menuitems.forEach( function( item ){
+		this.getMenuItems().forEach( function( item ){
 			item.className = item.iconClass + ' inactive';
 		} );
 	}
@@ -58,7 +58,7 @@ define([
 		
 		this.setAllMenuItemsInactive();
 		
-		this.menuitems.forEach( function( item ){
+		this.getMenuItems().forEach( function( item ){
 			if( item.href == link ){
 				item.className = item.iconClass + ' active';
 			} 
@@ -124,6 +124,19 @@ define([
 	SideMenu.prototype.toggleSideMenu = toggleSideMenu;
 
 	objects.mixin(SideMenu.prototype, {
+		clearMenuItems: function() {
+			this.menuitems = [];
+			lib.empty(this.anchor);
+		},
+		getMenuItems: function() {
+			var menuitems = this.menuitems;
+			return Object.keys(menuitems).map(function(id) {
+				return menuitems[id];
+			});
+		},
+		getMenuItem: function(catId) {
+			return this.menuitems[catId];
+		},
 		getDisplayState: function() {
 			var state = localStorage.getItem(this.LOCAL_STORAGE_NAME);
 			if (!state) {
@@ -212,6 +225,7 @@ define([
 		},
 		_renderCategories: function() {
 			var categories = this.categories, _self = this;
+			this.clearMenuItems();
 			categories.getCategoryIDs().map(function(catId) {
 				return categories.getCategory(catId);
 			}).sort(compareCategories).forEach(function(cat) {
@@ -229,35 +243,25 @@ define([
 					return l.textContent + " (" + l.href + ")";
 				}).join(", ") + "]");
 			});
-			
-			// Set up category hovers
-			Object.keys(this.links).forEach(function(catId) {
-				var menuitem, index;
-				_self.menuitems.forEach(function(m, index) {
-					if (m.categoryId === catId) {
-						menuitem = m;
-						return true;
-					}
-				});
+
+			// Start fresh. This creates menuitems anew
+			this._renderCategories();
+
+			// Append link elements to each menu item
+			Object.keys(this.menuitems).forEach(function(catId) {
+				var menuitem = _self.getMenuItem(catId);
 				if (!menuitem)
 					return;
-				// TODO we should recreate menuitems here
-				var category = _self.categories.getCategory(catId);
 				var bin = _self._getLinksBin(catId);
 				if (bin.length === 1) {
-					var classlist = menuitem.className;
-					var icon = classlist.split( ' ' );
-					menuitem.className = icon[1] + ' ' + icon[2];
-					bin[0].innerHTML = '<span class="' + icon[0] + ' active"></span>';
-					bin[0].className = 'active';
-					menuitem.appendChild(bin[0]);
+					var category = _self.categories.getCategory(catId);
+					var link = document.createElement("a");
+					link.href = bin[0].href;
+					link.title = bin[0].textContent;
+					link.className = category.imageClass + " active";
+					menuitem.classList.remove(category.imageClass);
+					menuitem.appendChild(link);
 				} else {
-					var newMenuitem = _self.createListItem(category.imageClass, catId);
-					_self.menuitems[index] = newMenuitem;
-					_self.anchor.replaceChild(newMenuitem, menuitem);
-					menuitem = newMenuitem;
-					// need hover
-						
 					var sideMenuSubMenu = document.createElement('ul');
 					sideMenuSubMenu.className="sideMenuSubMenu";
 							
