@@ -440,6 +440,12 @@ hard-coded numbers elsewhere.
 	text-decoration:none !important;
 }
 
+.sideMenu-openOverlay {
+	opacity: 0.9;
+	border-bottom-right-radius: 20px;
+	bottom: auto;
+}
+
 .sideMenu-maximized {
 	top: 0;
 	bottom: 0;

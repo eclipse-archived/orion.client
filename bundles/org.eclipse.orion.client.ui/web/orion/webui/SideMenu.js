@@ -74,6 +74,7 @@ define([
 		
 		if( parent ){
 			
+			parent.classList.remove("sideMenu-openOverlay");
 			if( sideMenuNavigation === this.CLOSED_STATE ){
 				this.setSideMenuWidth( this.SIDE_MENU_CLOSED_WIDTH );
 				parent.style.display = 'none';
@@ -86,6 +87,7 @@ define([
 			
 			if( sideMenuNavigation === this.OPEN_OVERLAY_STATE ){
 				this.setSideMenuWidth( this.SIDE_MENU_OPEN_WIDTH, true );
+				parent.classList.add("sideMenu-openOverlay");
 				parent.style.display = 'block';
 			}
 		}
