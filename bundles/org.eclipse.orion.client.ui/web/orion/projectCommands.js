@@ -935,7 +935,14 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						var item = forceSingleItem(data.items);
 						var project = item.Project;
 						
-						var appPath = item.Location.replace(project.ContentLocation, "");
+						var appPath;
+						if(item.Location){
+							//Folder is selected
+							appPath = item.Location.replace(project.ContentLocation, "");
+						} else {
+							//Project root is selected
+							appPath = "";
+						}
 						
 						var func = arguments.callee;
 						var params = handleParamsInCommand(func, data, deployService.tooltip);
