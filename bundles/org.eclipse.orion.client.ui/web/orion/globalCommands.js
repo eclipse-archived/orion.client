@@ -108,7 +108,7 @@ define([
 		afterGenerateRelatedLinks: mCustomGlobalCommands.afterGenerateRelatedLinks || function (serviceRegistry, item, exclusions, commandRegistry, alternateItem) {},
 		afterSetPageTarget: mCustomGlobalCommands.afterSetPageTarget || function (options) {},
 		generateNavigationMenu: mCustomGlobalCommands.generateNavigationMenu || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
-			var nav = document.getElementById('centralNavigation');
+			var nav = document.getElementById('centralNavigation'); //$NON-NLS-0$
 
 			new mTooltip.Tooltip({
 				node: nav,
@@ -116,8 +116,19 @@ define([
 				position: ["right"] //$NON-NLS-0$
 			});
 
-			sideMenu = new SideMenu("sideMenu");
-			nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu));
+			sideMenu = new SideMenu("sideMenu"); //$NON-NLS-0$
+			nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
+			//TODO write the hovering behavior without a mouse move listener on the document
+			document.addEventListener("mousemove", function(evt) { //$NON-NLS-0$
+				var sideMenuNode = sideMenu.parentNode;
+				var over = sideMenuNode.contains(evt.target);
+				var centralNavigationArea = lib.node("centralNavigationArea"); //$NON-NLS-0$
+				var staticBanner = lib.node("staticBanner"); //$NON-NLS-0$
+				if (!over && centralNavigationArea && staticBanner) {
+					over = staticBanner.contains(evt.target) && evt.clientX < lib.bounds(centralNavigationArea).width;
+				}
+				sideMenu.setOverlaySideMenu(over);
+			});
 		},
 		afterGenerateBanner: mCustomGlobalCommands.afterGenerateBanner || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {}
 	};

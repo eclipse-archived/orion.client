@@ -32,6 +32,7 @@ define([
 	
 	SideMenu.prototype.LOCAL_STORAGE_NAME = "sideMenuNavigation";
 	SideMenu.prototype.OPEN_STATE = "open";
+	SideMenu.prototype.OPEN_OVERLAY_STATE = "openOverlay";
 	SideMenu.prototype.CLOSED_STATE = "closed";
 	SideMenu.prototype.DEFAULT_STATE = SideMenu.prototype.OPEN_STATE;
 	SideMenu.prototype.SIDE_MENU_OPEN_WIDTH = "40px";
@@ -69,32 +70,61 @@ define([
 			
 		var sideMenuNavigation = this.getDisplayState();
 		
-		var listAnchor = this.anchor;
+		var parent = this.parentNode;
 		
-		if( listAnchor ){
+		if( parent ){
 			
 			if( sideMenuNavigation === this.CLOSED_STATE ){
 				this.setSideMenuWidth( this.SIDE_MENU_CLOSED_WIDTH );
-				listAnchor.style.display = 'none';
+				parent.style.display = 'none';
 			}
 			
 			if( sideMenuNavigation === this.OPEN_STATE ){
 				this.setSideMenuWidth( this.SIDE_MENU_OPEN_WIDTH );
-				listAnchor.style.display = 'list-item';
+				parent.style.display = 'block';
+			}
+			
+			if( sideMenuNavigation === this.OPEN_OVERLAY_STATE ){
+				this.setSideMenuWidth( this.SIDE_MENU_OPEN_WIDTH, true );
+				parent.style.display = 'block';
 			}
 		}
 	}
 		
-	function setSideMenuWidth( sideMenuWidth ){
+	function setSideMenuWidth( sideMenuWidth, overlay ){
 		var pageContent = lib.node( "pageContent" );
-		if (pageContent) {
+		if (pageContent && !overlay) {
 			pageContent.style.left = sideMenuWidth;
 		}
 		var sideToolBar = lib.node( "sideMenu" );
 		if( sideToolBar ){
 			sideToolBar.style.width = sideMenuWidth;
 		}
-	};	
+	};
+	
+	function setOverlaySideMenu(show) {
+		
+		var sideMenuNavigation = this.getDisplayState();
+		
+		var newState = sideMenuNavigation;
+		if (show) {
+			if( sideMenuNavigation === this.CLOSED_STATE ){
+				newState = this.OPEN_OVERLAY_STATE;
+			}
+		} else {
+			if( sideMenuNavigation === this.OPEN_OVERLAY_STATE ){
+				newState = this.CLOSED_STATE;
+			}
+		}
+
+		if (newState === this.DEFAULT_STATE) {
+			localStorage.removeItem(this.LOCAL_STORAGE_NAME);
+		} else {
+			localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
+		}
+		
+		this.setSideMenu();
+	}
 		
 	function toggleSideMenu(){
 			
@@ -122,6 +152,7 @@ define([
 	SideMenu.prototype.setSideMenu = setSideMenu;		
 	SideMenu.prototype.setSideMenuWidth = setSideMenuWidth;
 	SideMenu.prototype.toggleSideMenu = toggleSideMenu;
+	SideMenu.prototype.setOverlaySideMenu = setOverlaySideMenu;
 
 	objects.mixin(SideMenu.prototype, {
 		clearMenuItems: function() {

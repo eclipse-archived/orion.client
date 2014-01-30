@@ -428,6 +428,7 @@ hard-coded numbers elsewhere.
     top: 36px;
 	/* bottom: 36px; $FooterHeight + footer border (1px) */   
     bottom: 0;
+    z-index: 50;
     -webkit-animation: slide 0.5s forwards;
     -webkit-animation-delay: 2s;
     animation: slide 0.5s forwards;
