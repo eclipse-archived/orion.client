@@ -300,6 +300,7 @@ define([
 					inputManager: inputManager,
 					toolbarId: "toolsActions", //$NON-NLS-0$
 					saveToolbarId: "fileActions", //$NON-NLS-0$
+					editToolbarId: "editActions", //$NON-NLS-0$
 					readonly: readonly,
 					navToolbarId: "pageNavigationActions", //$NON-NLS-0$
 					textSearcher: localSearcher,

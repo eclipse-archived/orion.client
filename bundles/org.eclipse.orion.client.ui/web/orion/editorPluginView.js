@@ -166,6 +166,7 @@ define([
 				readonly: this.readonly,
 				toolbarId: "toolsActions", //$NON-NLS-0$
 				saveToolbarId: "fileActions", //$NON-NLS-0$
+				editToolbarId: "editActions", //$NON-NLS-0$
 				navToolbarId: "pageNavigationActions" //$NON-NLS-0$
 			});
 			commandGenerator.generateBaseEditorCommands(this.editor);
