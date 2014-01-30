@@ -460,6 +460,11 @@ hard-coded numbers elsewhere.
 	color:#78c4d8 !important;
 }
 
+.sideMenuItem a:hover{
+	text-decoration:none;
+	color:#78c4d8 !important;
+}
+
 .active{
 	color:whitesmoke !important;
 	font-size:20px !important;
