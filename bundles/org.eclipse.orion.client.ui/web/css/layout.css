@@ -481,8 +481,8 @@ hard-coded numbers elsewhere.
 	display: none;
 	list-style-type:none;
 	position:absolute;
-	left:0;
 	font-family:sans-serif;
+	padding-left: 10px;
 	z-index:100;
 }
 
