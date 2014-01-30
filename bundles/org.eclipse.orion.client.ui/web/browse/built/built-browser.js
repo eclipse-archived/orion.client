@@ -6974,6 +6974,16 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 		}
 		element.className = "dropdownMenuItem"; //$NON-NLS-0$
 		element.role = "menuitem";  //$NON-NLS-0$
+		
+		if (command.tooltip) {
+			/* nested menu items may represent commands, hence require tooltips */
+			element.commandTooltip = new Tooltip.Tooltip({
+				node: element,
+				text: command.tooltip,
+				position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			});
+		}
+		
 		var li = document.createElement("li"); //$NON-NLS-0$
 		parent.appendChild(li);
 		li.appendChild(element); //$NON-NLS-0$
@@ -31568,6 +31578,12 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		}
 	};
 	var getCaptureStyles = function(result, captures, offset, styles) {
+		if (captures[0]) {
+			/* capture index 0 is the full result */
+			styles.push({start: offset, end: offset + result[0].length, style: captures[0].name});
+			return;
+		}
+
 		var stringIndex = 0;
 		for (var i = 1; i < result.length; i++) {
 			if (result[i]) {
@@ -33168,10 +33184,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 		contentTypes: ["text/html"],
 		patterns: [
 			{
-				begin: "(<!(?:doctype|DOCTYPE))",
-				end: "(>)",
+				begin: "<!(?:doctype|DOCTYPE)",
+				end: ">",
 				captures: {
-					1: {name: "entity.name.tag.doctype.html"},
+					0: {name: "entity.name.tag.doctype.html"},
 				},
 				name: "meta.tag.doctype.html",
 			}, {
@@ -33188,10 +33204,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(?i)(<script(?:\\s+language\\s*=\\s*(?:'javascript'|\"javascript\"))?\\s*>)",
-				end: "(?i)(</script>)",
+				begin: "(?i)<script(?:\\s+language\\s*=\\s*(?:'javascript'|\"javascript\"))?\\s*>",
+				end: "(?i)</script>",
 				captures: {
-					1: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.js.embedded.html",
 				patterns: [
@@ -33200,10 +33216,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(?i)(<script(?:\\s+language\\s*=\\s*(?:'php'|\"php\"))?\\s*>)",
-				end: "(?i)(</script>)",
+				begin: "(?i)<script(?:\\s+language\\s*=\\s*(?:'php'|\"php\"))?\\s*>",
+				end: "(?i)</script>",
 				captures: {
-					1: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -33212,10 +33228,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(?i)(<\\?(?:=|php)?(?:\\s|$))",
-				end: "(\\?>)",
+				begin: "(?i)<\\?(?:=|php)?(?:\\s|$)",
+				end: "\\?>",
 				captures: {
-					1: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -33224,10 +33240,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(<%=?(?:\\s|$))",
-				end: "(%>)",
+				begin: "<%=?(?:\\s|$)",
+				end: "%>",
 				captures: {
-					1: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.tag.html"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -33251,10 +33267,10 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(</?[A-Za-z0-9]+)",
-				end: "(/?>)",
+				begin: "</?[A-Za-z0-9]+",
+				end: "/?>",
 				captures: {
-					1: {name: "entity.name.tag.html"},
+					0: {name: "entity.name.tag.html"},
 				},
 				name: "meta.tag.html",
 				patterns: [

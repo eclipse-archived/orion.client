@@ -1,4 +1,3 @@
-npm install
 rmdir /s /q temp
 node ./copy/copy.js "D:/JazzIntegration/OrionSource/org.eclipse.orion.client/bundles"
 xcopy /y .\temp\browse\builder\i18n.js .\temp\orion
