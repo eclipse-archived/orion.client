@@ -218,7 +218,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 						deferred.resolve({
 							CheckState: true,
 							ToSave: {
-								ConfigurationName: result.Target.Space.Name + "_" + result.Target.Org.Name + "_" + result.App.entity.name,
+								ConfigurationName: result.App.entity.name + " on " + result.Target.Space.Name + " / " + result.Target.Org.Name,
 								Parameters: {
 									Target: {
 										Url: result.Target.Url,
