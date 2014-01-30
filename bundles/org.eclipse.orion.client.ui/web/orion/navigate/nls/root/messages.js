@@ -94,6 +94,7 @@ define({
 	"Open With": "Open With",
 	"Loading ": "Loading ",
 	"New": "New",
+	"File": "File",
 	"Actions": "Actions",
 	"Orion Content": "Orion Content",
 	" is not supported in this file system": " is not supported in this file system",
@@ -106,5 +107,5 @@ define({
 	"Did not drop ${0}.  Folder drop is not supported in this browser.": "Did not drop ${0}.  Folder drop is not supported in this browser.",
 	"You cannot copy files directly into the workspace.  Create a folder first.": "You cannot copy files directly into the workspace.  Create a folder first.",
 	"Unzip ${0}?": "Unzip ${0}?",
-	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
+	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
 });
