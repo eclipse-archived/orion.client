@@ -422,7 +422,7 @@ hard-coded numbers elsewhere.
 
 .sideMenu{
     width: 0;
-    background: rgba(47, 49, 58, 1);
+    background: rgba(47, 49, 58, 0.9);
     float: left;
     position: absolute;
     top: 36px;
@@ -496,11 +496,18 @@ hard-coded numbers elsewhere.
 .sideMenuSubMenuItem{
 	display: inline-block;
 	width: 100px;
-	height: 12px;
 	font-size: 12px;
     background: rgba(47, 49, 58, 0.9);
 	padding: 10px;
 	border-bottom: 1px solid #555;
+}
+
+.sideMenuSubMenuItem:first-child{
+	border-top-right-radius: 4px;
+}
+
+.sideMenuSubMenuItem:last-child{
+	border-bottom-right-radius: 4px;
 }
 
 .sideMenuSubMenuItemLink{
