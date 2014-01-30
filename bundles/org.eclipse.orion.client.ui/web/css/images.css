@@ -523,6 +523,42 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.core-sprite-sites{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-shell{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.core-sprite-search{
+	font-size: 16px;
+	line-height: normal;
+	vertical-align:middle;
+	color: #555;
+	font-family: 'Orion Icon Font';
+	background: none;
+	border: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .core-sprite-hamburger:before{ content:'\0041'; }
 .core-sprite-gear:before{ content:'\0042'; }
 .core-sprite-silhouette:before{ content:'\0043'; float: right;}
@@ -548,6 +584,9 @@
 .core-sprite-warning:before{content:'\0079';}
 .core-sprite-error:before{content:'\007A';}
 .core-sprite-repository:before{ content:'\0065'; }
+.core-sprite-sites:before{ content:'\0033'; }
+.core-sprite-shell:before{ content:'\0073'; }
+.core-sprite-search:before{ content:'\0032'; }
 
 /* icons for file types - possibly more to come - at least one for images */ 
 
