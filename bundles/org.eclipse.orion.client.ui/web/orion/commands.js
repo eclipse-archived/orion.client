@@ -458,6 +458,16 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		}
 		element.className = "dropdownMenuItem"; //$NON-NLS-0$
 		element.role = "menuitem";  //$NON-NLS-0$
+		
+		if (command.tooltip) {
+			/* nested menu items may represent commands, hence require tooltips */
+			element.commandTooltip = new Tooltip.Tooltip({
+				node: element,
+				text: command.tooltip,
+				position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			});
+		}
+		
 		var li = document.createElement("li"); //$NON-NLS-0$
 		parent.appendChild(li);
 		li.appendChild(element); //$NON-NLS-0$
