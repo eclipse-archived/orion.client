@@ -188,7 +188,6 @@ define([
 //			console.log("setCategories()"); //console.log(categories);
 			this.categories = categories;
 			this.links = Object.create(null); // Maps category ID {String} to link DOM elements {Element[]}
-			this._renderCategories();
 		},
 		// Should only be called once
 		setPageLinks: function(pagelinks) {
