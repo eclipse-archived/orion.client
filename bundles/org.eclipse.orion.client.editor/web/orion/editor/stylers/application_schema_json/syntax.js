@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/application_schema+json/syntax", ["orion/editor/stylers/application_json/syntax"], function(mJSON) { //$NON-NLS-0$
+define("orion/editor/stylers/application_schema_json/syntax", ["orion/editor/stylers/application_json/syntax"], function(mJSON) { //$NON-NLS-0$
 	var keywords = [
 		"additionalItems", "additionalProperties", "allOf", "anyOf", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"default", "definitions", "dependencies", "description", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
