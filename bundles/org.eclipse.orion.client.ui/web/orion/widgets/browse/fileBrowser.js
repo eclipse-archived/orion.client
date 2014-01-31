@@ -11,7 +11,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint browser:true devel:true sub:true*/
-/*global define eclipse:true orion:true window URL*/
+/*global define console eclipse:true orion:true window URL*/
 
 define([
 	'orion/PageUtil', 
@@ -26,7 +26,6 @@ define([
 	'orion/fileClient',
 	'orion/contentTypes',
 	'orion/widgets/browse/staticDataSource',
-	'orion/widgets/browse/readonlyFileClient',
 	'orion/widgets/browse/emptyFileClient',
 	'orion/Deferred',
 	'orion/URITemplate',
@@ -34,7 +33,7 @@ define([
 	'orion/webui/littlelib'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mBranchSelector, mMarkdownView,
-	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mReadonlyFileClient, mEmptyFileClient, Deferred, URITemplate, objects, lib
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, lib
 ) {
 	/**
 	 * @class This object describes the options for the readonly file system browser.
@@ -62,17 +61,13 @@ define([
 	function FileBrowser(options) {
 		this._parentDomNode = lib.node(options.parent);//Required
 		this._parentDomNode.classList.add("browserParentDome");
-		this._fileClient = options.fileClient;//Required
-		this._repoURL = options.repoURL;
-		if(options.serviceRegistry) {
+		if(options.fileClient) {
+			this._fileClient = options.fileClient;
+		} else if(options.serviceRegistry) {
 			this._fileClient = new mFileClient.FileClient(options.serviceRegistry);
-		} else if(!this._fileClient && options.serviceRefs) {
-			this._fileClient = new mReadonlyFileClient.FileClient(options.serviceRefs);		
-		}
-		if(!this._fileClient){
+		} else {
 			this._fileClient = new mEmptyFileClient.FileClient();		
 		}
-		
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		if(!this._syntaxHighlighter) {
 			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
@@ -141,6 +136,9 @@ define([
 								}.bind(this));
 								this.refresh(currentComponent.Location);
 							}
+						}.bind(this),
+						function(err) {
+							console.log(err);
 						}.bind(this));
 						return;
 					}
@@ -180,7 +178,6 @@ define([
 				var rootURL = this._fileClient.fileServiceRootURL("");
 				this._fileClient.fetchChildren(rootURL).then(function(contents){
 					if(contents && contents.length > 0) {
-						//var uriToShow = contents[0].Location;
 						this._branches = contents;
 						this._branchSelector = new mBranchSelector.BranchSelector({
 							commandRegistry: this._commandRegistry,

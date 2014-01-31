@@ -12,7 +12,7 @@
 /*global URL define window console eclipse orion*/
 define(['orion/widgets/browse/fileBrowser', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/URL-shim'],
 function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
-	var pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=https://github.com/eclipse/orion.client.git", window.location.href);
+	var pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=https://github.com/eclipse/orion.client.git&token=3bbaae0679391edd086b665627fbbe5b7168ff50", window.location.href);
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 	var plugins = {};
 	plugins[pluginURL.href] = true;
