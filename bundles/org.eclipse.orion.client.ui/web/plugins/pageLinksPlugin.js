@@ -61,7 +61,7 @@ define([
 		nameKey: "Shell",
 		id: "orion.shell",
 		nls: "orion/nls/messages",
-		category: "edit",
+		category: "shell",
 		uriTemplate: "{+OrionHome}/shell/shellPage.html"
 	});
 	provider.registerService("orion.page.link", serviceImpl, {
