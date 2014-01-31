@@ -269,12 +269,12 @@ define([
 			var _self = this;
 			
 			// debug
-			console.log(" ------- ");
-			Object.keys(this.links).forEach(function(catId) {
-				console.log(catId + " -> [" + _self.links[catId].map(function(l) { 
-					return l.textContent + " (" + l.href + ")";
-				}).join(", ") + "]");
-			});
+//			console.log(" ------- ");
+//			Object.keys(this.links).forEach(function(catId) {
+//				console.log(catId + " -> [" + _self.links[catId].map(function(l) { 
+//					return l.textContent + " (" + l.href + ")";
+//				}).join(", ") + "]");
+//			});
 
 			// Start fresh. This creates menuitems anew
 			this._renderCategories();
