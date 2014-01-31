@@ -277,7 +277,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 				var textView = editor.getTextView();
 				var annotationModel = editor.getAnnotationModel();
 				if (contentType) {
-					contentType = contentType.replace(/[*|:/".<>?]/g, '_');
+					contentType = contentType.replace(/[*|:/".<>?+]/g, '_');
 					require(["./stylers/" + contentType + "/syntax"], function(grammar) { //$NON-NLS-1$ //$NON-NLS-0$
 						this.styler = new mTextStyler.TextStyler(textView, annotationModel, grammar.grammars, grammar.id);
 					});
