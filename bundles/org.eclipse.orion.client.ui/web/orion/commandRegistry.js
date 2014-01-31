@@ -714,6 +714,9 @@ define([
 				if (node.commandTooltip) {
 					node.commandTooltip.destroy();
 				}
+				if (node.extraCommandTooltip) {
+					node.extraCommandTooltip.destroy();
+				}
 				if (node.emptyGroupTooltip) {
 					node.emptyGroupTooltip.destroy();
 				}
@@ -965,7 +968,7 @@ define([
 			if (!parent || !lib.contains(document.body, parent)) {
 				return null;
 			}
-			var menuButton, newMenu;
+			var menuButton, newMenu, extraDropdownButton;
 			var destroyButton, menuParent = parent;
 			if (nested) {
 				var range = document.createRange();
@@ -1003,14 +1006,15 @@ define([
 				}
 				menuButton = created.menuButton;
 				newMenu = created.menu;
+				extraDropdownButton = created.extraDropdownButton;
 				if (tooltip) {
 					menuButton.commandTooltip = new mTooltip.Tooltip({
 						node: menuButton,
-						text: defaultInvocation && defaultInvocation.command && defaultInvocation.command.name ? tooltip + ": " + defaultInvocation.command.name: tooltip,
+						text: defaultInvocation && defaultInvocation.command && defaultInvocation.command.name ? tooltip + ": " + defaultInvocation.command.name: tooltip, //$NON-NLS-0$
 						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 					if(created.extraDropdownButton){
-						menuButton.commandTooltip = new mTooltip.Tooltip({
+						menuButton.extraCommandTooltip = new mTooltip.Tooltip({
 							node: created.extraDropdownButton,
 							text: tooltip,
 							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -1019,7 +1023,7 @@ define([
 				}
 			}
 			
-			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton, extraDropdownButton: created.extraDropdownButton};
+			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton, extraDropdownButton: extraDropdownButton};
 		},
 		
 		_generateMenuSeparator: function(dropdown) {
