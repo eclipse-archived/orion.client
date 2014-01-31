@@ -75,7 +75,7 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 		 */
 		destroy: function() {
 			if (this._model) {
-				this._model.removeEventListener("preChanged", this._listener.onChanged); //$NON-NLS-0$
+				this._model.removeEventListener("postChanged", this._listener.onChanged); //$NON-NLS-0$
 				this._model.removeEventListener("preChanging", this._listener.onChanging); //$NON-NLS-0$
 				this._model = null;
 			}
