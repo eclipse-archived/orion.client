@@ -50,7 +50,7 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/shared/
 				id: "comment_multiline",
 			}, {
 				begin: "#",
-				end: ".*",
+				end: "$",
 				name: "comment.line.number-sign.ruby",
 				patterns: [
 					{

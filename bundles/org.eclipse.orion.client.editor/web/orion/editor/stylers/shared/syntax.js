@@ -45,7 +45,7 @@ define("orion/editor/stylers/shared/syntax", [], function() { //$NON-NLS-0$
 				}, {
 					id: "comment_singleline",
 					begin: "//",
-					end: ".*",
+					end: "$",
 					name: "comment.line.double-slash",
 					patterns: [
 						{

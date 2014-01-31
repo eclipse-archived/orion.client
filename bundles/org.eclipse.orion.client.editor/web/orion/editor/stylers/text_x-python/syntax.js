@@ -51,7 +51,7 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/share
 				name: "constant.numeric.number.python"
 			}, {
 				begin: "#",
-				end: ".*",
+				end: "$",
 				name: "comment.line.number-sign.python",
 				patterns: [
 					{

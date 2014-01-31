@@ -60,10 +60,11 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		regex.lastIndex = 0;
 		if (currentLine) {
 			var lineStart = currentLine.index;
-			var char = text.charAt(lineStart);
-			while (0 <= lineStart && char !== NEWLINE && char !== CR) {
-				lineStart--;
-				char = text.charAt(lineStart);
+			while (0 <= --lineStart) {
+				var char = text.charAt(lineStart);
+				if (char === NEWLINE || char === CR) {
+					break;
+				}
 			}
 			lineString = text.substring(lineStart + 1, currentLine.index + currentLine[1].length);
 			regex.lastIndex = indexAdjustment = currentLine.index - lineStart - 1;
@@ -95,6 +96,23 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		}
 		regex.lastIndex = initialLastIndex;
 		return null;
+	};
+	var substituteCaptureValues = function(regex, resolvedResult) {
+		var regexString = regex.toString();
+		captureReferenceRegex.lastIndex = 0;
+		if (!captureReferenceRegex.test(regexString)) {
+			/* nothing to do */
+			return regex;
+		}
+
+		captureReferenceRegex.lastIndex = 0;
+		var result = captureReferenceRegex.exec(regexString);
+		while (result) {
+			regexString = regexString.replace(result[0], resolvedResult[result[1]] || "");
+			result = captureReferenceRegex.exec(regexString);
+		}
+		/* return an updated regex, remove the leading '/' and trailing /g */
+		return new RegExp(regexString.substring(1, regexString.length - 2), "g");
 	};
 	var updateMatch = function(match, text, matches, minimumIndex) {
 		var regEx = match.pattern.regex ? match.pattern.regex : match.pattern.regexBegin;
@@ -152,8 +170,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		patterns.forEach(function(current) {
 			var regex = current.regex || current.regexBegin;
 			regex.oldLastIndex = regex.lastIndex;
-			regex.lastIndex = 0;
-			var result = regex.exec(text);
+			var result = _findMatch(regex, text, 0);
 			if (result) {
 				matches.push({result: result, pattern: current});
 			}
@@ -186,7 +203,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			if (current.pattern.regex) {	/* line pattern defined by a "match" */
 				result = current.result;
 				end = start + result[0].length;
-				var tokenStyle = {start: offset + start, end: offset + end, style: current.pattern.pattern.name, isWhitespace: current.pattern.isWhitespace};
+				var tokenStyle = {start: offset + start, end: offset + end, style: current.pattern.pattern.name};
 				if (!ignoreCaptures) {
 					if (current.pattern.pattern.captures) {
 						getCaptureStyles(result, current.pattern.pattern.captures, offset + start, substyles);
@@ -210,14 +227,20 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 				mergeStyles(tokenStyle, substyles, styles);
 			} else {	/* pattern defined by a "begin/end" pair */
-				current.pattern.regexEnd.lastIndex = current.result.index + current.result[0].length;
-				result = current.pattern.regexEnd.exec(text);
+				/* 
+				 * If the end match contains a capture reference (eg.- "\1") then update
+				 * its regex with the resolved capture values from the begin match.
+				 */
+				var endRegex = current.pattern.regexEnd;
+				endRegex = substituteCaptureValues(endRegex, current.result);
+
+				result = _findMatch(endRegex, text, current.result.index + current.result[0].length);
 				if (!result) {
 					eolRegex.lastIndex = 0;
 					result = eolRegex.exec(text);
 				}
 				end = result.index + result[0].length;
-				styles.push({start: offset + start, end: offset + end, style: current.pattern.pattern.name, isWhitespace: current.pattern.isWhitespace});
+				styles.push({start: offset + start, end: offset + end, style: current.pattern.pattern.name});
 			}
 			index = result.index + result[0].length;
 			updateMatch(current, text, matches, index);
@@ -308,18 +331,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					 * its regex with the resolved capture values from the begin match.
 					 */
 					var endRegex = current.pattern.regexEnd;
-					var regexString = endRegex.toString();
-					captureReferenceRegex.lastIndex = 0;
-					if (captureReferenceRegex.test(regexString)) {
-						captureReferenceRegex.lastIndex = 0;
-						var result = captureReferenceRegex.exec(regexString);
-						while (result) {
-							regexString = regexString.replace(result[0], current.result[result[1]] || "");
-							result = captureReferenceRegex.exec(regexString);
-						}
-						/* create the updated regex, remove the leading '/' and trailing /g */
-						endRegex = new RegExp(regexString.substring(1, regexString.length - 2), "g");
-					}
+					endRegex = substituteCaptureValues(endRegex, current.result);
 
 					var lastIndex = contentStart;
 					while (!resultEnd) {

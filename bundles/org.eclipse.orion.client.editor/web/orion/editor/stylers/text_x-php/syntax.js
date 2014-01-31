@@ -47,7 +47,7 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/shared/s
 				include: "orion.patterns"
 			}, {
 				begin: "#",
-				end: ".*",
+				end: "$",
 				name: "comment.line.number-sign.php",
 				patterns: [
 					{
