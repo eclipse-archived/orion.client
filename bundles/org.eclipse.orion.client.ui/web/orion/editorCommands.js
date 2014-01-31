@@ -420,9 +420,6 @@ define([
 					if (!editor.installed) {
 						return false;
 					}
-					if (self.editorSettings && !self.editorSettings().showBlame) {
-						return false;
-					}
 					return blamer.isVisible(self.serviceRegistry, self.inputManager);
 				},
 				callback: function(data) {

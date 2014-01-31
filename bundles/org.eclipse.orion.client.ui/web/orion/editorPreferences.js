@@ -29,8 +29,6 @@ define([], function() {
 		autoLoadVisible: true,
 		saveDiffs: true,
 		saveDiffsVisible: true,
-		showBlame: false,
-		showBlameVisible: true,
 		contentAssistAutoTrigger: true,
 		contentAssistAutoTriggerVisible: true,
 		showOccurrences: false,

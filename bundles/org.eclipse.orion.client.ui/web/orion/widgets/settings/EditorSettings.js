@@ -191,11 +191,6 @@ define("orion/widgets/settings/EditorSettings", //$NON-NLS-0$
 				contentAssistAutoTrigger: {
 					create: createBooleanProperty
 				}
-			},
-			sourceControl: {
-				showBlame: {
-					create: createBooleanProperty
-				}
 			}
 		}
 	};
