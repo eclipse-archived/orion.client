@@ -94,7 +94,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 				name: "comment.block.html",
 				patterns: [
 					{
-						match: "(\\b)(TODO)(\\b)(.*)",
+						match: "(\\b)(TODO)(\\b)(((?!-->).)*)",
 						name: "meta.annotation.task.todo",
 						captures: {
 							2: {name: "keyword.other.documentation.task"},
