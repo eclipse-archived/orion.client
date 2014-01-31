@@ -27,7 +27,11 @@ define([
 
 		this.anchor = document.createElement("ul");
 		this.anchor.classList.add("sideMenuList");
-		this.parentNode.appendChild(this.anchor);
+		if(this.parentNode){
+			this.parentNode.appendChild(this.anchor);
+		} else {
+			console.error("No sideMenu parent node");
+		}
 	}
 	
 	SideMenu.prototype.LOCAL_STORAGE_NAME = "sideMenuNavigation";
