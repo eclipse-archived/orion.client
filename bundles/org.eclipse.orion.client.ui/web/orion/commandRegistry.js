@@ -812,7 +812,10 @@ define([
 											if (created.menu.parentNode) {
 												created.menu.remove();
 												created.menuButton.remove();
-												created.extraDropdownButton.remove();
+												
+												if(created.extraDropdownButton){
+													created.extraDropdownButton.remove();
+												}
 											}
 											if (created.destroyButton && created.destroyButton.parentNode) {
 												created.destroyButton.parentNode.removeChild(created.destroyButton);
