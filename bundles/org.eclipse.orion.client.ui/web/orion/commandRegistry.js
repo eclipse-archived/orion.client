@@ -691,7 +691,7 @@ define([
 				return;
 			} 
 			if (contributions) {
-				this._render(this._contributionsByScopeId[scopeId], parent, items, handler, renderType || "button", userData, domNodeWrapperList); //$NON-NLS-0$
+				this._render(contributions, parent, items, handler, renderType || "button", userData, domNodeWrapperList); //$NON-NLS-0$
 				// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
 				this._checkForTrailingSeparator(parent, renderType, true);
 			}
@@ -725,6 +725,7 @@ define([
 		_render: function(contributions, parent, items, handler, renderType, userData, domNodeWrapperList) {
 			// sort the items
 			var sortedByPosition = contributions.sortedContributions;
+			
 			if (!sortedByPosition) {
 				sortedByPosition = [];
 				var pushedItem = false;
@@ -756,6 +757,7 @@ define([
 				}
 				
 				if (contribution.children && Object.getOwnPropertyNames(contribution.children).length > 0) {
+					
 					var childContributions = contribution.children;
 					var created;
 					if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
@@ -791,6 +793,7 @@ define([
 									// of a trailing separator in the menu first, and then decide if our menu is necessary
 									self._checkForTrailingSeparator(created.menu, "menu", true);  //$NON-NLS-0$
 									// now determine if we actually needed the menu or not
+									
 									if (created.menu.childNodes.length === 0) {
 										if (contribution.emptyGroupMessage) {
 											if (!created.menuButton.emptyGroupTooltip) {
@@ -805,8 +808,11 @@ define([
 											if(domNodeWrapperList){
 												mNavUtils.removeNavGrid(domNodeWrapperList, created.menuButton);
 											}
+											
 											if (created.menu.parentNode) {
-												created.menu.parentNode.removeChild(created.menu);
+												created.menu.remove();
+												created.menuButton.remove();
+												created.extraDropdownButton.remove();
 											}
 											if (created.destroyButton && created.destroyButton.parentNode) {
 												created.destroyButton.parentNode.removeChild(created.destroyButton);
@@ -1010,7 +1016,7 @@ define([
 				}
 			}
 			
-			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton};
+			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton, extraDropdownButton: created.extraDropdownButton};
 		},
 		
 		_generateMenuSeparator: function(dropdown) {
