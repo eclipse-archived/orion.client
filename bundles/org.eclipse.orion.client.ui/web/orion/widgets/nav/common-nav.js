@@ -386,7 +386,7 @@ define([
 			commandRegistry.registerSelectionService(this.contextMenuActionsScope, visible ? this.selection : null);
 			FileCommands.updateNavTools(this.registry, commandRegistry, this, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], treeRoot, true);
 			commandRegistry.destroy(this.toolsActionsScope);
-			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
+			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, this.editorInputManager.getFileMetadata(), this, "tool"); //$NON-NLS-0$
 			commandRegistry.destroy(this.additionalActionsScope);
 			commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
 			if (this._sidebarContextMenuNode) {
