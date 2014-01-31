@@ -682,6 +682,108 @@ define([
 				}
 			});
 		},
+		
+		/**
+		 * Find a token with a bogus offset
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
+		 */
+		test_findTokenBadOffset1: function() {
+			var text = "if(()) {};";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(-1, ast);
+					Assert.equal(token, null, "Should not have found a token for a negative offset");
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a token with a bogus offset
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
+		 */
+		test_findTokenBadOffset2: function() {
+			var text = "if(()) {};";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(null, ast);
+					Assert.equal(token, null, "Should not have found a token for a null offset");
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a token with a bogus offset
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
+		 */
+		test_findTokenBadOffset3: function() {
+			var text = "if(()) {};";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(undefined, ast);
+					Assert.equal(token, null, "Should not have found a token for an undefined offset");
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a node with a bogus offset
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
+		 */
+		test_findNodeBadOffset1: function() {
+			var text = "if(()) {};";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findNode(null, ast);
+					Assert.equal(token, null, "Should not have found a node for a null offset");
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a node with a bogus offset
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
+		 */
+		test_findNodeBadOffset2: function() {
+			var text = "if(()) {};";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findNode(-1, ast);
+					Assert.equal(token, null, "Should not have found a node for a negative offset");
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a node with a bogus offset
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427141
+		 */
+		test_findNodeBadOffset3: function() {
+			var text = "if(()) {};";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findNode(undefined, ast);
+					Assert.equal(token, null, "Should not have found a node for an undefined offset");
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
 	};
 	
 	return Tests;

@@ -71,7 +71,7 @@ define([
 		 */
 		findNode: function(offset, ast) {
 			var found = null;
-			if(ast) {
+			if(offset != null && offset > -1 && ast) {
 				Estraverse.traverse(ast, {
 					/**
 					 * start visiting an AST node
@@ -103,36 +103,35 @@ define([
 		 * @returns {Object} The AST token that starts at the given start offset
 		 */
 		findToken: function(offset, tokens) {
-			if(offset < 0) {
-				return null;
-			}
-			var min = 0,
-				max = tokens.length-1,
-				token, 
-				idx = 0;
-				token = tokens[0];
-			if(offset >= token.range[0] && offset < token.range[1]) {
-				return token;
-			}
-			token = tokens[max];
-			if(offset >= token.range[0] && offset < token.range[1]) {
-				return token;
-			}
-			token = null;
-			while(min <= max) {
-				idx = Math.floor((min + max) / 2);
-				token = tokens[idx];
-				if(offset < token.range[0]) {
-					max = idx-1;
-				}
-				else if(offset >= token.range[1]) {
-					min = idx+1;
-				}
-				else if(offset >= token.range[0] && offset < token.range[1]) {
+			if(offset != null && offset > -1 && tokens && tokens.length > 0) {
+				var min = 0,
+					max = tokens.length-1,
+					token, 
+					idx = 0;
+					token = tokens[0];
+				if(offset >= token.range[0] && offset < token.range[1]) {
 					return token;
 				}
-				if(min === max) {
-					return tokens[min];
+				token = tokens[max];
+				if(offset >= token.range[0] && offset < token.range[1]) {
+					return token;
+				}
+				token = null;
+				while(min <= max) {
+					idx = Math.floor((min + max) / 2);
+					token = tokens[idx];
+					if(offset < token.range[0]) {
+						max = idx-1;
+					}
+					else if(offset >= token.range[1]) {
+						min = idx+1;
+					}
+					else if(offset >= token.range[0] && offset < token.range[1]) {
+						return token;
+					}
+					if(min === max) {
+						return tokens[min];
+					}
 				}
 			}
 			return null;
