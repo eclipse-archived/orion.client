@@ -175,9 +175,9 @@ define([
 					this.projectClient.getProjectDeployTypes().then(function(deployTypes){
 						if(deployTypes && deployTypes.length>0){
 							if((!this.launchCommands || this.launchCommands.length ===0) && deployTypes.length === 1){
-								commandRegistry.addCommandGroup(additionalNavActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", "orion.project.deploy." + deployTypes[0]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+								commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", "orion.project.deploy." + deployTypes[0]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 							} else {
-								commandRegistry.addCommandGroup(additionalNavActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+								commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 							}
 						}
 						for(var i=0; i<deployTypes.length; i++){
