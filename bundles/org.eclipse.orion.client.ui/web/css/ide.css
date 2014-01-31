@@ -188,7 +188,7 @@ button::-moz-focus-inner {
 
 /* parameter labels */
 label.parameterInput{
-	color: whitesmoke;
+	color: #555;
 	white-space: nowrap;
 }
 
@@ -642,6 +642,8 @@ textarea.parameterInput {
 .treetable {
 	border-spacing: 0;
 	width:100%;
+	padding-left:10px;
+	padding-right:10px;
 }
 
 .secondaryColumn {
@@ -918,7 +920,7 @@ input {
 }
 
 .modifiedFileMarker{
-	color:white;
+	color:#333;
 	padding-left:5px;
 }
 
