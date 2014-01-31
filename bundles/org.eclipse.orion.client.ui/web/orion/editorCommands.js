@@ -452,6 +452,8 @@ define([
 		
 		_generateEditCommands: function(editor) {
 			var self = this;
+			
+			var toolbarId = this.toolbarId;
 
 			function getContentTypes(serviceRegistry) {
 				if (contentTypesCache) {
@@ -612,7 +614,7 @@ define([
 					// metadata, because we'll generate again once we know.
 					var metadata;
 					if ((metadata = inputManager.getFileMetadata())) {
-						var toolbar = lib.node("pageActions"); //$NON-NLS-0$
+						var toolbar = lib.node(toolbarId); //$NON-NLS-0$
 						if (toolbar) {	
 							self.commandService.destroy(toolbar);
 							self.commandService.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
