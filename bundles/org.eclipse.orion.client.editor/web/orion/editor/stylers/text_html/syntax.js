@@ -40,7 +40,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(?i)<script(?:\\s+language\\s*=\\s*(?:'javascript'|\"javascript\"))?\\s*>",
+				begin: "(?i)<script(?:\\s+language\\s*=\\s*(?:(['\"])javascript\\1))?\\s*>",
 				end: "(?i)</script>",
 				captures: {
 					0: {name: "entity.name.tag.html"}
@@ -52,7 +52,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(?i)<script(?:\\s+language\\s*=\\s*(?:'php'|\"php\"))?\\s*>",
+				begin: "(?i)<script(?:\\s+language\\s*=\\s*(?:(['\"])php\\1))?\\s*>",
 				end: "(?i)</script>",
 				captures: {
 					0: {name: "entity.name.tag.html"}

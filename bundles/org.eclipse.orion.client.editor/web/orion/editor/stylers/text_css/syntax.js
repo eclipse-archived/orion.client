@@ -69,13 +69,9 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/shared/syn
 				match: "#[0-9A-Fa-f]+\\b",
 				name: "constant.numeric.hex.css"
 			}, {
-				begin: "'[^'\\n]*\\\\\n", //$NON-NLS-0$
-				end: "(?:[^'\\n]*\\\\\\n)*[^'\\n]*'?", //$NON-NLS-0$
-				name: "string.quoted.single.css" //$NON-NLS-0$
-			}, {
-				begin: "\"[^\"\\n]*\\\\\n", //$NON-NLS-0$
-				end: "(?:[^\"\\n]*\\\\\\n)*[^\"\\n]*\"?", //$NON-NLS-0$
-				name: "string.quoted.double.css" //$NON-NLS-0$
+				begin: "(['\"])(?:\\\\.|[^\\\\\\1])*\\\\$", //$NON-NLS-0$
+				end: "^(?:$|(?:\\\\.|[^\\\\\\1])*(\\1|[^\\\\]$))", //$NON-NLS-0$
+				name: "string.quoted.multiline.css" //$NON-NLS-0$
 			}, {
 				/* override orion.patterns#comment_singleline */
 				id: "comment_singleline"

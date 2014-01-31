@@ -64,12 +64,8 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/share
 					}
 				]
 			}, {
-				begin: "'''",
-				end: "'''",
-				name: "string.quoted.triple.python"
-			}, {
-				begin: '"""',
-				end: '"""',
+				begin: "(['\"])\\1\\1",
+				end: "\\1\\1\\1",
 				name: "string.quoted.triple.python"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",

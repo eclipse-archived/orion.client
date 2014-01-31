@@ -109,6 +109,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		var result = captureReferenceRegex.exec(regexString);
 		while (result) {
 			regexString = regexString.replace(result[0], resolvedResult[result[1]] || "");
+			captureReferenceRegex.lastIndex = 0;
 			result = captureReferenceRegex.exec(regexString);
 		}
 		/* return an updated regex, remove the leading '/' and trailing /g */

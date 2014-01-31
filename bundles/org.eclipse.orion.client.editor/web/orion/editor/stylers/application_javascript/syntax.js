@@ -42,13 +42,9 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "keyword.control.js" //$NON-NLS-0$
 			}, {
-				begin: "'(?:\\\\.|[^\\\\'])*\\\\$", //$NON-NLS-0$
-				end: "^(?:$|(?:\\\\.|[^\\\\'])*('|[^\\\\]$))", //$NON-NLS-0$
-				name: "string.quoted.single.js" //$NON-NLS-0$
-			}, {
-				begin: '"(?:\\\\.|[^\\\\"])*\\\\$', //$NON-NLS-0$
-				end: '^(?:$|(?:\\\\.|[^\\\\"])*("|[^\\\\]$))', //$NON-NLS-0$
-				name: "string.quoted.double.js" //$NON-NLS-0$
+				begin: "(['\"])(?:\\\\.|[^\\\\\\1])*\\\\$", //$NON-NLS-0$
+				end: "^(?:$|(?:\\\\.|[^\\\\\\1])*(\\1|[^\\\\]$))", //$NON-NLS-0$
+				name: "string.quoted.multiline.js" //$NON-NLS-0$
 			}
 		]
 	});
