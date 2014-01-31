@@ -387,7 +387,9 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 	function getIdFromInfo(info) {
 		return info.id || info.name
 	}
-	
+
+	var DEFAULT_NAME = messages["UnnamedCommand"]; //$NON-NLS-0$
+	var DEFAULT_TOOLTIP = ""; //$NON-NLS-0$
 	// Turns an info object containing the service properties and the service (or reference) into Command options.
 	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry, contentTypesMap, /**boolean*/ createNavigateCommandCallback, /**optional function**/ validationItemConverter) {
 		
@@ -446,12 +448,14 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 			var callback = function(commandMessages) {
 				var name, tooltip;
 				if (commandMessages) {
-					name = (info.nameKey && commandMessages[info.nameKey]) || info.name;
-					tooltip = (info.tooltipKey && commandMessages[info.tooltipKey]) || info.tooltip;
+					var translatedName = info.nameKey && commandMessages[info.nameKey];
+					var translatedTooltip = info.tooltipKey && commandMessages[info.tooltipKey];
+					name = translatedName || info.name || DEFAULT_NAME;
+					tooltip = translatedTooltip || info.tooltip || DEFAULT_TOOLTIP;
 				} else {
-					// Failed to load nls bundle -- fallback to untranslated name or Key in worst case
-					name = info.name || info.nameKey;
-					tooltip = info.tooltip || info.tooltipKey;
+					// Failed to load nls bundle -- fallback to untranslated name or Key
+					name = info.name || info.nameKey || DEFAULT_NAME;
+					tooltip = info.tooltip || info.tooltipKey || DEFAULT_TOOLTIP;
 				}
 				var commandOptions = {
 					name: name,
