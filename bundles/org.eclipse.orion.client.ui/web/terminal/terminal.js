@@ -14,12 +14,12 @@
 
 define(["require", "orion/browserCompatibility", "orion/bootstrap", "orion/xhr", "orion/Deferred",
 	"orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
-	"orion/status", "orion/progress", "orion/operationsClient", "dockerTerm/term"],
+	"orion/status", "orion/progress", "orion/operationsClient", "terminal/term"],
 
 function(require, mBrowserCompatibility, mBootstrap, xhr, Deferred, mCommandRegistry, mFileClient,
 mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal) {
 
-	var dockerTerminal = {
+	var orionTerminal = {
 		connect: function() {
 			return xhr("POST", "/docker/connect", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
@@ -54,9 +54,9 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		new mProgress.ProgressService(serviceRegistry, operationsClient, commandRegistry);
-		mGlobalCommands.generateBanner("orion-dockerTerminalPage", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-terminalPage", serviceRegistry, commandRegistry, preferences, searcher); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({
-			task: "Docker Terminal",
+			task: "Orion Terminal",
 			serviceRegistry: serviceRegistry,
 			commandService: commandRegistry
 		});
@@ -65,7 +65,7 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 		var websocket;
 
 		var connect = function() {
-			dockerTerminal.connect().then(function(result) {
+			orionTerminal.connect().then(function(result) {
 				var jsonObject = JSON.parse(result.responseText);
 				var attachWsURI = jsonObject.attachWsURI;
 				term.reset();
@@ -115,7 +115,7 @@ mSearchClient, mGlobalCommands, mStatus, mProgress, mOperationsClient, terminal)
 		};
 
 		var disconnect = function() {
-			dockerTerminal.disconnect().then(function(result) {
+			orionTerminal.disconnect().then(function(result) {
 				websocket.close();
 				term.reset();
 			}, function(error) {
