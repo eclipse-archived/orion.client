@@ -17,7 +17,7 @@ define({
 	"switchEditor": "Switch Editor", //$NON-NLS-1$ //$NON-NLS-0$
 	"Fetching": "Fetching: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"confirmUnsavedChanges": "There are unsaved changes.  Do you still want to navigate away?", //$NON-NLS-1$ //$NON-NLS-0$
-	"searchFiles": "Search Files", //$NON-NLS-1$ //$NON-NLS-0$
+	"searchFiles": "Search Files...", //$NON-NLS-1$ //$NON-NLS-0$
 	"searchTerm": "Enter search term:", //$NON-NLS-1$ //$NON-NLS-0$
 	"unsavedChanges": "There are unsaved changes.", //$NON-NLS-1$ //$NON-NLS-0$
 	"Save": "Save", //$NON-NLS-1$ //$NON-NLS-0$
@@ -30,12 +30,12 @@ define({
 	"Reading": "Reading ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
-	"gotoLine": "Go to Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"gotoLine": "Go to Line...", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLineTooltip": "Go to specified line number", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLinePrompt": "Go to line:", //$NON-NLS-1$ //$NON-NLS-0$
 	"Undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
 	"Redo": "Redo", //$NON-NLS-1$ //$NON-NLS-0$
-	"Find": "Find", //$NON-NLS-1$ //$NON-NLS-0$
+	"Find": "Find...", //$NON-NLS-1$ //$NON-NLS-0$
 	"noResponse": "No response from server.  Check your internet connection and try again.", //$NON-NLS-1$ //$NON-NLS-0$
 	"savingFile": "Saving file ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"running": "Running ${0}", //$NON-NLS-1$ //$NON-NLS-0$
