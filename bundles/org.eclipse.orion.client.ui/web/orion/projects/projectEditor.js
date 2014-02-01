@@ -527,7 +527,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			});
 
 			
-//			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandRegistry, this, this.fileClient, this.projectClient);
+//			mProjectCommands.createDependencyCommands(this.serviceRegistry, this.commandRegistry, this.fileClient, this.projectClient);
 //			var dependencyTypes = this.projectClient.getProjectHandlerTypes();
 			this.commandRegistry.registerCommandContribution(this.dependencyActions, "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandRegistry.registerCommandContribution(this.dependencyActions, "orion.project.dependency.disconnect", 2); //$NON-NLS-0$

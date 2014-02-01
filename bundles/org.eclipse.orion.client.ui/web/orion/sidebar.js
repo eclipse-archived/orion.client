@@ -36,6 +36,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		this.selection = params.selection;
 		this.serviceRegistry = params.serviceRegistry;
 		this.sidebarNavInputManager = params.sidebarNavInputManager;
+		this.menuBar = params.menuBar;
 		this.viewModes = {};
 		this.activeViewMode = null;
 		this.switcherScope = params.switcherScope;
@@ -81,7 +82,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				choiceCallback: this.viewModeMenuCallback.bind(this)
 			});
 			commandRegistry.addCommand(changeViewModeCommand);
-			commandRegistry.registerCommandContribution(switcherNode.id, "orion.sidebar.viewmode", 2, "orion.menuBarViewGroup"); //$NON-NLS-0$
+			commandRegistry.registerCommandContribution(switcherNode.id, "orion.sidebar.viewmode", 2, "orion.menuBarViewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 
 			this.addViewMode("nav", new MiniNavViewMode({ //$NON-NLS-0$
 				commandRegistry: commandRegistry,
@@ -91,7 +92,8 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				parentNode: parentNode,
 				sidebarNavInputManager: this.sidebarNavInputManager,
 				serviceRegistry: serviceRegistry,
-				toolbarNode: toolbarNode
+				toolbarNode: toolbarNode,
+				sidebar: this
 			}));
 			
 			if (this.serviceRegistry.getServiceReferences("orion.projects").length > 0) { //$NON-NLS-0$

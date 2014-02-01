@@ -50,6 +50,7 @@ define([
 		this.commandRegistry = params.commandRegistry;
 		this.editorInputManager = params.editorInputManager;
 		this.progressService = params.progressService;
+		this.sidebar = params.sidebar;
 		var sidebarNavInputManager = this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 
@@ -259,7 +260,7 @@ define([
 		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
-			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
+			var commandRegistry = this.commandRegistry, serviceRegistry = this.registry;
 			var fileActionsScope = this.fileActionsScope;
 			var editActionsScope = this.editActionsScope;
 			var viewActionsScope = this.viewActionsScope;
@@ -333,62 +334,41 @@ define([
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.downloadFile", 1, "orion.commonNavContextMenuEditGroup/orion.ExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.exportSFTPCommand", 2, "orion.commonNavContextMenuEditGroup/orion.ExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
-			return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, viewActionsScope, 3, "orion.menuBarViewGroup", true).then(function() { //$NON-NLS-0$
-				// Context menu OpenWith and Extensions group
-				var openWithCommands = ExtensionCommands.getOpenWithCommands(commandRegistry);
-				openWithCommands.forEach(function(command){
-					commandRegistry.registerCommandContribution(contextMenuActionsScope, command.id, 1, "orion.commonNavContextMenuEditGroup/orion.OpenWith"); //$NON-NLS-0$
-				});
-								
-				// Context menu Extensions group
-				var fileCommandIds = ExtensionCommands.getFileCommandIds();
-				fileCommandIds.forEach(function(commandId){
-					commandRegistry.registerCommandContribution(contextMenuActionsScope, commandId, 1, "orion.commonNavContextMenuEditGroup/orion.Extensions"); //$NON-NLS-0$
-				});
-	
-				if (serviceRegistry.getServiceReferences("orion.projects").length > 0) { //$NON-NLS-0$
-					commandRegistry.addCommandGroup(fileActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.commonNavContextMenuEditGroup/orion.New"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(viewActionsScope, "eclipse.openWith", 1000, messages["OpenWith"], "orion.menuBarViewGroup", null, null, null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(viewActionsScope, "eclipse.fileCommandExtensions", 1000, messages["Extensions"], "orion.menuBarViewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+							
+			ExtensionCommands.getOpenWithCommands(commandRegistry).forEach(function(command){
+				commandRegistry.registerCommandContribution(viewActionsScope, command.id, 1, "orion.menuBarViewGroup/eclipse.openWith"); //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(contextMenuActionsScope, command.id, 1, "orion.commonNavContextMenuEditGroup/orion.OpenWith"); //$NON-NLS-0$
+			});
+			
+			//TODO getFileCommands should return commands
+			ExtensionCommands.getFileCommandIds().forEach(function(commandId){
+				commandRegistry.registerCommandContribution(viewActionsScope, commandId, 1, "orion.menuBarViewGroup/eclipse.fileCommandExtensions"); //$NON-NLS-0$
+				commandRegistry.registerCommandContribution(contextMenuActionsScope, commandId, 1, "orion.commonNavContextMenuEditGroup/orion.Extensions"); //$NON-NLS-0$
+			});
 
-					commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.basic", 1, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.project.create.basic", 1, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.fromfile", 2, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.project.create.fromfile", 2, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					// TODO: comment out create project from an SFTP site for 5.0 M1
-					commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.sftp", 3, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.project.create.sftp", 3, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					
-					var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
-					var dependencyTypesDef = new Deferred();
-					projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
-						for(var i=0; i<dependencyTypes.length; i++){
-							commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.createproject." + dependencyTypes[i], i+4, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-							commandRegistry.registerCommandContribution(contextMenuActionsScope, "orion.project.createproject." + dependencyTypes[i], i+4, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-						}
-						
-						ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, projectClient, dependencyTypes).then(dependencyTypesDef.resolve, dependencyTypesDef.resolve);
-					}.bind(this), dependencyTypesDef.resolve);
-	
-					commandRegistry.registerCommandContribution(editActionsScope, "orion.project.initProject", 0, "orion.menuBarEditGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-	
-					return dependencyTypesDef;
-				}
-			}.bind(this)); //$NON-NLS-0$
+			if (serviceRegistry.getServiceReferences("orion.projects").length > 0) { //$NON-NLS-0$
+				commandRegistry.addCommandGroup(fileActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+				commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.commonNavContextMenuEditGroup/orion.New"); //$NON-NLS-1$ //$NON-NLS-0$
+
+				var position = 0;
+				ProjectCommands.getCreateProjectCommands(commandRegistry).forEach(function(command){
+					commandRegistry.registerCommandContribution(fileActionsScope, command.id, position, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(contextMenuActionsScope, command.id, position, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-0$
+					position++;
+				});
+
+				commandRegistry.registerCommandContribution(editActionsScope, "orion.project.initProject", 0, "orion.menuBarEditGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			return new Deferred().resolve();
 		},
 		updateCommands: function(selections) {
 			var visible = this.isCommandsVisible();
 			this.createActionSections();
-			var treeRoot = this.treeRoot, commandRegistry = this.commandRegistry;
-			commandRegistry.registerSelectionService(this.fileActionsScope, visible ? this.selection : null);
-			commandRegistry.registerSelectionService(this.editActionsScope, visible ? this.selection : null);
-			commandRegistry.registerSelectionService(this.viewActionsScope, visible ? this.selection : null);
+			var commandRegistry = this.commandRegistry;
+			this.sidebar.menuBar.updateCommands(this);
 			commandRegistry.registerSelectionService(this.contextMenuActionsScope, visible ? this.selection : null);
-			FileCommands.updateNavTools(this.registry, commandRegistry, this, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], treeRoot, true);
-			commandRegistry.destroy(this.toolsActionsScope);
-			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, this.editorInputManager.getFileMetadata(), this, "tool"); //$NON-NLS-0$
-			commandRegistry.destroy(this.additionalActionsScope);
-			commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, this.treeRoot, this, "tool"); //$NON-NLS-0$
 			if (this._sidebarContextMenuNode) {
 				this._populateContextMenu(this._sidebarContextMenuNode);
 			}

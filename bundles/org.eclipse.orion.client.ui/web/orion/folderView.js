@@ -16,8 +16,6 @@ define([
 	'orion/explorers/navigatorRenderer',
 	'orion/selection',
 	'orion/fileCommands',
-	'orion/extensionCommands',
-	'orion/keyBinding',
 	'orion/markdownView', 
 	'orion/projects/projectEditor',
 	'orion/PageUtil',
@@ -27,10 +25,9 @@ define([
 	'orion/Deferred',
 	'orion/projects/projectView',
 	'orion/section'
-], function(messages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, Selection, FileCommands, ExtensionCommands, mKeyBinding, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, Deferred, mProjectView, mSection) {
+], function(messages, mGlobalCommands, mExplorerTable, mNavigatorRenderer, Selection, FileCommands, mMarkdownView, mProjectEditor, PageUtil, URITemplate, lib, objects, Deferred, mProjectView, mSection) {
 	
 	var FileExplorer = mExplorerTable.FileExplorer;
-	var KeyBinding = mKeyBinding.KeyBinding;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
 	
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
@@ -53,9 +50,8 @@ define([
 			folderNode.classList.add("targetSelector"); //$NON-NLS-0$
 			folderNode.classList.remove("navlinkonpage"); //$NON-NLS-0$
 			if (this.explorer.readonly && this.explorer.clickHandler) { //$NON-NLS-0$
-				folderNode.href = "javascript:void(0)";
-				folderNode.addEventListener("click", function(){this.explorer.clickHandler(folder.Location);}.bind(this)
-				, false);
+				folderNode.href = "javascript:void(0)"; //$NON-NLS-0$
+				folderNode.addEventListener("click", function(){this.explorer.clickHandler(folder.Location);}.bind(this), false); //$NON-NLS-0$
 			}
 			return folderNode;
 		},
@@ -66,9 +62,8 @@ define([
 			mNavigatorRenderer.NavigatorRenderer.prototype.updateFileNode.call(this, file, fileNode, isImage);
 			if (this.explorer.readonly && fileNode.tagName === "A") { //$NON-NLS-0$
 				if(this.explorer.clickHandler){
-					fileNode.href = "javascript:void(0)";
-					fileNode.addEventListener("click", function(){this.explorer.clickHandler(file.Location);}.bind(this)
-					, false);
+					fileNode.href = "javascript:void(0)"; //$NON-NLS-0$
+					fileNode.addEventListener("click", function(){this.explorer.clickHandler(file.Location);}.bind(this), false); //$NON-NLS-0$
 				} else {
 					fileNode.href = uriTemplate.expand({resource: file.Location});
 				}
@@ -120,7 +115,7 @@ define([
 			}, explorer, options.commandRegistry, options.contentTypeRegistry);
 		};
 		FileExplorer.apply(this, arguments);
-		this.commandsId = ".folderNav"; //$NON-NLS-0$
+		this.menuBar = options.menuBar;
 		this.serviceRegistry = options.serviceRegistry;
 		this.fileClient = options.fileClient;
 		this.commandRegistry = options.commandRegistry;
@@ -134,7 +129,6 @@ define([
 		this.fileActionsScope = "fileActions"; //$NON-NLS-0$
 		this.editActionsScope = "editActions"; //$NON-NLS-0$
 		this.viewActionsScope = "viewActions"; //$NON-NLS-0$
-//		this.actionsSections = [this.fileActionsScope, this.editActionsScope, this.viewActionsScope];
 	}
 	FolderNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(FolderNavExplorer.prototype, /** @lends orion.FolderNavExplorer.prototype */ {
@@ -146,6 +140,9 @@ define([
 			}
 		},
 		isCommandsVisible: function() {
+			if (!this.selection) {
+				return false;
+			}
 			var mainSplitter = mGlobalCommands.getMainSplitter();
 			if (mainSplitter) {
 				return mainSplitter.splitter.isClosed();
@@ -154,68 +151,11 @@ define([
 		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
-			var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.serviceRegistry;
-			var fileActionsScope = this.fileActionsScope;
-			var editActionsScope = this.editActionsScope;
-			var viewActionsScope = this.viewActionsScope;
-			
-			commandRegistry.addCommandGroup(fileActionsScope, "orion.menuBarFileGroup", 1000, messages["File"], null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(editActionsScope, "orion.menuBarEditGroup", 100, messages["Edit"], null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(viewActionsScope, "orion.menuBarViewGroup", 100, messages["View"], null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$	
-			
-			commandRegistry.addCommandGroup(fileActionsScope, "orion.newContentGroup", 0, messages["New"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(fileActionsScope, "orion.importGroup", 100, messages["Import"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(fileActionsScope, "orion.exportGroup", 1001, messages["Export"], "orion.menuBarFileGroup", null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			
-			var parent = lib.node(this.parentId);
-			var renameBinding = new KeyBinding(113); // F2
-			var delBinding = new KeyBinding(46); // Delete
-			var cutBinding = new KeyBinding('x', true); /* Ctrl+X */ //$NON-NLS-0$
-			var copySelections = new KeyBinding('c', true); /* Ctrl+C */ //$NON-NLS-0$
-			var pasteSelections = new KeyBinding('v', true); /* Ctrl+V */ //$NON-NLS-0$
-			pasteSelections.domScope = copySelections.domScope = cutBinding.domScope = delBinding.domScope = renameBinding.domScope = parent.id; //$NON-NLS-0$
-			pasteSelections.scopeName = copySelections.scopeName = cutBinding.scopeName = delBinding.scopeName = renameBinding.scopeName = messages.FolderNavigator; //$NON-NLS-0$
-
-			// New actions
-			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.newFile" + this.commandsId, 1, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.newFolder" + this.commandsId, 2, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default", false, null/*, new mCommandRegistry.URLBinding("newFolder", "name")*/); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(fileActionsScope, "orion.new.project" + this.commandsId, 3, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(fileActionsScope, "orion.new.linkProject" + this.commandsId, 4, "orion.menuBarFileGroup/orion.newContentGroup/orion.new.default"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-			// Import actions
-			commandRegistry.registerCommandContribution(fileActionsScope, "orion.import" + this.commandsId, 1, "orion.menuBarFileGroup/orion.importGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(fileActionsScope, "orion.importZipURL" + this.commandsId, 2, "orion.menuBarFileGroup/orion.importGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(fileActionsScope, "orion.importSFTP" + this.commandsId, 3, "orion.menuBarFileGroup/orion.importGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-
-			// Export actions
-			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.downloadFile" + this.commandsId, 1, "orion.menuBarFileGroup/orion.exportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(fileActionsScope, "eclipse.exportSFTPCommand" + this.commandsId, 2, "orion.menuBarFileGroup/orion.exportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-
-			// Edit actions
-			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.renameResource" + this.commandsId, 1, "orion.menuBarEditGroup/orion.renameGroup", false, renameBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.cut" + this.commandsId, 2, "orion.menuBarEditGroup/orion.clipboardGroup", false, cutBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.copySelections" + this.commandsId, 3, "orion.menuBarEditGroup/orion.clipboardGroup", false, copySelections); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.pasteSelections" + this.commandsId, 4, "orion.menuBarEditGroup/orion.clipboardGroup", false, pasteSelections); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.deleteFile" + this.commandsId, 5, "orion.menuBarEditGroup/orion.deleteGroup", false, delBinding); //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWith" + this.commandsId, 6, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.registerCommandContribution(editActionsScope, "eclipse.compareWithEachOther" + this.commandsId, 7, "orion.menuBarEditGroup/orion.compareGroup");  //$NON-NLS-1$ //$NON-NLS-0$
-
-			if(serviceRegistry) {
-				FileCommands.createFileCommands(serviceRegistry, commandRegistry, this, fileClient);
-			}
-			if (serviceRegistry) {
-				return ExtensionCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandRegistry, viewActionsScope, 3, "orion.menuBarViewGroup", true); //$NON-NLS-0$
-			}
 			return new Deferred().resolve();
 		},
 		updateCommands: function(selections) {
-			var commandRegistry = this.commandRegistry;
-			commandRegistry.registerSelectionService(this.fileActionsScope, this.selection);
-			commandRegistry.registerSelectionService(this.editActionsScope, this.selection);
-			commandRegistry.registerSelectionService(this.viewActionsScope, this.selection);
-
-			if(this.serviceRegistry) {
-				FileCommands.updateNavTools(this.serviceRegistry, this.commandRegistry, this, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], this.treeRoot, true);
+			if (this.menuBar) {
+				this.menuBar.updateCommands(this);
 			}
 		}
 	});
@@ -229,14 +169,15 @@ define([
 	function FolderView(options) {
 		this._parent = options.parent;
 		this._metadata = options.metadata;
+		this.menuBar = options.menuBar;
 		this.fileClient = options.fileService;
 		this.progress = options.progressService;
 		this.serviceRegistry = options.serviceRegistry;
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.preferences = options.preferences;
-		this.readonly = typeof options.readonly === 'undefined' ? false : options.readonly;
-		this.showProjectView = typeof options.showProjectView === 'undefined' ? true : options.showProjectView;
+		this.readonly = options.readonly === undefined ? false : options.readonly;
+		this.showProjectView = options.showProjectView === undefined ? true : options.showProjectView;
 		this.showFolderNav = true;
 		this.readmeHeaderClass = options.readmeHeaderClass;
 		this.editorView = options.editorView;
@@ -248,7 +189,7 @@ define([
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
 		_init: function(){
-			if(this.serviceRegistry && this.serviceRegistry.getServiceReferences("orion.projects").length===0){
+			if(this.serviceRegistry && this.serviceRegistry.getServiceReferences("orion.projects").length===0){ //$NON-NLS-0$
 				this.showProjectView = false;
 			}
 			this.markdownView = new mMarkdownView.MarkdownView({
@@ -327,17 +268,17 @@ define([
 			
 			function renderSections(sectionsOrder){
 				sectionsOrder.forEach(function(sectionName){
-					if(sectionName === "project"){
+					if(sectionName === "project"){ //$NON-NLS-0$
 						if(projectJson && this.showProjectView){
 							div = document.createElement("div"); //$NON-NLS-0$
 							this.projectEditor.displayContents(div, this._metadata);
 							this._node.appendChild(div);
 						}
-					} else if(sectionName === "folderNav") {
+					} else if(sectionName === "folderNav") { //$NON-NLS-0$
 						if (this.showFolderNav) {
 							var navNode = document.createElement("div"); //$NON-NLS-0$
 							navNode.id = "folderNavNode"; //$NON-NLS-0$
-							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: !this.readonly});
+							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: !this.readonly}); //$NON-NLS-0$
 							if(this.editorView) {//To embed an orion editor in the section
 								foldersSection.setContent(this.editorView.getParent());
 								this.editorView.create();
@@ -357,6 +298,7 @@ define([
 									parentId: navNode,
 									view: this,
 									readonly: this.readonly,
+									menuBar: this.menuBar,
 									breadCrumbMaker: this.breadCrumbMaker,
 									clickHandler: this.clickHandler,
 									serviceRegistry: this.serviceRegistry,
@@ -378,7 +320,7 @@ define([
 								}
 							}
 						}
-					} else if(sectionName === "readme"){
+					} else if(sectionName === "readme"){ //$NON-NLS-0$
 						if (readmeMd) {
 							div = document.createElement("div"); //$NON-NLS-0$
 							this.markdownView.displayInFrame(div, readmeMd, this.readmeHeaderClass);
@@ -388,13 +330,13 @@ define([
 				}.bind(this));
 			}
 			
-			var sectionsOrder = ["project", "folderNav", "readme"];
+			var sectionsOrder = ["project", "folderNav", "readme"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			if(this.editorView) {
 				renderSections.apply(this, [sectionsOrder]);
 			} else {
 				if(this.preferences) {
-					this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
-						sectionsOrder = sectionsOrderPrefs.get("folderView") || sectionsOrder;
+					this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){ //$NON-NLS-0$
+						sectionsOrder = sectionsOrderPrefs.get("folderView") || sectionsOrder; //$NON-NLS-0$
 						renderSections.apply(this, [sectionsOrder]);
 					}.bind(this), function(error){
 						renderSections.apply(this, [sectionsOrder]);

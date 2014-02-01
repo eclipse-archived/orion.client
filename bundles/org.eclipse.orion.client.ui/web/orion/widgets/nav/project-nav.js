@@ -95,7 +95,6 @@ define([
 	 */
 	function ProjectNavExplorer(params) {
 		this.projectClient = params.projectClient;
-		this.sidebar = params.sidebar;
 		CommonNavExplorer.apply(this, arguments);
 		
 		var _self = this;
@@ -160,38 +159,30 @@ define([
 		},
 		registerCommands: function() {
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
-				var commandRegistry = this.commandRegistry, fileClient = this.fileClient, serviceRegistry = this.registry;
+				var commandRegistry = this.commandRegistry;
 				var fileActionsScope = this.fileActionsScope;
 				var additionalActionsScope = this.additionalActionsScope;
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.connect", 1); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.disconnect", 2); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.readme", 5, "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.addFolder", 6, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
-				var projectCommandsDef = new Deferred();
-				this.projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
-					for(var i=0; i<dependencyTypes.length; i++){
-						commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.adddependency." + dependencyTypes[i], i+7, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectDependencies"); //$NON-NLS-1$ //$NON-NLS-0$
+				
+				var position = 6;
+				ProjectCommands.getAddDependencyCommands(commandRegistry).forEach(function(command){
+					commandRegistry.registerCommandContribution(fileActionsScope, command.id, position++, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectDependencies"); //$NON-NLS-0$
+				});
+
+				var deployCommands = ProjectCommands.getDeployProjectCommands(commandRegistry);
+				if(deployCommands && deployCommands.length>0){
+					if((!this.launchCommands || this.launchCommands.length ===0) && deployCommands.length === 1){
+						commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", deployCommands[0].id); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+					} else {
+						commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 					}
-					this.projectClient.getProjectDeployTypes().then(function(deployTypes){
-						if(deployTypes && deployTypes.length>0){
-							if((!this.launchCommands || this.launchCommands.length ===0) && deployTypes.length === 1){
-								commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", "orion.project.deploy." + deployTypes[0]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
-							} else {
-								commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
-							}
-						}
-						for(var i=0; i<deployTypes.length; i++){
-							commandRegistry.registerCommandContribution(additionalActionsScope, "orion.project.deploy." + deployTypes[i], i+100, "orion.deployNavGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-						}
-						
-						ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient, dependencyTypes, deployTypes).then(projectCommandsDef.resolve, projectCommandsDef.resolve);
-					}.bind(this), function(error){
-						console.error(error);
-						ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, this, fileClient, this.projectClient, dependencyTypes).then(projectCommandsDef.resolve, projectCommandsDef.resolve);
-						projectCommandsDef.resolve();
+					position = 100;
+					deployCommands.forEach(function(command){
+						commandRegistry.registerCommandContribution(additionalActionsScope, command.id, position++, "orion.deployNavGroup"); //$NON-NLS-0$
 					});
-				}.bind(this), projectCommandsDef.resolve);
-				return projectCommandsDef;
+				}
 			}.bind(this));
 		},
 		updateCommands: function(selections){
@@ -404,6 +395,7 @@ define([
 				commandRegistry: this.commandRegistry,
 				fileClient: this.fileClient,
 				editorInputManager: this.editorInputManager,
+				sidebar: this.sidebar,
 				sidebarNavInputManager: this.sidebarNavInputManager,
 				parentId: this.parentNode.id,
 				projectClient: this.projectClient,

@@ -12,15 +12,12 @@
 /*global window define orion XMLHttpRequest confirm*/
 /*jslint sub:true*/
 define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
- 'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/ImportDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog', 'orion/editorCommands', 'orion/EventTarget',
+ 'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/ImportDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog', 
+ 'orion/fileCommands', 'orion/editorCommands', 'orion/EventTarget',
  'orion/URITemplate', 'orion/PageLinks', 'orion/objects'],
-	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog, ProjectOptionalParametersDialog, mEditorCommands, EventTarget,
+	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog, ProjectOptionalParametersDialog, FileCommands, mEditorCommands, EventTarget,
 		URITemplate, PageLinks, objects){
 		var projectCommandUtils = {};
-		
-		var selectionListenerAdded = false;
-		
-		var lastItemLoaded = {Location: null};
 		
 		var progress;
 		
@@ -194,7 +191,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		return sharedDependencyDispatcher;
 	};
 			
-	function initDependency(projectClient, explorer, commandService, errorHandler, handler, dependency, project, data, params){
+	function initDependency(projectClient, commandService, errorHandler, handler, dependency, project, data, params){
 			var actionComment;
 			if(handler.actionComment){
 				if(params){
@@ -272,7 +269,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		})(launchConfigurations[i]);
 		}
 	},
-	projectCommandUtils.createDependencyCommands = function(serviceRegistry, commandService, explorer, fileClient, projectClient, dependencyTypes) {
+	projectCommandUtils.createDependencyCommands = function(serviceRegistry, commandService, fileClient, projectClient, dependencyTypes) {
 		progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		
 		function errorHandler(error) {
@@ -298,10 +295,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				var projectHandler = projectClient.getProjectHandler(item.Dependency.Type);
 				if(projectHandler.then){
 					projectHandler.then(function(projectHandler){
-						initDependency(projectClient, explorer, commandService, errorHandler,projectHandler, item.Dependency, item.Project, data, params);
+						initDependency(projectClient, commandService, errorHandler,projectHandler, item.Dependency, item.Project, data, params);
 					});
 				} else {
-					initDependency(projectClient, explorer, commandService, errorHandler,projectHandler, item.Dependency, item.Project, data, params);
+					initDependency(projectClient, commandService, errorHandler,projectHandler, item.Dependency, item.Project, data, params);
 				}
 				
 			},
@@ -536,22 +533,79 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		});
 		commandService.addCommand(deployLaunchConfigurationCommands);
 	};
+	
+	/**
+	 * Gets any add project dependency commands in the given <code>commandRegistry</code>. If {@link #createProjectCommands}, has not been called,
+	 * this returns an empty array.
+	 * @name orion.projectCommands.getAddDependencyCommands
+	 * @function
+	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to consult.
+	 * @returns {orion.commands.Command[]} All the add project dependency commands added to the given <code>commandRegistry</code>.
+	 */
+	projectCommandUtils.getAddDependencyCommands = function(commandRegistry) {
+		var commands = [];
+		for (var commandId in commandRegistry._commandList) {
+			var command = commandRegistry._commandList[commandId];
+			if (command.isAddDependency) {
+				commands.push(command);
+			}
+		}
+		return commands;
+	};
+	
+	/**
+	 * Gets any create project commands in the given <code>commandRegistry</code>. If {@link #createProjectCommands}, has not been called,
+	 * this returns an empty array.
+	 * @name orion.projectCommands.getDeployProjectCommands
+	 * @function
+	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to consult.
+	 * @returns {orion.commands.Command[]} All the create project commands added to the given <code>commandRegistry</code>.
+	 */
+	projectCommandUtils.getCreateProjectCommands = function(commandRegistry) {
+		var commands = [];
+		for (var commandId in commandRegistry._commandList) {
+			var command = commandRegistry._commandList[commandId];
+			if (command.isCreateProject) {
+				commands.push(command);
+			}
+		}
+		return commands;
+	};
+	
+	/**
+	 * Gets any deploy project commands in the given <code>commandRegistry</code>. If {@link #createProjectCommands}, has not been called,
+	 * this returns an empty array.
+	 * @name orion.projectCommands.getDeployProjectCommands
+	 * @function
+	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to consult.
+	 * @returns {orion.commands.Command[]} All the deploy project commands added to the given <code>commandRegistry</code>.
+	 */
+	projectCommandUtils.getDeployProjectCommands = function(commandRegistry) {
+		var commands = [];
+		for (var commandId in commandRegistry._commandList) {
+			var command = commandRegistry._commandList[commandId];
+			if (command.isDeployProject) {
+				commands.push(command);
+			}
+		}
+		return commands;
+	};
+	
+	var explorer;
+	projectCommandUtils.setExplorer = function(theExplorer) {
+		explorer = theExplorer;
+	};
 		
 	/**
 	 * Creates the commands related to file management.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use when creating commands
 	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to get commands from
-	 * @param {orion.explorer.FileExplorer} explorer The explorer view to add commands to, and to update when model items change.
-	 * To broadcast model change nodifications, this explorer must have a <code>modelEventDispatcher</code> field.
-	 * @param {orion.EventTarget} [explorer.modelEventDispatcher] If supplied, this dispatcher will be invoked to dispatch events
-	 * describing model changes that are performed by file commands.
 	 * @param {orion.fileClient.FileClient} fileClient The file system client that the commands should use
-	 * @name orion.fileCommands#createFileCommands
+	 * @name orion.projectCommands#createFileCommands
 	 * @function
 	 */
-	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, explorer, fileClient, projectClient, dependencyTypes, deploymentTypes) {
+	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, fileClient, projectClient, dependencyTypes, deploymentTypes) {
 		progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-		var that = this;
 		function errorHandler(error) {
 			if (progress) {
 				progress.setProgressResult(error);
@@ -562,20 +616,16 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		
 				
 		function dispatchNewProject(workspace, project){
-			var dispatcher = explorer.modelEventDispatcher;
-			if (dispatcher && typeof dispatcher.dispatchEvent === "function") { //$NON-NLS-0$
-				if(project.ContentLocation){
-					fileClient.read(project.ContentLocation, true).then(function(folder){
-						dispatcher.dispatchEvent( { type: "create", parent: workspace, newValue: folder});
-					},
-					function(){
-						dispatcher.dispatchEvent( { type: "create", parent: workspace, newValue: null});					
-					});
-				} else {
-					dispatcher.dispatchEvent( { type: "create", parent: workspace, newValue: null});
-				}
+			var dispatcher = FileCommands.getModelEventDispatcher();
+			if(project.ContentLocation){
+				fileClient.read(project.ContentLocation, true).then(function(folder){
+					dispatcher.dispatchEvent( { type: "create", parent: workspace, newValue: folder});
+				},
+				function(){
+					dispatcher.dispatchEvent( { type: "create", parent: workspace, newValue: null});					
+				});
 			} else {
-				explorer.changedItem(workspace, true);
+				dispatcher.dispatchEvent( { type: "create", parent: workspace, newValue: null});
 			}
 		}
 		
@@ -651,12 +701,13 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				
 			},
 			visibleWhen: function(item) {
-				if (!explorer.isCommandsVisible()) {
+				if (!explorer || !explorer.isCommandsVisible()) {
 					return false;
 				}
 				return item.type==="Project" || explorer.treeRoot.type==="Project";
 			}
 		});
+		addFolderCommand.isAddDependency = true;
 		commandService.addCommand(addFolderCommand);
 		
 		var initProjectCommand = new mCommands.Command({
@@ -664,7 +715,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			tooltip: "Convert this folder into a project",
 			id: "orion.project.initProject", //$NON-NLS-0$
 			visibleWhen: function(item) {
-				if (!explorer.isCommandsVisible()) {
+				if (!explorer || !explorer.isCommandsVisible()) {
 					return false;
 				}
 				return true;
@@ -772,13 +823,13 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 									}
 								}, errorHandler);
 							} else {
-								initDependency(projectClient, explorer, commandService, errorHandler,handler, {}, item, data, params);
+								initDependency(projectClient, commandService, errorHandler,handler, {}, item, data, params);
 							}
 						});
 	
 					},
 					visibleWhen: function(item) {
-						if (!explorer.isCommandsVisible()) {
+						if (!explorer || !explorer.isCommandsVisible()) {
 							return false;
 						}
 						return item.type==="Project" || explorer.treeRoot.type==="Project";
@@ -788,6 +839,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				commandParams.parameters = getCommandParameters(handler.addParameters, handler.optionalParameters);				
 				
 				var command = new mCommands.Command(commandParams);
+				command.isAddDependency = true;
 				commandService.addCommand(command);
 			});
 		}
@@ -837,7 +889,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 	
 					},
 					visibleWhen: function(item) {
-						if (!explorer.isCommandsVisible()) {
+						if (!explorer || !explorer.isCommandsVisible()) {
 							return false;
 						}
 						item = forceSingleItem(item);
@@ -848,6 +900,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				commandParams.parameters = getCommandParameters(handler.addParameters, handler.optionalParameters);
 
 				var command = new mCommands.Command(commandParams);
+				command.isCreateProject = true;
 				commandService.addCommand(command);
 			});
 		}
@@ -877,7 +930,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				});
 			},
 			visibleWhen: function(item) {
-				if (!explorer.isCommandsVisible()) {
+				if (!explorer || !explorer.isCommandsVisible()) {
 					return false;
 				}
 				if(!item.Project || !item.Project.children || !item.Project.ContentLocation){
@@ -912,7 +965,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					});
 				},
 			visibleWhen: function(item) {
-					if (!explorer.isCommandsVisible()) {
+					if (!explorer || !explorer.isCommandsVisible()) {
 						return false;
 					}
 					item = forceSingleItem(item);
@@ -920,7 +973,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				}
 			}
 			);
-			
+			createBasicProjectCommand.isCreateProject = true;
 			commandService.addCommand(createBasicProjectCommand);
 			
 			var createSftpProjectCommand = new mCommands.Command({
@@ -946,7 +999,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 						});
 					},
 				visibleWhen: function(item) {
-						if (!explorer.isCommandsVisible()) {
+						if (!explorer || !explorer.isCommandsVisible()) {
 							return false;
 						}
 						item = forceSingleItem(item);
@@ -954,7 +1007,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					}
 				}
 				);
-				
+				createSftpProjectCommand.isCreateProject = true;
 				commandService.addCommand(createSftpProjectCommand);
 				
 			var createZipProjectCommand = new mCommands.Command({
@@ -984,7 +1037,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					});
 				},
 			visibleWhen: function(item) {
-					if (!explorer.isCommandsVisible()) {
+					if (!explorer || !explorer.isCommandsVisible()) {
 						return false;
 					}
 					item = forceSingleItem(item);
@@ -992,10 +1045,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				}
 			}
 			);
-			
+			createZipProjectCommand.isCreateProject = true;
 			commandService.addCommand(createZipProjectCommand);
 			
-			projectCommandUtils.createDependencyCommands(serviceRegistry, commandService, explorer, fileClient, projectClient, dependencyTypes);
+			projectCommandUtils.createDependencyCommands(serviceRegistry, commandService, fileClient, projectClient, dependencyTypes);
 			
 			function createDeployProjectCommand(deployService){
 				var commandParams = {
@@ -1042,6 +1095,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				commandParams.parameters = getCommandParameters(deployService.parameters, deployService.optionalParameters);
 				
 				var command = new mCommands.Command(commandParams);
+				command.isDeployProject = true;
 				commandService.addCommand(command);
 			}
 			

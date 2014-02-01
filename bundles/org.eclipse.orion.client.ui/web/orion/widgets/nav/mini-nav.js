@@ -79,6 +79,7 @@ define([
 		this.fileClient = params.fileClient;
 		this.editorInputManager = params.editorInputManager;
 		this.parentNode = params.parentNode;
+		this.sidebar = params.sidebar;
 		this.sidebarNavInputManager = params.sidebarNavInputManager;
 		this.toolbarNode = params.toolbarNode;
 		this.serviceRegistry = params.serviceRegistry;
@@ -100,6 +101,7 @@ define([
 				commandRegistry: this.commandRegistry,
 				fileClient: this.fileClient,
 				editorInputManager: this.editorInputManager,
+				sidebar: this.sidebar,
 				sidebarNavInputManager: this.sidebarNavInputManager,
 				parentId: this.parentNode.id,
 				rendererFactory: function(explorer) {

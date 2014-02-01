@@ -437,20 +437,22 @@ exports.ExplorerNavHandler = (function() {
 					if (overflow === "auto" || overflow === "scroll") { break; } //$NON-NLS-1$ //$NON-NLS-0$
 					offsetParent = offsetParent.parentNode;
 				}
-				var visible = true;
-				if(currentRowDiv.offsetTop <= offsetParent.scrollTop){
-					visible = false;
-					if(next === undefined){
-						next = false;
+				if (offsetParent) {
+					var visible = true;
+					if(currentRowDiv.offsetTop <= offsetParent.scrollTop){
+						visible = false;
+						if(next === undefined){
+							next = false;
+						}
+					}else if((currentRowDiv.offsetTop + currentRowDiv.offsetHeight) >= (offsetParent.scrollTop + offsetParent.clientHeight)){
+						visible = false;
+						if(next === undefined){
+							next = true;
+						}
 					}
-				}else if((currentRowDiv.offsetTop + currentRowDiv.offsetHeight) >= (offsetParent.scrollTop + offsetParent.clientHeight)){
-					visible = false;
-					if(next === undefined){
-						next = true;
+					if(!visible){
+						currentRowDiv.scrollIntoView(!next);
 					}
-				}
-				if(!visible){
-					currentRowDiv.scrollIntoView(!next);
 				}
 			}
 			if(this.explorer.onCursorChanged){
