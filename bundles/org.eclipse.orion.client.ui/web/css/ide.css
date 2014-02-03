@@ -537,6 +537,8 @@ textarea.parameterInput {
 }
 
 .keyAssistAccel {
+	/*font-family: Monaco;*/
+	font-size: 10pt;
 	font-weight: bold;
 	color: gold;
 	text-align: right;

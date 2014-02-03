@@ -22,22 +22,31 @@ define(['orion/webui/littlelib'], function(lib) {
 		var userString = "";
 		var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 	
-		if (binding.mod1) {
-			if (isMac) {
-				userString+="Cmd+"; //$NON-NLS-0$
-			} else {
-				userString+="Ctrl+"; //$NON-NLS-0$
+		if (isMac) {
+			if (binding.mod4) {
+				userString+= "\u2303"; //Ctrl //$NON-NLS-0$
+			}
+			if (binding.mod3) {
+				userString+= "\u2325"; //Alt //$NON-NLS-0$
+			}
+			if (binding.mod2) {
+				userString+= "\u21e7"; //Shift //$NON-NLS-0$
+			}
+			if (binding.mod1) {
+				userString+= "\u2318"; //Command //$NON-NLS-0$
+			}
+		} else {
+			if (binding.mod1) {
+				userString+= "Ctrl+"; //$NON-NLS-0$
+			}
+			if (binding.mod2) {
+				userString+= "Shift+"; //$NON-NLS-0$
+			}
+			if (binding.mod3) {
+				userString+= "Alt+"; //$NON-NLS-0$
 			}
 		}
-		if (binding.mod2) {
-			userString += "Shift+"; //$NON-NLS-0$
-		}
-		if (binding.mod3) {
-			userString += "Alt+"; //$NON-NLS-0$
-		}
-		if (binding.mod4 && isMac) {
-			userString += "Ctrl+"; //$NON-NLS-0$
-		}
+		
 		if (binding.alphaKey) {
 			return userString+binding.alphaKey;
 		}
@@ -47,6 +56,59 @@ define(['orion/webui/littlelib'], function(lib) {
 		for (var keyName in lib.KEY) {
 			if (typeof(lib.KEY[keyName] === "number")) { //$NON-NLS-0$
 				if (lib.KEY[keyName] === binding.keyCode) {
+					if (isMac) {
+						switch (lib.KEY[keyName]) {
+							case lib.KEY.BKSPC:
+								keyName = "\u232b";	//$NON-NLS-0$
+								break;
+							case lib.KEY.TAB:
+								keyName = "\u21e5";	//$NON-NLS-0$
+								break;
+							case lib.KEY.ENTER:
+								keyName = "\u23ce";	//$NON-NLS-0$
+								break;
+							case lib.KEY.ESCAPE:
+								keyName = "\u238b";	//$NON-NLS-0$
+								break;
+							case lib.KEY.SPACE:
+								keyName = "\u2423";	//$NON-NLS-0$
+								break;
+							case lib.KEY.PAGEUP:
+								keyName = "\u21de";	//$NON-NLS-0$
+								break;
+							case lib.KEY.PAGEDOWN:
+								keyName = "\u21df";	//$NON-NLS-0$
+								break;
+							case lib.KEY.END:
+								keyName = "\u21f2";	//$NON-NLS-0$
+								break;
+							case lib.KEY.HOME:
+								keyName = "\u21f1";	//$NON-NLS-0$
+								break;
+							case lib.KEY.DEL:
+								keyName = "\u2326";	//$NON-NLS-0$
+								break;
+							default: //do nothing
+						}
+					}
+					
+					switch (lib.KEY[keyName]) {				
+						case lib.KEY.DOWN:
+							keyName = "\u2193";	//$NON-NLS-0$
+							break;
+						case lib.KEY.UP:
+							keyName = "\u2191"; //$NON-NLS-0$
+							break;
+						case lib.KEY.RIGHT:
+							keyName = "\u2192"; //$NON-NLS-0$
+							break;
+						case lib.KEY.LEFT:
+							keyName = "\u2190"; //$NON-NLS-0$
+							break;
+						
+						default: //do nothing
+					}
+						
 					return userString+keyName;
 				}
 			}
