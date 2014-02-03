@@ -8,8 +8,8 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window console define localStorage*/
-/*jslint browser:true*/
+/*global console*/
+/*jslint amd:true browser:true*/
 
 define([
 	'orion/commands',
@@ -18,149 +18,125 @@ define([
 ], function(mCommands, objects, lib) {
 
 	function SideMenu(parentNode){
-		if (!parentNode)
-			throw new Error("Missing parentNode");
 		this.parentNode = lib.node(parentNode);
+		if (!this.parentNode) {
+			throw new Error("Missing parentNode");
+		}
 		this.menuitems = Object.create(null); // Maps category id {String} to menuitem
 		this.links = null;
 		this.categories = null;
 
 		this.anchor = document.createElement("ul");
 		this.anchor.classList.add("sideMenuList");
-		if(this.parentNode){
-			this.parentNode.appendChild(this.anchor);
-		} else {
-			console.error("No sideMenu parent node");
-		}
+		this.parentNode.appendChild(this.anchor);
 	}
-	
-	SideMenu.prototype.LOCAL_STORAGE_NAME = "sideMenuNavigation";
-	SideMenu.prototype.OPEN_STATE = "open";
-	SideMenu.prototype.OPEN_OVERLAY_STATE = "openOverlay";
-	SideMenu.prototype.CLOSED_STATE = "closed";
-	SideMenu.prototype.DEFAULT_STATE = SideMenu.prototype.OPEN_STATE;
-	SideMenu.prototype.SIDE_MENU_OPEN_WIDTH = "40px";
-	SideMenu.prototype.SIDE_MENU_CLOSED_WIDTH = "0";
-	
-	function addMenuItem( imageClassName, categoryId /*, link*/ ){
-		var anchor = this.anchor;
-		
-		var listItem = this.createListItem(imageClassName, categoryId);
-		
-		anchor.appendChild( listItem );
-	
-		this.menuitems[categoryId] = listItem;
-	}
-
-	function setAllMenuItemsInactive(){
-		
-		this.getMenuItems().forEach( function( item ){
-			item.className = item.iconClass + ' inactive';
-		} );
-	}
-	
-	function setActiveMenuItem( link ){
-		
-		this.setAllMenuItemsInactive();
-		
-		this.getMenuItems().forEach( function( item ){
-			if( item.href == link ){
-				item.className = item.iconClass + ' active';
-			} 
-		});
-	}
-	
-	function setSideMenu(){
-			
-		var sideMenuNavigation = this.getDisplayState();
-		
-		var parent = this.parentNode;
-		
-		if( parent ){
-			
-			parent.classList.remove("sideMenu-openOverlay");
-			if( sideMenuNavigation === this.CLOSED_STATE ){
-				this.setSideMenuWidth( this.SIDE_MENU_CLOSED_WIDTH );
-				parent.style.display = 'none';
-			}
-			
-			if( sideMenuNavigation === this.OPEN_STATE ){
-				this.setSideMenuWidth( this.SIDE_MENU_OPEN_WIDTH );
-				parent.style.display = 'block';
-			}
-			
-			if( sideMenuNavigation === this.OPEN_OVERLAY_STATE ){
-				this.setSideMenuWidth( this.SIDE_MENU_OPEN_WIDTH, true );
-				parent.classList.add("sideMenu-openOverlay");
-				parent.style.display = 'block';
-			}
-		}
-	}
-		
-	function setSideMenuWidth( sideMenuWidth, overlay ){
-		var pageContent = lib.node( "pageContent" );
-		if (pageContent && !overlay) {
-			pageContent.style.left = sideMenuWidth;
-		}
-		var sideToolBar = lib.node( "sideMenu" );
-		if( sideToolBar ){
-			sideToolBar.style.width = sideMenuWidth;
-		}
-	};
-	
-	function setOverlaySideMenu(show) {
-		
-		var sideMenuNavigation = this.getDisplayState();
-		
-		var newState = sideMenuNavigation;
-		if (show) {
-			if( sideMenuNavigation === this.CLOSED_STATE ){
-				newState = this.OPEN_OVERLAY_STATE;
-			}
-		} else {
-			if( sideMenuNavigation === this.OPEN_OVERLAY_STATE ){
-				newState = this.CLOSED_STATE;
-			}
-		}
-
-		if (newState === this.DEFAULT_STATE) {
-			localStorage.removeItem(this.LOCAL_STORAGE_NAME);
-		} else {
-			localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
-		}
-		
-		this.setSideMenu();
-	}
-		
-	function toggleSideMenu(){
-			
-		var sideMenuNavigation = this.getDisplayState();
-		
-		var newState;
-		if( sideMenuNavigation === this.OPEN_STATE ){
-			newState = this.CLOSED_STATE;
-		} else {
-			newState = this.OPEN_STATE;
-		}
-
-		if (newState === this.DEFAULT_STATE) {
-			localStorage.removeItem(this.LOCAL_STORAGE_NAME);
-		} else {
-			localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
-		}
-		
-		this.setSideMenu();
-	};
-			
-	SideMenu.prototype.addMenuItem = addMenuItem;	
-	SideMenu.prototype.setAllMenuItemsInactive = setAllMenuItemsInactive;
-	SideMenu.prototype.setActiveMenuItem = setActiveMenuItem;
-	SideMenu.prototype.setSideMenu = setSideMenu;		
-	SideMenu.prototype.setSideMenuWidth = setSideMenuWidth;
-	SideMenu.prototype.toggleSideMenu = toggleSideMenu;
-	SideMenu.prototype.setOverlaySideMenu = setOverlaySideMenu;
-
 	objects.mixin(SideMenu.prototype, {
+		LOCAL_STORAGE_NAME: "sideMenuNavigation",
+		OPEN_STATE: "open",
+		OPEN_OVERLAY_STATE: "openOverlay",
+		CLOSED_STATE: "closed",
+		DEFAULT_STATE: SideMenu.prototype.OPEN_STATE,
+		SIDE_MENU_OPEN_WIDTH: "40px",
+		SIDE_MENU_CLOSED_WIDTH: "0",
+	
+		addMenuItem: function( imageClassName, categoryId /*, link*/ ){
+			var anchor = this.anchor;
+			
+			var listItem = this.createListItem(imageClassName, categoryId);
+			
+			anchor.appendChild( listItem );
+		
+			this.menuitems[categoryId] = listItem;
+		},
+//		setAllMenuItemsInactive: function(){
+//			this.getMenuItems().forEach( function( item ){
+//				item.className = item.iconClass + ' inactive';
+//			} );
+//		},
+//		setActiveMenuItem: function( link ){
+//			this.setAllMenuItemsInactive();
+//			
+//			this.getMenuItems().forEach( function( item ){
+//				if( item.href === link ){
+//					item.className = item.iconClass + ' active';
+//				} 
+//			});
+//		},
+		setSideMenu: function(){
+			var sideMenuNavigation = this.getDisplayState();
+			
+			var parent = this.parentNode;
+			
+			if( parent ){
+				
+				parent.classList.remove("sideMenu-openOverlay");
+				if( sideMenuNavigation === this.CLOSED_STATE ){
+					this.setWidth( this.SIDE_MENU_CLOSED_WIDTH );
+					parent.style.display = 'none';
+				}
+				
+				if( sideMenuNavigation === this.OPEN_STATE ){
+					this.setWidth( this.SIDE_MENU_OPEN_WIDTH );
+					parent.style.display = 'block';
+				}
+				
+				if( sideMenuNavigation === this.OPEN_OVERLAY_STATE ){
+					this.setWidth( this.SIDE_MENU_OPEN_WIDTH, true );
+					parent.classList.add("sideMenu-openOverlay");
+					parent.style.display = 'block';
+				}
+			}
+		},
+		setWidth: function( width, overlay ){
+			var pageContent = lib.node( "pageContent" );
+			if (pageContent && !overlay) {
+				pageContent.style.left = width;
+			}
+			var sideToolBar = lib.node( "sideMenu" );
+			if( sideToolBar ){
+				sideToolBar.style.width = width;
+			}
+		},
+		toggleSideMenu: function(){
+			var sideMenuNavigation = this.getDisplayState();
+			
+			var newState;
+			if( sideMenuNavigation === this.OPEN_STATE ){
+				newState = this.CLOSED_STATE;
+			} else {
+				newState = this.OPEN_STATE;
+			}
+	
+			if (newState === this.DEFAULT_STATE) {
+				localStorage.removeItem(this.LOCAL_STORAGE_NAME);
+			} else {
+				localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
+			}
+			
+			this.setSideMenu();
+		},
+		setOverlaySideMenu: function(show) {
+			var sideMenuNavigation = this.getDisplayState();
+			
+			var newState = sideMenuNavigation;
+			if (show) {
+				if( sideMenuNavigation === this.CLOSED_STATE ){
+					newState = this.OPEN_OVERLAY_STATE;
+				}
+			} else {
+				if( sideMenuNavigation === this.OPEN_OVERLAY_STATE ){
+					newState = this.CLOSED_STATE;
+				}
+			}
+	
+			if (newState === this.DEFAULT_STATE) {
+				localStorage.removeItem(this.LOCAL_STORAGE_NAME);
+			} else {
+				localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
+			}
+			
+			this.setSideMenu();
+		},
 		clearMenuItems: function() {
 			this.menuitems = [];
 			lib.empty(this.anchor);

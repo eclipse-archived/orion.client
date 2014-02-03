@@ -94,33 +94,37 @@ define([
 		},
 		// each relatedLink is { relatedLink: Object, command: Command, invocation: CommandInvocation }
 		addRelatedLinkCommands: mCustomGlobalCommands.addRelatedLinkCommands || function (relatedLinks) {
-			sideMenu.setRelatedLinks(relatedLinks);
+			if (sideMenu) {
+				sideMenu.setRelatedLinks(relatedLinks);
+			}
 		},
 		afterGenerateRelatedLinks: mCustomGlobalCommands.afterGenerateRelatedLinks || function (serviceRegistry, item, exclusions, commandRegistry, alternateItem) {},
 		afterSetPageTarget: mCustomGlobalCommands.afterSetPageTarget || function (options) {},
 		generateNavigationMenu: mCustomGlobalCommands.generateNavigationMenu || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
-			var nav = document.getElementById('centralNavigation'); //$NON-NLS-0$
+			var sideMenuParent = lib.node("sideMenu"); //$NON-NLS-0$
+			if (sideMenuParent) {
+				var nav = lib.node('centralNavigation'); //$NON-NLS-0$
+				new mTooltip.Tooltip({
+					node: nav,
+					text: messages["CentralNavTooltip"], //$NON-NLS-0$
+					position: ["right"] //$NON-NLS-0$
+				});
 
-			new mTooltip.Tooltip({
-				node: nav,
-				text: messages["CentralNavTooltip"],
-				position: ["right"] //$NON-NLS-0$
-			});
-
-			sideMenu = new SideMenu("sideMenu"); //$NON-NLS-0$
-			nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
-			//TODO write the hovering behavior without a mouse move listener on the document
-			//TODO disable hovering behavior for now
-//			document.addEventListener("mousemove", function(evt) { //$NON-NLS-0$
-//				var sideMenuNode = sideMenu.parentNode;
-//				var over = sideMenuNode.contains(evt.target);
-//				var centralNavigationArea = lib.node("centralNavigationArea"); //$NON-NLS-0$
-//				var staticBanner = lib.node("staticBanner"); //$NON-NLS-0$
-//				if (!over && centralNavigationArea && staticBanner) {
-//					over = staticBanner.contains(evt.target) && evt.clientX < lib.bounds(centralNavigationArea).width;
-//				}
-//				sideMenu.setOverlaySideMenu(over);
-//			});
+				sideMenu = new SideMenu(sideMenuParent); //$NON-NLS-0$
+				nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
+				//TODO write the hovering behavior without a mouse move listener on the document
+				//TODO disable hovering behavior for now
+	//			document.addEventListener("mousemove", function(evt) { //$NON-NLS-0$
+	//				var sideMenuNode = sideMenu.parentNode;
+	//				var over = sideMenuNode.contains(evt.target);
+	//				var centralNavigationArea = lib.node("centralNavigationArea"); //$NON-NLS-0$
+	//				var staticBanner = lib.node("staticBanner"); //$NON-NLS-0$
+	//				if (!over && centralNavigationArea && staticBanner) {
+	//					over = staticBanner.contains(evt.target) && evt.clientX < lib.bounds(centralNavigationArea).width;
+	//				}
+	//				sideMenu.setOverlaySideMenu(over);
+	//			});
+			}
 		},
 		afterGenerateNavigationMenu: mCustomGlobalCommands.afterGenerateNavigationMenu || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
 			// No-op
@@ -648,13 +652,14 @@ define([
 		var categoriesPromise = PageLinks.getCategoriesInfo(serviceRegistry);
 		var pageLinksPromise = PageLinks.getPageLinksInfo(serviceRegistry, "orion.page.link");
 		Deferred.all([ categoriesPromise, pageLinksPromise ]).then(function(results) {
-			var categoriesInfo = results[0], pageLinksInfo = results[1];
-			sideMenu.setCategories(categoriesInfo);
-			sideMenu.setPageLinks(pageLinksInfo);
+			if (sideMenu) {
+				var categoriesInfo = results[0], pageLinksInfo = results[1];
+				sideMenu.setCategories(categoriesInfo);
+				sideMenu.setPageLinks(pageLinksInfo);
 
-			// Now we have enough to show the sidemenu with its close-to-final layout
-			sideMenu.setSideMenu();
-
+				// Now we have enough to show the sidemenu with its close-to-final layout
+				sideMenu.setSideMenu();
+			}
 		});
 
 		// hook up split behavior - the splitter widget and the associated global command/key bindings.
