@@ -171,6 +171,7 @@
 		<optimize pageDir="cfui/plugins" name="cFPlugin" bundle="org.eclipse.orion.client.cf" />
 		<optimize pageDir="edit" name="edit" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="edit/content" name="jsonEditorPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="edit/content" name="imageViewerPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="compare" name="compare" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="operations" name="list" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="search" name="search" bundle="org.eclipse.orion.client.ui" />
