@@ -110,16 +110,17 @@ define([
 			sideMenu = new SideMenu("sideMenu"); //$NON-NLS-0$
 			nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
 			//TODO write the hovering behavior without a mouse move listener on the document
-			document.addEventListener("mousemove", function(evt) { //$NON-NLS-0$
-				var sideMenuNode = sideMenu.parentNode;
-				var over = sideMenuNode.contains(evt.target);
-				var centralNavigationArea = lib.node("centralNavigationArea"); //$NON-NLS-0$
-				var staticBanner = lib.node("staticBanner"); //$NON-NLS-0$
-				if (!over && centralNavigationArea && staticBanner) {
-					over = staticBanner.contains(evt.target) && evt.clientX < lib.bounds(centralNavigationArea).width;
-				}
-				sideMenu.setOverlaySideMenu(over);
-			});
+			//TODO disable hovering behavior for now
+//			document.addEventListener("mousemove", function(evt) { //$NON-NLS-0$
+//				var sideMenuNode = sideMenu.parentNode;
+//				var over = sideMenuNode.contains(evt.target);
+//				var centralNavigationArea = lib.node("centralNavigationArea"); //$NON-NLS-0$
+//				var staticBanner = lib.node("staticBanner"); //$NON-NLS-0$
+//				if (!over && centralNavigationArea && staticBanner) {
+//					over = staticBanner.contains(evt.target) && evt.clientX < lib.bounds(centralNavigationArea).width;
+//				}
+//				sideMenu.setOverlaySideMenu(over);
+//			});
 		},
 		afterGenerateNavigationMenu: mCustomGlobalCommands.afterGenerateNavigationMenu || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
 			// No-op
