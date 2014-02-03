@@ -145,6 +145,23 @@ define([
 			}
 			return !this.readonly;
 		},
+		scope: function(childrenLocation) {
+			window.location.href = uriTemplate.expand({resource: childrenLocation});
+		},
+		scopeUp: function() {
+			var navigate;
+			var root = this.treeRoot;
+			var parent = root.Parents && root.Parents[0];
+			if (parent) {
+				navigate = parent.ChildrenLocation;
+			} else {
+				navigate = this.fileClient.fileServiceRootURL(root.Location);
+			}
+			this.scope(navigate);
+		},
+		scopeDown: function(item) {
+			this.scope(item.ChildrenLocation);
+		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
 			return new Deferred().resolve();
