@@ -574,7 +574,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			if (!explorer || !explorer.isCommandsVisible()) {
 				return false;
 			}
-			return getTargetFolder(explorer.selection.getSelections()) || getTargetFolder(item);
+			return getTargetFolder(item);
 		}
 		
 		function doMove(item, newText) {
@@ -888,11 +888,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-new_file", //$NON-NLS-0$
 			id: "eclipse.newFile", //$NON-NLS-0$
 			callback: function(data) {
-				// Check selection service first, then use the provided item
-				explorer.selection.getSelections(function(selections) {
-					var item = getParentItem(selections);
-					createNewArtifact(messages["New File"], item, false);
-				});
+				var item = getParentItem(data.items);
+				createNewArtifact(messages["New File"], item, false);
 			},
 			visibleWhen: checkFolderSelection
 		});
@@ -904,11 +901,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			imageClass: "core-sprite-new_folder", //$NON-NLS-0$
 			id: "eclipse.newFolder", //$NON-NLS-0$
 			callback: function(data) {
-				// Check selection service first, then use the provided item
-				explorer.selection.getSelections(function(selections) {
-					var item = getParentItem(selections);
-					createNewArtifact(messages["New Folder"], item, true);
-				});
+				var item = getParentItem(data.items);
+				createNewArtifact(messages["New Folder"], item, true);
 			},
 			visibleWhen: function(item) {
 				return checkFolderSelection(item) && !mFileUtils.isAtRoot(item.Location);
@@ -949,21 +943,18 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			description: messages["Create an empty folder on the Orion server.  You can import, upload, or create content in the editor."],
 			id: "orion.new.project", //$NON-NLS-0$
 			callback: function(data) {
-				// Check selection service first, then use the provided item
-				explorer.selection.getSelections(function(selections) {
-					var item;
-					if (getTargetFolder(selections)) {
-						newFolderCommand.callback(data);
-					} else {
-						item = forceSingleItem(data.items);
-						var defaultName = messages['New Folder']; //$NON-NLS-0$
-						createUniqueNameArtifact(item, defaultName, function(uniqueName){
-							getNewItemName(explorer, item, explorer.getRow(item), uniqueName, function(name) {
-								createProject(explorer, fileClient, progressService, name);
-							});
+				var item;
+				if (getTargetFolder(data.items)) {
+					newFolderCommand.callback(data);
+				} else {
+					item = forceSingleItem(data.items);
+					var defaultName = messages['New Folder']; //$NON-NLS-0$
+					createUniqueNameArtifact(item, defaultName, function(uniqueName){
+						getNewItemName(explorer, item, explorer.getRow(item), uniqueName, function(name) {
+							createProject(explorer, fileClient, progressService, name);
 						});
-					} 
-				});
+					});
+				} 
 			},
 			visibleWhen: canCreateProject
 		});
@@ -1023,17 +1014,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			id: "eclipse.downFolder", //$NON-NLS-0$
 			callback: function(data) {
 				if (typeof explorer.scopeDown === "function") { //$NON-NLS-0$
-					explorer.selection.getSelections(function(selections) {
-						explorer.scopeDown(selections[0]);
-					});
+					explorer.scopeDown(data.items[0]);
 				}
 			},
 			visibleWhen: function(item) {
 				if (!explorer || !explorer.isCommandsVisible()) {
 					return false;
 				}
-				var selections = explorer.selection.getSelections();
-				return selections.length === 1 && selections[0].Directory;
+				item = forceSingleItem(item);
+				return item.Directory;
 			}
 		});
 		commandService.addCommand(goIntoCommand);
@@ -1141,7 +1130,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		});
 		commandService.addCommand(moveCommand);
 		
-		var copyToBuffer = function() {
+		var copyToBuffer = function(data) {
 			var navHandler = explorer.getNavHandler();
 			// re-enable items that were previously cut and not yet pasted, if any
 			if (isCutInProgress) {
@@ -1150,16 +1139,16 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				});
 			}
 			isCutInProgress = false; // reset the state, caller should set to true if necessary
-			bufferedSelection = explorer.selection.getSelections();
+			bufferedSelection = data.items;
 		};
 		
 		var cutCommand = new mCommands.Command({
 			name: messages["Cut"],
 			id: "eclipse.cut", //$NON-NLS-0$
-			callback: function() {
+			callback: function(data) {
 				var navHandler = explorer.getNavHandler();
 				
-				copyToBuffer();
+				copyToBuffer(data);
 				
 				if (bufferedSelection.length) {
 					isCutInProgress = true;
@@ -1193,76 +1182,73 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				id: "eclipse.pasteSelections", //$NON-NLS-0$
 				visibleWhen: canPaste,
 				callback: function(data) {
-					// Check selection service first.  If a single folder is selected, that is the target.  Otherwise the root is the target.
-					explorer.selection.getSelections(function(selections) {
-						var item = getTargetFolder(selections) || getTargetFolder(data.items);
-						if (bufferedSelection.length > 0 && item) {
-							// Do not allow pasting into the Root of the Workspace
-							if (mFileUtils.isAtRoot(item.Location)) {
-								errorHandler(messages["Cannot paste into the root"]);
-								return;
-							}
-							var fileOperation = isCutInProgress ? fileClient.moveFile : fileClient.copyFile;
-							var summary = [];
-							var deferreds = [];
-							bufferedSelection.forEach(function(selectedItem) {
-								var location = selectedItem.Location;
-								var name = selectedItem.Name || null;
-								if (location) {
-									var itemLocation = item.Location || item.ContentLocation;
-									var prompt = false;
-									if (selectedItem.parent && selectedItem.parent.Location === itemLocation) {
-										prompt = true;
-									} else {
-										//TODO: if tree is not expanded, the children must be fetched from the server.
-										var children = item.Children || item.children;
-										if (children) {
-											prompt = children.some(function(child) {
-												return child.Name === selectedItem.Name;
-											});
-										}
-									}
-									if (prompt) {
-										name = window.prompt(i18nUtil.formatMessage(messages['Enter a new name for \'${0}\''], selectedItem.Name), i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name));
-										// user cancelled?  don't copy this one
-										if (!name) {
-											location = null;
-										}
-									}
-									if (location) {
-										var deferred = fileOperation.apply(fileClient, [location, itemLocation, name]);
-										var messageKey = isCutInProgress ? "Moving ${0}": "Pasting ${0}"; //$NON-NLS-1$ //$NON-NLS-0$
-										var eventType = isCutInProgress ? "move": "copy"; //$NON-NLS-1$ //$NON-NLS-0$
-										deferreds.push(progressService.showWhile(deferred, i18nUtil.formatMessage(messages[messageKey], location)).then(
-											function(result) {
-												summary.push({
-													oldValue: selectedItem,
-													newValue: result,
-													parent: item
-												});
-												dispatchModelEvent({ type: eventType, oldValue: selectedItem, newValue: result, parent: item, count: bufferedSelection.length });
-											},
-											errorHandler));
-									}
-								}
-							});
-							Deferred.all(deferreds).then(function() {
-								dispatchModelEvent({
-									type: isCutInProgress ? "moveMultiple" : "copyMultiple", //$NON-NLS-1$ //$NON-NLS-0$
-									items: summary
-								});
-								
-								if (isCutInProgress) {
-									var navHandler = explorer.getNavHandler();
-									bufferedSelection.forEach(function(pastedItem){
-										navHandler.enableItem(pastedItem);
-									});
-									bufferedSelection = [];
-									isCutInProgress = false;
-								}
-							});
+					var item = getTargetFolder(data.items);
+					if (bufferedSelection.length > 0 && item) {
+						// Do not allow pasting into the Root of the Workspace
+						if (mFileUtils.isAtRoot(item.Location)) {
+							errorHandler(messages["Cannot paste into the root"]);
+							return;
 						}
-					});
+						var fileOperation = isCutInProgress ? fileClient.moveFile : fileClient.copyFile;
+						var summary = [];
+						var deferreds = [];
+						bufferedSelection.forEach(function(selectedItem) {
+							var location = selectedItem.Location;
+							var name = selectedItem.Name || null;
+							if (location) {
+								var itemLocation = item.Location || item.ContentLocation;
+								var prompt = false;
+								if (selectedItem.parent && selectedItem.parent.Location === itemLocation) {
+									prompt = true;
+								} else {
+									//TODO: if tree is not expanded, the children must be fetched from the server.
+									var children = item.Children || item.children;
+									if (children) {
+										prompt = children.some(function(child) {
+											return child.Name === selectedItem.Name;
+										});
+									}
+								}
+								if (prompt) {
+									name = window.prompt(i18nUtil.formatMessage(messages['Enter a new name for \'${0}\''], selectedItem.Name), i18nUtil.formatMessage(messages['Copy of ${0}'], selectedItem.Name));
+									// user cancelled?  don't copy this one
+									if (!name) {
+										location = null;
+									}
+								}
+								if (location) {
+									var deferred = fileOperation.apply(fileClient, [location, itemLocation, name]);
+									var messageKey = isCutInProgress ? "Moving ${0}": "Pasting ${0}"; //$NON-NLS-1$ //$NON-NLS-0$
+									var eventType = isCutInProgress ? "move": "copy"; //$NON-NLS-1$ //$NON-NLS-0$
+									deferreds.push(progressService.showWhile(deferred, i18nUtil.formatMessage(messages[messageKey], location)).then(
+										function(result) {
+											summary.push({
+												oldValue: selectedItem,
+												newValue: result,
+												parent: item
+											});
+											dispatchModelEvent({ type: eventType, oldValue: selectedItem, newValue: result, parent: item, count: bufferedSelection.length });
+										},
+										errorHandler));
+								}
+							}
+						});
+						Deferred.all(deferreds).then(function() {
+							dispatchModelEvent({
+								type: isCutInProgress ? "moveMultiple" : "copyMultiple", //$NON-NLS-1$ //$NON-NLS-0$
+								items: summary
+							});
+							
+							if (isCutInProgress) {
+								var navHandler = explorer.getNavHandler();
+								bufferedSelection.forEach(function(pastedItem){
+									navHandler.enableItem(pastedItem);
+								});
+								bufferedSelection = [];
+								isCutInProgress = false;
+							}
+						});
+					}
 				}
 			});
 		commandService.addCommand(pasteFromBufferCommand);		
