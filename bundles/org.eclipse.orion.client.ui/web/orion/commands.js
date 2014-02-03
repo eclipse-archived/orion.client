@@ -11,10 +11,23 @@
 /*jslint sub:true*/
  /*global define document window Image */
  
-define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown', 'text!orion/webui/dropdowntriggerbutton.html', 'text!orion/webui/dropdowntriggerbuttonwitharrow.html', 'text!orion/webui/submenutriggerbutton.html', 
-	'text!orion/webui/checkedmenuitem.html', 'orion/webui/tooltip'], 
-	function(require, util, lib, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, SubMenuButtonFragment, CheckedMenuItemFragment, Tooltip) {
-	
+define([
+	'orion/util',
+	'orion/webui/littlelib',
+	'orion/webui/dropdown',
+	'text!orion/webui/dropdowntriggerbutton.html',
+	'text!orion/webui/dropdowntriggerbuttonwitharrow.html',
+	'text!orion/webui/submenutriggerbutton.html',
+	'text!orion/webui/checkedmenuitem.html',
+	'orion/webui/tooltip'
+], function(util, lib, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, SubMenuButtonFragment, CheckedMenuItemFragment, Tooltip) {
+		/**
+		 * @name orion.commands.NO_IMAGE
+		 * @description Image data for 16x16 transparent png.
+		 * @property
+		 */
+		var NO_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAAtJREFUCNdjIBEAAAAwAAFletZ8AAAAAElFTkSuQmCC"; //$NON-NLS-0$
+
 		/* a function that can be set for retrieving bindings stored elsewhere, such as a command registry */
 		var getBindings = null;
 		
@@ -616,7 +629,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
 			this.positioningNode = options.positioningNode; // optional positioning node choice command.
-			this.image = options.image || (require.toUrl && require.toUrl("images/none.png")); //$NON-NLS-0$
+			this.image = options.image || NO_IMAGE;
 			this.imageClass = options.imageClass;   // points to the location in a sprite
 			this.addImageClassToElement = options.addImageClassToElement; // optional boolean if true will add the image class to the 
 																		// element's class list
@@ -695,7 +708,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		 * externally.
 		 */
 		hasImage: function() {
-			return this.imageClass || this.image !== require.toUrl("images/none.png"); //$NON-NLS-0$
+			return this.imageClass || this.image !== NO_IMAGE; //$NON-NLS-0$
 		}
 	};  // end Command prototype
 	Command.prototype.constructor = Command;
@@ -714,6 +727,7 @@ define(['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown'
 		CommandsProxy: CommandsProxy,
 		getKeyBindings: getKeyBindings,
 		processKey: processKey,
+		NO_IMAGE: NO_IMAGE,
 		_testMethodProcessKey: _processKey  // only exported for test cases
 	};
 });

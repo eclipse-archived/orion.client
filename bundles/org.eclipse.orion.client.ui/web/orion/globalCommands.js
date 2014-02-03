@@ -601,7 +601,7 @@ define([
 		home.href = require.toUrl("edit/edit.html"); //$NON-NLS-0$
 		home.setAttribute("aria-label", messages['Orion Home']); //$NON-NLS-1$ //$NON-NLS-0$
 		var progressPane = lib.node("progressPane"); //$NON-NLS-0$
-		progressPane.src = require.toUrl("images/none.png"); //$NON-NLS-0$
+		progressPane.src = mCommands.NO_IMAGE;
 
 		var toolbar = lib.node("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {

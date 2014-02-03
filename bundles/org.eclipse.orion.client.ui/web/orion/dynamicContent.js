@@ -10,8 +10,13 @@
  ******************************************************************************/
 
 /*global define document*/
- define(['require', 'orion/webui/littlelib', 'orion/webui/tooltip'], function(require, lib, mTooltip){
- 
+define([
+	'require',
+	'orion/commands',
+	'orion/webui/littlelib',
+	'orion/webui/tooltip'
+], function(require, Commands, lib, mTooltip){
+
 	/**
 	* Progress indicator in form of a simple spinner.
 	*
@@ -39,7 +44,7 @@
 		start: function(){
 			var image = document.createElement("img");
 			image.id = this._prefix+this._id;
-			image.src = require.toUrl("images/none.png");
+			image.src = Commands.NO_IMAGE;
 			image.className = "progressPane_running";
 			this._anchor.appendChild(image);
 		},
