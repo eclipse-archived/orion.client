@@ -704,7 +704,7 @@ define('orion/edit/nls/root/messages',{
 	"switchEditor": "Switch Editor", //$NON-NLS-1$ //$NON-NLS-0$
 	"Fetching": "Fetching: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"confirmUnsavedChanges": "There are unsaved changes.  Do you still want to navigate away?", //$NON-NLS-1$ //$NON-NLS-0$
-	"searchFiles": "Search Files", //$NON-NLS-1$ //$NON-NLS-0$
+	"searchFiles": "Search Files...", //$NON-NLS-1$ //$NON-NLS-0$
 	"searchTerm": "Enter search term:", //$NON-NLS-1$ //$NON-NLS-0$
 	"unsavedChanges": "There are unsaved changes.", //$NON-NLS-1$ //$NON-NLS-0$
 	"Save": "Save", //$NON-NLS-1$ //$NON-NLS-0$
@@ -717,36 +717,43 @@ define('orion/edit/nls/root/messages',{
 	"Reading": "Reading ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
-	"gotoLine": "Go to Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"gotoLine": "Go to Line...", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLineTooltip": "Go to specified line number", //$NON-NLS-1$ //$NON-NLS-0$
 	"gotoLinePrompt": "Go to line:", //$NON-NLS-1$ //$NON-NLS-0$
 	"Undo": "Undo", //$NON-NLS-1$ //$NON-NLS-0$
 	"Redo": "Redo", //$NON-NLS-1$ //$NON-NLS-0$
-	"Find": "Find", //$NON-NLS-1$ //$NON-NLS-0$
+	"Find": "Find...", //$NON-NLS-1$ //$NON-NLS-0$
 	"noResponse": "No response from server.  Check your internet connection and try again.", //$NON-NLS-1$ //$NON-NLS-0$
 	"savingFile": "Saving file ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"running": "Running ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"Saving..." : "Saving...", //$NON-NLS-1$ //$NON-NLS-0$
 	"View": "View", //$NON-NLS-1$ //$NON-NLS-0$
-	"ViewTooltip": "View", //$NON-NLS-1$ //$NON-NLS-0$
+	"Show": "Show", //$NON-NLS-1$ //$NON-NLS-0$
+	"ShowTooltip": "Show", //$NON-NLS-1$ //$NON-NLS-0$
 	"Actions": "Actions", //$NON-NLS-1$ //$NON-NLS-0$
 	"Navigator": "Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"FolderNavigator": "Folder Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"Project": "Project", //$NON-NLS-1$ //$NON-NLS-0$
 	"New": "New", //$NON-NLS-1$ //$NON-NLS-0$
+	"File": "File", //$NON-NLS-1$ //$NON-NLS-0$
+	"Project": "Project", //$NON-NLS-1$ //$NON-NLS-0$
+	"Edit": "Edit", //$NON-NLS-1$ //$NON-NLS-0$
+	"Tools": "Tools", //$NON-NLS-1$ //$NON-NLS-0$
 	"Add": "Add", //$NON-NLS-1$ //$NON-NLS-0$
 	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding.", //$NON-NLS-1$ //$NON-NLS-0$
 	"LocalEditorSettings": "Local Editor Settings", //$NON-NLS-1$ //$NON-NLS-0$
 	"NoProject": "${0} is not a project. To convert it to a project use ${1}.", //$NON-NLS-1$ //$NON-NLS-0$
-	"NoProjects": "There are no projects in your workspace. Use ${0} to create projects.", //$NON-NLS-1$ //$NON-NLS-0$
+	"NoProjects": "There are no projects in your workspace. Use the ${0} menu to create projects.", //$NON-NLS-1$ //$NON-NLS-0$
 	"disconnected": "(disconnected)", //$NON-NLS-1$ //$NON-NLS-0$
 	"ChooseFS": "Choose Filesystem", //$NON-NLS-1$ //$NON-NLS-0$
 	"ChooseFSTooltip": "Choose the filesystem you want to view.", //$NON-NLS-1$ //$NON-NLS-0$
 	"FSTitle": "${0} (${1})", //$NON-NLS-1$ //$NON-NLS-0$
 	"Deploy": "Deploy", //$NON-NLS-1$ //$NON-NLS-0$
-	"ImportExport": "Import/Export", //$NON-NLS-1$ //$NON-NLS-0$
-	"OpenWith": "Open with...", //$NON-NLS-1$ //$NON-NLS-0$
-	"Extensions": "Extensions" //$NON-NLS-1$ //$NON-NLS-0$
+	"Import": "Import", //$NON-NLS-1$ //$NON-NLS-0$
+	"Export": "Export", //$NON-NLS-1$ //$NON-NLS-0$
+	"OpenWith": "Open With", //$NON-NLS-1$ //$NON-NLS-0$
+	"Extensions": "Extensions", //$NON-NLS-1$ //$NON-NLS-0$
+	"UnnamedCommand": "Unnamed" //$NON-NLS-1$ //$NON-NLS-0$
 });
 
 /*******************************************************************************
@@ -1207,7 +1214,6 @@ define('orion/i18nUtil',['require', 'orion/Deferred'], function(require, Deferre
 		delete bundle._expires;
 	}
 
-
 	function getMessageBundle(name) {
 		if (messageBundleDeffereds[name]) {
 			return messageBundleDeffereds[name];
@@ -1231,10 +1237,14 @@ define('orion/i18nUtil',['require', 'orion/Deferred'], function(require, Deferre
 			});
 		}
 
+		function _rejectMessageBundle(error) {
+			d.reject(error);
+		}
+
 		try {
-			require([name], _resolveMessageBundle);
+			require([name], _resolveMessageBundle, _rejectMessageBundle);
 		} catch (ignore) {
-			require(['orion/i18n!' + name], _resolveMessageBundle); //$NON-NLS-0$
+			require(['orion/i18n!' + name], _resolveMessageBundle, _rejectMessageBundle); //$NON-NLS-0$
 		}
 		return d;
 	}
@@ -2745,12 +2755,12 @@ define('orion/navigate/nls/root/messages',{
 	"Unknown item": "Unknown item",
 	"Are you sure you want to delete these ${0} items?": "Are you sure you want to delete these ${0} items?",
 	"Are you sure you want to delete '${0}'?": "Are you sure you want to delete '${0}'?",
-	"Export as zip": "Export as zip",
+	"Export as zip": "Zip",
 	"Create a zip file of the folder contents and download it": "Create a zip file of the folder contents and download it",
-	"New File": "New File",
+	"New File": "File",
 	"Create a new file": "Create a new file",
 	"Name:" : "Name:",
-	"New Folder": "New Folder",
+	"New Folder": "Folder",
 	"Folder name:": "Folder name:",
 	"Create a new folder": "Create a new folder",
 	"Creating folder": "Creating folder",
@@ -2782,12 +2792,12 @@ define('orion/navigate/nls/root/messages',{
 	"Move up to the parent folder": "Move up to the parent folder",
 	"Go Into": "Go Into",
 	"Move into the selected folder": "Move into the selected folder",
-	"Import local file...": "Import local file...",
+	"Import local file...": "File System",
 	"Copy files and folders from your local file system": "Copy files and folders from your local file system",
-	"SFTP from...": "SFTP from...",
+	"SFTP from...": "SFTP",
 	"Copy files and folders from a specified SFTP connection": "Copy files and folders from a specified SFTP connection",
 	"Importing from ${0}": "Importing from ${0}",
-	"SFTP to...": "SFTP to...",
+	"SFTP to...": "SFTP",
 	"Copy files and folders to a specified SFTP location": "Copy files and folders to a specified SFTP location",
 	"Exporting": "Exporting to ${0}",
 	"Pasting ${0}": "Pasting ${0}",
@@ -2808,11 +2818,12 @@ define('orion/navigate/nls/root/messages',{
 	"Open With": "Open With",
 	"Loading ": "Loading ",
 	"New": "New",
+	"File": "File",
 	"Actions": "Actions",
 	"Orion Content": "Orion Content",
 	" is not supported in this file system": " is not supported in this file system",
 	"Create new content" : "Create new content",
-	"Import from HTTP..." : "Import from HTTP...",
+	"Import from HTTP..." : "HTTP",
 	"File URL:" : "File URL:",
 	"Copy a file from a URL and optionally unzip it" : "Copy a file from a URL and optionally unzip it",
 	"Unzip *.zip files:" : "Unzip *.zip files:",
@@ -2820,7 +2831,7 @@ define('orion/navigate/nls/root/messages',{
 	"Did not drop ${0}.  Folder drop is not supported in this browser.": "Did not drop ${0}.  Folder drop is not supported in this browser.",
 	"You cannot copy files directly into the workspace.  Create a folder first.": "You cannot copy files directly into the workspace.  Create a folder first.",
 	"Unzip ${0}?": "Unzip ${0}?",
-	"NoFile": "Use the ${0} to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
+	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
 });
 
 /*******************************************************************************
@@ -2936,7 +2947,8 @@ define('orion/nls/root/messages',{
 	"UnknownWarning": "An unknown warning occurred.",
 	"Filter": "Filter (* = any string, ? = any character)",
 	"To view the browser's context menu, trigger the context menu again.": "To view the browser's context menu, trigger the context menu again.",
-	"Edit": "Edit"
+	"Edit": "Edit",
+	"CentralNavTooltip": "Toggle Side Menu"
 });
 
 /*******************************************************************************
@@ -4332,22 +4344,31 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 		var userString = "";
 		var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 	
-		if (binding.mod1) {
-			if (isMac) {
-				userString+="Cmd+"; //$NON-NLS-0$
-			} else {
-				userString+="Ctrl+"; //$NON-NLS-0$
+		if (isMac) {
+			if (binding.mod4) {
+				userString+= "\u2303"; //Ctrl //$NON-NLS-0$
+			}
+			if (binding.mod3) {
+				userString+= "\u2325"; //Alt //$NON-NLS-0$
+			}
+			if (binding.mod2) {
+				userString+= "\u21e7"; //Shift //$NON-NLS-0$
+			}
+			if (binding.mod1) {
+				userString+= "\u2318"; //Command //$NON-NLS-0$
+			}
+		} else {
+			if (binding.mod1) {
+				userString+= "Ctrl+"; //$NON-NLS-0$
+			}
+			if (binding.mod2) {
+				userString+= "Shift+"; //$NON-NLS-0$
+			}
+			if (binding.mod3) {
+				userString+= "Alt+"; //$NON-NLS-0$
 			}
 		}
-		if (binding.mod2) {
-			userString += "Shift+"; //$NON-NLS-0$
-		}
-		if (binding.mod3) {
-			userString += "Alt+"; //$NON-NLS-0$
-		}
-		if (binding.mod4 && isMac) {
-			userString += "Ctrl+"; //$NON-NLS-0$
-		}
+		
 		if (binding.alphaKey) {
 			return userString+binding.alphaKey;
 		}
@@ -4357,6 +4378,59 @@ define('orion/uiUtils',['orion/webui/littlelib'], function(lib) {
 		for (var keyName in lib.KEY) {
 			if (typeof(lib.KEY[keyName] === "number")) { //$NON-NLS-0$
 				if (lib.KEY[keyName] === binding.keyCode) {
+					if (isMac) {
+						switch (lib.KEY[keyName]) {
+							case lib.KEY.BKSPC:
+								keyName = "\u232b";	//$NON-NLS-0$
+								break;
+							case lib.KEY.TAB:
+								keyName = "\u21e5";	//$NON-NLS-0$
+								break;
+							case lib.KEY.ENTER:
+								keyName = "\u23ce";	//$NON-NLS-0$
+								break;
+							case lib.KEY.ESCAPE:
+								keyName = "\u238b";	//$NON-NLS-0$
+								break;
+							case lib.KEY.SPACE:
+								keyName = "\u2423";	//$NON-NLS-0$
+								break;
+							case lib.KEY.PAGEUP:
+								keyName = "\u21de";	//$NON-NLS-0$
+								break;
+							case lib.KEY.PAGEDOWN:
+								keyName = "\u21df";	//$NON-NLS-0$
+								break;
+							case lib.KEY.END:
+								keyName = "\u21f2";	//$NON-NLS-0$
+								break;
+							case lib.KEY.HOME:
+								keyName = "\u21f1";	//$NON-NLS-0$
+								break;
+							case lib.KEY.DEL:
+								keyName = "\u2326";	//$NON-NLS-0$
+								break;
+							default: //do nothing
+						}
+					}
+					
+					switch (lib.KEY[keyName]) {				
+						case lib.KEY.DOWN:
+							keyName = "\u2193";	//$NON-NLS-0$
+							break;
+						case lib.KEY.UP:
+							keyName = "\u2191"; //$NON-NLS-0$
+							break;
+						case lib.KEY.RIGHT:
+							keyName = "\u2192"; //$NON-NLS-0$
+							break;
+						case lib.KEY.LEFT:
+							keyName = "\u2190"; //$NON-NLS-0$
+							break;
+						
+						default: //do nothing
+					}
+						
 					return userString+keyName;
 				}
 			}
@@ -5046,20 +5120,22 @@ exports.ExplorerNavHandler = (function() {
 					if (overflow === "auto" || overflow === "scroll") { break; } //$NON-NLS-1$ //$NON-NLS-0$
 					offsetParent = offsetParent.parentNode;
 				}
-				var visible = true;
-				if(currentRowDiv.offsetTop <= offsetParent.scrollTop){
-					visible = false;
-					if(next === undefined){
-						next = false;
+				if (offsetParent) {
+					var visible = true;
+					if(currentRowDiv.offsetTop <= offsetParent.scrollTop){
+						visible = false;
+						if(next === undefined){
+							next = false;
+						}
+					}else if((currentRowDiv.offsetTop + currentRowDiv.offsetHeight) >= (offsetParent.scrollTop + offsetParent.clientHeight)){
+						visible = false;
+						if(next === undefined){
+							next = true;
+						}
 					}
-				}else if((currentRowDiv.offsetTop + currentRowDiv.offsetHeight) >= (offsetParent.scrollTop + offsetParent.clientHeight)){
-					visible = false;
-					if(next === undefined){
-						next = true;
+					if(!visible){
+						currentRowDiv.scrollIntoView(!next);
 					}
-				}
-				if(!visible){
-					currentRowDiv.scrollIntoView(!next);
 				}
 			}
 			if(this.explorer.onCursorChanged){
@@ -6193,11 +6269,11 @@ define('text',['module'], function (module) {
     return text;
 });
 
-define('text!orion/webui/dropdowntriggerbutton.html',[],function () { return '<button class="dropdownTrigger">${ButtonText}<span class="dropdownArrowDown core-sprite-openarrow"></span></button><ul class="dropdownMenu"></ul>';});
+define('text!orion/webui/dropdowntriggerbutton.html',[],function () { return '<button class="dropdownTrigger">${ButtonText}<!--span class="dropdownArrowDown core-sprite-openarrow"></span--></button><ul class="dropdownMenu"></ul>';});
 
 define('text!orion/webui/dropdowntriggerbuttonwitharrow.html',[],function () { return '<button>${ButtonText}</button><button class="dropdownTrigger"><span class="dropdownArrowDown core-sprite-openarrow"></span></button><ul class="dropdownMenu"></ul>';});
 
-define('text!orion/webui/submenutriggerbutton.html',[],function () { return '<li class="dropdownSubMenu"><span class="dropdownTrigger dropdownMenuItem" role="menuitem" tabindex="0">${ButtonText}<span class="dropdownArrowRight core-sprite-closedarrow"></span></span><ul class="dropdownMenu"></ul></li>';});
+define('text!orion/webui/submenutriggerbutton.html',[],function () { return '<li class="dropdownSubMenu"><span class="dropdownTrigger dropdownMenuItem" role="menuitem" tabindex="0"><span class="dropdownCommandName">${ButtonText}</span><span class="dropdownArrowRight core-sprite-closedarrow"></span></span><ul class="dropdownMenu"></ul></li>';});
 
 define('text!orion/webui/checkedmenuitem.html',[],function () { return '<li><label class="dropdownMenuItem"><input class="checkedMenuItem" role="menuitem" type="checkbox" />${ItemText}</label></li>';});
 
@@ -6527,10 +6603,23 @@ define('orion/webui/tooltip',['require', 'orion/webui/littlelib'], function(requ
 /*jslint sub:true*/
  /*global define document window Image */
  
-define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orion/webui/dropdown', 'text!orion/webui/dropdowntriggerbutton.html', 'text!orion/webui/dropdowntriggerbuttonwitharrow.html', 'text!orion/webui/submenutriggerbutton.html', 
-	'text!orion/webui/checkedmenuitem.html', 'orion/webui/tooltip'], 
-	function(require, util, lib, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, SubMenuButtonFragment, CheckedMenuItemFragment, Tooltip) {
-	
+define('orion/commands',[
+	'orion/util',
+	'orion/webui/littlelib',
+	'orion/webui/dropdown',
+	'text!orion/webui/dropdowntriggerbutton.html',
+	'text!orion/webui/dropdowntriggerbuttonwitharrow.html',
+	'text!orion/webui/submenutriggerbutton.html',
+	'text!orion/webui/checkedmenuitem.html',
+	'orion/webui/tooltip'
+], function(util, lib, Dropdown, DropdownButtonFragment, DropdownButtonWithArrowFragment, SubMenuButtonFragment, CheckedMenuItemFragment, Tooltip) {
+		/**
+		 * @name orion.commands.NO_IMAGE
+		 * @description Image data for 16x16 transparent png.
+		 * @property
+		 */
+		var NO_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAAtJREFUCNdjIBEAAAAwAAFletZ8AAAAAElFTkSuQmCC"; //$NON-NLS-0$
+
 		/* a function that can be set for retrieving bindings stored elsewhere, such as a command registry */
 		var getBindings = null;
 		
@@ -6932,12 +7021,22 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 		return element;
 	}
 	
-	function createCommandMenuItem(parent, command, commandInvocation, keyBinding, callback) {
+	function appendKeyBindingString(element, keyBindingString) {
+		var span = document.createElement("span"); //$NON-NLS-0$
+		span.classList.add("dropdownKeyBinding"); //$NON-NLS-0$
+		span.appendChild(document.createTextNode(keyBindingString));
+		element.appendChild(span);
+	}
+	
+	function createCommandMenuItem(parent, command, commandInvocation, keyBinding, callback, keyBindingString) {
 		var element;
 		var dropdown = parent.dropdown;
 		if (command.hrefCallback) {
 			element = document.createElement("a"); //$NON-NLS-0$
-			element.appendChild(document.createTextNode(command.name));
+			var span = document.createElement("span");
+			span.appendChild(document.createTextNode(command.name));
+			span.classList.add("dropdownCommandName"); //$NON-NLS-0$
+			element.appendChild(span);
 			var href = command.hrefCallback.call(commandInvocation.handler, commandInvocation);
 			if (href.then){
 				href.then(function(l){
@@ -6956,7 +7055,10 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 		} else {
 			element = document.createElement("span"); //$NON-NLS-0$
 			element.tabIndex = 0;
-			element.appendChild(document.createTextNode(command.name));
+			var span = document.createElement("span");
+			span.appendChild(document.createTextNode(command.name));
+			span.classList.add("dropdownCommandName"); //$NON-NLS-0$
+			element.appendChild(span);
 			var onClick = callback || command.callback;
 			if (onClick) {
 				command.onClick = onClick;
@@ -6984,6 +7086,9 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 			});
 		}
 		
+		if (keyBindingString) {
+			appendKeyBindingString(element, keyBindingString);
+		}
 		var li = document.createElement("li"); //$NON-NLS-0$
 		parent.appendChild(li);
 		li.appendChild(element); //$NON-NLS-0$
@@ -7132,7 +7237,7 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
 			this.positioningNode = options.positioningNode; // optional positioning node choice command.
-			this.image = options.image || (require.toUrl && require.toUrl("images/none.png")); //$NON-NLS-0$
+			this.image = options.image || NO_IMAGE;
 			this.imageClass = options.imageClass;   // points to the location in a sprite
 			this.addImageClassToElement = options.addImageClassToElement; // optional boolean if true will add the image class to the 
 																		// element's class list
@@ -7211,7 +7316,7 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 		 * externally.
 		 */
 		hasImage: function() {
-			return this.imageClass || this.image !== require.toUrl("images/none.png"); //$NON-NLS-0$
+			return this.imageClass || this.image !== NO_IMAGE; //$NON-NLS-0$
 		}
 	};  // end Command prototype
 	Command.prototype.constructor = Command;
@@ -7230,6 +7335,7 @@ define('orion/commands',['require', 'orion/util', 'orion/webui/littlelib', 'orio
 		CommandsProxy: CommandsProxy,
 		getKeyBindings: getKeyBindings,
 		processKey: processKey,
+		NO_IMAGE: NO_IMAGE,
 		_testMethodProcessKey: _processKey  // only exported for test cases
 	};
 });
@@ -9533,9 +9639,7 @@ define('orion/explorers/navigatorRenderer',[
 		noFile.classList.add("noFile"); //$NON-NLS-0$
 		noFile.textContent = messages["NoFile"];
 		var plusIcon = document.createElement("span"); //$NON-NLS-0$
-		plusIcon.classList.add("core-sprite-addcontent"); //$NON-NLS-0$
-		plusIcon.classList.add("icon-inline"); //$NON-NLS-0$
-		plusIcon.classList.add("imageSprite"); //$NON-NLS-0$
+		plusIcon.appendChild(document.createTextNode(messages["File"]));
 		lib.processDOMNodes(noFile, [plusIcon]);
 		td.appendChild(noFile);
 		tr.appendChild(td);
@@ -19899,7 +20003,7 @@ define("orion/editor/projectionTextModel", ['orion/editor/textModel', 'orion/edi
 		 */
 		destroy: function() {
 			if (this._model) {
-				this._model.removeEventListener("preChanged", this._listener.onChanged); //$NON-NLS-0$
+				this._model.removeEventListener("postChanged", this._listener.onChanged); //$NON-NLS-0$
 				this._model.removeEventListener("preChanging", this._listener.onChanging); //$NON-NLS-0$
 				this._model = null;
 			}
@@ -21929,7 +22033,7 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 				if (message) {
 					this.reportStatus(message, "error"); //$NON-NLS-0$
 				} else {
-					if (contents !== null && contents !== undefined) {
+					if (contents !== null && contents !== undefined && typeof contents === "string") { //$NON-NLS-0$
 						this._setModelText(contents);
 					}
 				}
@@ -23660,7 +23764,7 @@ define('orion/commandRegistry',[
 				return;
 			} 
 			if (contributions) {
-				this._render(this._contributionsByScopeId[scopeId], parent, items, handler, renderType || "button", userData, domNodeWrapperList); //$NON-NLS-0$
+				this._render(contributions, parent, items, handler, renderType || "button", userData, domNodeWrapperList); //$NON-NLS-0$
 				// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
 				this._checkForTrailingSeparator(parent, renderType, true);
 			}
@@ -23683,6 +23787,9 @@ define('orion/commandRegistry',[
 				if (node.commandTooltip) {
 					node.commandTooltip.destroy();
 				}
+				if (node.extraCommandTooltip) {
+					node.extraCommandTooltip.destroy();
+				}
 				if (node.emptyGroupTooltip) {
 					node.emptyGroupTooltip.destroy();
 				}
@@ -23694,6 +23801,7 @@ define('orion/commandRegistry',[
 		_render: function(contributions, parent, items, handler, renderType, userData, domNodeWrapperList) {
 			// sort the items
 			var sortedByPosition = contributions.sortedContributions;
+			
 			if (!sortedByPosition) {
 				sortedByPosition = [];
 				var pushedItem = false;
@@ -23725,6 +23833,7 @@ define('orion/commandRegistry',[
 				}
 				
 				if (contribution.children && Object.getOwnPropertyNames(contribution.children).length > 0) {
+					
 					var childContributions = contribution.children;
 					var created;
 					if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
@@ -23754,12 +23863,13 @@ define('orion/commandRegistry',[
 
 							// render the children asynchronously
 							if (created) {
-								window.setTimeout(function() {
+//								window.setTimeout(function() {
 									self._render(contribution.children, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 									// special post-processing when we've created a menu in an image bar.  We want to get rid 
 									// of a trailing separator in the menu first, and then decide if our menu is necessary
 									self._checkForTrailingSeparator(created.menu, "menu", true);  //$NON-NLS-0$
 									// now determine if we actually needed the menu or not
+									
 									if (created.menu.childNodes.length === 0) {
 										if (contribution.emptyGroupMessage) {
 											if (!created.menuButton.emptyGroupTooltip) {
@@ -23774,8 +23884,14 @@ define('orion/commandRegistry',[
 											if(domNodeWrapperList){
 												mNavUtils.removeNavGrid(domNodeWrapperList, created.menuButton);
 											}
+											
 											if (created.menu.parentNode) {
-												created.menu.parentNode.removeChild(created.menu);
+												created.menu.remove();
+												created.menuButton.remove();
+												
+												if(created.extraDropdownButton){
+													created.extraDropdownButton.remove();
+												}
 											}
 											if (created.destroyButton && created.destroyButton.parentNode) {
 												created.destroyButton.parentNode.removeChild(created.destroyButton);
@@ -23784,7 +23900,7 @@ define('orion/commandRegistry',[
 									} else {
 										created.menuButton.style.visibility = "visible";  //$NON-NLS-0$
 									}
-								}, 0);
+//								}, 0);
 							}
 						} else {  
 							// rendering a group using a separator on each end. We do it synchronously because order matters with
@@ -23810,6 +23926,9 @@ define('orion/commandRegistry',[
 							var subMenu = self._createDropdownMenu(parent, contribution.title, true, null, null, contribution.imageClass);
 							if (subMenu) {
 								self._render(childContributions, subMenu.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
+								// special post-processing when we've created a menu in an image bar.  We want to get rid 
+								// of a trailing separator in the menu first, and then decide if our menu is necessary
+								self._checkForTrailingSeparator(subMenu.menu, "menu", true);  //$NON-NLS-0$
 								// If no items rendered in the submenu, we don't need it.
 								if (subMenu.menu.childNodes.length === 0 && subMenu.destroyButton) {
 									parent.removeChild(subMenu.destroyButton);
@@ -23898,7 +24017,11 @@ define('orion/commandRegistry',[
 								self._invoke(invocation);
 							};
 							if (renderType === "menu") { //$NON-NLS-0$
-								element = Commands.createCommandMenuItem(parent, command, invocation, null, onClick);
+								var bindingString = null;
+								if (keyBinding && keyBinding.keyBinding) {
+									bindingString = UIUtil.getUserKeyString(keyBinding.keyBinding);
+								}
+								element = Commands.createCommandMenuItem(parent, command, invocation, null, onClick, bindingString);
 							} else {
 								id = renderType + command.id + index;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
 								element = Commands.createCommandItem(parent, command, invocation, id, null, renderType === "tool", onClick); //$NON-NLS-0$
@@ -23922,7 +24045,7 @@ define('orion/commandRegistry',[
 			if (!parent || !lib.contains(document.body, parent)) {
 				return null;
 			}
-			var menuButton, newMenu;
+			var menuButton, newMenu, extraDropdownButton;
 			var destroyButton, menuParent = parent;
 			if (nested) {
 				var range = document.createRange();
@@ -23960,14 +24083,15 @@ define('orion/commandRegistry',[
 				}
 				menuButton = created.menuButton;
 				newMenu = created.menu;
+				extraDropdownButton = created.extraDropdownButton;
 				if (tooltip) {
 					menuButton.commandTooltip = new mTooltip.Tooltip({
 						node: menuButton,
-						text: defaultInvocation && defaultInvocation.command && defaultInvocation.command.name ? tooltip + ": " + defaultInvocation.command.name: tooltip,
+						text: defaultInvocation && defaultInvocation.command && defaultInvocation.command.name ? tooltip + ": " + defaultInvocation.command.name: tooltip, //$NON-NLS-0$
 						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 					if(created.extraDropdownButton){
-						menuButton.commandTooltip = new mTooltip.Tooltip({
+						menuButton.extraCommandTooltip = new mTooltip.Tooltip({
 							node: created.extraDropdownButton,
 							text: tooltip,
 							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -23976,7 +24100,7 @@ define('orion/commandRegistry',[
 				}
 			}
 			
-			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton};
+			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton, extraDropdownButton: extraDropdownButton};
 		},
 		
 		_generateMenuSeparator: function(dropdown) {
@@ -25041,11 +25165,33 @@ define('orion/widgets/browse/browseView',[
 				this.loadResourceList(PageUtil.matchResourceParameters().resource + "?depth=1", false).then(this.loaded.bind(this)); //$NON-NLS-0$
 			}
 		},
+		loaded: function(){
+		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
 			return new Deferred().resolve();
 		},
 		updateCommands: function(selections) {
+		},
+		setCommandsVisible: function(section, visible) {
+			section.actionsNode.style.visibility = visible ? "" : "hidden";
+			var selectionPolicy = visible ? null : "cursorOnly"; //$NON-NLS-0$
+			this.renderer.selectionPolicy = selectionPolicy;
+			var navHandler = this.getNavHandler();
+			if (navHandler) {
+				navHandler.setSelectionPolicy(selectionPolicy);
+			}
+			if (visible) {
+				this.updateCommands();
+			} else {
+				if(this.actionsSections) {
+					this.actionsSections.forEach(function(id) {
+						if(lib.node(id)) {
+							this.commandRegistry.destroy(id);
+						}
+					}.bind(this));
+				}
+			}
 		}
 	});
 	
@@ -25063,12 +25209,12 @@ define('orion/widgets/browse/browseView',[
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.preferences = options.preferences;
-		this.readonly = typeof options.readonly === 'undefined' ? false : options.readonly;
-		this.showFolderNav = true;
+		this.readonly = true;
 		this.readmeHeaderClass = options.readmeHeaderClass;
 		this.editorView = options.editorView;
 		this._maxEditorLines = options.maxEditorLines;
 		this.imageView = options.imageView;
+		this.breadCrumbInHeader = options.breadCrumbInHeader;
 		this.isMarkdownView = options.isMarkdownView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
@@ -25115,63 +25261,70 @@ define('orion/widgets/browse/browseView',[
 			function renderSections(sectionsOrder){
 				sectionsOrder.forEach(function(sectionName){
 					if(sectionName === "folderNav") {
-						if (this.showFolderNav) {
-							var navNode = document.createElement("div"); //$NON-NLS-0$
-							navNode.id = "folderNavNode"; //$NON-NLS-0$
-							this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: !this.readonly});
-							if(this.editorView) {//To embed an orion editor in the section
-								this._foldersSection.setContent(this.editorView.getParent());
-								this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
-								this.editorView.create();
-								var textView = this.editorView. editor.getTextView();
-								textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
-									var linesToRender = textView.getModel().getLineCount();
-									if(this._maxEditorLines && this._maxEditorLines > 0 && linesToRender >this._maxEditorLines) {
-										linesToRender = this._maxEditorLines;
-									}
-									var textViewheight = textView.getLineHeight() * linesToRender + 20;
-									this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
-								}.bind(this));
-								this.editor = this.editorView.editor;
-							} else if(this.isMarkdownView) {
-								div = document.createElement("div"); //$NON-NLS-0$
-								this.markdownView.displayContents(div, this._metadata);
-								this._foldersSection.setContent(div);
-							} else if(this.imageView) {
-								//Do nothing, updateImage will be called.
+						var navNode = document.createElement("div"); //$NON-NLS-0$
+						navNode.id = "folderNavNode"; //$NON-NLS-0$
+						this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Browse", canHide: !this.readonly});
+						this.sectionContents = document.createElement("div"); //$NON-NLS-0$
+						this.sectionContents.classList.add("browseSectionWrapper"); 
+						this._foldersSection.setContent(this.sectionContents);
+						
+						//Render the branch selector 
+						var tileNode = this._foldersSection.getTitleElement();
+						if(tileNode) {
+							lib.empty(tileNode);
+							if(this.branchSelector) {
+								tileNode.appendChild(this.branchSelector.node);
+								this.branchSelector.refresh();
+							}
+						}
+						//Render the bread crumb 
+						if(this.breadCrumbMaker) {
+							var bcNodeContainer = document.createElement("div"), bcNode=document.createElement("div");
+							bcNodeContainer.appendChild(bcNode);
+							if(this.breadCrumbInHeader) {
+								bcNodeContainer.classList.add("breadCrumbContainerInHeader"); 
+								tileNode.appendChild(bcNodeContainer);
+								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 150/*branch selector width*/ - 50);
 							} else {
-								this.folderNavExplorer = new FolderNavExplorer({
-									parentId: navNode,
-									readonly: this.readonly,
-									breadCrumbMaker: this.breadCrumbMaker,
-									clickHandler: this.clickHandler,
-									fileClient: this.fileClient,
-									commandRegistry: this.commandRegistry,
-									contentTypeRegistry: this.contentTypeRegistry
-								});
-								this._foldersSection.embedExplorer(this.folderNavExplorer, null, true);
-								this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
-								this.folderNavExplorer.loadRoot(this._metadata);
+								bcNodeContainer.classList.add("breadCrumbContainer"); 
+								this.sectionContents.appendChild(bcNodeContainer);
+								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 5);
 							}
-							if(this.breadCrumbMaker) {
-								var tileNode = this._foldersSection.getTitleElement();
-								if(tileNode) {
-									lib.empty(tileNode);
-									var bcNodeContainer = document.createElement("div"); //$NON-NLS-0$
-									bcNodeContainer.classList.add("breadCrumbContainer"); 
-									var bcNode = document.createElement("div"); //$NON-NLS-0$
-									if(this.branchSelector) {
-										tileNode.appendChild(this.branchSelector.node);
-									}
-									bcNodeContainer.appendChild(bcNode);
-									tileNode.appendChild(bcNodeContainer);
-									this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 150/*branch selector width*/ - 50);
-									if(this.branchSelector) {
-										this.branchSelector.refresh();
-									}
-									
+						}
+						if(this.editorView) {//To embed an orion editor in the section
+							this.sectionContents.appendChild(this.editorView.getParent());
+							this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
+							this.editorView.create();
+							var textView = this.editorView. editor.getTextView();
+							textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
+								var linesToRender = textView.getModel().getLineCount();
+								if(this._maxEditorLines && this._maxEditorLines > 0 && linesToRender >this._maxEditorLines) {
+									linesToRender = this._maxEditorLines;
 								}
-							}
+								var textViewheight = textView.getLineHeight() * linesToRender + 20;
+								this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
+							}.bind(this));
+							this.editor = this.editorView.editor;
+						} else if(this.isMarkdownView) {
+							div = document.createElement("div"); //$NON-NLS-0$
+							this.markdownView.displayContents(div, this._metadata);
+							this.sectionContents.appendChild(div);
+						} else if(this.imageView) {
+							//Do nothing, updateImage will be called.
+						} else {
+							this.folderNavExplorer = new FolderNavExplorer({
+								parentId: navNode,
+								readonly: this.readonly,
+								breadCrumbMaker: this.breadCrumbMaker,
+								clickHandler: this.clickHandler,
+								fileClient: this.fileClient,
+								commandRegistry: this.commandRegistry,
+								contentTypeRegistry: this.contentTypeRegistry
+							});
+							//this._foldersSection.embedExplorer(this.folderNavExplorer, null, true);
+							this.sectionContents.appendChild(this.folderNavExplorer.parent);
+							this.folderNavExplorer.setCommandsVisible(this._foldersSection, this._isCommandsVisible());
+							this.folderNavExplorer.loadRoot(this._metadata);
 						}
 					} else if(sectionName === "readme"){
 						if (readmeMd) {
@@ -25196,7 +25349,7 @@ define('orion/widgets/browse/browseView',[
 			td.appendChild(imageContent);
 			tr.appendChild(td);
 			imageTable.appendChild(tr);
-			this._foldersSection.setContent(imageTable);
+			this.sectionContents.appendChild(imageTable);
 		},
 		create: function() {
 			if(this._metadata.Projects){ //this is a workspace root
@@ -28479,7 +28632,7 @@ define("orion/editor/textDND", ['orion/util'], function(util) { //$NON-NLS-1$ //
 
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -28679,6 +28832,12 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 			}
 			
 			if (0 < proposals.length) {
+				//sort the proposals by name
+				proposals.sort(function(p1, p2) {
+					if (p1.name < p2.name) return -1;
+					if (p1.name > p2.name) return 1;
+					return 0;
+				});
 				// if any templates were added to the list of 
 				// proposals, add a title as the first element
 				proposals.splice(0, 0, {
@@ -29307,8 +29466,6 @@ define('orion/editorPreferences',[], function() {
 		autoLoadVisible: true,
 		saveDiffs: true,
 		saveDiffsVisible: true,
-		showBlame: false,
-		showBlameVisible: true,
 		contentAssistAutoTrigger: true,
 		contentAssistAutoTriggerVisible: true,
 		showOccurrences: false,
@@ -31527,10 +31684,11 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		regex.lastIndex = 0;
 		if (currentLine) {
 			var lineStart = currentLine.index;
-			var char = text.charAt(lineStart);
-			while (0 <= lineStart && char !== NEWLINE && char !== CR) {
-				lineStart--;
-				char = text.charAt(lineStart);
+			while (0 <= --lineStart) {
+				var char = text.charAt(lineStart);
+				if (char === NEWLINE || char === CR) {
+					break;
+				}
 			}
 			lineString = text.substring(lineStart + 1, currentLine.index + currentLine[1].length);
 			regex.lastIndex = indexAdjustment = currentLine.index - lineStart - 1;
@@ -31562,6 +31720,24 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		}
 		regex.lastIndex = initialLastIndex;
 		return null;
+	};
+	var substituteCaptureValues = function(regex, resolvedResult) {
+		var regexString = regex.toString();
+		captureReferenceRegex.lastIndex = 0;
+		if (!captureReferenceRegex.test(regexString)) {
+			/* nothing to do */
+			return regex;
+		}
+
+		captureReferenceRegex.lastIndex = 0;
+		var result = captureReferenceRegex.exec(regexString);
+		while (result) {
+			regexString = regexString.replace(result[0], resolvedResult[result[1]] || "");
+			captureReferenceRegex.lastIndex = 0;
+			result = captureReferenceRegex.exec(regexString);
+		}
+		/* return an updated regex, remove the leading '/' and trailing /g */
+		return new RegExp(regexString.substring(1, regexString.length - 2), "g");
 	};
 	var updateMatch = function(match, text, matches, minimumIndex) {
 		var regEx = match.pattern.regex ? match.pattern.regex : match.pattern.regexBegin;
@@ -31619,8 +31795,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		patterns.forEach(function(current) {
 			var regex = current.regex || current.regexBegin;
 			regex.oldLastIndex = regex.lastIndex;
-			regex.lastIndex = 0;
-			var result = regex.exec(text);
+			var result = _findMatch(regex, text, 0);
 			if (result) {
 				matches.push({result: result, pattern: current});
 			}
@@ -31653,7 +31828,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			if (current.pattern.regex) {	/* line pattern defined by a "match" */
 				result = current.result;
 				end = start + result[0].length;
-				var tokenStyle = {start: offset + start, end: offset + end, style: current.pattern.pattern.name, isWhitespace: current.pattern.isWhitespace};
+				var tokenStyle = {start: offset + start, end: offset + end, style: current.pattern.pattern.name};
 				if (!ignoreCaptures) {
 					if (current.pattern.pattern.captures) {
 						getCaptureStyles(result, current.pattern.pattern.captures, offset + start, substyles);
@@ -31677,14 +31852,20 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 				mergeStyles(tokenStyle, substyles, styles);
 			} else {	/* pattern defined by a "begin/end" pair */
-				current.pattern.regexEnd.lastIndex = current.result.index + current.result[0].length;
-				result = current.pattern.regexEnd.exec(text);
+				/* 
+				 * If the end match contains a capture reference (eg.- "\1") then update
+				 * its regex with the resolved capture values from the begin match.
+				 */
+				var endRegex = current.pattern.regexEnd;
+				endRegex = substituteCaptureValues(endRegex, current.result);
+
+				result = _findMatch(endRegex, text, current.result.index + current.result[0].length);
 				if (!result) {
 					eolRegex.lastIndex = 0;
 					result = eolRegex.exec(text);
 				}
 				end = result.index + result[0].length;
-				styles.push({start: offset + start, end: offset + end, style: current.pattern.pattern.name, isWhitespace: current.pattern.isWhitespace});
+				styles.push({start: offset + start, end: offset + end, style: current.pattern.pattern.name});
 			}
 			index = result.index + result[0].length;
 			updateMatch(current, text, matches, index);
@@ -31775,18 +31956,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					 * its regex with the resolved capture values from the begin match.
 					 */
 					var endRegex = current.pattern.regexEnd;
-					var regexString = endRegex.toString();
-					captureReferenceRegex.lastIndex = 0;
-					if (captureReferenceRegex.test(regexString)) {
-						captureReferenceRegex.lastIndex = 0;
-						var result = captureReferenceRegex.exec(regexString);
-						while (result) {
-							regexString = regexString.replace(result[0], current.result[result[1]] || "");
-							result = captureReferenceRegex.exec(regexString);
-						}
-						/* create the updated regex, remove the leading '/' and trailing /g */
-						endRegex = new RegExp(regexString.substring(1, regexString.length - 2), "g");
-					}
+					endRegex = substituteCaptureValues(endRegex, current.result);
 
 					var lastIndex = contentStart;
 					while (!resultEnd) {
@@ -32868,7 +33038,7 @@ define("orion/editor/stylers/shared/syntax", [], function() { //$NON-NLS-0$
 				}, {
 					id: "comment_singleline",
 					begin: "//",
-					end: ".*",
+					end: "$",
 					name: "comment.line.double-slash",
 					patterns: [
 						{
@@ -32968,13 +33138,9 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "keyword.control.js" //$NON-NLS-0$
 			}, {
-				begin: "'(?:\\\\.|[^\\\\'])*\\\\$", //$NON-NLS-0$
-				end: "^(?:$|(?:\\\\.|[^\\\\'])*('|[^\\\\]$))", //$NON-NLS-0$
-				name: "string.quoted.single.js" //$NON-NLS-0$
-			}, {
-				begin: '"(?:\\\\.|[^\\\\"])*\\\\$', //$NON-NLS-0$
-				end: '^(?:$|(?:\\\\.|[^\\\\"])*("|[^\\\\]$))', //$NON-NLS-0$
-				name: "string.quoted.double.js" //$NON-NLS-0$
+				begin: "(['\"])(?:\\\\.|[^\\\\\\1])*\\\\$", //$NON-NLS-0$
+				end: "^(?:$|(?:\\\\.|[^\\\\\\1])*(\\1|[^\\\\]$))", //$NON-NLS-0$
+				name: "string.quoted.multiline.js" //$NON-NLS-0$
 			}
 		]
 	});
@@ -33056,13 +33222,9 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/shared/syn
 				match: "#[0-9A-Fa-f]+\\b",
 				name: "constant.numeric.hex.css"
 			}, {
-				begin: "'[^'\\n]*\\\\\n", //$NON-NLS-0$
-				end: "(?:[^'\\n]*\\\\\\n)*[^'\\n]*'?", //$NON-NLS-0$
-				name: "string.quoted.single.css" //$NON-NLS-0$
-			}, {
-				begin: "\"[^\"\\n]*\\\\\n", //$NON-NLS-0$
-				end: "(?:[^\"\\n]*\\\\\\n)*[^\"\\n]*\"?", //$NON-NLS-0$
-				name: "string.quoted.double.css" //$NON-NLS-0$
+				begin: "(['\"])(?:\\\\.|[^\\\\\\1])*\\\\$", //$NON-NLS-0$
+				end: "^(?:$|(?:\\\\.|[^\\\\\\1])*(\\1|[^\\\\]$))", //$NON-NLS-0$
+				name: "string.quoted.multiline.css" //$NON-NLS-0$
 			}, {
 				/* override orion.patterns#comment_singleline */
 				id: "comment_singleline"
@@ -33125,7 +33287,7 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/shared/s
 				include: "orion.patterns"
 			}, {
 				begin: "#",
-				end: ".*",
+				end: "$",
 				name: "comment.line.number-sign.php",
 				patterns: [
 					{
@@ -33204,7 +33366,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(?i)<script(?:\\s+language\\s*=\\s*(?:'javascript'|\"javascript\"))?\\s*>",
+				begin: "(?i)<script\\s*>|<script\\s.*(?:language\\s*=\\s*(['\"])javascript\\1|type\\s*=\\s*(['\"])(?:text|application)/(?:javascript|ecmascript)\\2).*>",
 				end: "(?i)</script>",
 				captures: {
 					0: {name: "entity.name.tag.html"}
@@ -33216,7 +33378,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				begin: "(?i)<script(?:\\s+language\\s*=\\s*(?:'php'|\"php\"))?\\s*>",
+				begin: "(?i)<script\\s.*(?:language\\s*=\\s*(['\"])php\\1|type\\s*=\\s*(['\"])text/x-php\\2).*>",
 				end: "(?i)</script>",
 				captures: {
 					0: {name: "entity.name.tag.html"}
@@ -33258,7 +33420,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 				name: "comment.block.html",
 				patterns: [
 					{
-						match: "(\\b)(TODO)(\\b)(.*)",
+						match: "(\\b)(TODO)(\\b)(((?!-->).)*)",
 						name: "meta.annotation.task.todo",
 						captures: {
 							2: {name: "keyword.other.documentation.task"},
@@ -33442,7 +33604,7 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/share
 				name: "constant.numeric.number.python"
 			}, {
 				begin: "#",
-				end: ".*",
+				end: "$",
 				name: "comment.line.number-sign.python",
 				patterns: [
 					{
@@ -33455,12 +33617,8 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/share
 					}
 				]
 			}, {
-				begin: "'''",
-				end: "'''",
-				name: "string.quoted.triple.python"
-			}, {
-				begin: '"""',
-				end: '"""',
+				begin: "(['\"])\\1\\1",
+				end: "\\1\\1\\1",
 				name: "string.quoted.triple.python"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
@@ -33527,7 +33685,7 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/shared/
 				id: "comment_multiline",
 			}, {
 				begin: "#",
-				end: ".*",
+				end: "$",
 				name: "comment.line.number-sign.ruby",
 				patterns: [
 					{
@@ -33778,332 +33936,6 @@ define('orion/widgets/browse/staticDataSource',[
 
 /** @namespace The global container for eclipse APIs. */
 
-define('orion/widgets/browse/readonlyFileClient',['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"], function(messages, Deferred, i18nUtil){
-	/**
-	 * @name orion.serviceregistry.DeferredService
-	 * @description Creates a new service promise to resolve the service at a later time.
-	 * @class A service that is resolved later
-	 * @private
-	 * @param {orion.serviceregistry.ServiceReference} implementation The implementation of the service
-	 * @param {Function} isRegistered A function to call to know if the service is already registered
-	 */
-	function DeferredService(implementation) {
-		function _createServiceCall(methodName) {
-			return function() {
-					var d;
-					try {
-						var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
-						if (result && typeof result.then === "function") {
-							return result;
-						} else {
-							d = new Deferred();
-							d.resolve(result);
-						}
-					} catch (e) {
-							d = new Deferred();
-							d.reject(e);
-					}
-					return d.promise;
-			};
-		}
-
-		var method;
-		for (method in implementation) {
-			if (typeof implementation[method] === 'function') {
-				this[method] = _createServiceCall(method);
-			}
-		}
-	}
-	
-	/**
-	 * @name orion.serviceregistry.ServiceReference
-	 * @description Creates a new service reference.
-	 * @class A reference to a service in the Orion service registry
-	 * @param {String} serviceId The symbolic id of this service instance
-	 * @param {String} name The service name
-	 * @param {Object} properties A JSON object containing the service's declarative properties
-	 */
-	function ServiceReference(serviceId, objectClass, properties, service) {
-		this._properties = properties || {};
-		this._properties["service.id"] = serviceId;
-		this._properties.objectClass = objectClass;
-		this._properties["service.names"] = objectClass;
-		this.service = service;
-	}
-
-	ServiceReference.prototype = /** @lends orion.serviceregistry.ServiceReference.prototype */
-	{
-		/**
-		 * @name getPropertyKeys
-		 * @description Returns the names of the declarative properties of this service.
-		 * @function
-		 * @public
-		 * @memberof orion.serviceregistry.ServiceReference.prototype
-		 * @returns the names of the declarative properties of this service
-		 */
-		getPropertyKeys: function() {
-			var result = [];
-			var name;
-			for (name in this._properties) {
-				if (this._properties.hasOwnProperty(name)) {
-					result.push(name);
-				}
-			}
-			return result;
-		},
-		/**
-		 * @name getProperty
-		 * @description Returns the declarative service property with the given name, or <code>undefined</code>
-		 * if this service does not have such a property.
-		 * @function
-		 * @public
-		 * @memberof orion.serviceregistry.ServiceReference.prototype
-		 * @param {String} propertyName The name of the service property to return
-		 * @returns The {String} property with the given name or <code>undefined</code>
-		 */
-		getProperty: function(propertyName) {
-			return this._properties[propertyName];
-		}
-	};
-	ServiceReference.prototype.constructor = ServiceReference;
-
-	/**
-	 * This helper method implements invocation of the service call,
-	 * with retry on authentication error if needed.
-	 * @private
-	 */
-	function _doServiceCall(fileService, funcName, funcArgs) {
-		//if the function is not implemented in the file service, we throw an exception to the caller
-		if(!fileService[funcName]){
-			throw funcName + messages[" is not supported in this file system"];
-		}
-		return fileService[funcName].apply(fileService, funcArgs);
-	}
-	
-	/**
-	 * Creates a new file client.
-	 * @class The file client provides a convenience API for interacting with file services
-	 * provided by plugins. This class handles authorization, and authentication-related
-	 * error handling.
-	 * @name orion.fileClient.FileClient
-	 */
-	function FileClient(/*serviceRegistry, */serviceRefs, filter) {
-		var allReferences = [];
-		serviceRefs.forEach(function(serviceRef){
-			var serviceImpl = new DeferredService(serviceRef.impl);
-			allReferences.push(
-				new ServiceReference(serviceRef.id, "readonly.file.service", serviceRef.serviceProperties, serviceImpl)
-			);
-		});
-		
-		//var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
-		var _references = allReferences;
-		if (filter) {
-			_references = [];
-			for(var i = 0; i < allReferences.length; ++i) {
-				if (filter(allReferences[i])) {
-					_references.push(allReferences[i]);
-				}
-			}
-		}
-		var _patterns = [];
-		var _services = [];
-		var _names = [];
-		
-		function _noMatch(location) {
-			var d = new Deferred();
-			d.reject(messages["No Matching FileService for location:"] + location);
-			return d;
-		}
-		
-		var _fileSystemsRoots = [];
-		var _allFileSystemsService =  {
-			fetchChildren: function() {
-				var d = new Deferred();
-				d.resolve(_fileSystemsRoots);
-				return d;
-			},
-			createWorkspace: function() {
-				var d = new Deferred();
-				d.reject(messages["no file service"]);
-				return d;
-			},
-			loadWorkspaces: function() {
-				var d = new Deferred();
-				d.reject(messages['no file service']);
-				return d;
-			},
-			loadWorkspace: function(location) {
-				var d = new Deferred();
-				window.setTimeout(function() {
-					d.resolve({
-						Directory: true, 
-						Length: 0, 
-						LocalTimeStamp: 0,
-						Name: messages["File Servers"],
-						Location: "/",  //$NON-NLS-0$
-						Children: _fileSystemsRoots,
-						ChildrenLocation: "/" //$NON-NLS-0$
-					});
-				}, 100);
-				return d;
-			},
-			search: _noMatch,
-			createProject: _noMatch,
-			createFolder: _noMatch,
-			createFile: _noMatch,
-			deleteFile: _noMatch,
-			moveFile: _noMatch,
-			copyFile: _noMatch,
-			read: _noMatch,
-			write: _noMatch
-		};
-				
-		for(var j = 0; j < _references.length; ++j) {
-			_fileSystemsRoots[j] = {
-				Directory: true, 
-				Length: 0, 
-				LocalTimeStamp: 0,
-				Location: _references[j].getProperty("top"), //$NON-NLS-0$
-				ChildrenLocation: _references[j].getProperty("top"), //$NON-NLS-0$
-				Name: _references[j].getProperty("Name")		 //$NON-NLS-0$
-			};
-
-			var patternString = _references[j].getProperty("pattern") || ".*"; //$NON-NLS-1$ //$NON-NLS-0$
-			if (patternString[0] !== "^") { //$NON-NLS-0$
-				patternString = "^" + patternString; //$NON-NLS-0$
-			}
-			_patterns[j] = new RegExp(patternString);			
-			//_services[j] = serviceRegistry.getService(_references[j]);
-			_services[j] = _references[j].service;
-			_names[j] = _references[j].getProperty("Name"); //$NON-NLS-0$
-			
-			if(_references[j].getProperty("NameKey") && _references[j].getProperty("nls")){
-				i18nUtil.getMessageBundle(_references[j].getProperty("nls")).then(function(j, pluginMessages){
-					_fileSystemsRoots[j].Name = pluginMessages[_references[j].getProperty("NameKey")]; //$NON-NLS-0$
-					_names[j] = pluginMessages[_references[j].getProperty("NameKey")]; //$NON-NLS-0$
-				}.bind(this, j));
-			}
-		}
-				
-		this._getServiceIndex = function(location) {
-			// client must specify via "/" when a multi file service tree is truly wanted
-			if (location === "/") { //$NON-NLS-0$
-				return -1;
-			} else if (!location || (location.length && location.length === 0)) {
-				// TODO we could make the default file service a preference but for now we use the first one
-				return _services[0] ? 0 : -1;
-			}
-			for(var i = 0; i < _patterns.length; ++i) {
-				if (_patterns[i].test(location)) {
-					return i;
-				}
-			}
-			throw messages['No Matching FileService for location:'] + location;
-		};
-		
-		this._getService = function(location) {
-			var i = this._getServiceIndex(location);
-			return i === -1 ? _allFileSystemsService : _services[i];
-		};
-		
-		this._getServiceName = function(location) {
-			var i = this._getServiceIndex(location);
-			return i === -1 ? _allFileSystemsService.Name : _names[i];
-		};
-		
-		this._getServiceRootURL = function(location) {
-			var i = this._getServiceIndex(location);
-			return i === -1 ? _allFileSystemsService.Location : _fileSystemsRoots[i].Location;
-		};
-	}
-	
-	FileClient.prototype = /**@lends orion.fileClient.FileClient.prototype */ {
-		/**
-		 * Returns the file service managing this location
-		 * @param location The location of the item 
-		 */
-		getService: function(location) {
-			return this._getService(location);
-		},
-		 
-		/**
-		 * Returns the name of the file service managing this location
-		 * @param location The location of the item 
-		 */
-		fileServiceName: function(location) {
-			return this._getServiceName(location);
-		},
-		 
-		/**
-		 * Returns the root url of the file service managing this location
-		 * @param location The location of the item 
-		 */
-		fileServiceRootURL: function(location) {
-			return this._getServiceRootURL(location);
-		},
-		 
-		/**
-		 * Obtains the children of a remote resource
-		 * @param location The location of the item to obtain children for
-		 * @return A deferred that will provide the array of child objects when complete
-		 */
-		fetchChildren: function(location) {
-			return _doServiceCall(this._getService(location), "fetchChildren", arguments); //$NON-NLS-0$
-		},
-
-		/**
-		 * Loads all the user's workspaces. Returns a deferred that will provide the loaded
-		 * workspaces when ready.
-		 */
-		loadWorkspaces: function() {
-			return _doServiceCall(this._getService(), "loadWorkspaces", arguments); //$NON-NLS-0$
-		},
-		
-		/**
-		 * Returns the contents or metadata of the file at the given location.
-		 *
-		 * @param {String} location The location of the file to get contents for
-		 * @param {Boolean} [isMetadata] If defined and true, returns the file metadata, 
-		 *   otherwise file contents are returned
-		 * @return A deferred that will be provided with the contents or metadata when available
-		 */
-		read: function(location, isMetadata) {
-			return _doServiceCall(this._getService(location), "read", arguments); //$NON-NLS-0$
-		},
-		
-		/**
-		 * Loads the workspace with the given id and sets it to be the current
-		 * workspace for the IDE. The workspace is created if none already exists.
-		 * @param {String} location the location of the workspace to load
-		 * @param {Function} onLoad the function to invoke when the workspace is loaded
-		 */
-		loadWorkspace: function(location) {
-			return _doServiceCall(this._getService(location), "loadWorkspace", arguments); //$NON-NLS-0$
-		}
-	};//end FileClient prototype
-	FileClient.prototype.constructor = FileClient;
-
-	//return the module exports
-	return {FileClient: FileClient};
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- * Contributors: IBM Corporation - initial API and implementation
- ******************************************************************************/
-
-/*global window define */
-/*jslint forin:true devel:true*/
-
-/** @namespace The global container for eclipse APIs. */
-
 define('orion/widgets/browse/emptyFileClient',["orion/Deferred"], function(Deferred){
 	
 	var reameFile = {
@@ -34237,7 +34069,7 @@ define('orion/widgets/browse/emptyFileClient',["orion/Deferred"], function(Defer
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint browser:true devel:true sub:true*/
-/*global define eclipse:true orion:true window URL*/
+/*global define console eclipse:true orion:true window URL*/
 
 define('orion/widgets/browse/fileBrowser',[
 	'orion/PageUtil', 
@@ -34252,7 +34084,6 @@ define('orion/widgets/browse/fileBrowser',[
 	'orion/fileClient',
 	'orion/contentTypes',
 	'orion/widgets/browse/staticDataSource',
-	'orion/widgets/browse/readonlyFileClient',
 	'orion/widgets/browse/emptyFileClient',
 	'orion/Deferred',
 	'orion/URITemplate',
@@ -34260,7 +34091,7 @@ define('orion/widgets/browse/fileBrowser',[
 	'orion/webui/littlelib'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mBranchSelector, mMarkdownView,
-	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mReadonlyFileClient, mEmptyFileClient, Deferred, URITemplate, objects, lib
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, lib
 ) {
 	/**
 	 * @class This object describes the options for the readonly file system browser.
@@ -34288,17 +34119,13 @@ define('orion/widgets/browse/fileBrowser',[
 	function FileBrowser(options) {
 		this._parentDomNode = lib.node(options.parent);//Required
 		this._parentDomNode.classList.add("browserParentDome");
-		this._fileClient = options.fileClient;//Required
-		this._repoURL = options.repoURL;
-		if(options.serviceRegistry) {
+		if(options.fileClient) {
+			this._fileClient = options.fileClient;
+		} else if(options.serviceRegistry) {
 			this._fileClient = new mFileClient.FileClient(options.serviceRegistry);
-		} else if(!this._fileClient && options.serviceRefs) {
-			this._fileClient = new mReadonlyFileClient.FileClient(options.serviceRefs);		
-		}
-		if(!this._fileClient){
+		} else {
 			this._fileClient = new mEmptyFileClient.FileClient();		
 		}
-		
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		if(!this._syntaxHighlighter) {
 			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
@@ -34310,6 +34137,7 @@ define('orion/widgets/browse/fileBrowser',[
 		this._preferences = options.preferences;//Optional
 		this.rootName = options.rootName;
 		this._showBranch = options.showBranch;
+		this._breadCrumbInHeader= options.breadCrumbInHeader;
 		this._showComponent = options.showComponent;
 		this._init(options);
 	}
@@ -34367,6 +34195,9 @@ define('orion/widgets/browse/fileBrowser',[
 								}.bind(this));
 								this.refresh(currentComponent.Location);
 							}
+						}.bind(this),
+						function(err) {
+							console.log(err);
 						}.bind(this));
 						return;
 					}
@@ -34406,7 +34237,6 @@ define('orion/widgets/browse/fileBrowser',[
 				var rootURL = this._fileClient.fileServiceRootURL("");
 				this._fileClient.fetchChildren(rootURL).then(function(contents){
 					if(contents && contents.length > 0) {
-						//var uriToShow = contents[0].Location;
 						this._branches = contents;
 						this._branchSelector = new mBranchSelector.BranchSelector({
 							commandRegistry: this._commandRegistry,
@@ -34499,9 +34329,8 @@ define('orion/widgets/browse/fileBrowser',[
 			if (metadata && input) {
 				var browseViewOptons = {
 					parent: this._parentDomNode,
-					readonly: true,
-					showProjectView: false,
 					maxEditorLines: this._maxEditorLines,
+					breadCrumbInHeader: this._breadCrumbInHeader,
 					readmeHeaderClass: "readmeHeader",
 					metadata: metadata,
 					branchSelector: this._branchSelector,
@@ -36402,7 +36231,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 				showBranch: true,
 				showComponent: showComponent,
 				rootName: params.rootName,
-				maxEditorLines: 100,
+				maxEditorLines: 300,
 				serviceRegistry: serviceRegistry
 			});
 		}.bind(this));
