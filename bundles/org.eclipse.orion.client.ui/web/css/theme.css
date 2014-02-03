@@ -371,8 +371,8 @@ a.currentLocation:hover {
 }
 
 .dropdownArrowRight {
-	position: absolute;
-	right: 0;
+	float: right;
+	font-size: 12px;
 }
 
 .dropdownTrigger {
@@ -468,10 +468,9 @@ a.currentLocation:hover {
 
 .dropdownMenuItem, .dropdownMenuItem a {
 	display: inline-block;
-	vertical-align: baseline;
+	vertical-align: middle;
 	color: #555 !important;
-	padding: 0 5px 0;
-	line-height: 22px;
+	padding: 3px 5px;
 	cursor: pointer;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -480,6 +479,19 @@ a.currentLocation:hover {
 	-ms-user-select: none;
 	user-select: none;
 	white-space: nowrap;
+}
+
+.dropdownMenuItem .dropdownKeyBinding {
+	color: grey !important; /* !important to override .dropdownMenuItem */
+	float: right;
+	font-size: 11px;
+	padding-left: 15px;
+	padding-right: 10px;
+}
+
+.dropdownMenuItem .dropdownCommandName {
+	float: left;
+	text-decoration: inherit; /* inherit hover decoration when inside an <a> */
 }
 
 .dropdownSelection {

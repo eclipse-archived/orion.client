@@ -944,7 +944,11 @@ define([
 								self._invoke(invocation);
 							};
 							if (renderType === "menu") { //$NON-NLS-0$
-								element = Commands.createCommandMenuItem(parent, command, invocation, null, onClick);
+								var bindingString = null;
+								if (keyBinding && keyBinding.keyBinding) {
+									bindingString = UIUtil.getUserKeyString(keyBinding.keyBinding);
+								}
+								element = Commands.createCommandMenuItem(parent, command, invocation, null, onClick, bindingString);
 							} else {
 								id = renderType + command.id + index;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
 								element = Commands.createCommandItem(parent, command, invocation, id, null, renderType === "tool", onClick); //$NON-NLS-0$
