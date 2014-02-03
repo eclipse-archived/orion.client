@@ -59,8 +59,10 @@ define(['i18n!git/nls/gitmessages', 'require', 'orion/browserCompatibility', 'or
 			
 			// git contributions
 			commandService.addCommandGroup("pageActions", "eclipse.gitPushGroup", 100, "Push", null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.push", 100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-0$undefined	
-			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.pushForce", 100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-0$
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.push", 100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-0$
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.pushForce", 200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-0$
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.pushBranch", 300, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-0$
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.pushForceBranch", 400, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-0$
 			
 			commandService.addCommandGroup("pageActions", "eclipse.gitFetchGroup", 100, "Fetch", null, null, null, "Fetch", null, "eclipse.orion.git.fetch"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.fetch", 100, "eclipse.gitFetchGroup"); //$NON-NLS-0$ //$NON-NLS-0$undefined	
