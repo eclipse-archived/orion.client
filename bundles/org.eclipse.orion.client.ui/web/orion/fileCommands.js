@@ -1022,7 +1022,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					return false;
 				}
 				item = forceSingleItem(item);
-				return item.Directory;
+				return item.Directory && item.Location !== explorer.treeRoot.Location;
 			}
 		});
 		commandService.addCommand(goIntoCommand);
