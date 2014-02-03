@@ -133,11 +133,33 @@ define([
 				this.loadResourceList(PageUtil.matchResourceParameters().resource + "?depth=1", false).then(this.loaded.bind(this)); //$NON-NLS-0$
 			}
 		},
+		loaded: function(){
+		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
 			return new Deferred().resolve();
 		},
 		updateCommands: function(selections) {
+		},
+		setCommandsVisible: function(section, visible) {
+			section.actionsNode.style.visibility = visible ? "" : "hidden";
+			var selectionPolicy = visible ? null : "cursorOnly"; //$NON-NLS-0$
+			this.renderer.selectionPolicy = selectionPolicy;
+			var navHandler = this.getNavHandler();
+			if (navHandler) {
+				navHandler.setSelectionPolicy(selectionPolicy);
+			}
+			if (visible) {
+				this.updateCommands();
+			} else {
+				if(this.actionsSections) {
+					this.actionsSections.forEach(function(id) {
+						if(lib.node(id)) {
+							this.commandRegistry.destroy(id);
+						}
+					}.bind(this));
+				}
+			}
 		}
 	});
 	
@@ -155,12 +177,12 @@ define([
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.preferences = options.preferences;
-		this.readonly = typeof options.readonly === 'undefined' ? false : options.readonly;
-		this.showFolderNav = true;
+		this.readonly = true;
 		this.readmeHeaderClass = options.readmeHeaderClass;
 		this.editorView = options.editorView;
 		this._maxEditorLines = options.maxEditorLines;
 		this.imageView = options.imageView;
+		this.breadCrumbInHeader = options.breadCrumbInHeader;
 		this.isMarkdownView = options.isMarkdownView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
@@ -207,63 +229,70 @@ define([
 			function renderSections(sectionsOrder){
 				sectionsOrder.forEach(function(sectionName){
 					if(sectionName === "folderNav") {
-						if (this.showFolderNav) {
-							var navNode = document.createElement("div"); //$NON-NLS-0$
-							navNode.id = "folderNavNode"; //$NON-NLS-0$
-							this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: !this.readonly});
-							if(this.editorView) {//To embed an orion editor in the section
-								this._foldersSection.setContent(this.editorView.getParent());
-								this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
-								this.editorView.create();
-								var textView = this.editorView. editor.getTextView();
-								textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
-									var linesToRender = textView.getModel().getLineCount();
-									if(this._maxEditorLines && this._maxEditorLines > 0 && linesToRender >this._maxEditorLines) {
-										linesToRender = this._maxEditorLines;
-									}
-									var textViewheight = textView.getLineHeight() * linesToRender + 20;
-									this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
-								}.bind(this));
-								this.editor = this.editorView.editor;
-							} else if(this.isMarkdownView) {
-								div = document.createElement("div"); //$NON-NLS-0$
-								this.markdownView.displayContents(div, this._metadata);
-								this._foldersSection.setContent(div);
-							} else if(this.imageView) {
-								//Do nothing, updateImage will be called.
+						var navNode = document.createElement("div"); //$NON-NLS-0$
+						navNode.id = "folderNavNode"; //$NON-NLS-0$
+						this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Browse", canHide: !this.readonly});
+						this.sectionContents = document.createElement("div"); //$NON-NLS-0$
+						this.sectionContents.classList.add("browseSectionWrapper"); 
+						this._foldersSection.setContent(this.sectionContents);
+						
+						//Render the branch selector 
+						var tileNode = this._foldersSection.getTitleElement();
+						if(tileNode) {
+							lib.empty(tileNode);
+							if(this.branchSelector) {
+								tileNode.appendChild(this.branchSelector.node);
+								this.branchSelector.refresh();
+							}
+						}
+						//Render the bread crumb 
+						if(this.breadCrumbMaker) {
+							var bcNodeContainer = document.createElement("div"), bcNode=document.createElement("div");
+							bcNodeContainer.appendChild(bcNode);
+							if(this.breadCrumbInHeader) {
+								bcNodeContainer.classList.add("breadCrumbContainerInHeader"); 
+								tileNode.appendChild(bcNodeContainer);
+								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 150/*branch selector width*/ - 50);
 							} else {
-								this.folderNavExplorer = new FolderNavExplorer({
-									parentId: navNode,
-									readonly: this.readonly,
-									breadCrumbMaker: this.breadCrumbMaker,
-									clickHandler: this.clickHandler,
-									fileClient: this.fileClient,
-									commandRegistry: this.commandRegistry,
-									contentTypeRegistry: this.contentTypeRegistry
-								});
-								this._foldersSection.embedExplorer(this.folderNavExplorer, null, true);
-								this.folderNavExplorer.setCommandsVisible(this._isCommandsVisible());
-								this.folderNavExplorer.loadRoot(this._metadata);
+								bcNodeContainer.classList.add("breadCrumbContainer"); 
+								this.sectionContents.appendChild(bcNodeContainer);
+								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 5);
 							}
-							if(this.breadCrumbMaker) {
-								var tileNode = this._foldersSection.getTitleElement();
-								if(tileNode) {
-									lib.empty(tileNode);
-									var bcNodeContainer = document.createElement("div"); //$NON-NLS-0$
-									bcNodeContainer.classList.add("breadCrumbContainer"); 
-									var bcNode = document.createElement("div"); //$NON-NLS-0$
-									if(this.branchSelector) {
-										tileNode.appendChild(this.branchSelector.node);
-									}
-									bcNodeContainer.appendChild(bcNode);
-									tileNode.appendChild(bcNodeContainer);
-									this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 150/*branch selector width*/ - 50);
-									if(this.branchSelector) {
-										this.branchSelector.refresh();
-									}
-									
+						}
+						if(this.editorView) {//To embed an orion editor in the section
+							this.sectionContents.appendChild(this.editorView.getParent());
+							this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
+							this.editorView.create();
+							var textView = this.editorView. editor.getTextView();
+							textView.getModel().addEventListener("Changed", this._editorViewModelChangedListener = function(e){ //$NON-NLS-0$
+								var linesToRender = textView.getModel().getLineCount();
+								if(this._maxEditorLines && this._maxEditorLines > 0 && linesToRender >this._maxEditorLines) {
+									linesToRender = this._maxEditorLines;
 								}
-							}
+								var textViewheight = textView.getLineHeight() * linesToRender + 20;
+								this.editorView.getParent().style.height = textViewheight + "px"; //$NON-NLS-0$
+							}.bind(this));
+							this.editor = this.editorView.editor;
+						} else if(this.isMarkdownView) {
+							div = document.createElement("div"); //$NON-NLS-0$
+							this.markdownView.displayContents(div, this._metadata);
+							this.sectionContents.appendChild(div);
+						} else if(this.imageView) {
+							//Do nothing, updateImage will be called.
+						} else {
+							this.folderNavExplorer = new FolderNavExplorer({
+								parentId: navNode,
+								readonly: this.readonly,
+								breadCrumbMaker: this.breadCrumbMaker,
+								clickHandler: this.clickHandler,
+								fileClient: this.fileClient,
+								commandRegistry: this.commandRegistry,
+								contentTypeRegistry: this.contentTypeRegistry
+							});
+							//this._foldersSection.embedExplorer(this.folderNavExplorer, null, true);
+							this.sectionContents.appendChild(this.folderNavExplorer.parent);
+							this.folderNavExplorer.setCommandsVisible(this._foldersSection, this._isCommandsVisible());
+							this.folderNavExplorer.loadRoot(this._metadata);
 						}
 					} else if(sectionName === "readme"){
 						if (readmeMd) {
@@ -288,7 +317,7 @@ define([
 			td.appendChild(imageContent);
 			tr.appendChild(td);
 			imageTable.appendChild(tr);
-			this._foldersSection.setContent(imageTable);
+			this.sectionContents.appendChild(imageTable);
 		},
 		create: function() {
 			if(this._metadata.Projects){ //this is a workspace root

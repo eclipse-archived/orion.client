@@ -79,6 +79,7 @@ define([
 		this._preferences = options.preferences;//Optional
 		this.rootName = options.rootName;
 		this._showBranch = options.showBranch;
+		this._breadCrumbInHeader= options.breadCrumbInHeader;
 		this._showComponent = options.showComponent;
 		this._init(options);
 	}
@@ -270,9 +271,8 @@ define([
 			if (metadata && input) {
 				var browseViewOptons = {
 					parent: this._parentDomNode,
-					readonly: true,
-					showProjectView: false,
 					maxEditorLines: this._maxEditorLines,
+					breadCrumbInHeader: this._breadCrumbInHeader,
 					readmeHeaderClass: "readmeHeader",
 					metadata: metadata,
 					branchSelector: this._branchSelector,

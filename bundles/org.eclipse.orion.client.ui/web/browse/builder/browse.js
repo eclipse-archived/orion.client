@@ -99,7 +99,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 				showBranch: true,
 				showComponent: showComponent,
 				rootName: params.rootName,
-				maxEditorLines: 100,
+				maxEditorLines: 300,
 				serviceRegistry: serviceRegistry
 			});
 		}.bind(this));
