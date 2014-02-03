@@ -188,7 +188,7 @@ exports.ResourceComparer = (function() {
 							toolbarId: inputManager.manager._actionBarId,
 							readonly: false,
 							navToolbarId: "pageNavigationActions", //$NON-NLS-0$
-							textSearch: localSearcher
+							textSearcher: localSearcher
 						});
 						var saveCmdId = inputManager.manager._editorIndex === 1 ? "orion.compare.save.left" : "orion.compare.save.right"; //$NON-NLS-1$ //$NON-NLS-0$
 						commandGenerator.generateSimpleEditorCommands(editor, saveCmdId);
