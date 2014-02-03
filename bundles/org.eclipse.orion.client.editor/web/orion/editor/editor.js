@@ -355,6 +355,9 @@ define("orion/editor/editor", [ //$NON-NLS-0$
 		 * @returns {orion.editor.TextModel}
 		 */
 		getModel: function() {
+			if (!this._textView) {
+				return null;
+			}
 			var model = this._textView.getModel();
 			if (model.getBaseModel) {
 				model = model.getBaseModel();
