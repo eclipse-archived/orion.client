@@ -203,10 +203,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		renderViewModeMenu: function() {
 			var switcher = this.switcherNode;
 			this.commandRegistry.destroy(switcher);
-			var modes = Object.keys(this.viewModes);
-			if (modes.length > 1) {
-				this.commandRegistry.renderCommands(switcher.id, switcher, {}, this, "button"); //$NON-NLS-0$
-			}
+			this.commandRegistry.renderCommands(switcher.id, switcher, null, this, "button"); //$NON-NLS-0$
 		}
 	});
 
