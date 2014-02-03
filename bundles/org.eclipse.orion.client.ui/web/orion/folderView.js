@@ -125,10 +125,6 @@ define([
 		this.clickHandler = options.clickHandler;
 		this.treeRoot = {};
 		this.parent = lib.node(options.parentId);	
-		this.toolbarId = this.parent.id + "Tool"; //$NON-NLS-0$
-		this.fileActionsScope = "fileActions"; //$NON-NLS-0$
-		this.editActionsScope = "editActions"; //$NON-NLS-0$
-		this.viewActionsScope = "viewActions"; //$NON-NLS-0$
 	}
 	FolderNavExplorer.prototype = Object.create(FileExplorer.prototype);
 	objects.mixin(FolderNavExplorer.prototype, /** @lends orion.FolderNavExplorer.prototype */ {
