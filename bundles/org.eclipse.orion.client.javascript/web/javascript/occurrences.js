@@ -31,9 +31,6 @@ define([
 		scopes: [],
 		context: null,
 		thisCheck: false,
-		callExpressions: [],
-		GENERAL: 1,
-		FUNCTION: 2,
 		
 		/**
 		 * @name enter
@@ -45,142 +42,165 @@ define([
 		 * @returns The status if we should continue visiting
 		 */
 		enter: function(node) {
-			if (node.type === Estraverse.Syntax.Program){
-				this.callExpressions = [];
-				this.occurrences = [];
-				this.scopes = [{range: node.range, occurrences: []}];
-				this.defnode = null;
-				this.defscope = null;
-			} else if (this.thisCheck) {
-				return this.enterThis(node);
-			} else {
-				switch(node.type) {
-					case Estraverse.Syntax.FunctionDeclaration:
-						this.checkId(node.id, this.FUNCTION, true);
-						//we want the parent scope for a declaration, otherwise we leave it right away
-						this.scopes.push({range: node.range, occurrences: []});
-						if (node.params) {
-							for (var i = 0; i < node.params.length; i++) {
-								if(this.checkId(node.params[i], this.GENERAL, true)) {
-									return Estraverse.VisitorOption.Skip;
-								}
+			switch(node.type) {
+				case Estraverse.Syntax.Program:
+					this.occurrences = [];
+					this.scopes = [{range: node.range, occurrences: []}];
+					this.defnode = null;
+					this.defscope = null;
+					break;
+				case Estraverse.Syntax.FunctionDeclaration:
+					this.checkId(node.id, true);
+					//we want the parent scope for a declaration, otherwise we leave it right away
+					this._enterScope(node);
+					if (node.params) {
+						for (var i = 0; i < node.params.length; i++) {
+							if(this.checkId(node.params[i], true)) {
+								return Estraverse.VisitorOption.Skip;
 							}
 						}
-						break;
-					case Estraverse.Syntax.FunctionExpression:
-						if (node.params) {
-							this.scopes.push({range: node.range, occurrences: []});
-							for (var j = 0; j < node.params.length; j++) {
-								if(this.checkId(node.params[j], this.GENERAL, true)) {
-									return Estraverse.VisitorOption.Skip;
-								}
+					}
+					break;
+				case Estraverse.Syntax.FunctionExpression:
+					if (node.params) {
+						if(this._enterScope(node)) {
+							return Estraverse.VisitorOption.Skip;
+						}
+						for (var j = 0; j < node.params.length; j++) {
+							if(this.checkId(node.params[j], true)) {
+								return Estraverse.VisitorOption.Skip;
 							}
 						}
-						break;
-					case Estraverse.Syntax.AssignmentExpression:
-						this.checkId(node.left);
-						this.checkId(node.right);
-						break;
-					case Estraverse.Syntax.ArrayExpression: 
-						if (node.elements) {
-							for (var k = 0; k < node.elements.length; k++) {
-								this.checkId(node.elements[k]);
+					}
+					break;
+				case Estraverse.Syntax.AssignmentExpression:
+					this.checkId(node.left);
+					this.checkId(node.right);
+					break;
+				case Estraverse.Syntax.ArrayExpression: 
+					if (node.elements) {
+						for (var k = 0; k < node.elements.length; k++) {
+							this.checkId(node.elements[k]);
+						}
+					}
+					break;
+				case Estraverse.Syntax.MemberExpression:
+					this.checkId(node.object);
+					if (node.computed) { //computed = true for [], false for . notation
+						this.checkId(node.property);
+					}
+					break;
+				case Estraverse.Syntax.BinaryExpression:
+					this.checkId(node.left);
+					this.checkId(node.right);
+					break;
+				case Estraverse.Syntax.UnaryExpression:
+					this.checkId(node.argument);
+					break;
+				case Estraverse.Syntax.IfStatement:
+					this.checkId(node.test);
+					break;
+				case Estraverse.Syntax.SwitchStatement:
+					this.checkId(node.discriminant);
+					break;
+				case Estraverse.Syntax.UpdateExpression:
+					this.checkId(node.argument);
+					break;
+				case Estraverse.Syntax.ConditionalExpression:
+					this.checkId(node.test);
+					this.checkId(node.consequent);
+					this.checkId(node.alternate);
+					break;
+				case Estraverse.Syntax.CallExpression:
+					this.checkId(node.callee, false);
+					if (node.arguments) {
+						for (var l = 0; l < node.arguments.length; l++) {
+							this.checkId(node.arguments[l]);
+						}
+					}
+					break;
+				case Estraverse.Syntax.ReturnStatement:
+					this.checkId(node.argument);
+					break;
+				case Estraverse.Syntax.ObjectExpression:
+					if(this._enterScope(node)) {
+						return Estraverse.VisitorOption.Skip;
+					}
+					if(node.properties) {
+						var len = node.properties.length;
+						for (var m = 0; m < len; m++) {
+							var prop = node.properties[m];
+							if(this.thisCheck && prop.value && prop.value.type === Estraverse.Syntax.FunctionExpression) {
+								//tag it 
+								prop.value.isprop = true;
 							}
+							this.checkId(prop.value);
 						}
-						break;
-					case Estraverse.Syntax.MemberExpression:
-						this.checkId(node.object);
-						if (node.computed) { //computed = true for [], false for . notation
-							this.checkId(node.property);
+					}
+					break;
+				case Estraverse.Syntax.VariableDeclarator:
+					this.checkId(node.id, true);
+					this.checkId(node.init);
+					break;
+				case Estraverse.Syntax.NewExpression:
+					this.checkId(node.callee, false);
+					break;
+				case Estraverse.Syntax.LogicalExpression:
+					this.checkId(node.left);
+					this.checkId(node.right);
+					break;
+				case Estraverse.Syntax.ThisExpression:
+					if(this.thisCheck) {
+						var scope = this.scopes[this.scopes.length-1];
+						scope.occurrences.push({
+							start: node.range[0],
+							end: node.range[1]
+						});
+						// if this node is the selected this we are in the right scope
+						if (node.range[0] === this.context.node.range[0]){
+							this.defscope = scope;
 						}
-						break;
-					case Estraverse.Syntax.BinaryExpression:
-						this.checkId(node.left);
-						this.checkId(node.right);
-						break;
-					case Estraverse.Syntax.UnaryExpression:
-						this.checkId(node.argument);
-						break;
-					case Estraverse.Syntax.IfStatement:
-						this.checkId(node.test);
-						break;
-					case Estraverse.Syntax.SwitchStatement:
-						this.checkId(node.discriminant);
-						break;
-					case Estraverse.Syntax.UpdateExpression:
-						this.checkId(node.argument);
-						break;
-					case Estraverse.Syntax.ConditionalExpression:
-						this.checkId(node.test);
-						this.checkId(node.consequent);
-						this.checkId(node.alternate);
-						break;
-					case Estraverse.Syntax.CallExpression:
-						this.checkId(node.callee, this.FUNCTION, false);
-						if (node.arguments) {
-							for (var l = 0; l < node.arguments.length; l++) {
-								this.checkId(node.arguments[l]);
-							}
-						}
-						break;
-					case Estraverse.Syntax.ReturnStatement:
-						this.checkId(node.argument);
-						break;
-					case Estraverse.Syntax.ObjectExpression:
-						if(node.properties) {
-							var len = node.properties.length;
-							for (var m = 0; m < len; m++) {
-								this.checkId(node.properties[m].value);
-							}
-						}
-						break;
-					case Estraverse.Syntax.VariableDeclarator:
-						this.checkId(node.id, this.GENERAL, true);
-						this.checkId(node.init);
-						break;
-					case Estraverse.Syntax.NewExpression:
-						this.checkId(node.callee, this.FUNCTION, false);
-						break;
-					case Estraverse.Syntax.LogicalExpression:
-						this.checkId(node.left);
-						this.checkId(node.right);
-						break;
-				}
+					}
+					break;
 			}
 		},
 		
 		/**
-		 * @name enterThis
-		 * @description Callback from estraverse when a node is starting to be visited and we are searching for occurrences of 'this'
+		 * @description Enters and records the current scope onthe scope stack
 		 * @function
 		 * @private
-		 * @param {Object} node The AST node currently being visited
-		 * @returns The status if we should continue visiting
+		 * @param {Object} node The AST node
+		 * @returns {Boolean} If we should skip visiting children of the scope node
 		 */
-		enterThis: function(node) {
-			// A function expression inside a call expression means a new scope for 'this'
-			if (node.type === Estraverse.Syntax.CallExpression){
-				this.callExpressions.push(node);
-			} else if (node.type === Estraverse.Syntax.FunctionExpression){
-				if (this.callExpressions.length > 0){
-					this.scopes.push({range: node.range, occurrences: []});
-					// If the outer scope has the selected 'this' we can skip the inner scope
-					if (this.defscope){
-						return Estraverse.VisitorOption.Skip;
-					}
-				}
-			} else if (node.type === Estraverse.Syntax.ThisExpression){
-				var scope = this.scopes[this.scopes.length-1];
-				scope.occurrences.push({
-					start: node.range[0],
-					end: node.range[1]
-				});
-				
-				// if this node is the selected this we are in the right scope
-				if (node.range === this.context.node.range){
-					this.defscope = scope;
+		_enterScope: function(node) {
+			if(this.thisCheck) {
+				switch(node.type) {
+					case Estraverse.Syntax.ObjectExpression:
+						this.scopes.push({range: node.range, occurrences: []});
+						if (this.defscope){
+							return true;
+						}
+						break;
+					case Estraverse.Syntax.FunctionExpression:
+						if (!node.isprop){
+							this.scopes.push({range: node.range, occurrences: []});
+							// If the outer scope has the selected 'this' we can skip the inner scope
+							if (this.defscope){
+								return true;
+							}
+						}
+						break;
 				}
 			}
+			else {
+				switch(node.type) {
+					case Estraverse.Syntax.FunctionDeclaration:
+					case Estraverse.Syntax.FunctionExpression:
+						this.scopes.push({range: node.range, occurrences: []});	
+						break;
+				}
+			}
+			return false;
 		},
 		
 		/**
@@ -193,53 +213,56 @@ define([
 		 * @return The status if we should continue visiting
 		 */
 		leave: function(node) {
-			if (this.context.node.type === Estraverse.Syntax.ThisExpression){
-				return this.leaveThis(node);
-			} else {
-				if (node.type === Estraverse.Syntax.FunctionDeclaration || 
-					node.type === Estraverse.Syntax.FunctionExpression ||
-					node.type === Estraverse.Syntax.Program) {
-					//if we leave the defining scope
-					var scope = this.scopes.pop();
-					if(this.defscope) {
-						var len = scope.occurrences.length;
-						for(var i = 0; i < len; i++) {
-							this.occurrences.push(scope.occurrences[i]);
+			if(this.thisCheck) {
+				switch(node.type) {
+					case Estraverse.Syntax.FunctionExpression:
+						if(node.isprop) {
+							delete node.isprop; //remove the tag
+							break;
 						}
-						if(this.defscope.range[0] === scope.range[0] && this.defscope.range[1] === scope.range[1]) {
-							//we just popped out of the scope the word was defined in, we can quit
+						//FALL-THROUGH
+					case Estraverse.Syntax.ObjectExpression:
+					case Estraverse.Syntax.Program:
+						if(this._popScope()) {
+							//we left an object closure, end
 							return Estraverse.VisitorOption.Break;
 						}
-					}
+						break;
+				}
+			}
+			else {
+				switch(node.type) {
+					case Estraverse.Syntax.FunctionExpression:
+					case Estraverse.Syntax.FunctionDeclaration:
+					case Estraverse.Syntax.Program:
+						if(this._popScope()) {
+							return Estraverse.VisitorOption.Break;
+						}
+						break;
 				}
 			}
 		},
 		
 		/**
-		 * @name leaveThis
-		 * @description Callback when visitation of a node has completed and we are searching for occurrences of 'this'
+		 * @description Pops the tip of the scope stack off, adds occurrences (if any) and returns if we should
+		 * quit visiting
 		 * @function
 		 * @private
-		 * @param {Object} node The AST node we are inspecting
-		 * @return The status if we should continue visiting
+		 * @returns {Boolean} If we should quit visiting
 		 */
-		leaveThis: function(node) {
-			if (node.type === Estraverse.Syntax.CallExpression){
-				this.callExpressions.pop();
-			} else if ((this.callExpressions.length > 0 && node.type === Estraverse.Syntax.FunctionExpression) ||
-						node.type === Estraverse.Syntax.Program) {
-				var scope = this.scopes.pop();
-				if(this.defscope) {
-					var len = scope.occurrences.length;
-					for(var i = 0; i < len; i++) {
-						this.occurrences.push(scope.occurrences[i]);
-					}
-					if(this.defscope.range[0] === scope.range[0] && this.defscope.range[1] === scope.range[1]) {
-						//we just popped out of the scope the word was defined in, we can quit
-						return Estraverse.VisitorOption.Break;
-					}
+		_popScope: function() {
+			var scope = this.scopes.pop();
+			if(this.defscope) {
+				var len = scope.occurrences.length;
+				for(var i = 0; i < len; i++) {
+					this.occurrences.push(scope.occurrences[i]);
+				}
+				if(this.defscope.range[0] === scope.range[0] && this.defscope.range[1] === scope.range[1]) {
+					//we just popped out of the scope the node was defined in, we can quit
+					return true;
 				}
 			}
+			return false;
 		},
 		
 		/**
@@ -249,12 +272,11 @@ define([
 		 * @private
 		 * @memberof javascript.JavaScriptOccurrences.prototype
 		 * @param {Object} node The AST node we are inspecting
-		 * @param {Number} kind The kind of occurrence to consider
 		 * @param {Boolean} candefine If the given node can define the word we are looking for
 		 * @returns {Boolean} <code>true</code> if we should skip the next nodes, <code>false</code> otherwise
 		 */
-		checkId: function(node, kind, candefine) {
-			if (node && node.type === Estraverse.Syntax.Identifier) {
+		checkId: function(node, candefine) {
+			if (!this.thisCheck && node && node.type === Estraverse.Syntax.Identifier) {
 				if (node.name === this.context.word) {
 					var scope = this.scopes[this.scopes.length-1]; // Always will have at least the program scope
 					if(candefine) {
@@ -271,7 +293,6 @@ define([
 						}
 						if(node.range[0] <= this.context.start && node.range[1] >= this.context.start) {
 							this.defnode = node.range;
-							this.defnode.kind = !kind ? this.GENERAL : kind;
 						}
 					}
 					scope.occurrences.push({

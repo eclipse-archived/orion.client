@@ -71,7 +71,7 @@ define([
 		 */
 		findNode: function(offset, ast) {
 			var found = null;
-			if(offset != null && offset > -1 && ast) {
+			if(offset !== null && offset > -1 && ast) {
 				Estraverse.traverse(ast, {
 					/**
 					 * start visiting an AST node
@@ -103,7 +103,7 @@ define([
 		 * @returns {Object} The AST token that starts at the given start offset
 		 */
 		findToken: function(offset, tokens) {
-			if(offset != null && offset > -1 && tokens && tokens.length > 0) {
+			if(offset !== null && offset > -1 && tokens && tokens.length > 0) {
 				var min = 0,
 					max = tokens.length-1,
 					token, 

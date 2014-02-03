@@ -601,11 +601,155 @@ define([
 	 * Tests this usage in 2 objects
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424756
 	 */
-	Tests.test_thisUsageObjects = function() {
+	Tests.test_thisUsageObjects1 = function() {
 		editorContext.text = "var o1={v1: 'a', f1: function(){ if (this.v1){ this.v1++; }}}; var o2={v1: 'a', f1: function(){ if (this.v1){ this.v1++; }}};";
 		return occurrences.computeOccurrences(editorContext, setContext(39, 39)).then(function(results) {
 			try {
-				assertOccurrences(results, [{start:37, end:41}, {start:47, end:51}, {start:100, end:104}, {start:110, end:114}]);
+				assertOccurrences(results, [{start:37, end:41}, {start:47, end:51}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage in 2 objects
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=424756
+	 */
+	Tests.test_thisUsageObjects2 = function() {
+		editorContext.text = "var o1={v1: 'a', f1: function(){ if (this.v1){ this.v1++; }}}; var o2={v1: 'a', f1: function(){ if (this.v1){ this.v1++; }}};";
+		return occurrences.computeOccurrences(editorContext, setContext(102, 102)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:100, end:104}, {start:110, end:114}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage in the root (global) scope of the file
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
+	 */
+	Tests.test_thisUsageGlobal1 = function() {
+		editorContext.text = "function f1() {this.foo =1;};this.bar = 2;";
+		return occurrences.computeOccurrences(editorContext, setContext(17, 17)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:15, end:19}, {start:29, end:33}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage in the root (global) scope of the file
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
+	 */
+	Tests.test_thisUsageGlobal2 = function() {
+		editorContext.text = "function f1() {this.foo =1;};this.bar = 2;";
+		return occurrences.computeOccurrences(editorContext, setContext(31, 31)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:15, end:19}, {start:29, end:33}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage in the root (global) scope of the file
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
+	 */
+	Tests.test_thisUsageGlobal3 = function() {
+		editorContext.text = "function f1() {this.foo =1;function f2() {this.baz = 3;}};this.bar = 2;";
+		return occurrences.computeOccurrences(editorContext, setContext(17, 17)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:15, end:19}, {start:42, end:46}, {start:58, end:62}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage in the root (global) scope of the file
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
+	 */
+	Tests.test_thisUsageGlobal4 = function() {
+		editorContext.text = "function f1() {this.foo =1;function f2() {this.baz = 3;}};this.bar = 2;";
+		return occurrences.computeOccurrences(editorContext, setContext(44, 44)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:15, end:19}, {start:42, end:46}, {start:58, end:62}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage in the root (global) scope of the file
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
+	 */
+	Tests.test_thisUsageGlobal3 = function() {
+		editorContext.text = "function f1() {this.foo =1;function f2() {this.baz = 3;}};this.bar = 2;";
+		return occurrences.computeOccurrences(editorContext, setContext(60, 60)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:15, end:19}, {start:42, end:46}, {start:58, end:62}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage in an object expression passed as a param
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
+	 */
+	Tests.test_thisUsageCallExpressionObject1 = function() {
+		editorContext.text = "call({f1: function() {this.bool;},f2: function() {this.bool;},f3: function() {this.bool;}}this.end = true;";
+		return occurrences.computeOccurrences(editorContext, setContext(24, 24)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:22, end:26}, {start:50, end:54}, {start:78, end:82}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage in an object expression passed as a param
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
+	 */
+	Tests.test_thisUsageCallExpressionObject2 = function() {
+		editorContext.text = "call({f1: function() {this.bool;},f2: function() {this.bool;},f3: function() {this.bool;}}this.end = true;";
+		return occurrences.computeOccurrences(editorContext, setContext(53, 53)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:22, end:26}, {start:50, end:54}, {start:78, end:82}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests this usage in an object expression passed as a param
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=426930
+	 */
+	Tests.test_thisUsageCallExpressionObject3 = function() {
+		editorContext.text = "call({f1: function() {this.bool;},f2: function() {this.bool;},f3: function() {this.bool;}}this.end = true;";
+		return occurrences.computeOccurrences(editorContext, setContext(81, 81)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:22, end:26}, {start:50, end:54}, {start:78, end:82}]);
 			}
 			finally {
 				tearDown();
