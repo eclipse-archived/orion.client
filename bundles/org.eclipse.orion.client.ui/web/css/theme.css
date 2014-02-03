@@ -378,7 +378,7 @@ a.currentLocation:hover {
 .dropdownTrigger {
 	font-weight: normal;
 	background: none !important;
-	border: none !important;
+	border-color: transparent !important;
 }
 
 .dropdownTrigger a {
@@ -497,10 +497,6 @@ a.currentLocation:hover {
 .dropdownSelection {
 	background-color: #e6e6e6 !important;
 	border: 1px solid #ccc !important;
-	/* compensate for the 1px border, in order that adding/removing dropdownSelection on an element
-	 * does not change the element's box dimensions.
-	 */
-	margin: -1px;
 }
 
 .checkedMenuItem {
