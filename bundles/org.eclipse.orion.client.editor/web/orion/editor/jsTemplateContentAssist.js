@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
  * Copyright (c) 2012 VMware, Inc.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
@@ -122,7 +122,33 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 			prefix: "function", //$NON-NLS-0$
 			name: "function", //$NON-NLS-0$
 			description: " - function declaration",  //$NON-NLS-0$
-			template: "function ${name} (${parameter}) {\n\t${cursor}\n}" //$NON-NLS-0$
+			template: "/**\n"+  //$NON-NLS-0$
+					  " * @name ${name}\n"+  //$NON-NLS-0$
+					  " * @param ${parameter}\n"+  //$NON-NLS-0$
+					  " */\n"+  //$NON-NLS-0$
+					  "function ${name} (${parameter}) {\n\t${cursor}\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "function", //$NON-NLS-0$
+			name: "function", //$NON-NLS-0$
+			description: " - function expression",  //$NON-NLS-0$
+			template: "/**\n"+  //$NON-NLS-0$
+					  " * @name ${name}\n"+  //$NON-NLS-0$
+					  " * @function\n"+  //$NON-NLS-0$
+					  " * @param ${parameter}\n"+  //$NON-NLS-0$
+					  " */\n"+  //$NON-NLS-0$
+					  "${name}: function(${parameter}) {\n\t${cursor}\n}" //$NON-NLS-0$
+		},
+		{
+			prefix: "define", //$NON-NLS-0$
+			name: "define", //$NON-NLS-0$
+			description: " - define function call",  //$NON-NLS-0$
+			template: "/* global define */\n"+
+					  "define('${name}',[\n"+  //$NON-NLS-0$
+					  "'${import}'\n"+  //$NON-NLS-0$
+					  "], function(${importname}) {\n"+  //$NON-NLS-0$
+					  "\t${cursor}\n"+  //$NON-NLS-0$
+					  "});" //$NON-NLS-0$
 		},
 		{
 			prefix: "nls", //$NON-NLS-0$
@@ -135,6 +161,42 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 			name: "log", //$NON-NLS-0$
 			description: " - console log", //$NON-NLS-0$
 			template: "console.log(${object});" //$NON-NLS-0$
+		},
+		{
+			prefix: "mongodb", //$NON-NLS-0$
+			name: "mongodb", //$NON-NLS-0$
+			description: " - Node.js require statement for MongoDB client", //$NON-NLS-0$
+			template: "var ${name} = require('mongodb').MongoClient;" //$NON-NLS-0$
+		},
+		{
+			prefix: "redis", //$NON-NLS-0$
+			name: "redis", //$NON-NLS-0$
+			description: " - Node.js require statement for Redis client", //$NON-NLS-0$
+			template: "var ${name} = require('redis').RedisClient;" //$NON-NLS-0$
+		},
+		{
+			prefix: "pg", //$NON-NLS-0$
+			name: "postgres", //$NON-NLS-0$
+			description: " - Node.js require statement for Postgres DB client", //$NON-NLS-0$
+			template: "var ${name} = require('pg').Client;" //$NON-NLS-0$
+		},
+		{
+			prefix: "mysql", //$NON-NLS-0$
+			name: "mysql", //$NON-NLS-0$
+			description: " - Node.js require statement for MySQL DB client", //$NON-NLS-0$
+			template: "var ${name} = require('mysql');" //$NON-NLS-0$
+		},
+		{
+			prefix: "express", //$NON-NLS-0$
+			name: "express", //$NON-NLS-0$
+			description: " - Node.js require statement for Express framework", //$NON-NLS-0$
+			template: "var ${name} = require('express');" //$NON-NLS-0$
+		},
+		{
+			prefix: "amqp", //$NON-NLS-0$
+			name: "amqp", //$NON-NLS-0$
+			description: " - Node.js require statement for AMQP framework", //$NON-NLS-0$
+			template: "var ${name} = require('amqp');" //$NON-NLS-0$
 		}
 	];
 

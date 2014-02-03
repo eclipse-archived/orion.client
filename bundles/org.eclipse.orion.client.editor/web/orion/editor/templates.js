@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -200,6 +200,12 @@ define("orion/editor/templates", [], function() { //$NON-NLS-0$
 			}
 			
 			if (0 < proposals.length) {
+				//sort the proposals by name
+				proposals.sort(function(p1, p2) {
+					if (p1.name < p2.name) return -1;
+					if (p1.name > p2.name) return 1;
+					return 0;
+				});
 				// if any templates were added to the list of 
 				// proposals, add a title as the first element
 				proposals.splice(0, 0, {
