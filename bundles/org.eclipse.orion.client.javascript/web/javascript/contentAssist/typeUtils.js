@@ -22,7 +22,9 @@ define([
 'doctrine/doctrine'
 ], function(proposalUtils, _doctrine) {
 	/**
-	 * Doctrine closure compiler style type objects
+	 * @description Doctrine closure compiler style type objects
+	 * @param {String} signature The Doctrine-style signature to parse
+	 * @returns {Object} The Doctrine-style type object
 	 */
 	function ensureTypeObject(signature) {
 		if (!signature) {
@@ -40,22 +42,25 @@ define([
 	}
 
 	/**
-	 * @param {String} char a string of at least one char14acter
-	 * @return {boolean} true iff uppercase ascii character
+	 * @description Returns if the given character is upper case or not considering the locale
+	 * @param {String} string A string of at least one char14acter
+	 * @return {Boolean} True iff the first character of the given string is uppercase
 	 */
-	function isUpperCaseChar(c) {
-		if (c.length < 1) {
+	function isUpperCaseChar(string) {
+		if (string.length < 1) {
 			return false;
 		}
-		var charCode = c.charCodeAt(0);
-		if (isNaN(charCode)) {
+		if (isNaN(string.charCodeAt(0))) {
 			return false;
 		}
-		var char = c.charAt(0);
-		return c.toLocaleUpperCase().charAt(0) === char;
+		return string.toLocaleUpperCase().charAt(0) === string.charAt(0);
 	}
 
-
+	/**
+	 * @description Returns a new NameExpression object
+	 * @param {String} name The name to wrap
+	 * @returns {Object} The new NameExpression object
+	 */
 	function createNameType(name) {
 	    if (typeof name !== 'string') {
 	        throw new Error('Expected string, but found: ' + JSON.parse(name));
@@ -69,7 +74,7 @@ define([
 	var UNDEFINED_OR_EMPTY_OBJ = /:undefined|:\{\}/g;
 
 	/**
-	 * The Definition class refers to the declaration of an identifier.
+	 * @description The Definition class refers to the declaration of an identifier.
 	 * The start and end are locations in the source code.
 	 * Path is a URL corresponding to the document where the definition occurs.
 	 * If range is undefined, then the definition refers to the entire document
@@ -102,7 +107,9 @@ define([
 	};
 
 	/**
-	 * Revivies a Definition object from a regular object
+	 * @description Revivies a Definition object from a regular object
+	 * @param {Object} obj The type object to revive
+	 * @returns {Definition} The revived definition
 	 */
 	Definition.revive = function(obj) {
 		var defn = new Definition();
@@ -120,6 +127,12 @@ define([
 	
 	var GEN_NAME = "gen~";
 	
+	/**
+	 * @description Returns if the generated type name refers to the general object or is undefined
+	 * @param {String} generatedTypeName The type name to check
+	 * @param {Object} allTypes The type object
+	 * @returns {Boolean} True if the generated type is 'Object' or 'undefined'
+	 */
 	function isEmpty(generatedTypeName, allTypes) {
 		if (typeof generatedTypeName !== 'string') {
 			// original type was not a name expression
@@ -130,7 +143,6 @@ define([
 			// not a synthetic type, so not empty
 			return false;
 		}
-
 
 		// now check to see if there are any non-default fields in this type
 		var type = allTypes[generatedTypeName];
@@ -163,9 +175,9 @@ define([
 	 * added to it.  Additionally, the type specified in the $$proto property is
 	 * either empty or is Object
 	 *
-	 * @param {{}} leftTypeObj
-	 * @param {{}} rightTypeObj
-	 * @param {{getAllTypes:function():Object}} env
+	 * @param {Object} leftTypeObj
+	 * @param {Object} rightTypeObj
+	 * @param {Object} env
 	 *
 	 * @return Boolean
 	 */
@@ -177,7 +189,12 @@ define([
 				leftTypeName = 'undefined';
 			}
 		}
-
+		/**
+		 * @description Converts the type name to a number
+		 * @function
+		 * @param {String} typeName The name of the type
+		 * @returns {Number} The number corresponding to the type
+		 */
 		function convertToNumber(typeName) {
 			if (typeName === "undefined") {
 				return 0;
@@ -207,9 +224,6 @@ define([
 		}
 	}
 
-
-
-
 	var protoLength = "~proto".length;
 	return {
 		Definition : Definition,
@@ -218,7 +232,6 @@ define([
 
 		/** constant that defines generated type name prefixes */
 		GEN_NAME : GEN_NAME,
-
 
 		// type parsing
 		isArrayType : function(typeObj) {
@@ -274,7 +287,6 @@ define([
 					expression: result
 				});
 			}
-
 			return functionTypeObj;
 		},
 
@@ -296,7 +308,6 @@ define([
 				// not an array type
 				return arrayObj;
 			}
-
 			if (elts.length > 0) {
 				return elts[0];
 			} else {
@@ -376,7 +387,6 @@ define([
 					return {
 						type: jsdocType.type
 					};
-
 				case 'UnionType':
 					return {
 						type: jsdocType.type,
@@ -384,13 +394,11 @@ define([
 							return self.convertJsDocType(elt, env, doCombine, depth);
 						})
 					};
-
 				case 'RestType':
 					return {
 						type: jsdocType.type,
 						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth)
 					};
-
 				case 'ArrayType':
 					return {
 						type: jsdocType.type,
@@ -398,7 +406,6 @@ define([
 							return self.convertJsDocType(elt, env, doCombine, depth);
 						})
 					};
-
 				case 'FunctionType':
 					var fnType = {
 						type: jsdocType.type,
@@ -412,24 +419,7 @@ define([
 							{ type : 'NameExpression', name : JUST_DOTS } :
 							self.convertJsDocType(jsdocType.result, env, doCombine, depth);
 					}
-
-					// TODO should remove?  new and this are folded into params
-//					if (jsdocType['new']) {
-//						// prevent recursion on functions that return themselves
-//						fnType['new'] = depth < 2 && jsdocType['new'].type === 'FunctionType' ?
-//							self.convertJsDocType(jsdocType['new'], env, doCombine, depth) :
-//							{ type : 'NameExpression', name : JUST_DOTS };
-//					}
-//
-//					if (jsdocType['this']) {
-//						// prevent recursion on functions that return themselves
-//						fnType['this'] = depth < 2 && jsdocType['this'].type === 'FunctionType' ?
-//							self.convertJsDocType(jsdocType['this'], env, doCombine, depth) :
-//							{ type : 'NameExpression', name : JUST_DOTS };
-//					}
-
 					return fnType;
-
 				case 'TypeApplication':
 					var typeApp = {
 						type: jsdocType.type,
@@ -442,7 +432,6 @@ define([
 						});
 					}
 					return typeApp;
-
 				case 'ParameterType':
 					return {
 						type: jsdocType.type,
@@ -451,7 +440,6 @@ define([
 							self.convertJsDocType(jsdocType.expression, env, doCombine, depth) :
 							null
 					};
-
 				case 'NonNullableType':
 				case 'OptionalType':
 				case 'NullableType':
@@ -460,7 +448,6 @@ define([
 						type: jsdocType.type,
 						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth)
 					};
-
 				case 'NameExpression':
 					if (doCombine && env.isSyntheticName(name)) {
 						// Must mush together all properties for this synthetic type
@@ -492,8 +479,6 @@ define([
 								value: fieldType
 							});
 						});
-
-
 						return {
 							type: 'RecordType',
 							fields: newFields
@@ -509,14 +494,12 @@ define([
 						}
 					}
 					return THE_UNKNOWN_TYPE;
-
 				case 'FieldType':
 					return {
 						type: jsdocType.type,
 						key: jsdocType.key,
 						value: self.convertJsDocType(jsdocType.value, env, doCombine, depth)
 					};
-
 				case 'RecordType':
 					if (doCombine) {
 						// when we are combining, do not do anything special for record types
@@ -611,7 +594,6 @@ define([
 			return useHtml ? '<span style="font-weight:bold; color:purple;">' + text + '</span>': text;
 		},
 
-
 		/**
 		 * creates a human readable type name from the name given
 		 */
@@ -637,7 +619,6 @@ define([
 			var res;
 			var parts = [];
 			depth = depth || 0;
-
 			switch(typeObj.type) {
 				case 'NullableLiteral':
 					return this.styleAsType("?", true);
@@ -649,11 +630,9 @@ define([
 					return this.styleAsType("undefined", true);
 				case 'VoidLiteral':
 					return this.styleAsType("void", true);
-
 				case 'NameExpression':
 					var name = typeObj.name === JUST_DOTS ? "{...}" : typeObj.name;
 					return this.styleAsType(name, true);
-
 				case 'UnionType':
 					parts = [];
 					if (typeObj.expressions) {
@@ -662,9 +641,6 @@ define([
 						});
 					}
 					return "( " + parts.join(", ") + " )";
-
-
-
 				case 'TypeApplication':
 					if (typeObj.applications) {
 						typeObj.applications.forEach(function(elt) {
@@ -689,7 +665,6 @@ define([
 						});
 					}
 					return parts.join(", ") + '[]';
-
 				case 'NonNullableType':
 					return "!" +  this.convertToHtml(typeObj.expression, depth);
 				case 'OptionalType':
@@ -698,11 +673,9 @@ define([
 					return "?" +  this.convertToHtml(typeObj.expression, depth);
 				case 'RestType':
 					return "..." +  this.convertToHtml(typeObj.expression, depth);
-
 				case 'ParameterType':
 					return this.styleAsProperty(typeObj.name, true) +
 						(typeObj.expression.name === JUST_DOTS ? "" : (":" + this.convertToHtml(typeObj.expression, depth)));
-
 				case 'FunctionType':
 					var isCons = false;
 					var resType;
@@ -719,11 +692,9 @@ define([
 							}
 						});
 					}
-
 					if (!resType && typeObj.result) {
 						resType = typeObj.result;
 					}
-
 					var resText;
 					if (resType && resType.type !== 'UndefinedLiteral' && resType.name !== 'undefined') {
 						resText = this.convertToHtml(resType, depth+1);
@@ -738,9 +709,7 @@ define([
 					if (!isCons && resText) {
 						res += '&rarr;' + resText;
 					}
-
 					return res;
-
 				case 'RecordType':
 					if (typeObj.fields && typeObj.fields.length > 0) {
 						typeObj.fields.forEach(function(elt) {
@@ -751,7 +720,6 @@ define([
 						return '{ }';
 					}
 					break;
-
 				case 'FieldType':
 					return this.styleAsProperty(typeObj.key, true) +
 						":" + this.convertToHtml(typeObj.value, depth);

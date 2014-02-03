@@ -23,18 +23,10 @@ define([
 	'orion/editor/jsTemplateContentAssist' //TODO remove this once we merge the code
 ], function(ContentAssist, Indexer, assert, objects, Esprima, Doctrine, Deferred, JSTemplateProposals) {
 
-	//////////////////////////////////////////////////////////
-	// helpers
-	//////////////////////////////////////////////////////////
-	function parse(contents) {
-		// Can't change hte parse options here since tests depend on the stringified AST
-		return esprima.parse(contents,{
-			range: false,
-			loc: false,
-			tolerant: true
-		});
-	}
-
+	/**
+	 * @description Parse the snippet
+	 * @returns {Object} The AST
+	 */
 	function parseFull(contents) {
 		return esprima.parse(contents, {
 					range: true,
@@ -44,6 +36,11 @@ define([
 				});
 	}
 
+	/**
+	 * @description Sets up the test
+	 * @param {Object} options The options the set up with
+	 * @returns {Object} The object with the initialized values
+	 */
 	function setup(options) {
 		var buffer = options.buffer,
 		    prefix = options.prefix,
@@ -117,7 +114,12 @@ define([
 		var templateAssist = new JSTemplateProposals.JSTemplateContentAssistProvider();
 		return new Deferred().resolve(templateAssist.computeProposals(buffer, offset, context));
 	}
-
+	/**
+	 * @description Conpares the given proposal to the given text and description
+	 * @param {Object} proposal The proposal returned from the content assist
+	 * @param {String} text The name of the proposal to compare
+	 * @param {String} description The description to compare
+	 */
 	function testProposal(proposal, text, description) {
 		assert.equal(proposal.proposal, text, "Invalid proposal text"); //$NON-NLS-0$
 		if (description) {
@@ -128,7 +130,11 @@ define([
 			}
 		}
 	}
-
+	/**
+	 * @description Pretty-prints the given array of proposal objects
+	 * @param {Array} expectedProposals The array of proposals
+	 * @returns {String} The pretty-printed proposals
+	 */
 	function stringifyExpected(expectedProposals) {
 		var text = "";
 		for (var i = 0; i < expectedProposals.length; i++)  {
@@ -136,7 +142,12 @@ define([
 		}
 		return text;
 	}
-
+	
+	/**
+	 * @description Pretty-prints the given array of proposal objects
+	 * @param {Array} expectedProposals The array of proposals
+	 * @returns {String} The pretty-printed proposals
+	 */
 	function stringifyActual(actualProposals) {
 		var text = "";
 		for (var i = 0; i < actualProposals.length; i++) {
@@ -149,6 +160,12 @@ define([
 		return text;
 	}
 
+	/**
+	 * @description Checks the proposals returned from the given proposal promise against
+	 * the array of given proposals
+	 * @param {orion.Promise} actualProposalsPromise The promise to return proposals
+	 * @param {Array} expectedProposals The array of expected proposal objects
+	 */
 	function testProposals(actualProposalsPromise, expectedProposals) {
 		return actualProposalsPromise.then(function (actualProposals) {
 			assert.equal(actualProposals.length, expectedProposals.length,
@@ -163,7 +180,9 @@ define([
 	}
 
 	/**
-	 * Asserts that a given proposal is NOT present in a list of actual proposals.
+	 * @description Asserts that a given proposal is NOT present in a list of actual proposals.
+	 * @param {Object} expectedProposal The proposal we are not expecting to see
+	 * @param {orion.Promise} actualProposalsPromise The promise to return proposals
 	 */
 	function assertNoProposal(expectedProposal, actualProposalsPromise) {
 		return actualProposalsPromise.then(function(actualProposals) {
@@ -186,6 +205,11 @@ define([
 	 */
 	function assertProposalMatching(/*String[]*/ required, /*String[]*/ prohibited, actualProposalsPromise) {
 		return actualProposalsPromise.then(function(actualProposals) {
+			/**
+			 * @description Checks if the given text has the given word in it
+			 * @param {String} text 
+			 * @param {String} word
+			 */
 			function matches(text, word) {
 				return text.indexOf(word) !== -1;
 			}
@@ -231,12 +255,21 @@ define([
 			return proposal.proposal.replace(/\n/g, "\\n").replace(/\t/g, "\\t");
 		});
 	}
-
+	
+	/**
+	 * @description Check that the AST has no errors in it
+	 * @param {Objet} ast The AST to check
+	 */
 	function assertNoErrors(ast) {
 		assert.ok(ast.errors===null || ast.errors.length===0,
 			'errors: '+ast.errors.length+'\n'+ast.errors);
 	}
-
+	
+	/**
+	 * @description Check that the AST has the given error
+	 * @param {Object} ast The AST
+	 * @param {Array} expectedErrors The array of expected errors
+	 */
 	function assertErrors(ast,expectedErrors) {
 		var expectedErrorList = (expectedErrors instanceof Array ? expectedErrors: [expectedErrors]);
 		var correctNumberOfErrors = ast.errors!==null && ast.errors.length===expectedErrorList.length;
@@ -251,7 +284,11 @@ define([
 			}
 		}
 	}
-
+	/**
+	 * @description Pretty-print the AST
+	 * @param {Object} parsedProgram The AST
+	 * @returns {String} The pretty-printed AST
+	 */
 	function stringify(parsedProgram) {
 		var body = parsedProgram.body;
 		if (body.length===1) {
@@ -265,7 +302,12 @@ define([
 		};
 		return JSON.stringify(body,replacer).replace(/"/g,'');
 	}
-
+	/**
+	 * @description Create a new message object
+	 * @param {Number} line The line number
+	 * @param {String} text The message text
+	 * @returns A new message object: {lineNumber, message}
+	 */
 	function message(line, text) {
 		return {
 			lineNumber:line,
@@ -280,15 +322,15 @@ define([
 	var tests = {};
 
 	tests["test recovery basic parse"] = function() {
-		var parsedProgram = parse("foo.bar");
+		var parsedProgram = parseFull("foo.bar");
 		assertNoErrors(parsedProgram);
-		assert.equal(stringify(parsedProgram),"{type:ExpressionStatement,expression:{type:MemberExpression,object:{type:Identifier,name:foo},property:{type:Identifier,name:bar}}}");
+		assert.equal(stringify(parsedProgram),"{type:ExpressionStatement,expression:{type:MemberExpression,object:{type:Identifier,name:foo,range:[0,3]},property:{type:Identifier,name:bar,range:[4,7]},range:[0,7]},range:[0,7]}");
 	};
 
 	tests["test recovery - dot followed by EOF"] = function() {
-		var parsedProgram = parse("foo.");
+		var parsedProgram = parseFull("foo.");
 		assertErrors(parsedProgram,message(1,'Unexpected end of input'));
-		assert.equal(stringify(parsedProgram),"{type:ExpressionStatement,expression:{type:MemberExpression,object:{type:Identifier,name:foo},property:null}}");
+		assert.equal(stringify(parsedProgram),"{type:ExpressionStatement,expression:{type:MemberExpression,object:{type:Identifier,name:foo,range:[0,3]},property:null,range:[0,4]},range:[0,4]}");
 	};
 
 	tests["test Empty Content Assist"] = function() {
@@ -4555,7 +4597,8 @@ define([
 		return testProposals(results, [
 				//proposal, description
 				["", "Templates"], 
-				["ction name (parameter) {\n\t\n}", "function - function declaration"],
+				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
 				["", "Keywords"], 
 				["ction", "function"], 
 				]);
@@ -4570,7 +4613,8 @@ define([
 		return testProposals(results, [
 				//proposal, description
 				["", "Templates"], 
-				["ction name (parameter) {\n\t\n}", "function - function declaration"],
+				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
 				["", "Keywords"], 
 				["ction", "function"], 
 				]);
@@ -4585,7 +4629,8 @@ define([
 		return testProposals(results, [
 				//proposal, description
 				["", "Templates"], 
-				["ction name (parameter) {\n\t\n}", "function - function declaration"],
+				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
 				["", "Keywords"], 
 				["ction", "function"], 
 				]);
@@ -4600,7 +4645,8 @@ define([
 		return testProposals(results, [
 				//proposal, description
 				["", "Templates"], 
-				["ction name (parameter) {\n\t\n}", "function - function declaration"],
+				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
 				["", "Keywords"], 
 				["ction", "function"], 
 				]);
@@ -4615,7 +4661,8 @@ define([
 		return testProposals(results, [
 				//proposal, description
 				["", "Templates"], 
-				["ction name (parameter) {\n\t\n}", "function - function declaration"],
+				["/**\n * @name name\n * @param parameter\n */\nfunction name (parameter) {\n\t\n}", "function - function declaration"],
+				["/**\n * @name name\n * @function\n * @param parameter\n */\nname: function(parameter) {\n\t\n}", "function - function expression"],
 				["", "Keywords"], 
 				["ction", "function"], 
 				]);

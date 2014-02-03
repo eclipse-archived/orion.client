@@ -307,7 +307,15 @@ define([
 			}
 		}
 	}
-
+	
+	/**
+	 * @description Creates the collection of non-inferred proposals and adds them to the 
+	 * given proposals object
+	 * @param {Object} environment The type environment
+	 * @param {String} prefix The prefix of the porposal
+	 * @param {Number} replaceStart The offset to start replacing from
+	 * @param {Object} proposals The proposals object
+	 */
 	function createNoninferredProposals(environment, prefix, replaceStart, proposals) {
 		var proposalAdded = false;
 		// a property to return is one that is
@@ -319,6 +327,10 @@ define([
 			return type.hasOwnProperty(prop) && prop.indexOf(prefix) === 0 && !proposals['$' + prop] && prop !== '$$proto'&& prop !== '$$isBuiltin' &&
 			prop !== '$$fntype' && prop !== '$$newtype' && prop !== '$$prototype';
 		}
+		/**
+		 * @description Walks over the given type object collection proposals
+		 * @param {Object} type The type object to check
+		 */
 		function forType(type) {
 			for (var prop in type) {
 				if (isInterestingProperty(type, prop)) {
@@ -356,7 +368,6 @@ define([
 				forType(allTypes[typeName]);
 			}
 		}
-
 		if (proposalAdded) {
 			proposals['---dummy'] = {
 				proposal: '',
@@ -368,7 +379,11 @@ define([
 			};
 		}
 	}
-
+	/**
+	 * @description Visits the given type object
+	 * @param {Object} typeObj The type object to check
+	 * @param {Function} operation The function to call on nodes
+	 */
 	function visitTypeStructure(typeObj, operation) {
 		if (typeof typeObj !== 'object') {
 			return;
@@ -430,8 +445,12 @@ define([
 		}
 	}
 
-	// finds unreachable types from the given type name
-	// and marks them as already seen
+	/** 
+	 * @description finds unreachable types from the given type name and marks them as already seen
+	 * @param {String} currentTypeName The type name
+	 * @param {Object} allTypes The root type object
+	 * @param {Object} alreadySeen The type object with signatures tagged as already seen (if they have been)
+	 */
 	function findUnreachable(currentTypeName, allTypes, alreadySeen) {
 		var currentType = allTypes[currentTypeName];
 		var operation = function(typeObj, operation) {
@@ -456,15 +475,19 @@ define([
 	}
 
 	/**
-	 * Before we can remove empty objects from the type graph, we need to update
+	 * @description Before we can remove empty objects from the type graph, we need to update
 	 * the properties currently pointing to those types.  Make them point to the
 	 * closest non-empty type in their prototype hierarchy (most likely, this is Object).
+	 * @param {Object} currentTypeObject The current object context
+	 * @param {Object} allTypes The root type object
+	 * @param {Object} empties The object of empty types
+	 * @param {Object} alreadySeen The type object of already seen types
 	 */
 	function fixMissingPointers(currentTypeObj, allTypes, empties, alreadySeen) {
 		alreadySeen = alreadySeen || {};
 		var operation = function(typeObj, operation) {
 			while (empties[typeObj.name]) {
-				// change this to the first non-epty prototype of the empty type
+				// change this to the first non-empty prototype of the empty type
 				typeObj.name = allTypes[typeObj.name].$$proto.typeObj.name;
 				if (!typeObj.name) {
 					typeObj.name = 'Object';
@@ -485,12 +508,15 @@ define([
 				}
 			}
 		};
-
 		visitTypeStructure(currentTypeObj, operation);
 	}
 
 	/**
-	 * Is typeObj a reference to a function type?
+	 * @description If the typeObj is a reference to a function type
+	 * @param {Object} typeObj The type object
+	 * @param {Object} allTypes The root type object
+	 * @returns {Boolean} If the given type object is a NameExpression and is known in the given type collection
+	 * and that its name references a function type
 	 */
 	function fnTypeRef(typeObj, allTypes) {
 		return typeObj.type === "NameExpression" &&
@@ -498,9 +524,12 @@ define([
 	}
 
 	/**
-	 * Inline all the function types referenced from the function type
+	 * @description Inline all the function types referenced from the function type
 	 * def, by replacing references to object types with a $$fntype
 	 * property to the value of the $$fntype property
+	 * @param {Object} def The function type
+	 * @param {Object} allTypes The root type object
+	 * @param {Object} fnTypes The function type collector
 	 */
 	function inlineFunctionTypes(def,allTypes,fnTypes) {
 		if (def.params) {
@@ -523,7 +552,12 @@ define([
 	}
 
 	/**
-	 * filters types from the environment that should not be exported
+	 * //TODO should this be moved to the environment to filter types as they are added / asked for?
+	 * @description Filters types from the environment that should not be exported
+	 * @param {Object} environment The type environment
+	 * @param {Number} kind The kind 
+	 * @param {Object} moduleTypeObj The type object for the module
+	 * @param {Object} provided The object of provided types
 	 */
 	function filterTypes(environment, kind, moduleTypeObj, provided) {
 		var moduleTypeName = doctrine.type.stringify(moduleTypeObj, {compact: true});
@@ -638,8 +672,13 @@ define([
 	var browserRegExp = /browser\s*:\s*true/;
 	var nodeRegExp = /node\s*:\s*true/;
 	var amdRegExp = /amd\s*:\s*true/;
+	
+	/**
+	 * @description Find the global objects given the AST comments and the lint options
+	 * @param {Array} comments The array of comment nodes from the AST
+	 * @param {Object} lintOptions The lint options
+	 */
 	function findGlobalObject(comments, lintOptions) {
-
 		for (var i = 0; i < comments.length; i++) {
 			var comment = comments[i];
 			if (comment.type === "Block" && (comment.value.substring(0, "jslint".length) === "jslint" ||
@@ -663,7 +702,13 @@ define([
 		}
 		return "Global";
 	}
-
+	
+	/**
+	 * @description Filter and sort the completion proposals from the given proposal collector.
+	 * Proposals are sorted by relevance and name and added to an array.
+	 * @param {Object} proposalsObj The object with all of the completion proposals
+	 * @returns {Array} The sorted proposals array
+	 */
 	function filterAndSortProposals(proposalsObj) {
 		// convert from object to array
 		var proposals = [];
@@ -782,6 +827,10 @@ define([
 			return this.indexDataPromise;
 		},
 		_computeProposalsFromAST: function(ast, buffer, context) {
+			/**
+			 * @description An empty promise
+			 * @returns {orion.Promise} An empty promise that does no work
+			 */
 			function emptyArrayPromise() {
 				var d = new Deferred();
 				d.resolve([]);
