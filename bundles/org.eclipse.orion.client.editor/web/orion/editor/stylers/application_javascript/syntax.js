@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-0$
 	var keywords = [
 		"break", //$NON-NLS-0$
 		"case", "class", "catch", "continue", "const", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -31,13 +31,13 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 		"yield" //$NON-NLS-0$
 	];
 
-	var grammars = mShared.grammars;
+	var grammars = mLib.grammars;
 	grammars.push({
 		id: "orion.js", //$NON-NLS-0$
 		contentTypes: ["application/javascript"], //$NON-NLS-0$
 		patterns: [
 			{
-				include: "orion.patterns" //$NON-NLS-0$
+				include: "orion.c-like" //$NON-NLS-0$
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "keyword.control.js" //$NON-NLS-0$

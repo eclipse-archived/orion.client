@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-0$
 	var keywords = [
 		"alignment-adjust", "alignment-baseline", "animation-delay", "animation-direction", "animation-duration", "animation-iteration-count", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"animation-name", "animation-play-state", "animation-timing-function", "animation", "appearance", //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -52,13 +52,15 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/shared/syn
 		"widows", "width", "word-break", "word-spacing", "word-wrap", "z-index" //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
-	var grammars = mShared.grammars;
+	var grammars = mLib.grammars;
 	grammars.push({
 		id: "orion.css",
 		contentTypes: ["text/css"],
 		patterns: [
 			{
-				include: "orion.patterns"
+				include: "orion.lib"
+			}, {
+				include: "orion.c-like#comment_block"
 			}, {
 				match: "(?:-webkit-|-moz-|-ms-|\\b)(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control.css"
@@ -66,17 +68,18 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/shared/syn
 				match: "(?i)\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:%|em|ex|ch|rem|vw|vh|vmin|vmax|in|cm|mm|pt|pc|px|deg|grad|rad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?\\b",
 				name: "constant.numeric.value.css"
 			}, {
-				match: "#[0-9A-Fa-f]+\\b",
-				name: "constant.numeric.hex.css"
-			}, {
 				begin: "(['\"])(?:\\\\.|[^\\\\\\1])*\\\\$", //$NON-NLS-0$
 				end: "^(?:$|(?:\\\\.|[^\\\\\\1])*(\\1|[^\\\\]$))", //$NON-NLS-0$
 				name: "string.quoted.multiline.css" //$NON-NLS-0$
-			}, {
-				/* override orion.patterns#comment_singleline */
-				id: "comment_singleline"
 			}
-		]
+		],
+		repository: {
+			/* override orion.lib#number_hex */
+			number_hex: {
+				match: "#[0-9A-Fa-f]+\\b",
+				name: "constant.numeric.hex.css"
+			}
+		}
 	});
 	return {
 		id: grammars[grammars.length - 1].id,

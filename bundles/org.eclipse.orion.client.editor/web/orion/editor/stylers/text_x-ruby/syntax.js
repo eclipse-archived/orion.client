@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-0$
 	var keywords = [
 		"alias", "alias_method", "and", "attr_reader", "attr_writer", "attr_accessor", "attr", //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"BEGIN", "begin", "break", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -35,35 +35,23 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/shared/
 		"__ENCODING__", "__END__", "__FILE__", "__LINE__" //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
-	var grammars = mShared.grammars;
+	var grammars = mLib.grammars;
 	grammars.push({
 		id: "orion.ruby",
 		contentTypes: ["text/x-ruby"],
 		patterns: [
 			{
-				include: "orion.patterns"
-			}, {
-				/* override from orion.patterns */
-				id: "comment_singleline",
-			}, {
-				/* override from orion.patterns */
-				id: "comment_multiline",
+				include: "orion.lib"
 			}, {
 				begin: "#",
 				end: "$",
 				name: "comment.line.number-sign.ruby",
 				patterns: [
 					{
-						match: "(\\b)(TODO)(\\b)(.*)",
-						name: "meta.annotation.task.todo",
-						captures: {
-							2: {name: "keyword.other.documentation.task"},
-							4: {name: "comment.line"}
-						}
+						include: "orion.lib#todo_comment_singleLine"
 					}
 				]
 			}, {
-				id: "comment_multiline",
 				begin: "^=begin",
 				end: "^=end",
 				name: "comment.block.ruby",

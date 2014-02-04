@@ -11,15 +11,17 @@
 
 /*global define*/
 
-define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/text_css/syntax", "orion/editor/stylers/text_x-php/syntax"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	function(mShared, mJS, mCSS, mPHP) {
-	
-	var grammars = mShared.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mPHP.grammars);
+define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/text_css/syntax", "orion/editor/stylers/text_x-php/syntax"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	function(mLib, mJS, mCSS, mPHP) {
+
+	var grammars = mLib.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mPHP.grammars);
 	grammars.push({
 		id: "orion.html",
 		contentTypes: ["text/html"],
 		patterns: [
 			{
+				include: "#comment"
+			}, {
 				begin: "<!(?:doctype|DOCTYPE)",
 				end: ">",
 				captures: {
@@ -88,7 +90,25 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 					}
 				]
 			}, {
-				id: "comment",
+				begin: "</?[A-Za-z0-9]+",
+				end: "/?>",
+				captures: {
+					0: {name: "entity.name.tag.html"},
+				},
+				name: "meta.tag.html",
+				patterns: [
+					{
+						include: "#comment"
+					}, {
+						include: "orion.lib#string_doubleQuote"
+					}, {
+						include: "orion.lib#string_singleQuote"
+					}
+				]
+			}
+		],
+		repository: {
+			comment: {
 				begin: "<!--",
 				end: "-->",
 				name: "comment.block.html",
@@ -102,24 +122,8 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/shared/sy
 						}
 					}
 				]
-			}, {
-				begin: "</?[A-Za-z0-9]+",
-				end: "/?>",
-				captures: {
-					0: {name: "entity.name.tag.html"},
-				},
-				name: "meta.tag.html",
-				patterns: [
-					{
-						include: "#comment"
-					}, {
-						include: "orion.patterns#string"
-					}, {
-						include: "orion.patterns#string_singleQuote"
-					}
-				]
 			}
-		]
+		}
 	});
 	return {
 		id: grammars[grammars.length - 1].id,

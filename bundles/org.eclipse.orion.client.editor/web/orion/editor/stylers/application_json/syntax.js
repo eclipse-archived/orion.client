@@ -11,25 +11,19 @@
 
 /*global define*/
 
-define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-0$
 	var keywords = ["false", "null", "true"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-	var grammars = mShared.grammars;
+	var grammars = mLib.grammars;
 	grammars.push({
 		id: "orion.json", //$NON-NLS-0$
 		contentTypes: ["application/json"], //$NON-NLS-0$
 		patterns: [
 			{
-				include: "orion.patterns" //$NON-NLS-0$
+				include: "orion.lib" //$NON-NLS-0$
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-0$
 				name: "keyword.control.json" //$NON-NLS-0$
-			}, {
-				/* override orion.patterns#comment_singleline */
-				id: "comment_singleline" //$NON-NLS-0$
-			}, {
-				/* override orion.patterns#comment_multiline */
-				id: "comment_multiline" //$NON-NLS-0$
 			}
 		]
 	});

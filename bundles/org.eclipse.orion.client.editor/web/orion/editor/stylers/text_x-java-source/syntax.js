@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-0$
 	var keywords = [
 		"abstract", //$NON-NLS-0$
 		"boolean", "break", "byte", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -30,21 +30,22 @@ define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/
 		"while" //$NON-NLS-0$
 	];
 
-	var grammars = mShared.grammars;
+	var grammars = mLib.grammars;
 	grammars.push({
 		id: "orion.java",
 		contentTypes: ["text/x-java-source"],
 		patterns: [
 			{
-				include: "orion.patterns"
+				include: "orion.c-like"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control.java"
-			}, {
-				/* override orion.patterns#string_singleQuote */
-				id: "string_singleQuote"
 			}
-		]
+		],
+		repository: {
+			/* override orion.lib#string_singleQuote (no-op) */
+			string_singleQuote: {}
+		}
 	});
 	return {
 		id: grammars[grammars.length - 1].id,

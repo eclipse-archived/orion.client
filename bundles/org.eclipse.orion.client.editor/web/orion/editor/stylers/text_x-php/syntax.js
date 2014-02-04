@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-0$
 	var keywords = [
 		"abstract", "and", "array", "as", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"break", //$NON-NLS-0$
@@ -38,25 +38,20 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/shared/s
 		"__LINE__", "__METHOD__", "__NAMESPACE__", "__TRAIT__"  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	];
 
-	var grammars = mShared.grammars;
+	var grammars = mLib.grammars;
 	grammars.push({
 		id: "orion.php",
 		contentTypes: ["text/x-php"],
 		patterns: [
 			{
-				include: "orion.patterns"
+				include: "orion.c-like"
 			}, {
 				begin: "#",
 				end: "$",
 				name: "comment.line.number-sign.php",
 				patterns: [
 					{
-						match: "(\\b)(TODO)(\\b)(.*)",
-						name: "meta.annotation.task.todo",
-						captures: {
-							2: {name: "keyword.other.documentation.task"},
-							4: {name: "comment.line"}
-						}
+						include: "orion.lib#todo_comment_singleLine"
 					}
 				]
 			}, {

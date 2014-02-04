@@ -377,10 +377,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		this._unnamedCounter = 0;
 		this._patterns = [];
 		this._rootId = rootId;
-		grammars.forEach(function(current) {
-			if (current.patterns) {
-				this._addPatterns(current.patterns, current.id);
-			}
+		grammars.forEach(function(grammar) {
+			this._addRepositoryPatterns(grammar.repository || {}, grammar.id);
+			this._addPatterns(grammar.patterns || [], grammar.id);
 		}.bind(this));
 	}
 	PatternManager.prototype = {
@@ -398,7 +397,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			/* indexes on patterns are used to break ties when multiple patterns match the same start text */
 			var indexCounter = [0];
 			var resultObject = {};
-			var regEx = new RegExp(parentId + "#[^#]+$"); //$NON-NLS-0$
+			var regEx = new RegExp("^" + parentId + "#[^#]+$"); //$NON-NLS-0$
 			var includes = [];
 			this._patterns.forEach(function(current) {
 				if (regEx.test(current.qualifiedId)) {
@@ -426,31 +425,37 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			return result;
 		},
 		_addPatterns: function(patterns, parentId) {
-			for (var i = 0; i < patterns.length; i++) {
-				var current = patterns[i];
-				current.parentId = parentId;
-				if (!current.id) {
-					current.id = this._UNNAMED + this._unnamedCounter++;
-				}
-				current.qualifiedId = current.parentId + "#" + current.id;
-				this._patterns.push(current);
-				if (current.patterns && !current.include) {
-					this._addPatterns(current.patterns, current.qualifiedId);
-				}
-			};
+			patterns.forEach(function(pattern) {
+				this._addPattern(pattern, this._NO_ID + this._unnamedCounter++, parentId);
+			}.bind(this));
+		},
+		_addRepositoryPatterns: function(repository, parentId) {
+			var keys = Object.keys(repository);
+			keys.forEach(function(key) {
+				this._addPattern(repository[key], key, parentId);
+			}.bind(this));
+		},
+		_addPattern: function(pattern, patternId, parentId) {
+			pattern.parentId = parentId;
+			pattern.id = patternId;
+			pattern.qualifiedId = pattern.parentId + "#" + pattern.id;
+			this._patterns.push(pattern);
+			if (pattern.patterns && !pattern.include) {
+				this._addPatterns(pattern.patterns, pattern.qualifiedId);
+			}
 		},
 		_processInclude: function(pattern, indexCounter, resultObject) {
 			var searchExp;
 			var index = pattern.include.indexOf("#");
 			if (index === 0) {
 				/* inclusion of pattern from same grammar */
-				searchExp = new RegExp(pattern.parentId.substring(0, pattern.parentId.indexOf("#")) + pattern.include + "$");
+				searchExp = new RegExp("^" + pattern.qualifiedId.substring(0, pattern.qualifiedId.indexOf("#")) + pattern.include + "$");
 			} else if (index === -1) {
 				/* inclusion of whole grammar */
-				searchExp = new RegExp(pattern.include + "#[^#]+$");				
+				searchExp = new RegExp("^" + pattern.include + "#" + this._NO_ID + "[^#]+$");
 			} else {
 				/* inclusion of specific pattern from another grammar */
-				searchExp = new RegExp(pattern.include);
+				searchExp = new RegExp("^" + pattern.include + "$");
 			}
 			var includes = [];
 			this._patterns.forEach(function(current) {
@@ -463,6 +468,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					}
 				}
 			}.bind(this));
+
 			/*
 			 * The includes get processed last to ensure that locally-defined patterns are given
 			 * precedence over included ones with respect to pattern identifiers and indexes.
@@ -471,7 +477,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				this._processInclude(current, indexCounter, resultObject);
 			}.bind(this));
 		},
-		_UNNAMED: "noId"	//$NON-NLS-0$
+		_NO_ID: "NoID"	//$NON-NLS-0$
 	};
 
 	function Block(bounds, pattern, styler, model, parent) {

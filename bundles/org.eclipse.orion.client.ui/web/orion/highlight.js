@@ -92,7 +92,8 @@ define(['examples/editor/textStyler', 'orion/editor/textStyler', 'orion/editor/t
 					this.orionGrammars[id] = {
 						id: id,
 						contentTypes: serviceRef.getProperty("contentTypes"),
-						patterns: serviceRef.getProperty("patterns")
+						patterns: serviceRef.getProperty("patterns"),
+						repository: serviceRef.getProperty("repository")
 					};
 				}
 			}

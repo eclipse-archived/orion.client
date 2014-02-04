@@ -27,21 +27,6 @@ define("orion/editor/stylers/text_x-yaml/syntax", [], function() { //$NON-NLS-0$
 				match: "---|\\.\\.\\.", //$NON-NLS-0$
 				name: "meta.separator.yaml" //$NON-NLS-0$
 			}, {
-				id: "numberSignComment", //$NON-NLS-0$
-				begin: "(?:^|\\s)#", //$NON-NLS-0$
-				end: "$", //$NON-NLS-0$
-				name: "comment.line.number-sign.yaml", //$NON-NLS-0$
-				patterns: [
-					{
-						match: "(\\b)(TODO)(\\b)(.*)", //$NON-NLS-0$
-						name: "meta.annotation.task.todo", //$NON-NLS-0$
-						captures: {
-							2: {name: "keyword.other.documentation.task"}, //$NON-NLS-0$
-							4: {name: "comment.line"} //$NON-NLS-0$
-						}
-					}
-				]
-			}, {
 				begin: "^.*?:\\s", //$NON-NLS-0$
 				end: "$", //$NON-NLS-0$
 				contentName: "string.unquoted.yaml", //$NON-NLS-0$
@@ -66,9 +51,21 @@ define("orion/editor/stylers/text_x-yaml/syntax", [], function() { //$NON-NLS-0$
 					}
 				]
 			}
-		]
+		],
+		repository: {
+			numberSignComment: {
+				begin: "(?:^|\\s)#", //$NON-NLS-0$
+				end: "$", //$NON-NLS-0$
+				name: "comment.line.number-sign.yaml", //$NON-NLS-0$
+				patterns: [
+					{
+						include: "orion.lib#todo_comment_singleLine"
+					}
+				]
+			}
+		}
 	};
-	
+
 	return {
 		id: id,
 		grammars: [grammar],

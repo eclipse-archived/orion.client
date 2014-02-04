@@ -11,7 +11,7 @@
 
 /*global define*/
 
-define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/shared/syntax"], function(mShared) { //$NON-NLS-0$
+define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-0$
 	var keywords = [
 		"and", "as", "assert", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		"break", //$NON-NLS-0$
@@ -31,36 +31,20 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/share
 		"yield" //$NON-NLS-0$
 	];
 
-	var grammars = mShared.grammars;
+	var grammars = mLib.grammars;
 	grammars.push({
 		id: "orion.python",
 		contentTypes: ["text/x-python"],
 		patterns: [
 			{
-				include: "orion.patterns"
-			}, {
-				/* override from orion.patterns */
-				id: "comment_singleline",
-			}, {
-				/* override from orion.patterns */
-				id: "comment_multiline",
-			}, {
-				/* override from orion.patterns */
-				id: "number_decimal",
-				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)[lL]?\\b",
-				name: "constant.numeric.number.python"
+				include: "orion.lib"
 			}, {
 				begin: "#",
 				end: "$",
 				name: "comment.line.number-sign.python",
 				patterns: [
 					{
-						match: "(\\b)(TODO)(\\b)(.*)",
-						name: "meta.annotation.task.todo",
-						captures: {
-							2: {name: "keyword.other.documentation.task"},
-							4: {name: "comment.line"}
-						}
+						include: "orion.lib#todo_comment_singleLine"
 					}
 				]
 			}, {
@@ -71,7 +55,14 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/share
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control.python"
 			}
-		]
+		],
+		repository: {
+			/* override orion.lib#number_decimal */
+			number_decimal: {
+				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)[lL]?\\b",
+				name: "constant.numeric.number.python"
+			}
+		}
 	});
 	return {
 		id: grammars[grammars.length - 1].id,
