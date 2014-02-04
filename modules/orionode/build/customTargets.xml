@@ -12,10 +12,10 @@
 		<exec executable="git" dir="${buildDirectory}/maps">
 			<arg line="archive -format=tar -remote=ssh://dev.eclipse.org/gitroot/orion/org.eclipse.orion.server.git master releng/org.eclipse.orion.releng/maps | tar -xf -" />
 		</exec>
-		
+
 		<cvs cvsRoot="${mapsRepo}" package="${mapsRoot}" dest="${buildDirectory}/maps" tag="${mapsCheckoutTag}" />
 		<antcall target="${super}.getMapFiles" />
-			
+
 		<antcall target="compareMapFiles"/>
 		<antcall target="tagMapFiles" />
 		-->
@@ -61,9 +61,9 @@ lastMapTag=${mapsTagTag}
 	<!-- ===================================================================== -->
 	<target name="preSetup">
 
-	    <!-- emf needs to be part of the "runnable" target, since Eclipse wants to "require" EMF, 
+	    <!-- emf needs to be part of the "runnable" target, since Eclipse wants to "require" EMF,
 	         not "include" it -->
-	            
+
 		<echo message="Mirror from ${emfRepoURL} to ${localRepoLocation}" />
 		<p2.mirror destination="file:${localRepoLocation}" ignoreerrors="true">
 			<source location="${emfRepoURL}" />
@@ -81,16 +81,16 @@ lastMapTag=${mapsTagTag}
 			<slicingOptions includeOptional="false" includeNonGreedy="false" latestVersionOnly="true" followStrict="true" />
 			<iu id="org.eclipse.rcp.feature.group" version="0.0.0" />
 		</p2.mirror>
-		
+
 		<!-- convert to runnable form -->
         <echo message="creating runnable in preSetup" />
         <echo message="basedir: ${basedir}" />
-		<echo message="buildDirectory: ${buildDirectory}" />	    
+		<echo message="buildDirectory: ${buildDirectory}" />
 	    <echo message="transformedRepoLocation: ${transformedRepoLocation}" />
 		<p2.repo2runnable destination="${transformedRepoLocation}">
 			<source location="file:${localRepoLocation}" />
 		</p2.repo2runnable>
-		
+
 	</target>
 
 	<target name="postFetch">
@@ -131,7 +131,7 @@ lastMapTag=${mapsTagTag}
 		<attribute name="pageDir" default = "." />
 		<attribute name="bundle"  />
 		<sequential>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" 
+			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true"
 				  dir="${buildDirectory}/optimization">
 				<classpath>
 					<pathelement location="${requirejsHome}/lib/rhino/js.jar" />
@@ -179,6 +179,7 @@ lastMapTag=${mapsTagTag}
 		<!-- Stage files for optimization -->
 		<copy todir="${buildDirectory}/optimization" >
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.core/web" includes="**"/>
+			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.cf/web" includes="**"/>
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" includes="**"/>
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.editor/web" includes="**"/>
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.git/web" includes="**"/>
@@ -202,11 +203,11 @@ lastMapTag=${mapsTagTag}
 		<optimize pageDir="plugins" name="pageLinksPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="webEditingPlugin" bundle="org.eclipse.orion.client.ui" />
 <!--		<optimize pageDir="plugins" name="preferencesPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="taskPlugin" bundle="org.eclipse.orion.client.ui" />		
+		<optimize pageDir="plugins" name="taskPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="sites" name="site" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="sites" name="sites" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="sites" name="view" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="mixloginstatic" name="LoginWindow" bundle="org.eclipse.orion.client.ui" />		
+		<optimize pageDir="mixloginstatic" name="LoginWindow" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="mixloginstatic" name="manageOpenids" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="git/plugins" name="gitPlugin" bundle="org.eclipse.orion.client.git" />
 		<optimize pageDir="git" name="git-log" bundle="org.eclipse.orion.client.git" />
