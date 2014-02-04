@@ -422,8 +422,8 @@ hard-coded numbers elsewhere.
 
 .sideMenu{
     width: 0;
-    background: rgba(47, 49, 58, 0.9);
-    float: left;
+    background: #373737;
+	float: left;
     position: absolute;
     top: 36px;
 	/* bottom: 36px; $FooterHeight + footer border (1px) */   
@@ -438,6 +438,7 @@ hard-coded numbers elsewhere.
     font-family: sans-serif;
 	font-size:10px;
 	text-decoration:none !important;
+	border-right: 1px solid #333;
 }
 
 .sideMenu-openOverlay {
@@ -453,7 +454,7 @@ hard-coded numbers elsewhere.
 }
 
 .sideMenuList{
-	padding:10px;
+	padding:12px;
 	display:inline-block !important;
 }
 
@@ -465,23 +466,23 @@ hard-coded numbers elsewhere.
 
 .sideMenuItem:hover{
 	text-decoration:none;
-	color:#78c4d8 !important;
+	color:white !important;
 }
 
 .sideMenuItem a:hover{
 	text-decoration:none;
-	color:#78c4d8 !important;
+	color:white !important;
 }
 
 .active{
-	color:whitesmoke !important;
-	font-size:20px !important;
+	color:#ddd !important;
+	font-size:16px !important;
 	text-decoration:none !important;
 }
 
 .inactive{
-	color:#999 !important;
-	font-size:20px !important;
+	color:#efefef !important;
+	font-size:16px !important;
 	text-decoration:none !important;
 }
 
@@ -490,7 +491,7 @@ hard-coded numbers elsewhere.
 	list-style-type:none;
 	position:absolute;
 	font-family:sans-serif;
-	padding-left: 10px;
+	padding-left: 13px;
 	z-index:100;
 }
 
@@ -498,9 +499,17 @@ hard-coded numbers elsewhere.
 	display: inline-block;
 	width: 100px;
 	font-size: 12px;
-    background: rgba(47, 49, 58, 0.9);
+    background: lightgrey;
 	padding: 10px;
-	border-bottom: 1px solid #555;
+	border-right:1px solid #bbb;
+}
+
+.sideMenuSubMenuItemTop{
+	border-top:1px solid #bbb;
+}
+
+.sideMenuSubMenuItemBottom{
+	border-bottom:1px solid #bbb;
 }
 
 .sideMenuSubMenuItem:first-child{
@@ -513,11 +522,17 @@ hard-coded numbers elsewhere.
 
 .sideMenuSubMenuItemLink{
 	display: inline-block;
-	color:#78c4d8;
+	color:#333;
 }
+
+
 
 .sideMenuSubMenuItemSpan{
 	display: inline-block;
+}
+
+.sideMenuSubMenuItemSpan:hover {
+	color: black !important;
 }
 
 .sideMenuItem:hover ul { 

@@ -84,7 +84,7 @@ a:hover {
 /* Row selection */
 
 .checkedRow {
-	background-color: lightblue !important; /* was e3e3e3 */
+	background-color: #cedce7 !important; /* was e3e3e3 */
 }
 
 .navbar-item-selected {
@@ -166,7 +166,7 @@ a.currentLocation:hover {
 
 .filesystemName {
 	font-weight: bold;
-	margin-left: 4px;
+	margin-left: 10px;
 	margin-top: 8px;
 	white-space: nowrap;
 	overflow: hidden;
