@@ -417,7 +417,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			lastRoot = evt.root;
 		});
 		var gotoInput = function(evt) { //$NON-NLS-0$
-			var newInput = evt.newInput || ""; //$NON-NLS-0$
+			var newInput = evt.newInput || evt.parent || ""; //$NON-NLS-0$
 			window.location = uriTemplate.expand({resource: newInput}); //$NON-NLS-0$
 		};
 		sidebarNavInputManager.addEventListener("filesystemChanged", gotoInput); //$NON-NLS-0$

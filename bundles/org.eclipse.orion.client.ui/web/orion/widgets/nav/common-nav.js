@@ -154,7 +154,7 @@ define([
 				}
 				this.sidebarNavInputManager.dispatchEvent({
 					type: "editorInputMoved", //$NON-NLS-0$
-					parent: this.treeRoot.ChildrenLocation,
+					parent: oldValue.parent.Location,
 					newInput: newInput
 				});
 			}
