@@ -33,7 +33,6 @@ define([
 	objects.mixin(SideMenu.prototype, {
 		LOCAL_STORAGE_NAME: "sideMenuNavigation",
 		OPEN_STATE: "open",
-		OPEN_OVERLAY_STATE: "openOverlay",
 		CLOSED_STATE: "closed",
 		DEFAULT_STATE: SideMenu.prototype.OPEN_STATE,
 		SIDE_MENU_OPEN_WIDTH: "40px",
@@ -69,7 +68,6 @@ define([
 			
 			if( parent ){
 				
-				parent.classList.remove("sideMenu-openOverlay");
 				if( sideMenuNavigation === this.CLOSED_STATE ){
 					this.setWidth( this.SIDE_MENU_CLOSED_WIDTH );
 					parent.style.display = 'none';
@@ -80,16 +78,11 @@ define([
 					parent.style.display = 'block';
 				}
 				
-				if( sideMenuNavigation === this.OPEN_OVERLAY_STATE ){
-					this.setWidth( this.SIDE_MENU_OPEN_WIDTH, true );
-					parent.classList.add("sideMenu-openOverlay");
-					parent.style.display = 'block';
-				}
 			}
 		},
-		setWidth: function( width, overlay ){
+		setWidth: function( width ){
 			var pageContent = lib.node( "pageContent" );
-			if (pageContent && !overlay) {
+			if (pageContent) {
 				pageContent.style.left = width;
 			}
 			var sideToolBar = lib.node( "sideMenu" );
@@ -105,28 +98,6 @@ define([
 				newState = this.CLOSED_STATE;
 			} else {
 				newState = this.OPEN_STATE;
-			}
-	
-			if (newState === this.DEFAULT_STATE) {
-				localStorage.removeItem(this.LOCAL_STORAGE_NAME);
-			} else {
-				localStorage.setItem(this.LOCAL_STORAGE_NAME, newState);
-			}
-			
-			this.setSideMenu();
-		},
-		setOverlaySideMenu: function(show) {
-			var sideMenuNavigation = this.getDisplayState();
-			
-			var newState = sideMenuNavigation;
-			if (show) {
-				if( sideMenuNavigation === this.CLOSED_STATE ){
-					newState = this.OPEN_OVERLAY_STATE;
-				}
-			} else {
-				if( sideMenuNavigation === this.OPEN_OVERLAY_STATE ){
-					newState = this.CLOSED_STATE;
-				}
 			}
 	
 			if (newState === this.DEFAULT_STATE) {

@@ -441,13 +441,6 @@ hard-coded numbers elsewhere.
 	border-right: 1px solid #333;
 }
 
-.sideMenu-openOverlay {
-    background: rgba(47, 49, 58, 0.9);
-	border-bottom-right-radius: 4px;
-	bottom: auto;
-	padding-bottom: 40px;
-}
-
 .sideMenu-maximized {
 	top: 0;
 	bottom: 0;
