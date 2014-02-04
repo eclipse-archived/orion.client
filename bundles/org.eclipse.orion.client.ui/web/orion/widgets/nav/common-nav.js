@@ -367,7 +367,9 @@ define([
 			var visible = this.isCommandsVisible();
 			this.createActionSections();
 			var commandRegistry = this.commandRegistry;
-			this.sidebar.menuBar.updateCommands(this);
+			var menuBar = this.sidebar.menuBar;
+			menuBar.setActiveExplorer(this);
+			menuBar.updateCommands();
 			commandRegistry.registerSelectionService(this.contextMenuActionsScope, visible ? this.selection : null);
 			if (this._sidebarContextMenuNode) {
 				this._populateContextMenu(this._sidebarContextMenuNode);

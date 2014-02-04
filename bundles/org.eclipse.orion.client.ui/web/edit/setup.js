@@ -122,7 +122,11 @@ var exports = {};
 				});
 			});
 		},
-		updateCommands: function(explorer) {
+		setActiveExplorer: function(explorer) {
+			this.explorer = explorer;
+		},
+		updateCommands: function() {
+			var explorer = this.explorer;
 			var visible, selection, treeRoot;
 			if (explorer) {
 				visible = explorer.isCommandsVisible();

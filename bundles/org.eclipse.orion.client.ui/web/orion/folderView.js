@@ -168,7 +168,8 @@ define([
 		},
 		updateCommands: function(selections) {
 			if (this.menuBar) {
-				this.menuBar.updateCommands(this);
+				this.menuBar.setActiveExplorer(this);
+				this.menuBar.updateCommands();
 			}
 		}
 	});
