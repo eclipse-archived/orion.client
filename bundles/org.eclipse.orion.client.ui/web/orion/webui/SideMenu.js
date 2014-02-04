@@ -34,7 +34,7 @@ define([
 		LOCAL_STORAGE_NAME: "sideMenuNavigation",
 		OPEN_STATE: "open",
 		CLOSED_STATE: "closed",
-		DEFAULT_STATE: SideMenu.prototype.OPEN_STATE,
+		DEFAULT_STATE: "open",
 		SIDE_MENU_OPEN_WIDTH: "40px",
 		SIDE_MENU_CLOSED_WIDTH: "0",
 	
