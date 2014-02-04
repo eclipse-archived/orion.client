@@ -170,12 +170,10 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			//From annotations.css
 			defineRule("annotationLine.currentLine", settings.currentLine, true); //$NON-NLS-0$
 			
-			//From default-theme.css
+			//From textstyler.css
 			defineRule("entity-name-tag", settings.keyword, false); //$NON-NLS-0$
 			defineRule("entity-other-attribute-name", settings.attribute, false); //$NON-NLS-0$
 			defineRule("string-quoted", settings.string, false); //$NON-NLS-0$
-			
-			//From textstyler.css
 			defineRule("line_caret", settings.currentLine, true); //$NON-NLS-0$
 			defineRule("keyword", settings.keyword, false); //$NON-NLS-0$
 			defineRule("string", settings.string, false); //$NON-NLS-0$

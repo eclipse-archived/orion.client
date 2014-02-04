@@ -12,7 +12,7 @@
 /*global define*/
 
 define("orion/editor/stylers/application_json/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-0$
-	var keywords = ["false", "null", "true"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var keywords = ["false", "true"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	var grammars = mLib.grammars;
 	grammars.push({

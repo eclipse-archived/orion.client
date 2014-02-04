@@ -289,6 +289,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				matches.push({result: result, pattern: current});
 			}
 		}.bind(this));
+		if (!matches.length) {
+			return matches;
+		}
 		matches.sort(function(a,b) {
 			if (a.result.index < b.result.index) {
 				return -1;
@@ -298,9 +301,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			return a.pattern.pattern.index < b.pattern.pattern.index ? -1 : 1;
 		});
-		if (!matches.length) {
-			return matches;
-		}
 
 		var index = 0;
 		var results = [];
