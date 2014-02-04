@@ -873,7 +873,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		
 		var getParentItem = function(selections, items){
 			var item = getTargetFolder(selections);
-			if (!item) {
+			if (!item || !item.Location) {
 				item = explorer.treeRoot;
 				if (item.Project) {
 					item = item.children[0];
