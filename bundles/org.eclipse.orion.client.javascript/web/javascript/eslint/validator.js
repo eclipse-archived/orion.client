@@ -123,8 +123,16 @@ define([
 				var len = asterrors.length;
 				for(var i = 0; i < len; i++) {
 					var error = asterrors[i];
-					var token = Finder.findToken(error.index, ast.tokens);
+					var token = null;
+					if(error.end && error.token) {
+						token = {range: [error.index, error.end], value: error.token};
+					}
+					else if(ast.tokens.length > 0) {
+						//error object did not contain the token infos, try to find it
+						token = Finder.findToken(error.index, ast.tokens);	
+					} 
 					if(!token) {
+						//failed to compute it, continue
 						continue;
 					}
 					var msg = error.message;

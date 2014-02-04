@@ -1195,6 +1195,8 @@ parseStatement: true, parseSourceElement: true */
         if (typeof token.lineNumber === 'number') {
             error = new Error('Line ' + token.lineNumber + ': ' + msg);
             error.index = token.range[0];
+            error.end = token.range[1];
+            error.token = token.value;
             error.lineNumber = token.lineNumber;
             error.column = token.range[0] - lineStart + 1;
         } else {
