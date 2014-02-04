@@ -59,6 +59,19 @@ define([
 	JSONRenderer.prototype = new mExplorer.SelectionRenderer();
 	objects.mixin(JSONRenderer.prototype, {
 		labelColumnIndex: 0,
+		emptyCallback: function(bodyElement) {
+			var msg = this.explorer.emptyMessage;
+			if (!msg) { return; }
+			var tr = document.createElement("tr"); //$NON-NLS-0$
+			var td = document.createElement("td"); //$NON-NLS-0$
+			td.colSpan = 3;
+			var noContent = document.createElement("div"); //$NON-NLS-0$
+			noContent.classList.add("emptyJSON"); //$NON-NLS-0$
+			noContent.appendChild(document.createTextNode(msg));
+			td.appendChild(noContent);
+			tr.appendChild(td);
+			bodyElement.appendChild(tr);
+		},
 		getCellElement: function(col_no, item, tableRow) {
 			var col, span;
 	        switch (col_no) {

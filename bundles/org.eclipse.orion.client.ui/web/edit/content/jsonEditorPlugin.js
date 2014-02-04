@@ -36,13 +36,13 @@ define([
 		if (model) {
 			model.getText().then(function(text) {
 				json = {};
+				if (!explorer) {
+					explorer = new mJSONExplorer.JSONExplorer({parentId: document.body, update: updateModel});
+				}
 				try {
 					json = JSON.parse(text);
 				} catch (e) {
-					//TODO - display error
-				}
-				if (!explorer) {
-					explorer = new mJSONExplorer.JSONExplorer({parentId: document.body, update: updateModel});
+					explorer.emptyMessage = "Error parsing JSON text: " + e.message;
 				}
 				explorer.display(json);
 				if (showItem) {
