@@ -125,6 +125,7 @@ hard-coded numbers elsewhere.
 	/* bottom: 36px; $FooterHeight + footer border (1px) */    
     bottom: 0;
     left: 0;
+    transition: left 0.3s ease; /* if this is changed SideMenu.js->TRANSITION_DURATION_MS needs to be changed as well */
     right: 0;
 	/*margin-bottom: 29px;*/
 }
@@ -428,7 +429,7 @@ hard-coded numbers elsewhere.
     top: 36px;
 	/* bottom: 36px; $FooterHeight + footer border (1px) */   
     bottom: 0;
-    z-index: 100;
+    z-index: -1;
     -webkit-animation: slide 0.5s forwards;
     -webkit-animation-delay: 2s;
     animation: slide 0.5s forwards;
@@ -438,7 +439,6 @@ hard-coded numbers elsewhere.
     font-family: sans-serif;
 	font-size:10px;
 	text-decoration:none !important;
-	border-right: 1px solid #333;
 }
 
 .sideMenu-maximized {

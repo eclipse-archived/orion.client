@@ -36,8 +36,8 @@ define([
 		CLOSED_STATE: "closed",
 		DEFAULT_STATE: "open",
 		SIDE_MENU_OPEN_WIDTH: "40px",
-		SIDE_MENU_CLOSED_WIDTH: "0",
-	
+		TRANSITION_DURATION_MS: 301, /* this should always be greater than the duration of the left transition of .content-fixedHeight */
+		
 		addMenuItem: function( imageClassName, categoryId /*, link*/ ){
 			var anchor = this.anchor;
 			
@@ -69,25 +69,24 @@ define([
 			if( parent ){
 				
 				if( sideMenuNavigation === this.CLOSED_STATE ){
-					this.setWidth( this.SIDE_MENU_CLOSED_WIDTH );
-					parent.style.display = 'none';
+					this.setPageContentLeft("0"); //$NON-NLS-0$
+					window.setTimeout(function() {
+						parent.style.display = 'none'; //$NON-NLS-0$
+					}, this.TRANSITION_DURATION_MS);
 				}
 				
 				if( sideMenuNavigation === this.OPEN_STATE ){
-					this.setWidth( this.SIDE_MENU_OPEN_WIDTH );
-					parent.style.display = 'block';
+					parent.style.display = 'block'; //$NON-NLS-0$
+					parent.style.width = this.SIDE_MENU_OPEN_WIDTH;
+					this.setPageContentLeft(this.SIDE_MENU_OPEN_WIDTH);
 				}
 				
 			}
 		},
-		setWidth: function( width ){
+		setPageContentLeft: function( left ){
 			var pageContent = lib.node( "pageContent" );
 			if (pageContent) {
-				pageContent.style.left = width;
-			}
-			var sideToolBar = lib.node( "sideMenu" );
-			if( sideToolBar ){
-				sideToolBar.style.width = width;
+				pageContent.style.left = left;
 			}
 		},
 		toggleSideMenu: function(){
