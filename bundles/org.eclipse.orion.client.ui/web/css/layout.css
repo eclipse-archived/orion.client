@@ -490,7 +490,8 @@ hard-coded numbers elsewhere.
 
 .sideMenuSubMenuItem{
 	display: inline-block;
-	width: 100px;
+	width: 100%;
+	white-space: nowrap;
 	font-size: 12px;
     background: lightgrey;
 	padding: 10px;
