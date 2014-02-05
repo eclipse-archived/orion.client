@@ -180,6 +180,13 @@
 		<optimize pageDir="shell" name="shellPage" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="shell/plugins" name="shellPagePlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="javascript/plugins" name="javascriptPlugin" bundle="org.eclipse.orion.client.javascript" />
+		<optimize pageDir="plugins/languages/css" name="cssPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins/languages/html" name="htmlPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins/languages/java" name="javaPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins/languages/php" name="phpPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins/languages/python" name="pythonPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins/languages/ruby" name="rubyPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins/languages/yaml" name="yamlPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins/site" name="sitePlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="authenticationPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="csslintPlugin" bundle="org.eclipse.orion.client.ui" />

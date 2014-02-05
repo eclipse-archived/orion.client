@@ -12,22 +12,12 @@
 /*global define*/
 define([
 	'orion/plugin',
-	'orion/editor/cssContentAssist',
-	'orion/editor/htmlContentAssist',
-	'orion/editor/htmlGrammar',
-	'orion/editor/stylers/text_x-java-source/syntax',
-	'orion/editor/stylers/text_x-python/syntax',
-	'orion/editor/stylers/text_x-ruby/syntax',
-	'orion/editor/stylers/text_x-php/syntax',
-	'orion/editor/stylers/text_css/syntax',
-	'orion/editor/stylers/text_html/syntax',
-	'orion/editor/stylers/text_x-yaml/syntax',
 	'orion/editor/templates'
-], function(PluginProvider, cssContentAssist, htmlContentAssist, htmlGrammar, mJava, mPython, mRuby, mPHP, mCSS, mHTML, mYAML, templates) {
+], function(PluginProvider, templates) {
 	var headers = {
 		name: "Orion Web Editing Plugin",
 		version: "1.0",
-		description: "This plugin provides editor link support for the navigator and provides default editing capabilities for HTML, JavaScript, and CSS."
+		description: "This plugin provides editor link support for the navigator."
 	};
 
 	var provider = new PluginProvider(headers);
@@ -40,59 +30,16 @@ define([
 				extension: ["txt"],
 				imageClass: "file-sprite-text modelDecorationSprite"
 			},
-			{	id: "text/html",
-				"extends": "text/plain",
-				name: "HTML",
-				extension: ["html", "htm"],
-				imageClass: "file-sprite-html modelDecorationSprite"
-			},
-			{	id: "text/css",
-				"extends": "text/plain",
-				name: "CSS",
-				extension: ["css"],
-				imageClass: "file-sprite-css modelDecorationSprite"
-			},
-			{	id: "application/json",
-				"extends": "text/plain",
-				name: "JSON",
-				extension: ["json"],
-				imageClass: "file-sprite-text modelDecorationSprite"
-			},
 			{	id: "application/xml",
 				"extends": "text/plain",
 				name: "XML",
 				extension: ["xml"],
 				imageClass: "file-sprite-xml"
 			},
-			{	id: "text/x-java-source",
-				"extends": "text/plain",
-				name: "Java",
-				extension: ["java"]
-			},
-			{	id: "text/x-python",
-				"extends": "text/plain",
-				name: "Python",
-				extension: ["py", "rpy", "pyw", "cpy", "SConstruct", "Sconstruct", "sconstruct", "SConscript", "gyp", "gypi"]
-			},
-			{	id: "text/x-ruby",
-				"extends": "text/plain",
-				name: "Ruby",
-				extension: ["rb", "rbx", "rjs", "Rakefile", "rake", "cgi", "fcgi", "gemspec", "irbrc", "capfile", "ru", "prawn", "Gemfile", "Guardfile", "Vagrantfile", "Appraisals", "Rantfile"]
-			},
-			{	id: "text/x-php",
-				"extends": "text/plain",
-				name: "PHP",
-				extension: ["php", "php3", "php4", "php5", "phpt", "phtml", "aw", "ctp"]
-			},
 			{	id: "text/x-markdown",
 				"extends": "text/plain",
 				name: "Markdown",
 				extension: ["md"]
-			},
-			{	id: "text/x-yaml",
-				"extends": "text/plain",
-				name: "YAML",
-				extension: ["yaml", "yml"]
 			},
 			{	id: "text/conf",
 				"extends": "text/plain",
@@ -178,28 +125,6 @@ define([
 			source: "!Projects" // Filter out workspace; Raw only applies to regular files and folders.
 		}]
 	});
-
-	// Register content assist providers
-	provider.registerService("orion.edit.contentassist",
-		new cssContentAssist.CssContentAssistProvider(),
-		{	name: "CSS content assist",
-			contentType: ["text/css"]
-		});
-	provider.registerService("orion.edit.contentassist",
-		new htmlContentAssist.HTMLContentAssistProvider(),
-		{	name: "HTML content assist",
-			contentType: ["text/html"],
-			charTriggers: "<",
-			excludedStyles: "(comment.*|string.*)"
-		});
-
-	/**
-	 * Register syntax styling
-	 */
-	var grammars = mJava.grammars.concat(mCSS.grammars).concat(mHTML.grammars).concat(mPython.grammars).concat(mRuby.grammars).concat(mPHP.grammars).concat(mYAML.grammars);
-	grammars.forEach(function(current) {
-		provider.registerServiceProvider("orion.edit.highlighter", {}, current);
-	}.bind(this));
 
 	provider.connect();
 });

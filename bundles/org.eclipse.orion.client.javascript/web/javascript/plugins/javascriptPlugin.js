@@ -44,7 +44,7 @@ define([
 	var provider = new PluginProvider(headers);
 	
 	/**
-	 * Register the JavaScript content type
+	 * Register the JavaScript content types
 	 */
 	provider.registerServiceProvider("orion.core.contenttype", {}, {
 		contentTypes: [
@@ -53,8 +53,13 @@ define([
 				name: "JavaScript",
 				extension: ["js"],
 				imageClass: "file-sprite-javascript modelDecorationSprite"
+			}, {id: "application/json",
+				"extends": "text/plain",
+				name: "JSON",
+				extension: ["json"],
+				imageClass: "file-sprite-javascript modelDecorationSprite"
 			}
-		] 
+		]
 	});
 
 	/**
