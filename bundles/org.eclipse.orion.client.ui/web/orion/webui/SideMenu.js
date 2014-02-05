@@ -235,8 +235,10 @@ define([
 				var menuitem = _self.getMenuItem(catId);
 				if (!menuitem)
 					return;
-				var bin = _self._getLinksBin(catId);
-				if (bin.length === 1) {
+				var bin = _self._getLinksBin(catId), length = bin.length;
+				if (!length) {
+					// Empty category, nothing to do
+				} else if (length === 1) {
 					var category = _self.categories.getCategory(catId);
 					var link = document.createElement("a");
 					link.href = bin[0].href;
@@ -247,11 +249,9 @@ define([
 				} else {
 					var sideMenuSubMenu = document.createElement('ul');
 					sideMenuSubMenu.className="sideMenuSubMenu";
-					
 			
 					bin[0].top = true;
-					
-					bin[bin.length-1].bottom = true;
+					bin[length-1].bottom = true;
 							
 					bin.forEach( function( item ){
 						
