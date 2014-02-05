@@ -186,6 +186,7 @@ define([
 		this.isMarkdownView = options.isMarkdownView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
+		this.componentSelector = options.componentSelector;
 		this.clickHandler = options.clickHandler;
 		this._init();
 	}
@@ -236,13 +237,17 @@ define([
 						this.sectionContents.classList.add("browseSectionWrapper"); 
 						this._foldersSection.setContent(this.sectionContents);
 						
-						//Render the branch selector 
+						//Render the branch and component selector 
 						var tileNode = this._foldersSection.getTitleElement();
 						if(tileNode) {
 							lib.empty(tileNode);
 							if(this.branchSelector) {
-								tileNode.appendChild(this.branchSelector.node);
+								tileNode.appendChild(this.branchSelector.parentNode);
 								this.branchSelector.refresh();
+							}
+							if(this.componentSelector) {
+								tileNode.appendChild(this.componentSelector.parentNode);
+								this.componentSelector.refresh();
 							}
 						}
 						//Render the bread crumb 
