@@ -172,6 +172,8 @@ define([
 		authenticationIds = [];
 
 		var menuGenerator = customGlobalCommands.createMenuGenerator.apply(this, arguments);
+		
+		if (!menuGenerator) { return; } 
 
 		for (var i = 0; i < authServices.length; i++) {
 			var servicePtr = authServices[i];
@@ -200,7 +202,6 @@ define([
 				});
 			});
 		}
-
 	}
 
 	function continueOnError(error) {
