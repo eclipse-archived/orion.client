@@ -201,6 +201,7 @@ define([
 							commandRegistry: this._commandRegistry,
 							fileClient: this._fileClient,
 							parentNode: branchSelectorContainer,
+							labelHeader: this._showComponent ? "stream" : "branch",
 							resourceChangeDispatcher: this._showComponent ? this._resourceChangeHandler : null,
 							fetchChildren: this._showComponent ? true : false,
 							commandScopeId: "orion.browse.brSelector", //$NON-NLS-0$
@@ -217,6 +218,7 @@ define([
 								commandRegistry: this._commandRegistry,
 								fileClient: this._fileClient,
 								parentNode: compSelectorContainer,
+								labelHeader: "component",
 								commandScopeId: "orion.browse.compSelector", //$NON-NLS-0$
 								dropDownId: "orion.browse.switchcomp", //$NON-NLS-0$
 								dropDownTooltip: "Select a componet", //$NON-NLS-0$

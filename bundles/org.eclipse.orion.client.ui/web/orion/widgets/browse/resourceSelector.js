@@ -40,6 +40,7 @@ define([
 		this.dropDownTooltip = params.dropDownTooltip;
 		this.allItems = params.allItems;
 		this.activeResourceName = params.activeResourceName;
+		this.labelHeader = params.labelHeader;
 		this.parentNode = params.parentNode;
 		this.listener = function(event) {
 			this.refresh(event.root);
@@ -115,8 +116,10 @@ define([
 		_resourceLabel: function() {
 			//TOTO figure out the resource name from any meta (e.g. sub folder)
 			var fragment = document.createDocumentFragment();
-			fragment.textContent = this.activeResourceName; //$NON-NLS-0$
-			//lib.processDOMNodes(fragment, [document.createTextNode(name), document.createTextNode(hostname)]);
+			fragment.textContent = this.labelHeader + ": ${0}"; //$NON-NLS-0$
+			var nameLabel = document.createElement("b"); //$NON-NLS-0$
+			nameLabel.textContent = this.activeResourceName;
+			lib.processDOMNodes(fragment, [nameLabel]);
 			return fragment;
 		},
 		refresh: function() {
