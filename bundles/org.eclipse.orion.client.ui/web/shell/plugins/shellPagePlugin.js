@@ -36,7 +36,8 @@ define([
 	});
 	provider.registerService("orion.page.link.related", null, {
 		id: "eclipse.shell.open",
-		category: "shell"
+		category: "shell",
+		order: 10 // First link in Shell category
 	});
 	provider.registerService("orion.page.link.related", null, {
 		nameKey: "ShellHere",
@@ -44,6 +45,7 @@ define([
 		tooltipKey: "Open Shell page",
 		nls: "orion/shell/nls/messages",
 		category: "shell",
+		order: 10, // same rank as the other related link, but these 2 links should never be rendered simultaneously, so OK.
 		validationProperties: [{
 			source: "NoTarget"
 		}],

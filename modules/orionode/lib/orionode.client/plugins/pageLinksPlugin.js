@@ -70,8 +70,9 @@ define([
 		nameKey: "Search",
 		id: "orion.Search",
 		nls: "orion/nls/messages",
+		uriTemplate: "{+OrionHome}/search/search.html",
 		category: "search",
-		uriTemplate: "{+OrionHome}/search/search.html"
+		order: 10 // first link in search category
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
@@ -79,6 +80,8 @@ define([
 		nameKey: "EditorHere",
 		nls: "orion/nls/messages",
 		tooltip: "Open Editor page",
+		category: "edit",
+		order: 10,
 		validationProperties: [{
 			source: "ChildrenLocation|ContentLocation",
 			variableName: "EditorLocation",

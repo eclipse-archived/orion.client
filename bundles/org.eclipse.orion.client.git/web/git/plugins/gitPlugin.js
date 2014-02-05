@@ -93,7 +93,8 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 
 	provider.registerService("orion.page.link.related", null, {
 		id: "eclipse.git.status",
-		category: "git"
+		category: "git",
+		order: 10 // Git Status should be first in the Git category
 	});
 	
 	provider.registerService("orion.page.link.related", null, {
@@ -102,6 +103,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		tooltipKey: "Go to Git Status",
 		nls: "git/nls/gitmessages",
 		category: "git",
+		order: 10,
 		validationProperties: [{
 			source: "StatusLocation|Clone:StatusLocation", 
 			variableName: "GitStatusLocation"
