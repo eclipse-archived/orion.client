@@ -1024,6 +1024,12 @@ define([
 							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						});						
 					}
+				} else if(defaultInvocation && defaultInvocation.command && defaultInvocation.command.name){
+					menuButton.commandTooltip = new mTooltip.Tooltip({
+						node: menuButton,
+						text: name + ": " + defaultInvocation.command.name, //$NON-NLS-0$
+						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});					
 				}
 			}
 			

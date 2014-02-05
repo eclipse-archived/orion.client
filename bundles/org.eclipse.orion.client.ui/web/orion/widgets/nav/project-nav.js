@@ -174,9 +174,9 @@ define([
 				var deployCommands = ProjectCommands.getDeployProjectCommands(commandRegistry);
 				if(deployCommands && deployCommands.length>0){
 					if((!this.launchCommands || this.launchCommands.length ===0) && deployCommands.length === 1){
-						commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", deployCommands[0].id); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+						commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, null, null, "dropdownSelection", deployCommands[0].id); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 					} else {
-						commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+						commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, null, null, "dropdownSelection", true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 					}
 					position = 100;
 					deployCommands.forEach(function(command){
@@ -207,9 +207,9 @@ define([
 					var defaultCommand = ProjectCommands.getDefaultLaunchCommand(this.treeRoot.Project.Name);
 					
 					if(defaultCommand){
-						this.commandRegistry.addCommandGroup(this.additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", defaultCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+						this.commandRegistry.addCommandGroup(this.additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, null, null, "dropdownSelection", defaultCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 					} else if(launchConfigurations.length === 1){
-						this.commandRegistry.addCommandGroup(this.additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", launchCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+						this.commandRegistry.addCommandGroup(this.additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, null, null, "dropdownSelection", launchCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 					}
 					CommonNavExplorer.prototype.updateCommands.apply(this, selections);					
 				}
@@ -223,7 +223,7 @@ define([
 							if(event.type === "changedDefault"){
 								var defaultCommand = ProjectCommands.getDefaultLaunchCommand(_self.treeRoot.Project.Name);
 								if(defaultCommand){
-									_self.commandRegistry.addCommandGroup(_self.additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, "core-sprite-deploy", null, "dropdownSelection", defaultCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+									_self.commandRegistry.addCommandGroup(_self.additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, null, null, "dropdownSelection", defaultCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 								}
 								_self.updateCommands(_self.selection.getSelections());
 								return;
