@@ -212,7 +212,9 @@ define([
 			categories.getCategoryIDs().map(function(catId) {
 				return categories.getCategory(catId);
 			}).sort(compareCategories).forEach(function(cat) {
-				_self.addMenuItem(cat.imageClass, cat.id);
+				if (_self._getLinksBin(cat.id).length > 0) { // do not render empty categories
+					_self.addMenuItem(cat.imageClass, cat.id);
+				}
 			});
 		},
 		_renderLinks: function() {
@@ -237,7 +239,7 @@ define([
 					return;
 				var bin = _self._getLinksBin(catId), length = bin.length;
 				if (!length) {
-					// Empty category, nothing to do
+					// Empty category -- should not happen
 				} else if (length === 1) {
 					var category = _self.categories.getCategory(catId);
 					var link = document.createElement("a");
