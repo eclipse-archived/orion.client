@@ -70,12 +70,20 @@ define([
 				
 				if( sideMenuNavigation === this.CLOSED_STATE ){
 					this.setPageContentLeft("0"); //$NON-NLS-0$
-					window.setTimeout(function() {
+					if (this._timeout) {
+						window.clearTimeout(this._timeout);
+						this._timeout = null;
+					}
+					this._timeout = window.setTimeout(function() {
 						parent.style.display = 'none'; //$NON-NLS-0$
 					}, this.TRANSITION_DURATION_MS);
 				}
 				
 				if( sideMenuNavigation === this.OPEN_STATE ){
+					if (this._timeout) {
+						window.clearTimeout(this._timeout);
+						this._timeout = null;
+					}
 					parent.style.display = 'block'; //$NON-NLS-0$
 					parent.style.width = this.SIDE_MENU_OPEN_WIDTH;
 					this.setPageContentLeft(this.SIDE_MENU_OPEN_WIDTH);
