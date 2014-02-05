@@ -95,8 +95,7 @@ define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 			],
 			repository: {
 				comment_singleLine: {
-					begin: "//",
-					end: "$",
+					match: "//.*",
 					name: "comment.line.double-slash",
 					patterns: [
 						{

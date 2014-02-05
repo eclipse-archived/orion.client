@@ -39,8 +39,7 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/lib/s
 			{
 				include: "orion.lib"
 			}, {
-				begin: "#",
-				end: "$",
+				match: "#.*",
 				name: "comment.line.number-sign.python",
 				patterns: [
 					{

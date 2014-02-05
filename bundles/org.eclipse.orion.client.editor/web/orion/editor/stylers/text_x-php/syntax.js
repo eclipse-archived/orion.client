@@ -46,8 +46,7 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 			{
 				include: "orion.c-like"
 			}, {
-				begin: "#",
-				end: "$",
+				match: "#.*",
 				name: "comment.line.number-sign.php",
 				patterns: [
 					{

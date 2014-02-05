@@ -43,8 +43,7 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 			{
 				include: "orion.lib"
 			}, {
-				begin: "#",
-				end: "$",
+				match: "#.*",
 				name: "comment.line.number-sign.ruby",
 				patterns: [
 					{
