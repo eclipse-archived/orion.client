@@ -252,16 +252,10 @@ define([
 					var sideMenuSubMenu = document.createElement('ul');
 					sideMenuSubMenu.className="sideMenuSubMenu";
 			
-					bin[0].top = true;
-					bin[length-1].bottom = true;
-							
 					bin.forEach( function( item ){
 						
 							var sideMenuSubMenuItem = document.createElement('li');	
 							sideMenuSubMenuItem.className="sideMenuSubMenuItem";
-							
-							if( item.top ){ sideMenuSubMenuItem.className += " sideMenuSubMenuItemTop" };
-							if( item.bottom ){ sideMenuSubMenuItem.className += " sideMenuSubMenuItemBottom" };
 							
 							var sideMenuSubMenuItemLink = document.createElement('a');
 							sideMenuSubMenuItemLink.href = item;
