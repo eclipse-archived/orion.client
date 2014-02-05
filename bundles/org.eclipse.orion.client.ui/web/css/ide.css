@@ -56,6 +56,14 @@ button::-moz-focus-inner {
 	color: #333333;
 }
 
+.navlink:hover {
+	color: #F58B0F;
+}
+
+.navlink > span {
+	color: inherit;
+}
+
 .nav_fakelink:hover {
 	cursor: pointer;
 }
@@ -73,6 +81,7 @@ button::-moz-focus-inner {
 .navlinkonpage:hover {
 	text-decoration: none;
 	border-bottom: 1px dotted;
+	color: #F58B0F;
 }
 
 .dragOver {
@@ -858,7 +867,7 @@ input {
 }
 
 .centralNavigation:hover{
-
+	color: #F58B0F;
 }
 
 .navigationLabel{

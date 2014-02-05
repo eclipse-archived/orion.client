@@ -233,6 +233,14 @@ a.currentLocation:hover {
 	margin: 0;  /* to override user agent stylesheet */
 }
 
+.commandButton.orionButton.dropdownTrigger {
+	border-color: transparent;
+}
+
+.commandButton.orionButton.dropdownTrigger:hover {
+	border-color: #ccc;
+}
+
 .commandButton {
 	color: #222;
 	border: 1px solid #dedede;
@@ -386,7 +394,7 @@ a.currentLocation:hover {
 .dropdownTrigger {
 	font-weight: normal;
 	background: none !important;
-	border-color: transparent !important;
+	border-color: transparent;
 }
 
 .dropdownTrigger a {

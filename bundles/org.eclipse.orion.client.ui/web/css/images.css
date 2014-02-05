@@ -126,6 +126,10 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.core-sprite-silhouette:hover {
+	color: #F58B0F;
+}
+
 .core-sprite-addcontent{
 	font-size: 16px;
 	color: #f89427;
