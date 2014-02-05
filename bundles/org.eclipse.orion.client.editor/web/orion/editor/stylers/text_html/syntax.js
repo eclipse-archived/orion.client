@@ -42,7 +42,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 					}
 				]
 			}, {
-				begin: "(?i)<script\\s*>|<script\\s.*(?:language\\s*=\\s*(['\"])javascript\\1|type\\s*=\\s*(['\"])(?:text|application)/(?:javascript|ecmascript)\\2).*>",
+				begin: "(?i)<script\\s*>|<script\\s.*?(?:language\\s*=\\s*(['\"])javascript\\1|type\\s*=\\s*(['\"])(?:text|application)/(?:javascript|ecmascript)\\2).*?>",
 				end: "(?i)</script>",
 				captures: {
 					0: {name: "entity.name.tag.html"}
@@ -54,7 +54,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 					}
 				]
 			}, {
-				begin: "(?i)<script\\s.*(?:language\\s*=\\s*(['\"])php\\1|type\\s*=\\s*(['\"])text/x-php\\2).*>",
+				begin: "(?i)<script\\s.*?(?:language\\s*=\\s*(['\"])php\\1|type\\s*=\\s*(['\"])text/x-php\\2).*?>",
 				end: "(?i)</script>",
 				captures: {
 					0: {name: "entity.name.tag.html"}
