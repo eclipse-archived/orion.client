@@ -93,9 +93,9 @@ define([
 			return true;
 		},
 		// each relatedLink is { relatedLink: Object, command: Command, invocation: CommandInvocation }
-		addRelatedLinkCommands: mCustomGlobalCommands.addRelatedLinkCommands || function (relatedLinks) {
-			if (sideMenu) {
-				sideMenu.setRelatedLinks(relatedLinks);
+		addRelatedLinkCommands: mCustomGlobalCommands.addRelatedLinkCommands || function (commandRegistry, relatedLinks, inactive) {
+			if (this.sideMenu) {
+				this.sideMenu.setRelatedLinks(relatedLinks);
 			}
 		},
 		afterGenerateRelatedLinks: mCustomGlobalCommands.afterGenerateRelatedLinks || function (serviceRegistry, item, exclusions, commandRegistry, alternateItem) {},
@@ -110,7 +110,7 @@ define([
 					position: ["right"] //$NON-NLS-0$
 				});
 
-				sideMenu = new SideMenu(sideMenuParent); //$NON-NLS-0$
+				sideMenu = this.sideMenu = new SideMenu(sideMenuParent); //$NON-NLS-0$
 				nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
 			}
 		},
@@ -289,8 +289,9 @@ define([
 			return;
 		}
 
+		var thisGlobalCommands = this;
 		Deferred.when(getContentTypes(), function () {
-			if (!customGlobalCommands.beforeGenerateRelatedLinks.apply(this, globalArguments)) {
+			if (!customGlobalCommands.beforeGenerateRelatedLinks.apply(thisGlobalCommands, globalArguments)) {
 				return;
 			}
 
@@ -331,14 +332,19 @@ define([
 				commandItems.sort(function(a, b) {
 					return a.command.name.localeCompare(b.command.name);
 				});
-				return Deferred.all(commandItems.map(setInvocation), continueOnError).then(function(commandItems) {
+				return Deferred.all(commandItems.map(setInvocation), continueOnError).then(function(invoked) {
+					var nonInvoked = [];
 					// Filter out any holes caused by setInvocation() failing
-					commandItems = commandItems.filter(function(item) {
-						return item;
+					invoked = invoked.filter(function(item, i) {
+						if (item) {
+							return true;
+						}
+						nonInvoked.push(commandItems[i]);
+						return false;
 					});
 					// Finally pass the relatedLinks data to customGlobalCommands
-					customGlobalCommands.addRelatedLinkCommands(commandItems);
-					customGlobalCommands.afterGenerateRelatedLinks.apply(this, globalArguments);
+					customGlobalCommands.addRelatedLinkCommands.call(thisGlobalCommands, commandRegistry, invoked, nonInvoked);
+					customGlobalCommands.afterGenerateRelatedLinks.apply(thisGlobalCommands, globalArguments);
 				});
 			});
 		});
@@ -431,13 +437,13 @@ define([
 			}
 			name = options.name || options.target.Name;
 			pageItem = options.target;
-			generateRelatedLinks(serviceRegistry, options.target, exclusions, options.commandService, options.makeAlternate);
+			generateRelatedLinks.call(this, serviceRegistry, options.target, exclusions, options.commandService, options.makeAlternate);
 		} else {
 			if (!options.breadcrumbTarget) {
 				breadcrumbRootName = breadcrumbRootName || options.task || options.name;
 			}
 			name = options.name;
-			generateRelatedLinks(serviceRegistry, {
+			generateRelatedLinks.call(this, serviceRegistry, {
 				NoTarget: ""
 			}, exclusions, options.commandService, options.makeAlternate);
 		}
