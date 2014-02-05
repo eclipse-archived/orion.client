@@ -74,7 +74,7 @@ define([
 	
 	provider.registerService("orion.page.link.related", null, {
 		id: "orion.editFromMetadata",
-		nameKey: "Editor",
+		nameKey: "EditorHere",
 		nls: "orion/nls/messages",
 		tooltip: "Open Editor page",
 		category: "edit",

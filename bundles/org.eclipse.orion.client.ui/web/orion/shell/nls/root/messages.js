@@ -12,6 +12,7 @@
 
 define({
 	"Shell": "Shell",
+	"ShellHere": "Open Shell Here",
 	"Changed to: ": "Changed to: ",
 	"Initial directory: ": "Initial directory: ",
 	"${0} is not a directory": "${0} is not a directory",
