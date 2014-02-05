@@ -52,20 +52,20 @@ define([
 	});
 
 	// Primary navigation links
-	provider.registerService("orion.page.link", null, {
-		nameKey: "Editor",
-		nls: "orion/nls/messages",
-		tooltip: "Edit code",
-		category: "edit",
-		uriTemplate: "{+OrionHome}/edit/edit.html"
-	});
-	provider.registerService("orion.page.link", serviceImpl, {
-		nameKey: "Shell",
-		id: "orion.shell",
-		nls: "orion/nls/messages",
-		category: "shell",
-		uriTemplate: "{+OrionHome}/shell/shellPage.html"
-	});
+//	provider.registerService("orion.page.link", null, {
+//		nameKey: "Editor",
+//		nls: "orion/nls/messages",
+//		tooltip: "Edit code",
+//		category: "edit",
+//		uriTemplate: "{+OrionHome}/edit/edit.html"
+//	});
+//	provider.registerService("orion.page.link", serviceImpl, {
+//		nameKey: "Shell",
+//		id: "orion.shell",
+//		nls: "orion/nls/messages",
+//		category: "shell",
+//		uriTemplate: "{+OrionHome}/shell/shellPage.html"
+//	});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Search",
 		id: "orion.Search",
@@ -77,7 +77,7 @@ define([
 	
 	provider.registerService("orion.page.link.related", null, {
 		id: "orion.editFromMetadata",
-		nameKey: "EditorHere",
+		nameKey: "EditorRelatedLink",
 		nls: "orion/nls/messages",
 		tooltip: "Open Editor page",
 		category: "edit",
@@ -87,9 +87,8 @@ define([
 			variableName: "EditorLocation",
 			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
 		}],
-		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation},navigate={,EditorLocation}?depth=1"
+		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
 	});
-
 
 	provider.registerService("orion.page.link.user", null, {
 		id: "orion.help",

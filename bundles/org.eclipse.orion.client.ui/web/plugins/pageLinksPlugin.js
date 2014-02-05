@@ -50,20 +50,20 @@ define([
 	});
 
 	// Primary navigation links
-	provider.registerService("orion.page.link", null, {
-		nameKey: "Editor",
-		nls: "orion/nls/messages",
-		tooltip: "Edit code",
-		category: "edit",
-		uriTemplate: "{+OrionHome}/edit/edit.html"
-	});
-	provider.registerService("orion.page.link", serviceImpl, {
-		nameKey: "Shell",
-		id: "orion.shell",
-		nls: "orion/nls/messages",
-		category: "shell",
-		uriTemplate: "{+OrionHome}/shell/shellPage.html"
-	});
+//	provider.registerService("orion.page.link", null, {
+//		nameKey: "Editor",
+//		nls: "orion/nls/messages",
+//		tooltip: "Edit code",
+//		category: "edit",
+//		uriTemplate: "{+OrionHome}/edit/edit.html"
+//	});
+//	provider.registerService("orion.page.link", serviceImpl, {
+//		nameKey: "Shell",
+//		id: "orion.shell",
+//		nls: "orion/nls/messages",
+//		category: "shell",
+//		uriTemplate: "{+OrionHome}/shell/shellPage.html"
+//	});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Search",
 		id: "orion.Search",
@@ -72,10 +72,10 @@ define([
 		category: "search",
 		order: 10
 	});
-	
+
 	provider.registerService("orion.page.link.related", null, {
 		id: "orion.editFromMetadata",
-		nameKey: "EditorHere",
+		nameKey: "EditorRelatedLink",
 		nls: "orion/nls/messages",
 		tooltip: "Open Editor page",
 		category: "edit",
@@ -85,7 +85,24 @@ define([
 			variableName: "EditorLocation",
 			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
 		}],
-		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation},navigate={,EditorLocation}?depth=1"
+		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
+		// use this uri if we ever want to drill the LHS nav into the EditorLocation
+		// uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation},navigate={,EditorLocation}?depth=1"
+	});
+	// TODO need related link that takes you to the "project root", but how to implement that?
+
+	// Generic link to editor when page has no target/file context (eg. Settings page)
+	provider.registerService("orion.page.link.related", null, {
+		id: "orion.editFromMetadataAlways",
+		nameKey: "EditorRelatedLinkTop",
+		nls: "orion/nls/messages",
+		tooltip: "Open Editor page",
+		category: "edit",
+		order: 10, // Make it first link in edit category
+		validationProperties: [{
+			source: "NoTarget"
+		}],
+		uriTemplate: "{+OrionHome}/edit/edit.html#"
 	});
 
 	provider.registerService("orion.page.link.user", null, {

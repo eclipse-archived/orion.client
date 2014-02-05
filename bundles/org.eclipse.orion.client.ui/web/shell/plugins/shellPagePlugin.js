@@ -22,7 +22,7 @@ define([
 	var provider = new PluginProvider(headers);
 	
 	provider.registerService("orion.navigate.command", {}, {
-		nameKey: "ShellHere",
+		nameKey: "ShellRelatedLink",
 		id: "eclipse.shell.open",
 		tooltipKey: "Open Shell page",
 		nls: "orion/shell/nls/messages",
@@ -40,7 +40,7 @@ define([
 		order: 10 // First link in Shell category
 	});
 	provider.registerService("orion.page.link.related", null, {
-		nameKey: "ShellHere",
+		nameKey: "ShellRelatedLink",
 		id: "eclipse.shell.open",
 		tooltipKey: "Open Shell page",
 		nls: "orion/shell/nls/messages",
