@@ -24,8 +24,13 @@
 	<body id="orion-shellPage" class="orionPage">
 		<div id="sideMenu" class="sideMenu"></div>
 		<div id="pageContent" class="content-fixedHeight">
-			<div class="shell-output" id="shell-output"></div>
-			<div class="shell-input" id="shell-input"></div>
+			<div class="fixedToolbarHolder mainpane mainPanelLayout">
+				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+				<div id="mainNode" class="toolbarTarget pageLayoutTarget toolbarTarget-toolbarHidden">
+					<div class="shell-output" id="shell-output"></div>
+					<div class="shell-input" id="shell-input"></div>
+				</div>
+			</div>
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer"></div>
 	</body>

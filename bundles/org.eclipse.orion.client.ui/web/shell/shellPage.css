@@ -10,7 +10,17 @@ html,body {
 
 .shell-input {
   position: absolute; height: 27px; bottom: 0; left: 0; right: 0;
-  width: 100%;
+}
+
+.shell-input input {
+	outline: none;
+	border: 0;
+	margin: 0;
+}
+
+.shell-input .gcli-prompt {
+	max-width: 22px;
+	z-index: 1;
 }
 
 .shell-output {
@@ -25,4 +35,9 @@ html,body {
 .modelDecorationSprite { 
 	display: inline-block; 
 	vertical-align: middle; 
+}
+
+.toolbarTarget {
+	overflow: hidden;
+	margin-top: 10px;
 }
