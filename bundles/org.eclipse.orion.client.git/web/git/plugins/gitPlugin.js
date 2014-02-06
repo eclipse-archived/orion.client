@@ -83,6 +83,20 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		uriTemplate: "{+OrionHome}/git/git-log.html#{,GitRemoteLocation}?page=1",
 		forceSingleItem: true
 	});
+
+	// orion.navigate.command for Git Repository -- applies to File objects
+	provider.registerService("orion.navigate.command", null, {
+		id: "eclipse.git.repository",
+		nameKey: "Git Repository",
+		tooltipKey: "Go to the git repository",
+		nls: "git/nls/gitmessages",
+		category: "git",
+		validationProperties: [{
+			source: "Git:CloneLocation",
+			variableName: "GitRepoLocation"
+		}],
+		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitRepoLocation}"
+	});
 	
 	provider.registerService("orion.core.content", null, {
 		id: "orion.content.gitClone",
@@ -147,13 +161,14 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		uriTemplate: "{+OrionHome}/git/git-log.html#{,GitRemoteLocation}?page=1",
 		forceSingleItem: true
 	});
-	
+
+	// Applies to Git commit objects
 	provider.registerService("orion.page.link.related", null, {
-		nameKey: "Git Repository",
 		id: "eclipse.git.repository2",
+		category: "git",
+		nameKey: "Git Repository",
 		tooltipKey: "Go to the git repository",
 		nls: "git/nls/gitmessages",
-		category: "git",
 		validationProperties: [
 			{source: "CloneLocation", variableName: "GitCloneLocation"},
 			{source: "Type", match: "Commit"}
@@ -161,17 +176,10 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitCloneLocation}"
 	});
 
+	// Applies to File objects
 	provider.registerService("orion.page.link.related", null, {
-		id: "eclipse.git.repository",
-		nameKey: "Git Repository",
-		tooltipKey: "Go to the git repository",
-		nls: "git/nls/gitmessages",
-		category: "git",
-		validationProperties: [{
-			source: "Git:CloneLocation",
-			variableName: "GitRepoLocation"
-		}],
-		uriTemplate: "{+OrionHome}/git/git-repository.html#{,GitRepoLocation}"
+		id: "eclipse.git.repository", // ref existing orion.navigate.command
+		category: "git"
 	});
 
 	provider.registerService("orion.page.link.related", null, {
