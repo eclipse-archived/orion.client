@@ -354,56 +354,6 @@ define([
 		},
 
 		_makeDropTarget: function(item, node, persistAndReplace) {
-			function dropFileEntry(entry, path, target, explorer, performDrop, fileClient) {
-				if (!target.Location && target.fileMetadata) {
-					target = target.fileMetadata;
-				}
-				path = path || "";
-				if (entry.isFile) {
-					// can't drop files directly into workspace.
-					if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
-						if(explorer.registry) {
-							explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
-								Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
-						}
-					} else {
-						entry.file(function(file) {
-							performDrop(target, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name))); //$NON-NLS-1$ //$NON-NLS-0$ 
-						});
-					}
-				} else if (entry.isDirectory) {
-					var dirReader = entry.createReader();
-					var traverseChildren = function(folder) {
-						dirReader.readEntries(function(entries) {
-							for (var i=0; i<entries.length; i++) {
-								dropFileEntry(entries[i], path + entry.name + "/", folder, explorer, performDrop, fileClient); //$NON-NLS-0$
-							}
-						});
-					};
-					var progress = null;
-					if(explorer.registry) {
-						progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
-					}
-					if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
-						(progress ? progress.progress(fileClient.createProject(target.ChildrenLocation, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) : 
-									fileClient.createProject(target.ChildrenLocation, entry.name)).then(function(project) {
-							explorer.loadResourceList(explorer.treeRoot.Path, true);					
-							(progress ? progress.progress(fileClient.read(project.ContentLocation, true), messages["Loading "] + project.name) :
-										fileClient.read(project.ContentLocation, true)).then(function(folder) {
-									traverseChildren(folder);
-								});
-						});
-					} else {
-						(progress ? progress.progress(fileClient.createFolder(target.Location, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) :
-									fileClient.createFolder(target.Location, entry.name)).then(function(subFolder) {
-							var dispatcher = explorer.modelEventDispatcher;
-							dispatcher.dispatchEvent({ type: "create", parent: item, newValue: subFolder }); //$NON-NLS-0$
-							traverseChildren(subFolder);
-						});
-					}
-				}
-			}
-			
 			if (this.dragAndDrop) {
 				var explorer = this;
 				var performDrop = this.dragAndDrop;
@@ -491,6 +441,66 @@ define([
 					this._oldDragOver = dragOver;
 				}
 	
+				var progress = null;
+				if(explorer.registry) {
+					progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
+				}
+				
+				var errorHandler = function(error) {
+					if (progress) {
+						progress.setProgressResult(error);
+					} else {
+						window.console.log(error);
+					}
+				};
+				
+				function dropFileEntry(entry, path, target, explorer, performDrop, fileClient) {
+					if (!target.Location && target.fileMetadata) {
+						target = target.fileMetadata;
+					}
+					path = path || "";
+					if (entry.isFile) {
+						// can't drop files directly into workspace.
+						if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
+							if(explorer.registry) {
+								explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
+									Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
+							}
+						} else {
+							entry.file(function(file) {
+								performDrop(target, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name))); //$NON-NLS-1$ //$NON-NLS-0$ 
+							});
+						}
+					} else if (entry.isDirectory) {
+						var dirReader = entry.createReader();
+						var traverseChildren = function(folder) {
+							dirReader.readEntries(function(entries) {
+								for (var i=0; i<entries.length; i++) {
+									dropFileEntry(entries[i], path + entry.name + "/", folder, explorer, performDrop, fileClient); //$NON-NLS-0$
+								}
+							});
+						};
+						
+						if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
+							(progress ? progress.progress(fileClient.createProject(target.ChildrenLocation, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) : 
+										fileClient.createProject(target.ChildrenLocation, entry.name)).then(function(project) {
+								explorer.loadResourceList(explorer.treeRoot.Path, true);					
+								(progress ? progress.progress(fileClient.read(project.ContentLocation, true), messages["Loading "] + project.name) :
+											fileClient.read(project.ContentLocation, true)).then(function(folder) {
+										traverseChildren(folder);
+									}, errorHandler);
+							}, errorHandler);
+						} else {
+							(progress ? progress.progress(fileClient.createFolder(target.Location, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) :
+										fileClient.createFolder(target.Location, entry.name)).then(function(subFolder) {
+								var dispatcher = explorer.modelEventDispatcher;
+								dispatcher.dispatchEvent({ type: "create", parent: item, newValue: subFolder }); //$NON-NLS-0$
+								traverseChildren(subFolder);
+							}, errorHandler);
+						}
+					}
+				}
+				
 				var drop = function(evt) {
 					var i;
 					node.classList.remove("dragOver"); //$NON-NLS-0$
@@ -508,23 +518,13 @@ define([
 						if (!source) {
 							return;
 						}
-						var progress = null;
-						if(explorer.registry) {
-							progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
-						}
 						var isCopy = dropEffect === "copy"; //$NON-NLS-0$
 						var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 						(progress ? progress.showWhile(func.apply(fileClient, [source.Location, item.Location]), i18nUtil.formatMessage(messages[isCopy ? "Copying ${0}" : "Moving ${0}"], source.Location)) : 
 									func.apply(fileClient, [source.Location, item.Location])).then(function(result) {
 							var dispatcher = explorer.modelEventDispatcher;
 							dispatcher.dispatchEvent({type: isCopy ? "copy" : "move", oldValue: source, newValue: result, parent: item}); //$NON-NLS-1$ //$NON-NLS-0$
-						}, function(error) {
-							if (progress) {
-								progress.setProgressResult(error);
-							} else {
-								window.console.log(error);
-							}
-						});
+						}, errorHandler);
 						
 					// webkit supports testing for and traversing directories
 					// http://wiki.whatwg.org/wiki/DragAndDropEntries
