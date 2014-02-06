@@ -728,8 +728,8 @@ define('orion/edit/nls/root/messages',{
 	"running": "Running ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"Saving..." : "Saving...", //$NON-NLS-1$ //$NON-NLS-0$
 	"View": "View", //$NON-NLS-1$ //$NON-NLS-0$
-	"Show": "Show", //$NON-NLS-1$ //$NON-NLS-0$
-	"ShowTooltip": "Show", //$NON-NLS-1$ //$NON-NLS-0$
+	"SidePanel": "Side Panel", //$NON-NLS-1$ //$NON-NLS-0$
+	"SidePanelTooltip": "Choose what to show in the side panel.", //$NON-NLS-1$ //$NON-NLS-0$
 	"Actions": "Actions", //$NON-NLS-1$ //$NON-NLS-0$
 	"Navigator": "Navigator", //$NON-NLS-1$ //$NON-NLS-0$
 	"FolderNavigator": "Folder Navigator", //$NON-NLS-1$ //$NON-NLS-0$
@@ -2875,7 +2875,9 @@ define('orion/nls/root/messages',{
 	"Get Plugins": "Get Plugins",
 	"Global": "Global",
 	"Editor": "Editor",
-	"EditorHere": "Open Editor Here",
+	"EditorRelatedLink": "Go To Folder",
+	"EditorRelatedLinkTop": "Workspace",
+	"EditorRelatedLinkProj": "Go To Project Root",
 	"Filter bindings": "Filter bindings",
 	"Orion Editor": "Orion Editor",
 	"Orion Image Viewer": "Orion Image Viewer",
@@ -2950,7 +2952,7 @@ define('orion/nls/root/messages',{
 	"Filter": "Filter (* = any string, ? = any character)",
 	"To view the browser's context menu, trigger the context menu again.": "To view the browser's context menu, trigger the context menu again.",
 	"Edit": "Edit",
-	"CentralNavTooltip": "Toggle Side Menu"
+	"CentralNavTooltip": "Toggle Navigation Menu"
 });
 
 /*******************************************************************************
@@ -12746,7 +12748,7 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			defineRule("entity-name-tag", settings.keyword, false); //$NON-NLS-0$
 			defineRule("entity-other-attribute-name", settings.attribute, false); //$NON-NLS-0$
 			defineRule("string-quoted", settings.string, false); //$NON-NLS-0$
-			defineRule("line_caret", settings.currentLine, true); //$NON-NLS-0$
+			defineRule("meta.annotation.currentLine", settings.currentLine, true); //$NON-NLS-0$
 			defineRule("keyword", settings.keyword, false); //$NON-NLS-0$
 			defineRule("string", settings.string, false); //$NON-NLS-0$
 			defineRule("comment", settings.comment, false); //$NON-NLS-0$
@@ -25129,6 +25131,7 @@ define('orion/widgets/browse/browseView',[
 		 */
 		emptyCallback: function(bodyElement) {
 			if (this.explorer.readonly) {
+				this.explorer.folderViewer.updateEmptyContents("This folder is empty.");
 				return;
 			}
 			mNavigatorRenderer.NavigatorRenderer.prototype.emptyCallback.call(this, bodyElement);
@@ -25156,6 +25159,7 @@ define('orion/widgets/browse/browseView',[
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.readonly = options.readonly;
+		this.folderViewer = options.fodlerViewer;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.clickHandler = options.clickHandler;
 		this.treeRoot = {};
@@ -25324,10 +25328,13 @@ define('orion/widgets/browse/browseView',[
 							this.markdownView.displayContents(div, this._metadata);
 							this.sectionContents.appendChild(div);
 						} else if(this.imageView) {
-							//Do nothing, updateImage will be called.
+							if(this.imageView.image) {
+								this.updateImage(this.imageView.image);
+							}						
 						} else {
 							this.folderNavExplorer = new FolderNavExplorer({
 								parentId: navNode,
+								fodlerViewer: this,
 								readonly: this.readonly,
 								breadCrumbMaker: this.breadCrumbMaker,
 								clickHandler: this.clickHandler,
@@ -25335,7 +25342,6 @@ define('orion/widgets/browse/browseView',[
 								commandRegistry: this.commandRegistry,
 								contentTypeRegistry: this.contentTypeRegistry
 							});
-							//this._foldersSection.embedExplorer(this.folderNavExplorer, null, true);
 							this.sectionContents.appendChild(this.folderNavExplorer.parent);
 							this.folderNavExplorer.setCommandsVisible(this._foldersSection, this._isCommandsVisible());
 							this.folderNavExplorer.loadRoot(this._metadata);
@@ -25364,6 +25370,18 @@ define('orion/widgets/browse/browseView',[
 			tr.appendChild(td);
 			imageTable.appendChild(tr);
 			this.sectionContents.appendChild(imageTable);
+		},
+		updateEmptyContents: function(message) {
+			var messageTable = document.createElement("table");
+			messageTable.classList.add("emptyViewTable");
+			var tr = document.createElement("tr");
+			var td = document.createElement("td"); 
+			var messageContent = document.createElement("div");
+			messageContent.appendChild(document.createTextNode(message));
+			td.appendChild(messageContent);
+			tr.appendChild(td);
+			messageTable.appendChild(tr);
+			this.sectionContents.appendChild(messageTable);
 		},
 		create: function() {
 			if(this._metadata.Projects){ //this is a workspace root
@@ -30901,7 +30919,7 @@ define('orion/widgets/browse/resourceSelector',[
 			return this.allItems.map(function(resource) { //$NON-NLS-0$
 				return {
 					name: resource.Name,
-					callback: _self.setActiveResource.bind(_self, {resource: resource})
+					callback: _self.setActiveResource.bind(_self, {resource: resource, changeHash: true})
 				};
 			});
 		},
@@ -30918,7 +30936,8 @@ define('orion/widgets/browse/resourceSelector',[
 
 			this.registerCommands();
 
-			this.resourceName.addEventListener("click", this._openMenu.bind(this)); //$NON-NLS-0$
+			//this.resourceName.addEventListener("click", this._openMenu.bind(this)); //$NON-NLS-0$
+			this.parentNode.addEventListener("click", this._openMenu.bind(this)); //$NON-NLS-0$
 		},
 		_openMenu: function(event) {
 			var menu = lib.$(".dropdownTrigger", this.menu); //$NON-NLS-0$
@@ -30937,6 +30956,7 @@ define('orion/widgets/browse/resourceSelector',[
 			fragment.textContent = this.labelHeader + ": ${0}"; //$NON-NLS-0$
 			var nameLabel = document.createElement("b"); //$NON-NLS-0$
 			nameLabel.textContent = this.activeResourceName;
+			nameLabel.classList.add("browserResourceSelectorNameBold");
 			lib.processDOMNodes(fragment, [nameLabel]);
 			return fragment;
 		},
@@ -30954,14 +30974,14 @@ define('orion/widgets/browse/resourceSelector',[
 			if(this.fetchChildren) {//Lazy fetch
 				if(params.resource.selectorAllItems){
 					if(this.resourceChangeDispatcher) {
-						this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild}); //$NON-NLS-0$
+						this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild, changeHash: params.changeHash}); //$NON-NLS-0$
 					}
 				} else {
 					this.fileClient.fetchChildren(params.resource.Location).then(function(contents){
 						if(contents && contents.length > 0) {
 							params.resource.selectorAllItems = contents;
 							if(this.resourceChangeDispatcher) {
-								this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild}); //$NON-NLS-0$
+								this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild, changeHash: params.changeHash}); //$NON-NLS-0$
 							}
 						}
 					}.bind(this),
@@ -31691,7 +31711,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	 */
 
 	// Styles
-	var caretLineStyle = {styleClass: "line_caret"}; //$NON-NLS-0$
+	var caretLineStyle = {styleClass: "meta annotation currentLine"}; //$NON-NLS-0$
 
 	var PUNCTUATION_SECTION_BEGIN = ".begin"; //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
@@ -33333,6 +33353,12 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 			{
 				include: "orion.c-like"
 			}, {
+				match: "(?i)<\\?(?:=|php)?(?:\\s|$)",
+				name: "entity.name.declaration.php",
+			}, {
+				match: "<%=?(?:\\s|$)",
+				name: "entity.name.declaration.php",
+			}, {
 				match: "#.*",
 				name: "comment.line.number-sign.php",
 				patterns: [
@@ -33387,14 +33413,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 		contentTypes: ["text/html"],
 		patterns: [
 			{
-				include: "#comment"
-			}, {
-				begin: "<!(?:doctype|DOCTYPE)",
-				end: ">",
-				captures: {
-					0: {name: "entity.name.tag.doctype.html"},
-				},
-				name: "meta.tag.doctype.html",
+				include: "orion.xml"
 			}, {
 				begin: "(?i)(<style)([^>]*)(>)",
 				end: "(?i)(</style>)",
@@ -33436,7 +33455,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 				begin: "(?i)<\\?(?:=|php)?(?:\\s|$)",
 				end: "\\?>",
 				captures: {
-					0: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.declaration.php"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -33448,7 +33467,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 				begin: "<%=?(?:\\s|$)",
 				end: "%>",
 				captures: {
-					0: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.declaration.php"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -33456,40 +33475,11 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 						include: "orion.php"
 					}
 				]
-			}, {
-				begin: "</?[A-Za-z0-9]+",
-				end: "/?>",
-				captures: {
-					0: {name: "entity.name.tag.html"},
-				},
-				name: "meta.tag.html",
-				patterns: [
-					{
-						include: "#comment"
-					}, {
-						include: "orion.lib#string_doubleQuote"
-					}, {
-						include: "orion.lib#string_singleQuote"
-					}
-				]
 			}
 		],
 		repository: {
-			comment: {
-				begin: "<!--",
-				end: "-->",
-				name: "comment.block.html",
-				patterns: [
-					{
-						match: "(\\b)(TODO)(\\b)(((?!-->).)*)",
-						name: "meta.annotation.task.todo",
-						captures: {
-							2: {name: "keyword.other.documentation.task"},
-							4: {name: "comment.line"}
-						}
-					}
-				]
-			}
+			/* override orion.xml#xmlDeclaration (no-op) */
+			xmlDeclaration: {}
 		}
 	});
 	return {
@@ -34178,7 +34168,11 @@ define('orion/widgets/browse/fileBrowser',[
 						return true;
 					}
 				});
-				this.refresh(currentComponentLocation);
+				if(event.changeHash) {
+					window.location = new URITemplate("#{,resource,params*}").expand({resource:currentComponentLocation});
+				} else {
+					this.refresh(new URITemplate("{,resource}").expand({resource:currentComponentLocation}));
+				}
 			}
 			this._componentSelector.activeResourceName = this._componentSelector.getActiveResource(currentComponentLocation).Name;
 			this._componentSelector.refresh();
@@ -34231,12 +34225,12 @@ define('orion/widgets/browse/fileBrowser',[
 					this._branchSelector.activeResourceName = activeBranchName;
 					
 					if(this._showComponent) {
-						this._branchSelector.setActiveResource({resource: this._branchSelector.getActiveResource(this._activeBranchLocation), defaultChild: this._activeComponentLocation});
+						this._branchSelector.setActiveResource({resource: this._branchSelector.getActiveResource(this._activeBranchLocation), changeHash: metadata.Parents,  defaultChild: this._activeComponentLocation});
 						if(!this._activeComponentLocation) {
 							return;
 						}
 					} else if(newLocation){
-						this.refresh(newLocation);
+						this.refresh(new URITemplate("{,resource}").expand({resource:newLocation}));
 						return;
 					}
 				}
@@ -34247,7 +34241,7 @@ define('orion/widgets/browse/fileBrowser',[
 					this._breadCrumbTarget = this._lastRoot;
 				}
 				//this._breadCrumbMaker("localBreadCrumb");
-				var view = this._getEditorView(evt.input, metadata);
+				var view = this._getEditorView(evt.input, evt.contents, metadata);
 				this._setEditor(view ? view.editor : null);
 				evt.editor = this._editor;
 			}.bind(this));
@@ -34398,7 +34392,7 @@ define('orion/widgets/browse/fileBrowser',[
 			}
 			return workspaceRootURL;
 		},
-		_getEditorView: function(input, metadata) {
+		_getEditorView: function(input, contents, metadata) {
 			var view = null;
 			if (metadata && input) {
 				var browseViewOptons = {
@@ -34418,20 +34412,18 @@ define('orion/widgets/browse/fileBrowser',[
 				};
 				if (!metadata.Directory) {
 					var cType = this._contentTypeService.getFileContentType(metadata);
-					if(cType.id === "text/x-markdown") {
+					if(!cType) {
+						browseViewOptons.editorView = this._editorView;
+					} else if(cType.id === "text/x-markdown") {
 						browseViewOptons.isMarkdownView = true;
 					} else if(!mNavigatorRenderer.isImage(cType)) {
 						browseViewOptons.editorView = this._editorView;
 					} else {
-						browseViewOptons.imageView = {};
-						//TODO: remove readBlob if inputManager already did readBlob
-						this._fileClient.readBlob(metadata.Location).then(function(buffer){
-							var objectURL = URL.createObjectURL(new Blob([buffer],{type: cType.id}));
-							var image = document.createElement("img"); //$NON-NLS-0$
-							image.src = objectURL;
-							image.classList.add("readonlyImage"); //$NON-NLS-0$
-							this._currentEditorView.updateImage(image);
-						}.bind(this));							
+						var objectURL = URL.createObjectURL(new Blob([contents],{type: cType.id}));
+						var image = document.createElement("img"); //$NON-NLS-0$
+						image.src = objectURL;
+						image.classList.add("readonlyImage"); //$NON-NLS-0$
+						browseViewOptons.imageView = {image: image};
 					}
 				}
 				view = new mBrowseView.BrowseView(browseViewOptons);
@@ -34448,11 +34440,10 @@ define('orion/widgets/browse/fileBrowser',[
 			return this._currentEditorView;
 		},
 		refresh: function(uri) {
-			var fileUri = uri;
-			if(!fileUri) {
-				fileUri = this._fileClient.fileServiceRootURL("");
+			if(!uri) {
+				uri = new URITemplate("{,resource}").expand({resource:this._fileClient.fileServiceRootURL("")});
 			}
-			this._inputManager.setInput(fileUri);
+			this._inputManager.setInput(uri);
 		},
 		create: function() {
 		},
@@ -36294,6 +36285,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			this._fileBrowser = new mFileBrowser.FileBrowser({
 				parent: params.parentId,
 				showBranch: true,
+				repo: repo,
 				showComponent: showComponent,
 				rootName: params.rootName,
 				maxEditorLines: 300,
