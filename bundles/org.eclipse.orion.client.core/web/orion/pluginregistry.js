@@ -1125,7 +1125,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/URL-shim"], function(Defer
                     var plugin = this.getPlugin(url);
                     if (!plugin) {
                         var manifest = configuration.plugins[url];
-                        manifest = typeof manifest === "object" || {};
+                        if (typeof manifest !== "object") {
+                        	manifest = {};
+                        }
                         manifest.autostart = manifest.autostart || configuration.defaultAutostart || "lazy";
                         _plugins.push(new Plugin(url, manifest, internalRegistry));
                     }
