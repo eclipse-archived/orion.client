@@ -171,6 +171,12 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				);
 			}
 			
+			var display = {};
+			display.Severity = "Info";
+			display.HTML = true;
+			display.Message = "Use <a href=\""+ require.toUrl("edit/edit.html#" + enhansedLaunchConf.project.ContentLocation) + "\">Project</a> page to view and manage the application.";
+			progress.setProgressResult(display);
+			
 		}, function(error){
 			if(error.Retry && error.Retry.parameters){
 				context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
