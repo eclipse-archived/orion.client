@@ -37,7 +37,7 @@
 .prospecto .string-quoted {
 	color: #446FBD;
 }
-.prospecto .line_caret {
+.prospecto .meta.annotation.currentLine {
 	background-color: #EAF2FE;
 }
 .prospecto .keyword {

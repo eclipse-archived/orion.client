@@ -37,7 +37,7 @@
 .eclipse .string-quoted {
 	color: blue;
 }
-.eclipse .line_caret {
+.eclipse .meta.annotation.currentLine {
 	background-color: #EAF2FE;
 }
 .eclipse .keyword {

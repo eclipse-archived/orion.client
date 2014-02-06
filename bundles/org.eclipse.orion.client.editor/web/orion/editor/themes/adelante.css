@@ -37,7 +37,7 @@
 .adelante .string-quoted {
 	color: #DE5D3B;
 }
-.adelante .line_caret {
+.adelante .meta.annotation.currentLine {
 	background-color: #9e937b;
 }
 .adelante .keyword {

@@ -174,7 +174,7 @@ define("orion/editor/textTheme", //$NON-NLS-0$
 			defineRule("entity-name-tag", settings.keyword, false); //$NON-NLS-0$
 			defineRule("entity-other-attribute-name", settings.attribute, false); //$NON-NLS-0$
 			defineRule("string-quoted", settings.string, false); //$NON-NLS-0$
-			defineRule("line_caret", settings.currentLine, true); //$NON-NLS-0$
+			defineRule("meta.annotation.currentLine", settings.currentLine, true); //$NON-NLS-0$
 			defineRule("keyword", settings.keyword, false); //$NON-NLS-0$
 			defineRule("string", settings.string, false); //$NON-NLS-0$
 			defineRule("comment", settings.comment, false); //$NON-NLS-0$

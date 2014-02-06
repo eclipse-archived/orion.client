@@ -37,7 +37,7 @@
 .ambience .string-quoted {
 	color: lightcoral;
 }
-.ambience .line_caret {
+.ambience .meta.annotation.currentLine {
 	background-color: lightcyan;
 }
 .ambience .keyword {

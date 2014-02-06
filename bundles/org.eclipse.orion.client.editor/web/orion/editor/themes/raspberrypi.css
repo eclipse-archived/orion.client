@@ -37,7 +37,7 @@
 .raspberrypi .string-quoted {
 	color: darkorange;
 }
-.raspberrypi .line_caret {
+.raspberrypi .meta.annotation.currentLine {
 	background-color: #F5B1AE;
 }
 .raspberrypi .keyword {

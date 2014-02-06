@@ -23,7 +23,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	 */
 
 	// Styles
-	var caretLineStyle = {styleClass: "line_caret"}; //$NON-NLS-0$
+	var caretLineStyle = {styleClass: "meta annotation currentLine"}; //$NON-NLS-0$
 
 	var PUNCTUATION_SECTION_BEGIN = ".begin"; //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$

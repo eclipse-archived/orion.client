@@ -55,7 +55,7 @@ define("examples/editor/textStyler", [ //$NON-NLS-0$
 	var keywordStyle = {styleClass: "keyword"}; //$NON-NLS-0$
 	var spaceStyle = {styleClass: "punctuation separator space", unmergeable: true}; //$NON-NLS-0$
 	var tabStyle = {styleClass: "punctuation separator tab", unmergeable: true}; //$NON-NLS-0$
-	var caretLineStyle = {styleClass: "line_caret"}; //$NON-NLS-0$
+	var caretLineStyle = {styleClass: "meta annotation currentLine"}; //$NON-NLS-0$
 
 	function Scanner (keywords, whitespacesVisible) {
 		this.keywords = keywords;

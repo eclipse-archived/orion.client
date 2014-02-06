@@ -61,16 +61,16 @@
 	font-weight: bold;
 }
 
-.line_caret {
-	background-color: #EAF2FE;
-}
-
 .markup.heading, .markup-heading {
 	font-weight: bold;
 }
 
 .markup.quote, .markup-quote {
 	font-style: italic;
+}
+
+.meta.annotation.currentLine {
+	background-color: #EAF2FE;
 }
 
 .meta.tag {

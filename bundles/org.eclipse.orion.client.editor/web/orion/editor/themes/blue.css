@@ -37,7 +37,7 @@
 .blue .string-quoted {
 	color: cornFlowerBlue;
 }
-.blue .line_caret {
+.blue .meta.annotation.currentLine {
 	background-color: white;
 }
 .blue .keyword {

@@ -37,7 +37,7 @@
 .tierra .string-quoted {
 	color: orangered;
 }
-.tierra .line_caret {
+.tierra .meta.annotation.currentLine {
 	background-color: #baa289;
 }
 .tierra .keyword {

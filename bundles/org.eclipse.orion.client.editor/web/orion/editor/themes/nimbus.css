@@ -37,7 +37,7 @@
 .nimbus .string-quoted {
 	color: cornflowerblue;
 }
-.nimbus .line_caret {
+.nimbus .meta.annotation.currentLine {
 	background-color: #aabfbb;
 }
 .nimbus .keyword {
