@@ -517,14 +517,6 @@ hard-coded numbers elsewhere.
 	border-right: 7px solid lightgrey;
 }
 
-.sideMenuSubMenuItemTop{
-	border-top:1px solid #bbb;
-}
-
-.sideMenuSubMenuItemBottom{
-	border-bottom:1px solid #bbb;
-}
-
 .sideMenuSubMenuItem:first-child{
 	border-top:1px solid #bbb;
 	border-top-right-radius: 4px;
