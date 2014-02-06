@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -39,7 +39,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/
 				var parameters = PageUtil.matchResourceParameters();
 				
 				// Get our DOM id's so we can pass them to javascript components.
-				var content = lib.node("pageContent"); //$NON-NLS-0$
+				var content = lib.node("table"); //$NON-NLS-0$
 				
 				// Either create some kind of component to attach to content dom....
 				// var myComponent = new mComponent.Component({node: content, ...other services and options....});

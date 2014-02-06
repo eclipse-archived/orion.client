@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -37,8 +37,8 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/bootstrap', 'orion/
 			
 			function fillMyPage() {
 				// Get our DOM id's so we can pass them to javascript components.
-				var leftPane = lib.node("leftPane"); //$NON-NLS-0$
-				var rightPane = lib.node("rightPane");  //$NON-NLS-0$
+				var leftPane = lib.node("sidebar"); //$NON-NLS-0$
+				var rightPane = lib.node("target");  //$NON-NLS-0$
 				
 				// Create a section component for the left hand side.
 				var leftHandSection = new mSection.Section(leftPane, {

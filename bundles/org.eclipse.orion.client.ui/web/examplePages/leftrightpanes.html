@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="UTF-8">
+		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2014." >
+		<meta http-equiv="Content-Language" content="en-us">
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<link rel="icon" href="/images/edit.png" type="image/png">
 		<title>Left and Right Pane Page</title>
 		<link rel="stylesheet" type="text/css" href="leftrightpanes.css" />
     	<script type="text/javascript" src="../requirejs/require.js"></script>
@@ -21,19 +24,25 @@
 	</head>
 	
 	<body id="orion-leftrightpage" class="orionPage">
-		<div class="content-fixedHeight">
-			<div id="sectionContainer" class="auxpane sidePanelLayout hasSplit">
-				<div id="leftPane" class="sidePanelMargins"></div>
-			</div>
-			<div class="split splitLayout"></div>
-			<div id="rightContainer" class="mainpane mainPanelLayout hasSplit">
-				<div class="fixedToolbarHolder">
-					<div class="mainToolbar toolComposite" id="pageToolbar"></div>
-					<div class="toolbarTarget" tabindex="0"  id="rightPane">
-					</div>				
+		<div id="sideMenu" class="sideMenu"></div>
+		<div id="pageContent" class="content-fixedHeight">
+			<div id="pageToolbar" class="mainToolbar toolComposite toolbarLayout"></div>
+			<div id="innerPanels" style="position:absolute;width:100%;top:36px;bottom:0;">
+				<div id="auxpane" class="auxpane sidePanelLayout hasSplit">
+					<div class="fixedToolbarHolder">
+						<div id="sidebarToolbar" class="sidebarToolbar mainToolbar toolComposite toolbarLayout"></div>
+						<div id="sidebar" class="dropdownTrigger toolbarTarget"></div>
+					</div>
+				</div>
+				<div class="split splitLayout" style="left: 25%;"></div>
+				<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
+					<div class="fixedToolbarHolder">
+						<div id="target" class="workingTarget"></div>
+					</div>
+				</div>
 			</div>
 		</div>
-		<div class="footer-fixed-bottom footer" id="footer"></div>
+		<div class="footer-fixed-bottom footer" id="footer">
 		</div>
 	</body>
 </html>
