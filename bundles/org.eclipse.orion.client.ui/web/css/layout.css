@@ -455,8 +455,10 @@ hard-coded numbers elsewhere.
 }
 
 .sideMenuList{
-	padding:12px;
+	padding: 12px 0 12px 0;
 	display:inline-block !important;
+	width: 100%;
+	text-align: center;
 }
 
 .sideMenuItem{
@@ -464,6 +466,7 @@ hard-coded numbers elsewhere.
 	padding: 0;
 	padding-bottom:15px;
 	font-size:16px !important;
+	width: 100%;
 }
 
 .sideMenuItem:hover{
@@ -475,6 +478,8 @@ hard-coded numbers elsewhere.
 .sideMenuItem>a {
 	color: #ddd !important;
 	text-decoration:none !important;
+	width: 100%;
+	display: inline-block;
 }
 .sideMenuItem>a:hover{
 	text-decoration:none;
@@ -488,7 +493,9 @@ hard-coded numbers elsewhere.
 	position:absolute;
 	font-family:sans-serif;
 	padding-left: 13px;
+	margin-left: -12px;
 	z-index:100;
+	text-align: left;
 }
 
 .sideMenuSubMenuItem{
@@ -524,11 +531,11 @@ hard-coded numbers elsewhere.
 	border-bottom-right-radius: 4px;
 }
 
-.sideMenuSubMenuItem a { /*.sideMenuSubMenuItemLink*/
+.sideMenuSubMenuItem a {
 	display: inline-block;
 	color: #333;
-	padding: 10px;
-	width: calc(100% - 12px); /* clamp to container's width, plus fudge factor */
+	padding: 10px 30px 10px 10px;
+	width: calc(100% - 30px - 10px + 8px); /* clamp to container's width, plus 5px fudge factor */
 }
 
 /* 1) Set up special hover colors for submenu items */
