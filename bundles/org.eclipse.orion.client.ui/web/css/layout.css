@@ -311,7 +311,7 @@ hard-coded numbers elsewhere.
 .pageLayoutTarget {
 	position: absolute;
  	width: calc( 100% - 35px );
- 	bottom: 0;
+ 	bottom: 10px;
  	overflow-y: auto;
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33); /* 0 0 0 1px #d1d1d1,0 0 4px 1px #ccc; */
 	margin-left: 2px;
