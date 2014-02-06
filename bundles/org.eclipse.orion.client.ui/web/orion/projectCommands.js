@@ -926,12 +926,16 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			callback: function(data){
 				var item = forceSingleItem(data.items);
 				progress.progress(fileClient.createFile(item.Project.ContentLocation, "README.md"), "Creating README.md").then(function(readmeMeta){
+					function dispatch() {
+						var dispatcher = FileCommands.getModelEventDispatcher();
+						dispatcher.dispatchEvent({ type: "create", parent: item, newValue: readmeMeta });
+					}
 					if(item.Project){
 						progress.progress(fileClient.write(readmeMeta.Location, "# " + item.Project.Name), "Writing sample readme").then(function(){
-							explorer.changedItem();							
+							dispatch();
 						});
 					} else {
-						explorer.changedItem();
+						dispatch();
 					}
 				});
 			},
@@ -939,6 +943,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				if (!explorer || !explorer.isCommandsVisible()) {
 					return false;
 				}
+				item = forceSingleItem(item);
 				if(!item.Project || !item.Project.children || !item.Project.ContentLocation){
 					return false;
 				}
