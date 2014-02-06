@@ -67,10 +67,10 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			var switcherNode = this.switcherNode = lib.node(this.switcherScope);
 			
 			var changeViewModeCommand = new mCommands.Command({
-				name: messages["Show"],
+				name: messages["SidePanel"],
 				imageClass: "core-sprite-outline", //$NON-NLS-0$
 				selectionClass: "dropdownSelection", //$NON-NLS-0$
-				tooltip: messages["ShowTooltip"],
+				tooltip: messages["SidePanelTooltip"],
 				id: "orion.sidebar.viewmode", //$NON-NLS-0$
 				visibleWhen: function(item) {
 					var mainSplitter = mGlobalCommands.getMainSplitter();
