@@ -104,7 +104,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 			var editor = editors[i];
 			var isDefaultEditor = (defaultEditor && defaultEditor.editor === editor.id);
 			var editorContentTypes = getEditorOpenWith(serviceRegistry, editor);
-			if (editorContentTypes.length) {
+			if (isDefaultEditor || editorContentTypes.length) {
 				var properties = {
 					name: editor.name || editor.id,
 					nameKey: editor.nameKey,
