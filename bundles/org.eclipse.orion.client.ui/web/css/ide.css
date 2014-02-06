@@ -705,7 +705,6 @@ input {
 }
 
 .treeIterationCursor {
-	outline: #AAA 1px dotted !important;
 	border-radius:4px;
 }
 
@@ -714,7 +713,6 @@ input {
 }
 
 .treeIterationCursorRow_Dotted {
-	outline: skyblue 1px dotted !important;
 	background-color: #f3f6fe;
 }
 
