@@ -439,6 +439,7 @@ hard-coded numbers elsewhere.
     font-family: sans-serif;
 	font-size:10px;
 	text-decoration:none !important;
+	border-right:1px solid #ccc;
 }
 
 .sideMenu:hover{
@@ -500,6 +501,28 @@ hard-coded numbers elsewhere.
     background: lightgrey;
 	padding: 10px;
 	border-right:1px solid #bbb;
+}
+
+/* left arrow */
+.sideMenuSubMenuItem:before {
+	width: 0;
+	height: 0;
+	top: 5px;
+	content: "";
+	left: 6px;
+	position: absolute;
+	z-index: 200;
+	border-top: 7px solid transparent;
+	border-bottom: 7px solid transparent;
+	border-right: 7px solid lightgrey;
+}
+
+.sideMenuSubMenuItemTop{
+	border-top:1px solid #bbb;
+}
+
+.sideMenuSubMenuItemBottom{
+	border-bottom:1px solid #bbb;
 }
 
 .sideMenuSubMenuItem:first-child{
