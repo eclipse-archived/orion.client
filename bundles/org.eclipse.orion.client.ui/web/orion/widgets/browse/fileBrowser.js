@@ -103,7 +103,11 @@ define([
 						return true;
 					}
 				});
-				this.refresh(currentComponentLocation);
+				if(event.changeHash) {
+					window.location = new URITemplate("#{,resource,params*}").expand({resource:currentComponentLocation});
+				} else {
+					this.refresh(new URITemplate("{,resource}").expand({resource:currentComponentLocation}));
+				}
 			}
 			this._componentSelector.activeResourceName = this._componentSelector.getActiveResource(currentComponentLocation).Name;
 			this._componentSelector.refresh();
@@ -156,12 +160,12 @@ define([
 					this._branchSelector.activeResourceName = activeBranchName;
 					
 					if(this._showComponent) {
-						this._branchSelector.setActiveResource({resource: this._branchSelector.getActiveResource(this._activeBranchLocation), defaultChild: this._activeComponentLocation});
+						this._branchSelector.setActiveResource({resource: this._branchSelector.getActiveResource(this._activeBranchLocation), changeHash: metadata.Parents,  defaultChild: this._activeComponentLocation});
 						if(!this._activeComponentLocation) {
 							return;
 						}
 					} else if(newLocation){
-						this.refresh(newLocation);
+						this.refresh(new URITemplate("{,resource}").expand({resource:newLocation}));
 						return;
 					}
 				}
@@ -172,7 +176,7 @@ define([
 					this._breadCrumbTarget = this._lastRoot;
 				}
 				//this._breadCrumbMaker("localBreadCrumb");
-				var view = this._getEditorView(evt.input, metadata);
+				var view = this._getEditorView(evt.input, evt.contents, metadata);
 				this._setEditor(view ? view.editor : null);
 				evt.editor = this._editor;
 			}.bind(this));
@@ -323,7 +327,7 @@ define([
 			}
 			return workspaceRootURL;
 		},
-		_getEditorView: function(input, metadata) {
+		_getEditorView: function(input, contents, metadata) {
 			var view = null;
 			if (metadata && input) {
 				var browseViewOptons = {
@@ -343,20 +347,18 @@ define([
 				};
 				if (!metadata.Directory) {
 					var cType = this._contentTypeService.getFileContentType(metadata);
-					if(cType.id === "text/x-markdown") {
+					if(!cType) {
+						browseViewOptons.editorView = this._editorView;
+					} else if(cType.id === "text/x-markdown") {
 						browseViewOptons.isMarkdownView = true;
 					} else if(!mNavigatorRenderer.isImage(cType)) {
 						browseViewOptons.editorView = this._editorView;
 					} else {
-						browseViewOptons.imageView = {};
-						//TODO: remove readBlob if inputManager already did readBlob
-						this._fileClient.readBlob(metadata.Location).then(function(buffer){
-							var objectURL = URL.createObjectURL(new Blob([buffer],{type: cType.id}));
-							var image = document.createElement("img"); //$NON-NLS-0$
-							image.src = objectURL;
-							image.classList.add("readonlyImage"); //$NON-NLS-0$
-							this._currentEditorView.updateImage(image);
-						}.bind(this));							
+						var objectURL = URL.createObjectURL(new Blob([contents],{type: cType.id}));
+						var image = document.createElement("img"); //$NON-NLS-0$
+						image.src = objectURL;
+						image.classList.add("readonlyImage"); //$NON-NLS-0$
+						browseViewOptons.imageView = {image: image};
 					}
 				}
 				view = new mBrowseView.BrowseView(browseViewOptons);
@@ -373,11 +375,10 @@ define([
 			return this._currentEditorView;
 		},
 		refresh: function(uri) {
-			var fileUri = uri;
-			if(!fileUri) {
-				fileUri = this._fileClient.fileServiceRootURL("");
+			if(!uri) {
+				uri = new URITemplate("{,resource}").expand({resource:this._fileClient.fileServiceRootURL("")});
 			}
-			this._inputManager.setInput(fileUri);
+			this._inputManager.setInput(uri);
 		},
 		create: function() {
 		},

@@ -83,7 +83,7 @@ define([
 			return this.allItems.map(function(resource) { //$NON-NLS-0$
 				return {
 					name: resource.Name,
-					callback: _self.setActiveResource.bind(_self, {resource: resource})
+					callback: _self.setActiveResource.bind(_self, {resource: resource, changeHash: true})
 				};
 			});
 		},
@@ -100,7 +100,8 @@ define([
 
 			this.registerCommands();
 
-			this.resourceName.addEventListener("click", this._openMenu.bind(this)); //$NON-NLS-0$
+			//this.resourceName.addEventListener("click", this._openMenu.bind(this)); //$NON-NLS-0$
+			this.parentNode.addEventListener("click", this._openMenu.bind(this)); //$NON-NLS-0$
 		},
 		_openMenu: function(event) {
 			var menu = lib.$(".dropdownTrigger", this.menu); //$NON-NLS-0$
@@ -119,6 +120,7 @@ define([
 			fragment.textContent = this.labelHeader + ": ${0}"; //$NON-NLS-0$
 			var nameLabel = document.createElement("b"); //$NON-NLS-0$
 			nameLabel.textContent = this.activeResourceName;
+			nameLabel.classList.add("browserResourceSelectorNameBold");
 			lib.processDOMNodes(fragment, [nameLabel]);
 			return fragment;
 		},
@@ -136,14 +138,14 @@ define([
 			if(this.fetchChildren) {//Lazy fetch
 				if(params.resource.selectorAllItems){
 					if(this.resourceChangeDispatcher) {
-						this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild}); //$NON-NLS-0$
+						this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild, changeHash: params.changeHash}); //$NON-NLS-0$
 					}
 				} else {
 					this.fileClient.fetchChildren(params.resource.Location).then(function(contents){
 						if(contents && contents.length > 0) {
 							params.resource.selectorAllItems = contents;
 							if(this.resourceChangeDispatcher) {
-								this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild}); //$NON-NLS-0$
+								this.resourceChangeDispatcher.dispatchEvent({ type: "resourceChanged", newResource: params.resource, defaultChild: params.defaultChild, changeHash: params.changeHash}); //$NON-NLS-0$
 							}
 						}
 					}.bind(this),

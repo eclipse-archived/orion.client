@@ -97,6 +97,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			this._fileBrowser = new mFileBrowser.FileBrowser({
 				parent: params.parentId,
 				showBranch: true,
+				repo: repo,
 				showComponent: showComponent,
 				rootName: params.rootName,
 				maxEditorLines: 300,

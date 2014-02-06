@@ -88,6 +88,7 @@ define([
 		 */
 		emptyCallback: function(bodyElement) {
 			if (this.explorer.readonly) {
+				this.explorer.folderViewer.updateEmptyContents("This folder is empty.");
 				return;
 			}
 			mNavigatorRenderer.NavigatorRenderer.prototype.emptyCallback.call(this, bodyElement);
@@ -115,6 +116,7 @@ define([
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.readonly = options.readonly;
+		this.folderViewer = options.fodlerViewer;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.clickHandler = options.clickHandler;
 		this.treeRoot = {};
@@ -283,10 +285,13 @@ define([
 							this.markdownView.displayContents(div, this._metadata);
 							this.sectionContents.appendChild(div);
 						} else if(this.imageView) {
-							//Do nothing, updateImage will be called.
+							if(this.imageView.image) {
+								this.updateImage(this.imageView.image);
+							}						
 						} else {
 							this.folderNavExplorer = new FolderNavExplorer({
 								parentId: navNode,
+								fodlerViewer: this,
 								readonly: this.readonly,
 								breadCrumbMaker: this.breadCrumbMaker,
 								clickHandler: this.clickHandler,
@@ -294,7 +299,6 @@ define([
 								commandRegistry: this.commandRegistry,
 								contentTypeRegistry: this.contentTypeRegistry
 							});
-							//this._foldersSection.embedExplorer(this.folderNavExplorer, null, true);
 							this.sectionContents.appendChild(this.folderNavExplorer.parent);
 							this.folderNavExplorer.setCommandsVisible(this._foldersSection, this._isCommandsVisible());
 							this.folderNavExplorer.loadRoot(this._metadata);
@@ -323,6 +327,18 @@ define([
 			tr.appendChild(td);
 			imageTable.appendChild(tr);
 			this.sectionContents.appendChild(imageTable);
+		},
+		updateEmptyContents: function(message) {
+			var messageTable = document.createElement("table");
+			messageTable.classList.add("emptyViewTable");
+			var tr = document.createElement("tr");
+			var td = document.createElement("td"); 
+			var messageContent = document.createElement("div");
+			messageContent.appendChild(document.createTextNode(message));
+			td.appendChild(messageContent);
+			tr.appendChild(td);
+			messageTable.appendChild(tr);
+			this.sectionContents.appendChild(messageTable);
 		},
 		create: function() {
 			if(this._metadata.Projects){ //this is a workspace root
