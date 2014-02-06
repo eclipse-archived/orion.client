@@ -283,6 +283,8 @@ define({
 	"Push commits and tags from your local branch into the remote branch": "Push commits and tags from your local branch into the remote branch",
 	"Push Branch": "Push Branch",
 	"Push commits without tags from your local branch into the remote branch": "Push commits without tags from your local branch into the remote branch",
+	"Push for Review": "Push for Review",
+	"Push commits to Gerrit Code Review": "Push commits to Gerrit Code Review",
 	"Force Push Branch": "Force Push Branch",
 	"Push commits without tags from your local branch into the remote branch overriding its current content": "Push commits without tags from your local branch into the remote branch overriding its current content",
 	"Pushing remote: ": "Pushing remote: ",
