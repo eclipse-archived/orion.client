@@ -333,10 +333,19 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 			if (props.Target && props.Name){
 				cFService.startApp(props.Target, props.Name).then(
 					function(result){
+						var instances = 0;
+						var runningInstances = 0;
+						for (var key in result) {
+							var instance = result[key];
+							instances++;
+							if (instance.state === "RUNNING")
+								runningInstances++;
+						}
+						
 						var app = result.entity;
 						deferred.resolve({
-							State: (app.state === "STARTED" ? "STARTED" : "STOPPED"),
-							Message: "Application is running"
+							State: (runningInstances > 0 ? "STARTED": "STOPPED"),
+							Message: runningInstances + " of " + instances + " instance(s) running"
 						});
 					}, function(error){
 						if (error.HttpCode === 404){
