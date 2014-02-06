@@ -800,6 +800,7 @@ define(['require', 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orio
 						that.commandService.addCommandGroup(titleWrapper.actionsNode.id, "eclipse.gitPushGroup", 1000, "Push", null, null, null, "Push", null, "eclipse.orion.git.push"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.push", 1100, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.pushBranch", 1200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
+						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.pushToGerrit", 1200, "eclipse.gitPushGroup"); //$NON-NLS-0$ //$NON-NLS-1$
 						
 						that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch, that, "button"); //$NON-NLS-0$
 

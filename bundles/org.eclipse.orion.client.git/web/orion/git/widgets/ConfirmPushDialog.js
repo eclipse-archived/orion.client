@@ -32,13 +32,14 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog'], function(messages, d
 		this.func = options.func;
 		
 		this.buttons = [];
-		this.buttons.push({
-			callback: function(){
-				that.destroy();
-				that.dialog2.show();
-			}, 
-			text: 'More'}
-		);
+		if (this.dialog2)
+			this.buttons.push({
+				callback: function(){
+					that.destroy();
+					that.dialog2.show();
+				}, 
+				text: 'More'}
+			);
 		
 		this.buttons.push({
 			callback: function(){
@@ -56,7 +57,8 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog'], function(messages, d
 		var header = this.$header;
 		header.appendChild(document.createTextNode("You are going to push to the following remote: " + this.location));
 		header.appendChild(document.createElement("br"));
-		header.appendChild(document.createTextNode(" Click More to push to another remote or OK to push to default."));
+		if (this.dialog2)
+			header.appendChild(document.createTextNode(" Click More to push to another remote or OK to push to default."));
 	};
 	
 	ConfirmPushDialog.prototype.constructor = ConfirmPushDialog;

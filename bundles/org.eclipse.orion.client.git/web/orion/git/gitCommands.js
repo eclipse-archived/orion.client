@@ -1720,6 +1720,169 @@ var exports = {};
 		});
 		commandService.addCommand(pushBranchCommand);
 
+		var pushToGerritCommand = new mCommands.Command({
+			name : messages["Push to Gerrit"],
+			tooltip: messages["Push commits to Gerrit Code Review"],
+			imageClass: "git-sprite-push", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			id : "eclipse.orion.git.pushToGerrit", //$NON-NLS-0$
+			callback: function(data) {
+				//previously saved target branch
+				var itemTargetBranch = data.targetBranch;
+			
+				var target;
+				var item = data.items;
+				if (item.toRef) {
+					item = item.toRef;
+				}
+				var commandInvocation = data;
+				
+				var parts = item.CloneLocation.split("/");
+				
+				var handleResponse = function(jsonData, commandInvocation){
+					if (jsonData.JsonData.HostKey){
+						commandInvocation.parameters = null;
+						commandInvocation.errorData = jsonData.JsonData;
+						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
+						commandService.collectParameters(commandInvocation);
+					} else if (!commandInvocation.optionsRequested){
+						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+						gitPreferenceStorage.isEnabled().then(
+							function(isEnabled){
+								if(isEnabled){
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommandRegistry.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommandRegistry.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								} else {
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommandRegistry.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								}
+								
+								commandInvocation.errorData = jsonData.JsonData;
+								commandInvocation.errorData.failedOperation = jsonData.failedOperation;
+								commandService.collectParameters(commandInvocation);
+							}
+						);
+					} else {
+						commandInvocation.errorData = jsonData.JsonData;
+						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
+						commandService.collectParameters(commandInvocation);
+					}
+				};
+				
+				if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){
+					commandInvocation.parameters = null;
+					commandInvocation.optionsRequested = true;
+					commandService.collectParameters(commandInvocation);
+					return;
+				}
+				var gitService = serviceRegistry.getService("orion.git.provider");
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				
+				if(commandInvocation.errorData && commandInvocation.errorData.failedOperation){
+					progress.removeOperation(commandInvocation.errorData.failedOperation);
+				}
+				
+				var handlePush = function(options, location, ref, name, force){
+					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+					var deferred = progress.progress(gitService.doPush(location, ref, false, force, //$NON-NLS-0$
+							options.gitSshUsername, options.gitSshPassword, options.knownHosts,
+							options.gitPrivateKey, options.gitPassphrase), messages['Pushing remote: '] + name);
+					progressService.createProgressMonitor(deferred, messages['Pushing remote: '] + name);
+					deferred.then(
+						function(jsonData){
+							exports.handleGitServiceResponse(jsonData, serviceRegistry, 
+								function() {
+									explorer.changedItem();
+								}, function (jsonData) {
+									handleResponse(jsonData, commandInvocation);
+								}
+							);
+						}, function(jsonData, secondArg) {
+							exports.handleGitServiceResponse(jsonData, serviceRegistry, 
+								function() {
+									explorer.changedItem();
+								}, function (jsonData) {
+									handleResponse(jsonData, commandInvocation);
+								}
+							);
+						}
+					);
+				};
+
+				progress.progress(gitService.getGitClone(item.CloneLocation), "Getting git repository details " + item.Name).then(
+					function(clone){
+						var remoteLocation = clone.Children[0].RemoteLocation;
+						var locationToChange = clone.Children[0].ConfigLocation;
+						
+						var handleError = function(error){
+							exports.handleProgressServiceResponse(error, {}, serviceRegistry);
+						};
+						
+						exports.gatherSshCredentials(serviceRegistry, commandInvocation).then(
+							function(options) {
+								var result = new Deferred();
+								
+								if (item.RemoteLocation.length === 1 && item.RemoteLocation[0].Children.length === 1) { //when we push next time - chance to switch saved remote
+									result = progress.progress(gitService.getGitRemote(remoteLocation), "Getting git remote details " + item.Name);
+								} else {
+									var remotes = {};
+									remotes.Children = item.RemoteLocation;
+									result.resolve(remotes);
+									
+								}
+						
+								result.then(
+									function(remotes){
+										if(itemTargetBranch){
+											handlePush(options, itemTargetBranch.Location, "HEAD", itemTargetBranch.Name, false);
+											return;
+										}
+										commandInvocation.targetBranch = item.RemoteLocation[0].Children[0];
+										var branchLocation = item.RemoteLocation[0].Children[0].Location;
+										var arr = branchLocation.split("/");
+										var destination = "refs/for/master"; // for now we hardcode it
+										arr[4] = encodeURIComponent(encodeURIComponent(destination));
+										var remoteLocation = arr.join("/");
+										commandInvocation.targetBranch.Location = remoteLocation;
+										commandInvocation.targetBranch.Name = destination;
+									
+										dialog = new mConfirmPush.ConfirmPushDialog({
+											title: messages["Choose Branch"],
+											serviceRegistry: serviceRegistry,
+											gitClient: gitService,
+											dialog: null,
+											location: destination,
+											func: function(){
+												handlePush(options, remoteLocation, "HEAD", destination, false);
+											}
+										});
+										
+										dialog.show();
+									}
+								);
+						
+							}
+						);
+					}
+				);
+			},
+			visibleWhen : function(item) {
+				if (item.toRef)
+					// for action in the git log
+					return item.RepositoryPath === "" && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation //$NON-NLS-0$
+						&& item.toRef.RemoteLocation[0].IsGerrit; 
+				else
+					// for action in the repo view
+					return item.Type === "Branch" && item.Current && item.RemoteLocation && item.RemoteLocation[0].IsGerrit; //$NON-NLS-0$
+				
+			}
+		});
+		commandService.addCommand(pushToGerritCommand);
+
 		var pushForceCommand = new mCommands.Command({
 			name : messages["Force Push All"],
 			tooltip: messages["Push commits and tags from your local branch into the remote branch overriding its current content"],
