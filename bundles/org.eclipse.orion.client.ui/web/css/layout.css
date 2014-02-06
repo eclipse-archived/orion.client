@@ -125,9 +125,12 @@ hard-coded numbers elsewhere.
 	/* bottom: 36px; $FooterHeight + footer border (1px) */    
     bottom: 0;
     left: 0;
-    transition: left 0.3s ease; /* if this is changed SideMenu.js->TRANSITION_DURATION_MS needs to be changed as well */
     right: 0;
 	/*margin-bottom: 29px;*/
+}
+
+.content-fixedHeight-animation {
+    transition: left 0.3s ease; /* if this is changed SideMenu.js->TRANSITION_DURATION_MS needs to be changed as well */
 }
 
 .content-fixedHeight-maximized {

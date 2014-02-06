@@ -101,6 +101,13 @@ define([
 			var sideMenuNavigation = this.getDisplayState();
 			
 			var newState;
+			
+			// add animation if necessary
+			var pageContent = lib.node( "pageContent" ); //$NON-NLS-0$
+			if (pageContent) {
+				pageContent.classList.add("content-fixedHeight-animation"); //$NON-NLS-0$
+			}
+			
 			if( sideMenuNavigation === this.OPEN_STATE ){
 				newState = this.CLOSED_STATE;
 			} else {
