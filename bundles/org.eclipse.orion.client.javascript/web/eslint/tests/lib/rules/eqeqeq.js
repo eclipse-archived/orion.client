@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -81,5 +81,42 @@ describe(RULE_ID, function() {
 		assert.equal(messages[0].ruleId, RULE_ID);
 		assert.equal(messages[0].related.type, "Punctuator");
 		assert.equal(messages[0].related.value, "==");
+	});
+	//nullness checks
+	it("should not flag != for null check RHS", function() {
+		var topic = "if (a != null) {}";
+
+		var config = { rules: {} };
+		config.rules[RULE_ID] = 1;
+
+		var messages = eslint.verify(topic, config);
+		assert.equal(messages.length, 0);
+	});
+	it("should not flag != for null check LHS", function() {
+		var topic = "if (null != a) {}";
+
+		var config = { rules: {} };
+		config.rules[RULE_ID] = 1;
+
+		var messages = eslint.verify(topic, config);
+		assert.equal(messages.length, 0);
+	});
+	it("should not flag != for undefined check RHS", function() {
+		var topic = "if (a != undefined) {}";
+
+		var config = { rules: {} };
+		config.rules[RULE_ID] = 1;
+
+		var messages = eslint.verify(topic, config);
+		assert.equal(messages.length, 0);
+	});
+	it("should not flag != for null check LHS", function() {
+		var topic = "if (undefined != a) {}";
+
+		var config = { rules: {} };
+		config.rules[RULE_ID] = 1;
+
+		var messages = eslint.verify(topic, config);
+		assert.equal(messages.length, 0);
 	});
 });
