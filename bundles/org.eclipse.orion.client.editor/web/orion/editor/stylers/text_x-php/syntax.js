@@ -46,6 +46,12 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 			{
 				include: "orion.c-like"
 			}, {
+				match: "(?i)<\\?(?:=|php)?(?:\\s|$)",
+				name: "entity.name.declaration.php",
+			}, {
+				match: "<%=?(?:\\s|$)",
+				name: "entity.name.declaration.php",
+			}, {
 				match: "#.*",
 				name: "comment.line.number-sign.php",
 				patterns: [

@@ -62,7 +62,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 				begin: "(?i)<\\?(?:=|php)?(?:\\s|$)",
 				end: "\\?>",
 				captures: {
-					0: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.declaration.php"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
@@ -74,7 +74,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 				begin: "<%=?(?:\\s|$)",
 				end: "%>",
 				captures: {
-					0: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.declaration.php"}
 				},
 				contentName: "source.php.embedded.html",
 				patterns: [
