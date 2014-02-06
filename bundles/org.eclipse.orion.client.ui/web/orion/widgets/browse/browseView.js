@@ -88,7 +88,7 @@ define([
 		 */
 		emptyCallback: function(bodyElement) {
 			if (this.explorer.readonly) {
-				this.explorer.folderViewer.updateEmptyContents("This folder is empty.");
+				this.explorer.folderViewer.updateMessageContents("This folder is empty.", ["emptyViewTable"]);
 				return;
 			}
 			mNavigatorRenderer.NavigatorRenderer.prototype.emptyCallback.call(this, bodyElement);
@@ -184,6 +184,7 @@ define([
 		this.editorView = options.editorView;
 		this._maxEditorLines = options.maxEditorLines;
 		this.imageView = options.imageView;
+		this.messageView = options.messageView;
 		this.breadCrumbInHeader = options.breadCrumbInHeader;
 		this.isMarkdownView = options.isMarkdownView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
@@ -211,7 +212,7 @@ define([
 			this._parent.appendChild(this._node);
 		},
 		displayBrowseView: function(root){
-			var children = root.Children;
+			var children = root && root.Children;
 			var readmeMd;
 			if(children) {
 				for (var i=0; i<children.length; i++) {
@@ -266,7 +267,11 @@ define([
 								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 5);
 							}
 						}
-						if(this.editorView) {//To embed an orion editor in the section
+						if(this.messageView) {
+							if(typeof this.messageView.message === "string") {
+								this.updateMessageContents(this.messageView.message, ["messageViewTable"]);
+							}						
+						} else if(this.editorView) {//To embed an orion editor in the section
 							this.sectionContents.appendChild(this.editorView.getParent());
 							this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
 							this.editorView.create();
@@ -328,9 +333,13 @@ define([
 			imageTable.appendChild(tr);
 			this.sectionContents.appendChild(imageTable);
 		},
-		updateEmptyContents: function(message) {
+		updateMessageContents: function(message, messageClasses) {
 			var messageTable = document.createElement("table");
-			messageTable.classList.add("emptyViewTable");
+			if(messageClasses){
+				messageClasses.forEach( function(messageClass) {
+					messageTable.classList.add(messageClass);
+				});
+			}
 			var tr = document.createElement("tr");
 			var td = document.createElement("td"); 
 			var messageContent = document.createElement("div");
@@ -341,10 +350,10 @@ define([
 			this.sectionContents.appendChild(messageTable);
 		},
 		create: function() {
-			if(this._metadata.Projects){ //this is a workspace root
+			if(this._metadata && this._metadata.Projects){ //this is a workspace root
 				this.displayWorkspaceView();
 			}
-			if(this.editorView || this.imageView || this.isMarkdownView) {
+			if(this.editorView || this.imageView || this.isMarkdownView || this.messageView) {
 				this.displayBrowseView(this._metadata);
 			} else if(this._metadata.Children){
 				this.displayBrowseView(this._metadata);

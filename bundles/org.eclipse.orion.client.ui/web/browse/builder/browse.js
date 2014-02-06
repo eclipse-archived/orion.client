@@ -88,7 +88,8 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		}
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		var plugins = {};
-		plugins[pluginURL.href] = true;
+		plugins[pluginURL.href] = {autostart: "started", lastModified: -1};
+		//plugins[pluginURL.href] = true;
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
 			storage: {},
 			plugins: plugins

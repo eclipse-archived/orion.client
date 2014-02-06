@@ -115,12 +115,11 @@ define([
 		 * @returns {String|DocumentFragment}
 		 */
 		_resourceLabel: function() {
-			//TOTO figure out the resource name from any meta (e.g. sub folder)
 			var fragment = document.createDocumentFragment();
-			fragment.textContent = this.labelHeader + ": ${0}"; //$NON-NLS-0$
-			var nameLabel = document.createElement("b"); //$NON-NLS-0$
-			nameLabel.textContent = this.activeResourceName;
-			nameLabel.classList.add("browserResourceSelectorNameBold");
+			fragment.textContent = "${0} " + this.activeResourceName; //$NON-NLS-0$
+			var nameLabel = document.createElement("span"); //$NON-NLS-0$
+			nameLabel.appendChild(document.createTextNode(this.labelHeader + ":")); //$NON-NLS-0$
+			nameLabel.classList.add("browserResourceSelectorNameLabel");
 			lib.processDOMNodes(fragment, [nameLabel]);
 			return fragment;
 		},

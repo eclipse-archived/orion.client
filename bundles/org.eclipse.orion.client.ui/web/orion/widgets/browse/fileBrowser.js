@@ -118,6 +118,13 @@ define([
 		_init: function(options){
 			this._commandRegistry = new mCommandRegistry.CommandRegistry({});
 			this._maxEditorLines = options.maxEditorLines;
+			
+			var browseViewOptons = {
+				parent: this._parentDomNode,
+				messageView: {message: "Loading..."}
+			};
+			this._switchView(new mBrowseView.BrowseView(browseViewOptons));
+			
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
@@ -236,6 +243,18 @@ define([
 			} else {
 				this.refresh(PageUtil.hash());
 			}
+		},
+		_switchView: function(view) {
+			if (this._currentEditorView !== view) {
+				if (this._currentEditorView) {
+					this._currentEditorView.destroy();
+				}
+				this._currentEditorView = view;
+				if (this._currentEditorView) {
+					this._currentEditorView.create();
+				}
+			}
+			return this._currentEditorView;
 		},
 		_breadCrumbMaker: function(bcContainer, maxLength){
 			this._renderBreadCrumb({
@@ -363,16 +382,7 @@ define([
 				}
 				view = new mBrowseView.BrowseView(browseViewOptons);
 			}
-			if (this._currentEditorView !== view) {
-				if (this._currentEditorView) {
-					this._currentEditorView.destroy();
-				}
-				this._currentEditorView = view;
-				if (this._currentEditorView) {
-					this._currentEditorView.create();
-				}
-			}
-			return this._currentEditorView;
+			return this._switchView(view);
 		},
 		refresh: function(uri) {
 			if(!uri) {

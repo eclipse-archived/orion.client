@@ -53,7 +53,7 @@
 }
 
 .browserResourceSelectorName {
-	font-weight: normal;
+	font-weight: bold;
 	margin-left: 4px;
 	padding-top: 2px;
 	white-space: nowrap;
@@ -65,11 +65,12 @@
 	-webkit-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	color:#798891;
+	color:#444444;
 }
 
-.browserResourceSelectorNameBold {
-	color:#444444;
+.browserResourceSelectorNameLabel {
+	font-weight: normal;
+	color:#798891;
 }
 
 .resourceSelectorContainer {
@@ -135,6 +136,14 @@ a.currentLocation:hover {
     height:100%;
     text-align:center; 
     vertical-align:middle;
+ }
+
+.messageViewTable {
+    width:100%;
+    height:100%;
+    text-align:center; 
+    vertical-align:middle;
+    min-height: 64px;
 }
 
 .emptyViewTable {
