@@ -94,5 +94,5 @@ define({
 	"Filter": "Filter (* = any string, ? = any character)",
 	"To view the browser's context menu, trigger the context menu again.": "To view the browser's context menu, trigger the context menu again.",
 	"Edit": "Edit",
-	"CentralNavTooltip": "Toggle Side Menu"
+	"CentralNavTooltip": "Toggle Navigation Menu"
 });
