@@ -131,9 +131,10 @@ define([
 	 * @description Returns if the generated type name refers to the general object or is undefined
 	 * @param {String} generatedTypeName The type name to check
 	 * @param {Object} allTypes The type object
+         * @param {Object} visited types visited this far during empty check
 	 * @returns {Boolean} True if the generated type is 'Object' or 'undefined'
 	 */
-	function isEmpty(generatedTypeName, allTypes) {
+	function isEmpty(generatedTypeName, allTypes, visited) {
 		if (typeof generatedTypeName !== 'string') {
 			// original type was not a name expression
 			return false;
@@ -143,6 +144,17 @@ define([
 			// not a synthetic type, so not empty
 			return false;
 		}
+
+		// check for cycles in prototype chain
+		if (visited) {
+			if (visited[generatedTypeName]) {
+				// cycle!
+				return true;
+			}
+		} else {
+			visited = {};
+		}
+		visited[generatedTypeName] = true;
 
 		// now check to see if there are any non-default fields in this type
 		var type = allTypes[generatedTypeName];
@@ -159,7 +171,7 @@ define([
 		if (popCount === 1) {
 			// we have an empty object literal, must check parent
 			// must traverse prototype hierarchy to make sure empty
-			return isEmpty(type.$$proto.typeObj.name, allTypes);
+			return isEmpty(type.$$proto.typeObj.name, allTypes, visited);
 		}
 		return false;
 	}
@@ -415,7 +427,7 @@ define([
 					};
 					if (jsdocType.result) {
 						// prevent recursion on functions that return themselves
-						fnType.result = depth > 1 && jsdocType.result.type === 'FunctionType' ?
+						fnType.result = depth > 2 /*&& jsdocType.result.type === 'FunctionType'*/ ?
 							{ type : 'NameExpression', name : JUST_DOTS } :
 							self.convertJsDocType(jsdocType.result, env, doCombine, depth);
 					}

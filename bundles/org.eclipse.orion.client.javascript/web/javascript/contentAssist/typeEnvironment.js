@@ -135,7 +135,7 @@ define([
 
 		// routine to lookup a member name of a type that follows the prototype chain
 		// to search for the member
-		function innerLookup(env, name, type, includeDefinition) {
+		function innerLookup(env, name, type, includeDefinition, visited) {
 			var res = type[name];
 
 			var proto = type.$$proto;
@@ -148,7 +148,16 @@ define([
 				// type object
 				return includeDefinition || name === '$$fntype' ? res : res.typeObj;
 			} else if (proto) {
-				return innerLookup(env, name, env.lookupQualifiedType(proto.typeObj.name), includeDefinition);
+				// check for cyclic prototype chain
+				if (visited) {
+					if (visited[proto.typeObj.name]) {
+						return null;
+					}
+				} else {
+					visited = {};
+				}
+				visited[proto.typeObj.name] = true;
+				return innerLookup(env, name, env.lookupQualifiedType(proto.typeObj.name), includeDefinition, visited);
 			} else {
 				return null;
 			}
@@ -577,25 +586,76 @@ define([
 					this._allTypes[newObjectName].$$newtype = new typeUtils.Definition(newTypeName,null,this.uid);
 					this._allTypes[newTypeName].$$proto = new typeUtils.Definition(emptyProtoName,null,this.uid);
 				},
-	
-	            /**
-	             * update the $$newtype of a function expression created in an object literal to have the final
-	             * types for all the object literal's properties
-	             */
-	            updateObjLitFunctionType: function(objLitNode,propName,funcExpNode) {
-	              var objLitTypeName = objLitNode.extras.inferredTypeObj.name, funcTypeName = funcExpNode.extras.inferredTypeObj.name;
-	              if (objLitTypeName && funcTypeName) {
-	                var objLitType = this._allTypes[objLitTypeName];
-	                var funcExpNewType = this._allTypes[this._allTypes[funcTypeName].$$newtype.typeObj.name];
-	                for (var p in objLitType) {
-	                  // NOTE we don't add a property if it already exists, to preserve writes to 'this'
-	                  // inside the function.  Also, don't add a type for the corresponding property name
-	                  if (objLitType.hasOwnProperty(p) && !funcExpNewType.hasOwnProperty(p) && p !== propName && p.indexOf("$$") !== 0) {
-	                    funcExpNewType[p] = objLitType[p];
-	                  }
-	                }
-	              }
-	            },
+                /**
+                 * update the 'new' types of all function expressions assigned
+                 * to properties of the object literal, based on the idea that
+                 * the object literal is likely to be passed as the 'this' parameter
+                 * to the functions
+                 */
+                updateObjLitFunctionTypes: function(objLitNode) {
+        			// we want to update the 'new' type (i.e., the type of 'this') for each function 
+        			// assigned to a property of the literal as follows:
+        			// 1. add all the object literal properties to each 'new' type
+        			// 2. propagate properties from each 'new' type to all the others
+        			var objLitTypeName = objLitNode.extras.inferredTypeObj.name;
+        			if (!objLitTypeName) {
+        			    return;
+        			}
+        			// first, collect the "merged" new type for everything
+        			var mergedType = {};
+        			var self = this;
+        			function mergeInType(target, newType) {
+                                    if (target === newType) return;
+        			    for (var p in newType) {
+        			        if (newType.hasOwnProperty(p) && p.indexOf("$$") !== 0) {
+        			            if (!target.hasOwnProperty(p)) {
+        			                target[p] = newType[p];
+        			            } else {
+        			                // some kind of recursive call in the case of two object types
+        			                if (target[p].typeObj.type === "NameExpression" && self.isSyntheticName(target[p].typeObj.name) &&
+        			                    newType[p].typeObj.type === "NameExpression" && self.isSyntheticName(newType[p].typeObj.name)) {
+                                        var newTarget = self._allTypes[target[p].typeObj.name], newSource = self._allTypes[newType[p].typeObj.name];
+                                        if (newTarget && newSource) {
+                                            mergeInType(newTarget, newSource);
+                                        }
+        			                }
+        			            }
+        			        }
+        			    }
+        			}
+        			var objLitType = this._allTypes[objLitTypeName];
+        			mergeInType(mergedType,objLitType);
+        			// add in properties from new type for each function
+        			var kvps = objLitNode.properties;
+        			for (var i = 0; i < kvps.length; i++) {
+        				if (kvps[i].hasOwnProperty("key")) {
+        					var name = kvps[i].key.name;
+        					if (name && kvps[i].value.type === "FunctionExpression") {
+        					    var funcTypeName = kvps[i].value.extras.inferredTypeObj.name;
+        					    var funcExpNewType = this._allTypes[this._allTypes[funcTypeName].$$newtype.typeObj.name];
+        					    mergeInType(mergedType,funcExpNewType);
+        					}
+        				}
+        			}
+        			// now, update all the 'new' types
+        			for (i = 0; i < kvps.length; i++) {
+        				if (kvps[i].hasOwnProperty("key")) {
+        					name = kvps[i].key.name;
+        					if (name && kvps[i].value.type === "FunctionExpression") {
+        					    funcTypeName = kvps[i].value.extras.inferredTypeObj.name;
+        					    funcExpNewType = this._allTypes[this._allTypes[funcTypeName].$$newtype.typeObj.name];
+        					    for (var p in mergedType) {
+        					        // don't override existing types
+        					        // TODO is this right?
+        					        if (mergedType.hasOwnProperty(p) && !funcExpNewType.hasOwnProperty(p)) {
+        					            funcExpNewType[p] = mergedType[p];
+        					        }
+        					    }
+        					}
+        				}
+        			}
+                },
+
 	            /**
 	             * updates a function type to include a new return type.
 	             */

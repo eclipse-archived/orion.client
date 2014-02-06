@@ -128,7 +128,7 @@ define([
 		var toDefer;
 		if (parents && parents.length) {
 			var parent = parents.pop();
-			for (var i = 0; i < parents.length; i++) {
+			for (var i = parents.length - 1; i >= 0; i--) {
 				if ((parents[i].type === Estraverse.Syntax.FunctionDeclaration || 
 						parents[i].type === Estraverse.Syntax.FunctionExpression) &&
 						!(parents[i].id && proposalUtils.inRange(offset, parents[i].id.range, true))) {
@@ -225,15 +225,27 @@ define([
 	 * @param {Number} replaceStart The offset into the source where to start the completion
 	 * @param {Object} proposals The object that attach computed proposals to
 	 * @param {Number} relevance The ordering relevance of the proposals
+	 * @param {Object} visited Those types visited thus far while computing proposals (to detect cycles)
 	 */
-	function createInferredProposals(targetTypeName, env, completionKind, prefix, replaceStart, proposals, relevance) {
+	function createInferredProposals(targetTypeName, env, completionKind, prefix, replaceStart, proposals, relevance, visited) {
 		var prop, propTypeObj, propName, res, type = env.lookupQualifiedType(targetTypeName), proto = type.$$proto;
 		if (!relevance) {
 			relevance = 100;
 		}
 		// start at the top of the prototype hierarchy so that duplicates can be removed
 		if (proto) {
-			createInferredProposals(proto.typeObj.name, env, completionKind, prefix, replaceStart, proposals, relevance - 10);
+			var cycle = false;
+			if (visited) {
+				if (visited[proto.typeObj.name]) {
+					cycle = true;
+				}
+			} else {
+				visited = {};
+			}
+			if (!cycle) {
+				visited[proto.typeObj.name] = true;
+				createInferredProposals(proto.typeObj.name, env, completionKind, prefix, replaceStart, proposals, relevance - 10, visited);
+			}
 		}
 
 		// add a separator proposal

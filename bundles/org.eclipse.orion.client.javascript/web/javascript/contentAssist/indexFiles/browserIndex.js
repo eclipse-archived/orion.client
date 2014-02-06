@@ -815,10 +815,10 @@ define('javascript/contentAssist/indexFiles/browserIndex', [
 			"!type": "fn(x: Number, y: Number)"
 		},
 		"open": {
-			"!type": "fn(strUrl: String, strWindowName: String, strWindowFeatures?: String) -> Window"
+			"!type": "fn(strUrl: String, strWindowName: String, strWindowFeatures?: String) -> <top>"
 		},
 		"openDialog": {
-			"!type": "fn(strUrl: String, strWindowName: String, strWindowFeatures: String, args?: String) -> Window"
+			"!type": "fn(strUrl: String, strWindowName: String, strWindowFeatures: String, args?: String) -> <top>"
 		},
 		"postMessage": {
 			"!type": "fn(message: String, targetOrigin: String)"

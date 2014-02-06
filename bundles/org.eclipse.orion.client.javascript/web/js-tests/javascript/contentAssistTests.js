@@ -2489,7 +2489,13 @@ define([
 		return testProposals(results, []);
 	};
 
-
+	tests["test browser15"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:true */\n" +
+			"var w = window.open();\n" +
+			"w.document.ffff", "ffff");
+		return testProposals(results, []);
+	};
 
 	// Node awareness
 	tests["test node1"] = function() {
@@ -4049,52 +4055,56 @@ define([
 		]);
 	};
 
-	tests["test full file inferecing 23"] = function() {
-		var results = computeContentAssist(
-			"function a() {\n" +
-			"  function b() {\n" +
-			"    x.f/**/\n" +
-			"  }\n" +
-			"  x.fff = '';\n" +
-			"}\n" +
-			"var x = {ff2 : ''};", "f");
-		return testProposals(results, [
-			["ff2", "ff2 : String"],
-			["fff", "fff : String"]
-		]);
-	};
-
-	tests["test full file inferecing 24"] = function() {
-		var results = computeContentAssist(
-			"function a() {\n" +
-			"  function b() {\n" +
-			"    var y = x;\n" +
-			"    y.f/**/\n" +
-			"  }\n" +
-			"  x.fff = '';\n" +
-			"}\n" +
-			"var x = {ff2 : ''};", "f");
-		return testProposals(results, [
-			["ff2", "ff2 : String"],
-			["fff", "fff : String"]
-		]);
-	};
-
-	tests["test full file inferecing 25"] = function() {
-		var results = computeContentAssist(
-			"function a() {\n" +
-			"  function b() {\n" +
-			"    x.f/**/\n" +
-			"  }\n" +
-			"  var y = x;\n" +
-			"  y.fff = '';\n" +
-			"}\n" +
-			"var x = {ff2 : ''};", "f");
-		return testProposals(results, [
-			["ff2", "ff2 : String"],
-			["fff", "fff : String"]
-		]);
-	};
+	// disabling next three tests since, empirically, we do
+	// better by only deferring type inference for the closest
+	// enclosing function of the completion.  --MS
+	
+//	tests["test full file inferecing 23"] = function() {
+//		var results = computeContentAssist(
+//			"function a() {\n" +
+//			"  function b() {\n" +
+//			"    x.f/**/\n" +
+//			"  }\n" +
+//			"  x.fff = '';\n" +
+//			"}\n" +
+//			"var x = {ff2 : ''};", "f");
+//		return testProposals(results, [
+//			["ff2", "ff2 : String"],
+//			["fff", "fff : String"]
+//		]);
+//	};
+//
+//	tests["test full file inferecing 24"] = function() {
+//		var results = computeContentAssist(
+//			"function a() {\n" +
+//			"  function b() {\n" +
+//			"    var y = x;\n" +
+//			"    y.f/**/\n" +
+//			"  }\n" +
+//			"  x.fff = '';\n" +
+//			"}\n" +
+//			"var x = {ff2 : ''};", "f");
+//		return testProposals(results, [
+//			["ff2", "ff2 : String"],
+//			["fff", "fff : String"]
+//		]);
+//	};
+//
+//	tests["test full file inferecing 25"] = function() {
+//		var results = computeContentAssist(
+//			"function a() {\n" +
+//			"  function b() {\n" +
+//			"    x.f/**/\n" +
+//			"  }\n" +
+//			"  var y = x;\n" +
+//			"  y.fff = '';\n" +
+//			"}\n" +
+//			"var x = {ff2 : ''};", "f");
+//		return testProposals(results, [
+//			["ff2", "ff2 : String"],
+//			["fff", "fff : String"]
+//		]);
+//	};
 
 
 	tests["test full file inferecing 26"] = function() {
@@ -4588,7 +4598,32 @@ define([
 		]);
 	};
 
-	/**
+	tests["test object literal usage-based inference 3"] = function() {
+		var results = computeContentAssist(
+			"var p = { f1: function(a) { this.cccc = a; }, f2: function(b) { this.dddd = b; }, f3: function() { var y = this.ccc/**/ } };", "ccc");
+		return testProposals(results, [
+			["cccc", "cccc : {}"]
+		]);
+	};
+
+	tests["test object literal usage-based inference 4"] = function() {
+		var results = computeContentAssist(
+			"var p = { o1: { cccc: 3 }, f1: function() { this.o1.ffff = 4; }, f2: function() { var y = this.o1.ccc/**/ } };", "ccc");
+		return testProposals(results, [
+			["cccc", "cccc : Number"]
+		]);
+	};
+
+	tests["test object literal usage-based inference 5"] = function() {
+		var results = computeContentAssist(
+			"var p = { o1: { cccc: 3 }, f1: function() { this.o1.ffff = 4; }, f2: function() { var y = this.o1.fff/**/ } };", "fff");
+		return testProposals(results, [
+			["ffff", "ffff : Number"]
+		]);
+	};
+
+  
+        /**
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=425675
 	 * @since 5.0
 	 */
@@ -4783,6 +4818,64 @@ define([
 		assertProposal("do", result);
 	};
 
+      
+	/**
+	 * Test cyclic types
+	 */
+	tests["test cycle 1"] = function() {
+		var results = computeContentAssist(
+			"var f1 = function f1() {};\n" +
+			"var f2 = function f2() {};\n" +
+			"var new_f1 = new f1();\n" +
+			"f1.prototype = new_f1;\n" +
+			"f2.prototype = new_f1;\n" +
+			"var x = new f1();\n" +
+			"x.f.g", "g");
+		return testProposals(results, []);
+	};
+
+	/**
+	 * Test cyclic types
+	 */
+	tests["test cycle 2"] = function() {
+		var results = computeContentAssist(
+			"function foo() {\n" +
+			"this._init = function() { return this; }\n" +
+			"this.cmd = function() {\n" +
+			"this._in", "_in");
+		return testProposals(results, [
+			["_init()", "_init() : _init"]
+		]);
+        };
+
+	/**
+	 * Test cyclic types
+	 */
+        tests["test cycle 3 "] = function() {
+		var results = computeContentAssist(
+			"var f2 = function () {};\n" +
+			"var new_f2 = new f2();\n" +
+			"f2.prototype = new_f2;\n" +
+			"var c = new f2();\n" +
+			"c.fff", "fff");
+		return testProposals(results, []);
+	};
+
+	tests["test one-shot closure 1"] = function() {
+	    var results = computeContentAssist("var x = {ffff : 3 }; (function (p) { p.fff/**/ })(x);", "fff");
+	    return testProposals(results, [
+	       ["ffff", "ffff : Number"]
+	    ]);
+        };
+
+	tests["test one-shot closure 2"] = function() {
+	    var results = computeContentAssist("(function() { var x = { y: { zzz: 3 }, f: function() { var s = this.y.zz/**/ } };}());", "zz");
+	    return testProposals(results, [
+	       ["zzz", "zzz : Number"]
+	    ]);
+	};
+
+  
 	////////////////////////////////////////
 	// tests for contributed Tern index files
 	////////////////////////////////////////
@@ -4844,7 +4937,7 @@ define([
 		return testProposals(results, [
 			["whatever", "whatever : Number"]
 		]);
-	};
 
+	};
 	return tests;
 });

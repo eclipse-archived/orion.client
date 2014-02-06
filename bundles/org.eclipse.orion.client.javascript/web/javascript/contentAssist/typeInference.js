@@ -419,6 +419,13 @@ define([
 				for (i = 0; i < len; i++) {
 					callArgs[i] = paramTypes[i];
 				}
+			} else if (node.extras.stashedArguments) {
+			    // this is a one-shot closure; read the types that were already inferred
+			    // for the arguments
+			    var len = Math.min(params.length || 0, node.extras.stashedArguments.length || 0);
+			    for (i = 0; i < len; i++) {
+			        callArgs[i] = node.extras.stashedArguments[i].extras.inferredTypeObj;
+			    }
 			}
 			if (!node.body.extras) {
 				node.body.extras = {};
@@ -605,6 +612,20 @@ define([
 				if (rightMost && rightMost.type === "Identifier") {
 					rightMost.extras = rightMost.extras || {};
 					rightMost.extras.callArgs = node["arguments"];
+				} else if (node.callee.type === "FunctionExpression" && node.arguments) {
+				    // one-shot closure of the form `(function (f1,f2,...))(a1,a2,...)`
+				    // here, we want to infer the types of the actual parameters,
+				    // and then use those types for the formal parameters of the closure
+			        for (var j = 0; j < node.arguments.length; j++) {
+			            mVisitor.visit(node.arguments[j], env, inferencer, inferencerPostOp);
+			        }
+			        // stash away the arguments under the closure and temporarily delete them,
+			        // so they don't get visited twice
+			        if (!node.callee.extras) {
+			            node.callee.extras = {};
+			        }
+			        node.callee.extras.stashedArguments = node.arguments;
+			        delete node.arguments;
 				}
 			}
 			break;
@@ -819,6 +840,14 @@ define([
 				fnTypeObj = typeUtils.extractReturnType(env.getFnType(node.callee));
 			}
 			node.extras.inferredTypeObj = fnTypeObj;
+			if (node.callee.extras.stashedArguments) {
+			    // one-shot closure.  restore the arguments to the CallExpression
+			    if (node.arguments) {
+			        throw "thought we deleted node.arguments";
+			    }
+			    node.arguments = node.callee.extras.stashedArguments;
+			    delete node.callee.extras.stashedArguments;
+			}
 			break;
 		case "NewExpression":
 			// FIXADE we have a problem here.
@@ -862,18 +891,9 @@ define([
 					}
 				}
 			}
-			// now, we update the types of any function expressions assigned to literal properties,
-			// adding all the object literal's properties to each such type.  This is a heuristic
-			// based on the likelihood of the literal itself being passed as the 'this' argument
-			// to such functions
-			for (i = 0; i < kvps.length; i++) {
-				if (kvps[i].hasOwnProperty("key")) {
-					name = kvps[i].key.name;
-					if (name && kvps[i].value.type === "FunctionExpression") {
-						env.updateObjLitFunctionType(node,name,kvps[i].value);
-					}
-				}
-			}
+			// now, we update the types of any function expressions assigned to literal properties.
+			env.updateObjLitFunctionTypes(node);
+
 			if (node.extras.fname) {
 				// this object expression is contained inside another object expression
 				env.popName();
@@ -1094,7 +1114,10 @@ define([
 
 					if (node.extras.target) {
 						// this is a property on an object.  just add to the target
-						env.addVariable(name, node.extras.target, env.newFleetingObject(), node.range);
+						var res = env.addVariable(name, node.extras.target, env.newFleetingObject(), node.range);
+						if (res) {
+						    node.extras.inferredTypeObj = res.typeObj;
+						}
 					} else {
 						// add as a global variable
 						node.extras.inferredTypeObj = env.addOrSetGlobalVariable(name, null, node.range).typeObj;
