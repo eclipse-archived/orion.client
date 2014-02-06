@@ -497,7 +497,6 @@ hard-coded numbers elsewhere.
 	white-space: nowrap;
 	font-size: 12px;
     background: lightgrey;
-	padding: 10px;
 	border-right:1px solid #bbb;
 }
 
@@ -528,7 +527,8 @@ hard-coded numbers elsewhere.
 .sideMenuSubMenuItem a { /*.sideMenuSubMenuItemLink*/
 	display: inline-block;
 	color: #333;
-	width: 100%;
+	padding: 10px;
+	width: calc(100% - 12px); /* clamp to container's width, plus fudge factor */
 }
 
 /* 1) Set up special hover colors for submenu items */
