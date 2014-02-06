@@ -110,7 +110,7 @@ define([
 					position: ["right"] //$NON-NLS-0$
 				});
 
-				sideMenu = this.sideMenu = new SideMenu(sideMenuParent); //$NON-NLS-0$
+				sideMenu = this.sideMenu = new SideMenu(sideMenuParent, lib.node("pageContent")); //$NON-NLS-0$
 				nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
 			}
 		},

@@ -17,8 +17,9 @@ define([
 	'orion/webui/littlelib'
 ], function(mCommands, objects, lib) {
 
-	function SideMenu(parentNode){
+	function SideMenu(parentNode, contentNode){
 		this.parentNode = lib.node(parentNode);
+		this.contentNode = lib.node(contentNode);
 		if (!this.parentNode) {
 			throw new Error("Missing parentNode");
 		}
@@ -92,7 +93,7 @@ define([
 			}
 		},
 		setPageContentLeft: function( left ){
-			var pageContent = lib.node( "pageContent" );
+			var pageContent = this.contentNode;
 			if (pageContent) {
 				pageContent.style.left = left;
 			}
@@ -103,7 +104,7 @@ define([
 			var newState;
 			
 			// add animation if necessary
-			var pageContent = lib.node( "pageContent" ); //$NON-NLS-0$
+			var pageContent = this.contentNode;
 			if (pageContent) {
 				pageContent.classList.add("content-fixedHeight-animation"); //$NON-NLS-0$
 			}
