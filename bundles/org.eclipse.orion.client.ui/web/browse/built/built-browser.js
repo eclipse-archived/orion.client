@@ -8592,53 +8592,6 @@ define('orion/explorers/explorer-table',[
 		},
 
 		_makeDropTarget: function(item, node, persistAndReplace) {
-			function dropFileEntry(entry, path, target, explorer, performDrop, fileClient) {
-				path = path || "";
-				if (entry.isFile) {
-					// can't drop files directly into workspace.
-					if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
-						if(explorer.registry) {
-							explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
-								Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
-						}
-					} else {
-						entry.file(function(file) {
-							performDrop(target, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name))); //$NON-NLS-1$ //$NON-NLS-0$ 
-						});
-					}
-				} else if (entry.isDirectory) {
-					var dirReader = entry.createReader();
-					var traverseChildren = function(folder) {
-						dirReader.readEntries(function(entries) {
-							for (var i=0; i<entries.length; i++) {
-								dropFileEntry(entries[i], path + entry.name + "/", folder, explorer, performDrop, fileClient); //$NON-NLS-0$
-							}
-						});
-					};
-					var progress = null;
-					if(explorer.registry) {
-						progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
-					}
-					if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
-						(progress ? progress.progress(fileClient.createProject(target.ChildrenLocation, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) : 
-									fileClient.createProject(target.ChildrenLocation, entry.name)).then(function(project) {
-							explorer.loadResourceList(explorer.treeRoot.Path, true);					
-							(progress ? progress.progress(fileClient.read(project.ContentLocation, true), messages["Loading "] + project.name) :
-										fileClient.read(project.ContentLocation, true)).then(function(folder) {
-									traverseChildren(folder);
-								});
-						});
-					} else {
-						(progress ? progress.progress(fileClient.createFolder(target.Location, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) :
-									fileClient.createFolder(target.Location, entry.name)).then(function(subFolder) {
-							var dispatcher = explorer.modelEventDispatcher;
-							dispatcher.dispatchEvent({ type: "create", parent: item, newValue: subFolder }); //$NON-NLS-0$
-							traverseChildren(subFolder);
-						});
-					}
-				}
-			}
-			
 			if (this.dragAndDrop) {
 				var explorer = this;
 				var performDrop = this.dragAndDrop;
@@ -8726,6 +8679,66 @@ define('orion/explorers/explorer-table',[
 					this._oldDragOver = dragOver;
 				}
 	
+				var progress = null;
+				if(explorer.registry) {
+					progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
+				}
+				
+				var errorHandler = function(error) {
+					if (progress) {
+						progress.setProgressResult(error);
+					} else {
+						window.console.log(error);
+					}
+				};
+				
+				function dropFileEntry(entry, path, target, explorer, performDrop, fileClient) {
+					if (!target.Location && target.fileMetadata) {
+						target = target.fileMetadata;
+					}
+					path = path || "";
+					if (entry.isFile) {
+						// can't drop files directly into workspace.
+						if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
+							if(explorer.registry) {
+								explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
+									Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
+							}
+						} else {
+							entry.file(function(file) {
+								performDrop(target, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name))); //$NON-NLS-1$ //$NON-NLS-0$ 
+							});
+						}
+					} else if (entry.isDirectory) {
+						var dirReader = entry.createReader();
+						var traverseChildren = function(folder) {
+							dirReader.readEntries(function(entries) {
+								for (var i=0; i<entries.length; i++) {
+									dropFileEntry(entries[i], path + entry.name + "/", folder, explorer, performDrop, fileClient); //$NON-NLS-0$
+								}
+							});
+						};
+						
+						if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
+							(progress ? progress.progress(fileClient.createProject(target.ChildrenLocation, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) : 
+										fileClient.createProject(target.ChildrenLocation, entry.name)).then(function(project) {
+								explorer.loadResourceList(explorer.treeRoot.Path, true);					
+								(progress ? progress.progress(fileClient.read(project.ContentLocation, true), messages["Loading "] + project.name) :
+											fileClient.read(project.ContentLocation, true)).then(function(folder) {
+										traverseChildren(folder);
+									}, errorHandler);
+							}, errorHandler);
+						} else {
+							(progress ? progress.progress(fileClient.createFolder(target.Location, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) :
+										fileClient.createFolder(target.Location, entry.name)).then(function(subFolder) {
+								var dispatcher = explorer.modelEventDispatcher;
+								dispatcher.dispatchEvent({ type: "create", parent: item, newValue: subFolder }); //$NON-NLS-0$
+								traverseChildren(subFolder);
+							}, errorHandler);
+						}
+					}
+				}
+				
 				var drop = function(evt) {
 					var i;
 					node.classList.remove("dragOver"); //$NON-NLS-0$
@@ -8743,23 +8756,13 @@ define('orion/explorers/explorer-table',[
 						if (!source) {
 							return;
 						}
-						var progress = null;
-						if(explorer.registry) {
-							progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
-						}
 						var isCopy = dropEffect === "copy"; //$NON-NLS-0$
 						var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 						(progress ? progress.showWhile(func.apply(fileClient, [source.Location, item.Location]), i18nUtil.formatMessage(messages[isCopy ? "Copying ${0}" : "Moving ${0}"], source.Location)) : 
 									func.apply(fileClient, [source.Location, item.Location])).then(function(result) {
 							var dispatcher = explorer.modelEventDispatcher;
 							dispatcher.dispatchEvent({type: isCopy ? "copy" : "move", oldValue: source, newValue: result, parent: item}); //$NON-NLS-1$ //$NON-NLS-0$
-						}, function(error) {
-							if (progress) {
-								progress.setProgressResult(error);
-							} else {
-								window.console.log(error);
-							}
-						});
+						}, errorHandler);
 						
 					// webkit supports testing for and traversing directories
 					// http://wiki.whatwg.org/wiki/DragAndDropEntries
@@ -25131,7 +25134,7 @@ define('orion/widgets/browse/browseView',[
 		 */
 		emptyCallback: function(bodyElement) {
 			if (this.explorer.readonly) {
-				this.explorer.folderViewer.updateEmptyContents("This folder is empty.");
+				this.explorer.folderViewer.updateMessageContents("This folder is empty.", ["emptyViewTable"]);
 				return;
 			}
 			mNavigatorRenderer.NavigatorRenderer.prototype.emptyCallback.call(this, bodyElement);
@@ -25227,6 +25230,7 @@ define('orion/widgets/browse/browseView',[
 		this.editorView = options.editorView;
 		this._maxEditorLines = options.maxEditorLines;
 		this.imageView = options.imageView;
+		this.messageView = options.messageView;
 		this.breadCrumbInHeader = options.breadCrumbInHeader;
 		this.isMarkdownView = options.isMarkdownView;
 		this.breadCrumbMaker = options.breadCrumbMaker;
@@ -25254,7 +25258,7 @@ define('orion/widgets/browse/browseView',[
 			this._parent.appendChild(this._node);
 		},
 		displayBrowseView: function(root){
-			var children = root.Children;
+			var children = root && root.Children;
 			var readmeMd;
 			if(children) {
 				for (var i=0; i<children.length; i++) {
@@ -25309,7 +25313,11 @@ define('orion/widgets/browse/browseView',[
 								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 5);
 							}
 						}
-						if(this.editorView) {//To embed an orion editor in the section
+						if(this.messageView) {
+							if(typeof this.messageView.message === "string") {
+								this.updateMessageContents(this.messageView.message, ["messageViewTable"]);
+							}						
+						} else if(this.editorView) {//To embed an orion editor in the section
 							this.sectionContents.appendChild(this.editorView.getParent());
 							this.editorView.getParent().style.height = "30px"; //$NON-NLS-0$
 							this.editorView.create();
@@ -25371,9 +25379,13 @@ define('orion/widgets/browse/browseView',[
 			imageTable.appendChild(tr);
 			this.sectionContents.appendChild(imageTable);
 		},
-		updateEmptyContents: function(message) {
+		updateMessageContents: function(message, messageClasses) {
 			var messageTable = document.createElement("table");
-			messageTable.classList.add("emptyViewTable");
+			if(messageClasses){
+				messageClasses.forEach( function(messageClass) {
+					messageTable.classList.add(messageClass);
+				});
+			}
 			var tr = document.createElement("tr");
 			var td = document.createElement("td"); 
 			var messageContent = document.createElement("div");
@@ -25384,10 +25396,10 @@ define('orion/widgets/browse/browseView',[
 			this.sectionContents.appendChild(messageTable);
 		},
 		create: function() {
-			if(this._metadata.Projects){ //this is a workspace root
+			if(this._metadata && this._metadata.Projects){ //this is a workspace root
 				this.displayWorkspaceView();
 			}
-			if(this.editorView || this.imageView || this.isMarkdownView) {
+			if(this.editorView || this.imageView || this.isMarkdownView || this.messageView) {
 				this.displayBrowseView(this._metadata);
 			} else if(this._metadata.Children){
 				this.displayBrowseView(this._metadata);
@@ -29735,6 +29747,7 @@ define('orion/settings/nls/root/messages',{
 	"Title": "Title",
 	"Plugins": "Plugins",
 	"User Profile": "User Profile",
+	"Git": "Git",
 	"Git Settings": "Git Settings",
 	"General": "General",
 	"Navigation": "Navigation",
@@ -30951,12 +30964,11 @@ define('orion/widgets/browse/resourceSelector',[
 		 * @returns {String|DocumentFragment}
 		 */
 		_resourceLabel: function() {
-			//TOTO figure out the resource name from any meta (e.g. sub folder)
 			var fragment = document.createDocumentFragment();
-			fragment.textContent = this.labelHeader + ": ${0}"; //$NON-NLS-0$
-			var nameLabel = document.createElement("b"); //$NON-NLS-0$
-			nameLabel.textContent = this.activeResourceName;
-			nameLabel.classList.add("browserResourceSelectorNameBold");
+			fragment.textContent = "${0} " + this.activeResourceName; //$NON-NLS-0$
+			var nameLabel = document.createElement("span"); //$NON-NLS-0$
+			nameLabel.appendChild(document.createTextNode(this.labelHeader + ":")); //$NON-NLS-0$
+			nameLabel.classList.add("browserResourceSelectorNameLabel");
 			lib.processDOMNodes(fragment, [nameLabel]);
 			return fragment;
 		},
@@ -34183,6 +34195,13 @@ define('orion/widgets/browse/fileBrowser',[
 		_init: function(options){
 			this._commandRegistry = new mCommandRegistry.CommandRegistry({});
 			this._maxEditorLines = options.maxEditorLines;
+			
+			var browseViewOptons = {
+				parent: this._parentDomNode,
+				messageView: {message: "Loading..."}
+			};
+			this._switchView(new mBrowseView.BrowseView(browseViewOptons));
+			
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
@@ -34301,6 +34320,18 @@ define('orion/widgets/browse/fileBrowser',[
 			} else {
 				this.refresh(PageUtil.hash());
 			}
+		},
+		_switchView: function(view) {
+			if (this._currentEditorView !== view) {
+				if (this._currentEditorView) {
+					this._currentEditorView.destroy();
+				}
+				this._currentEditorView = view;
+				if (this._currentEditorView) {
+					this._currentEditorView.create();
+				}
+			}
+			return this._currentEditorView;
 		},
 		_breadCrumbMaker: function(bcContainer, maxLength){
 			this._renderBreadCrumb({
@@ -34428,16 +34459,7 @@ define('orion/widgets/browse/fileBrowser',[
 				}
 				view = new mBrowseView.BrowseView(browseViewOptons);
 			}
-			if (this._currentEditorView !== view) {
-				if (this._currentEditorView) {
-					this._currentEditorView.destroy();
-				}
-				this._currentEditorView = view;
-				if (this._currentEditorView) {
-					this._currentEditorView.create();
-				}
-			}
-			return this._currentEditorView;
+			return this._switchView(view);
 		},
 		refresh: function(uri) {
 			if(!uri) {
@@ -35986,7 +36008,9 @@ define('orion/pluginregistry',["orion/Deferred", "orion/EventTarget", "orion/URL
                     var plugin = this.getPlugin(url);
                     if (!plugin) {
                         var manifest = configuration.plugins[url];
-                        manifest = typeof manifest === "object" || {};
+                        if (typeof manifest !== "object") {
+                        	manifest = {};
+                        }
                         manifest.autostart = manifest.autostart || configuration.defaultAutostart || "lazy";
                         _plugins.push(new Plugin(url, manifest, internalRegistry));
                     }
@@ -36276,7 +36300,8 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		}
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		var plugins = {};
-		plugins[pluginURL.href] = true;
+		plugins[pluginURL.href] = {autostart: "started", lastModified: -1};
+		//plugins[pluginURL.href] = true;
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
 			storage: {},
 			plugins: plugins
