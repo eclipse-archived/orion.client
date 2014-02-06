@@ -19,6 +19,7 @@ define({
 	"Title": "Title",
 	"Plugins": "Plugins",
 	"User Profile": "User Profile",
+	"Git": "Git",
 	"Git Settings": "Git Settings",
 	"General": "General",
 	"Navigation": "Navigation",

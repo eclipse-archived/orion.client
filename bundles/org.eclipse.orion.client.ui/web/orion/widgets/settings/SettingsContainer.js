@@ -77,7 +77,7 @@ define([
 				if (categories.showGitSettings === undefined || categories.showGitSettings) {
 					_self.settingsCategories.push({
 						id: "gitSettings", //$NON-NLS-0$
-						textContent: messages["Git Settings"],
+						textContent: messages.Git,
 						show: _self.showGitSettings
 					});
 				}
