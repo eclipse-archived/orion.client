@@ -20,14 +20,7 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 		contentTypes: ["text/html"],
 		patterns: [
 			{
-				include: "#comment"
-			}, {
-				begin: "<!(?:doctype|DOCTYPE)",
-				end: ">",
-				captures: {
-					0: {name: "entity.name.tag.doctype.html"},
-				},
-				name: "meta.tag.doctype.html",
+				include: "orion.xml"
 			}, {
 				begin: "(?i)(<style)([^>]*)(>)",
 				end: "(?i)(</style>)",
@@ -89,40 +82,11 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 						include: "orion.php"
 					}
 				]
-			}, {
-				begin: "</?[A-Za-z0-9]+",
-				end: "/?>",
-				captures: {
-					0: {name: "entity.name.tag.html"},
-				},
-				name: "meta.tag.html",
-				patterns: [
-					{
-						include: "#comment"
-					}, {
-						include: "orion.lib#string_doubleQuote"
-					}, {
-						include: "orion.lib#string_singleQuote"
-					}
-				]
 			}
 		],
 		repository: {
-			comment: {
-				begin: "<!--",
-				end: "-->",
-				name: "comment.block.html",
-				patterns: [
-					{
-						match: "(\\b)(TODO)(\\b)(((?!-->).)*)",
-						name: "meta.annotation.task.todo",
-						captures: {
-							2: {name: "keyword.other.documentation.task"},
-							4: {name: "comment.line"}
-						}
-					}
-				]
-			}
+			/* override orion.xml#xmlDeclaration (no-op) */
+			xmlDeclaration: {}
 		}
 	});
 	return {

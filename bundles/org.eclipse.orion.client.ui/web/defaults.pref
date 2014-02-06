@@ -15,6 +15,7 @@
 		"plugins/languages/php/phpPlugin.html":true,
 		"plugins/languages/python/pythonPlugin.html":true,
 		"plugins/languages/ruby/rubyPlugin.html":true,
+		"plugins/languages/xml/xmlPlugin.html":true,
 		"plugins/languages/yaml/yamlPlugin.html":true,
 		"plugins/pageLinksPlugin.html":true,
 		"plugins/preferencesPlugin.html":true,

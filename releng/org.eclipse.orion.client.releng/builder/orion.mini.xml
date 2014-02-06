@@ -186,6 +186,7 @@
 		<optimize pageDir="plugins/languages/php" name="phpPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins/languages/python" name="pythonPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins/languages/ruby" name="rubyPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins/languages/xml" name="xmlPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins/languages/yaml" name="yamlPlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins/site" name="sitePlugin" bundle="org.eclipse.orion.client.ui" />
 		<optimize pageDir="plugins" name="authenticationPlugin" bundle="org.eclipse.orion.client.ui" />
