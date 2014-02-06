@@ -947,7 +947,6 @@ input {
 }
 
 .projectNavColumn {
-	background: none repeat scroll 0 0 #eee;
     color: #666;
     font-weight: bold;
     padding-bottom: 0.2em;
@@ -955,7 +954,6 @@ input {
 }
 
 .projectPrimaryNavColumn {
-	background: none repeat scroll 0 0 #EEEEEE;
 	color: #000;
 }
 
