@@ -30858,6 +30858,7 @@ define('orion/widgets/browse/resourceSelector',[
 		this.dropDownTooltip = params.dropDownTooltip;
 		this.allItems = params.allItems;
 		this.activeResourceName = params.activeResourceName;
+		this.labelHeader = params.labelHeader;
 		this.parentNode = params.parentNode;
 		this.listener = function(event) {
 			this.refresh(event.root);
@@ -30933,8 +30934,10 @@ define('orion/widgets/browse/resourceSelector',[
 		_resourceLabel: function() {
 			//TOTO figure out the resource name from any meta (e.g. sub folder)
 			var fragment = document.createDocumentFragment();
-			fragment.textContent = this.activeResourceName; //$NON-NLS-0$
-			//lib.processDOMNodes(fragment, [document.createTextNode(name), document.createTextNode(hostname)]);
+			fragment.textContent = this.labelHeader + ": ${0}"; //$NON-NLS-0$
+			var nameLabel = document.createElement("b"); //$NON-NLS-0$
+			nameLabel.textContent = this.activeResourceName;
+			lib.processDOMNodes(fragment, [nameLabel]);
 			return fragment;
 		},
 		refresh: function() {
@@ -31916,36 +31919,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			regex.lastIndex = regex.oldLastIndex;
 		});
 	};
-	var computeTasks = function(offset, block, baseModel, styles) {
-		if (!block.detectTasks()) { return; }
-		var annotationModel = block.getAnnotationModel();
-		if (!annotationModel) { return; }
-
-		var annotationType = mAnnotations.AnnotationType.ANNOTATION_TASK;
-		var add = [], remove = [];
-
-		styles.forEach(function(current) {
-			var annotations = annotationModel.getAnnotations(current.start, current.end);
-			while (annotations.hasNext()) {
-				var annotation = annotations.next();
-				if (annotation.type === annotationType) {
-					remove.push(annotation);
-				}
-			}
-
-			var subPatterns = current.getLinePatterns();
-			if (subPatterns.length && current.pattern.pattern.name && current.pattern.pattern.name.indexOf("comment") === 0) {
-				var substyles = [];
-				parse(baseModel.getText(current.contentStart, current.end), current.contentStart, current, substyles, true);
-				for (var i = 0; i < substyles.length; i++) {
-					if (substyles[i].style === "meta.annotation.task.todo") {
-						add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, substyles[i].start, substyles[i].end, baseModel.getText(substyles[i].start, substyles[i].end)));
-					}
-				}
-			}
-		}.bind(this));
-		annotationModel.replaceAnnotations(remove, add);
-	};
 	var computeBlocks = function(model, text, block, offset) {
 		var matches = [];
 		block.getBlockPatterns().forEach(function(current) {
@@ -32049,8 +32022,27 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			updateMatch(current, text, matches, index);
 		}
-		computeTasks(offset, block, model, results);
 		return results;
+	};
+	var computeTasks = function(block, baseModel, annotations) {
+		var annotationModel = block.getAnnotationModel();
+		if (!annotationModel) { return; }
+
+		var annotationType = mAnnotations.AnnotationType.ANNOTATION_TASK;
+		var subPatterns = block.getLinePatterns();
+		if (subPatterns.length && block.pattern && block.pattern.pattern.name && block.pattern.pattern.name.indexOf("comment") === 0) {
+			var substyles = [];
+			parse(baseModel.getText(block.contentStart, block.end), block.contentStart, block, substyles, true);
+			for (var i = 0; i < substyles.length; i++) {
+				if (substyles[i].style === "meta.annotation.task.todo") {
+					annotations.push(mAnnotations.AnnotationType.createAnnotation(annotationType, substyles[i].start, substyles[i].end, baseModel.getText(substyles[i].start, substyles[i].end)));
+				}
+			}
+		}
+
+		block.getBlocks().forEach(function(current) {
+			computeTasks(current, baseModel, annotations);
+		}.bind(this));
 	};
 
 	function PatternManager(grammars, rootId) {
@@ -32244,9 +32236,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 			return fullBlock;
 		},
-		detectTasks: function() {
-			return this._styler._getDetectTasks();
-		},
 		getAnnotationModel: function() {
 			return this._styler._getAnnotationModel();
 		},
@@ -32371,6 +32360,11 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		var rootBounds = {start: 0, contentStart: 0, end: charCount, contentEnd: charCount};
 		this._rootBlock = new Block(rootBounds, null, this, model);
 		this._computeFolding(this._rootBlock.getBlocks());
+		if (this.detectTasks) {
+			var add = [];
+			computeTasks(this._rootBlock, model, add);
+			annotationModel.replaceAnnotations([], add);
+		}
 		view.redrawLines();
 	}
 
@@ -32634,9 +32628,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		},
 		_getAnnotationModel: function() {
 			return this.annotationModel;
-		},
-		_getDetectTasks: function() {
-			return this.detectTasks;
 		},
 		_getLineStyle: function(lineIndex) {
 			if (this.highlightCaretLine) {
@@ -32917,15 +32908,15 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				view.redrawRange(redrawStart, redrawEnd);
 			}
 
-			if (this.foldingEnabled && baseModel !== viewModel && this.annotationModel) {
-				var annotationModel = this.annotationModel;
-				var iter = annotationModel.getAnnotations(ts, te);
-				var remove = [], all = [];
-				var annotation;
+			if (this.annotationModel) {
+				var remove = [], add = [];
+				var allFolding = [];
+				var iter = this.annotationModel.getAnnotations(ts, te);
+				var doFolding = this.foldingEnabled && baseModel !== viewModel;
 				while (iter.hasNext()) {
-					annotation = iter.next();
-					if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_FOLDING) {
-						all.push(annotation);
+					var annotation = iter.next();
+					if (doFolding && annotation.type === mAnnotations.AnnotationType.ANNOTATION_FOLDING) {
+						allFolding.push(annotation);
 						for (i = 0; i < newBlocks.length; i++) {
 							if (annotation.start === newBlocks[i].start && annotation.end === newBlocks[i].end) {
 								break;
@@ -32951,28 +32942,34 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 										annotation.expand();
 									}
 								} else {
-									annotationModel.removeAnnotation(annotation);
+									this.annotationModel.removeAnnotation(annotation);
 								}
 							}
 						}
+						for (i = 0; i < newBlocks.length; i++) {
+							block = newBlocks[i];
+							for (var j = 0; j < allFolding.length; j++) {
+								if (allFolding[j].start === block.start && allFolding[j].end === block.end) {
+									break;
+								}
+							}
+							if (j === allFolding.length) {
+								annotation = this._createFoldingAnnotation(viewModel, baseModel, block.start, block.end);
+								if (annotation) {
+									add.push(annotation);
+								}
+							}
+						}
+					} else if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_TASK) {
+						remove.push(annotation);
 					}
 				}
-				var add = [];
-				for (i = 0; i < newBlocks.length; i++) {
-					block = newBlocks[i];
-					for (var j = 0; j < all.length; j++) {
-						if (all[j].start === block.start && all[j].end === block.end) {
-							break;
-						}
-					}
-					if (j === all.length) {
-						annotation = this._createFoldingAnnotation(viewModel, baseModel, block.start, block.end);
-						if (annotation) {
-							add.push(annotation);
-						}
+				if (this.detectTasks) {
+					for (i = 0; i < newBlocks.length; i++) {
+						computeTasks(newBlocks[i], baseModel, add);
 					}
 				}
-				annotationModel.replaceAnnotations(remove, add);
+				this.annotationModel.replaceAnnotations(remove, add);
 			}
 		},
 		_spliceStyles: function(whitespacePattern, ranges, text, offset) {
@@ -34279,6 +34276,7 @@ define('orion/widgets/browse/fileBrowser',[
 							commandRegistry: this._commandRegistry,
 							fileClient: this._fileClient,
 							parentNode: branchSelectorContainer,
+							labelHeader: this._showComponent ? "stream" : "branch",
 							resourceChangeDispatcher: this._showComponent ? this._resourceChangeHandler : null,
 							fetchChildren: this._showComponent ? true : false,
 							commandScopeId: "orion.browse.brSelector", //$NON-NLS-0$
@@ -34295,6 +34293,7 @@ define('orion/widgets/browse/fileBrowser',[
 								commandRegistry: this._commandRegistry,
 								fileClient: this._fileClient,
 								parentNode: compSelectorContainer,
+								labelHeader: "component",
 								commandScopeId: "orion.browse.compSelector", //$NON-NLS-0$
 								dropDownId: "orion.browse.switchcomp", //$NON-NLS-0$
 								dropDownTooltip: "Select a componet", //$NON-NLS-0$

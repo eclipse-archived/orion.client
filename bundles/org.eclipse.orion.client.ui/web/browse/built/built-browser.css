@@ -989,14 +989,14 @@ padding-bottom:5px;
 padding-top:3px;
 }
 .browserResourceSelectorName{
-font-weight:bold;
+font-weight:normal;
 margin-left:4px;
 padding-top:2px;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
-max-width:calc(100% - 6px - 4px - 24px);
-max-width:-webkit-calc(100% - 6px - 4px - 24px);
+max-width:calc(100% - 1px - 4px - 24px);
+max-width:-webkit-calc(100% - 1px - 4px - 24px);
 -moz-user-select:-moz-none;
 -webkit-user-select:none;
 -ms-user-select:none;
@@ -1007,11 +1007,12 @@ color:#444;
 margin-left:4px;
 outline:1px solid;
 height:21px;
-width:150px;
+width:200px;
 margin-top:-2px;
 background-color:white;
 display:inline-block;
-outline-color:#dadada
+outline-color:#dadada;
+cursor:pointer;
 }
 .componentSelectorContainer{
 margin-left:8px;
