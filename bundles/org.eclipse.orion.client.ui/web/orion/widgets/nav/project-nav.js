@@ -145,6 +145,7 @@ define([
 				this.projectLocation = parentProject ? parentProject.Location : null;
 				projectData.type = "Project"; //$NON-NLS-0$
 				projectData.Directory = true;
+				projectData.fileMetadata = fileMetadata;
 				return CommonNavExplorer.prototype.display.call(this, projectData, redisplay).then(function() {
 					return this.expandItem(fileMetadata);
 				}.bind(this));

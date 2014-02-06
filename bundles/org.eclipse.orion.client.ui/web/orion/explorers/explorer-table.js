@@ -355,6 +355,9 @@ define([
 
 		_makeDropTarget: function(item, node, persistAndReplace) {
 			function dropFileEntry(entry, path, target, explorer, performDrop, fileClient) {
+				if (!target.Location && target.fileMetadata) {
+					target = target.fileMetadata;
+				}
 				path = path || "";
 				if (entry.isFile) {
 					// can't drop files directly into workspace.
