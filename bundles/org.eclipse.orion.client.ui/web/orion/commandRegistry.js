@@ -12,7 +12,6 @@
  /*global define document window Image */
  
 define([
-	'require',
 	'orion/commands',
 	'orion/explorers/navigationUtils',
 	'orion/PageUtil',
@@ -23,7 +22,7 @@ define([
 	'text!orion/webui/checkedmenuitem.html',
 	'text!orion/webui/dropdowntriggerbutton.html',
 	'text!orion/webui/submenutriggerbutton.html'
-], function(require, Commands, mNavUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, CheckedMenuItemFragment, DropdownButtonFragment, SubMenuButtonFragment) {
+], function(Commands, mNavUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, CheckedMenuItemFragment, DropdownButtonFragment, SubMenuButtonFragment) {
 
 	/**
 	 * Constructs a new command registry with the given options.
