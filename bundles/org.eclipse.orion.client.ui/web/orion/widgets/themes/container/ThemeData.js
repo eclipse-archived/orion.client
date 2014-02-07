@@ -24,6 +24,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme', 'orion/wid
 			return resultString + result;
 		}
 		
+		// TODO: what are these for? They just get overridden by ThemeData constructor
 		StyleSet.prototype.name = 'Orion';
 		StyleSet.prototype.navbar = '#404648';
 		StyleSet.prototype.button = '#EFEFEF';
@@ -45,7 +46,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme', 'orion/wid
 			
 			var orion = new StyleSet();
 			orion.name = 'Orion';
-			orion.navbar = '#404648';
+			orion.navbar = 'white'; // #404648 for dark banner
 			orion.button = '#EFEFEF';
 			orion.location = '#efefef';
 			orion.selection = 'FEC';

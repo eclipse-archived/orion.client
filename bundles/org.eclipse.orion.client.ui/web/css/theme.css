@@ -1,3 +1,7 @@
+/**
+ * Note: many styles defined in this file are dynamically overridden at page-load time by by ThemeSheetWriter.js and ThemeData.js
+ */
+
 /* Page color */
 
 .orionPage {
@@ -11,7 +15,7 @@
 .topRowBanner {
 	margin: 0;
 	border: 0;
-	background-color: rgb(51, 51, 51);
+	background-color: white;
 	height: 16px;
 	padding: 10px 3px 6px 2px;
 	display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */

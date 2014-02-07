@@ -14,7 +14,8 @@
 define(['orion/widgets/themes/ThemeClass'], 
 	function(ThemeClass) {
 		
-		var navbar = '#333';
+		// These values are used to override various themeable element -> color mappings provided by theme data.
+		var navbar = 'white';
 		var button = '#777777';
 		var location = '#EFEFEF';
 		var selection = 'FEC';
