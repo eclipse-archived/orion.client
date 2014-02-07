@@ -167,9 +167,10 @@ define([
 				commandRegistry.registerCommandContribution("dependencyCommands", "orion.project.dependency.disconnect", 2); //$NON-NLS-1$ //$NON-NLS-0$
 				commandRegistry.registerCommandContribution(fileActionsScope, "orion.project.create.readme", 5, "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 				
-				var position = 6;
+				var position = 0;
+				commandRegistry.addCommandGroup(fileActionsScope, "orion.newDependency", 6, messages["Dependency"], "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				ProjectCommands.getAddDependencyCommands(commandRegistry).forEach(function(command){
-					commandRegistry.registerCommandContribution(fileActionsScope, command.id, position++, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectDependencies"); //$NON-NLS-0$
+					commandRegistry.registerCommandContribution(fileActionsScope, command.id, position++, "orion.menuBarFileGroup/orion.newContentGroup/orion.newDependency"); //$NON-NLS-0$
 				});
 
 				var deployCommands = ProjectCommands.getDeployProjectCommands(commandRegistry);

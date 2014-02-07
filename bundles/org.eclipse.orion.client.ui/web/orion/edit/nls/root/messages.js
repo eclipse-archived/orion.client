@@ -67,5 +67,6 @@ define({
 	"Export": "Export", //$NON-NLS-1$ //$NON-NLS-0$
 	"OpenWith": "Open With", //$NON-NLS-1$ //$NON-NLS-0$
 	"OpenRelated": "Open Related", //$NON-NLS-1$ //$NON-NLS-0$
+	"Dependency": "Dependency", //$NON-NLS-1$ //$NON-NLS-0$
 	"UnnamedCommand": "Unnamed" //$NON-NLS-1$ //$NON-NLS-0$
 });
