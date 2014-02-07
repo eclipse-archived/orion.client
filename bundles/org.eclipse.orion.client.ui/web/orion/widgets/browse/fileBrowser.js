@@ -167,15 +167,6 @@ define([
 					return new Deferred().resolve(resource);
 				};
 			}
-			var editorContainer = document.createElement("div"); //$NON-NLS-0$
-			var editorOptions = {
-				parent: editorContainer,
-				syntaxHighlighter: this._syntaxHighlighter,
-				inputManager: this._inputManager,
-				preferences: this._preferences,
-				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
-			};
-			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				if(!evt.metadata || !evt.input) {
@@ -236,6 +227,15 @@ define([
 				evt.editor = this._editor;
 			}.bind(this));
 
+			var editorContainer = document.createElement("div"); //$NON-NLS-0$
+			var editorOptions = {
+				parent: editorContainer,
+				syntaxHighlighter: this._syntaxHighlighter,
+				inputManager: this._inputManager,
+				preferences: this._preferences,
+				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
+			};
+			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
 			if(this._showBranch) {
 				var branchSelectorContainer = document.createElement("div"); //$NON-NLS-0$
 				branchSelectorContainer.classList.add("resourceSelectorContainer"); //$NON-NLS-0$
