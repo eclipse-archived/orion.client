@@ -16,10 +16,14 @@ html,body {
 	outline: none;
 	border: 0;
 	margin: 0;
+	z-index: 2;
 }
 
 .shell-input .gcli-prompt {
-	max-width: 22px;
+	z-index: 0;
+}
+
+.shell-input .gcli-in-complete {
 	z-index: 1;
 }
 
