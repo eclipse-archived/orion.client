@@ -39,19 +39,21 @@ define([
 		category: "shell",
 		order: 10 // First link in Shell category
 	});
-	provider.registerService("orion.page.link.related", null, {
-		nameKey: "Shell",
-		id: "eclipse.shell.open",
-		tooltipKey: "Open Shell page",
-		nls: "orion/shell/nls/messages",
-		category: "shell",
-		order: 10, // same rank as the other related link, but these 2 links should never be rendered simultaneously, so OK.
-		validationProperties: [{
-			source: "NoTarget"
-		}],
-		uriTemplate: "{+OrionHome}/shell/shellPage.html#",
-		forceSingleItem: true
-	});
+
+//	// Removed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427617
+//	provider.registerService("orion.page.link.related", null, {
+//		nameKey: "Shell",
+//		id: "eclipse.shell.open",
+//		tooltipKey: "Open Shell page",
+//		nls: "orion/shell/nls/messages",
+//		category: "shell",
+//		order: 10, // same rank as the other related link, but these 2 links should never be rendered simultaneously, so OK.
+//		validationProperties: [{
+//			source: "NoTarget"
+//		}],
+//		uriTemplate: "{+OrionHome}/shell/shellPage.html#",
+//		forceSingleItem: true
+//	});
 
 	provider.connect();
 });

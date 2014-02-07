@@ -52,20 +52,22 @@ define([
 	});
 
 	// Primary navigation links
-//	provider.registerService("orion.page.link", null, {
-//		nameKey: "Editor",
-//		nls: "orion/nls/messages",
-//		tooltip: "Edit code",
-//		category: "edit",
-//		uriTemplate: "{+OrionHome}/edit/edit.html"
-//	});
-//	provider.registerService("orion.page.link", serviceImpl, {
-//		nameKey: "Shell",
-//		id: "orion.shell",
-//		nls: "orion/nls/messages",
-//		category: "shell",
-//		uriTemplate: "{+OrionHome}/shell/shellPage.html"
-//	});
+	provider.registerService("orion.page.link", null, {
+		nameKey: "EditorLinkWorkspace",
+		nls: "orion/nls/messages",
+		tooltip: "Edit code",
+		category: "edit",
+		default: true, // Only show if nothing more specific is available
+		uriTemplate: "{+OrionHome}/edit/edit.html"
+	});
+	provider.registerService("orion.page.link", serviceImpl, {
+		nameKey: "ShellLinkWorkspace",
+		id: "orion.shell",
+		nls: "orion/nls/messages",
+		category: "shell",
+		default: true,
+		uriTemplate: "{+OrionHome}/shell/shellPage.html"
+	});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Search",
 		id: "orion.Search",

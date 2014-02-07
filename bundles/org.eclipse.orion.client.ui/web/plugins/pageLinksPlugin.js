@@ -29,7 +29,7 @@ define([
 	// Categories for primary nav and related links
 	provider.registerService("orion.page.link.category", null, {
 		id: "edit",
-		nameKey: "Edit",
+		nameKey: "Editor",
 		nls: "orion/nls/messages",
 		imageClass: "core-sprite-edit",
 		order: 10
@@ -50,20 +50,22 @@ define([
 	});
 
 	// Primary navigation links
-//	provider.registerService("orion.page.link", null, {
-//		nameKey: "Editor",
-//		nls: "orion/nls/messages",
-//		tooltip: "Edit code",
-//		category: "edit",
-//		uriTemplate: "{+OrionHome}/edit/edit.html"
-//	});
-//	provider.registerService("orion.page.link", serviceImpl, {
-//		nameKey: "Shell",
-//		id: "orion.shell",
-//		nls: "orion/nls/messages",
-//		category: "shell",
-//		uriTemplate: "{+OrionHome}/shell/shellPage.html"
-//	});
+	provider.registerService("orion.page.link", null, {
+		nameKey: "EditorLinkWorkspace",
+		nls: "orion/nls/messages",
+		tooltip: "Edit code",
+		category: "edit",
+		"default": true, // Only show if nothing more specific is available
+		uriTemplate: "{+OrionHome}/edit/edit.html"
+	});
+	provider.registerService("orion.page.link", serviceImpl, {
+		nameKey: "ShellLinkWorkspace",
+		id: "orion.shell",
+		nls: "orion/nls/messages",
+		category: "shell",
+		"default": true, // Only show if nothing more specific is available
+		uriTemplate: "{+OrionHome}/shell/shellPage.html"
+	});
 	provider.registerService("orion.page.link", serviceImpl, {
 		nameKey: "Search",
 		id: "orion.Search",
@@ -91,19 +93,19 @@ define([
 	});
 	// TODO need related link that takes you to the "project root", but how to implement that?
 
-	// Generic link to editor when page has no target/file context (eg. Settings page)
-	provider.registerService("orion.page.link.related", null, {
-		id: "orion.editFromMetadataAlways",
-		nameKey: "EditorRelatedLinkTop",
-		nls: "orion/nls/messages",
-		tooltip: "Open Editor page",
-		category: "edit",
-		order: 10, // Make it first link in edit category
-		validationProperties: [{
-			source: "NoTarget"
-		}],
-		uriTemplate: "{+OrionHome}/edit/edit.html#"
-	});
+//	// Removed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427617
+//	provider.registerService("orion.page.link.related", null, {
+//		id: "orion.editFromMetadataAlways",
+//		nameKey: "EditorLinkWorkspace",
+//		nls: "orion/nls/messages",
+//		tooltip: "Open Editor page",
+//		category: "edit",
+//		order: 10, // Make it first link in edit category
+//		validationProperties: [{
+//			source: "NoTarget"
+//		}],
+//		uriTemplate: "{+OrionHome}/edit/edit.html#"
+//	});
 
 	provider.registerService("orion.page.link.user", null, {
 		id: "orion.help",

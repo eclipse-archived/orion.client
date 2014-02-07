@@ -249,10 +249,16 @@ define([
 				var menuitem = _self.getMenuItem(catId);
 				if (!menuitem)
 					return;
-				var bin = _self._getLinksBin(catId), length = bin.length;
+				var bin = _self._getLinksBin(catId).slice(), length = bin.length;
 				if (!length) {
 					// Empty category -- should not happen
 					return;
+				}
+				// If other links are present in this category, we do not render the default link
+				if (length > 1) {
+					bin = bin.filter(function(link) {
+						return !(link.source.default);
+					});
 				}
 				// First link becomes the icon link
 				var category = _self.categories.getCategory(catId);
