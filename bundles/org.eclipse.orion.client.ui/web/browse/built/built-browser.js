@@ -23093,7 +23093,6 @@ define('orion/selection',["orion/EventTarget", "orion/Deferred"], function(Event
  /*global define document window Image */
  
 define('orion/commandRegistry',[
-	'require',
 	'orion/commands',
 	'orion/explorers/navigationUtils',
 	'orion/PageUtil',
@@ -23104,7 +23103,7 @@ define('orion/commandRegistry',[
 	'text!orion/webui/checkedmenuitem.html',
 	'text!orion/webui/dropdowntriggerbutton.html',
 	'text!orion/webui/submenutriggerbutton.html'
-], function(require, Commands, mNavUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, CheckedMenuItemFragment, DropdownButtonFragment, SubMenuButtonFragment) {
+], function(Commands, mNavUtils, PageUtil, UIUtil, lib, mDropdown, mTooltip, CheckedMenuItemFragment, DropdownButtonFragment, SubMenuButtonFragment) {
 
 	/**
 	 * Constructs a new command registry with the given options.
@@ -34149,7 +34148,7 @@ define('orion/widgets/browse/fileBrowser',[
 			this._fileClient = options.fileClient;
 		} else if(options.serviceRegistry) {
 			this._fileClient = new mFileClient.FileClient(options.serviceRegistry);
-		} else {
+		} else if(!options.init){
 			this._fileClient = new mEmptyFileClient.FileClient();		
 		}
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
@@ -34165,7 +34164,6 @@ define('orion/widgets/browse/fileBrowser',[
 		this._showBranch = options.showBranch;
 		this._breadCrumbInHeader= options.breadCrumbInHeader;
 		this._showComponent = options.showComponent;
-		this._lastInputResource = null;
 		this._resourceChangeHandler = new ResourceChangeHandler();
 		this._resourceChangeHandler.addEventListener("resourceChanged", function(event){
 			if(!this._componentSelector || !event || !event.newResource || !event.newResource.selectorAllItems) {
@@ -34202,12 +34200,33 @@ define('orion/widgets/browse/fileBrowser',[
 			};
 			this._switchView(new mBrowseView.BrowseView(browseViewOptons));
 			
+			this._uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+			
+			window.addEventListener("hashchange", function() { //$NON-NLS-0$
+				this.refresh(PageUtil.hash());
+			}.bind(this));
+			if(this._fileClient) {
+				this.startup();
+			}
+		},
+		startup: function(serviceRegistry) {
+			if(serviceRegistry) {
+				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
+			}
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
 				contentTypeRegistry: this._contentTypeService
 			});
-			this._uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+			var editorContainer = document.createElement("div"); //$NON-NLS-0$
+			var editorOptions = {
+				parent: editorContainer,
+				syntaxHighlighter: this._syntaxHighlighter,
+				inputManager: this._inputManager,
+				preferences: this._preferences,
+				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
+			};
+			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				var metadata = evt.metadata;
@@ -34265,19 +34284,6 @@ define('orion/widgets/browse/fileBrowser',[
 				evt.editor = this._editor;
 			}.bind(this));
 
-			var editorContainer = document.createElement("div"); //$NON-NLS-0$
-			var editorOptions = {
-				parent: editorContainer,
-				syntaxHighlighter: this._syntaxHighlighter,
-				inputManager: this._inputManager,
-				preferences: this._preferences,
-				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
-			};
-			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
-			
-			window.addEventListener("hashchange", function() { //$NON-NLS-0$
-				this.refresh(PageUtil.hash());
-			}.bind(this));
 			if(this._showBranch) {
 				var branchSelectorContainer = document.createElement("div"); //$NON-NLS-0$
 				branchSelectorContainer.classList.add("resourceSelectorContainer"); //$NON-NLS-0$
@@ -34416,9 +34422,9 @@ define('orion/widgets/browse/fileBrowser',[
 			}
 		},
 		_calculateRootURL: function(workspaceRootURL) {
-			if(this._activeComponentLocation) {
+			if(this._activeComponentLocation && this._componentSelector) {
 				return this._activeComponentLocation;
-			} else if(this._activeBranchLocation) {
+			} else if(this._activeBranchLocation && this._branchSelector) {
 				return this._activeBranchLocation;
 			}
 			return workspaceRootURL;
@@ -36301,21 +36307,21 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		var plugins = {};
 		plugins[pluginURL.href] = {autostart: "started", lastModified: -1};
-		//plugins[pluginURL.href] = true;
+		this._fileBrowser = new mFileBrowser.FileBrowser({
+			parent: params.parentId,
+			showBranch: true,
+			repo: repo,
+			showComponent: showComponent,
+			rootName: params.rootName,
+			maxEditorLines: 300,
+			init: true
+		});
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
 			storage: {},
 			plugins: plugins
 		});
 		pluginRegistry.start().then(function() {
-			this._fileBrowser = new mFileBrowser.FileBrowser({
-				parent: params.parentId,
-				showBranch: true,
-				repo: repo,
-				showComponent: showComponent,
-				rootName: params.rootName,
-				maxEditorLines: 300,
-				serviceRegistry: serviceRegistry
-			});
+			this._fileBrowser.startup(serviceRegistry);
 		}.bind(this));
 	}
 
