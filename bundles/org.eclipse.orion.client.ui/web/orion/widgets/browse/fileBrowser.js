@@ -88,7 +88,6 @@ define([
 		this._showBranch = options.showBranch;
 		this._breadCrumbInHeader= options.breadCrumbInHeader;
 		this._showComponent = options.showComponent;
-		this._lastInputResource = null;
 		this._resourceChangeHandler = new ResourceChangeHandler();
 		this._resourceChangeHandler.addEventListener("resourceChanged", function(event){
 			if(!this._componentSelector || !event || !event.newResource || !event.newResource.selectorAllItems) {
@@ -339,9 +338,9 @@ define([
 			}
 		},
 		_calculateRootURL: function(workspaceRootURL) {
-			if(this._activeComponentLocation) {
+			if(this._activeComponentLocation && this._componentSelector) {
 				return this._activeComponentLocation;
-			} else if(this._activeBranchLocation) {
+			} else if(this._activeBranchLocation && this._branchSelector) {
 				return this._activeBranchLocation;
 			}
 			return workspaceRootURL;
