@@ -639,7 +639,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		
 		var addFolderCommand = new mCommands.Command({
 			name: "Associated Folder",
-			tooltip: "Add an associated folder from workspace",
+			tooltip: "Associate a folder from the workspace with this project.",
 			id: "orion.project.addFolder", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items).Project;
@@ -921,7 +921,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		
 		var addReadmeCommand = new mCommands.Command({
 			name: "Readme File",
-			tooltip: "Create README.md file in this project",
+			tooltip: "Create a README.md file in this project",
 			id: "orion.project.create.readme",
 			callback: function(data){
 				var item = forceSingleItem(data.items);
@@ -959,8 +959,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		commandService.addCommand(addReadmeCommand);
 		
 		var createBasicProjectCommand = new mCommands.Command({
-			name: "Basic Project",
-			tooltip: "Create an empty project",
+			name: "Basic",
+			tooltip: "Create an empty project.",
 			id: "orion.project.create.basic",
 			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
 			callback: function(data){
@@ -986,44 +986,10 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			);
 			createBasicProjectCommand.isCreateProject = true;
 			commandService.addCommand(createBasicProjectCommand);
-			
-			var createSftpProjectCommand = new mCommands.Command({
-				name: "Project from an SFTP Site",
-				tooltip: "Create a project from an SFTP site",
-				id: "orion.project.create.sftp",
-				parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		                                                               		new mCommandRegistry.CommandParameter('url', 'url', 'Url:')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				callback: function(data){
-						var name = data.parameters.valueFor("name");
-						if(!name){
-							return;
-						}
-						var url = data.parameters.valueFor("url");
-						if(!url){
-							return;
-						}
-						var item = forceSingleItem(data.items);
-						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
-							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name, ContentLocation: url}), "Creating project " + name).then(function(project){
-								dispatchNewProject(workspace, project);
-							});
-						});
-					},
-				visibleWhen: function(item) {
-						if (!explorer || !explorer.isCommandsVisible()) {
-							return false;
-						}
-						item = forceSingleItem(item);
-						return(!!item.Location);
-					}
-				}
-				);
-				createSftpProjectCommand.isCreateProject = true;
-				commandService.addCommand(createSftpProjectCommand);
 				
 			var createZipProjectCommand = new mCommands.Command({
-			name: "Project from a Zipped Folder",
-			tooltip: "Create project and fill it with data from local file",
+			name: "File System",
+			tooltip: "Create project from a local zipped file.",
 			id: "orion.project.create.fromfile",
 			parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter("name", "text", "Name: ")]),
 			callback: function(data){
@@ -1058,6 +1024,40 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			);
 			createZipProjectCommand.isCreateProject = true;
 			commandService.addCommand(createZipProjectCommand);
+			
+			var createSftpProjectCommand = new mCommands.Command({
+				name: "SFTP",
+				tooltip: "Create a project from an SFTP site.",
+				id: "orion.project.create.sftp",
+				parameters : new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', 'Name:'),  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		                                                               		new mCommandRegistry.CommandParameter('url', 'url', 'Url:')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				callback: function(data){
+						var name = data.parameters.valueFor("name");
+						if(!name){
+							return;
+						}
+						var url = data.parameters.valueFor("url");
+						if(!url){
+							return;
+						}
+						var item = forceSingleItem(data.items);
+						fileClient.loadWorkspace(fileClient.fileServiceRootURL(item.Location)).then(function(workspace) {
+							progress.progress(projectClient.createProject(workspace.ChildrenLocation, {Name: name, ContentLocation: url}), "Creating project " + name).then(function(project){
+								dispatchNewProject(workspace, project);
+							});
+						});
+					},
+				visibleWhen: function(item) {
+						if (!explorer || !explorer.isCommandsVisible()) {
+							return false;
+						}
+						item = forceSingleItem(item);
+						return(!!item.Location);
+					}
+				}
+				);
+				createSftpProjectCommand.isCreateProject = true;
+				commandService.addCommand(createSftpProjectCommand);
 			
 			projectCommandUtils.createDependencyCommands(serviceRegistry, commandService, fileClient, projectClient, dependencyTypes);
 			
