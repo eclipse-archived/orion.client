@@ -9,16 +9,6 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global require define console window URL*/
-
-require.config({
-	baseUrl: '..',
-	paths: {
-		text: 'requirejs/text',
-		i18n: 'requirejs/i18n',
-		domReady: 'requirejs/domReady'
-	}
-});
-
 define(["orion/plugin", "orion/Deferred", "plugins/filePlugin/GitHubFileImpl", "orion/URL-shim"], function(PluginProvider, Deferred, GitHubFileImpl) {
 
 	function trace(implementation) {

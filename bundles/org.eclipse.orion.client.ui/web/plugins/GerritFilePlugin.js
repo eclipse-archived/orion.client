@@ -9,16 +9,6 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global require define console window URL*/
-
-require.config({
-	baseUrl: '..',
-	paths: {
-		text: 'requirejs/text',
-		i18n: 'requirejs/i18n',
-		domReady: 'requirejs/domReady'
-	}
-});
-
 define(["orion/plugin", "orion/Deferred", "plugins/filePlugin/GerritFileImpl", "orion/URL-shim"], function(PluginProvider, Deferred, GerritFileImpl) {
 
 	function trace(implementation) {
