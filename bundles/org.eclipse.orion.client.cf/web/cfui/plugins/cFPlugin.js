@@ -326,27 +326,15 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 		},
 		
 		start: function(props) {
-			return this._retryWithLogin(props, this._start);
+			return this._retryWithLogin(props, this._start.bind(this));
 		},
 		
 		_start: function(props, deferred) {
+			var that = this;
 			if (props.Target && props.Name){
 				cFService.startApp(props.Target, props.Name).then(
 					function(result){
-						var instances = 0;
-						var runningInstances = 0;
-						for (var key in result) {
-							var instance = result[key];
-							instances++;
-							if (instance.state === "RUNNING")
-								runningInstances++;
-						}
-						
-						var app = result.entity;
-						deferred.resolve({
-							State: (runningInstances > 0 ? "STARTED": "STOPPED"),
-							Message: runningInstances + " of " + instances + " instance(s) running"
-						});
+						deferred.resolve(that._prepareAppStateMessage(result));
 					}, function(error){
 						if (error.HttpCode === 404){
 							deferred.resolve({
@@ -404,6 +392,24 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 				);
 				return deferred;
 			}
+		},
+		
+		_prepareAppStateMessage: function(appInstances){
+			var instances = 0;
+			var runningInstances = 0;
+			var flappingInstances = 0;
+			for (var key in appInstances) {
+				var instance = appInstances[key];
+				instances++;
+				if (instance.state === "RUNNING")
+					runningInstances++;
+				else if (instance.state === "FLAPPING")
+					flappingInstances++;
+			}
+			return {
+				State: (runningInstances > 0 ? "STARTED": "STOPPED"),
+				Message: runningInstances + "/" + instances + " instance(s) running" + (flappingInstances > 0 ? " : " + flappingInstances  + " flapping" : "")
+			};
 		}
 	}, {
 		name: "Deploy to Cloud Foundry",

@@ -110,7 +110,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				if (url) loginData.Url = url;
 				if (username) {
 					loginData.Username = username;
-					loginData.Password = password
+					loginData.Password = password;
 				}
 				
 				return this._xhrV1("POST", require.toUrl("cfapi/target"), loginData);
