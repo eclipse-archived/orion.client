@@ -64,7 +64,8 @@ define([
 		nameKey: "Sites",
 		nls: "orion/nls/messages",
 		imageClass: "core-sprite-sites",
-		order: 50
+		order: 50,
+		uriTemplate: "{+OrionHome}/sites/"
 	});
 
 	provider.registerService("orion.page.link", null, {

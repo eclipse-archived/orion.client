@@ -14,8 +14,10 @@
 define([
 	'orion/commands',
 	'orion/objects',
-	'orion/webui/littlelib'
-], function(mCommands, objects, lib) {
+	'orion/webui/littlelib',
+	'orion/PageLinks',
+	'orion/URITemplate'
+], function(mCommands, objects, lib, PageLinks, URITemplate) {
 
 	function SideMenu(parentNode, contentNode){
 		this.parentNode = lib.node(parentNode);
@@ -144,8 +146,9 @@ define([
 			return state;
 		},
 		createListItem: function(imageClassName, categoryId) {
-			var listItem = document.createElement( 'li' );
-			listItem.className = imageClassName + " sideMenuItem active";
+			var listItem = document.createElement( 'li' ); //$NON-NLS-0$
+			listItem.className = imageClassName;
+			listItem.classList.add("sideMenuItem"); //$NON-NLS-0$
 			listItem.categoryId = categoryId;
 			return listItem;
 		},
@@ -226,12 +229,24 @@ define([
 		},
 		_renderCategories: function() {
 			var categories = this.categories, _self = this;
+			var currentLocation = window.location.href;
+			var orionHome = PageLinks.getOrionHome();
+			var locationObject = {OrionHome: orionHome};
 			this.clearMenuItems();
 			categories.getCategoryIDs().map(function(catId) {
 				return categories.getCategory(catId);
 			}).sort(compareCategories).forEach(function(cat) {
 				if (_self._getLinksBin(cat.id).length > 0) { // do not render empty categories
 					_self.addMenuItem(cat.imageClass, cat.id);
+					
+					if (cat.uriTemplate) {
+						var uriTemplate = new URITemplate(cat.uriTemplate);
+						var expandedHref = uriTemplate.expand(locationObject);
+						if (0 === currentLocation.indexOf(expandedHref)) {
+							_self.menuitems[cat.id].classList.add("sideMenuItemActive"); //$NON-NLS-0$
+							_self._currentActiveCategory = cat;
+						}	
+					}
 				}
 			});
 		},
@@ -264,7 +279,7 @@ define([
 				var category = _self.categories.getCategory(catId);
 				var link = document.createElement("a");
 				link.href = bin[0].href;
-				link.className = category.imageClass + " active";
+				link.className = category.imageClass;
 				menuitem.classList.remove(category.imageClass);
 				menuitem.appendChild(link);
 

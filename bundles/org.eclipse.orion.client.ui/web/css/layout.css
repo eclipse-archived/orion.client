@@ -426,7 +426,7 @@ hard-coded numbers elsewhere.
 
 .sideMenu{
     width: 0;
-    background: #373737;
+    background: #4a4a4a;
 	float: left;
     position: absolute;
     top: 36px;
@@ -455,18 +455,19 @@ hard-coded numbers elsewhere.
 }
 
 .sideMenuList{
-	padding: 12px 0 12px 0;
+	margin: 0;
+	padding: 0;
 	display:inline-block !important;
 	width: 100%;
 	text-align: center;
 }
 
 .sideMenuItem{
+	border-bottom: 1px solid #444;
+	border-top: 1px solid transparent;
 	list-style-type: none;
-	padding: 0;
-	padding-bottom:15px;
+	padding: 12px 12px 15px 12px;
 	font-size:16px !important;
-	width: 100%;
 }
 
 .sideMenuItem:hover{
@@ -476,7 +477,7 @@ hard-coded numbers elsewhere.
 
 /* icon links */
 .sideMenuItem>a {
-	color: #ddd !important;
+	color: #bbb !important;
 	text-decoration:none !important;
 	width: 100%;
 	display: inline-block;
@@ -486,6 +487,16 @@ hard-coded numbers elsewhere.
 	color:white !important;
 }
 
+.sideMenuItemActive {
+	background: radial-gradient(circle 20px, #3a3a3a, #333);
+	border-top: 1px solid #555;
+	border-bottom: 1px solid #666;
+}
+
+.sideMenuItemActive > a {
+	color: white !important;
+}
+
 /* sub menus */
 .sideMenuSubMenu{
 	display: none;
@@ -493,7 +504,6 @@ hard-coded numbers elsewhere.
 	position:absolute;
 	font-family:sans-serif;
 	padding-left: 13px;
-	margin-left: -12px;
 	z-index:100;
 	text-align: left;
 }
@@ -503,7 +513,7 @@ hard-coded numbers elsewhere.
 	width: 100%;
 	white-space: nowrap;
 	font-size: 12px;
-    background: lightgrey;
+    background: white;
 	border-right:1px solid #bbb;
 }
 
@@ -513,12 +523,12 @@ hard-coded numbers elsewhere.
 	height: 0;
 	top: 5px;
 	content: "";
-	left: 6px;
+	left: 7px;
 	position: absolute;
 	z-index: 200;
 	border-top: 7px solid transparent;
 	border-bottom: 7px solid transparent;
-	border-right: 7px solid lightgrey;
+	border-right: 7px solid white;
 }
 
 .sideMenuSubMenuItem:first-child{
@@ -543,11 +553,11 @@ hard-coded numbers elsewhere.
 	background-color: #373737;
 }
 .sideMenuSubMenuItem:hover a {
-	color: #ddd;
+	color: white;
 }
 /* 2) Disable hover colors when submenu has only 1 item */
 .sideMenuSubMenuItem:only-child:hover {
-	background-color: lightgrey;
+	background-color: white;
 }
 .sideMenuSubMenuItem:only-child:hover a {
 	color: #333;
