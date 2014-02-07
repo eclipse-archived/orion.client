@@ -714,6 +714,7 @@ define('orion/edit/nls/root/messages',{
 	"saveOutOfSync": "Resource is out of sync with the server. Do you want to save it anyway?", //$NON-NLS-1$ //$NON-NLS-0$
 	"loadOutOfSync": "Resource is out of sync with the server. Do you want to load it anyway? This will overwrite your local changes.", //$NON-NLS-1$ //$NON-NLS-0$
 	"ReadingMetadata": "Reading metadata of ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"ReadingMetadataError": "Can not get metadata of ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"Reading": "Reading ${0}", //$NON-NLS-1$ //$NON-NLS-0$
 	"readonly": "Read Only.", //$NON-NLS-1$ //$NON-NLS-0$
 	"saveFile": "Save this file", //$NON-NLS-1$ //$NON-NLS-0$
@@ -753,7 +754,8 @@ define('orion/edit/nls/root/messages',{
 	"Import": "Import", //$NON-NLS-1$ //$NON-NLS-0$
 	"Export": "Export", //$NON-NLS-1$ //$NON-NLS-0$
 	"OpenWith": "Open With", //$NON-NLS-1$ //$NON-NLS-0$
-	"Extensions": "Extensions", //$NON-NLS-1$ //$NON-NLS-0$
+	"OpenRelated": "Open Related", //$NON-NLS-1$ //$NON-NLS-0$
+	"Dependency": "Dependency", //$NON-NLS-1$ //$NON-NLS-0$
 	"UnnamedCommand": "Unnamed" //$NON-NLS-1$ //$NON-NLS-0$
 });
 
@@ -1522,6 +1524,7 @@ define('orion/inputManager',[
 	function InputManager(options) {
 		EventTarget.attach(this);
 		this.serviceRegistry = options.serviceRegistry;
+		this.statusService = options.statusService;
 		this.fileClient = options.fileClient;
 		this.progressService = options.progressService;
 		this.contentTypeRegistry = options.contentTypeRegistry;
@@ -1607,6 +1610,8 @@ define('orion/inputManager',[
 					var statusService = null;
 					if(this.serviceRegistry) {
 						statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+					} else if(this.statusService) {
+						statusService = this.statusService;
 					}
 					handleError(statusService, error);
 					this._setNoInput();
@@ -1614,7 +1619,9 @@ define('orion/inputManager',[
 				this._acceptPatch = null;
 				// Read metadata
 				progress(this._read(metadataURI, true), messages.ReadingMetadata, metadataURI).then(function(metadata) {
-					if (metadata.Directory) {
+					if(!metadata) {
+						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, metadataURI)});
+					} else if (metadata.Directory) {
 						// Fetch children
 						progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI).then(function(contents) {
 							clearTimeout();
@@ -2741,7 +2748,7 @@ define('orion/navigate/nls/root/messages',{
 	"Open or close the left pane": "Open or close the left pane",
 	"Navigator": "Navigator",
 	"Strings Xtrnalizr": "Strings Xtrnalizr",
-	"Externalize Strings from JavaScript files in this folder": "Externalize Strings from JavaScript files in this folder",
+	"Externalize Strings from JavaScript files in this folder": "Externalize strings from JavaScript files in this folder.",
 	"Choose a Folder": "Choose a Folder",
 	"Copy of ${0}": "Copy of ${0}",
 	"Enter a new name for '${0}'": "Enter a new name for '${0}'",
@@ -2872,11 +2879,12 @@ define('orion/nls/root/messages',{
 	"Navigator": "Navigator",
 	"Sites": "Sites",
 	"Shell": "Shell",
+	"ShellLinkWorkspace": "Workspace Shell",
 	"Get Plugins": "Get Plugins",
 	"Global": "Global",
 	"Editor": "Editor",
 	"EditorRelatedLink": "Go To Folder",
-	"EditorRelatedLinkTop": "Workspace",
+	"EditorLinkWorkspace": "Go To Workspace",
 	"EditorRelatedLinkProj": "Go To Project Root",
 	"Filter bindings": "Filter bindings",
 	"Orion Editor": "Orion Editor",
@@ -2884,7 +2892,7 @@ define('orion/nls/root/messages',{
 	"Orion Markdown Viewer": "Orion Markdown Viewer",
 	"Orion JSON Editor": "Orion JSON Editor",
 	"View on Site": "View on Site",
-	"View this file or folder on a web site hosted by Orion": "View this file or folder on a web site hosted by Orion",
+	"View this file or folder on a web site hosted by Orion": "View this file or folder on a web site hosted by Orion.",
 	"Show a list of all the keybindings on this page": "Show a list of all the keybindings on this page",
 	"Show Keys": "Show Keys",
 	"Hide or show the page banner and footer": "Hide or show the page banner and footer",
@@ -25133,7 +25141,7 @@ define('orion/widgets/browse/browseView',[
 		 */
 		emptyCallback: function(bodyElement) {
 			if (this.explorer.readonly) {
-				this.explorer.folderViewer.updateMessageContents("This folder is empty.", ["emptyViewTable"]);
+				this.explorer.folderViewer.updateMessageContents("This folder is empty.", ["emptyViewTable"], null, true);
 				return;
 			}
 			mNavigatorRenderer.NavigatorRenderer.prototype.emptyCallback.call(this, bodyElement);
@@ -25314,7 +25322,7 @@ define('orion/widgets/browse/browseView',[
 						}
 						if(this.messageView) {
 							if(typeof this.messageView.message === "string") {
-								this.updateMessageContents(this.messageView.message, ["messageViewTable"]);
+								this.updateMessageContents(this.messageView.message, this.messageView.classes ? this.messageView.classes : ["messageViewTable"], this.messageView.tdClass);
 							}						
 						} else if(this.editorView) {//To embed an orion editor in the section
 							this.sectionContents.appendChild(this.editorView.getParent());
@@ -25378,7 +25386,7 @@ define('orion/widgets/browse/browseView',[
 			imageTable.appendChild(tr);
 			this.sectionContents.appendChild(imageTable);
 		},
-		updateMessageContents: function(message, messageClasses) {
+		updateMessageContents: function(message, messageClasses, tdClass, doNotEmpty) {
 			var messageTable = document.createElement("table");
 			if(messageClasses){
 				messageClasses.forEach( function(messageClass) {
@@ -25387,11 +25395,17 @@ define('orion/widgets/browse/browseView',[
 			}
 			var tr = document.createElement("tr");
 			var td = document.createElement("td"); 
+			if(tdClass) {
+				td.classList.add(tdClass);
+			}
 			var messageContent = document.createElement("div");
 			messageContent.appendChild(document.createTextNode(message));
 			td.appendChild(messageContent);
 			tr.appendChild(td);
 			messageTable.appendChild(tr);
+			if(!doNotEmpty) {
+				lib.empty(this.sectionContents);
+			}
 			this.sectionContents.appendChild(messageTable);
 		},
 		create: function() {
@@ -34118,6 +34132,22 @@ define('orion/widgets/browse/fileBrowser',[
 		//this.resourceSelector = options.resourceSelector;
 	}
 	
+	function statusService(fileBrowser){
+		this.fileBrowser = fileBrowser;
+	}
+	objects.mixin(statusService.prototype, {
+		setProgressResult: function(error){
+			if(this.fileBrowser._currentEditorView && this.fileBrowser._currentEditorView.messageView) {
+				this.fileBrowser._currentEditorView.updateMessageContents(error.Message, ["messageViewTable"], "errorMessageViewTable");
+			} else {
+				var browseViewOptons = {
+					parent: this.fileBrowser._parentDomNode,
+					messageView: {message: error.Message, classes: ["messageViewTable"], tdClass: "errorMessageViewTable"}
+				};
+				this.fileBrowser._switchView(new mBrowseView.BrowseView(browseViewOptons));
+			}
+		}
+	});
 	/**
 	 * @class This object describes the options for the readonly file system browser.
 	 * <p>
@@ -34161,6 +34191,7 @@ define('orion/widgets/browse/fileBrowser',[
 		}
 		this._preferences = options.preferences;//Optional
 		this.rootName = options.rootName;
+		this.shouldLoadWorkSpace = options.shouldLoadWorkSpace;
 		this._showBranch = options.showBranch;
 		this._breadCrumbInHeader= options.breadCrumbInHeader;
 		this._showComponent = options.showComponent;
@@ -34198,6 +34229,7 @@ define('orion/widgets/browse/fileBrowser',[
 				parent: this._parentDomNode,
 				messageView: {message: "Loading..."}
 			};
+			this._statusService = new statusService(this);
 			this._switchView(new mBrowseView.BrowseView(browseViewOptons));
 			
 			this._uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
@@ -34216,8 +34248,15 @@ define('orion/widgets/browse/fileBrowser',[
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
+				statusService: this._statusService,
 				contentTypeRegistry: this._contentTypeService
 			});
+			//We have to overide the inputManager's function here if the widget does not need to call loadWorkSpace on file service.
+			if(!this.shouldLoadWorkSpace){
+				this._inputManager._maybeLoadWorkspace = function(resource) {
+					return new Deferred().resolve(resource);
+				};
+			}
 			var editorContainer = document.createElement("div"); //$NON-NLS-0$
 			var editorOptions = {
 				parent: editorContainer,
@@ -34229,6 +34268,9 @@ define('orion/widgets/browse/fileBrowser',[
 			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+				if(!evt.metadata || !evt.input) {
+					return;
+				}
 				var metadata = evt.metadata;
 				if(this._branches && this._branchSelector){
 					var activeBranchName = this._branches[0].Name;
