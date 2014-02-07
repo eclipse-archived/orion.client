@@ -188,7 +188,9 @@ define([
 				this._acceptPatch = null;
 				// Read metadata
 				progress(this._read(metadataURI, true), messages.ReadingMetadata, metadataURI).then(function(metadata) {
-					if (metadata.Directory) {
+					if(!metadata) {
+						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, metadataURI)});
+					} else if (metadata.Directory) {
 						// Fetch children
 						progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI).then(function(contents) {
 							clearTimeout();

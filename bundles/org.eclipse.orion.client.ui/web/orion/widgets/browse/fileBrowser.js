@@ -42,6 +42,22 @@ define([
 		//this.resourceSelector = options.resourceSelector;
 	}
 	
+	function statusService(fileBrowser){
+		this.fileBrowser = fileBrowser;
+	}
+	objects.mixin(statusService.prototype, {
+		setProgressResult: function(error){
+			if(this.fileBrowser._currentEditorView && this.fileBrowser._currentEditorView.messageView) {
+				this.fileBrowser._currentEditorView.updateMessageContents(error.Message, ["messageViewTable"], "errorMessageViewTable");
+			} else {
+				var browseViewOptons = {
+					parent: this.fileBrowser._parentDomNode,
+					messageView: {message: error.Message, classes: ["messageViewTable"], tdClass: "errorMessageViewTable"}
+				};
+				this.fileBrowser._switchView(new mBrowseView.BrowseView(browseViewOptons));
+			}
+		}
+	});
 	/**
 	 * @class This object describes the options for the readonly file system browser.
 	 * <p>
@@ -123,6 +139,7 @@ define([
 				parent: this._parentDomNode,
 				messageView: {message: "Loading..."}
 			};
+			this._statusService = new statusService(this);
 			this._switchView(new mBrowseView.BrowseView(browseViewOptons));
 			
 			this._uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
@@ -141,6 +158,7 @@ define([
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
+				statusService: this._statusService,
 				contentTypeRegistry: this._contentTypeService
 			});
 			//We have to overide the inputManager's function here if the widget does not need to call loadWorkSpace on file service.
@@ -160,6 +178,9 @@ define([
 			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
+				if(!evt.metadata || !evt.input) {
+					return;
+				}
 				var metadata = evt.metadata;
 				if(this._branches && this._branchSelector){
 					var activeBranchName = this._branches[0].Name;

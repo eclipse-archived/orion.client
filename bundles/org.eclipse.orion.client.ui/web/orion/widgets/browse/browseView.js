@@ -269,7 +269,7 @@ define([
 						}
 						if(this.messageView) {
 							if(typeof this.messageView.message === "string") {
-								this.updateMessageContents(this.messageView.message, ["messageViewTable"]);
+								this.updateMessageContents(this.messageView.message, this.messageView.classes ? this.messageView.classes : ["messageViewTable"], this.messageView.tdClass);
 							}						
 						} else if(this.editorView) {//To embed an orion editor in the section
 							this.sectionContents.appendChild(this.editorView.getParent());
@@ -331,9 +331,10 @@ define([
 			td.appendChild(imageContent);
 			tr.appendChild(td);
 			imageTable.appendChild(tr);
+			lib.empty(this.sectionContents);
 			this.sectionContents.appendChild(imageTable);
 		},
-		updateMessageContents: function(message, messageClasses) {
+		updateMessageContents: function(message, messageClasses, tdClass) {
 			var messageTable = document.createElement("table");
 			if(messageClasses){
 				messageClasses.forEach( function(messageClass) {
@@ -342,11 +343,15 @@ define([
 			}
 			var tr = document.createElement("tr");
 			var td = document.createElement("td"); 
+			if(tdClass) {
+				td.classList.add(tdClass);
+			}
 			var messageContent = document.createElement("div");
 			messageContent.appendChild(document.createTextNode(message));
 			td.appendChild(messageContent);
 			tr.appendChild(td);
 			messageTable.appendChild(tr);
+			lib.empty(this.sectionContents);
 			this.sectionContents.appendChild(messageTable);
 		},
 		create: function() {

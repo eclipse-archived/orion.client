@@ -147,6 +147,11 @@ a.currentLocation:hover {
     min-height: 64px;
 }
 
+.errorMessageViewTable {
+	font-weight: bold;
+	color: #b94a48 !important;
+}
+
 .emptyViewTable {
 	padding-left: 1px;
     width:100%;
