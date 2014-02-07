@@ -401,5 +401,7 @@ define({
 	"git url:": "git url: ",
 	"Revert": "Revert",
 	"Revert changes introduced by the commit into your active branch": "Revert changes introduced by the commit into your active branch",
-	". Could not revert into active branch": ". Could not revert into active branch"
+	". Could not revert into active branch": ". Could not revert into active branch",
+	"Login": "Login",
+	"Authentication required for: ${0}. ${1} and re-try the request.": "Authentication required for: ${0}. ${1} and re-try the request."
 });
