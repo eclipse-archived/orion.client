@@ -466,8 +466,8 @@ hard-coded numbers elsewhere.
 	border-bottom: 1px solid #444;
 	border-top: 1px solid transparent;
 	list-style-type: none;
-	padding: 12px 12px 15px 12px;
 	font-size:16px !important;
+	padding: 0;
 }
 
 .sideMenuItem:hover{
@@ -481,6 +481,7 @@ hard-coded numbers elsewhere.
 	text-decoration:none !important;
 	width: 100%;
 	display: inline-block;
+	padding: 9px 0px 12px 0px;
 }
 .sideMenuItem>a:hover{
 	text-decoration:none;
@@ -503,9 +504,10 @@ hard-coded numbers elsewhere.
 	list-style-type:none;
 	position:absolute;
 	font-family:sans-serif;
-	padding-left: 13px;
+	padding-left: 0;
 	z-index:100;
 	text-align: left;
+	left: 40px;
 }
 
 .sideMenuSubMenuItem{
@@ -521,9 +523,9 @@ hard-coded numbers elsewhere.
 .sideMenuSubMenuItem:before {
 	width: 0;
 	height: 0;
-	top: 5px;
+	top: 13px;
 	content: "";
-	left: 7px;
+	left: -7px;
 	position: absolute;
 	z-index: 200;
 	border-top: 7px solid transparent;
@@ -544,7 +546,7 @@ hard-coded numbers elsewhere.
 .sideMenuSubMenuItem a {
 	display: inline-block;
 	color: #333;
-	padding: 10px 30px 10px 10px;
+	padding: 12px 30px 12px 10px;
 	width: calc(100% - 30px - 10px + 8px); /* clamp to container's width, plus 5px fudge factor */
 }
 
