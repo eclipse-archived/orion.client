@@ -15,20 +15,22 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 	var pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=https://github.com/eclipse/orion.client.git&token=3bbaae0679391edd086b665627fbbe5b7168ff50", window.location.href);
 	var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 	var plugins = {};
-	plugins[pluginURL.href] = true;
+	plugins[pluginURL.href] = {autostart: "started", lastModified: -1};
 	var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
 		storage: {},
 		plugins: plugins
 	});
+	var fileBrowser = new mFileBrowser.FileBrowser({
+		parent: "fileBrowser", 
+		showBranch: true,
+		init: true,
+		//showComponent: true,
+		//rootName: "RootName",
+		//breadCrumbInHeader: true,
+		maxEditorLines: 300
+	});
 	pluginRegistry.start().then(function() {
-		var fileBrowser = new mFileBrowser.FileBrowser({
-			parent: "fileBrowser", 
-			showBranch: true,
-			//showComponent: true,
-			//rootName: "RootName",
-			maxEditorLines: 100,
-			serviceRegistry: serviceRegistry
-		});
+		fileBrowser.startup(serviceRegistry);
 	});
 });
 

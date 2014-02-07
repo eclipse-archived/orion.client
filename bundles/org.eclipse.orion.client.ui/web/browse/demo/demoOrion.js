@@ -19,6 +19,10 @@ define([
 	mBootstrap.startup().then(function(core) {
 		var fBrowser = new mFileBrowser.FileBrowser({
 			parent: "fileBrowser", 
+			shouldLoadWorkSpace: true,
+			breadCrumbInHeader: true,
+			//showBranch: true,
+			//showComponent: true,
 			//maxEditorHeight: 800,
 			fileClient: new mFileClient.FileClient(core.serviceRegistry)
 		}); 

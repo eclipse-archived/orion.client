@@ -93,6 +93,7 @@ define([
 	function InputManager(options) {
 		EventTarget.attach(this);
 		this.serviceRegistry = options.serviceRegistry;
+		this.statusService = options.statusService;
 		this.fileClient = options.fileClient;
 		this.progressService = options.progressService;
 		this.contentTypeRegistry = options.contentTypeRegistry;
@@ -178,6 +179,8 @@ define([
 					var statusService = null;
 					if(this.serviceRegistry) {
 						statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+					} else if(this.statusService) {
+						statusService = this.statusService;
 					}
 					handleError(statusService, error);
 					this._setNoInput();

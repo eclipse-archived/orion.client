@@ -85,6 +85,7 @@ define([
 		}
 		this._preferences = options.preferences;//Optional
 		this.rootName = options.rootName;
+		this.shouldLoadWorkSpace = options.shouldLoadWorkSpace;
 		this._showBranch = options.showBranch;
 		this._breadCrumbInHeader= options.breadCrumbInHeader;
 		this._showComponent = options.showComponent;
@@ -142,6 +143,12 @@ define([
 				statusReporter: this._statusReport,
 				contentTypeRegistry: this._contentTypeService
 			});
+			//We have to overide the inputManager's function here if the widget does not need to call loadWorkSpace on file service.
+			if(!this.shouldLoadWorkSpace){
+				this._inputManager._maybeLoadWorkspace = function(resource) {
+					return new Deferred().resolve(resource);
+				};
+			}
 			var editorContainer = document.createElement("div"); //$NON-NLS-0$
 			var editorOptions = {
 				parent: editorContainer,
