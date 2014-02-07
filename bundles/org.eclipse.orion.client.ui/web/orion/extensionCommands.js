@@ -523,7 +523,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 		return extensionCommandUtils.createFileCommands(serviceRegistry, null, navCommands, openWithCommands, commandRegistry).then(function(fileCommands) {
 			if (commandGroup && (0 < fileCommands.length)) {
 				commandRegistry.addCommandGroup(toolbarId, "eclipse.openWith", 1000, messages["OpenWith"], commandGroup, null, null, null, "dropdownSelection"); ///$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.addCommandGroup(toolbarId, "eclipse.fileCommandExtensions", 1000, messages["Extensions"], commandGroup); //$NON-NLS-0$
+				commandRegistry.addCommandGroup(toolbarId, "eclipse.fileCommandExtensions", 1000, messages["OpenRelated"], commandGroup); //$NON-NLS-0$
 			}
 			fileCommands.forEach(function(command) {
 				var group = null;	

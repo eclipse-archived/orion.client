@@ -48,7 +48,7 @@ define({
 	"The service identifier": "The service identifier",
 	"disabled": "disabled",
 	"Open Shell": "Open Shell",
-	"Open Shell page": "Open Shell page",
+	"Open Shell page": "Open the Shell page with this folder as the current directory.",
 	"'${0}' already exists": "'${0}' already exists",
 	"Source file service does not support binary read": "Source file service does not support binary read",
 	"Target file service does not support binary write": "Target file service does not support binary write",

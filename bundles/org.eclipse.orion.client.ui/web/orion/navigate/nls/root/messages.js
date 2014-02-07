@@ -16,7 +16,7 @@ define({
 	"Open or close the left pane": "Open or close the left pane",
 	"Navigator": "Navigator",
 	"Strings Xtrnalizr": "Strings Xtrnalizr",
-	"Externalize Strings from JavaScript files in this folder": "Externalize Strings from JavaScript files in this folder",
+	"Externalize Strings from JavaScript files in this folder": "Externalize strings from JavaScript files in this folder.",
 	"Choose a Folder": "Choose a Folder",
 	"Copy of ${0}": "Copy of ${0}",
 	"Enter a new name for '${0}'": "Enter a new name for '${0}'",

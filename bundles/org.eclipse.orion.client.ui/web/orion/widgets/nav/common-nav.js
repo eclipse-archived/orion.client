@@ -308,7 +308,7 @@ define([
 			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.commonNavContextMenuEditGroup", 100, null, null, null, null, null, "dropdownSelection"); //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.New", 0, messages["New"], "orion.commonNavContextMenuEditGroup", null, null, null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.OpenWith", 1001, messages["OpenWith"], "orion.commonNavContextMenuEditGroup", null, null, null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.Extensions", 1002, messages["Extensions"], "orion.commonNavContextMenuEditGroup", null, null, null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.Extensions", 1002, messages["OpenRelated"], "orion.commonNavContextMenuEditGroup", null, null, null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.ImportGroup", 1003, messages["Import"], "orion.commonNavContextMenuEditGroup", null, null, null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$			
 			commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.ExportGroup", 1004, messages["Export"], "orion.commonNavContextMenuEditGroup", null, null, null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$			
 
@@ -335,7 +335,7 @@ define([
 			commandRegistry.registerCommandContribution(contextMenuActionsScope, "eclipse.exportSFTPCommand", 2, "orion.commonNavContextMenuEditGroup/orion.ExportGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			commandRegistry.addCommandGroup(viewActionsScope, "eclipse.openWith", 1000, messages["OpenWith"], "orion.menuBarViewGroup", null, null, null, "dropdownSelection"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandRegistry.addCommandGroup(viewActionsScope, "eclipse.fileCommandExtensions", 1000, messages["Extensions"], "orion.menuBarViewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+			commandRegistry.addCommandGroup(viewActionsScope, "eclipse.fileCommandExtensions", 1000, messages["OpenRelated"], "orion.menuBarViewGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 							
 			ExtensionCommands.getOpenWithCommands(commandRegistry).forEach(function(command){
 				commandRegistry.registerCommandContribution(viewActionsScope, command.id, 1, "orion.menuBarViewGroup/eclipse.openWith"); //$NON-NLS-0$

@@ -91,7 +91,7 @@ define({
 	"Save the current search": "Save the current search",
 	"Type filter text": "Type filter text",
 	"Scope Search": "Scope Search",
-	"Open in Search page for this directory": "Open in Search page for this directory",
+	"Open in Search page for this directory": "Open the Search page for this folder.",
 	"${0}. Try your search again.": "${0}. Try your search again.",
 	"Click or use delete key to delete the search term": "Click or use delete key to delete the search term",
 	"${0} matches": "${0} matches",
