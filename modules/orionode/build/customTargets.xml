@@ -164,14 +164,14 @@ lastMapTag=${mapsTagTag}
 	</macrodef>
 
 	<target name="updateHTML" >
-		<condition property="builtResult" value="require([&quot;built-${name}.js&quot;]);" else="require([&quot;${name}.js&quot;]);" >
+		<condition property="builtResult" value="built-${name}" else="${name}" >
 			<length file="${minifiedScript}" when="greater" length="0" />
 		</condition>
-		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="require([&quot;${name}.js&quot;]);" value="${builtResult}" />
-		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="require([&apos;${name}.js&apos;]);" value="${builtResult}" />
+		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="require([&quot;${name}.js&quot;]);" value="require([&quot;${builtResult}.js&quot;]);" />
+		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="require([&apos;${name}.js&apos;]);" value="require([&quot;${builtResult}.js&quot;]);" />
 		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="requirejs/require.js" value="requirejs/require.min.js" />
-		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="data-main=&quot;${name}.js&quot;" value="data-main=&quot;built-${name}.js&quot;" />
-		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="data-main=&apos;${name}.js&apos;" value="data-main=&quot;built-${name}.js&quot;" />		
+		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="data-main=&quot;${name}.js&quot;" value="data-main=&quot;${builtResult}.js&quot;" />
+		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="data-main=&apos;${name}.js&apos;" value="data-main=&quot;${builtResult}.js&quot;" />
 	</target>
 
 	<target name="requirejs" if="requirejsHome" >
