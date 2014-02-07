@@ -88,7 +88,7 @@ define([
 		 */
 		emptyCallback: function(bodyElement) {
 			if (this.explorer.readonly) {
-				this.explorer.folderViewer.updateMessageContents("This folder is empty.", ["emptyViewTable"]);
+				this.explorer.folderViewer.updateMessageContents("This folder is empty.", ["emptyViewTable"], null, true);
 				return;
 			}
 			mNavigatorRenderer.NavigatorRenderer.prototype.emptyCallback.call(this, bodyElement);
@@ -331,10 +331,9 @@ define([
 			td.appendChild(imageContent);
 			tr.appendChild(td);
 			imageTable.appendChild(tr);
-			lib.empty(this.sectionContents);
 			this.sectionContents.appendChild(imageTable);
 		},
-		updateMessageContents: function(message, messageClasses, tdClass) {
+		updateMessageContents: function(message, messageClasses, tdClass, doNotEmpty) {
 			var messageTable = document.createElement("table");
 			if(messageClasses){
 				messageClasses.forEach( function(messageClass) {
@@ -351,7 +350,9 @@ define([
 			td.appendChild(messageContent);
 			tr.appendChild(td);
 			messageTable.appendChild(tr);
-			lib.empty(this.sectionContents);
+			if(!doNotEmpty) {
+				lib.empty(this.sectionContents);
+			}
 			this.sectionContents.appendChild(messageTable);
 		},
 		create: function() {
