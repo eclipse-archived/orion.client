@@ -370,14 +370,30 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			var td = document.createElement("td");
 			if(item.ServiceId){
 				this.projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
-					if(service && service.logLocationTemplate){
+					if(!service){
+						return;
+					}
+					if(service.getLogLocationTemplate){
+						service.getLogLocationTemplate(item).then(function(template){
+							if(!template){
+								return;
+							}
+						var a = document.createElement("a");
+						var uriTemplate = new URITemplate(template);
+						var params = objects.clone(item.Params);
+						objects.mixin(params, {OrionHome : PageLinks.getOrionHome()});
+						a.href = uriTemplate.expand(params);
+						a.appendChild(document.createTextNode("Logs"));
+						td.appendChild(a);							
+						});
+					} else if(service.logLocationTemplate){
 						var a = document.createElement("a");
 						var uriTemplate = new URITemplate(service.logLocationTemplate);
 						var params = objects.clone(item.Params);
 						objects.mixin(params, {OrionHome : PageLinks.getOrionHome()});
 						a.href = uriTemplate.expand(params);
 						a.appendChild(document.createTextNode("Logs"));
-						td.appendChild(a);						
+						td.appendChild(a);
 					}
 				});
 			}
@@ -443,7 +459,13 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 							for(var i=0; i<td.classList.length; i++){
 								newTd.classList.toggle(td.classList[i], true);
 							}
+							var oldLogsColumn = td.previousSibling;
 							tableRow.replaceChild(newTd, td);
+							var newLogsColumn = this.getCellElement(col_no-1, item, tableRow);
+							for(var i=0; i<oldLogsColumn.classList.length; i++){
+								newLogsColumn.classList.toggle(oldLogsColumn.classList[i], true);
+							}
+							tableRow.replaceChild(newLogsColumn, oldLogsColumn);
 							return;
 						}.bind(this), function(error){
 							item.status = {error: error};
@@ -451,7 +473,13 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 							for(var i=0; i<td.classList.length; i++){
 								newTd.classList.toggle(td.classList[i], true);
 							}
+							var oldLogsColumn = td.previousSibling;
 							tableRow.replaceChild(newTd, td);
+							var newLogsColumn = this.getCellElement(col_no-1, item, tableRow);
+							for(var i=0; i<oldLogsColumn.classList.length; i++){
+								newLogsColumn.classList.toggle(oldLogsColumn.classList[i], true);
+							}
+							tableRow.replaceChild(newLogsColumn, oldLogsColumn);
 							return;
 						}.bind(this));
 					} else {

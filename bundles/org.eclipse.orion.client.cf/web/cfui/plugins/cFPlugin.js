@@ -288,7 +288,13 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 			
 			return deferred;
 		},
-
+		getLogLocationTemplate: function(props){
+			if(props.status && props.status.State === "STARTED"){
+				return "{+OrionHome}/cfui/logs.html#{Name,Target*}";
+			} else {
+				return null;
+			}
+		},
 		getState: function(props) {
 			return this._retryWithLogin(props, this._getState);
 		},
@@ -415,8 +421,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 		name: "Deploy to Cloud Foundry",
 		id: "org.eclipse.orion.client.cf.deploy",
 		tooltip: "Deploy application in cloud.",
-		validationProperties: [{source: "NoShow" }],
-		logLocationTemplate: "{+OrionHome}/cfui/logs.html#{Name,Target*}"
+		validationProperties: [{source: "NoShow" }]
 	});
 	
 	/////////////////////////////////////////////////////
