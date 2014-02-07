@@ -33429,10 +33429,113 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 
 /*global define*/
 
-define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/text_css/syntax", "orion/editor/stylers/text_x-php/syntax"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	function(mLib, mJS, mCSS, mPHP) {
+define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib/syntax"], function(mLib) { //$NON-NLS-1$ //$NON-NLS-0$
 
-	var grammars = mLib.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mPHP.grammars);
+	var grammars = mLib.grammars;
+	grammars.push({
+		id: "orion.xml",
+		contentTypes: ["application/xml", "application/xhtml+xml"],
+		patterns: [
+			{
+				include: "#comment"
+			}, {
+				include: "#xmlDeclaration"
+			}, {
+				begin: "<!(?:doctype|DOCTYPE)",
+				end: ">",
+				captures: {
+					0: {name: "entity.name.tag.doctype.xml"},
+				},
+				patterns: [
+					{
+						include: "#comment"
+					}, {
+						include: "orion.lib#string_doubleQuote"
+					}, {
+						include: "orion.lib#string_singleQuote"
+					}
+				],
+				name: "meta.tag.doctype.xml",
+			}, {
+				begin: "</?[A-Za-z0-9]+",
+				end: "/?>",
+				captures: {
+					0: {name: "entity.name.tag.xml"},
+				},
+				name: "meta.tag.xml",
+				patterns: [
+					{
+						include: "#comment"
+					}, {
+						include: "orion.lib#string_doubleQuote"
+					}, {
+						include: "orion.lib#string_singleQuote"
+					}
+				]
+			}, {
+				match: "&lt;|&gt;|&amp;",
+				name: "constant.character"
+			}
+		],
+		repository: {
+			comment: {
+				begin: "<!--",
+				end: "-->",
+				name: "comment.block.xml",
+				patterns: [
+					{
+						match: "(\\b)(TODO)(\\b)(((?!-->).)*)",
+						name: "meta.annotation.task.todo",
+						captures: {
+							2: {name: "keyword.other.documentation.task"},
+							4: {name: "comment.line"}
+						}
+					}
+				]
+			},
+			xmlDeclaration: {
+				begin: "<\\?xml",
+				end: "\\?>",
+				captures: {
+					0: {name: "entity.name.tag.declaration.xml"},
+				},
+				patterns: [
+					{
+						include: "#comment"
+					}, {
+						include: "orion.lib#string_doubleQuote"
+					}, {
+						include: "orion.lib#string_singleQuote"
+					}
+				],
+				name: "meta.tag.declaration.xml"
+			}
+		}
+	});
+	return {
+		id: grammars[grammars.length - 1].id,
+		grammars: grammars,
+		keywords: []
+	};
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2014 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
+
+/*global define*/
+
+define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/text_css/syntax", "orion/editor/stylers/text_x-php/syntax", "orion/editor/stylers/application_xml/syntax"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	function(mLib, mJS, mCSS, mPHP, mXML) {
+
+	var grammars = mLib.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mPHP.grammars).concat(mXML.grammars);
 	grammars.push({
 		id: "orion.html",
 		contentTypes: ["text/html"],
@@ -34257,15 +34360,6 @@ define('orion/widgets/browse/fileBrowser',[
 					return new Deferred().resolve(resource);
 				};
 			}
-			var editorContainer = document.createElement("div"); //$NON-NLS-0$
-			var editorOptions = {
-				parent: editorContainer,
-				syntaxHighlighter: this._syntaxHighlighter,
-				inputManager: this._inputManager,
-				preferences: this._preferences,
-				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
-			};
-			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				if(!evt.metadata || !evt.input) {
@@ -34326,6 +34420,15 @@ define('orion/widgets/browse/fileBrowser',[
 				evt.editor = this._editor;
 			}.bind(this));
 
+			var editorContainer = document.createElement("div"); //$NON-NLS-0$
+			var editorOptions = {
+				parent: editorContainer,
+				syntaxHighlighter: this._syntaxHighlighter,
+				inputManager: this._inputManager,
+				preferences: this._preferences,
+				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
+			};
+			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
 			if(this._showBranch) {
 				var branchSelectorContainer = document.createElement("div"); //$NON-NLS-0$
 				branchSelectorContainer.classList.add("resourceSelectorContainer"); //$NON-NLS-0$
