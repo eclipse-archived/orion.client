@@ -89,21 +89,21 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		var serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		var plugins = {};
 		plugins[pluginURL.href] = {autostart: "started", lastModified: -1};
-		//plugins[pluginURL.href] = true;
+		this._fileBrowser = new mFileBrowser.FileBrowser({
+			parent: params.parentId,
+			showBranch: true,
+			repo: repo,
+			showComponent: showComponent,
+			rootName: params.rootName,
+			maxEditorLines: 300,
+			init: true
+		});
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {
 			storage: {},
 			plugins: plugins
 		});
 		pluginRegistry.start().then(function() {
-			this._fileBrowser = new mFileBrowser.FileBrowser({
-				parent: params.parentId,
-				showBranch: true,
-				repo: repo,
-				showComponent: showComponent,
-				rootName: params.rootName,
-				maxEditorLines: 300,
-				serviceRegistry: serviceRegistry
-			});
+			this._fileBrowser.startup(serviceRegistry);
 		}.bind(this));
 	}
 

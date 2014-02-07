@@ -72,7 +72,7 @@ define([
 			this._fileClient = options.fileClient;
 		} else if(options.serviceRegistry) {
 			this._fileClient = new mFileClient.FileClient(options.serviceRegistry);
-		} else {
+		} else if(!options.init){
 			this._fileClient = new mEmptyFileClient.FileClient();		
 		}
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
@@ -124,12 +124,33 @@ define([
 			};
 			this._switchView(new mBrowseView.BrowseView(browseViewOptons));
 			
+			this._uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+			
+			window.addEventListener("hashchange", function() { //$NON-NLS-0$
+				this.refresh(PageUtil.hash());
+			}.bind(this));
+			if(this._fileClient) {
+				this.startup();
+			}
+		},
+		startup: function(serviceRegistry) {
+			if(serviceRegistry) {
+				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
+			}
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
 				contentTypeRegistry: this._contentTypeService
 			});
-			this._uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+			var editorContainer = document.createElement("div"); //$NON-NLS-0$
+			var editorOptions = {
+				parent: editorContainer,
+				syntaxHighlighter: this._syntaxHighlighter,
+				inputManager: this._inputManager,
+				preferences: this._preferences,
+				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
+			};
+			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
 			
 			this._inputManager.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 				var metadata = evt.metadata;
@@ -187,19 +208,6 @@ define([
 				evt.editor = this._editor;
 			}.bind(this));
 
-			var editorContainer = document.createElement("div"); //$NON-NLS-0$
-			var editorOptions = {
-				parent: editorContainer,
-				syntaxHighlighter: this._syntaxHighlighter,
-				inputManager: this._inputManager,
-				preferences: this._preferences,
-				statusReporter: function(message, type, isAccessible) {this._statusReport(message, type, isAccessible);}.bind(this)
-			};
-			this._editorView = new mReadonlyEditorView.ReadonlyEditorView(editorOptions);
-			
-			window.addEventListener("hashchange", function() { //$NON-NLS-0$
-				this.refresh(PageUtil.hash());
-			}.bind(this));
 			if(this._showBranch) {
 				var branchSelectorContainer = document.createElement("div"); //$NON-NLS-0$
 				branchSelectorContainer.classList.add("resourceSelectorContainer"); //$NON-NLS-0$
