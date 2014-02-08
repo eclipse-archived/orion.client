@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/orion/plugin.js"></script>
+    <meta charset="UTF-8" />
+    <title>TTY Shell Plugin</title>
+    <script>
+      var headers = { name: "TTY Shell Plugin", 
+        version: "0.1", 
+        description: "A plugin to add a link to the tty shell"};
+      var provider = new orion.PluginProvider(headers);
+      var serviceImpl = { };
+      provider.registerService("orion.navigate.command", {}, {
+        nameKey: "TTY Shell",
+        id: "eclipse.tty.shell.open",
+        tooltipKey: "Open TTY Shell page",
+        nls: "orion/ttyshell/nls/messages",
+        uriTemplate: "{+OrionHome}/tty/ttyShell.html",
+        forceSingleItem: true
+      });
+      provider.registerService("orion.page.link.related", null, {
+        id: "eclipse.tty.shell.open",
+        category: "shell",
+      });
+      provider.connect(); 
+    </script>
+  </head>
+  <body>
+    <h1>Shell Plugin for Orion using tty.js</h1>
+  </body>
+</html>
