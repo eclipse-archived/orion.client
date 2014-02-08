@@ -226,6 +226,14 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		},
 		
 		/**
+		 * Get the title DOM node
+		 * @returns {DomNode} The dom node that holds the section title.
+		 */
+		getActionElement: function(title){
+			return this._toolActionsNode;
+		},
+		
+		/**
 		 * Changes the contents of the section.
 		 * @param {String|DomNode} content
 		 */

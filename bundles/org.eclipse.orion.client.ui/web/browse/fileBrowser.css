@@ -52,6 +52,10 @@
 	padding-top: 3px;
 }
 
+.readmeTitle{
+	margin-left: 4px;
+}
+
 .browserResourceSelectorName {
 	font-weight: bold;
 	margin-left: 4px;
@@ -149,7 +153,9 @@ a.currentLocation:hover {
 
 .errorMessageViewTable {
 	font-weight: bold;
-	color: #b94a48 !important;
+	background-color: #FFF3F3;
+	outline: 1px solid #FFADAD;
+	color: #DD0000 !important;
 }
 
 .emptyViewTable {
@@ -159,6 +165,31 @@ a.currentLocation:hover {
     text-align:left;
     min-height: 32px;
     vertical-align:middle;
+}
+
+.repoUrlLink {
+	margin-top: 5px;
+	margin-right: 8px;
+	color: #3087B3;
+}
+
+.repoUrlLink:hover {
+	text-decoration: underline;
+	color: #F58B0F;
+	cursor: pointer;
+}
+
+.repoUrlDropdown {
+	width: 360px;
+	height: 36px;
+}
+
+.repoUrlInput {
+	border: 1px solid #dadada;
+	margin-top: 4px;
+	margin-left: 9px;
+	width: 340px;
+	height: 24px;
 }
 
 .browseSectionWrapper {

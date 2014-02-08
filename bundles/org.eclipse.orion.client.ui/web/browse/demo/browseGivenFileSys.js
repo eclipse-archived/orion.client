@@ -46,7 +46,7 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 			pluginRegistry.start().then(function() {
 				fileBrowser = new mFileBrowser.FileBrowser({
 					parent: "fileBrowser", 
-					showBranch: true,
+					selectorNumber: 1,
 					//maxEditorHeight: 800,
 					serviceRegistry: serviceRegistry
 				});

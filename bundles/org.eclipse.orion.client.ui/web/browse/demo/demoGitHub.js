@@ -22,9 +22,9 @@ function(mFileBrowser, mServiceRegistry, mPluginRegistry) {
 	});
 	var fileBrowser = new mFileBrowser.FileBrowser({
 		parent: "fileBrowser", 
-		showBranch: true,
+		selectorNumber: 2,
 		init: true,
-		//showComponent: true,
+		repoURL: "https://github.com/eclipse/orion.client.git",
 		//rootName: "RootName",
 		//breadCrumbInHeader: true,
 		maxEditorLines: 300

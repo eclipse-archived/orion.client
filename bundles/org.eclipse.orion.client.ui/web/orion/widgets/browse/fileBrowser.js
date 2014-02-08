@@ -31,10 +31,11 @@ define([
 	'orion/URITemplate',
 	'orion/objects',
 	'orion/EventTarget',
+	'text!orion/widgets/browse/repoUrlTrigger.html',
 	'orion/webui/littlelib'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector, mMarkdownView,
-	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, lib
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, lib
 ) {
 	
 	function ResourceChangeHandler(options) {
@@ -58,6 +59,12 @@ define([
 			}
 		}
 	});
+	
+	function repoURLHandler(repoURL){
+		this.repoURL = repoURL;
+		this.RepoURLTriggerTemplate = RepoURLTriggerTemplate;
+	}
+	
 	/**
 	 * @class This object describes the options for the readonly file system browser.
 	 * <p>
@@ -91,6 +98,7 @@ define([
 		} else if(!options.init){
 			this._fileClient = new mEmptyFileClient.FileClient();		
 		}
+		this.repoURL = options.repoURL;
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		if(!this._syntaxHighlighter) {
 			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
@@ -102,10 +110,16 @@ define([
 		this._preferences = options.preferences;//Optional
 		this.rootName = options.rootName;
 		this.shouldLoadWorkSpace = options.shouldLoadWorkSpace;
-		this._showBranch = options.showBranch;
+		if(typeof options.selectorNumber === "number") {
+			if(options.selectorNumber >= 1) {
+				this._showBranch = true;
+			} 
+			if(options.selectorNumber >= 2) {
+				this._showComponent = true;
+			} 
+		}
 		this._breadCrumbInHeader= options.breadCrumbInHeader;
-		this._showComponent = options.showComponent;
-		this._resourceChangeHandler = new ResourceChangeHandler();
+		this._resourceChangeHandler = new ResourceChangeHandler(options.repo);
 		this._resourceChangeHandler.addEventListener("resourceChanged", function(event){
 			if(!this._componentSelector || !event || !event.newResource || !event.newResource.selectorAllItems) {
 				return;
@@ -154,6 +168,9 @@ define([
 		startup: function(serviceRegistry) {
 			if(serviceRegistry) {
 				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
+			}
+			if(this.repoURL) {
+				this.repoURLHandler = new repoURLHandler(this.repoURL);
 			}
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
@@ -247,7 +264,7 @@ define([
 							commandRegistry: this._commandRegistry,
 							fileClient: this._fileClient,
 							parentNode: branchSelectorContainer,
-							labelHeader: this._showComponent ? "stream" : "branch",
+							labelHeader: this._showComponent ? "Stream" : "Branch",
 							resourceChangeDispatcher: this._showComponent ? this._resourceChangeHandler : null,
 							fetchChildren: this._showComponent ? true : false,
 							commandScopeId: "orion.browse.brSelector", //$NON-NLS-0$
@@ -264,7 +281,7 @@ define([
 								commandRegistry: this._commandRegistry,
 								fileClient: this._fileClient,
 								parentNode: compSelectorContainer,
-								labelHeader: "component",
+								labelHeader: "Component",
 								commandScopeId: "orion.browse.compSelector", //$NON-NLS-0$
 								dropDownId: "orion.browse.switchcomp", //$NON-NLS-0$
 								dropDownTooltip: "Select a componet", //$NON-NLS-0$
@@ -388,13 +405,13 @@ define([
 					parent: this._parentDomNode,
 					maxEditorLines: this._maxEditorLines,
 					breadCrumbInHeader: this._breadCrumbInHeader,
-					readmeHeaderClass: "readmeHeader",
 					metadata: metadata,
 					branchSelector: this._branchSelector,
 					componentSelector: this._componentSelector,
 					commandRegistry: this._commandRegistry,
 					contentTypeRegistry: this._contentTypeService,
 					inputManager: this._inputManager,
+					repoURLHandler: this.repoURLHandler,
 					fileService: this._fileClient,
 					//clickHandler: function(location) {this.refresh(location);}.bind(this),
 					breadCrumbMaker: function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this)

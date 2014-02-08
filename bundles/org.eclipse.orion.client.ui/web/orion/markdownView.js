@@ -88,8 +88,14 @@ define([
 			}.bind(this));
 			node.appendChild(div);
 		},
-		displayInFrame: function(node, file, headerClass) {
+		displayInFrame: function(node, file, headerClass, titleClass) {
 			var markdownSection = new mSection.Section(node, {id: "markdownSection", title: file.Name || "readme", headerClass: headerClass, canHide: this.canHide}); //$NON-NLS-0$
+			if(titleClass) {
+				var titleNode = markdownSection.getTitleElement();
+				if(titleNode) {
+					titleNode.classList.add(titleClass);
+				}
+			}
 			this.displayContents.call(this, markdownSection.getContentElement(), file);
 		}
 	};

@@ -19,8 +19,9 @@ define([
 	'orion/webui/littlelib',
 	'orion/objects',
 	'orion/Deferred',
+	'orion/webui/dropdown',
 	'orion/section'
-], function(messages, mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mSection) {
+], function(messages, mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mDropdown, mSection) {
 	
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
@@ -180,13 +181,13 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.preferences = options.preferences;
 		this.readonly = true;
-		this.readmeHeaderClass = options.readmeHeaderClass;
 		this.editorView = options.editorView;
 		this._maxEditorLines = options.maxEditorLines;
 		this.imageView = options.imageView;
 		this.messageView = options.messageView;
 		this.breadCrumbInHeader = options.breadCrumbInHeader;
 		this.isMarkdownView = options.isMarkdownView;
+		this.repoURLHandler =  options.repoURLHandler;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
 		this.componentSelector = options.componentSelector;
@@ -239,17 +240,42 @@ define([
 						this.sectionContents = document.createElement("div"); //$NON-NLS-0$
 						this.sectionContents.classList.add("browseSectionWrapper"); 
 						this._foldersSection.setContent(this.sectionContents);
+						//Render the action node
+						if(!this.messageView && this.repoURLHandler) {
+							var actionNode = this._foldersSection.getActionElement();
+							if(actionNode) {
+								lib.empty(actionNode);
+								var range = document.createRange();
+								range.selectNode(actionNode);
+								var repoURLFragment = range.createContextualFragment(this.repoURLHandler.RepoURLTriggerTemplate);
+								actionNode.appendChild(repoURLFragment);
+								this.repoURLDropdown = new mDropdown.Dropdown({
+									triggerNode: lib.node("orion.browse.repoURLTrigger"), 
+									dropdown: lib.node("orion.browse.repoURLDropdown")
+								});
+								this.repoURLDropdown.getItems = function() {
+									lib.node("orion.browse.repoURLInput").value = this.repoURLHandler.repoURL;
+									return [lib.node("orion.browse.repoURLInput")];
+								}.bind(this);
+								this.repoURLDropdown._positionDropdown = function(evt) {
+									this._dropdownNode.style.left = "";
+									this._dropdownNode.style.top = "";
+									this._dropdownNode.style.left = this._triggerNode.offsetLeft + this._triggerNode.offsetWidth - this._dropdownNode.offsetWidth  + "px";
+									lib.node("orion.browse.repoURLInput").select();
+								}.bind(this.repoURLDropdown);
+							}
+						}
 						
 						//Render the branch and component selector 
-						var tileNode = this._foldersSection.getTitleElement();
-						if(tileNode) {
-							lib.empty(tileNode);
+						var titleNode = this._foldersSection.getTitleElement();
+						if(titleNode) {
+							lib.empty(titleNode);
 							if(this.branchSelector) {
-								tileNode.appendChild(this.branchSelector.parentNode);
+								titleNode.appendChild(this.branchSelector.parentNode);
 								this.branchSelector.refresh();
 							}
 							if(this.componentSelector) {
-								tileNode.appendChild(this.componentSelector.parentNode);
+								titleNode.appendChild(this.componentSelector.parentNode);
 								this.componentSelector.refresh();
 							}
 						}
@@ -259,7 +285,7 @@ define([
 							bcNodeContainer.appendChild(bcNode);
 							if(this.breadCrumbInHeader) {
 								bcNodeContainer.classList.add("breadCrumbContainerInHeader"); 
-								tileNode.appendChild(bcNodeContainer);
+								titleNode.appendChild(bcNodeContainer);
 								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 150/*branch selector width*/ - 50);
 							} else {
 								bcNodeContainer.classList.add("breadCrumbContainer"); 
@@ -311,7 +337,7 @@ define([
 					} else if(sectionName === "readme"){
 						if (readmeMd) {
 							div = document.createElement("div"); //$NON-NLS-0$
-							this.markdownView.displayInFrame(div, readmeMd, this.readmeHeaderClass);
+							this.markdownView.displayInFrame(div, readmeMd, "readmeHeader", "readmeTitle");
 							this._node.appendChild(div);
 						}
 					}
@@ -378,6 +404,9 @@ define([
 			}
 			if (this.folderNavExplorer) {
 				this.folderNavExplorer.destroy();
+			}
+			if(this.repoURLDropdown) {
+				this.repoURLDropdown.destroy();
 			}
 			this.folderNavExplorer = null;
 			if (this._node && this._node.parentNode) {

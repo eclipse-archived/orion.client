@@ -53,7 +53,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		var url = new URL(params.repo || window.location.href);
 		var repo = url.href;
 		var base = params.base;
-		var showComponent = false;
+		var selectorNumber = 1;
 
 		if (!params.rootName) {
 			var found = repo.match(/\/([^/]+)\/([^/]+)$/);
@@ -76,13 +76,13 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 				base = new URL(ccmPath, repo).href;
 			}
 			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
-			showComponent = true;
+			selectorNumber = 2;
 		} else if (url.pathname.indexOf("/project/") === 0) {
 			if (!base) {
 				base = new URL("/ccm01", repo).href;
 			}
 			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
-			showComponent = true;
+			selectorNumber = 2;
 		} else {
 			throw "Bad Repo URL - " + repo;
 		}
@@ -91,9 +91,8 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		plugins[pluginURL.href] = {autostart: "started", lastModified: -1};
 		this._fileBrowser = new mFileBrowser.FileBrowser({
 			parent: params.parentId,
-			showBranch: true,
-			repo: repo,
-			showComponent: showComponent,
+			repoURL: repo,
+			selectorNumber: selectorNumber,
 			rootName: params.rootName,
 			maxEditorLines: 300,
 			init: true
