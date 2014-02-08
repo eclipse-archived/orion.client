@@ -24679,6 +24679,14 @@ define('orion/section',['orion/webui/littlelib', 'orion/selection', 'orion/comma
 		},
 		
 		/**
+		 * Get the title DOM node
+		 * @returns {DomNode} The dom node that holds the section title.
+		 */
+		getActionElement: function(title){
+			return this._toolActionsNode;
+		},
+		
+		/**
 		 * Changes the contents of the section.
 		 * @param {String|DomNode} content
 		 */
@@ -24981,8 +24989,14 @@ define('orion/markdownView',[
 			}.bind(this));
 			node.appendChild(div);
 		},
-		displayInFrame: function(node, file, headerClass) {
+		displayInFrame: function(node, file, headerClass, titleClass) {
 			var markdownSection = new mSection.Section(node, {id: "markdownSection", title: file.Name || "readme", headerClass: headerClass, canHide: this.canHide}); //$NON-NLS-0$
+			if(titleClass) {
+				var titleNode = markdownSection.getTitleElement();
+				if(titleNode) {
+					titleNode.classList.add(titleClass);
+				}
+			}
 			this.displayContents.call(this, markdownSection.getContentElement(), file);
 		}
 	};
@@ -25072,8 +25086,9 @@ define('orion/widgets/browse/browseView',[
 	'orion/webui/littlelib',
 	'orion/objects',
 	'orion/Deferred',
+	'orion/webui/dropdown',
 	'orion/section'
-], function(messages, mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mSection) {
+], function(messages, mExplorerTable, mNavigatorRenderer, mMarkdownView, PageUtil, URITemplate, lib, objects, Deferred, mDropdown, mSection) {
 	
 	var FileExplorer = mExplorerTable.FileExplorer;
 	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
@@ -25233,13 +25248,13 @@ define('orion/widgets/browse/browseView',[
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.preferences = options.preferences;
 		this.readonly = true;
-		this.readmeHeaderClass = options.readmeHeaderClass;
 		this.editorView = options.editorView;
 		this._maxEditorLines = options.maxEditorLines;
 		this.imageView = options.imageView;
 		this.messageView = options.messageView;
 		this.breadCrumbInHeader = options.breadCrumbInHeader;
 		this.isMarkdownView = options.isMarkdownView;
+		this.repoURLHandler =  options.repoURLHandler;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.branchSelector = options.branchSelector;
 		this.componentSelector = options.componentSelector;
@@ -25292,17 +25307,42 @@ define('orion/widgets/browse/browseView',[
 						this.sectionContents = document.createElement("div"); //$NON-NLS-0$
 						this.sectionContents.classList.add("browseSectionWrapper"); 
 						this._foldersSection.setContent(this.sectionContents);
+						//Render the action node
+						if(!this.messageView && this.repoURLHandler) {
+							var actionNode = this._foldersSection.getActionElement();
+							if(actionNode) {
+								lib.empty(actionNode);
+								var range = document.createRange();
+								range.selectNode(actionNode);
+								var repoURLFragment = range.createContextualFragment(this.repoURLHandler.RepoURLTriggerTemplate);
+								actionNode.appendChild(repoURLFragment);
+								this.repoURLDropdown = new mDropdown.Dropdown({
+									triggerNode: lib.node("orion.browse.repoURLTrigger"), 
+									dropdown: lib.node("orion.browse.repoURLDropdown")
+								});
+								this.repoURLDropdown.getItems = function() {
+									lib.node("orion.browse.repoURLInput").value = this.repoURLHandler.repoURL;
+									return [lib.node("orion.browse.repoURLInput")];
+								}.bind(this);
+								this.repoURLDropdown._positionDropdown = function(evt) {
+									this._dropdownNode.style.left = "";
+									this._dropdownNode.style.top = "";
+									this._dropdownNode.style.left = this._triggerNode.offsetLeft + this._triggerNode.offsetWidth - this._dropdownNode.offsetWidth  + "px";
+									lib.node("orion.browse.repoURLInput").select();
+								}.bind(this.repoURLDropdown);
+							}
+						}
 						
 						//Render the branch and component selector 
-						var tileNode = this._foldersSection.getTitleElement();
-						if(tileNode) {
-							lib.empty(tileNode);
+						var titleNode = this._foldersSection.getTitleElement();
+						if(titleNode) {
+							lib.empty(titleNode);
 							if(this.branchSelector) {
-								tileNode.appendChild(this.branchSelector.parentNode);
+								titleNode.appendChild(this.branchSelector.parentNode);
 								this.branchSelector.refresh();
 							}
 							if(this.componentSelector) {
-								tileNode.appendChild(this.componentSelector.parentNode);
+								titleNode.appendChild(this.componentSelector.parentNode);
 								this.componentSelector.refresh();
 							}
 						}
@@ -25312,7 +25352,7 @@ define('orion/widgets/browse/browseView',[
 							bcNodeContainer.appendChild(bcNode);
 							if(this.breadCrumbInHeader) {
 								bcNodeContainer.classList.add("breadCrumbContainerInHeader"); 
-								tileNode.appendChild(bcNodeContainer);
+								titleNode.appendChild(bcNodeContainer);
 								this.breadCrumbMaker(bcNode, this._foldersSection.getHeaderElement().offsetWidth - 150/*branch selector width*/ - 50);
 							} else {
 								bcNodeContainer.classList.add("breadCrumbContainer"); 
@@ -25364,7 +25404,7 @@ define('orion/widgets/browse/browseView',[
 					} else if(sectionName === "readme"){
 						if (readmeMd) {
 							div = document.createElement("div"); //$NON-NLS-0$
-							this.markdownView.displayInFrame(div, readmeMd, this.readmeHeaderClass);
+							this.markdownView.displayInFrame(div, readmeMd, "readmeHeader", "readmeTitle");
 							this._node.appendChild(div);
 						}
 					}
@@ -25431,6 +25471,9 @@ define('orion/widgets/browse/browseView',[
 			}
 			if (this.folderNavExplorer) {
 				this.folderNavExplorer.destroy();
+			}
+			if(this.repoURLDropdown) {
+				this.repoURLDropdown.destroy();
 			}
 			this.folderNavExplorer = null;
 			if (this._node && this._node.parentNode) {
@@ -34191,6 +34234,8 @@ define('orion/widgets/browse/emptyFileClient',["orion/Deferred"], function(Defer
 	return {FileClient: FileClient};
 });
 
+define('text!orion/widgets/browse/repoUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Repository URL</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<input id="orion.browse.repoURLInput" class = "repoUrlInput dropdownSubMenu" type="text" readonly></input>\r\n</div>';});
+
 /*******************************************************************************
  *
  * @license
@@ -34224,10 +34269,11 @@ define('orion/widgets/browse/fileBrowser',[
 	'orion/URITemplate',
 	'orion/objects',
 	'orion/EventTarget',
+	'text!orion/widgets/browse/repoUrlTrigger.html',
 	'orion/webui/littlelib'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector, mMarkdownView,
-	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, lib
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, lib
 ) {
 	
 	function ResourceChangeHandler(options) {
@@ -34251,6 +34297,12 @@ define('orion/widgets/browse/fileBrowser',[
 			}
 		}
 	});
+	
+	function repoURLHandler(repoURL){
+		this.repoURL = repoURL;
+		this.RepoURLTriggerTemplate = RepoURLTriggerTemplate;
+	}
+	
 	/**
 	 * @class This object describes the options for the readonly file system browser.
 	 * <p>
@@ -34284,6 +34336,7 @@ define('orion/widgets/browse/fileBrowser',[
 		} else if(!options.init){
 			this._fileClient = new mEmptyFileClient.FileClient();		
 		}
+		this.repoURL = options.repoURL;
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		if(!this._syntaxHighlighter) {
 			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
@@ -34295,10 +34348,16 @@ define('orion/widgets/browse/fileBrowser',[
 		this._preferences = options.preferences;//Optional
 		this.rootName = options.rootName;
 		this.shouldLoadWorkSpace = options.shouldLoadWorkSpace;
-		this._showBranch = options.showBranch;
+		if(typeof options.selectorNumber === "number") {
+			if(options.selectorNumber >= 1) {
+				this._showBranch = true;
+			} 
+			if(options.selectorNumber >= 2) {
+				this._showComponent = true;
+			} 
+		}
 		this._breadCrumbInHeader= options.breadCrumbInHeader;
-		this._showComponent = options.showComponent;
-		this._resourceChangeHandler = new ResourceChangeHandler();
+		this._resourceChangeHandler = new ResourceChangeHandler(options.repo);
 		this._resourceChangeHandler.addEventListener("resourceChanged", function(event){
 			if(!this._componentSelector || !event || !event.newResource || !event.newResource.selectorAllItems) {
 				return;
@@ -34347,6 +34406,9 @@ define('orion/widgets/browse/fileBrowser',[
 		startup: function(serviceRegistry) {
 			if(serviceRegistry) {
 				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
+			}
+			if(this.repoURL) {
+				this.repoURLHandler = new repoURLHandler(this.repoURL);
 			}
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
@@ -34440,7 +34502,7 @@ define('orion/widgets/browse/fileBrowser',[
 							commandRegistry: this._commandRegistry,
 							fileClient: this._fileClient,
 							parentNode: branchSelectorContainer,
-							labelHeader: this._showComponent ? "stream" : "branch",
+							labelHeader: this._showComponent ? "Stream" : "Branch",
 							resourceChangeDispatcher: this._showComponent ? this._resourceChangeHandler : null,
 							fetchChildren: this._showComponent ? true : false,
 							commandScopeId: "orion.browse.brSelector", //$NON-NLS-0$
@@ -34457,7 +34519,7 @@ define('orion/widgets/browse/fileBrowser',[
 								commandRegistry: this._commandRegistry,
 								fileClient: this._fileClient,
 								parentNode: compSelectorContainer,
-								labelHeader: "component",
+								labelHeader: "Component",
 								commandScopeId: "orion.browse.compSelector", //$NON-NLS-0$
 								dropDownId: "orion.browse.switchcomp", //$NON-NLS-0$
 								dropDownTooltip: "Select a componet", //$NON-NLS-0$
@@ -34581,13 +34643,13 @@ define('orion/widgets/browse/fileBrowser',[
 					parent: this._parentDomNode,
 					maxEditorLines: this._maxEditorLines,
 					breadCrumbInHeader: this._breadCrumbInHeader,
-					readmeHeaderClass: "readmeHeader",
 					metadata: metadata,
 					branchSelector: this._branchSelector,
 					componentSelector: this._componentSelector,
 					commandRegistry: this._commandRegistry,
 					contentTypeRegistry: this._contentTypeService,
 					inputManager: this._inputManager,
+					repoURLHandler: this.repoURLHandler,
 					fileService: this._fileClient,
 					//clickHandler: function(location) {this.refresh(location);}.bind(this),
 					breadCrumbMaker: function(bcContainer, maxLength) {this._breadCrumbMaker(bcContainer, maxLength);}.bind(this)
@@ -36416,7 +36478,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		var url = new URL(params.repo || window.location.href);
 		var repo = url.href;
 		var base = params.base;
-		var showComponent = false;
+		var selectorNumber = 1;
 
 		if (!params.rootName) {
 			var found = repo.match(/\/([^/]+)\/([^/]+)$/);
@@ -36439,13 +36501,13 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 				base = new URL(ccmPath, repo).href;
 			}
 			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
-			showComponent = true;
+			selectorNumber = 2;
 		} else if (url.pathname.indexOf("/project/") === 0) {
 			if (!base) {
 				base = new URL("/ccm01", repo).href;
 			}
 			pluginURL = new URL(base + "/service/com.ibm.team.filesystem.service.jazzhub.IOrionFilesystem/sr/pluginOrionWs.html?" + repo);
-			showComponent = true;
+			selectorNumber = 2;
 		} else {
 			throw "Bad Repo URL - " + repo;
 		}
@@ -36454,9 +36516,8 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		plugins[pluginURL.href] = {autostart: "started", lastModified: -1};
 		this._fileBrowser = new mFileBrowser.FileBrowser({
 			parent: params.parentId,
-			showBranch: true,
-			repo: repo,
-			showComponent: showComponent,
+			repoURL: repo,
+			selectorNumber: selectorNumber,
 			rootName: params.rootName,
 			maxEditorLines: 300,
 			init: true
