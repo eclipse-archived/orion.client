@@ -17,3 +17,5 @@ staging
 *.log
 node_modules/
 
+# Mac Development
+.DS_Store
