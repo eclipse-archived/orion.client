@@ -533,6 +533,8 @@ hard-coded numbers elsewhere.
 	border-right: 7px solid white;
 }
 
+
+
 .sideMenuSubMenuItem:first-child{
 	border-top:1px solid #bbb;
 	border-top-right-radius: 4px;
@@ -552,14 +554,16 @@ hard-coded numbers elsewhere.
 
 /* 1) Set up special hover colors for submenu items */
 .sideMenuSubMenuItem:hover {
-	background-color: #373737;
+	background-color: #fde7cf; /* #373737; */
 }
 .sideMenuSubMenuItem:hover a {
-	color: white;
+	/* color: white; */
 }
+
+
 /* 2) Disable hover colors when submenu has only 1 item */
 .sideMenuSubMenuItem:only-child:hover {
-	background-color: white;
+	/* background-color: white; */
 }
 .sideMenuSubMenuItem:only-child:hover a {
 	color: #333;
