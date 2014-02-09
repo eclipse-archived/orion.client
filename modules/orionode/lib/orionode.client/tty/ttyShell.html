@@ -22,6 +22,43 @@
 		});
 		require(["ttyPage.js"]);
 	</script>
+	<script src="/socket.io/socket.io.js"></script><script src="term.js"></script>
+	<script>
+    	;(function() {
+        	window.onload = function() {
+        		var socket = io.connect();
+        		socket.on('connect', function() {
+          			var term = new Terminal({
+              			cols: 80,
+              			rows: 24,
+              			useStyle: true,
+              			screenKeys: true
+            		});
+    
+            		term.on('data', function(data) {
+            			socket.emit('data', data);
+            		});
+    
+            		term.on('title', function(title) {
+            			document.title = title;
+            		});
+    
+            		term.open(document.getElementById("terminalBox"));
+    
+            		term.write('\x1b[31mWelcome to term.js!\x1b[m\r\n');
+    
+            		socket.on('data', function(data) {
+              			term.write(data);
+            		});
+    
+            		socket.on('disconnect', function() {
+              			term.destroy();
+          			});
+      			});
+    		};
+  		}).call(this);
+	</script>
+		
 </head>
 	<body id="orion-shellPage" class="orionPage">
 		<div id="sideMenu" class="sideMenu"></div>
@@ -29,9 +66,11 @@
 			<div class="fixedToolbarHolder mainpane mainPanelLayout">
 				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
 				<div id="mainNode" class="toolbarTarget pageLayoutTarget toolbarTarget-toolbarHidden">
+					<div id ="terminalBox"></div>
 				</div>
 			</div>
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer"></div>
 	</body>
 </html>
+
