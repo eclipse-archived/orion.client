@@ -12,7 +12,8 @@
 		"javascript/plugins/javascriptPlugin.html":true,
 		"shell/plugins/shellPagePlugin.html":true,
 		"plugins/nodePlugin.html":true,
-		"plugins/ttyShellPlugin.html" :true
+		"plugins/ttyShellPlugin.html" :true,
+		"plugins/clearLocalStoragePlugin.html" :true
 	},
 	"/settingsContainer":{
 		"categories":{

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/orion/plugin.js"></script>
+    <meta charset="UTF-8" />
+    <title>Clear Local Storage Plugin</title>
+    <script>
+      var headers = { name: "Clear Local Storage Plugin", 
+        version: "0.1", 
+        description: "A plugin to clear local storage"};
+      var provider = new orion.PluginProvider(headers);
+      var serviceImpl = { };
+      provider.registerService("orion.navigate.command", {}, {
+        nameKey: "Clear Local Storage",
+        id: "eclipse.clear.local.storage.open",
+        tooltipKey: "Open Clear Local Storage page",
+        nls: "orion/ttyshell/nls/messages",
+        uriTemplate: "{+OrionHome}/clearLocalStorage/clearLocalStorage.html",
+        forceSingleItem: true
+      });
+      provider.registerService("orion.page.link.related", null, {
+        id: "eclipse.clear.local.storage.open",
+        category: "shell",
+      });
+      provider.connect(); 
+    </script>
+  </head>
+  <body>
+    <h1>Shell Plugin for Orion to clear HTML5 Local Storage</h1>
+  </body>
+</html>
