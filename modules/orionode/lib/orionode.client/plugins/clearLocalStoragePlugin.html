@@ -15,7 +15,7 @@
         id: "eclipse.clear.local.storage.open",
         tooltipKey: "Open Clear Local Storage page",
         nls: "orion/ttyshell/nls/messages",
-        uriTemplate: "{+OrionHome}/clearLocalStorage/clearLocalStorage.html",
+        uriTemplate: "javascript:localStorage.clear(); alert('Your local storage was cleared.');",
         forceSingleItem: true
       });
       provider.registerService("orion.page.link.related", null, {
