@@ -673,11 +673,12 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		renderProjectInfo: function(parent, sectionName){
 			
 			var title = sectionName || "Project Information";
-			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection", title: title, canHide: true});
+			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection", headerClass: ["sectionTreeTableHeader"], title: title, canHide: true});
 			var explorerParent = document.createElement("div");
 			explorerParent.id = "projectInformationNode";
 			var projectInfoRenderer = new ProjectInfoRenderer({
 				checkbox: false,
+				treeTableClass: "sectionTreeTable",
 				cachePrefix: "ProjectInfoExplorer" //$NON-NLS-0$
 			}, this);
 			var projectInfoExplorer = new mExplorer.Explorer(this.serviceRegistry, null, projectInfoRenderer, this.commandRegistry);
@@ -702,9 +703,10 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 						if(!cat.Name){
 							continue;
 						}
-						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.Name + "Section", title: cat.Name, canHide: true});
+						var addotopnalInfoSection = new mSection.Section(parent, {id: cat.Name + "Section", headerClass: ["sectionTreeTableHeader"], title: cat.Name, canHide: true});
 						var explorerParent = document.createElement("div");
 						var additionalInfoRenderer = new AdditionalInfoRenderer({
+							treeTableClass: "sectionTreeTable",
 							checkbox: false
 						}, this);
 						var additionalInfoExplorer = new mExplorer.Explorer(this.serviceRegistry, null, additionalInfoRenderer, this.commandRegistry);
@@ -723,11 +725,12 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			
 			this.dependenciesSectionName = sectionName || "Associated Content";
 			
-			var dependenciesSection = new mSection.Section(parent, {id: "projectDependenciesSection", title: this.dependenciesSectionName, canHide: true});
+			var dependenciesSection = new mSection.Section(parent, {id: "projectDependenciesSection", headerClass: ["sectionTreeTableHeader"], title: this.dependenciesSectionName, canHide: true});
 			var dependenciesParent = document.createElement("div");
 			dependenciesParent.id = "dependenciesNode";
 			var dependenciesRenderer = new DependenciesRenderer({
 				checkbox: false,
+				treeTableClass: "sectionTreeTable",
 				commandRegistry: this.commandRegistry,
 				actionScopeId:  this.dependencyActions
 			}, this);
@@ -751,11 +754,12 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			}
 			lib.empty(this.configurationsParent);
 			this.launchCofunctionSectionsTitle = sectionName || "Deployment Information";
-			var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", title: this.launchCofunctionSectionsTitle, canHide: true});
+			var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", headerClass: ["sectionTreeTableHeader"], title: this.launchCofunctionSectionsTitle, canHide: true});
 			var launchConfigurationParent = document.createElement("div");
 			launchConfigurationParent.id = "launchConfigurationsNode";
 			var launchConfigurationRenderer = new LaunchConfigurationRenderer({
 				checkbox: false,
+				treeTableClass: "sectionTreeTable",
 				commandRegistry: this.commandRegistry,
 				actionScopeId:  this.launchConfigurationActions,
 				projectClient: this.projectClient

@@ -108,6 +108,7 @@ define([
 		options.rendererFactory = function(explorer) {
 			return new FolderNavRenderer({
 				checkbox: false,
+				treeTableClass: "sectionTreeTable",
 				cachePrefix: "FolderNavigator" //$NON-NLS-0$
 			}, explorer, options.commandRegistry, options.contentTypeRegistry);
 		};
@@ -236,7 +237,7 @@ define([
 					if(sectionName === "folderNav") {
 						var navNode = document.createElement("div"); //$NON-NLS-0$
 						navNode.id = "folderNavNode"; //$NON-NLS-0$
-						this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Browse", canHide: !this.readonly});
+						this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", headerClass: ["sectionTreeTableHeader"], title: "Browse", canHide: !this.readonly});
 						this.sectionContents = document.createElement("div"); //$NON-NLS-0$
 						this.sectionContents.classList.add("browseSectionWrapper"); 
 						this._foldersSection.setContent(this.sectionContents);
@@ -337,7 +338,7 @@ define([
 					} else if(sectionName === "readme"){
 						if (readmeMd) {
 							div = document.createElement("div"); //$NON-NLS-0$
-							this.markdownView.displayInFrame(div, readmeMd, "readmeHeader", "readmeTitle");
+							this.markdownView.displayInFrame(div, readmeMd,  ["sectionTreeTableHeader", "readmeHeader"], "readmeTitle");
 							this._node.appendChild(div);
 						}
 					}

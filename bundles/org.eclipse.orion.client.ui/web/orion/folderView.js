@@ -111,6 +111,7 @@ define([
 		options.rendererFactory = function(explorer) {
 			return new FolderNavRenderer({
 				checkbox: false,
+				treeTableClass: "sectionTreeTable",
 				cachePrefix: "FolderNavigator" //$NON-NLS-0$
 			}, explorer, options.commandRegistry, options.contentTypeRegistry);
 		};
@@ -193,7 +194,6 @@ define([
 		this.readonly = options.readonly === undefined ? false : options.readonly;
 		this.showProjectView = options.showProjectView === undefined ? true : options.showProjectView;
 		this.showFolderNav = true;
-		this.readmeHeaderClass = options.readmeHeaderClass;
 		this.editorView = options.editorView;
 		this._maxEditorHeight = options.maxEditorHeight;
 		this.imageView = options.imageView;
@@ -293,7 +293,7 @@ define([
 							var navNode = document.createElement("div"); //$NON-NLS-0$
 							navNode.id = "folderNavNode"; //$NON-NLS-0$
 							var title = sectionNames[sectionName] || "Files";
-							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: title, canHide: !this.readonly}); //$NON-NLS-0$
+							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", headerClass: ["sectionTreeTableHeader"], title: title, canHide: !this.readonly}); //$NON-NLS-0$
 							if(this.editorView) {//To embed an orion editor in the section
 								foldersSection.setContent(this.editorView.getParent());
 								this.editorView.create();
@@ -338,7 +338,7 @@ define([
 					} else if(sectionName === "readme"){ //$NON-NLS-0$
 						if (readmeMd) {
 							div = document.createElement("div"); //$NON-NLS-0$
-							this.markdownView.displayInFrame(div, readmeMd, this.readmeHeaderClass, null, sectionNames[sectionName]);
+							this.markdownView.displayInFrame(div, readmeMd, ["sectionTreeTableHeader"], null, sectionNames[sectionName]);
 							this._node.appendChild(div);
 						}
 					}

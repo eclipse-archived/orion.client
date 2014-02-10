@@ -1086,6 +1086,27 @@ input {
 	position: relative;
 }
 
+.sectionTreeTable {
+	border-spacing: 0;
+	width:100%;
+}
+
+.sectionTreeTable td {
+	border-bottom: none !important;
+}
+
+.sectionTreeTableHeader{
+	background: none !important;
+}
+
+.lightSectionTreeTableRow {
+	background-color: #FFFFFF;
+}
+
+.darkSectionTreeTableRow {
+	background-color: #f5f7f9;
+}
+
 .lightTreeTableRow, .darkTreeTableRow {
 	border-bottom: 1px solid #dadada;
 }

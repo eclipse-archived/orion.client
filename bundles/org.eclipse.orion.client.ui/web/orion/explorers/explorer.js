@@ -466,6 +466,7 @@ exports.ExplorerRenderer = (function() {
 		
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
+			this.tableNode = tableNode;
 			lib.empty(tableNode);
 			if (this._treeTableClass) {
 				tableNode.classList.add(this._treeTableClass); 
@@ -704,6 +705,14 @@ exports.ExplorerRenderer = (function() {
 			if(this.explorer.selectionPolicy !== "cursorOnly"){ //$NON-NLS-0$
 				this.explorer.refreshSelection();
 				this.explorer.initNavHandler();			
+			}
+			if(lib.$(".sectionTreeTable", this.tableNode.parentNode)) {
+				lib.$$array(".treeTableRow", this.tableNode).forEach(function(node, i) { //$NON-NLS-0$
+					var on = (!(i % 2)) ? "darkSectionTreeTableRow" : "lightSectionTreeTableRow";
+					var off = (on === "darkSectionTreeTableRow") ? "lightSectionTreeTableRow" : "darkSectionTreeTableRow";
+					node.classList.add(on);
+					node.classList.remove(off);
+				});
 			}
 		},
 		updateCommands: function(){
