@@ -351,7 +351,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		if(col_no===2){
 			var td = document.createElement("td");
 			if(item.ServiceId){
-				this.projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
+				this.projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
 					if(!service){
 						return;
 					}
@@ -430,7 +430,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				}
 			}
 			if(item.ServiceId){
-				this.projectClient.getProjectDelpoyService(item.ServiceId).then(function(service){
+				this.projectClient.getProjectDelpoyService(item.ServiceId, item.Type).then(function(service){
 					if(service && service.getState){
 						item.status = {State: "PROGRESS"};
 						td.innerHTML = this.getCellElement(col_no, item, tableRow).innerHTML;

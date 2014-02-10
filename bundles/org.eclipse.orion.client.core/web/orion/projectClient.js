@@ -377,10 +377,21 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		return types;
 	},
 	
-	getProjectDelpoyService: function(type){
+	getProjectDelpoyService: function(serviceId, type){
 		for(var i=0; i<this.allProjectDeployReferences.length; i++){
-			if(this.allProjectDeployReferences[i].getProperty("id") === type){
+			if(this.allProjectDeployReferences[i].getProperty("id") === serviceId){
 				return this._getProjectDeployService(this.allProjectDeployReferences[i]);
+			}
+		}
+		if(type){
+			for(var i=0; i<this.allProjectDeployReferences.length; i++){
+				var deployTypes = this.allProjectDeployReferences[i].getProperty("deployTypes");
+				if(!deployTypes){
+					continue;
+				}
+				if(deployTypes.some(function(typeFromService){return type === typeFromService;})){
+					return this._getProjectDeployService(this.allProjectDeployReferences[i]);
+				}
 			}
 		}
 	},
@@ -509,7 +520,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		return deferred;
 	},
 	
-	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, serviceId, params, url, manageUrl, path, urlTitle){
+	saveProjectLaunchConfiguration: function(projectMetadata, configurationName, serviceId, params, url, manageUrl, path, urlTitle, deployType){
 		var deferred = new Deferred();
 		var configurationFile = configurationName;
 		configurationFile = configurationFile.replace(/\ /g,' ');
@@ -527,6 +538,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		};
 		if(urlTitle){
 			launchConfigurationEnry.UrlTitle= urlTitle;
+		}
+		if(deployType){
+			launchConfigurationEnry.Type = deployType;
 		}
 		this._getLaunchConfigurationsDir(projectMetadata, true).then(function(launchConfDir){
 			if(launchConfDir.Children){

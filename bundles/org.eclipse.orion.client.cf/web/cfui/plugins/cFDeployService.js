@@ -197,6 +197,7 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 									},
 									Url: "http://" + result.Route.entity.host + "." + result.Domain,
 									UrlTitle: result.App.entity.name,
+									Type: "Cloud Foundry",
 									ManageUrl: result.ManageUrl,
 									Path: appPath
 								}
