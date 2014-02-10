@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+ * This file is derived from the Original Code provided by mozilla.org.
+ * Changes to the original file were made by the Orion project on
+ * February 10, 2014, and are marked with trailing comment "//Orion-20140210".
+ */
+
 define(function(require, exports, module) {
 
 'use strict';
@@ -220,7 +226,7 @@ Tooltip.prototype.assignmentContentsChanged = function(ev) {
   // Assignments fire AssignmentChange events on any change, including minor
   // things like whitespace change in arg prefix, so we ignore anything but
   // an actual value change.
-  if (ev.conversion.arg.text === ev.oldConversion.arg.text) {
+  if (ev.conversion.arg.text === ev.oldConversion.arg.text && ev.conversion.message === ev.oldConversion.message) { //Orion-20140210
     return;
   }
 

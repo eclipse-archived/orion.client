@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+ * This file is derived from the Original Code provided by mozilla.org.
+ * Changes to the original file were made by the Orion project on
+ * February 10, 2014, and are marked with trailing comment "//Orion-20140210".
+ */
+
 define(function(require, exports, module) {
 
 'use strict';
@@ -73,12 +79,18 @@ ParamType.prototype.lookup = function() {
   return displayedParams;
 };
 
-ParamType.prototype.parse = function(arg) {
+ParamType.prototype.parse = function(arg, requisition) { //Orion-20140210
   if (this.isIncompleteName) {
     return SelectionType.prototype.parse.call(this, arg);
   }
   else {
     var message = l10n.lookup('cliUnusedArg');
+    if (requisition) { //Orion-20140210
+    	var conversion = requisition.commandAssignment.conversion; //Orion-20140210
+    	if (conversion.getStatus() === Status.ERROR && conversion.message) { //Orion-20140210
+    		message = conversion.message; //Orion-20140210
+    	} //Orion-20140210
+    } //Orion-20140210
     return Promise.resolve(new Conversion(undefined, arg, Status.ERROR, message));
   }
 };
@@ -123,14 +135,14 @@ CommandType.prototype._addToPredictions = function(predictions, option, arg) {
   }
 };
 
-CommandType.prototype.parse = function(arg) {
+CommandType.prototype.parse = function(arg, isFirstArg) { //Orion-20140210
   // Especially at startup, predictions live over the time that things change
   // so we provide a completion function rather than completion values
   var predictFunc = function() {
-    return this._findPredictions(arg);
+    return this._findPredictions(arg, isFirstArg); //Orion-20140210
   }.bind(this);
 
-  return this._findPredictions(arg).then(function(predictions) {
+  return this._findPredictions(arg, isFirstArg).then(function(predictions) { //Orion-20140210
     if (predictions.length === 0) {
       var msg = l10n.lookupFormat('typesSelectionNomatch', [ arg.text ]);
       return new Conversion(undefined, arg, Status.ERROR, msg, predictFunc);

@@ -18,6 +18,8 @@
  * This file is derived from the Original Code provided by mozilla.org.
  * Changes to the original file were made by the Orion project on
  * March 22, 2013 and are marked with trailing comment "//Orion-20130322".
+ * Additional changes were made on February 10, 2014, and are marked with
+ * trailing comment "//Orion-20140210".
  */
 
 define(function(require, exports, module) {
@@ -360,7 +362,7 @@ function UnassignedAssignment(requisition, arg) {
   this.onAssignmentChange = util.createEvent('UnassignedAssignment.onAssignmentChange');
 
   // synchronize is ok because we can be sure that param type is synchronous
-  this.conversion = util.synchronize(this.param.type.parse(arg));
+  this.conversion = util.synchronize(this.param.type.parse(arg, requisition)); //Orion-20140210
   this.conversion.assign(this);
 }
 
@@ -1554,7 +1556,7 @@ Requisition.prototype._split = function(args) {
               new MergedArgument(args, 0, argsUsed);
     // Making this promise synchronous is OK because we know that commandType
     // is a synchronous type.
-    conversion = util.synchronize(commandType.parse(arg));
+    conversion = util.synchronize(commandType.parse(arg, argsUsed === 1 && args.length > 1)); //Orion-20140210
 
     // We only want to carry on if this command is a parent command,
     // which means that there is a commandAssignment, but not one with

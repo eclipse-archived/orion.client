@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+ * This file is derived from the Original Code provided by mozilla.org.
+ * Changes to the original file were made by the Orion project on
+ * February 10, 2014, and are marked with trailing comment "//Orion-20140210".
+ */
+
 define(function(require, exports, module) {
 
 'use strict';
@@ -190,24 +196,32 @@ function dataToLookup(data) {
  * @param arg The initial input to match
  * @return A trimmed array of string:value pairs
  */
-SelectionType.prototype._findPredictions = function(arg) {
+SelectionType.prototype._findPredictions = function(arg, isFirstArg) { //Orion-20140210
   return Promise.resolve(this.getLookup()).then(function(lookup) {
     var predictions = [];
     var i, option;
     var maxPredictions = Conversion.maxPredictions;
     var match = arg.text.toLowerCase();
 
-    // If the arg has a suffix then we're kind of 'done'. Only an exact match
-    // will do.
-    if (arg.suffix.length > 0) {
+    // If the arg has a suffix, or if this is the first arg (meaning it's the command name) then we're kind of 'done'. //Orion-20140210
+    // Only an exact match will do. //Orion-20140210
+    if (isFirstArg || arg.suffix.length > 0) { //Orion-20140210
+      var isParentCommand; //Orion-20140210
       for (i = 0; i < lookup.length && predictions.length < maxPredictions; i++) {
         option = lookup[i];
         if (option.name === arg.text) {
+          if (!option.value.exec) { //Orion-20140210
+            /* this indicates a parent command, which should not be treated as a final command name */	//Orion-20140210
+            isParentCommand = true; //Orion-20140210
+            predictions = []; //Orion-20140210
+            break; //Orion-20140210
+          } //Orion-20140210
           this._addToPredictions(predictions, option, arg);
         }
       }
-
-      return predictions;
+      if (!isParentCommand) { //Orion-20140210
+      	return predictions;
+      } //Orion-20140210
     }
 
     // Cache lower case versions of all the option names
