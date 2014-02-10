@@ -13,6 +13,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 	 * @class Sidebar that appears alongside an {@link orion.editor.Editor} in the Orion IDE.
 	 * @param {Object} params
 	 * @param {orion.commandregistry.CommandRegistry} params.commandRegistry
+	 * @param {orion.preferences.PreferencesService} params.preferences
 	 * @param {orion.core.ContentTypeRegistry} params.contentTypeRegistry
 	 * @param {orion.fileClient.FileClient} params.fileClient
 	 * @param {orion.editor.InputManager} params.editorInputManager
@@ -23,9 +24,11 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 	 * @param {Object} [params.sidebarNavInputManager]
 	 * @param {Element|String} params.parent
 	 * @param {Element|String} params.toolbar
+	 * @param {Element|String} params.switcherScope
 	 */
 	function Sidebar(params) {
 		this.params = params;
+		this.preferences = params.preferences;
 		this.commandRegistry = params.commandRegistry;
 		this.contentTypeRegistry = params.contentTypeRegistry;
 		this.fileClient = params.fileClient;
@@ -87,6 +90,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 			this.addViewMode("nav", new MiniNavViewMode({ //$NON-NLS-0$
 				commandRegistry: commandRegistry,
 				contentTypeRegistry: contentTypeRegistry,
+				preferences: this.preferences,
 				fileClient: fileClient,
 				editorInputManager: editorInputManager,
 				parentNode: parentNode,
@@ -100,6 +104,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				this.projectViewMode = new ProjectNavViewMode({
 					commandRegistry: commandRegistry,
 					contentTypeRegistry: contentTypeRegistry,
+					preferences: this.preferences,
 					fileClient: fileClient,
 					editorInputManager: editorInputManager,
 					parentNode: parentNode,
@@ -116,6 +121,7 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 				toolbar: toolbarNode,
 				serviceRegistry: serviceRegistry,
 				contentTypeRegistry: contentTypeRegistry,
+				preferences: this.preferences,
 				outlineService: outlineService,
 				commandService: commandRegistry,
 				selectionService: selection,

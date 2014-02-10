@@ -339,6 +339,7 @@ define([
 	 * @class
 	 */
 	function ProjectNavViewMode(params) {
+		this.preferences = params.preferences;
 		this.commandRegistry = params.commandRegistry;
 		this.contentTypeRegistry = params.contentTypeRegistry;
 		this.fileClient = params.fileClient;
@@ -394,6 +395,7 @@ define([
 		create: function() {
 			var _self = this;
 			this.explorer = new ProjectNavExplorer({
+				preferences: this.preferences,
 				commandRegistry: this.commandRegistry,
 				fileClient: this.fileClient,
 				editorInputManager: this.editorInputManager,

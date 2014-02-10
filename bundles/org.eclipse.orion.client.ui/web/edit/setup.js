@@ -399,6 +399,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			commandRegistry: commandRegistry,
 			contentTypeRegistry: contentTypeRegistry,
 			editorInputManager: inputManager,
+			preferences: preferences,
 			fileClient: fileClient,
 			outlineService: outlineService,
 			parent: sidebarDomNode,

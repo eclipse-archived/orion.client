@@ -74,6 +74,7 @@ define([
 	 * @class
 	 */
 	function MiniNavViewMode(params) {
+		this.preferences = params.preferences;
 		this.commandRegistry = params.commandRegistry;
 		this.contentTypeRegistry = params.contentTypeRegistry;
 		this.fileClient = params.fileClient;
@@ -98,6 +99,7 @@ define([
 		create: function() {
 			var _self = this;
 			this.explorer = new MiniNavExplorer({
+				preferences: this.preferences,
 				commandRegistry: this.commandRegistry,
 				fileClient: this.fileClient,
 				editorInputManager: this.editorInputManager,

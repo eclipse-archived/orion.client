@@ -47,6 +47,7 @@ define([
 		params.modelEventDispatcher = FileCommands.getModelEventDispatcher();
 		params.dragAndDrop = FileCommands.uploadFile;
 		FileExplorer.apply(this, arguments);
+		this.preferences = params.preferences;
 		this.commandRegistry = params.commandRegistry;
 		this.editorInputManager = params.editorInputManager;
 		this.progressService = params.progressService;
@@ -349,17 +350,22 @@ define([
 			});
 
 			if (serviceRegistry.getServiceReferences("orion.projects").length > 0) { //$NON-NLS-0$
-				commandRegistry.addCommandGroup(fileActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-				commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.commonNavContextMenuEditGroup/orion.New"); //$NON-NLS-1$ //$NON-NLS-0$
-
-				var position = 0;
-				ProjectCommands.getCreateProjectCommands(commandRegistry).forEach(function(command){
-					commandRegistry.registerCommandContribution(fileActionsScope, command.id, position, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-0$
-					commandRegistry.registerCommandContribution(contextMenuActionsScope, command.id, position, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-0$
-					position++;
+				return this.preferences.getPreferences("/common-nav").then(function(prefs) { //$NON-NLS-0$
+					var show = prefs.get("showNewProjectCommands"); //$NON-NLS-0$
+					if (show === undefined || show) {
+						commandRegistry.addCommandGroup(fileActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.menuBarFileGroup/orion.newContentGroup"); //$NON-NLS-1$ //$NON-NLS-0$
+						commandRegistry.addCommandGroup(contextMenuActionsScope, "orion.projectsNewGroup", 100, messages["Project"], "orion.commonNavContextMenuEditGroup/orion.New"); //$NON-NLS-1$ //$NON-NLS-0$
+		
+						var position = 0;
+						ProjectCommands.getCreateProjectCommands(commandRegistry).forEach(function(command){
+							commandRegistry.registerCommandContribution(fileActionsScope, command.id, position, "orion.menuBarFileGroup/orion.newContentGroup/orion.projectsNewGroup"); //$NON-NLS-0$
+							commandRegistry.registerCommandContribution(contextMenuActionsScope, command.id, position, "orion.commonNavContextMenuEditGroup/orion.New/orion.projectsNewGroup"); //$NON-NLS-0$
+							position++;
+						});
+		
+						commandRegistry.registerCommandContribution(editActionsScope, "orion.project.initProject", 0, "orion.menuBarEditGroup");  //$NON-NLS-1$ //$NON-NLS-0$
+					}
 				});
-
-				commandRegistry.registerCommandContribution(editActionsScope, "orion.project.initProject", 0, "orion.menuBarEditGroup");  //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			return new Deferred().resolve();
 		},
