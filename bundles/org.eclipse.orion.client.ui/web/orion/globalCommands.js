@@ -112,6 +112,11 @@ define([
 
 				sideMenu = this.sideMenu = new SideMenu(sideMenuParent, lib.node("pageContent")); //$NON-NLS-0$
 				nav.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
+				
+				var sideMenuToggle = lib.node("sideMenuToggle"); //$NON-NLS-0$
+				if (sideMenuToggle) {
+					sideMenuToggle.addEventListener("click", sideMenu.toggleSideMenu.bind(sideMenu)); //$NON-NLS-0$
+				}
 			}
 		},
 		afterGenerateNavigationMenu: mCustomGlobalCommands.afterGenerateNavigationMenu || function (parentId, serviceRegistry, commandRegistry, prefsService, searcher, handler, /* optional */ editor) {
