@@ -127,14 +127,14 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 				
 				this._getDefaultTarget().then(
 					function(defaultTarget){
-						var params = launchConf.Params;
+						var params = launchConf.Params || {};
 						
-						var target = (params ? params.Target || defaultTarget : defaultTarget);
-						var appName = (params ? params.Name : null);
+						var target = params.Target || defaultTarget;
+						var appName = params.Name;
 						var appPath = launchConf.Path;
 						
-						if(launchConf.user && launchConf.password){
-							cFService.login(target.Url, launchConf.user, launchConf.password).then(
+						if(params.user && params.password){
+							cFService.login(target.Url, params.user, params.password).then(
 								function(result){
 									that._deploy(project, target, appName, appPath, deferred);
 								}, function(error){
