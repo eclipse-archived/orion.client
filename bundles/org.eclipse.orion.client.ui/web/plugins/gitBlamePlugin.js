@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global define document */
 
-define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], function(xhr, PluginProvider, Deferred, operation) {
+define(["require", "orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], function(require, xhr, PluginProvider, Deferred, operation) {
 	var headers = {
 		name: "Git Blame Plugin",
 		version: "1.0", //$NON-NLS-0$
@@ -25,7 +25,7 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 
 			var clientDeferred = new Deferred();
 			
-			xhr("GET", "/gitapi/blame/" + (commit ? commit : "HEAD") + location, { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			xhr("GET", require.toUrl("/gitapi/blame/") + (commit ? commit : "HEAD") + location, { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 						"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
@@ -74,6 +74,7 @@ define(["orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], funct
 	 * requests for all of the commits that make up the blame data
 	 */
 	function blame(location) {
+		
 		//TODO this URL parsing needs to be done by the server
 		var commit;
 		var prefix = "/gitapi/commit/"; //$NON-NLS-0$
