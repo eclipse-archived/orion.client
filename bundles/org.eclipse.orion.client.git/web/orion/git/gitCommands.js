@@ -324,7 +324,7 @@ var exports = {};
 		
 			// try to gather creds from the slideout first
 			if (data.parameters && !data.optionsRequested) {
-				var sshUser =  data.parameters ? data.parameters.valueFor("sshuser") : ""; //$NON-NLS-0$
+				var sshUser = (data.parameters && data.parameters.valueFor("sshuser")) ? data.parameters.valueFor("sshuser") : data.errorData.User; //$NON-NLS-0$
 				var sshPassword = data.parameters ? data.parameters.valueFor("sshpassword") : "";	 //$NON-NLS-0$
 				var saveCredentials = (data.parameters && data.parameters.valueFor("saveCredentials")) ? data.parameters.valueFor("saveCredentials") : false;
 				
