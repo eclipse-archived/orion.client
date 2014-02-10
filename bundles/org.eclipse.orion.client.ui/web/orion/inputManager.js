@@ -225,6 +225,12 @@ define([
 				editor.processParameters(input);
 			}
 		},
+		getAutoLoadEnabled: function() {
+			return this._autoLoadEnabled;
+		},
+		getAutoSaveEnabled: function() {
+			return this._autoSaveEnabled;
+		},
 		getEditor: function() {
 			return this.editor;
 		},

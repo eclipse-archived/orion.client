@@ -446,7 +446,11 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 
 	window.onbeforeunload = function() {
 		if (editor && editor.isDirty()) {
-			 return messages.unsavedChanges;
+			if (inputManager.getAutoSaveEnabled()) {
+				inputManager.save();
+				return;
+			}
+			return messages.unsavedChanges;
 		}
 	};
 };
