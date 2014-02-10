@@ -946,8 +946,6 @@ input {
 .projectNavColumn {
     color: #666;
     font-weight: bold;
-    padding-bottom: 0.2em;
-    padding-top: 0.2em;
 }
 
 .projectPrimaryNavColumn {
@@ -965,7 +963,7 @@ input {
 }
 
 .projectInformationNode{
-	margin-top:3px;
+
 }
 
 .sectionWrapper, .sectionTable{
