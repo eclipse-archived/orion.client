@@ -692,7 +692,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		var rootBounds = {start: 0, contentStart: 0, end: charCount, contentEnd: charCount};
 		this._rootBlock = new Block(rootBounds, null, this, model);
 		this._computeFolding(this._rootBlock.getBlocks());
-		if (this.detectTasks) {
+		if (annotationModel && this.detectTasks) {
 			var add = [];
 			computeTasks(this._rootBlock, model, add);
 			annotationModel.replaceAnnotations([], add);
