@@ -64,6 +64,7 @@ define({
 	"ChooseFSTooltip": "Choose the filesystem you want to view.", //$NON-NLS-1$ //$NON-NLS-0$
 	"FSTitle": "${0} (${1})", //$NON-NLS-1$ //$NON-NLS-0$
 	"Deploy": "Deploy", //$NON-NLS-1$ //$NON-NLS-0$
+	"Deploy As": "Deploy As", //$NON-NLS-1$ //$NON-NLS-0$
 	"Import": "Import", //$NON-NLS-1$ //$NON-NLS-0$
 	"Export": "Export", //$NON-NLS-1$ //$NON-NLS-0$
 	"OpenWith": "Open With", //$NON-NLS-1$ //$NON-NLS-0$

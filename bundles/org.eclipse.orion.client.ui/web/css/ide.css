@@ -108,7 +108,7 @@ button::-moz-focus-inner {
 }
 
 .pageActions {
-	min-height: 28px;
+	min-height: 20px;
 	margin-top: 8px;
 }
 

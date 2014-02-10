@@ -83,6 +83,9 @@ var exports = {};
 					elem.classList.add("commandList"); //$NON-NLS-0$
 					elem.classList.add("layoutLeft"); //$NON-NLS-0$
 					elem.classList.add("pageActions"); //$NON-NLS-0$
+					if (id === _self.additionalActionsScope) {
+						elem.classList.add("extraActions"); //$NON-NLS-0$
+					}
 					_self.parentNode.insertBefore(elem, _self.parentNode.firstChild);
 					_self[id] = elem;
 				}
@@ -143,7 +146,7 @@ var exports = {};
 			commandRegistry.destroy(this.toolsActionsScope);
 			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, metadata, explorer, "tool"); //$NON-NLS-0$
 			commandRegistry.destroy(this.additionalActionsScope);
-			commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, treeRoot, explorer, "tool"); //$NON-NLS-0$
+			commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, treeRoot, explorer, "button"); //$NON-NLS-0$
 		}
 	});
 

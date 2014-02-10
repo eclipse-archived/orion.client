@@ -12,6 +12,7 @@
 /*jslint browser:true devel:true sub:true*/
 define([
 	'i18n!orion/edit/nls/messages',
+	'orion/commands',
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/explorers/explorer-table',
@@ -22,7 +23,7 @@ define([
 	'orion/Deferred',
 	'orion/projectClient'
 ], function(
-	messages, objects, lib, mExplorer, mCommonNav, ProjectCommands,
+	messages, mCommands, objects, lib, mExplorer, mCommonNav, ProjectCommands,
 	PageUtil, URITemplate, Deferred, mProjectClient
 ) {
 	var CommonNavExplorer = mCommonNav.CommonNavExplorer;
@@ -158,7 +159,25 @@ define([
 			this.scopeUp(item.Location);
 			return new Deferred().reject();
 		},
+		createDefaultDeployCommand: function() {
+			var self = this;
+			var deployCommand =  new mCommands.Command({
+				name: messages.Deploy,
+				tooltip: messages.Deploy,
+				id: "orion.project.deploy.default", //$NON-NLS-0$
+				visibleWhen: function() {
+					return self.defaultDeployCommand && self.defaultDeployCommand.visibleWhen.apply(self.defaultDeployCommand, arguments);
+				},
+				callback: function(data) {
+					return self.defaultDeployCommand.callback(data);
+				}
+			});
+			var commandRegistry = this.commandRegistry;
+			commandRegistry.addCommand(deployCommand);
+			commandRegistry.registerCommandContribution(this.additionalActionsScope, deployCommand.id, 0);
+		},
 		registerCommands: function() {
+			this.createDefaultDeployCommand();
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
 				var commandRegistry = this.commandRegistry;
 				var fileActionsScope = this.fileActionsScope;
@@ -173,14 +192,11 @@ define([
 					commandRegistry.registerCommandContribution(fileActionsScope, command.id, position++, "orion.menuBarFileGroup/orion.newContentGroup/orion.newDependency"); //$NON-NLS-0$
 				});
 
+				commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy As"], null, null, null, null, "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
 				var deployCommands = ProjectCommands.getDeployProjectCommands(commandRegistry);
 				if(deployCommands && deployCommands.length>0){
-					if((!this.launchCommands || this.launchCommands.length ===0) && deployCommands.length === 1){
-						commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, null, null, "dropdownSelection", deployCommands[0].id); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
-					} else {
-						commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, null, null, "dropdownSelection", true); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
-					}
-					position = 100;
+					this.defaultDeployCommand = deployCommands[0];
+					position = 0;
 					deployCommands.forEach(function(command){
 						commandRegistry.registerCommandContribution(additionalActionsScope, command.id, position++, "orion.deployNavGroup"); //$NON-NLS-0$
 					});
@@ -188,12 +204,14 @@ define([
 			}.bind(this));
 		},
 		updateCommands: function(selections){
-			if(this.treeRoot && this.treeRoot.Project && typeof this.treeRoot.Project.launchConfigurations === "undefined"){
+			var self = this;
+			if(this.treeRoot && this.treeRoot.Project && typeof this.treeRoot.Project.launchConfigurations === "undefined"){ //$NON-NLS-0$
 				this.treeRoot.Project.launchConfigurations = [];
 				
 				function doUpdateForLaunchConfigurations(launchConfigurations, selections){
+					var i;
 					if(this.launchCommands){
-						for(var i=0; i<this.launchCommands.length; i++){
+						for(i=0; i<this.launchCommands.length; i++){
 							this.commandRegistry.unregisterCommandContribution(this.additionalActionsScope, this.launchCommands[i]);
 						}
 					}
@@ -201,17 +219,14 @@ define([
 					this.launchCommands = [];
 					ProjectCommands.updateProjectNavCommands(this.treeRoot, launchConfigurations, this.commandRegistry, this.projectClient, this.fileClient);
 					var launchCommand;
-					for(var i=0; i<launchConfigurations.length; i++){
-						launchCommand = "orion.launchConfiguration.deploy." + launchConfigurations[i].ServiceId + launchConfigurations[i].Name;
+					for(i=0; i<launchConfigurations.length; i++){
+						launchCommand = "orion.launchConfiguration.deploy." + launchConfigurations[i].ServiceId + launchConfigurations[i].Name; //$NON-NLS-0$
 						this.launchCommands.push(launchCommand);
 						this.commandRegistry.registerCommandContribution(this.additionalActionsScope, launchCommand, i+1, "orion.deployNavGroup/orion.deployLaunchConfigurationGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					var defaultCommand = ProjectCommands.getDefaultLaunchCommand(this.treeRoot.Project.Name);
-					
-					if(defaultCommand){
-						this.commandRegistry.addCommandGroup(this.additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, null, null, "dropdownSelection", defaultCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
-					} else if(launchConfigurations.length === 1){
-						this.commandRegistry.addCommandGroup(this.additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, null, null, "dropdownSelection", launchCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
+					if (defaultCommand) {
+						self.defaultDeployCommand = this.commandRegistry.findCommand(defaultCommand);
 					}
 					CommonNavExplorer.prototype.updateCommands.apply(this, selections);					
 				}
@@ -222,11 +237,7 @@ define([
 						var _self = this;
 						this.launchConfigurationDispatcher = ProjectCommands.getLaunchConfigurationDispatcher();
 						this.launchConfigurationListener = function(event){
-							if(event.type === "changedDefault"){
-								var defaultCommand = ProjectCommands.getDefaultLaunchCommand(_self.treeRoot.Project.Name);
-								if(defaultCommand){
-									_self.commandRegistry.addCommandGroup(_self.additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy"], null, null, null, null, "dropdownSelection", defaultCommand); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
-								}
+							if(event.type === "changedDefault"){ //$NON-NLS-0$
 								_self.updateCommands(_self.selection.getSelections());
 								return;
 							}
@@ -251,7 +262,7 @@ define([
 								doUpdateForLaunchConfigurations.apply(_self, [_self.treeRoot.Project.launchConfigurations]);
 							});
 						};
-						this._launchConfigurationEventTypes = ["create", "delete", "changedDefault"];
+						this._launchConfigurationEventTypes = ["create", "delete", "changedDefault"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						this._launchConfigurationEventTypes.forEach(function(eventType) {
 							_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
 						});
@@ -285,7 +296,7 @@ define([
 		destroy: function(){
 			if(this.launchCommands){
 				for(var i=0; i<this.launchCommands.length; i++){
-					this.commandRegistry.unregisterCommandContribution(this.additionalActionsScope, this.launchCommands[i], "orion.deployNavGroup/orion.deployLaunchConfigurationGroup");
+					this.commandRegistry.unregisterCommandContribution(this.additionalActionsScope, this.launchCommands[i], "orion.deployNavGroup/orion.deployLaunchConfigurationGroup"); //$NON-NLS-0$
 				}
 			}
 			var _self = this;
