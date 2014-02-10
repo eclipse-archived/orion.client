@@ -149,6 +149,7 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 										Name: result.App.entity.name
 									},
 									Url: "http://" + result.Route.entity.host + "." + result.Domain,
+									UrlTitle: result.App.entity.name,
 									ManageUrl: result.ManageUrl,
 									Path: appPath
 								}

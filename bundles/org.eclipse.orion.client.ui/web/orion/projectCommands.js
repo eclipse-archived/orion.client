@@ -89,7 +89,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		progress.setProgressResult(status);
 		
 		if(status.ToSave){
-			progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl, status.ToSave.Path), "Saving configuration").then(
+			progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl, status.ToSave.Path, status.ToSave.UrlTitle), "Saving configuration").then(
 				function(configuration){
 					storeLastDeployment(context.project, context.deployService, configuration);
 					if(sharedLaunchConfigurationDispatcher){
@@ -161,7 +161,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			}
 			
 			if(result.ToSave){
-				progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path), "Saving configuration").then(
+				progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, result.ToSave.ConfigurationName, context.deployService.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.UrlTitle), "Saving configuration").then(
 					function(configuration){
 						storeLastDeployment(context.project.Name, context.deployService, configuration);
 						if(sharedLaunchConfigurationDispatcher){
@@ -448,7 +448,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 									sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: item });
 								}
 								if(result.ToSave){
-									progress.showWhile(projectClient.saveProjectLaunchConfiguration(item.project, result.ToSave.ConfigurationName, service.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path), "Saving configuration").then(
+									progress.showWhile(projectClient.saveProjectLaunchConfiguration(item.project, result.ToSave.ConfigurationName, service.id, result.ToSave.Parameters, result.ToSave.Url, result.ToSave.ManageUrl, result.ToSave.Path, result.ToSave.UrlTitle), "Saving configuration").then(
 										function(configuration){
 											storeLastDeployment(item.project.Name, service, configuration);
 											if(sharedLaunchConfigurationDispatcher){
