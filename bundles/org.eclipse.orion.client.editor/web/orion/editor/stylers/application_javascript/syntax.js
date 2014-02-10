@@ -37,6 +37,8 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 		contentTypes: ["application/javascript"], //$NON-NLS-0$
 		patterns: [
 			{
+				include: "orion.lib#doc_block" //$NON-NLS-0$
+			}, {
 				include: "orion.c-like" //$NON-NLS-0$
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

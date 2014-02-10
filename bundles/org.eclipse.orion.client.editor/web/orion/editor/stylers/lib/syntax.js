@@ -53,13 +53,26 @@ define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 					match: "\\)",
 					name: "punctuation.section.parens.end"
 				},
-				doc_markup: {
-					match: "\\<\\S*\\>",
-					name: "keyword.other.documentation.markup"
-				},
-				doc_tag: {
-					match: "@(?:(?!\\*/)\\S)*",
-					name: "keyword.other.documentation.tag"
+				doc_block: {
+					begin: "/\\*\\*",
+					end: "\\*/",
+					name: "comment.block.documentation",
+					patterns: [
+						{
+							match: "@(?:(?!\\*/)\\S)*",
+							name: "keyword.other.documentation.tag"
+						}, {
+							match: "\\<\\S*\\>",
+							name: "keyword.other.documentation.markup"
+						}, {
+							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",
+							name: "meta.annotation.task.todo",
+							captures: {
+								2: {name: "keyword.other.documentation.task"},
+								4: {name: "comment.block"}
+							}
+						}
+					]
 				},
 				number_decimal: {
 					match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
@@ -109,10 +122,6 @@ define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 					name: "comment.block",
 					patterns: [
 						{
-							include: "orion.lib#doc_tag"
-						}, {
-							include: "orion.lib#doc_markup"
-						}, {
 							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",
 							name: "meta.annotation.task.todo",
 							captures: {

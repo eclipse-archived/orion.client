@@ -36,6 +36,8 @@ define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/
 		contentTypes: ["text/x-java-source"],
 		patterns: [
 			{
+				include: "orion.lib#doc_block" //$NON-NLS-0$
+			}, {
 				include: "orion.c-like"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",

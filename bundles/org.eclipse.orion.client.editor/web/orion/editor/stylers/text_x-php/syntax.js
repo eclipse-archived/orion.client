@@ -44,6 +44,8 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 		contentTypes: ["text/x-php"],
 		patterns: [
 			{
+				include: "orion.lib#doc_block"
+			}, {
 				include: "orion.c-like"
 			}, {
 				match: "(?i)<\\?(?:=|php)?(?:\\s|$)",
