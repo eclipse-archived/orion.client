@@ -238,6 +238,7 @@ define([
 		_renderCategories: function() {
 			var categories = this.categories, _self = this;
 			var currentURL = new URL(window.location.href), pageParams = PageUtil.matchResourceParameters();
+			pageParams.OrionHome = PageLinks.getOrionHome();
 			var activeCategoryKnown = false;
 			this.clearMenuItems();
 			categories.getCategoryIDs().map(function(catId) {
