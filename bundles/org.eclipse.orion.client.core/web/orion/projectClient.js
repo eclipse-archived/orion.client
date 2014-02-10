@@ -12,6 +12,14 @@
 /*global define window console*/
 define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCommands'], function(messages, Deferred, mExtensionCommands){
 
+	function _toJSON(text) {
+		try {
+			return text ? JSON.parse(text) : {};
+		} catch (e) {
+			return {__TEXT__: String(text)};
+		}
+	}
+
 	/**
 	 * Creates a new project client.
 	 * @class Project client provides client-side API to handle projects based on given file client.
@@ -31,18 +39,18 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 			var deferred = new Deferred();
 			for(var i=0; i<children.length; i++){
 				if(children[i].Name === "project.json"){
-					this.fileClient.read(children[i].Location).then(function(content){
-						try{
-							var projectJson = content && content.length>0 ? JSON.parse(content) : {};
-							projectJson.Name = projectJson.Name || folderMetadata.Name;
-							projectJson.ContentLocation = folderMetadata.Location;
-							projectJson.WorkspaceLocation = workspace.Location;
-							projectJson.ProjectJsonLocation = children[i].Location;
-							deferred.resolve(projectJson);
-						} catch (e){
-							deferred.reject(e);
-						}
-					}, function(error){deferred.reject(error);}, function(progress){deferred.progress(progress);});
+					this.fileClient.read(children[i].Location).then(function(content) {
+						var projectJson = _toJSON(content);
+						projectJson.Name = projectJson.Name || folderMetadata.Name;
+						projectJson.ContentLocation = folderMetadata.Location;
+						projectJson.WorkspaceLocation = workspace.Location;
+						projectJson.ProjectJsonLocation = children[i].Location;
+						deferred.resolve(projectJson);
+					}, function(error) {
+						deferred.reject(error);
+					}, function(progress) {
+						deferred.progress(progress);
+					});
 					return deferred;
 				}
 			}
@@ -241,7 +249,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 				if(children[i].Name==="project.json"){
 					this.fileClient.read(children[i].Location).then(function(content){
 						try{
-							var projectJson = content && content.length>0 ? JSON.parse(content) : {};
+							var projectJson = _toJSON(content);
 							if(!projectJson.Dependencies){
 								projectJson.Dependencies = [];
 							}
@@ -280,7 +288,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 				if(children[i].Name==="project.json"){
 					this.fileClient.read(children[i].Location).then(function(content){
 						try{
-							var projectJson = content && content.length>0 ? JSON.parse(content) : {};
+							var projectJson = _toJSON(content);
 							if(!projectJson.Dependencies){
 								projectJson.Dependencies = [];
 							}
@@ -318,7 +326,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 		function saveProperties(projectJsonLocation){
 			this.fileClient.read(projectJsonLocation).then(function(content){
 				try{
-					var projectJson = content && content.length>0 ? JSON.parse(content) : {};
+					var projectJson = _toJSON(content);
 					for(var key in properties){
 						projectJson[key] = properties[key];
 					}
