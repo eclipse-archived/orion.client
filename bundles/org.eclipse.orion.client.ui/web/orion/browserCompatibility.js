@@ -22,7 +22,7 @@
 							{name: 'Firefox', regExp: /firefox\/(\d+)/i, minVersion: 17}, //$NON-NLS-0$
 							{name: 'Microsoft Internet Explorer', regExp: /msie\s(\d+)/i, minVersion: 10}, //$NON-NLS-0$
 							{name: 'Microsoft Internet Explorer', regExp: /Trident\/(\d+)/i, minVersion: 6}, //$NON-NLS-0$
-							{name: 'Safari', regExp: /version\/(\d+).*?safari/i, minVersion: 5} ]; //$NON-NLS-0$
+							{name: 'Safari', regExp: /version\/(\d+).*?safari/i, minVersion: 6} ]; //$NON-NLS-0$
 
 		for (var i = 0; i < browserData.length; i++) {
 			var browser = browserData[i];
