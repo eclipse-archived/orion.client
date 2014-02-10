@@ -280,7 +280,7 @@ define([
 			}
 			this._parent.appendChild(this._node);
 			
-			function renderSections(sectionsOrder){
+			function renderSections(sectionsOrder, sectionNames){
 				sectionsOrder.forEach(function(sectionName){
 					if(sectionName === "project"){ //$NON-NLS-0$
 						if(projectJson && this.showProjectView){
@@ -292,7 +292,8 @@ define([
 						if (this.showFolderNav) {
 							var navNode = document.createElement("div"); //$NON-NLS-0$
 							navNode.id = "folderNavNode"; //$NON-NLS-0$
-							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Files", canHide: !this.readonly}); //$NON-NLS-0$
+							var title = sectionNames[sectionName] || "Files";
+							var foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: title, canHide: !this.readonly}); //$NON-NLS-0$
 							if(this.editorView) {//To embed an orion editor in the section
 								foldersSection.setContent(this.editorView.getParent());
 								this.editorView.create();
@@ -337,7 +338,7 @@ define([
 					} else if(sectionName === "readme"){ //$NON-NLS-0$
 						if (readmeMd) {
 							div = document.createElement("div"); //$NON-NLS-0$
-							this.markdownView.displayInFrame(div, readmeMd, this.readmeHeaderClass);
+							this.markdownView.displayInFrame(div, readmeMd, this.readmeHeaderClass, null, sectionNames[sectionName]);
 							this._node.appendChild(div);
 						}
 					}
@@ -345,19 +346,21 @@ define([
 			}
 			
 			var sectionsOrder = ["project", "folderNav", "readme"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var	sectionNames = {};
 			if(this.editorView) {
-				renderSections.apply(this, [sectionsOrder]);
+				renderSections.apply(this, [sectionsOrder, sectionNames]);
 			} else {
 				if(this.preferences) {
 					this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){ //$NON-NLS-0$
+						sectionNames = sectionsOrderPrefs.get("folderViewNames") || sectionNames;
 						sectionsOrder = sectionsOrderPrefs.get("folderView") || sectionsOrder; //$NON-NLS-0$
-						renderSections.apply(this, [sectionsOrder]);
+						renderSections.apply(this, [sectionsOrder, sectionNames]);
 					}.bind(this), function(error){
-						renderSections.apply(this, [sectionsOrder]);
+						renderSections.apply(this, [sectionsOrder, sectionNames]);
 						window.console.error(error);
 					}.bind(this));
 				} else {
-					renderSections.apply(this, [sectionsOrder]);
+					renderSections.apply(this, [sectionsOrder, sectionNames]);
 				}
 			}
 		},

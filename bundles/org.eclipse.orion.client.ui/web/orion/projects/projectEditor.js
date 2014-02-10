@@ -51,12 +51,6 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	ProjectInfoRenderer.prototype.constructor = ProjectInfoRenderer;
 	
 	ProjectInfoRenderer.prototype.getCellHeaderElement = function(col_no){
-		if(col_no===0){
-			var td = document.createElement("td");
-			td.colSpan = 2;
-			td.appendChild(document.createTextNode("Project Information"));
-			return td;
-		}
 	};
 	
 	ProjectInfoRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -248,12 +242,6 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	DependenciesRenderer.prototype.constructor = DependenciesRenderer;
 	
 	DependenciesRenderer.prototype.getCellHeaderElement = function(col_no){
-		if(col_no===0){
-			var td = document.createElement("td");
-			td.colSpan = 2;
-			td.appendChild(document.createTextNode("Associated Content"));
-			return td;
-		}
 	};
 	
 	DependenciesRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -337,12 +325,6 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 	LaunchConfigurationRenderer.prototype.constructor = LaunchConfigurationRenderer;
 	
 	LaunchConfigurationRenderer.prototype.getCellHeaderElement = function(col_no){
-		if(col_no===0){
-			var td = document.createElement("td");
-			td.colSpan = 2;
-			td.appendChild(document.createTextNode("Deployment Information"));
-			return td;
-		}
 	};
 	
 	LaunchConfigurationRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -569,14 +551,15 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			this.node.className = "orionProject";				
 			this.projectData = projectData;
 			
-			function renderSections(sectionsOrder){
+			function renderSections(sectionsOrder, sectionNames){
+				sectionNames = sectionNames || {};
 				sectionsOrder.forEach(function(sectionName){
 					var span;
 					switch (sectionName) {
 						case "projectInfo":
 							span = document.createElement("span");
 							this.node.appendChild(span);
-							this.renderProjectInfo(span);
+							this.renderProjectInfo(span, sectionNames[sectionName]);
 							break;
 						case "additionalInfo":
 							span = document.createElement("span");
@@ -586,13 +569,13 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 						case "deployment":
 							span = document.createElement("span");
 							this.node.appendChild(span);
-							this.renderLaunchConfigurations(span);
+							this.renderLaunchConfigurations(span, null, sectionNames[sectionName]);
 							break;
 						case "dependencies":
 							span = document.createElement("span");
 							span.id = "projectDependenciesNode";
 							this.node.appendChild(span);
-							this.renderDependencies(span);
+							this.renderDependencies(span, sectionNames[sectionName]);
 							break;
 					}
 				}.bind(this));
@@ -601,9 +584,10 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			var sectionsOrder = ["projectInfo", "additionalInfo", "deployment", "dependencies"];
 			this.preferences.getPreferences("/sectionsOrder").then(function(sectionsOrderPrefs){
 				sectionsOrder = sectionsOrderPrefs.get("projectView") || sectionsOrder;
-				renderSections.apply(this, [sectionsOrder]);
+				var sectionsNames = sectionsOrderPrefs.get("projectViewNames") || [];
+				renderSections.apply(this, [sectionsOrder, sectionsNames]);
 			}.bind(this), function(error){
-				renderSections.apply(this, [sectionsOrder]);
+				renderSections.apply(this, [sectionsOrder, {}]);
 				window.console.error(error);
 			}.bind(this));
 			
@@ -635,7 +619,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				}
 			}
 			lib.empty(dependenciesNode);
-			this.renderDependencies(dependenciesNode);
+			this.renderDependencies(dependenciesNode, this.dependenciesSectionName);
 		},
 		_renderEditableFields: function(input, property, tabIndex, urlElement /*optional*/){	
 			var saveInput = function(event) {
@@ -686,9 +670,10 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 				saveInput(event);
 			};
 		},
-		renderProjectInfo: function(parent){
+		renderProjectInfo: function(parent, sectionName){
 			
-			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection", title: "Project Information", canHide: true});
+			var title = sectionName || "Project Information";
+			var projectInfoSection = new mSection.Section(parent, {id: "projectInfoSection", title: title, canHide: true});
 			var explorerParent = document.createElement("div");
 			explorerParent.id = "projectInformationNode";
 			var projectInfoRenderer = new ProjectInfoRenderer({
@@ -730,13 +715,15 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			}
 			}.bind(this));
 		},
-		renderDependencies: function(parent){
+		renderDependencies: function(parent, sectionName){
 			
 			if(!this.projectData.Dependencies || this.projectData.Dependencies.length===0){
 				return;
 			}
 			
-			var dependenciesSection = new mSection.Section(parent, {id: "projectDependenciesSection", title: "Associated Content", canHide: true});
+			this.dependenciesSectionName = sectionName || "Associated Content";
+			
+			var dependenciesSection = new mSection.Section(parent, {id: "projectDependenciesSection", title: this.dependenciesSectionName, canHide: true});
 			var dependenciesParent = document.createElement("div");
 			dependenciesParent.id = "dependenciesNode";
 			var dependenciesRenderer = new DependenciesRenderer({
@@ -750,7 +737,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			dependenciesExplorer.createTree(dependenciesParent, new DependenciesModel(this.projectData, this.projectClient),  {indent: '8px', noSelection: true});
 			
 		},
-		renderLaunchConfigurations: function(parent, configurations){
+		renderLaunchConfigurations: function(parent, configurations, sectionName){
 			this.configurationsParent = parent;
 			if(!configurations){
 				this.projectClient.getProjectLaunchConfigurations(this.projectData).then(function(configurations){
@@ -758,12 +745,13 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 					if(!configurations || configurations.length === 0){
 						return;
 					}
-					this.renderLaunchConfigurations(parent, configurations);
+					this.renderLaunchConfigurations(parent, configurations, sectionName);
 				}.bind(this));
 				return;
 			}
 			lib.empty(this.configurationsParent);
-			var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", title: "Deployment Information", canHide: true});
+			this.launchCofunctionSectionsTitle = sectionName || "Deployment Information";
+			var launchConfigurationSection = new mSection.Section(parent, {id: "projectLaunchConfigurationSection", title: this.launchCofunctionSectionsTitle, canHide: true});
 			var launchConfigurationParent = document.createElement("div");
 			launchConfigurationParent.id = "launchConfigurationsNode";
 			var launchConfigurationRenderer = new LaunchConfigurationRenderer({
@@ -785,13 +773,13 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 					var configuration = this.configurations[i];
 					if(configuration.Name === event.newValue.Name && configuration.ServiceId === event.newValue.ServiceId){
 						this.configurations[i] = event.newValue;
-						this.renderLaunchConfigurations(this.configurationsParent, this.configurations);
+						this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle);
 						return;
 					}
 				}
 				if(event.type === "create"){
 					this.configurations.push(event.newValue);
-					this.renderLaunchConfigurations(this.configurationsParent, this.configurations);
+					this.renderLaunchConfigurations(this.configurationsParent, this.configurations, this.launchCofunctionSectionsTitle);
 					return;
 				}
 			}
