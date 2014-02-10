@@ -136,9 +136,11 @@ define(['orion/Deferred', 'orion/objects', 'orion/commands', 'orion/outliner', '
 		/** @private */
 		viewModeMenuCallback: function() {
 			var _self = this;
+			var active = this.getActiveViewModeId();
 			return Object.keys(this.viewModes).map(function(modeId) {
 				var mode = _self.getViewMode(modeId);
 				return {
+					checked: modeId === active,
 					name: mode.label || modeId,
 					callback: _self.setViewMode.bind(_self, modeId)
 				};

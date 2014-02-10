@@ -663,6 +663,9 @@ define([
 		 */
 		 populateChoicesMenu: function(parent, items, handler, userData, commandService) {
 			var choices = this.getChoices(items, handler, userData);
+			var addCheck = choices.some(function(choice) {
+				return choice.checked;
+			});
 			choices.forEach(function(choice) {
 				if (choice.name) {
 					var itemNode = document.createElement("li"); //$NON-NLS-0$
@@ -671,7 +674,13 @@ define([
 					node.tabIndex = 0; 
 					node.role = "menuitem"; //$NON-NLS-0$
 					node.classList.add("dropdownMenuItem"); //$NON-NLS-0$
-					var text = document.createTextNode(choice.name); //$NON-NLS-0$
+					if (addCheck) {
+						var check = document.createElement("span"); //$NON-NLS-0$
+						check.classList.add("check");
+						check.appendChild(document.createTextNode(choice.checked ? "\u25CF" : "")); //$NON-NLS-1$ //$NON-NLS-0$
+						node.appendChild(check);
+					}
+					var text = document.createTextNode(choice.name);
 					node.appendChild(text);
 					itemNode.appendChild(node);
 					node.choice = choice;

@@ -80,9 +80,10 @@ define([
 			var _self = this;
 			return serviceRegistry.getServiceReferences("orion.core.file").map(function(fileServiceRef) { //$NON-NLS-0$
 				var top = fileServiceRef.getProperty("top"); //$NON-NLS-0$
+				var label = _self._fileServiceLabel(top, true);
 				return {
-					// TODO indicate which FS is currently active with bullet, etc
-					name: _self._fileServiceLabel(top, true),
+					checked: _self.fileSystem === label,
+					name: label,
 					callback: _self.setActiveFilesystem.bind(_self, top)
 				};
 			});
@@ -143,6 +144,7 @@ define([
 				target = location.ChildrenLocation;
 			}
 			lib.empty(this.fsName);
+			this.fileSystem = this._fileServiceLabel(target, true);
 			this.fsName.appendChild(this._fileServiceLabel(target));
 
 			this.commandRegistry.destroy(this.menu);

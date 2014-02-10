@@ -501,6 +501,11 @@ a.currentLocation:hover {
 	white-space: nowrap;
 }
 
+.dropdownMenuItem .check {
+	display: inline-block;
+	width: 12px;
+}
+
 .dropdownMenuItem .dropdownKeyBinding {
 	color: grey !important; /* !important to override .dropdownMenuItem */
 	float: right;
