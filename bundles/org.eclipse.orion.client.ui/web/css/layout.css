@@ -532,8 +532,10 @@ hard-coded numbers elsewhere.
 	border-bottom: 7px solid transparent;
 	border-right: 7px solid white;
 }
-
-
+/* left arrow: match submenu bgcolor on hover */
+.sideMenuSubMenuItem:hover:before {
+	border-right: 7px solid #fde7cf;
+}
 
 .sideMenuSubMenuItem:first-child{
 	border-top:1px solid #bbb;
