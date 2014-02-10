@@ -9,21 +9,68 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define*/
+/*global window define document*/
 
 define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/serviceregistry', 
-        'orion/preferences', 'orion/PageLinks'],
-        function(Deferred, CFClient, URITemplate, ServiceRegistry, Preferences, PageLinks){
+        'orion/preferences', 'orion/PageLinks', 'orion/xhr'],
+        function(Deferred, CFClient, URITemplate, ServiceRegistry, Preferences, PageLinks, xhr){
 	
 	var cFService = new CFClient.CFService();
 	
 	// initialize service registry and EAS services
 	var serviceRegistry = new ServiceRegistry.ServiceRegistry();
+	
+	var temp = document.createElement('a');
+	temp.href = "../../prefs/user";
+	var location = temp.href;
+	
+	function PreferencesProvider(location) {
+		this.location = location;
+	}
+
+	PreferencesProvider.prototype = {
+		get: function(name) {
+			return xhr("GET", this.location + name, {
+				headers: {
+					"Orion-Version": "1"
+				},
+				timeout: 15000,
+				log: false
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
+			});
+		},
+		put: function(name, data) {
+			return xhr("PUT", this.location + name, {
+				data: JSON.stringify(data),
+				headers: {
+					"Orion-Version": "1"
+				},
+				contentType: "application/json;charset=UTF-8",
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
+			});
+		},
+		remove: function(name, key){
+			return xhr("DELETE", this.location + name +"?key=" + key, {
+				headers: {
+					"Orion-Version": "1"
+				},
+				contentType: "application/json;charset=UTF-8",
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
+			});
+		}
+	};
+	
+	var service = new PreferencesProvider(location);
+	serviceRegistry.registerService("orion.core.preference.provider", service, {});
 
 	// This is code to ensure the first visit to orion works
 	// we read settings and wait for the plugin registry to fully startup before continuing
 	var preferences = new Preferences.PreferencesService(serviceRegistry);
-
 	
 	function DeployService(){
 	};
