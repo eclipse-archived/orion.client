@@ -8,7 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console URL*/
+/*global URL*/
 /*jslint amd:true browser:true*/
 
 define([
@@ -158,13 +158,11 @@ define([
 		},
 		// Should only be called once
 		setCategories: function(categories) {
-//			console.log("setCategories()"); //console.log(categories);
 			this.categories = categories;
 			this.links = Object.create(null); // Maps category ID {String} to link DOM elements {Element[]}
 		},
 		// Should only be called once
 		setPageLinks: function(pagelinks) {
-//			console.log("setPagelinks())"); //console.log(pagelinks);
 			this.pageLinks = pagelinks;
 
 			var _self = this;
@@ -183,7 +181,6 @@ define([
 		 * @param {String[]} exclusions List of related link IDs that the page has requested to not be shown.
 		 */
 		setRelatedLinks: function(relatedLinks, exclusions) {
-//			console.log("setRelatedLinks())"); //console.log(relatedLinks);
 			this.relatedLinks = relatedLinks;
 
 			var _self = this;
@@ -254,7 +251,6 @@ define([
 					var isActive = catLinks.some(function(link) {
 						if (!link.source.uriTemplate) {
 							// Should not happen -- every link has a uriTemplate
-							console.log('bad link'); console.log(link);
 							return false;
 						}
 						var uriTemplate = new URITemplate(link.source.uriTemplate);
@@ -332,15 +328,15 @@ define([
 		}
 	});
 
-	function debug() {
-		console.log(" ------- ");
-		var _self = this;
-		Object.keys(this.links).forEach(function(catId) {
-			console.log(catId + " -> [" + _self.links[catId].map(function(l) { 
-				return l.textContent + " (" + l.href + ")";
-			}).join(", ") + "]");
-		});
-	}
+//	function debug() {
+//		console.log(" ------- ");
+//		var _self = this;
+//		Object.keys(this.links).forEach(function(catId) {
+//			console.log(catId + " -> [" + _self.links[catId].map(function(l) { 
+//				return l.textContent + " (" + l.href + ")";
+//			}).join(", ") + "]");
+//		});
+//	}
 
 	function isNotRelatedLink(elem) {
 		return !elem.isRelatedLink;
