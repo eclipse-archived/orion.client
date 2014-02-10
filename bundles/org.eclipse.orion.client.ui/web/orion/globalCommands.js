@@ -18,11 +18,11 @@ define([
 		'orion/PageUtil', 'orion/widgets/themes/ThemePreferences', 'orion/widgets/themes/container/ThemeData', 'orion/Deferred',
 		'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html',
 		'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html', 'orion/widgets/input/DropDownMenu', 
-		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu'
+		'orion/util', 'orion/customGlobalCommands', 'orion/fileClient', 'orion/webui/SideMenu', 'orion/objects'
 	],
 	function (messages, require, commonHTML, KeyBinding, EventTarget, mCommandRegistry, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding,
 		mBreadcrumbs, lib, mSplitter, mDropdown, mTooltip, mContentTypes, URITemplate, mKeyAssist, PageUtil, mThemePreferences, mThemeData, Deferred,
-		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, util, mCustomGlobalCommands, mFileClient, SideMenu) {
+		mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate, DropDownMenu, util, mCustomGlobalCommands, mFileClient, SideMenu, objects) {
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 *
@@ -93,9 +93,9 @@ define([
 			return true;
 		},
 		// each relatedLink is { relatedLink: Object, command: Command, invocation: CommandInvocation }
-		addRelatedLinkCommands: mCustomGlobalCommands.addRelatedLinkCommands || function (commandRegistry, relatedLinks, inactive) {
+		addRelatedLinkCommands: mCustomGlobalCommands.addRelatedLinkCommands || function (commandRegistry, relatedLinks, inactive, exclusions) {
 			if (this.sideMenu) {
-				this.sideMenu.setRelatedLinks(relatedLinks);
+				this.sideMenu.setRelatedLinks(relatedLinks, exclusions);
 			}
 		},
 		afterGenerateRelatedLinks: mCustomGlobalCommands.afterGenerateRelatedLinks || function (serviceRegistry, item, exclusions, commandRegistry, alternateItem) {},
@@ -246,7 +246,16 @@ define([
 			}
 			return info;
 		}
-
+		function getNavCommandRef(navCommandsRefs, id) {
+			var commandRef = null;
+			navCommandsRefs.some(function(ref) {
+				if (id === ref.getProperty("id")) { //$NON-NLS-0$
+					return !!(commandRef = ref);
+				}
+				return false;
+			});
+			return commandRef;
+		}
 		var alternateItemDeferred;
 		/**
 		 * Creates a CommandInvocation for given commandItem.
@@ -297,37 +306,37 @@ define([
 			}
 
 			// assemble the related links.
+			var navCommands = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
 			var deferredCommandItems = [];
 			contributedLinks.forEach(function(contribution) {
 				var info = getServiceProperties(contribution);
-				// exclude anything in the list of exclusions
-				if (!info.id || exclusions.indexOf(info.id) !== -1) {
+				if (!info.id) {
 					return; // skip
 				}
 				// First see if we have a uriTemplate and name, which is enough to build a command internally.
+				var commandOptionsPromise;
 				if (((info.nls && info.nameKey) || info.name) && info.uriTemplate) {
-					var commandOptionsPromise = mExtensionCommands._createCommandOptions(info, contribution, serviceRegistry, contentTypesCache, true);
+					commandOptionsPromise = mExtensionCommands._createCommandOptions(info, contribution, serviceRegistry, contentTypesCache, true);
 					deferredCommandItems.push(commandItem(info, commandOptionsPromise, null));
 					return;
 				}
-				// We couldn't compose one, so see if one is already registered.
+				// Otherwise, check if this related link references an orion.navigate.command contribution
+				var navRef = getNavCommandRef(navCommands, info.id);
+				if (!navRef)
+					return; // skip: no nav command
+
+				// Build relatedLink info by merging the 2 contributions. info has "id", "category"; navInfo has everything else
+				var navInfo = getServiceProperties(navRef), relatedLink = {};
+				objects.mixin(relatedLink, navInfo, info); // {} <- navInfo <- info
 				var command;
 				if ((command = commandRegistry.findCommand(info.id))) {
-					deferredCommandItems.push(commandItem(info, null, command));
-					return;
+					// A Command exists already, use it
+					deferredCommandItems.push(commandItem(relatedLink, null, command));
+				} else {
+					// Create a new Command for the nav contribution
+					commandOptionsPromise = mExtensionCommands._createCommandOptions(navInfo, navRef, serviceRegistry, contentTypesCache, true);
+					deferredCommandItems.push(commandItem(relatedLink, commandOptionsPromise, null));
 				}
-				// It's not registered, so look for it in orion.navigate.command and create it
-				var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
-				commandsReferences.some(function(commandReference) {
-					var id = commandReference.getProperty("id"); //$NON-NLS-0$
-					if (id !== info.id) {
-						return false; // continue
-					}
-					var navInfo = getServiceProperties(commandReference);
-					var commandOptionsPromise = mExtensionCommands._createCommandOptions(navInfo, commandReference, serviceRegistry, contentTypesCache, true);
-					deferredCommandItems.push(commandItem(info, commandOptionsPromise, null));
-					return true; // stop
-				});
 			});
 			Deferred.all(deferredCommandItems, continueOnError).then(function(commandItems) {
 				commandItems.sort(function(a, b) {
@@ -344,7 +353,7 @@ define([
 						return false;
 					});
 					// Finally pass the relatedLinks data to customGlobalCommands
-					customGlobalCommands.addRelatedLinkCommands.call(thisGlobalCommands, commandRegistry, invoked, nonInvoked);
+					customGlobalCommands.addRelatedLinkCommands.call(thisGlobalCommands, commandRegistry, invoked, nonInvoked, exclusions);
 					customGlobalCommands.afterGenerateRelatedLinks.apply(thisGlobalCommands, globalArguments);
 				});
 			});

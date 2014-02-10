@@ -34,24 +34,21 @@ define([
 		nameKey: "Edit",
 		nls: "orion/nls/messages",
 		imageClass: "core-sprite-edit",
-		order: 10,
-		uriTemplate: "{+OrionHome}/edit/"
+		order: 10
 	});
 	provider.registerService("orion.page.link.category", null, {
 		id: "search",
 		nameKey: "Search",
 		nls: "orion/nls/messages",
 		imageClass: "core-sprite-search",
-		order: 30,
-		uriTemplate: "{+OrionHome}/search/"
+		order: 30
 	});
 	provider.registerService("orion.page.link.category", null, {
 		id: "shell",
 		nameKey: "Shell",
 		nls: "orion/nls/messages",
 		imageClass: "core-sprite-shell",
-		order: 40,
-		uriTemplate: "{+OrionHome}/shell/"
+		order: 40
 	});
 
 	// Primary navigation links

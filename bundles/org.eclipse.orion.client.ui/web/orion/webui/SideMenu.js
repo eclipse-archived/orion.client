@@ -8,7 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global console*/
+/*global console URL*/
 /*jslint amd:true browser:true*/
 
 define([
@@ -16,8 +16,10 @@ define([
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/PageLinks',
-	'orion/URITemplate'
-], function(mCommands, objects, lib, PageLinks, URITemplate) {
+	'orion/PageUtil',
+	'orion/URITemplate',
+	'orion/URL-shim'
+], function(mCommands, objects, lib, PageLinks, PageUtil, URITemplate, _) {
 
 	function SideMenu(parentNode, contentNode){
 		this.parentNode = lib.node(parentNode);
@@ -41,10 +43,12 @@ define([
 		SIDE_MENU_OPEN_WIDTH: "40px",
 		TRANSITION_DURATION_MS: 301, /* this should always be greater than the duration of the left transition of .content-fixedHeight */
 		
-		addMenuItem: function( imageClassName, categoryId /*, link*/ ){
+		addMenuItem: function( imageClassName, categoryId, isActive ){
 			var anchor = this.anchor;
 			
 			var listItem = this.createListItem(imageClassName, categoryId);
+			if (isActive)
+				listItem.classList.add("sideMenuItemActive"); //$NON-NLS-0$
 			
 			anchor.appendChild( listItem );
 		
@@ -173,8 +177,12 @@ define([
 			});
 			this._renderLinks();
 		},
-		// Called whenever the page target changes
-		setRelatedLinks: function(relatedLinks) {
+		/**
+		 * Called whenever the page target changes.
+		 * @param {Object} relatedLinks
+		 * @param {String[]} exclusions List of related link IDs that the page has requested to not be shown.
+		 */
+		setRelatedLinks: function(relatedLinks, exclusions) {
 //			console.log("setRelatedLinks())"); //console.log(relatedLinks);
 			this.relatedLinks = relatedLinks;
 
@@ -196,7 +204,7 @@ define([
 				relatedLinkElement.source = relatedLink;
 				linkBin.push(relatedLinkElement);
 			});
-			this._renderLinks();
+			this._renderLinks(exclusions);
 		},
 		/** @returns Array where link elements should be pushed for the given category */
 		_getLinksBin: function(catId) {
@@ -229,28 +237,38 @@ define([
 		},
 		_renderCategories: function() {
 			var categories = this.categories, _self = this;
-			var currentLocation = window.location.href;
-			var orionHome = PageLinks.getOrionHome();
-			var locationObject = {OrionHome: orionHome};
+			var currentURL = new URL(window.location.href), pageParams = PageUtil.matchResourceParameters();
+			var activeCategoryKnown = false;
 			this.clearMenuItems();
 			categories.getCategoryIDs().map(function(catId) {
 				return categories.getCategory(catId);
 			}).sort(compareCategories).forEach(function(cat) {
-				if (_self._getLinksBin(cat.id).length > 0) { // do not render empty categories
-					_self.addMenuItem(cat.imageClass, cat.id);
-					
-					if (cat.uriTemplate) {
-						var uriTemplate = new URITemplate(cat.uriTemplate);
-						var expandedHref = uriTemplate.expand(locationObject);
-						if (0 === currentLocation.indexOf(expandedHref)) {
-							_self.menuitems[cat.id].classList.add("sideMenuItemActive"); //$NON-NLS-0$
-							_self._currentActiveCategory = cat;
-						}	
-					}
+				var catLinks = _self._getLinksBin(cat.id);
+				if (!catLinks.length)
+					return; // do not render empty categories
+
+				if (activeCategoryKnown) {
+					_self.addMenuItem(cat.imageClass, cat.id, false);
+				} else {
+					var isActive = catLinks.some(function(link) {
+						if (!link.source.uriTemplate) {
+							// Should not happen -- every link has a uriTemplate
+							console.log('bad link'); console.log(link);
+							return false;
+						}
+						var uriTemplate = new URITemplate(link.source.uriTemplate);
+						var templateURL = new URL(uriTemplate.expand(pageParams), window.location);
+						if (samePageURL(templateURL, currentURL)) {
+							return (activeCategoryKnown = true);
+						}
+						return false;
+					});
+					_self.addMenuItem(cat.imageClass, cat.id, isActive);
 				}
 			});
 		},
-		_renderLinks: function() {
+		_renderLinks: function(exclusions) {
+			exclusions = exclusions || [];
 			this._sort();
 
 //			debug.call(this);
@@ -265,16 +283,20 @@ define([
 				if (!menuitem)
 					return;
 				var bin = _self._getLinksBin(catId).slice(), length = bin.length;
+				bin = bin.filter(function(link) {
+					// Don't render links that the page has requested we exclude.
+					if (exclusions.indexOf(link.source.id) >= 0)
+						return false;
+					// Don't render a default link if there are others in this category
+					if (length > 1 && link.source.default)
+						return false;
+					return true;
+				});
 				if (!length) {
-					// Empty category -- should not happen
+					// Empty category: can happen if the page has excluded every command in this category
 					return;
 				}
-				// If other links are present in this category, we do not render the default link
-				if (length > 1) {
-					bin = bin.filter(function(link) {
-						return !(link.source.default);
-					});
-				}
+
 				// First link becomes the icon link
 				var category = _self.categories.getCategory(catId);
 				var link = document.createElement("a");
@@ -321,6 +343,12 @@ define([
 
 	function isNotRelatedLink(elem) {
 		return !elem.isRelatedLink;
+	}
+
+	// Hack. Compare URLs, ignoring hashes, to determine "equality" as far as this menu is concerned
+	function samePageURL(a, b) {
+		return a.protocol === b.protocol && a.host === b.host && a.hostname === b.hostname && a.port === b.port
+			&& a.pathname === b.pathname && a.search === b.search;
 	}
 
 	function compareCategories(c1, c2) {
