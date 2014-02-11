@@ -255,7 +255,7 @@ define([
 									dropdown: lib.node("orion.browse.repoURLDropdown")
 								});
 								this.repoURLDropdown.getItems = function() {
-									lib.node("orion.browse.repoURLInput").value = this.repoURLHandler.repoURL;
+									lib.node("orion.browse.repoURLInput").value = this.repoURLHandler.promptValue;
 									return [lib.node("orion.browse.repoURLInput")];
 								}.bind(this);
 								this.repoURLDropdown._positionDropdown = function(evt) {

@@ -32,10 +32,11 @@ define([
 	'orion/objects',
 	'orion/EventTarget',
 	'text!orion/widgets/browse/repoUrlTrigger.html',
+	'text!orion/widgets/browse/repoAndBaseUrlTrigger.html',
 	'orion/webui/littlelib'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector, mMarkdownView,
-	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, lib
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, RepoAndBaseURLTriggerTemplate, lib
 ) {
 	
 	function ResourceChangeHandler(options) {
@@ -60,9 +61,24 @@ define([
 		}
 	});
 	
-	function repoURLHandler(repoURL){
+	function repoURLHandler(repoURL, baseURL){
 		this.repoURL = repoURL;
-		this.RepoURLTriggerTemplate = RepoURLTriggerTemplate;
+		this.baseURL = baseURL;
+		if(this.baseURL) {
+			this.RepoURLTriggerTemplate = RepoAndBaseURLTriggerTemplate;
+			var found = this.repoURL.match(/\/([^\/]+)\/([^\/]+)$/);
+			if (found) {
+				this.promptValue = "teamRepository=" + this.baseURL + "\n" +
+								   "userId=" + decodeURIComponent(found[1]) + "\n" + 
+								   "userName=" + decodeURIComponent(found[1]) + "\n" + 
+								   "projectAreaName=" + decodeURIComponent(found[1]) + " | " + decodeURIComponent(found[2]);
+			} else {
+				this.promptValue = this.baseURL;
+			}
+		} else {
+			this.RepoURLTriggerTemplate = RepoURLTriggerTemplate;
+			this.promptValue = this.repoURL;
+		}
 	}
 	
 	/**
@@ -99,6 +115,7 @@ define([
 			this._fileClient = new mEmptyFileClient.FileClient();		
 		}
 		this.repoURL = options.repoURL;
+		this.baseURL = options.baseURL;
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		if(!this._syntaxHighlighter) {
 			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
@@ -170,7 +187,7 @@ define([
 				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
 			}
 			if(this.repoURL) {
-				this.repoURLHandler = new repoURLHandler(this.repoURL);
+				this.repoURLHandler = new repoURLHandler(this.repoURL, this.baseURL);
 			}
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
