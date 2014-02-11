@@ -751,6 +751,7 @@ define('orion/edit/nls/root/messages',{
 	"ChooseFSTooltip": "Choose the filesystem you want to view.", //$NON-NLS-1$ //$NON-NLS-0$
 	"FSTitle": "${0} (${1})", //$NON-NLS-1$ //$NON-NLS-0$
 	"Deploy": "Deploy", //$NON-NLS-1$ //$NON-NLS-0$
+	"Deploy As": "Deploy As", //$NON-NLS-1$ //$NON-NLS-0$
 	"Import": "Import", //$NON-NLS-1$ //$NON-NLS-0$
 	"Export": "Export", //$NON-NLS-1$ //$NON-NLS-0$
 	"OpenWith": "Open With", //$NON-NLS-1$ //$NON-NLS-0$
@@ -1655,6 +1656,12 @@ define('orion/inputManager',[
 			if (editor && editor.processParameters) {
 				editor.processParameters(input);
 			}
+		},
+		getAutoLoadEnabled: function() {
+			return this._autoLoadEnabled;
+		},
+		getAutoSaveEnabled: function() {
+			return this._autoSaveEnabled;
 		},
 		getEditor: function() {
 			return this.editor;
@@ -7267,6 +7274,9 @@ define('orion/commands',[
 		 */
 		 populateChoicesMenu: function(parent, items, handler, userData, commandService) {
 			var choices = this.getChoices(items, handler, userData);
+			var addCheck = choices.some(function(choice) {
+				return choice.checked;
+			});
 			choices.forEach(function(choice) {
 				if (choice.name) {
 					var itemNode = document.createElement("li"); //$NON-NLS-0$
@@ -7275,7 +7285,13 @@ define('orion/commands',[
 					node.tabIndex = 0; 
 					node.role = "menuitem"; //$NON-NLS-0$
 					node.classList.add("dropdownMenuItem"); //$NON-NLS-0$
-					var text = document.createTextNode(choice.name); //$NON-NLS-0$
+					if (addCheck) {
+						var check = document.createElement("span"); //$NON-NLS-0$
+						check.classList.add("check");
+						check.appendChild(document.createTextNode(choice.checked ? "\u25CF" : "")); //$NON-NLS-1$ //$NON-NLS-0$
+						node.appendChild(check);
+					}
+					var text = document.createTextNode(choice.name);
 					node.appendChild(text);
 					itemNode.appendChild(node);
 					node.choice = choice;
@@ -7820,6 +7836,7 @@ exports.ExplorerRenderer = (function() {
 		
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
+			this.tableNode = tableNode;
 			lib.empty(tableNode);
 			if (this._treeTableClass) {
 				tableNode.classList.add(this._treeTableClass); 
@@ -8058,6 +8075,14 @@ exports.ExplorerRenderer = (function() {
 			if(this.explorer.selectionPolicy !== "cursorOnly"){ //$NON-NLS-0$
 				this.explorer.refreshSelection();
 				this.explorer.initNavHandler();			
+			}
+			if(lib.$(".sectionTreeTable", this.tableNode.parentNode)) {
+				lib.$$array(".treeTableRow", this.tableNode).forEach(function(node, i) { //$NON-NLS-0$
+					var on = (!(i % 2)) ? "darkSectionTreeTableRow" : "lightSectionTreeTableRow";
+					var off = (on === "darkSectionTreeTableRow") ? "lightSectionTreeTableRow" : "darkSectionTreeTableRow";
+					node.classList.add(on);
+					node.classList.remove(off);
+				});
 			}
 		},
 		updateCommands: function(){
@@ -24989,8 +25014,8 @@ define('orion/markdownView',[
 			}.bind(this));
 			node.appendChild(div);
 		},
-		displayInFrame: function(node, file, headerClass, titleClass) {
-			var markdownSection = new mSection.Section(node, {id: "markdownSection", title: file.Name || "readme", headerClass: headerClass, canHide: this.canHide}); //$NON-NLS-0$
+		displayInFrame: function(node, file, headerClass, titleClass, defaultTitle) {
+			var markdownSection = new mSection.Section(node, {id: "markdownSection", title: file.Name || defaultTitle || "readme", headerClass: headerClass, canHide: this.canHide}); //$NON-NLS-0$
 			if(titleClass) {
 				var titleNode = markdownSection.getTitleElement();
 				if(titleNode) {
@@ -25175,6 +25200,7 @@ define('orion/widgets/browse/browseView',[
 		options.rendererFactory = function(explorer) {
 			return new FolderNavRenderer({
 				checkbox: false,
+				treeTableClass: "sectionTreeTable",
 				cachePrefix: "FolderNavigator" //$NON-NLS-0$
 			}, explorer, options.commandRegistry, options.contentTypeRegistry);
 		};
@@ -25303,7 +25329,7 @@ define('orion/widgets/browse/browseView',[
 					if(sectionName === "folderNav") {
 						var navNode = document.createElement("div"); //$NON-NLS-0$
 						navNode.id = "folderNavNode"; //$NON-NLS-0$
-						this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", title: "Browse", canHide: !this.readonly});
+						this._foldersSection = new mSection.Section(this._node, {id: "folderNavSection", headerClass: ["sectionTreeTableHeader"], title: "Browse", canHide: !this.readonly});
 						this.sectionContents = document.createElement("div"); //$NON-NLS-0$
 						this.sectionContents.classList.add("browseSectionWrapper"); 
 						this._foldersSection.setContent(this.sectionContents);
@@ -25404,7 +25430,7 @@ define('orion/widgets/browse/browseView',[
 					} else if(sectionName === "readme"){
 						if (readmeMd) {
 							div = document.createElement("div"); //$NON-NLS-0$
-							this.markdownView.displayInFrame(div, readmeMd, "readmeHeader", "readmeTitle");
+							this.markdownView.displayInFrame(div, readmeMd,  ["sectionTreeTableHeader", "readmeHeader"], "readmeTitle");
 							this._node.appendChild(div);
 						}
 					}
@@ -30970,7 +30996,7 @@ define('orion/widgets/browse/resourceSelector',[
 				var commandRegistry = this.commandRegistry;
 				var switchBrCommand = new Commands.Command({
 					imageClass: "core-sprite-openarrow", //$NON-NLS-0$
-					selectionClass: "dropdownSelection", //$NON-NLS-0$
+					//selectionClass: "dropdownSelection", //$NON-NLS-0$
 					//tooltip: this.dropDownTooltip,
 					id: this.dropDownId,
 					visibleWhen: function(item) {
@@ -32448,7 +32474,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		var rootBounds = {start: 0, contentStart: 0, end: charCount, contentEnd: charCount};
 		this._rootBlock = new Block(rootBounds, null, this, model);
 		this._computeFolding(this._rootBlock.getBlocks());
-		if (this.detectTasks) {
+		if (annotationModel && this.detectTasks) {
 			var add = [];
 			computeTasks(this._rootBlock, model, add);
 			annotationModel.replaceAnnotations([], add);
@@ -33151,13 +33177,26 @@ define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 					match: "\\)",
 					name: "punctuation.section.parens.end"
 				},
-				doc_markup: {
-					match: "\\<\\S*\\>",
-					name: "keyword.other.documentation.markup"
-				},
-				doc_tag: {
-					match: "@(?:(?!\\*/)\\S)*",
-					name: "keyword.other.documentation.tag"
+				doc_block: {
+					begin: "/\\*\\*",
+					end: "\\*/",
+					name: "comment.block.documentation",
+					patterns: [
+						{
+							match: "@(?:(?!\\*/)\\S)*",
+							name: "keyword.other.documentation.tag"
+						}, {
+							match: "\\<\\S*\\>",
+							name: "keyword.other.documentation.markup"
+						}, {
+							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",
+							name: "meta.annotation.task.todo",
+							captures: {
+								2: {name: "keyword.other.documentation.task"},
+								4: {name: "comment.block"}
+							}
+						}
+					]
 				},
 				number_decimal: {
 					match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)(?:[eE][+-]?\\d+)?\\b",
@@ -33207,10 +33246,6 @@ define("orion/editor/stylers/lib/syntax", [], function() { //$NON-NLS-0$
 					name: "comment.block",
 					patterns: [
 						{
-							include: "orion.lib#doc_tag"
-						}, {
-							include: "orion.lib#doc_markup"
-						}, {
 							match: "(\\b)(TODO)(\\b)(((?!\\*/).)*)",
 							name: "meta.annotation.task.todo",
 							captures: {
@@ -33265,6 +33300,8 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 		contentTypes: ["application/javascript"], //$NON-NLS-0$
 		patterns: [
 			{
+				include: "orion.lib#doc_block" //$NON-NLS-0$
+			}, {
 				include: "orion.c-like" //$NON-NLS-0$
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -33419,6 +33456,8 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 		contentTypes: ["text/x-php"],
 		patterns: [
 			{
+				include: "orion.lib#doc_block"
+			}, {
 				include: "orion.c-like"
 			}, {
 				match: "(?i)<\\?(?:=|php)?(?:\\s|$)",
@@ -33698,6 +33737,8 @@ define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/
 		contentTypes: ["text/x-java-source"],
 		patterns: [
 			{
+				include: "orion.lib#doc_block" //$NON-NLS-0$
+			}, {
 				include: "orion.c-like"
 			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
