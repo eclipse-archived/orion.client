@@ -1172,7 +1172,15 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					if (lineOffset + nodeLength > offset) {
 						range = document.body.createTextRange();
 						if (offset === lineOffset && data.count < 0) {
-							range.moveToElementText(lineChild.previousSibling);
+							var temp = lineChild.previousSibling;
+							// skip empty nodes
+							while (temp) {
+								if (temp.firstChild && temp.firstChild.length) {
+									break;
+								}
+								temp = temp.previousSibling;
+							}
+							range.moveToElementText(temp ? temp : lineChild.previousSibling);
 						} else {
 							range.moveToElementText(lineChild);
 							range.collapse();
