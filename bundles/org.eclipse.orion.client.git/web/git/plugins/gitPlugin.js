@@ -368,7 +368,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 						} 
 						if(error.JsonData.Host){
 							error.Retry = {
-								addParameters : [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"}],
+								addParameters : [{id: "sshuser", type: "text", name: messages["SSH User Name:"]}, {id: "sshpassword", type: "password", name: messages["SSH Password:"]}],
 								optionalParameters: [{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}]
 							};
 							deferred.reject(error);
