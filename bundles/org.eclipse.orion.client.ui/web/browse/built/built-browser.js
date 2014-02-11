@@ -14088,7 +14088,15 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					if (lineOffset + nodeLength > offset) {
 						range = document.body.createTextRange();
 						if (offset === lineOffset && data.count < 0) {
-							range.moveToElementText(lineChild.previousSibling);
+							var temp = lineChild.previousSibling;
+							// skip empty nodes
+							while (temp) {
+								if (temp.firstChild && temp.firstChild.length) {
+									break;
+								}
+								temp = temp.previousSibling;
+							}
+							range.moveToElementText(temp ? temp : lineChild.previousSibling);
 						} else {
 							range.moveToElementText(lineChild);
 							range.collapse();
@@ -23923,18 +23931,15 @@ define('orion/commandRegistry',[
 											if(domNodeWrapperList){
 												mNavUtils.removeNavGrid(domNodeWrapperList, created.menuButton);
 											}
-											
-											if (created.menu.parentNode) {
-												created.menu.remove();
-												created.menuButton.remove();
-												
-												if(created.extraDropdownButton){
-													created.extraDropdownButton.remove();
+											function remove(child) {
+												if (child && child.parentNode) {
+													child.parentNode.removeChild(child);
 												}
 											}
-											if (created.destroyButton && created.destroyButton.parentNode) {
-												created.destroyButton.parentNode.removeChild(created.destroyButton);
-											}
+											remove(created.menu);
+											remove(created.menuButton);
+											remove(created.extraDropdownButton);
+											remove(created.destroyButton);
 										}
 									} else {
 										created.menuButton.style.visibility = "visible";  //$NON-NLS-0$
@@ -24608,14 +24613,16 @@ define('orion/section',['orion/webui/littlelib', 'orion/selection', 'orion/comma
 		this._toolActionsNode.classList.add("layoutRight"); //$NON-NLS-0$
 		this._toolActionsNode.classList.add("sectionActions"); //$NON-NLS-0$
 		this.domNode.appendChild(this._toolActionsNode);
-		this.actionsNode = document.createElement("div"); //$NON-NLS-0$
+		this.actionsNode = document.createElement("ul"); //$NON-NLS-0$
 		this.actionsNode.id = options.id + "ActionArea"; //$NON-NLS-0$
 		this.actionsNode.classList.add("layoutRight"); //$NON-NLS-0$
+		this.actionsNode.classList.add("commandList"); //$NON-NLS-0$
 		this.actionsNode.classList.add("sectionActions"); //$NON-NLS-0$
 		this.domNode.appendChild(this.actionsNode);
-		this.selectionNode = document.createElement("div"); //$NON-NLS-0$
+		this.selectionNode = document.createElement("ul"); //$NON-NLS-0$
 		this.selectionNode.id = options.id + "SelectionArea"; //$NON-NLS-0$
 		this.selectionNode.classList.add("layoutRight"); //$NON-NLS-0$
+		this.selectionNode.classList.add("commandList"); //$NON-NLS-0$
 		this.selectionNode.classList.add("sectionActions"); //$NON-NLS-0$
 		this.domNode.appendChild(this.selectionNode);
 		
@@ -25337,10 +25344,16 @@ define('orion/widgets/browse/browseView',[
 							var actionNode = this._foldersSection.getActionElement();
 							if(actionNode) {
 								lib.empty(actionNode);
+								var letfNode = document.createElement("div"), rightNode=document.createElement("div");
+								letfNode.classList.add("layoutLeft");
+								rightNode.classList.add("layoutRight");
+								actionNode.appendChild(letfNode);
+								actionNode.appendChild(rightNode);
+								this.actionNode = rightNode;
 								var range = document.createRange();
-								range.selectNode(actionNode);
+								range.selectNode(letfNode);
 								var repoURLFragment = range.createContextualFragment(this.repoURLHandler.RepoURLTriggerTemplate);
-								actionNode.appendChild(repoURLFragment);
+								letfNode.appendChild(repoURLFragment);
 								this.repoURLDropdown = new mDropdown.Dropdown({
 									triggerNode: lib.node("orion.browse.repoURLTrigger"), 
 									dropdown: lib.node("orion.browse.repoURLDropdown")
@@ -25356,8 +25369,12 @@ define('orion/widgets/browse/browseView',[
 									lib.node("orion.browse.repoURLInput").select();
 								}.bind(this.repoURLDropdown);
 							}
+						} else if (!this.messageView) {
+							this.actionNode =  this._foldersSection.getActionElement();
 						}
-						
+						if(!this.messageView && this.commandRegistry) {
+							this.commandRegistry.renderCommands("orion.browse.sectionActions", this.actionNode, {}, "button");
+						}
 						//Render the branch and component selector 
 						var titleNode = this._foldersSection.getTitleElement();
 						if(titleNode) {
@@ -34274,9 +34291,9 @@ define('orion/widgets/browse/emptyFileClient',["orion/Deferred"], function(Defer
 	return {FileClient: FileClient};
 });
 
-define('text!orion/widgets/browse/repoUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Git URL</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<div class="repoUrlHeader">\r\n\t\t<button class="repoUrlHeaderClose  core-sprite-close imageSprite" id="orion.browse.repoURLClose"></button>\r\n\t\t<span class="repoUrlHeaderTitle" id="orion.browse.repoURLTitle">Git URL</span>\r\n\t</div>\r\n\t<input id="orion.browse.repoURLInput" class = "repoUrlInput dropdownSubMenu" type="text" readonly></input>\r\n</div>';});
+define('text!orion/widgets/browse/repoUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Git URL</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<div class="repoUrlHeader">\r\n\t\t<div class="repoUrlHeaderClose  core-sprite-close imageSprite" id="orion.browse.repoURLClose"></div>\r\n\t\t<span class="repoUrlHeaderTitle" id="orion.browse.repoURLTitle">Git URL</span>\r\n\t</div>\r\n\t<input id="orion.browse.repoURLInput" class = "repoUrlInput dropdownSubMenu" type="text" readonly></input>\r\n</div>';});
 
-define('text!orion/widgets/browse/repoAndBaseUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Team Invitation</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<div class="repoUrlHeader">\r\n\t\t<button class="repoUrlHeaderClose  core-sprite-close imageSprite" id="orion.browse.repoURLClose"></button>\r\n\t\t<span class="repoUrlHeaderTitle" id="orion.browse.repoURLTitle">Copy the invitation below</span>\r\n\t</div>\r\n\t<textarea id="orion.browse.repoURLInput" class="repoAndBaseUrlInput dropdownSubMenu" type="text" readonly></textarea>\r\n</div>';});
+define('text!orion/widgets/browse/repoAndBaseUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Team Invitation</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<div class="repoUrlHeader">\r\n\t\t<div class="repoUrlHeaderClose  core-sprite-close imageSprite" id="orion.browse.repoURLClose"></div>\r\n\t\t<span class="repoUrlHeaderTitle" id="orion.browse.repoURLTitle">Copy the invitation below</span>\r\n\t</div>\r\n\t<textarea id="orion.browse.repoURLInput" class="repoAndBaseUrlInput dropdownSubMenu" type="text" readonly></textarea>\r\n</div>';});
 
 /*******************************************************************************
  *
@@ -34313,10 +34330,12 @@ define('orion/widgets/browse/fileBrowser',[
 	'orion/EventTarget',
 	'text!orion/widgets/browse/repoUrlTrigger.html',
 	'text!orion/widgets/browse/repoAndBaseUrlTrigger.html',
-	'orion/webui/littlelib'
+	'orion/commands',
+	'orion/webui/littlelib',
+	'orion/URL-shim'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector, mMarkdownView,
-	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, RepoAndBaseURLTriggerTemplate, lib
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, RepoAndBaseURLTriggerTemplate, mCommands, lib
 ) {
 	
 	function ResourceChangeHandler(options) {
@@ -34396,6 +34415,7 @@ define('orion/widgets/browse/fileBrowser',[
 		}
 		this.repoURL = options.repoURL;
 		this.baseURL = options.baseURL;
+		this.codeURL = options.codeURL;
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		if(!this._syntaxHighlighter) {
 			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
@@ -34462,6 +34482,20 @@ define('orion/widgets/browse/fileBrowser',[
 				this.startup();
 			}
 		},
+		_registerCommands: function() {
+			var editCodeCommand = new mCommands.Command({
+				imageClass: "core-sprite-edit", //$NON-NLS-0$
+				id: "orion.browse.gotoEdit",
+				visibleWhen: function(item) {
+					return true;
+				},
+				hrefCallback : function(data) {
+					return this.codeURL ? this.codeURL : (new URL("code", window.location.href)).href;
+				}.bind(this)			
+			});
+			this._commandRegistry.addCommand(editCodeCommand);
+			this._commandRegistry.registerCommandContribution("orion.browse.sectionActions", "orion.browse.gotoEdit", 1); //$NON-NLS-1$ //$NON-NLS-0$
+		},
 		startup: function(serviceRegistry) {
 			if(serviceRegistry) {
 				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
@@ -34469,6 +34503,7 @@ define('orion/widgets/browse/fileBrowser',[
 			if(this.repoURL) {
 				this.repoURLHandler = new repoURLHandler(this.repoURL, this.baseURL);
 			}
+			this._registerCommands();
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,
@@ -36530,6 +36565,9 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			if (arguments.length > 2) {
 				params.base = arguments[2];
 			}
+			if (arguments.length > 3) {
+				params.codeURL = arguments[3];
+			}
 		} else {
 			params = params || {};
 		}
@@ -36542,7 +36580,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		if (!params.rootName) {
 			var found = repo.match(/\/([^/]+)\/([^/]+)$/);
 			if (found) {
-				params.rootName = decodeURIComponent(found[1]) + " / " + decodeURIComponent(found[2]);
+				params.rootName = decodeURIComponent(found[1]) + " | " + decodeURIComponent(found[2]);
 				if (params.rootName.match(/\.git$/)) {
 					params.rootName = params.rootName.substring(0, params.rootName.length - 4);
 				}
@@ -36577,6 +36615,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			parent: params.parentId,
 			repoURL: repo,
 			baseURL: (selectorNumber === 2 ? base : null),
+			codeURL: params.codeURL,
 			selectorNumber: selectorNumber,
 			rootName: params.rootName,
 			maxEditorLines: 300,
