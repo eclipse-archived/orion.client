@@ -368,7 +368,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 						} 
 						if(error.JsonData.Host){
 							error.Retry = {
-								addParameters : [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"}],
+								addParameters : [{id: "sshuser", type: "text", name: "User Name:"}, {id: "sshpassword", type: "password", name: "Password:"}],
 								optionalParameters: [{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}]
 							};
 							deferred.reject(error);
@@ -441,7 +441,7 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		id: "orion.git.projecthandler",
 		type: "git",
 		addParameters: [{id: "url", type: "url", name: "Url:"}],
-		optionalParameters: [{id: "sshuser", type: "text", name: "Ssh User:"}, {id: "sshpassword", type: "password", name: "Ssh Password:"},{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}],
+		optionalParameters: [{id: "sshuser", type: "text", name: "User Name:"}, {id: "sshpassword", type: "password", name: "Password:"},{id: "sshprivateKey", type: "textarea", name: "Ssh Private Key:"}, {id: "sshpassphrase", type: "password", name: "Ssh Passphrase:"}],
 		addDependencyName: "Git Repository",
 		addDependencyTooltip: "Associate a git repository with this project.",
 		addProjectName: "Git Repository",
