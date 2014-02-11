@@ -423,8 +423,7 @@ define([
 					}, explorer, _self.commandRegistry, _self.contentTypeRegistry);
 				},
 				serviceRegistry: this.serviceRegistry,
-				toolbarNode: this.toolbarNode,
-				sidebar: this.sidebar
+				toolbarNode: this.toolbarNode
 			});
 			this.explorer.display(this.project);
 			window.location.href = uriTemplate.expand({resource: this.project.Location});

@@ -36,7 +36,6 @@ function () {
     			"createQuery": {
 	  				"!type": "fn(sql: String, values: Object, cb: fn()) -> +Query"
 	  			},
-    			"Types": "Types",
     			"escape": {
 	  				"!type": "fn(val: String, stringifyObjects: Boolean, timeZone: String) -> String"
 	  			},

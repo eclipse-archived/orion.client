@@ -737,7 +737,6 @@ define('orion/edit/nls/root/messages',{
 	"Project": "Project", //$NON-NLS-1$ //$NON-NLS-0$
 	"New": "New", //$NON-NLS-1$ //$NON-NLS-0$
 	"File": "File", //$NON-NLS-1$ //$NON-NLS-0$
-	"Project": "Project", //$NON-NLS-1$ //$NON-NLS-0$
 	"Edit": "Edit", //$NON-NLS-1$ //$NON-NLS-0$
 	"Tools": "Tools", //$NON-NLS-1$ //$NON-NLS-0$
 	"Add": "Add", //$NON-NLS-1$ //$NON-NLS-0$
