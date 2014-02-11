@@ -35,7 +35,8 @@
 					id: "org.eclipse.orion.client.cf.deploy",
 					deployTypes: ["Cloud Foundry"],
 					tooltip: "Deploy application in cloud.",
-					validationProperties: [{source: "NoShow" }]
+					validationProperties: [{source: "NoShow" }],
+					priorityForDefault: 9
 				});
 				
 			provider.connect();

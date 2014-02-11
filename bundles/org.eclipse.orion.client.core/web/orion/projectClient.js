@@ -378,9 +378,19 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 	},
 	
 	getProjectDeployTypes: function(){
+		function compareByPriority(ref1,ref2) {
+			var prio1 = ref1.getProperty("priorityForDefault") || 0;
+			var prio2 = ref2.getProperty("priorityForDefault") || 0;
+		  if (prio1 > prio2)
+		     return -1;
+		  if (prio1 < prio2)
+		    return 1;
+		  return 0;
+		}
+		var sortedReferences = this.allProjectDeployReferences.sort(compareByPriority);
 		var types = [];
-		for(var i=0; i<this.allProjectDeployReferences.length; i++){
-			types.push(this.allProjectDeployReferences[i].getProperty("id"));
+		for(var i=0; i<sortedReferences.length; i++){
+			types.push(sortedReferences[i].getProperty("id"));
 		}
 		return types;
 	},
