@@ -1096,10 +1096,11 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 
 					},
 					visibleWhen: function(item) {
-						if(!item.Project|| !item.Project.fileMetadata){
+						item = explorer.treeRoot;
+						if(!item.Project || !item.children || item.children.length === 0){
 							return false;
 						}
-						return projectClient.matchesDeployService(item.Project.fileMetadata, deployService);
+						return projectClient.matchesDeployService(item.children[0], deployService);
 					}
 				};
 				
