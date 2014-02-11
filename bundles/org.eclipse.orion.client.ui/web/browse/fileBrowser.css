@@ -170,7 +170,7 @@ a.currentLocation:hover {
 .repoUrlLink {
 	margin-top: 5px;
 	margin-right: 8px;
-	color: #3087B3;
+	color: #02ADD0;
 }
 
 .repoUrlLink:hover {
@@ -199,7 +199,7 @@ a.currentLocation:hover {
 .breadcrumb {
 	font-size: 1.05em;
 	text-decoration: none;
-	color: #3087B3;
+	color: #02ADD0;
 	padding-top: 2px;
 }
 .browserParentDome {

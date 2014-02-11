@@ -65,7 +65,7 @@ define([
 				var commandRegistry = this.commandRegistry;
 				var switchBrCommand = new Commands.Command({
 					imageClass: "core-sprite-openarrow", //$NON-NLS-0$
-					selectionClass: "dropdownSelection", //$NON-NLS-0$
+					//selectionClass: "dropdownSelection", //$NON-NLS-0$
 					//tooltip: this.dropDownTooltip,
 					id: this.dropDownId,
 					visibleWhen: function(item) {

@@ -1,6 +1,12 @@
 .navlink {
 	display: inline-block;
 	padding: 2px;
+	color: #02ADD0 !important;
+	vertical-align: bottom;
+}
+
+.navlink:hover {
+	color:#F58B0F !important;
 }
 
 .nav_fakelink:hover {
@@ -20,6 +26,11 @@
 	text-decoration: none;
 	border-bottom: 1px dotted;
 }
+
+.targetSelector{
+
+}
+
 
 .navTableHeading {
 	color: #404040;
@@ -305,6 +316,15 @@
 	color: #6d6d6d;
 	margin-top: 4px;
 	margin-bottom: 4px;
+}
+
+.modelDecorationSprite {
+	color: #798891 !important;
+}
+
+.modelDecorationSprite:hover {
+	color:#F58B0F !important;
+	text-decoration: none !important;
 }
 
 .orionMarkdown body {
