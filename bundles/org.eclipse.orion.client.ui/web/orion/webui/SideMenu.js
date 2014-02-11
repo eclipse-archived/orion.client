@@ -273,23 +273,25 @@ define([
 			// Start fresh. This creates menuitems anew
 			this._renderCategories();
 
-			var _self = this;
+			var _self = this, windowHref = window.location.href;
 			// Append link elements to each menu item
 			Object.keys(this.menuitems).forEach(function(catId) {
 				var menuitem = _self.getMenuItem(catId);
 				if (!menuitem)
 					return;
-				var bin = _self._getLinksBin(catId).slice(), length = bin.length;
+				var bin = _self._getLinksBin(catId).slice();
 				bin = bin.filter(function(link) {
-					// Don't render links that the page has requested we exclude.
-					if (exclusions.indexOf(link.source.id) >= 0)
+					// Don't render links that the page has requested we exclude, nor links to page we're already on.
+					if (exclusions.indexOf(link.source.id) >= 0 || link.href === windowHref) {
 						return false;
-					// Don't render a default link if there are others in this category
-					if (length > 1 && link.source.default)
-						return false;
+					}
 					return true;
 				});
-				if (!length) {
+				// Don't render a default link if there are others available in this category
+				bin = bin.filter(function(link) {
+					return !(bin.length > 1 && link.source.default);
+				});
+				if (!bin.length) {
 					// Empty category: can happen if the page has excluded every command in this category
 					return;
 				}
