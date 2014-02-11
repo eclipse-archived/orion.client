@@ -916,5 +916,101 @@ define([
 			}
 		});
 	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427836
+	 */
+	Tests.test_newExpression1 = function() {
+		editorContext.text = "var foo = 1;function f1() {};var bar = new f1(foo);";
+		return occurrences.computeOccurrences(editorContext, setContext(6, 6)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:4, end:7}, {start:46, end:49}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427836
+	 */
+	Tests.test_newExpression2 = function() {
+		editorContext.text = "var foo = 1;function f1() {};var bar = new f1(foo);";
+		return occurrences.computeOccurrences(editorContext, setContext(48, 48)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:4, end:7}, {start:46, end:49}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427836
+	 */
+	Tests.test_newExpression3 = function() {
+		editorContext.text = "var foo = 1;function f1() {};var o = {a: function() {var bar = new f1(foo);}}";
+		return occurrences.computeOccurrences(editorContext, setContext(6, 6)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:4, end:7}, {start:70, end:73}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427836
+	 */
+	Tests.test_newExpression4 = function() {
+		editorContext.text = "var foo = 1;function f1() {};var o = {a: function() {var bar = new f1(foo);}}";
+		return occurrences.computeOccurrences(editorContext, setContext(72, 72)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:4, end:7}, {start:70, end:73}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427836
+	 */
+	Tests.test_newExpression5 = function() {
+		editorContext.text = "var foo = 1;function f1() {};function f2() {var bar = new f1(foo);}";
+		return occurrences.computeOccurrences(editorContext, setContext(6, 6)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:4, end:7}, {start:61, end:64}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests logic expressions that contain identifier nodes
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427836
+	 */
+	Tests.test_newExpression6 = function() {
+		editorContext.text = "var foo = 1;function f1() {};function f2() {var bar = new f1(foo);}";
+		return occurrences.computeOccurrences(editorContext, setContext(62, 62)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:4, end:7}, {start:61, end:64}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
 	return Tests;
 });

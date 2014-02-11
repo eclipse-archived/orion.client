@@ -144,6 +144,12 @@ define([
 					break;
 				case Estraverse.Syntax.NewExpression:
 					this.checkId(node.callee, false);
+					if(node.arguments) {
+						var len = node.arguments.length;
+						for(var m = 0; m < len; m++) {
+							this.checkId(node.arguments[m]);
+						}
+					}
 					break;
 				case Estraverse.Syntax.LogicalExpression:
 					this.checkId(node.left);
