@@ -92,6 +92,21 @@ define([
 		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
 	});
 
+	// Shows a link to the topmost parent folder (Project Root)
+	provider.registerService("orion.page.link.related", null, {
+		id: "orion.editProjectRoot",
+		nameKey: "EditorRelatedLinkProj",
+		nls: "orion/nls/messages",
+		category: "edit",
+		order: 5, // Make it first link in edit category
+		validationProperties: [{
+			source: "Parents[-1]:Location", // FIXME
+			variableName: "EditorLocation",
+			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
+		}],
+		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
+	});
+
 	provider.registerService("orion.page.link.user", null, {
 		id: "orion.help",
 		nameKey: "Help",
