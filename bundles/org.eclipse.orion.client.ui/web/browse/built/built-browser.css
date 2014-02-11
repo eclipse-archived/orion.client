@@ -1103,14 +1103,54 @@ cursor:pointer;
 }
 .repoUrlDropdown{
 width:360px;
-height:36px;
+color:#666666;
+overflow:hidden;
 }
 .repoUrlInput{
 border:1px solid #dadada;
-margin-top:4px;
+margin-top:1px;
 margin-left:9px;
 width:340px;
 height:24px;
+margin-bottom:4px;
+}
+.repoAndBaseUrlInput{
+border:1px solid #dadada;
+margin-top:1px;
+margin-left:9px;
+width:340px;
+height:64px;
+margin-bottom:4px;
+overflow:hidden;
+}
+.repoUrlHeader{
+margin-top:3px;
+margin-left:9px;
+width:340px;
+height:18px;
+}
+.repoUrlHeaderTitle{
+float:right;
+font-weight:bold;
+}
+.repoUrlHeaderClose{
+float:left;
+padding-left:0 !important;
+font-size:1.1em;
+margin:0 2px 0;
+vertical-align:middle;
+}
+.dismissButton{
+border:1px solid transparent;
+background:transparent;
+color:#666;
+border-radius:1px;
+padding:2px;
+font:8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
+margin:0 4px 0;
+vertical-align:middle;
+min-height:16px;
+min-width:16px;
 }
 .browseSectionWrapper{
 width:100%;

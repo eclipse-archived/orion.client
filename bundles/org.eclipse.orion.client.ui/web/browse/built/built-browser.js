@@ -25347,7 +25347,7 @@ define('orion/widgets/browse/browseView',[
 									dropdown: lib.node("orion.browse.repoURLDropdown")
 								});
 								this.repoURLDropdown.getItems = function() {
-									lib.node("orion.browse.repoURLInput").value = this.repoURLHandler.repoURL;
+									lib.node("orion.browse.repoURLInput").value = this.repoURLHandler.promptValue;
 									return [lib.node("orion.browse.repoURLInput")];
 								}.bind(this);
 								this.repoURLDropdown._positionDropdown = function(evt) {
@@ -34275,7 +34275,9 @@ define('orion/widgets/browse/emptyFileClient',["orion/Deferred"], function(Defer
 	return {FileClient: FileClient};
 });
 
-define('text!orion/widgets/browse/repoUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Repository URL</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<input id="orion.browse.repoURLInput" class = "repoUrlInput dropdownSubMenu" type="text" readonly></input>\r\n</div>';});
+define('text!orion/widgets/browse/repoUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Git URL</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<div class="repoUrlHeader">\r\n\t\t<button class="repoUrlHeaderClose  core-sprite-close imageSprite" id="orion.browse.repoURLClose"></button>\r\n\t\t<span class="repoUrlHeaderTitle" id="orion.browse.repoURLTitle">Git URL</span>\r\n\t</div>\r\n\t<input id="orion.browse.repoURLInput" class = "repoUrlInput dropdownSubMenu" type="text" readonly></input>\r\n</div>';});
+
+define('text!orion/widgets/browse/repoAndBaseUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Team Invitation</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<div class="repoUrlHeader">\r\n\t\t<button class="repoUrlHeaderClose  core-sprite-close imageSprite" id="orion.browse.repoURLClose"></button>\r\n\t\t<span class="repoUrlHeaderTitle" id="orion.browse.repoURLTitle">Copy the invitation below</span>\r\n\t</div>\r\n\t<textarea id="orion.browse.repoURLInput" class="repoAndBaseUrlInput dropdownSubMenu" type="text" readonly></textarea>\r\n</div>';});
 
 /*******************************************************************************
  *
@@ -34311,10 +34313,11 @@ define('orion/widgets/browse/fileBrowser',[
 	'orion/objects',
 	'orion/EventTarget',
 	'text!orion/widgets/browse/repoUrlTrigger.html',
+	'text!orion/widgets/browse/repoAndBaseUrlTrigger.html',
 	'orion/webui/littlelib'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector, mMarkdownView,
-	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, lib
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, RepoAndBaseURLTriggerTemplate, lib
 ) {
 	
 	function ResourceChangeHandler(options) {
@@ -34339,9 +34342,24 @@ define('orion/widgets/browse/fileBrowser',[
 		}
 	});
 	
-	function repoURLHandler(repoURL){
+	function repoURLHandler(repoURL, baseURL){
 		this.repoURL = repoURL;
-		this.RepoURLTriggerTemplate = RepoURLTriggerTemplate;
+		this.baseURL = baseURL;
+		if(this.baseURL) {
+			this.RepoURLTriggerTemplate = RepoAndBaseURLTriggerTemplate;
+			var found = this.repoURL.match(/\/([^\/]+)\/([^\/]+)$/);
+			if (found) {
+				this.promptValue = "teamRepository=" + this.baseURL + "\n" +
+								   "userId=" + decodeURIComponent(found[1]) + "\n" + 
+								   "userName=" + decodeURIComponent(found[1]) + "\n" + 
+								   "projectAreaName=" + decodeURIComponent(found[1]) + " | " + decodeURIComponent(found[2]);
+			} else {
+				this.promptValue = this.baseURL;
+			}
+		} else {
+			this.RepoURLTriggerTemplate = RepoURLTriggerTemplate;
+			this.promptValue = this.repoURL;
+		}
 	}
 	
 	/**
@@ -34378,6 +34396,7 @@ define('orion/widgets/browse/fileBrowser',[
 			this._fileClient = new mEmptyFileClient.FileClient();		
 		}
 		this.repoURL = options.repoURL;
+		this.baseURL = options.baseURL;
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		if(!this._syntaxHighlighter) {
 			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
@@ -34449,7 +34468,7 @@ define('orion/widgets/browse/fileBrowser',[
 				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
 			}
 			if(this.repoURL) {
-				this.repoURLHandler = new repoURLHandler(this.repoURL);
+				this.repoURLHandler = new repoURLHandler(this.repoURL, this.baseURL);
 			}
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
@@ -36558,6 +36577,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		this._fileBrowser = new mFileBrowser.FileBrowser({
 			parent: params.parentId,
 			repoURL: repo,
+			baseURL: (selectorNumber === 2 ? base : null),
 			selectorNumber: selectorNumber,
 			rootName: params.rootName,
 			maxEditorLines: 300,
