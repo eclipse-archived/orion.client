@@ -146,7 +146,7 @@ var exports = {};
 			commandRegistry.destroy(this.toolsActionsScope);
 			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, metadata, explorer, "tool"); //$NON-NLS-0$
 			commandRegistry.destroy(this.additionalActionsScope);
-			commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, metadata, explorer, "button"); //$NON-NLS-0$
+			commandRegistry.renderCommands(this.additionalActionsScope, this.additionalActionsScope, treeRoot, explorer, "button"); //$NON-NLS-0$
 		}
 	});
 
