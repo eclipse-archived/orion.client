@@ -810,18 +810,15 @@ define([
 											if(domNodeWrapperList){
 												mNavUtils.removeNavGrid(domNodeWrapperList, created.menuButton);
 											}
-											
-											if (created.menu.parentNode) {
-												created.menu.remove();
-												created.menuButton.remove();
-												
-												if(created.extraDropdownButton){
-													created.extraDropdownButton.remove();
+											function remove(child) {
+												if (child && child.parentNode) {
+													child.parentNode.removeChild(child);
 												}
 											}
-											if (created.destroyButton && created.destroyButton.parentNode) {
-												created.destroyButton.parentNode.removeChild(created.destroyButton);
-											}
+											remove(created.menu);
+											remove(created.menuButton);
+											remove(created.extraDropdownButton);
+											remove(created.destroyButton);
 										}
 									} else {
 										created.menuButton.style.visibility = "visible";  //$NON-NLS-0$
