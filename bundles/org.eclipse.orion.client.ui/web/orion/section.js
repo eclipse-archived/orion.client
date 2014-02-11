@@ -131,14 +131,16 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		this._toolActionsNode.classList.add("layoutRight"); //$NON-NLS-0$
 		this._toolActionsNode.classList.add("sectionActions"); //$NON-NLS-0$
 		this.domNode.appendChild(this._toolActionsNode);
-		this.actionsNode = document.createElement("div"); //$NON-NLS-0$
+		this.actionsNode = document.createElement("ul"); //$NON-NLS-0$
 		this.actionsNode.id = options.id + "ActionArea"; //$NON-NLS-0$
 		this.actionsNode.classList.add("layoutRight"); //$NON-NLS-0$
+		this.actionsNode.classList.add("commandList"); //$NON-NLS-0$
 		this.actionsNode.classList.add("sectionActions"); //$NON-NLS-0$
 		this.domNode.appendChild(this.actionsNode);
-		this.selectionNode = document.createElement("div"); //$NON-NLS-0$
+		this.selectionNode = document.createElement("ul"); //$NON-NLS-0$
 		this.selectionNode.id = options.id + "SelectionArea"; //$NON-NLS-0$
 		this.selectionNode.classList.add("layoutRight"); //$NON-NLS-0$
+		this.selectionNode.classList.add("commandList"); //$NON-NLS-0$
 		this.selectionNode.classList.add("sectionActions"); //$NON-NLS-0$
 		this.domNode.appendChild(this.selectionNode);
 		
