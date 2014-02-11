@@ -163,7 +163,7 @@ define([
 			var self = this;
 			var deployCommand =  new mCommands.Command({
 				name: messages.Deploy,
-				tooltip: messages.Deploy,
+				tooltip: self.defaultDeployCommand ? (self.defaultDeployCommand.tooltip ? self.defaultDeployCommand.tooltip : self.defaultDeployCommand.name) : messages.Deploy,
 				id: "orion.project.deploy.default", //$NON-NLS-0$
 				visibleWhen: function() {
 					return self.defaultDeployCommand && self.defaultDeployCommand.visibleWhen.apply(self.defaultDeployCommand, arguments);
@@ -177,7 +177,6 @@ define([
 			commandRegistry.registerCommandContribution(this.additionalActionsScope, deployCommand.id, 0);
 		},
 		registerCommands: function() {
-			this.createDefaultDeployCommand();
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
 				var commandRegistry = this.commandRegistry;
 				var fileActionsScope = this.fileActionsScope;
@@ -201,6 +200,9 @@ define([
 						commandRegistry.registerCommandContribution(additionalActionsScope, command.id, position++, "orion.deployNavGroup"); //$NON-NLS-0$
 					});
 				}
+				
+				this.createDefaultDeployCommand();
+				
 			}.bind(this));
 		},
 		updateCommands: function(selections){
@@ -223,10 +225,6 @@ define([
 						launchCommand = "orion.launchConfiguration.deploy." + launchConfigurations[i].ServiceId + launchConfigurations[i].Name; //$NON-NLS-0$
 						this.launchCommands.push(launchCommand);
 						this.commandRegistry.registerCommandContribution(this.additionalActionsScope, launchCommand, i+1, "orion.deployNavGroup/orion.deployLaunchConfigurationGroup"); //$NON-NLS-1$ //$NON-NLS-0$
-					}
-					var defaultCommand = ProjectCommands.getDefaultLaunchCommand(this.treeRoot.Project.Name);
-					if (defaultCommand) {
-						self.defaultDeployCommand = this.commandRegistry.findCommand(defaultCommand);
 					}
 					CommonNavExplorer.prototype.updateCommands.apply(this, selections);					
 				}
@@ -262,7 +260,7 @@ define([
 								doUpdateForLaunchConfigurations.apply(_self, [_self.treeRoot.Project.launchConfigurations]);
 							});
 						};
-						this._launchConfigurationEventTypes = ["create", "delete", "changedDefault"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						this._launchConfigurationEventTypes = ["create", "delete"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						this._launchConfigurationEventTypes.forEach(function(eventType) {
 							_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
 						});
