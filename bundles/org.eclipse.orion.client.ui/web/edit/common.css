@@ -50,8 +50,8 @@
 	cursor: pointer;
 }
 
-.extraActions {
-	margin-left: 6px;
+.extraActions:not(:empty) {
+	margin-left: 4px;
 	padding-left: 10px;
 	border-left: 1px solid #ccc;
 }
