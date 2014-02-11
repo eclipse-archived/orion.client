@@ -40,7 +40,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 			+ '<input id="gitSshUsername" value="">' + '</div>'
 
 			+ '<div id="gitSshPasswordRow" style="padding: 8px">' + '<input id="isSshPassword" type="radio" name="isSshPassword" checked value="password"/>'
-			+ '<label id="gitSshPasswordLabel" for="gitSshPassword" style="padding: 0 8px">${Ssh password:}</label>'
+			+ '<label id="gitSshPasswordLabel" for="gitSshPassword" style="padding: 0 8px">${Password:}</label>'
 			+ '<input type="password" id="gitSshPassword" value="" style="width: 30em">' + '</div>'
 
 			+ '<div style="padding: 8px">' + '<div id="gitPrivateKeyRow">'
