@@ -96,7 +96,58 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 		assert.equal(validator.validationFunction(item1), true);
 		assert.equal(validator.validationFunction(item2), false);
 	};	
-	
+
+	/**
+	 * Test nested properties using array index
+	 */
+	tests.testValidationPropertyArrayIndex = function() {
+		var validationProperty = {
+			source: "SubArray[0]",
+			variableName: "FirstElement"
+		};
+		var item = {
+			SubArray: ["snit", "fnord"]
+		};
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{+FirstElement}"), serviceRegistry, contentTypesCache);
+		assert.equal(validator.validationFunction(item), true);
+		assert.equal(validator.validationFunction(item1), false);
+		assert.equal(validator.validationFunction(item2), false);
+		assert.equal(validator.getURI(item), "snit");
+	};
+
+	// Test negative array indices for counting backwards from array.length
+	tests.testNegativeArrayIndex = function() {
+		var validationProperty = {
+			source: "SubArray[-1]",
+			variableName: "LastElement"
+		};
+		var item = {
+			SubArray: ["snit", "fnord"]
+		};
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{+LastElement}"), serviceRegistry, contentTypesCache);
+		assert.equal(validator.validationFunction(item), true);
+		assert.equal(validator.validationFunction(item1), false);
+		assert.equal(validator.validationFunction(item2), false);
+		assert.equal(validator.getURI(item), "fnord");
+	};
+
+	tests.testPropertyAfterArrayIndex = function() {
+		var validationProperty = {
+			source: "SubArray[1]:flop",
+			variableName: "NestedThing"
+		};
+		var item = {
+			SubArray: ["snit", { flop: "hi" }]
+		};
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{+NestedThing}"), serviceRegistry, contentTypesCache);
+		assert.equal(validator.validationFunction(item), true);
+		assert.equal(validator.getURI(item), "hi");
+		validator.itemCached = null;
+		assert.equal(validator.validationFunction(item1), false);
+		validator.itemCached = null;
+		assert.equal(validator.validationFunction(item2), false);
+	};
+
 	/**
 	 * Test combinations of nested properties and OR properties
 	 */

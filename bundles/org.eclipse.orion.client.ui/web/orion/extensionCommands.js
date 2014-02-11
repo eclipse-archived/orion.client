@@ -219,25 +219,41 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 			}
 			return false;
 		}
-		
+
+		/**
+		 * @param {Object|Array} item
+		 * @param {String} propertyName
+		 * @param {Object} validationProperty
+		 * @param {Validator} validator
+		 */
 		function matchSinglePattern(item, propertyName, validationProperty, validator){
 			var value = validationProperty.match;
-			var key, keyLastSegments;
-			if (propertyName.indexOf("[") === 0) { //$NON-NLS-0$
-				if(propertyName.indexOf("]")<0){
+			var key, keyLastSegments, pos1, pos2;
+			// Initial processing to handle array indices
+			if ((pos1 = propertyName.indexOf("[")) >= 0) { //$NON-NLS-0$
+				if((pos2 = propertyName.indexOf("]")) < 0){ //$NON-NLS-0$
 					return false;
 				}
-				if(!Array.isArray(item)){
+				// The [] is used to drill into a numeric property of an array
+				var fieldName = propertyName.substring(0, pos1), array, arrayIndex;
+				if(!(array = item[fieldName]) || !Array.isArray(array)){
 					return false;
 				}
-				key = propertyName.replace("[", "").replace("]", "");
-				for(var i=0; i<item.length; i++){
-					if (matchSinglePattern(item[i], key, validationProperty, validator)) {
-						return true;
-					}
-				}
-				
-			} else if (propertyName.indexOf("|") >= 0) { //$NON-NLS-0$
+				key = propertyName.substring(pos1 + 1, pos2);
+				arrayIndex = parseInt(key, 10);
+				if (isNaN(arrayIndex))
+					return false;
+
+				// Index may be < 0 in which case it counts backwards from object.length
+				if (arrayIndex < 0)
+					arrayIndex += array.length;
+
+				// Just rewrite the [] expression into a nested property access and fall down to the ":" case
+				keyLastSegments = propertyName.substring(pos2 + 1);
+				propertyName = fieldName + ":" + String(arrayIndex) + keyLastSegments;
+			}
+
+			if (propertyName.indexOf("|") >= 0) { //$NON-NLS-0$
 				// the pipe means that any one of the piped properties can match
 				key = propertyName.substring(0, propertyName.indexOf("|")); //$NON-NLS-0$
 				keyLastSegments = propertyName.substring(propertyName.indexOf("|")+1); //$NON-NLS-0$
