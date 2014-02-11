@@ -202,16 +202,16 @@ define("orion/editor/jsTemplateContentAssist", [ //$NON-NLS-0$
 		},
 		{
 			prefix: "mongodb", //$NON-NLS-0$
-			name: "mongodb Cloud Foundry connect", //$NON-NLS-0$
+			name: "mongodb connect (Cloud Foundry)", //$NON-NLS-0$
 			description: " - connect to an existing MongoDB database using Cloud Foundry", //$NON-NLS-0$
 			template: "if (${process}.env.VCAP_SERVICES) {\n" +  //$NON-NLS-0$
    					  "\tvar env = JSON.parse(${process}.env.VCAP_SERVICES);\n" +  //$NON-NLS-0$
    					  "\tvar mongo = env[\'${mongo-version}\'][0].credentials;\n" +  //$NON-NLS-0$
 					  "} else {\n" +  //$NON-NLS-0$
 					  "\tvar mongo = {\n" +  //$NON-NLS-0$
-					  "\t\tusername : \'${username}\',\n" +  //$NON-NLS-0$
-					  "\t\tpassword : \'${password}\',\n" +  //$NON-NLS-0$
-					  "\t\turl : \'mongodb://${username}:${password}@localhost:27017/${database}\'\n" +  //$NON-NLS-0$
+					  "\t\tusername : \'username\',\n" +  //$NON-NLS-0$
+					  "\t\tpassword : \'password\',\n" +  //$NON-NLS-0$
+					  "\t\turl : \'mongodb://username:password@localhost:27017/database\'\n" +  //$NON-NLS-0$
 					  "\t};\n}\n" +  //$NON-NLS-0$
 					  "var MongoClient = require('mongodb').MongoClient;\n" +//$NON-NLS-0$
 					  "MongoClient.connect(mongo.url, function(error, db) {\n"+  //$NON-NLS-0$
