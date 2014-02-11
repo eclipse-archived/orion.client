@@ -364,12 +364,16 @@ define([
 		var sidebar = this.sidebar;
 		// Switch to project view mode if a project is opened
 		function openProject(metadata){
-			if (metadata && metadata.Directory && sidebar.getActiveViewModeId() !== _self.id) {
+			if (metadata && metadata.Directory) {
 				_self.getProjectJson(metadata).then(function(json) {
 					if (json) {
-						_self.project = metadata;
 						_self.showViewMode(true);
-						sidebar.setViewMode(_self.id);
+						if (sidebar.getActiveViewModeId() === _self.id) {
+							_self.explorer.display(metadata);
+						} else {
+							_self.project = metadata;
+							sidebar.setViewMode(_self.id);
+						}
 					}
 				});
 			}
