@@ -720,12 +720,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			name: "Convert to project",
 			tooltip: "Convert this folder into a project",
 			id: "orion.project.initProject", //$NON-NLS-0$
-			visibleWhen: function(item) {
-				if (!explorer || !explorer.isCommandsVisible()) {
-					return false;
-				}
-				return true;
-			},
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				if(item){
@@ -752,6 +746,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				
 			},
 			visibleWhen: function(items) {
+				if (!explorer || !explorer.isCommandsVisible()) {
+					return false;
+				}
 				var item = forceSingleItem(items);
 				if (item && ((item.parent && item.parent.Projects) || (item.Parents && item.Parents.length === 0))) {
 					//TODO only works if children has been cached
