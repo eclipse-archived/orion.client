@@ -28,7 +28,6 @@
 }
 
 .targetSelector{
-
 }
 
 .navTableHeading {
@@ -319,6 +318,7 @@
 
 .modelDecorationSprite {
 	color: #798891 !important;
+	text-decoration: none !important;
 }
 
 .modelDecorationSprite:hover {

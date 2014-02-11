@@ -79,14 +79,15 @@
 
 .resourceSelectorContainer {
 	margin-left: 4px;
-	outline: 1px solid;
+	border: 1px solid;
 	height: 21px; 
 	width: 200px; 
 	margin-top: -2px;
 	background-color: white;
 	display: inline-block;
-	outline-color: #dadada;
+	border-color: #dadada;
 	cursor: pointer;
+	border-radius: 5px;
 }
 
 .componentSelectorContainer {
@@ -109,7 +110,7 @@
 	height: 22px;
 	border-color: #dadada;
 	-webkit-box-sizing: initial !important;
-	background: none repeat scroll 0 0 #f7f7f7;
+	/*background: none repeat scroll 0 0 #f7f7f7;*/
 }
 
 .dropdownMenuOpen {
@@ -169,8 +170,9 @@ a.currentLocation:hover {
 
 .repoUrlLink {
 	margin-top: 5px;
-	margin-right: 8px;
+	margin-right: 4px;
 	color: #02ADD0;
+	font-size: 1.1em;
 }
 
 .repoUrlLink:hover {
@@ -202,8 +204,8 @@ a.currentLocation:hover {
 	height: 64px;
 	margin-bottom: 4px;
 	overflow: hidden;
+	outline: none !important;
 }
-
 
 .repoUrlHeader {
 	margin-top: 3px;
@@ -224,23 +226,21 @@ a.currentLocation:hover {
 	font-size: 1.1em;
 	margin: 0 2px 0;
 	vertical-align: middle;
+	outline: none !important;
+	cursor: pointer;
 }
 
-.dismissButton {
-	border: 1px solid transparent;
-	background: transparent;
-	color: #666;
-    border-radius: 1px;
-	padding: 2px;
-	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;  /* to override user agent stylesheet */
-	margin: 0 4px 0;
-	vertical-align: middle;
-	min-height: 16px;
-	min-width: 16px;
+.repoUrlHeaderClose:hover {
+	color: #F58B0F; 
 }
 
 .browseSectionWrapper {
 	width:100%;
+}
+
+.imageSprite: hover {
+	background-color: #F58B0F; 
+	
 }
 
 .breadcrumb {

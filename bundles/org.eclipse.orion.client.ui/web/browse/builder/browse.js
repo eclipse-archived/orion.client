@@ -46,6 +46,9 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			if (arguments.length > 2) {
 				params.base = arguments[2];
 			}
+			if (arguments.length > 3) {
+				params.codeURL = arguments[3];
+			}
 		} else {
 			params = params || {};
 		}
@@ -58,7 +61,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		if (!params.rootName) {
 			var found = repo.match(/\/([^/]+)\/([^/]+)$/);
 			if (found) {
-				params.rootName = decodeURIComponent(found[1]) + " / " + decodeURIComponent(found[2]);
+				params.rootName = decodeURIComponent(found[1]) + " | " + decodeURIComponent(found[2]);
 				if (params.rootName.match(/\.git$/)) {
 					params.rootName = params.rootName.substring(0, params.rootName.length - 4);
 				}
@@ -93,6 +96,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 			parent: params.parentId,
 			repoURL: repo,
 			baseURL: (selectorNumber === 2 ? base : null),
+			codeURL: params.codeURL,
 			selectorNumber: selectorNumber,
 			rootName: params.rootName,
 			maxEditorLines: 300,

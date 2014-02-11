@@ -33,10 +33,12 @@ define([
 	'orion/EventTarget',
 	'text!orion/widgets/browse/repoUrlTrigger.html',
 	'text!orion/widgets/browse/repoAndBaseUrlTrigger.html',
-	'orion/webui/littlelib'
+	'orion/commands',
+	'orion/webui/littlelib',
+	'orion/URL-shim'
 ], function(
 	PageUtil, mInputManager, mBreadcrumbs, mBrowseView, mNavigatorRenderer, mReadonlyEditorView, mResourceSelector, mMarkdownView,
-	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, RepoAndBaseURLTriggerTemplate, lib
+	mCommandRegistry, mFileClient, mContentTypes, mStaticDataSource, mEmptyFileClient, Deferred, URITemplate, objects, EventTarget, RepoURLTriggerTemplate, RepoAndBaseURLTriggerTemplate, mCommands, lib
 ) {
 	
 	function ResourceChangeHandler(options) {
@@ -116,6 +118,7 @@ define([
 		}
 		this.repoURL = options.repoURL;
 		this.baseURL = options.baseURL;
+		this.codeURL = options.codeURL;
 		this._syntaxHighlighter = options.syntaxHighlighter;//Required
 		if(!this._syntaxHighlighter) {
 			this._syntaxHighlighter =  new mStaticDataSource.SyntaxHighlighter();
@@ -182,6 +185,20 @@ define([
 				this.startup();
 			}
 		},
+		_registerCommands: function() {
+			var editCodeCommand = new mCommands.Command({
+				imageClass: "core-sprite-edit", //$NON-NLS-0$
+				id: "orion.browse.gotoEdit",
+				visibleWhen: function(item) {
+					return true;
+				},
+				hrefCallback : function(data) {
+					return this.codeURL ? this.codeURL : (new URL("code", window.location.href)).href;
+				}.bind(this)			
+			});
+			this._commandRegistry.addCommand(editCodeCommand);
+			this._commandRegistry.registerCommandContribution("orion.browse.sectionActions", "orion.browse.gotoEdit", 1); //$NON-NLS-1$ //$NON-NLS-0$
+		},
 		startup: function(serviceRegistry) {
 			if(serviceRegistry) {
 				this._fileClient = new mFileClient.FileClient(serviceRegistry);	
@@ -189,6 +206,7 @@ define([
 			if(this.repoURL) {
 				this.repoURLHandler = new repoURLHandler(this.repoURL, this.baseURL);
 			}
+			this._registerCommands();
 			this._inputManager = new mInputManager.InputManager({
 				fileClient: this._fileClient,
 				statusReporter: this._statusReport,

@@ -246,10 +246,16 @@ define([
 							var actionNode = this._foldersSection.getActionElement();
 							if(actionNode) {
 								lib.empty(actionNode);
+								var letfNode = document.createElement("div"), rightNode=document.createElement("div");
+								letfNode.classList.add("layoutLeft");
+								rightNode.classList.add("layoutRight");
+								actionNode.appendChild(letfNode);
+								actionNode.appendChild(rightNode);
+								this.actionNode = rightNode;
 								var range = document.createRange();
-								range.selectNode(actionNode);
+								range.selectNode(letfNode);
 								var repoURLFragment = range.createContextualFragment(this.repoURLHandler.RepoURLTriggerTemplate);
-								actionNode.appendChild(repoURLFragment);
+								letfNode.appendChild(repoURLFragment);
 								this.repoURLDropdown = new mDropdown.Dropdown({
 									triggerNode: lib.node("orion.browse.repoURLTrigger"), 
 									dropdown: lib.node("orion.browse.repoURLDropdown")
@@ -265,8 +271,12 @@ define([
 									lib.node("orion.browse.repoURLInput").select();
 								}.bind(this.repoURLDropdown);
 							}
+						} else if (!this.messageView) {
+							this.actionNode =  this._foldersSection.getActionElement();
 						}
-						
+						if(!this.messageView && this.commandRegistry) {
+							this.commandRegistry.renderCommands("orion.browse.sectionActions", this.actionNode, {}, "button");
+						}
 						//Render the branch and component selector 
 						var titleNode = this._foldersSection.getTitleElement();
 						if(titleNode) {
