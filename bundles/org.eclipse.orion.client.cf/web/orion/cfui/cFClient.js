@@ -97,11 +97,13 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 			// Target CF v2 operations
 			
 			setTarget: function(url, org, space) {
-				return this._xhrV1("POST", require.toUrl("cfapi/target"), {
-					'Url': url,
-					'Org': org, 
-					'Space': space
-				});
+				var targetObject = {
+					'Url': url
+				};
+				if (org) targetObject.Org = org;
+				if (space) targetObject.Space = space;
+				
+				return this._xhrV1("POST", require.toUrl("cfapi/target"), targetObject);
 			},
 			
 			login: function(url, username, password, org, space) {

@@ -125,7 +125,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 	var targetImpl = {
 		callback: function(args) {
 			if (args.url) {
-				return cFService.setTarget(args.url).then(function(result) {
+				return cFService.setTarget(args.url, args.org, args.space).then(function(result) {
 					if (result) {
 						return "target: " + result.Url;
 					} else {
@@ -151,7 +151,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 				description: "Target URL to switch to",
 				defaultValue: null
 			}, {
-				name: "organization",
+				name: "org",
 				type: "string",
 				description: "Organization",
 				defaultValue: null
