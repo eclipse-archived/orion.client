@@ -215,9 +215,9 @@ define(["orion/assert", "../mockTextView.js", "orion/editor/textMateStyler", "te
 		var regex7 = mTextMateStyler.RegexUtil.toRegExp("(?x: \n \\\\ b)", false); // (literal backslash)b
 		assert.equal(regex7.source, "\\\\b");
 		
-		var str4 = '(?x:                # turn on extended mode\n                     \\\\                # a literal backslash\n                     (?:               # ...followed by...\n                       ["\\\\/bfnrt]     # one of these characters\n                       |               # ...or...\n                       u               # a u\n                       [0-9a-fA-F]{4}  # and four hex digits\n                     )\n                   )';
+		var str4 = '(?x:                # turn on extended mode\n                     \\\\                # a literal backslash\n                     (?:               # ...followed by...\n                       ["\\\/bfnrt]     # one of these characters\n                       |               # ...or...\n                       u               # a u\n                       [0-9a-fA-F]{4}  # and four hex digits\n                     )\n                   )';
 		var regex4 = mTextMateStyler.RegexUtil.toRegExp(str4, false);
-		assert.equal(regex4.source, '\\\\(?:["\\\\/bfnrt]|u[0-9a-fA-F]{4})');
+		assert.equal(regex4.source, '\\\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})');
 		
 		// Case-insensitive flag applied to entire regex pattern
 		var str8 = "(?i)fIzz",
