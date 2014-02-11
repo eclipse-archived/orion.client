@@ -106,5 +106,10 @@
 
 .cloneWrapper {
 	display: block;
+	overflow: visible;
 	z-index: 1000; /* must be greater than .contentassist z-index */
+}
+
+.contentassist.cloneWrapper:hover {
+	overflow: visible;
 }
