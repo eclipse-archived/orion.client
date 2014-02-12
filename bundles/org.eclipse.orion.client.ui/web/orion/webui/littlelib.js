@@ -119,12 +119,42 @@ define(["orion/util"], function(util) {
 			node.removeChild(child);
 		}
 	}
-	
+
+	function _getTabIndex(node) {
+		var result = node.tabIndex;
+		if (result === 0 && util.isIE) {
+			/*
+			 * The default value of tabIndex is 0 on IE, even for elements that are not focusable
+			 * by default (http://msdn.microsoft.com/en-us/library/ie/ms534654(v=vs.85).aspx).
+			 * Handle this browser difference by treating this value as -1 if the node is a type
+			 * that is not focusable by default according to the MS doc and has not had this
+			 * attribute value explicitly set on it.
+			 */
+			var focusableElements = {
+				a: true,
+				body: true,
+				button: true,
+				frame: true,
+				iframe: true,
+				img: true,
+				input: true,
+				isindex: true,
+				object: true,
+				select: true,
+				textarea: true
+			};
+            if (!focusableElements[node.nodeName.toLowerCase()] && !node.attributes.tabIndex) {
+				result = -1;
+			}
+		}
+		return result;
+	}
+
 	/* 
 	 * Inspired by http://brianwhitmer.blogspot.com/2009/05/jquery-ui-tabbable-what.html
 	 */
 	function firstTabbable(node) {
-		if (node.tabIndex >= 0) {
+		if (_getTabIndex(node) >= 0) {
 			return node;
 		}
 		if (node.hasChildNodes()) {
@@ -139,7 +169,7 @@ define(["orion/util"], function(util) {
 	}
 	
 	function lastTabbable(node) {
-		if (node.tabIndex >= 0) {
+		if (_getTabIndex(node) >= 0) {
 			return node;
 		}
 		if (node.hasChildNodes()) {
