@@ -1067,7 +1067,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					tootlip: deployService.tooltip,
 					id: "orion.project.deploy." + deployService.id,
 					callback: function(data){
-						var item = forceSingleItem(data.items);
+//						var item = forceSingleItem(data.items);
+						var item = forceSingleItem(explorer.selection.getSelections());
 						var project = item.Project;
 						
 						var appPath;
