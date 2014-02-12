@@ -281,10 +281,9 @@ define([
 					return;
 				var bin = _self._getLinksBin(catId).slice();
 				bin = bin.filter(function(link) {
-					// Don't render links that the page has requested we exclude, nor links to page we're already on.
-					if (exclusions.indexOf(link.source.id) >= 0 || link.href === windowHref) {
+					// Don't render links that the page has requested we exclude, or a non-default-link that links to the current page.
+					if (exclusions.indexOf(link.source.id) >= 0 || (!link.source.default && link.href === windowHref))
 						return false;
-					}
 					return true;
 				});
 				// Don't render a default link if there are others available in this category

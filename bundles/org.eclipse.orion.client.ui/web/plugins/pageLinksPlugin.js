@@ -70,9 +70,10 @@ define([
 		nameKey: "Search",
 		id: "orion.Search",
 		nls: "orion/nls/messages",
-		uriTemplate: "{+OrionHome}/search/search.html",
 		category: "search",
-		order: 10
+		"default": true, // Only show if nothing more specific is available
+		order: 10,
+		uriTemplate: "{+OrionHome}/search/search.html",
 	});
 
 	provider.registerService("orion.page.link.related", null, {
