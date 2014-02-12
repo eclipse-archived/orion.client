@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define document */
+/*global define document window parent */
 
 define(["require", "orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operation'], function(require, xhr, PluginProvider, Deferred, operation) {
 	var headers = {
@@ -18,14 +18,34 @@ define(["require", "orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operati
 	};
 	var provider = new PluginProvider(headers);
 
+	var tryParentRelative = true;
+	function makeParentRelative(location) {
+		if (tryParentRelative) {
+			try {
+				if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
+					return location.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
+				} else {
+					tryParentRelative = false;
+				}
+			} catch (e) {
+				tryParentRelative = false;
+			}
+		}
+		return location;
+	}
+
+	
+	var temp = document.createElement('a');
+	temp.href = "../gitapi/blame/";
+	var gitapiBase = makeParentRelative(temp.href);
+
 	var blameRequest = {
 
 		getBlameInfo: function(location, commit) {
 			var service = this; //$NON-NLS-0$
-
 			var clientDeferred = new Deferred();
-			
-			xhr("GET", require.toUrl("/gitapi/blame/") + (commit ? commit : "HEAD") + location, { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	
+			xhr("GET", require.toUrl(gitapiBase) + (commit ? commit : "HEAD") + location, { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				headers: {
 					"Orion-Version": "1", //$NON-NLS-1$ //$NON-NLS-0$
 						"Content-Type": "application/json; charset=UTF-8" //$NON-NLS-1$ //$NON-NLS-0$
@@ -87,6 +107,15 @@ define(["require", "orion/xhr", "orion/plugin", "orion/Deferred", 'orion/operati
 			end = location.indexOf("?", start); //$NON-NLS-0$
 			if (end === -1) { end = location.length; }
 			location = location.substring(start, end);
+		}
+		
+		//TODO this URL parsing needs to be done by the server
+		var filePrefix = "/file"; //$NON-NLS-0$
+		var subBegin = location.indexOf(filePrefix);
+		if(subBegin > 0){
+			var subEnd = location.indexOf("?", subBegin); //$NON-NLS-0$
+			if (subEnd === -1) { subEnd = location.length; }
+			location = location.substring(subBegin, subEnd);
 		}
 		
 		var wrappedResult = new Deferred();
