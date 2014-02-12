@@ -141,8 +141,9 @@ var exports = {};
 			commandRegistry.registerSelectionService(this.fileActionsScope, visible ? selection : null);
 			commandRegistry.registerSelectionService(this.editActionsScope, visible ? selection : null);
 			commandRegistry.registerSelectionService(this.viewActionsScope, visible ? selection : null);
-			mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], treeRoot, true);
+			mFileCommands.setExplorer(explorer);
 			ProjectCommands.setExplorer(explorer);
+			mFileCommands.updateNavTools(serviceRegistry, commandRegistry, explorer, null, [this.fileActionsScope, this.editActionsScope, this.viewActionsScope], treeRoot, true);
 			commandRegistry.destroy(this.toolsActionsScope);
 			commandRegistry.renderCommands(this.toolsActionsScope, this.toolsActionsScope, metadata, explorer, "tool"); //$NON-NLS-0$
 			commandRegistry.destroy(this.additionalActionsScope);
