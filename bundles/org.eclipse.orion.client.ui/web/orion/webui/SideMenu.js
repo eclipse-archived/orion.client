@@ -18,8 +18,11 @@ define([
 	'orion/PageLinks',
 	'orion/PageUtil',
 	'orion/URITemplate',
-	'orion/URL-shim'
-], function(mCommands, objects, lib, PageLinks, PageUtil, URITemplate, _) {
+	'orion/URL-shim',
+	'orion/util'
+], function(mCommands, objects, lib, PageLinks, PageUtil, URITemplate, _, util) {
+
+	var isTouch = util.isTouch;
 
 	function SideMenu(parentNode, contentNode){
 		this.parentNode = lib.node(parentNode);
@@ -31,9 +34,15 @@ define([
 		this.links = null;
 		this.categories = null;
 
-		this.anchor = document.createElement("ul");
-		this.anchor.classList.add("sideMenuList");
+		this.anchor = document.createElement("ul"); //$NON-NLS-0$
+		this.anchor.classList.add("sideMenuList"); //$NON-NLS-0$
 		this.parentNode.appendChild(this.anchor);
+
+		this.anchor.addEventListener("click", this._handleEvent.bind(this)); //$NON-NLS-0$
+		this.anchor.addEventListener("touchstart", this._handleEvent.bind(this)); //$NON-NLS-0$
+		// useCapture allows focus event from a submenu-trigger to bubble up to anchor
+		this.anchor.addEventListener("focus", this._handleEvent.bind(this), true /*useCapture*/); //$NON-NLS-0$
+		lib.addAutoDismiss([this.anchor], this._expandMenu.bind(this, null)); //$NON-NLS-0$
 	}
 	objects.mixin(SideMenu.prototype, {
 		LOCAL_STORAGE_NAME: "sideMenuNavigation",
@@ -84,6 +93,7 @@ define([
 					this._timeout = window.setTimeout(function() {
 						parent.style.display = 'none'; //$NON-NLS-0$
 					}, this.TRANSITION_DURATION_MS);
+					parent.classList.add("animating"); //$NON-NLS-0$
 				}
 				
 				if( sideMenuNavigation === this.OPEN_STATE ){
@@ -91,6 +101,7 @@ define([
 						window.clearTimeout(this._timeout);
 						this._timeout = null;
 					}
+					parent.classList.remove("animating"); //$NON-NLS-0$
 					parent.style.display = 'block'; //$NON-NLS-0$
 					parent.style.width = this.SIDE_MENU_OPEN_WIDTH;
 					this.setPageContentLeft(this.SIDE_MENU_OPEN_WIDTH);
@@ -295,12 +306,7 @@ define([
 				}
 
 				// First link becomes the icon link
-				var category = _self.categories.getCategory(catId);
-				var link = document.createElement("a");
-				link.href = bin[0].href;
-				link.className = category.imageClass;
-				menuitem.classList.remove(category.imageClass);
-				menuitem.appendChild(link);
+				menuitem.appendChild(_self._createCategoryElement(catId, menuitem, bin[0]));
 
 				// Links go into submenu
 				var sideMenuSubMenu = document.createElement('ul');
@@ -325,8 +331,53 @@ define([
 				});
 				menuitem.appendChild(sideMenuSubMenu);
 			});
+		},
+		_createCategoryElement: function(catId, menuitem, linkElement) {
+			var category = this.categories.getCategory(catId), element;
+			if (isTouch) {
+				element = document.createElement("button"); //$NON-NLS-0$
+				element.type = "button"; //$NON-NLS-0$
+			} else {
+				element = document.createElement("a"); //$NON-NLS-0$
+				element.href = linkElement.href;
+			}
+			element.className += category.imageClass;
+			element.classList.add("submenu-trigger"); //$NON-NLS-0$
+			element.tabIndex = "0"; //$NON-NLS-0$
+			menuitem.classList.remove(category.imageClass); // remove icon from menuitem; on link instead
+			return element;
+		},
+		_handleEvent: function(event) {
+			var target = event.target, isFocus = event.type === "focus"; //$NON-NLS-0$
+			if (target.tagName === "A" && !isFocus)
+				return; // do not interfere with link clicking
+			if (isMenuTrigger(target) && (isTouch || isFocus)) {
+				this._expandMenu(getMenu(target));
+			}
+		},
+		/**
+		 * @param {Element} [menu] Submenu to expand, or null to collapse all menus.
+		 */
+		_expandMenu: function(menu) {
+			// Un-expand every other menu
+			this.getMenuItems().forEach(function(item) {
+				var itemMenu = lib.$(".sideMenuSubMenu", item); //$NON-NLS-0$
+				if (menu === itemMenu)
+					return;
+				itemMenu.classList.remove("expanded"); //$NON-NLS-0$
+			});
+			if (menu)
+				menu.classList.toggle("expanded"); //$NON-NLS-0$
 		}
 	});
+
+	function isMenuTrigger(node) {
+		return node.classList.contains("submenu-trigger"); //$NON-NLS-0$
+	}
+
+	function getMenu(triggerNode) {
+		return lib.$(".sideMenuSubMenu", triggerNode.parentNode); //$NON-NLS-0$
+	}
 
 //	function debug() {
 //		console.log(" ------- ");

@@ -432,7 +432,7 @@ hard-coded numbers elsewhere.
     top: 36px;
 	/* bottom: 36px; $FooterHeight + footer border (1px) */   
     bottom: 0;
-    z-index: 0;
+    /*z-index: 0;*/
     -webkit-animation: slide 0.5s forwards;
     -webkit-animation-delay: 2s;
     animation: slide 0.5s forwards;
@@ -443,10 +443,13 @@ hard-coded numbers elsewhere.
 	font-size:10px;
 	text-decoration:none !important;
 	border-right:1px solid #ccc;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: -moz-none;
 }
 
-.sideMenu:hover{
-	z-index: 100;
+.sideMenu.animating {
+	z-index: 0;
 }
 
 .sideMenu-maximized {
@@ -470,20 +473,20 @@ hard-coded numbers elsewhere.
 	padding: 0;
 }
 
-.sideMenuItem:hover{
+.sideMenuItem:hover, .sideMenuItem.expanded {
 	text-decoration:none;
 	color:white !important;
 }
 
 /* icon links */
-.sideMenuItem>a {
+.sideMenuItem > .submenu-trigger {
 	color: #bbb !important;
 	text-decoration:none !important;
 	width: 100%;
 	display: inline-block;
 	padding: 9px 0px 12px 0px;
 }
-.sideMenuItem>a:hover{
+.sideMenuItem>.submenu-trigger:hover, .sideMenuItem.expanded>.submenu-trigger{
 	text-decoration:none;
 	color:white !important;
 }
@@ -494,7 +497,7 @@ hard-coded numbers elsewhere.
 	border-bottom: 1px solid #666;
 }
 
-.sideMenuItemActive > a {
+.sideMenuItemActive > .submenu-trigger {
 	color: white !important;
 }
 
@@ -589,7 +592,9 @@ hard-coded numbers elsewhere.
 	display: inline-block;
 }
 
-.sideMenuItem:hover ul { 
+/* Show submenu on hover, and when "expanded" is set programatically
+ */
+.sideMenuItem:hover .sideMenuSubMenu, .sideMenuSubMenu.expanded { 
     display:inline-block;
 }
 
