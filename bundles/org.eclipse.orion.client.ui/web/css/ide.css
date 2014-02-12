@@ -652,6 +652,11 @@ textarea.parameterInput {
 .treetable {
 	border-spacing: 0;
 	width:100%;
+}
+
+.miniNavTreeTable {
+	border-spacing: 0;
+	width:100%;
 	padding-left:10px;
 	padding-right:10px;
 }
@@ -683,7 +688,6 @@ textarea.parameterInput {
 
 .selectionModelContainer {
 	outline: none;
-	padding-top:1px;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;

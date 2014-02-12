@@ -706,7 +706,7 @@ exports.ExplorerRenderer = (function() {
 				this.explorer.refreshSelection();
 				this.explorer.initNavHandler();			
 			}
-			if(lib.$(".sectionTreeTable", this.tableNode.parentNode)) {
+			if(lib.$(".sectionTreeTable", this.tableNode.parentNode) || lib.$(".treetable", this.tableNode.parentNode)) {
 				lib.$$array(".treeTableRow", this.tableNode).forEach(function(node, i) { //$NON-NLS-0$
 					var on = (!(i % 2)) ? "darkSectionTreeTableRow" : "lightSectionTreeTableRow";
 					var off = (on === "darkSectionTreeTableRow") ? "lightSectionTreeTableRow" : "darkSectionTreeTableRow";

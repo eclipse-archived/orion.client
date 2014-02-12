@@ -109,6 +109,7 @@ define([
 				rendererFactory: function(explorer) {
 					return new MiniNavRenderer({
 						checkbox: false,
+						treeTableClass: "miniNavTreeTable",
 						cachePrefix: "MiniNav" //$NON-NLS-0$
 					}, explorer, _self.commandRegistry, _self.contentTypeRegistry); //$NON-NLS-0$
 				},
