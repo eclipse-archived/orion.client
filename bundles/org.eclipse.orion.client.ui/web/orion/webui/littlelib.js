@@ -143,7 +143,7 @@ define(["orion/util"], function(util) {
 				select: true,
 				textarea: true
 			};
-            if (!focusableElements[node.nodeName.toLowerCase()] && !node.attributes.tabIndex) {
+			if (!focusableElements[node.nodeName.toLowerCase()] && !node.attributes.tabIndex) {
 				result = -1;
 			}
 		}
