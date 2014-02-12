@@ -179,6 +179,9 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 			
 		}, function(error){
 			if(error.Retry && error.Retry.parameters){
+				if(error.forceShowMessage){
+					context.errorHandler(error);
+				}
 				context.data.parameters = getCommandParameters(error.Retry.parameters, error.Retry.optionalParameters);
 				context.data.oldParams = enhansedLaunchConf.Params;
 				context.commandService.collectParameters(context.data);
