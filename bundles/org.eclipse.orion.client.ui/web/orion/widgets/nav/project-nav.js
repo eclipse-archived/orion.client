@@ -419,6 +419,7 @@ define([
 				rendererFactory: function(explorer) {
 					return new ProjectNavRenderer({
 						checkbox: false,
+						treeTableClass: "miniNavTreeTable",
 						cachePrefix: "ProjectNav" //$NON-NLS-0$
 					}, explorer, _self.commandRegistry, _self.contentTypeRegistry);
 				},
