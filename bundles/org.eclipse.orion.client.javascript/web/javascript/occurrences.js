@@ -42,6 +42,7 @@ define([
 		 * @returns The status if we should continue visiting
 		 */
 		enter: function(node) {
+			var len, idx;
 			switch(node.type) {
 				case Estraverse.Syntax.Program:
 					this.occurrences = [];
@@ -54,8 +55,9 @@ define([
 					//we want the parent scope for a declaration, otherwise we leave it right away
 					this._enterScope(node);
 					if (node.params) {
-						for (var i = 0; i < node.params.length; i++) {
-							if(this.checkId(node.params[i], true)) {
+						len = node.params.length;
+						for (idx = 0; idx < len; idx++) {
+							if(this.checkId(node.params[idx], true)) {
 								return Estraverse.VisitorOption.Skip;
 							}
 						}
@@ -66,8 +68,9 @@ define([
 						if(this._enterScope(node)) {
 							return Estraverse.VisitorOption.Skip;
 						}
-						for (var j = 0; j < node.params.length; j++) {
-							if(this.checkId(node.params[j], true)) {
+						len = node.params.length;
+						for (idx = 0; idx < len; idx++) {
+							if(this.checkId(node.params[idx], true)) {
 								return Estraverse.VisitorOption.Skip;
 							}
 						}
@@ -79,8 +82,9 @@ define([
 					break;
 				case Estraverse.Syntax.ArrayExpression: 
 					if (node.elements) {
-						for (var k = 0; k < node.elements.length; k++) {
-							this.checkId(node.elements[k]);
+						len = node.elements.length;
+						for (idx = 0; idx < len; idx++) {
+							this.checkId(node.elements[idx]);
 						}
 					}
 					break;
@@ -114,8 +118,9 @@ define([
 				case Estraverse.Syntax.CallExpression:
 					this.checkId(node.callee, false);
 					if (node.arguments) {
-						for (var l = 0; l < node.arguments.length; l++) {
-							this.checkId(node.arguments[l]);
+						len = node.arguments.length;
+						for (idx = 0; idx < len; idx++) {
+							this.checkId(node.arguments[idx]);
 						}
 					}
 					break;
@@ -127,9 +132,9 @@ define([
 						return Estraverse.VisitorOption.Skip;
 					}
 					if(node.properties) {
-						var len = node.properties.length;
-						for (var m = 0; m < len; m++) {
-							var prop = node.properties[m];
+						len = node.properties.length;
+						for (idx = 0; idx < len; idx++) {
+							var prop = node.properties[idx];
 							if(this.thisCheck && prop.value && prop.value.type === Estraverse.Syntax.FunctionExpression) {
 								//tag it 
 								prop.value.isprop = true;
@@ -145,9 +150,9 @@ define([
 				case Estraverse.Syntax.NewExpression:
 					this.checkId(node.callee, false);
 					if(node.arguments) {
-						var len = node.arguments.length;
-						for(var m = 0; m < len; m++) {
-							this.checkId(node.arguments[m]);
+						len = node.arguments.length;
+						for(idx = 0; idx < len; idx++) {
+							this.checkId(node.arguments[idx]);
 						}
 					}
 					break;
@@ -163,7 +168,7 @@ define([
 							end: node.range[1]
 						});
 						// if this node is the selected this we are in the right scope
-						if (node.range[0] === this.context.node.range[0]){
+						if (node.range[0] === this.context.token.range[0]){
 							this.defscope = scope;
 						}
 					}
@@ -343,7 +348,7 @@ define([
 				this.visitor.enter = this.visitor.enter.bind(this.visitor);
 				this.visitor.leave = this.visitor.leave.bind(this.visitor);
 			}
-			this.visitor.thisCheck = context.node && context.node.type === Estraverse.Syntax.ThisExpression;
+			this.visitor.thisCheck = context.token && context.token.type === 'Keyword' && context.token.value === 'this';
 			this.visitor.context = context;
 			return this.visitor;			
 		},
@@ -352,13 +357,13 @@ define([
 		 * @description Computes the node name to use while searching
 		 * @function
 		 * @private
-		 * @param {Object} node The AST node
+		 * @param {Object} token The AST token
 		 * @returns {String} The node name to use while seraching
 		 */
-		_nameFromNode: function(node) {
-			switch(node.type) {
-				case Estraverse.Syntax.Identifier: return node.name;
-				case Estraverse.Syntax.ThisExpression: return 'this';
+		_nameFromNode: function(token) {
+			switch(token.type) {
+				case Estraverse.Syntax.Identifier: return token.value;
+				case 'Keyword': return 'this';
 			}
 		},
 		
@@ -367,19 +372,52 @@ define([
 		 * @function
 		 * @private
 		 * @param {Object} context The selection context from the editor
-		 * @param {Object} node The AST node
+		 * @param {Object} token The AST token
 		 * @param {Object} ast The AST
 		 * @returns {Boolean} True if we shoud skip computing occurrences
 		 */
-		_skip: function(context, node, ast) {
-			if(!node || node.type === Estraverse.Syntax.Literal) {
-				return true;
-			}	
-			var comment = Finder.findComment(context.selection.start, ast);
-			if(comment) {
+		_skip: function(context, token, ast) {
+			if(!token) {
 				return true;
 			}
-			return false;
+			if(token.type === 'Keyword') {
+				return token.value !== 'this';
+			}
+			return token.type !== Estraverse.Syntax.Identifier
+		},
+		
+		/**
+		 * @description Gets the token from the given offset or the proceeding token if the found token 
+		 * is a punctuator
+		 * @function
+		 * @private
+		 * @param {Number} offset The offset into the source
+		 * @param {Object} ast The AST
+		 * @return {Object} The token for the given offset or null
+		 */
+		_getToken: function(offset, ast) {
+			if(ast.tokens && ast.tokens.length > 0) {
+				var token = Finder.findToken(offset, ast.tokens);
+				if(token) {
+					if(token.type === 'Punctuator') {
+						var index = token.index;
+						//only check back if we are at the start of the punctuator i.e. here -> {
+						if(offset === token.range[0] && index != null && index > 0) {
+							var prev = ast.tokens[index-1];
+							if(prev.range[1] !== token.range[0]) {
+								return null;
+							}
+							else {
+								token = prev;
+							}
+						}
+					}
+					if(token.type === 'Identifier' || (token.type === 'Keyword' && token.value === 'this')) {
+						return token;
+					}
+				}
+			}
+			return null;
 		},
 		
 		/**
@@ -395,13 +433,13 @@ define([
 			var that = this;
 			return this.astManager.getAST(editorContext).then(function(ast) {
 				if(ast) {
-					var node = Finder.findNode(ctxt.selection.start, ast);
-					if(!that._skip(ctxt, node, ast)) {
+					var token = that._getToken(ctxt.selection.start, ast);
+					if(!that._skip(ctxt, token, ast)) {
 						var context = {
 							start: ctxt.selection.start,
 							end: ctxt.selection.end,
-							word: that._nameFromNode(node),
-							node: node,
+							word: that._nameFromNode(token),
+							token: token,
 						};
 						var visitor = that.getVisitor(context);
 						Estraverse.traverse(ast, visitor);

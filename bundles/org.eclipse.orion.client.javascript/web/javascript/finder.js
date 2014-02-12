@@ -110,10 +110,12 @@ define([
 					idx = 0;
 					token = tokens[0];
 				if(offset >= token.range[0] && offset < token.range[1]) {
+					token.index = offset;
 					return token;
 				}
 				token = tokens[max];
-				if(offset >= token.range[0] && offset < token.range[1]) {
+				if(offset >= token.range[0]) {
+					token.index = max;
 					return token;
 				}
 				token = null;
@@ -123,14 +125,30 @@ define([
 					if(offset < token.range[0]) {
 						max = idx-1;
 					}
-					else if(offset >= token.range[1]) {
+					else if(offset > token.range[1]) {
 						min = idx+1;
 					}
+					else if(offset === token.range[1]) {
+						var next = tokens[idx+1];
+						if(next.range[0] === token.range[1]) {
+							min = idx+1;
+						}
+						else {
+							token.index = idx;
+							return token;
+						}
+					}
 					else if(offset >= token.range[0] && offset < token.range[1]) {
+						token.index = idx;
 						return token;
 					}
 					if(min === max) {
-						return tokens[min];
+						token = tokens[min];
+						if(offset >= token.range[0] && offset <= token.range[1]) {
+							token.index = min;
+							return token;
+						}
+						return null;
 					}
 				}
 			}

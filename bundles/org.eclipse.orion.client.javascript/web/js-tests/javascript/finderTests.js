@@ -570,6 +570,148 @@ define([
 		},
 		
 		/**
+		 * Find a token in an AST with copious whitespace
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
+		 */
+		test_findToken16: function() {
+			var text = "var   foo = {f: function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(4, ast.tokens);
+					Assert.equal(null, token, 'Should not have found a token');
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a token in an AST with copious whitespace
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
+		 */
+		test_findToken17: function() {
+			var text = "var   foo = {f: function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(5, ast.tokens);
+					Assert.equal(null, token, 'Should not have found a token');
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a token in an AST with copious whitespace
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
+		 */
+		test_findToken18: function() {
+			var text = "var foo = {  f: function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(12, ast.tokens);
+					Assert.equal(null, token, 'Should not have found a token');
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a token in an AST with copious whitespace
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
+		 */
+		test_findToken19: function() {
+			var text = "var foo = {f:   function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(14, ast.tokens);
+					Assert.equal(null, token, 'Should not have found a token');
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a token in an AST with copious whitespace
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
+		 */
+		test_findToken20: function() {
+			var text = "var foo = {f:   function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(15, ast.tokens);
+					Assert.equal(null, token, 'Should not have found a token');
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a token in an AST with copious whitespace
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
+		 */
+		test_findToken21: function() {
+			var text = "  var foo = {f: function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(1, ast.tokens);
+					Assert.equal(null, token, 'Should not have found a token');
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a token in an AST with copious whitespace
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
+		 */
+		test_findToken22: function() {
+			var text = "  var foo = {f:   function() {}}";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(0, ast.tokens);
+					Assert.equal(null, token, 'Should not have found a token');
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
+		 * Find a token in an AST with copious whitespace
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427931
+		 */
+		test_findToken23: function() {
+			var text = "function f3(  foo   ,   bar   , baz) {};";
+			return astManager.getAST(setUp(text)).then(function(ast) {
+				try {
+					var token = Finder.findToken(17, ast.tokens);
+					if(!token) {
+						Assert.fail('Should have found a token');
+					}
+					else {
+						Assert.equal(token.type, 'Identifier', 'Should have found an Identifier token');
+						Assert.equal(token.value, 'foo', 'Should have found a foo token');
+					}
+				}
+				finally {
+					astManager.updated();
+				}
+			});
+		},
+		
+		/**
 		 * Find a comment
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=426033
 		 */
