@@ -236,6 +236,7 @@ a.currentLocation:hover {
 
 .browseSectionWrapper {
 	width:100%;
+	overflow: hidden;
 }
 
 .imageSprite: hover {
