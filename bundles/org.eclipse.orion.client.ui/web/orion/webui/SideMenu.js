@@ -221,16 +221,6 @@ define([
 				// Sort the links within this category
 				links[key].sort(compareLinkElements);
 			});
-			// Remove duplicate links (mutates bin)
-			catIds.forEach(function(catId) {
-				var bin = links[catId];
-				for (var i = bin.length-1; i > 0; i--) {
-					var a = bin[i], b = bin[i-1];
-					if (a.href === b.href && a.textContent === b.textContent) {
-						bin.splice(i, 1);
-					}
-				}
-			});
 		},
 		_renderCategories: function() {
 			var categories = this.categories, _self = this;
@@ -290,6 +280,13 @@ define([
 				bin = bin.filter(function(link) {
 					return !(bin.length > 1 && link.source.default);
 				});
+				// Filter out duplicate links (we sorted bin earlier, so any duplicates are consecutive elements)
+				for (var i = bin.length-1; i > 0; i--) {
+					var a = bin[i], b = bin[i-1];
+					if (a.href === b.href && a.textContent === b.textContent) {
+						bin.splice(i, 1); // remove one of the dupes
+					}
+				}
 				if (!bin.length) {
 					// Empty category: can happen if the page has excluded every command in this category
 					return;

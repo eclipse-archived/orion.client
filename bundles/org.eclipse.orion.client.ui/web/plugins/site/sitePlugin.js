@@ -68,11 +68,23 @@ define([
 		uriTemplate: "{+OrionHome}/sites/"
 	});
 
+	// Default link to ensure "Sites" category is never empty
 	provider.registerService("orion.page.link", null, {
 		nameKey: "Sites",
 		id: "orion.sites",
 		nls: "orion/nls/messages",
 		category: "sites",
+		"default": true,
+		order: 10, // Make this the first since it's the most useful one
+		uriTemplate: "{+OrionHome}/sites/sites.html"
+	});
+
+	provider.registerService("orion.page.link", null, {
+		nameKey: "Sites",
+		id: "orion.sites.2",
+		nls: "orion/nls/messages",
+		category: "sites",
+		order: 10, // Make this the first since it's the most useful one
 		uriTemplate: "{+OrionHome}/sites/sites.html"
 	});
 
