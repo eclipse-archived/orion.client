@@ -256,7 +256,8 @@ define([
 		onModelMove: function(modelEvent) {
 			var ex = this, changedLocations = {};
 			(modelEvent.items || [modelEvent]).forEach(function(item) {
-				if (ex.treeRoot.Location === item.Location) {
+				var treeRoot = ex.treeRoot;
+				if ((treeRoot.Location || treeRoot.ContentLocation) === item.oldValue.Location) {
 					// the treeRoot was moved
 					var oldRoot = ex.treeRoot;
 					var newItem = item.newValue;
@@ -285,10 +286,10 @@ define([
 		},
 		onModelDelete: function(modelEvent) {
 			var items = modelEvent.items || [modelEvent];
-			var ex = this;
+			var ex = this, treeRoot = ex.treeRoot;
 			var newRoot;
 			var treeRootDeleted = items.some(function(item) {
-				if (item.oldValue.Location === ex.treeRoot.Location) {
+				if (item.oldValue.Location === (treeRoot.Location || treeRoot.ContentLocation)) {
 					newRoot = item.parent;
 					return true;
 				}

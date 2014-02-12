@@ -152,6 +152,13 @@ define([
 				}.bind(this));
 			}.bind(this));
 		},
+		loadResourceList: function(path, force, postLoad) {
+			if (this.treeRoot && path === this.treeRoot.ContentLocation) {
+				this.display(this.fileMetadata, true);
+			} else {
+				this.scopeUp();
+			}
+		},
 		createModel: function() {
 			return new ProjectNavModel(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders, this.projectClient, this.fileMetadata);
 		},
@@ -206,7 +213,6 @@ define([
 			}.bind(this));
 		},
 		updateCommands: function(selections){
-			var self = this;
 			if(this.treeRoot && this.treeRoot.Project && typeof this.treeRoot.Project.launchConfigurations === "undefined"){ //$NON-NLS-0$
 				this.treeRoot.Project.launchConfigurations = [];
 				
