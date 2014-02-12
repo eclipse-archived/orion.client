@@ -284,38 +284,31 @@ define([
 		return node;
 	}
 
-	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode, displayExtraDropdown) {
+	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode, displayDropdownArrow) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
 		}
 		var range = document.createRange();
 		range.selectNode(parent);
-		var buttonFragment = displayExtraDropdown ? range.createContextualFragment(DropdownButtonWithArrowFragment) : range.createContextualFragment(DropdownButtonFragment);
+		var buttonFragment = displayDropdownArrow ? range.createContextualFragment(DropdownButtonWithArrowFragment) : range.createContextualFragment(DropdownButtonFragment);
 		// bind name to fragment variable
 		lib.processTextNodes(buttonFragment, {ButtonText: name});
 		parent.appendChild(buttonFragment);
 		var newMenu = parent.lastChild;
 		var menuButton;
-		var extraDropdownButton;
-		if(displayExtraDropdown){
-			extraDropdownButton = newMenu.previousSibling;
-			menuButton = extraDropdownButton.previousSibling;
+		var dropdownArrow;
+		if (displayDropdownArrow) {
+			menuButton = newMenu.previousSibling;
+			dropdownArrow = menuButton.lastChild;
 		} else {
 			menuButton = newMenu.previousSibling;
 		}
 		if (buttonClass) {
 			menuButton.classList.add(buttonClass); //$NON-NLS-0$
-			if(extraDropdownButton) extraDropdownButton.classList.add(buttonClass); //$NON-NLS-0$
 		} else {
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 			menuButton.classList.add("commandButton"); //$NON-NLS-0$
-			if(extraDropdownButton) {
-				extraDropdownButton.classList.add("orionButton"); //$NON-NLS-0$
-				extraDropdownButton.classList.add("commandButton"); //$NON-NLS-0$
-				extraDropdownButton.classList.add("commandHalfButton_right"); //$NON-NLS-0$
-				menuButton.classList.add("commandHalfButton_left"); //$NON-NLS-0$
-			}
 		}
 		if (buttonIconClass) {
 			if(!showName) {
@@ -323,21 +316,17 @@ define([
 				menuButton.setAttribute("aria-label", name); //$NON-NLS-0$
 			}
 			_addImageToElement({ spriteClass: "commandSprite", imageClass: buttonIconClass }, menuButton, name); //$NON-NLS-0$
-			if(extraDropdownButton) {
-				extraDropdownButton.classList.add("commandImage"); //$NON-NLS-0$
-				extraDropdownButton.classList.add("commandHalfImage_right"); //$NON-NLS-0$
-				menuButton.classList.add("commandHalfImage_left"); //$NON-NLS-0$
-			}
-			menuButton.classList.add("orionButton"); // $NON-NLS-0$
+			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 		}
 		menuButton.dropdown = new Dropdown.Dropdown({
 			dropdown: newMenu, 
 			populate: populateFunction,
 			selectionClass: selectionClass,
+			skipTriggerEventListeners: !!dropdownArrow,
 			positioningNode: positioningNode
 		});
 		newMenu.dropdown = menuButton.dropdown;
-		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, extraDropdownButton: extraDropdownButton};
+		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, dropdownArrow: dropdownArrow};
 	}
 	
 	function createCheckedMenuItem(parent, name, checked, onChange) {

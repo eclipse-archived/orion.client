@@ -253,26 +253,6 @@ a.currentLocation:hover {
 	vertical-align:middle;
 }
 
-.commandHalfButton_left, .commandHalfButton_left:hover, .commandHalfButton_left:focus {
-    border-top-right-radius:0 !important;
-	border-bottom-right-radius:0 !important;
-	margin-right: 0 !important;
-	padding-right: 0 !important;
-	font-weight: normal !important;
-	background: none !important;
-	border-color: transparent !important;
-}
-
-.commandHalfButton_right, .commandHalfButton_right:hover, .commandHalfButton_right:focus {
-    border-top-left-radius:0 !important;
-	border-bottom-left-radius:0 !important;
-	margin-left: 0 !important;
-	padding-left: 0 !important;
-	font-weight: normal !important;
-	background: none !important;
-	border-color: transparent !important;
-}
-
 .commandButton:hover, .commandButton:focus {
 	background-color: #eee;
 }
@@ -395,7 +375,7 @@ a.currentLocation:hover {
 	font-size: 12px;
 }
 
-.dropdownTrigger {
+.dropdownTrigger:not(.dropdownDefaultButton) {
 	font-weight: normal;
 	background: none !important;
 	border-color: transparent;

@@ -713,9 +713,6 @@ define([
 				if (node.commandTooltip) {
 					node.commandTooltip.destroy();
 				}
-				if (node.extraCommandTooltip) {
-					node.extraCommandTooltip.destroy();
-				}
 				if (node.emptyGroupTooltip) {
 					node.emptyGroupTooltip.destroy();
 				}
@@ -817,7 +814,6 @@ define([
 											}
 											remove(created.menu);
 											remove(created.menuButton);
-											remove(created.extraDropdownButton);
 											remove(created.destroyButton);
 										}
 									} else {
@@ -968,7 +964,7 @@ define([
 			if (!parent || !lib.contains(document.body, parent)) {
 				return null;
 			}
-			var menuButton, newMenu, extraDropdownButton;
+			var menuButton, newMenu, dropdownArrow;
 			var destroyButton, menuParent = parent;
 			if (nested) {
 				var range = document.createRange();
@@ -995,41 +991,47 @@ define([
 				}
 				tooltip = icon ? (tooltip || name) : tooltip;
 				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon, false, selectionClass, positioningNode, defaultInvocation || pretendDefaultActionId);
-				if(defaultInvocation){
-					defaultInvocation.domNode = created.menuButton;
-					var self = this;
-					created.menuButton.onclick = function(){
-						self._invoke(defaultInvocation);
-					};
-				} else if(pretendDefaultActionId && created.dropdown){
-					created.dropdown.addTriggerNode(created.menuButton);
-				}
+				dropdownArrow = created.dropdownArrow;
 				menuButton = created.menuButton;
-				newMenu = created.menu;
-				extraDropdownButton = created.extraDropdownButton;
-				if (tooltip) {
-					menuButton.commandTooltip = new mTooltip.Tooltip({
-						node: menuButton,
-						text: defaultInvocation && defaultInvocation.command && defaultInvocation.command.name ? tooltip + ": " + defaultInvocation.command.name: tooltip, //$NON-NLS-0$
-						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-					if(created.extraDropdownButton){
-						menuButton.extraCommandTooltip = new mTooltip.Tooltip({
-							node: created.extraDropdownButton,
-							text: tooltip,
-							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						});						
+				if (dropdownArrow) {
+					if (defaultInvocation) {
+						defaultInvocation.domNode = created.menuButton;
 					}
-				} else if(defaultInvocation && defaultInvocation.command && defaultInvocation.command.name){
+					var self = this;
+					menuButton.onclick = function(evt){
+						var bounds = lib.bounds(dropdownArrow);
+						if (evt.clientX >= bounds.left && created.dropdown) {
+							created.dropdown.toggle(evt);
+						} else {
+							self._invoke(defaultInvocation);
+						}
+					};
+					if (created.dropdown) {
+						menuButton.onkeydown = function(evt) {
+							if (lib.KEY.DOWN === evt.keyCode) {
+								created.dropdown.toggle(evt);
+								lib.stop(evt);
+							}
+						};
+					}
+				}
+				newMenu = created.menu;
+				var tooltipText, hasDefault = defaultInvocation && defaultInvocation.command && (defaultInvocation.command.tooltip || defaultInvocation.command.name);
+				if (hasDefault) {
+					tooltipText = defaultInvocation.command.tooltip || defaultInvocation.command.name;
+				} else if (hasDefault) {
+					tooltipText = tooltip;
+				}
+				if (tooltipText) {
 					menuButton.commandTooltip = new mTooltip.Tooltip({
 						node: menuButton,
-						text: name + ": " + defaultInvocation.command.name, //$NON-NLS-0$
+						text: tooltipText,
 						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});					
 				}
 			}
 			
-			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton, extraDropdownButton: extraDropdownButton};
+			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton, dropdownArrow: dropdownArrow};
 		},
 		
 		_generateMenuSeparator: function(dropdown) {
