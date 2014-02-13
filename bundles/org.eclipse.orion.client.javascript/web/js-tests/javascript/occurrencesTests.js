@@ -1012,5 +1012,280 @@ define([
 			}
 		});
 	};
+
+	/**
+	 * Tests when a variable is redefined
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineSimpleVariable1 = function() {
+		editorContext.text = "var reDef; var a=reDef; var reDef; var b=reDef;";
+		return occurrences.computeOccurrences(editorContext, setContext(4, 9)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:4, end:9}, {start:17, end:22}, {start:41, end:46}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a variable is redefined
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineSimpleVariable2 = function() {
+		editorContext.text = "var reDef; var a=reDef; var reDef; var b=reDef;";
+		return occurrences.computeOccurrences(editorContext, setContext(17, 17)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:4, end:9}, {start:17, end:22}, {start:41, end:46}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a variable is redefined
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineSimpleVariable3 = function() {
+		editorContext.text = "var reDef; var a=reDef; var reDef; var b=reDef;";
+		return occurrences.computeOccurrences(editorContext, setContext(30, 30)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:28, end:33}, {start:41, end:46}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a variable is redefined
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineSimpleVariable4 = function() {
+		editorContext.text = "var reDef; var a=reDef; var reDef; var b=reDef;";
+		return occurrences.computeOccurrences(editorContext, setContext(46, 46)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:28, end:33}, {start:41, end:46}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a variable is redefined in nested scopes
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineNestedVariable1 = function() {
+		editorContext.text = "var reDef; var a=reDef; function f1(){var b=reDef;} function f2(reDef){var c=reDef;	var reDef; var d=reDef;	function f3(){var e=reDef;}} var f=reDef;";
+		return occurrences.computeOccurrences(editorContext, setContext(4, 9)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:4, end:9}, {start:17, end:22}, {start:44, end:49}, {start:143, end:148}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a variable is redefined in nested scopes
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineNestedVariable2 = function() {
+		editorContext.text = "var reDef; var a=reDef; function f1(){var b=reDef;} function f2(reDef){var c=reDef;	var reDef; var d=reDef;	function f3(){var e=reDef;}} var f=reDef;";
+		return occurrences.computeOccurrences(editorContext, setContext(66, 66)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:64, end:69}, {start:77, end:82}, {start:101, end:106}, {start:128, end:133}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+		/**
+	 * Tests when a variable is redefined in nested scopes
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineNestedVariable3 = function() {
+		editorContext.text = "var reDef; var a=reDef; function f1(){var b=reDef;} function f2(reDef){var c=reDef;	var reDef; var d=reDef;	function f3(){var e=reDef;}} var f=reDef;";
+		return occurrences.computeOccurrences(editorContext, setContext(133, 133)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:88, end:93}, {start:101, end:106}, {start:128, end:133}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * DISABLED marks occurrences inside the nested scope, fix as part of Bug 428133
+	 * Tests when a variable is redefined in nested scopes
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+//	Tests.test_redefineNestedVariable4 = function() {
+//		editorContext.text = "var reDef; var a=reDef; function f1(){var b=reDef;} function f2(reDef){var c=reDef;	var reDef; var d=reDef;	function f3(){var e=reDef;}} var f=reDef;";
+//		return occurrences.computeOccurrences(editorContext, setContext(143, 143)).then(function(results) {
+//			try {
+//				assertOccurrences(results, [{start:4, end:9}, {start:17, end:22}, {start:44, end:49}, {start:143, end:148}]);
+//			}
+//			finally {
+//				tearDown();
+//			}
+//		});
+//	};
+	
+	/**
+	 * Tests when a function is redefined
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineSimpleFunction1 = function() {
+		editorContext.text = "function reDef(){}; reDef(); function reDef(){}; reDef();";
+		return occurrences.computeOccurrences(editorContext, setContext(9, 14)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:9, end:14}, {start:20, end:25}, {start:49, end:54}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a function is redefined
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineSimpleFunction2 = function() {
+		editorContext.text = "function reDef(){}; reDef(); function reDef(){}; reDef();";
+		return occurrences.computeOccurrences(editorContext, setContext(20, 20)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:9, end:14}, {start:20, end:25}, {start:49, end:54}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a function is redefined
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineSimpleFunction3 = function() {
+		editorContext.text = "function reDef(){}; reDef(); function reDef(){}; reDef();";
+		return occurrences.computeOccurrences(editorContext, setContext(40, 40)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:38, end:43}, {start:49, end:54}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a function is redefined
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineSimpleFunction4 = function() {
+		editorContext.text = "function reDef(){}; reDef(); function reDef(){}; reDef();";
+		return occurrences.computeOccurrences(editorContext, setContext(54, 54)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:38, end:43}, {start:49, end:54}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a function is redefined in nested scopes
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineNestedFunction1 = function() {
+		editorContext.text = "function reDef(){}; reDef(); function f1(){reDef();} function f2(reDef){reDef(); function reDef(){}; reDef(); function f3(){reDef();}} reDef();";
+		return occurrences.computeOccurrences(editorContext, setContext(9, 14)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:9, end:14}, {start:20, end:25}, {start:43, end:48}, {start:135, end:140}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a function is redefined in nested scopes
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineNestedFunction2 = function() {
+		editorContext.text = "function reDef(){}; reDef(); function f1(){reDef();} function f2(reDef){reDef(); function reDef(){}; reDef(); function f3(){reDef();}} reDef();";
+		return occurrences.computeOccurrences(editorContext, setContext(67, 67)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:65, end:70}, {start:72, end:77}, {start:101, end:106}, {start:124, end:129}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests when a function is redefined in nested scopes
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+	Tests.test_redefineNestedFunction3 = function() {
+		editorContext.text = "function reDef(){}; reDef(); function f1(){reDef();} function f2(reDef){reDef(); function reDef(){}; reDef(); function f3(){reDef();}} reDef();";
+		return occurrences.computeOccurrences(editorContext, setContext(129, 129)).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:90, end:95}, {start:101, end:106}, {start:124, end:129}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * DISABLED marks occurrences inside the nested scope, fix as part of Bug 428133
+	 * Tests when a function is redefined in nested scopes
+	 * Must be updated when follow-up Bug 428133 is fixed
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427928
+	 */
+//	Tests.test_redefineNestedFunction4 = function() {
+//		editorContext.text = "function reDef(){}; reDef(); function f1(){reDef();} function f2(reDef){reDef(); function reDef(){}; reDef(); function f3(){reDef();}} reDef();";
+//		return occurrences.computeOccurrences(editorContext, setContext(135, 135)).then(function(results) {
+//			try {
+//				assertOccurrences(results, [{start:9, end:14}, {start:20, end:25}, {start:43, end:48}, {start:135, end:140}]);
+//			}
+//			finally {
+//				tearDown();
+//			}
+//		});
+//	};
+	
 	return Tests;
 });

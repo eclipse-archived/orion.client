@@ -291,19 +291,19 @@ define([
 				if (node.name === this.context.word) {
 					var scope = this.scopes[this.scopes.length-1]; // Always will have at least the program scope
 					if(candefine) {
-						if(this.defscope && this.defnode) {
-							//trying to re-define, we can break since any matches past here would not be the original definition
-							//redefinition is OK if we are still descending to the offset, but not once we are in position
-							if(node.range[0] >= this.context.start) {
+						if(this.defscope) {
+							// Re-defining, we want the last defining node previous to the selection, skip any future re-defines
+							if(node.range[0] > this.context.start) {
 								return true;
+							} else {
+								// Occurrences collected for the previous define are now invalid, fall through to mark this occurrence
+								this.occurrences = [];
+								scope.occurrences = [];
 							}
 						}
 						//does the scope enclose it?
 						if(scope && (scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
 							this.defscope = {range: scope.range};
-						}
-						if(node.range[0] <= this.context.start && node.range[1] >= this.context.start) {
-							this.defnode = node.range;
 						}
 					}
 					scope.occurrences.push({
