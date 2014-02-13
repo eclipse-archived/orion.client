@@ -1021,6 +1021,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				if (!explorer || !explorer.isCommandsVisible()) {
 					return false;
 				}
+				if (typeof explorer.scopeDown !== "function") { //$NON-NLS-0$
+					return false;
+				}
 				item = forceSingleItem(item);
 				return item.Directory && item.Location !== explorer.treeRoot.Location;
 			}

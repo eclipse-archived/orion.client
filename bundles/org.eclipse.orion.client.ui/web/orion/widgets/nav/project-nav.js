@@ -280,6 +280,7 @@ define([
 				CommonNavExplorer.prototype.updateCommands.apply(this, selections);
 			}
 		},
+		scopeDown: false,
 		scopeUp: function() {
 			var input = PageUtil.matchResourceParameters();
 			var resource = input.resource;
