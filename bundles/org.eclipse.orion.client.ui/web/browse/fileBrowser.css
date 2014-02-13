@@ -48,8 +48,9 @@
 
 .readmeHeader{
 	margin-top: 24px;
-	padding-bottom: 5px;
-	padding-top: 3px;
+	color: #444;
+	padding-top: 8px !important;
+	padding-bottom: 10px !important;
 }
 
 .readmeTitle{
@@ -69,7 +70,7 @@
 	-webkit-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	color:#444444;
+	color:#444;
 }
 
 .browserResourceSelectorNameLabel {
@@ -110,13 +111,30 @@
 	height: 22px;
 	border-color: #dadada;
 	-webkit-box-sizing: initial !important;
+	box-sizing: initial !important;
 	/*background: none repeat scroll 0 0 #f7f7f7;*/
 }
 
+.dropdownMenu > li {
+	-webkit-box-sizing: initial !important;
+	box-sizing: initial !important;
+}
+
+.dropdownTrigger:not(.dropdownDefaultButton) {
+	-webkit-box-sizing: initial !important;
+	box-sizing: initial !important;
+}
+
+.dropdownMenuItem, .dropdownMenuItem a {
+	color: #444 !important;
+}
 .dropdownMenuOpen {
 	max-height: 175px;/*holds 8 drop down items*/
 	overflow-y: auto;
 	overflow-x: hidden;
+	color:  #444 !important;
+	-webkit-box-sizing: initial !important;
+	box-sizing: initial !important;
 }
 
 .currentLocation {
@@ -166,6 +184,7 @@ a.currentLocation:hover {
     text-align:left;
     min-height: 32px;
     vertical-align:middle;
+    background-color: #f5f7f9;
 }
 
 .repoUrlLink {

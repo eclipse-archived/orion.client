@@ -38,6 +38,7 @@
 .navColumn {
 	min-width: 150px;
 	vertical-align: baseline;
+	padding: 2px !important;
 }
 
 .navColumnNoIcon {
@@ -226,6 +227,9 @@
 
 .sectionTreeTableHeader{
 	background: none !important;
+	/*background: linear-gradient(to bottom, #f8f8f8 0%,#f2f2f3 100%) !important;*/
+	padding-top: 5px !important;
+	padding-bottom: 5px !important;
 }
 
 .lightSectionTreeTableRow {
@@ -252,7 +256,7 @@
 
 .orionMarkdown {
 	padding: 8px;
-	color: gray;
+	color: #26343F;
 }
 
 .orionMarkdown img {
@@ -285,6 +289,10 @@
 	margin-right: 0px !important;
 }
 
+.orionMarkdown a {
+	color: #02ADD0 !important;
+}
+
 .orionMarkdown pre code {
 	background-color: transparent;
     padding: 0;
@@ -296,7 +304,7 @@
 .orionMarkdown h1 {
 	font-size:1.3em;
 	font-weight: bold;
-	color: #6d6d6d;
+	color: #444;
 	line-height: 36px;
 	top:0;
 	bottom:0;
@@ -307,7 +315,7 @@
 .orionMarkdown h2 {
 	font-size: 1.17em;
 	font-weight: bold;
-	color: #6d6d6d;
+	color: #444;
 	margin-top: 4px;
 	margin-bottom: 4px;
 }
@@ -315,7 +323,7 @@
 .orionMarkdown h3, .orionMarkdown h4, .orionMarkdown h5, .orionMarkdown h6 {
 	font-size: 1.17em;
 	font-weight: bold;
-	color: #6d6d6d;
+	color: #444;
 	margin-top: 4px;
 	margin-bottom: 4px;
 }
