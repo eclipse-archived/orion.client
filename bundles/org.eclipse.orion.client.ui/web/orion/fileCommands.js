@@ -763,6 +763,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 										return false;
 									});
 								}
+								// special case for deleting a project displayed in the project nav
+								if (item.type === "ProjectRoot" && parent.ProjectLocation) {
+									deleteLocation = parent.ProjectLocation;
+								}
 								if (!deleteLocation) {
 									return new Deferred().resolve();
 								}

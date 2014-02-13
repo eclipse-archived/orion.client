@@ -153,6 +153,9 @@ define([
 			}.bind(this));
 		},
 		loadResourceList: function(path, force, postLoad) {
+			if (path && typeof path === "object") { //$NON-NLS-0$
+				path = path.ChildrenLocation || path.ContentLocation;
+			}
 			if (this.treeRoot && path === this.treeRoot.ContentLocation) {
 				this.display(this.fileMetadata, true);
 			} else {
