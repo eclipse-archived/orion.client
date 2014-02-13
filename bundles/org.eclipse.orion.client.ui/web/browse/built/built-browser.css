@@ -1024,6 +1024,8 @@ display:inline-block;
 border-color:#dadada;
 cursor:pointer;
 border-radius:5px;
+-webkit-box-sizing:initial !important;
+box-sizing:initial !important;
 }
 .componentSelectorContainer{
 margin-left:8px;
@@ -1055,6 +1057,8 @@ box-sizing:initial !important;
 }
 .dropdownMenuItem,.dropdownMenuItem a{
 color:#444 !important;
+-webkit-box-sizing:initial !important;
+box-sizing:initial !important;
 }
 .dropdownMenuOpen{
 max-height:175px;
@@ -1063,6 +1067,9 @@ overflow-x:hidden;
 color:#444 !important;
 -webkit-box-sizing:initial !important;
 box-sizing:initial !important;
+}
+.commandButton.orionButton.dropdownTrigger:hover{
+border-color:transparent;
 }
 .currentLocation{
 vertical-align:top;
