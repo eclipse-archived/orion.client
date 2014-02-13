@@ -2176,12 +2176,42 @@ define('orion/webui/littlelib',["orion/util"], function(util) {
 			node.removeChild(child);
 		}
 	}
-	
+
+	function _getTabIndex(node) {
+		var result = node.tabIndex;
+		if (result === 0 && util.isIE) {
+			/*
+			 * The default value of tabIndex is 0 on IE, even for elements that are not focusable
+			 * by default (http://msdn.microsoft.com/en-us/library/ie/ms534654(v=vs.85).aspx).
+			 * Handle this browser difference by treating this value as -1 if the node is a type
+			 * that is not focusable by default according to the MS doc and has not had this
+			 * attribute value explicitly set on it.
+			 */
+			var focusableElements = {
+				a: true,
+				body: true,
+				button: true,
+				frame: true,
+				iframe: true,
+				img: true,
+				input: true,
+				isindex: true,
+				object: true,
+				select: true,
+				textarea: true
+			};
+			if (!focusableElements[node.nodeName.toLowerCase()] && !node.attributes.tabIndex) {
+				result = -1;
+			}
+		}
+		return result;
+	}
+
 	/* 
 	 * Inspired by http://brianwhitmer.blogspot.com/2009/05/jquery-ui-tabbable-what.html
 	 */
 	function firstTabbable(node) {
-		if (node.tabIndex >= 0) {
+		if (_getTabIndex(node) >= 0) {
 			return node;
 		}
 		if (node.hasChildNodes()) {
@@ -2196,7 +2226,7 @@ define('orion/webui/littlelib',["orion/util"], function(util) {
 	}
 	
 	function lastTabbable(node) {
-		if (node.tabIndex >= 0) {
+		if (_getTabIndex(node) >= 0) {
 			return node;
 		}
 		if (node.hasChildNodes()) {
@@ -2889,9 +2919,10 @@ define('orion/nls/root/messages',{
 	"Get Plugins": "Get Plugins",
 	"Global": "Global",
 	"Editor": "Editor",
-	"EditorRelatedLink": "Go To Folder",
-	"EditorLinkWorkspace": "Go To Workspace",
-	"EditorRelatedLinkProj": "Go To Project Root",
+	"EditorRelatedLink": "Show Current Folder",
+	"EditorRelatedLinkParent": "Show Enclosing Folder",
+	"EditorLinkWorkspace": "Show Workspace",
+	"EditorRelatedLinkProj": "Show Project",
 	"Filter bindings": "Filter bindings",
 	"Orion Editor": "Orion Editor",
 	"Orion Image Viewer": "Orion Image Viewer",
@@ -6268,8 +6299,9 @@ define('text',['module'], function (module) {
                     // only appear at the top of a file.
                     line = line.substring(1);
                 }
-
-                stringBuffer.append(line);
+				if (line !== null) {
+                	stringBuffer.append(line);
+                }
 
                 while ((line = input.readLine()) !== null) {
                     stringBuffer.append(lineSeparator);
@@ -6289,7 +6321,7 @@ define('text',['module'], function (module) {
 
 define('text!orion/webui/dropdowntriggerbutton.html',[],function () { return '<button class="dropdownTrigger">${ButtonText}<!--span class="dropdownArrowDown core-sprite-openarrow"></span--></button><ul class="dropdownMenu"></ul>';});
 
-define('text!orion/webui/dropdowntriggerbuttonwitharrow.html',[],function () { return '<button>${ButtonText}</button><button class="dropdownTrigger"><span class="dropdownArrowDown core-sprite-openarrow"></span></button><ul class="dropdownMenu"></ul>';});
+define('text!orion/webui/dropdowntriggerbuttonwitharrow.html',[],function () { return '<button class="dropdownTrigger dropdownDefaultButton">${ButtonText}<span class="dropdownArrowDown core-sprite-openarrow"></span></button><ul class="dropdownMenu"></ul>';});
 
 define('text!orion/webui/submenutriggerbutton.html',[],function () { return '<li class="dropdownSubMenu"><span class="dropdownTrigger dropdownMenuItem" role="menuitem" tabindex="0"><span class="dropdownCommandName">${ButtonText}</span><span class="dropdownArrowRight core-sprite-closedarrow"></span></span><ul class="dropdownMenu"></ul></li>';});
 
@@ -6894,38 +6926,31 @@ define('orion/commands',[
 		return node;
 	}
 
-	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode, displayExtraDropdown) {
+	function createDropdownMenu(parent, name, populateFunction, buttonClass, buttonIconClass, showName, selectionClass, positioningNode, displayDropdownArrow) {
 		parent = lib.node(parent);
 		if (!parent) {
 			throw "no parent node was specified"; //$NON-NLS-0$
 		}
 		var range = document.createRange();
 		range.selectNode(parent);
-		var buttonFragment = displayExtraDropdown ? range.createContextualFragment(DropdownButtonWithArrowFragment) : range.createContextualFragment(DropdownButtonFragment);
+		var buttonFragment = displayDropdownArrow ? range.createContextualFragment(DropdownButtonWithArrowFragment) : range.createContextualFragment(DropdownButtonFragment);
 		// bind name to fragment variable
 		lib.processTextNodes(buttonFragment, {ButtonText: name});
 		parent.appendChild(buttonFragment);
 		var newMenu = parent.lastChild;
 		var menuButton;
-		var extraDropdownButton;
-		if(displayExtraDropdown){
-			extraDropdownButton = newMenu.previousSibling;
-			menuButton = extraDropdownButton.previousSibling;
+		var dropdownArrow;
+		if (displayDropdownArrow) {
+			menuButton = newMenu.previousSibling;
+			dropdownArrow = menuButton.lastChild;
 		} else {
 			menuButton = newMenu.previousSibling;
 		}
 		if (buttonClass) {
 			menuButton.classList.add(buttonClass); //$NON-NLS-0$
-			if(extraDropdownButton) extraDropdownButton.classList.add(buttonClass); //$NON-NLS-0$
 		} else {
 			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 			menuButton.classList.add("commandButton"); //$NON-NLS-0$
-			if(extraDropdownButton) {
-				extraDropdownButton.classList.add("orionButton"); //$NON-NLS-0$
-				extraDropdownButton.classList.add("commandButton"); //$NON-NLS-0$
-				extraDropdownButton.classList.add("commandHalfButton_right"); //$NON-NLS-0$
-				menuButton.classList.add("commandHalfButton_left"); //$NON-NLS-0$
-			}
 		}
 		if (buttonIconClass) {
 			if(!showName) {
@@ -6933,21 +6958,17 @@ define('orion/commands',[
 				menuButton.setAttribute("aria-label", name); //$NON-NLS-0$
 			}
 			_addImageToElement({ spriteClass: "commandSprite", imageClass: buttonIconClass }, menuButton, name); //$NON-NLS-0$
-			if(extraDropdownButton) {
-				extraDropdownButton.classList.add("commandImage"); //$NON-NLS-0$
-				extraDropdownButton.classList.add("commandHalfImage_right"); //$NON-NLS-0$
-				menuButton.classList.add("commandHalfImage_left"); //$NON-NLS-0$
-			}
-			menuButton.classList.add("orionButton"); // $NON-NLS-0$
+			menuButton.classList.add("orionButton"); //$NON-NLS-0$
 		}
 		menuButton.dropdown = new Dropdown.Dropdown({
 			dropdown: newMenu, 
 			populate: populateFunction,
 			selectionClass: selectionClass,
+			skipTriggerEventListeners: !!dropdownArrow,
 			positioningNode: positioningNode
 		});
 		newMenu.dropdown = menuButton.dropdown;
-		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, extraDropdownButton: extraDropdownButton};
+		return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, dropdownArrow: dropdownArrow};
 	}
 	
 	function createCheckedMenuItem(parent, name, checked, onChange) {
@@ -8526,7 +8547,8 @@ define('orion/explorers/explorer-table',[
 		onModelMove: function(modelEvent) {
 			var ex = this, changedLocations = {};
 			(modelEvent.items || [modelEvent]).forEach(function(item) {
-				if (ex.treeRoot.Location === item.Location) {
+				var treeRoot = ex.treeRoot;
+				if ((treeRoot.Location || treeRoot.ContentLocation) === item.oldValue.Location) {
 					// the treeRoot was moved
 					var oldRoot = ex.treeRoot;
 					var newItem = item.newValue;
@@ -8555,10 +8577,10 @@ define('orion/explorers/explorer-table',[
 		},
 		onModelDelete: function(modelEvent) {
 			var items = modelEvent.items || [modelEvent];
-			var ex = this;
+			var ex = this, treeRoot = ex.treeRoot;
 			var newRoot;
 			var treeRootDeleted = items.some(function(item) {
-				if (item.oldValue.Location === ex.treeRoot.Location) {
+				if (item.oldValue.Location === (treeRoot.Location || treeRoot.ContentLocation)) {
 					newRoot = item.parent;
 					return true;
 				}
@@ -23834,9 +23856,6 @@ define('orion/commandRegistry',[
 				if (node.commandTooltip) {
 					node.commandTooltip.destroy();
 				}
-				if (node.extraCommandTooltip) {
-					node.extraCommandTooltip.destroy();
-				}
 				if (node.emptyGroupTooltip) {
 					node.emptyGroupTooltip.destroy();
 				}
@@ -23938,7 +23957,6 @@ define('orion/commandRegistry',[
 											}
 											remove(created.menu);
 											remove(created.menuButton);
-											remove(created.extraDropdownButton);
 											remove(created.destroyButton);
 										}
 									} else {
@@ -24089,7 +24107,7 @@ define('orion/commandRegistry',[
 			if (!parent || !lib.contains(document.body, parent)) {
 				return null;
 			}
-			var menuButton, newMenu, extraDropdownButton;
+			var menuButton, newMenu, dropdownArrow;
 			var destroyButton, menuParent = parent;
 			if (nested) {
 				var range = document.createRange();
@@ -24116,41 +24134,47 @@ define('orion/commandRegistry',[
 				}
 				tooltip = icon ? (tooltip || name) : tooltip;
 				var created = Commands.createDropdownMenu(menuParent, name, populateFunction, buttonCss, icon, false, selectionClass, positioningNode, defaultInvocation || pretendDefaultActionId);
-				if(defaultInvocation){
-					defaultInvocation.domNode = created.menuButton;
-					var self = this;
-					created.menuButton.onclick = function(){
-						self._invoke(defaultInvocation);
-					};
-				} else if(pretendDefaultActionId && created.dropdown){
-					created.dropdown.addTriggerNode(created.menuButton);
-				}
+				dropdownArrow = created.dropdownArrow;
 				menuButton = created.menuButton;
-				newMenu = created.menu;
-				extraDropdownButton = created.extraDropdownButton;
-				if (tooltip) {
-					menuButton.commandTooltip = new mTooltip.Tooltip({
-						node: menuButton,
-						text: defaultInvocation && defaultInvocation.command && defaultInvocation.command.name ? tooltip + ": " + defaultInvocation.command.name: tooltip, //$NON-NLS-0$
-						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-					if(created.extraDropdownButton){
-						menuButton.extraCommandTooltip = new mTooltip.Tooltip({
-							node: created.extraDropdownButton,
-							text: tooltip,
-							position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						});						
+				if (dropdownArrow) {
+					if (defaultInvocation) {
+						defaultInvocation.domNode = created.menuButton;
 					}
-				} else if(defaultInvocation && defaultInvocation.command && defaultInvocation.command.name){
+					var self = this;
+					menuButton.onclick = function(evt){
+						var bounds = lib.bounds(dropdownArrow);
+						if (evt.clientX >= bounds.left && created.dropdown) {
+							created.dropdown.toggle(evt);
+						} else {
+							self._invoke(defaultInvocation);
+						}
+					};
+					if (created.dropdown) {
+						menuButton.onkeydown = function(evt) {
+							if (lib.KEY.DOWN === evt.keyCode) {
+								created.dropdown.toggle(evt);
+								lib.stop(evt);
+							}
+						};
+					}
+				}
+				newMenu = created.menu;
+				var tooltipText, hasDefault = defaultInvocation && defaultInvocation.command && (defaultInvocation.command.tooltip || defaultInvocation.command.name);
+				if (hasDefault) {
+					tooltipText = defaultInvocation.command.tooltip || defaultInvocation.command.name;
+				} else if (hasDefault) {
+					tooltipText = tooltip;
+				}
+				if (tooltipText) {
 					menuButton.commandTooltip = new mTooltip.Tooltip({
 						node: menuButton,
-						text: name + ": " + defaultInvocation.command.name, //$NON-NLS-0$
+						text: tooltipText,
 						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});					
 				}
 			}
 			
-			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton, extraDropdownButton: extraDropdownButton};
+			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton, dropdownArrow: dropdownArrow};
 		},
 		
 		_generateMenuSeparator: function(dropdown) {
