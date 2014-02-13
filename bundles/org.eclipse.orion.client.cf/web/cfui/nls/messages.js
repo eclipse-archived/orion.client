@@ -11,7 +11,7 @@
  
  /*global define*/
  
-define(['orion/i18n!git/nls/messages', 'git/nls/root/messages'], function(bundle, root) {
+define(['orion/i18n!cfui/nls/messages', 'cfui/nls/root/messages'], function(bundle, root) {
 	var result = {
 			root:root
 	};
