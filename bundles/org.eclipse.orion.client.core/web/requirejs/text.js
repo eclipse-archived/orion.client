@@ -312,8 +312,9 @@ define(['module'], function (module) {
                     // only appear at the top of a file.
                     line = line.substring(1);
                 }
-
-                stringBuffer.append(line);
+				if (line !== null) {
+                	stringBuffer.append(line);
+                }
 
                 while ((line = input.readLine()) !== null) {
                     stringBuffer.append(lineSeparator);
