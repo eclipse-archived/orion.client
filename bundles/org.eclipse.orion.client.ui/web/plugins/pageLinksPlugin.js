@@ -76,13 +76,14 @@ define([
 		uriTemplate: "{+OrionHome}/search/search.html",
 	});
 
+	// Links to an Editor view of current folder. This is only useful from non-Editor pages (eg Shell)
 	provider.registerService("orion.page.link.related", null, {
 		id: "orion.editFromMetadata",
 		nameKey: "EditorRelatedLink",
 		nls: "orion/nls/messages",
 		tooltip: "Open Editor page",
 		category: "edit",
-		order: 10, // first link in edit category
+		order: 1, // First link in edit category on Shell
 		validationProperties: [{
 			source: "ChildrenLocation|ContentLocation",
 			variableName: "EditorLocation",
@@ -92,22 +93,52 @@ define([
 		// use this uri if we ever want to drill the LHS nav into the EditorLocation
 		// uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation},navigate={,EditorLocation}?depth=1"
 	});
-	// TODO need related link that takes you to the "project root", but how to implement that?
 
-	// Shows a link to the topmost parent folder (Project Root)
+	// Links to an Editor view of the parent folder (Enclosing Folder)
 	provider.registerService("orion.page.link.related", null, {
-		id: "orion.editProjectRoot",
-		nameKey: "EditorRelatedLinkProj",
+		id: "orion.editParent",
+		nameKey: "EditorRelatedLinkParent",
 		nls: "orion/nls/messages",
 		category: "edit",
-		order: 5, // Make it first link in edit category
+		order: 3,
 		validationProperties: [{
-			source: "Parents[-1]:Location", // FIXME
+			source: "Parents[0]:Location",
 			variableName: "EditorLocation",
 			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
 		}],
 		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
 	});
+
+	// Links to an Editor view of the topmost parent folder (Project Root)
+	provider.registerService("orion.page.link.related", null, {
+		id: "orion.editProjectRoot",
+		nameKey: "EditorRelatedLinkProj",
+		nls: "orion/nls/messages",
+		category: "edit",
+		order: 5,
+		validationProperties: [{
+			source: "Parents[-1]:Location",
+			variableName: "EditorLocation",
+			replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
+		}],
+		uriTemplate: "{+OrionHome}/edit/edit.html#{,EditorLocation}"
+	});
+
+	// Uncomment this if we ever want "Project Root" to be the 1st link in the "edit" slot when you're already viewing a project.
+	// (Encourages users to stay within their current project rather than ascend to workspace)
+//	provider.registerService("orion.page.link.related", null, {
+//		id: "orion.editProjectRootNoOp",
+//		nameKey: "EditorRelatedLinkProj",
+//		nls: "orion/nls/messages",
+//		category: "edit",
+//		order: 5,
+//		force: true, // Show even when it's a no-op
+//		validationProperties: [{
+//			source: "Parents:length",
+//			match: 0
+//		}],
+//		uriTemplate: "{+OrionHome}/edit/edit.html#{,Location}"
+//	});
 
 //	// Removed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427617
 //	provider.registerService("orion.page.link.related", null, {

@@ -189,7 +189,6 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		pageToolbar = lib.node("pageToolbar"), //$NON-NLS-0$
 		editorDomNode = lib.node("editor"); //$NON-NLS-0$
 
-	//mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
 	// Do not collapse sidebar, https://bugs.eclipse.org/bugs/show_bug.cgi?id=418558
 	var collapseSidebar = false; //PageUtil.hash() !== ""
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandRegistry, preferences, searcher, null, null, collapseSidebar); //$NON-NLS-0$
@@ -339,6 +338,9 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			name = lastRoot ? lastRoot.Name : "";
 			target = lastRoot;
 		}
+		// Exclude the "Show current folder" command: it's useless on editor page with built-in nav.
+		// TODO the command exclusions should be an API and specified by individual pages (page links)?
+		mGlobalCommands.setPageCommandExclusions(["orion.editFromMetadata"]); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({
 			task: "Editor", //$NON-NLS-0$
 			name: name,

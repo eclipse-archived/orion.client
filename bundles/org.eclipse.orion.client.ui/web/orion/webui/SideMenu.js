@@ -271,8 +271,10 @@ define([
 					return;
 				var bin = _self._getLinksBin(catId).slice();
 				bin = bin.filter(function(link) {
-					// Don't render links that the page has requested we exclude, or a non-default-link that links to the current page.
-					if (exclusions.indexOf(link.source.id) >= 0 || (!link.source.default && link.href === windowHref))
+					// Don't render links that the page has requested we exclude, nor a non-default-link that links to the current page.
+					// However! If the link has force==true then it wants to be shown despite being a no-op link.
+					var source = link.source;
+					if (exclusions.indexOf(source.id) >= 0 || (!source.default && !source.force && link.href === windowHref))
 						return false;
 					return true;
 				});
@@ -283,7 +285,7 @@ define([
 				// Filter out duplicate links (we sorted bin earlier, so any duplicates are consecutive elements)
 				for (var i = bin.length-1; i > 0; i--) {
 					var a = bin[i], b = bin[i-1];
-					if (a.href === b.href && a.textContent === b.textContent) {
+					if (a.href === b.href) {
 						bin.splice(i, 1); // remove one of the dupes
 					}
 				}
