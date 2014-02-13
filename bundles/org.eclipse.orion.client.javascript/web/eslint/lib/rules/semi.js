@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -26,16 +26,29 @@
 }(this, function(require, exports, module) {
 	module.exports = function(context) {
 		"use strict";
-
+		
+		/**
+		 * @description Checks a set of tokens for the given node to see if the trailing one
+		 * is a semicolon
+		 * @private
+		 * @param {Object} node The AST node
+		 */
 		function checkForSemicolon(node) {
 			var tokens = context.getTokens(node);
-			var t = tokens[tokens.length - 1];
+			var len = tokens.length;
+			var t = tokens[len - 1];
 			if (t && t.type === "Punctuator" && t.value === ";") {
 				return;
 			}
 			context.report(node, "Missing semicolon.", null, t /* expose the bad token */);
 		}
 
+		/**
+		 * @description Checks a set of tokens for a variable declaration to see if the trailing one
+		 * is a semicolon iff it is not part of a for-statement
+		 * @private
+		 * @param {Object} node The AST node
+		 */
 		function checkVariableDeclaration(node) {
 			var ancestors = context.getAncestors(node),
 			    parent = ancestors[ancestors.length - 1],
@@ -51,7 +64,8 @@
 
 		return {
 			"VariableDeclaration": checkVariableDeclaration,
-			"ExpressionStatement": checkForSemicolon
+			"ExpressionStatement": checkForSemicolon,
+			"ReturnStatement": checkForSemicolon,
 		};
 	};
 	return module.exports;
