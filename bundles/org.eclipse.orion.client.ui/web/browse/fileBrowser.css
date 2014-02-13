@@ -89,6 +89,8 @@
 	border-color: #dadada;
 	cursor: pointer;
 	border-radius: 5px;
+	-webkit-box-sizing: initial !important;
+	box-sizing: initial !important;
 }
 
 .componentSelectorContainer {
@@ -127,6 +129,8 @@
 
 .dropdownMenuItem, .dropdownMenuItem a {
 	color: #444 !important;
+	-webkit-box-sizing: initial !important;
+	box-sizing: initial !important;
 }
 .dropdownMenuOpen {
 	max-height: 175px;/*holds 8 drop down items*/
@@ -135,6 +139,10 @@
 	color:  #444 !important;
 	-webkit-box-sizing: initial !important;
 	box-sizing: initial !important;
+}
+
+.commandButton.orionButton.dropdownTrigger:hover {
+	border-color: transparent;
 }
 
 .currentLocation {
