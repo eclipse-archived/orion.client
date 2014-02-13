@@ -193,6 +193,16 @@ define([
 								{label: "Error", value:2}
 							]
 						},
+						{	id: "validate_unnecessary_semi",
+							name: "Unnecessary semicolons",
+							type: "number",
+							defaultValue: 1,
+							options: [
+								{label: "Ignore", value:0},
+								{label: "Warning", value:1},
+								{label: "Error", value:2}
+							]
+						},
 						{	id: "validate_no_unused_vars",
 							name: "Unused variables",
 							type: "number",

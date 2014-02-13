@@ -26,6 +26,7 @@ define([
 			"no-unused-vars": 1, //$NON-NLS-0$
 			"no-use-before-define": 1, //$NON-NLS-0$
 			"semi": 1, //$NON-NLS-0$
+			"no-extra-semi": 1, //$NON-NLS-0$
 			"missing-func-decl-doc": [0, 'decl'], //$NON-NLS-0$ //$NON-NLS-1$
 			"missing-func-expr-doc": [0, 'expr'] //$NON-NLS-0$ //$NON-NLS-1$
 		},
@@ -207,6 +208,7 @@ define([
 			config.setOption("no-unused-vars", properties.validate_no_unused_vars); //$NON-NLS-0$
 			config.setOption("no-use-before-define", properties.validate_use_before_define); //$NON-NLS-0$
 			config.setOption("semi", properties.validate_missing_semi); //$NON-NLS-0$
+			config.setOption("no-extra-semi", properties.validate_unnecessary_semi); //$NON-NLS-0$
 		}
 	});
 
