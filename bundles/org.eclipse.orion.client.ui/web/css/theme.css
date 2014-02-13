@@ -279,24 +279,6 @@ a.currentLocation:hover {
 	user-select: none;
 }
 
-.commandHalfImage_left, .commandHalfImage_left:hover, .commandHalfImage_left:focus{
-	border-right: 0;
-    border-top-right-radius:0;
-	border-bottom-right-radius:0;
-	padding-right: 0;
-	margin-right: 0;
-}
-
-.commandHalfImage_right, .commandHalfImage_right:hover, .commandHalfImage_right:focus{
-	border-left: 0;
-    border-top-left-radius:0;
-	border-bottom-left-radius:0;
-	line-height: inherit;
-	padding-left: 0;
-	margin-left: 0;
-	vertical-align: top;
-}
-
 .commandImage:hover, .commandImage:focus {
 	background-color: #e6e6e6;
 	border: 1px solid #ccc;
