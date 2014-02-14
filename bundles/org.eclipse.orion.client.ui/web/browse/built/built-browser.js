@@ -31011,6 +31011,7 @@ define('orion/widgets/browse/resourceSelector',[
 		this.dropDownTooltip = params.dropDownTooltip;
 		this.allItems = params.allItems;
 		this.activeResourceName = params.activeResourceName;
+		this.activeResourceLocation = params.activeResourceLocation;
 		this.labelHeader = params.labelHeader;
 		this.parentNode = params.parentNode;
 		this.listener = function(event) {
@@ -31054,6 +31055,7 @@ define('orion/widgets/browse/resourceSelector',[
 			return this.allItems.map(function(resource) { //$NON-NLS-0$
 				return {
 					name: resource.Name,
+					checked: resource.Location === _self.activeResourceLocation,
 					callback: _self.setActiveResource.bind(_self, {resource: resource, changeHash: true})
 				};
 			});
@@ -31105,6 +31107,7 @@ define('orion/widgets/browse/resourceSelector',[
 		 */
 		setActiveResource: function(params) {
 			this.activeResourceName = params.resource.Name;
+			this.activeResourceLocation = params.resource.Location;
 			if(this.fetchChildren) {//Lazy fetch
 				if(params.resource.selectorAllItems){
 					if(this.resourceChangeDispatcher) {
@@ -34480,7 +34483,9 @@ define('orion/widgets/browse/fileBrowser',[
 					this.refresh(new URITemplate("{,resource}").expand({resource:currentComponentLocation}));
 				}
 			}
-			this._componentSelector.activeResourceName = this._componentSelector.getActiveResource(currentComponentLocation).Name;
+			var activeComp = this._componentSelector.getActiveResource(currentComponentLocation);
+			this._componentSelector.activeResourceName = activeComp.Name;
+			this._componentSelector.activeResourceLocation = activeComp.Location;
 			this._componentSelector.refresh();
 		}.bind(this)); 
 		this._init(options);
@@ -34577,6 +34582,7 @@ define('orion/widgets/browse/fileBrowser',[
 						this._activeBranchLocation = this._activeBranchLocation || this._branches[0].Location;
 					}
 					this._branchSelector.activeResourceName = activeBranchName;
+					this._branchSelector.activeResourceLocation = this._activeBranchLocation;
 					
 					if(this._showComponent) {
 						this._branchSelector.setActiveResource({resource: this._branchSelector.getActiveResource(this._activeBranchLocation), changeHash: metadata.Parents,  defaultChild: this._activeComponentLocation});
