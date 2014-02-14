@@ -40,6 +40,7 @@ define([
 		this.dropDownTooltip = params.dropDownTooltip;
 		this.allItems = params.allItems;
 		this.activeResourceName = params.activeResourceName;
+		this.activeResourceLocation = params.activeResourceLocation;
 		this.labelHeader = params.labelHeader;
 		this.parentNode = params.parentNode;
 		this.listener = function(event) {
@@ -83,6 +84,7 @@ define([
 			return this.allItems.map(function(resource) { //$NON-NLS-0$
 				return {
 					name: resource.Name,
+					checked: resource.Location === _self.activeResourceLocation,
 					callback: _self.setActiveResource.bind(_self, {resource: resource, changeHash: true})
 				};
 			});
@@ -134,6 +136,7 @@ define([
 		 */
 		setActiveResource: function(params) {
 			this.activeResourceName = params.resource.Name;
+			this.activeResourceLocation = params.resource.Location;
 			if(this.fetchChildren) {//Lazy fetch
 				if(params.resource.selectorAllItems){
 					if(this.resourceChangeDispatcher) {

@@ -159,7 +159,9 @@ define([
 					this.refresh(new URITemplate("{,resource}").expand({resource:currentComponentLocation}));
 				}
 			}
-			this._componentSelector.activeResourceName = this._componentSelector.getActiveResource(currentComponentLocation).Name;
+			var activeComp = this._componentSelector.getActiveResource(currentComponentLocation);
+			this._componentSelector.activeResourceName = activeComp.Name;
+			this._componentSelector.activeResourceLocation = activeComp.Location;
 			this._componentSelector.refresh();
 		}.bind(this)); 
 		this._init(options);
@@ -256,6 +258,7 @@ define([
 						this._activeBranchLocation = this._activeBranchLocation || this._branches[0].Location;
 					}
 					this._branchSelector.activeResourceName = activeBranchName;
+					this._branchSelector.activeResourceLocation = this._activeBranchLocation;
 					
 					if(this._showComponent) {
 						this._branchSelector.setActiveResource({resource: this._branchSelector.getActiveResource(this._activeBranchLocation), changeHash: metadata.Parents,  defaultChild: this._activeComponentLocation});
