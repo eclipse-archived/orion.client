@@ -13,7 +13,12 @@
 
 define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme'], 
 	function(messages, mTextTheme) {
-	
+
+		/**
+		 * Version string for theme data. Please update this string whenever you change the style of a themable element.
+		 */
+		var THEMES_VERSION = "5.0";
+
 		/* Synchronizing colors and styles for HTML, CSS and JS files like this ...
 	
 			Using Prospecto as an example:
@@ -228,8 +233,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme'],
 		ThemeData.prototype.fontSettable = fontSettable;
 		
 		function getThemeStorageInfo(){
-			var themeInfo = { storage:'/themes', styleset:'editorstyles', defaultTheme:'Prospecto', selectedKey: 'editorSelected' }; 
-			return themeInfo;
+			return {
+				storage:'/themes',
+				styleset:'editorstyles',
+				defaultTheme:'Prospecto',
+				selectedKey: 'editorSelected',
+				version: THEMES_VERSION
+			}; 
 		}
 
 		ThemeData.prototype.getThemeStorageInfo = getThemeStorageInfo;

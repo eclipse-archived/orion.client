@@ -14,6 +14,11 @@
 define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme', 'orion/widgets/themes/container/ThemeSheetWriter'], 
 	function(messages, mTextTheme, ThemeSheetWriter) {
 
+		/**
+		 * Version string for theme data. Please update this string whenever you change the style of a themable element.
+		 */
+		var THEMES_VERSION = "5.0";
+
 		function StyleSet(){
 		
 		}
@@ -204,8 +209,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/editor/textTheme', 'orion/wid
 		
 		
 		function getThemeStorageInfo(){
-			var themeInfo = { storage:'/themes', styleset:'styles', defaultTheme:'Orion2014', selectedKey: 'selected'  }; 
-			return themeInfo;
+			return {
+				storage:'/themes',
+				styleset:'styles',
+				defaultTheme:'Orion2014',
+				selectedKey: 'selected',
+				version: THEMES_VERSION
+			};
 		}
 
 		ThemeData.prototype.getThemeStorageInfo = getThemeStorageInfo;

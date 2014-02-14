@@ -16,6 +16,7 @@ define([], function() {
 		this._preferences = preferences;
 		this._themeData = themeData;
 		var themeInfo = themeData.getThemeStorageInfo();
+		this._themeVersion = themeInfo.version;
 		var storageKey = preferences.listenForChangedSettings(themeInfo.storage, 2, function(e) {
 			if (e.key === storageKey) {
 				this.apply();
@@ -25,20 +26,31 @@ define([], function() {
 	
 	ThemePreferences.prototype = /** @lends orion.editor.ThemePreferences.prototype */ {
 		_initialize: function(themeInfo, themeData, prefs) {
-			var styles = prefs.get(themeInfo.styleset); 
+			var styles, selected;
+			if (this._themeVersion === undefined || prefs.get('version') === this._themeVersion) { //$NON-NLS-0$
+				// Version matches (or ThemeData hasn't provided an expected version). Trust prefs
+				styles = prefs.get(themeInfo.styleset);
+				selected = prefs.get('selected'); //$NON-NLS-0$
+				if (selected) {
+					selected = JSON.parse(selected);
+				}
+			} else {
+				// Stale theme prefs. Overwrite everything
+				styles = null;
+				selected = null;
+			}
+
 			if (!styles){
 				styles = themeData.getStyles();
 				prefs.put(themeInfo.styleset, JSON.stringify(styles)); 
-			}
-			var selected = prefs.get('selected'); //$NON-NLS-0$
-			if (selected) {
-				selected = JSON.parse(selected);
 			}
 			if (!selected || selected[themeInfo.selectedKey] === undefined) {
 				selected = selected || {}; 
 				selected[themeInfo.selectedKey] = themeInfo.defaultTheme;
 				prefs.put('selected', JSON.stringify(selected)); //$NON-NLS-0$
 			}
+			// prefs have now been updated
+			prefs.put('version', this._themeVersion); //$NON-NLS-0$
 		},
 		apply: function() {
 			this.setTheme();
@@ -86,6 +98,7 @@ define([], function() {
 						break;
 					}	
 				}
+				prefs.put('version', this._themeVersion);
 			}.bind(this));
 		},
 		setFontSize: function(size) {
