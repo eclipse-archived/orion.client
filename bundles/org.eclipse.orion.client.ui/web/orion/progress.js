@@ -98,7 +98,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 					if(this._progressPane.hasAttribute("aria-valuetext")) { //$NON-NLS-0$
 						this._progressPane.removeAttribute("aria-valuetext"); //$NON-NLS-0$
 					}
-					this._switchIconTo("progressPane_operations");					 //$NON-NLS-0$
+					this._switchIconTo("progressPane_empty");					 //$NON-NLS-0$
 				}
 				this._operationsDialog.setOperations(operationsToDisplay, deferreds);
 			},
