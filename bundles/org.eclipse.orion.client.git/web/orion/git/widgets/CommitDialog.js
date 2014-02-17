@@ -12,8 +12,8 @@
   /*globals define window*/
 
 define(
-		[ 'i18n!git/nls/gitmessages', 'orion/webui/dialog' ],
-		function(messages, dialog) {
+		[ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/git/gitConfigPreference' ],
+		function(messages, dialog, GitConfigPreference) {
 
 			function CommitDialog(options) {
 				this._init(options);
@@ -28,7 +28,8 @@ define(
 					+ '<div style="padding:4px"><label id="committerNameLabel" for="committerName">${Committer Name:}</label><input id="committerName" style="width: 30em" value=""></div>'
 					+ '<div style="padding:4px"><label id="committerEmailLabel" for="committerEmail">${Committer Email:}</label><input id="committerEmail" style="width: 30em" value=""></div>'
 					+ '<div style="padding:4px"><label id="authorNameLabel" for="authorName">${Author Name:}</label><input id="authorName" style="width: 30em" value=""></div>'
-					+ '<div style="padding:4px"><label id="authorEmailLabel" for="authorEmail">${Author Email:}</label><input id="authorEmail" style="width: 30em" value=""></div>';
+					+ '<div style="padding:4px"><label id="authorEmailLabel" for="authorEmail">${Author Email:}</label><input id="authorEmail" style="width: 30em" value=""></div>'
+					+ '<div style="padding:4px"><label id="persistLabel" for="persist">${Remember my commiter name and email:}</label><input id="persist" type="checkbox"></div>';
 
 			CommitDialog.prototype._init = function(options) {
 				var that = this;
@@ -46,7 +47,8 @@ define(
 				text : 'OK',
 				id : 'commitChangesButton'
 				});
-
+				
+				
 				// Start the dialog initialization.
 				this._initialize();
 			};
@@ -134,7 +136,8 @@ define(
 				
 				if (this.options.func) {
 					var body = {};
-
+					
+					var persist = this.$persist ? true : false;
 					body.Message = this.$commitMessage.value;
 					body.Amend = this.$amend.checked ? true : false;
 					body.ChangeId = this.$changeId.checked ? true : false;
@@ -142,6 +145,12 @@ define(
 					body.CommitterEmail = this.$committerEmail.value;
 					body.AuthorName = this.$authorName.value;
 					body.AuthorEmail = this.$authorEmail.value;
+					
+					if (persist == true) {
+						var userInfo = { GitName : body.CommitterName, GitMail : body.CommitterEmail };
+						var gitConfigPrefs = new GitConfigPreference(this.options.serviceRegistry);
+						gitConfigPrefs.setConfig(userInfo);
+					}
 
 					this.options.func(body);
 				}
