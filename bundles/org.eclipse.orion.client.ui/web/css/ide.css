@@ -669,6 +669,23 @@ textarea.parameterInput {
 	vertical-align:top;
 }
 
+.secondaryColumnRight {
+	color: #666666;	
+	padding-right: 8px;
+	padding-top: 8px;
+	vertical-align:top;
+	text-align: right;
+}
+
+.secondaryColumnLeft {
+	color: #666666;	
+	padding-right: 8px;
+	padding-left: 8px;
+	padding-top: 8px;
+	vertical-align:top;
+	text-align: left;
+}
+
 .primaryColumn {
 	color: #3087B3;
 	text-decoration: none;

@@ -332,7 +332,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			var td = document.createElement("td");
 			
 			if(item.Name){
-				td.className = "navColumnNoIcon";
+				td.className = "secondaryColumnLeft";
 				td.appendChild(document.createTextNode(item.Name));
 			}
 			return td;
@@ -341,6 +341,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			var td = document.createElement("td");
 			if(item.Url){
 				var a = document.createElement("a");
+				a.target = "_new";
 				a.href = item.Url.indexOf("://")<0 ? "http://" + item.Url : item.Url;
 				a.title = item.Url;
 				a.appendChild(document.createTextNode(item.UrlTitle || item.Params.Name || "View App"));
@@ -361,6 +362,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 								return;
 							}
 						var a = document.createElement("a");
+						a.target = "_new";
 						var uriTemplate = new URITemplate(template);
 						var params = objects.clone(item.Params);
 						objects.mixin(params, {OrionHome : PageLinks.getOrionHome()});
@@ -370,6 +372,7 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 						});
 					} else if(service.logLocationTemplate){
 						var a = document.createElement("a");
+						a.target = "_new";
 						var uriTemplate = new URITemplate(service.logLocationTemplate);
 						var params = objects.clone(item.Params);
 						objects.mixin(params, {OrionHome : PageLinks.getOrionHome()});
@@ -383,14 +386,14 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 		}
 		if(col_no===3){
 			var td = document.createElement("td");
-			td.classList.add("actionsColumn");
+			td.classList.add("secondaryColumnRight");
 			if(item.status && item.status.CheckState === true){
 				delete item.status;
 			} else if(item.status){
 				if(item.status.error && item.status.error.Retry){
 					item.parametersRequested = item.status.error.Retry.parameters;
 					item.optionalParameters = item.status.error.Retry.optionalParameters;
-					return this.getActionsColumn(item, tableRow, null, "actionsColumn", true);
+					return this.getActionsColumn(item, tableRow, null, "secondaryColumnRight", true);
 				} else if(item.status.error){
 					var span = document.createElement("span");
 					span.appendChild(document.createTextNode("Error"));
@@ -494,6 +497,10 @@ define(['orion/URITemplate', 'orion/webui/littlelib', 'orion/Deferred', 'orion/o
 			this.selectionActionsNode = lib.node(this.selectionActions);
 			lib.empty(this.selectionActionsNode);
 			this.commandService.renderCommands(this.selectionActions, this.selectionActionsNode, selections, this, "tool");
+			lib.$$array(".commandLink", this.selectionActionsNode).forEach(function(node, i) {
+				//There is no way to render commands with target, so setting after rendering
+				node.target = "_new";
+			});
 		},
 		load: function(parent, project, configurations, projectClient){
 			this.createTree(parent, new LaunchConfigurationModel(project, configurations, projectClient),  {indent: '8px'});
