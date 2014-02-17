@@ -79,6 +79,7 @@ function(lib, mExplorer, objects,URITemplate){
 		this.explorer = explorer;
 		this.commandService = options.commandRegistry;
 		this.actionScopeId = options.actionScopeId;
+		this.colorLightDarkRows = options.isMiniNav;
 	}
 	
 	LogsRenderer.prototype = new mExplorer.SelectionRenderer();
@@ -115,17 +116,29 @@ function(lib, mExplorer, objects,URITemplate){
 			col.appendChild(span);
 			return col;
 		},
+		rowsChanged: function() {
+			mExplorer.SelectionRenderer.prototype.rowsChanged.apply(this, arguments);
+			if(this.colorLightDarkRows){
+				lib.$$array(".darkSectionTreeTableRow", this.tableNode).forEach(function(node, i) {
+					node.classList.remove("darkSectionTreeTableRow");
+				});
+				lib.$$array(".lightSectionTreeTableRow", this.tableNode).forEach(function(node, i) {
+					node.classList.remove("lightSectionTreeTableRow");
+				});
+			}
+		},
 		prototype: LogsRenderer
 	});
 	
 	
-	function LogsExplorer(serviceRegistry, selection, commandRegistry, parent, titleNode) {
+	function LogsExplorer(serviceRegistry, selection, commandRegistry, parent, titleNode, isMiniNav) {
 		this.parent = parent;
 		this.titleNode = titleNode;
 		mExplorer.Explorer.apply(this, [serviceRegistry, selection, new LogsRenderer({
 			singleSelection: true,
 			checkbox: false,
-			commandRegistry: commandRegistry
+			commandRegistry: commandRegistry,
+			isMiniNav: isMiniNav
 		}, this), commandRegistry]);
 	}
 	
@@ -138,6 +151,7 @@ function(lib, mExplorer, objects,URITemplate){
 				lib.empty(this.titleNode);
 				var span = document.createElement("span");
 				span.id = "LogsNavigationTitle";
+				span.className = "filesystemName layoutLeft";
 				span.appendChild(document.createTextNode(logs.Application));
 				this.titleNode.appendChild(span);
 			}

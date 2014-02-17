@@ -49,7 +49,7 @@ define(['orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progr
 				}
 			}
 			
-			var logsNavExplorer = new mLogsExplorer.LogsExplorer(serviceRegistry, selection, commandRegistry, sidebar, sidebarToolbar);
+			var logsNavExplorer = new mLogsExplorer.LogsExplorer(serviceRegistry, selection, commandRegistry, sidebar, sidebarToolbar, true);
 			var logsInlineExplorer = new mLogsExplorer.LogsExplorer(serviceRegistry, selection, commandRegistry, logsExplorerParent);
 			var logEditorView = new mLogView.LogEditorView({
 					parent: mainLogView,

@@ -979,7 +979,6 @@ input {
 	margin-left: 5%;
 	margin-right: 5%;
 	margin-top: 30px;
-	width: inherit;
 }
 
 .mainpane .sectionTable .treetable, .mainpane .sectionWrapper .treetable, .mainpane .sectionTable .treetable .actionsColumn{
