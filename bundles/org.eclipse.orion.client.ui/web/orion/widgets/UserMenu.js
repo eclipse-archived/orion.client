@@ -184,12 +184,11 @@ define([
 					getCategory(0).appendChild(keyAssist);
 				}
 
-				// TODO need i18n on this eventually
 				var getStartedServiceRef = serviceRegistry.getServiceReferences("orion.page.getstarted")[0]; //$NON-NLS-0$
 				if (getStartedServiceRef) {
 					var data = getStartedServiceRef.getProperty("data"); //$NON-NLS-0$
 					var getStarted = document.createElement('li');
-					var startElement = this._makeMenuItem("Getting Started", this.getStartedDialog.bind(this, data));
+					var startElement = this._makeMenuItem(messages["Getting Started"], this.getStartedDialog.bind(this, data));
 					getStarted.appendChild(startElement);
 					getCategory(0).appendChild(getStarted);
 				}
