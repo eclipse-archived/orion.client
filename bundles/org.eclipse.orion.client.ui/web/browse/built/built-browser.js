@@ -36620,7 +36620,7 @@ define('browse/builder/browse', ['orion/widgets/browse/fileBrowser', 'orion/serv
 		if (url.host === "github.com") {
 			pluginURL = new URL("../../plugins/GitHubFilePlugin.html?repo=" + url.href, _browser_script_source);
 		} else if (url.pathname.indexOf("/git/") === 0) {
-			pluginURL = new URL("/gerrit/plugins/gerritFilesystem/static/plugins/GerritFilePlugin.html", url);
+			pluginURL = new URL("/gerrit/plugins/gerritfs/static/plugins/GerritFilePlugin.html", url);
 			pluginURL.query.set("project", url.pathname.substring(5));
 		} else if (url.pathname.indexOf("/ccm") === 0) {
 			if (!base) {
