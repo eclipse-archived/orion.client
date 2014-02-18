@@ -8,21 +8,22 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define document window URL console*/
+/*global define document window URL console Blob*/
 define([
 	'marked/marked',
 	'orion/editor/editor',
 	'orion/objects',
 	'orion/webui/littlelib',
 	'orion/URITemplate',
-	'orion/PageUtil',
 	'orion/section', 
 	'orion/URL-shim'
-], function(marked, mEditor, objects, lib, URITemplate, PageUtil, mSection) {
+], function(marked, mEditor, objects, lib, URITemplate, mSection) {
 
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+	var extensionRegex = /\.([0-9a-z]+)(?:[\?#]|$)/i;
+	var imgCount = 0;
 
-	function filterOutputLink(outputLink, resourceURL, isRelative) {
+	function filterOutputLink(outputLink, resourceURL, fileClient, isRelative) {
 		return function(cap, link) {
 			if (link.href.indexOf(":") === -1) { //$NON-NLS-0$
 				
@@ -44,6 +45,17 @@ define([
 							resource: linkURL.href
 						});
 					} else {
+						if (fileClient.readBlob) {
+							var id = "_md_img_" + imgCount++;
+							fileClient.readBlob(linkURL.href).then(function(bytes) {
+								var extensionMatch = linkURL.href.match(extensionRegex);
+								var mimeType = extensionMatch ? "image/" +extensionMatch[1] : "image/png";
+								var objectURL = URL.createObjectURL(new Blob([bytes], {type: mimeType}));
+								document.getElementById(id).src = objectURL;
+								URL.revokeObjectURL(objectURL);
+							});
+							return "<img id='" + id + "' src=''>";							
+						}
 						link.href = linkURL.href;
 					}
 				} catch(e) {
@@ -54,12 +66,11 @@ define([
 		};
 	}
 
-	function createMarked(markdown) {
+	function createMarked(markdown, resource, fileClient) {
 		// relativizing marked's outputLink
 		var outputLink = marked.InlineLexer.prototype.outputLink;
-		var resource = PageUtil.matchResourceParameters().resource;
 		var resourceURL = new URL(resource, window.location.href);
-		marked.InlineLexer.prototype.outputLink = filterOutputLink(outputLink, resourceURL, resource.indexOf(":") === -1); //$NON-NLS-0$
+		marked.InlineLexer.prototype.outputLink = filterOutputLink(outputLink, resourceURL, fileClient, resource.indexOf(":") === -1); //$NON-NLS-0$
 		var result = marked(markdown, {
 			sanitize: true
 		});
@@ -75,16 +86,16 @@ define([
 		this._node = null;
 	}
 	MarkdownView.prototype = {
-		display: function(node, markdown) {
+		display: function(node, markdown, resource, fileClient) {
 			node.classList.add("orionMarkdown"); //$NON-NLS-0$
-			node.innerHTML = createMarked(markdown);
+			node.innerHTML = createMarked(markdown, resource, fileClient);
 		},
 		displayContents: function(node, file) {
 			var location = file.Location || file;
 			lib.empty(node);
 			var div = document.createElement("div"); //$NON-NLS-0$
 			(this.progress ? this.progress.progress(this.fileClient.read(location), "Reading file " + (file.Name || location)) : this.fileClient.read(location)).then(function(markdown) {
-				this.display.bind(this)(div, markdown);
+				this.display.bind(this)(div, markdown, location, this.fileClient);
 			}.bind(this));
 			node.appendChild(div);
 		},
