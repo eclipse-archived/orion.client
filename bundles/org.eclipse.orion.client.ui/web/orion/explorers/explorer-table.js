@@ -290,7 +290,9 @@ define([
 			var newRoot;
 			var treeRootDeleted = items.some(function(item) {
 				if (item.oldValue.Location === (treeRoot.Location || treeRoot.ContentLocation)) {
-					newRoot = item.parent;
+					if (item.oldValue.Location !== (item.parent.Location || item.parent.ContentLocation)) {
+						newRoot = item.parent;
+					}
 					return true;
 				}
 				return false;
