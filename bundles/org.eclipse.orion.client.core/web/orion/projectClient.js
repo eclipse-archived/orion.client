@@ -558,16 +558,17 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 			if(launchConfDir.Children){
 				for(var i=0; i<launchConfDir.Children.length; i++){
 					if(launchConfDir.Children[i].Name === configurationFile){
-						if(window.confirm("Launch configuration " + configurationFile + " already exists, do you want to replace it?")){
+//not sure if we won't need this later, see Bug 428460						
+//						if(window.confirm("Launch configuration " + configurationFile + " already exists, do you want to replace it?")){
 							this.fileClient.write(launchConfDir.Children[i].Location, JSON.stringify(launchConfigurationEnry)).then(
 							function(){
 								deferred.resolve(launchConfigurationEnry);
 							}, deferred.reject);
 							return;
-						} else {
-							deferred.reject("Launch configuration already exists");
-							return;
-						}
+//						} else {
+//							deferred.reject("Launch configuration already exists");
+//							return;
+//						}
 					}
 				}
 				this.fileClient.createFile(launchConfDir.Location, configurationFile).then(function(result){
