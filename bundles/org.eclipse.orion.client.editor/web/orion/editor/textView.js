@@ -3507,17 +3507,27 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (util.isIE || util.isOpera) {
 				pixelY = (-e.wheelDelta / 40) * lineHeight;
 			} else if (util.isFirefox) {
-				var pixel;
-				if (util.isMac) {
-					pixel = e.detail * 3;
+				var limit = 256;
+				if (e.type === "wheel") { //$NON-NLS-0$
+					if (e.deltaMode) { // page or line
+						pixelX = Math.max(-limit, Math.min(limit, e.deltaX)) * lineHeight;
+						pixelY = Math.max(-limit, Math.min(limit, e.deltaY)) * lineHeight;
+					} else {
+						pixelX = e.deltaX;
+						pixelY = e.deltaY;
+					}
 				} else {
-					var limit = 256;
-					pixel = Math.max(-limit, Math.min(limit, e.detail)) * lineHeight;
-				}
-				if (e.axis === e.HORIZONTAL_AXIS) {
-					pixelX = pixel;
-				} else {
-					pixelY = pixel;
+					var pixel;
+					if (util.isMac) {
+						pixel = e.detail * 3;
+					} else {
+						pixel = Math.max(-limit, Math.min(limit, e.detail)) * lineHeight;
+					}
+					if (e.axis === e.HORIZONTAL_AXIS) {
+						pixelX = pixel;
+					} else {
+						pixelY = pixel;
+					}
 				}
 			} else {
 				//Webkit
@@ -3571,7 +3581,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			* Note: Using a timer is not a solution, because the timeout needs to
 			* be at least as long as the gesture (which is too long).
 			*/
-			if (util.isSafari) {
+			if (util.isSafari || (util.isChrome && util.isMac)) {
 				var lineDiv = e.target;
 				while (lineDiv && lineDiv.lineIndex === undefined) {
 					lineDiv = lineDiv.parentNode;
@@ -5419,9 +5429,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				handlers.push({target: topNode, type: "dragover", handler: function(e) { return self._handleDragOver(e ? e : window.event);}}); //$NON-NLS-0$
 				handlers.push({target: topNode, type: "dragleave", handler: function(e) { return self._handleDragLeave(e ? e : window.event);}}); //$NON-NLS-0$
 				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e ? e : window.event);}}); //$NON-NLS-0$
-				handlers.push({target: this._clientDiv, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
+				handlers.push({target: this._clientDiv, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				if (this._clipDiv) {
-					handlers.push({target: this._clipDiv, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
+					handlers.push({target: this._clipDiv, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				if (util.isFirefox && (!util.isWindows || util.isFirefox >= 15)) {
 					var MutationObserver = window.MutationObserver || window.MozMutationObserver;
@@ -5459,7 +5469,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (util.isIE) {
 				handlers.push({target: div, type: "selectstart", handler: function() {return false;}}); //$NON-NLS-0$
 			}
-			handlers.push({target: div, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
+			handlers.push({target: div, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			handlers.push({target: div, type: "click", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
 			handlers.push({target: div, type: "dblclick", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
 			handlers.push({target: div, type: "mousemove", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
