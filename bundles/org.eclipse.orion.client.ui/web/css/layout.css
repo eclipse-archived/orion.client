@@ -502,17 +502,7 @@ hard-coded numbers elsewhere.
 }
 
 .sideMenuToggle {
-	position: absolute;
-    width: 5px;
-    margin-right: 5px;
-    margin-top: 1px;
-    margin-bottom: 1px;
-    height: 34px;
-	background: #ccc;
-	cursor: pointer;
-	border-top-right-radius: 5px;
-	border-bottom-right-radius: 5px;
-	z-index: 50;
+	display: none;
 }
 
 /* sub menus */
