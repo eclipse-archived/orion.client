@@ -29,6 +29,8 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 		this._progressPane.addEventListener("click", function(evt) {  //$NON-NLS-0$
 			that._operationsDialog.show();
 		});
+		
+		this._operationsDialog.setOperations(null, null); // initialize
 	}
 	
 	ProgressMonitorTool.prototype = {
