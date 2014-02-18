@@ -3480,7 +3480,8 @@ var exports = {};
 					} else {
 						var dialog = new mCommit.CommitDialog({
 							body: body,
-							func: commitFunction
+							func: commitFunction,
+							serviceRegistry : serviceRegistry
 						});
 	
 						dialog.show();
