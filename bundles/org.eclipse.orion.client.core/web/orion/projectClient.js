@@ -458,20 +458,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 	
 	_getLaunchConfigurationsDir: function(projectMetadata, create){
 		var deferred = new Deferred();
-		
-		if(projectMetadata.children && projectMetadata.children.length>0 && projectMetadata.children[0].Children && projectMetadata.children[0].Children.length>0){
-			for(var i=0; i<projectMetadata.children[0].Children.length; i++){
-				if(projectMetadata.children[0].Children[i].Name && projectMetadata.children[0].Children[i].Name===this._launchConfigurationsDir){
-					deferred.resolve(projectMetadata.children[0].Children[i]);
-					return deferred;
-				}
-			}
-			if(create){
-				this.fileClient.createFolder(projectMetadata.ContentLocation, this._launchConfigurationsDir).then(deferred.resolve, deferred.reject);
-			} else {
-				deferred.resolve(null);
-			}
-		} else if(projectMetadata.ContentLocation) {
+		if(projectMetadata.ContentLocation) {
 			this.fileClient.fetchChildren(projectMetadata.ContentLocation).then(function(children){
 				for(var i=0; i<children.length; i++){
 					if(children[i].Name && children[i].Name===this._launchConfigurationsDir){
