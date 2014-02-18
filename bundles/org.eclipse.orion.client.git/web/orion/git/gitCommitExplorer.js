@@ -228,7 +228,7 @@ define(
 					var cut = false;
 					var mainMessageMaxLength = 100;
 
-					var commitMessage0 = commitMessage.split(/(\r?\n|$)/)[0].trim();
+					var commitMessage0 = commitMessage //.split(/(\r?\n|$)/)[0].trim();
 					if (commitMessage0.length > mainMessageMaxLength) {
 						var cutPoint = commitMessage0.indexOf(" ", mainMessageMaxLength - 10); //$NON-NLS-0$
 						commitMessage0 = commitMessage0.substring(0, (cutPoint !== -1 ? cutPoint : mainMessageMaxLength));
