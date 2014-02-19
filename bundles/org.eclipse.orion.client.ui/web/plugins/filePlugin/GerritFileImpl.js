@@ -13,18 +13,21 @@
 
 define(["orion/Deferred", "orion/xhr", "orion/URITemplate", "orion/URL-shim"], function(Deferred, xhr, URITemplate) {
 
+	var pathRegex = /.*\/(?:contents|list)\/([^\/]*)(?:\/([^\/]*)(?:\/(.*))?)?/;
+
 	function GerritFileImpl(pluginURL, project) {
-		this._listTemplate = new URITemplate(pluginURL + "/list" + "{?project,ref,path}");
-		this._contentTemplate = new URITemplate(pluginURL + "/contents" + "{?project,ref,path}");
+		this._listTemplate = new URITemplate(pluginURL + "/list" + "{/project,ref,path:0}{+path}");
+		this._contentTemplate = new URITemplate(pluginURL + "/contents" + "{/project,ref,path:0}{+path}");
 		this._repoURL = this._listTemplate.expand({project: project});
 	}
 
 	GerritFileImpl.prototype = {
 		_getParents: function(location) {
 			var url = new URL(location);
-			var project = url.query.get("project");
-			var ref = url.query.get("ref");
-			var path = url.query.get("path");
+			var pathmatch = url.pathname.match(pathRegex);
+			var project = pathmatch[1] ? decodeURIComponent(pathmatch[1]) : pathmatch[1];
+			var ref = pathmatch[2] ? decodeURIComponent(pathmatch[2]) : pathmatch[2];
+			var path = pathmatch[3] ? decodeURIComponent(pathmatch[3]) : pathmatch[3];
 			if (!ref){
 				return null;
 			}
@@ -94,8 +97,9 @@ define(["orion/Deferred", "orion/xhr", "orion/URITemplate", "orion/URL-shim"], f
 		loadWorkspace: function(location) {
 			var _this = this;
 			var url = new URL(location);
-			var ref = url.query.get("ref");
-			var path = url.query.get("path");
+			var pathmatch = url.pathname.match(pathRegex);
+			var ref = pathmatch[2] ? decodeURIComponent(pathmatch[2]) : pathmatch[2];
+			var path = pathmatch[3] ? decodeURIComponent(pathmatch[3]) : pathmatch[3];
 
 			return this.fetchChildren(location).then(function(children) {
 				var result = {
@@ -151,8 +155,9 @@ define(["orion/Deferred", "orion/xhr", "orion/URITemplate", "orion/URL-shim"], f
 			if (isMetadata) {
 				var _this = this;
 				var url = new URL(location);
-				var ref = url.query.get("ref");
-				var path = url.query.get("path");
+				var pathmatch = url.pathname.match(pathRegex);
+				var ref = pathmatch[2] ? decodeURIComponent(pathmatch[2]) : pathmatch[2];
+				var path = pathmatch[3] ? decodeURIComponent(pathmatch[3]) : pathmatch[3];
 				if (!ref || !path) {
 					return {
 						Attributes: {
