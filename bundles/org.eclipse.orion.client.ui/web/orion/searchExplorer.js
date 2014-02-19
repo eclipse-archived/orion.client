@@ -1037,7 +1037,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         }
         var that = this;
         this.createTree(this._uiFactory ? this._uiFactory.getMatchDivID() : this.getParentDivId(), this.model, {
-            selectionPolicy: "cursorOnly", //$NON-NLS-0$
+            selectionPolicy: "singleSelection", //$NON-NLS-0$
             indent: 0,
             onCollapse: function(model) {
                 that.onCollapse(model);
@@ -1502,7 +1502,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             this.initCommands();
             _empty(this.getParentDivId());
             this.createTree(this.getParentDivId(), this.model, {
-                selectionPolicy: "cursorOnly", //$NON-NLS-0$
+                selectionPolicy: "singleSelection", //$NON-NLS-0$
                 indent: 0,
 				getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
                 onCollapse: function(model) {
@@ -1539,7 +1539,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         var that = this;
         this.model.buildResultModel();
         this.createTree(this.getParentDivId(), this.model, {
-            selectionPolicy: "cursorOnly", //$NON-NLS-0$
+            selectionPolicy: "singleSelection", //$NON-NLS-0$
             getChildrenFunc: function(model) {return this.model.getFilteredChildren(model);}.bind(this),
             indent: 0,
             onCollapse: function(model) {
@@ -1563,7 +1563,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     SearchResultExplorer.prototype._renderFiltered = function(filterText) {
         this.model.filterOn(filterText);
         this.createTree(this.getParentDivId(), this.model, {
-            selectionPolicy: "cursorOnly", //$NON-NLS-0$
+            selectionPolicy: "singleSelection", //$NON-NLS-0$
             indent: 0,
             onCollapse: function(model) {
                 this.onCollapse(model);

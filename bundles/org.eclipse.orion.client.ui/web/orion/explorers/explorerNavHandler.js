@@ -531,7 +531,7 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		_checkRow: function(model, toggle) {
-			if(this.explorer.renderer._useCheckboxSelection){
+			if(this.explorer.renderer._useCheckboxSelection && this._selectionPolicy !== "singleSelection"){
 				var tableRow = this.getRowDiv(model);
 				if(!tableRow){
 					return;
