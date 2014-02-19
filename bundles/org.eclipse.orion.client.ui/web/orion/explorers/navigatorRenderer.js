@@ -68,7 +68,6 @@ define([
 	 * from the service registry.
 	 * @param {Object[]} [openWithCommands] The "open with" commands used to generate link hrefs. If this parameter is not provided, the caller must
 	 * have already processed the service extension and added to the command registry (usually by calling {@link orion.extensionCommands.createAndPlaceFileCommandsExtension}).
-	 * @param {Object} [defaultEditor] The default editor to use. If not provided, this will be computed from <code>openWithCommands</code>.
 	 * @param {Object} [linkProperties] gives additional properties to mix in to the HTML anchor element.
 	 * @param {Object} [uriParams] A map giving additional parameters that will be provided to the URI template that generates the href.
 	 * @param {Object} [separateImageHolder] Separate image holder object. {holderDom: dom}. If separateImageHolder is not defined, the file icon image is rendered in the link as the first child.
@@ -76,7 +75,7 @@ define([
 	 * If separateImageHolder is defined with holderDom property, the file icon iamge is rendered in separateImageHolder.holderDom.
 	 * IF separateImageHolder is defined as an empty object, {}, the file icon iamge is not rendered at all.
 	 */
-	function createLink(folderPageURL, item, commandService, contentTypeService, openWithCommands, defaultEditor, linkProperties, uriParams, separateImageHolder, renderer) {
+	function createLink(folderPageURL, item, commandService, contentTypeService, openWithCommands, linkProperties, uriParams, separateImageHolder, renderer) {
 		// TODO FIXME folderPageURL is bad; need to use URITemplates here.
 		// TODO FIXME refactor the async href calculation portion of this function into a separate function, for clients who do not want the <A> created.
 		item = objects.clone(item);
@@ -90,17 +89,8 @@ define([
 			}
 		} else {
 			var i;			
-			// Images: always generate link to file. Non-images: use the "open with" href if one matches,
-			// otherwise use default editor.
 			if (!openWithCommands) {
 				openWithCommands = mExtensionCommands.getOpenWithCommands(commandService);
-			}
-			if (!defaultEditor) {
-				for (i=0; i < openWithCommands.length; i++) {
-					if (openWithCommands[i].isEditor === "default") { //$NON-NLS-0$
-						defaultEditor = openWithCommands[i];
-					}
-				}
 			}
 			link = document.createElement("a"); //$NON-NLS-0$
 			link.className= "navlink targetSelector"; //$NON-NLS-0$
@@ -123,29 +113,21 @@ define([
 			if(item.Name){
 				link.appendChild(document.createTextNode(item.Name));
 			}
-			var foundEditor = false;
 			var href = item.Location;
 			if (uriParams && typeof uriParams === "object") { //$NON-NLS-0$
 				item.params = {};
 				objects.mixin(item.params, uriParams);
 			}
-			for (i=0; i < openWithCommands.length; i++) {
-				var openWithCommand = openWithCommands[i];
-				if (openWithCommand.visibleWhen(item)) {
-					href = openWithCommand.hrefCallback({items: item});
-					foundEditor = true;
-					break; // use the first one
-				}
+			var openWithCommand = mExtensionCommands.getOpenWithCommand(commandService, item, openWithCommands);
+			if (openWithCommand) {
+				href = openWithCommand.hrefCallback({items: item});
 			}
 			Deferred.when(contentTypeService.getFileContentType(item), function(contentType) {
-				if (!foundEditor && defaultEditor && !isImage(contentType)) {
-					href = defaultEditor.hrefCallback({items: item});
-				}
 				if(imageHolderDom) {
 					addImageToLink(contentType, imageHolderDom, item.Location, image);
 				}
 				link.href = href;
-				if(renderer && typeof renderer.updateFileNode === 'function') {
+				if(renderer && typeof renderer.updateFileNode === 'function') { //$NON-NLS-0$
 					renderer.updateFileNode(item, link, isImage(contentType));
 				}
 			});
@@ -339,18 +321,10 @@ define([
 				this.explorer._makeDropTarget(item, itemNode);
 				this.explorer._makeDropTarget(item, tableRow);
 			} else {
-				var i;			
-				// Images: always generate link to file. Non-images: use the "open with" href if one matches,
-				// otherwise use default editor.
 				if (!this.openWithCommands) {
 					this.openWithCommands = mExtensionCommands.getOpenWithCommands(this.commandService);
-					for (i=0; i < this.openWithCommands.length; i++) {
-						if (this.openWithCommands[i].isEditor === "default") { //$NON-NLS-0$
-							this.defaultEditor = this.openWithCommands[i];
-						}
-					}
 				}
-				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, this.defaultEditor, { target: this.target }, null, null, this);
+				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, { target: this.target }, null, null, this);
 				span.appendChild(itemNode); //$NON-NLS-0$
 			}
 			if (itemNode) {

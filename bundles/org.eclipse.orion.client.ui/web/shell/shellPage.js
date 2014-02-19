@@ -15,7 +15,7 @@
 
 define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility", "orion/bootstrap", "orion/commandRegistry", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/shell/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
-		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
+		"orion/i18nUtil", "orion/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
 		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters", "orion/URL-shim"],
 	function(require, messages, mBrowserCompatibility, mBootstrap, mCommandRegistry, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
 		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate, Deferred, mStatus, mProgress,
@@ -23,7 +23,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 
 	var shellPageFileService, fileClient, commandRegistry, output, fileType;
 	var hashUpdated = false;
-	var contentTypeService, openWithCommands = [], serviceRegistry;
+	var contentTypeService, serviceRegistry;
 	var pluginRegistry, pluginType, preferences, serviceElementCounter = 0;
 
 	var ROOT_ORIONCONTENT = new URL(require.toUrl("file"), window.location.href).pathname; //$NON-NLS-0$
@@ -245,39 +245,11 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 	};
 
 	function computeEditURL(node) {
-		for (var i = 0; i < openWithCommands.length; i++) {
-			var openWithCommand = openWithCommands[i];
-			if (openWithCommand.visibleWhen(node)) {
-				return openWithCommand.hrefCallback({items: node});  /* use the first one */
-			}
+		var openWithCommand = mExtensionCommands.getOpenWithCommand(commandRegistry, node);
+		if (openWithCommand) {
+			return openWithCommand.hrefCallback({items: node});
 		}
-
-		/*
-		 * Use the default editor if there is one and the resource is not an image,
-		 * otherwise open the resource's direct URL.
-		 */
-		var contentType = contentTypeService.getFileContentType(node);
-		switch (contentType && contentType.id) {
-			case "image/jpeg": //$NON-NLS-0$
-			case "image/png": //$NON-NLS-0$
-			case "image/gif": //$NON-NLS-0$
-			case "image/ico": //$NON-NLS-0$
-			case "image/tiff": //$NON-NLS-0$
-			case "image/svg": //$NON-NLS-0$
-				return node.Location;
-		}
-
-		var defaultEditor = null;
-		for (i = 0; i < openWithCommands.length; i++) {
-			if (openWithCommands[i].isEditor === "default") { //$NON-NLS-0$
-				defaultEditor = openWithCommands[i];
-				break;
-			}
-		}
-		if (!defaultEditor) {
-			return node.Location;
-		}
-		return defaultEditor.hrefCallback({items: node});
+		return null;
 	}
 
 	function createLink(node) {
@@ -1083,16 +1055,7 @@ define(["require", "i18n!orion/shell/nls/messages", "orion/browserCompatibility"
 
 		/* initialize the editors cache (used by some of the built-in commands */
 		contentTypeService = new mContentTypes.ContentTypeRegistry(serviceRegistry);
-		serviceRegistry.getService("orion.core.contentTypeRegistry").getContentTypes().then(function(contentTypes) { //$NON-NLS-0$
-			var commands = mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypes);
-			var fn = function(command) {
-				openWithCommands.push(command);
-			};
-			for (var i = 0; i < commands.length; i++) {
-				var commandDeferred = mExtensionCommands._createCommandOptions(commands[i].properties, commands[i].service, serviceRegistry, contentTypes, true);
-				commandDeferred.then(fn);
-			}
-		});
+		mExtensionCommands.createOpenWithCommands(serviceRegistry, contentTypeService, commandRegistry);
 
 		/* add types contributed through the plug-in API */
 		var allReferences = serviceRegistry.getServiceReferences("orion.shell.type"); //$NON-NLS-0$

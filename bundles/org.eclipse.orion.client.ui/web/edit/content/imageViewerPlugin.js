@@ -21,7 +21,7 @@ define([
 
 	var commandsProxy = new mCommands.CommandsProxy();
 	
-	var EDITOR_ID = "orion.imageViewer"; //$NON-NLS-0$
+	var EDITOR_ID = "orion.viewer.image"; //$NON-NLS-0$
 	
 	var headers = {
 		name: "Orion Image Viewer Plugin",
@@ -62,6 +62,7 @@ define([
 		}
 	}, {
 		id: EDITOR_ID,
+		"default": true, //$NON-NLS-0$
 		nameKey: "Orion Image Viewer", //$NON-NLS-0$
 		nls: "orion/nls/messages", //$NON-NLS-0$
 		uriTemplate: "../edit/edit.html#{,Location,params*},editor=" + EDITOR_ID //$NON-NLS-0$

@@ -21,7 +21,7 @@ define([
 	
 	var json, showItem, expandItem, model, explorer, commandsProxy = new mCommands.CommandsProxy();
 	
-	var EDITOR_ID = "orion.jsonEditor"; //$NON-NLS-0$
+	var EDITOR_ID = "orion.editor.json"; //$NON-NLS-0$
 	
 	function updateModel(item, expand) {
 		if (model) {

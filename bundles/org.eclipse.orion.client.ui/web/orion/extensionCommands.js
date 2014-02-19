@@ -71,6 +71,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 				var serviceRef = serviceReferences[i], id = serviceRef.getProperty("id"); //$NON-NLS-0$
 				editors.push({
 					id: id,
+					"default": serviceRef.getProperty("default") || false, //$NON-NLS-1$ //$NON-NLS-0$
 					name: serviceRef.getProperty("name"), //$NON-NLS-0$
 					nameKey: serviceRef.getProperty("nameKey"), //$NON-NLS-0$
 					nls: serviceRef.getProperty("nls"), //$NON-NLS-0$
@@ -111,21 +112,12 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 			}
 			return {contentTypes: types, excludedContentTypes: excludedTypes};
 		}
-		function getDefaultEditor(serviceRegistry) {
-			var defaultEditor = null;
-			var defaultOpenWithRefs = serviceRegistry.getServiceReferences("orion.navigate.openWith.default"); //$NON-NLS-0$
-			if (0 < defaultOpenWithRefs.length) {
-				defaultEditor = _getServiceProperties(defaultOpenWithRefs[0]);
-			}
-			return defaultEditor;
-		}
 		
-		var editors = getEditors(), defaultEditor = getDefaultEditor(serviceRegistry);
+		var editors = getEditors();
 		var fileCommands = [];
 
 		for (var i=0; i < editors.length; i++) {
 			var editor = editors[i];
-			var isDefaultEditor = (defaultEditor && defaultEditor.editor === editor.id);
 			var editorContentTypeInfo = getEditorOpenWith(serviceRegistry, editor);
 			var editorContentTypes = editorContentTypeInfo.contentTypes;
 			var excludedContentTypes = editorContentTypeInfo.excludedContentTypes;
@@ -138,7 +130,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 				uriTemplate: editor.uriTemplate,
 				nls: editor.nls,
 				forceSingleItem: true,
-				isEditor: (isDefaultEditor ? "default": "editor"), // Distinguishes from a normal fileCommand //$NON-NLS-1$ //$NON-NLS-0$
+				isEditor: (editor["default"] ? "default": "editor"), // Distinguishes from a normal fileCommand //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				validationProperties: editor.validationProperties
 			};
 			fileCommands.push({properties: properties, service: {}});
@@ -500,7 +492,34 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 	};
 
 	/**
-	 * Gets any "open with" commands in the given <code>commandRegistry</code>. If {@link #createAndPlaceFileCommandsExtension}, has not been called,
+	 * Gets the "open with" command in the given <code>commandRegistry</code> for a given item. If {@link #createFileCommands}, has not been called,
+	 * this returns <code>null</code>.
+	 * @name orion.extensionCommands.getOpenWithCommand
+	 * @function
+	 * @param {orion.commandregistry.CommandRegistry} commandRegistry The command registry to consult.
+	 * @param {Object} item The item to open.
+	 * @param {orion.commands.Command[]} The optional list of commands to search for the appropriate command. If it is not provided, 
+	 * 		orion.extensionCommands.getOpenWithCommands() is used.
+	 */
+	extensionCommandUtils.getOpenWithCommand = function(commandRegistry, item, commands) {
+		var openWithCommand;
+		var openWithCommands = commands || extensionCommandUtils.getOpenWithCommands(commandRegistry);
+		for (var i=0; i < openWithCommands.length; i++) {
+			if (openWithCommands[i].visibleWhen(item)) {
+				var isDefault = openWithCommands[i].isEditor === "default"; //$NON-NLS-0$
+				if (!openWithCommands[i] || isDefault) {
+					openWithCommand = openWithCommands[i];
+					if (isDefault) {
+						break;
+					}
+				}
+			}
+		}
+		return openWithCommand;
+	};
+
+	/**
+	 * Gets any "open with" commands in the given <code>commandRegistry</code>. If {@link #createFileCommands}, has not been called,
 	 * this returns an empty array.
 	 * @name orion.extensionCommands.getOpenWithCommands
 	 * @function

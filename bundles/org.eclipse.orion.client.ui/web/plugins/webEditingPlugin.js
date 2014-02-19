@@ -86,6 +86,7 @@ define([
 
 	provider.registerService("orion.edit.editor", {}, {
 		id: "orion.editor",
+		"default": true, 
 		nameKey: "Orion Editor",
 		nls: "orion/nls/messages",
 		uriTemplate: "../edit/edit.html#{,Location,params*}",
@@ -102,22 +103,20 @@ define([
 		editor: "orion.editor",
 		excludedContentTypes: ["image/*"]});
 
-	provider.registerService("orion.navigate.openWith.default", {}, {
-			editor: "orion.editor"});
-
+	var MARKDOWN_EDITOR_ID = "orion.viewer.markdown";
 	provider.registerService("orion.edit.editor", {}, {
-		id: "orion.markdownViewer",
+		id: MARKDOWN_EDITOR_ID,
 		nameKey: "Orion Markdown Viewer",
 		nls: "orion/nls/messages",
-		uriTemplate: "../edit/edit.html#{,Location,params*},editor=orion.markdownViewer"});
+		uriTemplate: "../edit/edit.html#{,Location,params*},editor=" + MARKDOWN_EDITOR_ID});
 
 	provider.registerService("orion.navigate.openWith", {}, {
-			editor: "orion.markdownViewer",
+			editor: MARKDOWN_EDITOR_ID,
 			contentType: ["text/x-markdown"]});
 
 	// open file with browser, no associated orion.navigate.openWith command means that any content type is valid
 	provider.registerService("orion.edit.editor", {}, {
-		id: "orion.view.raw",
+		id: "orion.viewer.raw",
 		nameKey: "Browser",
 		nls: "orion/nls/messages",
 		uriTemplate:  "{+Location}",

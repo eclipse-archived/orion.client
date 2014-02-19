@@ -113,12 +113,17 @@ define([
 
 	var BaseEditor = mEditor.BaseEditor;
 	function MarkdownEditor(options) {
-		this.id = "orion.markdownViewer"; //$NON-NLS-0$
+		this.id = "orion.viewer.markdown"; //$NON-NLS-0$
+		this.fileClient = options.fileClient;
+		this.metadata = options.metadata;
 		BaseEditor.apply(this, arguments);
 	}
 		
 	MarkdownEditor.prototype = Object.create(BaseEditor.prototype);
 	objects.mixin(MarkdownEditor.prototype, /** @lends orion.edit.MarkdownEditor.prototype */ {
+		createMarked: function(contents) {
+			return createMarked(contents, this.metadata.Location, this.fileClient);
+		},
 		install: function() {
 			var root = this._rootDiv = document.createElement("div"); //$NON-NLS-0$
 			root.style.width = "100%"; //$NON-NLS-0$
@@ -128,13 +133,13 @@ define([
 			root.appendChild(div);
 			var parent = lib.node(this._domNode);
 			parent.appendChild(root);
-			this._contentDiv.innerHTML = createMarked(this.getModel().getText());
+			this._contentDiv.innerHTML = this.createMarked(this.getModel().getText());
 			BaseEditor.prototype.install.call(this);
 		},
 		setInput: function(title, message, contents, contentsSaved) {
 			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
 			if (!message && !contentsSaved) {
-				this._contentDiv.innerHTML = createMarked(contents);
+				this._contentDiv.innerHTML = this.createMarked(contents);
 			}
 		},
 		uninstall: function() {
@@ -145,6 +150,8 @@ define([
 
 	function MarkdownEditorView(options) {
 		this._parent = options.parent;
+		this.fileClient = options.fileService;
+		this.metadata = options.metadata;
 		this.serviceRegistry = options.serviceRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.commandRegistry = options.commandRegistry;
@@ -156,6 +163,8 @@ define([
 		create: function() {
 			this.editor = new MarkdownEditor({
 				domNode: this._parent,
+				fileClient: this.fileClient,
+				metadata: this.metadata,
 				model: this.model,
 				undoStack: this.undoStack
 			});
