@@ -65,6 +65,9 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 					}
 				]
 			}, {
+				match: "/(?![\\s])(?:\\\\.|[^/])+/(?:[ioxmuesn]\\b)?", //$NON-NLS-0$
+				name: "string.regexp.ruby" //$NON-NLS-0$
+			}, {
 				match: "\\b0[bB][01]+\\b",
 				name: "constant.numeric.binary.ruby"
 			}, {
