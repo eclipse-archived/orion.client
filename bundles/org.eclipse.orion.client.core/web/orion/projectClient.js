@@ -44,8 +44,16 @@ define(['i18n!orion/navigate/nls/messages', 'orion/Deferred', 'orion/extensionCo
 						projectJson.Name = projectJson.Name || folderMetadata.Name;
 						projectJson.ContentLocation = folderMetadata.Location;
 						projectJson.WorkspaceLocation = workspace.Location;
+						var projectId;
+						workspace.Children.some(function(child) {
+							if (child.Location === folderMetadata.Location) {
+								projectId = child.Id;
+								return true;
+							}
+							return false;
+						});
 						workspace.Projects.some(function(project) {
-							if (project.Id === folderMetadata.Name) {
+							if (project.Id === projectId) {
 								projectJson.ProjectLocation = project.Location;
 								return true;
 							}
