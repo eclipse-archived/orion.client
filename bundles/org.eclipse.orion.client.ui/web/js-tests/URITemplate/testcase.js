@@ -98,7 +98,7 @@ define(["orion/assert", "orion/URITemplate"], function(assert, URITemplate) {
 		assert.equal(new URITemplate("{,list*}").expand(variables), "red,green,blue");
 		assert.equal(new URITemplate("{,keys}").expand(variables), "semi,;,dot,.,comma,%2C");
 		assert.equal(new URITemplate("{,keys*}").expand(variables), "semi=;,dot=.,comma=%2C");
-		assert.equal(new URITemplate("{,encodedpct}").expand(variables), "%25%A2");
+		assert.equal(new URITemplate("{,encodedpct}").expand(variables), "%2525%25A2");
 	};
 	return tests;
 });

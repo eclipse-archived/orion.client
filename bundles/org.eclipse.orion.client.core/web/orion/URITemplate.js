@@ -119,8 +119,7 @@ define(function(){
 				var value = params[name];
 				var valueType = typeof(value);
 				if (valueType !== "undefined" && value !== null) { //$NON-NLS-0$
-					var sep = result.length === 0 ? this._operator.first: this._operator.sep;
-					var resultText = sep;				
+					var resultText = result.length === 0 ? this._operator.first: this._operator.sep;			
 					if (valueType === "string") { //$NON-NLS-0$
 						if (this._operator.named) {
 							resultText += encodeString(name, "U+R"); //$NON-NLS-0$
@@ -132,31 +131,37 @@ define(function(){
 						
 						resultText += encodeString(value, this._operator.allow);
 					} else if (Array.isArray(value)) {
+						if (value.length === 0) {
+							continue; // treated as undefined and skipped
+						}
 						if (!varSpec.explode) {
+							var encodedArray = encodeArray(value, this._operator.allow, ","); //$NON-NLS-0$
 							if (this._operator.named) {
 								resultText += encodeString(name, "U+R"); //$NON-NLS-0$
-								resultText += (value.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
-							}							
-							resultText += encodeArray(value, this._operator.allow, ","); //$NON-NLS-0$
+								resultText += (encodedArray.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
+							}
+							resultText += encodedArray;
 						} else {
 							resultText += encodeArray(value, this._operator.allow, this._operator.sep);
 						}				
 					} else if (valueType === "object") { //$NON-NLS-0$
+						if (Object.keys(value).length === 0) {
+							continue; // treated as undefined and skipped
+						}
 						if (!varSpec.explode) {
+							var encodedObject = encodeObject(value, this._operator.allow, ",", ","); //$NON-NLS-1$ //$NON-NLS-0$
 							if (this._operator.named) {
 								resultText += encodeString(name, "U+R"); //$NON-NLS-0$
-								resultText += (Object.keys(value).length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
+								resultText += (encodedObject.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
 							}
-							resultText += encodeObject(value, this._operator.allow, ",", ","); //$NON-NLS-1$ //$NON-NLS-0$
+							resultText += encodedObject; //$NON-NLS-0$
 						} else {
 							resultText += encodeObject(value, this._operator.allow, "=", this._operator.sep); //$NON-NLS-0$
 						}
 					} else {
 						throw new Error("bad param type: " + name + " : " + valueType); //$NON-NLS-1$ //$NON-NLS-0$
 					}
-					if (resultText !== sep || i < this._varSpecList.length - 1) {
-						result.push(resultText);
-					}
+					result.push(resultText);
 				}
 			}
 			return result.join("");
