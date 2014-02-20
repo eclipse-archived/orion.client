@@ -11,14 +11,14 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['orion/webui/littlelib'], function(lib) {
+define(['i18n!orion/widgets/nls/messages','orion/webui/littlelib'], function(messages,lib) {
 	
 		function UATaskPanel( anchor, modal, elementData ){
 			this.elements = elementData;
 
 			this.taskPanel = document.createElement( 'div' );
 			this.taskPanel.className = "UAContainer";
-			this.taskPanel.innerHTML = '<header class="UAHeader">Develop software from within the cloud</header>';
+			this.taskPanel.innerHTML = '<header class="UAHeader">'+messages["Develop software from within the cloud"]+'</header>';
 							
 			this.elementNode = document.createElement( 'div' );
 			this.switchesContainer = document.createElement( 'div' );

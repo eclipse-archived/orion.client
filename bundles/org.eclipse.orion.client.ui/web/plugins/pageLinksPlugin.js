@@ -11,11 +11,12 @@
  *******************************************************************************/
 /*global define document*/
 define([
+	'i18n!orion/nls/messages',
 	'require',
 	'orion/PageLinks',
 	'orion/plugin',
 	'orion/URITemplate'
-], function(require, PageLinks, PluginProvider, URITemplate) {
+], function(messages, require, PageLinks, PluginProvider, URITemplate) {
 	var serviceImpl = { /* All data is in properties */ };
 
 	var headers = {
@@ -228,21 +229,21 @@ define([
 	provider.registerService("orion.page.getstarted", null, {
 		data: [
 			{
-				label:"Add",
+				label:messages["Add"],
 				image:"../images/add.png",
 				secondaryImage: "../images/add-large-dulled.png",
 				alt: "Add Content",
 				media:"../media/Create.gif"
 			},
 			{
-				label:"Modify",
+				label:messages["Modify"],
 				image:"../images/modify.png",
 				secondaryImage: "../images/gear-large-dulled.png",
 				alt: "Modify Content",
 				media:"../media/Modify.gif"
 			},
 			{
-				label:"Manage",
+				label:messages["Manage"],
 				image:"../images/manage.png",
 				secondaryImage: "../images/hamburger-large-dulled.png",
 				alt: "Manage Content",
