@@ -21,23 +21,9 @@ define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib
 			{
 				include: "#comment"
 			}, {
-				include: "#xmlDeclaration"
+				include: "#doctype"
 			}, {
-				begin: "<!(?:doctype|DOCTYPE)",
-				end: ">",
-				captures: {
-					0: {name: "entity.name.tag.doctype.xml"},
-				},
-				patterns: [
-					{
-						include: "#comment"
-					}, {
-						include: "orion.lib#string_doubleQuote"
-					}, {
-						include: "orion.lib#string_singleQuote"
-					}
-				],
-				name: "meta.tag.doctype.xml",
+				include: "#xmlDeclaration"
 			}, {
 				begin: "</?[A-Za-z0-9]+",
 				end: "/?>",
@@ -72,6 +58,23 @@ define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib
 							2: {name: "keyword.other.documentation.task"},
 							4: {name: "comment.line"}
 						}
+					}
+				]
+			},
+			doctype: {
+				begin: "<!(?:doctype|DOCTYPE)",
+				end: ">",
+				name: "meta.tag.doctype.xml",
+				captures: {
+					0: {name: "entity.name.tag.doctype.xml"},
+				},
+				patterns: [
+					{
+						include: "#comment"
+					}, {
+						include: "orion.lib#string_doubleQuote"
+					}, {
+						include: "orion.lib#string_singleQuote"
 					}
 				]
 			},

@@ -29,9 +29,10 @@ define([
 	'orion/editor/jsTemplateContentAssist',
 	'orion/editor/stylers/application_javascript/syntax',
 	'orion/editor/stylers/application_json/syntax',
-	'orion/editor/stylers/application_schema_json/syntax'
+	'orion/editor/stylers/application_schema_json/syntax',
+	'orion/editor/stylers/application_x-ejs/syntax'
 ], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, Indexer, EslintValidator, Occurrences, Outliner,
-		i18nUtil, PluginProvider, jsTemplateContentAssist, mJS, mJSON, mJSONSchema) {
+		i18nUtil, PluginProvider, jsTemplateContentAssist, mJS, mJSON, mJSONSchema, mEJS) {
 
 	/**
 	 * Plug-in headers
@@ -57,6 +58,11 @@ define([
 				"extends": "text/plain",
 				name: "JSON",
 				extension: ["json"],
+				imageClass: "file-sprite-javascript modelDecorationSprite"
+			}, {id: "application/x-ejs",
+				"extends": "text/plain",
+				name: "Embedded Javascript",
+				extension: ["ejs"],
 				imageClass: "file-sprite-javascript modelDecorationSprite"
 			}
 		]
@@ -231,7 +237,7 @@ define([
 	/**
 	 * Register syntax styling for js, json and json schema content
 	 */
-	var grammars = mJS.grammars.concat(mJSON.grammars).concat(mJSONSchema.grammars);
+	var grammars = mJS.grammars.concat(mJSON.grammars).concat(mJSONSchema.grammars).concat(mEJS.grammars);
 	grammars.forEach(function(current) {
 		provider.registerServiceProvider("orion.edit.highlighter", {}, current);	
 	}.bind(this));
