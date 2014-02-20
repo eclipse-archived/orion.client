@@ -226,7 +226,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		var params = helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, null, helper.params.replace, true) : null;
 		var name = this.explorer.model._filterText ? null : renderName;
 		var link = navigatorRenderer.createLink(null, {Location: item.location, Name: name}, this.explorer._commandService, this.explorer._contentTypeService,
-			this.explorer._openWithCommands, null /*defaultEditor*/, {id:this.getItemLinkId(item)}, params, {holderDom: this._lastFileIconDom});
+			this.explorer._openWithCommands, {id:this.getItemLinkId(item)}, params, {holderDom: this._lastFileIconDom});
         spanHolder.appendChild(link);
         mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
         if(this.explorer.model._filterText){

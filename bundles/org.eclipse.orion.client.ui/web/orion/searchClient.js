@@ -139,7 +139,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler, navigat
 							params.regEx = searchHelper.inFileQuery.wildCard ? true : undefined;
 						}
 						var resourceLink = navigatorRenderer.createLink(require.toUrl("edit/edit.html"), item, commandRegistry, contentTypeService,
-							openWithCommands, null /*defaultEditor*/, {
+							openWithCommands, {
 								"aria-describedby": (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,''), //$NON-NLS-0$
 								style: {
 									verticalAlign: "middle" //$NON-NLS-0$
