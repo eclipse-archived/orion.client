@@ -707,6 +707,7 @@ define('orion/edit/nls/root/messages',{
 	"searchFiles": "Search Files...", //$NON-NLS-1$ //$NON-NLS-0$
 	"searchTerm": "Enter search term:", //$NON-NLS-1$ //$NON-NLS-0$
 	"unsavedChanges": "There are unsaved changes.", //$NON-NLS-1$ //$NON-NLS-0$
+	"unsavedAutoSaveChanges": "Please stay on the page until Auto Save is complete.", //$NON-NLS-1$ //$NON-NLS-0$
 	"Save": "Save", //$NON-NLS-1$ //$NON-NLS-0$
 	"Saved": "Saved", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "Blame", //$NON-NLS-1$ //$NON-NLS-0$
@@ -2014,6 +2015,8 @@ define('orion/util',[],function() {
 	var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 	var isWindows = navigator.platform.indexOf("Win") !== -1; //$NON-NLS-0$
 	var isLinux = navigator.platform.indexOf("Linux") !== -1; //$NON-NLS-0$
+	var isTouch = "ontouchstart" in document.createElement("input"); //$NON-NLS-1$ //$NON-NLS-0$
+	
 	var platformDelimiter = isWindows ? "\r\n" : "\n"; //$NON-NLS-1$ //$NON-NLS-0$
 
 	function formatMessage(msg) {
@@ -2050,7 +2053,10 @@ define('orion/util',[],function() {
 		isMac: isMac,
 		isWindows: isWindows,
 		isLinux: isLinux,
-		
+
+		/** Capabilities */
+		isTouch: isTouch,
+
 		platformDelimiter: platformDelimiter
 	};
 });
@@ -5263,7 +5269,7 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		_checkRow: function(model, toggle) {
-			if(this.explorer.renderer._useCheckboxSelection){
+			if(this.explorer.renderer._useCheckboxSelection && this._selectionPolicy !== "singleSelection"){
 				var tableRow = this.getRowDiv(model);
 				if(!tableRow){
 					return;
@@ -8581,7 +8587,9 @@ define('orion/explorers/explorer-table',[
 			var newRoot;
 			var treeRootDeleted = items.some(function(item) {
 				if (item.oldValue.Location === (treeRoot.Location || treeRoot.ContentLocation)) {
-					newRoot = item.parent;
+					if (item.oldValue.Location !== (item.parent.Location || item.parent.ContentLocation)) {
+						newRoot = item.parent;
+					}
 					return true;
 				}
 				return false;
@@ -9270,6 +9278,9 @@ define('orion/extensionCommands',[], function() {
 	return {
 		getOpenWithCommands: function() {
 			return [];
+		},
+		getOpenWithCommand: function(commandService, item, openWithCommands) {
+			return null;
 		}
 	};
 });
@@ -9395,8 +9406,7 @@ define('orion/URITemplate',[],function(){
 				var value = params[name];
 				var valueType = typeof(value);
 				if (valueType !== "undefined" && value !== null) { //$NON-NLS-0$
-					var sep = result.length === 0 ? this._operator.first: this._operator.sep;
-					var resultText = sep;				
+					var resultText = result.length === 0 ? this._operator.first: this._operator.sep;			
 					if (valueType === "string") { //$NON-NLS-0$
 						if (this._operator.named) {
 							resultText += encodeString(name, "U+R"); //$NON-NLS-0$
@@ -9408,31 +9418,37 @@ define('orion/URITemplate',[],function(){
 						
 						resultText += encodeString(value, this._operator.allow);
 					} else if (Array.isArray(value)) {
+						if (value.length === 0) {
+							continue; // treated as undefined and skipped
+						}
 						if (!varSpec.explode) {
+							var encodedArray = encodeArray(value, this._operator.allow, ","); //$NON-NLS-0$
 							if (this._operator.named) {
 								resultText += encodeString(name, "U+R"); //$NON-NLS-0$
-								resultText += (value.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
-							}							
-							resultText += encodeArray(value, this._operator.allow, ","); //$NON-NLS-0$
+								resultText += (encodedArray.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
+							}
+							resultText += encodedArray;
 						} else {
 							resultText += encodeArray(value, this._operator.allow, this._operator.sep);
 						}				
 					} else if (valueType === "object") { //$NON-NLS-0$
+						if (Object.keys(value).length === 0) {
+							continue; // treated as undefined and skipped
+						}
 						if (!varSpec.explode) {
+							var encodedObject = encodeObject(value, this._operator.allow, ",", ","); //$NON-NLS-1$ //$NON-NLS-0$
 							if (this._operator.named) {
 								resultText += encodeString(name, "U+R"); //$NON-NLS-0$
-								resultText += (Object.keys(value).length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
+								resultText += (encodedObject.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
 							}
-							resultText += encodeObject(value, this._operator.allow, ",", ","); //$NON-NLS-1$ //$NON-NLS-0$
+							resultText += encodedObject; //$NON-NLS-0$
 						} else {
 							resultText += encodeObject(value, this._operator.allow, "=", this._operator.sep); //$NON-NLS-0$
 						}
 					} else {
 						throw new Error("bad param type: " + name + " : " + valueType); //$NON-NLS-1$ //$NON-NLS-0$
 					}
-					if (resultText !== sep || i < this._varSpecList.length - 1) {
-						result.push(resultText);
-					}
+					result.push(resultText);
 				}
 			}
 			return result.join("");
@@ -9566,7 +9582,6 @@ define('orion/explorers/navigatorRenderer',[
 	 * from the service registry.
 	 * @param {Object[]} [openWithCommands] The "open with" commands used to generate link hrefs. If this parameter is not provided, the caller must
 	 * have already processed the service extension and added to the command registry (usually by calling {@link orion.extensionCommands.createAndPlaceFileCommandsExtension}).
-	 * @param {Object} [defaultEditor] The default editor to use. If not provided, this will be computed from <code>openWithCommands</code>.
 	 * @param {Object} [linkProperties] gives additional properties to mix in to the HTML anchor element.
 	 * @param {Object} [uriParams] A map giving additional parameters that will be provided to the URI template that generates the href.
 	 * @param {Object} [separateImageHolder] Separate image holder object. {holderDom: dom}. If separateImageHolder is not defined, the file icon image is rendered in the link as the first child.
@@ -9574,7 +9589,7 @@ define('orion/explorers/navigatorRenderer',[
 	 * If separateImageHolder is defined with holderDom property, the file icon iamge is rendered in separateImageHolder.holderDom.
 	 * IF separateImageHolder is defined as an empty object, {}, the file icon iamge is not rendered at all.
 	 */
-	function createLink(folderPageURL, item, commandService, contentTypeService, openWithCommands, defaultEditor, linkProperties, uriParams, separateImageHolder, renderer) {
+	function createLink(folderPageURL, item, commandService, contentTypeService, openWithCommands, linkProperties, uriParams, separateImageHolder, renderer) {
 		// TODO FIXME folderPageURL is bad; need to use URITemplates here.
 		// TODO FIXME refactor the async href calculation portion of this function into a separate function, for clients who do not want the <A> created.
 		item = objects.clone(item);
@@ -9588,17 +9603,8 @@ define('orion/explorers/navigatorRenderer',[
 			}
 		} else {
 			var i;			
-			// Images: always generate link to file. Non-images: use the "open with" href if one matches,
-			// otherwise use default editor.
 			if (!openWithCommands) {
 				openWithCommands = mExtensionCommands.getOpenWithCommands(commandService);
-			}
-			if (!defaultEditor) {
-				for (i=0; i < openWithCommands.length; i++) {
-					if (openWithCommands[i].isEditor === "default") { //$NON-NLS-0$
-						defaultEditor = openWithCommands[i];
-					}
-				}
 			}
 			link = document.createElement("a"); //$NON-NLS-0$
 			link.className= "navlink targetSelector"; //$NON-NLS-0$
@@ -9621,29 +9627,21 @@ define('orion/explorers/navigatorRenderer',[
 			if(item.Name){
 				link.appendChild(document.createTextNode(item.Name));
 			}
-			var foundEditor = false;
 			var href = item.Location;
 			if (uriParams && typeof uriParams === "object") { //$NON-NLS-0$
 				item.params = {};
 				objects.mixin(item.params, uriParams);
 			}
-			for (i=0; i < openWithCommands.length; i++) {
-				var openWithCommand = openWithCommands[i];
-				if (openWithCommand.visibleWhen(item)) {
-					href = openWithCommand.hrefCallback({items: item});
-					foundEditor = true;
-					break; // use the first one
-				}
+			var openWithCommand = mExtensionCommands.getOpenWithCommand(commandService, item, openWithCommands);
+			if (openWithCommand) {
+				href = openWithCommand.hrefCallback({items: item});
 			}
 			Deferred.when(contentTypeService.getFileContentType(item), function(contentType) {
-				if (!foundEditor && defaultEditor && !isImage(contentType)) {
-					href = defaultEditor.hrefCallback({items: item});
-				}
 				if(imageHolderDom) {
 					addImageToLink(contentType, imageHolderDom, item.Location, image);
 				}
 				link.href = href;
-				if(renderer && typeof renderer.updateFileNode === 'function') {
+				if(renderer && typeof renderer.updateFileNode === 'function') { //$NON-NLS-0$
 					renderer.updateFileNode(item, link, isImage(contentType));
 				}
 			});
@@ -9837,18 +9835,10 @@ define('orion/explorers/navigatorRenderer',[
 				this.explorer._makeDropTarget(item, itemNode);
 				this.explorer._makeDropTarget(item, tableRow);
 			} else {
-				var i;			
-				// Images: always generate link to file. Non-images: use the "open with" href if one matches,
-				// otherwise use default editor.
 				if (!this.openWithCommands) {
 					this.openWithCommands = mExtensionCommands.getOpenWithCommands(this.commandService);
-					for (i=0; i < this.openWithCommands.length; i++) {
-						if (this.openWithCommands[i].isEditor === "default") { //$NON-NLS-0$
-							this.defaultEditor = this.openWithCommands[i];
-						}
-					}
 				}
-				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, this.defaultEditor, { target: this.target }, null, null, this);
+				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, { target: this.target }, null, null, this);
 				span.appendChild(itemNode); //$NON-NLS-0$
 			}
 			if (itemNode) {
@@ -16445,17 +16435,27 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (util.isIE || util.isOpera) {
 				pixelY = (-e.wheelDelta / 40) * lineHeight;
 			} else if (util.isFirefox) {
-				var pixel;
-				if (util.isMac) {
-					pixel = e.detail * 3;
+				var limit = 256;
+				if (e.type === "wheel") { //$NON-NLS-0$
+					if (e.deltaMode) { // page or line
+						pixelX = Math.max(-limit, Math.min(limit, e.deltaX)) * lineHeight;
+						pixelY = Math.max(-limit, Math.min(limit, e.deltaY)) * lineHeight;
+					} else {
+						pixelX = e.deltaX;
+						pixelY = e.deltaY;
+					}
 				} else {
-					var limit = 256;
-					pixel = Math.max(-limit, Math.min(limit, e.detail)) * lineHeight;
-				}
-				if (e.axis === e.HORIZONTAL_AXIS) {
-					pixelX = pixel;
-				} else {
-					pixelY = pixel;
+					var pixel;
+					if (util.isMac) {
+						pixel = e.detail * 3;
+					} else {
+						pixel = Math.max(-limit, Math.min(limit, e.detail)) * lineHeight;
+					}
+					if (e.axis === e.HORIZONTAL_AXIS) {
+						pixelX = pixel;
+					} else {
+						pixelY = pixel;
+					}
 				}
 			} else {
 				//Webkit
@@ -16509,7 +16509,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			* Note: Using a timer is not a solution, because the timeout needs to
 			* be at least as long as the gesture (which is too long).
 			*/
-			if (util.isSafari) {
+			if (util.isSafari || (util.isChrome && util.isMac)) {
 				var lineDiv = e.target;
 				while (lineDiv && lineDiv.lineIndex === undefined) {
 					lineDiv = lineDiv.parentNode;
@@ -18357,9 +18357,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				handlers.push({target: topNode, type: "dragover", handler: function(e) { return self._handleDragOver(e ? e : window.event);}}); //$NON-NLS-0$
 				handlers.push({target: topNode, type: "dragleave", handler: function(e) { return self._handleDragLeave(e ? e : window.event);}}); //$NON-NLS-0$
 				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e ? e : window.event);}}); //$NON-NLS-0$
-				handlers.push({target: this._clientDiv, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
+				handlers.push({target: this._clientDiv, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				if (this._clipDiv) {
-					handlers.push({target: this._clipDiv, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
+					handlers.push({target: this._clipDiv, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				if (util.isFirefox && (!util.isWindows || util.isFirefox >= 15)) {
 					var MutationObserver = window.MutationObserver || window.MozMutationObserver;
@@ -18397,7 +18397,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (util.isIE) {
 				handlers.push({target: div, type: "selectstart", handler: function() {return false;}}); //$NON-NLS-0$
 			}
-			handlers.push({target: div, type: util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-1$ //$NON-NLS-0$
+			handlers.push({target: div, type: util.isFirefox > 26 ? "wheel" : util.isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e ? e : window.event); }}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			handlers.push({target: div, type: "click", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
 			handlers.push({target: div, type: "dblclick", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
 			handlers.push({target: div, type: "mousemove", handler: function(e) { self._handleRulerEvent(e ? e : window.event); }}); //$NON-NLS-0$
@@ -25069,12 +25069,17 @@ define('orion/markdownView',[
 
 	var BaseEditor = mEditor.BaseEditor;
 	function MarkdownEditor(options) {
-		this.id = "orion.markdownViewer"; //$NON-NLS-0$
+		this.id = "orion.viewer.markdown"; //$NON-NLS-0$
+		this.fileClient = options.fileClient;
+		this.metadata = options.metadata;
 		BaseEditor.apply(this, arguments);
 	}
 		
 	MarkdownEditor.prototype = Object.create(BaseEditor.prototype);
 	objects.mixin(MarkdownEditor.prototype, /** @lends orion.edit.MarkdownEditor.prototype */ {
+		createMarked: function(contents) {
+			return createMarked(contents, this.metadata.Location, this.fileClient);
+		},
 		install: function() {
 			var root = this._rootDiv = document.createElement("div"); //$NON-NLS-0$
 			root.style.width = "100%"; //$NON-NLS-0$
@@ -25084,13 +25089,13 @@ define('orion/markdownView',[
 			root.appendChild(div);
 			var parent = lib.node(this._domNode);
 			parent.appendChild(root);
-			this._contentDiv.innerHTML = createMarked(this.getModel().getText());
+			this._contentDiv.innerHTML = this.createMarked(this.getModel().getText());
 			BaseEditor.prototype.install.call(this);
 		},
 		setInput: function(title, message, contents, contentsSaved) {
 			BaseEditor.prototype.setInput.call(this, title, message, contents, contentsSaved);
 			if (!message && !contentsSaved) {
-				this._contentDiv.innerHTML = createMarked(contents);
+				this._contentDiv.innerHTML = this.createMarked(contents);
 			}
 		},
 		uninstall: function() {
@@ -25101,6 +25106,8 @@ define('orion/markdownView',[
 
 	function MarkdownEditorView(options) {
 		this._parent = options.parent;
+		this.fileClient = options.fileService;
+		this.metadata = options.metadata;
 		this.serviceRegistry = options.serviceRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.commandRegistry = options.commandRegistry;
@@ -25112,6 +25119,8 @@ define('orion/markdownView',[
 		create: function() {
 			this.editor = new MarkdownEditor({
 				domNode: this._parent,
+				fileClient: this.fileClient,
+				metadata: this.metadata,
 				model: this.model,
 				undoStack: this.undoStack
 			});
@@ -29760,6 +29769,7 @@ define('orion/widgets/themes/ThemePreferences',[], function() {
 		this._preferences = preferences;
 		this._themeData = themeData;
 		var themeInfo = themeData.getThemeStorageInfo();
+		this._themeVersion = themeInfo.version;
 		var storageKey = preferences.listenForChangedSettings(themeInfo.storage, 2, function(e) {
 			if (e.key === storageKey) {
 				this.apply();
@@ -29769,20 +29779,31 @@ define('orion/widgets/themes/ThemePreferences',[], function() {
 	
 	ThemePreferences.prototype = /** @lends orion.editor.ThemePreferences.prototype */ {
 		_initialize: function(themeInfo, themeData, prefs) {
-			var styles = prefs.get(themeInfo.styleset); 
+			var styles, selected;
+			if (this._themeVersion === undefined || prefs.get('version') === this._themeVersion) { //$NON-NLS-0$
+				// Version matches (or ThemeData hasn't provided an expected version). Trust prefs
+				styles = prefs.get(themeInfo.styleset);
+				selected = prefs.get('selected'); //$NON-NLS-0$
+				if (selected) {
+					selected = JSON.parse(selected);
+				}
+			} else {
+				// Stale theme prefs. Overwrite everything
+				styles = null;
+				selected = null;
+			}
+
 			if (!styles){
 				styles = themeData.getStyles();
 				prefs.put(themeInfo.styleset, JSON.stringify(styles)); 
-			}
-			var selected = prefs.get('selected'); //$NON-NLS-0$
-			if (selected) {
-				selected = JSON.parse(selected);
 			}
 			if (!selected || selected[themeInfo.selectedKey] === undefined) {
 				selected = selected || {}; 
 				selected[themeInfo.selectedKey] = themeInfo.defaultTheme;
 				prefs.put('selected', JSON.stringify(selected)); //$NON-NLS-0$
 			}
+			// prefs have now been updated
+			prefs.put('version', this._themeVersion); //$NON-NLS-0$
 		},
 		apply: function() {
 			this.setTheme();
@@ -29830,6 +29851,7 @@ define('orion/widgets/themes/ThemePreferences',[], function() {
 						break;
 					}	
 				}
+				prefs.put('version', this._themeVersion);
 			}.bind(this));
 		},
 		setFontSize: function(size) {
@@ -30120,7 +30142,12 @@ define('orion/settings/nls/messages',['orion/i18n!orion/settings/nls/messages', 
 
 define('orion/widgets/themes/editor/ThemeData',['i18n!orion/settings/nls/messages', 'orion/editor/textTheme'], 
 	function(messages, mTextTheme) {
-	
+
+		/**
+		 * Version string for theme data. Please update this string whenever you change the style of a themable element.
+		 */
+		var THEMES_VERSION = "5.0";
+
 		/* Synchronizing colors and styles for HTML, CSS and JS files like this ...
 	
 			Using Prospecto as an example:
@@ -30335,8 +30362,13 @@ define('orion/widgets/themes/editor/ThemeData',['i18n!orion/settings/nls/message
 		ThemeData.prototype.fontSettable = fontSettable;
 		
 		function getThemeStorageInfo(){
-			var themeInfo = { storage:'/themes', styleset:'editorstyles', defaultTheme:'Prospecto', selectedKey: 'editorSelected' }; 
-			return themeInfo;
+			return {
+				storage:'/themes',
+				styleset:'editorstyles',
+				defaultTheme:'Prospecto',
+				selectedKey: 'editorSelected',
+				version: THEMES_VERSION
+			}; 
 		}
 
 		ThemeData.prototype.getThemeStorageInfo = getThemeStorageInfo;
@@ -33361,6 +33393,9 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "keyword.control.js" //$NON-NLS-0$
 			}, {
+				match: "/(?![\\s])(?:\\\\.|[^/])+/(?![/*])(?:[gim]\\b)?", //$NON-NLS-0$
+				name: "string.regexp.js" //$NON-NLS-0$
+			}, {
 				begin: "(['\"])(?:\\\\.|[^\\\\\\1])*\\\\$", //$NON-NLS-0$
 				end: "^(?:$|(?:\\\\.|[^\\\\\\1])*(\\1|[^\\\\]$))", //$NON-NLS-0$
 				name: "string.quoted.multiline.js" //$NON-NLS-0$
@@ -33575,23 +33610,9 @@ define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib
 			{
 				include: "#comment"
 			}, {
-				include: "#xmlDeclaration"
+				include: "#doctype"
 			}, {
-				begin: "<!(?:doctype|DOCTYPE)",
-				end: ">",
-				captures: {
-					0: {name: "entity.name.tag.doctype.xml"},
-				},
-				patterns: [
-					{
-						include: "#comment"
-					}, {
-						include: "orion.lib#string_doubleQuote"
-					}, {
-						include: "orion.lib#string_singleQuote"
-					}
-				],
-				name: "meta.tag.doctype.xml",
+				include: "#xmlDeclaration"
 			}, {
 				begin: "</?[A-Za-z0-9]+",
 				end: "/?>",
@@ -33626,6 +33647,23 @@ define("orion/editor/stylers/application_xml/syntax", ["orion/editor/stylers/lib
 							2: {name: "keyword.other.documentation.task"},
 							4: {name: "comment.line"}
 						}
+					}
+				]
+			},
+			doctype: {
+				begin: "<!(?:doctype|DOCTYPE)",
+				end: ">",
+				name: "meta.tag.doctype.xml",
+				captures: {
+					0: {name: "entity.name.tag.doctype.xml"},
+				},
+				patterns: [
+					{
+						include: "#comment"
+					}, {
+						include: "orion.lib#string_doubleQuote"
+					}, {
+						include: "orion.lib#string_singleQuote"
 					}
 				]
 			},
@@ -33986,6 +34024,9 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 					}
 				]
 			}, {
+				match: "/(?![\\s])(?:\\\\.|[^/])+/(?:[ioxmuesn]\\b)?", //$NON-NLS-0$
+				name: "string.regexp.ruby" //$NON-NLS-0$
+			}, {
 				match: "\\b0[bB][01]+\\b",
 				name: "constant.numeric.binary.ruby"
 			}, {
@@ -33998,6 +34039,57 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 		id: grammars[grammars.length - 1].id,
 		grammars: grammars,
 		keywords: keywords
+	};
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2014 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
+
+/*global define*/
+
+define("orion/editor/stylers/application_x-ejs/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/application_xml/syntax"], //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	function(mLib, mJS, mXML) {
+
+	var grammars = mLib.grammars.concat(mJS.grammars).concat(mXML.grammars);
+	grammars.push({
+		id: "orion.ejs",
+		contentTypes: ["application/x-ejs"],
+		patterns: [
+			{
+				include: "orion.xml"
+			}, {
+				begin: "<%=?(?:\\s|$)",
+				end: "%>",
+				captures: {
+					0: {name: "entity.name.declaration.js"}
+				},
+				contentName: "source.js.embedded.ejs",
+				patterns: [
+					{
+						include: "orion.js"
+					}
+				]
+			}
+		],
+		repository: {
+			/* override orion.xml#doctype (no-op) */
+			doctype: {},
+			/* override orion.xml#xmlDeclaration (no-op) */
+			xmlDeclaration: {}
+		}
+	});
+	return {
+		id: grammars[grammars.length - 1].id,
+		grammars: grammars,
+		keywords: []
 	};
 });
 
@@ -34026,8 +34118,9 @@ define('orion/widgets/browse/staticDataSource',[
 	"orion/editor/stylers/application_json/syntax",
 	"orion/editor/stylers/text_x-php/syntax",
 	"orion/editor/stylers/text_x-python/syntax",
-	"orion/editor/stylers/text_x-ruby/syntax"
-], function(Deferred, mStyler, mJS, mCss, mHtml, mJava, mJson, mPhp, mPython, mRuby) {
+	"orion/editor/stylers/text_x-ruby/syntax",
+	'orion/editor/stylers/application_x-ejs/syntax'
+], function(Deferred, mStyler, mJS, mCss, mHtml, mJava, mJson, mPhp, mPython, mRuby, mEJS) {
 	var ContentTypes = [{	id: "text/plain",
 			name: "Text",
 			extension: ["txt"],
@@ -34062,6 +34155,12 @@ define('orion/widgets/browse/staticDataSource',[
 			name: "XML",
 			extension: ["xml"],
 			imageClass: "file-sprite-xml"
+		},
+		{	id: "application/x-ejs",
+			"extends": "text/plain",
+			name: "Embedded Javascript",
+			extension: ["ejs"],
+			imageClass: "file-sprite-javascript modelDecorationSprite"
 		},
 		{	id: "text/x-java-source",
 			"extends": "text/plain",
@@ -34158,6 +34257,9 @@ define('orion/widgets/browse/staticDataSource',[
 				switch(fileContentType.id) {
 					case "application/javascript": //$NON-NLS-0$
 						this.styler = new mStyler.TextStyler(textView, annotationModel, mJS.grammars, "orion.js"); //$NON-NLS-0$
+						break;
+					case "application/x-ejs": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mEJS.grammars, "orion.ejs"); //$NON-NLS-0$
 						break;
 					case "text/css": //$NON-NLS-0$
 						this.styler = new mStyler.TextStyler(textView, annotationModel, mCss.grammars, "orion.css"); //$NON-NLS-0$
