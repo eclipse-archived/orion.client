@@ -21,13 +21,42 @@ require('../lib/compat');
 var async = require('../lib/async');
 var child_process = require('child_process');
 var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
-var constants = require('constants');
 var fs = require('fs');
 var path = require('path');
 var sax = require('sax'), strictSax = true;
 
 var BUNDLE_WEB_FOLDER = './web/';
 var IS_WINDOWS = process.platform === 'win32';
+
+/*
+ * Pages that the Node server never uses are listed here. We will skip optimizing them to save time.
+ */
+var EXCLUDE_PAGES = [
+	"index",
+	"deploy",
+	"logs",
+	"cFPlugin",
+	"authenticationPlugin",
+	"GerritFilePlugin",
+	"GitHubFilePlugin",
+	"npmPlugin",
+	"preferencesPlugin",
+	"sitePlugin",
+	"gitBlamePlugin",
+	"site",
+	"sites",
+	"view",
+	"taskPlugin",
+	"LoginWindow",
+	"manageOpenids",
+	"gitPlugin",
+	"git-log",
+	"git-status",
+	"git-repository",
+	"git-commit",
+	"user-list",
+	"userservicePlugin",
+];
 
 var pathToNode = process.execPath;
 var pathToRjs = require.resolve('requirejs');
@@ -97,24 +126,18 @@ function getCopyDirCmd(src, dest) {
 	return IS_WINDOWS ? format('xcopy /e /h /q /y /i "${0}" "${1}"', src, dest) : format("cp -R ${0}/* ${1}", src, dest);
 }
 
-/**
- * Filter function for Array.prototype.filter that produces an array with unique strictly-equal elements.
- */
-function unique(bundle, i, array) {
-	return array.every(function(bundle2, j) {
-		if (bundle === bundle2) {
-			return i >= j;
-		}
-		return true;
-	});
-}
-
 function section(name) {
 	console.log('-------------------------------------------------------\n' + name + '...\n');
 }
 
 function build(optimizeElements) {
-	var optimizes = optimizeElements.map(function(optimize) {
+	var optimizes = optimizeElements.filter(function(optimize) {
+		var name = optimize.attributes.name;
+		if (EXCLUDE_PAGES.indexOf(name) === -1)
+			return true;
+		console.log("Skip plugin: " + name);
+		return false;
+	}).map(function(optimize) {
 		var pageDir = optimize.attributes.pageDir;
 		var name = optimize.attributes.name;
 		return {
@@ -212,9 +235,9 @@ function build(optimizeElements) {
 					"-o",
 					pathToBuildFile,
 					"name=" + pageDir + '/' + name,
-					"out=" + '.temp/' + pageDir + '/built-' + name + '.js',
-					"baseUrl=.temp"
-				], { cwd: __dirname });
+					"out=" + './' + pageDir + '/built-' + name + '.js',
+					"baseUrl=."
+				], { cwd: pathToTempDir });
 			};
 		}));
 	}).then(function() {
@@ -230,9 +253,11 @@ function build(optimizeElements) {
 								pathToRjs,
 								"-o",
 								pathToBuildFile,
-								"cssIn=.temp/" + cssFile.path,
-								"out=.temp/" + cssFile.path
-							], { cwd: path.dirname(pathToBuildFile) });
+								// FIXME the cssIn paths are wrng?
+								"cssIn=./" + cssFile.path,
+								"out=./" + cssFile.path,
+								"baseUrl=."
+							], { cwd: pathToTempDir });
 					}
 				});
 			};
@@ -347,6 +372,6 @@ function processFile(filepath) {
 /*
  * The fun starts here
  */
-processFile(path.join(__dirname, 'customTargets.xml')).then(
+processFile(path.join(__dirname, '../../../releng/org.eclipse.orion.client.releng/builder/orion.mini.xml')).then(
 	exitSuccess,
 	exitFail);

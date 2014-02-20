@@ -2,14 +2,23 @@
 	"/plugins":{
 		"plugins/fileClientPlugin.html":true,
 		"plugins/jslintPlugin.html":true,
+		"edit/content/imageViewerPlugin.html":true,
+		"edit/content/jsonEditorPlugin.html":true,
 		"plugins/webEditingPlugin.html":true,
+		"plugins/languages/css/cssPlugin.html":true,
+		"plugins/languages/html/htmlPlugin.html":true,
+		"plugins/languages/java/javaPlugin.html":true,
+		"plugins/languages/php/phpPlugin.html":true,
+		"plugins/languages/python/pythonPlugin.html":true,
+		"plugins/languages/ruby/rubyPlugin.html":true,
+		"plugins/languages/xml/xmlPlugin.html":true,
+		"plugins/languages/yaml/yamlPlugin.html":true,
 		"plugins/pageLinksPlugin.html":true,
 		"plugins/csslintPlugin.html": true,
 		"javascript/plugins/javascriptPlugin.html":true,
 		"shell/plugins/shellPagePlugin.html":true,
 		"plugins/nodePlugin.html":true,
-		"search/plugins/searchPagePlugin.html":true,
-		"plugins/projectsPlugin.html" :true
+		"search/plugins/searchPagePlugin.html":true
 	},
 	"/settingsContainer":{
 		"categories":{
