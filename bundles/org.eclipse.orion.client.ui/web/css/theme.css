@@ -91,11 +91,6 @@ a:hover {
 	background-color: #cedce7 !important; /* was e3e3e3 */
 }
 
-.navbar-item-selected {
-	background: #FEC;
-	color: black;
-}
-
 /* Breadcrumbs */
 
 .breadcrumb {
