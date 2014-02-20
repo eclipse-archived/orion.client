@@ -36,8 +36,8 @@
 }
 .progressPane {
 	vertical-align: middle;
-	margin-right: 8px;
-	background-position: 0 0; 
+	margin-right: 24px;
+	background-position: 0 0;
 	text-align: right;
 	border: 0;
 	width: 16px;
