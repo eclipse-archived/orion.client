@@ -23,8 +23,9 @@ define([
 	"orion/editor/stylers/application_json/syntax",
 	"orion/editor/stylers/text_x-php/syntax",
 	"orion/editor/stylers/text_x-python/syntax",
-	"orion/editor/stylers/text_x-ruby/syntax"
-], function(Deferred, mStyler, mJS, mCss, mHtml, mJava, mJson, mPhp, mPython, mRuby) {
+	"orion/editor/stylers/text_x-ruby/syntax",
+	'orion/editor/stylers/application_x-ejs/syntax'
+], function(Deferred, mStyler, mJS, mCss, mHtml, mJava, mJson, mPhp, mPython, mRuby, mEJS) {
 	var ContentTypes = [{	id: "text/plain",
 			name: "Text",
 			extension: ["txt"],
@@ -59,6 +60,12 @@ define([
 			name: "XML",
 			extension: ["xml"],
 			imageClass: "file-sprite-xml"
+		},
+		{	id: "application/x-ejs",
+			"extends": "text/plain",
+			name: "Embedded Javascript",
+			extension: ["ejs"],
+			imageClass: "file-sprite-javascript modelDecorationSprite"
 		},
 		{	id: "text/x-java-source",
 			"extends": "text/plain",
@@ -155,6 +162,9 @@ define([
 				switch(fileContentType.id) {
 					case "application/javascript": //$NON-NLS-0$
 						this.styler = new mStyler.TextStyler(textView, annotationModel, mJS.grammars, "orion.js"); //$NON-NLS-0$
+						break;
+					case "application/x-ejs": //$NON-NLS-0$
+						this.styler = new mStyler.TextStyler(textView, annotationModel, mEJS.grammars, "orion.ejs"); //$NON-NLS-0$
 						break;
 					case "text/css": //$NON-NLS-0$
 						this.styler = new mStyler.TextStyler(textView, annotationModel, mCss.grammars, "orion.css"); //$NON-NLS-0$
