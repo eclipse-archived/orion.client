@@ -20,6 +20,7 @@ define({
 	"searchFiles": "Search Files...", //$NON-NLS-1$ //$NON-NLS-0$
 	"searchTerm": "Enter search term:", //$NON-NLS-1$ //$NON-NLS-0$
 	"unsavedChanges": "There are unsaved changes.", //$NON-NLS-1$ //$NON-NLS-0$
+	"unsavedAutoSaveChanges": "Please stay on the page until Auto Save is complete.", //$NON-NLS-1$ //$NON-NLS-0$
 	"Save": "Save", //$NON-NLS-1$ //$NON-NLS-0$
 	"Saved": "Saved", //$NON-NLS-1$ //$NON-NLS-0$
 	"Blame": "Blame", //$NON-NLS-1$ //$NON-NLS-0$

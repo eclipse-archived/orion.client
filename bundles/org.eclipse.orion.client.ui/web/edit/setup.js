@@ -454,7 +454,7 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 		if (editor && editor.isDirty()) {
 			if (inputManager.getAutoSaveEnabled()) {
 				inputManager.save();
-				return;
+				return messages.unsavedAutoSaveChanges;
 			}
 			return messages.unsavedChanges;
 		}
