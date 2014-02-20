@@ -19,6 +19,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			throw "Bad Github repository url " + repoURL;
 		}
 		this._repoURL = new URL("https://api.github.com/repos/" + found[1] + "/" + found[2]);
+		this._contentsPath = this._repoURL.pathname + "/contents";
 		this._headers = {
 			"Accept": "application/vnd.github.v3+json"
 		};
@@ -28,6 +29,32 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 	}
 
 	GitHubFileImpl.prototype = {
+		_refPathToQuery: function(location) {
+			var url = new URL(location);
+			var path = url.pathname;
+			if (path.indexOf(this._contentsPath) === 0) {
+				var suffix = path.substring(this._contentsPath.length);
+				var matches = suffix.match(/\!([^\/]+)(.*)/);
+				if (matches) {
+					url.query.set("ref", decodeURIComponent(matches[1]));
+					url.pathname = this._contentsPath + matches[2];
+					location = url.href;
+				}
+			}
+			return location;
+		},
+		_refQueryToPath: function(location) {
+			var url = new URL(location);
+			var path = url.pathname;
+			var ref = url.query.get("ref") || "master";
+			if (ref && path.indexOf(this._contentsPath) === 0) {
+				var suffix = path.substring(this._contentsPath.length);
+				url.query.delete("ref");
+				url.pathname = this._contentsPath + "!" + encodeURIComponent(ref) + suffix;
+				location = url.href;
+			}
+			return location;
+		},
 		_getBranches: function() {
 			var _this = this;
 			return xhr("GET", this._repoURL.href + "/branches", {
@@ -36,7 +63,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			}).then(function(result) {
 				var branches = JSON.parse(result.response);
 				return branches.map(function(branch) {
-					var location = _this._repoURL.href + "/contents?ref=" + branch.name;
+					var location = _this._repoURL.href + "/contents!" + encodeURIComponent(branch.name);
 					return {
 						Attributes: {
 							Archive: false,
@@ -55,12 +82,15 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			});
 		},
 		_getChildren: function(location) {
+			location = this._refPathToQuery(location);
+			var _this = this;
 			return xhr("GET", location, {
 				headers: this._headers,
 				timeout: 15000
 			}).then(function(result) {
 				var directory = JSON.parse(result.response);
 				return directory.map(function(entry) {
+					var entryLocation = _this._refQueryToPath(entry.url);
 					var result = {
 						Attributes: {
 							Archive: false,
@@ -68,7 +98,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 							ReadOnly: true,
 							SymLink: false
 						},
-						Location: entry.url,
+						Location: entryLocation,
 						Name: entry.name,
 						Length: entry.size,
 						LocalTimeStamp: 0,
@@ -76,38 +106,34 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 					};
 					if (entry.type === "dir") {
 						result.Directory = true;
-						result.ChildrenLocation = entry.url;
+						result.ChildrenLocation = entryLocation;
 					}
 					return result;
 				});
 			});
 		},
 		_getParents: function(location) {
-			var url = new URL(location);
-			var path = url.pathname;
-			var branch = url.query.get("ref");
-			var contentsPath = this._repoURL.pathname + "/contents";
-			if (!branch || path.indexOf(contentsPath) === -1) {
+			if (location === this._repoURL.href) {
 				return null;
 			}
-
+			var url = new URL(location);
+			var path = url.pathname;
 			var result = [];
-			var tail = path.substring(contentsPath.length);
-			if (tail === "") {
+			var tail = path.substring(this._contentsPath.length);
+			var segments = tail.split("/");
+			segments.pop(); // pop off the current name
+			if (segments.length === 0) {
 				return result;
 			}
-			var segments = tail.split("/");
-			segments.shift(); // pop off initial slash
-			segments.pop(); // pop off the current name
-			url.pathname = contentsPath;
+			var bangref = segments.shift();
+			url.pathname = this._contentsPath + bangref;
 			result.push({
-				Name: branch,
+				Name: decodeURIComponent(bangref.substring(1)),
 				Location: url.href,
 				ChildrenLocation: url.href
 			});
-
 			for (var i = 0; i < segments.length; ++i) {
-				var parentName = segments[i];
+				var parentName = decodeURIComponent(segments[i]);
 				url.pathname += "/" + parentName;
 				result.push({
 					Name: parentName,
@@ -129,11 +155,6 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		},
 		loadWorkspace: function(location) {
 			var _this = this;
-			var url = new URL(location);
-			var path = url.pathname;
-			var branch = url.query.get("ref");
-			var contentsPath = this._repoURL.pathname + "/contents";
-
 			return this.fetchChildren(location).then(function(children) {
 				var result = {
 					Attributes: {
@@ -150,21 +171,16 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 					ChildrenLocation: location,
 					Children: children
 				};
-				if (!branch || path.indexOf(contentsPath) === -1) {
+				if (location === _this._repoURL.href) {
 					result.Name = "repo_root";
-					result.Location = _this._repoURL.href;
-					result.ChildrenLocation = _this._repoURL.href;
 				} else {
-					if (path.substring(contentsPath.length) === "") {
-						result.Name = branch;
-						result.Parents = [];
-					} else {
-						result.Name = path.split("/").pop();
-						result.Parents = _this._getParents(location);
-					}
+					var url = new URL(location);
+					var path = url.pathname.substring(_this.contentsPath.length + 1);
+					result.Name = decodeURIComponent(path.split("/").pop());
+					result.Parents = _this._getParents(location);
 				}
 				return result;
-			})
+			});
 		},
 		createProject: function(url, projectName, serverPath, create) {
 			throw "Not supported";
@@ -187,11 +203,8 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 		read: function(location, isMetadata) {
 			if (isMetadata) {
 				var _this = this;
-				var url = new URL(location);
-				var path = url.pathname;
-				var branch = url.query.get("ref");
-				var contentsPath = this._repoURL.pathname + "/contents";
-				if (!branch || path === contentsPath) {
+				var parents = this._getParents(location);
+				if (parents === null || parents.length === 0) {
 					return {
 						Attributes: {
 							Archive: false,
@@ -199,16 +212,15 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 							ReadOnly: true,
 							SymLink: false
 						},
-						Name: branch || "",
+						Name: parents === null ? "" : decodeURIComponent(new URL(location).pathname.substring(this._contentsPath.length + 1)),
 						Location: location,
 						Length: 0,
 						LocalTimeStamp: 0,
-						Parents: this._getParents(location),
+						Parents: parents,
 						Directory: true,
 						ChildrenLocation: location
 					};
 				}
-				var parents = this._getParents(location);
 				return this._getChildren(parents[0].Location).then(function(children) {
 					var result;
 					children.some(function(entry) {
@@ -236,6 +248,7 @@ define(["orion/Deferred", "orion/xhr", "orion/Base64", "orion/encoding-shim", "o
 			throw "Not supported";
 		},
 		readBlob: function(location) {
+			location = this._refPathToQuery(location);
 			return xhr("GET", location, {
 				headers: this._headers,
 				timeout: 15000
