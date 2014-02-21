@@ -549,7 +549,7 @@ define([
 							// this test is reverse engineered as a way to figure out when a file entry is a directory.
 							// The File API in HTML5 doesn't specify a way to check explicitly (when this code was written).
 							// see http://www.w3.org/TR/FileAPI/#file
-							if (!file.length && (!file.type || file.type === "")) {
+							if (!file.size && !file.type) {
 								if(explorer.registry) {
 									explorer.registry.getService("orion.page.message").setProgressResult( //$NON-NLS-0$
 										{Severity: "Error", Message: i18nUtil.formatMessage(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], file.name)}); //$NON-NLS-1$ //$NON-NLS-0$ 
