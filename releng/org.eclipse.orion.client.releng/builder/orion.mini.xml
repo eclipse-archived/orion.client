@@ -1,7 +1,22 @@
 <project name="WebIDE customTargets overrides" >
+	<!--
+	Required properties
+	======================================================================
+		${builder}           Path to the org.eclipse.orion.client/releng/builder/ folder
+		${requireJsHome}     Path to the folder where r.js can be found. Must also contain a ./lib/ 
+		                       subfolder containing jars for Closure and Rhino.
+		${buildConfig}       Path to the RequireJS build config file for the product (eg. orion.build.js).
+		${buildDirectory}    Path to the directory where build will be performed.
+
+	Optional properties
+	======================================================================
+		${minifyEditor}      If set, the standalone editor will be generated to ${buildDirectory]/built-js/
+	-->
 
 	<property name="super" value="Build specific targets and properties" />
-	<property name="minifyDirectory" value="${buildDirectory}/built-js" />
+	<property name="editorOutDirectory" value="${buildDirectory}/built-js" />
+	<property name="staging" value="${buildDirectory}/staging" />
+	<property name="optimized" value="${buildDirectory}/optimized" />
 
     <target name="download3rdPartyLibs">
         <mkdir dir="${requirejsHome}" />
@@ -23,72 +38,129 @@
 		</replace>
 	</target>
 
-	<macrodef name="optimize" >
+	<scriptdef name="finishBuiltModules" language="javascript" src="${builder}/scripts/finishModules.js">
+		<attribute name="buildfile" />
+		<attribute name="out" />
+		<attribute name="bundles" />
+	</scriptdef>
+
+	<scriptdef name="stageBundles" language="javascript" src="${builder}/scripts/stageBundles.js">
+		<attribute name="buildfile" />
+		<attribute name="todir" />
+	</scriptdef>
+
+	<macrodef name="finishModule">
+		<attribute name="out" />
+		<attribute name="bundles" />
 		<attribute name="name" />
-		<attribute name="pageDir" default = "." />
-		<attribute name="bundle"  />
+		<attribute name="bundle" />
+		<attribute name="pagedir" />
 		<sequential>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true"
-				  dir="${buildDirectory}/optimization">
+			<echo message="Finishing module @{pageDir}/@{name}, bundle: @{bundle}..." />
+			
+			<!-- copy @{name} to built-@{name}.js -->
+			<copy tofile="@{out}/@{pagedir}/built-@{name}.js">
+				<fileset file="@{out}/@{pagedir}/@{name}.js">
+					<size when="more" value="0" />
+				</fileset>
+			</copy>
+
+			<antcall target="updateHTML">
+				<param name="htmlFile" value="@{out}/@{pagedir}/@{name}.html" />
+				<param name="minifiedScript" value="@{out}/@{pagedir}/built-@{name}.js" />
+				<param name="pageDir" value="@{pagedir}" />
+				<param name="name" value="@{name}" />
+			</antcall>
+
+			<!-- Rewrite the module name to built-@{name} -->
+			<antcall target="updateJS">
+				<param name="minifiedScript" value="@{out}/@{pagedir}/built-@{name}.js" />
+				<param name="pageDir" value="@{pagedir}" />
+				<param name="name" value="@{name}" />
+			</antcall>
+		
+			<!-- Copy JS and HTML files back -->
+			<copy todir="@{bundle}/web/@{pagedir}" >
+				<fileset dir="@{out}/@{pagedir}" includes="built-@{name}.js, @{name}.html" >
+					<size when="more" value="0" />
+				</fileset>
+			</copy>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="orionOptimize">
+		<attribute name="buildfile" />
+		<attribute name="staging" /> <!-- Input folder for r.js -->
+		<attribute name="out" />     <!-- Output folder of r.js -->
+		<sequential>
+			<echo message="Minifying Orion pages and plugins..."/>
+			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}">
 				<classpath>
 					<fileset dir="${requirejsHome}/lib/">
 				    	<include name="**/*.jar"/>
 				    </fileset>
 				</classpath>
 				<jvmarg value="-Xss1024k" />
-				<!-- JavaScript language version -->
 				<arg value="-version" />
 				<arg value="180" />
 				<arg value="${requirejsHome}/r.js"/>
 				<arg value="-o" />
-				<arg value="./orion.build.js"/>
-				<arg value="optimize=closure" />
-				<arg value="name=@{pageDir}/@{name}" />
-				<arg value="out=@{pageDir}/built-@{name}.js"/>
-				<arg value="dir=" />
+				<arg value="@{buildfile}"/>
+				<!-- <arg value="optimize=closure" /> -->
+				<arg value="appDir=@{staging}" />
+				<arg value="baseUrl=./" />
+				<arg value="dir=@{out}" />
 			</java>
 
-			<!-- optimize the page css -->
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="${buildDirectory}/optimization">
-				<classpath>
-				    <fileset dir="${requirejsHome}/lib/">
-				    	<include name="**/*.jar"/>
-				    </fileset>
-				</classpath>
-				<arg value="${requirejsHome}/r.js"/>
-				<arg value="-o" />
-				<arg value="./orion.build.js"/>
-				<arg value="cssIn=@{pageDir}/@{name}.css" />
-				<arg value="out=@{pageDir}/@{name}.css" />
-			</java>
-
-			<antcall target="updateHTML">
-				<param name="minifiedScript" value="${buildDirectory}/optimization/@{pageDir}/built-@{name}.js" />
-				<param name="pageDir" value="@{pageDir}" />
-				<param name="name" value="@{name}" />
-			</antcall>
-
-			<antcall target="updateJS">
-				<param name="minifiedScript" value="${buildDirectory}/optimization/@{pageDir}/built-@{name}.js" />
-				<param name="pageDir" value="@{pageDir}" />
-				<param name="name" value="@{name}" />
-			</antcall>
-
-			<copy todir="${buildDirectory}/bundles/@{bundle}/web/@{pageDir}" >
-				<fileset dir="${buildDirectory}/optimization/@{pageDir}" includes="built-@{name}.js, @{name}.html" >
-					<size when="more" value="0" />
-				</fileset>
-			</copy>
+			<finishBuiltModules buildfile="@{buildfile}" out="@{out}" bundles="${buildDirectory}/bundles" />
 		</sequential>
 	</macrodef>
 
-	<macrodef name="editorOptimize" >
-		<attribute name="scriptName" />
-		<attribute name="fileName" />
+	<target name="editorClean" if="minifyEditor">
+		<delete dir="${editorOutDirectory}" />
+		<mkdir dir="${editorOutDirectory}" />
+
+		<!--
+			Copy editor build files to ${staging} to make editorOptimize simpler. cssIn paths must be 
+			relative to the build file location, and having build file location == ${staging} is easier.
+		-->
+		<copy file="${builder}/scripts/editor.build-css.js" tofile="${staging}/editor.build-css.js" overwrite="true"/>
+		<copy file="${builder}/scripts/editor.build-js.js" tofile="${staging}/editor.build-js.js" overwrite="true"/>
+		<copy file="${builder}/scripts/editor.build.almond-js.js" tofile="${staging}/editor.build.almond-js.js" overwrite="true"/>
+	</target>
+
+	<target name="editorOptimize" if="minifyEditor">
+		<sequential>
+			<editorOptimizeFile out="${out}/built-editor.css"
+				buildfile="${staging}/editor.build-css.js"
+				optimize="closure"
+				staging="${staging}" />
+			<editorOptimizeFile out="${out}/built-editor-amd.min.js"
+				buildfile="${staging}/editor.build-js.js"
+				optimize="closure"
+				staging="${staging}" />
+			<editorOptimizeFile out="${out}/built-editor-amd.js"
+				buildfile="${staging}/editor.build-js.js"
+				optimize="none"
+				staging="${staging}" />
+			<editorOptimizeFile out="${out}/built-editor.min.js"
+				buildfile="${staging}/editor.build.almond-js.js"
+				optimize="closure"
+				staging="${staging}" />
+			<editorOptimizeFile out="${out}/built-editor.js"
+				buildfile="${staging}/editor.build.almond-js.js"
+				optimize="none"
+				staging="${staging}" />
+		</sequential>
+	</target>
+
+	<macrodef name="editorOptimizeFile">
+		<attribute name="staging" />
+		<attribute name="buildfile" />
+		<attribute name="out" />
 		<attribute name="optimize" />
 		<sequential>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true"
-				 dir="${buildDirectory}/optimization">
+			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}">
 				<classpath>
 					<fileset dir="${requirejsHome}/lib/">
 				    	<include name="**/*.jar"/>
@@ -99,23 +171,29 @@
 				<arg value="180" />
 				<arg value="${requirejsHome}/r.js"/>
 				<arg value="-o" />
-				<arg value="@{scriptName}"/>
+				<arg value="@{buildfile}"/>
 				<arg value="optimize=@{optimize}" />
-				<arg value="out=${minifyDirectory}/@{fileName}"/>
+				<arg value="out=@{out}"/>
 				<arg value="dir=" />
 			</java>
 		</sequential>
 	</macrodef>
 
-	<target name="updateHTML" >
+	<target name="checkHTMLExists">
+		<available file="${htmlFile}" property="htmlFileExists"/>
+	</target>
+		
+	
+	<target name="updateHTML" depends="checkHTMLExists" if="htmlFileExists">
+		<echo message="updateHTML for ${htmlFile}..." />
 		<condition property="builtResult" value="built-${name}" else="${name}" >
 			<length file="${minifiedScript}" when="greater" length="0" />
 		</condition>
-		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="require([&quot;${name}.js&quot;]);" value="require([&quot;${builtResult}.js&quot;]);" />
-		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="require([&apos;${name}.js&apos;]);" value="require([&quot;${builtResult}.js&quot;]);" />
-		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="requirejs/require.js" value="requirejs/require.min.js" />
-		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="data-main=&quot;${name}.js&quot;" value="data-main=&quot;${builtResult}.js&quot;" />
-		<replace file="${buildDirectory}/optimization/${pageDir}/${name}.html" token="data-main=&apos;${name}.js&apos;" value="data-main=&quot;${builtResult}.js&quot;" />
+		<replace file="${htmlFile}" token="require([&quot;${name}.js&quot;]);" value="require([&quot;${builtResult}.js&quot;]);" />
+		<replace file="${htmlFile}" token="require([&apos;${name}.js&apos;]);" value="require([&quot;${builtResult}.js&quot;]);" />
+		<replace file="${htmlFile}" token="requirejs/require.js" value="requirejs/require.min.js" />
+		<replace file="${htmlFile}" token="data-main=&quot;${name}.js&quot;" value="data-main=&quot;${builtResult}.js&quot;" />
+		<replace file="${htmlFile}" token="data-main=&apos;${name}.js&apos;" value="data-main=&quot;${builtResult}.js&quot;" />
 	</target>
 
 	<target name="checkBuiltResult">
@@ -138,94 +216,55 @@
 		</replace>
 	</target>
 
-	<target name="requirejs" if="minify">
+	<!-- These 3 tasks are just for conditionally removing existing ${staging} and ${optimized} -->
+	<target name="checkDirs">
+		<available file="${staging}"   type="dir" property="staging.exists" />
+		<available file="${optimized}" type="dir" property="optimized.exists" />
+	</target>
+	<target name="cleanStaging" if="staging.exists">
+		<echo message="Removing ${staging}" />
+		<delete>
+			<fileset dir="${staging}" />
+		</delete>
+	</target>
+	<target name="cleanOptimized" if="optimized.exists">
+		<echo message="Removing ${optimized}" />
+		<delete>
+			<fileset dir="${optimized}" />
+		</delete>
+	</target>
+
+	<target name="requirejs" depends="checkDirs, cleanStaging, cleanOptimized" if="minify">
 	    <echo message="Minification started..."/>
 
-		<delete dir="${buildDirectory}/optimization" />
-		<delete dir="${minifyDirectory}" />
-		<mkdir dir="${minifyDirectory}" />
-		<copy file="${builder}/scripts/orion.build.js" tofile="${buildDirectory}/optimization/orion.build.js" overwrite="true"/>
-		<copy file="${builder}/scripts/editor.build-js.js" tofile="${buildDirectory}/optimization/editor.build-js.js" overwrite="true"/>
-		<copy file="${builder}/scripts/editor.build.almond-js.js" tofile="${buildDirectory}/optimization/editor.build.almond-js.js" overwrite="true"/>
-		<copy file="${builder}/scripts/editor.build-css.js" tofile="${buildDirectory}/optimization/editor.build-css.js" overwrite="true"/>
+		<mkdir dir="${staging}" />
+		<mkdir dir="${optimized}" />
+		<antcall target="editorClean">
+			<param name="staging" value="${staging}" />
+		</antcall>
 
 		<!-- Stage files for optimization -->
-		<copy todir="${buildDirectory}/optimization" >
-			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.core/web" includes="**"/>
-			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.cf/web" includes="**"/>
-			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web" includes="**"/>
-			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.editor/web" includes="**"/>
-			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.git/web" includes="**"/>
-			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.javascript/web" includes="**"/>
-			<fileset dir="${buildDirectory}/bundles/org.eclipse.orion.client.users/web" includes="**"/>
-		</copy>
+		<stageBundles todir="${staging}" buildfile="${buildConfig}" />
 
-		<!-- build standalone editor -->
-		<editorOptimize  filename="built-editor.css" scriptname="editor.build-css.js" optimize="closure"/>
-		<editorOptimize  filename="built-editor-amd.min.js" scriptname="editor.build-js.js" optimize="closure"/>
-		<editorOptimize  filename="built-editor-amd.js" scriptname="editor.build-js.js" optimize="none"/>
-		<editorOptimize  filename="built-editor.min.js" scriptname="editor.build.almond-js.js" optimize="closure"/>
-		<editorOptimize  filename="built-editor.js" scriptname="editor.build.almond-js.js" optimize="none"/>
+		<!-- build Orion pages and plugins -->
+		<orionOptimize staging="${staging}" out="${optimized}" buildfile="${buildConfig}" />
 
-		<!-- build orion pages and plugins -->
-		<optimize pageDir="." name="index" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="cfui" name="deploy" bundle="org.eclipse.orion.client.cf" />
-		<optimize pageDir="cfui" name="logs" bundle="org.eclipse.orion.client.cf" />
-		<optimize pageDir="cfui/plugins" name="cFPlugin" bundle="org.eclipse.orion.client.cf" />
-		<optimize pageDir="edit" name="edit" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="edit/content" name="jsonEditorPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="edit/content" name="imageViewerPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="compare" name="compare" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="operations" name="list" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="search" name="search" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="settings" name="settings" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="shell" name="shellPage" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="shell/plugins" name="shellPagePlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="javascript/plugins" name="javascriptPlugin" bundle="org.eclipse.orion.client.javascript" />
-		<optimize pageDir="plugins/languages/css" name="cssPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins/languages/html" name="htmlPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins/languages/java" name="javaPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins/languages/php" name="phpPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins/languages/python" name="pythonPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins/languages/ruby" name="rubyPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins/languages/xml" name="xmlPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins/languages/yaml" name="yamlPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins/site" name="sitePlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="authenticationPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="csslintPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="fileClientPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="GerritFilePlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="GitHubFilePlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="jslintPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="npmPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="pageLinksPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="preferencesPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="taskPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="webEditingPlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="plugins" name="gitBlamePlugin" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="sites" name="site" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="sites" name="sites" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="sites" name="view" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="mixloginstatic" name="LoginWindow" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="mixloginstatic" name="manageOpenids" bundle="org.eclipse.orion.client.ui" />
-		<optimize pageDir="git/plugins" name="gitPlugin" bundle="org.eclipse.orion.client.git" />
-		<optimize pageDir="git" name="git-log" bundle="org.eclipse.orion.client.git" />
-		<optimize pageDir="git" name="git-status" bundle="org.eclipse.orion.client.git" />
-		<optimize pageDir="git" name="git-repository" bundle="org.eclipse.orion.client.git" />
-		<optimize pageDir="git" name="git-commit" bundle="org.eclipse.orion.client.git" />
-		<optimize pageDir="profile" name="user-list" bundle="org.eclipse.orion.client.users" />
-		<optimize pageDir="profile" name="userservicePlugin" bundle="org.eclipse.orion.client.users" />
-
+		<!-- build standalone editor (if property is set) -->
+		<antcall target="editorOptimize">
+			<param name="staging" value="${staging}" />
+			<param name="out" value="${editorOutDirectory}" />
+		</antcall>
 
 		<!-- copy css back -->
+		<!-- TODO! this should be done automatically using the ${buildConfig} -->
 		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web" >
-			<fileset dir="${buildDirectory}/optimization" includes="**/*.css" excludes="git/,profile/"/>
+			<fileset dir="${optimized}" includes="**/*.css" excludes="git/,profile/"/>
 		</copy>
 		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.git/web" >
-			<fileset dir="${buildDirectory}/optimization" includes="git/**/*.css" />
+			<fileset dir="${optimized}" includes="git/**/*.css" />
 		</copy>
 		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.users/web" >
-			<fileset dir="${buildDirectory}/optimization" includes="profile/**/*.css" />
+			<fileset dir="${optimized}" includes="profile/**/*.css" />
 		</copy>
 	</target>
 

@@ -8,4 +8,5 @@ npm-debug.log
 # Per-user Orionode data
 .workspace/
 build/.temp/
+build/.temp-optimized/
 test/.test_workspace/

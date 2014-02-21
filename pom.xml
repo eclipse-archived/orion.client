@@ -170,12 +170,10 @@
 						<configuration>
 							<tasks>
 							    <!-- minify javascript -->
-								<property name="builder"
-									value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
-                                <property name="requirejsHome"
-                                    value="${requirejsHome}"/>
-                                <property name="buildDirectory"
-                          			value="${basedir}"/>
+								<property name="builder" value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
+								<property name="requirejsHome" value="${requirejsHome}"/>
+								<property name="buildConfig" value="${builder}/scripts/orion.build.js" />
+								<property name="buildDirectory" value="${basedir}"/>
 								<ant antfile="${basedir}/releng/org.eclipse.orion.client.releng/builder/orion.mini.xml">
 								    <target name="download3rdPartyLibs"/>
 								    <target name="updateBuildLabel"/>
