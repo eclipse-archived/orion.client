@@ -43,6 +43,8 @@ function(PluginProvider, xhr, mServiceregistry, mGitClient, mSshTools, i18nUtil,
 		nls: "git/nls/gitmessages",
 		category: "git",
 		order: 110, // Bottom
+		"default": true,
+		force: true,
 		uriTemplate: "{+OrionHome}/git/git-repository.html#"
 	});
 	

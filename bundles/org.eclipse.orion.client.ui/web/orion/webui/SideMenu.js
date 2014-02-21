@@ -289,9 +289,10 @@ define([
 						return false;
 					return true;
 				});
-				// Don't render a default link if there are others available in this category
+				// Don't render a default link if (i) there are others available in this category and (ii) it isn't force'd
 				bin = bin.filter(function(link) {
-					return !(bin.length > 1 && link.source.default);
+					var source = link.source;
+					return !(bin.length > 1 && source.default && !source.force);
 				});
 				// Filter out duplicate links (we sorted bin earlier, so any duplicates are consecutive elements)
 				for (var i = bin.length-1; i > 0; i--) {
