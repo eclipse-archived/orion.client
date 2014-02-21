@@ -53,13 +53,18 @@ define(['require', 'orion/Deferred'], function(require, Deferred) {
 				return d;
 		}
 
-		function _resolveMessageBundle() {
-			require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
-				if (bundle) {
-					setCachedMessageBundle(name, bundle);
-				}
-				d.resolve(bundle);
-			});
+		function _resolveMessageBundle(bundle) {
+			if (bundle) {
+				require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
+					if (bundle) {
+						setCachedMessageBundle(name, bundle);
+					}
+					d.resolve(bundle);
+				});
+			} else {
+				// IE disguises failure as success, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=428797
+				_rejectMessageBundle(new Error(name));
+			}
 		}
 
 		function _rejectMessageBundle(error) {
