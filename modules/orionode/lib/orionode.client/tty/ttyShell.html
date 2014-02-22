@@ -33,43 +33,92 @@
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="term.js"></script>
 	<script>
-    	;(function() {
-        	window.onload = function() {
-        		var socket = io.connect();
-        		socket.on('connect', function() {
-          			var term = new Terminal({
-              			cols: 160,
-              			rows: 24,
-              			useStyle: true,
-              			screenKeys: true
-            		});
-                       		
-            		term.colors[1] = '#000000';
-            		term.colors[256] = '#ffffff';
-					term.colors[257] = '#ffcc99';
-    
-            		term.on('data', function(data) {
-            			socket.emit('data', data);
-            		});
-    
-            		term.on('title', function(title) {
-            			document.title = title;
-            		});
-    
-            		term.open(document.getElementById("terminalBox"));
-    
-            		term.write('\x1b[31mWelcome to your terminal emulator.\x1b[m\r\n');
-    
-            		socket.on('data', function(data) {
-              			term.write(data);
-            		});
-    
-            		socket.on('disconnect', function() {
-              			term.destroy();
-          			});
-      			});
-    		};
-  		}).call(this);
+  	;(function() {
+      // default settings:
+      var bgColor = '#000000';
+      var txColor = '#FFFFFF';
+
+      window.onload = function() {
+        var socket = io.connect();
+        socket.on('connect', function() {
+          var term = new Terminal({
+            cols: 200,
+            rows: 27,
+            useStyle: true,
+            screenKeys: true,
+          });
+          term.colors[257] = txColor;
+          term.colors[256] = bgColor;
+          term.on('data', function(data) {
+            socket.emit('data', data);
+          });
+
+          term.on('title', function(title) {
+            document.title = title;
+          });
+
+          term.open(document.getElementById("terminalBox"));
+
+          term.write('\x1b[31mWelcome to your terminal emulator.\x1b[m\r\n');
+          socket.on('data', function(data) {
+              term.write(data);
+          });
+          socket.on('disconnect', function() {
+              term.destroy();
+          });
+        });
+
+    		var bgButton = document.getElementById("bg");
+  			bgButton.onchange = changeBg;
+
+  			var txButton = document.getElementById("tx");
+  			txButton.onchange = changeTx;
+  		};
+
+      function changeTx() {
+        var t = document.getElementsByClassName('terminal');
+        var tx = document.getElementById("tx").value;
+        switch(tx)
+        {
+        case 'Blue':
+          txColor = '#0404B4';
+          break;
+        case 'White':
+          txColor = '#FFFFFF';
+          break;
+        case 'Green':
+          txColor = '#01DF01';
+          break;
+        case 'Black':
+          txColor = '#000000';
+          break;
+        case 'Orange':
+          txColor = '#FF8000';
+          break;
+        }
+        t[0].style.color = txColor;
+      }
+
+  		function changeBg() {
+        var t = document.getElementsByClassName('terminal');
+        var bg = document.getElementById("bg").value;
+        switch(bg)
+        {
+        case 'Blue':
+          bgColor = '#0404B4';
+          break;
+        case 'Grey':
+          bgColor = '#585858';
+          break;
+        case 'Green':
+          bgColor = '#0B6121';
+          break;
+        case 'Black':
+          bgColor = '#000000';
+        }
+        t[0].style.backgroundColor = bgColor;
+  		}
+		}).call(this);
 	</script>
 		
 </head>
@@ -80,6 +129,23 @@
 				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
 				<div id="mainNode" class="toolbarTarget pageLayoutTarget toolbarTarget-toolbarHidden">
 					<div id ="terminalBox"></div>
+					<div>
+						Background Color:
+						<select id="bg">
+                <option selected="selected">Black</option>
+							  <option>Grey</option>
+							  <option>Green</option>
+							  <option>Blue</option>
+						</select>
+						Text Color:
+						<select id="tx">
+                <option selected="selected">White</option>
+							  <option>Black</option>
+							  <option>Green</option>
+							  <option>Blue</option>
+                <option>Orange</option>
+						</select>
+					</div>
 				</div>
 			</div>
 		</div>

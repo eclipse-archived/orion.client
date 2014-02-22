@@ -320,7 +320,7 @@ hard-coded numbers elsewhere.
 	margin-left: 2px;
 	margin-right: 10px;
 	margin-left:10px;
-	padding-top: 10px;
+	/*padding-top: 10px;*/
 	padding-bottom: 5px;
 	background: white;
 }
