@@ -507,7 +507,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 		for (var i=0; i < openWithCommands.length; i++) {
 			if (openWithCommands[i].visibleWhen(item)) {
 				var isDefault = openWithCommands[i].isEditor === "default"; //$NON-NLS-0$
-				if (!openWithCommands[i] || isDefault) {
+				if (!openWithCommand || isDefault) {
 					openWithCommand = openWithCommands[i];
 					if (isDefault) {
 						break;
