@@ -1232,13 +1232,18 @@ define('orion/i18nUtil',['require', 'orion/Deferred'], function(require, Deferre
 				return d;
 		}
 
-		function _resolveMessageBundle() {
-			require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
-				if (bundle) {
-					setCachedMessageBundle(name, bundle);
-				}
-				d.resolve(bundle);
-			});
+		function _resolveMessageBundle(bundle) {
+			if (bundle) {
+				require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
+					if (bundle) {
+						setCachedMessageBundle(name, bundle);
+					}
+					d.resolve(bundle);
+				});
+			} else {
+				// IE disguises failure as success, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=428797
+				_rejectMessageBundle(new Error(name));
+			}
 		}
 
 		function _rejectMessageBundle(error) {
@@ -1496,8 +1501,9 @@ define('orion/inputManager',[
 			window.console.log(error);
 			return;
 		}
+		var newError;
 		if (error.status === 0) {
-			error = {
+			newError = {
 				Severity: "Error", //$NON-NLS-0$
 				Message: messages.noResponse
 			};
@@ -1505,17 +1511,28 @@ define('orion/inputManager',[
 			var responseText = error.responseText;
 			if (responseText) {
 				try {
-					error = JSON.parse(responseText);
+					newError = JSON.parse(responseText);
 				} catch(e) {
-					error = {
+					newError = {
 						//HTML: true,
 						Severity: "Error", //$NON-NLS-0$
 						Message: responseText
 					};
 				}
+				if(!newError.Severity) {
+					newError.Severity = "Error"; //$NON-NLS-0$
+				}
+				if(!newError.Message) {
+					newError.Message = responseText;
+				}
+			} else {
+				newError = {
+					Severity: "Error", //$NON-NLS-0$
+					Message: JSON.stringify(error)
+				};
 			}
 		}
-		statusService.setProgressResult(error);
+		statusService.setProgressResult(newError);
 	}
 
 	/**
@@ -1983,6 +2000,7 @@ define('orion/inputManager',[
 		}
 	});
 	return {
+		handleError: handleError,
 		InputManager: InputManager
 	};
 });
@@ -8846,7 +8864,7 @@ define('orion/explorers/explorer-table',[
 							// this test is reverse engineered as a way to figure out when a file entry is a directory.
 							// The File API in HTML5 doesn't specify a way to check explicitly (when this code was written).
 							// see http://www.w3.org/TR/FileAPI/#file
-							if (!file.length && (!file.type || file.type === "")) {
+							if (!file.size && !file.type) {
 								if(explorer.registry) {
 									explorer.registry.getService("orion.page.message").setProgressResult( //$NON-NLS-0$
 										{Severity: "Error", Message: i18nUtil.formatMessage(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], file.name)}); //$NON-NLS-1$ //$NON-NLS-0$ 
@@ -34433,7 +34451,7 @@ define('orion/widgets/browse/emptyFileClient',["orion/Deferred"], function(Defer
 
 define('text!orion/widgets/browse/repoUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Git URL</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<div class="repoUrlHeader">\r\n\t\t<div class="repoUrlHeaderClose  core-sprite-close imageSprite" id="orion.browse.repoURLClose"></div>\r\n\t\t<span class="repoUrlHeaderTitle" id="orion.browse.repoURLTitle">Git URL</span>\r\n\t</div>\r\n\t<input id="orion.browse.repoURLInput" class = "repoUrlInput dropdownSubMenu" type="text" readonly></input>\r\n</div>';});
 
-define('text!orion/widgets/browse/repoAndBaseUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Team Invitation</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<div class="repoUrlHeader">\r\n\t\t<div class="repoUrlHeaderClose  core-sprite-close imageSprite" id="orion.browse.repoURLClose"></div>\r\n\t\t<span class="repoUrlHeaderTitle" id="orion.browse.repoURLTitle">Copy the invitation below</span>\r\n\t</div>\r\n\t<textarea id="orion.browse.repoURLInput" class="repoAndBaseUrlInput dropdownSubMenu" type="text" readonly></textarea>\r\n</div>';});
+define('text!orion/widgets/browse/repoAndBaseUrlTrigger.html',[],function () { return '<div id="orion.browse.repoURLTrigger" class="repoUrlLink"><span>Jazz Repository</span></div>\r\n<div id="orion.browse.repoURLDropdown" class="dropdownMenu repoUrlDropdown">\r\n\t<div class="repoUrlHeader">\r\n\t\t<div class="repoUrlHeaderClose  core-sprite-close imageSprite" id="orion.browse.repoURLClose"></div>\r\n\t\t<span class="repoUrlHeaderTitle" id="orion.browse.repoURLTitle">Copy the invitation below</span>\r\n\t</div>\r\n\t<textarea id="orion.browse.repoURLInput" class="repoAndBaseUrlInput dropdownSubMenu" type="text" readonly></textarea>\r\n</div>';});
 
 /*******************************************************************************
  *
@@ -34766,6 +34784,10 @@ define('orion/widgets/browse/fileBrowser',[
 						}
 					}
 					this.refresh(PageUtil.hash());
+				}.bind(this),
+				function(error){
+					console.log(error);
+					mInputManager.handleError(this._statusService, error);
 				}.bind(this));
 			} else {
 				this.refresh(PageUtil.hash());
