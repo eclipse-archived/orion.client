@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*eslint-env node*/
+var term = require('term.js');
+var pty = require('pty.js');
 
 function emitError(socket, error) {
 	socket.emit('error', error && error.stack);
@@ -102,6 +104,44 @@ exports.install = function(options) {
 			// stop piping?
 		});
 	});
+  io.of('/tty').on('connection', function(sock) {
+
+    var buff = [];
+    // Open Terminal Connection
+    var terminal = pty.fork(process.env.SHELL || 'sh', [], {
+      name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
+      ? 'xterm-256color'
+      : 'xterm',
+        cols: 80,
+        rows: 24,
+        cwd: process.env.HOME
+    });
+
+    terminal.on('data', function(data) {
+      return !sock
+      ? buff.push(data)
+      : sock.emit('data', data);
+    });
+
+    console.log(''
+      + 'Created shell h pty master/slave'
+      + ' pair (master: %d, pid: %d)',
+      terminal.fd, terminal.pid);
+
+    // Set up communication paths
+    sock.on('data', function(data) {
+      terminal.write(data);
+    });
+
+    sock.on('disconnect', function() {
+      terminal.destroy()
+      termsocket = null;
+    });
+
+    while (buff.length) {
+      sock.emit('data', buff.shift());
+    }
+  });
 };
 
 exports.uninstall = function() {

@@ -39,7 +39,7 @@
       var txColor = '#FFFFFF';
 
       window.onload = function() {
-        var socket = io.connect();
+        var socket = io.connect('/tty');
         socket.on('connect', function() {
           var term = new Terminal({
             cols: 200,
