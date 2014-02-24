@@ -92,8 +92,8 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 					var ct = ref.getProperty("contentType"); //$NON-NLS-0$
 					if (ct instanceof Array) {
 						types = types.concat(ct);
-					} else if (ct !== null && typeof ct !== "undefined") { //$NON-NLS-0$
-						types.push(ct);
+					} else { //$NON-NLS-0$
+						types.push(ct || "*/*");
 					}
 					
 					var excludes = ref.getProperty("excludedContentTypes"); //$NON-NLS-0$
@@ -289,36 +289,33 @@ define(["require", "orion/Deferred", "orion/commands", "orion/regex", "orion/con
 			}
 			// now content types
 			var showCommand = true;
-			var contentType = null;
+			var contentType = contentTypes ? mContentTypes.getFilenameContentType(item.Name, contentTypes) : null;
+			contentType = contentType || {
+				id:"application/octet-stream"
+			};
 			if (validator.info.excludedContentTypes && contentTypes) {
-				contentType = mContentTypes.getFilenameContentType(item.Name, contentTypes);
-				if (contentType) {
-					showCommand = validator.info.excludedContentTypes.every(function(excludedContentType){
-						var filter = excludedContentType.replace(/([*?])/g, ".$1");	//$NON-NLS-0$ //convert user input * and ? to .* and .?
-						if (-1 !== contentType.id.search(filter)) {
-							// found a match, return false thereby hiding this command
-							return false;
-						}
-						return true;
-					});
-				}
+				showCommand = validator.info.excludedContentTypes.every(function(excludedContentType){
+					var filter = excludedContentType.replace(/([*?])/g, ".$1");	//$NON-NLS-0$ //convert user input * and ? to .* and .?
+					if (-1 !== contentType.id.search(filter)) {
+						// found a match, return false thereby hiding this command
+						return false;
+					}
+					return true;
+				});
 			}
 			
 			if (showCommand && validator.info.contentType && contentTypes) {
 				// the presence of validator.info.contentType means that we only 
 				// want to show the command if the contentType matches
-				showCommand = false;
-				contentType = mContentTypes.getFilenameContentType(item.Name, contentTypes);
-				if (contentType) {
-					for (var i=0; i<validator.info.contentType.length; i++) {
-						if (contentType.id === validator.info.contentType[i]) {
-							showCommand = true;
-							break;
-						}
+				showCommand = validator.info.contentType.some(function(includedContentType){
+					var filter = includedContentType.replace(/([*?])/g, ".$1");	//$NON-NLS-0$ //convert user input * and ? to .* and .?
+					if (-1 !== contentType.id.search(filter)) {
+						// found a match, return true
+						return true;
 					}
-				}
-			}
-			
+					return false;
+				});
+			}			
 			return showCommand;
 		}
 	
