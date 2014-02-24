@@ -64,8 +64,9 @@ define([
 			window.console.log(error);
 			return;
 		}
+		var newError;
 		if (error.status === 0) {
-			error = {
+			newError = {
 				Severity: "Error", //$NON-NLS-0$
 				Message: messages.noResponse
 			};
@@ -73,17 +74,28 @@ define([
 			var responseText = error.responseText;
 			if (responseText) {
 				try {
-					error = JSON.parse(responseText);
+					newError = JSON.parse(responseText);
 				} catch(e) {
-					error = {
+					newError = {
 						//HTML: true,
 						Severity: "Error", //$NON-NLS-0$
 						Message: responseText
 					};
 				}
+				if(!newError.Severity) {
+					newError.Severity = "Error"; //$NON-NLS-0$
+				}
+				if(!newError.Message) {
+					newError.Message = responseText;
+				}
+			} else {
+				newError = {
+					Severity: "Error", //$NON-NLS-0$
+					Message: JSON.stringify(error)
+				};
 			}
 		}
-		statusService.setProgressResult(error);
+		statusService.setProgressResult(newError);
 	}
 
 	/**
@@ -551,6 +563,7 @@ define([
 		}
 	});
 	return {
+		handleError: handleError,
 		InputManager: InputManager
 	};
 });

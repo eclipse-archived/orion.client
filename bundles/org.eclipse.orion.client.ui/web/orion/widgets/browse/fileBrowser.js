@@ -329,6 +329,10 @@ define([
 						}
 					}
 					this.refresh(PageUtil.hash());
+				}.bind(this),
+				function(error){
+					console.log(error);
+					mInputManager.handleError(this._statusService, error);
 				}.bind(this));
 			} else {
 				this.refresh(PageUtil.hash());
