@@ -60,6 +60,7 @@ define({
 	"Sign In To ": "Sign In To ",
 	"Sign In": "Sign In",
 	"Help": "Help",
+	"Report a Bug": "Report a Bug",
 	"Keyboard Shortcuts": "Keyboard Shortcuts",
 	"Settings": "Settings",
 	"View profile of ": "View profile of ",

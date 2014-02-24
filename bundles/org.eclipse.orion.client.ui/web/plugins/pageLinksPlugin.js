@@ -163,6 +163,14 @@ define([
 	});
 	
 	provider.registerService("orion.page.link.user", null, {
+		id: "orion.report.bug",
+		nameKey: "Report a Bug",
+		nls: "orion/widgets/nls/messages",
+		uriTemplate: "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Client&version=5.0",
+		category: "user.0"
+	});
+	
+	provider.registerService("orion.page.link.user", null, {
 		id: "orion.settings",
 		nameKey: "Settings",
 		nls: "orion/widgets/nls/messages",
