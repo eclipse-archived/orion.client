@@ -29,39 +29,160 @@
 		<p>An important part of plugging into Orion pages is supplying links that connect the user to other pages inside and outside of Orion.  Page-level linking services allow plugins and page authors to contribute links and other forms of connectivity between an Orion page and other web pages.  The most general of these services can be used on any Orion page. </p>
 		<p>When specifying links to other pages, a service may need to use some information about the page to decide whether a link is applicable and how the link is composed.  This is accomplished for many services by using the <tt>validationProperties</tt>, <tt>uriTemplate</tt>, and <tt>contentType</tt> properties in the service definition.</p>
 		<h2 id="Validation_Properties">Validation Properties</h2>
-		<p>Validation properties describe the properties of a page object that should be analyzed to determine whether a particular service applies to the page.  They can optionally store information from page objects into variables that can be referenced in a URI template.  Linking services generally specify one or more of these properties in an array.  The general format of an individual validation property is as follows:</p>
+		<p>
+			<i>Validation properties</i> describe the properties of a page object that should be analyzed to determine whether a particular service applies to the object. They can optionally store information from page objects into variables that can be referenced in a URI template. Contributing services generally specify one or more of these properties in an array.  
+		</p>
+		<h2 id="The_ValidationProperty_Object">The ValidationProperty Object</h2>
+		<p>A ValidationProperty has the following properties:</p>
 		<dl>
 			<dt>source</dt>
-			<dd><tt>String</tt> The name of a property to look for in the target object.  The ":" character represents nested properties, and the "|" character represents OR'ed properties.  For example, the source <tt>Location</tt> specifies that the page object must have a "Location" property, such as <tt>myObject.Location</tt>.  The source <tt>Git:ContentLocation</tt> specifies that the page object must have a sub-object and property such as <tt>myObject.Git.ContentLocation</tt>.  The source <tt>ChildrenLocation|ContentLocation</tt> means that the page object must have either a property such as <tt>myObject.ChildrenLocation</tt> or a property such as <tt>myObject.ContentLocation</tt>.  The first property found will be used.</dd>
+			<dd><tt>String</tt> The name of a property to look for in the target object.  The ":" character represents nested properties, and the "|" character represents OR'ed properties. The "
+				<a href="n">n</a>" operator may appear after a property name to treat the property as an array. The value of the property selected by 
+				<b>source</b> flows to the 
+				<b>match</b> and 
+				<b>variableName</b> expressions (if specified).
+			</dd>
+		</dl>
+		<p>For example:</p>
+		<dl>
+			<dd>
+				<dl>
+					<dd>The source <tt>Location</tt> specifies that the page object must have a "Location" property, such as <tt>myObject.Location</tt>.</dd>
+					<dd>The source <tt>Git:ContentLocation</tt> specifies that the page object must have a sub-object and property such as <tt>myObject.Git.ContentLocation</tt>.</dd>
+					<dd>The source <tt>ChildrenLocation|ContentLocation</tt> means that the page object must have either a property such as <tt>myObject.ChildrenLocation</tt> or a property such as <tt>myObject.ContentLocation</tt>. The first property found will be used.</dd>
+					<dd>Elements of an array can be referred to by ":n" or "
+						<a href="n">n</a>". For example, the source <tt>Children
+						<a href="0">0</a></tt> specifies that the page object must have a "Children" property with at least one element in it.
+					</dd>
+					<dd>A negative array index "
+						<a href="-n">-n</a>" refers to the element at index <tt>length - n</tt>. For example, <tt>Children
+						<a href="-1">-1</a></tt> refers to the last element of the Children array.
+					</dd>
+				</dl>
+			</dd>
 			<dt>match</dt>
-			<dd><tt>Object</tt> A value used to validate the source property.  In general, the value of the page object's property will be compared against this value.  However, if this value is a string, the string is assumed to specify a regular expression that will be passed to the RegExp constructor.  </dd>
+			<dd><tt>String|Object</tt> 
+				<i>Optional.</i> An expression that the property selected by 
+				<b>source</b> will have its value validated against. If the value matches the 
+				<b>match</b>, then this validation property is considered to match the target object.<p>If 
+				<b>match</b> is an object, a simple strict equality comparison is performed against the source value. If 
+				<b>match</b> is a string, it gives a regular expression pattern that will be passed to the <tt>RegExp</tt> constructor, and executed against the source value.</p>
+			</dd>
 			<dt>variableName</dt>
-			<dd><tt>String</tt> Optional.  The name of a variable that represents the value of the source property.  If specified, then an associated URI template may use a variable of this name, and it will contain the value of the matched source property.</dd>
+			<dd><tt>String</tt> 
+				<i>Optional.</i> The name of a variable that the value of the 
+				<b>source</b> property will be bound to. If provided, then an associated 
+				<a href="#URI_Templates">URI template</a> may reference a variable of this name, and it will be substituted with the value of the matched 
+				<b>source</b> property.
+			</dd>
 			<dt>variableMatchPosition</dt>
-			<dd><tt>String</tt> Optional.  A string that specifies what part of a matching string is used in the variable value when a regular expression was used to match the property.  </dd>
+			<dd><tt>String</tt> 
+				<i>Optional.</i> A string that specifies what part of a matching string is used in the variable value when a regular expression was used to match the property.  
+				<dl>
+					<dd><tt>"all"</tt> (default) means the entire property value should be substituted for the variable.  </dd>
+					<dd><tt>"only"</tt> means only the matching part of the property value should be substituted in the URI template.  </dd>
+					<dd><tt>"before"</tt> means the part before the match is substituted in the URI template. </dd>
+					<dd><tt>"after"</tt> means the part after the match is substituted in the URI template.</dd>
+				</dl>
+			</dd>
+			<dt>replacements</dt>
+			<dd><tt>ReplacePattern[]</tt> 
+				<i>Optional.</i> Specifies an array of replacements that can be used to further modify a variable value used in a URI template. Each ReplacePattern element has the following properties:
+			</dd>
 		</dl>
 		<ul>
-			<li><tt>"all"</tt> (default) means the entire property value should be substituted for the variable.  </li>
-			<li><tt>only</tt> means only the matching part of the property value should be substituted in the URI template.  </li>
-			<li><tt>before</tt> means the part before the match is substituted in the URI template. </li>
-			<li><tt>after</tt> means the part after the match is substituted in the URI template.</li>
+			<li>
+				<b>pattern</b> <code>String</code> RegExp string giving the pattern to match.
+			</li>
+			<li>
+				<b>replacement</b> <code>String</code> The string that replaces a match. JavaScript's special 
+				<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_string_as_a_parameter" target="orion_external">replacement patterns</a> can be used here.
+			</li>
 		</ul>
-		<dl>
-			<dt>replacements</dt>
-			<dd><tt>Array</tt> Optional.  Specifies an array of replacements (pattern and replace strings) that can be used to further modify a variable value used in a URI template.</dd>
-		</dl>
+		<h3 id="Example_1:_targeting_a_property">Example 1: targeting a property</h3>
+		<p>Consider a model object like a 
+			<a href="../../../../Orion/Server_API/Server-API.html" title="Orion/Server API">File</a> returned by the Orion file API. A file located at the path <tt>/MyProject/src/README.md</tt> within an Orion workspace might be represented by an object like this:
+		</p>
+		<pre class="source-javascript">{
+  Name: "README.md",
+  Parents: [
+    {
+      ChildrenLocation: "/file/username/MyProject/src/?depth=1",
+      Location: "/file/username/MyProject/src/",
+      Name: "src"
+    },
+    {
+      ChildrenLocation: "/file/username/MyProject/?depth=1",
+      Location: "/file/username/MyProject/",
+      Name: "MyProject"
+    }
+  ]
+}
+
+</pre>
+		<p>We can write a Validation Property that matches a File-like object by checking for the presence of the <tt>Parents</tt> property in our 
+			<b>source</b>:
+		</p>
+		<pre class="source-javascript">validationProperties: [{
+    source: "Parents"
+}]
+
+</pre>
+		<h3 id="Example_2:_sub-properties">Example 2: sub-properties</h3>
+		<p>But suppose we want to match only files (and folders) that are not at the top level? Building on the previous example, we match only objects whose <tt>Parents</tt> property has a child property named <tt>0</tt>; effectively selecting only files with 1 or more parents. (A top-level folder has an empty <tt>Parents</tt> array, which has no "0" property, and hence will not match <tt>Parents:0</tt>.)</p>
+		<pre class="source-javascript">validationProperties: [{
+    source: "Parents:0"  // or equivalently "Parents[0]"
+}]
+
+</pre>
+		<h3 id="Example_3:_variables">Example 3: variables</h3>
+		<p>Now suppose we want to generate a link to a web search for the parent folder's name. Again using the ":" child property selector, we target the <tt>Name</tt> field of the parent folder. Using the 
+			<b>variableName</b>, we assign the matched value to a URI variable named <tt>ParentFolder</tt>. Finally, our URI template references that variable. At display time, when the URI template is expanded, the parent folder's name will be encoded into the search query.
+		</p>
+		<pre class="source-javascript">validationProperties: [{
+    source: "Parents:0:Name",  // or equivalently "Parents[0]:Name"
+    variableName: "ParentFolder"
+}],
+uriTemplate: "http://www.example.org/search?q={ParentFolder}"
+
+</pre>
+		<h3 id="Example_4:_array_indices">Example 4: array indices</h3>
+		<p>Modifying the problem in Example 3, suppose we want to  generate a web search for the name of the 
+			<i>topmost</i> containing folder of a given item. Here our 
+			<b>source</b> expression uses <tt>Parents
+			<a href="-1">-1</a></tt> to select the last element in the Parents array (which is the top-level folder, as Parents are ordered from lowest to highest). Top-level folders themselves always have <tt>Parents.length === 0</tt>, and will not be matched by this source expression.
+		</p>
+		<pre class="source-javascript">validationProperties: [{
+    source: "Parents[-1]:Name",
+    variableName: "TopFolder"
+}],
+uriTemplate: "http://www.example.org/search?q={TopFolder}"
+
+</pre>
 		<h2 id="URI_Templates">URI Templates</h2>
-		<p>URI templates describe the link to another page.  Variables in the URI template can refer to the page object metadata, to variables named in the validation properties, or to special variables defined in Orion.  Variables are referenced using curly brackets.  The following variables are system wide variables (independent of the page object or variable names in the validation properties).</p>
+		<p>A URI template describes a hyperlink to another page. In Orion, URI templates are the format plugins use to provide links that the Orion UI can render. URI templates are preferred over simple strings because they correctly handle certain error-prone encoding rules of URLs, and they can contain 
+			<i>variables</i>, which offer an easy method to parameterize the URL.
+		</p>
+		<p>The 
+			<i>variables</i> can refer to page object metadata that a command is being evaluated against, or to a 
+			<b>variableName</b> provided in the 
+			<a href="#The_ValidationProperty_Object">validation properties</a>, or to certain system-wide variables defined in Orion. Variables are referenced by enclosing the variable name in curly brackets {VariableName} in the template expression. At display time, the Orion UI 
+			<i>expands</i> a URI template by substituting values in for its parameters.
+		</p>
+		<p>The following variables are system-wide variables offered by Orion, independent of the page object or variable names in the validation properties:</p>
 		<dl>
 			<dt>OrionHome</dt>
 			<dd>Specifies the hostname for the Orion server instance.  This variable can be used by a plugin that is installed in another domain to reference a page location in Orion.</dd>
 		</dl>
-		<p>For example, the URI template <tt>{+OrionHome}/content/content.html#{+Location}</tt> links to a particular page (content.html) in the running Orion instance, and includes the value of the <tt>Location</tt> property in the originating page's object metadata after the hash. Note that we prefix variables with <code>+</code> in the template to indicate that their value should 
-			<i>not</i> be 
-			<a href="http://en.wikipedia.org/wiki/Percent-encoding" target="orion_external">percent-encoded</a> when the template is expanded. This is required for any variables that we expect to contain raw URL characters like <code>'/'</code>, which would otherwise be encoded to <code>%2F</code> by the template engine.
-		</p>
 		<p>The URI Template syntax is specified by 
 			<a href="http://tools.ietf.org/html/rfc6570" target="orion_external">RFC 6570</a>.
+		</p>
+		<h3 id="Example">Example</h3>
+		<p>Here's an example of a URI template:</p>
+		<pre>{+OrionHome}/content/content.html#{+Location}
+</pre>
+		<p>This template links to a particular page (content.html) in the running Orion instance, and puts the value of the <tt>Location</tt> property in the originating page's object metadata after the hash. By default, parameter values are 
+			<a href="http://en.wikipedia.org/wiki/Percent-encoding" target="orion_external">percent-encoded</a> when the template is expanded. Prefixing the variable name with <code>+</code> in the template turns off percent-encoding. (This is required for any variables that we expect to contain raw URL characters like <code>'/'</code>, which would otherwise be encoded to <code>%2F</code> by the template engine.)
 		</p>
 		<h2 id="Content_Types">Content Types</h2>
 		<p>Content types may be used to further validate file-based metadata.  For example, if a page link should only be visible when the page is showing HTML or CSS, a content type of <tt>

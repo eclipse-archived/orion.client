@@ -40,9 +40,9 @@
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-navigate-openWith.html#orion.navigate.openWith" title="Orion/Documentation/Developer_Guide/Plugging_into_the_navigator#orion.navigate.openWith">orion.navigate.openWith</a>: Associates a content type (registered via <code>orion.core.contenttype</code>) to an editor (registered via <code>orion.edit.editor</code>).
 			</li>
 		</ul>
-		<h2 id="Service_methods_2">Service methods</h2>
+		<h2 id="Service_methods">Service methods</h2>
 		<p>None. This service is purely declarative.</p>
-		<h2 id="Service_attributes_4">Service attributes</h2>
+		<h2 id="Service_attributes_3">Service attributes</h2>
 		<dl>
 			<dt>id</dt>
 			<dd><code>String</code> The unique identifier of this editor.</dd>
@@ -58,11 +58,12 @@
 				<b>uriTemplate</b> field. However an Orion template allows a more human-readable parameter encoding scheme than a 
 				<a href="http://tools.ietf.org/html/draft-gregorio-uritemplate-08" target="orion_external">URI Template</a>. If both fields are provided, the 
 				<b>orionTemplate</b> takes priority over the 
-				<b>uriTemplate</b>.&lt;br /&gt;
+				<b>uriTemplate</b>.
+				<br/>
 				<b>NOTE:</b> Orion templates are not yet standardized.
 			</dd>
 		</dl>
-		<h2 id="Examples_4">Examples</h2>
+		<h2 id="Examples_3">Examples</h2>
 		<p>This example code declares an editor called "My Great Editor". When My Great Editor is used to edit a file in Orion, the user will be pointed to a URL containing the location of the file they want to edit as <code>"fileToEdit"</code> in the query portion of the URL. Presumably myGreatEditor.php would read the string and open the file. Authentication is beyond the scope of this example.</p>
 		<pre class="source-javascript">var provider = new eclipse.PluginProvider();
 provider.registerServiceProvider("orion.edit.editor", {}, 

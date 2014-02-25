@@ -99,15 +99,15 @@
 			</dd>
 		</dl>
 		<p>A document-based problem can span several lines.</p>
-		<h2 id="Service_attributes_9">Service attributes</h2>
+		<h2 id="Service_attributes_8">Service attributes</h2>
 		<p>Implementations of <code>orion.edit.validator</code> must define the following attributes:</p>
 		<dl>
 			<dt>contentType</dt>
-			<dd><code>Array</code> An array of 
+			<dd><code>String[]</code> An array of 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> giving the types of files that this validator is capable of validating.
 			</dd>
 		</dl>
-		<h2 id="Examples_7">Examples</h2>
+		<h2 id="Examples_6">Examples</h2>
 		<pre class="source-javascript"> var provider = new eclipse.PluginProvider();
  var serviceProvider = provider.registerServiceProvider("orion.edit.validator",
    {
@@ -139,6 +139,9 @@
 		<p>This example will validate JavaScript files. It finds lines containing a sequence of 
 			<i>space-tab-space</i> or 
 			<i>tab-space-tab</i> and produces a warning on every such line. Note that <code>+1</code> is necessary because column and line indices in the Orion UI are numbered from 1, not 0.
+		</p>
+		<p>
+			<a href="http://wiki.eclipse.org/Category:Orion" title="Category:Orion" target="orion_external">Category:Orion</a>
 		</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>

@@ -71,7 +71,11 @@
 		<dl>
 			<dd><b>label</b> <code>String</code> Text to be shown in the UI for this element.</dd>
 			<dd><b>className</b> <code>String</code> <i>Optional</i> A space-separated list of CSS class names to be applied to this element in the UI.</dd>
-			<dd><b>children</b> <code>Array</code> <i>Optional</i> Array of child OutlineElements of this element. Children may be nested to an arbitrary depth.</dd>
+			<dd><b>labelPre</b> <code>String</code> <i>Optional</i> Text to be shown in the UI, prior to the <b>label</b> text.</dd>
+			<dd><b>classNamePre</b> <code>String</code> <i>Optional</i> A space-separated list of CSS class names to be applied to the labelPre element.  Can be used to add an image before the <b>label</b> text.</dd>
+			<dd><b>labelPost</b> <code>String</code> <i>Optional</i> Text to be shown in the UI, after the <b>label</b> text.</dd>
+			<dd><b>classNamePost</b> <code>String</code> <i>Optional</i> A space-separated list of CSS class names to be applied to the labelPost element.</dd>
+			<dd><b>children</b> <code>OutlineElement[]</code> <i>Optional</i> Array of child OutlineElements of this element. Children may be nested to an arbitrary depth.</dd>
 			<dd><b>line</b> <code>Number</code> <i>Optional</i> The line number within the file to use as the link for this element in the UI. Line numbers begin counting from 1.
 				<dl>
 					<dd>The optional properties <b>column</b>, <b>start</b>, <b>end</b>, <b>text</b> may be provided for finer-grained control. (Consult the <code>orion.util.hashFromPosition()</code> documentation in the Client API reference for details about these parameters.)</dd>
@@ -79,19 +83,27 @@
 			</dd>
 			<dd><b>href</b> <code>String</code> <i>Optional</i> When <b>line</b> is omitted, the <b>href</b> property provides a URL to use as the link.</dd>
 		</dl>
-		<h2 id="Service_attributes_8">Service attributes</h2>
+		<h2 id="Service_attributes_7">Service attributes</h2>
 		<p>Implementations of <code>orion.edit.outliner</code> must define the following attributes:</p>
 		<dl>
 			<dt>contentType</dt>
-			<dd><code>Array</code> An array of 
+			<dd><code>String[]</code> An array of 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer_Guide/Plugging_into_the_navigator#orion.core.contenttype">Content Type IDs</a> giving the types of files that this outliner can provide an outline for.
 			</dd>
 			<dt>id</dt>
 			<dd><code>String</code> A unique identifier for this outline provider.</dd>
 			<dt>name</dt>
-			<dd><code>String</code> A user-readable name for this outline provider.</dd>
+			<dd><code>String</code> A user-readable name for this outline provider. If a <tt>nameKey</tt> is provided, <tt>name</tt> is optional.</dd>
+			<dt>nls</dt>
+			<dd><code>String</code> 
+				<i>Optional.</i> Path to an NLS bundle that the Orion NLS framework will load to obtain translated strings for this provider.
+			</dd>
+			<dt>nameKey</dt>
+			<dd><code>String</code> 
+				<i>Optional.</i> The NLS key used to look up the translated name of this provider in the message bundle given by the <tt>nls</tt> field.
+			</dd>
 		</dl>
-		<h2 id="Examples_6">Examples</h2>
+		<h2 id="Examples_5">Examples</h2>
 		<p>This example shows an outline provider that runs on .txt files. It finds Mediawiki-style <code>=Section Headings=</code> and generates a flat outline from them. (A more elaborate implementation might also find subsections and include them as children of the top-level sections.)</p>
 		<pre class="source-javascript"> var provider = new eclipse.PluginProvider();
  provider.registerServiceProvider("orion.edit.outliner", {

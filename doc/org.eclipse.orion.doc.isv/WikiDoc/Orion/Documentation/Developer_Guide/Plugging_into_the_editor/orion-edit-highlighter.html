@@ -30,85 +30,109 @@
 			</tr>
 		</table><hr/>
 		<h1 id="orion.edit.highlighter">orion.edit.highlighter</h1>
-		<p>The <code>orion.edit.highlighter</code> service contributes syntax highlighting rules to the editor. A highlighter service may provide highlighting in one of two ways:</p>
-		<ul>
-			<li>By passing a <i>grammar</i>, which is a declarative description of a language's syntax. The grammar tells the Orion editor how to recognize and style language constructs in a file.</li>
-			<li>By writing a <i>highlighter</i>, which allows highlighting information to be calculated asynchronously by the provider itself and sent to the Orion editor  for display.</li>
-		</ul>
-		<p>The service also provides a list of content types. When the editor opens a file of a registered content type, the provider is invoked (using one of the two methods described above) to obtain the styling.</p>
 		<p>
-			<b>NOTE:</b> The "highlighter" API is experimental and subject to change in future versions.
+			<i>Note that this section has been rewritten for the new syntax styling service in the Orion 5.0 release.  The implementation of the older syntax styling service is also in Orion 5.0 in order to preserve backwards-compatibility, but is considered deprecated.  Documentation for this old service can be found 
+				<a href="https://wiki.eclipse.org/index.php?title=Orion/Documentation/Developer_Guide/Plugging_into_the_editor&amp;oldid=356484#orion.edit.highlighter" target="orion_external">here</a>.  All new syntax styling declaration should be implemented in terms of the new styling service that is described below.
+			</i>
 		</p>
-		<h2 id="Service_methods_3">Service methods</h2>
-		<p>Implementations of <code>orion.edit.highlighter</code> whose 
-			<b>type</b> attribute is "highlighter", must define the following method:
-		</p>
+		<p>The <code>orion.edit.highlighter</code> service contributes syntax styling patterns to the editor. This is done by passing a <i>grammar</i>, which is a declarative description of a language's syntax. The grammar tells the Orion editor how to recognize and style language constructs in a file.
+			The service also provides a list of content types. When the editor opens a file of a registered content type, the provider is invoked to obtain the styling.</p>
+		<h2 id="Service_methods_2">Service methods</h2>
+		<p>None. This service is purely declarative.</p>
+		<h2 id="Service_attributes_4">Service attributes</h2>
+		<p>Implementations of <code>orion.edit.highlighter</code> define the following attributes:</p>
 		<dl>
-			<dt>setContentType(contentTypeId)</dt>
-			<dd>
-				<b>contentTypeId</b> <code>String</code> The Content Type ID of the file that is being edited.
+			<dt>id</dt>
+			<dd><code>String</code> A name that uniquely identifies this grammar.</dd>
+			<dt>contentTypes</dt>
+			<dd><code>String[]</code> An array of 
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> that this grammar will be used for.
 			</dd>
-		</dl>
-		<p>Orion invokes this method to inform the provider what kind of file it must provide highlighting for. This allows the provider that to register itself with several content types, but implement different logic for each type.</p>
-		<p>When this provider's 
-			<b>type</b> is "grammar", no service methods are defined: a grammar provider is purely declarative.
-		</p>
-		<h2 id="Service_attributes_5">Service attributes</h2>
-		<p>Implementations of <code>orion.edit.highlighter</code> must define the following attributes:</p>
-		<dl>
-			<dt>type</dt>
-			<dd><code>String</code> What kind of highlight provider is being registered. Allowed values are <code>"grammar"</code> and <code>"highlighter"</code>. Future versions may support more.</dd>
-			<dt>contentType</dt>
-			<dd><code>Array</code> An array of 
-				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> that this provider will be used for.
-			</dd>
-			<dt>grammar</dt>
+			<dt>patterns</dt>
+			<dd><code>Object[]</code> An array of pattern objects to be used to assign style classes. Pattern objects are described below.</dd>
+			<dt>repository</dt>
 			<dd><code>Object</code> 
-				<i>Optional</i>. When the 
-				<b>type</b> of this provider is "grammar", this attribute holds an object giving the grammar to be used to assign style classes. This object is a JavaScript equivalent of the format described 
-				<a href="http://manual.macromates.com/en/language_grammars.html" target="orion_external">here</a>.
+				<i>Optional</i>. A set of named pattern objects that can be referenced by this grammar and others.
 			</dd>
 		</dl>
-		<h2 id="Service_events">Service events</h2>
-		<p>When the 
-			<b>type</b> of the provider is "highlighter", the provider must independently listen to changes in the Orion text editor by registering with the <code>orion.edit.model</code> service, and calculate the necessary highlighting information in response to the changes. Whenever highlighting information is available, the provider must dispatch an event of type <code>"orion.edit.highlighter.styleReady"</code> containing the styles. The event will be used by the Orion editor to apply styles to the file being displayed.
+		<h2 id="Pattern_objects">Pattern objects</h2>
+		<p>Patterns are defined in a similar way to 
+			<a href="http://manual.macromates.com/en/language_grammars.html#language_rules" target="orion_external">TextMate language rules</a>, with some minor variation to adapt to the context of Orion:
 		</p>
-		<dl>
-			<dt>orion.edit.highlighter.styleReady</dt>
-			<dd>This event is documented in the Orion Client API reference as <code>orion.editor.StyleReadyEvent</code>. Consult its entry there for detailed information.</dd>
-		</dl>
-		<p>When the 
-			<b>type</b> of the provider is "grammar", the provider dispatches no service events.
+		<ul>
+			<li>Patterns are defined using valid Javascript syntax, and remember that every '\' character requires an extra '\' to escape it in the Javascript string (for example, to define a regular expression that matches a tab character would require string "\\t").</li>
+			<li>Regular expressions are bound by the abilities/constraints of Javascript's RegExp (for example, no look-behinds).</li>
+			<li>Sub-patterns can be defined for both 
+				<i>match:</i> and 
+				<i>begin:/end:</i> patterns.
+			</li>
+			<li>A pattern that references another grammar does so by its id attribute (for example: "include: 'orion.lib'").</li>
+			<li>If a capture group is used to style part of a match then all parts of the match MUST belong to capture groups, to help the styler correctly compute the capture group range (this is due to a limitation in Javascript's RegExp).  For example, to style the escaped character sequences in match result "newline is \n, tab is \t", the capture groups could look like "(newline is )(\n)(, tab is )(\t)", with the escaped character styling applied to capture groups 2 and 4.</li>
+		</ul>
+		<h2 id="Style_names">Style names</h2>
+		<p>The 
+			<a href="http://manual.macromates.com/en/language_grammars.html#naming_conventions" target="orion_external">TextMate naming conventions</a> are followed by the text styler.  In addition to visual styling, the following styles can be used to provide semantic info about matches:
 		</p>
-		<h2 id="Example_of_a_.27grammar.27_provider">Example of a 'grammar' provider</h2>
-		<pre class="source-javascript"> var provider = new eclipse.PluginProvider();
- provider.registerServiceProvider("orion.edit.highlighter",
+		<ul>
+			<li>
+				<i>punctuation.section.(begin|end)</i>: pairs of matches with these styles are used by the editor to compute section matches (for example, showing bracket matching)
+			</li>
+			<li>
+				<i>meta.annotation.task.todo</i>: a match within a comment that has this style may be handled specially by the editor's container (for example, Orion will show a corresponding TODO annotation in the editor's gutter)
+			</li>
+		</ul>
+		<h2 id="orion.lib_and_orion.c-like">orion.lib and orion.c-like</h2>
+		<p>Many of the patterns that were defined for Orion's core language stylings are applicable across many languages (for example, strings, numbers, etc.).  In order to make these patterns easily re-usable, two generic grammars are defined that contain them and can be inherited by other language grammars either in whole or in part.  These grammars are:</p>
+		<ul>
+			<li>
+				<i>orion.lib</i>: provides stylings for:
+				<ul>
+					<li>matching of (), [] and {} brackets</li>
+					<li>base-10 and base-16 numbers (for example, -1.02, 3e10, 0x8ab3, etc.)</li>
+					<li>single- and double-quoted strings</li>
+				</ul>
+			</li>
+			<li>
+				<i>orion.c-like</i>: provides stylings for everything in orion.lib, and additionally for 
+				<i>//</i> and 
+				<i>/* */</i> comments
+			</li>
+		</ul>
+		<p>A grammar can include the full set of patterns from 
+			<i>orion.lib</i> with 
+			<i>"include: 'orion.lib'"</i>.  That grammar could then override any of the included patterns, including an override to no-op, by specifying a pattern with the same name in its 
+			<i>repository</i> section.
+		</p>
+		<p>For an example of including most patterns from 
+			<i>orion.c-like</i> see 
+			<a href="http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/tree/bundles/org.eclipse.orion.client.editor/web/orion/editor/stylers/text_x-java-source/syntax.js?id=v20140220-2312#n33" target="orion_external">Orion's Java syntax styling</a>.  The 
+			<i>orion.lib</i> and 
+			<i>orion.c-like</i> grammars are defined  
+			<a href="http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/tree/bundles/org.eclipse.orion.client.editor/web/orion/editor/stylers/lib/syntax.js#n17" target="orion_external">here</a>.
+		</p>
+		<h2 id="Example">Example</h2>
+		<pre class="source-javascript"> provider.registerServiceProvider("orion.edit.highlighter",
    {
-     // "grammar" provider is purely declarative. No service methods.
+     // no service methods
    }, {
-     type : "grammar",
-     contentType: ["text/html"],
-     grammar: {
-       patterns: [
-           {  begin: "&lt;!--", 
-              end: "--&gt;",
-              captures: { "0": "punctuation.definition.comment.html" },
-              contentName: "comment.block.html"
-           }
-       ]
-     }
+     id: "orion.json",
+     contentTypes: ["application/json"],
+     patterns: [
+       {
+           include: "orion.lib"
+       }, {
+           match: "\\b(?:false|true)\\b",
+           name: "keyword.json"
+       }
+     ]
    });
- provider.connect();
 
 </pre>
-		<p>The above example provides a grammar to be used for HTML files. It will assign the CSS class <code>punctuation-definition-comment-html</code> to the <code>&lt;!--</code> and <code>--&gt;</code> delimiters, and assign the CSS class <code>comment-block-html</code> to the text inside the delimiters. Consult 
-			<a href="http://manual.macromates.com/en/language_grammars.html" target="orion_external">this reference</a> for a full description of the grammar format.
-		</p>
-		<p><i>(Note that some aspects of the grammar format are not supported. See</i> <code>orion.editor.TextMateStyler</code> <i>in the Client API reference for a detailed explanation.)</i></p>
-		<h2 id="Example_of_a_.27highlighter.27_provider">Example of a 'highlighter' provider</h2>
-		<p>See the source code of the 
-			<a href="https://github.com/mamacdon/orion-codemirror" target="orion_external">orion-codemirror plugin</a>, particularly 
-			<a href="https://github.com/mamacdon/orion-codemirror/blob/master/src/js/codeMirrorPlugin.js#L163-L183" target="orion_external">these lines</a>.
+		<p>The above example shows Orion's grammar for styling of .json files. Since .json has many language constructs that are found in other languages it is able to inherit most of its styling from Orion's provided 
+			<i>orion.lib</i> grammar.  The .json grammar supplements this by defining a pattern for styling 
+			<i>false</i> and 
+			<i>true</i> as keywords (an alternate styling name for these could have been 
+			<i>constant.language</i>).
 		</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>

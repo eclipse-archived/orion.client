@@ -2,7 +2,15 @@
 <toc topic="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html" label="Plugging into Orion pages">
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html" label="Overview of plugging into Orion pages">
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Validation_Properties" label="Validation Properties"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#URI_Templates" label="URI Templates"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#The_ValidationProperty_Object" label="The ValidationProperty Object">
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Example_1:_targeting_a_property" label="Example 1: targeting a property"></topic>
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Example_2:_sub-properties" label="Example 2: sub-properties"></topic>
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Example_3:_variables" label="Example 3: variables"></topic>
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Example_4:_array_indices" label="Example 4: array indices"></topic>
+		</topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#URI_Templates" label="URI Templates">
+			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Example" label="Example"></topic>
+		</topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Content_Types" label="Content Types"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/orion-page-content.html" label="orion.page.content">
@@ -28,7 +36,7 @@
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/orion-core-content.html" label="orion.core.content">
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/orion-core-content.html#Service_methods_5" label="Service methods"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/orion-core-content.html#Service_attributes_5" label="Service attributes"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/orion-core-content.html#Example" label="Example"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/orion-core-content.html#Example_2" label="Example"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Updating-this-document.html" label="Updating this document"></topic>
 </toc>

@@ -48,7 +48,7 @@
 						<b>options.indentation</b> <code>String</code> The leading whitespace at the start of the line.
 					</dd>
 					<dd>
-						<b>options.line</b> <code>Number</code> The text of the line.
+						<b>options.line</b> <code>String</code> The text of the line.
 					</dd>
 					<dd>
 						<b>options.offset</b> <code>Number</code> The offset at which content assist is being requested. Relative to the document.
@@ -65,6 +65,9 @@
 				</dl>
 			</dd>
 		</dl>
+		<p>Returns <code>
+			<a href="#The_Proposal_object">Proposal</a>[]</code>.
+		</p>
 		<h2 id="Service_methods_.28Orion_3.0.29_2">Service methods (Orion 3.0)</h2>
 		<dl>
 			<dt>computeProposals(buffer, offset, context)</dt>
@@ -93,26 +96,51 @@
 				</dl>
 			</dd>
 		</dl>
-		<p>Returns an <code>Array</code> giving possible completions that may be inserted into the editor. Result elements must be "proposal" objects having the following properties:</p>
+		<p>Returns <code>
+			<a href="#The_Proposal_object">Proposal</a>[]</code>.
+		</p>
+		<h2 id="The_Proposal_object">The Proposal object</h2>
+		<p>A Proposal object has the following properties:</p>
 		<dl>
-			<dd><b>proposal</b> <code>String</code> completion text that will be inserted in the editor if chosen. The text is inserted at the <b>offset</b>.</dd>
-			<dd><b>description</b> A <code>String</code> describing the completion. This text will be shown in the content assist popup.</dd>
-			<dd><b>positions</b> An optional <code>Array</code> of positions within the completion proposal that require user input. Supplying this property will cause the editor to enter <i>linked mode</i>, and the user can use the <b>Tab</b> key to iterate through the regions of the proposal that require user input. For example if the completion is a function, the positions could indicate the function arguments that need to be supplied. Entries in this position array must be objects with two integer properties: <b>offset</b>, and <b>length</b> describing the regions requiring user input.</dd>
-			<dd><b>escapePosition</b> An optional <code>Number</code> indicating the offset the cursor should have in the document after the completion is inserted. If this value is not supplied, the cursor will be positioned at the end of the inserted text.</dd>
-			<dd><b>style</b> A String giving styling information for the proposal. The available styles are: <code>"default"</code> (no styling, also used if this property is not present), <code>"emphasis"</code> (proposal displayed in bold), <code>"noemphasis"</code> (proposal is greyed out with a colored background), <code>"hr"</code> (proposal displayed as a &lt;hr/&gt; and is not selectable by up and down arrows).</dd>
+			<dd>
+				<b>description</b> <code>String</code> Description text for this proposal. Will be shown in the content assist popup.
+			</dd>
+			<dd>
+				<b>escapePosition</b> <code>Number</code> 
+				<i>Optional.</i> Gives the offset, relative to the document, where the cursor should be placed after the proposal is inserted. If this value is not supplied, the cursor will be positioned at the end of the inserted text.
+			</dd>
+			<dd>
+				<b>overwrite</b> <code>Boolean</code> 
+				<i>Optional, defaults to <code>false</code>.</i> If true, this proposal's <code>proposal</code> will overwrite the 
+				<b>prefix</b> that was passed to computeProposals().
+			</dd>
+			<dd>
+				<b>positions</b> <code>Object[]</code> 
+				<i>Optional.</i> An optional array of positions within the completion proposal that require user input. Supplying this property will cause the editor to enter <i>linked mode</i>, and the user can use the 
+				<b>Tab</b> key to iterate through the regions of the proposal that require user input. For example if the completion is a function, the positions could indicate the function arguments that need to be supplied. Entries in this position array must be objects with two integer properties: 
+				<b>offset</b>, and 
+				<b>length</b> describing the regions requiring user input.
+			</dd>
+			<dd>
+				<b>proposal</b> <code>String</code> Completion text that will be inserted in the editor if chosen by the user. The text is inserted at the 
+				<b>offset</b> that was passed to computeProposals().
+			</dd>
+			<dd>
+				<b>style</b> <code>String</code> 
+				<i>Optional.</i> Gives styling information for the proposal. The available styles are: <code>"default"</code> (no styling, also used if this property is not present), <code>"emphasis"</code> (proposal displayed in bold), <code>"noemphasis"</code> (proposal is greyed out with a colored background), <code>"hr"</code> (proposal displayed as a &lt;hr/&gt; and is not selectable by up and down arrows).
+			</dd>
 		</dl>
-		<p>Alternatively, a Deferred may be returned, which allows the suggestions to be computed asynchronously.</p>
-		<h2 id="Service_attributes_3">Service attributes</h2>
+		<h2 id="Service_attributes_2">Service attributes</h2>
 		<p>Implementations of <code>orion.edit.contentAssist</code> must define the following attributes:</p>
 		<dl>
 			<dt>name</dt>
 			<dd><code>String</code> Name for the content assist provider.</dd>
 			<dt>contentType</dt>
-			<dd><code>Array</code> An array of 
+			<dd><code>String[]</code> An array of 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> that this provider can provide content assist for. The provider's <code>computeProposals</code> function will be called only for files having one of these content types.
 			</dd>
 		</dl>
-		<h2 id="Examples_3">Examples</h2>
+		<h2 id="Examples_2">Examples</h2>
 		<p>The example below provides content assist suggestions for files whose name ends in <code>.js</code>. It offers JavaScript keywords as suggestions, by checking them against the prefix provided by the content assist engine.</p>
 		<pre class="source-javascript"> var provider = new orion.PluginProvider();
  provider.registerServiceProvider("orion.edit.contentAssist",
@@ -162,8 +190,9 @@
  provider.connect();
 
 </pre>
-		<p>Here is an identical example to the HTML provider, but written against the Orion 4.0 API:</p>
-		<pre class="source-javascript"> define(["orion/plugin"], function(PluginProvider) {
+		<p>Here is an identical example to the HTML provider, but written against the Orion 4.0 API. </p>
+		<pre class="source-javascript"> // Note that orion/Deferred is an implied dependency of orion/plugin here, because we are using an object reference.
+ define(["orion/plugin"], function(PluginProvider) {
      var provider = new PluginProvider();
      provider.registerServiceProvider('orion.edit.contentAssist',
        {
@@ -185,7 +214,7 @@
  });
 
 </pre>
-		<p>More advanced content assist providers will generally use the buffer text or the AST provided in the editorContext object.</p><hr/>
+		<p>More advanced content assist providers will generally use the buffer text, possibly parsing the file into an Abstract Syntax Tree (AST).</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
 				<td style="width: 20%" align="left">

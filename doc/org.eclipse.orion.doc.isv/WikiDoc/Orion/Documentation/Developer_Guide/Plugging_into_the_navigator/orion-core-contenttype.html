@@ -68,6 +68,13 @@
 			<dd><tt>String</tt> 
 				<i>Optional.</i> URL of an image to display beside files of this type (for example, in the Orion navigator).
 			</dd>
+			<dt>imageClass</dt>
+			<dd><tt>String</tt> 
+				<i>Optional.</i> CSS class name for an image to display beside files of this type (for example, in the Orion navigator). Providing a class name allows a variety of CSS techniques to be used to generate an icon: for example, sprites, web fonts, etc. Multiple class names (separated by a space) can be provided within the 
+				<b>imageClass</b> string. The 
+				<b>imageClass</b> supersedes 
+				<b>image</b> if both are provided.
+			</dd>
 		</dl>
 		<h2 id="Service_methods_3">Service methods</h2>
 		<p>None. This service is purely declarative.</p>
@@ -92,12 +99,16 @@ provider.connect();
             id: "text/x-maven-pom",
             name: "Maven build file",
             filename: ["pom.xml"],
-            "extends": "application/xml"
+            "extends": "application/xml",
+            imageClass: "orion-maven-sprite"
         }
     ]});
 provider.connect();
 
-</pre><hr/>
+</pre>
+		<p>
+			<a href="http://wiki.eclipse.org/Category:Orion" title="Category:Orion" target="orion_external">Category:Orion</a>
+		</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
 				<td style="width: 20%" align="left">

@@ -44,56 +44,79 @@
 			<dt>fetchChildren (location) — returns Array of 
 				<a href="http://wiki.eclipse.org/Orion/Server_API/File_API#File" title="Orion/Server API/File API#File" target="orion_external">File</a>.
 			</dt>
-			<dd>Obtains the children of a remote resource.&lt;br /&gt;Among other places, this function is used in the Orion navigator to display the file system contents in a tree view.</dd>
+			<dd>Obtains the children of a remote resource.
+				<br/>Among other places, this function is used in the Orion navigator to display the file system contents in a tree view.
+			</dd>
 			<dt>createWorkspace (name)</dt>
-			<dd>Creates a new workspace with the given name.&lt;br /&gt;TODO -- this is never called by the Orion IDE.</dd>
+			<dd>Creates a new workspace with the given name.
+				<br/>TODO -- this is never called by the Orion IDE.
+			</dd>
 			<dt>loadWorkspaces ( ) — returns an Array of 
 				<a href="http://wiki.eclipse.org/Orion/Server_API/File_API#File" title="Orion/Server API/File API#File" target="orion_external">File</a>.
 			</dt>
-			<dd>Loads all the user's workspaces.&lt;br /&gt;TODO -- this is never called by the Orion IDE.</dd>
+			<dd>Loads all the user's workspaces.
+				<br/>TODO -- this is never called by the Orion IDE.
+			</dd>
 			<dt>loadWorkspace (location) —  returns a 
 				<a href="http://wiki.eclipse.org/Orion/Server_API/File_API#File" title="Orion/Server API/File API#File" target="orion_external">File</a>.
 			</dt>
-			<dd>Loads the workspace with the given id and sets it to be the current workspace for the IDE. The workspace is created if none already exists.&lt;br /&gt;Called by the Orion navigator when navigating to the root of the file system.&lt;br /&gt;NOTE: The returned file object should have a zero-length 'Parents' array to designate it as the root of the filesystem (see 
+			<dd>Loads the workspace with the given id and sets it to be the current workspace for the IDE. The workspace is created if none already exists.
+				<br/>Called by the Orion navigator when navigating to the root of the file system.
+				<br/>NOTE: The returned file object should have a zero-length 'Parents' array to designate it as the root of the filesystem (see 
 				<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=392374" target="orion_external">bug 392374</a>).
 			</dd>
 			<dt>createProject (url, projectName, serverPath, create)</dt>
-			<dd>Adds a project to a workspace.&lt;br /&gt;TODO -- the Orion IDE never calls this function for third-party file systems.</dd>
+			<dd>Adds a project to a workspace.
+				<br/>TODO -- the Orion IDE never calls this function for third-party file systems.
+			</dd>
 			<dt>createFolder (parentLocation, folderName)</dt>
-			<dd>Creates a folder.&lt;br /&gt;Invoked when using the 
+			<dd>Creates a folder.
+				<br/>Invoked when using the 
 				<b>New Folder</b> command in the Orion navigator.
 			</dd>
 			<dt>createFile (parentLocation, fileName)</dt>
-			<dd>Create a new file in a specified location.&lt;br /&gt;Invoked when using the 
+			<dd>Create a new file in a specified location.
+				<br/>Invoked when using the 
 				<b>New File</b> command in the Orion navigator.
 			</dd>
 			<dt>deleteFile (location)</dt>
-			<dd>Deletes a file, directory, or project.&lt;br /&gt;Invoked when using the 
+			<dd>Deletes a file, directory, or project.
+				<br/>Invoked when using the 
 				<b>Delete</b> command in the Orion navigator.
 			</dd>
 			<dt>moveFile (sourceLocation, targetLocation, name)</dt>
-			<dd>Moves a file or directory.&lt;br /&gt;Invoked when using the 
+			<dd>Moves a file or directory.
+				<br/>Invoked when using the 
 				<b>Move</b> and 
 				<b>Cut..Paste</b> commands in the Orion navigator.
 			</dd>
 			<dt>copyFile (sourceLocation, targetLocation)</dt>
-			<dd>Copies a file or directory.&lt;br /&gt;Invoked when using the 
+			<dd>Copies a file or directory.
+				<br/>Invoked when using the 
 				<b>Copy..Paste</b> commands in the Orion navigator.
 			</dd>
 			<dt>read (location, isMetadata) — returns String (contents) or 
 				<a href="http://wiki.eclipse.org/Orion/Server_API/File_API#File" title="Orion/Server API/File API#File" target="orion_external">File</a> (metadata).
 			</dt>
-			<dd>Returns the contents or metadata of the file at the given location.&lt;br /&gt;Invoked by the Orion editor to open a file for editing, and to retrieve metadata about the file being edited.</dd>
+			<dd>Returns the contents or metadata of the file at the given location.
+				<br/>Invoked by the Orion editor to open a file for editing, and to retrieve metadata about the file being edited.
+			</dd>
 			<dt>write (location, contents, args)</dt>
-			<dd>Writes the contents or metadata of the file at the given location.&lt;br /&gt;Invoked by the Orion editor to save a file being edited.</dd>
+			<dd>Writes the contents or metadata of the file at the given location.
+				<br/>Invoked by the Orion editor to save a file being edited.
+			</dd>
 			<dt>remoteImport (targetLocation, options)</dt>
-			<dd>Imports file and directory contents from another server.&lt;br /&gt;</dd>
+			<dd>Imports file and directory contents from another server.
+				<br/>
+			</dd>
 			<dt>remoteExport (sourceLocation, options)</dt>
 			<dd>Exports file and directory contents to another server.</dd>
 			<dt>search (location, query) — returns Array of 
 				<a href="http://wiki.eclipse.org/Orion/Server_API/File_API#File" title="Orion/Server API/File API#File" target="orion_external">File</a>.
 			</dt>
-			<dd>Performs a search with the given query.&lt;br /&gt;Invoked by various search widgets that appear in the Orion UI.</dd>
+			<dd>Performs a search with the given query.
+				<br/>Invoked by various search widgets that appear in the Orion UI.
+			</dd>
 		</dl>
 		<p>This API is asynchronous: in other words, every API method is expected to return a promise that eventually resolves with the result object, or rejects if an error occurred.</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">

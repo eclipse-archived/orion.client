@@ -33,7 +33,7 @@
 		<p>The <code>orion.edit.occurrences</code> service allows plugins to compute identifier occurrences for specific 
 			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">content types</a>.
 		</p>
-		<h2 id="Service_methods_5">Service methods</h2>
+		<h2 id="Service_methods_4">Service methods</h2>
 		<p>Implementations of <code>orion.edit.occurrences</code> must define the following function:</p>
 		<dl>
 			<dt>computeOccurrences(editorContext, context)</dt>
@@ -44,18 +44,27 @@
 				<b>context</b> is an object that contains the current selection in the editor to find occurrences for.
 			</dd>
 		</dl>
-		<h2 id="Service_attributes_7">Service attributes</h2>
+		<p>The return value (or fulfillment value) is an Array of top-level 
+			<a href="#The_Occurrence_object">occurrence objects</a>, which will be automatically marked in the editor.
+		</p>
+		<h2 id="The_Occurrence_object">The Occurrence object</h2>
+		<p>Each occurrence object has these properties:</p>
+		<dl>
+			<dd><b>start</b> <code>Number</code> The offset into the file for the start of the occurrence</dd>
+			<dd><b>end</b> <code>Number</code> The offset into the file for the end of the occurrence</dd>
+		</dl>
+		<h2 id="Service_attributes_6">Service attributes</h2>
 		<p>Implementations of <code>orion.edit.occurrences</code> may define the following attributes:</p>
 		<dl>
 			<dt>contentType</dt>
-			<dd><code>Array</code> An array of 
+			<dd><code>String[]</code> An array of 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> for which this occurrence computer is valid.
 			</dd>
 			<dt>pattern</dt>
 			<dd><code>String</code> A string to create a regular expression to determine if this occurrence service applies to the current context. This attribute has been </dd>
 		</dl>
 		<p>deprecated in favor of <code>contentType</code>.</p>
-		<h2 id="Examples_5">Examples</h2>
+		<h2 id="Examples_4">Examples</h2>
 		<p>The following example is how Orion plugs in occurrence support for JavaScript:</p>
 		<pre class="source-javascript">var provider = new orion.PluginProvider();
 provider.registerService('orion.edit.occurrences', 

@@ -5,19 +5,14 @@
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/The-Editor-Context-object.html#API_versions" label="API versions"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/The-Editor-Context-object.html#Editor_Context_methods" label="Editor Context methods"></topic>
 	</topic>
-	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-core-astprovider.html" label="orion.core.astprovider">
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-core-astprovider.html#Service_methods" label="Service methods"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-core-astprovider.html#Service_attributes" label="Service attributes"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-core-astprovider.html#Examples" label="Examples"></topic>
-	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html" label="orion.edit.command">
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#Service_methods_.28Orion_4.0.29" label="Service methods (Orion 4.0)"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#Service_methods_.28Orion_3.0.29" label="Service methods (Orion 3.0)">
 			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#The_CommandResult_object" label="The CommandResult object"></topic>
 			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#The_Status_object" label="The Status object"></topic>
 		</topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#Service_attributes_2" label="Service attributes"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#Examples_2" label="Examples">
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#Service_attributes" label="Service attributes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#Examples" label="Examples">
 			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#Replacing_the_selection" label="Replacing the selection"></topic>
 			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#Replacing_the_editor_contents" label="Replacing the editor contents"></topic>
 			<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-command.html#Delegating_a_UI_before_manipulating_the_editor" label="Delegating a UI before manipulating the editor"></topic>
@@ -27,44 +22,48 @@
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-contentAssist.html" label="orion.edit.contentAssist">
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-contentAssist.html#Service_methods_.28Orion_4.0.29_2" label="Service methods (Orion 4.0)"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-contentAssist.html#Service_methods_.28Orion_3.0.29_2" label="Service methods (Orion 3.0)"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-contentAssist.html#Service_attributes_3" label="Service attributes"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-contentAssist.html#Examples_3" label="Examples"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-contentAssist.html#The_Proposal_object" label="The Proposal object"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-contentAssist.html#Service_attributes_2" label="Service attributes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-contentAssist.html#Examples_2" label="Examples"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html" label="orion.edit.editor">
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html#Service_methods_2" label="Service methods"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html#Service_attributes_4" label="Service attributes"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html#Examples_4" label="Examples"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html#Service_methods" label="Service methods"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html#Service_attributes_3" label="Service attributes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-editor.html#Examples_3" label="Examples"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html" label="orion.edit.highlighter">
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#Service_methods_3" label="Service methods"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#Service_attributes_5" label="Service attributes"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#Service_events" label="Service events"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#Example_of_a_.27grammar.27_provider" label="Example of a 'grammar' provider"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#Example_of_a_.27highlighter.27_provider" label="Example of a 'highlighter' provider"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#Service_methods_2" label="Service methods"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#Service_attributes_4" label="Service attributes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#Pattern_objects" label="Pattern objects"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#Style_names" label="Style names"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#orion.lib_and_orion.c-like" label="orion.lib and orion.c-like"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-highlighter.html#Example" label="Example"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-model.html" label="orion.edit.model">
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-model.html#Service_methods_4" label="Service methods"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-model.html#Service_attributes_6" label="Service attributes"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-model.html#Example" label="Example"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-model.html#Service_methods_3" label="Service methods"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-model.html#Service_attributes_5" label="Service attributes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-model.html#Example_1" label="Example 1"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-model.html#Example_2" label="Example 2"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-occurrences.html" label="orion.edit.occurrences">
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-occurrences.html#Service_methods_5" label="Service methods"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-occurrences.html#Service_attributes_7" label="Service attributes"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-occurrences.html#Examples_5" label="Examples"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-occurrences.html#Service_methods_4" label="Service methods"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-occurrences.html#The_Occurrence_object" label="The Occurrence object"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-occurrences.html#Service_attributes_6" label="Service attributes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-occurrences.html#Examples_4" label="Examples"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-outliner.html" label="orion.edit.outliner">
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-outliner.html#Service_methods_.28Orion_4.0.29_3" label="Service methods (Orion 4.0)"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-outliner.html#Service_methods_.28Orion_3.0.29_3" label="Service methods (Orion 3.0)"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-outliner.html#The_OutlineElement_object" label="The OutlineElement object"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-outliner.html#Service_attributes_8" label="Service attributes"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-outliner.html#Examples_6" label="Examples"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-outliner.html#Service_attributes_7" label="Service attributes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-outliner.html#Examples_5" label="Examples"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html" label="orion.edit.validator">
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#Service_methods_.28Orion_4.0.29_4" label="Service methods (Orion 4.0)"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#Service_methods_.28Orion_3.0.29_4" label="Service methods (Orion 3.0)"></topic>
 		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#The_Problem_object" label="The Problem object"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#Service_attributes_9" label="Service attributes"></topic>
-		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#Examples_7" label="Examples"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#Service_attributes_8" label="Service attributes"></topic>
+		<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/orion-edit-validator.html#Examples_6" label="Examples"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Documentation/Developer_Guide/Plugging_into_the_editor/Updating-this-document.html" label="Updating this document"></topic>
 </toc>

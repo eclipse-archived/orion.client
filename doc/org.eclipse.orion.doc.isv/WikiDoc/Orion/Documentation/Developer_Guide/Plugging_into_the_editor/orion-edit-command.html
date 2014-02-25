@@ -12,7 +12,7 @@
 			</tr>
 			<tr>
 				<td style="width: 20%" align="left">
-					<a href="orion-core-astprovider.html" title="orion.core.astprovider">
+					<a href="The-Editor-Context-object.html" title="The Editor Context object">
 						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
 					</a>
 				</td>
@@ -24,7 +24,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td style="width: 20%" align="left" valign="top">orion.core.astprovider</td>
+				<td style="width: 20%" align="left" valign="top">The Editor Context object</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right" valign="top">orion.edit.contentAssist</td>
 			</tr>
@@ -98,7 +98,7 @@
 				<b>Message</b> <code>String</code>. The status message to display. May include hyperlinks, given in Markdown syntax.
 			</dd>
 		</dl>
-		<h2 id="Service_attributes_2">Service attributes</h2>
+		<h2 id="Service_attributes">Service attributes</h2>
 		<p>Implementations of <code>orion.edit.command</code> must define the following attributes:</p>
 		<dl>
 			<dt>name</dt>
@@ -114,15 +114,16 @@
 			<dt>key</dt>
 			<dd><code>Array</code> Optional.  A key binding for the command. The structure of this array matches the arguments of the <code>orion.textview.KeyBinding</code> constructor. See its entry in the Client API reference for details.</dd>
 			<dt>validationProperties</dt>
-			<dd><code>Array</code> Optional.  An array 
+			<dd><code>
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#The_ValidationProperty_Object" title="Orion/Documentation/Developer Guide/Plugging into Orion pages#The ValidationProperty Object">ValidationProperty</a>[]</code> Optional.  An array of 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_Orion_pages/Plugging-into-Orion-pages.html#Validation_Properties" title="Orion/Documentation/Developer Guide/Plugging into Orion pages#Validation Properties">Validation Properties</a> that must match the editor's file in order for the command to appear.
 			</dd>
 			<dt>contentType</dt>
-			<dd><code>Array</code> Optional.  An array of 
+			<dd><code>String[]</code> Optional.  An array of 
 				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> for which this command is valid.
 			</dd>
 		</dl>
-		<h2 id="Examples_2">Examples</h2>
+		<h2 id="Examples">Examples</h2>
 		<p>The following examples start with the simplest editor command and then add more complexity.</p>
 		<h3 id="Replacing_the_selection">Replacing the selection</h3>
 		<p>This example converts the selected text to upper case. The function return value is a simple string, so this is interpreted by the editor as replacement for the original editor selection. In the service properties, we see the command provides a key binding of Ctrl+U (or Cmd+U on Mac). </p>
@@ -192,7 +193,7 @@ window.parent.postMessage(JSON.stringify({
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
 				<td style="width: 20%" align="left">
-					<a href="orion-core-astprovider.html" title="orion.core.astprovider">
+					<a href="The-Editor-Context-object.html" title="The Editor Context object">
 						<img alt="Previous" border="0" src="../../../../images/prev.gif"/>
 					</a>
 				</td>
@@ -208,7 +209,7 @@ window.parent.postMessage(JSON.stringify({
 				</td>
 			</tr>
 			<tr>
-				<td style="width: 20%" align="left" valign="top">orion.core.astprovider</td>
+				<td style="width: 20%" align="left" valign="top">The Editor Context object</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right" valign="top">orion.edit.contentAssist</td>
 			</tr>

@@ -18,7 +18,7 @@
 				</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right">
-					<a href="orion-core-astprovider.html" title="orion.core.astprovider">
+					<a href="orion-edit-command.html" title="orion.edit.command">
 						<img alt="Next" border="0" src="../../../../images/next.gif"/>
 					</a>
 				</td>
@@ -26,31 +26,29 @@
 			<tr>
 				<td style="width: 20%" align="left" valign="top">Plugging into the editor</td>
 				<td style="width: 60%" align="center"></td>
-				<td style="width: 20%" align="right" valign="top">orion.core.astprovider</td>
+				<td style="width: 20%" align="right" valign="top">orion.edit.command</td>
 			</tr>
 		</table><hr/>
 		<h1 id="The_Editor_Context_object">The Editor Context object</h1>
-		<p>Orion 4.0 introduces &lt;dfn&gt;Object References&lt;/dfn&gt;, which allow two-way communication between a service provider and the host Orion page. An Object Reference exposes functions that a service provider can call to help it fulfill a service contract. Like everything in Orion's service framework, Object References work asynchronously: all functions return Promises and the caller must wait for them to fulfill to an actual value. An Object Reference is valid only during the lifetime of its parent service call. Once the provider has fulfilled the service call, any Object References created for that call are unregistered by the framework, and cannot be used thereafter.</p>
-		<p>Many of the service APIs documented on this page now provide a special Object Reference, called the &lt;dfn&gt;Editor Context object&lt;/dfn&gt;, as the first parameter in their function signatures. The Editor Context object contains various functions to query the state of the Orion editor, and to cause side effects. For example, if a provider needs the text from the editor buffer to fulfill its service contract, it can invoke the Editor Context's getText() method:</p>
+		<p>Orion 4.0 introduces 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Object_References" title="Orion/Documentation/Developer Guide/Architecture#Object_References">''Object References''</a>, which enable two-way communication between a service provider and the host Orion page. An Object Reference exposes functions that a service provider can call to help it fulfill a service contract. Like everything in Orion's service framework, Object References work asynchronously: all functions return Promises and the caller must wait for them to fulfill to an actual value. An Object Reference is valid only during the lifetime of its parent service call. Once the provider has fulfilled the service call, any Object References created for that call are unregistered by the framework, and cannot be used thereafter.
+		</p>
+		<p>Many of the service APIs documented on this page now provide a special Object Reference, called the 
+			<i>Editor Context object</i>, as the first parameter in their function signatures. The Editor Context object contains various functions to query the state of the Orion editor, and to cause side effects. For example, if a provider needs the text from the editor buffer to fulfill its service contract, it can invoke the Editor Context's <code>getText()</code> method:
+		</p>
 		<pre class="source-javascript">editorContextObject.getText().then(function(text) {
     // Use text to fulfill the provider's service contract
 });
 
 </pre>
+		<p>Any plugin that uses Object References must load Orion's <code>
+			<a href="https://github.com/eclipse/orion.client/blob/master/bundles/org.eclipse.orion.client.core/web/orion/Deferred.js" target="orion_external">Deferred.js</a></code> in addition to the usual <code>plugin.js</code> script. Failure to do this will cause runtime errors when the plugin attempts to use an Object Reference.
+		</p>
 		<h2 id="API_versions">API versions</h2>
 		<p>The older API signatures are labelled as "Orion 3.0" in the documentation. These are still supported, but date from Orion releases when Object References were not available. It is preferable to use the "Orion 4.0" version of an API whenever available, as these provide greater consistency, are somewhat more efficient, and can be more easily evolved in future releases without changing method signatures.</p>
 		<h2 id="Editor_Context_methods">Editor Context methods</h2>
 		<p>The Editor Context object provides the following methods:</p>
 		<dl>
-			<dd>
-				<b>getAST(options)</b>
-				<dl>
-					<dd>Resolves to <code>Object</code>. Returns an AST for the file being edited, if an 
-						<a href="orion-core-astprovider.html#orion.core.astprovider">AST provider</a> is available. Orion ships with an 
-						<a href="http://esprima.org/" target="orion_external">Esprima</a> AST provider for JavaScript files. Additional providers can be contributed by plugins.
-					</dd>
-				</dl>
-			</dd>
 			<dd>
 				<b>getCaretOffset()</b>
 				<dl>
@@ -101,7 +99,7 @@
 					</a>
 				</td>
 				<td style="width: 20%" align="right">
-					<a href="orion-core-astprovider.html" title="orion.core.astprovider">
+					<a href="orion-edit-command.html" title="orion.edit.command">
 						<img alt="Next" border="0" src="../../../../images/next.gif"/>
 					</a>
 				</td>
@@ -109,7 +107,7 @@
 			<tr>
 				<td style="width: 20%" align="left" valign="top">Plugging into the editor</td>
 				<td style="width: 60%" align="center"></td>
-				<td style="width: 20%" align="right" valign="top">orion.core.astprovider</td>
+				<td style="width: 20%" align="right" valign="top">orion.edit.command</td>
 			</tr>
 		</table>
 	</body>

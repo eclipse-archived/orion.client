@@ -31,15 +31,10 @@
 		</table><hr/>
 		<h1 id="orion.edit.model">orion.edit.model</h1>
 		<p>An <code>orion.edit.model</code> service provides listeners on changes made to the <code>orion.textview.TextView</code> that powers the Orion editor.</p>
-		<p>
-			<b>NOTE:</b> This section is experimental and may change in future versions.
-		</p>
-		<h2 id="Service_methods_4">Service methods</h2>
-		<p>An implementation of <code>orion.edit.model</code> may define zero or more functions depending on what event types it gives in its 
-			<b>types</b> attribute. For every event type in 
-			<b>types</b>, the function with the name <code>"on" + eventType</code> will be invoked. For example, a "ModelChanged" event type causes the the provider's "onModelChanged()" function to be invoked.
-		</p>
-		<p>The functions are always invoked with a single parameter, <code>event</code>, containing the event data that was dispatched by the TextView. The current list of supported onXXXX methods is as follows:</p>
+		<h2 id="Service_methods_3">Service methods</h2>
+		<p>An implementation of <code>orion.edit.model</code> may define zero or more functions depending on what event types it wants to receive. When an event of type <code>X</code> is dispatched by the TextView, this the implementation's service method named <code>onX</code> will be invoked, passing the the event. For example, when the TextView dispatches a "ModelChanged" event, the provider's "onModelChanged()" method is invoked and passed the ModelChanged event object.</p>
+		<p>The methods are always invoked with a single parameter, <code>event</code>, containing the event data that was dispatched by the TextView. The return value is ignored.</p>
+		<p>The current list of supported "onX" methods is as follows:</p>
 		<ul>
 			<li>onContextMenu(event)</li>
 			<li>onDragStart(event)</li>
@@ -61,21 +56,38 @@
 			<li>onFocus(event)</li>
 			<li>onBlur(event)</li>
 		</ul>
-		<h2 id="Service_attributes_6">Service attributes</h2>
+		<p>Consult the 
+			<a href="https://orionhub.org/jsdoc/symbols/orion.editor.TextView.html" target="orion_external">TextView Client API reference</a> for details about these event types.
+		</p>
+		<h2 id="Service_attributes_5">Service attributes</h2>
 		<p>Implementations of <code>orion.edit.model</code> must define the following attributes:</p>
 		<dl>
-			<dt>types</dt>
-			<dd><code>Array</code> An array of TextView event types that this provider is interested in. When an event of one of these types is dispatched by the TextView, this provider's corresponding function will be invoked. For example, a provider with "ModelChanged" in its types array will have its 
-				<b>onModelChanged</b> function invoked whenever the TextView dispatches a <code>ModelChanged</code> event.
-			</dd>
 			<dt>contentType</dt>
-			<dd><code>Array</code> An array of 
-				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> that this provider is interested in listening to changes for. The provider will only be notified of events that occur when a file matching one of these content types is being edited.
+			<dd><code>String[]</code> An array of 
+				<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_navigator/orion-core-contenttype.html#orion.core.contenttype" title="Orion/Documentation/Developer Guide/Plugging into the navigator#orion.core.contenttype">Content Type IDs</a> that this provider wants to receive events for. The provider will only be notified of events that occur when the file being edited matches (or descends from) a content type given in the array.
 			</dd>
 		</dl>
-		<h2 id="Example">Example</h2>
+		<h2 id="Example_1">Example 1</h2>
+		<p>The following example prints out some information to the browser console when certain text events occur while a JavaScript file is being edited.</p>
+		<pre class="source-javascript">var provider = new orion.PluginProvider();
+provider.registerService("orion.edit.model", 
+    {
+        onModelChanging: function(event) {
+            console.log("Text is about to be inserted: " + event.text);
+        },
+        onScroll: function(event) {
+            console.log("Editor scrolled to " + event.newValue.x + ", " + event.newValue.y);
+        }
+    },
+    {
+        contentType: [ "application/javascript" ]
+    }});
+provider.connect();
+
+</pre>
+		<h2 id="Example_2">Example 2</h2>
 		<p>See the source code of the 
-			<a href="https://github.com/mamacdon/orion-codemirror" target="orion_external">orion-codemirror plugin</a>.
+			<a href="https://github.com/mamacdon/orion-codemirror" target="orion_external">orion-codemirror plugin</a>, which uses onModelChanging to build a shadow copy of the Orion text buffer, which it then uses to perform syntax highlighting.
 		</p><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>

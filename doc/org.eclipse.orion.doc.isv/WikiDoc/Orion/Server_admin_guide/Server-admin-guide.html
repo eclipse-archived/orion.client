@@ -29,10 +29,25 @@
 		<h1 id="Operating_the_server">Operating the server</h1>
 		<h2 id="Starting_the_server">Starting the server</h2>
 		<p>The server is started by simply invoking the "orion" executable (orion.exe on Windows, "orion" on Unix platforms). Starting the OSGI console by passing the "-console" argument is also recommended:</p>
-		<pre>orion -console
+		<pre>% orion -console
 </pre>
 		<h2 id="Stopping_the_server">Stopping the server</h2>
-		<p>To stop the server, go to the OSGi console and type "close". You can also simply kill the server process, but an orderly shutdown is always recommended to ensure all data is correctly persisted.</p><hr/>
+		<p>To stop the server, go to the OSGi console and type "close". You can also simply kill the server process, but an orderly shutdown is always recommended to ensure all data is correctly persisted.</p>
+		<h2 id="Running_disconnected_from_a_shell_on_Unix">Running disconnected from a shell on Unix</h2>
+		<p>On a headless Linux server it is desirable to not have to keep a shell running with OSGI console. You can start an Orion server using the nohup command in this case.</p>
+		<pre>% nohup orion -console 4444 &gt; orion.log &amp;
+nohup: ignoring input and redirecting stderr to stdout
+</pre>
+		<p>We have specified the log file orion.log that will capture the console output. You may look at the log to see that the server started and there are no errors. </p>
+		<p>We have also set the console to listen to port 4444. You can telnet to port 4444 to issue the close command to stop the server.</p>
+		<pre>% telnet localhost 4444
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+osgi&gt; close
+Really want to stop Equinox? (y/n; default=y)  y
+osgi&gt; Connection closed by foreign host.
+</pre><hr/>
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
 				<td style="width: 20%" align="left"></td>

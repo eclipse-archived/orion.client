@@ -46,17 +46,19 @@
    ...
    deleteFile: function(itemId) {
       var item = this.myTree.getItem(itemId);
-      var service = &lt;b&gt;registry.getService&lt;/b&gt;("orion.page.dialog");
+      var service = registry.getService("orion.page.dialog");
       var message = "Are you sure you want to delete '" + item.Name + "'?";
-      service.confirm(message, function(doit) { /* perform deletion */});
+      service.confirm(message, function(doit) {
+        /* perform deletion */
+      });
    }
 
 </pre>
 		<p>The <code>getService</code> function takes the service name as argument, and returns either the service instance or null. For this example we're assuming the service is present. However you should check for <code>null</code>, especially when using services dynamically contributed from a plugin.</p>
 		<h3 id="Communication_with_Services">Communication with Services</h3>
-		<p>One crucial point to understand is that 
+		<p>In Orion, 
 			<b>all service calls through the service registry are ''asynchronous</b>'' and return a 
-			<a href="http://wiki.commonjs.org/wiki/Promises/A" target="orion_external">Promise</a> object. You cannot assume that the service function will have been executed by the time the service function returns, and instead must chain any follow-on calls to the promise using its <code>then()</code> method. This inherent asynchronousness allows the service implementation to employ a variety of long-running techniques to execute the service, such as calls to a remote web service, cross-domain postMessage, HTML5 web workers, etc.
+			<a href="http://wiki.commonjs.org/wiki/Promises/A" target="orion_external">Promise</a> object. You cannot assume that the service function will have been executed by the time the service function returns, and instead must chain any follow-on calls to the promise using its <code>then()</code> method. This inherent asynchronicity allows the service implementation to employ a variety of long-running techniques to execute the service, such as calls to a remote web service, cross-domain postMessage, HTML5 web workers, etc.
 		</p>
 		<p>Plugin communication with the host page operates on the 
 			<a href="http://en.wikipedia.org/wiki/Hollywood_principle" target="orion_external">"don't call us, we'll call you" principle</a>: the host Orion page initiates a service call, and the provider is merely responsible for fulfilling the contract of the service call. Providers cannot initiate this process themselves. However, the host page may choose to expose certain callable functions to service providers through 
@@ -81,7 +83,10 @@
 </pre>
 		<p>This service registers a new command in the editor. The service implementation has a single <code>run</code> method that converts the provided text to upper case. The service properties specify the name of the command, the icon, and key binding. This way the editor can display the command in the toolbar using the cached service properties, without actually loading the plugin.</p>
 		<h3 id="Object_References">Object References</h3>
-		<p>Orion 4.0 introduces &lt;dfn&gt;Object References&lt;/dfn&gt;, which allow two-way communication between a service provider and the host Orion page. An Object Reference exposes functions that a service provider can call to help it fulfill a service contract. Like everything in the service framework, Object References work asynchronously: all functions return Promises and the caller must wait for them to fulfill to an actual value. An Object Reference is valid only during the lifetime of its parent service call. Once the provider has fulfilled the service call, any Object References created for that call are unregistered by the framework, and cannot be used thereafter.  This preserves the "don't call us, we'll call you" design approach.</p>
+		<p>Orion 4.0 introduces 
+			<i>Object References</i>, which allow two-way communication between a service provider running in a 
+			<a href="Plugins" title="Orion/Documentation/Developer Guide/Architecture#Plugins">plugin</a>, and the host Orion page. An Object Reference exposes functions that a service provider can call to help it fulfill a service contract. Like everything in the service framework, Object References work asynchronously: all functions return Promises and the caller must wait for them to fulfill to an actual value. An Object Reference is valid only during the lifetime of its parent service call. Once the provider has fulfilled the service call, any Object References created for that call are unregistered by the framework, and cannot be used thereafter.  This preserves the "don't call us, we'll call you" design approach.
+		</p>
 		<p>In Orion 4.0, Object References are used to enhance many of the 
 			<a href="../../../../Orion/Documentation/Developer_Guide/Plugging_into_the_editor/Plugging-into-the-editor.html" title="Orion/Documentation/Developer Guide/Plugging into the editor">editor extension points</a>.
 		</p>
@@ -95,7 +100,8 @@
 &lt;html&gt;
 &lt;head&gt;
     &lt;!-- Dependencies --&gt;
-    &lt;script type="text/javascript" src="./orion/plugin.js"&gt;&lt;/script&gt;
+    &lt;!-- &lt;script src="./orion/Deferred.js"&gt;&lt;/script&gt; --&gt;
+    &lt;script src="./orion/plugin.js"&gt;&lt;/script&gt;
     &lt;script&gt;
       window.onload = function() {
         // Service declarations go here
@@ -108,7 +114,7 @@
 
 </pre>
 		<p>A simple plugin can consist of only the plugin's HTML file, and the required <code>plugin.js</code> script from Orion. A plugin that makes use of 
-			<a href="#Object_References">Object References</a> will must also load the <code>orion/Deferred</code> library, as the framework will need to instantiate promises in the plugin's window. Complex plugins will typically be broken into several script files containing the concrete service implementation objects. See Orion's 
+			<a href="#Object_References">Object References</a> must also load the <code>Deferred.js</code> library, as the framework will need to instantiate promises in the plugin's window. Complex plugins will typically be broken into several script files containing the concrete service implementation objects. See Orion's 
 			<a href="../../../../Orion/Documentation/Developer_Guide/Simple_plugin_example/Simple-plugin-example.html" title="Orion/Documentation/Developer_Guide/Simple_plugin_example">Simple plugin tutorial</a> for a step-by-step guide.
 		</p>
 		<p>Plugins are installed or uninstalled from the 

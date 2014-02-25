@@ -43,13 +43,13 @@
 			<a href="http://wiki.eclipse.org/Orion/Documentation/Developer_Guide" title="Orion/Documentation/Developer_Guide" target="orion_external">Developer Guide</a>.
 		</p>
 		<h2 id="What_you_need">What you need</h2>
-		<p>Every plugin must include the following JavaScript library: 
+		<p>Every plugin must minimally include the following JavaScript library: 
 			<b><tt>
 				<a href="http://orionhub.org/orion/plugin.js" target="orion_external">plugin.js</a></tt>
 			</b>
 		</p>
 		<p>You can copy-paste its contents into a &lt;script&gt; tag in your plugin, or load it externally like so:</p>
-		<pre class="source-javascript">&lt;script src="plugin.js"&gt;&lt;/script&gt;
+		<pre class="source-html5">&lt;script src="plugin.js"&gt;&lt;/script&gt;
 
 </pre>
 		<p>The plugin.js file is also an AMD module, so you can alternatively load it through a module loader like 
@@ -60,6 +60,15 @@
 });
 
 </pre>
+		<h4 id="Advanced_API_usage">Advanced API usage</h4>
+		<p>If you're authoring a plugin that will use 
+			<a href="../../../../Orion/Documentation/Developer_Guide/Architecture/Client-architecture.html#Object_References" title="Orion/Documentation/Developer Guide/Architecture#Object_References">Object References</a>, you must load an additional script, <code>Deferred.js</code>. Your script section would then look like this:
+		</p>
+		<pre class="source-html5">&lt;script src="Deferred.js"&gt;&lt;/script&gt;
+&lt;script src="plugin.js"&gt;&lt;/script&gt;
+
+</pre>
+		<p>The plugin we construct in this tutorial does not use Object References, so just <code>plugin.js</code> will suffice.</p>
 		<h2 id="Writing_the_plugin">Writing the plugin</h2>
 		<p>Let's make a plugin that adds a button to the toolbar of the Orion editor. When clicked, it will reverse the selected text in the editor. This is not a very useful feature, but it'll be a good introduction to the concepts involved.</p>
 		<h3 id="Creating_the_HTML_file">Creating the HTML file</h3>
@@ -208,36 +217,31 @@
 		<p>Here are some existing plugins we've written. View their source code to see how they work:</p>
 		<dl>
 			<dt>
-				<a href="http://orionhub.org/plugins/sampleCommandsPlugin.html" target="orion_external">http://orionhub.org/plugins/sampleCommandsPlugin.html</a>
+				<a href="https://orionhub.org/plugins/sampleCommandsPlugin.html" target="orion_external">https://orionhub.org/plugins/sampleCommandsPlugin.html</a>
 			</dt>
 			<dd>Contributes several sample actions to the Orion navigator by using the <tt>orion.navigate.command</tt> service type.</dd>
 		</dl>
 		<dl>
 			<dt>
-				<a href="http://orionhub.org/plugins/webEditingPlugin.html" target="orion_external">http://orionhub.org/plugins/webEditingPlugin.html</a>
+				<a href="https://orionhub.org/plugins/webEditingPlugin.html" target="orion_external">https://orionhub.org/plugins/webEditingPlugin.html</a>
 			</dt>
 			<dd>Contributes syntax highlighting support for HTML files by using the <tt>orion.edit.highlighter</tt> service type.</dd>
 		</dl>
 		<dl>
 			<dt>
-				<a href="http://orionhub.org/plugins/sampleSearchProposalPlugin_notFiltered.html" target="orion_external">http://orionhub.org/plugins/sampleSearchProposalPlugin_notFiltered.html</a>
+				<a href="https://orionhub.org/plugins/sampleSearchProposalPlugin_notFiltered.html" target="orion_external">https://orionhub.org/plugins/sampleSearchProposalPlugin_notFiltered.html</a>
 			</dt>
 			<dd>Contributes extended search completion in addition to recent searches by using the <tt>orion.search.proposal</tt> service type.</dd>
 		</dl>
 		<dl>
 			<dt>
-				<a href="http://mamacdon.github.io/0.5/plugins/beautify/jsbeautify.html" target="orion_external">http://mamacdon.github.io/0.5/plugins/beautify/jsbeautify.html</a>
+				<a href="https://orion-plugins.googlecode.com/git/0.5/plugins/beautify/jsbeautify.html" target="orion_external">https://orion-plugins.googlecode.com/git/0.5/plugins/beautify/jsbeautify.html</a>
 			</dt>
-			<dd>Contributes a "Beautify JS" button to the editor toolbar by using the <tt>orion.edit.command</tt> service type. Visit 
-				<a href="http://mamacdon.github.io" target="orion_external">http://mamacdon.github.io</a> for a directory of other available plugins, organized by Orion version.
-			</dd>
+			<dd>Contributes a "Beautify JS" button to the editor toolbar by using the <tt>orion.edit.command</tt> service type.</dd>
 		</dl>
-		<dl>
-			<dt>
-				<a href="http://mamacdon.github.io/0.5/plugins/uglify/uglify-plugin.html" target="orion_external">http://mamacdon.github.io/0.5/plugins/uglify/uglify-plugin.html</a>
-			</dt>
-			<dd>Contributes an "Uglify JS" (minify, in other words) button to the editor toolbar by using the <tt>orion.edit.command</tt> service type.</dd>
-		</dl>
+		<p>Visit 
+			<a href="https://orion-plugins.googlecode.com/git/index.html" target="orion_external">orion-plugins.googlecode.com</a> for a directory of Orion plugins that you can install and view the source of.
+		</p>
 		<h2 id="See_also">See also</h2>
 		<ul>
 			<li>

@@ -3,6 +3,7 @@
 	<topic href="WikiDoc/Orion/Server_admin_guide/Server-admin-guide.html" label="Operating the server">
 		<topic href="WikiDoc/Orion/Server_admin_guide/Server-admin-guide.html#Starting_the_server" label="Starting the server"></topic>
 		<topic href="WikiDoc/Orion/Server_admin_guide/Server-admin-guide.html#Stopping_the_server" label="Stopping the server"></topic>
+		<topic href="WikiDoc/Orion/Server_admin_guide/Server-admin-guide.html#Running_disconnected_from_a_shell_on_Unix" label="Running disconnected from a shell on Unix"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html" label="Configuring the server">
 		<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html#Server_configuration_file" label="Server configuration file"></topic>
@@ -33,6 +34,7 @@
 			</topic>
 		</topic>
 		<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html#Changing_the_backend_metadata_format" label="Changing the backend metadata format"></topic>
+		<topic href="WikiDoc/Orion/Server_admin_guide/Configuring-the-server.html#Turning_on_Server_Logging" label="Turning on Server Logging"></topic>
 	</topic>
 	<topic href="WikiDoc/Orion/Server_admin_guide/Administering-users.html" label="Administering users">
 		<topic href="WikiDoc/Orion/Server_admin_guide/Administering-users.html#Creating_and_deleting_users" label="Creating and deleting users"></topic>
