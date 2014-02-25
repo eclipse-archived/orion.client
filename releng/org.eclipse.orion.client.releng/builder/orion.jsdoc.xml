@@ -14,16 +14,19 @@
     </target>
 
 	<target name="jsdocs" if="jsdocHome" >
-		<java jar="${jsdocHome}/jsrun.jar" fork="true">
-			<arg line="${jsdocHome}/app/run.js -s -v -a " />
+		<runjsdoc jar="${jsdocHome}/jsrun.jar" buildfile="${builder}/scripts/orion.build.js">
+			<argline value="${jsdocHome}/app/run.js -s -v -a" />
 			<arg value="-r=3" />
 			<arg value="-t=${jsdocHome}/templates/jsdoc" />
 			<arg value="-d=${buildDirectory}/doc/org.eclipse.orion.doc.isv/jsdoc" />
-			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.core/web/orion/" />
-			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web/orion/" />
-			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.editor/web/orion/" />
-			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.git/web/orion/" />
-			<arg value="${buildDirectory}/bundles/org.eclipse.orion.client.users/web/orion/" />
-		</java>
+		</runjsdoc>
 	</target>
+
+	<scriptdef name="runjsdoc" language="javascript" src="${builder}/scripts/generateJsdocs.js">
+		<attribute name="jar" />
+		<attribute name="buildfile" />
+		<!-- Should reuse <arg> from the Exec/Java tasks here if that is possible.. -->
+		<element name="argline" type="string" />
+		<element name="arg" type="string" />
+	</scriptdef>
 </project>

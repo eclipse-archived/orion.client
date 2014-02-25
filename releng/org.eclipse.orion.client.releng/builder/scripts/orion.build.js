@@ -54,6 +54,7 @@
             name: "eslint/conf",
             location: "eslint/conf",
         }],
+    // Bundles whose ./web/ folders will be copied into the staging directory by the builder.
     bundles: [
         "${buildDirectory}/bundles/org.eclipse.orion.client.core",
         "${buildDirectory}/bundles/org.eclipse.orion.client.cf",
@@ -63,6 +64,17 @@
         "${buildDirectory}/bundles/org.eclipse.orion.client.javascript",
         "${buildDirectory}/bundles/org.eclipse.orion.client.users"
     ],
+    // Folders that should be searched for JSDoc
+    jsdocs: [
+        "${buildDirectory}/bundles/org.eclipse.orion.client.core/web/orion/",
+        "${buildDirectory}/bundles/org.eclipse.orion.client.cf/web/orion/",
+        "${buildDirectory}/bundles/org.eclipse.orion.client.ui/web/orion/",
+        "${buildDirectory}/bundles/org.eclipse.orion.client.editor/web/orion/",
+        "${buildDirectory}/bundles/org.eclipse.orion.client.git/web/orion/",
+        "${buildDirectory}/bundles/org.eclipse.orion.client.javascript/web/javascript/",
+        "${buildDirectory}/bundles/org.eclipse.orion.client.users/web/orion/"
+    ],
+    // List of modules that r.js will optimize
     modules: [
         { name: "index", bundle: "${buildDirectory}/bundles/org.eclipse.orion.client.ui" },
         { name: "cfui/logs", bundle: "${buildDirectory}/bundles/org.eclipse.orion.client.cf" },
