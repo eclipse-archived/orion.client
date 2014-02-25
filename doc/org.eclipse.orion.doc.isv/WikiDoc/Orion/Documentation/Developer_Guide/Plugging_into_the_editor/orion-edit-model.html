@@ -31,7 +31,7 @@
 		</table><hr/>
 		<h1 id="orion.edit.model">orion.edit.model</h1>
 		<p>An <code>orion.edit.model</code> service provides listeners on changes made to the <code>orion.textview.TextView</code> that powers the Orion editor.</p>
-		<h2 id="Service_methods_3">Service methods</h2>
+		<h2 id="Service_methods_5">Service methods</h2>
 		<p>An implementation of <code>orion.edit.model</code> may define zero or more functions depending on what event types it wants to receive. When an event of type <code>X</code> is dispatched by the TextView, this the implementation's service method named <code>onX</code> will be invoked, passing the the event. For example, when the TextView dispatches a "ModelChanged" event, the provider's "onModelChanged()" method is invoked and passed the ModelChanged event object.</p>
 		<p>The methods are always invoked with a single parameter, <code>event</code>, containing the event data that was dispatched by the TextView. The return value is ignored.</p>
 		<p>The current list of supported "onX" methods is as follows:</p>

@@ -31,7 +31,7 @@
 		</table><hr/>
 		<h1 id="orion.edit.validator">orion.edit.validator</h1>
 		<p>An <code>orion.edit.validator</code> service provides a function that can check the contents of a file and return a data structure indicating where problems are. The result of this service is used by the Orion UI to create annotations in the ruler beside each problematic line, and also to underline the specific portion of the document where the problem occurs.</p>
-		<h2 id="Service_methods_.28Orion_4.0.29_4">Service methods (Orion 4.0)</h2>
+		<h2 id="Service_methods_8">Service methods</h2>
 		<dl>
 			<dt>computeProblems(editorContext, options)</dt>
 			<dd>
@@ -53,19 +53,6 @@
 		</dl>
 		<p>Returns (or fulfills to) an <code>Object</code> giving the validation result. The returned object must have a <code>problems</code> property giving an Array of 
 			<a href="#The_Problem_object">problems</a> found in the file.
-		</p>
-		<h2 id="Service_methods_.28Orion_3.0.29_4">Service methods (Orion 3.0)</h2>
-		<dl>
-			<dt>checkSyntax(title, contents)</dt>
-			<dd>
-				<b>title</b> <code>String</code> The path and filename of the file being edited.
-			</dd>
-			<dd>
-				<b>contents</b> <code>String</code> The contents of the file being edited.
-			</dd>
-		</dl>
-		<p>Returns an <code>Object</code> giving the validation result. The returned object must have a <code>problems</code> property whose value is an array giving the 
-			<a href="#The_Problem_object">problems</a> found in the file. 
 		</p>
 		<h2 id="The_Problem_object">The Problem object</h2>
 		<p>A Problem object has the following properties:</p>

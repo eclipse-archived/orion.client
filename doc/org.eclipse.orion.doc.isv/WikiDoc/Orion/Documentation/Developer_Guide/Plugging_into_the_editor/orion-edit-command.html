@@ -31,8 +31,8 @@
 		</table><hr/>
 		<h1 id="orion.edit.command">orion.edit.command</h1>
 		<p>The <code>orion.edit.command</code> service allows plugins to provide a command that operates on the editor. Typically, the command that takes some editor text as input, performs some operation or transformation on the text, and generates a new text value. The command can also optionally receive and return selection information for changing the editor selection. The transformation can happen directly, or indirectly through a &lt;dfn&gt;delegated UI&lt;/dfn&gt; provided by the plugin.</p>
-		<h2 id="Service_methods_.28Orion_4.0.29">Service methods (Orion 4.0)</h2>
-		<p>The 4.0 version of the command API allows a command to take arbitrary action using the editorContext.</p>
+		<h2 id="Service_methods">Service methods</h2>
+		<p>The command API allows a command to take arbitrary action using the editorContext.</p>
 		<dl>
 			<dt>execute(editorContext, options)</dt>
 			<dd>
@@ -55,25 +55,6 @@
 		<p>The <code>execute()</code> method should return a Promise, which the provider is expected to resolve when it has finished performing the command action. The command action should be performed using the Editor Context object: for example, use <code>editorContext.setText()</code>to change the editor text, or <code>editorContext.setSelection()</code> to change the editor selection. The fulfillment value of the promise is ignored.</p>
 		<p>Note: Future versions of Orion will expose delegated UI functionality through the EditorContext object. This is currently not supported, due to 
 			<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=419764" target="orion_external">Bug 419764</a>.
-		</p>
-		<h2 id="Service_methods_.28Orion_3.0.29">Service methods (Orion 3.0)</h2>
-		<dl>
-			<dt>run(selectedText, text, selection, resource)</dt>
-			<dd>
-				<b>selectedText</b> <code>String</code>. The text that is currently selected in the editor.
-			</dd>
-			<dd>
-				<b>text</b> <code>String</code>. Provides the entire buffer being edited. 
-			</dd>
-			<dd>
-				<b>selection</b> <code>orion.editor.Selection</code> The current selection in the editor.
-			</dd>
-			<dd>
-				<b>resource</b> <code>String</code> The full path and filename of the file being edited.
-			</dd>
-		</dl>
-		<p>The return value of <code>run()</code> is a 
-			<a href="#The_CommandResult_object">CommandResult</a> object.
 		</p>
 		<h3 id="The_CommandResult_object">The CommandResult object</h3>
 		<p>A CommandResult object is either a simple <code>String</code> which will replace the current editor selection, or an <code>object</code>.</p>

@@ -31,7 +31,7 @@
 		</table><hr/>
 		<h1 id="orion.edit.contentAssist">orion.edit.contentAssist</h1>
 		<p>The <code>orion.edit.contentAssist</code> service contributes content assist providers to the editor. A content assist provider produces suggestions for text that may be inserted into the editor at a given point. Providers are invoked when the user triggers the "content assist" action by pressing Ctrl+Space in the editor.</p>
-		<h2 id="Service_methods_.28Orion_4.0.29_2">Service methods (Orion 4.0)</h2>
+		<h2 id="Service_methods_2">Service methods</h2>
 		<dl>
 			<dt>computeContentAssist(editorContext, options)</dt>
 			<dd>
@@ -61,37 +61,6 @@
 					</dd>
 					<dd>
 						<b>options.tab</b> <code>String</code> The tab character being used in the editor. Typical values are a Tab character, or a sequence of four spaces.
-					</dd>
-				</dl>
-			</dd>
-		</dl>
-		<p>Returns <code>
-			<a href="#The_Proposal_object">Proposal</a>[]</code>.
-		</p>
-		<h2 id="Service_methods_.28Orion_3.0.29_2">Service methods (Orion 3.0)</h2>
-		<dl>
-			<dt>computeProposals(buffer, offset, context)</dt>
-			<dd>When content assist is triggered, the editor calls this function to obtain suggestions from a content assist provider.
-				<dl>
-					<dd>
-						<b>buffer</b> <code>String</code> The entire buffer being edited.
-					</dd>
-					<dd>
-						<b>offset</b> <code>Number</code> Offset in the text buffer at which content assist is being invoked.
-					</dd>
-					<dd>
-						<b>context</b> <code>Object</code> Additional contextual information about the content assist invocation. This object has the following properties:
-						<dl>
-							<dd>
-								<b>context.line</b> <code>String</code> Text of the entire line that the editing caret is on.
-							</dd>
-							<dd>
-								<b>context.prefix</b> <code>String</code> The substring extending from the first non-word character preceding the editing caret up to the editing caret. This may give a clue about what the user intended to type, and can be used to narrow down the results to be returned. The prefix is just a guess; it is not appropriate for all types of document, depending on their syntax rules.
-							</dd>
-							<dd>
-								<b>selection</b> <code>orion.editor.Selection</code> The current selection in the editor.
-							</dd>
-						</dl>
 					</dd>
 				</dl>
 			</dd>

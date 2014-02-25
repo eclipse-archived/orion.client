@@ -31,7 +31,7 @@
 		</table><hr/>
 		<h1 id="orion.edit.outliner">orion.edit.outliner</h1>
 		<p>An <code>orion.edit.outliner</code> service provides an overview of a file being edited. The overview is given as a tree, which the Orion UI renders in the left-hand pane alongside the file you are editing. Items in the tree can be links that take you to the appropriate position in the file, or to another URL entirely.</p>
-		<h2 id="Service_methods_.28Orion_4.0.29_3">Service methods (Orion 4.0)</h2>
+		<h2 id="Service_methods_7">Service methods</h2>
 		<p>A provider implements the <code>computeOutline</code> method, whose signature is as follows:</p>
 		<dl>
 			<dt>computeOutline(editorContext, options)</dt>
@@ -50,20 +50,6 @@
 			</dd>
 		</dl>
 		<p>The return value (or fulfillment value) is an Array of top-level 
-			<a href="#The_OutlineElement_object">OutlineElement objects</a>, which will be displayed in the outline pane.
-		</p>
-		<h2 id="Service_methods_.28Orion_3.0.29_3">Service methods (Orion 3.0)</h2>
-		<p>A provider implements the <code>getOutline</code> method, whose signature is as follows:</p>
-		<dl>
-			<dt>getOutline(contents, title)</dt>
-			<dd>
-				<b>contents</b> <code>String</code> The contents of the file being edited.
-			</dd>
-			<dd>
-				<b>title</b> <code>String</code> The path and filename of the file being edited.
-			</dd>
-		</dl>
-		<p>Returns an Array of top-level 
 			<a href="#The_OutlineElement_object">OutlineElement objects</a>, which will be displayed in the outline pane.
 		</p>
 		<h2 id="The_OutlineElement_object">The OutlineElement object</h2>
