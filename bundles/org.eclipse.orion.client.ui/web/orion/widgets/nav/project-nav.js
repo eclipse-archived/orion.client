@@ -457,10 +457,11 @@ define([
 				return null;
 			}
 			var deferred = new Deferred();
-			if (metadata.Children){
-				deferred.resolve(getJson(metadata.Children));
+			if (metadata.Children || metadata.children){
+				deferred.resolve(getJson(metadata.Children || metadata.children));
 			} else if(metadata.ChildrenLocation){
 				this.fileClient.fetchChildren(metadata.ChildrenLocation).then(function(children){
+					metadata.Children = children;
 					deferred.resolve(getJson(children));
 				});
 			}

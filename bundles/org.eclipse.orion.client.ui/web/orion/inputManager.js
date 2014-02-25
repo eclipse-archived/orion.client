@@ -548,14 +548,14 @@ define([
 			this.dispatchEvent(evt);
 			this.editor = editor = evt.editor;
 			if (!isDir) {
-				if (editor && editor.getTextView && editor.getTextView()) {
-					editor.getTextView().addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
-				}
 				if (editor && editor.getModel && editor.getModel()) {
 					editor.getModel().addEventListener("Changing", this._changingListener = this.onChanging.bind(this)); //$NON-NLS-0$
 				}
 				if (!noSetInput) {
 					editor.setInput(title, null, contents);
+				}
+				if (editor && editor.getTextView && editor.getTextView()) {
+					editor.getTextView().addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
 				}
 				this._unsavedChanges = [];
 				this.processParameters(input);

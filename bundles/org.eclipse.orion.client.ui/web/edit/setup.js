@@ -346,7 +346,9 @@ exports.setUpEditor = function(serviceRegistry, pluginRegistry, preferences, isR
 			name: name,
 			target: target,
 			makeAlternate: function() {
-				if (metadata && metadata.Parents && metadata.Parents.length > 0) {
+				if (metadata && metadata.parent) {
+					return metadata.parent;
+				} else if (metadata && metadata.Parents && metadata.Parents.length > 0) {
 					// The mini-nav in sidebar wants to do the same work, can we share it?
 					return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), i18nUtil.formatMessage(messages.ReadingMetadata, metadata.Parents[0].Location));
 				}
