@@ -93,6 +93,29 @@ define([
 			}
 		}
 	}
+	/**
+	 * Trims the message 
+	 */
+	function trimCommitMessage(message) {
+				var maxMessageLength = 150,
+					changeIdIndex = message.lastIndexOf('Change-Id'),
+					signedOffByIndex = message.lastIndexOf('Signed-off-by');
+				
+					
+				if (message.length > maxMessageLength) {
+					if (signedOffByIndex !== -1 || changeIdIndex !== -1) {
+						var cutIndex = changeIdIndex < signedOffByIndex ? changeIdIndex : signedOffByIndex;
+						var messageTail = message.substring(cutIndex,message.length);
+						maxMessageLength = cutIndex < maxMessageLength ? cutIndex : maxMessageLength;
+					}
+					
+					var trimmedMessage = message.substring(0,maxMessageLength);
+					trimmedMessage += '[...] ';
+					message = messageTail ? trimmedMessage+messageTail : trimmedMessage;
+				}
+				
+				return message;
+	}
 
 	return {
 		statusUILocation: statusUILocation,
@@ -101,6 +124,7 @@ define([
 		isChange: isChange,
 		hasStagedChanges: hasStagedChanges,
 		hasUnstagedChanges: hasUnstagedChanges,
-		parseSshGitUrl: parseSshGitUrl
+		parseSshGitUrl: parseSshGitUrl,
+		trimCommitMessage: trimCommitMessage
 	};
 });
