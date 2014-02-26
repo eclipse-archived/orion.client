@@ -21,9 +21,7 @@ require('../lib/compat');
 var async = require('../lib/async');
 var child_process = require('child_process');
 var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
-var fs = require('fs');
 var path = require('path');
-var sax = require('sax'), strictSax = true;
 
 var BUNDLE_WEB_FOLDER = './web/';
 var IS_WINDOWS = process.platform === 'win32';
@@ -33,6 +31,7 @@ var IS_WINDOWS = process.platform === 'win32';
  */
 var EXCLUDE_PAGES = [
 	"index",
+	"cFDeployService",
 	"deploy",
 	"logs",
 	"cFPlugin",
@@ -61,10 +60,19 @@ var EXCLUDE_PAGES = [
 var pathToNode = process.execPath;
 var pathToRjs = require.resolve('requirejs');
 
-var pathToOrionClientBundlesFolder = path.resolve(__dirname, process.argv[2] || '../../../bundles/');
-var pathToBuildFile = path.resolve(__dirname, process.argv[3] || '../../../releng/org.eclipse.orion.client.releng/builder/scripts/orion.build.js');
+var pathToOrionClientBundlesFolder = process.argv[2]
+	? path.resolve(__dirname, process.argv[2])
+	: path.resolve(__dirname, '../../../bundles/');
+var pathToBuildFile = process.argv[3]
+	? path.resolve(__dirname, process.argv[3])
+	: path.resolve(pathToOrionClientBundlesFolder, '../releng/org.eclipse.orion.client.releng/builder/scripts/orion.build.js');
+var nodeBuildFile = pathToBuildFile + ".node.js";
 var pathToOrionodeClient = path.resolve(__dirname, '../lib/orionode.client/');
 var pathToTempDir = path.resolve(__dirname, '.temp');
+var pathToOutDir = path.resolve(__dirname, '.temp-optimized');
+
+// Arguments to format() for replacing the property ${buildDirectory} in a string
+var bundleFormatArgs = { buildDirectory: path.join(pathToOrionClientBundlesFolder, "../") };
 
 /**
  * Pass varargs to get numbered parameters, or a single object for named parameters.
@@ -118,7 +126,7 @@ function spawn(cmd, args, options) {
 }
 
 function getCopyFileCmd(srcFile, destFile) {
-	return IS_WINDOWS ? format('echo f | xcopy /y /i "${0}" "${1}"', srcFile, destFile) : format("cp ${0} ${1}", srcFile, destFile);
+	return IS_WINDOWS ? format('echo f | xcopy /q /y /i "${0}" "${1}"', srcFile, destFile) : format("cp ${0} ${1}", srcFile, destFile);
 }
 
 /** @returns {String} command for performing recursive copy of src directory to dest directory. */
@@ -130,30 +138,42 @@ function section(name) {
 	console.log('-------------------------------------------------------\n' + name + '...\n');
 }
 
-function build(optimizeElements) {
-	var optimizes = optimizeElements.filter(function(optimize) {
-		var name = optimize.attributes.name;
-		if (EXCLUDE_PAGES.indexOf(name) === -1)
+function getBaseName(modulePath) {
+	return modulePath.split("/").pop();
+}
+
+function getPageDir(modulePath) {
+	var segs = modulePath.split("/");
+	segs.pop();
+	return segs.length ? segs.join("/") : ".";
+}
+
+function build(buildConfig) {
+	var filteredModules = buildConfig.modules.slice().filter(function(module) {
+		// Filter out modules we don't care about
+		var name = module.name;
+		if (EXCLUDE_PAGES.indexOf(getBaseName(name)) === -1)
 			return true;
-		console.log("Skip plugin: " + name);
+		console.log("Skip module: " + name);
 		return false;
-	}).map(function(optimize) {
-		var pageDir = optimize.attributes.pageDir;
-		var name = optimize.attributes.name;
+	});
+	var optimizes = filteredModules.map(function(module) {
+		var pageDir = getPageDir(module.name), baseName = getBaseName(module.name);
 		return {
 			pageDir: pageDir,
-			name: name,
-			bundle: optimize.attributes.bundle,
-			pageDirPath: path.join(pathToTempDir, pageDir),
-			minifiedFilePath: path.join(pathToTempDir, pageDir, 'built-' + name) + '.js',
-			htmlFilePath: path.join(pathToTempDir, pageDir, name + '.html')
+			name: baseName,
+			bundle: format(module.bundle, bundleFormatArgs),
+			outPath: path.join(pathToOutDir, pageDir, baseName) + '.js',
+			builtFilePath: path.join(pathToOutDir, pageDir, 'built-' + baseName) + '.js',
+			htmlFilePath: path.join(pathToOutDir, pageDir, baseName + '.html')
 		};
 	});
 	var cssFiles = optimizes.map(function(op) {
+		// Assume {name}.js has a {name}.css
 		var tempPath = path.join(op.pageDir, op.name + '.css');
 		return {
-			path: tempPath,
-			bundlePath: path.join(op.bundle, BUNDLE_WEB_FOLDER, tempPath)
+			bundlePath: path.join(op.bundle, BUNDLE_WEB_FOLDER, tempPath),
+			builtFilePath: path.join(pathToOutDir, tempPath)
 		};
 	});
 
@@ -162,9 +182,8 @@ function build(optimizeElements) {
 	 */
 	// When debugging, change these to false to skip steps.
 	var steps = {
-		copy: true,
+		stage: true,
 		optimize: true,
-		css: true,
 		updateHtml: true,
 		updateJS: true,
 		copyBack: true
@@ -185,89 +204,66 @@ function build(optimizeElements) {
 		return dfs.mkdir(pathToTempDir);
 	}).then(function() {
 		// Copy all required files into the .temp directory for doing the build
-		if (steps.copy === false) { return new Deferred().resolve(); }
-		section('Copying client code to ' + pathToTempDir);
+		if (steps.stage === false) { return new Deferred().resolve(); }
+		section('Staging client code to ' + pathToTempDir);
 
-		// Get the list of bundles from the orion.client lib:
-		var bundles = [];
-		return dfs.readdir(pathToOrionClientBundlesFolder).then(function(contents) {
-			return Deferred.all(contents.map(function(item) {
-				return dfs.stat(path.join(pathToOrionClientBundlesFolder, item)).then(function(stats) {
-					if (stats.isDirectory()) {
-						bundles.push(item);
-					}
-				});
-			}));
-		}).then(function() {
-			console.log('Copying orion.client');
-			/* So. Because the file structure of the Orion source bundles doesn't match the URL/RequireJS module
-			 * structure, we need to copy all the bundles' "./web/" folders into the temp dir, so that modules
-			 * will resolve in later optimization steps.
-			 */
-			return async.sequence(bundles.map(function(bundle) {
-					return function() {
-						var bundleWebFolder = path.resolve(pathToOrionClientBundlesFolder, bundle, BUNDLE_WEB_FOLDER);
-						return dfs.exists(bundleWebFolder).then(function(exists) {
-							if (exists) {
-								return execCommand(getCopyDirCmd(bundleWebFolder, pathToTempDir));
-							} else {
-								console.log('Bundle has no web/ folder, skip: ' + bundle);
-								return;
-							}
-						});
-					};
-				}).concat([
-					function() {
-						console.log('Copying orionode.client');
-						return execCommand(getCopyDirCmd(pathToOrionodeClient, pathToTempDir));
-					}
-				]));
-		});
+		console.log('Copying orion.client');
+
+		/* Convert from project layout to WWW layout by copying all the bundles' ./web/ folders into the 
+		 * temp dir. This produces the path structure consumable by RequireJS.
+		 */
+		var bundles = buildConfig.bundles;
+		return async.sequence(bundles.map(function(bundle) {
+				bundle = format(bundle, bundleFormatArgs);
+				return function() {
+					var bundleWebFolder = path.resolve(pathToOrionClientBundlesFolder, bundle, BUNDLE_WEB_FOLDER);
+					return dfs.exists(bundleWebFolder).then(function(exists) {
+						if (exists) {
+							return execCommand(getCopyDirCmd(bundleWebFolder, pathToTempDir));
+						} else {
+							console.log('Bundle has no web/ folder, skip: ' + bundle);
+							return;
+						}
+					});
+				};
+		}).concat([
+			function() {
+				// We copy the orionode.client resources last, as they must override anything from orion.client
+				console.log('Copying orionode.client');
+				return execCommand(getCopyDirCmd(pathToOrionodeClient, pathToTempDir));
+			}
+		]));
 	}).then(function() {
 		if (steps.optimize === false) { return new Deferred().resolve(); }
-		section('Optimizing page JS (' + optimizes.length + ')');
-		return async.sequence(optimizes.map(function(op) {
-			return function() {
-				// TODO check existence of path.join(pageDir, name) -- skip if the file doesn't exist
-				var pageDir = op.pageDir, name = op.name;
-				return spawn(pathToNode, [
-					pathToRjs,
-					"-o",
-					pathToBuildFile,
-					"name=" + pageDir + '/' + name,
-					"out=" + './' + pageDir + '/built-' + name + '.js',
-					"baseUrl=."
-				], { cwd: pathToTempDir });
-			};
-		}));
-	}).then(function() {
-		if (steps.css === false) { return new Deferred().resolve(); }
-		// Optimize each page's corresponding ${page}.css file.
-		// TODO This is probably a dumb way to do it, but i don't understand how CSS optimization works in the real Orion build.
-		section('Optimizing page CSS files');
-		return async.sequence(cssFiles.map(function(cssFile) {
-			return function() {
-				return dfs.exists(path.join(pathToTempDir, cssFile.path)).then(function(exists) {
-					if (exists) {
-						return spawn(pathToNode, [
-								pathToRjs,
-								"-o",
-								pathToBuildFile,
-								// FIXME the cssIn paths are wrng?
-								"cssIn=./" + cssFile.path,
-								"out=./" + cssFile.path,
-								"baseUrl=."
-							], { cwd: pathToTempDir });
-					}
-				});
-			};
-		}));
+		section('Optimizing app...');
+
+		// Copy the build file with our exclusions made, then run against it
+		buildConfig.modules = filteredModules;
+		var text =  "(" + JSON.stringify(buildConfig, null, 4) + ")";
+		return dfs.writeFile(nodeBuildFile, text).then(function() {
+			return spawn(pathToNode, [
+				pathToRjs,
+				"-o",
+				nodeBuildFile,
+				"optimize=uglify",
+				"appDir=" + pathToTempDir,
+				"baseUrl=./",
+				"dir=" + pathToOutDir,
+			], { cwd: pathToTempDir }).then(function() {
+				// App build has finished. Copy each optimized module ${name}.js to its built-${name}.js
+				return async.sequence(optimizes.map(function(op) {
+					return function() {
+						return execCommand(getCopyFileCmd(op.outPath, op.builtFilePath));
+					};
+				}));
+			});
+		});
 	}).then(function() {
 		if (steps.updateHtml === false) { return new Deferred().resolve(); }
 		section('Running updateHTML');
 		return async.sequence(optimizes.map(function(op) {
 			return function() {
-				// TODO stat minifiedFilePath, only perform the replace if minifiedfile.size > 0
+				// TODO stat builtFilePath, only perform the replace if builtFile.size > 0
 				var name = op.name;
 				var builtResult = 'require(["built-' + name + '.js"]);';
 				console.log("updateHTML " + op.htmlFilePath);
@@ -290,7 +286,7 @@ function build(optimizeElements) {
 			return function() {
 				// Replace define("{pageDir}/{name}" with define("built-{name}.js" in built js files
 				// TODO check existence of path.join(pageDir, name) -- skip if the file doesn't exist
-				var pageDir = op.pageDir, name = op.name, builtJsFile = op.minifiedFilePath;
+				var pageDir = op.pageDir, name = op.name, builtJsFile = op.builtFilePath;
 				var buildResult = 'define("built-' + name + '.js"';
 				console.log("updateJS " + builtJsFile);
 				return dfs.readFile(builtJsFile, 'utf8').then(function(jsFile) {
@@ -306,15 +302,15 @@ function build(optimizeElements) {
 		}));
 	}).then(function() {
 		if (steps.copyBack === false) { return new Deferred().resolve(); }
-		// Copy the built files from our .temp directory back to their original locations in the bundles folder
+		// Copy the built files from output directory back to their original locations in the bundles folder
 		// TODO: should create a separate 'optimized' source folder to avoid polluting the lib/orion.client/ folder.
 		section('Copy built files to ' + pathToOrionClientBundlesFolder);
 		return async.sequence(optimizes.map(function(op) {
 			return function() {
 				var args = {
-					builtJsFile: op.minifiedFilePath,
+					builtJsFile: op.builtFilePath,
 					htmlFile: op.htmlFilePath,
-					originalFolder: path.join(pathToOrionClientBundlesFolder, op.bundle, BUNDLE_WEB_FOLDER, op.pageDir)
+					originalFolder: path.join(op.bundle, BUNDLE_WEB_FOLDER, op.pageDir)
 				};
 				if (IS_WINDOWS) {
 					return execCommand(format('xcopy /q /y /i ${builtJsFile} ${originalFolder}', args)).then(
@@ -329,15 +325,21 @@ function build(optimizeElements) {
 			section('Copy optimized CSS files to ' + pathToOrionClientBundlesFolder);
 			return async.sequence(cssFiles.map(function(cssFile) {
 				return function() {
-					var optimizedCssPath = path.join(pathToTempDir, cssFile.path);
+					var optimizedCssPath = cssFile.builtFilePath;
 					return dfs.exists(optimizedCssPath).then(function(exists) {
 						if (exists) {
-							return execCommand(getCopyFileCmd(optimizedCssPath, path.join(pathToOrionClientBundlesFolder, cssFile.bundlePath)));
+							return execCommand(getCopyFileCmd(optimizedCssPath, cssFile.bundlePath));
 						}
 					});
 				};
 			}));
 		});
+	});
+}
+
+function parseBuildFile(filepath) {
+	return dfs.readFile(filepath, "utf8").then(function(text) {
+		return new Function("var b = " + text + "; return b;")();
 	});
 }
 
@@ -348,30 +350,9 @@ function exitFail(error) {
 
 function exitSuccess() { process.exit(0); }
 
-/**
- * @param {String} xmlFile
- * @returns {Promise}
- */
-function processFile(filepath) {
-	var saxStream = sax.createStream(strictSax);
-	var optimizeElements = [];
-	var buildPromise = new Deferred();
-	saxStream.on('opentag', function(node) {
-		if (node.name === 'optimize') {
-			optimizeElements.push(node);
-		}
-	});
-	saxStream.on('end', function() {
-		build(optimizeElements).then(buildPromise.resolve, buildPromise.reject);
-	});
-	saxStream.on('error', exitFail);
-	fs.createReadStream(filepath).pipe(saxStream);
-	return buildPromise;
-}
-
 /*
  * The fun starts here
  */
-processFile(path.join(__dirname, '../../../releng/org.eclipse.orion.client.releng/builder/orion.mini.xml')).then(
+parseBuildFile(pathToBuildFile).then(build).then(
 	exitSuccess,
 	exitFail);

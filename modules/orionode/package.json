@@ -7,7 +7,6 @@
   "dependencies": {
     "connect": "~2.4.6",
     "node-inspector": "~0.2.0-beta3",
-    "sax": "~0.4.2",
     "socket.io": "~0.9.11",
     "socket.io-client": "~0.9.11",
     "deferred-fs": ">=0.1.0",

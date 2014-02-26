@@ -56,6 +56,8 @@ done
 # The * construct above omits things whose name begins with dot (.)
 # But we need .gitignore, it's important for npm, so copy it over.
 cp "$REPO"/modules/orionode/.gitignore $STAGING
+# Add an additional line to prevent npm from publishing the releng folder
+echo lib/orion.client/releng/ >> "$STAGING"/modules/orionode/.gitignore
 
 # unnecessary: these are ignored via .gitignore
 # delete .workspace/
@@ -70,6 +72,10 @@ ensure_dir "$STAGING"/lib/orion.client
 ensure_dir "$STAGING"/lib/orion.client/bundles
 cp -r "$STAGING"/bundles/* "$STAGING"/lib/orion.client/bundles
 rm -rf "$STAGING"/bundles/
+
+# Copy client releng, required by build.js
+mkdir "$STAGING"/lib/orion.client/releng
+cp -r "$REPO"/releng/org.eclipse.orion.client.releng "$STAGING"/lib/orion.client/releng
 
 # Minify the client-side code
 NODE="`which node`"
