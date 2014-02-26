@@ -1570,6 +1570,9 @@ define('orion/inputManager',[
 		 * a filesystem root URL, the original read() operation is instead performed on the workspace.
 		 */
 		_read: function(location /**, readArgs*/) {
+			if (this.cachedMetadata && this.cachedMetadata.Location === location) {
+				return new Deferred().resolve(this.cachedMetadata);
+			}
 			var fileClient = this.fileClient;
 			var readArgs = Array.prototype.slice.call(arguments, 1);
 			return this._maybeLoadWorkspace(location).then(function(newLocation) {
@@ -1641,7 +1644,7 @@ define('orion/inputManager',[
 						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, metadataURI)});
 					} else if (metadata.Directory) {
 						// Fetch children
-						progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI).then(function(contents) {
+						Deferred.when(metadata.Children || progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI), function(contents) {
 							clearTimeout();
 							metadata.Children = contents;
 							this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
@@ -1985,14 +1988,14 @@ define('orion/inputManager',[
 			this.dispatchEvent(evt);
 			this.editor = editor = evt.editor;
 			if (!isDir) {
-				if (editor && editor.getTextView && editor.getTextView()) {
-					editor.getTextView().addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
-				}
 				if (editor && editor.getModel && editor.getModel()) {
 					editor.getModel().addEventListener("Changing", this._changingListener = this.onChanging.bind(this)); //$NON-NLS-0$
 				}
 				if (!noSetInput) {
 					editor.setInput(title, null, contents);
+				}
+				if (editor && editor.getTextView && editor.getTextView()) {
+					editor.getTextView().addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
 				}
 				this._unsavedChanges = [];
 				this.processParameters(input);
@@ -8360,6 +8363,8 @@ define('orion/explorers/explorer-table',[
 		 *	Process the parent and children, doing any filtering or sorting that may be necessary.
 		 */
 		processParent: function(parent, children) {
+			// Note that the Parents property is not available for metadatas retrieved with fetchChildren().
+			var parents = parent.Projects ? [] : [parent].concat(parent.Parents || []);
 			if (this.excludeFiles || this.excludeFolders) {
 				var filtered = [];
 				for (var i in children) {
@@ -8367,12 +8372,16 @@ define('orion/explorers/explorer-table',[
 					if (!exclude) {
 						filtered.push(children[i]);
 						children[i].parent = parent;
+						if (!children[i].Parents)
+							children[i].Parents = parents;
 					}
 				}
 				children = filtered;
 			} else {
 				for (var j in children) {
 					children[j].parent = parent;
+					if (!children[j].Parents)
+						children[j].Parents = parents;
 				}
 			}
 		
@@ -8403,6 +8412,8 @@ define('orion/explorers/explorer-table',[
 				onComplete(parentItem.children);
 			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 				onComplete([]);
+			} else if (parentItem.Children) {
+				onComplete(self.processParent(parentItem, parentItem.Children));
 			} else if (parentItem.Location) {
 				var progress = null;
 				if(this.registry) {
@@ -8914,7 +8925,7 @@ define('orion/explorers/explorer-table',[
 			}
 			var that = this;
 			var deferred = new Deferred();
-			parent.children = null;
+			parent.children = parent.Children = null;
 			this.model.getChildren(parent, function(children) {
 				//If a key board navigator is hooked up, we need to sync up the model
 				if(that.getNavHandler()){
@@ -25210,6 +25221,9 @@ define('orion/widgets/browse/browseView',[
 				folderNode.addEventListener("click", function(){this.explorer.clickHandler(folder.Location);}.bind(this)
 				, false);
 			}
+			folderNode.addEventListener("click", function() { //$NON-NLS-0$
+				this.explorer.editorInputManager.cachedMetadata = folder;
+			}.bind(this), false);
 			return folderNode;
 		},
 		/**
@@ -25217,6 +25231,9 @@ define('orion/widgets/browse/browseView',[
 		 */
 		updateFileNode: function(file, fileNode, isImage) {
 			mNavigatorRenderer.NavigatorRenderer.prototype.updateFileNode.call(this, file, fileNode, isImage);
+			fileNode.addEventListener("click", function() { //$NON-NLS-0$
+				this.explorer.editorInputManager.cachedMetadata = file;
+			}.bind(this), false);
 			if (this.explorer.readonly && fileNode.tagName === "A") { //$NON-NLS-0$
 				if(this.explorer.clickHandler){
 					fileNode.href = "javascript:void(0)";
@@ -25279,6 +25296,7 @@ define('orion/widgets/browse/browseView',[
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.readonly = options.readonly;
 		this.folderViewer = options.fodlerViewer;
+		this.editorInputManager = options.editorInputManager;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.clickHandler = options.clickHandler;
 		this.treeRoot = {};
@@ -25336,6 +25354,7 @@ define('orion/widgets/browse/browseView',[
 	function BrowseView(options) {
 		this._parent = options.parent;
 		this._metadata = options.metadata;
+		this.editorInputManager = options.inputManager;
 		this.fileClient = options.fileService;
 		this.progress = options.progressService;
 		this.commandRegistry = options.commandRegistry;
@@ -25498,6 +25517,7 @@ define('orion/widgets/browse/browseView',[
 								breadCrumbMaker: this.breadCrumbMaker,
 								clickHandler: this.clickHandler,
 								fileClient: this.fileClient,
+								editorInputManager: this.editorInputManager,
 								commandRegistry: this.commandRegistry,
 								contentTypeRegistry: this.contentTypeRegistry
 							});
