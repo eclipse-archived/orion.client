@@ -12,9 +12,9 @@
 /*global define console document Image */
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/section', 'orion/i18nUtil', 'orion/globalCommands', 
-        'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
+        'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog','orion/git/util'], 
 		function(messages, require, mExplorer, PageUtil, URITemplate, lib, mSection, i18nUtil, mGlobalCommands, mGitCommands, mNavUtils, Deferred,
-				mCommitTooltip) {
+				mCommitTooltip, util) {
 var exports = {};
 
 var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
@@ -415,7 +415,7 @@ exports.GitLogExplorer = (function() {
 					var titleLink = document.createElement("a");
 					titleLink.className = "navlinkonpage";
 					titleLink.href = require.toUrl(commitTemplate.expand({resource: commit.Location})); //$NON-NLS-0$
-					titleLink.textContent = commit.Message;
+					titleLink.textContent = util.trimCommitMessage(commit.Message);
 					detailsView.appendChild(titleLink);
 					
 					//Add the commit page link as the first grid of the row
