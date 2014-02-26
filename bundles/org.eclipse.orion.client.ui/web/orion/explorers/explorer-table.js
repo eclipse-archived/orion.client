@@ -607,7 +607,7 @@ define([
 			}
 			var that = this;
 			var deferred = new Deferred();
-			parent.children = null;
+			parent.children = parent.Children = null;
 			this.model.getChildren(parent, function(children) {
 				//If a key board navigator is hooked up, we need to sync up the model
 				if(that.getNavHandler()){
