@@ -133,6 +133,9 @@ define([
 		 * a filesystem root URL, the original read() operation is instead performed on the workspace.
 		 */
 		_read: function(location /**, readArgs*/) {
+			if (this.cachedMetadata && this.cachedMetadata.Location === location) {
+				return new Deferred().resolve(this.cachedMetadata);
+			}
 			var fileClient = this.fileClient;
 			var readArgs = Array.prototype.slice.call(arguments, 1);
 			return this._maybeLoadWorkspace(location).then(function(newLocation) {
@@ -204,7 +207,7 @@ define([
 						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, metadataURI)});
 					} else if (metadata.Directory) {
 						// Fetch children
-						progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI).then(function(contents) {
+						Deferred.when(metadata.Children || progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI), function(contents) {
 							clearTimeout();
 							metadata.Children = contents;
 							this._setInputContents(this._parsedLocation, fileURI, contents, metadata);

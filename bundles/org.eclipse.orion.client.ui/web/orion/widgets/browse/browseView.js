@@ -50,6 +50,9 @@ define([
 				folderNode.addEventListener("click", function(){this.explorer.clickHandler(folder.Location);}.bind(this)
 				, false);
 			}
+			folderNode.addEventListener("click", function() { //$NON-NLS-0$
+				this.explorer.editorInputManager.cachedMetadata = folder;
+			}.bind(this), false);
 			return folderNode;
 		},
 		/**
@@ -57,6 +60,9 @@ define([
 		 */
 		updateFileNode: function(file, fileNode, isImage) {
 			mNavigatorRenderer.NavigatorRenderer.prototype.updateFileNode.call(this, file, fileNode, isImage);
+			fileNode.addEventListener("click", function() { //$NON-NLS-0$
+				this.explorer.editorInputManager.cachedMetadata = file;
+			}.bind(this), false);
 			if (this.explorer.readonly && fileNode.tagName === "A") { //$NON-NLS-0$
 				if(this.explorer.clickHandler){
 					fileNode.href = "javascript:void(0)";
@@ -119,6 +125,7 @@ define([
 		this.contentTypeRegistry = options.contentTypeRegistry;
 		this.readonly = options.readonly;
 		this.folderViewer = options.fodlerViewer;
+		this.editorInputManager = options.editorInputManager;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.clickHandler = options.clickHandler;
 		this.treeRoot = {};
@@ -176,6 +183,7 @@ define([
 	function BrowseView(options) {
 		this._parent = options.parent;
 		this._metadata = options.metadata;
+		this.editorInputManager = options.inputManager;
 		this.fileClient = options.fileService;
 		this.progress = options.progressService;
 		this.commandRegistry = options.commandRegistry;
@@ -338,6 +346,7 @@ define([
 								breadCrumbMaker: this.breadCrumbMaker,
 								clickHandler: this.clickHandler,
 								fileClient: this.fileClient,
+								editorInputManager: this.editorInputManager,
 								commandRegistry: this.commandRegistry,
 								contentTypeRegistry: this.contentTypeRegistry
 							});

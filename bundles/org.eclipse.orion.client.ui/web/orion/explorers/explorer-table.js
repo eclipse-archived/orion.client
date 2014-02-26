@@ -45,6 +45,8 @@ define([
 		 *	Process the parent and children, doing any filtering or sorting that may be necessary.
 		 */
 		processParent: function(parent, children) {
+			// Note that the Parents property is not available for metadatas retrieved with fetchChildren().
+			var parents = parent.Projects ? [] : [parent].concat(parent.Parents || []);
 			if (this.excludeFiles || this.excludeFolders) {
 				var filtered = [];
 				for (var i in children) {
@@ -52,12 +54,16 @@ define([
 					if (!exclude) {
 						filtered.push(children[i]);
 						children[i].parent = parent;
+						if (!children[i].Parents)
+							children[i].Parents = parents;
 					}
 				}
 				children = filtered;
 			} else {
 				for (var j in children) {
 					children[j].parent = parent;
+					if (!children[j].Parents)
+						children[j].Parents = parents;
 				}
 			}
 		
@@ -88,6 +94,8 @@ define([
 				onComplete(parentItem.children);
 			} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 				onComplete([]);
+			} else if (parentItem.Children) {
+				onComplete(self.processParent(parentItem, parentItem.Children));
 			} else if (parentItem.Location) {
 				var progress = null;
 				if(this.registry) {

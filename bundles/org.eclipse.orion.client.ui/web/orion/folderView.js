@@ -53,6 +53,9 @@ define([
 				folderNode.href = "javascript:void(0)"; //$NON-NLS-0$
 				folderNode.addEventListener("click", function(){this.explorer.clickHandler(folder.Location);}.bind(this), false); //$NON-NLS-0$
 			}
+			folderNode.addEventListener("click", function() { //$NON-NLS-0$
+				this.explorer.editorInputManager.cachedMetadata = folder;
+			}.bind(this), false);
 			return folderNode;
 		},
 		/**
@@ -60,6 +63,9 @@ define([
 		 */
 		updateFileNode: function(file, fileNode, isImage) {
 			mNavigatorRenderer.NavigatorRenderer.prototype.updateFileNode.call(this, file, fileNode, isImage);
+			fileNode.addEventListener("click", function() { //$NON-NLS-0$
+				this.explorer.editorInputManager.cachedMetadata = file;
+			}.bind(this), false);
 			if (this.explorer.readonly && fileNode.tagName === "A") { //$NON-NLS-0$
 				if(this.explorer.clickHandler){
 					fileNode.href = "javascript:void(0)"; //$NON-NLS-0$
@@ -111,7 +117,7 @@ define([
 		options.rendererFactory = function(explorer) {
 			return new FolderNavRenderer({
 				checkbox: false,
-				treeTableClass: "sectionTreeTable",
+				treeTableClass: "sectionTreeTable", //$NON-NLS-0$
 				cachePrefix: "FolderNavigator" //$NON-NLS-0$
 			}, explorer, options.commandRegistry, options.contentTypeRegistry);
 		};
@@ -121,6 +127,7 @@ define([
 		this.fileClient = options.fileClient;
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
+		this.editorInputManager = options.editorInputManager;
 		this.readonly = options.readonly;
 		this.breadCrumbMaker = options.breadCrumbMaker;
 		this.clickHandler = options.clickHandler;
@@ -190,6 +197,7 @@ define([
 		this.serviceRegistry = options.serviceRegistry;
 		this.commandRegistry = options.commandRegistry;
 		this.contentTypeRegistry = options.contentTypeRegistry;
+		this.editorInputManager = options.inputManager;
 		this.preferences = options.preferences;
 		this.readonly = options.readonly === undefined ? false : options.readonly;
 		this.showProjectView = options.showProjectView === undefined ? true : options.showProjectView;
@@ -318,6 +326,7 @@ define([
 									clickHandler: this.clickHandler,
 									serviceRegistry: this.serviceRegistry,
 									fileClient: this.fileClient,
+									editorInputManager: this.editorInputManager,
 									commandRegistry: this.commandRegistry,
 									contentTypeRegistry: this.contentTypeRegistry
 								});
