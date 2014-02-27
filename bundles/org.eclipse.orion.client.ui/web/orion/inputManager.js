@@ -59,43 +59,41 @@ define([
 		}
 	};
 
+	function _makeError(error) {
+		var newError = {
+			Severity: "Error", //$NON-NLS-0$
+			Message: messages.noResponse
+		};
+		if (error.status === 0) {
+			return newError; // might do better here
+		} else if (error.responseText) {
+			var responseText = error.responseText;
+			try {
+				var parsedError = JSON.parse(responseText);
+				newError.Severity = parsedError.Severity || newError.Severity;
+				newError.Message = parsedError.Message || newError.Message;
+			} catch (e) {
+				newError.Message = responseText;
+			}
+		} else {
+			try {
+				newError.Message = JSON.stringify(error);
+			} catch (e) {
+				// best effort - fallthrough
+			}
+		}
+		return newError;
+	}
+
 	function handleError(statusService, error) {
 		if (!statusService) {
 			window.console.log(error);
 			return;
 		}
-		var newError;
-		if (error.status === 0) {
-			newError = {
-				Severity: "Error", //$NON-NLS-0$
-				Message: messages.noResponse
-			};
-		} else {
-			var responseText = error.responseText;
-			if (responseText) {
-				try {
-					newError = JSON.parse(responseText);
-				} catch(e) {
-					newError = {
-						//HTML: true,
-						Severity: "Error", //$NON-NLS-0$
-						Message: responseText
-					};
-				}
-				if(!newError.Severity) {
-					newError.Severity = "Error"; //$NON-NLS-0$
-				}
-				if(!newError.Message) {
-					newError.Message = responseText;
-				}
-			} else {
-				newError = {
-					Severity: "Error", //$NON-NLS-0$
-					Message: JSON.stringify(error)
-				};
-			}
+		if (!error.Severity) {
+			error = _makeError(error);
 		}
-		statusService.setProgressResult(newError);
+		statusService.setProgressResult(error);
 	}
 
 	/**
