@@ -56,6 +56,16 @@ define([
 	}
 	
 	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+	
+	var clickedItem;
+	/**
+	 * Returns the last item clicked by links created with #createLink.
+	 * @name orion.explorer.NavigatorRenderer.getClickedItem
+	 * @function
+	 */
+	function getClickedItem() {
+		return clickedItem;
+	}
 		
 	/**
 	 * Exported so that it can be used by other UI that wants to use navigator-style links. commandService and contentTypeService  are necessary to compute 
@@ -132,6 +142,9 @@ define([
 				}
 			});
 		}
+		link.addEventListener("click", function() { //$NON-NLS-0$
+			clickedItem = item;
+		}.bind(this), false);
 		return link;
 	}
 		
@@ -373,6 +386,7 @@ define([
 	return {
 		NavigatorRenderer: NavigatorRenderer,
 		isImage : isImage,
+		getClickedItem: getClickedItem,
 		createLink: createLink
 	};
 });

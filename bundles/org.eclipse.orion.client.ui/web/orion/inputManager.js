@@ -14,12 +14,13 @@
 /*jslint browser:true*/
 define([
 	'i18n!orion/edit/nls/messages',
+	'orion/explorers/navigatorRenderer',
 	'orion/i18nUtil',
 	'orion/Deferred',
 	'orion/EventTarget',
 	'orion/objects',
 	'orion/PageUtil'
-], function(messages, i18nUtil, Deferred, EventTarget, objects, PageUtil) {
+], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil) {
 
 	function Idle(options){
 		this._document = options.document || document;
@@ -131,8 +132,9 @@ define([
 		 * a filesystem root URL, the original read() operation is instead performed on the workspace.
 		 */
 		_read: function(location /**, readArgs*/) {
-			if (this.cachedMetadata && this.cachedMetadata.Location === location) {
-				return new Deferred().resolve(this.cachedMetadata);
+			var cachedMetadata = this.cachedMetadata || mNavigatorRenderer.getClickedItem();
+			if (cachedMetadata && cachedMetadata.Location === location && cachedMetadata.Parents && cachedMetadata.Attributes) {
+				return new Deferred().resolve(cachedMetadata);
 			}
 			var fileClient = this.fileClient;
 			var readArgs = Array.prototype.slice.call(arguments, 1);

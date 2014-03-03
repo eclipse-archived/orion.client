@@ -374,7 +374,7 @@ define([
 		var sidebar = this.sidebar;
 		// Switch to project view mode if a project is opened
 		function openProject(metadata){
-			if (metadata && metadata.Directory) {
+			if (metadata && metadata.Directory && (metadata.parent && metadata.parent.Projects)) {
 				_self.getProjectJson(metadata).then(function(json) {
 					if (json) {
 						_self.showViewMode(true);

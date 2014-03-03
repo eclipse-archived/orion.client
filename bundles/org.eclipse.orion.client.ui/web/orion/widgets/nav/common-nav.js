@@ -458,16 +458,7 @@ define([
 			} else {
 				folderNode.classList.add("nav_fakelink"); //$NON-NLS-0$
 			}
-			folderNode.addEventListener("click", function() { //$NON-NLS-0$
-				this.explorer.editorInputManager.cachedMetadata = folder;
-			}.bind(this), false);
 			return folderNode;
-		},
-		updateFileNode: function(file, fileNode, isImage) {
-			mNavigatorRenderer.NavigatorRenderer.prototype.updateFileNode.call(this, file, fileNode, isImage);
-			fileNode.addEventListener("click", function() { //$NON-NLS-0$
-				this.explorer.editorInputManager.cachedMetadata = file;
-			}.bind(this), false);
 		},
 		/**
 		 * Overrides NavigatorRenderer.prototype.rowCallback
