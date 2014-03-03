@@ -92,7 +92,9 @@ define([
 						}
 					}
 					window.removeEventListener("message", _messageHandler, false); //$NON-NLS-0$
-					iframe.parentNode.removeChild(iframe);
+					if (delegatedParent.parentNode) {
+						delegatedParent.parentNode.removeChild(delegatedParent);
+					}
 				}
 			}
 		}, false);
