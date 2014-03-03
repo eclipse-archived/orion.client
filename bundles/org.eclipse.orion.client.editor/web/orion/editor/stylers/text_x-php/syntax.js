@@ -44,37 +44,43 @@ define("orion/editor/stylers/text_x-php/syntax", ["orion/editor/stylers/lib/synt
 		contentTypes: ["text/x-php"],
 		patterns: [
 			{
-				include: "orion.lib#doc_block"
+				include: "orion.html"
 			}, {
-				include: "orion.c-like"
-			}, {
-				match: "(?i)<\\?(?:=|php)?(?:\\s|$)",
-				name: "entity.name.declaration.php",
-			}, {
-				match: "<%=?(?:\\s|$)",
-				name: "entity.name.declaration.php",
-			}, {
-				match: "#.*",
-				name: "comment.line.number-sign.php",
+				begin: "(?i)<(\\?|%(?!php))(?:=|php)?(?:\\s|$)",
+				end: "[\\1]>",
+				captures: {
+					0: {name: "entity.name.declaration.php"}
+				},
+				contentName: "source.php.embedded",
 				patterns: [
 					{
-						include: "orion.lib#todo_comment_singleLine"
+						include: "orion.lib#doc_block"
+					}, {
+						include: "orion.c-like"
+					}, {
+						match: "\\b0[bB][01]+\\b",
+						name: "constant.numeric.binary.php"
+					}, {
+						match: "#.*",
+						name: "comment.line.number-sign.php",
+						patterns: [
+							{
+								include: "orion.lib#todo_comment_singleLine"
+							}
+						]
+					}, {
+						begin: "<<<(\\w+)$",
+						end: "^\\1;$",
+						name: "string.unquoted.heredoc.php"
+					}, {
+						begin: "<<<'(\\w+)'$",
+						end: "^\\1;$",
+						name: "string.unquoted.heredoc.nowdoc.php"
+					}, {
+						match: "\\b(?:" + keywords.join("|") + ")\\b",
+						name: "keyword.control.php"
 					}
 				]
-			}, {
-				begin: "<<<(\\w+)$",
-				end: "^\\1;$",
-				name: "string.unquoted.heredoc.php"
-			}, {
-				begin: "<<<'(\\w+)'$",
-				end: "^\\1;$",
-				name: "string.unquoted.heredoc.nowdoc.php"
-			}, {
-				match: "\\b0[bB][01]+\\b",
-				name: "constant.numeric.binary.php"
-			}, {
-				match: "\\b(?:" + keywords.join("|") + ")\\b",
-				name: "keyword.control.php"
 			}
 		]
 	});

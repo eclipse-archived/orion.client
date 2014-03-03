@@ -39,6 +39,9 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/lib/s
 			{
 				include: "orion.lib"
 			}, {
+				/* override orion.lib#number_decimal */
+				include: "#number_decimal"
+			}, {
 				match: "#.*",
 				name: "comment.line.number-sign.python",
 				patterns: [
@@ -56,7 +59,6 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/lib/s
 			}
 		],
 		repository: {
-			/* override orion.lib#number_decimal */
 			number_decimal: {
 				match: "\\b-?(?:\\.\\d+|\\d+\\.?\\d*)[lL]?\\b",
 				name: "constant.numeric.number.python"

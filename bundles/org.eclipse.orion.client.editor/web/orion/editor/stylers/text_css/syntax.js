@@ -62,6 +62,9 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 			}, {
 				include: "orion.c-like#comment_block"
 			}, {
+				/* override orion.lib#number_hex */
+				include: "#number_hex"
+			}, {
 				match: "(?:-webkit-|-moz-|-ms-|\\b)(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control.css"
 			}, {
@@ -74,7 +77,6 @@ define("orion/editor/stylers/text_css/syntax", ["orion/editor/stylers/lib/syntax
 			}
 		],
 		repository: {
-			/* override orion.lib#number_hex */
 			number_hex: {
 				match: "#[0-9A-Fa-f]+\\b",
 				name: "constant.numeric.hex.css"

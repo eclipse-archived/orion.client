@@ -21,6 +21,8 @@ define("orion/editor/stylers/text_x-yaml/syntax", [], function() { //$NON-NLS-0$
 		contentTypes: ["text/x-yaml"], //$NON-NLS-0$
 		patterns: [
 			{
+				include: "#numberSignComment"
+			}, {
 				match: "^%(?:YAML|TAG)\\s.*", //$NON-NLS-0$
 				name: "meta.directive.yaml" //$NON-NLS-0$
 			}, {

@@ -40,12 +40,14 @@ define("orion/editor/stylers/text_x-java-source/syntax", ["orion/editor/stylers/
 			}, {
 				include: "orion.c-like"
 			}, {
+				/* override orion.lib#string_singleQuote (no-op) */
+				include: "#string_singleQuote"
+			}, {
 				match: "\\b(?:" + keywords.join("|") + ")\\b",
 				name: "keyword.control.java"
 			}
 		],
 		repository: {
-			/* override orion.lib#string_singleQuote (no-op) */
 			string_singleQuote: {}
 		}
 	});

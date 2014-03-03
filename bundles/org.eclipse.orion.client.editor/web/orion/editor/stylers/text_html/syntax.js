@@ -11,16 +11,19 @@
 
 /*global define*/
 
-define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/text_css/syntax", "orion/editor/stylers/text_x-php/syntax", "orion/editor/stylers/application_xml/syntax"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	function(mLib, mJS, mCSS, mPHP, mXML) {
+define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/syntax", "orion/editor/stylers/application_javascript/syntax", "orion/editor/stylers/text_css/syntax", "orion/editor/stylers/application_xml/syntax"], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	function(mLib, mJS, mCSS, mXML) {
 
-	var grammars = mLib.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mPHP.grammars).concat(mXML.grammars);
+	var grammars = mLib.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mXML.grammars);
 	grammars.push({
 		id: "orion.html",
 		contentTypes: ["text/html"],
 		patterns: [
 			{
 				include: "orion.xml"
+			}, {
+				/* override orion.xml#xmlDeclaration (no-op) */
+				include: "#xmlDeclaration"
 			}, {
 				begin: "(?i)(<style)([^>]*)(>)",
 				end: "(?i)(</style>)",
@@ -46,46 +49,9 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 						include: "orion.js"
 					}
 				]
-			}, {
-				begin: "(?i)<script\\s.*?(?:language\\s*=\\s*(['\"])php\\1|type\\s*=\\s*(['\"])text/x-php\\2).*?>",
-				end: "(?i)</script>",
-				captures: {
-					0: {name: "entity.name.tag.html"}
-				},
-				contentName: "source.php.embedded.html",
-				patterns: [
-					{
-						include: "orion.php"
-					}
-				]
-			}, {
-				begin: "(?i)<\\?(?:=|php)?(?:\\s|$)",
-				end: "\\?>",
-				captures: {
-					0: {name: "entity.name.declaration.php"}
-				},
-				contentName: "source.php.embedded.html",
-				patterns: [
-					{
-						include: "orion.php"
-					}
-				]
-			}, {
-				begin: "<%=?(?:\\s|$)",
-				end: "%>",
-				captures: {
-					0: {name: "entity.name.declaration.php"}
-				},
-				contentName: "source.php.embedded.html",
-				patterns: [
-					{
-						include: "orion.php"
-					}
-				]
 			}
 		],
 		repository: {
-			/* override orion.xml#xmlDeclaration (no-op) */
 			xmlDeclaration: {}
 		}
 	});

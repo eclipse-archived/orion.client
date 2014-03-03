@@ -22,6 +22,9 @@ define("orion/editor/stylers/application_x-ejs/syntax", ["orion/editor/stylers/l
 			{
 				include: "orion.xml"
 			}, {
+				/* override orion.xml#xmlDeclaration (no-op) */
+				include: "#xmlDeclaration"
+			}, {
 				begin: "<%=?(?:\\s|$)",
 				end: "%>",
 				captures: {
@@ -36,9 +39,6 @@ define("orion/editor/stylers/application_x-ejs/syntax", ["orion/editor/stylers/l
 			}
 		],
 		repository: {
-			/* override orion.xml#doctype (no-op) */
-			doctype: {},
-			/* override orion.xml#xmlDeclaration (no-op) */
 			xmlDeclaration: {}
 		}
 	});

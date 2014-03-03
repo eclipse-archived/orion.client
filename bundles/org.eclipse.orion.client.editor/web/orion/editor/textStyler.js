@@ -33,8 +33,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 	var eolRegex = /$/;
 	var captureReferenceRegex = /\\(\d)/g;
+	var ignoreCaseRegex = /^\(\?i\)\s*/;
 	var linebreakRegex = /(.*)(?:[\r\n]|$)/g;
-	var spacePattern = {regex: / /g, style: {styleClass: "punctuation separator space", unmergeable: true}}; //$NON-NLS-0$
+	var spacePattern = {regex: /[ ]/g, style: {styleClass: "punctuation separator space", unmergeable: true}}; //$NON-NLS-0$
 	var tabPattern = {regex: /\t/g, style: {styleClass: "punctuation separator tab", unmergeable: true}}; //$NON-NLS-0$
 
 	var _findMatch = function(regex, text, startIndex, testBeforeMatch) {
@@ -297,10 +298,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 					var contentStart = current.result.index;
 					var resultEnd = null;
 
-					/* 
-					 * If the end match contains a capture reference (eg.- "\1") then update
-					 * its regex with the resolved capture values from the begin match.
-					 */
 					var endRegex = current.pattern.regexEnd;
 					if (!endRegex) {
 						resultEnd = new Block(
@@ -316,7 +313,26 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 							block);
 					} else {
 						contentStart += current.result[0].length;
-						endRegex = substituteCaptureValues(endRegex, current.result);
+						var testPattern = current.pattern;
+						/* 
+						 * If the end regex contains a capture reference (eg.- "\1") then substitute
+						 * the resolved capture values from the begin match.
+						 */
+						var resolvedEndRegex = substituteCaptureValues(endRegex, current.result);
+						if (resolvedEndRegex !== endRegex) {
+							/*
+							 * A substitution was made, so make a copy of the test pattern and set its
+							 * end regex to the resolved one.  This will cause end-match detection to be
+							 * performed with this concrete end regex value, but the original pattern
+							 * definition containing the capture reference will not be affected.
+							 */
+							testPattern = {
+								pattern: testPattern.pattern,
+								regexBegin: testPattern.regexBegin,
+								regexEnd: resolvedEndRegex
+							};
+							endRegex = resolvedEndRegex;
+						}
 
 						var lastIndex = contentStart;
 						while (!resultEnd) {
@@ -333,7 +349,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 									contentStart: offset + contentStart,
 									contentEnd: offset + result.index
 								},
-								current.pattern,
+								testPattern,
 								block.getStyler(),
 								model,
 								block);
@@ -390,18 +406,19 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		getPatterns: function(pattern) {
 			var parentId;
 			if (!pattern) {
-				parentId = this._rootId;
+				parentId = this._rootId + "#" + this._NO_ID;
 			} else {
 				if (typeof(pattern) === "string") { //$NON-NLS-0$
 					parentId = pattern;
 				} else {
 					parentId = pattern.qualifiedId;
 				}
+				parentId += "#";
 			}
 			/* indexes on patterns are used to break ties when multiple patterns match the same start text */
 			var indexCounter = [0];
 			var resultObject = {};
-			var regEx = new RegExp("^" + parentId + "#[^#]+$"); //$NON-NLS-0$
+			var regEx = new RegExp("^" + parentId + "[^#]+$"); //$NON-NLS-0$
 			var includes = [];
 			this._patterns.forEach(function(current) {
 				if (regEx.test(current.qualifiedId)) {
@@ -414,9 +431,21 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 			}.bind(this));
 			/*
-			 * The includes get processed last to ensure that locally-defined patterns are given
-			 * precedence over included ones with respect to pattern identifiers and indexes.
+			 * The includes get processed last to ensure that locally-defined and locally-included
+			 * patterns are given precedence over ones from other grammars with respect to pattern
+			 * identifiers and indexes.
 			 */
+			includes.sort(function(a,b) {
+				var aIndex = a.include.indexOf("#");
+				var bIndex = b.include.indexOf("#");
+				if (aIndex === 0 && bIndex !== 0) {
+					return -1;
+				}
+				if (bIndex === 0 && aIndex !== 0) {
+					return 1;
+				}
+				return 0;
+			});
 			includes.forEach(function(current) {
 				this._processInclude(current, indexCounter, resultObject);
 			}.bind(this));
@@ -598,7 +627,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		_initPatterns: function() {
 			var patterns = this.getPatternManager().getPatterns(this.pattern ? this.pattern.pattern : null);
 			var processIgnore = function(matchString) {
-				var result = /^\(\?i\)\s*/.exec(matchString);
+				var result = ignoreCaseRegex.exec(matchString);
 				if (result) {
 					matchString = matchString.substring(result[0].length);
 				}
