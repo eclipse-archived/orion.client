@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global exports module define setTimeout*/
+/*global exports module define setTimeout process document MutationObserver*/
 
 (function(root, factory) { // UMD
     if (typeof define === "function" && define.amd) { //$NON-NLS-0$
@@ -31,11 +31,32 @@
         running = false;
     }
 
+	var runAsync = (function() {
+		if (typeof process !== "undefined" && typeof process.nextTick === "function") {
+			var nextTick = process.nextTick;
+    		return function() {
+    			nextTick(run);
+    		};
+		} else if (typeof MutationObserver === "function") {
+			var div = document.createElement("div");
+			var observer = new MutationObserver(run);
+			observer.observe(div, {
+            	attributes: true
+        	});
+        	return function() {
+        		div.setAttribute("class", "_tick");
+        	};
+		}
+		return function() {
+			setTimeout(run, 0);
+		};
+	})();
+
     function enqueue(fn) {
         queue.push(fn);
         if (!running) {
             running = true;
-            setTimeout(run, 0);
+            runAsync();
         }
     }
 
