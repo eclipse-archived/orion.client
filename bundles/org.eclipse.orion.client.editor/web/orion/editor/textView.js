@@ -4620,7 +4620,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					div1 = util.createElement(document, "div"); //$NON-NLS-0$
 					div1.style.position = "fixed"; //$NON-NLS-0$
 					div1.style.left = "-1000px"; //$NON-NLS-0$
-					div1.innerHTML = new Array(this._wrapOffset + 1).join(" "); //$NON-NLS-0$
+					div1.innerHTML = new Array(this._wrapOffset + 1 + (util.isWebkit ? 0 : 1)).join(" "); //$NON-NLS-0$
 					parent.appendChild(div1);
 					rect1 = div1.getBoundingClientRect();
 					wrapWidth = Math.ceil(rect1.right - rect1.left);
