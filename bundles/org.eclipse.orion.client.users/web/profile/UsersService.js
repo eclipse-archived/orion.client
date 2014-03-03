@@ -187,6 +187,11 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 				}
 				ret.resolve(jsonData);
 			}, function(error) {
+				if (error.status === 409) {
+					var jsonData = getJSON(error.response);
+					var errorMessage = jsonData.Message;
+					alert(errorMessage);
+				}
 				ret.reject(error.response || error);
 			});
 			
