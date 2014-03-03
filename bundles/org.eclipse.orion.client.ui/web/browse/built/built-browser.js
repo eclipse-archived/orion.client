@@ -789,9 +789,142 @@ define('orion/edit/nls/messages',['orion/i18n!orion/edit/nls/messages', 'orion/e
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
+ ******************************************************************************/
+
+//NLS_CHARSET=UTF-8
+ 
+define('orion/navigate/nls/root/messages',{
+	"Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files.": "Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files.",
+	"Toggle Left Pane": "Toggle Left Pane",
+	"Open or close the left pane": "Open or close the left pane",
+	"Navigator": "Navigator",
+	"Strings Xtrnalizr": "Strings Xtrnalizr",
+	"Externalize Strings from JavaScript files in this folder": "Externalize strings from JavaScript files in this folder.",
+	"Choose a Folder": "Choose a Folder",
+	"Copy of ${0}": "Copy of ${0}",
+	"Enter a new name for '${0}'": "Enter a new name for '${0}'",
+	"Choose folder...": "Choose folder...",
+	"Rename": "Rename",
+	"Rename the selected files or folders": "Rename the selected files or folders",
+	"Compare with each other": "Compare with each other",
+	"Compare the selected 2 files with each other": "Compare the selected 2 files with each other",
+	"Compare with...": "Compare with...",
+	"Compare the selected folder with a specified folder": "Compare the selected folder with a specified folder",
+	"Delete": "Delete",
+	"Unknown item": "Unknown item",
+	"Are you sure you want to delete these ${0} items?": "Are you sure you want to delete these ${0} items?",
+	"Are you sure you want to delete '${0}'?": "Are you sure you want to delete '${0}'?",
+	"Export as zip": "Zip",
+	"Create a zip file of the folder contents and download it": "Create a zip file of the folder contents and download it",
+	"New File": "File",
+	"Create a new file": "Create a new file",
+	"Name:" : "Name:",
+	"New Folder": "Folder",
+	"Folder name:": "Folder name:",
+	"Create a new folder": "Create a new folder",
+	"Creating folder": "Creating folder",
+	"Folder": "Folder",
+	"Create an empty folder": "Create an empty folder",
+	"Create an empty folder on the Orion server.  You can import, upload, or create content in the editor.": "Create an empty folder on the Orion server.  You can import, upload, or create content in the editor.",
+	"Sample HTML5 Site": "Sample HTML5 Site",
+	"Generate a sample": "Generate a sample",
+	"Generate an HTML5 \"Hello World\" website, including JavaScript, HTML, and CSS files.": "Generate an HTML5 \"Hello World\" website, including JavaScript, HTML, and CSS files.",
+	"Creating a folder for ${0}": "Creating a folder for ${0}",
+	"SFTP Import": "SFTP Import",
+	"Import content from SFTP": "Import content from SFTP",
+	"Import content from an SFTP location into an Orion folder.  You will be prompted for the SFTP location and credentials.": "Import content from an SFTP location into an Orion folder.  You will be prompted for the SFTP location and credentials.",
+	"Imported Content": "Imported Content",
+	"Upload a Zip": "Upload a Zip",
+	"Upload content from a local zip file": "Upload content from a local zip file",
+	"Upload content from a local zip file into an Orion folder.  You will be prompted for the local zip file.": "Upload content from a local zip file into an Orion folder.  You will be prompted for the local zip file.",
+	"Uploaded Content": "Uploaded Content",
+	"Creating an upload folder for ": "Creating an upload folder for ",
+	"Clone Git Repository": "Clone Git Repository",
+	"Clone a git repository": "Clone a git repository",
+	"Go to the Orion repositories page to provide a git repository URL.  Once the repository is created, it will appear in the Navigator.": "Go to the Orion repositories page to provide a git repository URL.  Once the repository is created, it will appear in the Navigator.",
+	"Link to Server": "Link to Server",
+	"Link to existing content on the server": "Link to existing content on the server",
+	"Create a folder that links to an existing folder on the server.": "Create a folder that links to an existing folder on the server.",
+	"Server path:": "Server path:",
+	"The name and server location were not specified.": "The name and server location were not specified.",
+	"Go Up": "Go Up",
+	"Move up to the parent folder": "Move up to the parent folder",
+	"Go Into": "Go Into",
+	"Move into the selected folder": "Move into the selected folder",
+	"Import local file...": "File System",
+	"Copy files and folders from your local file system": "Copy files and folders from your local file system",
+	"SFTP from...": "SFTP",
+	"Copy files and folders from a specified SFTP connection": "Copy files and folders from a specified SFTP connection",
+	"Importing from ${0}": "Importing from ${0}",
+	"SFTP to...": "SFTP",
+	"Copy files and folders to a specified SFTP location": "Copy files and folders to a specified SFTP location",
+	"Exporting": "Exporting to ${0}",
+	"Pasting ${0}": "Pasting ${0}",
+	"Copy to": "Copy to",
+	"Move to": "Move to",
+	"Copying ${0}": "Copying ${0}",
+	"Moving ${0}": "Moving ${0}",
+	"Renaming ${0}": "Renaming ${0}",
+	"Deleting ${0}": "Deleting ${0}",
+	"Creating ${0}": "Creating ${0}",
+	"Linking to ${0}": "Linking to ${0}",
+	"Move files and folders to a new location": "Move files and folders to a new location",
+	"Cut": "Cut",
+	"Copy": "Copy",
+	"Fetching children of ": "Fetching children of ",
+	"Paste": "Paste",
+	"Cannot paste into the Workspace root": "Cannot paste into the Workspace root",
+	"Open With": "Open With",
+	"Loading ": "Loading ",
+	"New": "New",
+	"File": "File",
+	"Actions": "Actions",
+	"Orion Content": "Orion Content",
+	" is not supported in this file system": " is not supported in this file system",
+	"Create new content" : "Create new content",
+	"Import from HTTP..." : "HTTP",
+	"File URL:" : "File URL:",
+	"Copy a file from a URL and optionally unzip it" : "Copy a file from a URL and optionally unzip it",
+	"Unzip *.zip files:" : "Unzip *.zip files:",
+	"Extracted from:" : "Extracted from:",
+	"Did not drop ${0}.  Folder drop is not supported in this browser.": "Did not drop ${0}.  Folder drop is not supported in this browser.",
+	"You cannot copy files directly into the workspace.  Create a folder first.": "You cannot copy files directly into the workspace.  Create a folder first.",
+	"Unzip ${0}?": "Unzip ${0}?",
+	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ ******************************************************************************/
+define('orion/navigate/nls/messages',['orion/i18n!orion/navigate/nls/messages', 'orion/navigate/nls/root/messages'], function(bundle, root) {
+	var result = {
+			root:root
+	};
+	Object.keys(bundle).forEach(function(key) {
+		if (typeof result[key] === 'undefined') {
+			result[key] = bundle[key];
+		}
+	});
+	return result;
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global exports module define setTimeout*/
+/*global exports module define setTimeout process document MutationObserver*/
 
 (function(root, factory) { // UMD
     if (typeof define === "function" && define.amd) { //$NON-NLS-0$
@@ -814,11 +947,32 @@ define('orion/edit/nls/messages',['orion/i18n!orion/edit/nls/messages', 'orion/e
         running = false;
     }
 
+	var runAsync = (function() {
+		if (typeof process !== "undefined" && typeof process.nextTick === "function") {
+			var nextTick = process.nextTick;
+    		return function() {
+    			nextTick(run);
+    		};
+		} else if (typeof MutationObserver === "function") {
+			var div = document.createElement("div");
+			var observer = new MutationObserver(run);
+			observer.observe(div, {
+            	attributes: true
+        	});
+        	return function() {
+        		div.setAttribute("class", "_tick");
+        	};
+		}
+		return function() {
+			setTimeout(run, 0);
+		};
+	})();
+
     function enqueue(fn) {
         queue.push(fn);
         if (!running) {
             running = true;
-            setTimeout(run, 0);
+            runAsync();
         }
     }
 
@@ -1180,87 +1334,102 @@ define('orion/edit/nls/messages',['orion/i18n!orion/edit/nls/messages', 'orion/e
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
- * Contributors: IBM Corporation - initial API and implementation
- *******************************************************************************/
+ ******************************************************************************/
 
-/*global define localStorage*/
-define('orion/i18nUtil',['require', 'orion/Deferred'], function(require, Deferred) {
+//NLS_CHARSET=UTF-8
 
-	var messageBundleDeffereds = {};
-
-	function formatMessage(msg) {
-		var args = arguments;
-		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) {
-			return args[(index << 0) + 1];
-		});
-	}
-
-	function getCachedMessageBundle(name) {
-		var item = localStorage.getItem('orion/messageBundle/' + name);
-		if (item) {
-			var bundle = JSON.parse(item);
-			if (bundle._expires && bundle._expires > new Date().getTime()) {
-				delete bundle._expires;
-				return bundle;
-			}
-		}
-		return null;
-	}
-
-	function setCachedMessageBundle(name, bundle) {
-		bundle._expires = new Date().getTime() + 1000 * 900; //15 minutes
-		localStorage.setItem('orion/messageBundle/' + name, JSON.stringify(bundle));
-		delete bundle._expires;
-	}
-
-	function getMessageBundle(name) {
-		if (messageBundleDeffereds[name]) {
-			return messageBundleDeffereds[name];
-		}
-
-		var d = new Deferred();
-		messageBundleDeffereds[name] = d;
-
-		var cached = getCachedMessageBundle(name);
-		if (cached) {
-				d.resolve(cached);
-				return d;
-		}
-
-		function _resolveMessageBundle(bundle) {
-			if (bundle) {
-				require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
-					if (bundle) {
-						setCachedMessageBundle(name, bundle);
-					}
-					d.resolve(bundle);
-				});
-			} else {
-				// IE disguises failure as success, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=428797
-				_rejectMessageBundle(new Error(name));
-			}
-		}
-
-		function _rejectMessageBundle(error) {
-			d.reject(error);
-		}
-
-		try {
-			require([name], _resolveMessageBundle, _rejectMessageBundle);
-		} catch (ignore) {
-			require(['orion/i18n!' + name], _resolveMessageBundle, _rejectMessageBundle); //$NON-NLS-0$
-		}
-		return d;
-	}
-	return {
-		getMessageBundle: getMessageBundle,
-		formatMessage: formatMessage
-	};
+define('orion/nls/root/messages',{
+	"Navigator": "Navigator",
+	"Sites": "Sites",
+	"Shell": "Shell",
+	"ShellLinkWorkspace": "Workspace Shell",
+	"Get Plugins": "Get Plugins",
+	"Global": "Global",
+	"Editor": "Editor",
+	"EditorRelatedLink": "Show Current Folder",
+	"EditorRelatedLinkParent": "Show Enclosing Folder",
+	"EditorLinkWorkspace": "Show Workspace",
+	"EditorRelatedLinkProj": "Show Project",
+	"Filter bindings": "Filter bindings",
+	"Orion Editor": "Orion Editor",
+	"Orion Image Viewer": "Orion Image Viewer",
+	"Orion Markdown Viewer": "Orion Markdown Viewer",
+	"Orion JSON Editor": "Orion JSON Editor",
+	"View on Site": "View on Site",
+	"View this file or folder on a web site hosted by Orion": "View this file or folder on a web site hosted by Orion.",
+	"Show a list of all the keybindings on this page": "Show a list of all the keybindings on this page",
+	"Show Keys": "Show Keys",
+	"Hide or show the page banner and footer": "Hide or show the page banner and footer",
+	"Toggle banner and footer": "Toggle banner and footer",
+	"Choose a file by name and open an editor on it": "Choose a file by name and open an editor on it",
+	"Find File Named...": "Find File Named...",
+	"System Configuration Details": "System Configuration Details",
+	"System Config Tooltip": "Go to the System Configuration Details page",
+	"Background Operations": "Background Operations",
+	"Background Operations Tooltip": "Go to the Background Operations page",
+	"Operation status is unknown": "Operation status is unknown",
+	"Unknown item": "Unknown item",
+	"Can't search: no search service is available": "Can't search: no search service is available",
+	"could not find banner parent, id was ": "could not find banner parent, id was ",
+	"Related": "Related",
+	"Options": "Options",
+	"FAQ": "FAQ",
+	"Report a Bug": "Bugs",
+	"Privacy Policy": "Privacy",
+	"Terms of Use": "Terms",
+	"Copyright Agent": "Copyright",
+	"Orion Logo": "Orion Logo",
+	"Orion is in Beta. Please try it out but BEWARE your data may be lost.": "@buildLabel@",
+	"LOG: ": "LOG: ",
+	"View": "View",
+	"no parent": "no parent",
+	"no tree model": "no tree model",
+	"no renderer": "no renderer",
+	"could not find table row ": "could not find table row ",
+	"Resource is out of sync with the server. Do you want to save it anyway?": "Resource is out of sync with the server. Do you want to save it anyway?",
+	"Operations": "Operations",
+	"Operations running": "Operations running",
+	"Some operations finished with warning": "Some operations finished with warning",
+	"Some operations finished with error": "Some operations finished with error",
+	"no service registry": "no service registry",
+	"Tasks": "Tasks",
+	"Close": "Close",
+	"Expand all": "Expand all",
+	"Collapse all": "Collapse all",
+	"Search" : "Search",
+	"Advanced search" : "Advanced search",
+	"Submit" : "Submit",
+	"More" : "More",
+	"Saved searches" : "Saved searches",
+	"Recent searches" : "Recent searches",
+	"Regular expression" : "Regular expression",
+	"Search options" : "Search options",
+	"Global search" : "Global search",
+	"Orion Home" : "Orion Home",
+	"Close notification" : "Close notification",
+	"Operations - Press spacebar to show current operations" : "Operations - Press spacebar to show current operations",
+	"Type a keyword or wild card to search in root" : "Type a keyword or wild card to search in root",
+	"Toggle side panel" : "Toggle side panel",
+	"Open or close the side panel": "Open or close the side panel",
+	"Projects" : "Projects",
+	"Toggle Sidebar" : "Toggle Sidebar",
+	"Sample HTML5 Site": "Sample HTML5 Site",
+	"Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.": "Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.",
+	"Sample Orion Plugin": "Sample Orion Plugin",
+	"Generate a sample plugin for integrating with Orion.": "Generate a sample plugin for integrating with Orion.",
+	"Browser": "Web Browser",
+	"OutlineProgress": "Getting outline for ${0} from ${1}",
+	"UnknownError": "An unknown error occurred.",
+	"UnknownWarning": "An unknown warning occurred.",
+	"Filter": "Filter (* = any string, ? = any character)",
+	"To view the browser's context menu, trigger the context menu again.": "To view the browser's context menu, trigger the context menu again.",
+	"Edit": "Edit",
+	"CentralNavTooltip": "Toggle Navigation Menu"
 });
 
 /*******************************************************************************
@@ -1270,742 +1439,18 @@ define('orion/i18nUtil',['require', 'orion/Deferred'], function(require, Deferre
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-/*global define console*/
-
-define('orion/EventTarget',[],function() {
-	/**
-	 * Creates an Event Target
-	 *
-	 * @name orion.EventTarget
-	 * @class Base for creating an Orion event target
-	 */
-	function EventTarget() {
-		this._namedListeners = {};
-	}
-
-	EventTarget.prototype = /** @lends orion.EventTarget.prototype */
-	{
-		/**
-		 * Dispatches a named event along with an arbitrary set of arguments. Any arguments after <code>eventName</code>
-		 * will be passed to the event listener(s).
-		 * @param {Object} event The event to dispatch. The event object MUST have a type field
-		 * @returns {boolean} false if the event has been canceled and any associated default action should not be performed
-		 * listeners (if any) have resolved.
-		 */
-		dispatchEvent: function(event) {
-			if (!event.type) {
-				throw new Error("unspecified type");
-			}
-			var listeners = this._namedListeners[event.type];
-			if (listeners) {
-				listeners.forEach(function(listener) {
-					try {
-						if (typeof listener === "function") {
-							listener(event);
-						} else {
-							listener.handleEvent(event);
-						}
-					} catch (e) {
-						if (typeof console !== 'undefined') {
-							console.log(e); // for now, probably should dispatch an ("error", e)
-						}
-					}			
-				});
-			}
-			return !event.defaultPrevented;
-		},
-
-		/**
-		 * Adds an event listener for a named event
-		 * @param {String} eventName The event name
-		 * @param {Function} listener The function called when an event occurs
-		 */
-		addEventListener: function(eventName, listener) {
-			if (typeof listener === "function" || listener.handleEvent) {
-				this._namedListeners[eventName] = this._namedListeners[eventName] || [];
-				this._namedListeners[eventName].push(listener);
-			}
-		},
-
-		/**
-		 * Removes an event listener for a named event
-		 * @param {String} eventName The event name
-		 * @param {Function} listener The function called when an event occurs
-		 */
-		removeEventListener: function(eventName, listener) {
-			var listeners = this._namedListeners[eventName];
-			if (listeners) {
-				for (var i = 0; i < listeners.length; i++) {
-					if (listeners[i] === listener) {
-						if (listeners.length === 1) {
-							delete this._namedListeners[eventName];
-						} else {
-							listeners.splice(i, 1);
-						}
-						break;
-					}
-				}
-			}
-		}
-	};
-	EventTarget.prototype.constructor = EventTarget;
-	
-	EventTarget.attach = function(obj) {
-		var eventTarget = new EventTarget();
-		obj.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
-		obj.addEventListener = eventTarget.addEventListener.bind(eventTarget);
-		obj.removeEventListener = eventTarget.removeEventListener.bind(eventTarget);
-	};
-	
-	return EventTarget;
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
- * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define*/
-define('orion/objects',[], function() {
-	function mixin(target/*, source..*/) {
-		for (var j = 1; j < arguments.length; j++) {
-			var source = arguments[j];
-			for (var key in source) {
-				if (Object.prototype.hasOwnProperty.call(source, key)) {
-					target[key] = source[key];
-				}
-			}
-		}
-		return target;
-	}
-
-	/**
-	 * @name orion.objects
-	 * @class Object-oriented helpers.
-	 */
-	return {
-		/**
-		 * Creates a shallow clone of the given <code>object</code>.
-		 * @name orion.objects.clone
-		 * @function
-		 * @static
-		 * @param {Object|Array} object The object to clone. Must be a "normal" Object or Array. Other built-ins,
-		 * host objects, primitives, etc, will not work.
-		 * @returns {Object|Array} A clone of <code>object</code>.
-		 */
-		clone: function(object) {
-			if (Array.isArray(object)) {
-				return Array.prototype.slice.call(object);
-			}
-			var clone = Object.create(Object.getPrototypeOf(object));
-			mixin(clone, object);
-			return clone;
-		},
-		/**
-		 * Mixes all <code>source</code>'s own enumerable properties into <code>target</code>. Multiple source objects
-		 * can be passed as varags.
-		 * @name orion.objects.mixin
-		 * @function
-		 * @static
-		 * @param {Object} target
-		 * @param {Object} source
-		 */
-		mixin: mixin,
-		/**
-		 * Wraps an object into an Array if necessary.
-		 * @name orion.objects.toArray
-		 * @function
-		 * @static
-		 * @param {Object} obj An object.
-		 * @returns {Array} Returns <code>obj</code> unchanged, if <code>obj</code> is an Array. Otherwise returns a 1-element Array
-		 * whose sole element is <code>obj</code>.
-		 */
-		toArray: function(o) {
-			return Array.isArray(o) ? o : [o];
-		}
+define('orion/nls/messages',['orion/i18n!orion/nls/messages', 'orion/nls/root/messages'], function(bundle, root) {
+	var result = {
+			root:root
 	};
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2010, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-
-/*global define window */
-/*jslint browser:true*/
-define('orion/inputManager',[
-	'i18n!orion/edit/nls/messages',
-	'orion/i18nUtil',
-	'orion/Deferred',
-	'orion/EventTarget',
-	'orion/objects',
-	'orion/PageUtil'
-], function(messages, i18nUtil, Deferred, EventTarget, objects, PageUtil) {
-
-	function Idle(options){
-		this._document = options.document || document;
-		this._timeout = options.timeout;
-		//TODO: remove listeners if there are no clients
-		//TODO: add support for multiple clients with different timeouts
-		var events = ["keypress","keydown","keyup","mousemove","mousedown","mousemove"]; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		var reset = function (e) { this._resetTimer(); }.bind(this);
-		for (var i = 0; i < events.length; i++) {
-			var event = events[i];
-			this._document.addEventListener(event, reset, true);
-		}
-		EventTarget.attach(this);
-	}
-
-	Idle.prototype = {
-		_resetTimer: function() {
-			var window = this._document.defaultView || this._document.parentWindow;
-			if (this._timer) {
-				window.clearTimeout(this._timer);
-				this._timer = null;
-			}
-			if (this._timeout !== -1) {
-				this._timer = window.setTimeout(function() {
-					this.onIdle({type:"Idle"});	//$NON-NLS-0$
-					this._timer = null;
-					this._resetTimer();
-				}.bind(this), this._timeout);
-			}
-		},
-		onIdle: function (idleEvent) {
-			return this.dispatchEvent(idleEvent);
-		},
-		setTimeout: function(timeout) {
-			this._timeout = timeout;
-			this._resetTimer();
-		}
-	};
-
-	function handleError(statusService, error) {
-		if (!statusService) {
-			window.console.log(error);
-			return;
-		}
-		var newError;
-		if (error.status === 0) {
-			newError = {
-				Severity: "Error", //$NON-NLS-0$
-				Message: messages.noResponse
-			};
-		} else {
-			var responseText = error.responseText;
-			if (responseText) {
-				try {
-					newError = JSON.parse(responseText);
-				} catch(e) {
-					newError = {
-						//HTML: true,
-						Severity: "Error", //$NON-NLS-0$
-						Message: responseText
-					};
-				}
-				if(!newError.Severity) {
-					newError.Severity = "Error"; //$NON-NLS-0$
-				}
-				if(!newError.Message) {
-					newError.Message = responseText;
-				}
-			} else {
-				newError = {
-					Severity: "Error", //$NON-NLS-0$
-					Message: JSON.stringify(error)
-				};
-			}
-		}
-		statusService.setProgressResult(newError);
-	}
-
-	/**
-	 * @name orion.editor.InputManager
-	 * @class
-	 */
-	function InputManager(options) {
-		EventTarget.attach(this);
-		this.serviceRegistry = options.serviceRegistry;
-		this.statusService = options.statusService;
-		this.fileClient = options.fileClient;
-		this.progressService = options.progressService;
-		this.contentTypeRegistry = options.contentTypeRegistry;
-		this.selection = options.selection;
-		this._input = this._title = "";
-		this.dispatcher = null;
-		this._unsavedChanges = [];
-	}
-	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
-		/**
-		 * @returns {orion.Promise} Promise resolving to the new Location we should use
-		 */
-		_maybeLoadWorkspace: function(resource) {
-			var fileClient = this.fileClient;
-			// If it appears to be a workspaceRootURL we cannot load it directly, have to get the workspace first
-			if (resource === fileClient.fileServiceRootURL(resource)) {
-				return fileClient.loadWorkspace(resource).then(function(workspace) {
-					return workspace.Location;
-				});
-			}
-			return new Deferred().resolve(resource);
-		},
-		/**
-		 * Wrapper for fileClient.read() that tolerates a filesystem root URL passed as location. If location is indeed
-		 * a filesystem root URL, the original read() operation is instead performed on the workspace.
-		 */
-		_read: function(location /**, readArgs*/) {
-			if (this.cachedMetadata && this.cachedMetadata.Location === location) {
-				return new Deferred().resolve(this.cachedMetadata);
-			}
-			var fileClient = this.fileClient;
-			var readArgs = Array.prototype.slice.call(arguments, 1);
-			return this._maybeLoadWorkspace(location).then(function(newLocation) {
-				return fileClient.read.apply(fileClient, [newLocation].concat(readArgs));
-			});
-		},
-		load: function() {
-			var fileURI = this.getInput();
-			if (!fileURI) { return; }
-			var fileClient = this.fileClient;
-			var resource = this._parsedLocation.resource;
-			var progressService = this.progressService;
-			var progress = function(deferred, msgKey, uri) {
-				if (!progressService) { return deferred; }
-				return progressService.progress(deferred, i18nUtil.formatMessage(msgKey, uri));
-			};
-			var editor = this.getEditor();
-			if (this._fileMetadata) {
-				//Reload if out of sync, unless we are already in the process of saving
-				if (!this._saving && !this._fileMetadata.Directory && !this._readonly) {
-					progress(fileClient.read(resource, true), messages.ReadingMetadata, fileURI).then(function(data) {
-						if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
-							this._fileMetadata = data;
-							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
-								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
-									editor.setInput(fileURI, null, contents);
-									this._unsavedChanges = [];
-								}.bind(this));
-							}
-						}
-					}.bind(this));
-				}
-			} else {
-				//TODO this URL parsing to retrieve the should be done in the server side.
-				//TODO /gitapi/commit URLs are not supported be the orion file client.
-				var metadataURI = resource;
-				if (metadataURI.indexOf("/gitapi/commit/") === 0) { //$NON-NLS-0$
-					var start = metadataURI.indexOf("/file"); //$NON-NLS-0$
-					var end = metadataURI.indexOf("?", start); //$NON-NLS-0$
-					if (end === -1) { end = metadataURI.length; }
-					metadataURI = metadataURI.substring(start, end);
-					this._readonly = true;
-				}
-				var progressTimeout = window.setTimeout(function() {
-					progressTimeout = null;
-					this.reportStatus(i18nUtil.formatMessage(messages.Fetching, fileURI));
-				}.bind(this), 800);
-				var clearTimeout = function() {
-					this.reportStatus("");
-					if (progressTimeout) {
-						window.clearTimeout(progressTimeout);
-					}
-				}.bind(this);
-				var errorHandler = function(error) {
-					clearTimeout();
-					var statusService = null;
-					if(this.serviceRegistry) {
-						statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-					} else if(this.statusService) {
-						statusService = this.statusService;
-					}
-					handleError(statusService, error);
-					this._setNoInput();
-				}.bind(this);
-				this._acceptPatch = null;
-				// Read metadata
-				progress(this._read(metadataURI, true), messages.ReadingMetadata, metadataURI).then(function(metadata) {
-					if(!metadata) {
-						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, metadataURI)});
-					} else if (metadata.Directory) {
-						// Fetch children
-						Deferred.when(metadata.Children || progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI), function(contents) {
-							clearTimeout();
-							metadata.Children = contents;
-							this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
-						}.bind(this), errorHandler);
-					} else {
-						// Read contents if this is a text file
-						if (this._isText(metadata)) {
-							// Read text contents
-							progress(fileClient.read(resource, false, true), messages.Reading, fileURI).then(function(contents) {
-								clearTimeout();
-								if (typeof contents !== "string") { //$NON-NLS-0$
-									this._acceptPatch = contents.acceptPatch;
-									contents = contents.result;
-								}
-								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
-							}.bind(this), errorHandler);
-						} else {
-							progress(fileClient._getService(resource).readBlob(resource), messages.Reading, fileURI).then(function(contents) {
-								clearTimeout();
-								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
-							}.bind(this), errorHandler);
-						}
-					}
-				}.bind(this), errorHandler);
-			}
-		},
-		processParameters: function(input) {
-			var editor = this.getEditor();
-			if (editor && editor.processParameters) {
-				editor.processParameters(input);
-			}
-		},
-		getAutoLoadEnabled: function() {
-			return this._autoLoadEnabled;
-		},
-		getAutoSaveEnabled: function() {
-			return this._autoSaveEnabled;
-		},
-		getEditor: function() {
-			return this.editor;
-		},
-		getInput: function() {
-			return this._input;
-		},
-		getTitle: function() {
-			return this._title;
-		},
-		getFileMetadata: function() {
-			return this._fileMetadata;
-		},
-		getReadOnly: function() {
-			var data = this._fileMetadata;
-			return this._readonly || !data || (data.Attributes && data.Attributes.ReadOnly);
-		},
-		getContentType: function() {
-			return this._contentType;
-		},
-		onFocus: function(e) {
-			// If there was an error while auto saving, auto save is temporarily disabled and
-			// we retry saving every time the editor gets focus
-			if (this._autoSaveEnabled && this._errorSaving) {
-				this.save();
-				return;
-			}
-			if (this._autoLoadEnabled) {
-				this.load();
-			}
-		},
-		onChanging: function(e) {
-			if (!this._getSaveDiffsEnabled()) { return; }
-			var length = this._unsavedChanges.length;
-			var addedCharCount = e.addedCharCount;
-			var removedCharCount = e.removedCharCount;
-			var start = e.start;
-			var end = e.start + removedCharCount;
-			var type = 0;
-			if (addedCharCount === 0) {
-				type = -1;
-			} else if (removedCharCount === 0) {
-				type = 1;
-			}
-			if (length > 0) {
-				if (type === this.previousChangeType) {
-					var previousChange = this._unsavedChanges[length-1];
-					if (removedCharCount === 0 && start === previousChange.end + previousChange.text.length) {
-						previousChange.text += e.text;
-						return;
-					}
-					if (e.addedCharCount === 0 && end === previousChange.start) {
-						previousChange.start = start;
-						return;
-					}
-				}
-			}
-			this.previousChangeType = type;
-			this._unsavedChanges.push({start:start, end:end, text:e.text});
-		},
-		reportStatus: function(msg) {
-			if (this.statusReporter) {
-				this.statusReporter(msg);
-			} else if (this.editor) {
-				this.editor.reportStatus(msg);
-			}
-		},
-		save: function() {
-			if (this._saving) { return; }
-			var editor = this.getEditor();
-			if (!editor || !editor.isDirty() || this.getReadOnly()) { return; }
-			var failedSaving = this._errorSaving;
-			this._saving = true;
-			var input = this.getInput();
-			this.reportStatus(messages['Saving...']);
-
-			this.dispatchEvent({ type: "Saving", inputManager: this}); //$NON-NLS-0$
-
-			editor.markClean();
-			var contents = editor.getText();
-			var data = contents;
-			if (this._getSaveDiffsEnabled() && !this._errorSaving) {
-				var changes = this._unsavedChanges;
-				var length = 0;
-				for (var i = 0; i < changes.length; i++) {
-					length += changes[i].text.length;
-				}
-				if (contents.length > length) {
-					data = {
-						diff: changes
-					};
-				}
-			}
-			this._unsavedChanges = [];
-			this._errorSaving = false;
-
-			var etag = this.getFileMetadata().ETag;
-			var args = { "ETag" : etag }; //$NON-NLS-0$
-			var resource = this._parsedLocation.resource;
-			var def = this.fileClient.write(resource, data, args);
-			var progress = this.progressService;
-			var statusService = null;
-			if(this.serviceRegistry){
-				statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-			}
-			if (progress) {
-				def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
-			}
-			var self = this;
-			function successHandler(result) {
-				if (input === self.getInput()) {
-					self.getFileMetadata().ETag = result.ETag;
-					editor.setInput(input, null, contents, true);
-				}
-				self.reportStatus("");
-				if (failedSaving && statusService) {
-					statusService.setProgressResult({Message:messages.Saved, Severity:"Normal"}); //$NON-NLS-0$
-				}
-				if (self.afterSave) {
-					self.afterSave();
-				}
-				self._saving = false;
-			}
-			function errorHandler(error) {
-				self.reportStatus("");
-				handleError(statusService, error);
-				self._saving = false;
-				self._errorSaving = true;
-			}
-			def.then(successHandler, function(error) {
-				// expected error - HTTP 412 Precondition Failed
-				// occurs when file is out of sync with the server
-				if (error.status === 412) {
-					var forceSave = window.confirm(messages.saveOutOfSync);
-					if (forceSave) {
-						// repeat save operation, but without ETag
-						var def = self.fileClient.write(resource, contents);
-						if (progress) {
-							def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
-						}
-						def.then(successHandler, errorHandler);
-					} else {
-						self._saving = false;
-					}
-				} else {
-					// unknown error
-					errorHandler(error);
-				}
-			});
-		},
-		setAutoLoadEnabled: function(enabled) {
-			this._autoLoadEnabled = enabled;
-		},
-		/**
-		 * Set the autosave timeout. If the timeout is <code>-1</code>, autosave is
-		 * disabled.
-		 * @param {Number} timeout - the autosave timeout in milliseconds
-		 */
-		setAutoSaveTimeout: function(timeout) {
-			this._autoSaveEnabled = timeout !== -1;
-			if (!this._idle) {
-				var options = {
-					document: document,
-					timeout: timeout
-				};
-				this._idle = new Idle(options);
-				this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
-					if (!this._errorSaving) {
-						this.save();
-					}
-				}.bind(this));
-			} else {
-				this._idle.setTimeout(timeout);
-			}
-		},
-		setContentType: function(contentType) {
-			this._contentType = contentType;
-		},
-		setInput: function(location) {
-			if (this._ignoreInput) { return; }
-			if (!location) {
-				location = PageUtil.hash();
-			}
-			if (typeof location !== "string") { //$NON-NLS-0$
-				return;
-			}
-			var editor = this.getEditor();
-			if (location && location[0] !== "#") { //$NON-NLS-0$
-				location = "#" + location; //$NON-NLS-0$
-			}
-			var input = PageUtil.matchResourceParameters(location), oldInput = this._parsedLocation || {};
-			if (editor && editor.isDirty()) {
-				var oldLocation = this._location;
-				var oldResource = oldInput.resource;
-				var newResource = input.resource;
-				if (oldResource !== newResource) {
-					if (this._autoSaveEnabled) {
-						this.save();
-					} else if (!window.confirm(messages.confirmUnsavedChanges)) {
-						window.location.hash = oldLocation;
-						return;
-					}
-				}
-			}
-			var editorChanged = editor && oldInput.editor !== input.editor;
-			this._location = location;
-			this._parsedLocation = input;
-			this._ignoreInput = true;
-			if(this.selection) {
-				this.selection.setSelections(location);
-			}
-			this._ignoreInput = false;
-			var fileURI = input.resource;
-			if (fileURI) {
-				if (fileURI === this._input) {
-					if (editorChanged) {
-						this.reportStatus("");
-						this._setInputContents(input, fileURI, null, this._fileMetadata, this._isText(this._fileMetadata));
-					} else {
-						this.processParameters(input);
-					}
-				} else {
-					this._input = fileURI;
-					this._readonly = false;
-					this._fileMetadata = null;
-					this.load();
-				}
-			} else {
-				this._setNoInput(true);
-			}
-		},
-		setTitle: function(title) {
-			var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
-			var shortTitle = title;
-			if (indexOfSlash !== -1) {
-				shortTitle = shortTitle.substring(indexOfSlash + 1);
-			}
-			this._title = shortTitle;
-		},
-		setSaveDiffsEnabled: function(enabled) {
-			this._saveDiffsEnabled = enabled;
-		},
-		_getSaveDiffsEnabled: function() {
-			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
-		},
-		_isText: function(metadata) {
-			var contentType = this.contentTypeRegistry.getFileContentType(metadata);
-			// Allow unkownn content types to be loaded as text files
-			if (!contentType) { return true; }
-			var textPlain = this.contentTypeRegistry.getContentType("text/plain"); //$NON-NLS-0$
-			return this.contentTypeRegistry.isExtensionOf(contentType, textPlain);
-		},
-		_setNoInput: function(loadRoot) {
-			if (loadRoot) {
-				this.fileClient.loadWorkspace("").then(function(root) {
-					this._input = root.ChildrenLocation;
-					this._setInputContents(root.ChildrenLocation, null, root, root);
-				}.bind(this));
-				return;
-			}
-			// No input, no editor.
-			this._input = this._title = this._fileMetadata = null;
-			this.setContentType(null);
-			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
-		},
-		_setInputContents: function(input, title, contents, metadata, noSetInput) {
-			var name, isDir = false;
-			if (metadata) {
-				this._fileMetadata = metadata;
-				this.setTitle(metadata.Location || String(metadata));
-				this.setContentType(this.contentTypeRegistry.getFileContentType(metadata));
-				name = metadata.Name;
-				isDir = metadata.Directory;
-			} else {
-				// No metadata
-				this._fileMetadata = null;
-				this.setTitle(title);
-				this.setContentType(this.contentTypeRegistry.getFilenameContentType(this.getTitle()));
-				name = this.getTitle();
-			}
-			var editor = this.getEditor();
-			if (this._focusListener) {
-				if (editor && editor.getTextView && editor.getTextView()) {
-					editor.getTextView().removeEventListener("Focus", this._focusListener); //$NON-NLS-0$
-				}
-				this._focusListener = null;
-			}
-			if (this._changingListener) {
-				if (editor && editor.getModel && editor.getModel()) {
-					editor.getModel().removeEventListener("Changing", this._changingListener); //$NON-NLS-0$
-				}
-				this._changingListener = null;
-			}
-			var evt = {
-				type: "InputChanged", //$NON-NLS-0$
-				input: input,
-				name: name,
-				title: title,
-				contentType: this.getContentType(),
-				metadata: metadata,
-				location: window.location,
-				contents: contents
-			};
-			this.dispatchEvent(evt);
-			this.editor = editor = evt.editor;
-			if (!isDir) {
-				if (editor && editor.getModel && editor.getModel()) {
-					editor.getModel().addEventListener("Changing", this._changingListener = this.onChanging.bind(this)); //$NON-NLS-0$
-				}
-				if (!noSetInput) {
-					editor.setInput(title, null, contents);
-				}
-				if (editor && editor.getTextView && editor.getTextView()) {
-					editor.getTextView().addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
-				}
-				this._unsavedChanges = [];
-				this.processParameters(input);
-			}
+	Object.keys(bundle).forEach(function(key) {
+		if (typeof result[key] === 'undefined') {
+			result[key] = bundle[key];
 		}
 	});
-	return {
-		handleError: handleError,
-		InputManager: InputManager
-	};
+	return result;
 });
 
 /*******************************************************************************
@@ -2464,1284 +1909,6 @@ define('orion/webui/littlelib',["orion/util"], function(util) {
 		setFramesEnabled: setFramesEnabled,
 		removeAutoDismiss: removeAutoDismiss,
 		KEY: KEY
-	};
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- * Contributors: IBM Corporation - initial API and implementation
- ******************************************************************************/
-/*global window define document */
-define('orion/breadcrumbs',['require', 'orion/webui/littlelib'], function (require, lib) {
-
-    /**
-     * Constructs a new BreadCrumb with the given options.
-     * @param {Object} options The options object, which must specify the parent container.
-     * @param options.container The parent container for the bread crumb presentation
-     * @param [options.resource] The current resource
-     * @param [options.rootSegmentName] The name to use for the root segment in lieu of the metadata name.
-     * @param [options.workspaceRootSegmentName] The name to use for the workspace root. If not specified, the workspace root
-     * will not be shown.
-     * @param {Function} [options.makeHref] The callback function to make the href on a bread crumb item. If not defined "/edit/edit.html#" is used.
-     * @param {Function} [option.getFirstSegment] The callback function to make DOM node for the first segment in breadcrumb. 
-     * @class Bread crumbs show the current position within a resource tree and allow navigation
-     * to different places in the tree. Unlike the fairy tale, bread crumbs typically don't lead
-     * to a cottage made of gingerbread. Sorry!
-     * @name orion.breadcrumbs.BreadCrumbs
-     */
-
-    function BreadCrumbs(options) {
-        this._init(options);
-    }
-    BreadCrumbs.prototype = /** @lends orion.breadcrumbs.BreadCrumbs.prototype */ {
-        _init: function (options) {
-            var container = lib.node(options.container);
-            if (!container) {
-                throw "no parent container"; //$NON-NLS-0$
-            }
-            this._container = container;
-            container.classList.remove("currentLocation"); //$NON-NLS-0$
-            this._id = options.id || "eclipse.breadcrumbs"; //$NON-NLS-0$
-            this._resource = options.resource || null;
-            this._rootSegmentName = options.rootSegmentName;
-            this._workspaceRootSegmentName = options.workspaceRootSegmentName;
-			this._workspaceRootURL = options.workspaceRootURL;
-            this._makeHref = options.makeHref;
-            this._makeFinalHref = options.makeFinalHref;
-            this._maxLength = options.maxLength;
-            this.path = "";
-            this.measure();
-            this.render();
-        },
-
-        getNavigatorWorkspaceRootSegment: function () {
-            if (this._workspaceRootSegmentName) {
-                var seg;
-                if (this._resource && this._resource.Parents && !this._resource.skip) {
-                    seg = document.createElement('a'); //$NON-NLS-0$
-					var param = this._workspaceRootURL ? this._workspaceRootURL : "";
-                    if (this._makeHref) {
-                        this._makeHref(seg, param );
-                    } else {
-                        seg.href = require.toUrl("edit/edit.html") + "#" + param; //$NON-NLS-1$ //$NON-NLS-0$
-                    }
-                } else {
-                    seg = document.createElement('span'); //$NON-NLS-0$
-                }
-                lib.empty(seg);
-                seg.appendChild(document.createTextNode(this._workspaceRootSegmentName));
-                return seg;
-            }
-            return null;
-        },
-
-        MAX_LENGTH: 500,
-        INCLUDE_FIRST_SECTION: true,
-
-        segments: [],
-
-        buildSegment: function (name) {
-            var segment = document.createElement('a'); //$NON-NLS-0$
-            segment.classList.add("breadcrumb"); //$NON-NLS-0$
-            segment.appendChild(document.createTextNode(name));
-            return segment;
-        },
-
-        addSegmentHref: function (seg, section) {
-            if (this._makeHref) {
-                this._makeHref(seg, section.Location, section);
-            } else {
-                seg.href = require.toUrl("edit/edit.html") + "#" + section.ChildrenLocation; //$NON-NLS-1$ //$NON-NLS-0$
-            }
-        },
-
-        buildSegments: function (firstSegmentName, direction) {
-	
-			if( this._resource.Parents ){      
-	            var parents = this._resource.Parents.slice(0); // create a copy
-	            var seg;
-	            var segmentName;
-	            
-	            if( parents ){
-	
-		            var collection = parents.slice(0);
-		
-		            if (direction === 'reverse') { //$NON-NLS-0$
-		                collection = collection.reverse().slice(0);
-		            }
-		
-		            collection.forEach(function (parent) {
-						if(parent.skip) {
-							return;
-						}
-		                if (firstSegmentName) {
-		                    segmentName = firstSegmentName;
-		                    firstSegmentName = null;
-		                } else {
-		                    segmentName = parent.Name;
-		                }
-		
-		                seg = this.buildSegment(segmentName);
-		                
-		
-			                this.path += parent.Name;
-			                this.addSegmentHref(seg, parent);
-		                
-		                seg.include = false;
-		                this.segments.push(seg);
-		
-		            }.bind(this));         
-	            }
-            }
-        },
-
-        addDivider: function () {
-            var slash = document.createElement('span'); //$NON-NLS-0$
-            slash.appendChild(document.createTextNode(' / ')); //$NON-NLS-0$
-            this.path += "/"; //$NON-NLS-0$
-            slash.classList.add("breadcrumbSeparator"); //$NON-NLS-0$		
-            this.append(slash);
-        },
-
-        refresh: function () {
-            this.crumbs = lib.node(this._id);
-
-            if (this.crumbs) {
-                lib.empty(this.crumbs);
-            } else {
-                this.crumbs = document.createElement('span'); //$NON-NLS-0$
-                this.crumbs.id = this._id;
-                this._container.appendChild(this.crumbs);
-
-                this.dirty = document.createElement('span'); //$NON-NLS-0$
-                this.dirty.id = "dirty"; //$NON-NLS-0$
-                this.dirty.className = "modifiedFileMarker"; //$NON-NLS-0$
-                this._container.appendChild(this.dirty);
-            }
-            
-            this.crumbs.style.width = 'auto'; //$NON-NLS-0$
-            this.crumbs.style.visibility = 'visible'; //$NON-NLS-0$
-            this.crumbs.parentNode.className = "currentLocation"; //$NON-NLS-0$
-            this.crumbs.parentNode.style.width = 'auto'; //$NON-NLS-0$
-        },
-
-        append: function (section) {
-            this.crumbs.appendChild(section);
-        },
-
-        addTitle: function (seg, firstSegmentName) {
-            // if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
-
-			var text = firstSegmentName || document.title;
-
-            if (this.crumbs.childNodes.length === 0) {
-                seg = document.createElement('span'); //$NON-NLS-0$
-                seg.appendChild(document.createTextNode( text ));
-                seg.classList.add("breadcrumb"); //$NON-NLS-0$
-                seg.classList.add("currentLocation"); //$NON-NLS-0$
-                this.append(seg);
-            }
-        },
-
-        finalSegment: function (seg, firstSegmentName) {
-        	if(this._resource.skip) {
-        		return;
-        	}
-            var name;
-            if (firstSegmentName) {
-                name = firstSegmentName;
-            } else {
-				name = this._resource.Name;
-            }
-            if (this._makeFinalHref) {
-               seg = this.buildSegment(name); //$NON-NLS-0$
-               this.addSegmentHref(seg, this._resource);
-            } else {
-                seg = document.createElement('span'); //$NON-NLS-0$
-                seg.appendChild(document.createTextNode( name ));
-            }
-            seg.classList.add("currentLocation"); //$NON-NLS-0$
-            this.path += this._resource.Name;
-            this.append(seg);
-        },
-
-        firstSegment: function (segment) {
-            if (segment) {
-                this.append(segment);
-
-                if (this._resource && this._resource.Parents && !this._resource.skip) {
-                    segment.classList.add("breadcrumb"); //$NON-NLS-0$
-                    this.addDivider();
-                } else { // we are at the root.  Get rid of any href since we are already here
-                    if(!this._resource.skip) {
-                    	segment.href = "";
-                    }
-                    segment.classList.add("currentLocation"); //$NON-NLS-0$
-                    return;
-                }
-            }
-        },
-
-        drawSegments: function () {
-
-            if (this._resource.Parents) {
-                var reverseParents = this.segments.slice(0);
-                reverseParents.forEach(function (parent) {
-                    if (parent.include === true) {
-                        this.append(parent);
-                        this.addDivider();
-                    }
-                }.bind(this));
-            }
-        },
-
-        measureSegments: function () {
-
-            this.INCLUDE_FIRST_SECTION = true;
-
-            if (this._resource.Parents) {
-                var reverseParents = this.segments.slice(0).reverse();
-                reverseParents.forEach(function (parent) {
-                    this.append(parent);
-                    this.addDivider();
-                    if (this.crumbs.offsetWidth < this.MAX_LENGTH) {
-                        parent.include = true;
-                    } else {
-                        this.INCLUDE_FIRST_SECTION = false;
-                    }
-
-                }.bind(this));
-
-                this.segments = reverseParents.reverse();
-            }
-        },
-
-        measure: function () {
-        
-        	var middleWidth = this._container;
-
-			middleWidth.style.width = 'auto';
-			
-			if(this._maxLength) {
-        		this.MAX_LENGTH = this._maxLength;
-			} else {
-        		this.MAX_LENGTH = middleWidth.offsetWidth;
-        	}
-
-            this.refresh();
-            
-            this.segments = [];
-
-            this.crumbs.style.visibility = 'hidden'; //$NON-NLS-0$
-
-            var segment = this.getNavigatorWorkspaceRootSegment();
-
-            var firstSegmentName = this._rootSegmentName;
-
-            if (firstSegmentName) {
-                this.addTitle(segment, firstSegmentName);
-            } else {
-                this.finalSegment(segment, firstSegmentName);
-
-                if (this._resource && this._resource.Parents) {
-                    this.buildSegments(firstSegmentName, 'reverse'); //$NON-NLS-0$
-                    this.measureSegments();
-                    this.firstSegment(segment);   
-                }
-	
-				if (this.crumbs.offsetWidth >= this.MAX_LENGTH) {
-                        this.INCLUDE_FIRST_SECTION = false;
-				}
-            }
-        },
-
-        render: function () {
-
-            this.refresh();
-
-            var segment = this.getNavigatorWorkspaceRootSegment();
-
-            var firstSegmentName = this._rootSegmentName;
-
-            if (firstSegmentName) {
-                this.addTitle(segment, firstSegmentName);
-            } else {
-            
-				if (this.INCLUDE_FIRST_SECTION === true) {
-                    this.firstSegment(segment);
-                }
-
-                if (this._resource && this._resource.Parents) {
-                    this.drawSegments();
-                    this.finalSegment(segment, firstSegmentName);
-                }
-            }
-
-            this.crumbs.parentNode.style.width = this.crumbs.offsetWidth + 20 + 'px';    //$NON-NLS-0$
-        }
-    };
-
-    BreadCrumbs.prototype.constructor = BreadCrumbs;
-    return {
-        BreadCrumbs: BreadCrumbs
-    };
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- ******************************************************************************/
-
-//NLS_CHARSET=UTF-8
- 
-define('orion/navigate/nls/root/messages',{
-	"Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files.": "Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files.",
-	"Toggle Left Pane": "Toggle Left Pane",
-	"Open or close the left pane": "Open or close the left pane",
-	"Navigator": "Navigator",
-	"Strings Xtrnalizr": "Strings Xtrnalizr",
-	"Externalize Strings from JavaScript files in this folder": "Externalize strings from JavaScript files in this folder.",
-	"Choose a Folder": "Choose a Folder",
-	"Copy of ${0}": "Copy of ${0}",
-	"Enter a new name for '${0}'": "Enter a new name for '${0}'",
-	"Choose folder...": "Choose folder...",
-	"Rename": "Rename",
-	"Rename the selected files or folders": "Rename the selected files or folders",
-	"Compare with each other": "Compare with each other",
-	"Compare the selected 2 files with each other": "Compare the selected 2 files with each other",
-	"Compare with...": "Compare with...",
-	"Compare the selected folder with a specified folder": "Compare the selected folder with a specified folder",
-	"Delete": "Delete",
-	"Unknown item": "Unknown item",
-	"Are you sure you want to delete these ${0} items?": "Are you sure you want to delete these ${0} items?",
-	"Are you sure you want to delete '${0}'?": "Are you sure you want to delete '${0}'?",
-	"Export as zip": "Zip",
-	"Create a zip file of the folder contents and download it": "Create a zip file of the folder contents and download it",
-	"New File": "File",
-	"Create a new file": "Create a new file",
-	"Name:" : "Name:",
-	"New Folder": "Folder",
-	"Folder name:": "Folder name:",
-	"Create a new folder": "Create a new folder",
-	"Creating folder": "Creating folder",
-	"Folder": "Folder",
-	"Create an empty folder": "Create an empty folder",
-	"Create an empty folder on the Orion server.  You can import, upload, or create content in the editor.": "Create an empty folder on the Orion server.  You can import, upload, or create content in the editor.",
-	"Sample HTML5 Site": "Sample HTML5 Site",
-	"Generate a sample": "Generate a sample",
-	"Generate an HTML5 \"Hello World\" website, including JavaScript, HTML, and CSS files.": "Generate an HTML5 \"Hello World\" website, including JavaScript, HTML, and CSS files.",
-	"Creating a folder for ${0}": "Creating a folder for ${0}",
-	"SFTP Import": "SFTP Import",
-	"Import content from SFTP": "Import content from SFTP",
-	"Import content from an SFTP location into an Orion folder.  You will be prompted for the SFTP location and credentials.": "Import content from an SFTP location into an Orion folder.  You will be prompted for the SFTP location and credentials.",
-	"Imported Content": "Imported Content",
-	"Upload a Zip": "Upload a Zip",
-	"Upload content from a local zip file": "Upload content from a local zip file",
-	"Upload content from a local zip file into an Orion folder.  You will be prompted for the local zip file.": "Upload content from a local zip file into an Orion folder.  You will be prompted for the local zip file.",
-	"Uploaded Content": "Uploaded Content",
-	"Creating an upload folder for ": "Creating an upload folder for ",
-	"Clone Git Repository": "Clone Git Repository",
-	"Clone a git repository": "Clone a git repository",
-	"Go to the Orion repositories page to provide a git repository URL.  Once the repository is created, it will appear in the Navigator.": "Go to the Orion repositories page to provide a git repository URL.  Once the repository is created, it will appear in the Navigator.",
-	"Link to Server": "Link to Server",
-	"Link to existing content on the server": "Link to existing content on the server",
-	"Create a folder that links to an existing folder on the server.": "Create a folder that links to an existing folder on the server.",
-	"Server path:": "Server path:",
-	"The name and server location were not specified.": "The name and server location were not specified.",
-	"Go Up": "Go Up",
-	"Move up to the parent folder": "Move up to the parent folder",
-	"Go Into": "Go Into",
-	"Move into the selected folder": "Move into the selected folder",
-	"Import local file...": "File System",
-	"Copy files and folders from your local file system": "Copy files and folders from your local file system",
-	"SFTP from...": "SFTP",
-	"Copy files and folders from a specified SFTP connection": "Copy files and folders from a specified SFTP connection",
-	"Importing from ${0}": "Importing from ${0}",
-	"SFTP to...": "SFTP",
-	"Copy files and folders to a specified SFTP location": "Copy files and folders to a specified SFTP location",
-	"Exporting": "Exporting to ${0}",
-	"Pasting ${0}": "Pasting ${0}",
-	"Copy to": "Copy to",
-	"Move to": "Move to",
-	"Copying ${0}": "Copying ${0}",
-	"Moving ${0}": "Moving ${0}",
-	"Renaming ${0}": "Renaming ${0}",
-	"Deleting ${0}": "Deleting ${0}",
-	"Creating ${0}": "Creating ${0}",
-	"Linking to ${0}": "Linking to ${0}",
-	"Move files and folders to a new location": "Move files and folders to a new location",
-	"Cut": "Cut",
-	"Copy": "Copy",
-	"Fetching children of ": "Fetching children of ",
-	"Paste": "Paste",
-	"Cannot paste into the Workspace root": "Cannot paste into the Workspace root",
-	"Open With": "Open With",
-	"Loading ": "Loading ",
-	"New": "New",
-	"File": "File",
-	"Actions": "Actions",
-	"Orion Content": "Orion Content",
-	" is not supported in this file system": " is not supported in this file system",
-	"Create new content" : "Create new content",
-	"Import from HTTP..." : "HTTP",
-	"File URL:" : "File URL:",
-	"Copy a file from a URL and optionally unzip it" : "Copy a file from a URL and optionally unzip it",
-	"Unzip *.zip files:" : "Unzip *.zip files:",
-	"Extracted from:" : "Extracted from:",
-	"Did not drop ${0}.  Folder drop is not supported in this browser.": "Did not drop ${0}.  Folder drop is not supported in this browser.",
-	"You cannot copy files directly into the workspace.  Create a folder first.": "You cannot copy files directly into the workspace.  Create a folder first.",
-	"Unzip ${0}?": "Unzip ${0}?",
-	"NoFile": "Use the ${0} menu to create new files and folders. Click a file to start coding." //$NON-NLS-1$ //$NON-NLS-0$
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- ******************************************************************************/
-define('orion/navigate/nls/messages',['orion/i18n!orion/navigate/nls/messages', 'orion/navigate/nls/root/messages'], function(bundle, root) {
-	var result = {
-			root:root
-	};
-	Object.keys(bundle).forEach(function(key) {
-		if (typeof result[key] === 'undefined') {
-			result[key] = bundle[key];
-		}
-	});
-	return result;
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
- *
- ******************************************************************************/
-
-//NLS_CHARSET=UTF-8
-
-define('orion/nls/root/messages',{
-	"Navigator": "Navigator",
-	"Sites": "Sites",
-	"Shell": "Shell",
-	"ShellLinkWorkspace": "Workspace Shell",
-	"Get Plugins": "Get Plugins",
-	"Global": "Global",
-	"Editor": "Editor",
-	"EditorRelatedLink": "Show Current Folder",
-	"EditorRelatedLinkParent": "Show Enclosing Folder",
-	"EditorLinkWorkspace": "Show Workspace",
-	"EditorRelatedLinkProj": "Show Project",
-	"Filter bindings": "Filter bindings",
-	"Orion Editor": "Orion Editor",
-	"Orion Image Viewer": "Orion Image Viewer",
-	"Orion Markdown Viewer": "Orion Markdown Viewer",
-	"Orion JSON Editor": "Orion JSON Editor",
-	"View on Site": "View on Site",
-	"View this file or folder on a web site hosted by Orion": "View this file or folder on a web site hosted by Orion.",
-	"Show a list of all the keybindings on this page": "Show a list of all the keybindings on this page",
-	"Show Keys": "Show Keys",
-	"Hide or show the page banner and footer": "Hide or show the page banner and footer",
-	"Toggle banner and footer": "Toggle banner and footer",
-	"Choose a file by name and open an editor on it": "Choose a file by name and open an editor on it",
-	"Find File Named...": "Find File Named...",
-	"System Configuration Details": "System Configuration Details",
-	"System Config Tooltip": "Go to the System Configuration Details page",
-	"Background Operations": "Background Operations",
-	"Background Operations Tooltip": "Go to the Background Operations page",
-	"Operation status is unknown": "Operation status is unknown",
-	"Unknown item": "Unknown item",
-	"Can't search: no search service is available": "Can't search: no search service is available",
-	"could not find banner parent, id was ": "could not find banner parent, id was ",
-	"Related": "Related",
-	"Options": "Options",
-	"FAQ": "FAQ",
-	"Report a Bug": "Bugs",
-	"Privacy Policy": "Privacy",
-	"Terms of Use": "Terms",
-	"Copyright Agent": "Copyright",
-	"Orion Logo": "Orion Logo",
-	"Orion is in Beta. Please try it out but BEWARE your data may be lost.": "@buildLabel@",
-	"LOG: ": "LOG: ",
-	"View": "View",
-	"no parent": "no parent",
-	"no tree model": "no tree model",
-	"no renderer": "no renderer",
-	"could not find table row ": "could not find table row ",
-	"Resource is out of sync with the server. Do you want to save it anyway?": "Resource is out of sync with the server. Do you want to save it anyway?",
-	"Operations": "Operations",
-	"Operations running": "Operations running",
-	"Some operations finished with warning": "Some operations finished with warning",
-	"Some operations finished with error": "Some operations finished with error",
-	"no service registry": "no service registry",
-	"Tasks": "Tasks",
-	"Close": "Close",
-	"Expand all": "Expand all",
-	"Collapse all": "Collapse all",
-	"Search" : "Search",
-	"Advanced search" : "Advanced search",
-	"Submit" : "Submit",
-	"More" : "More",
-	"Saved searches" : "Saved searches",
-	"Recent searches" : "Recent searches",
-	"Regular expression" : "Regular expression",
-	"Search options" : "Search options",
-	"Global search" : "Global search",
-	"Orion Home" : "Orion Home",
-	"Close notification" : "Close notification",
-	"Operations - Press spacebar to show current operations" : "Operations - Press spacebar to show current operations",
-	"Type a keyword or wild card to search in root" : "Type a keyword or wild card to search in root",
-	"Toggle side panel" : "Toggle side panel",
-	"Open or close the side panel": "Open or close the side panel",
-	"Projects" : "Projects",
-	"Toggle Sidebar" : "Toggle Sidebar",
-	"Sample HTML5 Site": "Sample HTML5 Site",
-	"Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.": "Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.",
-	"Sample Orion Plugin": "Sample Orion Plugin",
-	"Generate a sample plugin for integrating with Orion.": "Generate a sample plugin for integrating with Orion.",
-	"Browser": "Web Browser",
-	"OutlineProgress": "Getting outline for ${0} from ${1}",
-	"UnknownError": "An unknown error occurred.",
-	"UnknownWarning": "An unknown warning occurred.",
-	"Filter": "Filter (* = any string, ? = any character)",
-	"To view the browser's context menu, trigger the context menu again.": "To view the browser's context menu, trigger the context menu again.",
-	"Edit": "Edit",
-	"CentralNavTooltip": "Toggle Navigation Menu"
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- ******************************************************************************/
-define('orion/nls/messages',['orion/i18n!orion/nls/messages', 'orion/nls/root/messages'], function(bundle, root) {
-	var result = {
-			root:root
-	};
-	Object.keys(bundle).forEach(function(key) {
-		if (typeof result[key] === 'undefined') {
-			result[key] = bundle[key];
-		}
-	});
-	return result;
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-/*global document window StopIteration*/
-/*jslint regexp:false*/
-// URL Shim -- see http://url.spec.whatwg.org/ and http://dvcs.w3.org/hg/url/raw-file/tip/Overview.html
-
-(function() {
-    try {
-        var testURL;
-        if (typeof window.URL === "function" && window.URL.length !== 0 &&
-                (testURL = new window.URL("http://www.w3.org?q")).protocol === "http:" && testURL.query) {
-            return;
-        }
-    } catch (e) {}
-
-    //[1]scheme, [2]authority, [3]path, [4]query, [5]fragment
-    var _URI_RE = /^(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?$/;
-    //[ userinfo "@" ] host [ ":" port ]
-    var _AUTHORITY_RE = /^(?:(.*)@)?(\[[^\]]*\]|[^:]*)(?::(.*))?$/;
-
-    var _NO_WS_RE = /^\S*$/;
-    var _SCHEME_RE = /^([a-zA-Z](?:[a-zA-Z0-9+-.])*)$/;
-    var _PORT_RE = /^\d*$/;
-    var _HOST_RE = /^(\[[^\]\/?#\s]*\]|[^:\/?#\s]*)$/;
-    var _HOSTPORT_RE = /^(\[[^\]\/?#\s]*\]|[^:\/?#\s]*)(?::(\d*))?$/;
-    var _PATH_RE = /^([^?#\s]*)$/;
-    var _QUERY_RE = /^([^\s]*)$/;
-    var _FRAGMENT_RE = _NO_WS_RE;
-    var _USERNAME_PASSWORD_RE = /([^:]*):?(.*)/;
-
-    var STOP_ITERATION = typeof StopIteration !== "undefined" ? StopIteration : new Error("Stop Iteration");
-    var DEFAULT_PORTS = {
-        "ftp:": "21",
-            "gopher:": "70",
-            "http:": "80",
-            "https:": "443",
-            "ws:": "80",
-            "wss:": "443"
-    };
-
-    function _checkString(txt) {
-        if (typeof txt !== "string") {
-            throw new TypeError();
-        }
-    }
-
-    function _parseQuery(query) {
-        return query ? query.split("&") : [];
-    }
-
-    function _stringifyQuery(pairs) {
-        if (pairs.length === 0) {
-            return "";
-        }
-        return pairs.join("&");
-    }
-
-    function _parsePair(pair) {
-        var parsed = /([^=]*)(?:=?)(.*)/.exec(pair);
-        var key = parsed[1] ? decodeURIComponent(parsed[1]) : "";
-        var value = parsed[2] ? decodeURIComponent(parsed[2]) : "";
-        return [key, value];
-    }
-
-    function _stringifyPair(entry) {
-        var pair = encodeURIComponent(entry[0]);
-        if (entry[1]) {
-            pair += "=" + encodeURIComponent(entry[1]);
-        }
-        return pair;
-    }
-
-    function _createMapIterator(url, kind) {
-        var query = "";
-        var pairs = [];
-        var index = 0;
-        return {
-            next: function() {
-                if (query !== url.query) {
-                    query = url.query;
-                    pairs = _parseQuery(query);
-                }
-                if (index < pairs.length) {
-                    var entry = _parsePair(pairs[index++]);
-                    switch (kind) {
-                        case "keys":
-                            return entry[0];
-                        case "values":
-                            return entry[1];
-                        case "keys+values":
-                            return [entry[0], entry[1]];
-                        default:
-                            throw new TypeError();
-                    }
-                }
-                throw STOP_ITERATION;
-            }
-        };
-    }
-
-    // See http://url.spec.whatwg.org/#interface-urlquery
-    function URLQuery(url) {
-        Object.defineProperty(this, "_url", {
-            get: function() {
-                return url._url;
-            }
-        });
-    }
-
-    Object.defineProperties(URLQuery.prototype, {
-        get: {
-            value: function(key) {
-                _checkString(key);
-                var result;
-                var pairs = _parseQuery(this._url.query);
-                pairs.some(function(pair) {
-                    var entry = _parsePair(pair);
-                    if (entry[0] === key) {
-                        result = entry[1];
-                        return true;
-                    }
-                });
-                return result;
-            },
-            enumerable: true
-        },
-        set: {
-            value: function(key, value) {
-                _checkString(key);
-                _checkString(value);
-                var pairs = _parseQuery(this._url.query);
-                var found = pairs.some(function(pair, i) {
-                    var entry = _parsePair(pair);
-                    if (entry[0] === key) {
-                        entry[1] = value;
-                        pairs[i] = _stringifyPair(entry);
-                        return true;
-                    }
-                });
-                if (!found) {
-                    pairs.push(_stringifyPair([key, value]));
-                }
-                this._url.query = _stringifyQuery(pairs);
-            },
-            enumerable: true
-        },
-        has: {
-            value: function(key) {
-                _checkString(key);
-                var pairs = _parseQuery(this._url.query);
-                return pairs.some(function(pair) {
-                    var entry = _parsePair(pair);
-                    if (entry[0] === key) {
-                        return true;
-                    }
-                });
-            },
-            enumerable: true
-        },
-            "delete": {
-            value: function(key) {
-                _checkString(key);
-                var pairs = _parseQuery(this._url.query);
-                var filtered = pairs.filter(function(pair) {
-                    var entry = _parsePair(pair);
-                    return entry[0] !== key;
-                });
-                if (filtered.length !== pairs.length) {
-                    this._url.query = _stringifyQuery(filtered);
-                    return true;
-                }
-                return false;
-            },
-            enumerable: true
-        },
-        clear: {
-            value: function() {
-                this._url.query = "";
-            },
-            enumerable: true
-        },
-        forEach: {
-            value: function(callback, thisArg) {
-                if (typeof callback !== "function") {
-                    throw new TypeError();
-                }
-                var iterator = _createMapIterator(this._url, "keys+values");
-                try {
-                    while (true) {
-                        var entry = iterator.next();
-                        callback.call(thisArg, entry[1], entry[0], this);
-                    }
-                } catch (e) {
-                    if (e !== STOP_ITERATION) {
-                        throw e;
-                    }
-                }
-            },
-            enumerable: true
-        },
-        keys: {
-            value: function() {
-                return _createMapIterator(this._url, "keys");
-            },
-            enumerable: true
-        },
-        values: {
-            value: function() {
-                return _createMapIterator(this._url, "values");
-            },
-            enumerable: true
-        },
-        items: {
-            value: function() {
-                return _createMapIterator(this._url, "keys+values");
-            }
-        },
-        size: {
-            get: function() {
-                return _parseQuery(this._url.query).length;
-            },
-            enumerable: true
-        },
-        getAll: {
-            value: function(key) {
-                _checkString(key);
-                var result = [];
-                var pairs = _parseQuery(this._url.query);
-                pairs.forEach(function(pair) {
-                    var entry = _parsePair(pair);
-                    if (entry[0] === key) {
-                        result.push(entry[1]);
-                    }
-                });
-                return result;
-            },
-            enumerable: true
-        },
-        append: {
-            value: function(key, value) {
-                _checkString(key);
-                _checkString(value);
-                var pairs = _parseQuery(this._url.query);
-                pairs.push(_stringifyPair([key, value]));
-                this._url.query = _stringifyQuery(pairs);
-            },
-            enumerable: true
-        }
-    });
-
-    function _makeAbsoluteURL(url, base) {
-        if (!url.scheme && base) {
-            url.scheme = base.scheme;
-            if (!url.host && base.host) {
-                url.userinfo = base.userinfo;
-                url.host = base.host;
-                url.port = base.port;
-                url.pathRelative = true;
-            }
-        }
-        if (url.pathRelative) {
-            if (!url.path) {
-                url.path = base.path;
-            } else if (url.path[0] !== "/") {
-                var basePath = /^(.*\/)[^\/]*$/.exec(base.path)[1] || "/";
-                url.path = basePath + url.path;
-            }
-        }
-    }
-
-    function _normalizeScheme(scheme) {
-        return scheme.toLowerCase();
-    }
-
-    function _normalizePort(port) {
-        return port ? (/[1-9]\d*$/).exec(port)[0] : "";
-    }
-
-    function _normalizePath(path) {
-        var result = [];
-        path.split("/").forEach(function(segment) {
-            if (segment === "..") {
-                result.pop();
-            } else if (segment !== ".") {
-                result.push(segment);
-            }
-        });
-        return result.join("/");
-    }
-
-
-    function _normalizeURL(url) {
-        if (url.scheme) {
-            url.scheme = _normalizeScheme(url.scheme);
-        }
-        if (url.port) {
-            url.port = _normalizePort(url.port);
-        }
-        if (url.host && url.path) {
-            url.path = _normalizePath(url.path);
-        }
-    }
-
-    function _encodeWhitespace(text) {
-        return text.replace(/\s/g, function(c) {
-            return "%" + c.charCodeAt(0).toString(16);
-        });
-    }
-
-    function _parseURL(input, base) {
-        if (typeof input !== "string") {
-            throw new TypeError();
-        }
-
-        input = _encodeWhitespace(input);
-
-        var parsedURI = _URI_RE.exec(input);
-        if (!parsedURI) {
-            return null;
-        }
-        var url = {};
-        url.scheme = parsedURI[1] || "";
-        if (url.scheme && !_SCHEME_RE.test(url.scheme)) {
-            return null;
-        }
-        var authority = parsedURI[2];
-        if (authority) {
-            var parsedAuthority = _AUTHORITY_RE.exec(authority);
-            url.userinfo = parsedAuthority[1];
-            url.host = parsedAuthority[2];
-            url.port = parsedAuthority[3];
-            if (url.port && !_PORT_RE.test(url.port)) {
-                return null;
-            }
-        }
-        url.path = parsedURI[3];
-        url.query = parsedURI[4];
-        url.fragment = parsedURI[5];
-
-        _makeAbsoluteURL(url, base);
-        _normalizeURL(url);
-        return url;
-    }
-
-    function _serialize(url) {
-        var result = (url.scheme ? url.scheme + ":" : "");
-        if (url.host) {
-            result += "//";
-            if (url.userinfo) {
-                result += url.userinfo + "@";
-            }
-            result += url.host;
-            if (url.port) {
-                result += ":" + url.port;
-            }
-        }
-        result += url.path;
-        if (url.query) {
-            result += "?" + url.query;
-        }
-        if (url.fragment) {
-            result += "#" + url.fragment;
-        }
-        return result;
-    }
-
-    // See http://url.spec.whatwg.org/#api
-    function URL(input, base) {
-        var baseURL;
-        if (base) {
-            base = base.href || base;
-            baseURL = _parseURL(base);
-            if (!baseURL || !baseURL.scheme) {
-                throw new SyntaxError();
-            }
-            Object.defineProperty(this, "_baseURL", {
-                value: baseURL
-            });
-        }
-
-        var url = _parseURL(input, baseURL);
-        if (!url) {
-            throw new SyntaxError();
-        }
-
-        Object.defineProperty(this, "_input", {
-            value: input,
-            writable: true
-        });
-
-        Object.defineProperty(this, "_url", {
-            value: url,
-            writable: true
-        });
-
-        var query = new URLQuery(this);
-        Object.defineProperty(this, "query", {
-            get: function() {
-                return this._url ? query : null;
-            },
-            enumerable: true
-        });
-    }
-
-    Object.defineProperties(URL.prototype, {
-        href: {
-            get: function() {
-                return this._url ? _serialize(this._url) : this._input;
-            },
-            set: function(value) {
-                _checkString(value);
-                this._input = value;
-                this._url = _parseURL(this._input, this._baseURL);
-            },
-            enumerable: true
-        },
-        origin: {
-            get: function() {
-                return (this._url && this._url.host ? this.protocol + "//" + this.host : "");
-            },
-            enumerable: true
-        },
-        protocol: {
-            get: function() {
-                return this._url ? this._url.scheme + ":" : ":";
-            },
-            set: function(value) {
-                _checkString(value);
-                if (!this._url) {
-                    return;
-                }
-                var scheme = (value.slice(-1) === ":") ? value.substring(0, value.length - 1) : value;
-                if (scheme === "" || _SCHEME_RE.test(scheme)) {
-                    this._url.scheme = _normalizeScheme(scheme);
-                }
-
-            },
-            enumerable: true
-        },
-        _userinfo: { // note: not part of spec so not enumerable
-            get: function() {
-                return this._url ? this._url.userinfo : "";
-            },
-            set: function(value) {
-                _checkString(value);
-                if (!this._url) {
-                    return;
-                }
-                this._url.userinfo = value;
-            }
-        },
-        username: {
-            get: function() {
-                if (!this._url) {
-                    return "";
-                }
-                var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
-                var username = decodeURIComponent(parsed[1] || "");
-                return username;
-            },
-            set: function(value) {
-                _checkString(value);
-                if (!this._url) {
-                    return;
-                }
-                var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
-                var userpass = [encodeURIComponent(value || "")];
-                if (parsed[2]) {
-                    userpass.push(parsed[2]);
-                }
-                this._userinfo = userpass.join(":");
-            },
-            enumerable: true
-        },
-        password: {
-            get: function() {
-                if (!this._url) {
-                    return "";
-                }
-                var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
-                var password = decodeURIComponent(parsed[2] || "");
-                return password;
-            },
-            set: function(value) {
-                _checkString(value);
-                if (!this._url) {
-                    return;
-                }
-                var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
-                var userpass = [parsed[1] || ""];
-                if (value) {
-                    userpass.push(encodeURIComponent(value));
-                }
-                this._userinfo = userpass.join(":");
-            },
-            enumerable: true
-        },
-        host: {
-            get: function() {
-                var result = "";
-                if (this._url && this._url.host) {
-                    result += this._url.host;
-                    if (this._url.port) {
-                        result += ":" + this._url.port;
-                    }
-                }
-                return result;
-            },
-            set: function(value) {
-                _checkString(value);
-                if (!this._url) {
-                    return;
-                }
-                var result = _HOSTPORT_RE.exec(value);
-                if (result) {
-                    this._url.host = result[1];
-                    this._url.port = _normalizePort(result[2]);
-                }
-            },
-            enumerable: true
-        },
-        hostname: {
-            get: function() {
-                return this._url ? this._url.host : "";
-            },
-            set: function(value) {
-                _checkString(value);
-                if (!this._url) {
-                    return;
-                }
-                var result = _HOST_RE.exec(value);
-                if (result) {
-                    this._url.host = value;
-                }
-            },
-            enumerable: true
-        },
-        port: {
-            get: function() {
-                var port = this._url ? this._url.port || "" : "";
-                if (port && port === DEFAULT_PORTS[this.protocol]) {
-                    port = "";
-                }
-                return port;
-            },
-            set: function(value) {
-                _checkString(value);
-                if (!this._url) {
-                    return;
-                }
-                var result = _PORT_RE.exec(value);
-                if (result) {
-                    this._url.port = _normalizePort(value);
-                }
-            },
-            enumerable: true
-        },
-        pathname: {
-            get: function() {
-                return this._url ? this._url.path : "";
-            },
-            set: function(value) {
-                _checkString(value);
-                if (!this._url) {
-                    return;
-                }
-                var result = _PATH_RE.exec(value);
-                if (result) {
-                    if (this._url.host && value && value[0] !== "/") {
-                        value = "/" + value;
-                    }
-                    this._url.path = value ? _normalizePath(value) : "";
-                }
-            },
-            enumerable: true
-        },
-        search: {
-            get: function() {
-                return (this._url && this._url.query ? "?" + this._url.query : "");
-            },
-            set: function(value) {
-                _checkString(value);
-                if (!this._url) {
-                    return;
-                }
-                if (value && value[0] === "?") {
-                    value = value.substring(1);
-                }
-                var result = _QUERY_RE.exec(value);
-                if (result) {
-                    this._url.query = value;
-                }
-            },
-            enumerable: true
-        },
-        hash: {
-            get: function() {
-                return (this._url && this._url.fragment ? "#" + this._url.fragment : "");
-            },
-            set: function(value) {
-                _checkString(value);
-                if (!this._url) {
-                    return;
-                }
-                if (value && value[0] === "#") {
-                    value = value.substring(1);
-                }
-                var result = _FRAGMENT_RE.exec(value);
-                if (result) {
-                    this._url.fragment = value;
-                }
-            },
-            enumerable: true
-        }
-    });
-
-	var _URL = window.URL || window.webkitURL;
-    if (_URL && _URL.createObjectURL) {
-        Object.defineProperty(URL, "createObjectURL", {
-            value: _URL.createObjectURL.bind(_URL),
-            enumerable: false
-        });
-
-        Object.defineProperty(URL, "revokeObjectURL", {
-            value: _URL.revokeObjectURL.bind(_URL),
-            enumerable: false
-        });
-    }
-    window.URL = URL;
-}());
-
-define("orion/URL-shim", function(){});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors: IBM Corporation - initial API and implementation
- *******************************************************************************/
-/*global define window document navigator URL*/
-
-define('orion/fileUtils',['require', 'i18n!orion/nls/messages', 'orion/URL-shim'], function(require, messages) {
-                
-	/**
-	 * This class contains static utility methods. It is not intended to be instantiated.
-	 * @class This class contains static utility methods.
-	 * @name orion.fileUtils
-	 */
-
-	function makeRelative(location) {
-		if (!location) {
-			return location;
-		}
-		var hostName = window.location.protocol + "//" + window.location.host; //$NON-NLS-0$
-		if (location.indexOf(hostName) === 0) {
-			return location.substring(hostName.length);
-		}
-		return location;
-	}
-	
-	/**
-	 * Determines if the path represents the workspace root
-	 * @name orion.util#isAtRoot
-	 * @function
-	 */
-	function isAtRoot(path) {
-		if (!path) {
-			return false;
-		}
-		if (path === "/workspace") {
-			return true; // sad but true
-		}
-		var workspaceUrl = new URL(require.toUrl("workspace"), window.location.href);
-		var pathUrl = new URL(path, window.location.href);
-		return pathUrl.href.indexOf(workspaceUrl.href) === 0; //$NON-NLS-0$
-	}
-	
-	//return module exports
-	return {
-		makeRelative: makeRelative,
-		isAtRoot: isAtRoot
 	};
 });
 
@@ -5629,6 +3796,107 @@ exports.ExplorerNavDict = (function() {
 }());
 
 return exports;
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+/*global define console*/
+
+define('orion/EventTarget',[],function() {
+	/**
+	 * Creates an Event Target
+	 *
+	 * @name orion.EventTarget
+	 * @class Base for creating an Orion event target
+	 */
+	function EventTarget() {
+		this._namedListeners = {};
+	}
+
+	EventTarget.prototype = /** @lends orion.EventTarget.prototype */
+	{
+		/**
+		 * Dispatches a named event along with an arbitrary set of arguments. Any arguments after <code>eventName</code>
+		 * will be passed to the event listener(s).
+		 * @param {Object} event The event to dispatch. The event object MUST have a type field
+		 * @returns {boolean} false if the event has been canceled and any associated default action should not be performed
+		 * listeners (if any) have resolved.
+		 */
+		dispatchEvent: function(event) {
+			if (!event.type) {
+				throw new Error("unspecified type");
+			}
+			var listeners = this._namedListeners[event.type];
+			if (listeners) {
+				listeners.forEach(function(listener) {
+					try {
+						if (typeof listener === "function") {
+							listener(event);
+						} else {
+							listener.handleEvent(event);
+						}
+					} catch (e) {
+						if (typeof console !== 'undefined') {
+							console.log(e); // for now, probably should dispatch an ("error", e)
+						}
+					}			
+				});
+			}
+			return !event.defaultPrevented;
+		},
+
+		/**
+		 * Adds an event listener for a named event
+		 * @param {String} eventName The event name
+		 * @param {Function} listener The function called when an event occurs
+		 */
+		addEventListener: function(eventName, listener) {
+			if (typeof listener === "function" || listener.handleEvent) {
+				this._namedListeners[eventName] = this._namedListeners[eventName] || [];
+				this._namedListeners[eventName].push(listener);
+			}
+		},
+
+		/**
+		 * Removes an event listener for a named event
+		 * @param {String} eventName The event name
+		 * @param {Function} listener The function called when an event occurs
+		 */
+		removeEventListener: function(eventName, listener) {
+			var listeners = this._namedListeners[eventName];
+			if (listeners) {
+				for (var i = 0; i < listeners.length; i++) {
+					if (listeners[i] === listener) {
+						if (listeners.length === 1) {
+							delete this._namedListeners[eventName];
+						} else {
+							listeners.splice(i, 1);
+						}
+						break;
+					}
+				}
+			}
+		}
+	};
+	EventTarget.prototype.constructor = EventTarget;
+	
+	EventTarget.attach = function(obj) {
+		var eventTarget = new EventTarget();
+		obj.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
+		obj.addEventListener = eventTarget.addEventListener.bind(eventTarget);
+		obj.removeEventListener = eventTarget.removeEventListener.bind(eventTarget);
+	};
+	
+	return EventTarget;
 });
 
 /*******************************************************************************
@@ -8323,6 +6591,2474 @@ return exports;
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors: IBM Corporation - initial API and implementation
+ *******************************************************************************/
+/*global define window document navigator*/
+
+define('orion/explorers/navigationUtils',[], function() {
+	var userAgent = navigator.userAgent;
+	var isPad = userAgent.indexOf("iPad") !== -1; //$NON-NLS-0$
+	
+	/**
+	 * Generate a grid navigation item into a given array. A grid navigation item is presented by a wrapper object wrapping the domNode. 
+	 *
+	 * @param {Array} domNodeWrapperList the array that holds the grid navigation item. Normally the .gridChildren property from a row model.
+	 * @param {Element} element the html dom element representing a grid. Normally left or right arrow keys on the current row highlight the dom element.
+	 *        When a grid is rendered, the caller has to decide what dom element can be passed. 
+	 */
+	 
+	 
+	function generateNavGrid(domNodeWrapperList, domNode, widget, onClick) {
+		if(isPad){
+			return;
+		}
+		if(!domNodeWrapperList){
+			return;
+		}
+		domNodeWrapperList.push({domNode: domNode});
+		domNode.tabIndex = -1;
+		domNode.style.outline = "none"; //$NON-NLS-0$
+	}
+                
+	/**
+	 * Add a grid navigation item to the navigation dictionary. A row navigation model normally comes from any node in a {treeModelIterator}.
+	 * The .gridChildren property will be lazily created on the row model as an array where all the grid navigation items live.
+	 *
+	 * @param {ExplorerNavDict} navDict the dictionary that holds the info of all navigation info from model id.
+	 * @param {object} rowModel the row model from the {treeModelIterator}.
+	 * @param {Element} element the html dom element representing a grid. Normally left or right arrow keys on the current row highlight the dom element.
+	 *        When a grid is rendered, the caller has to decide what dom element can be passed. 
+	 */
+	function addNavGrid(navDict, rowModel, domNode) {
+		if(!navDict){
+			return;
+		}
+		var navHolder = navDict.getGridNavHolder(rowModel, true);
+		if(navHolder){
+			generateNavGrid(navHolder, domNode);
+		}
+	}
+	
+	/**
+	 * Remove a grid navigation item from a given array. A grid navigation item is presented by a wrapper object wrapping the domNode, widget and onClick properties. 
+	 *
+	 * @param {Array} domNodeWrapperList the array that holds the grid navigation item. Normally the .gridChildren property from a row model.
+	 * @param {DomNode} domNode the html dom node representing a grid. Normally left or right arrow keys on the current row highlight the dom node.
+	 *        When a grid is rendered, the caller has to decide what dom node can be passed. 
+	 */
+	function removeNavGrid(domNodeWrapperList, domNode) {
+		if(!domNodeWrapperList){
+			return;
+		}
+		
+		for(var i = 0; i < domNodeWrapperList.length ; i++){
+			if(domNodeWrapperList[i].domNode === domNode){
+				domNodeWrapperList.splice(i, 1);
+				return;
+			}
+		}
+	}
+	//return module exports
+	return {
+		addNavGrid: addNavGrid,
+		generateNavGrid: generateNavGrid,
+		removeNavGrid: removeNavGrid
+	};
+});
+
+/* global define */
+define('orion/extensionCommands',[], function() {
+	return {
+		getOpenWithCommands: function() {
+			return [];
+		},
+		getOpenWithCommand: function(commandService, item, openWithCommands) {
+			return null;
+		}
+	};
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2013 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
+/*global define*/
+define('orion/objects',[], function() {
+	function mixin(target/*, source..*/) {
+		for (var j = 1; j < arguments.length; j++) {
+			var source = arguments[j];
+			for (var key in source) {
+				if (Object.prototype.hasOwnProperty.call(source, key)) {
+					target[key] = source[key];
+				}
+			}
+		}
+		return target;
+	}
+
+	/**
+	 * @name orion.objects
+	 * @class Object-oriented helpers.
+	 */
+	return {
+		/**
+		 * Creates a shallow clone of the given <code>object</code>.
+		 * @name orion.objects.clone
+		 * @function
+		 * @static
+		 * @param {Object|Array} object The object to clone. Must be a "normal" Object or Array. Other built-ins,
+		 * host objects, primitives, etc, will not work.
+		 * @returns {Object|Array} A clone of <code>object</code>.
+		 */
+		clone: function(object) {
+			if (Array.isArray(object)) {
+				return Array.prototype.slice.call(object);
+			}
+			var clone = Object.create(Object.getPrototypeOf(object));
+			mixin(clone, object);
+			return clone;
+		},
+		/**
+		 * Mixes all <code>source</code>'s own enumerable properties into <code>target</code>. Multiple source objects
+		 * can be passed as varags.
+		 * @name orion.objects.mixin
+		 * @function
+		 * @static
+		 * @param {Object} target
+		 * @param {Object} source
+		 */
+		mixin: mixin,
+		/**
+		 * Wraps an object into an Array if necessary.
+		 * @name orion.objects.toArray
+		 * @function
+		 * @static
+		 * @param {Object} obj An object.
+		 * @returns {Array} Returns <code>obj</code> unchanged, if <code>obj</code> is an Array. Otherwise returns a 1-element Array
+		 * whose sole element is <code>obj</code>.
+		 */
+		toArray: function(o) {
+			return Array.isArray(o) ? o : [o];
+		}
+	};
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+/*global define console */
+
+define('orion/URITemplate',[],function(){
+	
+	var OPERATOR = {
+		NUL: {first:"", sep:",", named: false, ifemp: "", allow: "U"}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"+": {first:"", sep:",", named: false, ifemp: "", allow: "U+R"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		".": {first:".", sep:",", named: false, ifemp: "", allow: "U"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"/": {first:"/", sep:"/", named: false, ifemp: "", allow: "U"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		";": {first:";", sep:";", named: true, ifemp: "", allow: "U"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"?": {first:"?", sep:"&", named: true, ifemp: "=", allow: "U"}, //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"&": {first:"&", sep:"&", named: true, ifemp: "=", allow: "U"}, //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		"#": {first:"#", sep:",", named: false, ifemp: "", allow: "U+R"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		",": {first:"", sep:",", named: false, ifemp: "", allow: "U+R-,"} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	};
+
+	var VARSPEC_REGEXP = /^((?:(?:[a-zA-Z0-9_])|(?:%[0-9A-F][0-9A-F]))(?:(?:[a-zA-Z0-9_.])|(?:%[0-9A-F][0-9A-F]))*)(?:(\*)|:([0-9]+))?$/;
+	var PCT_ENCODED_G = /%25[0-9A-F][0-9A-F]/g;
+
+	function Literal(text) {
+		this._text = text;
+	}
+
+	Literal.prototype = {
+		expand: function(vars) {
+			return encodeURI(this._text);
+		}
+	};
+	
+	function decodePercent(str) {
+		return str.replace("%25", "%");
+	}
+	
+	function encodeString(value, encoding) {
+		if (encoding === "U") { //$NON-NLS-0$
+			return encodeURIComponent(value).replace(/[!'()*]/g, function(str) {
+				return '%' + str.charCodeAt(0).toString(16).toUpperCase(); //$NON-NLS-0$
+			});
+		}
+		if (encoding === "U+R") { //$NON-NLS-0$
+			return encodeURI(value).replace(/%5B/g, '[').replace(/%5D/g, ']').replace(PCT_ENCODED_G, decodePercent); //$NON-NLS-1$ //$NON-NLS-0$
+		}
+		if (encoding === "U+R-,") { //$NON-NLS-0$
+			return encodeURI(value).replace(/%5B/g, '[').replace(/%5D/g, ']').replace(/,/g, '%2C'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		}
+		throw new Error("Unknown allowed character set: " + encoding);
+	}
+	
+	function encodeArray(value, encoding, separator) {
+		var result = [];
+		for (var i=0; i < value.length; i++) {
+			if (typeof(value[i]) !== "undefined") { //$NON-NLS-0$
+				result.push(encodeString(value[i], encoding));
+			}
+		}
+		return result.join(separator);
+	}
+	
+	function encodeObject(value, encoding, nameValueSeparator, pairSeparator ) {
+		var keys = Object.keys(value);
+		var result = [];
+		for (var i=0; i < keys.length; i++) {
+			if (typeof(value[keys[i]]) !== "undefined") { //$NON-NLS-0$
+				result.push(encodeString(keys[i], encoding) + nameValueSeparator + encodeString(value[keys[i]], encoding));
+			}
+		}
+		return result.join(pairSeparator);
+	}
+	
+	function parseVarSpecs(text) {
+		var result = [];
+		var rawSpecs = text.split(","); //$NON-NLS-0$
+		for (var i=0; i < rawSpecs.length; i++) {
+			var match = rawSpecs[i].match(VARSPEC_REGEXP);
+			if (match === null) {
+				throw new Error("Bad VarSpec: " + text); //$NON-NLS-0$
+			}
+			result.push({
+				name: match[1], 
+				explode: !!match[2], 
+				prefix: match[3] ? parseInt(match[3], 10) : -1
+			}); 
+		}
+		return result;
+	}
+	
+	function Expression(text) {
+		if (text.length === 0) {
+			throw new Error("Invalid Expression: 0 length expression"); //$NON-NLS-0$
+		}
+		
+		this._operator = OPERATOR[text[0]];
+		if (this._operator) {
+			text = text.substring(1);
+		} else {
+			this._operator = OPERATOR.NUL;
+		}
+		
+		this._varSpecList = parseVarSpecs(text);
+	}
+	
+	Expression.prototype = {
+		expand: function(params) {
+			var result = [];
+			for (var i=0; i < this._varSpecList.length; i++) {
+				var varSpec = this._varSpecList[i];
+				var name = varSpec.name;
+				var value = params[name];
+				var valueType = typeof(value);
+				if (valueType !== "undefined" && value !== null) { //$NON-NLS-0$
+					var resultText = result.length === 0 ? this._operator.first: this._operator.sep;			
+					if (valueType === "string") { //$NON-NLS-0$
+						if (this._operator.named) {
+							resultText += encodeString(name, "U+R"); //$NON-NLS-0$
+							resultText += (value.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
+						}
+						if (varSpec.prefix !== -1 && varSpec.prefix < value.length) {
+							value = value.substring(0, varSpec.prefix);
+						}
+						
+						resultText += encodeString(value, this._operator.allow);
+					} else if (Array.isArray(value)) {
+						if (value.length === 0) {
+							continue; // treated as undefined and skipped
+						}
+						if (!varSpec.explode) {
+							var encodedArray = encodeArray(value, this._operator.allow, ","); //$NON-NLS-0$
+							if (this._operator.named) {
+								resultText += encodeString(name, "U+R"); //$NON-NLS-0$
+								resultText += (encodedArray.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
+							}
+							resultText += encodedArray;
+						} else {
+							resultText += encodeArray(value, this._operator.allow, this._operator.sep);
+						}				
+					} else if (valueType === "object") { //$NON-NLS-0$
+						if (Object.keys(value).length === 0) {
+							continue; // treated as undefined and skipped
+						}
+						if (!varSpec.explode) {
+							var encodedObject = encodeObject(value, this._operator.allow, ",", ","); //$NON-NLS-1$ //$NON-NLS-0$
+							if (this._operator.named) {
+								resultText += encodeString(name, "U+R"); //$NON-NLS-0$
+								resultText += (encodedObject.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
+							}
+							resultText += encodedObject; //$NON-NLS-0$
+						} else {
+							resultText += encodeObject(value, this._operator.allow, "=", this._operator.sep); //$NON-NLS-0$
+						}
+					} else {
+						throw new Error("bad param type: " + name + " : " + valueType); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					result.push(resultText);
+				}
+			}
+			return result.join("");
+		}
+	};
+
+	function parseTemplate(text) {
+		var result = [];
+		var current = 0;	
+		var curlyStartIndex = text.indexOf("{", current); //$NON-NLS-0$
+		while (curlyStartIndex !== -1) {
+			result.push(new Literal(text.substring(current, curlyStartIndex)));
+			var curlyEndIndex = text.indexOf("}", curlyStartIndex + 1); //$NON-NLS-0$
+			if (curlyEndIndex === -1) {
+				throw new Error("Invalid template: " + text); //$NON-NLS-0$
+			}
+			result.push(new Expression(text.substring(curlyStartIndex + 1, curlyEndIndex)));
+			current = curlyEndIndex + 1;
+			curlyStartIndex = text.indexOf("{", current);			 //$NON-NLS-0$
+		}
+		result.push(new Literal(text.substring(current)));
+		return result;
+	}
+
+	/**
+	 * @name orion.URITemplate
+	 * @class A URITemplate describes a range of Uniform Resource Identifiers through variable expansion, and allows for particular URIs to 
+	 * be generated by expanding variables to actual values.</p>
+	 * <p>Because the syntax and encoding rules of URIs can be complex, URITemplates are recommended over manual construction of URIs through 
+	 * string concatenation or other means.</p>
+	 * <p>A URITemplate is created by invoking the constructor, passing a <em>template string</em>:</p>
+	 * <p><code>new URITemplate(template)</code></p>
+	 * <p>The <dfn>template string</dfn> is an expression following a well-defined syntax (see <a href="http://tools.ietf.org/html/rfc6570#section-1.2">here</a>
+	 * for an introduction). Most notably, the template may include variables.</p>
+	 * <p>Once created, a URITemplate's {@link #expand} method can be invoked to generate a URI. Arguments to {@link #expand} give the values to be 
+	 * substituted for the template variables.</p>
+	 * @description Creates a new URITemplate.
+	 * @param {String} template The template string. Refer to <a href="http://tools.ietf.org/html/rfc6570#section-2">RFC 6570</a> for details
+	 * of the template syntax.
+	 */
+	function URITemplate(template) {
+		this._templateComponents = parseTemplate(template);
+	}
+	
+	URITemplate.prototype = /** @lends orion.URITemplate.prototype */ {
+		/**
+		 * Expands this URITemplate to a URI.
+		 * @param {Object} params The parameters to use for expansion. This object is a map of keys (variable names) to values (the variable's
+		 * value in the <a href="http://tools.ietf.org/html/rfc6570#section-3.2.1">expansion algorithm</a>).
+		 * @returns {String} The resulting URI.
+		 */
+		expand: function(params) {
+			var result = [];
+			for (var i = 0; i < this._templateComponents.length; i++) {
+				result.push(this._templateComponents[i].expand(params));
+			}
+			return result.join("");
+		}
+	};
+
+	return URITemplate;
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2009, 2013 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
+/*global define */
+/*jslint regexp:false browser:true forin:true sub:true*/
+
+define('orion/explorers/navigatorRenderer',[
+	'i18n!orion/navigate/nls/messages',
+	'orion/Deferred',
+	'orion/explorers/explorer',
+	'orion/explorers/navigationUtils',
+	'orion/extensionCommands',
+	'orion/objects',
+	'orion/URITemplate',
+	'orion/webui/littlelib'
+], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, lib) {
+		
+	function isImage(contentType) {
+		switch (contentType && contentType.id) {
+			case "image/jpeg": //$NON-NLS-0$
+			case "image/png": //$NON-NLS-0$
+			case "image/gif": //$NON-NLS-0$
+			case "image/ico": //$NON-NLS-0$
+			case "image/tiff": //$NON-NLS-0$
+			case "image/svg": //$NON-NLS-0$
+				return true;
+		}
+		return false;
+	}
+	
+	/* Internal */
+	function addImageToLink(contentType, link, location, replace) {
+		if (contentType) {
+			var image, imageClass = contentType.imageClass, imageURL = contentType.image;
+			if (imageClass) {
+				image = document.createElement("span"); //$NON-NLS-0$
+				image.className += imageClass; // may be several classes in here
+				image.classList.add("thumbnail"); //$NON-NLS-0$
+			} else if (imageURL) {
+				image = document.createElement("img"); //$NON-NLS-0$
+				image.src = imageURL;
+				// to minimize the height/width in case of a large one
+				image.classList.add("thumbnail"); //$NON-NLS-0$
+			}
+			if (image) {
+				link.replaceChild(image, replace);
+			}
+		}
+	}
+	
+	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
+	
+	var clickedItem;
+	/**
+	 * Returns the last item clicked by links created with #createLink.
+	 * @name orion.explorer.NavigatorRenderer.getClickedItem
+	 * @function
+	 */
+	function getClickedItem() {
+		return clickedItem;
+	}
+		
+	/**
+	 * Exported so that it can be used by other UI that wants to use navigator-style links. commandService and contentTypeService  are necessary to compute 
+	 * the proper editor for a file.
+	 * @name orion.explorer.NavigatorRenderer.createLink
+	 * @function
+	 * @param {String} folderPageURL the page you want to direct folders to (such as navigator).  Using a blank string will just hash the current page.
+	 * @param {Object} item a json object describing an Orion file or folder
+	 * @param {Object} commandService necessary to compute the proper editor for a file. Must be a synchronous, in-page service, not retrieved 
+	 * from the service registry.
+	 * @param {Object[]} [openWithCommands] The "open with" commands used to generate link hrefs. If this parameter is not provided, the caller must
+	 * have already processed the service extension and added to the command registry (usually by calling {@link orion.extensionCommands.createAndPlaceFileCommandsExtension}).
+	 * @param {Object} [linkProperties] gives additional properties to mix in to the HTML anchor element.
+	 * @param {Object} [uriParams] A map giving additional parameters that will be provided to the URI template that generates the href.
+	 * @param {Object} [separateImageHolder] Separate image holder object. {holderDom: dom}. If separateImageHolder is not defined, the file icon image is rendered in the link as the first child.
+	 * @param {NavigatorRenderer} [renderer] The renderer object. Optional. If defined, renderer.updateFileNode() is called to update the file element for sub classes.
+	 * If separateImageHolder is defined with holderDom property, the file icon iamge is rendered in separateImageHolder.holderDom.
+	 * IF separateImageHolder is defined as an empty object, {}, the file icon iamge is not rendered at all.
+	 */
+	function createLink(folderPageURL, item, commandService, contentTypeService, openWithCommands, linkProperties, uriParams, separateImageHolder, renderer) {
+		// TODO FIXME folderPageURL is bad; need to use URITemplates here.
+		// TODO FIXME refactor the async href calculation portion of this function into a separate function, for clients who do not want the <A> created.
+		item = objects.clone(item);
+		var link;
+		if (item.Directory) {
+			link = document.createElement("a"); //$NON-NLS-0$
+			link.className = "navlinkonpage"; //$NON-NLS-0$
+			link.href = !folderPageURL ? uriTemplate : new URITemplate(folderPageURL + "#{,resource,params*}").expand({resource: item.ChildrenLocation}); //$NON-NLS-0$
+			if(item.Name){
+				link.appendChild(document.createTextNode(item.Name));
+			}
+		} else {
+			var i;			
+			if (!openWithCommands) {
+				openWithCommands = mExtensionCommands.getOpenWithCommands(commandService);
+			}
+			link = document.createElement("a"); //$NON-NLS-0$
+			link.className= "navlink targetSelector"; //$NON-NLS-0$
+			if (linkProperties && typeof linkProperties === "object") { //$NON-NLS-0$
+				Object.keys(linkProperties).forEach(function(property) {
+					link[property] = linkProperties[property];
+				});
+			}
+			var imageHolderDom = null, image = null;
+			if(separateImageHolder) {
+				imageHolderDom = separateImageHolder.holderDom;
+			} else {
+				imageHolderDom = link;
+			}
+			if(imageHolderDom) {
+				image = document.createElement("span"); //$NON-NLS-0$
+				image.className = "core-sprite-file modelDecorationSprite thumbnail"; //$NON-NLS-0$
+				imageHolderDom.appendChild(image);
+			}
+			if(item.Name){
+				link.appendChild(document.createTextNode(item.Name));
+			}
+			var href = item.Location;
+			if (uriParams && typeof uriParams === "object") { //$NON-NLS-0$
+				item.params = {};
+				objects.mixin(item.params, uriParams);
+			}
+			var openWithCommand = mExtensionCommands.getOpenWithCommand(commandService, item, openWithCommands);
+			if (openWithCommand) {
+				href = openWithCommand.hrefCallback({items: item});
+			}
+			Deferred.when(contentTypeService.getFileContentType(item), function(contentType) {
+				if(imageHolderDom) {
+					addImageToLink(contentType, imageHolderDom, item.Location, image);
+				}
+				link.href = href;
+				if(renderer && typeof renderer.updateFileNode === 'function') { //$NON-NLS-0$
+					renderer.updateFileNode(item, link, isImage(contentType));
+				}
+			});
+		}
+		link.addEventListener("click", function() { //$NON-NLS-0$
+			clickedItem = item;
+		}.bind(this), false);
+		return link;
+	}
+		
+	/**
+	 * @name orion.explorer.NavigatorRenderer
+	 * @class Renderer for a tree-table of files, like the Orion Navigator.
+	 * @description Renderer for a tree-table of files, like the Orion Navigator.
+	 * @param {Object} options
+	 * @param {orion.explorer.Explorer} explorer
+	 * @param {orion.commandregistry.CommandRegistry} commandRegistry
+	 * @param {orion.core.ContentTypeRegistry} contentTypeService
+	 */
+	function NavigatorRenderer (options, explorer, commandService, contentTypeService) {
+		this.explorer = explorer;
+		this.commandService = commandService;
+		this.contentTypeService = contentTypeService;
+		this.openWithCommands = null;
+		this.actionScopeId = options.actionScopeId;
+		
+		this._init(options);
+		this.target = "_self"; //$NON-NLS-0$
+	}
+	NavigatorRenderer.prototype = new mExplorer.SelectionRenderer(); 
+
+	NavigatorRenderer.prototype.wrapperCallback = function(wrapperElement) {
+		wrapperElement.setAttribute("role", "tree"); //$NON-NLS-1$ //$NON-NLS-0$
+	};
+
+	NavigatorRenderer.prototype.tableCallback = function(tableElement) {
+		tableElement.setAttribute("aria-label", messages["Navigator"]); //$NON-NLS-1$ //$NON-NLS-0$
+		tableElement.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+	};
+
+	/**
+	 * @param {Element} rowElement
+	 */
+	NavigatorRenderer.prototype.rowCallback = function(rowElement, model) {
+		rowElement.setAttribute("role", "treeitem"); //$NON-NLS-1$ //$NON-NLS-0$
+	};
+	
+	
+	/**
+	 * @param {Element} bodyElement
+	 */
+	NavigatorRenderer.prototype.emptyCallback = function(bodyElement) {
+		var tr = document.createElement("tr"); //$NON-NLS-0$
+		var td = document.createElement("td"); //$NON-NLS-0$
+		td.colSpan = this.oneColumn ? 1 : 3;
+		var noFile = document.createElement("div"); //$NON-NLS-0$
+		noFile.classList.add("noFile"); //$NON-NLS-0$
+		noFile.textContent = messages["NoFile"];
+		var plusIcon = document.createElement("span"); //$NON-NLS-0$
+		plusIcon.appendChild(document.createTextNode(messages["File"]));
+		lib.processDOMNodes(noFile, [plusIcon]);
+		td.appendChild(noFile);
+		tr.appendChild(td);
+		bodyElement.appendChild(tr);
+	};
+
+	/**
+	 * Creates the column header element. We are really only using the header for a spacer at this point.
+	 * @name orion.explorer.NavigatorRenderer.prototype.getCellHeaderElement
+	 * @function
+	 * @returns {Element}
+	 */
+	NavigatorRenderer.prototype.getCellHeaderElement = function(col_no){
+		// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
+		if (this.oneColumn && col_no !== 0) {
+			return null;
+		}
+
+		switch(col_no){
+		case 0:
+		case 1:
+		case 2:
+			var th = document.createElement("th"); //$NON-NLS-0$
+			th.style.height = "8px"; //$NON-NLS-0$
+		}
+	};
+
+	/**
+	 * Sets the link target to be used for file links.
+	 * @name orion.explorer.NavigatorRenderer#setTarget
+	 * @function
+	 * @param {String} target The target (eg. "new", "_self").
+	 */
+	NavigatorRenderer.prototype.setTarget = function(target){
+		this.target = target;
+	};
+		
+	/**
+	 * Creates a image DOM Element for the specified folder.
+	 * @name orion.explorer.NavigatorRenderer#getFolderImage
+	 * @type {Function}
+	 * @param {Object} folder The folder to create an image for.
+	 * @returns {Element} The folder image element.
+	 */
+	NavigatorRenderer.prototype.getFolderImage = function(folder) {
+		if (!this.showFolderImage) {
+			return null;
+		}
+		var span = document.createElement("span"); //$NON-NLS-0$
+		span.className = "core-sprite-folder modelDecorationSprite"; //$NON-NLS-0$
+		return span;
+	};
+
+	/**
+	* Subclasses can override this function to customize the DOM Element that is created to represent a folder.
+	 * The default implementation creates either a hyperlink or a plain text node.
+	 * @name orion.explorer.NavigatorRenderer#createFolderNode
+	 * @type {Function}
+	 * @see orion.explorer.NavigatorRenderer#showFolderLinks
+	 * @see orion.explorer.NavigatorRenderer#folderLink
+	 * @param {Object} folder The folder to create a node for.
+	 * @returns {Element} The folder element.
+	 */
+	// The returned element must have an <code>id</code> property.
+	NavigatorRenderer.prototype.createFolderNode = function(folder) {
+		var itemNode;
+		if (this.showFolderLinks) { //$NON-NLS-0$
+			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
+			itemNode = createLink(this.folderLink || "", folder, this.commandService, this.contentTypeService); //$NON-NLS-0$
+			var image = this.getFolderImage(folder);
+			if (image) {
+				itemNode.insertBefore(image, itemNode.firstChild);
+			}
+		} else {
+			itemNode = document.createElement("span"); //$NON-NLS-0$
+			itemNode.textContent = folder.Name;
+		}
+		return itemNode;
+	};
+
+	/**
+	* Subclasses can override this function to customize the DOM Element that is created to represent a file.
+	 * The default implementation does nothing.
+	 * @name orion.explorer.NavigatorRenderer#updateFileNode
+	 * @type {Function}
+	 * @param {Object} file The file model to update for.
+	 * @param {Element} fileNode The file node to update.
+	 * @param {Boolean} isImage The flag to indicate if the file is an image file.
+	 */
+	// The returned element must have an <code>id</code> property.
+	NavigatorRenderer.prototype.updateFileNode = function(file, fileNode, isImage) {
+	};
+
+	/**
+	 * Whether the default implementation of {@link #createFolderNode} should show folders should as links (<code>true</code>),
+	 * or just plain text (<code>false</code>).
+	 * @name orion.explorer.NavigatorRenderer#showFolderLinks
+	 * @type {Boolean}
+	 * @default true
+	 */
+	NavigatorRenderer.prototype.showFolderLinks = true;
+	/**
+	 * Gives the base href to be used by the default implementation of {@link #createFolderNode} for creating folder links.
+	 * This property only takes effect if {@link #showFolderLinks} is <code>true</code>. 
+	 * TODO see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121">Bug 400121</a>
+	 * @name orion.explorer.NavigatorRenderer#folderLink
+	 * @type {String}
+	 * @default ""
+	 */
+	/**
+	 * Generate the DOM element for a cell. If you override this function, you will most likely have to override {@link orion.explorers.FileExplorer#getNameNode}
+	 * in your explorer class.
+	 * @name orion.explorer.NavigatorRenderer#getCellElement
+	 * @function
+	 * @returns {Element}
+	 */
+	NavigatorRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		switch(col_no){
+		case 0:
+			var col = document.createElement('td'); //$NON-NLS-0$
+			var span = document.createElement("span"); //$NON-NLS-0$
+			span.id = tableRow.id+"MainCol"; //$NON-NLS-0$
+			span.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+			col.appendChild(span);
+			col.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
+			span.className = "mainNavColumn"; //$NON-NLS-0$
+			var itemNode;
+			if (item.Directory) {
+				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
+				var image = this.getExpandImage(tableRow, span);
+				itemNode = this.createFolderNode(item);
+
+				span.appendChild(itemNode);
+				this.explorer._makeDropTarget(item, itemNode);
+				this.explorer._makeDropTarget(item, tableRow);
+			} else {
+				if (!this.openWithCommands) {
+					this.openWithCommands = mExtensionCommands.getOpenWithCommands(this.commandService);
+				}
+				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, { target: this.target }, null, null, this);
+				span.appendChild(itemNode); //$NON-NLS-0$
+			}
+			if (itemNode) {
+				// orion.explorers.FileExplorer#getNameNode
+				itemNode.id = tableRow.id + "NameLink"; //$NON-NLS-0$
+				if (itemNode.nodeType === 1) {
+					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemNode);
+					itemNode.setAttribute("role", "link"); //$NON-NLS-1$ //$NON-NLS-0$
+					itemNode.setAttribute("tabindex", "-1"); //$NON-NLS-1$ //$NON-NLS-0$
+				}
+			}
+			// render any inline commands that are present.
+			if (this.actionScopeId) {
+				this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool", null, true); //$NON-NLS-0$
+			}
+			return col;
+		case 1:
+			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
+			if (this.oneColumn) {
+				return null;
+			}
+			var dateColumn = document.createElement('td'); //$NON-NLS-0$
+			if (item.LocalTimeStamp) {
+				var fileDate = new Date(item.LocalTimeStamp);
+				dateColumn.textContent = fileDate.toLocaleString();
+			}
+			return dateColumn;
+		case 2:
+			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
+			if (this.oneColumn) {
+				return null;
+			}
+			var sizeColumn = document.createElement('td'); //$NON-NLS-0$
+			if (!item.Directory && typeof item.Length === "number") { //$NON-NLS-0$
+				var length = parseInt(item.Length, 10),
+					kb = length / 1024;
+				sizeColumn.textContent = Math.ceil(kb).toLocaleString() + " KB"; //$NON-NLS-0$
+			}
+			sizeColumn.style.textAlign = "right"; //$NON-NLS-0$
+			return sizeColumn;
+		}
+	};
+	NavigatorRenderer.prototype.constructor = NavigatorRenderer;
+	
+	//return module exports
+	return {
+		NavigatorRenderer: NavigatorRenderer,
+		isImage : isImage,
+		getClickedItem: getClickedItem,
+		createLink: createLink
+	};
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors: IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+/*global define localStorage*/
+define('orion/i18nUtil',['require', 'orion/Deferred'], function(require, Deferred) {
+
+	var messageBundleDeffereds = {};
+
+	function formatMessage(msg) {
+		var args = arguments;
+		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) {
+			return args[(index << 0) + 1];
+		});
+	}
+
+	function getCachedMessageBundle(name) {
+		var item = localStorage.getItem('orion/messageBundle/' + name);
+		if (item) {
+			var bundle = JSON.parse(item);
+			if (bundle._expires && bundle._expires > new Date().getTime()) {
+				delete bundle._expires;
+				return bundle;
+			}
+		}
+		return null;
+	}
+
+	function setCachedMessageBundle(name, bundle) {
+		bundle._expires = new Date().getTime() + 1000 * 900; //15 minutes
+		localStorage.setItem('orion/messageBundle/' + name, JSON.stringify(bundle));
+		delete bundle._expires;
+	}
+
+	function getMessageBundle(name) {
+		if (messageBundleDeffereds[name]) {
+			return messageBundleDeffereds[name];
+		}
+
+		var d = new Deferred();
+		messageBundleDeffereds[name] = d;
+
+		var cached = getCachedMessageBundle(name);
+		if (cached) {
+				d.resolve(cached);
+				return d;
+		}
+
+		function _resolveMessageBundle(bundle) {
+			if (bundle) {
+				require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
+					if (bundle) {
+						setCachedMessageBundle(name, bundle);
+					}
+					d.resolve(bundle);
+				});
+			} else {
+				// IE disguises failure as success, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=428797
+				_rejectMessageBundle(new Error(name));
+			}
+		}
+
+		function _rejectMessageBundle(error) {
+			d.reject(error);
+		}
+
+		try {
+			require([name], _resolveMessageBundle, _rejectMessageBundle);
+		} catch (ignore) {
+			require(['orion/i18n!' + name], _resolveMessageBundle, _rejectMessageBundle); //$NON-NLS-0$
+		}
+		return d;
+	}
+	return {
+		getMessageBundle: getMessageBundle,
+		formatMessage: formatMessage
+	};
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+/*global define window */
+/*jslint browser:true*/
+define('orion/inputManager',[
+	'i18n!orion/edit/nls/messages',
+	'orion/explorers/navigatorRenderer',
+	'orion/i18nUtil',
+	'orion/Deferred',
+	'orion/EventTarget',
+	'orion/objects',
+	'orion/PageUtil'
+], function(messages, mNavigatorRenderer, i18nUtil, Deferred, EventTarget, objects, PageUtil) {
+
+	function Idle(options){
+		this._document = options.document || document;
+		this._timeout = options.timeout;
+		//TODO: remove listeners if there are no clients
+		//TODO: add support for multiple clients with different timeouts
+		var events = ["keypress","keydown","keyup","mousemove","mousedown","mousemove"]; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		var reset = function (e) { this._resetTimer(); }.bind(this);
+		for (var i = 0; i < events.length; i++) {
+			var event = events[i];
+			this._document.addEventListener(event, reset, true);
+		}
+		EventTarget.attach(this);
+	}
+
+	Idle.prototype = {
+		_resetTimer: function() {
+			var window = this._document.defaultView || this._document.parentWindow;
+			if (this._timer) {
+				window.clearTimeout(this._timer);
+				this._timer = null;
+			}
+			if (this._timeout !== -1) {
+				this._timer = window.setTimeout(function() {
+					this.onIdle({type:"Idle"});	//$NON-NLS-0$
+					this._timer = null;
+					this._resetTimer();
+				}.bind(this), this._timeout);
+			}
+		},
+		onIdle: function (idleEvent) {
+			return this.dispatchEvent(idleEvent);
+		},
+		setTimeout: function(timeout) {
+			this._timeout = timeout;
+			this._resetTimer();
+		}
+	};
+
+	function _makeError(error) {
+		var newError = {
+			Severity: "Error", //$NON-NLS-0$
+			Message: messages.noResponse
+		};
+		if (error.status === 0) {
+			return newError; // might do better here
+		} else if (error.responseText) {
+			var responseText = error.responseText;
+			try {
+				var parsedError = JSON.parse(responseText);
+				newError.Severity = parsedError.Severity || newError.Severity;
+				newError.Message = parsedError.Message || newError.Message;
+			} catch (e) {
+				newError.Message = responseText;
+			}
+		} else {
+			try {
+				newError.Message = JSON.stringify(error);
+			} catch (e) {
+				// best effort - fallthrough
+			}
+		}
+		return newError;
+	}
+
+	function handleError(statusService, error) {
+		if (!statusService) {
+			window.console.log(error);
+			return;
+		}
+		if (!error.Severity) {
+			error = _makeError(error);
+		}
+		statusService.setProgressResult(error);
+	}
+
+	/**
+	 * @name orion.editor.InputManager
+	 * @class
+	 */
+	function InputManager(options) {
+		EventTarget.attach(this);
+		this.serviceRegistry = options.serviceRegistry;
+		this.statusService = options.statusService;
+		this.fileClient = options.fileClient;
+		this.progressService = options.progressService;
+		this.contentTypeRegistry = options.contentTypeRegistry;
+		this.selection = options.selection;
+		this._input = this._title = "";
+		this.dispatcher = null;
+		this._unsavedChanges = [];
+	}
+	objects.mixin(InputManager.prototype, /** @lends orion.editor.InputManager.prototype */ {
+		/**
+		 * @returns {orion.Promise} Promise resolving to the new Location we should use
+		 */
+		_maybeLoadWorkspace: function(resource) {
+			var fileClient = this.fileClient;
+			// If it appears to be a workspaceRootURL we cannot load it directly, have to get the workspace first
+			if (resource === fileClient.fileServiceRootURL(resource)) {
+				return fileClient.loadWorkspace(resource).then(function(workspace) {
+					return workspace.Location;
+				});
+			}
+			return new Deferred().resolve(resource);
+		},
+		/**
+		 * Wrapper for fileClient.read() that tolerates a filesystem root URL passed as location. If location is indeed
+		 * a filesystem root URL, the original read() operation is instead performed on the workspace.
+		 */
+		_read: function(location /**, readArgs*/) {
+			var cachedMetadata = this.cachedMetadata || mNavigatorRenderer.getClickedItem();
+			if (cachedMetadata && cachedMetadata.Location === location && cachedMetadata.Parents && cachedMetadata.Attributes) {
+				return new Deferred().resolve(cachedMetadata);
+			}
+			var fileClient = this.fileClient;
+			var readArgs = Array.prototype.slice.call(arguments, 1);
+			return this._maybeLoadWorkspace(location).then(function(newLocation) {
+				return fileClient.read.apply(fileClient, [newLocation].concat(readArgs));
+			});
+		},
+		load: function() {
+			var fileURI = this.getInput();
+			if (!fileURI) { return; }
+			var fileClient = this.fileClient;
+			var resource = this._parsedLocation.resource;
+			var progressService = this.progressService;
+			var progress = function(deferred, msgKey, uri) {
+				if (!progressService) { return deferred; }
+				return progressService.progress(deferred, i18nUtil.formatMessage(msgKey, uri));
+			};
+			var editor = this.getEditor();
+			if (this._fileMetadata) {
+				//Reload if out of sync, unless we are already in the process of saving
+				if (!this._saving && !this._fileMetadata.Directory && !this._readonly) {
+					progress(fileClient.read(resource, true), messages.ReadingMetadata, fileURI).then(function(data) {
+						if (this._fileMetadata && this._fileMetadata.Location === data.Location && this._fileMetadata.ETag !== data.ETag) {
+							this._fileMetadata = data;
+							if (!editor.isDirty() || window.confirm(messages.loadOutOfSync)) {
+								progress(fileClient.read(resource), messages.Reading, fileURI).then(function(contents) {
+									editor.setInput(fileURI, null, contents);
+									this._unsavedChanges = [];
+								}.bind(this));
+							}
+						}
+					}.bind(this));
+				}
+			} else {
+				//TODO this URL parsing to retrieve the should be done in the server side.
+				//TODO /gitapi/commit URLs are not supported be the orion file client.
+				var metadataURI = resource;
+				if (metadataURI.indexOf("/gitapi/commit/") === 0) { //$NON-NLS-0$
+					var start = metadataURI.indexOf("/file"); //$NON-NLS-0$
+					var end = metadataURI.indexOf("?", start); //$NON-NLS-0$
+					if (end === -1) { end = metadataURI.length; }
+					metadataURI = metadataURI.substring(start, end);
+					this._readonly = true;
+				}
+				var progressTimeout = window.setTimeout(function() {
+					progressTimeout = null;
+					this.reportStatus(i18nUtil.formatMessage(messages.Fetching, fileURI));
+				}.bind(this), 800);
+				var clearTimeout = function() {
+					this.reportStatus("");
+					if (progressTimeout) {
+						window.clearTimeout(progressTimeout);
+					}
+				}.bind(this);
+				var errorHandler = function(error) {
+					clearTimeout();
+					var statusService = null;
+					if(this.serviceRegistry) {
+						statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+					} else if(this.statusService) {
+						statusService = this.statusService;
+					}
+					handleError(statusService, error);
+					this._setNoInput();
+				}.bind(this);
+				this._acceptPatch = null;
+				// Read metadata
+				progress(this._read(metadataURI, true), messages.ReadingMetadata, metadataURI).then(function(metadata) {
+					if(!metadata) {
+						errorHandler({responseText: i18nUtil.formatMessage(messages.ReadingMetadataError, metadataURI)});
+					} else if (metadata.Directory) {
+						// Fetch children
+						Deferred.when(metadata.Children || progress(fileClient.fetchChildren(metadata.ChildrenLocation), messages.Reading, fileURI), function(contents) {
+							clearTimeout();
+							metadata.Children = contents;
+							this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
+						}.bind(this), errorHandler);
+					} else {
+						// Read contents if this is a text file
+						if (this._isText(metadata)) {
+							// Read text contents
+							progress(fileClient.read(resource, false, true), messages.Reading, fileURI).then(function(contents) {
+								clearTimeout();
+								if (typeof contents !== "string") { //$NON-NLS-0$
+									this._acceptPatch = contents.acceptPatch;
+									contents = contents.result;
+								}
+								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
+							}.bind(this), errorHandler);
+						} else {
+							progress(fileClient._getService(resource).readBlob(resource), messages.Reading, fileURI).then(function(contents) {
+								clearTimeout();
+								this._setInputContents(this._parsedLocation, fileURI, contents, metadata);
+							}.bind(this), errorHandler);
+						}
+					}
+				}.bind(this), errorHandler);
+			}
+		},
+		processParameters: function(input) {
+			var editor = this.getEditor();
+			if (editor && editor.processParameters) {
+				editor.processParameters(input);
+			}
+		},
+		getAutoLoadEnabled: function() {
+			return this._autoLoadEnabled;
+		},
+		getAutoSaveEnabled: function() {
+			return this._autoSaveEnabled;
+		},
+		getEditor: function() {
+			return this.editor;
+		},
+		getInput: function() {
+			return this._input;
+		},
+		getTitle: function() {
+			return this._title;
+		},
+		getFileMetadata: function() {
+			return this._fileMetadata;
+		},
+		getReadOnly: function() {
+			var data = this._fileMetadata;
+			return this._readonly || !data || (data.Attributes && data.Attributes.ReadOnly);
+		},
+		getContentType: function() {
+			return this._contentType;
+		},
+		onFocus: function(e) {
+			// If there was an error while auto saving, auto save is temporarily disabled and
+			// we retry saving every time the editor gets focus
+			if (this._autoSaveEnabled && this._errorSaving) {
+				this.save();
+				return;
+			}
+			if (this._autoLoadEnabled) {
+				this.load();
+			}
+		},
+		onChanging: function(e) {
+			if (!this._getSaveDiffsEnabled()) { return; }
+			var length = this._unsavedChanges.length;
+			var addedCharCount = e.addedCharCount;
+			var removedCharCount = e.removedCharCount;
+			var start = e.start;
+			var end = e.start + removedCharCount;
+			var type = 0;
+			if (addedCharCount === 0) {
+				type = -1;
+			} else if (removedCharCount === 0) {
+				type = 1;
+			}
+			if (length > 0) {
+				if (type === this.previousChangeType) {
+					var previousChange = this._unsavedChanges[length-1];
+					if (removedCharCount === 0 && start === previousChange.end + previousChange.text.length) {
+						previousChange.text += e.text;
+						return;
+					}
+					if (e.addedCharCount === 0 && end === previousChange.start) {
+						previousChange.start = start;
+						return;
+					}
+				}
+			}
+			this.previousChangeType = type;
+			this._unsavedChanges.push({start:start, end:end, text:e.text});
+		},
+		reportStatus: function(msg) {
+			if (this.statusReporter) {
+				this.statusReporter(msg);
+			} else if (this.editor) {
+				this.editor.reportStatus(msg);
+			}
+		},
+		save: function() {
+			if (this._saving) { return; }
+			var editor = this.getEditor();
+			if (!editor || !editor.isDirty() || this.getReadOnly()) { return; }
+			var failedSaving = this._errorSaving;
+			this._saving = true;
+			var input = this.getInput();
+			this.reportStatus(messages['Saving...']);
+
+			this.dispatchEvent({ type: "Saving", inputManager: this}); //$NON-NLS-0$
+
+			editor.markClean();
+			var contents = editor.getText();
+			var data = contents;
+			if (this._getSaveDiffsEnabled() && !this._errorSaving) {
+				var changes = this._unsavedChanges;
+				var length = 0;
+				for (var i = 0; i < changes.length; i++) {
+					length += changes[i].text.length;
+				}
+				if (contents.length > length) {
+					data = {
+						diff: changes
+					};
+				}
+			}
+			this._unsavedChanges = [];
+			this._errorSaving = false;
+
+			var etag = this.getFileMetadata().ETag;
+			var args = { "ETag" : etag }; //$NON-NLS-0$
+			var resource = this._parsedLocation.resource;
+			var def = this.fileClient.write(resource, data, args);
+			var progress = this.progressService;
+			var statusService = null;
+			if(this.serviceRegistry){
+				statusService = this.serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+			}
+			if (progress) {
+				def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
+			}
+			var self = this;
+			function successHandler(result) {
+				if (input === self.getInput()) {
+					self.getFileMetadata().ETag = result.ETag;
+					editor.setInput(input, null, contents, true);
+				}
+				self.reportStatus("");
+				if (failedSaving && statusService) {
+					statusService.setProgressResult({Message:messages.Saved, Severity:"Normal"}); //$NON-NLS-0$
+				}
+				if (self.afterSave) {
+					self.afterSave();
+				}
+				self._saving = false;
+			}
+			function errorHandler(error) {
+				self.reportStatus("");
+				handleError(statusService, error);
+				self._saving = false;
+				self._errorSaving = true;
+			}
+			def.then(successHandler, function(error) {
+				// expected error - HTTP 412 Precondition Failed
+				// occurs when file is out of sync with the server
+				if (error.status === 412) {
+					var forceSave = window.confirm(messages.saveOutOfSync);
+					if (forceSave) {
+						// repeat save operation, but without ETag
+						var def = self.fileClient.write(resource, contents);
+						if (progress) {
+							def = progress.progress(def, i18nUtil.formatMessage(messages.savingFile, input));
+						}
+						def.then(successHandler, errorHandler);
+					} else {
+						self._saving = false;
+					}
+				} else {
+					// unknown error
+					errorHandler(error);
+				}
+			});
+		},
+		setAutoLoadEnabled: function(enabled) {
+			this._autoLoadEnabled = enabled;
+		},
+		/**
+		 * Set the autosave timeout. If the timeout is <code>-1</code>, autosave is
+		 * disabled.
+		 * @param {Number} timeout - the autosave timeout in milliseconds
+		 */
+		setAutoSaveTimeout: function(timeout) {
+			this._autoSaveEnabled = timeout !== -1;
+			if (!this._idle) {
+				var options = {
+					document: document,
+					timeout: timeout
+				};
+				this._idle = new Idle(options);
+				this._idle.addEventListener("Idle", function () { //$NON-NLS-0$
+					if (!this._errorSaving) {
+						this.save();
+					}
+				}.bind(this));
+			} else {
+				this._idle.setTimeout(timeout);
+			}
+		},
+		setContentType: function(contentType) {
+			this._contentType = contentType;
+		},
+		setInput: function(location) {
+			if (this._ignoreInput) { return; }
+			if (!location) {
+				location = PageUtil.hash();
+			}
+			if (typeof location !== "string") { //$NON-NLS-0$
+				return;
+			}
+			var editor = this.getEditor();
+			if (location && location[0] !== "#") { //$NON-NLS-0$
+				location = "#" + location; //$NON-NLS-0$
+			}
+			var input = PageUtil.matchResourceParameters(location), oldInput = this._parsedLocation || {};
+			if (editor && editor.isDirty()) {
+				var oldLocation = this._location;
+				var oldResource = oldInput.resource;
+				var newResource = input.resource;
+				if (oldResource !== newResource) {
+					if (this._autoSaveEnabled) {
+						this.save();
+					} else if (!window.confirm(messages.confirmUnsavedChanges)) {
+						window.location.hash = oldLocation;
+						return;
+					}
+				}
+			}
+			var editorChanged = editor && oldInput.editor !== input.editor;
+			this._location = location;
+			this._parsedLocation = input;
+			this._ignoreInput = true;
+			if(this.selection) {
+				this.selection.setSelections(location);
+			}
+			this._ignoreInput = false;
+			var fileURI = input.resource;
+			if (fileURI) {
+				if (fileURI === this._input) {
+					if (editorChanged) {
+						this.reportStatus("");
+						this._setInputContents(input, fileURI, null, this._fileMetadata, this._isText(this._fileMetadata));
+					} else {
+						this.processParameters(input);
+					}
+				} else {
+					this._input = fileURI;
+					this._readonly = false;
+					this._fileMetadata = null;
+					this.load();
+				}
+			} else {
+				this._setNoInput(true);
+			}
+		},
+		setTitle: function(title) {
+			var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
+			var shortTitle = title;
+			if (indexOfSlash !== -1) {
+				shortTitle = shortTitle.substring(indexOfSlash + 1);
+			}
+			this._title = shortTitle;
+		},
+		setSaveDiffsEnabled: function(enabled) {
+			this._saveDiffsEnabled = enabled;
+		},
+		_getSaveDiffsEnabled: function() {
+			return this._saveDiffsEnabled && this._acceptPatch !== null && this._acceptPatch.indexOf("application/json-patch") !== -1; //$NON-NLS-0$
+		},
+		_isText: function(metadata) {
+			var contentType = this.contentTypeRegistry.getFileContentType(metadata);
+			// Allow unkownn content types to be loaded as text files
+			if (!contentType) { return true; }
+			var textPlain = this.contentTypeRegistry.getContentType("text/plain"); //$NON-NLS-0$
+			return this.contentTypeRegistry.isExtensionOf(contentType, textPlain);
+		},
+		_setNoInput: function(loadRoot) {
+			if (loadRoot) {
+				this.fileClient.loadWorkspace("").then(function(root) {
+					this._input = root.ChildrenLocation;
+					this._setInputContents(root.ChildrenLocation, null, root, root);
+				}.bind(this));
+				return;
+			}
+			// No input, no editor.
+			this._input = this._title = this._fileMetadata = null;
+			this.setContentType(null);
+			this.dispatchEvent({ type: "InputChanged", input: null }); //$NON-NLS-0$
+		},
+		_setInputContents: function(input, title, contents, metadata, noSetInput) {
+			var name, isDir = false;
+			if (metadata) {
+				this._fileMetadata = metadata;
+				this.setTitle(metadata.Location || String(metadata));
+				this.setContentType(this.contentTypeRegistry.getFileContentType(metadata));
+				name = metadata.Name;
+				isDir = metadata.Directory;
+			} else {
+				// No metadata
+				this._fileMetadata = null;
+				this.setTitle(title);
+				this.setContentType(this.contentTypeRegistry.getFilenameContentType(this.getTitle()));
+				name = this.getTitle();
+			}
+			var editor = this.getEditor();
+			if (this._focusListener) {
+				if (editor && editor.getTextView && editor.getTextView()) {
+					editor.getTextView().removeEventListener("Focus", this._focusListener); //$NON-NLS-0$
+				}
+				this._focusListener = null;
+			}
+			if (this._changingListener) {
+				if (editor && editor.getModel && editor.getModel()) {
+					editor.getModel().removeEventListener("Changing", this._changingListener); //$NON-NLS-0$
+				}
+				this._changingListener = null;
+			}
+			var evt = {
+				type: "InputChanged", //$NON-NLS-0$
+				input: input,
+				name: name,
+				title: title,
+				contentType: this.getContentType(),
+				metadata: metadata,
+				location: window.location,
+				contents: contents
+			};
+			this.dispatchEvent(evt);
+			this.editor = editor = evt.editor;
+			if (!isDir) {
+				if (editor && editor.getModel && editor.getModel()) {
+					editor.getModel().addEventListener("Changing", this._changingListener = this.onChanging.bind(this)); //$NON-NLS-0$
+				}
+				if (!noSetInput) {
+					editor.setInput(title, null, contents);
+				}
+				if (editor && editor.getTextView && editor.getTextView()) {
+					editor.getTextView().addEventListener("Focus", this._focusListener = this.onFocus.bind(this)); //$NON-NLS-0$
+				}
+				this._unsavedChanges = [];
+				this.processParameters(input);
+			}
+		}
+	});
+	return {
+		handleError: handleError,
+		InputManager: InputManager
+	};
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
+/*global window define document */
+define('orion/breadcrumbs',['require', 'orion/webui/littlelib'], function (require, lib) {
+
+    /**
+     * Constructs a new BreadCrumb with the given options.
+     * @param {Object} options The options object, which must specify the parent container.
+     * @param options.container The parent container for the bread crumb presentation
+     * @param [options.resource] The current resource
+     * @param [options.rootSegmentName] The name to use for the root segment in lieu of the metadata name.
+     * @param [options.workspaceRootSegmentName] The name to use for the workspace root. If not specified, the workspace root
+     * will not be shown.
+     * @param {Function} [options.makeHref] The callback function to make the href on a bread crumb item. If not defined "/edit/edit.html#" is used.
+     * @param {Function} [option.getFirstSegment] The callback function to make DOM node for the first segment in breadcrumb. 
+     * @class Bread crumbs show the current position within a resource tree and allow navigation
+     * to different places in the tree. Unlike the fairy tale, bread crumbs typically don't lead
+     * to a cottage made of gingerbread. Sorry!
+     * @name orion.breadcrumbs.BreadCrumbs
+     */
+
+    function BreadCrumbs(options) {
+        this._init(options);
+    }
+    BreadCrumbs.prototype = /** @lends orion.breadcrumbs.BreadCrumbs.prototype */ {
+        _init: function (options) {
+            var container = lib.node(options.container);
+            if (!container) {
+                throw "no parent container"; //$NON-NLS-0$
+            }
+            this._container = container;
+            container.classList.remove("currentLocation"); //$NON-NLS-0$
+            this._id = options.id || "eclipse.breadcrumbs"; //$NON-NLS-0$
+            this._resource = options.resource || null;
+            this._rootSegmentName = options.rootSegmentName;
+            this._workspaceRootSegmentName = options.workspaceRootSegmentName;
+			this._workspaceRootURL = options.workspaceRootURL;
+            this._makeHref = options.makeHref;
+            this._makeFinalHref = options.makeFinalHref;
+            this._maxLength = options.maxLength;
+            this.path = "";
+            this.measure();
+            this.render();
+        },
+
+        getNavigatorWorkspaceRootSegment: function () {
+            if (this._workspaceRootSegmentName) {
+                var seg;
+                if (this._resource && this._resource.Parents && !this._resource.skip) {
+                    seg = document.createElement('a'); //$NON-NLS-0$
+					var param = this._workspaceRootURL ? this._workspaceRootURL : "";
+                    if (this._makeHref) {
+                        this._makeHref(seg, param );
+                    } else {
+                        seg.href = require.toUrl("edit/edit.html") + "#" + param; //$NON-NLS-1$ //$NON-NLS-0$
+                    }
+                } else {
+                    seg = document.createElement('span'); //$NON-NLS-0$
+                }
+                lib.empty(seg);
+                seg.appendChild(document.createTextNode(this._workspaceRootSegmentName));
+                return seg;
+            }
+            return null;
+        },
+
+        MAX_LENGTH: 500,
+        INCLUDE_FIRST_SECTION: true,
+
+        segments: [],
+
+        buildSegment: function (name) {
+            var segment = document.createElement('a'); //$NON-NLS-0$
+            segment.classList.add("breadcrumb"); //$NON-NLS-0$
+            segment.appendChild(document.createTextNode(name));
+            return segment;
+        },
+
+        addSegmentHref: function (seg, section) {
+            if (this._makeHref) {
+                this._makeHref(seg, section.Location, section);
+            } else {
+                seg.href = require.toUrl("edit/edit.html") + "#" + section.ChildrenLocation; //$NON-NLS-1$ //$NON-NLS-0$
+            }
+        },
+
+        buildSegments: function (firstSegmentName, direction) {
+	
+			if( this._resource.Parents ){      
+	            var parents = this._resource.Parents.slice(0); // create a copy
+	            var seg;
+	            var segmentName;
+	            
+	            if( parents ){
+	
+		            var collection = parents.slice(0);
+		
+		            if (direction === 'reverse') { //$NON-NLS-0$
+		                collection = collection.reverse().slice(0);
+		            }
+		
+		            collection.forEach(function (parent) {
+						if(parent.skip) {
+							return;
+						}
+		                if (firstSegmentName) {
+		                    segmentName = firstSegmentName;
+		                    firstSegmentName = null;
+		                } else {
+		                    segmentName = parent.Name;
+		                }
+		
+		                seg = this.buildSegment(segmentName);
+		                
+		
+			                this.path += parent.Name;
+			                this.addSegmentHref(seg, parent);
+		                
+		                seg.include = false;
+		                this.segments.push(seg);
+		
+		            }.bind(this));         
+	            }
+            }
+        },
+
+        addDivider: function () {
+            var slash = document.createElement('span'); //$NON-NLS-0$
+            slash.appendChild(document.createTextNode(' / ')); //$NON-NLS-0$
+            this.path += "/"; //$NON-NLS-0$
+            slash.classList.add("breadcrumbSeparator"); //$NON-NLS-0$		
+            this.append(slash);
+        },
+
+        refresh: function () {
+            this.crumbs = lib.node(this._id);
+
+            if (this.crumbs) {
+                lib.empty(this.crumbs);
+            } else {
+                this.crumbs = document.createElement('span'); //$NON-NLS-0$
+                this.crumbs.id = this._id;
+                this._container.appendChild(this.crumbs);
+
+                this.dirty = document.createElement('span'); //$NON-NLS-0$
+                this.dirty.id = "dirty"; //$NON-NLS-0$
+                this.dirty.className = "modifiedFileMarker"; //$NON-NLS-0$
+                this._container.appendChild(this.dirty);
+            }
+            
+            this.crumbs.style.width = 'auto'; //$NON-NLS-0$
+            this.crumbs.style.visibility = 'visible'; //$NON-NLS-0$
+            this.crumbs.parentNode.className = "currentLocation"; //$NON-NLS-0$
+            this.crumbs.parentNode.style.width = 'auto'; //$NON-NLS-0$
+        },
+
+        append: function (section) {
+            this.crumbs.appendChild(section);
+        },
+
+        addTitle: function (seg, firstSegmentName) {
+            // if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
+
+			var text = firstSegmentName || document.title;
+
+            if (this.crumbs.childNodes.length === 0) {
+                seg = document.createElement('span'); //$NON-NLS-0$
+                seg.appendChild(document.createTextNode( text ));
+                seg.classList.add("breadcrumb"); //$NON-NLS-0$
+                seg.classList.add("currentLocation"); //$NON-NLS-0$
+                this.append(seg);
+            }
+        },
+
+        finalSegment: function (seg, firstSegmentName) {
+        	if(this._resource.skip) {
+        		return;
+        	}
+            var name;
+            if (firstSegmentName) {
+                name = firstSegmentName;
+            } else {
+				name = this._resource.Name;
+            }
+            if (this._makeFinalHref) {
+               seg = this.buildSegment(name); //$NON-NLS-0$
+               this.addSegmentHref(seg, this._resource);
+            } else {
+                seg = document.createElement('span'); //$NON-NLS-0$
+                seg.appendChild(document.createTextNode( name ));
+            }
+            seg.classList.add("currentLocation"); //$NON-NLS-0$
+            this.path += this._resource.Name;
+            this.append(seg);
+        },
+
+        firstSegment: function (segment) {
+            if (segment) {
+                this.append(segment);
+
+                if (this._resource && this._resource.Parents && !this._resource.skip) {
+                    segment.classList.add("breadcrumb"); //$NON-NLS-0$
+                    this.addDivider();
+                } else { // we are at the root.  Get rid of any href since we are already here
+                    if(!this._resource.skip) {
+                    	segment.href = "";
+                    }
+                    segment.classList.add("currentLocation"); //$NON-NLS-0$
+                    return;
+                }
+            }
+        },
+
+        drawSegments: function () {
+
+            if (this._resource.Parents) {
+                var reverseParents = this.segments.slice(0);
+                reverseParents.forEach(function (parent) {
+                    if (parent.include === true) {
+                        this.append(parent);
+                        this.addDivider();
+                    }
+                }.bind(this));
+            }
+        },
+
+        measureSegments: function () {
+
+            this.INCLUDE_FIRST_SECTION = true;
+
+            if (this._resource.Parents) {
+                var reverseParents = this.segments.slice(0).reverse();
+                reverseParents.forEach(function (parent) {
+                    this.append(parent);
+                    this.addDivider();
+                    if (this.crumbs.offsetWidth < this.MAX_LENGTH) {
+                        parent.include = true;
+                    } else {
+                        this.INCLUDE_FIRST_SECTION = false;
+                    }
+
+                }.bind(this));
+
+                this.segments = reverseParents.reverse();
+            }
+        },
+
+        measure: function () {
+        
+        	var middleWidth = this._container;
+
+			middleWidth.style.width = 'auto';
+			
+			if(this._maxLength) {
+        		this.MAX_LENGTH = this._maxLength;
+			} else {
+        		this.MAX_LENGTH = middleWidth.offsetWidth;
+        	}
+
+            this.refresh();
+            
+            this.segments = [];
+
+            this.crumbs.style.visibility = 'hidden'; //$NON-NLS-0$
+
+            var segment = this.getNavigatorWorkspaceRootSegment();
+
+            var firstSegmentName = this._rootSegmentName;
+
+            if (firstSegmentName) {
+                this.addTitle(segment, firstSegmentName);
+            } else {
+                this.finalSegment(segment, firstSegmentName);
+
+                if (this._resource && this._resource.Parents) {
+                    this.buildSegments(firstSegmentName, 'reverse'); //$NON-NLS-0$
+                    this.measureSegments();
+                    this.firstSegment(segment);   
+                }
+	
+				if (this.crumbs.offsetWidth >= this.MAX_LENGTH) {
+                        this.INCLUDE_FIRST_SECTION = false;
+				}
+            }
+        },
+
+        render: function () {
+
+            this.refresh();
+
+            var segment = this.getNavigatorWorkspaceRootSegment();
+
+            var firstSegmentName = this._rootSegmentName;
+
+            if (firstSegmentName) {
+                this.addTitle(segment, firstSegmentName);
+            } else {
+            
+				if (this.INCLUDE_FIRST_SECTION === true) {
+                    this.firstSegment(segment);
+                }
+
+                if (this._resource && this._resource.Parents) {
+                    this.drawSegments();
+                    this.finalSegment(segment, firstSegmentName);
+                }
+            }
+
+            this.crumbs.parentNode.style.width = this.crumbs.offsetWidth + 20 + 'px';    //$NON-NLS-0$
+        }
+    };
+
+    BreadCrumbs.prototype.constructor = BreadCrumbs;
+    return {
+        BreadCrumbs: BreadCrumbs
+    };
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+/*global document window StopIteration*/
+/*jslint regexp:false*/
+// URL Shim -- see http://url.spec.whatwg.org/ and http://dvcs.w3.org/hg/url/raw-file/tip/Overview.html
+
+(function() {
+    try {
+        var testURL;
+        if (typeof window.URL === "function" && window.URL.length !== 0 &&
+                (testURL = new window.URL("http://www.w3.org?q")).protocol === "http:" && testURL.query) {
+            return;
+        }
+    } catch (e) {}
+
+    //[1]scheme, [2]authority, [3]path, [4]query, [5]fragment
+    var _URI_RE = /^(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?$/;
+    //[ userinfo "@" ] host [ ":" port ]
+    var _AUTHORITY_RE = /^(?:(.*)@)?(\[[^\]]*\]|[^:]*)(?::(.*))?$/;
+
+    var _NO_WS_RE = /^\S*$/;
+    var _SCHEME_RE = /^([a-zA-Z](?:[a-zA-Z0-9+-.])*)$/;
+    var _PORT_RE = /^\d*$/;
+    var _HOST_RE = /^(\[[^\]\/?#\s]*\]|[^:\/?#\s]*)$/;
+    var _HOSTPORT_RE = /^(\[[^\]\/?#\s]*\]|[^:\/?#\s]*)(?::(\d*))?$/;
+    var _PATH_RE = /^([^?#\s]*)$/;
+    var _QUERY_RE = /^([^\s]*)$/;
+    var _FRAGMENT_RE = _NO_WS_RE;
+    var _USERNAME_PASSWORD_RE = /([^:]*):?(.*)/;
+
+    var STOP_ITERATION = typeof StopIteration !== "undefined" ? StopIteration : new Error("Stop Iteration");
+    var DEFAULT_PORTS = {
+        "ftp:": "21",
+            "gopher:": "70",
+            "http:": "80",
+            "https:": "443",
+            "ws:": "80",
+            "wss:": "443"
+    };
+
+    function _checkString(txt) {
+        if (typeof txt !== "string") {
+            throw new TypeError();
+        }
+    }
+
+    function _parseQuery(query) {
+        return query ? query.split("&") : [];
+    }
+
+    function _stringifyQuery(pairs) {
+        if (pairs.length === 0) {
+            return "";
+        }
+        return pairs.join("&");
+    }
+
+    function _parsePair(pair) {
+        var parsed = /([^=]*)(?:=?)(.*)/.exec(pair);
+        var key = parsed[1] ? decodeURIComponent(parsed[1]) : "";
+        var value = parsed[2] ? decodeURIComponent(parsed[2]) : "";
+        return [key, value];
+    }
+
+    function _stringifyPair(entry) {
+        var pair = encodeURIComponent(entry[0]);
+        if (entry[1]) {
+            pair += "=" + encodeURIComponent(entry[1]);
+        }
+        return pair;
+    }
+
+    function _createMapIterator(url, kind) {
+        var query = "";
+        var pairs = [];
+        var index = 0;
+        return {
+            next: function() {
+                if (query !== url.query) {
+                    query = url.query;
+                    pairs = _parseQuery(query);
+                }
+                if (index < pairs.length) {
+                    var entry = _parsePair(pairs[index++]);
+                    switch (kind) {
+                        case "keys":
+                            return entry[0];
+                        case "values":
+                            return entry[1];
+                        case "keys+values":
+                            return [entry[0], entry[1]];
+                        default:
+                            throw new TypeError();
+                    }
+                }
+                throw STOP_ITERATION;
+            }
+        };
+    }
+
+    // See http://url.spec.whatwg.org/#interface-urlquery
+    function URLQuery(url) {
+        Object.defineProperty(this, "_url", {
+            get: function() {
+                return url._url;
+            }
+        });
+    }
+
+    Object.defineProperties(URLQuery.prototype, {
+        get: {
+            value: function(key) {
+                _checkString(key);
+                var result;
+                var pairs = _parseQuery(this._url.query);
+                pairs.some(function(pair) {
+                    var entry = _parsePair(pair);
+                    if (entry[0] === key) {
+                        result = entry[1];
+                        return true;
+                    }
+                });
+                return result;
+            },
+            enumerable: true
+        },
+        set: {
+            value: function(key, value) {
+                _checkString(key);
+                _checkString(value);
+                var pairs = _parseQuery(this._url.query);
+                var found = pairs.some(function(pair, i) {
+                    var entry = _parsePair(pair);
+                    if (entry[0] === key) {
+                        entry[1] = value;
+                        pairs[i] = _stringifyPair(entry);
+                        return true;
+                    }
+                });
+                if (!found) {
+                    pairs.push(_stringifyPair([key, value]));
+                }
+                this._url.query = _stringifyQuery(pairs);
+            },
+            enumerable: true
+        },
+        has: {
+            value: function(key) {
+                _checkString(key);
+                var pairs = _parseQuery(this._url.query);
+                return pairs.some(function(pair) {
+                    var entry = _parsePair(pair);
+                    if (entry[0] === key) {
+                        return true;
+                    }
+                });
+            },
+            enumerable: true
+        },
+            "delete": {
+            value: function(key) {
+                _checkString(key);
+                var pairs = _parseQuery(this._url.query);
+                var filtered = pairs.filter(function(pair) {
+                    var entry = _parsePair(pair);
+                    return entry[0] !== key;
+                });
+                if (filtered.length !== pairs.length) {
+                    this._url.query = _stringifyQuery(filtered);
+                    return true;
+                }
+                return false;
+            },
+            enumerable: true
+        },
+        clear: {
+            value: function() {
+                this._url.query = "";
+            },
+            enumerable: true
+        },
+        forEach: {
+            value: function(callback, thisArg) {
+                if (typeof callback !== "function") {
+                    throw new TypeError();
+                }
+                var iterator = _createMapIterator(this._url, "keys+values");
+                try {
+                    while (true) {
+                        var entry = iterator.next();
+                        callback.call(thisArg, entry[1], entry[0], this);
+                    }
+                } catch (e) {
+                    if (e !== STOP_ITERATION) {
+                        throw e;
+                    }
+                }
+            },
+            enumerable: true
+        },
+        keys: {
+            value: function() {
+                return _createMapIterator(this._url, "keys");
+            },
+            enumerable: true
+        },
+        values: {
+            value: function() {
+                return _createMapIterator(this._url, "values");
+            },
+            enumerable: true
+        },
+        items: {
+            value: function() {
+                return _createMapIterator(this._url, "keys+values");
+            }
+        },
+        size: {
+            get: function() {
+                return _parseQuery(this._url.query).length;
+            },
+            enumerable: true
+        },
+        getAll: {
+            value: function(key) {
+                _checkString(key);
+                var result = [];
+                var pairs = _parseQuery(this._url.query);
+                pairs.forEach(function(pair) {
+                    var entry = _parsePair(pair);
+                    if (entry[0] === key) {
+                        result.push(entry[1]);
+                    }
+                });
+                return result;
+            },
+            enumerable: true
+        },
+        append: {
+            value: function(key, value) {
+                _checkString(key);
+                _checkString(value);
+                var pairs = _parseQuery(this._url.query);
+                pairs.push(_stringifyPair([key, value]));
+                this._url.query = _stringifyQuery(pairs);
+            },
+            enumerable: true
+        }
+    });
+
+    function _makeAbsoluteURL(url, base) {
+        if (!url.scheme && base) {
+            url.scheme = base.scheme;
+            if (!url.host && base.host) {
+                url.userinfo = base.userinfo;
+                url.host = base.host;
+                url.port = base.port;
+                url.pathRelative = true;
+            }
+        }
+        if (url.pathRelative) {
+            if (!url.path) {
+                url.path = base.path;
+            } else if (url.path[0] !== "/") {
+                var basePath = /^(.*\/)[^\/]*$/.exec(base.path)[1] || "/";
+                url.path = basePath + url.path;
+            }
+        }
+    }
+
+    function _normalizeScheme(scheme) {
+        return scheme.toLowerCase();
+    }
+
+    function _normalizePort(port) {
+        return port ? (/[1-9]\d*$/).exec(port)[0] : "";
+    }
+
+    function _normalizePath(path) {
+        var result = [];
+        path.split("/").forEach(function(segment) {
+            if (segment === "..") {
+                result.pop();
+            } else if (segment !== ".") {
+                result.push(segment);
+            }
+        });
+        return result.join("/");
+    }
+
+
+    function _normalizeURL(url) {
+        if (url.scheme) {
+            url.scheme = _normalizeScheme(url.scheme);
+        }
+        if (url.port) {
+            url.port = _normalizePort(url.port);
+        }
+        if (url.host && url.path) {
+            url.path = _normalizePath(url.path);
+        }
+    }
+
+    function _encodeWhitespace(text) {
+        return text.replace(/\s/g, function(c) {
+            return "%" + c.charCodeAt(0).toString(16);
+        });
+    }
+
+    function _parseURL(input, base) {
+        if (typeof input !== "string") {
+            throw new TypeError();
+        }
+
+        input = _encodeWhitespace(input);
+
+        var parsedURI = _URI_RE.exec(input);
+        if (!parsedURI) {
+            return null;
+        }
+        var url = {};
+        url.scheme = parsedURI[1] || "";
+        if (url.scheme && !_SCHEME_RE.test(url.scheme)) {
+            return null;
+        }
+        var authority = parsedURI[2];
+        if (authority) {
+            var parsedAuthority = _AUTHORITY_RE.exec(authority);
+            url.userinfo = parsedAuthority[1];
+            url.host = parsedAuthority[2];
+            url.port = parsedAuthority[3];
+            if (url.port && !_PORT_RE.test(url.port)) {
+                return null;
+            }
+        }
+        url.path = parsedURI[3];
+        url.query = parsedURI[4];
+        url.fragment = parsedURI[5];
+
+        _makeAbsoluteURL(url, base);
+        _normalizeURL(url);
+        return url;
+    }
+
+    function _serialize(url) {
+        var result = (url.scheme ? url.scheme + ":" : "");
+        if (url.host) {
+            result += "//";
+            if (url.userinfo) {
+                result += url.userinfo + "@";
+            }
+            result += url.host;
+            if (url.port) {
+                result += ":" + url.port;
+            }
+        }
+        result += url.path;
+        if (url.query) {
+            result += "?" + url.query;
+        }
+        if (url.fragment) {
+            result += "#" + url.fragment;
+        }
+        return result;
+    }
+
+    // See http://url.spec.whatwg.org/#api
+    function URL(input, base) {
+        var baseURL;
+        if (base) {
+            base = base.href || base;
+            baseURL = _parseURL(base);
+            if (!baseURL || !baseURL.scheme) {
+                throw new SyntaxError();
+            }
+            Object.defineProperty(this, "_baseURL", {
+                value: baseURL
+            });
+        }
+
+        var url = _parseURL(input, baseURL);
+        if (!url) {
+            throw new SyntaxError();
+        }
+
+        Object.defineProperty(this, "_input", {
+            value: input,
+            writable: true
+        });
+
+        Object.defineProperty(this, "_url", {
+            value: url,
+            writable: true
+        });
+
+        var query = new URLQuery(this);
+        Object.defineProperty(this, "query", {
+            get: function() {
+                return this._url ? query : null;
+            },
+            enumerable: true
+        });
+    }
+
+    Object.defineProperties(URL.prototype, {
+        href: {
+            get: function() {
+                return this._url ? _serialize(this._url) : this._input;
+            },
+            set: function(value) {
+                _checkString(value);
+                this._input = value;
+                this._url = _parseURL(this._input, this._baseURL);
+            },
+            enumerable: true
+        },
+        origin: {
+            get: function() {
+                return (this._url && this._url.host ? this.protocol + "//" + this.host : "");
+            },
+            enumerable: true
+        },
+        protocol: {
+            get: function() {
+                return this._url ? this._url.scheme + ":" : ":";
+            },
+            set: function(value) {
+                _checkString(value);
+                if (!this._url) {
+                    return;
+                }
+                var scheme = (value.slice(-1) === ":") ? value.substring(0, value.length - 1) : value;
+                if (scheme === "" || _SCHEME_RE.test(scheme)) {
+                    this._url.scheme = _normalizeScheme(scheme);
+                }
+
+            },
+            enumerable: true
+        },
+        _userinfo: { // note: not part of spec so not enumerable
+            get: function() {
+                return this._url ? this._url.userinfo : "";
+            },
+            set: function(value) {
+                _checkString(value);
+                if (!this._url) {
+                    return;
+                }
+                this._url.userinfo = value;
+            }
+        },
+        username: {
+            get: function() {
+                if (!this._url) {
+                    return "";
+                }
+                var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
+                var username = decodeURIComponent(parsed[1] || "");
+                return username;
+            },
+            set: function(value) {
+                _checkString(value);
+                if (!this._url) {
+                    return;
+                }
+                var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
+                var userpass = [encodeURIComponent(value || "")];
+                if (parsed[2]) {
+                    userpass.push(parsed[2]);
+                }
+                this._userinfo = userpass.join(":");
+            },
+            enumerable: true
+        },
+        password: {
+            get: function() {
+                if (!this._url) {
+                    return "";
+                }
+                var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
+                var password = decodeURIComponent(parsed[2] || "");
+                return password;
+            },
+            set: function(value) {
+                _checkString(value);
+                if (!this._url) {
+                    return;
+                }
+                var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
+                var userpass = [parsed[1] || ""];
+                if (value) {
+                    userpass.push(encodeURIComponent(value));
+                }
+                this._userinfo = userpass.join(":");
+            },
+            enumerable: true
+        },
+        host: {
+            get: function() {
+                var result = "";
+                if (this._url && this._url.host) {
+                    result += this._url.host;
+                    if (this._url.port) {
+                        result += ":" + this._url.port;
+                    }
+                }
+                return result;
+            },
+            set: function(value) {
+                _checkString(value);
+                if (!this._url) {
+                    return;
+                }
+                var result = _HOSTPORT_RE.exec(value);
+                if (result) {
+                    this._url.host = result[1];
+                    this._url.port = _normalizePort(result[2]);
+                }
+            },
+            enumerable: true
+        },
+        hostname: {
+            get: function() {
+                return this._url ? this._url.host : "";
+            },
+            set: function(value) {
+                _checkString(value);
+                if (!this._url) {
+                    return;
+                }
+                var result = _HOST_RE.exec(value);
+                if (result) {
+                    this._url.host = value;
+                }
+            },
+            enumerable: true
+        },
+        port: {
+            get: function() {
+                var port = this._url ? this._url.port || "" : "";
+                if (port && port === DEFAULT_PORTS[this.protocol]) {
+                    port = "";
+                }
+                return port;
+            },
+            set: function(value) {
+                _checkString(value);
+                if (!this._url) {
+                    return;
+                }
+                var result = _PORT_RE.exec(value);
+                if (result) {
+                    this._url.port = _normalizePort(value);
+                }
+            },
+            enumerable: true
+        },
+        pathname: {
+            get: function() {
+                return this._url ? this._url.path : "";
+            },
+            set: function(value) {
+                _checkString(value);
+                if (!this._url) {
+                    return;
+                }
+                var result = _PATH_RE.exec(value);
+                if (result) {
+                    if (this._url.host && value && value[0] !== "/") {
+                        value = "/" + value;
+                    }
+                    this._url.path = value ? _normalizePath(value) : "";
+                }
+            },
+            enumerable: true
+        },
+        search: {
+            get: function() {
+                return (this._url && this._url.query ? "?" + this._url.query : "");
+            },
+            set: function(value) {
+                _checkString(value);
+                if (!this._url) {
+                    return;
+                }
+                if (value && value[0] === "?") {
+                    value = value.substring(1);
+                }
+                var result = _QUERY_RE.exec(value);
+                if (result) {
+                    this._url.query = value;
+                }
+            },
+            enumerable: true
+        },
+        hash: {
+            get: function() {
+                return (this._url && this._url.fragment ? "#" + this._url.fragment : "");
+            },
+            set: function(value) {
+                _checkString(value);
+                if (!this._url) {
+                    return;
+                }
+                if (value && value[0] === "#") {
+                    value = value.substring(1);
+                }
+                var result = _FRAGMENT_RE.exec(value);
+                if (result) {
+                    this._url.fragment = value;
+                }
+            },
+            enumerable: true
+        }
+    });
+
+	var _URL = window.URL || window.webkitURL;
+    if (_URL && _URL.createObjectURL) {
+        Object.defineProperty(URL, "createObjectURL", {
+            value: _URL.createObjectURL.bind(_URL),
+            enumerable: false
+        });
+
+        Object.defineProperty(URL, "revokeObjectURL", {
+            value: _URL.revokeObjectURL.bind(_URL),
+            enumerable: false
+        });
+    }
+    window.URL = URL;
+}());
+
+define("orion/URL-shim", function(){});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors: IBM Corporation - initial API and implementation
+ *******************************************************************************/
+/*global define window document navigator URL*/
+
+define('orion/fileUtils',['require', 'i18n!orion/nls/messages', 'orion/URL-shim'], function(require, messages) {
+                
+	/**
+	 * This class contains static utility methods. It is not intended to be instantiated.
+	 * @class This class contains static utility methods.
+	 * @name orion.fileUtils
+	 */
+
+	function makeRelative(location) {
+		if (!location) {
+			return location;
+		}
+		var hostName = window.location.protocol + "//" + window.location.host; //$NON-NLS-0$
+		if (location.indexOf(hostName) === 0) {
+			return location.substring(hostName.length);
+		}
+		return location;
+	}
+	
+	/**
+	 * Determines if the path represents the workspace root
+	 * @name orion.util#isAtRoot
+	 * @function
+	 */
+	function isAtRoot(path) {
+		if (!path) {
+			return false;
+		}
+		if (path === "/workspace") {
+			return true; // sad but true
+		}
+		var workspaceUrl = new URL(require.toUrl("workspace"), window.location.href);
+		var pathUrl = new URL(path, window.location.href);
+		return pathUrl.href.indexOf(workspaceUrl.href) === 0; //$NON-NLS-0$
+	}
+	
+	//return module exports
+	return {
+		makeRelative: makeRelative,
+		isAtRoot: isAtRoot
+	};
+});
+
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2009, 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
@@ -9216,707 +9952,6 @@ define('orion/explorers/explorer-table',[
 	return {
 		FileExplorer: FileExplorer,
 		FileModel: FileModel
-	};
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2009, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors: IBM Corporation - initial API and implementation
- *******************************************************************************/
-/*global define window document navigator*/
-
-define('orion/explorers/navigationUtils',[], function() {
-	var userAgent = navigator.userAgent;
-	var isPad = userAgent.indexOf("iPad") !== -1; //$NON-NLS-0$
-	
-	/**
-	 * Generate a grid navigation item into a given array. A grid navigation item is presented by a wrapper object wrapping the domNode. 
-	 *
-	 * @param {Array} domNodeWrapperList the array that holds the grid navigation item. Normally the .gridChildren property from a row model.
-	 * @param {Element} element the html dom element representing a grid. Normally left or right arrow keys on the current row highlight the dom element.
-	 *        When a grid is rendered, the caller has to decide what dom element can be passed. 
-	 */
-	 
-	 
-	function generateNavGrid(domNodeWrapperList, domNode, widget, onClick) {
-		if(isPad){
-			return;
-		}
-		if(!domNodeWrapperList){
-			return;
-		}
-		domNodeWrapperList.push({domNode: domNode});
-		domNode.tabIndex = -1;
-		domNode.style.outline = "none"; //$NON-NLS-0$
-	}
-                
-	/**
-	 * Add a grid navigation item to the navigation dictionary. A row navigation model normally comes from any node in a {treeModelIterator}.
-	 * The .gridChildren property will be lazily created on the row model as an array where all the grid navigation items live.
-	 *
-	 * @param {ExplorerNavDict} navDict the dictionary that holds the info of all navigation info from model id.
-	 * @param {object} rowModel the row model from the {treeModelIterator}.
-	 * @param {Element} element the html dom element representing a grid. Normally left or right arrow keys on the current row highlight the dom element.
-	 *        When a grid is rendered, the caller has to decide what dom element can be passed. 
-	 */
-	function addNavGrid(navDict, rowModel, domNode) {
-		if(!navDict){
-			return;
-		}
-		var navHolder = navDict.getGridNavHolder(rowModel, true);
-		if(navHolder){
-			generateNavGrid(navHolder, domNode);
-		}
-	}
-	
-	/**
-	 * Remove a grid navigation item from a given array. A grid navigation item is presented by a wrapper object wrapping the domNode, widget and onClick properties. 
-	 *
-	 * @param {Array} domNodeWrapperList the array that holds the grid navigation item. Normally the .gridChildren property from a row model.
-	 * @param {DomNode} domNode the html dom node representing a grid. Normally left or right arrow keys on the current row highlight the dom node.
-	 *        When a grid is rendered, the caller has to decide what dom node can be passed. 
-	 */
-	function removeNavGrid(domNodeWrapperList, domNode) {
-		if(!domNodeWrapperList){
-			return;
-		}
-		
-		for(var i = 0; i < domNodeWrapperList.length ; i++){
-			if(domNodeWrapperList[i].domNode === domNode){
-				domNodeWrapperList.splice(i, 1);
-				return;
-			}
-		}
-	}
-	//return module exports
-	return {
-		addNavGrid: addNavGrid,
-		generateNavGrid: generateNavGrid,
-		removeNavGrid: removeNavGrid
-	};
-});
-
-/* global define */
-define('orion/extensionCommands',[], function() {
-	return {
-		getOpenWithCommands: function() {
-			return [];
-		},
-		getOpenWithCommand: function(commandService, item, openWithCommands) {
-			return null;
-		}
-	};
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-/*global define console */
-
-define('orion/URITemplate',[],function(){
-	
-	var OPERATOR = {
-		NUL: {first:"", sep:",", named: false, ifemp: "", allow: "U"}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"+": {first:"", sep:",", named: false, ifemp: "", allow: "U+R"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		".": {first:".", sep:",", named: false, ifemp: "", allow: "U"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"/": {first:"/", sep:"/", named: false, ifemp: "", allow: "U"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		";": {first:";", sep:";", named: true, ifemp: "", allow: "U"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"?": {first:"?", sep:"&", named: true, ifemp: "=", allow: "U"}, //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"&": {first:"&", sep:"&", named: true, ifemp: "=", allow: "U"}, //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		"#": {first:"#", sep:",", named: false, ifemp: "", allow: "U+R"}, //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		",": {first:"", sep:",", named: false, ifemp: "", allow: "U+R-,"} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	};
-
-	var VARSPEC_REGEXP = /^((?:(?:[a-zA-Z0-9_])|(?:%[0-9A-F][0-9A-F]))(?:(?:[a-zA-Z0-9_.])|(?:%[0-9A-F][0-9A-F]))*)(?:(\*)|:([0-9]+))?$/;
-	var PCT_ENCODED_G = /%25[0-9A-F][0-9A-F]/g;
-
-	function Literal(text) {
-		this._text = text;
-	}
-
-	Literal.prototype = {
-		expand: function(vars) {
-			return encodeURI(this._text);
-		}
-	};
-	
-	function decodePercent(str) {
-		return str.replace("%25", "%");
-	}
-	
-	function encodeString(value, encoding) {
-		if (encoding === "U") { //$NON-NLS-0$
-			return encodeURIComponent(value).replace(/[!'()*]/g, function(str) {
-				return '%' + str.charCodeAt(0).toString(16).toUpperCase(); //$NON-NLS-0$
-			});
-		}
-		if (encoding === "U+R") { //$NON-NLS-0$
-			return encodeURI(value).replace(/%5B/g, '[').replace(/%5D/g, ']').replace(PCT_ENCODED_G, decodePercent); //$NON-NLS-1$ //$NON-NLS-0$
-		}
-		if (encoding === "U+R-,") { //$NON-NLS-0$
-			return encodeURI(value).replace(/%5B/g, '[').replace(/%5D/g, ']').replace(/,/g, '%2C'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		}
-		throw new Error("Unknown allowed character set: " + encoding);
-	}
-	
-	function encodeArray(value, encoding, separator) {
-		var result = [];
-		for (var i=0; i < value.length; i++) {
-			if (typeof(value[i]) !== "undefined") { //$NON-NLS-0$
-				result.push(encodeString(value[i], encoding));
-			}
-		}
-		return result.join(separator);
-	}
-	
-	function encodeObject(value, encoding, nameValueSeparator, pairSeparator ) {
-		var keys = Object.keys(value);
-		var result = [];
-		for (var i=0; i < keys.length; i++) {
-			if (typeof(value[keys[i]]) !== "undefined") { //$NON-NLS-0$
-				result.push(encodeString(keys[i], encoding) + nameValueSeparator + encodeString(value[keys[i]], encoding));
-			}
-		}
-		return result.join(pairSeparator);
-	}
-	
-	function parseVarSpecs(text) {
-		var result = [];
-		var rawSpecs = text.split(","); //$NON-NLS-0$
-		for (var i=0; i < rawSpecs.length; i++) {
-			var match = rawSpecs[i].match(VARSPEC_REGEXP);
-			if (match === null) {
-				throw new Error("Bad VarSpec: " + text); //$NON-NLS-0$
-			}
-			result.push({
-				name: match[1], 
-				explode: !!match[2], 
-				prefix: match[3] ? parseInt(match[3], 10) : -1
-			}); 
-		}
-		return result;
-	}
-	
-	function Expression(text) {
-		if (text.length === 0) {
-			throw new Error("Invalid Expression: 0 length expression"); //$NON-NLS-0$
-		}
-		
-		this._operator = OPERATOR[text[0]];
-		if (this._operator) {
-			text = text.substring(1);
-		} else {
-			this._operator = OPERATOR.NUL;
-		}
-		
-		this._varSpecList = parseVarSpecs(text);
-	}
-	
-	Expression.prototype = {
-		expand: function(params) {
-			var result = [];
-			for (var i=0; i < this._varSpecList.length; i++) {
-				var varSpec = this._varSpecList[i];
-				var name = varSpec.name;
-				var value = params[name];
-				var valueType = typeof(value);
-				if (valueType !== "undefined" && value !== null) { //$NON-NLS-0$
-					var resultText = result.length === 0 ? this._operator.first: this._operator.sep;			
-					if (valueType === "string") { //$NON-NLS-0$
-						if (this._operator.named) {
-							resultText += encodeString(name, "U+R"); //$NON-NLS-0$
-							resultText += (value.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
-						}
-						if (varSpec.prefix !== -1 && varSpec.prefix < value.length) {
-							value = value.substring(0, varSpec.prefix);
-						}
-						
-						resultText += encodeString(value, this._operator.allow);
-					} else if (Array.isArray(value)) {
-						if (value.length === 0) {
-							continue; // treated as undefined and skipped
-						}
-						if (!varSpec.explode) {
-							var encodedArray = encodeArray(value, this._operator.allow, ","); //$NON-NLS-0$
-							if (this._operator.named) {
-								resultText += encodeString(name, "U+R"); //$NON-NLS-0$
-								resultText += (encodedArray.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
-							}
-							resultText += encodedArray;
-						} else {
-							resultText += encodeArray(value, this._operator.allow, this._operator.sep);
-						}				
-					} else if (valueType === "object") { //$NON-NLS-0$
-						if (Object.keys(value).length === 0) {
-							continue; // treated as undefined and skipped
-						}
-						if (!varSpec.explode) {
-							var encodedObject = encodeObject(value, this._operator.allow, ",", ","); //$NON-NLS-1$ //$NON-NLS-0$
-							if (this._operator.named) {
-								resultText += encodeString(name, "U+R"); //$NON-NLS-0$
-								resultText += (encodedObject.length === 0) ? this._operator.ifemp : "="; //$NON-NLS-0$
-							}
-							resultText += encodedObject; //$NON-NLS-0$
-						} else {
-							resultText += encodeObject(value, this._operator.allow, "=", this._operator.sep); //$NON-NLS-0$
-						}
-					} else {
-						throw new Error("bad param type: " + name + " : " + valueType); //$NON-NLS-1$ //$NON-NLS-0$
-					}
-					result.push(resultText);
-				}
-			}
-			return result.join("");
-		}
-	};
-
-	function parseTemplate(text) {
-		var result = [];
-		var current = 0;	
-		var curlyStartIndex = text.indexOf("{", current); //$NON-NLS-0$
-		while (curlyStartIndex !== -1) {
-			result.push(new Literal(text.substring(current, curlyStartIndex)));
-			var curlyEndIndex = text.indexOf("}", curlyStartIndex + 1); //$NON-NLS-0$
-			if (curlyEndIndex === -1) {
-				throw new Error("Invalid template: " + text); //$NON-NLS-0$
-			}
-			result.push(new Expression(text.substring(curlyStartIndex + 1, curlyEndIndex)));
-			current = curlyEndIndex + 1;
-			curlyStartIndex = text.indexOf("{", current);			 //$NON-NLS-0$
-		}
-		result.push(new Literal(text.substring(current)));
-		return result;
-	}
-
-	/**
-	 * @name orion.URITemplate
-	 * @class A URITemplate describes a range of Uniform Resource Identifiers through variable expansion, and allows for particular URIs to 
-	 * be generated by expanding variables to actual values.</p>
-	 * <p>Because the syntax and encoding rules of URIs can be complex, URITemplates are recommended over manual construction of URIs through 
-	 * string concatenation or other means.</p>
-	 * <p>A URITemplate is created by invoking the constructor, passing a <em>template string</em>:</p>
-	 * <p><code>new URITemplate(template)</code></p>
-	 * <p>The <dfn>template string</dfn> is an expression following a well-defined syntax (see <a href="http://tools.ietf.org/html/rfc6570#section-1.2">here</a>
-	 * for an introduction). Most notably, the template may include variables.</p>
-	 * <p>Once created, a URITemplate's {@link #expand} method can be invoked to generate a URI. Arguments to {@link #expand} give the values to be 
-	 * substituted for the template variables.</p>
-	 * @description Creates a new URITemplate.
-	 * @param {String} template The template string. Refer to <a href="http://tools.ietf.org/html/rfc6570#section-2">RFC 6570</a> for details
-	 * of the template syntax.
-	 */
-	function URITemplate(template) {
-		this._templateComponents = parseTemplate(template);
-	}
-	
-	URITemplate.prototype = /** @lends orion.URITemplate.prototype */ {
-		/**
-		 * Expands this URITemplate to a URI.
-		 * @param {Object} params The parameters to use for expansion. This object is a map of keys (variable names) to values (the variable's
-		 * value in the <a href="http://tools.ietf.org/html/rfc6570#section-3.2.1">expansion algorithm</a>).
-		 * @returns {String} The resulting URI.
-		 */
-		expand: function(params) {
-			var result = [];
-			for (var i = 0; i < this._templateComponents.length; i++) {
-				result.push(this._templateComponents[i].expand(params));
-			}
-			return result.join("");
-		}
-	};
-
-	return URITemplate;
-});
-
-/*******************************************************************************
- * @license
- * Copyright (c) 2009, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- * Contributors: IBM Corporation - initial API and implementation
- ******************************************************************************/
-/*global define */
-/*jslint regexp:false browser:true forin:true sub:true*/
-
-define('orion/explorers/navigatorRenderer',[
-	'i18n!orion/navigate/nls/messages',
-	'orion/Deferred',
-	'orion/explorers/explorer',
-	'orion/explorers/navigationUtils',
-	'orion/extensionCommands',
-	'orion/objects',
-	'orion/URITemplate',
-	'orion/webui/littlelib'
-], function(messages, Deferred, mExplorer, mNavUtils, mExtensionCommands, objects, URITemplate, lib) {
-		
-	function isImage(contentType) {
-		switch (contentType && contentType.id) {
-			case "image/jpeg": //$NON-NLS-0$
-			case "image/png": //$NON-NLS-0$
-			case "image/gif": //$NON-NLS-0$
-			case "image/ico": //$NON-NLS-0$
-			case "image/tiff": //$NON-NLS-0$
-			case "image/svg": //$NON-NLS-0$
-				return true;
-		}
-		return false;
-	}
-	
-	/* Internal */
-	function addImageToLink(contentType, link, location, replace) {
-		if (contentType) {
-			var image, imageClass = contentType.imageClass, imageURL = contentType.image;
-			if (imageClass) {
-				image = document.createElement("span"); //$NON-NLS-0$
-				image.className += imageClass; // may be several classes in here
-				image.classList.add("thumbnail"); //$NON-NLS-0$
-			} else if (imageURL) {
-				image = document.createElement("img"); //$NON-NLS-0$
-				image.src = imageURL;
-				// to minimize the height/width in case of a large one
-				image.classList.add("thumbnail"); //$NON-NLS-0$
-			}
-			if (image) {
-				link.replaceChild(image, replace);
-			}
-		}
-	}
-	
-	var uriTemplate = new URITemplate("#{,resource,params*}"); //$NON-NLS-0$
-		
-	/**
-	 * Exported so that it can be used by other UI that wants to use navigator-style links. commandService and contentTypeService  are necessary to compute 
-	 * the proper editor for a file.
-	 * @name orion.explorer.NavigatorRenderer.createLink
-	 * @function
-	 * @param {String} folderPageURL the page you want to direct folders to (such as navigator).  Using a blank string will just hash the current page.
-	 * @param {Object} item a json object describing an Orion file or folder
-	 * @param {Object} commandService necessary to compute the proper editor for a file. Must be a synchronous, in-page service, not retrieved 
-	 * from the service registry.
-	 * @param {Object[]} [openWithCommands] The "open with" commands used to generate link hrefs. If this parameter is not provided, the caller must
-	 * have already processed the service extension and added to the command registry (usually by calling {@link orion.extensionCommands.createAndPlaceFileCommandsExtension}).
-	 * @param {Object} [linkProperties] gives additional properties to mix in to the HTML anchor element.
-	 * @param {Object} [uriParams] A map giving additional parameters that will be provided to the URI template that generates the href.
-	 * @param {Object} [separateImageHolder] Separate image holder object. {holderDom: dom}. If separateImageHolder is not defined, the file icon image is rendered in the link as the first child.
-	 * @param {NavigatorRenderer} [renderer] The renderer object. Optional. If defined, renderer.updateFileNode() is called to update the file element for sub classes.
-	 * If separateImageHolder is defined with holderDom property, the file icon iamge is rendered in separateImageHolder.holderDom.
-	 * IF separateImageHolder is defined as an empty object, {}, the file icon iamge is not rendered at all.
-	 */
-	function createLink(folderPageURL, item, commandService, contentTypeService, openWithCommands, linkProperties, uriParams, separateImageHolder, renderer) {
-		// TODO FIXME folderPageURL is bad; need to use URITemplates here.
-		// TODO FIXME refactor the async href calculation portion of this function into a separate function, for clients who do not want the <A> created.
-		item = objects.clone(item);
-		var link;
-		if (item.Directory) {
-			link = document.createElement("a"); //$NON-NLS-0$
-			link.className = "navlinkonpage"; //$NON-NLS-0$
-			link.href = !folderPageURL ? uriTemplate : new URITemplate(folderPageURL + "#{,resource,params*}").expand({resource: item.ChildrenLocation}); //$NON-NLS-0$
-			if(item.Name){
-				link.appendChild(document.createTextNode(item.Name));
-			}
-		} else {
-			var i;			
-			if (!openWithCommands) {
-				openWithCommands = mExtensionCommands.getOpenWithCommands(commandService);
-			}
-			link = document.createElement("a"); //$NON-NLS-0$
-			link.className= "navlink targetSelector"; //$NON-NLS-0$
-			if (linkProperties && typeof linkProperties === "object") { //$NON-NLS-0$
-				Object.keys(linkProperties).forEach(function(property) {
-					link[property] = linkProperties[property];
-				});
-			}
-			var imageHolderDom = null, image = null;
-			if(separateImageHolder) {
-				imageHolderDom = separateImageHolder.holderDom;
-			} else {
-				imageHolderDom = link;
-			}
-			if(imageHolderDom) {
-				image = document.createElement("span"); //$NON-NLS-0$
-				image.className = "core-sprite-file modelDecorationSprite thumbnail"; //$NON-NLS-0$
-				imageHolderDom.appendChild(image);
-			}
-			if(item.Name){
-				link.appendChild(document.createTextNode(item.Name));
-			}
-			var href = item.Location;
-			if (uriParams && typeof uriParams === "object") { //$NON-NLS-0$
-				item.params = {};
-				objects.mixin(item.params, uriParams);
-			}
-			var openWithCommand = mExtensionCommands.getOpenWithCommand(commandService, item, openWithCommands);
-			if (openWithCommand) {
-				href = openWithCommand.hrefCallback({items: item});
-			}
-			Deferred.when(contentTypeService.getFileContentType(item), function(contentType) {
-				if(imageHolderDom) {
-					addImageToLink(contentType, imageHolderDom, item.Location, image);
-				}
-				link.href = href;
-				if(renderer && typeof renderer.updateFileNode === 'function') { //$NON-NLS-0$
-					renderer.updateFileNode(item, link, isImage(contentType));
-				}
-			});
-		}
-		return link;
-	}
-		
-	/**
-	 * @name orion.explorer.NavigatorRenderer
-	 * @class Renderer for a tree-table of files, like the Orion Navigator.
-	 * @description Renderer for a tree-table of files, like the Orion Navigator.
-	 * @param {Object} options
-	 * @param {orion.explorer.Explorer} explorer
-	 * @param {orion.commandregistry.CommandRegistry} commandRegistry
-	 * @param {orion.core.ContentTypeRegistry} contentTypeService
-	 */
-	function NavigatorRenderer (options, explorer, commandService, contentTypeService) {
-		this.explorer = explorer;
-		this.commandService = commandService;
-		this.contentTypeService = contentTypeService;
-		this.openWithCommands = null;
-		this.actionScopeId = options.actionScopeId;
-		
-		this._init(options);
-		this.target = "_self"; //$NON-NLS-0$
-	}
-	NavigatorRenderer.prototype = new mExplorer.SelectionRenderer(); 
-
-	NavigatorRenderer.prototype.wrapperCallback = function(wrapperElement) {
-		wrapperElement.setAttribute("role", "tree"); //$NON-NLS-1$ //$NON-NLS-0$
-	};
-
-	NavigatorRenderer.prototype.tableCallback = function(tableElement) {
-		tableElement.setAttribute("aria-label", messages["Navigator"]); //$NON-NLS-1$ //$NON-NLS-0$
-		tableElement.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
-	};
-
-	/**
-	 * @param {Element} rowElement
-	 */
-	NavigatorRenderer.prototype.rowCallback = function(rowElement, model) {
-		rowElement.setAttribute("role", "treeitem"); //$NON-NLS-1$ //$NON-NLS-0$
-	};
-	
-	
-	/**
-	 * @param {Element} bodyElement
-	 */
-	NavigatorRenderer.prototype.emptyCallback = function(bodyElement) {
-		var tr = document.createElement("tr"); //$NON-NLS-0$
-		var td = document.createElement("td"); //$NON-NLS-0$
-		td.colSpan = this.oneColumn ? 1 : 3;
-		var noFile = document.createElement("div"); //$NON-NLS-0$
-		noFile.classList.add("noFile"); //$NON-NLS-0$
-		noFile.textContent = messages["NoFile"];
-		var plusIcon = document.createElement("span"); //$NON-NLS-0$
-		plusIcon.appendChild(document.createTextNode(messages["File"]));
-		lib.processDOMNodes(noFile, [plusIcon]);
-		td.appendChild(noFile);
-		tr.appendChild(td);
-		bodyElement.appendChild(tr);
-	};
-
-	/**
-	 * Creates the column header element. We are really only using the header for a spacer at this point.
-	 * @name orion.explorer.NavigatorRenderer.prototype.getCellHeaderElement
-	 * @function
-	 * @returns {Element}
-	 */
-	NavigatorRenderer.prototype.getCellHeaderElement = function(col_no){
-		// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
-		if (this.oneColumn && col_no !== 0) {
-			return null;
-		}
-
-		switch(col_no){
-		case 0:
-		case 1:
-		case 2:
-			var th = document.createElement("th"); //$NON-NLS-0$
-			th.style.height = "8px"; //$NON-NLS-0$
-		}
-	};
-
-	/**
-	 * Sets the link target to be used for file links.
-	 * @name orion.explorer.NavigatorRenderer#setTarget
-	 * @function
-	 * @param {String} target The target (eg. "new", "_self").
-	 */
-	NavigatorRenderer.prototype.setTarget = function(target){
-		this.target = target;
-	};
-		
-	/**
-	 * Creates a image DOM Element for the specified folder.
-	 * @name orion.explorer.NavigatorRenderer#getFolderImage
-	 * @type {Function}
-	 * @param {Object} folder The folder to create an image for.
-	 * @returns {Element} The folder image element.
-	 */
-	NavigatorRenderer.prototype.getFolderImage = function(folder) {
-		if (!this.showFolderImage) {
-			return null;
-		}
-		var span = document.createElement("span"); //$NON-NLS-0$
-		span.className = "core-sprite-folder modelDecorationSprite"; //$NON-NLS-0$
-		return span;
-	};
-
-	/**
-	* Subclasses can override this function to customize the DOM Element that is created to represent a folder.
-	 * The default implementation creates either a hyperlink or a plain text node.
-	 * @name orion.explorer.NavigatorRenderer#createFolderNode
-	 * @type {Function}
-	 * @see orion.explorer.NavigatorRenderer#showFolderLinks
-	 * @see orion.explorer.NavigatorRenderer#folderLink
-	 * @param {Object} folder The folder to create a node for.
-	 * @returns {Element} The folder element.
-	 */
-	// The returned element must have an <code>id</code> property.
-	NavigatorRenderer.prototype.createFolderNode = function(folder) {
-		var itemNode;
-		if (this.showFolderLinks) { //$NON-NLS-0$
-			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
-			itemNode = createLink(this.folderLink || "", folder, this.commandService, this.contentTypeService); //$NON-NLS-0$
-			var image = this.getFolderImage(folder);
-			if (image) {
-				itemNode.insertBefore(image, itemNode.firstChild);
-			}
-		} else {
-			itemNode = document.createElement("span"); //$NON-NLS-0$
-			itemNode.textContent = folder.Name;
-		}
-		return itemNode;
-	};
-
-	/**
-	* Subclasses can override this function to customize the DOM Element that is created to represent a file.
-	 * The default implementation does nothing.
-	 * @name orion.explorer.NavigatorRenderer#updateFileNode
-	 * @type {Function}
-	 * @param {Object} file The file model to update for.
-	 * @param {Element} fileNode The file node to update.
-	 * @param {Boolean} isImage The flag to indicate if the file is an image file.
-	 */
-	// The returned element must have an <code>id</code> property.
-	NavigatorRenderer.prototype.updateFileNode = function(file, fileNode, isImage) {
-	};
-
-	/**
-	 * Whether the default implementation of {@link #createFolderNode} should show folders should as links (<code>true</code>),
-	 * or just plain text (<code>false</code>).
-	 * @name orion.explorer.NavigatorRenderer#showFolderLinks
-	 * @type {Boolean}
-	 * @default true
-	 */
-	NavigatorRenderer.prototype.showFolderLinks = true;
-	/**
-	 * Gives the base href to be used by the default implementation of {@link #createFolderNode} for creating folder links.
-	 * This property only takes effect if {@link #showFolderLinks} is <code>true</code>. 
-	 * TODO see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121">Bug 400121</a>
-	 * @name orion.explorer.NavigatorRenderer#folderLink
-	 * @type {String}
-	 * @default ""
-	 */
-	/**
-	 * Generate the DOM element for a cell. If you override this function, you will most likely have to override {@link orion.explorers.FileExplorer#getNameNode}
-	 * in your explorer class.
-	 * @name orion.explorer.NavigatorRenderer#getCellElement
-	 * @function
-	 * @returns {Element}
-	 */
-	NavigatorRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		switch(col_no){
-		case 0:
-			var col = document.createElement('td'); //$NON-NLS-0$
-			var span = document.createElement("span"); //$NON-NLS-0$
-			span.id = tableRow.id+"MainCol"; //$NON-NLS-0$
-			span.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
-			col.appendChild(span);
-			col.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
-			span.className = "mainNavColumn"; //$NON-NLS-0$
-			var itemNode;
-			if (item.Directory) {
-				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				var image = this.getExpandImage(tableRow, span);
-				itemNode = this.createFolderNode(item);
-
-				span.appendChild(itemNode);
-				this.explorer._makeDropTarget(item, itemNode);
-				this.explorer._makeDropTarget(item, tableRow);
-			} else {
-				if (!this.openWithCommands) {
-					this.openWithCommands = mExtensionCommands.getOpenWithCommands(this.commandService);
-				}
-				itemNode = createLink("", item, this.commandService, this.contentTypeService, this.openWithCommands, { target: this.target }, null, null, this);
-				span.appendChild(itemNode); //$NON-NLS-0$
-			}
-			if (itemNode) {
-				// orion.explorers.FileExplorer#getNameNode
-				itemNode.id = tableRow.id + "NameLink"; //$NON-NLS-0$
-				if (itemNode.nodeType === 1) {
-					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemNode);
-					itemNode.setAttribute("role", "link"); //$NON-NLS-1$ //$NON-NLS-0$
-					itemNode.setAttribute("tabindex", "-1"); //$NON-NLS-1$ //$NON-NLS-0$
-				}
-			}
-			// render any inline commands that are present.
-			if (this.actionScopeId) {
-				this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool", null, true); //$NON-NLS-0$
-			}
-			return col;
-		case 1:
-			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
-			if (this.oneColumn) {
-				return null;
-			}
-			var dateColumn = document.createElement('td'); //$NON-NLS-0$
-			if (item.LocalTimeStamp) {
-				var fileDate = new Date(item.LocalTimeStamp);
-				dateColumn.textContent = fileDate.toLocaleString();
-			}
-			return dateColumn;
-		case 2:
-			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
-			if (this.oneColumn) {
-				return null;
-			}
-			var sizeColumn = document.createElement('td'); //$NON-NLS-0$
-			if (!item.Directory && typeof item.Length === "number") { //$NON-NLS-0$
-				var length = parseInt(item.Length, 10),
-					kb = length / 1024;
-				sizeColumn.textContent = Math.ceil(kb).toLocaleString() + " KB"; //$NON-NLS-0$
-			}
-			sizeColumn.style.textAlign = "right"; //$NON-NLS-0$
-			return sizeColumn;
-		}
-	};
-	NavigatorRenderer.prototype.constructor = NavigatorRenderer;
-	
-	//return module exports
-	return {
-		NavigatorRenderer: NavigatorRenderer,
-		isImage : isImage,
-		createLink: createLink
 	};
 });
 
@@ -25221,9 +25256,6 @@ define('orion/widgets/browse/browseView',[
 				folderNode.addEventListener("click", function(){this.explorer.clickHandler(folder.Location);}.bind(this)
 				, false);
 			}
-			folderNode.addEventListener("click", function() { //$NON-NLS-0$
-				this.explorer.editorInputManager.cachedMetadata = folder;
-			}.bind(this), false);
 			return folderNode;
 		},
 		/**
@@ -25231,9 +25263,6 @@ define('orion/widgets/browse/browseView',[
 		 */
 		updateFileNode: function(file, fileNode, isImage) {
 			mNavigatorRenderer.NavigatorRenderer.prototype.updateFileNode.call(this, file, fileNode, isImage);
-			fileNode.addEventListener("click", function() { //$NON-NLS-0$
-				this.explorer.editorInputManager.cachedMetadata = file;
-			}.bind(this), false);
 			if (this.explorer.readonly && fileNode.tagName === "A") { //$NON-NLS-0$
 				if(this.explorer.clickHandler){
 					fileNode.href = "javascript:void(0)";
@@ -31091,7 +31120,6 @@ define('orion/widgets/browse/resourceSelector',[
 		this.dropDownId = params.dropDownId;
 		this.dropDownTooltip = params.dropDownTooltip;
 		this.allItems = params.allItems;
-		this.activeResourceName = params.activeResourceName;
 		this.activeResourceLocation = params.activeResourceLocation;
 		this.labelHeader = params.labelHeader;
 		this.parentNode = params.parentNode;
@@ -31170,7 +31198,7 @@ define('orion/widgets/browse/resourceSelector',[
 		 */
 		_resourceLabel: function() {
 			var fragment = document.createDocumentFragment();
-			fragment.textContent = "${0} " + this.activeResourceName; //$NON-NLS-0$
+			fragment.textContent = "${0} " + this.getActiveResource(this.activeResourceLocation).Name; //$NON-NLS-0$
 			var nameLabel = document.createElement("span"); //$NON-NLS-0$
 			nameLabel.appendChild(document.createTextNode(this.labelHeader + ":")); //$NON-NLS-0$
 			nameLabel.classList.add("browserResourceSelectorNameLabel");
@@ -31187,7 +31215,6 @@ define('orion/widgets/browse/resourceSelector',[
 		 * @param {Object|String} location The ChildrenLocation, or an object with a ChildrenLocation field.
 		 */
 		setActiveResource: function(params) {
-			this.activeResourceName = params.resource.Name;
 			this.activeResourceLocation = params.resource.Location;
 			if(this.fetchChildren) {//Lazy fetch
 				if(params.resource.selectorAllItems){
@@ -33431,12 +33458,16 @@ define("orion/editor/stylers/application_javascript/syntax", ["orion/editor/styl
 				match: "\\b(?:" + keywords.join("|") + ")\\b", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				name: "keyword.control.js" //$NON-NLS-0$
 			}, {
-				match: "/(?![\\s])(?:\\\\.|[^/])+/(?![/*])(?:[gim]\\b)?", //$NON-NLS-0$
+				match: "/(?![\\s])(?:\\\\.|[^/])+/(?:[gim]{0,3})", //$NON-NLS-0$
 				name: "string.regexp.js" //$NON-NLS-0$
 			}, {
-				begin: "(['\"])(?:\\\\.|[^\\\\\\1])*\\\\$", //$NON-NLS-0$
-				end: "^(?:$|(?:\\\\.|[^\\\\\\1])*(\\1|[^\\\\]$))", //$NON-NLS-0$
-				name: "string.quoted.multiline.js" //$NON-NLS-0$
+				begin: "'(?:\\\\.|[^\\\\'])*\\\\$", //$NON-NLS-0$
+				end: "^(?:$|(?:\\\\.|[^\\\\'])*('|[^\\\\]$))", //$NON-NLS-0$
+				name: "string.quoted.single.js" //$NON-NLS-0$
+			}, {
+				begin: '"(?:\\\\.|[^\\\\"])*\\\\$', //$NON-NLS-0$
+				end: '^(?:$|(?:\\\\.|[^\\\\"])*("|[^\\\\]$))', //$NON-NLS-0$
+				name: "string.quoted.double.js" //$NON-NLS-0$
 			}
 		]
 	});
@@ -34635,7 +34666,6 @@ define('orion/widgets/browse/fileBrowser',[
 				}
 			}
 			var activeComp = this._componentSelector.getActiveResource(currentComponentLocation);
-			this._componentSelector.activeResourceName = activeComp.Name;
 			this._componentSelector.activeResourceLocation = activeComp.Location;
 			this._componentSelector.refresh();
 		}.bind(this)); 
@@ -34732,7 +34762,6 @@ define('orion/widgets/browse/fileBrowser',[
 						newLocation = newLocation || this._branches[0].Location;
 						this._activeBranchLocation = this._activeBranchLocation || this._branches[0].Location;
 					}
-					this._branchSelector.activeResourceName = activeBranchName;
 					this._branchSelector.activeResourceLocation = this._activeBranchLocation;
 					
 					if(this._showComponent) {
@@ -34783,7 +34812,6 @@ define('orion/widgets/browse/fileBrowser',[
 							commandScopeId: "orion.browse.brSelector", //$NON-NLS-0$
 							dropDownId: "orion.browse.switchbr", //$NON-NLS-0$
 							dropDownTooltip: this._showComponent ? "Select a stream" : "Select a branch", //$NON-NLS-0$
-							activeResourceName: "default",
 							allItems: contents
 						});
 						if(this._showComponent){
@@ -34798,7 +34826,6 @@ define('orion/widgets/browse/fileBrowser',[
 								commandScopeId: "orion.browse.compSelector", //$NON-NLS-0$
 								dropDownId: "orion.browse.switchcomp", //$NON-NLS-0$
 								dropDownTooltip: "Select a componet", //$NON-NLS-0$
-								activeResourceName: "default",
 								allItems: contents
 							});
 						}
