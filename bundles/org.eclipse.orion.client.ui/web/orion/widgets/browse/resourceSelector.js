@@ -39,7 +39,6 @@ define([
 		this.dropDownId = params.dropDownId;
 		this.dropDownTooltip = params.dropDownTooltip;
 		this.allItems = params.allItems;
-		this.activeResourceName = params.activeResourceName;
 		this.activeResourceLocation = params.activeResourceLocation;
 		this.labelHeader = params.labelHeader;
 		this.parentNode = params.parentNode;
@@ -118,7 +117,7 @@ define([
 		 */
 		_resourceLabel: function() {
 			var fragment = document.createDocumentFragment();
-			fragment.textContent = "${0} " + this.activeResourceName; //$NON-NLS-0$
+			fragment.textContent = "${0} " + this.getActiveResource(this.activeResourceLocation).Name; //$NON-NLS-0$
 			var nameLabel = document.createElement("span"); //$NON-NLS-0$
 			nameLabel.appendChild(document.createTextNode(this.labelHeader + ":")); //$NON-NLS-0$
 			nameLabel.classList.add("browserResourceSelectorNameLabel");
@@ -135,7 +134,6 @@ define([
 		 * @param {Object|String} location The ChildrenLocation, or an object with a ChildrenLocation field.
 		 */
 		setActiveResource: function(params) {
-			this.activeResourceName = params.resource.Name;
 			this.activeResourceLocation = params.resource.Location;
 			if(this.fetchChildren) {//Lazy fetch
 				if(params.resource.selectorAllItems){

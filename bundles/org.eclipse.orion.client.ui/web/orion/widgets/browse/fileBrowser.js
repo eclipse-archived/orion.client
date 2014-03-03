@@ -160,7 +160,6 @@ define([
 				}
 			}
 			var activeComp = this._componentSelector.getActiveResource(currentComponentLocation);
-			this._componentSelector.activeResourceName = activeComp.Name;
 			this._componentSelector.activeResourceLocation = activeComp.Location;
 			this._componentSelector.refresh();
 		}.bind(this)); 
@@ -257,7 +256,6 @@ define([
 						newLocation = newLocation || this._branches[0].Location;
 						this._activeBranchLocation = this._activeBranchLocation || this._branches[0].Location;
 					}
-					this._branchSelector.activeResourceName = activeBranchName;
 					this._branchSelector.activeResourceLocation = this._activeBranchLocation;
 					
 					if(this._showComponent) {
@@ -308,7 +306,6 @@ define([
 							commandScopeId: "orion.browse.brSelector", //$NON-NLS-0$
 							dropDownId: "orion.browse.switchbr", //$NON-NLS-0$
 							dropDownTooltip: this._showComponent ? "Select a stream" : "Select a branch", //$NON-NLS-0$
-							activeResourceName: "default",
 							allItems: contents
 						});
 						if(this._showComponent){
@@ -323,7 +320,6 @@ define([
 								commandScopeId: "orion.browse.compSelector", //$NON-NLS-0$
 								dropDownId: "orion.browse.switchcomp", //$NON-NLS-0$
 								dropDownTooltip: "Select a componet", //$NON-NLS-0$
-								activeResourceName: "default",
 								allItems: contents
 							});
 						}
