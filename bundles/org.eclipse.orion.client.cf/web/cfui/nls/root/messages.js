@@ -13,4 +13,8 @@
 //NLS_CHARSET=UTF-8
 
 define({
+	'API URL':'API URL',
+	'Manage URL':'Manage URL',
+	'Settings':'Settings',
+	'Cloud':'Cloud'
 });

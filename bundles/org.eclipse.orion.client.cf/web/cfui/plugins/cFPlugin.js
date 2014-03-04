@@ -11,9 +11,9 @@
 
 /*global window document define setTimeout*/
 
-define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cFClient', 'orion/serviceregistry', 
+define(['i18n!cfui/nls/messages','require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cFClient', 'orion/serviceregistry', 
         'orion/preferences', 'orion/URITemplate', 'orion/PageLinks', 'domReady!'],
-		function(require, xhr, Deferred, PluginProvider, CFClient, ServiceRegistry, Preferences, URITemplate,
+		function(messages,require, xhr, Deferred, PluginProvider, CFClient, ServiceRegistry, Preferences, URITemplate,
 			PageLinks) {
 
 	var temp = document.createElement('a');
@@ -94,16 +94,16 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/plugin', 'orion/cfui/cF
 	provider.registerService("orion.core.setting", null, {
 		settings: [{
 			pid: "org.eclipse.orion.client.cf.settings",
-			name: "Settings",
-			category: 'Cloud',
+			name: messages['Settings'],
+			category: messages['Cloud'],
 			properties: [{
 				id: "targetUrl",
-				name: "API Url",
+				name: messages['API URL'],
 				type: "string",
 				defaultValue: apiUrl
 			}, {
 				id: "manageUrl",
-				name: "Manage Url",
+				name: messages['Manage URL'],
 				type: "string",
 				defaultValue: manageUrl
 			}]
