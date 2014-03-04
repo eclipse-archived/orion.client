@@ -423,8 +423,11 @@ define([
 					} else {
 						// context menu was triggered on sidebar itself,
 						// clear previous selections
-						this.selection.setSelections(null);
-						navHandler.refreshSelection(true, true);
+						var triggerX = event.offsetX === undefined ? event.layerX : event.offsetX;
+						if (triggerX > 0) { // X coordinate should be greater than 0 if mouse right button was used
+							this.selection.setSelections(null);
+							navHandler.refreshSelection(true, true);
+						}
 					}
 				}
 			}.bind(this);
