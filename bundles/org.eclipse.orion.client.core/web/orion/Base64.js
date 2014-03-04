@@ -14,7 +14,7 @@ define(function() {
 	
 	var handlesWhitespace = (function(){
 		try {
-			return atob("AA==") === atob("A A = =")
+			return atob("AA==") === atob("A A = =");
 		} catch(e) {
 			return false;
 		}
