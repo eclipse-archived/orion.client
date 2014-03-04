@@ -25,8 +25,14 @@
 		<div id="sideMenu" class="sideMenu"></div>
 		<div id="pageContent" class="content-fixedHeight">
 			<div id="sideMenuToggle" class="sideMenuToggle"></div>
-			<div class="terminal" id="terminal"></div>
+			<div class="fixedToolbarHolder mainpane mainPanelLayout">
+				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+				<div id="mainNode" class="toolbarTarget pageLayoutTarget">
+					<div class="terminal" id="terminal"></div>
+				</div>
+			</div>
 		</div>
-		<div class="footer-fixed-bottom footer" id="footer"></div>
-	</body>
+		<div class="footer-fixed-bottom footer" id="footer">
+		</div>
+	</body>	
 </html>
