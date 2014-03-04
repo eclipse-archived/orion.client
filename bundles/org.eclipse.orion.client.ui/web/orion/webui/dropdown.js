@@ -409,9 +409,82 @@ define(['require', 'orion/webui/littlelib', 'orion/EventTarget'], function(requi
 			if (this._boundAutoDismiss) {
 				lib.removeAutoDismiss(this._boundAutoDismiss);
 			}
-		 }
+		},
+		
+		/**
+		 * Creates a new menu item and appends it to the bottom of this dropdown.
+		 * @param {String} text The text to display inside the new menu item. Required.
+		 * @param {String} innerNodeType The type of the inner node to create. The default is "span". Optional.
+		 * @returns {Object} The top-most new element that was created
+		 */
+		appendMenuItem: function(text, innerNodeType) {
+			var li = createMenuItem(text, innerNodeType);
+			this._dropdownNode.appendChild(li);
+			return li;
+		},
+		
+		/**
+		 * Creates a new separator and appends it to the bottom of this dropdown.
+		 */
+		appendSeparator: function() {
+			// Add a separator
+			var li = createSeparator();
+			this._dropdownNode.appendChild(li);
+			return li;
+		}
 	};
+	
+	/**
+	 * Creates a new menu item and returns it to the caller.
+	 * @param {String} text The text to display inside the new menu item. Required.
+	 * @param {String} innerNodeType The type of the inner node to create. The default is "span". Optional.
+	 * @returns {Object} The top-most new element that was created
+	 */
+	function createMenuItem(text, innerNodeType) {
+		innerNodeType = innerNodeType === undefined ? "span" : innerNodeType; //$NON-NLS-0$
+	 	
+	 	var element = document.createElement(innerNodeType); //$NON-NLS-0$
+		element.tabIndex = 0;
+		element.className = "dropdownMenuItem"; //$NON-NLS-0$
+		element.role = "menuitem";  //$NON-NLS-0$
+	
+		var span = document.createElement("span");  //$NON-NLS-0$
+		span.appendChild(document.createTextNode(text));
+		span.classList.add("dropdownCommandName"); //$NON-NLS-0$
+		element.appendChild(span);
+	 	
+	 	var li = document.createElement("li"); //$NON-NLS-0$
+	 	li.appendChild(element); //$NON-NLS-0$
+		
+		return li;
+	}
+	
+	/**
+	 * Creates a new separator menu item and returns it to the caller.
+	 * @returns {Object} The new separator element that was created
+	 */
+	function createSeparator() {
+		var li = document.createElement("li"); //$NON-NLS-0$
+		li.classList.add("dropdownSeparator"); //$NON-NLS-0$
+		return li;
+	}
+	
+	/**
+	 * Appends the specified keyBindingString to the specified menu item.
+	 * @param {Object} element The menu item to append the keybinding string to. Required.
+	 * @param {String} keyBindingString The keybinding string to append. Required.
+	 */
+	function appendKeyBindingString(element, keyBindingString) {
+		var span = document.createElement("span"); //$NON-NLS-0$
+		span.classList.add("dropdownKeyBinding"); //$NON-NLS-0$
+		span.appendChild(document.createTextNode(keyBindingString));
+		element.appendChild(span);
+	}
+		
 	Dropdown.prototype.constructor = Dropdown;
 	//return the module exports
-	return {Dropdown: Dropdown};
+	return {Dropdown: Dropdown,
+			appendKeyBindingString: appendKeyBindingString,
+			createMenuItem: createMenuItem,
+			createSeparator: createSeparator};
 });
