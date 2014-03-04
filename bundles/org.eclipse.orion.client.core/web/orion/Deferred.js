@@ -65,6 +65,31 @@
             fn(result);
         };
     }
+    
+    function settleDeferred(fn, result, deferred) {
+    	try {
+    		var listenerResult = fn(result);
+    		var listenerThen = listenerResult && (typeof listenerResult === "object" || typeof listenerResult === "function") && listenerResult.then;
+    		if (typeof listenerThen === "function") {
+    			if (listenerResult === deferred.promise) {
+    				deferred.reject(new TypeError());
+    			} else {
+    				var listenerResultCancel = listenerResult.cancel;
+    				if (typeof listenerResultCancel === "function") {
+    					deferred._parentCancel = listenerResultCancel.bind(listenerResult);
+    				} else {
+    					delete deferred._parentCancel;
+    				}
+    				listenerThen.call(listenerResult, noReturn(deferred.resolve), noReturn(deferred.reject), noReturn(deferred.progress));
+    			}
+    		} else {
+    			deferred.resolve(listenerResult);
+    		}
+    	} catch (e) {
+    		deferred.reject(e);
+    	}
+    }
+
 
     /**
      * @name orion.Promise
@@ -117,27 +142,7 @@
                 var methodName = state === "fulfilled" ? "resolve" : "reject"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
                 var fn = listener[methodName];
                 if (typeof fn === "function") { //$NON-NLS-0$
-                    try {
-                        var listenerResult = fn(result);
-                        var listenerThen = listenerResult && (typeof listenerResult === "object" || typeof listenerResult === "function") && listenerResult.then;
-                        if (typeof listenerThen === "function") {
-                            if (listenerResult === deferred.promise) {
-                                deferred.reject(new TypeError());
-                            } else {
-                                var listenerResultCancel = listenerResult.cancel;
-                                if (typeof listenerResultCancel === "function") {
-                                    deferred._parentCancel = listenerResultCancel.bind(listenerResult);
-                                } else {
-                                    delete deferred._parentCancel;
-                                }
-                                listenerThen.call(listenerResult, noReturn(deferred.resolve), noReturn(deferred.reject), noReturn(deferred.progress));
-                            }
-                        } else {
-                            deferred.resolve(listenerResult);
-                        }
-                    } catch (e) {
-                        deferred.reject(e);
-                    }
+                	settleDeferred(fn, result, deferred);
                 } else {
                     deferred[methodName](result);
                 }
