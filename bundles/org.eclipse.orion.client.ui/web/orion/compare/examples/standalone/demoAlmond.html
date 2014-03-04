@@ -19,18 +19,12 @@
 			border:1px solid #bebebe;
 		}
 	</style>
-	<!--
-    <link rel="stylesheet" type="text/css" href="built-compare.css"/>
-	<script src="require.min.js"></script>
-	<script>
-    require(["built-compare.min.js"], function(Compare) {
-	-->
     <link rel="stylesheet" type="text/css" href="http://eclipse.org/orion/compare/releases/5.0/built-compare.css"/>
-	<script src="http://requirejs.org/docs/release/2.1.4/minified/require.js"></script>
+	<script src="http://eclipse.org/orion/compare/releases/5.0/built-compare-amd.min.js"></script>
 	<script>
-	/*global require window */
-    require(["http://eclipse.org/orion/compare/releases/5.0/built-compare.min.js"], function(Compare) {
-	var document = window.document;
+	/*global orion window */
+ window.onload=function(){
+ 	var document = window.document;
 
 	/** Buttons */	
 	var bCompare = document.getElementById("doCompare"); //$NON-NLS-0$
@@ -65,7 +59,7 @@
         }
     };
 	
-	var compare = new Compare(options, "compareCmdDiv", "twoWay", true/*toggleable*/); //$NON-NLS-1$ //$NON-NLS-0$
+	var compare = new orion.compare.comparer(options, "compareCmdDiv", "twoWay", true/*toggleable*/); //$NON-NLS-1$ //$NON-NLS-0$
 	
 	function getFile(file) {
 		try {
@@ -450,7 +444,7 @@
 			"	bContentType.onchange = onContentType;\n" + 
 			" });\n" + 
 			"";
-	});
+	};
 </script>
 </head>
 

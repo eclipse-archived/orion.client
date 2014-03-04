@@ -1,5 +1,5 @@
 ({
-    baseUrl: '.',
+    baseUrl: '../../',
 	closure: {
 		CompilerOptions: {},
 		CompilationLevel: 'SIMPLE_OPTIMIZATIONS',
