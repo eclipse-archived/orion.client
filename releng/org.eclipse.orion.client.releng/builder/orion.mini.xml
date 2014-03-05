@@ -166,7 +166,10 @@
 			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}">
 				<classpath>
 					<fileset dir="${requirejsHome}/lib/">
-				    	<include name="**/*.jar"/>
+						<!-- Rhino jar has to be first or else the PDE build breaks :) -->
+						<!-- <include name="**/*.jar"/> -->
+						<pathelement location="${requirejsHome}/lib/rhino/js.jar" />
+						<pathelement location="${requirejsHome}/lib/closure/compiler.jar" />
 				    </fileset>
 				</classpath>
 				<!-- JavaScript language version -->
