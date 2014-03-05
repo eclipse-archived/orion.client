@@ -113,7 +113,7 @@ describe(RULE_ID, function() {
 		assert.equal(messages[0].node.type, "Identifier");
 	});
 	it("should flag setInterval() use call infer literal arg", function() {
-		var topic = "function setInterval() {} var s = 'code'; setInterval('code', 300);";
+		var topic = "function setInterval() {} var s = 'code'; setInterval(s, 300);";
 
 		var config = { rules: {} };
 		config.rules[RULE_ID] = 1;
@@ -146,7 +146,7 @@ describe(RULE_ID, function() {
 		assert.equal(messages[0].node.type, "Identifier");
 	});
 	it("should flag setTimeout() use call infer literal arg", function() {
-		var topic = "function setTimeout() {} var s = 'code'; setTimeout('code', 300);";
+		var topic = "function setTimeout() {} var s = 'code'; setTimeout(s, 300);";
 
 		var config = { rules: {} };
 		config.rules[RULE_ID] = 1;
