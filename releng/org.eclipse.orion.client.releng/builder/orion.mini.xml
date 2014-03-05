@@ -98,8 +98,8 @@
 				<classpath>
 					<!-- Rhino jar has to be first or else the PDE build breaks :) -->
 					<!-- <include name="**/*.jar"/> -->
-					<pathelement location="${requirejsHome}/lib/rhino/js.jar" />
-					<pathelement location="${requirejsHome}/lib/closure/compiler.jar" />
+					<pathelement location="${requirejsHome}/lib/rhino.jar" />
+					<pathelement location="${requirejsHome}/lib/closure-compiler.jar" />
 				</classpath>
 				<jvmarg value="-Xss1024k" />
 				<arg value="-version" />
@@ -165,8 +165,8 @@
 				<classpath>
 					<!-- Rhino jar has to be first or else the PDE build breaks :) -->
 					<!-- <include name="**/*.jar"/> -->
-					<pathelement location="${requirejsHome}/lib/rhino/js.jar" />
-					<pathelement location="${requirejsHome}/lib/closure/compiler.jar" />
+					<pathelement location="${requirejsHome}/lib/rhino.jar" />
+					<pathelement location="${requirejsHome}/lib/closure-compiler.jar" />
 				</classpath>
 				<!-- JavaScript language version -->
 				<arg value="-version" />
