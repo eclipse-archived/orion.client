@@ -1,4 +1,4 @@
-
+/* global exports module require define*/
 (function(root, factory) {
     if(typeof exports === 'object') {
         module.exports = factory(require, exports, module);
@@ -53,6 +53,34 @@ exports.mergeConfigs = function mergeConfigs(base, custom) {
     });
 
     return base;
+};
+
+/**
+ * @description Looks up the given reference in the current scope and its parent scopes
+ * @param {Object} ref The AST node reference
+ * @param {Object} scope The current EScope object
+ * @returns The AST node the declares the given reference node or null if no declaration is found
+ * @since 6.0
+ */
+exports.getDeclaration = function(ref, scope) {
+	for (var curScope = scope; true; ) {
+		if (!curScope) {
+			return null;
+		}
+		var name = (ref.name ? ref.name : ref.identifier.name);
+		var decl;
+		curScope.variables.some(function(v) {
+			if (v.name === name) {
+				decl = v;
+				return true;
+			}
+			return false;
+		});
+		if (decl) {
+			return decl;
+		}
+		curScope = curScope.upper;
+	}
 };
 
     return module.exports;
