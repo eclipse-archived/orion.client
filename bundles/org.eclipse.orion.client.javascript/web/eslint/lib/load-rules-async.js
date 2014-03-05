@@ -23,9 +23,10 @@ define([
 	"eslint/rules/no-extra-semi",
 	"eslint/rules/missing-doc",
 	'eslint/rules/no-debugger',
-	'eslint/rules/no-dupe-keys'
+	'eslint/rules/no-dupe-keys',
+	'eslint/rules/no-eval'
 ], function(eqeqeq, no_redeclare, no_undef, no_unused_vars, no_use_before_define, semi, no_extra_semi, missing_doc,
-				no_debugger, no_dupe_keys) {
+				no_debugger, no_dupe_keys, no_eval) {
 	return function() {
 		return {
 			"eqeqeq": eqeqeq,
@@ -38,7 +39,8 @@ define([
 			"missing-func-decl-doc" : missing_doc,
 			"missing-func-expr-doc" : missing_doc,
 			'no-debugger' : no_debugger,
-			'no-dupe-keys' : no_dupe_keys
+			'no-dupe-keys' : no_dupe_keys,
+			'no-eval' : no_eval
 		};
 	};
 });

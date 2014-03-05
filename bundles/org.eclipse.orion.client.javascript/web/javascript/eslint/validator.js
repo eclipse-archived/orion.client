@@ -30,7 +30,8 @@ define([
 			"missing-func-decl-doc": [0, 'decl'], //$NON-NLS-0$ //$NON-NLS-1$
 			"missing-func-expr-doc": [0, 'expr'], //$NON-NLS-0$ //$NON-NLS-1$
 			'no-debugger' : 1, //$NON-NLS-0$
-			'no-dupe-keys' : 2 //$NON-NLS-0$ 
+			'no-dupe-keys' : 2, //$NON-NLS-0$ 
+			'no-eval' : 0 //$NON-NLS-0$ 
 		},
 		/**
 		 * @description Sets the given rule to the given enabled value
@@ -213,6 +214,7 @@ define([
 			config.setOption("no-extra-semi", properties.validate_unnecessary_semi); //$NON-NLS-0$
 			config.setOption("no-debugger", properties.validate_debugger); //$NON-NLS-0$
 			config.setOption("no-dupe-keys", properties.validate_dupe_obj_keys); //$NON-NLS-0$
+			config.setOption("no-eval", properties.validate_eval); //$NON-NLS-0$
 		}
 	});
 

@@ -143,6 +143,16 @@ define([
 					tags: "validation javascript js eslint".split(" "),  //$NON-NLS-0$  //$NON-NLS-1$
 					category: "validation",  //$NON-NLS-0$
 					properties: [
+						{	id: "validate_eqeqeq",  //$NON-NLS-0$
+							nameKey: 'eqeqeq',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: 1,
+							options: [
+								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
+								{labelKey: 'warning', value:1},  //$NON-NLS-0$
+								{labelKey: 'error', value:2}  //$NON-NLS-0$
+							]
+						},
 						{	id: "validate_debugger",  //$NON-NLS-0$
 							nameKey: 'noDebugger',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
@@ -153,10 +163,10 @@ define([
 								{labelKey: 'error', value:2}  //$NON-NLS-0$
 							]
 						},
-						{	id: "validate_eqeqeq",  //$NON-NLS-0$
-							nameKey: 'eqeqeq',  //$NON-NLS-0$
+						{	id: "validate_eval",  //$NON-NLS-0$
+							nameKey: 'noEval',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 1,
+							defaultValue: 0,
 							options: [
 								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
 								{labelKey: 'warning', value:1},  //$NON-NLS-0$
