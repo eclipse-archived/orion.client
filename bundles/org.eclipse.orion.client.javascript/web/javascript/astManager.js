@@ -89,7 +89,7 @@ define([
 		 * @returns {Object} A new, empty AST object
 		 */
 		_emptyAST: function(text) {
-			var charCount = (text && typeof text.length === "number") ? text.length : 0;
+			var charCount = (text && typeof text.length === "number") ? text.length : 0;  //$NON-NLS-0$
 			return {
 				type: "Program", //$NON-NLS-0$
 				body: [],

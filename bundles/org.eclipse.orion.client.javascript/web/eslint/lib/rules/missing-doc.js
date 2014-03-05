@@ -11,10 +11,10 @@
  *******************************************************************************/
 /*global define module require exports */
 (function(root, factory) {
-	if(typeof exports === 'object') {
+	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
 	}
-	else if(typeof define === 'function' && define.amd) {
+	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
 		define(['require', 'exports', 'module'], factory);
 	}
 	else {
@@ -25,7 +25,7 @@
 	}
 }(this, function(require, exports, module) {
 	module.exports = function(context) {
-		"use strict";
+		"use strict";  //$NON-NLS-0$
 		
 		/**
 		 * @name checkDoc
@@ -40,15 +40,15 @@
 			var comments;
 			var name;
 			switch(node.type) {
-				case 'Property':
-					if((context.options[0] === 'expr') && node.value && (node.value.type === 'FunctionExpression')) {
+				case 'Property':  //$NON-NLS-0$
+					if((context.options[0] === 'expr') && node.value && (node.value.type === 'FunctionExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
 						comments = context.getComments(node);
 						if(!comments || comments.leading.length < 1) {
-							switch(node.key.type) {
-								case 'Identifier':
+							switch(node.key.type) { 
+								case 'Identifier':  //$NON-NLS-0$
 									name = node.key.name;
 									break;
-								case 'Literal':
+								case 'Literal':  //$NON-NLS-0$
 									name = node.key.value;
 									break;
 							}
@@ -56,18 +56,18 @@
 						}
 					}
 					break;
-				case 'FunctionDeclaration':
-					if(context.options[0] === 'decl') {
+				case 'FunctionDeclaration':  //$NON-NLS-0$
+					if(context.options[0] === 'decl') {  //$NON-NLS-0$
 						comments = context.getComments(node);
 						if(!comments || comments.leading.length < 1) {
 							reportMissingDoc(node.id, node.id.name);
 						}
 					}
 					break;
-				case 'ExpressionStatement':
-					if((context.options[0] === 'expr') && node.expression && node.expression.type === 'AssignmentExpression') {
+				case 'ExpressionStatement':  //$NON-NLS-0$
+					if((context.options[0] === 'expr') && node.expression && node.expression.type === 'AssignmentExpression') {  //$NON-NLS-0$  //$NON-NLS-1$
 						var anode = node.expression;
-						if(anode.right && (anode.right.type === 'FunctionExpression') && anode.left && (anode.left.type === 'MemberExpression')) {
+						if(anode.right && (anode.right.type === 'FunctionExpression') && anode.left && (anode.left.type === 'MemberExpression')) {  //$NON-NLS-0$  //$NON-NLS-1$
 							//comments are attached to the enclosing expression statement
 							comments = context.getComments(node);
 							if(!comments || comments.leading.length < 1) {
@@ -78,7 +78,7 @@
 					}
 					break;
 			}
-		};
+		}
 		
 		/**
 		 * @name reportMissingDoc
@@ -90,9 +90,9 @@
 		}
 		
 		return {
-			"Property": checkDoc,
-			"FunctionDeclaration": checkDoc,
-			"ExpressionStatement": checkDoc
+			"Property": checkDoc,  //$NON-NLS-0$
+			"FunctionDeclaration": checkDoc,  //$NON-NLS-0$
+			"ExpressionStatement": checkDoc  //$NON-NLS-0$
 		};
 	};
 	return module.exports;

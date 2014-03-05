@@ -11,10 +11,10 @@
  *******************************************************************************/
 /*global define module require exports */
 (function(root, factory) {
-	if(typeof exports === 'object') {
+	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
 	}
-	else if(typeof define === 'function' && define.amd) {
+	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
 		define(['require', 'exports', 'module'], factory);
 	}
 	else {
@@ -25,7 +25,7 @@
 	}
 }(this, function(require, exports, module) {
 	module.exports = function(context) {
-		"use strict";
+		"use strict";  //$NON-NLS-0$
 		
 		/**
 		 * @description Checks a set of tokens for the given node to see if the trailing one
@@ -37,7 +37,7 @@
 			var tokens = context.getTokens(node);
 			var len = tokens.length;
 			var t = tokens[len - 1];
-			if (t && t.type === "Punctuator" && t.value === ";") {
+			if (t && t.type === "Punctuator" && t.value === ";") {  //$NON-NLS-0$  //$NON-NLS-1$
 				return;
 			}
 			context.report(node, "Missing semicolon.", null, t /* expose the bad token */);
@@ -53,7 +53,7 @@
 			var ancestors = context.getAncestors(node),
 			    parent = ancestors[ancestors.length - 1],
 			    parentType = parent.type;
-			if ((parentType === "ForStatement" && parent.init === node) || (parentType === "ForInStatement" && parent.left === node)){
+			if ((parentType === "ForStatement" && parent.init === node) || (parentType === "ForInStatement" && parent.left === node)){  //$NON-NLS-0$  //$NON-NLS-1$
 				// One of these cases, no semicolon token is required after the VariableDeclaration:
 				// for(var x;;)
 				// for(var x in y)
@@ -63,9 +63,9 @@
 		}
 
 		return {
-			"VariableDeclaration": checkVariableDeclaration,
-			"ExpressionStatement": checkForSemicolon,
-			"ReturnStatement": checkForSemicolon,
+			"VariableDeclaration": checkVariableDeclaration,  //$NON-NLS-0$
+			"ExpressionStatement": checkForSemicolon,  //$NON-NLS-0$
+			"ReturnStatement": checkForSemicolon,  //$NON-NLS-0$
 		};
 	};
 	return module.exports;

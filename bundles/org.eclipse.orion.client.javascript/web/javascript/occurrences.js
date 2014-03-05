@@ -348,7 +348,7 @@ define([
 				this.visitor.enter = this.visitor.enter.bind(this.visitor);
 				this.visitor.leave = this.visitor.leave.bind(this.visitor);
 			}
-			this.visitor.thisCheck = context.token && context.token.type === 'Keyword' && context.token.value === 'this';
+			this.visitor.thisCheck = context.token && context.token.type === 'Keyword' && context.token.value === 'this';  //$NON-NLS-0$  //$NON-NLS-1$
 			this.visitor.context = context;
 			return this.visitor;			
 		},
@@ -363,7 +363,7 @@ define([
 		_nameFromNode: function(token) {
 			switch(token.type) {
 				case Estraverse.Syntax.Identifier: return token.value;
-				case 'Keyword': return 'this';
+				case 'Keyword': return 'this'; //$NON-NLS-0$  //$NON-NLS-1$
 			}
 		},
 		
@@ -380,10 +380,10 @@ define([
 			if(!token) {
 				return true;
 			}
-			if(token.type === 'Keyword') {
-				return token.value !== 'this';
+			if(token.type === 'Keyword') {  //$NON-NLS-0$
+				return token.value !== 'this';  //$NON-NLS-0$
 			}
-			return token.type !== Estraverse.Syntax.Identifier
+			return token.type !== Estraverse.Syntax.Identifier;
 		},
 		
 		/**
@@ -399,7 +399,7 @@ define([
 			if(ast.tokens && ast.tokens.length > 0) {
 				var token = Finder.findToken(offset, ast.tokens);
 				if(token) {
-					if(token.type === 'Punctuator') {
+					if(token.type === 'Punctuator') {  //$NON-NLS-0$
 						var index = token.index;
 						//only check back if we are at the start of the punctuator i.e. here -> {
 						if(offset === token.range[0] && index != null && index > 0) {
@@ -412,7 +412,7 @@ define([
 							}
 						}
 					}
-					if(token.type === 'Identifier' || (token.type === 'Keyword' && token.value === 'this')) {
+					if(token.type === 'Identifier' || (token.type === 'Keyword' && token.value === 'this')) { //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
 						return token;
 					}
 				}

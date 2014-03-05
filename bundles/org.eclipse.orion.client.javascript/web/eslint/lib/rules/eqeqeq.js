@@ -11,10 +11,10 @@
  *******************************************************************************/
 /*global define module require exports */
 (function(root, factory) {
-	if(typeof exports === 'object') {
+	if(typeof exports === 'object') {  //$NON-NLS-0$
 		module.exports = factory(require, exports, module);
 	}
-	else if(typeof define === 'function' && define.amd) {
+	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
 		define(['require', 'exports', 'module'], factory);
 	}
 	else {
@@ -39,7 +39,7 @@
 			}
 		}
 		return null;
-	};
+	}
 
 	/**
 	 * @description Ruturns if the given node is an identifier and is one of 'null' or 'undefined'
@@ -48,22 +48,22 @@
 	 */
 	function isNullness(node) {
 		if(node && node.type) {
-			return (node.type === 'Literal' && node.value == null) || (node.type === 'Identifier' && node.name === 'undefined');
+			return (node.type === 'Literal' && node.value == null) || (node.type === 'Identifier' && node.name === 'undefined');  //$NON-NLS-0$  //$NON-NLS-1$  //$NON-NLS-2$
 		}
 		return false;
-	};
+	}
 
 	module.exports = function(context) {
-		"use strict";
+		"use strict";  //$NON-NLS-0$
 		return {
-			"BinaryExpression": function(node) {
+			"BinaryExpression": function(node) {  //$NON-NLS-0$
 				if(isNullness(node.left) || isNullness(node.right)) {
 					return;
 				}
 				var op = node.operator;
-				if (op === "==") {
+				if (op === "==") {  //$NON-NLS-0$
 					context.report(node, "Expected '===' and instead saw '=='.", null, getOperatorToken(context, node));
-				} else if (op === "!=") {
+				} else if (op === "!=") {  //$NON-NLS-0$
 					context.report(node, "Expected '!==' and instead saw '!='.", null, getOperatorToken(context, node));
 				}
 			}

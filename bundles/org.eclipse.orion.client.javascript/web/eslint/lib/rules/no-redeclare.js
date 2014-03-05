@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,10 +11,10 @@
  *******************************************************************************/
 /*global define module require exports */
 (function(root, factory) {
-	if(typeof exports === 'object') {
-		module.exports = factory(require('../util'), require, exports, module);
+	if(typeof exports === 'object') {  //$NON-NLS-0$
+		module.exports = factory(require('../util'), require, exports, module);  //$NON-NLS-0$
 	}
-	else if(typeof define === 'function' && define.amd) {
+	else if(typeof define === 'function' && define.amd) {  //$NON-NLS-0$
 		define(['eslint/util', 'require', 'exports', 'module'], factory);
 	}
 	else {
@@ -25,7 +25,7 @@
 	}
 }(this, function(util, require, exports, module) {
 	module.exports = function(context) {
-		"use strict";
+		"use strict";  //$NON-NLS-0$
 
 		function reportRedeclaration(node, name) {
 			context.report(node, "'{{name}}' is already defined.", {name: name});
@@ -34,7 +34,7 @@
 		function addNamedFunctions(map, scope) {
 			scope.variables.forEach(function(variable) {
 				variable.defs.some(function(def) {
-					if (def.type === "FunctionName") {
+					if (def.type === "FunctionName") {  //$NON-NLS-0$
 						var name = def.name.name;
 						if (!(Object.prototype.hasOwnProperty.call(map, name))) {
 							map[name] = scope;
@@ -69,7 +69,7 @@
 
 		function isParameter(variable) {
 			return variable.defs.some(function(def) {
-				return def.type === "Parameter";
+				return def.type === "Parameter";  //$NON-NLS-0$
 			});
 		}
 
@@ -81,7 +81,7 @@
 				// If variable collides with a named function name from an upper scope, it's a redeclaration. Unless
 				// the variable is a param, then we allow it.
 				var bindingSource;
-				if (node.type !== "Program" && (bindingSource = namedFunctions[variable.name]) && bindingSource !== scope && !isParameter(variable)) {
+				if (node.type !== "Program" && (bindingSource = namedFunctions[variable.name]) && bindingSource !== scope && !isParameter(variable)) {  //$NON-NLS-0$
 					reportRedeclaration(variable.defs[0].name, variable.name);
 				}
 
@@ -89,7 +89,7 @@
 				var defs = variable.defs.filter(function(def) {
 					// Workaround for escope bug
 					// https://github.com/Constellation/escope/issues/21
-					return def.type !== "ImplicitGlobalVariable";
+					return def.type !== "ImplicitGlobalVariable";  //$NON-NLS-0$
 				});
 				defs.forEach(function(def, i) {
 					if (i > 0) {
@@ -100,9 +100,9 @@
 		}
 
 		return {
-			"Program": checkScope,
-			"FunctionDeclaration": checkScope,
-			"FunctionExpression": checkScope
+			"Program": checkScope,  //$NON-NLS-0$
+			"FunctionDeclaration": checkScope,  //$NON-NLS-0$
+			"FunctionExpression": checkScope  //$NON-NLS-0$
 		};
 	};
 	return module.exports;

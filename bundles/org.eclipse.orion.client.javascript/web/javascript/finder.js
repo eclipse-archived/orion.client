@@ -16,7 +16,7 @@ define([
 
 	var Finder = {
 		
-		punc: '\n\t\r (){}[]:;,.+=-*^&@!%~`\'\"\/\\',
+		punc: '\n\t\r (){}[]:;,.+=-*^&@!%~`\'\"\/\\',  //$NON-NLS-0$
 		
 		/**
 		 * @name findWord
