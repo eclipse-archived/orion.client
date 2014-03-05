@@ -17,7 +17,9 @@
 // Load helper library
 (function() {
 	var file = project.resolveFile(project.replaceProperties("${builder}/scripts/helpers.js"));
-	var code = String(new Packages.java.lang.String(Packages.java.nio.file.Files.readAllBytes(file.toPath()), "UTF-8"));
+	var scanner = new Packages.java.util.Scanner(file, "UTF-8").useDelimiter("\\Z");
+	var code = String(scanner.next());
+	scanner.close();
 	eval(code);
 }());
 

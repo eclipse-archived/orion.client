@@ -14,27 +14,57 @@
  */
 /*global Packages orion:true project*/
 
-//importPackage(java.io);
-//importPackage(java.nio.file);
-//importPackage(java.nio.charset);
-//importPackage(org.apache.tools.ant);
-
 if (typeof orion === "undefined" || orion === null) {
 	orion = {};
 }
 orion.build = orion.build || {};
 
 (function() {
+	// Rough ES5 shims if we are running under an ancient ES3 environment.. like the version of Rhino bundled with Java6
+	if (!Array.prototype.filter) {
+		Array.prototype.filter = function(callback/*, thisArg */) {
+			var array = Object(this), len = array.length, thisArg = arguments.length > 1 ? arguments[1] : undefined;
+			var result = [];
+			for (var i=0; i < len; i++) {
+				if (i in array) {
+					var value = array[i];
+					if (callback.call(thisArg, value, i, array))
+						result.push(value);
+				}
+			}
+			return result;
+		};
+	}
+	if (!Array.prototype.forEach) {
+		Array.prototype.forEach = function(callback/*, thisArg */) {
+			var array = Object(this), len = array.length, thisArg = arguments.length > 1 ? arguments[1] : undefined;
+			for (var i=0; i < len; i++) {
+				if (i in array)
+					callback.call(thisArg, array[i], i, array);
+			}
+		};
+	}
+	if (!Array.prototype.map) {
+		Array.prototype.map = function(callback/*, thisArg*/) {
+			var array = Object(this), len = array.length, thisArg = arguments.length > 1 ? arguments[1] : undefined;
+			var result = new Array(len);
+			for (var i=0; i < len; i++) {
+				if (i in array)
+					result[i] = callback.call(thisArg, array[i], i, array);
+			}
+			return result;
+		};
+	}
+
 	function deserialize(buildFileText) {
 		return new Function("var o = " + buildFileText + "; return o;")();
 	}
 	
 	function getBuildObject(path) {
-		var Files = Packages.java.nio.file.Files, Paths = Packages.java.nio.file.Paths;
-		var Charset = Packages.java.nio.charset.Charset;
-	
-		var jpath = project.resolveFile(path).toPath();
-		var text = Files.readAllLines(Paths.get(jpath), Charset.forName("UTF-8")).toArray().join("\n");
+		var file = project.resolveFile(path);
+		var scanner = new Packages.java.util.Scanner(file, "UTF-8").useDelimiter("\\Z");
+		var text = String(scanner.next());
+		scanner.close();
 		return deserialize(text);
 	}
 
