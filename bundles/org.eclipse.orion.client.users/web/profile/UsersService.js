@@ -108,18 +108,6 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], funct
 				password : userInfo.password,
 				email: userInfo.email
 			};
-			if (userInfo.guest) {
-				formData.guest = '';
-				if (typeof formData.login !== 'string') {
-					delete formData.login;
-				}
-				if (typeof formData.password !== 'string') {
-					delete formData.password;
-				}
-				if (typeof formData.email !== 'string') {
-					delete formData.email;
-				}
-			}
 			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Content-Type": "application/x-www-form-urlencoded", //$NON-NLS-1$ //$NON-NLS-0$
