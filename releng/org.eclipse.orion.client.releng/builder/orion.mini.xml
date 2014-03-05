@@ -96,9 +96,11 @@
 			<echo message="Minifying Orion pages and plugins..."/>
 			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}">
 				<classpath>
-					<fileset dir="${requirejsHome}/lib/">
-						<include name="**/*.jar"/>
-					</fileset>
+					<sort>
+						<fileset dir="${requirejsHome}/lib/">
+							<include name="**/*.jar"/>
+						</fileset>
+					</sort>
 				</classpath>
 				<jvmarg value="-Xss1024k" />
 				<arg value="-version" />
@@ -162,9 +164,11 @@
 		<sequential>
 			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}">
 				<classpath>
-					<fileset dir="${requirejsHome}/lib/">
-						<include name="**/*.jar"/>
-					</fileset>
+					<sort>
+						<fileset dir="${requirejsHome}/lib/">
+							<include name="**/*.jar"/>
+						</fileset>
+					</sort>
 				</classpath>
 				<!-- JavaScript language version -->
 				<arg value="-version" />
