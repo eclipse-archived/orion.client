@@ -96,10 +96,9 @@
 			<echo message="Minifying Orion pages and plugins..."/>
 			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}">
 				<classpath>
-					<!-- Rhino jar has to be first or else the PDE build breaks :) -->
-					<!-- <include name="**/*.jar"/> -->
-					<pathelement location="${requirejsHome}/lib/rhino.jar" />
-					<pathelement location="${requirejsHome}/lib/closure-compiler.jar" />
+					<fileset dir="${requirejsHome}/lib/">
+						<include name="**/*.jar"/>
+					</fileset>
 				</classpath>
 				<jvmarg value="-Xss1024k" />
 				<arg value="-version" />
@@ -163,10 +162,9 @@
 		<sequential>
 			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}">
 				<classpath>
-					<!-- Rhino jar has to be first or else the PDE build breaks :) -->
-					<!-- <include name="**/*.jar"/> -->
-					<pathelement location="${requirejsHome}/lib/rhino.jar" />
-					<pathelement location="${requirejsHome}/lib/closure-compiler.jar" />
+					<fileset dir="${requirejsHome}/lib/">
+						<include name="**/*.jar"/>
+					</fileset>
 				</classpath>
 				<!-- JavaScript language version -->
 				<arg value="-version" />
