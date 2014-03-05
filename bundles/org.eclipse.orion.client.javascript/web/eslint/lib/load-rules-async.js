@@ -21,8 +21,10 @@ define([
 	"eslint/rules/no-use-before-define",
 	"eslint/rules/semi",
 	"eslint/rules/no-extra-semi",
-	"eslint/rules/missing-doc"
-], function(eqeqeq, no_redeclare, no_undef, no_unused_vars, no_use_before_define, semi, no_extra_semi, missing_doc) {
+	"eslint/rules/missing-doc",
+	'eslint/rules/no-debugger'
+], function(eqeqeq, no_redeclare, no_undef, no_unused_vars, no_use_before_define, semi, no_extra_semi, missing_doc,
+				no_debugger) {
 	return function() {
 		return {
 			"eqeqeq": eqeqeq,
@@ -33,7 +35,8 @@ define([
 			"semi": semi,
 			"no-extra-semi": no_extra_semi,
 			"missing-func-decl-doc" : missing_doc,
-			"missing-func-expr-doc" : missing_doc
+			"missing-func-expr-doc" : missing_doc,
+			'no-debugger' : no_debugger
 		};
 	};
 });

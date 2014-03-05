@@ -18,6 +18,7 @@ define({
 	'contentAssist' : 'JavaScript content assist', //$NON-NLS-0$  //$NON-NLS-1$
 	'eslintValidator' : 'ESLint Validator', //$NON-NLS-0$  //$NON-NLS-1$
 	'eqeqeq' : 'Discouraged \'==\' use', //$NON-NLS-0$  //$NON-NLS-1$
+	'noDebugger' : 'Discouraged \'debugger\' statement use', //$NON-NLS-0$  //$NON-NLS-1$
 	'docFuncDecl' : 'No JSDoc on function declarations', //$NON-NLS-0$  //$NON-NLS-1$
 	'docFuncExpr' : 'No JSDoc on function expressions', //$NON-NLS-0$  //$NON-NLS-1$
 	'useBeforeDefine' : 'Member used before definition', //$NON-NLS-0$  //$NON-NLS-1$

@@ -16,7 +16,6 @@
 //------------------------------------------------------------------------------
 
 var assert = require("assert"),
-	mocha = require("mocha"),
 	eslint = require("../../../lib/eslint");
 
 //------------------------------------------------------------------------------
@@ -117,7 +116,7 @@ describe(RULE_ID, function() {
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427930
 	 */
 	it("should indicate the problematic token in return of call expression", function() {
-		var topic = "function f() {return f()};";
+		var topic = "function f() {return f()}";
 
 		var config = { rules: {} };
 		config.rules[RULE_ID] = 1;
@@ -132,7 +131,7 @@ describe(RULE_ID, function() {
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427930
 	 */
 	it("should indicate the problematic token in return of object", function() {
-		var topic = "function f2() {return {}};";
+		var topic = "function f2() {return {}}";
 
 		var config = { rules: {} };
 		config.rules[RULE_ID] = 1;
@@ -147,7 +146,7 @@ describe(RULE_ID, function() {
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427930
 	 */
 	it("should indicate the problematic token in return of string", function() {
-		var topic = "function f3() {return 'foo'};";
+		var topic = "function f3() {return 'foo'}";
 
 		var config = { rules: {} };
 		config.rules[RULE_ID] = 1;
@@ -162,7 +161,7 @@ describe(RULE_ID, function() {
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427930
 	 */
 	it("should indicate the problematic token in return of number", function() {
-		var topic = "function f4() {return 2};";
+		var topic = "function f4() {return 2}";
 
 		var config = { rules: {} };
 		config.rules[RULE_ID] = 1;
@@ -307,7 +306,7 @@ describe(RULE_ID, function() {
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427930
 	 */
 	it("should not flag call expression root", function() {
-		var topic = "function f() {};f();";
+		var topic = "function f() {} f();";
 
 		var config = { rules: {} };
 		config.rules[RULE_ID] = 1;
@@ -319,7 +318,7 @@ describe(RULE_ID, function() {
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=427930
 	 */
 	it("should not flag call expression return statement", function() {
-		var topic = "function f() {return f();};";
+		var topic = "function f() {return f();}";
 
 		var config = { rules: {} };
 		config.rules[RULE_ID] = 1;
