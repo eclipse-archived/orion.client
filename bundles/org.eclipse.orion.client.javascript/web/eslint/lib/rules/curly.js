@@ -38,7 +38,7 @@
 					//flag the first token of the statement that should be in the block
 					context.report(node.consequent, "Statement should be enclosed in braces.", null, context.getTokens(node.consequent)[0]);
 				}
-				if(node.alternate && node.alternate.type !== 'BlockStatement') {
+				if(node.alternate && node.alternate.type !== 'BlockStatement' && node.alternate.type !== 'IfStatement') {
 					//flag the first token of the statement that should be in the block
 					context.report(node.alternate, "Statement should be enclosed in braces.", null, context.getTokens(node.alternate)[0]);
 				}

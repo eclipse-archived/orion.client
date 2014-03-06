@@ -147,4 +147,14 @@ describe(RULE_ID, function() {
 		var messages = eslint.verify(topic, config);
 		assert.equal(messages.length, 0);
 	});
+	
+	it("should not flag else-if with no block", function() {
+		var topic = "if(true) {var i = 1;}else if(false) {var t = 8;}";
+
+		var config = { rules: {} };
+		config.rules[RULE_ID] = 1;
+
+		var messages = eslint.verify(topic, config);
+		assert.equal(messages.length, 0);
+	});
 });
