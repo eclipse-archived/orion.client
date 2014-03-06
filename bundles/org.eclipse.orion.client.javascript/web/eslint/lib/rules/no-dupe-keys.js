@@ -36,7 +36,7 @@
 					for(var i = 0; i < len; i++) {
 						var prop = props[i];
 						var name = (prop.key.name ? prop.key.name : prop.key.value);
-						if(seen[name] != null) {
+						if(seen.hasOwnProperty(name)) {
 							context.report(prop, 'Duplicate object key \'{{key}}\'', {key: name}, context.getTokens(prop)[0]);
 						}
 						else {
