@@ -25,6 +25,7 @@ define({
 	'docFuncDecl' : 'No JSDoc on function declarations', //$NON-NLS-0$  //$NON-NLS-1$
 	'docFuncExpr' : 'No JSDoc on function expressions', //$NON-NLS-0$  //$NON-NLS-1$
 	'useBeforeDefine' : 'Member used before definition', //$NON-NLS-0$  //$NON-NLS-1$
+	'newParens' : 'Missing parentheses in constructor call', //$NON-NLS-0$  //$NON-NLS-1$
 	'missingSemi' : 'Missing semicolons', //$NON-NLS-0$  //$NON-NLS-1$
 	'unusedVars' : 'Unused variables', //$NON-NLS-0$  //$NON-NLS-1$
 	'varRedecl' : 'Variable re-declarations', //$NON-NLS-0$  //$NON-NLS-1$

@@ -25,9 +25,10 @@ define([
 	'eslint/rules/no-debugger',
 	'eslint/rules/no-dupe-keys',
 	'eslint/rules/no-eval',
-	'eslint/rules/curly'
+	'eslint/rules/curly',
+	'eslint/rules/new-parens'
 ], function(eqeqeq, no_redeclare, no_undef, no_unused_vars, no_use_before_define, semi, no_extra_semi, missing_doc,
-				no_debugger, no_dupe_keys, no_eval, curly) {
+				no_debugger, no_dupe_keys, no_eval, curly, new_parens) {
 	return function() {
 		return {
 			"eqeqeq": eqeqeq,
@@ -42,7 +43,8 @@ define([
 			'no-debugger' : no_debugger,
 			'no-dupe-keys' : no_dupe_keys,
 			'no-eval' : no_eval,
-			'curly' : curly
+			'curly' : curly,
+			'new-parens' : new_parens
 		};
 	};
 });
