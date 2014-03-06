@@ -91,6 +91,19 @@ a:hover {
 	background-color: #cedce7 !important; /* was e3e3e3 */
 }
 
+.navRow > td:first-child {
+	border-left: 6px solid transparent;
+}
+
+.navRow.checkedRow > td:first-child {
+	border-left-color: #7fa4c0;
+}
+
+.navbar-item-selected {
+	background: #FEC;
+	color: black;
+}
+
 /* Breadcrumbs */
 
 .breadcrumb {
@@ -126,6 +139,7 @@ a.breadcrumb:hover {
 	text-decoration: none;
 	line-height: 10pt;
 	white-space:nowrap;
+	text-shadow: rgba(0,0,0,0.25) 0 2px 2px;
 }
 
 a.currentLocation:hover {
@@ -246,10 +260,13 @@ a.currentLocation:hover {
 	background-color: #ddd;
 	border-radius: 2px;
 	vertical-align:middle;
+	-webkit-transition: all 0.2s ease;
+	transition: all 0.2s ease;
 }
 
 .commandButton:hover, .commandButton:focus {
 	background-color: #eee;
+	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
 }
 
 .commandButton.disabled {
@@ -346,7 +363,7 @@ a.currentLocation:hover {
 
 .dropdownTrigger:not(.dropdownDefaultButton) {
 	font-weight: normal;
-	background: none !important;
+	background: none;
 	border-color: transparent;
 }
 
@@ -359,8 +376,12 @@ a.currentLocation:hover {
 }
 
 .dropdownMenu {
+	box-shadow: 2px 2px 5px 3px rgba(0, 0, 0, .2);
 	color: #555;
-	background-color: #fbfbfb;
+	background-color: white;
+	border-collapse: separate;
+	border: 1px solid #bbbbbb;
+	border-radius: 1px;
 	visibility: hidden;
 	z-index: 150;
 	position: absolute;
@@ -368,20 +389,6 @@ a.currentLocation:hover {
 	display: none; /* don't take part in layout until open */
 	line-height: normal; /* don't want to inherit strange line-heights from ancestor elements */
 	margin: 0; /* needed for context menu positioning to work properly */
-
-
-	-webkit-border-radius: 0;
-	-moz-border-radius: 0;
-	border-radius: 0;
-	-webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-	-moz-box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-	box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-	-webkit-transition: opacity 0.218s;
-	-moz-transition: opacity 0.218s;
-	-o-transition: opacity 0.218s;
-	transition: opacity 0.218s;
-	background: #ffffff;
-	border: 1px solid #ddd;
 	cursor: default;
 	font-size: 12px;
 	margin: 0;
@@ -407,8 +414,7 @@ a.currentLocation:hover {
 
 .dropdownMenu > li {
 	min-width: 120px;
-	padding: 0 2px;
-	display: block;
+	display: flex;
 }
 
 .dropdownMenu > li > a, .dropdownMenu > li > span {
@@ -418,12 +424,6 @@ a.currentLocation:hover {
 
 .dropdownMenu > li > *:focus {
 	outline: none;
-	background: #f3f6fe;
-}
-
-.dropdownMenu > li:hover {
-	text-decoration: none;
-	background: #ffeecc;
 }
 
 
@@ -439,7 +439,7 @@ a.currentLocation:hover {
 	display: inline-block;
 	vertical-align: middle;
 	color: #555 !important;
-	padding: 3px 5px;
+	padding: 3px 3px 3px 5px;
 	cursor: pointer;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -448,6 +448,12 @@ a.currentLocation:hover {
 	-ms-user-select: none;
 	user-select: none;
 	white-space: nowrap;
+	border-left: 6px solid transparent;
+}
+
+.dropdownMenu .dropdownMenuItemSelected {
+	background-color: #FEEFDE;
+	border-left-color: #F58B0F;
 }
 
 .dropdownMenuItem .check {
@@ -469,8 +475,19 @@ a.currentLocation:hover {
 }
 
 .dropdownSelection {
-	background-color: #e6e6e6 !important;
-	border: 1px solid #ccc !important;
+/* Using !important everywhere because this class is used by
+ * a variety of elements making it difficult to increase the
+ * specificity correctly for all users.
+ */
+	background-color: white !important;
+	border: 1px solid #bbbbbb !important;
+	border-bottom: none !important;
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+	box-shadow: -1px -1px 2px 0 rgba(0, 0, 0, .2) !important;
+	margin-bottom: -1px !important;
+	position: relative !important;
+	z-index: 200 !important;
 }
 
 .checkedMenuItem {

@@ -651,6 +651,7 @@ textarea.parameterInput {
 }
 
 .treetable {
+	border-collapse: collapse;
 	border-spacing: 0;
 	width:100%;
 }
@@ -658,8 +659,7 @@ textarea.parameterInput {
 .miniNavTreeTable {
 	border-spacing: 0;
 	width:100%;
-	padding-left:10px;
-	padding-right:10px;
+	padding-left:4px;
 }
 
 .secondaryColumn {
@@ -896,40 +896,6 @@ input {
 	padding-right: 3px;
 }
 
-.dropDownContainer{
-	border-radius:1px;
-	background:#fefefe;
-	border: 1px solid #DDD;
-	padding:10px;
-	margin-top: 5px;
-	outline: none;
-	position:absolute;
-	z-index:100;
-	box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-
-.dropDownContainer ul {
-	list-style: none;
-	padding:0;
-}
-
-.dropDownContainer ul li a {
-	display: block;
-	padding: 5px 15px;
-	color:#3087B3;
-	line-height: 1;
-}
-
-.dropDownContainer ul li a:focus,
-.dropDownContainer ul li a:hover {
-	color:#F58B0F;
-}
-
-.dropDownContainer ul li a:active {
-	background: #ddd;
-}	
-
 .groupedContentDivider{
 	float: left;
 	width: 1px;
@@ -993,9 +959,8 @@ input {
 	border-collapse: collapse;
 	border-spacing: 0;
 	padding: 0;
-	margin-left: 5%;
-	margin-right: 5%;
 	margin-top: 30px;
+	overflow-y: hidden; /* prevent vertical scrollbar from showing during expand/collapse */
 }
 
 .mainpane .sectionTable .treetable, .mainpane .sectionWrapper .treetable, .mainpane .sectionTable .treetable .actionsColumn{
@@ -1011,18 +976,37 @@ input {
 
 .sectionTable {
 	margin-top: 0;
+	margin-left: 6%;
+	margin-right: 6%;
 	border: 1px solid;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
 	border-color:#dadada;
+	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.1);
+	-webkit-transition: all 0.5s ease;
+	transition: all 0.5s ease;
 }
 
-.sectionWrapperClosed{
-	border-bottom: 1px solid;
+/* sectionTable preceeded by a sectionWrapper */
+.sectionWrapper+.sectionTable {
+	margin-top: 2px;
+	border-top: none;
+}
+
+.sectionTable:last-child {
+	margin-bottom: 20px;
+}
+
+.sectionTable.sectionClosed {
+	height: 0;
+	border-bottom-color: transparent;
+	box-shadow: none;
 }
 
 .sectionWrapper{
-	border-top: 1px solid;
-	border-left: 1px solid;
-	border-right: 1px solid;
+	border: 1px solid;
+	margin-left: 5%;
+	margin-right: 5%;
 	background: none repeat scroll 0 0 #f4f4f4;
 	vertical-align: middle;
 	font-weight: bold;
@@ -1030,6 +1014,20 @@ input {
 	color: gray;
 	margin-bottom: 0;
 	border-color: #dadada;
+	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+	transition: all 0.5s ease;
+}
+
+.sectionWrapper.sectionClosed {
+	box-shadow: none;
+	opacity: 0.9;
+	background: none;
+}
+
+.sectionWrapper.sectionClosed:hover {
+	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+	opacity: 1;
+	transition: all 0.3s;
 }
 
 .sectionTable td {
@@ -1083,7 +1081,7 @@ input {
 }
 
 .orionProject .discreetInput {
-	border: none;
+	border: 1px solid transparent; /* prevent movement on hover */
 	color: gray;
 	font: 8pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 	width: 90%;

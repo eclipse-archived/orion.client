@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- /*global define window document*/
+ /*global define window document MutationObserver*/
 define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'orion/commonHTMLFragments', 'orion/objects', 	'orion/selection'], function(lib, mSelection, mCommands, mHTMLFragments, objects, Selection){
 	
 	/**
@@ -68,7 +68,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 			this.domNode.appendChild(this.twistie);
 			this.domNode.tabIndex = 0; //$NON-NLS-0$
 			this.domNode.addEventListener("click", function(evt) { //$NON-NLS-0$
-				if (evt.target === that.titleNode || evt.target === that.twistie) {
+				if (evt.target === that.titleNode || evt.target === that.twistie || evt.target === that.domNode) {
 					that._changeExpandedState();
 				}
 			}, false);
@@ -158,7 +158,37 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		this._contentParent.classList.add("sectionTable"); //$NON-NLS-0$
 		this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
 		parent.appendChild(this._contentParent);
-
+		
+		try {
+			// setup observer which sets the appropriate height on this._contentParent 
+			// when its contents have been modified, allowing smooth CSS transitions
+			this._mutationObserver = new MutationObserver((function(mutations, observer){
+				var removedNodes = mutations.some(function(mutation){
+					return mutation.removedNodes;
+				});
+				if (removedNodes) {
+					this._contentParent.style.height = "auto"; //$NON-NLS-0$
+					if (this._resizeTimeoutID) {
+						window.clearTimeout(this._resizeTimeoutID);
+					}
+					this._resizeTimeoutID = window.setTimeout((function() {
+						this._contentParent.style.height = this._contentParent.scrollHeight + "px"; //$NON-NLS-0$
+					}).bind(this), 200);
+				} else {
+					this._contentParent.style.height = this._contentParent.scrollHeight + "px"; //$NON-NLS-0$	
+				}
+			}).bind(this));
+	
+			this._mutationObserverConfig = {childList: true, subtree: true};	
+		} catch (err) {
+			if (err instanceof ReferenceError){
+				//ignore, MutationObserver is not supported
+			} else {
+				throw err;
+			}
+			
+		}
+				
 		if(options.content){
 			this.setContent(options.content);
 		}
@@ -169,8 +199,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		}
 		this._preferenceService = options.preferenceService;
 		// initially style as hidden until we determine what needs to happen
-		this._contentParent.style.display = "none"; //$NON-NLS-0$
-		this.domNode.classList.add("sectionWrapperClosed");
+		this._collapse();
 		// should we consult a preference?
 		if (this._preferenceService) {
 			var self = this;
@@ -183,16 +212,14 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 				}
 
 				if (!self.hidden) {
-					self._contentParent.style.display = "block"; //$NON-NLS-0$
-					self.domNode.classList.remove("sectionWrapperClosed");
+					self._expand();
 				}
 				
 				self._updateExpandedState(!self.hidden, false);
 			});
 		} else {
-			if (!this.hidden) {
-				this._contentParent.style.display = "block"; //$NON-NLS-0$
-				this.domNode.classList.remove("sectionWrapperClosed");
+			if (!options.hidden) {
+				this._expand();
 			}
 			this._updateExpandedState(!this.hidden, false);
 		}
@@ -382,15 +409,10 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 		},
 		
 		_changeExpandedState: function() {
-			// TODO we could use classes with CSS transitions to animate				
-			if (!this.hidden){
-				this._contentParent.style.display = "none"; //$NON-NLS-0$
-				this.domNode.classList.add("sectionWrapperClosed");
-				this.hidden = true;
+			if (this.hidden){
+				this._expand();
 			} else {
-				this._contentParent.style.display = "block"; //$NON-NLS-0$
-				this.domNode.classList.remove("sectionWrapperClosed");
-				this.hidden = false;
+				this._collapse();
 			}
 			
 			this._updateExpandedState(!this.hidden, true);
@@ -414,6 +436,40 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 			if (this._onExpandCollapse) {
 				this._onExpandCollapse(isExpanded, this);
 			}
+		},
+		
+		_expand: function() {
+			this._contentParent.classList.remove("sectionClosed"); //$NON-NLS-0$
+			this.domNode.classList.remove("sectionClosed"); //$NON-NLS-0$
+			
+			if (this._mutationObserver) {
+				if (this._contentParent.innerHTML && this._contentParent.scrollHeight) {
+					// must set a concrete height in order for transition animation to work properly
+					this._contentParent.style.height = this._contentParent.scrollHeight + "px"; //$NON-NLS-0$
+				} else {
+					this._contentParent.style.height = "auto"; //$NON-NLS-0$
+				}
+				
+				// listen for DOM node changes
+				this._mutationObserver.observe(this._contentParent, this._mutationObserverConfig);	
+			} else {
+				this._contentParent.style.display = ""; //$NON-NLS-0$
+			}
+			
+			this.hidden = false;
+		},
+		
+		_collapse: function() {
+			if (this._mutationObserver) {
+				this._mutationObserver.disconnect();
+				this._contentParent.style.height = "0"; //$NON-NLS-0$ // setting it directly in element to override any previous direct height modification
+			} else {
+				this._contentParent.style.display = "none"; //$NON-NLS-0$
+			}
+			
+			this.hidden = true;
+			this._contentParent.classList.add("sectionClosed"); //$NON-NLS-0$
+			this.domNode.classList.add("sectionClosed"); //$NON-NLS-0$
 		}
 	};
 	
