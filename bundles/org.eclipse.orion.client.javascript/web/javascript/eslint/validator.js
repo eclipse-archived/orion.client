@@ -33,7 +33,8 @@ define([
 			'no-dupe-keys' : 2, //$NON-NLS-0$ 
 			'no-eval' : 0, //$NON-NLS-0$ 
 			'curly' : 0, //$NON-NLS-0$ 
-			'new-parens' : 2 //$NON-NLS-0$
+			'new-parens' : 2, //$NON-NLS-0$
+			'use-isnan' : 2 //$NON-NLS-0$
 		},
 		/**
 		 * @description Sets the given rule to the given enabled value
@@ -219,6 +220,7 @@ define([
 			config.setOption("no-eval", properties.validate_eval); //$NON-NLS-0$
 			config.setOption("curly", properties.validate_curly); //$NON-NLS-0$
 			config.setOption("new-parens", properties.validate_new_parens); //$NON-NLS-0$
+			config.setOption("use-isnan", properties.validate_use_isnan); //$NON-NLS-0$
 		}
 	});
 

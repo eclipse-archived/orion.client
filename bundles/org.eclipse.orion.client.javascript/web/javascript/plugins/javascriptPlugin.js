@@ -183,6 +183,16 @@ define([
 								{labelKey: 'error', value:2}  //$NON-NLS-0$
 							]
 						},
+						{	id: "validate_use_isnan",  //$NON-NLS-0$
+							nameKey: 'useIsNaN',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: 2,
+							options: [
+							   {labelKey: 'ignore', value:0},  //$NON-NLS-0$
+							    {labelKey: 'warning', value:1},  //$NON-NLS-0$
+							    {labelKey: 'error', value:2}  //$NON-NLS-0$
+							]
+						},
 						{	id: "validate_func_decl",  //$NON-NLS-0$
 							nameKey: 'docFuncDecl',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$

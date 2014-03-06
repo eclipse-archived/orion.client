@@ -26,9 +26,10 @@ define([
 	'eslint/rules/no-dupe-keys',
 	'eslint/rules/no-eval',
 	'eslint/rules/curly',
-	'eslint/rules/new-parens'
+	'eslint/rules/new-parens',
+	'eslint/rules/use-isnan'
 ], function(eqeqeq, no_redeclare, no_undef, no_unused_vars, no_use_before_define, semi, no_extra_semi, missing_doc,
-				no_debugger, no_dupe_keys, no_eval, curly, new_parens) {
+				no_debugger, no_dupe_keys, no_eval, curly, new_parens, use_isnan) {
 	return function() {
 		return {
 			"eqeqeq": eqeqeq,
@@ -44,7 +45,8 @@ define([
 			'no-dupe-keys' : no_dupe_keys,
 			'no-eval' : no_eval,
 			'curly' : curly,
-			'new-parens' : new_parens
+			'new-parens' : new_parens,
+			'use-isnan' : use_isnan
 		};
 	};
 });

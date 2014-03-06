@@ -22,6 +22,7 @@ define({
 	'noDebugger' : 'Discouraged \'debugger\' statement use', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEval' : 'Discouraged \'eval()\' use', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDupeKeys' : 'Duplicate object keys', //$NON-NLS-0$  //$NON-NLS-1$
+	'useIsNaN' : 'NaN not compared with isNaN()', //$NON-NLS-0$  //$NON-NLS-1$
 	'docFuncDecl' : 'No JSDoc on function declarations', //$NON-NLS-0$  //$NON-NLS-1$
 	'docFuncExpr' : 'No JSDoc on function expressions', //$NON-NLS-0$  //$NON-NLS-1$
 	'useBeforeDefine' : 'Member used before definition', //$NON-NLS-0$  //$NON-NLS-1$
