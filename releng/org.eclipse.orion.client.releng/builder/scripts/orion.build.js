@@ -27,8 +27,9 @@
         asynchLoader: true
     },
 
-    // Only optimize files listed in modules section, ignore other .js files in staging directory.
-    skipDirOptimize: true,
+    // Only minify files listed in modules section, ignore other .js files in staging directory.
+    // This option seems to be problematic: r.js does not minify the modules we *want* minified. So, omit it for now.
+    //skipDirOptimize: true,
 
     baseUrl: '.',
     locale: 'en-us',
