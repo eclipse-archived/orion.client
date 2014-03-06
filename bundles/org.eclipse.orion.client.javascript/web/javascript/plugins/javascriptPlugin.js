@@ -223,6 +223,16 @@ define([
 								{labelKey: 'error', value:2}  //$NON-NLS-0$
 							]
 						},
+						{	id: "validate_curly",  //$NON-NLS-0$
+							nameKey: 'curly',  //$NON-NLS-0$
+							type: "number",  //$NON-NLS-0$
+							defaultValue: 0,
+							options: [
+								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
+								{labelKey: 'warning', value:1},  //$NON-NLS-0$
+								{labelKey: 'error', value:2}  //$NON-NLS-0$
+							]
+						},
 						{	id: "validate_no_undef",  //$NON-NLS-0$
 							nameKey: 'undefMember',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$

@@ -17,6 +17,7 @@ define({
 	'sourceOutlineTitle': 'JavaScript source outline',  //$NON-NLS-0$  //$NON-NLS-1$
 	'contentAssist' : 'JavaScript content assist', //$NON-NLS-0$  //$NON-NLS-1$
 	'eslintValidator' : 'ESLint Validator', //$NON-NLS-0$  //$NON-NLS-1$
+	'curly' : 'Statements not enclosed in braces', //$NON-NLS-0$  //$NON-NLS-1$
 	'eqeqeq' : 'Discouraged \'==\' use', //$NON-NLS-0$  //$NON-NLS-1$
 	'noDebugger' : 'Discouraged \'debugger\' statement use', //$NON-NLS-0$  //$NON-NLS-1$
 	'noEval' : 'Discouraged \'eval()\' use', //$NON-NLS-0$  //$NON-NLS-1$
