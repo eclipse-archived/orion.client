@@ -40,6 +40,30 @@ describe(RULE_ID, function() {
 		assert.equal(messages[0].message, "Duplicate object key 'one'");
 		assert.equal(messages[0].node.type, "Property");
 	});
+	it("should flag single literal dupe", function() {
+		var topic = "var o = {\'one\': 1, two: 2, one: 3}";
+
+		var config = { rules: {} };
+		config.rules[RULE_ID] = 1;
+
+		var messages = eslint.verify(topic, config);
+		assert.equal(messages.length, 1);
+		assert.equal(messages[0].ruleId, RULE_ID);
+		assert.equal(messages[0].message, "Duplicate object key 'one'");
+		assert.equal(messages[0].node.type, "Property");
+	});
+	it("should flag double literal dupe", function() {
+		var topic = "var o = {\'one\': 1, two: 2, \'one\': 3}";
+
+		var config = { rules: {} };
+		config.rules[RULE_ID] = 1;
+
+		var messages = eslint.verify(topic, config);
+		assert.equal(messages.length, 1);
+		assert.equal(messages[0].ruleId, RULE_ID);
+		assert.equal(messages[0].message, "Duplicate object key 'one'");
+		assert.equal(messages[0].node.type, "Property");
+	});
 	it("should flag multi dupe", function() {
 		var topic = "var o = {one: 1, two: 2, one: 3, two: 4}";
 
