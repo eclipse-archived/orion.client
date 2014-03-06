@@ -13,7 +13,7 @@
         <delete dir="${jsdocHome}/jsdoc_toolkit-2.4.0"/>
     </target>
 
-	<target name="jsdocs" if="jsdocHome" >
+	<target name="jsdocs" if="jsdocHome" unless="skipJsdoc">
 		<runjsdoc jar="${jsdocHome}/jsrun.jar" buildfile="${builder}/scripts/orion.build.js">
 			<argline value="${jsdocHome}/app/run.js -s -v -a" />
 			<arg value="-r=3" />
