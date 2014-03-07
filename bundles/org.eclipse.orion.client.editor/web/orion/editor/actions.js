@@ -298,7 +298,6 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var textView = editor.getTextView();
 			var annotationModel = editor.getAnnotationModel();
 			if(!annotationModel) { return true; }
-			var model = editor.getModel();
 			var annotation, iter = annotationModel.getAnnotations();
 			textView.setRedraw(false);
 			while (iter.hasNext()) {
@@ -792,13 +791,13 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		 * Automatically inserts the specified opening and closing brackets around the caret or selected text.
 		 */
 		autoPairBrackets: function(openBracket, closeBracket) {
-			if (openBracket === "[" && !this.autoPairSquareBrackets) {
+			if (openBracket === "[" && !this.autoPairSquareBrackets) { //$NON-NLS-0$
 				return false;
-			} else if (openBracket === "{" && !this.autoPairBraces) {
+			} else if (openBracket === "{" && !this.autoPairBraces) { //$NON-NLS-0$
 				return false;
-			} else if (openBracket === "(" && !this.autoPairParentheses) {
+			} else if (openBracket === "(" && !this.autoPairParentheses) { //$NON-NLS-0$
 				return false;
-			} else if (openBracket === "<" && !this.autoPairAngleBrackets) {
+			} else if (openBracket === "<" && !this.autoPairAngleBrackets) { //$NON-NLS-0$
 				return false;
 			}
 
