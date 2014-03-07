@@ -28,6 +28,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 	var PUNCTUATION_SECTION_BEGIN = ".begin"; //$NON-NLS-0$
 	var PUNCTUATION_SECTION_END = ".end"; //$NON-NLS-0$
 
+	var FLAGS = "g"; //$NON-NLS-0$
 	var CR = "\r"; //$NON-NLS-0$
 	var NEWLINE = "\n"; //$NON-NLS-0$
 
@@ -113,8 +114,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			captureReferenceRegex.lastIndex = 0;
 			result = captureReferenceRegex.exec(regexString);
 		}
-		/* return an updated regex, remove the leading '/' and trailing /g */
-		return new RegExp(regexString.substring(1, regexString.length - 2), "g");
+		/* return an updated regex, remove the leading '/' and trailing /FLAGS */
+		return new RegExp(regexString.substring(1, regexString.length - 1 - FLAGS.length), FLAGS);
 	};
 	var updateMatch = function(match, text, matches, minimumIndex) {
 		var regEx = match.pattern.regex ? match.pattern.regex : match.pattern.regexBegin;
@@ -163,6 +164,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		}
 	};
 	var parse = function(text, offset, block, styles, ignoreCaptures) {
+		if (!text) {
+			return;
+		}
 		var patterns = block.getLinePatterns();
 		if (!patterns) {
 			return;
@@ -253,6 +257,10 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		});
 	};
 	var computeBlocks = function(model, text, block, offset) {
+		if (!text) {
+			return [];
+		}
+
 		var matches = [];
 		block.getBlockPatterns().forEach(function(current) {
 			var result = _findMatch(current.regexBegin || current.regex, text, 0);
@@ -285,89 +293,80 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				continue;
 			}
 
-			/* verify that the begin match is valid (eg.- is not within a string, etc.) */
-			var lineIndex = model.getLineAtOffset(offset + current.result.index);
-			var lineText = model.getLine(lineIndex);
-			var styles = [];
-			parse(lineText, model.getLineStart(lineIndex), block, styles);
 			var start = offset + current.result.index;
-			var i = 0;
-			for (; i < styles.length; i++) {
-				if (styles[i].start === start) {
-					/* found it, now determine the end (and ensure that it is valid) */
-					var contentStart = current.result.index;
-					var resultEnd = null;
+			var contentStart = current.result.index;
+			var resultEnd = null;
 
-					var endRegex = current.pattern.regexEnd;
-					if (!endRegex) {
-						resultEnd = new Block(
-							{
-								start: start,
-								end: start + current.result[0].length,
-								contentStart: start,
-								contentEnd: start + current.result[0].length
-							},
-							current.pattern,
-							block.getStyler(),
-							model,
-							block);
-					} else {
-						contentStart += current.result[0].length;
-						var testPattern = current.pattern;
-						/* 
-						 * If the end regex contains a capture reference (eg.- "\1") then substitute
-						 * the resolved capture values from the begin match.
-						 */
-						var resolvedEndRegex = substituteCaptureValues(endRegex, current.result);
-						if (resolvedEndRegex !== endRegex) {
-							/*
-							 * A substitution was made, so make a copy of the test pattern and set its
-							 * end regex to the resolved one.  This will cause end-match detection to be
-							 * performed with this concrete end regex value, but the original pattern
-							 * definition containing the capture reference will not be affected.
-							 */
-							testPattern = {
-								pattern: testPattern.pattern,
-								regexBegin: testPattern.regexBegin,
-								regexEnd: resolvedEndRegex
-							};
-							endRegex = resolvedEndRegex;
-						}
+			var endRegex = current.pattern.regexEnd;
+			if (!endRegex) {
+				if (!current.pattern.pattern.patterns) {
+					index = current.result.index + current.result[0].length;
+					updateMatch(current, text, matches, index);
+					continue;
+				} else {
+					resultEnd = new Block(
+						{
+							start: start,
+							end: start + current.result[0].length,
+							contentStart: start,
+							contentEnd: start + current.result[0].length
+						},
+						current.pattern,
+						block.getStyler(),
+						model,
+						block);
+				}
+			} else {
+				contentStart += current.result[0].length;
+				var testPattern = current.pattern;
+				/*
+				 * If the end regex contains a capture reference (eg.- "\1") then substitute
+				 * the resolved capture values from the begin match.
+				 */
+				var resolvedEndRegex = substituteCaptureValues(endRegex, current.result);
+				if (resolvedEndRegex !== endRegex) {
+					/*
+					 * A substitution was made, so make a copy of the test pattern and set its
+					 * end regex to the resolved one.  This will cause end-match detection to be
+					 * performed with this concrete end regex value, but the original pattern
+					 * definition containing the capture reference will not be affected.
+					 */
+					testPattern = {
+						pattern: testPattern.pattern,
+						regexBegin: testPattern.regexBegin,
+						regexEnd: resolvedEndRegex
+					};
+					endRegex = resolvedEndRegex;
+				}
 
-						var lastIndex = contentStart;
-						while (!resultEnd) {
-							var result = _findMatch(endRegex, text, lastIndex);
-							if (!result) {
-								eolRegex.lastIndex = 0;
-								result = eolRegex.exec(text);
-							}
-							var styles2 = [];
-							var testBlock = new Block(
-								{
-									start: start,
-									end: offset + result.index + result[0].length,
-									contentStart: offset + contentStart,
-									contentEnd: offset + result.index
-								},
-								testPattern,
-								block.getStyler(),
-								model,
-								block);
-							parse(text.substring(contentStart, result.index + result[0].length), contentStart, testBlock, styles2);
-							if (!styles2.length || styles2[styles2.length - 1].end <= result.index) {
-								resultEnd = testBlock;
-							}
-							lastIndex = result.index + result[0].length;
-						}
+				var lastIndex = contentStart;
+				while (!resultEnd) {
+					var result = _findMatch(endRegex, text, lastIndex);
+					if (!result) {
+						eolRegex.lastIndex = 0;
+						result = eolRegex.exec(text);
 					}
-					results.push(resultEnd);
-					index = resultEnd.end - offset;
-					break;
+					var styles2 = [];
+					var testBlock = new Block(
+						{
+							start: start,
+							end: offset + result.index + result[0].length,
+							contentStart: offset + contentStart,
+							contentEnd: offset + result.index
+						},
+						testPattern,
+						block.getStyler(),
+						model,
+						block);
+					parse(text.substring(contentStart, result.index + result[0].length), contentStart, testBlock, styles2);
+					if (!styles2.length || styles2[styles2.length - 1].end <= result.index) {
+						resultEnd = testBlock;
+					}
+					lastIndex = result.index + result[0].length;
 				}
 			}
-			if (i === styles.length) {
-				index = current.result.index + 1;
-			}
+			results.push(resultEnd);
+			index = resultEnd.end - offset;
 			updateMatch(current, text, matches, index);
 		}
 		return results;
@@ -419,35 +418,15 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			var indexCounter = [0];
 			var resultObject = {};
 			var regEx = new RegExp("^" + parentId + "[^#]+$"); //$NON-NLS-0$
-			var includes = [];
 			this._patterns.forEach(function(current) {
 				if (regEx.test(current.qualifiedId)) {
 					if (current.include) {
-						includes.push(current);
+						this._processInclude(current, indexCounter, resultObject);
 					} else {
 						current.index = indexCounter[0]++;
 						resultObject[current.id] = current;
 					}
 				}
-			}.bind(this));
-			/*
-			 * The includes get processed last to ensure that locally-defined and locally-included
-			 * patterns are given precedence over ones from other grammars with respect to pattern
-			 * identifiers and indexes.
-			 */
-			includes.sort(function(a,b) {
-				var aIndex = a.include.indexOf("#");
-				var bIndex = b.include.indexOf("#");
-				if (aIndex === 0 && bIndex !== 0) {
-					return -1;
-				}
-				if (bIndex === 0 && aIndex !== 0) {
-					return 1;
-				}
-				return 0;
-			});
-			includes.forEach(function(current) {
-				this._processInclude(current, indexCounter, resultObject);
 			}.bind(this));
 
 			var result = [];
@@ -490,24 +469,15 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				/* inclusion of specific pattern from another grammar */
 				searchExp = new RegExp("^" + pattern.include + "$");
 			}
-			var includes = [];
 			this._patterns.forEach(function(current) {
 				if (searchExp.test(current.qualifiedId)) {
 					if (current.include) {
-						includes.push(current);
+						this._processInclude(current, indexCounter, resultObject);
 					} else if (!resultObject[current.id]) {
 						current.index = indexCounter[0]++;
 						resultObject[current.id] = current;
 					}
 				}
-			}.bind(this));
-
-			/*
-			 * The includes get processed last to ensure that locally-defined patterns are given
-			 * precedence over included ones with respect to pattern identifiers and indexes.
-			 */
-			includes.forEach(function(current) {
-				this._processInclude(current, indexCounter, resultObject);
 			}.bind(this));
 		},
 		_NO_ID: "NoID"	//$NON-NLS-0$
@@ -625,6 +595,12 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			return this._styler._isRenderingWhitespace();
 		},
 		_initPatterns: function() {
+			if (this.pattern && this.pattern.pattern._linePatterns) {
+				this._linePatterns = this.pattern.pattern._linePatterns;
+				this._blockPatterns = this.pattern.pattern._blockPatterns;
+				this._enclosurePatterns = this.pattern.pattern._enclosurePatterns;
+				return;
+			}
 			var patterns = this.getPatternManager().getPatterns(this.pattern ? this.pattern.pattern : null);
 			var processIgnore = function(matchString) {
 				var result = ignoreCaseRegex.exec(matchString);
@@ -633,39 +609,44 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 				return matchString;
 			};
+			var lastBlock = -1;
+			var index = 0;
 			patterns.forEach(function(current) {
 				var pattern;
 				if (current.match && !current.begin && !current.end) {
-					var flags = "g";	//$NON-NLS-0$
+					var flags = FLAGS;
 					var match = processIgnore(current.match);
 					if (match !== current.match) {
-						flags += "i";	//$NON-NLS-0$
+						flags += "i"; //$NON-NLS-0$
 					}
 					pattern = {regex: new RegExp(match, flags), pattern: current};
 					this._linePatterns.push(pattern);
-					if (current.patterns) {
-						this._blockPatterns.push(pattern);
-					} else {
-						if (current.name && current.name.indexOf("punctuation.section") === 0 && (current.name.indexOf(PUNCTUATION_SECTION_BEGIN) !== -1 || current.name.indexOf(PUNCTUATION_SECTION_END) !== -1)) { //$NON-NLS-0$
-							this._enclosurePatterns[current.name] = pattern;
-						}
+					if (current.name && current.name.indexOf("punctuation.section") === 0 && (current.name.indexOf(PUNCTUATION_SECTION_BEGIN) !== -1 || current.name.indexOf(PUNCTUATION_SECTION_END) !== -1)) { //$NON-NLS-0$
+						this._enclosurePatterns[current.name] = pattern;
 					}
 				} else if (!current.match && current.begin && current.end) {
-					var beginFlags = "g";	//$NON-NLS-0$
+					lastBlock = index;
+					var beginFlags = FLAGS;
 					var begin = processIgnore(current.begin);
 					if (begin !== current.begin) {
-						beginFlags += "i";	//$NON-NLS-0$
+						beginFlags += "i"; //$NON-NLS-0$
 					}
-					var endFlags = "g";	//$NON-NLS-0$
+					var endFlags = FLAGS;
 					var end = processIgnore(current.end);
 					if (end !== current.end) {
-						endFlags += "i";	//$NON-NLS-0$
+						endFlags += "i"; //$NON-NLS-0$
 					}
 					pattern = {regexBegin: new RegExp(begin, beginFlags), regexEnd: new RegExp(end, endFlags), pattern: current};
 					this._linePatterns.push(pattern);
-					this._blockPatterns.push(pattern);
 				}
+				index++;
 			}.bind(this));
+			this._blockPatterns = this._linePatterns.slice(0, lastBlock + 1);
+			if (this.pattern) {
+				this.pattern.pattern._enclosurePatterns = this._enclosurePatterns;
+				this.pattern.pattern._linePatterns = this._linePatterns;
+				this.pattern.pattern._blockPatterns = this._blockPatterns;
+			}
 		}
 	};
 
@@ -1239,6 +1220,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 				var text = baseModel.getText(ts, te), block;
 				newBlocks = computeBlocks(baseModel, text, this._rootBlock, ts);
+
 			} while (newBlocks.length && blocks.length && blockEnd < blockCount && newBlocks[newBlocks.length - 1].pattern.pattern.id !== blocks[blockEnd - 1].pattern.pattern.id);
 
 			for (var i = blockStart; i < blocks.length; i++) {

@@ -16,44 +16,36 @@ define("orion/editor/stylers/text_html/syntax", ["orion/editor/stylers/lib/synta
 
 	var grammars = mLib.grammars.concat(mJS.grammars).concat(mCSS.grammars).concat(mXML.grammars);
 	grammars.push({
-		id: "orion.html",
-		contentTypes: ["text/html"],
+		id: "orion.html", //$NON-NLS-0$
+		contentTypes: ["text/html"], //$NON-NLS-0$
 		patterns: [
 			{
-				include: "orion.xml"
-			}, {
-				/* override orion.xml#xmlDeclaration (no-op) */
-				include: "#xmlDeclaration"
-			}, {
-				begin: "(?i)(<style)([^>]*)(>)",
-				end: "(?i)(</style>)",
+				begin: "(?i)(<style)([^>]*)(>)", //$NON-NLS-0$
+				end: "(?i)(</style>)", //$NON-NLS-0$
 				captures: {
-					1: {name: "entity.name.tag.html"},
-					3: {name: "entity.name.tag.html"}
+					1: {name: "entity.name.tag.html"}, //$NON-NLS-0$
+					3: {name: "entity.name.tag.html"} //$NON-NLS-0$
 				},
-				contentName: "source.css.embedded.html",
+				contentName: "source.css.embedded.html", //$NON-NLS-0$
 				patterns: [
-					{
-						include: "orion.css"
-					}
+					{include: "orion.css"} //$NON-NLS-0$
 				]
 			}, {
-				begin: "(?i)<script\\s*>|<script\\s.*?(?:language\\s*=\\s*(['\"])javascript\\1|type\\s*=\\s*(['\"])(?:text|application)/(?:javascript|ecmascript)\\2).*?>",
-				end: "(?i)</script>",
+				begin: "(?i)<script\\s*>|<script\\s.*?(?:language\\s*=\\s*(['\"])javascript\\1|type\\s*=\\s*(['\"])(?:text|application)/(?:javascript|ecmascript)\\2).*?>", //$NON-NLS-0$
+				end: "(?i)</script>", //$NON-NLS-0$
 				captures: {
-					0: {name: "entity.name.tag.html"}
+					0: {name: "entity.name.tag.html"} //$NON-NLS-0$
 				},
-				contentName: "source.js.embedded.html",
+				contentName: "source.js.embedded.html", //$NON-NLS-0$
 				patterns: [
-					{
-						include: "orion.js"
-					}
+					{include: "orion.js"} //$NON-NLS-0$
 				]
-			}
-		],
-		repository: {
-			xmlDeclaration: {}
-		}
+			},
+			{include: "orion.xml#comment"}, //$NON-NLS-0$
+			{include: "orion.xml#doctype"}, //$NON-NLS-0$
+			{include: "orion.xml#tag"}, //$NON-NLS-0$
+			{include: "orion.xml#ampersandEscape"} //$NON-NLS-0$
+		]
 	});
 	return {
 		id: grammars[grammars.length - 1].id,
