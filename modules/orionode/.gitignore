@@ -1,11 +1,21 @@
+# This file also serves as the top-level npmignore at publish time
+# for the minified Node server
+
 # Want to track this .gitignore file in Git, so override the top-level ignore
 !.gitignore
 .project
 
-node_modules/
+# Ignore npm artifacts
+**/node_modules/
 npm-debug.log
 
-# Per-user Orionode data
+# Ignore any Maven artifacts that creep into the repo
+**/bundles/*/target/*
+
+# Ignore built browser widget until we get it removed from version control
+**/web/browse/
+
+# Ignore per-user Orionode data
 .workspace/
 build/.temp/
 build/.temp-optimized/
