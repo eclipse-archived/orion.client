@@ -261,6 +261,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			return [];
 		}
 
+		var results = [];
 		var matches = [];
 		block.getBlockPatterns().forEach(function(current) {
 			var result = _findMatch(current.regexBegin || current.regex, text, 0);
@@ -269,7 +270,7 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 			}
 		}.bind(this));
 		if (!matches.length) {
-			return matches;
+			return results;
 		}
 		matches.sort(function(a,b) {
 			if (a.result.index < b.result.index) {
@@ -282,7 +283,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		});
 
 		var index = 0;
-		var results = [];
 		while (matches.length > 0) {
 			var current = matches[0];
 			matches.splice(0,1);
@@ -299,23 +299,17 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 
 			var endRegex = current.pattern.regexEnd;
 			if (!endRegex) {
-				if (!current.pattern.pattern.patterns) {
-					index = current.result.index + current.result[0].length;
-					updateMatch(current, text, matches, index);
-					continue;
-				} else {
-					resultEnd = new Block(
-						{
-							start: start,
-							end: start + current.result[0].length,
-							contentStart: start,
-							contentEnd: start + current.result[0].length
-						},
-						current.pattern,
-						block.getStyler(),
-						model,
-						block);
-				}
+				resultEnd = new Block(
+					{
+						start: start,
+						end: start + current.result[0].length,
+						contentStart: start,
+						contentEnd: start + current.result[0].length
+					},
+					current.pattern,
+					block.getStyler(),
+					model,
+					block);
 			} else {
 				contentStart += current.result[0].length;
 				var testPattern = current.pattern;
@@ -346,7 +340,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 						eolRegex.lastIndex = 0;
 						result = eolRegex.exec(text);
 					}
-					var styles2 = [];
 					var testBlock = new Block(
 						{
 							start: start,
@@ -358,8 +351,8 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 						block.getStyler(),
 						model,
 						block);
-					parse(text.substring(contentStart, result.index + result[0].length), contentStart, testBlock, styles2);
-					if (!styles2.length || styles2[styles2.length - 1].end <= result.index) {
+					var subBlocks = testBlock.getBlocks();
+					if (!subBlocks.length || subBlocks[subBlocks.length - 1].end <= (result.index + offset)) {
 						resultEnd = testBlock;
 					}
 					lastIndex = result.index + result[0].length;
@@ -1220,7 +1213,6 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				}
 				var text = baseModel.getText(ts, te), block;
 				newBlocks = computeBlocks(baseModel, text, this._rootBlock, ts);
-
 			} while (newBlocks.length && blocks.length && blockEnd < blockCount && newBlocks[newBlocks.length - 1].pattern.pattern.id !== blocks[blockEnd - 1].pattern.pattern.id);
 
 			for (var i = blockStart; i < blocks.length; i++) {
