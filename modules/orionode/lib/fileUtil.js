@@ -55,15 +55,17 @@ var getChildren = exports.getChildren = function(directory, parentLocation, excl
 				if(isDirectory && location[location.length-1] !== "/"){
 					location = location +"/";
 				}
-				return {
+				var child = {
 					Name: childname,
 					Id: childname,
 					Length: size,
 					LocalTimeStamp: timeStamp,
 					Directory: isDirectory,
-					Location: location,
-					ChildrenLocation: isDirectory ? api.join(parentLocation, childname) + '?depth=1' : null
+					Location: location
 				};
+				if (isDirectory)
+					child.ChildrenLocation = api.join(parentLocation, childname) + '?depth=1';
+				return child;
 			});
 			callback(children); //yay
 		});

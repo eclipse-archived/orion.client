@@ -272,5 +272,21 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commandRegist
 		assert.equal(validator.validationFunction(item2), true);
 	};
 
+	// test that we can tolerate attempt to replace a null/undefined variable without blowing up
+	tests.testReplaceNull = function() {
+		var validationProperty = {
+			source: "Frob",
+			variableName: "Myvar",
+			replacements:  [{pattern: "*", replacement: "fs"}]
+		};
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{+Myvar}"), serviceRegistry, contentTypesCache);
+		try {
+			validator.getURI({ Frob: null });
+			validator.getURI({ Frob: undefined });
+		} catch(e) {
+			assert.fail("unexpected error: " + (e && e.message));
+		}
+	};
+
 	return tests;
 });

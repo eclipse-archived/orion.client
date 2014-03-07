@@ -319,9 +319,11 @@ describe('File API', function() {
 					assert.equal(body.Children[0].Name, 'buzz.txt');
 					assert.equal(body.Children[0].Directory, false);
 					assert.equal(body.Children[0].Location, PREFIX + '/project/my%20folder/buzz.txt');
+					assert.equal("ChildrenLocation" in body.Children[0], false, "Child file has no ChildrenLocation");
 					assert.equal(body.Children[1].Name, 'my subfolder');
 					assert.equal(body.Children[1].Directory, true);
 					assert.equal(body.Children[1].Location, PREFIX + '/project/my%20folder/my%20subfolder/');
+					assert.equal("ChildrenLocation" in body.Children[1], true, "Child folder has ChildrenLocation"); 
 					done();
 				});
 			});

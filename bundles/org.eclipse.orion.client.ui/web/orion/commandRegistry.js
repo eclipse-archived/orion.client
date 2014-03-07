@@ -874,7 +874,13 @@ define([
 					if (command) {
 						invocation = new Commands.CommandInvocation(handler, items, userData, command, self);
 						invocation.domParent = parent;
-						var enabled = render && (command.visibleWhen ? command.visibleWhen(items) : true);
+						var enabled = false;
+						try {
+							enabled = render && (command.visibleWhen ? command.visibleWhen(items) : true);
+						} catch (e) {
+							console.log(e);
+							throw e;
+						}
 						// ensure that keybindings are bound to the current handler, items, and user data
 						if (self._activeBindings[command.id] && self._activeBindings[command.id].keyBinding) {
 							keyBinding = self._activeBindings[command.id];
