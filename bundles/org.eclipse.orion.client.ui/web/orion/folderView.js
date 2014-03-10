@@ -205,9 +205,6 @@ define([
 	}
 	FolderView.prototype = /** @lends orion.FolderView.prototype */ {
 		_init: function(){
-			if(this.serviceRegistry && this.serviceRegistry.getServiceReferences("orion.projects").length===0){ //$NON-NLS-0$
-				this.showProjectView = false;
-			}
 			this.markdownView = new mMarkdownView.MarkdownView({
 				fileClient : this.fileClient,
 				canHide: !this.readonly,

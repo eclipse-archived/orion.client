@@ -112,16 +112,14 @@ var exports = {};
 			var fileClient = this.fileClient;
 			return mFileCommands.createFileCommands(serviceRegistry, commandRegistry, fileClient).then(function() {
 				return mExtensionCommands.createFileCommands(serviceRegistry, null, "all", true, commandRegistry).then(function() { //$NON-NLS-0$
-					if (serviceRegistry.getServiceReferences("orion.projects").length > 0) { //$NON-NLS-0$
-						var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
-						return projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
-							return projectClient.getProjectDeployTypes().then(function(deployTypes){
-								return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes, deployTypes);
-							}, function(error){
-								return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes);
-							});
+					var projectClient = serviceRegistry.getService("orion.project.client"); //$NON-NLS-0$
+					return projectClient.getProjectHandlerTypes().then(function(dependencyTypes){
+						return projectClient.getProjectDeployTypes().then(function(deployTypes){
+							return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes, deployTypes);
+						}, function(error){
+							return ProjectCommands.createProjectCommands(serviceRegistry, commandRegistry, fileClient, projectClient, dependencyTypes);
 						});
-					}
+					});
 				});
 			});
 		},

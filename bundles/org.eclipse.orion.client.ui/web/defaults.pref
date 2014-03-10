@@ -25,7 +25,6 @@
 		"plugins/npmPlugin.html": true,
 		"shell/plugins/shellPagePlugin.html":true,
 		"search/plugins/searchPagePlugin.html":true,
-		"plugins/projectsPlugin.html" :true,
 		"plugins/gitBlamePlugin.html" :true,
 		"cfui/plugins/cFPlugin.html":true,
 		"cfui/plugins/cFDeployPlugin.html":true
