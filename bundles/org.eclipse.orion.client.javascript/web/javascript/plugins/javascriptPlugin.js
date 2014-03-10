@@ -46,7 +46,7 @@ define([
 	/**
 	 * Register the JavaScript content types
 	 */
-	provider.registerServiceProvider("orion.core.contenttype", {}, { //$NON-NLS-0$
+	provider.registerService("orion.core.contenttype", {}, { //$NON-NLS-0$
 		contentTypes: [
 			{	id: "application/javascript", //$NON-NLS-0$
 				"extends": "text/plain", //$NON-NLS-0$
@@ -75,7 +75,7 @@ define([
 	/**
 	 * Register AST manager as Model Change listener
 	 */
-	provider.registerServiceProvider("orion.edit.model", {  //$NON-NLS-0$
+	provider.registerService("orion.edit.model", {  //$NON-NLS-0$
 			onModelChanging: astManager.updated.bind(astManager)
 		},
 		{
@@ -86,7 +86,7 @@ define([
 	/**
 	 * Register the jsdoc-based outline
 	 */
-	provider.registerServiceProvider("orion.edit.outliner", new Outliner.JSOutliner(astManager),  //$NON-NLS-0$
+	provider.registerService("orion.edit.outliner", new Outliner.JSOutliner(astManager),  //$NON-NLS-0$
 		{ contentType: ["application/javascript"],  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
 		  	nameKey: 'sourceOutline',  //$NON-NLS-0$
@@ -112,7 +112,7 @@ define([
 			name: 'contentAssist',  //$NON-NLS-0$
 			contentType: ["application/javascript"]  //$NON-NLS-0$
 		});
-	provider.registerServiceProvider("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager, new Indexer()),  //$NON-NLS-0$
+	provider.registerService("orion.edit.contentassist", new ContentAssist.JSContentAssist(astManager, new Indexer()),  //$NON-NLS-0$
 		{
 			contentType: ["application/javascript"],  //$NON-NLS-0$
 			nls: 'javascript/nls/messages',  //$NON-NLS-0$
@@ -125,7 +125,7 @@ define([
 	/**
 	 * Register the ESLint validator
 	 */
-	provider.registerServiceProvider(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager),  //$NON-NLS-0$  //$NON-NLS-1$
+	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager),  //$NON-NLS-0$  //$NON-NLS-1$
 		{
 			contentType: ["application/javascript"],  //$NON-NLS-0$
 			pid: 'eslint.config'  //$NON-NLS-0$
@@ -303,38 +303,38 @@ define([
 	 */
 	var grammars = mJS.grammars.concat(mJSON.grammars).concat(mJSONSchema.grammars).concat(mEJS.grammars);
 	grammars.forEach(function(current) {
-		provider.registerServiceProvider("orion.edit.highlighter", {}, current);	
+		provider.registerService("orion.edit.highlighter", {}, current);
 	}.bind(this));
 
 	/**
 	 * Register type definitions for known JS libraries
 	 */
-	provider.registerServiceProvider("orion.core.typedef", {}, {  //$NON-NLS-0$
+	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
 		id: "node.redis",  //$NON-NLS-0$
 		type: "tern",  //$NON-NLS-0$
 		defs: RedisIndex
 	});
-	provider.registerServiceProvider("orion.core.typedef", {}, {  //$NON-NLS-0$
+	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
 		id: "node.mysql",  //$NON-NLS-0$
 		type: "tern",  //$NON-NLS-0$
 		defs: MysqlIndex
 	});
-	provider.registerServiceProvider("orion.core.typedef", {}, {  //$NON-NLS-0$
+	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
 		id: "node.postgres",  //$NON-NLS-0$
 		type: "tern",  //$NON-NLS-0$
 		defs: PostgresIndex
 	});
-	provider.registerServiceProvider("orion.core.typedef", {}, {  //$NON-NLS-0$
+	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
 		id: "node.mongodb",  //$NON-NLS-0$
 		type: "tern",  //$NON-NLS-0$
 		defs: MongodbIndex
 	});
-	provider.registerServiceProvider("orion.core.typedef", {}, {  //$NON-NLS-0$
+	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
 		id: "node.express",  //$NON-NLS-0$
 		type: "tern", //$NON-NLS-0$
 		defs: ExpressIndex
 	});
-	provider.registerServiceProvider("orion.core.typedef", {}, {  //$NON-NLS-0$
+	provider.registerService("orion.core.typedef", {}, {  //$NON-NLS-0$
 		id: "node.amqp",  //$NON-NLS-0$
 		type: "tern",  //$NON-NLS-0$
 		defs: AMQPIndex
