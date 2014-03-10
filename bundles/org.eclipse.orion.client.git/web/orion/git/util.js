@@ -93,6 +93,35 @@ define([
 			}
 		}
 	}
+	/**
+	 * Trims the message 
+	 */
+	function trimCommitMessage(message) {
+		var maxMessageLength = 150,
+			changeIdIndex = message.lastIndexOf("Change-Id:"),	//$NON-NLS-0$
+			signedOffByIndex = message.lastIndexOf("Signed-off-by:");	//$NON-NLS-0$
+				
+		if (message.length > maxMessageLength) {
+			
+			var cutIndex;
+			
+			if (signedOffByIndex !== -1 && changeIdIndex !== -1) {
+				cutIndex = (changeIdIndex < signedOffByIndex) ? changeIdIndex : signedOffByIndex;
+			} else if (signedOffByIndex === -1 && changeIdIndex === -1) {
+				cutIndex = message.length;
+			} else {
+				cutIndex = changeIdIndex !== -1 ? changeIdIndex : signedOffByIndex; 
+			}
+			
+			var messageTail = message.substring(cutIndex,message.length);
+			maxMessageLength = cutIndex < maxMessageLength ? cutIndex : maxMessageLength;
+				
+			var trimmedMessage = message.substring(0,maxMessageLength);
+			trimmedMessage += '[...] ';
+			message = messageTail ? trimmedMessage+messageTail : trimmedMessage;
+		}		
+		return message;
+	}
 
 	return {
 		statusUILocation: statusUILocation,
@@ -101,6 +130,7 @@ define([
 		isChange: isChange,
 		hasStagedChanges: hasStagedChanges,
 		hasUnstagedChanges: hasUnstagedChanges,
-		parseSshGitUrl: parseSshGitUrl
+		parseSshGitUrl: parseSshGitUrl,
+		trimCommitMessage: trimCommitMessage
 	};
 });
