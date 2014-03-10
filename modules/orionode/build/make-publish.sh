@@ -57,7 +57,7 @@ done
 # But we need .gitignore, it's important for npm, so copy it over.
 cp "$REPO"/modules/orionode/.gitignore $STAGING
 # Add an additional line to prevent npm from publishing the releng folder
-echo lib/orion.client/releng/ >> "$STAGING"/modules/orionode/.gitignore
+echo lib/orion.client/releng/ >> "$STAGING"/.gitignore
 
 # unnecessary: these are ignored via .gitignore
 # delete .workspace/
@@ -76,6 +76,12 @@ rm -rf "$STAGING"/bundles/
 # Copy client releng, required by build.js
 mkdir "$STAGING"/lib/orion.client/releng
 cp -r "$REPO"/releng/org.eclipse.orion.client.releng "$STAGING"/lib/orion.client/releng
+
+# install orion node dependencies, required for minification if they haven't been installed yet
+echo Installing Orion node modules...
+pushd ${STAGING}
+npm install
+popd
 
 # Minify the client-side code
 NODE="`which node`"
