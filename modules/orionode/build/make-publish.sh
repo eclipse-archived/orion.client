@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # This script transforms the Orion client repo into a form suitable for publishing Orionode to npm.
 #
 # Usage: ./make-publish publish_dir
