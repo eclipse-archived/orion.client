@@ -23,12 +23,16 @@ ensure_dir() {
 	fi
 }
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 USAGE=$(printf "Usage: publish [dir]\n\nWhere [dir] is the temporary directory to use for publishing.\nThe contents of [dir] will be cleared first, so don't use an important folder.")
 
 # Set args
 REPO=${SCRIPT_DIR}/../../../
-STAGING=$1
+REPO=$( cd $REPO; pwd)
+STAGING=$(cd $1; pwd)
+
+echo Repo directory: ${REPO}
+echo Publish directory: ${STAGING}
 
 # Validate args
 [ "$#" -eq 1 ] || die "$USAGE"
@@ -64,7 +68,7 @@ echo lib/orion.client/releng/ >> "$STAGING"/.gitignore
 # delete build/.temp/
 
 # Remove unneeded bundles
-echo Removing unneeded bundles
+echo Removing unneeded bundles and files
 rm -rf "$STAGING"/bundles/org.eclipse.orion.client.git.greasemonkey
 
 # Move bundles/ into lib/orion.client/
@@ -84,15 +88,15 @@ npm install
 popd
 
 # Minify the client-side code
-NODE="`which node`"
-if [ ! -f "$NODE" ] ; then
-	echo "Could not find node. Can't minify :("
+if hash node 2> /dev/null; then
+	NODE=node
 else
+	echo "Could not find node. Can't minify :("
+fi
+if [ -n "$NODE" ]; then 
 	echo Minifying client-side code
-	pushd "$STAGING"/build
-	pwd
-	node build.js "$STAGING"/lib/orion.client/bundles
-	popd
+	node "$STAGING"/build/build.js "$STAGING"/lib/orion.client/bundles
+	node "$STAGING"/build/build.js "$STAGING"/lib/orion.client/bundles
 fi
 
 echo Rewriting ORION_CLIENT path in index.js
@@ -104,14 +108,15 @@ echo Rewriting ORION_CLIENT path in index.js
 sed -e 's/ORION_CLIENT = path.normalize(path.join(__dirname, '\''..\/..\/'\''))/ORION_CLIENT = path.normalize(path.join(__dirname, '\''.\/lib\/orion.client\/'\''))/' "$STAGING"/index.js > "$STAGING"/sjs.tmp && mv "$STAGING"/sjs.tmp "$STAGING"/index.js
 
 echo Sanity check: running server tests
-MOCHA="`which mocha`"
-if [ ! -f "$MOCHA" ] ; then
-    MOCHA="$REPO"/modules/orionode/node_modules/bin/mocha
+if hash mocha 2> /dev/null; then
+	MOCHA=mocha
+elif [ -f "$STAGING"/node_modules/mocha/bin/mocha ]; then
+	MOCHA="$STAGING"/node_modules/mocha/bin/mocha
+else
+	echo "Could not find mocha. Can't run sanity check :("
 fi
 
-if [ ! -f "$MOCHA" ] ; then
-	echo "Could not find mocha. Can't run sanity check :("
-else
+if [ -n "$MOCHA" ]; then
 	$MOCHA "$STAGING"/test/test-server
 fi
 
