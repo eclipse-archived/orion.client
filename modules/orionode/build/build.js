@@ -237,10 +237,12 @@ function build(buildConfig) {
 		if (steps.optimize === false) { return new Deferred().resolve(); }
 		section('Optimizing app...');
 
-		// Copy the build file with our exclusions made, then run against it
+		// Make a copy of the build file with our exclusions applied, then run against the copy
 		buildConfig.modules = filteredModules;
+		buildConfig.skipDirOptimize = true;
 		var text =  "(" + JSON.stringify(buildConfig, null, 4) + ")";
 		return dfs.writeFile(nodeBuildFile, text).then(function() {
+			console.log("Using modified build file: " + text);
 			return spawn(pathToNode, [
 				pathToRjs,
 				"-o",
