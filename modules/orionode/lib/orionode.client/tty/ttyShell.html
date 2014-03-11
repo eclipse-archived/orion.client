@@ -1,195 +1,63 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2012, 2014." >
-	<meta http-equiv="Content-Language" content="en-us">
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<link rel="icon" href="/images/shell.png" type="image/png">
-	<title>Shell</title>
-	<link rel="stylesheet" type="text/css" href="ttyPage.css" />
-	<script src="../requirejs/require.js"></script>
-	<script>
-		/*global require*/
-		require({
-			baseUrl: "..",
-			paths: {
-				text: "requirejs/text",
-				i18n: "requirejs/i18n",
-				domReady: "requirejs/domReady",
-				gcli: "gcli/gcli",
-				util: "gcli/util"
-			}
-		});
-		require(["ttyPage.js"]);
-	</script>
-	
-	<style>
-		.terminal {
-			font-size: 14px;
-			font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
-		}
-	</style>
-	
-	<script src="/socket.io/socket.io.js"></script>
-	<script src="term.js"></script>
+  <head>
+    <meta name="copyright" content="Copyright (c) IBM Corporation and others 2012, 2014." >
+    <meta http-equiv="Content-Language" content="en-us">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="icon" href="/images/shell.png" type="image/png">
+    <title>Shell</title>
+    <link rel="stylesheet" type="text/css" href="ttyPage.css" />
+    <script data-main="/tty/scripts/main" src="../requirejs/require.js"></script>
+  </head>
+  <body id="orion-shellPage" class="orionPage">
+    <div id="sideMenu" class="sideMenu"></div>
+    <div id="pageContent" class="content-fixedHeight">
+     
+      <div class="fixedToolbarHolder mainpane mainPanelLayout">
+        <div class="mainToolbar toolComposite">
 
-	<script>
-  	;(function() {
-      // default settings:
-      var bgColor = '#000000';
-      var txColor = '#FFFFFF';
+        <button id="menuWrench" class="orionButton commandImage dropdownSelection">
+          <span class="commandSprite core-sprite-wrench"></span>
+        </button>
+        <div id="dropdown" class="dropDownContainer" tabindex="0">
+          <div class="sections local">
+            <div>
+              <div class="setting-property">
+                <label>
+                  <span class="setting-label">Background Color:</span>
+                  <select id="bg" class="setting-control">
+                    <option selected="selected">Black</option>
+                    <option>Grey</option>
+                    <option>Green</option>
+                    <option>Blue</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div>
+              <div class="setting-property">
+                <label>
+                  <span class="setting-label">Text Color:</span>
+                  <select id="tx" class="setting-control">
+                    <option selected="selected">White</option>
+                    <option>Black</option>
+                    <option>Green</option>
+                    <option>Blue</option>
+                    <option>Orange</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      window.onload = function() {
-        var socket = io.connect('/tty');
-        socket.on('connect', function() {
-          var term = new Terminal({
-            cols: 150,
-            rows: 30,
-            useStyle: true,
-            screenKeys: true,
-          });
-
-          term.colors[257] = txColor;
-          term.colors[256] = bgColor;
-          term.on('data', function(data) {
-            socket.emit('data', data);
-          });
-
-          term.on('title', function(title) {
-            document.title = title;
-          });
-
-          term.open(document.getElementById("terminalBox"));
-
-          term.write('\x1b[31mWelcome to your terminal emulator.\x1b[m\r\n');
-          socket.on('data', function(data) {
-              term.write(data);
-          });
-          socket.on('disconnect', function() {
-              term.destroy();
-          });
-        });
-
-    		var bgButton = document.getElementById("bg");
-  			bgButton.onchange = changeBg;
-
-  			var txButton = document.getElementById("tx");
-  			txButton.onchange = changeTx;
-
-  		};
-      function changeTx() {
-		var t = document.getElementsByClassName('terminal');
-        var tx = document.getElementById("tx").value;
-        switch(tx)
-        {
-        case 'Blue':
-          txColor = '#0404B4';
-          break;
-        case 'White':
-          txColor = '#FFFFFF';
-          break;
-        case 'Green':
-          txColor = '#01DF01';
-          break;
-        case 'Black':
-          txColor = '#000000';
-          break;
-        case 'Orange':
-          txColor = '#FF8000';
-          break;
-        }
-        t[0].style.color = txColor;
-      }
-
-  		function changeBg() {
-  			
-        var t = document.getElementsByClassName('terminal');
-        var bg = document.getElementById("bg").value;
-        
-        switch(bg)
-        {
-        case 'Blue':
-          bgColor = '#0404B4';
-          break;
-        case 'Grey':
-          bgColor = '#585858';
-          break;
-        case 'Green':
-          bgColor = '#0B6121';
-          break;
-        case 'Black':
-          bgColor = '#000000';
-        }
-        t[0].style.backgroundColor = bgColor;
-  		}	
-
-
-		}).call(this);
-
-		function showDiv() {
-			var d = document.getElementById("dropdown");
-			if (d.style.display == "block")
-				d.style.display = "none";
-			else
-				d.style.display = "block";
-		}
-		
-	</script>
-
-</head>
-
-	<body id="orion-shellPage" class="orionPage">
-		<div id="sideMenu" class="sideMenu"></div>
-		<div id="pageContent" class="content-fixedHeight">
-			<div style="background:#F0F0F0; padding-top:8px; padding-right:10px;" align="right">
-			
-				<button class="orionButton commandImage dropdownSelection" onclick="showDiv()">
-					<span class="commandSprite core-sprite-wrench"></span>
-				</button>
-				
-				<div id="dropdown" class="dropDownContainer" style="margin-top: 0px; right: 9px; display: none;" tabindex="0">
-					<div class="sections local">
-						<div>
-							<div class="setting-property">
-								<label>
-									<span class="setting-label">Background Color:</span>
-									<select id="bg" class="setting-control">
-										<option selected="selected">Black</option>
-								  		<option>Grey</option>
-								  		<option>Green</option>
-								  		<option>Blue</option>
-									</select>
-								</label>
-							</div>
-						</div>
-						<div>
-							<div class="setting-property">
-								<label>
-									<span class="setting-label">Text Color:</span>
-									<select id="tx" class="setting-control">
-										<option selected="selected">White</option>
-								  		<option>Black</option>
-								  		<option>Green</option>
-								  		<option>Blue</option>
-								  		<option>Orange</option>
-									</select>
-								</label>
-							</div>
-						</div>
-					</div>
-				</div>
-			
-			</div>
-				
-		
-			<div class="fixedToolbarHolder mainpane mainPanelLayout">
-				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
-				<div id="mainNode" class="toolbarTarget pageLayoutTarget toolbarTarget-toolbarHidden">
-					<div id ="terminalBox" class="terminalContainer"></div>
-				</div>
-			</div>
-		</div>
-		<div class="footer-fixed-bottom footer" id="footer"></div>
-	</body>
+        </div>
+        <div id="mainNode" class="toolbarTarget pageLayoutTarget">
+          <div id="terminalBox" class="clearfix"></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-fixed-bottom footer" id="footer"></div>
+  </body>
 </html>
 

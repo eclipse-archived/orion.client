@@ -133,6 +133,11 @@ exports.install = function(options) {
       terminal.write(data);
     });
 
+    // Set up resize path
+    sock.on('resize', function(cols, rows) {
+      terminal.resize(cols, rows);
+    });
+
     sock.on('disconnect', function() {
       terminal.destroy()
       termsocket = null;

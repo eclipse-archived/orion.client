@@ -5754,3 +5754,6 @@ if (typeof module !== 'undefined') {
 }).call(function() {
   return this || (typeof window !== 'undefined' ? window : global);
 }());
+define(function() {
+  return Terminal; 
+});

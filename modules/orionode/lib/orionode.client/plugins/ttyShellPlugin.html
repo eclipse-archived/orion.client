@@ -11,10 +11,9 @@
       var provider = new orion.PluginProvider(headers);
       var serviceImpl = { };
       provider.registerService("orion.navigate.command", {}, {
-        nameKey: "TTY Shell",
+        name: "TTY Shell",
         id: "eclipse.tty.shell.open",
         tooltipKey: "Open TTY Shell page",
-        nls: "orion/ttyshell/nls/messages",
         uriTemplate: "{+OrionHome}/tty/ttyShell.html",
         forceSingleItem: true
       });
