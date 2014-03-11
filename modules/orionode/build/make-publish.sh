@@ -9,7 +9,6 @@
 #
 # Requirements:
 #  Node in your PATH, for running the build
-#  Mocha, for running the server sanity test
 #
 die() {
     echo >&2 "$@"
@@ -23,25 +22,33 @@ ensure_dir() {
 	fi
 }
 
-export SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#export SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 USAGE=$(printf "Usage: publish [dir]\n\nWhere [dir] is the temporary directory to use for publishing.\nThe contents of [dir] will be cleared first, so don't use an important folder.")
 
 # Set args
+SCRIPT_DIR=$( dirname "$0" )
+SCRIPT_DIR=$(cd "$SCRIPT_DIR" && pwd)
 REPO=${SCRIPT_DIR}/../../../
-REPO=$( cd $REPO; pwd)
-STAGING=$(cd $1; pwd)
+STAGING="$1"
 
-echo Repo directory: ${REPO}
-echo Publish directory: ${STAGING}
+# Create folder if necessary
+[ -d "$STAGING" ] || mkdir "$STAGING"
+
+# Resolve to absolute paths
+REPO=$( cd "$REPO"; pwd)
+STAGING=$(cd "$STAGING"; pwd)
 
 # Validate args
 [ "$#" -eq 1 ] || die "$USAGE"
+[ -d "$REPO/bundles" ] || die "Could not find a 'bundles' folder in $REPO -- exiting."
 ! [ -d "$STAGING"/.git ] || die "publish dir appears to contain a Git repo -- refusing to overwrite."
+echo Repo directory: ${REPO}
+echo Publish directory: ${STAGING}
+ensure_dir "$REPO"
+ensure_dir "$STAGING"
+
 # This is unnecessary
 #! [ "$STAGING" -ef "$REPO" ] || die "publish dir appears to be your repo directory -- refusing to overwrite."
-
-# Start the build
-ensure_dir "$STAGING"
 
 # TODO -- Purge publish dir -- this often hangs on Windows
 #echo Clearing "$STAGING"...
@@ -59,7 +66,8 @@ for f in "$REPO"/modules/orionode/* ; do
 done
 # The * construct above omits things whose name begins with dot (.)
 # But we need .gitignore, it's important for npm, so copy it over.
-cp "$REPO"/modules/orionode/.gitignore $STAGING
+echo Copying .gitignore
+cp "$REPO"/modules/orionode/.gitignore "$STAGING"
 # Add an additional line to prevent npm from publishing the releng folder
 echo lib/orion.client/releng/ >> "$STAGING"/.gitignore
 
@@ -78,13 +86,13 @@ cp -r "$STAGING"/bundles/* "$STAGING"/lib/orion.client/bundles
 rm -rf "$STAGING"/bundles/
 
 # Copy client releng, required by build.js
-mkdir "$STAGING"/lib/orion.client/releng
+ensure_dir "$STAGING"/lib/orion.client/releng
 cp -r "$REPO"/releng/org.eclipse.orion.client.releng "$STAGING"/lib/orion.client/releng
 
 # install orion node dependencies, required for minification if they haven't been installed yet
-echo Installing Orion node modules...
+echo Installing Orion node dependencies...
 pushd ${STAGING}
-npm install
+npm -q install
 popd
 
 # Minify the client-side code
@@ -93,10 +101,14 @@ if hash node 2> /dev/null; then
 else
 	echo "Could not find node. Can't minify :("
 fi
-if [ -n "$NODE" ]; then 
-	echo Minifying client-side code
-	node "$STAGING"/build/build.js "$STAGING"/lib/orion.client/bundles
-	node "$STAGING"/build/build.js "$STAGING"/lib/orion.client/bundles
+if [ -n "$NODE" ]; then
+	BUILD="$STAGING"/build/build.js
+	if [ -f "$BUILD" ]; then
+		echo Minifying client-side code: 'node "$BUILD" "$STAGING"/lib/orion.client/bundles'
+		node "$BUILD" "$STAGING"/lib/orion.client/bundles
+	else
+		echo "Build file does not exist: ${BUILD}. Can't minify"
+	fi
 fi
 
 echo Rewriting ORION_CLIENT path in index.js
