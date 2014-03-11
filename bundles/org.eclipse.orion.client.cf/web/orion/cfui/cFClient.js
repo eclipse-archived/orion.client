@@ -205,6 +205,15 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 					stopReq.Target = target;
 				
 				return this._xhrV1("PUT", require.toUrl("cfapi/apps"), stopReq);
+			},
+			
+			getOrgs: function(target) {
+				var url = require.toUrl("cfapi/orgs");
+				
+				if (target)
+					url += "&Target=" + JSON.stringify(target);
+				
+				return this._xhrV1("GET", url);
 			}
 		};
 		

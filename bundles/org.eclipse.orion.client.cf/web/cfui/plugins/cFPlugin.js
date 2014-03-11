@@ -189,6 +189,51 @@ define(['i18n!cfui/nls/messages','require', 'orion/xhr', 'orion/Deferred', 'orio
 		}
 	);
 	
+	/** Add cf orgs command **/
+	function describeOrg(org) {
+		var name = org.Name;
+		var strResult = name;
+
+		strResult += ": ";
+		if (org.Spaces){
+			org.Spaces.forEach(function(space, index){
+				strResult += space.Name;
+				if (index < org.Spaces.length - 1)
+					strResult += ", ";
+			});
+		} else {
+			strResult += "<none>";
+		}
+		
+		return strResult;
+	}
+	
+	var orgsImpl = {
+		callback: function(args) {
+			return cFService.getOrgs().then(function(result) {
+				result = result.Orgs;
+				
+				if (!result || result.length === 0) {
+					return "No orgs.";
+				}
+				var strResult = "";
+				result.forEach(function(org) {
+					strResult += describeOrg(org);
+					strResult += "\n";
+				});
+				return strResult;
+			});
+		}
+	};
+	
+	provider.registerServiceProvider(
+		"orion.shell.command",
+		orgsImpl, {
+			name: "cfo orgs",
+			description: "List all orgs"
+		}
+	);
+	
 	/** Add cf login command **/
 	var loginImpl = {
 		callback: function(args) {
