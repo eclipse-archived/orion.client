@@ -86,6 +86,16 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 		if (!allowHTML && status && typeof status.HTML !== "undefined") { //$NON-NLS-0$
 			delete status.HTML;
 		}
+		
+		if(status.Retry && status.Retry.parameters){
+			if(status.forceShowMessage){
+				progress.setProgressResult(status);
+			}
+			context.data.parameters = getCommandParameters(status.Retry.parameters, status.Retry.optionalParameters);
+			context.data.oldParams = context.oldParams;
+			context.commandService.collectParameters(context.data);
+		}
+		
 		progress.setProgressResult(status);
 		
 		if(status.ToSave){
@@ -148,6 +158,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				options.width = result.Width;
 				options.height = result.Height;
 				options.id = result.UriTemplateId || context.deployService.id; 
+				context.oldParams = enhansedLaunchConf.Params;
 				options.done = function(status){localHandleStatus(status, null, context);};
 				options.status = function(status){localHandleStatus(status, null, context);};
 				mEditorCommands.createDelegatedUI(options);
