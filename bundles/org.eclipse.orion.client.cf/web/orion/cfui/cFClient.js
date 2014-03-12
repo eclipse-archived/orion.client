@@ -211,7 +211,7 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				var url = require.toUrl("cfapi/orgs");
 				
 				if (target)
-					url += "&Target=" + JSON.stringify(target);
+					url += "?Target=" + JSON.stringify(target);
 				
 				return this._xhrV1("GET", url);
 			}
