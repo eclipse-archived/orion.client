@@ -65,5 +65,8 @@
     "user-list",
     "userservicePlugin",
     "view"
-  ]
+  ],
+  "bin" : {
+    "orion": "./bin-global/orion.js"
+  }
 }
