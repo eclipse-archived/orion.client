@@ -215,7 +215,7 @@
         }
 
         function _handleMessage(event) {
-            if (event.source !== _target) {
+            if (event.source !== _target && typeof window !== "undefined") {
                 return;
             }
             var message = (typeof event.data !== "string" ? event.data : JSON.parse(event.data)); //$NON-NLS-0$
