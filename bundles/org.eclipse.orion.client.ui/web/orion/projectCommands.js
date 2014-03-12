@@ -148,8 +148,8 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				options.width = result.Width;
 				options.height = result.Height;
 				options.id = result.UriTemplateId || context.deployService.id; 
-				options.done = localHandleStatus;
-				options.status = localHandleStatus;
+				options.done = function(status){localHandleStatus(status, null, context);};
+				options.status = function(status){localHandleStatus(status, null, context);};
 				mEditorCommands.createDelegatedUI(options);
 			}
 
