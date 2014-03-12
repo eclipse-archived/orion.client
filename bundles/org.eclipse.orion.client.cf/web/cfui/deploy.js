@@ -8,6 +8,9 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	mBootstrap.startup().then(
 		function(core) {
 			
+			var pageParams = PageUtil.matchResourceParameters();
+			var contentLocation = pageParams.resource;
+			
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 			var cFService = new CFClient.CFService(serviceRegistry);
@@ -24,14 +27,74 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var orgsTree = document.getElementById('orgsTree'); //$NON-NLS-0$
 			var okButton = document.getElementById('okbutton'); //$NON-NLS-0$
 			
+			var selection;
+			
 			// cancel button
 			var closeFrame = function() {
 				 window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
 					 source: "org.eclipse.orion.client.cf.deploy", cancelled: true}), "*");
 			};
 			
+			var doAction = function() {
+				var msgNode = msgLabel.appendChild(document.createTextNode("Deploying...")); //$NON-NLS-0$
+				
+				selection.getSelection(
+					function(selection) {
+						if(selection===null || selection.length===0){
+							window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
+								source: "org.eclipse.orion.client.cf.deploy", cancelled: true}), "*");
+							return;
+						}
+						
+						cFService.pushApp(selection, null, decodeURIComponent(contentLocation)).then(
+							function(result){
+								postMsg({
+									CheckState: true,
+									ToSave: {
+										ConfigurationName: result.App.entity.name + " on " + result.Target.Space.Name + " / " + result.Target.Org.Name,
+										Parameters: {
+											Target: {
+												Url: result.Target.Url,
+												Org: result.Target.Org.Name,
+												Space: result.Target.Space.Name
+											},
+											Name: result.App.entity.name
+										},
+										Url: "http://" + result.Route.entity.host + "." + result.Domain,
+										UrlTitle: result.App.entity.name,
+										Type: "Cloud Foundry",
+										ManageUrl: result.ManageUrl,
+										Path: appPath
+									}
+								});
+							}, function(error){
+								if (error.HttpCode === 404){
+									postError({
+										State: "NOT_DEPLOYED",
+										Message: error.Message
+									});
+								} else if (error.JsonData && error.JsonData.error_code) {
+									var err = error.JsonData;
+									if (err.error_code === "CF-InvalidAuthToken"){
+										error.Retry = {
+											parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+										};
+									} else if (err.error_code === "CF-TargetNotSet"){
+										var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+										error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+									}
+									postError(error);
+								} else {
+									postError(error);
+								}
+							}
+						);
+					}
+				);
+			};
+			
 			var validate = function() {
-				this.selection.getSelection(function(selection) {
+				selection.getSelection(function(selection) {
 					if(selection===null || selection.length===0){
 						okButton.classList.add(self.DISABLED);
 						okButton.disabled = true;
@@ -42,7 +105,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				});
 			};
 
-			document.getElementById('okbutton').onclick = closeFrame;
+			document.getElementById('okbutton').onclick = doAction;
 			document.getElementById('closeDialog').onclick = closeFrame;
 			 
 			// allow frame to be dragged by title bar
@@ -83,70 +146,37 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				function(config) {
 					 // get target and app, then do push and open application
 					getTarget(cFService, config, preferences).then(
-						function(result1){
-							cFService.getOrgs(result1).then(
+						function(target){
+							cFService.getOrgs(target).then(
 								function(result2){
 									msgLabel.removeChild(msgNode);
 									
-									var spaces = [];
+									var targets = [];
 									result2.Orgs.forEach(function(org){
 										if (org.Spaces)
 											org.Spaces.forEach(function(space){
-												space.Org = org;
-												spaces.push(space);
+												var newTarget = {};
+												newTarget.Url = target.Url;
+												newTarget.Org = org.Name;
+												newTarget.Space = space.Name;
+												targets.push(newTarget);
 											});
 									});
 									
-									this.selection = new mSelection.Selection(serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
-									this.selection.addEventListener("selectionChanged", validate);
+									selection = new mSelection.Selection(serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
+									selection.addEventListener("selectionChanged", validate);
 
-									this.explorer = new mExplorer.Explorer(
+									var explorer = new mExplorer.Explorer(
 										serviceRegistry,
-										this.selection,
+										selection,
 										new SpacesRenderer({checkbox: false, singleSelection: true, treeTableClass: "Spaces"}));
-									var model = new mExplorer.ExplorerFlatModel(null, null, spaces);
+									var model = new mExplorer.ExplorerFlatModel(null, null, targets);
 									model.getId = function(item){
-										return item.Name + item.Org.Name;
+										return item.Space + item.Org;
 									};
-									this.explorer.createTree(orgsTree.id, model, {});
+									explorer.createTree(orgsTree.id, model, {});
 								}
 							);
-							
-//					 getApps(cFService, config, result1).then(function(result2){
-//						 
-//						msgLabel.removeChild(msgNode);
-//						var props = config.getProperties();
-//						var targetUrl = props["app.target"];
-//						var manageUrl = props["app.manage.url"];
-//						var msg = "Pushing application into " + targetUrl + ".";
-//						msgNode = msgLabel.appendChild(document.createTextNode(msg));
-//						var warningLabel = document.getElementById('warningLabel'); //$NON-NLS-0$
-//						var msgWarning = "Note: This can take several minutes.";
-//						warningNode = warningLabel.appendChild(document.createTextNode(msgWarning));
-//						settingsMsg.hidden = false;
-//						 
-//						cFService.pushApplication(null, location).then(function(result) {
-//							 // open app
-//							if (result.applications && result.applications.length>0 && result.applications[0].uris.length>0) {
-//								var appUrl = "http://" + result.applications[0].uris[0];
-//								var name = result.applications[0].name;
-//								var message = "Click [here](" + appUrl + ") to view '" + name + "'.";
-//								
-//								if (manageUrl){
-//									var appManageUrl = manageUrl + "?appName=" + name;
-//									message += " Click [here](" + appManageUrl + ") to manage '" + name + "'.";	
-//								}
-//		
-//								postMsg(message);
-//							} else {
-//								postMsg("This application has no url");
-//							}
-//						 },function(error){
-//							 postError(error);
-//						 });
-//					 },function(error){
-//						 postError(error);
-//					 });
 						}, function(error){
 							postError(error);
 						}
@@ -212,37 +242,16 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		return deferred;
 	}
 
-	function postMsg(msg) {
+	function postMsg(status) {
 		window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
 			 source: "com.ibm.cloudoe.editor.run", 
-			 status: {Message: msg}}), "*");
+			 status: status}), "*");
 	}
 	
 	function postError(error) {
-		var msg = "Unknown error";
-		if (typeof error === 'object') {
-			if (error.response) {
-				try {
-					error = JSON.parse(error.response);
-				} catch (err) {
-				}
-			}
-				
-			if (error.DetailedMessage) {
-				msg = error.DetailedMessage; 
-			} else if (error.Message) {
-				msg = error.Message;
-			} else if (error.error) {
-				msg = error.error;
-			}
-
-			if (error.HttpCode) {
-				msg += " (" + error.HttpCode + ")";
-			}
-		}
 		window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
 			 source: "com.ibm.cloudoe.editor.run", 
-			 status: {Message: msg, Severity: "Error"}}), "*");
+			 status: error}), "*");
 	}
 	
 	function SpacesRenderer (options) {
@@ -260,7 +269,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
 			col.appendChild(span);
 			span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
-			span.appendChild(document.createTextNode(item.Name + " (" + item.Org.Name + ")"));
+			span.appendChild(document.createTextNode(item.Space.Name + " (" + item.Org.Name + ")"));
 			return col;
 		}
 	};
