@@ -38,16 +38,16 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var doAction = function() {
 				var msgNode = msgLabel.appendChild(document.createTextNode("Deploying...")); //$NON-NLS-0$
 				
-				selection.getSelection(function(selection) {
-					if(selection===null || selection.length===0){
-						window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-							source: "org.eclipse.orion.client.cf.deploy", cancelled: true}), "*");
-						return;
-					}
-					
-					cFService.pushApp(selection, null, decodeURIComponent(contentLocation)).then(
-						function(result){
-							console.info("Done");
+				selection.getSelection(
+					function(selection) {
+						if(selection===null || selection.length===0){
+							window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
+								source: "org.eclipse.orion.client.cf.deploy", cancelled: true}), "*");
+							return;
+						}
+						
+						cFService.pushApp(selection, null, decodeURIComponent(contentLocation)).then(
+							function(result){
 								postMsg({
 									CheckState: true,
 									ToSave: {
@@ -157,8 +157,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 											org.Spaces.forEach(function(space){
 												var newTarget = {};
 												newTarget.Url = target.Url;
-												newTarget.Org = org;
-												newTarget.Space = space;
+												newTarget.Org = org.Name;
+												newTarget.Space = space.Name;
 												targets.push(newTarget);
 											});
 									});
@@ -172,7 +172,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 										new SpacesRenderer({checkbox: false, singleSelection: true, treeTableClass: "Spaces"}));
 									var model = new mExplorer.ExplorerFlatModel(null, null, targets);
 									model.getId = function(item){
-										return item.Space.Name + item.Org.Name;
+										return item.Space + item.Org;
 									};
 									explorer.createTree(orgsTree.id, model, {});
 								}
@@ -269,7 +269,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
 			col.appendChild(span);
 			span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
-			span.appendChild(document.createTextNode(item.Space.Name + " (" + item.Org.Name + ")"));
+			span.appendChild(document.createTextNode(item.Space + " (" + item.Org + ")"));
 			return col;
 		}
 	};
