@@ -10,13 +10,11 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 		function(core) {
 			
 			var pageParams = PageUtil.matchResourceParameters();
-			var contentLocation = pageParams.resource;
+			var deployResource = decodeURIComponent(pageParams.resource);
 			
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 			var cFService = new CFClient.CFService(serviceRegistry);
-			var params = PageUtil.matchResourceParameters();
-			var location = decodeURIComponent(params.location);
 			
 			// initial message
 			document.getElementById('title').appendChild(document.createTextNode("Choose Space To Deploy")); //$NON-NLS-1$//$NON-NLS-0$
@@ -46,7 +44,9 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							return;
 						}
 						
-						cFService.pushApp(selection, null, decodeURIComponent(contentLocation)).then(
+						var deployResourceJSON = JSON.parse(deployResource);
+						
+						cFService.pushApp(selection, null, decodeURIComponent(deployResourceJSON.ContentLocation + deployResourceJSON.AppPath)).then(
 							function(result){
 								postMsg({
 									CheckState: true,
@@ -63,8 +63,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 										Url: "http://" + result.Route.entity.host + "." + result.Domain,
 										UrlTitle: result.App.entity.name,
 										Type: "Cloud Foundry",
-										ManageUrl: result.ManageUrl
-//										Path: appPath
+										ManageUrl: result.ManageUrl,
+										Path: deployResourceJSON.AppPath
 									}
 								});
 							}, function(error){
