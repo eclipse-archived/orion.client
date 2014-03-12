@@ -3,8 +3,8 @@
 var uiTestFunc = null;
 
 define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection', 'orion/explorers/explorer',
-	'orion/URITemplate', 'orion/PageLinks'], 
-		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, mExplorer, URITemplate, PageLinks) {
+	'orion/URITemplate', 'orion/PageLinks', 'orion/preferences'], 
+		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, mExplorer, URITemplate, PageLinks, Preferences) {
 
 	mBootstrap.startup().then(
 		function(core) {
@@ -13,7 +13,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var deployResource = decodeURIComponent(pageParams.resource);
 			
 			var serviceRegistry = core.serviceRegistry;
-			var preferences = core.preferences;
+//			var preferences = core.preferences;
 			var cFService = new CFClient.CFService(serviceRegistry);
 			
 			// initial message
@@ -27,6 +27,60 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var okButton = document.getElementById('okbutton'); //$NON-NLS-0$
 			
 			var selection;
+			
+			// register hacked pref service
+			
+			var temp = document.createElement('a');
+			temp.href = "../prefs/user";
+			var location = temp.href;
+			
+			function PreferencesProvider(location) {
+				this.location = location;
+			}
+
+			PreferencesProvider.prototype = {
+				get: function(name) {
+					return xhr("GET", this.location + name, {
+						headers: {
+							"Orion-Version": "1"
+						},
+						timeout: 15000,
+						log: false
+					}).then(function(result) {
+						return result.response ? JSON.parse(result.response) : null;
+					});
+				},
+				put: function(name, data) {
+					return xhr("PUT", this.location + name, {
+						data: JSON.stringify(data),
+						headers: {
+							"Orion-Version": "1"
+						},
+						contentType: "application/json;charset=UTF-8",
+						timeout: 15000
+					}).then(function(result) {
+						return result.response ? JSON.parse(result.response) : null;
+					});
+				},
+				remove: function(name, key){
+					return xhr("DELETE", this.location + name +"?key=" + key, {
+						headers: {
+							"Orion-Version": "1"
+						},
+						contentType: "application/json;charset=UTF-8",
+						timeout: 15000
+					}).then(function(result) {
+						return result.response ? JSON.parse(result.response) : null;
+					});
+				}
+			};
+			
+			var service = new PreferencesProvider(location);
+			serviceRegistry.registerService("orion.core.preference.provider", service, {});
+			
+			// This is code to ensure the first visit to orion works
+			// we read settings and wait for the plugin registry to fully startup before continuing
+			var preferences = new Preferences.PreferencesService(serviceRegistry);
 			
 			// cancel button
 			var closeFrame = function() {
@@ -190,55 +244,110 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	function getTarget(cFService, config, preferences) {
 		var deferred = new Deferred();
 		
-		preferences.getPreferences('/settingsCF').then(
+		preferences.getPreferences('/cm/configurations').then(
 			function(settings){
-				var props = config.getProperties() || {};
-				var cfgTarget = props["app.target"] || ""; //$NON-NLS-0$
-				var cfgValid = (typeof cfgTarget === 'string' && cfgTarget.length > 0);
-
-				var defaultTarget = settings.get("targetUrl");
-				if (!cfgValid){
-					props["app.target"] = defaultTarget;
-					props["app.manage.url"] = settings.get("manageUrl");
-					config.update(props);
+				var cloud = settings.get("org.eclipse.orion.client.cf.settings");
+				if (cloud && cloud.targetUrl){
+					var target = {};
+					target.Url = cloud.targetUrl;
+					if (cloud.manageUrl)
+						target.ManageUrl = cloud.manageUrl;
+					if (cloud.org)
+						target.Org = cloud.org;
+					if (cloud.space)
+						target.Space = cloud.space;
+					deferred.resolve(target);
+					return;
 				}
 				
-				cFService.getTarget().then(function(result) {
-					var cFTarget = result.Url;
-					var cFValid = (typeof cFTarget === 'string' && cFTarget.length > 0);
-					// if cf target is invalid, prompt for target
-					if (!cFValid) {
-						if (defaultTarget) {
-							cFService.setTarget(defaultTarget).then(function (result) {
-								deferred.resolve(result);					
-							}, function(error) {
-								deferred.reject(error);					
-							});
+				preferences.getPreferences('/settingsCF', 1).then(
+					function(settings){
+						var cloud = settings;
+						if (cloud && cloud.get("targetUrl")){
+							var target = {};
+							target.Url = cloud.get("targetUrl");
+							if (cloud.get("manageUrl"))
+								target.ManageUrl = cloud.get("manageUrl");
+							deferred.resolve(target);
+							return;
 						} else {
+//							deferred.resolve(null);
 							var error = {};
 							var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
 							error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
 							error.Severity = "Warning";
 							deferred.reject(error);
 						}
-					} else {
-						// if cf target doesn't match settings, change settings
-						if (cFValid && cFTarget !== cfgTarget) {
-							props["app.target"] = cFTarget;
-							config.update(props);
-						}
-						deferred.resolve({target:cFTarget});
+					}, function(error){
+						var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+						error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+						error.Severity = "Warning";
+						deferred.reject(error);
+//						deferred.resolve(null);
 					}
-				}, function (error) {
-					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
-					error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
-					error.Severity = "Warning";
-					deferred.reject(error);
-				});	
+				);
+			}, function(error){
+				var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+				error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+				error.Severity = "Warning";
+				deferred.reject(error);
+//				deferred.resolve(null);
 			}
 		);
-
 		return deferred;
+		
+		
+//		var deferred = new Deferred();
+//		
+//		preferences.getPreferences('/settingsCF').then(
+//			function(settings){
+//				var props = config.getProperties() || {};
+//				var cfgTarget = props["app.target"] || ""; //$NON-NLS-0$
+//				var cfgValid = (typeof cfgTarget === 'string' && cfgTarget.length > 0);
+//
+//				var defaultTarget = settings.get("targetUrl");
+//				if (!cfgValid){
+//					props["app.target"] = defaultTarget;
+//					props["app.manage.url"] = settings.get("manageUrl");
+//					config.update(props);
+//				}
+//				
+//				cFService.getTarget().then(function(result) {
+//					var cFTarget = result.Url;
+//					var cFValid = (typeof cFTarget === 'string' && cFTarget.length > 0);
+//					// if cf target is invalid, prompt for target
+//					if (!cFValid) {
+//						if (defaultTarget) {
+//							cFService.setTarget(defaultTarget).then(function (result) {
+//								deferred.resolve(result);					
+//							}, function(error) {
+//								deferred.reject(error);					
+//							});
+//						} else {
+//							var error = {};
+//							var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+//							error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+//							error.Severity = "Warning";
+//							deferred.reject(error);
+//						}
+//					} else {
+//						// if cf target doesn't match settings, change settings
+//						if (cFValid && cFTarget !== cfgTarget) {
+//							props["app.target"] = cFTarget;
+//							config.update(props);
+//						}
+//						deferred.resolve({target:cFTarget});
+//					}
+//				}, function (error) {
+//					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+//					error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+//					error.Severity = "Warning";
+//					deferred.reject(error);
+//				});	
+//			}
+//		);
+//
+//		return deferred;
 	}
 
 	function postMsg(status) {
