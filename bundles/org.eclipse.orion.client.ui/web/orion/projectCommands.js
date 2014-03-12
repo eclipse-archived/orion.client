@@ -147,7 +147,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				options.uriTemplate = result.UriTemplate;
 				options.width = result.Width;
 				options.height = result.Height;
-				options.id = context.deployService.id; 
+				options.id = result.UriTemplateId || context.deployService.id; 
 				options.done = localHandleStatus;
 				options.status = localHandleStatus;
 				mEditorCommands.createDelegatedUI(options);
