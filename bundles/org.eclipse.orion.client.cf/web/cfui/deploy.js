@@ -2,8 +2,9 @@
 	
 var uiTestFunc = null;
 
-define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection', 'orion/explorers/explorer'], 
-		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, mExplorer) {
+define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred', 'orion/cfui/cFClient', 'orion/PageUtil', 'orion/selection', 'orion/explorers/explorer',
+	'orion/URITemplate', 'orion/PageLinks'], 
+		function(mBootstrap, xhr, lib, Deferred, CFClient, PageUtil, mSelection, mExplorer, URITemplate, PageLinks) {
 
 	mBootstrap.startup().then(
 		function(core) {
@@ -62,8 +63,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 										Url: "http://" + result.Route.entity.host + "." + result.Domain,
 										UrlTitle: result.App.entity.name,
 										Type: "Cloud Foundry",
-										ManageUrl: result.ManageUrl,
-										Path: appPath
+										ManageUrl: result.ManageUrl
+//										Path: appPath
 									}
 								});
 							}, function(error){
@@ -95,11 +96,11 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var validate = function() {
 				selection.getSelection(function(selection) {
 					if(selection===null || selection.length===0){
-						okButton.classList.add(self.DISABLED);
+						okButton.classList.add("disabled");
 						okButton.disabled = true;
 						return;
 					}
-					okButton.classList.remove(self.DISABLED);
+					okButton.classList.remove("disabled");
 					okButton.disabled = false;
 				});
 			};
@@ -213,12 +214,6 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							}, function(error) {
 								deferred.reject(error);					
 							});
-						} else {
-							promptTarget(cFService, config, false).then(function(result) {
-								deferred.resolve(result);				
-							}, function (error) {
-								deferred.reject(error);
-							});
 						}
 					} else {
 						// if cf target doesn't match settings, change settings
@@ -229,11 +224,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						deferred.resolve({target:cFTarget});
 					}
 				}, function (error) {			
-					promptTarget(cFService, config, true).then(function(result) {
-						deferred.resolve(result);				
-					}, function (error) {
 						deferred.reject(error);
-					});
 				});	
 			}
 		);
