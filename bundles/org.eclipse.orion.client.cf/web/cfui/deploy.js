@@ -32,7 +32,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			// cancel button
 			var closeFrame = function() {
 				 window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-					 source: "org.eclipse.orion.client.cf.deploy", cancelled: true}), "*");
+					 source: "org.eclipse.orion.client.cf.deploy.uritemplate", cancelled: true}), "*");
 			};
 			
 			var doAction = function() {
@@ -41,8 +41,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				selection.getSelection(
 					function(selection) {
 						if(selection===null || selection.length===0){
-							window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-								source: "org.eclipse.orion.client.cf.deploy", cancelled: true}), "*");
+							closeFrame();
 							return;
 						}
 						
@@ -244,13 +243,13 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 
 	function postMsg(status) {
 		window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-			 source: "com.ibm.cloudoe.editor.run", 
+			 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
 			 status: status}), "*");
 	}
 	
 	function postError(error) {
 		window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
-			 source: "com.ibm.cloudoe.editor.run", 
+			 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
 			 status: error}), "*");
 	}
 	

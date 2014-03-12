@@ -180,7 +180,11 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 						}
 					);
 				} else {
-					deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deploy.html#" + project.ContentLocation + appPath, Width: "400px", Height: "300px"});
+					deferred.resolve({UriTemplate: "{+OrionHome}/cfui/deploy.html#" + project.ContentLocation + appPath, 
+						Width: "400px", 
+						Height: "300px",
+						URITemplateId: "org.eclipse.orion.client.cf.deploy.uritemplate"});
+					
 //					cFService.pushApp(target, null, decodeURIComponent(project.ContentLocation + appPath)).then(
 //						function(result){
 //							deferred.resolve({
