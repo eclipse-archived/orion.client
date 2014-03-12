@@ -269,7 +269,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
 			col.appendChild(span);
 			span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
-			span.appendChild(document.createTextNode(item.Space.Name + " (" + item.Org.Name + ")"));
+			span.appendChild(document.createTextNode(item.Space + " (" + item.Org + ")"));
 			return col;
 		}
 	};
