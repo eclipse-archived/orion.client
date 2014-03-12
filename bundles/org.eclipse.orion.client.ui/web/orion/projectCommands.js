@@ -162,6 +162,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				options.done = function(status){localHandleStatus(status, null, context);};
 				options.status = function(status){localHandleStatus(status, null, context);};
 				mEditorCommands.createDelegatedUI(options);
+				return;
 			}
 
 			if(context.launchConfiguration && (result.State || result.CheckState)){
