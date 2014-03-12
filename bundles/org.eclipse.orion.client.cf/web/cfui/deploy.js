@@ -204,7 +204,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				}
 				
 				cFService.getTarget().then(function(result) {
-					var cFTarget = result.target;
+					var cFTarget = result.Url;
 					var cFValid = (typeof cFTarget === 'string' && cFTarget.length > 0);
 					// if cf target is invalid, prompt for target
 					if (!cFValid) {
@@ -214,6 +214,11 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							}, function(error) {
 								deferred.reject(error);					
 							});
+						} else {
+							var error = {};
+							var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+							error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+							deferred.reject(error);
 						}
 					} else {
 						// if cf target doesn't match settings, change settings
@@ -223,8 +228,10 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						}
 						deferred.resolve({target:cFTarget});
 					}
-				}, function (error) {			
-						deferred.reject(error);
+				}, function (error) {
+					var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+					error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+					deferred.reject(error);
 				});	
 			}
 		);
