@@ -101,7 +101,7 @@ eclipse.UsersList = (function(){
 				var display = {};
 				display.Severity = "Error"; //$NON-NLS-0$
 				display.HTML = false;
-				display.Message = messages["Permission to biew user list denied."]; //$NON-NLS-0$
+				display.Message = messages["Permission to view user list denied."]; //$NON-NLS-0$
 				this.registry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 				var progress = lib.node("progress");  //$NON-NLS-0$
 				lib.empty(progress);

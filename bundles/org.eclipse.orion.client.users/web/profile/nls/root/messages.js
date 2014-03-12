@@ -51,5 +51,5 @@ define({
 	"Email:" : "Email:",
 	"Create" : "Create",
 	"Set Password" : "Set Password",
-	"Permission to view user list denied." : "Permission to biew user list denied."
+	"Permission to view user list denied." : "Permission to view user list denied."
 });
