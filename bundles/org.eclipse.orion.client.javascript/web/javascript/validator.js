@@ -14,8 +14,9 @@ define([
 	"eslint",
 	"orion/objects",
 	"javascript/astManager",
-	"javascript/finder"
-], function(eslint, Objects, ASTManager, Finder) {
+	"javascript/finder",
+	'orion/Deferred'
+], function(eslint, Objects, ASTManager, Finder, Deferred) {
 	// Should have a better way of keeping this up-to-date with ./load-rules-async.js
 	var config = {
 		// 0:off, 1:warning, 2:error
@@ -173,29 +174,104 @@ define([
 		 */
 		computeProblems: function(editorContext, context) {
 			var _self = this;
-			return this.astManager.getAST(editorContext).then(function(ast) {
-				var eslintErrors = [], error;
-				try {
-					eslintErrors = eslint.verify(ast, config);
-				} catch (e) {
-					error = e;
-				}
-				var parseErrors = _self._extractParseErrors(ast);
-				var problems = []
-					.concat(eslintErrors)
-					.concat(parseErrors)
-					.map(toProblem);
-				if (error && !parseErrors.length) {
-					// Warn about ESLint failure
-					problems.push({
-						start: 0,
-						description: "ESLint could not validate this file because an error occurred: " + error.toString(),
-						severity: "error" //$NON-NLS-0$
+			switch(context.contentType) {
+				case 'text/html': 
+					return editorContext.getText().then(function(text) {
+						var blocks = _self._extractScriptBlocks(text);
+						var len = blocks.length;
+						var allproblems = [];
+						for(var i = 0; i < len; i++) {
+							//we don't want to cache these ASTs so call into the private parse method of the manager
+							var block = blocks[i];
+							var ast = _self.astManager.parse(block.text);
+							var problems = _self._validateAst(ast).problems;
+							var len2 = problems.length;
+							for(var j = 0; j < len2; j++) {
+								//patch the start of the problem for the script block offset
+								problems[j].start += block.offset; 
+								problems[j].end += block.offset; 
+							}
+							allproblems = allproblems.concat(problems);
+						}
+						return {problems: allproblems};
+					});
+				case 'application/javascript': 
+					return this.astManager.getAST(editorContext).then(function(ast) {
+						return _self._validateAst(ast);
+					});
+			}
+		},
+		
+		/**
+		 * @description Validates the given AST
+		 * @function
+		 * @private
+		 * @param {Object} ast The AST
+		 * @returns {Array|Object} The array of problem objects
+		 * @since 6.0
+		 */
+		_validateAst: function(ast) {
+			var eslintErrors = [], error;
+			try {
+				eslintErrors = eslint.verify(ast, config);
+			} catch (e) {
+				error = e;
+			}
+			var parseErrors = this._extractParseErrors(ast);
+			var problems = []
+				.concat(eslintErrors)
+				.concat(parseErrors)
+				.map(toProblem);
+			if (error && !parseErrors.length) {
+				// Warn about ESLint failure
+				problems.push({
+					start: 0,
+					description: "ESLint could not validate this file because an error occurred: " + error.toString(),
+					severity: "error" //$NON-NLS-0$
+				});
+			}
+			return { problems: problems };
+		},
+		
+		/**
+		 * @description Computes the script blocks from an HTML file
+		 * @function
+		 * @private
+		 * @param {String} buffer The file contents
+		 * @returns {Object} An object of script block items {text, offset}
+		 * @since 6.0
+		 */
+		_extractScriptBlocks: function(buffer) {
+			var blocks = [];
+			var script = '<script>';
+			var scriptend = '<\/script>';
+			var starts = buffer.match(/<script\s*>/ig);
+			if(!starts || starts.length < 1) {
+				//we can stop there are no script blocks
+				return blocks;
+			}
+			//sanitize the buffer a bit first, probably bad for performance
+			buffer = buffer.replace(/<script\s*>/ig, script);
+			buffer = buffer.replace(/<\/script\s*>/ig, scriptend);
+			var index = buffer.indexOf(script);
+			var end;
+			var idx = 0;
+			var offset = 0;
+			while(index > -1) {
+				offset = index + starts[idx].length;
+				end = buffer.indexOf(scriptend, index);
+				if(end != index) {
+					blocks.push({
+						text: buffer.substring(index + script.length, end),
+						offset: offset
 					});
 				}
-				return { problems: problems };
-			});
+				index = buffer.indexOf(script, end);
+				idx++;
+			}
+			return blocks;
 		},
+		
 		/**
 		 * @description Callback from orion.cm.managedservice
 		 * @function

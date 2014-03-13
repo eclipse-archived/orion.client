@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2013 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -22,7 +22,6 @@ define([
 	};
 	var validationOptions = DEFAULT_VALIDATION_OPTIONS;
 	var isEnabledFor = {
-		'application/javascript': false,
 		'application/json': true,
 		'text/html': true
 	};
@@ -81,7 +80,7 @@ define([
 	 * @param {String} contents Text of file.
 	 */
 	function _computeProblems(options, contents) {
-		if (isEnabledFor[options.contentType] === false) {
+		if (!isEnabledFor[options.contentType]) {
 			return {problems: []};
 		}
 		var result = jslint(contents);
@@ -148,10 +147,6 @@ define([
 		// ManagedService
 		updated: function(properties) {
 			if (properties) {
-				if (typeof properties.enabled === "boolean") {
-					// At the moment this setting only controls .js files
-					isEnabledFor['application/javascript'] = !!properties.enabled;
-				}
 				if (typeof properties.options === "string") {
 					var options = properties.options;
 					if (!/^\s*$/.test(options)) {
@@ -230,7 +225,7 @@ define([
 	var headers = {
 		name: "Orion JSLint Service",
 		version: "1.0",
-		description: "This plugin provides JSLint functionality for outlining and validating JavaScript code."
+		description: "This plugin provides JSLint functionality for outlining and validating HTML and JSON code."
 	};
 
 	var provider = new PluginProvider(headers);
@@ -249,14 +244,9 @@ define([
 		{	settings: [
 				{	pid: 'jslint.config',
 					name: 'JSLint Validator',
-					tags: 'validation javascript js jslint'.split(' '),
+					tags: 'validation HTML JSON jslint'.split(' '),
 					category: 'validation',
 					properties: [
-						{	id: 'enabled',
-							name: 'Use JSLint to check JavaScript code',
-							defaultValue: true,
-							type: 'boolean'
-						},
 						{	id: 'options',
 							name: 'Options to pass to JSLint (/*jslint ..*/)',
 							type: 'string'

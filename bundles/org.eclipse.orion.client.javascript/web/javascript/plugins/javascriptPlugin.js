@@ -21,7 +21,7 @@ define([
 	'javascript/contentAssist/indexFiles/amqpIndex',
 	'javascript/contentAssist/contentAssist',
 	'javascript/contentAssist/indexer',
-	'javascript/eslint/validator',
+	'javascript/validator',
 	'javascript/occurrences',
 	'javascript/outliner',
 	'orion/plugin',
@@ -127,7 +127,7 @@ define([
 	 */
 	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], new EslintValidator(astManager),  //$NON-NLS-0$  //$NON-NLS-1$
 		{
-			contentType: ["application/javascript"],  //$NON-NLS-0$
+			contentType: ["application/javascript", "text/html"],  //$NON-NLS-0$
 			pid: 'eslint.config'  //$NON-NLS-0$
 		});
 
