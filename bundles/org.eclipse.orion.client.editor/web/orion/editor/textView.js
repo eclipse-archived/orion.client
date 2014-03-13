@@ -2680,7 +2680,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				* view is refreshed.  The fix is to toggle the contentEditable state and
 				* force the clientDiv to loose and receive focus if it is focused.
 				*/
-				if (util.isFirefox) {
+				if (util.isFirefox < 13) {
 					this._fixCaret();
 				}
 			}
@@ -2745,7 +2745,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		/**************************************** Event handlers *********************************/
 		_handleRootMouseDown: function (e) {
 			if (this._ignoreEvent(e)) { return; }
-			if (util.isFirefox && e.which === 1) {
+			if (util.isFirefox < 13 && e.which === 1) {
 				this._clientDiv.contentEditable = false;
 				(this._overlayDiv || this._clientDiv).draggable = true;
 				this._ignoreBlur = true;
@@ -2779,7 +2779,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		_handleRootMouseUp: function (e) {
 			if (this._ignoreEvent(e)) { return; }
-			if (util.isFirefox && e.which === 1) {
+			if (util.isFirefox < 13 && e.which === 1) {
 				this._clientDiv.contentEditable = true;
 				(this._overlayDiv || this._clientDiv).draggable = false;
 				
@@ -2903,7 +2903,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		_handleDragStart: function (e) {
 			if (this._ignoreEvent(e)) { return; }
-			if (util.isFirefox) {
+			if (util.isFirefox < 13) {
 				var self = this;
 				var window = this._getWindow();
 				window.setTimeout(function() {
@@ -2934,7 +2934,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			if (this.isListening("DragEnd")) { //$NON-NLS-0$
 				this.onDragEnd(this._createMouseEvent("DragEnd", e)); //$NON-NLS-0$
 			}
-			if (util.isFirefox) {
+			if (util.isFirefox < 13) {
 				this._fixCaret();
 				/*
 				* Bug in Firefox.  For some reason, Firefox stops showing the caret when the 
@@ -5696,14 +5696,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				* view is refreshed.  The fix is to toggle the contentEditable state and
 				* force the clientDiv to loose and receive focus if it is focused.
 				*/
-				if (util.isFirefox) {
-					this._ignoreFocus = false;
-					var hasFocus = this._hasFocus;
-					if (hasFocus) { clientDiv.blur(); }
-					clientDiv.contentEditable = false;
-					clientDiv.contentEditable = true;
-					if (hasFocus) { clientDiv.focus(); }
-					this._ignoreFocus = false;
+				if (util.isFirefox < 13) {
+					this._fixCaret ();
 				}
 			}
 		},
