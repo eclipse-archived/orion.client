@@ -240,6 +240,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 									model.getId = function(item){
 										return item.Space + item.Org;
 									};
+									orgsTree.classList.add("sectionTable");
 									explorer.createTree(orgsTree.id, model, {});
 								}, function(error){
 									postError(error);

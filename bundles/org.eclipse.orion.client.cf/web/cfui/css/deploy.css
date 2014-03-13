@@ -26,3 +26,13 @@ html, body {
 	display: table;
     width: calc(100% - 15px);
 }
+
+.Spaces{
+	width: 100%;
+}
+
+#orgsTree{
+    margin-bottom: 0;
+    max-height: 140px;
+    overflow-y: auto;
+}
