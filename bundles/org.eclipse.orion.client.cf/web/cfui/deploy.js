@@ -122,25 +122,25 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 									}
 								});
 							}, function(error){
-								if (error.HttpCode === 404){
-									postError({
-										State: "NOT_DEPLOYED",
-										Message: error.Message
-									});
-								} else if (error.JsonData && error.JsonData.error_code) {
-									var err = error.JsonData;
-									if (err.error_code === "CF-InvalidAuthToken"){
-										error.Retry = {
-											parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
-										};
-									} else if (err.error_code === "CF-TargetNotSet"){
-										var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
-										error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
-									}
+//								if (error.HttpCode === 404){
+//									postError({
+//										State: "NOT_DEPLOYED",
+//										Message: error.Message
+//									});
+//								} else if (error.JsonData && error.JsonData.error_code) {
+//									var err = error.JsonData;
+//									if (err.error_code === "CF-InvalidAuthToken"){
+//										error.Retry = {
+//											parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+//										};
+//									} else if (err.error_code === "CF-TargetNotSet"){
+//										var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+//										error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+//									}
+//									postError(error);
+//								} else {
 									postError(error);
-								} else {
-									postError(error);
-								}
+//								}
 							}
 						);
 					}
@@ -359,6 +359,23 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	}
 	
 	function postError(error) {
+		if (error.HttpCode === 404){
+			error = {
+				State: "NOT_DEPLOYED",
+				Message: error.Message
+			};
+		} else if (error.JsonData && error.JsonData.error_code) {
+			var err = error.JsonData;
+			if (err.error_code === "CF-InvalidAuthToken"){
+				error.Retry = {
+					parameters: [{id: "user", type: "text", name: "User:"}, {id: "password", type: "password", name: "Password:"}]
+				};
+			} else if (err.error_code === "CF-TargetNotSet"){
+				var cloudSettingsPageUrl = new URITemplate("{+OrionHome}/settings/settings.html#,category=Cloud").expand({OrionHome : PageLinks.getOrionHome()});
+				error.Message = "Set up your Cloud. Go to [Settings](" + cloudSettingsPageUrl + ")."; 
+			}
+		}
+		
 		window.parent.postMessage(JSON.stringify({pageService: "orion.page.delegatedUI", 
 			 source: "org.eclipse.orion.client.cf.deploy.uritemplate", 
 			 status: error}), "*");
