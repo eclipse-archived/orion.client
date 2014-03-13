@@ -18,13 +18,25 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			
 			// initial message
 			document.getElementById('title').appendChild(document.createTextNode("Choose Space To Deploy")); //$NON-NLS-1$//$NON-NLS-0$
+			var progressPane = document.getElementById('progressPane'); //$NON-NLS-0$
 			var msgLabel = document.getElementById('messageLabel'); //$NON-NLS-0$
-			var msgNode = msgLabel.appendChild(document.createTextNode("Getting spaces...")); //$NON-NLS-0$
-			var warningNode;
-			var progressBar = document.getElementById('progressBar');
-			var settingsMsg = document.getElementById('settingsMsg'); //$NON-NLS-0$
+			var msgNode;
 			var orgsTree = document.getElementById('orgsTree'); //$NON-NLS-0$
 			var okButton = document.getElementById('okbutton'); //$NON-NLS-0$
+			
+			function showMessage(message){
+				msgNode = msgLabel.appendChild(document.createTextNode(message)); //$NON-NLS-0$
+				progressPane.classList.add("running");
+			}
+			
+			function hideMessage(){
+				if(msgNode){
+					msgLabel.removeChild(msgNode);
+				}
+				progressPane.classList.remove("running");
+			}
+			
+			showMessage("Getting spaces...");
 			
 			var selection;
 			
@@ -89,7 +101,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			};
 			
 			var doAction = function() {
-				var msgNode = msgLabel.appendChild(document.createTextNode("Deploying...")); //$NON-NLS-0$
+				showMessage("Deploying...");
 				
 				selection.getSelection(
 					function(selection) {
@@ -203,7 +215,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						function(target){
 							cFService.getOrgs(target).then(
 								function(result2){
-									msgLabel.removeChild(msgNode);
+									hideMessage();
 									
 									var targets = [];
 									result2.Orgs.forEach(function(org){

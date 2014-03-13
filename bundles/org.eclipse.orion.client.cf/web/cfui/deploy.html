@@ -25,11 +25,24 @@
 		</button>
 	</div>
 	
-	<div>
-		<div style="padding: 15px 0 0 15px;" id="messageRow">
-			<div><label id="messageLabel"></label></div>
-			<div><label id="warningLabel"></label></div>
+	<div style="display: table;" id="messageRow">
+		<div style="display: table-row">
+			<div id="messageArea"><label id="messageLabel"></label></div>
+			<div id="progressPane" style="display: table-cell;" class="progressWatch" tabindex="0" role="progressbar">
+				<div id="watchButton" class="watchButton"></div>
+				<div id="watchBody" class="watchBody">
+					<span class="hand longMinute">
+						<span class="darkSide"></span>
+					</span>
+					<span class="hand longHour">
+						<span class="darkSide"></span>
+					</span>
+				</div>
+			</div>
 		</div>
+	</div>
+	
+	<div>
 		
 		<div style="overflow: auto; margin: 15px; min-height: 140px">
 			<div id="orgsTree">
