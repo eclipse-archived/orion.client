@@ -229,6 +229,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 										return item.Space + item.Org;
 									};
 									explorer.createTree(orgsTree.id, model, {});
+								}, function(error){
+									postError(error);
 								}
 							);
 						}, function(error){
