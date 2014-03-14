@@ -23,6 +23,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var msgNode;
 			var orgsTree = document.getElementById('orgsTree'); //$NON-NLS-0$
 			var okButton = document.getElementById('okbutton'); //$NON-NLS-0$
+			var explorer;
 			
 			function showMessage(message){
 				msgNode = msgLabel.appendChild(document.createTextNode(message)); //$NON-NLS-0$
@@ -109,6 +110,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 							closeFrame();
 							return;
 						}
+						
+						explorer.getNavHandler().setSelectionPolicy("readonlySelection");
 						
 						var deployResourceJSON = JSON.parse(deployResource);
 						
@@ -232,7 +235,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 									selection = new mSelection.Selection(serviceRegistry, "orion.Spaces.selection"); //$NON-NLS-0$
 									selection.addEventListener("selectionChanged", validate);
 
-									var explorer = new mExplorer.Explorer(
+									explorer = new mExplorer.Explorer(
 										serviceRegistry,
 										selection,
 										new SpacesRenderer({checkbox: false, singleSelection: true, treeTableClass: "Spaces"}));

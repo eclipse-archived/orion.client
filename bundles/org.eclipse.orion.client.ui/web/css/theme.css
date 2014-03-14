@@ -91,6 +91,10 @@ a:hover {
 	background-color: #cedce7 !important; /* was e3e3e3 */
 }
 
+.checkedRow.disabledRow {
+	background-color: #dadada !important; /* was e3e3e3 */
+}
+
 .navRow > td:first-child {
 	border-left: 6px solid transparent;
 }
