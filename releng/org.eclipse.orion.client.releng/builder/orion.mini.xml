@@ -129,34 +129,56 @@
 		<copy file="${builder}/scripts/editor.build-css.js" tofile="${staging}/editor.build-css.js" overwrite="true"/>
 		<copy file="${builder}/scripts/editor.build-js.js" tofile="${staging}/editor.build-js.js" overwrite="true"/>
 		<copy file="${builder}/scripts/editor.build.almond-js.js" tofile="${staging}/editor.build.almond-js.js" overwrite="true"/>
+		<copy file="${builder}/scripts/browse.build-css.js" tofile="${staging}/browse.build-css.js" overwrite="true"/>
+		<copy file="${builder}/scripts/browse.build.almond-js.js" tofile="${staging}/browse.build.almond-js.js" overwrite="true"/>
 	</target>
 
 	<target name="editorOptimize" if="minifyEditor">
 		<sequential>
-			<editorOptimizeFile out="${out}/built-editor.css"
+			<widgetOptimizeFile out="${out}/built-editor.css"
 				buildfile="${staging}/editor.build-css.js"
 				optimize="closure"
 				staging="${staging}" />
-			<editorOptimizeFile out="${out}/built-editor-amd.min.js"
+			<widgetOptimizeFile out="${out}/built-editor-amd.min.js"
 				buildfile="${staging}/editor.build-js.js"
 				optimize="closure"
 				staging="${staging}" />
-			<editorOptimizeFile out="${out}/built-editor-amd.js"
+			<widgetOptimizeFile out="${out}/built-editor-amd.js"
 				buildfile="${staging}/editor.build-js.js"
 				optimize="none"
 				staging="${staging}" />
-			<editorOptimizeFile out="${out}/built-editor.min.js"
+			<widgetOptimizeFile out="${out}/built-editor.min.js"
 				buildfile="${staging}/editor.build.almond-js.js"
 				optimize="closure"
 				staging="${staging}" />
-			<editorOptimizeFile out="${out}/built-editor.js"
+			<widgetOptimizeFile out="${out}/built-editor.js"
 				buildfile="${staging}/editor.build.almond-js.js"
 				optimize="none"
 				staging="${staging}" />
 		</sequential>
 	</target>
 
-	<macrodef name="editorOptimizeFile">
+	<target name="browserOptimize" if="minifyBrowser">
+		<sequential>
+			<widgetOptimizeFile out="${out}/built-browser.css"
+				buildfile="${staging}/browse.build-css.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/built-browser.min.js"
+				buildfile="${staging}/browse.build.almond-js.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/built-browser.js"
+				buildfile="${staging}/browse.build.almond-js.js"
+				optimize="none"
+				staging="${staging}" />
+			<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web/browse/built" >
+				<fileset dir="${out}" includes="built-browser.js, built-browser.css, built-browser.min.js"/>
+			</copy>
+		</sequential>
+	</target>
+	
+	<macrodef name="widgetOptimizeFile">
 		<attribute name="staging" />
 		<attribute name="buildfile" />
 		<attribute name="out" />
@@ -253,6 +275,12 @@
 		<!-- build Orion pages and plugins -->
 		<orionOptimize staging="${staging}" out="${optimized}" buildfile="${buildConfig}" />
 
+		<!-- build readonly widget (if property is set) -->
+		<antcall target="browserOptimize">
+			<param name="staging" value="${staging}" />
+			<param name="out" value="${editorOutDirectory}" />
+		</antcall>
+
 		<!-- build standalone editor (if property is set) -->
 		<antcall target="editorOptimize">
 			<param name="staging" value="${staging}" />
@@ -261,6 +289,9 @@
 
 		<!-- copy css back -->
 		<!-- TODO! this should be done automatically using the ${buildConfig} -->
+		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web" >
+			<fileset dir="${optimized}" includes="**/*.css" excludes="git/,profile/"/>
+		</copy>
 		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web" >
 			<fileset dir="${optimized}" includes="**/*.css" excludes="git/,profile/"/>
 		</copy>
