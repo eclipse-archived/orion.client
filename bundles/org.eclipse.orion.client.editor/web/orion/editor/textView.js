@@ -3487,17 +3487,17 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				* mouse down and ungrab on mouse move when the button 1 is not set.
 				*/
 				if (this._isW3CEvents) { this._setGrab(null); }
-
-				/*
-				* Note that there cases when Firefox sets the DOM selection in mouse up.
-				* This happens for example after a cancelled drag operation.
-				*
-				* Note that on Chrome and IE, the caret stops blicking if mouse up is
-				* prevented.
-				*/
-				if (util.isFirefox) {
-					e.preventDefault();
-				}
+			}
+			/*
+			* Note that there cases when Firefox sets the DOM selection in mouse up.
+			* This happens for example after a cancelled drag operation.
+			*
+			* Note that on Chrome and IE, the caret stops blicking if mouse up is
+			* prevented.
+			*/
+			if (left && util.isFirefox) {
+				this._updateDOMSelection();
+				e.preventDefault();
 			}
 		},
 		_handleMouseWheel: function (e) {
