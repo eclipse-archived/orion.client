@@ -643,12 +643,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var result = null;
 			if (offset < model.getLineEnd(lineIndex)) {
 				var lineOffset = model.getLineStart(lineIndex);
-				var lineChild = child.firstChild;
-				while (lineChild) {
-					if (lineChild.ignore) {
-						lineChild = lineChild.nextSibling;
-						continue;
-					}
+				this.forEach(function(lineChild) {
 					var textNode = lineChild.firstChild;
 					var nodeLength = this._nodeLength(lineChild); 
 					if (lineOffset + nodeLength > offset) {
@@ -710,11 +705,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 							result.top = result.top * yFactor;
 							result.bottom = result.bottom * yFactor;
 						}
-						break;
+						return false;
 					}
 					lineOffset += nodeLength;
-					lineChild = lineChild.nextSibling;
-				}
+					return true;
+				});
 			}
 			var rect = this.getBoundingClientRect();
 			if (!result) {
@@ -745,7 +740,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			while (lineChild) {
 				var next = lineChild.nextSibling;
 				if (!lineChild.ignore) {
-					callback(lineChild);
+					if (!callback.call(this, lineChild)) {
+						break;
+					}
 				}
 				lineChild = next;
 			}
@@ -772,21 +769,16 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			return newRects;
 		},
-		/** @private */
 		getClientRects: function(lineIndex) {
 			if (!this.view._wrapMode) { return [this.getBoundingClientRect()]; }
 			var child = this._ensureCreated();
 			//TODO [perf] cache rects
 			var result = [];
-			var lineChild = child.firstChild, i, r, parentRect = child.getBoundingClientRect();
-			while (lineChild) {
-				if (lineChild.ignore) {
-					lineChild = lineChild.nextSibling;
-					continue;
-				}
+			var parentRect = child.getBoundingClientRect();
+			this.forEach(function(lineChild) {
 				var rects = this._getClientRects(lineChild, parentRect);
-				for (i = 0; i < rects.length; i++) {
-					var rect = rects[i], j;
+				for (var i = 0; i < rects.length; i++) {
+					var rect = rects[i], j, r;
 					if (rect.top === rect.bottom) { continue; }
 					var center = rect.top + (rect.bottom - rect.top) / 2;
 					for (j = 0; j < result.length; j++) {
@@ -804,8 +796,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						if (rect.bottom > r.bottom) { r.bottom = rect.bottom; }
 					}
 				}
-				lineChild = lineChild.nextSibling;
-			}
+				return true;
+			});
 			if (lineIndex !== undefined) {
 				return result[lineIndex];
 			}
@@ -869,22 +861,20 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return length;
 		},
 		getModelOffset: function(node, offset) {
-			var child = this._ensureCreated();
 			if (!node) { return 0; }
 			var lineOffset = 0;
 			if (node.tagName !== "DIV") { //$NON-NLS-0$
-				var lineChild = child.firstChild;
-				while (lineChild) {
+				this.forEach(function(lineChild) {
 					var textNode = lineChild.firstChild;
 					if (textNode === node) {
 						if (lineChild.ignoreChars) { lineOffset -= lineChild.ignoreChars; }
 						lineOffset += offset;
-						break;
+						return false;
 					}
 					if (lineChild.ignoreChars) { lineOffset -= lineChild.ignoreChars; }
 					lineOffset += textNode.data.length;
-					lineChild = lineChild.nextSibling;
-				}
+					return true;
+				});
 			}
 			var view = this.view;
 			var model = view._model;
@@ -892,18 +882,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		getNodeOffset: function(lineOffset) {
 			var lineNode, lineNodeOffset;
-			var child = this._ensureCreated();
-			var lineIndex = this.lineIndex;
 			var offset = 0;
 			var view = this.view;
 			var model = view._model;
-			var end = model.getLine(lineIndex).length;
-			var lineChild = child.firstChild;
-			while (lineChild) {
-				if (lineChild.ignore) {
-					lineChild = lineChild.nextSibling;
-					continue;
-				}
+			var end = model.getLineEnd(this.lineIndex);
+			this.forEach(function(lineChild) {
 				var node = lineChild.firstChild;
 				var nodeLength = this._nodeLength(lineChild);
 				if (nodeLength + offset > lineOffset || offset + nodeLength >= end) {
@@ -912,23 +895,17 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					if (lineChild.ignoreChars && nodeLength > 0 && lineNodeOffset === nodeLength) {
 						lineNodeOffset += lineChild.ignoreChars; 
 					}
-					break;
+					return false;
 				}
 				offset += nodeLength;
-				lineChild = lineChild.nextSibling;
-			}
+				return true;
+			});
 			return {node: lineNode, offset: lineNodeOffset};
 		},
 		getText: function(offsetNode) {
-			var child = this._ensureCreated();
-			var lineChild = child.firstChild;
 			var text = "", offset = 0;
-			while (lineChild) {
+			this.forEach(function(lineChild) {
 				var textNode;
-				if (lineChild.ignore) {
-					lineChild = lineChild.nextSibling;
-					continue;
-				}
 				if (lineChild.ignoreChars) {
 					textNode = lineChild.lastChild;
 					var ignored = 0, childText = [], childOffset = -1;
@@ -964,8 +941,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						textNode = textNode.nextSibling;
 					}
 				}
-				lineChild = lineChild.nextSibling;
-			}
+				return true;
+			});
 			return {text: text, offset: offset};
 		},
 		/** @private */
@@ -6115,6 +6092,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						if (style && style.tagName && style.tagName.toLowerCase() === "a") { //$NON-NLS-0$
 							line.replaceChild(line._line._createSpan(line, span.firstChild.data, style), span);
 						}
+						return true;
 					});
 				}
 				line = this._getLineNext(line);
