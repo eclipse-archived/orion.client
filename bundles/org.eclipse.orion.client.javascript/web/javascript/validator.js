@@ -177,7 +177,7 @@ define([
 			switch(context.contentType) {
 				case 'text/html': 
 					return editorContext.getText().then(function(text) {
-						var blocks = _self._extractScriptBlocks(text);
+						var blocks = Finder.findScriptBlocks(text);
 						var len = blocks.length;
 						var allproblems = [];
 						for(var i = 0; i < len; i++) {
@@ -231,45 +231,6 @@ define([
 				});
 			}
 			return { problems: problems };
-		},
-		
-		/**
-		 * @description Computes the script blocks from an HTML file
-		 * @function
-		 * @private
-		 * @param {String} buffer The file contents
-		 * @returns {Object} An object of script block items {text, offset}
-		 * @since 6.0
-		 */
-		_extractScriptBlocks: function(buffer) {
-			var blocks = [];
-			var script = '<script>';
-			var scriptend = '<\/script>';
-			var starts = buffer.match(/<script\s*>/ig);
-			if(!starts || starts.length < 1) {
-				//we can stop there are no script blocks
-				return blocks;
-			}
-			//sanitize the buffer a bit first, probably bad for performance
-			buffer = buffer.replace(/<script\s*>/ig, script);
-			buffer = buffer.replace(/<\/script\s*>/ig, scriptend);
-			var index = buffer.indexOf(script);
-			var end;
-			var idx = 0;
-			var offset = 0;
-			while(index > -1) {
-				offset = index + starts[idx].length;
-				end = buffer.indexOf(scriptend, index);
-				if(end != index) {
-					blocks.push({
-						text: buffer.substring(index + script.length, end),
-						offset: offset
-					});
-				}
-				index = buffer.indexOf(script, end);
-				idx++;
-			}
-			return blocks;
 		},
 		
 		/**

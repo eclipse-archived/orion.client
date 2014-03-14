@@ -46,7 +46,7 @@ define([
 			switch(node.type) {
 				case Estraverse.Syntax.Program:
 					this.occurrences = [];
-					this.scopes = [{range: node.range, occurrences: []}];
+					this.scopes = [{range: node.range, occurrences: [], kind:'p'}];
 					this.defnode = null;
 					this.defscope = null;
 					break;
@@ -187,14 +187,14 @@ define([
 			if(this.thisCheck) {
 				switch(node.type) {
 					case Estraverse.Syntax.ObjectExpression:
-						this.scopes.push({range: node.range, occurrences: []});
+						this.scopes.push({range: node.range, occurrences: [], kind:'o'});
 						if (this.defscope){
 							return true;
 						}
 						break;
 					case Estraverse.Syntax.FunctionExpression:
 						if (!node.isprop){
-							this.scopes.push({range: node.range, occurrences: []});
+							this.scopes.push({range: node.range, occurrences: [], kind:'fe'});
 							// If the outer scope has the selected 'this' we can skip the inner scope
 							if (this.defscope){
 								return true;
@@ -204,10 +204,13 @@ define([
 				}
 			}
 			else {
+				var kind = 'fe';
 				switch(node.type) {
 					case Estraverse.Syntax.FunctionDeclaration:
+						kind = 'fd';
+						//$FALL-THROUGH$
 					case Estraverse.Syntax.FunctionExpression:
-						this.scopes.push({range: node.range, occurrences: []});	
+						this.scopes.push({range: node.range, occurrences: [], kind:kind});	
 						break;
 				}
 			}
@@ -263,12 +266,14 @@ define([
 		 */
 		_popScope: function() {
 			var scope = this.scopes.pop();
+			var len = scope.occurrences.length;
+			var i;
 			if(this.defscope) {
-				var len = scope.occurrences.length;
-				for(var i = 0; i < len; i++) {
+				for(i = 0; i < len; i++) {
 					this.occurrences.push(scope.occurrences[i]);
 				}
-				if(this.defscope.range[0] === scope.range[0] && this.defscope.range[1] === scope.range[1]) {
+				if(this.defscope.range[0] === scope.range[0] && this.defscope.range[1] === scope.range[1] &&
+					this.defscope.kind === scope.kind) {
 					//we just popped out of the scope the node was defined in, we can quit
 					return true;
 				}
@@ -303,7 +308,7 @@ define([
 						}
 						//does the scope enclose it?
 						if(scope && (scope.range[0] <= this.context.start) && (scope.range[1] >= this.context.end)) {
-							this.defscope = {range: scope.range};
+							this.defscope = scope;
 						}
 					}
 					scope.occurrences.push({
@@ -431,23 +436,60 @@ define([
 		 */
 		computeOccurrences: function(editorContext, ctxt) {
 			var that = this;
-			return this.astManager.getAST(editorContext).then(function(ast) {
-				if(ast) {
-					var token = that._getToken(ctxt.selection.start, ast);
-					if(!that._skip(ctxt, token, ast)) {
-						var context = {
-							start: ctxt.selection.start,
-							end: ctxt.selection.end,
-							word: that._nameFromNode(token),
-							token: token,
-						};
-						var visitor = that.getVisitor(context);
-						Estraverse.traverse(ast, visitor);
-						return visitor.occurrences;
-					}
+			switch(ctxt.contentType) {
+				case 'text/html':
+					return editorContext.getText().then(function(text) {
+						var blocks = Finder.findScriptBlocks(text, ctxt.selection.start);
+						if(blocks.length > 0) {
+							var block = blocks[0];
+							var ast = that.astManager.parse(block.text);
+							var context = {
+								selection: {
+									start: ctxt.selection.start-block.offset, 
+									end: ctxt.selection.end-block.offset
+								}
+							};
+							var occurs = that._getOccurrencesFromAst(ast, context);
+							var len = occurs.length;
+							for(var i = 0; i < len; i++) {
+								occurs[i].start += block.offset;
+								occurs[i].end += block.offset;
+							}
+						}
+						return occurs;
+					});
+				case 'application/javascript':
+					return this.astManager.getAST(editorContext).then(function(ast) {
+						return that._getOccurrencesFromAst(ast, ctxt);
+					});
+			}
+		},
+		
+		/**
+		 * @description Computes the occurrences for the given AST
+		 * @function
+		 * @private
+		 * @param {Object} ast The AST to inspect
+		 * @param {Object} ctxt The selection context from the editor
+		 * @returns {Array} The array of occurrence objects or an empty array
+		 * @since 6.0
+		 */
+		_getOccurrencesFromAst: function(ast, ctxt) {
+			if(ast && ctxt) {
+				var token = this._getToken(ctxt.selection.start, ast);
+				if(!this._skip(ctxt, token, ast)) {
+					var context = {
+						start: ctxt.selection.start,
+						end: ctxt.selection.end,
+						word: this._nameFromNode(token),
+						token: token,
+					};
+					var visitor = this.getVisitor(context);
+					Estraverse.traverse(ast, visitor);
+					return visitor.occurrences;
 				}
-				return [];
-			});
+			}
+			return [];
 		}
 	});
 	

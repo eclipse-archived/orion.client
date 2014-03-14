@@ -125,7 +125,7 @@ require(
 	 */
 	provider.registerService("orion.edit.occurrences", new Occurrences.JavaScriptOccurrences(astManager),  //$NON-NLS-0$
 		{
-			contentType: ["application/javascript"]	//$NON-NLS-0$
+			contentType: ["application/javascript", "text/html"]	//$NON-NLS-0$ //$NON-NLS-1$
 	});
 	
 	/**

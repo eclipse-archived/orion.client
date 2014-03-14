@@ -179,6 +179,34 @@ define([
 				}
 				return null;
 			}
+		},
+		
+		/**
+		 * @description Finds the script blocks from an HTML file and returns the code and offset for found blocks
+		 * @function
+		 * @private
+		 * @param {String} buffer The file contents
+		 * @param {Number} offset The offset into the buffer to find the enclosing block for
+		 * @returns {Object} An object of script block items {text, offset}
+		 * @since 6.0
+		 */
+		findScriptBlocks: function(buffer, offset) {
+			var blocks = [];
+			var val = null, regex = /<script\s*>((?:.|\r?\n)*?)<\/script\s*>/ig;
+			while((val = regex.exec(buffer)) != null) {
+				var text = val[1];
+				if(text.length < 1) {
+					continue;
+				}
+				var index = val.index+val[0].indexOf('>')+1;
+				if((offset == null || (index <= offset && index+text.length >= offset))) {
+					blocks.push({
+						text: text,
+						offset: index
+					});
+				}
+			}
+			return blocks;
 		}
 	};
 

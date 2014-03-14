@@ -31,7 +31,8 @@ define([
 		selection: {
 			start:-1,
 			end: -1
-		}	
+		},
+		contentType: 'application/javascript'
 	};
 		
 	/**
@@ -45,7 +46,8 @@ define([
 		astManager.updated();
 		context.selection.start = -1;
 		context.selection.end = -1;
-	};
+		context.contentType = 'application/javascript';
+	}
 	
 	/**
 	 * @name assertOccurrence
@@ -76,7 +78,7 @@ define([
 				Assert.fail("Found an unknown occurrence: [start "+results[k].start+"][end "+results[k].end+"]");
 			}
 		}
-	};
+	}
 	
 	/**
 	 * @name setContext
@@ -85,11 +87,15 @@ define([
 	 * @public
 	 * @param {Number} start The start of the editor selection
 	 * @param {Number} end The end of thhe editor selection
+	 * @param {String} contentType Optional content type descriptor
 	 * @returns {Object} the modified context object
 	 */
-	function setContext(start, end) {
+	function setContext(start, end, contentType) {
 		context.selection.start = start;
 		context.selection.end = end;
+		if(contentType) {
+			context.contentType = contentType;
+		}
 		return context;
 	}
 	
@@ -1286,6 +1292,118 @@ define([
 //			}
 //		});
 //	};
+	
+	/**
+	 * Tests conputing occurrences from a script block in the <head> block
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+	 */
+	Tests.test_htmlHead1 = function() {
+		editorContext.text = "<!DOCTYPE html><head><script>function f() {}</script></head><html></html>";
+		return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:38, end:39}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests conputing occurrences from a script block in the <head> block
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+	 */
+	Tests.test_htmlHead2 = function() {
+		editorContext.text = "<!DOCTYPE html><head><scRipt>function f() {}</script></head><html></html>";
+		return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:38, end:39}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests conputing occurrences from a script block in the <head> block
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+	 */
+	Tests.test_htmlHead3 = function() {
+		editorContext.text = "<!DOCTYPE html><head><scRipt  >function f() {}</script></head><html></html>";
+		return occurrences.computeOccurrences(editorContext, setContext(41, 41, 'text/html')).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:40, end:41}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests conputing occurrences from a script block in the <head> block
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+	 */
+	Tests.test_htmlHeadMulti1 = function() {
+		editorContext.text = "<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head><html></html>";
+		return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:38, end:39}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests conputing occurrences from a script block in the <head> block
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+	 */
+	Tests.test_htmlHeadMulti2 = function() {
+		editorContext.text = "<!DOCTYPE html><head><scRipt>function f() {}</script><script>function f() {}</script></head><html></html>";
+		return occurrences.computeOccurrences(editorContext, setContext(39, 39, 'text/html')).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:38, end:39}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests conputing occurrences from a script block in the <head> block
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+	 */
+	Tests.test_htmlHeadMulti3 = function() {
+		editorContext.text = "<!DOCTYPE html><head><scRipt   >function f() {}</script><script>function f() {}</script></head><html></html>";
+		return occurrences.computeOccurrences(editorContext, setContext(42, 42, 'text/html')).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:41, end:42}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
+	
+	/**
+	 * Tests conputing occurrences from a script block in the <head> block
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+	 */
+	Tests.test_htmlHeadMulti4 = function() {
+		editorContext.text = "<!DOCTYPE html><head><scRipt   >function f() {}</script><script>function f() {}</script></head><html></html>";
+		return occurrences.computeOccurrences(editorContext, setContext(74, 74, 'text/html')).then(function(results) {
+			try {
+				assertOccurrences(results, [{start:73, end:74}]);
+			}
+			finally {
+				tearDown();
+			}
+		});
+	};
 	
 	return Tests;
 });

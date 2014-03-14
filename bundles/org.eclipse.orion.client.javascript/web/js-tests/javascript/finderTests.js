@@ -52,7 +52,7 @@ define([
 	function tearDown() {
 		editorContext.text = "";
 		astManager.updated();
-	};
+	}
 	
 	var Tests = {
 		/***/
@@ -925,6 +925,157 @@ define([
 					astManager.updated();
 				}
 			});
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlock1: function() {
+			var text = "<!DOCTYPE html><head><script>function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			Assert.equal(blocks.length, 1, "Should have found one script block");
+			Assert.equal(blocks[0].offset, 29);
+			Assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlock2: function() {
+			var text = "<!DOCTYPE html><head><scriPt>function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			Assert.equal(blocks.length, 1, "Should have found one script block");
+			Assert.equal(blocks[0].offset, 29);
+			Assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlock3: function() {
+			var text = "<!DOCTYPE html><head><script>function f() {}</scriPt></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			Assert.equal(blocks.length, 1, "Should have found one script block");
+			Assert.equal(blocks[0].offset, 29);
+			Assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlock4: function() {
+			var text = "<!DOCTYPE html><head><scRipt>function f() {}</scripT></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			Assert.equal(blocks.length, 1, "Should have found one script block");
+			Assert.equal(blocks[0].offset, 29);
+			Assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlock5: function() {
+			var text = "<!DOCTYPE html><head><scriPt   >function f() {}</scRIpt></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			Assert.equal(blocks.length, 1, "Should have found one script block");
+			Assert.equal(blocks[0].offset, 32);
+			Assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlockMulti1: function() {
+			var text = "<!DOCTYPE html><head><script>function f() {}</script><script>function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			Assert.equal(blocks.length, 2, "Should have found two script blocks");
+			Assert.equal(blocks[0].offset, 29);
+			Assert.equal(blocks[0].text, 'function f() {}');
+			Assert.equal(blocks[1].offset, 61);
+			Assert.equal(blocks[1].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlockMulti2: function() {
+			var text = "<!DOCTYPE html><head><scrIpt>function f() {}</script><scRipt>function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			Assert.equal(blocks.length, 2, "Should have found two script blocks");
+			Assert.equal(blocks[0].offset, 29);
+			Assert.equal(blocks[0].text, 'function f() {}');
+			Assert.equal(blocks[1].offset, 61);
+			Assert.equal(blocks[1].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlockMulti3: function() {
+			var text = "<!DOCTYPE html><head><scripT>function f() {}</scriPt><scRipt>function f() {}</Script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			Assert.equal(blocks.length, 2, "Should have found two script blocks");
+			Assert.equal(blocks[0].offset, 29);
+			Assert.equal(blocks[0].text, 'function f() {}');
+			Assert.equal(blocks[1].offset, 61);
+			Assert.equal(blocks[1].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlockMulti4: function() {
+			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text);
+			Assert.equal(blocks.length, 2, "Should have found two script blocks");
+			Assert.equal(blocks[0].offset, 30);
+			Assert.equal(blocks[0].text, 'function f() {}');
+			Assert.equal(blocks[1].offset, 64);
+			Assert.equal(blocks[1].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlockMultiWithOffset1: function() {
+			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 39);
+			Assert.equal(blocks.length, 1, "Should have found one script block");
+			Assert.equal(blocks[0].offset, 30);
+			Assert.equal(blocks[0].text, 'function f() {}');
+		},
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlockMultiWithOffset2: function() {
+			var text = "<!DOCTYPE html><head><script >function f() {}</script><script  >function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 71);
+			Assert.equal(blocks.length, 1, "Should have found one script block");
+			Assert.equal(blocks[0].offset, 64);
+			Assert.equal(blocks[0].text, 'function f() {}');
+		},
+		
+		/**
+		 * Tests the suport for finding script blocks in HTML
+		 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=430299
+		 */
+		test_findScriptBlockWithOffset1: function() {
+			var text = "<!DOCTYPE html><head><script >function f() {}</script></head><html></html>";
+			var blocks = Finder.findScriptBlocks(text, 39);
+			Assert.equal(blocks.length, 1, "Should have found one script block");
+			Assert.equal(blocks[0].offset, 30);
+			Assert.equal(blocks[0].text, 'function f() {}');
 		},
 	};
 	
