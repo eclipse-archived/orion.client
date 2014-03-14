@@ -885,7 +885,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var offset = 0;
 			var view = this.view;
 			var model = view._model;
-			var end = model.getLineEnd(this.lineIndex);
+			var end = model.getLine(this.lineIndex).length;
 			this.forEach(function(lineChild) {
 				var node = lineChild.firstChild;
 				var nodeLength = this._nodeLength(lineChild);
