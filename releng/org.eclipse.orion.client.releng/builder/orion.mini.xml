@@ -10,7 +10,9 @@
 
 	Optional properties
 	======================================================================
-		${minifyEditor}      If set, the standalone editor will be generated to ${buildDirectory]/built-js/
+		${skipOrionUI}      If set, the Orion pages and plugins will not be built
+		${skipBrowser}      If set, the readonly file browser widget will not be generated 
+		${skipEditor}       If set, the standalone editor will not be generated
 	-->
 
 	<property name="super" value="Build specific targets and properties" />
@@ -88,13 +90,13 @@
 		</sequential>
 	</macrodef>
 	
-	<macrodef name="orionOptimize">
-		<attribute name="buildfile" />
-		<attribute name="staging" /> <!-- Input folder for r.js -->
-		<attribute name="out" />     <!-- Output folder of r.js -->
+	<target name="orionOptimize" unless="skipOrionUI">
+		<!-- $staging: Input folder for r.js -->
+		<!-- $out:     Output folder of r.js -->
+		<!-- $buildfile: r.js build config -->
 		<sequential>
-			<echo message="Minifying Orion pages and plugins..."/>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}">
+			<echo message="Building Orion pages and plugins..."/>
+			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="${staging}">
 				<classpath>
 					<sort>
 						<fileset dir="${requirejsHome}/lib/">
@@ -107,18 +109,18 @@
 				<arg value="180" />
 				<arg value="${requirejsHome}/r.js"/>
 				<arg value="-o" />
-				<arg value="@{buildfile}"/>
+				<arg value="${buildfile}"/>
 				<!-- <arg value="optimize=closure" /> -->
-				<arg value="appDir=@{staging}" />
+				<arg value="appDir=${staging}" />
 				<arg value="baseUrl=./" />
-				<arg value="dir=@{out}" />
+				<arg value="dir=${out}" />
 			</java>
 
-			<finishBuiltModules buildfile="@{buildfile}" out="@{out}" bundles="${buildDirectory}/bundles" />
+			<finishBuiltModules buildfile="${buildfile}" out="${out}" bundles="${buildDirectory}/bundles" />
 		</sequential>
-	</macrodef>
+	</target>
 
-	<target name="editorClean" if="minifyEditor">
+	<target name="editorClean" unless="skipEditor">
 		<delete dir="${editorOutDirectory}" />
 		<mkdir dir="${editorOutDirectory}" />
 
@@ -133,7 +135,7 @@
 		<copy file="${builder}/scripts/browse.build.almond-js.js" tofile="${staging}/browse.build.almond-js.js" overwrite="true"/>
 	</target>
 
-	<target name="editorOptimize" if="minifyEditor">
+	<target name="editorOptimize" unless="skipEditor">
 		<sequential>
 			<widgetOptimizeFile out="${out}/built-editor.css"
 				buildfile="${staging}/editor.build-css.js"
@@ -158,7 +160,7 @@
 		</sequential>
 	</target>
 
-	<target name="browserOptimize" if="minifyBrowser">
+	<target name="browserOptimize" unless="skipBrowser">
 		<sequential>
 			<widgetOptimizeFile out="${out}/built-browser.css"
 				buildfile="${staging}/browse.build-css.js"
@@ -260,8 +262,8 @@
 		</delete>
 	</target>
 
-	<target name="requirejs" depends="checkDirs, cleanStaging, cleanOptimized" if="minify">
-	    <echo message="Minification started..."/>
+	<target name="requirejs" depends="checkDirs, cleanStaging, cleanOptimized">
+	    <echo message="requirejs build started..."/>
 
 		<mkdir dir="${staging}" />
 		<mkdir dir="${optimized}" />
@@ -272,16 +274,20 @@
 		<!-- Stage files for optimization -->
 		<stageBundles todir="${staging}" buildfile="${buildConfig}" />
 
-		<!-- build Orion pages and plugins -->
-		<orionOptimize staging="${staging}" out="${optimized}" buildfile="${buildConfig}" />
+		<!-- build Orion pages and plugins (unless skipOrionUI is set) -->
+		<antcall target="orionOptimize">
+			<param name="staging" value="${staging}" />
+			<param name="out" value="${optimized}" />
+			<param name="buildfile" value="${buildConfig}" />
+		</antcall>
 
-		<!-- build readonly widget (if property is set) -->
+		<!-- build readonly widget (unless skipBrowser is set) -->
 		<antcall target="browserOptimize">
 			<param name="staging" value="${staging}" />
 			<param name="out" value="${editorOutDirectory}" />
 		</antcall>
 
-		<!-- build standalone editor (if property is set) -->
+		<!-- build standalone editor (unless skipEditor is set) -->
 		<antcall target="editorOptimize">
 			<param name="staging" value="${staging}" />
 			<param name="out" value="${editorOutDirectory}" />
