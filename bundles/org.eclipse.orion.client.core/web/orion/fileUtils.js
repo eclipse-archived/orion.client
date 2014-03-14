@@ -30,7 +30,12 @@ define(['require', 'i18n!orion/nls/messages', 'orion/URL-shim'], function(requir
 	}
 	
 	//cache this
-	var _workspaceUrlHref = (new URL(require.toUrl("workspace"), window.location.href)).href;
+	var _workspaceUrlHref;
+	if(!require.toUrl){
+		_workspaceUrlHref =(new URL("/", window.location.href)).href;
+	} else {
+		_workspaceUrlHref =(new URL(require.toUrl("workspace"), window.location.href)).href;
+	}
 	/**
 	 * Determines if the path represents the workspace root
 	 * @name orion.util#isAtRoot
