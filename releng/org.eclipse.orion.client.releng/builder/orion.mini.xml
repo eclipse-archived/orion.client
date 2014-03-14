@@ -292,9 +292,6 @@
 		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web" >
 			<fileset dir="${optimized}" includes="**/*.css" excludes="git/,profile/"/>
 		</copy>
-		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web" >
-			<fileset dir="${optimized}" includes="**/*.css" excludes="git/,profile/"/>
-		</copy>
 		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.git/web" >
 			<fileset dir="${optimized}" includes="git/**/*.css" />
 		</copy>
