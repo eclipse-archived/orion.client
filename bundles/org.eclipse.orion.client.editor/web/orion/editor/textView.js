@@ -398,9 +398,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
 			var e = {type:"LineStyle", textView: view, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-0$
-			if (lineText.length < 2000) {
-				view.onLineStyle(e);
-			}
+			view.onLineStyle(e);
 			var lineDiv = div || util.createElement(parent.ownerDocument, "div"); //$NON-NLS-0$
 			if (!div || !compare(div.viewStyle, e.style)) {
 				applyStyle(e.style, lineDiv, div);
@@ -409,6 +407,13 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				lineDiv.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			lineDiv.lineIndex = lineIndex;
+			
+			if (div && lineDiv.viewLineText === lineText && compare(e.ranges, lineDiv.viewRanges)) {
+				return lineDiv;
+			}
+			lineDiv.viewRanges = e.ranges;
+			lineDiv.viewLineText = lineText;
+			
 			var ranges = [];
 			var data = {tabOffset: 0, ranges: ranges};
 			this._createRanges(e.ranges, lineText, 0, lineText.length, lineStart, data);
@@ -436,71 +441,88 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			} else {
 				ranges.splice(ranges.length - 1, 0, range);
 			}
-			
-			var span, style, oldSpan, oldStyle, text, oldText, end = 0, oldEnd = 0, next;
-			var changeCount, changeStart;
-			if (div) {
-				var modelChangedEvent = div.modelChangedEvent;
-				if (modelChangedEvent) {
-					if (modelChangedEvent.removedLineCount === 0 && modelChangedEvent.addedLineCount === 0) {
-						changeStart = modelChangedEvent.start - lineStart;
-						changeCount = modelChangedEvent.addedCharCount - modelChangedEvent.removedCharCount;
-					} else {
-						changeStart = -1;
-					}
-					div.modelChangedEvent = undefined;
-				}
-				oldSpan = div.firstChild;
-			}
-			for (var i = 0; i < ranges.length; i++) {
-				range = ranges[i];
-				text = range.text;
-				end += text.length;
-				style = range.style;
-				if (oldSpan) {
-					oldText = oldSpan.firstChild.data;
-					oldStyle = oldSpan.viewStyle;
-					if (oldText === text && compare(style, oldStyle)) {
-						oldEnd += oldText.length;
-						oldSpan._rectsCache = undefined;
-						span = oldSpan = oldSpan.nextSibling;
-						continue;
-					} else {
-						while (oldSpan) {
-							if (changeStart !== -1) {
-								var spanEnd = end;
-								if (spanEnd >= changeStart) {
-									spanEnd -= changeCount;
-								}
-								var t = oldSpan.firstChild.data;
-								var length = t ? t.length : 0;
-								if (oldEnd + length > spanEnd) { break; }
-								oldEnd += length;
-							}
-							next = oldSpan.nextSibling;
-							lineDiv.removeChild(oldSpan);
-							oldSpan = next;
-						}
-					}
-				}
-				span = this._createSpan(lineDiv, text, style, range.ignoreChars);
-				if (oldSpan) {
-					lineDiv.insertBefore(span, oldSpan);
-				} else {
-					lineDiv.appendChild(span);
-				}
+		
+			var span, style, oldSpan, oldStyle, text, oldText, end = 0, oldEnd = 0, next, i;
+			if (util.isFirefox && lineText.length > 2000) {
 				if (div) {
+					lineDiv.innerHTML = "";
 					div.lineWidth = undefined;
 				}
-			}
-			if (div) {
-				var tmp = span ? span.nextSibling : null;
-				while (tmp) {
-					next = tmp.nextSibling;
-					div.removeChild(tmp);
-					tmp = next;
+				var frag = document.createDocumentFragment();
+				for (i = 0; i < ranges.length; i++) {
+					range = ranges[i];
+					text = range.text;
+					style = range.style;
+					span = this._createSpan(lineDiv, text, style, range.ignoreChars);
+					frag.appendChild(span);
 				}
+				lineDiv.appendChild(frag);
 			} else {
+				var changeCount, changeStart;
+				if (div) {
+					var modelChangedEvent = div.modelChangedEvent;
+					if (modelChangedEvent) {
+						if (modelChangedEvent.removedLineCount === 0 && modelChangedEvent.addedLineCount === 0) {
+							changeStart = modelChangedEvent.start - lineStart;
+							changeCount = modelChangedEvent.addedCharCount - modelChangedEvent.removedCharCount;
+						} else {
+							changeStart = -1;
+						}
+						div.modelChangedEvent = undefined;
+					}
+					oldSpan = div.firstChild;
+				}
+				for (i = 0; i < ranges.length; i++) {
+					range = ranges[i];
+					text = range.text;
+					end += text.length;
+					style = range.style;
+					if (oldSpan) {
+						oldText = oldSpan.firstChild.data;
+						oldStyle = oldSpan.viewStyle;
+						if (oldText === text && compare(style, oldStyle)) {
+							oldEnd += oldText.length;
+							oldSpan._rectsCache = undefined;
+							span = oldSpan = oldSpan.nextSibling;
+							continue;
+						} else {
+							while (oldSpan) {
+								if (changeStart !== -1) {
+									var spanEnd = end;
+									if (spanEnd >= changeStart) {
+										spanEnd -= changeCount;
+									}
+									var t = oldSpan.firstChild.data;
+									var length = t ? t.length : 0;
+									if (oldEnd + length > spanEnd) { break; }
+									oldEnd += length;
+								}
+								next = oldSpan.nextSibling;
+								lineDiv.removeChild(oldSpan);
+								oldSpan = next;
+							}
+						}
+					}
+					span = this._createSpan(lineDiv, text, style, range.ignoreChars);
+					if (oldSpan) {
+						lineDiv.insertBefore(span, oldSpan);
+					} else {
+						lineDiv.appendChild(span);
+					}
+					if (div) {
+						div.lineWidth = undefined;
+					}
+				}
+				if (div) {
+					var tmp = span ? span.nextSibling : null;
+					while (tmp) {
+						next = tmp.nextSibling;
+						div.removeChild(tmp);
+						tmp = next;
+					}
+				}
+			}
+			if (!lineDiv.parentNode) {
 				parent.appendChild(lineDiv);
 			}
 			return lineDiv;
@@ -628,10 +650,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						continue;
 					}
 					var textNode = lineChild.firstChild;
-					var nodeLength = textNode.length; 
-					if (lineChild.ignoreChars) {
-						nodeLength -= lineChild.ignoreChars;
-					}
+					var nodeLength = this._nodeLength(lineChild); 
 					if (lineOffset + nodeLength > offset) {
 						var index = offset - lineOffset;
 						var range;
@@ -719,6 +738,17 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				result.bottom -= rect.top;
 			}
 			return result;
+		},
+		forEach: function(callback) {
+			var child = this._ensureCreated();
+			var lineChild = child.firstChild;
+			while (lineChild) {
+				var next = lineChild.nextSibling;
+				if (!lineChild.ignore) {
+					callback(lineChild);
+				}
+				lineChild = next;
+			}
 		},
 		/** @private */
 		_getClientRects: function(element, parentRect) {
@@ -830,6 +860,114 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var rects = this.getClientRects();
 			return this.getOffset(rects[lineIndex].left + 1, rects[lineIndex].top + 1);
 		},
+		_nodeLength: function(lineChild) {
+			if (!lineChild || lineChild.ignore) return 0;
+			var length = lineChild.firstChild.length; 
+			if (lineChild.ignoreChars) {
+				length -= lineChild.ignoreChars;
+			}
+			return length;
+		},
+		getModelOffset: function(node, offset) {
+			var child = this._ensureCreated();
+			if (!node) { return 0; }
+			var lineOffset = 0;
+			if (node.tagName !== "DIV") { //$NON-NLS-0$
+				var lineChild = child.firstChild;
+				while (lineChild) {
+					var textNode = lineChild.firstChild;
+					if (textNode === node) {
+						if (lineChild.ignoreChars) { lineOffset -= lineChild.ignoreChars; }
+						lineOffset += offset;
+						break;
+					}
+					if (lineChild.ignoreChars) { lineOffset -= lineChild.ignoreChars; }
+					lineOffset += textNode.data.length;
+					lineChild = lineChild.nextSibling;
+				}
+			}
+			var view = this.view;
+			var model = view._model;
+			return Math.max(0, lineOffset) + model.getLineStart(this.lineIndex);
+		},
+		getNodeOffset: function(lineOffset) {
+			var lineNode, lineNodeOffset;
+			var child = this._ensureCreated();
+			var lineIndex = this.lineIndex;
+			var offset = 0;
+			var view = this.view;
+			var model = view._model;
+			var end = model.getLine(lineIndex).length;
+			var lineChild = child.firstChild;
+			while (lineChild) {
+				if (lineChild.ignore) {
+					lineChild = lineChild.nextSibling;
+					continue;
+				}
+				var node = lineChild.firstChild;
+				var nodeLength = this._nodeLength(lineChild);
+				if (nodeLength + offset > lineOffset || offset + nodeLength >= end) {
+					lineNode = node;
+					lineNodeOffset = lineOffset - offset;
+					if (lineChild.ignoreChars && nodeLength > 0 && lineNodeOffset === nodeLength) {
+						lineNodeOffset += lineChild.ignoreChars; 
+					}
+					break;
+				}
+				offset += nodeLength;
+				lineChild = lineChild.nextSibling;
+			}
+			return {node: lineNode, offset: lineNodeOffset};
+		},
+		getText: function(offsetNode) {
+			var child = this._ensureCreated();
+			var lineChild = child.firstChild;
+			var text = "", offset = 0;
+			while (lineChild) {
+				var textNode;
+				if (lineChild.ignore) {
+					lineChild = lineChild.nextSibling;
+					continue;
+				}
+				if (lineChild.ignoreChars) {
+					textNode = lineChild.lastChild;
+					var ignored = 0, childText = [], childOffset = -1;
+					while (textNode) {
+						var data = textNode.data;
+						if (data) {
+							for (var i = data.length - 1; i >= 0; i--) {
+								var ch = data.substring(i, i + 1);
+								if (ignored < lineChild.ignoreChars && (ch === " " || ch === "\u200B" || ch === "\uFEFF")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									ignored++;
+								} else {
+									childText.push(ch === "\u00A0" ? "\t" : ch); //$NON-NLS-1$ //$NON-NLS-0$
+								}
+							}
+						}
+						if (offsetNode === textNode) {
+							childOffset = childText.length;
+						}
+						textNode = textNode.previousSibling;
+					}
+					childText = childText.reverse().join("");
+					if (childOffset !== -1) {
+						offset = text.length + childText.length - childOffset;
+					}
+					text += childText;
+				} else {
+					textNode = lineChild.firstChild;
+					while (textNode) {
+						if (offsetNode === textNode) {
+							offset = text.length;
+						}
+						text += textNode.data;
+						textNode = textNode.nextSibling;
+					}
+				}
+				lineChild = lineChild.nextSibling;
+			}
+			return {text: text, offset: offset};
+		},
 		/** @private */
 		getOffset: function(x, y) {
 			var view = this.view;
@@ -841,7 +979,148 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				return lineStart;
 			}
 			var child = this._ensureCreated();
-			var lineRect = this.getBoundingClientRect(), rects, rect;
+			var lineRect = this.getBoundingClientRect();
+			
+			var self = this;
+			function hitChild(lineChild, offset, rect) {
+				var textNode = lineChild.firstChild;
+				var nodeLength = self._nodeLength(lineChild);
+				var document = child.ownerDocument;
+				var window = getWindow(document);
+				var xFactor = util.isIE ? window.screen.logicalXDPI / window.screen.deviceXDPI : 1;
+				var yFactor = util.isIE ? window.screen.logicalYDPI / window.screen.deviceYDPI : 1;
+				var rangeLeft, rangeTop, rangeRight, rangeBottom;
+				var range, start, end;
+				var rl = rect.left + lineRect.left, fixIE8, rects;
+				if (util.isIE || view._isRangeRects) {
+					range = view._isRangeRects ? document.createRange() : document.body.createTextRange();
+					var high = nodeLength;
+					var low = -1;
+					while ((high - low) > 1) {
+						var mid = Math.floor((high + low) / 2);
+						start = low + 1;
+						end = mid === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : mid + 1;
+						/*
+						* Bug in IE8. TextRange.getClientRects() and TextRange.getBoundingClientRect() fails
+						* if the line child is not the first element in the line and if the start offset is 0. 
+						* The fix is to use Node.getClientRects() left edge instead.
+						*/
+						fixIE8 = start === 0 && util.isIE === 8;
+						if (view._isRangeRects) {
+							range.setStart(textNode, start);
+							range.setEnd(textNode, end);
+						} else {
+							if (fixIE8) { start = 1; } 
+							range.moveToElementText(lineChild);
+							range.move("character", start); //$NON-NLS-0$
+							range.moveEnd("character", end - start); //$NON-NLS-0$
+						}
+						rects = range.getClientRects();
+						var found = false;
+						for (var k = 0; k < rects.length; k++) {
+							rect = rects[k];
+							rangeLeft = (fixIE8 ? rl : rect.left) * xFactor - lineRect.left;
+							rangeRight = rect.right * xFactor - lineRect.left;
+							rangeTop = rect.top * yFactor - lineRect.top;
+							rangeBottom = rect.bottom * yFactor - lineRect.top;
+							if (rangeLeft <= x && x < rangeRight && (!view._wrapMode || (rangeTop <= y && y < rangeBottom))) {
+								found = true;
+								break;
+							}
+						}
+						if (found) {
+							high = mid;
+						} else {
+							low = mid;
+						}
+					}
+					offset += high;
+					start = high;
+					end = high === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : Math.min(high + 1, textNode.length);
+					if (view._isRangeRects) {
+						range.setStart(textNode, start);
+						range.setEnd(textNode, end);
+					} else {
+						range.moveToElementText(lineChild);
+						range.move("character", start); //$NON-NLS-0$
+						range.moveEnd("character", end - start); //$NON-NLS-0$
+					}
+					rects = range.getClientRects();
+					var trailing = false;
+					if (rects.length > 0) {
+						rect = rects[0];
+						rangeLeft = (fixIE8 ? rl : rect.left) * xFactor - lineRect.left;
+						rangeRight = rect.right * xFactor - lineRect.left;
+						//TODO test for character trailing (wrong for bidi)
+						trailing = x > (rangeLeft + (rangeRight - rangeLeft) / 2);
+					}
+					// Handle Unicode surrogates
+					var offsetInLine = offset - lineStart;
+					var lineText = model.getLine(lineIndex);
+					var c = lineText.charCodeAt(offsetInLine);
+					if (0xD800 <= c && c <= 0xDBFF && trailing) {
+						if (offsetInLine < lineText.length) {
+							c = lineText.charCodeAt(offsetInLine + 1);
+							if (0xDC00 <= c && c <= 0xDFFF) {
+								offset += 1;
+							}
+						}
+					} else if (0xDC00 <= c && c <= 0xDFFF && !trailing) {
+						if (offsetInLine > 0) {
+							c = lineText.charCodeAt(offsetInLine - 1);
+							if (0xD800 <= c && c <= 0xDBFF) {
+								offset -= 1;
+							}
+						}
+					}
+					if (trailing) {
+						offset++;
+					}
+				} else {
+					var newText = [];
+					for (var q = 0; q < nodeLength; q++) {
+						newText.push("<span>"); //$NON-NLS-0$
+						if (q === nodeLength - 1) {
+							newText.push(textNode.data.substring(q));
+						} else {
+							newText.push(textNode.data.substring(q, q + 1));
+						}
+						newText.push("</span>"); //$NON-NLS-0$
+					}
+					lineChild.innerHTML = newText.join("");
+					var rangeChild = lineChild.firstChild;
+					while (rangeChild) {
+						rect = rangeChild.getBoundingClientRect();
+						rangeLeft = rect.left - lineRect.left;
+						rangeRight = rect.right - lineRect.left;
+						if (rangeLeft <= x && x < rangeRight) {
+							//TODO test for character trailing (wrong for bidi)
+							if (x > rangeLeft + (rangeRight - rangeLeft) / 2) {
+								offset++;
+							}
+							break;
+						}
+						offset++;
+						rangeChild = rangeChild.nextSibling;
+					}
+					if (!self._createdDiv) {
+						lineChild.innerHTML = "";
+						lineChild.appendChild(textNode);
+						/*
+						 * Removing the element node that holds the selection start or end
+						 * causes the selection to be lost. The fix is to detect this case
+						 * and restore the selection. 
+						 */
+						var s = view._getSelection();
+						if ((offset <= s.start && s.start < offset + nodeLength) || (offset <= s.end && s.end < offset + nodeLength)) {
+							view._updateDOMSelection();
+						}
+					}
+				}
+				return offset;
+			}
+			
+			var rects, rect;
 			if (view._wrapMode) {
 				rects = this.getClientRects();
 				if (y < rects[0].top) {
@@ -859,161 +1138,70 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				if (x < 0) { x = 0; }
 				if (x > (lineRect.right - lineRect.left)) { x = lineRect.right - lineRect.left; }
 			}
-			var document = child.ownerDocument;
-			var window = getWindow(document);
-			var xFactor = util.isIE ? window.screen.logicalXDPI / window.screen.deviceXDPI : 1;
-			var yFactor = util.isIE ? window.screen.logicalYDPI / window.screen.deviceYDPI : 1;
-			var offset = lineStart;
-			var lineChild = child.firstChild;
-			done:
-			while (lineChild) {
-				if (lineChild.ignore) {
-					lineChild = lineChild.nextSibling;
-					continue;
-				}
-				var textNode = lineChild.firstChild;
-				var nodeLength = textNode.length;
-				if (lineChild.ignoreChars) {
-					nodeLength -= lineChild.ignoreChars;
-				}
-				var rangeLeft, rangeTop, rangeRight, rangeBottom;
-				rects = this._getClientRects(lineChild, lineRect);
+			
+			function hitRects(child) {
+				if (child.ignore) return null;
+				var rects = self._getClientRects(child, lineRect);
 				for (var j = 0; j < rects.length; j++) {
-					rect = rects[j];
+					var rect = rects[j];
 					if (rect.left <= x && x < rect.right && (!view._wrapMode || (rect.top <= y && y < rect.bottom))) {
-						var range, start, end;
-						var rl = rect.left + lineRect.left, fixIE8;
-						if (util.isIE || view._isRangeRects) {
-							range = view._isRangeRects ? document.createRange() : document.body.createTextRange();
-							var high = nodeLength;
-							var low = -1;
-							while ((high - low) > 1) {
-								var mid = Math.floor((high + low) / 2);
-								start = low + 1;
-								end = mid === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : mid + 1;
-								/*
-								* Bug in IE8. TextRange.getClientRects() and TextRange.getBoundingClientRect() fails
-								* if the line child is not the first element in the line and if the start offset is 0. 
-								* The fix is to use Node.getClientRects() left edge instead.
-								*/
-								fixIE8 = start === 0 && util.isIE === 8;
-								if (view._isRangeRects) {
-									range.setStart(textNode, start);
-									range.setEnd(textNode, end);
-								} else {
-									if (fixIE8) { start = 1; } 
-									range.moveToElementText(lineChild);
-									range.move("character", start); //$NON-NLS-0$
-									range.moveEnd("character", end - start); //$NON-NLS-0$
-								}
-								rects = range.getClientRects();
-								var found = false;
-								for (var k = 0; k < rects.length; k++) {
-									rect = rects[k];
-									rangeLeft = (fixIE8 ? rl : rect.left) * xFactor - lineRect.left;
-									rangeRight = rect.right * xFactor - lineRect.left;
-									rangeTop = rect.top * yFactor - lineRect.top;
-									rangeBottom = rect.bottom * yFactor - lineRect.top;
-									if (rangeLeft <= x && x < rangeRight && (!view._wrapMode || (rangeTop <= y && y < rangeBottom))) {
-										found = true;
-										break;
-									}
-								}
-								if (found) {
-									high = mid;
-								} else {
-									low = mid;
-								}
-							}
-							offset += high;
-							start = high;
-							end = high === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : Math.min(high + 1, textNode.length);
-							if (view._isRangeRects) {
-								range.setStart(textNode, start);
-								range.setEnd(textNode, end);
-							} else {
-								range.moveToElementText(lineChild);
-								range.move("character", start); //$NON-NLS-0$
-								range.moveEnd("character", end - start); //$NON-NLS-0$
-							}
-							rects = range.getClientRects();
-							var trailing = false;
-							if (rects.length > 0) {
-								rect = rects[0];
-								rangeLeft = (fixIE8 ? rl : rect.left) * xFactor - lineRect.left;
-								rangeRight = rect.right * xFactor - lineRect.left;
-								//TODO test for character trailing (wrong for bidi)
-								trailing = x > (rangeLeft + (rangeRight - rangeLeft) / 2);
-							}
-							// Handle Unicode surrogates
-							var offsetInLine = offset - lineStart;
-							var lineText = model.getLine(lineIndex);
-							var c = lineText.charCodeAt(offsetInLine);
-							if (0xD800 <= c && c <= 0xDBFF && trailing) {
-								if (offsetInLine < lineText.length) {
-									c = lineText.charCodeAt(offsetInLine + 1);
-									if (0xDC00 <= c && c <= 0xDFFF) {
-										offset += 1;
-									}
-								}
-							} else if (0xDC00 <= c && c <= 0xDFFF && !trailing) {
-								if (offsetInLine > 0) {
-									c = lineText.charCodeAt(offsetInLine - 1);
-									if (0xD800 <= c && c <= 0xDBFF) {
-										offset -= 1;
-									}
-								}
-							}
-							if (trailing) {
-								offset++;
-							}
-						} else {
-							var newText = [];
-							for (var q = 0; q < nodeLength; q++) {
-								newText.push("<span>"); //$NON-NLS-0$
-								if (q === nodeLength - 1) {
-									newText.push(textNode.data.substring(q));
-								} else {
-									newText.push(textNode.data.substring(q, q + 1));
-								}
-								newText.push("</span>"); //$NON-NLS-0$
-							}
-							lineChild.innerHTML = newText.join("");
-							var rangeChild = lineChild.firstChild;
-							while (rangeChild) {
-								rect = rangeChild.getBoundingClientRect();
-								rangeLeft = rect.left - lineRect.left;
-								rangeRight = rect.right - lineRect.left;
-								if (rangeLeft <= x && x < rangeRight) {
-									//TODO test for character trailing (wrong for bidi)
-									if (x > rangeLeft + (rangeRight - rangeLeft) / 2) {
-										offset++;
-									}
-									break;
-								}
-								offset++;
-								rangeChild = rangeChild.nextSibling;
-							}
-							if (!this._createdDiv) {
-								lineChild.innerHTML = "";
-								lineChild.appendChild(textNode);
-								/*
-								 * Removing the element node that holds the selection start or end
-								 * causes the selection to be lost. The fix is to detect this case
-								 * and restore the selection. 
-								 */
-								var s = view._getSelection();
-								if ((offset <= s.start && s.start < offset + nodeLength) || (offset <= s.end && s.end < offset + nodeLength)) {
-									view._updateDOMSelection();
-								}
-							}
-						}
-						break done;
+						return rect;
 					}
 				}
-				offset += nodeLength;
-				lineChild = lineChild.nextSibling;
+				return null;
 			}
+			
+			var offset, lineChild;
+			if (this._lastHitChild && this._lastHitChild.parentNode) {
+				// Search last hit child first, then search around the last hit child
+				offset = this._lastHitOffset;
+				lineChild = this._lastHitChild;
+				rect = hitRects(lineChild);
+				if (!rect ) {
+					var previousOffset = offset, nextOffset = offset + this._nodeLength(lineChild);
+					var previousChild = lineChild.previousSibling, nextChild = lineChild.nextSibling;
+					while (previousChild || nextChild) {
+						if (previousChild) {
+							previousOffset -= this._nodeLength(previousChild);
+							if (rect = hitRects(previousChild)) {
+								lineChild = previousChild;
+								offset = previousOffset;
+								break;
+							}
+							previousChild = previousChild.previousSibling;
+						}
+						if (nextChild) {
+							if (rect = hitRects(nextChild)) {
+								lineChild = nextChild;
+								offset = nextOffset;
+								break;
+							}
+							nextOffset += this._nodeLength(nextChild);
+							nextChild = nextChild.nextSibling;
+						}
+					}
+				}
+			} else {
+				// Start searching from the beginning of the line
+				offset = lineStart;
+				lineChild = child.firstChild;
+				while (lineChild) {
+					if (rect = hitRects(lineChild)) {
+						break;
+					}
+					offset += this._nodeLength(lineChild);
+					lineChild = lineChild.nextSibling;
+				}
+			}
+			
+			if (lineChild) {
+				// Cache the last hit child
+				this._lastHitChild = lineChild;
+				this._lastHitOffset = offset;
+
+				offset = hitChild(lineChild, offset, rect);
+			}
+
 			return Math.min(lineEnd, Math.max(lineStart, offset));
 		},
 		/** @private */
@@ -1164,11 +1352,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			} else {
 				lineChild = child.firstChild;
 				while (lineChild) {
-					var textNode = lineChild.firstChild;
-					var nodeLength = textNode.length;
-					if (lineChild.ignoreChars) {
-						nodeLength -= lineChild.ignoreChars;
-					}
+					var nodeLength = this._nodeLength(lineChild);
 					if (lineOffset + nodeLength > offset) {
 						range = document.body.createTextRange();
 						if (offset === lineOffset && data.count < 0) {
@@ -3734,23 +3918,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			} else {
 				lineNode = node.parentNode.parentNode;
 			}
-			var lineOffset = 0;
-			var lineIndex = lineNode.lineIndex;
-			if (node.tagName !== "DIV") { //$NON-NLS-0$
-				var child = lineNode.firstChild;
-				while (child) {
-					var textNode = child.firstChild;
-					if (textNode === node) {
-						if (child.ignoreChars) { lineOffset -= child.ignoreChars; }
-						lineOffset += offset;
-						break;
-					}
-					if (child.ignoreChars) { lineOffset -= child.ignoreChars; }
-					lineOffset += textNode.data.length;
-					child = child.nextSibling;
-				}
-			}
-			return Math.max(0, lineOffset) + this._model.getLineStart(lineIndex);
+			return lineNode._line._getModelOffset (node, offset);
 		},
 		_updateSelectionFromDOM: function() {
 			var window = this._getWindow();
@@ -5167,52 +5335,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return "";
 		},
 		_getDOMText: function(child, offsetNode) {
-			var lineChild = child.firstChild;
-			var text = "", offset = 0;
-			while (lineChild) {
-				var textNode;
-				if (lineChild.ignore) {
-					lineChild = lineChild.nextSibling;
-					continue;
-				}
-				if (lineChild.ignoreChars) {
-					textNode = lineChild.lastChild;
-					var ignored = 0, childText = [], childOffset = -1;
-					while (textNode) {
-						var data = textNode.data;
-						if (data) {
-							for (var i = data.length - 1; i >= 0; i--) {
-								var ch = data.substring(i, i + 1);
-								if (ignored < lineChild.ignoreChars && (ch === " " || ch === "\u200B" || ch === "\uFEFF")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-									ignored++;
-								} else {
-									childText.push(ch === "\u00A0" ? "\t" : ch); //$NON-NLS-1$ //$NON-NLS-0$
-								}
-							}
-						}
-						if (offsetNode === textNode) {
-							childOffset = childText.length;
-						}
-						textNode = textNode.previousSibling;
-					}
-					childText = childText.reverse().join("");
-					if (childOffset !== -1) {
-						offset = text.length + childText.length - childOffset;
-					}
-					text += childText;
-				} else {
-					textNode = lineChild.firstChild;
-					while (textNode) {
-						if (offsetNode === textNode) {
-							offset = text.length;
-						}
-						text += textNode.data;
-						textNode = textNode.nextSibling;
-					}
-				}
-				lineChild = lineChild.nextSibling;
-			}
-			return {text: text, offset: offset};
+			return child._line.getText(offsetNode);
 		},
 		_getTextFromElement: function(element) {
 			var document = element.ownerDocument;
@@ -5815,59 +5938,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			return true;
 		},
 		_setDOMSelection: function (startNode, startOffset, endNode, endOffset, startCaret) {
-			var startLineNode, startLineOffset, endLineNode, endLineOffset;
-			var offset = 0;
-			var lineChild = startNode.firstChild;
-			var node, nodeLength, model = this._model;
-			var startLineEnd = model.getLine(startNode.lineIndex).length;
-			while (lineChild) {
-				if (lineChild.ignore) {
-					lineChild = lineChild.nextSibling;
-					continue;
-				}
-				node = lineChild.firstChild;
-				nodeLength = node.length;
-				if (lineChild.ignoreChars) {
-					nodeLength -= lineChild.ignoreChars;
-				}
-				if (offset + nodeLength > startOffset || offset + nodeLength >= startLineEnd) {
-					startLineNode = node;
-					startLineOffset = startOffset - offset;
-					if (lineChild.ignoreChars && nodeLength > 0 && startLineOffset === nodeLength) {
-						startLineOffset += lineChild.ignoreChars; 
-					}
-					break;
-				}
-				offset += nodeLength;
-				lineChild = lineChild.nextSibling;
-			}
-			offset = 0;
-			lineChild = endNode.firstChild;
-			var endLineEnd = this._model.getLine(endNode.lineIndex).length;
-			while (lineChild) {
-				if (lineChild.ignore) {
-					lineChild = lineChild.nextSibling;
-					continue;
-				}
-				node = lineChild.firstChild;
-				nodeLength = node.length;
-				if (lineChild.ignoreChars) {
-					nodeLength -= lineChild.ignoreChars;
-				}
-				if (nodeLength + offset > endOffset || offset + nodeLength >= endLineEnd) {
-					endLineNode = node;
-					endLineOffset = endOffset - offset;
-					if (lineChild.ignoreChars && nodeLength > 0 && endLineOffset === nodeLength) {
-						endLineOffset += lineChild.ignoreChars; 
-					}
-					break;
-				}
-				offset += nodeLength;
-				lineChild = lineChild.nextSibling;
-			}
-			
-			this._setDOMFullSelection(startNode, startOffset, startLineEnd, endNode, endOffset, endLineEnd);
-
+			this._setDOMFullSelection(startNode, startOffset, endNode, endOffset);
+			var start = startNode._line.getNodeOffset(startOffset);
+			var end = endNode._line.getNodeOffset(endOffset);
 			var range;
 			var window = this._getWindow();
 			var document = this._parent.ownerDocument;
@@ -5875,18 +5948,18 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				//W3C
 				var sel = window.getSelection();
 				range = document.createRange();
-				range.setStart(startLineNode, startLineOffset);
-				range.setEnd(endLineNode, endLineOffset);
+				range.setStart(start.node, start.offset);
+				range.setEnd(end.node, end.offset);
 				if (this._hasFocus && (
-					sel.anchorNode !== startLineNode || sel.anchorOffset !== startLineOffset ||
-					sel.focusNode !== endLineNode || sel.focusOffset !== endLineOffset ||
-					sel.anchorNode !== endLineNode || sel.anchorOffset !== endLineOffset ||
-					sel.focusNode !== startLineNode || sel.focusOffset !== startLineOffset))
+					sel.anchorNode !== start.node || sel.anchorOffset !== start.offset ||
+					sel.focusNode !== end.node || sel.focusOffset !== end.offset ||
+					sel.anchorNode !== end.node || sel.anchorOffset !== end.offset ||
+					sel.focusNode !== start.node || sel.focusOffset !== start.offset))
 				{
-					this._anchorNode = startLineNode;
-					this._anchorOffset = startLineOffset;
-					this._focusNode = endLineNode;
-					this._focusOffset = endLineOffset;
+					this._anchorNode = start.node;
+					this._anchorOffset = start.offset;
+					this._focusNode = end.node;
+					this._focusOffset = end.offset;
 					this._ignoreSelect = false;
 					if (sel.rangeCount > 0) { sel.removeAllRanges(); }
 					sel.addRange(range);
@@ -5895,11 +5968,11 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				if (this._cursorDiv) {
 					range = document.createRange();
 					if (startCaret) {
-						range.setStart(startLineNode, startLineOffset);
-						range.setEnd(startLineNode, startLineOffset);
+						range.setStart(start.node, start.offset);
+						range.setEnd(start.node, start.offset);
 					} else {
-						range.setStart(endLineNode, endLineOffset);
-						range.setEnd(endLineNode, endLineOffset);
+						range.setStart(end.node, end.offset);
+						range.setEnd(end.node, end.offset);
 					}
 					var rect = range.getClientRects()[0];
 					var cursorParent = this._cursorDiv.parentNode;
@@ -5924,18 +5997,18 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				body.removeChild(child);
 				
 				range = body.createTextRange();
-				range.moveToElementText(startLineNode.parentNode);
-				range.moveStart("character", startLineOffset); //$NON-NLS-0$
+				range.moveToElementText(start.node.parentNode);
+				range.moveStart("character", start.offset); //$NON-NLS-0$
 				var endRange = body.createTextRange();
-				endRange.moveToElementText(endLineNode.parentNode);
-				endRange.moveStart("character", endLineOffset); //$NON-NLS-0$
+				endRange.moveToElementText(end.node.parentNode);
+				endRange.moveStart("character", end.offset); //$NON-NLS-0$
 				range.setEndPoint("EndToStart", endRange); //$NON-NLS-0$
 				this._ignoreSelect = false;
 				range.select();
 				this._ignoreSelect = true;
 			}
 		},
-		_setDOMFullSelection: function(startNode, startOffset, startLineEnd, endNode, endOffset, endLineEnd) {
+		_setDOMFullSelection: function(startNode, startOffset, endNode, endOffset) {
 			if (!this._selDiv1) { return; }
 			var selDiv = this._selDiv1;
 			selDiv.style.width = "0px"; //$NON-NLS-0$
@@ -6037,19 +6110,12 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var line = this._getLineNext();
 			while (line) {
 				if (line.hasLink) {
-					var lineChild = line.firstChild;
-					while (lineChild) {
-						if (lineChild.ignore) {
-							lineChild = lineChild.nextSibling;
-							continue;
-						}
-						var next = lineChild.nextSibling;
-						var style = lineChild.viewStyle;
+					line._line.forEach(function(span) {
+						var style = span.viewStyle;
 						if (style && style.tagName && style.tagName.toLowerCase() === "a") { //$NON-NLS-0$
-							line.replaceChild(line._line._createSpan(line, lineChild.firstChild.data, style), lineChild);
+							line.replaceChild(line._line._createSpan(line, span.firstChild.data, style), span);
 						}
-						lineChild = next;
-					}
+					});
 				}
 				line = this._getLineNext(line);
 			}
