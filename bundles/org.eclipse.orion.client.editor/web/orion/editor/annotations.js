@@ -393,6 +393,20 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		}
 	};
 	
+	/** @private */
+	function binarySearch (array, offset) {
+		var high = array.length, low = -1, index;
+		while (high - low > 1) {
+			index = Math.floor((high + low) / 2);
+			if (offset <= array[index].start) {
+				high = index;
+			} else {
+				low = index;
+			}
+		}
+		return high;
+	}
+	
 	/**
 	 * Constructs an annotation model.
 	 * 
@@ -432,7 +446,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 		addAnnotation: function(annotation) {
 			if (!annotation) { return; }
 			var annotations = this._annotations;
-			var index = this._binarySearch(annotations, annotation.start);
+			var index = binarySearch(annotations, annotation.start);
 			annotations.splice(index, 0, annotation);
 			annotation._annotationModel = this;
 			var e = {
@@ -617,7 +631,7 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			if (!add) { add = []; }
 			for (i = 0; i < add.length; i++) {
 				annotation = add[i];
-				index = this._binarySearch(annotations, annotation.start);
+				index = binarySearch(annotations, annotation.start);
 				annotation._annotationModel = this;
 				annotations.splice(index, 0, annotation);
 			}
@@ -648,22 +662,9 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			}
 		},
 		/** @ignore */
-		_binarySearch: function (array, offset) {
-			var high = array.length, low = -1, index;
-			while (high - low > 1) {
-				index = Math.floor((high + low) / 2);
-				if (offset <= array[index].start) {
-					high = index;
-				} else {
-					low = index;
-				}
-			}
-			return high;
-		},
-		/** @ignore */
 		_getAnnotationIndex: function(annotation) {
 			var annotations = this._annotations;
-			var index = this._binarySearch(annotations, annotation.start);
+			var index = binarySearch(annotations, annotation.start);
 			while (index < annotations.length && annotations[index].start === annotation.start) {
 				if (annotations[index] === annotation) {
 					return index;
@@ -811,8 +812,8 @@ define("orion/editor/annotations", ['i18n!orion/editor/nls/messages', 'orion/edi
 			if (!ranges) {
 				ranges = [];
 			}
-			var mergedStyle, i;
-			for (i=0; i<ranges.length && styleRange; i++) {
+			var mergedStyle, i = binarySearch(ranges, styleRange.start);
+			for (; i<ranges.length && styleRange; i++) {
 				var range = ranges[i];
 				if (styleRange.end <= range.start) { break; }
 				if (styleRange.start >= range.end) { continue; }
