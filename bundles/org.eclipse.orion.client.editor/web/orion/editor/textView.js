@@ -601,7 +601,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				tagName = style.tagName.toLowerCase();
 			}
 			var isLink = tagName === "a"; //$NON-NLS-0$
-			if (isLink) { parent.hasLink = true; }
+			if (isLink) { this.hasLink = true; }
 			if (isLink && !view._linksVisible) {
 				tagName = "span"; //$NON-NLS-0$
 			}
@@ -864,19 +864,17 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		getModelOffset: function(node, offset) {
 			if (!node) { return 0; }
 			var lineOffset = 0;
-			if (node.tagName !== "DIV") { //$NON-NLS-0$
-				this.forEach(function(lineChild) {
-					var textNode = lineChild.firstChild;
-					if (textNode === node) {
-						if (lineChild.ignoreChars) { lineOffset -= lineChild.ignoreChars; }
-						lineOffset += offset;
-						return false;
-					}
+			this.forEach(function(lineChild) {
+				var textNode = lineChild.firstChild;
+				if (textNode === node) {
 					if (lineChild.ignoreChars) { lineOffset -= lineChild.ignoreChars; }
-					lineOffset += textNode.data.length;
-					return true;
-				});
-			}
+					lineOffset += offset;
+					return false;
+				}
+				if (lineChild.ignoreChars) { lineOffset -= lineChild.ignoreChars; }
+				lineOffset += textNode.data.length;
+				return true;
+			});
 			return Math.max(0, lineOffset) + this.view._model.getLineStart(this.lineIndex);
 		},
 		getNodeOffset: function(modelOffset) {
@@ -1173,8 +1171,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			
 			if (lineChild) {
 				// Cache the last hit child
-				this._lastHitChild = lineChild;
-				this._lastHitOffset = offset;
+				if (!view._wrapMode) {
+					this._lastHitChild = lineChild;
+					this._lastHitOffset = offset;
+				}
 
 				offset = hitChild(lineChild, offset, rect);
 			}
@@ -1358,6 +1358,18 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			data.count -= step;
 			return result;
+		},
+		updateLinks: function() {
+			var child = this._ensureCreated();
+			if (!this.hasLink) { return; }
+			var self = this;
+			this.forEach(function(span) {
+				var style = span.viewStyle;
+				if (style && style.tagName && style.tagName.toLowerCase() === "a") { //$NON-NLS-0$
+					child.replaceChild(self._createSpan(child, span.firstChild.data, style), span);
+				}
+				return true;
+			});
 		},
 		/** @private */
 		destroy: function() {
@@ -3895,6 +3907,9 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			} else {
 				lineNode = node.parentNode.parentNode;
 			}
+			if (!lineNode._line) {
+				return 0;
+			}
 			return lineNode._line._getModelOffset (node, offset);
 		},
 		_updateSelectionFromDOM: function() {
@@ -6085,15 +6100,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			var line = this._getLineNext();
 			while (line) {
-				if (line.hasLink) {
-					line._line.forEach(function(span) {
-						var style = span.viewStyle;
-						if (style && style.tagName && style.tagName.toLowerCase() === "a") { //$NON-NLS-0$
-							line.replaceChild(line._line._createSpan(line, span.firstChild.data, style), span);
-						}
-						return true;
-					});
-				}
+				line._line.updateLinks();
 				line = this._getLineNext(line);
 			}
 			this._updateDOMSelection();
