@@ -12,7 +12,7 @@
  *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474 Bug#363945 Bug#366312 Bug#370584
  ******************************************************************************/
 
-/*global define document*/
+/*global define */
 
 define("orion/editor/textView", [ //$NON-NLS-0$
 	'i18n!orion/editor/nls/messages', //$NON-NLS-0$
@@ -399,7 +399,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var lineStart = model.getLineStart(lineIndex);
 			var e = {type:"LineStyle", textView: view, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-0$
 			view.onLineStyle(e);
-			var lineDiv = div || util.createElement(parent.ownerDocument, "div"); //$NON-NLS-0$
+			var document = parent.ownerDocument;
+			var lineDiv = div || util.createElement(document, "div"); //$NON-NLS-0$
 			if (!div || !compare(div.viewStyle, e.style)) {
 				applyStyle(e.style, lineDiv, div);
 				if (div) { div._trim = null; }
@@ -1161,14 +1162,14 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			} else {
 				// Start searching from the beginning of the line
 				offset = lineStart;
-				lineChild = child.firstChild;
-				while (lineChild) {
+				this.forEach(function(c) {
+					lineChild = c;
 					if (rect = hitRects(lineChild)) {
-						break;
+						return false;
 					}
 					offset += this._nodeLength(lineChild);
-					lineChild = lineChild.nextSibling;
-				}
+					return true;
+				});
 			}
 			
 			if (lineChild) {
@@ -2834,7 +2835,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._modifyContent({text: text, start: start, end: end, _code: true}, !reset);
 			if (reset) {
 				this._columnX = -1;
-				this._setSelection(new Selection (0, 0, false), true);
+				this._setSelection(new Selection(0, 0, false), true);
 				
 				/*
 				* Bug in Firefox.  For some reason, the caret does not show after the
@@ -4891,7 +4892,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				"toggleWrapMode": {defaultHandler: function(data) {return self._doWrapMode();}, actionDescription: {name: messages.toggleWrapMode}} //$NON-NLS-0$
 			};
 		},
-		_createRulerParent: function(className) {
+		_createRulerParent: function(document, className) {
 			var div = util.createElement(document, "div"); //$NON-NLS-0$
 			div.className = className;
 			div.tabIndex = -1;
@@ -4949,7 +4950,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-0$
 			parent.appendChild(rootDiv);
 			
-			var leftDiv = this._createRulerParent("textviewLeftRuler"); //$NON-NLS-0$
+			var leftDiv = this._createRulerParent(document, "textviewLeftRuler"); //$NON-NLS-0$
 			this._leftDiv = leftDiv;
 
 			var viewDiv = util.createElement(document, "div"); //$NON-NLS-0$
@@ -4969,7 +4970,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			rootDiv.appendChild(viewDiv);
 			
-			var rightDiv = this._createRulerParent("textviewRightRuler"); //$NON-NLS-0$
+			var rightDiv = this._createRulerParent(document, "textviewRightRuler"); //$NON-NLS-0$
 			this._rightDiv = rightDiv;
 			rightDiv.style.right = "0px"; //$NON-NLS-0$
 				
@@ -4980,7 +4981,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			scrollDiv.style.padding = "0px"; //$NON-NLS-0$
 			viewDiv.appendChild(scrollDiv);
 			
-			var marginDiv = this._marginDiv = this._createRulerParent("textviewMarginRuler"); //$NON-NLS-0$
+			var marginDiv = this._marginDiv = this._createRulerParent(document, "textviewMarginRuler"); //$NON-NLS-0$
 			marginDiv.style.zIndex = "4"; //$NON-NLS-0$
 			
 			if (!util.isIE && !util.isIOS) {
@@ -5609,7 +5610,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			this._keyModes = [];
 			this._rulers = [];
-			this._selection = new Selection (0, 0, false);
+			this._selection = new Selection(0, 0, false);
 			this._linksVisible = false;
 			this._redrawCount = 0;
 			this._maxLineWidth = 0;
@@ -5779,7 +5780,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			this._topIndexY = 0;
 			this._variableLineHeight = false;
 			this._resetLineHeight();
-			this._setSelection(new Selection (0, 0, false), false, false);
+			this._setSelection(new Selection(0, 0, false), false, false);
 			if (this._viewDiv) {
 				this._viewDiv.scrollLeft = 0;
 				this._viewDiv.scrollTop = 0;
@@ -6294,7 +6295,8 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		_updateBlockCursorVisible: function () {
 			if (this._blockCursorVisible || this._overwriteMode) {
 				if (!this._cursorDiv) {
-					var cursorDiv = util.createElement(document, "div"); //$NON-NLS-0$
+					var viewDiv = this._viewDiv;
+					var cursorDiv = util.createElement(viewDiv.ownerDocument, "div"); //$NON-NLS-0$
 					cursorDiv.className = "textviewBlockCursor"; //$NON-NLS-0$
 					this._cursorDiv = cursorDiv;
 					cursorDiv.tabIndex = -1;
@@ -6303,7 +6305,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					cursorDiv.style.position = "absolute"; //$NON-NLS-0$
 					cursorDiv.style.pointerEvents = "none"; //$NON-NLS-0$
 					cursorDiv.innerHTML = "&nbsp;"; //$NON-NLS-0$
-					this._viewDiv.appendChild(cursorDiv);
+					viewDiv.appendChild(cursorDiv);
 					this._updateDOMSelection();
 				}
 			} else {
@@ -7067,6 +7069,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				styleText += "\n.textview ::-moz-selection {background: " + this._highlightRGB + ";}"; //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			if (styleText) {
+				var document = this._clientDiv.ownerDocument;
 				var node = document.getElementById("_textviewStyle"); //$NON-NLS-0$
 				if (!node) {
 					node = util.createElement(document, "style"); //$NON-NLS-0$
