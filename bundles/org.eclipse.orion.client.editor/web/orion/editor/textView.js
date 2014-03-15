@@ -877,16 +877,15 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 					return true;
 				});
 			}
-			var view = this.view;
-			var model = view._model;
-			return Math.max(0, lineOffset) + model.getLineStart(this.lineIndex);
+			return Math.max(0, lineOffset) + this.view._model.getLineStart(this.lineIndex);
 		},
-		getNodeOffset: function(lineOffset) {
-			var lineNode, lineNodeOffset;
+		getNodeOffset: function(modelOffset) {
 			var offset = 0;
-			var view = this.view;
-			var model = view._model;
-			var end = model.getLine(this.lineIndex).length;
+			var lineNode, lineNodeOffset;
+			var model = this.view._model;
+			var lineStart = model.getLineStart(this.lineIndex);
+			var lineOffset = modelOffset - lineStart;
+			var end = model.getLineEnd(this.lineIndex) - lineStart;
 			this.forEach(function(lineChild) {
 				var node = lineChild.firstChild;
 				var nodeLength = this._nodeLength(lineChild);
@@ -5998,7 +5997,6 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			selDiv.style.width = "0px"; //$NON-NLS-0$
 			selDiv.style.height = "0px"; //$NON-NLS-0$
 			if (startNode === endNode && startOffset === endOffset) { return; }
-			var model = this._model;
 			var viewPad = this._getViewPadding();
 			var clientRect = this._clientDiv.getBoundingClientRect();
 			var viewRect = this._viewDiv.getBoundingClientRect();
@@ -6018,10 +6016,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			this._ignoreDOMSelection = true;
 			var startLine = new TextLine(this, startNode.lineIndex, startNode);
-			var startRect = startLine.getBoundingClientRect(model.getLineStart(startNode.lineIndex) + startOffset, false);
+			var startRect = startLine.getBoundingClientRect(startOffset, false);
 			var l = startRect.left;
 			var endLine = new TextLine(this, endNode.lineIndex, endNode);
-			var endRect = endLine.getBoundingClientRect(model.getLineStart(endNode.lineIndex) + endOffset, false);
+			var endRect = endLine.getBoundingClientRect(endOffset, false);
 			var r = endRect.left;
 			this._ignoreDOMSelection = false;
 			var sel1Div = this._selDiv1;
@@ -6519,24 +6517,24 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			var topNode, bottomNode, topOffset, bottomOffset;
 			if (startLine < firstNode.lineIndex) {
 				topNode = firstNode;
-				topOffset = 0;
+				topOffset = model.getLineStart(firstNode.lineIndex);
 			} else if (startLine > lastNode.lineIndex) {
 				topNode = lastNode;
-				topOffset = 0;
+				topOffset = model.getLineStart(lastNode.lineIndex);
 			} else {
 				topNode = this._getLineNode(startLine);
-				topOffset = selection.start - model.getLineStart(startLine);
+				topOffset = selection.start;
 			}
 
 			if (endLine < firstNode.lineIndex) {
 				bottomNode = firstNode;
-				bottomOffset = 0;
+				bottomOffset = model.getLineStart(firstNode.lineIndex);
 			} else if (endLine > lastNode.lineIndex) {
 				bottomNode = lastNode;
-				bottomOffset = 0;
+				bottomOffset = model.getLineStart(lastNode.lineIndex);
 			} else {
 				bottomNode = this._getLineNode(endLine);
-				bottomOffset = selection.end - model.getLineStart(endLine);
+				bottomOffset = selection.end;
 			}
 			this._setDOMSelection(topNode, topOffset, bottomNode, bottomOffset, selection.caret);
 		},
