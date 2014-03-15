@@ -848,7 +848,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		/** @private */
 		getLineStart: function (lineIndex) {
 			if (!this.view._wrapMode || lineIndex === 0) {
-				return this.view._model.getLineStart(lineIndex);
+				return this.view._model.getLineStart(this.lineIndex);
 			}
 			var rects = this.getClientRects();
 			return this.getOffset(rects[lineIndex].left + 1, rects[lineIndex].top + 1);
