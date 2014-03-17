@@ -912,7 +912,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 						if (data) {
 							for (var i = data.length - 1; i >= 0; i--) {
 								var ch = data.substring(i, i + 1);
-								if (ignored < lineChild.ignoreChars && (ch === " " || ch === "\u200B" || ch === "\uFEFF")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								if (ignored < lineChild.ignoreChars && (ch === " " || ch === "\uFEFF")) { //$NON-NLS-1$ //$NON-NLS-0$
 									ignored++;
 								} else {
 									childText.push(ch === "\u00A0" ? "\t" : ch); //$NON-NLS-1$ //$NON-NLS-0$
@@ -1169,12 +1169,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				});
 			}
 			
-			if (lineChild) {
+			if (lineChild && rect) {
 				// Cache the last hit child
-				if (!view._wrapMode) {
-					this._lastHitChild = lineChild;
-					this._lastHitOffset = offset;
-				}
+				this._lastHitChild = lineChild;
+				this._lastHitOffset = offset;
 
 				offset = hitChild(lineChild, offset, rect);
 			}
