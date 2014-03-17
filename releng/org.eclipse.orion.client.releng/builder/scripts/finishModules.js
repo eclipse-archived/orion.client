@@ -41,6 +41,9 @@ modules.forEach(function(module) {
 		pageDir = ".";
 	}
 
+	// Determine the file name of the calling module (by default it is {baseName}.html)
+	var caller = module.caller || (baseName + ".html");
+
 	// Invoke finishModule macro
 	var task = project.createTask("finishModule");
 	task.setOwningTarget(self.getOwningTarget()); // http://stackoverflow.com/a/12282731
@@ -48,5 +51,6 @@ modules.forEach(function(module) {
 	task.setDynamicAttribute("name", baseName);
 	task.setDynamicAttribute("bundle", bundle);
 	task.setDynamicAttribute("pagedir", pageDir);
+	task.setDynamicAttribute("caller", caller);
 	task.perform();
 });

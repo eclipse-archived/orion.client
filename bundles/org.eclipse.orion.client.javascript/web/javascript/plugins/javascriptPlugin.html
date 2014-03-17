@@ -9,25 +9,7 @@
 	<script type="text/javascript">
 		/*global require*/
 		require({
-			baseUrl: '../../',
-			paths: {
-				text: 'requirejs/text',
-				i18n: 'requirejs/i18n',
-				domReady: 'requirejs/domReady',
-				esprima: 'esprima/esprima',
-				estraverse: 'estraverse/estraverse',
-				escope: 'escope/escope'
-			},
-			packages: [
-				{
-					name: "eslint",
-					location: "eslint/lib",
-					main: "eslint"
-				},
-				{
-					name: "eslint/conf",
-					main: "eslint/conf"
-			}]
+			baseUrl: '../../'
 		});
 		require(["javascriptPlugin.js"]);
 	</script>

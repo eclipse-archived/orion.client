@@ -12,9 +12,8 @@
 /*global URL console*/
 /*jslint amd:true browser:true*/
 define([
-	'orion/EventTarget',
 	'orion/URL-shim'
-], function(EventTarget, _) {
+], function(_) {
 	// Talk directly to the framework message plumbing
 	var framework;
 	if (window !== window.parent)
@@ -24,13 +23,13 @@ define([
 	addEventListener("message", onFrameworkMessage);
 
 	// Start the worker
-	var worker = new Worker(new URL("javascriptPluginWorker.js", window.location.href).href);
+	var worker = new Worker(new URL("javascriptWorkerBootstrap.js", window.location.href).href);
 	worker.addEventListener("message", onWorkerMessage);
 	worker.addEventListener("error", onWorkerError);
 
 	function onWorkerError(err) {
-		console.log('javascriptPluginWorker encountered an error:');
-		console.log(err);
+		if (typeof console !== "undefined" && console)
+			console.log(err);
 	}
 
 	function onWorkerMessage(event) {

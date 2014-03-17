@@ -161,14 +161,14 @@ function build(buildConfig) {
 		return false;
 	});
 	var optimizes = filteredModules.map(function(module) {
-		var pageDir = getPageDir(module.name), baseName = getBaseName(module.name);
+		var pageDir = getPageDir(module.name), baseName = getBaseName(module.name), caller = module.caller || (baseName + '.html');
 		return {
 			pageDir: pageDir,
 			name: baseName,
 			bundle: format(module.bundle, bundleFormatArgs),
 			outPath: path.join(pathToOutDir, pageDir, baseName) + '.js',
 			builtFilePath: path.join(pathToOutDir, pageDir, 'built-' + baseName) + '.js',
-			htmlFilePath: path.join(pathToOutDir, pageDir, baseName + '.html')
+			callerFilePath: path.join(pathToOutDir, pageDir, caller)
 		};
 	});
 	var cssFiles = optimizes.map(function(op) {
@@ -187,7 +187,7 @@ function build(buildConfig) {
 	var steps = {
 		stage: true,
 		optimize: true,
-		updateHtml: true,
+		updateCaller: true,
 		updateJS: true,
 		copyBack: true
 	};
@@ -264,23 +264,29 @@ function build(buildConfig) {
 			});
 		});
 	}).then(function() {
-		if (steps.updateHtml === false) { return new Deferred().resolve(); }
-		section('Running updateHTML');
+		if (steps.updateCaller === false) { return new Deferred().resolve(); }
+		section('Running updateCaller');
 		return async.sequence(optimizes.map(function(op) {
 			return function() {
 				// TODO stat builtFilePath, only perform the replace if builtFile.size > 0
-				var name = op.name;
-				var builtResult = 'require(["built-' + name + '.js"]);';
-				console.log("updateHTML " + op.htmlFilePath);
-				return dfs.readFile(op.htmlFilePath, 'utf8').then(function(htmlFile) {
-					htmlFile = htmlFile.replace("require(['" + name + ".js']);", builtResult);
-					htmlFile = htmlFile.replace('require(["' + name + '.js"]);', builtResult);
-					htmlFile = htmlFile.replace("requirejs/require.js", "requirejs/require.min.js");
-					return dfs.writeFile(op.htmlFilePath, htmlFile);
-				}, function(error) {
-					// log and continue
-					console.log(error.stack || error);
-					console.log('');
+				return dfs.exists(op.callerFilePath).then(function(exists) {
+					if (!exists) {
+						console.log('HTML file does not exist: ' + op.callerFilePath);
+						return;
+					}
+					var name = op.name;
+					var builtResult = 'require(["built-' + name + '.js"]);';
+					console.log("updateHTML " + op.callerFilePath);
+					return dfs.readFile(op.callerFilePath, 'utf8').then(function(callerFile) {
+						callerFile = callerFile.replace("require(['" + name + ".js']);", builtResult);
+						callerFile = callerFile.replace('require(["' + name + '.js"]);', builtResult);
+						callerFile = callerFile.replace("/require.js", "/require.min.js");
+						return dfs.writeFile(op.callerFilePath, callerFile);
+					}, function(error) {
+						// log and continue
+						console.log(error.stack || error);
+						console.log('');
+					});
 				});
 			};
 		}));
@@ -312,19 +318,23 @@ function build(buildConfig) {
 		section('Copy built files to ' + pathToOrionClientBundlesFolder);
 		return async.sequence(optimizes.map(function(op) {
 			return function() {
-				var args = {
-					builtJsFile: op.builtFilePath,
-					htmlFile: op.htmlFilePath,
-					originalFolder: path.join(op.bundle, BUNDLE_WEB_FOLDER, op.pageDir)
-				};
-				if (IS_WINDOWS) {
-					return execCommand(format('xcopy /q /y /i ${builtJsFile} ${originalFolder}', args)).then(
-							function() {
-								return execCommand(format('xcopy /q /y /i ${htmlFile} ${originalFolder}', args));
-							});
-				} else {
-					return execCommand(format("cp ${builtJsFile} ${htmlFile} ${originalFolder}", args));
-				}
+				return dfs.exists(op.callerFilePath).then(function(callerFileExists) {
+					var args = {
+						builtJsFile: op.builtFilePath,
+						callerFile: callerFileExists ? op.callerFilePath : "",
+						originalFolder: path.join(op.bundle, BUNDLE_WEB_FOLDER, op.pageDir)
+					};
+					if (IS_WINDOWS) {
+						return execCommand(format('xcopy /q /y /i ${builtJsFile} ${originalFolder}', args)).then(
+								function() {
+									if (!callerFileExists)
+										return;
+									return execCommand(format('xcopy /q /y /i ${callerFile} ${originalFolder}', args));
+								});
+					} else {
+						return execCommand(format("cp ${builtJsFile} ${callerFile} ${originalFolder}", args));
+					}
+				});
 			};
 		})).then(function() {
 			section('Copy optimized CSS files to ' + pathToOrionClientBundlesFolder);
@@ -353,7 +363,10 @@ function exitFail(error) {
 	process.exit(1);
 }
 
-function exitSuccess() { process.exit(0); }
+function exitSuccess() {
+	console.log("Done.");
+	process.exit(0);
+}
 
 /*
  * The fun starts here

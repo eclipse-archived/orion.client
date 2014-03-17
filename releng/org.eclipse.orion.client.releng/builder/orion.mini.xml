@@ -54,10 +54,11 @@
 	<macrodef name="finishModule">
 		<attribute name="out" />
 		<attribute name="name" />
+		<attribute name="caller" /> <!-- Usually @{name}.html but not always. Must be located in pageDir. -->
 		<attribute name="bundle" />
 		<attribute name="pagedir" />
 		<sequential>
-			<echo message="Finishing module @{pageDir}/@{name}, bundle: @{bundle}..." />
+			<echo message="Finishing module @{pageDir}/@{name}, bundle: @{bundle}, caller: @{caller}..." />
 			
 			<!-- copy @{name} to built-@{name}.js -->
 			<copy tofile="@{out}/@{pagedir}/built-@{name}.js">
@@ -66,8 +67,8 @@
 				</fileset>
 			</copy>
 
-			<antcall target="updateHTML">
-				<param name="htmlFile" value="@{out}/@{pagedir}/@{name}.html" />
+			<antcall target="updateCaller">
+				<param name="callerFile" value="@{out}/@{pagedir}/@{caller}" />
 				<param name="minifiedScript" value="@{out}/@{pagedir}/built-@{name}.js" />
 				<param name="pageDir" value="@{pagedir}" />
 				<param name="name" value="@{name}" />
@@ -80,9 +81,9 @@
 				<param name="name" value="@{name}" />
 			</antcall>
 		
-			<!-- Copy JS and HTML files back -->
+			<!-- Copy JS and caller back to bundle folder -->
 			<copy todir="@{bundle}/web/@{pagedir}" >
-				<fileset dir="@{out}/@{pagedir}" includes="built-@{name}.js, @{name}.html" >
+				<fileset dir="@{out}/@{pagedir}" includes="built-@{name}.js, @{caller}" >
 					<size when="more" value="0" />
 				</fileset>
 			</copy>
@@ -216,21 +217,21 @@
 		</sequential>
 	</macrodef>
 
-	<target name="checkHTMLExists">
-		<available file="${htmlFile}" property="htmlFileExists"/>
+	<target name="checkCallerExists">
+		<available file="${callerFile}" property="caller.exists"/>
 	</target>
 		
-	
-	<target name="updateHTML" depends="checkHTMLExists" if="htmlFileExists">
-		<echo message="updateHTML for ${htmlFile}..." />
+	<!-- Updates any require statements in the "calling module" ${callerFile}. -->
+	<target name="updateCaller" depends="checkCallerExists" if="caller.exists">
+		<echo message="updateCaller for ${callerFile}..." />
 		<condition property="builtResult" value="built-${name}" else="${name}" >
 			<length file="${minifiedScript}" when="greater" length="0" />
 		</condition>
-		<replace file="${htmlFile}" token="require([&quot;${name}.js&quot;]);" value="require([&quot;${builtResult}.js&quot;]);" />
-		<replace file="${htmlFile}" token="require([&apos;${name}.js&apos;]);" value="require([&quot;${builtResult}.js&quot;]);" />
-		<replace file="${htmlFile}" token="requirejs/require.js" value="requirejs/require.min.js" />
-		<replace file="${htmlFile}" token="data-main=&quot;${name}.js&quot;" value="data-main=&quot;${builtResult}.js&quot;" />
-		<replace file="${htmlFile}" token="data-main=&apos;${name}.js&apos;" value="data-main=&quot;${builtResult}.js&quot;" />
+		<replace file="${callerFile}" token="require([&quot;${name}.js&quot;]);" value="require([&quot;${builtResult}.js&quot;]);" />
+		<replace file="${callerFile}" token="require([&apos;${name}.js&apos;]);" value="require([&quot;${builtResult}.js&quot;]);" />
+		<replace file="${callerFile}" token="requirejs/require.js" value="requirejs/require.min.js" />
+		<replace file="${callerFile}" token="data-main=&quot;${name}.js&quot;" value="data-main=&quot;${builtResult}.js&quot;" />
+		<replace file="${callerFile}" token="data-main=&apos;${name}.js&apos;" value="data-main=&quot;${builtResult}.js&quot;" />
 	</target>
 
 	<target name="checkBuiltResult">

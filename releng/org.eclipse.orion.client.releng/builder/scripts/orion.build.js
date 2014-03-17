@@ -91,6 +91,11 @@
         { name: "git/git-status", bundle: "${orionClient}/bundles/org.eclipse.orion.client.git" },
         { name: "git/plugins/gitPlugin", bundle: "${orionClient}/bundles/org.eclipse.orion.client.git" },
         { name: "javascript/plugins/javascriptPlugin", bundle: "${orionClient}/bundles/org.eclipse.orion.client.javascript" },
+        {
+            name: "javascript/plugins/javascriptPluginWorker",
+            bundle: "${orionClient}/bundles/org.eclipse.orion.client.javascript",
+            caller: "javascriptWorkerBootstrap.js"
+        },
         { name: "mixloginstatic/LoginWindow", bundle: "${orionClient}/bundles/org.eclipse.orion.client.ui" },
         { name: "mixloginstatic/manageOpenids", bundle: "${orionClient}/bundles/org.eclipse.orion.client.ui" },
         { name: "operations/list", bundle: "${orionClient}/bundles/org.eclipse.orion.client.ui" },

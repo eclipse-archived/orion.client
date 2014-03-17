@@ -9,54 +9,28 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global esprima importScripts*/
+/*global esprima */
 /*jslint amd:true */
-
-if (typeof importScripts !== "function")
-	throw new Error("This script must be run from a Worker");
-
-importScripts("../../requirejs/require.js");
-require(
-	{
-		baseUrl: '../../',
-		paths: {
-			text: 'requirejs/text',
-			i18n: 'requirejs/i18n',
-			domReady: 'requirejs/domReady',
-			esprima: 'esprima/esprima',
-			estraverse: 'estraverse/estraverse',
-			escope: 'escope/escope'
-		},
-		packages: [
-			{
-				name: "eslint",
-				location: "eslint/lib",
-				main: "eslint"
-			},
-			{
-				name: "eslint/conf",
-				main: "eslint/conf"
-		}]
-	},[
-		'javascript/astManager',
-		'javascript/contentAssist/indexFiles/mongodbIndex',
-		'javascript/contentAssist/indexFiles/mysqlIndex',
-		'javascript/contentAssist/indexFiles/postgresIndex',
-		'javascript/contentAssist/indexFiles/redisIndex',
-		'javascript/contentAssist/indexFiles/expressIndex',
-		'javascript/contentAssist/indexFiles/amqpIndex',
-		'javascript/contentAssist/contentAssist',
-		'javascript/contentAssist/indexer',
-		'javascript/validator',
-		'javascript/occurrences',
-		'javascript/outliner',
-		'orion/plugin',
-		'orion/editor/jsTemplateContentAssist',
-		'orion/editor/stylers/application_javascript/syntax',
-		'orion/editor/stylers/application_json/syntax',
-		'orion/editor/stylers/application_schema_json/syntax',
-		'orion/editor/stylers/application_x-ejs/syntax'
-	], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, Indexer, EslintValidator, Occurrences, Outliner,
+define([
+	'javascript/astManager',
+	'javascript/contentAssist/indexFiles/mongodbIndex',
+	'javascript/contentAssist/indexFiles/mysqlIndex',
+	'javascript/contentAssist/indexFiles/postgresIndex',
+	'javascript/contentAssist/indexFiles/redisIndex',
+	'javascript/contentAssist/indexFiles/expressIndex',
+	'javascript/contentAssist/indexFiles/amqpIndex',
+	'javascript/contentAssist/contentAssist',
+	'javascript/contentAssist/indexer',
+	'javascript/validator',
+	'javascript/occurrences',
+	'javascript/outliner',
+	'orion/plugin',
+	'orion/editor/jsTemplateContentAssist',
+	'orion/editor/stylers/application_javascript/syntax',
+	'orion/editor/stylers/application_json/syntax',
+	'orion/editor/stylers/application_schema_json/syntax',
+	'orion/editor/stylers/application_x-ejs/syntax'
+], function(ASTManager, MongodbIndex, MysqlIndex, PostgresIndex, RedisIndex, ExpressIndex, AMQPIndex, ContentAssist, Indexer, EslintValidator, Occurrences, Outliner,
 			PluginProvider, jsTemplateContentAssist, mJS, mJSON, mJSONSchema, mEJS) {
 
 	/**
