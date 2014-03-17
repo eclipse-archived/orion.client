@@ -168,7 +168,7 @@
 					<execution>
 						<phase>verify</phase>
 						<configuration>
-							<tasks>
+							<target unless="orion.client.build.skip">
 							    <!-- minify javascript -->
 								<property name="builder" value="${basedir}/releng/org.eclipse.orion.client.releng/builder/"/>
 								<property name="requirejsHome" value="${requirejsHome}"/>
@@ -187,7 +187,7 @@
 								    <target name="download3rdPartyLibs"/>
 								    <target name="jsdocs"/>
 								</ant>
-							</tasks>
+							</target>
 						</configuration>
 						<goals>
 							<goal>run</goal>
