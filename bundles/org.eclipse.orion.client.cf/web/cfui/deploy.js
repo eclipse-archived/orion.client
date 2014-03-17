@@ -21,7 +21,8 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			var progressPane = document.getElementById('progressPane'); //$NON-NLS-0$
 			var msgLabel = document.getElementById('messageLabel'); //$NON-NLS-0$
 			var msgNode;
-			var orgsTree = document.getElementById('orgsTree'); //$NON-NLS-0$
+			var orgsDropdownNode = document.getElementById('orgsSection');
+			var spacesTree = document.getElementById('spacesTree'); //$NON-NLS-0$
 			var okButton = document.getElementById('okbutton'); //$NON-NLS-0$
 			var explorer;
 			
@@ -220,15 +221,42 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 								function(result2){
 									hideMessage();
 									
-									var targets = [];
+									var div1 = document.createElement("div");
+									div1.id = "orgsLabel";
+									var label = document.createElement("label");
+									label.appendChild(document.createTextNode("Organization:"));
+									div1.appendChild(label);
+									orgsDropdownNode.appendChild(div1);
+
+									var div2 = document.createElement("div");
+									div2.id = "orgsDropdown";
+									var orgsDropdown = document.createElement("select");
 									result2.Orgs.forEach(function(org){
+										var option = document.createElement("option");
+										option.appendChild(document.createTextNode(org.Name));
+										option.org = org;
+										orgsDropdown.appendChild(option);
+									});
+									
+									orgsDropdown.onchange = function(event){
+										var selectedOrg = event.target.value;
+										loadTargets(selectedOrg);
+									};
+									
+									div2.appendChild(orgsDropdown);
+									orgsDropdownNode.classList.add("sectionTable");
+									orgsDropdownNode.appendChild(div2);
+																		
+									var targets = {};
+									result2.Orgs.forEach(function(org){
+										targets[org.Name] = [];
 										if (org.Spaces)
 											org.Spaces.forEach(function(space){
 												var newTarget = {};
 												newTarget.Url = target.Url;
 												newTarget.Org = org.Name;
 												newTarget.Space = space.Name;
-												targets.push(newTarget);
+												targets[org.Name].push(newTarget);
 											});
 									});
 									
@@ -239,12 +267,18 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 										serviceRegistry,
 										selection,
 										new SpacesRenderer({checkbox: false, singleSelection: true, treeTableClass: "Spaces"}));
-									var model = new mExplorer.ExplorerFlatModel(null, null, targets);
-									model.getId = function(item){
-										return item.Space + item.Org;
-									};
-									orgsTree.classList.add("sectionTable");
-									explorer.createTree(orgsTree.id, model, {});
+									
+									function loadTargets(org){
+										var model = new mExplorer.ExplorerFlatModel(null, null, targets[org]);
+										model.getId = function(item){
+											return item.Space + item.Org;
+										};
+										spacesTree.classList.add("sectionTable");
+										explorer.createTree(spacesTree.id, model, {});										
+									}
+									
+									loadTargets(orgsDropdown.value);
+									
 								}, function(error){
 									postError(error);
 								}
@@ -405,6 +439,16 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 	SpacesRenderer.prototype.getLabelColumnIndex = function() {
 		return 0;
 	};
+	SpacesRenderer.prototype.emptyCallback = function(bodyElement){
+		var tr = document.createElement("tr"); //$NON-NLS-0$
+		var td = document.createElement("td"); //$NON-NLS-0$
+		var noWorkspaceItems = document.createElement("div"); //$NON-NLS-0$
+		noWorkspaceItems.classList.add("noFile"); //$NON-NLS-0$
+		noWorkspaceItems.textContent = "No spaces found in this organization.";
+		td.appendChild(noWorkspaceItems);
+		tr.appendChild(td);
+		bodyElement.appendChild(tr);
+	}
 	SpacesRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		if(col_no===0){
 			var col = document.createElement("td"); //$NON-NLS-0$

@@ -31,8 +31,27 @@ html, body {
 	width: 100%;
 }
 
-#orgsTree{
+#orgsSection{
+    border: 0 none;
+    box-shadow: none;
+    margin-bottom: 10px;
+}
+
+#orgsDropdown{
+    float: right;
+    text-align: right;
+    width: calc(100% - 80px);
+}
+
+#orgsLabel{
+    border: 0 none;
+    float: left;
+    padding-top: 4px;
+    width: 80px;
+}
+
+#spacesTree{
     margin-bottom: 0;
-    max-height: 140px;
+    max-height: 100px;
     overflow-y: auto;
 }
