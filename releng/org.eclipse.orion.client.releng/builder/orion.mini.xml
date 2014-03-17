@@ -7,6 +7,7 @@
 		                       subfolder containing jars for Closure and Rhino.
 		${buildConfig}       Path to the RequireJS build config file for the product (eg. orion.build.js).
 		${buildDirectory}    Path to the directory where build will be performed.
+		${orionClient}       Path to the orion client repo. Optimized Orion page code is copied back into here.
 
 	Optional properties
 	======================================================================
@@ -43,7 +44,6 @@
 	<scriptdef name="finishBuiltModules" language="javascript" src="${builder}/scripts/finishModules.js">
 		<attribute name="buildfile" />
 		<attribute name="out" />
-		<attribute name="bundles" />
 	</scriptdef>
 
 	<scriptdef name="stageBundles" language="javascript" src="${builder}/scripts/stageBundles.js">
@@ -53,7 +53,6 @@
 
 	<macrodef name="finishModule">
 		<attribute name="out" />
-		<attribute name="bundles" />
 		<attribute name="name" />
 		<attribute name="bundle" />
 		<attribute name="pagedir" />
@@ -116,7 +115,7 @@
 				<arg value="dir=${out}" />
 			</java>
 
-			<finishBuiltModules buildfile="${buildfile}" out="${out}" bundles="${buildDirectory}/bundles" />
+			<finishBuiltModules buildfile="${buildfile}" out="${out}" />
 		</sequential>
 	</target>
 
@@ -184,7 +183,7 @@
 				buildfile="${staging}/browse.build.almond-js.js"
 				optimize="none"
 				staging="${staging}" />
-			<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web/browse/built" >
+			<copy todir="${orionClient}/bundles/org.eclipse.orion.client.ui/web/browse/built" >
 				<fileset dir="${out}" includes="built-browser.js, built-browser.css, built-browser.min.js"/>
 			</copy>
 		</sequential>
@@ -305,13 +304,13 @@
 
 		<!-- copy css back -->
 		<!-- TODO! this should be done automatically using the ${buildConfig} -->
-		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.ui/web" >
+		<copy todir="${orionClient}/bundles/org.eclipse.orion.client.ui/web" >
 			<fileset dir="${optimized}" includes="**/*.css" excludes="git/,profile/"/>
 		</copy>
-		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.git/web" >
+		<copy todir="${orionClient}/bundles/org.eclipse.orion.client.git/web" >
 			<fileset dir="${optimized}" includes="git/**/*.css" />
 		</copy>
-		<copy todir="${buildDirectory}/bundles/org.eclipse.orion.client.users/web" >
+		<copy todir="${orionClient}/bundles/org.eclipse.orion.client.users/web" >
 			<fileset dir="${optimized}" includes="profile/**/*.css" />
 		</copy>
 	</target>

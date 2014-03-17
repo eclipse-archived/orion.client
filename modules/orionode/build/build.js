@@ -72,7 +72,10 @@ var pathToTempDir = path.resolve(__dirname, '.temp');
 var pathToOutDir = path.resolve(__dirname, '.temp-optimized');
 
 // Arguments to format() for replacing the property ${buildDirectory} in a string
-var bundleFormatArgs = { buildDirectory: path.join(pathToOrionClientBundlesFolder, "../") };
+var bundleFormatArgs = {
+	buildDirectory: path.join(pathToOrionClientBundlesFolder, "../"),
+	orionClient: path.join(pathToOrionClientBundlesFolder, "../")
+};
 
 /**
  * Pass varargs to get numbered parameters, or a single object for named parameters.

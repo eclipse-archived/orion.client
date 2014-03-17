@@ -45,7 +45,6 @@ modules.forEach(function(module) {
 	var task = project.createTask("finishModule");
 	task.setOwningTarget(self.getOwningTarget()); // http://stackoverflow.com/a/12282731
 	task.setDynamicAttribute("out", attributes.get("out"));
-	task.setDynamicAttribute("bundles", attributes.get("bundles"));
 	task.setDynamicAttribute("name", baseName);
 	task.setDynamicAttribute("bundle", bundle);
 	task.setDynamicAttribute("pagedir", pageDir);
