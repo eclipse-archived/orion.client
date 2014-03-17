@@ -95,7 +95,6 @@ define([
 			this.menu = document.createElement("ul"); //$NON-NLS-0$
 			this.menu.classList.add("commandList"); //$NON-NLS-0$
 			this.menu.classList.add("layoutRight"); //$NON-NLS-0$
-			this.menu.classList.add("pageActions"); //$NON-NLS-0$
 			this.parentNode.appendChild(this.resourceName);
 			this.parentNode.appendChild(this.menu);
 

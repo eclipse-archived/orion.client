@@ -274,7 +274,6 @@ define([
 					this._breadCrumbName = this._lastRoot ? this._lastRoot.Name : "";
 					this._breadCrumbTarget = this._lastRoot;
 				}
-				//this._breadCrumbMaker("localBreadCrumb");
 				var view = this._getEditorView(evt.input, evt.contents, metadata);
 				this._setEditor(view ? view.editor : null);
 				evt.editor = this._editor;
@@ -327,7 +326,6 @@ define([
 					this.refresh(PageUtil.hash());
 				}.bind(this),
 				function(error){
-					console.log(error);
 					mInputManager.handleError(this._statusService, error);
 				}.bind(this));
 			} else {
