@@ -16,7 +16,7 @@
 	-->
 
 	<property name="super" value="Build specific targets and properties" />
-	<property name="editorOutDirectory" value="${buildDirectory}/built-js" />
+	<property name="widgetOutDirectory" value="${buildDirectory}/built-js" />
 	<property name="staging" value="${buildDirectory}/staging" />
 	<property name="optimized" value="${buildDirectory}/optimized" />
 
@@ -120,9 +120,19 @@
 		</sequential>
 	</target>
 
-	<target name="editorClean" unless="skipEditor">
-		<delete dir="${editorOutDirectory}" />
-		<mkdir dir="${editorOutDirectory}" />
+	<target name="widget.check">
+		<condition property="widget.run">
+			<or>
+				<not><isset property="skipBrowser" /></not>
+				<not><isset property="skipEditor" /></not>
+			</or>
+		</condition>
+	</target>
+
+	<!-- Clean widget output directory -->
+	<target name="widgetClean" depends="widget.check" if="widget.run">
+		<delete dir="${widgetOutDirectory}" />
+		<mkdir dir="${widgetOutDirectory}" />
 
 		<!--
 			Copy editor build files to ${staging} to make editorOptimize simpler. cssIn paths must be 
@@ -267,7 +277,7 @@
 
 		<mkdir dir="${staging}" />
 		<mkdir dir="${optimized}" />
-		<antcall target="editorClean">
+		<antcall target="widgetClean">
 			<param name="staging" value="${staging}" />
 		</antcall>
 
@@ -284,13 +294,13 @@
 		<!-- build readonly widget (unless skipBrowser is set) -->
 		<antcall target="browserOptimize">
 			<param name="staging" value="${staging}" />
-			<param name="out" value="${editorOutDirectory}" />
+			<param name="out" value="${widgetOutDirectory}" />
 		</antcall>
 
 		<!-- build standalone editor (unless skipEditor is set) -->
 		<antcall target="editorOptimize">
 			<param name="staging" value="${staging}" />
-			<param name="out" value="${editorOutDirectory}" />
+			<param name="out" value="${widgetOutDirectory}" />
 		</antcall>
 
 		<!-- copy css back -->
