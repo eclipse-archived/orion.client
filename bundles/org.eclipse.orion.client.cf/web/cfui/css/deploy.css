@@ -55,3 +55,17 @@ html, body {
     max-height: 100px;
     overflow-y: auto;
 }
+
+.progressWatch {
+	top: 3px;
+	position: relative;
+	display: inline-block;
+}
+
+.watchButton {
+	position: relative;
+}
+
+.watchBody{
+	position: relative;
+}

@@ -38,9 +38,34 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 				progressPane.classList.remove("running");
 			}
 			
-			showMessage("Getting spaces...");
-			
 			var selection;
+			
+			function setValid(valid){
+				if(valid){
+					okButton.classList.remove("disabled");
+				} else {
+					okButton.classList.add("disabled");
+				}
+				okButton.disabled = !valid;
+			}
+						
+			var validate = function() {
+				if(!selection){
+					setValid(false);
+					return;					
+				}
+				selection.getSelection(function(selection) {
+					if(selection===null || selection.length===0){
+						setValid(false);
+						return;
+					}
+					setValid(true);
+				});
+			};
+			
+			showMessage("Getting spaces...");
+			validate();
+			
 			
 			// register hacked pref service
 			
@@ -104,7 +129,7 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 			
 			var doAction = function() {
 				showMessage("Deploying...");
-				
+				setValid(false);
 				selection.getSelection(
 					function(selection) {
 						if(selection===null || selection.length===0){
@@ -161,18 +186,6 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 						);
 					}
 				);
-			};
-			
-			var validate = function() {
-				selection.getSelection(function(selection) {
-					if(selection===null || selection.length===0){
-						okButton.classList.add("disabled");
-						okButton.disabled = true;
-						return;
-					}
-					okButton.classList.remove("disabled");
-					okButton.disabled = false;
-				});
 			};
 
 			document.getElementById('okbutton').onclick = doAction;
