@@ -353,7 +353,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 		 * attached to the DOM or it is display=none.
 		 */
 		var window = doc.defaultView || doc.parentWindow;
-		if (getDisplay(window, doc, parent) !== "none" && getHeight(parent) <= 50) { //$NON-NLS-0$
+		if (!options.noComputeSize && getDisplay(window, doc, parent) !== "none" && getHeight(parent) <= 50) { //$NON-NLS-0$
 			var height = editor.getTextView().computeSize().height;
 			parent.style.height = height + "px"; //$NON-NLS-0$
 		}
