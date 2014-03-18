@@ -62,7 +62,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 			}
 			temp = temp.parentNode;
 		}
-		return display;
+		return display || "none"; //$NON-NLS-0$
 	}
 
 	/**	@private */
@@ -150,19 +150,7 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	
 	/**	@private */
 	function getHeight(node) {
-		if (node.clientHeight > 0) {
-			return node.clientHeight;
-		}
-		var document = node.ownerDocument;
-		var window = document.defaultView || document.parentWindow;
-		var height;
-		if (window.getComputedStyle) {
-			var style = window.getComputedStyle(node, null);
-			height = style.getPropertyValue("height"); //$NON-NLS-0$
-		} else if (node.currentStyle) {
-			height = node.currentStyle.height;
-		}
-		return parseInt(height, 10) || 0;
+		return node.clientHeight;
 	}
 	
 	/**
@@ -357,8 +345,12 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 				}
 			});
 		}
-		/* The minimum height of the editor is 50px */
-		if (getHeight(parent) <= 50) {
+		/*
+		 * The minimum height of the editor is 50px. Do not compute size if the editor is not
+		 * attached to the DOM or it is display=none.
+		 */
+		var window = doc.defaultView || doc.parentWindow;
+		if (getDisplay(window, doc, parent) !== "none" && getHeight(parent) <= 50) { //$NON-NLS-0$
 			var height = editor.getTextView().computeSize().height;
 			parent.style.height = height + "px"; //$NON-NLS-0$
 		}
