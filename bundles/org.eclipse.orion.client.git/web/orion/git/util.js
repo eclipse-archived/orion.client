@@ -93,6 +93,43 @@ define([
 			}
 		}
 	}
+	/**
+	 * Trims the message 
+	 */
+	function trimCommitMessage(message) {
+		var splitted = message.split(/\r\n|\n/);
+		while(splitted.length > 0 && /^\s*$/.test(splitted[0])) {
+			splitted.remove(0);
+		}
+		var maxMessageLength = 70;
+		if (splitted[0].length > 70) return splitted[0].substring(0,maxMessageLength)+'...';
+		return splitted[0];
+	}
+	
+	/**
+	 * Returns Change-Id and Signed-off-by if present
+	 */
+	function getGerritFooter(message) {
+		
+		var splitted = message.split(/\r\n|\n/);
+		var footer = {};
+		var changeIdCount = 0, 
+			signedOffBy = false;
+		for (var i = splitted.length-1; i >= 0; --i) {
+			if (splitted[i].indexOf("Change-Id: ") === 0) {	//$NON-NLS-0$
+				footer.changeId = splitted[i].substring(11,splitted[i].length);
+				if (++changeIdCount > 1) {
+					footer = {};
+					break;
+				};
+			} else if (!signedOffBy && splitted[i].indexOf("Signed-off-by: ") === 0) {	//$NON-NLS-0$
+				footer.signedOffBy = splitted[i].substring(15,splitted[i].length);
+				signedOffBy = true;
+			}
+		}
+		
+		return footer;
+	}
 
 	return {
 		statusUILocation: statusUILocation,
@@ -101,6 +138,8 @@ define([
 		isChange: isChange,
 		hasStagedChanges: hasStagedChanges,
 		hasUnstagedChanges: hasUnstagedChanges,
-		parseSshGitUrl: parseSshGitUrl
+		parseSshGitUrl: parseSshGitUrl,
+		trimCommitMessage: trimCommitMessage,
+		getGerritFooter: getGerritFooter
 	};
 });
