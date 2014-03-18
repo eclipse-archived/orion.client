@@ -207,6 +207,49 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		}
 		return trim;
 	}
+	/** @private */
+	function DOMReady(document, parent, className, callback) {
+		className = "_" + className + "DOMReady"; //$NON-NLS-1$ //$NON-NLS-0$
+		parent.classList.add(className); //$NON-NLS-0$
+		parent.__DOMReady = callback;
+		var id = className + "Style"; //$NON-NLS-0$
+		if (document.getElementById(id)) { return; }
+		var animationName = className + "Animation"; //$NON-NLS-0$
+		function insertListener(event) {
+			if (event.animationName === animationName) {
+				var target = event.target;
+				if (typeof target.__DOMReady === "function") { //$NON-NLS-0$
+					getWindow(document).setTimeout(function() {
+						target.__DOMReady();
+					}, 0);
+				}
+			}
+		}
+		function template(className, animationName) {
+			var props = ["", "-webkit-", "-moz-", "-ms-", "-o-"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var frames = "", classRule = "body ." + className + " {\n"; //$NON-NLS-1$ //$NON-NLS-0$
+			for (var i=0; i<props.length; i++) {
+				frames +=
+				"@" + props[i] + "keyframes " + animationName + " {\n" + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				"from { opacity: 0.99; }\n" + //$NON-NLS-0$
+				"to { opacity: 1; }\n" + //$NON-NLS-0$
+				"}\n"; //$NON-NLS-0$
+				classRule +=
+				props[i] + "animation-duration: 0.001s;\n" + //$NON-NLS-0$
+				props[i] + "animation-name: " + animationName + ";\n"; //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			classRule += "}"; //$NON-NLS-0$
+			return frames + classRule;
+		}
+		document.addEventListener("animationstart", insertListener, false); //$NON-NLS-0$
+		document.addEventListener("MSAnimationStart", insertListener, false);  //$NON-NLS-0$
+		document.addEventListener("webkitAnimationStart", insertListener, false); //$NON-NLS-0$
+		var style = document.createElement("style"); //$NON-NLS-0$
+		style.id = id;
+		var head = document.getElementsByTagName("head")[0] || document.documentElement; //$NON-NLS-0$
+		style.appendChild(document.createTextNode(template(className, animationName)));
+		head.insertBefore(style, head.firstChild);
+	}
 	
 	/**
 	 * @class
@@ -2903,7 +2946,7 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 		},
 		update: function(styleChanged, sync) {
 			if (!this._clientDiv) { return; }
-			if (styleChanged) {
+			if (styleChanged || this._metrics.invalid) {
 				this._updateStyle();
 			}
 			if (sync === undefined || sync) {
@@ -5095,6 +5138,18 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				this._createRuler(rulers[i]);
 			}
 			this._update();
+			// Detect when the parent is attached to the DOM or display
+			var self = this;
+			function checkDOMReady() {
+				if (!self._rootDiv) { return; }
+				self.update(true);
+				if (self._metrics.invalid) {
+					self._getWindow().setTimeout(function() {
+						checkDOMReady();
+					}, 100);
+				}
+			}
+			DOMReady(document, rootDiv, "textview", checkDOMReady); //$NON-NLS-0$
 		},
 		_defaultOptions: function() {
 			return {

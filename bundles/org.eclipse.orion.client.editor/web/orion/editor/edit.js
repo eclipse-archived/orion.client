@@ -62,7 +62,10 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 			}
 			temp = temp.parentNode;
 		}
-		return display || "none"; //$NON-NLS-0$
+		if (!temp || !display) {
+			return "none"; //$NON-NLS-0$
+		}
+		return display;
 	}
 
 	/**	@private */
