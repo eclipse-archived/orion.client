@@ -150,7 +150,19 @@ define('orion/editor/edit', [ //$NON-NLS-0$
 	
 	/**	@private */
 	function getHeight(node) {
-		return node.clientHeight;
+		if (node.clientHeight > 0) {
+			return node.clientHeight;
+		}
+		var document = node.ownerDocument;
+		var window = document.defaultView || document.parentWindow;
+		var height;
+		if (window.getComputedStyle) {
+			var style = window.getComputedStyle(node, null);
+			height = style.getPropertyValue("height"); //$NON-NLS-0$
+		} else if (node.currentStyle) {
+			height = node.currentStyle.height;
+		}
+		return parseInt(height, 10) || 0;
 	}
 	
 	/**
