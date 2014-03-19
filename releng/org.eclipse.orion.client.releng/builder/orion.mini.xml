@@ -141,6 +141,9 @@
 		<copy file="${builder}/scripts/editor.build-css.js" tofile="${staging}/editor.build-css.js" overwrite="true"/>
 		<copy file="${builder}/scripts/editor.build-js.js" tofile="${staging}/editor.build-js.js" overwrite="true"/>
 		<copy file="${builder}/scripts/editor.build.almond-js.js" tofile="${staging}/editor.build.almond-js.js" overwrite="true"/>
+		<copy file="${builder}/scripts/compare.build-css.js" tofile="${staging}/compare.build-css.js" overwrite="true"/>
+		<copy file="${builder}/scripts/compare.build-js.js" tofile="${staging}/compare.build-js.js" overwrite="true"/>
+		<copy file="${builder}/scripts/compare.build.almond-js.js" tofile="${staging}/compare.build.almond-js.js" overwrite="true"/>
 		<copy file="${builder}/scripts/browse.build-css.js" tofile="${staging}/browse.build-css.js" overwrite="true"/>
 		<copy file="${builder}/scripts/browse.build.almond-js.js" tofile="${staging}/browse.build.almond-js.js" overwrite="true"/>
 	</target>
@@ -167,6 +170,29 @@
 				buildfile="${staging}/editor.build.almond-js.js"
 				optimize="none"
 				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/built-compare.css"
+				buildfile="${staging}/compare.build-css.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/built-compare-amd.min.js"
+				buildfile="${staging}/compare.build-js.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/built-compare-amd.js"
+				buildfile="${staging}/compare.build-js.js"
+				optimize="none"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/built-compare.min.js"
+				buildfile="${staging}/compare.build.almond-js.js"
+				optimize="closure"
+				staging="${staging}" />
+			<widgetOptimizeFile out="${out}/built-compare.js"
+				buildfile="${staging}/compare.build.almond-js.js"
+				optimize="none"
+				staging="${staging}" />
+			<copy todir= "${out}" >
+				<fileset dir="${orionClient}/bundles/org.eclipse.orion.client.ui/web/font"  includes="OrionIconFont-Regular.eot, OrionIconFont-Regular.woff, OrionIconFont-Regular.ttf, OrionIconFont-Regular.svg"/>
+			</copy>
 		</sequential>
 	</target>
 
