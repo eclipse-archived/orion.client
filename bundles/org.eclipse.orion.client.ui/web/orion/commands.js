@@ -220,7 +220,7 @@ define([
 			} else {
 				processKey(evt);
 			}
-		};
+		}
 		
 		function CommandsProxy() {
 			this._init();
@@ -649,7 +649,7 @@ define([
 					node.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 					if (addCheck) {
 						var check = document.createElement("span"); //$NON-NLS-0$
-						check.classList.add("check");
+						check.classList.add("check"); //$NON-NLS-0$
 						check.appendChild(document.createTextNode(choice.checked ? "\u25CF" : "")); //$NON-NLS-1$ //$NON-NLS-0$
 						node.appendChild(check);
 					}
