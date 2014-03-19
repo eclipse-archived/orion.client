@@ -51,7 +51,7 @@ define ([
 					range.CommitLink = uriTemplate.expand(params);
 				}
 				serviceRegistry.getService("orion.core.blame")._setAnnotations(results); //$NON-NLS-0$
-			}
+			};
 			if (service.computeBlame) {
 				var context = {metadata: inputManager.getFileMetadata()};
 				service.computeBlame(EditorContext.getEditorContext(serviceRegistry), context).then(handleResult);

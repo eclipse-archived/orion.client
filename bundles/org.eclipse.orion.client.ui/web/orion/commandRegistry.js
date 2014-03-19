@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*jslint sub:true*/
- /*global define document window Image */
+/*jslint amd:true sub:true*/
+/*global console document window  */
  
 define([
 	'orion/commands',
@@ -913,7 +913,6 @@ define([
 						if (command.choiceCallback) {
 							// special case.  The item wants to provide a set of choices
 							var menuParent;
-							var nodeClass;
 							var nested;
 							if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
 								menuParent = parent;
@@ -921,8 +920,6 @@ define([
 								if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 									menuParent = document.createElement("li"); //$NON-NLS-0$
 									parent.appendChild(menuParent);
-								} else {
-									nodeClass = "commandMargins"; //$NON-NLS-0$
 								}
 							} else {
 								menuParent = parent;

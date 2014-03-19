@@ -70,6 +70,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 					}
 				}
 				
+				// TODO fixme this entire block does nothing
 				if(status==="" && this._lastOperation!=null){
 					if(this._lastOperation.type && this._lastOperation.type==="error"){
 						status=="error";

@@ -246,7 +246,7 @@ define([
 		_init: function() {
 			var editorPreferences = null;
 			if(this.preferences) {
-				editorPreferences = this.editorPreferences = new mEditorPreferences.EditorPreferences (this.preferences, function (prefs) {
+				editorPreferences = this.editorPreferences = new mEditorPreferences.EditorPreferences(this.preferences, function (prefs) {
 					if (!prefs) {
 						editorPreferences.getPrefs(this.updateSettings.bind(this));
 					} else {

@@ -1331,15 +1331,12 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
     SearchResultExplorer.prototype.onExpand = function(modelToExpand, childPosition, callback) {
         if (modelToExpand && modelToExpand.children && modelToExpand.children.length > 0 && typeof(childPosition) === "string") { //$NON-NLS-0$
             var childIndex = 0;
-            var forward = true;
             if (childPosition === "first") { //$NON-NLS-0$
                 childIndex = 0;
             } else if (childPosition === "last") { //$NON-NLS-0$
                 childIndex = modelToExpand.children.length - 1;
-                forward = false;
             } else {
                 childIndex = JSON.parse(childPosition);
-                forward = false;
             }
             if (typeof(childIndex) === "string" || childIndex < 0 || childIndex >= modelToExpand.children.length) { //$NON-NLS-0$
                 childIndex = 0;

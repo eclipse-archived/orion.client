@@ -11,11 +11,11 @@
  *******************************************************************************/
 /*global window define orion XMLHttpRequest confirm*/
 /*jslint sub:true*/
-define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
+define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
  'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/ImportDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog', 
  'orion/fileCommands', 'orion/editorCommands', 'orion/EventTarget',
  'orion/URITemplate', 'orion/PageLinks', 'orion/objects'],
-	function(messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog, ProjectOptionalParametersDialog, FileCommands, mEditorCommands, EventTarget,
+	function(require, messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog, ProjectOptionalParametersDialog, FileCommands, mEditorCommands, EventTarget,
 		URITemplate, PageLinks, objects){
 		var projectCommandUtils = {};
 		
@@ -108,7 +108,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				}, context.errorHandler
 			);
 		}
-	};
+	}
 	
 	var defaultLaunchCommandPrefix = "lastProjectDeploy_";
 	
@@ -201,7 +201,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 				context.errorHandler(error);
 			}
 		});
-	};
+	}
 	
 	var sharedDependencyDispatcher;
 	
@@ -792,7 +792,6 @@ define(['i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/comm
 					id: "orion.project.adddependency." + type,
 					tooltip: handler.addDependencyTooltip,
 					callback: function(data){
-						var def = new Deferred();
 						var item = forceSingleItem(data.items).Project;
 						
 						var func = arguments.callee;

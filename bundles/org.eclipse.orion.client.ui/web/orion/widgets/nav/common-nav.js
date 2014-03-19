@@ -261,7 +261,7 @@ define([
 		},
 		// Returns a deferred that completes once file command extensions have been processed
 		registerCommands: function() {
-			var commandRegistry = this.commandRegistry, serviceRegistry = this.registry;
+			var commandRegistry = this.commandRegistry;
 			var fileActionsScope = this.fileActionsScope;
 			var editActionsScope = this.editActionsScope;
 			var viewActionsScope = this.viewActionsScope;

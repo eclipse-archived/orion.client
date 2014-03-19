@@ -655,7 +655,15 @@ exports.ExplorerRenderer = (function() {
 				expandImage.classList.add(isExpanded === "progress" ? this._progressImageClass : isExpanded ? this._expandImageClass : this._collapseImageClass); //$NON-NLS-0$
 			}
 		},
-		
+
+		/**
+		 * Appends the image node with expand/collapse behavior
+		 * @param {Element} tableRow
+		 * @param {Element} placeHolder
+		 * @param {String} decorateImageClass
+		 * @param {String} spriteClass
+		 * @returns {Element} The image node
+		 */
 		getExpandImage: function(tableRow, placeHolder, /* optional extra decoration */ decorateImageClass, /* optional sprite class for extra decoration */ spriteClass){
 			var expandImage = document.createElement("span"); //$NON-NLS-0$
 			expandImage.id = this.expandCollapseImageId(tableRow.id);
@@ -669,6 +677,7 @@ exports.ExplorerRenderer = (function() {
 				decorateImage.classList.add(decorateImageClass);
 			}
 			var self = this;
+			// TODO should really avoid creating 1 listener per expandImage here
 			expandImage.onclick = function(evt) {
 				if (!self.explorer.getNavHandler().isDisabled(tableRow)) {
 					self.tableTree.toggle(tableRow.id);

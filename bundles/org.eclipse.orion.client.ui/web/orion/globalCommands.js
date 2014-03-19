@@ -136,34 +136,34 @@ define([
 		}
 	}
 
-	function setUserName(registry, node) {
-		var authService = registry.getService("orion.core.auth"); //$NON-NLS-0$
-		if (authService !== null) {
-			authService.getUser().then(function (jsonData) {
-				if (!jsonData) {
-					return;
-				}
-				var text;
-				if (jsonData.Name) {
-					text = document.createTextNode(jsonData.Name);
-				} else if (jsonData.login) {
-					text = document.createTextNode(jsonData.login);
-				}
-				if (text) {
-					if (node.childNodes.length > 0) {
-						if (node.childNodes[0].nodeType === 3) {
-							// replace original text
-							node.replaceChild(text, node.childNodes[0]);
-						} else {
-							node.insertBefore(text, node.childNodes[0]);
-						}
-					} else {
-						node.appendChild(text);
-					}
-				}
-			});
-		}
-	}
+//	function setUserName(registry, node) {
+//		var authService = registry.getService("orion.core.auth"); //$NON-NLS-0$
+//		if (authService !== null) {
+//			authService.getUser().then(function (jsonData) {
+//				if (!jsonData) {
+//					return;
+//				}
+//				var text;
+//				if (jsonData.Name) {
+//					text = document.createTextNode(jsonData.Name);
+//				} else if (jsonData.login) {
+//					text = document.createTextNode(jsonData.login);
+//				}
+//				if (text) {
+//					if (node.childNodes.length > 0) {
+//						if (node.childNodes[0].nodeType === 3) {
+//							// replace original text
+//							node.replaceChild(text, node.childNodes[0]);
+//						} else {
+//							node.insertBefore(text, node.childNodes[0]);
+//						}
+//					} else {
+//						node.appendChild(text);
+//					}
+//				}
+//			});
+//		}
+//	}
 
 	/**
 	 * Adds the user-related commands to the toolbar

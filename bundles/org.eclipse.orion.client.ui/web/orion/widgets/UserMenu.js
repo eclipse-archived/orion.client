@@ -210,7 +210,7 @@ define([
 		},
 		
 		getStartedDialog: function(getStartedData){
-			var taskPanel = new UATaskPanel( null, true, getStartedData );
+			new UATaskPanel( null, true, getStartedData );
 		},
 		
 		setKeyAssist: function(keyAssistFunction){

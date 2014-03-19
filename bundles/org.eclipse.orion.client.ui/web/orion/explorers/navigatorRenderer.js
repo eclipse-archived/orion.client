@@ -98,7 +98,6 @@ define([
 				link.appendChild(document.createTextNode(item.Name));
 			}
 		} else {
-			var i;			
 			if (!openWithCommands) {
 				openWithCommands = mExtensionCommands.getOpenWithCommands(commandService);
 			}
@@ -327,7 +326,7 @@ define([
 			var itemNode;
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				var image = this.getExpandImage(tableRow, span);
+				this.getExpandImage(tableRow, span);
 				itemNode = this.createFolderNode(item);
 
 				span.appendChild(itemNode);

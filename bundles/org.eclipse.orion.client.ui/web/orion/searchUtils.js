@@ -298,7 +298,6 @@ searchUtils.generateNewContents = function( updating, oldContents, newContents, 
 			var lineStringOrigin = oldContents[i];
 			var changingLine = false;
 			var checked = false;
-			var fullChecked = false;
 			var checkedMatches = [];
 			var originalMatches;
 			var k, startNumber = 0;
@@ -312,7 +311,6 @@ searchUtils.generateNewContents = function( updating, oldContents, newContents, 
 						}
 					}
 					checked = (checkedMatches.length > 0);
-					fullChecked = (checkedMatches.length === fileModelNode.children[j].matches.length);
 					originalMatches = fileModelNode.children[j].matches; 
 					changingLine = true;
 					break;
