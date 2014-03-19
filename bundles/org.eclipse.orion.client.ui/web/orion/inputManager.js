@@ -133,7 +133,10 @@ define([
 		 */
 		_read: function(location /**, readArgs*/) {
 			var cachedMetadata = this.cachedMetadata || mNavigatorRenderer.getClickedItem();
-			if (cachedMetadata && cachedMetadata.Location === location && cachedMetadata.Parents && cachedMetadata.Attributes) {
+			if (cachedMetadata && cachedMetadata.Location === location &&
+				cachedMetadata.Parents && cachedMetadata.Attributes &&
+				cachedMetadata.ETag
+			) {
 				return new Deferred().resolve(cachedMetadata);
 			}
 			var fileClient = this.fileClient;
