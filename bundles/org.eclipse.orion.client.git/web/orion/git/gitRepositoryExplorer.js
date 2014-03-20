@@ -10,9 +10,9 @@
  ******************************************************************************/
 /*global define document Image window*/
 define(['i18n!git/nls/gitmessages', 'require', 'orion/commandRegistry', 'orion/section', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/git/util', 'orion/URITemplate', 'orion/PageUtil', 'orion/dynamicContent', 'orion/fileUtils', 
-        'orion/globalCommands', 'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
+        'orion/globalCommands', 'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog', 'orion/git/util'], 
 		function(messages, require, mCommands, mSection, i18nUtil, lib, mGitUtil, URITemplate, PageUtil, mDynamicContent, mFileUtils, mGlobalCommands, mGitCommands, Deferred,
-				mCommitTooltip) {
+				mCommitTooltip, util) {
 var exports = {};
 	
 var repoTemplate = new URITemplate("git/git-repository.html#{,resource,params*}"); //$NON-NLS-0$
@@ -1004,7 +1004,7 @@ exports.GitRepositoryExplorer = (function() {
 		var titleLink = document.createElement("a");
 		titleLink.className = "navlinkonpage";
 		titleLink.href = require.toUrl(commitTemplate.expand({resource: commit.Location}));
-		titleLink.textContent = commit.Message;
+		titleLink.textContent = util.trimCommitMessage(commit.Message);
 		detailsView.appendChild(titleLink);
 
 		new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
