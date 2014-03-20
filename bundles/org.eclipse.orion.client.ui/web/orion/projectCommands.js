@@ -14,12 +14,13 @@
 define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 'orion/commands', 'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog',
  'orion/commandRegistry', 'orion/i18nUtil', 'orion/webui/dialogs/ImportDialog', 'orion/widgets/projects/ProjectOptionalParametersDialog', 
  'orion/fileCommands', 'orion/editorCommands', 'orion/EventTarget',
- 'orion/URITemplate', 'orion/PageLinks', 'orion/objects'],
+ 'orion/URITemplate', 'orion/PageLinks', 'orion/objects', 'orion/preferences'],
 	function(require, messages, lib, mCommands, Deferred, DirectoryPrompterDialog, mCommandRegistry, i18nUtil, ImportDialog, ProjectOptionalParametersDialog, FileCommands, mEditorCommands, EventTarget,
-		URITemplate, PageLinks, objects){
+		URITemplate, PageLinks, objects, mPreferences){
 		var projectCommandUtils = {};
 		
 		var progress;
+		var deployStore;
 		
 			
 	function forceSingleItem(item) {
@@ -101,7 +102,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		if(status.ToSave){
 			progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl, status.ToSave.Path, status.ToSave.UrlTitle, status.ToSave.Type), "Saving configuration").then(
 				function(configuration){
-					storeLastDeployment(context.project, context.deployService, configuration);
+					storeLastDeployment(context.project.Name, context.deployService, configuration);
 					if(sharedLaunchConfigurationDispatcher){
 						sharedLaunchConfigurationDispatcher.dispatchEvent({type: "create", newValue: configuration });
 					}
@@ -110,17 +111,15 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		}
 	}
 	
-	var defaultLaunchCommandPrefix = "lastProjectDeploy_";
-	
 	function storeLastDeployment(projectName, deployService, launchConfiguration){
 		var action;
-		if(window.sessionStorage){
+		if(deployStore){
 			if(launchConfiguration){
 				action = "orion.launchConfiguration.deploy." + launchConfiguration.ServiceId + launchConfiguration.Name;
 			} else {
 				action = "orion.project.deploy." + deployService.id;
 			}
-			window.sessionStorage[defaultLaunchCommandPrefix + projectName] = action;
+			deployStore.put(projectName, action);
 		}
 		if(sharedLaunchConfigurationDispatcher){
 			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changedDefault", newValue: action });
@@ -128,7 +127,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 	}
 	
 	projectCommandUtils.getDefaultLaunchCommand = function(projectName){
-		return window.sessionStorage[defaultLaunchCommandPrefix + projectName];
+		if(deployStore){
+			return deployStore.get(projectName);
+		}
 	};
 	
 	/**
@@ -626,6 +627,15 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 	 * @function
 	 */
 	projectCommandUtils.createProjectCommands = function(serviceRegistry, commandService, fileClient, projectClient, dependencyTypes, deploymentTypes) {
+		if(!deployStore){
+			var preferences = new mPreferences.PreferencesService(serviceRegistry);
+			preferences.getPreferences('/deploy/project').then(
+				function(deploySettings){
+					deployStore = deploySettings;
+				}
+			);
+		}
+		
 		progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		function errorHandler(error) {
 			if (progress) {

@@ -171,7 +171,7 @@ define([
 		},
 		createDefaultDeployCommand: function() {
 			var self = this;
-			var deployCommand =  new mCommands.Command({
+			this.deployCommand =  new mCommands.Command({
 				name: messages.Deploy,
 				tooltip: self.defaultDeployCommand ? (self.defaultDeployCommand.tooltip ? self.defaultDeployCommand.tooltip : self.defaultDeployCommand.name) : messages.Deploy,
 				id: "orion.project.deploy.default", //$NON-NLS-0$
@@ -183,8 +183,8 @@ define([
 				}
 			});
 			var commandRegistry = this.commandRegistry;
-			commandRegistry.addCommand(deployCommand);
-			commandRegistry.registerCommandContribution(this.additionalActionsScope, deployCommand.id, 0);
+			commandRegistry.addCommand(this.deployCommand);
+			commandRegistry.registerCommandContribution(this.additionalActionsScope, this.deployCommand.id, 0);
 		},
 		registerCommands: function() {
 			return CommonNavExplorer.prototype.registerCommands.call(this).then(function() {
@@ -202,11 +202,11 @@ define([
 				});
 
 				commandRegistry.addCommandGroup(additionalActionsScope, "orion.deployNavGroup", 1000, messages["Deploy As"], null, null, null, messages["Deploy As"], "dropdownSelection"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$							
-				var deployCommands = ProjectCommands.getDeployProjectCommands(commandRegistry);
-				if(deployCommands && deployCommands.length>0){
-					this.defaultDeployCommand = deployCommands[0];
+				this.deployCommands = ProjectCommands.getDeployProjectCommands(commandRegistry);
+				if(this.deployCommands && this.deployCommands.length>0){
+					this.defaultDeployCommand = this.deployCommands[0];
 					position = 0;
-					deployCommands.forEach(function(command){
+					this.deployCommands.forEach(function(command){
 						commandRegistry.registerCommandContribution(additionalActionsScope, command.id, position++, "orion.deployNavGroup"); //$NON-NLS-0$
 					});
 				}
@@ -235,7 +235,12 @@ define([
 						this.launchCommands.push(launchCommand);
 						this.commandRegistry.registerCommandContribution(this.additionalActionsScope, launchCommand, i+1, "orion.deployNavGroup/orion.deployLaunchConfigurationGroup"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
-					CommonNavExplorer.prototype.updateCommands.apply(this, selections);					
+					var defaultCommand = ProjectCommands.getDefaultLaunchCommand(this.treeRoot.Project.Name);
+					if (defaultCommand) {
+						this.defaultDeployCommand = this.commandRegistry.findCommand(defaultCommand) || this.deployCommands[0];
+						this.deployCommand.tooltip = this.defaultDeployCommand.tooltip ? this.defaultDeployCommand.tooltip : this.defaultDeployCommand.name;
+					}
+					CommonNavExplorer.prototype.updateCommands.apply(this, selections);
 				}
 				
 				this.projectClient.getProjectLaunchConfigurations(this.treeRoot.Project).then(function(launchConfigurations){
@@ -245,7 +250,12 @@ define([
 						this.launchConfigurationDispatcher = ProjectCommands.getLaunchConfigurationDispatcher();
 						this.launchConfigurationListener = function(event){
 							if(event.type === "changedDefault"){ //$NON-NLS-0$
-								_self.updateCommands(_self.selection.getSelections());
+								var defaultCommand = ProjectCommands.getDefaultLaunchCommand(_self.treeRoot.Project.Name);
+								if (defaultCommand) {
+									_self.defaultDeployCommand = _self.commandRegistry.findCommand(defaultCommand);
+									_self.deployCommand.tooltip = _self.defaultDeployCommand.tooltip ? _self.defaultDeployCommand.tooltip : _self.defaultDeployCommand.name;
+									CommonNavExplorer.prototype.updateCommands.apply(_self, selections);
+								}
 								return;
 							}
 							_self.selection.getSelections(function(selections){
@@ -269,7 +279,7 @@ define([
 								doUpdateForLaunchConfigurations.apply(_self, [_self.treeRoot.Project.launchConfigurations]);
 							});
 						};
-						this._launchConfigurationEventTypes = ["create", "delete"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						this._launchConfigurationEventTypes = ["create", "delete", "changedDefault"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						this._launchConfigurationEventTypes.forEach(function(eventType) {
 							_self.launchConfigurationDispatcher.addEventListener(eventType, _self.launchConfigurationListener);
 						});
