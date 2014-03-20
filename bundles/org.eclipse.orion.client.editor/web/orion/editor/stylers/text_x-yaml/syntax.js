@@ -25,9 +25,14 @@ define("orion/editor/stylers/text_x-yaml/syntax", [], function() { //$NON-NLS-0$
 				match: "^%(?:YAML|TAG)\\s.*", //$NON-NLS-0$
 				name: "meta.directive.yaml" //$NON-NLS-0$
 			}, {
-				begin: "^.*?:[\\t ]", //$NON-NLS-0$
+				begin: "^.*?:(?:[\\t ]|$)", //$NON-NLS-0$
 				end: "$", //$NON-NLS-0$
 				contentName: "string.unquoted.yaml", //$NON-NLS-0$
+				beginCaptures: {
+					0: {
+						name: "entity.name.key.yaml"
+					}
+				},
 				patterns: [
 					{include: "#numberSignComment"}, //$NON-NLS-0$
 					{
