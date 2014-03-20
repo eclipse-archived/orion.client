@@ -1031,6 +1031,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			var editor = this.editor;
 			var textView = editor.getTextView();
 			if (textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
+			var comment = this.lineComment || "//"; //$NON-NLS-0$
 			var model = editor.getModel();
 			var selection = editor.getSelection();
 			var firstLine = model.getLineAtOffset(selection.start);
@@ -1039,7 +1040,7 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 			for (var i = firstLine; i <= lastLine; i++) {
 				lineText = model.getLine(i, true);
 				lines.push(lineText);
-				if (!uncomment || (index = lineText.indexOf("//")) === -1) { //$NON-NLS-0$
+				if (!uncomment || (index = lineText.indexOf(comment)) === -1) {
 					uncomment = false;
 				} else {
 					if (index !== 0) {
@@ -1054,24 +1055,24 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 					}
 				}
 			}
-			var text, selStart, selEnd;
+			var text, selStart, selEnd, l = comment.length;
 			var lineStart = model.getLineStart(firstLine);
 			var lineEnd = model.getLineEnd(lastLine, true);
 			if (uncomment) {
 				for (var k = 0; k < lines.length; k++) {
 					lineText = lines[k];
-					index = lineText.indexOf("//"); //$NON-NLS-0$
-					lines[k] = lineText.substring(0, index) + lineText.substring(index + 2);
+					index = lineText.indexOf(comment);
+					lines[k] = lineText.substring(0, index) + lineText.substring(index + l);
 				}
 				text = lines.join("");
 				var lastLineStart = model.getLineStart(lastLine);
-				selStart = lineStart === selection.start ? selection.start : selection.start - 2;
-				selEnd = selection.end - (2 * (lastLine - firstLine + 1)) + (selection.end === lastLineStart+1 ? 2 : 0);
+				selStart = lineStart === selection.start ? selection.start : selection.start - l;
+				selEnd = selection.end - (l * (lastLine - firstLine + 1)) + (selection.end === lastLineStart+1 ? l : 0);
 			} else {
 				lines.splice(0, 0, "");
-				text = lines.join("//"); //$NON-NLS-0$
-				selStart = lineStart === selection.start ? selection.start : selection.start + 2;
-				selEnd = selection.end + (2 * (lastLine - firstLine + 1));
+				text = lines.join(comment);
+				selStart = lineStart === selection.start ? selection.start : selection.start + l;
+				selEnd = selection.end + (l * (lastLine - firstLine + 1));
 			}
 			editor.setText(text, lineStart, lineEnd);
 			editor.setSelection(selStart, selEnd);
@@ -1151,6 +1152,9 @@ define("orion/editor/actions", [ //$NON-NLS-0$
 		},
 		setAutoCompleteComments: function(enabled) {
 			this.autoCompleteComments = enabled;
+		},
+		setLineComment: function(lineComment) {
+			this.lineComment = lineComment;
 		},
 		setSmartIndentation: function(enabled) {
 			this.smartIndentation = enabled;
