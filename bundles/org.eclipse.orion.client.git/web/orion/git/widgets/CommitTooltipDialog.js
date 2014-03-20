@@ -11,8 +11,8 @@
  
  /*globals define window document Image*/
 
-define([ 'i18n!git/nls/gitmessages', 'require', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/webui/popupdialog'], 
-	function(messages, require, URITemplate, lib, i18nUtil, popupdialog) {
+define([ 'i18n!git/nls/gitmessages', 'require', 'orion/URITemplate', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/webui/popupdialog', 'orion/git/util'], 
+	function(messages, require, URITemplate, lib, i18nUtil, popupdialog, util) {
 
 	var commitTemplate = new URITemplate("git/git-commit.html#{,resource,params*}?page=1&pageSize=1"); //$NON-NLS-0$
 	
@@ -42,7 +42,7 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/URITemplate', 'orion/webu
 		var link = document.createElement("a"); //$NON-NLS-0$
 		link.className = "navlinkonpage"; //$NON-NLS-0$
 		link.href = require.toUrl(commitTemplate.expand({resource: commit.Location}));
-		link.textContent = commitMessage0;
+		link.textContent =  util.trimCommitMessage(commitMessage0);
 		tableNode.appendChild(link);
 		
 		var textDiv = document.createElement("div"); //$NON-NLS-0$
@@ -70,11 +70,26 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/URITemplate', 'orion/webu
 		commitNameDiv.style.paddingTop = "15px"; //$NON-NLS-0$
 		commitNameDiv.textContent = messages["commit:"] + commit.Name; //$NON-NLS-0$
 		textDiv.appendChild(commitNameDiv);
+		
+		var gerritFooter = util.getGerritFooter(commit.Message)
+
+		if (gerritFooter.changeId) {
+			var changeIdDiv = document.createElement("div"); //$NON-NLS-0$
+			changeIdDiv.style.paddingTop = "15px"; //$NON-NLS-0$
+			changeIdDiv.textContent = messages["Change-Id: "]+gerritFooter.changeId; //$NON-NLS-0$
+			textDiv.appendChild(changeIdDiv);
+		}
+		
+		if (gerritFooter.signedOffBy) {
+			var signedOffByDiv = document.createElement("div"); //$NON-NLS-0$
+			signedOffByDiv.textContent = messages["Signed-off-by: "]+gerritFooter.signedOffBy; //$NON-NLS-0$
+			textDiv.appendChild(signedOffByDiv);
+		}
 
 		if (commit.Parents && commit.Parents.length > 0) {
 			var parentNode = document.createElement("div"); //$NON-NLS-0$
 			parentNode.textContent = messages["parent:"]; //$NON-NLS-0$
-			
+			if (gerritFooter.signedOffBy || gerritFooter.changeId) parentNode.style.paddingTop = "15px";
 			var parentLink = document.createElement("a");
 			parentLink.className = "navlinkonpage"; //$NON-NLS-0$
 			parentLink.href = require.toUrl(commitTemplate.expand({resource: commit.Parents[0].Location}));
@@ -83,6 +98,10 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/URITemplate', 'orion/webu
 			
 			textDiv.appendChild(parentNode);
 		}
+		
+		
+		
+		
 
 		var displayBranches = commit.Branches && commit.Branches.length > 0;
 		var displayTags = commit.Tags && commit.Tags.length > 0;
