@@ -14,7 +14,15 @@
 define([
 	'orion/URL-shim'
 ], function(_) {
-	// Talk directly to the framework message plumbing
+	var pref = localStorage.getItem("jstools.worker"), useWorker = pref === null ? true : !!JSON.parse(pref);
+
+	if (!useWorker) {
+		// Non-worker case, for development only. This dependency will not be inlined by the RequireJS optimizer.
+		require(['javascriptPluginWorker.js']);
+		return;
+	}
+
+	// Worker case. Talk directly to the framework message plumbing
 	var framework;
 	if (window !== window.parent)
 		framework = window.parent;

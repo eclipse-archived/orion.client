@@ -13,17 +13,6 @@ html, body {
 	min-width:700px;
 } 
 
-h1 {
-	font-size:1.5em;
-	font-weight: bold;
-	color: #6d6d6d;
-	line-height: 36px;
-	position:absolute;
-	top:0;
-	bottom:0;
-	margin:auto;
-}
-
 h2 {
 	font-size: 1.1em;
 	font-weight: bold;
