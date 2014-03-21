@@ -21,10 +21,6 @@ define([
 			onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false
 	};
 	var validationOptions = DEFAULT_VALIDATION_OPTIONS;
-	var isEnabledFor = {
-		'application/json': true,
-		'text/html': true
-	};
 
 	function jslint(contents) {
 		JSLINT(contents, validationOptions);
@@ -80,9 +76,6 @@ define([
 	 * @param {String} contents Text of file.
 	 */
 	function _computeProblems(options, contents) {
-		if (!isEnabledFor[options.contentType]) {
-			return {problems: []};
-		}
 		var result = jslint(contents);
 		var problems = [];
 		var i;
@@ -178,66 +171,16 @@ define([
 		}
 	};
 
-	/**
-	 * Generates outline for an HTML document.
-	 * @param {String} contents
-	 * @returns {Object[]} Outline model
-	 */
-	function htmlOutline(contents) {
-		var outline = [];
-		var pattern = /id=['"]\S*["']/gi, // experimental: |<head[^>]*|<body[^>]*|<script[^>]*/gi;
-		    match;
-		while ((match = pattern.exec(contents)) !== null) {
-			var start = match.index,
-			    name = match[0],
-			    end;
-			if (name[0]==='<') {
-				name = "&lt;" + name.substring(1) + "&gt;";
-				start += 1;
-				end = start + name.length;
-			} else {
-				start += 4;
-				name = name.substring(4, name.length-1);
-				end = start+name.length;
-			}
-			var element = {
-				label: name,
-				children: null,
-				start: start,
-				end: end
-			};
-			outline.push(element);
-		}
-		return outline;
-	}
-
-	var outlineService = {
-		computeOutline: function(editorContext, context) {
-			return editorContext.getText().then(function(contents) {
-				var contentType = context.contentType;
-				if (contentType === "text/html") {
-					return htmlOutline(contents);
-				}
-			});
-		}
-	};
-
 	var headers = {
 		name: "Orion JSLint Service",
 		version: "1.0",
-		description: "This plugin provides JSLint functionality for outlining and validating HTML and JSON code."
+		description: "This plugin provides JSLint functionality for validating JSON."
 	};
 
 	var provider = new PluginProvider(headers);
 	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], validationService, {
-		contentType: ["application/javascript", "application/json", "text/html"],
+		contentType: ["application/json"],
 		pid: "jslint.config"
-	});
-	provider.registerService("orion.edit.outliner", outlineService, {
-		contentType: ["text/html"],	// TODO separate out HTML outline
-		nameKey: "Flat outline",
-		nls: "orion/editor/nls/messages",
-		id: "orion.edit.outliner.jslint"
 	});
 	provider.registerService("orion.core.setting",
 		{},
@@ -255,7 +198,6 @@ define([
 				}
 			]
 		});
-	//validationService.dispatchEvent = serviceProvider.dispatchEvent;
 	provider.connect();
 
 });
