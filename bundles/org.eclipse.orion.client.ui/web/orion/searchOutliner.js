@@ -25,8 +25,7 @@ define([
 	'orion/explorers/explorer',
 	'orion/EventTarget',
 	'orion/globalSearch/advSearchOptContainer',
-	'orion/webui/splitter'
-],  function(messages, require, lib, i18nUtil, mSection, mCommands, mCommandRegistry, mKeyBinding, mSelection, mExplorer, EventTarget, mAdvSearchOptContainer, splitter){
+],  function(messages, require, lib, i18nUtil, mSection, mCommands, mCommandRegistry, mKeyBinding, mSelection, mExplorer, EventTarget, mAdvSearchOptContainer){
 
 	/**
 	 * Instantiates the saved search service. This service is used internally by the
@@ -268,7 +267,8 @@ define([
 					content: '<div id="searchContent"></div>', //$NON-NLS-0$
 					useAuxStyle: true,
 					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
-					slideout: true
+					slideout: true,
+					canHide: true
 				});
 				this.searchSelection = new mSelection.Selection(serviceRegistry, "orion.searches.selection"); //$NON-NLS-0$
 				// add commands to the search section heading
@@ -330,16 +330,6 @@ define([
 		this._registry = options.serviceRegistry;
 		this.commandService = options.commandService;
 		this.advSearchOptContainer = new mAdvSearchOptContainer.AdvSearchOptContainer(this._parent, options.searcher, this._registry, this.commandService);
-		var outlinerParent = lib.node("outlineContainer"); //$NON-NLS-0$
-		var top = lib.$("#outlineTop", outlinerParent); //$NON-NLS-0$
-		var bottom = lib.$("#outlineBottom", outlinerParent); //$NON-NLS-0$
-		var splitNode = lib.$(".outlinerSplitLayout", outlinerParent); //$NON-NLS-0$
-		splitNode.id = "searchOutlineSplitter"; //$NON-NLS-0$
-		//The vertical splitter has to adjust the top and bottm pane when the outliner is refreshed by the click on browser's refresh.
-		//Otherwise there the bottom pane is a little offset.
-		window.setTimeout(function() { 
-			this._splitter = new splitter.Splitter({node: splitNode, sidePanel: top, mainPanel: bottom, toggle: true, vertical: true, closeReversely: true});
-		}, 100);
 	}
 	SearchBuilder.prototype = /** @lends orion.navoutliner.SearchOutliner.prototype */ {
 		loadSearchParams: function(searchParams) {

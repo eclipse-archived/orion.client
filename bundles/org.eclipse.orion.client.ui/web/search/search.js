@@ -17,13 +17,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility
         'orion/contentTypes', 'orion/searchUtils', 'orion/PageUtil','orion/webui/littlelib'], 
 		function(messages, require, mBrowserCompatibility, mBootstrap, mStatus, mProgress, mDialogs, mCommandRegistry, mSearchOutliner, 
 				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil, lib) {
-	function makeHref(fileClient, seg, location, searchParams, searcher){
-		var searchLocation = (!location || location === "" || location === "root") ? searcher.getSearchRootLocation() : location; //$NON-NLS-0$
-		var newParams = mSearchUtils.copySearchParams(searchParams);
-		newParams.resource = searchLocation;
-		seg.href = mSearchUtils.generateSearchHref(newParams);
-	}
-
+	
 	function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchBuilder, searchParams, progress){
 		var searchLoc = searchParams.resource;
 		var title = searchParams.replace ? messages["Replace All Matches"] : messages["Search Results"];
@@ -32,19 +26,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility
 				searcher.setRootLocationbyURL(searchLoc);
 				searcher.setLocationbyURL(searchLoc);
 				mGlobalCommands.setPageTarget({task: "Search", title: title, serviceRegistry: serviceRegistry, //$NON-NLS-0$
-					commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: fileClient.fileServiceName(searchLoc),
-					makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
-					searcher.setChildrenLocationbyURL(searchLoc);
-					searchBuilder.loadSearchParams(searchParams);
-					searchResultsGenerator.loadResults(searchParams);
+					commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: "Search", staticBreadcrumb: true}); //$NON-NLS-0$
+				searcher.setChildrenLocationbyURL(searchLoc);
+				searchBuilder.loadSearchParams(searchParams);
+				searchResultsGenerator.loadResults(searchParams);
 			} else {
 				(progress ? progress.progress(fileClient.read(searchLoc, true), "Loading file metadata " + searchLoc) : fileClient.read(searchLoc, true)).then( //$NON-NLS-0$
 					function(metadata) {
 						mGlobalCommands.setPageTarget({task: "Search", title: title, target: metadata, serviceRegistry: serviceRegistry,  //$NON-NLS-0$
-							fileService: fileClient, commandService: commandService, searchService: searcher, breadcrumbRootName: "Search", //$NON-NLS-0$
-							makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
-							searchBuilder.loadSearchParams(searchParams);
-							searchResultsGenerator.loadResults(searchParams);
+							fileService: fileClient, commandService: commandService, searchService: searcher, staticBreadcrumb: true, breadcrumbRootName: "Search"}); //$NON-NLS-0$
+						searchBuilder.loadSearchParams(searchParams);
+						searchResultsGenerator.loadResults(searchParams);
 					}.bind(this),
 					function(error) {
 						window.console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
@@ -53,10 +45,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/browserCompatibility
 			}
 		} else {
 			mGlobalCommands.setPageTarget({task: "Search", title: title, serviceRegistry: serviceRegistry,  //$NON-NLS-0$
-				commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: "Search", //$NON-NLS-0$
-				makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
-				searchBuilder.loadSearchParams(searchParams);
-				searchResultsGenerator.loadResults(searchParams);
+				commandService: commandService, searchService: searcher, fileService: fileClient, staticBreadcrumb: true, breadcrumbRootName: "Search"}); //$NON-NLS-0$
+			searchBuilder.loadSearchParams(searchParams);
+			searchResultsGenerator.loadResults(searchParams);
 		}
 	}
 	mBootstrap.startup().then(function(core) {

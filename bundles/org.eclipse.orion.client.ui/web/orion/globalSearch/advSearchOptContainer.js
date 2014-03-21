@@ -26,8 +26,13 @@ define([
 	'orion/objects',
 	'orion/EventTarget',
 	'orion/widgets/filesystem/filesystemSwitcher',
-	'text!orion/globalSearch/searchBuilder.html'], 
-		function(messages, require, mFileClient, mSearchUtils, mContentTypes, i18nUtil, lib, mInputCompletion, Deferred, mCommands, mSection, objects, EventTarget, mFilesystemSwitcher, optionTemplate){
+	'text!orion/globalSearch/searchBuilder.html',
+	'orion/explorers/explorer-table',
+	'orion/explorers/explorerNavHandler',
+	'orion/explorers/navigatorRenderer',
+	'orion/PageUtil',
+	'orion/selection'
+], function(messages, require, mFileClient, mSearchUtils, mContentTypes, i18nUtil, lib, mInputCompletion, Deferred, mCommands, mSection, objects, EventTarget, mFilesystemSwitcher, optionTemplate, mExplorerTable, mExplorerNavHandler, mNavigatorRenderer, mPageUtil, mSelection){
 
 	/**
 	 * @name orion.search.AdvSearchOptRenderer
@@ -43,14 +48,21 @@ define([
 		this._parentDiv = parentDiv;
 		this._searcher = searcher;
 		this._serviceRegistry = serviceRegistry;
+		this._contentTypeService = this._serviceRegistry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
+		if(!this._contentTypeService){
+			this._contentTypeService = new mContentTypes.ContentTypeRegistry(this._serviceRegistry);
+		}
+		this.contentTypesCache = this._contentTypeService.getContentTypes();
 		this._commandService = commandService;
         this.fileClient = new mFileClient.FileClient(this._serviceRegistry);
         this.fsToolbar = null;
-        this.fileSysChangeListener = function(evt) {
-			var href = mSearchUtils.generateSearchHref({resource : evt.newInput});
+        this.fileSysChangeListener = (function(evt) {
+        	var rootURL = evt.newInput;
+			var href = mSearchUtils.generateSearchHref({resource : rootURL});
 			window.location = href;
-        };
-		this.addEventListener("filesystemChanged", this.fileSysChangeListener);
+			this._rootURL = rootURL;
+        }).bind(this);
+		this.addEventListener("filesystemChanged", this.fileSysChangeListener); //$NON-NLS-0$
 		if (!this.fsToolbar) {
 			var fsToolbar = this.fsToolbar = document.createElement("div"); //$NON-NLS-0$
 			fsToolbar.classList.add("fsToolbarLayout"); //$NON-NLS-0$
@@ -72,13 +84,21 @@ define([
 		destroy: function() {
 			this.removeEventListener("filesystemChanged", this.fileSysChangeListener); //$NON-NLS-0$
 			this.fileSysChangeListener = null;
+			if (this._searchScopeExplorer) {
+				this._searchScopeExplorer.destroy();
+				this._searchScopeExplorer = null;
+			}
 		},
 		
-		getOptions: function(includeLocation){
-			var resource;
-			if(includeLocation) {
-				resource = this._searchParams ? this._searchParams.resource : this._searcher.getSearchRootLocation();
-			}
+		getOptions: function(){
+			var resource = ""; //$NON-NLS-0$
+			this._searchLocations.forEach(function(searchLocation){
+				if (resource) {
+					resource = resource.concat(","); //$NON-NLS-0$
+				}
+				resource = resource.concat(searchLocation);
+			}, this);
+
 			return {keyword: this._searchBox.value,
 					sort: this._sortBy.options[this._sortBy.selectedIndex].value,
 					rows: 40,
@@ -90,12 +110,26 @@ define([
 			        resource: resource
 			};
 		},
-	
+		
 		loadSearchParams: function(searchParams){
 			this._searchParams = searchParams;
 			this._locationName = null;
-			this.dispatchEvent({ type: "rootChanged", root: this.fileClient.fileServiceRootURL(this._searchParams.resource) }); //$NON-NLS-0$
-	        if (this._searchParams.resource.length > 0) {
+			//TODO handle resource parameter containing multiple resources once multiple file/folder search is enabled (see getOptions())
+			this._rootURL = this.fileClient.fileServiceRootURL(this._searchParams.resource);
+			
+			var loadRootOnly = function() {
+				this._searchLocations = [this._rootURL];
+	        	if (this._searchScopeExplorer) {
+	        		this._searchScopeExplorer.loadRoot(this._rootURL);
+	        	}
+	            this._locationName = messages["root"]; //$NON-NLS-0$
+	            if(this._searchNameBox){
+					this._searchNameBox.value = this._getDefaultSaveName();
+				}
+			}.bind(this);
+			
+			this.dispatchEvent({type: "rootChanged", root: this._rootURL}); //$NON-NLS-0$
+	        if ((this._searchParams.resource.length > 0) && (this._rootURL !== this._searchParams.resource)) {
 	            this._serviceRegistry.getService("orion.page.progress").progress(this.fileClient.read(this._searchParams.resource, true), "Getting file metadata " + this._searchParams.resource).then( //$NON-NLS-1$ //$NON-NLS-0$
 	            function(meta) {
 	                var parentName = meta.Parents ? mSearchUtils.fullPathNameByMeta(meta.Parents) : "";
@@ -103,21 +137,22 @@ define([
 		            if(this._searchNameBox){
 						this._searchNameBox.value = this._getDefaultSaveName();
 					}
-	            }.bind(this),
-	
-	            function(error) {
-	                this._locationName = "root"; //$NON-NLS-0$
-		            if(this._searchNameBox){
-						this._searchNameBox.value = this._getDefaultSaveName();
+					
+					if (this._searchScopeSection) {
+						this._searchLocations = [this._searchParams.resource];
+						
+						if (this._searchScopeExplorer) {
+							this._searchScopeExplorer.loadRoot(this._rootURL).then(function(){
+								this._searchScopeExplorer.reveal(meta);
+							}.bind(this));	
+						}
 					}
-	            }.bind(this));
+	            }.bind(this),
+	            loadRootOnly);
 	        } else {
-	            this._locationName = "root"; //$NON-NLS-0$
-	            if(this._searchNameBox){
-					this._searchNameBox.value = this._getDefaultSaveName();
-				}
+	        	loadRootOnly();
 	        }
-	        //this._searchHelper = mSearchUtils.generateSearchHelper(searchParams);
+
 			this._loadSearchParams();
 		},
 	
@@ -145,17 +180,10 @@ define([
 		},
 	
 		render: function(){
-			var contentTypeService = this._serviceRegistry.getService("orion.core.contentTypeRegistry"); //$NON-NLS-0$
-			if(!contentTypeService){
-				contentTypeService = new mContentTypes.ContentTypeRegistry(this._serviceRegistry);
-				this.contentTypesCache = contentTypeService.getContentTypes();
+			this._contentTypeService.getContentTypes().then(function(ct) {
+				this.contentTypesCache = ct;
 				this._render();
-			} else {
-				contentTypeService.getContentTypes().then(function(ct) {
-					this.contentTypesCache = ct;
-					this._render();
-				}.bind(this));
-			}
+			}.bind(this));
 		},
 	
 		_render: function(){
@@ -184,7 +212,7 @@ define([
 		
 	    _saveSearch: function() {
 			if(this._searchBox.value && this._searchNameBox.value){
-				var searchParams = this.getOptions(true);
+				var searchParams = this.getOptions();
 			    var query = mSearchUtils.generateSearchHref(searchParams).split("#")[1]; //$NON-NLS-0$
 				this._serviceRegistry.getService("orion.core.savedSearches").addSearch(this._searchNameBox.value, query); //$NON-NLS-0$
 			}
@@ -193,7 +221,7 @@ define([
 	    _getDefaultSaveName: function() {
 	        if (this._searchBox && this._searchBox.value) {
 	            var qName = "\'" + this._searchBox.value + "\' in "; //$NON-NLS-1$ //$NON-NLS-0$
-	            var locName = "root"; //$NON-NLS-0$
+	            var locName = messages["root"]; //$NON-NLS-0$
 	            if(this._locationName){
 					locName = this._locationName;
 	            }
@@ -402,6 +430,8 @@ define([
 			domWrapperList = [];
 	        this._commandService.renderCommands("advSaveSearchCmd", "advSaveSearchCmd", this, this, "button", null, domWrapperList); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	        domWrapperList[0].domNode.classList.add("search-button"); //$NON-NLS-0$
+	        
+	        this._initSearchScope();
 		},
 		
 		_initHTMLLabels: function(){
@@ -413,6 +443,154 @@ define([
 			document.getElementById("advSearchCaseSensitiveLabel").appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-0$ //$NON-NLS-0$
 			document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-0$ //$NON-NLS-0$
 			document.getElementById("advSortByLabel").appendChild(document.createTextNode(messages["Sort by"])); //$NON-NLS-0$ //$NON-NLS-0$
+		},
+		
+		_initSearchScope: function() {
+			this._searchLocations = [];
+			var resource = mPageUtil.matchResourceParameters().resource;
+			this._rootURL = this.fileClient.fileServiceRootURL(resource);
+			
+			if (resource) {
+				this._searchLocations.push(resource);
+			} else {
+				this._searchLocations.push(this._rootURL);
+			}
+			
+			this._searchScopeDiv = lib.$("#searchScope", this._parentDiv); //$NON-NLS-0$
+			
+			this._searchScopeSection = new mSection.Section(this._searchScopeDiv, {
+				id: "searchScopeSection", //$NON-NLS-0$
+				title: messages["Scope"] + ": ", //$NON-NLS-0$
+				canHide: true,
+				hidden: true
+			});
+			this._setSearchScopeTitle();
+		
+			var scopeExplorerNode = document.createElement("div"); //$NON-NLS-0$
+			scopeExplorerNode.id = "searchScopeExplorerNode"; //$NON-NLS-0$
+			
+			var selectionModel = new mSelection.Selection(this._serviceRegistry, "searchScopeSelection"); //$NON-NLS-0$
+			this._selectionListener = (function(event) { //$NON-NLS-0$
+				this._searchLocations = [];
+				var selections = event.selections;
+
+				if (selections) {
+					selections.forEach(function(selection){
+						this._searchLocations.push(selection.Location);
+					}, this);
+				} else {
+					this._searchLocations.push(this._rootURL);
+				}
+				
+				if (this._searchLocations) {
+					this._searcher.setLocationbyURL(this._searchLocations.join(","));
+				}
+				
+				this._setSearchScopeTitle();		
+			}).bind(this);
+			selectionModel.addEventListener("selectionChanged", this._selectionListener); //$NON-NLS-0$
+			
+			this._searchScopeExplorer = new ScopeExplorer({
+				parentId: scopeExplorerNode,
+				serviceRegistry: this._serviceRegistry,
+				fileClient: this.fileClient,
+				commandRegistry: this._commandService,
+				contentTypeRegistry: this._contentTypeService,
+				selection: selectionModel,
+				advSearchOptRenderer: this
+			});
+			
+			this._searchScopeSection.embedExplorer(this._searchScopeExplorer, scopeExplorerNode);	
+//			this._searchScopeExplorer.setCommandsVisible(true, "singleSelection"); //$NON-NLS-0$ //TODO remove "singleSelection" once multiple selection is supported
+			this._searchScopeExplorer.setCommandsVisible(true);
+			this._searchScopeExplorer.loadRoot(this._rootURL);
+		},
+		
+		_setSearchScopeTitle: function() {
+			var titleElement = this._searchScopeSection.getTitleElement();
+			lib.empty(titleElement);
+			titleElement.appendChild(document.createTextNode(messages["Scope"] + ": ")); //$NON-NLS-0$
+			
+			this._searchLocations.forEach(function(searchLocation){
+				var decodedLocation = decodeURI(searchLocation);
+				var scopeString = decodedLocation;
+				var rootName = this.fileClient.fileServiceRootURL(scopeString);
+				if (rootName === searchLocation) {
+					//replace location string with "root"
+					scopeString = messages["root"]; //$NON-NLS-0$
+				} else {
+					//set scopeString to resource name
+					var segments = scopeString.split("/");
+					if (segments) {
+						scopeString = segments.pop();
+						if (!scopeString) {
+							// scopeString ended with '/', last element in array returned by 
+							// split() was empty, pop again to get the name
+							scopeString = segments.pop();
+						}
+					}
+				}
+												
+				var locationElement = document.createElement("span"); //$NON-NLS-0$
+				locationElement.classList.add("searchScopeElement"); //$NON-NLS-0$
+				locationElement.dataset.locationString = searchLocation;
+				locationElement.title = decodedLocation;
+				
+				if (scopeString !== messages["root"]) {
+					var locationText = document.createElement("span"); //$NON-NLS-0$
+					locationText.classList.add("searchScopePreButtonText"); //$NON-NLS-0$
+					locationText.appendChild(document.createTextNode(scopeString));
+					locationElement.appendChild(locationText);
+					this._insertDeleteButton(locationElement);
+				} else {
+					locationElement.appendChild(document.createTextNode(scopeString));
+				}
+				
+				titleElement.appendChild(locationElement);	
+			}, this);
+		},
+		
+		_insertDeleteButton: function(locationElement) {
+			var deleteButton = document.createElement("button"); //$NON-NLS-0$
+			deleteButton.classList.add("imageSprite"); //$NON-NLS-0$
+			deleteButton.classList.add("core-sprite-delete"); //$NON-NLS-0$
+			deleteButton.classList.add("scopeDeleteButton"); //$NON-NLS-0$
+			locationElement.appendChild(deleteButton);
+			
+			var deleteButtonHandler = (function(){
+				var locationString = locationElement.dataset.locationString;
+				var index = this._searchLocations.indexOf(locationString);
+				this._searchLocations.splice(index, 1); //remove element from _searchLocations array
+				if (0 === this._searchLocations.length) {
+					this._searchLocations.push(this.fileClient.fileServiceRootURL());
+				}
+				
+				//find model in explorer
+				var explorer = this._searchScopeExplorer;
+				var navHandler = explorer.getNavHandler();
+				if ("singleSelection" === navHandler.getSelectionPolicy()) {
+					explorer.selection.setSelections(null);
+					navHandler.refreshSelection(true, true);
+				} else {
+					var selections = explorer.selection.getSelections();
+					var model = null;
+					selections.some(function(selection){
+						if (selection.Location === locationString){
+							model = selection;
+							return true; //found it, stop iterating
+						}
+						return false;
+					});
+					
+					if (model) {
+						//deselect model
+						navHandler.setSelection(model, true, false);	
+					}
+				}
+				this._setSearchScopeTitle();
+			}).bind(this);
+			
+			deleteButton.addEventListener("click", deleteButtonHandler);
 		}
 	});
 	
@@ -431,6 +609,70 @@ define([
 	};
 	
 	AdvSearchOptContainer.prototype.constructor = AdvSearchOptContainer;
+	
+	
+	var FileExplorer = mExplorerTable.FileExplorer;
+	var NavigatorRenderer = mNavigatorRenderer.NavigatorRenderer;
+	var ExplorerNavHandler = mExplorerNavHandler.ExplorerNavHandler;
+	
+	function ScopeExplorer(options) {
+		options.setFocus = false;   // do not steal focus on load
+		options.cachePrefix = null; // do not persist table state
+		options.excludeFiles = true; // do not show files
+		
+		options.rendererFactory = function(explorer) {
+			var renderer = new NavigatorRenderer({
+				checkbox: false,
+				showFolderImage: true,
+				treeTableClass: "sectionTreeTable" //$NON-NLS-0$
+			}, explorer, options.commandRegistry, options.contentTypeRegistry);
+			renderer.oneColumn = true; //don't show modification date and size
+			renderer.showFolderLinks = false; //show folder names but don't render links for them
+			return renderer;
+		};
+		
+		options.navHandlerFactory = {createNavHandler: function(explorer, explorerNavDict, options) {
+			options.setFocus = false;
+			options.gridClickSelectionPolicy = "active"; //clicking on children causes row to be selected
+			return new ScopeNavHandler(explorer, explorerNavDict, options);
+		}};
+		
+		FileExplorer.apply(this, arguments);
+		this.treeRoot = {};
+	}
+	ScopeExplorer.prototype = Object.create(FileExplorer.prototype);
+	objects.mixin(ScopeExplorer.prototype, /** @lends orion.ScopeExplorer.prototype */ {
+		loadRoot: function(root) {
+			var path = root || this.fileClient.fileServiceRootURL();
+			return this.loadResourceList(path);
+		}
+	});
+	ScopeExplorer.prototype.constructor = ScopeExplorer;
+	
+	function ScopeNavHandler(explorer, explorerNavDict, options) {
+		ExplorerNavHandler.apply(this, arguments);
+	}
+	ScopeNavHandler.prototype = Object.create(ExplorerNavHandler.prototype);
+	objects.mixin(ScopeNavHandler.prototype, /** @lends orion.ScopeNavHandler.prototype */ {
+		//overrides ExplorerNavHandler.onClick
+		onClick: function(model, mouseEvt) {
+			ExplorerNavHandler.prototype.onClick.call(this, model, mouseEvt);
+			
+			var twistieSpan = lib.node(this.explorer.renderer.expandCollapseImageId(this.model.getId(model)));
+			if(mouseEvt.target !== twistieSpan){ //don't do anything if twistie was clicked
+				//toggle the model's expand/collapse state
+				if (this.isExpandable(model)){
+					if (!this.isExpanded(model)){
+						this.explorer.myTree.expand(model);
+					} else {
+						this.explorer.myTree.collapse(model);
+					}
+				}
+			}
+		}
+	});
+	ScopeNavHandler.prototype.constructor = ScopeNavHandler;
+	
 	
 	//return module exports
 	return {

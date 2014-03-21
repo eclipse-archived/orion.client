@@ -210,6 +210,10 @@ textarea.parameterInput {
 	border-spacing: 8px;
 }
 
+.selectableNavRow:hover {
+	background-color: #cedce7;
+}
+
 .disabledNavRow > .navColumn > .mainNavColumn {
 	outline: 1px dashed lightgray;
 }
@@ -231,7 +235,7 @@ textarea.parameterInput {
 }
 
 .singleNavColumn {
-	width: 100%;
+	width: calc(100% - 6px); /* accounts for left border width */
 	white-space: nowrap;
 }
 
@@ -988,6 +992,91 @@ textarea.parameterInput {
 
 .sectionTable div.lightTreeTableRow:last-child, .sectionTable div.lightTreeTableRow:last-child{
 	border-bottom: 0;
+}
+
+/* Saved Searches section */
+#searchSectionContent.sectionTable {
+	box-shadow: none;
+}
+
+#searchSectionContent.sectionTable .mainNavColumn {
+	padding-right: 0;
+}
+
+/* Search Scope section */
+.searchScope .sectionWrapper {
+	color: #222; /* same as globalSearch.css->.search-label */
+	margin: 0 5px;
+}
+
+.searchScope .sectionWrapper.sectionClosed {
+	opacity: 1;
+}
+
+.searchScope .sectionTable {
+	background-color: white;
+	box-shadow: none;
+	margin: 2px 10px;
+}
+
+.searchScope .sectionTable .mainNavColumn span{
+	color: #222;
+}
+
+.searchScope .sectionTitle {
+	margin-top: 2px;
+	max-width: calc(100% - 30px);
+}
+
+.searchScope span.core-sprite-closedarrow, .searchScope span.core-sprite-openarrow {
+	cursor: pointer;
+}
+
+.searchScope span.core-sprite-closedarrow:hover, .searchScope span.core-sprite-openarrow:hover {
+	color: #F58B0F;
+}
+
+.searchScopeElement {
+	background-color: whitesmoke;
+	border: 1px solid lightgray;
+	border-radius: 5px;
+	color: #222;
+	cursor: initial;
+	display: inline-block;
+	font-weight: normal;
+	margin: 0 2px;
+	padding: 0 3px;
+	max-width: 100%; /* prevents div from overflowing parent */
+	white-space: nowrap;
+}
+
+.searchScopePreButtonText {
+	display: inline-block;
+	max-width: calc(100% - 15px);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	vertical-align: bottom;
+}
+
+button.scopeDeleteButton {
+	font-size: 14px;
+	margin-left: 2px;
+}
+
+button.scopeDeleteButton:hover {
+	color: #F58B0F;
+}
+
+.searchOutlineContainer {
+	height:100%;
+	width:100%;
+	position:relative;
+	overflow-y: auto;
+}
+
+.searchOutlineContainer .filesystemSwitcher .dropdownMenu {
+	position: fixed;
 }
 
 .orionMarkdown {

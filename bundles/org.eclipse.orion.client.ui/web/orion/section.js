@@ -274,9 +274,11 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commandRegistry', 'or
 				getCommandsVisible: function() {
 					return this.section.actionsNode.style.visibility!=="hidden";
 				},
-				setCommandsVisible: function(visible) {
+				setCommandsVisible: function(visible, selectionPolicy) {
 					this.section.actionsNode.style.visibility = visible ? "" : "hidden";
-					var selectionPolicy = visible ? null : "cursorOnly"; //$NON-NLS-0$
+					if (undefined === selectionPolicy){
+						selectionPolicy = visible ? null : "cursorOnly"; //$NON-NLS-0$	
+					} 
 					this.renderer.selectionPolicy = selectionPolicy;
 					var navHandler = this.getNavHandler();
 					if (navHandler) {

@@ -445,7 +445,7 @@ define([
 			if (options.searchService) {
 				options.searchService.setLocationByMetaData(options.target);
 			}
-			if (options.fileService && !options.breadcrumbTarget) {
+			if (options.fileService && !options.breadcrumbTarget && !options.staticBreadcrumb) {
 				fileSystemRootName = breadcrumbRootName ? breadcrumbRootName + " " : ""; //$NON-NLS-1$ //$NON-NLS-0$
 				fileSystemRootName = fileSystemRootName + options.fileService.fileServiceName(options.target.Location);
 				breadcrumbRootName = null;
@@ -475,18 +475,25 @@ define([
 		var locationNode = options.breadCrumbContainer ? lib.node(options.breadCrumbContainer) : lib.node("location"); //$NON-NLS-0$
 		if (locationNode) {
 			lib.empty(locationNode);
-			var fileClient = serviceRegistry && new mFileClient.FileClient(serviceRegistry);
-			var resource = options.breadcrumbTarget || options.target;
-			var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
-			new mBreadcrumbs.BreadCrumbs({
-				container: locationNode,
-				resource: resource,
-				rootSegmentName: breadcrumbRootName,
-				workspaceRootSegmentName: fileSystemRootName,
-				workspaceRootURL: workspaceRootURL,
-				makeFinalHref: options.makeBreadcrumFinalLink,
-				makeHref: options.makeBreadcrumbLink
-			});
+			if (options.staticBreadcrumb) {
+				new mBreadcrumbs.BreadCrumbs({
+					container: locationNode,
+					rootSegmentName: breadcrumbRootName
+				});	
+			} else {
+				var fileClient = serviceRegistry && new mFileClient.FileClient(serviceRegistry);
+				var resource = options.breadcrumbTarget || options.target;
+				var workspaceRootURL = (fileClient && resource && resource.Location) ? fileClient.fileServiceRootURL(resource.Location) : null;
+				new mBreadcrumbs.BreadCrumbs({
+					container: locationNode,
+					resource: resource,
+					rootSegmentName: breadcrumbRootName,
+					workspaceRootSegmentName: fileSystemRootName,
+					workspaceRootURL: workspaceRootURL,
+					makeFinalHref: options.makeBreadcrumFinalLink,
+					makeHref: options.makeBreadcrumbLink
+				});	
+			}
 		}
 	}
 

@@ -98,5 +98,7 @@ define({
 	"Regular expression is off. You can click here or use options to turn it on for replacement - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>." : 
 	"Regular expression is off. You can click here or use options to turn it on for replacement - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>.",
 	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>." : 
-	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>."
+	"Regular expression is on. You can click here or use options to turn it off - e.g. when the option is on you can replace <td([\\s\\S]*?)</td> with <span$1</span>.",
+	"root": "root",
+	"Scope": "Scope"
 });

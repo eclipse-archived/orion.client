@@ -799,6 +799,11 @@ exports.SelectionRenderer = (function(){
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
 		tableRow.verticalAlign = "baseline"; //$NON-NLS-0$
 		tableRow.classList.add("treeTableRow"); //$NON-NLS-0$
+		
+		if (this.explorer.selectionPolicy !== "cursorOnly") {
+			tableRow.classList.add("selectableNavRow"); //$NON-NLS-0$
+		}
+		
 		var navDict = this.explorer.getNavDict();
 		if(navDict){
 			navDict.addRow(item, tableRow);
