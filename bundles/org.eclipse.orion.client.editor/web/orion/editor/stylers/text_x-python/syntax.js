@@ -44,8 +44,8 @@ define("orion/editor/stylers/text_x-python/syntax", ["orion/editor/stylers/lib/s
 			{include: "orion.lib#string_doubleQuote"}, //$NON-NLS-0$
 			{include: "orion.lib#string_singleQuote"}, //$NON-NLS-0$
 			{
-				begin: "#", //$NON-NLS-0$
-				end: "$", //$NON-NLS-0$
+				begin: {match: "#", literal: "#"}, //$NON-NLS-0$
+				end: {match: "$", literal: ""}, //$NON-NLS-0$
 				name: "comment.line.number-sign.python", //$NON-NLS-0$
 				patterns: [
 					{

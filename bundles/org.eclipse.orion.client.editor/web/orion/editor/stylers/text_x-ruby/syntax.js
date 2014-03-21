@@ -46,14 +46,14 @@ define("orion/editor/stylers/text_x-ruby/syntax", ["orion/editor/stylers/lib/syn
 				match: "/(?![\\s])(?:\\\\.|[^/])+/(?:[ioxmuesn]\\b)?", //$NON-NLS-0$
 				name: "string.regexp.ruby" //$NON-NLS-0$
 			}, {
-				match: "#.*", //$NON-NLS-0$
+				match: {match: "#.*", literal: "#"}, //$NON-NLS-0$
 				name: "comment.line.number-sign.ruby", //$NON-NLS-0$
 				patterns: [
 					{include: "orion.lib#todo_comment_singleLine"} //$NON-NLS-0$
 				]
 			}, {
-				begin: "^=begin", //$NON-NLS-0$
-				end: "^=end", //$NON-NLS-0$
+				begin: {match: "^=begin", literal: "^=begin"}, //$NON-NLS-0$
+				end: {match: "^=end", literal: "^=end"}, //$NON-NLS-0$
 				name: "comment.block.ruby", //$NON-NLS-0$
 				patterns: [
 					{

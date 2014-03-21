@@ -581,6 +581,10 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		getPatternManager: function() {
 			return this._styler._getPatternManager();
 		},
+		getPatterns: function() {
+			/* all patterns appear in the line patterns list */
+			return this.getLinePatterns();	
+		},
 		getStyler: function() {
 			return this._styler;
 		},
@@ -595,41 +599,29 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				return;
 			}
 			var patterns = this.getPatternManager().getPatterns(this.pattern ? this.pattern.pattern : null);
-			var processIgnore = function(matchString) {
+			var initRegex = function(match) {
+				var matchString = typeof(match) === "string" ? match : match.match;
 				var result = ignoreCaseRegex.exec(matchString);
+				var flags = FLAGS;
 				if (result) {
 					matchString = matchString.substring(result[0].length);
+					flags += "i";
 				}
-				return matchString;
+				return new RegExp(matchString, flags);
 			};
 			var lastBlock = -1;
 			var index = 0;
 			patterns.forEach(function(current) {
 				var pattern;
 				if (current.match && !current.begin && !current.end) {
-					var flags = FLAGS;
-					var match = processIgnore(current.match);
-					if (match !== current.match) {
-						flags += "i"; //$NON-NLS-0$
-					}
-					pattern = {regex: new RegExp(match, flags), pattern: current};
+					pattern = {regex: initRegex(current.match), pattern: current};
 					this._linePatterns.push(pattern);
 					if (current.name && current.name.indexOf("punctuation.section") === 0 && (current.name.indexOf(PUNCTUATION_SECTION_BEGIN) !== -1 || current.name.indexOf(PUNCTUATION_SECTION_END) !== -1)) { //$NON-NLS-0$
 						this._enclosurePatterns[current.name] = pattern;
 					}
 				} else if (!current.match && current.begin && current.end) {
 					lastBlock = index;
-					var beginFlags = FLAGS;
-					var begin = processIgnore(current.begin);
-					if (begin !== current.begin) {
-						beginFlags += "i"; //$NON-NLS-0$
-					}
-					var endFlags = FLAGS;
-					var end = processIgnore(current.end);
-					if (end !== current.end) {
-						endFlags += "i"; //$NON-NLS-0$
-					}
-					pattern = {regexBegin: new RegExp(begin, beginFlags), regexEnd: new RegExp(end, endFlags), pattern: current};
+					pattern = {regexBegin: initRegex(current.begin), regexEnd: initRegex(current.end), pattern: current};
 					this._linePatterns.push(pattern);
 				}
 				index++;
@@ -647,6 +639,9 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 		this._styler = styler;
 	}
 	TextStylerAccessor.prototype = {
+		getPatterns: function(offset) {
+			return this._styler.getPatterns(offset);
+		},
 		getStyles: function(offset) {
 			return this._styler.getStyles(offset);
 		}
@@ -718,6 +713,10 @@ define("orion/editor/textStyler", [ //$NON-NLS-0$
 				view.removeEventListener("LineStyle", this._listener.onLineStyle); //$NON-NLS-0$
 				this.view = null;
 			}
+		},
+		getPatterns: function(offset) {
+			var block = this._findBlock(this._rootBlock, offset);
+			return block.getPatterns();
 		},
 		getStyleAccessor: function() {
 			return this._accessor;
