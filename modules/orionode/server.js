@@ -8,11 +8,25 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global __dirname console exports process require*/
-var path = require('path');
-var util = require('util');
-var argslib = require('./lib/args');
-var startServer = require('./index.js');
+/*jslint node:true*/
+var connect = require('connect'),
+    path = require('path'),
+    socketio = require('socket.io'),
+    util = require('util'),
+    appSocket = require('./lib/node_app_socket'),
+    argslib = require('./lib/args'),
+    orion = require('./index.js');
+
+function noop(req, res, next) { next(); }
+
+function auth(pwd) {
+	if (typeof pwd === 'string' && pwd.length > 0) {
+		return connect.basicAuth(function(user, password) {
+			return password === pwd;
+		});
+	}
+	return noop;
+}
 
 // Get the arguments, the workspace directory, and the password file (if configured), then launch the server
 var args = argslib.parseArgs(process.argv);
@@ -47,14 +61,26 @@ argslib.readConfigFile(path.join(__dirname, 'orion.conf'), function(configParams
 			}
 			console.log(util.format('Using workspace: %s', workspaceDir));
 			console.log(util.format('Listening on port %d...', port));
-			startServer({
-				port: port,
+
+			// create web server
+			var orionMiddleware = orion({
 				workspaceDir: dirs[0],
-				passwordFile: passwordFile,
-				password: password,
 				configParams: configParams,
 				dev: dev,
 				log: log
+			}), appContext = orionMiddleware.appContext;
+			var server = connect()
+				.use(log ? connect.logger('tiny') : noop)
+				.use(auth(password || configParams.pwd))
+				.use(connect.compress())
+				.use(orionMiddleware)
+				.listen(port);
+
+			// add socketIO and app support
+			var io = socketio.listen(server, { 'log level': 1 });
+			appSocket.install({ io: io, appContext: appContext });
+			server.on('error', function(err) {
+				console.log(err);
 			});
 		});
 	});

@@ -13,7 +13,6 @@ var assert = require('assert');
 var mocha = require('mocha');
 var request = require('supertest');
 
-var connect = require('connect');
 var path = require('path');
 var testData = require('./support/test_data');
 
@@ -21,40 +20,36 @@ var WORKSPACE = path.join(__dirname, '.test_workspace');
 
 var orion = require('../');
 
-describe('orionode', function() {
+describe('orion', function() {
 	var app;
 	beforeEach(function(done) {
 		app = testData.createApp();
 		testData.setUp(WORKSPACE, done);
 	});
 
-	// Make sure that we can .use() the orion server as a connect module.
-	it('exports #createServer', function(done) {
-		app.use(orion({
-			workspaceDir: WORKSPACE
-		}))
-		.request()
-		.get('/file/project/fizz.txt')
-		.expect(200, 'hello world', done);
-	});
+	describe('middleware', function() {
+		// Make sure that we can .use() the orion server as a connect module.
+		it('exports #createServer', function(done) {
+			app.use(orion({
+				workspaceDir: WORKSPACE
+			}))
+			.request()
+			.get('/file/project/fizz.txt')
+			.expect(200, 'hello world', done);
+		});
 
-	// Sanity check to ensure the orion client code is being mounted correctly
-	it('finds the orion.client code', function(done) {
-		app.use(orion({
-			workspaceDir: WORKSPACE
-		}))
-		.request()
-		.get('/index.html')
-		.expect(200)
-		.end(function(err, res) {
-			assert.ifError(err);
-			done();
+		// Sanity check to ensure the orion client code is being mounted correctly
+		it('finds the orion.client code', function(done) {
+			app.use(orion({
+				workspaceDir: WORKSPACE
+			}))
+			.request()
+			.get('/index.html')
+			.expect(200)
+			.end(function(err, res) {
+				assert.ifError(err);
+				done();
+			});
 		});
 	});
-
-	// TODO: Ensure server respects command line args passed to it
-//	it('respects -w argument', function(done) {
-//		
-//	});
-
 });

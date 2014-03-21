@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global Buffer exports module require*/
-/*jslint devel:true*/
-var api = require('./api');
+/*jslint node:true*/
 
 function emitError(socket, error) {
 	socket.emit('error', error && error.stack);
@@ -44,13 +42,6 @@ function checkParamType(args, name, type) {
 	if (typeof args[name] !== type) {
 		throw new Error('Missing parameter "' + name + '"');
 	}
-}
-
-function checkPort(port) {
-	if (typeof port !== 'number') {
-		throw new Error('Parameter "port" must be a number');
-	}
-	return true;
 }
 
 exports.install = function(options) {
