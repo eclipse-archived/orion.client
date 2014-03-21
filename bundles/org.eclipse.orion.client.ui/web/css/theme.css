@@ -143,7 +143,6 @@ a.breadcrumb:hover {
 	text-decoration: none;
 	line-height: 10pt;
 	white-space:nowrap;
-	text-shadow: rgba(0,0,0,0.25) 0 2px 2px;
 }
 
 a.currentLocation:hover {
