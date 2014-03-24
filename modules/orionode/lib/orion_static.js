@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global exports:true module require*/
+/*jslint node:true*/
 var connect = require('connect');
 var path = require('path');
 var mime = connect.mime;
@@ -18,13 +18,15 @@ mime.define({
 	'application/json': ['pref', 'json']
 });
 
+var _24_HOURS = 1440 * 60000;
+
 /**
  * @param {Object} options Options to be passed to connect/static
  * @param {Number} [options.maxAge]
  */
 exports = module.exports = function(options) {
 	options = options || {};
-	options.maxAge = options.dev ? 0 : (1440 * 60000); // 24 hours
+	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : _24_HOURS;
 	options.hidden = true;
 	var orionClientRoot = options.orionClientRoot;
 	if (!orionClientRoot) { throw new Error('orion-static root path required'); }

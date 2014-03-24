@@ -28,6 +28,7 @@ function handleError(err) {
 
 function startServer(options) {
 	options = options || {};
+	options.maxAge = typeof options.maxAge === "number" ? options.maxAge : undefined;
 	var workspaceDir = options.workspaceDir, configParams = options.configParams;
 	try {
 		var appContext = new AppContext({fileRoot: '/file', workspaceDir: workspaceDir, configParams: configParams});
@@ -39,7 +40,7 @@ function startServer(options) {
 			}))
 			.use(orionStatic({
 				orionClientRoot: ORION_CLIENT,
-				dev: options.dev
+				maxAge: options.maxAge
 			}))
 			// API handlers
 			.use(orionFile({

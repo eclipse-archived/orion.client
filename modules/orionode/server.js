@@ -54,7 +54,7 @@ argslib.readConfigFile(path.join(__dirname, 'orion.conf'), function(configParams
 			var dev = Object.prototype.hasOwnProperty.call(args, 'dev');
 			var log = Object.prototype.hasOwnProperty.call(args, 'log');
 			if (dev) {
-				console.log('Running in development mode');
+				console.log('Development mode: client code will not be cached.');
 			}
 			if (passwordFile) {
 				console.log(util.format('Using password from file: %s', passwordFile));
@@ -66,8 +66,7 @@ argslib.readConfigFile(path.join(__dirname, 'orion.conf'), function(configParams
 			var orionMiddleware = orion({
 				workspaceDir: dirs[0],
 				configParams: configParams,
-				dev: dev,
-				log: log
+				maxAge: (dev ? 0 : undefined),
 			}), appContext = orionMiddleware.appContext;
 			var server = connect()
 				.use(log ? connect.logger('tiny') : noop)
