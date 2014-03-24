@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012, 2013 VMware, Inc. and others.
+ * Copyright (c) 2012, 2014 VMware, Inc. and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -337,6 +337,9 @@ define([
 							return inferredTypeObj.expression.name;
 						} else if (inferredTypeObj.type === 'UndefinedLiteral') {
 							return "Object";
+						} else if(inferredTypeObj.type === 'UnionType') {
+							//TODO properly distinguish a union type
+							return 'Object';
 						}
 					} else {
 						// grab topmost scope
