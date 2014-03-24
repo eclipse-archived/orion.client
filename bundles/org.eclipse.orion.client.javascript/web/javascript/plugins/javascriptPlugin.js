@@ -24,10 +24,12 @@ define([
 
 	// Worker case. Talk directly to the framework message plumbing
 	var framework;
-	if (window !== window.parent)
+	if (window !== window.parent) {
 		framework = window.parent;
-	else
+	}
+	else {
 		framework = window.opener;
+	}
 	addEventListener("message", onFrameworkMessage);
 
 	// Start the worker
@@ -36,8 +38,9 @@ define([
 	worker.addEventListener("error", onWorkerError);
 
 	function onWorkerError(err) {
-		if (typeof console !== "undefined" && console)
+		if (typeof console !== "undefined" && console) {
 			console.log(err);
+		}
 	}
 
 	function onWorkerMessage(event) {
