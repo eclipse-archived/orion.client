@@ -8,28 +8,26 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global __dirname console require describe it beforeEach*/
+/*global describe it beforeEach*/
+/*jslint node:true*/
 var assert = require('assert');
-var mocha = require('mocha');
-var request = require('supertest');
-
-var connect = require('connect');
-var testData = require('./support/test_data');
 var path = require('path');
+var testData = require('./support/test_data');
 
-var PREFIX = '/workspace', PREFIX_FILE = '/file';
+var CONTEXT_PATH = '/orionn';
+var PREFIX = CONTEXT_PATH + '/workspace', PREFIX_FILE = CONTEXT_PATH + '/file';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 var DEFAULT_WORKSPACE_NAME = 'Orionode Workspace';
 
 var app = testData.createApp()
-		.use(require('../lib/workspace')({
-			root: PREFIX,
-			fileRoot: PREFIX_FILE,
+		.use(CONTEXT_PATH, require('../lib/workspace')({
+			root: '/workspace',
+			fileRoot: '/file',
 			workspaceDir: WORKSPACE
 		}))
-		.use(require('../lib/file')({
-			root: PREFIX_FILE,
-			workspaceRoot: PREFIX,
+		.use(CONTEXT_PATH, require('../lib/file')({
+			root: '/file',
+			workspaceRoot: '/workspace',
 			workspaceDir: WORKSPACE
 		}));
 
@@ -160,6 +158,7 @@ describe('Workspace API', function() {
 						.get(res.body.ChildrenLocation)
 						.expect(200)
 						.end(function(err, res){
+							assert.ok(Array.isArray(res.body.Children), "has children");
 							var foundFizz = res.body.Children.some(function(child) {
 								return child.Name === 'fizz.txt';
 							});

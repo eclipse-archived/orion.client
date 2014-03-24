@@ -8,8 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global Buffer console module process require*/
-var compat = require('./compat');
+/*jslint node:true*/
+require('./compat');
 var connect = require('connect');
 var fs = require('fs');
 var path = require('path');
@@ -18,8 +18,8 @@ var api = require('./api'), write = api.write, writeError = api.writeError;
 var fileUtil = require('./fileUtil'), ETag = fileUtil.ETag;
 var resource = require('./resource');
 
-var USER_WRITE_FLAG = parseInt('0200', 8);
-var USER_EXECUTE_FLAG = parseInt('0100', 8);
+//var USER_WRITE_FLAG = parseInt('0200', 8);
+//var USER_EXECUTE_FLAG = parseInt('0100', 8);
 
 function getParam(req, paramName) {
 	var parsedUrl = url.parse(req.url, true);
@@ -46,7 +46,11 @@ module.exports = function(options) {
 	if (!fileRoot) { throw 'options.root is required'; }
 	if (!workspaceDir) { throw 'options.workspaceDir is required'; }
 
-	var writeFileMetadata = fileUtil.writeFileMetadata.bind(null, fileRoot);
+	var writeFileMetadata = function(req /*, args.. */) {
+		var args = Array.prototype.slice.call(arguments, 1);
+		var originalFileUrl = fileUtil.getContextPath(req) + fileRoot;
+		return fileUtil.writeFileMetadata.apply(null, [originalFileUrl].concat(args));
+	};
 	var getSafeFilePath = fileUtil.safeFilePath.bind(null, workspaceDir);
 
 	function writeFileContents(res, rest, filepath, stats, etag) {
@@ -151,7 +155,7 @@ module.exports = function(options) {
 								return;
 							}
 							var etag = new ETag(newContents);
-							writeFileMetadata(res, rest, patchPath, stats, etag.getValue() /*the new ETag*/);
+							writeFileMetadata(req, res, rest, patchPath, stats, etag.getValue() /*the new ETag*/);
 						});
 					});
 					
@@ -203,7 +207,7 @@ module.exports = function(options) {
 				} else {
 					// TODO handle depth > 1 for directories
 					var includeChildren = (stats.isDirectory() && getParam(req, 'depth') === '1');
-					writeFileMetadata(res, rest, filepath, stats, etag, includeChildren);
+					writeFileMetadata(req, res, rest, filepath, stats, etag, includeChildren);
 				}
 			});
 		},
@@ -236,7 +240,7 @@ module.exports = function(options) {
 								return;
 							}
 							fs.stat(filepath, function(error, stats) {
-								writeFileMetadata(res, rest, filepath, stats, requestBodyETag.getValue() /*the new ETag*/);
+								writeFileMetadata(req, res, rest, filepath, stats, requestBodyETag.getValue() /*the new ETag*/);
 							});
 						});
 					} else {
@@ -254,7 +258,7 @@ module.exports = function(options) {
 										writeError(500, res, error);
 										return;
 									}
-									writeFileMetadata(res, rest, filepath, stats, requestBodyETag.getValue() /*the new ETag*/);
+									writeFileMetadata(req, res, rest, filepath, stats, requestBodyETag.getValue() /*the new ETag*/);
 								});
 							}
 						});

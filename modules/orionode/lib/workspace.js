@@ -11,8 +11,6 @@
 /*global module require*/
 var connect = require('connect');
 var fs = require('fs');
-var path = require('path');
-var url = require('url');
 var util = require('util');
 var api = require('./api'), writeError = api.writeError;
 var fileUtil = require('./fileUtil');
@@ -27,17 +25,27 @@ module.exports = function(options) {
 	var workspaceId = 'orionode';
 	var workspaceName = 'Orionode Workspace';
 
-	var makeProjectContentLocation = function(projectName) {
-		return api.join(fileRoot, projectName);
-	};
-	var makeProjectLocation = function(projectName) {
-		return api.join(workspaceRoot, 'project', projectName);
-	};
+	/**
+	 * @returns {String} The URL of the workspace middleware, with context path.
+	 */
+	function originalWorkspaceRoot(req) {
+		return fileUtil.getContextPath(req) + workspaceRoot;
+	}
+	function originalFileRoot(req) {
+		return fileUtil.getContextPath(req) + fileRoot;
+	}
+	function makeProjectContentLocation(req, projectName) {
+		return api.join(originalFileRoot(req), projectName);
+	}
+	function makeProjectLocation(req, projectName) {
+		return api.join(originalWorkspaceRoot(req), 'project', projectName);
+	}
 
 	return connect()
 	.use(connect.json())
 	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
+			var workspaceRootUrl = originalWorkspaceRoot(req);
 			if (rest === '') {
 				// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_the_list_of_available_workspaces
 				fileUtil.withStats(workspaceDir, function(err, stats) {
@@ -51,7 +59,7 @@ module.exports = function(options) {
 						Workspaces: [{
 							Id: workspaceId,
 							LastModified: stats.mtime.getTime(),
-							Location: api.join(workspaceRoot, workspaceId),
+							Location: api.join(workspaceRootUrl, workspaceId),
 							Name: workspaceName
 						}]
 					});
@@ -61,15 +69,15 @@ module.exports = function(options) {
 				});
 			} else if (rest === workspaceId) {
 				// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_workspace_metadata
-				var parentFileLocation = fileRoot;
+				var parentFileLocation = originalFileRoot(req);
 				fileUtil.getChildren(workspaceDir, parentFileLocation, function(children) {
 					// TODO this is basically a File object with 1 more field. Should unify the JSON between workspace.js and file.js
 					var ws = JSON.stringify({
 						Directory: true,
 						Id: workspaceId,
 						Name: workspaceName,
-						Location: api.join(workspaceRoot, workspaceId),
-						ChildrenLocation: api.join(workspaceRoot, workspaceId), // ?? // api.join(fileRoot, workspaceId, '?depth=1'),
+						Location: api.join(workspaceRootUrl, workspaceId),
+						ChildrenLocation: api.join(workspaceRootUrl, workspaceId), // ?? // api.join(fileRoot, workspaceId, '?depth=1'),
 						Children: children
 	//					Projects: [
 	//						// TODO projects -- does anything care about these?
@@ -103,15 +111,15 @@ module.exports = function(options) {
 				// Move/Rename a project
 				var location = req.body && req.body.Location;
 				if (location) {
-					var wwwpath = location,
+					var wwwpath = api.rest(fileRoot, location.substr(fileUtil.getContextPath(req).length)),
 					    filepath = fileUtil.safeFilePath(workspaceDir, projectName);
 
 					// Call the File POST helper to handle the filesystem operation. We inject the Project-specific metadata
 					// into the resulting File object.
 					fileUtil.handleFilePOST(workspaceDir, fileRoot, req, res, wwwpath, filepath, {
 						Id: projectName,
-						ContentLocation: makeProjectContentLocation(projectName),
-						Location: makeProjectLocation(projectName)
+						ContentLocation: makeProjectContentLocation(req, projectName),
+						Location: makeProjectLocation(req, projectName)
 					}, /*renaming a project is always 200 status*/ 200);
 					return;
 				}
@@ -124,8 +132,8 @@ module.exports = function(options) {
 					} else {
 						var newProject = JSON.stringify({
 							Id: projectName,
-							ContentLocation: makeProjectContentLocation(projectName), // Important
-							Location: makeProjectLocation(projectName) // not important
+							ContentLocation: makeProjectContentLocation(req, projectName), // Important
+							Location: makeProjectLocation(req, projectName) // not important
 						});
 						res.statusCode = 201;
 						res.setHeader('Content-Type', 'application/json');

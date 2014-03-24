@@ -8,20 +8,18 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global __dirname console require describe it beforeEach*/
+/*global describe it beforeEach*/
+/*jslint node:true*/
 var assert = require('assert');
-var mocha = require('mocha');
-
-var connect = require('connect');
-var testData = require('./support/test_data');
 var path = require('path');
+var testData = require('./support/test_data');
 
-var PREFIX = '/file';
+var CONTEXT_PATH = '/orion', PREFIX = CONTEXT_PATH + '/file';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 
 var app = testData.createApp()
-			.use(require('../lib/file')({
-				root: PREFIX,
+			.use(CONTEXT_PATH, require('../lib/file')({
+				root: '/file',
 				workspaceRoot: '/workspace',
 				workspaceDir: WORKSPACE
 			}));
@@ -196,8 +194,8 @@ describe('File API', function() {
 					assert.equal(body.Name, 'fizz.txt');
 					assert.equal(body.Parents.length, 1);
 					assert.deepEqual(body.Parents[0], {
-						ChildrenLocation: '/file/project?depth=1',
-						Location: '/file/project',
+						ChildrenLocation: PREFIX + '/project?depth=1',
+						Location: PREFIX + '/project',
 						Name: 'project'
 					});
 					done();
@@ -282,7 +280,7 @@ describe('File API', function() {
 					assert.equal(body.ChildrenLocation, PREFIX + '/project/my%20folder?depth=1');
 					assert.equal(body.Directory, true);
 					assert.equal(body.Name, 'my folder');
-					assert.equal(body.Location, '/file/project/my%20folder/');
+					assert.equal(body.Location, PREFIX + '/project/my%20folder/');
 					done();
 				});
 			});

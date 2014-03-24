@@ -138,7 +138,7 @@ var getParents = exports.getParents = function(fileRoot, relativePath) {
  * Performs the equivalent of rm -rf on a directory.
  * @param {Function} callback Invoked as callback(error)
  */
-exports.rumRuff = function rumRuff(dirpath, callback) {
+exports.rumRuff = function(dirpath, callback) {
 	rimraf(dirpath, callback);
 };
 
@@ -397,11 +397,21 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
 };
 
 /**
+ * The connect framework removes leading path segments that precede the path Orion is mounted at. This function
+ * returns the leading segments.
+ * @param {Request} req Request object.
+ */
+var getContextPath = exports.getContextPath = function(req) {
+	var orig = req.originalUrl, _url = req.url;
+	return orig.substr(0, orig.length - _url.length);
+};
+
+/**
  * Helper for fulfilling a file POST request (for example, copy, move, or create).
- * @param {String} fileRoot
+ * @param {String} fileRoot The route of the /file handler (not including context path)
  * @param {Object} req
  * @parma {Object} res
- * @param {String} srcFilepath
+ * @param {String} wwwpath
  * @param {String} destFilepath
  * @param {Object} [metadata] Additional metadata to be mixed in to the File response.
  * @param {Number} [statusCode] Status code to send on a successful response. By default, `201 Created` is sent if
@@ -410,6 +420,7 @@ var writeFileMetadata = exports.writeFileMetadata = function(fileRoot, res, wwwp
 exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, destFilepath, metadataMixins, statusCode) {
 	var getSafeFilePath = safeFilePath.bind(null, workspaceDir);
 	var isDirectory = req.body && getBoolean(req.body, 'Directory');
+	var fileRootUrl = getContextPath(req) + fileRoot;
 
 	fs.exists(destFilepath, function(destExists) {
 		function checkXCreateOptions(opts) {
@@ -435,7 +446,7 @@ exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, des
 					api.writeError(500, res, error);
 					return;
 				}
-				writeFileMetadata(fileRoot, res, wwwpath, destFilepath, stats, /*etag*/null, /*includeChildren*/false, metadataMixins);
+				writeFileMetadata(fileRootUrl, res, wwwpath, destFilepath, stats, /*etag*/null, /*includeChildren*/false, metadataMixins);
 			});
 		}
 		function createFile() {
@@ -451,7 +462,7 @@ exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, des
 				api.writeError(400, res, 'Missing Location property in request body');
 				return;
 			}
-			var sourceFilepath = getSafeFilePath(api.rest(fileRoot, api.matchHost(req, sourceUrl)));
+			var sourceFilepath = getSafeFilePath(api.rest(fileRootUrl, api.matchHost(req, sourceUrl)));
 			fs.exists(sourceFilepath, function(sourceExists) {
 				if (!sourceExists) {
 					api.write(404, res, null, 'File not found: ' + sourceUrl);
@@ -464,6 +475,7 @@ exports.handleFilePOST = function(workspaceDir, fileRoot, req, res, wwwpath, des
 				}
 			});
 		}
+
 		var xCreateOptions = (req.headers['x-create-options'] || "").split(",");
 		if (!checkXCreateOptions(xCreateOptions)) {
 			api.write(400, res, null, 'Illegal combination of X-Create-Options.');
