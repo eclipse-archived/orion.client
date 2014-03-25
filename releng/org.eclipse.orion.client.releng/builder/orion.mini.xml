@@ -96,7 +96,7 @@
 		<!-- $buildfile: r.js build config -->
 		<sequential>
 			<echo message="Building Orion pages and plugins..."/>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="${staging}">
+			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="${staging}" failonerror="true">
 				<classpath>
 					<sort>
 						<fileset dir="${requirejsHome}/lib/">
@@ -222,7 +222,7 @@
 		<attribute name="out" />
 		<attribute name="optimize" />
 		<sequential>
-			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}">
+			<java classname="org.mozilla.javascript.tools.shell.Main" fork="true" dir="@{staging}" failonerror="true">
 				<classpath>
 					<sort>
 						<fileset dir="${requirejsHome}/lib/">
