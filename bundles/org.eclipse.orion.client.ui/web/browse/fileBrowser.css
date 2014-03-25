@@ -66,8 +66,8 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: calc(100% - 1px - 4px - 24px);
-	max-width: -webkit-calc(100% - 1px - 4px - 24px);
+	max-width: calc(100% - 1px - 4px - 28px);
+	max-width: -webkit-calc(100% - 1px - 4px - 28px);
 	-moz-user-select: -moz-none;
 	-webkit-user-select: none;
 	-ms-user-select: none;
