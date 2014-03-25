@@ -453,13 +453,23 @@ define([
 				}
 	
 				var progress = null;
+				var statusService = null;
 				if(explorer.registry) {
 					progress = explorer.registry.getService("orion.page.progress"); //$NON-NLS-0$
+					statusService = explorer.registry.getService("orion.page.message");	 //$NON-NLS-0$
 				}
 				
 				var errorHandler = function(error) {
-					if (progress) {
-						progress.setProgressResult(error);
+					if (statusService) {
+						var errorMessage = null;
+						if ("string" === typeof error) {
+							errorMessage = {Severity: "Error", Message: error};
+						} else if (error && error.error) {
+							errorMessage = {Severity: "Error", Message: error.error};
+						} else {
+							errorMessage = error;	
+						}
+						statusService.setProgressResult(errorMessage);	//$NON-NLS-0$ 
 					} else {
 						window.console.log(error);
 					}
@@ -473,10 +483,7 @@ define([
 					if (entry.isFile) {
 						// can't drop files directly into workspace.
 						if (mFileUtils.isAtRoot(target.Location)){ //$NON-NLS-0$
-							if(explorer.registry) {
-								explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
-									Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
-							}
+							errorHandler(messages["You cannot copy files directly into the workspace.  Create a folder first."]); //$NON-NLS-0$
 						} else {
 							entry.file(function(file) {
 								performDrop(target, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name))); //$NON-NLS-1$ //$NON-NLS-0$ 
@@ -558,15 +565,9 @@ define([
 							// The File API in HTML5 doesn't specify a way to check explicitly (when this code was written).
 							// see http://www.w3.org/TR/FileAPI/#file
 							if (!file.size && !file.type) {
-								if(explorer.registry) {
-									explorer.registry.getService("orion.page.message").setProgressResult( //$NON-NLS-0$
-										{Severity: "Error", Message: i18nUtil.formatMessage(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], file.name)}); //$NON-NLS-1$ //$NON-NLS-0$ 
-								}
+								errorHandler(i18nUtil.formatMessage(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], file.name)); //$NON-NLS-0$
 							} else if (mFileUtils.isAtRoot(item.Location)){ //$NON-NLS-0$
-								if(explorer.registry) {
-									explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
-										Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
-								}
+								errorHandler(messages["You cannot copy files directly into the workspace.  Create a folder first."]); //$NON-NLS-0$ 
 							} else {
 								performDrop(item, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name))); //$NON-NLS-1$ //$NON-NLS-0$ 
 							}
