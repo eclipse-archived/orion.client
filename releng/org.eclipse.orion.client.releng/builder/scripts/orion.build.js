@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -91,11 +91,6 @@
         { name: "git/git-status", bundle: "${orionClient}/bundles/org.eclipse.orion.client.git" },
         { name: "git/plugins/gitPlugin", bundle: "${orionClient}/bundles/org.eclipse.orion.client.git" },
         { name: "javascript/plugins/javascriptPlugin", bundle: "${orionClient}/bundles/org.eclipse.orion.client.javascript" },
-        {
-            name: "javascript/plugins/javascriptPluginWorker",
-            bundle: "${orionClient}/bundles/org.eclipse.orion.client.javascript",
-            caller: "javascriptWorkerBootstrap.js"
-        },
         { name: "mixloginstatic/LoginWindow", bundle: "${orionClient}/bundles/org.eclipse.orion.client.ui" },
         { name: "mixloginstatic/manageOpenids", bundle: "${orionClient}/bundles/org.eclipse.orion.client.ui" },
         { name: "operations/list", bundle: "${orionClient}/bundles/org.eclipse.orion.client.ui" },
