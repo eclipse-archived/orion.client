@@ -475,7 +475,7 @@ define([
 					}
 				};
 				
-				function dropFileEntry(entry, path, target, explorer, performDrop, fileClient) {
+				function dropFileEntry(entry, path, target, explorer, performDrop, fileClient, preventNotification) {
 					if (!target.Location && target.fileMetadata) {
 						target = target.fileMetadata;
 					}
@@ -494,7 +494,7 @@ define([
 						var traverseChildren = function(folder) {
 							dirReader.readEntries(function(entries) {
 								for (var i=0; i<entries.length; i++) {
-									dropFileEntry(entries[i], path + entry.name + "/", folder, explorer, performDrop, fileClient); //$NON-NLS-0$
+									dropFileEntry(entries[i], path + entry.name + "/", folder, explorer, performDrop, fileClient, true); //$NON-NLS-0$
 								}
 							});
 						};
@@ -512,7 +512,9 @@ define([
 							(progress ? progress.progress(fileClient.createFolder(target.Location, entry.name), i18nUtil.formatMessage(messages["Creating ${0}"], entry.name)) :
 										fileClient.createFolder(target.Location, entry.name)).then(function(subFolder) {
 								var dispatcher = explorer.modelEventDispatcher;
-								dispatcher.dispatchEvent({ type: "create", parent: item, newValue: subFolder }); //$NON-NLS-0$
+								if (!preventNotification) {
+									dispatcher.dispatchEvent({ type: "create", parent: item, newValue: subFolder }); //$NON-NLS-0$	
+								}
 								traverseChildren(subFolder);
 							}, errorHandler);
 						}
