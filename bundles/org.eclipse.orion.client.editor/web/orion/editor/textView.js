@@ -650,14 +650,13 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 			}
 			var document = parent.ownerDocument;
 			var child = util.createElement(parent.ownerDocument, tagName);
+			child.appendChild(document.createTextNode(style && style.text ? style.text : text));
 			if (style && style.html) {
 				child.innerHTML = style.html;
 				child.ignore = true;
 			} else if (style && style.node) {
 				child.appendChild(style.node);
 				child.ignore = true;
-			} else {
-				child.appendChild(document.createTextNode(style && style.text ? style.text : text));
 			}
 			applyStyle(style, child);
 			if (tagName === "a") { //$NON-NLS-0$
