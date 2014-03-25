@@ -1028,11 +1028,11 @@ textarea.parameterInput {
 	max-width: calc(100% - 30px);
 }
 
-.searchScope span.core-sprite-closedarrow, .searchScope span.core-sprite-openarrow {
+.treeTableRow span.core-sprite-closedarrow, .treeTableRow span.core-sprite-openarrow {
 	cursor: pointer;
 }
 
-.searchScope span.core-sprite-closedarrow:hover, .searchScope span.core-sprite-openarrow:hover {
+.treeTableRow span.core-sprite-closedarrow:hover, .treeTableRow span.core-sprite-openarrow:hover {
 	color: #F58B0F;
 }
 
