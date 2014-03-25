@@ -254,7 +254,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 		
 		for(var i=0; i<launchConfigurations.length; i++){
 			(function(launchConfiguration){
-			var deployLaunchConfigurationCommands = new mCommands.Command({
+			var command = new mCommands.Command({
 				name: "Deploy to " + launchConfiguration.Name,
 				tooltip: "Deploy to " + launchConfiguration.Name,
 				id: "orion.launchConfiguration.deploy." + launchConfiguration.ServiceId + launchConfiguration.Name,
@@ -288,8 +288,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 					return(item.Project === treeRoot.Project);
 				}
 			});
-			deployLaunchConfigurationCommands.isLaunchCommand = true;
-			commandService.addCommand(deployLaunchConfigurationCommands);
+			command.isLaunchProject = true;
+			commandService.addCommand(command);
 		})(launchConfigurations[i]);
 		}
 	},
