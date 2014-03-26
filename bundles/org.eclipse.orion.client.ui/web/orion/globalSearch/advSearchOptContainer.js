@@ -501,8 +501,7 @@ define([
 			});
 			
 			this._searchScopeSection.embedExplorer(this._searchScopeExplorer, scopeExplorerNode);	
-//			this._searchScopeExplorer.setCommandsVisible(true, "singleSelection"); //$NON-NLS-0$ //TODO remove "singleSelection" once multiple selection is supported
-			this._searchScopeExplorer.setCommandsVisible(true);
+			this._searchScopeExplorer.setCommandsVisible(true, "singleSelection"); //$NON-NLS-0$ //TODO remove "singleSelection" once multiple selection is supported
 			this._searchScopeExplorer.loadRoot(this._rootURL);
 		},
 		
