@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,8 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global esprima */
-/*jslint amd:true */
+/*global URL console*/
+/*jslint amd:true browser:true*/
 define([
 	'javascript/astManager',
 	'javascript/contentAssist/indexFiles/mongodbIndex',
@@ -134,6 +134,11 @@ define([
 	/**
 	 * ESLint settings
 	 */
+	var ignore = 0, warning = 1, error = 2, severities = [
+		{labelKey: 'ignore',  value: ignore},  //$NON-NLS-0$
+		{labelKey: 'warning', value: warning},  //$NON-NLS-0$
+		{labelKey: 'error',   value: error}  //$NON-NLS-0$
+	];
 	provider.registerService("orion.core.setting",  //$NON-NLS-0$
 		{},
 		{	settings: [
@@ -146,152 +151,92 @@ define([
 						{	id: "validate_eqeqeq",  //$NON-NLS-0$
 							nameKey: 'eqeqeq',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 1,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: warning,
+							options: severities
 						},
 						{	id: "validate_debugger",  //$NON-NLS-0$
 							nameKey: 'noDebugger',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 1,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: warning,
+							options: severities
 						},
 						{	id: "validate_eval",  //$NON-NLS-0$
 							nameKey: 'noEval',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 0,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: ignore,
+							options: severities
 						},
 						{	id: "validate_dupe_obj_keys",  //$NON-NLS-0$
 							nameKey: 'noDupeKeys',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 2,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: error,
+							options: severities
 						},
 						{	id: "validate_use_isnan",  //$NON-NLS-0$
 							nameKey: 'useIsNaN',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 2,
-							options: [
-							   {labelKey: 'ignore', value:0},  //$NON-NLS-0$
-							    {labelKey: 'warning', value:1},  //$NON-NLS-0$
-							    {labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: error,
+							options: severities
 						},
 						{	id: "validate_func_decl",  //$NON-NLS-0$
 							nameKey: 'docFuncDecl',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 0,
-							options: [
-							   {labelKey: 'ignore', value:0},  //$NON-NLS-0$
-							    {labelKey: 'warning', value:1},  //$NON-NLS-0$
-							    {labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: ignore,
+							options: severities
 						},
 						{	id: "validate_func_expr",  //$NON-NLS-0$
 							nameKey: 'docFuncExpr',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 0,
-							options: [
-							   {labelKey: 'ignore', value:0},  //$NON-NLS-0$
-							    {labelKey: 'warning', value:1},  //$NON-NLS-0$
-							    {labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: ignore,
+							options: severities
 						},
 						{	id: "validate_use_before_define",  //$NON-NLS-0$
 							nameKey: 'useBeforeDefine',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 1,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: warning,
+							options: severities
 						},
 						{	id: "validate_new_parens",  //$NON-NLS-0$
 							nameKey: 'newParens',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 2,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: error,
+							options: severities
 						},
 						{	id: "validate_missing_semi",  //$NON-NLS-0$
 							nameKey: 'missingSemi',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 1,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: warning,
+							options: severities
 						},
 						{	id: "validate_curly",  //$NON-NLS-0$
 							nameKey: 'curly',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 0,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: ignore,
+							options: severities
 						},
 						{	id: "validate_no_undef",  //$NON-NLS-0$
 							nameKey: 'undefMember',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 2,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: error,
+							options: severities
 						},
 						{	id: "validate_unnecessary_semi",  //$NON-NLS-0$
 							nameKey: 'unnecessarySemis',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 1,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: warning,
+							options: severities
 						},
 						{	id: "validate_no_unused_vars",  //$NON-NLS-0$
 							nameKey: 'unusedVars',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 1,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: warning,
+							options: severities
 						},
 						{	id: "validate_no_redeclare",  //$NON-NLS-0$
 							nameKey: 'varRedecl',  //$NON-NLS-0$
 							type: "number",  //$NON-NLS-0$
-							defaultValue: 1,
-							options: [
-								{labelKey: 'ignore', value:0},  //$NON-NLS-0$
-								{labelKey: 'warning', value:1},  //$NON-NLS-0$
-								{labelKey: 'error', value:2}  //$NON-NLS-0$
-							]
+							defaultValue: warning,
+							options: severities
 						}
 					]
 				}
