@@ -7145,6 +7145,10 @@ define("orion/editor/textView", [ //$NON-NLS-0$
 				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-0$
 			}
 			var metrics = this._metrics = this._calculateMetrics();
+			if (this._variableLineHeight) {
+				this._variableLineHeight = false;
+				this._resetLineHeight();
+			}
 			if (util.isIE) {
 				this._rootDiv.style.lineHeight = (metrics.lineHeight - (metrics.lineTrim.top + metrics.lineTrim.bottom)) + "px"; //$NON-NLS-0$
 			} else {
