@@ -153,10 +153,11 @@ define(["orion/bootstrap", "orion/xhr", 'orion/webui/littlelib', 'orion/Deferred
 												Org: result.Target.Org.Name,
 												Space: result.Target.Space.Name
 											},
-											Name: result.App.entity.name
+											Name: result.App.entity.name,
+											Timeout: (result.Timeout !== undefined) ? result.Timeout : undefined
 										},
-										Url: "http://" + result.Route.entity.host + "." + result.Domain,
-										UrlTitle: result.App.entity.name,
+										Url: (result.Route !== undefined) ? "http://" + result.Route.entity.host + "." + result.Domain : undefined,
+										UrlTitle: (result.Route !== undefined) ? result.App.entity.name : undefined,
 										Type: "Cloud Foundry",
 										ManageUrl: result.ManageUrl,
 										Path: deployResourceJSON.AppPath

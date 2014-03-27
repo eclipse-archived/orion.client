@@ -296,7 +296,7 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 			_start: function(props, deferred) {
 				var that = this;
 				if (props.Target && props.Name){
-					cFService.startApp(props.Target, props.Name).then(
+					cFService.startApp(props.Target, props.Name, undefined, props.Timeout).then(
 						function(result){
 							deferred.resolve(that._prepareAppStateMessage(result));
 						}, function(error){

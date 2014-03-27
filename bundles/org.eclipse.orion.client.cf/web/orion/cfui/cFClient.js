@@ -181,10 +181,11 @@ define(['require', 'orion/xhr', 'orion/Deferred', 'orion/operation'], function(r
 				return this._xhrV1("GET", require.toUrl("cfapi/apps"));
 			},
 			
-			startApp: function(target, name, contentLocation) {
+			startApp: function(target, name, contentLocation, timeout) {
 				var startReq = {
 					Name: name, 
 					ContentLocation: contentLocation,
+					Timeout: timeout,
 					State: "Started"
 				};
 				
