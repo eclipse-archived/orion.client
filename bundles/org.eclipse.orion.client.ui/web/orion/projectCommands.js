@@ -95,9 +95,11 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			context.data.parameters = getCommandParameters(status.Retry.parameters, status.Retry.optionalParameters);
 			context.data.oldParams = context.oldParams;
 			context.commandService.collectParameters(context.data);
+		} else {
+			storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
+			progress.setProgressResult(status);
 		}
 		
-		progress.setProgressResult(status);
 		
 		if(status.ToSave){
 			progress.showWhile(context.projectClient.saveProjectLaunchConfiguration(context.project, status.ToSave.ConfigurationName, context.deployService.id, status.ToSave.Parameters, status.ToSave.Url, status.ToSave.ManageUrl, status.ToSave.Path, status.ToSave.UrlTitle, status.ToSave.Type), "Saving configuration").then(
@@ -147,7 +149,6 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 			context.launchConfiguration.status = {State: "PROGRESS"};
 			sharedLaunchConfigurationDispatcher.dispatchEvent({type: "changeState", newValue: context.launchConfiguration });
 		}
-		storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
 		progress.showWhile(context.deployService.deploy(context.project, enhansedLaunchConf), context.deployService.name + " in progress", true).then(function(result){
 			if(!result){
 				return;
@@ -160,7 +161,9 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				options.height = result.Height;
 				options.id = result.UriTemplateId || context.deployService.id; 
 				context.oldParams = enhansedLaunchConf.Params;
-				options.done = function(status){localHandleStatus(status, null, context);};
+				options.done = function(status){
+					localHandleStatus(status, null, context);
+				};
 				options.status = function(status){localHandleStatus(status, null, context);};
 				mEditorCommands.createDelegatedUI(options);
 				return;
@@ -182,6 +185,8 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 						}
 					}, context.errorHandler
 				);
+			} else {
+				storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
 			}
 			
 			var display = {};
@@ -200,6 +205,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/webui/littlelib', 
 				context.commandService.collectParameters(context.data);
 			} else {
 				context.errorHandler(error);
+				storeLastDeployment(context.project.Name, context.deployService, context.launchConfiguration);
 			}
 		});
 	}
