@@ -253,13 +253,6 @@ define(['orion/Deferred', 'orion/cfui/cFClient', 'orion/URITemplate', 'orion/ser
 				
 				return deferred;
 			},
-			getLogLocationTemplate: function(props){
-				if(props.status && props.status.State === "STARTED"){
-					return "{+OrionHome}/cfui/logs.html#{Name,Target*}";
-				} else {
-					return null;
-				}
-			},
 			getState: function(props) {
 				return this._retryWithLogin(props, this._getState);
 			},
