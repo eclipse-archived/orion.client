@@ -54,7 +54,7 @@
 	<macrodef name="finishModule">
 		<attribute name="out" />
 		<attribute name="name" />
-		<attribute name="caller" /> <!-- Usually @{name}.html but not always. Must be located in pageDir. -->
+		<attribute name="caller" /> <!-- Space-separated list of file names. Default is {name}.html -->
 		<attribute name="bundle" />
 		<attribute name="pagedir" />
 		<sequential>
@@ -68,9 +68,9 @@
 			</copy>
 
 			<antcall target="updateCaller">
-				<param name="callerFile" value="@{out}/@{pagedir}/@{caller}" />
+				<param name="dir" value="@{out}/@{pagedir}" />
+				<param name="caller" value="@{caller}" />
 				<param name="minifiedScript" value="@{out}/@{pagedir}/built-@{name}.js" />
-				<param name="pageDir" value="@{pagedir}" />
 				<param name="name" value="@{name}" />
 			</antcall>
 
@@ -245,21 +245,30 @@
 		</sequential>
 	</macrodef>
 
-	<target name="checkCallerExists">
-		<available file="${callerFile}" property="caller.exists"/>
-	</target>
-		
-	<!-- Updates any require statements in the "calling module" ${callerFile}. -->
-	<target name="updateCaller" depends="checkCallerExists" if="caller.exists">
-		<echo message="updateCaller for ${callerFile}..." />
+	<!-- Updates any require statements in the "calling module(s)" ${caller}. -->
+	<target name="updateCaller">
+		<echo message="update caller(s): ${caller}" />
 		<condition property="builtResult" value="built-${name}" else="${name}" >
 			<length file="${minifiedScript}" when="greater" length="0" />
 		</condition>
-		<replace file="${callerFile}" token="require([&quot;${name}.js&quot;]);" value="require([&quot;${builtResult}.js&quot;]);" />
-		<replace file="${callerFile}" token="require([&apos;${name}.js&apos;]);" value="require([&quot;${builtResult}.js&quot;]);" />
-		<replace file="${callerFile}" token="requirejs/require.js" value="requirejs/require.min.js" />
-		<replace file="${callerFile}" token="data-main=&quot;${name}.js&quot;" value="data-main=&quot;${builtResult}.js&quot;" />
-		<replace file="${callerFile}" token="data-main=&apos;${name}.js&apos;" value="data-main=&quot;${builtResult}.js&quot;" />
+
+		<fileset dir="${dir}" includes="${caller}" id="caller.fileset" />
+
+		<replace token="require([&quot;${name}.js&quot;]);" value="require([&quot;${builtResult}.js&quot;]);">
+			<fileset refid="caller.fileset" />
+		</replace>
+		<replace token="require([&apos;${name}.js&apos;]);" value="require([&quot;${builtResult}.js&quot;]);">
+			<fileset refid="caller.fileset" />
+		</replace>
+		<replace token="requirejs/require.js" value="requirejs/require.min.js">
+			<fileset refid="caller.fileset" />
+		</replace>
+		<replace token="data-main=&quot;${name}.js&quot;" value="data-main=&quot;${builtResult}.js&quot;">
+			<fileset refid="caller.fileset" />
+		</replace>
+		<replace token="data-main=&apos;${name}.js&apos;" value="data-main=&quot;${builtResult}.js&quot;">
+			<fileset refid="caller.fileset" />
+		</replace>
 	</target>
 
 	<target name="checkBuiltResult">

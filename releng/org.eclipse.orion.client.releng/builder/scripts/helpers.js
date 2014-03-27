@@ -21,6 +21,12 @@ orion.build = orion.build || {};
 
 (function() {
 	// Rough ES5 shims if we are running under an ancient ES3 environment.. like the version of Rhino bundled with Java6
+	if (!Array.isArray) {
+		Array.isArray = function(a) {
+			return Object.prototype.toString.call(a) === '[object Array]';
+		};
+	}
+
 	if (!Array.prototype.filter) {
 		Array.prototype.filter = function(callback/*, thisArg */) {
 			var array = Object(this), len = array.length, thisArg = arguments.length > 1 ? arguments[1] : undefined;

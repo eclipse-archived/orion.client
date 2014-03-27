@@ -41,8 +41,13 @@ modules.forEach(function(module) {
 		pageDir = ".";
 	}
 
-	// Determine the file name of the calling module (by default it is {baseName}.html)
-	var caller = module.caller || (baseName + ".html");
+	// Determine the file name include pattern for the calling module(s). Default is {baseName}.html
+	var caller;
+	if (module.caller) {
+		caller = Array.isArray(module.caller) ? module.caller.join(", ") : module.caller;
+	} else {
+		caller = baseName + ".html";
+	}
 
 	// Invoke finishModule macro
 	var task = project.createTask("finishModule");
